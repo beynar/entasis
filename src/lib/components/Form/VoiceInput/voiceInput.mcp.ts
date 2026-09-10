@@ -47,7 +47,7 @@ VoiceInput records microphone audio into a bindable Blob, renders live microphon
 - **pauseLabel**: \`string\` (default: \`'Pause recording'\`) - Playback-button label and tooltip while playing.
 - **seekLabel**: \`string\` (default: \`'Seek recording'\`) - Accessible label for the finalized waveform seek control.
 - **clearLabel**: \`string\` (default: \`'Clear recording'\`) - Clear-button accessible label and tooltip.
-- **onChange**: \`(value: Blob | null) => void\` - Runs when the field value changes, including Clear.
+- **onValueChange**: \`(value: Blob | null) => void\` - Runs when the field value changes, including Clear.
 - **onStart**: \`() => void\` - Runs after microphone capture starts.
 - **onStop**: \`({ blob, duration }: VoiceInputResult) => void\` - Runs after MediaRecorder finalizes the recording.
 - **onError**: \`(error: Error) => void\` - Runs when permission, recording, or playback fails.
@@ -114,4 +114,11 @@ Microphone capture requires a secure context (HTTPS, with localhost allowed by b
 - \`waveformInput\` - Native range hitbox layered over a finalized waveform.
 - \`timer\` - Stable tabular duration.
 - \`error\` - Operational error message.
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+
 `;

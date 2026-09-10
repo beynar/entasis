@@ -1,7 +1,19 @@
 <script lang="ts">
 	import Stepper from '$lib/components/Stepper/Stepper.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+
+	const stepperModes = ['classic', 'vertical'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'mode',
+			type: 'segmented',
+			label: 'Mode',
+			value: 'classic',
+			options: stepperModes
+		}
+	]);
 
 	type StepperItem = {
 		title: string;
@@ -82,7 +94,7 @@
 		}
 	] satisfies [StepperPanel, StepperPanel, StepperPanel];
 
-	const usageCode = `<script lang="ts">
+	const usageCode = $derived(`<script lang="ts">
 	const items = [
 		{
 			title: 'Collect the signal',
@@ -108,7 +120,7 @@
 	];
 ${'</' + 'script>'}
 
-<Stepper {items} class="w-full rounded-lg border border-neutral-muted bg-surface/30">
+<Stepper {items} mode="${controls.value.mode}" class="w-full rounded-lg border border-neutral-muted bg-surface/30">
 	{#snippet children({ stepper, item, index })}
 		<div class="p-3">
 			<div class="{item.card} {item.height} grid gap-4 rounded-md border p-5">
@@ -142,11 +154,13 @@ ${'</' + 'script>'}
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Each panel can carry its own content and height; the Stepper follows the active panel."
 		code={usageCode}
 	>
 		<Stepper
 			items={syncedPanels}
+			mode={controls.value.mode}
 			class="w-full rounded-lg border border-neutral-muted bg-surface/30"
 		>
 			{#snippet children({ stepper, item, index })}
@@ -174,9 +188,8 @@ ${'</' + 'script>'}
 
 						<div class="mt-auto flex gap-2">
 							{#if index > 0}
-								<button
-									class="rounded bg-surface/70 px-3 py-1.5"
-									onclick={() => stepper.previous()}>previous</button
+								<button class="rounded bg-surface/70 px-3 py-1.5" onclick={() => stepper.previous()}
+									>previous</button
 								>
 							{/if}
 							{#if index < syncedPanels.length - 1}
@@ -215,7 +228,7 @@ ${'</' + 'script>'}
 
 				<div class="grid gap-4 md:grid-cols-2">
 					<Stepper
-						bind:activeStep={syncedStep}
+						bind:value={syncedStep}
 						{items}
 						class="rounded-lg border border-neutral-muted bg-surface/30"
 					>
@@ -266,7 +279,7 @@ ${'</' + 'script>'}
 					</Stepper>
 
 					<Stepper
-						bind:activeStep={syncedStep}
+						bind:value={syncedStep}
 						{items}
 						class="rounded-lg border border-neutral-muted bg-surface/30"
 					>

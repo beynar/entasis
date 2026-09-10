@@ -1,21 +1,22 @@
 <script lang="ts">
-	import type { FileTreeDensity, FileTreeIcons } from '@pierre/trees';
+	import type { FileTreeIcons } from '@pierre/trees';
+	import type { Density } from 'svelai/types';
 	import Button from '$lib/components/Button/Button.svelte';
 	import Tree from '$lib/components/Tree/Tree.svelte';
 	import { gitStatus, workspaceTreePaths } from '../tree-demo-data.js';
 
 	type DensityOption = {
 		label: string;
-		value: FileTreeDensity;
+		value: Density;
 	};
 
 	const densityOptions: DensityOption[] = [
-		{ label: 'Compact', value: 'compact' },
-		{ label: 'Default', value: 'default' },
-		{ label: 'Relaxed', value: 'relaxed' }
+		{ label: 'Compact', value: 'small' },
+		{ label: 'Default', value: 'normal' },
+		{ label: 'Relaxed', value: 'large' }
 	];
 
-	let density = $state<FileTreeDensity>('compact');
+	let density = $state<Density>('small');
 	let coloredIcons = $state(true);
 
 	const icons = $derived<FileTreeIcons>({
@@ -31,18 +32,14 @@
 	});
 </script>
 
-{#snippet segmented(
-	current: FileTreeDensity,
-	options: DensityOption[],
-	onSelect: (value: FileTreeDensity) => void
-)}
+{#snippet segmented(current: Density, options: DensityOption[], onSelect: (value: Density) => void)}
 	<div class="flex flex-wrap gap-1">
 		{#each options as option (String(option.value))}
 			<Button
 				size="small"
 				variant={current === option.value ? 'solid' : 'ghost'}
 				color="neutral"
-				onClick={() => onSelect(option.value)}
+				onclick={() => onSelect(option.value)}
 			>
 				{option.label}
 			</Button>
@@ -59,7 +56,7 @@
 			size="small"
 			variant={coloredIcons ? 'solid' : 'outline'}
 			color="neutral"
-			onClick={() => (coloredIcons = !coloredIcons)}
+			onclick={() => (coloredIcons = !coloredIcons)}
 		>
 			Color icons
 		</Button>

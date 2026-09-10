@@ -98,6 +98,8 @@ export type LinkPreviewProps = WithAttachments<{
 	id?: string;
 	/** Controls whether the preview card is open; bindable for two-way control. */
 	open?: boolean;
+	/** Initial open state when `open` is not provided. */
+	defaultOpen?: boolean;
 	/** Trigger content for the anchor; defaults to the link host. */
 	children?: Slot<LinkPreviewPayload>;
 	/** Preloaded metadata; when provided, the component skips network loading. */
@@ -158,10 +160,12 @@ export type LinkPreviewProps = WithAttachments<{
 	cardVariant?: LinkPreviewCardVariant;
 	/** Show subtle borders between Card sections. */
 	showBorders?: boolean;
+	/** Called once when the library requests an open-state change. */
+	onOpenChange?: (open: boolean) => void;
 	/** Callback after the open transition finishes. */
-	onOpen?: (payload: LinkPreviewPayload) => void;
+	onAfterOpen?: (payload: LinkPreviewPayload) => void;
 	/** Callback after the close transition finishes. */
-	onClose?: (payload: LinkPreviewPayload) => void;
+	onAfterClose?: (payload: LinkPreviewPayload) => void;
 	/** Callback fired after metadata loads successfully. */
 	onLoad?: (metadata: LinkPreviewMetadata) => void;
 	/** Callback fired after metadata loading fails. */

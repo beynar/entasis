@@ -81,7 +81,7 @@ Use timeline.display to toggle criticalPath, baselines, deadlines, constraints, 
 
 The interactions policy independently enables task move, start/end resize, progress resize, row reorder, indent/outdent, empty-range creation, keyboard, and touch. dependencyCreation, clipboard, and history each accept false or their required configuration. Touch activation thresholds are internal. loading blocks content mutation but preserves safe navigation; disabled blocks both.
 
-Every UI or API mutation constructs a proposal, validates it, calls mutations.task/dependency/assignment.validate, calls the corresponding synchronous resolve hook, revalidates any adjusted record, then publishes immutable collections. Each mutation onChange callback receives the prior/current collection, affected ids, source/kind, and a guarded one-shot revert. Do not swallow persistence errors: call change.revert() only if desired, then handle or rethrow the error at the application boundary.
+Every UI or API mutation constructs a proposal, validates it, calls mutations.task/dependency/assignment.validate, calls the corresponding synchronous resolve hook, revalidates any adjusted record, then publishes immutable collections. The \`onTasksChange\`, \`onDependenciesChange\`, and \`onAssignmentsChange\` callbacks each receive one transaction payload with prior/current collections, affected ids, source/kind, and a guarded one-shot revert. Do not swallow persistence errors: call change.revert() only if desired, then handle or rethrow the error at the application boundary.
 
 Pointer-created links require interactions.dependencyCreation.create(request), because GanttChart cannot fabricate ids or required custom fields. Clipboard paste can use interactions.clipboard.getId(request). It copies one selected standalone task subtree, remaps internal dependencies and assignments, and explicitly omits external dependency links.
 
@@ -107,5 +107,5 @@ Bind the component instance as GanttChartApi. Real methods include:
 
 ## Application-owned editors and non-goals
 
-GanttChart does not own task creation/edit dialogs. Compose events.taskDoubleClick or events.emptyRangeSelect with Svelai Dialog and Form controls, validate the definition, then publish a fresh controlled array or call the API. Network fetching, persistence, retries, collaboration, recurrence, automatic resource leveling, proprietary import/export, and deployment are outside this package.
+GanttChart does not own task creation/edit dialogs. Compose events.onTaskDoubleClick or events.onEmptyRangeSelect with Svelai Dialog and Form controls, validate the definition, then publish a fresh controlled array or call the API. Network fetching, persistence, retries, collaboration, recurrence, automatic resource leveling, proprietary import/export, and deployment are outside this package.
 `;

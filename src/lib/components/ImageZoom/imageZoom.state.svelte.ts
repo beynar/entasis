@@ -25,8 +25,8 @@ type ImageZoomStateOptions = MakeRequired<
 		| 'backgroundColor'
 		| 'licenseKey'
 		| 'onOpenChange'
-		| 'onOpen'
-		| 'onClose'
+		| 'onAfterOpen'
+		| 'onAfterClose'
 	>,
 	| 'disabled'
 	| 'zoomMargin'
@@ -126,6 +126,6 @@ export class ImageZoomState {
 	updateOpen(nextOpen: boolean, notify: boolean) {
 		if (this.isOpen === nextOpen) return;
 		this.isOpen = nextOpen;
-		if (notify) this.onOpenChange?.(nextOpen, this.payload);
+		if (notify) this.onOpenChange?.(nextOpen);
 	}
 }

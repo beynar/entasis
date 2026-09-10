@@ -185,7 +185,7 @@ Extends all Field component props plus:
 	rows={10}
 	class="font-mono"
 	resize="both"
-	placeholder=".button { ... }"
+	placeholder={'.button { ... }'}
 />
 \`\`\`
 
@@ -335,4 +335,11 @@ The theme object contains the following parts:
   });
 </script>
 \`\`\`
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+
 `;

@@ -97,7 +97,7 @@
 		<ComponentCard description="Custom module styles, finder patterns, and gradient fills.">
 			<QRCode
 				{value}
-				dataModulesSettings={{ style: 'circle' }}
+				dataModulesSettings={{ style: 'circle', scale: 0.85 }}
 				finderPatternOuterSettings={{ style: 'rounded' }}
 				finderPatternInnerSettings={{ style: 'circle' }}
 			/>
@@ -133,9 +133,11 @@
 		<ComponentCard description="Download the rendered QR as SVG, PNG, or JPEG." class="flex-col">
 			<QRCode bind:this={qr} {value} size="large" />
 			<div class="flex gap-2">
-				<Button size="small" onClick={() => qr.download()}>SVG</Button>
-				<Button size="small" onClick={() => qr.download({ format: 'png' })}>PNG</Button>
-				<Button size="small" onClick={() => qr.download({ format: 'jpeg' })}>JPEG</Button>
+				<Button size="small" onclick={() => qr.download()}>SVG</Button>
+				<Button size="small" onclick={() => qr.download({ format: 'png', dimension: 800 })}>
+					PNG
+				</Button>
+				<Button size="small" onclick={() => qr.download({ format: 'jpeg' })}>JPEG</Button>
 			</div>
 		</ComponentCard>
 	{/snippet}

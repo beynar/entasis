@@ -2,7 +2,7 @@ import type { Colors, Sizes } from '$lib/types/index.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { ProgressCircleThemeProps } from './progressCircle.theme.js';
 
-export type ProgressCircleSize = Sizes | number;
+export type ProgressCircleSize = Sizes;
 
 type ProgressCircleBaseProps = {
 	/** Bindable reference to the root progress circle element. */
@@ -11,8 +11,10 @@ type ProgressCircleBaseProps = {
 	class?: string;
 	/** Theme color token applied to the active arc. */
 	color?: Colors;
-	/** Named size token or a numeric pixel size. */
+	/** Semantic geometry scale. */
 	size?: ProgressCircleSize;
+	/** Explicit circle diameter in pixels, overriding the semantic size. */
+	diameter?: number;
 	/** Progress value from 0 to 100. */
 	value?: number;
 	/** Accessible label used when the progress circle is not decorative. */

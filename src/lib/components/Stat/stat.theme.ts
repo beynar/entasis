@@ -8,14 +8,14 @@ const defaultStatRoot = cva({
 	base: 'raised-sm grid grid-cols-[minmax(0,1fr)_auto] border tabular-nums transition-colors',
 	variants: {
 		size: {
-			small: 'rounded-lg',
-			normal: 'rounded-xl',
-			large: 'rounded-xl'
+			small: 'rounded-md',
+			normal: 'rounded-lg',
+			large: 'rounded-lg'
 		},
 		density: {
-			small: 'gap-x-3 gap-y-1 p-3',
-			normal: 'gap-x-4 gap-y-1 p-4',
-			large: 'gap-x-5 gap-y-1.5 p-5'
+			small: 'gap-x-lg gap-y-xs p-lg',
+			normal: 'gap-x-xl gap-y-xs p-xl',
+			large: 'gap-x-layout-sm gap-y-sm p-layout-sm'
 		},
 		color: {
 			primary: 'border-primary',
@@ -118,29 +118,29 @@ const defaultStatIndicator = cva({
 		color: 'neutral'
 	},
 	compoundVariants: [
-		{ variant: ['icon', 'action'], size: 'small', class: 'size-7 rounded-lg [&_svg]:size-3.5' },
-		{ variant: ['icon', 'action'], size: 'normal', class: 'size-8 rounded-lg [&_svg]:size-4' },
-		{ variant: ['icon', 'action'], size: 'large', class: 'size-10 rounded-xl [&_svg]:size-5' },
+		{ variant: ['icon', 'action'], size: 'small', class: 'size-7 rounded-md [&_svg]:size-3.5' },
+		{ variant: ['icon', 'action'], size: 'normal', class: 'size-8 rounded-md [&_svg]:size-4' },
+		{ variant: ['icon', 'action'], size: 'large', class: 'size-10 rounded-lg [&_svg]:size-5' },
 		{
 			variant: 'badge',
 			size: 'small',
-			class: 'h-5 min-w-5 rounded-md px-1.5 text-[11px] [&_svg]:size-3'
+			class: 'h-5 min-w-5 rounded-sm px-sm text-[11px] [&_svg]:size-3'
 		},
 		{
 			variant: 'badge',
 			size: 'normal',
-			class: 'h-6 min-w-6 rounded-md px-2 text-xs [&_svg]:size-3.5'
+			class: 'h-6 min-w-6 rounded-sm px-md text-xs [&_svg]:size-3.5'
 		},
 		{
 			variant: 'badge',
 			size: 'large',
-			class: 'h-7 min-w-7 rounded-lg px-2.5 text-sm [&_svg]:size-4'
+			class: 'h-7 min-w-7 rounded-md px-md text-sm [&_svg]:size-4'
 		}
 	]
 });
 
 const defaultStatTrend = cva({
-	base: 'col-span-2 inline-flex min-w-0 items-center gap-1 font-medium leading-none [&_svg]:pointer-events-none [&_svg]:shrink-0',
+	base: 'col-span-2 inline-flex min-w-0 items-center gap-xs font-medium leading-none [&_svg]:pointer-events-none [&_svg]:shrink-0',
 	variants: {
 		size: {
 			small: 'text-[11px] [&_svg]:size-3',
@@ -177,9 +177,9 @@ const defaultStatSeparator = cva({
 	base: 'col-span-2',
 	variants: {
 		density: {
-			small: 'my-1',
-			normal: 'my-2',
-			large: 'my-3'
+			small: 'my-xs',
+			normal: 'my-md',
+			large: 'my-lg'
 		}
 	},
 	defaultVariants: {

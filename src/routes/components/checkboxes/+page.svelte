@@ -3,6 +3,8 @@
 	import DocPage from '../../DocPage.svelte';
 	import { CheckboxesInput } from '$lib/components/Form/CheckboxesInput/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	const items = [
 		{ value: 'email', label: 'Email', description: 'Receive updates by email' },
@@ -12,6 +14,23 @@
 
 	let selected = $state<string[]>(['email']);
 	let cardSelected = $state<string[]>([]);
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'mode',
+			type: 'segmented',
+			label: 'Mode',
+			value: 'normal',
+			options: ['normal', 'card']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -27,11 +46,14 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Select one or more notification channels"
 		code={`<CheckboxesInput
+	size="${controls.value.size}"
+	mode="${controls.value.mode}"
+	disabled={${controls.value.disabled}}
 	label="Notifications"
 	description="Pick the channels you want to hear from"
-	mode="normal"
 	items={[
 		{ value: 'email', label: 'Email', description: 'Receive updates by email' },
 		{ value: 'sms', label: 'SMS', description: 'Receive updates by text message' },
@@ -42,9 +64,11 @@
 	>
 		<div class="w-full max-w-md">
 			<CheckboxesInput
+				size={controls.value.size}
+				mode={controls.value.mode}
+				disabled={controls.value.disabled}
 				label="Notifications"
 				description="Pick the channels you want to hear from"
-				mode="normal"
 				{items}
 				bind:value={selected}
 			/>

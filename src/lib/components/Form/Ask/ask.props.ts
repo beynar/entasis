@@ -10,17 +10,8 @@ export type AskButton =
 			text: string;
 	  } & Omit<
 			ButtonProps,
-			| 'children'
-			| 'onClick'
-			| 'payload'
-			| 'loading'
-			| 'href'
-			| 'target'
-			| 'rel'
-			| 'download'
-			| 'type'
-			| 'ref'
-		>);
+			'children' | 'onclick' | 'loading' | 'href' | 'target' | 'rel' | 'download' | 'type' | 'ref'
+	  >);
 
 export type AskDialogOptions = Pick<DialogProps, 'type' | 'responsive' | 'size' | 'scroll'>;
 

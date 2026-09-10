@@ -17,7 +17,7 @@ export type ResolvedMapGeolocationConfig = {
 
 type WatchMapUserLocationOptions = {
 	onlocation: (location: MapUserLocation) => void;
-	onerror: (error: Error) => void;
+	onError: (error: Error) => void;
 };
 
 function toMapUserLocation(position: GeolocationPosition): MapUserLocation {
@@ -80,26 +80,23 @@ export function getCurrentMapUserLocation(): Promise<MapUserLocation> {
 
 export function watchMapUserLocation({
 	onlocation,
-	onerror
+	onError
 }: WatchMapUserLocationOptions): () => void {
 	if (!navigator.geolocation) {
-		onerror(new Error('Browser geolocation is not available.'));
+		onError(new Error('Browser geolocation is not available.'));
 		return () => {};
 	}
 
 	const watchId = navigator.geolocation.watchPosition(
 		(position) => onlocation(toMapUserLocation(position)),
-		(error) => onerror(toGeolocationError(error)),
+		(error) => onError(toGeolocationError(error)),
 		GEOLOCATION_OPTIONS
 	);
 
 	return () => navigator.geolocation.clearWatch(watchId);
 }
 
-export function getMapGeolocationZoom(
-	map: MapLibreMap,
-	zoom: number | undefined
-): number {
+export function getMapGeolocationZoom(map: MapLibreMap, zoom: number | undefined): number {
 	if (zoom !== undefined) {
 		return Math.min(map.getMaxZoom(), zoom);
 	}

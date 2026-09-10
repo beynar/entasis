@@ -7,7 +7,10 @@
 	import { rowsIcon } from '$lib/components/Icons/rows.js';
 	import { colors, sizes } from '$lib/utils/tokens.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+
+	const segmentedVariants = ['normal', 'pill'] as const;
 
 	const viewItems = [
 		{ value: 'grid', label: 'Grid', icon: gridFourIcon },
@@ -33,6 +36,31 @@
 	type LayoutValue = (typeof layoutItems)[number]['value'];
 	type DensityItem = (typeof densityItems)[number];
 	type DensityValue = DensityItem['value'];
+
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'normal',
+			options: segmentedVariants
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'neutral',
+			options: colors
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 
 	let view = $state<ViewValue>('grid');
 	let variantView = $state<ViewValue>('grid');
@@ -61,6 +89,7 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		code={`const items = [
 		{ value: 'grid', label: 'Grid', icon: gridFourIcon },
 		{ value: 'list', label: 'List', icon: listIcon },
@@ -69,14 +98,22 @@
 
 	let value = $state<(typeof items)[number]['value']>('grid');
 
-<SegmentedControl {items} bind:value />`}
+<SegmentedControl {items} bind:value size="${controls.value.size}" variant="${controls.value.variant}" color="${controls.value.color}" disabled={${controls.value.disabled}} />`}
 	>
 		<div class="flex w-full max-w-xl items-center justify-between gap-6">
 			<div class="min-w-0">
 				<p class="text-neutral text-sm font-medium">Project view</p>
 				<p class="text-neutral/60 truncate text-xs">Current mode: {view}</p>
 			</div>
-			<SegmentedControl items={viewItems} bind:value={view} ariaLabel="Project view" />
+			<SegmentedControl
+				items={viewItems}
+				bind:value={view}
+				size={controls.value.size}
+				variant={controls.value.variant}
+				color={controls.value.color}
+				disabled={controls.value.disabled}
+				ariaLabel="Project view"
+			/>
 		</div>
 	</ComponentCard>
 

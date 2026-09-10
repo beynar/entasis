@@ -1,7 +1,7 @@
 export const tailwindPluginDescription = `
 # Main Tailwind plugin
 
-\`@plugin './lib/tailwind/index'\`
+\`@plugin 'svelai/tailwind-plugin'\`
 
 This palette-agnostic plugin registers shared utilities, variants, keyframes, and spinner CSS.
 Use it when colors are defined separately instead of through the theme plugin.
@@ -23,4 +23,9 @@ Use it when colors are defined separately instead of through the theme plugin.
 
 Configure spacing, radius, typography scale, and raised borders at runtime through
 \`Theme.designTokens\`.
+
+Semantic spacing utilities use the active theme's \`xs\`, \`sm\`, \`md\`, \`lg\`, and \`xl\`
+scale for gaps, padding, margins, and physical insets. For example, \`gap-lg\`, \`p-lg\`,
+\`top-lg\`, and \`left-lg\` use the same spacing value. Inset utilities support \`top\`,
+\`right\`, \`bottom\`, and \`left\`, including responsive variants.
 `;

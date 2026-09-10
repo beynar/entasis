@@ -1,7 +1,9 @@
+// @ts-expect-error This build-only module runs in Node, whose ambient types are not a package dependency.
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
+// @ts-expect-error This build-only module runs in Node, whose ambient types are not a package dependency.
 import { basename, dirname, join } from 'node:path';
 import { Node, type Project, type Type, type Symbol as MorphSymbol, ts } from 'ts-morph';
-import type { ComponentDocs, PropCategory, PropDoc } from './types';
+import type { ComponentDocs, PropCategory, PropDoc } from './types.js';
 
 const MAX_EXPANDED_LENGTH = 4000;
 /** Above this, the resolved type text is too unwieldy for the cell - use the authored text instead. */
@@ -15,7 +17,7 @@ const MAX_VALUE_LENGTH = 80;
 function componentNameFromPath(filePath: string): string {
 	const base = basename(filePath).replace(/\.props\.ts$/, '');
 	const sibling = readdirSync(dirname(filePath)).find(
-		(file) =>
+		(file: string) =>
 			file.endsWith('.svelte') &&
 			file.slice(0, -'.svelte'.length).toLowerCase() === base.toLowerCase()
 	);
@@ -101,8 +103,8 @@ function readBindableNames(propsFilePath: string, componentName: string): Set<st
 	const files = existsSync(mainFile)
 		? [mainFile]
 		: readdirSync(dir)
-				.filter((file) => file.endsWith('.svelte'))
-				.map((file) => join(dir, file));
+				.filter((file: string) => file.endsWith('.svelte'))
+				.map((file: string) => join(dir, file));
 
 	const names = new Set<string>();
 	for (const file of files) {

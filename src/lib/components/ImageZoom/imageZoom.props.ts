@@ -40,6 +40,8 @@ export type ImageZoomProps = WithAttachments<
 			zoomHeight?: number;
 			/** Controls whether the zoomed layer is open; bindable for two-way control. */
 			open?: boolean;
+			/** Initial open state when `open` is not provided. */
+			defaultOpen?: boolean;
 			/** When true, prevents opening and marks the trigger disabled. */
 			disabled?: boolean;
 			/** Image width attribute forwarded to the thumbnail. */
@@ -80,12 +82,12 @@ export type ImageZoomProps = WithAttachments<
 			indicatorPosition?: ImageZoomIndicatorPosition;
 			/** Additional CSS classes merged onto the root element. */
 			class?: string;
-			/** Callback fired when user interaction requests a new open state. */
-			onOpenChange?: (open: boolean, payload: ImageZoomPayload) => void;
-			/** Callback fired after the open animation starts. */
-			onOpen?: (payload: ImageZoomPayload) => void;
+			/** Callback fired once when the library requests a new open state. */
+			onOpenChange?: (open: boolean) => void;
+			/** Callback fired after the open animation finishes. */
+			onAfterOpen?: (payload: ImageZoomPayload) => void;
 			/** Callback fired after the close animation finishes. */
-			onClose?: (payload: ImageZoomPayload) => void;
+			onAfterClose?: (payload: ImageZoomPayload) => void;
 			/** Per-instance theme overrides for image zoom parts. */
 			theme?: ImageZoomThemeProps;
 		},

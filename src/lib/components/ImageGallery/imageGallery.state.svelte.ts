@@ -28,6 +28,8 @@ type ImageGalleryStateOptions = MakeRequired<
 		| 'licenseKey'
 		| 'onOpenChange'
 		| 'onIndexChange'
+		| 'onAfterOpen'
+		| 'onAfterClose'
 	>,
 	| 'imageSelector'
 	| 'disabled'
@@ -155,13 +157,13 @@ export class ImageGalleryState {
 	updateOpen(nextOpen: boolean, notify: boolean) {
 		if (this.isOpen === nextOpen) return;
 		this.isOpen = nextOpen;
-		if (notify) this.onOpenChange?.(nextOpen, this.payload);
+		if (notify) this.onOpenChange?.(nextOpen);
 	}
 
 	updateIndex(nextIndex: number, notify: boolean) {
 		if (this.activeIndex === nextIndex) return;
 		this.activeIndex = nextIndex;
-		if (notify) this.onIndexChange?.(nextIndex, this.payload);
+		if (notify) this.onIndexChange?.({ index: nextIndex, gallery: this.payload });
 	}
 
 	getBoundedIndex(index: number) {

@@ -13,7 +13,6 @@
 		size = 'small',
 		type = 'button',
 		onSelect,
-		onclick,
 		children,
 		class: className,
 		theme,
@@ -23,7 +22,6 @@
 	const forwardedButtonProps = $derived({ ...buttonProps, 'data-slot': 'ai-suggestion' });
 
 	function select() {
-		onclick?.(suggestion);
 		onSelect?.(suggestion);
 	}
 </script>
@@ -36,7 +34,7 @@
 	{disabled}
 	aria-pressed={selected}
 	data-active={selected ? 'true' : undefined}
-	onClick={select}
+	onclick={select}
 	class={classes.suggestion({ className })}
 	{...forwardedButtonProps}
 >

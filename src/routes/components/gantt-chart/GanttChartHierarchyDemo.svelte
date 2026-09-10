@@ -94,11 +94,11 @@
 			Sort from a column header; press F2 on editable title or risk cells.
 		</p>
 		<div class="flex flex-wrap gap-2">
-			<Button size="small" variant="outline" onClick={() => (showHighRiskOnly = !showHighRiskOnly)}>
+			<Button size="small" variant="outline" onclick={() => (showHighRiskOnly = !showHighRiskOnly)}>
 				{showHighRiskOnly ? 'Show all tasks' : 'Only high risk'}
 			</Button>
-			<Button size="small" variant="outline" onClick={() => chart?.expandAll()}>Expand all</Button>
-			<Button size="small" variant="outline" onClick={() => chart?.collapseAll()}
+			<Button size="small" variant="outline" onclick={() => chart?.expandAll()}>Expand all</Button>
+			<Button size="small" variant="outline" onclick={() => chart?.collapseAll()}
 				>Collapse all</Button
 			>
 		</div>

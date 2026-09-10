@@ -26,7 +26,7 @@ const defaultGrid = cva({
 		}
 	},
 	defaultVariants: {
-		gap: '0',
+		gap: 'none',
 		align: 'stretch',
 		justify: 'stretch'
 	}

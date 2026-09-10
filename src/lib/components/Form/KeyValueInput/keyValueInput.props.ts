@@ -2,9 +2,9 @@ import type { InputProps, KeyValuePair } from '../Field/field.js';
 import type { Messages } from '$lib/i18n/en.js';
 import type { KeyValueInputThemeProps } from './keyValueInput.theme.js';
 
-export type KeyValueInputProps = Omit<InputProps<'keyvalue'>, 'onChange'> & {
+export type KeyValueInputProps = Omit<InputProps<'keyvalue'>, 'onValueChange'> & {
 	/** Called when the pairs change, with the new array of key/value pairs. */
-	onChange?: (value: KeyValuePair[]) => void;
+	onValueChange?: (value: KeyValuePair[]) => void;
 	/** Placeholder shown in the key input of each row. Defaults to the localized "Key" label. */
 	keyPlaceholder?: string;
 	/** Placeholder shown in the value input of each row. Defaults to the localized "Value" label. */

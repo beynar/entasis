@@ -1,9 +1,10 @@
 <script lang="ts" generics="Value extends string = string">
+	import { commandDialogTheme } from './command.dialog.theme.js';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { untrack } from 'svelte';
 	import type { CommandItem, CommandProps } from './command.props.js';
 	import { useCommandTheme } from './command.theme.js';
 	import { CommandState } from './command.state.svelte.js';
-	import type { DialogThemeProps } from '../Dialog/dialog.theme.js';
 	import Dialog from '../Dialog/Dialog.svelte';
 	import Slot from '../Slot/Slot.svelte';
 	import MenuOption from '../MenuOption/MenuOption.svelte';
@@ -12,13 +13,15 @@
 	let {
 		items,
 		dialog = false,
-		open = $bindable(false),
+		open = $bindable(),
+		defaultOpen = false,
 		onOpenChange,
 		shortcut = false,
 		title = 'Command palette',
 		closeOnSelect = true,
-		search = $bindable(''),
-		onSearchChange,
+		value = $bindable(),
+		defaultValue = '',
+		onValueChange,
 		placeholder = 'Type a command or search...',
 		showInput = true,
 		shouldFilter = true,
@@ -35,6 +38,20 @@
 		theme,
 		...attachments
 	}: CommandProps<Value> = $props();
+	const openState = createBindableValue(
+		() => open,
+		(next) => {
+			open = next;
+		},
+		() => defaultOpen
+	);
+	const valueState = createBindableValue(
+		() => value,
+		(next) => {
+			value = next;
+		},
+		() => defaultValue
+	);
 
 	const id = $props.id();
 
@@ -47,16 +64,16 @@
 			return dialog;
 		},
 		get isOpen() {
-			return open;
+			return openState.value;
 		},
 		set isOpen(value) {
-			open = value;
+			openState.value = value;
 		},
-		get search() {
-			return search;
+		get value() {
+			return valueState.value;
 		},
-		set search(value) {
-			search = value;
+		set value(nextValue) {
+			valueState.value = nextValue;
 		},
 		get shortcut() {
 			return shortcut;
@@ -73,8 +90,8 @@
 		get onOpenChange() {
 			return onOpenChange;
 		},
-		get onSearchChange() {
-			return onSearchChange;
+		get onValueChange() {
+			return onValueChange;
 		},
 		get onSelect() {
 			return onSelect;
@@ -83,19 +100,6 @@
 			return onHighlightChange;
 		}
 	});
-
-	// Dialog mode reuses the Dialog component as a bare panel: strip its padding, hide the header
-	// visually (it still carries the accessible title) and the close button (Escape still closes,
-	// since `closable` also gates Escape), and match the palette's radius.
-	const dialogTheme = {
-		align: { type: { modal: 'items-start pt-[15vh]' } },
-		content: {
-			base: 'rounded-xl p-0 overflow-hidden',
-			type: { drawerBottom: 'h-[min(70dvh,23rem)] [&>div]:h-full' }
-		},
-		header: { base: 'sr-only' },
-		closeButton: { base: 'hidden' }
-	} satisfies DialogThemeProps;
 
 	const classes = $derived(useCommandTheme(theme));
 
@@ -142,7 +146,7 @@
 		selected={highlighted}
 		disabled={!!it.disabled}
 		class={it.class}
-		onClick={() => command.select(it)}
+		onclick={() => command.select(it)}
 		attrs={{
 			id: command.optionId(it.value),
 			'data-value': it.value,
@@ -176,8 +180,8 @@
 						autocapitalize="off"
 						spellcheck="false"
 						{placeholder}
-						value={search}
-						oninput={(event) => command.setSearch(event.currentTarget.value)}
+						value={valueState.value}
+						oninput={(event) => command.setValue(event.currentTarget.value)}
 						onkeydown={command.onKeydown}
 					/>
 				</div>
@@ -226,10 +230,10 @@
 
 {#if dialog}
 	<Dialog
-		bind:open
+		bind:open={() => openState.value, command.setOpen}
 		type="modal"
 		{title}
-		theme={dialogTheme}
+		theme={commandDialogTheme}
 		trigger={trigger ? dialogTrigger : undefined}
 	>
 		{@render commandBox()}

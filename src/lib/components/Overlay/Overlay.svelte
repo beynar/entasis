@@ -1,16 +1,23 @@
 <script lang="ts">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
+	import { tick, untrack } from 'svelte';
 	import Button from '../Button/Button.svelte';
 	import Slot from '../Slot/Slot.svelte';
 	import type { OverlayProps } from './overlay.props.js';
 	import { useOverlayTheme } from './overlay.theme.js';
 
 	let {
-		ref = $bindable(),
+		ref = $bindable(null),
 		class: className,
 		position = 'fill',
 		align = 'center',
 		showOn = 'always',
-		open = true,
+		defaultOpen = true,
+		open = $bindable(),
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- The reserved state callback must not leak into DOM attributes; Overlay has no internal state action.
+		onOpenChange: _onOpenChange,
+		onAfterOpen,
+		onAfterClose,
 		scrim = true,
 		size = 'normal',
 		title,
@@ -21,26 +28,56 @@
 		theme,
 		...attachments
 	}: OverlayProps = $props();
+	const openState = createBindableValue(
+		() => open,
+		(next) => {
+			open = next;
+		},
+		() => defaultOpen
+	);
+	const isOpen = $derived(openState.value);
 
 	const classes = $derived(useOverlayTheme(theme));
+	let observedOpen = untrack(() => isOpen);
+	let transitionSequence = 0;
+
+	$effect(() => {
+		const nextOpen = isOpen;
+		if (nextOpen === observedOpen) return;
+		observedOpen = nextOpen;
+		const sequence = ++transitionSequence;
+		void settleTransition(nextOpen, sequence);
+	});
+
+	async function settleTransition(nextOpen: boolean, sequence: number) {
+		await tick();
+		const animations = ref?.getAnimations?.({ subtree: true }) ?? [];
+		await Promise.allSettled(animations.map((animation) => animation.finished));
+		if (sequence !== transitionSequence || isOpen !== nextOpen) return;
+		if (nextOpen) onAfterOpen?.();
+		else onAfterClose?.();
+	}
 </script>
 
 <div
 	bind:this={ref}
 	data-svelai-overlay
-	data-open={open}
+	data-open={isOpen}
 	data-show-on={showOn}
 	data-position={position}
-	aria-hidden={!open}
-	inert={!open ? true : undefined}
-	class={classes.root({ position, open, showOn, className })}
+	aria-hidden={!isOpen}
+	inert={!isOpen ? true : undefined}
+	class={classes.root({ position, open: isOpen, showOn, className })}
 	{...attachments}
 >
 	{#if scrim && position === 'fill'}
 		<div aria-hidden="true" class={classes.scrim({ position })}></div>
 	{/if}
 
-	<div data-overlay-content class={classes.content({ size, align, position, open, showOn })}>
+	<div
+		data-overlay-content
+		class={classes.content({ size, align, position, open: isOpen, showOn })}
+	>
 		{#if scrim && position !== 'fill'}
 			<div aria-hidden="true" class={classes.scrim({ position })}></div>
 		{/if}

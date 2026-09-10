@@ -27,7 +27,7 @@ The QRCode component renders a customizable QR code as an SVG. It supports theme
 ### Styling Props
 - **background**: string | GradientSettings - Background color or gradient. Transparent when not provided.
 - **gradient**: GradientSettings - Gradient applied to data modules and finder patterns. Overrides \`color\` and the settings colors.
-- **dataModulesSettings**: { color?, style?, randomSize?, size?, lineWidth? } - Data module rendering.
+- **dataModulesSettings**: { color?, style?, randomSize?, scale?, lineWidth? } - Data module rendering.
   - style: 'square' | 'square-sm' | 'pinched-square' | 'rounded' | 'leaf' | 'vertical-line' | 'horizontal-line' | 'circuit-board' | 'circle' | 'diamond' | 'star' | 'heart' | 'hashtag'
 - **finderPatternOuterSettings**: { color?, style? } - Outer finder pattern rendering.
   - style: 'square' | 'pinched-square' | 'rounded-sm' | 'rounded' | 'rounded-lg' | 'circle' | 'inpoint-sm' | 'inpoint' | 'inpoint-lg' | 'outpoint-sm' | 'outpoint' | 'outpoint-lg' | 'leaf-sm' | 'leaf' | 'leaf-lg'
@@ -50,7 +50,7 @@ Bind the component instance to access:
 - **download(options?)**: Downloads the QR code.
   - options.name: string (default: 'qr-code') - File name without extension.
   - options.format: 'svg' | 'png' | 'jpeg' (default: 'svg')
-  - options.size: number (default: 500) - Exported file size in pixels.
+  - options.dimension: number (default: 500) - Exported file width and height in pixels.
 
 \`\`\`svelte
 <script>
@@ -58,7 +58,7 @@ Bind the component instance to access:
 </script>
 
 <QRCode bind:this={qr} value="https://example.com" />
-<Button onClick={() => qr.download({ format: 'png' })}>Download</Button>
+<Button onclick={() => qr.download({ format: 'png' })}>Download</Button>
 \`\`\`
 
 ## Examples
@@ -98,5 +98,5 @@ Bind the component instance to access:
 
 - Colors default to \`currentColor\`, driven by the \`color\` prop theme classes; downloads resolve the computed color so exports match the on-screen theme.
 - Keep enough contrast between the modules and the surface behind the QR code, and prefer \`level="H"\` when embedding an image, otherwise the code may not scan.
-- \`randomSize\` and low \`size\`/\`lineWidth\` values in \`dataModulesSettings\` may degrade scannability.
+- \`randomSize\` and low \`scale\`/\`lineWidth\` values in \`dataModulesSettings\` may degrade scannability.
 `;

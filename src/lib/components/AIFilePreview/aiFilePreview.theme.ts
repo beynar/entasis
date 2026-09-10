@@ -7,7 +7,7 @@ import {
 
 export const aiFilePreviewTheme = {
 	root: cva({
-		base: 'group relative flex min-w-36 max-w-72 items-center gap-2 overflow-hidden rounded-md border border-neutral-muted bg-surface-raised p-2',
+		base: 'group relative flex min-w-36 max-w-72 items-center gap-md overflow-hidden rounded-sm border border-neutral-muted bg-surface-raised p-md',
 		variants: {
 			status: {
 				pending: '',
@@ -17,13 +17,13 @@ export const aiFilePreviewTheme = {
 			}
 		}
 	}),
-	preview: cva({ base: 'size-10 shrink-0 rounded object-cover' }),
+	preview: cva({ base: 'size-10 shrink-0 rounded-sm object-cover' }),
 	fallback: cva({
-		base: 'grid size-10 shrink-0 place-items-center rounded bg-neutral-muted text-neutral-muted-readable'
+		base: 'grid size-10 shrink-0 place-items-center rounded-sm bg-neutral-muted text-neutral-muted-readable'
 	}),
-	content: cva({ base: 'grid min-w-0 flex-1 gap-0.5' }),
+	content: cva({ base: 'grid min-w-0 flex-1 gap-micro' }),
 	name: cva({ base: 'truncate text-xs font-medium' }),
-	meta: cva({ base: 'flex items-center gap-1 text-xs text-neutral/60' }),
+	meta: cva({ base: 'flex items-center gap-xs text-xs text-neutral/60' }),
 	error: cva({ base: 'truncate text-xs text-danger-readable' })
 };
 

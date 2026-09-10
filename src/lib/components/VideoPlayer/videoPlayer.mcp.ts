@@ -90,7 +90,7 @@ VideoPlayer is a native HTML5 video player with Svelai chrome. It keeps the medi
 
 ### Events
 - **onPlay**, **onPause**, **onEnded**, **onTimeUpdate**, **onDurationChange**, **onVolumeChange**, **onRateChange**, **onLoopChange**, **onFullscreenChange**, **onPictureInPictureChange**, **onCaptionsChange** receive a VideoPlayerSnapshot.
-- **onError** receives \`(error, snapshot)\`.
+- **onError** receives \`{ error, snapshot }\`.
 
 ## Methods
 

@@ -40,7 +40,7 @@
 
 	let submenuPopovers = $state<Record<number, PopoverState>>({});
 	// Derived from the popovers' own isOpen (which flips the instant open()/close()
-	// is called) — NOT from onOpen/onClose callbacks, which only fire after the
+	// is called), not from onAfterOpen/onAfterClose callbacks, which only fire after the
 	// intro/outro transitions and would keep the parent nav frozen during the fade.
 	const anySubmenuOpen = $derived(Object.values(submenuPopovers).some((p) => p.isOpen));
 
@@ -130,7 +130,7 @@
 			{density}
 			theme={theme?.option}
 			attrs={{ 'data-menu-keep-open': 'true' }}
-			onClick={() => {
+			onclick={() => {
 				goBack();
 			}}
 			{@attach navigation.itemReference}
@@ -141,7 +141,7 @@
 		<Slot render={header} renderIf={!!header} class={classes.header()} />
 	{/if}
 
-	{#each items as item, index}
+	{#each items as item, index (index)}
 		{#if item.type === 'button'}
 			<Button
 				role="menuitem"
@@ -153,14 +153,15 @@
 					on(node, 'pointerenter', (e) => closeSubmenus(undefined, pointerFrom(e)))}
 			/>
 		{:else if item.type === 'option'}
+			<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -- Remove the menu discriminant before forwarding native element props. -->
 			{@const { type: _type, ...optionProps } = item}
 			<MenuOption
 				role="menuitem"
 				{density}
 				{...optionProps}
 				theme={theme?.option}
-				onEnter={(event) => {
-					item.onEnter?.(event);
+				onpointerenter={(event) => {
+					item.onpointerenter?.(event);
 					closeSubmenus(undefined, pointerFrom(event));
 				}}
 				{@attach navigation.itemReference}
@@ -170,6 +171,7 @@
 			<Separator {...item} theme={theme?.separator} />
 		{:else if item.type === 'submenu'}
 			{@const submenuItem = item as typeof item & { popoverClass?: string }}
+			<!-- eslint-disable @typescript-eslint/no-unused-vars -- Remove the submenu discriminant before forwarding native element props. -->
 			{@const {
 				type: _type,
 				menu,
@@ -179,15 +181,16 @@
 				closeOnMouseLeave = true,
 				debugSafeArea = false,
 				popoverClass,
-				onClick: itemOnClick,
-				onEnter: itemOnEnter,
+				onclick: itemOnClick,
+				onpointerenter: itemOnPointerEnter,
 				suffix,
 				attrs,
 				...itemProps
 			} = submenuItem}
+			<!-- eslint-enable @typescript-eslint/no-unused-vars -->
 			<PopupMenu
 				position={submenuPosition}
-				openOnHover={openOnHover && !isInMobileSheet}
+				openOnHover={openOnHover && !item.disabled && !isInMobileSheet}
 				{openOnClick}
 				{hoverDelay}
 				{closeOnMouseLeave}
@@ -218,13 +221,13 @@
 							'aria-expanded': popover.isOpen ? 'true' : 'false',
 							'data-menu-keep-open': 'true'
 						}}
-						onClick={(payload) => {
-							itemOnClick?.(payload);
+						onclick={(event) => {
+							itemOnClick?.(event);
 							closeSubmenus(index);
 							if (openOnClick) popover.open();
 						}}
-						onEnter={(event) => {
-							itemOnEnter?.(event);
+						onpointerenter={(event) => {
+							itemOnPointerEnter?.(event);
 							closeSubmenus(index, pointerFrom(event));
 						}}
 						{@attach popover.reference}

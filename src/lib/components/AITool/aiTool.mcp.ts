@@ -3,6 +3,8 @@ export const aiToolDescription = `
 
 Render one AI tool call or one collapsible group of consecutive calls. Non-empty \`tools\` takes precedence over \`tool\`. Missing statuses are inferred from output and errors, while arbitrary values use circular-safe depth and entry limits.
 
+Expanded call/group IDs use bindable \`value\`, initial \`defaultValue\`, and \`onValueChange(value)\`. The callback fires once for each user expansion change; parent prop updates stay silent. Nested rows inside a grouped call keep their own expansion state.
+
 \`\`\`svelte
 <script lang="ts">
   import { AITool, type AIToolCall } from 'svelai/ai-tool';

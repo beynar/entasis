@@ -1,5 +1,5 @@
 import structureMap from 'virtual:svelai-structure';
-import type { ThemePart, ThemeVariant } from '../../tooling/structure-docs/types';
+import type { ThemePart, ThemeVariant } from '../../tooling/structure-docs/types.js';
 
 export type ThemeSnippetMode = 'default' | 'empty';
 
@@ -18,10 +18,12 @@ export function buildThemeSnippet(component: string, mode: ThemeSnippetMode): st
 	const setter = structure.setter ?? `set${component}Theme`;
 	const importPath = structure.importPath ?? 'svelai';
 	const parts = structure.parts.filter(
-		(part) => part.base !== undefined || part.variants?.some((variant) => !isBooleanVariant(variant))
+		(part: ThemePart) =>
+			part.base !== undefined ||
+			part.variants?.some((variant: ThemeVariant) => !isBooleanVariant(variant))
 	);
 
-	const body = parts.map((part) => renderPart(part, mode)).join(',\n');
+	const body = parts.map((part: ThemePart) => renderPart(part, mode)).join(',\n');
 	return `import { ${setter} } from '${importPath}';\n\n${setter}({\n${body}\n});`;
 }
 

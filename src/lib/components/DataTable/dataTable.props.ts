@@ -239,9 +239,9 @@ export type DataTableColumn<TData, TValue = unknown> = {
 	reorderable?: boolean;
 	pinnable?: boolean;
 	align?: DataTableAlignment;
-	size?: number;
-	minSize?: number;
-	maxSize?: number;
+	width?: number;
+	minWidth?: number;
+	maxWidth?: number;
 	class?: string;
 	headerClass?: string;
 };
@@ -259,61 +259,99 @@ export type DataTablePaginationConfig = {
 };
 
 type DataTableBaseProps<TData> = {
+	/** Rows to display; provide only the current server page in manual mode. */
 	items: readonly TData[];
+	/** Column accessors, headers, rendering, and interaction policies. */
 	columns: readonly DataTableColumn<TData>[];
+	/** Returns a stable row identifier that persists across sorting and pagination. */
 	getRowId: (row: TData, index: number, parent?: TData) => string;
 	/** Scroll viewport height. Defaults to filling a parent with a definite height. */
 	height?: string | number;
+	/** Bindable table state, including filters, sorting, pagination, and selection. */
 	state?: DataTableState;
 	/** Narrow bindable facade for composing search, filters, and pagination outside the table. */
 	dataTable?: DataTableApi<TData>;
+	/** Initial values for uncontrolled table state slices. */
 	initialState?: Partial<DataTableState>;
+	/** Called after a table interaction changes the public table state. */
 	onStateChange?: (state: DataTableState) => void;
+	/** Keyboard interaction model for the table or editable grid. */
 	interactionMode?: DataTableInteractionMode;
+	/** Whether users may select no rows, one row, or multiple rows. */
 	selectionMode?: DataTableSelectionMode;
+	/** Enable and configure pagination, or disable it with false. */
 	pagination?: false | DataTablePaginationConfig;
+	/** Enable global search or configure its placeholder and debounce. */
 	search?: boolean | DataTableSearchConfig;
 	/** Shows the toolbar menu for toggling column visibility. */
 	showColumnVisibilityControl?: boolean;
+	/** Internal row and cell whitespace scale. */
 	density?: Density;
+	/** Keep the column header visible while the body scrolls. */
 	stickyHeader?: boolean;
+	/** Additional virtual rows rendered outside the visible viewport. */
 	overscan?: number;
+	/** Estimated row height in pixels before measurement. */
 	estimatedRowHeight?: number;
 	/** Animates stable rows into their new positions after sorting or filtering. */
 	animateRows?: boolean;
+	/** Disable table interactions while retaining the displayed rows. */
 	disabled?: boolean;
+	/** Returns child rows for hierarchical data. */
 	getSubRows?: (row: TData, index: number) => readonly TData[] | undefined;
+	/** Whether a row can reveal nested rows or expanded content. */
 	canExpand?: (row: TData) => boolean;
+	/** Whether a particular row may be selected. */
 	isRowSelectable?: (row: TData) => boolean;
+	/** Persists an edited cell; rejection leaves the edit error visible. */
 	onCellCommit?: (commit: DataTableCellCommit<TData>) => void | Promise<void>;
+	/** Additional classes on the table root. */
 	class?: string;
+	/** Bindable reference to the table root element. */
 	ref?: HTMLElement | null;
+	/** Overrides for the table theme parts. */
 	theme?: DataTableThemeProps;
+	/** Accessible caption for the table. */
 	caption?: Slot;
 	/** Table-level renderer for public data cells. Call renderDefault to retain built-in behavior. */
 	cell?: Snippet<[DataTableCellRenderPayload<TData>]>;
 	/** Table-level renderer for public header content. Structural controls remain DataTable-owned. */
 	header?: Snippet<[DataTableHeaderRenderPayload<TData>]>;
+	/** Content before the built-in toolbar controls. */
 	toolbarPrefix?: Slot<DataTableToolbarPayload<TData>>;
+	/** Content after the built-in toolbar controls. */
 	toolbarSuffix?: Slot<DataTableToolbarPayload<TData>>;
+	/** Actions available for the selected rows. */
 	bulkActions?: Slot<DataTableToolbarPayload<TData>>;
+	/** Actions rendered for an individual row. */
 	rowActions?: Slot<DataTableRowPayload<TData>>;
+	/** Additional content displayed below an expanded row. */
 	expandedContent?: Slot<DataTableRowPayload<TData>>;
+	/** Display the loading state while rows are being fetched. */
 	loading?: boolean;
+	/** Load failure exposed to the error content snippet. */
 	error?: unknown;
+	/** Custom content for the loading state. */
 	loadingContent?: Slot<DataTableToolbarPayload<TData>>;
+	/** Content when the data collection has no rows. */
 	empty?: Slot<DataTableToolbarPayload<TData>>;
+	/** Content when filters match no rows. */
 	noResults?: Slot<DataTableToolbarPayload<TData>>;
+	/** Custom content for the failed loading state. */
 	errorContent?: Slot<DataTableToolbarPayload<TData> & { error: unknown }>;
 };
 
 type DataTableClientProps = {
+	/** Process rows locally in client mode or use server-processed rows in manual mode. */
 	processingMode?: 'client';
+	/** Total matching server row count for manual pagination; omitted in client mode. */
 	rowCount?: never;
 };
 
 type DataTableManualProps = {
+	/** Process rows locally in client mode or use server-processed rows in manual mode. */
 	processingMode: 'manual';
+	/** Total matching server row count for manual pagination; omitted in client mode. */
 	rowCount: number;
 };
 

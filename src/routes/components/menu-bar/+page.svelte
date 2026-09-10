@@ -2,6 +2,8 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import DocPage from '../../DocPage.svelte';
 	import { MenuBar, type MenuBarMenu } from '$lib/components/MenuBar/index.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
+	import { sizes } from '$lib/utils/tokens.js';
 	import { bellIcon } from '$lib/components/Icons/bell.js';
 	import { gearIcon } from '$lib/components/Icons/gear.js';
 	import { houseIcon } from '$lib/components/Icons/house.js';
@@ -13,6 +15,16 @@
 
 	let lastAction = $state('Ready');
 
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		}
+	]);
+
 	const applicationMenus: MenuBarMenu[] = [
 		{
 			label: 'File',
@@ -21,27 +33,27 @@
 					type: 'option',
 					title: 'New document',
 					suffix: 'Ctrl+N',
-					onClick: () => (lastAction = 'New document')
+					onclick: () => (lastAction = 'New document')
 				},
 				{
 					type: 'option',
 					title: 'Open...',
 					suffix: 'Ctrl+O',
-					onClick: () => (lastAction = 'Open')
+					onclick: () => (lastAction = 'Open')
 				},
 				{ type: 'separator' },
-				{ type: 'option', title: 'Save', suffix: 'Ctrl+S', onClick: () => (lastAction = 'Saved') },
+				{ type: 'option', title: 'Save', suffix: 'Ctrl+S', onclick: () => (lastAction = 'Saved') },
 				{
 					type: 'submenu',
 					title: 'Export',
 					menu: [
-						{ type: 'option', title: 'PDF document', onClick: () => (lastAction = 'Exported PDF') },
+						{ type: 'option', title: 'PDF document', onclick: () => (lastAction = 'Exported PDF') },
 						{
 							type: 'option',
 							title: 'Markdown',
-							onClick: () => (lastAction = 'Exported Markdown')
+							onclick: () => (lastAction = 'Exported Markdown')
 						},
-						{ type: 'option', title: 'Plain text', onClick: () => (lastAction = 'Exported text') }
+						{ type: 'option', title: 'Plain text', onclick: () => (lastAction = 'Exported text') }
 					]
 				},
 				{ type: 'separator' },
@@ -51,12 +63,12 @@
 		{
 			label: 'Edit',
 			items: [
-				{ type: 'option', title: 'Undo', suffix: 'Ctrl+Z', onClick: () => (lastAction = 'Undo') },
+				{ type: 'option', title: 'Undo', suffix: 'Ctrl+Z', onclick: () => (lastAction = 'Undo') },
 				{
 					type: 'option',
 					title: 'Redo',
 					suffix: 'Ctrl+Shift+Z',
-					onClick: () => (lastAction = 'Redo')
+					onclick: () => (lastAction = 'Redo')
 				},
 				{ type: 'separator' },
 				{ type: 'option', title: 'Cut', suffix: 'Ctrl+X' },
@@ -114,7 +126,7 @@
 		{ label: 'View', items: [{ type: 'option', title: 'Zoom' }] }
 	];
 
-	const usageCode = `<script lang="ts">
+	const usageCode = $derived(`<script lang="ts">
 	import { MenuBar, type MenuBarMenu } from 'svelai/menu-bar';
 
 	const menus: MenuBarMenu[] = [
@@ -144,7 +156,7 @@
 	];
 <\/script>
 
-<MenuBar {menus} />`;
+<MenuBar {menus} size="${controls.value.size}" />`;
 </script>
 
 <DocPage
@@ -160,6 +172,7 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		title="Application menu"
 		description="Open one menu, then move across the bar with the pointer or Left and Right arrow keys."
 		class="min-h-[460px] items-start"
@@ -169,7 +182,7 @@
 			class="border-neutral-muted bg-surface w-full max-w-3xl overflow-hidden rounded-lg border shadow-sm"
 		>
 			<header class="border-neutral-muted flex items-center justify-between border-b px-3 py-2">
-				<MenuBar menus={applicationMenus} />
+				<MenuBar menus={applicationMenus} size={controls.value.size} />
 				<span class="text-neutral/60 hidden text-xs sm:block">{lastAction}</span>
 			</header>
 			<div class="min-h-64 px-8 py-10 sm:px-12">

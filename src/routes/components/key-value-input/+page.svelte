@@ -2,6 +2,8 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import DocPage from '../../DocPage.svelte';
 	import KeyValueInput from '$lib/components/Form/KeyValueInput/KeyValueInput.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	// State for each example
 	let value1 = $state<{ key: string; value: string }[] | null>(null);
@@ -16,6 +18,30 @@
 	]);
 	let envVars = $state<{ key: string; value: string }[] | null>([
 		{ key: 'NODE_ENV', value: 'production' }
+	]);
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
 	]);
 </script>
 
@@ -32,8 +58,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Edit the environment variables of a deployment"
 		code={`<KeyValueInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Environment variables"
 	description="Passed to the container at deploy time"
 	bind:value={envVars}
@@ -41,6 +72,10 @@
 	>
 		<div class="w-full max-w-md">
 			<KeyValueInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
 				label="Environment variables"
 				description="Passed to the container at deploy time"
 				bind:value={envVars}

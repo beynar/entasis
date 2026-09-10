@@ -2,13 +2,13 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultBreadcrumbsContainer = cva({
-	base: 'text-neutral/60 flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-4.5',
+	base: 'text-neutral/60 flex flex-wrap items-center gap-sm text-sm break-words sm:gap-xl',
 	variants: {},
 	defaultVariants: {}
 });
 
 const defaultBreadcrumbsItem = cva({
-	base: 'inline-flex items-center gap-1.5',
+	base: 'inline-flex items-center gap-sm',
 	variants: {
 		disabled: {
 			true: 'text-neutral/50 cursor-not-allowed *:pointer-events-none',
@@ -23,7 +23,7 @@ const defaultBreadcrumbsItem = cva({
 });
 
 const defaultBreadcrumbsLink = cva({
-	base: 'px-2 py-0.5  outline-none focus-visible:ring-1 focus-visible:ring-neutral focus-visible:ring-offset-1 ring-offset-surface rounded',
+	base: 'px-md py-micro  outline-none focus-visible:ring-1 focus-visible:ring-neutral focus-visible:ring-offset-1 ring-offset-surface rounded-sm',
 	variants: {
 		disabled: {
 			true: '',
@@ -37,12 +37,6 @@ const defaultBreadcrumbsLink = cva({
 	defaultVariants: {
 		disabled: false
 	}
-});
-
-const defaultBreadcrumbsPage = cva({
-	base: '  px-2 py-0.5',
-	variants: {},
-	defaultVariants: {}
 });
 
 const defaultBreadcrumbsSeparator = cva({

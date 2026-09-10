@@ -10,10 +10,14 @@ import {
 	hexagon,
 	lineY,
 	stack,
+	type ChannelAccessor,
 	type ChartLinearGradient,
+	type ChartDotStateStyle,
 	type ChartMark as TanStackMark,
+	type ChartMarkState,
 	type ChartValue as TanStackValue,
-	type SceneNode
+	type SceneNode,
+	type VisualChannel
 } from '@tanstack/charts';
 import {
 	compileChannel,
@@ -50,7 +54,6 @@ export type CompiledMark = TanStackMark<unknown, TanStackValue, TanStackValue>;
 export type CompiledMarkResult =
 	| {
 			mark: CompiledMark;
-			marks?: never;
 			annotationMarks?: readonly CompiledMark[];
 			requiresX: boolean;
 			requiresY: boolean;
@@ -60,7 +63,6 @@ export type CompiledMarkResult =
 			};
 	  }
 	| {
-			mark?: never;
 			marks: readonly CompiledMark[];
 			annotationMarks?: readonly CompiledMark[];
 			requiresX: boolean;
@@ -82,7 +84,8 @@ export function compileSeriesMark<TRow extends object>(
 	mark: ChartSeriesMark<TRow>,
 	path: string,
 	gradients: AreaGradients | undefined,
-	fallbackSeries?: ChartChannel<TRow, ChartKey>
+	fallbackSeries?: ChartChannel<TRow, ChartKey>,
+	focusAxis?: 'x' | 'y'
 ): CompiledMarkResult {
 	const line = resolveSeriesLine(mark);
 	if (!mark.area && !line && !mark.points) {
@@ -99,8 +102,8 @@ export function compileSeriesMark<TRow extends object>(
 		);
 	}
 	const compiled = mark.area
-		? compileAreaSeries(data, mark, path, gradients, line, fallbackSeries)
-		: compileLineSeries(data, mark, path, line, fallbackSeries);
+		? compileAreaSeries(data, mark, path, gradients, line, fallbackSeries, focusAxis)
+		: compileLineSeries(data, mark, path, line, fallbackSeries, focusAxis);
 	if (!mark.interval) return compiled;
 	const interval = compileSeriesInterval(data, mark, mark.interval, path, line, fallbackSeries);
 	const marks = 'marks' in compiled ? compiled.marks : [compiled.mark];
@@ -120,7 +123,6 @@ function compileSeriesInterval<TRow extends object>(
 	line: ChartLineOptions<TRow> | undefined,
 	fallbackSeries?: ChartChannel<TRow, ChartKey>
 ): CompiledMark {
-	const direction = mark.direction ?? 'vertical';
 	const curve = line?.curve ?? mark.curve;
 	const curveFactory = curve ? compileChartCurve(curve, `${path}.curve`) : undefined;
 	const style = {
@@ -129,7 +131,7 @@ function compileSeriesInterval<TRow extends object>(
 		fill: compileColorVisual(interval.fill ?? mark.fill ?? line?.stroke ?? mark.stroke),
 		fillOpacity: interval.fillOpacity ?? 0.18
 	};
-	if (direction === 'vertical') {
+	if (mark.direction === undefined || mark.direction === 'vertical') {
 		return withoutTooltipPoints(
 			areaY(data, {
 				...style,
@@ -140,7 +142,7 @@ function compileSeriesInterval<TRow extends object>(
 			})
 		);
 	}
-	if (direction === 'horizontal') {
+	if (mark.direction === 'horizontal') {
 		return withoutTooltipPoints(
 			areaX(data, {
 				...style,
@@ -151,7 +153,7 @@ function compileSeriesInterval<TRow extends object>(
 			})
 		);
 	}
-	return unsupportedDiscriminant(direction, `${path}.direction`);
+	return unsupportedDiscriminant(mark, `${path}.direction`);
 }
 
 function compileLineSeries<TRow extends object>(
@@ -159,7 +161,8 @@ function compileLineSeries<TRow extends object>(
 	mark: ChartSeriesMark<TRow>,
 	path: string,
 	line: ChartLineOptions<TRow> | undefined,
-	fallbackSeries?: ChartChannel<TRow, ChartKey>
+	fallbackSeries?: ChartChannel<TRow, ChartKey>,
+	focusAxis?: 'x' | 'y'
 ): CompiledMarkResult {
 	if (mark.direction === 'horizontal') {
 		throw new TypeError(`[Chart] ${path}.direction "horizontal" requires ${path}.area to be true.`);
@@ -185,7 +188,9 @@ function compileLineSeries<TRow extends object>(
 				mark.points,
 				`${path}:points`,
 				fallbackSeries,
-				mark.fill ?? line?.stroke ?? mark.stroke
+				mark.fill ?? line?.stroke ?? mark.stroke,
+				false,
+				focusAxis
 			)
 		: undefined;
 	const marks = [lineMark, points].filter(
@@ -206,44 +211,128 @@ function compileCartesianPoints<TRow extends object>(
 		key?: ChartRequiredChannel<TRow, ChartKey>;
 		series?: ChartChannel<TRow, ChartKey>;
 		colorBy?: ChartChannel<TRow, ChartKey>;
-		x: ChartChannel<TRow, ChartValue>;
-		y: ChartChannel<TRow, ChartValue>;
+		x: ChartChannel<TRow, ChartValue> | ChartChannel<TRow, number>;
+		y: ChartChannel<TRow, ChartValue> | ChartChannel<TRow, number>;
 	},
 	input: true | ChartPointOptions<TRow>,
 	id: string,
 	fallbackSeries?: ChartChannel<TRow, ChartKey>,
 	fallbackFill?: ChartVisual<TRow, ChartColor>,
-	isScatter = false
+	isScatter = false,
+	focusAxis?: 'x' | 'y',
+	radiusOverride?: number | ChannelAccessor<TRow, number | null | undefined>
 ): CompiledMark {
 	const options = input === true ? {} : input;
 	const fill = options.fill ?? fallbackFill;
-	const radius = compileNumberOrChannel(options.radius);
+	const radius = radiusOverride ?? compileNumberOrChannel(options.radius);
+	const compiledFill = compileColorVisual(fill);
+	const compiledStroke = compileColorVisual(options.stroke);
 	const common = {
 		...compileMarkChannels(mark, fallbackSeries),
 		id,
 		x: compileChannel(mark.x),
 		y: compileChannel(mark.y),
 		r: radius ?? (isScatter ? 3.5 : 2.5),
-		fill: compileColorVisual(fill),
+		fill: compiledFill,
 		fillOpacity: options.fillOpacity ?? options.opacity,
-		stroke: compileColorVisual(options.stroke),
+		stroke: compiledStroke,
 		strokeOpacity: options.strokeOpacity ?? options.opacity,
-		strokeWidth: options.strokeWidth
+		strokeWidth: options.strokeWidth,
+		states: compilePointFocusStates<TRow>(focusAxis)
 	};
-	return options.shape === 'hexagon' ? hexagon(data, common) : dot(data, common);
+	if (options.shape === 'hexagon') return hexagon(data, common);
+	const pointMark = dot(data, {
+		...common,
+		fill: typeof compiledFill === 'string' ? compiledFill : undefined,
+		stroke: typeof compiledStroke === 'string' ? compiledStroke : undefined
+	});
+	return applyDotVisualChannels(pointMark, data, compiledFill, compiledStroke);
+}
+
+function applyDotVisualChannels<TRow, TXValue extends TanStackValue, TYValue extends TanStackValue>(
+	mark: TanStackMark<TRow, TXValue, TYValue>,
+	data: readonly TRow[],
+	fill: VisualChannel<TRow, string> | undefined,
+	stroke: VisualChannel<TRow, string> | undefined
+): TanStackMark<TRow, TXValue, TYValue> {
+	if (typeof fill !== 'function' && typeof stroke !== 'function') return mark;
+	return {
+		...mark,
+		initialize(context) {
+			const initialized = mark.initialize(context);
+			return {
+				...initialized,
+				render(renderContext) {
+					const rendered = initialized.render(renderContext);
+					return {
+						...rendered,
+						nodes: rendered.nodes.map((node) => applyDotVisualNode(node, data, fill, stroke))
+					};
+				}
+			};
+		}
+	};
+}
+
+function applyDotVisualNode<TRow>(
+	node: SceneNode,
+	data: readonly TRow[],
+	fill: VisualChannel<TRow, string> | undefined,
+	stroke: VisualChannel<TRow, string> | undefined
+): SceneNode {
+	if (node.kind === 'group') {
+		return {
+			...node,
+			children: node.children.map((child) => applyDotVisualNode(child, data, fill, stroke))
+		};
+	}
+	if (node.kind !== 'dot' || !node.interaction?.point) return node;
+	const point = node.interaction.point;
+	const datum = data[point.datumIndex];
+	if (datum === undefined) return node;
+	const context = { index: point.datumIndex, data };
+	const resolvedFill = typeof fill === 'function' ? fill(datum, context) : node.style?.fill;
+	const resolvedStroke = typeof stroke === 'function' ? stroke(datum, context) : node.style?.stroke;
+	return {
+		...node,
+		interaction: {
+			...node.interaction,
+			point: {
+				...point,
+				color: resolvedFill ?? point.color
+			}
+		},
+		style: {
+			...node.style,
+			fill: resolvedFill,
+			stroke: resolvedStroke
+		}
+	};
+}
+
+function compilePointFocusStates<TRow>(
+	focusAxis: 'x' | 'y' | undefined
+): readonly ChartMarkState<TRow, ChartDotStateStyle<TRow>>[] | undefined {
+	if (!focusAxis) return undefined;
+	return [
+		{ when: { focus: focusAxis }, style: { r: 5 } },
+		{ when: { focus: 'unmatched' }, style: { opacity: 0.3 } }
+	];
 }
 
 export function compileScatterMark<TRow extends object>(
 	data: readonly TRow[],
 	mark: ChartScatterMark<TRow>,
 	path: string,
-	fallbackSeries?: ChartChannel<TRow, ChartKey>
+	fallbackSeries?: ChartChannel<TRow, ChartKey>,
+	focusAxis?: 'x' | 'y',
+	useColorScale = true
 ): CompiledMarkResult {
 	const variant: unknown = Reflect.get(mark, 'variant');
 	if (variant !== undefined && variant !== 'points' && variant !== 'hexbin') {
 		throw new TypeError(`[Chart] ${path}.variant "${String(variant)}" is not supported.`);
 	}
-	if (mark.variant === 'hexbin') return compileHexbinScatterMark(data, mark, path);
+	if (mark.variant === 'hexbin') return compileHexbinScatterMark(data, mark, path, useColorScale);
 	validateScatterSizeScale(mark.size, mark.sizeScale, path);
 	const radius =
 		mark.size !== undefined && typeof mark.size !== 'number'
@@ -254,7 +343,6 @@ export function compileScatterMark<TRow extends object>(
 		mark,
 		{
 			shape: mark.shape,
-			radius,
 			fill: mark.fill,
 			fillOpacity: mark.fillOpacity,
 			stroke: mark.stroke,
@@ -265,7 +353,9 @@ export function compileScatterMark<TRow extends object>(
 		mark.id ?? `${path}:points`,
 		fallbackSeries,
 		undefined,
-		true
+		true,
+		focusAxis,
+		radius
 	);
 	return { mark: points, annotationMarks: [points], requiresX: true, requiresY: true };
 }
@@ -325,9 +415,9 @@ function compileAreaSeries<TRow extends object>(
 	path: string,
 	gradients: AreaGradients | undefined,
 	line: ChartLineOptions<TRow> | undefined,
-	fallbackSeries?: ChartChannel<TRow, ChartKey>
+	fallbackSeries?: ChartChannel<TRow, ChartKey>,
+	focusAxis?: 'x' | 'y'
 ): CompiledMarkResult {
-	const direction = mark.direction ?? 'vertical';
 	const curve = line?.curve ?? mark.curve;
 	const curveFactory = curve ? compileChartCurve(curve, `${path}.curve`) : undefined;
 	const lineCurve = curveFactory ? d3Curve(curveFactory) : undefined;
@@ -339,7 +429,7 @@ function compileAreaSeries<TRow extends object>(
 		strokeWidth: line ? (line.strokeWidth ?? mark.strokeWidth ?? 2) : undefined
 	};
 
-	if (direction === 'vertical') {
+	if (mark.direction === undefined || mark.direction === 'vertical') {
 		const compiled = areaY(data, {
 			...style,
 			x: compileChannel(mark.x),
@@ -362,7 +452,9 @@ function compileAreaSeries<TRow extends object>(
 						mark.points,
 						`${path}:points`,
 						fallbackSeries,
-						mark.fill ?? line?.stroke ?? mark.stroke
+						mark.fill ?? line?.stroke ?? mark.stroke,
+						false,
+						focusAxis
 					),
 					area
 				)
@@ -375,7 +467,7 @@ function compileAreaSeries<TRow extends object>(
 		};
 	}
 
-	if (direction === 'horizontal') {
+	if (mark.direction === 'horizontal') {
 		const compiled = areaX(data, {
 			...style,
 			x: compileChannel(mark.x),
@@ -398,7 +490,9 @@ function compileAreaSeries<TRow extends object>(
 						mark.points,
 						`${path}:points`,
 						fallbackSeries,
-						mark.fill ?? line?.stroke ?? mark.stroke
+						mark.fill ?? line?.stroke ?? mark.stroke,
+						false,
+						focusAxis
 					),
 					area
 				)
@@ -411,7 +505,7 @@ function compileAreaSeries<TRow extends object>(
 		};
 	}
 
-	return unsupportedDiscriminant(direction, `${path}.direction`);
+	return unsupportedDiscriminant(mark, `${path}.direction`);
 }
 
 export function compileBarMark<TRow extends object>(
@@ -420,7 +514,6 @@ export function compileBarMark<TRow extends object>(
 	path: string,
 	fallbackSeries?: ChartChannel<TRow, ChartKey>
 ): CompiledMarkResult {
-	const direction = mark.direction ?? 'vertical';
 	if (mark.variant && mark.series === undefined && mark.colorBy === undefined) {
 		throw new TypeError(
 			`[Chart] ${path}.variant "${mark.variant}" requires ${path}.series or ${path}.colorBy.`
@@ -434,7 +527,7 @@ export function compileBarMark<TRow extends object>(
 		radius: mark.radius
 	};
 
-	if (direction === 'vertical') {
+	if (mark.direction === undefined || mark.direction === 'vertical') {
 		const compiled = barY(data, {
 			...style,
 			x: compileChannel(mark.x),
@@ -450,7 +543,7 @@ export function compileBarMark<TRow extends object>(
 		};
 	}
 
-	if (direction === 'horizontal') {
+	if (mark.direction === 'horizontal') {
 		const compiled = barX(data, {
 			...style,
 			x: compileChannel(mark.x),
@@ -466,7 +559,7 @@ export function compileBarMark<TRow extends object>(
 		};
 	}
 
-	return unsupportedDiscriminant(direction, `${path}.direction`);
+	return unsupportedDiscriminant(mark, `${path}.direction`);
 }
 
 function resolveSeriesLine<TRow>(mark: ChartSeriesMark<TRow>): ChartLineOptions<TRow> | undefined {

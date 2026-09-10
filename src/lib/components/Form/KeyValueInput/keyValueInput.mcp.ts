@@ -21,7 +21,7 @@ An editable list of key/value string pairs. Each row renders a key text input, a
 - **value**: \`KeyValuePair[] | null\` (default: \`null\`, bindable)
   - The current list of \`{ key, value }\` pairs. \`null\` is treated as an empty list.
   - The array is never mutated in place — every add/remove assigns a fresh array.
-  - \`value\` is an OUTPUT MIRROR of the editor rows: it is seeded from the initial value once at construction and thereafter reflects edits. Replacing \`value\` programmatically after mount is intentionally not reconciled back into the editor rows (see Notes).
+  - Replacing \`value\` updates the editor rows without emitting \`onValueChange\`. Use \`defaultValue\` to initialize an uncontrolled editor once.
 
 ### Content Props
 
@@ -51,7 +51,7 @@ An editable list of key/value string pairs. Each row renders a key text input, a
 
 ### Event Props
 
-- **onChange**: \`(value: KeyValuePair[]) => void\`
+- **onValueChange**: \`(value: KeyValuePair[]) => void\`
   - Called when the pairs change.
 
 - **onValidate**: \`(value: KeyValuePair[]) => string[] | boolean\`
@@ -135,7 +135,7 @@ The value is an array of pairs; convert it to a plain object with \`Object.fromE
 ## Notes
 
 - **Stable-id keying**: Rows are keyed by a stable per-instance uid, not by the key string. Keys can be empty or duplicated while typing, and duplicate/empty keys in a keyed \`{#each}\` would crash the renderer.
-- **Output mirror / init-seed limitation**: \`value\` is seeded from the initial value once and thereafter mirrors the editor rows. Programmatic replacement of \`value\` after mount does not repopulate the rows.
+- **Controlled values**: Parent value replacements update the editor. User edits publish one change callback; unchanged pairs do not publish another callback.
 - **Fresh arrays**: Add and remove always assign a new array so binding, reactivity, and form updates fire correctly.
 - **Animations**: Rows animate on reorder (\`animate:flip\`) and on enter/leave (\`transition:scale\`).
 - **maxRows**: Disables the Add button once the row count reaches \`maxRows\`.
@@ -166,4 +166,11 @@ The KeyValueInput uses a theme object customizable via the \`theme\` prop or a g
 	});
 </script>
 \`\`\`
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+
 `;

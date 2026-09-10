@@ -16,7 +16,7 @@ export type SidebarCollapsible = 'offcanvas' | 'icon' | 'none';
 export type SidebarMode = 'layout' | 'panel';
 export type SidebarFrame = 'viewport' | 'contained';
 export type SidebarMenuButtonVariant = 'default' | 'outline';
-export type SidebarMenuButtonSize = 'default' | 'sm' | 'lg';
+export type SidebarMenuButtonSize = Sizes;
 export type SidebarCollapseIcon = 'chevron' | 'plus-minus';
 export type SidebarTooltipMode = 'auto' | 'always';
 export type SidebarRail = boolean | 'line' | 'thumb';
@@ -24,7 +24,9 @@ export type SidebarMenuSide = 'top' | 'right' | 'bottom' | 'left';
 export type SidebarMenuAlign = 'start' | 'center' | 'end';
 export type SidebarIcon = Slot | string;
 
-export type SidebarResizeMeta = {
+export type SidebarWidthChangedPayload = {
+	/** Committed expanded width. */
+	width: string;
 	/** True when the width changed because of direct pointer or keyboard input. */
 	isUserInteraction: boolean;
 };
@@ -43,7 +45,7 @@ export type SidebarResizableOptions = {
 	/** Fires continuously while the user resizes. */
 	onWidthChange?: (width: string) => void;
 	/** Fires when a resize interaction is committed or a stored width is restored. */
-	onWidthChanged?: (width: string, meta: SidebarResizeMeta) => void;
+	onWidthChanged?: (payload: SidebarWidthChangedPayload) => void;
 };
 
 export type SidebarResizable = boolean | SidebarResizableOptions;
@@ -80,8 +82,8 @@ export type SidebarMenuActionDescriptor = {
 	label?: string;
 	/** Menu items rendered in a PopupMenu. */
 	menu?: MenuItem[];
-	/** Click handler for a plain action button. */
-	onClick?: (event: MouseEvent) => void;
+	/** Native click handler for a plain action button. */
+	onclick?: (event: MouseEvent) => void;
 	/** Classes applied to the popup menu surface. */
 	menuClass?: string;
 	/** Preferred popup side. */
@@ -95,16 +97,16 @@ export type SidebarMenuSubEntry = {
 	label: string;
 	/** Link href. */
 	href?: string;
-	/** Click handler. */
-	onClick?: (event: MouseEvent) => void;
+	/** Native click handler. */
+	onclick?: (event: MouseEvent) => void;
 	/** Leading icon. */
 	icon?: SidebarIcon;
 	/** Whether this entry represents the current page. */
 	isActive?: boolean;
 	/** Disable interaction. */
 	disabled?: boolean;
-	/** Sub-button size. */
-	size?: 'sm' | 'md';
+	/** Submenu row geometry scale. Defaults to the Sidebar size. */
+	size?: Sizes;
 };
 
 type SidebarMenuEntryBase = {
@@ -147,17 +149,17 @@ type SidebarMenuEntryBase = {
 type SidebarMenuEntryNavigation = SidebarMenuEntryBase & {
 	/** Link href. Mutually exclusive with menu. */
 	href?: string;
-	/** Click handler. Mutually exclusive with menu. */
-	onClick?: (event: MouseEvent) => void;
+	/** Native click handler. Mutually exclusive with menu. */
+	onclick?: (event: MouseEvent) => void;
 	/** Popup menu rows own the whole trigger, so they cannot also navigate. */
 	menu?: never;
 };
 
 type SidebarMenuEntryMenu = SidebarMenuEntryBase & {
-	/** Popup menu items rendered from the whole row. Mutually exclusive with href/onClick. */
+	/** Popup menu items rendered from the whole row. Mutually exclusive with href/onclick. */
 	menu: MenuItem[];
 	href?: never;
-	onClick?: never;
+	onclick?: never;
 };
 
 export type SidebarMenuEntry = SidebarMenuEntryNavigation | SidebarMenuEntryMenu;
@@ -169,8 +171,8 @@ export type SidebarSearch = {
 	label?: string;
 	/** Controlled input value. */
 	value?: string;
-	/** Input handler. */
-	onInput?: (event: Event & { currentTarget: HTMLInputElement }) => void;
+	/** Native input handler. */
+	oninput?: (event: Event & { currentTarget: HTMLInputElement }) => void;
 	/** Extra classes for the input. */
 	class?: string;
 };
@@ -182,8 +184,8 @@ export type SidebarTreeNode = {
 	icon?: SidebarIcon;
 	/** Leaf href. */
 	href?: string;
-	/** Click handler. */
-	onClick?: (event: MouseEvent) => void;
+	/** Native click handler. */
+	onclick?: (event: MouseEvent) => void;
 	/** Whether this node represents the current page. */
 	isActive?: boolean;
 	/** Whether this folder starts open. */
@@ -243,24 +245,24 @@ type SidebarMenuButtonItemBase = {
 };
 
 type SidebarMenuButtonLinkItem = SidebarMenuButtonItemBase & {
-	/** Link href. Mutually exclusive with menu/onClick. */
+	/** Link href. Mutually exclusive with menu/onclick. */
 	href: string;
 	menu?: never;
-	onClick?: never;
+	onclick?: never;
 };
 
 type SidebarMenuButtonActionItem = SidebarMenuButtonItemBase & {
-	/** Click handler. Mutually exclusive with menu/href. */
-	onClick?: (event: MouseEvent) => void;
+	/** Native click handler. Mutually exclusive with menu/href. */
+	onclick?: (event: MouseEvent) => void;
 	href?: never;
 	menu?: never;
 };
 
 type SidebarMenuButtonMenuItem = SidebarMenuButtonItemBase & {
-	/** Popup menu items. Mutually exclusive with href/onClick. */
+	/** Popup menu items. Mutually exclusive with href/onclick. */
 	menu: MenuItem[];
 	href?: never;
-	onClick?: never;
+	onclick?: never;
 };
 
 export type SidebarMenuButtonItem =
@@ -271,11 +273,13 @@ type SidebarOwnProps = {
 	ref?: HTMLElement | null;
 	/** Bindable desktop open state. */
 	open?: boolean;
-	/** Fires whenever the desktop open state changes. */
+	/** Initial desktop open state when open is omitted. Defaults to true. */
+	defaultOpen?: boolean;
+	/** Fires once for each library-originated desktop open state change. */
 	onOpenChange?: (open: boolean) => void;
 	/** Bindable semantic desktop display state. */
 	displayState?: SidebarDisplayState;
-	/** Fires whenever the semantic desktop display state changes. */
+	/** Fires once for each library-originated semantic desktop display state change. */
 	onDisplayStateChange?: (state: SidebarDisplayState) => void;
 	/** Side the sidebar is anchored to. */
 	side?: SidebarSide;

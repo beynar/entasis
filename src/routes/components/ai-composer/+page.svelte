@@ -175,7 +175,7 @@ ${'</' + 'script>'}
 			class="!min-h-[300px] p-4"
 			code={`<AIConversation bind:isStreaming>
 	  <AIComposer
-	    bind:queuedMessages
+	    bind:queue={queuedMessages}
 	    queueWhileBusy
 	    submitShortcut="enter"
 	  />
@@ -189,7 +189,7 @@ ${'</' + 'script>'}
 					</span>
 				</div>
 				<AIConversation bind:isStreaming>
-					<AIComposer bind:queuedMessages queueWhileBusy submitShortcut="enter" />
+					<AIComposer bind:queue={queuedMessages} queueWhileBusy submitShortcut="enter" />
 				</AIConversation>
 			</div>
 		</ComponentCard>

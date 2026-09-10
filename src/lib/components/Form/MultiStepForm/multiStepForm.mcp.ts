@@ -53,9 +53,11 @@ MultiStepForm owns one Form per step, displays them through Stepper, validates v
 ## Props
 
 - **items** (required): ordered FormStep array. Duplicate field names across steps throw.
-- **value** (bindable): partial values merged across all steps, synchronized in both directions.
+- **value** (bindable): controlled partial values merged across all steps, synchronized in both directions.
+- **defaultValue**: initial merged values when value is omitted.
+- **onValueChange**: called when the merged live value changes.
 - **onSubmitForm**: called with the validated merged payload on the final step only.
-- **onSubmitStep**: called with the validated values from visited steps after the step's onBeforeChange; unvisited step keys remain optional. Return false to block advancing.
+- **onSubmitStep**: receives one \`{ value, step, index }\` payload after the step's onBeforeChange. \`value\` contains validated values from visited steps; unvisited keys remain optional. Return false to block advancing.
 - **showMeter**: whether to render the progress meter. Defaults to true.
 - **meterColor**: meter color token. Defaults to neutral.
 - **previousText**, **nextText**, **submitText**: navigation labels.
@@ -94,7 +96,7 @@ When onBeforeChange is present, navigation remains blocked unless the hook calls
 ## MultiStepFormState
 
 - **steps**: current step definitions.
-- **stepper**: bound Stepper state, including activeStep, next(), and previous().
+- **stepper**: bound Stepper state, including value, next(), and previous().
 - **value**: merged live partial value.
 - **loading**: true while a navigation or final-submit hook is pending.
 - **isLastStep**: whether the current step is final.

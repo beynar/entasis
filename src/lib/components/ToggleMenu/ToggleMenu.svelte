@@ -23,21 +23,31 @@
 	} from './toggleMenu.props.js';
 	import { useToggleMenuOverflow } from './toggleMenu.state.svelte.js';
 	import { useToggleMenuTheme } from './toggleMenu.theme.js';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 
 	let {
-		items = $bindable(),
+		defaultValue = [],
+		value = $bindable(),
 		ariaLabel,
 		size,
 		color,
 		variant,
 		disabled = false,
-		onChange,
+		onValueChange,
 		class: className,
 		theme,
 		...attachments
 	}: ToggleMenuProps = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(next) => {
+			value = next;
+		},
+		() => defaultValue
+	);
 
 	const classes = $derived(useToggleMenuTheme(theme));
+	const currentValue = $derived(valueState.value);
 	const navigation = useNavigation({
 		orientation: 'horizontal',
 		loop: true,
@@ -46,18 +56,22 @@
 	const overflow = useToggleMenuOverflow();
 
 	function getToggleProps(item: ToggleMenuToggleItem): Omit<ToggleMenuToggleItem, 'type'> {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Remove the menu discriminant before forwarding native button props.
 		const { type: _type, ...props } = item;
 		return props;
 	}
 
 	function replaceItem(index: number, item: ToggleMenuItem): void {
-		items = items.map((currentItem, currentIndex) => (currentIndex === index ? item : currentItem));
-		onChange?.(items);
+		const nextValue = currentValue.map((currentItem, currentIndex) =>
+			currentIndex === index ? item : currentItem
+		);
+		valueState.value = nextValue;
+		onValueChange?.(nextValue);
 	}
 
-	function updateToggle(index: number, item: ToggleMenuToggleItem, checked: boolean): void {
-		replaceItem(index, { ...item, checked });
-		item.onChange?.(checked);
+	function updateToggle(index: number, item: ToggleMenuToggleItem, nextValue: boolean): void {
+		replaceItem(index, { ...item, value: nextValue });
+		item.onValueChange?.(nextValue);
 	}
 
 	function updateGroup(
@@ -66,17 +80,17 @@
 		key: string,
 		checked: boolean
 	): void {
-		const value = { ...item.value, [key]: checked };
-		replaceItem(index, { ...item, value });
-		item.items[key]?.onChange?.(checked);
-		item.onChange?.(value);
+		const nextValue = { ...(item.value ?? item.defaultValue), [key]: checked };
+		replaceItem(index, { ...item, value: nextValue });
+		item.items[key]?.onValueChange?.(checked);
+		item.onValueChange?.(nextValue);
 	}
 
-	function updateRadioGroup(index: number, value: string): void {
-		const item = items[index];
-		if (item?.type !== 'radio-group' || item.value === value) return;
-		replaceItem(index, { ...item, value });
-		item.onChange?.(value);
+	function updateRadioGroup(index: number, selectedValue: string): void {
+		const item = currentValue[index];
+		if (item?.type !== 'radio-group' || (item.value ?? item.defaultValue) === selectedValue) return;
+		replaceItem(index, { ...item, value: selectedValue });
+		item.onValueChange?.(selectedValue);
 	}
 
 	function getCustomOverflowItems(item: ToggleMenuCustomItem): MenuItem[] {
@@ -126,12 +140,12 @@
 			size: group?.size ?? size,
 			color: group?.color ?? color,
 			disabled: disabled || !!group?.disabled || !!button.disabled,
-			onClick: () => {
+			onclick: () => {
 				if (group && key !== undefined) {
 					updateGroup(itemIndex, group, key, !checked);
 					return;
 				}
-				const item = items[itemIndex];
+				const item = currentValue[itemIndex];
 				if (item?.type === 'toggle') updateToggle(itemIndex, item, !checked);
 			}
 		};
@@ -143,7 +157,7 @@
 		key: string,
 		button: ToggleMenuRadioGroupButton
 	): MenuItem {
-		const checked = group.value === key;
+		const checked = (group.value ?? group.defaultValue) === key;
 		return {
 			type: 'option',
 			role: 'menuitemradio',
@@ -157,23 +171,31 @@
 			size: group.size ?? size,
 			color: group.color ?? color,
 			disabled: disabled || !!group.disabled || !!button.disabled,
-			onClick: () => updateRadioGroup(itemIndex, key)
+			onclick: () => updateRadioGroup(itemIndex, key)
 		};
 	}
 
 	const overflowMenuItems = $derived.by(() => {
 		const menuItems: MenuItem[] = [];
 
-		items.slice(overflow.visibleCount).forEach((item, overflowIndex) => {
+		currentValue.slice(overflow.visibleCount).forEach((item, overflowIndex) => {
 			const itemIndex = overflow.visibleCount + overflowIndex;
 			const unitItems: MenuItem[] = [];
 
 			if (item.type === 'toggle') {
-				unitItems.push(createOverflowOption(itemIndex, item, !!item.checked));
+				unitItems.push(
+					createOverflowOption(itemIndex, item, item.value ?? item.defaultValue ?? false)
+				);
 			} else if (item.type === 'group') {
 				Object.entries(item.items).forEach(([key, button]) => {
 					unitItems.push(
-						createOverflowOption(itemIndex, button, item.value?.[key] ?? false, item, key)
+						createOverflowOption(
+							itemIndex,
+							button,
+							item.value?.[key] ?? item.defaultValue?.[key] ?? false,
+							item,
+							key
+						)
 					);
 				});
 			} else if (item.type === 'radio-group') {
@@ -195,10 +217,10 @@
 	});
 
 	$effect(() => {
-		items;
-		size;
-		color;
-		variant;
+		void currentValue;
+		void size;
+		void color;
+		void variant;
 		overflow.scheduleMeasure();
 	});
 </script>
@@ -214,7 +236,7 @@
 	{...attachments}
 >
 	<div class={classes.rail()} {@attach overflow.railReference}>
-		{#each items as item, index}
+		{#each currentValue as item, index (index)}
 			{@const overflowed = overflow.isOverflowed(index)}
 			{#if item.type === 'group'}
 				<ToggleMenuGroup
@@ -227,7 +249,7 @@
 					unitClass={classes.unit()}
 					unitReference={overflow.unitReference(index)}
 					buttonReference={navigation.itemReference}
-					onToggle={(key, checked) => updateGroup(index, item, key, checked)}
+					onToggle={({ key, value }) => updateGroup(index, item, key, value)}
 				/>
 			{:else if item.type === 'radio-group'}
 				<ToggleMenuRadioGroup
@@ -240,7 +262,7 @@
 					unitClass={classes.unit()}
 					unitReference={overflow.unitReference(index)}
 					buttonReference={navigation.itemReference}
-					onSelect={(value) => updateRadioGroup(index, value)}
+					onValueChange={(value) => updateRadioGroup(index, value)}
 				/>
 			{:else if item.type === 'menu'}
 				<ToggleMenuMenu
@@ -286,8 +308,8 @@
 						color={item.color ?? color}
 						variant={item.variant ?? variant}
 						disabled={disabled || !!item.disabled}
-						checked={item.checked ?? false}
-						onChange={(checked) => updateToggle(index, item, checked)}
+						value={item.value ?? item.defaultValue ?? false}
+						onValueChange={(checked) => updateToggle(index, item, checked)}
 						{@attach overflowed ? undefined : navigation.itemReference}
 						{@attach !item.children && item.ariaLabel && !overflowed
 							? tooltip({ content: item.ariaLabel, delay: 350 })
@@ -322,7 +344,7 @@
 					prefix={dotsThreeIcon}
 					{@attach overflow.hasOverflow ? navigation.itemReference : undefined}
 					{@attach popover.reference}
-					onClick={() => popover.toggle()}
+					onclick={() => popover.toggle()}
 				/>
 			{/snippet}
 		</PopupMenu>

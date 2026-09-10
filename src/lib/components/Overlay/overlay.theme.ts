@@ -48,9 +48,9 @@ const defaultOverlayContent = cva({
 	base: 'relative z-[1] isolate flex w-full min-w-0 flex-col will-change-transform transition-transform duration-200 ease-out motion-reduce:transition-none',
 	variants: {
 		size: {
-			small: 'gap-2 p-4',
-			normal: 'gap-3 p-6',
-			large: 'gap-4 p-8'
+			small: 'gap-md p-xl',
+			normal: 'gap-lg p-layout-md',
+			large: 'gap-xl p-layout-lg'
 		},
 		align: {
 			start: 'items-start text-left',
@@ -93,9 +93,9 @@ const defaultOverlayHeader = cva({
 	base: 'flex max-w-xl flex-col',
 	variants: {
 		size: {
-			small: 'gap-0.5',
-			normal: 'gap-1',
-			large: 'gap-1.5'
+			small: 'gap-micro',
+			normal: 'gap-xs',
+			large: 'gap-sm'
 		}
 	},
 	defaultVariants: {
@@ -149,9 +149,9 @@ const defaultOverlayActions = cva({
 	base: 'flex w-full max-w-sm flex-wrap items-center',
 	variants: {
 		size: {
-			small: 'gap-1.5',
-			normal: 'gap-2',
-			large: 'gap-2.5'
+			small: 'gap-sm',
+			normal: 'gap-md',
+			large: 'gap-md'
 		},
 		align: {
 			start: 'justify-start',

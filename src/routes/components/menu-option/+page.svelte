@@ -1,9 +1,11 @@
 <script lang="ts">
 	import DocPage from '../../DocPage.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import { MenuOption } from '$lib/components/MenuOption/index.js';
 	import SegmentedControl from '$lib/components/SegmentedControl/SegmentedControl.svelte';
 	import type { Density } from '$lib/types/theme.js';
+	import { colors, sizes } from '$lib/utils/tokens.js';
 	import { checkIcon } from '$lib/components/Icons/check.js';
 	import { gearIcon } from '$lib/components/Icons/gear.js';
 	import { userIcon } from '$lib/components/Icons/user.js';
@@ -13,6 +15,31 @@
 
 	let clickCount = $state(0);
 	let isHovered = $state(false);
+
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'primary',
+			options: colors
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 
 	const densitySegments = [
 		{ value: 'small', label: 'Small' },
@@ -34,11 +61,28 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Single item with icon, title, and description."
-		code={`<MenuOption prefix={userIcon} title="Profile" description="View and edit your profile" />`}
+		code={`<MenuOption
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	color="${controls.value.color}"
+	disabled={${controls.value.disabled}}
+	prefix={userIcon}
+	title="Profile"
+	description="View and edit your profile"
+/>`}
 	>
 		<div class="bg-surface rounded-xl border-neutral-muted w-64 space-y-1 border p-1">
-			<MenuOption prefix={userIcon} title="Profile" description="View and edit your profile" />
+			<MenuOption
+				size={controls.value.size}
+				density={controls.value.density}
+				color={controls.value.color}
+				disabled={controls.value.disabled}
+				prefix={userIcon}
+				title="Profile"
+				description="View and edit your profile"
+			/>
 		</div>
 	</ComponentCard>
 
@@ -113,11 +157,11 @@
 
 		<ComponentCard description="Click, hover, and link interactions.">
 			<div class="bg-surface rounded-xl border-neutral-muted w-64 space-y-1 border p-1">
-				<MenuOption onClick={() => clickCount++} title="Clicked {clickCount} times" />
+				<MenuOption onclick={() => clickCount++} title="Clicked {clickCount} times" />
 
 				<MenuOption
-					onEnter={() => (isHovered = true)}
-					onLeave={() => (isHovered = false)}
+					onpointerenter={() => (isHovered = true)}
+					onpointerleave={() => (isHovered = false)}
 					title={isHovered ? 'Hovering!' : 'Hover over me'}
 				/>
 

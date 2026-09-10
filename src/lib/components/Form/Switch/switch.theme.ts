@@ -2,43 +2,43 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 
 const defaultSwitchToggle = cva({
-	base: 'relative inline-flex shrink-0 border cursor-pointer items-center rounded-full transition-all duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-50 hover:shadow-md',
+	base: 'relative inline-flex shrink-0 cursor-pointer items-center rounded-full border p-micro transition-colors duration-200 ease-in-out outline-none focus-visible:ring-2 focus-visible:ring-color/50 disabled:cursor-not-allowed disabled:opacity-50',
 	variants: {
 		checked: {
-			true: 'bg-primary border-primary shadow-sm',
-			false: 'bg-surface-raised border-neutral-muted border '
+			true: 'bg-color border-color',
+			false: 'bg-neutral-muted border-neutral-muted'
 		},
 		size: {
-			small: 'h-[20px] w-[36px]',
-			normal: 'h-[24px] w-[44px]',
-			large: 'h-[28px] w-[52px]'
+			small: 'h-5 w-9',
+			normal: 'h-6 w-11',
+			large: 'h-7 w-12'
 		},
 		disabled: {
-			true: 'cursor-not-allowed opacity-50 hover:shadow-none',
+			true: 'cursor-not-allowed opacity-50',
 			false: ''
 		}
+	},
+	defaultVariants: {
+		size: 'normal',
+		checked: false,
+		disabled: false
 	}
 });
 
 const defaultSwitchThumb = cva({
-	base: 'pointer-events-none block rounded-full shadow-lg ring-0 transition-all duration-200 ease-in-out transform',
+	base: 'pointer-events-none block rounded-full bg-surface-floating shadow-sm ring-0 transition-transform duration-200 ease-in-out',
 	variants: {
 		checked: {
-			true: 'border-primary border bg-primary-contrast',
-			false: 'bg-surface-floating border-neutral-muted border'
+			true: '',
+			false: 'translate-x-0'
 		},
 		size: {
-			small: 'h-4 w-4',
-			normal: 'h-5 w-5',
-			large: 'h-6 w-6'
+			small: 'size-4',
+			normal: 'size-5',
+			large: 'size-6'
 		}
 	},
 	compoundVariants: [
-		{
-			checked: false,
-			class: 'translate-x-0.5'
-		},
-		// Checked translations
 		{
 			size: 'small',
 			checked: true,
@@ -52,23 +52,30 @@ const defaultSwitchThumb = cva({
 		{
 			size: 'large',
 			checked: true,
-			class: 'translate-x-6'
+			class: 'translate-x-5'
 		}
-	]
+	],
+	defaultVariants: {
+		size: 'normal',
+		checked: false
+	}
 });
 
 const defaultSwitchContainer = cva({
-	base: 'flex items-center gap-4 justify-start select-none px-0',
+	base: 'flex items-center justify-start select-none px-0',
 	variants: {
 		size: {
-			small: 'gap-2',
-			normal: 'gap-4',
-			large: 'gap-6'
+			small: 'gap-md',
+			normal: 'gap-xl',
+			large: 'gap-xl'
 		},
 		disabled: {
 			true: 'opacity-50',
 			false: ''
 		}
+	},
+	defaultVariants: {
+		size: 'normal'
 	}
 });
 

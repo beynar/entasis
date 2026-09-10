@@ -15,24 +15,22 @@ interface CommandOptions<Value extends string = string> extends Pick<
 	| 'onSelect'
 	| 'onHighlightChange'
 	| 'onOpenChange'
-	| 'onSearchChange'
+	| 'onValueChange'
 > {
 	id: string;
 	isOpen: boolean;
-	search: string;
+	value: string;
 }
 
 export interface CommandState<Value extends string = string> extends CommandOptions<Value> {}
 export class CommandState<Value extends string = string> {
-	// Skips the first run of the isOpen effect so onOpenChange only fires on real changes.
-	private mounted = false;
 	private triggerElement = $state<HTMLElement | null>(null);
 
 	listId = $derived(`${this.id}-list`);
 
 	/** Groups whose items match the current search query (or all groups when filtering is off). */
 	filteredGroups: CommandGroup<Value>[] = $derived.by(() => {
-		const query = this.search.trim();
+		const query = this.value.trim();
 		if (!this.shouldFilter || query === '') return this.items;
 		const match = this.filter ?? this.defaultMatch;
 		return this.items
@@ -67,19 +65,6 @@ export class CommandState<Value extends string = string> {
 
 	constructor(options: CommandOptions<Value>) {
 		bind(this, options);
-
-		// Notify open-state changes (covers both setOpen and external/bound changes, e.g. the
-		// Dialog closing itself on Escape or click outside).
-		$effect(() => {
-			const isOpen = this.isOpen;
-			untrack(() => {
-				if (!this.mounted) {
-					this.mounted = true;
-					return;
-				}
-				this.onOpenChange?.(isOpen);
-			});
-		});
 
 		// ⌘/Ctrl + shortcut toggles the palette. Dialog mode only.
 		$effect(() => {
@@ -155,21 +140,28 @@ export class CommandState<Value extends string = string> {
 		return true;
 	};
 
-	setSearch = (value: string) => {
-		this.search = value;
-		this.onSearchChange?.(value);
+	setValue = (value: string) => {
+		if (value === this.value) return;
+		this.value = value;
+		this.onValueChange?.(value);
 	};
 
 	open = () => {
-		this.isOpen = true;
+		this.setOpen(true);
 	};
 
 	close = () => {
-		this.isOpen = false;
+		this.setOpen(false);
 	};
 
 	toggle = () => {
-		this.isOpen = !this.isOpen;
+		this.setOpen(!this.isOpen);
+	};
+
+	setOpen = (open: boolean) => {
+		if (open === this.isOpen) return;
+		this.isOpen = open;
+		this.onOpenChange?.(open);
 	};
 
 	onKeydown = (event: KeyboardEvent) => {

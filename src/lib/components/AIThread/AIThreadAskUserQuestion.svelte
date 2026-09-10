@@ -17,12 +17,15 @@
 		request: AIThreadAskUserQuestionRequest<TMessage>;
 		value?: AIAskAnswers;
 		class?: string;
-		onChange: (request: AIThreadAskUserQuestionRequest<TMessage>, values: AIAskAnswers) => void;
-		onResolve: (
-			request: AIThreadAskUserQuestionRequest<TMessage>,
-			state: 'completed' | 'discarded',
-			detail?: AIAskUserQuestionSubmitDetail
-		) => void | Promise<void>;
+		onValuesChange: (payload: {
+			request: AIThreadAskUserQuestionRequest<TMessage>;
+			values: AIAskAnswers;
+		}) => void;
+		onResolve: (payload: {
+			request: AIThreadAskUserQuestionRequest<TMessage>;
+			state: 'completed' | 'discarded';
+			detail?: AIAskUserQuestionSubmitDetail;
+		}) => void | Promise<void>;
 	};
 
 	let {
@@ -30,7 +33,7 @@
 		value,
 		askUserQuestionDisabled = false,
 		class: className,
-		onChange,
+		onValuesChange,
 		onResolve
 	}: Props<TMessage> = $props();
 
@@ -50,8 +53,9 @@
 		nextLabel={request.nextLabel}
 		previousLabel={request.previousLabel}
 		discardLabel={request.discardLabel}
-		onChange={(nextValues: AIAskAnswers) => onChange(request, nextValues)}
-		onSubmit={(detail: AIAskUserQuestionSubmitDetail) => onResolve(request, 'completed', detail)}
-		onDiscard={() => onResolve(request, 'discarded')}
+		onValueChange={(values) => onValuesChange({ request, values })}
+		onSubmit={(detail: AIAskUserQuestionSubmitDetail) =>
+			onResolve({ request, state: 'completed', detail })}
+		onDiscard={() => onResolve({ request, state: 'discarded' })}
 	/>
 </div>

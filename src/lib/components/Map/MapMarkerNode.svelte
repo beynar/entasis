@@ -21,7 +21,7 @@
 		content?: Snippet<[MapMarkerSnippetArg<TData>]>;
 		popup?: boolean | Snippet<[MapMarkerPopupContentArg<TData>]>;
 		tooltip?: boolean | Snippet<[MapMarkerTooltipContentArg<TData>]>;
-		onmarkerclick?: (marker: MapMarker<TData>) => void;
+		onMarkerClick?: (marker: MapMarker<TData>) => void;
 	};
 
 	type MarkerAttachmentParams = {
@@ -30,7 +30,7 @@
 		lngLat: [number, number];
 	};
 
-	let { map, Marker, marker, content, popup, tooltip, onmarkerclick }: Props<TData> = $props();
+	let { map, Marker, marker, content, popup, tooltip, onMarkerClick }: Props<TData> = $props();
 
 	let popupOpen = $state(false);
 	let markerColor = $derived(marker.color ?? 'var(--color-neutral)');
@@ -46,7 +46,7 @@
 	let hasPopup = $derived(popup !== false && popupContent != null);
 	let hasTooltip = $derived(tooltip !== false && tooltipContent != null);
 	let plainLabel = $derived(marker.label ? getPlainHtmlText(marker.label) : String(marker.id));
-	let isInteractive = $derived(hasPopup || !!onmarkerclick);
+	let isInteractive = $derived(hasPopup || !!onMarkerClick);
 	let isFocusable = $derived(isInteractive || hasTooltip);
 	let triggerLabel = $derived(
 		plainLabel
@@ -74,7 +74,7 @@
 	}
 
 	function notifyMarkerClick(): void {
-		onmarkerclick?.(marker);
+		onMarkerClick?.(marker);
 	}
 
 	function activateCustomTriggerFromKeyboard(): void {

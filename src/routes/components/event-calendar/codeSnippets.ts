@@ -34,11 +34,11 @@ export const interactionCode = [
 	"    businessHours: [{ daysOfWeek: [1, 2, 3, 4, 5], start: '08:00', end: '18:00' }],",
 	'    constrainMutations: true',
 	'  }}',
-	'  onItemsChange={(nextItems, change) => persist(nextItems).catch((error) => {',
+	'  onItemsChange={({ items: nextItems, change }) => persist(nextItems).catch((error) => {',
 	'    change.revert();',
 	'    throw error;',
 	'  })}',
-	'  onSlotSelect={(slot, { source }) => openCreateDialog(slot, source)}',
+	'  onSlotSelect={({ slot, info: { source } }) => openCreateDialog(slot, source)}',
 	'  class="h-[42rem]"',
 	'/>'
 ].join('\n');

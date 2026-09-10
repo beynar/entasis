@@ -19,17 +19,17 @@ const defaultPopoverContainer = cva({
 
 // The visible, animated panel.
 const defaultPopover = cva({
-	base: 'ring-neutral/10 bg-surface-floating text-neutral isolate h-fit w-fit rounded-lg text-sm shadow-md ring-1',
+	base: 'ring-neutral/10 bg-surface-floating text-neutral isolate h-fit w-fit rounded-md text-sm shadow-md ring-1',
 	variants: {
 		size: {
-			small: 'max-w-3xs w-full p-1',
-			normal: 'max-w-xs w-full p-2.5',
-			large: 'max-w-sm w-full p-4'
+			small: 'max-w-3xs w-full p-xs',
+			normal: 'max-w-xs w-full p-md',
+			large: 'max-w-sm w-full p-xl'
 		},
 		mode: {
 			floating: '',
 			mobileSheet:
-				'max-h-[85dvh] w-full max-w-none overflow-auto rounded-b-none rounded-t-xl pb-[calc(env(safe-area-inset-bottom)+1rem)]'
+				'max-h-[85dvh] w-full max-w-none overflow-auto rounded-b-none rounded-t-lg pb-[calc(env(safe-area-inset-bottom)+1rem)]'
 		}
 	},
 	defaultVariants: {

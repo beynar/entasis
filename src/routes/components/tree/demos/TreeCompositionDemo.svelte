@@ -30,7 +30,7 @@
 				type: 'option',
 				title: `Focus ${data.name}`,
 				prefix: magnifyingGlassIcon,
-				onClick: () => {
+				onclick: () => {
 					data.itemHandle?.focus();
 					lastAction = `Focused ${data.path}.`;
 				}
@@ -39,7 +39,7 @@
 				type: 'option',
 				title: data.isSelected ? 'Deselect' : 'Select',
 				prefix: checkIcon,
-				onClick: () => {
+				onclick: () => {
 					data.itemHandle?.toggleSelect();
 					lastAction = `${data.isSelected ? 'Deselected' : 'Selected'} ${data.path}.`;
 				}
@@ -48,7 +48,7 @@
 				type: 'option',
 				title: 'Copy path',
 				prefix: copyIcon,
-				onClick: () => {
+				onclick: () => {
 					lastAction = `Copied ${data.path}.`;
 				}
 			}
@@ -60,7 +60,7 @@
 				type: 'option',
 				title: data.isExpanded ? 'Collapse folder' : 'Expand folder',
 				prefix: folderOpenIcon,
-				onClick: () => {
+				onclick: () => {
 					toggleDirectory(data);
 					lastAction = `${data.isExpanded ? 'Collapsed' : 'Expanded'} ${data.path}.`;
 				}

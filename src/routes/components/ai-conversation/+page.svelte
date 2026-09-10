@@ -127,7 +127,7 @@ ${'</' + 'script>'}
 				<span class="text-sm text-neutral/65"
 					>Status: {conversation?.status ?? 'initializing'}</span
 				>
-				<Button size="small" variant="outline" onClick={appendSystemMessage}>Append event</Button>
+				<Button size="small" variant="outline" onclick={appendSystemMessage}>Append event</Button>
 			</div>
 			<AIConversation bind:conversation bind:messages bind:status={controls.value.status}>
 				<AIThread class="rounded-lg border border-neutral-muted" />

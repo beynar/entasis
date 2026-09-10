@@ -3,9 +3,35 @@
 	import DocPage from '../../DocPage.svelte';
 	import { FileInput } from '$lib/components/Form/File/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let single = $state<File | null>(null);
 	let multiple = $state<File[] | null>(null);
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -21,8 +47,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Click or drag a single image file"
 		code={`<FileInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Avatar"
 	description="A square image works best."
 	mode="single"
@@ -32,6 +63,10 @@
 	>
 		<div class="w-full max-w-md">
 			<FileInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
 				label="Avatar"
 				description="A square image works best."
 				mode="single"

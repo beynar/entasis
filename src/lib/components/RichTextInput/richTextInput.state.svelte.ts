@@ -4,7 +4,11 @@ import { bind } from '$lib/utils/state.svelte.js';
 import type { LexicalEditor } from 'lexical';
 import type { AnchoredReference } from './anchored-reference.js';
 import { mountAIComposerLexicalEditor } from './composer/editor-lexical.js';
-import { loadComposerMarkdown, readComposerChange } from './composer/editor-markdown.js';
+import {
+	EXTERNAL_MARKDOWN_UPDATE,
+	loadComposerMarkdown,
+	readComposerChange
+} from './composer/editor-markdown.js';
 import { AIComposerSelectionMenuController } from './composer/editor-selection-menu.svelte.js';
 import {
 	insertAIComposerTextAtSelection,
@@ -128,7 +132,7 @@ export class RichTextInputState {
 				getFormats: () => this.formats,
 				closeMenu: this.closeMenu,
 				onSubmitShortcut: this.onSubmitShortcut,
-				onChange: this.emitChange,
+				onUpdate: this.emitChange,
 				onSelectionChange: this.updateMenuFromSelection
 			});
 			this.editor = nextEditor.editor;
@@ -154,12 +158,15 @@ export class RichTextInputState {
 		this.selectionMenu.update();
 	};
 
-	emitChange = () => {
+	emitChange = (isExternal: boolean) => {
 		const change = readComposerChange(this.formats);
-		this.lastMarkdown = change.markdown;
-		this.value = change.markdown;
+		const hasChanged = change.markdown !== this.lastMarkdown;
+		this.lastMarkdown = isExternal ? this.value : change.markdown;
 		this.isEmpty = change.isEmpty;
-		this.onValueChange?.(change);
+		if (!isExternal && hasChanged) {
+			this.value = change.markdown;
+			this.onValueChange?.(change);
+		}
 		this.updateMenuFromSelection();
 	};
 
@@ -180,9 +187,9 @@ export class RichTextInputState {
 		const selection = this.search.resolve(value);
 		if (!selection) return;
 		insertAIComposerToken(this.editor, this.menu, selection.token);
-		selection.config.onSelect?.(selection.item, {
-			trigger: selection.trigger,
-			query: this.menu.query
+		selection.config.onSelect?.({
+			item: selection.item,
+			context: { trigger: selection.trigger, query: this.menu.query }
 		});
 		this.closeMenu();
 		this.editor.focus();
@@ -225,7 +232,7 @@ export class RichTextInputState {
 		if (!config) throw new Error(`RichTextInput trigger "${trigger}" is not configured.`);
 		const context = { trigger, query: '' };
 		if (!this.insertTokenData(toRichTextInputToken(item, config, context))) return;
-		config.onSelect?.(item, context);
+		config.onSelect?.({ item, context });
 	};
 
 	insertToken = (token: RichTextInputToken) => {
@@ -246,7 +253,10 @@ export class RichTextInputState {
 
 	syncValue = () => {
 		if (!this.editor || this.value === this.lastMarkdown) return;
-		loadComposerMarkdown(this.editor, this.value, this.formats);
 		this.lastMarkdown = this.value;
+		loadComposerMarkdown(this.editor, this.value, this.formats, {
+			tag: EXTERNAL_MARKDOWN_UPDATE,
+			discrete: true
+		});
 	};
 }

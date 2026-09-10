@@ -233,7 +233,7 @@ export type AIThreadProps<TMessage extends AIThreadItem = AIThreadItem> = WithAt
 		/** Suggestions used as the default empty state. */
 		suggestions?: readonly string[];
 		/** Handles selection from the default empty-state suggestions. */
-		onSuggestionClick?: (suggestion: string) => void;
+		onSuggestionSelect?: (suggestion: string) => void;
 		/** Content rendered above the virtual transcript. */
 		header?: Slot;
 		/** Content rendered below the virtual transcript. */
@@ -284,8 +284,6 @@ export type AIThreadProps<TMessage extends AIThreadItem = AIThreadItem> = WithAt
 		markerContent?: Slot<AIThreadRenderPayload<TMessage>>;
 		/** Custom renderer for individual MCP App tool calls. */
 		app?: Slot<{ tool: AIMcpToolCall; message: TMessage; index: number }>;
-		/** Retries a rendered message. */
-		onRetry?: (message: TMessage, index: number) => void | Promise<void>;
 		/** Handles completion or dismissal of an ask-user-question request. */
 		onAskUserQuestionStateChange?: (
 			change: AIThreadAskUserQuestionStateChange<TMessage>
@@ -296,8 +294,6 @@ export type AIThreadProps<TMessage extends AIThreadItem = AIThreadItem> = WithAt
 		role?: HTMLAttributes<HTMLDivElement>['role'];
 		/** Accessible label applied to the focusable transcript viewport. */
 		viewportLabel?: string;
-		/** Called for native scroll events from the transcript viewport. */
-		onScroll?: (event: Event) => void;
 		/** Theme overrides for transcript rows and the minimap. */
 		theme?: AIThreadThemeProps;
 	}

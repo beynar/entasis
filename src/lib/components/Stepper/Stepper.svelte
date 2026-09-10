@@ -9,13 +9,15 @@
 	import { type StepperProps } from './stepper.props.js';
 	import { useStepperTheme } from './stepper.theme.js';
 	import { StepperState as StepperStateClass } from './stepper.state.svelte.js';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	let {
 		items = [],
-		activeStep = $bindable(0),
+		defaultValue = 0,
+		value = $bindable(),
 		stepper: bindableStepper = $bindable<StepperStateClass<Item>>(),
 		class: className,
 		children,
-		onChange,
+		onValueChange,
 		keyFramesOptions = {
 			duration: 300,
 			easing: 'ease-in-out',
@@ -26,21 +28,28 @@
 		panelAriaLabelledby,
 		panelAriaLabel
 	}: StepperProps<Item> = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(next) => {
+			value = next;
+		},
+		() => defaultValue
+	);
 
 	const id = $props.id();
 
 	const stepper = new StepperStateClass({
-		get activeStep() {
-			return activeStep;
+		get value() {
+			return valueState.value;
 		},
-		set activeStep(value) {
-			activeStep = value;
+		set value(nextValue) {
+			valueState.value = nextValue;
 		},
 		get items() {
 			return items;
 		},
-		get onChange() {
-			return onChange;
+		get onValueChange() {
+			return onValueChange;
 		},
 		get keyFramesOptions() {
 			return keyFramesOptions;
@@ -58,7 +67,7 @@
 	});
 
 	$effect(() => {
-		const targetStep = activeStep;
+		const targetStep = valueState.value;
 		if (items.length === 0) return;
 		untrack(() => stepper.syncActiveStep(targetStep));
 	});
@@ -117,7 +126,7 @@ container.style.height = firstSlide.clientHeight + 'px';
 		style:grid-template-columns="repeat({stepCount}, minmax(0, 1fr))"
 	>
 		{#each items as item, index (index)}
-			{@const isActiveStep = stepper.activeStep === index}
+			{@const isActiveStep = stepper.value === index}
 			{@const ariaLabelledby = getPanelAriaLabelledby(item, index)}
 			{@const ariaLabel = getPanelAriaLabel(item, index)}
 			{@const panelTabindex = panelRole === 'tabpanel' ? (isActiveStep ? 0 : -1) : undefined}

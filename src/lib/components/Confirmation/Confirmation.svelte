@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Dialog from '../Dialog/Dialog.svelte';
 	import Button from '../Button/Button.svelte';
+	import type { ButtonProps } from '../Button/button.props.js';
 	import type { ConfirmationDetail, ConfirmationState } from './confirmation.state.svelte.js';
 	import { onMount, tick } from 'svelte';
 	import { MediaQuery } from 'svelte/reactivity';
@@ -31,7 +32,14 @@
 		};
 	});
 
-	const actionConfirmation = (confirmation: ConfirmationState, continued: boolean) => async () => {
+	const actionConfirmation =
+		(
+			confirmation: ConfirmationState,
+			continued: boolean,
+			onclick?: ButtonProps['onclick']
+		): NonNullable<ButtonProps['onclick']> =>
+		async (event) => {
+			onclick?.(event);
 		let result;
 		if (continued) {
 			const res = confirmation.onConfirm?.();
@@ -45,14 +53,14 @@
 				detail: { id: confirmation.id, continued, result }
 			})
 		);
-	};
+		};
 	const isMobile = new MediaQuery('(max-width: 768px)');
 </script>
 
 {#each confirmations as confirmation}
 	<Dialog
 		type="alert"
-		onClose={() => {
+		onAfterClose={() => {
 			confirmations = confirmations.filter((a) => a.id !== confirmation.id);
 		}}
 		closable={false}
@@ -69,7 +77,7 @@
 						disabled={confirmation.loading}
 						color="neutral"
 						{...confirmation.cancel}
-						onClick={actionConfirmation(confirmation, false)}
+						onclick={actionConfirmation(confirmation, false, confirmation.cancel.onclick)}
 						fullWidth={isMobile.current}
 					>
 						{confirmation.cancel.text}
@@ -78,7 +86,7 @@
 					<Button
 						disabled={confirmation.loading}
 						color="neutral"
-						onClick={actionConfirmation(confirmation, false)}
+						onclick={actionConfirmation(confirmation, false)}
 						fullWidth={isMobile.current}
 					>
 						{confirmation.cancel}
@@ -89,7 +97,7 @@
 					<Button
 						loading={confirmation.loading}
 						{...confirmation.confirm}
-						onClick={actionConfirmation(confirmation, true)}
+						onclick={actionConfirmation(confirmation, true, confirmation.confirm.onclick)}
 						fullWidth={isMobile.current}
 					>
 						{confirmation.confirm.text}
@@ -97,7 +105,7 @@
 				{:else}
 					<Button
 						loading={confirmation.loading}
-						onClick={actionConfirmation(confirmation, true)}
+						onclick={actionConfirmation(confirmation, true)}
 						fullWidth={isMobile.current}
 					>
 						{confirmation.confirm}

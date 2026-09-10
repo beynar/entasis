@@ -20,13 +20,11 @@ AIComposer is a Markdown prompt composer built on the existing \`RichTextInput\`
 </script>
 \`\`\`
 
-## State and precedence
+## State and defaults
 
-- \`value\`, \`files\`, \`attachments\`, \`queue\`, and \`queuedMessages\` are bindable.
+- \`value\`, \`files\`, \`attachments\`, and \`queue\` are bindable.
 - Omitted \`value\`, \`files\`, \`attachments\`, \`busy\`, and labels inherit from the nearest \`AIConversation\`. A supplied direct prop always wins.
-- \`queue\` is the canonical queue prop and wins over the Svelte Pro-compatible \`queuedMessages\` alias.
-- \`accept\`, \`maxFiles\`, and \`maxFileSize\` win over \`fileAccept\`, \`fileMaxFiles\`, and \`fileMaxSize\`.
-- \`onSubmit\` wins over the Svelte Pro-compatible \`onSubmitMessage\` callback.
+- \`defaultValue\` initializes an uncontrolled draft once; \`onValueChange\` reports each library edit once and stays silent for parent updates.
 - Provider queue synchronization is signature-based and idempotent. It never compares proxy queue objects to their raw counterparts.
 
 ## Submission
@@ -55,7 +53,7 @@ When no direct submit callback is supplied, the nearest conversation receives a 
 - \`mentionItems\` is the compatibility list for files, references, and skills.
 - \`mentions\` and \`references\` compose into \`@\`; \`skills\` drives \`$\`.
 - Trigger-source objects support items, title, empty copy, grouping, token-kind resolution, custom token conversion, sync/async search, and selection.
-- Compatibility callbacks are \`onCommandSearch\`, \`onMentionSearch\`, and \`onSkillSearch\`. Skill search falls back to \`onMentionSearch(query, 'skill')\`.
+- Compatibility callbacks are \`onCommandSearch\`, \`onMentionSearch\`, and \`onSkillSearch\`. Mention search receives \`{ query, type }\`; skill search falls back to \`onMentionSearch({ query, type: 'skill' })\`.
 - Synchronous searches stay synchronous. Promise searches expose loading/error/request state through the reused RichTextInput lifecycle and ignore stale responses.
 - Selection callbacks and \`onSuggestionOpen\`, \`onSuggestionClose\`, \`onSuggestionQueryChange\`, and \`onSuggestionHighlightChange\` receive normalized source/lifecycle data.
 
@@ -85,10 +83,12 @@ Configure capture with \`voiceInputMinDuration\`, \`voiceInputMaxDuration\`, \`v
 
 When \`busy\` and \`queueWhileBusy\` are true, submission creates a flat \`AIComposerQueuedMessage\` and clears the draft. Queue rows can be reordered, steered, edited, restored, cancelled, or have editing cancelled. The lifecycle callbacks are:
 
-- \`onQueueChange\` / \`onQueuedMessagesChange\`
+- \`onQueueChange\`
 - \`onQueuedMessageAdd\`, \`onQueuedMessageCancel\`
 - \`onQueuedMessageEditStart\`, \`onQueuedMessageEditCommit\`, \`onQueuedMessageEditCancel\`
 - \`onQueuedMessageReorder\`, \`onSteer\`
+
+Single-message queue callbacks receive \`{ message, index }\`; edit commits also include \`previousMessage\`.
 
 AIComposer does not automatically drain the queue when \`busy\` becomes false. Missing queue targets throw instead of reporting a false success.
 

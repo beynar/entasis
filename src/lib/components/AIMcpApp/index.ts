@@ -22,6 +22,7 @@ export type {
 	AIMcpAppPermission,
 	AIMcpAppPermissionPolicy,
 	AIMcpAppProps,
+	AIMcpAppRequest,
 	AIMcpAppResource,
 	AIMcpAppState,
 	AIMcpAppStatus,

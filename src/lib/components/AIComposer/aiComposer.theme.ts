@@ -5,7 +5,7 @@ import {
 	type InferComponentTheme
 } from '$lib/utils/cva/index.js';
 const defaultRoot = cva({
-	base: 'relative grid min-w-0 grid-cols-[minmax(0,1fr)] gap-1 rounded-lg border border-neutral-muted bg-surface p-1.5 transition-colors focus-within:ring-2 focus-within:ring-primary/30',
+	base: 'relative grid min-w-0 grid-cols-[minmax(0,1fr)] gap-xs rounded-md border border-neutral-muted bg-surface p-sm transition-colors focus-within:ring-2 focus-within:ring-primary/30',
 	variants: {
 		dragState: {
 			idle: '',
@@ -16,7 +16,7 @@ const defaultRoot = cva({
 	}
 });
 const defaultDropzone = cva({
-	base: 'pointer-events-none absolute inset-1 z-20 flex items-center justify-center gap-2 rounded-md border border-dashed bg-surface/95 px-3 text-center text-sm font-medium shadow-sm',
+	base: 'pointer-events-none absolute inset-1 z-20 flex items-center justify-center gap-md rounded-sm border border-dashed bg-surface/95 px-lg text-center text-sm font-medium shadow-sm',
 	variants: {
 		state: {
 			idle: '',
@@ -28,10 +28,10 @@ const defaultDropzone = cva({
 });
 const defaultDropzoneIcon = cva({ base: 'shrink-0' });
 const defaultHeader = cva({ base: 'min-w-0' });
-const defaultFiles = cva({ base: 'flex w-max min-w-full gap-2 py-1' });
+const defaultFiles = cva({ base: 'flex w-max min-w-full gap-md py-xs' });
 const defaultBody = cva({ base: 'min-w-0' });
 const defaultEditor = cva({
-	base: 'py-1',
+	base: 'py-xs',
 	variants: {
 		autoresize: {
 			true: 'min-h-10',
@@ -42,9 +42,9 @@ const defaultEditor = cva({
 const defaultToolbar = cva({ base: 'min-w-0' });
 const defaultFile = cva({ base: 'shrink-0' });
 const defaultError = cva({ base: 'min-w-0' });
-const defaultFooter = cva({ base: 'flex min-w-0 items-center gap-2' });
+const defaultFooter = cva({ base: 'flex min-w-0 items-center gap-md' });
 const defaultActions = cva({
-	base: 'flex items-center gap-1',
+	base: 'flex items-center gap-xs',
 	variants: {
 		side: {
 			start: 'shrink-0',
@@ -63,12 +63,12 @@ const defaultVoiceInput = cva({
 	},
 	defaultVariants: { variant: 'compact' }
 });
-const defaultQueue = cva({ base: 'grid gap-1 border-b border-neutral-muted pb-2' });
+const defaultQueue = cva({ base: 'grid gap-xs border-b border-neutral-muted pb-md' });
 const defaultQueueEditing = cva({
-	base: 'flex min-w-0 items-center justify-between gap-2 rounded bg-neutral-muted/50 px-2 py-1 text-sm text-neutral/75'
+	base: 'flex min-w-0 items-center justify-between gap-md rounded-sm bg-neutral-muted/50 px-md py-xs text-sm text-neutral/75'
 });
-const defaultQueueList = cva({ base: 'grid gap-1' });
-const defaultQueueItem = cva({ base: 'flex min-w-0 flex-1 items-center gap-2' });
+const defaultQueueList = cva({ base: 'grid gap-xs' });
+const defaultQueueItem = cva({ base: 'flex min-w-0 flex-1 items-center gap-md' });
 const defaultQueueText = cva({ base: 'min-w-0 flex-1 truncate text-sm text-neutral/75' });
 export const aiComposerTheme = {
 	root: defaultRoot,

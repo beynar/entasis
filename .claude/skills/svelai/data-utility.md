@@ -79,7 +79,7 @@ Vertical drag-and-drop reorderable list, animated by default (placeholder holds 
 | `handle` | `boolean \| Snippet` | `false` | `false`: whole row drags. `true`: only a grip handle drags (row text stays selectable). Snippet: handle mode + custom grip content |
 | `disabled` | `boolean` | `false` | Renders rows but blocks reordering |
 | `size` | `'small' \| 'normal' \| 'large'` | `'normal'` | Row padding, gaps, typography |
-| `onReorder` | `(items: T[], d: { from, to, item }) => void` | - | Fired once on drop when the order changed (cancelled drags revert and do not fire) |
+| `onReorder` | `({ items, from, to, item }) => void` | - | Fired once on drop when the order changed (cancelled drags revert and do not fire) |
 | `i18n` | `Partial<Messages>` | - | Per-instance overrides (default handle aria-label `dragToReorder`) |
 
 ### Slots
@@ -96,7 +96,7 @@ Vertical drag-and-drop reorderable list, animated by default (placeholder holds 
   ]);
 </script>
 
-<SortableList bind:items handle onReorder={(next) => console.log(next)}>
+<SortableList bind:items handle onReorder={({ items: next }) => console.log(next)}>
   {#snippet item({ item })}
     <div class="flex flex-col">
       <span class="font-medium">{item.title}</span>
@@ -126,9 +126,9 @@ Flexible container with sections. Supports standard color/size/variant props.
 | `href` | `string` | - | Makes card an `<a>` link |
 | `target` | `string` | - | Link target |
 | `rel` | `string` | - | Link rel attribute |
-| `onClick` | `() => void` | - | Click handler (renders as `role="button"`) |
-| `onEnter` | `() => void` | - | Pointer enter handler |
-| `onLeave` | `() => void` | - | Pointer leave handler |
+| `onclick` | `() => void` | - | Click handler (renders as `role="button"`) |
+| `onpointerenter` | `() => void` | - | Pointer enter handler |
+| `onpointerleave` | `() => void` | - | Pointer leave handler |
 | `disabled` | `boolean` | `false` | Disables interaction + opacity |
 | `action` | `Snippet \| ButtonProps` | - | Action element (top-right). Pass ButtonProps object for auto-rendered Button |
 
@@ -150,7 +150,7 @@ Flexible container with sections. Supports standard color/size/variant props.
 
 ### Action as ButtonProps
 ```svelte
-<Card action={{ variant: 'ghost', size: 'small', children: 'Delete', color: 'danger', onClick: () => {} }}>
+<Card action={{ variant: 'ghost', size: 'small', children: 'Delete', color: 'danger', onclick: () => {} }}>
   {#snippet title()}Title{/snippet}
   {#snippet children()}Content{/snippet}
 </Card>

@@ -3,6 +3,18 @@
 	import { AspectRatio } from '$lib/components/AspectRatio/index.js';
 	import type { AspectRatioRatio } from '$lib/components/AspectRatio/aspectRatio.props.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
+
+	const aspectRatios = ['16x9', '4x3', '1x1', '3x2', '2x1', '2x3', '3x4', '9x16', '1x2'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'ratio',
+			type: 'segmented',
+			label: 'Ratio',
+			value: '16x9',
+			options: aspectRatios
+		}
+	]);
 
 	const ratios = [
 		{ ratio: '2x1', label: 'Wide' },
@@ -36,24 +48,27 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="16:9 aspect ratio container."
 		class="mx-auto max-w-4xl"
-		code={`<AspectRatio ratio="16x9">
+		code={`<AspectRatio ratio="${controls.value.ratio}">
 	{#snippet children()}
 		<div
 			class="from-primary to-secondary flex h-full w-full items-center justify-center bg-gradient-to-br"
 		>
-			<span class="text-primary-contrast text-2xl font-bold">16:9 Aspect Ratio</span>
+			<span class="text-primary-contrast text-2xl font-bold">${controls.value.ratio.replace('x', ':')} Aspect Ratio</span>
 		</div>
 	{/snippet}
 </AspectRatio>`}
 	>
-		<AspectRatio ratio="16x9">
+		<AspectRatio ratio={controls.value.ratio}>
 			{#snippet children()}
 				<div
 					class="from-primary to-secondary flex h-full w-full items-center justify-center bg-gradient-to-br"
 				>
-					<span class="text-primary-contrast text-2xl font-bold">16:9 Aspect Ratio</span>
+					<span class="text-primary-contrast text-2xl font-bold"
+						>{controls.value.ratio.replace('x', ':')} Aspect Ratio</span
+					>
 				</div>
 			{/snippet}
 		</AspectRatio>

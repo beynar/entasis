@@ -134,7 +134,7 @@
 
 	function handleItemActivate(segment: EventCalendarSegment<TItemFields>, event: MouseEvent): void {
 		calendar.interaction.resetSinglePointerSlot();
-		onItemClick?.(segment.occurrence, event);
+		onItemClick?.({ occurrence: segment.occurrence, event });
 		if (event.defaultPrevented) return;
 		calendar.select({ kind: 'item', itemKey: segment.occurrence.key, slot: null });
 	}
@@ -143,7 +143,7 @@
 		segment: EventCalendarSegment<TItemFields>,
 		event: MouseEvent
 	): void {
-		onItemDoubleClick?.(segment.occurrence, event);
+		onItemDoubleClick?.({ occurrence: segment.occurrence, event });
 	}
 
 	function handleDayClick(day: EventCalendarDateOnly, event: MouseEvent): void {
@@ -158,7 +158,7 @@
 			start: day,
 			end: addCivilDays(day, 1)
 		};
-		onSlotClick?.(slot, event);
+		onSlotClick?.({ slot, event });
 		if (event.defaultPrevented) {
 			calendar.interaction.resetSinglePointerSlot();
 			return;

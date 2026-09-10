@@ -9,17 +9,17 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
  * Code theme registered under the same name.
  */
 const defaultDiffRoot = cva({
-	base: 'flex w-full min-w-0 flex-col gap-3 text-sm text-neutral'
+	base: 'flex w-full min-w-0 flex-col gap-lg text-sm text-neutral'
 });
 
 /** Per-file wrapper: a rounded, bordered surface around each rendered file diff. */
 const defaultDiffFile = cva({
-	base: 'overflow-hidden rounded-lg border border-neutral-muted bg-surface'
+	base: 'overflow-hidden rounded-md border border-neutral-muted bg-surface'
 });
 
 /** Error surface shown when parsing/rendering the diff throws. */
 const defaultDiffError = cva({
-	base: 'rounded-lg border border-danger/40 bg-danger-muted px-4 py-3 text-sm text-danger-muted-readable'
+	base: 'rounded-md border border-danger/40 bg-danger-muted px-xl py-lg text-sm text-danger-muted-readable'
 });
 
 export const diffTheme = {

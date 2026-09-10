@@ -33,9 +33,9 @@ export const useMarkdownTheme = useComponentTheme('markdown', markdownTheme);
  * a svelai `Code` snippet, so these drive the fenced-code-block spacing.
  */
 export const markdownCodeSizes: Record<MarkdownSize, string> = {
-	small: 'my-2 text-xs',
-	normal: 'my-3 text-sm',
-	large: 'my-4 text-sm'
+	small: 'my-md text-xs',
+	normal: 'my-lg text-sm',
+	large: 'my-xl text-sm'
 };
 
 /**
@@ -82,12 +82,12 @@ const SIZES: Record<MarkdownSize, SizeScale> = {
 		h4: 'text-sm',
 		h5: 'text-sm',
 		h6: 'text-sm',
-		headingMargin: 'mt-4 mb-1.5',
-		blockMargin: 'my-2',
-		listIndent: 'ml-3',
+		headingMargin: 'mt-xl mb-sm',
+		blockMargin: 'my-md',
+		listIndent: 'ml-lg',
 		listItemPad: 'py-0',
 		smallText: 'text-xs',
-		ruleMargin: 'my-4'
+		ruleMargin: 'my-xl'
 	},
 	normal: {
 		h1: 'text-2xl',
@@ -96,12 +96,12 @@ const SIZES: Record<MarkdownSize, SizeScale> = {
 		h4: 'text-base',
 		h5: 'text-sm',
 		h6: 'text-sm',
-		headingMargin: 'mt-5 mb-2',
-		blockMargin: 'my-3',
-		listIndent: 'ml-4',
-		listItemPad: 'py-0.5',
+		headingMargin: 'mt-layout-sm mb-md',
+		blockMargin: 'my-lg',
+		listIndent: 'ml-xl',
+		listItemPad: 'py-micro',
 		smallText: 'text-sm',
-		ruleMargin: 'my-5'
+		ruleMargin: 'my-layout-sm'
 	},
 	large: {
 		h1: 'text-3xl',
@@ -110,12 +110,12 @@ const SIZES: Record<MarkdownSize, SizeScale> = {
 		h4: 'text-lg',
 		h5: 'text-base',
 		h6: 'text-base',
-		headingMargin: 'mt-6 mb-2.5',
-		blockMargin: 'my-4',
-		listIndent: 'ml-5',
-		listItemPad: 'py-0.5',
+		headingMargin: 'mt-layout-md mb-md',
+		blockMargin: 'my-xl',
+		listIndent: 'ml-layout-sm',
+		listItemPad: 'py-micro',
 		smallText: 'text-sm',
-		ruleMargin: 'my-6'
+		ruleMargin: 'my-layout-md'
 	}
 };
 
@@ -162,32 +162,32 @@ export const buildStreamdownTheme = (size: MarkdownSize): StreamdownProps['theme
 		},
 		li: {
 			base: s.listItemPad,
-			checkbox: ' mr-2'
+			checkbox: ' mr-md'
 		},
 		code: {
-			base: `${s.blockMargin} w-full overflow-hidden rounded-lg border border-neutral-muted bg-surface flex flex-col`,
-			container: 'relative overflow-visible bg-surface p-2 font-mono text-sm',
-			header: `flex items-center justify-between bg-surface-raised px-2 py-1 text-neutral/60 ${s.smallText}`,
-			buttons: 'flex items-center gap-2',
-			language: 'ml-1 font-mono lowercase',
+			base: `${s.blockMargin} w-full overflow-hidden rounded-md border border-neutral-muted bg-surface flex flex-col`,
+			container: 'relative overflow-visible bg-surface p-md font-mono text-sm',
+			header: `flex items-center justify-between bg-surface-raised px-md py-xs text-neutral/60 ${s.smallText}`,
+			buttons: 'flex items-center gap-md',
+			language: 'ml-xs font-mono lowercase',
 			skeleton:
-				'block rounded-md font-mono text-transparent bg-neutral-muted/80 scale-y-90 w-fit animate-pulse whitespace-nowrap',
+				'block rounded-sm font-mono text-transparent bg-neutral-muted/80 scale-y-90 w-fit animate-pulse whitespace-nowrap',
 			pre: 'overflow-x-auto font-mono p-0 bg-surface',
 			line: 'block '
 		},
 		codespan: {
-			base: `bg-surface-raised rounded px-1.5 py-0.5 font-mono text-neutral ${s.smallText}`
+			base: `bg-surface-raised rounded-sm px-sm py-micro font-mono text-neutral ${s.smallText}`
 		},
 		image: {
 			base: `group relative ${s.blockMargin} mx-auto w-fit block`,
-			image: 'max-w-full rounded-lg'
+			image: 'max-w-full rounded-md'
 		},
 		blockquote: {
-			base: `border-neutral/30 text-neutral/60 ${s.blockMargin} border-l-4 pl-4 italic`
+			base: `border-neutral/30 text-neutral/60 ${s.blockMargin} border-l-4 pl-xl italic`
 		},
 		alert: {
-			base: `relative ${s.blockMargin} border-l-4 p-4 bg-surface-raised`,
-			title: `${s.smallText} font-semibold flex items-center gap-2 mb-2 capitalize`,
+			base: `relative ${s.blockMargin} border-l-4 p-xl bg-surface-raised`,
+			title: `${s.smallText} font-semibold flex items-center gap-md mb-md capitalize`,
 			icon: 'size-5',
 			note: '[&>[data-alert-title]]:text-info-muted-readable border-info/40 stroke-info bg-info-muted',
 			tip: '[&>[data-alert-title]]:text-success-muted-readable border-success/40 stroke-success bg-success-muted',
@@ -199,7 +199,7 @@ export const buildStreamdownTheme = (size: MarkdownSize): StreamdownProps['theme
 				'[&>[data-alert-title]]:text-primary-muted-readable border-primary/40 stroke-primary bg-primary-muted'
 		},
 		table: {
-			base: `overflow-x-auto max-w-full ${s.blockMargin} rounded-lg border border-neutral-muted`,
+			base: `overflow-x-auto max-w-full ${s.blockMargin} rounded-md border border-neutral-muted`,
 			table: 'w-full border-collapse min-w-full'
 		},
 		thead: {
@@ -215,10 +215,10 @@ export const buildStreamdownTheme = (size: MarkdownSize): StreamdownProps['theme
 			base: 'state-layer border-neutral-muted not-last:border-b transition-colors'
 		},
 		td: {
-			base: `px-4 py-3 ${s.smallText} text-neutral min-w-[200px] max-w-[400px] break-words`
+			base: `px-xl py-lg ${s.smallText} text-neutral min-w-[200px] max-w-[400px] break-words`
 		},
 		th: {
-			base: `px-4 py-3 ${s.smallText} text-neutral min-w-[200px] max-w-[400px] break-words`
+			base: `px-xl py-lg ${s.smallText} text-neutral min-w-[200px] max-w-[400px] break-words`
 		},
 		sup: {
 			base: s.smallText
@@ -233,9 +233,9 @@ export const buildStreamdownTheme = (size: MarkdownSize): StreamdownProps['theme
 			base: 'font-semibold text-neutral'
 		},
 		mermaid: {
-			base: `group relative ${s.blockMargin} h-auto rounded-lg border border-neutral-muted bg-surface-raised overflow-hidden items-center min-h-[500px]`,
+			base: `group relative ${s.blockMargin} h-auto rounded-md border border-neutral-muted bg-surface-raised overflow-hidden items-center min-h-[500px]`,
 			icon: 'size-5',
-			buttons: 'absolute right-1 top-1 flex h-fit w-fit items-center gap-1'
+			buttons: 'absolute right-1 top-1 flex h-fit w-fit items-center gap-xs'
 		},
 		math: {
 			block: 'text-neutral',
@@ -257,34 +257,34 @@ export const buildStreamdownTheme = (size: MarkdownSize): StreamdownProps['theme
 			base: `${s.blockMargin} space-y-2`
 		},
 		descriptionTerm: {
-			base: 'font-semibold text-neutral border-l-2 border-neutral-muted pl-4'
+			base: 'font-semibold text-neutral border-l-2 border-neutral-muted pl-xl'
 		},
 		descriptionDetail: {
-			base: 'text-neutral/60 ml-4 leading-relaxed'
+			base: 'text-neutral/60 ml-xl leading-relaxed'
 		},
 		inlineCitation: {
-			preview: `state-layer ${s.smallText} text-neutral/60 bg-neutral-muted rounded-md px-2 py-0.5 cursor-pointer inline-flex border border-neutral-muted outline-none focus:ring-1 focus:ring-primary`,
+			preview: `state-layer ${s.smallText} text-neutral/60 bg-neutral-muted rounded-sm px-md py-micro cursor-pointer inline-flex border border-neutral-muted outline-none focus:ring-1 focus:ring-primary`,
 			carousel: {
 				header: 'flex items-center justify-between',
 				stepCounter: 'h-fit text-xs font-semibold text-neutral/60 tabular-nums',
-				buttons: 'flex w-fit items-center justify-end gap-2',
-				title: 'mb-2 line-clamp-2 font-semibold',
-				url: 'flex items-center gap-2 text-sm text-neutral/60',
-				favicon: 'h-4 w-4 rounded'
+				buttons: 'flex w-fit items-center justify-end gap-md',
+				title: 'mb-md line-clamp-2 font-semibold',
+				url: 'flex items-center gap-md text-sm text-neutral/60',
+				favicon: 'h-4 w-4 rounded-sm'
 			},
 			list: {
-				base: 'grid gap-2',
-				item: 'state-layer grid gap-1 rounded-md p-2',
+				base: 'grid gap-md',
+				item: 'state-layer grid gap-xs rounded-sm p-md',
 				title: 'line-clamp-1 font-semibold text-sm',
-				url: 'flex items-center gap-2 text-xs text-neutral/60',
-				favicon: 'h-3 w-3 rounded'
+				url: 'flex items-center gap-md text-xs text-neutral/60',
+				favicon: 'h-3 w-3 rounded-sm'
 			}
 		},
 		components: {
 			button:
-				'state-layer disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer p-1 text-neutral/60 transition-all hover:text-neutral rounded flex items-center justify-center w-6 h-6',
+				'state-layer disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer p-xs text-neutral/60 transition-all hover:text-neutral rounded-sm flex items-center justify-center w-6 h-6',
 			popover:
-				'min-w-[250px] max-w-md fixed z-[1000] max-h-md overflow-y-auto rounded-lg bg-surface-floating border border-neutral-muted p-2 shadow'
+				'min-w-[250px] max-w-md fixed z-[1000] max-h-md overflow-y-auto rounded-md bg-surface-floating border border-neutral-muted p-md shadow'
 		}
 	};
 };

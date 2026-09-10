@@ -17,7 +17,7 @@
 			id: 'name',
 			header: 'Name',
 			sortable: true,
-			size: 210
+			width: 210
 		}),
 		column.accessor('department', {
 			id: 'department',
@@ -27,7 +27,7 @@
 		column.accessor('status', {
 			id: 'status',
 			header: 'Status',
-			size: 140
+			width: 140
 		}),
 		column.accessor('salary', {
 			id: 'salary',
@@ -50,7 +50,7 @@
 		placeholder="Every status"
 		items={statuses.map((status) => ({ value: status, label: status }))}
 		value={typeof payload.value === 'string' ? payload.value : null}
-		onChange={(value) => payload.setValue(value || undefined)}
+		onValueChange={(value) => payload.setValue(value || undefined)}
 	/>
 {/snippet}
 

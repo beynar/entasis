@@ -3,8 +3,34 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import Form from '$lib/components/Form/Form/Form.svelte';
 	import TextInput from '$lib/components/Form/TextInput/TextInput.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let email = $state('');
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -19,8 +45,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Single-line text entry with a label"
 		code={`<TextInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Email"
 	description="We'll only use this for receipts"
 	placeholder="you@example.com"
@@ -29,6 +60,10 @@
 	>
 		<div class="w-full max-w-md">
 			<TextInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
 				label="Email"
 				description="We'll only use this for receipts"
 				placeholder="you@example.com"

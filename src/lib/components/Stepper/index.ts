@@ -3,7 +3,8 @@ export type {
 	StepperPanelAriaLabel,
 	StepperPanelAriaLabelledby,
 	StepperProps,
-	StepperRenderPayload
+	StepperRenderPayload,
+	StepperValueChangePayload
 } from './stepper.props.js';
 export { StepperState } from './stepper.state.svelte.js';
 export {

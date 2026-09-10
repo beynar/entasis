@@ -8,7 +8,35 @@
 	import { gearIcon } from '$lib/components/Icons/gear.js';
 	import { chartBarIcon } from '$lib/components/Icons/chartBar.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+	import { colors, sizes } from '$lib/utils/tokens.js';
+
+	const placements = ['top', 'bottom', 'left', 'right'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'tabbarSize',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'tabbarColor',
+			type: 'segmented',
+			label: 'Color',
+			value: 'primary',
+			options: colors
+		},
+		{
+			name: 'placement',
+			type: 'segmented',
+			label: 'Placement',
+			value: 'top',
+			options: placements
+		},
+		{ name: 'tabbarFullWidth', type: 'switch', label: 'Full width', value: false }
+	]);
 
 	let simpleActiveTab = $state(0);
 	let iconActiveTab = $state(0);
@@ -92,8 +120,35 @@
 		'Top, bottom, left, right placement'
 	]}
 >
-	<ComponentCard description="Basic tabs render one children snippet for every item.">
-		<Tabs items={simpleTabs} bind:activeTab={simpleActiveTab}>
+	<ComponentCard
+		{controls}
+		description="Basic tabs render one children snippet for every item."
+		code={`<Tabs
+	items={simpleTabs}
+	bind:value={activeTab}
+	tabbarSize="${controls.value.tabbarSize}"
+	tabbarColor="${controls.value.tabbarColor}"
+	placement="${controls.value.placement}"
+	tabbarFullWidth={${controls.value.tabbarFullWidth}}
+>
+	{#snippet children({ item, index })}
+		<section class="space-y-2 p-6">
+			<p class="text-neutral/60 text-sm">Panel {index + 1}</p>
+			<h3 class="text-xl font-semibold">{item.title}</h3>
+			<p class="text-neutral/80">{item.description}</p>
+		</section>
+	{/snippet}
+</Tabs>`}
+	>
+		<Tabs
+			class="w-full min-h-64"
+			items={simpleTabs}
+			bind:value={simpleActiveTab}
+			tabbarSize={controls.value.tabbarSize}
+			tabbarColor={controls.value.tabbarColor}
+			placement={controls.value.placement}
+			tabbarFullWidth={controls.value.tabbarFullWidth}
+		>
 			{#snippet children({ item, index })}
 				<section class="space-y-2 p-6">
 					<p class="text-neutral/60 text-sm">Panel {index + 1}</p>
@@ -106,7 +161,7 @@
 
 	{#snippet examples()}
 		<ComponentCard description="Tabs can use the same item data for labels, icons, and panels.">
-			<Tabs items={iconTabs} bind:activeTab={iconActiveTab}>
+			<Tabs items={iconTabs} bind:value={iconActiveTab}>
 				{#snippet children({ item })}
 					<section class="space-y-4 p-6">
 						<div class="flex items-center justify-between gap-3">
@@ -124,7 +179,7 @@
 		<ComponentCard
 			description="Control tab navigation programmatically through the snippet payload."
 		>
-			<Tabs items={programmaticTabs} bind:activeTab={programmaticActiveTab}>
+			<Tabs items={programmaticTabs} bind:value={programmaticActiveTab}>
 				{#snippet children({ item, index, stepper })}
 					<section class="space-y-4 p-6">
 						<div>
@@ -132,16 +187,16 @@
 							<p class="text-neutral/80 mt-1">{item.description}</p>
 						</div>
 						<div class="flex gap-2">
-							<Button variant="outline" disabled={index === 0} onClick={() => stepper.previous()}>
+							<Button variant="outline" disabled={index === 0} onclick={() => stepper.previous()}>
 								Previous
 							</Button>
 							<Button
 								disabled={index === programmaticTabs.length - 1}
-								onClick={() => stepper.next()}
+								onclick={() => stepper.next()}
 							>
 								Next
 							</Button>
-							<Button color="success" onClick={() => stepper.goTo(0)}>Start Over</Button>
+							<Button color="success" onclick={() => stepper.goTo(0)}>Start Over</Button>
 						</div>
 					</section>
 				{/snippet}
@@ -155,7 +210,7 @@
 					<div class="border-neutral-muted min-h-64 rounded border">
 						<Tabs
 							items={verticalTabs}
-							bind:activeTab={verticalActiveTab}
+							bind:value={verticalActiveTab}
 							placement="left"
 							tabbarSize="small"
 						>
@@ -186,8 +241,8 @@
 		<ComponentCard description="The same repeated children convention works for form-like panels.">
 			<Tabs
 				items={formTabs}
-				bind:activeTab={formActiveTab}
-				onChange={handleTabChange}
+				bind:value={formActiveTab}
+				onValueChange={handleTabChange}
 				tabbarColor="secondary"
 			>
 				{#snippet children({ item, index })}

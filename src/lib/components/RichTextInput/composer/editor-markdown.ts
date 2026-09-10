@@ -5,17 +5,21 @@ import {
 	$isTextNode,
 	$nodesOfType,
 	type LexicalNode,
-	type LexicalEditor
+	type LexicalEditor,
+	type EditorUpdateOptions
 } from 'lexical';
 import type { RichTextInputFormat } from '../richTextInput.props.js';
 import { getAIComposerMarkdownTransformers } from './markdown.js';
 import type { AIComposerEditorChange } from './editor-change.js';
 import { AIComposerTokenNode } from './token-node.js';
 
+export const EXTERNAL_MARKDOWN_UPDATE = 'svelai:external-markdown';
+
 export function loadComposerMarkdown(
 	editor: LexicalEditor,
 	markdown: string,
-	formats?: readonly RichTextInputFormat[]
+	formats?: readonly RichTextInputFormat[],
+	options?: EditorUpdateOptions
 ) {
 	editor.update(() => {
 		const root = $getRoot();
@@ -24,7 +28,7 @@ export function loadComposerMarkdown(
 		const selection = root.selectEnd();
 		selection.setFormat(0);
 		selection.setStyle('');
-	});
+	}, options);
 }
 
 function isBlankParagraph(node: LexicalNode) {
@@ -50,7 +54,6 @@ export function readComposerChange(
 		undefined,
 		true
 	).trimEnd();
-	const root = $getRoot();
 	const tokens = $nodesOfType(AIComposerTokenNode).map((node) => node.getData());
 	return {
 		markdown,

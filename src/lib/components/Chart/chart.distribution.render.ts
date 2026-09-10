@@ -329,8 +329,8 @@ function violinDensities(
 		(_value, index) => minimum + step * (index + 1)
 	);
 	const createBins = bin<number, number>().domain([minimum, maximum]).thresholds(thresholds);
-	return new Map(
-		summaries.map((summary) => {
+	return new Map<string, readonly DensityPoint[]>(
+		summaries.map((summary): readonly [string, readonly DensityPoint[]] => {
 			if (summary.values.length < 2) return [summary.identity, []] as const;
 			const bins = createBins(summary.values);
 			const maximumCount = Math.max(...bins.map((bucket) => bucket.length), 1);

@@ -6,7 +6,7 @@ import {
 } from '$lib/utils/cva/index.js';
 
 const root = cva({
-	base: 'relative flex min-w-0 flex-col gap-3',
+	base: 'relative flex min-w-0 flex-col gap-lg',
 	variants: {
 		fill: {
 			true: 'h-full min-h-0',
@@ -16,12 +16,12 @@ const root = cva({
 	defaultVariants: { fill: false }
 });
 const toolbar = cva({
-	base: 'flex min-w-0 flex-wrap items-center justify-between gap-2'
+	base: 'flex min-w-0 flex-wrap items-center justify-between gap-md'
 });
-const toolbarGroup = cva({ base: 'flex min-w-0 flex-wrap items-center gap-2' });
+const toolbarGroup = cva({ base: 'flex min-w-0 flex-wrap items-center gap-md' });
 const search = cva({ base: 'w-full sm:w-64' });
 const viewport = cva({
-	base: 'relative isolate overflow-hidden rounded border border-neutral-muted bg-surface [container-type:inline-size]',
+	base: 'relative isolate overflow-hidden rounded-sm border border-neutral-muted bg-surface [container-type:inline-size]',
 	variants: {
 		fill: {
 			true: 'min-h-0 flex-1',
@@ -36,7 +36,7 @@ const virtualTable = cva({ base: 'grid min-w-full table-fixed text-sm' });
 const caption = cva({
 	base: 'text-sm text-neutral/60',
 	variants: {
-		density: { small: 'mt-3', normal: 'mt-4', large: 'mt-6' }
+		density: { small: 'mt-lg', normal: 'mt-xl', large: 'mt-layout-md' }
 	},
 	defaultVariants: { density: 'normal' }
 });
@@ -45,12 +45,12 @@ const header = cva({
 });
 const headerRow = cva({ base: 'grid border-b border-neutral-muted bg-surface-raised' });
 const headerCell = cva({
-	base: 'group/data-table-header relative flex min-w-0 items-center gap-1 overflow-visible border-neutral-muted font-medium whitespace-nowrap',
+	base: 'group/data-table-header relative flex min-w-0 items-center gap-xs overflow-visible border-neutral-muted font-medium whitespace-nowrap',
 	variants: {
 		density: {
-			small: 'h-8 px-1.5',
-			normal: 'h-10 px-2',
-			large: 'h-12 px-3'
+			small: 'h-8 px-sm',
+			normal: 'h-10 px-md',
+			large: 'h-12 px-lg'
 		},
 		align: {
 			start: 'justify-start text-left',
@@ -62,10 +62,10 @@ const headerCell = cva({
 	defaultVariants: { density: 'normal', align: 'start', pinned: false }
 });
 const headerContent = cva({
-	base: 'flex min-w-0 flex-1 items-center gap-1'
+	base: 'flex min-w-0 flex-1 items-center gap-xs'
 });
 const headerButton = cva({
-	base: 'flex min-w-0 flex-1 items-center gap-1 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary [&_svg]:size-3.5 [&_svg]:shrink-0'
+	base: 'flex min-w-0 flex-1 items-center gap-xs rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary [&_svg]:size-3.5 [&_svg]:shrink-0'
 });
 const headerLabel = cva({ base: 'truncate' });
 const headerActions = cva({ base: 'ml-auto flex shrink-0 items-center' });
@@ -104,9 +104,9 @@ const cell = cva({
 	base: 'relative flex min-w-0 items-center overflow-hidden border-neutral-muted outline-none',
 	variants: {
 		density: {
-			small: 'min-h-8 px-1.5 py-1',
-			normal: 'min-h-10 p-2',
-			large: 'min-h-12 p-3'
+			small: 'min-h-8 px-sm py-xs',
+			normal: 'min-h-10 p-md',
+			large: 'min-h-12 p-lg'
 		},
 		align: {
 			start: 'justify-start text-left',
@@ -144,17 +144,17 @@ const detailCell = cva({
 	base: 'min-w-0 overflow-hidden',
 	variants: {
 		density: {
-			small: 'px-8 py-2',
-			normal: 'px-10 py-3',
-			large: 'px-12 py-4'
+			small: 'px-layout-lg py-md',
+			normal: 'px-layout-lg py-lg',
+			large: 'px-layout-xl py-xl'
 		}
 	},
 	defaultVariants: { density: 'normal' }
 });
 const spacer = cva({ base: 'pointer-events-none grid border-0' });
-const expander = cva({ base: 'mr-1 shrink-0' });
+const expander = cva({ base: 'mr-xs shrink-0' });
 const groupValue = cva({ base: 'min-w-0 truncate' });
-const groupCount = cva({ base: 'ml-1 text-xs font-normal text-neutral/60' });
+const groupCount = cva({ base: 'ml-xs text-xs font-normal text-neutral/60' });
 const pinnedBoundary = cva({
 	base: 'after:pointer-events-none after:absolute after:inset-y-0 after:w-px after:bg-neutral-muted',
 	variants: {
@@ -174,42 +174,42 @@ const editorInputContainer = cva({
 	base: 'w-full rounded-none border-0 bg-transparent shadow-none transition-none focus-within:ring-0',
 	variants: {
 		density: {
-			small: 'min-h-8 px-1.5 py-1',
-			normal: 'min-h-10 p-2',
-			large: 'min-h-12 p-3'
+			small: 'min-h-8 px-sm py-xs',
+			normal: 'min-h-10 p-md',
+			large: 'min-h-12 p-lg'
 		}
 	},
 	defaultVariants: { density: 'normal' }
 });
 const editorSwitchContainer = cva({ base: 'justify-center' });
 const editorError = cva({
-	base: 'absolute top-full left-0 z-50 mt-1 rounded bg-danger px-2 py-1 text-xs text-danger-contrast shadow'
+	base: 'absolute top-full left-0 z-50 mt-xs rounded-sm bg-danger px-md py-xs text-xs text-danger-contrast shadow'
 });
 const filterPanel = cva({
-	base: 'grid w-full gap-1 p-3',
+	base: 'grid w-full gap-xs p-lg',
 	variants: {
 		separated: {
-			true: 'mt-1 border-t border-neutral-muted',
+			true: 'mt-xs border-t border-neutral-muted',
 			false: ''
 		}
 	},
 	defaultVariants: { separated: false }
 });
-const filterHeader = cva({ base: 'flex items-center justify-between gap-3' });
+const filterHeader = cva({ base: 'flex items-center justify-between gap-lg' });
 const filterLabel = cva({ base: 'text-xs font-medium text-neutral/60' });
-const filterFields = cva({ base: 'grid grid-cols-2 gap-2' });
-const filterCheckboxGroup = cva({ base: '!gap-1' });
-const filterCheckboxContainer = cva({ base: '!gap-1' });
-const filterCheckboxItem = cva({ base: '!min-h-8 !py-1 !pl-9' });
+const filterFields = cva({ base: 'grid grid-cols-2 gap-md' });
+const filterCheckboxGroup = cva({ base: '!gap-xs' });
+const filterCheckboxContainer = cva({ base: '!gap-xs' });
+const filterCheckboxItem = cva({ base: '!min-h-8 !py-xs !pl-layout-lg' });
 const filterCheckboxIndicator = cva({ base: '!top-2 !size-4' });
 const stateRow = cva({ base: 'grid min-h-40' });
 const stateCell = cva({ base: 'relative grid min-w-0' });
 const stateContent = cva({
-	base: 'sticky start-0 grid w-[100cqw] place-items-center p-6 text-center'
+	base: 'sticky start-0 grid w-[100cqw] place-items-center p-layout-md text-center'
 });
-const skeletonList = cva({ base: 'grid w-full max-w-3xl gap-3' });
+const skeletonList = cva({ base: 'grid w-full max-w-3xl gap-lg' });
 const skeletonBar = cva({ base: 'h-8 w-full' });
-const footer = cva({ base: 'flex flex-wrap items-center justify-between gap-3' });
+const footer = cva({ base: 'flex flex-wrap items-center justify-between gap-lg' });
 const summary = cva({ base: 'text-sm text-neutral/60' });
 
 export const dataTableTheme = {

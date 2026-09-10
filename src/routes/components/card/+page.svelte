@@ -3,9 +3,42 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { Card } from '$lib/components/Card/index.js';
 	import Button from '$lib/components/Button/Button.svelte';
-	import { colors, variants } from '$lib/utils/tokens.js';
+	import { colors, sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import { Form } from '$lib/components/Form/Form/index.js';
 	import CardPlayground from './demos/CardPlayground.svelte';
+
+	const cardVariants = ['solid', 'outline', 'soft', 'ghost'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'solid',
+			options: cardVariants
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'neutral',
+			options: colors
+		}
+	]);
 </script>
 
 <DocPage
@@ -21,7 +54,8 @@
 	]}
 >
 	<ComponentCard
-		code={`<Card>
+		{controls}
+		code={`<Card size="${controls.value.size}" density="${controls.value.density}" variant="${controls.value.variant}" color="${controls.value.color}">
 	{#snippet title()}
 		Card Title
 	{/snippet}
@@ -33,7 +67,13 @@
 	{/snippet}
 </Card>`}
 	>
-		<Card class="w-full max-w-sm">
+		<Card
+			class="w-full max-w-sm"
+			size={controls.value.size}
+			density={controls.value.density}
+			variant={controls.value.variant}
+			color={controls.value.color}
+		>
 			{#snippet title()}
 				Card Title
 			{/snippet}
@@ -145,7 +185,7 @@
 			description="solid is the elevated default; outline and soft are quieter; ghost blends into the page."
 		>
 			<div class="grid w-full gap-6 sm:grid-cols-2">
-				{#each variants as variant (variant)}
+				{#each cardVariants as variant (variant)}
 					<Card {variant} color="primary">
 						{#snippet title()}
 							{variant}
@@ -226,7 +266,7 @@
 
 		<ComponentCard
 			title="Interactive"
-			description="With href the card renders as a link; with onClick it becomes a button."
+			description="With href the card renders as a link; with onclick it becomes a button."
 		>
 			<div class="grid w-full gap-6 sm:grid-cols-2">
 				<Card href="/" target="_blank" rel="noopener">
@@ -240,7 +280,7 @@
 						<p>Opens in a new tab.</p>
 					{/snippet}
 				</Card>
-				<Card onClick={() => console.log('Card clicked')}>
+				<Card onclick={() => console.log('Card clicked')}>
 					{#snippet title()}
 						Quick action
 					{/snippet}

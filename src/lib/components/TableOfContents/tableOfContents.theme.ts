@@ -26,7 +26,7 @@ const defaultTableOfContentsItem = cva({
 });
 
 const defaultTableOfContentsLink = cva({
-	base: 'text-neutral/60 hover:text-neutral block min-w-0 rounded-md py-[var(--table-of-contents-link-padding)] pe-2 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-color/45 focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+	base: 'text-neutral/60 hover:text-neutral block min-w-0 rounded-sm py-[var(--table-of-contents-link-padding)] pe-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-color/45 focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
 	variants: {
 		size: {
 			small: 'text-xs/5',

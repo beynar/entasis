@@ -7,4 +7,3 @@ export {
 	type PhoneInputTheme,
 	type PhoneInputThemeProps
 } from './phoneInput.theme.js';
-

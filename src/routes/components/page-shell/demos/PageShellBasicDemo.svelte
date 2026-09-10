@@ -1,7 +1,20 @@
 <script lang="ts">
-	import { PageShell, type PageShellAction } from '$lib/components/PageShell/index.js';
+	import {
+		PageShell,
+		type PageShellAction,
+		type PageShellContentPadding,
+		type PageShellContentWidth
+	} from '$lib/components/PageShell/index.js';
 	import { arrowClockwiseIcon } from '$lib/components/Icons/arrowClockwise.js';
 	import { downloadSimpleIcon } from '$lib/components/Icons/downloadSimple.js';
+
+	let {
+		contentPadding = 'normal',
+		contentWidth = 'wide'
+	}: {
+		contentPadding?: PageShellContentPadding;
+		contentWidth?: PageShellContentWidth;
+	} = $props();
 
 	const headerActions = [
 		{
@@ -23,8 +36,8 @@
 		title="Insights"
 		subtitle="Sticky header and footer with natural content flow"
 		{headerActions}
-		contentPadding="normal"
-		contentWidth="wide"
+		{contentPadding}
+		{contentWidth}
 	>
 		{#snippet footer()}
 			<span>Updated just now</span>

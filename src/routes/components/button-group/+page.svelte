@@ -3,8 +3,33 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import DocPage from '../../DocPage.svelte';
 	import { colors, sizes, variants } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	const items = [{ children: 'One' }, { children: 'Two' }, { children: 'Three' }];
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'solid',
+			options: variants
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'neutral',
+			options: colors
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -19,15 +44,14 @@
 	]}
 >
 	<ComponentCard
-		code={`<ButtonGroup
-	items={[
-		{ children: 'Button 1' },
-		{ children: 'Button 2' },
-		{ children: 'Button 3' }
-	]}
-/>`}
+		{controls}
+		code={`<ButtonGroup size="${controls.value.size}" variant="${controls.value.variant}" color="${controls.value.color}" disabled={${controls.value.disabled}} items={[...]} />`}
 	>
 		<ButtonGroup
+			size={controls.value.size}
+			variant={controls.value.variant}
+			color={controls.value.color}
+			disabled={controls.value.disabled}
 			items={[{ children: 'Button 1' }, { children: 'Button 2' }, { children: 'Button 3' }]}
 		/>
 	</ComponentCard>
@@ -41,7 +65,7 @@
 			</div>
 		</ComponentCard>
 
-		<ComponentCard description="Eight semantic colors, shown here in the solid variant.">
+		<ComponentCard description="Seven semantic colors, shown here in the solid variant.">
 			<div class="flex flex-wrap items-center justify-center gap-4">
 				{#each colors as color (color)}
 					<ButtonGroup {color} {items} />

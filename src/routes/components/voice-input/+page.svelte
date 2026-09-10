@@ -2,12 +2,45 @@
 	import Form from '$lib/components/Form/Form/Form.svelte';
 	import VoiceInput from '$lib/components/Form/VoiceInput/VoiceInput.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
 
 	let recording = $state<Blob | null>(null);
 	let duration = $state(0);
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'default',
+			options: ['default', 'expandable', 'compact']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 
-	const usageCode = `<script lang="ts">
+	const usageCode = $derived(`<script lang="ts">
 	import { VoiceInput } from 'svelai/voice-input';
 
 	let recording = $state<Blob | null>(null);
@@ -15,13 +48,18 @@
 ${'</' + 'script>'}
 
 <VoiceInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	variant="${controls.value.variant}"
+	disabled={${controls.value.disabled}}
 	label="Voice note"
 	description="Record a short message."
 	bind:value={recording}
 	bind:duration
 	minDuration={1}
 	maxDuration={60}
-/>`;
+/>`);
 
 	const durationCode = `<VoiceInput
 	label="Status update"
@@ -81,12 +119,18 @@ ${'</' + 'script>'}
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="The control fills its parent. Stop to finalize the message, then play it, seek on its waveform, or clear it."
 		class="!min-h-fit"
 		code={usageCode}
 	>
 		<div class="w-full max-w-3xl">
 			<VoiceInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				variant={controls.value.variant}
+				disabled={controls.value.disabled}
 				label="Voice note"
 				description="Record a message between 1 and 60 seconds."
 				bind:value={recording}

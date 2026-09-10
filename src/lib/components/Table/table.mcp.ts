@@ -227,29 +227,22 @@ type TableRow = {
 \`\`\`svelte
 <script>
 	import { Table } from 'svelai/table';
-	
-	{#snippet customStatus()}
-		<span class="text-success">✓ Active</span>
-	{/snippet}
-	
-	const header = {
-		name: 'Name',  // String
-		status: { content: customStatus },  // Snippet
-		date: { content: 'Date', class: 'w-32' }  // Full object with class
-	};
-	
-	const rows = [
-		{
-			cells: {
-				name: 'John Doe',  // String
-				status: customStatus,  // Snippet
-				date: '2024-01-15'  // String
-			}
-		}
-	];
 </script>
 
-<Table {header} items={rows} />
+{#snippet customStatus()}
+	<span class="text-success">✓ Active</span>
+{/snippet}
+
+<Table
+	header={{
+		name: 'Name',
+		status: { content: customStatus },
+		date: { content: 'Date', class: 'w-32' }
+	}}
+	items={[
+		{ cells: { name: 'John Doe', status: customStatus, date: '2024-01-15' } }
+	]}
+/>
 \`\`\`
 
 ### Table with Footer
@@ -296,26 +289,20 @@ type TableRow = {
 \`\`\`svelte
 <script>
 	import { Table } from 'svelai/table';
-	
-	const header = {
-		name: { content: 'Name' },
-		actions: { content: 'Actions' }
-	};
-	
-	{#snippet customRow()}
-		<td>John Doe</td>
-		<td>
-			<button>Edit</button>
-			<button>Delete</button>
-		</td>
-	{/snippet}
-	
-	const rows = [
-		{ content: customRow }
-	];
 </script>
 
-<Table {header} items={rows} />
+{#snippet customRow()}
+	<td>John Doe</td>
+	<td>
+		<button>Edit</button>
+		<button>Delete</button>
+	</td>
+{/snippet}
+
+<Table
+	header={{ name: 'Name', actions: 'Actions' }}
+	items={[{ content: customRow }]}
+/>
 \`\`\`
 
 ### Table with Prefix and Suffix (Future Features)

@@ -1,8 +1,10 @@
 <script lang="ts">
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 	import { ContextMenu } from '$lib/components/ContextMenu/index.js';
 	import type { MenuItem } from '$lib/components/Menu/menu.props.js';
+	import { sizes } from '$lib/utils/tokens.js';
 	import { copyIcon } from '$lib/components/Icons/copy.js';
 	import { scissorsIcon } from '$lib/components/Icons/scissors.js';
 	import { clipboardIcon } from '$lib/components/Icons/clipboard.js';
@@ -13,14 +15,25 @@
 
 	let lastAction = $state('nothing yet');
 
+	const controls = createComponentControls([
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
+
 	const basicItems: MenuItem[] = [
-		{ type: 'option', prefix: copyIcon, title: 'Copy', onClick: () => (lastAction = 'Copy') },
-		{ type: 'option', prefix: scissorsIcon, title: 'Cut', onClick: () => (lastAction = 'Cut') },
+		{ type: 'option', prefix: copyIcon, title: 'Copy', onclick: () => (lastAction = 'Copy') },
+		{ type: 'option', prefix: scissorsIcon, title: 'Cut', onclick: () => (lastAction = 'Cut') },
 		{
 			type: 'option',
 			prefix: clipboardIcon,
 			title: 'Paste',
-			onClick: () => (lastAction = 'Paste')
+			onclick: () => (lastAction = 'Paste')
 		},
 		{ type: 'separator' },
 		{
@@ -28,7 +41,7 @@
 			prefix: trashIcon,
 			title: 'Delete',
 			color: 'danger',
-			onClick: () => (lastAction = 'Delete')
+			onclick: () => (lastAction = 'Delete')
 		}
 	];
 
@@ -68,9 +81,23 @@
 		'Flips near viewport edges, closes on outside click / Esc'
 	]}
 >
-	<ComponentCard description="Right-click the area to open a menu at the pointer.">
+	<ComponentCard
+		{controls}
+		description="Right-click the area to open a menu at the pointer."
+		code={`<ContextMenu
+	items={basicItems}
+	menu={{ density: '${controls.value.density}' }}
+	disabled={${controls.value.disabled}}
+>
+	<div>Right-click anywhere in this area</div>
+</ContextMenu>`}
+	>
 		<div class="w-full">
-			<ContextMenu items={basicItems}>
+			<ContextMenu
+				items={basicItems}
+				menu={{ density: controls.value.density }}
+				disabled={controls.value.disabled}
+			>
 				{@render target('Right-click anywhere in this area')}
 			</ContextMenu>
 			<p class="text-neutral/60 mt-3 text-center text-xs">

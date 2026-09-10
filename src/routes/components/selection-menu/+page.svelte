@@ -6,8 +6,35 @@
 	import SelectionMenu from '$lib/components/SelectionMenu/SelectionMenu.svelte';
 	import type { SelectionMenuSelection } from '$lib/components/SelectionMenu/index.js';
 	import type { ToggleMenuItem } from '$lib/components/ToggleMenu/index.js';
+	import { colors, sizes } from '$lib/utils/tokens.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+
+	const toggleVariants = ['ghost', 'outline'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'ghost',
+			options: toggleVariants
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'neutral',
+			options: colors
+		}
+	]);
 
 	function createFormattingItems(): ToggleMenuItem[] {
 		return [
@@ -42,13 +69,14 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Place the menu beside selectable content and it watches the shared parent automatically."
 		code={`<div>
 \t<article contenteditable="true">
 \t\tSelect any passage in this editor.
 \t</article>
 
-\t<SelectionMenu bind:items ariaLabel="Selection tools" />
+\t<SelectionMenu bind:value={items} ariaLabel="Selection tools" size="${controls.value.size}" variant="${controls.value.variant}" color="${controls.value.color}" />
 </div>`}
 	>
 		<div class="mx-auto grid w-full max-w-2xl gap-4">
@@ -68,8 +96,11 @@
 			</div>
 
 			<SelectionMenu
-				bind:items={parentItems}
+				bind:value={parentItems}
 				ariaLabel="Selection tools"
+				size={controls.value.size}
+				variant={controls.value.variant}
+				color={controls.value.color}
 				onSelectionChange={(selection) => (currentSelection = selection)}
 			/>
 			<p class="text-neutral/60 min-h-5 text-center text-xs" aria-live="polite">
@@ -87,7 +118,7 @@
 
 <SelectionMenu
 \ttarget="#selection-source"
-\tbind:items
+\tbind:value={items}
 \tariaLabel="Quote tools"
 />`}
 		>
@@ -101,7 +132,7 @@
 
 				<SelectionMenu
 					target="#selection-menu-quote"
-					bind:items={selectorItems}
+					bind:value={selectorItems}
 					ariaLabel="Quote tools"
 				/>
 			</div>

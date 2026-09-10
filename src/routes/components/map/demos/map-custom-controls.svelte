@@ -44,7 +44,7 @@
 	>
 		{#snippet controlButton(button: MapControlButtonSnippetArg)}
 			<!-- The map wraps this in a click-forwarding element, so the button itself
-           doesn't need an onClick — it only renders the icon and disabled state. -->
+           doesn't need an onclick — it only renders the icon and disabled state. -->
 			<Button
 				variant="ghost"
 				size="small"

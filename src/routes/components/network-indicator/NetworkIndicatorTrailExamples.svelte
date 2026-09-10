@@ -9,7 +9,7 @@
 			loading
 			variant="trail"
 			color="primary"
-			size={4}
+			height={4}
 			trailDuration={650}
 			trailGap={0}
 			class="!absolute !z-10"
@@ -20,7 +20,7 @@
 			loading
 			variant="trail"
 			color="success"
-			size={5}
+			height={5}
 			trailDuration={450}
 			trailGap={120}
 			class="!absolute !z-10"
@@ -31,7 +31,7 @@
 			loading
 			variant="trail-bounce"
 			color="info"
-			size={4}
+			height={4}
 			trailDuration={700}
 			trailGap={80}
 			class="!absolute !z-10"

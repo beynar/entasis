@@ -9,9 +9,9 @@
 		size = 'normal',
 		position,
 		class: className = '',
-		onClick,
-		onEnter,
-		onLeave,
+		onclick,
+		onpointerenter,
+		onpointerleave,
 		suffix,
 		target,
 		rel,
@@ -26,7 +26,7 @@
 	}: ChipProps = $props();
 
 	const classes = $derived(useChipTheme(theme));
-	const as = $derived(href ? 'a' : onClick || onEnter || onLeave ? 'button' : 'div');
+	const as = $derived(href ? 'a' : onclick || onpointerenter || onpointerleave ? 'button' : 'div');
 	const isEmpty = $derived(!children && !prefix && !suffix);
 </script>
 
@@ -45,9 +45,9 @@
 	disabled={as === 'button' ? disabled : undefined}
 	aria-pressed={ariaPressed}
 	aria-disabled={ariaDisabled}
-	onclick={onClick}
-	onpointerenter={onEnter}
-	onpointerleave={onLeave}
+	{onclick}
+	{onpointerenter}
+	{onpointerleave}
 	class={classes.root({ color, variant, size, position, className, isLink: as === 'a', isEmpty })}
 	{...attachments}
 >

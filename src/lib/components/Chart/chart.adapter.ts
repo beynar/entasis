@@ -1,10 +1,14 @@
 import {
+	bandX,
+	bandY,
 	defineChart,
 	facet,
 	frame,
+	whenFocused,
 	type ChartAnimationOptions,
 	type ChartColorOptions,
-	type ChartDefinition,
+	type ChartControl,
+	type DomChartDefinition,
 	type ChartHostOptions,
 	type StaticChartDefinition
 } from '@tanstack/charts';
@@ -28,6 +32,8 @@ import {
 } from './chart.cartesian.js';
 import { compileDistribution, isEmpiricalDistributionMark } from './chart.distribution.js';
 import { unsupportedDiscriminant } from './chart.errors.js';
+import { compileHexbinColorOptions } from './chart.hexbin.js';
+import { compileChartLegend, withLegendSeries } from './chart.legend.js';
 import {
 	compileMatrixColorOptions,
 	compileMatrixMark,
@@ -48,6 +54,7 @@ import type {
 	ChartProportionMark,
 	ChartRelationMark,
 	ChartScatterMark,
+	ChartValue,
 	ChartProps
 } from './chart.props.js';
 import {
@@ -59,8 +66,12 @@ import { validateInitialDimensions, validateMarkId } from './chart.validation.js
 
 type ChartPlotConfiguration<TRow extends object> = Pick<
 	ChartProps<TRow>,
-	'marks' | 'x' | 'y' | 'guides' | 'clip' | 'frame' | 'margin' | 'palette' | 'tooltip'
->;
+	'marks' | 'x' | 'y' | 'guides' | 'clip' | 'frame' | 'margin' | 'palette' | 'tooltip' | 'legend'
+> & {
+	viewportDomain?: readonly ChartValue[];
+	legendValue?: readonly ChartKey[];
+	onLegendValueChange?: (value: readonly ChartKey[]) => void;
+};
 
 type CreateChartOptionsInput<TRow extends object> = Pick<
 	ChartProps<TRow>,
@@ -73,6 +84,7 @@ type CreateChartOptionsInput<TRow extends object> = Pick<
 	| 'frame'
 	| 'margin'
 	| 'palette'
+	| 'legend'
 	| 'tooltip'
 	| 'ariaLabel'
 	| 'ariaDescription'
@@ -81,6 +93,10 @@ type CreateChartOptionsInput<TRow extends object> = Pick<
 	idPrefix: string;
 	tooltipClassName?: string;
 	animation?: false | ChartAnimationOptions;
+	controls?: readonly ChartControl[];
+	viewportDomain?: readonly ChartValue[];
+	legendValue?: readonly ChartKey[];
+	onLegendValueChange?: (value: readonly ChartKey[]) => void;
 };
 
 type CompileMarkInput<TRow extends object> = {
@@ -92,6 +108,7 @@ type CompileMarkInput<TRow extends object> = {
 	readonly areaGradients?: AreaGradients;
 	readonly fallbackSeries?: ChartChannel<TRow, ChartKey>;
 	readonly distributionDomain?: readonly [number, number];
+	readonly tooltipGroupBy?: 'x' | 'y';
 };
 
 export function createChartOptions<TRow extends object>({
@@ -104,20 +121,40 @@ export function createChartOptions<TRow extends object>({
 	frame: chartFrame,
 	margin,
 	palette,
+	legend,
 	tooltip,
 	ariaLabel,
 	ariaDescription,
 	idPrefix,
 	initialDimensions,
 	tooltipClassName,
-	animation
+	animation,
+	controls,
+	viewportDomain,
+	legendValue,
+	onLegendValueChange
 }: CreateChartOptionsInput<TRow>): ChartHostOptions<TRow> {
 	validateInitialDimensions(initialDimensions);
 	const definition = compileChartDefinition(
 		data,
-		{ marks, x, y, guides, clip, frame: chartFrame, margin, palette, tooltip },
+		{
+			marks,
+			x,
+			y,
+			guides,
+			clip,
+			frame: chartFrame,
+			margin,
+			palette,
+			tooltip,
+			viewportDomain,
+			legend,
+			legendValue,
+			onLegendValueChange
+		},
 		tooltipClassName,
-		animation
+		animation,
+		controls
 	);
 
 	return {
@@ -134,8 +171,9 @@ function compileChartDefinition<TRow extends object>(
 	data: readonly TRow[],
 	configuration: ChartPlotConfiguration<TRow>,
 	tooltipClassName?: string,
-	animation?: false | ChartAnimationOptions
-): ChartDefinition<TRow> {
+	animation?: false | ChartAnimationOptions,
+	controls?: readonly ChartControl[]
+): DomChartDefinition<TRow> {
 	if (!Array.isArray(configuration.marks) || configuration.marks.length === 0) {
 		throw new TypeError('[Chart] marks must contain at least one mark.');
 	}
@@ -143,7 +181,15 @@ function compileChartDefinition<TRow extends object>(
 		(mark): mark is ChartRelationMark<TRow> => mark.type === 'relation'
 	);
 	if (!relationMark) {
-		return compileChartPlot(data, configuration, tooltipClassName, '', undefined, animation);
+		return compileChartPlot(
+			data,
+			configuration,
+			tooltipClassName,
+			'',
+			undefined,
+			animation,
+			controls
+		);
 	}
 	const relationIndex = configuration.marks.indexOf(relationMark);
 	const relationPath = `marks[${relationIndex}]`;
@@ -159,6 +205,7 @@ function compileChartDefinition<TRow extends object>(
 		mark: relationMark,
 		path: relationPath,
 		palette: configuration.palette,
+		legend: compileChartLegend(configuration.legend, undefined, undefined, false),
 		tooltip: chartTooltip.input
 	});
 }
@@ -169,8 +216,9 @@ function compileChartPlot<TRow extends object>(
 	tooltipClassName?: string,
 	path = '',
 	fallbackSeries?: ChartChannel<TRow, ChartKey>,
-	animation?: false | ChartAnimationOptions
-): StaticChartDefinition<TRow> {
+	animation?: false | ChartAnimationOptions,
+	controls?: readonly ChartControl[]
+): StaticChartDefinition<TRow, ChartValue, ChartValue, 'dom'> {
 	const marksPath = appendPath(path, 'marks');
 	const palettePath = appendPath(path, 'palette');
 	const xPath = appendPath(path, 'x');
@@ -192,6 +240,10 @@ function compileChartPlot<TRow extends object>(
 		(mark): mark is Extract<ChartScatterMark<TRow>, { variant: 'hexbin' }> =>
 			mark.type === 'scatter' && mark.variant === 'hexbin'
 	);
+	const interactiveLegend =
+		typeof configuration.legend === 'object' &&
+		configuration.legend.interactive === true &&
+		supportsSeriesVisibility(configuration.marks);
 	const proportionIndex = proportionMark ? configuration.marks.indexOf(proportionMark) : -1;
 	if (proportionMark) validateProportionPlot(configuration, proportionIndex, path);
 
@@ -199,8 +251,7 @@ function compileChartPlot<TRow extends object>(
 		configuration.tooltip,
 		tooltipClassName,
 		hexbinMark ? undefined : resolveChartTooltipGroupBy(configuration),
-		resolveTooltipSpecialization(distributionMark, proportionMark, hexbinMark),
-		configuration
+		resolveTooltipSpecialization(distributionMark, proportionMark, hexbinMark)
 	);
 	const areaGradients = configuration.marks.some((mark) => mark.type === 'series' && mark.area)
 		? compileAreaGradients(configuration.palette, path)
@@ -215,6 +266,8 @@ function compileChartPlot<TRow extends object>(
 	const marks: CompiledMark[] = [];
 	const plotFrame = compileFrame(configuration.frame);
 	if (plotFrame) marks.push(plotFrame);
+	const tooltipFocusBand = compileTooltipFocusBand(data, configuration.marks, chartTooltip.groupBy);
+	if (tooltipFocusBand) marks.push(tooltipFocusBand);
 
 	configuration.marks.forEach((mark, index) => {
 		const markPath = `${marksPath}[${index}]`;
@@ -247,7 +300,8 @@ function compileChartPlot<TRow extends object>(
 			areaGradients,
 			fallbackSeries,
 			distributionDomain:
-				mark.type === 'distribution' ? resolveDistributionDomain(mark, configuration) : undefined
+				mark.type === 'distribution' ? resolveDistributionDomain(mark, configuration) : undefined,
+			tooltipGroupBy: chartTooltip.groupBy
 		});
 		if (compiled.implicitPositions) {
 			resolvedX = compiled.implicitPositions.x;
@@ -267,7 +321,8 @@ function compileChartPlot<TRow extends object>(
 			path: markPath,
 			fallbackSeries
 		});
-		marks.push(...annotations.under, ...compiledMarks, ...analysisMarks, ...annotations.over);
+		const layers = [...annotations.under, ...compiledMarks, ...analysisMarks, ...annotations.over];
+		marks.push(...(interactiveLegend ? layers.map(withLegendSeries) : layers));
 	});
 
 	if (requiredXPath !== undefined && resolvedX === undefined) {
@@ -277,25 +332,91 @@ function compileChartPlot<TRow extends object>(
 		throw new TypeError(`[Chart] ${yPath} is required by ${requiredYPath}.`);
 	}
 
-	const definition: StaticChartDefinition<TRow> = {
+	const definition: StaticChartDefinition<TRow, ChartValue, ChartValue, 'dom'> = {
 		marks,
-		x: requiredXPath !== undefined && resolvedX ? compilePosition(resolvedX, xPath) : undefined,
-		y: requiredYPath !== undefined && resolvedY ? compilePosition(resolvedY, yPath) : undefined,
+		scales: {
+			x:
+				requiredXPath !== undefined && resolvedX
+					? compilePosition(resolvedX, xPath, configuration.viewportDomain)
+					: null,
+			y: requiredYPath !== undefined && resolvedY ? compilePosition(resolvedY, yPath) : null
+		},
 		guides: configuration.guides,
-		clip: configuration.clip,
+		clip: configuration.clip ?? Boolean(hexbinMark),
 		margin: configuration.margin,
 		gradients: areaGradients?.definitions,
-		color: matrixColor,
+		color: {
+			...(matrixColor ??
+				(hexbinMark && configuration.marks.length === 1
+					? compileHexbinColorOptions(hexbinMark)
+					: undefined)),
+			legend: compileChartLegend(
+				configuration.legend,
+				configuration.legendValue,
+				configuration.onLegendValueChange,
+				interactiveLegend
+			)
+		},
 		theme: compileChartTheme(configuration.palette)
 	};
 
 	return defineChart(definition, {
-		animate: animation,
-		keyboard: false,
+		svgAnimation: animation,
 		focusRing: false,
+		keyboard: false,
+		pointer: false,
 		focus: chartTooltip.focus,
+		controls,
 		tooltip: chartTooltip.input
 	});
+}
+
+function supportsSeriesVisibility<TRow extends object>(marks: readonly ChartMark<TRow>[]): boolean {
+	return marks.every((mark) => {
+		if (mark.type === 'distribution') return isEmpiricalDistributionMark(mark);
+		if (mark.type !== 'series' && mark.type !== 'scatter' && mark.type !== 'bar') return false;
+		if (mark.type === 'scatter' && mark.variant === 'hexbin') return false;
+		return mark.series === undefined || mark.colorBy === undefined || mark.series === mark.colorBy;
+	});
+}
+
+function compileTooltipFocusBand<TRow extends object>(
+	data: readonly TRow[],
+	marks: readonly ChartMark<TRow>[],
+	axis: 'x' | 'y' | undefined
+): CompiledMark | undefined {
+	if (!axis) return undefined;
+	const channel = marks
+		.map((mark) => {
+			switch (mark.type) {
+				case 'series':
+				case 'scatter':
+				case 'bar':
+					return mark[axis];
+				case 'matrix':
+					return mark.variant === 'calendar' ? undefined : mark[axis];
+				default:
+					return undefined;
+			}
+		})
+		.find((candidate) => candidate !== undefined);
+	if (!channel) return undefined;
+	const accessor = compileChannel(channel);
+	const rowsByValue = new Map<string, TRow>();
+	data.forEach((row, index) => {
+		const value = accessor(row, { index, data });
+		if (value === null || value === undefined) return;
+		const identity =
+			value instanceof Date ? `date:${value.getTime()}` : `${typeof value}:${String(value)}`;
+		if (!rowsByValue.has(identity)) rowsByValue.set(identity, row);
+	});
+	const rows = [...rowsByValue.values()];
+	const fill = compileColor('neutral');
+	const focusBand =
+		axis === 'x'
+			? bandX(rows, { id: 'chart-tooltip-focus', x: accessor, fill, fillOpacity: 0.14 })
+			: bandY(rows, { id: 'chart-tooltip-focus', y: accessor, fill, fillOpacity: 0.14 });
+	return whenFocused(focusBand, { match: axis });
 }
 
 function compileFrame(input: boolean | ChartFrameDefinition | undefined): CompiledMark | undefined {
@@ -320,13 +441,21 @@ function compileMark<TRow extends object>({
 	tooltipClassName,
 	areaGradients,
 	fallbackSeries,
-	distributionDomain
+	distributionDomain,
+	tooltipGroupBy
 }: CompileMarkInput<TRow>): CompiledMarkResult {
 	switch (mark.type) {
 		case 'series':
-			return compileSeriesMark(data, mark, path, areaGradients, fallbackSeries);
+			return compileSeriesMark(data, mark, path, areaGradients, fallbackSeries, tooltipGroupBy);
 		case 'scatter':
-			return compileScatterMark(data, mark, path, fallbackSeries);
+			return compileScatterMark(
+				data,
+				mark,
+				path,
+				fallbackSeries,
+				tooltipGroupBy,
+				configuration.marks.length === 1
+			);
 		case 'bar':
 			return compileBarMark(data, mark, path, fallbackSeries);
 		case 'distribution': {
@@ -359,17 +488,24 @@ function compileMark<TRow extends object>({
 		case 'matrix':
 			return compileMatrixMark(data, mark, path, fallbackSeries);
 		case 'facet': {
-			const nestedConfiguration: ChartPlotConfiguration<TRow> = {
-				...configuration,
-				marks: mark.marks,
-				frame: undefined,
-				tooltip: undefined
-			};
+			const nestedConfiguration = shareFacetPositionDomains(
+				data,
+				{
+					...configuration,
+					marks: mark.marks,
+					frame: undefined,
+					legend: false,
+					tooltip: undefined
+				},
+				mark.axes,
+				tooltipClassName,
+				path
+			);
 			return {
 				mark: facet(data, {
 					id: mark.id,
 					by: compileKeyChannel(mark.by),
-					chart: (facetData, facetKey) =>
+					chart: (facetData, { key: facetKey }) =>
 						compileChartPlot(
 							facetData,
 							nestedConfiguration,
@@ -396,6 +532,99 @@ function compileMark<TRow extends object>({
 		default:
 			return unsupportedDiscriminant(mark, `${path}.type`);
 	}
+}
+
+function shareFacetPositionDomains<TRow extends object>(
+	data: readonly TRow[],
+	configuration: ChartPlotConfiguration<TRow>,
+	axes: 'outer' | 'cell' | undefined,
+	tooltipClassName: string | undefined,
+	path: string
+): ChartPlotConfiguration<TRow> {
+	if (axes === 'cell') return configuration;
+	const definition = compileChartPlot(data, configuration, tooltipClassName, path);
+	return {
+		...configuration,
+		x: inferFacetPositionDomain(definition.marks, 'x', configuration.x),
+		y: inferFacetPositionDomain(definition.marks, 'y', configuration.y)
+	};
+}
+
+function inferFacetPositionDomain(
+	marks: readonly CompiledMark[],
+	axis: 'x' | 'y',
+	position: ChartPositionDefinition | undefined
+): ChartPositionDefinition | undefined {
+	if (!position || position.scale.domain !== undefined) return position;
+	const { values, includeZero } = collectFacetScaleValues(marks, axis);
+	if (!values.length) return position;
+	switch (position.scale.type) {
+		case 'band':
+		case 'point':
+			return {
+				reverse: position.reverse,
+				grid: position.grid,
+				axis: position.axis,
+				scale: { ...position.scale, domain: uniqueChartValues(values) }
+			};
+		case 'time':
+		case 'utc': {
+			const dates = values.filter(
+				(value): value is Date => value instanceof Date && Number.isFinite(value.getTime())
+			);
+			if (!dates.length) return position;
+			const timestamps = dates.map((date) => date.getTime());
+			return {
+				...position,
+				scale: {
+					...position.scale,
+					domain: [new Date(Math.min(...timestamps)), new Date(Math.max(...timestamps))]
+				}
+			};
+		}
+		default: {
+			const numbers = values.filter(
+				(value): value is number => typeof value === 'number' && Number.isFinite(value)
+			);
+			if (!numbers.length) return position;
+			if (includeZero) numbers.push(0);
+			return {
+				...position,
+				scale: { ...position.scale, domain: [Math.min(...numbers), Math.max(...numbers)] }
+			};
+		}
+	}
+}
+
+function collectFacetScaleValues(
+	marks: readonly CompiledMark[],
+	axis: 'x' | 'y'
+): { values: ChartValue[]; includeZero: boolean } {
+	const values: ChartValue[] = [];
+	let includeZero = false;
+	marks.forEach((mark, markIndex) => {
+		const initialized = mark.initialize({ markIndex });
+		for (const channel of Object.values(initialized.channels)) {
+			if (channel.scale !== axis) continue;
+			includeZero ||= channel.includeZero === true;
+			for (const value of channel.values) {
+				if (typeof value === 'number' || typeof value === 'string' || value instanceof Date) {
+					values.push(value);
+				}
+			}
+		}
+	});
+	return { values, includeZero };
+}
+
+function uniqueChartValues(values: readonly ChartValue[]): readonly ChartValue[] {
+	const unique = new Map<string, ChartValue>();
+	for (const value of values) {
+		const identity =
+			value instanceof Date ? `date:${value.getTime()}` : `${typeof value}:${String(value)}`;
+		if (!unique.has(identity)) unique.set(identity, value);
+	}
+	return [...unique.values()];
 }
 
 function validateRelationPlot<TRow extends object>(

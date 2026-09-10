@@ -1,0 +1,63 @@
+<script lang="ts">
+	import { Heading } from 'svelai/heading';
+	import { Button } from 'svelai/button';
+	import { Meter } from 'svelai/meter';
+	import { Chip } from 'svelai/chip';
+	const phases = [
+		{
+			title: 'Discover',
+			date: 'Week 01',
+			description: 'Listen, ask useful questions, and agree on the problem worth solving.'
+		},
+		{
+			title: 'Define',
+			date: 'Week 02',
+			description: 'Turn the findings into a clear direction and a small set of design principles.'
+		},
+		{
+			title: 'Create',
+			date: 'Weeks 03–05',
+			description: 'Explore the interface in real flows, test the details, and build together.'
+		},
+		{
+			title: 'Deliver',
+			date: 'Week 06',
+			description: 'Ship a useful first version, observe what happens, and keep learning.'
+		}
+	];
+	let step = $state(0);
+</script>
+
+<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+	<header class="flex flex-col gap-lg">
+		<p class="text-xs font-semibold uppercase tracking-widest text-primary">The project journey</p>
+		<Heading size="h2" weight="bold">Know where you are. See what’s next.</Heading>
+	</header>
+	<Meter
+		value={{ value: step + 1, color: 'primary' }}
+		max={phases.length}
+		label={`Phase ${step + 1} of ${phases.length}`}
+	/>
+	<div class="grid gap-xl md:grid-cols-[13rem_1fr]">
+		<nav aria-label="Project phases" class="flex flex-col gap-md">
+			{#each phases as phase, i (phase.title)}<Button
+					variant={step === i ? 'soft' : 'ghost'}
+					color={step === i ? 'primary' : 'neutral'}
+					class="justify-start"
+					onclick={() => (step = i)}>0{i + 1} · {phase.title}</Button
+				>{/each}
+		</nav>
+		<div class="flex flex-col gap-xl p-xl rounded-lg bg-surface-recessed">
+			<Chip class="w-fit" variant="soft">{phases[step].date}</Chip><Heading size="h3"
+				>{phases[step].title}</Heading
+			>
+			<p class="text-lg text-neutral/65">{phases[step].description}</p>
+			<div class="flex gap-lg justify-between">
+				<Button variant="outline" disabled={step === 0} onclick={() => (step -= 1)}>Previous</Button
+				><Button disabled={step === phases.length - 1} onclick={() => (step += 1)}
+					>Next phase →</Button
+				>
+			</div>
+		</div>
+	</div>
+</section>

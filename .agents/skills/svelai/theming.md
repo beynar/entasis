@@ -25,26 +25,25 @@ single plugin covers everything:
 @import 'tailwindcss';
 
 /* Default theme also bootstraps utilities/variants/spinner */
-@plugin './lib/tailwind/theme' {
+@plugin 'svelai/tailwind-plugin' {
 	name: light;
 	default: true;
 	colorscheme: light;
 }
-@plugin './lib/tailwind/theme' {
+@plugin 'svelai/tailwind-plugin' {
 	name: dark;
 	colorscheme: dark;
 }
 ```
 
-The standalone `@plugin './lib/tailwind/index'` still exists for consumers who
-want the engine without a generated palette, but it is no longer required.
+The same package entrypoint configures named palettes and the underlying utility engine.
 
 ## Theme Plugin Config
 
 Full example with all keys:
 
 ```css
-@plugin './lib/tailwind/theme' {
+@plugin 'svelai/tailwind-plugin' {
 	name: custom; /* string - used for data-theme attribute */
 	default: true; /* boolean - default theme for <html> */
 	colorscheme: light; /* 'light' | 'dark' */
@@ -166,7 +165,7 @@ light and dark can breathe differently. A `number` is used as the multiplier dir
 ## Main Plugin Config
 
 ```css
-@plugin './lib/tailwind/index' {
+@plugin 'svelai/tailwind-plugin' {
 	raised-with-border: true; /* borders on raised elements in light mode */
 }
 ```

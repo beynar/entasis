@@ -16,12 +16,14 @@ export type CheckboxMode = 'card' | 'normal';
 
 export type CheckboxesInputProps<T extends CheckboxOption = CheckboxOption> = Omit<
 	InputProps<'checkboxes'>,
-	'theme'
+	'theme' | 'value' | 'defaultValue' | 'onValueChange'
 > & {
 	/** Selected option values, bindable with `bind:value`. */
 	value?: string[];
-	/** Called when an option is clicked, with the clicked option's value. */
-	onClick?: (value: string) => void;
+	/** Initial selected option values when `value` is omitted. */
+	defaultValue?: string[];
+	/** Called when the selected option values change. */
+	onValueChange?: (value: string[]) => void;
 	/** Visual layout style for the checkbox group (`normal` or `card`). */
 	mode?: CheckboxMode;
 	/** Items to render as checkbox choices. */

@@ -16,9 +16,11 @@
 	import { onMount, untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { scale } from 'svelte/transition';
+	import { SvelteMap } from 'svelte/reactivity';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		searchValue = $bindable(''),
 		errors = $bindable([]),
 		loading = $bindable(false),
@@ -38,20 +40,21 @@
 		disabled,
 		name,
 		onValidate,
-		onChange,
+		onValueChange,
 		visible,
 		prefix,
 		suffix,
 		description,
 		...rest
 	}: TagsInputProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 	const listboxId = `${id}-listbox`;
 	const optionId = (value: string) => `${id}-option-${value.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
 
 	// Session cache of options resolved from the dropdown or getValueOption, used for label lookup.
-	let optionCache = $state<Map<string, ComboboxOption>>(new Map());
+	const optionCache = new SvelteMap<string, ComboboxOption>();
 
 	const field = createFieldState({
 		id,
@@ -64,7 +67,7 @@
 		get errors() {
 			return errors;
 		},
-		set errors(v: any) {
+		set errors(v: string[] | boolean) {
 			errors = v;
 		},
 		get focused() {
@@ -73,8 +76,8 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => {
-			onChange?.(v ?? []);
+		onValueChange: (v) => {
+			onValueChange?.(v ?? []);
 		},
 		get disabled() {
 			return disabled;
@@ -130,7 +133,7 @@
 			if (isOptionsAsync) {
 				loading = true;
 				try {
-					const results = await (items as (searchValue?: string) => any)(searchValue);
+					const results = await items(searchValue);
 					return { options: results as ComboboxOption[], error: null };
 				} catch (error) {
 					return {
@@ -166,8 +169,8 @@
 	}, 100);
 
 	$effect(() => {
-		searchValue;
-		showAllOnFocus;
+		void searchValue;
+		void showAllOnFocus;
 		untrack(() => {
 			debouncedSearch(searchValue, showAllOnFocus);
 		});
@@ -205,7 +208,6 @@
 	// Handle option selection: add the value, cache its label, clear search but keep focus.
 	const handleSelectOption = (option: ComboboxOption) => {
 		optionCache.set(option.value, option);
-		optionCache = new Map(optionCache);
 		addTag(option.value);
 		// Keep focus in the input so multi-select can continue (differs from Combobox).
 	};
@@ -284,7 +286,6 @@
 					}
 				}
 			}
-			optionCache = new Map(optionCache);
 		}
 	});
 
@@ -324,53 +325,52 @@
 
 {#if hasItems}
 	<Popover closeOnClickOutside={false} fitTrigger position="bottom" size="small" open={isOpen}>
-		{#snippet children(popover)}
-			<div
-				id={listboxId}
-				role="listbox"
-				aria-label="Options"
-				class="flex max-h-[200px] flex-col gap-1"
-			>
-				{#if loading}
-					<div class={classes.loading({ size })} role="status" aria-live="polite">
-						{loadingText}
-					</div>
-				{:else if optionsAsync.error}
-					<div class={classes.error({ size })} role="alert" aria-live="assertive">
-						{optionsAsync.error}
-					</div>
-				{:else if availableOptions.length === 0 && searchValue}
-					<div class={classes.noOptions({ size })} role="status">{noOptionsText}</div>
-				{:else if availableOptions.length === 0 && !searchValue && showAllOnFocus}
-					<div class={classes.noOptions({ size })} role="status">{noOptionsText}</div>
-				{:else if availableOptions.length > 0}
-					<ScrollArea scrollOnEdges type="auto" class="flex max-h-[200px] flex-col gap-1">
-						{#each availableOptions as option (option.value)}
-							<MenuOption
-								as="button"
-								role="option"
-								{size}
-								{density}
-								title={option.label}
-								description={option.description}
-								highlighted={nav.highlighted === option.value}
-								onClick={() => handleSelectOption(option)}
-								attrs={{
-									id: optionId(option.value),
-									onpointermove: () => nav.setHighlighted(option.value),
-									onmousedown: (e: MouseEvent) => {
-										e.stopPropagation();
-										e.preventDefault();
-									}
-								}}
-							/>
-						{/each}
-					</ScrollArea>
-				{/if}
-			</div>
-		{/snippet}
+		<div
+			id={listboxId}
+			role="listbox"
+			aria-label="Options"
+			class="flex max-h-[200px] flex-col gap-1"
+		>
+			{#if loading}
+				<div class={classes.loading({ size })} role="status" aria-live="polite">
+					{loadingText}
+				</div>
+			{:else if optionsAsync.error}
+				<div class={classes.error({ size })} role="alert" aria-live="assertive">
+					{optionsAsync.error}
+				</div>
+			{:else if availableOptions.length === 0 && searchValue}
+				<div class={classes.noOptions({ size })} role="status">{noOptionsText}</div>
+			{:else if availableOptions.length === 0 && !searchValue && showAllOnFocus}
+				<div class={classes.noOptions({ size })} role="status">{noOptionsText}</div>
+			{:else if availableOptions.length > 0}
+				<ScrollArea scrollOnEdges type="auto" class="flex max-h-[200px] flex-col gap-1">
+					{#each availableOptions as option (option.value)}
+						<MenuOption
+							as="button"
+							role="option"
+							{size}
+							{density}
+							title={option.label}
+							description={option.description}
+							highlighted={nav.highlighted === option.value}
+							onclick={() => handleSelectOption(option)}
+							attrs={{
+								id: optionId(option.value),
+								onpointermove: () => nav.setHighlighted(option.value),
+								onmousedown: (e: MouseEvent) => {
+									e.stopPropagation();
+									e.preventDefault();
+								}
+							}}
+						/>
+					{/each}
+				</ScrollArea>
+			{/if}
+		</div>
 		{#snippet trigger(popover: PopoverState)}
 			<Field
+				{density}
 				{field}
 				{size}
 				{description}
@@ -417,6 +417,7 @@
 	</Popover>
 {:else}
 	<Field
+		{density}
 		{field}
 		{size}
 		{description}

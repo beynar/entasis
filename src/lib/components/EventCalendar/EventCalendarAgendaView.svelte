@@ -87,7 +87,7 @@
 		event: MouseEvent
 	): void {
 		calendar.interaction.resetSinglePointerSlot();
-		onItemClick?.(occurrence, event);
+		onItemClick?.({ occurrence, event });
 		if (event.defaultPrevented) return;
 		calendar.select({ kind: 'item', itemKey: occurrence.key, slot: null });
 	}

@@ -59,13 +59,13 @@
 		popup,
 		tooltip,
 		shapes,
-		onmarkerclick,
-		onclusterclick,
-		onmapready,
-		onviewchange,
-		onmoveend,
-		onzoomend,
-		onerror,
+		onMarkerClick,
+		onClusterClick,
+		onReady,
+		onViewChange,
+		onMoveEnd,
+		onZoomEnd,
+		onError,
 		size = 'normal',
 		theme: mapTheme,
 		class: className,
@@ -93,7 +93,7 @@
 	let clusterConfig = $derived(resolveMapClusterConfig(cluster));
 
 	function reportError(error: Error): void {
-		reportMapError(error, onerror);
+		reportMapError(error, onError);
 	}
 
 	function handleMapError(event: MapLibreErrorEvent | { error?: unknown }): void {
@@ -136,7 +136,7 @@
 				}
 
 				isMapLoaded = true;
-				onmapready?.(mapInstance);
+				onReady?.(mapInstance);
 			});
 
 			appliedStyleSignature = initialStyle.signature;
@@ -211,21 +211,21 @@
 	};
 
 	$effect(() => {
-		resolvedMapTheme;
-		styleUrl;
-		styles;
+		void resolvedMapTheme;
+		void styleUrl;
+		void styles;
 		void applyResolvedStyle();
 	});
 
 	$effect(() => {
-		if (!map || (!onviewchange && !onmoveend && !onzoomend)) {
+		if (!map || (!onViewChange && !onMoveEnd && !onZoomEnd)) {
 			return;
 		}
 
 		return bindMapViewEvents(map, {
-			onviewchange,
-			onmoveend,
-			onzoomend
+			onViewChange,
+			onMoveEnd,
+			onZoomEnd
 		});
 	});
 
@@ -256,7 +256,7 @@
 	{/if}
 
 	{#if map}
-		<MapShapeLayer {map} {shapes} {onerror} />
+		<MapShapeLayer {map} {shapes} {onError} />
 		<MapViewport
 			{map}
 			{isMapLoaded}
@@ -291,9 +291,9 @@
 			{clusterMarker}
 			{userLocationMarker}
 			{controlButton}
-			{onmarkerclick}
-			{onclusterclick}
-			{onerror}
+			{onMarkerClick}
+			{onClusterClick}
+			{onError}
 		/>
 	{/if}
 </div>

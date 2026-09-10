@@ -231,7 +231,7 @@ export const sanitizeDataModulesSettings = (settings?: {
 	color?: string;
 	style?: DataModulesStyle;
 	randomSize?: boolean;
-	size?: number;
+	scale?: number;
 	lineWidth?: number;
 }) => {
 	const style = settings?.style || DEFAULT_DATA_MODULES_STYLE;
@@ -240,7 +240,7 @@ export const sanitizeDataModulesSettings = (settings?: {
 		color: settings?.color || DEFAULT_COLOR,
 		style,
 		randomSize: settings?.randomSize || false,
-		size: settings?.size ?? 1,
+		scale: settings?.scale ?? 1,
 		lineWidth: settings?.lineWidth ?? defaultLineWidth
 	};
 };
@@ -1041,7 +1041,7 @@ export const getDataModulesPath = (
 	margin: number,
 	settings: ReturnType<typeof sanitizeDataModulesSettings>
 ): string => {
-	const { style, randomSize, size: moduleSize, lineWidth } = settings;
+	const { style, randomSize, scale: moduleScale, lineWidth } = settings;
 	const ops: string[] = [];
 	const numCells = modules.length;
 	const isRandom = dataModuleCanBeRandomSize(style) && randomSize;
@@ -1056,7 +1056,7 @@ export const getDataModulesPath = (
 				return;
 			}
 
-			const scale = getScaleFactor(style, isRandom, moduleSize);
+			const scale = getScaleFactor(style, isRandom, moduleScale);
 			const size = 1 * scale;
 			const posOffset = (1 - 1 * scale) / 2;
 			const baseX = x + margin;

@@ -634,7 +634,7 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 		);
 		const change = mutation.createChange(revert, publishedItems);
 		committedStatus = { source: change.source, item: getChangeStatusItem(change) };
-		this.calendar.eventHandlers.onItemsChange?.(publishedItems, change);
+		this.calendar.eventHandlers.onItemsChange?.({ items: publishedItems, change });
 		if (wasReverted) return null;
 		if (!this.calendar.isModelBoundaryCurrent(committedBoundary)) {
 			this.reportBlocked({ reason: 'stale', source: mutation.source });

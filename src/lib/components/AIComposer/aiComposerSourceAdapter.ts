@@ -34,7 +34,7 @@ export type AIComposerSourceOptions = {
 	onCommandSearch?: AIComposerCommandSearch;
 	onMentionSearch?: AIComposerMentionSearch;
 	onSkillSearch?: AIComposerSkillSearch;
-	onItemSelect?: (item: RichTextInputItem, kind: RichTextInputTokenKind) => void;
+	onItemSelect?: (payload: { item: RichTextInputItem; kind: RichTextInputTokenKind }) => void;
 };
 
 export type AIComposerResolvedSources = {
@@ -88,7 +88,7 @@ function resolveCommands(
 		onSearch: options.onCommandSearch,
 		onSelect: (item) => {
 			options.onCommandSelect?.(item);
-			options.onItemSelect?.(item, 'command');
+			options.onItemSelect?.({ item, kind: 'command' });
 		}
 	});
 }
@@ -111,7 +111,7 @@ function resolveMentions(
 		items,
 		onSelect: (item) => {
 			options.onMentionSelect?.(item);
-			options.onItemSelect?.(item, itemKind(item, group));
+			options.onItemSelect?.({ item, kind: itemKind(item, group) });
 		}
 	});
 }
@@ -136,7 +136,7 @@ function resolveSkills(
 		onSearch: search,
 		onSelect: (item) => {
 			options.onSkillSelect?.(item);
-			options.onItemSelect?.(item, 'skill');
+			options.onItemSelect?.({ item, kind: 'skill' });
 		}
 	});
 }
@@ -159,9 +159,9 @@ function mergeSource<Item extends RichTextInputItem>(
 		items: dedupe([...(source?.items ?? []), ...(compatibility.items ?? [])]),
 		tokenKind: source?.tokenKind ?? ((item) => item.kind ?? compatibility.kind),
 		onSearch: combineSearch(source?.onSearch, compatibility.onSearch),
-		onSelect: (item, context) => {
-			source?.onSelect?.(item, context);
-			compatibility.onSelect?.(item);
+		onSelect: (payload) => {
+			source?.onSelect?.(payload);
+			compatibility.onSelect?.(payload.item);
 		}
 	};
 }
@@ -171,10 +171,10 @@ function combineSearch<Item extends RichTextInputItem>(
 	compatibilitySearch: ((query: string) => AIComposerSearchResult<Item>) | undefined
 ): AIComposerTriggerSource<Item>['onSearch'] {
 	if (!sourceSearch && !compatibilitySearch) return undefined;
-	return (query, context) =>
+	return (context) =>
 		combineSearchResults([
-			sourceSearch ? sourceSearch(query, context) : [],
-			compatibilitySearch ? compatibilitySearch(query) : []
+			sourceSearch ? sourceSearch(context) : [],
+			compatibilitySearch ? compatibilitySearch(context.query) : []
 		]);
 }
 
@@ -206,11 +206,13 @@ function toTrigger<Item extends RichTextInputItem>(
 		group: toGroupResolver(source),
 		tokenKind: toTokenKindResolver(source, kind),
 		onSearch: source.onSearch
-			? (query, context) =>
-					mapSearchResult(source.onSearch?.(query, context) ?? [], (items) => withKind(items, kind))
+			? (context) =>
+					mapSearchResult(source.onSearch?.(context) ?? [], (items) => withKind(items, kind))
 			: undefined,
-		onSelect: (item, context) => source.onSelect?.(item as Item, context),
-		toToken: toToken ? (item, context) => toToken(item as Item, context) : undefined
+		onSelect: ({ item, context }) => source.onSelect?.({ item: item as Item, context }),
+		toToken: toToken
+			? ({ item, context }) => toToken({ item: item as Item, context })
+			: undefined
 	};
 }
 
@@ -229,14 +231,14 @@ function toAtTrigger(
 		group: (item) => resolveGroup(atSource(item, mentions, references), item),
 		tokenKind: (item) => itemKind(item, 'mention'),
 		onSearch: createAtSearch(mentions, references, options.onMentionSearch),
-		onSelect: (item, context) => {
+		onSelect: ({ item, context }) => {
 			const mention = requireMention(item);
-			atSource(mention, mentions, references)?.onSelect?.(mention, context);
+			atSource(mention, mentions, references)?.onSelect?.({ item: mention, context });
 		},
-		toToken: (item, context) => {
+		toToken: ({ item, context }) => {
 			const mention = requireMention(item);
 			const source = atSource(mention, mentions, references);
-			if (source?.toToken) return source.toToken(mention, context);
+			if (source?.toToken) return source.toToken({ item: mention, context });
 			return toRichTextInputToken(mention, toFallbackConfig(source, mention), context);
 		}
 	};
@@ -260,12 +262,12 @@ function createAtSearch(
 	compatibilitySearch: AIComposerMentionSearch | undefined
 ): RichTextInputTriggerConfig['onSearch'] {
 	if (!mentions?.onSearch && !references?.onSearch && !compatibilitySearch) return undefined;
-	return (query, context) =>
+	return (context) =>
 		combineSearchResults([
-			searchSource(mentions, query, context, 'mention'),
-			searchSource(references, query, context, 'reference'),
+			searchSource(mentions, context, 'mention'),
+			searchSource(references, context, 'reference'),
 			mapSearchResult(
-				compatibilitySearch ? searchMentions(compatibilitySearch, query, 'all') : [],
+				compatibilitySearch ? searchMentions(compatibilitySearch, context.query, 'all') : [],
 				(items) =>
 					items
 						.filter(isAtMention)
@@ -276,12 +278,11 @@ function createAtSearch(
 
 function searchSource(
 	source: AIComposerTriggerSource<AIComposerMentionItem> | undefined,
-	query: string,
 	context: RichTextInputTriggerContext,
 	kind: 'mention' | 'reference'
 ): AIComposerSearchResult<RichTextInputItem> {
 	if (!source?.onSearch) return [];
-	return mapSearchResult(source.onSearch(query, context), (items) => withKind(items, kind));
+	return mapSearchResult(source.onSearch(context), (items) => withKind(items, kind));
 }
 
 function searchMentions(
@@ -289,11 +290,7 @@ function searchMentions(
 	query: string,
 	type: 'all' | 'skill'
 ): AIComposerSearchResult<AIComposerMentionItem> {
-	const typedSearch = search as (
-		query: string,
-		type: 'all' | 'skill'
-	) => AIComposerSearchResult<AIComposerMentionItem>;
-	return typedSearch(query, type);
+	return search({ query, type });
 }
 
 function toSource<Item extends RichTextInputItem>(

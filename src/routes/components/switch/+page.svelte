@@ -3,8 +3,27 @@
 	import DocPage from '../../DocPage.svelte';
 	import { Switch } from '$lib/components/Form/Switch/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let enabled = $state(false);
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -19,15 +38,26 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A boolean toggle with a label and description"
 		code={`<Switch
+	size="${controls.value.size}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Notifications"
 	description="Receive updates by email"
 	bind:value={enabled}
 />`}
 	>
 		<div class="w-full max-w-md">
-			<Switch label="Notifications" description="Receive updates by email" bind:value={enabled} />
+			<Switch
+				size={controls.value.size}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
+				label="Notifications"
+				description="Receive updates by email"
+				bind:value={enabled}
+			/>
 		</div>
 	</ComponentCard>
 

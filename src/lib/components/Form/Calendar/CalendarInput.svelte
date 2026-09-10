@@ -1,4 +1,5 @@
 <script lang="ts" generics="T extends 'calendar' | 'calendar-range'">
+	import { untrack } from 'svelte';
 	import type { CalendarInputProps } from './calendarInput.props.js';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
@@ -7,7 +8,8 @@
 	import type { CalendarValue } from './useCalendar.svelte.js';
 
 	let {
-		value = $bindable(null as CalendarInputProps<T>['value']),
+		defaultValue = null as CalendarInputProps<T>['value'],
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		type = 'calendar' as T,
@@ -15,7 +17,7 @@
 		disabled,
 		name,
 		onValidate,
-		onChange,
+		onValueChange,
 		visible,
 		theme,
 		disabledDates = [],
@@ -35,6 +37,7 @@
 		onViewChange,
 		...rest
 	}: CalendarInputProps<T> = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 	type CalendarFieldValue = FieldValue<T>;
@@ -59,8 +62,8 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => {
-			onChange?.(v as unknown as CalendarValue<T>);
+		onValueChange: (v) => {
+			onValueChange?.(v as unknown as CalendarValue<T>);
 		},
 		get disabled() {
 			return disabled;
@@ -102,7 +105,7 @@
 		}}
 	>
 		<CalendarPrimitive
-			onChange={(nextValue: CalendarValue<T>) => {
+			onValueChange={(nextValue: CalendarValue<T>) => {
 				field.value = nextValue as unknown as CalendarFieldValue;
 			}}
 			theme={theme?.calendar}

@@ -60,6 +60,10 @@ export type AIToolProps = WithAttachments<
 		tools?: readonly AIToolCall[];
 		/** Bindable ids of the expanded single call or aggregate call group. */
 		value?: string[];
+		/** Initial expanded call or group ids when value is omitted. */
+		defaultValue?: string[];
+		/** Called once for each library-originated expansion state change. */
+		onValueChange?: (value: string[]) => void;
 		/** Allows multiple nested tool-call rows to remain expanded. */
 		multiple?: boolean;
 		/** Visual treatment applied to the group trigger and each complete call surface. @default 'ghost' */

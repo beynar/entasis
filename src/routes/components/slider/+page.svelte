@@ -3,6 +3,8 @@
 	import DocPage from '../../DocPage.svelte';
 	import Form from '$lib/components/Form/Form/Form.svelte';
 	import { Slider } from '$lib/components/Form/Slider/index.js';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let volume = $state<number | null>(40);
 	let storage = $state<number | null>(120);
@@ -18,7 +20,6 @@
 	let verticalValue = $state<number | null>(60);
 
 	const semanticColors = ['primary', 'secondary', 'success', 'warning', 'danger', 'info'] as const;
-	const sizes = ['small', 'normal', 'large'] as const;
 	const sizeLabels = {
 		small: 'Small',
 		normal: 'Normal',
@@ -26,6 +27,30 @@
 	} as const;
 	const formatColorLabel = (color: (typeof semanticColors)[number]) =>
 		`${color[0].toUpperCase()}${color.slice(1)} intensity`;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'default',
+			options: ['default', 'thick', 'contained']
+		},
+		{
+			name: 'orientation',
+			type: 'segmented',
+			label: 'Orientation',
+			value: 'horizontal',
+			options: ['horizontal', 'vertical']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -41,8 +66,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A bounded numeric field with an inline value chip and helper text"
 		code={`<Slider
+	size="${controls.value.size}"
+	variant="${controls.value.variant}"
+	orientation="${controls.value.orientation}"
+	disabled={${controls.value.disabled}}
 	label="Volume"
 	description="Set the default output level."
 	bind:value={volume}
@@ -54,6 +84,10 @@
 	>
 		<div class="w-full max-w-md">
 			<Slider
+				size={controls.value.size}
+				variant={controls.value.variant}
+				orientation={controls.value.orientation}
+				disabled={controls.value.disabled}
 				label="Volume"
 				description="Set the default output level."
 				bind:value={volume}

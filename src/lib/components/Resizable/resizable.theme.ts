@@ -34,7 +34,7 @@ const defaultPanel = cva({
 	variants: {
 		variant: {
 			default: null,
-			splitted: 'border-neutral-muted bg-surface rounded-md border shadow-sm'
+			splitted: 'border-neutral-muted bg-surface rounded-sm border shadow-sm'
 		},
 		animating: {
 			true: 'motion-safe:will-change-[flex] motion-safe:transition-[flex] motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]',
@@ -145,12 +145,12 @@ const defaultGrip = cva({
 		{
 			orientation: 'horizontal',
 			handleVariant: 'grip',
-			class: 'h-7 w-4 grid-cols-2 gap-x-0.5 gap-y-1 px-1 py-1.5'
+			class: 'h-7 w-4 grid-cols-2 gap-x-micro gap-y-xs px-xs py-sm'
 		},
 		{
 			orientation: 'vertical',
 			handleVariant: 'grip',
-			class: 'h-4 w-7 grid-cols-3 gap-x-1 gap-y-0.5 px-1.5 py-1'
+			class: 'h-4 w-7 grid-cols-3 gap-x-xs gap-y-micro px-sm py-xs'
 		},
 		{
 			orientation: 'horizontal',

@@ -38,10 +38,10 @@ export type SeparatorProps = WithAttachments<
 			 */
 			color?: Colors | 'neutral';
 			/**
-			 * The size (thickness) of the separator in pixels.
+			 * The thickness of the separator in pixels.
 			 * @default 1
 			 */
-			size?: number;
+			thickness?: number;
 			/**
 			 * Custom theme overrides.
 			 */

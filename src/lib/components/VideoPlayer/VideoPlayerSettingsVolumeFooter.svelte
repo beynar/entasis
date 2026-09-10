@@ -1,7 +1,7 @@
 <script lang="ts">
 	import MediaVolumeControl from '../MediaVolume/MediaVolumeControl.svelte';
 	import type { Sizes } from '$lib/types/theme.js';
-	import { getVideoPlayerSliderTheme } from './videoPlayer.sliderTheme.js';
+	import { getVideoPlayerSliderTheme } from './videoPlayer.slider.theme.js';
 	import type { VideoPlayerState } from './videoPlayer.state.svelte.js';
 	import type { useVideoPlayerTheme } from './videoPlayer.theme.js';
 	import VideoPlayerIconButton from './VideoPlayerIconButton.svelte';
@@ -50,7 +50,7 @@
 				active={context.active}
 				pressed={context.pressed}
 				{disabled}
-				onClick={context.onClick}
+				onPress={context.activate}
 			/>
 		{/snippet}
 	</MediaVolumeControl>

@@ -58,7 +58,7 @@ Extends all Field component props plus:
 - **focused**: boolean - Trigger focus state
 
 ### Callbacks
-- **onChange**: (value) => void - Fires when the selection changes
+- **onValueChange**: (value) => void - Fires when the selection changes
 - **onValidate**: (value) => string[] | boolean - Custom validation
 
 ### Advanced Props
@@ -82,4 +82,11 @@ The selected option shows a check indicator and \`aria-selected\`.
 - Selection re-focuses the trigger (matches native select behavior)
 - Clicking outside closes via trigger blur; option rows prevent mousedown so the click can land
 - The dropdown scrolls beyond ~240px (ScrollArea); the highlight scrolls into view on keyboard nav
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+
 `;

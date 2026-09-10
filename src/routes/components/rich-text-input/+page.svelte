@@ -12,7 +12,9 @@
 		type RichTextInputTriggers
 	} from '$lib/components/RichTextInput/index.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
 
 	const commands: RichTextInputItem[] = [
 		{
@@ -100,13 +102,13 @@
 			group: 'Commands',
 			tokenKind: 'command',
 			items: commands,
-			onSearch: (query) => filterItems(commands, query)
+			onSearch: ({ query }) => filterItems(commands, query)
 		},
 		'@': {
 			title: 'Mentions',
 			empty: 'No files or references found.',
 			items: references,
-			onSearch: (query) => filterItems(references, query)
+			onSearch: ({ query }) => filterItems(references, query)
 		},
 		$: {
 			title: 'Skills',
@@ -114,7 +116,7 @@
 			group: 'Skills',
 			tokenKind: 'skill',
 			items: skills,
-			onSearch: (query) => filterItems(skills, query)
+			onSearch: ({ query }) => filterItems(skills, query)
 		}
 	};
 
@@ -133,6 +135,38 @@
 				item.keywords?.some((keyword) => keyword.toLowerCase().includes(normalizedQuery)) === true
 		);
 	}
+
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{
+			name: 'toolbar',
+			type: 'segmented',
+			label: 'Toolbar',
+			value: 'both',
+			options: ['hover', 'fixed', 'both', 'none']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -148,20 +182,29 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="AI-style composer input with commands, mentions, skills, and a fixed toolbar."
 		code={`<RichTextInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	toolbar="${controls.value.toolbar}"
+	disabled={${controls.value.disabled}}
 	bind:value
 	{triggers}
-	toolbar="both"
 	formats={formats}
 	placeholder="Use / for commands, @ for files or references, $ for skills..."
 />`}
 	>
 		<div class="flex w-full max-w-4xl flex-col gap-4">
 			<RichTextInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				toolbar={controls.value.toolbar}
+				disabled={controls.value.disabled}
 				bind:value
 				{triggers}
-				toolbar="both"
 				{formats}
 				placeholder="Use / for commands, @ for files or references, $ for skills..."
 			/>

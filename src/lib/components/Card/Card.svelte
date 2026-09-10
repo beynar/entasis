@@ -16,9 +16,9 @@
 		href,
 		target,
 		rel,
-		onClick = null,
-		onEnter = null,
-		onLeave = null,
+		onclick = null,
+		onpointerenter = null,
+		onpointerleave = null,
 		showBorders = false,
 		theme,
 		header,
@@ -41,12 +41,12 @@
 	const hasAction = $derived(!!action);
 
 	const element = $derived(href ? 'a' : 'div');
-	const role = $derived(href ? 'link' : onClick ? 'button' : undefined);
-	const clickable = $derived(!disabled && (!!href || !!onClick));
+	const role = $derived(href ? 'link' : onclick ? 'button' : undefined);
+	const clickable = $derived(!disabled && (!!href || !!onclick));
 
 	// Interactive descendants (footer buttons, the header action, links, form
 	// controls…) must keep working inside a clickable card: a click on them must
-	// not ALSO trigger the card's own onClick / navigation.
+	// not ALSO trigger the card's own click handler / navigation.
 	const INTERACTIVE_SELECTOR =
 		'button, a[href], input, select, textarea, label, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="switch"], [role="menuitem"], [contenteditable="true"]';
 
@@ -60,7 +60,8 @@
 
 	const handleClick = (event: MouseEvent) => {
 		if (disabled) {
-			if (href) event.preventDefault();
+			event.preventDefault();
+			event.stopPropagation();
 			return;
 		}
 		if (hitsInnerInteractive(event)) {
@@ -68,25 +69,25 @@
 			if (href) event.preventDefault();
 			return;
 		}
-		onClick?.();
+		onclick?.(event);
 	};
 	// A role="button" div is not keyboard-operable by itself: make it focusable
 	// and activate on Enter/Space like a real button (links handle their own).
 	// Only when the card itself is focused — keystrokes on inner controls bubble
 	// here too and must not re-trigger the card.
 	const handleKeydown = (event: KeyboardEvent) => {
-		if (href || !onClick || disabled) return;
+		if (href || !onclick || disabled) return;
 		if (event.target !== event.currentTarget) return;
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
-			onClick();
+			if (event.currentTarget instanceof HTMLElement) event.currentTarget.click();
 		}
 	};
-	const handleEnter = () => {
-		if (!disabled && onEnter) onEnter();
+	const handleEnter = (event: PointerEvent) => {
+		if (!disabled) onpointerenter?.(event);
 	};
-	const handleLeave = () => {
-		if (!disabled && onLeave) onLeave();
+	const handleLeave = (event: PointerEvent) => {
+		if (!disabled) onpointerleave?.(event);
 	};
 
 	const isButtonProps = (value: CardActionSlot | undefined): value is Omit<ButtonProps, 'as'> => {
@@ -107,17 +108,17 @@
 	data-density={density}
 	data-variant={variant}
 	data-clickable={clickable}
-	{href}
+	href={href && !disabled ? href : undefined}
 	{target}
 	{rel}
 	{role}
-	tabindex={!href && onClick && !disabled ? 0 : undefined}
+	tabindex={href ? (disabled ? -1 : undefined) : onclick && !disabled ? 0 : undefined}
 	class={classes.root({ color, variant, size, density, clickable, disabled, className })}
 	onclick={handleClick}
 	onkeydown={handleKeydown}
 	onpointerenter={handleEnter}
 	onpointerleave={handleLeave}
-	aria-disabled={disabled}
+	aria-disabled={disabled || undefined}
 	{...attachments}
 >
 	<Slot

@@ -26,8 +26,8 @@ All state props are bindable: \`conversation\`, \`status\`, \`error\`, \`message
   bind:conversation
   bind:messages
   bind:status
-  onSubmit={({ message, meta }, state) => sendMessage(message, meta, state)}
-  onStop={(state) => stopGeneration(state)}
+  onSubmit={({ message, meta, conversation }) => sendMessage(message, meta, conversation)}
+  onStop={(conversation) => stopGeneration(conversation)}
 >
   <AIThread />
   <AIComposer />
@@ -53,7 +53,7 @@ Lifecycle events: \`onStatusChange\`, \`onSubmit\`, \`onStop\`, \`onRetry\`, and
 
 Mutation events: \`onMessageAppend\`, \`onMessagePrepend\`, \`onMessageUpdate\`, \`onMessageRemove\`, \`onToolUpdate\`, \`onInputChange\`, \`onFilesChange\`, \`onAttachmentsChange\`, \`onLiveTextChange\`, \`onSuggestionsChange\`, \`onSelectedModelChange\`, \`onQueuedMessageChange\`, \`onQueuedMessageCommit\`, \`onQueuedMessageDiscard\`, \`onContextUsageChange\`, \`onStreamingChange\`, \`onActiveAskUserQuestionChange\`, and \`onAskUserQuestionStateChange\`.
 
-Every event receives the central \`AIConversationState\`; change events also receive the previous value or affected item.
+Every multi-value event receives one documented payload object containing the central \`conversation\`; state-change payloads also contain \`value\` and \`previousValue\`, while mutation payloads name the affected records.
 
 ## Context access
 

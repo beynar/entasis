@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { audioPlayerVolumeControlSliderTheme } from './audioPlayerVolumeControl.slider.theme.js';
 	import type { Colors, Sizes } from '$lib/types/theme.js';
 	import { speakerHighIcon } from '../Icons/speakerHigh.js';
 	import MediaVolumeControl from '../MediaVolume/MediaVolumeControl.svelte';
@@ -26,33 +27,6 @@
 		volumeStep: number;
 		disabled?: boolean;
 	} = $props();
-
-	const sliderTheme = $derived({
-		root: {
-			base: 'w-auto justify-items-center gap-0'
-		},
-		header: {
-			base: 'sr-only'
-		},
-		label: {
-			base: 'sr-only'
-		},
-		inputContainer: {
-			base: 'w-auto gap-0'
-		},
-		control: {
-			base: 'w-auto flex-col items-center gap-2'
-		},
-		track: {
-			base: 'h-36 focus-visible:ring-offset-0'
-		},
-		valueLabels: {
-			base: 'mt-1 ml-0 justify-center'
-		},
-		valueLabel: {
-			base: 'min-w-14 border-neutral-muted bg-surface text-center text-neutral'
-		}
-	});
 </script>
 
 <MediaVolumeControl
@@ -71,7 +45,7 @@
 		className: 'w-auto justify-center gap-1.5 px-0 pt-0.5 pb-0'
 	})}
 	sliderClass={classes.volumeSlider({ size, className: 'h-auto' })}
-	{sliderTheme}
+	sliderTheme={audioPlayerVolumeControlSliderTheme}
 	onToggleMuted={() => player.runInteraction(() => player.toggleMuted())}
 	onVolumeChange={(nextVolume) => player.runInteraction(() => player.setVolume(nextVolume))}
 >
@@ -86,7 +60,7 @@
 			{disabled}
 			aria-haspopup={context.ariaHaspopup}
 			aria-expanded={context.ariaExpanded}
-			onClick={context.onClick}
+			onPress={context.activate}
 			{@attach context.reference}
 		/>
 	{/snippet}
@@ -101,7 +75,7 @@
 			active={context.active}
 			pressed={context.pressed}
 			{disabled}
-			onClick={context.onClick}
+			onPress={context.activate}
 		/>
 	{/snippet}
 </MediaVolumeControl>

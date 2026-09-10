@@ -23,12 +23,12 @@ The tooltip attachment displays contextual information when hovering over an ele
 - **size**: 'small' | 'normal' | 'large' (default: 'normal') - Visual size
 - **color**: Colors (default: 'neutral') - Color theme
 - **variant**: 'solid' | 'outline' | 'soft' (default: 'solid') - Visual style matching Chip
-- **delay**: number (default: 400) - Delay in ms before showing tooltip
+- **delay**: number (default: 400) - Delay in ms before showing tooltip; zero shows immediately
 - **offset**: number - Distance from reference element in pixels
 - **class**: string - Additional CSS classes
 - **transition**: FSOProps - Custom transition configuration
-- **onOpen**: () => void - Callback when tooltip opens
-- **onClose**: () => void - Callback when tooltip closes
+- **onAfterOpen**: () => void - Callback after the opening transition completes
+- **onAfterClose**: () => void - Callback after the closing transition completes
 
 ## Examples
 
@@ -147,8 +147,8 @@ The tooltip attachment displays contextual information when hovering over an ele
 \`\`\`svelte
 <button {@attach tooltip({
 	content: 'Tracked tooltip',
-	onOpen: () => console.log('Tooltip opened'),
-	onClose: () => console.log('Tooltip closed')
+	onAfterOpen: () => console.log('Tooltip opened'),
+	onAfterClose: () => console.log('Tooltip closed')
 })}>
 	Track me
 </button>

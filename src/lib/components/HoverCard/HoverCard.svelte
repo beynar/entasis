@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { onDestroy } from 'svelte';
 
 	import Button from '../Button/Button.svelte';
@@ -11,7 +12,8 @@
 
 	let {
 		id: customId,
-		open = $bindable(false),
+		defaultOpen = false,
+		open = $bindable(),
 		trigger: triggerContent = 'Hover',
 		content,
 		children,
@@ -37,13 +39,22 @@
 		cardColor = 'neutral',
 		cardVariant = 'solid',
 		showBorders = false,
-		onOpen,
-		onClose,
+		onOpenChange,
+		onAfterOpen,
+		onAfterClose,
 		theme,
 		cardTheme,
 		popoverTheme,
 		...attachments
 	}: HoverCardProps = $props();
+	const openState = createBindableValue(
+		() => open,
+		(next) => {
+			open = next;
+		},
+		() => defaultOpen
+	);
+	const isOpen = $derived(openState.value);
 
 	const generatedId = $props.id();
 	const id = $derived(customId || generatedId);
@@ -70,17 +81,23 @@
 	const openImmediately = () => {
 		clearOpenTimer();
 		clearCloseTimer();
-		if (!disabled) open = true;
+		if (!disabled) setOpen(true);
 	};
 
 	const closeImmediately = () => {
 		clearOpenTimer();
 		clearCloseTimer();
-		open = false;
+		setOpen(false);
+	};
+
+	const setOpen = (nextOpen: boolean) => {
+		if (isOpen === nextOpen) return;
+		openState.value = nextOpen;
+		onOpenChange?.(nextOpen);
 	};
 
 	const toggleImmediately = () => {
-		if (open) {
+		if (isOpen) {
 			closeImmediately();
 		} else {
 			openImmediately();
@@ -89,13 +106,13 @@
 
 	const scheduleOpen = () => {
 		clearCloseTimer();
-		if (disabled || open || openTimer) return;
+		if (disabled || isOpen || openTimer) return;
 		openTimer = setTimeout(openImmediately, delay);
 	};
 
 	const scheduleClose = () => {
 		clearOpenTimer();
-		if (!open || closeTimer) return;
+		if (!isOpen || closeTimer) return;
 		closeTimer = setTimeout(closeImmediately, closeDelay);
 	};
 
@@ -112,7 +129,7 @@
 
 	const payload = $derived({
 		id,
-		isOpen: open,
+		isOpen,
 		open: openImmediately,
 		close: closeImmediately,
 		toggle: toggleImmediately
@@ -125,7 +142,7 @@
 </script>
 
 <Popover
-	bind:open
+	open={isOpen}
 	{id}
 	{position}
 	{offset}
@@ -140,8 +157,9 @@
 	{size}
 	class={classes.popover({ className: popoverClass })}
 	theme={popoverTheme}
-	onOpen={() => onOpen?.(payload)}
-	onClose={() => onClose?.(payload)}
+	onOpenChange={setOpen}
+	onAfterOpen={() => onAfterOpen?.(payload)}
+	onAfterClose={() => onAfterClose?.(payload)}
 >
 	{#snippet trigger(popover)}
 		{#if typeof triggerContent === 'string'}
@@ -149,9 +167,9 @@
 				{@attach popover.reference}
 				type="button"
 				class={classes.trigger({ disabled, className: triggerClass })}
-				data-state={open ? 'open' : 'closed'}
+				data-state={isOpen ? 'open' : 'closed'}
 				aria-haspopup="dialog"
-				aria-expanded={open}
+				aria-expanded={isOpen}
 				aria-controls={id}
 				{disabled}
 				onpointerenter={scheduleOpen}
@@ -167,7 +185,7 @@
 			<span
 				{@attach popover.reference}
 				class={classes.trigger({ disabled, className: triggerClass })}
-				data-state={open ? 'open' : 'closed'}
+				data-state={isOpen ? 'open' : 'closed'}
 				role="presentation"
 				onpointerenter={scheduleOpen}
 				onpointerleave={scheduleClose}
@@ -180,17 +198,17 @@
 					{@const {
 						content: buttonContent,
 						disabled: isTriggerDisabled,
-						onClick: onTriggerClick,
+						onclick: onTriggerClick,
 						...buttonProps
 					} = triggerContent}
 					<Button
 						{...buttonProps}
 						disabled={disabled || isTriggerDisabled}
 						aria-haspopup="dialog"
-						aria-expanded={open}
+						aria-expanded={isOpen}
 						aria-controls={id}
-						onClick={(buttonPayload) => {
-							onTriggerClick?.(buttonPayload);
+						onclick={(event) => {
+							onTriggerClick?.(event);
 							handleClick();
 						}}
 					>

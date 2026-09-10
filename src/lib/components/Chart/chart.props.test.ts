@@ -1,10 +1,5 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
-import type {
-	ChartMark,
-	ChartProps,
-	ChartSeriesMark,
-	ChartTooltipField
-} from './chart.props.js';
+import type { ChartMark, ChartProps, ChartSeriesMark, ChartTooltipField } from './chart.props.js';
 
 type ChartConfiguration<TRow extends object> = Pick<
 	ChartProps<TRow>,
@@ -114,11 +109,12 @@ describe('Chart public type contract', () => {
 		type Discriminant = ChartMark<Revenue>['type'];
 		expectTypeOf<Discriminant>().toEqualTypeOf<
 			| 'series'
+			| 'scatter'
 			| 'bar'
 			| 'distribution'
 			| 'proportion'
 			| 'polar'
-			| 'range'
+			| 'relation'
 			| 'matrix'
 			| 'facet'
 		>();

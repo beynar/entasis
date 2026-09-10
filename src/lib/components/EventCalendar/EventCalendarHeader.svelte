@@ -91,20 +91,20 @@
 			title: viewLabels[enabledView],
 			selected: enabledView === calendar.view,
 			disabled,
-			onClick: () => calendar.setView(enabledView)
+			onclick: () => calendar.setView(enabledView)
 		}))
 	);
 	const previousButton = $derived({
 		type: 'button' as const,
 		prefix: previousIcon,
 		label: messages.eventCalendarPrevious,
-		onClick: () => calendar.previous()
+		onclick: () => calendar.previous()
 	});
 	const nextButton = $derived({
 		type: 'button' as const,
 		prefix: nextIcon,
 		label: messages.eventCalendarNext,
-		onClick: () => calendar.next()
+		onclick: () => calendar.next()
 	});
 	const currentViewLabel = $derived(viewLabels[calendar.view]);
 </script>
@@ -163,7 +163,7 @@
 {/snippet}
 
 {#snippet todayPart()}
-	<Button type="button" size="small" variant="outline" {disabled} onClick={() => calendar.today()}>
+	<Button type="button" size="small" variant="outline" {disabled} onclick={() => calendar.today()}>
 		{messages.eventCalendarToday}
 	</Button>
 {/snippet}
@@ -195,7 +195,7 @@
 				value={calendar.view}
 				size="small"
 				ariaLabel={messages.eventCalendarViewSwitcher}
-				onChange={(nextView) => calendar.setView(nextView)}
+				onValueChange={(nextView) => calendar.setView(nextView)}
 			/>
 		</div>
 		<div class="@[40rem]:hidden">
@@ -210,7 +210,7 @@
 						aria-haspopup="menu"
 						aria-expanded={popover.isOpen}
 						{disabled}
-						onClick={() => popover.toggle()}
+						onclick={() => popover.toggle()}
 						{@attach popover.reference}
 					>
 						{currentViewLabel}
@@ -236,7 +236,7 @@
 					aria-haspopup="dialog"
 					aria-expanded={popover.isOpen}
 					{disabled}
-					onClick={() => {
+					onclick={() => {
 						calendar.refreshNow();
 						popover.toggle();
 					}}
@@ -259,7 +259,7 @@
 						pickerYear = startYear;
 						pickerMonth = startMonth;
 					}}
-					onChange={(selectedDate) => {
+					onValueChange={(selectedDate) => {
 						if (!selectedDate) return;
 						calendar.goTo(fromDateJumpDate(selectedDate));
 						popover.close();

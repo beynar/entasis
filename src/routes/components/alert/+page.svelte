@@ -167,7 +167,7 @@
 						description="You've used 90% of your quota."
 					/>
 				{:else}
-					<Button variant="soft" color="neutral" size="small" onClick={() => (dismissed = false)}>
+					<Button variant="soft" color="neutral" size="small" onclick={() => (dismissed = false)}>
 						Reset alert
 					</Button>
 				{/if}

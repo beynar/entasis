@@ -5,8 +5,8 @@ const defaultSeparator = cva({
 	base: 'relative flex items-center text-neutral/70 text-xs',
 	variants: {
 		orientation: {
-			horizontal: 'w-full my-2',
-			vertical: 'h-full mx-2 flex-col'
+			horizontal: 'w-full my-md',
+			vertical: 'h-full mx-md flex-col'
 		},
 		align: {
 			start: '',
@@ -45,18 +45,18 @@ const defaultSeparator = cva({
 		{
 			orientation: 'horizontal',
 			align: 'center',
-			class: 'before:flex-1 after:flex-1 [&:has(*)]:before:mr-2 [&:has(*)]:after:ml-2'
+			class: 'before:flex-1 after:flex-1 [&:has(*)]:before:mr-md [&:has(*)]:after:ml-md'
 		},
-		{ orientation: 'horizontal', align: 'start', class: 'after:flex-1 [&:has(*)]:after:ml-2' },
-		{ orientation: 'horizontal', align: 'end', class: 'before:flex-1 [&:has(*)]:before:mr-2' },
+		{ orientation: 'horizontal', align: 'start', class: 'after:flex-1 [&:has(*)]:after:ml-md' },
+		{ orientation: 'horizontal', align: 'end', class: 'before:flex-1 [&:has(*)]:before:mr-md' },
 		// Alignment (vertical)
 		{
 			orientation: 'vertical',
 			align: 'center',
-			class: 'before:flex-1 after:flex-1 [&:has(*)]:before:mb-2 [&:has(*)]:after:mt-2'
+			class: 'before:flex-1 after:flex-1 [&:has(*)]:before:mb-md [&:has(*)]:after:mt-md'
 		},
-		{ orientation: 'vertical', align: 'start', class: 'after:flex-1 [&:has(*)]:after:mt-2' },
-		{ orientation: 'vertical', align: 'end', class: 'before:flex-1 [&:has(*)]:before:mb-2' }
+		{ orientation: 'vertical', align: 'start', class: 'after:flex-1 [&:has(*)]:after:mt-md' },
+		{ orientation: 'vertical', align: 'end', class: 'before:flex-1 [&:has(*)]:before:mb-md' }
 	],
 	defaultVariants: {
 		orientation: 'horizontal',

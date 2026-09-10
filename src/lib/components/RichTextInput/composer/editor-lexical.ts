@@ -13,8 +13,8 @@ import {
 import type { RichTextInputFormat, RichTextInputSubmitShortcut } from '../richTextInput.props.js';
 import { getAIComposerMarkdownTransformers } from './markdown.js';
 import { AIComposerTokenNode } from './token-node.js';
-import { loadComposerMarkdown } from './editor-markdown.js';
-import { AI_COMPOSER_LEXICAL_THEME } from './editor-theme.js';
+import { EXTERNAL_MARKDOWN_UPDATE, loadComposerMarkdown } from './editor-markdown.js';
+import { RICH_TEXT_INPUT_LEXICAL_THEME } from './editor.lexicalTheme.js';
 import { registerAIComposerKeyboard, type AIComposerSuggestionHandle } from './keyboard.js';
 import { registerAIComposerPaste } from './editor-paste.js';
 import type { TriggerState } from './trigger.js';
@@ -29,7 +29,7 @@ type MountAIComposerEditorOptions = {
 	getFormats: () => readonly RichTextInputFormat[];
 	closeMenu: () => void;
 	onSubmitShortcut?: (event: KeyboardEvent) => void;
-	onChange: () => void;
+	onUpdate: (isExternal: boolean) => void;
 	onSelectionChange: () => void;
 };
 
@@ -40,7 +40,7 @@ export function mountAIComposerLexicalEditor(options: MountAIComposerEditorOptio
 		onError(error) {
 			throw error;
 		},
-		theme: AI_COMPOSER_LEXICAL_THEME
+		theme: RICH_TEXT_INPUT_LEXICAL_THEME
 	});
 
 	editor.setRootElement(options.rootElement);
@@ -60,8 +60,8 @@ export function mountAIComposerLexicalEditor(options: MountAIComposerEditorOptio
 			closeMenu: options.closeMenu,
 			getFormats: options.getFormats
 		}),
-		editor.registerUpdateListener(({ editorState }) => {
-			editorState.read(options.onChange);
+		editor.registerUpdateListener(({ editorState, tags }) => {
+			editorState.read(() => options.onUpdate(tags.has(EXTERNAL_MARKDOWN_UPDATE)));
 		}),
 		editor.registerCommand(
 			SELECTION_CHANGE_COMMAND,
@@ -73,7 +73,10 @@ export function mountAIComposerLexicalEditor(options: MountAIComposerEditorOptio
 		)
 	);
 
-	loadComposerMarkdown(editor, options.value, options.getFormats());
+	loadComposerMarkdown(editor, options.value, options.getFormats(), {
+		tag: EXTERNAL_MARKDOWN_UPDATE,
+		discrete: true
+	});
 	editor.setEditable(!options.disabled);
 
 	return {

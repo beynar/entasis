@@ -31,8 +31,10 @@ A searchable dropdown component that supports both static arrays and async optio
   - For arrays: filtered client-side
   - For functions: called with search value, returns Promise or array
 
-- **value**: \`string | null\` (default: \`null\`, bindable)
+- **value**: \`string | null\` (bindable)
   - Selected option value
+- **defaultValue**: \`string | null\` (default: \`null\`)
+  - Initial selected value when \`value\` is omitted
 
 - **searchValue**: \`string\` (default: \`''\`, bindable)
   - Current search input value
@@ -71,9 +73,9 @@ A searchable dropdown component that supports both static arrays and async optio
 
 ### Event Props
 
-- **onChange**: \`(value: string, option: ComboboxOption | null) => void\`
+- **onValueChange**: \`({ value, option }: { value: string | null; option: ComboboxOption | null }) => void\`
   - Called when selection changes
-  - Receives both value and full option object
+  - Receives a named payload with both the value and full option object
 
 - **onValidate**: \`(value: string) => string[] | boolean\`
   - Custom validation function
@@ -114,7 +116,7 @@ A searchable dropdown component that supports both static arrays and async optio
 ### Async Options (API Call)
 
 \`\`\`svelte
-<script>
+<script lang="ts">
 	let value = $state(null);
 	const getOptions = async (searchValue?: string) => {
 		const response = await fetch(\`/api/search?q=\${searchValue}\`);
@@ -142,7 +144,7 @@ A searchable dropdown component that supports both static arrays and async optio
 ### Pre-selected Value with Async Options
 
 \`\`\`svelte
-<script>
+<script lang="ts">
 	let value = $state('us');
 	const getValueOption = async (value: string) => {
 		return { value, label: 'United States' };

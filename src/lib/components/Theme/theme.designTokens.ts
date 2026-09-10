@@ -1,5 +1,7 @@
 export type ThemeSpacing = 'small' | 'normal' | 'large' | number;
 export type ThemeRadius = 'none' | 'subtile' | 'small' | 'normal' | 'large' | 'round' | number;
+export type ThemeSpacingStep = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export type ThemeSpacingScale = Record<ThemeSpacingStep, number>;
 
 export type TypeScaleRatio =
 	| 'minorSecond'
@@ -24,6 +26,7 @@ export type TypeScalePreset = 'compact' | 'default' | 'comfortable' | 'large';
 
 export type ThemeDesignTokens = {
 	spacing?: ThemeSpacing;
+	spacingScale?: Partial<ThemeSpacingScale>;
 	radius?: ThemeRadius;
 	typeScale?: TypeScalePreset | TypeScaleOptions;
 	raisedWithBorder?: boolean;
@@ -46,6 +49,14 @@ const spacingFactors = {
 	large: 1.2
 } as const;
 
+export const defaultThemeSpacingScale = {
+	xs: 1,
+	sm: 1.5,
+	md: 2,
+	lg: 3,
+	xl: 4
+} as const satisfies ThemeSpacingScale;
+
 const radiusFactors = {
 	none: 0,
 	subtile: 0.5,
@@ -56,15 +67,9 @@ const radiusFactors = {
 } as const;
 
 const radiusScale = {
-	xs: 0.125,
 	sm: 0.25,
-	DEFAULT: 0.25,
-	md: 0.375,
-	lg: 0.5,
-	xl: 0.75,
-	'2xl': 1,
-	'3xl': 1.5,
-	'4xl': 2
+	md: 0.5,
+	lg: 0.75
 } as const;
 
 const typeScaleRatios = {
@@ -117,6 +122,28 @@ const presetFactor = <Preset extends Record<string, number>>(
 const round = (value: number) => Number(value.toFixed(3));
 const formatRem = (value: number) => `${Number(value.toFixed(6))}rem`;
 
+const spacingScaleVariables = (spacingScale: Partial<ThemeSpacingScale>) => {
+	const resolvedScale: ThemeSpacingScale = {
+		...defaultThemeSpacingScale,
+		...spacingScale
+	};
+	const entries = Object.entries(resolvedScale) as [ThemeSpacingStep, number][];
+
+	entries.forEach(([step, value], index) => {
+		positiveNumber(value, `spacingScale.${step}`);
+		const previousEntry = entries[index - 1];
+		if (previousEntry && value <= previousEntry[1]) {
+			throw new Error(
+				`spacingScale.${step} must be greater than spacingScale.${previousEntry[0]}.`
+			);
+		}
+	});
+
+	return Object.fromEntries(
+		entries.map(([step, multiplier]) => [`--space-${step}`, `calc(var(--spacing) * ${multiplier})`])
+	);
+};
+
 const typeScaleVariables = (typeScale: TypeScalePreset | TypeScaleOptions) => {
 	const preset: TypeScaleOptions =
 		typeof typeScale === 'string' ? typeScalePresets[typeScale] : typeScale;
@@ -153,12 +180,21 @@ const typeScaleVariables = (typeScale: TypeScalePreset | TypeScaleOptions) => {
 
 const radiusVariables = (radius: ThemeRadius) => {
 	const factor = presetFactor(radius, radiusFactors, 'radius');
-	return Object.fromEntries(
-		Object.entries(radiusScale).map(([step, rem]) => [
-			step === 'DEFAULT' ? '--radius' : `--radius-${step}`,
-			formatRem(rem * factor)
-		])
-	);
+	const sm = formatRem(radiusScale.sm * factor);
+	const md = formatRem(radiusScale.md * factor);
+	const lg = formatRem(radiusScale.lg * factor);
+
+	return {
+		'--radius': sm,
+		'--radius-xs': sm,
+		'--radius-sm': sm,
+		'--radius-md': md,
+		'--radius-lg': lg,
+		'--radius-xl': lg,
+		'--radius-2xl': lg,
+		'--radius-3xl': lg,
+		'--radius-4xl': lg
+	};
 };
 
 const tokenVariables = (tokens: ThemeDesignTokens, colorScheme: 'light' | 'dark' | 'normal') => ({
@@ -167,6 +203,7 @@ const tokenVariables = (tokens: ThemeDesignTokens, colorScheme: 'light' | 'dark'
 		: {
 				'--spacing': formatRem(0.25 * presetFactor(tokens.spacing, spacingFactors, 'spacing'))
 			}),
+	...(tokens.spacingScale === undefined ? {} : spacingScaleVariables(tokens.spacingScale)),
 	...(tokens.radius === undefined ? {} : radiusVariables(tokens.radius)),
 	...(tokens.typeScale === undefined ? {} : typeScaleVariables(tokens.typeScale)),
 	...(tokens.raisedWithBorder === undefined

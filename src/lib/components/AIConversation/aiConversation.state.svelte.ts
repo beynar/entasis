@@ -60,6 +60,80 @@ export type AIConversationRetryDetail<TMessage extends AIThreadItem = AIThreadIt
 	message?: TMessage;
 };
 
+/** Previous and current value reported by a conversation state callback. */
+export type AIConversationValueChangePayload<
+	TValue,
+	TMessage extends AIThreadItem = AIThreadItem
+> = Readonly<{
+	value: TValue;
+	previousValue: TValue;
+	conversation: AIConversationState<TMessage>;
+}>;
+
+/** Derived status transition reported by `onStatusChange`. */
+export type AIConversationStatusChangePayload<
+	TMessage extends AIThreadItem = AIThreadItem
+> = Readonly<{
+	status: AIConversationStatus;
+	previousStatus: AIConversationStatus;
+	conversation: AIConversationState<TMessage>;
+}>;
+
+/** Submitted message details and their owning conversation. */
+export type AIConversationSubmitPayload<TMessage extends AIThreadItem = AIThreadItem> =
+	Readonly<AIConversationSubmitDetail<TMessage> & { conversation: AIConversationState<TMessage> }>;
+
+/** Retry request and its owning conversation. */
+export type AIConversationRetryPayload<TMessage extends AIThreadItem = AIThreadItem> =
+	Readonly<AIConversationRetryDetail<TMessage> & { conversation: AIConversationState<TMessage> }>;
+
+/** Conversation error and the state that owns it. */
+export type AIConversationErrorPayload<TMessage extends AIThreadItem = AIThreadItem> = Readonly<{
+	error: unknown;
+	conversation: AIConversationState<TMessage>;
+}>;
+
+/** Message mutation and its owning conversation. */
+export type AIConversationMessagePayload<TMessage extends AIThreadItem = AIThreadItem> = Readonly<{
+	message: TMessage;
+	index: number;
+	conversation: AIConversationState<TMessage>;
+}>;
+
+/** Message replacement with its previous value and index. */
+export type AIConversationMessageUpdatePayload<
+	TMessage extends AIThreadItem = AIThreadItem
+> = Readonly<{
+	message: TMessage;
+	previousMessage: TMessage;
+	index: number;
+	conversation: AIConversationState<TMessage>;
+}>;
+
+/** Queued message action and its owning conversation. */
+export type AIConversationQueuedMessagePayload<
+	TMessage extends AIThreadItem = AIThreadItem
+> = Readonly<{
+	message: TMessage;
+	conversation: AIConversationState<TMessage>;
+}>;
+
+/** Tool mutation and its owning conversation. */
+export type AIConversationToolUpdatePayload<
+	TMessage extends AIThreadItem = AIThreadItem
+> = Readonly<{
+	change: AIConversationToolUpdateChange<TMessage>;
+	conversation: AIConversationState<TMessage>;
+}>;
+
+/** Ask-user-question transition and its owning conversation. */
+export type AIConversationAskUserQuestionChangePayload<
+	TMessage extends AIThreadItem = AIThreadItem
+> = Readonly<{
+	change: AIThreadAskUserQuestionStateChange<TMessage>;
+	conversation: AIConversationState<TMessage>;
+}>;
+
 export type AIConversationBindableState<TMessage extends AIThreadItem = AIThreadItem> = {
 	status: AIConversationStatus;
 	error: unknown | undefined;
@@ -78,115 +152,64 @@ export type AIConversationBindableState<TMessage extends AIThreadItem = AIThread
 
 export type AIConversationStateEvents<TMessage extends AIThreadItem = AIThreadItem> = {
 	/** Called after the derived conversation status changes. */
-	onStatusChange?: (
-		status: AIConversationStatus,
-		previousStatus: AIConversationStatus,
-		state: AIConversationState<TMessage>
-	) => void;
+	onStatusChange?: (payload: AIConversationStatusChangePayload<TMessage>) => void;
 	/** Handles a submitted or steered message without imposing a transport. */
-	onSubmit?: (
-		detail: AIConversationSubmitDetail<TMessage>,
-		state: AIConversationState<TMessage>
-	) => void;
+	onSubmit?: (payload: AIConversationSubmitPayload<TMessage>) => void;
 	/** Requests that the active response stop. */
 	onStop?: (state: AIConversationState<TMessage>) => void;
 	/** Requests regeneration for an optional message target. */
-	onRetry?: (
-		detail: AIConversationRetryDetail<TMessage>,
-		state: AIConversationState<TMessage>
-	) => void;
+	onRetry?: (payload: AIConversationRetryPayload<TMessage>) => void;
 	/** Called when the conversation enters an error state. */
-	onError?: (error: unknown, state: AIConversationState<TMessage>) => void;
+	onError?: (payload: AIConversationErrorPayload<TMessage>) => void;
 	/** Called after a message is appended. */
-	onMessageAppend?: (message: TMessage, state: AIConversationState<TMessage>) => void;
+	onMessageAppend?: (payload: AIConversationMessagePayload<TMessage>) => void;
 	/** Called after a message is prepended. */
-	onMessagePrepend?: (message: TMessage, state: AIConversationState<TMessage>) => void;
+	onMessagePrepend?: (payload: AIConversationMessagePayload<TMessage>) => void;
 	/** Called after a targeted message is replaced. */
-	onMessageUpdate?: (
-		message: TMessage,
-		previousMessage: TMessage,
-		index: number,
-		state: AIConversationState<TMessage>
-	) => void;
+	onMessageUpdate?: (payload: AIConversationMessageUpdatePayload<TMessage>) => void;
 	/** Called after a targeted message is removed. */
-	onMessageRemove?: (
-		message: TMessage,
-		index: number,
-		state: AIConversationState<TMessage>
-	) => void;
+	onMessageRemove?: (payload: AIConversationMessagePayload<TMessage>) => void;
 	/** Called after a targeted tool call is updated. */
-	onToolUpdate?: (
-		change: AIConversationToolUpdateChange<TMessage>,
-		state: AIConversationState<TMessage>
-	) => void;
+	onToolUpdate?: (payload: AIConversationToolUpdatePayload<TMessage>) => void;
 	/** Called after the shared composer input changes. */
-	onInputChange?: (
-		value: string,
-		previousValue: string,
-		state: AIConversationState<TMessage>
-	) => void;
+	onInputChange?: (payload: AIConversationValueChangePayload<string, TMessage>) => void;
 	/** Called after selected files change. */
-	onFilesChange?: (
-		files: File[],
-		previousFiles: File[],
-		state: AIConversationState<TMessage>
-	) => void;
+	onFilesChange?: (payload: AIConversationValueChangePayload<File[], TMessage>) => void;
 	/** Called after composer attachment records change. */
 	onAttachmentsChange?: (
-		attachments: AIComposerAttachment[],
-		previousAttachments: AIComposerAttachment[],
-		state: AIConversationState<TMessage>
+		payload: AIConversationValueChangePayload<AIComposerAttachment[], TMessage>
 	) => void;
 	/** Called after streamed assistant text changes. */
 	onLiveTextChange?: (
-		value: string | undefined,
-		previousValue: string | undefined,
-		state: AIConversationState<TMessage>
+		payload: AIConversationValueChangePayload<string | undefined, TMessage>
 	) => void;
 	/** Called after prompt suggestions change. */
-	onSuggestionsChange?: (
-		value: string[],
-		previousValue: string[],
-		state: AIConversationState<TMessage>
-	) => void;
+	onSuggestionsChange?: (payload: AIConversationValueChangePayload<string[], TMessage>) => void;
 	/** Called after the selected model changes. */
 	onSelectedModelChange?: (
-		model: string | undefined,
-		previousModel: string | undefined,
-		state: AIConversationState<TMessage>
+		payload: AIConversationValueChangePayload<string | undefined, TMessage>
 	) => void;
 	/** Called after the queued message changes. */
 	onQueuedMessageChange?: (
-		message: TMessage | null,
-		previousMessage: TMessage | null,
-		state: AIConversationState<TMessage>
+		payload: AIConversationValueChangePayload<TMessage | null, TMessage>
 	) => void;
 	/** Called after the queued message is committed to the transcript. */
-	onQueuedMessageCommit?: (message: TMessage, state: AIConversationState<TMessage>) => void;
+	onQueuedMessageCommit?: (payload: AIConversationQueuedMessagePayload<TMessage>) => void;
 	/** Called after the queued message is discarded. */
-	onQueuedMessageDiscard?: (message: TMessage, state: AIConversationState<TMessage>) => void;
+	onQueuedMessageDiscard?: (payload: AIConversationQueuedMessagePayload<TMessage>) => void;
 	/** Called after context-window usage changes. */
 	onContextUsageChange?: (
-		usage: AIContextUsage | undefined,
-		previousUsage: AIContextUsage | undefined,
-		state: AIConversationState<TMessage>
+		payload: AIConversationValueChangePayload<AIContextUsage | undefined, TMessage>
 	) => void;
 	/** Called after streaming starts or stops. */
-	onStreamingChange?: (
-		isStreaming: boolean,
-		previousIsStreaming: boolean,
-		state: AIConversationState<TMessage>
-	) => void;
+	onStreamingChange?: (payload: AIConversationValueChangePayload<boolean, TMessage>) => void;
 	/** Called when the active ask-user-question request changes. */
 	onActiveAskUserQuestionChange?: (
-		request: AIThreadAskUserQuestion<TMessage> | null,
-		previousRequest: AIThreadAskUserQuestion<TMessage> | null,
-		state: AIConversationState<TMessage>
+		payload: AIConversationValueChangePayload<AIThreadAskUserQuestion<TMessage> | null, TMessage>
 	) => void;
 	/** Handles completion or dismissal of an ask-user-question request. */
 	onAskUserQuestionStateChange?: (
-		change: AIThreadAskUserQuestionStateChange<TMessage>,
-		state: AIConversationState<TMessage>
+		payload: AIConversationAskUserQuestionChangePayload<TMessage>
 	) => void | Promise<void>;
 };
 
@@ -263,12 +286,12 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 
 	appendMessage = (message: TMessage) => {
 		this.messages = [...this.messages, message];
-		this.onMessageAppend?.(message, this);
+		this.onMessageAppend?.({ message, index: this.messages.length - 1, conversation: this });
 		return message;
 	};
 	prependMessage = (message: TMessage) => {
 		this.messages = [message, ...this.messages];
-		this.onMessagePrepend?.(message, this);
+		this.onMessagePrepend?.({ message, index: 0, conversation: this });
 		return message;
 	};
 	updateMessage = (
@@ -283,7 +306,7 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 		this.messages = this.messages.map((current, currentIndex) =>
 			currentIndex === index ? message : current
 		);
-		this.onMessageUpdate?.(message, previousMessage, index, this);
+		this.onMessageUpdate?.({ message, previousMessage, index, conversation: this });
 		return message;
 	};
 	removeMessage = (target: AIConversationMessageTarget<TMessage>) => {
@@ -292,7 +315,7 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 		if (!message)
 			throw new Error(`Cannot remove missing AI conversation message at index ${index}.`);
 		this.messages = this.messages.filter((_, currentIndex) => currentIndex !== index);
-		this.onMessageRemove?.(message, index, this);
+		this.onMessageRemove?.({ message, index, conversation: this });
 		return message;
 	};
 	updateTool = (
@@ -311,8 +334,16 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 		this.messages = this.messages.map((message, index) =>
 			index === messageIndex ? change.message : message
 		);
-		this.onMessageUpdate?.(change.message, previousMessage, messageIndex, this);
-		this.onToolUpdate?.({ ...change, previousMessage, messageIndex }, this);
+		this.onMessageUpdate?.({
+			message: change.message,
+			previousMessage,
+			index: messageIndex,
+			conversation: this
+		});
+		this.onToolUpdate?.({
+			change: { ...change, previousMessage, messageIndex },
+			conversation: this
+		});
 		return change.tool;
 	};
 
@@ -334,7 +365,11 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 		}
 		this.queuedMessage = message;
 		this.syncStatus();
-		this.onQueuedMessageChange?.(message, previousMessage, this);
+		this.onQueuedMessageChange?.({
+			value: message,
+			previousValue: previousMessage,
+			conversation: this
+		});
 		return message;
 	};
 	queueMessage = (message: TMessage) => {
@@ -347,7 +382,7 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 	) => {
 		this.queueMessage(message);
 		const committed = this.commitQueuedMessage();
-		this.onSubmit?.({ ...detail, message: committed }, this);
+		this.onSubmit?.({ ...detail, message: committed, conversation: this });
 		return committed;
 	};
 	commitQueuedMessage = () => {
@@ -357,9 +392,9 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 		this.messages = [...this.messages, message];
 		this.queuedMessage = null;
 		this.syncStatus();
-		this.onQueuedMessageChange?.(null, message, this);
-		this.onMessageAppend?.(message, this);
-		this.onQueuedMessageCommit?.(message, this);
+		this.onQueuedMessageChange?.({ value: null, previousValue: message, conversation: this });
+		this.onMessageAppend?.({ message, index: this.messages.length - 1, conversation: this });
+		this.onQueuedMessageCommit?.({ message, conversation: this });
 		return message;
 	};
 	discardQueuedMessage = () => {
@@ -368,8 +403,8 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 			throw new Error('Cannot discard an AI conversation message because no message is queued.');
 		this.queuedMessage = null;
 		this.syncStatus();
-		this.onQueuedMessageChange?.(null, message, this);
-		this.onQueuedMessageDiscard?.(message, this);
+		this.onQueuedMessageChange?.({ value: null, previousValue: message, conversation: this });
+		this.onQueuedMessageDiscard?.({ message, conversation: this });
 		return message;
 	};
 	updateContextUsage = (
@@ -382,7 +417,7 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 		const usage = typeof update === 'function' ? update(previous) : update;
 		if (previous !== usage) {
 			this.contextUsage = usage;
-			this.onContextUsageChange?.(usage, previous, this);
+			this.onContextUsageChange?.({ value: usage, previousValue: previous, conversation: this });
 		}
 		return usage;
 	};
@@ -408,7 +443,7 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 	retry = (target?: AIConversationMessageTarget<TMessage>) => {
 		const message = target ? this.messages[this.findMessageIndex(target)] : undefined;
 		this.clearError();
-		this.onRetry?.({ target, message }, this);
+		this.onRetry?.({ target, message, conversation: this });
 		return message;
 	};
 	setError = (error: unknown) => {
@@ -417,7 +452,7 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 		this.setStreaming(false);
 		this.error = error;
 		this.setStatus('error');
-		this.onError?.(error, this);
+		this.onError?.({ error, conversation: this });
 		return error;
 	};
 	clearError = () => {
@@ -436,7 +471,11 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 		}
 		this.activeAskUserQuestion = request;
 		this.syncStatus();
-		this.onActiveAskUserQuestionChange?.(request, previous, this);
+		this.onActiveAskUserQuestionChange?.({
+			value: request,
+			previousValue: previous,
+			conversation: this
+		});
 		return request;
 	};
 	resolveAskUserQuestion = async (
@@ -457,7 +496,7 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 			state,
 			detail
 		} satisfies AIThreadAskUserQuestionStateChange<TMessage>;
-		await this.onAskUserQuestionStateChange?.(change, this);
+		await this.onAskUserQuestionStateChange?.({ change, conversation: this });
 		return change;
 	};
 
@@ -469,23 +508,24 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 		value: AIConversationBindableState<TMessage>[Key],
 		callback:
 			| ((
-					value: AIConversationBindableState<TMessage>[Key],
-					previous: AIConversationBindableState<TMessage>[Key],
-					state: AIConversationState<TMessage>
+					payload: AIConversationValueChangePayload<
+						AIConversationBindableState<TMessage>[Key],
+						TMessage
+					>
 			  ) => void)
 			| undefined
 	) {
 		const previous = this[key];
 		if (previous === value) return value;
 		Reflect.set(this, key, value);
-		callback?.(value, previous, this);
+		callback?.({ value, previousValue: previous, conversation: this });
 		return value;
 	}
 	private setStatus(status: AIConversationStatus) {
 		const previous = this.status;
 		if (previous !== status) {
 			this.status = status;
-			this.onStatusChange?.(status, previous, this);
+			this.onStatusChange?.({ status, previousStatus: previous, conversation: this });
 		}
 		return status;
 	}
@@ -493,7 +533,7 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 		const previous = this.isStreaming;
 		if (previous !== value) {
 			this.isStreaming = value;
-			this.onStreamingChange?.(value, previous, this);
+			this.onStreamingChange?.({ value, previousValue: previous, conversation: this });
 		}
 		return value;
 	}

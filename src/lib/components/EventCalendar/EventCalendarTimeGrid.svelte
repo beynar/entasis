@@ -514,7 +514,7 @@
 			end: addCivilDays(day, 1),
 			...(resourceId === undefined ? {} : { resourceId })
 		};
-		onSlotClick?.(slot, event);
+		onSlotClick?.({ slot, event });
 		if (event.defaultPrevented) {
 			calendar.interaction.resetSinglePointerSlot();
 			return;
@@ -549,7 +549,7 @@
 			end: slot.end,
 			...(resourceId === undefined ? {} : { resourceId })
 		};
-		onSlotClick?.(selectionSlot, event);
+		onSlotClick?.({ slot: selectionSlot, event });
 		if (event.defaultPrevented) {
 			calendar.interaction.resetSinglePointerSlot();
 			return;
@@ -560,7 +560,7 @@
 
 	function handleItemActivate(segment: EventCalendarSegment<TItemFields>, event: MouseEvent): void {
 		calendar.interaction.resetSinglePointerSlot();
-		onItemClick?.(segment.occurrence, event);
+		onItemClick?.({ occurrence: segment.occurrence, event });
 		if (event.defaultPrevented) return;
 		calendar.select({ kind: 'item', itemKey: segment.occurrence.key, slot: null });
 	}

@@ -100,11 +100,11 @@ The ButtonGroup component displays a collection of related buttons as a cohesive
 	items={[
 		{ 
 			children: 'Save',
-			onClick: () => handleOption('save')
+			onclick: () => handleOption('save')
 		},
 		{ 
 			children: 'Cancel',
-			onClick: () => handleOption('cancel')
+			onclick: () => handleOption('cancel')
 		}
 	]}
 />
@@ -164,17 +164,17 @@ The ButtonGroup component displays a collection of related buttons as a cohesive
 		{ 
 			children: 'Day',
 			variant: selected === 'day' ? 'solid' : 'ghost',
-			onClick: () => selected = 'day'
+			onclick: () => selected = 'day'
 		},
 		{ 
 			children: 'Week',
 			variant: selected === 'week' ? 'solid' : 'ghost',
-			onClick: () => selected = 'week'
+			onclick: () => selected = 'week'
 		},
 		{ 
 			children: 'Month',
 			variant: selected === 'month' ? 'solid' : 'ghost',
-			onClick: () => selected = 'month'
+			onclick: () => selected = 'month'
 		}
 	]}
 />

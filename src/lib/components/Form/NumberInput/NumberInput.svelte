@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { minusIcon } from '../../Icons/minus.js';
 	import { plusIcon } from '../../Icons/plus.js';
 	import Field from '../Field/Field.svelte';
@@ -8,7 +9,8 @@
 	import { useNumberInputTheme } from './numberInput.theme.js';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
@@ -17,7 +19,7 @@
 		disabled,
 		name,
 		onValidate,
-		onChange,
+		onValueChange,
 		visible,
 		min,
 		max,
@@ -26,6 +28,7 @@
 		showControls = true,
 		...rest
 	}: NumberInputProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 
@@ -40,7 +43,7 @@
 		get errors() {
 			return errors;
 		},
-		set errors(v: any) {
+		set errors(v: string[] | boolean) {
 			errors = v;
 		},
 		get focused() {
@@ -49,7 +52,7 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => onChange?.(v),
+		onValueChange: (v) => onValueChange?.(v),
 		get disabled() {
 			return disabled;
 		},
@@ -176,14 +179,14 @@
 				label="Decrease value"
 				disabled={!canDecrement}
 				prefix={minusIcon}
-				onClick={() => changeValue(-1)}
+				onclick={() => changeValue(-1)}
 			/>
 			<FieldActionButton
 				size={rest.size}
 				label="Increase value"
 				disabled={!canIncrement}
 				prefix={plusIcon}
-				onClick={() => changeValue(1)}
+				onclick={() => changeValue(1)}
 			/>
 		</div>
 	{/if}

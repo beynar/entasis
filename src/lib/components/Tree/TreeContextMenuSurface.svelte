@@ -7,8 +7,11 @@
 	import { cx } from '$lib/utils/cva/index.js';
 
 	type Props = {
+		/** Context-menu anchor, selected tree node, and close action. */
 		data: TreeContextMenuSnippetData;
+		/** Actions shown for the selected tree node. */
 		items: MenuItem[];
+		/** Additional classes for the positioned menu surface. */
 		class?: string;
 	};
 

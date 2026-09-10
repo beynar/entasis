@@ -7,7 +7,8 @@
 	import type { RatingInputProps } from './ratingInput.props.js';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
@@ -15,7 +16,7 @@
 		disabled,
 		name,
 		onValidate,
-		onChange,
+		onValueChange,
 		visible,
 		max = 5,
 		allowHalf = false,
@@ -28,6 +29,7 @@
 		label,
 		...rest
 	}: RatingInputProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 
@@ -51,7 +53,7 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => onChange?.(v),
+		onValueChange: (v) => onValueChange?.(v),
 		get disabled() {
 			return disabled;
 		},
@@ -124,18 +126,20 @@
 
 	const clamp = (next: number) => Math.min(Math.max(next, 0), max);
 
-	const handlePointerMove = (event: PointerEvent, starIndex: number, element: HTMLElement) => {
+	const handlePointerMove = (event: PointerEvent & { currentTarget: HTMLSpanElement }) => {
 		if (!interactive) return;
-		previewValue = valueFromPointer(event, starIndex, element);
+		const starIndex = Number(event.currentTarget.dataset.starIndex);
+		previewValue = valueFromPointer(event, starIndex, event.currentTarget);
 	};
 
 	const handlePointerLeave = () => {
 		previewValue = null;
 	};
 
-	const handleClick = (event: MouseEvent, starIndex: number, element: HTMLElement) => {
+	const handleClick = (event: MouseEvent & { currentTarget: HTMLSpanElement }) => {
 		if (!interactive) return;
-		const next = valueFromPointer(event, starIndex, element);
+		const starIndex = Number(event.currentTarget.dataset.starIndex);
+		const next = valueFromPointer(event, starIndex, event.currentTarget);
 		// Clicking the exact current value clears it when clearable.
 		if (clearable && field.value === next) {
 			commit(null);
@@ -185,8 +189,8 @@
 		{theme}
 		{interactive}
 		disabled={field.disabled}
-		onStarPointerMove={handlePointerMove}
-		onStarClick={handleClick}
+		onpointermove={handlePointerMove}
+		onclick={handleClick}
 		{id}
 		role="slider"
 		tabindex={readonly || field.disabled ? -1 : 0}

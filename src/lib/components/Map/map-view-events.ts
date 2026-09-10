@@ -3,9 +3,9 @@ import type { MapViewChangeArg } from './map-types.js';
 import type { MapLibreMap } from './maplibre-types.js';
 
 type MapViewEventCallbacks = {
-	onviewchange?: (view: MapViewChangeArg) => void;
-	onmoveend?: (view: MapViewChangeArg) => void;
-	onzoomend?: (view: MapViewChangeArg) => void;
+	onViewChange?: (view: MapViewChangeArg) => void;
+	onMoveEnd?: (view: MapViewChangeArg) => void;
+	onZoomEnd?: (view: MapViewChangeArg) => void;
 };
 
 function createAnimationFrameScheduler(callback: () => void) {
@@ -68,26 +68,23 @@ export function getMapView(map: MapLibreMap): MapViewChangeArg {
 	};
 }
 
-export function bindMapViewEvents(
-	map: MapLibreMap,
-	callbacks: MapViewEventCallbacks
-): () => void {
+export function bindMapViewEvents(map: MapLibreMap, callbacks: MapViewEventCallbacks): () => void {
 	const liveViewChange = createAnimationFrameScheduler(() => {
-		callbacks.onviewchange?.(getMapView(map));
+		callbacks.onViewChange?.(getMapView(map));
 	});
 
 	function scheduleViewChange(): void {
-		if (callbacks.onviewchange) liveViewChange.schedule();
+		if (callbacks.onViewChange) liveViewChange.schedule();
 	}
 
 	function handleMoveEnd(): void {
 		liveViewChange.flush();
-		callbacks.onmoveend?.(getMapView(map));
+		callbacks.onMoveEnd?.(getMapView(map));
 	}
 
 	function handleZoomEnd(): void {
 		liveViewChange.flush();
-		callbacks.onzoomend?.(getMapView(map));
+		callbacks.onZoomEnd?.(getMapView(map));
 	}
 
 	const unbindMovementEvents = bindLiveMapMovementEvents(map, {

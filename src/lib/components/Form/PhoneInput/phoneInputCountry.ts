@@ -1,7 +1,7 @@
-import type { Country, Iso2 } from 'intl-tel-input';
+import type { PhoneCountry } from './phoneInput-cdn.js';
 
 export type PhoneCountryOption = {
-	iso2: Iso2;
+	iso2: string;
 	name: string;
 	dialCode: string;
 	flag: string;
@@ -26,13 +26,13 @@ const getDisplayNames = () => {
 	}
 };
 
-const getCountryName = (iso2: Iso2, displayNames: Intl.DisplayNames | null) =>
+const getCountryName = (iso2: string, displayNames: Intl.DisplayNames | null) =>
 	displayNames?.of(iso2.toUpperCase()) || iso2.toUpperCase();
 
-const getCountryFlag = (iso2: Iso2) =>
+const getCountryFlag = (iso2: string) =>
 	iso2.toUpperCase().replace(/./g, (letter) => String.fromCodePoint(127397 + letter.charCodeAt(0)));
 
-export const createPhoneCountryOptions = (countries: Country[]): PhoneCountryOption[] => {
+export const createPhoneCountryOptions = (countries: PhoneCountry[]): PhoneCountryOption[] => {
 	const displayNames = getDisplayNames();
 
 	return countries

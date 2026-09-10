@@ -3,6 +3,7 @@
 	import { useMeterTheme } from './meter.theme.js';
 	import Slot from '../Slot/Slot.svelte';
 	import { useSpringState } from '$lib/utils/spring.svelte.js';
+	import { untrack } from 'svelte';
 
 	type T = $$Generic<Record<string, any> | undefined>;
 	type S = $$Generic<Record<string, any> | undefined>;
@@ -28,28 +29,42 @@
 	}: MeterProps<T, S> = $props();
 
 	const spring = useSpringState({
-		stiffness,
-		damping,
-		precision
+		get stiffness() {
+			return stiffness;
+		},
+		get damping() {
+			return damping;
+		},
+		get precision() {
+			return precision;
+		}
 	});
 
-	let springs = $state(
-		(Array.isArray(value) ? value : [value]).map((v) => {
-			const percentage = (v.value / max) * 100;
+	const meterSteps = $derived(Array.isArray(value) ? value : [value]);
+
+	const createMeterSprings = (steps: MeterStep<T>[]) =>
+		steps.map((step) => {
+			const percentage = (step.value / max) * 100;
 			return {
 				percentage,
-				value: spring(v.value),
+				value: spring(step.value),
 				width: spring(percentage)
 			};
-		})
-	);
+		});
+
+	let springs = $state(untrack(() => createMeterSprings(meterSteps)));
 
 	$effect(() => {
-		(Array.isArray(value) ? value : [value]).forEach((v, i) => {
-			springs[i].percentage = (v.value / max) * 100;
-			springs[i].value.set(v.value || 0, { soft });
-			springs[i].width!.set((v.value / max) * 100, { soft });
-		});
+		const currentSteps = meterSteps;
+		if (springs.length !== currentSteps.length) {
+			springs = createMeterSprings(currentSteps);
+			return;
+		}
+		for (const [index, step] of currentSteps.entries()) {
+			springs[index].percentage = (step.value / max) * 100;
+			springs[index].value.set(step.value || 0, { soft });
+			springs[index].width!.set((step.value / max) * 100, { soft });
+		}
 	});
 
 	const classes = $derived(useMeterTheme(theme));

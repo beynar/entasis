@@ -55,7 +55,7 @@
 		type="button"
 		class={classes.actionTrigger({ componentSize: size })}
 		aria-label={actionLabel}
-		onclick={action.onClick}
+		onclick={action.onclick}
 	>
 		<SidebarIcon icon={actionIcon} />
 		<span class="sr-only">{actionLabel}</span>

@@ -71,8 +71,7 @@ TagGroup renders a finite set of selectable tags as chips. It is a form input fo
 - **chipTheme**: ChipThemeProps - Theme overrides forwarded to each Chip.
 
 ### Events
-- **onChange**: (value: string | string[] | null) => void - Called when normalized selection changes.
-- **onClick**: (value: string) => void - Called when an option is clicked.
+- **onValueChange**: (value: string | string[] | null) => void - Called when normalized selection changes.
 - **onValidate**: (value: string | string[] | null) => string[] | boolean - Custom validation.
 
 ## Accessibility
@@ -81,4 +80,11 @@ TagGroup renders a finite set of selectable tags as chips. It is a form input fo
 - Buttons expose aria-pressed for selected state.
 - The field is rendered as a fieldset through the shared Field wrapper.
 - Hidden inputs mirror selected values for native form submission.
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+
 `;

@@ -28,7 +28,7 @@
 		unitClass: string;
 		unitReference: Attachment<HTMLElement>;
 		buttonReference?: Attachment<HTMLElement>;
-		onToggle: (key: string, checked: boolean) => void;
+		onToggle: (payload: { key: string; value: boolean }) => void;
 	} = $props();
 
 	const classes = $derived(useToggleButtonGroupTheme(item.theme));
@@ -54,8 +54,8 @@
 			color={item.color ?? color}
 			variant={item.variant ?? variant}
 			disabled={disabled || !!item.disabled || !!button.disabled}
-			checked={item.value?.[key] ?? false}
-			onChange={(checked) => onToggle(key, checked)}
+			value={item.value?.[key] ?? item.defaultValue?.[key] ?? false}
+			onValueChange={(value) => onToggle({ key, value })}
 			{@attach overflowed ? undefined : buttonReference}
 			{@attach !button.children && button.ariaLabel && !overflowed
 				? tooltip({ content: button.ariaLabel, delay: 350 })

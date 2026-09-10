@@ -22,10 +22,14 @@ export type DialogProps = WithSlot<
 		responsive?: boolean;
 		/** Controls whether the dialog is rendered; bindable for two-way control. */
 		open?: boolean;
-		/** Callback after the close transition finishes; receives the dialog state instance. */
-		onClose?: (dialog: DialogState) => void;
-		/** Callback after the open transition finishes; receives the dialog state instance. */
-		onOpen?: (dialog: DialogState) => void;
+		/** Initial open state when `open` is not provided. */
+		defaultOpen?: boolean;
+		/** Called once when the library requests an open-state change. */
+		onOpenChange?: (open: boolean) => void;
+		/** Called after the open transition finishes. */
+		onAfterOpen?: (dialog: DialogState) => void;
+		/** Called after the close transition finishes. */
+		onAfterClose?: (dialog: DialogState) => void;
 		/** Content max-width for modal and alert types; supports responsive values. */
 		size?: ResponsiveProps<'small' | 'normal' | 'large'>;
 		/** Where a dialog taller than the viewport scrolls: inside the card (`inner`, default) or the viewport (`outer`). */

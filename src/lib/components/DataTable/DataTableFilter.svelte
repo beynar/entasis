@@ -86,7 +86,7 @@
 				color="neutral"
 				size="small"
 				disabled={!active || model.props.disabled}
-				onClick={clearFilter}
+				onclick={clearFilter}
 			>
 				Clear
 			</Button>
@@ -100,7 +100,7 @@
 				placeholder={config.filter.placeholder ?? 'Filter values'}
 				value={typeof value === 'string' ? value : ''}
 				disabled={model.props.disabled}
-				onChange={(next) => model.setColumnFilter(column.id, next || undefined)}
+				onValueChange={(next) => model.setColumnFilter(column.id, next || undefined)}
 			/>
 		{:else if config.filter.type === 'number'}
 			<div class={classes.filterFields()}>
@@ -111,7 +111,7 @@
 					max={config.filter.max}
 					value={(value as { min?: number } | undefined)?.min ?? null}
 					disabled={model.props.disabled}
-					onChange={(next) => setNumberBound('min', next)}
+					onValueChange={(next) => setNumberBound('min', next)}
 				/>
 				<NumberInput
 					size="small"
@@ -120,7 +120,7 @@
 					max={config.filter.max}
 					value={(value as { max?: number } | undefined)?.max ?? null}
 					disabled={model.props.disabled}
-					onChange={(next) => setNumberBound('max', next)}
+					onValueChange={(next) => setNumberBound('max', next)}
 				/>
 			</div>
 		{:else if config.filter.type === 'select'}
@@ -130,7 +130,7 @@
 				items={[...config.filter.options]}
 				value={typeof value === 'string' ? value : null}
 				disabled={model.props.disabled}
-				onChange={(next) => model.setColumnFilter(column.id, next || undefined)}
+				onValueChange={(next) => model.setColumnFilter(column.id, next || undefined)}
 			/>
 		{:else if config.filter.type === 'multi-select'}
 			<CheckboxesInput
@@ -147,7 +147,7 @@
 					checkboxesInputItemTrack: { base: classes.filterCheckboxIndicator() },
 					checkboxesInputItemThumb: { base: classes.filterCheckboxIndicator() }
 				}}
-				onChange={scheduleMultiSelectFilter}
+				onValueChange={scheduleMultiSelectFilter}
 			/>
 		{:else if config.filter.type === 'date'}
 			<div class={classes.filterFields()}>
@@ -158,7 +158,7 @@
 					maxDate={config.filter.max}
 					value={(value as { start?: Date } | undefined)?.start ?? null}
 					disabled={model.props.disabled}
-					onChange={(next) => setDateBound('start', next)}
+					onValueChange={(next) => setDateBound('start', next)}
 				/>
 				<DateInput
 					size="small"
@@ -167,7 +167,7 @@
 					maxDate={config.filter.max}
 					value={(value as { end?: Date } | undefined)?.end ?? null}
 					disabled={model.props.disabled}
-					onChange={(next) => setDateBound('end', next)}
+					onValueChange={(next) => setDateBound('end', next)}
 				/>
 			</div>
 		{:else if config.filter.type === 'boolean'}
@@ -177,7 +177,7 @@
 					ariaLabel={config.filter.trueLabel ?? 'True'}
 					value={value === true}
 					disabled={model.props.disabled}
-					onChange={(next) => model.setColumnFilter(column.id, next ? true : undefined)}
+					onValueChange={(next) => model.setColumnFilter(column.id, next ? true : undefined)}
 				/>
 				<span>{config.filter.trueLabel ?? 'True'}</span>
 				<Checkbox
@@ -185,7 +185,7 @@
 					ariaLabel={config.filter.falseLabel ?? 'False'}
 					value={value === false}
 					disabled={model.props.disabled}
-					onChange={(next) => model.setColumnFilter(column.id, next ? false : undefined)}
+					onValueChange={(next) => model.setColumnFilter(column.id, next ? false : undefined)}
 				/>
 				<span>{config.filter.falseLabel ?? 'False'}</span>
 			</div>

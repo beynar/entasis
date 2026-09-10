@@ -672,7 +672,7 @@ export class GanttDependencyInteraction<
 	}
 
 	private reportBlocked(info: GanttInteractionBlockedInfo): void {
-		this.#owner.chart.eventHandlers?.interactionBlocked?.(info);
+		this.#owner.chart.eventHandlers?.onInteractionBlocked?.(info);
 	}
 }
 

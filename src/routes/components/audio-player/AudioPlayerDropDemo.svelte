@@ -2,7 +2,7 @@
 	import {
 		AudioPlayer,
 		type AudioPlayerControl,
-		type AudioPlayerError
+		type AudioPlayerErrorPayload
 	} from '$lib/components/AudioPlayer/index.js';
 	import { FileInput } from '$lib/components/Form/File/index.js';
 
@@ -40,7 +40,7 @@
 		return () => URL.revokeObjectURL(objectUrl);
 	});
 
-	function handleError(error: AudioPlayerError) {
+	function handleError({ error }: AudioPlayerErrorPayload) {
 		errorMessage = error instanceof Error ? error.message : 'Audio playback failed.';
 	}
 

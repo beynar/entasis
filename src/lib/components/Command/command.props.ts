@@ -64,8 +64,10 @@ export type CommandProps<Value extends string = string> = WithAttachments<
 			 * Dialog open state. Bindable. Dialog mode only.
 			 */
 			open?: boolean;
+			/** Initial dialog open state when `open` is omitted. */
+			defaultOpen?: boolean;
 			/**
-			 * Fires when the dialog open state changes.
+			 * Fires once after a library action changes the dialog state. External updates are silent.
 			 */
 			onOpenChange?: (open: boolean) => void;
 			/**
@@ -83,11 +85,13 @@ export type CommandProps<Value extends string = string> = WithAttachments<
 			/**
 			 * Search query. Bindable.
 			 */
-			search?: string;
+			value?: string;
+			/** Initial search query when `value` is omitted. */
+			defaultValue?: string;
 			/**
-			 * Fires when the search query changes.
+			 * Fires once after user input changes the search query. External updates are silent.
 			 */
-			onSearchChange?: (search: string) => void;
+			onValueChange?: (value: string) => void;
 			/**
 			 * Search input placeholder.
 			 */

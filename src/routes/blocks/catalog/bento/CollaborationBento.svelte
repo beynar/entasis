@@ -1,0 +1,70 @@
+<script lang="ts">
+	import { Stack } from 'svelai/stack';
+	import { Avatar } from 'svelai/avatar';
+	import { AvatarGroup } from 'svelai/avatar';
+	import { Card } from 'svelai/card';
+	import { Chip } from 'svelai/chip';
+	import { Heading } from 'svelai/heading';
+	import { Meter } from 'svelai/meter';
+	import { Stat } from 'svelai/stat';
+	import { targetIcon } from 'svelai/icons/target';
+</script>
+
+<section class="flex flex-col gap-xl p-lg md:p-xl">
+	<Heading as="h2" size="h2" weight="bold">A shared space for your best work.</Heading>
+	<div class="grid gap-lg md:grid-cols-3">
+		<Card class="md:col-span-2" color="primary" variant="soft" title="Keep everyone in the loop"
+			><div class="flex flex-col gap-xl">
+				<p>One conversation, with all the context your team needs.</p>
+				<Card title="Website launch" description="Design review · Today"
+					><div class="flex flex-col gap-md">
+						<div class="flex items-center gap-md">
+							<Avatar user={{ name: 'Maya Chen' }} />
+							<p class="text-sm">The final screens are ready for your review.</p>
+						</div>
+						<div class="flex justify-between">
+							<Chip color="success" size="small">On track</Chip><AvatarGroup
+								size="small"
+								items={[{ name: 'Ari Costa' }, { name: 'Jules Bernard' }, { name: 'Maya Chen' }]}
+							/>
+						</div>
+					</div></Card
+				>
+			</div></Card
+		>
+		<Card title="Momentum" description="Your week, at a glance"
+			><Stack gap="lg"
+				><Stat
+					label="Tasks completed"
+					value="28"
+					trend="↑ 12 this week"
+					trendDirection="up"
+					variant="ghost"
+				/><Meter label="Sprint progress" value={{ value: 82, color: 'success' }} /></Stack
+			></Card
+		>
+		<Card title="Built for focus" variant="outline"
+			><div class="flex flex-col gap-lg">
+				<span class="text-primary">{@render targetIcon({ size: 32 })}</span>
+				<p class="text-neutral/70">Group work by outcome. Make the next step obvious.</p>
+			</div></Card
+		>
+		<Card class="md:col-span-2" variant="outline"
+			><div class="flex flex-wrap items-center justify-between gap-xl">
+				<div class="flex flex-col gap-sm">
+					<Heading as="h3" size="h4">A place for every perspective.</Heading>
+					<p class="text-neutral/70">Bring design, engineering, and product together.</p>
+				</div>
+				<AvatarGroup
+					size="large"
+					items={[
+						{ name: 'Nora Ellis' },
+						{ name: 'Ari Costa' },
+						{ name: 'Maya Chen' },
+						{ name: 'Theo Park' }
+					]}
+				/>
+			</div></Card
+		>
+	</div>
+</section>

@@ -41,7 +41,7 @@ Extends all Field component props plus:
 - **size**: 'small' | 'normal' | 'large' - Field size, forwarded to the embedded ColorPicker
 
 ### Event Props
-- **onChange**: \`(value: string) => void\` - Fires on every committed change, including continuously
+- **onValueChange**: \`(value: string) => void\` - Fires on every committed change, including continuously
   while dragging in the picker. Receives the canonical hex string.
 - **onValidate**: \`(value: string) => string[] | boolean\` - Custom validation.
 
@@ -135,4 +135,11 @@ Field theme parts (label, description, error, ...) are also accepted on the same
 - The canonical \`value\` is always hex; use \`format\` only to change the input's text representation.
 - The swatch renders the color over a CSS checkerboard so colors with alpha < 1 read correctly, and
   shows a neutral muted square when the value is \`null\`.
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+
 `;

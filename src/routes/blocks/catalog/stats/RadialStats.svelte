@@ -1,0 +1,46 @@
+<script lang="ts">
+	import { Chip } from 'svelai/chip';
+	import { Heading } from 'svelai/heading';
+	import { ProgressCircle } from 'svelai/progress-circle';
+	import { Stat } from 'svelai/stat';
+</script>
+
+<section class="mx-auto flex max-w-5xl flex-col gap-xl p-lg md:p-xl">
+	<div class="text-center">
+		<Chip variant="outline">A quarter in perspective</Chip><Heading
+			as="h2"
+			size="h2"
+			weight="bold"
+			class="mt-xl">See the progress behind the plans.</Heading
+		>
+	</div>
+	<div class="grid items-center gap-xl md:grid-cols-2">
+		<div class="relative mx-auto flex size-72 items-center justify-center">
+			<ProgressCircle value={84} diameter={280} label="84 percent of quarterly goals complete" />
+			<div class="absolute text-center">
+				<strong class="text-6xl">84%</strong>
+				<p class="mt-sm text-sm text-neutral/60">of quarterly goals</p>
+			</div>
+		</div>
+		<div class="flex flex-col gap-lg">
+			<Stat
+				label="Outcomes delivered"
+				value="21 of 25"
+				trend="A focused final stretch"
+				trendDirection="up"
+				variant="outline"
+			/><Stat
+				label="Projects on track"
+				value="12"
+				description="Clear ownership across the team"
+				variant="outline"
+			/><Stat
+				label="Next shared review"
+				value="Friday"
+				description="Make the next decision together"
+				variant="outline"
+			/>
+		</div>
+	</div>
+	<p class="text-center text-xs text-neutral/50">Illustrative workspace metrics.</p>
+</section>

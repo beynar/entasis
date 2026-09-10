@@ -74,7 +74,7 @@
 							size="small"
 							variant="outline"
 							color="neutral"
-							onClick={() => goTo?.(...city.coords)}
+							onclick={() => goTo?.(...city.coords)}
 						>
 							{city.label}
 						</Button>

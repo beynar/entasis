@@ -23,6 +23,7 @@ The ScrollArea component provides a native scroll viewport with custom overlay s
 - **ariaLabel**: string (default: 'Scrollable content') - Accessible name for the native scrolling viewport
 - **type**: 'hover' | 'always' | 'scroll' | 'auto' (default: 'hover') - Controls scrollbar visibility behavior
 - **delay**: number (default: 0) - Milliseconds before hover mode treats the area as hovered
+- **onscroll**: (event: Event) => void - Native scroll handler attached to the viewport
 
 ### Behavior Props
 - **scrollOnEdges**: boolean (default: false) - Enables auto-scroll and up/down indicators when the pointer rests near the viewport edges

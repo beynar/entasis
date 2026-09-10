@@ -49,13 +49,13 @@
 			type: 'button' as const,
 			prefix: minusIcon,
 			label: messages.ganttChartZoomOut,
-			onClick: () => chart.zoomOut()
+			onclick: () => chart.zoomOut()
 		},
 		{
 			type: 'button' as const,
 			prefix: plusIcon,
 			label: messages.ganttChartZoomIn,
-			onClick: () => chart.zoomIn()
+			onclick: () => chart.zoomIn()
 		}
 	]);
 </script>
@@ -111,7 +111,7 @@
 		prefix={minusIcon}
 		label={messages.ganttChartZoomOut}
 		disabled={chart.disabled}
-		onClick={() => chart.zoomOut()}
+		onclick={() => chart.zoomOut()}
 	/>
 {/snippet}
 
@@ -125,7 +125,7 @@
 		prefix={plusIcon}
 		label={messages.ganttChartZoomIn}
 		disabled={chart.disabled}
-		onClick={() => chart.zoomIn()}
+		onclick={() => chart.zoomIn()}
 	/>
 {/snippet}
 
@@ -139,7 +139,7 @@
 		prefix={arrowsInIcon}
 		label={messages.ganttChartFitProject}
 		disabled={chart.disabled}
-		onClick={() => chart.fitProject()}
+		onclick={() => chart.fitProject()}
 	/>
 {/snippet}
 
@@ -151,7 +151,7 @@
 		color={chart.color}
 		prefix={calendarIcon}
 		disabled={chart.disabled}
-		onClick={() => chart.scrollToDate(new Date())}
+		onclick={() => chart.scrollToDate(new Date())}
 	>
 		{messages.ganttChartToday}
 	</Button>
@@ -172,8 +172,8 @@
 			size={chart.size}
 			density={chart.density}
 			disabled={chart.disabled}
-			attrs={{ 'aria-label': messages.ganttChartZoomLevel }}
-			onChange={(zoom) => chart.setZoom(zoom as GanttZoomLevel)}
+			triggerAttrs={{ 'aria-label': messages.ganttChartZoomLevel }}
+			onValueChange={(zoom) => chart.setZoom(zoom as GanttZoomLevel)}
 		/>
 	</div>
 {/snippet}

@@ -5,7 +5,7 @@ import {
 	type InferComponentTheme
 } from '$lib/utils/cva/index.js';
 const defaultRoot = cva({
-	base: 'group/message flex w-full min-w-0 gap-3',
+	base: 'group/message flex w-full min-w-0 gap-lg',
 	variants: {
 		role: {
 			user: 'justify-end',
@@ -14,9 +14,9 @@ const defaultRoot = cva({
 			tool: 'justify-start'
 		},
 		size: {
-			small: 'py-1.5',
-			normal: 'py-2',
-			large: 'py-2.5'
+			small: 'py-sm',
+			normal: 'py-md',
+			large: 'py-md'
 		}
 	},
 	defaultVariants: { role: 'assistant', size: 'normal' }
@@ -31,9 +31,9 @@ const defaultBody = cva({
 			tool: 'w-full max-w-full items-start'
 		},
 		size: {
-			small: 'gap-0.5',
-			normal: 'gap-1',
-			large: 'gap-1.5'
+			small: 'gap-micro',
+			normal: 'gap-xs',
+			large: 'gap-sm'
 		},
 		variant: {
 			bubble: null,
@@ -50,7 +50,7 @@ const defaultBody = cva({
 	defaultVariants: { role: 'assistant', size: 'normal', variant: 'bubble' }
 });
 const defaultHeader = cva({
-	base: 'px-1 font-medium text-neutral/55',
+	base: 'px-xs font-medium text-neutral/55',
 	variants: {
 		size: {
 			small: 'text-[0.6875rem]',
@@ -64,16 +64,16 @@ const defaultBubble = cva({
 	base: 'min-w-0 max-w-full break-words [&_*:first-child]:mt-0 [&_*:last-child]:mb-0',
 	variants: {
 		role: {
-			user: 'rounded-2xl rounded-br-md',
-			assistant: 'rounded-2xl rounded-bl-md bg-neutral-muted text-neutral',
+			user: 'rounded-lg rounded-br-sm',
+			assistant: 'rounded-lg rounded-bl-sm bg-neutral-muted text-neutral',
 			system:
-				'rounded-md border border-neutral-muted bg-surface text-neutral/70 [&_*]:!text-neutral/70',
-			tool: 'w-full max-w-none rounded-2xl rounded-bl-md bg-neutral-muted text-neutral'
+				'rounded-sm border border-neutral-muted bg-surface text-neutral/70 [&_*]:!text-neutral/70',
+			tool: 'w-full max-w-none rounded-lg rounded-bl-sm bg-neutral-muted text-neutral'
 		},
 		size: {
-			small: 'px-3 py-2 text-xs leading-normal',
-			normal: 'px-4 py-2.5 text-sm leading-relaxed',
-			large: 'px-5 py-3 text-base leading-relaxed'
+			small: 'px-lg py-md text-xs leading-normal',
+			normal: 'px-xl py-md text-sm leading-relaxed',
+			large: 'px-layout-sm py-lg text-base leading-relaxed'
 		},
 		variant: {
 			bubble: null,
@@ -92,9 +92,9 @@ const defaultBubble = cva({
 			variant: 'minimal',
 			class: 'bg-neutral-muted text-neutral [&_*]:!text-neutral [&_code]:!bg-neutral/10'
 		},
-		{ role: 'system', size: 'small', class: 'px-2.5 py-1 !text-[0.6875rem]' },
-		{ role: 'system', size: 'normal', class: 'px-3 py-1.5 !text-xs' },
-		{ role: 'system', size: 'large', class: 'px-4 py-2 !text-sm' },
+		{ role: 'system', size: 'small', class: 'px-md py-xs !text-[0.6875rem]' },
+		{ role: 'system', size: 'normal', class: 'px-lg py-sm !text-xs' },
+		{ role: 'system', size: 'large', class: 'px-xl py-md !text-sm' },
 		{
 			role: ['assistant', 'tool'],
 			variant: 'minimal',

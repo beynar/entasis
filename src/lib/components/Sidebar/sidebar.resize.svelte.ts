@@ -293,7 +293,7 @@ export class SidebarResizeState {
 
 	private commitWidth(isUserInteraction: boolean) {
 		const width = this.width;
-		this.resizeOptions?.onWidthChanged?.(width, { isUserInteraction });
+		this.resizeOptions?.onWidthChanged?.({ width, isUserInteraction });
 		this.writeStoredWidth();
 	}
 

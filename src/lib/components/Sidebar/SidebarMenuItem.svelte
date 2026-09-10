@@ -45,6 +45,9 @@
 	let submenuRef = $state<HTMLUListElement | null>(null);
 	let actionRef = $state<HTMLElement | null>(null);
 	const classes = $derived(useSidebarTheme(theme));
+	const menuSize = $derived(
+		item.size ? ({ small: 'sm', normal: 'default', large: 'lg' } as const)[item.size] : undefined
+	);
 	const t = $derived(useI18n());
 	const isOpen = $derived(open ?? item.defaultOpen ?? false);
 	const isIconCollapsed = $derived(api.displayState === 'collapsed' && !api.isMobile);
@@ -73,6 +76,15 @@
 		if (item.disabled) return;
 		open = !isOpen;
 	}
+
+	function handleClick(event: MouseEvent) {
+		if (item.disabled) {
+			event.preventDefault();
+			event.stopPropagation();
+			return;
+		}
+		item.onclick?.(event);
+	}
 </script>
 
 {#snippet entryContent()}
@@ -99,12 +111,14 @@
 
 {#snippet leafButton()}
 	{#if item.href}
+		<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs; library links cannot depend on SvelteKit routing. -->
 		<a
 			bind:this={rowRef}
-			href={item.href}
+			href={item.disabled ? undefined : item.href}
+			role={item.disabled ? 'link' : undefined}
 			data-slot="sidebar-menu-button"
 			data-sidebar="menu-button"
-			data-size={item.size ?? 'default'}
+			data-size={item.size ?? 'normal'}
 			data-active={item.isActive ? 'true' : undefined}
 			aria-current={item.isActive ? 'page' : undefined}
 			aria-disabled={item.disabled || undefined}
@@ -113,21 +127,22 @@
 				variant: item.variant,
 				componentSize: size,
 				density,
-				size: item.size,
+				size: menuSize,
 				className: item.class
 			})}
 			{@attach tooltipContent ? tooltip({ content: tooltipContent, position: 'right' }) : undefined}
-			onclick={item.onClick}
+			onclick={handleClick}
 		>
 			{@render entryContent()}
 		</a>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	{:else}
 		<button
 			bind:this={rowRef}
 			type="button"
 			data-slot="sidebar-menu-button"
 			data-sidebar="menu-button"
-			data-size={item.size ?? 'default'}
+			data-size={item.size ?? 'normal'}
 			data-active={item.isActive ? 'true' : undefined}
 			aria-current={item.isActive ? 'page' : undefined}
 			disabled={item.disabled || undefined}
@@ -135,11 +150,11 @@
 				variant: item.variant,
 				componentSize: size,
 				density,
-				size: item.size,
+				size: menuSize,
 				className: item.class
 			})}
 			{@attach tooltipContent ? tooltip({ content: tooltipContent, position: 'right' }) : undefined}
-			onclick={item.onClick}
+			onclick={handleClick}
 		>
 			{@render entryContent()}
 		</button>
@@ -158,13 +173,13 @@
 				type="button"
 				data-slot="sidebar-menu-button"
 				data-sidebar="menu-button"
-				data-size={item.size ?? 'default'}
+				data-size={item.size ?? 'normal'}
 				disabled={item.disabled || undefined}
 				class={classes.menuButton({
 					variant: item.variant,
 					componentSize: size,
 					density,
-					size: item.size,
+					size: menuSize,
 					className: ['aria-expanded:bg-neutral-muted', item.class]
 				})}
 				aria-expanded={popover.isOpen}
@@ -219,6 +234,7 @@
 					data-open={isOpen ? 'true' : undefined}
 					aria-label={`${t.toggle} ${t.submenu}`}
 					aria-expanded={showSubmenu}
+					disabled={item.disabled || undefined}
 					onclick={toggleSubmenu}
 				>
 					<SidebarIcon icon={caretRightIcon} />
@@ -229,14 +245,14 @@
 					type="button"
 					data-slot="sidebar-menu-button"
 					data-sidebar="menu-button"
-					data-size={item.size ?? 'default'}
+					data-size={item.size ?? 'normal'}
 					data-active={item.isActive ? 'true' : undefined}
 					disabled={item.disabled || undefined}
 					class={classes.menuButton({
 						variant: item.variant,
 						componentSize: size,
 						density,
-						size: item.size,
+						size: menuSize,
 						className: item.class
 					})}
 					aria-expanded={showSubmenu}

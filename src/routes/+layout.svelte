@@ -97,7 +97,7 @@
 	let appShellRef = $state<HTMLElement | null>(null);
 	const pageScrollPositions = new Map<string, number>();
 
-	const sidebarGroups = $derived(getSidebarGroups(page.route.id));
+	const sidebarGroups = $derived(getSidebarGroups(page.url.pathname));
 	const sidebarState = $derived<SidebarFooterState>(
 		sidebarDisplayState === 'collapsed' ? 'icon' : sidebarDisplayState
 	);
@@ -211,14 +211,14 @@
 		headerButton: {
 			icon: commandIcon,
 			title: 'Svelai',
-			subtitle: 'Components'
+			subtitle: page.url.pathname.startsWith('/blocks') ? 'Blocks' : 'Components'
 		},
 		footer: sidebarFooter
 	});
 </script>
 
 {#snippet headerLink({ href, text }: { href: string; text: string })}
-	{@const isActive = page.route.id === href}
+	{@const isActive = page.url.pathname === href || page.url.pathname.startsWith(`${href}/`)}
 	<a
 		{href}
 		class="state-layer rounded-md px-2 py-1 text-sm font-medium text-neutral transition-colors hover:text-neutral {isActive
@@ -238,7 +238,7 @@
 					<Button
 						variant={sidebarVariant === variant ? 'solid' : 'ghost'}
 						size="small"
-						onClick={() => (sidebarVariant = variant)}
+						onclick={() => (sidebarVariant = variant)}
 					>
 						{variant}
 					</Button>
@@ -253,7 +253,7 @@
 					<Button
 						variant={sidebarState === state ? 'solid' : 'ghost'}
 						size="small"
-						onClick={() => setSidebarState(state)}
+						onclick={() => setSidebarState(state)}
 					>
 						{state}
 					</Button>
@@ -285,7 +285,7 @@
 							size="small"
 							squared
 							class="md:hidden"
-							onClick={() => sidebar.toggle()}
+							onclick={() => sidebar.toggle()}
 						/>
 						<nav aria-label="Primary" class="flex min-w-0 flex-wrap items-center gap-1">
 							{#each headerLinks as link}
@@ -296,7 +296,7 @@
 					<Button
 						variant="outline"
 						size="small"
-						onClick={() => (theme.theme = theme.resolvedTheme === 'dark' ? 'light' : 'dark')}
+						onclick={() => (theme.theme = theme.resolvedTheme === 'dark' ? 'light' : 'dark')}
 					>
 						{theme.resolvedTheme === 'dark' ? 'Light' : 'Dark'}
 					</Button>

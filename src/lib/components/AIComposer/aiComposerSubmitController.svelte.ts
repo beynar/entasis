@@ -21,7 +21,6 @@ type AIComposerSubmitControllerOptions = {
 	buildMeta: () => AIComposerSubmitMeta;
 	clearDraft: () => void;
 	onSubmit: AIComposerProps['onSubmit'];
-	onSubmitMessage: AIComposerProps['onSubmitMessage'];
 	onStop: AIComposerProps['onStop'];
 };
 
@@ -88,11 +87,6 @@ export class AIComposerSubmitController {
 		const detail: AIComposerSubmitDetail = { ...meta, event, steered: false };
 		if (options.onSubmit) {
 			await options.onSubmit(detail);
-			return false;
-		}
-		if (options.onSubmitMessage) {
-			if (!event) throw new Error('AIComposer submit events must include their originating event.');
-			await options.onSubmitMessage(meta.markdown, event, meta);
 			return false;
 		}
 		if (!options.conversation) {

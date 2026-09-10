@@ -158,9 +158,7 @@
 		if (askState.hasFailure) {
 			askState.reject(askState.failure);
 		} else {
-			askState.resolve(
-				askState.outcome ?? { submitted: false, value: { ...askState.value } }
-			);
+			askState.resolve(askState.outcome ?? { submitted: false, value: { ...askState.value } });
 		}
 
 		asks = asks.filter((candidate) => candidate.id !== askState.id);
@@ -202,10 +200,10 @@
 			header: { base: '-mx-4 px-4' },
 			footer: { base: 'border-neutral-muted -mx-4 mt-2 border-t px-4 pt-3' }
 		}}
-		onOpen={(dialog) => {
+		onAfterOpen={(dialog) => {
 			if (dialog.isTop) focusFirstControl(askState);
 		}}
-		onClose={() => finishClose(askState)}
+		onAfterClose={() => finishClose(askState)}
 	>
 		<Form
 			inputs={askState.options.inputs}
@@ -227,9 +225,12 @@
 					{...cancelButton.props}
 					type="button"
 					size={cancelButton.size ?? askState.options.size}
-					disabled={!askState.open || !askState.form || askState.form.loading || cancelButton.disabled}
+					disabled={!askState.open ||
+						!askState.form ||
+						askState.form.loading ||
+						cancelButton.disabled}
 					bind:ref={askState.cancelButton}
-					onClick={() => cancelAsk(askState)}
+					onclick={() => cancelAsk(askState)}
 				>
 					{cancelButton.text}
 				</Button>
@@ -238,9 +239,12 @@
 					type="button"
 					size={confirmButton.size ?? askState.options.size}
 					loading={askState.form?.loading ?? false}
-					disabled={!askState.open || !askState.form || askState.form.loading || confirmButton.disabled}
+					disabled={!askState.open ||
+						!askState.form ||
+						askState.form.loading ||
+						confirmButton.disabled}
 					bind:ref={askState.confirmButton}
-					onClick={() => void submitAsk(askState)}
+					onclick={() => void submitAsk(askState)}
 				>
 					{confirmButton.text}
 				</Button>

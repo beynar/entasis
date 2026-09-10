@@ -31,8 +31,8 @@ Lifecycle:
     sandboxUrl: 'https://sandbox.example.com/mcp',
     permissionPolicy: { allowedPermissions: [] },
     appToolPolicy: { allowedTools: ['refresh-weather'] },
-    onAppToolCall: (params, sourceTool, extra) =>
-      runConversationTool(params, sourceTool, { signal: extra.signal })
+    onAppToolCall: ({ params, tool, extra }) =>
+      runConversationTool(params, tool, { signal: extra.signal })
   }}
 />
 \`\`\`

@@ -24,6 +24,7 @@ HoverCard previews supplemental content when a trigger is hovered or focused. It
 ### Core Props
 - **id**: string - Stable id for the underlying popover root.
 - **open**: boolean - Bindable open state.
+- **defaultOpen**: boolean (default: false) - Initial state when open is not provided.
 - **trigger**: string | Snippet<[HoverCardPayload]> | ButtonProps - Trigger content. ButtonProps render a Svelai Button.
 - **content**: string | Snippet<[HoverCardPayload]> - Main card content. Alias for children.
 - **children**: string | Snippet<[HoverCardPayload]> - Main card content.
@@ -60,8 +61,9 @@ HoverCard previews supplemental content when a trigger is hovered or focused. It
 - **popoverTheme**: PopoverThemeProps - Theme overrides for the underlying Popover.
 
 ### Callbacks
-- **onOpen**: (hoverCard: HoverCardPayload) => void - Called after the open transition finishes.
-- **onClose**: (hoverCard: HoverCardPayload) => void - Called after the close transition finishes.
+- **onOpenChange**: (open: boolean) => void - Called once for each library-requested state change.
+- **onAfterOpen**: (hoverCard: HoverCardPayload) => void - Called after the open transition finishes.
+- **onAfterClose**: (hoverCard: HoverCardPayload) => void - Called after the close transition finishes.
 
 ## Examples
 

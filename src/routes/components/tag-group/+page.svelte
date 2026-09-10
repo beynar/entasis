@@ -6,7 +6,9 @@
 	import { TagGroup } from '$lib/components/Form/TagGroup/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
 
 	const categoryItems = [
 		{ value: 'news', label: 'News' },
@@ -26,6 +28,30 @@
 	let category = $state('travel');
 	let interests = $state<string[]>(['news', 'gaming']);
 	let featured = $state('gaming');
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -41,8 +67,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A single selectable tag group."
 		code={`<TagGroup
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Category"
 	bind:value={category}
 	items={[
@@ -54,7 +85,15 @@
 />`}
 	>
 		<div class="w-full max-w-md">
-			<TagGroup label="Category" bind:value={category} items={categoryItems} />
+			<TagGroup
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
+				label="Category"
+				bind:value={category}
+				items={categoryItems}
+			/>
 			<p class="text-neutral/60 mt-4 text-sm">Selected: {category || 'none'}</p>
 		</div>
 	</ComponentCard>
@@ -79,7 +118,7 @@
 				class="bg-neutral text-neutral-contrast flex min-h-48 w-full items-center justify-center rounded border border-neutral/15 p-8"
 			>
 				<TagGroup
-					attrs={{ 'aria-label': 'Featured category' }}
+					fieldAttrs={{ 'aria-label': 'Featured category' }}
 					bind:value={featured}
 					items={categoryItemsWithIcons}
 					color="neutral"

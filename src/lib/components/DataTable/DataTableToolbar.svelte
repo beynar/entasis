@@ -83,7 +83,7 @@
 				disabled:
 					model.props.disabled ||
 					(visibleCount <= 1 && model.state.columnVisibility[column.id] !== false),
-				onClick: () => column.toggleVisibility()
+				onclick: () => column.toggleVisibility()
 			};
 		});
 	});
@@ -142,7 +142,7 @@
 					placeholder={searchConfig.placeholder ?? 'Search rows'}
 					value={searchValue}
 					disabled={model.props.disabled}
-					onChange={updateSearch}
+					onValueChange={(value) => updateSearch(value ?? '')}
 				/>
 			{/if}
 
@@ -159,7 +159,7 @@
 					color="neutral"
 					size="small"
 					disabled={model.props.disabled}
-					onClick={() => model.clearFilters()}
+					onclick={() => model.clearFilters()}
 				>
 					Clear filters
 				</Button>

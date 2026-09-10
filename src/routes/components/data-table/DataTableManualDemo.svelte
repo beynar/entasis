@@ -9,8 +9,8 @@
 
 	const source = createPeople(247);
 	const columns: DataTableColumn<Person>[] = [
-		{ id: 'name', accessor: 'name', header: 'Name', sortable: true, size: 220 },
-		{ id: 'email', accessor: 'email', header: 'Email', sortable: true, size: 280 },
+		{ id: 'name', accessor: 'name', header: 'Name', sortable: true, width: 220 },
+		{ id: 'email', accessor: 'email', header: 'Email', sortable: true, width: 280 },
 		{
 			id: 'department',
 			accessor: 'department',
@@ -21,7 +21,7 @@
 				options: departments.map((department) => ({ value: department, label: department }))
 			}
 		},
-		{ id: 'status', accessor: 'status', header: 'Status', sortable: true, size: 140 }
+		{ id: 'status', accessor: 'status', header: 'Status', sortable: true, width: 140 }
 	];
 
 	let tableState = $state(createDataTableState(columns, { pagination: { page: 1, pageSize: 25 } }));

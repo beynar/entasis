@@ -1,6 +1,6 @@
 <script lang="ts" generics="TMessage extends AIThreadItem = AIThreadItem">
+	import { aiThreadTocPreviewFileTheme } from './aiThreadTocPreview.file.theme.js';
 	import AIFilePreview from '../AIFilePreview/AIFilePreview.svelte';
-	import type { AIFilePreviewThemeProps } from '../AIFilePreview/aiFilePreview.theme.js';
 	import Slot from '../Slot/Slot.svelte';
 	import type {
 		AIFileSource,
@@ -20,15 +20,6 @@
 	type PreviewFile = {
 		file: AIFileSource;
 	};
-
-	const COMPACT_FILE_THEME = {
-		preview: { base: 'size-4 rounded-sm' },
-		fallback: { base: 'size-4 bg-transparent text-neutral/45' },
-		content: { base: 'min-w-0' },
-		name: { base: 'text-xs font-normal text-neutral/55' },
-		meta: { base: 'hidden' },
-		error: { base: 'hidden' }
-	} satisfies AIFilePreviewThemeProps;
 
 	let { entry, preview, title, excerpt, metadata, icon, theme }: Props = $props();
 
@@ -83,7 +74,7 @@
 						<AIFilePreview
 							file={previewFile.file}
 							class="min-w-0 max-w-36 gap-1.5 border-0 bg-transparent p-0"
-							theme={COMPACT_FILE_THEME}
+							theme={aiThreadTocPreviewFileTheme}
 						/>
 					</div>
 				{/each}

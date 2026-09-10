@@ -81,7 +81,7 @@ export type AIAskUserQuestionQuestionState = {
 
 export type AIAskUserQuestionState = {
 	questions: readonly AIAskQuestion[];
-	values: AIAskAnswers;
+	value: AIAskAnswers;
 	activeIndex: number;
 	activeQuestion: AIAskQuestion | undefined;
 	error: string | undefined;
@@ -104,9 +104,9 @@ export type AIAskUserQuestionProps = WithAttachments<
 		/** Ordered questions rendered as steps. */
 		questions: readonly AIAskQuestion[];
 		/** Bindable answers keyed by question id. */
-		values?: AIAskAnswers;
-		/** Svelte Pro-compatible alias for `values`. `values` takes precedence when both are set. */
 		value?: AIAskAnswers;
+		/** Initial answers used only when value is omitted. Later changes do not reset answers. */
+		defaultValue?: AIAskAnswers;
 		/** Bindable active question index. */
 		activeIndex?: number;
 		/** Automatically advances after a single-choice answer. Takes precedence over `autoAdvanceSingle`. */
@@ -151,8 +151,8 @@ export type AIAskUserQuestionProps = WithAttachments<
 		onSubmit?: (detail: AIAskUserQuestionSubmitDetail) => void | Promise<void>;
 		/** Called by the optional discard action. */
 		onDiscard?: () => void | Promise<void>;
-		/** Called after an answer changes. */
-		onChange?: (values: AIAskAnswers, question: AIAskQuestion) => void;
+		/** Called once with the complete answer map after a user changes an answer. */
+		onValueChange?: (value: AIAskAnswers) => void;
 		/** Replaces the default question-step region while retaining the header and footer. */
 		children?: Slot<AIAskUserQuestionState>;
 		/** Custom header receiving navigation and submission state. */

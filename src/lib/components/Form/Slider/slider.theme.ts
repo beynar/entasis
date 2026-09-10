@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 
 const defaultInputContainer = cva({
-	base: 'w-full rounded text-neutral transition-all flex items-center gap-3',
+	base: 'w-full rounded-sm text-neutral transition-all flex items-center gap-lg',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -21,16 +21,16 @@ const defaultInputContainer = cva({
 });
 
 const defaultRoot = cva({
-	base: 'grid w-full gap-2',
+	base: 'grid w-full gap-md',
 	variants: {
 		orientation: {
 			horizontal: '',
 			vertical: 'w-auto justify-items-center'
 		},
 		size: {
-			small: 'gap-1.5',
-			normal: 'gap-2',
-			large: 'gap-2.5'
+			small: 'gap-sm',
+			normal: 'gap-md',
+			large: 'gap-md'
 		}
 	},
 	defaultVariants: {
@@ -40,7 +40,7 @@ const defaultRoot = cva({
 });
 
 const defaultControl = cva({
-	base: 'flex w-full gap-3',
+	base: 'flex w-full gap-lg',
 	variants: {
 		orientation: {
 			horizontal: 'items-center',
@@ -125,7 +125,7 @@ const defaultTrack = cva({
 		variant: {
 			default: '',
 			thick: '',
-			contained: 'border-neutral-muted bg-surface-raised rounded-lg border'
+			contained: 'border-neutral-muted bg-surface-raised rounded-md border'
 		}
 	},
 	defaultVariants: {
@@ -380,7 +380,7 @@ const defaultThumbVisual = cva({
 });
 
 const defaultValueLabels = cva({
-	base: 'flex shrink-0 gap-1',
+	base: 'flex shrink-0 gap-xs',
 	variants: {
 		orientation: {
 			horizontal: 'flex-wrap items-center',
@@ -408,7 +408,7 @@ const defaultValueLabels = cva({
 		marks: false
 	},
 	compoundVariants: [
-		{ orientation: 'horizontal', marks: true, variant: 'default', class: 'mt-1 -translate-y-1/2' },
+		{ orientation: 'horizontal', marks: true, variant: 'default', class: 'mt-xs -translate-y-1/2' },
 		{
 			orientation: 'horizontal',
 			variant: 'contained',
@@ -432,21 +432,21 @@ const defaultValueLabels = cva({
 			marks: true,
 			variant: 'thick',
 			size: 'small',
-			class: 'mt-2 -translate-y-1/2'
+			class: 'mt-md -translate-y-1/2'
 		},
 		{
 			orientation: 'horizontal',
 			marks: true,
 			variant: 'thick',
 			size: 'normal',
-			class: 'mt-2.5 -translate-y-1/2'
+			class: 'mt-md -translate-y-1/2'
 		},
 		{
 			orientation: 'horizontal',
 			marks: true,
 			variant: 'thick',
 			size: 'large',
-			class: 'mt-3 -translate-y-1/2'
+			class: 'mt-lg -translate-y-1/2'
 		}
 	]
 });
@@ -459,9 +459,9 @@ const defaultValueLabel = cva({
 			vertical: ''
 		},
 		size: {
-			small: 'min-w-8 px-2 py-1 text-xs',
-			normal: 'min-w-10 px-2.5 py-1 text-xs',
-			large: 'min-w-12 px-3 py-1.5 text-sm'
+			small: 'min-w-8 px-md py-xs text-xs',
+			normal: 'min-w-10 px-md py-xs text-xs',
+			large: 'min-w-12 px-lg py-sm text-sm'
 		},
 		variant: {
 			default: '',
@@ -500,12 +500,12 @@ const defaultContainedLabel = cva({
 	base: 'text-neutral/60 pointer-events-none absolute top-0 left-0 z-30 flex max-w-[55%] min-w-0 items-center truncate font-medium',
 	variants: {
 		size: {
-			small: 'h-8 pl-3 text-xs',
-			normal: 'h-10 pl-4 text-sm',
-			large: 'h-12 pl-5 text-base'
+			small: 'h-8 pl-lg text-xs',
+			normal: 'h-10 pl-xl text-sm',
+			large: 'h-12 pl-layout-sm text-base'
 		},
 		required: {
-			true: "after:text-danger-readable after:ml-1 after:content-['*']",
+			true: "after:text-danger-readable after:ml-xs after:content-['*']",
 			false: ''
 		},
 		hasError: {
@@ -564,8 +564,8 @@ const defaultMarks = cva({
 	base: 'relative',
 	variants: {
 		orientation: {
-			horizontal: 'mt-1.5 h-5 w-full',
-			vertical: 'absolute inset-y-0 left-full ml-3 w-16'
+			horizontal: 'mt-sm h-5 w-full',
+			vertical: 'absolute inset-y-0 left-full ml-lg w-16'
 		},
 		size: {
 			small: 'text-xs',
@@ -583,8 +583,8 @@ const defaultMark = cva({
 	base: 'absolute flex text-center',
 	variants: {
 		orientation: {
-			horizontal: 'top-0 -translate-x-1/2 flex-col items-center gap-1',
-			vertical: 'left-0 -translate-y-1/2 items-center gap-2'
+			horizontal: 'top-0 -translate-x-1/2 flex-col items-center gap-xs',
+			vertical: 'left-0 -translate-y-1/2 items-center gap-md'
 		}
 	},
 	defaultVariants: {

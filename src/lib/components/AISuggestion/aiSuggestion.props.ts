@@ -15,8 +15,7 @@ export type SuggestionProps = Omit<
 	ButtonProps,
 	| 'ref'
 	| 'children'
-	| 'onClick'
-	| 'payload'
+	| 'onclick'
 	| 'class'
 	| 'theme'
 	| 'href'
@@ -37,8 +36,6 @@ export type SuggestionProps = Omit<
 		children?: Slot;
 		/** Called with the suggestion value when selected. */
 		onSelect?: (suggestion: string) => void;
-		/** Svelte Pro-compatible alias for `onSelect`. Both callbacks run when provided. */
-		onclick?: (suggestion: string) => void;
 		/** Class applied to the suggestion button. */
 		class?: string;
 		/** Theme overrides shared by `Suggestion` and `Suggestions`. */
@@ -67,6 +64,10 @@ export type SuggestionsProps = Omit<
 		suggestions: readonly string[];
 		/** Bindable selected suggestion. */
 		value?: string;
+		/** Initial selected suggestion when value is omitted. */
+		defaultValue?: string;
+		/** Called once for each library-originated change to the selected suggestion. */
+		onValueChange?: (value: string) => void;
 		/** Disables every suggestion. */
 		disabled?: boolean;
 		/** Button treatment applied to the built-in suggestion items. */
@@ -76,7 +77,7 @@ export type SuggestionsProps = Omit<
 		/** Custom suggestion renderer with selection state and action. */
 		suggestion?: Slot<SuggestionRenderPayload>;
 		/** Called after a suggestion is selected. */
-		onSuggestionClick?: (suggestion: string) => void;
+		onSuggestionSelect?: (suggestion: string) => void;
 		/** Class applied to the root scroll area. */
 		class?: string;
 		/** Theme overrides shared by `Suggestion` and `Suggestions`. */

@@ -1,0 +1,65 @@
+<script lang="ts">
+	import { Button } from 'svelai/button';
+	import { Heading } from 'svelai/heading';
+	import { Separator } from 'svelai/separator';
+	import { arrowsOutIcon } from 'svelai/icons/arrowsOut';
+	import { checkCircleIcon } from 'svelai/icons/checkCircle';
+	import { cursorClickIcon } from 'svelai/icons/cursorClick';
+	import { paletteIcon } from 'svelai/icons/palette';
+	import { puzzlePieceIcon } from 'svelai/icons/puzzlePiece';
+	import { textAlignLeftIcon } from 'svelai/icons/textAlignLeft';
+	const features = [
+		{
+			title: 'A familiar rhythm',
+			description: 'Spacing and type that make a screen easier to scan.',
+			icon: textAlignLeftIcon
+		},
+		{
+			title: 'Useful feedback',
+			description: 'Clear states for the moments between an action and its result.',
+			icon: checkCircleIcon
+		},
+		{
+			title: 'Room to adapt',
+			description: 'A composition that grows with your actual content.',
+			icon: arrowsOutIcon
+		},
+		{
+			title: 'Meaningful color',
+			description: 'Colors that communicate purpose and follow your theme.',
+			icon: paletteIcon
+		},
+		{
+			title: 'A clear next step',
+			description: 'Controls that make the available actions easy to find.',
+			icon: cursorClickIcon
+		},
+		{
+			title: 'A shared foundation',
+			description: 'Reusable patterns that keep your product coherent.',
+			icon: puzzlePieceIcon
+		}
+	];
+</script>
+
+<section class="flex flex-col gap-xl p-lg md:p-xl">
+	<div class="flex flex-wrap items-end justify-between gap-xl">
+		<div class="max-w-xl">
+			<Heading as="h2" size="h2" weight="bold">The details that make a product feel right.</Heading>
+			<p class="mt-lg text-neutral/70">
+				A small collection of thoughtful choices, carried through the whole experience.
+			</p>
+		</div>
+		<Button href="/components" variant="outline">Explore every component</Button>
+	</div>
+	<Separator />
+	<div class="grid gap-xl sm:grid-cols-2 lg:grid-cols-3">
+		{#each features as feature (feature.title)}<div class="flex flex-col items-start gap-lg">
+				<div class="rounded-lg bg-primary-muted p-md text-primary">
+					{@render feature.icon({ size: 26 })}
+				</div>
+				<Heading as="h3" size="h4">{feature.title}</Heading>
+				<p class="text-sm text-neutral/70">{feature.description}</p>
+			</div>{/each}
+	</div>
+</section>

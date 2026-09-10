@@ -7,4 +7,3 @@ export {
 	type NumberInputTheme,
 	type NumberInputThemeProps
 } from './numberInput.theme.js';
-

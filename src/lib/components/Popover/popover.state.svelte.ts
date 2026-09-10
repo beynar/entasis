@@ -28,8 +28,7 @@ interface PopoverOptions extends MakeRequired<
 		| 'size'
 		| 'position'
 		| 'transition'
-		| 'onClose'
-		| 'onOpen'
+		| 'onOpenChange'
 		| 'offset'
 		| 'directedTransition'
 		| 'closeOnEscape'
@@ -203,14 +202,20 @@ export class PopoverState {
 	}
 
 	toggle = () => {
-		this.isOpen = !this.isOpen;
+		this.setOpen(!this.isOpen);
 	};
 	open = () => {
-		this.isOpen = true;
+		this.setOpen(true);
 	};
 
 	close = () => {
-		this.isOpen = false;
+		this.setOpen(false);
+	};
+
+	setOpen = (nextOpen: boolean) => {
+		if (this.isOpen === nextOpen) return;
+		this.isOpen = nextOpen;
+		this.onOpenChange?.(nextOpen);
 	};
 
 	applyDirectedTransition = (node: HTMLElement, placement: Placement) => {

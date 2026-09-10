@@ -5,7 +5,8 @@
 	export const useCalendarTheme = useComponentTheme('calendar', calendarTheme);
 </script>
 
-<script lang="ts">
+<script lang="ts" generics="T extends CalendarType, CalendarEvent extends Event">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { transitionSize } from '$lib/attachments/transitionSize.js';
 	import { useResizeObserver } from '$lib/utils/useResizeObserver.svelte.js';
 	import { cubicOut } from 'svelte/easing';
@@ -18,11 +19,13 @@
 	import Chip from '$lib/components/Chip/Chip.svelte';
 	import CalendarMonthYearPicker from './CalendarMonthYearPicker.svelte';
 
-	type T = $$Generic<CalendarType>;
-	type CalendarEvent = $$Generic<Event>;
 	let {
 		type,
 		events,
+		defaultValue = (type === 'calendar-multiple' ? [] : null) as CalendarPrimitiveProps<
+			CalendarEvent,
+			T
+		>['value'],
 		value = $bindable(),
 		disabledDates = [],
 		view = 'single',
@@ -44,10 +47,17 @@
 			color: 'danger',
 			class: ''
 		},
-		onChange,
+		onValueChange,
 		onViewChange,
 		theme
 	}: CalendarPrimitiveProps<CalendarEvent, T> = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(nextValue) => {
+			value = nextValue;
+		},
+		() => defaultValue
+	);
 
 	let rootElement = $state<HTMLElement | null>(null);
 	let viewTriggerElement = $state<HTMLElement | null>(null);
@@ -121,14 +131,14 @@
 		get locale() {
 			return locale;
 		},
-		get onChange() {
-			return onChange;
+		get onValueChange() {
+			return onValueChange;
 		},
 		get value() {
-			return value;
+			return valueState.value;
 		},
 		set value(nextValue) {
-			value = nextValue;
+			valueState.value = nextValue;
 		}
 	});
 	let previousMonthIndex = calendar.currentYear * 12 + calendar.currentMonth;
@@ -247,7 +257,7 @@
 				disabled={disabled ||
 					buttonProps.prev.disabled ||
 					!calendar.canGoToMonth(calendar.currentYear, calendar.currentMonth - 1)}
-				onClick={() => handleMonthChange(-1)}
+				onclick={() => handleMonthChange(-1)}
 			>
 				{@render caretRightIcon()}
 			</Button>
@@ -263,7 +273,7 @@
 			label={`${activeView === 'picker' ? 'Show days for' : 'Choose month and year, currently'} ${calendar.displayedMonthLabel}`}
 			aria-expanded={activeView === 'picker'}
 			aria-controls={pickerId}
-			onClick={toggleActiveView}
+			onclick={toggleActiveView}
 		>
 			<span aria-live="polite">{calendar.displayedMonthLabel}</span>
 		</Button>
@@ -278,7 +288,7 @@
 				disabled={disabled ||
 					buttonProps.next.disabled ||
 					!calendar.canGoToMonth(calendar.currentYear, calendar.currentMonth + 1)}
-				onClick={() => handleMonthChange(1)}
+				onclick={() => handleMonthChange(1)}
 			>
 				{@render caretRightIcon()}
 			</Button>
@@ -327,7 +337,7 @@
 		aria-label={month.toLocaleDateString(locale, { month: 'long', year: 'numeric' })}
 	>
 		<div role="row" class="contents">
-			{#each Array(7) as _, dayIndex}
+			{#each [0, 1, 2, 3, 4, 5, 6] as dayIndex (dayIndex)}
 				{@const weekDay = (calendar.resolvedWeekStartsOn + dayIndex) % 7}
 				<span
 					role="columnheader"
@@ -343,7 +353,7 @@
 			{/each}
 		</div>
 
-		{#each rows as row}
+		{#each rows as row (getCalendarDateKey(row.cells[0].date))}
 			<div role="row" class="contents">
 				{#each row.cells as cell, columnIndex (getCalendarDateKey(cell.date))}
 					{#if cell.visible}

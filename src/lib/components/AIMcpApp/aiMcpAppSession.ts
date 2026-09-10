@@ -242,7 +242,10 @@ function registerBridgeHandlers(session: AIMcpAppSession): void {
 				session.host.messageModalities ?? { text: {} },
 				'message'
 			);
-			return session.clonePayload(await handler(safeParams, session.tool, extra), 'message result');
+			return session.clonePayload(
+				await handler({ params: safeParams, tool: session.tool, extra }),
+				'message result'
+			);
 		};
 	}
 	if (session.host.onOpenLink) {
@@ -250,7 +253,11 @@ function registerBridgeHandlers(session: AIMcpAppSession): void {
 			const handler = session.host.onOpenLink;
 			if (!handler) throw new Error('MCP App link handling is no longer available.');
 			return session.clonePayload(
-				await handler(session.clonePayload(params, 'open-link params'), session.tool, extra),
+				await handler({
+					params: session.clonePayload(params, 'open-link params'),
+					tool: session.tool,
+					extra
+				}),
 				'open-link result'
 			);
 		};
@@ -260,7 +267,11 @@ function registerBridgeHandlers(session: AIMcpAppSession): void {
 			const handler = session.host.onDownloadFile;
 			if (!handler) throw new Error('MCP App download handling is no longer available.');
 			return session.clonePayload(
-				await handler(session.clonePayload(params, 'download params'), session.tool, extra),
+				await handler({
+					params: session.clonePayload(params, 'download params'),
+					tool: session.tool,
+					extra
+				}),
 				'download result'
 			);
 		};
@@ -276,7 +287,7 @@ function registerBridgeHandlers(session: AIMcpAppSession): void {
 				session.host.modelContextModalities ?? { text: {} },
 				'model context'
 			);
-			await handler(safeParams, session.tool, extra);
+			await handler({ params: safeParams, tool: session.tool, extra });
 			return {};
 		};
 	}
@@ -284,7 +295,7 @@ function registerBridgeHandlers(session: AIMcpAppSession): void {
 		bridge.onloggingmessage = (params) => {
 			const handler = session.host.onLog;
 			if (!handler) throw new Error('MCP App logging is no longer available.');
-			handler(session.clonePayload(params, 'logging params'), session.tool);
+			handler({ params: session.clonePayload(params, 'logging params'), tool: session.tool });
 		};
 	}
 	if (session.allowedAppTools.length > 0) {
@@ -301,7 +312,7 @@ function registerBridgeHandlers(session: AIMcpAppSession): void {
 			const handler = session.host.onAppToolCall;
 			if (!handler) throw new Error('MCP App tool calls are disabled by host policy.');
 			return session.clonePayload(
-				await handler(safeParams, session.tool, extra),
+				await handler({ params: safeParams, tool: session.tool, extra }),
 				'tool call result'
 			);
 		};
@@ -321,7 +332,7 @@ function registerBridgeEvents(session: AIMcpAppSession, events: AIMcpAppSessionE
 			const safeParams = session.clonePayload(params, 'display-mode params');
 			const currentMode = getCurrentDisplayMode(session);
 			if (!isDisplayModeAvailable(session, safeParams.mode)) return { mode: currentMode };
-			const result = await handler(safeParams, session.tool, extra);
+			const result = await handler({ params: safeParams, tool: session.tool, extra });
 			assertDisplayModeResult(session, result);
 			await updateAIMcpAppHostContext(session, { displayMode: result.mode });
 			return session.clonePayload(result, 'display-mode result');

@@ -1,11 +1,12 @@
 <script lang="ts" generics="I extends FormInputs">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { getContext } from 'svelte';
-	import Button from '$lib/components/Button/Button.svelte';
 	import { useCardTheme } from '$lib/components/Card/card.theme.js';
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import { cx } from '$lib/utils/cva/index.js';
 	import type { FormInputs, FormInput, FormRenderableInput } from './form.js';
 	import FormActions from './FormActions.svelte';
+	import FormFieldRenderer from './FormFieldRenderer.svelte';
 	import FormInputRenderer from './FormInputRenderer.svelte';
 	import type { FormProps } from './form.props.js';
 	import { useFormTheme } from './form.theme.js';
@@ -14,7 +15,9 @@
 	let {
 		inputs,
 		onSubmit,
+		defaultValue = {},
 		value = $bindable(),
+		onValueChange,
 		class: className,
 		header,
 		title,
@@ -27,9 +30,15 @@
 		variant = 'plain',
 		layout = 'vertical',
 		actions,
-		submitButton,
 		theme
 	}: FormProps<I> = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(nextValue) => {
+			value = nextValue;
+		},
+		() => defaultValue
+	);
 
 	const formState = useForm({
 		get inputs() {
@@ -39,10 +48,13 @@
 			return onSubmit;
 		},
 		get value() {
-			return value;
+			return valueState.value;
 		},
 		set value(v) {
-			value = v;
+			valueState.value = v;
+		},
+		get onValueChange() {
+			return onValueChange;
 		}
 	});
 	if (form !== formState) form = formState;
@@ -60,11 +72,6 @@
 
 	const classes = $derived(useFormTheme(theme));
 	const cardClasses = $derived(useCardTheme());
-	const submitButtonState = $derived.by(() => {
-		if (!submitButton) return null;
-		const { onClick, loading, disabled, size: buttonSize, ...props } = submitButton;
-		return { onClick, loading, disabled, size: buttonSize, props };
-	});
 </script>
 
 {#snippet headerSnippet()}
@@ -91,6 +98,7 @@
 			actions={input.actions}
 			form={formState}
 			{size}
+			{density}
 			label={input.label}
 			description={input.description}
 			labelPosition={input.labelPosition ?? labelPosition}
@@ -110,6 +118,8 @@
 				className: [input.class, itemClass].filter(Boolean).join(' ')
 			})}
 		/>
+	{:else if input.type === 'field'}
+		<FormFieldRenderer {name} {input} {size} {density} {labelPosition} {itemClass} />
 	{:else}
 		<FormInputRenderer {name} {input} {size} {density} {labelPosition} {itemClass} />
 	{/if}
@@ -180,7 +190,7 @@
 		{/if}
 	{/each}
 	{@render children?.(formState)}
-	{#if footer || actions?.length || submitButtonState}
+	{#if footer || actions?.length}
 		<div
 			class={cx(
 				cardClasses.footer({ density, hasBorder: hasSectionBorders }),
@@ -188,27 +198,14 @@
 			)}
 		>
 			<Slot render={footer} payload={formState} />
-			{#if actions?.length || submitButtonState}
+			{#if actions?.length}
 				<FormActions
-					actions={actions ?? []}
+					{actions}
 					form={formState}
 					{size}
+					{density}
 					class={classes.formActions({ density })}
-				>
-					{#if submitButtonState}
-						<Button
-							{...submitButtonState.props}
-							size={submitButtonState.size ?? size}
-							loading={formState.loading || submitButtonState.loading}
-							disabled={formState.loading || submitButtonState.disabled}
-							onClick={(payload) => {
-								const submission = formState.submit();
-								submitButtonState.onClick?.(payload);
-								return submission;
-							}}
-						/>
-					{/if}
-				</FormActions>
+				/>
 			{/if}
 		</div>
 	{/if}

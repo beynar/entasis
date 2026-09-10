@@ -26,7 +26,8 @@ A compact single-selection input for switching between a small set of mutually e
 
 - **items**: \`readonly SegmentedControlItem[]\` — required options with unique \`value\` fields.
 - **value**: \`string\` — bindable selected value; defaults to the first enabled item.
-- **onChange**: \`(value: string) => void\` — called after user interaction changes the value.
+- **defaultValue**: \`string\` — initial selected value when value is omitted.
+- **onValueChange**: \`(value: string) => void\` — called once after user interaction changes the value.
 - **item**: \`Snippet<[SegmentedControlItem]>\` — replaces the default item renderer.
 - **size**: \`'small' | 'normal' | 'large'\` — defaults to \`'normal'\`.
 - **color**: semantic color — controls the selected pill and focus ring; defaults to \`'neutral'\`.

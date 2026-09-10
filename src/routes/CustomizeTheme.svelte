@@ -23,7 +23,7 @@
 				size="small"
 				variant={mode === 'default' ? 'solid' : 'ghost'}
 				color="neutral"
-				onClick={() => (mode = 'default')}
+				onclick={() => (mode = 'default')}
 			>
 				Full default
 			</Button>
@@ -31,7 +31,7 @@
 				size="small"
 				variant={mode === 'empty' ? 'solid' : 'ghost'}
 				color="neutral"
-				onClick={() => (mode = 'empty')}
+				onclick={() => (mode = 'empty')}
 			>
 				Empty scaffold
 			</Button>

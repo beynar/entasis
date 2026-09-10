@@ -2,12 +2,12 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultButton = cva({
-	base: 'group/button inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap relative overflow-hidden cursor-pointer rounded-lg border border-transparent bg-clip-padding font-medium text-sm outline-none transition-all duration-100 ease-in-out focus-visible:ring-2 focus-visible:ring-color/50 active:translate-y-px [&_svg:not([class*=size-])]:size-4',
+	base: 'group/button inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap relative overflow-hidden cursor-pointer rounded-md border border-transparent bg-clip-padding font-medium text-sm outline-none transition-all duration-100 ease-in-out focus-visible:ring-2 focus-visible:ring-color/50 active:translate-y-px [&_svg:not([class*=size-])]:size-icon-md',
 	variants: {
 		size: {
-			small: 'h-7 px-2.5 gap-1.5 text-xs',
-			normal: 'h-8 px-3.5 gap-2 text-sm',
-			large: 'h-9 px-4 gap-2 text-sm'
+			small: 'h-control-sm px-md gap-sm text-xs',
+			normal: 'h-control-md px-lg gap-md text-sm',
+			large: 'h-control-lg px-xl gap-md text-sm'
 		},
 		color: {
 			primary: 'bg-primary text-primary-contrast',
@@ -50,12 +50,12 @@ const defaultButton = cva({
 });
 
 const defaultButtonPrefix = cva({
-	base: 'inline-flex size-4 shrink-0 items-center justify-center overflow-hidden leading-none [&_svg:not([class*=size-])]:!size-full',
+	base: 'inline-flex shrink-0 items-center justify-center overflow-hidden leading-none [&_svg:not([class*=size-])]:!size-full',
 	variants: {
 		size: {
-			normal: 'size-4',
-			large: 'size-5',
-			small: 'size-3.5'
+			normal: 'size-icon-md',
+			large: 'size-icon-lg',
+			small: 'size-icon-sm'
 		}
 	},
 	defaultVariants: {
@@ -64,12 +64,12 @@ const defaultButtonPrefix = cva({
 });
 
 const defaultButtonSuffix = cva({
-	base: 'inline-flex size-4 shrink-0 items-center justify-center overflow-hidden leading-none [&_svg:not([class*=size-])]:!size-full',
+	base: 'inline-flex shrink-0 items-center justify-center overflow-hidden leading-none [&_svg:not([class*=size-])]:!size-full',
 	variants: {
 		size: {
-			normal: 'size-4',
-			large: 'size-5',
-			small: 'size-3.5'
+			normal: 'size-icon-md',
+			large: 'size-icon-lg',
+			small: 'size-icon-sm'
 		}
 	},
 	defaultVariants: {

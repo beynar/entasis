@@ -66,7 +66,7 @@
 	<div class="flex gap-2">
 		<Button
 			size="small"
-			onClick={() => {
+			onclick={() => {
 				record.test = record.test === true ? false : true;
 			}}
 		>
@@ -74,7 +74,7 @@
 		</Button>
 		<Button
 			size="small"
-			onClick={() => {
+			onclick={() => {
 				test.record.test = test.record.test === true ? false : true;
 			}}
 		>
@@ -83,7 +83,7 @@
 
 		<Button
 			size="small"
-			onClick={() => {
+			onclick={() => {
 				test.age++;
 			}}
 		>

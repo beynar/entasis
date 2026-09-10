@@ -54,7 +54,7 @@
     center={[6.2, 50.5]}
     zoom={4}
     fitMarkersPadding={64}
-    onmarkerclick={(marker) => (selectedMarker = marker)}
+    onMarkerClick={(marker) => (selectedMarker = marker)}
     class="h-[28rem]"
   >
     {#snippet marker(arg: MapMarkerSnippetArg<OfficeData>)}

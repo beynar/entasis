@@ -36,7 +36,7 @@ NetworkIndicator is a fixed top loading bar for SvelteKit navigation and explici
   - Duration of one trail pass in milliseconds. Only applies to \`variant="trail"\`. Lower values make the trail move faster.
 - **color**: 'primary' | 'secondary' | 'neutral' | 'danger' | 'success' | 'warning' | 'info' = 'neutral'
   - Applies the semantic color token to the bar.
-- **size**: number = 3
+- **height**: number = 3
   - Height in pixels. Keep most navigation indicators between 2 and 6.
 - **delay**: number = 300
   - Duration of each indeterminate animation segment in milliseconds.
@@ -97,7 +97,7 @@ Prefer \`showNetworkIndicator()\` and \`hideNetworkIndicator()\` for async work.
 	}
 </script>
 
-<Button onClick={save}>Save</Button>
+<Button onclick={save}>Save</Button>
 \`\`\`
 
 ### Color Variations
@@ -113,16 +113,16 @@ Prefer \`showNetworkIndicator()\` and \`hideNetworkIndicator()\` for async work.
 
 \`\`\`svelte
 <NetworkIndicator loading variant="trail" color="primary" trailDuration={650} trailGap={0} />
-<NetworkIndicator loading variant="trail" color="success" size={5} trailDuration={450} trailGap={120} />
+<NetworkIndicator loading variant="trail" color="success" height={5} trailDuration={450} trailGap={120} />
 <NetworkIndicator loading variant="trail-bounce" color="info" trailDuration={700} trailGap={80} />
 \`\`\`
 
-### Size Variations
+### Height Variations
 
 \`\`\`svelte
-<NetworkIndicator loading size={2} />
-<NetworkIndicator loading size={4} color="primary" />
-<NetworkIndicator loading size={6} color="info" />
+<NetworkIndicator loading height={2} />
+<NetworkIndicator loading height={4} color="primary" />
+<NetworkIndicator loading height={6} color="info" />
 \`\`\`
 
 ### Motion Variations
@@ -139,7 +139,7 @@ Prefer \`showNetworkIndicator()\` and \`hideNetworkIndicator()\` for async work.
 <NetworkIndicator
 	loading
 	color="success"
-	size={5}
+	height={5}
 	theme={{
 		root: {
 			base: 'ui-network-indicator fixed top-0 left-0 w-full z-[9999] origin-left rounded-none shadow-lg'

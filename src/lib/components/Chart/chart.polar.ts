@@ -2,17 +2,20 @@ import { type ChartMark as TanStackMark, type ChartValue as TanStackValue } from
 import {
 	angleGrid,
 	polar,
-	radialArc,
 	radialArea,
+	radialBarRadius,
 	radialDot,
 	radialGrid,
 	radialLine,
 	type PolarGuide,
-	type PolarLayoutContext,
 	type PolarMark
 } from '@tanstack/charts/polar';
-import { arc } from 'd3-shape';
-import { compileChannel, compileColor, compileColorVisual, compileMarkChannels } from './chart.channels.js';
+import {
+	compileChannel,
+	compileColor,
+	compileColorVisual,
+	compileMarkChannels
+} from './chart.channels.js';
 import type { CompiledMark } from './chart.cartesian.js';
 import type {
 	ChartNumericScaleDefinition,
@@ -22,14 +25,8 @@ import type {
 } from './chart.props.js';
 import { compileChartCurve, compileChartScale } from './chart.scale.js';
 
-type PolarPathMark<TRow> = Extract<
-	ChartPolarMark<TRow>,
-	{ variant: 'circular' | 'radar' }
->;
-type PolarBarMark<TRow> = Extract<
-	ChartPolarMark<TRow>,
-	{ variant: 'radial-bar' | 'rose' }
->;
+type PolarPathMark<TRow> = Extract<ChartPolarMark<TRow>, { variant: 'circular' | 'radar' }>;
+type PolarBarMark<TRow> = Extract<ChartPolarMark<TRow>, { variant: 'radial-bar' | 'rose' }>;
 
 export function compilePolarChartMark<TRow extends object>(
 	data: readonly TRow[],
@@ -52,13 +49,13 @@ export function compilePolarChartMark<TRow extends object>(
 			);
 	}
 	const isBar = mark.variant === 'radial-bar' || mark.variant === 'rose';
+	const innerRadius = isBar ? resolvePolarInnerRadius(mark, path) : 0;
 	const angleScale: ChartScaleDefinition =
 		mark.angleScale ?? (isBar ? { type: 'band', padding: 0.08 } : { type: 'point', padding: 0 });
-	const radiusScale: ChartNumericScaleDefinition =
-		mark.radiusScale ?? {
-			type: mark.variant === 'rose' ? 'sqrt' : 'linear',
-			domain: mark.domain
-		};
+	const radiusScale: ChartNumericScaleDefinition = mark.radiusScale ?? {
+		type: mark.variant === 'rose' ? 'sqrt' : 'linear',
+		domain: mark.domain
+	};
 	if (mark.domain && mark.radiusScale?.domain) {
 		throw new TypeError(
 			`[Chart] ${path}.domain cannot be combined with ${path}.radiusScale.domain.`
@@ -70,12 +67,18 @@ export function compilePolarChartMark<TRow extends object>(
 		id: mark.id,
 		marks,
 		guides: compilePolarGuides(mark),
-		angle: {
-			scale: compileChartScale(angleScale, `${path}.angleScale`),
-			wrap: true
-		},
-		radius: {
-			scale: compileChartScale(radiusScale, `${path}.radiusScale`)
+		scales: {
+			angle: {
+				scale: compileChartScale(angleScale, `${path}.angleScale`),
+				wrap: true
+			},
+			radius: {
+				scale: compileChartScale(radiusScale, `${path}.radiusScale`),
+				range:
+					innerRadius > 0
+						? [({ radius }) => radius * innerRadius, ({ radius }) => radius]
+						: undefined
+			}
 		},
 		startAngle: mark.startAngle,
 		endAngle: mark.endAngle,
@@ -165,84 +168,30 @@ function compilePolarBars<TRow extends object>(
 ): PolarMark<unknown, TanStackValue, TanStackValue> {
 	const angle = compileChannel(mark.angle);
 	const radius = compileChannel(mark.radius);
-	const innerRadius = mark.innerRadius ?? 0;
-	if (!Number.isFinite(innerRadius) || innerRadius < 0 || innerRadius >= 1) {
-		throw new TypeError(
-			`[Chart] ${path}.innerRadius must be greater than or equal to 0 and less than 1.`
-		);
-	}
 	const color = mark.color === undefined ? undefined : compileColor(mark.color);
-	const compiled = radialArc(data, {
+	return radialBarRadius(data, {
 		...compileMarkChannels(mark),
 		id: `${path}:bars`,
-		generator: (layout) =>
-			createPolarBarGenerator(
-				layout,
-				data,
-				angle,
-				radius,
-				innerRadius,
-				mark.padAngle,
-				mark.cornerRadius
-			),
+		angle,
+		radius,
+		radius1: 0,
+		cornerRadius: mark.cornerRadius,
 		fill: compileColorVisual(mark.fill) ?? color,
 		fillOpacity: mark.fillOpacity ?? 0.82,
 		stroke: compileColorVisual(mark.stroke),
 		strokeOpacity: mark.strokeOpacity,
 		strokeWidth: mark.strokeWidth
 	});
-
-	return {
-		initialize(context) {
-			const initialized = compiled.initialize(context);
-			return {
-				...initialized,
-				angleValues: data
-					.map((row, index) => angle(row, index, data))
-					.filter(isPolarScaleValue),
-				radiusValues: data
-					.map((row, index) => radius(row, index, data))
-					.filter((value): value is number => typeof value === 'number' && Number.isFinite(value)),
-				includeZeroRadius: true,
-				requiresAngleScale: true,
-				requiresRadiusScale: true
-			};
-		}
-	};
 }
 
-function createPolarBarGenerator<TRow extends object>(
-	layout: PolarLayoutContext,
-	rows: readonly TRow[],
-	angle: (row: TRow, index: number, rows: readonly TRow[]) => ChartValue | null | undefined,
-	radius: (row: TRow, index: number, rows: readonly TRow[]) => number | null | undefined,
-	innerRadiusRatio: number,
-	padAngle = 0.02,
-	cornerRadius = 0
-) {
-	const angleScale = layout.angle;
-	const radiusScale = layout.radiusScale;
-	if (!angleScale || !radiusScale) {
-		throw new Error('[Chart] Polar bars require resolved angle and radius scales.');
+function resolvePolarInnerRadius<TRow>(mark: PolarBarMark<TRow>, path: string): number {
+	const innerRadius = mark.innerRadius ?? 0;
+	if (!Number.isFinite(innerRadius) || innerRadius < 0 || innerRadius >= 1) {
+		throw new TypeError(
+			`[Chart] ${path}.innerRadius must be greater than or equal to 0 and less than 1.`
+		);
 	}
-	const innerRadius = layout.radius * innerRadiusRatio;
-	return arc<TRow>()
-		.startAngle((row, index) => {
-			const value = angle(row, index, rows);
-			return value == null ? 0 : angleScale.map(value) - angleScale.bandwidth / 2;
-		})
-		.endAngle((row, index) => {
-			const value = angle(row, index, rows);
-			return value == null ? 0 : angleScale.map(value) + angleScale.bandwidth / 2;
-		})
-		.padAngle(padAngle)
-		.innerRadius(innerRadius)
-		.outerRadius((row, index) => {
-			const value = radius(row, index, rows);
-			if (value == null) return innerRadius;
-			return innerRadius + radiusScale.map(value) * (1 - innerRadiusRatio);
-		})
-		.cornerRadius(cornerRadius);
+	return innerRadius;
 }
 
 function compilePolarGuides<TRow extends object>(
@@ -307,14 +256,6 @@ function centerPolarPolygon<TRow, TXValue extends TanStackValue, TYValue extends
 
 function chartValueIdentity(value: TanStackValue): string {
 	return value instanceof Date ? `date:${value.getTime()}` : `${typeof value}:${String(value)}`;
-}
-
-function isPolarScaleValue(value: unknown): value is TanStackValue {
-	return (
-		typeof value === 'string' ||
-		(typeof value === 'number' && Number.isFinite(value)) ||
-		(value instanceof Date && Number.isFinite(value.getTime()))
-	);
 }
 
 function readPolarVariant(value: unknown): unknown {

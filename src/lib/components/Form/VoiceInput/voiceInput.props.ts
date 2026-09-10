@@ -11,7 +11,7 @@ export type VoiceInputResult = {
 export type VoiceInputVariant = 'default' | 'expandable' | 'compact';
 
 export type VoiceInputProps = WithAttachments<
-	Omit<InputProps<'voice'>, 'onChange' | 'theme' | 'value'> & {
+	Omit<InputProps<'voice'>, 'onValueChange' | 'theme' | 'value'> & {
 		/** Recorded audio. Starting a new recording clears the previous value. */
 		value?: Blob | null;
 		/** Recording duration in seconds. Bind to retain it alongside the Blob value. */
@@ -37,7 +37,7 @@ export type VoiceInputProps = WithAttachments<
 		/** Accessible label and tooltip for clearing the finalized recording. */
 		clearLabel?: string;
 		/** Called whenever the recorded Blob changes. */
-		onChange?: (value: Blob | null) => void;
+		onValueChange?: (value: Blob | null) => void;
 		/** Called after microphone capture has started. */
 		onStart?: () => void;
 		/** Called after the recording has been finalized. */

@@ -284,7 +284,7 @@
 		questionResolution = change.state;
 	}
 
-	function handleSuggestionClick(suggestion: string): void {
+	function handleSuggestionSelect(suggestion: string): void {
 		selectedSuggestion = suggestion;
 	}
 </script>
@@ -369,27 +369,27 @@ ${'</' + 'script>'}
 						variant="outline"
 						prefix={arrowUpIcon}
 						disabled={historyStart === 0}
-						onClick={prependHistory}>Prepend</Button
+						onclick={prependHistory}>Prepend</Button
 					>
 					<Button
 						size="small"
 						variant="ghost"
 						prefix={arrowCounterClockwiseIcon}
-						onClick={resetHistory}>Reset</Button
+						onclick={resetHistory}>Reset</Button
 					>
 					<Button
 						size="small"
 						variant="outline"
 						prefix={arrowDownIcon}
 						disabled={historyEnd === completeHistory.length}
-						onClick={appendHistory}>Append</Button
+						onclick={appendHistory}>Append</Button
 					>
 				{:else if mode === 'question'}
 					<Button
 						size="small"
 						variant="outline"
 						prefix={arrowCounterClockwiseIcon}
-						onClick={resetQuestion}>Reset question</Button
+						onclick={resetQuestion}>Reset question</Button
 					>
 					{#if questionResolution}
 						<span class="text-xs text-neutral/60">{questionResolution}</span>
@@ -408,7 +408,7 @@ ${'</' + 'script>'}
 					liveText={mode === 'live' ? 'Assistant is drafting the next section.' : undefined}
 					isStreaming={mode === 'live'}
 					suggestions={mode === 'empty' ? directSuggestions : undefined}
-					onSuggestionClick={handleSuggestionClick}
+					onSuggestionSelect={handleSuggestionSelect}
 					onAskUserQuestionStateChange={handleQuestionStateChange}
 					class="rounded-lg border border-neutral-muted"
 				/>
@@ -459,7 +459,7 @@ ${'</' + 'script>'}
   <AIThread
     messages={[]}
     suggestions={directSuggestions}
-    onSuggestionClick={handleSuggestionClick}
+    onSuggestionSelect={handleSuggestionSelect}
   />
 </AIConversation>`}
 		>
@@ -468,7 +468,7 @@ ${'</' + 'script>'}
 					<AIThread
 						messages={[]}
 						suggestions={suggestionSource === 'direct' ? directSuggestions : undefined}
-						onSuggestionClick={handleSuggestionClick}
+						onSuggestionSelect={handleSuggestionSelect}
 						class="rounded-lg border border-neutral-muted"
 					/>
 				</AIConversation>

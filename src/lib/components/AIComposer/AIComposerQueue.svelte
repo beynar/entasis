@@ -56,7 +56,7 @@
 					variant="ghost"
 					label="Cancel queued message edit"
 					{disabled}
-					onClick={onCancelEdit}
+					onclick={onCancelEdit}
 				>
 					{@render xIcon({ size: 14 })}
 				</Button>
@@ -69,7 +69,7 @@
 				size="small"
 				{disabled}
 				class={classes.queueList()}
-				{onReorder}
+				onReorder={({ items }) => onReorder(items)}
 			>
 				{#snippet item({ item }: SortableListItemPayload<AIComposerQueuedMessage>)}
 					<div
@@ -91,7 +91,7 @@
 							label={`Steer queued message: ${getMessagePreview(item)}`}
 							aria-pressed={item.steered}
 							{disabled}
-							onClick={() => onSteer(item.id)}
+							onclick={() => onSteer(item.id)}
 						>
 							{@render arrowBendDownRightIcon({ size: 14 })}
 						</Button>
@@ -102,7 +102,7 @@
 							variant="ghost"
 							label={`Edit queued message: ${getMessagePreview(item)}`}
 							disabled={disabled || Boolean(editingMessage)}
-							onClick={() => onEdit(item.id)}
+							onclick={() => onEdit(item.id)}
 						>
 							{@render pencilSimpleIcon({ size: 14 })}
 						</Button>
@@ -114,7 +114,7 @@
 							color="danger"
 							label={`Cancel queued message: ${getMessagePreview(item)}`}
 							{disabled}
-							onClick={() => onCancel(item.id)}
+							onclick={() => onCancel(item.id)}
 						>
 							{@render trashSimpleIcon({ size: 14 })}
 						</Button>

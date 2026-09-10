@@ -57,14 +57,14 @@ When text parts are present, top-level message content is not rendered again. Co
 - **class**: string - Thread-root classes.
 - **role**: HTML role - Thread-root role. Default 'log'.
 - **viewportLabel**: string - Label for the focusable transcript viewport.
-- **onScroll**: (event) => void - Native viewport-scroll callback.
+- **onscroll**: (event) => void - Raw native viewport-scroll callback.
 - Native div attributes and Svelte attachments are forwarded to the thread root.
 
 ## Empty state and suggestions
 
 - **empty**: Slot - Replaces the empty state.
 - **suggestions**: readonly string[] - Default empty-state suggestions. Falls back to AIConversation.
-- **onSuggestionClick**: (suggestion) => void - Takes precedence over the provider's default \`setInput\` behavior.
+- **onSuggestionSelect**: (suggestion) => void - Takes precedence over the provider's default \`setInput\` behavior.
 
 ## Message composition
 
@@ -79,7 +79,6 @@ When text parts are present, top-level message content is not rendered again. Co
 Assistant text that continues through tool or app rows into another assistant segment does not render
 an action region. Actions belong to the terminal assistant segment for that user turn; completed
 historical turns retain hover actions.
-- **onRetry**: legacy (message, index) callback used when \`onMessageRetry\` is omitted.
 
 ## Tool, marker, and MCP composition
 

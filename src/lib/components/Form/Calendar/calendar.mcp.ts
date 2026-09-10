@@ -59,4 +59,11 @@ The visible month title opens an in-place month and year chooser composed from t
 Day focus is roving. Arrow keys move by day or week, Home/End move to week boundaries, PageUp/PageDown move by month, and Shift+PageUp/PageDown move by year. Enter or Space uses the native day button activation.
 
 Month navigation slides in chronological direction while the viewport transitions to its new intrinsic height. Double view responds to the calendar container rather than the browser viewport, so it safely falls back to one month in narrow layouts. Both animations respect reduced-motion preferences.
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+
 `;

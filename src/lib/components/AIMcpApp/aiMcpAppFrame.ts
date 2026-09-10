@@ -75,7 +75,7 @@ export async function resolveAIMcpAppSandboxUrl(
 		);
 	}
 	const value = host.resolveSandboxUrl
-		? await host.resolveSandboxUrl(resource, tool, signal)
+		? await host.resolveSandboxUrl({ resource, tool, signal })
 		: host.sandboxUrl;
 	throwIfAborted(signal);
 	if (!value) throw new Error('MCP App host requires sandboxUrl or resolveSandboxUrl.');

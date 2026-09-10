@@ -1,4 +1,9 @@
-import { compileChannel, compileKeyChannel, compileOptionalChannel } from './chart.channels.js';
+import {
+	compileChannel,
+	compileKeyChannel,
+	compileOptionalChannel,
+	type CompiledChartChannel
+} from './chart.channels.js';
 import type {
 	ChartKey,
 	ChartColor,
@@ -8,12 +13,12 @@ import type {
 	ChartSankeyRelationMark
 } from './chart.props.js';
 
-export type RelationLabelConfiguration<TRow> = {
+export type RelationLabelConfiguration<TRow extends object> = {
 	enabled: boolean;
 	color?: ChartColor;
 	fontSize: number;
 	fontWeight: number;
-	text?: ReturnType<typeof compileChannel<TRow, string | number>>;
+	text?: CompiledChartChannel<TRow, string | number>;
 };
 
 export type RelationSourceNode<TRow> = {
@@ -66,7 +71,7 @@ export type RelationLinkDatum = {
 
 export type RelationDatum = RelationNodeDatum | RelationLinkDatum;
 
-export type CompiledRelationData<TRow> = {
+export type CompiledRelationData<TRow extends object> = {
 	nodes: readonly RelationSourceNode<TRow>[];
 	nodeByIdentity: ReadonlyMap<string, RelationSourceNode<TRow>>;
 	labels: RelationLabelConfiguration<TRow>;
@@ -82,14 +87,15 @@ export function compileRelationData<TRow extends object>(
 	const labels = compileLabelConfiguration(mark);
 	const nodeByIdentity = new Map<string, RelationSourceNode<TRow>>();
 	const nodes = data.map((datum, index) => {
-		const id = nodeId(datum, index, data);
+		const context = { index, data };
+		const id = nodeId(datum, context);
 		validateKey(id, `${path}.nodeId`, index);
 		const identity = relationKeyIdentity(id);
 		if (nodeByIdentity.has(identity)) {
 			throw new TypeError(`[Chart] ${path}.nodeId returned duplicate value ${String(id)}.`);
 		}
-		const labelValue = labels.text?.(datum, index, data);
-		const group = colorBy?.(datum, index, data);
+		const labelValue = labels.text?.(datum, context);
+		const group = colorBy?.(datum, context);
 		if (group !== null && group !== undefined) {
 			validateKey(group, `${path}.colorBy`, index);
 		}
@@ -116,7 +122,7 @@ export function compileRelationEdges<TRow extends object>(
 	const relations = compileChannel(mark.relations);
 	const requiresValue = mark.variant === 'sankey';
 	return compiled.nodes.flatMap((source) => {
-		const outgoing = relations(source.datum, source.index, data);
+		const outgoing = relations(source.datum, { index: source.index, data });
 		if (!Array.isArray(outgoing)) {
 			throw new TypeError(
 				`[Chart] ${path}.relations must return an array for data[${source.index}].`
@@ -179,5 +185,7 @@ function compileLabelConfiguration<TRow extends object>(
 function validateKey(value: unknown, path: string, rowIndex: number): asserts value is ChartKey {
 	if (typeof value === 'string') return;
 	if (typeof value === 'number' && Number.isFinite(value)) return;
-	throw new TypeError(`[Chart] ${path} must return a string or finite number for data[${rowIndex}].`);
+	throw new TypeError(
+		`[Chart] ${path} must return a string or finite number for data[${rowIndex}].`
+	);
 }

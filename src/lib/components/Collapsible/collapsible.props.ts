@@ -13,11 +13,11 @@ type CollapsibleBaseProps = {
 	 */
 	class?: string;
 	/**
-	 * Whether the collapsible is open (controlled).
+	 * Current open state. Bindable.
 	 */
 	open?: boolean;
 	/**
-	 * Whether the collapsible is open by default (uncontrolled).
+	 * Initial open state when `open` is omitted.
 	 */
 	defaultOpen?: boolean;
 	/**

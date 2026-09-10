@@ -4,6 +4,8 @@
 	import { Menu, type MenuItem } from '$lib/components/Menu/index.js';
 	import SegmentedControl from '$lib/components/SegmentedControl/SegmentedControl.svelte';
 	import type { Density } from '$lib/types/theme.js';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import { userIcon } from '$lib/components/Icons/user.js';
 	import { gearIcon } from '$lib/components/Icons/gear.js';
 	import { signOutIcon } from '$lib/components/Icons/signOut.js';
@@ -17,6 +19,24 @@
 
 	let clickCount = $state(0);
 	let selectedOption = $state('Option 1');
+
+	const submenuModes = ['auto', 'popover', 'stack'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'submenuMode',
+			type: 'segmented',
+			label: 'Submenu',
+			value: 'auto',
+			options: submenuModes
+		}
+	]);
 
 	const densitySegments = [
 		{ value: 'small', label: 'Small' },
@@ -105,7 +125,7 @@
 			type: 'option',
 			prefix: userIcon,
 			title: `Clicked ${clickCount} times`,
-			onClick: () => clickCount++
+			onclick: () => clickCount++
 		},
 		{ type: 'separator' },
 		{
@@ -113,7 +133,7 @@
 			children: 'Reset Counter',
 			variant: 'ghost',
 			fullWidth: true,
-			onClick: () => (clickCount = 0)
+			onclick: () => (clickCount = 0)
 		}
 	]);
 
@@ -139,10 +159,10 @@
 
 	// Context menu
 	const contextMenuItems: MenuItem[] = [
-		{ type: 'option', title: 'Open', onClick: () => alert('Open') },
-		{ type: 'option', title: 'Open in New Tab', onClick: () => alert('Open in new tab') },
+		{ type: 'option', title: 'Open', onclick: () => alert('Open') },
+		{ type: 'option', title: 'Open in New Tab', onclick: () => alert('Open in new tab') },
 		{ type: 'separator' },
-		{ type: 'option', title: 'Copy Link', onClick: () => alert('Copy link') },
+		{ type: 'option', title: 'Copy Link', onclick: () => alert('Copy link') },
 		{ type: 'option', title: 'Share', suffix: caretRightIcon },
 		{ type: 'separator' },
 		{ type: 'option', prefix: trashIcon, title: 'Delete', color: 'danger' }
@@ -206,18 +226,25 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A simple vertical list of menu options."
 		code={`<Menu
-  items={[
-    { type: 'option', title: 'Profile' },
-    { type: 'option', title: 'Settings' },
-    { type: 'separator' },
-    { type: 'option', title: 'Logout', color: 'danger' }
-  ]}
+	density="${controls.value.density}"
+	submenuMode="${controls.value.submenuMode}"
+	items={[
+		{ type: 'option', title: 'Profile' },
+		{ type: 'option', title: 'Settings' },
+		{ type: 'separator' },
+		{ type: 'option', title: 'Logout', color: 'danger' }
+	]}
 />`}
 	>
 		<div class="bg-surface rounded-xl border-neutral-muted w-64 border p-2">
-			<Menu items={basicItems} />
+			<Menu
+				items={basicItems}
+				density={controls.value.density}
+				submenuMode={controls.value.submenuMode}
+			/>
 		</div>
 	</ComponentCard>
 

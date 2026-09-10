@@ -73,6 +73,12 @@ export type ResizableChangeMeta = {
 	isUserInteraction: boolean;
 };
 
+/** Final layout and its interaction source reported by `onLayoutCommit`. */
+export type ResizableLayoutCommitPayload = Readonly<{
+	sizes: number[];
+	isUserInteraction: boolean;
+}>;
+
 export type ResizableHandleAriaLabel = {
 	index: number;
 	size: number;
@@ -183,9 +189,9 @@ export type ResizableProps = WithAttachments<{
 	 */
 	onLayoutChange?: (sizes: number[]) => void;
 	/**
-	 * Fires after the layout has changed.
+	 * Fires after the layout commits.
 	 */
-	onLayoutChanged?: (sizes: number[], meta: ResizableChangeMeta) => void;
+	onLayoutCommit?: (payload: ResizableLayoutCommitPayload) => void;
 	/**
 	 * Fires when collapsed panel ids change.
 	 */

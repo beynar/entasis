@@ -115,14 +115,14 @@
 	closeOnClickOutside
 	closeOnEscape
 	class={classes.floatingPanel({ size, width: 'suggestions', class: className })}
-	onClose={handlePopoverClose}
+	onAfterClose={handlePopoverClose}
 >
 	{#snippet children()}
 		<Command
 			bind:this={command}
 			{size}
 			items={visibleItems}
-			search={query}
+			value={query}
 			{title}
 			empty={emptyState}
 			shouldFilter={false}

@@ -23,7 +23,7 @@
 	});
 </script>
 
-<Button onClick={() => (isActive = !isActive)}>
+<Button onclick={() => (isActive = !isActive)}>
 	{isActive ? 'Active' : 'Inactive'}
 </Button>
 <div class="flex flex-col gap-2">

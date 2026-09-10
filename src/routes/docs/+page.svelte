@@ -74,19 +74,19 @@
 /* Light theme — applied to <html> by default.
    The default theme also registers the utilities,
    variants and .ui-spinner component. */
-@plugin './lib/tailwind/theme' {
+@plugin 'svelai/tailwind-plugin/theme' {
 	name: light;
 	default: true;
 	colorscheme: light;
 }
 
 /* Dark theme — applied via html[data-theme="dark"] or .dark */
-@plugin './lib/tailwind/theme' {
+@plugin 'svelai/tailwind-plugin/theme' {
 	name: dark;
 	colorscheme: dark;
 }`;
 
-	const brandCode = `@plugin './lib/tailwind/theme' {
+	const brandCode = `@plugin 'svelai/tailwind-plugin/theme' {
 	name: light;
 	default: true;
 	colorscheme: light;
@@ -112,11 +112,11 @@
 	primary-contrast: #ffffff;
 }`;
 
-	const usageCode = `<button class="state-layer bg-primary text-primary-contrast rounded px-3 py-1.5">
+	const usageCode = `<button class="state-layer bg-primary text-primary-contrast rounded-sm px-lg py-sm">
 	Primary
 </button>
 
-<div class="bg-surface-canvas border-neutral-muted rounded-xl border p-4">
+<div class="bg-surface-canvas border-neutral-muted rounded-lg border p-xl">
 	<p class="text-neutral">Title</p>
 	<p class="text-neutral/60">Muted body copy</p>
 </div>
@@ -135,12 +135,14 @@
 	const designTokens = $derived({
 		light: {
 			spacing,
+			spacingScale: { xs: 1, sm: 1.5, md: 2, lg: 3, xl: 4 },
 			radius: 'normal',
 			typeScale: 'default',
 			raisedWithBorder: true
 		},
 		dark: {
 			spacing,
+			spacingScale: { xs: 1, sm: 1.5, md: 2, lg: 3, xl: 4 },
 			radius: 'small',
 			typeScale: 'compact',
 			raisedWithBorder: false
@@ -158,7 +160,8 @@
 </Theme>`;
 </script>
 
-{#snippet ic(text: string)}<code class="bg-neutral-muted rounded px-1 py-0.5 text-sm">{text}</code
+{#snippet ic(text: string)}<code class="bg-neutral-muted rounded-sm px-xs py-micro text-sm"
+		>{text}</code
 	>{/snippet}
 
 <article class="text-neutral mx-auto grid max-w-3xl gap-4 pb-20">
@@ -177,7 +180,7 @@
 
 	<p class="text-neutral/60">
 		Then wire up the theme in your {@render ic('src/app.css')}. Declare the {@render ic(
-			"@plugin './lib/tailwind/theme'"
+			"@plugin 'svelai/tailwind-plugin/theme'"
 		)} block once per theme — each generates a scoped color palette. The block marked
 		{@render ic('default: true')} also registers the shared utilities, variants and {@render ic(
 			'.ui-spinner'
@@ -188,7 +191,7 @@
 	<Separator class="my-2" children="Build-time color options" />
 
 	<p class="text-neutral/60">
-		Every key below is passed inside the {@render ic("@plugin './lib/tailwind/theme'")} block.
+		Every key below is passed inside the {@render ic("@plugin 'svelai/tailwind-plugin/theme'")} block.
 	</p>
 
 	<div class="border-neutral-muted rounded-xl overflow-hidden border">

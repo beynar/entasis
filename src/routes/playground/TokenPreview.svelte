@@ -6,14 +6,16 @@
 	import MapCardPreview from './MapCardPreview.svelte';
 
 	const spacingSamples = [
-		{ label: 'p-2', padding: 'p-2' },
-		{ label: 'p-4', padding: 'p-4' },
-		{ label: 'p-6', padding: 'p-6' }
+		{ label: 'p-xs', padding: 'p-xs' },
+		{ label: 'p-sm', padding: 'p-sm' },
+		{ label: 'p-md', padding: 'p-md' },
+		{ label: 'p-lg', padding: 'p-lg' },
+		{ label: 'p-xl', padding: 'p-xl' }
 	] as const;
 </script>
 
-<section class="grid min-w-0 gap-6">
-	<div class="grid gap-3">
+<section class="grid min-w-0 gap-layout-md">
+	<div class="grid gap-lg">
 		<div>
 			<h2 class="text-xl font-semibold">Component preview</h2>
 			<p class="text-neutral/60 text-sm">
@@ -29,9 +31,9 @@
 			{#snippet action()}
 				<Button size="small" variant="ghost">Edit</Button>
 			{/snippet}
-			<div class="grid gap-4">
+			<div class="grid gap-xl">
 				<TextInput label="Workspace name" value="Design systems" />
-				<div class="flex flex-wrap gap-2">
+				<div class="flex flex-wrap gap-md">
 					<Button>Save changes</Button>
 					<Button variant="outline">Cancel</Button>
 					<Button variant="soft" color="success">Published</Button>
@@ -42,13 +44,13 @@
 
 	<MapCardPreview />
 
-	<div class="grid gap-3">
+	<div class="grid gap-lg">
 		<h2 class="text-xl font-semibold">Spacing and radius</h2>
-		<div class="grid gap-4 sm:grid-cols-3">
+		<div class="grid gap-xl sm:grid-cols-2 xl:grid-cols-5">
 			{#each spacingSamples as sample (sample.label)}
-				<div class="raised-md grid gap-3 rounded-xl bg-surface-raised p-4">
-					<div class="bg-primary/15 rounded-lg {sample.padding}">
-						<div class="bg-primary h-8 rounded-md"></div>
+				<div class="raised-md grid gap-lg rounded-lg bg-surface-raised p-xl">
+					<div class="bg-primary/15 rounded-md {sample.padding}">
+						<div class="bg-primary h-control-md rounded-sm"></div>
 					</div>
 					<div>
 						<strong class="text-sm">{sample.label}</strong>
@@ -59,9 +61,9 @@
 		</div>
 	</div>
 
-	<div class="grid gap-3">
+	<div class="grid gap-lg">
 		<h2 class="text-xl font-semibold">Typography</h2>
-		<div class="border-neutral-muted grid gap-3 rounded-xl border bg-surface p-5">
+		<div class="border-neutral-muted grid gap-lg rounded-lg border bg-surface p-layout-sm">
 			<p class="text-xs">Extra small interface text</p>
 			<p class="text-sm">Small supporting text</p>
 			<p class="text-base">Base body text</p>

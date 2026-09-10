@@ -1,5 +1,20 @@
-import type { Channel as TanStackChannel, ChartTheme, VisualChannel } from '@tanstack/charts';
-import type { ChartChannel, ChartColor, ChartKey, ChartValue, ChartVisual } from './chart.props.js';
+import type { ChannelAccessor, ChartTheme, VisualChannel } from '@tanstack/charts';
+import type {
+	ChartChannel,
+	ChartColor,
+	ChartKey,
+	ChartRequiredChannel,
+	ChartValue,
+	ChartVisual
+} from './chart.props.js';
+
+export type CompilableChartChannel<TRow, TValue> =
+	string | ((row: TRow, index: number, rows: readonly TRow[]) => TValue | null | undefined);
+
+type CompilableRequiredChartChannel<TRow, TValue> =
+	string | ((row: TRow, index: number, rows: readonly TRow[]) => TValue);
+
+export type CompiledChartChannel<TRow, TValue> = ChannelAccessor<TRow, TValue | null | undefined>;
 
 const SEMANTIC_COLORS = new Set([
 	'primary',
@@ -34,9 +49,9 @@ export function compileChartTheme(palette: readonly ChartColor[] | undefined): C
 export function compileMarkChannels<TRow extends object>(
 	mark: {
 		id?: string;
-		key?: TanStackChannel<TRow, ChartKey>;
-		series?: ChartChannel<TRow, ChartKey>;
-		colorBy?: ChartChannel<TRow, ChartKey>;
+		key?: ChartRequiredChannel<TRow, ChartKey>;
+		series?: ChartChannel<TRow, ChartKey> | ChartRequiredChannel<TRow, ChartKey>;
+		colorBy?: ChartChannel<TRow, ChartKey> | ChartRequiredChannel<TRow, ChartKey>;
 	},
 	fallbackSeries?: ChartChannel<TRow, ChartKey>
 ) {
@@ -49,23 +64,25 @@ export function compileMarkChannels<TRow extends object>(
 }
 
 export function compileChannel<TRow extends object, TValue>(
-	channel: ChartChannel<TRow, TValue>
-): (row: TRow, index: number, rows: readonly TRow[]) => TValue | null | undefined {
-	if (typeof channel === 'function') return channel;
+	channel: CompilableChartChannel<TRow, TValue>
+): CompiledChartChannel<TRow, TValue> {
+	if (typeof channel === 'function') {
+		return (row, { index, data }) => channel(row, index, data);
+	}
 	// ChartField guarantees this property has the requested value type; Reflect cannot retain
 	// that mapped-type relationship once the field is translated into a runtime accessor.
 	return (row) => Reflect.get(row, channel) as TValue | null | undefined;
 }
 
 export function compileOptionalChannel<TRow extends object, TValue>(
-	channel: ChartChannel<TRow, TValue> | undefined
-): ((row: TRow, index: number, rows: readonly TRow[]) => TValue | null | undefined) | undefined {
+	channel: CompilableChartChannel<TRow, TValue> | undefined
+): CompiledChartChannel<TRow, TValue> | undefined {
 	return channel === undefined ? undefined : compileChannel(channel);
 }
 
 function compileValueOrChannel<TRow extends object, TValue>(
-	value: TValue | ChartChannel<TRow, TValue> | undefined,
-	isConstant: (candidate: TValue | ChartChannel<TRow, TValue>) => candidate is TValue
+	value: TValue | CompilableChartChannel<TRow, TValue> | undefined,
+	isConstant: (candidate: TValue | CompilableChartChannel<TRow, TValue>) => candidate is TValue
 ): TValue | ReturnType<typeof compileChannel<TRow, TValue>> | undefined {
 	if (value === undefined || isConstant(value)) return value;
 	return compileChannel(value);
@@ -74,10 +91,8 @@ function compileValueOrChannel<TRow extends object, TValue>(
 export function compileNumberOrChannel<TRow extends object>(
 	value: number | ChartChannel<TRow, number> | undefined
 ): number | ReturnType<typeof compileChannel<TRow, number>> | undefined {
-	return compileValueOrChannel(
-		value,
-		(candidate): candidate is number => typeof candidate === 'number'
-	);
+	if (value === undefined || typeof value === 'number') return value;
+	return compileChannel<TRow, number>(value);
 }
 
 export function compileNumberOrValueChannel<TRow extends object>(
@@ -87,15 +102,18 @@ export function compileNumberOrValueChannel<TRow extends object>(
 }
 
 export function compileKeyChannel<TRow extends object>(
-	channel: TanStackChannel<TRow, ChartKey>
-): (row: TRow, index: number, rows: readonly TRow[]) => ChartKey;
+	channel: CompilableRequiredChartChannel<TRow, ChartKey>
+): ChannelAccessor<TRow, ChartKey>;
 export function compileKeyChannel<TRow extends object>(
-	channel: TanStackChannel<TRow, ChartKey> | undefined
-): ((row: TRow, index: number, rows: readonly TRow[]) => ChartKey) | undefined;
+	channel: CompilableRequiredChartChannel<TRow, ChartKey> | undefined
+): ChannelAccessor<TRow, ChartKey> | undefined;
 export function compileKeyChannel<TRow extends object>(
-	channel: TanStackChannel<TRow, ChartKey> | undefined
-): ((row: TRow, index: number, rows: readonly TRow[]) => ChartKey) | undefined {
-	if (channel === undefined || typeof channel === 'function') return channel;
+	channel: CompilableRequiredChartChannel<TRow, ChartKey> | undefined
+): ChannelAccessor<TRow, ChartKey> | undefined {
+	if (channel === undefined) return undefined;
+	if (typeof channel === 'function') {
+		return (row, { index, data }) => channel(row, index, data);
+	}
 	return (row) => Reflect.get(row, channel) as ChartKey;
 }
 
@@ -103,7 +121,7 @@ export function compileColorVisual<TRow>(
 	color: ChartVisual<TRow, ChartColor> | undefined
 ): VisualChannel<TRow, string> | undefined {
 	if (typeof color !== 'function') return color === undefined ? undefined : compileColor(color);
-	return (row, index, rows) => compileColor(color(row, index, rows));
+	return (row, { index, data }) => compileColor(color(row, index, data));
 }
 
 export function compileOptionalColor(color: ChartColor | undefined): string | undefined {

@@ -2,11 +2,11 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultContainer = cva({
-	base: 'flex w-full flex-col gap-3 rounded-lg border border-neutral-muted bg-surface-raised p-2'
+	base: 'flex w-full flex-col gap-lg rounded-md border border-neutral-muted bg-surface-raised p-md'
 });
 
 const defaultHeader = cva({
-	base: 'flex min-h-8 items-center gap-2 px-1 font-semibold text-neutral',
+	base: 'flex min-h-8 items-center gap-md px-xs font-semibold text-neutral',
 	variants: {
 		picker: {
 			true: 'justify-center',
@@ -19,7 +19,7 @@ const defaultHeader = cva({
 });
 
 const defaultViewTrigger = cva({
-	base: 'min-w-0 max-w-full px-2 font-semibold'
+	base: 'min-w-0 max-w-full px-md font-semibold'
 });
 
 const defaultViewport = cva({
@@ -31,7 +31,7 @@ const defaultViewPanel = cva({
 });
 
 const defaultMonths = cva({
-	base: 'col-start-1 row-start-1 grid min-w-0 gap-3',
+	base: 'col-start-1 row-start-1 grid min-w-0 gap-lg',
 	variants: {
 		view: {
 			single: 'grid-cols-1',
@@ -44,19 +44,19 @@ const defaultMonths = cva({
 });
 
 const defaultGrid = cva({
-	base: 'grid min-w-0 grid-cols-7 gap-0.5'
+	base: 'grid min-w-0 grid-cols-7 gap-micro'
 });
 
 const defaultPicker = cva({
-	base: 'grid min-h-0 grid-cols-2 gap-2'
+	base: 'grid min-h-0 grid-cols-2 gap-md'
 });
 
 const defaultPickerColumn = cva({
-	base: 'grid min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-1'
+	base: 'grid min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-xs'
 });
 
 const defaultPickerLabel = cva({
-	base: 'px-2 text-center text-xs font-medium text-neutral/60'
+	base: 'px-md text-center text-xs font-medium text-neutral/60'
 });
 
 const defaultPickerScrollArea = cva({
@@ -64,11 +64,11 @@ const defaultPickerScrollArea = cva({
 });
 
 const defaultPickerOptions = cva({
-	base: 'flex min-w-0 flex-col gap-0.5 p-0.5'
+	base: 'flex min-w-0 flex-col gap-micro p-micro'
 });
 
 const defaultPickerOption = cva({
-	base: 'state-layer w-full cursor-pointer rounded-md px-2 py-1.5 text-center text-sm text-neutral outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-40',
+	base: 'state-layer w-full cursor-pointer rounded-sm px-md py-sm text-center text-sm text-neutral outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-40',
 	variants: {
 		selected: {
 			true: 'bg-primary-muted font-semibold text-primary-muted-readable',
@@ -82,11 +82,11 @@ const defaultPickerOption = cva({
 });
 
 const defaultWeekday = cva({
-	base: 'text-center text-xs font-medium text-neutral/60 uppercase py-2'
+	base: 'text-center text-xs font-medium text-neutral/60 uppercase py-md'
 });
 
 const defaultDay = cva({
-	base: 'state-layer relative flex aspect-square max-h-10 w-full cursor-pointer items-center justify-center rounded-md text-sm ring-inset outline-none transition-colors hover:z-[1] hover:ring-2 hover:ring-primary focus-visible:z-[2] focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50',
+	base: 'state-layer relative flex aspect-square max-h-10 w-full cursor-pointer items-center justify-center rounded-sm text-sm ring-inset outline-none transition-colors hover:z-[1] hover:ring-2 hover:ring-primary focus-visible:z-[2] focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50',
 	variants: {
 		selected: {
 			true: 'bg-primary-muted text-primary-muted-readable font-semibold'

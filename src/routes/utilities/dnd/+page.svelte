@@ -3,8 +3,21 @@
 	import DocPage from '../../DocPage.svelte';
 	import { useDndList } from '$lib/utils/useDndList.svelte.js';
 	import { dotsSixVerticalIcon } from '$lib/components/Icons/dotsSixVertical.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	type Task = { id: string; title: string };
+
+	const dndAxes = ['vertical', 'horizontal'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'axis',
+			type: 'segmented',
+			label: 'Axis',
+			value: 'vertical',
+			options: dndAxes
+		},
+		{ name: 'handle', type: 'switch', label: 'Handle', value: false }
+	]);
 
 	// --- Basic sortable list
 	let basicItems = $state<Task[]>([
@@ -16,6 +29,8 @@
 	const basic = useDndList({
 		id: 'basic',
 		items: () => basicItems,
+		axis: () => controls.value.axis,
+		handle: () => controls.value.handle,
 		onReorder: (next) => (basicItems = next)
 	});
 
@@ -105,10 +120,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A sortable list: attach dnd.list to the container and dnd.item to each row."
 		code={`const dnd = useDndList({
 	id: 'tasks',
 	items: () => items,
+	axis: '${controls.value.axis}',
+	handle: ${controls.value.handle},
 	onReorder: (next) => (items = next)
 });
 
@@ -118,10 +136,26 @@
 	{/each}
 </ul>`}
 	>
-		<div class="flex w-full max-w-md flex-col gap-1.5" {@attach basic.list}>
+		<div
+			class={controls.value.axis === 'horizontal'
+				? 'flex w-full max-w-xl flex-wrap gap-1.5'
+				: 'flex w-full max-w-md flex-col gap-1.5'}
+			{@attach basic.list}
+		>
 			{#each basicItems as item, index (item.id)}
-				<div class="cursor-grab" {@attach basic.item(item, index)}>
-					{@render row(item.title)}
+				<div class={controls.value.handle ? '' : 'cursor-grab'} {@attach basic.item(item, index)}>
+					{#if controls.value.handle}
+						<div
+							class="bg-surface-raised border-neutral-muted text-neutral flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"
+						>
+							<span data-dnd-handle class="text-neutral/60 cursor-grab">
+								{@render dotsSixVerticalIcon({ class: 'size-4' })}
+							</span>
+							{item.title}
+						</div>
+					{:else}
+						{@render row(item.title)}
+					{/if}
 				</div>
 			{/each}
 		</div>

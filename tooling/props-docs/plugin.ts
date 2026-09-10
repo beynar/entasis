@@ -1,8 +1,9 @@
+// @ts-expect-error This build-only module runs in Node, whose ambient types are not a package dependency.
 import { resolve } from 'node:path';
 import { Project, type SourceFile } from 'ts-morph';
 import type { Plugin } from 'vite';
-import { extractComponentDocs } from './extract';
-import type { PropsMap } from './types';
+import { extractComponentDocs } from './extract.js';
+import type { PropsMap } from './types.js';
 
 const VIRTUAL_ID = 'virtual:svelai-props';
 const RESOLVED_ID = '\0' + VIRTUAL_ID;
@@ -13,7 +14,7 @@ const RESOLVED_ID = '\0' + VIRTUAL_ID;
  * Never packaged - it lives outside `src/` and is only wired into vite.config.
  */
 export function svelaiPropsDocs(): Plugin {
-	let root = process.cwd();
+	let root = '';
 	let project: Project | null = null;
 	let cachedMap: PropsMap | null = null;
 

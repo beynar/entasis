@@ -30,7 +30,7 @@ Combines Tabbar + Stepper for a complete tabbed interface with animated content 
 - `tabs`: `Array<string | TabItem>` (required)
 - `activeTab`: number (default: 0, bindable)
 - `placement`: `'top' | 'bottom' | 'left' | 'right'` (default: `'top'`) -- auto-sets orientation
-- `onChange`: `(index: number) => void`
+- `onValueChange`: `(index: number) => void`
 - `stepper`: StepperState (bindable) -- programmatic control: `next()`, `previous()`, `goTo(index)`
 - `keyFramesOptions`: `{ duration: 300, easing: 'ease-in-out', fill: 'both' }`
 - Tabbar passthrough: `tabbarSize`, `tabbarColor`, `tabbarOrientation`, `tabbarAlignment`, `tabbarFullWidth`, `tabbarClass`, `tabbarTheme`
@@ -63,7 +63,7 @@ Standalone tab navigation bar with active indicator.
 - `orientation`: `'horizontal' | 'vertical'`
 - `alignment`: `'start' | 'center' | 'end'`
 - `fullWidth`: boolean
-- `onChange`: `(index: number) => void`
+- `onValueChange`: `(index: number) => void`
 
 When `href` is provided, tab renders as `<a>`. Roving tabindex + full keyboard nav (Arrow keys, Home, End).
 
@@ -87,7 +87,7 @@ Animated multi-step content container with smooth height transitions.
 - `activeStep`: number (default: 0, bindable)
 - `mode`: `'classic' | 'vertical'`
 - `stepper`: StepperState (bindable) -- `next()`, `previous()`, `goTo(index)`, `activeStep`, `items`, `stepHeights`
-- `onChange`: `(item: Item) => void`
+- `onValueChange`: `(item: Item) => void`
 - `keyFramesOptions`: `{ duration: 300, easing: 'ease-in-out', fill: 'both' }`
 
 **Content snippets:** `step` (default, receives `{ stepper, item, index }`) or `step1`, `step2`, ... (1-based)
@@ -111,7 +111,7 @@ Hierarchical navigation path. Semantic `<nav><ol><li>` structure.
 
 **Props:**
 
-- `items`: `BreadcrumbItem[]` (required) -- `{ label, href?, active?, disabled?, onClick?, icon?, menu? }`
+- `items`: `BreadcrumbItem[]` (required) -- `{ label, href?, active?, disabled?, onclick?, icon?, menu? }`
 - `home`: BreadcrumbItem -- prepended first item
 - `maxItems`: number -- shows first + ellipsis + last N items
 - `showSeparator`: boolean (default: true)
@@ -153,7 +153,7 @@ Collapsible content sections with single/multiple expand modes.
 - `onToggle`: `({ item, index, isOpen }) => void`
 - `transitions`: SlideTransitionProps
 
-**Snippets:** `title`, `description`, `content`, `actions`, `icon` (receives `{ isOpen }`)
+**Snippets:** `title`, `description`, `content`, `icon` (receives `{ isOpen }`)
 
 ```svelte
 <Accordion
@@ -208,13 +208,13 @@ Visual divider with optional label.
 
 - `orientation`: `'horizontal' | 'vertical'`
 - `color`: Colors (default: `'neutral'`)
-- `size`: number (default: 1) -- thickness in px
+- `thickness`: number (default: 1) -- thickness in px
 - `decorative`: boolean -- sets role none when true, role separator when false
 
 **Content:** `children` snippet or `children="OR"` string for label in the middle.
 
 ```svelte
-<Separator color="primary" size={2}>
+<Separator color="primary" thickness={2}>
 	{#snippet children()}OR{/snippet}
 </Separator>
 ```
@@ -236,9 +236,9 @@ Renders an array of items: buttons, options, separators, and submenus.
 
 **Item types:**
 
-- `{ type: 'option', title, description?, prefix?, suffix?, onClick?, href?, color?, size? }`
-- `{ type: 'button', children, variant?, color?, onClick? }`
-- `{ type: 'separator', color?, size?, children? }`
+- `{ type: 'option', title, description?, prefix?, suffix?, onclick?, href?, color?, size? }`
+- `{ type: 'button', children, variant?, color?, onclick? }`
+- `{ type: 'separator', color?, thickness?, children? }`
 - `{ type: 'submenu', title, menu: MenuItem[], openOnHover?, openOnClick?, hoverDelay?, closeOnMouseLeave? }`
 
 ```svelte
@@ -298,15 +298,20 @@ Individual menu item with title/description layout.
 - `prefix` / `suffix`: Snippet
 - `size`: `'small' | 'normal' | 'large'` (default: `'normal'`)
 - `color`: Colors (default: `'primary'`)
-- `onClick`, `onEnter`, `onLeave`
+- `onclick`, `onpointerenter`, `onpointerleave`
 - `href`, `target`, `rel`
 - `as`: string -- override element type
 
-**Auto element detection:** href renders a, onClick renders button, else div.
+**Auto element detection:** href renders a, onclick renders button, else div.
 
 ```svelte
+<script>
+  import { MenuOption } from 'svelai/menu-option';
+  import { gearIcon } from 'svelai/icons/gear';
+</script>
+
 <MenuOption href="/settings" color="primary">
-	{#snippet prefix()}<Icon />{/snippet}
+  {#snippet prefix()}{@render gearIcon()}{/snippet}
 	{#snippet title()}Settings{/snippet}
 	{#snippet description()}Manage preferences{/snippet}
 </MenuOption>

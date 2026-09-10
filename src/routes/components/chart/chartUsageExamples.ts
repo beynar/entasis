@@ -250,17 +250,14 @@ const contributionWeeks = Array.from(
 	{ length: 16 },
 	(_value, index) => `W${String(index + 1).padStart(2, '0')}`
 );
-const contributionRows: readonly ContributionRow[] = contributionWeeks.flatMap(
-	(week, weekIndex) =>
-		contributionWeekdays.map((weekday, weekdayIndex) => ({
-			date: new Date(Date.UTC(2026, 0, 5 + weekIndex * 7 + weekdayIndex)),
-			week,
-			weekday,
-			contributions:
-				(weekIndex + weekdayIndex) % 6 === 0
-					? 0
-					: (weekIndex * 3 + weekdayIndex * 5 + 2) % 15
-		}))
+const contributionRows: readonly ContributionRow[] = contributionWeeks.flatMap((week, weekIndex) =>
+	contributionWeekdays.map((weekday, weekdayIndex) => ({
+		date: new Date(Date.UTC(2026, 0, 5 + weekIndex * 7 + weekdayIndex)),
+		week,
+		weekday,
+		contributions:
+			(weekIndex + weekdayIndex) % 6 === 0 ? 0 : (weekIndex * 3 + weekdayIndex * 5 + 2) % 15
+	}))
 );
 const contributionDateFormat = new Intl.DateTimeFormat('en', {
 	month: 'short',
@@ -273,7 +270,7 @@ export function matrixChartUsageExample(
 	variant: ChartMatrixVariant,
 	tooltip: boolean
 ): ChartUsageExample<ContributionRow> {
-	const matrixTooltip = tooltip
+	const matrixTooltip: ChartProps<ContributionRow>['tooltip'] = tooltip
 		? {
 				groupBy: false,
 				fields: [
@@ -335,9 +332,7 @@ export function matrixChartUsageExample(
 	};
 }
 
-function seriesChartUsageExample(
-	options: MetricChartUsageOptions
-): ChartUsageExample<MetricRow> {
+function seriesChartUsageExample(options: MetricChartUsageOptions): ChartUsageExample<MetricRow> {
 	const interval = options.interval && !options.area;
 	const analysis = resolveSeriesAnalysis(options.seriesAnalysis);
 	const isStackedArea = options.area && analysis === undefined;
@@ -531,10 +526,7 @@ export function distributionChartUsageExample(
 	tooltip: boolean
 ): ChartUsageExample<DistributionRow> {
 	let analysis:
-		| readonly [
-				ChartDistributionReferenceAnalysis,
-				...ChartDistributionReferenceAnalysis[]
-		  ]
+		| readonly [ChartDistributionReferenceAnalysis, ...ChartDistributionReferenceAnalysis[]]
 		| undefined;
 	if (analysisUsage === 'mean') {
 		analysis = [{ type: 'reference', statistic: 'mean', scope: 'plot', color: 'secondary' }];
@@ -749,17 +741,22 @@ export function relationChartUsageExample(
 	variant: ChartRelationVariant,
 	options: { labels: boolean; tooltip: boolean }
 ): ChartUsageExample<RelationRow> {
-	const common = {
-		type: 'relation',
-		nodeId: 'id',
-		colorBy: 'group',
-		labels: options.labels ? { text: 'label' } : false
-	} as const;
+	const labels = options.labels ? ({ text: 'label' } as const) : false;
 	if (variant === 'tree') {
 		return {
 			data: relationRows,
 			props: {
-				marks: [{ ...common, variant, parent: 'parent', nodeRadius: 6 }],
+				marks: [
+					{
+						type: 'relation',
+						nodeId: 'id',
+						colorBy: 'group',
+						labels,
+						variant,
+						parent: 'parent',
+						nodeRadius: 6
+					}
+				],
 				tooltip: options.tooltip
 			}
 		};
@@ -768,7 +765,17 @@ export function relationChartUsageExample(
 		return {
 			data: relationRows,
 			props: {
-				marks: [{ ...common, variant, relations: 'relations', nodeRadius: 7 }],
+				marks: [
+					{
+						type: 'relation',
+						nodeId: 'id',
+						colorBy: 'group',
+						labels,
+						variant,
+						relations: 'relations',
+						nodeRadius: 7
+					}
+				],
 				tooltip: options.tooltip
 			}
 		};
@@ -778,7 +785,10 @@ export function relationChartUsageExample(
 		props: {
 			marks: [
 				{
-					...common,
+					type: 'relation',
+					nodeId: 'id',
+					colorBy: 'group',
+					labels,
 					variant,
 					relations: 'relations',
 					align: 'justify',

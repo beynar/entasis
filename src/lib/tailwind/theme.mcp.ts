@@ -1,14 +1,14 @@
 export const themePluginDescription = `
 # Theme Tailwind plugin
 
-\`@plugin './lib/tailwind/theme'\` generates color variables for each named theme. The declaration
+\`@plugin 'svelai/tailwind-plugin/theme'\` generates color variables for each named theme. The declaration
 marked \`default: true\` also registers the shared utility vocabulary, variants, spinner styles,
 and keyframes.
 
 \`\`\`css
 @import 'tailwindcss';
 
-@plugin './lib/tailwind/theme' {
+@plugin 'svelai/tailwind-plugin/theme' {
 	name: light;
 	default: true;
 	colorscheme: light;
@@ -17,7 +17,7 @@ and keyframes.
 	neutral: #121212;
 }
 
-@plugin './lib/tailwind/theme' {
+@plugin 'svelai/tailwind-plugin/theme' {
 	name: dark;
 	colorscheme: dark;
 	primary: #818cf8;
@@ -51,6 +51,11 @@ Each semantic color supports explicit \`-light\`, \`-lighter\`, \`-dark\`, \`-mu
 Spacing, radius, typography scale, and raised borders are not plugin options. Configure them with
 the \`designTokens\` prop on \`Theme\`. Tailwind still discovers and compiles the finite utility
 names; runtime theming changes the CSS variables those utilities consume.
+
+The public spacing vocabulary is \`xs | sm | md | lg | xl\`, available through named gap, padding,
+and margin utilities such as \`gap-md\` and \`px-lg\`. The \`micro\` and \`layout-*\` values are
+internal component-recipe tokens. Generated interfaces should prefer Stack/Grid gaps and must not
+emit arbitrary spacing or unsupported radius utilities.
 
 Color variables can also be overridden directly at runtime:
 

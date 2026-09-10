@@ -1,7 +1,7 @@
 import { cva } from '$lib/utils/cva/index.js';
 
-export const heading = cva({
-	base: 'ui-heading',
+const heading = cva({
+	base: '[text-box-edge:cap_alphabetic]',
 	variants: {
 		size: {
 			h1: 'text-4xl',
@@ -22,17 +22,24 @@ export const heading = cva({
 			right: 'text-right'
 		},
 		balanced: {
-			true: 'balanced',
-			false: ''
+			true: 'text-balance',
+			false: 'text-wrap'
 		},
 		underline: {
 			true: 'underline',
 			false: ''
 		},
 		muted: {
-			true: 'muted',
+			true: 'text-neutral/60',
 			false: ''
+		},
+		trim: {
+			start: '[text-box-trim:trim-start]',
+			end: '[text-box-trim:trim-end]',
+			both: '[text-box-trim:trim-both]',
+			none: '[text-box-trim:none]'
 		}
 	}
 });
 
+export const headingTheme = { root: heading };

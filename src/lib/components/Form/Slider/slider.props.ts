@@ -22,9 +22,14 @@ export type SliderRangeLabelPayload = SliderRangePayload;
 export type SliderMode = 'single' | 'range';
 export type SliderVariant = 'default' | 'thick' | 'contained';
 
-export type SliderProps = Omit<InputProps<'slider'>, 'value' | 'onChange' | 'onValidate'> & {
+export type SliderProps = Omit<
+	InputProps<'slider'>,
+	'value' | 'defaultValue' | 'onValueChange' | 'onValidate'
+> & {
 	/** The field's value, bindable with `bind:value`; arrays render multiple thumbs. */
 	value?: number | number[] | null;
+	/** Initial field value when `value` is omitted. */
+	defaultValue?: number | number[] | null;
 	/** Minimum selectable value. */
 	min?: number;
 	/** Maximum selectable value. */
@@ -60,7 +65,7 @@ export type SliderProps = Omit<InputProps<'slider'>, 'value' | 'onChange' | 'onV
 	/** Per-instance i18n overrides, merged over the global catalog. */
 	i18n?: Partial<Messages>;
 	/** Called whenever the field value changes. */
-	onChange?: (value: number | number[]) => void;
+	onValueChange?: (value: number | number[] | null) => void;
 	/** Validates the current value, returning error messages (or false) when invalid. */
 	onValidate?: (value: number | number[]) => string[] | boolean;
 	/** Theme overrides for slider parts and inherited Field parts. */

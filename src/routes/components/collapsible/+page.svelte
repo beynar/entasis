@@ -4,7 +4,27 @@
 	import { sizes } from '$lib/utils/tokens.js';
 	import { caretUpDownIcon } from '$lib/components/Icons/caretUpDown.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+
+	const collapsibleVariants = ['default', 'peek'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'default',
+			options: collapsibleVariants
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 
 	let controlledOpen = $state(false);
 	let peekOpen = $state(false);
@@ -31,8 +51,9 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A shadcn-style disclosure: a trigger row that reveals its content with a slide."
-		code={`<Collapsible icon={caretUpDownIcon}>
+		code={`<Collapsible icon={caretUpDownIcon} size="${controls.value.size}" variant="${controls.value.variant}" disabled={${controls.value.disabled}}>
 	{#snippet trigger()}
 		<span class="px-2 text-sm font-semibold">@peduarte starred 3 repositories</span>
 	{/snippet}
@@ -44,7 +65,13 @@
 </Collapsible>`}
 	>
 		<div class="border-neutral-muted bg-surface w-[360px] rounded-xl border p-2 shadow-sm">
-			<Collapsible icon={caretUpDownIcon}>
+			<Collapsible
+				icon={caretUpDownIcon}
+				size={controls.value.size}
+				variant={controls.value.variant}
+				disabled={controls.value.disabled}
+				peekHeight={96}
+			>
 				{#snippet trigger()}
 					<span class="text-neutral px-2 text-sm font-semibold">
 						@peduarte starred 3 repositories
@@ -170,7 +197,7 @@
 <\/script>
 
 <Collapsible bind:open>…</Collapsible>
-<Button onClick={() => (open = !open)}>Toggle from outside</Button>`}
+<Button onclick={() => (open = !open)}>Toggle from outside</Button>`}
 		>
 			<div class="flex w-[360px] flex-col gap-4">
 				<div class="border-neutral-muted bg-surface rounded-xl border px-2 shadow-sm">
@@ -181,7 +208,7 @@
 						<p class="text-neutral/60 text-sm">This panel's state lives in the parent.</p>
 					</Collapsible>
 				</div>
-				<Button variant="soft" color="primary" onClick={() => (controlledOpen = !controlledOpen)}>
+				<Button variant="soft" color="primary" onclick={() => (controlledOpen = !controlledOpen)}>
 					Toggle from outside
 				</Button>
 			</div>

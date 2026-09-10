@@ -76,7 +76,7 @@
 			size="small"
 			variant="outline"
 			color="neutral"
-			onClick={addEventFile}
+			onclick={addEventFile}
 			disabled={!fileTree}
 		>
 			Add event file

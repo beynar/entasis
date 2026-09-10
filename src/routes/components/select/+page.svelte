@@ -5,6 +5,8 @@
 	import Form from '$lib/components/Form/Form/Form.svelte';
 
 	import type { SelectItems } from '$lib/components/Form/Select/index.js';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	const roles = [
 		{ value: 'admin', label: 'Administrator' },
@@ -41,6 +43,30 @@
 
 	let value = $state<string | null>(null);
 	let timezone = $state<string | null>(null);
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -56,8 +82,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Pick a role for a team member"
 		code={`<Select
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Role"
 	description="Controls what this member can see and do"
 	placeholder="Select a role"
@@ -72,6 +103,10 @@
 	>
 		<div class="w-full max-w-md">
 			<Select
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
 				label="Role"
 				description="Controls what this member can see and do"
 				placeholder="Select a role"

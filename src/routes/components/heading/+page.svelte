@@ -1,11 +1,38 @@
 <script lang="ts">
 	import Heading from '$lib/components/Heading/Heading.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 
 	const sizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
 	const weights = ['light', 'normal', 'bold'] as const;
 	const aligns = ['left', 'center', 'right'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'h1',
+			options: sizes
+		},
+		{
+			name: 'weight',
+			type: 'segmented',
+			label: 'Weight',
+			value: 'normal',
+			options: weights
+		},
+		{
+			name: 'align',
+			type: 'segmented',
+			label: 'Align',
+			value: 'left',
+			options: aligns
+		},
+		{ name: 'muted', type: 'switch', label: 'Muted', value: false },
+		{ name: 'underline', type: 'switch', label: 'Underline', value: false },
+		{ name: 'balanced', type: 'switch', label: 'Balanced', value: false }
+	]);
 </script>
 
 <DocPage
@@ -20,9 +47,29 @@
 	]}
 >
 	<ComponentCard
-		code={`<Heading size="h1">The quick brown fox</Heading>`}
+		{controls}
+		code={`<Heading
+	size="${controls.value.size}"
+	weight="${controls.value.weight}"
+	align="${controls.value.align}"
+	muted={${controls.value.muted}}
+	underline={${controls.value.underline}}
+	balanced={${controls.value.balanced}}
+>
+	The quick brown fox
+</Heading>`}
 	>
-		<Heading size="h1">The quick brown fox</Heading>
+		<Heading
+			size={controls.value.size}
+			weight={controls.value.weight}
+			align={controls.value.align}
+			muted={controls.value.muted}
+			underline={controls.value.underline}
+			balanced={controls.value.balanced}
+			class="w-full"
+		>
+			The quick brown fox
+		</Heading>
 	</ComponentCard>
 
 	{#snippet examples()}

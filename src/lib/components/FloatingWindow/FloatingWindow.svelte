@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { crossfade, scale } from 'svelte/transition';
 	import Button from '../Button/Button.svelte';
@@ -17,7 +18,8 @@
 	let {
 		id: customId,
 		ref = $bindable(),
-		open = $bindable(true),
+		defaultOpen = true,
+		open = $bindable(),
 		minimized = $bindable(false),
 		dockPlacement = 'bottom-left',
 		title,
@@ -32,13 +34,22 @@
 		dimensions = $bindable({ width: 480, height: 320 }),
 		class: className,
 		theme,
-		onClose,
+		onOpenChange,
+		onAfterOpen,
+		onAfterClose,
 		onMinimize,
 		onRestore,
 		onMove,
 		onResize,
 		...attachments
 	}: FloatingWindowProps = $props();
+	const openState = createBindableValue(
+		() => open,
+		(next) => {
+			open = next;
+		},
+		() => defaultOpen
+	);
 
 	const generatedId = $props.id();
 	const id = $derived(customId || generatedId);
@@ -59,10 +70,10 @@
 			return id;
 		},
 		get open() {
-			return open;
+			return openState.value;
 		},
 		set open(value) {
-			open = value;
+			openState.value = value;
 		},
 		get minimized() {
 			return minimized;
@@ -103,8 +114,8 @@
 		set dimensions(value) {
 			dimensions = { ...dimensions, width: value.width, height: value.height };
 		},
-		get onClose() {
-			return onClose;
+		get onOpenChange() {
+			return onOpenChange;
 		},
 		get onMinimize() {
 			return onMinimize;
@@ -151,15 +162,41 @@
 		direction === 'north' || direction === 'south'
 			? (dimensions.max?.[1] ?? windowState.viewportHeight - 16)
 			: (dimensions.max?.[0] ?? windowState.viewportWidth - 16);
+
+	let observedOpen = openState.value;
+	let pendingAfterOpen = openState.value;
+	let pendingAfterClose = false;
+
+	$effect(() => {
+		const nextOpen = openState.value;
+		if (nextOpen === observedOpen) return;
+		observedOpen = nextOpen;
+		pendingAfterOpen = nextOpen;
+		pendingAfterClose = !nextOpen;
+	});
+
+	const handleIntroEnd = () => {
+		if (!pendingAfterOpen) return;
+		pendingAfterOpen = false;
+		onAfterOpen?.(windowState.payload);
+	};
+
+	const handleOutroEnd = () => {
+		if (!pendingAfterClose) return;
+		pendingAfterClose = false;
+		onAfterClose?.(windowState.payload);
+	};
 </script>
 
-{#if open && !minimized && windowState.position}
+{#if openState.value && !minimized && windowState.position}
 	<div
 		{@attach windowState.theme.floatingWindows.portal}
 		{@attach windowState.root}
 		{@attach windowState.windowDrag}
 		in:receive={{ key: id }}
 		out:send={{ key: id }}
+		onintroend={handleIntroEnd}
+		onoutroend={handleOutroEnd}
 		bind:this={ref}
 		{id}
 		role="dialog"
@@ -208,7 +245,7 @@
 						squared
 						label="Minimize window"
 						class={classes.control()}
-						onClick={() => windowState.minimize()}
+						onclick={() => windowState.minimize()}
 					>
 						{@render minusIcon({ size: 16 })}
 					</Button>
@@ -222,7 +259,7 @@
 						squared
 						label="Close window"
 						class={classes.control()}
-						onClick={() => windowState.close()}
+						onclick={() => windowState.close()}
 					>
 						{@render xIcon({ size: 16 })}
 					</Button>
@@ -257,13 +294,15 @@
 	</div>
 {/if}
 
-{#if open && minimized}
+{#if openState.value && minimized}
 	<div
 		{@attach windowState.theme.floatingWindows.portal}
 		{@attach windowState.dock}
 		{@attach windowState.dockDrag}
 		in:receive={{ key: id }}
 		out:send={{ key: id }}
+		onintroend={handleIntroEnd}
+		onoutroend={handleOutroEnd}
 		bind:this={ref}
 		role="group"
 		aria-label="Minimized window"
@@ -291,7 +330,7 @@
 				dragging: windowState.isDragging
 			})}
 			label="Restore window"
-			onClick={() => windowState.restoreFromDock()}
+			onclick={() => windowState.restoreFromDock()}
 		>
 			<span class={classes.dockTitleText({ side: windowState.dockSide })}>
 				<Slot render={title} payload={windowState.payload} />
@@ -309,7 +348,7 @@
 				squared
 				label="Restore window"
 				class={classes.control()}
-				onClick={() => windowState.restore()}
+				onclick={() => windowState.restore()}
 			>
 				{@render squareIcon({ size: 15 })}
 			</Button>
@@ -322,7 +361,7 @@
 					squared
 					label="Close window"
 					class={classes.control()}
-					onClick={() => windowState.close()}
+					onclick={() => windowState.close()}
 				>
 					{@render xIcon({ size: 15 })}
 				</Button>

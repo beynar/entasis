@@ -60,9 +60,7 @@
 		class="flex flex-wrap items-center gap-2 rounded-lg border border-neutral-muted bg-surface p-2"
 	>
 		<div class="relative min-w-56 flex-1">
-			<span
-				class="text-neutral/60 pointer-events-none absolute top-1/2 left-2 -translate-y-1/2"
-			>
+			<span class="text-neutral/60 pointer-events-none absolute top-1/2 left-2 -translate-y-1/2">
 				{@render magnifyingGlassIcon({ size: 16 })}
 			</span>
 			<input
@@ -81,7 +79,7 @@
 			color="neutral"
 			label="Previous search match"
 			disabled={fileTree == null || query.length === 0}
-			onClick={() => fileTree?.focusPreviousSearchMatch()}
+			onclick={() => fileTree?.focusPreviousSearchMatch()}
 		>
 			{@render caretUpIcon({ size: 16 })}
 		</Button>
@@ -91,7 +89,7 @@
 			color="neutral"
 			label="Next search match"
 			disabled={fileTree == null || query.length === 0}
-			onClick={() => fileTree?.focusNextSearchMatch()}
+			onclick={() => fileTree?.focusNextSearchMatch()}
 		>
 			{@render caretDownIcon({ size: 16 })}
 		</Button>

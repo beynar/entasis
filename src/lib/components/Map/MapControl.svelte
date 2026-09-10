@@ -37,7 +37,7 @@
 		geolocationConfig: ResolvedMapGeolocationConfig;
 		controlButton?: Snippet<[MapControlButtonSnippetArg]>;
 		onuserlocationchange?: (location: MapUserLocation) => void;
-		onerror?: (error: Error) => void;
+		onError?: (error: Error) => void;
 	};
 
 	type ControlAttachmentParams = {
@@ -57,7 +57,7 @@
 		geolocationConfig,
 		controlButton,
 		onuserlocationchange,
-		onerror
+		onError
 	}: Props<TData> = $props();
 
 	let isLocating = false;
@@ -65,7 +65,7 @@
 	let actionList = $derived(resolveMapControlActions(controls));
 
 	function reportError(error: Error): void {
-		reportMapError(error, onerror);
+		reportMapError(error, onError);
 	}
 
 	function isActionDisabled(action: MapControlAction): boolean {

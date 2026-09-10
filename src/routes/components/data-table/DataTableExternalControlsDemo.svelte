@@ -11,10 +11,10 @@
 
 	const people = createPeople(137);
 	const columns: DataTableColumn<Person>[] = [
-		{ id: 'name', accessor: 'name', header: 'Name', sortable: true, size: 220 },
-		{ id: 'email', accessor: 'email', header: 'Email', size: 280 },
+		{ id: 'name', accessor: 'name', header: 'Name', sortable: true, width: 220 },
+		{ id: 'email', accessor: 'email', header: 'Email', width: 280 },
 		{ id: 'department', accessor: 'department', header: 'Department', sortable: true },
-		{ id: 'status', accessor: 'status', header: 'Status', size: 140 }
+		{ id: 'status', accessor: 'status', header: 'Status', width: 140 }
 	];
 	let tableState = $state(createDataTableState(columns, { pagination: { page: 1, pageSize: 10 } }));
 	let dataTable = $state<DataTableApi<Person>>();
@@ -27,7 +27,7 @@
 			size="small"
 			placeholder="Search outside the table"
 			value={dataTable?.state.globalFilter ?? ''}
-			onChange={(value) => dataTable?.setGlobalFilter(value ?? '')}
+			onValueChange={(value) => dataTable?.setGlobalFilter(value ?? '')}
 		/>
 		{#if dataTable}
 			<Pagination

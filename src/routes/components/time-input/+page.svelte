@@ -3,8 +3,34 @@
 	import DocPage from '../../DocPage.svelte';
 	import { TimeInput } from '$lib/components/Form/TimeInput/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let openingTime = $state<number | null>(540);
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -19,8 +45,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A masked time input, value as minutes since midnight"
 		code={`<TimeInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Opening time"
 	description="When the store opens on weekdays"
 	bind:value={openingTime}
@@ -28,6 +59,10 @@
 	>
 		<div class="w-full max-w-md">
 			<TimeInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
 				label="Opening time"
 				description="When the store opens on weekdays"
 				bind:value={openingTime}
@@ -44,7 +79,7 @@
 					label="Time"
 					format="HH:MM"
 					placeholder="HH:MM"
-					onChange={(value) => {
+					onValueChange={(value) => {
 						console.log('value', value);
 					}}
 				/>

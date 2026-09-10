@@ -1,0 +1,72 @@
+<script lang="ts">
+	import { Stack } from 'svelai/stack';
+	import { AvatarGroup } from 'svelai/avatar';
+	import { Card } from 'svelai/card';
+	import { Chip } from 'svelai/chip';
+	import { Heading } from 'svelai/heading';
+	import { Meter } from 'svelai/meter';
+	import { Stat } from 'svelai/stat';
+</script>
+
+<section class="flex flex-col gap-xl p-lg md:p-xl">
+	<div class="max-w-xl">
+		<Heading as="h2" size="h2" weight="bold">From the first brief to the final detail.</Heading>
+		<p class="mt-lg text-neutral/70">Give every part of the project a clear home.</p>
+	</div>
+	<div class="grid gap-lg md:grid-cols-2">
+		<Card title="A clear path forward" description="Turn a big idea into small, useful steps."
+			><div class="flex flex-col gap-sm">
+				{#each ['Write the brief', 'Explore directions', 'Review the prototype'] as task, index (task)}<div
+						class="flex items-center gap-md rounded-lg bg-surface-recessed p-md"
+					>
+						<Chip size="small" color={index < 2 ? 'success' : 'primary'}
+							>{index < 2 ? 'Done' : 'Next'}</Chip
+						><span>{task}</span>
+					</div>{/each}
+			</div></Card
+		>
+		<Card title="Room in the budget" description="Know where you stand before you commit."
+			><Stack gap="lg"
+				><Stat label="Available this month" value="$8,420" variant="ghost" /><Meter
+					label="Budget allocated"
+					value={{ value: 64, color: 'primary' }}
+				/>
+				<p class="text-sm text-neutral/60">$15,000 of $23,420 allocated</p></Stack
+			></Card
+		>
+		<Card title="The right rhythm" variant="soft" color="primary"
+			><Stack gap="lg"
+				><div class="grid grid-cols-5 gap-sm">
+					{#each ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] as day, index (day)}<div
+							class="flex flex-col items-center gap-md min-w-0 rounded-lg bg-surface px-xs py-md"
+						>
+							<span class="text-xs text-neutral/60">{day}</span><strong class="text-2xl"
+								>{14 + index}</strong
+							><span
+								class={index === 2
+									? 'size-2 rounded-full bg-primary'
+									: 'size-2 rounded-full bg-neutral-muted'}
+							></span>
+						</div>{/each}
+				</div>
+				<p>Build a schedule that leaves space for the work.</p></Stack
+			></Card
+		>
+		<Card title="One team, every discipline" variant="outline"
+			><Stack gap="lg"
+				><AvatarGroup
+					size="large"
+					items={[
+						{ name: 'Maya Chen' },
+						{ name: 'Theo Park' },
+						{ name: 'Nora Ellis' },
+						{ name: 'Jules Bernard' }
+					]}
+				/>
+				<p class="text-neutral/70">
+					Bring the right perspective into the room, wherever that room happens to be.
+				</p></Stack
+			></Card
+		>
+	</div>
+</section>

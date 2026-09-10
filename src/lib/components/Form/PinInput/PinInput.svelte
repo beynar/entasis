@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import PinInputCells from './PinInputCells.svelte';
@@ -7,7 +8,8 @@
 	import { usePinInputTheme } from './pinInput.theme.js';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
@@ -21,13 +23,14 @@
 		disabled,
 		name,
 		onValidate,
-		onChange,
+		onValueChange,
 		onComplete,
 		visible,
 		label,
 		description,
 		...rest
 	}: PinInputProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 	const resolvedLength = () => (Number.isFinite(length) ? Math.max(1, Math.floor(length)) : 6);
@@ -52,7 +55,7 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => onChange?.(v ?? ''),
+		onValueChange: (v) => onValueChange?.(v ?? ''),
 		get disabled() {
 			return disabled;
 		},

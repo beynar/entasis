@@ -7,6 +7,7 @@ import type {
 	FileTreeSearchChangeListener,
 	FileTreeSelectionChangeListener
 } from '@pierre/trees';
+import type { Density } from '$lib/types/theme.js';
 
 export type TreeInput = {
 	paths?: readonly string[];
@@ -19,7 +20,10 @@ export type TreeEventProps = {
 	/** Called after a drag-and-drop move completes. Enables drag-and-drop unless `dragAndDrop={false}`. */
 	onDropComplete?: NonNullable<FileTreeDragAndDropConfig['onDropComplete']>;
 	/** Called when a drag-and-drop move is rejected or fails. */
-	onDropError?: NonNullable<FileTreeDragAndDropConfig['onDropError']>;
+	onDropError?: (failure: {
+		error: string;
+		event: Parameters<NonNullable<FileTreeDragAndDropConfig['onDropError']>>[1];
+	}) => void;
 	/** Called after an inline rename completes. Enables inline rename unless `renaming={false}`. */
 	onRename?: NonNullable<FileTreeRenamingConfig['onRename']>;
 	/** Called when inline rename validation or mutation fails. */
@@ -33,8 +37,8 @@ export type TreeEventProps = {
 export type TreeOptionProps = {
 	/** Pierre Trees composition hooks for header and context-menu surfaces. */
 	composition?: FileTreeCompositionOptions;
-	/** Row density preset or numeric density factor. */
-	density?: TreeOptions['density'];
+	/** Semantic whitespace density for tree rows. */
+	density?: Density;
 	/** Drag-and-drop enablement or policy object. */
 	dragAndDrop?: TreeOptions['dragAndDrop'];
 	/** Search filtering strategy. */
@@ -133,7 +137,10 @@ function createResolvedOptions(
 
 	if (optionProps != null) {
 		setDefinedOption(resolvedOptions, 'composition', optionProps.composition);
-		setDefinedOption(resolvedOptions, 'density', optionProps.density);
+		if (optionProps.density !== undefined) {
+			const presets = { small: 'compact', normal: 'default', large: 'relaxed' } as const;
+			resolvedOptions.density = presets[optionProps.density];
+		}
 		setDefinedOption(resolvedOptions, 'dragAndDrop', optionProps.dragAndDrop);
 		setDefinedOption(resolvedOptions, 'fileTreeSearchMode', optionProps.fileTreeSearchMode);
 		setDefinedOption(
@@ -249,7 +256,12 @@ function composeDragAndDrop(
 		dragAndDropConfig.onDropComplete,
 		eventProps.onDropComplete
 	);
-	const onDropError = composeCallbacks(dragAndDropConfig.onDropError, eventProps.onDropError);
+	const onDropError = composeCallbacks(
+		dragAndDropConfig.onDropError,
+		eventProps.onDropError
+			? (error, event) => eventProps.onDropError?.({ error, event })
+			: undefined
+	);
 
 	if (onDropComplete != null) dragAndDropConfig.onDropComplete = onDropComplete;
 	if (onDropError != null) dragAndDropConfig.onDropError = onDropError;

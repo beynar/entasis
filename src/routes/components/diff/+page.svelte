@@ -119,7 +119,7 @@ export const LOCALE = 'en-GB';
 				size="small"
 				variant={current === option ? 'solid' : 'ghost'}
 				color="neutral"
-				onClick={() => onSelect(option)}
+				onclick={() => onSelect(option)}
 			>
 				{option}
 			</Button>

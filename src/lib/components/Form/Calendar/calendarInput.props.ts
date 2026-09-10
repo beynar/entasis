@@ -1,4 +1,5 @@
-import type { fieldTheme, InputProps } from '../Field/field.js';
+import type { InputProps } from '../Field/field.js';
+import type { fieldTheme } from '../Field/field.theme.js';
 import type { InferComponentTheme } from '$lib/utils/cva/index.js';
 import type { WithSlot } from '$lib/components/Slot/slot.js';
 import type { ButtonProps } from '$lib/components/Button/index.js';
@@ -25,8 +26,10 @@ export type CalendarPrimitiveProps<
 	type: T;
 	/** Current selection for the chosen calendar type. */
 	value?: CalendarValue<T>;
+	/** Initial selection when `value` is omitted. */
+	defaultValue?: CalendarValue<T>;
 	/** Called whenever the calendar selection changes. */
-	onChange?: (value: CalendarValue<T>) => void;
+	onValueChange?: (value: CalendarValue<T>) => void;
 };
 
 export type BaseCalendarProps<E extends Event> = WithSlot<
@@ -88,7 +91,7 @@ export type BaseCalendarProps<E extends Event> = WithSlot<
 >;
 
 export type CalendarInputProps<T extends 'calendar' | 'calendar-range'> = CalendarPrimitiveProps<
-	any,
+	Event,
 	T
 > &
 	Omit<InputProps<T>, 'children' | 'type' | 'theme'> & {

@@ -7,7 +7,9 @@
 	import { Select } from '$lib/components/Form/Select/index.js';
 	import SegmentedControl from '$lib/components/SegmentedControl/SegmentedControl.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+	import { colors, sizes } from '$lib/utils/tokens.js';
 
 	type DemoFormat = Exclude<DocumentFormat, 'pages'>;
 	type DemoDocument = {
@@ -78,6 +80,40 @@
 	let mode = $state<DocumentViewMode>('scroll');
 	let page = $state(1);
 	let sheet = $state(1);
+
+	const toolbarPositions = ['top', 'bottom', 'left', 'right'] as const;
+	const orientations = ['vertical', 'horizontal'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'neutral',
+			options: colors
+		},
+		{
+			name: 'orientation',
+			type: 'segmented',
+			label: 'Orientation',
+			value: 'vertical',
+			options: orientations
+		},
+		{
+			name: 'toolbarPosition',
+			type: 'segmented',
+			label: 'Toolbar',
+			value: 'top',
+			options: toolbarPositions
+		},
+		{ name: 'sidebar', type: 'switch', label: 'Sidebar', value: true }
+	]);
 	const activeDocument = $derived(
 		demoDocuments.find(({ format }) => format === selectedFormat) ?? pdfDocument
 	);
@@ -102,12 +138,18 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		class="!min-h-fit !items-stretch !justify-start max-w-[90vw]"
 		code={`<div class="h-[720px]">
   <DocumentViewer
     src="${activeDocument.src}"
     format="${activeDocument.format}"
     mode="${mode}"
+    size="${controls.value.size}"
+    color="${controls.value.color}"
+    orientation="${controls.value.orientation}"
+    toolbarPosition="${controls.value.toolbarPosition}"
+    sidebar={${controls.value.sidebar}}
   />
 </div>`}
 	>
@@ -138,6 +180,11 @@
 					bind:page
 					bind:sheet
 					bind:mode
+					size={controls.value.size}
+					color={controls.value.color}
+					orientation={controls.value.orientation}
+					toolbarPosition={controls.value.toolbarPosition}
+					sidebar={controls.value.sidebar}
 				/>
 			</div>
 		</div>

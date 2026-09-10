@@ -3,7 +3,8 @@ export type {
 	SelectProps,
 	SelectOption,
 	SelectOptionGroup,
-	SelectItems
+	SelectItems,
+	SelectTriggerAttributes
 } from './select.props.js';
 export { SelectState } from './select.state.svelte.js';
 export {
@@ -13,4 +14,3 @@ export {
 	type SelectTheme,
 	type SelectThemeProps
 } from './select.theme.js';
-

@@ -1,11 +1,5 @@
-import {
-	areaX,
-	areaY,
-	d3AreaXCurve,
-	d3Curve,
-	lineY,
-	rect
-} from '@tanstack/charts';
+import { areaX, areaY, d3AreaXCurve, d3Curve, lineY, rect } from '@tanstack/charts';
+import { binX } from '@tanstack/charts/transform/bin';
 import { deviation } from 'd3-array';
 import { curveBasis, curveStepAfter, curveStepBefore } from 'd3-shape';
 import type { CompiledMark } from './chart.cartesian.js';
@@ -165,19 +159,17 @@ function histogramRows(
 	[minimum, maximum]: readonly [number, number]
 ): readonly DistributionEmpiricalDatum[] {
 	const step = (maximum - minimum) / binCount;
+	const boundaries = Array.from({ length: binCount + 1 }, (_value, index) =>
+		index === binCount ? maximum : minimum + step * index
+	);
 	return summaries.flatMap((summary) =>
-		Array.from({ length: binCount }, (_value, index) => {
-			const lower = minimum + step * index;
-			const upper = index === binCount - 1 ? maximum : lower + step;
-			const count = summary.values.filter(
-				(value) => value >= lower && (value < upper || (index === binCount - 1 && value <= upper))
-			).length;
-			return empiricalDatum(summary, 'histogram', direction, (lower + upper) / 2, count, index, {
-				lower,
-				upper,
-				count
-			});
-		})
+		binX(summary.values, { value: (value) => value, thresholds: boundaries }).map((bin, index) =>
+			empiricalDatum(summary, 'histogram', direction, bin.x, bin.value, index, {
+				lower: bin.x1,
+				upper: bin.x2,
+				count: bin.value
+			})
+		)
 	);
 }
 

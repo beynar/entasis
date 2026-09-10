@@ -32,7 +32,7 @@
 			squared={collapsed}
 			fullWidth={!collapsed}
 			class={collapsed ? 'mx-auto' : 'justify-start'}
-			onClick={() => open()}
+			onclick={() => open()}
 			size="large"
 		>
 			{#if !collapsed}

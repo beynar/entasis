@@ -24,6 +24,8 @@ export type MiniCalendarProps = WithAttachments<
 		HTMLAttributes<HTMLDivElement> & {
 			/** The selected date; compared by year/month/day. Bindable. */
 			value?: Date | null;
+			/** Initial selected date when `value` is omitted. Later default changes are ignored. */
+			defaultValue?: Date | null;
 			/** The first visible day of the strip; navigation shifts it by `days`. Bindable; defaults to today. */
 			startDate?: Date;
 			/** Number of day cells shown at once. */
@@ -44,7 +46,7 @@ export type MiniCalendarProps = WithAttachments<
 			class?: string;
 			/** Bindable reference to the root container element. */
 			ref?: HTMLElement | null;
-			/** Called with the picked date when a day cell is clicked. */
+			/** Called once when a day selection changes the value. Repeated and external selections are silent. */
 			onValueChange?: (date: Date) => void;
 			/** Called with the new start date when the chevrons shift the visible range. */
 			onStartDateChange?: (startDate: Date) => void;

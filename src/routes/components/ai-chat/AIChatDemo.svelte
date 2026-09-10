@@ -102,10 +102,11 @@
 
 	onDestroy(() => clearResponseTimer());
 
-	async function handleSubmit(
-		_detail: unknown,
-		state: AIConversationState<DemoMessage>
-	): Promise<void> {
+	async function handleSubmit({
+		conversation: state
+	}: {
+		conversation: AIConversationState<DemoMessage>;
+	}): Promise<void> {
 		clearResponseTimer();
 		state.startStreaming();
 		state.setLiveText('Reviewing the request and current launch context...');
@@ -196,7 +197,7 @@
 				<div class="text-sm font-semibold">Launch workspace</div>
 				<div class="text-xs text-neutral/60">{state.messages.length} transcript items</div>
 			</div>
-			<Button size="small" variant="outline" onClick={askForInput}>Ask for input</Button>
+			<Button size="small" variant="outline" onclick={askForInput}>Ask for input</Button>
 		</div>
 	{/snippet}
 	{#snippet message({ message, index, actionsVisibility })}

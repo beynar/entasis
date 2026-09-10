@@ -2,23 +2,23 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultPagination = cva({
-	base: 'flex w-fit max-w-full flex-wrap items-center gap-3'
+	base: 'flex w-fit max-w-full flex-wrap items-center gap-lg'
 });
 
 const defaultPaginationList = cva({
 	base: 'flex flex-wrap items-center',
 	variants: {
 		size: {
-			small: 'gap-1',
-			normal: 'gap-1.5',
-			large: 'gap-2'
+			small: 'gap-xs',
+			normal: 'gap-sm',
+			large: 'gap-md'
 		},
 		variant: {
 			pages: null,
-			count: 'gap-2',
-			compact: 'gap-2',
+			count: 'gap-md',
+			compact: 'gap-md',
 			dots: 'gap-0',
-			none: 'gap-2'
+			none: 'gap-md'
 		}
 	},
 	defaultVariants: {
@@ -52,12 +52,12 @@ const defaultPaginationItem = cva({
 });
 
 const defaultPaginationControl = cva({
-	base: 'inline-flex shrink-0 select-none items-center justify-center rounded-lg border font-medium outline-none transition-all duration-100 ease-in-out focus-visible:ring-2 focus-visible:ring-color/50 [&:active]:translate-y-px [&_svg:not([class*=size-])]:size-4',
+	base: 'inline-flex shrink-0 select-none items-center justify-center rounded-md border font-medium outline-none transition-all duration-100 ease-in-out focus-visible:ring-2 focus-visible:ring-color/50 [&:active]:translate-y-px [&_svg:not([class*=size-])]:size-icon-md',
 	variants: {
 		size: {
-			small: 'h-7 min-w-7 px-2 text-xs',
-			normal: 'h-8 min-w-8 px-2.5 text-sm',
-			large: 'h-9 min-w-9 px-3 text-sm'
+			small: 'h-control-sm min-size-hit-sm px-md text-xs',
+			normal: 'h-control-md min-size-hit-md px-lg text-sm',
+			large: 'h-control-lg min-size-hit-lg px-xl text-sm'
 		},
 		color: {
 			primary: 'text-primary-readable',
@@ -70,7 +70,7 @@ const defaultPaginationControl = cva({
 		},
 		controlVariant: {
 			solid: 'state-layer border-transparent bg-color text-color-contrast',
-			outline: 'state-layer border-neutral-muted bg-surface text-color-readable',
+			outline: 'state-layer bg-color/0 border-color text-color-readable',
 			soft: 'state-layer border-transparent bg-color-muted text-color-muted-readable',
 			ghost: 'state-layer border-transparent bg-transparent text-color-readable'
 		},
@@ -137,9 +137,9 @@ const defaultPaginationIcon = cva({
 	base: 'flex shrink-0 items-center justify-center',
 	variants: {
 		size: {
-			small: 'size-3.5',
-			normal: 'size-4',
-			large: 'size-4.5'
+			small: 'size-icon-sm',
+			normal: 'size-icon-md',
+			large: 'size-icon-lg'
 		}
 	},
 	defaultVariants: {
@@ -151,9 +151,9 @@ const defaultPaginationEllipsis = cva({
 	base: 'text-neutral/60 inline-flex shrink-0 items-center justify-center',
 	variants: {
 		size: {
-			small: 'h-7 min-w-7',
-			normal: 'h-8 min-w-8',
-			large: 'h-9 min-w-9'
+			small: 'h-control-sm min-w-[var(--control-height-sm)]',
+			normal: 'h-control-md min-w-[var(--control-height-md)]',
+			large: 'h-control-lg min-w-[var(--control-height-lg)]'
 		}
 	},
 	defaultVariants: {

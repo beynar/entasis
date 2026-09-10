@@ -17,8 +17,36 @@
 	import { textUnderlineIcon } from '$lib/components/Icons/textUnderline.js';
 	import type { MenuItem } from '$lib/components/Menu/index.js';
 	import type { Colors } from '$lib/types/theme.js';
+	import { colors, sizes } from '$lib/utils/tokens.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+
+	const toggleVariants = ['ghost', 'outline'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'ghost',
+			options: toggleVariants
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'neutral',
+			options: colors
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 
 	let textColor = $state<Colors>('neutral');
 
@@ -33,28 +61,28 @@
 				title: 'Default',
 				prefix: foregroundSwatch,
 				suffix: textColor === 'neutral' ? checkIcon : undefined,
-				onClick: () => selectTextColor('neutral')
+				onclick: () => selectTextColor('neutral')
 			},
 			{
 				type: 'option',
 				title: 'Primary',
 				prefix: primarySwatch,
 				suffix: textColor === 'primary' ? checkIcon : undefined,
-				onClick: () => selectTextColor('primary')
+				onclick: () => selectTextColor('primary')
 			},
 			{
 				type: 'option',
 				title: 'Danger',
 				prefix: dangerSwatch,
 				suffix: textColor === 'danger' ? checkIcon : undefined,
-				onClick: () => selectTextColor('danger')
+				onclick: () => selectTextColor('danger')
 			},
 			{
 				type: 'option',
 				title: 'Warning',
 				prefix: warningSwatch,
 				suffix: textColor === 'warning' ? checkIcon : undefined,
-				onClick: () => selectTextColor('warning')
+				onclick: () => selectTextColor('warning')
 			}
 		];
 	}
@@ -65,7 +93,7 @@
 				type: 'toggle',
 				prefix: eyeIcon,
 				ariaLabel: 'Preview',
-				checked: true
+				value: true
 			},
 			{
 				type: 'group',
@@ -104,7 +132,7 @@
 	let editorItems = $state<ToggleMenuItem[]>(createEditorItems());
 	let overflowItems = $state<ToggleMenuItem[]>(createEditorItems());
 	let textItems = $state<ToggleMenuItem[]>([
-		{ type: 'toggle', prefix: eyeIcon, children: 'Preview', checked: true },
+		{ type: 'toggle', prefix: eyeIcon, children: 'Preview', value: true },
 		{
 			type: 'group',
 			ariaLabel: 'Text formatting',
@@ -150,9 +178,10 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Toggles, exclusive choices, independent groups, and menu buttons share one keyboard and overflow model."
 		code={`let items = $state([
-\t{ type: 'toggle', prefix: eyeIcon, ariaLabel: 'Preview', checked: true },
+\t{ type: 'toggle', prefix: eyeIcon, ariaLabel: 'Preview', value: true },
 \t{
 \t\ttype: 'group',
 \t\tariaLabel: 'Text formatting',
@@ -181,9 +210,16 @@
 \t}
 ]);
 
-<ToggleMenu bind:items ariaLabel="Editor tools" />`}
+<ToggleMenu bind:value={items} ariaLabel="Editor tools" size="${controls.value.size}" variant="${controls.value.variant}" color="${controls.value.color}" disabled={${controls.value.disabled}} />`}
 	>
-		<ToggleMenu bind:items={editorItems} ariaLabel="Editor tools" />
+		<ToggleMenu
+			bind:value={editorItems}
+			ariaLabel="Editor tools"
+			size={controls.value.size}
+			variant={controls.value.variant}
+			color={controls.value.color}
+			disabled={controls.value.disabled}
+		/>
 	</ComponentCard>
 
 	{#snippet examples()}
@@ -192,11 +228,11 @@
 			description="When space runs out, complete logical groups move into More. Checked rows remain interactive and the menu stays open."
 			class="!min-h-fit"
 			code={`<div class="w-56">
-\t<ToggleMenu bind:items ariaLabel="Compact editor tools" />
+\t<ToggleMenu bind:value={items} ariaLabel="Compact editor tools" />
 </div>`}
 		>
 			<div class="w-56 max-w-full">
-				<ToggleMenu bind:items={overflowItems} ariaLabel="Compact editor tools" />
+				<ToggleMenu bind:value={overflowItems} ariaLabel="Compact editor tools" />
 			</div>
 		</ComponentCard>
 
@@ -206,7 +242,7 @@
 			class="!min-h-fit"
 		>
 			<div class="max-w-full">
-				<ToggleMenu bind:items={textItems} ariaLabel="Labeled editor tools" />
+				<ToggleMenu bind:value={textItems} ariaLabel="Labeled editor tools" />
 			</div>
 		</ComponentCard>
 
@@ -214,7 +250,7 @@
 			title="Disabled"
 			description="Disabling the toolbar preserves every pressed state."
 		>
-			<ToggleMenu items={createEditorItems()} ariaLabel="Unavailable editor tools" disabled />
+			<ToggleMenu value={createEditorItems()} ariaLabel="Unavailable editor tools" disabled />
 		</ComponentCard>
 	{/snippet}
 </DocPage>

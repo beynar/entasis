@@ -16,7 +16,7 @@
 		orientation = 'vertical',
 		align = 'stretch',
 		justify = 'start',
-		gap = 0,
+		gap = 'none',
 		padding,
 		paddingInline,
 		paddingBlock,

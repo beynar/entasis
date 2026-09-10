@@ -5,10 +5,11 @@
 	import { pauseIcon } from '$lib/components/Icons/pause.js';
 	import { playIcon } from '$lib/components/Icons/play.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 	import AudioPlayerDropDemo from './AudioPlayerDropDemo.svelte';
+	import { colors, sizes } from '$lib/utils/tokens.js';
 	import {
-		basicCode,
 		controlledCode,
 		controlledWaveform,
 		customSeekTheme,
@@ -22,6 +23,40 @@
 		trackControls,
 		transportControls
 	} from './audioPlayerDemoData.js';
+
+	const audioVariants = ['waveform', 'track'] as const;
+	const audioLayouts = ['block', 'inline'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'waveform',
+			options: audioVariants
+		},
+		{
+			name: 'layout',
+			type: 'segmented',
+			label: 'Layout',
+			value: 'block',
+			options: audioLayouts
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'primary',
+			options: colors
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 
 	let paused = $state(true);
 	let currentTime = $state(0);
@@ -38,7 +73,7 @@
 			label={player.paused || player.ended ? 'Play' : 'Pause'}
 			prefix={player.paused || player.ended ? playIcon : pauseIcon}
 			disabled={player.disabled}
-			onClick={() => player.runInteraction(() => player.togglePlay())}
+			onclick={() => player.runInteraction(() => player.togglePlay())}
 		/>
 		<span class="text-neutral/60 shrink-0 text-xs tabular-nums">
 			{formatTime(player.currentTime)} / {formatTime(player.duration)}
@@ -58,8 +93,10 @@
 		size="small"
 		disabled={player.disabled || player.duration <= 0}
 		theme={customSeekTheme}
-		onChange={(value) =>
-			player.runInteraction(() => player.seekTo(Array.isArray(value) ? (value[0] ?? 0) : value))}
+		onValueChange={(value) =>
+			player.runInteraction(() =>
+				player.seekTo(Array.isArray(value) ? (value[0] ?? 0) : (value ?? 0))
+			)}
 	/>
 {/snippet}
 
@@ -83,11 +120,30 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Default chrome generates waveform peaks from the audio source when samples are omitted."
 		class="!min-h-fit !items-stretch !justify-start"
-		code={basicCode}
+		code={`<AudioPlayer
+	src="${sampleAudio}"
+	title="Field recording"
+	artist="Svelai archives"
+	size="${controls.value.size}"
+	variant="${controls.value.variant}"
+	layout="${controls.value.layout}"
+	color="${controls.value.color}"
+	disabled={${controls.value.disabled}}
+/>`}
 	>
-		<AudioPlayer src={sampleAudio} title="Field recording" artist="Svelai archives" />
+		<AudioPlayer
+			src={sampleAudio}
+			title="Field recording"
+			artist="Svelai archives"
+			size={controls.value.size}
+			variant={controls.value.variant}
+			layout={controls.value.layout}
+			color={controls.value.color}
+			disabled={controls.value.disabled}
+		/>
 	</ComponentCard>
 
 	{#snippet examples()}

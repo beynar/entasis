@@ -880,7 +880,7 @@ export class GanttChartInteractions<
 				});
 				return false;
 			}
-			this.#chart.eventHandlers?.emptyRangeSelect?.(gesture.resolution.proposal);
+			this.#chart.eventHandlers?.onEmptyRangeSelect?.(gesture.resolution.proposal);
 			return true;
 		} finally {
 			this.cancel();
@@ -1031,7 +1031,7 @@ export class GanttChartInteractions<
 	}
 
 	private reportBlocked(info: GanttInteractionBlockedInfo): void {
-		this.#chart.eventHandlers?.interactionBlocked?.(info);
+		this.#chart.eventHandlers?.onInteractionBlocked?.(info);
 	}
 }
 

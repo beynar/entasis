@@ -3,7 +3,36 @@
 	import { confirmation } from '$lib/components/Confirmation/confirmation.state.svelte.js';
 	import Dialog from '$lib/components/Dialog/Dialog.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
+
+	const dialogTypes = [
+		'modal',
+		'alert',
+		'fullScreen',
+		'drawerRight',
+		'drawerLeft',
+		'drawerBottom',
+		'drawerTop'
+	] as const;
+	const controls = createComponentControls([
+		{
+			name: 'type',
+			type: 'segmented',
+			label: 'Type',
+			value: 'modal',
+			options: dialogTypes
+		},
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{ name: 'responsive', type: 'switch', label: 'Responsive', value: true }
+	]);
 
 	const shortText =
 		'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Placeat quas natus voluptatibus aliquam quisquam, dignissimos accusantium.';
@@ -29,9 +58,12 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A centered modal opened from a trigger button."
 		code={`<Dialog
-	type="modal"
+	type="${controls.value.type}"
+	size="${controls.value.size}"
+	responsive={${controls.value.responsive}}
 	title="Modal"
 	description="A centered modal dialog."
 	trigger={{ content: 'Open', color: 'primary' }}
@@ -40,7 +72,9 @@
 </Dialog>`}
 	>
 		<Dialog
-			type="modal"
+			type={controls.value.type}
+			size={controls.value.size}
+			responsive={controls.value.responsive}
 			title="Modal"
 			description="A centered modal dialog."
 			trigger={{ content: 'Open', color: 'primary' }}
@@ -205,7 +239,7 @@
 		description="Imperatively prompt for a yes/no decision with the confirmation() helper."
 	>
 		<Button
-			onClick={async () => {
+			onclick={async () => {
 				await confirmation({
 					title: 'Confirmation',
 					description: 'Are you sure you want to continue?',

@@ -125,7 +125,7 @@
 				title: formatChoice(effort),
 				suffix: reasoningEffort === effort ? checkIcon : undefined,
 				attrs: { 'aria-checked': reasoningEffort === effort },
-				onClick: () => (reasoningEffort = effort)
+				onclick: () => (reasoningEffort = effort)
 			}))
 		},
 		{
@@ -139,7 +139,7 @@
 				title: formatChoice(speed),
 				suffix: responseSpeed === speed ? checkIcon : undefined,
 				attrs: { 'aria-checked': responseSpeed === speed },
-				onClick: () => (responseSpeed = speed)
+				onclick: () => (responseSpeed = speed)
 			}))
 		}
 	]);
@@ -176,7 +176,7 @@
         type: 'option',
         title: effort,
         suffix: reasoning === effort ? 'Selected' : undefined,
-        onClick: () => (reasoning = effort)
+        onclick: () => (reasoning = effort)
       }))
     }
   ]);
@@ -190,7 +190,7 @@ ${'</' + 'script>'}
 			code: `<AIModelSelector {models} bind:value bind:query>
   {#snippet children({ model })}{model?.label ?? 'Choose a model'}{/snippet}
   {#snippet search({ query, setQuery })}
-    <TextInput value={query} onChange={(value) => setQuery(value ?? '')} />
+    <TextInput value={query} onValueChange={(value) => setQuery(value ?? '')} />
   {/snippet}
   {#snippet empty({ query })}No model matches "{query}".{/snippet}
 </AIModelSelector>`
@@ -311,7 +311,7 @@ ${'</' + 'script>'}
 								placeholder="Search label, provider, or keyword"
 								label="Search label, provider, or keyword"
 								theme={{ label: { base: 'sr-only' } }}
-								onChange={(nextValue) => setQuery(nextValue ?? '')}
+								onValueChange={(nextValue) => setQuery(nextValue ?? '')}
 							/>
 						{/snippet}
 						{#snippet empty({ query })}

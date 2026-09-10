@@ -10,7 +10,7 @@ The Tabbar component is a flexible navigation component that displays a list of 
 	let activeTab = $state(0);
 </script>
 
-<Tabbar items={['Home', 'Profile', 'Settings']} bind:activeTab />
+<Tabbar items={['Home', 'Profile', 'Settings']} bind:value={activeTab} />
 \`\`\`
 
 ## Props
@@ -21,11 +21,12 @@ The Tabbar component is a flexible navigation component that displays a list of 
     - A simple string (e.g., "Home")
     - A TabItem object with: { label, prefix?, suffix?, href?, disabled?, target?, rel? }
   
-- **activeTab**: number (default: 0, bindable)
+- **value**: number (default: 0, bindable)
   - The index of the currently active tab
-  - Can be bound with \`bind:activeTab\`
+  - Can be bound with \`bind:value\`
+- **defaultValue**: number (default: 0) - Initial active index when value is omitted
 
-- **onChange**: (index: number) => void
+- **onValueChange**: (value: number) => void
   - Callback function called when the active tab changes
   - Receives the new tab index as an argument
 
@@ -92,7 +93,7 @@ A tab with \`menu\` renders with a chevron and opens a popover menu instead of a
 \`\`\`svelte
 <Tabbar
 	items={['Home', 'Projects', { label: 'More', menu: ['Analytics', 'Reports', 'Billing'] }]}
-	bind:activeTab
+	bind:value={activeTab}
 />
 \`\`\`
 
@@ -122,7 +123,7 @@ The tabbar follows this DOM structure:
 
 <Tabbar 
 	items={['Home', 'About', 'Contact']} 
-	bind:activeTab 
+	bind:value={activeTab}
 	color="primary"
 />
 \`\`\`
@@ -150,7 +151,7 @@ The tabbar follows this DOM structure:
 	];
 </script>
 
-<Tabbar items={tabs} bind:activeTab />
+<Tabbar items={tabs} bind:value={activeTab} />
 \`\`\`
 
 ### Navigation Tabs (with links)
@@ -178,7 +179,7 @@ The tabbar follows this DOM structure:
 	];
 </script>
 
-<Tabbar items={tabs} bind:activeTab />
+<Tabbar items={tabs} bind:value={activeTab} />
 \`\`\`
 
 ### Vertical Orientation
@@ -189,7 +190,7 @@ The tabbar follows this DOM structure:
 
 <Tabbar 
 	items={['First', 'Second', 'Third']} 
-	bind:activeTab 
+	bind:value={activeTab}
 	orientation="vertical"
 />
 \`\`\`
@@ -201,10 +202,10 @@ The tabbar follows this DOM structure:
 </script>
 
 <!-- Centered tabs -->
-<Tabbar items={['One', 'Two', 'Three']} bind:activeTab alignment="center" />
+<Tabbar items={['One', 'Two', 'Three']} bind:value={activeTab} alignment="center" />
 
 <!-- Right-aligned tabs -->
-<Tabbar items={['One', 'Two', 'Three']} bind:activeTab alignment="end" />
+<Tabbar items={['One', 'Two', 'Three']} bind:value={activeTab} alignment="end" />
 \`\`\`
 
 ### Full Width Tabs
@@ -214,24 +215,23 @@ The tabbar follows this DOM structure:
 </script>
 
 <!-- Full width tabbar where tabs expand to fill available space -->
-<Tabbar items={['Tab 1', 'Tab 2', 'Tab 3']} bind:activeTab fullWidth />
+<Tabbar items={['Tab 1', 'Tab 2', 'Tab 3']} bind:value={activeTab} fullWidth />
 \`\`\`
 
-### With onChange Callback
+### With onValueChange Callback
 \`\`\`svelte
-<script>
+<script lang="ts">
 	let activeTab = $state(0);
 	
 	function handleTabChange(index: number) {
 		console.log('Active tab changed to:', index);
-		// Perform additional actions
 	}
 </script>
 
 <Tabbar 
 	items={['Tab 1', 'Tab 2', 'Tab 3']} 
-	bind:activeTab 
-	onChange={handleTabChange}
+	bind:value={activeTab}
+	onValueChange={handleTabChange}
 />
 \`\`\`
 
@@ -244,7 +244,7 @@ The tabbar follows this DOM structure:
 <!-- Small size with secondary color -->
 <Tabbar 
 	items={['Small', 'Tabs']} 
-	bind:activeTab 
+	bind:value={activeTab}
 	size="small"
 	color="secondary"
 />
@@ -252,7 +252,7 @@ The tabbar follows this DOM structure:
 <!-- Large size with success color -->
 <Tabbar 
 	items={['Large', 'Tabs']} 
-	bind:activeTab 
+	bind:value={activeTab}
 	size="large"
 	color="success"
 />
@@ -261,25 +261,19 @@ The tabbar follows this DOM structure:
 ### Complex Tabs with Badges
 \`\`\`svelte
 <script>
-	import Chip from '../Chip/Chip.svelte';
+	import { Chip } from 'svelai/chip';
 	
 	let activeTab = $state(0);
-	
-	const tabs = [
-		{ label: 'Inbox' },
-		{
-			label: 'Messages',
-			suffix: () => ({
-				{#snippet()}
-					<Chip color="danger" size="small">5</Chip>
-				{/snippet}
-			})
-		},
-		{ label: 'Sent' }
-	];
 </script>
 
-<Tabbar items={tabs} bind:activeTab />
+{#snippet unreadCount()}
+	<Chip color="danger" size="small">5</Chip>
+{/snippet}
+
+<Tabbar
+	items={['Inbox', { label: 'Messages', suffix: unreadCount }, 'Sent']}
+	bind:value={activeTab}
+/>
 \`\`\`
 
 ### External Links
@@ -340,10 +334,10 @@ Full keyboard support following WAI-ARIA best practices:
 ## Notes
 
 - When \`href\` is provided in a tab, it renders as an \`<a>\` tag, otherwise as a \`<button>\`
-- Disabled tabs cannot be clicked and do not trigger \`onChange\`
+- Disabled tabs cannot be clicked and do not trigger \`onValueChange\`
 - Active tab index is zero-based (first tab = 0)
-- The \`activeTab\` prop is bindable for two-way data binding
-- Tabs with \`href\` will not update \`activeTab\` on click (they navigate instead)
+- The \`value\` prop is bindable for two-way data binding
+- Tabs with \`href\` will not update \`value\` on click (they navigate instead)
 - Icon/content sizing is automatically adjusted based on tab size
 - The component is fully responsive and works with all color schemes
 
@@ -405,7 +399,7 @@ The theme object contains the following parts:
 **Basic Theme Override**:
 \`\`\`svelte
 <Tabbar items={tabs}
-  bind:activeTab
+  bind:value={activeTab}
   theme={{
     root: {
       base: 'border-b-2 border-gray-200',
@@ -425,7 +419,7 @@ The theme object contains the following parts:
 **Custom Active State**:
 \`\`\`svelte
 <Tabbar items={tabs}
-  bind:activeTab
+  bind:value={activeTab}
   theme={{
     tabbarItem: {
       active: {

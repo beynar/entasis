@@ -2,12 +2,12 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 
 const defaultInput = cva({
-	base: 'outline-none flex-1 w-full rounded bg-transparent resize-none placeholder:text-neutral/60 autofill:text-neutral appearance-none text-sm leading-normal',
+	base: 'outline-none flex-1 w-full min-w-0 h-full bg-transparent resize-none placeholder:text-neutral/60 autofill:text-neutral appearance-none text-sm leading-normal',
 	variants: {
 		size: {
-			small: 'text-xs h-5',
-			normal: 'text-sm h-5',
-			large: 'text-sm h-6'
+			small: 'text-xs',
+			normal: 'text-sm',
+			large: 'text-sm'
 		},
 		disabled: {
 			true: 'cursor-not-allowed opacity-50',
@@ -20,12 +20,12 @@ const defaultInput = cva({
 });
 
 const defaultInputContainer = cva({
-	base: 'px-3 bg-surface-raised border border-neutral-muted rounded text-neutral w-full focus-within:ring-1 focus-within:ring-primary ring-0 transition-all flex items-center py-2',
+	base: 'flex w-full items-center border border-neutral-muted bg-surface-raised px-lg text-neutral ring-0 transition-all rounded-md outline-none focus-within:ring-2 focus-within:ring-primary/50',
 	variants: {
 		size: {
-			small: 'py-1.5 text-xs',
-			normal: 'py-1.5 text-sm',
-			large: 'py-2 text-sm'
+			small: 'h-control-sm text-xs',
+			normal: 'h-control-md text-sm',
+			large: 'h-control-lg text-sm'
 		},
 		disabled: {
 			true: 'cursor-not-allowed opacity-50',
@@ -38,12 +38,12 @@ const defaultInputContainer = cva({
 });
 
 const defaultCountryTrigger = cva({
-	base: '-ml-3 mr-2 inline-flex h-auto shrink-0 self-stretch rounded-none border-0 bg-clip-border px-3 text-neutral hover:bg-transparent focus-visible:ring-0 focus-visible:text-primary-readable active:translate-y-0 active:bg-transparent',
+	base: '-ml-lg mr-md inline-flex h-auto shrink-0 self-stretch rounded-none border-0 bg-clip-border px-lg text-neutral hover:bg-transparent focus-visible:ring-0 focus-visible:text-primary-readable active:translate-y-0 active:bg-transparent',
 	variants: {
 		size: {
-			small: '-my-1.5 gap-1 text-xs',
-			normal: '-my-1.5 gap-1.5 text-sm',
-			large: '-my-2 gap-1.5 text-sm'
+			small: 'gap-xs text-xs',
+			normal: 'gap-sm text-sm',
+			large: 'gap-sm text-sm'
 		},
 		open: {
 			true: 'text-primary-readable',
@@ -102,7 +102,7 @@ const defaultPopover = cva({
 });
 
 const defaultCountryPicker = cva({
-	base: 'flex max-h-[calc(100vh-8rem)] flex-col gap-2 overflow-hidden p-2'
+	base: 'flex max-h-[calc(100vh-8rem)] flex-col gap-md overflow-hidden p-md'
 });
 
 const defaultCountrySearch = cva({
@@ -113,9 +113,9 @@ const defaultCountrySearchInputContainer = cva({
 	base: 'bg-surface-canvas',
 	variants: {
 		size: {
-			small: 'py-1',
-			normal: 'py-1',
-			large: 'py-1.5'
+			small: 'py-xs',
+			normal: 'py-xs',
+			large: 'py-sm'
 		}
 	},
 	defaultVariants: {
@@ -142,16 +142,16 @@ const defaultCountryList = cva({
 });
 
 const defaultCountryListbox = cva({
-	base: 'flex min-w-full flex-col gap-1'
+	base: 'flex min-w-full flex-col gap-xs'
 });
 
 const defaultCountryOption = cva({
-	base: 'w-full justify-start gap-2 rounded border-0 bg-clip-border px-2 text-left font-normal shadow-none outline-none focus-visible:ring-0 active:translate-y-0',
+	base: 'w-full justify-start gap-md rounded-sm border-0 bg-clip-border px-md text-left font-normal shadow-none outline-none focus-visible:ring-0 active:translate-y-0',
 	variants: {
 		size: {
-			small: 'min-h-7 py-1 text-xs',
-			normal: 'min-h-7 py-1 text-sm',
-			large: 'min-h-8 py-1.5 text-sm'
+			small: 'min-h-7 py-xs text-xs',
+			normal: 'min-h-7 py-xs text-sm',
+			large: 'min-h-8 py-sm text-sm'
 		},
 		highlighted: {
 			true: '',
@@ -202,7 +202,7 @@ const defaultCountryCheck = cva({
 });
 
 const defaultCountryEmpty = cva({
-	base: 'text-neutral/60 px-2 py-6 text-center',
+	base: 'text-neutral/60 px-md py-layout-md text-center',
 	variants: {
 		size: {
 			small: 'text-xs',

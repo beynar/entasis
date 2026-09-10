@@ -26,8 +26,10 @@ export type SegmentedControlProps<
 	items: Items;
 	/** Selected item value. Bindable; defaults to the first enabled item. */
 	value?: Items[number]['value'];
+	/** Initial selected value when `value` is omitted. */
+	defaultValue?: Items[number]['value'];
 	/** Called when pointer or keyboard interaction changes the selected value. */
-	onChange?: (value: Items[number]['value']) => void;
+	onValueChange?: (value: Items[number]['value']) => void;
 	/** Custom renderer receiving the original item object. */
 	item?: Snippet<[Items[number]]>;
 	/** Size applied to the track and every segment. */

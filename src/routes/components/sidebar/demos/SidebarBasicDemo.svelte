@@ -1,9 +1,12 @@
 <script lang="ts">
 	import {
 		Sidebar,
+		type SidebarDensity,
 		type SidebarDisplayState,
 		type SidebarGroup,
-		type SidebarMenuEntry
+		type SidebarMenuEntry,
+		type SidebarSize,
+		type SidebarVariant
 	} from '$lib/components/Sidebar/index.js';
 	import { Skeleton } from '$lib/components/Skeleton/index.js';
 	import type { MenuItem } from '$lib/components/Menu/index.js';
@@ -18,6 +21,16 @@
 	import { plusIcon } from '$lib/components/Icons/plus.js';
 	import { signOutIcon } from '$lib/components/Icons/signOut.js';
 	import { trayIcon } from '$lib/components/Icons/tray.js';
+
+	let {
+		variant = 'inset',
+		size = 'normal',
+		density = 'normal'
+	}: {
+		variant?: SidebarVariant;
+		size?: SidebarSize;
+		density?: SidebarDensity;
+	} = $props();
 
 	let displayState = $state<SidebarDisplayState>('expanded');
 	let width = $state('17rem');
@@ -61,7 +74,7 @@
 	const search = $derived({
 		placeholder: 'Search workspace',
 		value: query,
-		onInput: (event: Event & { currentTarget: HTMLInputElement }) => {
+		oninput: (event: Event & { currentTarget: HTMLInputElement }) => {
 			query = event.currentTarget.value;
 		}
 	});
@@ -100,7 +113,9 @@
 		items={visibleGroups}
 		{search}
 		collapsible="icon"
-		variant="inset"
+		{variant}
+		{size}
+		{density}
 		frame="contained"
 		rail="thumb"
 		widthIcon="3.5rem"

@@ -1,8 +1,6 @@
-// import type { ComponentsSystem } from '../plugin/components.js';
-
 import type { Breakpoint } from '$lib/components/Theme/theme.js';
 
-// import type { Spinner } from '$lib/plugin/spinner.js';
+/** Semantic palette roles accepted by component `color` props. */
 export type Colors =
 	'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'info' | 'neutral';
 export type FontSize = `fontSize.${
@@ -35,16 +33,15 @@ export const deepMerge = <T>(a?: Partial<T>, b?: Partial<T>): T => {
 
 export type Theme = {
 	radius: number;
-	shadows?: any;
+	shadows?: unknown;
 };
 export type Themes = Record<string, Theme>;
 
 export type DesignSystem = {
 	themes: Themes;
-	// components: ComponentsSystem;
-	// spinner?: Spinner;
 };
 
+/** Component geometry scale. It does not change internal whitespace density. */
 export type Sizes = 'small' | 'normal' | 'large';
 
 /**

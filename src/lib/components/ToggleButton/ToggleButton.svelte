@@ -2,8 +2,9 @@
 	import Slot from '../Slot/Slot.svelte';
 	import type { ToggleButtonProps } from './toggleButton.props.js';
 	import { useToggleButtonTheme } from './toggleButton.theme.js';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	let {
-		onChange = null,
+		onValueChange = null,
 		class: className,
 		ariaLabel,
 		type = 'button',
@@ -15,10 +16,18 @@
 		ref = $bindable(),
 		disabled = false,
 		theme,
-		checked = $bindable(false),
+		defaultValue = false,
+		value = $bindable(),
 		variant = 'ghost',
 		...attachments
 	}: ToggleButtonProps = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(next) => {
+			value = next;
+		},
+		() => defaultValue
+	);
 
 	const isSquared = $derived(
 		!!((!children && prefix && !suffix) || (!children && !prefix && suffix))
@@ -31,13 +40,13 @@
 	{type}
 	bind:this={ref}
 	data-color={color}
-	data-checked={checked}
+	data-checked={valueState.value}
 	aria-label={ariaLabel}
-	aria-pressed={checked}
+	aria-pressed={valueState.value}
 	{disabled}
 	class={classes.root({
 		color,
-		checked,
+		checked: valueState.value,
 		squared: isSquared,
 		variant,
 		size,
@@ -46,13 +55,13 @@
 	})}
 	onclick={() => {
 		if (!disabled) {
-			checked = !checked;
-			onChange?.(checked);
+			valueState.value = !valueState.value;
+			onValueChange?.(valueState.value);
 		}
 	}}
 	{...attachments}
 >
-	<Slot render={prefix} class={classes.prefix({ size, checked })} />
+	<Slot render={prefix} class={classes.prefix({ size, checked: valueState.value })} />
 	<Slot render={children} />
-	<Slot render={suffix} class={classes.suffix({ size, checked })} />
+	<Slot render={suffix} class={classes.suffix({ size, checked: valueState.value })} />
 </button>

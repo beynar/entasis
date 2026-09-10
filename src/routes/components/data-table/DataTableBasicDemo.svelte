@@ -24,7 +24,7 @@
 			header: 'Name',
 			sortable: true,
 			filter: { type: 'text', placeholder: 'Filter names' },
-			size: 210
+			width: 210
 		},
 		{
 			id: 'department',
@@ -44,7 +44,7 @@
 				type: 'multi-select',
 				options: statuses.map((status) => ({ value: status, label: status }))
 			},
-			size: 140
+			width: 140
 		},
 		{
 			id: 'salary',
@@ -53,7 +53,7 @@
 			sortable: true,
 			filter: { type: 'number', min: 0 },
 			align: 'end',
-			size: 130
+			width: 130
 		},
 		{
 			id: 'joinedAt',
@@ -61,7 +61,7 @@
 			header: 'Joined',
 			sortable: true,
 			filter: { type: 'date' },
-			size: 150
+			width: 150
 		},
 		{
 			id: 'verified',
@@ -69,7 +69,7 @@
 			header: 'Verified',
 			filter: { type: 'boolean', trueLabel: 'Verified', falseLabel: 'Unverified' },
 			align: 'center',
-			size: 120
+			width: 120
 		}
 	];
 </script>

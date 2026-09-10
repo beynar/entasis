@@ -17,7 +17,7 @@ Use items for the tab collection and a single children snippet for the repeated 
 	];
 </script>
 
-<Tabs {items} bind:activeTab>
+<Tabs {items} bind:value>
 	{#snippet children({ item, index, stepper })}
 		<section class="space-y-3 p-6">
 			<p class="text-sm text-neutral/60">Panel {index + 1}</p>
@@ -32,8 +32,9 @@ Use items for the tab collection and a single children snippet for the repeated 
 
 - items: required array of TabItem values. Each item is used by Tabbar and passed to children as item.
 - children: repeated panel renderer called with { stepper, item, index }.
-- activeTab: bindable zero-based active tab index.
-- onChange: called with the new active tab index.
+- value: bindable zero-based active tab index.
+- defaultValue: initial active tab index when value is omitted.
+- onValueChange: called once with the new active tab index.
 - placement: top, bottom, left, or right. Also drives the default tabbar orientation.
 - stepper: bindable StepperState reference for next(), previous(), and goTo(index).
 - keyFramesOptions: Web Animations timing for the panel transition.
@@ -51,7 +52,7 @@ Use items for the tab collection and a single children snippet for the repeated 
 
 - Render panel content through children.
 - Put per-panel differences in the item data and branch inside children when needed.
-- Use activeTab as the public controlled value.
+- Use value as the public controlled state.
 - Use stepper only when external controls need programmatic navigation.
 
 ## Structure

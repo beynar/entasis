@@ -25,7 +25,8 @@
 	import { on } from 'svelte/events';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		as = 'millisecondSinceMidnight',
@@ -39,9 +40,10 @@
 		name,
 		onValidate,
 		visible,
-		onChange,
+		onValueChange,
 		...rest
 	}: TimeInputProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 	let pickerOpen = $state(false);
@@ -57,7 +59,7 @@
 		get errors() {
 			return errors;
 		},
-		set errors(v: any) {
+		set errors(v: string[] | boolean) {
 			errors = v;
 		},
 		get focused() {
@@ -66,8 +68,8 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => {
-			onChange?.(v);
+		onValueChange: (v) => {
+			onValueChange?.(v);
 		},
 		get disabled() {
 			return disabled;
@@ -180,19 +182,17 @@
 	size="small"
 	class={classes.popover({ class: theme?.popover?.base })}
 >
-	{#snippet children()}
-		<TimeInputPicker
-			id={`${id}-time-picker`}
-			{hourOptions}
-			{minuteOptions}
-			{selectedHour}
-			{selectedMinute}
-			size={rest.size}
-			{theme}
-			onSelectHour={selectHour}
-			onSelectMinute={selectMinute}
-		/>
-	{/snippet}
+	<TimeInputPicker
+		id={`${id}-time-picker`}
+		{hourOptions}
+		{minuteOptions}
+		{selectedHour}
+		{selectedMinute}
+		size={rest.size}
+		{theme}
+		onSelectHour={selectHour}
+		onSelectMinute={selectMinute}
+	/>
 	{#snippet trigger(popover)}
 		<Field
 			{field}

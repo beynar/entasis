@@ -55,8 +55,8 @@
 				type: 'option' as const,
 				children: typeof item.label === 'string' ? item.label : item.label,
 				href: item.href,
-				// disabled: item.disabled,
-				onClick: item.onClick
+				disabled: item.disabled || item.active,
+				onclick: item.onclick
 			} satisfies MenuItem;
 		});
 
@@ -93,11 +93,14 @@
 						<PopupMenu menu={{ items: item.menu }}>
 							{#snippet trigger(popover)}
 								<button
+									type="button"
+									disabled={item.disabled || item.active}
 									class={classes.link()}
 									{@attach navigation.itemReference}
 									{@attach popover.reference}
 									onclick={(e) => {
 										e.preventDefault();
+										if (item.disabled || item.active) return;
 										popover.toggle();
 									}}
 								>
@@ -120,12 +123,22 @@
 					<svelte:element
 						this={item.active ? 'span' : item.href ? 'a' : 'button'}
 						role={item.active ? 'link' : item.href ? 'link' : 'button'}
-						onclick={item.onClick}
+						onclick={(event: MouseEvent) => {
+							if (item.disabled || item.active) {
+								event.preventDefault();
+								event.stopPropagation();
+								return;
+							}
+							item.onclick?.(event);
+						}}
 						class={classes.link({ disabled: item.disabled, active: item.active })}
-						href={item.href}
+						href={item.disabled || item.active ? undefined : item.href}
+						type={!item.active && !item.href ? 'button' : undefined}
+						disabled={!item.active && !item.href && item.disabled ? true : undefined}
+						tabindex={item.disabled || item.active ? -1 : undefined}
 						aria-disabled={item.disabled || item.active}
 						aria-current={item.active ? 'page' : undefined}
-						data-disabled={item.disabled || item.active}
+						data-disabled={item.disabled || item.active ? true : undefined}
 						{@attach navigation.itemReference}
 					>
 						{#if itemSlot}
@@ -144,6 +157,7 @@
 					as="li"
 					attrs={{ role: 'presentation', 'aria-hidden': true }}
 					render={separator || caretRightIcon.withProps({ size: 16 })}
+					payload={{}}
 					class={classes.separator()}
 				/>
 			{/if}

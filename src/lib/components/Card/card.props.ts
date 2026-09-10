@@ -55,17 +55,17 @@ type CardBaseProps = {
 	 */
 	rel?: string;
 	/**
-	 * Click handler; sets role="button" when href is not set.
+	 * Native click handler; sets role="button" when href is not set.
 	 */
-	onClick?: (() => void) | null | undefined;
+	onclick?: ((event: MouseEvent) => void) | null | undefined;
 	/**
-	 * Pointer enter handler called when not disabled.
+	 * Native pointer enter handler called when not disabled.
 	 */
-	onEnter?: (() => void) | null | undefined;
+	onpointerenter?: ((event: PointerEvent) => void) | null | undefined;
 	/**
-	 * Pointer leave handler called when not disabled.
+	 * Native pointer leave handler called when not disabled.
 	 */
-	onLeave?: (() => void) | null | undefined;
+	onpointerleave?: ((event: PointerEvent) => void) | null | undefined;
 	/**
 	 * Show subtle borders between sections (header/content, content/footer)
 	 * Default: false (borders are hidden by default)

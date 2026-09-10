@@ -26,7 +26,15 @@ export type SelectionMenuPayload = {
 
 type ToggleMenuPassThroughProps = Pick<
 	WithoutAttachments<ToggleMenuProps>,
-	'items' | 'ariaLabel' | 'color' | 'variant' | 'disabled' | 'onChange' | 'class' | 'theme'
+	| 'value'
+	| 'defaultValue'
+	| 'ariaLabel'
+	| 'color'
+	| 'variant'
+	| 'disabled'
+	| 'onValueChange'
+	| 'class'
+	| 'theme'
 >;
 
 type SelectionMenuBaseProps = {
@@ -60,9 +68,9 @@ type SelectionMenuBaseProps = {
 	/** Called when a valid selection is created, changed, or cleared. */
 	onSelectionChange?: (selection: SelectionMenuSelection | null) => void;
 	/** Called after the opening transition completes. */
-	onOpen?: (selectionMenu: SelectionMenuPayload) => void;
+	onAfterOpen?: (selectionMenu: SelectionMenuPayload) => void;
 	/** Called after the closing transition completes. */
-	onClose?: (selectionMenu: SelectionMenuPayload) => void;
+	onAfterClose?: (selectionMenu: SelectionMenuPayload) => void;
 	/** Theme overrides for the selection Popover panel and custom-content wrapper. */
 	selectionTheme?: SelectionMenuThemeProps;
 	/** Theme overrides passed to the underlying Popover. */

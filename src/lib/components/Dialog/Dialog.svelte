@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import type { DialogProps } from './dialog.props.js';
 	import { useDialogTheme } from './dialog.theme.js';
 	import { DialogState } from './dialog.state.svelte.js';
@@ -12,9 +13,11 @@
 		id: customId,
 		type,
 		responsive,
-		open = $bindable(false),
-		onClose,
-		onOpen,
+		defaultOpen = false,
+		open = $bindable(),
+		onOpenChange,
+		onAfterOpen,
+		onAfterClose,
 		size,
 		scroll,
 		transition,
@@ -34,6 +37,13 @@
 		trigger,
 		theme
 	}: DialogProps = $props();
+	const openState = createBindableValue(
+		() => open,
+		(next) => {
+			open = next;
+		},
+		() => defaultOpen
+	);
 
 	const id = $props.id();
 	const dialog = new DialogState({
@@ -47,10 +57,13 @@
 			return responsive;
 		},
 		get isOpen() {
-			return open;
+			return openState.value;
 		},
 		set isOpen(value) {
-			open = value;
+			openState.value = value;
+		},
+		get onOpenChange() {
+			return onOpenChange;
 		},
 		get size() {
 			return size;
@@ -92,7 +105,7 @@
 			class={classes.closeButton({ size: dialog.computedSize })}
 			size="small"
 			variant="ghost"
-			onClick={() => dialog.close()}
+			onclick={() => dialog.close()}
 		>
 			{@render xIcon({ size: 20 })}
 		</Button>
@@ -124,12 +137,12 @@
 				out:in_out={dialog.computedTransition.out}
 				onintroend={() => {
 					dialog.hasTransitioned = true;
-					onOpen?.(dialog);
+					onAfterOpen?.(dialog);
 				}}
 				onoutrostart={() => {
 					dialog.hasTransitioned = false;
 				}}
-				onoutroend={() => onClose?.(dialog)}
+				onoutroend={() => onAfterClose?.(dialog)}
 				class={classes.content({
 					size: dialog.computedSize,
 					type: dialog.computedType,
@@ -183,6 +196,14 @@
 	{#if typeof trigger === 'function'}
 		{@render trigger?.(dialog)}
 	{:else}
-		<Button {...trigger} onClick={() => dialog.open()}>{trigger.content}</Button>
+		<Button
+			{...trigger}
+			onclick={(event) => {
+				trigger.onclick?.(event);
+				dialog.open();
+			}}
+		>
+			{trigger.content}
+		</Button>
 	{/if}
 {/if}

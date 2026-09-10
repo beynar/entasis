@@ -127,7 +127,7 @@
 							value={allSelected}
 							indeterminate={someSelected}
 							disabled={model.props.disabled || selectableRows.length === 0}
-							onChange={togglePageSelection}
+							onValueChange={togglePageSelection}
 							{classes}
 						/>
 					{:else}

@@ -13,9 +13,9 @@ const defaultChip = cva({
 			false: null
 		},
 		size: {
-			small: 'h-5 px-2 gap-1 text-xs',
-			normal: 'h-6 px-2.5 gap-1.5 text-xs',
-			large: 'h-7 px-3 gap-1.5 text-sm'
+			small: 'h-5 px-md gap-xs text-xs',
+			normal: 'h-6 px-md gap-sm text-xs',
+			large: 'h-7 px-lg gap-sm text-sm'
 		},
 		color: {
 			primary: 'bg-primary text-primary-contrast',
@@ -41,7 +41,7 @@ const defaultChip = cva({
 	defaultVariants: {
 		color: 'primary',
 		variant: 'solid',
-		size: 'small',
+		size: 'normal',
 		isEmpty: false
 	},
 	compoundVariants: [

@@ -16,4 +16,3 @@ export type TimeInputProps = InputProps<'time'> & {
 	/** Theme overrides for the time input and its field container. */
 	theme?: TimeInputThemeProps & InputProps<'time'>['theme'];
 };
-

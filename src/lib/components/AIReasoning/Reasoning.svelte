@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Collapsible from '../Collapsible/Collapsible.svelte';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { brainIcon } from '../Icons/brain.js';
 	import Markdown from '../Markdown/Markdown.svelte';
 	import Slot from '../Slot/Slot.svelte';
@@ -31,7 +32,14 @@
 		theme,
 		...attachments
 	}: ReasoningProps = $props();
-	open ??= untrack(() => defaultOpen ?? isStreaming);
+	const openState = createBindableValue(
+		() => open,
+		(next) => {
+			open = next;
+		},
+		() => defaultOpen ?? isStreaming
+	);
+	const autoOpen = untrack(() => defaultOpen !== false);
 	let computedDuration = $state<number | undefined>(undefined);
 	let messageIndex = $state(0);
 	const duration = $derived(durationProp ?? computedDuration);
@@ -48,7 +56,7 @@
 	);
 	const displayedThinkingMessages = $derived([thinkingMessage]);
 	const reasoningState = $derived<AIReasoningState>({
-		open,
+		open: openState.value,
 		isStreaming,
 		duration,
 		message: thinkingMessage,
@@ -65,10 +73,15 @@
 		'data-streaming': isStreaming || undefined
 	});
 
-	let hasEverStreamed = false;
 	let hasAutoClosed = false;
 	let didAutoOpen = false;
 	let startedAt: number | null = null;
+
+	function setOpen(nextOpen: boolean) {
+		if (openState.value === nextOpen) return;
+		openState.value = nextOpen;
+		onOpenChange?.(nextOpen);
+	}
 
 	$effect(() => {
 		if (!isStreaming) return;
@@ -83,13 +96,12 @@
 
 	$effect(() => {
 		if (isStreaming) {
-			hasEverStreamed = true;
 			if (startedAt === null) {
 				startedAt = Date.now();
 				hasAutoClosed = false;
 			}
-			if (!didAutoOpen && defaultOpen !== false) {
-				open = true;
+			if (!didAutoOpen && autoOpen) {
+				setOpen(true);
 				didAutoOpen = true;
 			}
 		} else if (startedAt !== null) {
@@ -100,10 +112,10 @@
 	});
 
 	$effect(() => {
-		if (!hasEverStreamed || isStreaming || !open || hasAutoClosed) return;
+		if (computedDuration === undefined || isStreaming || !openState.value || hasAutoClosed) return;
 		const closeTimer = setTimeout(
 			() => {
-				open = false;
+				setOpen(false);
 				hasAutoClosed = true;
 			},
 			Math.max(0, autoCloseDelay)
@@ -131,7 +143,7 @@
 
 <Collapsible
 	bind:ref
-	bind:open
+	bind:open={openState.value}
 	{onOpenChange}
 	icon={triggerSlot === undefined ? undefined : false}
 	class={classes.root({ className })}

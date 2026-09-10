@@ -1,4 +1,5 @@
-import type { FieldLabelPosition, FieldValue, InputType } from '../Field/field.js';
+import type { FieldLabelPosition, FieldValue, InputProps, InputType } from '../Field/field.js';
+import type { FieldState } from '../Field/field.state.svelte.js';
 import type { TextInputProps } from '../TextInput/textInput.props.js';
 import type { NumberInputProps } from '../NumberInput/numberInput.props.js';
 import type { RatingInputProps } from '../RatingInput/ratingInput.props.js';
@@ -36,9 +37,9 @@ export type FormValueRecord = Record<string, FieldValue<InputType> | null | unde
 
 type FormVisibility = boolean | ((value: FormValueRecord) => boolean);
 
-type FormButtonAction<State> = Omit<ButtonProps, 'onClick' | 'payload'> & {
+type FormButtonAction<State> = ButtonProps & {
 	/** Called with the live form state when the action is activated. */
-	onClick?: (form: State) => MaybePromise<unknown>;
+	onAction?: (form: State) => MaybePromise<unknown>;
 };
 
 export type FormAction<I extends FormInputs = FormInputs> = FormButtonAction<FormState<I>>;
@@ -180,7 +181,22 @@ export type FormCustomInput = BaseFormRenderableInput & {
 	snippet: Snippet<[form: ErasedFormInputState]>;
 };
 
-export type FormRenderableInput = FormFieldInput | FormActionInput | FormCustomInput;
+export type FormFieldController<T extends InputType> = FieldState<T>;
+
+export type FormFieldEntry<T extends InputType = InputType> = T extends InputType
+	? BaseFormRenderableInput &
+			Omit<InputProps<T>, 'class' | 'name' | 'visible'> & {
+				type: 'field';
+				/** Built-in schema and value type used by the shared FieldState validation owner. */
+				fieldType: T;
+				/** Renders the control with its registered, bindable FieldState controller. */
+				snippet: Snippet<[field: FormFieldController<T>]>;
+			}
+	: never;
+
+export type FormValueInput = FormFieldInput | FormFieldEntry;
+export type FormRenderableInput =
+	FormFieldInput | FormFieldEntry | FormActionInput | FormCustomInput;
 
 export type FormGroupInputs = Record<string, FormRenderableInput>;
 export type FormGroupColumns = 1 | 2 | 3 | 4;
@@ -216,19 +232,24 @@ type BindFormInputState<Input, I extends FormInputs> = Input extends { type: 'ac
 	? Omit<Input, 'actions'> & { actions: FormInputAction<I>[] }
 	: Input extends { type: 'custom' }
 		? Omit<Input, 'snippet'> & { snippet: Snippet<[form: FormInputState<I>]> }
-		: Input extends { type: 'group'; inputs: infer GroupInputs extends FormGroupInputs }
-			? Omit<Input, 'inputs'> & {
-					inputs: { [K in keyof GroupInputs]: BindFormInputState<GroupInputs[K], I> };
-				}
-			: Input;
+		: Input extends FormFieldEntry<infer T>
+			? Omit<Input, 'snippet'> & { snippet: Snippet<[field: FieldState<T>]> }
+			: Input extends { type: 'group'; inputs: infer GroupInputs extends FormGroupInputs }
+				? Omit<Input, 'inputs'> & {
+						inputs: { [K in keyof GroupInputs]: BindFormInputState<GroupInputs[K], I> };
+					}
+				: Input;
 
 export type FormInputsWithState<I extends FormInputs> = string extends keyof I
 	? I
 	: { [K in keyof I]: BindFormInputState<I[K], I> };
 
-type InferInputValue<T extends FormFieldInput> = T['required'] extends true
-	? NonNullable<FieldValue<T['type']>>
-	: FieldValue<T['type']> | null;
+type FormValueInputType<T extends FormValueInput> =
+	T extends FormFieldEntry<infer Input> ? Input : T extends FormFieldInput ? T['type'] : never;
+
+type InferInputValue<T extends FormValueInput> = T['required'] extends true
+	? NonNullable<FieldValue<FormValueInputType<T>>>
+	: FieldValue<FormValueInputType<T>> | null;
 
 type UnionToIntersection<U> = (U extends unknown ? (value: U) => void : never) extends (
 	value: infer I
@@ -259,7 +280,7 @@ type ConditionalGroupInputs<Group extends FormGroup, Inputs extends FormGroupInp
 type FlattenFormInputEntry<Key extends PropertyKey, Input extends FormInput> =
 	Input extends FormGroup<infer Inputs>
 		? ConditionalGroupInputs<Input, Inputs>
-		: Input extends FormFieldInput
+		: Input extends FormValueInput
 			? { [K in Key]: Input }
 			: NoFormFields;
 
@@ -273,20 +294,20 @@ export type FlattenFormInputs<T extends FormInputs> = Simplify<
 
 type InferFlatFormValue<T> = {
 	[
-		K in keyof T as T[K] extends FormFieldInput
+		K in keyof T as T[K] extends FormValueInput
 			? HasConditionalVisibility<T[K]> extends true
 				? never
 				: K
 			: never
-	]: InferInputValue<Extract<T[K], FormFieldInput>>;
+	]: InferInputValue<Extract<T[K], FormValueInput>>;
 } & {
 	[
-		K in keyof T as T[K] extends FormFieldInput
+		K in keyof T as T[K] extends FormValueInput
 			? HasConditionalVisibility<T[K]> extends true
 				? K
 				: never
 			: never
-	]?: InferInputValue<Extract<T[K], FormFieldInput>>;
+	]?: InferInputValue<Extract<T[K], FormValueInput>>;
 };
 
 export type InferFormValue<T extends FormInputs> = Simplify<
@@ -315,12 +336,13 @@ export type FormInputProps<
 	T extends FormFieldInput['type'],
 	Display extends 'default' | 'selector' | 'picker' = 'default'
 > = Omit<FormInputVariant<T, Display>, 'type' | 'display' | 'visible'> & {
+	/** Resolved visibility for a control rendered by Form. */
 	visible?: boolean;
 };
 
 export type FlatFormField = {
 	name: string;
-	input: FormFieldInput;
+	input: FormValueInput;
 	group?: FormGroup;
 	path: string;
 };
@@ -328,7 +350,7 @@ export type FlatFormField = {
 export function flattenFormInputs(inputs: FormInputs): FlatFormField[] {
 	const fields: FlatFormField[] = [];
 
-	const addField = (name: string, input: FormFieldInput, path: string, group?: FormGroup) => {
+	const addField = (name: string, input: FormValueInput, path: string, group?: FormGroup) => {
 		fields.push({ name, input, group, path });
 	};
 
@@ -359,6 +381,9 @@ export function flattenFormInputs(inputs: FormInputs): FlatFormField[] {
 
 	return fields;
 }
+
+export const getFormValueInputType = (input: FormValueInput): InputType =>
+	input.type === 'field' ? input.fieldType : input.type;
 
 export type FormSubmitHandler<T extends FormInputs> = (
 	value: InferFormValue<T>

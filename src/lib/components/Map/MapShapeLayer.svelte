@@ -10,10 +10,10 @@
 	type Props = {
 		map: MapLibreMap;
 		shapes?: MapShape[];
-		onerror?: (error: Error) => void;
+		onError?: (error: Error) => void;
 	};
 
-	let { map, shapes, onerror }: Props = $props();
+	let { map, shapes, onError }: Props = $props();
 
 	let mounted = false;
 	const appliedSignatures = new Map<string, string>();
@@ -30,7 +30,7 @@
 	}
 
 	function reportError(error: Error): void {
-		reportMapError(error, onerror);
+		reportMapError(error, onError);
 	}
 
 	function syncShapes(): void {
@@ -73,7 +73,7 @@
 	});
 
 	$effect(() => {
-		shapes;
+		void shapes;
 		untrack(syncShapes);
 	});
 </script>

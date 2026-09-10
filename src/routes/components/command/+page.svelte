@@ -12,7 +12,26 @@
 	import { smileyIcon } from '$lib/components/Icons/smiley.js';
 	import { userIcon } from '$lib/components/Icons/user.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
+
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		}
+	]);
 
 	let lastSelected = $state('nothing yet');
 
@@ -49,11 +68,12 @@
 		'Listbox + combobox ARIA wiring',
 		'Arrow, Home, End, Enter navigation',
 		'Optional dialog mode with ⌘K shortcut',
-		'bind:open and bind:search',
+		'bind:open and bind:value',
 		'Keyword-aware fuzzy filtering'
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Inline searchable command palette."
 		class="max-w-md"
 		code={`<Command
@@ -80,11 +100,18 @@
 			items: [{ value: 'docs', label: 'Documentation', href: '/docs' }]
 		}
 	]}
+	size="${controls.value.size}"
+	density="${controls.value.density}"
 	onSelect={(value) => console.log(value)}
 />`}
 	>
 		<div class="border-neutral-muted w-full rounded-xl border">
-			<Command items={groups} onSelect={(value) => (lastSelected = value)} />
+			<Command
+				items={groups}
+				size={controls.value.size}
+				density={controls.value.density}
+				onSelect={(value) => (lastSelected = value)}
+			/>
 		</div>
 	</ComponentCard>
 
@@ -107,7 +134,7 @@
 		>
 			<Command dialog shortcut="k" items={groups} onSelect={(value) => (lastSelected = value)}>
 				{#snippet trigger({ open })}
-					<Button variant="outline" onClick={() => open()}>
+					<Button variant="outline" onclick={() => open()}>
 						{@render magnifyingGlassIcon({ size: 16 })}
 						Search commands...
 						<span class="text-neutral/60 ml-2 text-xs tracking-widest">⌘K</span>

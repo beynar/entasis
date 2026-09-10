@@ -28,7 +28,7 @@ export function compileTreeRelation<TRow extends object>(
 	}
 	const parent = compileChannel(mark.parent);
 	const sourceNodes: TreeSourceNode<TRow>[] = compiled.nodes.map((node) => {
-		const parentId = parent(node.datum, node.index, data);
+		const parentId = parent(node.datum, { index: node.index, data });
 		if (parentId === null || parentId === undefined) return { ...node, parentIdentity: null };
 		const parentIdentity = relationKeyIdentity(parentId);
 		if (!compiled.nodeByIdentity.has(parentIdentity)) {
@@ -49,7 +49,7 @@ export function compileTreeRelation<TRow extends object>(
 	const labelSpace = compiled.labels.enabled ? clamp(width * 0.13, 64, 120) : padding;
 	const horizontal = orientation === 'horizontal';
 	const breadth = Math.max(1, (horizontal ? height : width) - padding * 2);
-	const depth = Math.max(1, (horizontal ? width - labelSpace * 2 : height - padding * 2));
+	const depth = Math.max(1, horizontal ? width - labelSpace * 2 : height - padding * 2);
 	const layoutRoot = tree<TreeSourceNode<TRow>>().size([breadth, depth])(root);
 	const nodes: RelationNodeDatum<TRow>[] = layoutRoot.descendants().map((node) => {
 		const x = horizontal ? labelSpace + node.y : padding + node.x;

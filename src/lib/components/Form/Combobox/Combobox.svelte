@@ -16,7 +16,8 @@
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		searchValue = $bindable(''),
 		errors = $bindable([]),
 		loading = $bindable(false),
@@ -34,13 +35,14 @@
 		disabled,
 		name,
 		onValidate,
-		onChange,
+		onValueChange,
 		visible,
 		prefix,
 		suffix,
 		description,
 		...rest
 	}: ComboboxProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 	const listboxId = `${id}-listbox`;
@@ -58,7 +60,7 @@
 		get errors() {
 			return errors;
 		},
-		set errors(v: any) {
+		set errors(v: string[] | boolean) {
 			errors = v;
 		},
 		get focused() {
@@ -67,8 +69,8 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => {
-			onChange?.(v, selectedOption);
+		onValueChange: (v) => {
+			onValueChange?.({ value: v, option: selectedOption });
 		},
 		get disabled() {
 			return disabled;
@@ -147,8 +149,8 @@
 	}, 100);
 
 	$effect(() => {
-		searchValue;
-		showAllOnFocus;
+		void searchValue;
+		void showAllOnFocus;
 		untrack(() => {
 			debouncedSearch(searchValue, showAllOnFocus);
 		});
@@ -168,19 +170,18 @@
 
 	// Handle option selection
 	const handleSelectOption = (option: ComboboxOption) => {
+		currentOption = option;
 		field.value = option.value;
 		searchValue = '';
 		field.node?.blur();
-		currentOption = option;
-		// Focus the input after selection
 	};
 
 	// Handle clear
 	const handleClear = () => {
+		currentOption = null;
 		field.value = null;
 		searchValue = '';
 		field.node?.blur();
-		currentOption = null;
 	};
 
 	// Keyboard navigation: value-driven virtual focus. Re-anchors the highlight to the first
@@ -244,54 +245,48 @@
 </script>
 
 <Popover closeOnClickOutside={false} fitTrigger position="bottom" size="small" open={isOpen}>
-	{#snippet children(popover)}
-		<div
-			id={listboxId}
-			role="listbox"
-			aria-label="Options"
-			class="flex max-h-[200px] flex-col gap-1"
-		>
-			{#if loading}
-				<div class={classes.loading({ size })} role="status" aria-live="polite">
-					{loadingText}
-				</div>
-			{:else if optionsAsync.error}
-				<div class={classes.error({ size })} role="alert" aria-live="assertive">
-					{optionsAsync.error}
-				</div>
-			{:else if optionsAsync.options.length === 0 && searchValue}
-				<div class={classes.noOptions({ size })} role="status">{noOptionsText}</div>
-			{:else if optionsAsync.options.length === 0 && !searchValue && showAllOnFocus}
-				<div class={classes.noOptions({ size })} role="status">{noOptionsText}</div>
-			{:else if optionsAsync.options.length > 0}
-				<ScrollArea scrollOnEdges type="auto" class="flex max-h-[200px] flex-col gap-1">
-					{#each optionsAsync.options as option (option.value)}
-						<MenuOption
-							as="button"
-							role="option"
-							{size}
-							{density}
-							title={option.label}
-							description={option.description}
-							highlighted={nav.highlighted === option.value}
-							selected={field.value === option.value}
-							onClick={() => handleSelectOption(option)}
-							attrs={{
-								id: optionId(option.value),
-								onpointermove: () => nav.setHighlighted(option.value),
-								onmousedown: (e: MouseEvent) => {
-									e.stopPropagation();
-									e.preventDefault();
-								}
-							}}
-						/>
-					{/each}
-				</ScrollArea>
-			{/if}
-		</div>
-	{/snippet}
+	<div id={listboxId} role="listbox" aria-label="Options" class="flex max-h-[200px] flex-col gap-1">
+		{#if loading}
+			<div class={classes.loading({ size })} role="status" aria-live="polite">
+				{loadingText}
+			</div>
+		{:else if optionsAsync.error}
+			<div class={classes.error({ size })} role="alert" aria-live="assertive">
+				{optionsAsync.error}
+			</div>
+		{:else if optionsAsync.options.length === 0 && searchValue}
+			<div class={classes.noOptions({ size })} role="status">{noOptionsText}</div>
+		{:else if optionsAsync.options.length === 0 && !searchValue && showAllOnFocus}
+			<div class={classes.noOptions({ size })} role="status">{noOptionsText}</div>
+		{:else if optionsAsync.options.length > 0}
+			<ScrollArea scrollOnEdges type="auto" class="flex max-h-[200px] flex-col gap-1">
+				{#each optionsAsync.options as option (option.value)}
+					<MenuOption
+						as="button"
+						role="option"
+						{size}
+						{density}
+						title={option.label}
+						description={option.description}
+						highlighted={nav.highlighted === option.value}
+						selected={field.value === option.value}
+						onclick={() => handleSelectOption(option)}
+						attrs={{
+							id: optionId(option.value),
+							onpointermove: () => nav.setHighlighted(option.value),
+							onmousedown: (e: MouseEvent) => {
+								e.stopPropagation();
+								e.preventDefault();
+							}
+						}}
+					/>
+				{/each}
+			</ScrollArea>
+		{/if}
+	</div>
 	{#snippet trigger(popover: PopoverState)}
 		<Field
+			{density}
 			{field}
 			{size}
 			{description}
@@ -340,7 +335,7 @@
 					label="Clear selection"
 					disabled={field.disabled}
 					prefix={xIcon}
-					onClick={handleClear}
+					onclick={handleClear}
 				/>
 			{/if}
 		</Field>

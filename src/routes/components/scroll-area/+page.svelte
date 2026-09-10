@@ -1,10 +1,21 @@
 <script lang="ts">
 	import ScrollArea from '$lib/components/ScrollArea/ScrollArea.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 
 	const paragraphs = Array.from({ length: 12 }, (_, i) => i + 1);
 	const types = ['hover', 'always', 'scroll', 'auto'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'type',
+			type: 'segmented',
+			label: 'Type',
+			value: 'hover',
+			options: types
+		},
+		{ name: 'scrollFade', type: 'switch', label: 'Scroll fade', value: true }
+	]);
 </script>
 
 <DocPage
@@ -20,13 +31,18 @@
 	]}
 >
 	<ComponentCard
-		code={`<ScrollArea type="hover" scrollFade class="raised h-52 w-full max-w-md">
+		{controls}
+		code={`<ScrollArea type="${controls.value.type}" scrollFade={${controls.value.scrollFade}} class="raised h-52 w-full max-w-md">
 	<div class="flex flex-col gap-3 p-4">
 		<!-- long content -->
 	</div>
 </ScrollArea>`}
 	>
-		<ScrollArea type="hover" scrollFade class="raised h-52 w-full max-w-md">
+		<ScrollArea
+			type={controls.value.type}
+			scrollFade={controls.value.scrollFade}
+			class="raised h-52 w-full max-w-md"
+		>
 			<div class="flex flex-col gap-3 p-4">
 				{#each paragraphs as p}
 					<p class="text-neutral/80 text-sm">

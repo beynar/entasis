@@ -3,9 +3,9 @@ import type { InputProps } from '../Field/field.js';
 import type { ComboboxOption, MaybePromise } from '../Combobox/combobox.props.js';
 import type { TagsInputThemeProps } from './tagsInput.theme.js';
 
-export type TagsInputProps = Omit<InputProps<'tag'>, 'onChange'> & {
+export type TagsInputProps = Omit<InputProps<'tag'>, 'onValueChange'> & {
 	/** Called when the tags change, with the new array of tag values. */
-	onChange?: (value: string[]) => void;
+	onValueChange?: (value: string[]) => void;
 	/** Bindable text currently typed in the search input. */
 	searchValue?: string;
 	/** Bindable flag indicating async options are being fetched. */

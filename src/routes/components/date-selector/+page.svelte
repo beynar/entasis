@@ -6,7 +6,9 @@
 	import { calendarBlankIcon } from '$lib/components/Icons/calendarBlank.js';
 	import type { PopoverState } from '$lib/components/Popover/popover.state.svelte.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
 
 	const day = (offset: number) => new Date(2026, 6, 15 + offset, 12);
 	const formatDate = (date: Date | null) =>
@@ -33,6 +35,37 @@
 	let selectedDates = $state<Date[]>([day(0), day(2)]);
 	let constrainedDate = $state<Date | null>(null);
 	let closingDate = $state<Date | null>(null);
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{
+			name: 'view',
+			type: 'segmented',
+			label: 'View',
+			value: 'single',
+			options: ['single', 'double']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -50,8 +83,14 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A popover date field with a label and description"
 		code={`<DateSelectorInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	view="${controls.value.view}"
+	disabled={${controls.value.disabled}}
 	label="Due date"
 	description="We'll remind you the day before"
 	bind:value={date}
@@ -59,6 +98,11 @@
 	>
 		<div class="w-full max-w-md">
 			<DateSelectorInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				view={controls.value.view}
+				disabled={controls.value.disabled}
 				label="Due date"
 				description="We'll remind you the day before"
 				bind:value={selectedDate}
@@ -74,7 +118,7 @@
 	{#snippet trigger(popover)}
 		<Button
 			suffix={calendarBlankIcon}
-			onClick={popover.toggle}
+				onclick={popover.toggle}
 			{@attach popover.reference}
 		>
 			{value ? value.toLocaleDateString() : 'Choose date'}
@@ -85,7 +129,7 @@
 			<div class="flex flex-col items-center gap-3">
 				<DateSelector bind:value={selectedDate} presets={datePresets}>
 					{#snippet trigger(popover: PopoverState)}
-						<Button suffix={calendarBlankIcon} onClick={popover.toggle} {@attach popover.reference}>
+						<Button suffix={calendarBlankIcon} onclick={popover.toggle} {@attach popover.reference}>
 							{formatDate(selectedDate)}
 						</Button>
 					{/snippet}

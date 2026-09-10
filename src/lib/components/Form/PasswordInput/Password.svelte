@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { tick } from 'svelte';
 	import Field from '../Field/Field.svelte';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
@@ -9,7 +10,8 @@
 	import { eyeIcon } from '$lib/components/Icons/eye.js';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
@@ -18,10 +20,11 @@
 		disabled,
 		name,
 		onValidate,
-		onChange,
+		onValueChange,
 		visible,
 		...rest
 	}: PasswordInputProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	let showPassword = $state(false);
 	const id = $props.id();
@@ -37,7 +40,7 @@
 		get errors() {
 			return errors;
 		},
-		set errors(v: any) {
+		set errors(v: string[] | boolean) {
 			errors = v;
 		},
 		get focused() {
@@ -46,7 +49,7 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => onChange?.(v ?? ''),
+		onValueChange: (v) => onValueChange?.(v ?? ''),
 		get disabled() {
 			return disabled;
 		},
@@ -123,6 +126,6 @@
 		aria-pressed={showPassword}
 		disabled={field.disabled}
 		prefix={showPassword ? eyeIcon : eyeClosedIcon}
-		onClick={togglePasswordVisibility}
+		onclick={togglePasswordVisibility}
 	/>
 </Field>

@@ -1,4 +1,5 @@
 <script lang="ts" generics="I extends MultiStepFormItems">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Stepper from '$lib/components/Stepper/Stepper.svelte';
 	import { useCardTheme } from '$lib/components/Card/card.theme.js';
 	import type { MultiStepFormItems, MultiStepFormProps } from './multiStepForm.props.js';
@@ -33,8 +34,17 @@
 		nextButtonProps = {},
 		previousButtonProps = {},
 		submitButtonProps = {},
-		value = $bindable({})
+		defaultValue = {},
+		value = $bindable(),
+		onValueChange
 	}: MultiStepFormProps<I> = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(nextValue) => {
+			value = nextValue;
+		},
+		() => defaultValue
+	);
 
 	let form = new MultiStepFormState({
 		get steps() {
@@ -50,16 +60,19 @@
 			return meterColor;
 		},
 		get value() {
-			return value;
+			return valueState.value;
 		},
 		set value(nextValue) {
-			value = nextValue;
+			valueState.value = nextValue;
+		},
+		get onValueChange() {
+			return onValueChange;
 		}
 	});
 
 	const getButtonConfig = (props: ButtonProps) => {
-		const { onClick, disabled, loading, ...forwardedProps } = props;
-		return { onClick, disabled, loading, forwardedProps };
+		const { onclick, disabled, loading, ...forwardedProps } = props;
+		return { onclick, disabled, loading, forwardedProps };
 	};
 
 	const previousButton = $derived(getButtonConfig(previousButtonProps));
@@ -67,14 +80,14 @@
 	const submitButton = $derived(getButtonConfig(submitButtonProps));
 	const activeButton = $derived(form.isLastStep ? submitButton : nextButton);
 
-	const goToPreviousStep = () => {
+	const goToPreviousStep: NonNullable<ButtonProps['onclick']> = (event) => {
 		form.stepper?.previous();
-		previousButton.onClick?.(undefined);
+		previousButton.onclick?.(event);
 	};
 
-	const submitCurrentStep = () => {
+	const submitCurrentStep: NonNullable<ButtonProps['onclick']> = (event) => {
 		void form.submit();
-		activeButton.onClick?.(undefined);
+		activeButton.onclick?.(event);
 	};
 
 	const formTheme = $derived(theme?.form);
@@ -141,6 +154,7 @@
 	>
 		<Stepper
 			bind:stepper={form.stepper}
+			bind:value={form.activeStep}
 			{items}
 			class={isCard ? '-mx-4 w-auto max-w-none' : undefined}
 		>
@@ -155,11 +169,11 @@
 							bind:value={
 								() => form.getStepValue(index), (nextValue) => form.setStepValue(index, nextValue)
 							}
+							onValueChange={(nextValue) => form.setStepValue(index, nextValue, true)}
 							title={item.title}
 							description={item.description}
 							{variant}
 							theme={formTheme}
-							submitButton={null}
 						/>
 					</FormCardSurfaceBoundary>
 				</div>
@@ -178,9 +192,9 @@
 		<Button
 			{...previousButton.forwardedProps}
 			prefix={arrowLeftIcon}
-			disabled={form.stepper?.activeStep === 0 || form.loading || previousButton.disabled}
+			disabled={form.activeStep === 0 || form.loading || previousButton.disabled}
 			loading={form.loading || previousButton.loading}
-			onClick={goToPreviousStep}
+			onclick={goToPreviousStep}
 		>
 			{previousText}
 		</Button>
@@ -189,7 +203,7 @@
 			suffix={form.isLastStep ? arrowCircleUpIcon : arrowRightIcon}
 			disabled={form.loading || activeButton.disabled}
 			loading={form.loading || activeButton.loading}
-			onClick={submitCurrentStep}
+			onclick={submitCurrentStep}
 		>
 			{form.isLastStep ? submitText : nextText}
 		</Button>

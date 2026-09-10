@@ -239,7 +239,7 @@
 				generatedWaveform = undefined;
 				const waveformError =
 					cause instanceof Error ? cause : new Error('Audio waveform generation failed.');
-				player.callbacks.onError?.(waveformError, player.snapshot);
+				player.callbacks.onError?.({ error: waveformError, snapshot: player.snapshot });
 			});
 	});
 

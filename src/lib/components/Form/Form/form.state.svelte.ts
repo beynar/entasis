@@ -14,13 +14,14 @@ import type {
 	InferFormValue,
 	LiveFormValue
 } from './form.js';
-import { flattenFormInputs } from './form.js';
+import { flattenFormInputs, getFormValueInputType } from './form.js';
 import { isFieldVisible } from './visibility.js';
 
 type FormStateOptions<I extends FormInputs> = {
 	inputs: I;
 	onSubmit?: FormSubmitHandler<I>;
 	value?: LiveFormValue<I>;
+	onValueChange?: (value: LiveFormValue<I>) => void;
 };
 
 type RegisteredField = FieldState<InputType>;
@@ -140,7 +141,7 @@ export class FormState<I extends FormInputs = FormInputs> {
 		if (hasOwn(this.valueCache, field.name)) {
 			const cachedValue = this.valueCache[field.name];
 			if (!Object.is(field.value, cachedValue)) {
-				field.value = cachedValue as FieldValue<T> | null;
+				field.syncValue(cachedValue as FieldValue<T> | null);
 			}
 		} else {
 			this.setCachedValue(field.name, field.value);
@@ -157,9 +158,15 @@ export class FormState<I extends FormInputs = FormInputs> {
 		};
 	}
 
-	updateFieldValue<T extends InputType>(field: FieldState<T>): void {
+	updateFieldValue<T extends InputType>(field: FieldState<T>, notify = false): void {
 		if (this.fields.get(field.name) !== (field as RegisteredField)) return;
+		const previousValue = this.value;
 		this.setCachedValue(field.name, field.value);
+		const visibleValue = this.value;
+		if (!notify || areValuesEqual(previousValue, visibleValue)) return;
+		this.publishedValue = visibleValue;
+		this.options.value = visibleValue;
+		this.options.onValueChange?.(visibleValue);
 	}
 
 	keyboardNavigation: Attachment<HTMLElement> = (node) => on(node, 'keydown', this.handleKeydown);
@@ -273,17 +280,16 @@ export class FormState<I extends FormInputs = FormInputs> {
 		}
 
 		for (const { name, input } of definitions) {
-			if (!supportedInputTypes.has(input.type)) {
-				throw new Error(
-					`Form field "${name}" uses unsupported input type "${String(input.type)}".`
-				);
+			const inputType = getFormValueInputType(input);
+			if (!supportedInputTypes.has(inputType)) {
+				throw new Error(`Form field "${name}" uses unsupported input type "${String(inputType)}".`);
 			}
 
 			if (!hasOwn(externalValue, name)) continue;
 			const nextValue = externalRecord?.[name];
 			const field = this.fields.get(name);
 			if (field && !Object.is(field.value, nextValue)) {
-				field.value = nextValue;
+				field.syncValue(nextValue);
 			}
 			if (Object.is(nextCache[name], nextValue)) continue;
 			nextCache[name] = nextValue;
@@ -326,6 +332,8 @@ export class FormState<I extends FormInputs = FormInputs> {
 			const { input } = definition;
 			const hasConfiguredValue = hasOwn(input, 'value');
 			const configuredValue = hasConfiguredValue ? input.value : undefined;
+			const hasDefaultValue = hasOwn(input, 'defaultValue');
+			const defaultValue = hasDefaultValue ? input.defaultValue : undefined;
 			const previousConfiguredValue = this.configuredValues.get(name);
 			const configuredValueChanged =
 				this.configuredValues.has(name) && !Object.is(previousConfiguredValue, configuredValue);
@@ -341,10 +349,14 @@ export class FormState<I extends FormInputs = FormInputs> {
 				nextValue = externalRecord?.[name];
 				shouldApplyValue = true;
 			} else if (isExternalUpdate && activeDefinition && previouslyVisibleNames.has(name)) {
-				nextValue = hasConfiguredValue ? configuredValue : this.defaultValues.get(name);
+				nextValue = hasConfiguredValue
+					? configuredValue
+					: this.defaultValues.has(name)
+						? this.defaultValues.get(name)
+						: defaultValue;
 				shouldApplyValue = true;
-			} else if (!hasOwn(nextCache, name) && hasConfiguredValue) {
-				nextValue = configuredValue;
+			} else if (!hasOwn(nextCache, name) && (hasConfiguredValue || hasDefaultValue)) {
+				nextValue = hasConfiguredValue ? configuredValue : defaultValue;
 				shouldApplyValue = true;
 			} else if (activeDefinition && configuredValueChanged) {
 				nextValue = configuredValue;
@@ -356,7 +368,7 @@ export class FormState<I extends FormInputs = FormInputs> {
 			hasCacheChange = true;
 			const field = this.fields.get(name);
 			if (field && !Object.is(field.value, nextValue)) {
-				field.value = nextValue;
+				field.syncValue(nextValue);
 			}
 		}
 

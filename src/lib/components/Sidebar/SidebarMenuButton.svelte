@@ -8,10 +8,15 @@
 	import { useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 
 	type Props = SidebarMenuButtonItem & {
+		/** Uses the mobile menu placement when true. */
 		isMobile?: boolean;
+		/** Default alignment when the item does not provide menuAlign. */
 		defaultAlign?: 'start' | 'center' | 'end';
+		/** Typography, icon, and row geometry scale. */
 		size?: SidebarSize;
+		/** Internal whitespace scale. */
 		density?: SidebarDensity;
+		/** Sidebar theme overrides for this menu row. */
 		theme?: SidebarThemeProps;
 	};
 
@@ -23,7 +28,7 @@
 		subtitle,
 		trailing,
 		href,
-		onClick,
+		onclick,
 		menu,
 		menuSide,
 		menuAlign,
@@ -195,6 +200,7 @@
 		{/snippet}
 	</PopupMenu>
 {:else if href}
+	<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs; library links cannot depend on SvelteKit routing. -->
 	<a
 		{href}
 		data-slot="sidebar-menu-button"
@@ -203,10 +209,11 @@
 	>
 		{@render buttonInner()}
 	</a>
+	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 {:else}
 	<button
 		type="button"
-		onclick={onClick}
+		{onclick}
 		data-slot="sidebar-menu-button"
 		data-size={compact ? 'default' : 'lg'}
 		class={buttonClass}

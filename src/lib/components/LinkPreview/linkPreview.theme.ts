@@ -32,9 +32,9 @@ const defaultLinkPreviewContent = cva({
 	base: 'grid min-w-0 gap-0',
 	variants: {
 		size: {
-			small: '-mx-2',
-			normal: '-mx-4',
-			large: '-mx-6'
+			small: '-mx-md',
+			normal: '-mx-xl',
+			large: '-mx-layout-md'
 		}
 	},
 	defaultVariants: {
@@ -43,7 +43,7 @@ const defaultLinkPreviewContent = cva({
 });
 
 const defaultLinkPreviewMedia = cva({
-	base: 'bg-neutral-muted overflow-hidden rounded-t-xl rounded-b-none',
+	base: 'bg-neutral-muted overflow-hidden rounded-t-lg rounded-b-none',
 	variants: {
 		size: {
 			small: 'aspect-[1.9/1]',
@@ -61,12 +61,12 @@ const defaultLinkPreviewImage = cva({
 });
 
 const defaultLinkPreviewBody = cva({
-	base: 'grid min-w-0 gap-2',
+	base: 'grid min-w-0 gap-md',
 	variants: {
 		size: {
-			small: 'px-2 pt-3 pb-3',
-			normal: 'px-4 pt-4 pb-4',
-			large: 'px-6 pt-5 pb-5'
+			small: 'px-md pt-lg pb-lg',
+			normal: 'px-xl pt-xl pb-xl',
+			large: 'px-layout-md pt-layout-sm pb-layout-sm'
 		}
 	},
 	defaultVariants: {
@@ -75,7 +75,7 @@ const defaultLinkPreviewBody = cva({
 });
 
 const defaultLinkPreviewHeader = cva({
-	base: 'flex min-w-0 items-center gap-2'
+	base: 'flex min-w-0 items-center gap-md'
 });
 
 const defaultLinkPreviewFavicon = cva({
@@ -123,7 +123,7 @@ const defaultLinkPreviewLoading = cva({
 });
 
 const defaultLinkPreviewError = cva({
-	base: 'border-danger/20 bg-danger-muted/20 text-danger-muted-readable rounded-lg border p-3'
+	base: 'border-danger/20 bg-danger-muted/20 text-danger-muted-readable rounded-md border p-lg'
 });
 
 export const linkPreviewTheme = {

@@ -15,7 +15,8 @@ import type {
 	MergedMultiStepFormInputs,
 	MultiStepFormItemWithState,
 	MultiStepFormItems,
-	MultiStepFormItemsWithState
+	MultiStepFormItemsWithState,
+	MultiStepFormProps
 } from './multiStepForm.props.js';
 
 type MultiStepFormValue<I extends MultiStepFormItems> = LiveFormValue<MergedMultiStepFormInputs<I>>;
@@ -28,13 +29,10 @@ type StepInputs<I extends MultiStepFormItems> = I[number]['inputs'];
 type MultiStepFormOptions<I extends MultiStepFormItems> = {
 	steps: I & MultiStepFormItemsWithState<I>;
 	onSubmitForm?: (value: MultiStepSubmitValue<I>) => Promise<void> | void;
-	onSubmitStep?: (
-		value: MultiStepProgressValue<I>,
-		step: I[number],
-		index: number
-	) => Promise<void | boolean> | void | boolean;
+	onSubmitStep?: MultiStepFormProps<I>['onSubmitStep'];
 	meterColor?: Colors;
 	value?: MultiStepFormValue<I>;
+	onValueChange?: (value: MultiStepFormValue<I>) => void;
 };
 
 type ValidatedSteps<I extends MultiStepFormItems> = {
@@ -60,15 +58,16 @@ export class MultiStepFormState<I extends MultiStepFormItems = FormStep[]> {
 	readonly forms = new SvelteMap<number, FormState<FormInputs>>();
 	readonly stepValues = new SvelteMap<number, LiveFormValue<FormInputs>>();
 	stepper = $state<StepperState<MultiStepFormItemWithState<I>>>();
+	activeStep = $state(0);
 	loading = $state(false);
 	private readonly options!: MultiStepFormOptions<I>;
 	private submitPromise: Promise<MultiStepProgressValue<I> | false> | null = null;
 
 	steps = $derived(this.options.steps);
-	isLastStep = $derived(this.stepper?.activeStep === this.steps.length - 1);
+	isLastStep = $derived(this.activeStep === this.steps.length - 1);
 	value = $derived.by(() => this.mergeStepValues());
 	progress = $derived({
-		value: (((this.stepper?.activeStep ?? 0) + 1) / this.steps.length) * 100,
+		value: ((this.activeStep + 1) / this.steps.length) * 100,
 		color: this.options.meterColor ?? 'neutral'
 	});
 	meterSteps = $derived(
@@ -114,10 +113,14 @@ export class MultiStepFormState<I extends MultiStepFormItems = FormStep[]> {
 		return this.stepValues.get(index) ?? {};
 	}
 
-	setStepValue(index: number, value: LiveFormValue<FormInputs>): void {
+	setStepValue(index: number, value: LiveFormValue<FormInputs>, notify = false): void {
 		const currentValue = this.stepValues.get(index);
-		if (areValuesEqual(currentValue, value)) return;
-		this.stepValues.set(index, value);
+		if (!areValuesEqual(currentValue, value)) this.stepValues.set(index, value);
+		if (notify) {
+			const mergedValue = this.value;
+			this.options.value = mergedValue;
+			this.options.onValueChange?.(mergedValue);
+		}
 	}
 
 	submit = (): Promise<MultiStepProgressValue<I> | false> => {
@@ -163,11 +166,11 @@ export class MultiStepFormState<I extends MultiStepFormItems = FormStep[]> {
 			}
 
 			if (!canContinue) return validatedSteps.mergedValue;
-			const shouldContinue = await this.options.onSubmitStep?.(
-				validatedSteps.mergedValue,
+			const shouldContinue = await this.options.onSubmitStep?.({
+				value: validatedSteps.mergedValue,
 				step,
-				activeStep
-			);
+				index: activeStep
+			});
 			if (shouldContinue !== false) this.stepper?.next();
 			return validatedSteps.mergedValue;
 		} finally {
@@ -242,8 +245,7 @@ export class MultiStepFormState<I extends MultiStepFormItems = FormStep[]> {
 	}
 
 	private getActiveStep(): number {
-		const activeStep = this.stepper?.activeStep;
-		if (activeStep === undefined) throw new Error('MultiStepForm is not initialized.');
+		const activeStep = this.activeStep;
 		if (activeStep < 0 || activeStep >= this.steps.length) {
 			throw new Error(`MultiStepForm active step ${activeStep} is out of range.`);
 		}

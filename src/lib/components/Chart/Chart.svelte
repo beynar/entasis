@@ -12,6 +12,7 @@
 		frame,
 		margin,
 		palette,
+		legend,
 		tooltip,
 		viewport,
 		ariaLabel,
@@ -53,6 +54,9 @@
 		get palette() {
 			return palette;
 		},
+		get legend() {
+			return legend;
+		},
 		get tooltip() {
 			return tooltip;
 		},
@@ -91,14 +95,6 @@
 	<div {@attach chart.host} data-chart-host class={chart.plotClass} style="width:100%;height:100%">
 		{@html chart.initialMarkup}
 	</div>
-	{#if chart.viewportState.brushStyle}
-		<div
-			data-chart-brush
-			aria-hidden="true"
-			class="border-primary bg-primary/15 pointer-events-none absolute z-10 rounded-sm border shadow-sm"
-			style={chart.viewportState.brushStyle}
-		></div>
-	{/if}
 	{#if chart.viewportState.showReset}
 		<button
 			type="button"
@@ -109,9 +105,11 @@
 			Reset zoom
 		</button>
 	{/if}
-	<span class="sr-only" role="status" aria-live="polite" aria-atomic="true">
-		{chart.viewportState.status}
-	</span>
+	{#if chart.viewportState.status}
+		<span class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+			{chart.viewportState.status}
+		</span>
+	{/if}
 </div>
 
 <style>
@@ -128,13 +126,9 @@
 		touch-action: pan-y;
 	}
 
-	[data-slot='chart'][data-chart-viewport-axis='y'] :global(svg.ts-chart) {
-		cursor: crosshair;
-		touch-action: pan-x;
-	}
-
-	[data-slot='chart'][data-chart-viewport-axis='both'] :global(svg.ts-chart) {
-		cursor: crosshair;
-		touch-action: none;
+	/* The brush is a zoom gesture, not a draggable persistent range. */
+	[data-slot='chart'] :global([data-chart-brush-selection]),
+	[data-slot='chart'] :global([data-chart-brush-handle]) {
+		pointer-events: none;
 	}
 </style>

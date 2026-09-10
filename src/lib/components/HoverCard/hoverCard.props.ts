@@ -26,6 +26,8 @@ export type HoverCardProps = WithAttachments<{
 	id?: string;
 	/** Controls whether the hover card is open; bindable for two-way control. */
 	open?: boolean;
+	/** Initial open state when `open` is not provided. */
+	defaultOpen?: boolean;
 	/** Trigger content. Strings and snippets are wrapped; ButtonProps render a Button. */
 	trigger?: HoverCardTrigger;
 	/** Main card content. Alias for children, useful when mirroring other hover-card APIs. */
@@ -76,10 +78,12 @@ export type HoverCardProps = WithAttachments<{
 	cardVariant?: CardProps['variant'];
 	/** Show subtle borders between Card sections. */
 	showBorders?: CardProps['showBorders'];
+	/** Called once when the library requests an open-state change. */
+	onOpenChange?: (open: boolean) => void;
 	/** Callback after the open transition finishes. */
-	onOpen?: (hoverCard: HoverCardPayload) => void;
+	onAfterOpen?: (hoverCard: HoverCardPayload) => void;
 	/** Callback after the close transition finishes. */
-	onClose?: (hoverCard: HoverCardPayload) => void;
+	onAfterClose?: (hoverCard: HoverCardPayload) => void;
 	/** Theme overrides for HoverCard wrapper parts. */
 	theme?: HoverCardThemeProps;
 	/** Theme overrides for the inner Card. */

@@ -65,24 +65,24 @@
 	{#if showBar}
 		<div class={classes.buttons()} data-panzoom-ignore>
 			{#if has('fit')}
-				<Button {...buttonProps} label="Zoom to fit" onClick={state.zoomToFit} prefix={cornersOutIcon} />
+				<Button {...buttonProps} label="Zoom to fit" onclick={state.zoomToFit} prefix={cornersOutIcon} />
 			{/if}
 			{#if has('zoomOut')}
-				<Button {...buttonProps} label="Zoom out" onClick={state.zoomOut} prefix={magnifyingGlassMinusIcon} />
+				<Button {...buttonProps} label="Zoom out" onclick={state.zoomOut} prefix={magnifyingGlassMinusIcon} />
 			{/if}
 			{#if has('zoomIn')}
-				<Button {...buttonProps} label="Zoom in" onClick={state.zoomIn} prefix={magnifyingGlassPlusIcon} />
+				<Button {...buttonProps} label="Zoom in" onclick={state.zoomIn} prefix={magnifyingGlassPlusIcon} />
 			{/if}
 			{#if has('expand')}
 				<Button
 					{...buttonProps}
 					label={state.expanded ? 'Exit fullscreen' : 'Fullscreen'}
-					onClick={state.toggleExpand}
+					onclick={state.toggleExpand}
 					prefix={state.expanded ? arrowsInIcon : arrowsOutIcon}
 				/>
 			{/if}
 			{#if has('download')}
-				<Button {...buttonProps} label="Download SVG" onClick={() => state.downloadSvg()} prefix={downloadSimpleIcon} />
+				<Button {...buttonProps} label="Download SVG" onclick={() => state.downloadSvg()} prefix={downloadSimpleIcon} />
 			{/if}
 		</div>
 	{/if}

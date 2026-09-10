@@ -451,4 +451,11 @@ The theme object contains the following parts:
 - Works seamlessly with Form component
 - Supports Svelte 5 snippets for labels and descriptions
 - Each option requires a unique \`value\` property
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+
 `;

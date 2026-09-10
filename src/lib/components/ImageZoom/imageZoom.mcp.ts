@@ -28,6 +28,7 @@ high-resolution sources, slots, focus restoration, and configurable dismissal.
 - **zoomSrc**: string - Full-size image source. Defaults to \`src\`.
 - **zoomWidth / zoomHeight**: number - Intrinsic dimensions of \`zoomSrc\`. Provide both when \`zoomSrc\` differs from the thumbnail so the origin transition and final image use the same rectangle.
 - **open**: boolean (bindable, default: false) - Controls the zoom layer.
+- **defaultOpen**: boolean (default: false) - Initial state when open is not provided.
 - **disabled**: boolean (default: false) - Prevents opening.
 - **width / height / srcset / sizes / loading / decoding** - Forwarded to the thumbnail image.
 - **zoomMargin**: number (default: 40) - Minimum viewport margin around the zoomed image.
@@ -44,9 +45,9 @@ high-resolution sources, slots, focus restoration, and configurable dismissal.
 - **indicatorPosition**: "top-left" | "top-right" | "bottom-left" | "bottom-right" (default: "top-right") - Corner used for the thumbnail zoom indicator.
 - **class**: string - Additional root classes.
 - **theme**: ImageZoomThemeProps - Per-instance theme overrides.
-- **onOpenChange**: (open, payload) => void - Fired when user interaction requests a new open state.
-- **onOpen**: (payload) => void - Fired after the open animation starts.
-- **onClose**: (payload) => void - Fired after the close animation completes.
+- **onOpenChange**: (open: boolean) => void - Fired once when the library requests a new open state.
+- **onAfterOpen**: (payload) => void - Fired after the open animation completes.
+- **onAfterClose**: (payload) => void - Fired after the close animation completes.
 
 ## Slots
 

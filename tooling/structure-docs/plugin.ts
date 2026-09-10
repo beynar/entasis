@@ -1,9 +1,11 @@
+// @ts-expect-error This build-only module runs in Node, whose ambient types are not a package dependency.
 import { readdirSync, readFileSync } from 'node:fs';
+// @ts-expect-error This build-only module runs in Node, whose ambient types are not a package dependency.
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 import { Project } from 'ts-morph';
 import type { Plugin } from 'vite';
-import { extractComponentStructure, readThemeParts, readThemeSetter } from './extract';
-import type { StructureMap } from './types';
+import { extractComponentStructure, readThemeParts, readThemeSetter } from './extract.js';
+import type { StructureMap } from './types.js';
 
 const VIRTUAL_ID = 'virtual:svelai-structure';
 const RESOLVED_ID = '\0' + VIRTUAL_ID;
@@ -16,7 +18,7 @@ const COMPONENTS_DIR = 'src/lib/components';
  * component name. Never packaged - dev/docs only.
  */
 export function svelaiStructureDocs(): Plugin {
-	let root = process.cwd();
+	let root = '';
 	let project: Project | null = null;
 	let cachedMap: StructureMap | null = null;
 
@@ -88,8 +90,10 @@ function affectsStructureDocs(root: string, filePath: string): boolean {
 
 	const directory = dirname(filePath);
 	return readdirSync(directory)
-		.filter((file) => file.endsWith('.theme.ts'))
-		.some((themeFile) => findMainSvelteFiles(join(directory, themeFile)).includes(filePath));
+		.filter((file: string) => file.endsWith('.theme.ts'))
+		.some((themeFile: string) =>
+			findMainSvelteFiles(join(directory, themeFile)).includes(filePath)
+		);
 }
 
 /**
@@ -117,8 +121,8 @@ function buildImportMap(root: string): Map<string, string> {
 /** All `*.theme.ts` files under the components tree. */
 function findThemeFiles(dir: string): string[] {
 	return readdirSync(dir, { recursive: true, encoding: 'utf8' })
-		.filter((entry) => entry.endsWith('.theme.ts'))
-		.map((entry) => join(dir, entry));
+		.filter((entry: string) => entry.endsWith('.theme.ts'))
+		.map((entry: string) => join(dir, entry));
 }
 
 /**
@@ -130,15 +134,19 @@ function findMainSvelteFiles(themeFile: string): string[] {
 		.replace(/\.theme\.ts$/, '')
 		.toLowerCase();
 	const dir = dirname(themeFile);
-	const siblings = readdirSync(dir).filter((file) => file.endsWith('.svelte'));
-	const direct = siblings.find((file) => file.slice(0, -'.svelte'.length).toLowerCase() === base);
+	const siblings = (readdirSync(dir) as string[]).filter((file: string) =>
+		file.endsWith('.svelte')
+	);
+	const direct = siblings.find(
+		(file: string) => file.slice(0, -'.svelte'.length).toLowerCase() === base
+	);
 	if (direct) return [join(dir, direct)];
 	if (!base.startsWith('ai')) return [];
 	const unprefixed = base.slice(2);
 	return siblings
-		.filter((file) => {
+		.filter((file: string) => {
 			const name = file.slice(0, -'.svelte'.length).toLowerCase();
 			return name === unprefixed || name === `${unprefixed}s`;
 		})
-		.map((file) => join(dir, file));
+		.map((file: string) => join(dir, file));
 }

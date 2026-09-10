@@ -1,5 +1,6 @@
 import { lineY } from '@tanstack/charts';
-import { mean, median } from 'd3-array';
+import { median } from '@tanstack/charts/transform/reduce';
+import { rollingWindow } from '@tanstack/charts/transform/rolling-window';
 import {
 	groupAnalysisRows,
 	readChartValue,
@@ -7,15 +8,10 @@ import {
 	resolveAnalysisPaint,
 	type AnalysisGroupAccessor
 } from './chart.analysis.data.js';
-import { compileChannel } from './chart.channels.js';
+import { compileChannel, type CompilableChartChannel } from './chart.channels.js';
 import type { CompiledMark } from './chart.cartesian.js';
 import { withoutTooltipPoints } from './chart.mark.js';
-import type {
-	ChartChannel,
-	ChartKey,
-	ChartRollingAnalysis,
-	ChartValue
-} from './chart.props.js';
+import type { ChartKey, ChartRollingAnalysis, ChartValue } from './chart.props.js';
 
 type RollingDatum = {
 	readonly identity: string;
@@ -27,8 +23,8 @@ type RollingDatum = {
 type CompileRollingAnalysisInput<TRow extends object> = {
 	readonly data: readonly TRow[];
 	readonly analysis: ChartRollingAnalysis;
-	readonly x: ChartChannel<TRow, ChartValue>;
-	readonly y: ChartChannel<TRow, number>;
+	readonly x: CompilableChartChannel<TRow, ChartValue>;
+	readonly y: CompilableChartChannel<TRow, number>;
 	readonly group?: AnalysisGroupAccessor<TRow>;
 	readonly path: string;
 	readonly id: string;
@@ -56,26 +52,25 @@ export function compileRollingAnalysis<TRow extends object>({
 	const groupedRows = groupAnalysisRows(data, group, analysis.scope, path);
 	const rows = groupedRows.groups.flatMap((sourceGroup) => {
 		const observations = sourceGroup.rows.flatMap(({ row, index }) => {
-			const xValue = readChartValue(xAccessor(row, index, data), `${path}.x`);
-			const yValue = readFiniteNumber(yAccessor(row, index, data), `${path}.y`);
+			const context = { index, data };
+			const xValue = readChartValue(xAccessor(row, context), `${path}.x`);
+			const yValue = readFiniteNumber(yAccessor(row, context), `${path}.y`);
 			return xValue !== undefined && yValue !== undefined ? [{ x: xValue, y: yValue }] : [];
 		});
-		return observations.flatMap((observation, index) => {
-			if (index + 1 < analysis.window) return [];
-			const values = observations
-				.slice(index + 1 - analysis.window, index + 1)
-				.map((candidate) => candidate.y);
-			const yValue = analysis.statistic === 'mean' ? mean(values) : median(values);
-			if (yValue === undefined) return [];
-			return [
-				{
-					identity: `${sourceGroup.identity}:${index}`,
+		return rollingWindow(observations, {
+			size: analysis.window,
+			anchor: 'end',
+			partial: false,
+			outputs: { y: { value: 'y', reduce: analysis.statistic === 'mean' ? 'mean' : median } }
+		}).map(
+			(observation, index) =>
+				({
+					identity: `${sourceGroup.identity}:${index + analysis.window - 1}`,
 					group: sourceGroup.key,
 					x: observation.x,
-					y: yValue
-				} satisfies RollingDatum
-			];
-		});
+					y: observation.y
+				}) satisfies RollingDatum
+		);
 	});
 	if (rows.length === 0) return [];
 	const paint = resolveAnalysisPaint(analysis, groupedRows.isGrouped, 'secondary');

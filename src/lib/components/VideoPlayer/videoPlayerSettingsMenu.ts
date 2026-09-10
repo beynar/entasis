@@ -70,7 +70,7 @@ export function getVideoPlayerSettingsMenuItems({
 				disabled,
 				selected: player.playbackRate === rate,
 				suffix: player.playbackRate === rate ? checkIcon : undefined,
-				onClick: () => runIfEnabled(() => player.setPlaybackRate(rate))
+				onclick: () => runIfEnabled(() => player.setPlaybackRate(rate))
 			}))
 		};
 		items.push(speedItem);
@@ -84,7 +84,7 @@ export function getVideoPlayerSettingsMenuItems({
 			disabled,
 			selected: player.loop,
 			suffix: player.loop ? checkIcon : undefined,
-			onClick: () => runIfEnabled(() => player.setLoop(!player.loop))
+			onclick: () => runIfEnabled(() => player.setLoop(!player.loop))
 		});
 	}
 
@@ -155,7 +155,7 @@ function getCaptionsMenuItem({
 				disabled: captionsDisabled,
 				selected: !player.captionsEnabled,
 				suffix: !player.captionsEnabled ? checkIcon : undefined,
-				onClick: () => runIfEnabled(() => player.setActiveTextTrack(null))
+				onclick: () => runIfEnabled(() => player.setActiveTextTrack(null))
 			},
 			...captionTracks.map((track) => ({
 				type: 'option' as const,
@@ -163,7 +163,7 @@ function getCaptionsMenuItem({
 				disabled: captionsDisabled,
 				selected: player.activeTextTrack === track.value,
 				suffix: player.activeTextTrack === track.value ? checkIcon : undefined,
-				onClick: () => runIfEnabled(() => player.setActiveTextTrack(track.value))
+				onclick: () => runIfEnabled(() => player.setActiveTextTrack(track.value))
 			}))
 		]
 	};
@@ -197,7 +197,7 @@ function getActionMenuItems({
 			disabled: disabled || !player.supportsPictureInPicture,
 			selected: player.actualPictureInPicture,
 			suffix: player.actualPictureInPicture ? checkIcon : undefined,
-			onClick: () => runIfEnabled(() => player.togglePictureInPicture())
+			onclick: () => runIfEnabled(() => player.togglePictureInPicture())
 		});
 	}
 
@@ -220,7 +220,7 @@ function getActionMenuItems({
 			disabled: disabled || !player.supportsFullscreen,
 			selected: player.actualFullscreen,
 			suffix: player.actualFullscreen ? checkIcon : undefined,
-			onClick: () => runIfEnabled(() => player.toggleFullscreen())
+			onclick: () => runIfEnabled(() => player.toggleFullscreen())
 		});
 	}
 

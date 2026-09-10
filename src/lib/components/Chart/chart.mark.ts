@@ -1,4 +1,5 @@
 import type { ChartMark as TanStackMark, ChartValue as TanStackValue } from '@tanstack/charts';
+import { decorative } from '@tanstack/charts/mark/decorative';
 
 export function withoutTooltipPoints<
 	TDatum,
@@ -9,17 +10,5 @@ export function withoutTooltipPoints<
 >(
 	mark: TanStackMark<TDatum, TXPointValue, TYPointValue, TXScaleValue, TYScaleValue>
 ): TanStackMark<TDatum, TXPointValue, TYPointValue, TXScaleValue, TYScaleValue> {
-	return {
-		...mark,
-		initialize(context) {
-			const initialized = mark.initialize(context);
-			return {
-				...initialized,
-				render(renderContext) {
-					const rendered = initialized.render(renderContext);
-					return { ...rendered, points: [] };
-				}
-			};
-		}
-	};
+	return decorative(mark);
 }

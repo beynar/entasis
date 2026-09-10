@@ -16,7 +16,7 @@
 		type = 'hover',
 		scrollOnEdges = false,
 		scrollFade = false,
-		onScroll,
+		onscroll,
 		theme,
 		...attachments
 	}: ScrollAreaProps = $props();
@@ -70,7 +70,7 @@
 		tabindex={scrollArea.viewportTabindex}
 		role="group"
 		aria-label={ariaLabel}
-		onscroll={onScroll}
+		{onscroll}
 		{@attach scrollArea.viewportAttachment}
 		style:position="relative"
 		style:overflow="scroll"

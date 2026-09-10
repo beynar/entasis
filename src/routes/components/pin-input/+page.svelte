@@ -2,7 +2,10 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import DocPage from '../../DocPage.svelte';
 	import Form from '$lib/components/Form/Form/Form.svelte';
+	import Button from '$lib/components/Button/Button.svelte';
 	import { PIN_INPUT_ALPHANUMERIC_PATTERN, PinInput } from '$lib/components/Form/PinInput/index.js';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let code = $state('');
 	let maskedCode = $state('');
@@ -15,6 +18,30 @@
 	const setFormValue = (value: { otp: string | null }) => {
 		formValue = JSON.stringify(value);
 	};
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -29,8 +56,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Digits-only one-time code with paste cleanup."
 		code={`<PinInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Verification code"
 	description="Enter the 6-digit code we sent you"
 	bind:value={code}
@@ -39,6 +71,10 @@
 	>
 		<div class="w-full max-w-md">
 			<PinInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
 				label="Verification code"
 				description="Enter the 6-digit code we sent you"
 				bind:value={code}
@@ -104,8 +140,11 @@
 						}
 					}}
 					onSubmit={setFormValue}
-					submitButton={{ children: 'Verify code' }}
-				/>
+				>
+					{#snippet children(form)}
+						<Button onclick={() => form.submit()}>Verify code</Button>
+					{/snippet}
+				</Form>
 				{#if formValue}
 					<p class="text-neutral/60 text-sm">{formValue}</p>
 				{/if}

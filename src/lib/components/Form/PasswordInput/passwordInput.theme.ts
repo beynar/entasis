@@ -2,12 +2,12 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 
 const defaultInput = cva({
-	base: 'outline-none flex-1 w-full rounded bg-transparent resize-none placeholder:text-neutral/60 autofill:text-neutral appearance-none text-sm leading-normal',
+	base: 'outline-none flex-1 w-full min-w-0 h-full bg-transparent resize-none placeholder:text-neutral/60 autofill:text-neutral appearance-none text-sm leading-normal',
 	variants: {
 		size: {
-			small: 'text-xs h-5',
-			normal: 'text-sm h-5',
-			large: 'text-sm h-6'
+			small: 'text-xs',
+			normal: 'text-sm',
+			large: 'text-sm'
 		},
 		disabled: {
 			true: 'cursor-not-allowed opacity-50',
@@ -20,12 +20,12 @@ const defaultInput = cva({
 });
 
 const defaultInputContainer = cva({
-	base: 'px-3 bg-surface-raised border border-neutral-muted rounded text-neutral w-full focus-within:ring-1 focus-within:ring-primary ring-0 transition-all flex items-center py-2',
+	base: 'flex w-full items-center border border-neutral-muted bg-surface-raised px-lg text-neutral ring-0 transition-all rounded-md outline-none focus-within:ring-2 focus-within:ring-primary/50',
 	variants: {
 		size: {
-			small: 'py-1.5 text-xs',
-			normal: 'py-1.5 text-sm',
-			large: 'py-2 text-sm'
+			small: 'h-control-sm text-xs',
+			normal: 'h-control-md text-sm',
+			large: 'h-control-lg text-sm'
 		},
 		disabled: {
 			true: 'cursor-not-allowed opacity-50',

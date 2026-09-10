@@ -66,7 +66,7 @@ Extends all Field props plus:
 - **size**: 'small' | 'normal' | 'large' - Control size
 - **errors**: string[] | boolean (bindable) - Validation errors
 - **focused**: boolean (bindable) - Focus state
-- **onChange**: (value: number | number[]) => void - Called when value changes
+- **onValueChange**: (value: number | number[]) => void - Called when value changes
 - **onValidate**: (value: number | number[]) => string[] | boolean - Custom validation
 
 ### Slots
@@ -233,4 +233,11 @@ Theme parts:
 - **mark**: Individual mark positioning wrapper
 - **markDot**: Mark dot
 - **markLabel**: Mark text
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+
 `;

@@ -50,6 +50,11 @@ export type AIModelSelectorState = {
 	toggle: () => void;
 };
 
+export type AIModelSelectorValueChangePayload = {
+	value: string;
+	model: AIModelSelectorModel;
+};
+
 export type AIModelSelectorProps = WithAttachments<
 	Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'class'> & {
 		/** Bindable reference to the root selector. */
@@ -60,8 +65,14 @@ export type AIModelSelectorProps = WithAttachments<
 		groups?: readonly AIModelSelectorGroup[];
 		/** Selected model id; falls back to conversation state when omitted or undefined. Use `null` for a bindable controlled empty value. */
 		value?: string | null;
+		/** Initial selected model id when `value` is omitted. */
+		defaultValue?: string | null;
 		/** Bindable popup state. */
 		open?: boolean;
+		/** Initial popup state when `open` is omitted. */
+		defaultOpen?: boolean;
+		/** Called once after a component-owned popup state change. */
+		onOpenChange?: (open: boolean) => void;
 		/** Bindable search query. */
 		query?: string;
 		/** Shows the model search header and applies `query` filtering. */
@@ -84,8 +95,8 @@ export type AIModelSelectorProps = WithAttachments<
 		search?: Slot<AIModelSelectorState>;
 		/** Custom empty search content receiving complete selector state. */
 		empty?: Slot<AIModelSelectorState>;
-		/** Called after a valid model is selected. */
-		onValueChange?: (value: string, model: AIModelSelectorModel) => void;
+		/** Called once after a valid model changes the selected value. */
+		onValueChange?: (payload: AIModelSelectorValueChangePayload) => void;
 		/** Class applied to the root selector. */
 		class?: string;
 		/** Theme overrides for the trigger, search, and menu. */

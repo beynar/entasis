@@ -24,12 +24,12 @@ export type TagGroupOption = {
 
 type TagGroupFieldProps = Omit<
 	InputProps<'tag-group'>,
-	'value' | 'onChange' | 'onValidate' | 'theme'
+	'value' | 'onValueChange' | 'onValidate' | 'theme'
 > & {
 	/** Selected value. Single mode writes string|null; multiple mode writes string[]. */
 	value?: TagGroupValue;
 	/** Called when selection changes with the normalized value shape. */
-	onChange?: (value: TagGroupValue) => void;
+	onValueChange?: (value: TagGroupValue) => void;
 	/** Validates the normalized selected value. */
 	onValidate?: (value: TagGroupValue) => string[] | boolean;
 	/** Theme overrides for the tag group and field parts. */
@@ -50,8 +50,6 @@ export type TagGroupProps<Option extends TagGroupOption = TagGroupOption> = With
 		selectedVariant?: ChipProps['variant'];
 		/** Chip variant used for unselected chips. */
 		unselectedVariant?: ChipProps['variant'];
-		/** Called when a chip is clicked, with that option value. */
-		onClick?: (value: string) => void;
 		/** Theme overrides forwarded to each inner Chip. */
 		chipTheme?: ChipThemeProps;
 	} & Partial<Omit<FieldProps<'tag-group'>, 'children' | 'type'>>

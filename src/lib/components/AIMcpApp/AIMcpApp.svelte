@@ -165,12 +165,12 @@
 			const resolvedResource = validateAIMcpAppResource(
 				uri,
 				currentHost.resolveResource
-					? await currentHost.resolveResource(
+					? await currentHost.resolveResource({
 							uri,
-							currentHost.client,
-							currentTool,
-							controller.signal
-						)
+							client: currentHost.client,
+							tool: currentTool,
+							signal: controller.signal
+						})
 					: await resolveAIMcpAppResource(currentHost.client, uri, controller.signal)
 			);
 			throwIfAborted(controller.signal);
@@ -376,7 +376,7 @@
 		currentTool: AIMcpToolCall
 	): unknown {
 		try {
-			currentHost.onError?.(error, currentTool);
+			currentHost.onError?.({ error, tool: currentTool });
 			return error;
 		} catch (callbackError) {
 			return new AggregateError([error, callbackError], 'MCP App failure reporting also failed.');

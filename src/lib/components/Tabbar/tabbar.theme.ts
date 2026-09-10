@@ -23,13 +23,13 @@ const defaultTabbar = cva({
 			end: 'justify-end'
 		},
 		size: {
-			small: 'gap-0.5',
-			normal: 'gap-1',
-			large: 'gap-1.5'
+			small: 'gap-micro',
+			normal: 'gap-xs',
+			large: 'gap-sm'
 		},
 		variant: {
 			underline: '',
-			pill: 'rounded-full bg-neutral-muted/60 p-1'
+			pill: 'rounded-full bg-neutral-muted/60 p-xs'
 		},
 		fullWidth: {
 			true: 'w-full',
@@ -52,7 +52,7 @@ const defaultTabbar = cva({
 			class: 'shadow-[inset_-1px_0_0_0_var(--color-neutral-muted)]'
 		},
 		// A vertical pill track shouldn't be a stadium — soften to a large radius.
-		{ variant: 'pill', orientation: 'vertical', class: 'rounded-2xl' }
+		{ variant: 'pill', orientation: 'vertical', class: 'rounded-lg' }
 	],
 	defaultVariants: {
 		orientation: 'horizontal',
@@ -71,12 +71,12 @@ const defaultTab = cva({
 	// scroll) rather than compress when they don't fit. transition-colors (NOT
 	// transition-all) eases only the label colour as the indicator slides — scoped
 	// to colour so it never lags a layout/transform change.
-	base: 'rounded relative cursor-pointer inline-flex items-center justify-center outline-none whitespace-nowrap text-neutral/70 transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-color/45',
+	base: 'rounded-sm relative cursor-pointer inline-flex items-center justify-center outline-none whitespace-nowrap text-neutral/70 transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-color/45',
 	variants: {
 		size: {
-			small: 'px-2 py-1 text-xs gap-1',
-			normal: 'px-3 py-1 text-sm gap-2 ',
-			large: 'px-4 py-1 text-base gap-2.5 '
+			small: 'px-md py-xs text-xs gap-xs',
+			normal: 'px-lg py-xs text-sm gap-md ',
+			large: 'px-xl py-xs text-base gap-md '
 		},
 		color: {
 			primary: '',
@@ -195,9 +195,9 @@ const defaultTabPrefix = cva({
 	base: '',
 	variants: {
 		size: {
-			small: '',
-			normal: '',
-			large: ''
+			small: '[&>svg]:size-icon-sm',
+			normal: '[&>svg]:size-icon-md',
+			large: '[&>svg]:size-icon-lg'
 		}
 	},
 	defaultVariants: {
@@ -209,9 +209,9 @@ const defaultTabSuffix = cva({
 	base: '',
 	variants: {
 		size: {
-			small: '',
-			normal: '',
-			large: ''
+			small: '[&>svg]:size-icon-sm',
+			normal: '[&>svg]:size-icon-md',
+			large: '[&>svg]:size-icon-lg'
 		}
 	},
 	defaultVariants: {

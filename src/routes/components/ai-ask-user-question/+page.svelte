@@ -92,7 +92,7 @@ ${'</' + 'script>'}
 
 <AIAskUserQuestion
   {questions}
-  bind:values={answers}
+  bind:value={answers}
   onSubmit={({ answers }) => resolveTool(answers)}
 />`}
 	>
@@ -103,7 +103,7 @@ ${'</' + 'script>'}
 				autoAdvance={false}
 				submitting={controls.value.flowState === 'submitting'}
 				disabled={controls.value.flowState === 'disabled'}
-				bind:values={answers}
+				bind:value={answers}
 				onSubmit={(detail) => {
 					submitted = detail;
 				}}
@@ -138,7 +138,7 @@ ${'</' + 'script>'}
     <TextArea
       label={question.title}
       value={typeof value === 'string' ? value : ''}
-      onChange={(value) => setValue(value ?? '')}
+      onValueChange={(value) => setValue(value ?? '')}
     />
   {/snippet}
 </AIAskUserQuestion>`}
@@ -151,7 +151,7 @@ ${'</' + 'script>'}
 					<TextArea
 						label={question.title}
 						value={typeof value === 'string' ? value : ''}
-						onChange={(nextValue) => setValue(nextValue ?? '')}
+						onValueChange={(nextValue) => setValue(nextValue ?? '')}
 					/>
 				{/snippet}
 			</AIAskUserQuestion>

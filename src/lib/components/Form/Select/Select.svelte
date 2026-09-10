@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { SelectProps } from './select.props.js';
@@ -11,7 +12,8 @@
 	import { checkIcon } from '../../Icons/check.js';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
@@ -22,12 +24,14 @@
 		size = 'normal',
 		density = 'normal',
 		onValidate,
-		onChange,
+		onValueChange,
 		visible,
 		items,
 		separators = true,
+		triggerAttrs,
 		...rest
 	}: SelectProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 
@@ -51,8 +55,8 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		get onChange() {
-			return onChange;
+		get onValueChange() {
+			return onValueChange;
 		},
 		get disabled() {
 			return disabled;
@@ -155,7 +159,7 @@
 							selected={field.value === option.value}
 							disabled={!!option.disabled}
 							suffix={field.value === option.value ? checkMark : undefined}
-							onClick={() => select.selectValue(option.value)}
+							onclick={() => select.selectValue(option.value)}
 							attrs={{
 								id: select.optionId(option.value),
 								tabindex: -1,
@@ -173,6 +177,7 @@
 		<Field
 			{field}
 			{size}
+			{density}
 			theme={{
 				...(theme || {}),
 				inputContainer: {
@@ -187,6 +192,7 @@
 			{...rest}
 		>
 			<button
+				{...triggerAttrs}
 				type="button"
 				{id}
 				bind:this={field.node}
@@ -199,12 +205,22 @@
 				data-placeholder={select.selectedOption ? undefined : ''}
 				disabled={field.disabled}
 				class={classes.input({ size, disabled: field.disabled })}
-				onclick={select.toggle}
-				onkeydown={select.onTriggerKeydown}
-				onfocus={() => (field.focused = true)}
-				onblur={() => {
+				onclick={(event) => {
+					triggerAttrs?.onclick?.(event);
+					if (!event.defaultPrevented) select.toggle();
+				}}
+				onkeydown={(event) => {
+					triggerAttrs?.onkeydown?.(event);
+					if (!event.defaultPrevented) select.onTriggerKeydown(event);
+				}}
+				onfocus={(event) => {
+					field.focused = true;
+					triggerAttrs?.onfocus?.(event);
+				}}
+				onblur={(event) => {
 					field.focused = false;
 					select.close();
+					triggerAttrs?.onblur?.(event);
 				}}
 			>
 				<span class={classes.value({ size, placeholder: !select.selectedOption })}>

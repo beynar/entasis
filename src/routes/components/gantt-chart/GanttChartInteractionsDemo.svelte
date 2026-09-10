@@ -43,7 +43,7 @@
 		};
 	}
 
-	function handleTasksChange(_tasks: GanttTask[], change: GanttTasksChange): void {
+	function handleTasksChange(change: GanttTasksChange): void {
 		lastChange = change;
 		status = `${change.kind} committed from ${change.source}; ${change.affectedTaskIds.length} task definition${change.affectedTaskIds.length === 1 ? '' : 's'} changed.`;
 	}
@@ -64,13 +64,13 @@
 	<div class="flex flex-wrap items-center justify-between gap-2">
 		<p class="text-neutral/65 text-sm" aria-live="polite">{status}</p>
 		<div class="flex flex-wrap gap-2">
-			<Button size="small" variant="outline" onClick={() => chart?.copySelection()}>Copy</Button>
-			<Button size="small" variant="outline" onClick={() => chart?.paste()}>Paste</Button>
+			<Button size="small" variant="outline" onclick={() => chart?.copySelection()}>Copy</Button>
+			<Button size="small" variant="outline" onclick={() => chart?.paste()}>Paste</Button>
 			<Button
 				size="small"
 				variant="outline"
 				disabled={!chart?.canUndo()}
-				onClick={() => chart?.undo()}
+				onclick={() => chart?.undo()}
 			>
 				Undo
 			</Button>
@@ -78,11 +78,11 @@
 				size="small"
 				variant="outline"
 				disabled={!chart?.canRedo()}
-				onClick={() => chart?.redo()}
+				onclick={() => chart?.redo()}
 			>
 				Redo
 			</Button>
-			<Button size="small" variant="outline" disabled={!lastChange} onClick={revertLastChange}>
+			<Button size="small" variant="outline" disabled={!lastChange} onclick={revertLastChange}>
 				Revert
 			</Button>
 		</div>
@@ -101,10 +101,10 @@
 			},
 			history: { limit: 20 }
 		}}
-		mutations={{ task: { onChange: handleTasksChange } }}
+		mutations={{ task: { onTasksChange: handleTasksChange } }}
 		events={{
-			emptyRangeSelect: handleRange,
-			interactionBlocked: (info) => (status = info.message)
+			onEmptyRangeSelect: handleRange,
+			onInteractionBlocked: (info) => (status = info.message)
 		}}
 		class="h-[31rem] w-full"
 	/>

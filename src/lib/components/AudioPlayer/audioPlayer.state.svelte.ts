@@ -2,6 +2,7 @@ import { bind } from '$lib/utils/state.svelte.js';
 import { mediaVolume } from '../MediaVolume/index.js';
 import type {
 	AudioPlayerError,
+	AudioPlayerErrorPayload,
 	AudioPlayerSnapshot,
 	AudioPlayerStateMode
 } from './audioPlayer.props.js';
@@ -30,7 +31,7 @@ type AudioPlayerCallbacks = {
 	onDurationChange?: (snapshot: AudioPlayerSnapshot) => void;
 	onVolumeChange?: (snapshot: AudioPlayerSnapshot) => void;
 	onLoopChange?: (snapshot: AudioPlayerSnapshot) => void;
-	onError?: (error: AudioPlayerError, snapshot: AudioPlayerSnapshot) => void;
+	onError?: (payload: AudioPlayerErrorPayload) => void;
 };
 
 export interface AudioPlayerState extends AudioPlayerStateOptions {}
@@ -355,6 +356,6 @@ export class AudioPlayerState {
 
 	private setError(error: AudioPlayerError) {
 		this.error = error;
-		this.callbacks.onError?.(error, this.snapshot);
+		this.callbacks.onError?.({ error, snapshot: this.snapshot });
 	}
 }

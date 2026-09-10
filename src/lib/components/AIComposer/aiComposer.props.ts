@@ -73,12 +73,14 @@ export type AIComposerSkillItem = RichTextInputItem & {
 };
 
 export type AIComposerCommandSearch = (query: string) => AIComposerSearchResult<AIComposerCommand>;
-export type AIComposerMentionSearch =
-	| ((query: string) => AIComposerSearchResult<AIComposerMentionItem>)
-	| ((
-			query: string,
-			type: AIComposerMentionSearchType
-	  ) => AIComposerSearchResult<AIComposerMentionItem>);
+/** Query and mention category passed to compatibility mention searches. */
+export type AIComposerMentionSearchPayload = {
+	query: string;
+	type: AIComposerMentionSearchType;
+};
+export type AIComposerMentionSearch = (
+	payload: AIComposerMentionSearchPayload
+) => AIComposerSearchResult<AIComposerMentionItem>;
 export type AIComposerSkillSearch = (query: string) => AIComposerSearchResult<AIComposerSkillItem>;
 export type AIComposerSubmitToken = Omit<RichTextInputToken, 'markdown'> & { markdown: string };
 
@@ -108,6 +110,17 @@ export type AIComposerQueuedMessage = AIComposerSubmitMeta & {
 	steered?: boolean;
 };
 
+/** Queued message and its current queue index. */
+export type AIComposerQueuedMessagePayload = {
+	message: AIComposerQueuedMessage;
+	index: number;
+};
+
+/** Committed queue edit and the message it replaced. */
+export type AIComposerQueuedMessageEditPayload = AIComposerQueuedMessagePayload & {
+	previousMessage: AIComposerQueuedMessage;
+};
+
 export type AIComposerHandle = RichTextInputHandle & {
 	insertCommand: (item: AIComposerCommand) => void;
 	insertMention: (item: AIComposerMentionItem) => void;
@@ -121,12 +134,9 @@ export type AIComposerTriggerSource<Item extends RichTextInputItem = RichTextInp
 > & {
 	items?: Item[];
 	tokenKind?: RichTextInputTokenKind | ((item: Item) => RichTextInputTokenKind);
-	onSearch?: (
-		query: string,
-		context: RichTextInputTriggerContext
-	) => RichTextInputSearchResult<Item>;
-	onSelect?(item: Item, context: RichTextInputTriggerContext): void;
-	toToken?(item: Item, context: RichTextInputTriggerContext): RichTextInputToken;
+	onSearch?: (context: RichTextInputTriggerContext) => RichTextInputSearchResult<Item>;
+	onSelect?(payload: { item: Item; context: RichTextInputTriggerContext }): void;
+	toToken?(payload: { item: Item; context: RichTextInputTriggerContext }): RichTextInputToken;
 };
 
 export type AIComposerSuggestionKind = 'command' | 'mention' | 'skill';
@@ -158,14 +168,16 @@ export type AIComposerProps = WithAttachments<
 		ref?: HTMLFormElement | null;
 		/** Bindable Markdown source for the editor. */
 		value?: string;
+		/** Initial Markdown source when no value or conversation input is provided. */
+		defaultValue?: string;
+		/** Called once for each library-originated Markdown value change. */
+		onValueChange?: (value: string) => void;
 		/** Bindable files currently selected for submission. */
 		files?: File[];
 		/** Bindable attachment records, including upload state. */
 		attachments?: AIComposerAttachment[];
 		/** Bindable ordered submissions waiting while busy. */
 		queue?: AIComposerQueuedMessage[];
-		/** Svelte Pro-compatible alias for `queue`. `queue` takes precedence when both are set. */
-		queuedMessages?: AIComposerQueuedMessage[];
 		/** Whether a response is active and the composer should submit, queue, steer, or stop. */
 		busy?: boolean;
 		/** Disables editing and composer actions. */
@@ -176,18 +188,12 @@ export type AIComposerProps = WithAttachments<
 		fileDropzone?: boolean;
 		/** Allows more than one file to be selected. */
 		fileMultiple?: boolean;
-		/** Accepted file extensions or MIME patterns. Takes precedence over `fileAccept`. */
+		/** Accepted file extensions or MIME patterns. */
 		accept?: readonly string[];
-		/** Comma-separated Svelte Pro-compatible alias for `accept`. */
-		fileAccept?: string;
 		/** Maximum number of accepted files. Unlimited when omitted. */
 		maxFiles?: number;
-		/** Svelte Pro-compatible alias for `maxFiles`. */
-		fileMaxFiles?: number;
 		/** Maximum accepted size for one file in bytes. Unlimited when omitted. */
 		maxFileSize?: number;
-		/** Svelte Pro-compatible alias for `maxFileSize`. */
-		fileMaxSize?: number;
 		/** Slash-command trigger source. */
 		commands?: AIComposerTriggerSource<AIComposerCommand> | readonly AIComposerCommand[];
 		/** Svelte Pro-compatible mention list. Prefer `mentions` and `references` for new code. */
@@ -252,12 +258,6 @@ export type AIComposerProps = WithAttachments<
 		modelSelector?: Slot;
 		/** Handles a submission, queued submission, or steering message. */
 		onSubmit?: (detail: AIComposerSubmitDetail) => void | Promise<void>;
-		/** Svelte Pro-compatible submit callback. `onSubmit` takes precedence when both are set. */
-		onSubmitMessage?: (
-			value: string,
-			event: AIComposerSubmitEvent,
-			meta: AIComposerSubmitMeta
-		) => void | Promise<void>;
 		/** Requests that the active response stop. */
 		onStop?: () => void | Promise<void>;
 		/** Called with files rejected by count, type, or size constraints. */
@@ -274,26 +274,20 @@ export type AIComposerProps = WithAttachments<
 		onAttachmentRemove?: (attachment: AIComposerAttachment) => void;
 		/** Called after queued submissions are added, reordered, or removed. */
 		onQueueChange?: (queue: AIComposerQueuedMessage[]) => void;
-		/** Svelte Pro-compatible alias for `onQueueChange`. */
-		onQueuedMessagesChange?: (queue: AIComposerQueuedMessage[]) => void;
 		/** Called after a queued message is added. */
-		onQueuedMessageAdd?: (message: AIComposerQueuedMessage, index: number) => void;
+		onQueuedMessageAdd?: (payload: AIComposerQueuedMessagePayload) => void;
 		/** Called after a queued message is cancelled. */
-		onQueuedMessageCancel?: (message: AIComposerQueuedMessage, index: number) => void;
+		onQueuedMessageCancel?: (payload: AIComposerQueuedMessagePayload) => void;
 		/** Called when a queued message begins editing. */
-		onQueuedMessageEditStart?: (message: AIComposerQueuedMessage, index: number) => void;
+		onQueuedMessageEditStart?: (payload: AIComposerQueuedMessagePayload) => void;
 		/** Called after a queued-message edit is committed. */
-		onQueuedMessageEditCommit?: (
-			message: AIComposerQueuedMessage,
-			index: number,
-			previousMessage: AIComposerQueuedMessage
-		) => void;
+		onQueuedMessageEditCommit?: (payload: AIComposerQueuedMessageEditPayload) => void;
 		/** Called when a queued-message edit is cancelled. */
-		onQueuedMessageEditCancel?: (message: AIComposerQueuedMessage, index: number) => void;
+		onQueuedMessageEditCancel?: (payload: AIComposerQueuedMessagePayload) => void;
 		/** Called after drag-and-drop changes queue order. */
 		onQueuedMessageReorder?: (queue: AIComposerQueuedMessage[]) => void;
 		/** Called when a queued message is marked for steering. */
-		onSteer?: (message: AIComposerQueuedMessage, index: number) => void;
+		onSteer?: (payload: AIComposerQueuedMessagePayload) => void;
 		/** Called after a slash command is inserted. Trigger-source `onSelect` runs first. */
 		onCommandSelect?: (command: AIComposerCommand) => void;
 		/** Called after a mention or reference is inserted. Trigger-source `onSelect` runs first. */

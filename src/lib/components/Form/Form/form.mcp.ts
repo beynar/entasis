@@ -43,7 +43,7 @@ Form renders configured svelai fields inside a div, owns their state and validat
 	actions={[
 		{
 			children: 'Save',
-			onClick: (form) => form.submit()
+			onAction: (form) => form.submit()
 		}
 	]}
 	onSubmit={(validatedValue) => {
@@ -55,19 +55,22 @@ Form renders configured svelai fields inside a div, owns their state and validat
 ## Props
 
 - **inputs** (required): ordered object keyed by entry name. Entries may be value-bearing fields, visual groups, action-button rows, or custom snippets. Only fields contribute keys to the live and validated values.
-- **value** (bindable): partial live value. Visible mounted fields are published; hidden fields are omitted. A supplied top-level value takes precedence over an input's configured value.
+- **value** (bindable): controlled partial live value. Visible mounted fields are published; hidden fields are omitted. A supplied top-level value takes precedence over an input's configured value.
+- **defaultValue**: initial partial live value when value is omitted.
+- **onValueChange**: called once when a user changes the visible live value. Parent value updates do not emit it.
 - **form** (bindable): the FormState instance.
 - **onSubmit**: called with the validated visible payload. Its return value is ignored; rejected promises propagate.
 - **size**: small, normal (default), or large. Controls Form typography and becomes the fallback size for fields and actions. An explicit field or action size takes precedence.
 - **density**: small, normal (default), or large. Controls gaps between the Form header, fields, footer, and actions independently from size.
 - **variant**: plain (default), sectioned, or card. All variants consume the shared Card typography and header/footer density rules. Plain remains transparent without separators. Sectioned stays transparent and adds edge-to-edge separators between the header, visible top-level fields or groups, and footer. Card adds the same separators inside the Card surface and inset. Separators do not appear between fields inside a group.
 - **layout**: vertical (default) or horizontal. Horizontal keeps one field per row and places labels to the left from the desktop breakpoint; fields remain stacked on smaller screens.
-- **actions**: optional array of Button props. Each action's onClick receives the live FormState, so a submit action calls form.submit(). Actions are disabled while the form is submitting; their own loading and disabled props are composed with that protection.
-- **submitButton**: deprecated compatibility prop for one built-in submit button. Prefer actions. Its click handler is still composed with form.submit(), and its loading and disabled protection cannot be overridden.
+- **actions**: optional array of Button props. Each action's onAction receives the live FormState, so a submit action calls form.submit(). Actions are disabled while the form is submitting; their own loading and disabled props are composed with that protection.
 - **class**: additional classes on the root div.
 - **theme**: Form theme overrides for root, header, title, description, group, group label/description/fields, top-level items, custom entries, footer, and actions. Global Card typography and section-rhythm changes flow into all Form variants before Form-specific overrides are composed; Card surface changes apply only to the card variant.
 
 The **header**, **title**, **description**, **children**, and **footer** snippets each receive the FormState instance directly. No-argument snippets remain valid.
+
+Field wrapper attributes and native control attributes have separate owners. Use fieldAttrs for the shared Field wrapper. Controls expose a typed bag for their actual native element, such as inputAttrs on TextInput, textareaAttrs on TextArea, and triggerAttrs on the custom Select's combobox button.
 
 ## FormState
 
@@ -182,6 +185,34 @@ type Value = InferFormValue<typeof inputs>;
 
 The group key is visual only and never appears in value or submission output. Descendant field names remain top-level, so duplicate names across groups are rejected. Group visibility hides all descendants, preserves field values in the private cache, and makes inferred field keys optional. In a vertical form layout, set columns to 1, 2, 3, or 4 to control the equal-width desktop grid; groups collapse to one column on smaller screens. Horizontal form layouts ignore columns and always render group entries in one column. A child class may span tracks when an entry needs more room. Groups may contain fields, action rows, and custom snippets; nested groups are intentionally unsupported.
 
+## Custom value fields
+
+Use type: 'field' when Form must own a value but a custom control must render it. fieldType selects the existing FieldState schema and inferred value type. The snippet receives that registered FieldState controller:
+
+\`\`\`svelte
+{#snippet handleControl(field)}
+	<input
+		{...field.controlAttrs}
+		{@attach field.control}
+		bind:value={field.value}
+	/>
+{/snippet}
+
+<Form
+	inputs={{
+		handle: {
+			type: 'field',
+			fieldType: 'text',
+			label: 'Handle',
+			required: true,
+			snippet: handleControl
+		}
+	}}
+/>
+\`\`\`
+
+The controller exposes value, disabled, required, validation state, accessible ids, controlAttrs, and the control attachment. The entry participates in bind:value, visibility, validation, submission, and InferFormValue through the same FieldState owner as built-in controls.
+
 ## Non-value entries
 
 Use type: 'action' to place a labelled row of buttons in the ordered inputs flow. It accepts optional label and description content plus the same Form-aware action objects as the top-level actions prop. Its label position follows the Form layout unless labelPosition overrides it. Form size is the default button size, action density follows the Form, and loading or disabled protection cannot be overridden while the Form is submitting.
@@ -202,8 +233,8 @@ Use type: 'custom' to place a snippet in the flow. The snippet receives the live
 			label: 'Account actions',
 			description: 'Validate or save this account.',
 			actions: [
-				{ children: 'Validate', variant: 'soft', onClick: (form) => form.validate() },
-				{ children: 'Save', onClick: (form) => form.submit() }
+				{ children: 'Validate', variant: 'soft', onAction: (form) => form.validate() },
+				{ children: 'Save', onAction: (form) => form.submit() }
 			]
 		}
 	}}
@@ -229,5 +260,5 @@ text, email, url, password, number, rating, voice, slider, slider-range, textare
 
 Alternative displays are display: 'selector' for date and calendar-range, and display: 'picker' for color.
 
-group, action, and custom are structural visual nodes rather than value-bearing input types.
+field is the custom value-bearing entry. group, action, and custom are structural visual nodes rather than value-bearing input types.
 `;

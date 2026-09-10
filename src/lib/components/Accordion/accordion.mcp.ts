@@ -22,6 +22,8 @@ The Accordion component provides an interactive collapsible container for organi
 
 ### Core Props
 - **items**: Array<Item> (bindable) - Array of accordion items to display
+- **value**: string[] (bindable) - Expanded item ids
+- **defaultValue**: string[] - Initially expanded item ids when value is omitted
 - **titleKey**: string - Key to extract title from items (default: 'title')
 - **contentKey**: string - Key to extract content from items (default: 'content')
 - **descriptionKey**: string - Key to extract description from items (default: 'description')
@@ -41,10 +43,10 @@ The Accordion component provides an interactive collapsible container for organi
 - **splitted**: boolean (default: false) - Breaks the list into one surface per item with a gap: each item gets its own raised card (card), its own border (outlined), or its own underline (classic)
 
 ### Event Props
+- **onValueChange**: (value: string[]) => void - Called once when expanded item ids change
 - **onToggle**: (options: { item: Item; index: number; open: boolean }) => void - Callback when item is toggled
 
 ### Slot Props
-- **actions**: Snippet - Additional actions in header
 - **title**: Snippet - Custom title rendering
 - **description**: Snippet - Custom description rendering
 - **content**: Snippet - Custom content rendering

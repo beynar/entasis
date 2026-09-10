@@ -1,4 +1,10 @@
-import { ruleX, ruleY, type SceneNode } from '@tanstack/charts';
+import {
+	ruleX,
+	ruleY,
+	type ChartPoint,
+	type MarkRenderContext,
+	type SceneNode
+} from '@tanstack/charts';
 import { deviation, mean, median, quantileSorted } from 'd3-array';
 import {
 	assertSingleNumericKind,
@@ -8,11 +14,10 @@ import {
 	restoreNumericChartValue,
 	type AnalysisGroupAccessor
 } from './chart.analysis.data.js';
-import { compileChannel } from './chart.channels.js';
+import { compileChannel, type CompilableChartChannel } from './chart.channels.js';
 import type { CompiledMark } from './chart.cartesian.js';
 import { withoutTooltipPoints } from './chart.mark.js';
 import type {
-	ChartChannel,
 	ChartDistributionReferenceAnalysis,
 	ChartKey,
 	ChartReferenceAnalysis,
@@ -32,7 +37,7 @@ type ReferenceDatum = {
 type CompileReferenceAnalysisInput<TRow extends object> = {
 	readonly data: readonly TRow[];
 	readonly analysis: ReferenceAnalysis;
-	readonly value: ChartChannel<TRow, ChartValue>;
+	readonly value: CompilableChartChannel<TRow, ChartValue>;
 	readonly axis: 'x' | 'y';
 	readonly group?: AnalysisGroupAccessor<TRow>;
 	readonly path: string;
@@ -53,7 +58,7 @@ export function compileReferenceAnalysis<TRow extends object>({
 	const groupedRows = groupAnalysisRows(data, group, analysis.scope, path);
 	const rows = groupedRows.groups.flatMap((sourceGroup) => {
 		const values = sourceGroup.rows.flatMap(({ row, index }) => {
-			const numeric = readNumericChartValue(valueAccessor(row, index, data), `${path}.axis`);
+			const numeric = readNumericChartValue(valueAccessor(row, { index, data }), `${path}.axis`);
 			return numeric ? [numeric] : [];
 		});
 		const kind = assertSingleNumericKind(values, `${path}.axis`);
@@ -66,13 +71,9 @@ export function compileReferenceAnalysis<TRow extends object>({
 			group: sourceGroup.key,
 			value: restoreNumericChartValue(statistic.value, kind),
 			lower:
-				statistic.lower === undefined
-					? undefined
-					: restoreNumericChartValue(statistic.lower, kind),
+				statistic.lower === undefined ? undefined : restoreNumericChartValue(statistic.lower, kind),
 			upper:
-				statistic.upper === undefined
-					? undefined
-					: restoreNumericChartValue(statistic.upper, kind)
+				statistic.upper === undefined ? undefined : restoreNumericChartValue(statistic.upper, kind)
 		};
 		return [datum];
 	});
@@ -80,16 +81,7 @@ export function compileReferenceAnalysis<TRow extends object>({
 	const paint = resolveAnalysisPaint(analysis, groupedRows.isGrouped, 'neutral');
 	const line = compileReferenceLine(rows, axis, id, analysis, paint);
 	if (analysis.statistic !== 'standard-deviation') return [line];
-	return [
-		compileReferenceBand(
-			rows,
-			axis,
-			`${id}:band`,
-			paint,
-			analysis.fillOpacity ?? 0.1
-		),
-		line
-	];
+	return [compileReferenceBand(rows, axis, `${id}:band`, paint, analysis.fillOpacity ?? 0.1), line];
 }
 
 function validateReferenceAnalysis(analysis: ReferenceAnalysis, path: string): void {
@@ -126,12 +118,13 @@ function referenceStatistic(
 		return value === undefined ? undefined : { value };
 	}
 	if (analysis.statistic === 'quantile') {
-		const value = quantileSorted(values, analysis.quantile);
+		const value = quantileSorted([...values], analysis.quantile);
 		return value === undefined ? undefined : { value };
 	}
 	const value = mean(values);
 	if (value === undefined) return undefined;
 	if (analysis.statistic === 'mean') return { value };
+	if (analysis.statistic !== 'standard-deviation') return undefined;
 	const spread = (deviation(values) ?? 0) * (analysis.multiplier ?? 1);
 	return { value, lower: value - spread, upper: value + spread };
 }
@@ -151,11 +144,39 @@ function compileReferenceLine(
 		strokeWidth: analysis.strokeWidth ?? 1.5,
 		strokeDasharray: analysis.strokeDasharray ?? '5 4'
 	};
-	return withoutTooltipPoints(
-		axis === 'x'
-			? ruleX(rows, { ...style, x: 'value' })
-			: ruleY(rows, { ...style, y: 'value' })
-	);
+	const rule =
+		axis === 'x' ? ruleX(rows, { ...style, x: 'value' }) : ruleY(rows, { ...style, y: 'value' });
+	return withoutTooltipPoints({
+		...rule,
+		initialize(context) {
+			const initialized = rule.initialize(context);
+			return {
+				...initialized,
+				render(renderContext) {
+					const rendered = initialized.render(renderContext);
+					const owners = new Map(
+						(rendered.focusAnchors ?? []).map((anchor) => [
+							anchor.key,
+							referencePoint(
+								rows[anchor.datumIndex],
+								anchor.datumIndex,
+								anchor.key,
+								axis,
+								id,
+								paint,
+								renderContext
+							)
+						])
+					);
+					const ownNode = (node: SceneNode): SceneNode => {
+						if (node.kind === 'group') return { ...node, children: node.children.map(ownNode) };
+						return { ...node, pointOwner: owners.get(node.key) };
+					};
+					return { ...rendered, nodes: rendered.nodes.map(ownNode) };
+				}
+			};
+		}
+	});
 }
 
 function compileReferenceBand(
@@ -165,7 +186,7 @@ function compileReferenceBand(
 	paint: ReturnType<typeof resolveAnalysisPaint>,
 	fillOpacity: number
 ): CompiledMark {
-	return {
+	return withoutTooltipPoints({
 		initialize() {
 			return {
 				id,
@@ -173,16 +194,12 @@ function compileReferenceBand(
 					x: {
 						scale: 'x',
 						values:
-							axis === 'x'
-								? rows.flatMap((row) => [row.lower, row.upper].filter(isChartValue))
-								: []
+							axis === 'x' ? rows.flatMap((row) => [row.lower, row.upper].filter(isChartValue)) : []
 					},
 					y: {
 						scale: 'y',
 						values:
-							axis === 'y'
-								? rows.flatMap((row) => [row.lower, row.upper].filter(isChartValue))
-								: []
+							axis === 'y' ? rows.flatMap((row) => [row.lower, row.upper].filter(isChartValue)) : []
 					},
 					color: {
 						scale: 'color',
@@ -191,8 +208,9 @@ function compileReferenceBand(
 							: []
 					}
 				},
-				render({ chart, scales, color: resolveColor }) {
-					const children: SceneNode[] = rows.flatMap((row) => {
+				render(renderContext) {
+					const { chart, scales, color: resolveColor } = renderContext;
+					const children: SceneNode[] = rows.flatMap((row, index) => {
 						if (!isChartValue(row.lower) || !isChartValue(row.upper)) return [];
 						const first = scales[axis].map(row.lower);
 						const second = scales[axis].map(row.upper);
@@ -202,6 +220,15 @@ function compileReferenceBand(
 							{
 								kind: 'rect',
 								key: `${id}:${row.identity}`,
+								pointOwner: referencePoint(
+									row,
+									index,
+									`${id}:${row.identity}`,
+									axis,
+									id,
+									paint,
+									renderContext
+								),
 								x: axis === 'x' ? start : chart.x,
 								y: axis === 'y' ? start : chart.y,
 								width: axis === 'x' ? size : chart.width,
@@ -230,6 +257,30 @@ function compileReferenceBand(
 				}
 			};
 		}
+	});
+}
+
+function referencePoint(
+	row: ReferenceDatum,
+	datumIndex: number,
+	key: string,
+	axis: 'x' | 'y',
+	id: string,
+	paint: ReturnType<typeof resolveAnalysisPaint>,
+	{ chart, scales, color }: MarkRenderContext
+): ChartPoint<ReferenceDatum> {
+	return {
+		key,
+		markId: id,
+		group: row.group,
+		groupLabel: row.group === null ? id : String(row.group),
+		datum: row,
+		datumIndex,
+		xValue: axis === 'x' ? row.value : (scales.x?.domain[0] ?? 0),
+		yValue: axis === 'y' ? row.value : (scales.y?.domain[0] ?? 0),
+		x: axis === 'x' ? scales.x.map(row.value) : chart.x,
+		y: axis === 'y' ? scales.y.map(row.value) : chart.y,
+		color: paint.paint ?? color(row.group)
 	};
 }
 

@@ -23,5 +23,5 @@
 	aria-controls={open ? controls : undefined}
 	{disabled}
 	prefix={clockIcon}
-	onClick={onToggle}
+	onclick={onToggle}
 />

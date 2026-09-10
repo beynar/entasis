@@ -63,7 +63,7 @@ grips, and RTL-aware horizontal resizing.
 - \`ref\`: Bindable root element reference.
 - \`onResize\`: Fires after a drag ends or keyboard resize commits.
 - \`onLayoutChange\`: Fires while layout changes.
-- \`onLayoutChanged\`: Fires after layout changes, with \`{ isUserInteraction }\` metadata.
+- \`onLayoutCommit\`: Fires after layout changes with \`{ sizes, isUserInteraction }\`.
 - \`onCollapsedPanelsChange\`: Fires when collapsed panel ids change.
 - \`getHandleAriaLabel\`: Returns accessible labels for separators.
 

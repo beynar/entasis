@@ -1,15 +1,18 @@
 <script lang="ts" generics="Item extends TabItem = TabItem">
 	import { Tabbar } from '$lib/components/Tabbar/index.js';
 	import { Stepper } from '$lib/components/Stepper/index.js';
+	import type { StepperValueChangePayload } from '$lib/components/Stepper/index.js';
 	import type { TabItem } from '$lib/components/Tabbar/tabbar.props.js';
 	import { StepperState } from '../Stepper/stepper.state.svelte.js';
 	import type { TabsProps } from './tabs.props.js';
 	import { useTabsTheme } from './tabs.theme.js';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 
 	let {
 		items,
-		activeTab = $bindable(0),
-		onChange,
+		defaultValue = 0,
+		value = $bindable(),
+		onValueChange,
 		placement = 'top',
 		class: className = '',
 		theme,
@@ -28,6 +31,13 @@
 		tabbarFullWidth,
 		children: panel
 	}: TabsProps<Item> = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(next) => {
+			value = next;
+		},
+		() => defaultValue
+	);
 
 	const classes = $derived(useTabsTheme(theme));
 
@@ -37,17 +47,20 @@
 	);
 
 	function handleTabChange(index: number) {
-		stepper?.goTo(index);
-		onChange?.(index);
+		onValueChange?.(index);
+	}
+
+	function handleStepChange({ value: nextValue }: StepperValueChangePayload<Item>) {
+		onValueChange?.(nextValue);
 	}
 </script>
 
 <div class={classes.root({ placement, className })}>
 	<Tabbar
 		fullWidth={tabbarFullWidth}
-		onChange={handleTabChange}
+		onValueChange={handleTabChange}
 		{items}
-		bind:activeTab
+		bind:value={valueState.value}
 		size={tabbarSize}
 		orientation={effectiveTabbarOrientation}
 		color={tabbarColor}
@@ -60,7 +73,8 @@
 		class={classes.content({ placement })}
 		bind:stepper
 		{items}
-		bind:activeStep={activeTab}
+		bind:value={valueState.value}
+		onValueChange={handleStepChange}
 		{keyFramesOptions}
 	>
 		{#snippet children(payload)}

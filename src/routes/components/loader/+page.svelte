@@ -2,8 +2,36 @@
 	import DocPage from '../../DocPage.svelte';
 	import { spinnerOverlay } from '$lib/attachments/spinnerOverlay.svelte.js';
 	import Button from '$lib/components/Button/Button.svelte';
-
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
+	import { colors, sizes } from '$lib/utils/tokens.js';
+	import type { SpinnerVariant } from '$lib/components/Spinner/spinner.props.js';
+
+	const spinnerVariants = ['default', 'grid', 'pulse', 'puff', 'lines', 'circles'] as const satisfies readonly SpinnerVariant[];
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'primary',
+			options: colors
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'default',
+			options: spinnerVariants
+		},
+		{ name: 'loading', type: 'switch', label: 'Loading', value: true }
+	]);
 
 	let loadingText = $state('Loading...');
 	let isLoading = $state(true);
@@ -22,22 +50,33 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Overlay a spinner on an element while async work runs. The animation follows Theme."
 		code={`<div
 	{@attach spinnerOverlay({
-		loading: true,
-		text: 'Loading...'
+		loading: ${controls.value.loading},
+		text: 'Loading...',
+		size: '${controls.value.size}',
+		color: '${controls.value.color}',
+		variant: '${controls.value.variant}'
 	})}
 >
 	<Button fullWidth>Submit</Button>
 </div>`}
-		{@attach spinnerOverlay({
-			loading: isLoading,
-			text: loadingText
-		})}
 		class="raised bg-amber-100 p-2"
 	>
-		<Button fullWidth>Submit caca</Button>
+		<div
+			class="w-full"
+			{@attach spinnerOverlay({
+				loading: controls.value.loading,
+				text: loadingText,
+				size: controls.value.size,
+				color: controls.value.color,
+				variant: controls.value.variant
+			})}
+		>
+			<Button fullWidth>Submit caca</Button>
+		</div>
 	</ComponentCard>
 
 	{#snippet examples()}
@@ -62,7 +101,7 @@
 					</div>
 				{/if}
 
-				<Button fullWidth onClick={() => (show = !show)}>Show loader</Button>
+				<Button fullWidth onclick={() => (show = !show)}>Show loader</Button>
 			</div>
 		</ComponentCard>
 	{/snippet}

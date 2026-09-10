@@ -283,7 +283,7 @@
 	trend="Open tasks"
 	indicatorVariant="action"
 	indicatorColor="neutral"
-	onIndicatorClick={() => undefined}
+	onclick={() => undefined}
 	indicatorLabel="Open actions"
 >
 	{#snippet indicator()}
@@ -319,7 +319,7 @@
 					trend="Open tasks"
 					indicatorVariant="action"
 					indicatorColor="neutral"
-					onIndicatorClick={() => undefined}
+					onclick={() => undefined}
 					indicatorLabel="Open actions"
 				>
 					{#snippet indicator()}

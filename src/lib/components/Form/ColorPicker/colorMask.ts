@@ -44,11 +44,7 @@ const functionalMask = (name: string, segments: Segment[], alpha: Segment): Mask
 
 const alphaSegment: Segment = { width: 4, decimal: true };
 
-const rgbMask = functionalMask(
-	'rgb',
-	[{ width: 3 }, { width: 3 }, { width: 3 }],
-	alphaSegment
-);
+const rgbMask = functionalMask('rgb', [{ width: 3 }, { width: 3 }, { width: 3 }], alphaSegment);
 
 const hslMask = functionalMask(
 	'hsl',

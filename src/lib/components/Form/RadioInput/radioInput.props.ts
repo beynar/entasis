@@ -16,8 +16,6 @@ export type RadioOption = {
 export type RadioInputProps<T extends RadioOption = RadioOption> = InputProps<'radio'> & {
 	/** Visual layout style for the radio group (`normal` or `card`). */
 	mode?: 'card' | 'normal';
-	/** Called when an option is clicked, with the clicked option's value. */
-	onClick?: (value: string) => void;
 	/** Items to render as radio choices. */
 	items: T[];
 };

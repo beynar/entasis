@@ -1,8 +1,45 @@
 <script lang="ts">
 	import Button from '$lib/components/Button/Button.svelte';
 	import Overlay from '$lib/components/Overlay/Overlay.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+
+	const overlayPositions = ['fill', 'top', 'bottom'] as const;
+	const overlayAligns = ['start', 'center', 'end'] as const;
+	const overlayShowOn = ['always', 'hover', 'focus'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'position',
+			type: 'segmented',
+			label: 'Position',
+			value: 'fill',
+			options: overlayPositions
+		},
+		{
+			name: 'align',
+			type: 'segmented',
+			label: 'Align',
+			value: 'center',
+			options: overlayAligns
+		},
+		{
+			name: 'showOn',
+			type: 'segmented',
+			label: 'Show on',
+			value: 'always',
+			options: overlayShowOn
+		},
+		{ name: 'scrim', type: 'switch', label: 'Scrim', value: true }
+	]);
 
 	const valleyImage =
 		'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1600&q=85';
@@ -27,9 +64,15 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Place Overlay first: the plain parent becomes the positioning context without an attachment or wrapper API."
 		code={`<div class="aspect-video overflow-hidden rounded-lg">
 	<Overlay
+		size="${controls.value.size}"
+		position="${controls.value.position}"
+		align="${controls.value.align}"
+		showOn="${controls.value.showOn}"
+		scrim={${controls.value.scrim}}
 		title="Design system foundations"
 		description="A practical tour of tokens, primitives, and composition."
 		actions={[
@@ -46,6 +89,11 @@
 	>
 		<div class="aspect-video w-full max-w-4xl overflow-hidden rounded-lg">
 			<Overlay
+				size={controls.value.size}
+				position={controls.value.position}
+				align={controls.value.align}
+				showOn={controls.value.showOn}
+				scrim={controls.value.scrim}
 				title="Design system foundations"
 				description="A practical tour of tokens, primitives, and composition."
 				actions={[
@@ -133,7 +181,7 @@
 
 		<ComponentCard
 			description="The open prop preserves the fade transition when application state hides the overlay."
-			code={`<Button onClick={() => (overlayOpen = !overlayOpen)}>
+			code={`<Button onclick={() => (overlayOpen = !overlayOpen)}>
 	Toggle overlay
 </Button>
 
@@ -149,7 +197,7 @@
 </div>`}
 		>
 			<div class="flex w-full max-w-3xl flex-col items-center gap-4">
-				<Button size="small" variant="outline" onClick={() => (overlayOpen = !overlayOpen)}>
+				<Button size="small" variant="outline" onclick={() => (overlayOpen = !overlayOpen)}>
 					{overlayOpen ? 'Hide overlay' : 'Show overlay'}
 				</Button>
 				<div class="aspect-video w-full overflow-hidden rounded-lg">

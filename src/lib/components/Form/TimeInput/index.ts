@@ -7,4 +7,3 @@ export {
 	type TimeInputTheme,
 	type TimeInputThemeProps
 } from './timeInput.theme.js';
-

@@ -5,8 +5,8 @@
 	const people = createPeople(50_000);
 	const locations = ['Berlin', 'London', 'New York', 'Paris', 'Singapore', 'Toronto'] as const;
 	const columns: DataTableColumn<Person>[] = [
-		{ id: 'name', accessor: 'name', header: 'Name', sortable: true, size: 210 },
-		{ id: 'email', accessor: 'email', header: 'Email', size: 290 },
+		{ id: 'name', accessor: 'name', header: 'Name', sortable: true, width: 210 },
+		{ id: 'email', accessor: 'email', header: 'Email', width: 290 },
 		{ id: 'department', accessor: 'department', header: 'Department', sortable: true },
 		{ id: 'role', accessor: 'role', header: 'Role', sortable: true },
 		{ id: 'salary', accessor: 'salary', header: 'Salary', align: 'end', sortable: true },
@@ -23,17 +23,17 @@
 			header: 'Projects',
 			align: 'end',
 			sortable: true,
-			size: 130
+			width: 130
 		},
 		{
 			id: 'utilization',
 			accessor: (_person, index) => `${55 + ((index * 13) % 46)}%`,
 			header: 'Utilization',
 			align: 'end',
-			size: 140
+			width: 140
 		},
-		{ id: 'verified', accessor: 'verified', header: 'Verified', align: 'center', size: 120 },
-		{ id: 'status', accessor: 'status', header: 'Status', sortable: true, size: 140 }
+		{ id: 'verified', accessor: 'verified', header: 'Verified', align: 'center', width: 120 },
+		{ id: 'status', accessor: 'status', header: 'Status', sortable: true, width: 140 }
 	];
 </script>
 

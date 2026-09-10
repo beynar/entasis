@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { page } from '$app/state';
 	import Tabbar from '$lib/components/Tabbar/Tabbar.svelte';
+	import { componentInventory } from '$lib/generated/componentContract.js';
 	import PropsTable from './PropsTable.svelte';
 	import StructureSchema from './StructureSchema.svelte';
 	import ThemeSchema from './ThemeSchema.svelte';
@@ -29,7 +31,20 @@
 	} = $props();
 
 	const tabs = ['Usage', 'Examples', 'Structure'];
-	let activeTab = $state(0);
+	let tabValue = $state(0);
+	const contractEntry = $derived(
+		componentInventory.find((entry) => entry.docs.some((doc) => doc.route === page.url.pathname))
+	);
+	const relatedEntries = $derived(
+		(contractEntry?.relatedComponents ?? [])
+			.map((id) =>
+				componentInventory.find(
+					(entry) => entry.id === id || entry.docs.some((doc) => doc.id === id)
+				)
+			)
+			.map((entry) => entry?.docs[0])
+			.filter((entry) => entry !== undefined)
+	);
 </script>
 
 <article class="mx-auto w-full max-w-6xl">
@@ -64,10 +79,10 @@
 		</ul>
 	{/if}
 
-	<Tabbar items={tabs} bind:activeTab />
+	<Tabbar items={tabs} bind:value={tabValue} />
 
 	<div class="mt-8">
-		{#if activeTab === 0}
+		{#if tabValue === 0}
 			<div class="grid gap-10">
 				{@render children()}
 			</div>
@@ -80,7 +95,7 @@
 					<PropsTable component={relatedComponent} />
 				</section>
 			{/each}
-		{:else if activeTab === 1}
+		{:else if tabValue === 1}
 			{#if examples}
 				<div class="grid gap-10">
 					{@render examples()}
@@ -97,4 +112,20 @@
 			<p class="text-neutral/60 text-sm">No structural schema for this component.</p>
 		{/if}
 	</div>
+
+	{#if relatedEntries.length}
+		<nav class="border-neutral-muted mt-xl border-t pt-xl" aria-label="Related components">
+			<h2 class="text-neutral text-lg font-semibold">Related components</h2>
+			<div class="mt-sm flex flex-wrap gap-sm">
+				{#each relatedEntries as entry (entry.id)}
+					<a
+						class="border-neutral-muted text-primary-readable hover:border-primary/50 rounded-sm border px-md py-sm text-sm font-medium"
+						href={entry.route}
+					>
+						{entry.label}
+					</a>
+				{/each}
+			</div>
+		</nav>
+	{/if}
 </article>

@@ -68,7 +68,7 @@ function compileCalendarMatrixMark<TRow extends object>(
 	fallbackSeries: ChartChannel<TRow, ChartKey> | undefined
 ): CompiledMarkResult {
 	const date = compileChannel(mark.date);
-	const dates = data.map((row, index) => date(row, index, data));
+	const dates = data.map((row, index) => date(row, { index, data }));
 	const validDates = dates.filter(isValidDate);
 	const calendarStart = validDates.length
 		? startOfUtcWeek(new Date(Math.min(...validDates.map((value) => value.getTime()))))
@@ -86,11 +86,11 @@ function compileCalendarMatrixMark<TRow extends object>(
 	const matrix = cell(data, {
 		...compileMarkChannels(mark, fallbackSeries),
 		color: compileChannel(mark.value),
-		x: (_row, index) => {
+		x: (_row, { index }) => {
 			const week = weekIndexes[index];
 			return week === undefined ? undefined : weekLabels[week];
 		},
-		y: (_row, index) => {
+		y: (_row, { index }) => {
 			const value = dates[index];
 			return isValidDate(value) ? CALENDAR_WEEKDAYS[(value.getUTCDay() + 6) % 7] : undefined;
 		},

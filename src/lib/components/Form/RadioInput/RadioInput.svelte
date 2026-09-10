@@ -1,4 +1,5 @@
 <script lang="ts" generics="Option extends RadioOption">
+	import { untrack } from 'svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { RadioOption, RadioInputProps } from './radioInput.props.js';
@@ -6,7 +7,8 @@
 	import Slot from '../../Slot/Slot.svelte';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
@@ -18,10 +20,12 @@
 		onValidate,
 		visible,
 		label,
-		onChange,
-		onClick,
+		onValueChange,
+		fieldAttrs,
+		size = 'normal',
 		...rest
 	}: RadioInputProps<Option> = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 
@@ -45,7 +49,7 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => onChange?.(v),
+		onValueChange: (v) => onValueChange?.(v),
 		get disabled() {
 			return disabled;
 		},
@@ -76,10 +80,11 @@
 <!-- Create own field wrapper (when used standalone) -->
 <Field
 	as="fieldset"
-	attrs={{ role: 'radiogroup', 'aria-labelledby': field.labelId }}
+	fieldAttrs={{ ...fieldAttrs, role: 'radiogroup', 'aria-labelledby': field.labelId }}
 	{field}
 	{label}
 	class={componentTheme.root({ mode })}
+	{size}
 	{...rest}
 	theme={{
 		...theme,
@@ -100,16 +105,16 @@
 		<button
 			type="button"
 			role="radio"
+			data-color="primary"
 			aria-checked={checked}
 			disabled={optionDisabled}
 			aria-label={option.label}
-			class={componentTheme.radiosInputItem({ mode, checked, disabled: optionDisabled })}
+			class={componentTheme.radiosInputItem({ mode, checked, disabled: optionDisabled, size })}
 			onclick={() => {
 				if (optionDisabled) return;
 				if (!field.value || field.value !== option.value) {
 					field.value = option.value;
 				}
-				onClick?.(option.value);
 			}}
 		>
 			<input
@@ -129,16 +134,26 @@
 
 			<!-- Radio Button Track -->
 			<div
-				class={componentTheme.radiosInputItemTrack({ mode, checked, disabled: optionDisabled })}
+				class={componentTheme.radiosInputItemTrack({
+					mode,
+					checked,
+					disabled: optionDisabled,
+					size
+				})}
 			></div>
 
 			<!-- Radio Button Thumb -->
 			<div
-				class={componentTheme.radiosInputItemThumb({ checked, mode, disabled: optionDisabled })}
+				class={componentTheme.radiosInputItemThumb({
+					checked,
+					mode,
+					disabled: optionDisabled,
+					size
+				})}
 			></div>
 
 			<!-- Label Content -->
-			<div class={componentTheme.radiosInputItemLabel()}>
+			<div class={componentTheme.radiosInputItemLabel({ size })}>
 				{#if option.icon}
 					<Slot render={option.icon} class={componentTheme.radiosInputItemIcon()} />
 				{/if}

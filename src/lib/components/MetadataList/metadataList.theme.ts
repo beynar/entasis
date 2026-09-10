@@ -9,9 +9,9 @@ const defaultRoot = cva({
 	base: 'flex flex-col',
 	variants: {
 		density: {
-			small: 'gap-2',
-			normal: 'gap-3',
-			large: 'gap-4'
+			small: 'gap-md',
+			normal: 'gap-lg',
+			large: 'gap-xl'
 		}
 	},
 	defaultVariants: {
@@ -23,9 +23,9 @@ const defaultHeader = cva({
 	base: 'flex flex-col',
 	variants: {
 		density: {
-			small: 'gap-0.5',
-			normal: 'gap-1',
-			large: 'gap-1'
+			small: 'gap-micro',
+			normal: 'gap-xs',
+			large: 'gap-xs'
 		}
 	},
 	defaultVariants: {
@@ -65,9 +65,9 @@ const defaultList = cva({
 	base: 'grid',
 	variants: {
 		density: {
-			small: 'gap-x-4 gap-y-2',
-			normal: 'gap-x-6 gap-y-2.5',
-			large: 'gap-x-8 gap-y-3'
+			small: 'gap-x-xl gap-y-md',
+			normal: 'gap-x-layout-md gap-y-md',
+			large: 'gap-x-layout-lg gap-y-lg'
 		}
 	},
 	defaultVariants: {
@@ -79,9 +79,9 @@ const defaultItem = cva({
 	base: 'flex items-start',
 	variants: {
 		density: {
-			small: 'gap-2',
-			normal: 'gap-3',
-			large: 'gap-4'
+			small: 'gap-md',
+			normal: 'gap-lg',
+			large: 'gap-xl'
 		}
 	},
 	defaultVariants: {
@@ -98,9 +98,9 @@ const defaultKey = cva({
 			large: 'text-base'
 		},
 		density: {
-			small: 'gap-1.5',
-			normal: 'gap-2',
-			large: 'gap-2'
+			small: 'gap-sm',
+			normal: 'gap-md',
+			large: 'gap-md'
 		}
 	},
 	defaultVariants: {
@@ -145,9 +145,9 @@ const defaultChips = cva({
 	base: 'flex flex-wrap',
 	variants: {
 		density: {
-			small: 'gap-1',
-			normal: 'gap-1.5',
-			large: 'gap-2'
+			small: 'gap-xs',
+			normal: 'gap-sm',
+			large: 'gap-md'
 		}
 	},
 	defaultVariants: {
@@ -156,7 +156,7 @@ const defaultChips = cva({
 });
 
 const defaultToggle = cva({
-	base: 'inline-flex items-center self-start cursor-pointer rounded text-neutral/60 outline-none transition-colors hover:text-neutral focus-visible:ring-2 focus-visible:ring-primary/50',
+	base: 'inline-flex items-center self-start cursor-pointer rounded-sm text-neutral/60 outline-none transition-colors hover:text-neutral focus-visible:ring-2 focus-visible:ring-primary/50',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -164,9 +164,9 @@ const defaultToggle = cva({
 			large: 'text-base'
 		},
 		density: {
-			small: 'gap-1',
-			normal: 'gap-1.5',
-			large: 'gap-2'
+			small: 'gap-xs',
+			normal: 'gap-sm',
+			large: 'gap-md'
 		}
 	},
 	defaultVariants: {

@@ -6,8 +6,8 @@ import {
 } from '$lib/utils/cva/index.js';
 
 const defaultRoot = cva({ base: 'min-w-0 w-full' });
-const defaultList = cva({ base: 'flex w-max min-w-full flex-nowrap items-center gap-2 py-1' });
-const defaultSuggestion = cva({ base: 'shrink-0 rounded-full px-4' });
+const defaultList = cva({ base: 'flex w-max min-w-full flex-nowrap items-center gap-md py-xs' });
+const defaultSuggestion = cva({ base: 'shrink-0 rounded-full px-xl' });
 
 export const aiSuggestionTheme = {
 	root: defaultRoot,

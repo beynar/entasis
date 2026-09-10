@@ -29,7 +29,7 @@
 			{#each presetNames as preset (preset)}
 				<Button
 					variant={selectedPreset === preset ? 'solid' : 'outline'}
-					onClick={() => selectPreset(preset)}
+					onclick={() => selectPreset(preset)}
 				>
 					{preset}
 				</Button>

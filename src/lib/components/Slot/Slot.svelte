@@ -1,4 +1,4 @@
-<script lang="ts" generics="Payload extends any|undefined = undefined">
+<script lang="ts" generics="Payload = undefined">
 	import { type Slot } from './slot.js';
 	import type { Snippet } from 'svelte';
 	import type { WithAttachments } from '$lib/types/props.js';
@@ -12,23 +12,44 @@
 		renderIf = true,
 		payload,
 		...attachments
-	}: WithAttachments<{
-		class?: string;
-		as?: string;
-		attrs?: Record<string, any>;
-		children?: Snippet<[]>;
-		style?: string;
-		render?: Slot<Payload>;
-		renderIf?: boolean;
-		payload?: Payload;
-	}> = $props();
+	}: WithAttachments<
+		{
+			/** Classes for the optional wrapper; an empty value renders content without a wrapper. */
+			class?: string;
+			/** Tag name of the optional wrapper. */
+			as?: string;
+			/** Attributes forwarded to the optional wrapper element. */
+			attrs?: Record<string, unknown>;
+			/** Fallback content when render is absent. */
+			children?: Snippet<[]>;
+			/** Inline styles for the optional wrapper. */
+			style?: string;
+			/** Text or a snippet to render. */
+			render?: Slot<Payload>;
+			/** Allows fallback content when render is absent. */
+			renderIf?: boolean;
+		} & (undefined extends Payload
+			? {
+					/**
+					 * Optional context for a snippet that accepts undefined.
+					 */
+					payload?: Payload;
+				}
+			: {
+					/**
+					 * Required typed context passed to the render snippet.
+					 */
+					payload: Payload;
+				})
+	> = $props();
 </script>
 
 {#snippet slot()}
 	{#if typeof render === 'string'}
 		{render}
 	{:else if render}
-		{@render render?.(payload)}
+		<!-- The conditional prop contract requires payload when the snippet needs it. -->
+		{@render render(payload as Payload)}
 	{/if}
 {/snippet}
 

@@ -5,8 +5,8 @@ const defaultMultiStep = cva({
 	base: 'relative flex min-w-0 flex-col',
 	variants: {
 		variant: {
-			plain: 'p-2',
-			sectioned: 'p-2',
+			plain: 'p-md',
+			sectioned: 'p-md',
 			card: ''
 		}
 	},
@@ -24,7 +24,7 @@ const defaultMultiStepContent = cva({
 });
 
 const defaultMultiStepFooter = cva({
-	base: 'flex justify-between gap-2'
+	base: 'flex justify-between gap-md'
 });
 
 export const multiStepFormTheme = {

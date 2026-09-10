@@ -10,6 +10,9 @@ const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
 
 export default ts.config(
 	includeIgnoreFile(gitignorePath),
+	{ ignores: ['svelte-pro/**', '.playwright-cli/**', '.playwright-mcp/**'] },
+	// This fixture is type-checked in its installed-tarball project, without source aliases.
+	{ ignores: ['tooling/component-contract/consumer.svelte'] },
 	js.configs.recommended,
 	...ts.configs.recommended,
 	...svelte.configs.recommended,
@@ -35,5 +38,10 @@ export default ts.config(
 				svelteConfig
 			}
 		}
+	},
+	{
+		files: ['src/routes/blocks/catalog/**/*.svelte'],
+		// Copyable blocks also run outside SvelteKit and cannot import $app/paths.
+		rules: { 'svelte/no-navigation-without-resolve': 'off' }
 	}
 );

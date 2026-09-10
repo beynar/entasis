@@ -241,46 +241,98 @@ export type EventCalendarSnippetProps<
 > = {
 	/** Replaces the built-in header; `false` removes it. */
 	header?: Snippet<[EventCalendarHeaderPayload<TItemFields, TResourceFields>]> | false;
+	/** Renders additional header actions from the current calendar snapshot. */
 	actions?: Snippet<[EventCalendarSnapshot<TItemFields, TResourceFields>]>;
+	/** Replaces an occurrence segment's content with its view, selection, and drag state. */
 	item?: Snippet<[EventCalendarItemPayload<TItemFields>]>;
 	/** Replaces the built-in item HoverCard; `false` removes it. */
 	itemTooltip?: Snippet<[EventCalendarItemTooltipPayload<TItemFields>]> | false;
+	/** Replaces a month cell's content with its day, segments, states, and overflow count. */
 	monthCell?: Snippet<[EventCalendarMonthCellPayload<TItemFields>]>;
+	/** Replaces a visible-day header with its day, view, today state, and built-in content. */
 	dayHeader?: Snippet<[EventCalendarDayHeaderPayload]>;
+	/** Replaces a time-gutter label with its instant, formatted label, and built-in content. */
 	timeGutter?: Snippet<[EventCalendarTimeGutterPayload]>;
+	/** Replaces the all-day row with its visible days, segments, and built-in content. */
 	allDay?: Snippet<[EventCalendarAllDayPayload<TItemFields>]>;
+	/** Replaces a month-cell overflow trigger with its day and hidden occurrences. */
 	overflow?: Snippet<[EventCalendarOverflowPayload<TItemFields>]>;
+	/** Replaces the overflow popover body with its hidden occurrences and close action. */
 	overflowContent?: Snippet<[EventCalendarOverflowContentPayload<TItemFields>]>;
+	/** Renders additional details for an agenda occurrence. */
 	agendaDetails?: Snippet<[EventCalendarAgendaDetailsPayload<TItemFields>]>;
+	/** Replaces a resource header with its resource, hierarchy depth, and assignment state. */
 	resourceHeader?: Snippet<[EventCalendarResourceHeaderPayload<TResourceFields>]>;
 	/** Replaces the built-in current-time line; `false` removes it. */
 	nowIndicator?: Snippet<[EventCalendarNowIndicatorPayload]> | false;
+	/** Replaces the pointer-drag preview with its item proposal and validity state. */
 	dragPreview?: Snippet<[EventCalendarDragPreviewPayload<TItemFields>]>;
+	/** Replaces empty-state content with its visible range, days, and display mode. */
 	empty?: Snippet<[EventCalendarEmptyPayload]>;
+	/** Replaces loading-state content with its visible range and days. */
 	loadingContent?: Snippet<[EventCalendarLoadingPayload]>;
 };
 
 export type EventCalendarCallbackProps<TItemFields extends object = Record<never, never>> = {
+	/** Reports the view, anchor, zone, current/render/active/fetch ranges, and visible days. */
 	onRangeChange?: (info: EventCalendarRangeChangeInfo) => void;
-	onItemsChange?: (
-		items: EventCalendarItem<TItemFields>[],
-		change: EventCalendarChange<TItemFields>
-	) => void;
+	/** Reports an accepted immutable item mutation with updated items and its guarded transaction. */
+	onItemsChange?: (payload: EventCalendarItemsChangePayload<TItemFields>) => void;
+	/** Reports a calendar-driven reassignment of the active view. */
 	onViewChange?: (view: EventCalendarView) => void;
+	/** Reports a calendar-driven reassignment of the anchor instant. */
 	onDateChange?: (date: Date) => void;
+	/** Reports a calendar-driven reassignment of the visible-day count. */
 	onDayCountChange?: (dayCount: number) => void;
+	/** Reports a calendar-driven reassignment of the selected item or slot. */
 	onSelectionChange?: (selection: EventCalendarSelection) => void;
-	onItemClick?: (occurrence: EventCalendarOccurrence<TItemFields>, event: MouseEvent) => void;
-	onItemDoubleClick?: (occurrence: EventCalendarOccurrence<TItemFields>, event: MouseEvent) => void;
-	onSlotClick?: (slot: EventCalendarSlot, event: MouseEvent) => void;
-	onSlotSelect?: (slot: EventCalendarSlot, info: EventCalendarSlotSelectInfo) => void;
-	onMoreClick?: (
-		day: EventCalendarDateOnly,
-		occurrences: readonly EventCalendarOccurrence<TItemFields>[],
-		event: MouseEvent
-	) => false | void;
+	/** Reports an activated occurrence and its native pointer event. */
+	onItemClick?: (payload: EventCalendarItemClickPayload<TItemFields>) => void;
+	/** Reports a double-activated occurrence and its native pointer event. */
+	onItemDoubleClick?: (payload: EventCalendarItemClickPayload<TItemFields>) => void;
+	/** Reports an activated calendar slot and its native pointer event. */
+	onSlotClick?: (payload: EventCalendarSlotClickPayload) => void;
+	/** Reports a selected slot and the interaction source that selected it. */
+	onSlotSelect?: (payload: EventCalendarSlotSelectPayload) => void;
+	/** Reports a month's hidden occurrences and pointer event; return `false` to prevent its popover. */
+	onMoreClick?: (payload: EventCalendarMoreClickPayload<TItemFields>) => false | void;
+	/** Reports a rejected item or slot interaction with its reason and interaction source. */
 	onInteractionBlocked?: (info: EventCalendarInteractionBlockedInfo<TItemFields>) => void;
 };
+
+/** Immutable collection and guarded transaction reported after an item mutation. */
+export type EventCalendarItemsChangePayload<TItemFields extends object = Record<never, never>> =
+	Readonly<{
+		items: EventCalendarItem<TItemFields>[];
+		change: EventCalendarChange<TItemFields>;
+	}>;
+
+/** Occurrence and native pointer event reported by item click callbacks. */
+export type EventCalendarItemClickPayload<TItemFields extends object = Record<never, never>> =
+	Readonly<{
+		occurrence: EventCalendarOccurrence<TItemFields>;
+		event: MouseEvent;
+	}>;
+
+/** Calendar slot and native pointer event reported by `onSlotClick`. */
+export type EventCalendarSlotClickPayload = Readonly<{
+	slot: EventCalendarSlot;
+	event: MouseEvent;
+}>;
+
+/** Selected slot and interaction source reported by `onSlotSelect`. */
+export type EventCalendarSlotSelectPayload = Readonly<{
+	slot: EventCalendarSlot;
+	info: EventCalendarSlotSelectInfo;
+}>;
+
+/** Hidden occurrences and native pointer event reported by `onMoreClick`. */
+export type EventCalendarMoreClickPayload<TItemFields extends object = Record<never, never>> =
+	Readonly<{
+		day: EventCalendarDateOnly;
+		occurrences: readonly EventCalendarOccurrence<TItemFields>[];
+		event: MouseEvent;
+	}>;
 
 type EventCalendarOwnProps<
 	TItemFields extends object,

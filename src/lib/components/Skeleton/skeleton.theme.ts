@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultSkeleton = cva({
-	base: 'animate-pulse rounded-md',
+	base: 'animate-pulse rounded-sm',
 	variants: {
 		color: {
 			primary: 'bg-primary-light/10',

@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 
 const defaultInputContainer = cva({
-	base: 'px-3 py-2 bg-surface-raised border border-neutral-muted rounded text-neutral w-full focus-within:ring-1 focus-within:ring-primary ring-0 transition-all min-h-32 flex flex-col items-center justify-center cursor-pointer',
+	base: 'flex min-h-32 w-full cursor-pointer flex-col items-center justify-center border border-neutral-muted bg-surface-raised px-lg py-md text-neutral ring-0 transition-all rounded-md outline-none focus-within:ring-2 focus-within:ring-primary/50',
 	variants: {
 		size: {
 			small: 'min-h-24',
@@ -26,12 +26,12 @@ const defaultInputContainer = cva({
 });
 
 const defaultPlaceholder = cva({
-	base: 'flex flex-col items-center justify-center gap-2 text-neutral/60',
+	base: 'flex flex-col items-center justify-center gap-md text-neutral/60',
 	variants: {
 		size: {
-			small: 'text-xs gap-1',
-			normal: 'text-sm gap-2',
-			large: 'text-base gap-3'
+			small: 'text-xs gap-xs',
+			normal: 'text-sm gap-md',
+			large: 'text-base gap-lg'
 		}
 	},
 	defaultVariants: {
@@ -40,12 +40,12 @@ const defaultPlaceholder = cva({
 });
 
 const defaultFileList = cva({
-	base: 'w-full flex flex-col gap-2 mt-2',
+	base: 'w-full flex flex-col gap-md mt-md',
 	variants: {
 		size: {
-			small: 'gap-1',
-			normal: 'gap-2',
-			large: 'gap-3'
+			small: 'gap-xs',
+			normal: 'gap-md',
+			large: 'gap-lg'
 		}
 	},
 	defaultVariants: {
@@ -54,12 +54,12 @@ const defaultFileList = cva({
 });
 
 const defaultFile = cva({
-	base: 'flex items-center gap-3 p-2 bg-surface-canvas',
+	base: 'flex items-center gap-lg p-md bg-surface-canvas',
 	variants: {
 		size: {
-			small: 'p-1 text-xs gap-2',
-			normal: 'p-2 text-sm gap-3',
-			large: 'p-3 text-base gap-4'
+			small: 'p-xs text-xs gap-md',
+			normal: 'p-md text-sm gap-lg',
+			large: 'p-lg text-base gap-xl'
 		}
 	},
 	defaultVariants: {

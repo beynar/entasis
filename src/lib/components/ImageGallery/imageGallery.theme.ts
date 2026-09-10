@@ -6,7 +6,7 @@ const defaultImageGalleryRoot = cva({
 });
 
 const defaultImageGalleryCaption = cva({
-	base: 'text-neutral bg-surface-floating/90 fixed bottom-20 left-1/2 z-[1100] max-w-[min(44rem,calc(100vw-2rem))] -translate-x-1/2 rounded-full px-4 py-2 text-center text-sm shadow-sm backdrop-blur-md'
+	base: 'text-neutral bg-surface-floating/90 fixed bottom-20 left-1/2 z-[1100] max-w-[min(44rem,calc(100vw-2rem))] -translate-x-1/2 rounded-full px-xl py-md text-center text-sm shadow-sm backdrop-blur-md'
 });
 
 export const imageGalleryTheme = {

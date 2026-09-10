@@ -2,9 +2,23 @@
 	import Button from '$lib/components/Button/Button.svelte';
 	import { ImageZoom } from '$lib/components/ImageZoom/index.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 
 	let controlledOpen = $state(false);
+
+	const indicatorPositions = ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const;
+	const controls = createComponentControls([
+		{ name: 'showIndicator', type: 'switch', label: 'Indicator', value: true },
+		{
+			name: 'indicatorPosition',
+			type: 'segmented',
+			label: 'Position',
+			value: 'top-right',
+			options: indicatorPositions
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 
 	const mountainThumb =
 		'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=900&q=80';
@@ -85,6 +99,7 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		title="Medium Zoom"
 		description="Full-resolution dimensions keep the source and zoomed image on the same animated geometry."
 		class="max-w-4xl"
@@ -94,6 +109,9 @@
 	zoomWidth={1600}
 	zoomHeight={1126}
 	alt="Mountain ridge above a cloud layer"
+	showIndicator={${controls.value.showIndicator}}
+	indicatorPosition="${controls.value.indicatorPosition}"
+	disabled={${controls.value.disabled}}
 />`}
 	>
 		<article class="mx-auto max-w-2xl py-4 text-left">
@@ -108,14 +126,30 @@
 				its position in the article.
 			</p>
 
-			<ImageZoom {...mediumLandscape} width={860} height={605} backgroundColor="#fff" />
+			<ImageZoom
+				{...mediumLandscape}
+				width={860}
+				height={605}
+				backgroundColor="#fff"
+				showIndicator={controls.value.showIndicator}
+				indicatorPosition={controls.value.indicatorPosition}
+				disabled={controls.value.disabled}
+			/>
 
 			<p class="text-neutral/60 my-6 text-base leading-7">
 				Farther north, the shoreline became rougher and the horizon less certain. The larger source
 				replaces the thumbnail without changing its final rectangle.
 			</p>
 
-			<ImageZoom {...mediumCoast} width={860} height={573} backgroundColor="rgb(22 37 44)" />
+			<ImageZoom
+				{...mediumCoast}
+				width={860}
+				height={573}
+				backgroundColor="rgb(22 37 44)"
+				showIndicator={controls.value.showIndicator}
+				indicatorPosition={controls.value.indicatorPosition}
+				disabled={controls.value.disabled}
+			/>
 
 			<p class="text-neutral/60 my-6 text-base leading-7">
 				The final image sits inside the prose rather than taking the full column. Its portrait
@@ -123,7 +157,15 @@
 			</p>
 
 			<div class="float-right mb-4 ml-6 w-[min(42%,21rem)]">
-				<ImageZoom {...mediumPortrait} width={340} height={510} backgroundColor="rgb(28 62 74)" />
+				<ImageZoom
+					{...mediumPortrait}
+					width={340}
+					height={510}
+					backgroundColor="rgb(28 62 74)"
+					showIndicator={controls.value.showIndicator}
+					indicatorPosition={controls.value.indicatorPosition}
+					disabled={controls.value.disabled}
+				/>
 			</div>
 
 			<p class="text-neutral/60 text-base leading-7">
@@ -221,11 +263,11 @@
 			class="max-w-xl"
 			code={`let open = $state(false);
 
-<Button onClick={() => (open = true)}>Open zoom</Button>
+<Button onclick={() => (open = true)}>Open zoom</Button>
 <ImageZoom bind:open src="/photo.jpg" alt="Mountain valley at sunrise" />`}
 		>
 			<div class="grid gap-4">
-				<Button variant="outline" onClick={() => (controlledOpen = true)}>Open zoom</Button>
+				<Button variant="outline" onclick={() => (controlledOpen = true)}>Open zoom</Button>
 				<ImageZoom
 					bind:open={controlledOpen}
 					src={mountainThumb}

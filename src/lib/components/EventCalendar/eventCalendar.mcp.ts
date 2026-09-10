@@ -99,11 +99,11 @@ A recurring external source can move inside its original timed or all-day domain
 - 'validateSlotSelection(slot)': synchronous slot validation.
 - Validation order is structural/editability/range, business hours, overlap, then custom policy.
 
-'onItemsChange(nextItems, change)' runs after one accepted immutable reassignment. Persist 'nextItems' at the application boundary. On failure, call 'change.revert()' and then surface the original error. Revert is guarded and one-shot: it throws 'stale-transaction' rather than overwrite a newer calendar or consumer update.
+'onItemsChange({ items, change })' runs after one accepted immutable reassignment. Persist 'items' at the application boundary. On failure, call 'change.revert()' and then surface the original error. Revert is guarded and one-shot: it throws 'stale-transaction' rather than overwrite a newer calendar or consumer update.
 
 'interactions.clipboard=true' enables internal occurrence copy/paste through the API and Mod+C/Mod+V. Paste creates a standalone item, targets a selected compatible slot when present, and never mutates the copied recurrence series. 'historyLimit=50' bounds immutable undo entries; 0 disables history. Mod+Z undoes, Mod+Shift+Z and Mod+Y redo. History refuses stale controlled collections instead of overwriting consumer state.
 
-Item callbacks are 'onItemClick', 'onItemDoubleClick', 'onMoreClick', and 'onInteractionBlocked'. Slot callbacks are 'onSlotClick' and 'onSlotSelect(slot, { source })'; source is 'drag-create', 'keyboard', or 'single-pointer'. Bound-state callbacks are 'onViewChange', 'onDateChange', 'onDayCountChange', and 'onSelectionChange'.
+Item callbacks are 'onItemClick({ occurrence, event })', 'onItemDoubleClick({ occurrence, event })', 'onMoreClick({ day, occurrences, event })', and 'onInteractionBlocked'. Slot callbacks are 'onSlotClick({ slot, event })' and 'onSlotSelect({ slot, info })'; info.source is 'drag-create', 'keyboard', or 'single-pointer'. Bound-state callbacks are 'onViewChange', 'onDateChange', 'onDayCountChange', and 'onSelectionChange'.
 
 ## Recurrence
 

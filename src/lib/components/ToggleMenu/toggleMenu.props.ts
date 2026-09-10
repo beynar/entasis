@@ -69,7 +69,8 @@ export type ToggleMenuGroupItem<Items extends ToggleMenuGroupButtons = ToggleMen
 	items: Items;
 	ariaLabel: string;
 	value?: ToggleButtonGroupValue<Items>;
-	onChange?: (value: ToggleButtonGroupValue<Items>) => void;
+	defaultValue?: ToggleButtonGroupValue<Items>;
+	onValueChange?: (value: ToggleButtonGroupValue<Items>) => void;
 	joined?: boolean;
 	size?: Sizes;
 	color?: Colors;
@@ -86,7 +87,8 @@ export type ToggleMenuRadioGroupItem<
 	items: Items;
 	ariaLabel: string;
 	value?: Extract<keyof Items, string>;
-	onChange?: (value: Extract<keyof Items, string>) => void;
+	defaultValue?: Extract<keyof Items, string>;
+	onValueChange?: (value: Extract<keyof Items, string>) => void;
 	joined?: boolean;
 	size?: Sizes;
 	color?: Colors;
@@ -117,8 +119,10 @@ export type ToggleMenuItem =
 	| ToggleMenuCustomItem;
 
 export type ToggleMenuProps = WithAttachments<{
-	/** Ordered toggles, groups, menu buttons, and custom controls. */
-	items: ToggleMenuItem[];
+	/** Bindable ordered toggles, groups, menu buttons, and custom controls. */
+	value?: ToggleMenuItem[];
+	/** Initial toolbar value when `value` is omitted. */
+	defaultValue?: ToggleMenuItem[];
 	/** Accessible name for the toolbar. */
 	ariaLabel: string;
 	/** Default size inherited by every item. */
@@ -129,8 +133,8 @@ export type ToggleMenuProps = WithAttachments<{
 	variant?: ToggleButtonVariant;
 	/** When true, disables every item in the menu. */
 	disabled?: boolean;
-	/** Called with the complete updated configuration after any control state changes. */
-	onChange?: (items: ToggleMenuItem[]) => void;
+	/** Called once with the complete updated value after any control state changes. */
+	onValueChange?: (value: ToggleMenuItem[]) => void;
 	/** Class name on the root toolbar element. */
 	class?: string;
 	/** Theme overrides for the toolbar root, rail, units, and overflow trigger. */

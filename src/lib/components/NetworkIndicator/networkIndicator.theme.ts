@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultNetworkIndicator = cva({
-	base: 'ui-network-indicator fixed top-0 left-0 w-full z-[9999] origin-left rounded-xl',
+	base: 'ui-network-indicator fixed top-0 left-0 w-full z-[9999] origin-left rounded-lg',
 	variants: {
 		variant: {
 			bar: '',

@@ -184,7 +184,7 @@
 		>
 			<div class="grid w-full max-w-3xl gap-3">
 				<div class="flex items-center gap-3">
-					<Button label="Stream diagram" onClick={startStream} loading={streaming} size="small">
+					<Button label="Stream diagram" onclick={startStream} loading={streaming} size="small">
 						Stream
 					</Button>
 					<pre

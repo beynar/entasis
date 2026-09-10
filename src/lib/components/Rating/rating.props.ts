@@ -16,7 +16,7 @@ export type RatingStarPayload = {
 };
 
 export type RatingProps = WithAttachments<
-	HTMLAttributes<HTMLDivElement> & {
+	Omit<HTMLAttributes<HTMLDivElement>, 'onclick' | 'onpointermove'> & {
 		/** The displayed value; fractions render as partially filled stars. */
 		value?: number | null;
 		/** Number of stars rendered, which is also the maximum value. */
@@ -37,10 +37,10 @@ export type RatingProps = WithAttachments<
 		star?: Snippet<[RatingStarPayload]>;
 		/** Bindable reference to the root star-row element. */
 		ref?: HTMLElement | null;
-		/** Called on pointer move over a star; lets a wrapper (e.g. RatingInput) drive interaction. */
-		onStarPointerMove?: (event: PointerEvent, index: number, element: HTMLElement) => void;
-		/** Called on click of a star; lets a wrapper (e.g. RatingInput) drive interaction. */
-		onStarClick?: (event: MouseEvent, index: number, element: HTMLElement) => void;
+		/** Native pointer-move handler attached to each star. */
+		onpointermove?: (event: PointerEvent & { currentTarget: HTMLSpanElement }) => void;
+		/** Native click handler attached to each star. */
+		onclick?: (event: MouseEvent & { currentTarget: HTMLSpanElement }) => void;
 		/** Per-instance i18n overrides merged over the global catalog. */
 		i18n?: Partial<Messages>;
 		/** Theme overrides for the container, star, starBase and starFill parts. */

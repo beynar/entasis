@@ -5,6 +5,7 @@ type SidebarDisplayStateBridgeOptions = {
 	readonly displayState: SidebarDisplayState | undefined;
 	readonly collapsible: SidebarCollapsible;
 	setOpen: (open: boolean) => void;
+	onOpenChange?: (open: boolean) => void;
 	setDisplayStateProp: (state: SidebarDisplayState) => void;
 	onDisplayStateChange?: (state: SidebarDisplayState) => void;
 };
@@ -30,6 +31,8 @@ export class SidebarDisplayStateBridge {
 
 	setDisplayState = (nextState: SidebarDisplayState) => {
 		const normalizedState = this.normalizeState(nextState);
+		if (normalizedState === this.displayState) return;
+		const previousOpen = this.options.open;
 
 		if (this.options.displayState !== undefined) {
 			this.options.setDisplayStateProp(normalizedState);
@@ -37,8 +40,10 @@ export class SidebarDisplayStateBridge {
 			this.internalDisplayState = normalizedState;
 		}
 
-		this.options.onDisplayStateChange?.(normalizedState);
 		this.updateOpenFromDisplayState(normalizedState);
+		const nextOpen = this.options.open;
+		this.options.onDisplayStateChange?.(normalizedState);
+		if (nextOpen !== previousOpen) this.options.onOpenChange?.(nextOpen);
 	};
 
 	private syncExternalState() {
@@ -50,6 +55,9 @@ export class SidebarDisplayStateBridge {
 			this.previousOpen = nextOpen;
 			this.previousCollapsible = nextCollapsible;
 			this.previousControlledDisplayState = nextControlledDisplayState;
+			if (nextControlledDisplayState !== undefined) {
+				this.updateOpenFromDisplayState(nextControlledDisplayState);
+			}
 			return;
 		}
 

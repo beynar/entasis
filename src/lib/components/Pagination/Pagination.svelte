@@ -299,7 +299,12 @@
 							</svelte:element>
 						{:else if item.kind === 'ellipsis'}
 							<span aria-hidden="true" class={classes.ellipsis({ size })}>
-								<Slot as="span" render={ellipsis ?? ellipsisIcon} class={classes.icon({ size })} />
+								<Slot
+									as="span"
+									render={ellipsis ?? ellipsisIcon}
+									class={classes.icon({ size })}
+									payload={{}}
+								/>
 							</span>
 						{:else if item.kind === 'count'}
 							<Slot

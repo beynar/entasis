@@ -3,17 +3,16 @@
 	import type { CollapsibleProps } from './collapsible.props.js';
 	import { useCollapsibleTheme } from './collapsible.theme.js';
 	import { slide, type SlideParams } from 'svelte/transition';
-	import { caretUpDownIcon } from '../Icons/caretUpDown.js';
 	import { caretDownIcon } from '../Icons/caretDown.js';
 	import { plusIcon } from '../Icons/plus.js';
 	import { minusIcon } from '../Icons/minus.js';
-	import { untrack } from 'svelte';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 
 	let {
 		ref = $bindable(),
 		class: className,
-		open = $bindable(undefined),
 		defaultOpen = false,
+		open = $bindable(),
 		disabled = false,
 		onOpenChange,
 		size = 'normal',
@@ -27,12 +26,16 @@
 		peekHeight = 80,
 		...attachments
 	}: CollapsibleProps = $props();
+	const openState = createBindableValue(
+		() => open,
+		(next) => {
+			open = next;
+		},
+		() => defaultOpen
+	);
 
 	const id = $props.id();
-
-	// Internal state management
-	let internalOpen = $state(untrack(() => defaultOpen));
-	const isOpen = $derived(open !== undefined ? open : internalOpen);
+	const isOpen = $derived(openState.value);
 
 	const contentId = $derived(`${id}-content`);
 
@@ -45,12 +48,7 @@
 	const handleToggle = () => {
 		if (disabled) return;
 		const newOpen = !isOpen;
-		if (open === undefined) {
-			internalOpen = newOpen;
-		} else {
-			// If controlled, update the bound value
-			open = newOpen;
-		}
+		openState.value = newOpen;
 		onOpenChange?.(newOpen);
 	};
 
@@ -113,7 +111,7 @@
 					class="state-layer border-neutral-muted bg-surface text-neutral/80 pointer-events-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-medium shadow-sm transition disabled:cursor-not-allowed disabled:opacity-55"
 					onclick={handleToggle}
 				>
-					<Slot render={trigger} />
+					<Slot render={trigger} payload={{ open: isOpen }} />
 					{@render triggerIcon()}
 				</button>
 			</div>
@@ -138,7 +136,7 @@
 			class={classes.trigger({ size, disabled })}
 			onclick={handleToggle}
 		>
-			<Slot render={trigger} />
+			<Slot render={trigger} payload={{ open: isOpen }} />
 			{@render triggerIcon()}
 		</button>
 
@@ -153,7 +151,7 @@
 				<Slot payload={{ open: isOpen }} render={children} />
 			</div>
 		{:else if accessible || srOnlyContent}
-			<Slot render={srOnlyContent || children} />
+			<Slot render={srOnlyContent || children} payload={{ open: isOpen }} />
 		{/if}
 	</div>
 {/if}

@@ -9,12 +9,14 @@
 	import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
 	import { useSlidingIndicator } from '$lib/utils/useSlidingIndicator.svelte.js';
 	import type { Snippet } from 'svelte';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 
 	let {
 		ref = $bindable(null),
 		items,
-		activeTab = $bindable(0),
-		onChange,
+		defaultValue = 0,
+		value = $bindable(),
+		onValueChange,
 		size = 'normal',
 		orientation = 'horizontal',
 		color = 'primary',
@@ -27,9 +29,17 @@
 		scrollFade = true,
 		...attachments
 	}: TabbarProps = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(next) => {
+			value = next;
+		},
+		() => defaultValue
+	);
 
 	const id = $props.id();
 	const classes = $derived(useTabbarTheme(theme));
+	const selectedValue = $derived(valueState.value);
 
 	type NormalizedTab = {
 		label: string | Snippet;
@@ -113,8 +123,10 @@
 
 	const selectMenuEntry = (index: number, tab: NormalizedTab, menuIndex: number) => {
 		menuSelections[index] = menuIndex;
-		activeTab = index;
-		onChange?.(index);
+		if (selectedValue !== index) {
+			valueState.value = index;
+			onValueChange?.(index);
+		}
 		tab.onMenuSelect?.(menuIndex);
 		navigation.focusItem(index);
 	};
@@ -124,7 +136,7 @@
 			type: 'option' as const,
 			title: label,
 			suffix: menuSelections[index] === menuIndex ? checkIcon : undefined,
-			onClick: () => selectMenuEntry(index, tab, menuIndex)
+			onclick: () => selectMenuEntry(index, tab, menuIndex)
 		}));
 
 	// Navigation hook for keyboard support
@@ -136,24 +148,31 @@
 		onChange: (index) => {
 			// Menu tabs activate manually (via entry selection), never by focus alone —
 			// arrowing onto the trigger must not slide the indicator to it.
-			if (index !== null && index !== activeTab && !normalizedTabs[index]?.menu) {
-				activeTab = index;
-				onChange?.(index);
+			if (index !== null && index !== selectedValue && !normalizedTabs[index]?.menu) {
+				valueState.value = index;
+				onValueChange?.(index);
 			}
 		},
-		defaultFocusedIndex: () => activeTab
+		defaultFocusedIndex: () => selectedValue
 	});
 
-	function handleTabClick(index: number, tab: NormalizedTab) {
-		if (!tab.disabled && !tab.href) {
-			activeTab = index;
-			onChange?.(index);
+	function handleTabClick(event: MouseEvent, index: number, tab: NormalizedTab) {
+		if (tab.disabled) {
+			event.preventDefault();
+			event.stopPropagation();
+			return;
+		}
+		if (!tab.href) {
+			if (selectedValue !== index) {
+				valueState.value = index;
+				onValueChange?.(index);
+			}
 			navigation.focusItem(index);
 		}
 	}
 
 	const indicator = useSlidingIndicator({
-		activeIndex: () => activeTab,
+		activeIndex: () => selectedValue,
 		observe: () => [
 			items,
 			size,
@@ -220,7 +239,7 @@
 		></div>
 	{/if}
 	{#each normalizedTabs as tab, index (index)}
-		{@const isActive = activeTab === index}
+		{@const isActive = selectedValue === index}
 		{@const isFocused = navigation.focusedIndex === index}
 		{@const elementType = tab.href ? 'a' : 'button'}
 
@@ -294,10 +313,10 @@
 				data-slot="tabbar-tab"
 				role="tab"
 				aria-disabled={tab.disabled}
-				disabled={tab.disabled}
-				href={tab.href}
+				disabled={!tab.href && tab.disabled ? true : undefined}
+				href={tab.disabled ? undefined : tab.href}
 				target={tab.target}
-				tabindex={isFocused ? 0 : -1}
+				tabindex={!tab.disabled && isFocused ? 0 : -1}
 				rel={tab.rel}
 				data-color={color}
 				data-active={isActive ? 'true' : 'false'}
@@ -314,7 +333,7 @@
 					variant,
 					fullWidth
 				})}
-				onclick={() => handleTabClick(index, tab)}
+				onclick={(event: MouseEvent) => handleTabClick(event, index, tab)}
 				{@attach navigation.itemReference}
 				{@attach indicator.itemReference(index)}
 			>

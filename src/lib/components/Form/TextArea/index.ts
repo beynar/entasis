@@ -1,5 +1,5 @@
 export { default as TextArea } from './TextArea.svelte';
-export type { TextAreaProps } from './textArea.props.js';
+export type { TextAreaAttributes, TextAreaProps } from './textArea.props.js';
 export {
 	textAreaTheme,
 	setTextAreaTheme,
@@ -7,4 +7,3 @@ export {
 	type TextAreaTheme,
 	type TextAreaThemeProps
 } from './textArea.theme.js';
-

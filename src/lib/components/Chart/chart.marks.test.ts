@@ -134,13 +134,25 @@ describe('Chart mark rendering', () => {
 					x: 'x',
 					y: 'y',
 					key: 'id',
-					annotations: [{ type: 'arrow', target: { key: 'b' }, label: 'Selected point' }]
+					annotations: [
+						{
+							id: 'selected-band',
+							type: 'band',
+							target: { key: 'b' },
+							axis: 'x',
+							thickness: 24,
+							inset: 2,
+							placement: 'under'
+						},
+						{ type: 'arrow', target: { key: 'b' }, label: 'Selected point' }
+					]
 				}
 			]
 		} satisfies ChartConfiguration<Row>;
 
 		const body = renderDefinition(rows, definition, 'Annotated series');
+		expect(body).toContain('data-ts-key="selected-band"');
+		expect(body).toContain('width="20"');
 		expect(body).toContain('Selected point');
 	});
-
 });

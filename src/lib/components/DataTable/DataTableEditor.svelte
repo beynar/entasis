@@ -142,7 +142,7 @@
 				placeholder={editor.placeholder}
 				disabled={payload.pending}
 				value={payload.draft == null ? '' : String(payload.draft)}
-				onChange={(value) => payload.setDraft(value ?? '')}
+				onValueChange={(value) => payload.setDraft(value ?? '')}
 			/>
 		{:else if editor.type === 'number'}
 			<NumberInput
@@ -155,7 +155,7 @@
 				showControls={false}
 				disabled={payload.pending}
 				value={typeof payload.draft === 'number' ? payload.draft : null}
-				onChange={payload.setDraft}
+				onValueChange={payload.setDraft}
 			/>
 		{:else if editor.type === 'select'}
 			<Select
@@ -165,7 +165,7 @@
 				items={[...editor.options]}
 				disabled={payload.pending}
 				value={payload.draft == null ? null : String(payload.draft)}
-				onChange={payload.setDraft}
+				onValueChange={payload.setDraft}
 			/>
 		{:else if editor.type === 'date'}
 			<DateInput
@@ -176,7 +176,7 @@
 				maxDate={editor.max}
 				disabled={payload.pending}
 				value={payload.draft instanceof Date ? payload.draft : null}
-				onChange={payload.setDraft}
+				onValueChange={payload.setDraft}
 				onCalendarSelect={commitCalendarDate}
 			/>
 		{:else if editor.type === 'switch'}
@@ -187,7 +187,7 @@
 				ariaLabel={`Edit ${columnId}`}
 				disabled={payload.pending}
 				value={Boolean(payload.draft)}
-				onChange={payload.setDraft}
+				onValueChange={payload.setDraft}
 			/>
 		{:else}
 			<Slot render={editor.render} {payload} />

@@ -4,7 +4,9 @@ import type { SpinnerVariant } from '$lib/components/Spinner/spinner.props.js';
 import { useSpinnerTheme } from '$lib/components/Spinner/spinner.theme.js';
 import { useTheme } from '$lib/components/Theme/theme.state.svelte.js';
 import type { Colors, Sizes } from '$lib/types/theme.js';
-import { cva, cx, setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
+import { cx } from '$lib/utils/cva/index.js';
+import { useSpinnerOverlayTheme } from './spinnerOverlay.theme.js';
+export { setSpinnerOverlayTheme, useSpinnerOverlayTheme } from './spinnerOverlay.theme.js';
 import { mount, unmount, untrack } from 'svelte';
 
 export type SpinnerOverlayOptions = {
@@ -23,68 +25,6 @@ type MountedSpinnerIndicator = {
 };
 
 const mountedSpinnerIndicators = new WeakMap<HTMLElement, MountedSpinnerIndicator>();
-
-const defaultSpinnerOverlay = cva({
-	base: 'absolute overflow-hidden flex gap-2 flex-col items-center justify-center backdrop-blur-[10px] z-10 w-full h-full rounded-inherit inset-0 bg-color/20 '
-});
-
-const defaultSpinnerOverlaySpinner = cva({
-	base: 'order-2',
-	variants: {
-		size: {
-			small: 'w-4 h-4',
-			normal: 'w-5 h-5',
-			large: 'w-6 h-6'
-		},
-		color: {
-			primary: 'text-primary-readable',
-			secondary: 'text-secondary-readable',
-			neutral: 'text-neutral-readable',
-			danger: 'text-danger-readable',
-			success: 'text-success-readable',
-			warning: 'text-warning-readable',
-			info: 'text-info-readable'
-		}
-	},
-	defaultVariants: {
-		size: 'normal',
-		color: 'neutral'
-	}
-});
-
-const defaultSpinnerOverlayText = cva({
-	base: 'text-sm order-1',
-	variants: {
-		size: {
-			small: 'text-sm',
-			normal: 'text-base',
-			large: 'text-lg'
-		},
-		color: {
-			primary: 'text-primary-readable',
-			secondary: 'text-secondary-readable',
-			neutral: 'text-neutral-readable',
-			danger: 'text-danger-readable',
-			success: 'text-success-readable',
-			warning: 'text-warning-readable',
-			info: 'text-info-readable'
-		}
-	},
-	defaultVariants: {
-		size: 'normal',
-		color: 'neutral'
-	}
-});
-
-const spinnerOverlayTheme = {
-	overlay: defaultSpinnerOverlay,
-	spinner: defaultSpinnerOverlaySpinner,
-	text: defaultSpinnerOverlayText
-};
-
-export const setSpinnerOverlayTheme =
-	setComponentTheme<typeof spinnerOverlayTheme>('spinnerOverlay');
-export const useSpinnerOverlayTheme = useComponentTheme('spinnerOverlay', spinnerOverlayTheme);
 
 export const spinnerOverlay = (opts: SpinnerOverlayOptions) => {
 	const themeState = useTheme();
@@ -117,8 +57,8 @@ export const spinnerOverlay = (opts: SpinnerOverlayOptions) => {
 				removeSpinner(overlay);
 				overlay.remove();
 			}
-			textAnimation && textAnimation.cancel();
-			parentAnimation && parentAnimation.cancel();
+			textAnimation?.cancel();
+			parentAnimation?.cancel();
 		}
 	};
 
@@ -244,12 +184,12 @@ export const spinnerOverlay = (opts: SpinnerOverlayOptions) => {
 	};
 
 	return (node: HTMLElement) => {
-		opts.loading;
-		opts.text;
-		opts.variant;
-		opts.size;
-		opts.color;
-		themeState?.spinnerVariant;
+		void opts.loading;
+		void opts.text;
+		void opts.variant;
+		void opts.size;
+		void opts.color;
+		void themeState?.spinnerVariant;
 		return untrack(() => {
 			setup(node);
 			return () => {

@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { tick } from 'svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 	import { PopupMenu, type MenuItem } from '$lib/components/PopupMenu/index.js';
+	import { sizes } from '$lib/utils/tokens.js';
 	import { userIcon } from '$lib/components/Icons/user.js';
 	import { gearIcon } from '$lib/components/Icons/gear.js';
 	import { signOutIcon } from '$lib/components/Icons/signOut.js';
@@ -20,6 +22,23 @@
 	let contextMenuOpen = $state(false);
 	// A floating-ui virtual element: a zero-size rect at the cursor, so the menu anchors to the pointer.
 	let contextMenuRef = $state<{ getBoundingClientRect: () => DOMRect } | null>(null);
+
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		}
+	]);
 
 	// Basic menu items
 	const basicItems: MenuItem[] = [
@@ -78,7 +97,7 @@
 			children: 'Save Draft',
 			variant: 'ghost',
 			fullWidth: true,
-			onClick: () => alert('Saved as draft')
+			onclick: () => alert('Saved as draft')
 		},
 		{
 			type: 'button',
@@ -86,7 +105,7 @@
 			variant: 'solid',
 			color: 'primary',
 			fullWidth: true,
-			onClick: () => alert('Published!')
+			onclick: () => alert('Published!')
 		},
 		{ type: 'separator' },
 		{
@@ -95,16 +114,16 @@
 			variant: 'soft',
 			color: 'danger',
 			fullWidth: true,
-			onClick: () => alert('Deleted')
+			onclick: () => alert('Deleted')
 		}
 	];
 
 	// Context menu items
 	const contextItems: MenuItem[] = [
-		{ type: 'option', title: 'Open', onClick: () => alert('Open') },
-		{ type: 'option', title: 'Open in New Tab', onClick: () => alert('Open in new tab') },
+		{ type: 'option', title: 'Open', onclick: () => alert('Open') },
+		{ type: 'option', title: 'Open in New Tab', onclick: () => alert('Open in new tab') },
 		{ type: 'separator' },
-		{ type: 'option', title: 'Copy Link', onClick: () => alert('Link copied') },
+		{ type: 'option', title: 'Copy Link', onclick: () => alert('Link copied') },
 		{ type: 'option', title: 'Share', suffix: caretRightIcon },
 		{ type: 'separator' },
 		{ type: 'option', prefix: trashIcon, title: 'Delete', color: 'danger' }
@@ -115,7 +134,7 @@
 		{
 			type: 'option',
 			title: `Clicked ${clickCount} times`,
-			onClick: () => clickCount++
+			onclick: () => clickCount++
 		},
 		{ type: 'separator' },
 		{
@@ -123,7 +142,7 @@
 			children: 'Reset Counter',
 			variant: 'ghost',
 			fullWidth: true,
-			onClick: () => (clickCount = 0)
+			onclick: () => (clickCount = 0)
 		}
 	]);
 
@@ -198,11 +217,14 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A basic dropdown menu anchored to a trigger button."
 		code={`<PopupMenu
 	trigger={{ content: 'File', variant: 'outline' }}
 	position="bottom-start"
+	size="${controls.value.size}"
 	menu={{
+		density: '${controls.value.density}',
 		items: [
 			{ type: 'option', title: 'New File' },
 			{ type: 'option', title: 'Open...' },
@@ -227,7 +249,8 @@
 		<PopupMenu
 			trigger={{ content: 'File', variant: 'outline' }}
 			position="bottom-start"
-			menu={{ items: basicItems }}
+			size={controls.value.size}
+			menu={{ items: basicItems, density: controls.value.density }}
 		/>
 	</ComponentCard>
 
@@ -408,6 +431,8 @@
 
 		<ComponentCard description="Context menu opened at the pointer on right-click.">
 			<div
+				role="region"
+				aria-label="Context menu demo area"
 				class="bg-surface-raised rounded-xl border-neutral-muted flex h-48 w-full cursor-context-menu items-center justify-center border"
 				oncontextmenu={handleContextMenu}
 			>

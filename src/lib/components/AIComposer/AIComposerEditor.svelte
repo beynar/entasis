@@ -9,7 +9,7 @@
 		RichTextInputToolbar,
 		RichTextInputTriggers
 	} from '../RichTextInput/richTextInput.props.js';
-	import type { RichTextInputThemeProps } from '../RichTextInput/richTextInput.theme.js';
+	import { aiComposerEditorTheme } from './aiComposer.editor.theme.js';
 	import Slot from '../Slot/Slot.svelte';
 	import type { Slot as SlotType } from '../Slot/slot.js';
 	import type { AIComposerSuggestionLifecycleCallback } from './aiComposer.props.js';
@@ -29,7 +29,7 @@
 		prefix,
 		suffix,
 		onSubmit,
-		onChange,
+		onValueChange,
 		onSuggestionOpen,
 		onSuggestionClose,
 		onSuggestionQueryChange,
@@ -48,7 +48,7 @@
 		prefix?: SlotType;
 		suffix?: SlotType;
 		onSubmit: (event: KeyboardEvent) => void;
-		onChange: (change: RichTextInputChange) => void;
+		onValueChange: (change: RichTextInputChange) => void;
 		onSuggestionOpen?: AIComposerSuggestionLifecycleCallback;
 		onSuggestionClose?: AIComposerSuggestionLifecycleCallback;
 		onSuggestionQueryChange?: AIComposerSuggestionLifecycleCallback;
@@ -57,12 +57,6 @@
 	} = $props();
 
 	const classes = $derived(useAIComposerTheme(theme));
-	const embeddedEditorTheme = {
-		scrollArea: { base: '!min-h-0' },
-		editorShell: { base: 'px-2 py-0' },
-		editor: { base: '!min-h-10' },
-		placeholder: { base: 'left-2 top-0' }
-	} satisfies RichTextInputThemeProps;
 </script>
 
 <div data-slot="ai-composer-editor" class={classes.body()}>
@@ -78,7 +72,7 @@
 		{placeholder}
 		{disabled}
 		{submitShortcut}
-		theme={embeddedEditorTheme}
+		theme={aiComposerEditorTheme}
 		toolbarClass={classes.toolbar()}
 		onSubmitShortcut={onSubmit}
 		onSuggestionOpen={(state: RichTextInputSuggestionLifecycleState) =>
@@ -89,7 +83,7 @@
 			notifyAIComposerSuggestion(onSuggestionQueryChange, state)}
 		onSuggestionHighlightChange={(state: RichTextInputSuggestionLifecycleState) =>
 			notifyAIComposerSuggestion(onSuggestionHighlightChange, state)}
-		onValueChange={onChange}
+		{onValueChange}
 		class={classes.editor({ autoresize })}
 	/>
 	{#if suffix}<Slot render={suffix} />{/if}

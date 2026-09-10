@@ -5,8 +5,8 @@ import {
 	type InferComponentTheme
 } from '$lib/utils/cva/index.js';
 const defaultRoot = cva({ base: 'inline-flex min-w-0' });
-const defaultTrigger = cva({ base: 'min-w-44 justify-between gap-2' });
-const defaultTriggerContent = cva({ base: 'flex min-w-0 items-center gap-2' });
+const defaultTrigger = cva({ base: 'min-w-44 justify-between gap-md' });
+const defaultTriggerContent = cva({ base: 'flex min-w-0 items-center gap-md' });
 const defaultTriggerIcon = cva({
 	base: 'flex size-5 shrink-0 items-center justify-center rounded-sm border border-neutral-muted bg-surface text-xs'
 });
@@ -15,7 +15,7 @@ const defaultTriggerLabel = cva({
 	variants: { selected: { true: 'text-neutral', false: 'text-neutral/60' } },
 	defaultVariants: { selected: false }
 });
-const defaultSearch = cva({ base: 'p-1' });
+const defaultSearch = cva({ base: 'p-xs' });
 const defaultPopover = cva({ base: 'min-w-56' });
 const defaultMenu = cva({ base: 'min-w-56' });
 const defaultProvider = cva({ base: 'justify-start text-xs font-semibold text-neutral/55' });

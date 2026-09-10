@@ -32,10 +32,9 @@
 | href      | string             | -       | Renders as `<a>` instead of `<button>`         |
 | target    | string             | -       | Link target (with href)                        |
 | rel       | string             | -       | Link relationship (with href)                  |
-| onClick   | (payload?) => void | -       | Click handler                                  |
-| onEnter   | (payload?) => void | -       | Pointer enter handler                          |
-| onLeave   | (payload?) => void | -       | Pointer leave handler                          |
-| payload   | any                | -       | Data passed to event handlers                  |
+| onclick   | (event: MouseEvent) => void | - | Native click handler                         |
+| onpointerenter | (event: PointerEvent) => void | - | Native pointer enter handler            |
+| onpointerleave | (event: PointerEvent) => void | - | Native pointer leave handler            |
 | ref       | HTMLElement        | -       | Element reference                              |
 
 ### Theme Parts
@@ -45,8 +44,15 @@
 ### Key Example
 
 ```svelte
+<script>
+	import { Button } from 'svelai/button';
+	import { floppyDiskIcon } from 'svelai/icons/floppyDisk';
+
+	let saving = $state(false);
+</script>
+
 <Button variant="outline" color="primary" loading={saving}>
-	{#snippet prefix()}{@render saveIcon()}{/snippet}
+	{#snippet prefix()}{@render floppyDiskIcon()}{/snippet}
 	Save
 </Button>
 ```
@@ -79,12 +85,12 @@ Shared props (size, color, variant, disabled) apply to all buttons. Individual b
 		{
 			children: 'Day',
 			variant: selected === 'day' ? 'solid' : 'ghost',
-			onClick: () => (selected = 'day')
+			onclick: () => (selected = 'day')
 		},
 		{
 			children: 'Week',
 			variant: selected === 'week' ? 'solid' : 'ghost',
-			onClick: () => (selected = 'week')
+			onclick: () => (selected = 'week')
 		}
 	]}
 />
@@ -166,13 +172,13 @@ prefix = bottom-left badge, suffix = bottom-right badge (both receive `{ name, a
 
 `import { Chip } from 'svelai/chip'`
 
-Compact tag/label element. Renders as `<button>` (if onClick/onenter/onleave), `<a>` (if href), or `<div>`.
+Compact tag/label element. Renders as `<button>` (if onclick/onenter/onleave), `<a>` (if href), or `<div>`.
 
 ### Unique Props
 
 | Prop    | Type                          | Notes                  |
 | ------- | ----------------------------- | ---------------------- |
-| onClick | (event: MouseEvent) => void   | Makes chip interactive |
+| onclick | (event: MouseEvent) => void   | Makes chip interactive |
 | onenter | (event: PointerEvent) => void | Pointer enter          |
 | onleave | (event: PointerEvent) => void | Pointer leave          |
 | href    | string                        | Renders as anchor      |
@@ -188,11 +194,17 @@ Variants limited to: `solid`, `outline`, `soft`. Default color: `primary`.
 ### Key Example
 
 ```svelte
+<script>
+	import { Chip } from 'svelai/chip';
+	import { tagIcon } from 'svelai/icons/tag';
+	import { xIcon } from 'svelai/icons/x';
+</script>
+
 <Chip color="primary" variant="soft">
 	{#snippet prefix()}{@render tagIcon()}{/snippet}
 	Category
 	{#snippet suffix()}
-		<button onclick={() => remove(tag)}>{@render xIcon({ size: 12 })}</button>
+		<button aria-label="Remove category">{@render xIcon({ size: 12 })}</button>
 	{/snippet}
 </Chip>
 ```
@@ -254,7 +266,7 @@ No color/variant/size props.
 <p>Use <Code inline>$state()</Code> for reactivity.</p>
 
 <Code language="typescript">
-  interface User { name: string; age: number; }
+	{'interface User { name: string; age: number; }'}
 </Code>
 ```
 
@@ -313,7 +325,7 @@ Two-state toggle button. Default variant: `outline`.
 | -------- | -------------------------- | -------------------------- |
 | checked  | boolean                    | **Bindable.** Toggle state |
 | value    | any                        | Value when used in a group |
-| onChange | (checked: boolean) => void | State change callback      |
+| onValueChange | (checked: boolean) => void | State change callback      |
 
 Variants: `solid`, `outline`, `soft`, `ghost` (no `link`).
 
@@ -325,11 +337,14 @@ Variants: `solid`, `outline`, `soft`, `ghost` (no `link`).
 
 ```svelte
 <script>
+	import { ToggleButton } from 'svelai/toggle-button';
+	import { textBIcon } from 'svelai/icons/textB';
+
 	let isBold = $state(false);
 </script>
 
 <ToggleButton bind:checked={isBold}>
-	{#snippet prefix()}{@render boldIcon()}{/snippet}
+	{#snippet prefix()}{@render textBIcon()}{/snippet}
 	Bold
 </ToggleButton>
 ```
@@ -347,7 +362,7 @@ Variants: `solid`, `outline`, `soft`, `ghost` (no `link`).
 | buttons  | Array\<ToggleButtonProps\> | **Required** | Each needs `value` and `children`        |
 | value    | any \| Array\<any\>        | -            | **Bindable.** Selected value(s)          |
 | multiple | boolean                    | false        | Allow multi-select (value becomes array) |
-| onChange | (value) => void            | -            | Selection change callback                |
+| onValueChange | (value) => void            | -            | Selection change callback                |
 
 ### Theme Parts
 
@@ -357,6 +372,10 @@ Variants: `solid`, `outline`, `soft`, `ghost` (no `link`).
 
 ```svelte
 <script>
+	import { ToggleButtonGroup } from 'svelai/toggle-button-group';
+	import { textBIcon } from 'svelai/icons/textB';
+	import { textItalicIcon } from 'svelai/icons/textItalic';
+
 	let formats = $state([]);
 </script>
 
@@ -364,8 +383,8 @@ Variants: `solid`, `outline`, `soft`, `ghost` (no `link`).
 	bind:value={formats}
 	multiple
 	buttons={[
-		{ value: 'bold', prefix: boldIcon.withProps({}) },
-		{ value: 'italic', prefix: italicIcon.withProps({}) }
+		{ value: 'bold', prefix: textBIcon.withProps({}) },
+		{ value: 'italic', prefix: textItalicIcon.withProps({}) }
 	]}
 />
 ```
@@ -381,7 +400,7 @@ Variants: `solid`, `outline`, `soft`, `ghost` (no `link`).
 ### Import Pattern
 
 ```ts
-import { houseIcon, houseBoldIcon, houseFillIcon } from 'svelai/icons/house';
+import { houseIcon, houseIconBold, houseIconFill } from 'svelai/icons/house';
 ```
 
 ### IconProps
@@ -401,6 +420,11 @@ import { houseIcon, houseBoldIcon, houseFillIcon } from 'svelai/icons/house';
 ### withProps (passing to components)
 
 ```svelte
+<script>
+	import { Button } from 'svelai/button';
+	import { eyeClosedIcon } from 'svelai/icons/eyeClosed';
+</script>
+
 <Button prefix={eyeClosedIcon.withProps({ color: 'danger' })}>Click me</Button>
 ```
 
@@ -423,7 +447,7 @@ Renders a QR code as an SVG. `size` maps to fixed dimensions (small: 96px, norma
 | marginSize                 | number                                             | 4         | Quiet-zone modules                                                                   |
 | background                 | string \| GradientSettings                         | -         | Transparent when omitted                                                             |
 | gradient                   | GradientSettings                                   | -         | Applied to modules + finder patterns, overrides colors                               |
-| dataModulesSettings        | { style?, color?, size?, lineWidth?, randomSize? } | -         | Styles: square, circle, rounded, leaf, circuit-board, star, heart, diamond, hashtag… |
+| dataModulesSettings        | { style?, color?, scale?, lineWidth?, randomSize? } | -         | Styles: square, circle, rounded, leaf, circuit-board, star, heart, diamond, hashtag… |
 | finderPatternOuterSettings | { style?, color? }                                 | -         | Styles: square, rounded, circle, leaf, inpoint, outpoint…                            |
 | finderPatternInnerSettings | { style?, color? }                                 | -         | Outer styles plus diamond, star, heart, hashtag, microchip                           |
 | imageSettings              | { src, width, height, excavate?, … }               | -         | Embedded center image                                                                |
@@ -432,7 +456,7 @@ Renders a QR code as an SVG. `size` maps to fixed dimensions (small: 96px, norma
 
 ### Methods (via `bind:this`)
 
-`download({ name?, format?: 'svg' | 'png' | 'jpeg', size? })` — exports the QR code.
+`download({ name?, format?: 'svg' | 'png' | 'jpeg', dimension? })` — exports the QR code.
 
 ### Theme Parts
 
@@ -451,7 +475,7 @@ Renders a QR code as an SVG. `size` maps to fixed dimensions (small: 96px, norma
 	color="primary"
 	dataModulesSettings={{ style: 'circle' }}
 />
-<Button onClick={() => qr.download({ format: 'png' })}>Download</Button>
+<Button onclick={() => qr.download({ format: 'png' })}>Download</Button>
 ```
 
 ---

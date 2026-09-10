@@ -29,11 +29,14 @@ type FloatingWindowStateOptions = {
 	closeOnEscape: boolean;
 	position?: FloatingWindowPosition;
 	dimensions: FloatingWindowDimensions;
-	onClose?: (window: FloatingWindowPayload) => void;
+	onOpenChange?: (open: boolean) => void;
 	onMinimize?: (window: FloatingWindowPayload) => void;
 	onRestore?: (window: FloatingWindowPayload) => void;
-	onMove?: (position: FloatingWindowPosition, window: FloatingWindowPayload) => void;
-	onResize?: (dimensions: FloatingWindowDimensions, window: FloatingWindowPayload) => void;
+	onMove?: (payload: { position: FloatingWindowPosition; window: FloatingWindowPayload }) => void;
+	onResize?: (payload: {
+		dimensions: FloatingWindowDimensions;
+		window: FloatingWindowPayload;
+	}) => void;
 };
 
 export interface FloatingWindowState extends FloatingWindowStateOptions {}
@@ -230,8 +233,7 @@ export class FloatingWindowState {
 	close() {
 		if (!this.closable) return;
 		this.minimized = false;
-		this.open = false;
-		this.onClose?.(this.payload);
+		this.setOpen(false);
 	}
 
 	minimize() {
@@ -267,7 +269,7 @@ export class FloatingWindowState {
 		const previousPosition = this.position;
 		this.geometry.move({ x: previousPosition.x + deltaX, y: previousPosition.y + deltaY });
 		if (!samePosition(previousPosition, this.position) && this.position) {
-			this.onMove?.(this.position, this.payload);
+			this.onMove?.({ position: this.position, window: this.payload });
 		}
 	}
 
@@ -303,7 +305,7 @@ export class FloatingWindowState {
 			!sameDimensions(previousDimensions, this.dimensions) ||
 			!samePosition(previousPosition, this.position)
 		) {
-			this.onResize?.(this.dimensions, this.payload);
+			this.onResize?.({ dimensions: this.dimensions, window: this.payload });
 		}
 	}
 
@@ -349,7 +351,7 @@ export class FloatingWindowState {
 		if (!this.isDragging) return;
 		this.isDragging = false;
 		if (!samePosition(this.moveStartPosition, this.position) && this.position) {
-			this.onMove?.(this.position, this.payload);
+			this.onMove?.({ position: this.position, window: this.payload });
 		}
 	}
 
@@ -381,8 +383,14 @@ export class FloatingWindowState {
 		this.isResizing = false;
 		this.activeResizeDirection = null;
 		if (!sameDimensions(this.resizeStartDimensions, this.dimensions)) {
-			this.onResize?.(this.dimensions, this.payload);
+			this.onResize?.({ dimensions: this.dimensions, window: this.payload });
 		}
+	}
+
+	private setOpen(nextOpen: boolean) {
+		if (this.open === nextOpen) return;
+		this.open = nextOpen;
+		this.onOpenChange?.(nextOpen);
 	}
 
 	private captureReturnFocus() {

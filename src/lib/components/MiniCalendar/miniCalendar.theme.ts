@@ -2,12 +2,12 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 
 const defaultRoot = cva({
-	base: 'inline-flex w-fit items-center rounded-2xl border bg-surface',
+	base: 'inline-flex w-fit items-center rounded-lg border bg-surface',
 	variants: {
 		size: {
-			small: 'gap-0.5 p-0.5',
-			normal: 'gap-1 p-1',
-			large: 'gap-1.5 p-1.5'
+			small: 'gap-micro p-micro',
+			normal: 'gap-xs p-xs',
+			large: 'gap-sm p-sm'
 		},
 		disabled: {
 			true: 'cursor-not-allowed opacity-50',
@@ -21,7 +21,7 @@ const defaultRoot = cva({
 });
 
 const defaultNavButton = cva({
-	base: 'state-layer inline-flex shrink-0 items-center justify-center rounded-xl text-neutral/60 outline-none transition-colors hover:text-neutral focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none',
+	base: 'state-layer inline-flex shrink-0 items-center justify-center rounded-lg text-neutral/60 outline-none transition-colors hover:text-neutral focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none',
 	variants: {
 		size: {
 			small: 'size-7',
@@ -37,16 +37,16 @@ const defaultNavButton = cva({
 // A single-cell grid so the outgoing and incoming tracks overlap during the slide; the
 // padding/negative-margin pair keeps focus rings visible inside the overflow clip.
 const defaultDays = cva({
-	base: 'grid -m-0.5 overflow-hidden p-0.5'
+	base: 'grid -m-0.5 overflow-hidden p-micro'
 });
 
 const defaultTrack = cva({
 	base: 'col-start-1 row-start-1 flex items-center',
 	variants: {
 		size: {
-			small: 'gap-0.5',
-			normal: 'gap-1',
-			large: 'gap-1.5'
+			small: 'gap-micro',
+			normal: 'gap-xs',
+			large: 'gap-sm'
 		}
 	},
 	defaultVariants: {
@@ -55,12 +55,12 @@ const defaultTrack = cva({
 });
 
 const defaultDay = cva({
-	base: 'state-layer relative inline-flex shrink-0 flex-col items-center justify-center rounded-xl leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none',
+	base: 'state-layer relative inline-flex shrink-0 flex-col items-center justify-center rounded-lg leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none',
 	variants: {
 		size: {
-			small: 'min-w-11 gap-0.5 px-2 py-1',
-			normal: 'min-w-14 gap-0.5 px-3 py-1.5',
-			large: 'min-w-16 gap-1 px-4 py-2'
+			small: 'min-w-11 gap-micro px-md py-xs',
+			normal: 'min-w-14 gap-micro px-lg py-sm',
+			large: 'min-w-16 gap-xs px-xl py-md'
 		},
 		color: {
 			primary: '',

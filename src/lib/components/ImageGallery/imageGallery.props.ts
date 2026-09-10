@@ -38,6 +38,11 @@ export type ImageGalleryPayload = {
 	canNext: boolean;
 };
 
+export type ImageGalleryIndexChangePayload = {
+	index: number;
+	gallery: ImageGalleryPayload;
+};
+
 export type ImageGalleryProps = WithAttachments<
 	WithSlot<
 		{
@@ -45,6 +50,8 @@ export type ImageGalleryProps = WithAttachments<
 			id?: string;
 			/** Controls whether the zoomed gallery is open; bindable for two-way control. */
 			open?: boolean;
+			/** Initial open state when `open` is not provided. */
+			defaultOpen?: boolean;
 			/** Controls the active image index; bindable for two-way control. */
 			activeIndex?: number;
 			/** Selector used to discover descendant images. Defaults to `img`. */
@@ -73,10 +80,14 @@ export type ImageGalleryProps = WithAttachments<
 			licenseKey?: string;
 			/** Additional CSS classes merged onto the root element. */
 			class?: string;
-			/** Callback fired when user interaction requests a new open state. */
-			onOpenChange?: (open: boolean, payload: ImageGalleryPayload) => void;
+			/** Callback fired once when the library requests a new open state. */
+			onOpenChange?: (open: boolean) => void;
 			/** Callback fired when navigation changes the active image. */
-			onIndexChange?: (index: number, payload: ImageGalleryPayload) => void;
+			onIndexChange?: (payload: ImageGalleryIndexChangePayload) => void;
+			/** Callback fired after the open animation finishes. */
+			onAfterOpen?: (payload: ImageGalleryPayload) => void;
+			/** Callback fired after the close animation finishes. */
+			onAfterClose?: (payload: ImageGalleryPayload) => void;
 			/** Per-instance theme overrides for image gallery parts. */
 			theme?: ImageGalleryThemeProps;
 		},

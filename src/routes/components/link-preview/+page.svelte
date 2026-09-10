@@ -1,7 +1,19 @@
 <script lang="ts">
 	import LinkPreview from '$lib/components/LinkPreview/LinkPreview.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		}
+	]);
 
 	const svelaiMetadata = {
 		title: 'Svelai',
@@ -25,10 +37,11 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Hover or focus the link to load metadata through the default endpoint."
-		code={`<LinkPreview href="https://svelte.dev">Svelte</LinkPreview>`}
+		code={`<LinkPreview href="https://svelte.dev" size="${controls.value.size}">Svelte</LinkPreview>`}
 	>
-		<LinkPreview href="https://svelte.dev">Svelte</LinkPreview>
+		<LinkPreview href="https://svelte.dev" size={controls.value.size}>Svelte</LinkPreview>
 	</ComponentCard>
 
 	{#snippet examples()}

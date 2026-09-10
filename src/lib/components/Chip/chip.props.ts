@@ -28,8 +28,8 @@ export type ChipProps = WithAttachments<
 			target?: string;
 			/** Link rel attribute when href is set. */
 			rel?: string;
-			/** Click handler; renders as a button when set without href. */
-			onClick?: (event: MouseEvent) => void;
+			/** Native click handler; renders as a button when set without href. */
+			onclick?: (event: MouseEvent) => void;
 			/** Native button type when the chip renders as a button. */
 			type?: HTMLButtonAttributes['type'];
 			/** Disabled state when the chip renders as a button. */
@@ -38,10 +38,10 @@ export type ChipProps = WithAttachments<
 			'aria-pressed'?: HTMLButtonAttributes['aria-pressed'];
 			/** ARIA disabled marker for selectable chip buttons. */
 			'aria-disabled'?: HTMLButtonAttributes['aria-disabled'];
-			/** Pointer enter handler. */
-			onEnter?: (event: PointerEvent) => void;
-			/** Pointer leave handler. */
-			onLeave?: (event: PointerEvent) => void;
+			/** Native pointer enter handler. */
+			onpointerenter?: (event: PointerEvent) => void;
+			/** Native pointer leave handler. */
+			onpointerleave?: (event: PointerEvent) => void;
 			/** Theme overrides for the chip, prefix, and suffix parts. */
 			theme?: ChipThemeProps;
 		},

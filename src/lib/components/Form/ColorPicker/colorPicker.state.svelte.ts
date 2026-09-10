@@ -16,7 +16,7 @@ type ColorPickerStateOptions = {
 	value?: string;
 	format?: ColorFormat;
 	disabled?: boolean;
-	onChange?: (value: string) => void;
+	onValueChange?: (value: string) => void;
 };
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
@@ -25,12 +25,12 @@ const clampHue = (value: number) => Math.min(360, Math.max(0, value));
 // HSV → RGB (0–255). colorizr covers hex/rgb/hsl/oklab/oklch but not HSV, so the square's
 // hue/saturation/value math is done here to keep hue & saturation when a color is desaturated.
 const hsvToRgb = (h: number, s: number, v: number): Rgb => {
-	const hp = ((((h % 360) + 360) % 360) / 60);
+	const hp = (((h % 360) + 360) % 360) / 60;
 	const c = v * s;
 	const x = c * (1 - Math.abs((hp % 2) - 1));
-	let r = 0;
-	let g = 0;
-	let b = 0;
+	let r: number;
+	let g: number;
+	let b: number;
 	if (hp < 1) [r, g, b] = [c, x, 0];
 	else if (hp < 2) [r, g, b] = [x, c, 0];
 	else if (hp < 3) [r, g, b] = [0, c, x];
@@ -46,7 +46,11 @@ const hsvToRgb = (h: number, s: number, v: number): Rgb => {
 };
 
 // RGB (0–255) → HSV.
-const rgbToHsv = (rInput: number, gInput: number, bInput: number): { h: number; s: number; v: number } => {
+const rgbToHsv = (
+	rInput: number,
+	gInput: number,
+	bInput: number
+): { h: number; s: number; v: number } => {
 	const r = rInput / 255;
 	const g = gInput / 255;
 	const b = bInput / 255;
@@ -69,7 +73,7 @@ export class ColorPickerState extends createBindableStateClass<ColorPickerStateO
 	declare value?: string;
 	declare format?: ColorFormat;
 	declare disabled?: boolean;
-	declare onChange?: (value: string) => void;
+	declare onValueChange?: (value: string) => void;
 
 	// HSVA is the source of truth for the UI so hue/saturation survive a black/white/desaturated color.
 	h = $state(0);
@@ -190,12 +194,13 @@ export class ColorPickerState extends createBindableStateClass<ColorPickerStateO
 		this.a = a;
 	}
 
-	// Push the current HSVA out as hex: records it, writes the bound value, fires onChange.
+	// Push the current HSVA out as hex: records it, writes the bound value, fires onValueChange.
 	private emit() {
 		const hex = this.hex;
+		if (hex === this.value) return;
 		this.lastEmitted = hex;
 		this.value = hex;
-		this.onChange?.(hex);
+		this.onValueChange?.(hex);
 	}
 
 	private setSaturationValueFromPointer(payload: PointerDragPayload) {

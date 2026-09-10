@@ -3,12 +3,38 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { DateInput } from '$lib/components/Form/DateInput/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let date = $state<Date | null>(null);
 	const presets = [
 		{ label: 'Tomorrow', value: new Date(2026, 6, 16, 12) },
 		{ label: 'Next week', value: new Date(2026, 6, 22, 12) }
 	];
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -26,8 +52,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A masked date input (dd/mm/yyyy)"
 		code={`<DateInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Appointment date"
 	description="Type the date or pick one from the calendar"
 	bind:value={date}
@@ -35,6 +66,10 @@
 	>
 		<div class="w-full max-w-md">
 			<DateInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
 				label="Appointment date"
 				description="Type the date or pick one from the calendar"
 				bind:value={date}

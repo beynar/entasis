@@ -2,6 +2,7 @@ import { bind } from '$lib/utils/state.svelte.js';
 import { mediaVolume } from '../MediaVolume/index.js';
 import type {
 	VideoPlayerError,
+	VideoPlayerErrorPayload,
 	VideoPlayerSnapshot,
 	VideoPlayerStateMode
 } from './videoPlayer.props.js';
@@ -49,7 +50,7 @@ type VideoPlayerCallbacks = {
 	onFullscreenChange?: (snapshot: VideoPlayerSnapshot) => void;
 	onPictureInPictureChange?: (snapshot: VideoPlayerSnapshot) => void;
 	onCaptionsChange?: (snapshot: VideoPlayerSnapshot) => void;
-	onError?: (error: VideoPlayerError, snapshot: VideoPlayerSnapshot) => void;
+	onError?: (payload: VideoPlayerErrorPayload) => void;
 };
 
 export interface VideoPlayerState extends VideoPlayerStateOptions {}
@@ -529,7 +530,7 @@ export class VideoPlayerState {
 
 	private setError(error: VideoPlayerError) {
 		this.error = error;
-		this.callbacks.onError?.(error, this.snapshot);
+		this.callbacks.onError?.({ error, snapshot: this.snapshot });
 	}
 
 	private setInteractionError(error: unknown) {

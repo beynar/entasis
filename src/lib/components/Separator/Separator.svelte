@@ -11,7 +11,7 @@
 		align = 'center',
 		line = true,
 		color = 'neutral',
-		size = 1,
+		thickness = 1,
 		theme,
 		...attachments
 	}: SeparatorProps = $props();
@@ -25,7 +25,7 @@
 	data-color={color}
 	aria-orientation={orientation}
 	role={decorative ? 'none' : 'separator'}
-	style="--separator-border-width: {size}px"
+	style="--separator-border-width: {thickness}px"
 	{...attachments}
 >
 	{#if children}

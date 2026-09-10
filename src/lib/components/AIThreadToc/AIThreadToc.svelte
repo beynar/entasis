@@ -1,4 +1,6 @@
 <script lang="ts" generics="TMessage extends AIThreadItem = AIThreadItem">
+	import { aiThreadTocPopoverTheme } from './aiThreadToc.popover.theme.js';
+	import { aiThreadTocScrollAreaTheme } from './aiThreadToc.scrollArea.theme.js';
 	import { onDestroy } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { quintOut } from 'svelte/easing';
@@ -6,7 +8,6 @@
 	import { scale } from 'svelte/transition';
 	import HoverCard from '../HoverCard/HoverCard.svelte';
 	import ScrollArea from '../ScrollArea/ScrollArea.svelte';
-	import type { ScrollAreaThemeProps } from '../ScrollArea/scrollArea.theme.js';
 	import Slot from '../Slot/Slot.svelte';
 	import type { AIThreadItem, AIThreadTocEntry, AIThreadTocProps } from './aiThreadToc.props.js';
 	import { useAIThreadTocTheme } from './aiThreadToc.theme.js';
@@ -28,12 +29,6 @@
 	const PREVIEW_DELAY = 80;
 	const PREVIEW_CLOSE_DELAY = 120;
 	const PREVIEW_GAP = 10;
-	const PREVIEW_POPOVER_THEME = { root: { base: 'pointer-events-none' } };
-	const TOC_SCROLL_AREA_THEME = {
-		content: { base: 'h-full' },
-		scrollbar: { base: '!hidden' },
-		scrollbarX: { base: '!hidden' }
-	} satisfies ScrollAreaThemeProps;
 
 	let {
 		ref = $bindable(),
@@ -317,7 +312,7 @@
 		<ScrollArea
 			ariaLabel={scrollAreaLabel}
 			class={classes.scrollArea()}
-			theme={TOC_SCROLL_AREA_THEME}
+			theme={aiThreadTocScrollAreaTheme}
 		>
 			<div class={classes.scrollContent()}>
 				<!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -403,8 +398,8 @@
 								class="w-80 max-w-[calc(100vw-8rem)]"
 								triggerClass={classes.previewAnchor({ side })}
 								popoverClass="pointer-events-none"
-								popoverTheme={PREVIEW_POPOVER_THEME}
-								onClose={() => {
+								popoverTheme={aiThreadTocPopoverTheme}
+								onAfterClose={() => {
 									if (!previewOpen) previewEntry = undefined;
 								}}
 							/>

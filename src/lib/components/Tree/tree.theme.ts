@@ -2,7 +2,7 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultTreeRoot = cva({
-	base: 'my-4 flex w-full min-w-0 flex-col overflow-hidden rounded-lg border border-neutral-muted bg-surface text-sm text-neutral'
+	base: 'my-xl flex w-full min-w-0 flex-col overflow-hidden rounded-md border border-neutral-muted bg-surface text-sm text-neutral'
 });
 
 const defaultTreeViewport = cva({
@@ -14,7 +14,7 @@ const defaultTreeHost = cva({
 });
 
 const defaultTreeError = cva({
-	base: 'border-b border-danger/40 bg-danger-muted px-4 py-3 text-sm text-danger-muted-readable'
+	base: 'border-b border-danger/40 bg-danger-muted px-xl py-lg text-sm text-danger-muted-readable'
 });
 
 export const treeTheme = {

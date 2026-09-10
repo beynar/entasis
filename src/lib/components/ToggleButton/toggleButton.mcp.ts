@@ -10,7 +10,7 @@ The ToggleButton component is a two-state button that can be toggled on and off,
 	let isActive = $state(false);
 </script>
 
-<ToggleButton bind:checked={isActive}>
+<ToggleButton bind:value={isActive}>
 	Toggle Me
 </ToggleButton>
 \`\`\`
@@ -18,20 +18,21 @@ The ToggleButton component is a two-state button that can be toggled on and off,
 ## Props
 
 ### Core Props
-- **checked**: boolean (bindable) - Toggle state
+- **value**: boolean (bindable) - Toggle state
+- **defaultValue**: boolean (default: false) - Initial state when value is omitted
 - **ariaLabel**: string - Accessible name for icon-only buttons
 - **type**: 'button' | 'submit' | 'reset' (default: 'button') - Native button type. The default prevents accidental form submission.
 
 ### Visual Props
 - **color**: 'primary' | 'secondary' | 'neutral' | 'danger' | 'success' | 'warning' | 'info' (default: 'neutral')
-- **variant**: 'outline' | 'ghost' (default: 'ghost')
+- **variant**: 'outline' | 'ghost' (default: 'ghost') — a Button subset. Resting outline uses the same border and surface recipe as Button; the pressed state adds a muted fill.
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
 
 ### State Props
 - **disabled**: boolean (default: false) - Disables interaction
 
 ### Event Props
-- **onChange**: (checked: boolean) => void - Called when toggle state changes
+- **onValueChange**: (value: boolean) => void - Called once when toggle state changes
 
 ### Content Slots
 - **children**: Snippet - Button content
@@ -47,11 +48,11 @@ The ToggleButton component is a two-state button that can be toggled on and off,
 ### Basic Toggle
 \`\`\`svelte
 <script>
-	let checked = $state(false);
+	let value = $state(false);
 </script>
 
-<ToggleButton bind:checked>
-	{checked ? 'On' : 'Off'}
+<ToggleButton bind:value>
+	{value ? 'On' : 'Off'}
 </ToggleButton>
 \`\`\`
 
@@ -61,7 +62,7 @@ The ToggleButton component is a two-state button that can be toggled on and off,
 	let isBold = $state(false);
 </script>
 
-<ToggleButton bind:checked={isBold}>
+<ToggleButton bind:value={isBold}>
 	{#snippet prefix()}
 		<Icon name="bold" />
 	{/snippet}
@@ -71,15 +72,15 @@ The ToggleButton component is a two-state button that can be toggled on and off,
 
 ### Different Variants
 \`\`\`svelte
-<ToggleButton variant="ghost" bind:checked>Ghost</ToggleButton>
-<ToggleButton variant="outline" bind:checked>Outline</ToggleButton>
+<ToggleButton variant="ghost" bind:value>Ghost</ToggleButton>
+<ToggleButton variant="outline" bind:value>Outline</ToggleButton>
 \`\`\`
 
 ### Different Colors
 \`\`\`svelte
-<ToggleButton color="primary" bind:checked>Primary</ToggleButton>
-<ToggleButton color="danger" bind:checked>Danger</ToggleButton>
-<ToggleButton color="success" bind:checked>Success</ToggleButton>
+<ToggleButton color="primary" bind:value>Primary</ToggleButton>
+<ToggleButton color="danger" bind:value>Danger</ToggleButton>
+<ToggleButton color="success" bind:value>Success</ToggleButton>
 \`\`\`
 
 ### Toolbar Buttons
@@ -89,17 +90,17 @@ The ToggleButton component is a two-state button that can be toggled on and off,
 </script>
 
 <div class="flex gap-1">
-	<ToggleButton bind:checked={format.bold}>
+	<ToggleButton bind:value={format.bold}>
 		{#snippet prefix()}
 			<Icon name="bold" />
 		{/snippet}
 	</ToggleButton>
-	<ToggleButton bind:checked={format.italic}>
+	<ToggleButton bind:value={format.italic}>
 		{#snippet prefix()}
 			<Icon name="italic" />
 		{/snippet}
 	</ToggleButton>
-	<ToggleButton bind:checked={format.underline}>
+	<ToggleButton bind:value={format.underline}>
 		{#snippet prefix()}
 			<Icon name="underline" />
 		{/snippet}
@@ -110,19 +111,19 @@ The ToggleButton component is a two-state button that can be toggled on and off,
 ### With Change Handler
 \`\`\`svelte
 <script>
-	function handleChange(checked) {
-		console.log('Toggled:', checked);
+	function handleChange(value) {
+		console.log('Toggled:', value);
 	}
 </script>
 
-<ToggleButton onChange={handleChange}>
+<ToggleButton onValueChange={handleChange}>
 	Notify Me
 </ToggleButton>
 \`\`\`
 
 ### Disabled State
 \`\`\`svelte
-<ToggleButton disabled checked>Disabled On</ToggleButton>
+<ToggleButton disabled value>Disabled On</ToggleButton>
 <ToggleButton disabled>Disabled Off</ToggleButton>
 \`\`\`
 
@@ -181,7 +182,7 @@ The theme object contains the following parts:
 **Basic Theme Override**:
 \`\`\`svelte
 <ToggleButton 
-  bind:checked
+  bind:value
   theme={{
     root: {
       base: 'rounded-md transition-all',
@@ -202,7 +203,7 @@ The theme object contains the following parts:
 **Custom Checked State**:
 \`\`\`svelte
 <ToggleButton 
-  bind:checked
+  bind:value
   variant="outline"
   theme={{
     root: {

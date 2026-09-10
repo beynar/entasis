@@ -27,6 +27,14 @@ export type OverlayProps = WithAttachments<
 			showOn?: OverlayShowOn;
 			/** Controls whether the overlay can be shown. */
 			open?: boolean;
+			/** Initial open state when `open` is not provided. */
+			defaultOpen?: boolean;
+			/** Called once when the library requests an open-state change. */
+			onOpenChange?: (open: boolean) => void;
+			/** Called after the open transition finishes. */
+			onAfterOpen?: () => void;
+			/** Called after the close transition finishes. */
+			onAfterClose?: () => void;
 			/** Renders the dark fill or directional gradient behind the content. */
 			scrim?: boolean;
 			/** Size token controlling padding, gaps, and typography. */

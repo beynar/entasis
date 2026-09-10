@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { addAlphaToHex, isValidColor, parseCSS, rgb2hex, rgb2hsl } from 'colorizr';
 	import ColorPicker from '../ColorPicker/ColorPicker.svelte';
 	import { closeFunctional, colorMask } from '../ColorPicker/colorMask.js';
@@ -12,7 +13,8 @@
 	import { useColorInputTheme } from './colorInput.theme.js';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		format = $bindable('hex'),
@@ -22,11 +24,12 @@
 		disabled,
 		name,
 		onValidate,
-		onChange,
+		onValueChange,
 		visible,
 		i18n,
 		...rest
 	}: ColorInputProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 	let isPickerOpen = $state(false);
@@ -42,7 +45,7 @@
 		get errors() {
 			return errors;
 		},
-		set errors(v: any) {
+		set errors(v: string[] | boolean) {
 			errors = v;
 		},
 		get focused() {
@@ -51,7 +54,7 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => onChange?.(v),
+		onValueChange: (v) => onValueChange?.(v),
 		get disabled() {
 			return disabled;
 		},
@@ -80,7 +83,11 @@
 	const classes = $derived(useColorInputTheme(theme));
 
 	// Like DateInput's format-pattern placeholder: hint the masked shape of the selected format.
-	const formatPlaceholders = { hex: '#rrggbb', rgb: 'rgb(r, g, b)', hsl: 'hsl(h, s%, l%)' } as const;
+	const formatPlaceholders = {
+		hex: '#rrggbb',
+		rgb: 'rgb(r, g, b)',
+		hsl: 'hsl(h, s%, l%)'
+	} as const;
 	const effectivePlaceholder = $derived(placeholder || formatPlaceholders[format ?? 'hex']);
 
 	const round = (input: number, decimals: number) => {
@@ -155,8 +162,8 @@
 	// Reformat the input from the canonical value whenever the value or format changes and the field
 	// is not being edited (so a live draft is never clobbered; blur reverts unparseable drafts).
 	$effect(() => {
-		value;
-		format;
+		void value;
+		void format;
 		if (!field.focused) {
 			syncInputValue();
 		}
@@ -172,20 +179,18 @@
 	size="normal"
 	class={classes.popover({ class: theme?.popover?.base })}
 >
-	{#snippet children()}
-		<div id={`${id}-color-picker`} aria-label={`${t.choose} ${t.color}`}>
-			<ColorPicker
-				value={field.value ?? undefined}
-				bind:format
-				size={rest.size}
-				disabled={field.disabled}
-				{i18n}
-				onChange={(hex) => {
-					field.value = hex;
-				}}
-			/>
-		</div>
-	{/snippet}
+	<div id={`${id}-color-picker`} aria-label={`${t.choose} ${t.color}`}>
+		<ColorPicker
+			value={field.value ?? undefined}
+			bind:format
+			size={rest.size}
+			disabled={field.disabled}
+			{i18n}
+			onValueChange={(hex) => {
+				field.value = hex;
+			}}
+		/>
+	</div>
 
 	{#snippet trigger(popover: PopoverState)}
 		{#snippet swatch()}
@@ -224,7 +229,7 @@
 				aria-controls={isPickerOpen ? `${id}-color-picker` : undefined}
 				disabled={field.disabled}
 				prefix={swatch}
-				onClick={() => {
+				onclick={() => {
 					if (!field.disabled) {
 						popover.toggle();
 					}

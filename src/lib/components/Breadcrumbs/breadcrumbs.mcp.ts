@@ -25,7 +25,7 @@ A navigation component that displays a hierarchical path of links, helping users
 
 - **items**: BreadcrumbItem[] (required)
   - Array of breadcrumb items to display
-  - Each item can have: label, href, active, disabled, onClick, icon, menu
+  - Each item can have: label, href, active, disabled, onclick, icon, menu
   - Can be simple strings/snippets or full config objects
 
 - **home**: BreadcrumbItem (optional)
@@ -65,8 +65,8 @@ A navigation component that displays a hierarchical path of links, helping users
   - Whether the breadcrumb item is disabled
   - Disabled items are not navigable and have reduced opacity
 
-- **onClick**: () => void (optional)
-  - Click event handler for the breadcrumb item
+- **onclick**: (event: MouseEvent) => void (optional)
+  - Native click event handler for the breadcrumb item
 
 - **icon**: string | Snippet (optional)
   - Icon snippet or string to display before the label

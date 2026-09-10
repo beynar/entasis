@@ -15,7 +15,7 @@ export const defaultDialog = cva({
 });
 
 export const defaultDialogAlign = cva({
-	base: 'flex p-6',
+	base: 'flex p-layout-md',
 	variants: {
 		type: {
 			fullScreen: 'justify-center items-center',
@@ -43,7 +43,7 @@ export const defaultDialogBackdrop = cva({
 });
 
 export const defaultDialogContent = cva({
-	base: 'z-10 relative px-4 py-2 raised-xl h-fit bg-surface-floating text-neutral rounded flex flex-col z-50 will-change-transform transition-transform duration-200 ease-out',
+	base: 'z-10 relative px-xl py-md raised-xl h-fit bg-surface-floating text-neutral rounded-md flex flex-col z-50 will-change-transform transition-transform duration-200 ease-out',
 	variants: {
 		size: {
 			small: 'max-w-md w-full',
@@ -93,7 +93,7 @@ export const defaultDialogThumb = cva({
 });
 
 export const defaultDialogHeader = cva({
-	base: 'grid gap-1 mb-2 border-b border-neutral-muted py-2',
+	base: 'grid gap-xs mb-md border-b border-neutral-muted py-md',
 	variants: {
 		size: {
 			small: '',
@@ -115,7 +115,7 @@ export const defaultDialogFooter = cva({
 });
 
 export const defaultDialogCloseButton = cva({
-	base: 'state-layer ml-auto rounded-full absolute top-1 right-1 p-1 text-neutral',
+	base: 'state-layer ml-auto rounded-full absolute top-1 right-1 p-xs text-neutral',
 	variants: {
 		size: {
 			small: '',

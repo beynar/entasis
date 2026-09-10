@@ -102,7 +102,7 @@
 					placeholder={search.placeholder}
 					aria-label={search.label ?? t.search}
 					value={search.value}
-					oninput={search.onInput}
+					oninput={search.oninput}
 					class={classes.search({ componentSize: size, density, className: search.class })}
 				/>
 				<SidebarIcon

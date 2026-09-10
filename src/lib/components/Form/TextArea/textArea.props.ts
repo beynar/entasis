@@ -1,6 +1,12 @@
 import type { InputProps } from '../Field/field.js';
 import type { TextAreaThemeProps } from './textArea.theme.js';
 import type { FieldState } from '../Field/field.state.svelte.js';
+import type { HTMLTextareaAttributes } from 'svelte/elements';
+
+export type TextAreaAttributes = Omit<
+	HTMLTextareaAttributes,
+	'class' | 'disabled' | 'id' | 'maxlength' | 'name' | 'placeholder' | 'required' | 'rows' | 'value'
+>;
 
 export type TextAreaProps = InputProps<'textarea'> & {
 	/** Hint text shown in the empty textarea. */
@@ -11,6 +17,8 @@ export type TextAreaProps = InputProps<'textarea'> & {
 	rows?: number;
 	/** Maximum number of characters the user may enter. */
 	maxLength?: number;
+	/** Native attributes applied to the underlying textarea control. */
+	textareaAttrs?: TextAreaAttributes;
 	/** Called when Enter is pressed without Shift; default submission is prevented. */
 	onPressEnter?: (field: FieldState<'textarea'>) => void;
 };

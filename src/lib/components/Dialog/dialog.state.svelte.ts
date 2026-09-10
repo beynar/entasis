@@ -32,6 +32,7 @@ interface DialogOptions extends MakeRequired<
 	'closeOnEscape' | 'closeOnClickOutside' | 'closable'
 > {
 	isOpen: boolean;
+	onOpenChange?: (open: boolean) => void;
 }
 
 const defaultTransition = {
@@ -244,15 +245,21 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 	}
 
 	toggle = () => {
-		this.isOpen = !this.isOpen;
+		this.setOpen(!this.isOpen);
 	};
 	open = () => {
-		this.isOpen = true;
+		this.setOpen(true);
 	};
 
 	close = () => {
-		this.isOpen = false;
+		this.setOpen(false);
 	};
+
+	private setOpen(nextOpen: boolean) {
+		if (this.isOpen === nextOpen) return;
+		this.isOpen = nextOpen;
+		this.onOpenChange?.(nextOpen);
+	}
 
 	contentAttachment = (node: HTMLElement) => {
 		return untrack(() => {

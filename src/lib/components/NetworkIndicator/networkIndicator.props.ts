@@ -19,7 +19,7 @@ export type NetworkIndicatorProps = WithAttachments<{
 	 * The height of the network indicator in pixels.
 	 * @default 3
 	 */
-	size?: number;
+	height?: number;
 	/**
 	 * The animation delay/duration in milliseconds.
 	 * @default 300

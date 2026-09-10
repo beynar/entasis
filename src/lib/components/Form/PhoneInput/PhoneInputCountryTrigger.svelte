@@ -40,7 +40,7 @@
 		open,
 		class: theme?.countryTrigger?.base
 	})}
-	onClick={onToggle}
+	onclick={onToggle}
 >
 	<span class={classes.countryFlag({ size, class: theme?.countryFlag?.base })}>
 		{country?.flag ?? '--'}

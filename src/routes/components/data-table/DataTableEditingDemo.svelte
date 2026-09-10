@@ -25,7 +25,7 @@
 			header: 'Name',
 			sortable: true,
 			editor: { type: 'text', placeholder: 'Full name' },
-			size: 210
+			width: 210
 		},
 		{
 			id: 'role',
@@ -40,14 +40,14 @@
 			align: 'end',
 			sortable: true,
 			editor: { type: 'number', min: 0, step: 1000 },
-			size: 130
+			width: 130
 		},
 		{
 			id: 'joinedAt',
 			accessor: 'joinedAt',
 			header: 'Joined',
 			editor: { type: 'date' },
-			size: 150
+			width: 150
 		},
 		{
 			id: 'verified',
@@ -55,7 +55,7 @@
 			header: 'Verified',
 			align: 'center',
 			editor: { type: 'switch' },
-			size: 120
+			width: 120
 		}
 	];
 
@@ -89,7 +89,7 @@
 
 {#snippet bulkActions(payload: DataTableToolbarPayload<Person>)}
 	<span class="text-neutral/60 text-sm">{payload.selectedRows.length} selected</span>
-	<Button size="small" variant="ghost" color="danger" onClick={payload.clearSelection}>Clear</Button
+	<Button size="small" variant="ghost" color="danger" onclick={payload.clearSelection}>Clear</Button
 	>
 {/snippet}
 
@@ -99,7 +99,7 @@
 		items={roleOptions}
 		value={payload.draft == null ? null : String(payload.draft)}
 		disabled={payload.pending}
-		onChange={payload.setDraft}
+		onValueChange={payload.setDraft}
 	/>
 {/snippet}
 
@@ -110,7 +110,7 @@
 		size="small"
 		variant="ghost"
 		color="danger"
-		onClick={() => removePerson(payload.rowId)}
+		onclick={() => removePerson(payload.rowId)}
 	/>
 {/snippet}
 

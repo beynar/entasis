@@ -1,10 +1,36 @@
 <script lang="ts">
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 	import TableOfContentsDemo from './demos/TableOfContentsDemo.svelte';
 	import TableOfContentsPlayground from './demos/TableOfContentsPlayground.svelte';
+	import { colors, sizes } from '$lib/utils/tokens.js';
 
-	const usageCode = `<script lang="ts">
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'primary',
+			options: colors
+		}
+	]);
+
+	const usageCode = $derived(`<script lang="ts">
 	import { ScrollArea } from 'svelai/scroll-area';
 	import { TableOfContents } from 'svelai/table-of-contents';
 <\/script>
@@ -19,7 +45,7 @@
 	</ScrollArea>
 
 	<aside>
-		<TableOfContents target="#article" levels={[2, 3, 4]} />
+		<TableOfContents target="#article" levels={[2, 3, 4]} size="${controls.value.size}" density="${controls.value.density}" color="${controls.value.color}" />
 	</aside>
 </div>`;
 
@@ -155,11 +181,16 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Scroll the article: every visible title colors together, and the rail follows semantic heading depth."
 		code={usageCode}
 		class="!min-h-fit items-stretch p-4 md:p-8"
 	>
-		<TableOfContentsDemo />
+		<TableOfContentsDemo
+			size={controls.value.size}
+			density={controls.value.density}
+			color={controls.value.color}
+		/>
 	</ComponentCard>
 
 	{#snippet examples()}

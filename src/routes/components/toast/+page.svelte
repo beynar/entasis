@@ -58,7 +58,7 @@
 
 	// Deferred delete + Undo — the real-world pattern. Deleting an item removes it
 	// from the UI optimistically and shows a toast with an Undo action. The actual
-	// (irreversible) delete is deferred to `onAutoClose`, which fires only if the
+	// The irreversible delete is deferred to `onAutoDismiss`, which fires only if the
 	// toast times out — clicking Undo dismisses it first, so the delete never runs.
 	type Item = { id: number; name: string };
 	let items = $state<Item[]>([
@@ -77,12 +77,12 @@
 				{
 					content: 'Undo',
 					color: 'primary',
-					onClick: () => {
+					onclick: () => {
 						items = [...items, item].sort((a, b) => a.id - b.id); // restore
 					}
 				}
 			],
-			onAutoClose: () => {
+			onAutoDismiss: () => {
 				// Not undone → commit the real deletion here (your API call).
 				committed.push(item.name);
 				console.log('Committed delete:', item.name);
@@ -136,7 +136,7 @@
 <Toaster />
 
 	<Button
-		onClick={() =>
+		onclick={() =>
 			toast.${controls.value.color}({
 				title: 'Hello',
 				description: 'This is a toast',
@@ -149,7 +149,7 @@
 	Show toast
 </Button>`}
 	>
-		<Button color={controls.value.color} onClick={showConfiguredToast}>Show toast</Button>
+		<Button color={controls.value.color} onclick={showConfiguredToast}>Show toast</Button>
 	</ComponentCard>
 
 	{#snippet examples()}
@@ -167,14 +167,14 @@ toast.neutral({ title: 'Note', description: 'Just so you know.' });`}
 				<Button
 					color="success"
 					variant="soft"
-					onClick={() => toast.success({ title: 'Saved', description: 'Your changes were saved.' })}
+					onclick={() => toast.success({ title: 'Saved', description: 'Your changes were saved.' })}
 				>
 					Success
 				</Button>
 				<Button
 					color="info"
 					variant="soft"
-					onClick={() =>
+					onclick={() =>
 						toast.info({ title: 'Heads up', description: 'A new version is available.' })}
 				>
 					Info
@@ -182,7 +182,7 @@ toast.neutral({ title: 'Note', description: 'Just so you know.' });`}
 				<Button
 					color="warning"
 					variant="soft"
-					onClick={() =>
+					onclick={() =>
 						toast.warning({ title: 'Careful', description: 'This needs a review first.' })}
 				>
 					Warning
@@ -190,7 +190,7 @@ toast.neutral({ title: 'Note', description: 'Just so you know.' });`}
 				<Button
 					color="danger"
 					variant="soft"
-					onClick={() =>
+					onclick={() =>
 						toast.danger({ title: 'Something went wrong', description: 'Please try again.' })}
 				>
 					Danger
@@ -198,7 +198,7 @@ toast.neutral({ title: 'Note', description: 'Just so you know.' });`}
 				<Button
 					color="neutral"
 					variant="soft"
-					onClick={() => toast.neutral({ title: 'Note', description: 'Just so you know.' })}
+					onclick={() => toast.neutral({ title: 'Note', description: 'Just so you know.' })}
 				>
 					Neutral
 				</Button>
@@ -222,21 +222,21 @@ toast.success({ title: 'Saved', richColors: true });`}
 						<Button
 							color="success"
 							variant="soft"
-							onClick={() => toast.success({ title: 'Saved', description: 'Neutral surface.' })}
+							onclick={() => toast.success({ title: 'Saved', description: 'Neutral surface.' })}
 						>
 							Success
 						</Button>
 						<Button
 							color="danger"
 							variant="soft"
-							onClick={() => toast.danger({ title: 'Failed', description: 'Neutral surface.' })}
+							onclick={() => toast.danger({ title: 'Failed', description: 'Neutral surface.' })}
 						>
 							Danger
 						</Button>
 						<Button
 							color="info"
 							variant="soft"
-							onClick={() => toast.info({ title: 'Info', description: 'Neutral surface.' })}
+							onclick={() => toast.info({ title: 'Info', description: 'Neutral surface.' })}
 						>
 							Info
 						</Button>
@@ -249,21 +249,21 @@ toast.success({ title: 'Saved', richColors: true });`}
 					<div class="flex flex-wrap justify-center gap-2">
 						<Button
 							color="success"
-							onClick={() =>
+							onclick={() =>
 								toast.success({ title: 'Saved', description: 'Tinted surface.', richColors: true })}
 						>
 							Success
 						</Button>
 						<Button
 							color="danger"
-							onClick={() =>
+							onclick={() =>
 								toast.danger({ title: 'Failed', description: 'Tinted surface.', richColors: true })}
 						>
 							Danger
 						</Button>
 						<Button
 							color="info"
-							onClick={() =>
+							onclick={() =>
 								toast.info({ title: 'Info', description: 'Tinted surface.', richColors: true })}
 						>
 							Info
@@ -286,7 +286,7 @@ toast.info({ title: 'bottom-center', position: 'bottom-center' });`}
 						variant="outline"
 						color="neutral"
 						size="small"
-						onClick={() => toast.info({ title: position, position })}
+						onclick={() => toast.info({ title: position, position })}
 					>
 						{position}
 					</Button>
@@ -310,7 +310,7 @@ toast.success({ title: 'Prominent', size: 'large' });
 					<Button
 						variant="soft"
 						color="success"
-						onClick={() =>
+						onclick={() =>
 							toast.success({
 								title: size,
 								description: 'The quick brown fox.',
@@ -339,7 +339,7 @@ toast.warning({ title: 'You are offline.', position: 'banner-bottom' });`}
 				<Button
 					variant="soft"
 					color="info"
-					onClick={() =>
+					onclick={() =>
 						toast.info({
 							title: 'Scheduled maintenance tonight at 2am UTC.',
 							position: 'banner-top'
@@ -350,7 +350,7 @@ toast.warning({ title: 'You are offline.', position: 'banner-bottom' });`}
 				<Button
 					variant="soft"
 					color="warning"
-					onClick={() => toast.warning({ title: 'You are offline.', position: 'banner-bottom' })}
+					onclick={() => toast.warning({ title: 'You are offline.', position: 'banner-bottom' })}
 				>
 					Bottom banner
 				</Button>
@@ -359,7 +359,7 @@ toast.warning({ title: 'You are offline.', position: 'banner-bottom' });`}
 
 		<ComponentCard
 			title="Action toast (Undo)"
-			description="The real-world Undo pattern. Deleting removes the item immediately; the toast carries an Undo action. The irreversible delete is deferred to onAutoClose — it runs only if the toast times out, so Undo (a manual dismiss) cancels it. Hovering pauses the timer."
+			description="The real-world Undo pattern. Deleting removes the item immediately; the toast carries an Undo action. The irreversible delete is deferred to onAutoDismiss — it runs only if the toast times out, so Undo cancels it. Hovering pauses the timer."
 			class="!min-h-fit"
 			code={`const deleteItem = (item) => {
 	items = items.filter((i) => i.id !== item.id); // optimistic remove
@@ -368,10 +368,10 @@ toast.warning({ title: 'You are offline.', position: 'banner-bottom' });`}
 		title: \`Deleted "\${item.name}"\`,
 		duration: 5000,
 		actions: [
-			{ content: 'Undo', color: 'primary', onClick: () => restore(item) }
+			{ content: 'Undo', color: 'primary', onclick: () => restore(item) }
 		],
 		// Runs ONLY on timeout — never when the toast is dismissed (Undo).
-		onAutoClose: () => commitDelete(item)
+		onAutoDismiss: () => commitDelete(item)
 	});
 };`}
 		>
@@ -381,7 +381,7 @@ toast.warning({ title: 'You are offline.', position: 'banner-bottom' });`}
 				{#each items as item (item.id)}
 					<div class="flex items-center justify-between gap-2 px-3 py-2 text-sm">
 						<span class="text-neutral truncate">{item.name}</span>
-						<Button size="small" variant="ghost" color="danger" onClick={() => deleteItem(item)}>
+						<Button size="small" variant="ghost" color="danger" onclick={() => deleteItem(item)}>
 							Delete
 						</Button>
 					</div>
@@ -407,7 +407,7 @@ toast.info({ title: 'Auto-dismissing', duration: 6000, progress: true });
 			<Button
 				color="info"
 				variant="soft"
-				onClick={() =>
+				onclick={() =>
 					toast.info({
 						title: 'Auto-dismissing',
 						description: 'Hover to pause the countdown.',
@@ -439,7 +439,7 @@ t.opts = {
 	duration: 3000
 };`}
 		>
-			<Button color="primary" onClick={showLoadingToast}>Save changes</Button>
+			<Button color="primary" onclick={showLoadingToast}>Save changes</Button>
 		</ComponentCard>
 	{/snippet}
 </DocPage>

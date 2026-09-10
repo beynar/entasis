@@ -3,7 +3,7 @@ export const aiModelSelectorDescription = `
 
 Model selection built on Svelai \`PopupMenu\` and \`Menu\`. It accepts flat \`models\`, recursive \`groups\`, disabled entries, provider labels, optional keyword search, context-window metadata, and supplemental standard Menu items.
 
-Bind \`value\`, \`open\`, and \`query\` for direct control. Set \`searchable={false}\` to remove the search header and ignore, without erasing, a bound query. When \`value\` is omitted or undefined inside \`AIConversation\`, selection reads and updates \`conversation.selectedModel\`. A direct string or \`null\` wins over provider state; \`null\` is the bindable controlled-empty value because Svelte substitutes prop fallbacks for \`undefined\`. \`placeholder\` follows the same omission rule before the compact \`labels\` object and conversation placeholder, with \`null\` suppressing visible placeholder text.
+Bind \`value\`, \`open\`, and \`query\` for direct control. \`defaultValue\` and \`defaultOpen\` apply once when their live props are omitted; \`onValueChange\` receives \`{ value, model }\`, and \`onOpenChange\` reports component-owned disclosure changes. Set \`searchable={false}\` to remove the search header and ignore, without erasing, a bound query. When \`value\` is omitted or undefined inside \`AIConversation\`, selection reads and updates \`conversation.selectedModel\`. A direct string or \`null\` wins over provider state; \`null\` is the bindable controlled-empty value because Svelte substitutes prop fallbacks for \`undefined\`. \`placeholder\` follows the same omission rule before the compact \`labels\` object and conversation placeholder, with \`null\` suppressing visible placeholder text.
 
 The \`children\` trigger, \`search\` header, and \`empty\` snippets receive \`{ model, value, open, query, searchable, disabled, labels, select, setQuery, setOpen, toggle }\`. The resolved \`labels\` cover the empty trigger, its accessible fallback name, search field, empty result, and providerless-group heading. The trigger remains owned by PopupMenu, so keyboard navigation and focus return continue to work with custom content. Theme slots cover the root, trigger, trigger content/icon/label, popover, search header, menu, provider headings, model options, nested groups, and empty state.
 
@@ -16,7 +16,7 @@ Search is case-insensitive across model id, label, provider, description, and \`
 	  searchable={false}
 	  menuItems={[{ type: 'submenu', title: 'Reasoning effort', menu: reasoningItems }]}
 	  bind:value
-  onValueChange={(id, model) => selectModel(id, model)}
+  onValueChange={({ value, model }) => selectModel(value, model)}
 />
 \`\`\`
 `;

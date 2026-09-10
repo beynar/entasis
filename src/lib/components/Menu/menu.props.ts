@@ -8,7 +8,10 @@ import type { MenuThemeProps } from './menu.theme.js';
 
 export type MenuSubmenuMode = 'auto' | 'popover' | 'stack';
 
-export type SubMenuItemProps = Omit<MenuOptionProps, 'onClick' | 'onEnter' | 'onLeave'> & {
+export type SubMenuItemProps = Omit<
+	MenuOptionProps,
+	'onclick' | 'onpointerenter' | 'onpointerleave'
+> & {
 	/**
 	 * Array of submenu items.
 	 */

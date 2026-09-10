@@ -38,11 +38,11 @@ const defaultPanel = cva({
 			admin:
 				'border-neutral-muted bg-surface-canvas [--sidebar-icon-button-width:calc(var(--sidebar-width-icon)-0.5rem)] data-[side=left]:border-r data-[side=right]:border-l',
 			floating:
-				'rounded-xl border border-neutral-muted bg-surface shadow-sm [--sidebar-icon-button-width:var(--sidebar-width-icon)]',
+				'rounded-lg border border-neutral-muted bg-surface shadow-sm [--sidebar-icon-button-width:var(--sidebar-width-icon)]',
 			inset:
 				'border-0 bg-surface-canvas shadow-none [--sidebar-icon-button-width:calc(var(--sidebar-width-icon)-0.5rem)]',
 			split:
-				'rounded-xl border border-neutral-muted bg-surface shadow-sm [--sidebar-icon-button-width:var(--sidebar-width-icon)]'
+				'rounded-lg border border-neutral-muted bg-surface shadow-sm [--sidebar-icon-button-width:var(--sidebar-width-icon)]'
 		},
 		placement: {
 			panel: 'w-[var(--sidebar-width)]',
@@ -53,11 +53,11 @@ const defaultPanel = cva({
 		density: sidebarDensityVariables
 	},
 	compoundVariants: [
-		{ variant: ['floating', 'split'], placement: 'static', class: 'm-2' },
+		{ variant: ['floating', 'split'], placement: 'static', class: 'm-md' },
 		{
 			variant: 'inset',
 			placement: 'static',
-			class: 'my-2 h-[calc(100%_-_1rem)]'
+			class: 'my-md h-[calc(100%_-_1rem)]'
 		}
 	],
 	defaultVariants: {
@@ -72,9 +72,9 @@ const defaultStackSection = cva({
 	base: 'flex flex-col group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-[var(--sidebar-group-padding)] group-data-[collapsible=icon]:py-[calc((var(--sidebar-width-icon)-var(--sidebar-icon-button-width))/2)] group-data-[collapsible=icon]:[&>[data-slot=sidebar-menu-button]]:h-[var(--sidebar-icon-button-width)]',
 	variants: {
 		density: {
-			small: 'gap-1 p-1.5',
-			normal: 'gap-2 p-2',
-			large: 'gap-3 p-3'
+			small: 'gap-xs p-sm',
+			normal: 'gap-md p-md',
+			large: 'gap-lg p-lg'
 		}
 	},
 	defaultVariants: {
@@ -86,9 +86,9 @@ const defaultNav = cva({
 	base: 'scrollbar scrollbar-none flex min-h-0 flex-1 flex-col overflow-auto group-data-[collapsible=icon]:overflow-hidden',
 	variants: {
 		density: {
-			small: 'gap-1',
-			normal: 'gap-2',
-			large: 'gap-3'
+			small: 'gap-xs',
+			normal: 'gap-md',
+			large: 'gap-lg'
 		}
 	},
 	defaultVariants: {
@@ -100,9 +100,9 @@ const defaultGroup = cva({
 	base: 'relative flex w-full min-w-0 flex-col',
 	variants: {
 		density: {
-			small: 'p-1.5',
-			normal: 'p-2',
-			large: 'p-3'
+			small: 'p-sm',
+			normal: 'p-md',
+			large: 'p-lg'
 		}
 	},
 	defaultVariants: {
@@ -111,21 +111,21 @@ const defaultGroup = cva({
 });
 
 const defaultGroupLabel = cva({
-	base: 'text-neutral/65 flex shrink-0 items-center rounded-md font-medium outline-none transition-[height,margin,padding,opacity] duration-200 ease-linear group-data-[collapsible=icon]:opacity-0 disabled:pointer-events-none [&>svg]:shrink-0',
+	base: 'text-neutral/65 flex shrink-0 items-center rounded-sm font-medium outline-none transition-[height,margin,padding,opacity] duration-200 ease-linear group-data-[collapsible=icon]:opacity-0 disabled:pointer-events-none [&>svg]:shrink-0',
 	variants: {
 		interactive: {
 			true: 'state-layer hover:text-neutral focus-visible:ring-2 focus-visible:ring-primary/40',
 			false: null
 		},
 		componentSize: {
-			small: 'h-7 text-[0.6875rem] group-data-[collapsible=icon]:-mt-7 [&>svg]:size-3.5',
-			normal: 'h-8 text-xs group-data-[collapsible=icon]:-mt-8 [&>svg]:size-4',
-			large: 'h-9 text-sm group-data-[collapsible=icon]:-mt-9 [&>svg]:size-5'
+			small: 'h-7 text-[0.6875rem] group-data-[collapsible=icon]:-mt-layout-md [&>svg]:size-3.5',
+			normal: 'h-8 text-xs group-data-[collapsible=icon]:-mt-layout-lg [&>svg]:size-4',
+			large: 'h-9 text-sm group-data-[collapsible=icon]:-mt-layout-lg [&>svg]:size-5'
 		},
 		density: {
-			small: 'px-2',
-			normal: 'px-3',
-			large: 'px-3.5'
+			small: 'px-md',
+			normal: 'px-lg',
+			large: 'px-lg'
 		}
 	},
 	defaultVariants: {
@@ -136,7 +136,7 @@ const defaultGroupLabel = cva({
 });
 
 const defaultGroupAction = cva({
-	base: 'state-layer text-neutral hover:text-neutral absolute flex aspect-square items-center justify-center rounded-md p-0 outline-none transition group-data-[collapsible=icon]:hidden focus-visible:ring-2 focus-visible:ring-primary/40 [&>svg]:shrink-0',
+	base: 'state-layer text-neutral hover:text-neutral absolute flex aspect-square items-center justify-center rounded-sm p-0 outline-none transition group-data-[collapsible=icon]:hidden focus-visible:ring-2 focus-visible:ring-primary/40 [&>svg]:shrink-0',
 	variants: {
 		componentSize: {
 			small: 'top-[calc(var(--sidebar-group-padding)+0.3125rem)] size-4.5 [&>svg]:size-3.5',
@@ -170,8 +170,8 @@ const defaultMenu = cva({
 	variants: {
 		density: {
 			small: 'gap-0',
-			normal: 'gap-0.5',
-			large: 'gap-1'
+			normal: 'gap-micro',
+			large: 'gap-xs'
 		}
 	},
 	defaultVariants: {
@@ -180,7 +180,7 @@ const defaultMenu = cva({
 });
 
 const defaultMenuButton = cva({
-	base: 'state-layer peer/menu-button group/menu-button flex w-full items-center overflow-hidden rounded-md text-left outline-none transition-[background,color,width,height,padding,margin,border-radius] duration-200 ease-linear hover:text-neutral focus-visible:ring-2 focus-visible:ring-primary/40 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:bg-primary-muted data-active:text-primary-muted-readable data-active:font-medium group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:mx-[calc((var(--sidebar-width-icon)-var(--sidebar-icon-button-width))/2-var(--sidebar-group-padding))] group-data-[collapsible=icon]:w-[var(--sidebar-icon-button-width)] group-data-[collapsible=icon]:rounded-none group-data-[variant=admin]:group-data-[collapsible=icon]:rounded-sm group-data-[variant=inset]:group-data-[collapsible=icon]:rounded-sm group-data-[collapsible=icon]:![padding-inline:calc((var(--sidebar-icon-button-width)-var(--sidebar-icon-size))/2)] group-data-[collapsible=icon]:ring-inset [&_svg]:shrink-0',
+	base: 'state-layer peer/menu-button group/menu-button flex w-full items-center overflow-hidden rounded-sm text-left outline-none transition-[background,color,width,height,padding,margin,border-radius] duration-200 ease-linear hover:text-neutral focus-visible:ring-2 focus-visible:ring-primary/40 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:bg-primary-muted data-active:text-primary-muted-readable data-active:font-medium group-has-data-[sidebar=menu-action]/menu-item:pr-layout-lg group-data-[collapsible=icon]:mx-[calc((var(--sidebar-width-icon)-var(--sidebar-icon-button-width))/2-var(--sidebar-group-padding))] group-data-[collapsible=icon]:w-[var(--sidebar-icon-button-width)] group-data-[collapsible=icon]:rounded-none group-data-[variant=admin]:group-data-[collapsible=icon]:rounded-sm group-data-[variant=inset]:group-data-[collapsible=icon]:rounded-sm group-data-[collapsible=icon]:![padding-inline:calc((var(--sidebar-icon-button-width)-var(--sidebar-icon-size))/2)] group-data-[collapsible=icon]:ring-inset [&_svg]:shrink-0',
 	variants: {
 		variant: {
 			default: '',
@@ -192,9 +192,9 @@ const defaultMenuButton = cva({
 			large: 'text-base leading-6 [&_svg]:size-5'
 		},
 		density: {
-			small: 'gap-1.5 px-1.5',
-			normal: 'gap-2 px-2',
-			large: 'gap-2.5 px-2.5'
+			small: 'gap-sm px-sm',
+			normal: 'gap-md px-md',
+			large: 'gap-md px-md'
 		},
 		size: {
 			default: '',
@@ -257,9 +257,9 @@ const defaultSubMenu = cva({
 	base: 'border-neutral-muted flex min-w-0 translate-x-px flex-col border-l',
 	variants: {
 		density: {
-			small: 'mx-2.5 gap-0.5 px-2 py-0.5',
-			normal: 'mx-3.5 gap-1 px-2.5 py-0.5',
-			large: 'mx-4.5 gap-1.5 px-3 py-1'
+			small: 'mx-md gap-micro px-md py-micro',
+			normal: 'mx-lg gap-xs px-md py-micro',
+			large: 'mx-xl gap-sm px-lg py-xs'
 		}
 	},
 	defaultVariants: {
@@ -271,9 +271,9 @@ const defaultTreeSubMenu = cva({
 	base: 'border-neutral-muted ml-0 flex min-w-0 translate-x-px flex-col border-l',
 	variants: {
 		density: {
-			small: 'ml-1.5 gap-0.5 py-0.5 pl-1.5',
-			normal: 'ml-2 gap-1 py-0.5 pl-2',
-			large: 'ml-2.5 gap-1.5 py-1 pl-2.5'
+			small: 'ml-sm gap-micro py-micro pl-sm',
+			normal: 'ml-md gap-xs py-micro pl-md',
+			large: 'ml-md gap-sm py-xs pl-md'
 		}
 	},
 	defaultVariants: {
@@ -282,7 +282,7 @@ const defaultTreeSubMenu = cva({
 });
 
 const defaultSubButton = cva({
-	base: 'state-layer text-neutral/80 hover:text-neutral flex min-w-0 -translate-x-px items-center overflow-hidden rounded-md outline-none transition-[background,color,height,padding] duration-200 ease-linear focus-visible:ring-2 focus-visible:ring-primary/40 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:bg-primary-muted data-active:text-primary-muted-readable [&>span:last-child]:truncate [&>svg]:shrink-0',
+	base: 'state-layer text-neutral/80 hover:text-neutral flex min-w-0 -translate-x-px items-center overflow-hidden rounded-sm outline-none transition-[background,color,height,padding] duration-200 ease-linear focus-visible:ring-2 focus-visible:ring-primary/40 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:bg-primary-muted data-active:text-primary-muted-readable [&>span:last-child]:truncate [&>svg]:shrink-0',
 	variants: {
 		componentSize: {
 			small: 'h-6 text-xs leading-4 [&>svg]:size-3.5',
@@ -290,9 +290,9 @@ const defaultSubButton = cva({
 			large: 'h-8 text-base leading-6 [&>svg]:size-5'
 		},
 		density: {
-			small: 'gap-1.5 px-2',
-			normal: 'gap-2 px-3',
-			large: 'gap-2.5 px-3.5'
+			small: 'gap-sm px-md',
+			normal: 'gap-md px-lg',
+			large: 'gap-md px-lg'
 		},
 		size: {
 			sm: 'text-xs',
@@ -307,7 +307,7 @@ const defaultSubButton = cva({
 });
 
 const defaultMenuAction = cva({
-	base: 'state-layer text-neutral hover:text-neutral peer-hover/menu-button:text-neutral absolute top-1/2 flex aspect-square -translate-y-1/2 items-center justify-center rounded-md p-0 opacity-100 outline-none transition group-data-[collapsible=icon]:hidden focus-visible:ring-2 focus-visible:ring-primary/40 md:opacity-0 group-focus-within/menu-row:opacity-100 group-hover/menu-row:opacity-100 has-[[aria-expanded=true]]:opacity-100 [&>svg]:shrink-0',
+	base: 'state-layer text-neutral hover:text-neutral peer-hover/menu-button:text-neutral absolute top-1/2 flex aspect-square -translate-y-1/2 items-center justify-center rounded-sm p-0 opacity-100 outline-none transition group-data-[collapsible=icon]:hidden focus-visible:ring-2 focus-visible:ring-primary/40 md:opacity-0 group-focus-within/menu-row:opacity-100 group-hover/menu-row:opacity-100 has-[[aria-expanded=true]]:opacity-100 [&>svg]:shrink-0',
 	variants: {
 		componentSize: {
 			small: 'size-4.5 [&>svg]:size-3.5',
@@ -327,7 +327,7 @@ const defaultMenuAction = cva({
 });
 
 const defaultActionTrigger = cva({
-	base: 'flex size-full items-center justify-center rounded-md bg-transparent outline-none [&>svg]:shrink-0',
+	base: 'flex size-full items-center justify-center rounded-sm bg-transparent outline-none [&>svg]:shrink-0',
 	variants: {
 		componentSize: {
 			small: '[&>svg]:size-3.5',
@@ -341,7 +341,7 @@ const defaultActionTrigger = cva({
 });
 
 const defaultBadge = cva({
-	base: 'text-neutral/70 peer-hover/menu-button:text-neutral peer-data-active/menu-button:text-primary-muted-readable pointer-events-none absolute top-1/2 flex -translate-y-1/2 items-center justify-center rounded-md px-1 font-medium tabular-nums select-none group-data-[collapsible=icon]:hidden',
+	base: 'text-neutral/70 peer-hover/menu-button:text-neutral peer-data-active/menu-button:text-primary-muted-readable pointer-events-none absolute top-1/2 flex -translate-y-1/2 items-center justify-center rounded-sm px-xs font-medium tabular-nums select-none group-data-[collapsible=icon]:hidden',
 	variants: {
 		componentSize: {
 			small: 'h-4 min-w-4 text-[0.6875rem]',
@@ -380,7 +380,7 @@ const defaultSearchContainer = cva({
 });
 
 const defaultSearch = cva({
-	base: 'border-neutral-muted bg-surface-raised text-neutral placeholder:text-neutral/45 w-full rounded-md border shadow-none outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20',
+	base: 'border-neutral-muted bg-surface-raised text-neutral placeholder:text-neutral/45 w-full rounded-sm border shadow-none outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20',
 	variants: {
 		componentSize: {
 			small: 'h-8 text-xs',
@@ -388,9 +388,9 @@ const defaultSearch = cva({
 			large: 'h-10 text-base'
 		},
 		density: {
-			small: 'px-7',
-			normal: 'px-8',
-			large: 'px-9'
+			small: 'px-layout-md',
+			normal: 'px-layout-lg',
+			large: 'px-layout-lg'
 		}
 	},
 	defaultVariants: {
@@ -423,9 +423,9 @@ const defaultSeparator = cva({
 	base: 'bg-neutral-muted h-px w-auto shrink-0',
 	variants: {
 		density: {
-			small: 'mx-1.5',
-			normal: 'mx-2',
-			large: 'mx-3'
+			small: 'mx-sm',
+			normal: 'mx-md',
+			large: 'mx-lg'
 		}
 	},
 	defaultVariants: {
@@ -519,8 +519,8 @@ const defaultMain = cva({
 		variant: {
 			admin: 'bg-surface',
 			floating: 'bg-surface-canvas',
-			inset: 'bg-surface-canvas md:py-2',
-			split: 'bg-surface-canvas md:py-2 md:rounded-xl'
+			inset: 'bg-surface-canvas md:py-md',
+			split: 'bg-surface-canvas md:py-md md:rounded-lg'
 		},
 		side: {
 			left: '',
@@ -545,22 +545,22 @@ const defaultMain = cva({
 		{
 			variant: 'inset',
 			side: 'left',
-			class: 'md:rounded-l-xl'
+			class: 'md:rounded-l-lg'
 		},
 		{
 			variant: 'inset',
 			side: 'right',
-			class: 'md:rounded-r-xl'
+			class: 'md:rounded-r-lg'
 		},
 		{
 			variant: 'split',
 			side: 'left',
-			class: 'md:pr-2 md:pl-0'
+			class: 'md:pr-md md:pl-0'
 		},
 		{
 			variant: 'split',
 			side: 'right',
-			class: 'md:pr-0 md:pl-2'
+			class: 'md:pr-0 md:pl-md'
 		},
 		{
 			variant: ['inset', 'split'],
@@ -602,7 +602,7 @@ const defaultMobilePanel = cva({
 });
 
 const defaultMedia = cva({
-	base: 'bg-primary text-primary-contrast flex aspect-square shrink-0 items-center justify-center rounded-md',
+	base: 'bg-primary text-primary-contrast flex aspect-square shrink-0 items-center justify-center rounded-sm',
 	variants: {
 		size: {
 			default: '',
@@ -629,7 +629,7 @@ const defaultMedia = cva({
 });
 
 const defaultAvatar = cva({
-	base: 'bg-neutral-muted text-neutral-muted-readable flex shrink-0 items-center justify-center overflow-hidden rounded-md font-medium',
+	base: 'bg-neutral-muted text-neutral-muted-readable flex shrink-0 items-center justify-center overflow-hidden rounded-sm font-medium',
 	variants: {
 		componentSize: {
 			small: 'size-7 text-[0.6875rem]',

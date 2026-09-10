@@ -153,7 +153,7 @@
 				<Button
 					variant={selectedRecipeId === recipe.id ? 'solid' : 'outline'}
 					size="small"
-					onClick={() => selectRecipe(recipe)}
+					onclick={() => selectRecipe(recipe)}
 				>
 					{recipe.label}
 				</Button>
@@ -165,7 +165,7 @@
 				<Button
 					variant={sidebarState === state ? 'solid' : 'outline'}
 					size="small"
-					onClick={() => setSidebarState(state)}
+					onclick={() => setSidebarState(state)}
 				>
 					{state}
 				</Button>

@@ -1,6 +1,21 @@
 import type { Density } from '$lib/types/theme.js';
 import type { InputProps } from '../Field/field.js';
 import type { SelectThemeProps } from './select.theme.js';
+import type { HTMLButtonAttributes } from 'svelte/elements';
+
+export type SelectTriggerAttributes = Omit<
+	HTMLButtonAttributes,
+	| 'aria-activedescendant'
+	| 'aria-controls'
+	| 'aria-expanded'
+	| 'aria-haspopup'
+	| 'aria-required'
+	| 'class'
+	| 'disabled'
+	| 'id'
+	| 'role'
+	| 'type'
+>;
 
 export type SelectOption = {
 	/** Option value submitted when this item is chosen. */
@@ -35,4 +50,6 @@ export type SelectProps = InputProps<'select'> & {
 	density?: Density;
 	/** Render separators between consecutive groups. */
 	separators?: boolean;
+	/** Native attributes applied to the combobox trigger button. */
+	triggerAttrs?: SelectTriggerAttributes;
 };

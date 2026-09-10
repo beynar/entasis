@@ -1,4 +1,5 @@
 import type {
+	ChannelAccessor,
 	ChartPoint,
 	ChartValue as TanStackValue,
 	InitializedMark,
@@ -13,12 +14,19 @@ import {
 } from './chart.channels.js';
 import type { CompiledMark } from './chart.cartesian.js';
 import { unsupportedDiscriminant } from './chart.errors.js';
-import type { ChartAnnotation, ChartChannel, ChartKey, ChartVisual } from './chart.props.js';
+import { withoutTooltipPoints } from './chart.mark.js';
+import type {
+	ChartAnnotation,
+	ChartChannel,
+	ChartKey,
+	ChartRequiredChannel,
+	ChartVisual
+} from './chart.props.js';
 
 type AnnotatableMark<TRow extends object> = {
-	readonly key?: string | ((row: TRow, index: number, rows: readonly TRow[]) => ChartKey);
-	readonly series?: ChartChannel<TRow, ChartKey>;
-	readonly colorBy?: ChartChannel<TRow, ChartKey>;
+	readonly key?: ChartRequiredChannel<TRow, ChartKey>;
+	readonly series?: ChartChannel<TRow, ChartKey> | ChartRequiredChannel<TRow, ChartKey>;
+	readonly colorBy?: ChartChannel<TRow, ChartKey> | ChartRequiredChannel<TRow, ChartKey>;
 	readonly annotations?: readonly ChartAnnotation<TRow>[];
 };
 
@@ -74,7 +82,7 @@ function compileAnnotation<TRow extends object>(
 	const key = compileKeyChannel(mark.key);
 	const series = compileOptionalChannel(mark.series ?? mark.colorBy);
 
-	return {
+	return withoutTooltipPoints({
 		initialize(context) {
 			const initializedSources = sourceMarks.map((source) => source.initialize(context));
 			return {
@@ -83,9 +91,10 @@ function compileAnnotation<TRow extends object>(
 				seriesFromColor: initializedSources.some((source) => source.seriesFromColor),
 				render(renderContext) {
 					const targetRows = resolveTargetRows(data, annotation, key, series);
-					const renderedPoints = initializedSources.flatMap(
-						(source) => source.render(renderContext).points ?? []
-					);
+					const renderedPoints = initializedSources.flatMap((source) => {
+						const resolved = source.resolveLayout?.(renderContext) ?? source;
+						return collectRenderedPoints(resolved.render(renderContext));
+					});
 					const matches = uniqueCoordinates(
 						renderedPoints.filter((point) => pointContainsTargetRow(point, targetRows))
 					);
@@ -109,14 +118,30 @@ function compileAnnotation<TRow extends object>(
 							renderContext.chart,
 							renderContext.scales.x?.bandwidth,
 							renderContext.scales.y?.bandwidth,
-							path
-						),
+							annotation.id ?? path
+						).map((node) => ({ ...node, pointOwner: point })),
 						points: []
 					};
 				}
 			};
 		}
+	});
+}
+
+function collectRenderedPoints(
+	rendered: ReturnType<InitializedMark['render']>
+): readonly ChartPoint[] {
+	const points = [...(rendered.points ?? [])];
+	const collectNode = (node: SceneNode): void => {
+		if (node.pointOwner) points.push(node.pointOwner);
+		if ('interaction' in node && node.interaction) {
+			if (node.interaction.point) points.push(node.interaction.point);
+			else points.push(...node.interaction.points);
+		}
+		if (node.kind === 'group') node.children.forEach(collectNode);
 	};
+	rendered.nodes.forEach(collectNode);
+	return points;
 }
 
 function mergeChannels(
@@ -144,9 +169,8 @@ function mergeChannels(
 function resolveTargetRows<TRow extends object>(
 	data: readonly TRow[],
 	annotation: ChartAnnotation<TRow>,
-	key: ((row: TRow, index: number, rows: readonly TRow[]) => ChartKey) | undefined,
-	series:
-		((row: TRow, index: number, rows: readonly TRow[]) => ChartKey | null | undefined) | undefined
+	key: ChannelAccessor<TRow, ChartKey> | undefined,
+	series: ChannelAccessor<TRow, ChartKey | null | undefined> | undefined
 ): readonly TRow[] {
 	const target = annotation.target;
 	if ('where' in target && target.where) {
@@ -156,9 +180,10 @@ function resolveTargetRows<TRow extends object>(
 	const targetKey = chartKeyIdentity(target.key);
 	const targetSeries = target.series === undefined ? undefined : chartKeyIdentity(target.series);
 	return data.filter((row, index) => {
-		if (chartKeyIdentity(key(row, index, data)) !== targetKey) return false;
+		const context = { index, data };
+		if (chartKeyIdentity(key(row, context)) !== targetKey) return false;
 		if (targetSeries === undefined) return true;
-		const seriesKey = series?.(row, index, data);
+		const seriesKey = series?.(row, context);
 		return (
 			seriesKey !== null && seriesKey !== undefined && chartKeyIdentity(seriesKey) === targetSeries
 		);
@@ -251,16 +276,17 @@ function compileAnnotationNodes<TRow extends object>(
 				}
 			];
 		case 'band': {
-			const size = annotation.size ?? (annotation.axis === 'x' ? xBandwidth : yBandwidth) ?? 16;
+			const thickness =
+				annotation.thickness ?? (annotation.axis === 'x' ? xBandwidth : yBandwidth) ?? 16;
 			const inset = annotation.inset ?? 0;
 			return [
 				{
 					kind: 'rect',
 					key: path,
-					x: annotation.axis === 'x' ? point.x - size / 2 + inset : chart.x,
-					y: annotation.axis === 'y' ? point.y - size / 2 + inset : chart.y,
-					width: annotation.axis === 'x' ? Math.max(0, size - inset * 2) : chart.width,
-					height: annotation.axis === 'y' ? Math.max(0, size - inset * 2) : chart.height,
+					x: annotation.axis === 'x' ? point.x - thickness / 2 + inset : chart.x,
+					y: annotation.axis === 'y' ? point.y - thickness / 2 + inset : chart.y,
+					width: annotation.axis === 'x' ? Math.max(0, thickness - inset * 2) : chart.width,
+					height: annotation.axis === 'y' ? Math.max(0, thickness - inset * 2) : chart.height,
 					radius: annotation.radius,
 					ariaHidden: true,
 					style: {

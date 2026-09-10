@@ -1,6 +1,6 @@
 <script lang="ts">
 	import structureMap from 'virtual:svelai-structure';
-	import type { StructureNode } from '../../tooling/structure-docs/types';
+	import type { StructureNode } from '../../tooling/structure-docs/types.js';
 
 	let { component }: { component: string } = $props();
 	const structure = $derived(structureMap[component]);

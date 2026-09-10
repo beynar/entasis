@@ -18,7 +18,7 @@
 			name: 'size',
 			type: 'segmented',
 			label: 'Size',
-			value: 'small',
+			value: 'normal',
 			options: sizes
 		},
 		{
@@ -60,6 +60,40 @@
 	</ComponentCard>
 
 	{#snippet examples()}
+		<ComponentCard description="Solid, outline, and soft variants.">
+			<div class="flex flex-wrap items-center justify-center gap-3">
+				{#each variants as variant (variant)}
+					<Chip {variant}>{variant}</Chip>
+				{/each}
+			</div>
+		</ComponentCard>
+
+		<ComponentCard description="Seven semantic colors, shown here in the solid variant.">
+			<div class="flex flex-wrap items-center justify-center gap-3">
+				{#each colors as color (color)}
+					<Chip {color}>{color}</Chip>
+				{/each}
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="Three sizes on a badge scale (20 / 24 / 28). Chip does not share Button control height."
+		>
+			<div class="flex flex-wrap items-center justify-center gap-3">
+				{#each sizes as size (size)}
+					<Chip {size}>{size}</Chip>
+				{/each}
+			</div>
+		</ComponentCard>
+
+		<ComponentCard description="Prefix and suffix icon slots.">
+			<div class="flex flex-wrap items-center justify-center gap-3">
+				<Chip prefix={eyeClosedIcon}>Prefix</Chip>
+				<Chip suffix={eyeClosedIcon}>Suffix</Chip>
+				<Chip prefix={eyeClosedIcon} suffix={eyeClosedIcon}>Both</Chip>
+			</div>
+		</ComponentCard>
+
 		<ComponentCard
 			title="Positioned overlay"
 			description="Set position to anchor the Chip over a corner of a relatively positioned container."
@@ -92,38 +126,6 @@
 						<Chip position={position.value}>{position.label}</Chip>
 					</ChipPositionSurface>
 				{/each}
-			</div>
-		</ComponentCard>
-
-		<ComponentCard description="Solid, outline, and soft variants.">
-			<div class="flex flex-wrap items-center justify-center gap-3">
-				{#each variants as variant (variant)}
-					<Chip {variant}>{variant}</Chip>
-				{/each}
-			</div>
-		</ComponentCard>
-
-		<ComponentCard description="Eight semantic colors, shown here in the solid variant.">
-			<div class="flex flex-wrap items-center justify-center gap-3">
-				{#each colors as color (color)}
-					<Chip {color}>{color}</Chip>
-				{/each}
-			</div>
-		</ComponentCard>
-
-		<ComponentCard description="Three sizes to match surrounding density.">
-			<div class="flex flex-wrap items-center justify-center gap-3">
-				{#each sizes as size (size)}
-					<Chip {size}>{size}</Chip>
-				{/each}
-			</div>
-		</ComponentCard>
-
-		<ComponentCard description="Prefix and suffix icon slots.">
-			<div class="flex flex-wrap items-center justify-center gap-3">
-				<Chip prefix={eyeClosedIcon}>Prefix</Chip>
-				<Chip suffix={eyeClosedIcon}>Suffix</Chip>
-				<Chip prefix={eyeClosedIcon} suffix={eyeClosedIcon}>Both</Chip>
 			</div>
 		</ComponentCard>
 	{/snippet}

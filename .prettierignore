@@ -2,3 +2,8 @@
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
+
+# Separate repository and generated browser recordings
+/svelte-pro
+/.playwright-cli
+/.playwright-mcp

@@ -71,4 +71,17 @@ The \`trigger\` prop follows Popover's trigger contract. A trigger snippet recei
 Use \`view\`, \`weekStartsOnMonday\`, \`weekdayLength\`, \`locale\`, \`minDate\`, \`maxDate\`, and \`disabledDates\` to configure the embedded calendar. Set \`mobileSheet\` to render the selector as a bottom sheet below 768px.
 
 The content container animates intrinsic height changes. Month navigation uses a direction-aware slide and respects reduced-motion preferences.
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+- **open**: bindable popover visibility.
+- **defaultOpen**: initializes an uncontrolled selector once.
+- **onOpenChange**: receives the new boolean once for each opening or closing interaction.
+
+Selecting the current date or preset does not emit another value callback. With closeOnSelect,
+that selection can still close the popover and emit one onOpenChange callback.
+
 `;

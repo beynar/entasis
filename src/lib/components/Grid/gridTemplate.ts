@@ -18,7 +18,7 @@ const cappedTemplate = (
 ) => {
 	const gap = layoutSpacingCssValues[toLayoutSpacingKey(columnGap)];
 	const availableWidth =
-		columnGap === 0
+		columnGap === 'none'
 			? `calc(100% / ${maxColumns})`
 			: `calc((100% - ${maxColumns - 1} * ${gap}) / ${maxColumns})`;
 	const trackMinimum = `min(100%, max(${minWidth}px, ${availableWidth}))`;

@@ -8,9 +8,9 @@
 		size = 'normal',
 		density = 'normal',
 		class: className = '',
-		onClick,
-		onEnter,
-		onLeave,
+		onclick,
+		onpointerenter,
+		onpointerleave,
 		href,
 		target,
 		rel,
@@ -43,30 +43,41 @@
 	// Attributes assembled conditionally so the menu family (which sets data-highlighted
 	// imperatively via useNavigation) is never clobbered by a reactive `undefined` binding — the
 	// key is simply absent unless a `highlighted` prop is passed (listbox/combobox family).
-	const dynamicAttrs: Record<string, any> = $derived({
+	const dynamicAttrs = $derived({
+		...attrs,
 		...(highlighted !== undefined ? { 'data-highlighted': highlighted ? 'true' : undefined } : {}),
 		...(selected !== undefined
 			? { 'aria-selected': selected, 'data-selected': selected || undefined }
 			: {}),
-		...(disabled ? { 'aria-disabled': true } : {}),
+		...(disabled ? { 'aria-disabled': true, onclick: handleClick } : {}),
 		...(disabled && elementType === 'button' ? { disabled: true } : {}),
-		...attrs
+		...(disabled && elementType === 'a' ? { tabindex: -1, href: undefined } : {})
 	});
+
+	function handleClick(event: MouseEvent) {
+		if (disabled) {
+			event.preventDefault();
+			event.stopPropagation();
+			return;
+		}
+
+		onclick?.(event);
+	}
 </script>
 
 <svelte:element
 	this={elementType}
 	type={elementType === 'button' ? 'button' : undefined}
 	role={resolvedRole}
-	{href}
+	href={elementType === 'a' && disabled ? undefined : href}
 	{target}
 	{rel}
 	data-color={color}
 	data-size={size}
 	data-density={density}
-	onclick={disabled ? undefined : onClick}
-	onpointerenter={onEnter}
-	onpointerleave={onLeave}
+	onclick={disabled || onclick ? handleClick : undefined}
+	onpointerenter={disabled ? undefined : onpointerenter}
+	onpointerleave={disabled ? undefined : onpointerleave}
 	class={classes.root({
 		color,
 		size,

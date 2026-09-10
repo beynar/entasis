@@ -142,7 +142,7 @@
 >
 	<Stepper
 		items={panels}
-		{activeStep}
+		value={activeStep}
 		panelRole={null}
 		panelAriaLabelledby={false}
 		keyFramesOptions={{
@@ -207,7 +207,7 @@
 								hoverDelay: _hoverDelay,
 								closeOnMouseLeave: _closeOnMouseLeave,
 								popoverClass: _popoverClass,
-								onClick: itemOnClick,
+								onclick: itemOnClick,
 								suffix,
 								attrs,
 								...itemProps
@@ -224,8 +224,8 @@
 									'aria-expanded': 'false',
 									'data-menu-keep-open': 'true'
 								}}
-								onClick={(payload) => {
-									itemOnClick?.(payload);
+								onclick={(event) => {
+									itemOnClick?.(event);
 									if (openOnClick) void openSubmenu(depth, index, item);
 								}}
 								{@attach attachItemReference(isActivePanel)}

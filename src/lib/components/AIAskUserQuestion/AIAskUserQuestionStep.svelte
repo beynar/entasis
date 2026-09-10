@@ -27,7 +27,7 @@
 		errorMessage,
 		disabled = false,
 		renderer,
-		onChange,
+		onValueChange,
 		onError,
 		theme
 	}: {
@@ -36,7 +36,7 @@
 		errorMessage?: string;
 		disabled?: boolean;
 		renderer?: SlotType<AIAskUserQuestionQuestionState>;
-		onChange: (value: AIAskAnswer) => void;
+		onValueChange: (value: AIAskAnswer) => void;
 		onError: (message: string) => void;
 		theme?: AIAskUserQuestionThemeProps;
 	} = $props();
@@ -47,7 +47,7 @@
 
 <div data-slot="ai-ask-user-question-step" class={classes.stepContent()}>
 	{#if renderer}
-		<Slot render={renderer} payload={{ question, value, setValue: onChange }} />
+		<Slot render={renderer} payload={{ question, value, setValue: onValueChange }} />
 	{:else}
 		<div class={classes.question()}>
 			<div class={classes.questionTitle()}>{question.title}</div>
@@ -62,11 +62,11 @@
 				name={question.id}
 				placeholder={question.placeholder ?? 'Type your answer...'}
 				rows={question.rows ?? 4}
-				aria-invalid={errorMessage ? 'true' : undefined}
+				errors={errorMessage ? [errorMessage] : []}
 				class={classes.textArea()}
 				{required}
 				{disabled}
-				onChange={(answer: string) => onChange(answer)}
+				onValueChange={(answer) => onValueChange(answer ?? '')}
 			/>
 		{:else if question.type === 'single'}
 			<RadioInput
@@ -75,11 +75,13 @@
 				name={question.id}
 				items={question.options.map((option) => ({ ...option, value: option.id }))}
 				class={classes.options()}
-				aria-label={question.title}
-				aria-invalid={errorMessage ? 'true' : undefined}
+				fieldAttrs={{ 'aria-label': question.title }}
+				errors={errorMessage ? [errorMessage] : []}
 				{required}
 				{disabled}
-				onChange={(answer: string) => onChange(answer)}
+				onValueChange={(answer) => {
+					if (answer !== null) onValueChange(answer);
+				}}
 			/>
 		{:else if question.type === 'multiple'}
 			<CheckboxesInput
@@ -88,11 +90,11 @@
 				name={question.id}
 				items={question.options.map((option) => ({ ...option, value: option.id }))}
 				class={classes.options()}
-				aria-label={question.title}
-				aria-invalid={errorMessage ? 'true' : undefined}
+				fieldAttrs={{ role: 'group', 'aria-label': question.title }}
+				errors={errorMessage ? [errorMessage] : []}
 				{required}
 				{disabled}
-				onChange={(answer: string[]) => onChange(answer)}
+				onValueChange={(answer: string[]) => onValueChange(answer)}
 			/>
 		{:else if question.type === 'file'}
 			<AIAskUserQuestionFileStep
@@ -102,12 +104,12 @@
 				{disabled}
 				{theme}
 				{onError}
-				onChange={(files) => onChange(files)}
+				onValueChange={(files) => onValueChange(files)}
 			/>
 		{/if}
 	{/if}
 
-	{#if errorMessage}
+	{#if errorMessage && (renderer || question.type === 'file')}
 		<div role="alert" class={classes.error()}>{errorMessage}</div>
 	{/if}
 </div>

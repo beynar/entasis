@@ -1,4 +1,5 @@
 <script lang="ts" generics="Option extends TagGroupOption">
+	import { untrack } from 'svelte';
 	import Chip from '../../Chip/Chip.svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
@@ -6,7 +7,8 @@
 	import { useTagGroupTheme } from './tagGroup.theme.js';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
@@ -23,13 +25,13 @@
 		name,
 		label,
 		onValidate,
-		onChange,
-		onClick,
+		onValueChange,
 		visible,
-		attrs,
+		fieldAttrs,
 		class: className,
 		...rest
 	}: TagGroupProps<Option> = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 
@@ -50,7 +52,7 @@
 	const field = createFieldState({
 		id,
 		get value() {
-			return normalizedValue;
+			return value === undefined ? undefined : normalizedValue;
 		},
 		set value(nextValue) {
 			value = normalizeValue(nextValue);
@@ -67,8 +69,8 @@
 		set focused(nextFocused: boolean) {
 			focused = nextFocused;
 		},
-		onChange: (nextValue) => {
-			onChange?.(normalizeValue(nextValue));
+		onValueChange: (nextValue) => {
+			onValueChange?.(normalizeValue(nextValue));
 		},
 		get disabled() {
 			return disabled;
@@ -104,7 +106,6 @@
 		} else {
 			field.value = selected ? null : option.value;
 		}
-		onClick?.(option.value);
 	};
 
 	const handleFocusOut = (event: FocusEvent) => {
@@ -117,8 +118,8 @@
 </script>
 
 <Field
-	attrs={{
-		...attrs
+	fieldAttrs={{
+		...fieldAttrs
 	}}
 	as="fieldset"
 	{field}
@@ -166,7 +167,7 @@
 				aria-pressed={selected}
 				aria-disabled={itemDisabled}
 				disabled={itemDisabled}
-				onClick={() => setSelected(option)}
+				onclick={() => setSelected(option)}
 			>
 				{option.label ?? option.value}
 			</Chip>

@@ -34,7 +34,7 @@ export const chartUsageMetadata = {
 	scatter: {
 		label: 'Scatter',
 		description:
-			'The same numeric observations switch between points and responsive hexagonal bins with rectangular x/y brush zoom.',
+			'The same numeric observations switch between points and responsive hexagonal bins with native x-axis brush zoom.',
 		ariaLabel: 'Quarterly revenue bubble chart'
 	},
 	distribution: {

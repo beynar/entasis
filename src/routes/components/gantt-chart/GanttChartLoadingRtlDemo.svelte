@@ -33,11 +33,11 @@
 			<Button
 				size="small"
 				variant="outline"
-				onClick={() => (direction = direction === 'rtl' ? 'ltr' : 'rtl')}
+				onclick={() => (direction = direction === 'rtl' ? 'ltr' : 'rtl')}
 			>
 				Direction: {direction.toUpperCase()}
 			</Button>
-			<Button size="small" variant="outline" onClick={() => (loading = !loading)}>
+			<Button size="small" variant="outline" onclick={() => (loading = !loading)}>
 				Loading: {loading ? 'on' : 'off'}
 			</Button>
 		</div>

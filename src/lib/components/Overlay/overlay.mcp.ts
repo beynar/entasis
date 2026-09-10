@@ -7,16 +7,16 @@ Overlay layers concise content and actions over bounded media or another visual 
 
 \`\`\`svelte
 <script>
-\timport { Overlay } from 'svelai/overlay';
+	import { Overlay } from 'svelai/overlay';
 </script>
 
 <div class="aspect-video overflow-hidden rounded-lg">
-\t<Overlay
-\t\ttitle="Design system foundations"
-\t\tdescription="A practical tour of tokens, primitives, and composition."
-\t\tactions={[{ content: 'Open gallery', color: 'neutral', variant: 'soft' }]}
-\t/>
-\t<img src="/cover.jpg" alt="Coastal landscape" class="size-full object-cover" />
+	<Overlay
+		title="Design system foundations"
+		description="A practical tour of tokens, primitives, and composition."
+		actions={[{ content: 'Open gallery', color: 'neutral', variant: 'soft' }]}
+	/>
+	<img src="/cover.jpg" alt="Coastal landscape" class="size-full object-cover" />
 </div>
 \`\`\`
 
@@ -26,6 +26,10 @@ Overlay layers concise content and actions over bounded media or another visual 
 - **align**: 'start' | 'center' | 'end' (default: 'center') - Horizontal content and text alignment.
 - **showOn**: 'always' | 'hover' | 'focus' (default: 'always') - Reveal condition. Hover also reveals for focus-within so actions remain keyboard accessible.
 - **open**: boolean (default: true) - Enables or hides the overlay while preserving its reveal transition.
+- **defaultOpen**: boolean (default: true) - Initial state when open is not provided.
+- **onOpenChange**: (open: boolean) => void - Reserved for library-requested state changes.
+- **onAfterOpen**: () => void - Called after the open transition finishes.
+- **onAfterClose**: () => void - Called after the close transition finishes.
 - **scrim**: boolean (default: true) - Toggles the dark fill or directional gradient.
 - **size**: 'small' | 'normal' | 'large' (default: 'normal') - Scales padding, gaps, and typography.
 - **actions**: OverlayAction[] - Button props plus a content string, rendered as a wrapping action row.

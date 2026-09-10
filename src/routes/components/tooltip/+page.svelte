@@ -1,11 +1,42 @@
 <script lang="ts">
 	import Button from '$lib/components/Button/Button.svelte';
 	import { tooltip } from '$lib/components/Tooltip/tooltip.svelte.js';
+	import { colors, sizes, variants } from '$lib/utils/tokens.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 
-	const variants = ['solid', 'outline', 'soft'] as const;
-	const sizes = ['small', 'normal', 'large'] as const;
+	const placements = ['top', 'bottom', 'left', 'right'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'solid',
+			options: variants
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'neutral',
+			options: colors
+		},
+		{
+			name: 'position',
+			type: 'segmented',
+			label: 'Position',
+			value: 'top',
+			options: placements
+		}
+	]);
 </script>
 
 <DocPage
@@ -21,11 +52,12 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A tooltip attached to a button, shown on hover."
 		code={`<Button
 	variant="outline"
 	color="neutral"
-	{@attach tooltip({ content: 'Hover me', position: 'top' })}
+	{@attach tooltip({ content: 'Hover me', size: '${controls.value.size}', variant: '${controls.value.variant}', color: '${controls.value.color}', position: '${controls.value.position}' })}
 >
 	Hover me
 </Button>`}
@@ -33,7 +65,13 @@
 		<Button
 			variant="outline"
 			color="neutral"
-			{@attach tooltip({ content: 'Hover me', position: 'top' })}
+			{@attach tooltip({
+				content: 'Hover me',
+				size: controls.value.size,
+				variant: controls.value.variant,
+				color: controls.value.color,
+				position: controls.value.position
+			})}
 		>
 			Hover me
 		</Button>

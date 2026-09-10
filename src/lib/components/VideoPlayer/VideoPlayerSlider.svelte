@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Sizes } from '$lib/types/theme.js';
 	import Slider from '../Form/Slider/Slider.svelte';
-	import { getVideoPlayerSliderTheme } from './videoPlayer.sliderTheme.js';
+	import { getVideoPlayerSliderTheme } from './videoPlayer.slider.theme.js';
 	import type { useVideoPlayerTheme } from './videoPlayer.theme.js';
 
 	type VideoPlayerClasses = ReturnType<typeof useVideoPlayerTheme>;
@@ -19,7 +19,7 @@
 		showValue = false,
 		orientation = 'horizontal',
 		format = (nextValue: number) => `${nextValue}`,
-		onChange
+		onValueChange
 	}: {
 		classes: VideoPlayerClasses;
 		size: Sizes;
@@ -33,7 +33,7 @@
 		showValue?: boolean;
 		orientation?: 'horizontal' | 'vertical';
 		format?: (value: number) => string;
-		onChange: (value: number) => void;
+		onValueChange: (value: number) => void;
 	} = $props();
 
 	const maxValue = $derived(Math.max(min, max));
@@ -44,8 +44,8 @@
 	const bufferedStyle = $derived(`--video-player-slider-buffered: ${bufferedPercentage}%;`);
 	const sliderTheme = $derived(getVideoPlayerSliderTheme(orientation));
 
-	function handleChange(nextValue: number | number[]) {
-		onChange(Array.isArray(nextValue) ? (nextValue[0] ?? min) : nextValue);
+	function handleChange(nextValue: number | number[] | null) {
+		onValueChange(Array.isArray(nextValue) ? (nextValue[0] ?? min) : (nextValue ?? min));
 	}
 </script>
 
@@ -69,6 +69,6 @@
 		{orientation}
 		{size}
 		theme={sliderTheme}
-		onChange={handleChange}
+		onValueChange={handleChange}
 	/>
 </div>

@@ -69,7 +69,8 @@ parent with a definite height so the virtual viewport remains bounded.
 
 \`DataTableColumn<TData, TValue>\` supports \`id\`, \`accessor\`, required \`header\`, optional
 \`cell\` and \`aggregatedCell\`, sorting, filtering, grouping, aggregation, editing, visibility,
-resizing, reordering, pinning, alignment, sizing, and column classes.
+resizing, reordering, pinning, alignment, \`width\` / \`minWidth\` / \`maxWidth\`, and column
+classes.
 
 Use \`createDataTableColumnHelper<TData>()\` to infer accessor values inside cell and editor
 configuration. Raw DataTableColumn definitions remain available as an escape hatch.

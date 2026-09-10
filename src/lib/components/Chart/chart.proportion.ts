@@ -6,14 +6,10 @@ import {
 import { polar, radialArc } from '@tanstack/charts/polar';
 import { pie } from 'd3-shape';
 import type { CompiledMark } from './chart.cartesian.js';
-import { chartKeyIdentity } from './chart.channels.js';
+import { chartKeyIdentity, type CompiledChartChannel } from './chart.channels.js';
 import type { ChartKey, ChartProportionMark } from './chart.props.js';
 
-type ProportionAccessor<TRow, TValue> = (
-	row: TRow,
-	index: number,
-	rows: readonly TRow[]
-) => TValue | null | undefined;
+type ProportionAccessor<TRow, TValue> = CompiledChartChannel<TRow, TValue>;
 
 type NormalizedProportionVariant =
 	| { type: 'pie'; padAngle: number; cornerRadius: number }
@@ -75,16 +71,19 @@ function normalizeProportionVariant<TRow>(
 	mark: ChartProportionMark<TRow>,
 	path: string
 ): NormalizedProportionVariant {
-	const input = typeof mark.variant === 'string' ? { type: mark.variant } : mark.variant;
-	if (input.type === 'pie') {
+	const input = mark.variant;
+	const type = typeof input === 'string' ? input : input.type;
+	if (type === 'pie') {
+		const options = typeof input === 'object' && input.type === 'pie' ? input : undefined;
 		return {
 			type: 'pie',
-			padAngle: nonnegativeNumber(input.padAngle ?? 0.012, `${path}.variant.padAngle`),
-			cornerRadius: nonnegativeNumber(input.cornerRadius ?? 3, `${path}.variant.cornerRadius`)
+			padAngle: nonnegativeNumber(options?.padAngle ?? 0.012, `${path}.variant.padAngle`),
+			cornerRadius: nonnegativeNumber(options?.cornerRadius ?? 3, `${path}.variant.cornerRadius`)
 		};
 	}
-	if (input.type === 'donut') {
-		const innerRadius = input.innerRadius ?? 0.58;
+	if (type === 'donut') {
+		const options = typeof input === 'object' && input.type === 'donut' ? input : undefined;
+		const innerRadius = options?.innerRadius ?? 0.58;
 		if (!Number.isFinite(innerRadius) || innerRadius < 0 || innerRadius >= 1) {
 			throw new TypeError(
 				`[Chart] ${path}.variant.innerRadius must be a finite number greater than or equal to 0 and less than 1.`
@@ -93,21 +92,22 @@ function normalizeProportionVariant<TRow>(
 		return {
 			type: 'donut',
 			innerRadius,
-			padAngle: nonnegativeNumber(input.padAngle ?? 0.012, `${path}.variant.padAngle`),
-			cornerRadius: nonnegativeNumber(input.cornerRadius ?? 5, `${path}.variant.cornerRadius`)
+			padAngle: nonnegativeNumber(options?.padAngle ?? 0.012, `${path}.variant.padAngle`),
+			cornerRadius: nonnegativeNumber(options?.cornerRadius ?? 5, `${path}.variant.cornerRadius`)
 		};
 	}
-	if (input.type === 'waffle') {
-		const cells = positiveInteger(input.cells ?? 100, `${path}.variant.cells`);
+	if (type === 'waffle') {
+		const options = typeof input === 'object' && input.type === 'waffle' ? input : undefined;
+		const cells = positiveInteger(options?.cells ?? 100, `${path}.variant.cells`);
 		return {
 			type: 'waffle',
 			cells,
-			columns: Math.min(positiveInteger(input.columns ?? 10, `${path}.variant.columns`), cells),
-			gap: nonnegativeNumber(input.gap ?? 3, `${path}.variant.gap`),
-			radius: nonnegativeNumber(input.radius ?? 2, `${path}.variant.radius`)
+			columns: Math.min(positiveInteger(options?.columns ?? 10, `${path}.variant.columns`), cells),
+			gap: nonnegativeNumber(options?.gap ?? 3, `${path}.variant.gap`),
+			radius: nonnegativeNumber(options?.radius ?? 2, `${path}.variant.radius`)
 		};
 	}
-	throw new TypeError(`[Chart] ${path}.variant.type "${String(input.type)}" is not supported.`);
+	throw new TypeError(`[Chart] ${path}.variant.type "${String(type)}" is not supported.`);
 }
 
 function summarizeProportions<TRow extends object>(
@@ -118,8 +118,9 @@ function summarizeProportions<TRow extends object>(
 ): readonly ProportionDatum[] {
 	const categories = new Map<string, { category: ChartKey; value: number; rows: TRow[] }>();
 	data.forEach((row, index) => {
-		const category = categoryAccessor(row, index, data);
-		const value = valueAccessor(row, index, data);
+		const context = { index, data };
+		const category = categoryAccessor(row, context);
+		const value = valueAccessor(row, context);
 		if (value === null || value === undefined) return;
 		if (typeof category !== 'string' && typeof category !== 'number') {
 			throw new TypeError(
@@ -189,6 +190,7 @@ function compileArcs(
 				fillOpacity: 0.88
 			})
 		],
+		scales: { angle: null, radius: null },
 		inset: 16,
 		radiusRatio: 0.92
 	});

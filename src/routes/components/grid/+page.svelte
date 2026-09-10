@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 	import { Grid } from '$lib/components/Grid/index.js';
 	import { Stack } from '$lib/components/Stack/index.js';
@@ -31,6 +32,26 @@
 	} as const;
 
 	const panels = Array.from({ length: 6 }, (_, index) => index + 1);
+	const layoutGaps = ['none', 'xs', 'sm', 'md', 'lg', 'xl'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'columns',
+			type: 'slider',
+			label: 'Columns',
+			value: 3,
+			min: 1,
+			max: 6,
+			step: 1,
+			showValue: true
+		},
+		{
+			name: 'gap',
+			type: 'segmented',
+			label: 'Gap',
+			value: 'xl',
+			options: layoutGaps
+		}
+	]);
 </script>
 
 <DocPage
@@ -46,9 +67,10 @@
 	]}
 >
 	<ComponentCard
-		description="A responsive metric grid capped at three columns."
+		{controls}
+		description="A metric grid with live column count and gap."
 		class="min-h-[420px]"
-		code={`<Grid columns={{ minWidth: 180, max: 3 }} gap={4} width="100%">
+		code={`<Grid columns={${controls.value.columns}} gap="${controls.value.gap}" width="100%">
 	{#each metrics as metric}
 		<article class="rounded-lg border p-4">
 			<span>{metric.label}</span>
@@ -57,9 +79,14 @@
 	{/each}
 </Grid>`}
 	>
-		<Grid columns={{ minWidth: 180, max: 3 }} gap={4} width="100%" maxWidth={900}>
+		<Grid
+			columns={controls.value.columns}
+			gap={controls.value.gap}
+			width="100%"
+			maxWidth={900}
+		>
 			{#each metrics as metric (metric.label)}
-				<Stack gap={4} padding={4} class="border-neutral-muted bg-surface rounded-lg border">
+				<Stack gap="xl" padding="xl" class="border-neutral-muted bg-surface rounded-lg border">
 					<Stack orientation="horizontal" align="center" justify="between">
 						<span class="text-neutral/60 text-xs font-medium">{metric.label}</span>
 						<span
@@ -70,7 +97,7 @@
 							{@render metric.icon({ class: 'size-4' })}
 						</span>
 					</Stack>
-					<Stack gap={1}>
+					<Stack gap="xs">
 						<strong class="text-neutral text-2xl">{metric.value}</strong>
 						<span class="text-success text-xs">{metric.change} this month</span>
 					</Stack>
@@ -83,13 +110,13 @@
 		<ComponentCard
 			title="Fixed columns"
 			description="Numeric columns create equal tracks with min-width protection."
-			code={`<Grid columns={3} gap={3}>
+			code={`<Grid columns={3} gap="lg">
 	<div>One</div>
 	<div>Two</div>
 	<div>Three</div>
 </Grid>`}
 		>
-			<Grid columns={3} gap={3} width="100%" maxWidth={720}>
+			<Grid columns={3} gap="lg" width="100%" maxWidth={720}>
 				{#each panels.slice(0, 3) as panel (panel)}
 					<div
 						class="border-neutral-muted bg-surface-raised text-neutral flex min-h-24 items-center justify-center rounded-md border text-sm font-medium"
@@ -103,13 +130,13 @@
 		<ComponentCard
 			title="Responsive tracks"
 			description="Minimum track width determines when columns wrap; max prevents over-expansion on wide screens."
-			code={`<Grid columns={{ minWidth: 140, max: 4 }} gap={3}>
+			code={`<Grid columns={{ minWidth: 140, max: 4 }} gap="lg">
 	{#each items as item}
 		<div>{item}</div>
 	{/each}
 </Grid>`}
 		>
-			<Grid columns={{ minWidth: 140, max: 4 }} gap={3} width="100%" maxWidth={840}>
+			<Grid columns={{ minWidth: 140, max: 4 }} gap="lg" width="100%" maxWidth={840}>
 				{#each panels as panel (panel)}
 					<div
 						class="border-neutral-muted bg-surface text-neutral flex min-h-20 items-center justify-center rounded-md border text-sm"
@@ -123,22 +150,22 @@
 		<ComponentCard
 			title="Auto-fill and auto-fit"
 			description="Fill preserves empty tracks; fit collapses them so present items stretch."
-			code={`<Grid columns={{ minWidth: 150, repeat: 'fill' }} gap={3}>...</Grid>
-<Grid columns={{ minWidth: 150, repeat: 'fit' }} gap={3}>...</Grid>`}
+			code={`<Grid columns={{ minWidth: 150, repeat: 'fill' }} gap="lg">...</Grid>
+<Grid columns={{ minWidth: 150, repeat: 'fit' }} gap="lg">...</Grid>`}
 		>
-			<Stack gap={5} width="100%" maxWidth={780}>
-				<Stack gap={2}>
+			<Stack gap="xl" width="100%" maxWidth={780}>
+				<Stack gap="md">
 					<span class="text-neutral/60 font-mono text-[11px]">fill</span>
-					<Grid columns={{ minWidth: 150, repeat: 'fill' }} gap={3}>
+					<Grid columns={{ minWidth: 150, repeat: 'fill' }} gap="lg">
 						<div class="bg-primary/12 text-primary rounded-md p-4 text-center text-sm">Alpha</div>
 						<div class="bg-secondary/12 text-secondary rounded-md p-4 text-center text-sm">
 							Beta
 						</div>
 					</Grid>
 				</Stack>
-				<Stack gap={2}>
+				<Stack gap="md">
 					<span class="text-neutral/60 font-mono text-[11px]">fit</span>
-					<Grid columns={{ minWidth: 150, repeat: 'fit' }} gap={3}>
+					<Grid columns={{ minWidth: 150, repeat: 'fit' }} gap="lg">
 						<div class="bg-primary/12 text-primary rounded-md p-4 text-center text-sm">Alpha</div>
 						<div class="bg-secondary/12 text-secondary rounded-md p-4 text-center text-sm">
 							Beta

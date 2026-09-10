@@ -13,8 +13,10 @@ ProgressCircle is a compact determinate circular progress indicator with a visib
 
 - **value**: number (default: 0)
   - Progress value from 0 to 100. Values outside the range are clamped.
-- **size**: 'small' | 'normal' | 'large' | number (default: 'normal')
-  - Named tokens use the component theme. Numbers are treated as pixel sizes.
+- **size**: 'small' | 'normal' | 'large' (default: 'normal')
+  - Selects semantic component geometry.
+- **diameter**: number
+  - Optional explicit circle diameter in pixels.
 - **color**: 'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'info' | 'neutral' (default: 'primary')
   - Applies a theme color token to the animated arc.
 - **label**: string (default: 'Progress')
@@ -31,7 +33,7 @@ ProgressCircle is a compact determinate circular progress indicator with a visib
 \`\`\`svelte
 <ProgressCircle size="small" />
 <ProgressCircle value={45} color="danger" />
-<ProgressCircle value={72} size={56} color="success" />
+<ProgressCircle value={72} diameter={56} color="success" />
 \`\`\`
 
 ## Accessibility

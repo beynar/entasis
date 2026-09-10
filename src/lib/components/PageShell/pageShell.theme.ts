@@ -10,23 +10,23 @@ const defaultHeader = cva({
 });
 
 const defaultHeaderInner = cva({
-	base: 'flex min-h-12 items-center justify-between gap-3 px-3 py-2 md:px-4'
+	base: 'flex min-h-12 items-center justify-between gap-lg px-lg py-md md:px-xl'
 });
 
 const defaultTitleStack = cva({
-	base: 'grid min-w-0 gap-0.5'
+	base: 'grid min-w-0 gap-micro'
 });
 
 const defaultMeta = cva({
-	base: 'flex min-w-0 items-center gap-1.5 text-xs leading-4 text-neutral/55'
+	base: 'flex min-w-0 items-center gap-sm text-xs leading-4 text-neutral/55'
 });
 
 const defaultBack = cva({
-	base: 'inline-flex size-5 shrink-0 items-center justify-center rounded-md'
+	base: 'inline-flex size-5 shrink-0 items-center justify-center rounded-sm'
 });
 
 const defaultBreadcrumbs = cva({
-	base: 'min-w-0 gap-1.5 text-xs sm:gap-2'
+	base: 'min-w-0 gap-sm text-xs sm:gap-md'
 });
 
 const defaultEyebrow = cva({
@@ -42,7 +42,7 @@ const defaultSubtitle = cva({
 });
 
 const defaultActions = cva({
-	base: 'flex shrink-0 items-center justify-end gap-1.5'
+	base: 'flex shrink-0 items-center justify-end gap-sm'
 });
 
 const defaultContent = cva({
@@ -54,9 +54,9 @@ const defaultContentInner = cva({
 	variants: {
 		padding: {
 			none: '',
-			small: 'p-3',
-			normal: 'p-4 md:p-6',
-			large: 'p-6 md:p-8'
+			small: 'p-lg',
+			normal: 'p-xl md:p-layout-md',
+			large: 'p-layout-md md:p-layout-lg'
 		},
 		width: {
 			full: '',
@@ -77,7 +77,7 @@ const defaultFooter = cva({
 });
 
 const defaultFooterInner = cva({
-	base: 'flex min-h-12 items-center justify-between gap-3 px-4 py-2 text-sm text-neutral/70'
+	base: 'flex min-h-12 items-center justify-between gap-lg px-xl py-md text-sm text-neutral/70'
 });
 
 const defaultFooterContent = cva({
@@ -85,11 +85,11 @@ const defaultFooterContent = cva({
 });
 
 const defaultInlineActions = cva({
-	base: 'hidden shrink-0 items-center justify-end gap-2 md:flex'
+	base: 'hidden shrink-0 items-center justify-end gap-md md:flex'
 });
 
 const defaultMobileActions = cva({
-	base: 'flex shrink-0 items-center justify-end gap-2 md:hidden'
+	base: 'flex shrink-0 items-center justify-end gap-md md:hidden'
 });
 
 const defaultOverflowTrigger = cva({

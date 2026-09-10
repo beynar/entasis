@@ -15,7 +15,7 @@ The Separator component is a visual divider that separates content in an interfa
 - **orientation**: 'horizontal' | 'vertical' (default: 'horizontal') - The direction of the separator
 - **color**: Colors | 'neutral' (default: 'neutral') - The color of the separator line
   - Available: primary, secondary, success, warning, danger, info, neutral
-- **size**: number (default: 1) - The thickness of the separator in pixels
+- **thickness**: number (default: 1) - The thickness of the separator in pixels
 - **decorative**: boolean (default: false) - Whether the separator is purely decorative (affects ARIA role)
 
 ### Content Slots
@@ -71,16 +71,16 @@ The Separator component is a visual divider that separates content in an interfa
 <Separator color="success" />
 \`\`\`
 
-### Different Sizes
+### Different Thicknesses
 \`\`\`svelte
-<Separator size={1} />
-<Separator size={2} />
-<Separator size={4} />
+<Separator thickness={1} />
+<Separator thickness={2} />
+<Separator thickness={4} />
 \`\`\`
 
 ### Thicker Separator
 \`\`\`svelte
-<Separator size={3} color="primary" />
+<Separator thickness={3} color="primary" />
 \`\`\`
 
 ### With Label and Color
@@ -168,7 +168,7 @@ The Separator component is a visual divider that separates content in an interfa
 		<p>Your personal details</p>
 	</section>
 	
-	<Separator color="primary" size={2}>
+	<Separator color="primary" thickness={2}>
 		{#snippet children()}
 			Account Settings
 		{/snippet}
@@ -210,7 +210,7 @@ The Separator component is a visual divider that separates content in an interfa
 
 - Default orientation is horizontal
 - Default color is 'neutral' for subtle separation
-- Size controls the thickness (border-width) of the line
+- Thickness controls the border width of the line
 - Label automatically positions in the center with proper spacing
 - Vertical separators require a parent with defined height
 - Works well with MenuOption, Dialog, and other components

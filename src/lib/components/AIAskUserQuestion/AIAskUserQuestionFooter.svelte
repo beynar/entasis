@@ -56,7 +56,7 @@
 			size="small"
 			label={previousLabel}
 			disabled={disabled || isFirst}
-			onClick={onPrevious}
+			onclick={onPrevious}
 		>
 			{@render arrowLeftIcon({ size: 16 })}
 		</Button>
@@ -67,7 +67,7 @@
 			size="small"
 			label={nextLabel}
 			disabled={disabled || isLast}
-			onClick={onNext}
+			onclick={onNext}
 		>
 			{@render arrowRightIcon({ size: 16 })}
 		</Button>
@@ -81,7 +81,7 @@
 				size="small"
 				loading={isDiscarding}
 				{disabled}
-				onClick={onDiscard}
+				onclick={onDiscard}
 			>
 				{discardLabel}
 			</Button>
@@ -93,7 +93,7 @@
 			suffix={isLast ? undefined : arrowRightIcon}
 			loading={isLast && isSubmitting}
 			{disabled}
-			onClick={onPrimary}
+			onclick={onPrimary}
 		>
 			{isLast ? (isSubmitting ? submittingLabel : submitLabel) : nextLabel}
 		</Button>

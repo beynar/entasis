@@ -88,7 +88,7 @@ export const editingDataTableCode = `<script lang="ts">
     items={roleOptions}
     value={editor.draft == null ? null : String(editor.draft)}
     disabled={editor.pending}
-    onChange={editor.setDraft}
+    onValueChange={editor.setDraft}
   />
 {/snippet}
 
@@ -212,7 +212,7 @@ export const renderingDataTableCode = `<script lang="ts">
   <Select
     items={statusOptions}
     value={typeof filter.value === 'string' ? filter.value : null}
-    onChange={(value) => filter.setValue(value || undefined)}
+    onValueChange={(value) => filter.setValue(value || undefined)}
   />
 {/snippet}
 
@@ -267,7 +267,7 @@ export const externalControlsDataTableCode = `<script lang="ts">
 
 <TextInput
   value={dataTable?.state.globalFilter ?? ''}
-  onChange={(value) => dataTable?.setGlobalFilter(value ?? '')}
+  onValueChange={(value) => dataTable?.setGlobalFilter(value ?? '')}
 />
 
 {#if dataTable}

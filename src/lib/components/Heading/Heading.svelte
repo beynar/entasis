@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { HeadingProps } from './heading.props.js';
-	import { heading } from './heading.theme.js';
+	import { headingTheme } from './heading.theme.js';
 	let {
 		class: className = '',
 		underline = false,
@@ -25,7 +25,7 @@
 	data-muted={muted}
 	data-align={align}
 	data-weight={weight}
-	class={`${className}`}
+	class={headingTheme.root({ size, weight, align, balanced, underline, muted, trim, className })}
 	{...attachments}
 >
 	{#if children}

@@ -15,8 +15,8 @@
 		class: className,
 		star,
 		ref = $bindable(null),
-		onStarPointerMove,
-		onStarClick,
+		onpointermove,
+		onclick,
 		i18n,
 		theme,
 		...attachments
@@ -53,11 +53,10 @@
 		<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 		<span
 			aria-hidden="true"
+			data-star-index={starIndex}
 			class={classes.star({ size, interactive })}
-			onpointermove={onStarPointerMove
-				? (event) => onStarPointerMove(event, starIndex, event.currentTarget)
-				: undefined}
-			onclick={onStarClick ? (event) => onStarClick(event, starIndex, event.currentTarget) : undefined}
+			{onpointermove}
+			{onclick}
 		>
 			<span class={classes.starBase()}>
 				{#if star}

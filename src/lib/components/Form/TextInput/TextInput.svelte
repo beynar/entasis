@@ -1,11 +1,13 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { TextInputProps } from './textInput.props.js';
 	import { useTextInputTheme } from './textInput.theme.js';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
@@ -15,11 +17,12 @@
 		name,
 		onValidate,
 		visible,
-		onChange,
+		onValueChange,
 		type = 'text',
-
+		inputAttrs,
 		...rest
 	}: TextInputProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 
@@ -34,7 +37,7 @@
 		get errors() {
 			return errors;
 		},
-		set errors(v: any) {
+		set errors(v: string[] | boolean) {
 			errors = v;
 		},
 		get focused() {
@@ -43,8 +46,8 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => {
-			onChange?.(v);
+		onValueChange: (v) => {
+			onValueChange?.(v);
 		},
 		get disabled() {
 			return disabled;
@@ -92,7 +95,9 @@
 	{...rest}
 >
 	<input
+		{...inputAttrs}
 		disabled={field.disabled}
+		required={field.required}
 		data-1p-ignore
 		{type}
 		{id}
@@ -100,13 +105,16 @@
 		value={field.value ?? ''}
 		oninput={(event) => {
 			field.value = event.currentTarget.value;
+			inputAttrs?.oninput?.(event);
 		}}
 		bind:this={field.node}
-		onfocus={() => {
+		onfocus={(event) => {
 			field.focused = true;
+			inputAttrs?.onfocus?.(event);
 		}}
-		onblur={() => {
+		onblur={(event) => {
 			field.focused = false;
+			inputAttrs?.onblur?.(event);
 		}}
 		{placeholder}
 		class={classes.input({ disabled: field.disabled, size: rest.size })}

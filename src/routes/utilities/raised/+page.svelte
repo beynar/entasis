@@ -2,6 +2,18 @@
 	import Code from '$lib/components/Code/Code.svelte';
 	import Separator from '$lib/components/Separator/Separator.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
+
+	const elevations = ['raised-none', 'raised-sm', 'raised', 'raised-lg'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'elevation',
+			type: 'segmented',
+			label: 'Elevation',
+			value: 'raised',
+			options: elevations
+		}
+	]);
 
 	const usageCode = `<div class="raised rounded-lg bg-surface p-4">
 	Content
@@ -43,11 +55,14 @@
 	</header>
 
 	<ComponentCard
+		{controls}
 		description="Use raised on cards, popovers, and floating surfaces that need depth."
-		code={usageCode}
+		code={`<div class="${controls.value.elevation} rounded-lg bg-surface p-4">
+	Content
+</div>`}
 		class="!min-h-[240px]"
 	>
-		<div class="raised bg-surface rounded-lg p-4 text-sm">Content</div>
+		<div class="{controls.value.elevation} bg-surface rounded-lg p-4 text-sm">Content</div>
 	</ComponentCard>
 
 	<Separator class="my-2" children="Usage" />

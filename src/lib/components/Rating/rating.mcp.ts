@@ -48,8 +48,9 @@ A read-only star rating display with half/partial star support, a configurable s
 
 ### Advanced Props
 - **ref**: \`HTMLElement | null\` (bindable) - Reference to the root star-row element.
-- **onStarPointerMove** / **onStarClick**: \`(event, index, element) => void\` (optional)
-  - Per-star pointer callbacks that let a wrapper drive interaction (this is how RatingInput implements hover preview and selection). Leave unset for a purely static display.
+- **onpointermove**: \`(event: PointerEvent) => void\` (optional)
+- **onclick**: \`(event: MouseEvent) => void\` (optional)
+  - Native handlers attached to every star. Read the one-based index from \`event.currentTarget.dataset.starIndex\`. Leave unset for a purely static display.
 - **i18n**: \`Partial<Messages>\` - Per-instance i18n overrides merged over the global catalog.
 - **theme**: \`RatingThemeProps\` - Theme overrides.
 

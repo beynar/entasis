@@ -3,9 +3,28 @@
 	import DocPage from '../../DocPage.svelte';
 	import { Checkbox } from '$lib/components/Form/Checkbox/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let email = $state(true);
 	let terms = $state(false);
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'mode',
+			type: 'segmented',
+			label: 'Mode',
+			value: 'normal',
+			options: ['normal', 'card']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -21,15 +40,26 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Toggle a single notification preference"
 		code={`<Checkbox
+	size="${controls.value.size}"
+	mode="${controls.value.mode}"
+	disabled={${controls.value.disabled}}
 	label="Email"
 	description="Receive updates by email"
 	bind:value={email}
 />`}
 	>
 		<div class="w-full max-w-md">
-			<Checkbox label="Email" description="Receive updates by email" bind:value={email} />
+			<Checkbox
+				size={controls.value.size}
+				mode={controls.value.mode}
+				disabled={controls.value.disabled}
+				label="Email"
+				description="Receive updates by email"
+				bind:value={email}
+			/>
 			<p class="text-neutral/60 mt-4 text-sm">Value: {email}</p>
 		</div>
 	</ComponentCard>

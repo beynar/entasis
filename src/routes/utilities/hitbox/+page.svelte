@@ -4,6 +4,7 @@
 	import type { HitboxThemeProps } from '$lib/components/Hitbox/hitbox.theme.js';
 	import { sizes } from '$lib/utils/tokens.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 
 	const visibleHitboxTheme = {
@@ -13,6 +14,16 @@
 	} satisfies HitboxThemeProps;
 
 	let activations = $state(0);
+
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		}
+	]);
 </script>
 
 <DocPage
@@ -27,10 +38,11 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="The tinted surface visualizes the transparent target around the dot."
 		class="!min-h-fit"
 		code={`<button type="button" aria-label="Select item" class="relative size-2 rounded-full bg-primary">
-	<Hitbox size="normal" />
+	<Hitbox size="${controls.value.size}" />
 </button>`}
 	>
 		<div class="flex min-h-40 w-full flex-col items-center justify-center gap-6">
@@ -40,7 +52,7 @@
 				class="bg-primary relative size-2 cursor-pointer rounded-full"
 				onclick={() => activations++}
 			>
-				<Hitbox size="large" theme={visibleHitboxTheme} />
+				<Hitbox size={controls.value.size} theme={visibleHitboxTheme} />
 			</button>
 			<Chip color="neutral" variant="soft">Activations: {activations}</Chip>
 		</div>

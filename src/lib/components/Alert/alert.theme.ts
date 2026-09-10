@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultAlert = cva({
-	base: 'relative w-full rounded-lg border px-4 py-3 text-sm flex gap-3 items-start',
+	base: 'relative w-full rounded-md border px-xl py-lg text-sm flex gap-lg items-start',
 	variants: {
 		hasIcon: {
 			true: '',
@@ -19,15 +19,15 @@ const defaultAlert = cva({
 		},
 		variant: {
 			solid: 'bg-color text-color-contrast border-color',
-			outline: 'bg-transparent border-color text-color-readable',
+			outline: 'bg-color/0 border-color text-color-readable',
 			// The soft "toast" look: muted tint, colored border and a legible on-tint
 			// accent (`muted-readable` = dark text light-mode, light text dark-mode).
 			soft: 'bg-color-muted text-color-muted-readable border-color/20'
 		},
 		size: {
-			small: 'px-3 py-2 text-xs',
-			normal: 'px-4 py-3 text-sm',
-			large: 'px-5 py-4 text-base'
+			small: 'px-lg py-md text-xs',
+			normal: 'px-xl py-lg text-sm',
+			large: 'px-xl py-xl text-base'
 		},
 		disabled: {
 			true: 'opacity-55 cursor-not-allowed pointer-events-none',
@@ -91,7 +91,7 @@ const defaultAlertPrefix = cva({
 // Inline close button (top-right, aligned with the title). Subtle by default,
 // tinting on hover — mirrors the toast's close affordance.
 const defaultAlertClose = cva({
-	base: 'state-layer shrink-0 -mr-1 flex items-center justify-center rounded-md leading-none transition-colors outline-none focus-visible:ring-2 focus-visible:ring-color/40',
+	base: 'state-layer shrink-0 -mr-xs flex items-center justify-center rounded-sm leading-none transition-colors outline-none focus-visible:ring-2 focus-visible:ring-color/40',
 	variants: {
 		size: {
 			small: 'size-5 [&>svg]:size-3.5',
@@ -125,11 +125,11 @@ const defaultAlertTitle = cva({
 });
 
 const defaultAlertContent = cva({
-	base: 'flex min-w-0 flex-1 flex-col gap-0.5'
+	base: 'flex min-w-0 flex-1 flex-col gap-micro'
 });
 
 const defaultAlertDescription = cva({
-	base: 'flex flex-col gap-1 text-sm [&_p]:leading-relaxed',
+	base: 'flex flex-col gap-xs text-sm [&_p]:leading-relaxed',
 	variants: {
 		size: {
 			small: 'text-xs',

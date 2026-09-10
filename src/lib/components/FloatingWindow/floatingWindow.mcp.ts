@@ -13,7 +13,7 @@ FloatingWindow renders a non-modal, portaled utility window that can be moved, r
   let open = $state(false);
 </script>
 
-<Button onClick={() => (open = true)}>Open notes</Button>
+<Button onclick={() => (open = true)}>Open notes</Button>
 
 <FloatingWindow bind:open title="Notes">
   <p>Window content remains interactive alongside the page.</p>
@@ -24,6 +24,7 @@ FloatingWindow renders a non-modal, portaled utility window that can be moved, r
 
 - **id**: string - Stable DOM id. Generated when omitted.
 - **open**: boolean (default: true) - Bindable rendered state.
+- **defaultOpen**: boolean (default: true) - Initial state when open is not provided.
 - **minimized**: boolean (default: false) - Bindable docked state.
 - **dockPlacement**: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right' | 'left-top' | 'left-bottom' | 'right-top' | 'right-bottom' (default: 'bottom-left') - Edge and alignment used by the minimized dock. Top and bottom placements stack horizontally; left and right placements use a vertical title bar and stack vertically.
 - **title**: Slot<FloatingWindowPayload> (required) - Window title as text or a snippet.
@@ -39,11 +40,13 @@ FloatingWindow renders a non-modal, portaled utility window that can be moved, r
 - **class**: string - Additional classes on the visible window.
 - **theme**: FloatingWindowThemeProps - Per-instance theme overrides.
 - **ref**: HTMLDivElement - Bindable reference to the visible window or minimized dock item.
-- **onClose**: (window) => void - Runs after close state updates.
+- **onOpenChange**: (open: boolean) => void - Runs once for each library-requested state change.
+- **onAfterOpen**: (window) => void - Runs after the open transition finishes.
+- **onAfterClose**: (window) => void - Runs after the close transition finishes.
 - **onMinimize**: (window) => void - Runs after minimize state updates.
 - **onRestore**: (window) => void - Runs after restore state updates.
-- **onMove**: (position, window) => void - Runs when a move commits.
-- **onResize**: (dimensions, window) => void - Runs when a pointer or keyboard resize commits.
+- **onMove**: ({ position, window }) => void - Runs when a move commits.
+- **onResize**: ({ dimensions, window }) => void - Runs when a pointer or keyboard resize commits.
 
 ## Dragging
 

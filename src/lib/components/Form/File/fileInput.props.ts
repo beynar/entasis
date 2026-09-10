@@ -11,14 +11,16 @@ export type FileInputValue<Mode extends FileInputMode> = Mode extends 'single'
 
 export type FileInputProps<Mode extends FileInputMode = 'single'> = Omit<
 	InputProps<FileInputType<Mode>>,
-	'value' | 'placeholder'
+	'value' | 'defaultValue' | 'placeholder'
 > & {
 	/** Selects single-file or multiple-file upload mode. */
 	mode?: Mode;
 	/** Bindable selected file in single mode, or file array in multiple mode. */
 	value?: FileInputValue<Mode>;
+	/** Initial selected file or files when `value` is omitted. */
+	defaultValue?: FileInputValue<Mode>;
 	/** Called whenever the selected file(s) change. */
-	onChange?: (value: FileInputValue<Mode>) => void;
+	onValueChange?: (value: FileInputValue<Mode>) => void;
 	/** Called with each file rejected by type, size, duplicate, or count validation. */
 	onReject?: (rejections: FileRejection[]) => void;
 	/** Accepted MIME types or extensions for the hidden input accept attribute and drag validation. */
@@ -33,11 +35,11 @@ export type FileInputProps<Mode extends FileInputMode = 'single'> = Omit<
 	placeholder?: string;
 	// Slot props
 	/** Custom snippet to render the list of selected files. */
-	fileList?: Snippet<[any]>;
+	fileList?: Snippet;
 	/** Additional CSS classes for the file list container. */
 	fileListClass?: string;
 	/** Custom snippet to render each selected file row. */
-	file?: Snippet<[any]>;
+	file?: Snippet;
 	/** Additional CSS classes for each file row. */
 	fileClass?: string;
 	/** Additional CSS classes for the empty dropzone placeholder. */

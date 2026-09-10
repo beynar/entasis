@@ -5,7 +5,8 @@ export type {
 	AIModelSelectorMenuItem,
 	AIModelSelectorModel,
 	AIModelSelectorProps,
-	AIModelSelectorState
+	AIModelSelectorState,
+	AIModelSelectorValueChangePayload
 } from './aiModelSelector.props.js';
 export {
 	aiModelSelectorTheme,

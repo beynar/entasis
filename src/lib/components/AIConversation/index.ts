@@ -10,15 +10,25 @@ export {
 } from './aiConversation.state.svelte.js';
 export type {
 	AIConversationBindableState,
+	AIConversationAskUserQuestionChangePayload,
+	AIConversationErrorPayload,
 	AIConversationLabelOverrides,
 	AIConversationLabels,
 	AIConversationMessageTarget,
 	AIConversationMessageUpdate,
+	AIConversationMessagePayload,
+	AIConversationMessageUpdatePayload,
+	AIConversationQueuedMessagePayload,
 	AIConversationRetryDetail,
+	AIConversationRetryPayload,
 	AIConversationStateEvents,
 	AIConversationStateOptions,
 	AIConversationStatus,
-	AIConversationSubmitDetail
+	AIConversationStatusChangePayload,
+	AIConversationSubmitDetail,
+	AIConversationSubmitPayload,
+	AIConversationToolUpdatePayload,
+	AIConversationValueChangePayload
 } from './aiConversation.state.svelte.js';
 export type {
 	AIConversationToolTarget,

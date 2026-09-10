@@ -106,7 +106,7 @@
 		active={player.loop}
 		pressed={player.loop}
 		{disabled}
-		onClick={() => player.runInteraction(() => player.setLoop(!player.loop))}
+		onPress={() => player.runInteraction(() => player.setLoop(!player.loop))}
 	/>
 {/if}
 
@@ -119,7 +119,7 @@
 		active={player.captionsEnabled}
 		pressed={player.captionsEnabled}
 		disabled={disabled || !hasCaptionTracks}
-		onClick={() => player.runInteraction(() => player.setCaptionsEnabled(!player.captionsEnabled))}
+		onPress={() => player.runInteraction(() => player.setCaptionsEnabled(!player.captionsEnabled))}
 	/>
 {/if}
 
@@ -148,7 +148,7 @@
 		pressed={player.actualPictureInPicture}
 		disabled={disabled || !player.supportsPictureInPicture}
 		class="max-[360px]:hidden"
-		onClick={() => player.runInteraction(() => player.togglePictureInPicture())}
+		onPress={() => player.runInteraction(() => player.togglePictureInPicture())}
 	/>
 {/if}
 
@@ -174,6 +174,6 @@
 		active={player.actualFullscreen}
 		pressed={player.actualFullscreen}
 		disabled={disabled || !player.supportsFullscreen}
-		onClick={() => player.runInteraction(() => player.toggleFullscreen())}
+		onPress={() => player.runInteraction(() => player.toggleFullscreen())}
 	/>
 {/if}

@@ -52,7 +52,7 @@ Items need a stable, unique \`id\` property (primitive items are matched by valu
 \`\`\`
 
 ### Event Props
-- **onReorder**: \`(items: T[], details: { from: number; to: number; item: T }) => void\`
+- **onReorder**: \`({ items, from, to, item }: SortableListReorderPayload<T>) => void\`
   - Fired once when a drag ends and the order actually changed, with the reordered array and the move details. A cancelled drag or a no-op drop does not fire this.
 - **onReceive**: \`(detail: { item: T; index: number; from: { list: string; index: number } }) => void\` - A row arrived from another list of the group (\`items\` already updated). \`from.index\` is the row's index in the source list at drag start — enough to persist the full move.
 - **onRemove**: \`(detail: { item: T; index: number; to: { list: string } }) => void\` - One of this list's rows left for another list of the group (\`items\` already updated); \`index\` is its index here at the moment of drop.

@@ -28,8 +28,8 @@ const defaultTableRow = cva({
 	variants: {
 		density: {
 			small: 'py-0',
-			normal: 'py-0.5',
-			large: 'py-1'
+			normal: 'py-micro',
+			large: 'py-xs'
 		}
 	},
 	defaultVariants: {
@@ -41,9 +41,9 @@ const defaultTableHeadCell = cva({
 	base: 'text-neutral text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
 	variants: {
 		density: {
-			small: 'h-8 px-1.5',
-			normal: 'h-10 px-2',
-			large: 'h-12 px-3'
+			small: 'h-8 px-sm',
+			normal: 'h-10 px-md',
+			large: 'h-12 px-lg'
 		}
 	},
 	defaultVariants: {
@@ -55,9 +55,9 @@ const defaultTableCell = cva({
 	base: 'align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
 	variants: {
 		density: {
-			small: 'px-1.5 py-1',
-			normal: 'p-2',
-			large: 'p-3'
+			small: 'px-sm py-xs',
+			normal: 'p-md',
+			large: 'p-lg'
 		}
 	},
 	defaultVariants: {
@@ -69,9 +69,9 @@ const defaultTableCaption = cva({
 	base: 'text-neutral/60 text-sm',
 	variants: {
 		density: {
-			small: 'mt-3',
-			normal: 'mt-4',
-			large: 'mt-6'
+			small: 'mt-lg',
+			normal: 'mt-xl',
+			large: 'mt-layout-md'
 		}
 	},
 	defaultVariants: {

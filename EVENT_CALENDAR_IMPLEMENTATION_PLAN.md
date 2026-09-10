@@ -529,19 +529,19 @@ All-day/timed conversion has one deterministic duration contract. With `maintain
 ```ts
 export type EventCalendarCallbackProps<TItemFields extends object = Record<never, never>> = {
 	onRangeChange?: (info: EventCalendarRangeChangeInfo) => void;
-	onItemsChange?: (
-		items: EventCalendarItem<TItemFields>[],
-		change: EventCalendarChange<TItemFields>
-	) => void;
+	onItemsChange?: (payload: {
+		items: EventCalendarItem<TItemFields>[];
+		change: EventCalendarChange<TItemFields>;
+	}) => void;
 	onViewChange?: (view: EventCalendarView) => void;
 	onDateChange?: (date: Date) => void;
 	onDayCountChange?: (dayCount: number) => void;
 	onSelectionChange?: (selection: EventCalendarSelection) => void;
-	onItemClick?: (occurrence: EventCalendarOccurrence<TItemFields>, event: MouseEvent) => void;
-	onItemDoubleClick?: (occurrence: EventCalendarOccurrence<TItemFields>, event: MouseEvent) => void;
-	onSlotClick?: (slot: EventCalendarSlot, event: MouseEvent) => void;
-	onSlotSelect?: (slot: EventCalendarSlot, info: EventCalendarSlotSelectInfo) => void;
-	onMoreClick?: (
+	onItemClick?: (payload: { occurrence: EventCalendarOccurrence<TItemFields>; event: MouseEvent }) => void;
+	onItemDoubleClick?: (payload: { occurrence: EventCalendarOccurrence<TItemFields>; event: MouseEvent }) => void;
+	onSlotClick?: (payload: { slot: EventCalendarSlot; event: MouseEvent }) => void;
+	onSlotSelect?: (payload: { slot: EventCalendarSlot; info: EventCalendarSlotSelectInfo }) => void;
+	onMoreClick?: (payload: {
 		day: EventCalendarDateOnly,
 		occurrences: readonly EventCalendarOccurrence<TItemFields>[],
 		event: MouseEvent
@@ -552,16 +552,16 @@ export type EventCalendarCallbackProps<TItemFields extends object = Record<never
 
 | Callback                               | Purpose                                                                                                                     |
 | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `onItemsChange(items, change)`         | Typed as `EventCalendarItem<TItemFields>[]` plus `EventCalendarChange<TItemFields>`; fires after one accepted reassignment. |
+| `onItemsChange({ items, change })`     | Carries the current item collection and guarded mutation transaction; fires after one accepted reassignment.               |
 | `onViewChange(view)`                   | Reports component-originated view changes.                                                                                  |
 | `onDateChange(date)`                   | Reports component-originated anchor changes.                                                                                |
 | `onDayCountChange(dayCount)`           | Reports N-day changes.                                                                                                      |
 | `onSelectionChange(selection)`         | Reports event or slot selection changes.                                                                                    |
-| `onItemClick(occurrence, event)`       | Event-chip click before built-in selection; `event.preventDefault()` suppresses that selection.                             |
-| `onItemDoubleClick(occurrence, event)` | Event-chip double click.                                                                                                    |
-| `onSlotClick(slot, event)`             | Empty point click before built-in slot selection; `event.preventDefault()` suppresses that selection.                       |
-| `onSlotSelect(slot, info)`             | Completed range; `info.source` identifies drag-create, keyboard, or single-pointer input.                                   |
-| `onMoreClick(day, occurrences, event)` | Month overflow trigger; returning `false` suppresses the built-in popover.                                                  |
+| `onItemClick({ occurrence, event })`   | Event-chip click before built-in selection; `event.preventDefault()` suppresses that selection.                             |
+| `onItemDoubleClick({ occurrence, event })` | Event-chip double click.                                                                                                |
+| `onSlotClick({ slot, event })`         | Empty point click before built-in slot selection; `event.preventDefault()` suppresses that selection.                       |
+| `onSlotSelect({ slot, info })`         | Completed range; `info.source` identifies drag-create, keyboard, or single-pointer input.                                   |
+| `onMoreClick({ day, occurrences, event })` | Month overflow trigger; returning `false` suppresses the built-in popover.                                             |
 | `onInteractionBlocked(info)`           | Receives `EventCalendarInteractionBlockedInfo<TItemFields>` once per rejected attempted gesture.                            |
 
 `EventCalendarProposedUpdate.source` is a discriminated value: `'drag'`, `'resize-start'`, `'resize-end'`, `'keyboard'`, `'single-pointer'`, or `'api'`.

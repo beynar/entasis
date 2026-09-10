@@ -37,8 +37,8 @@ export type StatProps = WithAttachments<
 			indicatorVariant?: StatIndicatorVariant;
 			/** Semantic color token for the `indicator` slot. */
 			indicatorColor?: Colors;
-			/** Click handler for an action indicator; renders the indicator as a native button. */
-			onIndicatorClick?: (event: MouseEvent) => void;
+			/** Native click handler for an action indicator; renders the indicator as a button. */
+			onclick?: (event: MouseEvent) => void;
 			/** Accessible name for icon-only action indicators. */
 			indicatorLabel?: HTMLButtonAttributes['aria-label'];
 			/** Native button type used when the indicator is clickable. */

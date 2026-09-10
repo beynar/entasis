@@ -3,6 +3,7 @@ import { compileReferenceAnalysis } from './chart.analysis.reference.js';
 import { compileRegressionAnalysis } from './chart.analysis.regression.js';
 import { compileRollingAnalysis } from './chart.analysis.rolling.js';
 import type { CompiledMark } from './chart.cartesian.js';
+import type { CompilableChartChannel } from './chart.channels.js';
 import { isEmpiricalDistributionMark } from './chart.distribution.js';
 import type {
 	ChartBarMark,
@@ -16,11 +17,8 @@ import type {
 	ChartValue
 } from './chart.props.js';
 
-type AnalyzableMark<TRow> =
-	| ChartSeriesMark<TRow>
-	| ChartScatterMark<TRow>
-	| ChartBarMark<TRow>
-	| ChartDistributionMark<TRow>;
+type AnalyzableMark<TRow extends object> =
+	ChartSeriesMark<TRow> | ChartScatterMark<TRow> | ChartBarMark<TRow> | ChartDistributionMark<TRow>;
 
 type CompileMarkAnalysisInput<TRow extends object> = {
 	readonly data: readonly TRow[];
@@ -128,7 +126,9 @@ export function compileMarkAnalysis<TRow extends object>({
 	});
 }
 
-function isAnalyzableMark<TRow>(mark: ChartMark<TRow>): mark is AnalyzableMark<TRow> {
+function isAnalyzableMark<TRow extends object>(
+	mark: ChartMark<TRow>
+): mark is AnalyzableMark<TRow> {
 	return (
 		mark.type === 'series' ||
 		mark.type === 'scatter' ||
@@ -140,7 +140,7 @@ function isAnalyzableMark<TRow>(mark: ChartMark<TRow>): mark is AnalyzableMark<T
 function resolveAnalysisGroup<TRow extends object>(
 	mark: AnalyzableMark<TRow>,
 	fallbackSeries: ChartChannel<TRow, ChartKey> | undefined
-): ChartChannel<TRow, ChartKey> | undefined {
+): CompilableChartChannel<TRow, ChartKey> | undefined {
 	if (mark.type === 'distribution') return mark.group;
 	if (mark.type === 'scatter' && mark.variant === 'hexbin') return fallbackSeries;
 	return mark.series ?? mark.colorBy ?? fallbackSeries;
@@ -150,7 +150,7 @@ function resolveReferenceChannel<TRow extends object>(
 	mark: AnalyzableMark<TRow>,
 	analysis: ChartReferenceAnalysis | { type: 'reference' },
 	path: string
-): { value: ChartChannel<TRow, ChartValue>; axis: 'x' | 'y' } {
+): { value: CompilableChartChannel<TRow, ChartValue>; axis: 'x' | 'y' } {
 	if (mark.type === 'distribution') {
 		const direction = mark.direction ?? 'vertical';
 		const valueAxis = isEmpiricalDistributionMark(mark)

@@ -6,6 +6,7 @@
 	import type { Slot as SlotContent } from '../../Slot/slot.js';
 	import type { CheckboxMode } from './checkboxesInput.props.js';
 	import type { useCheckboxesInputTheme } from './checkboxesInput.theme.js';
+	import type { Sizes } from '$lib/types/theme.js';
 
 	type CheckboxLineClasses = ReturnType<typeof useCheckboxesInputTheme>;
 
@@ -18,6 +19,7 @@
 		ariaLabel,
 		disabled = false,
 		mode = 'normal',
+		size = 'normal',
 		label,
 		description,
 		classes,
@@ -34,6 +36,7 @@
 		ariaLabel?: string;
 		disabled?: boolean;
 		mode?: CheckboxMode | 'control';
+		size?: Sizes;
 		label?: SlotContent;
 		description?: SlotContent;
 		classes: CheckboxLineClasses;
@@ -63,11 +66,12 @@
 	aria-label={ariaLabel}
 	aria-checked={indeterminate ? 'mixed' : checked}
 	{disabled}
+	data-color="primary"
 	data-state={indeterminate ? 'mixed' : checked ? 'checked' : 'unchecked'}
 	onclick={toggle}
 	onfocus={onFocus}
 	onblur={onBlur}
-	class={classes.checkboxesInputItem({ mode, checked, disabled })}
+	class={classes.checkboxesInputItem({ mode, checked, disabled, size })}
 >
 	<input
 		hidden
@@ -83,11 +87,21 @@
 	/>
 
 	<div
-		class={classes.checkboxesInputItemTrack({ mode, checked: checked || indeterminate, disabled })}
+		class={classes.checkboxesInputItemTrack({
+			mode,
+			checked: checked || indeterminate,
+			disabled,
+			size
+		})}
 	></div>
 
 	<div
-		class={classes.checkboxesInputItemThumb({ checked: checked || indeterminate, mode, disabled })}
+		class={classes.checkboxesInputItemThumb({
+			checked: checked || indeterminate,
+			mode,
+			disabled,
+			size
+		})}
 	>
 		{#if indeterminate}
 			{@render minusIcon({ size: 40 })}
@@ -96,6 +110,6 @@
 		{/if}
 	</div>
 
-	<Slot render={label} class={classes.checkboxesInputItemLabel()} />
+	<Slot render={label} class={classes.checkboxesInputItemLabel({ size })} />
 	<Slot render={description} class={classes.checkboxesInputItemDescription({ mode, checked })} />
 </button>

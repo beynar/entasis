@@ -88,7 +88,7 @@
 		renderAskUserQuestion = true,
 		askUserQuestionDisabled = false,
 		suggestions,
-		onSuggestionClick,
+		onSuggestionSelect,
 		empty,
 		message: messageSlot,
 		messageActions,
@@ -111,14 +111,13 @@
 		markerIcon,
 		markerContent,
 		app: appSlot,
-		onRetry,
 		onAskUserQuestionStateChange,
 		header,
 		footer,
 		toc,
 		role = 'log',
 		viewportLabel = 'Conversation transcript',
-		onScroll,
+		onscroll,
 		onwheel: onWheel,
 		class: className,
 		theme,
@@ -417,9 +416,11 @@
 		return Math.max(distanceFromEnd, 0) <= Math.max(0, bottomThreshold);
 	}
 
-	function handleScroll(event: Event): void {
+	function handleScroll(
+		event: UIEvent & { currentTarget: EventTarget & HTMLDivElement }
+	): void {
 		syncThreadPosition(get(virtualizerStore));
-		onScroll?.(event);
+		onscroll?.(event);
 	}
 
 	function handleWheel(): void {
@@ -469,26 +470,33 @@
 		initialEndFrame = undefined;
 	}
 
-	function handleSuggestionClick(suggestion: string): void {
-		if (onSuggestionClick) {
-			onSuggestionClick(suggestion);
+	function handleSuggestionSelect(suggestion: string): void {
+		if (onSuggestionSelect) {
+			onSuggestionSelect(suggestion);
 			return;
 		}
 		conversation?.setInput(suggestion);
 	}
 
-	function handleQuestionChange(
-		request: AIThreadAskUserQuestion<TMessage>,
-		values: AIAskAnswers
-	): void {
+	function handleQuestionChange({
+		request,
+		values
+	}: {
+		request: AIThreadAskUserQuestion<TMessage>;
+		values: AIAskAnswers;
+	}): void {
 		questionValuesByKey = { ...questionValuesByKey, [request.key]: values };
 	}
 
-	async function resolveQuestion(
-		request: AIThreadAskUserQuestion<TMessage>,
-		state: 'completed' | 'discarded',
-		detail?: AIAskUserQuestionSubmitDetail
-	): Promise<void> {
+	async function resolveQuestion({
+		request,
+		state,
+		detail
+	}: {
+		request: AIThreadAskUserQuestion<TMessage>;
+		state: 'completed' | 'discarded';
+		detail?: AIAskUserQuestionSubmitDetail;
+	}): Promise<void> {
 		errorMessage = undefined;
 		questionStates = { ...questionStates, [request.key]: state };
 		const change = {
@@ -556,7 +564,7 @@
 				messageSize={resolvedMessageSize}
 				{messageVariant}
 				suggestions={resolvedSuggestions}
-				onSuggestionClick={handleSuggestionClick}
+				onSuggestionSelect={handleSuggestionSelect}
 				{empty}
 				message={messageSlot}
 				{messageActions}
@@ -579,7 +587,6 @@
 				{markerIcon}
 				{markerContent}
 				app={appSlot}
-				{onRetry}
 				{mcpHost}
 				{theme}
 			/>
@@ -602,7 +609,7 @@
 				variant="soft"
 				label="Scroll to latest message"
 				class={classes.scrollButton({ position: scrollButtonPosition })}
-				onClick={() => scrollToBottom()}
+				onclick={() => scrollToBottom()}
 			>
 				{@render arrowDownIcon({ size: 16 })}
 			</Button>
@@ -616,7 +623,7 @@
 				value={questionValuesByKey[question.key] ?? question.value}
 				{askUserQuestionDisabled}
 				class={classes.askQuestion()}
-				onChange={handleQuestionChange}
+				onValuesChange={handleQuestionChange}
 				onResolve={resolveQuestion}
 			/>
 		{/key}

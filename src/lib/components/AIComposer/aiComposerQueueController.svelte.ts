@@ -3,6 +3,8 @@ import type { AIThreadItem } from '../AIThread/aiThread.props.js';
 import type {
 	AIComposerAttachment,
 	AIComposerQueuedMessage,
+	AIComposerQueuedMessageEditPayload,
+	AIComposerQueuedMessagePayload,
 	AIComposerSubmitMeta
 } from './aiComposer.props.js';
 
@@ -21,18 +23,13 @@ type AIComposerQueueControllerOptions = {
 	restoreDraft: (message: AIComposerQueuedMessage) => void;
 	clearDraft: () => void;
 	onQueueChange?: (messages: AIComposerQueuedMessage[]) => void;
-	onQueuedMessagesChange?: (messages: AIComposerQueuedMessage[]) => void;
-	onAdd?: (message: AIComposerQueuedMessage, index: number) => void;
-	onCancel?: (message: AIComposerQueuedMessage, index: number) => void;
-	onEditStart?: (message: AIComposerQueuedMessage, index: number) => void;
-	onEditCommit?: (
-		message: AIComposerQueuedMessage,
-		index: number,
-		previousMessage: AIComposerQueuedMessage
-	) => void;
-	onEditCancel?: (message: AIComposerQueuedMessage, index: number) => void;
+	onAdd?: (payload: AIComposerQueuedMessagePayload) => void;
+	onCancel?: (payload: AIComposerQueuedMessagePayload) => void;
+	onEditStart?: (payload: AIComposerQueuedMessagePayload) => void;
+	onEditCommit?: (payload: AIComposerQueuedMessageEditPayload) => void;
+	onEditCancel?: (payload: AIComposerQueuedMessagePayload) => void;
 	onReorder?: (messages: AIComposerQueuedMessage[]) => void;
-	onSteer?: (message: AIComposerQueuedMessage, index: number) => void;
+	onSteer?: (payload: AIComposerQueuedMessagePayload) => void;
 };
 
 let queueId = 0;
@@ -55,7 +52,7 @@ export class AIComposerQueueController {
 		const message = createQueuedMessage(meta);
 		const index = options.messages.length;
 		this.commitMessages([...options.messages, message]);
-		options.onAdd?.(message, index);
+		options.onAdd?.({ message, index });
 		options.clearDraft();
 	}
 
@@ -74,14 +71,14 @@ export class AIComposerQueueController {
 				this.options.messages.map((candidate) => (candidate.id === messageId ? steered : candidate))
 			);
 		}
-		this.options.onSteer?.(steered, index);
+		this.options.onSteer?.({ message: steered, index });
 	}
 
 	cancel(messageId: string): void {
 		if (this.isDisabled) return;
 		const { message, index } = this.requireMessage(messageId, 'cancel');
 		this.commitMessages(this.options.messages.filter((candidate) => candidate.id !== messageId));
-		this.options.onCancel?.(message, index);
+		this.options.onCancel?.({ message, index });
 	}
 
 	startEdit(messageId: string): void {
@@ -91,7 +88,7 @@ export class AIComposerQueueController {
 		this.edit = { id: messageId, index, message: snapshot };
 		this.commitMessages(this.options.messages.filter((candidate) => candidate.id !== messageId));
 		this.options.restoreDraft(snapshot);
-		this.options.onEditStart?.(snapshot, index);
+		this.options.onEditStart?.({ message: snapshot, index });
 	}
 
 	commitEdit(meta: AIComposerSubmitMeta): void {
@@ -101,7 +98,7 @@ export class AIComposerQueueController {
 		const index = this.insertOrReplace(message, edit.index);
 		this.edit = undefined;
 		this.options.clearDraft();
-		this.options.onEditCommit?.(message, index, edit.message);
+		this.options.onEditCommit?.({ message, index, previousMessage: edit.message });
 	}
 
 	cancelEdit(): void {
@@ -110,7 +107,7 @@ export class AIComposerQueueController {
 		const index = this.insertOrReplace(edit.message, edit.index);
 		this.edit = undefined;
 		this.options.clearDraft();
-		this.options.onEditCancel?.(edit.message, index);
+		this.options.onEditCancel?.({ message: edit.message, index });
 	}
 
 	syncConversation(messages: AIComposerQueuedMessage[]): void {
@@ -139,7 +136,6 @@ export class AIComposerQueueController {
 		const options = this.options;
 		options.setMessages(messages);
 		options.onQueueChange?.(messages);
-		options.onQueuedMessagesChange?.(messages);
 	}
 
 	private requireMessage(

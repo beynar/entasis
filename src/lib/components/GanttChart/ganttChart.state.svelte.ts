@@ -427,7 +427,7 @@ export class GanttChartState<
 			anchorDate ?? new Date((currentRange.start.getTime() + currentRange.end.getTime()) / 2)
 		);
 		this.zoom = zoom;
-		this.eventHandlers?.zoomChange?.(zoom);
+		this.eventHandlers?.onZoomChange?.(zoom);
 	}
 
 	scrollToDate(date: Date, options?: { align?: 'start' | 'center' | 'end' }): boolean {
@@ -478,7 +478,7 @@ export class GanttChartState<
 			return;
 		}
 		this.#visibleRange = cloneRange(nextRange);
-		this.eventHandlers?.visibleRangeChange?.({
+		this.eventHandlers?.onVisibleRangeChange?.({
 			range: cloneRange(nextRange),
 			projectRange: cloneNullableRange(this.schedule.analysis.projectRange),
 			zoom: this.zoom,
@@ -565,7 +565,7 @@ export class GanttChartState<
 		this.#validateSelection(selection);
 		if (isSameGanttSelection(selection, this.selection)) return;
 		this.selection = selection;
-		this.eventHandlers?.selectionChange?.(selection);
+		this.eventHandlers?.onSelectionChange?.(selection);
 	}
 
 	clearSelection(): void {
@@ -675,7 +675,7 @@ export class GanttChartState<
 	}
 
 	blockInteraction(info: GanttInteractionBlockedInfo): void {
-		this.eventHandlers?.interactionBlocked?.(info);
+		this.eventHandlers?.onInteractionBlocked?.(info);
 	}
 
 	copySelection(): boolean {
@@ -745,7 +745,7 @@ export class GanttChartState<
 
 	#publishExpansion(expandedTaskIds: string[]): void {
 		this.expandedTaskIds = expandedTaskIds;
-		this.eventHandlers?.expansionChange?.(expandedTaskIds);
+		this.eventHandlers?.onExpansionChange?.(expandedTaskIds);
 	}
 
 	#validateSelection(selection: GanttSelection): void {

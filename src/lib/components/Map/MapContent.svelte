@@ -46,9 +46,9 @@
 		clusterMarker?: Snippet<[MapClusterSnippetArg<TData>]>;
 		userLocationMarker?: Snippet<[MapUserLocationSnippetArg]>;
 		controlButton?: Snippet<[MapControlButtonSnippetArg]>;
-		onmarkerclick?: (marker: MapMarker<TData>) => void;
-		onclusterclick?: (cluster: MapClusterSnippetArg<TData>) => void;
-		onerror?: (error: Error) => void;
+		onMarkerClick?: (marker: MapMarker<TData>) => void;
+		onClusterClick?: (cluster: MapClusterSnippetArg<TData>) => void;
+		onError?: (error: Error) => void;
 	};
 
 	let {
@@ -70,9 +70,9 @@
 		clusterMarker,
 		userLocationMarker,
 		controlButton,
-		onmarkerclick,
-		onclusterclick,
-		onerror
+		onMarkerClick,
+		onClusterClick,
+		onError
 	}: Props<TData> = $props();
 
 	let userLocation = $state<MapUserLocation | null>(null);
@@ -83,7 +83,7 @@
 	let geolocationConfig = $derived(resolveMapGeolocationConfig(geolocation));
 
 	function reportGeolocationError(error: Error): void {
-		reportMapError(error, onerror);
+		reportMapError(error, onError);
 	}
 
 	function handleUserLocationChange(location: MapUserLocation): void {
@@ -108,7 +108,9 @@
 
 			applyUserLocation(location);
 		} catch (error) {
-			reportGeolocationError(error instanceof Error ? error : new Error('Browser geolocation failed.'));
+			reportGeolocationError(
+				error instanceof Error ? error : new Error('Browser geolocation failed.')
+			);
 		}
 	}
 
@@ -127,7 +129,7 @@
 
 		return watchMapUserLocation({
 			onlocation: applyUserLocation,
-			onerror: reportGeolocationError
+			onError: reportGeolocationError
 		});
 	});
 </script>
@@ -143,10 +145,10 @@
 			{bounds}
 			{fitMarkersPadding}
 			{controlPosition}
-			geolocationConfig={geolocationConfig}
+			{geolocationConfig}
 			{controlButton}
 			onuserlocationchange={handleUserLocationChange}
-			{onerror}
+			{onError}
 		/>
 	{/key}
 {/if}
@@ -164,7 +166,7 @@
 			content={marker}
 			{popup}
 			{tooltip}
-			{onmarkerclick}
+			{onMarkerClick}
 		/>
 	{/each}
 {:else}
@@ -177,8 +179,8 @@
 		{popup}
 		{tooltip}
 		clusterContent={clusterMarker}
-		{onmarkerclick}
-		{onclusterclick}
-		{onerror}
+		{onMarkerClick}
+		{onClusterClick}
+		{onError}
 	/>
 {/if}

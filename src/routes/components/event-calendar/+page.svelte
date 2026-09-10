@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 	import EventCalendarCompositionDemo from './EventCalendarCompositionDemo.svelte';
 	import EventCalendarGuide from './EventCalendarGuide.svelte';
@@ -7,13 +8,25 @@
 	import EventCalendarLoadingRtlDemo from './EventCalendarLoadingRtlDemo.svelte';
 	import EventCalendarResourcesDemo from './EventCalendarResourcesDemo.svelte';
 	import EventCalendarViewsDemo from './EventCalendarViewsDemo.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
 	import {
 		compositionCode,
 		interactionCode,
 		loadingRtlCode,
-		resourcesCode,
-		viewsCode
+		resourcesCode
 	} from './codeSnippets.js';
+
+	const controls = createComponentControls([
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{ name: 'showWeekends', type: 'switch', label: 'Weekends', value: true },
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -33,12 +46,27 @@
 	<EventCalendarGuide />
 
 	<ComponentCard
+		{controls}
 		title="One model, six views"
 		description="Use the built-in switcher to inspect the same timed, all-day, background, multi-day, recurring, and resource-assigned definitions in every view."
-		code={viewsCode}
+		code={`<EventCalendar
+	density="${controls.value.density}"
+	showWeekends={${controls.value.showWeekends}}
+	disabled={${controls.value.disabled}}
+	{items}
+	{resources}
+	bind:date
+	bind:view
+	timeZone="UTC"
+	class="h-[38rem] w-full"
+/>`}
 		class="min-h-0 items-stretch p-3 md:p-5"
 	>
-		<EventCalendarViewsDemo />
+		<EventCalendarViewsDemo
+			density={controls.value.density}
+			showWeekends={controls.value.showWeekends}
+			disabled={controls.value.disabled}
+		/>
 	</ComponentCard>
 
 	{#snippet examples()}

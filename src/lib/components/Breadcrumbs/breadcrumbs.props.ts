@@ -25,10 +25,8 @@ export type BreadcrumbItemConfig = {
 	 * @default false
 	 */
 	disabled?: boolean;
-	/**
-	 * Click event handler for the breadcrumb item.
-	 */
-	onClick?: () => void;
+	/** Native click event handler for the breadcrumb item. */
+	onclick?: (event: MouseEvent) => void;
 	/**
 	 * Optional icon snippet to display before the label.
 	 */

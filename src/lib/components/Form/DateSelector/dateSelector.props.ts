@@ -1,7 +1,8 @@
 import type { Placement } from '@floating-ui/dom';
 import type { PopoverProps } from '$lib/components/Popover/popover.props.js';
 import type { InferComponentTheme } from '$lib/utils/cva/index.js';
-import type { fieldTheme, InputProps } from '../Field/field.js';
+import type { InputProps } from '../Field/field.js';
+import type { fieldTheme } from '../Field/field.theme.js';
 import type { CalendarThemeProps } from '../Calendar/calendar.theme.js';
 import type { DateSelectorThemeProps } from './dateSelector.theme.js';
 
@@ -25,8 +26,14 @@ export type DateSelectorProps<Mode extends DateSelectorMode = 'date'> = {
 	mode?: Mode;
 	/** Current selected date, range, or date list. */
 	value?: DateSelectorValue<Mode>;
+	/** Initial selection when `value` is omitted. */
+	defaultValue?: DateSelectorValue<Mode>;
 	/** Controls the selector popover. */
 	open?: boolean;
+	/** Initial popover state when open is omitted. */
+	defaultOpen?: boolean;
+	/** Called once when the selector opens or closes through interaction. */
+	onOpenChange?: (open: boolean) => void;
 	/** Closes the popover after a complete selection. Defaults to false. */
 	closeOnSelect?: boolean;
 	/** Optional shortcuts rendered beside the calendar. */
@@ -62,7 +69,7 @@ export type DateSelectorProps<Mode extends DateSelectorMode = 'date'> = {
 	/** Additional class applied to the popover panel. */
 	class?: string;
 	/** Called whenever the selected value changes. */
-	onChange?: (value: DateSelectorValue<Mode>) => void;
+	onValueChange?: (value: DateSelectorValue<Mode>) => void;
 	/** Per-instance DateSelector theme overrides. */
 	theme?: DateSelectorThemeProps;
 	/** Per-instance Calendar theme overrides. */
@@ -82,7 +89,7 @@ type DateSelectorFieldType<Mode extends DateSelectorInputMode> = Mode extends 'd
  */
 export type DateSelectorInputProps<Mode extends DateSelectorInputMode = 'date'> = Omit<
 	DateSelectorProps<Mode>,
-	'value' | 'onChange' | 'disabled' | 'class' | 'theme'
+	'value' | 'defaultValue' | 'onValueChange' | 'disabled' | 'class' | 'theme'
 > &
 	Omit<InputProps<DateSelectorFieldType<Mode>>, 'theme'> & {
 		/** Theme overrides for the selector popover and its field wrapper. */

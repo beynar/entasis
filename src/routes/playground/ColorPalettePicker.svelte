@@ -5,9 +5,9 @@
 	const playground = useRuntimeThemePlayground();
 </script>
 
-<div class="grid gap-2">
+<div class="grid gap-md">
 	<span class="text-sm font-medium">Color palette</span>
-	<div class="flex flex-wrap gap-2">
+	<div class="flex flex-wrap gap-md">
 		{#each runtimeColorPaletteNames as paletteName (paletteName)}
 			{@const palette = runtimeColorPalettes[paletteName]}
 			<button

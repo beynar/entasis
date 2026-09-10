@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		Chart,
+		type ChartLegend,
 		type ChartMatrixVariant,
 		type ChartPolarVariant,
 		type ChartRelationVariant,
@@ -47,7 +48,12 @@
 		guides,
 		labels,
 		brushZoom,
-		tooltip
+		tooltip,
+		legend,
+		interactiveLegend,
+		legendPlacement,
+		legendAlign,
+		legendOrientation
 	}: {
 		chartType: ChartUsageType;
 		barVariant: 'group' | 'stack';
@@ -71,6 +77,11 @@
 		labels: boolean;
 		brushZoom: boolean;
 		tooltip: boolean;
+		legend: boolean;
+		interactiveLegend: boolean;
+		legendPlacement: 'top' | 'bottom';
+		legendAlign: 'left' | 'center' | 'right';
+		legendOrientation: 'horizontal' | 'vertical';
 	} = $props();
 
 	const activeMetadata = $derived(chartUsageMetadata[chartType]);
@@ -88,6 +99,19 @@
 	});
 	const polarOptions = $derived({ line, area, points, guides, tooltip });
 	const initialDimensions = { width: 960, height: 480 } as const;
+	const legendOptions: ChartLegend = $derived.by(() => {
+		if (!legend || chartType === 'facet') return false;
+		let label: string | undefined;
+		if (chartType === 'matrix') label = 'Contributions';
+		else if (chartType === 'scatter' && scatterVariant === 'hexbin') label = 'Observations';
+		return {
+			interactive: interactiveLegend,
+			placement: legendPlacement,
+			align: legendAlign,
+			orientation: legendOrientation,
+			label
+		};
+	});
 </script>
 
 <div class="grid min-w-0 w-full gap-4">
@@ -101,6 +125,7 @@
 			<Chart
 				data={example.data}
 				{...example.props}
+				legend={legendOptions}
 				viewport={chartType === 'series' || chartType === 'bar' ? brushZoom : false}
 				ariaLabel={activeMetadata.ariaLabel}
 				{initialDimensions}
@@ -116,7 +141,8 @@
 			<Chart
 				data={example.data}
 				{...example.props}
-				viewport={brushZoom ? { axis: 'both' } : false}
+				legend={legendOptions}
+				viewport={brushZoom}
 				ariaLabel={activeMetadata.ariaLabel}
 				{initialDimensions}
 				class="w-full"
@@ -126,6 +152,7 @@
 			<Chart
 				data={example.data}
 				{...example.props}
+				legend={legendOptions}
 				viewport={matrixVariant === 'grid' && brushZoom}
 				ariaLabel={activeMetadata.ariaLabel}
 				{initialDimensions}
@@ -140,6 +167,7 @@
 			<Chart
 				data={example.data}
 				{...example.props}
+				legend={legendOptions}
 				viewport={brushZoom}
 				ariaLabel={activeMetadata.ariaLabel}
 				{initialDimensions}
@@ -150,6 +178,7 @@
 			<Chart
 				data={example.data}
 				{...example.props}
+				legend={legendOptions}
 				ariaLabel={activeMetadata.ariaLabel}
 				{initialDimensions}
 				class="w-full"
@@ -159,6 +188,7 @@
 			<Chart
 				data={example.data}
 				{...example.props}
+				legend={legendOptions}
 				ariaLabel={activeMetadata.ariaLabel}
 				{initialDimensions}
 				class="w-full"
@@ -168,6 +198,7 @@
 			<Chart
 				data={example.data}
 				{...example.props}
+				legend={legendOptions}
 				ariaLabel={activeMetadata.ariaLabel}
 				{initialDimensions}
 				class="w-full"

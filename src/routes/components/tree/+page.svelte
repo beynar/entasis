@@ -14,8 +14,8 @@
 			name: 'density',
 			type: 'segmented',
 			label: 'Density',
-			value: 'default',
-			options: ['compact', 'default', 'relaxed']
+			value: 'normal',
+			options: ['small', 'normal', 'large']
 		},
 		{ name: 'search', type: 'switch', label: 'Search', value: true }
 	]);

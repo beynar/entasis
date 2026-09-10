@@ -108,7 +108,7 @@ Never pass both \`paths\` and \`preparedInput\`. Virtualized trees need a bounde
 	{#snippet contextMenu(data)}
 		<TreeContextMenuSurface
 			{data}
-			items={[{ type: 'option', title: \`Copy \${data.name}\`, onClick: () => copy(data.path) }]}
+			items={[{ type: 'option', title: \`Copy \${data.name}\`, onclick: () => copy(data.path) }]}
 		/>
 	{/snippet}
 </Tree>
@@ -137,7 +137,7 @@ Never pass both \`paths\` and \`preparedInput\`. Virtualized trees need a bounde
 - **flattenEmptyDirectories**: boolean - Collapse single-child directory chains.
 - **presorted**: boolean - Treat input paths as already sorted.
 - **sort**: 'default' | FileTreeSortComparator - Sort policy.
-- **density**: 'compact' | 'default' | 'relaxed' | number - Row density.
+- **density**: 'small' | 'normal' | 'large' - Semantic row density. Lower-level numeric tuning belongs in options.density.
 - **itemHeight**: number - Virtualized row height.
 - **overscan**: number - Extra rows above and below the viewport.
 - **initialVisibleRowCount**: number - SSR and virtualization first-pass row count.
@@ -172,7 +172,7 @@ Never pass both \`paths\` and \`preparedInput\`. Virtualized trees need a bounde
 - **onRename**: FileTreeRenamingConfig['onRename'] - Rename completed.
 - **onRenameError**: FileTreeRenamingConfig['onError'] - Rename failed.
 - **onDropComplete**: FileTreeDragAndDropConfig['onDropComplete'] - Drop completed.
-- **onDropError**: FileTreeDragAndDropConfig['onDropError'] - Drop failed.
+- **onDropError**: receives one { error, event } object when a drop fails.
 
 ## Accessibility
 

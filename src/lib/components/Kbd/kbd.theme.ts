@@ -5,9 +5,9 @@ const defaultKbd = cva({
 	base: 'border-neutral/20 shadow-neutral/20 pointer-events-none inline-flex w-fit items-center justify-center rounded-sm border font-sans font-medium shadow-[0_1px_0] select-none',
 	variants: {
 		size: {
-			small: 'h-4 min-w-4 gap-0.5 px-1 text-[0.625rem] [&_svg:not([class*=size-])]:size-2.5',
-			normal: 'h-5 min-w-5 gap-1 px-1 text-xs [&_svg:not([class*=size-])]:size-3',
-			large: 'h-6 min-w-6 gap-1 px-1.5 text-sm [&_svg:not([class*=size-])]:size-3.5'
+			small: 'h-4 min-w-4 gap-micro px-xs text-[0.625rem] [&_svg:not([class*=size-])]:size-2.5',
+			normal: 'h-5 min-w-5 gap-xs px-xs text-xs [&_svg:not([class*=size-])]:size-3',
+			large: 'h-6 min-w-6 gap-xs px-sm text-sm [&_svg:not([class*=size-])]:size-3.5'
 		},
 		color: {
 			// Neutral keycap; semantic colors resolve through the data-color CSS vars (soft tint).
@@ -30,9 +30,9 @@ const defaultKbdGroup = cva({
 	base: 'inline-flex items-center',
 	variants: {
 		size: {
-			small: 'gap-0.5',
-			normal: 'gap-1',
-			large: 'gap-1.5'
+			small: 'gap-micro',
+			normal: 'gap-xs',
+			large: 'gap-sm'
 		}
 	},
 	defaultVariants: {

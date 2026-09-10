@@ -2,11 +2,11 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultToggleMenuRoot = cva({
-	base: 'border-neutral-muted bg-neutral-muted/40 relative inline-flex max-w-full items-center gap-1 rounded-lg border p-1'
+	base: 'border-neutral-muted bg-neutral-muted/40 relative inline-flex max-w-full items-center gap-xs rounded-md border p-xs'
 });
 
 const defaultToggleMenuRail = cva({
-	base: 'flex min-w-0 items-center gap-2 overflow-hidden whitespace-nowrap'
+	base: 'flex min-w-0 items-center gap-md overflow-hidden whitespace-nowrap'
 });
 
 const defaultToggleMenuUnit = cva({

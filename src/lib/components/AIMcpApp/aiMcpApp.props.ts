@@ -65,6 +65,13 @@ export type AIMcpAppState = {
 	resource?: AIMcpAppResource;
 };
 
+/** App request parameters with their originating tool and request lifetime. */
+export type AIMcpAppRequest<Params> = {
+	params: Params;
+	tool: AIMcpToolCall;
+	extra: AIMcpAppRequestExtra;
+};
+
 export type AIMcpAppHostConfig = {
 	/** Connected MCP client used to resolve UI resources. */
 	client: Client;
@@ -73,18 +80,18 @@ export type AIMcpAppHostConfig = {
 	/** Cross-origin sandbox relay URL used for every resource. */
 	sandboxUrl?: string | URL;
 	/** Resolves a cross-origin sandbox relay URL. Required when resource metadata declares `domain`. */
-	resolveSandboxUrl?: (
-		resource: AIMcpAppResource,
-		tool: AIMcpToolCall,
-		signal: AbortSignal
-	) => string | URL | Promise<string | URL>;
+	resolveSandboxUrl?: (request: {
+		resource: AIMcpAppResource;
+		tool: AIMcpToolCall;
+		signal: AbortSignal;
+	}) => string | URL | Promise<string | URL>;
 	/** Overrides the default `resources/read` UI resource resolver. */
-	resolveResource?: (
-		uri: string,
-		client: Client,
-		tool: AIMcpToolCall,
-		signal: AbortSignal
-	) => AIMcpAppResource | Promise<AIMcpAppResource>;
+	resolveResource?: (request: {
+		uri: string;
+		client: Client;
+		tool: AIMcpToolCall;
+		signal: AbortSignal;
+	}) => AIMcpAppResource | Promise<AIMcpAppResource>;
 	/** Explicit browser-permission policy. Resource requests are denied when this is omitted. */
 	permissionPolicy?: AIMcpAppPermissionPolicy;
 	/** Explicit app-visible server-tool allowlist. Tool calls are disabled when this is omitted. */
@@ -97,44 +104,32 @@ export type AIMcpAppHostConfig = {
 	modelContextModalities?: AIMcpAppContentModalities;
 	/** Handles app-originated conversation messages. */
 	onMessage?: (
-		params: AIMcpAppMessageParams,
-		tool: AIMcpToolCall,
-		extra: AIMcpAppRequestExtra
+		request: AIMcpAppRequest<AIMcpAppMessageParams>
 	) => AIMcpAppMessageResult | Promise<AIMcpAppMessageResult>;
 	/** Handles app-originated model-context updates. */
-	onModelContext?: (
-		params: AIMcpAppModelContextParams,
-		tool: AIMcpToolCall,
-		extra: AIMcpAppRequestExtra
-	) => void | Promise<void>;
+	onModelContext?: (request: AIMcpAppRequest<AIMcpAppModelContextParams>) => void | Promise<void>;
 	/** Handles an allowlisted app-originated server-tool call through conversation-scoped state. */
 	onAppToolCall?: (
-		params: AIMcpAppToolCallParams,
-		tool: AIMcpToolCall,
-		extra: AIMcpAppRequestExtra
+		request: AIMcpAppRequest<AIMcpAppToolCallParams>
 	) => AIMcpAppToolCallResult | Promise<AIMcpAppToolCallResult>;
 	/** Handles app-originated external-link requests. */
 	onOpenLink?: (
-		params: AIMcpAppOpenLinkParams,
-		tool: AIMcpToolCall,
-		extra: AIMcpAppRequestExtra
+		request: AIMcpAppRequest<AIMcpAppOpenLinkParams>
 	) => AIMcpAppOpenLinkResult | Promise<AIMcpAppOpenLinkResult>;
 	/** Handles app-originated file download requests. */
 	onDownloadFile?: (
-		params: AIMcpAppDownloadFileParams,
-		tool: AIMcpToolCall,
-		extra: AIMcpAppRequestExtra
+		request: AIMcpAppRequest<AIMcpAppDownloadFileParams>
 	) => AIMcpAppDownloadFileResult | Promise<AIMcpAppDownloadFileResult>;
 	/** Receives app logging notifications. */
-	onLog?: (params: LoggingMessageNotification['params'], tool: AIMcpToolCall) => void;
+	onLog?: (
+		notification: Omit<AIMcpAppRequest<LoggingMessageNotification['params']>, 'extra'>
+	) => void;
 	/** Handles requests to change the app display mode. */
 	onDisplayMode?: (
-		params: AIMcpAppDisplayModeParams,
-		tool: AIMcpToolCall,
-		extra: AIMcpAppRequestExtra
+		request: AIMcpAppRequest<AIMcpAppDisplayModeParams>
 	) => AIMcpAppDisplayModeResult | Promise<AIMcpAppDisplayModeResult>;
 	/** Called when resource loading or bridge initialization fails. */
-	onError?: (error: unknown, tool: AIMcpToolCall) => void;
+	onError?: (failure: { error: unknown; tool: AIMcpToolCall }) => void;
 	/** Called after the app bridge closes. */
 	onClosed?: (tool: AIMcpToolCall) => void;
 };

@@ -38,7 +38,7 @@ default, or inside a modal Dialog (⌘K style) with \`dialog\`.
 \`\`\`svelte
 <Command dialog shortcut="k" {items} onSelect={run}>
 	{#snippet trigger({ open })}
-		<Button variant="outline" onClick={open}>Search... ⌘K</Button>
+		<Button variant="outline" onclick={open}>Search... ⌘K</Button>
 	{/snippet}
 	{#snippet footer({ close })}
 		<div class="border-neutral-muted text-neutral/60 border-t px-3 py-2 text-xs">
@@ -61,13 +61,15 @@ default, or inside a modal Dialog (⌘K style) with \`dialog\`.
 ### Dialog Mode Props
 - **dialog**: boolean (default: false) - Render inside a modal Dialog instead of inline.
 - **open**: boolean (bindable, default: false) - Dialog open state.
-- **onOpenChange**: (open: boolean) => void - Fires when the open state changes.
+- **defaultOpen**: boolean (default: false) - Initial dialog state when open is omitted.
+- **onOpenChange**: (open: boolean) => void - Fires once after a component-owned open state change.
 - **shortcut**: string | false (default: false) - ⌘/Ctrl + key toggles the dialog (e.g. 'k').
 - **closeOnSelect**: boolean (default: true) - Close the dialog when an item is selected.
 
 ### Search / Filtering Props
-- **search**: string (bindable, default: '') - Search query.
-- **onSearchChange**: (search: string) => void - Fires when the query changes.
+- **value**: string (bindable, default: '') - Search query.
+- **defaultValue**: string (default: '') - Initial query when value is omitted.
+- **onValueChange**: (value: string) => void - Fires once when the query changes.
 - **placeholder**: string (default: 'Type a command or search...')
 - **showInput**: boolean (default: true) - Render the search input row.
 - **shouldFilter**: boolean (default: true) - Filter internally; set false to filter externally.

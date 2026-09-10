@@ -15,15 +15,15 @@ const defaultMediaVolumeControlRoot = cva({
 });
 
 const defaultMediaVolumeControlPopoverPanel = cva({
-	base: 'p-1.5 pb-2.5'
+	base: 'p-sm pb-md'
 });
 
 const defaultMediaVolumeControlPanel = cva({
-	base: 'flex min-w-0 items-center gap-2 p-1',
+	base: 'flex min-w-0 items-center gap-md p-xs',
 	variants: {
 		orientation: {
 			horizontal: 'w-full',
-			vertical: 'w-auto flex-col justify-center gap-1.5 px-0 pt-0.5 pb-0'
+			vertical: 'w-auto flex-col justify-center gap-sm px-0 pt-micro pb-0'
 		}
 	},
 	defaultVariants: {

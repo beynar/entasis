@@ -1,7 +1,7 @@
 export const phoneInputDescription = `
 # PhoneInput Component
 
-The PhoneInput component provides a formatted input field for phone numbers with country code selection and automatic formatting.
+The PhoneInput component provides a formatted input field for phone numbers with country code selection and automatic formatting. [intl-tel-input](https://intl-tel-input.com/) is loaded from a CDN at runtime and never bundled. A strict Content-Security-Policy must allow \`cdn.jsdelivr.net\` in \`script-src\`.
 
 ## Basic Usage
 
@@ -278,6 +278,7 @@ PhoneInput validates:
 
 ## Notes
 
+- intl-tel-input loads from a CDN on first mount; nothing is bundled. A network connection is required for formatting and validation.
 - Automatically formats as user types
 - Supports international phone numbers
 - Country code is included in value
@@ -362,4 +363,11 @@ The theme object contains the following parts:
   });
 </script>
 \`\`\`
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+
 `;

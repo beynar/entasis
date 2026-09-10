@@ -18,13 +18,17 @@
 		AIModelSelectorState
 	} from './aiModelSelector.props.js';
 	import { useAIModelSelectorTheme } from './aiModelSelector.theme.js';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 
 	let {
 		ref = $bindable(),
 		models = [],
 		groups = [],
-		value = $bindable<string | null>(),
-		open = $bindable(false),
+		value = $bindable<string | null | undefined>(),
+		defaultValue,
+		open = $bindable(),
+		defaultOpen = false,
+		onOpenChange,
 		query = $bindable(''),
 		searchable = true,
 		menuItems: supplementalItems = [],
@@ -41,6 +45,16 @@
 		theme,
 		...attachments
 	}: AIModelSelectorProps = $props();
+	const valueState = createBindableValue<string | null | undefined>(
+		() => value,
+		(nextValue) => (value = nextValue),
+		() => defaultValue
+	);
+	const openState = createBindableValue(
+		() => open,
+		(nextOpen) => (open = nextOpen),
+		() => defaultOpen
+	);
 	const conversation = getAIConversation();
 	const groupedModels = $derived(collectModels(groups));
 	const groupedModelIds = $derived(
@@ -58,7 +72,7 @@
 	const filteredGroups = $derived(filterGroups(groups, searchQuery));
 	const modelsById = $derived(new Map(allModels.map((model) => [model.id, model])));
 	const selectedValue = $derived(
-		value === undefined ? conversation?.selectedModel : (value ?? undefined)
+		valueState.value === undefined ? conversation?.selectedModel : (valueState.value ?? undefined)
 	);
 	const selectedModel = $derived(selectedValue ? modelsById.get(selectedValue) : undefined);
 	const resolvedLabels = $derived<AIModelSelectorLabels>({
@@ -75,7 +89,7 @@
 	const selectorState = $derived<AIModelSelectorState>({
 		model: selectedModel,
 		value: selectedValue,
-		open,
+		open: openState.value,
 		query,
 		searchable,
 		disabled,
@@ -94,21 +108,25 @@
 	}
 	function selectModel(model: AIModelSelectorModel) {
 		if (disabled || model.disabled) return;
-		if (value === undefined && conversation) conversation.setSelectedModel(model.id);
-		else value = model.id;
-		open = false;
+		if (selectedValue !== model.id) {
+			if (valueState.value === undefined && conversation) conversation.setSelectedModel(model.id);
+			else valueState.value = model.id;
+			onValueChange?.({ value: model.id, model });
+		}
+		setOpen(false);
 		query = '';
-		onValueChange?.(model.id, model);
 	}
 	function setQuery(nextQuery: string) {
 		query = nextQuery;
 	}
 	function setOpen(nextOpen: boolean) {
 		if (disabled && nextOpen) return;
-		open = nextOpen;
+		if (openState.value === nextOpen) return;
+		openState.value = nextOpen;
+		onOpenChange?.(nextOpen);
 	}
 	function toggle() {
-		setOpen(!open);
+		setOpen(!openState.value);
 	}
 	function contextLabel(tokens?: number): string | undefined {
 		if (tokens === undefined) return undefined;
@@ -131,7 +149,7 @@
 				'data-model-id': model.id,
 				'data-selected': selectedValue === model.id ? 'true' : undefined
 			},
-			onClick: () => selectModel(model)
+			onclick: () => selectModel(model)
 		};
 	}
 	function groupItem(group: AIModelSelectorGroup): MenuItem {
@@ -272,7 +290,7 @@
 				placeholder={resolvedLabels.searchPlaceholder}
 				label={resolvedLabels.searchPlaceholder}
 				theme={{ label: { base: 'sr-only' } }}
-				onChange={(nextValue: string | null) => setQuery(nextValue ?? '')}
+				onValueChange={(nextValue: string | null) => setQuery(nextValue ?? '')}
 			/>{/if}
 	</div>
 {/snippet}
@@ -286,7 +304,7 @@
 			class="inline-flex"
 			{disabled}
 			aria-haspopup="menu"
-			aria-expanded={open}
+			aria-expanded={openState.value}
 			{@attach popover.reference}
 			onclick={() => popover.toggle()}
 		>
@@ -300,13 +318,13 @@
 			size="small"
 			{disabled}
 			aria-haspopup="menu"
-			aria-expanded={open}
+			aria-expanded={openState.value}
 			label={selectedModel || resolvedLabels.placeholder
 				? undefined
 				: resolvedLabels.triggerAriaLabel}
 			class={classes.trigger()}
 			{@attach popover.reference}
-			onClick={() => popover.toggle()}
+			onclick={() => popover.toggle()}
 		>
 			<span class="contents">
 				<span class={classes.triggerContent()}>
@@ -326,7 +344,7 @@
 <div
 	bind:this={ref}
 	data-slot="ai-model-selector"
-	data-state={open ? 'open' : 'closed'}
+	data-state={openState.value ? 'open' : 'closed'}
 	data-disabled={disabled || undefined}
 	data-searchable={searchable || undefined}
 	data-value={selectedValue}
@@ -334,7 +352,7 @@
 	{...attachments}
 >
 	<PopupMenu
-		bind:open
+		bind:open={() => openState.value, setOpen}
 		trigger={selectorTrigger}
 		fitTrigger={false}
 		class={classes.popover()}

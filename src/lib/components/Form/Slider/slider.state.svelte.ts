@@ -1,5 +1,6 @@
 import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
+import { SvelteMap } from 'svelte/reactivity';
 import { createPointerDrag, type PointerDragPayload } from '$lib/utils/pointerDrag.js';
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
 import type { FieldValue } from '../Field/field.js';
@@ -78,8 +79,10 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 	activeThumb = $state<number | null>(null);
 	dragState = $state<SliderDragState | null>(null);
 	private trackNode: HTMLElement | null = null;
-	private thumbNodes = new Map<number, HTMLButtonElement>();
+	private thumbNodes = new SvelteMap<number, HTMLButtonElement>();
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Render-time attachment caches must not update reactive state.
 	private thumbAttachments = new Map<number, Attachment<HTMLButtonElement>>();
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Render-time attachment caches must not update reactive state.
 	private thumbHitboxAttachments = new Map<number, Attachment<HTMLElement>>();
 	private documentHitboxDragCleanup: (() => void) | null = null;
 	private trackDrag = createPointerDrag({
@@ -369,6 +372,11 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 
 	setValues(nextValues: number[]) {
 		const constrainedValues = this.constrainValues(nextValues);
+		if (
+			constrainedValues.length === this.values.length &&
+			constrainedValues.every((value, index) => value === this.values[index])
+		)
+			return;
 		if (this.thumbCount === 1) {
 			this.value = constrainedValues[0] ?? this.minValue;
 			return;
@@ -430,7 +438,7 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 	applyThumbKey(index: number, key: string, shiftKey: boolean) {
 		const currentValue = this.values[index] ?? this.minValue;
 		const stepSize = shiftKey ? this.stepValue * 10 : this.stepValue;
-		let nextValue = currentValue;
+		let nextValue: number;
 
 		if (key === 'ArrowRight' || key === 'ArrowUp') {
 			nextValue = currentValue + stepSize;

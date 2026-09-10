@@ -1,7 +1,10 @@
 import type { PluginAPI } from 'tailwindcss/plugin';
 import { colors, variants } from './colors.js';
+import { applyGeometryEngine } from './geometry.js';
+import { applyRadiusEngine } from './radius.js';
 import { addScrollFadeUtilities, scrollFadeKeyframes } from './scrollFade.js';
 import { addShimmerUtilities, shimmerKeyframes } from './shimmer.js';
+import { applySpacingEngine } from './spacing.js';
 import { getSpinner } from './spinner.js';
 import type { ThemeOptions } from './theme.js';
 
@@ -42,6 +45,9 @@ export const globalKeyframes = (options?: ThemeOptions) => ({
 export const applyGlobalEngine = (api: PluginAPI, options?: ThemeOptions) => {
 	const { addBase, addComponents, matchUtilities, addUtilities, theme, addVariant } = api;
 
+	applyGeometryEngine(api);
+	applyRadiusEngine(api);
+	applySpacingEngine(api);
 	addBase({ ...dataColors });
 
 	const parseUtility =

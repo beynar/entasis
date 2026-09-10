@@ -46,6 +46,16 @@ export type FloatingWindowPayload = {
 	bringToFront: () => void;
 };
 
+export type FloatingWindowMovePayload = {
+	position: FloatingWindowPosition;
+	window: FloatingWindowPayload;
+};
+
+export type FloatingWindowResizePayload = {
+	dimensions: FloatingWindowDimensions;
+	window: FloatingWindowPayload;
+};
+
 export type FloatingWindowProps = WithAttachments<{
 	/** Stable DOM id. A generated id is used when omitted. */
 	id?: string;
@@ -53,6 +63,8 @@ export type FloatingWindowProps = WithAttachments<{
 	ref?: HTMLDivElement | null;
 	/** Controls whether the window is rendered. Bindable. */
 	open?: boolean;
+	/** Initial open state when `open` is not provided. */
+	defaultOpen?: boolean;
 	/** Collapses the window into its configured viewport-edge dock. Bindable. */
 	minimized?: boolean;
 	/** Viewport edge and alignment used by the minimized dock. */
@@ -81,14 +93,18 @@ export type FloatingWindowProps = WithAttachments<{
 	class?: string;
 	/** Per-instance theme overrides. */
 	theme?: FloatingWindowThemeProps;
-	/** Called after the close command updates state. */
-	onClose?: (window: FloatingWindowPayload) => void;
+	/** Called once when the library requests an open-state change. */
+	onOpenChange?: (open: boolean) => void;
+	/** Called after the open transition finishes. */
+	onAfterOpen?: (window: FloatingWindowPayload) => void;
+	/** Called after the close transition finishes. */
+	onAfterClose?: (window: FloatingWindowPayload) => void;
 	/** Called after the minimize command updates state. */
 	onMinimize?: (window: FloatingWindowPayload) => void;
 	/** Called after the restore command updates state. */
 	onRestore?: (window: FloatingWindowPayload) => void;
 	/** Called when a pointer or keyboard move commits. */
-	onMove?: (position: FloatingWindowPosition, window: FloatingWindowPayload) => void;
+	onMove?: (payload: FloatingWindowMovePayload) => void;
 	/** Called when a pointer or keyboard resize commits. */
-	onResize?: (dimensions: FloatingWindowDimensions, window: FloatingWindowPayload) => void;
+	onResize?: (payload: FloatingWindowResizePayload) => void;
 }>;

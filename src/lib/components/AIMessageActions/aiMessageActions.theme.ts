@@ -5,7 +5,7 @@ import {
 	type InferComponentTheme
 } from '$lib/utils/cva/index.js';
 const defaultRoot = cva({
-	base: 'flex min-h-7 w-full flex-wrap items-center gap-1 px-1 transition-opacity motion-reduce:transition-none',
+	base: 'flex min-h-7 w-full flex-wrap items-center gap-xs px-xs transition-opacity motion-reduce:transition-none',
 	variants: {
 		role: {
 			user: 'justify-end',
@@ -20,9 +20,9 @@ const defaultRoot = cva({
 			none: 'hidden'
 		},
 		size: {
-			small: 'min-h-6 gap-0.5 px-0.5',
-			normal: 'min-h-7 gap-1 px-1',
-			large: 'min-h-8 gap-1.5 px-1'
+			small: 'min-h-6 gap-micro px-micro',
+			normal: 'min-h-7 gap-xs px-xs',
+			large: 'min-h-8 gap-sm px-xs'
 		}
 	},
 	defaultVariants: { role: 'assistant', visibility: 'always', size: 'normal' }
@@ -38,7 +38,7 @@ const defaultButton = cva({
 	},
 	defaultVariants: { size: 'normal' }
 });
-const defaultError = cva({ base: 'w-full basis-full pt-1' });
+const defaultError = cva({ base: 'w-full basis-full pt-xs' });
 export const aiMessageActionsTheme = {
 	root: defaultRoot,
 	button: defaultButton,

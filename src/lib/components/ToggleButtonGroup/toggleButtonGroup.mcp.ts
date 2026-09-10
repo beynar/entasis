@@ -27,7 +27,8 @@ ToggleButtonGroup renders a keyed set of ToggleButton items and exposes a bindab
 - **items**: Record<string, ToggleButtonGroupItem> (required) - Immutable keyed button configurations. Items do not contain \`checked\`.
 - **ariaLabel**: string (required) - Accessible name for the group.
 - **value**: Partial<Record<keyof items, boolean>> (bindable) - The only checked-state source. Missing keys are false.
-- **onChange**: (value) => void - Called with the full checked map after a toggle.
+- **defaultValue**: Partial<Record<keyof items, boolean>> - Initial checked map when value is omitted.
+- **onValueChange**: (value) => void - Called once with the full checked map after a toggle.
 - **size**: 'small' | 'normal' | 'large' - Applied to every item.
 - **color**: Colors - Applied to every item.
 - **variant**: 'outline' | 'ghost' - Applied to every item. Defaults to 'ghost'.
@@ -78,7 +79,7 @@ ToggleButtonGroup renders a keyed set of ToggleButton items and exposes a bindab
 		compact: { children: 'Compact' },
 		comfortable: { children: 'Comfortable' }
 	}}
-	onChange={(value) => {
+	onValueChange={(value) => {
 		console.log(value);
 	}}
 />

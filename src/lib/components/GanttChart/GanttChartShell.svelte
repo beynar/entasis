@@ -372,8 +372,8 @@
 				class="min-h-full overflow-visible"
 				theme={{ handle: { base: chart.classes.splitter(chart.themeVariants) } }}
 				getHandleAriaLabel={() => chart.messages.ganttChartResizePanels}
-				onLayoutChanged={(sizes, meta) => {
-					if (!meta.isUserInteraction || containerWidth <= 0) return;
+				onLayoutCommit={({ sizes, isUserInteraction }) => {
+					if (!isUserInteraction || containerWidth <= 0) return;
 					const nextWidth = Math.round((sizes[0] / 100) * containerWidth);
 					if (nextWidth !== chart.gridWidth) chart.gridWidth = nextWidth;
 				}}

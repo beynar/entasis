@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Button from '../Button/Button.svelte';
 	import Slider from '../Form/Slider/Slider.svelte';
 	import { speakerHighIcon } from '../Icons/speakerHigh.js';
@@ -15,6 +15,7 @@
 		MediaVolumeControlTriggerPayload
 	} from './mediaVolumeControl.props.js';
 	import { useMediaVolumeControlTheme } from './mediaVolumeControl.theme.js';
+	import { getMediaVolumeControlSliderTheme } from './mediaVolumeControl.slider.theme.js';
 
 	let {
 		volume,
@@ -27,8 +28,11 @@
 		size = 'normal',
 		color = 'primary',
 		orientation,
-		open = $bindable(false),
+		defaultOpen = false,
+		open = $bindable(),
 		onOpenChange,
+		onAfterOpen,
+		onAfterClose,
 		position = 'bottom',
 		offset = 8,
 		popoverSize,
@@ -48,6 +52,11 @@
 		toggleButton: toggleButtonSnippet,
 		theme
 	}: MediaVolumeControlProps = $props();
+	const openState = createBindableValue(
+		() => open,
+		(nextOpen) => (open = nextOpen),
+		() => defaultOpen
+	);
 
 	const classes = $derived(useMediaVolumeControlTheme(theme));
 	const resolvedOrientation = $derived(
@@ -61,54 +70,19 @@
 	const volumeIcon = $derived(
 		isEffectivelyMuted ? mutedIcon : volume < lowVolumeThreshold ? lowVolumeIcon : highVolumeIcon
 	);
-	const defaultSliderTheme = $derived({
-		root: {
-			base:
-				resolvedOrientation === 'vertical' ? 'w-auto justify-items-center gap-0' : 'w-full gap-0'
-		},
-		header: {
-			base: 'sr-only'
-		},
-		label: {
-			base: 'sr-only'
-		},
-		inputContainer: {
-			base: resolvedOrientation === 'vertical' ? 'w-auto gap-0' : 'w-full gap-0'
-		},
-		control: {
-			base:
-				resolvedOrientation === 'vertical' ? 'w-auto flex-col items-center gap-2' : 'w-full gap-2'
-		},
-		track: {
-			base:
-				resolvedOrientation === 'vertical'
-					? 'h-36 focus-visible:ring-offset-0'
-					: 'min-w-0 focus-visible:ring-offset-0'
-		},
-		valueLabels: {
-			base: resolvedOrientation === 'vertical' ? 'mt-1 ml-0 justify-center' : 'ml-1'
-		},
-		valueLabel: {
-			base: 'min-w-14 text-center'
-		}
-	});
-	let lastReportedOpen = false;
-
+	const defaultSliderTheme = $derived(getMediaVolumeControlSliderTheme(resolvedOrientation));
 	$effect(() => {
-		if (disabled) open = false;
+		if (disabled && openState.value) setOpen(false);
 	});
 
-	$effect(() => {
-		if (mode !== 'popover' || lastReportedOpen === open) return;
-		lastReportedOpen = open;
-		onOpenChange?.(open);
-	});
+	function setOpen(nextOpen: boolean) {
+		if (openState.value === nextOpen) return;
+		openState.value = nextOpen;
+		onOpenChange?.(nextOpen);
+	}
 
-	onDestroy(() => {
-		if (lastReportedOpen) onOpenChange?.(false);
-	});
-
-	function handleSliderChange(nextValue: number | number[]) {
+	function handleSliderChange(nextValue: number | number[] | null) {
+		if (nextValue === null) return;
 		const nextVolume = Array.isArray(nextValue) ? (nextValue[0] ?? 0) : nextValue;
 		onVolumeChange(nextVolume / 100);
 	}
@@ -130,7 +104,7 @@
 			active: isEffectivelyMuted,
 			pressed: isEffectivelyMuted,
 			disabled,
-			onClick: onToggleMuted
+			activate: onToggleMuted
 		};
 	}
 
@@ -142,7 +116,7 @@
 			reference: popover.reference,
 			ariaHaspopup: 'dialog',
 			ariaExpanded: popover.isOpen,
-			onClick: () => handleTriggerClick(popover)
+			activate: () => handleTriggerClick(popover)
 		};
 	}
 </script>
@@ -160,7 +134,7 @@
 		data-active={context.active ? 'true' : undefined}
 		aria-pressed={context.pressed}
 		prefix={context.icon}
-		onClick={context.onClick}
+		onclick={context.activate}
 		{@attach context.reference}
 		{@attach tooltip({ content: context.label, position: 'top', size: 'small' })}
 	/>
@@ -177,7 +151,7 @@
 		data-active={context.active ? 'true' : undefined}
 		aria-pressed={context.pressed}
 		prefix={context.icon}
-		onClick={context.onClick}
+		onclick={context.activate}
 		{@attach tooltip({ content: context.label, position: 'top', size: 'small' })}
 	/>
 {/snippet}
@@ -212,7 +186,7 @@
 				variant="thick"
 				{size}
 				theme={sliderTheme ?? defaultSliderTheme}
-				onChange={handleSliderChange}
+				onValueChange={handleSliderChange}
 			/>
 		</div>
 	</div>
@@ -221,7 +195,10 @@
 <div data-slot="media-volume-control" class={classes.root({ mode, className })}>
 	{#if mode === 'popover'}
 		<Popover
-			bind:open
+			open={openState.value}
+			onOpenChange={setOpen}
+			{onAfterOpen}
+			{onAfterClose}
 			{position}
 			{offset}
 			size={popoverSize}
@@ -239,9 +216,7 @@
 				{/if}
 			{/snippet}
 
-			{#snippet children()}
-				{@render panel()}
-			{/snippet}
+			{@render panel()}
 		</Popover>
 	{:else}
 		{@render panel()}

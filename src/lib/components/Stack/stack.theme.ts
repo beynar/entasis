@@ -44,7 +44,7 @@ const defaultStack = cva({
 		direction: 'vertical',
 		mainAlign: 'start',
 		crossAlign: 'stretch',
-		gap: '0',
+		gap: 'none',
 		wrap: 'nowrap',
 		scrollable: false
 	}

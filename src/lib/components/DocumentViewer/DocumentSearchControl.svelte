@@ -65,7 +65,7 @@
 		clearTimeout(searchTimer);
 		searchTimer = setTimeout(runSearch, 250);
 	};
-	const onClose = (popover: PopoverState) => {
+	const onAfterClose = (popover: PopoverState) => {
 		clearTimeout(searchTimer);
 		searchTimer = undefined;
 		query = '';
@@ -89,7 +89,7 @@
 	{position}
 	lockScroll={false}
 	closeOnClickOutside={false}
-	{onClose}
+	{onAfterClose}
 	class={classes.search()}
 >
 	{#snippet trigger(popover)}
@@ -97,7 +97,7 @@
 			{...buttonProps}
 			label="Search"
 			disabled={!viewer.isReady}
-			onClick={popover.toggle}
+			onclick={popover.toggle}
 			prefix={magnifyingGlassIcon}
 			{@attach popover.reference}
 		/>
@@ -118,14 +118,14 @@
 		{...buttonProps}
 		label="Previous match"
 		disabled={!viewer.matches.length}
-		onClick={() => runViewerTask(viewer.previousMatch())}
+		onclick={() => runViewerTask(viewer.previousMatch())}
 		prefix={caretUpIcon}
 	/>
 	<Button
 		{...buttonProps}
 		label="Next match"
 		disabled={!viewer.matches.length}
-		onClick={() => runViewerTask(viewer.nextMatch())}
+		onclick={() => runViewerTask(viewer.nextMatch())}
 		prefix={caretDownIcon}
 	/>
 </Popover>

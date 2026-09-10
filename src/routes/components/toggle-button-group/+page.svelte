@@ -5,6 +5,7 @@
 	import { textUnderlineIcon } from '$lib/components/Icons/textUnderline.js';
 	import { colors, sizes } from '$lib/utils/tokens.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 
 	const variants = ['ghost', 'outline'] as const;
@@ -13,6 +14,30 @@
 		italic: { prefix: textItalicIcon, ariaLabel: 'Italic' },
 		underline: { prefix: textUnderlineIcon, ariaLabel: 'Underline' }
 	};
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'ghost',
+			options: variants
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'neutral',
+			options: colors
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 
 	let formatting = $state({ bold: true, italic: false, underline: false });
 </script>
@@ -24,16 +49,21 @@
 	features={[
 		'Value is the single checked-state source',
 		'Optional joined button layout',
-		'onChange emits the checked map',
+		'onValueChange emits the checked map',
 		'Composes ToggleButton primitives'
 	]}
 >
 	<ComponentCard
+		{controls}
 		code={`let formatting = $state({ bold: true });
 
 <ToggleButtonGroup
 \tbind:value={formatting}
 \tariaLabel="Text formatting"
+\tsize="${controls.value.size}"
+\tvariant="${controls.value.variant}"
+\tcolor="${controls.value.color}"
+\tdisabled={${controls.value.disabled}}
 \titems={{
 \t\tbold: { prefix: textBIcon, ariaLabel: 'Bold' },
 \t\titalic: { prefix: textItalicIcon, ariaLabel: 'Italic' },
@@ -45,7 +75,10 @@
 			<ToggleButtonGroup
 				bind:value={formatting}
 				ariaLabel="Text formatting"
-				color="neutral"
+				size={controls.value.size}
+				variant={controls.value.variant}
+				color={controls.value.color}
+				disabled={controls.value.disabled}
 				items={formattingItems}
 			/>
 			<code class="text-neutral/60 text-xs">{JSON.stringify(formatting)}</code>

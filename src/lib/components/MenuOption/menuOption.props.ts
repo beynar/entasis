@@ -38,18 +38,12 @@ export type MenuOptionProps = WithAttachments<
 			 * Link rel attribute (only used when href is provided).
 			 */
 			rel?: string;
-			/**
-			 * Click event handler.
-			 */
-			onClick?: (event: MouseEvent) => void;
-			/**
-			 * Pointer enter event handler.
-			 */
-			onEnter?: (event: MouseEvent) => void;
-			/**
-			 * Pointer leave event handler.
-			 */
-			onLeave?: (event: MouseEvent) => void;
+			/** Native click event handler. */
+			onclick?: (event: MouseEvent) => void;
+			/** Native pointer enter event handler. */
+			onpointerenter?: (event: PointerEvent) => void;
+			/** Native pointer leave event handler. */
+			onpointerleave?: (event: PointerEvent) => void;
 			/**
 			 * Custom element type to render. Overrides automatic element detection.
 			 */
@@ -83,7 +77,7 @@ export type MenuOptionProps = WithAttachments<
 			 * Extra attributes/handlers spread onto the row element (`id`, `data-value`, `tabindex`,
 			 * `onpointermove`, `onmousedown`, aria-*). Escape hatch for listbox wiring.
 			 */
-			attrs?: Record<string, any>;
+			attrs?: Record<string, unknown>;
 			/**
 			 * Custom theme overrides.
 			 */

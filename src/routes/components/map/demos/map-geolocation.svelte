@@ -29,11 +29,11 @@
     controls={["zoom-in", "zoom-out", "geolocate", "reset"]}
     controlPosition="top-right"
     geolocation={{ enabled: false, showMarker: true, zoom: 13 }}
-    onerror={handleError}
+    onError={handleError}
     class="h-[28rem]"
   >
     {#snippet controlButton(button: MapControlButtonSnippetArg)}
-      <!-- Click is forwarded by the map's wrapper element, so no onClick here. -->
+      <!-- Click is forwarded by the map's wrapper element, so no onclick here. -->
       <Button
         variant="ghost"
         color={button.action === "geolocate" ? "secondary" : "neutral"}

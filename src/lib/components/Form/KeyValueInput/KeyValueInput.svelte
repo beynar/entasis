@@ -2,6 +2,7 @@
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { KeyValueInputProps } from './keyValueInput.props.js';
+	import type { KeyValuePair } from '../Field/field.js';
 	import { useKeyValueInputTheme } from './keyValueInput.theme.js';
 	import { plusIcon } from '../../Icons/plus.js';
 	import { xIcon } from '../../Icons/x.js';
@@ -14,7 +15,8 @@
 	type InputField = 'key' | 'value';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
@@ -28,13 +30,14 @@
 		disabled,
 		name,
 		onValidate,
-		onChange,
+		onValueChange,
 		visible,
 		prefix,
 		suffix,
 		description,
 		...rest
 	}: KeyValueInputProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 
@@ -48,7 +51,7 @@
 		value: new Map()
 	};
 
-	// Internal source of truth for the editor. Seeded ONCE from the initial value (untracked).
+	// Row IDs remain stable during edits; a parent replacement creates a new row set.
 	let rows = $state<KeyValueRow[]>(
 		untrack(() => (value ?? []).map((pair) => ({ id: nextId(), key: pair.key, value: pair.value })))
 	);
@@ -76,8 +79,8 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => {
-			onChange?.(v ?? []);
+		onValueChange: (v) => {
+			onValueChange?.(v ?? []);
 		},
 		get disabled() {
 			return disabled;
@@ -103,21 +106,22 @@
 		type: 'keyvalue'
 	});
 
-	// Sync OUT only: value is an output mirror of the editor rows. Reading value here would loop,
-	// so we only assign it. The first flush is skipped so that seeding rows from the initial value
-	// does not manufacture a spurious onChange or coerce a `null` value into `[]` on mount; after
-	// that, value is only reassigned when the serialized pairs actually differ from what was last
-	// emitted. Programmatic replacement of value after mount is intentionally not reconciled back
-	// into rows (see mcp doc).
-	let seeded = false;
+	const hasSamePairs = (left: KeyValuePair[], right: KeyValuePair[]) =>
+		left.length === right.length &&
+		left.every((pair, index) => pair.key === right[index].key && pair.value === right[index].value);
+
 	$effect(() => {
-		const next = pairs;
+		const nextValue = value;
 		untrack(() => {
-			if (!seeded) {
-				seeded = true;
-				return;
-			}
-			value = next;
+			if (hasSamePairs(nextValue ?? [], pairs)) return;
+			rows = (nextValue ?? []).map((pair) => ({ id: nextId(), ...pair }));
+		});
+	});
+
+	$effect(() => {
+		const nextPairs = pairs;
+		untrack(() => {
+			if (!hasSamePairs(value ?? [], nextPairs)) field.setValue(nextPairs);
 		});
 	});
 

@@ -93,33 +93,33 @@
 				permissionPolicy: { allowedPermissions: [] },
 				appToolPolicy: { allowedTools: ['record-demo-action'] },
 				modelContextModalities: { structuredContent: {} },
-				onMessage: (params) => {
+				onMessage: ({ params }) => {
 					recordEvent(`Message: ${params.content.length} content block`);
 					return {};
 				},
-				onModelContext: (params) => {
+				onModelContext: ({ params }) => {
 					recordEvent(
 						params.structuredContent
 							? 'Model context: structured content received'
 							: 'Model context updated'
 					);
 				},
-				onAppToolCall: async (params, _sourceTool, extra) => {
+				onAppToolCall: async ({ params, extra }) => {
 					recordEvent(`Tool call: ${params.name}`);
 					return CallToolResultSchema.parse(
 						await nextClient.callTool(params, CallToolResultSchema, { signal: extra.signal })
 					);
 				},
-				onOpenLink: (params) => {
+				onOpenLink: ({ params }) => {
 					recordEvent(`Link request: ${new URL(params.url).hostname}`);
 					return {};
 				},
-				onDownloadFile: (params) => {
+				onDownloadFile: ({ params }) => {
 					recordEvent(`Download request: ${params.contents.length} file`);
 					return {};
 				},
-				onLog: (params) => recordEvent(`Log: ${params.level}`),
-				onDisplayMode: (params) => {
+				onLog: ({ params }) => recordEvent(`Log: ${params.level}`),
+				onDisplayMode: ({ params }) => {
 					recordEvent(`Display request: ${params.mode} denied`);
 					return { mode: 'inline' };
 				},

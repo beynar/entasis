@@ -9,9 +9,9 @@ const defaultSpinner = cva({
 	base: 'inline-flex w-fit shrink-0 items-center justify-center align-middle',
 	variants: {
 		size: {
-			small: 'gap-1',
-			normal: 'gap-1.5',
-			large: 'gap-2'
+			small: 'gap-xs',
+			normal: 'gap-sm',
+			large: 'gap-md'
 		},
 		color: {
 			primary: 'text-primary-readable',

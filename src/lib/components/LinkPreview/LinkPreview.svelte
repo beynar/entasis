@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import HoverCard from '../HoverCard/HoverCard.svelte';
 	import Skeleton from '../Skeleton/Skeleton.svelte';
 	import Slot from '../Slot/Slot.svelte';
@@ -12,7 +13,8 @@
 	let {
 		id: customId,
 		href,
-		open = $bindable(false),
+		defaultOpen = false,
+		open = $bindable(),
 		children,
 		metadata,
 		fetchMetadata,
@@ -43,8 +45,9 @@
 		cardColor = 'neutral',
 		cardVariant = 'solid',
 		showBorders = false,
-		onOpen,
-		onClose,
+		onOpenChange,
+		onAfterOpen,
+		onAfterClose,
 		onLoad,
 		onError,
 		theme,
@@ -53,6 +56,13 @@
 		popoverTheme,
 		...attachments
 	}: LinkPreviewProps = $props();
+	const openState = createBindableValue(
+		() => open,
+		(next) => {
+			open = next;
+		},
+		() => defaultOpen
+	);
 
 	const generatedId = $props.id();
 	const id = $derived(customId || generatedId);
@@ -63,7 +73,7 @@
 		getMetadata: () => metadata,
 		getFetchMetadata: () => fetchMetadata,
 		getMetadataEndpoint: () => metadataEndpoint,
-		getShouldLoad: () => prefetch || open,
+		getShouldLoad: () => prefetch || openState.value,
 		getDisabled: () => disabled,
 		onLoad: (nextMetadata) => onLoad?.(nextMetadata),
 		onError: (nextError) => onError?.(nextError)
@@ -94,7 +104,7 @@
 		metadata: previewState.metadata,
 		status: previewState.status,
 		error: previewState.error,
-		isOpen: open,
+		isOpen: openState.value,
 		reload: previewState.reload,
 		hoverCard: hoverCardPayload
 	});
@@ -119,14 +129,25 @@
 		return `${url.host.replace(/^www\./, '')}${path}`;
 	}
 
-	function handleOpen(nextPayload: LinkPreviewPayload['hoverCard']) {
+	function handleAfterOpen(nextPayload: LinkPreviewPayload['hoverCard']) {
 		hoverCardPayload = nextPayload;
-		onOpen?.({ ...payload, hoverCard: nextPayload, isOpen: true });
+		onAfterOpen?.({ ...payload, hoverCard: nextPayload, isOpen: true });
 	}
 
-	function handleClose(nextPayload: LinkPreviewPayload['hoverCard']) {
+	function handleAfterClose(nextPayload: LinkPreviewPayload['hoverCard']) {
 		hoverCardPayload = nextPayload;
-		onClose?.({ ...payload, hoverCard: nextPayload, isOpen: false });
+		onAfterClose?.({ ...payload, hoverCard: nextPayload, isOpen: false });
+	}
+
+	function handleOpenChange(nextOpen: boolean) {
+		if (openState.value === nextOpen) return;
+		openState.value = nextOpen;
+		onOpenChange?.(nextOpen);
+	}
+
+	function blockDisabledActivation(event: MouseEvent) {
+		event.preventDefault();
+		event.stopPropagation();
 	}
 
 	$effect(() => {
@@ -141,7 +162,7 @@
 
 <HoverCard
 	{id}
-	bind:open
+	open={openState.value}
 	{position}
 	{offset}
 	{delay}
@@ -162,10 +183,12 @@
 	theme={hoverCardTheme}
 	{cardTheme}
 	{popoverTheme}
-	onOpen={handleOpen}
-	onClose={handleClose}
+	onOpenChange={handleOpenChange}
+	onAfterOpen={handleAfterOpen}
+	onAfterClose={handleAfterClose}
 >
 	{#snippet trigger()}
+		<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs; library links cannot depend on SvelteKit routing. -->
 		<a
 			href={disabled ? undefined : href}
 			{target}
@@ -173,10 +196,14 @@
 			class={classes.trigger({ disabled, className })}
 			data-status={previewState.status}
 			aria-describedby={id}
+			aria-disabled={disabled || undefined}
+			tabindex={disabled ? -1 : undefined}
+			onclick={disabled ? blockDisabledActivation : undefined}
 			{...attachments}
 		>
 			<Slot render={children ?? previewHost} {payload} />
 		</a>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	{/snippet}
 
 	{#snippet content()}

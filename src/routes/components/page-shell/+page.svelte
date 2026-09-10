@@ -7,6 +7,26 @@
 	import PageShellInjectionDemo from './demos/PageShellInjectionDemo.svelte';
 	import PageShellOverflowDemo from './demos/PageShellOverflowDemo.svelte';
 	import ShellMentalModel from '../ShellMentalModel.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
+
+	const contentPaddings = ['none', 'small', 'normal', 'large'] as const;
+	const contentWidths = ['full', 'narrow', 'normal', 'wide', 'prose'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'contentPadding',
+			type: 'segmented',
+			label: 'Padding',
+			value: 'normal',
+			options: contentPaddings
+		},
+		{
+			name: 'contentWidth',
+			type: 'segmented',
+			label: 'Width',
+			value: 'wide',
+			options: contentWidths
+		}
+	]);
 </script>
 
 <DocPage
@@ -25,6 +45,7 @@
 	<ShellMentalModel current="page-shell" />
 
 	<ComponentCard
+		{controls}
 		description="Use PageShell when navigation is already owned by Sidebar and the page needs stable content chrome."
 		class="!min-h-fit !items-start !p-4"
 		code={`<script lang="ts">
@@ -52,8 +73,8 @@ ${'</' + 'script>'}
 		title="Insights"
 		subtitle="Sticky header and footer with natural content flow"
 		{headerActions}
-		contentPadding="normal"
-		contentWidth="wide"
+		contentPadding="${controls.value.contentPadding}"
+		contentWidth="${controls.value.contentWidth}"
 	>
 		{#snippet footer()}
 			<span>Updated just now</span>
@@ -70,7 +91,10 @@ ${'</' + 'script>'}
 	</PageShell>
 </div>`}
 	>
-		<PageShellBasicDemo />
+		<PageShellBasicDemo
+			contentPadding={controls.value.contentPadding}
+			contentWidth={controls.value.contentWidth}
+		/>
 	</ComponentCard>
 
 	{#snippet examples()}

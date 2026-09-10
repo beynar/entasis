@@ -51,7 +51,12 @@
 		<div class="grid gap-5 sm:grid-cols-2">
 			<div class="grid gap-2">
 				<span class="text-neutral text-sm font-medium">Variant</span>
-				<SegmentedControl items={variantItems} bind:value={variant} size="small" ariaLabel="Variant" />
+				<SegmentedControl
+					items={variantItems}
+					bind:value={variant}
+					size="small"
+					ariaLabel="Variant"
+				/>
 			</div>
 			<div class="grid gap-2">
 				<span class="text-neutral text-sm font-medium">Color</span>
@@ -59,7 +64,12 @@
 			</div>
 			<div class="grid gap-2">
 				<span class="text-neutral text-sm font-medium">Size</span>
-				<SegmentedControl items={sizeItems} bind:value={size} size="small" ariaLabel="Typography size" />
+				<SegmentedControl
+					items={sizeItems}
+					bind:value={size}
+					size="small"
+					ariaLabel="Typography size"
+				/>
 			</div>
 			<div class="grid gap-2">
 				<span class="text-neutral text-sm font-medium">Density</span>
@@ -87,7 +97,7 @@
 			{density}
 			{showBorders}
 			{disabled}
-			onClick={clickable ? () => console.log('Card clicked') : null}
+			onclick={clickable ? () => console.log('Card clicked') : null}
 		>
 			{#snippet title()}
 				Team workspace

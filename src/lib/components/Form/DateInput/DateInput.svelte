@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { Maskito } from '@maskito/core';
 	import { maskitoDateOptionsGenerator } from '@maskito/kit';
 	import DateSelector from '../DateSelector/DateSelector.svelte';
@@ -11,7 +12,8 @@
 	import { useDateInputTheme } from './dateInput.theme.js';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		format = 'dd/mm/yyyy',
@@ -30,12 +32,13 @@
 		disabled,
 		name,
 		onValidate,
-		onChange,
+		onValueChange,
 		onCalendarSelect,
 		visible,
 		type = 'date',
 		...rest
 	}: DateInputProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 	const dateSeparator = $derived(separator || '/');
@@ -52,7 +55,7 @@
 		get errors() {
 			return errors;
 		},
-		set errors(v: any) {
+		set errors(v: string[] | boolean) {
 			errors = v;
 		},
 		get focused() {
@@ -61,8 +64,8 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => {
-			onChange?.(v);
+		onValueChange: (v) => {
+			onValueChange?.(v);
 		},
 		get disabled() {
 			return disabled;
@@ -213,7 +216,7 @@
 
 	$effect(() => {
 		if (!field.focused) {
-			syncInputValue(value);
+			syncInputValue(value ?? null);
 		}
 	});
 </script>
@@ -234,7 +237,7 @@
 	{locale}
 	disabled={field.disabled}
 	calendarLabel="Choose date"
-	onChange={handleCalendarChange}
+	onValueChange={handleCalendarChange}
 	class={classes.popover({ class: theme?.popover?.base })}
 >
 	{#snippet trigger(popover: PopoverState)}
@@ -286,7 +289,7 @@
 				aria-controls={isCalendarOpen ? `${id}-calendar-popover` : undefined}
 				disabled={field.disabled}
 				prefix={calendarBlankIcon}
-				onClick={() => {
+				onclick={() => {
 					if (!field.disabled) {
 						popover.toggle();
 					}

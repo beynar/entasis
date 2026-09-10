@@ -3,8 +3,34 @@
 	import DocPage from '../../DocPage.svelte';
 	import { PasswordInput } from '$lib/components/Form/PasswordInput/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let password = $state('');
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -19,15 +45,28 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A masked password input with visibility toggle"
 		code={`<PasswordInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Password"
 	placeholder="Enter your password"
 	bind:value={password}
 />`}
 	>
 		<div class="w-full max-w-md">
-			<PasswordInput label="Password" placeholder="Enter your password" bind:value={password} />
+			<PasswordInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
+				label="Password"
+				placeholder="Enter your password"
+				bind:value={password}
+			/>
 		</div>
 	</ComponentCard>
 

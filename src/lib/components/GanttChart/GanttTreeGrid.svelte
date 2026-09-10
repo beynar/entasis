@@ -330,7 +330,7 @@
 			class="h-full min-w-0"
 			ariaLabel={chart.messages.ganttChartGrid}
 			type="hover"
-			onScroll={handleHorizontalScroll}
+			onscroll={handleHorizontalScroll}
 		>
 			<div style:width={`${gridWidth}px`} style:min-width="100%" dir={chart.direction}>
 				<div

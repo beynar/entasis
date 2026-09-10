@@ -30,7 +30,7 @@ export type ReasoningProps = WithAttachments<
 		open?: boolean;
 		/** Initial open state when uncontrolled. Set false to opt out of streaming auto-open. */
 		defaultOpen?: boolean;
-		/** Called when the user toggles the collapsible. */
+		/** Called once after a user or stream lifecycle change updates `open`. */
 		onOpenChange?: (open: boolean) => void;
 		/** Keeps reasoning open and displays cycling progress labels. */
 		isStreaming?: boolean;

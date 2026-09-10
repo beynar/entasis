@@ -11,8 +11,8 @@ const defaultViewport = cva({
 	base: 'min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
 	variants: {
 		tocSide: {
-			left: 'pl-10',
-			right: 'pr-10'
+			left: 'pl-layout-lg',
+			right: 'pr-layout-lg'
 		}
 	}
 });
@@ -21,9 +21,9 @@ const defaultItem = cva({
 	base: 'absolute top-0 left-0 z-0 w-full has-[[data-actions-visibility=always]]:z-10 hover:!z-20 focus-within:!z-20',
 	variants: {
 		density: {
-			small: 'px-3 py-0.5',
-			normal: 'px-4 py-2',
-			large: 'px-5 py-3.5'
+			small: 'px-lg py-micro',
+			normal: 'px-xl py-md',
+			large: 'px-layout-sm py-lg'
 		}
 	},
 	defaultVariants: { density: 'normal' }
@@ -40,10 +40,10 @@ const defaultScrollButton = cva({
 	defaultVariants: { position: 'right' }
 });
 const defaultAskQuestion = cva({
-	base: 'shrink-0 border-t border-neutral-muted p-3'
+	base: 'shrink-0 border-t border-neutral-muted p-lg'
 });
 const defaultTocOverlay = cva({
-	base: 'pointer-events-none absolute inset-y-0 z-10 flex items-center py-3',
+	base: 'pointer-events-none absolute inset-y-0 z-10 flex items-center py-lg',
 	variants: {
 		side: {
 			left: 'left-0',

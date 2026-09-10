@@ -1,245 +1,198 @@
-# Migration Guide: Updating Imports to New Component Structure
+# Migrating to svelai 0.3
 
-## Objective
+Version 0.3 is a breaking release. The renamed APIs below have no forwarding aliases. The package
+remains `svelai`, with public subpath imports and an MIT license.
 
-Update your application code to use the new standardized import structure for all components in svelai library. All components now export from `index.ts` files and use kebab-case package exports.
+## Controlled and uncontrolled state
 
-## What Changed
+Editable or selected state uses `value`, `defaultValue`, and `onValueChange`. Disclosure state uses
+`open`, `defaultOpen`, and `onOpenChange`. Bindable props accept parent updates without echoing a
+change callback. A library-originated transition emits once; selecting the current value emits
+nothing. Defaults are read once and do not reset later edits when parent props change.
 
-### Before (Old Structure)
-
-- Components exported directly from `.svelte` files or mixed structure
-- Mixed PascalCase and kebab-case export names
-- Imports from various paths:
-  ```typescript
-  import Form from '$lib/components/Form/Form/Form.svelte';
-  import type { FormProps } from '$lib/components/Form/Form/form.js';
-  import { formTheme } from '$lib/components/Form/Form/form.js';
-  ```
-
-### After (New Structure)
-
-- All components export from `index.ts` files
-- Consistent kebab-case package exports
-- Unified import paths:
-  ```typescript
-  import { Form, type Form } from 'svelai/form';
-  ```
-
-## Migration Patterns
-
-### Pattern 1: Package Exports (Recommended)
-
-Use the package.json exports with kebab-case names:
-
-```typescript
-// ✅ NEW - Package exports
-import { Form } from 'svelai/form';
-import { TextInput } from 'svelai/text-input';
-import { MultiStepForm } from 'svelai/multi-step-form';
-import { Button } from 'svelai/button';
-import { Select } from 'svelai/select';
-```
-
-## Component Migration Reference
-
-### Form Components
-
-| Old Import               | New Import (Package)               |
-| ------------------------ | ---------------------------------- |
-| `TextInput.svelte`       | `from 'svelai/text-input'`         |
-| `NumberInput.svelte`     | `from 'svelai/number-input'`       |
-| `PasswordInput.svelte`   | `from 'svelai/password-input'`     |
-| `TextArea.svelte`        | `from 'svelai/text-area'`          |
-| `Select.svelte`          | `from 'svelai/select'`             |
-| `Combobox.svelte`        | `from 'svelai/combobox'`           |
-| `Switch.svelte`          | `from 'svelai/switch'`             |
-| `DateInput.svelte`       | `from 'svelai/date-input'`         |
-| `TimeInput.svelte`       | `from 'svelai/time-input'`         |
-| `PhoneInput.svelte`      | `from 'svelai/phone-input'`        |
-| `FileInput.svelte`       | `from 'svelai/file-input'`         |
-| `RadioInput.svelte`      | `from 'svelai/radio-input'`        |
-| `CheckBoxesInput.svelte` | `from 'svelai/checkboxes-input'`   |
-| `CalendarInput.svelte`   | `from 'svelai/calendar-primitive'` |
-| `MultiStepForm.svelte`   | `from 'svelai/multi-step-form'`    |
-| `Button.svelte`          | `from 'svelai/button'`             |
-| `Avatar.svelte`          | `from 'svelai/avatar'`             |
-| `Badge.svelte`           | `from 'svelai/badge'`              |
-| `Dialog.svelte`          | `from 'svelai/dialog'`             |
-| `Toast.svelte`           | `from 'svelai/toast'`              |
-| `Confirmation.svelte`    | `from 'svelai/confirmation'`       |
-
-## Detailed Migration Examples
-
-### Example 1: Simple Component Import
-
-**Before:**
-
-```svelte
-<script>
-	import Button from 'svela/Button';
-</script>
-
-<Button>Click me</Button>
-```
-
-**After:**
-
-```svelte
-<script>
-	import { Button } from 'svelai/button';
-</script>
-
-<Button>Click me</Button>
-```
-
-### Example 2: Component with Props Types
-
-**Before:**
+Controlled input:
 
 ```svelte
 <script lang="ts">
-	import TextInput from 'svelai/TextInput';
-	import type { TextInputProps } from 'svelai/TextInput';
-
-	let props: TextInputProps = {
-		type: 'text',
-		label: 'Name'
-	};
+	import { TextInput } from 'svelai/text-input';
+	let name = $state<string | null>('Ada');
+	let edits = $state(0);
 </script>
 
-<TextInput {...props} />
+<TextInput bind:value={name} label="Name" onValueChange={() => (edits += 1)} />
+<p>{name}: {edits} edits</p>
 ```
 
-**After:**
+Uncontrolled input:
 
 ```svelte
 <script lang="ts">
-	import { TextInput ,type TextInputProps } from 'svelai/text-input';
-
-
-	let props: TextInputProps = {
-		type: 'text',
-		label: 'Name'
-	};
+	import { TextInput } from 'svelai/text-input';
+	let lastName = $state<string | null>('Ada');
 </script>
 
-<TextInput {...props} />
+<TextInput defaultValue="Ada" label="Name" onValueChange={(value) => (lastName = value)} />
+<p>{lastName}</p>
 ```
 
-### Example 3: Component with Theme
+`onAfterOpen` and `onAfterClose` run after the corresponding transition. They do not replace the
+state-change callback. For example, a parent can bind `Dialog.open` while `onAfterClose` restores
+focus after the dialog leaves the screen.
 
-**Before:**
+| Previous state API                                                                                            | 0.3 API                                                                                  |
+| ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Input, Calendar, DateSelector, ColorPicker, Slider, PinInput, TagsInput, KeyValueInput, VoiceInput `onChange` | `onValueChange`                                                                          |
+| Checkbox and radio value callbacks called `onClick`                                                           | `onValueChange`; native clicks use `inputAttrs.onclick`                                  |
+| Tabs, Tabbar, SegmentedControl, ToggleButton, ToggleButtonGroup, ToggleMenu `onChange`                        | `onValueChange`                                                                          |
+| Command search state / `onSearchChange`                                                                       | `value`, `defaultValue`, `onValueChange`                                                 |
+| AIAskUserQuestion `values` / `onValuesChange` or `onChange`                                                   | `value`, `defaultValue`, `onValueChange(answerMap)`                                      |
+| AIComposer `queuedMessages` / `onQueuedMessagesChange`                                                        | `queue` / `onQueueChange`                                                                |
+| AIComposer `fileAccept`, `fileMaxFiles`, `fileMaxSize`                                                        | `accept` (string array), `maxFiles`, `maxFileSize`                                       |
+| AIComposer `onSubmitMessage({ value, event, meta })`                                                          | `onSubmit(detail)`; the detail contains `markdown`, `event`, and the submission metadata |
 
-```svelte
-<script lang="ts">
-	import Form, {setFormTheme} from 'svelai/Form';	
-	const classes = useFormTheme();
-</script>
-```
+Form, MultiStepForm, AIComposer, AIModelSelector, AITool, AISuggestion, and Accordion also expose the
+appropriate value trio. DateSelector, Command, Sidebar, the overlay components, media-volume
+popover, and model selector expose the open trio. Read-only values such as progress percentages,
+QR content, and rating displays are not editable-state contracts.
 
-**After:**
+## Native events and domain actions
 
-```svelte
-<script lang="ts">
-	import { Form, setFormTheme } from 'svelai/form';
+Native handlers use lowercase Svelte 5 names and receive the original DOM event. This includes
+`onclick`, `onpointerenter`, `onpointerleave`, `oninput`, and `onscroll`. Button no longer accepts a
+`payload` prop. Close over application data when handling a button event.
 
-setFormTheme({...})
-</script>
-```
+| Previous API                                                                              | 0.3 API                                                                                 |
+| ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Button, Card, Chip, Breadcrumbs, Menu, Sidebar and other native `onClick` handlers        | `onclick(event)`                                                                        |
+| `onEnter` / `onLeave`                                                                     | `onpointerenter(event)` / `onpointerleave(event)`                                       |
+| Form action `onClick(form)`                                                               | `onAction(form)`; `onclick` remains a native event                                      |
+| Form `submitButton`                                                                       | `actions` with `onAction: (form) => form.submit()`                                      |
+| Dialog, Popover, HoverCard, LinkPreview, SelectionMenu and ImageZoom `onOpen` / `onClose` | `onAfterOpen` / `onAfterClose`                                                          |
+| FloatingWindow `onClose`                                                                  | `onAfterClose`; use `onOpenChange` for disclosure state                                 |
+| Toast `onOpen`                                                                            | `onAfterOpen`                                                                           |
+| Rating `onStarClick` / `onStarPointerMove`                                                | `onclick` / `onpointermove` on each star; the original element is `event.currentTarget` |
+| Stepper indicator `onIndicatorClick`                                                      | Native `onclick`                                                                        |
+| AIThread and AIChat `onSuggestionClick`                                                   | `onSuggestionSelect`                                                                    |
+| MediaVolume trigger or toggle snippet `onClick()`                                         | `activate()`                                                                            |
+| Map `onmarkerclick`, `onclusterclick`, `onmapready`                                       | `onMarkerClick`, `onClusterClick`, `onReady`                                            |
+| Map `onviewchange`, `onmoveend`, `onzoomend`, `onerror`                                   | `onViewChange`, `onMoveEnd`, `onZoomEnd`, `onError`                                     |
 
-### Example 4: Multiple Components and Types
+Domain actions that require several values receive one payload object:
 
-**Before:**
+| Callback                                                                   | 0.3 payload                                                                   |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Combobox `onValueChange`                                                   | `{ value, option }`                                                           |
+| AIModelSelector `onValueChange`                                            | `{ value, model }`                                                            |
+| Stepper `onValueChange`                                                    | `{ value, item }`, where `value` is the step index                            |
+| MultiStepForm `onSubmitStep`                                               | `{ value, step, index }`                                                      |
+| SortableList `onReorder`                                                   | `{ items, from, to, item }`                                                   |
+| Resizable `onLayoutChanged` → `onLayoutCommit`                             | `{ sizes, isUserInteraction }`                                                |
+| Sidebar `onWidthChanged`                                                   | `{ width, isUserInteraction }`                                                |
+| FloatingWindow `onMove` / `onResize`                                       | `{ position, window }` / `{ dimensions, window }`                             |
+| AudioPlayer and VideoPlayer `onError`                                      | `{ error, snapshot }`                                                         |
+| ImageGallery `onIndexChange`                                               | `{ index, gallery }`                                                          |
+| ImageGallery and ImageZoom `onOpenChange`                                  | The boolean only; lifecycle callbacks carry the component snapshot            |
+| RichTextInput trigger `onSelect`                                           | `{ item, context }`                                                           |
+| AIComposer trigger `onSelect`                                              | `{ item, context }`                                                           |
+| AIComposer `onMentionSearch`                                               | `{ query, type }`                                                             |
+| AIComposer queue add, cancel, edit-start, edit-cancel, and steer callbacks | `{ message, index }`                                                          |
+| AIComposer queue edit-commit                                               | `{ message, index, previousMessage }`                                         |
+| Tree `onDropError`                                                         | `{ error, event }`; callbacks inside raw `options` keep the upstream contract |
+| AIMcpApp host request callbacks                                            | `{ params, tool, extra }`                                                     |
+| AIMcpApp host `onLog` / `onError`                                          | `{ params, tool }` / `{ error, tool }`                                        |
+| AIMcpApp `resolveResource`                                                 | `{ uri, client, tool, signal }`                                               |
+| AIMcpApp `resolveSandboxUrl`                                               | `{ resource, tool, signal }`                                                  |
 
-```typescript
-import Form from 'svelai/Form';
-import TextInput from 'svelai/TextInput';
-import Button from 'svelai/Button';
-```
+RichTextInput `onValueChange` supplies `{ markdown, tokens, isEmpty }`. Initialization, parent
+Markdown replacement, and no-op clears do not emit it.
 
-**After:**
+EventCalendar keeps its explicit domain event names. `onItemsChange`, `onItemClick`,
+`onItemDoubleClick`, `onSlotClick`, `onSlotSelect`, and `onMoreClick` now take their exported
+`EventCalendar*Payload` object instead of positional arguments.
 
-```typescript
-import { Form } from 'svelai/form';
-import { TextInput } from 'svelai/text-input';
-import { Button } from 'svelai/button';
-```
+Gantt collection callbacks are now `tasks.onTasksChange`, `dependencies.onDependenciesChange`, and
+`assignments.onAssignmentsChange`; each receives its exported change object. In `events`, prefix
+`selectionChange`, `expansionChange`, `zoomChange`, `visibleRangeChange`, `taskClick`,
+`taskDoubleClick`, `dependencyClick`, `emptyRangeSelect`, `interactionBlocked`, and
+`scheduleViolations` with `on` and capitalize the first letter. Task/dependency clicks and schedule
+violations use their exported payload objects.
 
-### Example 5: Calendar Component (Multiple Exports)
+## Native attribute ownership
 
-**Before:**
+Move attributes to the element that implements the control:
 
-```svelte
-<script>
-	import CalendarInput from 'svelai/Calendar/CalendarInput';
-	import CalendarPrimitive from 'svelai/Form/Calendar/CalendarPrimitive';
-</script>
-```
+- `inputAttrs` applies to an underlying `input`.
+- `textareaAttrs` applies to an underlying `textarea`.
+- `Select.triggerAttrs` applies to its combobox button.
+- Other `*Attrs` properties identify their specific native control; use their exported types.
+- `fieldAttrs` applies to the Field wrapper.
 
-**After:**
+Native input handlers are composed with the library's state updates and receive the original
+event. Library-owned IDs, disabled state, and accessibility relationships stay with the control.
+Disabled anchors have no active destination and cannot activate by pointer or keyboard.
 
-```svelte
-<script>
-	import { CalendarInput, CalendarPrimitive } from 'svelai/calendar';
-</script>
-```
+The unused `PhoneInput.separator` and `Accordion.actions` props were removed. They had no rendering
+behavior. Use the supported formatting or content slots at those owners.
 
-## Verification Checklist
+## Field and custom controls
 
-After migration, verify:
+`Field`, `createFieldState`, `FieldState`, and `fieldSchemas` are public through `svelai/field`.
+A field controller exposes `value`, `setValue`, validation and errors, control/label/error IDs,
+`controlAttrs`, the control attachment, disabled/required state, size, and density.
 
-- [ ] All component imports use package exports (`svelai/component-name`)
-- [ ] All components use named exports (`import { Component }`)
-- [ ] All type imports use `type` keyword and new paths
-- [ ] Theme functions imported from component packages
-- [ ] No direct `.svelte` file imports remain
-- [ ] No imports from old types files (e.g., `form.js`, `component.ts`)
-- [ ] TypeScript compilation succeeds
-- [ ] Application runs without errors
-- [ ] All components render correctly
-- [ ] Theme customization still works
+Use a Form entry with `type: 'field'` for a custom value-bearing control. Set `fieldType` to the
+existing field schema and supply its `snippet`. That snippet receives the registered field
+controller. The value participates in inference, validation, submission, and `bind:value`.
+`type: 'custom'` remains display-only.
 
-## Package Export Reference
+Form stays a programmatic state and validation component rendered with a `div`. Field and Form
+remain the validation owners; a custom control must call `field.setValue` instead of implementing
+a separate validation path. Explicit `null` values remain distinct from missing values.
 
-### Form Components (kebab-case)
+## Geometry, density, and theme ownership
 
-- `svelai/form`
-- `svelai/text-input`
-- `svelai/number-input`
-- `svelai/password-input`
-- `svelai/text-area`
-- `svelai/select`
-- `svelai/combobox`
-- `svelai/switch`
-- `svelai/date-input`
-- `svelai/time-input`
-- `svelai/phone-input`
-- `svelai/file-input`
-- `svelai/radio-input`
-- `svelai/checkboxes-input`
-- `svelai/calendar-primitive`
-- `svelai/multi-step-form`
-- `svelai/button`
-- `svelai/avatar`
-- `svelai/badge`
-- `svelai/chip`
-- `svelai/dialog`
-- `svelai/toast`
-- `svelai/confirmation`
-- `svelai/popover`
-- `svelai/tooltip`
-- `svelai/scroll-area`
-- `svelai/stepper`
-- `svelai/meter`
-- `svelai/toggle-button`
-- `svelai/toggle-button-group`
+Semantic component geometry uses `size: 'small' | 'normal' | 'large'`. Internal whitespace uses the
+same vocabulary through `density`, independently of size. Color props select semantic palette
+roles. Native color data, chart encodings, and other domain values keep their documented types.
 
-## Notes
+| Previous API                                       | 0.3 API                                             |
+| -------------------------------------------------- | --------------------------------------------------- |
+| `Separator.size`                                   | `Separator.thickness`                               |
+| `NetworkIndicator.size`                            | `NetworkIndicator.height`                           |
+| `DataTableColumn.size`, `minSize`, `maxSize`       | `width`, `minWidth`, `maxWidth`                     |
+| Numeric `ProgressCircle.size`                      | `diameter`; semantic `size` remains available       |
+| `QRCode.DownloadOptions.size`                      | `dimension`                                         |
+| `QRCode.dataModulesSettings.size`                  | `scale`                                             |
+| `ChartBandAnnotation.size`                         | `thickness`                                         |
+| Sidebar item size `default`, `sm`, `lg`            | `normal`, `small`, `large`                          |
+| Sidebar subitem size `sm`, `md`                    | `small`, `normal`                                   |
+| Tree density `compact`, `default`, `relaxed`       | `small`, `normal`, `large`                          |
+| Numeric Tree density                               | `options.density` at the raw adapter boundary       |
+| Field header/input-container theme `size` variants | `density` variants; label typography retains `size` |
 
-- **Type Safety**: Always use `type` keyword for type-only imports
+File byte counts, chart size channels, globe marker magnitude, and resizable panel shares keep
+`size` because it names domain data. The API check records explicit numeric-size justifications.
 
+Component CVAs live in `<owner>.theme.ts`. Reusable consumer presets live in
+`<consumer>.<role>.theme.ts`, including the VideoPlayer slider/settings-menu and MediaVolume slider
+presets. Geometry maps use `<owner>.geometry.ts`; RichTextInput's Lexical adapter uses
+`editor.lexicalTheme.ts`. Re-run the semantic-theme check when moving or changing these files.
 
+## Public entrypoints and verification
 
+Import from documented `svelai/<subpath>` entrypoints. `Slot` is public through `svelai/slot`;
+`GridSpan` is exported by `svelai/grid`. Icons are snippets imported by name from
+`svelai/icons/<name>`, not a generic `Icon` component.
 
+Use `svelai/tailwind-plugin` for the shared Tailwind utilities and
+`svelai/tailwind-plugin/theme` for named color themes. Install the optional Tailwind 4 peer when
+using either plugin. Source-tree plugin paths are not consumer entrypoints.
 
+The public manifest owns exports, typesVersions, source aliases, documentation navigation, MCP
+registration, related components, and both agent inventories. Run `npm run generate:component-contract`
+after editing the manifest; never edit its outputs by hand.
+
+Validate with the manifest, API, and semantic-theme checks, `npm run check`, `npm run lint`, unit
+and browser tests, and `npm run build`. `npm run check:packed-library` installs the produced tarball
+in an isolated consumer and checks every declared symbol and icon module, the license, and the
+Tailwind runtime. `npm run check:package-consumer` checks the workflow examples separately.

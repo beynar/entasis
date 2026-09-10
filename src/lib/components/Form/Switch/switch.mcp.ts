@@ -19,7 +19,8 @@ Extends all Field component props plus:
 
 ### Core Props
 - **checked**: boolean (bindable) - Toggle state
-- **value**: any - Value when used in forms
+- **value**: boolean | null (bindable) - Current switch value
+- **defaultValue**: boolean | null (default: null) - Initial value when value is omitted
 
 ### Field Props (inherited)
 - **label**: string | Snippet - Field label
@@ -30,7 +31,7 @@ Extends all Field component props plus:
 - **size**: 'small' | 'normal' | 'large' - Switch size
 
 ### Event Props
-- **onChange**: (checked: boolean) => void - Called when toggled
+- **onValueChange**: (checked: boolean) => void - Called when toggled
 
 ### Styling Props
 - **class**: string - Additional CSS classes
@@ -112,7 +113,7 @@ Extends all Field component props plus:
 <Switch 
 	label="Dark Mode"
 	bind:checked={darkMode}
-	onChange={handleToggle}
+	onValueChange={handleToggle}
 />
 \`\`\`
 

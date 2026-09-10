@@ -16,7 +16,14 @@
 		api,
 		class: className,
 		theme
-	}: { api: PageShellApi; class?: string; theme?: PageShellThemeProps } = $props();
+	}: {
+		/** Page state and regions supplied by the owning PageShell. */
+		api: PageShellApi;
+		/** Additional classes for the header element. */
+		class?: string;
+		/** Per-instance page theme overrides. */
+		theme?: PageShellThemeProps;
+	} = $props();
 
 	const classes = $derived(usePageShellTheme(theme));
 

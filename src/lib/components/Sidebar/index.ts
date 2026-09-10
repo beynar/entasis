@@ -21,7 +21,6 @@ export type {
 	SidebarRail,
 	SidebarResizable,
 	SidebarResizableOptions,
-	SidebarResizeMeta,
 	SidebarSearch,
 	SidebarSide,
 	SidebarSize,
@@ -29,7 +28,8 @@ export type {
 	SidebarState,
 	SidebarTooltipMode,
 	SidebarTreeNode,
-	SidebarVariant
+	SidebarVariant,
+	SidebarWidthChangedPayload
 } from './sidebar.props.js';
 export {
 	sidebarTheme,

@@ -1,0 +1,81 @@
+<script lang="ts">
+	import { Grid } from 'svelai/grid';
+	import { Stack } from 'svelai/stack';
+	import { Button } from 'svelai/button';
+	import { Card } from 'svelai/card';
+	import { Chip } from 'svelai/chip';
+	import { TextInput } from 'svelai/text-input';
+
+	let query = $state<string | null>('');
+	let tools = $state([
+		{
+			name: 'Slack',
+			category: 'Communication',
+			description: 'Keep conversations connected to your work.',
+			connected: true
+		},
+		{
+			name: 'GitHub',
+			category: 'Development',
+			description: 'Bring issues and pull requests into view.',
+			connected: false
+		},
+		{
+			name: 'Figma',
+			category: 'Design',
+			description: 'Keep designs close to the decisions.',
+			connected: true
+		},
+		{
+			name: 'Linear',
+			category: 'Projects',
+			description: 'Connect projects, issues, and roadmaps.',
+			connected: false
+		},
+		{
+			name: 'Google Drive',
+			category: 'Files',
+			description: 'Find the right document in one place.',
+			connected: false
+		},
+		{
+			name: 'Notion',
+			category: 'Knowledge',
+			description: 'Make team knowledge easier to find.',
+			connected: false
+		}
+	]);
+</script>
+
+<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+	<header>
+		<h2 class="text-3xl font-semibold">A little more connected.</h2>
+		<p class="mt-sm text-sm text-neutral/60">
+			Bring your tools into one workspace. Connection states are local demonstrations.
+		</p>
+	</header>
+	<TextInput label="Search integrations" placeholder="Find a tool" bind:value={query} />
+	<Grid columns={{ minWidth: 220, max: 3 }} gap="lg">
+		{#each tools.filter((tool) => (tool.name + ' ' + tool.category)
+				.toLowerCase()
+				.includes((query ?? '').toLowerCase())) as tool (tool)}<Card
+				title={tool.name}
+				description={tool.description}
+				><Stack gap="lg">
+					<div class="flex flex-wrap items-center justify-between gap-md">
+						<span
+							class="grid size-12 place-items-center rounded-lg bg-primary-muted text-lg font-semibold"
+							>{tool.name.slice(0, 1)}</span
+						><Chip color={tool.connected ? 'success' : 'neutral'}
+							>{tool.connected ? 'Enabled in demo' : tool.category}</Chip
+						>
+					</div>
+					<Button
+						variant={tool.connected ? 'outline' : 'solid'}
+						onclick={() => (tool.connected = !tool.connected)}
+						>{tool.connected ? 'Disable demo' : 'Enable demo'}</Button
+					>
+				</Stack></Card
+			>{:else}<p class="text-sm text-neutral/60">No tools match your search.</p>{/each}
+	</Grid>
+</Stack>

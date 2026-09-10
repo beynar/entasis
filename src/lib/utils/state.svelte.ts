@@ -1,22 +1,49 @@
-export const bind = (ref: Record<string, any>, props: Record<string, any>) => {
+import { untrack } from 'svelte';
+
+export function createBindableValue<Value>(
+	read: () => Value | undefined,
+	write: (value: Value) => void,
+	readDefault: () => Value
+) {
+	let retained: Value = $state(
+		untrack(() => {
+			const value = read();
+			return value === undefined ? readDefault() : value;
+		})
+	);
+	untrack(() => {
+		if (read() === undefined) write(retained);
+	});
+
+	return {
+		get value(): Value {
+			const value = read();
+			return value === undefined ? retained : value;
+		},
+		set value(value: Value) {
+			retained = value;
+			write(value);
+		}
+	};
+}
+
+export const bind = (ref: object, props: object) => {
 	const descriptors = Object.getOwnPropertyDescriptors(props);
 	for (const key in descriptors) {
 		Object.defineProperty(ref, key, descriptors[key]);
 	}
 };
 
-class BindableStateClass<P extends Record<string, any>> {
+class BindableStateClass<P extends object> {
 	constructor(props: P) {
 		bind(this, props);
 	}
 }
 
 // Type helper to create a properly typed bindable state class
-type TypedBindableStateClass<P extends Record<string, any>> = new (
-	props: P
-) => BindableStateClass<P> & P;
+type TypedBindableStateClass<P extends object> = new (props: P) => BindableStateClass<P> & P;
 
-export const createBindableStateClass = <P extends Record<string, any>>() => {
+export const createBindableStateClass = <P extends object>() => {
 	return class extends BindableStateClass<P> {
 		constructor(props: P) {
 			super(props);

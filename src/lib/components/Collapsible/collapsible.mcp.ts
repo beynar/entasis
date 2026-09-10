@@ -20,11 +20,10 @@ The Collapsible component provides a way to show and hide content with a toggle 
 
 ### Core Props
 - **open**: boolean (optional)
-  - Controlled state. When provided, the component becomes controlled.
-  - If not provided, uses internal state with \`defaultOpen\`.
+  - Current bindable disclosure state.
 
 - **defaultOpen**: boolean (default: false)
-  - Initial open state for uncontrolled mode.
+  - Initial open state when \`open\` is omitted.
   - Ignored when \`open\` prop is provided.
 
 - **disabled**: boolean (default: false)
@@ -32,7 +31,7 @@ The Collapsible component provides a way to show and hide content with a toggle 
   - Applies opacity styling and removes pointer events.
 
 - **onOpenChange**: (open: boolean) => void (optional)
-  - Callback fired when the open state changes.
+  - Callback fired once after a component-owned open state change.
   - Receives the new open state as parameter.
 
 ### Layout Props

@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultCheckboxesInput = cva({
-	base: 'grid gap-3 ',
+	base: 'grid gap-lg ',
 	variants: {
 		mode: {
 			card: '',
@@ -13,12 +13,17 @@ const defaultCheckboxesInput = cva({
 });
 
 const defaultCheckboxesInputItem = cva({
-	base: 'transition-all relative grid items-start min-h-10  gap-1 pl-12 cursor-pointer w-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 text-left rounded',
+	base: 'relative grid w-full cursor-pointer items-start gap-xs rounded-md pl-layout-xl text-left transition-all outline-none focus-visible:ring-2 focus-visible:ring-color/50',
 	variants: {
 		mode: {
-			card: 'rounded bg-surface-raised raised py-2',
-			normal: 'py-1',
-			control: '!inline-grid !size-5 !min-h-0 !w-5 !grid-cols-1 !place-items-center !gap-0 !p-0'
+			card: 'raised bg-surface-raised py-md',
+			normal: 'py-xs',
+			control: '!inline-grid !min-h-0 !grid-cols-1 !place-items-center !gap-0 !p-0 !pl-0'
+		},
+		size: {
+			small: 'min-h-8',
+			normal: 'min-h-10',
+			large: 'min-h-11'
 		},
 		checked: {
 			true: '',
@@ -29,25 +34,58 @@ const defaultCheckboxesInputItem = cva({
 			false: ''
 		}
 	},
+	defaultVariants: {
+		size: 'normal'
+	},
 	compoundVariants: [
 		{
 			mode: 'card',
 			checked: true,
-			class: 'ring-2 ring-primary bg-primary-muted text-primary-muted-readable'
+			class: 'ring-2 ring-color bg-color-muted text-color-muted-readable'
+		},
+		{
+			mode: 'control',
+			size: 'small',
+			class: '!size-4 !w-4'
+		},
+		{
+			mode: 'control',
+			size: 'normal',
+			class: '!size-5 !w-5'
+		},
+		{
+			mode: 'control',
+			size: 'large',
+			class: '!size-6 !w-6'
 		}
 	]
 });
 
 const defaultCheckboxesInputItemLabel = cva({
-	base: 'flex items-center gap-4 flex-wrap text-sm'
+	base: 'flex items-center gap-xl flex-wrap',
+	variants: {
+		size: {
+			small: 'text-xs',
+			normal: 'text-sm',
+			large: 'text-base'
+		}
+	},
+	defaultVariants: {
+		size: 'normal'
+	}
 });
 
 const defaultCheckboxesInputItemTrack = cva({
-	base: 'size-5 origin-center content-[""] bg-surface-raised border border-neutral-muted rounded absolute left-2',
+	base: 'origin-center content-[""] bg-surface-raised border border-neutral-muted rounded-sm absolute left-2',
 	variants: {
 		checked: {
 			true: '',
 			false: ''
+		},
+		size: {
+			small: 'size-4',
+			normal: 'size-5',
+			large: 'size-6'
 		},
 		mode: {
 			card: 'top-2',
@@ -62,13 +100,18 @@ const defaultCheckboxesInputItemTrack = cva({
 });
 
 const defaultCheckboxesInputItemThumb = cva({
-	base: `size-5 origin-center radio bg-neutral rounded flex items-center justify-center transition-all content-[""] absolute left-2 scale-[85%] opacity-0
-	stroke-primary-contrast [&>svg]:fill-primary-contrast p-1
+	base: `origin-center radio bg-neutral rounded-sm flex items-center justify-center transition-all content-[""] absolute left-2 scale-[85%] opacity-0
+	stroke-color-contrast [&>svg]:fill-color-contrast p-xs
 	`,
 	variants: {
 		checked: {
-			true: 'bg-primary scale-[100%] opacity-100',
+			true: 'bg-color scale-[100%] opacity-100',
 			false: ''
+		},
+		size: {
+			small: 'size-4',
+			normal: 'size-5',
+			large: 'size-6'
 		},
 		mode: {
 			card: 'top-2',
@@ -103,13 +146,13 @@ const defaultCheckboxesInputItemDescription = cva({
 		{
 			mode: 'card',
 			checked: true,
-			class: 'text-primary-muted-readable/70'
+			class: 'text-color-muted-readable/70'
 		}
 	]
 });
 
 const defaultCheckboxesInputContainer = cva({
-	base: 'grid gap-3 grid-cols-1 items-start',
+	base: 'grid gap-lg grid-cols-1 items-start',
 	variants: {
 		mode: {
 			card: '',

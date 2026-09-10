@@ -87,11 +87,11 @@ export type MultiStepFormProps<I extends MultiStepFormItems = FormStep[]> = With
 			values: InferFormValue<MergedMultiStepFormInputs<I>>
 		) => Promise<void> | void | never;
 		/** Called when advancing from a step; return false to block navigation. */
-		onSubmitStep?: (
-			values: Partial<InferFormValue<MergedMultiStepFormInputs<I>>>,
-			step: I[number],
-			index: number
-		) => Promise<void | boolean> | void | boolean;
+		onSubmitStep?: (payload: {
+			value: Partial<InferFormValue<MergedMultiStepFormInputs<I>>>;
+			step: I[number];
+			index: number;
+		}) => Promise<void | boolean> | void | boolean;
 		/** Additional CSS classes applied to the root container. */
 		class?: string;
 		/** Visual presentation of the multi-step shell. Card renders one shared card around all steps. */
@@ -109,6 +109,10 @@ export type MultiStepFormProps<I extends MultiStepFormItems = FormStep[]> = With
 		submitButtonProps?: ButtonProps;
 		/** Bindable partial form values merged across all steps. */
 		value?: LiveFormValue<MergedMultiStepFormInputs<I>>;
+		/** Initial merged form values when `value` is omitted. */
+		defaultValue?: LiveFormValue<MergedMultiStepFormInputs<I>>;
+		/** Called when merged form values change. */
+		onValueChange?: (value: LiveFormValue<MergedMultiStepFormInputs<I>>) => void;
 	},
 	'footer' | 'header',
 	MultiStepFormState<I>

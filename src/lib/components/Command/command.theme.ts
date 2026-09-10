@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultCommand = cva({
-	base: 'bg-surface text-neutral flex h-full w-full flex-col overflow-hidden rounded-xl p-1',
+	base: 'bg-surface text-neutral flex h-full w-full flex-col overflow-hidden rounded-lg p-xs',
 	variants: {
 		size: {
 			small: '',
@@ -13,7 +13,7 @@ const defaultCommand = cva({
 });
 
 const defaultCommandInputWrapper = cva({
-	base: 'p-1 pb-0',
+	base: 'p-xs pb-0',
 	variants: {
 		size: {
 			small: '',
@@ -24,7 +24,7 @@ const defaultCommandInputWrapper = cva({
 });
 
 const defaultCommandInputGroup = cva({
-	base: 'flex items-center gap-2 px-2',
+	base: 'flex items-center gap-md px-md',
 	variants: {
 		size: {
 			small: 'h-7',
@@ -68,7 +68,7 @@ const defaultCommandList = cva({
 });
 
 const defaultCommandEmpty = cva({
-	base: 'py-6 text-center',
+	base: 'py-layout-md text-center',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -79,7 +79,7 @@ const defaultCommandEmpty = cva({
 });
 
 const defaultCommandGroup = cva({
-	base: 'text-neutral overflow-hidden p-1',
+	base: 'text-neutral overflow-hidden p-xs',
 	variants: {
 		size: {
 			small: '',
@@ -93,15 +93,15 @@ const defaultCommandGroupHeading = cva({
 	base: 'text-neutral/60 font-medium',
 	variants: {
 		size: {
-			small: 'px-2 py-1 text-[0.6875rem]',
-			normal: 'px-2 py-1.5 text-xs',
-			large: 'px-2.5 py-2 text-sm'
+			small: 'px-md py-xs text-[0.6875rem]',
+			normal: 'px-md py-sm text-xs',
+			large: 'px-md py-md text-sm'
 		}
 	}
 });
 
 const defaultCommandSeparator = cva({
-	base: '-mx-1 h-px',
+	base: '-mx-xs h-px',
 	variants: {
 		size: {
 			small: '',
@@ -131,9 +131,9 @@ const defaultCommandShortcut = cva({
 });
 
 const defaultCommandFooter = cva({
-	// Bleeds the panel's p-1 so a border-t footer spans edge-to-edge; the panel's
-	// overflow-hidden + rounded-xl clip its bottom corners.
-	base: '-mx-1 -mb-1',
+	// Bleeds the panel's p-xs so a border-t footer spans edge-to-edge; the panel's
+	// overflow-hidden + rounded-lg clip its bottom corners.
+	base: '-mx-xs -mb-xs',
 	variants: {
 		size: {
 			small: '',

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import 'lightgallery/css/lightgallery.css';
 	import 'lightgallery/css/lg-thumbnail.css';
 	import 'lightgallery/css/lg-zoom.css';
@@ -9,7 +10,8 @@
 
 	let {
 		id: customId,
-		open = $bindable(false),
+		defaultOpen = false,
+		open = $bindable(),
 		activeIndex = $bindable(0),
 		imageSelector = 'img',
 		disabled = false,
@@ -26,11 +28,18 @@
 		class: className,
 		onOpenChange,
 		onIndexChange,
+		onAfterOpen,
+		onAfterClose,
 		theme,
 		children,
 		caption,
 		...attachments
 	}: ImageGalleryProps = $props();
+	const openState = createBindableValue(
+		() => open,
+		(nextOpen) => (open = nextOpen),
+		() => defaultOpen
+	);
 
 	const generatedId = $props.id();
 	const id = $derived(customId || generatedId);
@@ -40,10 +49,10 @@
 			return imageSelector;
 		},
 		get isOpen() {
-			return open;
+			return openState.value;
 		},
 		set isOpen(value) {
-			open = value;
+			openState.value = value;
 		},
 		get activeIndex() {
 			return activeIndex;
@@ -92,6 +101,12 @@
 		},
 		get onIndexChange() {
 			return onIndexChange;
+		},
+		get onAfterOpen() {
+			return onAfterOpen;
+		},
+		get onAfterClose() {
+			return onAfterClose;
 		}
 	});
 </script>
@@ -120,7 +135,7 @@
 	<Slot render={children} payload={state.payload} />
 </div>
 
-{#if open && caption}
+{#if openState.value && caption}
 	<Slot render={caption} payload={state.payload} class={classes.caption()} />
 {/if}
 

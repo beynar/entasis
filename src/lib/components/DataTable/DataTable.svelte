@@ -456,7 +456,7 @@
 		<NetworkIndicator
 			loading={isBusy}
 			color="primary"
-			size={2}
+			height={2}
 			delay={120}
 			label={isSaving ? 'Saving table changes' : 'Loading table data'}
 			class={classes.savingIndicator()}
@@ -521,7 +521,7 @@
 												title="No matching rows"
 												description="Adjust or clear the active filters."
 												actions={[
-													{ content: 'Clear filters', onClick: () => model.clearFilters() }
+													{ content: 'Clear filters', onclick: () => model.clearFilters() }
 												]}
 											/>
 										{/if}
@@ -613,7 +613,7 @@
 					}))}
 					value={String(tableState!.pagination.pageSize)}
 					{disabled}
-					onChange={(value) => model.setPageSize(Number(value))}
+					onValueChange={(value) => model.setPageSize(Number(value))}
 				/>
 			</div>
 			<Pagination

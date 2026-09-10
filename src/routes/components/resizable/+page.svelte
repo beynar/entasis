@@ -4,7 +4,27 @@
 	import { Resizable } from '$lib/components/Resizable/index.js';
 	import type { ResizableHandleAriaLabel } from '$lib/components/Resizable/index.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+
+	const resizableOrientations = ['horizontal', 'vertical'] as const;
+	const resizableVariants = ['default', 'splitted'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'orientation',
+			type: 'segmented',
+			label: 'Orientation',
+			value: 'horizontal',
+			options: resizableOrientations
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'default',
+			options: resizableVariants
+		}
+	]);
 
 	let workspaceSizes = $state<number[]>();
 	let verticalSizes = $state<number[]>();
@@ -188,10 +208,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A controlled editor layout with persisted sizes, visible handles, and accessible separator labels."
 		code={`<Resizable
 	bind:sizes={workspaceSizes}
 	storageKey="svelai-resizable-workspace-demo"
+	orientation="${controls.value.orientation}"
+	variant="${controls.value.variant}"
 	class="h-80 rounded-lg border border-neutral-muted"
 	withHandle
 	panels={[
@@ -205,7 +228,11 @@
 			<Resizable
 				bind:sizes={workspaceSizes}
 				storageKey="svelai-resizable-workspace-demo"
-				class="border-neutral-muted bg-surface h-80 rounded-lg border"
+				orientation={controls.value.orientation}
+				variant={controls.value.variant}
+				class={controls.value.variant === 'splitted'
+					? 'h-80'
+					: 'border-neutral-muted bg-surface h-80 rounded-lg border'}
 				withHandle
 				getHandleAriaLabel={getWorkspaceHandleLabel}
 				onResize={updateLastResize}

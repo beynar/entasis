@@ -5,7 +5,7 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 // min-heights ('small' matches the old small spacing, 'large' the old
 // large spacing — defaults render exactly as before the split).
 const defaultMenuOption = cva({
-	base: 'state-layer rounded cursor-pointer items-center inline-flex relative w-full text-left outline-none',
+	base: 'state-layer rounded-md cursor-pointer items-center inline-flex relative w-full text-left outline-none',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -13,9 +13,9 @@ const defaultMenuOption = cva({
 			large: 'text-base'
 		},
 		density: {
-			small: 'px-1.5 py-1 gap-1.5 min-h-6',
-			normal: 'px-2 py-1.5 gap-2 min-h-7',
-			large: 'px-3 py-2 gap-2.5 min-h-9'
+			small: 'px-sm py-xs gap-sm min-h-6',
+			normal: 'px-md py-sm gap-md min-h-7',
+			large: 'px-lg py-md gap-md min-h-9'
 		},
 		color: {
 			primary: 'text-primary-readable',
@@ -138,8 +138,8 @@ const defaultMenuOptionContent = cva({
 		// Spacing between title and description follows density, not size.
 		density: {
 			small: 'gap-0',
-			normal: 'gap-0.5',
-			large: 'gap-1'
+			normal: 'gap-micro',
+			large: 'gap-xs'
 		}
 	},
 	defaultVariants: {

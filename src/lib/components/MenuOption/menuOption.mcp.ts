@@ -32,9 +32,9 @@ Either use **title/description** OR **children** (mutually exclusive):
 - **suffix**: Snippet - Icon or badge at the end of the menu item
 
 ### Interaction Props
-- **onClick**: (event: MouseEvent) => void - Click event handler
-- **onEnter**: (event: MouseEvent) => void - Pointer enter event handler
-- **onLeave**: (event: MouseEvent) => void - Pointer leave event handler
+- **onclick**: (event: MouseEvent) => void - Native click event handler
+- **onpointerenter**: (event: PointerEvent) => void - Native pointer enter event handler
+- **onpointerleave**: (event: PointerEvent) => void - Native pointer leave event handler
 
 ### Link Props
 - **href**: string - If provided, renders as an anchor element
@@ -193,7 +193,7 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 	let count = $state(0);
 </script>
 
-<MenuOption onClick={() => count++}>
+<MenuOption onclick={() => count++}>
 	{#snippet title()}
 		Clicked {count} times
 	{/snippet}
@@ -207,8 +207,8 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 </script>
 
 <MenuOption 
-	onEnter={() => isHovered = true}
-	onLeave={() => isHovered = false}
+	onpointerenter={() => isHovered = true}
+	onpointerleave={() => isHovered = false}
 >
 	{#snippet title()}
 		{isHovered ? 'Hovering!' : 'Hover over me'}
@@ -318,7 +318,7 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 </script>
 
 <MenuOption 
-	onClick={handleClick}
+	onclick={handleClick}
 	{@attach spinnerOverlay({ loading })}
 >
 	{#snippet title()}
@@ -329,8 +329,8 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 
 ### Override Element Type
 \`\`\`svelte
-<!-- Force render as div even with onClick -->
-<MenuOption as="div" onClick={() => console.log('clicked')}>
+<!-- Force render as div even with onclick -->
+<MenuOption as="div" onclick={() => console.log('clicked')}>
 	{#snippet title()}
 		Custom Element Type
 	{/snippet}
@@ -352,7 +352,7 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 The component automatically determines the HTML element to render:
 1. If \`as\` prop is provided → uses that element
 2. If \`href\` is provided → renders as \`<a>\`
-3. If \`onClick\`, \`onEnter\`, or \`onLeave\` is provided → renders as \`<button>\`
+3. Otherwise → renders as \`<button>\`
 4. Otherwise → renders as \`<div>\`
 
 ## Notes

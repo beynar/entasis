@@ -2,11 +2,11 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultContainer = cva({
-	base: 'relative flex items-center overflow-hidden gap-1'
+	base: 'relative flex items-center overflow-hidden gap-xs'
 });
 
 const defaultSlider = cva({
-	base: 'display-grid py-4 relative whitespace-nowrap overflow-x-auto overflow-y-clip scroll-behavior-smooth overscroll-behavior-x-contain inline-size-full max-inline-size-[100vw] box-border scrollbar-width-none'
+	base: 'display-grid py-xl relative whitespace-nowrap overflow-x-auto overflow-y-clip scroll-behavior-smooth overscroll-behavior-x-contain inline-size-full max-inline-size-[100vw] box-border scrollbar-width-none'
 });
 
 const defaultSlide = cva({
@@ -14,7 +14,7 @@ const defaultSlide = cva({
 });
 
 const defaultNavigationButton = cva({
-	base: 'state-layer rounded cursor-pointer absolute inline-flex items-center justify-center transition-all duration-100 ease-in-out outline-none border-none',
+	base: 'state-layer rounded-sm cursor-pointer absolute inline-flex items-center justify-center transition-all duration-100 ease-in-out outline-none border-none',
 	variants: {
 		size: {
 			xs: 'w-5 h-5',
@@ -49,15 +49,15 @@ const defaultNavigationButton = cva({
 });
 
 const defaultDots = cva({
-	base: 'absolute w-fit mx-auto right-0 left-0 flex flex-1 translate-x-1/2 items-center gap-1 duration-300',
+	base: 'absolute w-fit mx-auto right-0 left-0 flex flex-1 translate-x-1/2 items-center gap-xs duration-300',
 	variants: {
 		size: {
-			xs: 'gap-1',
-			sm: 'gap-1',
-			md: 'gap-1.5',
-			lg: 'gap-2',
-			xl: 'gap-2.5',
-			default: 'gap-1'
+			xs: 'gap-xs',
+			sm: 'gap-xs',
+			md: 'gap-sm',
+			lg: 'gap-md',
+			xl: 'gap-md',
+			default: 'gap-xs'
 		},
 		position: {
 			top: 'top-1 bottom-auto',

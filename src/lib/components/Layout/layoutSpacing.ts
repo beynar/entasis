@@ -1,8 +1,8 @@
-export type LayoutSpacing = 0 | 0.5 | 1 | 1.5 | 2 | 3 | 4 | 5 | 6 | 8 | 10;
-export type LayoutSpacingKey = `${LayoutSpacing}`;
+export type LayoutSpacing = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export type LayoutSpacingKey = LayoutSpacing;
 
 const spacingValues = {
-	'0': {
+	none: {
 		gap: 'gap-0',
 		rowGap: 'gap-y-0',
 		columnGap: 'gap-x-0',
@@ -10,85 +10,45 @@ const spacingValues = {
 		paddingBlock: 'py-0',
 		css: '0px'
 	},
-	'0.5': {
-		gap: 'gap-0.5',
-		rowGap: 'gap-y-0.5',
-		columnGap: 'gap-x-0.5',
-		paddingInline: 'px-0.5',
-		paddingBlock: 'py-0.5',
-		css: 'calc(var(--spacing) * 0.5)'
+	xs: {
+		gap: 'gap-xs',
+		rowGap: 'gap-y-xs',
+		columnGap: 'gap-x-xs',
+		paddingInline: 'px-xs',
+		paddingBlock: 'py-xs',
+		css: 'var(--space-xs)'
 	},
-	'1': {
-		gap: 'gap-1',
-		rowGap: 'gap-y-1',
-		columnGap: 'gap-x-1',
-		paddingInline: 'px-1',
-		paddingBlock: 'py-1',
-		css: 'var(--spacing)'
+	sm: {
+		gap: 'gap-sm',
+		rowGap: 'gap-y-sm',
+		columnGap: 'gap-x-sm',
+		paddingInline: 'px-sm',
+		paddingBlock: 'py-sm',
+		css: 'var(--space-sm)'
 	},
-	'1.5': {
-		gap: 'gap-1.5',
-		rowGap: 'gap-y-1.5',
-		columnGap: 'gap-x-1.5',
-		paddingInline: 'px-1.5',
-		paddingBlock: 'py-1.5',
-		css: 'calc(var(--spacing) * 1.5)'
+	md: {
+		gap: 'gap-md',
+		rowGap: 'gap-y-md',
+		columnGap: 'gap-x-md',
+		paddingInline: 'px-md',
+		paddingBlock: 'py-md',
+		css: 'var(--space-md)'
 	},
-	'2': {
-		gap: 'gap-2',
-		rowGap: 'gap-y-2',
-		columnGap: 'gap-x-2',
-		paddingInline: 'px-2',
-		paddingBlock: 'py-2',
-		css: 'calc(var(--spacing) * 2)'
+	lg: {
+		gap: 'gap-lg',
+		rowGap: 'gap-y-lg',
+		columnGap: 'gap-x-lg',
+		paddingInline: 'px-lg',
+		paddingBlock: 'py-lg',
+		css: 'var(--space-lg)'
 	},
-	'3': {
-		gap: 'gap-3',
-		rowGap: 'gap-y-3',
-		columnGap: 'gap-x-3',
-		paddingInline: 'px-3',
-		paddingBlock: 'py-3',
-		css: 'calc(var(--spacing) * 3)'
-	},
-	'4': {
-		gap: 'gap-4',
-		rowGap: 'gap-y-4',
-		columnGap: 'gap-x-4',
-		paddingInline: 'px-4',
-		paddingBlock: 'py-4',
-		css: 'calc(var(--spacing) * 4)'
-	},
-	'5': {
-		gap: 'gap-5',
-		rowGap: 'gap-y-5',
-		columnGap: 'gap-x-5',
-		paddingInline: 'px-5',
-		paddingBlock: 'py-5',
-		css: 'calc(var(--spacing) * 5)'
-	},
-	'6': {
-		gap: 'gap-6',
-		rowGap: 'gap-y-6',
-		columnGap: 'gap-x-6',
-		paddingInline: 'px-6',
-		paddingBlock: 'py-6',
-		css: 'calc(var(--spacing) * 6)'
-	},
-	'8': {
-		gap: 'gap-8',
-		rowGap: 'gap-y-8',
-		columnGap: 'gap-x-8',
-		paddingInline: 'px-8',
-		paddingBlock: 'py-8',
-		css: 'calc(var(--spacing) * 8)'
-	},
-	'10': {
-		gap: 'gap-10',
-		rowGap: 'gap-y-10',
-		columnGap: 'gap-x-10',
-		paddingInline: 'px-10',
-		paddingBlock: 'py-10',
-		css: 'calc(var(--spacing) * 10)'
+	xl: {
+		gap: 'gap-xl',
+		rowGap: 'gap-y-xl',
+		columnGap: 'gap-x-xl',
+		paddingInline: 'px-xl',
+		paddingBlock: 'py-xl',
+		css: 'var(--space-xl)'
 	}
 } as const satisfies Record<
 	LayoutSpacingKey,
@@ -116,4 +76,4 @@ export const layoutPaddingInlineClasses = selectSpacingValues('paddingInline');
 export const layoutPaddingBlockClasses = selectSpacingValues('paddingBlock');
 export const layoutSpacingCssValues = selectSpacingValues('css');
 
-export const toLayoutSpacingKey = (spacing: LayoutSpacing): LayoutSpacingKey => `${spacing}`;
+export const toLayoutSpacingKey = (spacing: LayoutSpacing): LayoutSpacingKey => spacing;

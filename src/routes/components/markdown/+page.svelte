@@ -68,11 +68,11 @@ Use \`Markdown\` inline like any other component.`;
 	const mdxLayout = [
 		'## Product health',
 		'',
-		'<Grid columns={2} gap={3}>',
+		'<Grid columns={2} gap="lg">',
 		'<GridSpan columns="full">',
 		'<Card title="Release readiness" description="The current production candidate." variant="outline">',
-		'<Stack gap={3}>',
-		'<Stack orientation="horizontal" gap={3} align="center" wrap="wrap">',
+		'<Stack gap="lg">',
+		'<Stack orientation="horizontal" gap="lg" align="center" wrap="wrap">',
 		'<Stat label="Checks" value="24 / 24" trend="Passing" trendDirection="up" color="success" variant="soft" />',
 		'<Stat label="Reviewers" value="6" trend="2 active" color="info" variant="soft" />',
 		'</Stack>',
@@ -226,7 +226,7 @@ Use \`Markdown\` inline like any other component.`;
 		>
 			<div class="grid w-full max-w-3xl gap-4">
 				<div>
-					<Button label="Stream markdown" onClick={startStream} loading={streaming} size="small">
+					<Button label="Stream markdown" onclick={startStream} loading={streaming} size="small">
 						Stream
 					</Button>
 				</div>

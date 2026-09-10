@@ -23,7 +23,7 @@
 		'aria-haspopup'?: boolean | 'menu' | 'dialog' | 'listbox' | 'tree' | 'grid';
 		'aria-expanded'?: boolean;
 		'aria-controls'?: string;
-		onClick?: () => void;
+		onPress?: () => void;
 	}>;
 
 	let {
@@ -42,7 +42,7 @@
 		'aria-haspopup': ariaHaspopup,
 		'aria-expanded': ariaExpanded,
 		'aria-controls': ariaControls,
-		onClick,
+		onPress,
 		...attachments
 	}: Props = $props();
 </script>
@@ -65,7 +65,7 @@
 	aria-pressed={pressed}
 	class={classes.controlButton({ size, className })}
 	prefix={icon}
-	{onClick}
+	onclick={onPress}
 	{@attach tooltip({ content: label, position: 'top', size: 'small' })}
 	{...attachments}
 />

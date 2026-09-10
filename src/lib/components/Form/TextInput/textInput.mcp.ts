@@ -121,7 +121,7 @@ Extends all Field component props plus:
 \`\`\`svelte
 <TextInput label="API Key" bind:value={apiKey}>
 	{#snippet suffix()}
-		<Button size="small" squared onClick={copyToClipboard}>
+		<Button size="small" squared onclick={copyToClipboard}>
 			<Icon name="copy" />
 		</Button>
 	{/snippet}
@@ -302,4 +302,11 @@ The theme object contains the following parts:
   });
 </script>
 \`\`\`
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+
 `;

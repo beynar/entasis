@@ -10,7 +10,7 @@
 		class: className,
 		style,
 		columns = 1,
-		gap = 0,
+		gap = 'none',
 		rowGap,
 		columnGap,
 		rowHeight,

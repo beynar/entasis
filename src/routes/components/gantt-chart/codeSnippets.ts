@@ -66,8 +66,8 @@ export const interactionsCode = [
 	'    history: { limit: 20 },',
 	'    clipboard: { getId: createPasteId }',
 	'  }}',
-	'  mutations={{ task: { onChange: persistTasks } }}',
-	'  events={{ emptyRangeSelect: openCreateDialog }}',
+	'  mutations={{ task: { onTasksChange: persistTasks } }}',
+	'  events={{ onEmptyRangeSelect: openCreateDialog }}',
 	'  class="h-[36rem]"',
 	'/>'
 ].join('\n');
@@ -82,7 +82,7 @@ export const dependenciesCode = [
 	'  }}',
 	'  calendars={calendars}',
 	'  timeZone="Europe/Paris"',
-	'  events={{ scheduleViolations: showViolations }}',
+	'  events={{ onScheduleViolations: showViolations }}',
 	'/>'
 ].join('\n');
 
@@ -118,14 +118,14 @@ export const customizationCode = [
 	'<GanttChart',
 	'  bind:tasks',
 	'  timeZone="Europe/Paris"',
-	'  events={{ taskDoubleClick: openEditor }}',
+	'  events={{ onTaskDoubleClick: openEditor }}',
 	'  render={{ task: taskContent }}',
 	'/>',
 	'',
 	'<Dialog bind:open={editorOpen} title="Edit task">',
 	'  <TextInput bind:value={draftTitle} label="Task title" />',
 	'  {#snippet footer()}',
-	'    <Button onClick={saveTask}>Save task</Button>',
+	'    <Button onclick={saveTask}>Save task</Button>',
 	'  {/snippet}',
 	'</Dialog>'
 ].join('\n');

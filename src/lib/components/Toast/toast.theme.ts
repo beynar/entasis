@@ -27,9 +27,9 @@ const defaultToast = cva({
 			info: ''
 		},
 		size: {
-			small: 'gap-2 rounded-md px-2.5 py-2 min-w-[220px] max-w-[300px]',
-			normal: 'gap-2.5 rounded-lg px-3 py-2.5 min-w-[260px] max-w-[340px]',
-			large: 'gap-3 rounded-xl px-4 py-3 min-w-[300px] max-w-[400px]'
+			small: 'gap-md rounded-sm px-md py-md min-w-[220px] max-w-[300px]',
+			normal: 'gap-md rounded-md px-lg py-md min-w-[260px] max-w-[340px]',
+			large: 'gap-lg rounded-lg px-xl py-lg min-w-[300px] max-w-[400px]'
 		},
 		// Full screen-width bar flush to the top/bottom edge (overrides width & rounding).
 		banner: {
@@ -70,7 +70,7 @@ const defaultToastPrefix = cva({
 // Inline, top-aligned close button (sits in the header row next to the title, not
 // floating outside the toast). Subtle by default, tinting on hover.
 const defaultToastCloseIcon = cva({
-	base: 'state-layer shrink-0 -mr-1 -mt-0.5 flex items-center justify-center rounded-md leading-none transition-colors outline-none focus-visible:ring-2 focus-visible:ring-color/40',
+	base: 'state-layer shrink-0 -mr-xs -mt-micro flex items-center justify-center rounded-sm leading-none transition-colors outline-none focus-visible:ring-2 focus-visible:ring-color/40',
 	variants: {
 		size: {
 			small: 'size-4 [&_svg]:size-3',
@@ -97,14 +97,14 @@ const defaultToastCloseIcon = cva({
 
 // Trailing container for the toast's `actions` buttons.
 const defaultToastActions = cva({
-	base: 'flex shrink-0 items-center gap-1'
+	base: 'flex shrink-0 items-center gap-xs'
 });
 
 // Duration progress bar, pinned to the toast's bottom edge. `overflow-hidden` +
 // `rounded-b-md` clip the inner bar to the toast's corner radius (the root itself
 // can't be clipped — the close icon sits outside it).
 const defaultToastProgress = cva({
-	base: 'pointer-events-none absolute inset-x-0 bottom-0 h-1 overflow-hidden rounded-b-lg bg-color/15'
+	base: 'pointer-events-none absolute inset-x-0 bottom-0 h-1 overflow-hidden rounded-b-md bg-color/15'
 });
 
 const defaultToastSuffix = cva({
@@ -137,8 +137,8 @@ const defaultToastContent = cva({
 	variants: {
 		size: {
 			small: 'gap-0',
-			normal: 'gap-0.5',
-			large: 'gap-1'
+			normal: 'gap-micro',
+			large: 'gap-xs'
 		},
 		color: {
 			primary: '',
@@ -216,7 +216,7 @@ const defaultToaster = cva({
 	base: 'pointer-events-none fixed inset-0 z-[9999] m-0 h-full w-full max-h-none max-w-none overflow-hidden border-0 bg-transparent p-0'
 });
 
-const toastTheme = {
+export const toastTheme = {
 	toaster: defaultToaster,
 	root: defaultToast,
 	prefix: defaultToastPrefix,

@@ -25,11 +25,37 @@ export type ContextMenuProps = WithAttachments<{
 	 */
 	open?: boolean;
 	/**
+	 * Initial open state when `open` is not provided.
+	 */
+	defaultOpen?: boolean;
+	/**
+	 * Called once when the library requests an open-state change.
+	 */
+	onOpenChange?: (open: boolean) => void;
+	/**
+	 * Called after the open transition finishes.
+	 */
+	onAfterOpen?: PopupMenuProps['onAfterOpen'];
+	/**
+	 * Called after the close transition finishes.
+	 */
+	onAfterClose?: PopupMenuProps['onAfterClose'];
+	/**
 	 * The class name applied to the wrapper around the target content.
 	 */
 	class?: string;
 	/**
 	 * Additional PopupMenu/Popover overrides (position, offset, closeOnEscape, ...).
 	 */
-	popup?: Omit<PopupMenuProps, 'menu' | 'trigger' | 'open' | 'ref'>;
+	popup?: Omit<
+		PopupMenuProps,
+		| 'menu'
+		| 'trigger'
+		| 'open'
+		| 'defaultOpen'
+		| 'onOpenChange'
+		| 'onAfterOpen'
+		| 'onAfterClose'
+		| 'ref'
+	>;
 }>;

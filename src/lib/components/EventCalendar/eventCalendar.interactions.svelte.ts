@@ -403,7 +403,7 @@ export class EventCalendarInteractionsController<
 			return true;
 		}
 		this.calendar.select({ kind: 'slot', itemKey: null, slot });
-		this.calendar.eventHandlers.onSlotSelect?.(slot, { source: 'keyboard' });
+		this.calendar.eventHandlers.onSlotSelect?.({ slot, info: { source: 'keyboard' } });
 		this.calendar.notifyInteractionStatus({ type: 'commit', source: 'keyboard' });
 		return true;
 	}
@@ -446,7 +446,10 @@ export class EventCalendarInteractionsController<
 			return true;
 		}
 		this.calendar.select({ kind: 'slot', itemKey: null, slot: range });
-		this.calendar.eventHandlers.onSlotSelect?.(range, { source: 'single-pointer' });
+		this.calendar.eventHandlers.onSlotSelect?.({
+			slot: range,
+			info: { source: 'single-pointer' }
+		});
 		return true;
 	}
 
@@ -1496,7 +1499,7 @@ export class EventCalendarInteractionsController<
 			return;
 		}
 		this.calendar.select({ kind: 'slot', itemKey: null, slot });
-		this.calendar.eventHandlers.onSlotSelect?.(slot, { source: 'drag-create' });
+		this.calendar.eventHandlers.onSlotSelect?.({ slot, info: { source: 'drag-create' } });
 	}
 
 	private slotFromDropTarget(target: EventCalendarDropTarget): EventCalendarSlot {

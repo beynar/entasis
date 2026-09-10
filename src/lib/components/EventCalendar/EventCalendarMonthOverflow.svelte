@@ -52,7 +52,7 @@
 	lockScroll={false}
 	openOnClick={false}
 	class={classes.overflowPopover({ density, view: 'month' })}
-	onClose={() => triggerElement?.focus()}
+	onAfterClose={() => triggerElement?.focus()}
 >
 	{#snippet trigger(popoverState)}
 		<button
@@ -67,7 +67,7 @@
 			onpointerdown={(event) => event.stopPropagation()}
 			onclick={(event) => {
 				event.stopPropagation();
-				if (onMoreClick?.(day, hiddenOccurrences, event) === false) return;
+				if (onMoreClick?.({ day, occurrences: hiddenOccurrences, event }) === false) return;
 				popoverState.toggle();
 			}}
 			{@attach popoverState.reference}

@@ -32,9 +32,9 @@ The Chip component is a compact element for displaying tags, labels, categories,
   - Requires a containing element with a positioning context such as \`position: relative\`
 
 ### Interactive Props
-- **onClick**: (event: MouseEvent) => void - Click handler (makes chip a button)
-- **onEnter**: (event: PointerEvent) => void - Pointer enter handler
-- **onLeave**: (event: PointerEvent) => void - Pointer leave handler
+- **onclick**: (event: MouseEvent) => void - Native click handler (makes chip a button)
+- **onpointerenter**: (event: PointerEvent) => void - Native pointer enter handler
+- **onpointerleave**: (event: PointerEvent) => void - Native pointer leave handler
 
 ### Link Props
 - **href**: string - Makes chip render as anchor tag
@@ -120,7 +120,7 @@ The Chip component is a compact element for displaying tags, labels, categories,
 	}
 </script>
 
-<Chip onClick={handleClick}>
+<Chip onclick={handleClick}>
 	Clickable
 </Chip>
 \`\`\`
@@ -180,7 +180,7 @@ The Chip component is a compact element for displaying tags, labels, categories,
 		<Chip 
 			variant={selected === filter ? 'solid' : 'outline'}
 			color={selected === filter ? 'primary' : 'neutral'}
-			onClick={() => selected = filter}
+			onclick={() => selected = filter}
 		>
 			{filter}
 		</Chip>
@@ -200,7 +200,7 @@ The Chip component is a compact element for displaying tags, labels, categories,
 
 ## Rendering Behavior
 
-- Renders as \`<button>\` when \`onClick\`, \`onEnter\`, or \`onLeave\` is provided
+- Renders as \`<button>\` when \`onclick\`, \`onpointerenter\`, or \`onpointerleave\` is provided
 - Renders as \`<a>\` when \`href\` is provided
 - Renders as \`<div>\` otherwise
 

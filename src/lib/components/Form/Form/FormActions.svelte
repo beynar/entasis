@@ -3,44 +3,44 @@
 	import type { ButtonProps } from '$lib/components/Button/index.js';
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import type { Slot as SlotValue } from '$lib/components/Slot/slot.js';
-	import type { Snippet } from 'svelte';
-	import type { Sizes } from '$lib/types/theme.js';
+	import type { Density, Sizes } from '$lib/types/theme.js';
 	import { cx } from '$lib/utils/cva/index.js';
-	import { useFieldTheme } from '../Field/Field.svelte';
+	import { useFieldTheme } from '../Field/field.theme.js';
 	import type { FieldLabelPosition } from '../Field/field.js';
 	import type { MaybePromise } from './form.js';
 
-	type Action = Omit<ButtonProps, 'onClick' | 'payload'> & {
-		onClick?: (form: State) => MaybePromise<unknown>;
+	type Action = ButtonProps & {
+		onAction?: (form: State) => MaybePromise<unknown>;
 	};
 
 	let {
 		actions,
 		form,
 		size,
+		density = 'normal',
 		class: className,
 		containerClass,
 		label,
 		description,
-		labelPosition = 'top',
-		children
+		labelPosition = 'top'
 	}: {
 		actions: Action[];
 		form: State & { loading: boolean };
 		size: Sizes;
+		density?: Density;
 		class: string;
 		containerClass?: string;
 		label?: SlotValue;
 		description?: SlotValue;
 		labelPosition?: FieldLabelPosition;
-		children?: Snippet;
 	} = $props();
 
 	const fieldClasses = $derived(useFieldTheme());
 	const resolvedLabelPosition = $derived(label || description ? labelPosition : 'top');
 	const actionStates = $derived(
-		actions.map(({ onClick, loading, disabled, size: actionSize, ...props }) => ({
-			onClick,
+		actions.map(({ onAction, onclick, loading, disabled, size: actionSize, ...props }) => ({
+			onAction,
+			onclick,
 			loading,
 			disabled,
 			size: actionSize,
@@ -56,10 +56,12 @@
 			size={actionState.size ?? size}
 			loading={form.loading || actionState.loading}
 			disabled={form.loading || actionState.disabled}
-			onClick={() => actionState.onClick?.(form)}
+			onclick={(event) => {
+				actionState.onclick?.(event);
+				if (!event.defaultPrevented) return actionState.onAction?.(form);
+			}}
 		/>
 	{/each}
-	{@render children?.()}
 {/snippet}
 
 {#if label || description}
@@ -68,6 +70,7 @@
 		class={cx(
 			fieldClasses.root({
 				className: containerClass,
+				density,
 				hasError: false,
 				labelPosition: resolvedLabelPosition
 			}),
@@ -78,7 +81,7 @@
 			<div
 				class={cx(
 					fieldClasses.header({
-						size,
+						density,
 						required: false,
 						hasError: false,
 						labelPosition: resolvedLabelPosition
@@ -101,7 +104,7 @@
 		<div
 			class={cx(
 				fieldClasses.inputContainer({
-					size,
+					density,
 					hasError: false,
 					labelPosition: resolvedLabelPosition
 				}),

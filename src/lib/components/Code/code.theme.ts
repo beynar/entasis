@@ -3,7 +3,7 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultCode = cva({
 	// `group` + `relative` support the floating copy button on headerless blocks.
-	base: 'group relative my-4 flex w-full flex-col overflow-hidden rounded-lg border border-neutral-muted bg-surface'
+	base: 'group relative my-xl flex w-full flex-col overflow-hidden rounded-md border border-neutral-muted bg-surface'
 });
 
 // Floating copy button for headerless blocks: top-right, revealed on hover/focus.
@@ -12,7 +12,7 @@ const defaultCodeFloatingCopy = cva({
 });
 
 const defaultCodeHeader = cva({
-	base: 'flex items-center justify-between gap-2 border-b border-neutral-muted bg-surface-raised px-3 py-1.5 text-xs text-neutral/60'
+	base: 'flex items-center justify-between gap-md border-b border-neutral-muted bg-surface-raised px-lg py-sm text-xs text-neutral/60'
 });
 
 const defaultCodeTitle = cva({
@@ -27,7 +27,7 @@ const defaultCodeContainer = cva({
 });
 
 const defaultCodeFooter = cva({
-	base: 'flex items-center justify-between gap-2 border-t border-neutral-muted bg-surface-raised px-3 py-1.5 text-xs text-neutral/60'
+	base: 'flex items-center justify-between gap-md border-t border-neutral-muted bg-surface-raised px-lg py-sm text-xs text-neutral/60'
 });
 
 export const codeTheme = {

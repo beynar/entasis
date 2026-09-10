@@ -2,12 +2,12 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 
 const defaultInput = cva({
-	base: "outline-none flex w-full flex-1 cursor-pointer items-center justify-between gap-1.5 rounded bg-transparent text-left leading-normal select-none before:absolute before:inset-0 before:content-['']",
+	base: "outline-none flex h-full w-full flex-1 cursor-pointer items-center justify-between gap-sm bg-transparent text-left leading-normal select-none before:absolute before:inset-0 before:content-['']",
 	variants: {
 		size: {
-			small: 'text-xs h-5',
-			normal: 'text-sm h-5',
-			large: 'text-sm h-6'
+			small: 'text-xs',
+			normal: 'text-sm',
+			large: 'text-sm'
 		},
 		disabled: {
 			true: 'cursor-not-allowed opacity-50',
@@ -20,12 +20,12 @@ const defaultInput = cva({
 });
 
 const defaultInputContainer = cva({
-	base: 'relative px-3 bg-surface-raised border border-neutral-muted rounded text-neutral w-full focus-within:ring-1 focus-within:ring-primary ring-0 transition-all flex items-center py-2',
+	base: 'relative flex w-full items-center border border-neutral-muted bg-surface-raised px-lg text-neutral ring-0 transition-all rounded-md outline-none focus-within:ring-2 focus-within:ring-primary/50',
 	variants: {
 		size: {
-			small: 'py-1.5 text-xs',
-			normal: 'py-1.5 text-sm',
-			large: 'py-2 text-sm'
+			small: 'h-control-sm text-xs',
+			normal: 'h-control-md text-sm',
+			large: 'h-control-lg text-sm'
 		},
 		disabled: {
 			true: 'cursor-not-allowed opacity-50',
@@ -60,9 +60,9 @@ const defaultTriggerIcon = cva({
 	base: 'text-neutral/60 pointer-events-none shrink-0',
 	variants: {
 		size: {
-			small: 'size-3.5',
-			normal: 'size-4',
-			large: 'size-4'
+			small: 'size-icon-sm',
+			normal: 'size-icon-md',
+			large: 'size-icon-lg'
 		}
 	},
 	defaultVariants: {
@@ -82,7 +82,7 @@ const defaultContent = cva({
 });
 
 const defaultGroup = cva({
-	base: 'flex scroll-my-1 flex-col p-1',
+	base: 'flex scroll-my-1 flex-col p-xs',
 	variants: {
 		size: {
 			small: '',
@@ -96,9 +96,9 @@ const defaultGroupLabel = cva({
 	base: 'text-neutral/60',
 	variants: {
 		size: {
-			small: 'px-1.5 py-1 text-[0.6875rem]',
-			normal: 'px-1.5 py-1 text-xs',
-			large: 'px-1.5 py-1 text-xs'
+			small: 'px-sm py-xs text-[0.6875rem]',
+			normal: 'px-sm py-xs text-xs',
+			large: 'px-sm py-xs text-xs'
 		}
 	},
 	defaultVariants: {
@@ -107,9 +107,9 @@ const defaultGroupLabel = cva({
 });
 
 const defaultSeparator = cva({
-	// Flush (not `-mx-1`): the separator sits directly in the scroll content with no padding to
+	// Flush: the separator sits directly in the scroll content with no padding to
 	// bleed into, so a negative margin would overflow the viewport and trigger a spurious X bar.
-	base: 'bg-neutral-muted my-1 h-px',
+	base: 'bg-neutral-muted my-xs h-px',
 	variants: {
 		size: {
 			small: '',

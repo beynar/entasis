@@ -22,10 +22,10 @@ export type ToastPosition =
 
 /**
  * A button rendered inside the toast (full Button props, with its label as
- * `content`). Clicking it runs its `onClick` and then — unless `dismiss: false` —
- * dismisses the toast. Because a manual dismiss fires `onClose` and NOT
- * `onAutoClose`, this is exactly what makes the deferred-commit / Undo pattern
- * work: put the real destructive action in `onAutoClose` (runs only on timeout),
+ * `content`). Clicking it runs its `onclick` and then — unless `dismiss: false` —
+ * dismisses the toast. Because a manual dismiss fires `onDismiss` and not
+ * `onAutoDismiss`, this is exactly what makes the deferred-commit / Undo pattern
+ * work: put the real destructive action in `onAutoDismiss` (runs only on timeout),
  * and an Undo action here cancels it just by closing the toast early.
  */
 export type ToastAction = ButtonProps & {
@@ -36,29 +36,53 @@ export type ToastAction = ButtonProps & {
 };
 
 type ToastOptions = {
+	/** Stable toast identifier. */
 	id: string;
+	/** Semantic toast geometry. */
 	size?: Sizes;
-	closeOnClick?: boolean; // If true, clicking the toast body dismisses it. @default false (use swipe/close-icon instead).
-	swipeToDismiss?: boolean; // If true, the toast can be dragged toward its screen edge to dismiss it. @default true
-	showCloseIcon?: boolean; // If true, the toast will show a close icon.
-	duration?: number | false; // Time in milliseconds that should elapse before automatically closing the toast.
-	dismissible?: boolean; // If false, it'll prevent the user from dismissing the toast.
-	richColors?: boolean; // If true, the toast will use rich colors.
+	/** Dismisses the toast when its body is clicked. @default false */
+	closeOnClick?: boolean;
+	/** Allows dragging the toast toward its screen edge to dismiss it. @default true */
+	swipeToDismiss?: boolean;
+	/** Shows a close button. */
+	showCloseIcon?: boolean;
+	/** Automatic dismissal delay in milliseconds, or false to keep the toast open. */
+	duration?: number | false;
+	/** Allows manual dismissal. */
+	dismissible?: boolean;
+	/** Uses the semantic color as a prominent background. */
+	richColors?: boolean;
+	/** Leading content, or false to suppress it. */
 	prefix?: Slot | false;
+	/** Trailing content. */
 	suffix?: Slot;
-	actions?: ToastAction[]; // Buttons rendered in the toast (e.g. an "Undo" action).
-	closeIcon?: Slot; // The close button that shows inside the toast.
+	/** Action buttons rendered inside the toast. */
+	actions?: ToastAction[];
+	/** Content of the close button. */
+	closeIcon?: Slot;
+	/** Enter and exit transition configuration. */
 	animation?: FSOProps;
-	loading?: boolean; // If true, the toast will show a spinner.
-	progress?: boolean; // If true, show a progress bar counting down the remaining duration (only when the toast auto-closes).
-	title?: Slot; // Toast's title.
-	description?: Slot; // Toast's description, renders underneath the title.
+	/** Shows a loading indicator. */
+	loading?: boolean;
+	/** Shows the remaining automatic dismissal time as a progress bar. */
+	progress?: boolean;
+	/** Main toast content. */
+	title?: Slot;
+	/** Supporting content below the title. */
+	description?: Slot;
+	/** Semantic palette role. */
 	color: Colors;
-	important?: boolean; // Control the sensitivity of the toast for screen readers
-	icon?: string; // Icon displayed in front of toast's text, aligned vertically.
-	onClose?: (toast: Toast) => void; // Called when the toast is dismissed manually (close button, an action, or toast.remove()). NOT called on timeout.
-	onOpen?: (toast: Toast) => void; // Called once the toast has finished entering.
-	onAutoClose?: (toast: Toast) => void; // Called when the toast closes on its own after `duration`. Put deferred/committed work (e.g. the real delete of an Undo flow) here — it never fires if the toast is dismissed first.
+	/** Announces the toast with an assertive live region. */
+	important?: boolean;
+	/** Icon text displayed before the toast content. */
+	icon?: string;
+	/** Called once for manual dismissal, including an action or remove(). */
+	onDismiss?: (toast: Toast) => void;
+	/** Called after the toast's entry transition finishes. */
+	onAfterOpen?: (toast: Toast) => void;
+	/** Called once when the duration expires; manual dismissal cancels it. */
+	onAutoDismiss?: (toast: Toast) => void;
+	/** Screen position for this toast. */
 	position?: ToastPosition;
 };
 
@@ -76,19 +100,28 @@ export type ToasterProps = Pick<
 	| 'closeIcon'
 	| 'progress'
 > & {
+	/** Per-instance toast theme overrides. */
 	theme?: ToastThemeProps;
 	/** Per-instance i18n overrides, merged over the global catalog. */
 	i18n?: Partial<import('$lib/i18n/en.js').Messages>;
-	collapseHorizontalAxis?: ResponsiveProps<boolean>; // If true, the toast will collapse horizontally. Specially useful on mobile.
-	expand?: boolean; // If true, the toast will expand by default;
-	visibleToasts?: number; // If true, the toast will be visible by default;
-	gap?: number; // Gap between toasts
-	offset?: number; // Offset from the edge of the screen
-	direction?: 'ltr' | 'rtl'; // Direction of the toast
+	/** Collapses the toast stack horizontally at the selected breakpoints. */
+	collapseHorizontalAxis?: ResponsiveProps<boolean>;
+	/** Keeps the toast stack expanded. */
+	expand?: boolean;
+	/** Maximum number of visible toasts. */
+	visibleToasts?: number;
+	/** Gap between stacked toasts in pixels. */
+	gap?: number;
+	/** Distance from the screen edge in pixels. */
+	offset?: number;
+	/** Text and layout direction. */
+	direction?: 'ltr' | 'rtl';
+	/** Responsive default screen position. */
 	position?: ResponsiveProps<ToastPosition>;
+	/** Transition configuration for each toast position. */
 	animation?: Partial<Record<ToastPosition, FSOProps>>;
-	perspectiveAmount?: number; // A number between 0 and 100 that controls the perspective amount of the toast stack.
-	// hotkey?: string; // Hotkey to show/hide the toast TODO: implement
+	/** Stack perspective amount from 0 to 100. */
+	perspectiveAmount?: number;
 };
 
 type MakeRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
@@ -163,7 +196,7 @@ export class Toaster {
 					toast,
 					position: toast.opts.position,
 					duration: toast.opts.duration || 0,
-					// Timeout is the ONLY path that fires onAutoClose (the deferred-commit hook).
+					// Timeout is the only path that fires onAutoDismiss (the deferred-commit hook).
 					callback: () => toast.remove('auto')
 				};
 			});
@@ -192,7 +225,7 @@ export class Toaster {
 		}
 	};
 
-	addToast = (opts: ToastOptions) => {
+	addToast = (opts: Omit<ToastOptions, 'id'> & { id?: string }) => {
 		const toast = new Toast(
 			{
 				...opts,
@@ -333,8 +366,8 @@ export class Toast {
 
 	private removed = false;
 
-	// `reason` distinguishes an automatic timeout ('auto' → onAutoClose, the commit
-	// hook) from every manual dismissal ('manual' → onClose). Guarded so a stray
+	// `reason` distinguishes an automatic timeout ('auto' → onAutoDismiss, the commit
+	// hook) from every manual dismissal ('manual' → onDismiss). Guarded so a stray
 	// event object passed as the argument (e.g. onclick={toast.remove}) still counts
 	// as manual. Idempotent: an action-button click bubbles to the toast's own
 	// closeOnClick handler, so remove() can fire twice — callbacks must run once.
@@ -344,9 +377,9 @@ export class Toast {
 		this.toaster?.removeToast(this);
 		this.timer?.destroy();
 		if (reason === 'auto') {
-			this.opts?.onAutoClose?.(this);
+			this.opts?.onAutoDismiss?.(this);
 		} else {
-			this.opts?.onClose?.(this);
+			this.opts?.onDismiss?.(this);
 		}
 	};
 }
@@ -380,7 +413,7 @@ export const toast = new Proxy(
 	{
 		get(_obj, key) {
 			if (typeof key === 'string') {
-				return (payload: any) => {
+				return (payload: Parameters<ToastCreator[Colors]>[0]) => {
 					if (typeof window === 'undefined' || !window.toaster) {
 						throw new Error(
 							'toast() called without a mounted <Toaster />. Add <Toaster /> to your root layout.'

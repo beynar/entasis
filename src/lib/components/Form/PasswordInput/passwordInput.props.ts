@@ -7,4 +7,3 @@ export type PasswordInputProps = InputProps<'password'> & {
 	/** Theme overrides for the password input and its field container. */
 	theme?: PasswordInputThemeProps & InputProps<'password'>['theme'];
 };
-

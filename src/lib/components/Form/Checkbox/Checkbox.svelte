@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import CheckboxLine from '../CheckboxesInput/CheckboxLine.svelte';
@@ -6,7 +7,8 @@
 	import type { CheckboxProps } from './checkbox.props.js';
 
 	let {
-		value = $bindable(false),
+		defaultValue = false,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
@@ -18,13 +20,14 @@
 		name,
 		onValidate,
 		visible,
-		onChange,
-		onClick,
+		onValueChange,
 		label,
 		description,
 		labelPosition,
+		size = 'normal',
 		...rest
 	}: CheckboxProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 
@@ -48,8 +51,8 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (checked) => {
-			onChange?.(checked);
+		onValueChange: (checked) => {
+			onValueChange?.(checked);
 		},
 		get disabled() {
 			return disabled;
@@ -81,7 +84,6 @@
 	const setChecked = (checked: boolean) => {
 		if (field.disabled) return;
 		field.value = checked;
-		onClick?.(checked);
 	};
 </script>
 
@@ -91,6 +93,7 @@
 	label={labelPosition ? label : undefined}
 	description={labelPosition ? description : undefined}
 	class={componentTheme.root({ mode })}
+	{size}
 	theme={{
 		...theme,
 		inputContainer: {
@@ -114,6 +117,7 @@
 		{ariaLabel}
 		disabled={field.disabled}
 		{mode}
+		{size}
 		label={labelPosition ? undefined : label}
 		description={labelPosition ? undefined : description}
 		classes={componentTheme}

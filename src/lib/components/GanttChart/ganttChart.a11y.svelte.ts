@@ -696,7 +696,7 @@ export class GanttChartA11y<
 			source: 'keyboard',
 			message: error.message
 		};
-		this.chart.eventHandlers?.interactionBlocked?.(info);
+		this.chart.eventHandlers?.onInteractionBlocked?.(info);
 	}
 }
 

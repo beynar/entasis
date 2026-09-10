@@ -84,7 +84,7 @@
 			(accepts?.({ item: source.item as T, from: peerName(source.listId) }) ?? true),
 		onReorder: (next, detail) => {
 			items = next;
-			onReorder?.(next, { from: detail.from, to: detail.to, item: detail.item });
+			onReorder?.({ items: next, from: detail.from, to: detail.to, item: detail.item });
 		},
 		onReceive: ({ item: received, index, from }) => {
 			const value = received as T;

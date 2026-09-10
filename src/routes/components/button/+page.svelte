@@ -5,9 +5,35 @@
 	import type { ButtonVariant } from '$lib/components/Button/index.js';
 	import { eyeClosedIcon } from '$lib/components/Icons/eyeClosed.js';
 	import { colors, sizes, variants } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let loading = $state(false);
 	const buttonVariants = [...variants, 'ghost', 'link'] satisfies ButtonVariant[];
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'solid',
+			options: buttonVariants
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'neutral',
+			options: colors
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'loading', type: 'switch', label: 'Loading', value: false }
+	]);
 
 	const triggerLoading = () => {
 		loading = true;
@@ -27,8 +53,19 @@
 		'Prefix & suffix icon slots'
 	]}
 >
-	<ComponentCard code={`<Button>Click me</Button>`}>
-		<Button>Click me</Button>
+	<ComponentCard
+		{controls}
+		code={`<Button size="${controls.value.size}" variant="${controls.value.variant}" color="${controls.value.color}" disabled={${controls.value.disabled}} loading={${controls.value.loading}}>Click me</Button>`}
+	>
+		<Button
+			size={controls.value.size}
+			variant={controls.value.variant}
+			color={controls.value.color}
+			disabled={controls.value.disabled}
+			loading={controls.value.loading}
+		>
+			Click me
+		</Button>
 	</ComponentCard>
 
 	{#snippet examples()}
@@ -40,7 +77,7 @@
 			</div>
 		</ComponentCard>
 
-		<ComponentCard description="Eight semantic colors, shown here in the solid variant.">
+		<ComponentCard description="Seven semantic colors, shown here in the solid variant.">
 			<div class="flex flex-wrap items-center justify-center gap-3">
 				{#each colors as color (color)}
 					<Button {color}>{color}</Button>
@@ -68,7 +105,7 @@
 		</ComponentCard>
 
 		<ComponentCard description="Loading buttons use the Spinner variant configured on Theme.">
-			<Button {loading} onClick={triggerLoading}>Save changes</Button>
+			<Button {loading} onclick={triggerLoading}>Save changes</Button>
 		</ComponentCard>
 
 		<ComponentCard description="Disabled buttons are dimmed and ignore interaction.">

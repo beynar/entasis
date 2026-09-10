@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultButton = cva({
-	base: 'group/toggle relative inline-flex shrink-0 cursor-pointer select-none items-center justify-center overflow-hidden whitespace-nowrap rounded-lg border border-transparent bg-clip-padding text-sm font-medium outline-none transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-color/35 [&_svg:not([class*=size-])]:size-4',
+	base: 'group/toggle relative inline-flex shrink-0 cursor-pointer select-none items-center justify-center overflow-hidden whitespace-nowrap rounded-md border border-transparent bg-clip-padding text-sm font-medium outline-none transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:ring-color/50 [&_svg:not([class*=size-])]:size-icon-md',
 	variants: {
 		checked: {
 			true: '',
@@ -15,15 +15,14 @@ const defaultButton = cva({
 		color: {
 			primary: '',
 			secondary: '',
-			neutral: 'focus-visible:ring-neutral/25',
+			neutral: '',
 			danger: '',
 			success: '',
 			warning: '',
 			info: ''
 		},
 		variant: {
-			outline:
-				'state-layer border-color/35 bg-transparent text-color-readable hover:border-color/50',
+			outline: 'state-layer bg-color/0 border border-color text-color-readable',
 			ghost: 'state-layer border-transparent bg-transparent text-color-readable'
 		},
 		squared: {
@@ -31,13 +30,16 @@ const defaultButton = cva({
 			false: null
 		},
 		size: {
-			small: 'h-7 min-w-7 px-2.5 gap-1 text-xs',
-			normal: 'h-8 min-w-8 px-2.5 gap-1 text-sm',
-			large: 'h-9 min-w-9 px-2.5 gap-1 text-sm'
+			small: 'h-control-sm min-size-hit-sm px-md gap-sm text-xs',
+			normal: 'h-control-md min-size-hit-md px-lg gap-md text-sm',
+			large: 'h-control-lg min-size-hit-lg px-xl gap-md text-sm'
 		}
 	},
 	defaultVariants: {
-		checked: false
+		checked: false,
+		size: 'normal',
+		variant: 'ghost',
+		color: 'neutral'
 	},
 	compoundVariants: [
 		{
@@ -48,23 +50,18 @@ const defaultButton = cva({
 		{
 			variant: 'outline',
 			checked: true,
-			class: 'bg-color-muted text-color-muted-readable'
-		},
-		{
-			variant: 'outline',
-			checked: true,
-			class: 'border-color/55 hover:border-color/70'
+			class: 'bg-color-muted text-color-muted-readable border-color'
 		}
 	]
 });
 
 const defaultToggleButtonPrefix = cva({
-	base: 'inline-flex size-4 shrink-0 items-center justify-center overflow-hidden leading-none [&_svg:not([class*=size-])]:!size-full',
+	base: 'inline-flex shrink-0 items-center justify-center overflow-hidden leading-none [&_svg:not([class*=size-])]:!size-full',
 	variants: {
 		size: {
-			normal: 'size-4',
-			large: 'size-5',
-			small: 'size-3.5'
+			normal: 'size-icon-md',
+			large: 'size-icon-lg',
+			small: 'size-icon-sm'
 		},
 		checked: {
 			true: '',
@@ -77,12 +74,12 @@ const defaultToggleButtonPrefix = cva({
 });
 
 const defaultToggleButtonSuffix = cva({
-	base: 'inline-flex size-4 shrink-0 items-center justify-center overflow-hidden leading-none [&_svg:not([class*=size-])]:!size-full',
+	base: 'inline-flex shrink-0 items-center justify-center overflow-hidden leading-none [&_svg:not([class*=size-])]:!size-full',
 	variants: {
 		size: {
-			normal: 'size-4',
-			large: 'size-5',
-			small: 'size-3.5'
+			normal: 'size-icon-md',
+			large: 'size-icon-lg',
+			small: 'size-icon-sm'
 		},
 		checked: {
 			true: '',

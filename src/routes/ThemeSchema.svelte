@@ -1,6 +1,6 @@
 <script lang="ts">
 	import structureMap from 'virtual:svelai-structure';
-	import type { ThemePart } from '../../tooling/structure-docs/types';
+	import type { ThemePart } from '../../tooling/structure-docs/types.js';
 	import CustomizeTheme from './CustomizeTheme.svelte';
 
 	let { component }: { component: string } = $props();
@@ -9,7 +9,7 @@
 	// Only parts carrying a resolvable cva definition are worth showing.
 	const parts = $derived(
 		(structureMap[component]?.parts ?? []).filter(
-			(part) => part.base || (part.variants && part.variants.length)
+			(part: ThemePart) => part.base || (part.variants && part.variants.length)
 		)
 	);
 

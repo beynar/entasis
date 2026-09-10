@@ -91,7 +91,7 @@
 								variant="outline"
 								prefix={sidebarSimpleIcon}
 								label="Toggle left sidebar"
-								onClick={() => (leftOpen = !leftOpen)}
+								onclick={() => (leftOpen = !leftOpen)}
 							>
 								Left
 							</Button>
@@ -100,7 +100,7 @@
 								variant="outline"
 								prefix={sidebarSimpleIcon}
 								label="Toggle right sidebar"
-								onClick={() => (rightOpen = !rightOpen)}
+								onclick={() => (rightOpen = !rightOpen)}
 							>
 								Right
 							</Button>

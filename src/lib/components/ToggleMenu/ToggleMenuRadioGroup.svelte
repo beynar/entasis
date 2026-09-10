@@ -18,7 +18,7 @@
 		unitClass,
 		unitReference,
 		buttonReference,
-		onSelect
+		onValueChange
 	}: {
 		item: ToggleMenuRadioGroupItem;
 		size?: Sizes;
@@ -29,7 +29,7 @@
 		unitClass: string;
 		unitReference: Attachment<HTMLElement>;
 		buttonReference?: Attachment<HTMLElement>;
-		onSelect: (value: string) => void;
+		onValueChange: (value: string) => void;
 	} = $props();
 
 	const groupClasses = $derived(useToggleButtonGroupTheme(item.theme));
@@ -61,7 +61,7 @@
 		{@const resolvedColor = item.color ?? color ?? 'neutral'}
 		{@const resolvedVariant = item.variant ?? variant ?? 'ghost'}
 		{@const isDisabled = disabled || !!item.disabled || !!button.disabled}
-		{@const isChecked = item.value === key}
+		{@const isChecked = (item.value ?? item.defaultValue) === key}
 		<button
 			type="button"
 			role="radio"
@@ -79,7 +79,7 @@
 				disabled: isDisabled,
 				className: button.class
 			})}
-			onclick={() => onSelect(key)}
+			onclick={() => onValueChange(key)}
 			{@attach overflowed ? undefined : buttonReference}
 			{@attach !button.children && button.ariaLabel && !overflowed
 				? tooltip({ content: button.ariaLabel, delay: 350 })

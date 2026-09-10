@@ -4,7 +4,34 @@
 	import { houseIcon } from '$lib/components/Icons/house.js';
 	import { gearIcon } from '$lib/components/Icons/gear.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+	import { colors, sizes } from '$lib/utils/tokens.js';
+
+	const tabbarVariants = ['underline', 'pill'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'underline',
+			options: tabbarVariants
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'primary',
+			options: colors
+		}
+	]);
 
 	let simpleActiveTab = $state(0);
 	let iconActiveTab = $state(0);
@@ -73,22 +100,29 @@
 		'Sliding underline / pill indicator',
 		'Correct on SSR, animates after hydration',
 		'tablist/tab roles with arrow keys',
-		'bind:activeTab selection state'
+		'bind:value selection state'
 	]}
 >
 	<ComponentCard
+		{controls}
 		code={`<Tabbar
 	items={['Home', 'Profile', 'Settings']}
-	bind:activeTab={activeTab}
-	onChange={(index) => console.log('Tab changed to:', index)}
+	bind:value={activeTab}
+	size="${controls.value.size}"
+	variant="${controls.value.variant}"
+	color="${controls.value.color}"
+	onValueChange={(index) => console.log('Tab changed to:', index)}
 />`}
 	>
 		<div class="flex flex-col items-center">
 			<Tabbar
 				class="w-fit"
 				items={simpleTabs}
-				bind:activeTab={simpleActiveTab}
-				onChange={handleTabChange}
+				bind:value={simpleActiveTab}
+				size={controls.value.size}
+				variant={controls.value.variant}
+				color={controls.value.color}
+				onValueChange={handleTabChange}
 			/>
 		</div>
 	</ComponentCard>
@@ -101,8 +135,8 @@
 				<Tabbar
 					class="w-fit"
 					items={simpleTabs}
-					bind:activeTab={simpleActiveTab}
-					onChange={handleTabChange}
+					bind:value={simpleActiveTab}
+					onValueChange={handleTabChange}
 				/>
 				<p class="text-neutral/70 text-sm">Active tab: {simpleActiveTab}</p>
 			</div>
@@ -113,13 +147,13 @@
 			description="Tabs accept prefix/suffix snippets, typically icons."
 		>
 			<div class="flex flex-col items-center">
-				<Tabbar class="w-fit" items={tabsWithIcons} bind:activeTab={iconActiveTab} />
+				<Tabbar class="w-fit" items={tabsWithIcons} bind:value={iconActiveTab} />
 			</div>
 		</ComponentCard>
 
 		<ComponentCard title="Disabled tabs" description="Individual tabs can be disabled.">
 			<div class="flex flex-col items-center">
-				<Tabbar class="w-fit" items={tabsWithDisabled} bind:activeTab={disabledActiveTab} />
+				<Tabbar class="w-fit" items={tabsWithDisabled} bind:value={disabledActiveTab} />
 			</div>
 		</ComponentCard>
 
@@ -134,8 +168,8 @@
 				<Tabbar
 					fullWidth
 					items={simpleTabs}
-					bind:activeTab={simpleActiveTab}
-					onChange={handleTabChange}
+					bind:value={simpleActiveTab}
+					onValueChange={handleTabChange}
 				/>
 				<p class="text-neutral/70 text-sm">Active tab: {simpleActiveTab}</p>
 			</div>
@@ -146,7 +180,7 @@
 			description="A rounded track where the active tab is a raised pill. The pill slides and resizes between tabs with the same animation as the underline indicator."
 		>
 			<div class="flex flex-col items-center">
-				<Tabbar variant="pill" items={pillTabs} bind:activeTab={pillActiveTab} />
+				<Tabbar variant="pill" items={pillTabs} bind:value={pillActiveTab} />
 			</div>
 		</ComponentCard>
 
@@ -156,7 +190,7 @@
 		>
 			<div class="flex flex-col items-center gap-3">
 				{#each pillColors as c (c)}
-					<Tabbar variant="pill" color={c} items={pillTabs} bind:activeTab={pillColorTab} />
+					<Tabbar variant="pill" color={c} items={pillTabs} bind:value={pillColorTab} />
 				{/each}
 			</div>
 		</ComponentCard>
@@ -166,8 +200,8 @@
 			description="The indicator measures the active tab, so it adapts to uneven label lengths — in both variants."
 		>
 			<div class="flex flex-col items-center gap-3">
-				<Tabbar class="w-fit" items={variableTabs} bind:activeTab={variableActiveTab} />
-				<Tabbar variant="pill" items={variableTabs} bind:activeTab={variableActiveTab} />
+				<Tabbar class="w-fit" items={variableTabs} bind:value={variableActiveTab} />
+				<Tabbar variant="pill" items={variableTabs} bind:value={variableActiveTab} />
 			</div>
 		</ComponentCard>
 
@@ -176,13 +210,8 @@
 			description="When the tabs don't fit, the bar scrolls horizontally with no visible scrollbar — in both variants."
 		>
 			<div class="flex w-full max-w-sm flex-col items-center gap-3">
-				<Tabbar class="w-full" items={manyTabs} bind:activeTab={scrollableActiveTab} />
-				<Tabbar
-					variant="pill"
-					class="w-full"
-					items={manyTabs}
-					bind:activeTab={scrollableActiveTab}
-				/>
+				<Tabbar class="w-full" items={manyTabs} bind:value={scrollableActiveTab} />
+				<Tabbar variant="pill" class="w-full" items={manyTabs} bind:value={scrollableActiveTab} />
 			</div>
 		</ComponentCard>
 
@@ -191,7 +220,7 @@
 			description="A tab with menu opens a popover listing additional items that do not fit inline. Selecting one activates the tab and shows the selection's label on it."
 		>
 			<div class="flex flex-col items-center">
-				<Tabbar class="w-fit" items={overflowTabs} bind:activeTab={overflowActiveTab} />
+				<Tabbar class="w-fit" items={overflowTabs} bind:value={overflowActiveTab} />
 			</div>
 		</ComponentCard>
 
@@ -204,7 +233,7 @@
 					variant="pill"
 					orientation="vertical"
 					items={pillTabs}
-					bind:activeTab={pillVerticalActiveTab}
+					bind:value={pillVerticalActiveTab}
 				/>
 			</div>
 		</ComponentCard>

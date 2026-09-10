@@ -3,8 +3,8 @@ import tailwindcss from '@tailwindcss/vite';
 import { svelteTesting } from '@testing-library/svelte/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
-import { svelaiPropsDocs } from './tooling/props-docs/plugin';
-import { svelaiStructureDocs } from './tooling/structure-docs/plugin';
+import { svelaiPropsDocs } from './tooling/props-docs/plugin.js';
+import { svelaiStructureDocs } from './tooling/structure-docs/plugin.js';
 
 export default defineConfig({
 	optimizeDeps: {
@@ -16,6 +16,7 @@ export default defineConfig({
 	},
 	plugins: [
 		font({
+			autoDetect: false,
 			fonts: [
 				{
 					family: 'Fira Mono',

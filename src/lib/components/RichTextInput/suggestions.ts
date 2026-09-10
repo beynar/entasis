@@ -88,7 +88,7 @@ export function toRichTextInputToken(
 	config: RichTextInputTriggerConfig,
 	context: RichTextInputTriggerContext
 ): RichTextInputToken {
-	if (config.toToken) return config.toToken(item, context);
+	if (config.toToken) return config.toToken({ item, context });
 	const kind = getTokenKind(item, config);
 	const token: RichTextInputToken = {
 		kind,

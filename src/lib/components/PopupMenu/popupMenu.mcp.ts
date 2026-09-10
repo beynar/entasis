@@ -89,9 +89,11 @@ The PopupMenu component is a wrapper around Popover that renders a Menu inside. 
 
 - **ref**: HTMLElement | null - External reference element (instead of trigger)
 
-- **onOpen**: (popover: PopoverState) => void - Callback when popover opens
+- **onOpenChange**: (open: boolean) => void - Called for component-owned state changes
 
-- **onClose**: (popover: PopoverState) => void - Callback when popover closes
+- **onAfterOpen**: (popover: PopoverState) => void - Called after the popover opens
+
+- **onAfterClose**: (popover: PopoverState) => void - Called after the popover closes
 
 - **theme**: PopoverThemeProps - Theme overrides for popover
 
@@ -150,15 +152,15 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 
 ### Context Menu (Right Click)
 \`\`\`svelte
-<script>
+<script lang="ts">
 	import { trashIcon, copyIcon, shareIcon } from '$lib/components/Icons';
 	
 	let open = $state(false);
-	let contextMenuRef = $state(null);
+	let contextMenuRef = $state<HTMLElement | null>(null);
 	
 	function handleContextMenu(e: MouseEvent) {
 		e.preventDefault();
-		contextMenuRef = e.target as HTMLElement;
+		contextMenuRef = e.currentTarget as HTMLElement;
 		open = true;
 	}
 	
@@ -312,12 +314,12 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 		{ 
 			type: 'option', 
 			title: 'Option 1',
-			onClick: () => selections.push('Option 1')
+			onclick: () => selections.push('Option 1')
 		},
 		{ 
 			type: 'option', 
 			title: 'Option 2',
-			onClick: () => selections.push('Option 2')
+			onclick: () => selections.push('Option 2')
 		},
 		{ type: 'separator' },
 		{ 
@@ -345,7 +347,7 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 	
 	const mainItems = [
 		{ type: 'option', title: 'New File' },
-		{ type: 'option', title: 'More Options', suffix: caretRightIcon, onClick: () => submenuOpen = true }
+		{ type: 'option', title: 'More Options', suffix: caretRightIcon, onclick: () => submenuOpen = true }
 	];
 	
 	const subItems = [

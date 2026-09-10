@@ -25,12 +25,12 @@ const defaultRoot = cva({
 });
 
 const defaultInputContainer = cva({
-	base: 'relative ml-auto flex w-full min-w-0 items-center overflow-hidden rounded-lg border border-neutral-muted bg-surface-raised px-3 transition-[max-width,background-color,border-color,box-shadow] duration-300 ease-out motion-reduce:transition-none focus-within:border-color/60 focus-within:ring-2 focus-within:ring-color/25',
+	base: 'relative ml-auto flex w-full min-w-0 items-center overflow-hidden rounded-md border border-neutral-muted bg-surface-raised px-lg transition-[max-width,background-color,border-color,box-shadow] duration-300 ease-out motion-reduce:transition-none focus-within:border-color/60 focus-within:ring-2 focus-within:ring-color/25',
 	variants: {
 		size: {
-			small: 'min-h-9 gap-1.5 py-1.5',
-			normal: 'min-h-11 gap-2 py-1.5',
-			large: 'min-h-12 gap-2.5 py-2'
+			small: 'min-h-9 gap-sm py-sm',
+			normal: 'min-h-11 gap-md py-sm',
+			large: 'min-h-12 gap-md py-md'
 		},
 		recording: {
 			true: 'border-color/50',
@@ -140,9 +140,9 @@ const defaultContent = cva({
 	base: 'flex min-w-0 flex-1 items-center overflow-hidden transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none',
 	variants: {
 		size: {
-			small: 'gap-1.5',
-			normal: 'gap-2',
-			large: 'gap-2.5'
+			small: 'gap-sm',
+			normal: 'gap-md',
+			large: 'gap-md'
 		},
 		variant: {
 			default: null,

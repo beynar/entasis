@@ -7,11 +7,13 @@
 	import { useSlidingIndicator } from '$lib/utils/useSlidingIndicator.svelte.js';
 	import type { SegmentedControlItem, SegmentedControlProps } from './segmentedControl.props.js';
 	import { useSegmentedControlTheme } from './segmentedControl.theme.js';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 
 	let {
 		items,
-		value = $bindable(items.find((item) => !item.disabled)?.value),
-		onChange,
+		defaultValue = items.find((item) => !item.disabled)?.value,
+		value = $bindable(),
+		onValueChange,
 		item: itemRenderer,
 		size = 'normal',
 		color = 'neutral',
@@ -22,10 +24,17 @@
 		theme,
 		...attachments
 	}: SegmentedControlProps<Items> = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(next) => {
+			value = next;
+		},
+		() => defaultValue
+	);
 
 	const id = $props.id();
 	const classes = $derived(useSegmentedControlTheme(theme));
-	const selectedIndex = $derived(items.findIndex((item) => item.value === value));
+	const selectedIndex = $derived(items.findIndex((item) => item.value === valueState.value));
 	const firstEnabledIndex = $derived(items.findIndex((item) => !item.disabled));
 	const tabStopIndex = $derived(
 		selectedIndex >= 0 && !items[selectedIndex]?.disabled ? selectedIndex : firstEnabledIndex
@@ -33,10 +42,16 @@
 
 	function selectItem(index: number) {
 		const selectedItem = items[index];
-		if (!selectedItem || disabled || selectedItem.disabled || selectedItem.value === value) return;
+		if (
+			!selectedItem ||
+			disabled ||
+			selectedItem.disabled ||
+			selectedItem.value === valueState.value
+		)
+			return;
 
-		value = selectedItem.value;
-		onChange?.(selectedItem.value);
+		valueState.value = selectedItem.value;
+		onValueChange?.(selectedItem.value);
 	}
 
 	const navigation = useNavigation({

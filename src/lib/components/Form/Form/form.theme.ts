@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultForm = cva({
-	base: `grid gap-y-4 gap-x-2 grid-cols-2 [&>*:not(.col-span-1)]:col-span-2`,
+	base: `grid gap-y-xl gap-x-md grid-cols-2 [&>*:not(.col-span-1)]:col-span-2`,
 	variants: {
 		variant: {
 			plain: '',
@@ -14,9 +14,9 @@ const defaultForm = cva({
 			horizontal: 'grid-cols-1 [&>*]:!col-span-1'
 		},
 		density: {
-			small: `gap-3`,
-			normal: `gap-4`,
-			large: `gap-6`
+			small: `gap-lg`,
+			normal: `gap-xl`,
+			large: `gap-layout-md`
 		}
 	},
 	defaultVariants: {
@@ -25,9 +25,9 @@ const defaultForm = cva({
 		density: 'normal'
 	},
 	compoundVariants: [
-		{ variant: 'card', density: 'small', class: 'px-3' },
-		{ variant: 'card', density: 'normal', class: 'px-4' },
-		{ variant: 'card', density: 'large', class: 'px-6' }
+		{ variant: 'card', density: 'small', class: 'px-lg' },
+		{ variant: 'card', density: 'normal', class: 'px-xl' },
+		{ variant: 'card', density: 'large', class: 'px-layout-md' }
 	]
 });
 
@@ -50,9 +50,9 @@ const defaultFormHeader = cva({
 		density: 'normal'
 	},
 	compoundVariants: [
-		{ variant: 'card', density: 'small', class: '-mx-3' },
-		{ variant: 'card', density: 'normal', class: '-mx-4' },
-		{ variant: 'card', density: 'large', class: '-mx-6' }
+		{ variant: 'card', density: 'small', class: '-mx-lg' },
+		{ variant: 'card', density: 'normal', class: '-mx-xl' },
+		{ variant: 'card', density: 'large', class: '-mx-layout-md' }
 	]
 });
 
@@ -119,7 +119,7 @@ const defaultFormGroupLabel = cva({
 });
 
 const defaultFormGroupDescription = cva({
-	base: 'mt-1 text-neutral/60',
+	base: 'mt-xs text-neutral/60',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -143,9 +143,9 @@ const defaultFormGroupFields = cva({
 			4: 'md:grid-cols-4'
 		},
 		density: {
-			small: 'mt-2 gap-1',
-			normal: 'mt-3 gap-2',
-			large: 'mt-4 gap-3'
+			small: 'mt-md gap-xs',
+			normal: 'mt-lg gap-md',
+			large: 'mt-xl gap-lg'
 		}
 	},
 	defaultVariants: {
@@ -173,12 +173,12 @@ const defaultFormItem = cva({
 		density: 'normal'
 	},
 	compoundVariants: [
-		{ variant: 'sectioned', density: 'small', class: 'pt-3' },
-		{ variant: 'sectioned', density: 'normal', class: 'pt-4' },
-		{ variant: 'sectioned', density: 'large', class: 'pt-6' },
-		{ variant: 'card', density: 'small', class: '-mx-3 px-3 pt-3' },
-		{ variant: 'card', density: 'normal', class: '-mx-4 px-4 pt-4' },
-		{ variant: 'card', density: 'large', class: '-mx-6 px-6 pt-6' }
+		{ variant: 'sectioned', density: 'small', class: 'pt-lg' },
+		{ variant: 'sectioned', density: 'normal', class: 'pt-xl' },
+		{ variant: 'sectioned', density: 'large', class: 'pt-layout-md' },
+		{ variant: 'card', density: 'small', class: '-mx-lg px-lg pt-lg' },
+		{ variant: 'card', density: 'normal', class: '-mx-xl px-xl pt-xl' },
+		{ variant: 'card', density: 'large', class: '-mx-layout-md px-layout-md pt-layout-md' }
 	]
 });
 
@@ -190,9 +190,9 @@ const defaultFormActions = cva({
 			end: 'justify-end'
 		},
 		density: {
-			small: 'gap-1',
-			normal: 'gap-2',
-			large: 'gap-3'
+			small: 'gap-xs',
+			normal: 'gap-md',
+			large: 'gap-lg'
 		}
 	},
 	defaultVariants: {
@@ -227,9 +227,9 @@ const defaultFormFooter = cva({
 		density: 'normal'
 	},
 	compoundVariants: [
-		{ variant: 'card', density: 'small', class: '-mx-3' },
-		{ variant: 'card', density: 'normal', class: '-mx-4' },
-		{ variant: 'card', density: 'large', class: '-mx-6' }
+		{ variant: 'card', density: 'small', class: '-mx-lg' },
+		{ variant: 'card', density: 'normal', class: '-mx-xl' },
+		{ variant: 'card', density: 'large', class: '-mx-layout-md' }
 	]
 });
 

@@ -26,7 +26,7 @@ Use items for the collection and a single children snippet for the repeated pane
 	];
 </script>
 
-<Stepper {items} bind:activeStep bind:stepper>
+<Stepper {items} bind:value={activeStep} bind:stepper>
 	{#snippet children({ stepper, item, index })}
 		<section class="space-y-4 p-6">
 			<h2>{item.title}</h2>
@@ -47,9 +47,10 @@ Use items for the collection and a single children snippet for the repeated pane
 
 - items: required array of step data. Each item is passed to children as item.
 - children: repeated snippet called for each panel with { stepper, item, index }.
-- activeStep: bindable zero-based active index. Use this as the public source of truth when syncing steppers.
+- value: bindable zero-based active index. Use this as the public source of truth when syncing steppers.
+- defaultValue: initial active index when value is omitted.
 - stepper: bindable StepperState reference for next(), previous(), and goTo(index).
-- onChange: called with the newly active item and zero-based index when the active step changes.
+- onValueChange: called once with { value, item } when the active step changes.
 - keyFramesOptions: Web Animations options used for the slide transition and timing. Default duration is 300ms.
 - mode: classic or vertical.
 - panelRole: "tabpanel", "group", or null. Defaults to "tabpanel"; use "group" for labelled question flows.
@@ -62,8 +63,8 @@ Use items for the collection and a single children snippet for the repeated pane
 - next(): move to the next item when one exists.
 - previous(): move to the previous item when one exists.
 - goTo(index): request a specific zero-based step.
-- syncActiveStep(index): internal synchronization path used by the component when activeStep changes.
-- activeStep: current public active index.
+- syncActiveStep(index): internal synchronization path used by the component when value changes.
+- value: current public active index.
 - items: current item array.
 - stepHeights: measured panel heights used for smooth height transitions.
 
@@ -71,7 +72,7 @@ Use items for the collection and a single children snippet for the repeated pane
 
 - Render repeated step content through the children snippet.
 - Put per-step differences in the item data and branch inside children when needed.
-- Bind activeStep when the parent or another Stepper controls the current step.
+- Bind value when the parent or another Stepper controls the current step.
 - Bind stepper when external controls need to call next(), previous(), or goTo(index).
 
 ## Accessibility

@@ -5,7 +5,7 @@ import type { ToggleButtonGroupThemeProps } from './toggleButtonGroup.theme.js';
 
 export type ToggleButtonGroupItem = Omit<
 	WithoutAttachments<ToggleButtonProps>,
-	'checked' | 'variant' | 'color' | 'size'
+	'value' | 'defaultValue' | 'variant' | 'color' | 'size'
 >;
 
 export type ToggleButtonGroupItems = Record<string, ToggleButtonGroupItem>;
@@ -36,6 +36,8 @@ export type ToggleButtonGroupProps<Items extends ToggleButtonGroupItems = Toggle
 		theme?: ToggleButtonGroupThemeProps;
 		/** Bindable checked state keyed by each entry in `items`. */
 		value?: ToggleButtonGroupValue<Items>;
-		/** Called when any button toggles, with the updated checked map. */
-		onChange?: (value: ToggleButtonGroupValue<Items>) => void;
+		/** Initial checked state when `value` is omitted. */
+		defaultValue?: ToggleButtonGroupValue<Items>;
+		/** Called once when any button toggles, with the updated checked map. */
+		onValueChange?: (value: ToggleButtonGroupValue<Items>) => void;
 	}>;

@@ -4,16 +4,16 @@ import type { StepperProps } from './stepper.props.js';
 type StepperKeyFramesOptions = NonNullable<StepperProps<unknown>['keyFramesOptions']>;
 
 type StepperStateBindableProps = {
-	activeStep: number;
+	value: number;
 	items: unknown[];
-	onChange?: (item: unknown, index: number) => void;
+	onValueChange?: (payload: { value: number; item: unknown }) => void;
 	keyFramesOptions: StepperKeyFramesOptions;
 };
 
 type StepperStateProps<Item> = {
-	activeStep: number;
+	value: number;
 	items: Item[];
-	onChange?: (item: Item, index: number) => void;
+	onValueChange?: (payload: { value: number; item: Item }) => void;
 	keyFramesOptions: StepperKeyFramesOptions;
 };
 
@@ -23,7 +23,7 @@ export class StepperState<Item> extends createBindableStateClass<StepperStateBin
 	offsets = $state<number[]>([]);
 	stepHeights = $state<number[]>([]);
 	stepContainer: HTMLElement | null = null;
-	declare activeStep: number;
+	declare value: number;
 	declare keyFramesOptions: StepperKeyFramesOptions;
 	visualStep = $state(0);
 	isAnimating = $state(false);
@@ -33,11 +33,11 @@ export class StepperState<Item> extends createBindableStateClass<StepperStateBin
 
 	constructor(props: StepperStateProps<Item>) {
 		super(props as unknown as StepperStateBindableProps);
-		this.visualStep = props.activeStep;
+		this.visualStep = props.value;
 	}
 
 	get activeHeight() {
-		return this.stepHeights[this.activeStep];
+		return this.stepHeights[this.value];
 	}
 
 	measureStepHeights() {
@@ -52,20 +52,20 @@ export class StepperState<Item> extends createBindableStateClass<StepperStateBin
 	}
 
 	next = () => {
-		this.goTo(this.activeStep + 1);
+		this.goTo(this.value + 1);
 	};
 
 	previous = () => {
-		this.goTo(this.activeStep - 1);
+		this.goTo(this.value - 1);
 	};
 
 	goTo = (step: number) => {
 		if (!this.canGoToStep(step)) return;
-		if (step === this.activeStep) {
+		if (step === this.value) {
 			this.syncActiveStep(step);
 			return;
 		}
-		this.activeStep = step;
+		this.value = step;
 		this.translateToStep(step);
 		this.notifyChange(step);
 	};
@@ -75,12 +75,8 @@ export class StepperState<Item> extends createBindableStateClass<StepperStateBin
 		this.translateToStep(step);
 	}
 
-	setActiveStep = (step: number) => () => {
-		this.goTo(step);
-	};
-
 	translate = () => {
-		this.syncActiveStep(this.activeStep);
+		this.syncActiveStep(this.value);
 	};
 
 	scroller = (node: HTMLElement) => {
@@ -95,7 +91,7 @@ export class StepperState<Item> extends createBindableStateClass<StepperStateBin
 				const steps = this.getSteps();
 				this.offsets = steps.map((step) => step.offsetLeft);
 				this.stepHeights = steps.map((step) => step.clientHeight || 0);
-				if (!this.isAnimating) this.lockTransformToStep(this.activeStep);
+				if (!this.isAnimating) this.lockTransformToStep(this.value);
 				this.rafId = null;
 			});
 		};
@@ -185,8 +181,9 @@ export class StepperState<Item> extends createBindableStateClass<StepperStateBin
 
 	private notifyChange(step: number) {
 		if (!(step in this.items)) return;
-		const onChange = this.onChange as ((item: Item, index: number) => void) | undefined;
-		onChange?.((this.items as Item[])[step], step);
+		const onValueChange = this.onValueChange as
+			((payload: { value: number; item: Item }) => void) | undefined;
+		onValueChange?.({ value: step, item: (this.items as Item[])[step] });
 	}
 
 	private getSteps() {

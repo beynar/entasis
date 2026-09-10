@@ -2,7 +2,7 @@
 	import Button from '$lib/components/Button/Button.svelte';
 	import type { ButtonPrimitiveProps } from '$lib/components/Button/button.props.js';
 	import type { WithAttachments } from '$lib/types/props.js';
-	import { useFieldTheme } from './Field.svelte';
+	import { useFieldTheme } from './field.theme.js';
 
 	type FieldActionButtonEdge = 'start' | 'end' | 'none';
 	type FieldActionButtonProps = WithAttachments<
@@ -17,12 +17,14 @@
 			| 'disabled'
 			| 'id'
 			| 'label'
-			| 'onClick'
+			| 'onclick'
 			| 'prefix'
 			| 'size'
 			| 'type'
 		> & {
+			/** Marks the adjacent field action as active. */
 			active?: boolean;
+			/** Field edge whose padding the action occupies. */
 			edge?: FieldActionButtonEdge;
 		}
 	>;
@@ -35,7 +37,7 @@
 		disabled,
 		edge = 'end',
 		label,
-		onClick,
+		onclick,
 		prefix,
 		size,
 		type = 'button',
@@ -56,7 +58,7 @@
 	variant="ghost"
 	color={effectiveColor}
 	{size}
-	squared={false}
+	squared={true}
 	{label}
 	aria-haspopup={ariaHaspopup}
 	aria-expanded={ariaExpanded}
@@ -65,6 +67,6 @@
 	{disabled}
 	class={classes.actionButton({ size, edge, active, class: className })}
 	{prefix}
-	{onClick}
+	{onclick}
 	{...attachments}
 />

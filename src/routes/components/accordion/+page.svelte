@@ -2,8 +2,37 @@
 	import Accordion from '$lib/components/Accordion/Accordion.svelte';
 	import SegmentedControl from '$lib/components/SegmentedControl/SegmentedControl.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 	import type { Density } from '$lib/types/theme.js';
+	import { sizes } from '$lib/utils/tokens.js';
+
+	const accordionVariants = ['classic', 'card', 'outlined'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'classic',
+			options: accordionVariants
+		},
+		{ name: 'oneAtATime', type: 'switch', label: 'One at a time', value: true },
+		{ name: 'splitted', type: 'switch', label: 'Splitted', value: false }
+	]);
 
 	const densitySegments = [
 		{ value: 'small', label: 'Small' },
@@ -74,6 +103,7 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A flat list of expandable rows — the title underlines on hover and the chevron rotates open."
 		code={`<Accordion
 	items={[
@@ -81,10 +111,22 @@
 		{ title: 'Is it styled?', content: 'Yes. It comes with sensible default styles.' },
 		{ title: 'Is it animated?', content: 'Yes, with reduced-motion support.' }
 	]}
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	variant="${controls.value.variant}"
+	oneAtATime={${controls.value.oneAtATime}}
+	splitted={${controls.value.splitted}}
 />`}
 	>
 		<div class="w-full max-w-md">
-			<Accordion items={faqItems} />
+			<Accordion
+				items={faqItems}
+				size={controls.value.size}
+				density={controls.value.density}
+				variant={controls.value.variant}
+				oneAtATime={controls.value.oneAtATime}
+				splitted={controls.value.splitted}
+			/>
 		</div>
 	</ComponentCard>
 

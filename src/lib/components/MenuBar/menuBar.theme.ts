@@ -2,12 +2,12 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultMenuBar = cva({
-	base: 'bg-surface inline-flex w-fit max-w-full items-center overflow-x-auto rounded-lg scrollbar-none',
+	base: 'bg-surface inline-flex w-fit max-w-full items-center overflow-x-auto rounded-md scrollbar-none',
 	variants: {
 		size: {
-			small: 'gap-0.5 p-0.5',
-			normal: 'gap-0.5 p-1',
-			large: 'gap-1 p-1'
+			small: 'gap-micro p-micro',
+			normal: 'gap-micro p-xs',
+			large: 'gap-xs p-xs'
 		}
 	},
 	defaultVariants: {

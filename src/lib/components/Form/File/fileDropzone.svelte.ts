@@ -18,7 +18,7 @@ export type FileDropzoneOptions = {
 	clickable?: boolean;
 	files?: readonly File[];
 	onAccept?: (files: File[]) => void;
-	onChange?: (files: File[]) => void;
+	onValueChange?: (files: File[]) => void;
 	onReject?: (rejections: FileRejection[]) => void;
 	onError?: (error: unknown) => void;
 };
@@ -267,7 +267,7 @@ export class FileDropzone {
 	private commitFiles(nextFiles: readonly File[], acceptedFiles: File[]): void {
 		this.files = [...nextFiles];
 		if (acceptedFiles.length > 0) this.options.onAccept?.(acceptedFiles);
-		this.options.onChange?.([...this.files]);
+		this.options.onValueChange?.([...this.files]);
 	}
 
 	private handleError(error: unknown): void {

@@ -44,7 +44,7 @@
 		'aria-label': label,
 		'data-menu-keep-open': 'true'
 	}}
-	onClick={onBack}
+	onclick={onBack}
 	{@attach itemReference}
 	{@attach backReference}
 />

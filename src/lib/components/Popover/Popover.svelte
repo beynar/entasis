@@ -1,10 +1,11 @@
 <script lang="ts">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
+	import { getPopoverDialogTheme } from './popover.dialog.theme.js';
 	import type { PopoverProps } from './popover.props.js';
 	import { usePopoverTheme } from './popover.theme.js';
 	import { PopoverState } from './popover.state.svelte.js';
 	import Button from '../Button/Button.svelte';
 	import Dialog from '../Dialog/Dialog.svelte';
-	import type { DialogThemeProps } from '../Dialog/dialog.theme.js';
 	import { fso } from '$lib/transitions/transition.js';
 	import { portal } from '$lib/attachments/portal.js';
 	import { transitionSize } from '$lib/attachments/transitionSize.js';
@@ -13,13 +14,15 @@
 		id: customId,
 		position,
 		ref,
-		onClose,
-		onOpen,
+		onOpenChange,
+		onAfterOpen,
+		onAfterClose,
 		size,
 		offset,
 		transition,
 		children,
-		open = $bindable(false),
+		defaultOpen = false,
+		open = $bindable(),
 		openOnHover = false,
 		openOnClick = true,
 		hoverDelay = 100,
@@ -36,6 +39,13 @@
 		trigger,
 		theme
 	}: PopoverProps = $props();
+	const openState = createBindableValue(
+		() => open,
+		(next) => {
+			open = next;
+		},
+		() => defaultOpen
+	);
 
 	const id = $props.id();
 	const popover = new PopoverState({
@@ -43,10 +53,13 @@
 			return customId || id;
 		},
 		get isOpen() {
-			return open;
+			return openState.value;
 		},
 		set isOpen(value) {
-			open = value;
+			openState.value = value;
+		},
+		get onOpenChange() {
+			return onOpenChange;
 		},
 		get size() {
 			return size;
@@ -95,12 +108,6 @@
 		},
 		get openOnClick() {
 			return openOnClick;
-		},
-		get onClose() {
-			return onClose;
-		},
-		get onOpen() {
-			return onOpen;
 		}
 	});
 
@@ -112,16 +119,15 @@
 		popover.isOpen && (popover.isMobileSheet || popover.referenceElement || popover.externalRef)
 	);
 
-	const mobileSheetDialogTheme = $derived({
-		content: {
-			base: classes.popover({
+	const mobileSheetDialogTheme = $derived(
+		getPopoverDialogTheme(
+			classes.popover({
 				size: popover.computedSize,
 				mode: 'mobileSheet',
 				className
 			})
-		},
-		closeButton: { base: 'hidden' }
-	} satisfies DialogThemeProps);
+		)
+	);
 </script>
 
 {#snippet emptyCloseButton()}{/snippet}
@@ -129,7 +135,7 @@
 {#if popover.isMobileSheet}
 	<Dialog
 		id={popover.id}
-		bind:open
+		open={popover.isOpen}
 		type="drawerBottom"
 		responsive={false}
 		{size}
@@ -141,13 +147,14 @@
 		thumb={false}
 		closeButton={emptyCloseButton}
 		theme={mobileSheetDialogTheme}
-		onOpen={() => {
+		onOpenChange={(nextOpen) => popover.setOpen(nextOpen)}
+		onAfterOpen={() => {
 			popover.hasTransitioned = true;
-			onOpen?.(popover);
+			onAfterOpen?.(popover);
 		}}
-		onClose={() => {
+		onAfterClose={() => {
 			popover.hasTransitioned = false;
-			onClose?.(popover);
+			onAfterClose?.(popover);
 		}}
 	>
 		<div {@attach transitionSize({ isActive: () => mobileSheetSizeTransition })}>
@@ -179,12 +186,12 @@
 			out:in_out={popover.computedTransition.out}
 			onintroend={() => {
 				popover.hasTransitioned = true;
-				onOpen?.(popover);
+				onAfterOpen?.(popover);
 			}}
 			onoutrostart={() => {
 				popover.hasTransitioned = false;
 			}}
-			onoutroend={() => onClose?.(popover)}
+			onoutroend={() => onAfterClose?.(popover)}
 		>
 			{@render children?.(popover)}
 		</div>
@@ -196,7 +203,10 @@
 	{:else if typeof trigger !== 'boolean'}
 		<Button
 			{...trigger}
-			onClick={() => openOnClick && popover.toggle()}
+			onclick={(event) => {
+				trigger.onclick?.(event);
+				if (openOnClick) popover.toggle();
+			}}
 			{@attach popover.reference}
 		>
 			{trigger.content}

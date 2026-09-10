@@ -17,7 +17,7 @@
 		indicator,
 		indicatorVariant = 'default',
 		indicatorColor = 'neutral',
-		onIndicatorClick,
+		onclick,
 		indicatorLabel,
 		indicatorType = 'button',
 		indicatorDisabled,
@@ -63,7 +63,7 @@
 	/>
 
 	{#if indicator}
-		{#if onIndicatorClick}
+		{#if onclick}
 			<button
 				data-slot="stat-indicator"
 				data-variant={indicatorVariant}
@@ -72,7 +72,7 @@
 				type={indicatorType}
 				disabled={indicatorDisabled}
 				aria-label={indicatorLabel}
-				onclick={onIndicatorClick}
+				{onclick}
 				class={classes.indicator({
 					size,
 					variant: indicatorVariant,

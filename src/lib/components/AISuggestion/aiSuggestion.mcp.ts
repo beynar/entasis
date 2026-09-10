@@ -3,8 +3,9 @@ export const aiSuggestionDescription = `
 
 Prompt suggestions rendered as a horizontal, scroll-faded button row.
 
-- \`Suggestion\` is the theme-aware button primitive, defaults to the soft variant, accepts regular Button size, color, and variant props, and supports both \`onSelect\` and the Svelte Pro-compatible \`onclick\` alias.
-- \`Suggestions\` owns horizontal scrolling, optional \`scrollFade\`, bindable \`value\`, disabled state, shared built-in item \`variant\`, and \`onSuggestionClick\`.
+- \`Suggestion\` is the theme-aware button primitive, defaults to the soft variant, accepts regular Button size, color, and variant props, and reports semantic selection through \`onSelect\`.
+- \`Suggestions\` owns horizontal scrolling, optional \`scrollFade\`, bindable \`value\`, \`defaultValue\`, disabled state, shared built-in item \`variant\`, and \`onSuggestionSelect\`.
+- \`defaultValue\` initializes the selected suggestion when \`value\` is omitted. \`onValueChange(value)\` fires once when a user changes that selection; parent updates and selecting the same value stay silent. \`onSuggestionSelect(value)\` reports every suggestion activation, including repeated selection.
 - Its \`suggestion\` snippet receives \`{ suggestion, selected, disabled, select }\` for composed item rendering.
 
 \`\`\`svelte

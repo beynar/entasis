@@ -88,7 +88,7 @@ ${scriptCode}
 
 		<div>
 			<h2 class="mb-2 text-sm font-medium text-neutral-light">Set the keys</h2>
-			<Tabs items={codeTabs} bind:activeTab={codeTab}>
+			<Tabs items={codeTabs} bind:value={codeTab}>
 				{#snippet children({ index })}
 					<div class="p-4">
 						{#if index === 0}

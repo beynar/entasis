@@ -28,10 +28,12 @@ export type ToggleButtonProps = WithAttachments<
 			class?: string;
 			/** Theme overrides for the button, prefix, and suffix parts. */
 			theme?: ToggleButtonThemeProps;
-			/** Bindable checked state toggled on each click when not disabled. */
-			checked?: boolean;
-			/** Called after the checked state changes from a user click. */
-			onChange?: ((checked: boolean) => void) | null | undefined;
+			/** Bindable pressed state toggled on each click when not disabled. */
+			value?: boolean;
+			/** Initial pressed state when `value` is omitted. */
+			defaultValue?: boolean;
+			/** Called once after a user interaction changes `value`. */
+			onValueChange?: ((value: boolean) => void) | null | undefined;
 		},
 		'prefix' | 'children' | 'suffix'
 	>

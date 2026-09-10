@@ -37,7 +37,7 @@
 			<Switch
 				label={control.label}
 				value={controls.value[control.name] as boolean}
-				onChange={(value) => controls.setValue(control.name, !!value)}
+				onValueChange={(value) => controls.setValue(control.name, !!value)}
 				size={control.size ?? 'small'}
 				disabled={control.disabled}
 			/>
@@ -45,7 +45,7 @@
 			<Slider
 				label={control.label}
 				value={controls.value[control.name] as number}
-				onChange={(value) => {
+				onValueChange={(value) => {
 					if (typeof value === 'number') controls.setValue(control.name, value);
 				}}
 				min={control.min}

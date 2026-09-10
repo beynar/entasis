@@ -7,6 +7,11 @@ export type StepperRenderPayload<Item> = {
 	index: number;
 };
 
+export type StepperValueChangePayload<Item> = {
+	value: number;
+	item: Item;
+};
+
 export type StepperPanelAriaLabelledby<Item> =
 	string | false | ((payload: StepperRenderPayload<Item>) => string | undefined);
 
@@ -23,9 +28,9 @@ export type StepperProps<Item> = {
 	 */
 	children?: Snippet<[StepperRenderPayload<Item>]>;
 	/**
-	 * Called when the active step changes, with the newly active item and index.
+	 * Called once when the active step changes.
 	 */
-	onChange?: (item: Item, index: number) => void;
+	onValueChange?: (payload: StepperValueChangePayload<Item>) => void;
 	/**
 	 * Additional CSS classes for the root stepper container.
 	 */
@@ -33,7 +38,9 @@ export type StepperProps<Item> = {
 	/**
 	 * Zero-based index of the currently visible step. Bindable.
 	 */
-	activeStep?: number;
+	value?: number;
+	/** Initial active step index when `value` is omitted. */
+	defaultValue?: number;
 	/**
 	 * Bindable stepper state for programmatic navigation (`next`, `previous`, `goTo`).
 	 */

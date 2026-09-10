@@ -1,4 +1,5 @@
-<script lang="ts">
+<script lang="ts" generics="Mode extends DateSelectorMode">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Button from '$lib/components/Button/Button.svelte';
 	import { calendarBlankIcon } from '$lib/components/Icons/calendarBlank.js';
 	import Popover from '$lib/components/Popover/Popover.svelte';
@@ -16,11 +17,13 @@
 	} from './dateSelector.props.js';
 	import { useDateSelectorTheme } from './dateSelector.theme.js';
 
-	type Mode = $$Generic<DateSelectorMode>;
 	let {
 		mode = 'date' as Mode,
+		defaultValue = (mode === 'multiple' ? [] : null) as DateSelectorProps<Mode>['value'],
 		value = $bindable(),
-		open = $bindable(false),
+		defaultOpen = false,
+		open = $bindable(),
+		onOpenChange,
 		closeOnSelect = false,
 		presets = [],
 		trigger,
@@ -38,10 +41,25 @@
 		calendarLabel = 'Choose dates',
 		id,
 		class: className,
-		onChange,
+		onValueChange,
 		theme,
 		calendarTheme
 	}: DateSelectorProps<Mode> = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(nextValue) => {
+			value = nextValue;
+		},
+		() => defaultValue
+	);
+
+	const openState = createBindableValue(
+		() => open,
+		(nextOpen) => {
+			open = nextOpen;
+		},
+		() => defaultOpen
+	);
 
 	const classes = $derived(useDateSelectorTheme(theme));
 	const calendarType = $derived(
@@ -56,16 +74,16 @@
 	const formatDay = (date: Date) => date.toLocaleDateString(locale);
 	const defaultTriggerLabel = $derived.by(() => {
 		if (mode === 'date') {
-			const date = value as Date | null;
+			const date = valueState.value as Date | null;
 			return date ? formatDay(date) : 'Choose dates';
 		}
 		if (mode === 'range') {
-			const range = value as [Date | null, Date | null] | null;
+			const range = valueState.value as [Date | null, Date | null] | null;
 			if (!range || (!range[0] && !range[1])) return 'Choose dates';
 			const side = (date: Date | null) => (date ? formatDay(date) : '…');
 			return `${side(range[0])} – ${side(range[1])}`;
 		}
-		const dates = value as Date[] | undefined;
+		const dates = valueState.value as Date[] | undefined;
 		return dates?.length ? dates.map(formatDay).join(', ') : 'Choose dates';
 	});
 	const resolvedTrigger = $derived(
@@ -109,10 +127,19 @@
 	}
 
 	function commitValue(nextValue: DateSelectorValue<Mode>, isSelectionComplete = true) {
+		if (disabled) return;
 		const normalizedValue = normalizeValue(nextValue);
-		value = normalizedValue;
-		onChange?.(normalizedValue);
-		if (closeOnSelect && isSelectionComplete) open = false;
+		if (!isValueSelected(normalizedValue)) {
+			valueState.value = normalizedValue;
+			onValueChange?.(normalizedValue);
+		}
+		if (closeOnSelect && isSelectionComplete) setOpen(false);
+	}
+
+	function setOpen(nextOpen: boolean) {
+		if (openState.value === nextOpen || (disabled && nextOpen)) return;
+		openState.value = nextOpen;
+		onOpenChange?.(nextOpen);
 	}
 
 	function handleCalendarChange(nextValue: CalendarValue<CalendarType>) {
@@ -124,9 +151,9 @@
 		commitValue(nextValue as DateSelectorValue<Mode>, isSelectionComplete);
 	}
 
-	function isPresetSelected(presetValue: DateSelectorValue<Mode>) {
+	function isValueSelected(presetValue: DateSelectorValue<Mode>) {
 		if (mode === 'date') {
-			const currentDate = value as Date | null | undefined;
+			const currentDate = valueState.value as Date | null | undefined;
 			const presetDate = presetValue as Date | null;
 			return currentDate && presetDate
 				? getCalendarDateKey(currentDate) === getCalendarDateKey(presetDate)
@@ -134,7 +161,7 @@
 		}
 
 		if (mode === 'range') {
-			const currentRange = value as [Date | null, Date | null] | null | undefined;
+			const currentRange = valueState.value as [Date | null, Date | null] | null | undefined;
 			const presetRange = presetValue as [Date | null, Date | null] | null;
 			if (!currentRange || !presetRange) return currentRange === presetRange;
 			return currentRange.every((date, index) => {
@@ -145,7 +172,7 @@
 			});
 		}
 
-		const currentDates = (value as Date[] | undefined) ?? [];
+		const currentDates = (valueState.value as Date[] | undefined) ?? [];
 		const presetDates = presetValue as Date[];
 		if (currentDates.length !== presetDates.length) return false;
 		const currentKeys = currentDates.map(getCalendarDateKey).sort();
@@ -156,7 +183,8 @@
 
 <Popover
 	{id}
-	bind:open
+	open={openState.value}
+	onOpenChange={setOpen}
 	{position}
 	{offset}
 	{mobileSheet}
@@ -164,40 +192,38 @@
 	trigger={resolvedTrigger}
 	class={classes.popover({ class: className })}
 >
-	{#snippet children()}
-		<div class={classes.root({ withPresets: presets.length > 0, view })}>
-			{#if presets.length > 0}
-				<div class={classes.presets()} aria-label="Preset dates">
-					{#each presets as preset (preset.label)}
-						<Button
-							variant={isPresetSelected(preset.value) ? 'soft' : 'ghost'}
-							size="small"
-							fullWidth
-							{disabled}
-							class={classes.preset()}
-							onClick={() => commitValue(preset.value)}
-						>
-							{preset.label}
-						</Button>
-					{/each}
-				</div>
-			{/if}
+	<div class={classes.root({ withPresets: presets.length > 0, view })}>
+		{#if presets.length > 0}
+			<div class={classes.presets()} aria-label="Preset dates">
+				{#each presets as preset (preset.label)}
+					<Button
+						variant={isValueSelected(preset.value) ? 'soft' : 'ghost'}
+						size="small"
+						fullWidth
+						{disabled}
+						class={classes.preset()}
+						onclick={() => commitValue(preset.value)}
+					>
+						{preset.label}
+					</Button>
+				{/each}
+			</div>
+		{/if}
 
-			<CalendarPrimitive
-				type={calendarType}
-				value={value as CalendarValue<CalendarType>}
-				{view}
-				{weekStartsOnMonday}
-				{weekdayLength}
-				{locale}
-				{minDate}
-				{maxDate}
-				{disabledDates}
-				{disabled}
-				ariaLabel={calendarLabel}
-				theme={mergedCalendarTheme}
-				onChange={handleCalendarChange}
-			/>
-		</div>
-	{/snippet}
+		<CalendarPrimitive
+			type={calendarType}
+			value={valueState.value as CalendarValue<CalendarType>}
+			{view}
+			{weekStartsOnMonday}
+			{weekdayLength}
+			{locale}
+			{minDate}
+			{maxDate}
+			{disabledDates}
+			{disabled}
+			ariaLabel={calendarLabel}
+			theme={mergedCalendarTheme}
+			onValueChange={handleCalendarChange}
+		/>
+	</div>
 </Popover>

@@ -151,27 +151,24 @@ export type GanttMutationPolicy<
 	task?: Readonly<{
 		validate?: (proposal: GanttTaskProposal<TTaskFields>) => boolean;
 		resolve?: (proposal: GanttTaskProposal<TTaskFields>) => GanttTaskUpdateResult<TTaskFields>;
-		onChange?: (tasks: GanttTask<TTaskFields>[], change: GanttTasksChange<TTaskFields>) => void;
+		/** Called after the task collection commits with its guarded transaction. */
+		onTasksChange?: (change: GanttTasksChange<TTaskFields>) => void;
 	}>;
 	dependency?: Readonly<{
 		validate?: (proposal: GanttDependencyProposal<TDependencyFields>) => boolean;
 		resolve?: (
 			proposal: GanttDependencyProposal<TDependencyFields>
 		) => GanttDependencyUpdateResult<TDependencyFields>;
-		onChange?: (
-			dependencies: GanttDependency<TDependencyFields>[],
-			change: GanttDependenciesChange<TDependencyFields>
-		) => void;
+		/** Called after the dependency collection commits with its guarded transaction. */
+		onDependenciesChange?: (change: GanttDependenciesChange<TDependencyFields>) => void;
 	}>;
 	assignment?: Readonly<{
 		validate?: (proposal: GanttAssignmentProposal<TAssignmentFields>) => boolean;
 		resolve?: (
 			proposal: GanttAssignmentProposal<TAssignmentFields>
 		) => GanttAssignmentUpdateResult<TAssignmentFields>;
-		onChange?: (
-			assignments: GanttAssignment<TAssignmentFields>[],
-			change: GanttAssignmentsChange<TAssignmentFields>
-		) => void;
+		/** Called after the assignment collection commits with its guarded transaction. */
+		onAssignmentsChange?: (change: GanttAssignmentsChange<TAssignmentFields>) => void;
 	}>;
 	range?: Readonly<{
 		validate?: (proposal: GanttRangeProposal) => boolean;
@@ -427,22 +424,39 @@ export type GanttEventHandlers<
 	TTaskFields extends object = Record<never, never>,
 	TDependencyFields extends object = Record<never, never>
 > = Readonly<{
-	selectionChange?: (selection: GanttSelection) => void;
-	expansionChange?: (expandedTaskIds: string[]) => void;
-	zoomChange?: (zoom: GanttZoomLevel) => void;
-	visibleRangeChange?: (info: GanttVisibleRangeInfo) => void;
-	taskClick?: (task: GanttResolvedTaskNode<TTaskFields>, event: MouseEvent) => void;
-	taskDoubleClick?: (task: GanttResolvedTaskNode<TTaskFields>, event: MouseEvent) => void;
-	dependencyClick?: (
-		dependency: GanttResolvedDependency<TTaskFields, TDependencyFields>,
-		event: MouseEvent
+	onSelectionChange?: (selection: GanttSelection) => void;
+	onExpansionChange?: (expandedTaskIds: string[]) => void;
+	onZoomChange?: (zoom: GanttZoomLevel) => void;
+	onVisibleRangeChange?: (info: GanttVisibleRangeInfo) => void;
+	onTaskClick?: (payload: GanttTaskClickPayload<TTaskFields>) => void;
+	onTaskDoubleClick?: (payload: GanttTaskClickPayload<TTaskFields>) => void;
+	onDependencyClick?: (
+		payload: GanttDependencyClickPayload<TTaskFields, TDependencyFields>
 	) => void;
-	emptyRangeSelect?: (proposal: GanttRangeProposal) => void;
-	interactionBlocked?: (info: GanttInteractionBlockedInfo) => void;
-	scheduleViolations?: (
-		violations: readonly GanttConstraintViolation[],
-		source: 'validation' | 'task-change' | 'dependency-change' | 'calendar-change'
-	) => void;
+	onEmptyRangeSelect?: (proposal: GanttRangeProposal) => void;
+	onInteractionBlocked?: (info: GanttInteractionBlockedInfo) => void;
+	onScheduleViolations?: (payload: GanttScheduleViolationsPayload) => void;
+}>;
+
+/** Task and native pointer event reported by task click callbacks. */
+export type GanttTaskClickPayload<TTaskFields extends object = Record<never, never>> = Readonly<{
+	task: GanttResolvedTaskNode<TTaskFields>;
+	event: MouseEvent;
+}>;
+
+/** Dependency and native pointer event reported by dependency click callbacks. */
+export type GanttDependencyClickPayload<
+	TTaskFields extends object = Record<never, never>,
+	TDependencyFields extends object = Record<never, never>
+> = Readonly<{
+	dependency: GanttResolvedDependency<TTaskFields, TDependencyFields>;
+	event: MouseEvent;
+}>;
+
+/** Constraint violations and the mutation boundary that reported them. */
+export type GanttScheduleViolationsPayload = Readonly<{
+	violations: readonly GanttConstraintViolation[];
+	source: 'validation' | 'task-change' | 'dependency-change' | 'calendar-change';
 }>;
 
 type GanttOwnProps<

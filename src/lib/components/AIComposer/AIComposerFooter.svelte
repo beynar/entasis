@@ -114,7 +114,7 @@
 					color="neutral"
 					label={attachLabel}
 					disabled={attachDisabled}
-					onClick={onAttach}
+					onclick={onAttach}
 				>
 					{@render paperclipIcon({ size: 16 })}
 				</Button>
@@ -167,7 +167,7 @@
 					label={stopLabel}
 					loading={isStopping}
 					disabled={disabled || isWorking}
-					onClick={onStop}
+					onclick={onStop}
 				>
 					{@render stopIcon({ size: 16 })}
 				</Button>

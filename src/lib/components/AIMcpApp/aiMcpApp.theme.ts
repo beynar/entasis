@@ -6,7 +6,7 @@ import {
 } from '$lib/utils/cva/index.js';
 
 const defaultRoot = cva({
-	base: 'relative min-w-0 overflow-hidden rounded-md bg-surface',
+	base: 'relative min-w-0 overflow-hidden rounded-sm bg-surface',
 	variants: {
 		bordered: {
 			true: 'border border-neutral-muted',
@@ -15,7 +15,7 @@ const defaultRoot = cva({
 	}
 });
 const defaultFrame = cva({ base: 'block min-h-32 w-full border-0 bg-transparent' });
-const defaultState = cva({ base: 'grid min-h-32 place-items-center p-4' });
+const defaultState = cva({ base: 'grid min-h-32 place-items-center p-xl' });
 
 export const aiMcpAppTheme = {
 	root: defaultRoot,

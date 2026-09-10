@@ -35,7 +35,7 @@ Modal/drawer overlay that blocks page interaction.
 - `trigger`: `Snippet<[DialogState]>` or `ButtonProps & { content?: string }`
 
 ### Events
-- `onOpen(dialog: DialogState)`, `onClose(dialog: DialogState)`
+- `onAfterOpen(dialog: DialogState)`, `onAfterClose(dialog: DialogState)`
 
 ### DialogState (passed to snippets)
 - `isOpen`, `id`, `type`, `size`, `open()`, `close()`
@@ -49,7 +49,7 @@ Modal/drawer overlay that blocks page interaction.
   trigger={{ content: "Open", color: "primary" }}>
   Drawer content
   {#snippet footer()}
-    <Button onClick={() => isOpen = false}>Close</Button>
+    <Button onclick={() => isOpen = false}>Close</Button>
   {/snippet}
 </Dialog>
 ```
@@ -84,7 +84,7 @@ Floating content positioned relative to a trigger element.
 - `trigger`: `Snippet<[PopoverState]>` | `ButtonProps & { content?: string }` | `false`
 
 ### Events
-- `onOpen(popover: PopoverState)`, `onClose(popover: PopoverState)`
+- `onAfterOpen(popover: PopoverState)`, `onAfterClose(popover: PopoverState)`
 
 ### PopoverState (passed to snippets)
 - `isOpen`, `id`, `size`, `position`, `offset`, `open()`, `close()`
@@ -95,7 +95,7 @@ Floating content positioned relative to a trigger element.
 ### Example
 ```svelte
 <!-- External ref usage -->
-<Avatar bind:ref={avatarRef} onClick={() => isOpen = !isOpen} />
+<Avatar bind:ref={avatarRef} onclick={() => isOpen = !isOpen} />
 <Popover bind:isOpen ref={avatarRef} position="bottom-end" trigger={false}>
   <ProfileCard />
 </Popover>
@@ -123,8 +123,8 @@ Attachment directive (not a component). Uses `{@attach}` on any element.
 | `color` | `Colors` | `'background'` |
 | `delay` | `number` | `400` |
 | `offset` | `number` | - |
-| `onOpen` | `() => void` | - |
-| `onClose` | `() => void` | - |
+| `onAfterOpen` | `() => void` | - |
+| `onAfterClose` | `() => void` | - |
 
 ### Theme Parts
 `tooltip` (base, size, color)
@@ -185,7 +185,7 @@ t.remove(); // dismiss programmatically
 | `suffix` | `Slot` | - |
 
 ### Events
-`onOpen(toast)` | `onClose(toast)` | `onAutoClose(toast)`
+`onAfterOpen(toast)` | `onAfterClose(toast)` | `onAutoClose(toast)`
 
 ### Theme Parts
 `toast` (base, richColors, color, size) | `prefix` | `suffix` | `content` | `closeIcon` | `title` | `description`
@@ -260,9 +260,14 @@ Static message banner. Uses CSS Grid layout adapting to icon presence.
 
 ### Example
 ```svelte
+<script>
+  import { Alert } from 'svelai/alert';
+  import { warningCircleIcon } from 'svelai/icons/warningCircle';
+</script>
+
 <Alert color="danger" variant="soft">
   {#snippet prefix()}
-    <Icon name="alert-circle" />
+    {@render warningCircleIcon()}
   {/snippet}
   {#snippet title()}Error{/snippet}
   {#snippet description()}Something went wrong.{/snippet}
@@ -280,7 +285,7 @@ Top-of-page loading bar. Auto-shows during SvelteKit navigations.
 ### Unique Props
 | Prop | Type | Default |
 |---|---|---|
-| `size` | `number` (px height) | `3` |
+| `height` | `number` (px) | `3` |
 | `delay` | `number` (ms) | `300` |
 | `easing` | `Easing` (30+ options) | `'cubicInOut'` |
 
@@ -299,7 +304,7 @@ toggleNetworkIndicator(); // hide
 ### Example
 ```svelte
 <!-- In +layout.svelte -->
-<NetworkIndicator color="primary" size={4} delay={200} />
+<NetworkIndicator color="primary" height={4} delay={200} />
 <slot />
 ```
 

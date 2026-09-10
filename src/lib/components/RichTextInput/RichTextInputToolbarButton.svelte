@@ -40,7 +40,7 @@
 	aria-pressed={active || undefined}
 	class={`${classes.toolbarButton({ size })} rich-text-input-toolbar-control`}
 	prefix={iconSlot}
-	onClick={onSelect}
+	onclick={onSelect}
 	{@attach preserveSelection}
 	{@attach tooltip({ content: shortcut ? `${label} (${shortcut})` : label, delay: 350 })}
 />

@@ -44,10 +44,10 @@ The built-in tags are **Card**, **Stat**, **Stack**, **Grid**, and **GridSpan**:
 
 ~~~svelte
 const content = [
-  '<Grid columns={2} gap={3}>',
+  '<Grid columns={2} gap="lg">',
   '<GridSpan columns="full">',
   '<Card title="Release readiness" variant="outline">',
-  '<Stack gap={2}>Everything is **ready**.</Stack>',
+  '<Stack gap="md">Everything is **ready**.</Stack>',
   '</Card>',
   '</GridSpan>',
   '<Stat label="Coverage" value="94%" trend="+3.2%" trendDirection="up" />',

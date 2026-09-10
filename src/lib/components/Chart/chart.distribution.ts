@@ -1,15 +1,11 @@
 import { deviation, mean, quantileSorted } from 'd3-array';
 import type { CompiledMark } from './chart.cartesian.js';
-import { chartKeyIdentity } from './chart.channels.js';
+import { chartKeyIdentity, type CompiledChartChannel } from './chart.channels.js';
 import { compileEmpiricalDistribution } from './chart.distribution.empirical.js';
 import { compileDistributionMarks } from './chart.distribution.render.js';
 import type { ChartDistributionInterval, ChartDistributionMark, ChartKey } from './chart.props.js';
 
-type DistributionAccessor<TRow, TValue> = (
-	row: TRow,
-	index: number,
-	rows: readonly TRow[]
-) => TValue | null | undefined;
+type DistributionAccessor<TRow, TValue> = CompiledChartChannel<TRow, TValue>;
 
 export type NormalizedSummaryDistributionVariant =
 	| { type: 'violin'; bins: number; showMedian: boolean }
@@ -113,30 +109,35 @@ function normalizeVariant<TRow>(
 	mark: ChartDistributionMark<TRow>,
 	path: string
 ): NormalizedDistributionVariant {
-	const input = typeof mark.variant === 'string' ? { type: mark.variant } : mark.variant;
-	if (input.type === 'violin') {
-		const bins = input.bins ?? 16;
+	const input = mark.variant;
+	const type = typeof input === 'string' ? input : input.type;
+	if (type === 'violin') {
+		const options = typeof input === 'object' && input.type === 'violin' ? input : undefined;
+		const bins = options?.bins ?? 16;
 		if (!Number.isInteger(bins) || bins < 4) {
 			throw new TypeError(
 				`[Chart] ${path}.variant.bins must be an integer greater than or equal to 4.`
 			);
 		}
-		return { type: 'violin', bins, showMedian: input.showMedian ?? true };
+		return { type: 'violin', bins, showMedian: options?.showMedian ?? true };
 	}
-	if (input.type === 'box') {
+	if (type === 'box') {
+		const options = typeof input === 'object' && input.type === 'box' ? input : undefined;
 		return {
 			type: 'box',
-			whiskers: input.whiskers ?? 'tukey',
-			showOutliers: input.showOutliers ?? true
+			whiskers: options?.whiskers ?? 'tukey',
+			showOutliers: options?.showOutliers ?? true
 		};
 	}
-	if (input.type === 'error-bar') {
-		const interval = input.interval ?? { type: 'confidence', level: 0.95 };
+	if (type === 'error-bar') {
+		const options = typeof input === 'object' && input.type === 'error-bar' ? input : undefined;
+		const interval = options?.interval ?? { type: 'confidence', level: 0.95 };
 		validateInterval(interval, `${path}.variant.interval`);
 		return { type: 'error-bar', interval };
 	}
-	if (input.type === 'histogram') {
-		const bins = input.bins ?? 16;
+	if (type === 'histogram') {
+		const options = typeof input === 'object' && input.type === 'histogram' ? input : undefined;
+		const bins = options?.bins ?? 16;
 		if (!Number.isInteger(bins) || bins < 2) {
 			throw new TypeError(
 				`[Chart] ${path}.variant.bins must be an integer greater than or equal to 2.`
@@ -144,25 +145,26 @@ function normalizeVariant<TRow>(
 		}
 		return { type: 'histogram', bins };
 	}
-	if (input.type === 'density') {
+	if (type === 'density') {
+		const options = typeof input === 'object' && input.type === 'density' ? input : undefined;
 		if (
-			input.bandwidth !== undefined &&
-			(!Number.isFinite(input.bandwidth) || input.bandwidth <= 0)
+			options?.bandwidth !== undefined &&
+			(!Number.isFinite(options.bandwidth) || options.bandwidth <= 0)
 		) {
 			throw new TypeError(
 				`[Chart] ${path}.variant.bandwidth must be a finite number greater than 0.`
 			);
 		}
-		const samples = input.samples ?? 64;
+		const samples = options?.samples ?? 64;
 		if (!Number.isInteger(samples) || samples < 16) {
 			throw new TypeError(
 				`[Chart] ${path}.variant.samples must be an integer greater than or equal to 16.`
 			);
 		}
-		return { type: 'density', bandwidth: input.bandwidth, samples };
+		return { type: 'density', bandwidth: options?.bandwidth, samples };
 	}
-	if (input.type === 'ecdf') return { type: 'ecdf' };
-	throw new TypeError(`[Chart] ${path}.variant.type "${String(input.type)}" is not supported.`);
+	if (type === 'ecdf') return { type: 'ecdf' };
+	throw new TypeError(`[Chart] ${path}.variant.type "${String(type)}" is not supported.`);
 }
 
 function isEmpiricalDistributionVariant(
@@ -194,8 +196,9 @@ function summarizeDistribution<TRow extends object>(
 ): readonly DistributionSummary[] {
 	const groups = new Map<string, { group: ChartKey; values: number[]; rows: TRow[] }>();
 	data.forEach((row, index) => {
-		const group = groupAccessor(row, index, data);
-		const value = valueAccessor(row, index, data);
+		const context = { index, data };
+		const group = groupAccessor(row, context);
+		const value = valueAccessor(row, context);
 		if ((typeof group !== 'string' && typeof group !== 'number') || !Number.isFinite(value)) return;
 		const identity = chartKeyIdentity(group);
 		const entry = groups.get(identity);

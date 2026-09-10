@@ -25,7 +25,7 @@
 		theme,
 		onResize,
 		onLayoutChange,
-		onLayoutChanged,
+		onLayoutCommit,
 		onCollapsedPanelsChange,
 		getHandleAriaLabel,
 		...attachments
@@ -74,7 +74,7 @@
 		},
 		onResize: (nextSizes) => onResize?.(nextSizes),
 		onLayoutChange: (nextSizes) => onLayoutChange?.(nextSizes),
-		onLayoutChanged: (nextSizes, meta) => onLayoutChanged?.(nextSizes, meta),
+		onLayoutCommit: (payload) => onLayoutCommit?.(payload),
 		onCollapsedPanelsChange: (panelIds) => onCollapsedPanelsChange?.(panelIds)
 	});
 

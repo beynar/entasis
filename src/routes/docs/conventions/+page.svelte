@@ -7,7 +7,7 @@ import { TextInput } from 'svelai/text-input';
 import { Dialog } from 'svelai/dialog';`;
 
 	const booleanCode = `<Dialog bind:open />
-<Switch bind:checked />
+<ToggleButton bind:value />
 <Button disabled loading />`;
 
 	const collectionCode = `<Accordion items={sections} />
@@ -54,21 +54,23 @@ import { Dialog } from 'svelai/dialog';`;
 RadioInput
 RadioOption
 CheckboxesInput
-onEnter
-onLeave
+onclick
+onpointerenter
+onpointerleave
 bind:open`;
 
 	const eventCode = `onOpenChange={(open) => ...}
 onValueChange={(value) => ...}
 onSelect={(value) => ...}
 
-// Pointer callbacks use component casing.
-onEnter={(event) => ...}
-onLeave={(event) => ...}`;
+// Native DOM handlers use Svelte 5 lowercase attributes.
+onclick={(event) => ...}
+onpointerenter={(event) => ...}
+onpointerleave={(event) => ...}
+onscroll={(event) => ...}`;
 </script>
 
-{#snippet ic(text: string)}<code class="bg-neutral-muted rounded px-1 py-0.5 text-sm"
-		>{text}</code
+{#snippet ic(text: string)}<code class="bg-neutral-muted rounded px-1 py-0.5 text-sm">{text}</code
 	>{/snippet}
 
 <article class="text-neutral mx-auto grid max-w-3xl gap-4 pb-20">
@@ -97,7 +99,11 @@ onLeave={(event) => ...}`;
 
 	<ul class="text-neutral/60 grid gap-2 text-sm">
 		<li>Overlay state: {@render ic('open')} and {@render ic('bind:open')}.</li>
-		<li>Checkable controls: {@render ic('checked')} and {@render ic('bind:checked')}.</li>
+		<li>
+			Editable and selected state: {@render ic('value')}, {@render ic('defaultValue')}, {@render ic(
+				'bind:value'
+			)}, and {@render ic('onValueChange')}.
+		</li>
 		<li>
 			State flags: {@render ic('disabled')}, {@render ic('loading')}, {@render ic('selected')}, {@render ic(
 				'active'
@@ -149,8 +155,8 @@ onLeave={(event) => ...}`;
 	<Separator class="my-2" children="Events" />
 
 	<p class="text-neutral/60">
-		Change callbacks describe the value that changed. The callback argument uses the same name as
-		the public prop. Pointer callbacks use component casing.
+		Change callbacks describe semantic state. Native DOM handlers use lowercase Svelte 5 attributes
+		and receive the real event object. Domain actions keep explicit verb names.
 	</p>
 
 	<Code language="ts" code={eventCode} />

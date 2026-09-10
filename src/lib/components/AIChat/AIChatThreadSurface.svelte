@@ -133,7 +133,7 @@
 		{onMessageRetry}
 		renderAskUserQuestion={false}
 		suggestions={suggestionsRegion ? [] : conversation.suggestions}
-		onSuggestionClick={selectSuggestion}
+		onSuggestionSelect={selectSuggestion}
 		empty={hasCustomEmpty ? renderEmpty : undefined}
 		message={message ? renderMessage : undefined}
 		tool={tool ? renderTool : undefined}

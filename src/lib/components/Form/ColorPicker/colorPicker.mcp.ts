@@ -25,7 +25,7 @@ chrome (label, description, errors, form registration) and extends InputProps wi
 <!-- Raw panel primitive -->
 <ColorPicker bind:value={color} />
 <ColorPicker bind:value={color} format="rgb" size="large" />
-<ColorPicker value="#22c55e80" onChange={(hex) => console.log(hex)} />
+<ColorPicker value="#22c55e80" onValueChange={(hex) => console.log(hex)} />
 <ColorPicker value="#000000" disabled />
 \`\`\`
 
@@ -52,7 +52,7 @@ Accepts every field prop from InputProps ('color') — \`label\`, \`description\
 - **disabled**: \`boolean\` (default: \`false\`) - Disables every control and dims the panel.
 
 ### Event Props
-- **onChange**: \`(value: string) => void\`
+- **onValueChange**: \`(value: string) => void\`
   - Fires on every committed change, including continuously while dragging. Receives the canonical hex string.
 
 ### Advanced Props
@@ -99,4 +99,11 @@ A rounded \`root\` panel containing, top to bottom:
 - Theme parts: \`root\`, \`area\`, \`areaSaturation\`, \`areaValue\`, \`areaThumb\`, \`controls\`,
   \`eyedropperButton\`, \`sliders\`, \`hueTrack\`, \`alphaTrack\`, \`alphaGradient\`, \`sliderThumb\`,
   \`inputs\`, \`select\`, \`input\`, \`alphaField\`, \`alphaInput\`, \`alphaSuffix\` (each with a \`size\` variant).
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+
 `;

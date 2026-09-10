@@ -3,6 +3,8 @@
 	import DocPage from '../../DocPage.svelte';
 	import RadioInput from '$lib/components/Form/RadioInput/RadioInput.svelte';
 	import Form from '$lib/components/Form/Form/Form.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let selectedOptions = $state(['option1']);
 	let usageValue = $state<string | null>('option1');
@@ -19,6 +21,23 @@
 		{ value: 'card2', label: 'Card Option 2', description: 'Another card style option' },
 		{ value: 'card3', label: 'Card Option 3', description: 'Yet another card style option' }
 	];
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'mode',
+			type: 'segmented',
+			label: 'Mode',
+			value: 'normal',
+			options: ['normal', 'card']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -34,8 +53,12 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Choose a single option from a group"
 		code={`<RadioInput
+	size="${controls.value.size}"
+	mode="${controls.value.mode}"
+	disabled={${controls.value.disabled}}
 	label="Choose your option"
 	description="You can change this later in settings"
 	items={[
@@ -43,17 +66,18 @@
 		{ value: 'option2', label: 'Option 2', description: 'This is the second option' },
 		{ value: 'option3', label: 'Option 3', description: 'This is the third option' }
 	]}
-	mode="normal"
 	name="usage-radios"
 	bind:value
 />`}
 	>
 		<div class="w-full max-w-md">
 			<RadioInput
+				size={controls.value.size}
+				mode={controls.value.mode}
+				disabled={controls.value.disabled}
 				label="Choose your option"
 				description="You can change this later in settings"
 				items={normalOptions}
-				mode="normal"
 				name="usage-radios"
 				bind:value={usageValue}
 			/>
@@ -64,7 +88,7 @@
 		<ComponentCard description="Radio group with normal layout.">
 			<div class="w-full max-w-md">
 				<RadioInput
-					onClick={(value) => {
+					onValueChange={(value) => {
 						console.log('clicked', value);
 					}}
 					items={normalOptions}

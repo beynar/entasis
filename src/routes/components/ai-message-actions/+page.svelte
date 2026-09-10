@@ -40,7 +40,7 @@
 </script>
 
 {#snippet customActions({ copied, copy, size }: AIMessageActionState)}
-	<Button type="button" variant="ghost" {size} onClick={() => void copy()}>
+	<Button type="button" variant="ghost" {size} onclick={() => void copy()}>
 		{copied ? 'Copied' : 'Copy answer'}
 	</Button>
 {/snippet}
@@ -101,7 +101,7 @@ ${'</' + 'script>'}
 			description="The actions snippet receives copied state, capability flags, context, and awaitable copy, edit, and retry methods."
 			class="!min-h-[220px]"
 			code={`{#snippet actions({ copied, copy, size })}
-  <Button type="button" {size} onClick={() => void copy()}>
+  <Button type="button" {size} onclick={() => void copy()}>
     {copied ? 'Copied' : 'Copy answer'}
   </Button>
 {/snippet}
@@ -117,7 +117,7 @@ ${'</' + 'script>'}
 			class="!min-h-[220px]"
 			code={`<AIMessageActions role="assistant" content="Answer" onRetry={regenerate}>
   {#snippet children({ canRetry, retry })}
-    <Button type="button" disabled={!canRetry} onClick={() => void retry()}>
+    <Button type="button" disabled={!canRetry} onclick={() => void retry()}>
       Regenerate
     </Button>
   {/snippet}
@@ -130,7 +130,7 @@ ${'</' + 'script>'}
 						variant="ghost"
 						size="small"
 						disabled={!canRetry}
-						onClick={() => void retry()}>Regenerate</Button
+						onclick={() => void retry()}>Regenerate</Button
 					>
 				{/snippet}
 			</AIMessageActions>

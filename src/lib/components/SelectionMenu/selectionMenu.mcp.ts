@@ -7,26 +7,26 @@ SelectionMenu renders ToggleMenu controls anchored to a non-collapsed document s
 
 \`\`\`svelte
 <script lang="ts">
-\timport { SelectionMenu } from 'svelai/selection-menu';
-\timport type { ToggleMenuItem } from 'svelai/toggle-menu';
+	import { SelectionMenu } from 'svelai/selection-menu';
+	import type { ToggleMenuItem } from 'svelai/toggle-menu';
 
-\tlet items = $state<ToggleMenuItem[]>([
-\t\t{ type: 'toggle', ariaLabel: 'Bold', prefix: boldIcon },
-\t\t{ type: 'toggle', ariaLabel: 'Comment', prefix: commentIcon }
-\t]);
+	let items = $state<ToggleMenuItem[]>([
+		{ type: 'toggle', ariaLabel: 'Bold', prefix: boldIcon },
+		{ type: 'toggle', ariaLabel: 'Comment', prefix: commentIcon }
+	]);
 </script>
 
 <div>
-\t<article>Select text in this article.</article>
-\t<SelectionMenu bind:items ariaLabel="Selection tools" />
+	<article>Select text in this article.</article>
+	<SelectionMenu bind:value={items} ariaLabel="Selection tools" />
 </div>
 \`\`\`
 
 With no target prop, SelectionMenu watches its parent. Pass a selector or an HTMLElement when the selection container is elsewhere:
 
 \`\`\`svelte
-<SelectionMenu target="#editor" bind:items ariaLabel="Editor tools" />
-<SelectionMenu target={editorElement} bind:items ariaLabel="Editor tools" />
+<SelectionMenu target="#editor" bind:value={items} ariaLabel="Editor tools" />
+<SelectionMenu target={editorElement} bind:value={items} ariaLabel="Editor tools" />
 \`\`\`
 
 ## Props
@@ -35,7 +35,7 @@ With no target prop, SelectionMenu watches its parent. Pass a selector or an HTM
 - **items**: ToggleMenuItem[] - Bindable toolbar configuration passed directly to ToggleMenu.
 - **ariaLabel**: string - Accessible name passed directly to ToggleMenu.
 - **color / variant / disabled**: ToggleMenu defaults inherited by every item.
-- **onChange**: (items) => void - Receives the complete updated toolbar configuration.
+- **value / defaultValue / onValueChange**: Canonical ToggleMenu value state.
 - **class / theme**: ToggleMenu root class and theme overrides.
 - **children**: Optional temporary replacement for the ToggleMenu body while retaining the same selection tracker. Toolbar props remain required.
 - **enabled**: boolean = true - Temporarily suppresses the menu without changing the target.
@@ -47,7 +47,7 @@ With no target prop, SelectionMenu watches its parent. Pass a selector or an HTM
 - **closeOnEscape**: boolean = true - Escape dismisses the current selection.
 - **closeOnClickOutside**: boolean = true - Outside clicks dismiss the current selection.
 - **onSelectionChange**: (selection | null) => void - Receives cloned valid ranges and clear events.
-- **onOpen / onClose**: lifecycle callbacks receiving SelectionMenuPayload.
+- **onAfterOpen / onAfterClose**: post-transition lifecycle callbacks receiving SelectionMenuPayload.
 - **popoverClass**: string - Additional classes for the floating Popover panel.
 - **contentClass**: string - Additional classes for the advanced custom-content wrapper.
 - **selectionTheme**: SelectionMenuThemeProps - Popover panel and custom-content theme overrides.

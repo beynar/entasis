@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Field from '../Form/Field/Field.svelte';
 	import { createFieldState } from '../Form/Field/field.state.svelte.js';
 	import { AI_COMPOSER_DEFAULT_RICH_TEXT_FORMATS } from './composer/selection-formatting.js';
@@ -13,14 +14,14 @@
 
 	let {
 		id: idProp,
-		value = $bindable<string | null>(''),
+		defaultValue = '',
+		value = $bindable<string | null>(),
 		ref = $bindable<HTMLDivElement | null>(null),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
 		name,
 		onValidate,
-		onChange,
 		visible,
 		triggers = {},
 		onSuggestionOpen,
@@ -50,9 +51,14 @@
 		suffix,
 		error,
 		errorsContainer,
-		attrs,
+		fieldAttrs,
 		...attachments
 	}: Props = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(nextValue) => (value = nextValue),
+		() => defaultValue
+	);
 
 	const generatedId = $props.id();
 	const field = createFieldState({
@@ -60,15 +66,15 @@
 			return idProp ?? generatedId;
 		},
 		get value() {
-			return value ?? '';
+			return valueState.value ?? '';
 		},
 		set value(nextValue: string | null) {
-			value = nextValue ?? '';
+			valueState.value = nextValue ?? '';
 		},
 		get errors() {
 			return errors;
 		},
-		set errors(nextErrors: any) {
+		set errors(nextErrors: string[] | boolean) {
 			errors = nextErrors;
 		},
 		get focused() {
@@ -76,9 +82,6 @@
 		},
 		set focused(nextFocused: boolean) {
 			focused = nextFocused;
-		},
-		onChange: (nextValue) => {
-			onChange?.(nextValue);
 		},
 		get disabled() {
 			return disabled;
@@ -209,7 +212,7 @@
 {/snippet}
 
 {#if standalone}
-	<div class={className} {...attrs} {...attachments}>
+	<div class={className} {...fieldAttrs} {...attachments}>
 		{@render richTextInputChrome()}
 	</div>
 {:else}
@@ -227,7 +230,7 @@
 		{suffix}
 		{error}
 		{errorsContainer}
-		{attrs}
+		{fieldAttrs}
 		theme={{
 			...(theme || {}),
 			inputContainer: {

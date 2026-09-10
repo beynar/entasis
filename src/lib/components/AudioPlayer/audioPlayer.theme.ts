@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultAudioPlayerRoot = cva({
-	base: 'group/audio-player relative grid w-full min-w-0 gap-3 overflow-hidden rounded-lg border border-neutral-muted bg-surface p-3 text-neutral shadow-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-color/60',
+	base: 'group/audio-player relative grid w-full min-w-0 gap-lg overflow-hidden rounded-md border border-neutral-muted bg-surface p-lg text-neutral shadow-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-color/60',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -21,12 +21,12 @@ const defaultAudioPlayerRoot = cva({
 });
 
 const defaultAudioPlayerHeader = cva({
-	base: 'flex min-w-0 flex-wrap items-center gap-3',
+	base: 'flex min-w-0 flex-wrap items-center gap-lg',
 	variants: {
 		size: {
-			small: 'gap-2',
-			normal: 'gap-3',
-			large: 'gap-4'
+			small: 'gap-md',
+			normal: 'gap-lg',
+			large: 'gap-xl'
 		}
 	},
 	defaultVariants: {
@@ -35,7 +35,7 @@ const defaultAudioPlayerHeader = cva({
 });
 
 const defaultAudioPlayerArtwork = cva({
-	base: 'relative grid shrink-0 place-items-center overflow-hidden rounded-md border border-neutral-muted bg-neutral-muted text-neutral-muted-readable',
+	base: 'relative grid shrink-0 place-items-center overflow-hidden rounded-sm border border-neutral-muted bg-neutral-muted text-neutral-muted-readable',
 	variants: {
 		size: {
 			small: 'size-10',
@@ -85,16 +85,16 @@ const defaultAudioPlayerArtist = cva({
 });
 
 const defaultAudioPlayerControls = cva({
-	base: 'min-w-0 gap-2',
+	base: 'min-w-0 gap-md',
 	variants: {
 		size: {
-			small: 'gap-0.5',
-			normal: 'gap-1',
-			large: 'gap-1.5'
+			small: 'gap-micro',
+			normal: 'gap-xs',
+			large: 'gap-sm'
 		},
 		layout: {
 			block:
-				'grid flex-[1_1_100%] md:flex md:flex-[0_1_auto] md:flex-wrap md:items-center md:justify-end md:gap-1',
+				'grid flex-[1_1_100%] md:flex md:flex-[0_1_auto] md:flex-wrap md:items-center md:justify-end md:gap-xs',
 			inline: 'flex shrink-0 flex-wrap items-center'
 		}
 	},
@@ -105,7 +105,7 @@ const defaultAudioPlayerControls = cva({
 });
 
 const defaultAudioPlayerControlGroup = cva({
-	base: 'flex min-w-0 flex-wrap items-center gap-1',
+	base: 'flex min-w-0 flex-wrap items-center gap-xs',
 	variants: {
 		layout: {
 			block: 'w-full md:w-auto',
@@ -146,12 +146,12 @@ const defaultAudioPlayerPlayButton = cva({
 });
 
 const defaultAudioPlayerWaveform = cva({
-	base: 'relative h-24 min-w-0 overflow-hidden rounded-md border border-neutral-muted bg-neutral-muted/45 p-3 outline-none has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-color/60',
+	base: 'relative h-24 min-w-0 overflow-hidden rounded-sm border border-neutral-muted bg-neutral-muted/45 p-lg outline-none has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-color/60',
 	variants: {
 		size: {
-			small: 'h-20 p-2',
-			normal: 'h-24 p-3',
-			large: 'h-28 p-4'
+			small: 'h-20 p-md',
+			normal: 'h-24 p-lg',
+			large: 'h-28 p-xl'
 		},
 		variant: {
 			centered: '',
@@ -259,12 +259,12 @@ const defaultAudioPlayerTrackInput = cva({
 });
 
 const defaultAudioPlayerInline = cva({
-	base: 'flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center',
+	base: 'flex min-w-0 flex-col gap-md sm:flex-row sm:items-center',
 	variants: {
 		size: {
-			small: 'gap-1.5',
-			normal: 'gap-2',
-			large: 'gap-3'
+			small: 'gap-sm',
+			normal: 'gap-md',
+			large: 'gap-lg'
 		}
 	},
 	defaultVariants: {
@@ -312,12 +312,12 @@ const defaultAudioPlayerPopoverPanel = cva({
 });
 
 const defaultAudioPlayerVolumePanel = cva({
-	base: 'flex min-w-0 flex-col items-center gap-2 p-1',
+	base: 'flex min-w-0 flex-col items-center gap-md p-xs',
 	variants: {
 		size: {
-			small: 'gap-2',
-			normal: 'gap-3',
-			large: 'gap-4'
+			small: 'gap-md',
+			normal: 'gap-lg',
+			large: 'gap-xl'
 		}
 	},
 	defaultVariants: {
@@ -340,7 +340,7 @@ const defaultAudioPlayerVolumeSlider = cva({
 });
 
 const defaultAudioPlayerStatus = cva({
-	base: 'rounded-md border border-neutral-muted bg-surface px-2 py-1 text-neutral/60',
+	base: 'rounded-sm border border-neutral-muted bg-surface px-md py-xs text-neutral/60',
 	variants: {
 		size: {
 			small: 'text-xs',

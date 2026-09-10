@@ -123,12 +123,12 @@
 			Ada is deliberately over-allocated; Lin uses a four-day resource calendar.
 		</p>
 		<div class="flex flex-wrap gap-2">
-			<Button size="small" variant="outline" onClick={() => (activeResourceId = null)}>All</Button>
+			<Button size="small" variant="outline" onclick={() => (activeResourceId = null)}>All</Button>
 			{#each resources.filter((resource) => resource.parentId) as resource (resource.id)}
 				<Button
 					size="small"
 					variant={activeResourceId === resource.id ? 'solid' : 'outline'}
-					onClick={() => (activeResourceId = resource.id)}>{resource.title}</Button
+					onclick={() => (activeResourceId = resource.id)}>{resource.title}</Button
 				>
 			{/each}
 		</div>

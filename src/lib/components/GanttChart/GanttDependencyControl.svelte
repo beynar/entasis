@@ -187,7 +187,9 @@
 							label={messages.ganttChartDependencyType}
 							items={dependencyTypes}
 							value={draftType}
-							onChange={updateDraftType}
+							onValueChange={(value) => {
+								if (value !== null) updateDraftType(value);
+							}}
 						/>
 						<div class="grid grid-cols-2 gap-2">
 							<NumberInput
@@ -195,21 +197,23 @@
 								label={messages.ganttChartDependencyLag}
 								value={draftLagValue}
 								showControls={false}
-								onChange={(value) => (draftLagValue = value)}
+								onValueChange={(value) => (draftLagValue = value)}
 							/>
 							<Select
 								size="small"
 								label={messages.ganttChartDependencyLagUnit}
 								items={lagUnits}
 								value={draftLagUnit}
-								onChange={updateDraftLagUnit}
+								onValueChange={(value) => {
+									if (value !== null) updateDraftLagUnit(value);
+								}}
 							/>
 						</div>
 						<div class="flex justify-end gap-2">
-							<Button size="small" variant="ghost" onClick={() => popover.close()}>
+							<Button size="small" variant="ghost" onclick={() => popover.close()}>
 								{messages.ganttChartCancel}
 							</Button>
-							<Button size="small" onClick={() => commitEditor(popover)}>
+							<Button size="small" onclick={() => commitEditor(popover)}>
 								{messages.ganttChartApply}
 							</Button>
 						</div>

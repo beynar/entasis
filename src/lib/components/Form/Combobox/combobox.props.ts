@@ -13,12 +13,17 @@ export type ComboboxOption = {
 	/** Supporting text rendered below the option label in the dropdown. */
 	description?: string;
 	/** Optional arbitrary metadata attached to the option. */
-	data?: Record<string, any>;
+	data?: Record<string, unknown>;
 };
 
-export type ComboboxProps = Omit<InputProps<'combobox'>, 'prefix' | 'onChange'> & {
-	/** Called when the selection changes, with the new value and selected option (or null when cleared). */
-	onChange?: (value: string, option: ComboboxOption | null) => void;
+export type ComboboxValueChangePayload = {
+	value: string | null;
+	option: ComboboxOption | null;
+};
+
+export type ComboboxProps = Omit<InputProps<'combobox'>, 'prefix' | 'onValueChange'> & {
+	/** Called when the selection changes with its value and resolved option context. */
+	onValueChange?: (payload: ComboboxValueChangePayload) => void;
 	/** Bindable text currently typed in the search input. */
 	searchValue?: string;
 	/** Bindable flag indicating async options are being fetched. */

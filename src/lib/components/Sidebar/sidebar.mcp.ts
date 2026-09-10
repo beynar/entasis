@@ -46,7 +46,7 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 1. Use \`items\` for normal navigation. Use \`content\` only when data-driven rows cannot express the layout.
 2. Use local Svelai icon snippets such as \`houseIcon\`, not Lucide component constructors.
 3. Use \`MenuItem[]\` from \`svelai/menu\` for \`menu\` and action dropdowns.
-4. Do not combine \`menu\` with \`href\` or \`onClick\` on the same row; use \`action\` for a trailing row menu.
+4. Do not combine \`menu\` with \`href\` or \`onclick\` on the same row; use \`action\` for a trailing row menu.
 5. Keep \`children\`, \`header\`, \`content\`, \`footer\`, \`banner\`, and action snippets pure; they receive \`SidebarApi\`.
 6. Use \`collapsible="icon"\` for icon rail behavior, \`collapsible="offcanvas"\` for hidden desktop panels, and \`collapsible="none"\` for fixed sidebars. Icon collapse automatically falls back to offcanvas when any data-driven row lacks an icon.
 7. Offcanvas sidebars reveal over the content from the screen edge by default when hidden; set \`edgeReveal={false}\` to disable that. A revealed hidden sidebar keeps its resize handle and dismisses through a small rectangular pointer tolerance.
@@ -69,7 +69,7 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 - **label**: string - Visible row label.
 - **icon**: SidebarIcon - Svelai icon snippet or string.
 - **href**: string - Render as an anchor. Mutually exclusive with menu.
-- **onClick**: (event: MouseEvent) => void - Render as a button or handle anchor clicks. Mutually exclusive with menu.
+- **onclick**: (event: MouseEvent) => void - Native click handler for button or anchor rows. Mutually exclusive with menu.
 - **isActive**: boolean - Adds active styling and \`aria-current="page"\`.
 - **disabled**: boolean - Disables button rows and marks anchor rows disabled.
 - **badge**: string | number - Trailing count/status, hidden in icon mode.
@@ -77,7 +77,7 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 - **items**: SidebarMenuSubEntry[] - Inline nested menu.
 - **collapsible**: boolean - Set false for an always-open submenu.
 - **defaultOpen**: boolean - Initial nested menu state.
-- **menu**: MenuItem[] - Popup menu opened from the full row. Mutually exclusive with href/onClick.
+- **menu**: MenuItem[] - Popup menu opened from the full row. Mutually exclusive with href/onclick.
 - **action**: SidebarMenuActionDescriptor | Snippet<[SidebarApi]> - Hover/focus trailing action.
 
 ### SidebarMenuButtonItem
@@ -87,14 +87,16 @@ Use for \`headerButton\`, \`footerButton\`, or direct \`<SidebarMenuButton />\` 
 - **variant**: 'default' | 'brand' | 'compact'.
 - **title**: string - Primary text.
 - **subtitle**: string - Secondary text.
-- **href** / **onClick** / **menu** - Choose link, button, or popup behavior.
+- **href** / **onclick** / **menu** - Choose link, button, or popup behavior.
 - **menuIconClass**: string - Class override for option icons inside the popup menu.
 
 ## Props
 
 ### State
 - **open**: boolean (bindable, default true) - Desktop expanded state.
-- **onOpenChange**: (open: boolean) => void - Desktop state change callback.
+- **defaultOpen**: boolean (default true) - Initial desktop state when \`open\` is omitted.
+- **onOpenChange**: (open: boolean) => void - Called once for a library-originated desktop state change. Repeated requests and parent prop updates stay silent.
+- **onDisplayStateChange**: (state: SidebarDisplayState) => void - Called once for a library-originated semantic display-state change.
 - **api.displayState**: 'expanded' | 'collapsed' | 'hidden' - Semantic desktop state; hidden means closed offcanvas.
 - **keyboardShortcut**: string | false (default 'b') - Ctrl/Cmd shortcut key.
 
@@ -112,12 +114,15 @@ Use for \`headerButton\`, \`footerButton\`, or direct \`<SidebarMenuButton />\` 
 - **rail**: boolean | 'line' | 'thumb' - Edge toggle rail. \`true\` keeps the thin line style; \`thumb\` renders a short visible handle with the same full-height hitbox. The appearance is preserved when the rail shares the resize control.
 - **edgeReveal**: boolean (default true) - Pointer/focus edge preview for hidden offcanvas sidebars. Hover reveal overlays content, remains resizable when configured, and re-hides after the pointer leaves its small rectangular tolerance. Dragging the sidebar closed suppresses immediate hover reopening until the pointer leaves the edge trigger; toggle/click opens persistently.
 - **resizable**: boolean | SidebarResizableOptions - Enables pointer and keyboard resizing while expanded, icon-collapsed, or temporarily edge-revealed. By default, collapse requires dragging 75% of \`minWidth\` beyond the minimum; override \`collapseThreshold\` for a custom boundary. Use \`storageKey\` to restore and persist the expanded width across sessions.
+  - \`onWidthChange(width)\` reports continuous width state.
+  - \`onWidthChanged({ width, isUserInteraction })\` reports a committed resize or restored width with one named payload.
 
 ### Content
 - **items**: SidebarGroup[] - Data-driven body navigation.
 - **headerButton** / **footerButton**: SidebarMenuButtonItem - Sticky large rows.
-- **search**: SidebarSearch - Header search input.
+- **search**: SidebarSearch - Header search input; use its native \`oninput\` handler.
 - **headerMenu** / **footerMenu**: SidebarMenuEntry[] - Sticky quick menus.
+- Menu entries and nested entries accept \`size: 'small' | 'normal' | 'large'\` for row geometry.
 - **header**, **content**, **footer**, **children**, **banner**: Snippet<[SidebarApi]> - Escape hatches.
 
 ### Styling
@@ -128,7 +133,7 @@ Use for \`headerButton\`, \`footerButton\`, or direct \`<SidebarMenuButton />\` 
 
 - Active links set \`aria-current="page"\`.
 - Collapsible rows and groups set \`aria-expanded\`.
-- Disabled buttons use \`disabled\`; disabled links use \`aria-disabled\` and \`tabindex=-1\`.
+- Disabled buttons use \`disabled\`; disabled links omit \`href\`, use \`aria-disabled\` and \`tabindex=-1\`, and block activation.
 - Mobile drawer includes a backdrop button labelled "Close Sidebar".
 - Icon-collapsed rows keep their labels mounted and visually fade them, preserving accessible names and stable icon geometry.
 - Search, group controls, actions, and nested rows become inert before collapse can remove or hide them; focus returns to the owning visible row.

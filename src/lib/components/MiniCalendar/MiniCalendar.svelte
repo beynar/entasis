@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { cubicOut } from 'svelte/easing';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Slot from '../Slot/Slot.svelte';
 	import { caretLeftIcon } from '../Icons/caretLeft.js';
 	import { caretRightIcon } from '../Icons/caretRight.js';
@@ -19,8 +20,9 @@
 		a.getDate() === b.getDate();
 
 	let {
-		value = $bindable(null),
-		startDate = $bindable(normalizeDay(new Date())),
+		defaultValue = null,
+		value = $bindable(),
+		startDate = $bindable(),
 		days = 5,
 		size = 'normal',
 		color = 'primary',
@@ -36,6 +38,20 @@
 		day,
 		...attachments
 	}: MiniCalendarProps = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(next) => {
+			value = next;
+		},
+		() => defaultValue
+	);
+	const startDateState = createBindableValue(
+		() => startDate,
+		(next) => {
+			startDate = next;
+		},
+		() => normalizeDay(new Date())
+	);
 
 	const t = $derived(useI18n(i18n));
 	const classes = $derived(useMiniCalendarTheme(theme));
@@ -47,14 +63,14 @@
 	const today = normalizeDay(new Date());
 
 	const count = $derived(Math.max(1, Math.floor(days)));
-	const start = $derived(startDate ? normalizeDay(startDate) : today);
+	const start = $derived(normalizeDay(startDateState.value));
 
 	const cells = $derived(
 		Array.from({ length: count }, (_, index) => {
 			const date = addDays(start, index);
 			return {
 				date,
-				selected: value ? isSameDay(date, value) : false,
+				selected: valueState.value ? isSameDay(date, valueState.value) : false,
 				today: isSameDay(date, today),
 				monthLabel: date.toLocaleString(resolvedLocale, { month: 'short' }),
 				dayNumber: date.getDate()
@@ -107,14 +123,15 @@
 		if (disabled) return;
 		shiftDir = direction;
 		const next = addDays(start, direction * count);
-		startDate = next;
+		startDateState.value = next;
 		onStartDateChange?.(next);
 	};
 
 	const selectDate = (date: Date) => {
 		if (disabled) return;
 		const picked = normalizeDay(date);
-		value = picked;
+		if (valueState.value && isSameDay(valueState.value, picked)) return;
+		valueState.value = picked;
 		onValueChange?.(picked);
 	};
 </script>

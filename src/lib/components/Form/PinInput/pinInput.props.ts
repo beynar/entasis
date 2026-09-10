@@ -3,7 +3,7 @@ import type { PinInputThemeProps } from './pinInput.theme.js';
 import type { PinInputPattern } from './pinInput.state.svelte.js';
 import type { HTMLInputAttributes } from 'svelte/elements';
 
-export type PinInputProps = Omit<InputProps<'pin'>, 'onChange'> & {
+export type PinInputProps = Omit<InputProps<'pin'>, 'onValueChange'> & {
 	/** Number of visible cells. */
 	length?: number;
 	/** Partial-value pattern used to accept typed and pasted input. */
@@ -15,7 +15,7 @@ export type PinInputProps = Omit<InputProps<'pin'>, 'onChange'> & {
 	/** Transforms pasted text before it is inserted. */
 	pasteTransformer?: (text: string) => string;
 	/** Called when the value changes. */
-	onChange?: (value: string) => void;
+	onValueChange?: (value: string) => void;
 	/** Called once when the input reaches the configured length. */
 	onComplete?: (value: string) => void;
 	/** Whether displayed characters should be visually masked. */

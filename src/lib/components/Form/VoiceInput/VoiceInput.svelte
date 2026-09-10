@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { microphoneIcon } from '$lib/components/Icons/microphone.js';
 	import { pauseIcon } from '$lib/components/Icons/pause.js';
 	import { playIcon } from '$lib/components/Icons/play.js';
@@ -19,7 +20,8 @@
 	import { useVoiceInputTheme } from './voiceInput.theme.js';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		duration = $bindable(0),
 		minDuration = 0,
 		maxDuration,
@@ -29,7 +31,7 @@
 		disabled = false,
 		name,
 		onValidate,
-		onChange,
+		onValueChange,
 		onStart,
 		onStop,
 		onError,
@@ -43,10 +45,11 @@
 		pauseLabel = 'Pause recording',
 		seekLabel = 'Seek recording',
 		clearLabel = 'Clear recording',
-		attrs,
+		fieldAttrs,
 		theme,
 		...rest
 	}: VoiceInputProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 	const normalizedMinDuration = $derived(normalizeVoiceInputDuration(minDuration) ?? 0);
@@ -100,7 +103,7 @@
 		get visible() {
 			return visible;
 		},
-		onChange: (nextValue) => onChange?.(nextValue),
+		onValueChange: (nextValue) => onValueChange?.(nextValue),
 		type: 'voice'
 	});
 
@@ -194,8 +197,8 @@
 	{field}
 	{size}
 	theme={fieldTheme}
-	attrs={{
-		...attrs,
+	fieldAttrs={{
+		...fieldAttrs,
 		'data-color': color,
 		'data-state': recorder.status,
 		'data-variant': variant,
@@ -218,7 +221,7 @@
 				class: theme?.playbackAction?.base
 			})}
 			prefix={recorder.isPlaying ? pauseIcon : playIcon}
-			onClick={recorder.togglePlayback}
+			onclick={recorder.togglePlayback}
 			{@attach tooltip({ content: playbackButtonLabel, position: 'top', size: 'small' })}
 		/>
 	{/if}
@@ -250,7 +253,7 @@
 				class: theme?.clearAction?.base
 			})}
 			prefix={xIcon}
-			onClick={clearRecording}
+			onclick={clearRecording}
 			{@attach tooltip({ content: clearLabel, position: 'top', size: 'small' })}
 		/>
 	{/if}
@@ -268,7 +271,7 @@
 			class: theme?.action?.base
 		})}
 		prefix={recorder.isRecording || recorder.isStopping ? stopIconFill : microphoneIcon}
-		onClick={recorder.isRecording ? recorder.stop : recorder.start}
+		onclick={recorder.isRecording ? recorder.stop : recorder.start}
 		{@attach recorder.trigger}
 		{@attach tooltip({ content: buttonLabel, position: 'top', size: 'small' })}
 	/>

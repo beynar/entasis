@@ -30,7 +30,7 @@
 			options: ['primary', 'success', 'warning', 'danger', 'info']
 		},
 		{
-			name: 'size',
+			name: 'height',
 			type: 'slider',
 			label: 'Height',
 			value: 3,
@@ -98,11 +98,11 @@ ${'</' + 'script>'}
 			{loading}
 			variant="${controls.value.variant}"
 			color="${controls.value.color}"
-			size={${controls.value.size}}
+			height={${controls.value.height}}
 			delay={${controls.value.delay}}
 			class="!absolute"
 		/>
-		<Button onClick={previewRequest} loading={loading}>
+		<Button onclick={previewRequest} loading={loading}>
 		{loading ? 'Syncing' : 'Preview async work'}
 	</Button>
 </div>`}
@@ -114,11 +114,11 @@ ${'</' + 'script>'}
 				loading={isPreviewLoading}
 				variant={controls.value.variant}
 				color={controls.value.color}
-				size={controls.value.size}
+				height={controls.value.height}
 				delay={controls.value.delay}
 				class="!absolute !z-10"
 			/>
-			<Button onClick={previewNetworkRequest} loading={isPreviewLoading}>
+			<Button onclick={previewNetworkRequest} loading={isPreviewLoading}>
 				{isPreviewLoading ? 'Syncing' : 'Preview async work'}
 			</Button>
 			<p class="text-neutral/60 text-sm">The local indicator runs for 1.4 seconds.</p>
@@ -143,7 +143,7 @@ ${'</' + 'script>'}
 
 <div class="relative overflow-hidden rounded-lg border p-6">
 	<NetworkIndicator {loading} color="primary" class="!absolute !z-10" />
-	<Button onClick={runTask} loading={loading}>
+	<Button onclick={runTask} loading={loading}>
 		{loading ? 'Saving' : 'Run task'}
 	</Button>
 </div>`}
@@ -152,7 +152,7 @@ ${'</' + 'script>'}
 				class="border-neutral-muted bg-surface relative flex min-h-24 w-full max-w-xl items-center justify-center overflow-hidden rounded-lg border p-6"
 			>
 				<NetworkIndicator loading={isPreviewLoading} color="primary" class="!absolute !z-10" />
-				<Button onClick={previewNetworkRequest} loading={isPreviewLoading}>
+				<Button onclick={previewNetworkRequest} loading={isPreviewLoading}>
 					{isPreviewLoading ? 'Saving' : 'Run task'}
 				</Button>
 			</div>
@@ -162,7 +162,7 @@ ${'</' + 'script>'}
 			description="Trail variant renders one randomly sized moving segment at a time. Use trailDuration for speed and trailGap for the pause between passes."
 			class="!min-h-[220px]"
 			code={`<NetworkIndicator loading variant="trail" color="primary" trailDuration={650} trailGap={0} />
-<NetworkIndicator loading variant="trail" color="success" size={5} trailDuration={450} trailGap={120} />
+<NetworkIndicator loading variant="trail" color="success" height={5} trailDuration={450} trailGap={120} />
 <NetworkIndicator loading variant="trail-bounce" color="info" trailDuration={700} trailGap={80} />`}
 		>
 			<NetworkIndicatorTrailExamples />
@@ -172,7 +172,7 @@ ${'</' + 'script>'}
 			description="Use positioning utilities when the indicator should sit on a local surface edge instead of the viewport top."
 			class="!min-h-[220px]"
 			code={`<div class="relative overflow-hidden rounded-lg border">
-	<NetworkIndicator loading color="warning" size={4} class="!absolute !top-auto !bottom-0 !z-10" />
+	<NetworkIndicator loading color="warning" height={4} class="!absolute !top-auto !bottom-0 !z-10" />
 	<div class="p-6">Panel content</div>
 </div>`}
 		>
@@ -181,7 +181,7 @@ ${'</' + 'script>'}
 					<NetworkIndicator
 						loading
 						color="warning"
-						size={4}
+						height={4}
 						class="!absolute !top-auto !bottom-0 !z-10"
 					/>
 				</NetworkIndicatorPreview>
@@ -198,7 +198,7 @@ ${'</' + 'script>'}
 			<div class="grid w-full max-w-xl gap-4">
 				{#each colors as color}
 					<NetworkIndicatorPreview label={color} class="h-10">
-						<NetworkIndicator loading {color} size={4} class="!absolute !z-10" />
+						<NetworkIndicator loading {color} height={4} class="!absolute !z-10" />
 					</NetworkIndicatorPreview>
 				{/each}
 			</div>
@@ -207,17 +207,17 @@ ${'</' + 'script>'}
 		<ComponentCard
 			description="Use a 2-6px height range. Thin is quiet for navigation; thicker bars are better for explicit tasks."
 			class="!min-h-[240px]"
-			code={`<NetworkIndicator loading size={2} />
-<NetworkIndicator loading size={4} color="primary" />
-<NetworkIndicator loading size={6} color="info" />`}
+			code={`<NetworkIndicator loading height={2} />
+<NetworkIndicator loading height={4} color="primary" />
+<NetworkIndicator loading height={6} color="info" />`}
 		>
 			<div class="grid w-full max-w-xl gap-4">
-				{#each [2, 4, 6] as size}
-					<NetworkIndicatorPreview label={`${size}px`}>
+				{#each [2, 4, 6] as height}
+					<NetworkIndicatorPreview label={`${height}px`}>
 						<NetworkIndicator
 							loading
-							{size}
-							color={size === 2 ? 'neutral' : size === 4 ? 'primary' : 'info'}
+							{height}
+							color={height === 2 ? 'neutral' : height === 4 ? 'primary' : 'info'}
 							class="!absolute !z-10"
 						/>
 					</NetworkIndicatorPreview>
@@ -238,7 +238,7 @@ ${'</' + 'script>'}
 						<NetworkIndicator
 							loading
 							color="secondary"
-							size={4}
+							height={4}
 							delay={example.delay}
 							easing={example.easing}
 							class="!absolute !z-10"
@@ -259,7 +259,7 @@ ${'</' + 'script>'}
 						loading
 						label="Uploading files"
 						color="info"
-						size={4}
+						height={4}
 						class="!absolute !z-10"
 					/>
 				</NetworkIndicatorPreview>
@@ -272,7 +272,7 @@ ${'</' + 'script>'}
 			code={`<NetworkIndicator
 	loading
 	color="success"
-	size={5}
+	height={5}
 	theme={{
 		root: {
 			base: 'ui-network-indicator fixed top-0 left-0 w-full z-[9999] origin-left rounded-none shadow-lg'
@@ -285,7 +285,7 @@ ${'</' + 'script>'}
 					<NetworkIndicator
 						loading
 						color="success"
-						size={5}
+						height={5}
 						class="!absolute !z-10"
 						theme={{
 							root: {

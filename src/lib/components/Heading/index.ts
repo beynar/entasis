@@ -1,4 +1,3 @@
 export { default as Heading } from './Heading.svelte';
 export type { HeadingProps } from './heading.props.js';
-export { heading } from './heading.theme.js';
 

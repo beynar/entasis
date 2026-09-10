@@ -34,6 +34,7 @@ Images are discovered from the DOM with \`imageSelector\`, defaulting to \`img\`
 ## Props
 
 - **open**: boolean (bindable, default: false) - Controls the zoomed gallery.
+- **defaultOpen**: boolean (default: false) - Initial state when open is not provided.
 - **activeIndex**: number (bindable, default: 0) - Controls the active discovered image.
 - **imageSelector**: string (default: "img") - Selector used inside the wrapper.
 - **disabled**: boolean (default: false) - Prevents image enhancement and opening.
@@ -49,8 +50,10 @@ Images are discovered from the DOM with \`imageSelector\`, defaulting to \`img\`
 - **licenseKey**: string (default: LightGallery evaluation key) - LightGallery license key. A production key is required unless the consuming project is GPLv3-compatible.
 - **class**: string - Additional root classes.
 - **theme**: ImageGalleryThemeProps - Per-instance theme overrides.
-- **onOpenChange**: (open, payload) => void - Fired when the gallery opens or closes.
-- **onIndexChange**: (index, payload) => void - Fired when navigation changes the active image.
+- **onOpenChange**: (open: boolean) => void - Fired once when the library requests a new open state.
+- **onIndexChange**: ({ index, gallery }) => void - Fired when navigation changes the active image.
+- **onAfterOpen**: (payload) => void - Fired after the open animation completes.
+- **onAfterClose**: (payload) => void - Fired after the close animation completes.
 
 ## Slots
 

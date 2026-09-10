@@ -15,7 +15,7 @@
 		buffered = 0,
 		disabled = false,
 		format = (nextValue: number) => `${nextValue}`,
-		onChange
+		onValueChange
 	}: {
 		classes: VideoPlayerClasses;
 		size: Sizes;
@@ -27,7 +27,7 @@
 		buffered?: number;
 		disabled?: boolean;
 		format?: (value: number) => string;
-		onChange: (value: number) => void;
+		onValueChange: (value: number) => void;
 	} = $props();
 
 	const maxValue = $derived(Math.max(min, max));
@@ -52,7 +52,7 @@
 	function handleInput(event: Event) {
 		const input = event.currentTarget;
 		if (!(input instanceof HTMLInputElement)) return;
-		onChange(Number(input.value));
+		onValueChange(Number(input.value));
 	}
 </script>
 

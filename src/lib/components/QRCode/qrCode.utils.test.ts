@@ -78,6 +78,11 @@ describe('qrCode.utils', () => {
 		}
 	});
 
+	it('preserves the configured data module scale', () => {
+		expect(sanitizeDataModulesSettings({ scale: 0.8 }).scale).toBe(0.8);
+		expect(sanitizeDataModulesSettings().scale).toBe(1);
+	});
+
 	it('excavates a region and defaults the margin to 4', () => {
 		const excavated = excavateModules(modules, { x: 10, y: 10, w: 3, h: 3 });
 		expect(excavated[11][11]).toBe(false);

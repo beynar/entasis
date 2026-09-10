@@ -1,0 +1,71 @@
+<script lang="ts">
+	import { Stack } from 'svelai/stack';
+	import { Accordion } from 'svelai/accordion';
+	import { Button } from 'svelai/button';
+	import { Card } from 'svelai/card';
+	import { Chip } from 'svelai/chip';
+	import { Heading } from 'svelai/heading';
+	import { arrowRightIcon } from 'svelai/icons/arrowRight';
+</script>
+
+<section class="mx-auto grid max-w-6xl gap-xl p-lg md:grid-cols-3 md:p-xl">
+	<div class="flex flex-col gap-xl md:col-span-2">
+		<Chip class="self-start" variant="outline">Interface design</Chip><Heading
+			as="h2"
+			size="h1"
+			weight="bold">Make the useful feel effortless.</Heading
+		>
+		<p class="text-lg text-neutral/70">
+			A good interface carries the context, makes the choice clear, and gets out of the way at the
+			right moment.
+		</p>
+		<Heading as="h3" size="h3">From the flow to the final detail</Heading>
+		<p class="text-neutral/70">
+			We shape the structure and interaction around the way people think about their work. Then we
+			bring the same care to the type, spacing, states, and small transitions that make the whole
+			experience feel coherent.
+		</p>
+		<Accordion
+			items={[
+				{
+					id: 'structure',
+					title: 'Structure and flow',
+					content: 'A clear model for the pages, actions, and information the product needs.'
+				},
+				{
+					id: 'system',
+					title: 'Visual language',
+					content: 'A considered set of type, color, geometry, and component decisions.'
+				},
+				{
+					id: 'detail',
+					title: 'Interaction detail',
+					content:
+						'The feedback, empty states, and transitions that help people move with confidence.'
+				}
+			]}
+			icon="math"
+		/>
+	</div>
+	<aside class="flex flex-col gap-lg">
+		<Card variant="soft" color="primary" title="The engagement"
+			><Stack gap="lg"
+				><dl class="grid gap-md text-sm">
+					<dt class="text-neutral/60">Typical focus</dt>
+					<dd>One core product workflow</dd>
+					<dt class="text-neutral/60">Working rhythm</dt>
+					<dd>Weekly review sessions</dd>
+					<dt class="text-neutral/60">Outputs</dt>
+					<dd>Designs, prototype, and system notes</dd>
+				</dl>
+				<Button href="/blocks" variant="outline">See interface examples</Button></Stack
+			></Card
+		><Card variant="outline" title="Related expertise"
+			><Stack gap="lg"
+				><Button href="/docs" variant="link" suffix={arrowRightIcon}>Product foundations</Button
+				><Button href="/components" variant="link" suffix={arrowRightIcon}>Component systems</Button
+				></Stack
+			></Card
+		>
+	</aside>
+</section>

@@ -2,8 +2,10 @@ import { createContext } from 'svelte';
 import type {
 	ThemeDesignTokenMap,
 	ThemeDesignTokens,
+	ThemeSpacingScale,
 	TypeScalePreset
 } from '$lib/components/Theme/theme.designTokens.js';
+import { defaultThemeSpacingScale } from '$lib/components/Theme/theme.designTokens.js';
 import {
 	runtimeColorPaletteStyle,
 	type RuntimeColorPaletteName
@@ -105,6 +107,7 @@ export const runtimeThemePresets = {
 
 class RuntimeThemePlayground {
 	spacing = $state(1);
+	spacingScaleValues = $state<number[]>(Object.values(defaultThemeSpacingScale));
 	radius = $state(1);
 	typeScale = $state<TypeScalePreset>('default');
 	raisedWithBorder = $state(true);
@@ -115,6 +118,7 @@ class RuntimeThemePlayground {
 			const preset = runtimeThemePresets[presetName];
 			return (
 				preset.spacing === this.spacing &&
+				this.hasDefaultSpacingScale &&
 				preset.radius === this.radius &&
 				preset.typeScale === this.typeScale &&
 				preset.raisedWithBorder === this.raisedWithBorder &&
@@ -127,9 +131,36 @@ class RuntimeThemePlayground {
 		return runtimeColorPaletteStyle(this.palette);
 	}
 
+	get spacingScale(): ThemeSpacingScale {
+		const [xs, sm, md, lg, xl] = this.spacingScaleValues;
+		return {
+			xs: xs ?? defaultThemeSpacingScale.xs,
+			sm: sm ?? defaultThemeSpacingScale.sm,
+			md: md ?? defaultThemeSpacingScale.md,
+			lg: lg ?? defaultThemeSpacingScale.lg,
+			xl: xl ?? defaultThemeSpacingScale.xl
+		};
+	}
+
+	get resolvedSpacingScale() {
+		return Object.fromEntries(
+			Object.entries(this.spacingScale).map(([step, multiplier]) => [
+				step,
+				`${Number((4 * this.spacing * multiplier).toFixed(1))}px`
+			])
+		) as Record<keyof ThemeSpacingScale, string>;
+	}
+
+	get hasDefaultSpacingScale() {
+		return Object.values(defaultThemeSpacingScale).every(
+			(multiplier, index) => this.spacingScaleValues[index] === multiplier
+		);
+	}
+
 	get designTokens(): ThemeDesignTokenMap<readonly ['light', 'dark']> {
 		const tokens = {
 			spacing: this.spacing,
+			spacingScale: this.spacingScale,
 			radius: this.radius,
 			typeScale: this.typeScale,
 			raisedWithBorder: this.raisedWithBorder
@@ -144,6 +175,7 @@ class RuntimeThemePlayground {
 	applyPreset(presetName: RuntimeThemePresetName) {
 		const preset = runtimeThemePresets[presetName];
 		this.spacing = preset.spacing;
+		this.spacingScaleValues = Object.values(defaultThemeSpacingScale);
 		this.radius = preset.radius;
 		this.typeScale = preset.typeScale;
 		this.raisedWithBorder = preset.raisedWithBorder;

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { eyedropperIcon } from '../../Icons/eyedropper.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { alphaMask, colorMask } from './colorMask.js';
@@ -7,23 +9,31 @@
 	import { useColorPickerTheme } from './colorPicker.theme.js';
 
 	let {
-		value = $bindable('#000000'),
+		defaultValue = '#000000',
+		value = $bindable(),
 		format = $bindable('hex'),
 		size = 'normal',
 		disabled = false,
-		onChange,
+		onValueChange,
 		class: className,
 		theme,
 		i18n,
 		...attachments
 	}: ColorPickerProps = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(nextValue) => {
+			value = nextValue;
+		},
+		() => defaultValue
+	);
 
 	const picker = new ColorPickerState({
 		get value() {
-			return value;
+			return valueState.value;
 		},
 		set value(v) {
-			value = v;
+			valueState.value = v;
 		},
 		get format() {
 			return format;
@@ -34,7 +44,7 @@
 		get disabled() {
 			return disabled;
 		},
-		onChange: (v) => onChange?.(v)
+		onValueChange: (v) => onValueChange?.(v)
 	});
 
 	const t = $derived(useI18n(i18n));
@@ -47,8 +57,8 @@
 	// The native EyeDropper API is not in every browser (and absent during SSR); enable the button
 	// only once we can confirm support on the client.
 	let eyeDropperSupported = $state(false);
-	$effect(() => {
-		eyeDropperSupported = typeof window !== 'undefined' && 'EyeDropper' in window;
+	onMount(() => {
+		eyeDropperSupported = 'EyeDropper' in window;
 	});
 
 	const openEyeDropper = async () => {

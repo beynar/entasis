@@ -449,12 +449,12 @@ export class GanttChartMutations<
 				this.chart.dependencies = boundary.dependencies;
 				this.chart.assignments = boundary.assignments;
 				this.chart.selection = previousSelection;
-				this.chart.eventHandlers?.selectionChange?.(previousSelection);
+				this.chart.eventHandlers?.onSelectionChange?.(previousSelection);
 			},
 			() => committedRevert.run?.()
 		);
 		if (!isSameGanttSelection(previousSelection, nextSelection)) {
-			this.chart.eventHandlers?.selectionChange?.(nextSelection);
+			this.chart.eventHandlers?.onSelectionChange?.(nextSelection);
 		}
 		const taskChangeKind = getAggregateTaskKind(
 			boundary.tasks,
@@ -462,7 +462,7 @@ export class GanttChartMutations<
 			input.preferredTaskKind
 		);
 		if (taskIds.length > 0 && taskChangeKind) {
-			this.chart.mutationPolicy?.task?.onChange?.(committedTasks, {
+			this.chart.mutationPolicy?.task?.onTasksChange?.({
 				kind: taskChangeKind,
 				source: input.source,
 				previousTasks: boundary.tasks,
@@ -479,7 +479,7 @@ export class GanttChartMutations<
 			input.preferredDependencyKind
 		);
 		if (dependencyIds.length > 0 && dependencyChangeKind) {
-			this.chart.mutationPolicy?.dependency?.onChange?.(committedDependencies, {
+			this.chart.mutationPolicy?.dependency?.onDependenciesChange?.({
 				kind: dependencyChangeKind,
 				source: input.source,
 				previousDependencies: boundary.dependencies,
@@ -495,7 +495,7 @@ export class GanttChartMutations<
 			input.preferredAssignmentKind
 		);
 		if (assignmentIds.length > 0 && assignmentChangeKind) {
-			this.chart.mutationPolicy?.assignment?.onChange?.(committedAssignments, {
+			this.chart.mutationPolicy?.assignment?.onAssignmentsChange?.({
 				kind: assignmentChangeKind,
 				source: input.source,
 				previousAssignments: boundary.assignments,
@@ -506,10 +506,10 @@ export class GanttChartMutations<
 		}
 		if (wasReverted) return false;
 		if (taskIds.length > 0 || dependencyIds.length > 0) {
-			this.chart.eventHandlers?.scheduleViolations?.(
-				schedule.analysis.violations,
-				dependencyIds.length > 0 ? 'dependency-change' : 'task-change'
-			);
+			this.chart.eventHandlers?.onScheduleViolations?.({
+				violations: schedule.analysis.violations,
+				source: dependencyIds.length > 0 ? 'dependency-change' : 'task-change'
+			});
 		}
 		committedRevert.run = this.notifyCommit({
 			before: boundary,
@@ -812,7 +812,7 @@ export class GanttChartMutations<
 			...(input.previousTask ? [input.previousTask.id] : []),
 			...schedule.autoScheduledTaskIds
 		]);
-		this.chart.mutationPolicy?.task?.onChange?.(committedTasks, {
+		this.chart.mutationPolicy?.task?.onTasksChange?.({
 			kind: input.kind,
 			source: input.source,
 			previousTasks,
@@ -821,7 +821,10 @@ export class GanttChartMutations<
 			violations: schedule.analysis.violations,
 			revert
 		});
-		this.chart.eventHandlers?.scheduleViolations?.(schedule.analysis.violations, 'task-change');
+		this.chart.eventHandlers?.onScheduleViolations?.({
+			violations: schedule.analysis.violations,
+			source: 'task-change'
+		});
 		if (this.chart.tasks === committedTasks) {
 			onCommittedRevert = this.notifyCommit({
 				before: boundary,
@@ -903,14 +906,14 @@ export class GanttChartMutations<
 					this.chart.selection.dependencyId === committedSelection.dependencyId
 				) {
 					this.chart.selection = previousSelection;
-					this.chart.eventHandlers?.selectionChange?.(previousSelection);
+					this.chart.eventHandlers?.onSelectionChange?.(previousSelection);
 				}
 			},
 			() => onCommittedRevert?.()
 		);
-		if (committedSelection) this.chart.eventHandlers?.selectionChange?.(committedSelection);
+		if (committedSelection) this.chart.eventHandlers?.onSelectionChange?.(committedSelection);
 		if (schedule.autoScheduledTaskIds.length > 0) {
-			this.chart.mutationPolicy?.task?.onChange?.(committedTasks, {
+			this.chart.mutationPolicy?.task?.onTasksChange?.({
 				kind: 'schedule',
 				source: input.source,
 				previousTasks,
@@ -920,7 +923,7 @@ export class GanttChartMutations<
 				revert
 			});
 		}
-		this.chart.mutationPolicy?.dependency?.onChange?.(committedDependencies, {
+		this.chart.mutationPolicy?.dependency?.onDependenciesChange?.({
 			kind: input.kind,
 			source: input.source,
 			previousDependencies,
@@ -931,10 +934,10 @@ export class GanttChartMutations<
 			]),
 			revert
 		});
-		this.chart.eventHandlers?.scheduleViolations?.(
-			schedule.analysis.violations,
-			'dependency-change'
-		);
+		this.chart.eventHandlers?.onScheduleViolations?.({
+			violations: schedule.analysis.violations,
+			source: 'dependency-change'
+		});
 		if (this.chart.tasks === committedTasks && this.chart.dependencies === committedDependencies) {
 			onCommittedRevert = this.notifyCommit({
 				before: boundary,
@@ -998,7 +1001,7 @@ export class GanttChartMutations<
 			},
 			() => onCommittedRevert?.()
 		);
-		this.chart.mutationPolicy?.assignment?.onChange?.(committedAssignments, {
+		this.chart.mutationPolicy?.assignment?.onAssignmentsChange?.({
 			kind: input.kind,
 			source: input.source,
 			previousAssignments,

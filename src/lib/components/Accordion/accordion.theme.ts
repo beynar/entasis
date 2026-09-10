@@ -32,12 +32,12 @@ const defaultAccordion = cva({
 	},
 	compoundVariants: [
 		// One container surface holding all rows (same surface as the Card component).
-		{ variant: 'card', splitted: false, class: 'raised rounded-lg bg-surface-raised' },
-		{ variant: 'outlined', splitted: false, class: 'rounded-lg border border-neutral-muted' },
+		{ variant: 'card', splitted: false, class: 'raised rounded-md bg-surface-raised' },
+		{ variant: 'outlined', splitted: false, class: 'rounded-md border border-neutral-muted' },
 		// Gap between the per-item surfaces.
-		{ splitted: true, density: 'small', class: 'gap-2' },
-		{ splitted: true, density: 'normal', class: 'gap-3' },
-		{ splitted: true, density: 'large', class: 'gap-4' }
+		{ splitted: true, density: 'small', class: 'gap-md' },
+		{ splitted: true, density: 'normal', class: 'gap-lg' },
+		{ splitted: true, density: 'large', class: 'gap-xl' }
 	],
 	defaultVariants: {
 		size: 'normal',
@@ -79,8 +79,8 @@ const defaultAccordionItem = cva({
 		{ splitted: false, class: 'border-b border-neutral-muted last:border-b-0' },
 		// One surface per item.
 		{ variant: 'classic', splitted: true, class: 'border-b border-neutral-muted' },
-		{ variant: 'card', splitted: true, class: 'raised rounded-lg bg-surface-raised' },
-		{ variant: 'outlined', splitted: true, class: 'rounded-lg border border-neutral-muted' }
+		{ variant: 'card', splitted: true, class: 'raised rounded-md bg-surface-raised' },
+		{ variant: 'outlined', splitted: true, class: 'rounded-md border border-neutral-muted' }
 	],
 	defaultVariants: {
 		size: 'normal',
@@ -94,7 +94,7 @@ const defaultAccordionItem = cva({
 const defaultAccordionTrigger = cva({
 	// items-start + the icon wrapper's slight downward nudge keep the chevron
 	// aligned to the first title line when titles wrap or a description exists.
-	base: 'group/accordion-trigger cursor-pointer w-full flex items-start justify-between gap-4 text-left transition-all outline-none rounded-md focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-50',
+	base: 'group/accordion-trigger cursor-pointer w-full flex items-start justify-between gap-xl text-left transition-all outline-none rounded-sm focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-50',
 	variants: {
 		size: {
 			small: '',
@@ -102,15 +102,15 @@ const defaultAccordionTrigger = cva({
 			large: ''
 		},
 		density: {
-			small: 'py-2',
-			normal: 'py-2.5',
-			large: 'py-3.5'
+			small: 'py-md',
+			normal: 'py-md',
+			large: 'py-lg'
 		},
 		variant: {
 			classic: '',
 			// Contained surfaces inset their rows (variant chrome, not density).
-			card: 'px-4',
-			outlined: 'px-4'
+			card: 'px-xl',
+			outlined: 'px-xl'
 		}
 	},
 	defaultVariants: {
@@ -130,8 +130,8 @@ const defaultAccordionHeader = cva({
 		},
 		density: {
 			small: 'gap-0',
-			normal: 'gap-0.5',
-			large: 'gap-1'
+			normal: 'gap-micro',
+			large: 'gap-xs'
 		}
 	},
 	defaultVariants: {
@@ -195,14 +195,14 @@ const defaultAccordionContent = cva({
 			large: 'text-base'
 		},
 		density: {
-			small: 'pb-2',
-			normal: 'pb-2.5',
-			large: 'pb-3.5'
+			small: 'pb-md',
+			normal: 'pb-md',
+			large: 'pb-lg'
 		},
 		variant: {
 			classic: '',
-			card: 'px-4',
-			outlined: 'px-4'
+			card: 'px-xl',
+			outlined: 'px-xl'
 		}
 	},
 	defaultVariants: {

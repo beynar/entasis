@@ -85,7 +85,7 @@
 <div class="grid w-full gap-3">
 	<div class="flex flex-wrap items-center justify-between gap-2">
 		<p class="text-neutral/65 text-sm" aria-live="polite">{status}</p>
-		<Button size="small" variant="outline" onClick={() => (autoSchedule = !autoSchedule)}>
+		<Button size="small" variant="outline" onclick={() => (autoSchedule = !autoSchedule)}>
 			Auto-schedule: {autoSchedule ? 'on' : 'off'}
 		</Button>
 	</div>
@@ -104,13 +104,13 @@
 		interactions={{ dependencyCreation: { create: createDependency } }}
 		mutations={{
 			dependency: {
-				onChange: (_next, change) => {
+				onDependenciesChange: (change) => {
 					status = `${change.kind} dependency committed from ${change.source}.`;
 				}
 			}
 		}}
 		events={{
-			scheduleViolations: (violations) => {
+			onScheduleViolations: ({ violations }) => {
 				status =
 					violations.length === 0
 						? 'The schedule satisfies all current constraints.'

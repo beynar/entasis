@@ -43,7 +43,7 @@ export type ChartRuleAnnotation<TRow> = ChartAnnotationBase<TRow> & {
 export type ChartBandAnnotation<TRow> = ChartAnnotationBase<TRow> & {
 	type: 'band';
 	axis: 'x' | 'y';
-	size?: number;
+	thickness?: number;
 	inset?: number;
 	radius?: number;
 	fillOpacity?: number;
@@ -65,7 +65,10 @@ export type ChartAnnotation<TRow> =
 	| ChartMarkerAnnotation<TRow>;
 
 export type ChartDataMarkProps<TRow> = {
+	/** Stable mark identifier used to match rendered marks across updates. */
 	id?: string;
+	/** Channel that identifies each row for annotations and keyed updates. */
 	key?: ChartRequiredChannel<TRow, ChartKey>;
+	/** Annotations drawn relative to selected rows in this mark. */
 	annotations?: readonly ChartAnnotation<TRow>[];
 };

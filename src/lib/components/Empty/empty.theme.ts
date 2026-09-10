@@ -2,12 +2,12 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultEmpty = cva({
-	base: 'flex w-full min-w-0 flex-1 flex-col items-center justify-center rounded-xl text-center text-balance',
+	base: 'flex w-full min-w-0 flex-1 flex-col items-center justify-center rounded-lg text-center text-balance',
 	variants: {
 		size: {
-			small: 'gap-3 p-4',
-			normal: 'gap-4 p-6',
-			large: 'gap-6 p-8'
+			small: 'gap-lg p-xl',
+			normal: 'gap-xl p-layout-md',
+			large: 'gap-layout-md p-layout-lg'
 		},
 		// normal: transparent placeholder (current behavior). card: a raised surface matching Card.
 		mode: {
@@ -30,9 +30,9 @@ const defaultEmptyHeader = cva({
 	base: 'flex max-w-sm flex-col items-center',
 	variants: {
 		size: {
-			small: 'gap-1.5',
-			normal: 'gap-2',
-			large: 'gap-2.5'
+			small: 'gap-sm',
+			normal: 'gap-md',
+			large: 'gap-md'
 		}
 	},
 	defaultVariants: {
@@ -44,13 +44,13 @@ const defaultEmptyMedia = cva({
 	base: 'flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0',
 	variants: {
 		size: {
-			small: 'mb-1.5',
-			normal: 'mb-2',
-			large: 'mb-3'
+			small: 'mb-sm',
+			normal: 'mb-md',
+			large: 'mb-lg'
 		},
 		mediaVariant: {
 			default: 'bg-transparent',
-			icon: 'bg-neutral-muted text-neutral-muted-readable rounded-lg'
+			icon: 'bg-neutral-muted text-neutral-muted-readable rounded-md'
 		}
 	},
 	compoundVariants: [
@@ -108,9 +108,9 @@ const defaultEmptyContent = cva({
 	base: 'flex w-full max-w-sm min-w-0 flex-col items-center text-balance',
 	variants: {
 		size: {
-			small: 'gap-2 text-xs',
-			normal: 'gap-2.5 text-sm',
-			large: 'gap-3 text-base'
+			small: 'gap-md text-xs',
+			normal: 'gap-md text-sm',
+			large: 'gap-lg text-base'
 		}
 	},
 	defaultVariants: {
@@ -123,9 +123,9 @@ const defaultEmptyActions = cva({
 	base: 'flex flex-wrap items-center justify-center',
 	variants: {
 		size: {
-			small: 'gap-1.5',
-			normal: 'gap-2',
-			large: 'gap-2.5'
+			small: 'gap-sm',
+			normal: 'gap-md',
+			large: 'gap-md'
 		}
 	},
 	defaultVariants: {

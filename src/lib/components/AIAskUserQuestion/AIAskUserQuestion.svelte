@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Alert from '../Alert/Alert.svelte';
 	import Empty from '../Empty/Empty.svelte';
 	import Slot from '../Slot/Slot.svelte';
@@ -26,8 +27,8 @@
 	let {
 		ref = $bindable<HTMLDivElement | null>(null),
 		questions,
-		values = $bindable<AIAskAnswers>(),
 		value = $bindable<AIAskAnswers>(),
+		defaultValue = {},
 		activeIndex = $bindable(0),
 		autoAdvance,
 		autoAdvanceSingle,
@@ -50,7 +51,7 @@
 		requiredMessage = 'Answer required.',
 		onSubmit,
 		onDiscard,
-		onChange,
+		onValueChange,
 		question: questionSlot,
 		header,
 		footer,
@@ -60,6 +61,13 @@
 		theme,
 		...attachments
 	}: AIAskUserQuestionProps = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(nextValue) => {
+			value = nextValue;
+		},
+		() => defaultValue
+	);
 
 	let errorMessage = $state<string>();
 	let errorQuestionId = $state<string>();
@@ -68,7 +76,7 @@
 	let advanceTimer: ReturnType<typeof setTimeout> | undefined;
 
 	const questionItems = $derived<AIAskQuestion[]>(Array.from(questions));
-	const resolvedValues = $derived(values ?? value ?? {});
+	const resolvedValues = $derived(valueState.value);
 	const shouldAutoAdvance = $derived(autoAdvance ?? autoAdvanceSingle ?? true);
 	const resolvedAutoAdvanceDelay = $derived(autoAdvanceDelay ?? autoAdvanceSingleDelay ?? 280);
 	const resolvedEmptyLabel = $derived(emptyLabel ?? emptyTitle ?? 'No questions');
@@ -83,7 +91,7 @@
 	const classes = $derived(useAIAskUserQuestionTheme(theme));
 	const componentState = $derived<AIAskUserQuestionState>({
 		questions: questionItems,
-		values: resolvedValues,
+		value: resolvedValues,
 		activeIndex,
 		activeQuestion,
 		error: errorMessage,
@@ -115,18 +123,13 @@
 		if (controlsDisabled) return;
 		if (hasSameAIAskAnswer(question, resolvedValues[questionId], answer)) return;
 		const nextValues = { ...resolvedValues, [questionId]: answer };
-		setValues(nextValues);
+		valueState.value = nextValues;
 		if (errorQuestionId === questionId && isAIAskQuestionAnswered(question, nextValues)) {
 			errorQuestionId = undefined;
 			errorMessage = undefined;
 		}
-		onChange?.(nextValues, question);
+		onValueChange?.(nextValues);
 		scheduleAdvance(question, answer);
-	}
-
-	function setValues(nextValues: AIAskAnswers): void {
-		values = nextValues;
-		value = nextValues;
 	}
 
 	function goTo(index: number): void {
@@ -271,7 +274,7 @@
 			{:else}
 				<Stepper
 					items={questionItems}
-					bind:activeStep={activeIndex}
+					bind:value={activeIndex}
 					panelRole="group"
 					panelAriaLabel={({ index }) => progressLabel(index + 1, questionItems.length)}
 					panelAriaLabelledby={false}
@@ -283,7 +286,7 @@
 							errorMessage={errorQuestionId === item.id ? errorMessage : undefined}
 							disabled={controlsDisabled}
 							renderer={questionSlot}
-							onChange={(answer) => setAnswer(item.id, answer)}
+							onValueChange={(answer) => setAnswer(item.id, answer)}
 							onError={(message) => setQuestionError(item.id, message)}
 							{theme}
 						/>

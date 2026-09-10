@@ -22,8 +22,17 @@ export const usageCode = `<script lang="ts">
       type: 'series',
       x: 'quarter',
       y: 'value',
+      key: 'quarter',
       series: 'product',
       colorBy: 'product',
+      annotations: [
+        {
+          type: 'band',
+          target: { key: 'Q2', series: 'Platform' },
+          axis: 'x',
+          thickness: 24
+        }
+      ],
       interval: { lower: 'low', upper: 'high' },
       analysis: [
         { type: 'reference', statistic: 'median' },
@@ -40,6 +49,7 @@ export const usageCode = `<script lang="ts">
   {marks}
   tooltip
   viewport
+  legend={{ interactive: true, placement: 'bottom' }}
   ariaLabel="Quarterly revenue line chart"
   initialDimensions={{ width: 960, height: 480 }}
 />`;

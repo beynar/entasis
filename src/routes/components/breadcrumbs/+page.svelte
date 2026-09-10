@@ -1,9 +1,14 @@
 <script lang="ts">
 	import DocPage from '../../DocPage.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import { Breadcrumbs } from '$lib/components/Breadcrumbs/index.js';
 	import type { BreadcrumbItem } from '$lib/components/Breadcrumbs/breadcrumbs.props.js';
 	import type { MenuItem } from '$lib/components/Menu/menu.props.js';
+
+	const controls = createComponentControls([
+		{ name: 'showSeparator', type: 'switch', label: 'Separator', value: true }
+	]);
 </script>
 
 <DocPage
@@ -19,8 +24,10 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Standard breadcrumb trail with an active last item."
 		code={`<Breadcrumbs
+	showSeparator={${controls.value.showSeparator}}
 	items={[
 		{ label: 'Home', href: '/' },
 		{ label: 'Products', href: '/products' },
@@ -29,6 +36,7 @@
 />`}
 	>
 		<Breadcrumbs
+			showSeparator={controls.value.showSeparator}
 			items={[
 				{ label: 'Home', href: '/' },
 				{ label: 'Products', href: '/products' },

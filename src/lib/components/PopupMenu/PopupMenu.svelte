@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Popover from '../Popover/Popover.svelte';
 	import Menu from '../Menu/Menu.svelte';
 	import type { PopupMenuProps } from './popupMenu.props.js';
@@ -9,13 +10,22 @@
 	let {
 		menu,
 		closeOnItemClick = true,
-		open = $bindable(false),
+		defaultOpen = false,
+		open = $bindable(),
+		onOpenChange,
 		closeOnEscape = true,
 		mobileSheet,
 		mobileSheetSizeTransition,
 		class: className,
 		...popoverProps
 	}: PopupMenuProps = $props();
+	const openState = createBindableValue(
+		() => open,
+		(next) => {
+			open = next;
+		},
+		() => defaultOpen
+	);
 
 	// A menu-appropriate min-width so short-label menus (e.g. context menus) don't collapse to their
 	// content. Overridable — a consumer `class` wins via tailwind-merge.
@@ -28,6 +38,12 @@
 	const resolvedMobileSheetSizeTransition = $derived(
 		usesStackedSubmenus ? false : mobileSheetSizeTransition
 	);
+
+	const setOpen = (nextOpen: boolean) => {
+		if (openState.value === nextOpen) return;
+		openState.value = nextOpen;
+		onOpenChange?.(nextOpen);
+	};
 
 	const closeOnClick = (popover: PopoverState) => (node: HTMLElement) => {
 		if (closeOnItemClick) {
@@ -50,7 +66,8 @@
 </script>
 
 <Popover
-	bind:open
+	open={openState.value}
+	onOpenChange={setOpen}
 	size="small"
 	{closeOnEscape}
 	{mobileSheet}

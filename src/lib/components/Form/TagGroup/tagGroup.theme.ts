@@ -22,9 +22,9 @@ const defaultTagGroupList = cva({
 	base: 'flex w-full flex-wrap items-center justify-start',
 	variants: {
 		size: {
-			small: 'gap-1',
-			normal: 'gap-1.5',
-			large: 'gap-2'
+			small: 'gap-xs',
+			normal: 'gap-sm',
+			large: 'gap-md'
 		}
 	},
 	defaultVariants: {

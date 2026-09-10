@@ -1,11 +1,20 @@
 import { describe, test, expect } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/svelte';
-import Page from './+page.svelte';
+import ComponentInventory from './components/+page.svelte';
 
-describe('/+page.svelte', () => {
-	test('should render h1', () => {
-		render(Page);
-		expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
+describe('/components', () => {
+	test('shows public entrypoints and links to component documentation', () => {
+		render(ComponentInventory);
+		expect(
+			screen.getByRole('heading', { level: 1, name: 'Components and entrypoints' })
+		).toBeInTheDocument();
+		expect(screen.getByText('svelai/field', { exact: true })).toBeVisible();
+		expect(screen.getByText('svelai/slot', { exact: true })).toBeVisible();
+		expect(screen.getByText('svelai/tailwind-plugin', { exact: true })).toBeVisible();
+		expect(screen.getByRole('link', { name: 'Button' })).toHaveAttribute(
+			'href',
+			'/components/button'
+		);
 	});
 });

@@ -4,9 +4,34 @@
 	import ToggleButton from '$lib/components/ToggleButton/ToggleButton.svelte';
 	import { eyeClosedIcon } from '$lib/components/Icons/eyeClosed.js';
 	import { colors, sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	const variants = ['ghost', 'outline'] as const;
 	let formSubmissions = $state(0);
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'ghost',
+			options: variants
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'neutral',
+			options: colors
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -14,14 +39,27 @@
 	subtitle="A button that toggles between pressed and unpressed states."
 	component="ToggleButton"
 	features={[
-		'Bindable checked state',
+		'Bindable value state',
+		'Ghost and outline variants (Button subset)',
+		'Resting outline matches Button',
 		'Auto square layout for icon-only',
 		'data-checked reflects pressed state',
 		'Prefix, suffix & children slots'
 	]}
 >
-	<ComponentCard code={`<ToggleButton type="button">Toggle me</ToggleButton>`}>
-		<ToggleButton>Toggle me</ToggleButton>
+	<ComponentCard
+		{controls}
+		code={`<ToggleButton type="button" size="${controls.value.size}" variant="${controls.value.variant}" color="${controls.value.color}" disabled={${controls.value.disabled}}>Toggle me</ToggleButton>`}
+	>
+		<ToggleButton
+			type="button"
+			size={controls.value.size}
+			variant={controls.value.variant}
+			color={controls.value.color}
+			disabled={controls.value.disabled}
+		>
+			Toggle me
+		</ToggleButton>
 	</ComponentCard>
 
 	{#snippet examples()}
@@ -48,7 +86,7 @@
 											{color}
 											prefix={eyeClosedIcon}
 											ariaLabel={`${color} on`}
-											checked
+											value
 										/>
 									</div>
 								</div>
@@ -70,7 +108,7 @@
 		<ComponentCard description="With only an icon and no label, the toggle renders squared.">
 			<div class="flex flex-wrap items-center justify-center gap-3">
 				<ToggleButton prefix={eyeClosedIcon} ariaLabel="Visibility off" />
-				<ToggleButton prefix={eyeClosedIcon} ariaLabel="Visibility on" checked />
+				<ToggleButton prefix={eyeClosedIcon} ariaLabel="Visibility on" value />
 			</div>
 		</ComponentCard>
 
@@ -95,7 +133,7 @@
 		<ComponentCard description="Disabled toggles are dimmed and ignore interaction.">
 			<div class="flex flex-wrap items-center justify-center gap-3">
 				<ToggleButton disabled>Off</ToggleButton>
-				<ToggleButton disabled checked>On</ToggleButton>
+				<ToggleButton disabled value>On</ToggleButton>
 			</div>
 		</ComponentCard>
 	{/snippet}

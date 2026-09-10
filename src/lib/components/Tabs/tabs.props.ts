@@ -24,12 +24,14 @@ export type TabsProps<Item extends TabItem = TabItem> = WithAttachments<{
 	 * The index of the currently active tab. This is bindable.
 	 * @default 0
 	 */
-	activeTab?: number;
+	value?: number;
+	/** Initial active tab index when `value` is omitted. */
+	defaultValue?: number;
 	/**
 	 * Callback function called when the active tab changes.
 	 * Receives the new tab index as an argument.
 	 */
-	onChange?: (index: number) => void;
+	onValueChange?: (value: number) => void;
 	/**
 	 * The placement of the tabbar relative to the content.
 	 * @default 'top'

@@ -111,8 +111,13 @@ Extends TextInput. Built-in visibility toggle (eye icon). Only `prefix` slot (su
 **Theme parts:** `input`, `inputContainer` (same as TextInput)
 
 ```svelte
+<script>
+	import { PasswordInput } from 'svelai/password-input';
+	import { lockIcon } from 'svelai/icons/lock';
+</script>
+
 <PasswordInput label="Password" bind:value={password} required>
-	{#snippet prefix()}<Icon name="lock" />{/snippet}
+	{#snippet prefix()}{@render lockIcon()}{/snippet}
 </PasswordInput>
 ```
 
@@ -124,7 +129,7 @@ Extends TextInput. Built-in visibility toggle (eye icon). Only `prefix` slot (su
 
 **Unique props:** `value: string` (bindable), `defaultCountry: string` (default `'US'`), `placeholder`
 
-Built-in country code selector with flags, auto-formatting per country.
+Built-in country code selector with flags, auto-formatting per country. intl-tel-input is loaded from a CDN at runtime and never bundled.
 
 **Theme parts:** `input`, `inputContainer` (variants: `size`, `disabled`)
 
@@ -192,7 +197,7 @@ Standalone color picker panel (not Field-based) -- a saturation/brightness squar
 - `value: string` (bindable, default `'#000000'`) -- canonical hex output (`#rrggbb`, or `#rrggbbaa` when alpha < 1); accepts any parseable CSS color as input
 - `format` (`'hex' | 'rgb' | 'hsl'`, default `'hex'`, bindable) -- the input's text representation only; the bound value stays hex
 - `size` (`'small' | 'normal' | 'large'`), `disabled`
-- `onChange: (value: string) => void` -- fires on every committed change, including continuously while dragging (receives hex)
+- `onValueChange: (value: string) => void` -- fires on every committed change, including continuously while dragging (receives hex)
 - `i18n: Partial<Messages>`
 
 The square and both sliders support click-to-jump and pointer drag; the area thumb and slider thumbs are focusable `role="slider"` controls (arrows adjust, Shift for a larger step, Home/End to min/max). The eyedropper uses `window.EyeDropper` and hides where unsupported (SSR-safe). Hue and saturation are preserved internally, so dragging a color to black/white never loses the chosen hue. Global setter: `setColorPickerTheme`.
@@ -242,7 +247,7 @@ Searchable dropdown with async support.
 - `value: string | null` (bindable), `searchValue: string` (bindable), `loading: boolean` (bindable)
 - `showAllOnFocus`, `getValueOption: (value) => MaybePromise<ComboboxOption>` (async pre-selected)
 - `placeholder`, `loadingText`, `noOptionsText`
-- `onChange: (value, option) => void`, `onValidate`
+- `onValueChange: ({ value, option }) => void`, `onValidate`
 - `prefix`: default magnifying glass, set `false` to hide
 - `errors: string[] | boolean` (bindable), `focused: boolean` (bindable)
 
@@ -270,7 +275,7 @@ Multi-tag input: free text, or restricted to a searchable option list (like Comb
 - `maxTags: number` — once reached, further adds are ignored
 - `showAllOnFocus`, `getValueOption: (value) => MaybePromise<ComboboxOption>` (resolve labels for initial values)
 - `placeholder`, `loadingText`, `noOptionsText`
-- `onChange: (value: string[]) => void`, `onValidate`
+- `onValueChange: (value: string[]) => void`, `onValidate`
 - `errors: string[] | boolean` (bindable), `focused: boolean` (bindable)
 
 Option format: `{ value: string, label: string, description?: string }` (reused from Combobox). Without `items` it is a plain free-text tag input; with `items` it is restricted to the list (unless `allowCustom`). Duplicate tags are never added. Keyboard: Enter (add current search), Backspace on empty input (remove last tag), Arrow keys / Home / End / Enter to navigate the dropdown, Escape blurs.
@@ -297,7 +302,7 @@ An editable list of key/value string pairs. Each row is `[key input] [value inpu
 - `valuePlaceholder: string` — value input placeholder (defaults to the localized "Value" label)
 - `addLabel: string` — text on the Add button (defaults to the localized "Add" label)
 - `maxRows: number` — once reached, the Add button is disabled
-- `onChange: (value: KeyValuePair[]) => void`, `onValidate`
+- `onValueChange: (value: KeyValuePair[]) => void`, `onValidate`
 - `i18n: Partial<Messages>` — override the add/key/value/remove strings
 - `errors: string[] | boolean` (bindable), `focused: boolean` (bindable)
 
@@ -316,7 +321,7 @@ Rows are keyed by a stable per-row id (not the key string), so empty or duplicat
 
 `import { Switch } from 'svelai/switch'`
 
-**Unique props:** `checked: boolean` (bindable -- NOT `value`), `value: any` (forms), `onChange: (checked) => void`
+**State props:** `value: boolean | null` (bindable), `defaultValue: boolean | null`, `onValueChange: (value) => void`
 
 Label rendered beside the toggle. Global setter: `setSwitchInputTheme`.
 
@@ -413,7 +418,7 @@ Standalone calendar (not Field-based). Used inside DateInput or standalone.
 - `value: Date | { start, end }` (bindable), `type: 'calendar' | 'calendar-range'`
 - `month`, `year`, `showWeekNumbers`, `firstDayOfWeek: 0 | 1`
 - `min`, `max: Date`, `disabledDates: Date[]`, `disabledDays: number[]`
-- `onChange`, `onMonthChange`
+- `onValueChange`, `onMonthChange`
 
 **Theme parts:** `calendar`, `calendarHeader`, `calendarGrid`, `calendarDay` (variants: `selected`, `today`, `disabled`, `inRange`)
 

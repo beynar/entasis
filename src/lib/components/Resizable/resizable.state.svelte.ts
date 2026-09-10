@@ -25,11 +25,11 @@ import {
 } from './resizable.layout.js';
 import { readResizableStoredLayout, writeResizableStoredLayout } from './resizable.persistence.js';
 import type {
-	ResizableChangeMeta,
 	ResizableDir,
 	ResizableDisabledHandles,
 	ResizableHandleAriaLabel,
 	ResizableHandlePayload,
+	ResizableLayoutCommitPayload,
 	ResizableOrientation,
 	ResizablePanelPayload,
 	ResizablePanelItem
@@ -48,7 +48,7 @@ type ResizableStateOptions = {
 	keyboardStep?: number;
 	onResize?: (sizes: number[]) => void;
 	onLayoutChange?: (sizes: number[]) => void;
-	onLayoutChanged?: (sizes: number[], meta: ResizableChangeMeta) => void;
+	onLayoutCommit?: (payload: ResizableLayoutCommitPayload) => void;
 	onCollapsedPanelsChange?: (panelIds: string[]) => void;
 };
 
@@ -329,7 +329,7 @@ export class ResizableState {
 		if (areNumberArraysEqual(nextSizes, currentSizes ?? [])) return;
 		this.sizes = nextSizes;
 		this.onLayoutChange?.([...nextSizes]);
-		this.onLayoutChanged?.([...nextSizes], { isUserInteraction: false });
+		this.onLayoutCommit?.({ sizes: [...nextSizes], isUserInteraction: false });
 	}
 
 	private setHandle(
@@ -434,7 +434,7 @@ export class ResizableState {
 	private commitChange(isUserInteraction: boolean) {
 		const nextSizes = [...this.layoutSizes];
 		this.onResize?.(nextSizes);
-		this.onLayoutChanged?.(nextSizes, { isUserInteraction });
+		this.onLayoutCommit?.({ sizes: nextSizes, isUserInteraction });
 		this.writeStoredLayout();
 	}
 

@@ -155,7 +155,7 @@
 		{@const request = conversation.activeAskUserQuestion}
 		<AIAskUserQuestion
 			questions={request.questions}
-			values={askUserQuestionValue(request)}
+			value={askUserQuestionValue(request)}
 			{disabled}
 			title={request.title ?? 'Clarify before continuing'}
 			requester={request.requester}
@@ -165,7 +165,7 @@
 			nextLabel={request.nextLabel}
 			previousLabel={request.previousLabel}
 			discardLabel={request.discardLabel}
-			onChange={(values) => updateAskUserQuestionValue(request, values)}
+			onValueChange={(value) => updateAskUserQuestionValue(request, value)}
 			onSubmit={(detail) => resolveAskUserQuestion(request, 'completed', detail)}
 			onDiscard={() => resolveAskUserQuestion(request, 'discarded')}
 		/>

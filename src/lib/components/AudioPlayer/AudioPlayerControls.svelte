@@ -75,7 +75,7 @@
 				label={`Back ${seekStep} seconds`}
 				icon={skipBackIcon}
 				disabled={disabled || !canSeek}
-				onClick={() => player.runInteraction(() => player.seekBy(-seekStep))}
+				onPress={() => player.runInteraction(() => player.seekBy(-seekStep))}
 			/>
 		{/if}
 
@@ -88,7 +88,7 @@
 				label={player.paused || player.ended ? 'Play' : 'Pause'}
 				icon={player.paused || player.ended ? playIcon : pauseIcon}
 				{disabled}
-				onClick={() => player.runInteraction(() => player.togglePlay())}
+				onPress={() => player.runInteraction(() => player.togglePlay())}
 			/>
 		{/if}
 
@@ -100,7 +100,7 @@
 				label={`Forward ${seekStep} seconds`}
 				icon={skipForwardIcon}
 				disabled={disabled || !canSeek}
-				onClick={() => player.runInteraction(() => player.seekBy(seekStep))}
+				onPress={() => player.runInteraction(() => player.seekBy(seekStep))}
 			/>
 		{/if}
 
@@ -138,7 +138,7 @@
 				active={player.loop}
 				pressed={player.loop}
 				{disabled}
-				onClick={() => player.runInteraction(() => player.setLoop(!player.loop))}
+				onPress={() => player.runInteraction(() => player.setLoop(!player.loop))}
 			/>
 		{/if}
 

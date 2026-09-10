@@ -20,6 +20,7 @@ The Popover component displays floating content positioned relative to a trigger
 
 ### Core Props
 - **open**: boolean (bindable) - Controls popover visibility (optional when using trigger prop)
+- **defaultOpen**: boolean (default: false) - Initial state when open is not provided
 - **ref**: HTMLElement | null - Reference element to position popover against (optional when using trigger prop)
 - **id**: string - Unique identifier
 
@@ -32,8 +33,9 @@ The Popover component displays floating content positioned relative to a trigger
 - **mobileSheetSizeTransition**: boolean (default: true) - Whether mobile-sheet panels animate intrinsic size changes
 
 ### Event Props
-- **onClose**: (popover: PopoverState) => void - Called when popover closes, receives popover state
-- **onOpen**: (popover: PopoverState) => void - Called when popover opens, receives popover state
+- **onOpenChange**: (open: boolean) => void - Called once for each library-requested state change
+- **onAfterOpen**: (popover: PopoverState) => void - Called after the open transition finishes
+- **onAfterClose**: (popover: PopoverState) => void - Called after the close transition finishes
 
 ### Slot Props
 - **children**: Snippet<[PopoverState]> - Popover content
@@ -91,7 +93,7 @@ The Popover component displays floating content positioned relative to a trigger
 
 <Popover>
 	{#snippet trigger(popover)}
-		<Button onClick={() => popover.open()}>Open</Button>
+		<Button onclick={() => popover.open()}>Open</Button>
 	{/snippet}
 	
 	<p>This is a popover!</p>
@@ -267,8 +269,8 @@ The Popover component displays floating content positioned relative to a trigger
 
 <Popover 
 	trigger={{ content: "Trigger" }}
-	onOpen={(popover) => console.log('Popover opened', popover)}
-	onClose={(popover) => console.log('Popover closed', popover)}
+	onAfterOpen={(popover) => console.log('Popover opened', popover)}
+	onAfterClose={(popover) => console.log('Popover closed', popover)}
 >
 	Watch the console
 </Popover>
@@ -287,7 +289,7 @@ The Popover component displays floating content positioned relative to a trigger
 	let user = { name: 'John Doe', email: 'john@example.com' };
 </script>
 
-<Avatar bind:ref={avatarRef} user={user} onClick={() => open = !open} />
+<Avatar bind:ref={avatarRef} user={user} onclick={() => open = !open} />
 
 <Popover bind:open ref={avatarRef} position="bottom">
 	<div class="p-4">

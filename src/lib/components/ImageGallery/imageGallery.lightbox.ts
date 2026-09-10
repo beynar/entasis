@@ -260,6 +260,9 @@ export class ImageGalleryLightbox {
 			this.gallery.updateIndex(index, true);
 			this.gallery.updateOpen(true, true);
 		});
+		this.addEvent(root, 'lgAfterOpen', () => {
+			this.gallery.onAfterOpen?.(this.gallery.payload);
+		});
 		this.addEvent(root, 'lgBeforeSlide', (event) => {
 			const { index } = (event as CustomEvent<{ index: number }>).detail;
 			this.gallery.updateIndex(index, true);
@@ -268,6 +271,7 @@ export class ImageGalleryLightbox {
 			this.gallery.updateOpen(false, true);
 			if (this.activeSource?.isConnected) this.activeSource.focus({ preventScroll: true });
 			this.activeSource = null;
+			this.gallery.onAfterClose?.(this.gallery.payload);
 		});
 	}
 

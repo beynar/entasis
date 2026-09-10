@@ -35,6 +35,7 @@
 	let {
 		tools,
 		value = $bindable([]),
+		onValueChange,
 		multiple = true,
 		scope = 'calls',
 		variant = 'ghost',
@@ -54,6 +55,7 @@
 	}: {
 		tools: readonly AIToolCall[];
 		value?: string[];
+		onValueChange?: (value: string[]) => void;
 		multiple?: boolean;
 		scope?: Extract<AIToolAccordionScope, 'single' | 'calls'>;
 		variant?: AIToolVariant;
@@ -185,6 +187,7 @@
 <Accordion
 	{items}
 	bind:value
+	{onValueChange}
 	oneAtATime={!multiple}
 	title={toolTitle}
 	content={toolContent}

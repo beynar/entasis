@@ -149,7 +149,9 @@ describe('useComponentTheme', () => {
 		const defaultTheme = makeTheme();
 		let result: string | undefined;
 		inComponent(() => {
-			setComponentTheme('btnVariantOrder')({ button: { size: { sm: 'p-2' } } });
+			setComponentTheme<typeof defaultTheme>('btnVariantOrder')({
+				button: { size: { sm: 'p-2' } }
+			});
 			const use = useComponentTheme('btnVariantOrder', defaultTheme);
 			result = use({ button: { size: { sm: 'p-4' } } }).button({ size: 'sm' });
 		});

@@ -7,4 +7,3 @@ export {
 	type PasswordInputTheme,
 	type PasswordInputThemeProps
 } from './passwordInput.theme.js';
-

@@ -55,18 +55,21 @@ export type RichTextInputTriggerContext = {
 	query: string;
 };
 
+/** Selected suggestion and the trigger state that produced it. */
+export type RichTextInputItemContext = {
+	item: RichTextInputItem;
+	context: RichTextInputTriggerContext;
+};
+
 export type RichTextInputTriggerConfig = {
 	title?: string;
 	empty?: string;
 	items?: RichTextInputItem[];
 	tokenKind?: RichTextInputTokenKind | ((item: RichTextInputItem) => RichTextInputTokenKind);
 	group?: string | ((item: RichTextInputItem) => string | undefined);
-	onSearch?: (
-		query: string,
-		context: RichTextInputTriggerContext
-	) => RichTextInputSearchResult<RichTextInputItem>;
-	onSelect?: (item: RichTextInputItem, context: RichTextInputTriggerContext) => void;
-	toToken?: (item: RichTextInputItem, context: RichTextInputTriggerContext) => RichTextInputToken;
+	onSearch?: (context: RichTextInputTriggerContext) => RichTextInputSearchResult<RichTextInputItem>;
+	onSelect?: (payload: RichTextInputItemContext) => void;
+	toToken?: (payload: RichTextInputItemContext) => RichTextInputToken;
 };
 
 export type RichTextInputTriggers = Record<string, RichTextInputTriggerConfig>;
@@ -93,12 +96,14 @@ export type RichTextInputHandle = {
 	insertToken: (token: RichTextInputToken) => void;
 };
 
-type RichTextInputFieldProps = Omit<InputProps<'rich-text'>, 'theme'>;
+type RichTextInputFieldProps = Omit<InputProps<'rich-text'>, 'theme' | 'onValueChange'>;
 
 export type RichTextInputProps = WithAttachments<
 	RichTextInputFieldProps & {
 		/** Bindable markdown value. Plain text is valid markdown. */
 		value?: string | null;
+		/** Initial markdown value when `value` is not bound. */
+		defaultValue?: string | null;
 		/** Bindable reference to the editable Lexical root. */
 		ref?: HTMLDivElement | null;
 		/** Stable id applied to the editable root. */

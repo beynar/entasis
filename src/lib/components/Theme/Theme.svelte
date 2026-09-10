@@ -2,7 +2,7 @@
 	import BeforeHydratation from '../Utils/BeforeHydratation.svelte';
 	import { Theme as SvelteTheme } from 'svelte-themes';
 	import { ThemeState } from './theme.state.svelte.js';
-	import { escapeForInlineScript, escapeJsString, MEDIA } from './helper.js';
+	import { compileThemeBlockingScript } from './helper.js';
 	import Tooltip from '../Tooltip/Tooltip.svelte';
 	import DialogBackdrop from '../Dialog/DialogBackdrop.svelte';
 	import type { ThemeProps } from './theme.props.js';
@@ -90,7 +90,6 @@
 		theme
 	);
 
-	const attrs = !value ? ((themes || []) as string[]) : (Object.values(value || {}) as string[]);
 	const designTokenCss = $derived(
 		compileThemeDesignTokens({
 			designTokens,
@@ -100,30 +99,20 @@
 		})
 	);
 
-	let themeScript = `<script>
-		function svelteTheme(){		
-		var d=document.documentElement;
-		var x=${escapeForInlineScript(value || {})};
-		var y=${escapeForInlineScript(colorScheme || {})};
-		var validThemes=${escapeForInlineScript(theme.themes)};		
-		var localStorageTheme; try { localStorageTheme = localStorage.getItem('${escapeJsString(storageKey)}'); } catch(e) { localStorageTheme = null; }
-		var systemTheme = ${enableSystem ? `window.matchMedia('${MEDIA}').matches ? 'dark' : 'light'` : "'normal'"};
-		var isValidTheme = validThemes.indexOf(localStorageTheme) !== -1;	
-		var isSystemThemeButDisabled = localStorageTheme === 'system' && ${!enableSystem};
-		var currentTheme = isValidTheme ? localStorageTheme : '${escapeJsString(validatedDefaultTheme)}';
-		if (isSystemThemeButDisabled) {
-			currentTheme = '${escapeJsString(validatedDefaultTheme)}';
-			try { localStorage.setItem('${escapeJsString(storageKey)}', currentTheme); } catch(e) {}
-		}		
-		var isSystemTheme = ${enableSystem ? "currentTheme === 'system'" : 'false'};
-		var resolvedTheme = ${forcedTheme ? `'${escapeJsString(forcedTheme)}'` : `isSystemTheme ? systemTheme : currentTheme`};				
-		var colorSchemeMode = y[resolvedTheme] || (resolvedTheme === 'light' || resolvedTheme === 'dark' ? resolvedTheme : 'normal');
-		var val = x[resolvedTheme] || resolvedTheme;
-		${enableColorScheme ? `d.style.setProperty('color-scheme', colorSchemeMode);` : ''}
-		${attribute === 'class' ? `d.classList.remove(${attrs.map((t) => `'${escapeJsString(t)}'`).join(',')})` : ''};
-		${attribute === 'class' ? `d.classList.add(val);` : `d.setAttribute('${escapeJsString(attribute)}', val);`};
-		};svelteTheme();
-		</${'script'}>`;
+	const themeScript = $derived(
+		compileThemeBlockingScript({
+			value,
+			colorScheme,
+			themes,
+			validThemes: theme.themes,
+			storageKey,
+			enableSystem,
+			enableColorScheme,
+			forcedTheme,
+			defaultTheme: validatedDefaultTheme,
+			attribute
+		})
+	);
 </script>
 
 <BeforeHydratation

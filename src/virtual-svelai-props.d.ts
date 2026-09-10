@@ -1,5 +1,4 @@
 declare module 'virtual:svelai-props' {
-	import type { PropsMap } from '../tooling/props-docs/types';
-	const propsMap: PropsMap;
+	const propsMap: import('../tooling/props-docs/types.js').PropsMap;
 	export default propsMap;
 }

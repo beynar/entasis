@@ -344,7 +344,7 @@
 			class="h-full min-w-0"
 			ariaLabel={chart.messages.ganttChartTimeline}
 			type="hover"
-			onScroll={handleScroll}
+			onscroll={handleScroll}
 		>
 			<div
 				class="relative overflow-x-clip"

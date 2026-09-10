@@ -1,6 +1,5 @@
 import type { Snippet } from 'svelte';
 import type { WithSlot } from '$lib/components/Slot/slot.js';
-import type { ButtonProps } from '$lib/components/Button/index.js';
 import type { Density, Sizes } from '$lib/types/theme.js';
 import type {
 	FormAction,
@@ -29,6 +28,10 @@ export type FormProps<I extends FormInputs> = WithSlot<
 		 * Bindable object of current field values, inferred from the inputs configuration.
 		 */
 		value?: LiveFormValue<I>;
+		/** Initial field values when `value` is omitted. */
+		defaultValue?: LiveFormValue<I>;
+		/** Called once when a user changes the visible field values; parent updates do not emit it. */
+		onValueChange?: (value: LiveFormValue<I>) => void;
 		/**
 		 * Custom content rendered after the fields, receiving the form state instance.
 		 */
@@ -66,11 +69,6 @@ export type FormProps<I extends FormInputs> = WithSlot<
 		 * Buttons rendered after the form content. Each handler receives the live form state.
 		 */
 		actions?: FormAction<I>[];
-		/**
-		 * Props for the legacy submit button rendered after the actions; set to null to hide it.
-		 * @deprecated Use actions with an onClick handler that calls form.submit().
-		 */
-		submitButton?: ButtonProps | null;
 	},
 	'header' | 'title' | 'description' | 'footer',
 	FormState<I>

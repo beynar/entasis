@@ -15,8 +15,10 @@ export type SortableListItemPayload<T> = {
 	isDragging: boolean;
 };
 
-/** Details passed to `onReorder` describing a completed drag. */
-export type SortableListReorderDetails<T> = {
+/** Payload passed to `onReorder` after a completed drag changes the list order. */
+export type SortableListReorderPayload<T> = {
+	/** The complete reordered list. */
+	items: T[];
 	/** The index the item was dragged from (its position before the drag started). */
 	from: number;
 	/** The index the item was dropped at (its final position). */
@@ -69,8 +71,8 @@ export type SortableListProps<T> = WithAttachments<
 			 * list's `name`. Defaults to accepting everything in the group.
 			 */
 			accepts?: (detail: { item: T; from: string }) => boolean;
-			/** Called once when a drag ends and the order changed, with the reordered array and `{ from, to, item }`. */
-			onReorder?: (items: T[], details: SortableListReorderDetails<T>) => void;
+			/** Called once when a drag ends and the order changed. */
+			onReorder?: (payload: SortableListReorderPayload<T>) => void;
 			/** A row from another list of the group was dropped here at `index`. `items` is already updated — this is a notification. `from.index` is the row's index in the source list at drag start. */
 			onReceive?: (detail: {
 				item: T;

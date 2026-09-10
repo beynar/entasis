@@ -72,7 +72,7 @@ Stat renders a compact metric card with semantic regions for label, value, indic
 ### Indicator Props
 - **indicatorVariant**: 'default' | 'icon' | 'badge' | 'action' (default: 'default') - Indicator presentation.
 - **indicatorColor**: Colors (default: 'neutral') - Semantic color for the indicator.
-- **onIndicatorClick**: (event: MouseEvent) => void - Renders the indicator as a native button.
+- **onclick**: (event: MouseEvent) => void - Native click handler that renders the indicator as a button.
 - **indicatorLabel**: string - Accessible label for icon-only clickable indicators.
 - **indicatorType**: HTMLButtonAttributes['type'] (default: 'button') - Button type used for clickable indicators.
 - **indicatorDisabled**: boolean - Disabled state used for clickable indicators.
@@ -97,7 +97,7 @@ Stat renders a compact metric card with semantic regions for label, value, indic
 ## Accessibility
 
 - The root is a non-interactive \`div\`; use surrounding landmarks/headings to provide page structure.
-- The indicator renders as a native \`button\` only when \`onIndicatorClick\` is supplied.
+- The indicator renders as a native \`button\` only when \`onclick\` is supplied.
 - Icon-only clickable indicators should provide \`indicatorLabel\`.
 - The separator is decorative.
 

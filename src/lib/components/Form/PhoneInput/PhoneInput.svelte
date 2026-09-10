@@ -2,7 +2,11 @@
 	import Popover from '../../Popover/Popover.svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
-	import intlTelInput from 'intl-tel-input';
+	import {
+		loadIntlTelInputFromCdn,
+		type IntlTelInputInstance,
+		type IntlTelInputLibrary
+	} from './phoneInput-cdn.js';
 	import PhoneInputCountryPicker from './PhoneInputCountryPicker.svelte';
 	import PhoneInputCountryTrigger from './PhoneInputCountryTrigger.svelte';
 	import type { PhoneInputProps } from './phoneInput.props.js';
@@ -16,33 +20,38 @@
 	import { on } from 'svelte/events';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		country = $bindable('fr'),
-		iti = $bindable<ReturnType<typeof intlTelInput> | undefined>(),
+		iti = $bindable<IntlTelInputInstance | undefined>(),
 		required = false,
 		strict = true,
-		separator,
 		searchPlaceholder = 'Search',
 		placeholder = 'Phone number',
 		theme,
 		disabled,
 		name,
 		onValidate,
-		onChange,
+		onValueChange,
 		visible,
 		...rest
 	}: PhoneInputProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 	const countryPickerId = `${id}-country-picker`;
 	let countryPickerOpen = $state(false);
 	let phoneInputNode = $state<HTMLInputElement | null>(null);
-	const countryOptions = createPhoneCountryOptions(intlTelInput.getAllCountries());
+	let library = $state<IntlTelInputLibrary | null>(null);
+	let attachmentId = 0;
+	const countryOptions = $derived(
+		library ? createPhoneCountryOptions(library.getAllCountries()) : []
+	);
 
 	const getValue = () => {
-		if (!iti || !intlTelInput.utils) {
+		if (!iti || !library?.utils) {
 			return (phoneInputNode?.value ?? '').replaceAll(' ', '');
 		}
 
@@ -65,7 +74,7 @@
 		get errors() {
 			return errors;
 		},
-		set errors(v: any) {
+		set errors(v: string[] | boolean) {
 			errors = v;
 		},
 		get focused() {
@@ -74,8 +83,8 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => {
-			onChange?.(v);
+		onValueChange: (v) => {
+			onValueChange?.(v);
 		},
 		get disabled() {
 			return disabled;
@@ -94,7 +103,8 @@
 		},
 		onValidate: (value) => {
 			const customErrors = onValidate?.(value);
-			const isValid = country && intlTelInput.utils && iti?.isValidNumber();
+			if (!iti || !library?.utils) return customErrors;
+			const isValid = Boolean(country && iti.isValidNumber());
 			return customErrors || (isValid ? [] : ['Invalid phone number']);
 		},
 		get visible() {
@@ -132,36 +142,62 @@
 
 	const usePhoneInput = (node: HTMLInputElement) => {
 		return untrack(() => {
+			const currentAttachmentId = ++attachmentId;
 			phoneInputNode = node;
 
 			if (value) {
 				node.value = value;
 			}
-			const instance = intlTelInput(node, {
-				strictMode: strict,
-				initialCountry: selectedCountry?.iso2 ?? '',
-				allowPhonewords: false,
-				formatAsYouType: true,
-				separateDialCode: false,
-				showFlags: false,
-				countrySelectorMode: 'OFF',
-				containerClass: 'min-w-0 w-full flex-1',
-				loadUtils: () => import('intl-tel-input/utils')
-			});
-			iti = instance;
 
-			syncSelectedCountry();
-			instance.promise.then(() => {
-				if (iti === instance) {
-					field.value = getValue();
-				}
-			});
+			let instance: IntlTelInputInstance | undefined;
+			let offCountryChange: (() => void) | undefined;
 
-			const offCountryChange = on(node, 'countrychange', syncSelectedCountry);
+			void loadIntlTelInputFromCdn()
+				.then((intlTelInput) => {
+					if (currentAttachmentId !== attachmentId || phoneInputNode !== node) {
+						return;
+					}
+
+					library = intlTelInput;
+					const countries = createPhoneCountryOptions(intlTelInput.getAllCountries());
+					const initialCountry =
+						getPhoneCountryOption(countries, country) ?? getPhoneCountryOption(countries, 'fr');
+					instance = intlTelInput(node, {
+						strictMode: strict,
+						initialCountry: initialCountry?.iso2 ?? '',
+						allowPhonewords: false,
+						formatAsYouType: true,
+						separateDialCode: false,
+						showFlags: false,
+						countrySelectorMode: 'OFF',
+						containerClass: 'min-w-0 w-full flex-1'
+					});
+					iti = instance;
+
+					syncSelectedCountry();
+					void instance.promise.then(() => {
+						if (iti === instance) {
+							field.value = getValue();
+						}
+					});
+
+					offCountryChange = on(node, 'countrychange', syncSelectedCountry);
+				})
+				.catch((error: unknown) => {
+					if (currentAttachmentId !== attachmentId) {
+						return;
+					}
+					console.error(error);
+				});
 
 			return () => {
-				offCountryChange();
-				instance.destroy();
+				if (currentAttachmentId !== attachmentId) {
+					return;
+				}
+
+				attachmentId += 1;
+				offCountryChange?.();
+				instance?.destroy();
 				if (phoneInputNode === node) {
 					phoneInputNode = null;
 				}
@@ -189,17 +225,15 @@
 	size="normal"
 	class={classes.popover({ class: theme?.popover?.base })}
 >
-	{#snippet children()}
-		<PhoneInputCountryPicker
-			id={countryPickerId}
-			countries={countryOptions}
-			{selectedCountry}
-			{searchPlaceholder}
-			size={rest.size}
-			{theme}
-			onSelectCountry={selectCountry}
-		/>
-	{/snippet}
+	<PhoneInputCountryPicker
+		id={countryPickerId}
+		countries={countryOptions}
+		{selectedCountry}
+		{searchPlaceholder}
+		size={rest.size}
+		{theme}
+		onSelectCountry={selectCountry}
+	/>
 	{#snippet trigger(popover)}
 		<Field
 			{field}

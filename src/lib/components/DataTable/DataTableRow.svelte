@@ -237,7 +237,7 @@
 					ariaLabel={`Select row ${rowIndex + 1}`}
 					value={rowSelected}
 					disabled={model.props.disabled || !row.getCanSelect()}
-					onChange={(checked) => row.toggleSelected(checked)}
+					onValueChange={(checked) => row.toggleSelected(checked)}
 					{classes}
 				/>
 			{:else if column.id === DATA_TABLE_ACTIONS_COLUMN}

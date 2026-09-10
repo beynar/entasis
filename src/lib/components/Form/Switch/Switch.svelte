@@ -1,12 +1,15 @@
 <script lang="ts">
-	import Field, { useFieldTheme } from '../Field/Field.svelte';
+	import { untrack } from 'svelte';
+	import Field from '../Field/Field.svelte';
+	import { useFieldTheme } from '../Field/field.theme.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { SwitchProps } from './switch.props.js';
 	import { useSwitchTheme } from './switch.theme.js';
 	import Slot from '$lib/components/Slot/Slot.svelte';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
@@ -19,9 +22,10 @@
 		label,
 		labelPosition,
 		ariaLabel,
-		onChange,
+		onValueChange,
 		...rest
 	}: SwitchProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 
@@ -45,8 +49,8 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => {
-			onChange?.(v);
+		onValueChange: (v) => {
+			onValueChange?.(v);
 		},
 		get disabled() {
 			return disabled;
@@ -125,6 +129,7 @@
 		aria-disabled={field.disabled || undefined}
 		role="switch"
 		tabindex={field.disabled ? -1 : 0}
+		data-color="primary"
 		class={classes.toggle({ checked: !!value, size, disabled })}
 		{onclick}
 		onkeydown={onKeydown}

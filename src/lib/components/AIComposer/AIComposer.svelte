@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import type {
 		RichTextInputChange,
 		RichTextInputHandle,
@@ -38,22 +39,20 @@
 
 	let {
 		ref = $bindable<HTMLFormElement | null>(null),
-		value = $bindable<string>(),
+		defaultValue,
+		value = $bindable<string | undefined>(),
+		onValueChange,
 		files = $bindable<File[]>(),
 		attachments = $bindable<AIComposerAttachment[]>(),
 		queue = $bindable<AIComposerQueuedMessage[]>(),
-		queuedMessages = $bindable<AIComposerQueuedMessage[]>(),
 		busy,
 		disabled = false,
 		queueWhileBusy = true,
 		fileDropzone = false,
 		fileMultiple = true,
 		accept,
-		fileAccept,
 		maxFiles,
-		fileMaxFiles,
 		maxFileSize,
-		fileMaxSize,
 		commands,
 		mentionItems = [],
 		mentions,
@@ -78,7 +77,6 @@
 		dropLabel = 'Drop files to attach',
 		dropInvalidLabel = 'These files cannot be attached',
 		onSubmit,
-		onSubmitMessage,
 		onStop,
 		onFilesRejected,
 		onFilesChange,
@@ -87,7 +85,6 @@
 		onAttachmentRetry,
 		onAttachmentRemove,
 		onQueueChange,
-		onQueuedMessagesChange,
 		onQueuedMessageAdd,
 		onQueuedMessageCancel,
 		onQueuedMessageEditStart,
@@ -119,6 +116,11 @@
 		voiceInputTheme,
 		...formAttachments
 	}: AIComposerProps = $props();
+	const valueState = createBindableValue<string | undefined>(
+		() => value,
+		(nextValue) => (value = nextValue),
+		() => defaultValue
+	);
 
 	const conversation = getAIConversation<AIThreadItem>();
 	let editorHandle = $state<RichTextInputHandle>();
@@ -126,7 +128,7 @@
 	let tokens = $state<RichTextInputToken[]>([]);
 	const submitMetadata = new AIComposerSubmitMetadata();
 
-	const resolvedValue = $derived(value ?? conversation?.currentInput ?? '');
+	const resolvedValue = $derived(valueState.value ?? conversation?.currentInput ?? '');
 	const resolvedFiles = $derived<File[]>(files ?? conversation?.files ?? []);
 	const resolvedAttachments = $derived<AIComposerAttachment[]>(
 		attachments ?? conversation?.attachments ?? []
@@ -136,17 +138,13 @@
 			(files === undefined && Boolean(conversation)) ||
 			Boolean(onAttachmentAdd || onAttachmentRetry || onAttachmentRemove)
 	);
-	const resolvedQueue = $derived<AIComposerQueuedMessage[]>(queue ?? queuedMessages ?? []);
+	const resolvedQueue = $derived<AIComposerQueuedMessage[]>(queue ?? []);
 	const resolvedBusy = $derived(
 		busy ?? (conversation ? conversation.isStreaming || conversation.status === 'stopping' : false)
 	);
-	const resolvedAccept = $derived(resolveAccept(accept, fileAccept));
-	const resolvedMaxFiles = $derived(
-		Math.max(0, maxFiles ?? fileMaxFiles ?? Number.POSITIVE_INFINITY)
-	);
-	const resolvedMaxFileSize = $derived(
-		Math.max(0, maxFileSize ?? fileMaxSize ?? Number.POSITIVE_INFINITY)
-	);
+	const resolvedAccept = $derived(Array.from(accept ?? []));
+	const resolvedMaxFiles = $derived(Math.max(0, maxFiles ?? Number.POSITIVE_INFINITY));
+	const resolvedMaxFileSize = $derived(Math.max(0, maxFileSize ?? Number.POSITIVE_INFINITY));
 	const resolvedSources = $derived(
 		resolveAIComposerSources({
 			commands,
@@ -160,7 +158,7 @@
 			onCommandSearch,
 			onMentionSearch,
 			onSkillSearch,
-			onItemSelect: (item, kind) => submitMetadata.remember(item, kind)
+			onItemSelect: ({ item, kind }) => submitMetadata.remember(item, kind)
 		})
 	);
 	const resolvedPlaceholder = $derived(
@@ -219,7 +217,6 @@
 		restoreDraft: restoreQueuedMessage,
 		clearDraft,
 		onQueueChange,
-		onQueuedMessagesChange,
 		onAdd: onQueuedMessageAdd,
 		onCancel: onQueuedMessageCancel,
 		onEditStart: onQueuedMessageEditStart,
@@ -239,7 +236,6 @@
 		buildMeta: buildSubmitMeta,
 		clearDraft,
 		onSubmit,
-		onSubmitMessage,
 		onStop
 	}));
 	const isWorking: boolean = $derived(submitController.isWorking);
@@ -314,16 +310,18 @@
 		const typedItem = { ...item, kind: item.kind ?? kind };
 		const context = { trigger, query: '' };
 		const token = source?.toToken
-			? source.toToken(item, context)
+			? source.toToken({ item, context })
 			: toRichTextInputToken(typedItem, { tokenKind: typedItem.kind }, context);
 		handle.insertToken(token);
 		submitMetadata.remember(item, kind);
-		source?.onSelect?.(item, context);
+		source?.onSelect?.({ item, context });
 	}
 
 	function setValue(nextValue: string): void {
-		if (value !== undefined || !conversation) value = nextValue;
+		if (nextValue === resolvedValue) return;
+		if (valueState.value !== undefined || !conversation) valueState.value = nextValue;
 		else conversation.setInput(nextValue);
+		onValueChange?.(nextValue);
 	}
 
 	function setFiles(nextFiles: File[]): void {
@@ -337,8 +335,7 @@
 	}
 
 	function setQueue(nextQueue: AIComposerQueuedMessage[]): void {
-		if (queue !== undefined || queuedMessages === undefined) queue = nextQueue;
-		else queuedMessages = nextQueue;
+		queue = nextQueue;
 	}
 
 	function handleValueChange(change: RichTextInputChange): void {
@@ -379,18 +376,6 @@
 		tokens = [];
 		submitMetadata.clear();
 		setValue('');
-	}
-
-	function resolveAccept(
-		directAccept: readonly string[] | undefined,
-		compatibilityAccept: string | undefined
-	): string[] {
-		if (directAccept !== undefined) return Array.from(directAccept);
-		if (!compatibilityAccept) return [];
-		return compatibilityAccept
-			.split(',')
-			.map((type) => type.trim())
-			.filter(Boolean);
 	}
 </script>
 
@@ -476,7 +461,7 @@
 		{prefix}
 		{suffix}
 		onSubmit={submitController.submit}
-		onChange={handleValueChange}
+		onValueChange={handleValueChange}
 		{onSuggestionOpen}
 		{onSuggestionClose}
 		{onSuggestionQueryChange}

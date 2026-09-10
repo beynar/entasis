@@ -3,8 +3,34 @@
 	import DocPage from '../../DocPage.svelte';
 	import { PhoneInput } from '$lib/components/Form/PhoneInput/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let phone = $state('');
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -12,7 +38,7 @@
 	subtitle="International phone number entry with country selection."
 	component="PhoneInput"
 	features={[
-		'Powered by intl-tel-input',
+		'intl-tel-input loaded from CDN at runtime',
 		'Bindable value, errors & country',
 		'Formats number as you type',
 		'Validates with isValidNumber()',
@@ -20,8 +46,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="An international phone input with country selector"
 		code={`<PhoneInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Phone"
 	description="We'll send delivery updates to this number"
 	placeholder="Phone number"
@@ -30,6 +61,10 @@
 	>
 		<div class="w-full max-w-md">
 			<PhoneInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
 				label="Phone"
 				description="We'll send delivery updates to this number"
 				placeholder="Phone number"

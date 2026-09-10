@@ -1,6 +1,6 @@
 import { parse } from 'svelte/compiler';
 import { Node, type ObjectLiteralExpression, type Project, type SourceFile } from 'ts-morph';
-import type { ComponentStructure, StructureNode, ThemePart, ThemeVariant } from './types';
+import type { ComponentStructure, StructureNode, ThemePart, ThemeVariant } from './types.js';
 
 /*
  * Svelte's compiler AST types are verbose and version-unstable, so template
@@ -95,7 +95,9 @@ function surface(nodes: RawNode[]): StructureNode[] {
  */
 function collapseConditions(nodes: StructureNode[]): StructureNode[] {
 	return nodes.map((node) => {
-		let current: StructureNode = node.children ? { ...node, children: collapseConditions(node.children) } : node;
+		let current: StructureNode = node.children
+			? { ...node, children: collapseConditions(node.children) }
+			: node;
 		while (
 			isConditional(current) &&
 			current.children?.length === 1 &&
@@ -104,7 +106,10 @@ function collapseConditions(nodes: StructureNode[]): StructureNode[] {
 			const inner = current.children[0];
 			current = {
 				kind: 'control',
-				control: { keyword: current.control!.keyword, label: mergeTests(current.control!.label, inner.control!.label) },
+				control: {
+					keyword: current.control!.keyword,
+					label: mergeTests(current.control!.label, inner.control!.label)
+				},
 				children: inner.children
 			};
 		}
@@ -126,7 +131,8 @@ function groupSameThemePart(
 
 	const leaves = survivors.map((branch) => branch.nodes[0]);
 	const part = leaves[0].themePart;
-	if (!part || !leaves.every((node) => node.themePart === part && !node.children?.length)) return null;
+	if (!part || !leaves.every((node) => node.themePart === part && !node.children?.length))
+		return null;
 
 	const slotLeaf = leaves.find((node) => node.kind === 'slot');
 	const hasDefault = leaves.some((node) => node.kind !== 'slot');
@@ -143,7 +149,10 @@ function groupSameThemePart(
 }
 
 function isConditional(node: StructureNode): boolean {
-	return node.kind === 'control' && (node.control?.keyword === 'if' || node.control?.keyword === 'else if');
+	return (
+		node.kind === 'control' &&
+		(node.control?.keyword === 'if' || node.control?.keyword === 'else if')
+	);
 }
 
 function mergeTests(outer?: string, inner?: string): string | undefined {
@@ -165,7 +174,11 @@ function surfaceNode(node: RawNode): StructureNode[] {
 
 	if (node.kind === 'if') {
 		const survivors = (node.branches ?? [])
-			.map((branch) => ({ test: branch.test, defaultValue: branch.defaultValue, nodes: surface(branch.nodes) }))
+			.map((branch) => ({
+				test: branch.test,
+				defaultValue: branch.defaultValue,
+				nodes: surface(branch.nodes)
+			}))
 			.filter((branch) => branch.nodes.length > 0);
 		if (survivors.length === 0) return [];
 
@@ -185,7 +198,9 @@ function surfaceNode(node: RawNode): StructureNode[] {
 		if (survivors.length === 1) {
 			const only = survivors[0];
 			if (only.nodes.length === 1 && only.nodes[0].hasDefault) return only.nodes;
-			return [{ kind: 'control', control: { keyword: 'if', label: only.test }, children: only.nodes }];
+			return [
+				{ kind: 'control', control: { keyword: 'if', label: only.test }, children: only.nodes }
+			];
 		}
 
 		// Genuine either/or: one region per surviving branch.
@@ -193,7 +208,11 @@ function surfaceNode(node: RawNode): StructureNode[] {
 		return survivors.map((branch) => {
 			const keyword = branch.test === undefined ? 'else' : seenTest ? 'else if' : 'if';
 			seenTest ||= branch.test !== undefined;
-			return { kind: 'control' as const, control: { keyword, label: branch.test }, children: branch.nodes };
+			return {
+				kind: 'control' as const,
+				control: { keyword, label: branch.test },
+				children: branch.nodes
+			};
 		});
 	}
 
@@ -221,7 +240,8 @@ function surfaceNode(node: RawNode): StructureNode[] {
  * to a local `const x = cva({..})` identifier; the config is resolved from that.
  */
 export function readThemeParts(project: Project, themeFilePath: string): ThemePart[] {
-	const sourceFile = project.getSourceFile(themeFilePath) ?? project.addSourceFileAtPath(themeFilePath);
+	const sourceFile =
+		project.getSourceFile(themeFilePath) ?? project.addSourceFileAtPath(themeFilePath);
 	const cvaConfigs = collectCvaConfigs(sourceFile);
 
 	for (const decl of sourceFile.getVariableDeclarations()) {
@@ -253,11 +273,16 @@ export function readThemeParts(project: Project, themeFilePath: string): ThemePa
  * the actual declaration rather than deriving it. Returns the first such export.
  */
 export function readThemeSetter(project: Project, themeFilePath: string): string | undefined {
-	const sourceFile = project.getSourceFile(themeFilePath) ?? project.addSourceFileAtPath(themeFilePath);
+	const sourceFile =
+		project.getSourceFile(themeFilePath) ?? project.addSourceFileAtPath(themeFilePath);
 	for (const decl of sourceFile.getVariableDeclarations()) {
 		if (!decl.isExported()) continue;
 		const init = decl.getInitializer();
-		if (init && Node.isCallExpression(init) && init.getExpression().getText() === 'setComponentTheme') {
+		if (
+			init &&
+			Node.isCallExpression(init) &&
+			init.getExpression().getText() === 'setComponentTheme'
+		) {
 			return decl.getName();
 		}
 	}
@@ -302,7 +327,10 @@ function parseVariants(variantsObj: ObjectLiteralExpression): ThemeVariant[] {
 		const options = optionsObj
 			.getProperties()
 			.filter(Node.isPropertyAssignment)
-			.map((option) => ({ value: option.getName(), classes: literalString(option.getInitializer()) ?? '' }))
+			.map((option) => ({
+				value: option.getName(),
+				classes: literalString(option.getInitializer()) ?? ''
+			}))
 			.filter((option) => option.classes.length > 0);
 		if (options.length) variants.push({ name: prop.getName(), options });
 	}
@@ -325,7 +353,10 @@ function stringProp(obj: ObjectLiteralExpression, name: string): string | undefi
 	return prop && Node.isPropertyAssignment(prop) ? literalString(prop.getInitializer()) : undefined;
 }
 
-function objectProp(obj: ObjectLiteralExpression, name: string): ObjectLiteralExpression | undefined {
+function objectProp(
+	obj: ObjectLiteralExpression,
+	name: string
+): ObjectLiteralExpression | undefined {
 	const prop = obj.getProperty(name);
 	if (!prop || !Node.isPropertyAssignment(prop)) return undefined;
 	const init = prop.getInitializer();
@@ -333,8 +364,9 @@ function objectProp(obj: ObjectLiteralExpression, name: string): ObjectLiteralEx
 }
 
 /** The string value of a string or no-substitution template literal, else undefined. */
-function literalString(node: unknown): string | undefined {
-	if (Node.isStringLiteral(node) || Node.isNoSubstitutionTemplateLiteral(node)) return node.getLiteralValue();
+function literalString(node: Node | undefined): string | undefined {
+	if (Node.isStringLiteral(node) || Node.isNoSubstitutionTemplateLiteral(node))
+		return node.getLiteralValue();
 	return undefined;
 }
 
@@ -361,7 +393,9 @@ function walkNode(node: any, ctx: Ctx): RawNode[] {
 			return [element('component', name, node, ctx)];
 		}
 		case 'EachBlock':
-			return [{ kind: 'each', label: raw(ctx, node.expression), children: walkFragment(node.body, ctx) }];
+			return [
+				{ kind: 'each', label: raw(ctx, node.expression), children: walkFragment(node.body, ctx) }
+			];
 		case 'IfBlock':
 			return [{ kind: 'if', branches: flattenIf(node, ctx) }];
 		case 'RenderTag':
@@ -390,7 +424,10 @@ function flattenIf(node: any, ctx: Ctx): Branch[] {
 		});
 		const alternate = current.alternate;
 		if (!alternate?.nodes?.length) break;
-		const elseif = alternate.nodes.length === 1 && alternate.nodes[0].type === 'IfBlock' ? alternate.nodes[0] : null;
+		const elseif =
+			alternate.nodes.length === 1 && alternate.nodes[0].type === 'IfBlock'
+				? alternate.nodes[0]
+				: null;
 		if (elseif?.elseif) {
 			current = elseif;
 		} else {
@@ -524,11 +561,18 @@ function readPropDefaults(instance: any): Map<string, string> {
 		if (stmt.type !== 'VariableDeclaration') continue;
 		for (const decl of stmt.declarations) {
 			const init = decl.init;
-			const isProps = init?.type === 'CallExpression' && init.callee?.type === 'Identifier' && init.callee.name === '$props';
+			const isProps =
+				init?.type === 'CallExpression' &&
+				init.callee?.type === 'Identifier' &&
+				init.callee.name === '$props';
 			if (!isProps || decl.id?.type !== 'ObjectPattern') continue;
 			for (const prop of decl.id.properties) {
 				const value = prop.type === 'Property' ? prop.value : undefined;
-				if (value?.type === 'AssignmentPattern' && value.left?.type === 'Identifier' && value.right?.type === 'Literal') {
+				if (
+					value?.type === 'AssignmentPattern' &&
+					value.left?.type === 'Identifier' &&
+					value.right?.type === 'Literal'
+				) {
 					defaults.set(value.left.name, String(value.right.value));
 				}
 			}
@@ -544,13 +588,17 @@ function readPropNames(instance: any): Set<string> {
 		if (stmt.type !== 'VariableDeclaration') continue;
 		for (const decl of stmt.declarations) {
 			const init = decl.init;
-			const isProps = init?.type === 'CallExpression' && init.callee?.type === 'Identifier' && init.callee.name === '$props';
+			const isProps =
+				init?.type === 'CallExpression' &&
+				init.callee?.type === 'Identifier' &&
+				init.callee.name === '$props';
 			if (!isProps || decl.id?.type !== 'ObjectPattern') continue;
 			for (const prop of decl.id.properties) {
 				if (prop.type === 'Property') {
 					const value = prop.value;
 					if (value?.type === 'Identifier') names.add(value.name);
-					else if (value?.type === 'AssignmentPattern' && value.left?.type === 'Identifier') names.add(value.left.name);
+					else if (value?.type === 'AssignmentPattern' && value.left?.type === 'Identifier')
+						names.add(value.left.name);
 				}
 			}
 		}
@@ -565,7 +613,12 @@ function readPropNames(instance: any): Set<string> {
 function defaultBranchValue(test: any, defaults: Map<string, string>): string | undefined {
 	let found: string | undefined;
 	walkEstree(test, (node) => {
-		if (found || node.type !== 'BinaryExpression' || (node.operator !== '===' && node.operator !== '==')) return;
+		if (
+			found ||
+			node.type !== 'BinaryExpression' ||
+			(node.operator !== '===' && node.operator !== '==')
+		)
+			return;
 		const pair = comparedLiteral(node.left, node.right) ?? comparedLiteral(node.right, node.left);
 		if (pair && defaults.get(pair.name) === pair.value) found = pair.value;
 	});
@@ -573,14 +626,16 @@ function defaultBranchValue(test: any, defaults: Map<string, string>): string | 
 }
 
 function comparedLiteral(a: any, b: any): { name: string; value: string } | null {
-	if (a?.type === 'Identifier' && b?.type === 'Literal') return { name: a.name, value: String(b.value) };
+	if (a?.type === 'Identifier' && b?.type === 'Literal')
+		return { name: a.name, value: String(b.value) };
 	return null;
 }
 
 /** True for `useXTheme(..)` or `$derived(useXTheme(..))`. */
 function callsThemeHook(init: any): boolean {
 	let call = init;
-	if (call?.type === 'CallExpression' && call.callee?.name === '$derived') call = call.arguments?.[0];
+	if (call?.type === 'CallExpression' && call.callee?.name === '$derived')
+		call = call.arguments?.[0];
 	const name = call?.type === 'CallExpression' ? call.callee?.name : undefined;
 	return !!name && (/^use[A-Z]\w*Theme$/.test(name) || name === 'useComponentTheme');
 }
@@ -588,7 +643,8 @@ function callsThemeHook(init: any): boolean {
 function collectSnippets(fragment: any): Map<string, any> {
 	const map = new Map<string, any>();
 	walkAll(fragment, (node) => {
-		if (node.type === 'SnippetBlock' && node.expression?.name) map.set(node.expression.name, node.body);
+		if (node.type === 'SnippetBlock' && node.expression?.name)
+			map.set(node.expression.name, node.body);
 	});
 	return map;
 }
@@ -684,13 +740,20 @@ function isHidden(node: any): boolean {
 	const classAttr = getAttr(node, 'class');
 	if (classAttr) {
 		for (const value of normAttrValue(classAttr.value)) {
-			if (value?.type === 'Text' && String(value.data ?? '').split(/\s+/).includes('sr-only')) return true;
+			if (
+				value?.type === 'Text' &&
+				String(value.data ?? '')
+					.split(/\s+/)
+					.includes('sr-only')
+			)
+				return true;
 		}
 	}
 	const ariaHidden = getAttr(node, 'aria-hidden');
 	if (ariaHidden) {
 		const values = normAttrValue(ariaHidden.value);
-		if (values.some((v) => v?.type === 'Text' && String(v.data ?? '').trim() === 'true')) return true;
+		if (values.some((v) => v?.type === 'Text' && String(v.data ?? '').trim() === 'true'))
+			return true;
 	}
 	return false;
 }

@@ -104,14 +104,14 @@ ${'</' + 'script>'}
 			code={`<AIConversation bind:currentInput>
   <Suggestions
     suggestions={items}
-    onSuggestionClick={(suggestion) => (currentInput = suggestion)}
+    onSuggestionSelect={(suggestion) => (currentInput = suggestion)}
   />
   <AIComposer />
 </AIConversation>`}
 		>
 			<div class="grid w-full max-w-2xl gap-3">
 				<AIConversation bind:currentInput={value}>
-					<Suggestions suggestions={items} onSuggestionClick={(nextValue) => (value = nextValue)} />
+					<Suggestions suggestions={items} onSuggestionSelect={(nextValue) => (value = nextValue)} />
 					<AIComposer />
 				</AIConversation>
 			</div>

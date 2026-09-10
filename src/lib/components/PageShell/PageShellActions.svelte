@@ -72,7 +72,7 @@
 							prefix={dotsThreeIcon}
 							class={classes.overflowTrigger()}
 							{@attach popover.reference}
-							onClick={() => popover.toggle()}
+							onclick={() => popover.toggle()}
 						/>
 					{/snippet}
 				</PopupMenu>

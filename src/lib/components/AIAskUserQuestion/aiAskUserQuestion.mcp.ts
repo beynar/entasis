@@ -28,9 +28,10 @@ The package exports Valibot schemas for tool state, options, every question kind
 
 Questions are required by default. Disabled choice options remain visible but cannot be selected. File questions use the shared chooser/drop acceptance behavior and show type, size, count, and duplicate failures.
 
-## State and precedence
+## State and behavior
 
-- \`values\` is the canonical bindable answer map and wins over the Svelte Pro-compatible \`value\` alias.
+- \`value\` is the bindable answer map. \`defaultValue\` initializes omitted state once; later default changes do not reset answers.
+- \`onValueChange(value)\` runs once after a user changes an answer. Parent value changes and selecting the current answer do not emit it.
 - \`activeIndex\` is bindable and is clamped whenever the question list changes.
 - \`autoAdvance\` wins over \`autoAdvanceSingle\`; \`autoAdvanceDelay\` wins over \`autoAdvanceSingleDelay\`.
 - Single-choice answers auto-advance by default after 280 ms, including values set through a custom question slot. Empty values, the last step, disabled state, and active async work never auto-advance.
@@ -40,7 +41,7 @@ Questions are required by default. Disabled choice options remain visible but ca
 
 The default required message is \`Answer required.\`. \`requiredMessage\` accepts either a string or a per-question formatter. Primary navigation validates the active question; final submission finds the first missing required answer and moves to it. Previous/next icon controls remain available for explicit navigation.
 
-\`onChange(values, question)\` runs after each answer update. \`onSubmit\` receives typed \`answers\`, the raw \`values\` map, and the source \`questions\`. \`onDiscard\` adds the optional dismiss action. Async submit/discard exceptions and file rejection messages render visibly instead of being swallowed.
+\`onSubmit\` receives typed \`answers\`, the raw \`values\` map, and the source \`questions\`. \`onDiscard\` adds the optional dismiss action. Async submit/discard exceptions and file rejection messages render visibly instead of being swallowed.
 
 \`\`\`svelte
 <AIAskUserQuestion
@@ -61,14 +62,14 @@ The default required message is \`Answer required.\`. \`requiredMessage\` accept
       required: false
     }
   ]}
-  bind:values
+  bind:value={answers}
   onSubmit={({ answers, values }) => resolveTool({ answers, values })}
 />
 \`\`\`
 
 ## Composition
 
-\`header\`, \`footer\`, \`children\`, and \`empty\` receive \`AIAskUserQuestionState\`: questions, values, active question/index, visible error, working flags, first/last flags, and \`goTo\`, \`previous\`, \`next\`, \`submit\`, and \`discard\` actions.
+\`header\`, \`footer\`, \`children\`, and \`empty\` receive \`AIAskUserQuestionState\`: questions, value, active question/index, visible error, working flags, first/last flags, and \`goTo\`, \`previous\`, \`next\`, \`submit\`, and \`discard\` actions.
 
 The \`question\` slot receives \`{ question, value, setValue }\`. Its setter preserves central validation, change callbacks, and single-choice auto-advance; no public compound subcomponents are required.
 

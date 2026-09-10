@@ -10,6 +10,33 @@
 	import rawDoubleSidebarCode from './demos/AppShellDoubleSidebarDemo.svelte?raw';
 	import rawFeatureShowcaseCode from './demos/AppShellFeatureShowcaseDemo.svelte?raw';
 	import rawVariantGalleryCode from './demos/AppShellVariantGalleryDemo.svelte?raw';
+	import { createComponentControls } from '../../componentControls.svelte.js';
+	import { sizes } from '$lib/utils/tokens.js';
+
+	const sidebarVariants = ['admin', 'floating', 'inset', 'split'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'inset',
+			options: sidebarVariants
+		},
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		}
+	]);
 
 	const doubleSidebarCode = toPublicExampleCode(rawDoubleSidebarCode);
 	const featureShowcaseCode = toPublicExampleCode(rawFeatureShowcaseCode);
@@ -41,6 +68,7 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Use AppShell when every route follows the same sidebar plus page-shell structure."
 		class="!min-h-fit !items-start !p-4"
 		code={`<script lang="ts">
@@ -61,6 +89,8 @@
 		onDisplayStateChange: (nextDisplayState) => {
 			sidebarDisplayState = nextDisplayState;
 		},
+		size: '${controls.value.size}',
+		density: '${controls.value.density}',
 		collapsible: 'icon',
 		rail: true,
 		width: sidebarWidth,
@@ -90,7 +120,7 @@
 	});
 ${'</' + 'script>'}
 
-<AppShell variant="inset" {sidebar} title="Dashboard" subtitle="Sidebar navigation with sticky page chrome">
+<AppShell variant="${controls.value.variant}" {sidebar} title="Dashboard" subtitle="Sidebar navigation with sticky page chrome">
 	{#snippet headerActions({ sidebar })}
 		<button type="button" aria-label="Toggle sidebar" onclick={sidebar.toggle}>
 			{@render sidebarIcon({ class: 'size-4' })}
@@ -107,7 +137,11 @@ ${'</' + 'script>'}
 	{/snippet}
 </AppShell>`}
 	>
-		<AppShellBasicDemo />
+		<AppShellBasicDemo
+			variant={controls.value.variant}
+			size={controls.value.size}
+			density={controls.value.density}
+		/>
 	</ComponentCard>
 
 	{#snippet examples()}

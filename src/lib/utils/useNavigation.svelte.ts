@@ -1,7 +1,7 @@
 import { SvelteSet } from 'svelte/reactivity';
 import { useKeyDown } from './useKeyDown.svelte.js';
 import { on } from 'svelte/events';
-import { onDestroy, tick, untrack } from 'svelte';
+import { onDestroy, untrack } from 'svelte';
 import { usePointerDown } from './usePointerDown.svelte.js';
 
 type NavigationOptions = {
@@ -95,10 +95,11 @@ export const useNavigation = (opts: NavigationOptions) => {
 
 	// Check if item is disabled
 	const isItemDisabled = (item: HTMLElement) => {
+		const dataDisabled = item.getAttribute('data-disabled');
 		return (
 			item.hasAttribute('disabled') ||
 			item.getAttribute('aria-disabled') === 'true' ||
-			item.hasAttribute('data-disabled')
+			(dataDisabled !== null && dataDisabled !== 'false')
 		);
 	};
 
@@ -106,26 +107,16 @@ export const useNavigation = (opts: NavigationOptions) => {
 	const findNextIndex = (currentIndex: number, direction: 1 | -1): number => {
 		const { loop = true } = opts;
 		const total = items.length;
-		let nextIndex = currentIndex + direction;
-
-		// Handle looping
-		if (loop) {
-			if (nextIndex >= total) nextIndex = 0;
-			if (nextIndex < 0) nextIndex = total - 1;
-		} else {
-			if (nextIndex >= total) nextIndex = total - 1;
-			if (nextIndex < 0) nextIndex = 0;
+		for (let distance = 1; distance <= total; distance += 1) {
+			let nextIndex = currentIndex + direction * distance;
+			if (loop) {
+				nextIndex = ((nextIndex % total) + total) % total;
+			} else if (nextIndex < 0 || nextIndex >= total) {
+				return currentIndex;
+			}
+			if (!isItemDisabled(items[nextIndex])) return nextIndex;
 		}
-
-		// If same as current, we've wrapped around completely
-		if (nextIndex === currentIndex) return currentIndex;
-
-		// Skip disabled items
-		if (isItemDisabled(items[nextIndex])) {
-			return findNextIndex(nextIndex, direction);
-		}
-
-		return nextIndex;
+		return currentIndex;
 	};
 
 	// Find first non-disabled index
@@ -151,9 +142,14 @@ export const useNavigation = (opts: NavigationOptions) => {
 		// enabled one. This makes Tab land on the meaningful item WITHOUT any element
 		// being DOM-focused on mount (which would flash a focus ring). Virtual focus
 		// keeps every item out of the tab order.
-		const tabStop = opts.virtualFocus
-			? -1
-			: (focusIdx ?? opts.defaultFocusedIndex?.() ?? findFirstIndex());
+		const preferredTabStop = focusIdx ?? opts.defaultFocusedIndex?.();
+		const enabledTabStop =
+			preferredTabStop != null &&
+			items[preferredTabStop] &&
+			!isItemDisabled(items[preferredTabStop])
+				? preferredTabStop
+				: findFirstIndex();
+		const tabStop = opts.virtualFocus ? -1 : enabledTabStop;
 		items.forEach((item, index) => {
 			const isFocused = index === focusIdx;
 			const itemId = `${baseId}-item-${index}`;
@@ -165,7 +161,7 @@ export const useNavigation = (opts: NavigationOptions) => {
 
 			// Roving tabindex sits on the tab-stop; data-highlighted (below) tracks
 			// actual keyboard focus, which is a separate concern.
-			item.setAttribute('tabindex', index === tabStop ? '0' : '-1');
+			item.setAttribute('tabindex', index === tabStop && !isItemDisabled(item) ? '0' : '-1');
 
 			// Set data-highlighted for keyboard focus
 			if (isFocused) {
@@ -309,8 +305,8 @@ export const useNavigation = (opts: NavigationOptions) => {
 						}
 					} else if (focusedIndex !== null) {
 						const node = items[focusedIndex];
-						if ((node as any).onPrevious) {
-							(node as any).onPrevious();
+						if ('onPrevious' in node && typeof node.onPrevious === 'function') {
+							node.onPrevious();
 						}
 					}
 					break;
@@ -322,8 +318,8 @@ export const useNavigation = (opts: NavigationOptions) => {
 						}
 					} else if (focusedIndex !== null) {
 						const node = items[focusedIndex];
-						if ((node as any).onNext) {
-							(node as any).onNext();
+						if ('onNext' in node && typeof node.onNext === 'function') {
+							node.onNext();
 						}
 					}
 					break;

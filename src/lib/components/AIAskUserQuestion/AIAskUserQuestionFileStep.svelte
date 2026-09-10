@@ -12,7 +12,7 @@
 		files,
 		disabled = false,
 		required = false,
-		onChange,
+		onValueChange,
 		onError,
 		theme
 	}: {
@@ -20,7 +20,7 @@
 		files: File[];
 		disabled?: boolean;
 		required?: boolean;
-		onChange: (files: File[]) => void;
+		onValueChange: (files: File[]) => void;
 		onError: (message: string) => void;
 		theme?: AIAskUserQuestionThemeProps;
 	} = $props();
@@ -59,7 +59,7 @@
 			{required}
 			{disabled}
 			onReject={(rejections) => onError(formatRejections(rejections))}
-			onChange={(answer) => onChange(answer ?? [])}
+			onValueChange={(answer) => onValueChange(answer ?? [])}
 		/>
 	{:else}
 		<FileInput
@@ -71,7 +71,7 @@
 			{required}
 			{disabled}
 			onReject={(rejections) => onError(formatRejections(rejections))}
-			onChange={(answer) => onChange(answer ? [answer] : [])}
+			onValueChange={(answer) => onValueChange(answer ? [answer] : [])}
 		/>
 	{/if}
 </div>

@@ -5,9 +5,9 @@ const defaultMeter = cva({
 	base: 'flex flex-col relative',
 	variants: {
 		size: {
-			small: 'gap-1',
-			normal: 'gap-2',
-			large: 'gap-3'
+			small: 'gap-xs',
+			normal: 'gap-md',
+			large: 'gap-lg'
 		}
 	}
 });
@@ -16,9 +16,9 @@ const defaultMeterHeader = cva({
 	base: 'flex w-full items-center justify-between relative',
 	variants: {
 		size: {
-			small: 'gap-1',
-			normal: 'gap-2',
-			large: 'gap-3'
+			small: 'gap-xs',
+			normal: 'gap-md',
+			large: 'gap-lg'
 		}
 	}
 });
@@ -88,15 +88,15 @@ const defaultMeterTrack = cva({
 			large: 'h-3'
 		},
 		labelsPosition: {
-			top: 'mt-4',
-			bottom: 'mb-4',
-			both: 'mt-4 mb-4'
+			top: 'mt-xl',
+			bottom: 'mb-xl',
+			both: 'mt-xl mb-xl'
 		}
 	}
 });
 
 const defaultMeterIndicator = cva({
-	base: 'absolute whitespace-nowrap w-fit rounded text-color-readable mx-auto left-0 right-0 leading-none',
+	base: 'absolute whitespace-nowrap w-fit rounded-sm text-color-readable mx-auto left-0 right-0 leading-none',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -125,12 +125,12 @@ const defaultMeterLegend = cva({
 });
 
 const defaultMeterLegendItem = cva({
-	base: 'flex items-center gap-2 [&[data-color="danger"]_*]:text-danger-readable [&[data-color="warning"]_*]:text-warning-readable [&[data-color="success"]_*]:text-success-readable [&[data-color="info"]_*]:text-info-readable',
+	base: 'flex items-center gap-md [&[data-color="danger"]_*]:text-danger-readable [&[data-color="warning"]_*]:text-warning-readable [&[data-color="success"]_*]:text-success-readable [&[data-color="info"]_*]:text-info-readable',
 	variants: {
 		size: {
-			small: 'gap-1.5',
-			normal: 'gap-2',
-			large: 'gap-2.5'
+			small: 'gap-sm',
+			normal: 'gap-md',
+			large: 'gap-md'
 		}
 	}
 });

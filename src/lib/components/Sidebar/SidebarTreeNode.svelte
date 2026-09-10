@@ -80,8 +80,8 @@
 				...option,
 				type: 'option',
 				href: treeNode.href,
-				onClick: (event) => {
-					treeNode.onClick?.(event);
+				onclick: (event) => {
+					treeNode.onclick?.(event);
 					popupOpen = false;
 				}
 			};
@@ -185,7 +185,7 @@
 			aria-current={node.isActive ? 'page' : undefined}
 			class={rowClass}
 			{@attach tooltipContent ? tooltip({ content: tooltipContent, position: 'right' }) : undefined}
-			onclick={node.onClick}
+			onclick={node.onclick}
 		>
 			<SidebarIcon icon={node.icon ?? fileIcon} />
 			<span class={isSubNode ? undefined : classes.menuLabel()}>{node.label}</span>
@@ -198,7 +198,7 @@
 			data-active={node.isActive ? 'true' : undefined}
 			class={rowClass}
 			{@attach tooltipContent ? tooltip({ content: tooltipContent, position: 'right' }) : undefined}
-			onclick={node.onClick}
+			onclick={node.onclick}
 		>
 			<SidebarIcon icon={node.icon ?? fileIcon} />
 			<span class={isSubNode ? undefined : classes.menuLabel()}>{node.label}</span>

@@ -57,11 +57,11 @@ const defaultPreviewAnchor = cva({
 	defaultVariants: { side: 'left' }
 });
 const defaultPreview = cva({
-	base: 'grid min-w-0 gap-1.5 overflow-hidden text-left'
+	base: 'grid min-w-0 gap-sm overflow-hidden text-left'
 });
-const defaultPreviewHeader = cva({ base: 'flex min-w-0 items-start gap-2' });
+const defaultPreviewHeader = cva({ base: 'flex min-w-0 items-start gap-md' });
 const defaultPreviewIcon = cva({
-	base: 'mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md border border-neutral-muted bg-surface text-neutral/60'
+	base: 'mt-micro flex size-6 shrink-0 items-center justify-center rounded-sm border border-neutral-muted bg-surface text-neutral/60'
 });
 const defaultPreviewTitle = cva({ base: 'truncate text-sm font-medium leading-tight' });
 const defaultPreviewExcerpt = cva({
@@ -69,7 +69,7 @@ const defaultPreviewExcerpt = cva({
 });
 const defaultPreviewMetadata = cva({ base: 'truncate text-xs text-neutral/55' });
 const defaultPreviewFiles = cva({
-	base: 'flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 pt-0.5'
+	base: 'flex min-w-0 flex-wrap items-center gap-x-lg gap-y-xs pt-micro'
 });
 
 export const aiThreadTocTheme = {

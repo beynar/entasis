@@ -220,7 +220,8 @@
 						onControlFocus={() => a11y.handleTimeTargetFocus(itemTargetKey)}
 						onControlKeydown={(event) => handleTargetKeydown(event, itemTargetKey)}
 						onActivate={(event) => handleItemActivate(segment, event)}
-						onDoubleClick={(event) => onItemDoubleClick?.(segment.occurrence, event)}
+						onDoubleClick={(event) =>
+							onItemDoubleClick?.({ occurrence: segment.occurrence, event })}
 					/>
 				</div>
 			{/each}

@@ -43,6 +43,12 @@ export type AudioPlayerSnapshot = {
 
 export type AudioPlayerError = MediaError | Error;
 
+/** Error and player snapshot reported by `onError`. */
+export type AudioPlayerErrorPayload = Readonly<{
+	error: AudioPlayerError;
+	snapshot: AudioPlayerSnapshot;
+}>;
+
 export type AudioPlayerProps = WithAttachments<{
 	/** Single audio source URL. Use sources for multiple encodings. */
 	src?: string;
@@ -143,7 +149,7 @@ export type AudioPlayerProps = WithAttachments<{
 	/** Called when loop changes through the component API. */
 	onLoopChange?: (snapshot: AudioPlayerSnapshot) => void;
 	/** Called when native media, waveform generation, or custom interaction errors occur. */
-	onError?: (error: AudioPlayerError, snapshot: AudioPlayerSnapshot) => void;
+	onError?: (payload: AudioPlayerErrorPayload) => void;
 	/** Per-instance theme overrides. */
 	theme?: AudioPlayerThemeProps;
 }>;

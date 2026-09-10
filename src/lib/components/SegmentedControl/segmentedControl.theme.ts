@@ -2,15 +2,15 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultSegmentedControl = cva({
-	base: 'relative isolate inline-flex w-fit max-w-full items-center overflow-visible bg-surface-recessed p-1',
+	base: 'relative isolate inline-flex w-fit max-w-full items-center overflow-visible bg-surface-recessed p-xs',
 	variants: {
 		size: {
-			small: 'gap-0.5',
-			normal: 'gap-1',
-			large: 'gap-1.5'
+			small: 'gap-micro',
+			normal: 'gap-xs',
+			large: 'gap-sm'
 		},
 		variant: {
-			normal: 'rounded-lg',
+			normal: 'rounded-md',
 			pill: 'rounded-full'
 		},
 		disabled: {
@@ -26,14 +26,15 @@ const defaultSegmentedControl = cva({
 });
 
 const defaultSegment = cva({
-	base: "relative z-10 inline-flex cursor-pointer select-none items-center justify-center whitespace-nowrap font-medium text-neutral/70 outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-color/45 hover:text-neutral before:absolute before:top-1/2 before:-translate-y-1/2 before:content-[''] first-of-type:before:-left-1 last:before:-right-1",
+	base: "relative z-10 inline-flex cursor-pointer select-none items-center justify-center whitespace-nowrap font-medium text-neutral/70 outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-color/45 hover:text-neutral before:absolute before:inset-y-1 before:content-[''] first-of-type:before:-left-1 last:before:-right-1",
 	variants: {
 		size: {
-			small: 'gap-1 px-2 py-1 text-xs before:-right-px before:-left-px before:h-9 [&>svg]:size-3',
+			small:
+				'h-control-sm gap-xs px-md text-xs before:-right-px before:-left-px [&>svg]:size-icon-sm',
 			normal:
-				'gap-2 px-3 py-1 text-sm before:-right-0.5 before:-left-0.5 before:h-11 [&>svg]:size-3.5',
+				'h-control-md gap-md px-lg text-sm before:-right-0.5 before:-left-0.5 [&>svg]:size-icon-md',
 			large:
-				'gap-2.5 px-4 py-1 text-base before:-right-[3px] before:-left-[3px] before:h-12 [&>svg]:size-4'
+				'h-control-lg gap-md px-xl text-sm before:-right-[3px] before:-left-[3px] [&>svg]:size-icon-lg'
 		},
 		variant: {
 			normal: 'rounded-md',
@@ -66,12 +67,6 @@ const defaultSegment = cva({
 	},
 	compoundVariants: [
 		{
-			color: 'neutral',
-			selected: true,
-			class: 'text-neutral hover:text-neutral'
-		},
-		{
-			color: ['primary', 'secondary', 'danger', 'success', 'warning', 'info'],
 			selected: true,
 			class: 'text-color-contrast hover:text-color-contrast'
 		}
@@ -88,7 +83,7 @@ const defaultIndicator = cva({
 		color: {
 			primary: 'bg-color',
 			secondary: 'bg-color',
-			neutral: 'bg-surface-floating',
+			neutral: 'bg-color',
 			danger: 'bg-color',
 			success: 'bg-color',
 			warning: 'bg-color',
@@ -111,7 +106,7 @@ const defaultStaticIndicator = cva({
 		color: {
 			primary: 'bg-color',
 			secondary: 'bg-color',
-			neutral: 'bg-surface-floating',
+			neutral: 'bg-color',
 			danger: 'bg-color',
 			success: 'bg-color',
 			warning: 'bg-color',

@@ -48,10 +48,10 @@ export function resolveTimelineItems<Item extends TimelineItem>(
 			);
 		}
 
-		let side: TimelineSide = placement;
-		if (placement === 'alternate') {
-			side = timelineItem.side ?? (index % 2 === 0 ? 'end' : 'start');
-		}
+		const side: TimelineSide =
+			placement === 'alternate'
+				? (timelineItem.side ?? (index % 2 === 0 ? 'end' : 'start'))
+				: placement;
 
 		let key = `index:${index}`;
 		if (explicitId !== undefined) {

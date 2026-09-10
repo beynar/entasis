@@ -15,9 +15,9 @@ const defaultRoot = cva({
 	base: 'relative inline-flex items-center',
 	variants: {
 		size: {
-			small: 'gap-1',
-			normal: 'gap-1.5',
-			large: 'gap-2'
+			small: 'gap-xs',
+			normal: 'gap-sm',
+			large: 'gap-md'
 		},
 		disabled: {
 			true: 'cursor-not-allowed',
@@ -39,10 +39,10 @@ const defaultCell = cva({
 		size: {
 			small: 'size-8 rounded-md text-sm',
 			normal: 'size-10 rounded-md text-base',
-			large: 'size-12 rounded-lg text-lg'
+			large: 'size-12 rounded-md text-lg'
 		},
 		active: {
-			true: 'border-primary ring-2 ring-primary/25',
+			true: 'border-primary ring-2 ring-primary/50',
 			false: ''
 		},
 		disabled: {

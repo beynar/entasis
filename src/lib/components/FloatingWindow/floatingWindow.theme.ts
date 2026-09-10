@@ -2,7 +2,7 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultFloatingWindow = cva({
-	base: 'bg-surface-floating text-neutral pointer-events-auto fixed isolate flex flex-col overflow-visible rounded-xl shadow-xl ring-1 ring-neutral/15 outline-none focus-visible:ring-2 focus-visible:ring-primary',
+	base: 'bg-surface-floating text-neutral pointer-events-auto fixed isolate flex flex-col overflow-visible rounded-lg shadow-xl ring-1 ring-neutral/15 outline-none focus-visible:ring-2 focus-visible:ring-primary',
 	variants: {
 		dragFrom: {
 			header: '',
@@ -25,7 +25,7 @@ const defaultFloatingWindow = cva({
 });
 
 const defaultFloatingWindowHeader = cva({
-	base: 'border-neutral-muted flex h-9 shrink-0 items-center gap-1.5 border-b px-2.5 select-none',
+	base: 'border-neutral-muted flex h-9 shrink-0 items-center gap-sm border-b px-md select-none',
 	variants: {
 		draggable: {
 			true: 'cursor-move touch-none',
@@ -42,11 +42,11 @@ const defaultFloatingWindowTitle = cva({
 });
 
 const defaultFloatingWindowActions = cva({
-	base: 'flex shrink-0 items-center gap-0.5'
+	base: 'flex shrink-0 items-center gap-micro'
 });
 
 const defaultFloatingWindowControl = cva({
-	base: 'shrink-0 !p-1.5 text-neutral/65 hover:text-neutral'
+	base: 'shrink-0 !p-sm text-neutral/65 hover:text-neutral'
 });
 
 const defaultFloatingWindowScrollArea = cva({
@@ -54,7 +54,7 @@ const defaultFloatingWindowScrollArea = cva({
 });
 
 const defaultFloatingWindowContent = cva({
-	base: 'p-4'
+	base: 'p-xl'
 });
 
 const defaultFloatingWindowResizeHandle = cva({
@@ -83,10 +83,10 @@ const defaultFloatingWindowDockItem = cva({
 			vertical: 'w-9 flex-col'
 		},
 		side: {
-			top: 'rounded-t-none rounded-b-lg',
-			right: 'rounded-r-none rounded-l-lg',
-			bottom: 'rounded-t-lg rounded-b-none',
-			left: 'rounded-r-lg rounded-l-none'
+			top: 'rounded-t-none rounded-b-md',
+			right: 'rounded-r-none rounded-l-md',
+			bottom: 'rounded-t-md rounded-b-none',
+			left: 'rounded-r-md rounded-l-none'
 		},
 		dragging: {
 			true: 'cursor-grabbing select-none',
@@ -104,8 +104,8 @@ const defaultFloatingWindowDockTitle = cva({
 	base: '!min-w-0 !flex-1 !rounded-none !text-xs !font-medium',
 	variants: {
 		orientation: {
-			horizontal: '!h-full !w-auto !justify-start !px-2.5 !text-left',
-			vertical: '!h-auto !min-h-0 !w-full !px-0 !py-2.5'
+			horizontal: '!h-full !w-auto !justify-start !px-md !text-left',
+			vertical: '!h-auto !min-h-0 !w-full !px-0 !py-md'
 		},
 		dragging: {
 			true: '!cursor-grabbing',
@@ -137,8 +137,8 @@ const defaultFloatingWindowDockActions = cva({
 	base: 'flex shrink-0 items-center gap-0',
 	variants: {
 		orientation: {
-			horizontal: 'flex-row pr-1',
-			vertical: 'flex-col pb-1'
+			horizontal: 'flex-row pr-xs',
+			vertical: 'flex-col pb-xs'
 		}
 	},
 	defaultVariants: {

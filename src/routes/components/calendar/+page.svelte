@@ -6,7 +6,9 @@
 		Event as CalendarEvent
 	} from '$lib/components/Form/Calendar/useCalendar.svelte.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
 
 	const date = (day: number) => new Date(2026, 6, day, 12);
 	const events: CalendarEvent[] = [
@@ -17,6 +19,37 @@
 	let selectedDate = $state<Date | null>(date(15));
 	let selectedRange = $state<[Date | null, Date | null] | null>([date(15), date(19)]);
 	let selectedDates = $state<Date[]>([date(15), date(18), date(24)]);
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{
+			name: 'view',
+			type: 'segmented',
+			label: 'View',
+			value: 'single',
+			options: ['single', 'double']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 {#snippet eventCell(cell: Cell<CalendarEvent>)}
@@ -45,8 +78,14 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Pick a publish date for a scheduled post"
 		code={`<CalendarInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	view="${controls.value.view}"
+	disabled={${controls.value.disabled}}
 	label="Publish date"
 	description="Choose when the post goes live"
 	type="calendar"
@@ -55,6 +94,11 @@
 	>
 		<div class="w-full max-w-md">
 			<CalendarInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				view={controls.value.view}
+				disabled={controls.value.disabled}
 				label="Publish date"
 				description="Choose when the post goes live"
 				type="calendar"

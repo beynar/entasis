@@ -6,7 +6,39 @@
 	import type { FloatingWindowDockPlacement } from '$lib/components/FloatingWindow/floatingWindow.props.js';
 	import { terminalWindowIcon } from '$lib/components/Icons/terminalWindow.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+
+	const dockPlacements: FloatingWindowDockPlacement[] = [
+		'bottom-left',
+		'bottom-right',
+		'top-left',
+		'top-right',
+		'left-top',
+		'left-bottom',
+		'right-top',
+		'right-bottom'
+	];
+	const controls = createComponentControls([
+		{
+			name: 'dragFrom',
+			type: 'segmented',
+			label: 'Drag',
+			value: 'header',
+			options: ['header', 'window']
+		},
+		{
+			name: 'dockPlacement',
+			type: 'segmented',
+			label: 'Dock',
+			value: 'bottom-left',
+			options: dockPlacements
+		},
+		{ name: 'draggable', type: 'switch', label: 'Draggable', value: true },
+		{ name: 'resizable', type: 'switch', label: 'Resizable', value: true },
+		{ name: 'minimizable', type: 'switch', label: 'Minimize', value: true },
+		{ name: 'closable', type: 'switch', label: 'Close', value: true }
+	]);
 
 	let notesOpen = $state(false);
 	let notesMinimized = $state(false);
@@ -20,17 +52,6 @@
 	let activeDockPlacement = $state<FloatingWindowDockPlacement>('bottom-left');
 	let layeringWindowOpen = $state(false);
 	let layeringDialogOpen = $state(false);
-
-	const dockPlacements: FloatingWindowDockPlacement[] = [
-		'bottom-left',
-		'bottom-right',
-		'top-left',
-		'top-right',
-		'left-top',
-		'left-bottom',
-		'right-top',
-		'right-bottom'
-	];
 
 	const openNotes = () => {
 		notesOpen = true;
@@ -81,20 +102,19 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Open a utility window that remains interactive alongside the page. Drag the title bar, resize from any edge or corner, then minimize it into the compact edge dock."
-		code={`<script lang="ts">
-	import { Button } from 'svelai/button';
-	import { FloatingWindow } from 'svelai/floating-window';
-
-	let open = $state(false);
-	let minimized = $state(false);
-<\/script>
-
-<Button onClick={() => { open = true; minimized = false; }}>
-	Open project notes
-</Button>
-
-<FloatingWindow bind:open bind:minimized title="Project notes">
+		code={`<FloatingWindow
+	bind:open
+	bind:minimized
+	title="Project notes"
+	dragFrom="${controls.value.dragFrom}"
+	dockPlacement="${controls.value.dockPlacement}"
+	draggable={${controls.value.draggable}}
+	resizable={${controls.value.resizable}}
+	minimizable={${controls.value.minimizable}}
+	closable={${controls.value.closable}}
+>
 	<p>Review the release checklist before publishing.</p>
 </FloatingWindow>`}
 	>
@@ -103,10 +123,20 @@
 				<p class="font-medium">Project notes</p>
 				<p class="text-neutral/60 mt-1 text-sm">A focused utility window without modal blocking.</p>
 			</div>
-			<Button onClick={openNotes}>Open project notes</Button>
+			<Button onclick={openNotes}>Open project notes</Button>
 		</div>
 
-		<FloatingWindow bind:open={notesOpen} bind:minimized={notesMinimized} title="Project notes">
+		<FloatingWindow
+			bind:open={notesOpen}
+			bind:minimized={notesMinimized}
+			title="Project notes"
+			dragFrom={controls.value.dragFrom}
+			dockPlacement={controls.value.dockPlacement}
+			draggable={controls.value.draggable}
+			resizable={controls.value.resizable}
+			minimizable={controls.value.minimizable}
+			closable={controls.value.closable}
+		>
 			<div class="grid gap-4">
 				<p class="text-neutral/70 text-sm">
 					Review the release checklist before publishing the new component package.
@@ -141,7 +171,7 @@
 	Dialog content
 </Dialog>`}
 		>
-			<Button variant="outline" onClick={openLayeringExample}>Open window and dialog</Button>
+			<Button variant="outline" onclick={openLayeringExample}>Open window and dialog</Button>
 
 			<FloatingWindow
 				bind:open={layeringWindowOpen}
@@ -160,8 +190,8 @@
 						The dialog and its backdrop always render above every floating window in this Theme.
 					</p>
 					<div class="flex justify-end gap-2">
-						<Button variant="ghost" onClick={() => (layeringDialogOpen = false)}>Cancel</Button>
-						<Button onClick={() => (layeringDialogOpen = false)}>Confirm</Button>
+						<Button variant="ghost" onclick={() => (layeringDialogOpen = false)}>Cancel</Button>
+						<Button onclick={() => (layeringDialogOpen = false)}>Confirm</Button>
 					</div>
 				</div>
 			</Dialog>
@@ -182,7 +212,7 @@
 				<p class="text-neutral/60 max-w-lg text-sm">
 					Open both windows, minimize them, then drag a title horizontally or restore either window.
 				</p>
-				<Button variant="outline" onClick={openDockExample}>Open both windows</Button>
+				<Button variant="outline" onclick={openDockExample}>Open both windows</Button>
 			</div>
 
 			<FloatingWindow
@@ -239,7 +269,7 @@
 				</p>
 				<div class="flex max-w-2xl flex-wrap justify-center gap-2">
 					{#each dockPlacements as placement}
-						<Button size="small" variant="outline" onClick={() => openPlacementExample(placement)}>
+						<Button size="small" variant="outline" onclick={() => openPlacementExample(placement)}>
 							{placement}
 						</Button>
 					{/each}
@@ -272,7 +302,7 @@
 	</div>
 </FloatingWindow>`}
 		>
-			<Button variant="outline" onClick={() => (inspectorOpen = true)}>Open build inspector</Button>
+			<Button variant="outline" onclick={() => (inspectorOpen = true)}>Open build inspector</Button>
 
 			<FloatingWindow
 				bind:open={inspectorOpen}

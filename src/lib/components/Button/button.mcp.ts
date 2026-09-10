@@ -41,9 +41,9 @@ The Button component is a flexible and customizable button element that supports
 - **rel**: string - Link relationship
 
 ### Event Props
-- **onClick**: (payload?: any) => void - Click event handler
-- **onEnter**: (payload?: any) => void - Pointer enter event handler
-- **onLeave**: (payload?: any) => void - Pointer leave event handler
+- **onclick**: (event: MouseEvent) => void - Native click event handler
+- **onpointerenter**: (event: PointerEvent) => void - Native pointer enter event handler
+- **onpointerleave**: (event: PointerEvent) => void - Native pointer leave event handler
 
 ### Content Props (Slots)
 - **children**: Snippet - Main button content
@@ -51,7 +51,6 @@ The Button component is a flexible and customizable button element that supports
 - **suffix**: Snippet - Content after main text (typically icons)
 
 ### Advanced Props
-- **payload**: any - Data passed to event handlers
 - **ref**: HTMLElement - Reference to the button element
 - **class**: string - Additional CSS classes
 - **theme**: ComponentTheme - Custom theme overrides
@@ -108,16 +107,14 @@ The button follows this DOM structure:
 
 ### With Event Handlers
 \`\`\`svelte
-<script>
-	let payload = { id: 123 };
-	
-	function handleClick(data) {
-		console.log('Clicked with payload:', data);
+<script lang="ts">
+	function handleClick(event: MouseEvent) {
+		console.log('Clicked:', event.currentTarget);
 	}
 </script>
 
-<Button {payload} onClick={handleClick}>
-	Click with Payload
+<Button onclick={handleClick}>
+	Click
 </Button>
 \`\`\`
 

@@ -9,7 +9,7 @@
 	import {
 		videoPlayerSettingsMenuOptionTheme,
 		videoPlayerSettingsMenuSeparatorTheme
-	} from './videoPlayerSettingsMenuTheme.js';
+	} from './videoPlayer.settingsMenu.theme.js';
 	import type { VideoPlayerState } from './videoPlayer.state.svelte.js';
 	import type { useVideoPlayerTheme } from './videoPlayer.theme.js';
 	import VideoPlayerIconButton from './VideoPlayerIconButton.svelte';
@@ -131,7 +131,7 @@
 				{disabled}
 				aria-haspopup="menu"
 				aria-expanded={popover.isOpen}
-				onClick={() => popover.toggle()}
+				onPress={() => popover.toggle()}
 				{@attach popover.reference}
 			/>
 		{/snippet}

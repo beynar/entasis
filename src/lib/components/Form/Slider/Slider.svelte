@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
@@ -13,7 +14,8 @@
 		min = 0,
 		max = 100,
 		step = 1,
-		value = $bindable(min),
+		defaultValue = min,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
@@ -22,7 +24,7 @@
 		name,
 		onValidate,
 		visible,
-		onChange,
+		onValueChange,
 		color = 'primary',
 		marks = [],
 		showValue = false,
@@ -36,15 +38,12 @@
 		minStepsBetweenThumbs = 0,
 		dragRange = false,
 		thumbLabels = [],
-		type: _formType,
 		size = 'normal',
 		i18n,
 		label,
 		...rest
-	}: SliderProps & { type?: string } = $props();
-
-	// svelte-ignore state_referenced_locally
-	void _formType;
+	}: SliderProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const t = $derived(useI18n(i18n));
 
@@ -55,7 +54,7 @@
 			return value;
 		},
 		set value(v) {
-			value = v;
+			field.setValue(v);
 		},
 		get min() {
 			return min;
@@ -95,7 +94,7 @@
 	const field = createFieldState<'slider' | 'slider-range'>({
 		id,
 		get value() {
-			return slider.fieldValue;
+			return value === undefined ? undefined : slider.fieldValue;
 		},
 		set value(v) {
 			value = v;
@@ -112,7 +111,7 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => onChange?.(v),
+		onValueChange: (v) => onValueChange?.(v),
 		get disabled() {
 			return disabled;
 		},

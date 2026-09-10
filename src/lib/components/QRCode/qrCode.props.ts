@@ -47,13 +47,13 @@ export interface DataModulesSettings {
 	/** Randomize the size of each data module (fillable styles only). */
 	randomSize?: boolean;
 	/**
-	 * Fixed size multiplier applied to each data module (1 = full size). Keep
+	 * Scale multiplier applied to each data module (1 = full size). Keep
 	 * between 0.75 and 1 for best results — lower values may degrade
 	 * scannability. Only applies to fillable styles (square, pinched-square,
 	 * circle, diamond, heart, star, hashtag). Ignored when `randomSize` is true.
 	 * @default 1
 	 */
-	size?: number;
+	scale?: number;
 	/**
 	 * Width of the stroke for connected-shape styles, in module units. Only
 	 * applies to `vertical-line`, `horizontal-line`, `rounded`, and
@@ -152,8 +152,8 @@ export interface DownloadOptions {
 	name?: string;
 	/** File format. @default 'svg' */
 	format?: DownloadFileFormat;
-	/** The exported file size in pixels. @default 500 */
-	size?: number;
+	/** The exported file width and height in pixels. @default 500 */
+	dimension?: number;
 }
 
 export type QRCodeProps = WithAttachments<{

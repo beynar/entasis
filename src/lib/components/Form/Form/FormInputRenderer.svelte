@@ -47,6 +47,7 @@
 	} = $props();
 	const inputProps = $derived({
 		...prepareInputProps(input, size, labelPosition),
+		density: input.density ?? density,
 		class: [input.class, itemClass].filter(Boolean).join(' ') || undefined
 	});
 	const inheritedDensity = $derived(

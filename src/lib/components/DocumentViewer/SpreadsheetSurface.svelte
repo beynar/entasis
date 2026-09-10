@@ -141,7 +141,7 @@
 	class={classes.grid()}
 	type="hover"
 	ariaLabel="Spreadsheet grid"
-	{onScroll}
+	onscroll={onScroll}
 	theme={documentViewerScrollAreaTheme}
 >
 	<div

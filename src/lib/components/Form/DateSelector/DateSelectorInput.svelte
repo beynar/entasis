@@ -1,4 +1,6 @@
 <script lang="ts" generics="Mode extends DateSelectorInputMode">
+	import { untrack } from 'svelte';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { FieldValue } from '../Field/field.js';
@@ -12,16 +14,19 @@
 	type FieldType = Mode extends 'date' ? 'date' : 'calendar-range';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
-		open = $bindable(false),
+		defaultOpen = false,
+		open = $bindable(),
+		onOpenChange,
 		mode = 'date' as Mode,
 		required = false,
 		disabled,
 		name,
 		onValidate,
-		onChange,
+		onValueChange,
 		visible,
 		theme,
 		closeOnSelect,
@@ -43,6 +48,15 @@
 		size,
 		...rest
 	}: DateSelectorInputProps<Mode> = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
+
+	const openState = createBindableValue(
+		() => open,
+		(nextOpen) => {
+			open = nextOpen;
+		},
+		() => defaultOpen
+	);
 
 	const id = $props.id();
 
@@ -66,8 +80,8 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (nextValue) => {
-			onChange?.(nextValue as Parameters<NonNullable<typeof onChange>>[0]);
+		onValueChange: (nextValue) => {
+			onValueChange?.(nextValue as Parameters<NonNullable<typeof onValueChange>>[0]);
 		},
 		get disabled() {
 			return disabled;
@@ -99,7 +113,7 @@
 	// loss from here. Treat "popover open" as focused alongside real focus-within.
 	let focusWithin = $state(false);
 	$effect(() => {
-		field.focused = focusWithin || open;
+		field.focused = focusWithin || openState.value;
 	});
 </script>
 
@@ -117,10 +131,11 @@
 		<DateSelector
 			{mode}
 			value={field.value as unknown as DateSelectorValue<Mode>}
-			onChange={(nextValue: DateSelectorValue<Mode>) => {
+			onValueChange={(nextValue: DateSelectorValue<Mode>) => {
 				field.value = nextValue as unknown as FieldValue<FieldType>;
 			}}
-			bind:open
+			bind:open={openState.value}
+			{onOpenChange}
 			{closeOnSelect}
 			{presets}
 			{trigger}

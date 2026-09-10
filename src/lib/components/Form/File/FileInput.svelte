@@ -1,4 +1,5 @@
 <script lang="ts" generics="Mode extends 'single' | 'multiple' = 'single'">
+	import { untrack } from 'svelte';
 	import Button from '../../Button/Button.svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
@@ -10,11 +11,12 @@
 	import Slot from '../../Slot/Slot.svelte';
 
 	let {
-		value = $bindable(null),
+		defaultValue = null,
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		mode = 'single' as Mode,
-		onChange,
+		onValueChange,
 		onReject,
 		types = ['image/*'],
 		maxFiles = 1,
@@ -34,6 +36,7 @@
 		visible,
 		...rest
 	}: FileInputProps<Mode> = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 
@@ -57,8 +60,8 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => {
-			onChange?.(v as FileInputValue<Mode>);
+		onValueChange: (v) => {
+			onValueChange?.(v as FileInputValue<Mode>);
 		},
 		get disabled() {
 			return disabled;
@@ -101,7 +104,7 @@
 		mode,
 		files: normalizeFiles(field.value as File | File[] | null | undefined),
 		onReject,
-		onChange: (files: File[]) => {
+		onValueChange: (files: File[]) => {
 			field.value = (mode === 'single' ? (files[0] ?? null) : files) as FieldValue<
 				FileInputType<Mode>
 			> | null;
@@ -131,7 +134,7 @@
 			})
 		}
 	}}
-	attrs={{
+	fieldAttrs={{
 		'data-state': dropzone.state,
 		'data-clickable': clickable
 	}}
@@ -184,7 +187,7 @@
 								<div class="truncate">{fil.name}</div>
 								<div class="text-neutral/60 text-xs">{size}</div>
 							</div>
-							<Button variant="ghost" size="small" squared onClick={() => dropzone.removeFile(fil)}>
+							<Button variant="ghost" size="small" squared onclick={() => dropzone.removeFile(fil)}>
 								{#snippet prefix()}
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
@@ -206,7 +209,7 @@
 					</div>
 				{/each}
 				{#if mode === 'multiple' && dropzone.files.length > 0 && dropzone.files.length < maxFiles}
-					<Button variant="soft" color="primary" fullWidth onClick={() => dropzone.open()}>
+					<Button variant="soft" color="primary" fullWidth onclick={() => dropzone.open()}>
 						{#snippet prefix()}
 							<svg
 								xmlns="http://www.w3.org/2000/svg"

@@ -53,13 +53,13 @@ The Card component is a flexible container component used to display content in 
 - **href**: string - Makes the card a link (renders as <a>)
 - **target**: string - Link target attribute (e.g., '_blank')
 - **rel**: string - Link rel attribute (e.g., 'noopener noreferrer')
-- **onClick**: () => void - Click handler (renders as role="button" with keyboard activation via Enter/Space)
-- **onEnter**: () => void - Pointer enter handler
-- **onLeave**: () => void - Pointer leave handler
+- **onclick**: (event: MouseEvent) => void - Native click handler (renders as role="button" with keyboard activation via Enter/Space)
+- **onpointerenter**: (event: PointerEvent) => void - Native pointer enter handler
+- **onpointerleave**: (event: PointerEvent) => void - Native pointer leave handler
 
-Cards with href or onClick automatically get the internal \`clickable\` styling: pointer cursor, a hover effect matched to the surface (solids lift with a stronger ring and shadow, outline/ghost gain a translucent wash of the card color, soft deepens its tint), a pressed translate, and a keyboard focus ring. No prop needed — it follows from the interactivity.
+Cards with href or onclick automatically get the internal \`clickable\` styling: pointer cursor, a hover effect matched to the surface (solids lift with a stronger ring and shadow, outline/ghost gain a translucent wash of the card color, soft deepens its tint), a pressed translate, and a keyboard focus ring. No prop needed — it follows from the interactivity.
 
-Interactive descendants stay independent: clicks (and Enter/Space) on buttons, links, form controls, or role="button|link|checkbox|radio|switch|menuitem" elements inside the card never trigger the card's own onClick, and on href cards they don't navigate — only clicks on the card surface itself do.
+Interactive descendants stay independent: clicks (and Enter/Space) on buttons, links, form controls, or role="button|link|checkbox|radio|switch|menuitem" elements inside the card never trigger the card's own onclick, and on href cards they don't navigate — only clicks on the card surface itself do.
 
 ### Content Props (Slots)
 - **header**: Snippet - Custom header content (overrides default header structure)
@@ -174,7 +174,7 @@ The Card component uses a flexible slot-based structure:
 </Card>
 \`\`\`
 
-### Card with Action Button (ButtonProps with onClick)
+### Card with Action Button (ButtonProps with onclick)
 \`\`\`svelte
 <Card
 	action={{
@@ -182,7 +182,7 @@ The Card component uses a flexible slot-based structure:
 		size: 'small',
 		children: 'Delete',
 		color: 'danger',
-		onClick: () => console.log('Deleted!')
+		onclick: () => console.log('Deleted!')
 	}}
 >
 	{#snippet title()}
@@ -211,7 +211,7 @@ The Card component uses a flexible slot-based structure:
 
 ### Interactive Card (Click Handler)
 \`\`\`svelte
-<Card onClick={() => console.log('Card clicked')} onEnter={() => console.log('Hovered')}>
+<Card onclick={(event) => console.log(event)} onpointerenter={(event) => console.log(event)}>
 	{#snippet title()}
 		Clickable Card
 	{/snippet}
@@ -312,7 +312,7 @@ Enable edge-to-edge boundaries between sections using the \`showBorders\` prop.
 ## Accessibility
 
 - When \`href\` is provided, the card renders as an \`<a>\` element with \`role="link"\`
-- When \`onClick\` is provided without \`href\`, the card renders as a \`<div>\` with \`role="button"\`
+- When \`onclick\` is provided without \`href\`, the card renders as a \`<div>\` with \`role="button"\`
 - Disabled cards have \`pointer-events-none\` and reduced opacity
 - The card uses semantic HTML structure with data attributes for styling hooks
 
@@ -394,7 +394,7 @@ const customTheme: CardThemeProps = {
   - density: 'small' | 'normal' | 'large' - Padding and gap spacing
   - color: 'primary' | 'secondary' | 'neutral' | 'danger' | 'success' | 'warning' | 'info' - Color scheme
   - variant: 'solid' | 'outline' | 'soft' | 'ghost' - Visual style variant
-  - clickable: boolean - Internal; set automatically when href/onClick is present (hover, press, focus ring)
+  - clickable: boolean - Internal; set automatically when href/onclick is present (hover, press, focus ring)
   - disabled: boolean - Disabled state styling
 
 **header**:

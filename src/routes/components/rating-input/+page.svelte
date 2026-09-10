@@ -3,8 +3,34 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import RatingInput from '$lib/components/Form/RatingInput/RatingInput.svelte';
 	import Form from '$lib/components/Form/Form/Form.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let rating = $state<number | null>(3);
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -19,8 +45,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Collect a star rating with helper text"
 		code={`<RatingInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Overall rating"
 	description="How would you rate your experience?"
 	bind:value={rating}
@@ -28,6 +59,10 @@
 	>
 		<div class="w-full max-w-md">
 			<RatingInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
 				label="Overall rating"
 				description="How would you rate your experience?"
 				bind:value={rating}

@@ -43,13 +43,13 @@
 			{taskCount.toLocaleString()} controlled tasks · {mountedRows} tree rows currently mounted
 		</p>
 		<div class="flex flex-wrap gap-2">
-			<Button size="small" variant="outline" onClick={() => chart?.scrollToTask('large-task-1')}>
+			<Button size="small" variant="outline" onclick={() => chart?.scrollToTask('large-task-1')}>
 				First task
 			</Button>
 			<Button
 				size="small"
 				variant="outline"
-				onClick={() => chart?.scrollToTask(`large-task-${taskCount}`)}
+				onclick={() => chart?.scrollToTask(`large-task-${taskCount}`)}
 			>
 				Last task
 			</Button>

@@ -5,7 +5,6 @@
 	import { getAIConversation } from '../AIConversation/aiConversation.state.svelte.js';
 	import Empty from '../Empty/Empty.svelte';
 	import AIMessage from '../AIMessage/AIMessage.svelte';
-	import type { AIMessageActionState } from '../AIMessageActions/aiMessageActions.props.js';
 	import AIMcpApp from '../AIMcpApp/AIMcpApp.svelte';
 	import AISuggestions from '../AISuggestion/Suggestions.svelte';
 	import Slot from '../Slot/Slot.svelte';
@@ -23,7 +22,7 @@
 	type Props<TMessage extends AIThreadItem> = Pick<
 		AIThreadProps<TMessage>,
 		| 'suggestions'
-		| 'onSuggestionClick'
+		| 'onSuggestionSelect'
 		| 'density'
 		| 'messageSize'
 		| 'messageVariant'
@@ -49,7 +48,6 @@
 		| 'markerIcon'
 		| 'markerContent'
 		| 'app'
-		| 'onRetry'
 		| 'mcpHost'
 		| 'theme'
 	> & {
@@ -65,7 +63,7 @@
 		totalSize,
 		measureItem,
 		suggestions = [],
-		onSuggestionClick,
+		onSuggestionSelect,
 		density = 'normal',
 		messageSize = 'normal',
 		messageVariant = 'bubble',
@@ -91,7 +89,6 @@
 		markerIcon,
 		markerContent,
 		app: appSlot,
-		onRetry,
 		mcpHost,
 		theme
 	}: Props<TMessage> = $props();
@@ -125,14 +122,10 @@
 		return item.message.name;
 	}
 
-	async function handleLegacyRetry(state: AIMessageActionState<TMessage>): Promise<void> {
-		if (!onRetry || !state.message || state.index === undefined) return;
-		await onRetry(state.message, state.index);
-	}
 </script>
 
 {#snippet suggestionContent()}
-	<AISuggestions {suggestions} {onSuggestionClick} class="mx-auto max-w-full" />
+	<AISuggestions {suggestions} {onSuggestionSelect} class="mx-auto max-w-full" />
 {/snippet}
 
 {#if renderItems.length === 0}
@@ -185,7 +178,7 @@
 								retryAction={messageRetryable}
 								onCopy={onMessageCopy}
 								onEdit={onMessageEdit}
-								onRetry={onMessageRetry ?? (onRetry ? handleLegacyRetry : undefined)}
+								onRetry={onMessageRetry}
 							/>
 						{/if}
 					{:else if item.kind === 'marker'}

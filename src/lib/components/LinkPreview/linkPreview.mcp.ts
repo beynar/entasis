@@ -54,6 +54,7 @@ By default, LinkPreview requests \`/api/link-metadata?url=<href>\` when the card
 - **href**: string - URL opened by the trigger link and requested by the metadata loader.
 - **id**: string - Stable DOM id for the underlying HoverCard; falls back to a generated id.
 - **open**: boolean - Bindable open state.
+- **defaultOpen**: boolean (default: false) - Initial state when open is not provided.
 - **children**: string | Snippet<[LinkPreviewPayload]> - Trigger anchor content.
 - **metadata**: LinkPreviewMetadata - Preloaded metadata; skips network loading.
 - **fetchMetadata**: (href, signal) => Promise<LinkPreviewMetadata> - Custom async loader.
@@ -84,8 +85,9 @@ By default, LinkPreview requests \`/api/link-metadata?url=<href>\` when the card
 - **cardColor**: Colors - Inner Card color.
 - **cardVariant**: 'solid' | 'outline' | 'soft' | 'ghost' - Inner Card variant.
 - **showBorders**: boolean - Show Card section borders.
-- **onOpen**: (payload) => void - Called after open transition.
-- **onClose**: (payload) => void - Called after close transition.
+- **onOpenChange**: (open: boolean) => void - Called once for each library-requested state change.
+- **onAfterOpen**: (payload) => void - Called after open transition.
+- **onAfterClose**: (payload) => void - Called after close transition.
 - **onLoad**: (metadata) => void - Called after metadata loads.
 - **onError**: (error) => void - Called after metadata loading fails.
 - **theme**: LinkPreviewThemeProps - LinkPreview theme overrides.

@@ -1,4 +1,4 @@
-import type { ChartAxisOptions, ChartScale } from '@tanstack/charts';
+import type { ChannelAccessor, ChartAxisOptions, ChartScale } from '@tanstack/charts';
 import {
 	scaleBand,
 	scaleLinear,
@@ -86,55 +86,6 @@ export function compileChartScale(definition: ChartScaleDefinition, path: string
 	}
 }
 
-export function invertChartContinuousScale(
-	definition: Exclude<
-		ChartScaleDefinition,
-		Extract<ChartScaleDefinition, { type: 'band' | 'point' }>
-	>,
-	domain: readonly ChartValue[],
-	range: readonly [number, number],
-	coordinate: number,
-	path: string
-): number | Date {
-	switch (definition.type) {
-		case 'linear':
-			return createLinearScale(definition)
-				.domain(numericDomain(domain, path))
-				.range(range)
-				.invert(coordinate);
-		case 'sqrt':
-			return createSqrtScale(definition)
-				.domain(numericDomain(domain, path))
-				.range(range)
-				.invert(coordinate);
-		case 'pow':
-			return createPowerScale(definition)
-				.domain(numericDomain(domain, path))
-				.range(range)
-				.invert(coordinate);
-		case 'log':
-			return createLogScale(definition)
-				.domain(numericDomain(domain, path))
-				.range(range)
-				.invert(coordinate);
-		case 'symlog':
-			return createSymlogScale(definition)
-				.domain(numericDomain(domain, path))
-				.range(range)
-				.invert(coordinate);
-		case 'time':
-			return createTimeScale(definition)
-				.domain(dateDomain(domain, path))
-				.range(range)
-				.invert(coordinate);
-		case 'utc':
-			return createUtcScale(definition)
-				.domain(dateDomain(domain, path))
-				.range(range)
-				.invert(coordinate);
-	}
-}
-
 function createLinearScale(definition: Extract<ChartScaleDefinition, { type: 'linear' }>) {
 	return scaleLinear().clamp(definition.clamp ?? false);
 }
@@ -164,32 +115,6 @@ function createTimeScale(definition: Extract<ChartScaleDefinition, { type: 'time
 
 function createUtcScale(definition: Extract<ChartScaleDefinition, { type: 'utc' }>) {
 	return scaleUtc().clamp(definition.clamp ?? false);
-}
-
-function numericDomain(values: readonly ChartValue[], path: string): readonly [number, number] {
-	if (
-		values.length === 2 &&
-		typeof values[0] === 'number' &&
-		Number.isFinite(values[0]) &&
-		typeof values[1] === 'number' &&
-		Number.isFinite(values[1])
-	) {
-		return [values[0], values[1]];
-	}
-	throw new TypeError(`[Chart] ${path} must resolve to two finite numbers.`);
-}
-
-function dateDomain(values: readonly ChartValue[], path: string): readonly [Date, Date] {
-	if (
-		values.length === 2 &&
-		values[0] instanceof Date &&
-		Number.isFinite(values[0].getTime()) &&
-		values[1] instanceof Date &&
-		Number.isFinite(values[1].getTime())
-	) {
-		return [values[0], values[1]];
-	}
-	throw new TypeError(`[Chart] ${path} must resolve to two valid dates.`);
 }
 
 export function compileChartCurve(curve: ChartCurve, path: string): CurveFactory {
@@ -229,11 +154,7 @@ export function compileChartCurve(curve: ChartCurve, path: string): CurveFactory
 
 const DEFAULT_SCATTER_SIZE_RANGE = [3, 18] as const;
 
-type NumericChannelAccessor<TRow> = (
-	row: TRow,
-	index: number,
-	rows: readonly TRow[]
-) => number | null | undefined;
+type NumericChannelAccessor<TRow> = ChannelAccessor<TRow, number | null | undefined>;
 
 type ResolvedScatterSizeScale = Exclude<ChartScatterSizeScale, string>;
 
@@ -246,11 +167,11 @@ export function compileChartSizeChannel<TRow>(
 	let cachedRows: readonly TRow[] | undefined;
 	let cachedRadii: readonly (number | null | undefined)[] = [];
 
-	return (_row, index, rows) => {
-		if (rows !== cachedRows) {
-			const values = rows.map((row, rowIndex) => channel(row, rowIndex, rows));
+	return (_row, { index, data }) => {
+		if (data !== cachedRows) {
+			const values = data.map((row, rowIndex) => channel(row, { index: rowIndex, data }));
 			cachedRadii = mapScatterSizes(values, resolved, path);
-			cachedRows = rows;
+			cachedRows = data;
 		}
 		return cachedRadii[index];
 	};

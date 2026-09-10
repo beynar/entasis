@@ -51,11 +51,11 @@ An interactive vector map (pan, zoom, markers, clustering, shapes, geolocation) 
 - **controlButton**: Snippet - Custom control button; receives \`{ action, label, disabled, active, onclick }\`.
 
 ### Event Props
-- **onmarkerclick**: (marker) => void
-- **onclusterclick**: (cluster) => void
-- **onmapready**: (map) => void - The MapLibre map instance is ready.
-- **onviewchange** / **onmoveend** / **onzoomend**: (view) => void
-- **onerror**: (error: Error) => void - Loading, style, or runtime errors (otherwise logged to console).
+- **onMarkerClick**: (marker) => void
+- **onClusterClick**: (cluster) => void
+- **onReady**: (map) => void - The MapLibre map instance is ready.
+- **onViewChange** / **onMoveEnd** / **onZoomEnd**: (view) => void
+- **onError**: (error: Error) => void - Loading, style, or runtime errors (otherwise logged to console).
 
 ### Advanced Props
 - **class**: string - Additional classes on the map root.

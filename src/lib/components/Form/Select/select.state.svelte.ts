@@ -16,14 +16,18 @@ interface SelectStateOptions {
 	triggerEl: HTMLElement | null;
 }
 
-export interface SelectState extends SelectStateOptions {}
 export class SelectState {
+	declare id: string;
+	declare items: SelectItems | undefined;
+	declare value: string | null | undefined;
+	declare disabled: boolean | undefined;
+	declare triggerEl: HTMLElement | null;
 	isOpen = $state(false);
 
-	listboxId = $derived(`${this.id}-listbox`);
+	listboxId = $derived.by(() => `${this.id}-listbox`);
 
 	/** All options, flattened across groups — render order. */
-	flatOptions: SelectOption[] = $derived(
+	flatOptions: SelectOption[] = $derived.by(() =>
 		(this.items ?? []).flatMap((entry) => (isGroup(entry) ? entry.items : [entry]))
 	);
 

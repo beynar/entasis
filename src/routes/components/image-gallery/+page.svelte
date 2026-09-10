@@ -2,10 +2,26 @@
 	import Button from '$lib/components/Button/Button.svelte';
 	import { ImageGallery } from '$lib/components/ImageGallery/index.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 
 	let controlledOpen = $state(false);
 	let controlledIndex = $state(1);
+
+	const controls = createComponentControls([
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'closeOnClickOutside', type: 'switch', label: 'Close outside', value: true },
+		{
+			name: 'zoomMargin',
+			type: 'slider',
+			label: 'Zoom margin',
+			value: 32,
+			min: 0,
+			max: 96,
+			step: 4,
+			showValue: true
+		}
+	]);
 
 	const landscapeOne =
 		'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1100&q=80';
@@ -32,10 +48,15 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		title="Basic Gallery"
 		description="Wrap any image grid. Each descendant image becomes a zoom trigger."
 		class="max-w-4xl"
-		code={`<ImageGallery>
+		code={`<ImageGallery
+	disabled={${controls.value.disabled}}
+	closeOnClickOutside={${controls.value.closeOnClickOutside}}
+	zoomMargin={${controls.value.zoomMargin}}
+>
 	<div class="grid grid-cols-3 gap-3">
 		<img src="/desert-road.jpg" alt="Desert road" title="Desert road" />
 		<img src="/clear-water.jpg" alt="Clear ocean water" title="Clear ocean water" />
@@ -43,7 +64,11 @@
 	</div>
 </ImageGallery>`}
 	>
-		<ImageGallery>
+		<ImageGallery
+			disabled={controls.value.disabled}
+			closeOnClickOutside={controls.value.closeOnClickOutside}
+			zoomMargin={controls.value.zoomMargin}
+		>
 			<div class="grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
 				<img
 					src={landscapeOne}
@@ -116,7 +141,7 @@
 			code={`let open = $state(false);
 let activeIndex = $state(1);
 
-<Button onClick={() => { activeIndex = 1; open = true; }}>
+<Button onclick={() => { activeIndex = 1; open = true; }}>
 	Open second image
 </Button>
 
@@ -128,7 +153,7 @@ let activeIndex = $state(1);
 			<div class="grid gap-4">
 				<Button
 					variant="outline"
-					onClick={() => {
+					onclick={() => {
 						controlledIndex = 1;
 						controlledOpen = true;
 					}}

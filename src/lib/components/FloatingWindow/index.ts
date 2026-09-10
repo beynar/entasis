@@ -4,9 +4,11 @@ export type {
 	FloatingWindowDimensions,
 	FloatingWindowDockPlacement,
 	FloatingWindowDragFrom,
+	FloatingWindowMovePayload,
 	FloatingWindowPayload,
 	FloatingWindowPosition,
 	FloatingWindowProps,
+	FloatingWindowResizePayload,
 	FloatingWindowResizeDirection
 } from './floatingWindow.props.js';
 export {

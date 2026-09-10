@@ -94,7 +94,7 @@
 			size="small"
 			variant="ghost"
 			label={`Retry ${fileName}`}
-			onClick={onRetry}
+			onclick={onRetry}
 		>
 			{@render arrowClockwiseIcon({ size: 14 })}
 		</Button>
@@ -106,7 +106,7 @@
 			size="small"
 			variant="ghost"
 			label={`Remove ${fileName}`}
-			onClick={onRemove}
+			onclick={onRemove}
 		>
 			{@render xIcon({ size: 14 })}
 		</Button>

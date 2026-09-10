@@ -61,7 +61,7 @@
 		delay = 300,
 		class: className = '',
 		color = 'neutral',
-		size = 3,
+		height = 3,
 		easing = 'cubicInOut',
 		loading = false,
 		variant = 'bar',
@@ -180,7 +180,7 @@
 		role="progressbar"
 		aria-label={label}
 		class={classes.root({ color, variant, className })}
-		style:height="{size}px"
+		style:height="{height}px"
 		style:opacity={!isTrailVariant ? '0' : undefined}
 		style:transform={!isTrailVariant ? 'scaleX(0)' : undefined}
 		{...attachments}

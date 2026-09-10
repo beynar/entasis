@@ -22,7 +22,7 @@
 		},
 		{
 			title: 'Application-owned dialogs',
-			body: 'GanttChart does not own create or edit dialogs. Compose events.taskDoubleClick or events.emptyRangeSelect with Svelai Dialog and Form controls, validate the domain record, then publish a fresh controlled array or call the imperative API. Persistence, fetching, retries, and conflict UI remain at the application boundary.'
+			body: 'GanttChart does not own create or edit dialogs. Compose events.onTaskDoubleClick or events.onEmptyRangeSelect with Svelai Dialog and Form controls, validate the domain record, then publish a fresh controlled array or call the imperative API. Persistence, fetching, retries, and conflict UI remain at the application boundary.'
 		},
 		{
 			title: 'Composition, accessibility, and scale',

@@ -2,7 +2,12 @@ import type { Sizes, Colors } from '$lib/types/theme.js';
 import type { WithSlot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { ButtonThemeProps } from './button.theme.js';
-import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
+import type {
+	HTMLAnchorAttributes,
+	HTMLButtonAttributes,
+	MouseEventHandler,
+	PointerEventHandler
+} from 'svelte/elements';
 
 export type ButtonVariant = 'solid' | 'outline' | 'soft' | 'ghost' | 'link';
 type ButtonForwardedAttributes = Pick<
@@ -17,14 +22,18 @@ type ButtonForwardedAttributes = Pick<
 	| 'aria-selected'
 	| 'aria-pressed'
 >;
+type ButtonEventAttributes = {
+	/** Native click handler receiving the root element's MouseEvent. */
+	onclick?: MouseEventHandler<HTMLElement> | null;
+	/** Native pointer-enter handler receiving the root element's PointerEvent. */
+	onpointerenter?: PointerEventHandler<HTMLElement> | null;
+	/** Native pointer-leave handler receiving the root element's PointerEvent. */
+	onpointerleave?: PointerEventHandler<HTMLElement> | null;
+};
 type ButtonForwardedAnchorAttributes = Pick<HTMLAnchorAttributes, 'download'>;
 export type ButtonPrimitiveProps = WithAttachments<
 	WithSlot<
 		{
-			/**
-			 * Value passed to onClick, onEnter, and onLeave handlers when they fire.
-			 */
-			payload?: any;
 			/**
 			 * Accessible label applied as aria-label on the root element.
 			 */
@@ -71,18 +80,6 @@ export type ButtonPrimitiveProps = WithAttachments<
 			 */
 			disabled?: boolean;
 			/**
-			 * Click handler called with payload when not disabled.
-			 */
-			onClick?: ((payload: any) => void) | null | undefined;
-			/**
-			 * Pointer enter handler called with payload when not disabled.
-			 */
-			onEnter?: ((payload: any) => void) | null | undefined;
-			/**
-			 * Pointer leave handler called with payload when not disabled.
-			 */
-			onLeave?: ((payload: any) => void) | null | undefined;
-			/**
 			 * The class name of the button. First element that the component outputs in the DOM.
 			 */
 			class?: string;
@@ -113,7 +110,8 @@ export type ButtonPrimitiveProps = WithAttachments<
 			/** Semantic part name used by composed components and theme tooling. */
 			'data-slot'?: string;
 		} & ButtonForwardedAttributes &
-			ButtonForwardedAnchorAttributes,
+			ButtonForwardedAnchorAttributes &
+			ButtonEventAttributes,
 		'suffix' | 'prefix' | 'children'
 	>
 >;

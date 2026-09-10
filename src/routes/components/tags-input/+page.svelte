@@ -3,6 +3,8 @@
 	import DocPage from '../../DocPage.svelte';
 	import TagsInput from '$lib/components/Form/TagsInput/TagsInput.svelte';
 	import type { ComboboxOption } from '$lib/components/Form/Combobox/combobox.props.js';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	// Example data set
 	const technologies = [
@@ -46,6 +48,30 @@
 	let value4 = $state<string[] | null>(null);
 	let value5 = $state<string[] | null>(null);
 	let value6 = $state<string[] | null>(['svelte', 'ts']); // Pre-filled values for demo
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -61,8 +87,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Free mode — type and press Enter to add a tag"
 		code={`<TagsInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Skills"
 	description="Press Enter to add each skill."
 	placeholder="Add a skill..."
@@ -71,6 +102,10 @@
 	>
 		<div class="w-full max-w-md">
 			<TagsInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
 				label="Skills"
 				description="Press Enter to add each skill."
 				placeholder="Add a skill..."

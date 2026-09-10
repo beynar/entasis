@@ -87,7 +87,7 @@
 {/snippet}
 
 {#snippet customActions(payload: ActionsPayload)}
-	<Button size="small" variant="outline" onClick={() => payload.api.fitProject()}>Frame plan</Button
+	<Button size="small" variant="outline" onclick={() => payload.api.fitProject()}>Frame plan</Button
 	>
 {/snippet}
 
@@ -116,7 +116,7 @@
 	calendars={[parisProjectCalendar]}
 	timeZone="Europe/Paris"
 	schedule={{ calendarId: parisProjectCalendar.id }}
-	events={{ taskDoubleClick: openEditor }}
+	events={{ onTaskDoubleClick: ({ task }) => openEditor(task) }}
 	render={{
 		header: customHeader,
 		actions: customActions,
@@ -136,7 +136,7 @@
 		<TextInput bind:value={draftTitle} label="Task title" required />
 	</div>
 	{#snippet footer()}
-		<Button variant="ghost" color="neutral" onClick={() => (editorOpen = false)}>Cancel</Button>
-		<Button onClick={saveTask}>Save task</Button>
+		<Button variant="ghost" color="neutral" onclick={() => (editorOpen = false)}>Cancel</Button>
+		<Button onclick={saveTask}>Save task</Button>
 	{/snippet}
 </Dialog>

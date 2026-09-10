@@ -13,8 +13,8 @@
 		cluster: MapClusterSnippetArg<TData>;
 		content?: Snippet<[MapClusterSnippetArg<TData>]>;
 		zoomOnClick: boolean;
-		onclusterclick?: (cluster: MapClusterSnippetArg<TData>) => void;
-		onerror?: (error: Error) => void;
+		onClusterClick?: (cluster: MapClusterSnippetArg<TData>) => void;
+		onError?: (error: Error) => void;
 	};
 
 	type ClusterMarkerAttachmentParams = {
@@ -23,7 +23,7 @@
 		lngLat: [number, number];
 	};
 
-	let { map, Marker, cluster, content, zoomOnClick, onclusterclick, onerror }: Props<TData> =
+	let { map, Marker, cluster, content, zoomOnClick, onClusterClick, onError }: Props<TData> =
 		$props();
 
 	let lngLat = $derived(cluster.coordinates);
@@ -43,7 +43,7 @@
 
 	function handleClusterClick(event: MouseEvent): void {
 		event.stopPropagation();
-		onclusterclick?.(cluster);
+		onClusterClick?.(cluster);
 
 		if (zoomOnClick) {
 			cluster.expand();
@@ -54,7 +54,7 @@
 		try {
 			syncMapClusterHull(map, cluster.markers);
 		} catch (error) {
-			onerror?.(toMapError(error, 'Failed to draw map cluster hull.'));
+			onError?.(toMapError(error, 'Failed to draw map cluster hull.'));
 		}
 	}
 
@@ -62,7 +62,7 @@
 		try {
 			removeMapClusterHull(map);
 		} catch (error) {
-			onerror?.(toMapError(error, 'Failed to clear map cluster hull.'));
+			onError?.(toMapError(error, 'Failed to clear map cluster hull.'));
 		}
 	}
 

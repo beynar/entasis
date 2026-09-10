@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Accordion from '../Accordion/Accordion.svelte';
 	import Spinner from '../Spinner/Spinner.svelte';
 	import type { AIToolCall, AIToolLabels, AIToolProps } from './aiTool.props.js';
@@ -20,7 +21,9 @@
 		ref = $bindable(null),
 		tool,
 		tools = [],
-		value = $bindable([]),
+		defaultValue = [],
+		value = $bindable(),
+		onValueChange,
 		multiple = true,
 		variant = 'ghost',
 		toggleIcon = 'none',
@@ -39,6 +42,13 @@
 		theme,
 		...rootAttributes
 	}: AIToolProps = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(next) => {
+			value = next;
+		},
+		() => defaultValue
+	);
 
 	let nestedValue = $state<string[]>([]);
 	const resolvedTools = $derived(tools.length > 0 ? [...tools] : tool ? [tool] : []);
@@ -126,7 +136,8 @@
 	>
 		<AIToolCallList
 			tools={[singleTool]}
-			bind:value
+			bind:value={valueState.value}
+			{onValueChange}
 			{multiple}
 			scope="single"
 			{toggleIcon}
@@ -155,7 +166,8 @@
 	>
 		<Accordion
 			items={groupItems}
-			bind:value
+			bind:value={valueState.value}
+			{onValueChange}
 			oneAtATime={!multiple}
 			title={groupTitle}
 			content={groupContent}

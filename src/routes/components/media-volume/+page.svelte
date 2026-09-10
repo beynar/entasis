@@ -3,7 +3,9 @@
 	import { MediaVolumeControl } from '$lib/components/MediaVolume/index.js';
 	import type { SliderProps } from '$lib/components/Form/Slider/slider.props.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+	import { colors, sizes } from '$lib/utils/tokens.js';
 
 	type VolumeState = {
 		volume: number;
@@ -16,6 +18,39 @@
 		muted: false,
 		lastAudibleVolume: 0.72
 	});
+	const volumeModes = ['popover', 'inline'] as const;
+	const volumeOrientations = ['horizontal', 'vertical'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'primary',
+			options: colors
+		},
+		{
+			name: 'mode',
+			type: 'segmented',
+			label: 'Mode',
+			value: 'popover',
+			options: volumeModes
+		},
+		{
+			name: 'orientation',
+			type: 'segmented',
+			label: 'Orientation',
+			value: 'vertical',
+			options: volumeOrientations
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 	let inlineVolume = $state<VolumeState>({
 		volume: 0.4,
 		muted: false,
@@ -26,40 +61,6 @@
 		muted: false,
 		lastAudibleVolume: 1
 	});
-
-	const usageCode = `<script lang="ts">
-	import { MediaVolumeControl } from 'svelai/media-volume';
-
-	let volume = $state(0.72);
-	let muted = $state(false);
-	let lastAudibleVolume = $state(0.72);
-
-	function setVolume(nextVolume: number) {
-		volume = nextVolume;
-		if (nextVolume > 0) {
-			muted = false;
-			lastAudibleVolume = nextVolume;
-		}
-	}
-
-	function toggleMuted() {
-		if (muted || volume === 0) {
-			muted = false;
-			volume = lastAudibleVolume || 0.05;
-			return;
-		}
-
-		lastAudibleVolume = volume;
-		muted = true;
-	}
-${'</' + 'script>'}
-
-<MediaVolumeControl
-	{volume}
-	{muted}
-	onVolumeChange={setVolume}
-	onToggleMuted={toggleMuted}
-/>`;
 
 	const inlineCode = `<MediaVolumeControl
 	mode="inline"
@@ -86,7 +87,7 @@ ${'</' + 'script>'}
 			color="neutral"
 			label={context.label}
 			prefix={context.icon}
-			onClick={context.onClick}
+			onclick={context.activate}
 			aria-haspopup={context.ariaHaspopup}
 			aria-expanded={context.ariaExpanded}
 			{@attach context.reference}
@@ -160,14 +161,30 @@ ${'</' + 'script>'}
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Default popover control with a vertical slider and stable value chip."
 		class="!min-h-fit"
-		code={usageCode}
+		code={`<MediaVolumeControl
+	{volume}
+	{muted}
+	size="${controls.value.size}"
+	color="${controls.value.color}"
+	mode="${controls.value.mode}"
+	orientation="${controls.value.orientation}"
+	disabled={${controls.value.disabled}}
+	onVolumeChange={setVolume}
+	onToggleMuted={toggleMuted}
+/>`}
 	>
 		<div class="flex min-h-80 items-start justify-center pt-6">
 			<MediaVolumeControl
 				volume={defaultVolume.volume}
 				muted={defaultVolume.muted}
+				size={controls.value.size}
+				color={controls.value.color}
+				mode={controls.value.mode}
+				orientation={controls.value.orientation}
+				disabled={controls.value.disabled}
 				onVolumeChange={(nextVolume) => setVolume(defaultVolume, nextVolume)}
 				onToggleMuted={() => toggleMuted(defaultVolume)}
 			/>
@@ -219,7 +236,7 @@ ${'</' + 'script>'}
 							data-active={context.active ? 'true' : undefined}
 							aria-haspopup={context.ariaHaspopup}
 							aria-expanded={context.ariaExpanded}
-							onClick={context.onClick}
+							onclick={context.activate}
 							class="border border-white/10 bg-white/5 text-white hover:bg-white/10"
 							{@attach context.reference}
 						/>
@@ -235,7 +252,7 @@ ${'</' + 'script>'}
 							prefix={context.icon}
 							data-active={context.active ? 'true' : undefined}
 							aria-pressed={context.pressed}
-							onClick={context.onClick}
+							onclick={context.activate}
 							class="border border-white/10 bg-white/5 text-white hover:bg-white/10"
 						/>
 					{/snippet}

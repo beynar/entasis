@@ -169,7 +169,7 @@ ${'</' + 'script>'}
 
 <Popover position="bottom-start">
 	{#snippet trigger(popover)}
-		<Button {@attach popover.reference} onClick={() => popover.toggle()}>
+		<Button {@attach popover.reference} onclick={() => popover.toggle()}>
 			Custom trigger
 		</Button>
 	{/snippet}
@@ -177,7 +177,7 @@ ${'</' + 'script>'}
 	<div>Custom trigger content</div>
 </Popover>
 
-<Button bind:ref={anchor} onClick={() => (open = !open)}>
+<Button bind:ref={anchor} onclick={() => (open = !open)}>
 	External anchor
 </Button>
 <Popover trigger={false} bind:open ref={anchor} position="right">
@@ -192,7 +192,7 @@ ${'</' + 'script>'}
 					variant="outline"
 					color="neutral"
 					{@attach popover.reference}
-					onClick={() => popover.toggle()}
+					onclick={() => popover.toggle()}
 				>
 					Custom trigger
 				</Button>
@@ -205,7 +205,7 @@ ${'</' + 'script>'}
 				bind:ref={externalAnchor}
 				variant="soft"
 				color="secondary"
-				onClick={() => (externalOpen = !externalOpen)}
+				onclick={() => (externalOpen = !externalOpen)}
 			>
 				External anchor
 			</Button>

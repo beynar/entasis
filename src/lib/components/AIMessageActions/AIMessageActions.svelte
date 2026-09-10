@@ -167,7 +167,7 @@
 					size={buttonSize}
 					variant="ghost"
 					label={actionState.copied ? 'Copied' : 'Copy'}
-					onClick={() => void handleCopy()}
+					onclick={() => void handleCopy()}
 					class={classes.button({ size })}
 					>{@render (actionState.copied ? checkIcon : copyIcon)({ size: 14 })}</Button
 				>{/if}
@@ -177,7 +177,7 @@
 					size={buttonSize}
 					variant="ghost"
 					label="Edit message"
-					onClick={() => void handleEdit()}
+					onclick={() => void handleEdit()}
 					class={classes.button({ size })}>{@render pencilSimpleIcon({ size: 14 })}</Button
 				>{/if}
 			{#if actionState.canRetry}<Button
@@ -186,7 +186,7 @@
 					size={buttonSize}
 					variant="ghost"
 					label="Retry response"
-					onClick={() => void handleRetry()}
+					onclick={() => void handleRetry()}
 					class={classes.button({ size })}>{@render arrowsClockwiseIcon({ size: 14 })}</Button
 				>{/if}
 		{/if}

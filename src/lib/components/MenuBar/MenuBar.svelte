@@ -43,7 +43,7 @@
 			lockScroll={false}
 			{closeOnItemClick}
 			menu={state.getMenuProps(menu, index)}
-			onClose={() => state.handleMenuClose(index)}
+			onAfterClose={() => state.handleMenuClose(index)}
 		>
 			{#snippet trigger(popover)}
 				<Button
@@ -61,7 +61,7 @@
 					aria-controls={`${id}-menu-${index}`}
 					data-active={state.activeIndex === index ? 'true' : undefined}
 					class={classes.trigger({ active: state.activeIndex === index })}
-					onClick={() => state.handleTriggerClick(index)}
+					onclick={() => state.handleTriggerClick(index)}
 					{@attach popover.reference}
 					{@attach state.navigation.itemReference}
 					{@attach state.attachTrigger(index)}

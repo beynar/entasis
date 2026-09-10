@@ -34,7 +34,7 @@ Use \`format\` with \`dd\`, \`mm\`, \`yy\`, and \`yyyy\` segments. Supported val
 - \`mobileSheet\`: renders the DateSelector as a bottom sheet below 768px.
 - \`closeOnSelect\`: closes after choosing a date; defaults to \`false\`.
 - \`onCalendarSelect\`: called only when a date is chosen from the selector or its presets;
-  \`onChange\` continues to report both typed and selected valid dates.
+  \`onValueChange\` continues to report both typed and selected valid dates.
 
 \`\`\`svelte
 <DateInput
@@ -49,4 +49,11 @@ Use \`format\` with \`dd\`, \`mm\`, \`yy\`, and \`yyyy\` segments. Supported val
 \`\`\`
 
 The input opens its selector on focus or from the full-height field action button. It stays open after selection unless \`closeOnSelect\` is enabled. Calendar days support arrow, Home/End, and PageUp/PageDown navigation.
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+
 `;

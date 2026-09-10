@@ -6,7 +6,9 @@
 		type VideoPlayerTrack
 	} from '$lib/components/VideoPlayer/index.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
 
 	const sampleVideo = 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
 	const sampleWebm = 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm';
@@ -36,10 +38,17 @@
 	let paused = $state(true);
 	let currentTime = $state(0);
 
-	const basicCode = `<VideoPlayer
-	src="${sampleVideo}"
-	title="Flower sample"
-/>`;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'autoHideControls', type: 'switch', label: 'Auto-hide', value: true }
+	]);
 
 	const minimalCode = `<VideoPlayer
 	src="${sampleVideo}"
@@ -92,11 +101,24 @@ ${'</' + 'script>'}
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Default controls include transport, seek, time, volume, settings, Picture-in-Picture, download, and fullscreen."
 		class="!min-h-fit !items-stretch !justify-start"
-		code={basicCode}
+		code={`<VideoPlayer
+	src="${sampleVideo}"
+	title="Flower sample"
+	size="${controls.value.size}"
+	disabled={${controls.value.disabled}}
+	autoHideControls={${controls.value.autoHideControls}}
+/>`}
 	>
-		<VideoPlayer src={sampleVideo} title="Flower sample" />
+		<VideoPlayer
+			src={sampleVideo}
+			title="Flower sample"
+			size={controls.value.size}
+			disabled={controls.value.disabled}
+			autoHideControls={controls.value.autoHideControls}
+		/>
 	</ComponentCard>
 
 	{#snippet examples()}

@@ -3,6 +3,8 @@
 	import DocPage from '../../DocPage.svelte';
 	import Combobox from '$lib/components/Form/Combobox/Combobox.svelte';
 	import type { ComboboxOption } from '$lib/components/Form/Combobox/combobox.props.js';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	// Example data sets
 	const countries = [
@@ -84,6 +86,30 @@
 	let value5 = $state<string | null>(null);
 	let value6 = $state<string | null>(null);
 	let value7 = $state<string | null>('fr'); // Pre-selected value for demo
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -99,8 +125,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Search and pick a country"
 		code={`<Combobox
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Country"
 	description="Used to localize dates and currency"
 	showAllOnFocus
@@ -115,6 +146,10 @@
 	>
 		<div class="w-full max-w-md">
 			<Combobox
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
 				label="Country"
 				description="Used to localize dates and currency"
 				showAllOnFocus

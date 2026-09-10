@@ -1,0 +1,37 @@
+<script lang="ts">
+	import { Button } from 'svelai/button';
+	import { Card } from 'svelai/card';
+	import { Chip } from 'svelai/chip';
+	import { Heading } from 'svelai/heading';
+	import { arrowRightIcon } from 'svelai/icons/arrowRight';
+	import { arrowUpRightIcon } from 'svelai/icons/arrowUpRight';
+	import { bookOpenIcon } from 'svelai/icons/bookOpen';
+	import { paletteIcon } from 'svelai/icons/palette';
+	import { squaresFourIcon } from 'svelai/icons/squaresFour';
+</script>
+
+<section class="mx-auto grid max-w-6xl gap-xl p-lg md:grid-cols-2 md:p-xl">
+	<div class="flex flex-col items-start gap-xl">
+		<Chip variant="outline">Keep the momentum</Chip><Heading as="h2" size="h1" weight="bold"
+			>Where will you take it from here?</Heading
+		>
+		<p class="text-lg text-neutral/70">
+			There is more than one good place to start. Find the one that fits how you like to work.
+		</p>
+		<Button href="/components" suffix={arrowRightIcon}>Explore the library</Button>
+	</div>
+	<div class="flex flex-col gap-md">
+		{#each [{ title: 'Understand the foundations', description: 'A practical introduction to the shared system.', href: '/docs', icon: bookOpenIcon }, { title: 'Learn from a working example', description: 'Complete patterns, made from familiar components.', href: '/blocks', icon: squaresFourIcon }, { title: 'Find your visual language', description: 'Build a palette that belongs to your product.', href: '/colors', icon: paletteIcon }] as resource (resource.title)}<Card
+				href={resource.href}
+				variant="outline"
+				><div class="flex items-center gap-lg">
+					<span class="text-primary">{@render resource.icon({ size: 28 })}</span>
+					<div class="flex-1">
+						<strong>{resource.title}</strong>
+						<p class="mt-sm text-sm text-neutral/60">{resource.description}</p>
+					</div>
+					{@render arrowUpRightIcon()}
+				</div></Card
+			>{/each}
+	</div>
+</section>

@@ -15,7 +15,7 @@ export type MediaVolumeControlButtonPayload = {
 	active: boolean;
 	pressed: boolean;
 	disabled: boolean;
-	onClick: () => void;
+	activate: () => void;
 };
 
 export type MediaVolumeControlTriggerPayload = MediaVolumeControlButtonPayload & {
@@ -48,8 +48,14 @@ export type MediaVolumeControlProps = {
 	orientation?: MediaVolumeControlOrientation;
 	/** Controlled popover open state. Only used in `popover` mode. */
 	open?: boolean;
-	/** Called when the popover opens or closes. */
+	/** Initial popover state when `open` is not provided. */
+	defaultOpen?: boolean;
+	/** Called once when the library requests an open-state change. */
 	onOpenChange?: (open: boolean) => void;
+	/** Called after the popover open transition finishes. */
+	onAfterOpen?: () => void;
+	/** Called after the popover close transition finishes. */
+	onAfterClose?: () => void;
 	/** Preferred popover placement. */
 	position?: PopoverProps['position'];
 	/** Popover offset from its trigger. */

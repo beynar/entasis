@@ -1,19 +1,23 @@
-<script lang="ts" generics="Item extends Record<string, any>">
+<script lang="ts" generics="Item extends Record<string, unknown>">
 	import { getters } from 'melt';
 	import { Accordion } from 'melt/builders';
 	import { SvelteSet } from 'svelte/reactivity';
 	import type { AccordionProps } from './accordion.props.js';
 	import { useAccordionTheme } from './accordion.theme.js';
 	import Slot from '../Slot/Slot.svelte';
+	import type { Slot as SlotContent } from '../Slot/slot.js';
 	import { slide, type SlideTransitionParams } from '$lib/transitions/transition.js';
 	import { useTheme } from '../Theme/theme.state.svelte.js';
 	import { caretDownIcon } from '../Icons/caretDown.js';
 	import { plusIcon } from '../Icons/plus.js';
 	import { minusIcon } from '../Icons/minus.js';
+	import { untrack } from 'svelte';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 
 	let {
 		items: itemsWithoutIds = $bindable([]),
-		value = $bindable([]),
+		defaultValue = [],
+		value = $bindable(),
 		titleKey,
 		contentKey,
 		descriptionKey,
@@ -27,7 +31,6 @@
 		density = 'normal',
 		class: className,
 		theme,
-		actions,
 		title,
 		description,
 		content,
@@ -35,9 +38,17 @@
 		accessible = true,
 		...attachments
 	}: AccordionProps<Item> = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(next) => {
+			value = next;
+		},
+		() => defaultValue
+	);
 
 	const id = $props.id();
 	const classes = $derived(useAccordionTheme(theme));
+	const currentValue = $derived(valueState.value);
 
 	const themeState = useTheme();
 	const split = $derived(themeState.splitTransition<SlideTransitionParams>(transitions));
@@ -46,12 +57,13 @@
 	const slideTransition = slide();
 
 	const resolve = (item: Item, key: keyof Item) => {
-		return item[key] as any;
+		return item[key] as SlotContent<{ item: Item }> | undefined;
 	};
 
 	// Prefer the item's own id (stable across reorder/filter), but disambiguate
 	// duplicates — melt keys by id, so collisions would toggle items together.
 	const items = $derived.by(() => {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Local duplicate counts are rebuilt for each immutable item snapshot.
 		const seen = new Map<string, number>();
 		return itemsWithoutIds.map((item, index) => {
 			const base = 'id' in item ? String(item.id) : id + '-' + index;
@@ -61,7 +73,8 @@
 		}) as (Item & { id: string })[];
 	});
 
-	let prevOpen: string[] = [...value];
+	let prevOpen: string[] = untrack(() => [...currentValue]);
+	let isSyncingValue = false;
 	const accordion = new Accordion({
 		...getters({
 			get multiple() {
@@ -74,7 +87,8 @@
 				(id) => next.includes(id) !== prevOpen.includes(id)
 			);
 			prevOpen = next;
-			value = next;
+			valueState.value = next;
+			if (isSyncingValue) return;
 			onValueChange?.(next);
 			if (changed === undefined) return;
 			const index = items.findIndex((i) => i.id === changed);
@@ -84,7 +98,7 @@
 	});
 
 	$effect(() => {
-		const requested = oneAtATime ? value.slice(0, 1) : [...value];
+		const requested = oneAtATime ? currentValue.slice(0, 1) : [...currentValue];
 		const current = normalizeValue(accordion.value);
 		if (
 			current.length === requested.length &&
@@ -93,7 +107,12 @@
 			return;
 		}
 		prevOpen = requested;
-		accordion.value = oneAtATime ? requested[0] : new SvelteSet(requested);
+		isSyncingValue = true;
+		try {
+			accordion.value = oneAtATime ? requested[0] : new SvelteSet(requested);
+		} finally {
+			isSyncingValue = false;
+		}
 	});
 
 	function normalizeValue(current: string | Iterable<string> | null | undefined): string[] {
@@ -121,7 +140,7 @@
 	class={classes.root({ size, density, variant, splitted, className })}
 	{...attachments}
 >
-	{#each items as accordionItem}
+	{#each items as accordionItem (accordionItem.id)}
 		{@const accordionControl = accordion.getItem(accordionItem)}
 		<div
 			class={classes.item({

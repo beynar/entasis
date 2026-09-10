@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import 'lightgallery/css/lightgallery.css';
 	import 'lightgallery/css/lg-medium-zoom.css';
 	import Slot from '../Slot/Slot.svelte';
@@ -14,7 +15,8 @@
 		zoomSrc,
 		zoomWidth,
 		zoomHeight,
-		open = $bindable(false),
+		defaultOpen = false,
+		open = $bindable(),
 		disabled = false,
 		width,
 		height,
@@ -36,14 +38,19 @@
 		indicatorPosition = 'top-right',
 		class: className,
 		onOpenChange,
-		onOpen,
-		onClose,
+		onAfterOpen,
+		onAfterClose,
 		theme,
 		children,
 		caption,
 		indicator,
 		...attachments
 	}: ImageZoomProps = $props();
+	const openState = createBindableValue(
+		() => open,
+		(nextOpen) => (open = nextOpen),
+		() => defaultOpen
+	);
 
 	const generatedId = $props.id();
 	const id = $derived(customId || generatedId);
@@ -65,10 +72,10 @@
 			return zoomHeight;
 		},
 		get isOpen() {
-			return open;
+			return openState.value;
 		},
 		set isOpen(value) {
-			open = value;
+			openState.value = value;
 		},
 		get disabled() {
 			return disabled;
@@ -103,11 +110,11 @@
 		get onOpenChange() {
 			return onOpenChange;
 		},
-		get onOpen() {
-			return onOpen;
+		get onAfterOpen() {
+			return onAfterOpen;
 		},
-		get onClose() {
-			return onClose;
+		get onAfterClose() {
+			return onAfterClose;
 		}
 	});
 </script>
@@ -141,7 +148,7 @@
 		{disabled}
 		aria-label={buttonLabel}
 		aria-haspopup="dialog"
-		aria-expanded={open}
+		aria-expanded={openState.value}
 		data-image-zoom-trigger
 		data-src={zoomSrc || src || undefined}
 	>
@@ -173,6 +180,6 @@
 	</button>
 </div>
 
-{#if open && caption}
+{#if openState.value && caption}
 	<Slot render={caption} payload={state.payload} class={classes.caption()} />
 {/if}

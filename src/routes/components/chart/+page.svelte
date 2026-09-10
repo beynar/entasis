@@ -45,6 +45,13 @@
 		);
 	}
 
+	function hasInteractiveLegend(value: ComponentControlValues): boolean {
+		return value.chartType === 'series'
+			|| value.chartType === 'bar'
+			|| (value.chartType === 'scatter' && value.scatterVariant === 'points')
+			|| (value.chartType === 'distribution' && ['histogram', 'density', 'ecdf'].includes(String(value.distributionVariant)));
+	}
+
 	const usageControls = createComponentControls([
 		{
 			name: 'chartType',
@@ -192,7 +199,12 @@
 			value: true,
 			visible: hasBrushZoom
 		},
-		{ name: 'tooltip', type: 'switch', label: 'Tooltip', value: true }
+		{ name: 'tooltip', type: 'switch', label: 'Tooltip', value: true },
+		{ name: 'legend', type: 'switch', label: 'Legend', value: true, visible: (value) => value.chartType !== 'facet' },
+		{ name: 'interactiveLegend', type: 'switch', label: 'Interactive legend', value: true, visible: (value) => Boolean(value.legend) && hasInteractiveLegend(value) },
+		{ name: 'legendPlacement', type: 'segmented', label: 'Legend placement', value: 'bottom', options: [{ value: 'top', label: 'Top' }, { value: 'bottom', label: 'Bottom' }], visible: (value) => Boolean(value.legend) && value.chartType !== 'facet' },
+		{ name: 'legendAlign', type: 'segmented', label: 'Legend alignment', value: 'left', options: [{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }], visible: (value) => Boolean(value.legend) && value.chartType !== 'facet' },
+		{ name: 'legendOrientation', type: 'segmented', label: 'Legend direction', value: 'horizontal', options: [{ value: 'horizontal', label: 'Horizontal' }, { value: 'vertical', label: 'Vertical' }], visible: (value) => Boolean(value.legend) && value.chartType !== 'facet' && value.chartType !== 'matrix' && !(value.chartType === 'scatter' && value.scatterVariant === 'hexbin') }
 	]);
 	let previousArea = usageControls.value.area;
 
@@ -245,20 +257,32 @@
 			empty server host that mounts the chart only in the browser.
 		</p>
 		<p class="text-neutral/60 max-w-3xl text-sm leading-6">
-			Set <code>viewport</code> to enable drag-to-zoom on the x axis. The chart renders a brush,
-			animates to the selected domain, and shows an accessible reset control. Use
-			<code>viewport={{ axis: 'both' }}</code> for a rectangular x/y selection, as shown by the scatter
-			demo, or use the object form to configure the transition.
+			Set <code>viewport</code> to enable TanStack's native x-axis brush. Drag across the plot to zoom,
+			then drag again to narrow the window further. Numeric and date axes use continuous selection; category
+			axes snap to values and also provide keyboard range handles. Hover tooltips stay active outside
+			a drag. The chart animates to the selected window and provides a Reset zoom button. Use the object
+			form to configure the transition. Native two-dimensional brushing is not yet available.
 		</p>
 		<p class="text-neutral/60 max-w-3xl text-sm leading-6">
 			Add an <code>analysis</code> array to a series, scatter, bar, or distribution mark. Reference analysis
 			derives a mean, median, quantile, or standard-deviation band. Scatter and numeric series can derive
 			a linear regression with a confidence or prediction interval. Series can also derive a rolling mean
-			or median. These layers use the same channels and do not add tooltip points.
+			or median. Regression intervals use Student-t with the fit's residual degrees of freedom, so
+			small-sample intervals are wider. These layers use the same channels and do not add tooltip points.
 		</p>
 		<p class="text-neutral/60 max-w-3xl text-sm leading-6">
 			Enable <code>tooltip</code> to compare every series at the pointer category or date. The tooltip
 			stays inside the chart surface without adding chart focus states.
+		</p>
+		<p class="text-neutral/60 max-w-3xl text-sm leading-6">
+			Enable <code>legend</code> for categorical color keys or numeric heatmap and hexbin scales.
+			Use <code>{'legend={{ interactive: true }}'}</code> for series, bars, scatter points, and empirical
+			distributions. Clicking a legend button hides that series without changing the axes, colors, or
+			stack totals. Other layouts use static legends; facets keep their own labels.
+			Use <code>placement</code> for top/bottom, <code>align</code> for left/center/right, and
+			<code>orientation</code> for horizontal/vertical entries. Numeric color ramps stay horizontal.
+			The object form accepts <code>placement</code>, <code>label</code>, and controlled <code>value</code>
+			with <code>onValueChange</code>, or an initial <code>defaultValue</code>.
 		</p>
 		<p class="text-neutral/60 max-w-3xl text-sm leading-6">
 			Use one <code>distribution</code> mark with <code>group</code> and <code>value</code>
@@ -286,7 +310,8 @@
 		<p class="text-neutral/60 max-w-3xl text-sm leading-6">
 			Put annotations on the data mark they explain. Their target uses the parent key or a
 			predicate, so arrows, labels, rules, bands, and markers follow the final grouped, stacked,
-			polar, or faceted position.
+			polar, or faceted position. Set a band annotation's cross-axis size with
+			<code>thickness</code>.
 		</p>
 	</section>
 
@@ -320,6 +345,11 @@
 			labels={usageControls.value.labels}
 			brushZoom={usageControls.value.brushZoom}
 			tooltip={usageControls.value.tooltip}
+			legend={usageControls.value.legend}
+			interactiveLegend={usageControls.value.interactiveLegend && hasInteractiveLegend(usageControls.value)}
+			legendPlacement={usageControls.value.legendPlacement}
+			legendAlign={usageControls.value.legendAlign}
+			legendOrientation={usageControls.value.legendOrientation}
 		/>
 	</ComponentCard>
 

@@ -203,13 +203,13 @@
 		{
 			children: 'Use Grace Hopper',
 			variant: 'soft',
-			onClick: () => {
+			onAction: () => {
 				profileValue = { ...profileValue, name: 'Grace Hopper' };
 			}
 		},
 		{
 			children: 'Save profile',
-			onClick: (form) => form.submit()
+			onAction: (form) => form.submit()
 		}
 	];
 
@@ -430,7 +430,7 @@ async function editProfile() {
 `}
 		>
 			<div class="grid w-full max-w-xl gap-4">
-				<Button class="w-fit" onClick={() => void openProfileAsk()}>Edit profile</Button>
+				<Button class="w-fit" onclick={() => void openProfileAsk()}>Edit profile</Button>
 				{#if askError}
 					<p role="alert" class="text-danger text-sm">{askError}</p>
 				{/if}
@@ -463,7 +463,7 @@ async function editProfile() {
 							fullWidth
 							loading={form.loading}
 							disabled={form.loading}
-							onClick={() => void form.submit()}
+							onclick={() => void form.submit()}
 						>
 							Save preferences
 						</Button>

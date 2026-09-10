@@ -80,7 +80,7 @@
 	export const download = ({
 		name = DEFAULT_FILENAME,
 		format = 'svg',
-		size: fileSize = 500
+		dimension: fileSize = 500
 	}: DownloadOptions = {}) => {
 		if (!ref) return;
 

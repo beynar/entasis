@@ -34,6 +34,10 @@ floating-ui virtual element, so the menu appears exactly at the pointer (and fli
 
 ### Bindable Props
 - **open**: boolean - Open state of the context menu.
+- **defaultOpen**: boolean (default: false) - Initial state when open is not provided.
+- **onOpenChange**: (open: boolean) => void - Called once for each library-requested state change.
+- **onAfterOpen**: (popover) => void - Called after the open transition finishes.
+- **onAfterClose**: (popover) => void - Called after the close transition finishes.
 
 ### Advanced Props
 - **menu**: Omit<MenuProps, 'items'> - Overrides forwarded to the underlying Menu (header, footer, theme).

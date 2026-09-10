@@ -9,8 +9,6 @@ export type CheckboxProps = InputProps<'checkbox'> & {
 	indeterminate?: boolean;
 	/** Accessible name for compact controls without a visible label. */
 	ariaLabel?: string;
-	/** Called when the checkbox is toggled. */
-	onClick?: (checked: boolean) => void;
 	/** Theme overrides for the checkbox row and field parts. */
 	theme?: CheckboxesInputThemeProps & InputProps<'checkbox'>['theme'];
 };

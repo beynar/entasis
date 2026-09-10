@@ -78,9 +78,9 @@ Flexible container with sections. Supports standard color/size/variant props.
 | `href` | `string` | - | Makes card an `<a>` link |
 | `target` | `string` | - | Link target |
 | `rel` | `string` | - | Link rel attribute |
-| `onClick` | `() => void` | - | Click handler (renders as `role="button"`) |
-| `onEnter` | `() => void` | - | Pointer enter handler |
-| `onLeave` | `() => void` | - | Pointer leave handler |
+| `onclick` | `() => void` | - | Click handler (renders as `role="button"`) |
+| `onpointerenter` | `() => void` | - | Pointer enter handler |
+| `onpointerleave` | `() => void` | - | Pointer leave handler |
 | `disabled` | `boolean` | `false` | Disables interaction + opacity |
 | `action` | `Snippet \| ButtonProps` | - | Action element (top-right). Pass ButtonProps object for auto-rendered Button |
 
@@ -102,7 +102,7 @@ Flexible container with sections. Supports standard color/size/variant props.
 
 ### Action as ButtonProps
 ```svelte
-<Card action={{ variant: 'ghost', size: 'small', children: 'Delete', color: 'danger', onClick: () => {} }}>
+<Card action={{ variant: 'ghost', size: 'small', children: 'Delete', color: 'danger', onclick: () => {} }}>
   {#snippet title()}Title{/snippet}
   {#snippet children()}Content{/snippet}
 </Card>

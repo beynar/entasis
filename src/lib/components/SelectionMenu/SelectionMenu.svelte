@@ -8,15 +8,17 @@
 	import type { SelectionMenuProps, SelectionMenuPayload } from './selectionMenu.props.js';
 	import { SelectionMenuState } from './selectionMenu.state.svelte.js';
 	import { useSelectionMenuTheme } from './selectionMenu.theme.js';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 
 	let {
 		target,
-		items = $bindable(),
+		defaultValue = [],
+		value = $bindable(),
 		ariaLabel,
 		color,
 		variant,
 		disabled = false,
-		onChange,
+		onValueChange,
 		class: className,
 		theme: toggleMenuTheme,
 		children: content,
@@ -31,12 +33,19 @@
 		popoverClass,
 		contentClass,
 		onSelectionChange,
-		onOpen,
-		onClose,
+		onAfterOpen,
+		onAfterClose,
 		selectionTheme,
 		popoverTheme,
 		...attachments
 	}: SelectionMenuProps = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(next) => {
+			value = next;
+		},
+		() => defaultValue
+	);
 
 	let open = $state(false);
 	let popoverState = $state<PopoverState | null>(null);
@@ -51,7 +60,7 @@
 	});
 
 	$effect(() => {
-		target;
+		void target;
 		selectionMenu.refresh();
 	});
 
@@ -61,7 +70,7 @@
 	});
 
 	$effect(() => {
-		selectionMenu.revision;
+		void selectionMenu.revision;
 		if (!open || !popoverState?.dialogElement) return;
 		void tick().then(() => {
 			if (popoverState?.dialogElement) void popoverState.place(popoverState.dialogElement);
@@ -123,8 +132,8 @@
 	lockScroll={false}
 	class={classes.popover({ className: popoverClass })}
 	theme={popoverTheme}
-	onOpen={() => onOpen?.(payload)}
-	onClose={() => onClose?.(payload)}
+	onAfterOpen={() => onAfterOpen?.(payload)}
+	onAfterClose={() => onAfterClose?.(payload)}
 >
 	{#snippet children(popover)}
 		{#if content}
@@ -138,13 +147,14 @@
 			</div>
 		{:else}
 			<ToggleMenu
-				bind:items
+				bind:value={valueState.value}
+				{defaultValue}
 				{ariaLabel}
 				{size}
 				{color}
 				{variant}
 				{disabled}
-				{onChange}
+				{onValueChange}
 				class={className}
 				theme={toggleMenuTheme}
 				{@attach contentReference(popover)}

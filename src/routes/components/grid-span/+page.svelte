@@ -1,11 +1,35 @@
 <script lang="ts">
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 	import { Grid, GridSpan } from '$lib/components/Grid/index.js';
 	import { Stack } from '$lib/components/Stack/index.js';
 	import { chartBarIcon } from '$lib/components/Icons/chartBar.js';
 	import { checksIcon } from '$lib/components/Icons/checks.js';
 	import { usersThreeIcon } from '$lib/components/Icons/usersThree.js';
+
+	const controls = createComponentControls([
+		{
+			name: 'columns',
+			type: 'slider',
+			label: 'Columns',
+			value: 2,
+			min: 1,
+			max: 4,
+			step: 1,
+			showValue: true
+		},
+		{
+			name: 'rows',
+			type: 'slider',
+			label: 'Rows',
+			value: 3,
+			min: 1,
+			max: 4,
+			step: 1,
+			showValue: true
+		}
+	]);
 </script>
 
 <DocPage
@@ -21,10 +45,11 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A compact dashboard using both column and row spans."
 		class="min-h-[500px]"
-		code={`<Grid columns={{ minWidth: 110, max: 4, repeat: 'fit' }} rowHeight={64} gap={3}>
-	<GridSpan columns={2} rows={3}>Overview</GridSpan>
+		code={`<Grid columns={{ minWidth: 110, max: 4, repeat: 'fit' }} rowHeight={64} gap="lg">
+	<GridSpan columns={${controls.value.columns}} rows={${controls.value.rows}}>Overview</GridSpan>
 	<GridSpan columns={2}>Team</GridSpan>
 	<GridSpan columns={2} rows={2}>Tasks</GridSpan>
 	<GridSpan columns="full">Status</GridSpan>
@@ -33,21 +58,21 @@
 		<Grid
 			columns={{ minWidth: 110, max: 4, repeat: 'fit' }}
 			rowHeight={64}
-			gap={3}
+			gap="lg"
 			width="100%"
 			maxWidth={860}
 		>
-			<GridSpan columns={2} rows={3}>
+			<GridSpan columns={controls.value.columns} rows={controls.value.rows}>
 				<Stack
 					justify="between"
-					padding={4}
+					padding="xl"
 					class="bg-primary/12 border-primary/25 h-full rounded-lg border"
 				>
 					<Stack orientation="horizontal" justify="between" align="center">
 						<span class="text-primary text-xs font-semibold">Overview</span>
 						<span class="text-primary">{@render chartBarIcon({ class: 'size-5' })}</span>
 					</Stack>
-					<Stack gap={1}>
+					<Stack gap="xs">
 						<strong class="text-neutral text-3xl">74%</strong>
 						<span class="text-neutral/60 text-xs">Quarterly target</span>
 					</Stack>
@@ -56,13 +81,13 @@
 			<GridSpan columns={2}>
 				<Stack
 					orientation="horizontal"
-					gap={3}
+					gap="lg"
 					align="center"
-					padding={3}
+					padding="lg"
 					class="bg-success/12 border-success/25 h-full rounded-lg border"
 				>
 					<span class="text-success">{@render usersThreeIcon({ class: 'size-5' })}</span>
-					<Stack gap={0.5}>
+					<Stack gap="xs">
 						<strong class="text-neutral text-sm">18 members</strong>
 						<span class="text-neutral/60 text-xs">3 online now</span>
 					</Stack>
@@ -71,13 +96,13 @@
 			<GridSpan columns={2} rows={2}>
 				<Stack
 					orientation="horizontal"
-					gap={3}
+					gap="lg"
 					align="center"
-					padding={3}
+					padding="lg"
 					class="bg-warning/12 border-warning/25 h-full rounded-lg border"
 				>
 					<span class="text-warning">{@render checksIcon({ class: 'size-5' })}</span>
-					<Stack gap={0.5}>
+					<Stack gap="xs">
 						<strong class="text-neutral text-sm">32 completed</strong>
 						<span class="text-neutral/60 text-xs">8 remaining</span>
 					</Stack>
@@ -88,7 +113,7 @@
 					orientation="horizontal"
 					justify="between"
 					align="center"
-					paddingInline={3}
+					paddingInline="lg"
 					class="border-neutral-muted bg-surface h-full rounded-lg border"
 				>
 					<span class="text-neutral text-xs font-medium">Systems operational</span>
@@ -102,13 +127,13 @@
 		<ComponentCard
 			title="Column spans"
 			description="Mix ordinary grid children with wider featured regions."
-			code={`<Grid columns={4} gap={3}>
+			code={`<Grid columns={4} gap="lg">
 	<GridSpan columns={2}>Two columns</GridSpan>
 	<div>One</div>
 	<div>One</div>
 </Grid>`}
 		>
-			<Grid columns={4} gap={3} width="100%" maxWidth={760}>
+			<Grid columns={4} gap="lg" width="100%" maxWidth={760}>
 				<GridSpan columns={2}>
 					<div class="bg-primary/15 text-primary rounded-md p-5 text-center text-sm font-medium">
 						Two columns
@@ -122,14 +147,14 @@
 		<ComponentCard
 			title="Full row"
 			description="Use full when an item should cross every explicit grid track."
-			code={`<Grid columns={3} gap={3}>
+			code={`<Grid columns={3} gap="lg">
 	<GridSpan columns="full">Summary</GridSpan>
 	<div>Detail</div>
 	<div>Detail</div>
 	<div>Detail</div>
 </Grid>`}
 		>
-			<Grid columns={3} gap={3} width="100%" maxWidth={720}>
+			<Grid columns={3} gap="lg" width="100%" maxWidth={720}>
 				<GridSpan columns="full">
 					<div class="bg-secondary/12 text-secondary rounded-md p-4 text-sm font-medium">
 						Summary across the complete grid
@@ -146,13 +171,13 @@
 		<ComponentCard
 			title="Row spans"
 			description="Pair rowHeight on Grid with row spans for predictable dashboard rhythm."
-			code={`<Grid columns={3} rowHeight={44} gap={2}>
+			code={`<Grid columns={3} rowHeight={44} gap="md">
 	<GridSpan rows={3}>Tall</GridSpan>
 	<GridSpan rows={1}>Short</GridSpan>
 	<GridSpan rows={2}>Medium</GridSpan>
 </Grid>`}
 		>
-			<Grid columns={3} rowHeight={44} gap={2} width="100%" maxWidth={700}>
+			<Grid columns={3} rowHeight={44} gap="md" width="100%" maxWidth={700}>
 				<GridSpan rows={3}>
 					<div
 						class="bg-primary/12 text-primary flex h-full items-center justify-center rounded-md text-sm"

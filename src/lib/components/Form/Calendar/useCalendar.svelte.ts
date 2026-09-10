@@ -1,5 +1,6 @@
 import { untrack } from 'svelte';
 import { on } from 'svelte/events';
+import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
 export type CalendarType = 'calendar' | 'calendar-range' | 'calendar-multiple';
 export type CalendarWeekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
@@ -10,7 +11,7 @@ export type CalendarValue<T extends CalendarType> = T extends 'calendar'
 		? [Date | null, Date | null] | null
 		: Date[];
 
-export type CalendarChangeHandler<T extends CalendarType> = (value: CalendarValue<T>) => void;
+export type CalendarValueChangeHandler<T extends CalendarType> = (value: CalendarValue<T>) => void;
 
 export interface Event {
 	start: Date;
@@ -54,7 +55,7 @@ export interface CalendarStateOptions<E extends Event, T extends CalendarType> {
 	disabledDates?: (Date | [Date, Date])[];
 	disabled?: boolean;
 	locale?: string;
-	onChange?: CalendarChangeHandler<T>;
+	onValueChange?: CalendarValueChangeHandler<T>;
 	value?: CalendarValue<T>;
 }
 
@@ -114,12 +115,10 @@ const getElementWithDate = (event: globalThis.Event) =>
 				target instanceof HTMLElement && target.hasAttribute('data-date')
 		);
 
-export interface CalendarState<
-	E extends Event = Event,
-	T extends CalendarType = 'calendar'
-> extends CalendarStateOptions<E, T> {}
-
 export class CalendarState<E extends Event = Event, T extends CalendarType = 'calendar'> {
+	declare type: T | undefined;
+	declare value: CalendarValue<T> | undefined;
+	declare onValueChange: CalendarValueChangeHandler<T> | undefined;
 	view: 'single' | 'double' = 'single';
 	events: E[] = [];
 	minDate: Date | null = null;
@@ -181,7 +180,7 @@ export class CalendarState<E extends Event = Event, T extends CalendarType = 'ca
 	});
 
 	eventsMap = $derived.by(() => {
-		const eventsByDate = new Map<string, E[]>();
+		const eventsByDate = new SvelteMap<string, E[]>();
 		for (const calendarEvent of this.events) {
 			let date = normalizeCalendarDate(calendarEvent.start);
 			const end = normalizeCalendarDate(calendarEvent.end);
@@ -197,7 +196,7 @@ export class CalendarState<E extends Event = Event, T extends CalendarType = 'ca
 	});
 
 	disabledDateKeys = $derived.by(() => {
-		const disabledDateKeys = new Set<string>();
+		const disabledDateKeys = new SvelteSet<string>();
 		for (const disabledDate of this.disabledDates) {
 			if (!Array.isArray(disabledDate)) {
 				disabledDateKeys.add(getCalendarDateKey(disabledDate));
@@ -314,9 +313,9 @@ export class CalendarState<E extends Event = Event, T extends CalendarType = 'ca
 	getCalendarRows = (date: Date = this.date, isNextMonth = false): Row<E>[] => {
 		const year = date.getFullYear();
 		const month = date.getMonth();
-		const daysInMonth = new Date(year, month + 1, 0).getDate();
-		const daysInPreviousMonth = new Date(year, month, 0).getDate();
-		const nativeFirstDay = new Date(year, month, 1).getDay();
+		const daysInMonth = createCalendarDate(year, month + 1, 0).getDate();
+		const daysInPreviousMonth = createCalendarDate(year, month, 0).getDate();
+		const nativeFirstDay = createCalendarDate(year, month, 1).getDay();
 		const firstDay = (nativeFirstDay - this.resolvedWeekStartsOn + 7) % 7;
 		const weekCount = Math.ceil((firstDay + daysInMonth) / 7);
 		const tabStopDate = this.getTabStopDate();
@@ -392,8 +391,24 @@ export class CalendarState<E extends Event = Event, T extends CalendarType = 'ca
 	};
 
 	private commitValue(value: CalendarValue<T>) {
+		const currentValue = this.value;
+		if (Object.is(value, currentValue)) return;
+		if (
+			value instanceof Date &&
+			currentValue instanceof Date &&
+			isSameCalendarDay(value, currentValue)
+		) {
+			return;
+		}
+		if (
+			Array.isArray(value) &&
+			Array.isArray(currentValue) &&
+			value.length === currentValue.length &&
+			value.every((date, index) => date?.getTime() === currentValue[index]?.getTime())
+		)
+			return;
 		this.value = value;
-		this.onChange?.(value);
+		this.onValueChange?.(value);
 	}
 
 	selectDate = (date: Date) => {

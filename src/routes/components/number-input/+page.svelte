@@ -3,8 +3,34 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { NumberInput } from '$lib/components/Form/NumberInput/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let quantity = $state<number | null>(1);
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -19,8 +45,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A numeric input"
 		code={`<NumberInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Quantity"
 	description="How many items to order"
 	placeholder="0"
@@ -29,6 +60,10 @@
 	>
 		<div class="w-full max-w-md">
 			<NumberInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
 				label="Quantity"
 				description="How many items to order"
 				placeholder="0"

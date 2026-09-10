@@ -1,21 +1,13 @@
 import {
 	chartKeyIdentity,
 	compileColor,
-	compileOptionalChannel
+	compileOptionalChannel,
+	type CompilableChartChannel,
+	type CompiledChartChannel
 } from './chart.channels.js';
-import type {
-	ChartAnalysisScope,
-	ChartChannel,
-	ChartColor,
-	ChartKey,
-	ChartValue
-} from './chart.props.js';
+import type { ChartAnalysisScope, ChartColor, ChartKey, ChartValue } from './chart.props.js';
 
-export type AnalysisGroupAccessor<TRow> = (
-	row: TRow,
-	index: number,
-	rows: readonly TRow[]
-) => ChartKey | null | undefined;
+export type AnalysisGroupAccessor<TRow> = CompiledChartChannel<TRow, ChartKey>;
 
 export type AnalysisSourceRow<TRow> = {
 	readonly row: TRow;
@@ -78,12 +70,9 @@ export function groupAnalysisRows<TRow>(
 			`[Chart] ${path}.scope "series" requires the parent mark to define series, colorBy, or group.`
 		);
 	}
-	const groups = new Map<
-		string,
-		{ key: ChartKey; rows: AnalysisSourceRow<TRow>[] }
-	>();
+	const groups = new Map<string, { key: ChartKey; rows: AnalysisSourceRow<TRow>[] }>();
 	data.forEach((row, index) => {
-		const key = group(row, index, data);
+		const key = group(row, { index, data });
 		if (key === null || key === undefined) return;
 		if (typeof key !== 'string' && typeof key !== 'number') {
 			throw new TypeError(`[Chart] ${path}.scope received a non-scalar series key.`);
@@ -117,10 +106,7 @@ export function resolveAnalysisPaint(
 		: { paint: compileColor(fallback) };
 }
 
-export function readNumericChartValue(
-	value: unknown,
-	path: string
-): NumericChartValue | undefined {
+export function readNumericChartValue(value: unknown, path: string): NumericChartValue | undefined {
 	if (value === null || value === undefined) return undefined;
 	if (typeof value === 'number' && Number.isFinite(value)) {
 		return { numeric: value, kind: 'number' };
@@ -164,7 +150,7 @@ export function assertSingleNumericKind(
 }
 
 export function compileAnalysisGroupAccessor<TRow extends object>(
-	channel: ChartChannel<TRow, ChartKey> | undefined
+	channel: CompilableChartChannel<TRow, ChartKey> | undefined
 ): AnalysisGroupAccessor<TRow> | undefined {
 	return compileOptionalChannel(channel);
 }

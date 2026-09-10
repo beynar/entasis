@@ -213,7 +213,7 @@
 	class={classes.surface()}
 	type="hover"
 	ariaLabel={viewer.unit === 'slide' ? 'Document slides' : 'Document pages'}
-	onScroll={schedulePageSync}
+	onscroll={schedulePageSync}
 	theme={documentViewerScrollAreaTheme}
 >
 	{#if model}

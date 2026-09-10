@@ -11,8 +11,8 @@ const defaultMenu = cva({
 	variants: {
 		density: {
 			small: 'gap-0',
-			normal: 'gap-0.5',
-			large: 'gap-1'
+			normal: 'gap-micro',
+			large: 'gap-xs'
 		}
 	},
 	defaultVariants: {

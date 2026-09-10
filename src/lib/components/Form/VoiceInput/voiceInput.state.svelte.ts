@@ -380,8 +380,8 @@ export class VoiceInputState {
 			audio.addEventListener('pause', this.handlePlaybackPause);
 			audio.addEventListener('ended', this.handlePlaybackEnded);
 			audio.addEventListener('timeupdate', this.handlePlaybackTimeUpdate);
-			audio.addEventListener('loadedmetadata', this.handlePlaybackDurationChange);
-			audio.addEventListener('durationchange', this.handlePlaybackDurationChange);
+			audio.addEventListener('loadedmetadata', this.handlePlaybackDurationValueChange);
+			audio.addEventListener('durationchange', this.handlePlaybackDurationValueChange);
 			audio.addEventListener('error', this.handlePlaybackError);
 			this.playbackAudio = audio;
 			this.playbackUrl = url;
@@ -400,8 +400,8 @@ export class VoiceInputState {
 			audio.removeEventListener('pause', this.handlePlaybackPause);
 			audio.removeEventListener('ended', this.handlePlaybackEnded);
 			audio.removeEventListener('timeupdate', this.handlePlaybackTimeUpdate);
-			audio.removeEventListener('loadedmetadata', this.handlePlaybackDurationChange);
-			audio.removeEventListener('durationchange', this.handlePlaybackDurationChange);
+			audio.removeEventListener('loadedmetadata', this.handlePlaybackDurationValueChange);
+			audio.removeEventListener('durationchange', this.handlePlaybackDurationValueChange);
 			audio.removeEventListener('error', this.handlePlaybackError);
 			audio.pause();
 			audio.removeAttribute('src');
@@ -439,7 +439,7 @@ export class VoiceInputState {
 		this.playbackCurrentTime = clamp(audio.currentTime, 0, this.playbackDuration);
 	};
 
-	private handlePlaybackDurationChange = () => {
+	private handlePlaybackDurationValueChange = () => {
 		this.refreshPlaybackDuration(this.options.getDuration());
 	};
 

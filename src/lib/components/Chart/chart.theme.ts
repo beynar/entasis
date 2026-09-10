@@ -6,11 +6,11 @@ const defaultChartRoot = cva({
 });
 
 const defaultChartPlot = cva({
-	base: 'relative size-full min-w-0 [&_.ts-chart]:overflow-visible'
+	base: 'relative size-full min-w-0 [&_.ts-chart]:overflow-visible [&_[data-chart-legend-key]]:!border-neutral-muted [&_[data-chart-legend-key]]:!bg-surface [&_[data-chart-legend-key]]:!text-neutral [&_[data-chart-legend-key]]:!font-sans [&_[data-chart-legend-key]]:!rounded-md [&_[data-chart-legend-key][aria-pressed=true]]:!bg-neutral-muted [&_[data-chart-legend-key]]:focus-visible:outline-primary'
 });
 
 const defaultChartTooltip = cva({
-	base: 'z-50 !max-w-80 !rounded-lg !border-neutral-muted !bg-surface-floating !px-3 !py-2 !font-sans !text-xs !leading-tight !font-medium !text-neutral !shadow-xl'
+	base: 'z-50 !max-w-80 !rounded-md !border-neutral-muted !bg-surface-floating !px-lg !py-md !font-sans !text-xs !leading-tight !font-medium !text-neutral !shadow-xl'
 });
 
 export const chartTheme = {

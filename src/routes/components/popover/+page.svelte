@@ -5,9 +5,29 @@
 
 	import {} from 'svelte/compiler';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 	import Button from '$lib/components/Button/Button.svelte';
 	import { tooltip } from '$lib/components/Tooltip/tooltip.svelte.js';
+	import { sizes } from '$lib/utils/tokens.js';
+
+	const placements = ['top', 'bottom', 'left', 'right'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'position',
+			type: 'segmented',
+			label: 'Position',
+			value: 'bottom',
+			options: placements
+		}
+	]);
 
 	const text = `Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor`;
 
@@ -49,13 +69,15 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A floating panel opened from a trigger button."
 		code={`<Popover
 	trigger={{
 		content: 'Open',
 		color: 'primary'
 	}}
-	position="bottom"
+	size="${controls.value.size}"
+	position="${controls.value.position}"
 >
 	<div>
 		<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor</p>
@@ -67,7 +89,8 @@
 				content: 'Open',
 				color: 'primary'
 			}}
-			position="bottom"
+			size={controls.value.size}
+			position={controls.value.position}
 		>
 			<div>
 				<p>{text}</p>
@@ -227,7 +250,7 @@
 						variant="soft"
 						size="small"
 						{@attach popover.reference}
-						onClick={() => {
+						onclick={() => {
 							console.log(popover);
 							popover.toggle();
 						}}

@@ -1,14 +1,7 @@
-<script lang="ts" module>
-	import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
-	import { fieldTheme, type FieldTheme } from './field.js';
-
-	export const setFieldTheme = setComponentTheme<FieldTheme>('field');
-	export const useFieldTheme = useComponentTheme<FieldTheme>('field', fieldTheme);
-</script>
-
 <script lang="ts" generics="Type extends InputType">
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import type { InputType, FieldProps } from './field.js';
+	import { useFieldTheme } from './field.theme.js';
 
 	let {
 		class: className = '',
@@ -23,13 +16,14 @@
 		prefix,
 		footer,
 		header,
-		size,
+		size = 'normal',
+		density = 'normal',
 		labelPosition = 'top',
 		theme,
 		field,
 		as = 'div',
 		labelFor = field.id,
-		attrs,
+		fieldAttrs,
 		...attachments
 	}: FieldProps<Type> = $props();
 
@@ -84,11 +78,12 @@
 	data-label-position={resolvedLabelPosition}
 	class={classes.root({
 		className,
+		density,
 		hasError: field.hasError,
 		labelPosition: resolvedLabelPosition
 	})}
 	bind:this={field.rootNode}
-	{...attrs}
+	{...fieldAttrs}
 	id="{field.id}-field"
 	{...attachments}
 >
@@ -99,7 +94,7 @@
 				render={header}
 				attrs={{ id: field.labelId }}
 				class={classes.header({
-					size,
+					density,
 					required: field.required,
 					hasError: field.hasError,
 					labelPosition: resolvedLabelPosition
@@ -110,13 +105,13 @@
 					class={classes.label({ size, hasError: field.hasError, required: field.required })}
 					render={label}
 				/>
-				<Slot class={classes.actions({ size })} render={actions} />
+				<Slot class={classes.actions({ density })} render={actions} />
 			</Slot>
 		{:else}
 			<Slot
 				render={header}
 				class={classes.header({
-					size,
+					density,
 					required: field.required,
 					hasError: field.hasError,
 					labelPosition: resolvedLabelPosition
@@ -128,23 +123,23 @@
 					class={classes.label({ size, hasError: field.hasError, required: field.required })}
 					render={label}
 				/>
-				<Slot class={classes.actions({ size })} render={actions} />
+				<Slot class={classes.actions({ density })} render={actions} />
 			</Slot>
 		{/if}
 	{/if}
 	<div
 		class={classes.inputContainer({
-			size,
+			density,
 			hasError: field.hasError,
 			labelPosition: resolvedLabelPosition
 		})}
 	>
-		<Slot render={prefix} class={classes.prefix({ size })} />
+		<Slot render={prefix} class={classes.prefix({ density })} />
 		{@render children()}
-		<Slot render={suffix} class={classes.suffix({ size })} />
+		<Slot render={suffix} class={classes.suffix({ density })} />
 	</div>
 	{#if description || helper || footer}
-		<Slot render={footer} class={classes.footer({ size, labelPosition: resolvedLabelPosition })}>
+		<Slot render={footer} class={classes.footer({ density, labelPosition: resolvedLabelPosition })}>
 			<Slot class={classes.description({ size })} render={description} />
 			<Slot class={classes.helper({ size })} render={helper} />
 		</Slot>

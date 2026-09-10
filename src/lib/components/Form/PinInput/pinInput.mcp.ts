@@ -35,7 +35,7 @@ PinInput is a one-time-code input built from one real text input plus visible ce
 - **onComplete**: (value: string) => void
   - Called once when the value reaches the configured length.
 
-- **onChange**: (value: string) => void
+- **onValueChange**: (value: string) => void
   - Called when the value changes.
 
 ### Input Props
@@ -109,4 +109,11 @@ PinInput extends the standard field props:
 
 - The pattern should accept partial values, not only the final full code. Use \`^\\\\d+$\`, not \`^\\\\d{6}$\`.
 - For pasted codes with spaces or hyphens, pass a \`pasteTransformer\`.
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+
 `;

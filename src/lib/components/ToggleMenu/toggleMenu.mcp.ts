@@ -7,36 +7,36 @@ ToggleMenu renders standalone toggles, independent toggle groups, exclusive radi
 
 \`\`\`svelte
 <script>
-\timport { ToggleMenu } from 'svelai/toggle-menu';
+	import { ToggleMenu } from 'svelai/toggle-menu';
 
-\tlet items = $state([
-\t\t{ type: 'toggle', prefix: eyeIcon, ariaLabel: 'Preview', checked: true },
-\t\t{
-\t\t\ttype: 'group',
-\t\t\tariaLabel: 'Text formatting',
-\t\t\tvalue: { bold: true },
-\t\t\titems: {
-\t\t\t\tbold: { prefix: textBIcon, ariaLabel: 'Bold' },
-\t\t\t\titalic: { prefix: textItalicIcon, ariaLabel: 'Italic' }
-\t\t\t}
-\t\t},
-\t\t{
-\t\t\ttype: 'menu',
-\t\t\tariaLabel: 'Text color',
-\t\t\tprefix: paletteIcon,
-\t\t\tmenu: getTextColorOptions
-\t\t}
-\t]);
+	let items = $state([
+		{ type: 'toggle', prefix: eyeIcon, ariaLabel: 'Preview', value: true },
+		{
+			type: 'group',
+			ariaLabel: 'Text formatting',
+			value: { bold: true },
+			items: {
+				bold: { prefix: textBIcon, ariaLabel: 'Bold' },
+				italic: { prefix: textItalicIcon, ariaLabel: 'Italic' }
+			}
+		},
+		{
+			type: 'menu',
+			ariaLabel: 'Text color',
+			prefix: paletteIcon,
+			menu: getTextColorOptions
+		}
+	]);
 </script>
 
-<ToggleMenu bind:items ariaLabel="Editor tools" />
+<ToggleMenu bind:value={items} ariaLabel="Editor tools" />
 \`\`\`
 
 ## Item Types
 
-- **toggle**: A standalone ToggleButton configuration with \`type: 'toggle'\`. Its \`checked\` property is bindable through the menu items array.
+- **toggle**: A standalone ToggleButton configuration with \`type: 'toggle'\`. Its boolean \`value\` stores the pressed state.
 - **group**: A labeled collection of independent toggles. Nested items are immutable configuration and the group \`value\` map owns their checked state.
-- **radio-group**: A labeled collection of mutually exclusive toolbar choices. Its string \`value\` owns the checked radio and \`onChange\` receives the selected key.
+- **radio-group**: A labeled collection of mutually exclusive toolbar choices. Its string \`value\` owns the checked radio and \`onValueChange\` receives the selected key.
 - **menu**: A toolbar menu button. Its \`menu\` is a \`MenuItem[]\` or reactive factory and automatically becomes a submenu inside More.
 - **custom**: A snippet control with \`type: 'custom'\`. Its \`children\` snippet receives the resolved toolbar state and a \`reference\` attachment for the primary focusable element. \`overflowItems\` is required so the control has an explicit representation inside More.
 
@@ -44,13 +44,14 @@ Groups are joined by default. Set \`joined: false\` when their buttons should re
 
 ## Props
 
-- **items**: ToggleMenuItem[] (required, bindable) - Ordered toggles, groups, menu buttons, and custom controls.
+- **value**: ToggleMenuItem[] (bindable) - Ordered toggles, groups, menu buttons, and custom controls.
+- **defaultValue**: ToggleMenuItem[] - Initial toolbar value when value is omitted.
 - **ariaLabel**: string (required) - Accessible name for the toolbar.
 - **size**: 'small' | 'normal' | 'large' - Default size inherited by items.
 - **color**: Colors - Default color inherited by items.
 - **variant**: 'outline' | 'ghost' - Default variant inherited by items.
 - **disabled**: boolean - Disables every item.
-- **onChange**: (items) => void - Called with the complete updated configuration.
+- **onValueChange**: (value) => void - Called once with the complete updated configuration.
 - **class**: string - Additional classes for the toolbar root.
 - **theme**: ToggleMenuThemeProps - Theme overrides for root, rail, units, and overflow trigger.
 

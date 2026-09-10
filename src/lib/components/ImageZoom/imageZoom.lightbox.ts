@@ -169,11 +169,11 @@ export class ImageZoomLightbox {
 					: this.triggerElement;
 			this.zoom.updateOpen(true, true);
 		});
-		this.addEvent(root, 'lgAfterOpen', () => this.zoom.onOpen?.(this.zoom.payload));
+		this.addEvent(root, 'lgAfterOpen', () => this.zoom.onAfterOpen?.(this.zoom.payload));
 		this.addEvent(root, 'lgBeforeClose', () => this.zoom.updateOpen(false, true));
 		this.addEvent(root, 'lgAfterClose', () => {
 			this.restoreFocus();
-			this.zoom.onClose?.(this.zoom.payload);
+			this.zoom.onAfterClose?.(this.zoom.payload);
 		});
 		this.addEvent(imageElement, 'load', this.handleImageLoad);
 		const handleScrollIntent = () => {

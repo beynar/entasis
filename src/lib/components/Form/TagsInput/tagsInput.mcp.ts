@@ -71,7 +71,7 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 
 ### Event Props
 
-- **onChange**: \`(value: string[]) => void\`
+- **onValueChange**: \`(value: string[]) => void\`
   - Called when the list of tags changes.
 
 - **onValidate**: \`(value: string[]) => string[] | boolean\`
@@ -112,7 +112,7 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 ### Async Options
 
 \`\`\`svelte
-<script>
+<script lang="ts">
 	let value = $state(null);
 	const getItems = async (searchValue?: string) => {
 		const response = await fetch(\`/api/search?q=\${searchValue}\`);
@@ -138,7 +138,7 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 ### Pre-filled Values with Async Labels
 
 \`\`\`svelte
-<script>
+<script lang="ts">
 	let value = $state(['us', 'uk']);
 	const getValueOption = async (value: string) => {
 		return { value, label: value.toUpperCase() };
@@ -199,4 +199,11 @@ The TagsInput uses a theme object customizable via the \`theme\` prop or a globa
 	});
 </script>
 \`\`\`
+
+## State contract
+
+- **value**: current bindable editable value.
+- **defaultValue**: initial value used only when \`value\` is omitted.
+- **onValueChange**: called with the new value when the component changes it.
+
 `;

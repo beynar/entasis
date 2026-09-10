@@ -1,8 +1,10 @@
 import {
 	defineChart,
-	type ChartDefinition,
-	type ChartTooltipInput,
-	type DynamicChartDefinition
+	type ChartColorLegend,
+	type ChartValue,
+	type DomChartDefinition,
+	type ResponsiveChartDefinition,
+	type ChartTooltipInput
 } from '@tanstack/charts';
 import { scaleLinear } from 'd3-scale';
 import { compileChartTheme } from './chart.channels.js';
@@ -19,7 +21,8 @@ type CompileRelationChartInput<TRow extends object> = {
 	mark: ChartRelationMark<TRow>;
 	path: string;
 	palette?: readonly ChartColor[];
-	tooltip: false | ChartTooltipInput<TRow>;
+	legend?: ChartColorLegend;
+	tooltip: false | ChartTooltipInput<TRow, ChartValue, ChartValue, 'dom'>;
 };
 
 export function compileRelationChart<TRow extends object>({
@@ -27,9 +30,10 @@ export function compileRelationChart<TRow extends object>({
 	mark,
 	path,
 	palette,
+	legend,
 	tooltip
-}: CompileRelationChartInput<TRow>): ChartDefinition<TRow> {
-	const definition: DynamicChartDefinition<TRow> = {
+}: CompileRelationChartInput<TRow>): DomChartDefinition<TRow> {
+	const definition: ResponsiveChartDefinition<TRow, ChartValue, ChartValue, 'dom'> = {
 		chart({ width, height }) {
 			const plotWidth = Math.max(1, width);
 			const plotHeight = Math.max(1, height);
@@ -50,17 +54,21 @@ export function compileRelationChart<TRow extends object>({
 			}
 			return {
 				marks,
-				x: { scale: scaleLinear().domain([0, plotWidth]), axis: false },
-				y: { scale: scaleLinear().domain([plotHeight, 0]), axis: false },
+				scales: {
+					x: { scale: scaleLinear().domain([0, plotWidth]), axis: false },
+					y: { scale: scaleLinear().domain([plotHeight, 0]), axis: false }
+				},
 				guides: false,
 				clip: false,
 				margin: 0,
+				color: { legend },
 				theme: compileChartTheme(palette)
 			};
 		}
 	};
 	return defineChart(definition, {
 		keyboard: false,
+		pointer: false,
 		focusRing: false,
 		tooltip
 	});

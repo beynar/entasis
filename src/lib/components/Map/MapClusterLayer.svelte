@@ -5,7 +5,17 @@
 	import MapMarkerNode from './MapMarkerNode.svelte';
 	import { reportMapError, toMapError } from './map-errors.js';
 	import { bindLiveMapRefreshEvents, createLiveMapRefresh } from './map-refresh.js';
-	import { MAP_CLUSTER_LAYER_ID, MAP_CLUSTER_SOURCE_ID, createMapClusterExpand, getMapClusterSource, groupVisibleMapFeatures, removeMapClusterSourceAndLayer, resolveMapClusterRenderArgs, syncMapClusterSourceAndLayer, type ResolvedMapClusterConfig } from './map-cluster.js';
+	import {
+		MAP_CLUSTER_LAYER_ID,
+		MAP_CLUSTER_SOURCE_ID,
+		createMapClusterExpand,
+		getMapClusterSource,
+		groupVisibleMapFeatures,
+		removeMapClusterSourceAndLayer,
+		resolveMapClusterRenderArgs,
+		syncMapClusterSourceAndLayer,
+		type ResolvedMapClusterConfig
+	} from './map-cluster.js';
 	import type { MapMarker, NormalizedMapMarkers } from './map-data.js';
 	import type {
 		MapClusterSnippetArg,
@@ -13,7 +23,13 @@
 		MapMarkerSnippetArg,
 		MapMarkerTooltipContentArg
 	} from './map-types.js';
-	import type { MapLibreGeoJSONSource, MapLibreMap, MapLibreMapGeoJSONFeature, MapLibreMapSourceDataEvent, MapLibreMarkerConstructor } from './maplibre-types.js';
+	import type {
+		MapLibreGeoJSONSource,
+		MapLibreMap,
+		MapLibreMapGeoJSONFeature,
+		MapLibreMapSourceDataEvent,
+		MapLibreMarkerConstructor
+	} from './maplibre-types.js';
 
 	type Props<TData = unknown> = {
 		map: MapLibreMap;
@@ -24,9 +40,9 @@
 		popup?: boolean | Snippet<[MapMarkerPopupContentArg<TData>]>;
 		tooltip?: boolean | Snippet<[MapMarkerTooltipContentArg<TData>]>;
 		clusterContent?: Snippet<[MapClusterSnippetArg<TData>]>;
-		onmarkerclick?: (marker: MapMarker<TData>) => void;
-		onclusterclick?: (cluster: MapClusterSnippetArg<TData>) => void;
-		onerror?: (error: Error) => void;
+		onMarkerClick?: (marker: MapMarker<TData>) => void;
+		onClusterClick?: (cluster: MapClusterSnippetArg<TData>) => void;
+		onError?: (error: Error) => void;
 	};
 
 	let {
@@ -38,9 +54,9 @@
 		popup,
 		tooltip,
 		clusterContent,
-		onmarkerclick,
-		onclusterclick,
-		onerror
+		onMarkerClick,
+		onClusterClick,
+		onError
 	}: Props<TData> = $props();
 
 	let visibleClusterMarkers = $state<MapClusterSnippetArg<TData>[]>([]);
@@ -55,7 +71,7 @@
 	const liveRefresh = createLiveMapRefresh(refreshVisibleFeatures);
 
 	function reportError(error: Error): void {
-		reportMapError(error, onerror);
+		reportMapError(error, onError);
 	}
 
 	function clearVisibleState(): void {
@@ -142,7 +158,10 @@
 
 		const nextRefreshVersion = refreshVersion + 1;
 		refreshVersion = nextRefreshVersion;
-		const visibleFeatures = groupVisibleMapFeatures(queriedFeatures, normalizedMarkers.markerLookup);
+		const visibleFeatures = groupVisibleMapFeatures(
+			queriedFeatures,
+			normalizedMarkers.markerLookup
+		);
 
 		void resolveVisibleClusterMarkers(
 			source,
@@ -219,8 +238,8 @@
 	});
 
 	$effect(() => {
-		normalizedMarkers;
-		clusterConfig;
+		void normalizedMarkers;
+		void clusterConfig;
 		untrack(syncSourceAndLayer);
 	});
 </script>
@@ -232,8 +251,8 @@
 		cluster={clusterArg}
 		content={clusterContent}
 		zoomOnClick={clusterConfig.zoomOnClick}
-		{onclusterclick}
-		{onerror}
+		{onClusterClick}
+		{onError}
 	/>
 {/each}
 {#each visiblePointMarkers as mapMarker (String(mapMarker.id))}
@@ -244,6 +263,6 @@
 		content={markerContent}
 		{popup}
 		{tooltip}
-		{onmarkerclick}
+		{onMarkerClick}
 	/>
 {/each}

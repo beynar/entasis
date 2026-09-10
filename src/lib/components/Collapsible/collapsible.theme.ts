@@ -16,12 +16,12 @@ const defaultCollapsibleContainer = cva({
 });
 
 const defaultCollapsibleTrigger = cva({
-	base: 'state-layer flex items-center justify-between cursor-pointer transition-all bg-transparent border-0 text-left w-full gap-2 rounded-md',
+	base: 'state-layer flex items-center justify-between cursor-pointer transition-all bg-transparent border-0 text-left w-full gap-md rounded-sm',
 	variants: {
 		size: {
-			small: 'px-1.5 py-1.5 text-sm ',
-			normal: 'px-2 py-2 text-sm ',
-			large: 'px-3 py-3 text-base'
+			small: 'px-sm py-sm text-sm ',
+			normal: 'px-md py-md text-sm ',
+			large: 'px-lg py-lg text-base'
 		},
 		disabled: {
 			true: 'opacity-55 cursor-not-allowed pointer-events-none',
@@ -38,9 +38,9 @@ const defaultCollapsibleContent = cva({
 	base: 'overflow-hidden flex flex-col',
 	variants: {
 		size: {
-			small: 'gap-1.5 mt-1',
-			normal: 'gap-2 mt-2',
-			large: 'gap-3 mt-3'
+			small: 'gap-sm mt-xs',
+			normal: 'gap-md mt-md',
+			large: 'gap-lg mt-lg'
 		}
 	},
 	defaultVariants: {

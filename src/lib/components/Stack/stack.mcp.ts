@@ -16,9 +16,9 @@ alignment.
 ## Usage
 
 \`\`\`svelte
-<Stack gap={4} padding={4}>
+<Stack gap="xl" padding="xl">
   <h2>Account</h2>
-  <Stack orientation="horizontal" align="center" gap={2} wrap="wrap">
+  <Stack orientation="horizontal" align="center" gap="md" wrap="wrap">
     <span>Profile</span>
     <span>Security</span>
   </Stack>
@@ -30,7 +30,8 @@ alignment.
 - \`orientation\`: \`'horizontal' | 'vertical'\` — flex direction (default: \`'vertical'\`).
 - \`align\`: cross-axis alignment — \`start | center | end | stretch\` (default: \`'stretch'\`).
 - \`justify\`: main-axis alignment — \`start | center | end | between | around | evenly\` (default: \`'start'\`).
-- \`gap\`, \`padding\`, \`paddingInline\`, \`paddingBlock\` use the numeric Svelai spacing scale.
+- \`gap\`, \`padding\`, \`paddingInline\`, and \`paddingBlock\` accept
+  \`none | xs | sm | md | lg | xl\`.
 - \`paddingInline\` and \`paddingBlock\` override \`padding\` on their axis.
 - \`width\`, \`height\`, \`maxWidth\`, and \`minHeight\` accept CSS strings or pixel numbers.
 - \`wrap\` accepts \`nowrap | wrap | wrap-reverse\`.
@@ -38,4 +39,6 @@ alignment.
 - \`as\` changes the semantic HTML element without changing layout behavior.
 
 Stack forwards common semantic HTML attributes and Svelte attachments to the root element.
+Prefer parent-owned \`gap\` over child margins. The internal \`micro\` and \`layout-*\` tokens are
+reserved for component recipes and must not be used in generated interfaces.
 `;

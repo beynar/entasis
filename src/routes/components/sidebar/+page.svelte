@@ -7,13 +7,38 @@
 	import SidebarTreeDemo from './demos/SidebarTreeDemo.svelte';
 	import SidebarVariantDemo from './demos/SidebarVariantDemo.svelte';
 	import ShellMentalModel from '../ShellMentalModel.svelte';
-	import rawBasicCode from './demos/SidebarBasicDemo.svelte?raw';
 	import rawIconCode from './demos/SidebarIconDemo.svelte?raw';
 	import rawPanelModeCode from './demos/SidebarPanelModeDemo.svelte?raw';
 	import rawTreeCode from './demos/SidebarTreeDemo.svelte?raw';
 	import rawVariantCode from './demos/SidebarVariantDemo.svelte?raw';
+	import { createComponentControls } from '../../componentControls.svelte.js';
+	import { sizes } from '$lib/utils/tokens.js';
 
-	const basicCode = toPublicExampleCode(rawBasicCode);
+	const sidebarVariants = ['admin', 'floating', 'inset', 'split'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'inset',
+			options: sidebarVariants
+		},
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		}
+	]);
+
 	const iconCode = toPublicExampleCode(rawIconCode);
 	const panelModeCode = toPublicExampleCode(rawPanelModeCode);
 	const treeCode = toPublicExampleCode(rawTreeCode);
@@ -64,11 +89,28 @@
 	</section>
 
 	<ComponentCard
+		{controls}
 		description="Render a Sidebar layout from typed groups, search, account menus, badges, row actions, and a resizable thumb rail. The page side is intentionally just skeleton content."
 		class="!min-h-fit !items-start !p-4"
-		code={basicCode}
+		code={`<Sidebar
+	variant="${controls.value.variant}"
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	collapsible="icon"
+	frame="contained"
+	rail="thumb"
+	items={groups}
+>
+	{#snippet children()}
+		<!-- page content -->
+	{/snippet}
+</Sidebar>`}
 	>
-		<SidebarBasicDemo />
+		<SidebarBasicDemo
+			variant={controls.value.variant}
+			size={controls.value.size}
+			density={controls.value.density}
+		/>
 	</ComponentCard>
 
 	{#snippet examples()}

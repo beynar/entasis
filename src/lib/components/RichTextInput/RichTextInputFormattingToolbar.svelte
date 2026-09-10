@@ -194,7 +194,7 @@
 			buttons[control.id] = {
 				prefix: control.icon,
 				ariaLabel: control.shortcut ? `${control.label} (${control.shortcut})` : control.label,
-				onChange: control.onSelect
+				onValueChange: control.onSelect
 			};
 			value[control.id] = control.active;
 		}
@@ -229,7 +229,8 @@
 			ariaLabel,
 			items: buttons,
 			value: controls.some((control) => control.id === value) ? value : undefined,
-			onChange: (nextValue) => controls.find((control) => control.id === nextValue)?.onSelect(),
+			onValueChange: (nextValue) =>
+				controls.find((control) => control.id === nextValue)?.onSelect(),
 			joined: false
 		} satisfies ToggleMenuRadioGroupItem);
 	}
@@ -240,7 +241,7 @@
 				type: 'option',
 				title: 'Dismiss formatting toolbar',
 				prefix: xIcon,
-				onClick: dismiss
+				onclick: dismiss
 			}
 		];
 	}
@@ -256,7 +257,7 @@
 		{size}
 		{disabled}
 		squared
-		onClick={dismiss}
+		onclick={dismiss}
 		{@attach reference}
 		{@attach tooltip({ content: 'Dismiss formatting toolbar', delay: 350 })}
 	/>
@@ -280,7 +281,7 @@
 		bind:this={selectionMenu}
 		target={selectionTarget}
 		enabled={selectionEnabled}
-		bind:items={menuItems}
+		bind:value={menuItems}
 		ariaLabel="Rich text formatting"
 		{size}
 		color="neutral"
@@ -290,7 +291,7 @@
 		offset={8}
 		directedTransition={false}
 		popoverClass={selectionPopoverClass}
-		onClose={() => onSelectionClose?.()}
+		onAfterClose={() => onSelectionClose?.()}
 		children={isEditingLink ? linkEditor : undefined}
 		{@attach restoreSelectionFocusOnEscape}
 	/>
@@ -298,7 +299,7 @@
 	{@render linkEditor()}
 {:else}
 	<ToggleMenu
-		bind:items={menuItems}
+		bind:value={menuItems}
 		ariaLabel="Rich text formatting"
 		{size}
 		color="neutral"

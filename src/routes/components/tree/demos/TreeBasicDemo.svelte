@@ -3,10 +3,10 @@
 	import { basicTreePaths } from '../tree-demo-data.js';
 
 	let {
-		density = 'default',
+		density = 'normal',
 		search = true
 	}: {
-		density?: 'compact' | 'default' | 'relaxed';
+		density?: 'small' | 'normal' | 'large';
 		search?: boolean;
 	} = $props();
 </script>

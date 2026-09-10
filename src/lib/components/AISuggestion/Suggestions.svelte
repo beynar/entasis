@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import ScrollArea from '../ScrollArea/ScrollArea.svelte';
 	import Slot from '../Slot/Slot.svelte';
-	import type { ScrollAreaThemeProps } from '../ScrollArea/scrollArea.theme.js';
-	import { cx } from '../../utils/cva/index.js';
+	import { getSuggestionsScrollAreaTheme } from './suggestions.scrollArea.theme.js';
 	import type { SuggestionsProps } from './aiSuggestion.props.js';
 	import { useAISuggestionTheme } from './aiSuggestion.theme.js';
 	import Suggestion from './Suggestion.svelte';
@@ -13,30 +13,36 @@
 		listRef = $bindable(null),
 		suggestions,
 		ariaLabel = 'Prompt suggestions',
+		defaultValue,
 		value = $bindable(),
+		onValueChange,
 		disabled = false,
 		variant = 'soft',
 		scrollFade = true,
 		suggestion,
-		onSuggestionClick,
+		onSuggestionSelect,
 		class: className,
 		theme,
 		scrollAreaTheme,
 		...scrollAreaProps
 	}: SuggestionsProps = $props();
+	const valueState = createBindableValue(
+		() => value,
+		(next) => {
+			value = next;
+		},
+		() => defaultValue
+	);
 	const classes = $derived(useAISuggestionTheme(theme));
-	const resolvedScrollAreaTheme = $derived<ScrollAreaThemeProps>({
-		...scrollAreaTheme,
-		scrollbarX: {
-			...scrollAreaTheme?.scrollbarX,
-			base: cx('!hidden', scrollAreaTheme?.scrollbarX?.base)
-		}
-	});
+	const resolvedScrollAreaTheme = $derived(getSuggestionsScrollAreaTheme(scrollAreaTheme));
 
 	function select(nextValue: string) {
 		if (disabled) return;
-		value = nextValue;
-		onSuggestionClick?.(nextValue);
+		if (valueState.value !== nextValue) {
+			valueState.value = nextValue;
+			onValueChange?.(nextValue);
+		}
+		onSuggestionSelect?.(nextValue);
 	}
 </script>
 
@@ -49,7 +55,7 @@
 	{...scrollAreaProps}
 	data-slot="ai-suggestions"
 	data-disabled={disabled ? 'true' : undefined}
-	data-value={value}
+	data-value={valueState.value}
 	aria-disabled={disabled}
 	class={classes.root({ className })}
 >
@@ -60,7 +66,7 @@
 					render={suggestion}
 					payload={{
 						suggestion: item,
-						selected: value === item,
+						selected: valueState.value === item,
 						disabled,
 						select: () => select(item)
 					}}
@@ -68,7 +74,7 @@
 			{:else}
 				<Suggestion
 					suggestion={item}
-					selected={value === item}
+					selected={valueState.value === item}
 					{disabled}
 					{variant}
 					onSelect={select}

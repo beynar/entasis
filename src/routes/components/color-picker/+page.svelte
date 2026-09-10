@@ -2,10 +2,36 @@
 	import DocPage from '../../DocPage.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { ColorPicker, ColorPickerInput } from '$lib/components/Form/ColorPicker/index.js';
+	import { sizes } from '$lib/utils/tokens.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let color = $state('#6366f1');
 	let alphaColor = $state('#22c55e80');
 	let lastChange = $state('');
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'labelPosition',
+			type: 'segmented',
+			label: 'Label',
+			value: 'top',
+			options: ['top', 'left']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+	]);
 </script>
 
 <DocPage
@@ -21,8 +47,13 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A color picker field with a label and description"
 		code={`<ColorPickerInput
+	size="${controls.value.size}"
+	density="${controls.value.density}"
+	labelPosition="${controls.value.labelPosition}"
+	disabled={${controls.value.disabled}}
 	label="Brand color"
 	description="Used for buttons and links across the app"
 	bind:value={color}
@@ -30,6 +61,10 @@
 	>
 		<div class="w-full max-w-md">
 			<ColorPickerInput
+				size={controls.value.size}
+				density={controls.value.density}
+				labelPosition={controls.value.labelPosition}
+				disabled={controls.value.disabled}
 				label="Brand color"
 				description="Used for buttons and links across the app"
 				bind:value={color}
@@ -47,9 +82,7 @@
 			<div class="flex flex-col items-center gap-3">
 				<ColorPicker bind:value={color} />
 				<div class="flex items-center gap-2 text-sm">
-					<span
-						class="border-neutral-muted size-5 rounded border"
-						style="background-color: {color}"
+					<span class="border-neutral-muted size-5 rounded border" style="background-color: {color}"
 					></span>
 					<code class="font-mono">{color}</code>
 				</div>
@@ -103,13 +136,13 @@
 			<ColorPicker value="#ef4444" disabled />
 		</ComponentCard>
 
-		<!-- Example 6: onChange logging -->
+		<!-- Example 6: onValueChange logging -->
 		<ComponentCard
-			description="onChange fires on every committed change, including continuously while dragging"
-			code={`<ColorPicker value="#3b82f6" onChange={(hex) => console.log(hex)} />`}
+			description="onValueChange fires on every committed change, including continuously while dragging"
+			code={`<ColorPicker value="#3b82f6" onValueChange={(hex) => console.log(hex)} />`}
 		>
 			<div class="flex flex-col items-center gap-3">
-				<ColorPicker value="#3b82f6" onChange={(hex) => (lastChange = hex)} />
+				<ColorPicker value="#3b82f6" onValueChange={(hex) => (lastChange = hex)} />
 				<p class="text-neutral/60 text-xs">
 					Last change: <code class="font-mono">{lastChange || '—'}</code>
 				</p>

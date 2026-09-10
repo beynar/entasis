@@ -1,4 +1,5 @@
 <script lang="ts" module>
+	import { ganttTaskBarPopoverTheme } from './ganttTaskBar.popover.theme.js';
 	function clampHandleCenter(
 		preferred: number,
 		bounds: Readonly<{ start: number; end: number }>,
@@ -41,7 +42,6 @@
 >
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import HoverCard from '$lib/components/HoverCard/HoverCard.svelte';
-	import type { PopoverThemeProps } from '$lib/components/Popover/index.js';
 	import { getDateTimeFormatter } from '$lib/scheduling/zonedTime.js';
 	import GanttResourceAssignments from './GanttResourceAssignments.svelte';
 	import { getGanttTaskColor, isGanttSemanticColor } from './ganttChart.color.js';
@@ -55,10 +55,6 @@
 		GanttTaskTooltipPayload
 	} from './ganttChart.props.js';
 	import type { GanttChartState } from './ganttChart.state.svelte.js';
-
-	const TASK_TOOLTIP_POPOVER_THEME = {
-		root: { base: 'pointer-events-none' }
-	} satisfies PopoverThemeProps;
 
 	let {
 		positioned,
@@ -373,7 +369,7 @@
 		}
 		if (chart.disabled) return;
 		chart.a11y.setTaskTarget(node.taskId);
-		chart.eventHandlers?.taskClick?.(node, event);
+		chart.eventHandlers?.onTaskClick?.({ task: node, event });
 	}
 
 	function handleDoubleClick(event: MouseEvent): void {
@@ -383,7 +379,7 @@
 			return;
 		}
 		if (chart.disabled) return;
-		chart.eventHandlers?.taskDoubleClick?.(node, event);
+		chart.eventHandlers?.onTaskDoubleClick?.({ task: node, event });
 	}
 
 	function getProgressHandleLeft(
@@ -492,7 +488,7 @@
 			disabled={chart.disabled || isInteractionActive}
 			triggerClass="pointer-events-auto size-full"
 			popoverClass="pointer-events-none"
-			popoverTheme={TASK_TOOLTIP_POPOVER_THEME}
+			popoverTheme={ganttTaskBarPopoverTheme}
 		>
 			{#snippet trigger()}
 				<button

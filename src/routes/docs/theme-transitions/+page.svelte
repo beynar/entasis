@@ -78,7 +78,7 @@
 				<h2 class="text-lg font-semibold">Current variation</h2>
 				<code class="mt-1 block text-sm">{selectedTransition}</code>
 			</div>
-			<Button onClick={() => previewTransition(selectedTransition)}>Replay transition</Button>
+			<Button onclick={() => previewTransition(selectedTransition)}>Replay transition</Button>
 		</div>
 		<Code language="svelte" code={usage} />
 	</section>
@@ -95,7 +95,7 @@
 						variant={selectedTransition === transition ? 'solid' : 'outline'}
 						color={selectedTransition === transition ? 'primary' : 'neutral'}
 						class="justify-start font-mono"
-						onClick={() => previewTransition(transition)}
+						onclick={() => previewTransition(transition)}
 					>
 						{transition}
 					</Button>

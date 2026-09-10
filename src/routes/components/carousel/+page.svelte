@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Carousel } from '$lib/components/Carousel/index.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 
 	let items = $state([
@@ -48,29 +49,17 @@
 		}
 	]);
 
-	const basicCode = `<Carousel
-	items={items.slice(0, 5)}
-	layout={{ default: 1, md: 2, xl: 3 }}
-	gaps={{ default: 16 }}
-	partialDelta={{ default: 48 }}
-	class="w-full max-w-[90vw]"
-	dots={{ color: 'primary' }}
->
-	{#snippet children({ item, index })}
-		<article class="bg-surface raised-lg grid h-64 content-between rounded-xl border border-neutral-muted p-5">
-			<div class="flex items-start justify-between gap-4">
-				<div class="bg-primary text-primary-contrast flex h-10 w-10 items-center justify-center rounded font-semibold">
-					{index + 1}
-				</div>
-				<span class="bg-primary-muted text-primary rounded-full px-3 py-1 text-sm">item</span>
-			</div>
-			<div>
-				<h2 class="text-2xl font-semibold">{item.title}</h2>
-				<p class="text-neutral/60 mt-2">{item.description}</p>
-			</div>
-		</article>
-	{/snippet}
-</Carousel>`;
+	const snapAlignments = ['start', 'center', 'end'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'snapAlign',
+			type: 'segmented',
+			label: 'Snap',
+			value: 'start',
+			options: snapAlignments
+		},
+		{ name: 'dragFree', type: 'switch', label: 'Drag free', value: false }
+	]);
 
 	const responsiveCode = `<Carousel
 	items={items}
@@ -176,14 +165,30 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A multi-slide carousel with a partial next-slide preview."
-		code={basicCode}
+		code={`<Carousel
+	items={items.slice(0, 5)}
+	layout={{ default: 1, md: 2, xl: 3 }}
+	gaps={{ default: 16 }}
+	partialDelta={{ default: 48 }}
+	snapAlign="${controls.value.snapAlign}"
+	dragFree={${controls.value.dragFree}}
+	class="w-full max-w-[90vw]"
+	dots={{ color: 'primary' }}
+>
+	{#snippet children({ item, index })}
+		<article>...</article>
+	{/snippet}
+</Carousel>`}
 	>
 		<Carousel
 			items={items.slice(0, 5)}
 			layout={{ default: 1, md: 2, xl: 3 }}
 			gaps={{ default: 16 }}
 			partialDelta={{ default: 48 }}
+			snapAlign={controls.value.snapAlign}
+			dragFree={controls.value.dragFree}
 			class="w-full max-w-[90vw]"
 			dots={{ color: 'primary' }}
 		>

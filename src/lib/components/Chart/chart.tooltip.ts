@@ -1,11 +1,12 @@
 import type {
-	ChartFocusMode,
+	ChartFocusPreset,
 	ChartPoint,
 	ChartTooltipContent,
 	ChartTooltipContentContext,
 	ChartTooltipDatumItem,
 	ChartTooltipInput,
-	ChartTooltipRow
+	ChartTooltipRow,
+	ChartValue
 } from '@tanstack/charts';
 import { tooltip } from '@tanstack/charts/tooltip';
 import type { DistributionEmpiricalDatum } from './chart.distribution.empirical.js';
@@ -18,7 +19,6 @@ import type {
 	ChartTooltipDefinition,
 	ChartTooltipField
 } from './chart.props.js';
-import { compileVisibleTooltipFocus, type ChartTooltipPositions } from './chart.tooltip.focus.js';
 
 const GROUPED_TOOLTIP_PLACEMENTS = ['top', 'right', 'left', 'bottom'] as const;
 const PROPORTION_VALUE_FORMAT = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 });
@@ -37,11 +37,11 @@ export function compileChartTooltip<TRow extends object>(
 	definition: boolean | ChartTooltipDefinition<TRow> | undefined,
 	className: string | undefined,
 	groupBy: 'x' | 'y' | undefined,
-	specialization?: ChartTooltipSpecialization,
-	positions?: ChartTooltipPositions
+	specialization?: ChartTooltipSpecialization
 ): {
-	input: false | ChartTooltipInput<TRow>;
-	focus?: ChartFocusMode<TRow>;
+	input: false | ChartTooltipInput<TRow, ChartValue, ChartValue, 'dom'>;
+	focus?: ChartFocusPreset;
+	groupBy?: 'x' | 'y';
 } {
 	if (!definition) return { input: false };
 	let distributionGroupBy: 'x' | 'y' | undefined;
@@ -86,9 +86,7 @@ export function compileChartTooltip<TRow extends object>(
 			definition === true ? groupBy : resolveConfiguredGroupBy(definition, groupBy);
 	}
 	const isGrouped = configuredGroupBy !== undefined;
-	const focus =
-		compileVisibleTooltipFocus<TRow>(configuredGroupBy, positions) ??
-		(configuredGroupBy ? (`group-${configuredGroupBy}` as const) : undefined);
+	const focus = configuredGroupBy ? (`group-${configuredGroupBy}` as const) : 'nearest';
 	const placement = definition === true ? undefined : definition.placement;
 	let content:
 		| ((
@@ -103,6 +101,7 @@ export function compileChartTooltip<TRow extends object>(
 
 	return {
 		focus,
+		groupBy: configuredGroupBy,
 		input: {
 			use: tooltip,
 			className,

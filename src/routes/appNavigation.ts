@@ -1,4 +1,7 @@
 import type { SidebarGroup } from '$lib/components/Sidebar/index.js';
+import { componentNavigationSections } from './componentNavigation.generated.js';
+import { blockCategories, blockGroups } from './blocks/catalog.js';
+import { workflowBlocks } from './blocks/blocks.js';
 
 export type AppNavigationLink = {
 	href: string;
@@ -7,228 +10,65 @@ export type AppNavigationLink = {
 
 export const headerLinks: AppNavigationLink[] = [
 	{ href: '/docs', text: 'Docs' },
-	{ href: '/components/accordion', text: 'Components' },
-	{ href: '/', text: 'Sections' },
-	{ href: '/', text: 'Examples' },
+	{ href: '/components', text: 'Components' },
+	{ href: '/blocks', text: 'Blocks' },
 	{ href: '/playground', text: 'Playground' },
 	{ href: '/colors', text: 'Colors' }
 ];
 
+const gettingStartedLinks: AppNavigationLink[] = [
+	{ href: '/docs', text: 'Theme & setup' },
+	{ href: '/docs/conventions', text: 'Conventions' },
+	{ href: '/docs/colors', text: 'Color system' },
+	{ href: '/docs/theme-transitions', text: 'Theme transitions' },
+	{ href: '/docs/i18n', text: 'Internationalization' }
+];
+
+const additionalUtilityLinks: AppNavigationLink[] = [
+	{ href: '/utilities/dnd', text: 'Dnd list' },
+	{ href: '/utilities/raised', text: 'Raised' },
+	{ href: '/utilities/scroll-fade', text: 'Scroll fade' },
+	{ href: '/utilities/shimmer', text: 'Shimmer' }
+];
+
 const sidebarSections: Array<{ label: string; links: AppNavigationLink[] }> = [
-	{
-		label: 'Getting Started',
-		links: [
-			{ href: '/docs', text: 'Theme & setup' },
-			{ href: '/docs/conventions', text: 'Conventions' },
-			{ href: '/docs/colors', text: 'Color system' },
-			{ href: '/docs/theme-transitions', text: 'Theme transitions' },
-			{ href: '/docs/i18n', text: 'Internationalization' }
-		]
-	},
-	{
-		label: 'AI',
-		links: [
-			{ href: '/components/ai-conversation', text: 'Conversation' },
-			{ href: '/components/ai-ask-user-question', text: 'Ask user question' },
-			{ href: '/components/ai-chat', text: 'Chat' },
-			{ href: '/components/ai-context', text: 'Context' },
-			{ href: '/components/ai-thread', text: 'Thread' },
-			{ href: '/components/ai-thread-toc', text: 'Thread TOC' },
-			{ href: '/components/ai-message', text: 'Message' },
-			{ href: '/components/ai-message-actions', text: 'Message actions' },
-			{ href: '/components/ai-marker', text: 'Marker' },
-			{ href: '/components/ai-model-selector', text: 'Model selector' },
-			{ href: '/components/ai-composer', text: 'Composer' },
-			{ href: '/components/ai-reasoning', text: 'Reasoning' },
-			{ href: '/components/ai-suggestion', text: 'Suggestion' },
-			{ href: '/components/ai-tool', text: 'Tool' },
-			{ href: '/components/ai-mcp-app', text: 'MCP App' }
-		]
-	},
-	{
-		label: 'Layout',
-		links: [
-			{ href: '/components/aspect-ratio', text: 'Aspect ratio' },
-			{ href: '/components/card', text: 'Card' },
-			{ href: '/components/grid', text: 'Grid' },
-			{ href: '/components/grid-span', text: 'Grid span' },
-			{ href: '/components/heading', text: 'Heading' },
-			{ href: '/components/h-stack', text: 'Stack' },
-			{ href: '/components/resizable', text: 'Resizable' },
-			{ href: '/components/scroll-area', text: 'Scroll area' },
-			{ href: '/components/separator', text: 'Separator' },
-			{ href: '/components/v-stack', text: 'Stack — Vertical' }
-		]
-	},
-	{
-		label: 'Shells',
-		links: [
-			{ href: '/components/app-shell', text: 'App shell' },
-			{ href: '/components/page-shell', text: 'Page shell' },
-			{ href: '/components/sidebar', text: 'Sidebar' }
-		]
-	},
-	{
-		label: 'Actions',
-		links: [
-			{ href: '/components/button', text: 'Button' },
-			{ href: '/components/button-group', text: 'Button group' },
-			{ href: '/components/segmented-control', text: 'Segmented control' },
-			{ href: '/components/toggle-button', text: 'Toggle button' },
-			{ href: '/components/toggle-button-group', text: 'Toggle group' },
-			{ href: '/components/toggle-menu', text: 'Toggle menu' },
-			{ href: '/components/selection-menu', text: 'Selection menu' }
-		]
-	},
-	{
-		label: 'Forms',
-		links: [
-			{ href: '/components/calendar', text: 'Calendar' },
-			{ href: '/components/checkbox', text: 'Checkbox' },
-			{ href: '/components/checkboxes', text: 'Checkboxes' },
-			{ href: '/components/color-input', text: 'Color input' },
-			{ href: '/components/color-picker', text: 'Color picker' },
-			{ href: '/components/combobox', text: 'Combobox' },
-			{ href: '/components/date-input', text: 'Date input' },
-			{ href: '/components/date-selector', text: 'Date selector' },
-			{ href: '/components/file', text: 'File' },
-			{ href: '/components/form', text: 'Form' },
-			{ href: '/components/key-value-input', text: 'Key value input' },
-			{ href: '/components/multi-step-form', text: 'Multi-step form' },
-			{ href: '/components/number-input', text: 'Number input' },
-			{ href: '/components/password', text: 'Password' },
-			{ href: '/components/phone', text: 'Phone' },
-			{ href: '/components/pin-input', text: 'Pin input' },
-			{ href: '/components/radios', text: 'Radios' },
-			{ href: '/components/rating-input', text: 'Rating input' },
-			{ href: '/components/rich-text-input', text: 'Rich text input' },
-			{ href: '/components/voice-input', text: 'Voice input' },
-			{ href: '/components/select', text: 'Select' },
-			{ href: '/components/slider', text: 'Slider' },
-			{ href: '/components/switch', text: 'Switch' },
-			{ href: '/components/tag-group', text: 'Tag group' },
-			{ href: '/components/tags-input', text: 'Tags Input' },
-			{ href: '/components/textinput', text: 'Text input' },
-			{ href: '/components/textarea', text: 'Textarea' },
-			{ href: '/components/time-input', text: 'Time input' }
-		]
-	},
-	{
-		label: 'Data display',
-		links: [
-			{ href: '/components/avatar', text: 'Avatar' },
-			{ href: '/components/avatar-group', text: 'Avatar group' },
-			{ href: '/components/chart', text: 'Chart' },
-			{ href: '/components/chip', text: 'Chip' },
-			{ href: '/components/event-calendar', text: 'Event calendar' },
-			{ href: '/components/gantt-chart', text: 'Gantt chart' },
-			{ href: '/components/kanban', text: 'Kanban' },
-			{ href: '/components/kbd', text: 'Kbd' },
-			{ href: '/components/metadata-list', text: 'Metadata list' },
-			{ href: '/components/mini-calendar', text: 'Mini calendar' },
-			{ href: '/components/rating', text: 'Rating' },
-			{ href: '/components/sortable-list', text: 'Sortable list' },
-			{ href: '/components/stat', text: 'Stat' },
-			{ href: '/components/table', text: 'Table' },
-			{ href: '/components/data-table', text: 'Data table' },
-			{ href: '/components/timeline', text: 'Timeline' },
-			{ href: '/components/tree', text: 'Tree' }
-		]
-	},
-	{
-		label: 'Feedback',
-		links: [
-			{ href: '/components/alert', text: 'Alert' },
-			{ href: '/components/confirmation', text: 'Confirmation' },
-			{ href: '/components/empty', text: 'Empty' },
-			{ href: '/components/meter', text: 'Meter' },
-			{ href: '/components/network-indicator', text: 'Network indicator' },
-			{ href: '/components/progress-circle', text: 'Progress circle' },
-			{ href: '/components/skeleton', text: 'Skeleton' },
-			{ href: '/components/spinner', text: 'Spinner' },
-			{ href: '/components/spinner-text', text: 'Spinner Text' },
-			{ href: '/components/toast', text: 'Toast' }
-		]
-	},
-	{
-		label: 'Disclosure',
-		links: [
-			{ href: '/components/accordion', text: 'Accordion' },
-			{ href: '/components/collapsible', text: 'Collapsible' }
-		]
-	},
-	{
-		label: 'Navigation',
-		links: [
-			{ href: '/components/breadcrumbs', text: 'Breadcrumbs' },
-			{ href: '/components/command', text: 'Command' },
-			{ href: '/components/pagination', text: 'Pagination' },
-			{ href: '/components/stepper', text: 'Stepper' },
-			{ href: '/components/tabbar', text: 'Tabbar' },
-			{ href: '/components/table-of-contents', text: 'Table of contents' },
-			{ href: '/components/tabs', text: 'Tabs' }
-		]
-	},
-	{
-		label: 'Menus',
-		links: [
-			{ href: '/components/context-menu', text: 'Context menu' },
-			{ href: '/components/menu', text: 'Menu' },
-			{ href: '/components/menu-bar', text: 'Menu bar' },
-			{ href: '/components/menu-option', text: 'Menu option' },
-			{ href: '/components/popup-menu', text: 'Popup menu' }
-		]
-	},
-	{
-		label: 'Overlays',
-		links: [
-			{ href: '/components/dialog', text: 'Dialog' },
-			{ href: '/components/floating-window', text: 'Floating window' },
-			{ href: '/components/hover-card', text: 'Hover card' },
-			{ href: '/components/link-preview', text: 'Link preview' },
-			{ href: '/components/overlay', text: 'Overlay' },
-			{ href: '/components/popover', text: 'Popover' },
-			{ href: '/components/tooltip', text: 'Tooltip' }
-		]
-	},
-	{
-		label: 'Media',
-		links: [
-			{ href: '/components/audio-player', text: 'Audio player' },
-			{ href: '/components/carousel', text: 'Carousel' },
-			{ href: '/components/image-gallery', text: 'Image gallery' },
-			{ href: '/components/image-zoom', text: 'Image zoom' },
-			{ href: '/components/media-volume', text: 'Media volume' },
-			{ href: '/components/document-viewer', text: 'Document viewer' },
-			{ href: '/components/video-player', text: 'Video player' }
-		]
-	},
-	{
-		label: 'Content & graphics',
-		links: [
-			{ href: '/components/code', text: 'Code' },
-			{ href: '/components/diff', text: 'Diff' },
-			{ href: '/components/globe', text: 'Globe' },
-			{ href: '/components/map', text: 'Map' },
-			{ href: '/components/markdown', text: 'Markdown' },
-			{ href: '/components/marquee', text: 'Marquee' },
-			{ href: '/components/mermaid', text: 'Mermaid' },
-			{ href: '/components/qr-code', text: 'QR code' }
-		]
-	},
-	{
-		label: 'Utilities',
-		links: [
-			{ href: '/utilities/dnd', text: 'Dnd list' },
-			{ href: '/utilities/hitbox', text: 'Hitbox' },
-			{ href: '/utilities/raised', text: 'Raised' },
-			{ href: '/utilities/scroll-fade', text: 'Scroll fade' },
-			{ href: '/utilities/shimmer', text: 'Shimmer' }
-		]
-	}
+	{ label: 'Getting Started', links: gettingStartedLinks },
+	...componentNavigationSections.map((section) => ({
+		label: section.label,
+		links:
+			section.label === 'Utilities'
+				? [...section.links, ...additionalUtilityLinks]
+				: [...section.links]
+	}))
 ];
 
 export function getSidebarGroups(routeId: string | null | undefined): SidebarGroup[] {
+	if (routeId?.startsWith('/blocks')) {
+		return [
+			{ items: [{ label: 'All blocks', href: '/blocks', isActive: routeId === '/blocks' }] },
+			...blockGroups.map((group) => ({
+				label: group,
+				items: blockCategories
+					.filter((category) => category.group === group)
+					.map((category) => ({
+						label: category.title,
+						href: `/blocks/${category.slug}`,
+						badge: category.blocks.length,
+						isActive:
+							routeId === `/blocks/${category.slug}` ||
+							routeId.startsWith(`/blocks/${category.slug}/`)
+					}))
+			})),
+			{
+				label: 'Application workflows',
+				items: workflowBlocks.map((block) => ({
+					label: block.title,
+					href: `/blocks/${block.slug}`,
+					isActive: routeId === `/blocks/${block.slug}`
+				}))
+			}
+		];
+	}
 	return sidebarSections.map((section) => ({
 		label: section.label,
 		items: section.links.map((link) => ({

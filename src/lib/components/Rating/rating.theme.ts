@@ -2,12 +2,12 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 
 const defaultContainer = cva({
-	base: 'inline-flex items-center rounded outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-all',
+	base: 'inline-flex items-center rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-all',
 	variants: {
 		size: {
-			small: 'gap-0.5',
-			normal: 'gap-1',
-			large: 'gap-1.5'
+			small: 'gap-micro',
+			normal: 'gap-xs',
+			large: 'gap-sm'
 		},
 		disabled: {
 			true: 'cursor-not-allowed opacity-50',

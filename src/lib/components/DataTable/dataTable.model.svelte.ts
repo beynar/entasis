@@ -456,9 +456,9 @@ export class DataTableModel<TData> {
 			definitions.push({
 				id: column.id,
 				accessorFn,
-				size: column.size ?? 180,
-				minSize: column.minSize ?? 80,
-				maxSize: column.maxSize ?? 640,
+				size: column.width ?? 180,
+				minSize: column.minWidth ?? 80,
+				maxSize: column.maxWidth ?? 640,
 				enableHiding: column.hideable !== false,
 				enablePinning: column.pinnable !== false,
 				enableResizing: column.resizable !== false,

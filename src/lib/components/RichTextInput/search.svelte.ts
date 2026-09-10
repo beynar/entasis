@@ -115,7 +115,7 @@ export class RichTextInputSearch {
 		this.searchedTriggerKey = triggerKey;
 		let result: RichTextInputSearchResult<RichTextInputItem>;
 		try {
-			result = config.onSearch(menu.query, { trigger: menu.trigger, query: menu.query });
+			result = config.onSearch({ trigger: menu.trigger, query: menu.query });
 		} catch (error: unknown) {
 			this.handleSearchError(error, requestId);
 			return;

@@ -40,7 +40,7 @@ Use \`defaultOpen={false}\` to opt out of streaming auto-open without disabling 
 
 ## Controlled state
 
-\`open\` is bindable. \`onOpenChange\` runs when the user toggles the underlying Collapsible trigger; automatic lifecycle changes update the binding without invoking that user-toggle callback.
+\`open\` is bindable. \`onOpenChange\` runs once for user toggles and automatic stream-driven open or close changes. Initialization and parent assignments do not invoke it.
 
 \`\`\`svelte
 <script lang="ts">
@@ -126,7 +126,7 @@ Global overrides use \`setAIReasoningTheme\` from the same package entry.
 - \`labels?: Partial<AIReasoningLabels>\`: Default thinking text, unknown-duration text, and duration formatter.
 - \`open?: boolean\`: Bindable open state.
 - \`defaultOpen?: boolean\`: Initial state; false also opts out of streaming auto-open.
-- \`onOpenChange?: (open: boolean) => void\`: User-toggle callback.
+- \`onOpenChange?: (open: boolean) => void\`: Component-owned open-state callback.
 - \`duration?: number\`: Controlled duration in seconds.
 - \`autoCloseDelay?: number\`: First-completion close delay in milliseconds; defaults to 1000.
 - \`trigger?: Slot<AIReasoningState>\`: Complete trigger replacement.

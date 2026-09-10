@@ -7,6 +7,7 @@ export type {
 	ResizableHandleVariant,
 	ResizableHandleAriaLabel,
 	ResizableHandlePayload,
+	ResizableLayoutCommitPayload,
 	ResizableOrientation,
 	ResizablePanelItem,
 	ResizablePanelPayload,

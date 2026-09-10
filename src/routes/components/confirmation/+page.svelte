@@ -83,7 +83,7 @@ const { confirmed } = await confirmation({
 });`}
 	>
 		<div class="flex flex-col items-center gap-4">
-			<Button color={controls.value.color} onClick={showConfirmation}>Open confirmation</Button>
+			<Button color={controls.value.color} onclick={showConfirmation}>Open confirmation</Button>
 			<p class="text-neutral/60 text-sm">Last result: {lastResult}</p>
 		</div>
 	</ComponentCard>
@@ -103,7 +103,7 @@ const { confirmed } = await confirmation({
 });`}
 		>
 			<div class="flex flex-col items-center gap-4">
-				<Button color="primary" onClick={confirmAsync}>Publish changes</Button>
+				<Button color="primary" onclick={confirmAsync}>Publish changes</Button>
 				<p class="text-neutral/60 text-sm">Last result: {lastResult}</p>
 			</div>
 		</ComponentCard>

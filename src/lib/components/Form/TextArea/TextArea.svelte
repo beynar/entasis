@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { TextAreaProps } from './textArea.props.js';
@@ -6,7 +7,8 @@
 	import { autosize } from './autosize.svelte.js';
 
 	let {
-		value = $bindable(''),
+		defaultValue = '',
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
@@ -16,12 +18,14 @@
 		name,
 		onValidate,
 		visible,
-		onChange,
+		onValueChange,
 		rows = 3,
 		maxLength,
 		onPressEnter,
+		textareaAttrs,
 		...rest
 	}: TextAreaProps = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 
@@ -30,13 +34,13 @@
 		get value() {
 			return value;
 		},
-		set value(v: string | null) {
+		set value(v: string | null | undefined) {
 			value = v || '';
 		},
 		get errors() {
 			return errors;
 		},
-		set errors(v: any) {
+		set errors(v: string[] | boolean) {
 			errors = v;
 		},
 		get focused() {
@@ -45,7 +49,7 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => onChange?.(v ?? ''),
+		onValueChange: (v) => onValueChange?.(v ?? ''),
 		get disabled() {
 			return disabled;
 		},
@@ -91,6 +95,7 @@
 	{...rest}
 >
 	<textarea
+		{...textareaAttrs}
 		maxlength={maxLength}
 		disabled={field.disabled}
 		{rows}
@@ -100,6 +105,8 @@
 		{placeholder}
 		bind:value={field.value}
 		onkeydown={(e) => {
+			textareaAttrs?.onkeydown?.(e);
+			if (e.defaultPrevented) return;
 			if (e.key === 'Enter' && !e.shiftKey && onPressEnter) {
 				e.preventDefault();
 				onPressEnter?.(field);

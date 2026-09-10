@@ -11,15 +11,46 @@
 	} from '$lib/components/Pagination/pagination.props.js';
 	import { colors, sizes } from '$lib/utils/tokens.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 
-	const variants = ['pages', 'count', 'compact', 'dots', 'none'] satisfies PaginationVariant[];
+	const variants = ['pages', 'count', 'compact', 'dots', 'none'] as const satisfies readonly PaginationVariant[];
 	const controlVariants = [
 		'solid',
 		'outline',
 		'soft',
 		'ghost'
-	] satisfies PaginationControlVariant[];
+	] as const satisfies readonly PaginationControlVariant[];
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'pages',
+			options: variants
+		},
+		{
+			name: 'controlVariant',
+			type: 'segmented',
+			label: 'Control',
+			value: 'ghost',
+			options: controlVariants
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'Color',
+			value: 'neutral',
+			options: colors
+		}
+	]);
 	const invoiceHeader = {
 		id: 'Invoice',
 		customer: 'Customer',
@@ -87,11 +118,28 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A controlled pagination bar with previous and next controls."
-		code={`<Pagination bind:page totalPages={20} />`}
+		code={`<Pagination
+	bind:page
+	totalPages={20}
+	size="${controls.value.size}"
+	variant="${controls.value.variant}"
+	controlVariant="${controls.value.controlVariant}"
+	color="${controls.value.color}"
+/>`}
 	>
 		<div class="flex w-full flex-col items-center justify-center gap-4">
-			<Pagination bind:page totalPages={20} />
+			<Pagination
+				bind:page
+				totalPages={20}
+				totalItems={200}
+				pageSize={10}
+				size={controls.value.size}
+				variant={controls.value.variant}
+				controlVariant={controls.value.controlVariant}
+				color={controls.value.color}
+			/>
 			<Chip color="neutral" variant="soft">Page {page} of 20</Chip>
 		</div>
 	</ComponentCard>

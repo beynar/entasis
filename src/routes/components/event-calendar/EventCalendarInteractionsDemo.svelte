@@ -5,8 +5,8 @@
 		externalEvent,
 		type EventCalendarChange,
 		type EventCalendarItem,
-		type EventCalendarSlot,
-		type EventCalendarSlotSelectInfo
+		type EventCalendarItemsChangePayload,
+		type EventCalendarSlotSelectPayload
 	} from '$lib/components/EventCalendar/index.js';
 	import {
 		EVENT_CALENDAR_DEMO_TIME_ZONE,
@@ -43,15 +43,12 @@
 		};
 	}
 
-	function handleItemsChange(
-		_nextItems: typeof items,
-		change: EventCalendarChange<MeetingFields>
-	): void {
+	function handleItemsChange({ change }: EventCalendarItemsChangePayload<MeetingFields>): void {
 		lastChange = change;
 		status = `${change.kind} committed from ${change.source}; the bound array was replaced.`;
 	}
 
-	function handleSlotSelect(slot: EventCalendarSlot, info: EventCalendarSlotSelectInfo): void {
+	function handleSlotSelect({ slot, info }: EventCalendarSlotSelectPayload): void {
 		status =
 			slot.allDay === true
 				? `Selected ${slot.start} through ${slot.end} (exclusive) with ${info.source}.`
@@ -74,13 +71,13 @@
 	<div class="flex flex-wrap items-center justify-between gap-3">
 		<p class="text-neutral/70 text-sm" aria-live="polite">{status}</p>
 		<div class="flex flex-wrap gap-2">
-			<Button size="small" variant="outline" onClick={() => calendar?.copySelection()}>Copy</Button>
-			<Button size="small" variant="outline" onClick={() => calendar?.paste()}>Paste</Button>
+			<Button size="small" variant="outline" onclick={() => calendar?.copySelection()}>Copy</Button>
+			<Button size="small" variant="outline" onclick={() => calendar?.paste()}>Paste</Button>
 			<Button
 				size="small"
 				variant="outline"
 				disabled={!calendar?.canUndo()}
-				onClick={() => calendar?.undo()}
+				onclick={() => calendar?.undo()}
 			>
 				Undo
 			</Button>
@@ -88,11 +85,11 @@
 				size="small"
 				variant="outline"
 				disabled={!calendar?.canRedo()}
-				onClick={() => calendar?.redo()}
+				onclick={() => calendar?.redo()}
 			>
 				Redo
 			</Button>
-			<Button size="small" variant="outline" disabled={!lastChange} onClick={revertLastChange}>
+			<Button size="small" variant="outline" disabled={!lastChange} onclick={revertLastChange}>
 				Revert last change
 			</Button>
 		</div>

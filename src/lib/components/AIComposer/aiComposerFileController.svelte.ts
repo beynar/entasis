@@ -37,7 +37,7 @@ export class AIComposerFileController {
 			maxFiles: this.maxFiles,
 			maxSize: this.options.maxFileSize,
 			files: this.files,
-			onChange: (files) => this.replaceFiles(files),
+			onValueChange: (files) => this.replaceFiles(files),
 			onReject: (rejections) => this.reportRejections(rejections)
 		}));
 	}

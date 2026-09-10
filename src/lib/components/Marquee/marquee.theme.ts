@@ -9,9 +9,9 @@ const defaultMarquee = cva({
 			up: 'flex-col'
 		},
 		size: {
-			small: 'gap-2',
-			normal: 'gap-4',
-			large: 'gap-6'
+			small: 'gap-md',
+			normal: 'gap-xl',
+			large: 'gap-layout-md'
 		},
 		fade: {
 			true: 'scroll-fade-static',
@@ -37,9 +37,9 @@ const defaultInner = cva({
 			up: 'flex-col animate-marquee-up'
 		},
 		size: {
-			small: 'gap-2',
-			normal: 'gap-4',
-			large: 'gap-6'
+			small: 'gap-md',
+			normal: 'gap-xl',
+			large: 'gap-layout-md'
 		},
 		pauseOnHover: {
 			true: 'group-hover:[--marquee-animation-play-state:paused]',

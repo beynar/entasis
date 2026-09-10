@@ -3,7 +3,10 @@ import type { WithAttachments } from '$lib/types/props.js';
 import type { ScrollAreaThemeProps } from './scrollArea.theme.js';
 import type { HTMLAttributes } from 'svelte/elements';
 
-type ScrollAreaRootAttributes = Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'class'>;
+type ScrollAreaRootAttributes = Omit<
+	HTMLAttributes<HTMLDivElement>,
+	'children' | 'class' | 'onscroll'
+>;
 
 export type ScrollAreaProps = WithAttachments<
 	ScrollAreaRootAttributes & {
@@ -33,8 +36,8 @@ export type ScrollAreaProps = WithAttachments<
 		 * @default 0
 		 */
 		delay?: number;
-		/** Called for native scroll events from the viewport. */
-		onScroll?: (event: Event) => void;
+		/** Native scroll handler attached to the viewport. */
+		onscroll?: (event: Event & { currentTarget: HTMLDivElement }) => void;
 		/** Content rendered inside the scrollable viewport. */
 		children?: Snippet;
 		/** Class name applied to the root scroll area element. */

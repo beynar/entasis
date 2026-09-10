@@ -10,6 +10,7 @@
 		LiveFormValue
 	} from '$lib/components/Form/Form/index.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 
 	const accountInputs = {
@@ -79,6 +80,16 @@
 	type Inputs = MergedMultiStepFormInputs<typeof steps>;
 	let value = $state<LiveFormValue<Inputs>>({ name: 'Ada' });
 	let submission = $state<InferFormValue<Inputs> | null>(null);
+	const controls = createComponentControls([
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'plain',
+			options: ['plain', 'sectioned', 'card']
+		},
+		{ name: 'showMeter', type: 'switch', label: 'Meter', value: true }
+	]);
 </script>
 
 <DocPage
@@ -94,11 +105,23 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="Every required step must be valid before final submission"
 		class="!items-start"
+		code={`<MultiStepForm
+	variant="${controls.value.variant}"
+	showMeter={${controls.value.showMeter}}
+	items={steps}
+	bind:value
+	onSubmitForm={(validatedValue) => {
+		submission = validatedValue;
+	}}
+/>`}
 	>
 		<div class="grid w-full max-w-xl gap-4">
 			<MultiStepForm
+				variant={controls.value.variant}
+				showMeter={controls.value.showMeter}
 				items={steps}
 				bind:value
 				onSubmitForm={(validatedValue) => {

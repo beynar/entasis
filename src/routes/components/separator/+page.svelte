@@ -6,6 +6,19 @@
 	import { userIcon } from '$lib/components/Icons/user.js';
 	import { gearIcon } from '$lib/components/Icons/gear.js';
 	import { signOutIcon } from '$lib/components/Icons/signOut.js';
+	import { createComponentControls } from '../../componentControls.svelte.js';
+
+	const separatorOrientations = ['horizontal', 'vertical'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'orientation',
+			type: 'segmented',
+			label: 'Orientation',
+			value: 'horizontal',
+			options: separatorOrientations
+		},
+		{ name: 'decorative', type: 'switch', label: 'Decorative', value: false }
+	]);
 </script>
 
 <DocPage
@@ -20,24 +33,33 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A horizontal separator dividing related content."
 		code={`<div class="w-full max-w-xl">
 	<div class="space-y-1">
 		<h4 class="text-sm font-medium leading-none">Svelai</h4>
 		<p class="text-neutral/60 text-sm">The foundation for your design system.</p>
 	</div>
-	<Separator class="my-4" />
+	<Separator class="my-4" orientation="${controls.value.orientation}" decorative={${controls.value.decorative}} />
 	<p class="text-sm leading-relaxed">
 		A set of beautifully designed Svelte components that you can customize, extend, and build on.
 	</p>
 </div>`}
 	>
-		<div class="w-full max-w-xl">
+		<div
+			class={controls.value.orientation === 'vertical'
+				? 'flex h-24 w-full max-w-xl items-center gap-4'
+				: 'w-full max-w-xl'}
+		>
 			<div class="space-y-1">
 				<h4 class="text-sm font-medium leading-none">Svelai</h4>
 				<p class="text-neutral/60 text-sm">The foundation for your design system.</p>
 			</div>
-			<Separator class="my-4" />
+			<Separator
+				class={controls.value.orientation === 'vertical' ? 'mx-4 h-full' : 'my-4'}
+				orientation={controls.value.orientation}
+				decorative={controls.value.decorative}
+			/>
 			<p class="text-sm leading-relaxed">
 				A set of beautifully designed Svelte components that you can customize, extend, and build
 				on.
@@ -99,23 +121,23 @@
 		<ComponentCard description="Border thickness from 1px to 4px." class="!min-h-fit">
 			<div class="space-y-4">
 				<div>
-					<p class="text-neutral/70 mb-2 text-sm">Size 1 (default)</p>
-					<Separator size={1} />
+					<p class="text-neutral/70 mb-2 text-sm">Thickness 1 (default)</p>
+					<Separator thickness={1} />
 				</div>
 
 				<div>
-					<p class="text-neutral/70 mb-2 text-sm">Size 2</p>
-					<Separator size={2} />
+					<p class="text-neutral/70 mb-2 text-sm">Thickness 2</p>
+					<Separator thickness={2} />
 				</div>
 
 				<div>
-					<p class="text-neutral/70 mb-2 text-sm">Size 4</p>
-					<Separator size={4} />
+					<p class="text-neutral/70 mb-2 text-sm">Thickness 4</p>
+					<Separator thickness={4} />
 				</div>
 
 				<div>
-					<p class="text-neutral/70 mb-2 text-sm">Size 4 with Color</p>
-					<Separator size={4} color="primary" />
+					<p class="text-neutral/70 mb-2 text-sm">Thickness 4 with Color</p>
+					<Separator thickness={4} color="primary" />
 				</div>
 			</div>
 		</ComponentCard>
@@ -130,9 +152,9 @@
 
 				<div class="flex h-32 items-center gap-4">
 					<div class="flex-1 text-center">Section A</div>
-					<Separator orientation="vertical" color="primary" size={2} />
+					<Separator orientation="vertical" color="primary" thickness={2} />
 					<div class="flex-1 text-center">Section B</div>
-					<Separator orientation="vertical" color="primary" size={2} />
+					<Separator orientation="vertical" color="primary" thickness={2} />
 					<div class="flex-1 text-center">Section C</div>
 				</div>
 			</div>
@@ -159,7 +181,7 @@
 					<p class="text-neutral/70">Manage your personal details</p>
 				</section>
 
-				<Separator color="primary" size={2} children="Account Settings" />
+				<Separator color="primary" thickness={2} children="Account Settings" />
 
 				<section>
 					<h3 class="text-xl font-semibold">Security</h3>

@@ -6,7 +6,7 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 // only; `density` owns paddings and gaps ('large' matches vega's default
 // 6-scale, 'normal' its sm 4-scale).
 const defaultCard = cva({
-	base: 'group/card text-neutral flex flex-col rounded-xl tabular-nums transition-all',
+	base: 'group/card text-neutral flex flex-col rounded-lg tabular-nums transition-all',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -14,9 +14,9 @@ const defaultCard = cva({
 			large: 'text-base'
 		},
 		density: {
-			small: 'py-3 gap-3',
-			normal: 'py-4 gap-4',
-			large: 'py-6 gap-6'
+			small: 'py-lg gap-lg',
+			normal: 'py-xl gap-xl',
+			large: 'py-layout-md gap-layout-md'
 		},
 		// The color itself flows through the data-color attribute (bg-color /
 		// ring-color / text-color-contrast resolve against it); the axis stays for
@@ -40,7 +40,7 @@ const defaultCard = cva({
 			// No ! on bg-transparent: it would also defeat the clickable hover bg.
 			ghost: 'bg-transparent text-neutral'
 		},
-		// Internal: set when the card has an onClick or href — interactive cards
+		// Internal: set when the card has an onclick or href — interactive cards
 		// get cursor, hover, press and keyboard-focus treatment.
 		clickable: {
 			true: 'state-layer cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-primary/50 active:translate-y-px',
@@ -82,9 +82,9 @@ const defaultCardHeader = cva({
 	base: 'grid auto-rows-min items-start',
 	variants: {
 		density: {
-			small: 'px-3 gap-0.5',
-			normal: 'px-4 gap-1',
-			large: 'px-6 gap-1.5'
+			small: 'px-lg gap-micro',
+			normal: 'px-xl gap-xs',
+			large: 'px-layout-md gap-sm'
 		},
 		hasAction: {
 			true: 'grid-cols-[1fr_auto]',
@@ -107,9 +107,9 @@ const defaultCardHeader = cva({
 		hasBorder: false
 	},
 	compoundVariants: [
-		{ hasBorder: true, density: 'small', class: 'pb-3' },
-		{ hasBorder: true, density: 'normal', class: 'pb-4' },
-		{ hasBorder: true, density: 'large', class: 'pb-6' }
+		{ hasBorder: true, density: 'small', class: 'pb-lg' },
+		{ hasBorder: true, density: 'normal', class: 'pb-xl' },
+		{ hasBorder: true, density: 'large', class: 'pb-layout-md' }
 	]
 });
 
@@ -161,9 +161,9 @@ const defaultCardContent = cva({
 	base: '',
 	variants: {
 		density: {
-			small: 'px-3',
-			normal: 'px-4',
-			large: 'px-6'
+			small: 'px-lg',
+			normal: 'px-xl',
+			large: 'px-layout-md'
 		},
 		hasBorderTop: {
 			true: '',
@@ -184,9 +184,9 @@ const defaultCardFooter = cva({
 	base: 'flex flex-wrap items-center',
 	variants: {
 		density: {
-			small: 'px-3 gap-2',
-			normal: 'px-4 gap-2',
-			large: 'px-6 gap-3'
+			small: 'px-lg gap-md',
+			normal: 'px-xl gap-md',
+			large: 'px-layout-md gap-lg'
 		},
 		hasBorder: {
 			true: 'border-t border-neutral-muted',
@@ -198,9 +198,9 @@ const defaultCardFooter = cva({
 		hasBorder: false
 	},
 	compoundVariants: [
-		{ hasBorder: true, density: 'small', class: 'pt-3' },
-		{ hasBorder: true, density: 'normal', class: 'pt-4' },
-		{ hasBorder: true, density: 'large', class: 'pt-6' }
+		{ hasBorder: true, density: 'small', class: 'pt-lg' },
+		{ hasBorder: true, density: 'normal', class: 'pt-xl' },
+		{ hasBorder: true, density: 'large', class: 'pt-layout-md' }
 	]
 });
 

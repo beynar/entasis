@@ -46,7 +46,7 @@
 		event.stopPropagation();
 		if (chart.disabled) return;
 		chart.a11y.setDependencyTarget(dependency.dependency.id);
-		chart.eventHandlers?.dependencyClick?.(dependency, event);
+		chart.eventHandlers?.onDependencyClick?.({ dependency, event });
 	}
 </script>
 

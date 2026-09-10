@@ -1,0 +1,79 @@
+<script lang="ts">
+	import { Grid } from 'svelai/grid';
+	import { Stack } from 'svelai/stack';
+	import { Avatar } from 'svelai/avatar';
+	import { Button } from 'svelai/button';
+	import { Card } from 'svelai/card';
+	import { Chip } from 'svelai/chip';
+	import { Meter } from 'svelai/meter';
+	import { Stat } from 'svelai/stat';
+
+	let guests = $state([
+		{ name: 'Alex Morgan', room: '204', nights: 3, checkedIn: false },
+		{ name: 'Maya Chen', room: '318', nights: 2, checkedIn: false },
+		{ name: 'Sam Rivera', room: '112', nights: 4, checkedIn: true },
+		{ name: 'Jordan Lee', room: '407', nights: 1, checkedIn: false }
+	]);
+</script>
+
+<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+	<header class="flex flex-wrap items-center justify-between gap-lg">
+		<div>
+			<p class="text-sm text-primary-readable">The Linden House / Front desk</p>
+			<h2 class="mt-sm text-3xl font-semibold">A warm welcome, every time.</h2>
+		</div>
+		<Chip color="neutral">Monday, June 15</Chip>
+	</header>
+	<Grid columns={{ minWidth: 220, max: 3 }} gap="md">
+		<Stat label="Occupancy" value="84%" /><Stat
+			label="Arrivals remaining"
+			value={String(guests.filter((guest) => !guest.checkedIn).length)}
+		/><Stat label="Rooms ready" value="12" />
+	</Grid>
+	<div class="grid gap-lg lg:grid-cols-3">
+		<Card
+			title="Today’s arrivals"
+			description="Check guests in to update this local desk."
+			class="lg:col-span-2"
+			><Stack gap="lg">
+				{#each guests as guest (guest)}<div
+						class="flex flex-wrap items-center justify-between gap-md border-b border-neutral-muted pb-lg"
+					>
+						<div class="flex items-center gap-md">
+							<Avatar user={{ name: guest.name }} />
+							<div>
+								<strong class="text-sm">{guest.name}</strong>
+								<p class="text-xs text-neutral/60">Room {guest.room} · {guest.nights} nights</p>
+							</div>
+						</div>
+						<Button
+							size="small"
+							variant={guest.checkedIn ? 'soft' : 'outline'}
+							disabled={guest.checkedIn}
+							onclick={() => (guest.checkedIn = true)}
+							>{guest.checkedIn ? 'Checked in' : 'Check in'}</Button
+						>
+					</div>{/each}
+			</Stack></Card
+		>
+		<Stack gap="lg">
+			<Card title="Room readiness"
+				><Stack gap="lg">
+					<Meter
+						label="Clean and inspected"
+						value={{ value: 38, color: 'success' }}
+						max={48}
+					/><Meter label="Housekeeping" value={{ value: 7, color: 'warning' }} max={48} /><Meter
+						label="Maintenance"
+						value={{ value: 3, color: 'neutral' }}
+						max={48}
+					/>
+				</Stack></Card
+			><Card title="Front desk note" description="A small detail makes a memorable stay."
+				><p class="text-sm text-neutral/65">
+					Room 204 is celebrating an anniversary. A welcome note is ready at reception.
+				</p></Card
+			>
+		</Stack>
+	</div>
+</Stack>

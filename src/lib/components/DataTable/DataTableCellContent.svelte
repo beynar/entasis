@@ -46,7 +46,7 @@
 			size="small"
 			class={classes.expander()}
 			disabled={model.props.disabled}
-			onClick={() => row.toggleExpanded()}
+			onclick={() => row.toggleExpanded()}
 		/>
 		<span class={classes.groupValue()}>{formatValue(cell.getValue())}</span>
 		<span class={classes.groupCount()}>({row.subRows.length})</span>
@@ -69,7 +69,7 @@
 				size="small"
 				class={classes.expander()}
 				disabled={model.props.disabled}
-				onClick={() => row.toggleExpanded()}
+				onclick={() => row.toggleExpanded()}
 			/>
 		{/if}
 		{#if config.cell}

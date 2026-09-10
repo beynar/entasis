@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultVideoPlayerRoot = cva({
-	base: 'group/video-player relative isolate w-full min-w-0 overflow-hidden rounded-lg border border-neutral-muted bg-black text-white outline-none focus-visible:ring-2 focus-visible:ring-primary/60',
+	base: 'group/video-player relative isolate w-full min-w-0 overflow-hidden rounded-md border border-neutral-muted bg-black text-white outline-none focus-visible:ring-2 focus-visible:ring-primary/60',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -67,7 +67,7 @@ const defaultVideoPlayerMedia = cva({
 });
 
 const defaultVideoPlayerOverlay = cva({
-	base: 'pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-4',
+	base: 'pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-xl',
 	variants: {
 		visible: {
 			true: '',
@@ -80,7 +80,7 @@ const defaultVideoPlayerOverlay = cva({
 });
 
 const defaultVideoPlayerPanel = cva({
-	base: 'rounded-lg border border-white/15 bg-black/70 px-3 py-2 text-center text-white shadow-lg backdrop-blur',
+	base: 'rounded-md border border-white/15 bg-black/70 px-lg py-md text-center text-white shadow-lg backdrop-blur',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -123,12 +123,12 @@ const defaultVideoPlayerControlsBackdrop = cva({
 });
 
 const defaultVideoPlayerControlsBar = cva({
-	base: 'absolute inset-x-0 bottom-0 z-20 grid gap-2',
+	base: 'absolute inset-x-0 bottom-0 z-20 grid gap-md',
 	variants: {
 		size: {
-			small: 'gap-1.5 p-1 md:p-2',
-			normal: 'gap-2 p-1 md:p-2 lg:p-3',
-			large: 'gap-2.5 p-2 md:p-3 lg:p-4'
+			small: 'gap-sm p-xs md:p-md',
+			normal: 'gap-md p-xs md:p-md lg:p-lg',
+			large: 'gap-md p-md md:p-lg lg:p-xl'
 		}
 	},
 	defaultVariants: {
@@ -137,12 +137,12 @@ const defaultVideoPlayerControlsBar = cva({
 });
 
 const defaultVideoPlayerControlRow = cva({
-	base: 'grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 md:flex md:flex-nowrap',
+	base: 'grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-md md:flex md:flex-nowrap',
 	variants: {
 		size: {
-			small: 'gap-1 md:gap-1',
-			normal: 'gap-1.5 md:gap-1 lg:gap-1.5',
-			large: 'gap-2 md:gap-1.5 lg:gap-2'
+			small: 'gap-xs md:gap-xs',
+			normal: 'gap-sm md:gap-xs lg:gap-sm',
+			large: 'gap-md md:gap-sm lg:gap-md'
 		}
 	},
 	defaultVariants: {
@@ -165,12 +165,12 @@ const defaultVideoPlayerControlStart = cva({
 });
 
 const defaultVideoPlayerControlCenter = cva({
-	base: 'order-2 flex shrink-0 items-center justify-center gap-1 md:order-1 md:justify-start',
+	base: 'order-2 flex shrink-0 items-center justify-center gap-xs md:order-1 md:justify-start',
 	variants: {
 		size: {
-			small: 'gap-0.5 md:gap-1',
-			normal: 'gap-1 md:gap-1 lg:gap-1.5',
-			large: 'gap-1.5 md:gap-1.5 lg:gap-2'
+			small: 'gap-micro md:gap-xs',
+			normal: 'gap-xs md:gap-xs lg:gap-sm',
+			large: 'gap-sm md:gap-sm lg:gap-md'
 		}
 	},
 	defaultVariants: {
@@ -179,12 +179,12 @@ const defaultVideoPlayerControlCenter = cva({
 });
 
 const defaultVideoPlayerControlEnd = cva({
-	base: 'order-3 flex min-w-0 items-center justify-end gap-0.5 md:ml-auto',
+	base: 'order-3 flex min-w-0 items-center justify-end gap-micro md:ml-auto',
 	variants: {
 		size: {
-			small: 'gap-0.5 md:gap-1',
-			normal: 'gap-0.5 md:gap-1 lg:gap-1.5',
-			large: 'gap-1 md:gap-1.5 lg:gap-2'
+			small: 'gap-micro md:gap-xs',
+			normal: 'gap-micro md:gap-xs lg:gap-sm',
+			large: 'gap-xs md:gap-sm lg:gap-md'
 		}
 	},
 	defaultVariants: {
@@ -207,12 +207,12 @@ const defaultVideoPlayerControlButton = cva({
 });
 
 const defaultVideoPlayerSlider = cva({
-	base: 'relative flex w-full min-w-0 flex-1 items-center gap-2 py-1.5',
+	base: 'relative flex w-full min-w-0 flex-1 items-center gap-md py-sm',
 	variants: {
 		size: {
-			small: 'py-1',
-			normal: 'py-1.5',
-			large: 'py-2'
+			small: 'py-xs',
+			normal: 'py-sm',
+			large: 'py-md'
 		},
 		disabled: {
 			true: 'cursor-not-allowed opacity-60',
@@ -273,7 +273,7 @@ const defaultVideoPlayerTime = cva({
 });
 
 const defaultVideoPlayerMenu = cva({
-	base: 'grid gap-1'
+	base: 'grid gap-xs'
 });
 
 const defaultVideoPlayerPopoverPanel = cva({
@@ -281,7 +281,7 @@ const defaultVideoPlayerPopoverPanel = cva({
 });
 
 const defaultVideoPlayerVolumePanel = cva({
-	base: 'flex w-full min-w-0 items-center gap-2 p-1'
+	base: 'flex w-full min-w-0 items-center gap-md p-xs'
 });
 
 export const videoPlayerTheme = {

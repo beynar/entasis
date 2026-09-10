@@ -76,7 +76,7 @@
 				{...buttonProps}
 				label={isSidebarOpen ? 'Hide page thumbnails' : 'Show page thumbnails'}
 				variant={isSidebarOpen ? 'soft' : 'ghost'}
-				onClick={() => (isSidebarOpen = !isSidebarOpen)}
+				onclick={() => (isSidebarOpen = !isSidebarOpen)}
 				prefix={sidebarSimpleIcon}
 			/>
 		{/if}
@@ -85,14 +85,14 @@
 				{...buttonProps}
 				label="Previous {unitLabel}"
 				disabled={!viewer.canGoPrevious}
-				onClick={viewer.previous}
+				onclick={viewer.previous}
 				prefix={caretLeftIcon}
 			/>
 			<Button
 				{...buttonProps}
 				label="Next {unitLabel}"
 				disabled={!viewer.canGoNext}
-				onClick={viewer.next}
+				onclick={viewer.next}
 				prefix={caretRightIcon}
 			/>
 		{/if}
@@ -106,14 +106,14 @@
 				{...buttonProps}
 				label="Zoom out"
 				disabled={!viewer.canZoomOut}
-				onClick={viewer.zoomOut}
+				onclick={viewer.zoomOut}
 				prefix={magnifyingGlassMinusIcon}
 			/>
 			<Button
 				{...buttonProps}
 				label="Zoom in"
 				disabled={!viewer.canZoomIn}
-				onClick={viewer.zoomIn}
+				onclick={viewer.zoomIn}
 				prefix={magnifyingGlassPlusIcon}
 			/>
 		{/if}
@@ -122,7 +122,7 @@
 				{...buttonProps}
 				variant={viewer.fit === 'width' ? 'soft' : 'ghost'}
 				label="Fit to width"
-				onClick={() => viewer.setFit(viewer.fit === 'width' ? null : 'width')}
+				onclick={() => viewer.setFit(viewer.fit === 'width' ? null : 'width')}
 				prefix={arrowsHorizontalIcon}
 			/>
 		{/if}
@@ -132,7 +132,7 @@
 				label={viewer.mode === 'scroll'
 					? `Switch to single ${unitLabel}`
 					: 'Switch to continuous scroll'}
-				onClick={viewer.toggleMode}
+				onclick={viewer.toggleMode}
 				prefix={viewer.mode === 'scroll' ? scrollIcon : fileIcon}
 			/>
 		{/if}
@@ -142,7 +142,7 @@
 				label={viewer.orientation === 'vertical'
 					? 'Switch to horizontal layout'
 					: 'Switch to vertical layout'}
-				onClick={viewer.toggleOrientation}
+				onclick={viewer.toggleOrientation}
 				prefix={viewer.orientation === 'vertical' ? arrowsDownUpIcon : arrowsLeftRightIcon}
 			/>
 		{/if}
@@ -150,13 +150,13 @@
 			<Button
 				{...buttonProps}
 				label="Rotate counterclockwise"
-				onClick={() => viewer.rotate(-90)}
+				onclick={() => viewer.rotate(-90)}
 				prefix={arrowCounterClockwiseIcon}
 			/>
 			<Button
 				{...buttonProps}
 				label="Rotate clockwise"
-				onClick={() => viewer.rotate(90)}
+				onclick={() => viewer.rotate(90)}
 				prefix={arrowClockwiseIcon}
 			/>
 		{/if}
@@ -168,7 +168,7 @@
 				{...buttonProps}
 				label="Download"
 				disabled={!viewer.isReady}
-				onClick={viewer.download}
+				onclick={viewer.download}
 				prefix={downloadSimpleIcon}
 			/>
 		{/if}
@@ -177,7 +177,7 @@
 				{...buttonProps}
 				label="Print"
 				disabled={!viewer.isReady}
-				onClick={() => runViewerTask(viewer.print())}
+				onclick={() => runViewerTask(viewer.print())}
 				prefix={printerIcon}
 			/>
 		{/if}

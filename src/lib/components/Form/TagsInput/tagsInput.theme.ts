@@ -2,12 +2,12 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 
 const defaultInput = cva({
-	base: 'outline-none flex-1 min-w-24 rounded bg-transparent resize-none autofill:text-neutral appearance-none text-sm leading-normal',
+	base: 'outline-none flex-1 min-w-24 min-h-0 bg-transparent resize-none autofill:text-neutral appearance-none text-sm leading-normal',
 	variants: {
 		size: {
-			small: 'text-xs placeholder:text-xs h-5',
-			normal: 'text-sm placeholder:text-sm h-5',
-			large: 'text-sm placeholder:text-sm h-6'
+			small: 'text-xs placeholder:text-xs',
+			normal: 'text-sm placeholder:text-sm',
+			large: 'text-sm placeholder:text-sm'
 		},
 		disabled: {
 			true: 'cursor-not-allowed opacity-50',
@@ -21,12 +21,12 @@ const defaultInput = cva({
 });
 
 const defaultInputContainer = cva({
-	base: 'px-3 bg-surface-raised border border-neutral-muted rounded text-neutral w-full focus-within:ring-1 focus-within:ring-primary ring-0 transition-all flex flex-wrap items-center justify-start py-2',
+	base: 'flex w-full flex-wrap items-center justify-start border border-neutral-muted bg-surface-raised px-lg text-neutral ring-0 transition-all rounded-md outline-none focus-within:ring-2 focus-within:ring-primary/50',
 	variants: {
 		size: {
-			small: 'py-1.5 text-xs gap-1',
-			normal: 'py-1.5 text-sm gap-1.5',
-			large: 'py-2 text-sm gap-1.5'
+			small: 'min-h-[var(--control-height-sm)] py-xs text-xs gap-xs',
+			normal: 'min-h-[var(--control-height-md)] py-xs text-sm gap-sm',
+			large: 'min-h-[var(--control-height-lg)] py-sm text-sm gap-sm'
 		},
 		disabled: {
 			true: 'cursor-not-allowed opacity-50',
@@ -54,34 +54,34 @@ const defaultTag = cva({
 });
 
 const defaultLoading = cva({
-	base: 'text-neutral/60 p-2 text-sm',
+	base: 'text-neutral/60 p-md text-sm',
 	variants: {
 		size: {
-			small: 'text-xs p-1.5',
-			normal: 'text-sm p-1.5',
-			large: 'text-sm p-2'
+			small: 'text-xs p-sm',
+			normal: 'text-sm p-sm',
+			large: 'text-sm p-md'
 		}
 	}
 });
 
 const defaultError = cva({
-	base: 'text-danger-readable p-2 text-sm',
+	base: 'text-danger-readable p-md text-sm',
 	variants: {
 		size: {
-			small: 'text-xs p-1.5',
-			normal: 'text-sm p-1.5',
-			large: 'text-sm p-2'
+			small: 'text-xs p-sm',
+			normal: 'text-sm p-sm',
+			large: 'text-sm p-md'
 		}
 	}
 });
 
 const defaultNoOptions = cva({
-	base: 'text-neutral/60 p-2 text-sm',
+	base: 'text-neutral/60 p-md text-sm',
 	variants: {
 		size: {
-			small: 'text-xs p-1.5',
-			normal: 'text-sm p-1.5',
-			large: 'text-sm p-2'
+			small: 'text-xs p-sm',
+			normal: 'text-sm p-sm',
+			large: 'text-sm p-md'
 		}
 	}
 });

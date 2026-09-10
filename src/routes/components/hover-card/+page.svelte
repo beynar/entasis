@@ -2,11 +2,29 @@
 	import Avatar from '$lib/components/Avatar/Avatar.svelte';
 	import Button from '$lib/components/Button/Button.svelte';
 	import HoverCard from '$lib/components/HoverCard/HoverCard.svelte';
+	import { sizes } from '$lib/utils/tokens.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 
 	const sideExamples = ['top', 'right', 'bottom', 'left'] as const;
 	const sizeExamples = ['small', 'normal', 'large'] as const;
+	const controls = createComponentControls([
+		{
+			name: 'size',
+			type: 'segmented',
+			label: 'Size',
+			value: 'normal',
+			options: sizes
+		},
+		{
+			name: 'density',
+			type: 'segmented',
+			label: 'Density',
+			value: 'normal',
+			options: sizes
+		}
+	]);
 	const stats = [
 		{ label: 'Components', value: '70+' },
 		{ label: 'Tokens', value: '8' },
@@ -39,9 +57,12 @@
 	]}
 >
 	<ComponentCard
+		{controls}
 		description="A compact preview shown from a trigger on hover or focus."
 		code={`<HoverCard
 	trigger={{ content: '@svelai', variant: 'link' }}
+	size="${controls.value.size}"
+	density="${controls.value.density}"
 	title="@svelai"
 	description="Configuration-first Svelte components."
 >
@@ -50,6 +71,8 @@
 	>
 		<HoverCard
 			trigger={{ content: '@svelai', variant: 'link' }}
+			size={controls.value.size}
+			density={controls.value.density}
 			title="@svelai"
 			description="Configuration-first Svelte components."
 		>

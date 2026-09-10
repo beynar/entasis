@@ -12,10 +12,14 @@ export type PopoverProps = WithAttachments<{
 	id?: string;
 	/** Controls whether the popover is open; bindable for two-way control. */
 	open?: boolean;
-	/** Callback after the close transition finishes; receives the popover state instance. */
-	onClose?: (popover: PopoverState) => void;
-	/** Callback after the open transition finishes; receives the popover state instance. */
-	onOpen?: (popover: PopoverState) => void;
+	/** Initial open state when `open` is not provided. */
+	defaultOpen?: boolean;
+	/** Called once when the library requests an open-state change. */
+	onOpenChange?: (open: boolean) => void;
+	/** Called after the open transition finishes. */
+	onAfterOpen?: (popover: PopoverState) => void;
+	/** Called after the close transition finishes. */
+	onAfterClose?: (popover: PopoverState) => void;
 	/** Popover panel size variant; supports responsive values. */
 	size?: ResponsiveProps<'small' | 'normal' | 'large'>;
 	/** Gap in pixels between the reference element and the popover panel. */

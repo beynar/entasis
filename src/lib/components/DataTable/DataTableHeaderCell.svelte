@@ -126,7 +126,7 @@
 					prefix: arrowLineLeftIcon,
 					selected: pinning === 'left',
 					suffix: pinning === 'left' ? checkIcon : undefined,
-					onClick: () => column.pin('left')
+					onclick: () => column.pin('left')
 				},
 				{
 					type: 'option',
@@ -134,14 +134,14 @@
 					prefix: arrowLineRightIcon,
 					selected: pinning === 'right',
 					suffix: pinning === 'right' ? checkIcon : undefined,
-					onClick: () => column.pin('right')
+					onclick: () => column.pin('right')
 				},
 				{
 					type: 'option',
 					title: 'Unpin',
 					prefix: pushPinSlashIcon,
 					disabled: !pinning,
-					onClick: () => column.pin(false)
+					onclick: () => column.pin(false)
 				}
 			);
 		}
@@ -149,7 +149,7 @@
 			items.push({
 				type: 'option',
 				title: model.state.grouping.includes(column.id) ? 'Stop grouping' : 'Group by this column',
-				onClick: () => column.toggleGrouping()
+				onclick: () => column.toggleGrouping()
 			});
 		}
 		if (config.resizable !== false) {
@@ -157,7 +157,7 @@
 				type: 'option',
 				title: 'Reset width',
 				prefix: arrowCounterClockwiseIcon,
-				onClick: () => column.resetSize()
+				onclick: () => column.resetSize()
 			});
 		}
 		if (config.hideable !== false) {
@@ -168,7 +168,7 @@
 				disabled:
 					model.table.getVisibleLeafColumns().filter((entry) => model.getColumnConfig(entry.id))
 						.length <= 1,
-				onClick: () => column.toggleVisibility(false)
+				onclick: () => column.toggleVisibility(false)
 			});
 		}
 		return items;
@@ -353,7 +353,7 @@
 						aria-haspopup="menu"
 						aria-expanded={popover.isOpen}
 						class={classes.headerMenuButton({ active: filtered })}
-						onClick={() => popover.toggle()}
+						onclick={() => popover.toggle()}
 						{@attach popover.reference}
 					/>
 				{/snippet}

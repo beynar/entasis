@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { cx } from '$lib/utils/cva/index.js';
 	import BeforeHydratation from '$lib/components/Utils/BeforeHydratation.svelte';
@@ -19,7 +20,8 @@
 	let {
 		id: customId,
 		ref = $bindable(),
-		open = $bindable(true),
+		defaultOpen = true,
+		open = $bindable(),
 		onOpenChange,
 		displayState = $bindable<SidebarDisplayState | undefined>(undefined),
 		onDisplayStateChange,
@@ -55,6 +57,13 @@
 		theme,
 		...attachments
 	}: SidebarProps = $props();
+	const openState = createBindableValue(
+		() => open,
+		(next) => {
+			open = next;
+		},
+		() => defaultOpen
+	);
 	const generatedId = $props.id();
 	const rootId = $derived(customId || `sidebar-${generatedId}`);
 	const resizeOptions = $derived(typeof resizable === 'object' ? resizable : undefined);
@@ -71,8 +80,7 @@
 	});
 	let edgeRevealed = $state(false);
 	function setOpen(nextOpen: boolean) {
-		open = nextOpen;
-		onOpenChange?.(nextOpen);
+		openState.value = nextOpen;
 	}
 	function setWidth(nextWidth: string) {
 		width = nextWidth;
@@ -99,7 +107,7 @@
 	);
 	const displayStateBridge = new SidebarDisplayStateBridge({
 		get open() {
-			return open;
+			return openState.value;
 		},
 		get displayState() {
 			return displayState;
@@ -108,6 +116,9 @@
 			return resolvedCollapsible;
 		},
 		setOpen,
+		get onOpenChange() {
+			return onOpenChange;
+		},
 		setDisplayStateProp: (nextDisplayState) => {
 			displayState = nextDisplayState;
 		},

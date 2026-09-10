@@ -21,7 +21,7 @@ const defaultRoot = cva({
 		orientation: {
 			vertical: 'grid w-full overflow-visible',
 			horizontal:
-				'grid w-full max-w-full auto-cols-[minmax(var(--timeline-item-min-width),1fr)] grid-flow-col grid-rows-[auto_var(--timeline-marker-size)_auto] overflow-x-auto overflow-y-hidden overscroll-x-contain p-1 scrollbar-none'
+				'grid w-full max-w-full auto-cols-[minmax(var(--timeline-item-min-width),1fr)] grid-flow-col grid-rows-[auto_var(--timeline-marker-size)_auto] overflow-x-auto overflow-y-hidden overscroll-x-contain p-xs scrollbar-none'
 		},
 		size: {
 			small: '[--timeline-marker-size:0.875rem] [--timeline-title-center-offset:0.171875rem]',
@@ -170,17 +170,17 @@ const defaultOpposite = cva({
 		{
 			orientation: 'vertical',
 			density: 'small',
-			class: '@max-[40rem]:min-h-[calc(var(--timeline-marker-size)+0.375rem)] @max-[40rem]:pb-1.5'
+			class: '@max-[40rem]:min-h-[calc(var(--timeline-marker-size)+0.375rem)] @max-[40rem]:pb-sm'
 		},
 		{
 			orientation: 'vertical',
 			density: 'normal',
-			class: '@max-[40rem]:min-h-[calc(var(--timeline-marker-size)+0.5rem)] @max-[40rem]:pb-2'
+			class: '@max-[40rem]:min-h-[calc(var(--timeline-marker-size)+0.5rem)] @max-[40rem]:pb-md'
 		},
 		{
 			orientation: 'vertical',
 			density: 'large',
-			class: '@max-[40rem]:min-h-[calc(var(--timeline-marker-size)+0.75rem)] @max-[40rem]:pb-3'
+			class: '@max-[40rem]:min-h-[calc(var(--timeline-marker-size)+0.75rem)] @max-[40rem]:pb-lg'
 		},
 		{
 			orientation: 'horizontal',
@@ -313,9 +313,9 @@ const defaultContent = cva({
 		},
 		variant: {
 			ghost: 'bg-transparent text-neutral',
-			card: 'rounded-xl bg-surface-raised text-neutral ring-1 ring-neutral/10 shadow-xs',
-			outline: 'rounded-xl bg-transparent text-neutral ring-1 ring-color',
-			soft: 'rounded-xl bg-color-muted text-color-muted-readable'
+			card: 'rounded-lg bg-surface-raised text-neutral ring-1 ring-neutral/10 shadow-xs',
+			outline: 'rounded-lg bg-transparent text-neutral ring-1 ring-color',
+			soft: 'rounded-lg bg-color-muted text-color-muted-readable'
 		},
 		density: {
 			small: '',
@@ -361,9 +361,9 @@ const defaultContent = cva({
 			side: 'end',
 			class: 'row-start-3 self-start mt-[var(--timeline-space)]'
 		},
-		{ variant: ['card', 'outline', 'soft'], density: 'small', class: 'p-3' },
-		{ variant: ['card', 'outline', 'soft'], density: 'normal', class: 'p-4' },
-		{ variant: ['card', 'outline', 'soft'], density: 'large', class: 'p-5' }
+		{ variant: ['card', 'outline', 'soft'], density: 'small', class: 'p-lg' },
+		{ variant: ['card', 'outline', 'soft'], density: 'normal', class: 'p-xl' },
+		{ variant: ['card', 'outline', 'soft'], density: 'large', class: 'p-layout-sm' }
 	],
 	defaultVariants: {
 		orientation: 'vertical',
@@ -401,9 +401,9 @@ const defaultDate = cva({
 		}
 	},
 	compoundVariants: [
-		{ placement: ['start', 'end'], density: 'small', class: 'mb-1' },
-		{ placement: ['start', 'end'], density: 'normal', class: 'mb-1.5' },
-		{ placement: ['start', 'end'], density: 'large', class: 'mb-2' }
+		{ placement: ['start', 'end'], density: 'small', class: 'mb-xs' },
+		{ placement: ['start', 'end'], density: 'normal', class: 'mb-sm' },
+		{ placement: ['start', 'end'], density: 'large', class: 'mb-md' }
 	],
 	defaultVariants: {
 		size: 'normal',
@@ -447,9 +447,9 @@ const defaultDescription = cva({
 			large: 'text-[0.9375rem]'
 		},
 		density: {
-			small: 'mt-1',
-			normal: 'mt-1.5',
-			large: 'mt-2'
+			small: 'mt-xs',
+			normal: 'mt-sm',
+			large: 'mt-md'
 		},
 		variant: {
 			ghost: 'text-neutral/65',

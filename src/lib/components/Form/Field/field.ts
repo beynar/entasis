@@ -1,8 +1,9 @@
 import type { WithSlot } from '$lib/components/Slot/slot.js';
-import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 import type { Snippet } from 'svelte';
+import type { HTMLAttributes } from 'svelte/elements';
 import type { FieldState } from './field.state.svelte.js';
-import type { Sizes } from '$lib/types/theme.js';
+import type { FieldThemeProps } from './field.theme.js';
+import type { Density, Sizes } from '$lib/types/theme.js';
 
 export type KeyValuePair = { key: string; value: string };
 
@@ -25,6 +26,7 @@ export type FileInputType = 'file' | 'files';
 export type CalendarInputType = 'calendar' | 'calendar-range';
 export type ColorInputType = 'color';
 export type FieldLabelPosition = 'top' | 'left';
+export type FieldAttributes = Omit<HTMLAttributes<HTMLElement>, 'class' | 'id'>;
 
 export type InputType =
 	| FileInputType
@@ -96,25 +98,28 @@ export type InputProps<T extends InputType> = WithSlot<
 		required?: boolean;
 		/** Disables the input, preventing interaction and focus. */
 		disabled?: boolean;
-		/** Visual size of the field (label, spacing, and control). */
+		/** Geometry and typography of the field control and label. */
 		size?: Sizes;
+		/** Internal spacing between field regions, labels, and adornments. */
+		density?: Density;
 		/** Places the field label above the control or to its left from the desktop breakpoint. */
 		labelPosition?: FieldLabelPosition;
 		/** Whether the field is rendered; when false the field is hidden from the form. */
 		visible?: boolean;
-		// schema?: any;
-		/** Validates the current value, returning error messages (or false) when invalid. */
+		/** Validates the value; messages or true mark it invalid, false/null/undefined accept it. */
 		onValidate?: (value: FieldValue<T>) => string | string[] | boolean | null | undefined;
 		/** Called whenever the field value changes. */
-		onChange?: (value: FieldValue<T>) => void;
-		/** Extra HTML attributes spread onto the underlying input element. */
-		attrs?: Record<string, string | boolean>;
+		onValueChange?: (value: FieldValue<T> | null) => void;
+		/** Native attributes applied to the Field wrapper. */
+		fieldAttrs?: FieldAttributes;
 		/** CSS classes applied to the field's root element. */
 		class?: string;
 		/** Theme overrides for the field's structural parts (label, input, error, ...). */
 		theme?: FieldThemeProps;
 		/** The field's value, bindable with `bind:value`. */
 		value?: FieldValue<T> | null;
+		/** Initial field value when `value` is omitted. */
+		defaultValue?: FieldValue<T> | null;
 		/** Validation errors to display; `true` marks the field as errored without a message. */
 		errors?: string[] | boolean;
 		/** Whether the field currently holds focus, bindable with `bind:focused`. */
@@ -134,209 +139,27 @@ export type InputProps<T extends InputType> = WithSlot<
 
 export type FieldProps<T extends InputType> = Omit<
 	InputProps<T>,
-	'type' | 'name' | 'required' | 'disabled' | 'visible' | 'onValidate' | 'onChange'
+	| 'type'
+	| 'name'
+	| 'required'
+	| 'disabled'
+	| 'visible'
+	| 'onValidate'
+	| 'onValueChange'
+	| 'defaultValue'
+	| 'value'
+	| 'errors'
+	| 'focused'
 > & {
+	/** Native wrapper element; use fieldset for a group of controls. */
 	as?: string;
+	/** Control ID associated with the label, or false for an aria-labelledby label. */
 	labelFor?: string | false;
+	/** Custom control content composed with the shared field controller. */
 	children: Snippet;
+	/** Shared value, validation, and accessibility controller. */
 	field: FieldState<T>;
 };
-
-const defaultField = cva({
-	base: 'grid min-w-0 gap-2',
-	variants: {
-		labelPosition: {
-			top: 'grid-cols-1',
-			left: 'grid-cols-1 md:grid-cols-[minmax(8rem,0.4fr)_minmax(0,1fr)] md:gap-x-6'
-		},
-		hasError: {
-			true: 'text-danger-readable',
-			false: ''
-		}
-	},
-	defaultVariants: {
-		labelPosition: 'top'
-	}
-});
-
-const defaultFieldHeader = cva({
-	base: 'flex items-center gap-2 relative',
-	variants: {
-		labelPosition: {
-			top: '',
-			left: 'md:col-start-1 md:row-start-1 md:self-start md:pt-2'
-		},
-		size: {
-			small: 'gap-1',
-			normal: 'gap-2',
-			large: 'gap-3'
-		},
-		required: {
-			// true: 'before:content-["*"] before:text-danger before:mr-1 before:text-sm  before:font-bold before:absolute before:right-0 before:top-0',
-			false: ''
-		},
-		hasError: {
-			true: 'text-danger-readable',
-			false: ''
-		}
-	}
-});
-
-const defaultFieldLabel = cva({
-	base: 'text-neutral text-sm',
-	variants: {
-		size: {
-			small: 'text-xs',
-			normal: 'text-sm',
-			large: 'text-base'
-		},
-		hasError: {
-			true: 'text-danger-readable',
-			false: ''
-		},
-		required: {
-			true: 'relative before:content-["*"] before:text-danger-readable before:text-sm  before:font-bold before:absolute before:-right-2 before:top-0',
-			false: ''
-		}
-	}
-});
-
-const defaultFieldActions = cva({
-	base: 'flex items-start gap-2',
-	variants: {
-		size: {
-			small: 'gap-1',
-			normal: 'gap-2',
-			large: 'gap-3'
-		}
-	}
-});
-
-const defaultFieldErrorsContainer = cva({
-	base: 'grid gap-1',
-	variants: {
-		labelPosition: {
-			top: '',
-			left: 'md:col-start-2'
-		},
-		size: {
-			small: 'text-xs',
-			normal: 'text-sm',
-			large: 'text-base'
-		}
-	}
-});
-
-const defaultFieldError = cva({
-	base: 'text-danger-readable text-xs leading-3',
-	variants: {
-		size: {
-			small: 'text-xs',
-			normal: 'text-sm',
-			large: 'text-base'
-		}
-	}
-});
-
-const defaultFieldInputContainer = cva({
-	base: 'flex-1 gap-2 flex justify-between w-full items-center',
-	variants: {
-		labelPosition: {
-			top: '',
-			left: 'md:col-start-2 md:row-start-1 md:self-center'
-		},
-		size: {
-			small: 'gap-1',
-			normal: 'gap-2',
-			large: 'gap-3'
-		},
-		hasError: {
-			true: '!ring-2 ring-offset-2 rounded !ring-danger',
-			false: ''
-		}
-	}
-});
-
-const defaultFieldPrefix = cva({
-	base: 'flex items-center gap-2',
-	variants: {
-		size: {
-			small: 'gap-1',
-			normal: 'gap-2',
-			large: 'gap-3'
-		}
-	}
-});
-const defaultFieldSuffix = cva({
-	base: 'flex items-center gap-2',
-	variants: {
-		size: {
-			small: 'gap-1',
-			normal: 'gap-2',
-			large: 'gap-3'
-		}
-	}
-});
-
-const defaultFieldActionButton = cva({
-	base: 'h-auto min-h-0 self-stretch rounded-none border-0 bg-clip-border !px-0 active:translate-y-0',
-	variants: {
-		size: {
-			small: '-my-1.5 min-w-8',
-			normal: '-my-1.5 min-w-9',
-			large: '-my-2 min-w-10'
-		},
-		edge: {
-			start: '-ml-3 mr-1',
-			end: 'ml-1 -mr-3',
-			none: 'mx-0'
-		},
-		active: {
-			true: 'text-primary-readable',
-			false: ''
-		}
-	},
-	defaultVariants: {
-		size: 'normal',
-		edge: 'end',
-		active: false
-	}
-});
-
-const defaultFieldFooter = cva({
-	base: 'flex items-start gap-2 justify-between',
-	variants: {
-		labelPosition: {
-			top: '',
-			left: 'md:col-start-2'
-		},
-		size: {
-			small: 'gap-1',
-			normal: 'gap-2',
-			large: 'gap-3'
-		}
-	}
-});
-const defaultFieldDescription = cva({
-	base: 'text-neutral/60 text-xs leading-3 flex-1',
-	variants: {
-		size: {
-			small: 'text-xs',
-			normal: 'text-sm',
-			large: 'text-base'
-		}
-	}
-});
-const defaultFieldHelper = cva({
-	base: 'text-neutral/60 text-xs leading-3',
-	variants: {
-		size: {
-			small: 'text-xs',
-			normal: 'text-sm',
-			large: 'text-base'
-		}
-	}
-});
 
 export const fieldStructure = `
 <Field>
@@ -361,9 +184,10 @@ export const fieldStructure = `
 
 export const llmDescription = `
 The field component is a versatile wrapper component for form inputs.
-You won't need to use this component directly, but it's a good idea to know about it.
 The field component is used to wrap form inputs and provide a consistent look and feel.
 It's also used to provide a consistent way to handle errors and validation.
+Use it directly with createFieldState for standalone custom controls, or use a Form
+type: 'field' entry to receive a registered controller in a snippet.
 
 The field component is composed of the following parts:
 - Header
@@ -379,32 +203,12 @@ To customize the field component, you can use the following snippets:
 - header: it is the wrapper for the label and actions.
 - label: it is the label for the field.
 - actions: it is the actions for the field.
-- inputContainer: it is the wrapper for the input, prefix and suffix.
 - footer: it is the wrapper for the description and helper.
 - errorsContainer: it is the wrapper for the error.
 - error: it is the error for the field.
 - description: it is the description for the field.
 - helper: it is the helper for the field.
 
-These snippets will receive the fieldState as argument.
+Compose snippets with the field controller captured in the parent component.
 
 `;
-
-export const fieldTheme = {
-	root: defaultField,
-	header: defaultFieldHeader,
-	label: defaultFieldLabel,
-	actions: defaultFieldActions,
-	errorsContainer: defaultFieldErrorsContainer,
-	error: defaultFieldError,
-	inputContainer: defaultFieldInputContainer,
-	prefix: defaultFieldPrefix,
-	suffix: defaultFieldSuffix,
-	actionButton: defaultFieldActionButton,
-	footer: defaultFieldFooter,
-	description: defaultFieldDescription,
-	helper: defaultFieldHelper
-};
-
-export type FieldTheme = typeof fieldTheme;
-export type FieldThemeProps = InferComponentTheme<FieldTheme>;

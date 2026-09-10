@@ -165,7 +165,7 @@
 						class: theme?.countryOption?.base
 					})}
 					onpointermove={() => nav.setHighlighted(country.iso2)}
-					onClick={() => onSelectCountry(country)}
+					onclick={() => onSelectCountry(country)}
 				>
 					<span class={classes.countryFlag({ size, class: theme?.countryFlag?.base })}>
 						{country.flag}

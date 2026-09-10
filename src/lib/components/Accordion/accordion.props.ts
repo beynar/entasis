@@ -11,7 +11,7 @@ export type ConditionalKeys<Base, Condition> = NonNullable<
 	}[keyof Base]
 >;
 
-export type AccordionProps<Item extends Record<string, any>> = WithAttachments<
+export type AccordionProps<Item extends Record<string, unknown>> = WithAttachments<
 	WithSlot<
 		{
 			/**
@@ -24,6 +24,8 @@ export type AccordionProps<Item extends Record<string, any>> = WithAttachments<
 			items: Item[];
 			/** Bindable ids of the currently expanded items. */
 			value?: string[];
+			/** Initially expanded item ids when `value` is omitted. */
+			defaultValue?: string[];
 			/** Called after the expanded item ids change. */
 			onValueChange?: (value: string[]) => void;
 			/**
@@ -90,7 +92,10 @@ export type AccordionProps<Item extends Record<string, any>> = WithAttachments<
 			 */
 			accessible?: boolean;
 		},
-		'actions' | 'title' | 'description' | 'content',
-		{ item: Item }
+		'title' | 'description' | 'content',
+		{
+			/** Current accordion item passed to the slot. */
+			item: Item;
+		}
 	>
 >;

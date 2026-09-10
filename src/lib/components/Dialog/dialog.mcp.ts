@@ -21,6 +21,7 @@ The Dialog component (also known as Modal) displays content in a layer above the
 
 ### Core Props
 - **open**: boolean (bindable) - Controls dialog visibility
+- **defaultOpen**: boolean (default: false) - Initial state when open is not provided
 - **id**: string - Unique identifier for the dialog
 - **type**: 'fullScreen' | 'drawerRight' | 'drawerLeft' | 'drawerBottom' | 'drawerTop' | 'alert' | 'modal' (default: 'modal')
   - fullScreen: Full screen dialog overlay
@@ -40,8 +41,9 @@ The Dialog component (also known as Modal) displays content in a layer above the
   - large: Larger dialog size
 
 ### Event Props
-- **onClose**: (dialog: DialogState) => void - Called when dialog closes, receives dialog state
-- **onOpen**: (dialog: DialogState) => void - Called when dialog opens, receives dialog state
+- **onOpenChange**: (open: boolean) => void - Called once for each library-requested state change
+- **onAfterOpen**: (dialog: DialogState) => void - Called after the open transition finishes
+- **onAfterClose**: (dialog: DialogState) => void - Called after the close transition finishes
 
 ### Slot Props
 - **title**: string | Snippet<[DialogState]> - Dialog title
@@ -104,7 +106,7 @@ The Dialog component (also known as Modal) displays content in a layer above the
 	<p>This is a basic dialog.</p>
 	
 	{#snippet trigger(dialog)}
-		<Button onClick={() => dialog.open()}>Open</Button>
+		<Button onclick={() => dialog.open()}>Open</Button>
 	{/snippet}
 </Dialog>
 \`\`\`
@@ -178,10 +180,10 @@ size:"small"
 	
 	{#snippet footer()}
 		<div class="flex gap-2 justify-end">
-			<Button variant="ghost" onClick={() => open = false}>
+			<Button variant="ghost" onclick={() => open = false}>
 				Cancel
 			</Button>
-			<Button color="danger" onClick={handleConfirm}>
+			<Button color="danger" onclick={handleConfirm}>
 				Confirm
 			</Button>
 		</div>
@@ -252,8 +254,8 @@ size:"small"
 <Dialog 
 	bind:open
 	title="Lifecycle"
-	onOpen={(dialog) => console.log('Dialog opened', dialog)}
-	onClose={(dialog) => console.log('Dialog closed', dialog)}
+	onAfterOpen={(dialog) => console.log('Dialog opened', dialog)}
+	onAfterClose={(dialog) => console.log('Dialog closed', dialog)}
 >
 	Watch the console
 </Dialog>

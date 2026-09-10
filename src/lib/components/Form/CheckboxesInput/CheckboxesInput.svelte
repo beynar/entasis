@@ -1,4 +1,5 @@
 <script lang="ts" generics="Option extends CheckboxOption">
+	import { untrack } from 'svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { CheckboxOption, CheckboxesInputProps } from './checkboxesInput.props.js';
@@ -7,7 +8,8 @@
 	import { checkIcon } from '$lib/components/Icons/check.js';
 
 	let {
-		value = $bindable([]),
+		defaultValue = [],
+		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
@@ -18,11 +20,12 @@
 		name,
 		onValidate,
 		visible,
-		onChange,
-		onClick,
+		onValueChange,
 		label,
+		size = 'normal',
 		...rest
 	}: CheckboxesInputProps<Option> = $props();
+	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
 
@@ -46,7 +49,7 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onChange: (v) => onChange?.(v ?? []),
+		onValueChange: (v) => onValueChange?.(v ?? []),
 		get disabled() {
 			return disabled;
 		},
@@ -85,6 +88,7 @@
 	{field}
 	{label}
 	class={componentTheme.root({ mode })}
+	{size}
 	theme={{
 		...theme,
 		inputContainer: {
@@ -105,6 +109,7 @@
 		<button
 			type="button"
 			role="checkbox"
+			data-color="primary"
 			aria-checked={checked}
 			disabled={optionDisabled}
 			onclick={() => {
@@ -114,9 +119,8 @@
 				} else {
 					field.value = [...(field.value || []), option.value];
 				}
-				onClick?.(option.value);
 			}}
-			class={componentTheme.checkboxesInputItem({ mode, checked, disabled: optionDisabled })}
+			class={componentTheme.checkboxesInputItem({ mode, checked, disabled: optionDisabled, size })}
 		>
 			<input
 				hidden
@@ -139,18 +143,28 @@
 
 			<!-- Checkbox Button Track -->
 			<div
-				class={componentTheme.checkboxesInputItemTrack({ mode, checked, disabled: optionDisabled })}
+				class={componentTheme.checkboxesInputItemTrack({
+					mode,
+					checked,
+					disabled: optionDisabled,
+					size
+				})}
 			></div>
 
 			<!-- Checkbox Button Thumb -->
 			<div
-				class={componentTheme.checkboxesInputItemThumb({ checked, mode, disabled: optionDisabled })}
+				class={componentTheme.checkboxesInputItemThumb({
+					checked,
+					mode,
+					disabled: optionDisabled,
+					size
+				})}
 			>
 				{@render checkIcon({ size: 40 })}
 			</div>
 
 			<!-- Label -->
-			<Slot render={option.label} class={componentTheme.checkboxesInputItemLabel()} />
+			<Slot render={option.label} class={componentTheme.checkboxesInputItemLabel({ size })} />
 
 			<!-- Description -->
 			<Slot render={option.description} class={componentTheme.checkboxesInputItemDescription()} />

@@ -26,7 +26,7 @@
 
 <div class="grid w-full max-w-xl gap-3" dir="rtl">
 	<div class="flex flex-wrap items-center justify-between gap-3">
-		<Button size="small" variant="outline" onClick={() => (loading = !loading)}>
+		<Button size="small" variant="outline" onclick={() => (loading = !loading)}>
 			{loading ? 'إنهاء التحميل' : 'محاكاة التحميل'}
 		</Button>
 		<code class="text-neutral/60 overflow-hidden text-xs text-ellipsis">{rangeLabel}</code>

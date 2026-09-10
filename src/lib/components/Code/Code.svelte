@@ -61,7 +61,7 @@
 		color="neutral"
 		size="small"
 		squared
-		onClick={copy}
+		onclick={copy}
 		label={clipboard.copied ? 'Copied' : 'Copy'}
 	>
 		{#if clipboard.copied}
@@ -113,6 +113,10 @@
 	</ScrollArea>
 
 	{#if footer}
-		<Slot render={footer} class={classes.footer()} />
+		<Slot
+			render={footer}
+			class={classes.footer()}
+			payload={{ language: resolvedLanguage, label, copied: clipboard.copied, copy }}
+		/>
 	{/if}
 </div>

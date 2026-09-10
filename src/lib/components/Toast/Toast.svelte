@@ -20,7 +20,14 @@
 		theme,
 		updateArea,
 		...attachments
-	}: WithAttachments<{ updateArea: () => void; toast: Toast; theme?: ToastThemeProps }> = $props();
+	}: WithAttachments<{
+		/** Recalculates the interactive toast-stack area after movement or expansion. */
+		updateArea: () => void;
+		/** Toast state owned by the parent Toaster. */
+		toast: Toast;
+		/** Per-instance component theme overrides. */
+		theme?: ToastThemeProps;
+	}> = $props();
 
 	const { reversedIndex, index } = $derived(toast.indexInStack);
 
@@ -140,7 +147,7 @@
 		}
 	}}
 	onintroend={() => {
-		toast.opts.onOpen?.(toast);
+		toast.opts.onAfterOpen?.(toast);
 		updateArea();
 	}}
 	onoutroend={() => {
@@ -216,14 +223,14 @@
 	{#if toast.opts.actions?.length}
 		<div class={classes.actions()}>
 			{#each toast.opts.actions as action, i (i)}
-				{@const { content: label, dismiss, onClick, ...buttonProps } = action}
+				{@const { content: label, dismiss, onclick, ...buttonProps } = action}
 				<Button
 					size="small"
 					variant="soft"
 					{...buttonProps}
-					onClick={(payload) => {
-						onClick?.(payload);
-						// A manual dismiss fires onClose, never onAutoClose — so an Undo
+					onclick={(event) => {
+						onclick?.(event);
+						// A manual dismiss fires onDismiss, never onAutoDismiss — so an Undo
 						// action here cancels the deferred commit just by closing early.
 						if (dismiss !== false) toast.remove();
 					}}

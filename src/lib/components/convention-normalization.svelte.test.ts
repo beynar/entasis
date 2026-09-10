@@ -1,9 +1,13 @@
 import { describe, expect, test, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/svelte';
+import Card from './Card/Card.svelte';
 import Chip from './Chip/Chip.svelte';
 import Harness from './ConventionNormalizationHarness.test.svelte';
-import { fieldTheme } from './Form/Field/field.js';
+import { fieldTheme } from './Form/Field/field.theme.js';
+import MenuOption from './MenuOption/MenuOption.svelte';
+import Rating from './Rating/Rating.svelte';
+import Stat from './Stat/Stat.svelte';
 
 describe('component convention normalization', () => {
 	test('wraps a custom Code.header slot with the header theme class', () => {
@@ -23,10 +27,10 @@ describe('component convention normalization', () => {
 		expect(screen.getByText('Menu footer').closest('.custom-menu-footer')).toBeInTheDocument();
 	});
 
-	test('Field normal size variants apply the expected classes', () => {
-		expect(fieldTheme.header({ size: 'normal' })).toContain('gap-2');
+	test('Field size and density variants apply the expected classes', () => {
+		expect(fieldTheme.header({ density: 'normal' })).toContain('gap-md');
 		expect(fieldTheme.label({ size: 'normal' })).toContain('text-sm');
-		expect(fieldTheme.inputContainer({ size: 'normal' })).toContain('gap-2');
+		expect(fieldTheme.inputContainer({ density: 'normal' })).toContain('gap-md');
 	});
 
 	test('positioned Chip uses the root theme and exposes its anchor', () => {
@@ -44,10 +48,10 @@ describe('component convention normalization', () => {
 		expect(chip).toHaveClass('canonical-root-class', 'absolute');
 	});
 
-	test('Chip fires canonical pointer enter and leave handlers', async () => {
-		const onEnter = vi.fn();
-		const onLeave = vi.fn();
-		render(Chip, { props: { children: 'Canonical chip', onEnter, onLeave } });
+	test('Chip exposes native pointer enter and leave handlers with real events', async () => {
+		const onpointerenter = vi.fn();
+		const onpointerleave = vi.fn();
+		render(Chip, { props: { children: 'Canonical chip', onpointerenter, onpointerleave } });
 
 		const chip = screen.getByText('Canonical chip').closest('button');
 		if (!(chip instanceof HTMLElement)) {
@@ -56,7 +60,53 @@ describe('component convention normalization', () => {
 		await fireEvent.pointerEnter(chip);
 		await fireEvent.pointerLeave(chip);
 
-		expect(onEnter).toHaveBeenCalledOnce();
-		expect(onLeave).toHaveBeenCalledOnce();
+		expect(onpointerenter).toHaveBeenCalledOnce();
+		expect(onpointerenter.mock.calls[0]?.[0]).toBeInstanceOf(Event);
+		expect(onpointerleave).toHaveBeenCalledOnce();
+		expect(onpointerleave.mock.calls[0]?.[0]).toBeInstanceOf(Event);
+	});
+
+	test('Card onclick receives real click events from pointer and keyboard activation', async () => {
+		const onclick = vi.fn();
+		render(Card, { props: { children: 'Interactive card', onclick } });
+
+		const card = screen.getByRole('button', { name: 'Interactive card' });
+		await fireEvent.click(card);
+		await fireEvent.keyDown(card, { key: 'Enter' });
+
+		expect(onclick).toHaveBeenCalledTimes(2);
+		expect(onclick.mock.calls[0]?.[0]).toBeInstanceOf(MouseEvent);
+		expect(onclick.mock.calls[1]?.[0]).toBeInstanceOf(MouseEvent);
+	});
+
+	test('MenuOption onclick receives the native event', async () => {
+		const onclick = vi.fn();
+		render(MenuOption, { props: { title: 'Open settings', onclick } });
+
+		await fireEvent.click(screen.getByRole('button', { name: 'Open settings' }));
+
+		expect(onclick).toHaveBeenCalledOnce();
+		expect(onclick.mock.calls[0]?.[0]).toBeInstanceOf(MouseEvent);
+	});
+
+	test('Stat and Rating expose native child interaction events', async () => {
+		const onStatClick = vi.fn();
+		let ratingCurrentTarget: EventTarget | null = null;
+		const onRatingClick = vi.fn((event: MouseEvent) => {
+			ratingCurrentTarget = event.currentTarget;
+		});
+		render(Stat, {
+			props: { label: 'Revenue', indicator: 'Open actions', onclick: onStatClick }
+		});
+		render(Rating, { props: { value: 3, onclick: onRatingClick } });
+
+		await fireEvent.click(screen.getByRole('button', { name: 'Open actions' }));
+		const firstStar = document.querySelector<HTMLElement>('[data-star-index="1"]');
+		if (!firstStar) throw new Error('Expected Rating to render indexed stars.');
+		await fireEvent.click(firstStar);
+
+		expect(onStatClick.mock.calls[0]?.[0]).toBeInstanceOf(MouseEvent);
+		expect(onRatingClick.mock.calls[0]?.[0]).toBeInstanceOf(MouseEvent);
+		expect(ratingCurrentTarget).toBe(firstStar);
 	});
 });

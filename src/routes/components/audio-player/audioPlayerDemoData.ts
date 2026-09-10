@@ -88,7 +88,7 @@ ${'</' + 'script>'}
 		color="success"
 		label={player.paused || player.ended ? 'Play' : 'Pause'}
 		prefix={player.paused || player.ended ? playIcon : pauseIcon}
-		onClick={() => player.runInteraction(() => player.togglePlay())}
+		onclick={() => player.runInteraction(() => player.togglePlay())}
 	/>
 {/snippet}
 
@@ -101,7 +101,7 @@ ${'</' + 'script>'}
 		step={0.1}
 		color="success"
 		variant="thick"
-		onChange={(value) => player.runInteraction(() => player.seekTo(Array.isArray(value) ? (value[0] ?? 0) : value))}
+		onValueChange={(value) => player.runInteraction(() => player.seekTo(Array.isArray(value) ? (value[0] ?? 0) : value))}
 	/>
 {/snippet}
 

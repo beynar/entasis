@@ -74,6 +74,12 @@ export type VideoPlayerSnapshot = {
 
 export type VideoPlayerError = MediaError | Error;
 
+/** Error and player snapshot reported by `onError`. */
+export type VideoPlayerErrorPayload = Readonly<{
+	error: VideoPlayerError;
+	snapshot: VideoPlayerSnapshot;
+}>;
+
 export type VideoPlayerOverlayPayload = {
 	state: VideoPlayerStateMode;
 	error: VideoPlayerError | null;
@@ -195,7 +201,7 @@ export type VideoPlayerProps = WithAttachments<{
 	/** Called when captions/subtitles are toggled. */
 	onCaptionsChange?: (snapshot: VideoPlayerSnapshot) => void;
 	/** Called when native media or custom interaction errors occur. */
-	onError?: (error: VideoPlayerError, snapshot: VideoPlayerSnapshot) => void;
+	onError?: (payload: VideoPlayerErrorPayload) => void;
 	/** Per-instance theme overrides. */
 	theme?: VideoPlayerThemeProps;
 }>;

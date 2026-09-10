@@ -2,7 +2,7 @@ export { default as SortableList } from './SortableList.svelte';
 export type {
 	SortableListProps,
 	SortableListItemPayload,
-	SortableListReorderDetails
+	SortableListReorderPayload
 } from './sortableList.props.js';
 export {
 	sortableListTheme,

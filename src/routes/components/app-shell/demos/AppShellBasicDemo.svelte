@@ -1,12 +1,28 @@
 <script lang="ts">
 	import { AppShell, type AppShellSidebarProps } from '$lib/components/AppShell/index.js';
-	import type { SidebarDisplayState, SidebarGroup } from '$lib/components/Sidebar/index.js';
+	import type {
+		SidebarDensity,
+		SidebarDisplayState,
+		SidebarGroup,
+		SidebarSize,
+		SidebarVariant
+	} from '$lib/components/Sidebar/index.js';
 	import { chartBarIcon } from '$lib/components/Icons/chartBar.js';
 	import { commandIcon } from '$lib/components/Icons/command.js';
 	import { gearIcon } from '$lib/components/Icons/gear.js';
 	import { houseIcon } from '$lib/components/Icons/house.js';
 	import { sidebarIcon } from '$lib/components/Icons/sidebar.js';
 	import { trayIcon } from '$lib/components/Icons/tray.js';
+
+	let {
+		variant = 'inset',
+		size = 'normal',
+		density = 'normal'
+	}: {
+		variant?: SidebarVariant;
+		size?: SidebarSize;
+		density?: SidebarDensity;
+	} = $props();
 
 	let sidebarDisplayState = $state<SidebarDisplayState>('expanded');
 	let sidebarWidth = $state('17rem');
@@ -30,6 +46,8 @@
 			sidebarDisplayState = nextDisplayState;
 		},
 		items,
+		size,
+		density,
 		collapsible: 'icon',
 		rail: true,
 		width: sidebarWidth,
@@ -52,7 +70,7 @@
 <div class="h-[520px] w-full">
 	<AppShell
 		{sidebar}
-		variant="inset"
+		{variant}
 		title="Dashboard"
 		subtitle="Sidebar navigation with sticky page chrome"
 		theme={{

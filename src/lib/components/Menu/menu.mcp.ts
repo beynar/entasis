@@ -68,68 +68,53 @@ The Menu accepts a discriminated union of four item types:
 
 ### Button Item
 \`\`\`typescript
-{
-	type: 'button';
-	// All ButtonProps are available
-	children?: Snippet;
-	variant?: 'solid' | 'outline' | 'soft' | 'ghost' | 'link';
-	color?: Colors;
-	size?: Sizes;
-	onClick?: (payload) => void;
-	// ... and all other Button props
-}
+import type { MenuItem } from 'svelai/menu';
+
+const buttonItem = {
+	type: 'button',
+	children: 'Log out',
+	variant: 'ghost',
+	color: 'danger'
+} satisfies MenuItem;
 \`\`\`
 
 ### MenuOption Item
 \`\`\`typescript
-{
-	type: 'option';
-	// All MenuOptionProps are available
-	title?: Snippet;
-	description?: Snippet;
-	prefix?: Snippet;
-	suffix?: Snippet;
-	color?: Colors;
-	size?: Sizes;
-	onClick?: (event: MouseEvent) => void;
-	href?: string;
-	// ... and all other MenuOption props
-}
+import type { MenuItem } from 'svelai/menu';
+
+const optionItem = {
+	type: 'option',
+	title: 'Profile',
+	description: 'Manage your account',
+	href: '/profile'
+} satisfies MenuItem;
 \`\`\`
 
 ### Separator Item
 \`\`\`typescript
-{
-	type: 'separator';
-	// All SeparatorProps are available
-	color?: Colors | 'neutral';
-	size?: number;
-	decorative?: boolean;
-	children?: Snippet; // Optional label
-	// ... and all other Separator props
-}
+import type { MenuItem } from 'svelai/menu';
+
+const separatorItem = {
+	type: 'separator',
+	color: 'neutral',
+	decorative: true
+} satisfies MenuItem;
 \`\`\`
 
 ### Submenu Item
 \`\`\`typescript
-{
-	type: 'submenu';
-	// Most MenuOptionProps are available (title, description, prefix, suffix, color, size, etc.)
-	title?: Snippet;
-	description?: Snippet;
-	prefix?: Snippet;
-	suffix?: Snippet; // Auto-populated with caret-right icon if not provided
-	color?: Colors;
-	size?: Sizes;
-	// Submenu-specific props
-	menu: MenuItem[]; // Array of submenu items (required)
-	openOnHover?: boolean; // Open submenu on hover (default: true)
-	openOnClick?: boolean; // Open submenu on click (default: true)
-	hoverDelay?: number; // Hover delay in milliseconds (default: 100)
-	closeOnMouseLeave?: boolean; // Close when pointer leaves prediction cone + rectangle tolerance (default: true)
-	debugSafeArea?: boolean; // Show blue rectangle and orange cone debug overlays (default: false)
-	// ... and most other MenuOption props (except onClick, onEnter, onLeave)
-}
+import type { MenuItem } from 'svelai/menu';
+
+const submenuItem = {
+	type: 'submenu',
+	title: 'Settings',
+	menu: [
+		{ type: 'option', title: 'General' },
+		{ type: 'option', title: 'Privacy' }
+	],
+	openOnHover: true,
+	hoverDelay: 100
+} satisfies MenuItem;
 \`\`\`
 
 ## Structure
@@ -210,9 +195,9 @@ The menu follows this DOM structure:
 	}
 	
 	const items = [
-		{ type: 'option', title: 'Profile', onClick: handleProfile },
+		{ type: 'option', title: 'Profile', onclick: handleProfile },
 		{ type: 'separator' },
-		{ type: 'button', children: 'Logout', onClick: handleLogout, color: 'danger' }
+		{ type: 'button', children: 'Logout', onclick: handleLogout, color: 'danger' }
 	];
 </script>
 

@@ -1,25 +1,10 @@
-import type { ChartScene } from '@tanstack/charts';
+import type { ChartControl, ChartScene, ChartValue as TanStackValue } from '@tanstack/charts';
+import { brushX, type BrushRange, type BrushXChange } from '@tanstack/charts/interaction/brush';
+import { controlledSignal } from '@tanstack/charts/interaction/signal';
 import { bind } from '$lib/utils/state.svelte.js';
-import { untrack } from 'svelte';
 import type { ChartValue } from './chart.core.js';
 import type { ChartState } from './chart.state.svelte.js';
-import {
-	applyChartViewportDomain,
-	resolveChartViewport,
-	resolveChartViewportDomain,
-	sameChartViewportDomain
-} from './chart.viewport.js';
-
-type ScenePoint = Readonly<{ x: number; y: number }>;
-
-type PendingBrush<TRow extends object> = {
-	readonly pointerId: number;
-	readonly client: ScenePoint;
-	readonly start: ScenePoint;
-	readonly scene: ChartScene<TRow>;
-};
-
-const BRUSH_THRESHOLD = 6;
+import { resolveChartViewport, sameChartViewportDomain } from './chart.viewport.js';
 
 export interface ChartViewportState<TRow extends object> {
 	readonly chart: ChartState<TRow>;
@@ -27,45 +12,19 @@ export interface ChartViewportState<TRow extends object> {
 
 export class ChartViewportState<TRow extends object> {
 	xDomain = $state<readonly ChartValue[] | undefined>();
-	yDomain = $state<readonly ChartValue[] | undefined>();
-	brushScene = $state<ChartScene<TRow> | undefined>();
-	brushStart = $state<ScenePoint | undefined>();
-	brushCurrent = $state<ScenePoint | undefined>();
+	fullDomain = $state<readonly ChartValue[]>([]);
+	range = $state<BrushRange<ChartValue> | undefined>();
+	isBrushing = $state(false);
 
-	readonly configuration = $derived(
-		resolveChartViewport(this.chart.viewport, this.chart.x, this.chart.y)
-	);
-	readonly axis = $derived(this.configuration?.axis);
+	readonly currentDomain = $derived(this.xDomain ?? this.fullDomain);
+	readonly configuration = $derived(resolveChartViewport(this.chart.viewport, this.chart.x));
+	readonly axis = $derived(this.configuration ? 'x' : undefined);
 	readonly isEnabled = $derived(this.configuration !== undefined);
-	readonly isZoomed = $derived(this.xDomain !== undefined || this.yDomain !== undefined);
+	readonly isZoomed = $derived(this.xDomain !== undefined);
 	readonly showReset = $derived(this.configuration?.reset === true && this.isZoomed);
 	readonly animation = $derived(this.configuration?.animation);
-	readonly x = $derived(applyChartViewportDomain(this.chart.x, this.xDomain, 'x'));
-	readonly y = $derived(applyChartViewportDomain(this.chart.y, this.yDomain, 'y'));
-	readonly brushStyle = $derived.by(() => {
-		if (!this.brushScene || !this.brushStart || !this.brushCurrent || !this.axis) {
-			return undefined;
-		}
-		const chart = this.brushScene.chart;
-		const x1 = this.axis === 'y' ? chart.x : Math.min(this.brushStart.x, this.brushCurrent.x);
-		const x2 =
-			this.axis === 'y' ? chart.x + chart.width : Math.max(this.brushStart.x, this.brushCurrent.x);
-		const y1 = this.axis === 'x' ? chart.y : Math.min(this.brushStart.y, this.brushCurrent.y);
-		const y2 =
-			this.axis === 'x' ? chart.y + chart.height : Math.max(this.brushStart.y, this.brushCurrent.y);
-		return `left:${percent(x1, this.brushScene.width)};top:${percent(y1, this.brushScene.height)};width:${percent(x2 - x1, this.brushScene.width)};height:${percent(y2 - y1, this.brushScene.height)}`;
-	});
-	readonly status = $derived(
-		this.isZoomed
-			? `Chart zoomed on ${this.xDomain && this.yDomain ? 'both axes' : this.xDomain ? 'the x axis' : 'the y axis'}.`
-			: ''
-	);
-
-	#pending: PendingBrush<TRow> | undefined;
-	#host: HTMLDivElement | undefined;
-	#window: Window | undefined;
-	#isTransitioning = false;
-	#transitionTimer: number | undefined;
+	readonly controls = $derived(this.createControls());
+	readonly status = $derived(this.isZoomed ? 'Chart zoomed on the x axis.' : '');
 
 	constructor(chart: ChartState<TRow>) {
 		bind(this, {
@@ -74,236 +33,144 @@ export class ChartViewportState<TRow extends object> {
 			}
 		});
 		$effect(() => {
-			const axis = this.configuration?.axis;
-			untrack(() => {
-				if (axis !== 'x' && axis !== 'both') this.xDomain = undefined;
-				if (axis !== 'y' && axis !== 'both') this.yDomain = undefined;
-			});
+			if (this.configuration) return;
+			this.xDomain = undefined;
+			this.fullDomain = [];
+			this.range = undefined;
+			this.isBrushing = false;
 		});
 	}
 
-	attachment = (node: HTMLDivElement) => {
-		this.#host = node;
-		this.#window = node.ownerDocument.defaultView ?? undefined;
-		node.addEventListener('pointerdown', this.#handlePointerDown, true);
-		node.addEventListener('click', this.#handleClick, true);
-		this.#window?.addEventListener('pointermove', this.#handlePointerMove, true);
-		this.#window?.addEventListener('pointerup', this.#handlePointerUp, true);
-		this.#window?.addEventListener('pointercancel', this.#handlePointerCancel, true);
-		return () => {
-			node.removeEventListener('pointerdown', this.#handlePointerDown, true);
-			node.removeEventListener('click', this.#handleClick, true);
-			this.#window?.removeEventListener('pointermove', this.#handlePointerMove, true);
-			this.#window?.removeEventListener('pointerup', this.#handlePointerUp, true);
-			this.#window?.removeEventListener('pointercancel', this.#handlePointerCancel, true);
-			this.#cancelBrush();
-			this.#stopTransition();
-			this.#host = undefined;
-			this.#window = undefined;
-		};
-	};
-
-	#handleClick = (event: MouseEvent) => {
-		this.chart.clearPointerFocus();
-		event.preventDefault();
-		event.stopImmediatePropagation();
-	};
+	syncScene(scene: ChartScene<TRow>) {
+		if (!this.configuration || this.isZoomed) return;
+		const scale = scene.scales.x;
+		if (!scale || scale.domain.length === 0) return;
+		const domain = scale.domain;
+		if (!sameChartViewportDomain(domain, this.fullDomain)) {
+			this.fullDomain = domain;
+			this.range = domainRange(domain);
+		}
+	}
 
 	reset = () => {
-		if (this.isZoomed) {
-			this.chart.clearPointerFocus();
-			this.#startTransition();
-		}
+		if (this.isZoomed) this.chart.clearPointerFocus();
 		this.xDomain = undefined;
-		this.yDomain = undefined;
-		this.#cancelBrush();
+		this.range = domainRange(this.fullDomain);
+		this.isBrushing = false;
 	};
 
-	#handlePointerDown = (event: PointerEvent) => {
-		if (!this.configuration || event.button !== 0 || !event.isPrimary) return;
-		const scene = this.chart.getScene();
-		const point = scene
-			? clientToScene(this.#host, scene, event.clientX, event.clientY)
-			: undefined;
-		if (!scene || !point || !contains(scene, point)) return;
-		this.chart.clearPointerFocus();
-		this.#pending = {
-			pointerId: event.pointerId,
-			client: { x: event.clientX, y: event.clientY },
-			start: point,
-			scene
+	private createControls(): readonly ChartControl[] | undefined {
+		if (!this.configuration || !this.range) return undefined;
+		const isFullRange = sameRange(this.range, domainRange(this.currentDomain));
+		const options = {
+			ariaLabel: 'Chart zoom range',
+			startAriaLabel: 'Zoom range start',
+			endAriaLabel: 'Zoom range end',
+			format: formatBrushValue,
+			selectionStyle: {
+				fill: 'var(--color-primary)',
+				fillOpacity: isFullRange ? 0 : 0.15,
+				stroke: 'var(--color-primary)',
+				strokeOpacity: isFullRange ? 0 : 1,
+				strokeWidth: 1
+			},
+			handleStyle: {
+				fill: 'var(--color-primary)',
+				fillOpacity: isFullRange ? 0 : 0.9
+			}
 		};
-	};
+		if (this.chart.x?.scale.type === 'band' || this.chart.x?.scale.type === 'point') {
+			return [
+				brushX({
+					...options,
+					values: this.currentDomain,
+					range: controlledSignal(
+						this.range,
+						(next, { reason }: { reason: BrushXChange<ChartValue> }) =>
+							this.handleBrushChange(next, reason)
+					)
+				})
+			];
+		}
+		const { start, end } = this.range;
+		if (typeof start === 'string' || typeof end === 'string') {
+			throw new TypeError('[Chart] A continuous brush requires number or Date bounds.');
+		}
+		return [
+			brushX({
+				...options,
+				keyboard: false,
+				range: controlledSignal(
+					{ start, end },
+					(next, { reason }: { reason: BrushXChange<number | Date> }) =>
+						this.handleBrushChange(next, reason)
+				)
+			})
+		];
+	}
 
-	#handlePointerMove = (event: PointerEvent) => {
-		if (this.#isTransitioning && this.#isChartTarget(event.target)) {
-			event.stopImmediatePropagation();
-			return;
-		}
-		const pending = this.#pending;
-		if (!pending || pending.pointerId !== event.pointerId) return;
-		if (this.#isChartTarget(event.target)) event.stopImmediatePropagation();
-		const current = clientToScene(this.#host, pending.scene, event.clientX, event.clientY);
-		if (!current) return;
-		if (!this.brushStart) {
-			const distance = Math.hypot(
-				event.clientX - pending.client.x,
-				event.clientY - pending.client.y
-			);
-			if (distance < BRUSH_THRESHOLD) return;
-			this.#host?.setPointerCapture(event.pointerId);
-			this.brushScene = pending.scene;
-			this.brushStart = pending.start;
-		}
-		this.brushCurrent = clampToChart(pending.scene, current);
-		event.preventDefault();
-		event.stopImmediatePropagation();
-	};
-
-	#handlePointerUp = (event: PointerEvent) => {
-		const pending = this.#pending;
-		if (!pending || pending.pointerId !== event.pointerId) return;
-		const hasBrush = this.brushStart !== undefined && this.brushCurrent !== undefined;
-		if (hasBrush) {
-			this.#commitBrush(pending.scene);
-			event.preventDefault();
-			event.stopImmediatePropagation();
-		}
-		this.#releasePointer(event.pointerId);
-		this.#cancelBrush();
-	};
-
-	#handlePointerCancel = (event: PointerEvent) => {
-		if (this.#pending?.pointerId !== event.pointerId) return;
-		this.#releasePointer(event.pointerId);
-		this.#cancelBrush();
-	};
-
-	#commitBrush(scene: ChartScene<TRow>) {
-		if (!this.configuration || !this.brushStart || !this.brushCurrent) return;
-		const { axis } = this.configuration;
-		let nextXDomain = this.xDomain;
-		let nextYDomain = this.yDomain;
-		if (axis === 'x' || axis === 'both') {
-			const selected = resolveChartViewportDomain(
-				this.chart.x,
-				scene.scales.x,
-				this.brushStart.x,
-				this.brushCurrent.x,
-				'viewport.x'
-			);
-			if (selected && !sameChartViewportDomain(selected, scene.scales.x?.domain)) {
-				nextXDomain = selected;
-			}
-		}
-		if (axis === 'y' || axis === 'both') {
-			const selected = resolveChartViewportDomain(
-				this.chart.y,
-				scene.scales.y,
-				this.brushStart.y,
-				this.brushCurrent.y,
-				'viewport.y'
-			);
-			if (selected && !sameChartViewportDomain(selected, scene.scales.y?.domain)) {
-				nextYDomain = selected;
-			}
-		}
-		if (nextXDomain === this.xDomain && nextYDomain === this.yDomain) return;
+	private handleBrushChange(next: BrushRange<ChartValue>, reason: BrushXChange<ChartValue>) {
 		this.chart.clearPointerFocus();
-		this.#startTransition();
-		this.xDomain = nextXDomain;
-		this.yDomain = nextYDomain;
-	}
-
-	#releasePointer(pointerId: number) {
-		if (this.#host?.hasPointerCapture(pointerId)) this.#host.releasePointerCapture(pointerId);
-	}
-
-	#cancelBrush() {
-		this.#pending = undefined;
-		this.brushScene = undefined;
-		this.brushStart = undefined;
-		this.brushCurrent = undefined;
-	}
-
-	#startTransition() {
-		this.#stopTransition();
-		const animation = this.animation;
-		const duration = animation === false ? 0 : (animation?.duration ?? 0);
-		if (!this.#window || duration <= 0) return;
-		if (
-			animation !== false &&
-			animation?.respectReducedMotion !== false &&
-			this.#window.matchMedia('(prefers-reduced-motion: reduce)').matches
-		) {
+		this.isBrushing = reason.type === 'preview';
+		if (reason.type === 'cancel') {
+			this.range = reason.origin;
 			return;
 		}
-		this.#isTransitioning = true;
-		this.#transitionTimer = this.#window.setTimeout(() => {
-			this.#isTransitioning = false;
-			this.#transitionTimer = undefined;
-		}, duration + 34);
-	}
-
-	#stopTransition() {
-		if (this.#transitionTimer !== undefined) this.#window?.clearTimeout(this.#transitionTimer);
-		this.#transitionTimer = undefined;
-		this.#isTransitioning = false;
-	}
-
-	#isChartTarget(target: EventTarget | null): boolean {
-		return Boolean(this.#host && isDomNode(target) && this.#host.contains(target));
-	}
-}
-
-function isDomNode(target: EventTarget | null): target is Node {
-	return target !== null && 'nodeType' in target;
-}
-
-function clientToScene<TRow extends object>(
-	host: HTMLDivElement | undefined,
-	scene: ChartScene<TRow>,
-	clientX: number,
-	clientY: number
-): ScenePoint | undefined {
-	const svg = host?.querySelector<SVGSVGElement>('svg.ts-chart');
-	if (!svg) return undefined;
-	const matrix = svg.getScreenCTM();
-	if (matrix) {
-		const determinant = matrix.a * matrix.d - matrix.b * matrix.c;
-		if (Number.isFinite(determinant) && Math.abs(determinant) > Number.EPSILON) {
-			const x = clientX - matrix.e;
-			const y = clientY - matrix.f;
-			return {
-				x: (matrix.d * x - matrix.c * y) / determinant,
-				y: (-matrix.b * x + matrix.a * y) / determinant
-			};
+		this.range = next;
+		if (reason.type !== 'commit') return;
+		const domain = selectedDomain(this.chart.x, this.currentDomain, next);
+		if (!domain || sameChartViewportDomain(domain, this.currentDomain)) {
+			this.range = domainRange(this.currentDomain);
+			return;
 		}
+		this.range = domainRange(domain);
+		this.xDomain = domain;
 	}
-	const bounds = svg.getBoundingClientRect();
-	if (!bounds.width || !bounds.height) return undefined;
-	return {
-		x: ((clientX - bounds.left) / bounds.width) * scene.width,
-		y: ((clientY - bounds.top) / bounds.height) * scene.height
-	};
 }
 
-function contains<TRow extends object>(scene: ChartScene<TRow>, point: ScenePoint): boolean {
-	return (
-		point.x >= scene.chart.x &&
-		point.x <= scene.chart.x + scene.chart.width &&
-		point.y >= scene.chart.y &&
-		point.y <= scene.chart.y + scene.chart.height
-	);
+function selectedDomain(
+	position: ChartState<object>['x'],
+	currentDomain: readonly ChartValue[],
+	range: BrushRange<ChartValue>
+): readonly ChartValue[] | undefined {
+	if (!position || currentDomain.length === 0) return undefined;
+	if (position.scale.type === 'band' || position.scale.type === 'point') {
+		const start = currentDomain.findIndex((value) => sameValue(value, range.start));
+		const end = currentDomain.findIndex((value) => sameValue(value, range.end));
+		if (start < 0 || end < 0) return undefined;
+		const selected = currentDomain.slice(Math.min(start, end), Math.max(start, end) + 1);
+		return selected.length > 1 ? selected : undefined;
+	}
+	if (sameValue(range.start, range.end)) return undefined;
+	const isAscending = valueNumber(currentDomain[0]) <= valueNumber(currentDomain.at(-1));
+	return isAscending ? [range.start, range.end] : [range.end, range.start];
 }
 
-function clampToChart<TRow extends object>(scene: ChartScene<TRow>, point: ScenePoint): ScenePoint {
-	return {
-		x: Math.max(scene.chart.x, Math.min(scene.chart.x + scene.chart.width, point.x)),
-		y: Math.max(scene.chart.y, Math.min(scene.chart.y + scene.chart.height, point.y))
-	};
+function domainRange(domain: readonly ChartValue[]): BrushRange<ChartValue> | undefined {
+	const start = domain[0];
+	const end = domain.at(-1);
+	return start === undefined || end === undefined ? undefined : { start, end };
 }
 
-function percent(value: number, total: number): string {
-	return `${Math.max(0, Math.min(100, (value / total) * 100))}%`;
+function sameRange(
+	left: BrushRange<ChartValue>,
+	right: BrushRange<ChartValue> | undefined
+): boolean {
+	return Boolean(right && sameValue(left.start, right.start) && sameValue(left.end, right.end));
+}
+
+function sameValue(left: ChartValue, right: TanStackValue | undefined): boolean {
+	if (left instanceof Date || right instanceof Date) {
+		return left instanceof Date && right instanceof Date && left.getTime() === right.getTime();
+	}
+	return Object.is(left, right);
+}
+
+function valueNumber(value: ChartValue | undefined): number {
+	if (value instanceof Date) return value.getTime();
+	return typeof value === 'number' ? value : Number.NaN;
+}
+
+function formatBrushValue(value: ChartValue): string {
+	return value instanceof Date ? value.toLocaleDateString() : String(value);
 }

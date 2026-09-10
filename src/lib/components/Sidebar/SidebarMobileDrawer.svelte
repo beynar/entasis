@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { sidebarMobileDrawerDialogTheme } from './sidebarMobileDrawer.dialog.theme.js';
 	import type { Snippet } from 'svelte';
-	import { Dialog, type DialogThemeProps } from '$lib/components/Dialog/index.js';
+	import { Dialog } from '$lib/components/Dialog/index.js';
 	import type { SidebarDensity, SidebarSide, SidebarSize } from './sidebar.props.js';
 	import { useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 
@@ -30,32 +31,19 @@
 
 	const classes = $derived(useSidebarTheme(theme));
 	const dialogType = $derived(side === 'right' ? 'drawerRight' : 'drawerLeft');
-	const dialogTheme = {
-		override: true,
-		content: {
-			base: 'relative z-50 flex h-full max-h-full flex-col overflow-hidden rounded-none bg-surface-floating p-0 text-neutral shadow-xl will-change-transform transition-transform duration-200 ease-out [&>div]:h-full [&>div]:min-h-0'
-		},
-		header: {
-			base: 'sr-only'
-		},
-		title: {
-			base: 'sr-only'
-		},
-		closeButton: {
-			base: 'hidden'
-		}
-	} satisfies DialogThemeProps;
 </script>
 
 <Dialog
 	{open}
-	onClose={close}
+	onOpenChange={(nextOpen) => {
+		if (!nextOpen) close();
+	}}
 	type={dialogType}
 	responsive={false}
 	thumb={false}
 	title={label}
 	class="md:hidden"
-	theme={dialogTheme}
+	theme={sidebarMobileDrawerDialogTheme}
 >
 	<div
 		data-slot="sidebar"

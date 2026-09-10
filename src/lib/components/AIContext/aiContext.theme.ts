@@ -10,9 +10,9 @@ const defaultPopover = cva({ base: 'w-auto p-0' });
 const defaultCard = cva({ base: 'w-auto gap-0 py-0' });
 const defaultCardContent = cva({ base: 'p-0' });
 const defaultTrigger = cva({
-	base: 'state-layer inline-flex items-center rounded-md bg-surface text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/40',
+	base: 'state-layer inline-flex items-center rounded-sm bg-surface text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/40',
 	variants: {
-		compact: { true: 'size-8 justify-center p-0', false: 'gap-1.5 px-2 py-1' },
+		compact: { true: 'size-8 justify-center p-0', false: 'gap-sm px-md py-xs' },
 		tone: {
 			default: 'text-neutral',
 			warning: 'text-warning-readable',
@@ -23,8 +23,8 @@ const defaultTrigger = cva({
 });
 const defaultProgress = cva({ base: 'shrink-0' });
 const defaultTriggerValue = cva({ base: 'text-center font-normal tabular-nums' });
-const defaultContent = cva({ base: 'flex min-w-56 flex-col gap-3 p-3' });
-const defaultSummary = cva({ base: 'flex items-start justify-between gap-3' });
+const defaultContent = cva({ base: 'flex min-w-56 flex-col gap-lg p-lg' });
+const defaultSummary = cva({ base: 'flex items-start justify-between gap-lg' });
 const defaultTitle = cva({ base: 'text-xs leading-4 font-medium' });
 const defaultRemaining = cva({ base: 'text-[0.6875rem] leading-4 text-neutral/60' });
 const defaultPercent = cva({ base: 'text-xs leading-4 font-medium tabular-nums' });
@@ -36,8 +36,8 @@ const defaultBar = cva({
 	},
 	defaultVariants: { tone: 'default' }
 });
-const defaultRows = cva({ base: 'grid gap-1.5 text-xs leading-4' });
-const defaultRow = cva({ base: 'flex justify-between gap-3' });
+const defaultRows = cva({ base: 'grid gap-sm text-xs leading-4' });
+const defaultRow = cva({ base: 'flex justify-between gap-lg' });
 const defaultRowLabel = cva({ base: 'text-neutral/60' });
 const defaultRowValue = cva({ base: 'font-medium tabular-nums' });
 

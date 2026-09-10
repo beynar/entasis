@@ -134,7 +134,7 @@
 					'min-h-11 flex-1 rounded-none border-0 bg-transparent pe-4 ps-6 py-0 [--state-hover-opacity:0.06] focus-visible:ring-inset'
 			})}
 			onclick={(event) => onActivate(occurrence, event)}
-			ondblclick={(event) => onDoubleClick?.(occurrence, event)}
+			ondblclick={(event) => onDoubleClick?.({ occurrence, event })}
 			onfocus={() => a11y.handleOccurrenceFocus(occurrence.key, entry.segment.day)}
 			{@attach registerItemControl}
 		>

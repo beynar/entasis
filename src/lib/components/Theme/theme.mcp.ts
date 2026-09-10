@@ -14,12 +14,14 @@ transitions. Wrap the application once and use the \`ThemeState\` received by th
 	const designTokens = $derived({
 		light: {
 			spacing,
+			spacingScale: { xs: 1, sm: 1.5, md: 2, lg: 3, xl: 4 },
 			radius: 'normal',
 			typeScale: 'default',
 			raisedWithBorder: true
 		},
 		dark: {
 			spacing,
+			spacingScale: { xs: 1, sm: 1.5, md: 2, lg: 3, xl: 4 },
 			radius: 'small',
 			typeScale: 'compact',
 			raisedWithBorder: false
@@ -44,14 +46,19 @@ Changing the controlled object updates already-rendered Tailwind utilities witho
 
 ### ThemeDesignTokens
 
-- \`spacing\`: \`'small' | 'normal' | 'large' | number\`. Scales Tailwind spacing utilities,
-  including padding, margin, gap, width, and height.
+- \`spacing\`: \`'small' | 'normal' | 'large' | number\`. Globally scales density.
+- \`spacingScale\`: partial overrides for the strictly increasing \`xs\`, \`sm\`, \`md\`, \`lg\`,
+  and \`xl\` spacing multipliers. Defaults to 1/1.5/2/3/4.
 - \`radius\`: \`'none' | 'subtile' | 'small' | 'normal' | 'large' | 'round' | number\`.
 - \`typeScale\`: \`'compact' | 'default' | 'comfortable' | 'large' | TypeScaleOptions\`.
 - \`raisedWithBorder\`: toggles the border used by \`raised-*\` utilities.
 
 Component-level density remains a local variant. It selects utility classes whose values inherit
 the active global spacing token.
+
+Generated interfaces should use the public \`xs | sm | md | lg | xl\` vocabulary through component
+props and named gap/padding utilities. \`micro\` and \`layout-*\` are internal recipe tokens. Prefer
+parent-owned gaps over child margins; do not emit arbitrary spacing or unsupported radius values.
 
 ## Theme selection
 

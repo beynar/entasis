@@ -10,7 +10,7 @@
 			header: 'Department',
 			groupable: true,
 			sortable: true,
-			size: 190
+			width: 190
 		},
 		{
 			id: 'role',
@@ -26,7 +26,7 @@
 			header: 'Headcount',
 			aggregation: 'sum',
 			align: 'end',
-			size: 130
+			width: 130
 		},
 		{
 			id: 'salary',
@@ -35,14 +35,14 @@
 			aggregation: 'mean',
 			sortable: true,
 			align: 'end',
-			size: 170
+			width: 170
 		},
 		{
 			id: 'status',
 			accessor: 'status',
 			header: 'Statuses',
 			aggregation: 'uniqueCount',
-			size: 140
+			width: 140
 		}
 	];
 </script>

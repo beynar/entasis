@@ -224,10 +224,10 @@ The icons cover these categories:
 	import { Button } from 'svelai';
 	import { plusIcon } from 'svelai/icons';
 
-	let { onClick, icon = plusIcon, ...props } = $props();
+	let { onclick, icon = plusIcon, ...props } = $props();
 </script>
 
-<Button {onClick} {...props}>
+<Button {onclick} {...props}>
 	{#snippet prefix()}
 		{@render icon()}
 	{/snippet}

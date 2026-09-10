@@ -88,7 +88,7 @@
 					icon={rewindIcon}
 					disabled={disabled || !canSeek}
 					class="!size-8 !min-w-8 [&_svg]:!size-4"
-					onClick={() => player.runInteraction(() => player.seekBy(-seekStep))}
+					onPress={() => player.runInteraction(() => player.seekBy(-seekStep))}
 				/>
 			{/if}
 
@@ -100,7 +100,7 @@
 					icon={player.paused || player.ended ? playIcon : pauseIcon}
 					{disabled}
 					class="!size-10 !min-w-10 !rounded-full !bg-white/15 [&_svg]:!size-5"
-					onClick={() => player.runInteraction(() => player.togglePlay())}
+					onPress={() => player.runInteraction(() => player.togglePlay())}
 				/>
 			{/if}
 
@@ -112,7 +112,7 @@
 					icon={fastForwardIcon}
 					disabled={disabled || !canSeek}
 					class="!size-8 !min-w-8 [&_svg]:!size-4"
-					onClick={() => player.runInteraction(() => player.seekBy(seekStep))}
+					onPress={() => player.runInteraction(() => player.seekBy(seekStep))}
 				/>
 			{/if}
 		</div>
@@ -131,7 +131,7 @@
 				buffered={player.buffered}
 				disabled={disabled || !canSeek}
 				format={(value) => formatVideoPlayerTime(value)}
-				onChange={(value) => player.runInteraction(() => player.seekTo(value))}
+				onValueChange={(value) => player.runInteraction(() => player.seekTo(value))}
 			/>
 		{/if}
 
@@ -156,7 +156,7 @@
 						label={`Rewind ${seekStep} seconds`}
 						icon={rewindIcon}
 						disabled={disabled || !canSeek}
-						onClick={() => player.runInteraction(() => player.seekBy(-seekStep))}
+						onPress={() => player.runInteraction(() => player.seekBy(-seekStep))}
 					/>
 				{/if}
 
@@ -167,7 +167,7 @@
 						label={player.paused || player.ended ? 'Play' : 'Pause'}
 						icon={player.paused || player.ended ? playIcon : pauseIcon}
 						{disabled}
-						onClick={() => player.runInteraction(() => player.togglePlay())}
+						onPress={() => player.runInteraction(() => player.togglePlay())}
 					/>
 				{/if}
 
@@ -178,7 +178,7 @@
 						label={`Forward ${seekStep} seconds`}
 						icon={fastForwardIcon}
 						disabled={disabled || !canSeek}
-						onClick={() => player.runInteraction(() => player.seekBy(seekStep))}
+						onPress={() => player.runInteraction(() => player.seekBy(seekStep))}
 					/>
 				{/if}
 			</div>
