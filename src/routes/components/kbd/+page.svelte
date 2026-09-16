@@ -47,7 +47,7 @@
 	{#snippet examples()}
 		<ComponentCard
 			description="Single keys, combos, sizes, colors, inline usage, and button suffixes."
-			class="!min-h-fit grid gap-8"
+			class="grid !min-h-fit gap-8"
 		>
 			<!-- Single keys -->
 			<div class="flex items-center justify-center gap-2">
@@ -56,9 +56,7 @@
 				<Kbd>⇧</Kbd>
 				<Kbd>Enter</Kbd>
 				<Kbd>
-					{#snippet children()}
-						{@render commandIcon({})}
-					{/snippet}
+					{@render commandIcon({})}
 				</Kbd>
 			</div>
 
@@ -74,14 +72,14 @@
 
 			<!-- Sizes -->
 			<div class="flex items-center justify-center gap-6">
-				{#each sizes as size}
+				{#each sizes as size, index (index)}
 					<Kbd {size} keys={['⌘', 'K']} separator="+" />
 				{/each}
 			</div>
 
 			<!-- Colors -->
 			<div class="flex flex-wrap items-center justify-center gap-4">
-				{#each colors as color}
+				{#each colors as color, index (index)}
 					<Kbd {color} keys={['⌘', 'K']} />
 				{/each}
 			</div>

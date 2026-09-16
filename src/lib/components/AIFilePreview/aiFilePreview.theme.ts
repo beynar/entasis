@@ -23,7 +23,7 @@ export const aiFilePreviewTheme = {
 	}),
 	content: cva({ base: 'grid min-w-0 flex-1 gap-micro' }),
 	name: cva({ base: 'truncate text-xs font-medium' }),
-	meta: cva({ base: 'flex items-center gap-xs text-xs text-neutral/60' }),
+	meta: cva({ base: 'flex items-center gap-xs text-xs text-neutral/70' }),
 	error: cva({ base: 'truncate text-xs text-danger-readable' })
 };
 

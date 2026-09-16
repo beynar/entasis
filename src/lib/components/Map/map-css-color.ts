@@ -1,5 +1,7 @@
 export function toMapLibreColor(color: string): string | null {
-	const srgbMatch = /^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\)$/.exec(color);
+	const srgbMatch = /^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\)$/.exec(
+		color
+	);
 
 	if (srgbMatch) {
 		const red = Math.round(Number(srgbMatch[1]) * 255);
@@ -12,5 +14,7 @@ export function toMapLibreColor(color: string): string | null {
 			: `rgb(${red}, ${green}, ${blue})`;
 	}
 
-	return color.startsWith('rgb(') || color.startsWith('rgba(') || color.startsWith('#') ? color : null;
+	return color.startsWith('rgb(') || color.startsWith('rgba(') || color.startsWith('#')
+		? color
+		: null;
 }

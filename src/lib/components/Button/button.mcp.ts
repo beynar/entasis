@@ -35,6 +35,13 @@ The Button component is a flexible and customizable button element that supports
 - **disabled**: boolean (default: false) - Disables button interaction
 - **loading**: boolean (default: false) - Shows the Theme-configured loading spinner and disables interaction
 
+### State Props
+Describe the meaning; the Button writes the ARIA. Never pass an aria-* attribute to a Button.
+- **pressed**: boolean - Toggle state of a button that stays on or off (a bold button in a toolbar, a "show password" eye). Rendered as aria-pressed
+- **selected**: boolean - Chosen state of a button acting as one option among several (a tab, a listbox option). Rendered as aria-selected
+- **expanded**: boolean - Whether the surface this button opens is showing. Rendered as aria-expanded. A svelai surface (Popover, PopupMenu, Select, Combobox) sets this on its own trigger, so pass it only for a surface you open yourself
+- **haspopup**: 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid' | true - What the surface this button opens contains. Rendered as aria-haspopup, and likewise set by a svelai surface on its own trigger
+
 ### Link Props
 - **href**: string - Makes button render as anchor tag
 - **target**: string - Link target (e.g., "_blank")
@@ -51,6 +58,7 @@ The Button component is a flexible and customizable button element that supports
 - **suffix**: Snippet - Content after main text (typically icons)
 
 ### Advanced Props
+- **label**: string - Accessible label applied as aria-label on the root element (required for icon-only buttons)
 - **ref**: HTMLElement - Reference to the button element
 - **class**: string - Additional CSS classes
 - **theme**: ComponentTheme - Custom theme overrides
@@ -120,7 +128,7 @@ The button follows this DOM structure:
 
 ### Custom Styling
 \`\`\`svelte
-<Button class="shadow-lg border-2" color="primary" variant="outline">
+<Button class="lift-4 border-2" color="primary" variant="outline">
 	Custom Styled
 </Button>
 \`\`\`
@@ -213,7 +221,7 @@ const customTheme: ButtonThemeProps = {
 <Button 
   theme={{
     root: {
-      base: 'rounded-full shadow-lg',
+      base: 'rounded-full lift-4',
       size: {
         large: 'px-8 py-4 text-xl'
       }
@@ -248,7 +256,7 @@ const customTheme: ButtonThemeProps = {
   setButtonTheme({
     root: {
       variant: {
-        solid: 'state-layer bg-color text-color-contrast shadow-md hover:shadow-lg transition-shadow',
+        solid: 'state-layer bg-color text-color-contrast lift-3 hover:lift-4 transition-shadow',
         outline: 'state-layer border-2 border-color'
       }
     },

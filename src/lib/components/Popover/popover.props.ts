@@ -1,6 +1,7 @@
 import type { Snippet } from 'svelte';
 import type { PopoverState } from './popover.state.svelte.js';
 import type { ResponsiveProps } from '../Theme/theme.js';
+import type { Sizes } from '$lib/types/theme.js';
 import type { ButtonProps } from '../Button/index.js';
 import type { FSOProps } from '$lib/transitions/transition.js';
 import { type Placement, type VirtualElement } from '@floating-ui/dom';
@@ -17,11 +18,11 @@ export type PopoverProps = WithAttachments<{
 	/** Called once when the library requests an open-state change. */
 	onOpenChange?: (open: boolean) => void;
 	/** Called after the open transition finishes. */
-	onAfterOpen?: (popover: PopoverState) => void;
+	onAfterOpen?: (payload: PopoverState) => void;
 	/** Called after the close transition finishes. */
-	onAfterClose?: (popover: PopoverState) => void;
+	onAfterClose?: (payload: PopoverState) => void;
 	/** Popover panel size variant; supports responsive values. */
-	size?: ResponsiveProps<'small' | 'normal' | 'large'>;
+	size?: ResponsiveProps<Sizes>;
 	/** Gap in pixels between the reference element and the popover panel. */
 	offset?: number;
 	/**
@@ -35,10 +36,10 @@ export type PopoverProps = WithAttachments<{
 	position?: ResponsiveProps<Placement>;
 	/** When true, clicking the trigger toggles the popover open and closed. */
 	openOnClick?: boolean;
-	/** When true, hovering the trigger opens the popover after `hoverDelay`. */
+	/** When true, hovering the trigger opens the popover after `delay`. */
 	openOnHover?: boolean;
 	/** Delay in milliseconds before opening on hover when `openOnHover` is enabled. */
-	hoverDelay?: number;
+	delay?: number;
 	/** When true, enter and exit transitions slide from the placement direction. */
 	directedTransition?: boolean;
 	/** Fly/scale opacity transition overrides for open and close; supports responsive values. */
@@ -47,6 +48,19 @@ export type PopoverProps = WithAttachments<{
 	children?: Snippet<[PopoverState]>;
 	/** Snippet, button props, or `false` to render, customize, or hide the trigger control. */
 	trigger?: Snippet<[PopoverState]> | (ButtonProps & { content?: string }) | false;
+	/**
+	 * Where focus goes when the panel opens: `'first'` (autofocus target or first tabbable),
+	 * `'container'` (the panel itself), or `false` (stay on the trigger). Focus always returns
+	 * to the trigger when the popover closes.
+	 * @default false
+	 */
+	focusOnOpen?: 'first' | 'container' | false;
+	/**
+	 * Value of `aria-haspopup` applied to the trigger, describing what the panel contains.
+	 * `aria-expanded` and `aria-controls` are managed automatically alongside it.
+	 * @default 'dialog'
+	 */
+	haspopup?: 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid' | true;
 	/** When true, clicking outside the popover closes it. */
 	closeOnClickOutside?: boolean;
 	/** When true, pressing Escape closes the topmost open popover. */
@@ -59,11 +73,23 @@ export type PopoverProps = WithAttachments<{
 	lockScroll?: boolean;
 	/** Additional CSS classes merged onto the popover dialog element. */
 	class?: string;
-	/** When true, sets the popover panel width to match the trigger element width. */
+	/**
+	 * When true, the panel is at least as wide as the trigger and grows to fit its content (up to
+	 * the `size` cap), so a narrow trigger never forces its options to wrap or scroll sideways.
+	 */
 	fitTrigger?: boolean;
 	/** When true, renders the popover as a bottom sheet on mobile viewports (<768px).
 	 *  Default `false`, so existing popovers stay anchored on every screen size. */
 	mobileSheet?: boolean;
+	/**
+	 * When true, the panel renders in normal document flow where the component sits instead of
+	 * portaling to the viewport-fixed layer: no floating-ui positioning, no scroll lock, no
+	 * outside-press dismissal (Escape still closes it). Same panel classes and motion, so it
+	 * looks identical; the trigger still toggles it. Use it to show an open panel statically,
+	 * e.g. in docs or visual tests. Wins over `mobileSheet`.
+	 * @default false
+	 */
+	inline?: boolean;
 	/** When true, mobile-sheet panels animate intrinsic height changes. */
 	mobileSheetSizeTransition?: boolean;
 	/** Per-instance theme overrides for popover layout and styling class names. */

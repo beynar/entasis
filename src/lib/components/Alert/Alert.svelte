@@ -13,7 +13,7 @@
 		ref = $bindable(),
 		class: className,
 		disabled = false,
-		color = 'primary',
+		color = 'neutral',
 		variant = 'outline',
 		dismissible = false,
 		onDismiss,
@@ -30,8 +30,8 @@
 	const classes = $derived(useAlertTheme(theme));
 	const t = $derived(useI18n(i18n));
 
-	// A filled status icon shown automatically on soft alerts when no `prefix` is
-	// given (like the toast). Non-status colors have no default icon.
+	// A filled status icon shown automatically when no `prefix` is given.
+	// Non-status colors have no default icon.
 	const defaultIcon = $derived(
 		color === 'danger'
 			? xCircleIconFill
@@ -43,7 +43,7 @@
 						? checkCircleIconFill
 						: undefined
 	);
-	const resolvedIcon = $derived(prefix ?? (variant === 'soft' ? defaultIcon : undefined));
+	const resolvedIcon = $derived(prefix ?? defaultIcon);
 
 	const hasIcon = $derived(!!resolvedIcon);
 	const hasDescription = $derived(!!description || !!children);
@@ -71,7 +71,7 @@
 	<Slot render={resolvedIcon} class={classes.prefix({ size, variant, hasDescription })} />
 	<div class={classes.content()}>
 		<Slot render={title} class={classes.title({ size })} />
-		<Slot render={description} class={classes.description({ size })}>
+		<Slot render={description} class={classes.description({ size, variant })}>
 			<Slot render={children} />
 		</Slot>
 	</div>

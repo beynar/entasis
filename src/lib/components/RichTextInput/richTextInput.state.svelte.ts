@@ -1,6 +1,6 @@
 import { untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
-import { bind } from '$lib/utils/state.svelte.js';
+import { createBindableStateClass } from '$lib/utils/state.svelte.js';
 import type { LexicalEditor } from 'lexical';
 import type { AnchoredReference } from './anchored-reference.js';
 import { mountAIComposerLexicalEditor } from './composer/editor-lexical.js';
@@ -48,7 +48,7 @@ type RichTextInputStateOptions = {
 	onSuggestionClose?: RichTextInputSuggestionLifecycleCallback;
 	onSuggestionQueryChange?: RichTextInputSuggestionLifecycleCallback;
 	onSuggestionHighlightChange?: RichTextInputSuggestionLifecycleCallback;
-	onValueChange?: (change: RichTextInputChange) => void;
+	onValueChange?: (payload: RichTextInputChange) => void;
 	onSubmitShortcut?: (event: KeyboardEvent) => void;
 	submitShortcut: RichTextInputSubmitShortcut;
 	toolbar: RichTextInputToolbar;
@@ -56,9 +56,7 @@ type RichTextInputStateOptions = {
 	disabled: boolean;
 };
 
-export interface RichTextInputState extends RichTextInputStateOptions {}
-
-export class RichTextInputState {
+export class RichTextInputState extends createBindableStateClass<RichTextInputStateOptions>() {
 	rootElement = $state<HTMLDivElement | null>(null);
 	editor = $state<LexicalEditor | null>(null);
 	isEmpty = $state(true);
@@ -115,7 +113,7 @@ export class RichTextInputState {
 	}));
 
 	constructor(options: RichTextInputStateOptions) {
-		bind(this, options);
+		super(options);
 		this.lastMarkdown = this.value;
 	}
 

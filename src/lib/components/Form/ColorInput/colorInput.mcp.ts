@@ -9,7 +9,7 @@ string (\`#rrggbb\`, or \`#rrggbbaa\` when alpha < 1).
 
 \`\`\`svelte
 <script>
-	import { ColorInput } from 'svelai';
+	import { ColorInput } from 'svelai/color-input';
 	let color = $state('#6366f1');
 </script>
 
@@ -76,9 +76,11 @@ Extends all Field component props plus:
 
 ### Required inside a Form
 \`\`\`svelte
-<Form>
-	<ColorInput name="color" label="Theme color" required />
-</Form>
+<Form
+	inputs={{
+		color: { type: 'color', label: 'Theme color', required: true }
+	}}
+/>
 \`\`\`
 
 ### Disabled
@@ -115,7 +117,7 @@ The theme object contains the following parts:
 - **input**: The color text input element (size, disabled variants)
 - **inputContainer**: The bordered field container (size, disabled variants)
 - **popover**: The popover panel wrapping the ColorPicker
-- **swatch**: The color swatch inside the leading action button (size variant, empty variant)
+- **swatch**: The color swatch inside the leading action button (empty variant)
 
 Field theme parts (label, description, error, ...) are also accepted on the same \`theme\` prop.
 
@@ -124,7 +126,7 @@ Field theme parts (label, description, error, ...) are also accepted on the same
 	label="Brand color"
 	bind:value={color}
 	theme={{
-		swatch: { size: { normal: 'size-6 rounded-full' } },
+		swatch: { base: 'rounded-full', empty: { true: 'bg-neutral-muted/50' } },
 		inputContainer: { base: 'border-2' }
 	}}
 />

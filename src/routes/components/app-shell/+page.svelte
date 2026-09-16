@@ -11,9 +11,9 @@
 	import rawFeatureShowcaseCode from './demos/AppShellFeatureShowcaseDemo.svelte?raw';
 	import rawVariantGalleryCode from './demos/AppShellVariantGalleryDemo.svelte?raw';
 	import { createComponentControls } from '../../componentControls.svelte.js';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 
-	const sidebarVariants = ['admin', 'floating', 'inset', 'split'] as const;
+	const sidebarVariants = ['admin', 'floating', 'inset', 'split', 'framed'] as const;
 	const controls = createComponentControls([
 		{
 			name: 'variant',
@@ -34,7 +34,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		}
 	]);
 
@@ -60,6 +60,7 @@
 	component="AppShell"
 	features={[
 		'Coordinates Sidebar geometry with matching PageShell header and footer surfaces',
+		'A framed variant draws one rounded card on the canvas around the sidebar and the page',
 		'Composes Sidebar-owned surfaces with PageShell page chrome',
 		'Keeps page scrolling on the document for native navigation restoration',
 		'Keeps Sidebar responsive drawer, collapse, rail, and edge reveal behavior',
@@ -97,8 +98,8 @@
 		resizable: {
 			minWidth: '12rem',
 			maxWidth: '24rem',
-			onWidthChange: (nextWidth) => {
-				sidebarWidth = nextWidth;
+			onWidthChange: ({ width }) => {
+				sidebarWidth = width;
 			}
 		},
 		items: [
@@ -148,9 +149,9 @@ ${'</' + 'script>'}
 		<ShellMentalModel current="app-shell" />
 
 		<section
-			class="grid gap-3 rounded-xl border border-neutral-muted bg-surface p-4 text-sm text-neutral/70"
+			class="border-neutral-muted bg-surface text-neutral/70 grid gap-3 rounded-xl border p-4 text-sm"
 		>
-			<p class="font-medium text-neutral">Nested and two-sided sidebars</p>
+			<p class="text-neutral font-medium">Nested and two-sided sidebars</p>
 			<p>
 				AppShell intentionally manages one Sidebar. For one right-side navigation panel, pass <code
 					>side: 'right'</code
@@ -254,7 +255,7 @@ ${'</' + 'script>'}
 
 <section>Customer content</section>`}
 		>
-			<div class="max-w-xl text-sm text-neutral/70">
+			<div class="text-neutral/70 max-w-xl text-sm">
 				AppShell does not replace PageShell. It composes it, so route-level PageShell injection
 				stays available under the combined frame.
 			</div>

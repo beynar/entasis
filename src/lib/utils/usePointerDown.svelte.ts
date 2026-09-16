@@ -1,12 +1,13 @@
-import { onDestroy, untrack } from 'svelte';
+import { onDestroy } from 'svelte';
 import { on } from 'svelte/events';
+import { SvelteSet } from 'svelte/reactivity';
 
 export const usePointerDown = (opts: {
 	isActive: () => boolean;
 	onDown?: (event: PointerEvent) => void;
 	onUp?: (event: PointerEvent) => void;
 }) => {
-	let offs = new Set<() => void>();
+	const offs = new SvelteSet<() => void>();
 	let isDown = $state(false);
 	const onDown = (event: PointerEvent) => {
 		isDown = true;

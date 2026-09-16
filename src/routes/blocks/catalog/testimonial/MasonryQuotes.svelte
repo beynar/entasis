@@ -45,25 +45,25 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl flex flex-col">
 	<div class="mx-auto max-w-2xl text-center">
 		<Heading as="h2" size="h2" weight="bold">Small changes. Better everyday work.</Heading>
 		<p class="mt-lg text-neutral/70">
 			A few illustrative voices from teams finding a clearer rhythm.
 		</p>
 	</div>
-	<div class="columns-1 gap-lg sm:columns-2 lg:columns-3">
+	<div class="gap-lg columns-1 sm:columns-2 lg:columns-3">
 		{#each quotes as quote (quote.name)}<div class="mb-lg break-inside-avoid">
 				<Card variant="outline"
 					><Stack gap="lg"
 						><Rating value={quote.rating} size="small" />
 						<blockquote class="leading-relaxed">“{quote.text}”</blockquote>
 						<Separator />
-						<div class="flex items-center gap-md">
-							<Avatar size="small" user={{ name: quote.name }} />
+						<div class="gap-md flex items-center">
+							<Avatar size="small" name={quote.name} />
 							<div>
 								<strong class="text-sm">{quote.name}</strong>
-								<p class="text-xs text-neutral/50">{quote.role}</p>
+								<p class="text-neutral/65 text-xs">{quote.role}</p>
 							</div>
 						</div></Stack
 					></Card

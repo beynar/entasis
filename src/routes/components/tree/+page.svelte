@@ -15,7 +15,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: ['small', 'normal', 'large']
+			options: ['compact', 'normal', 'comfortable']
 		},
 		{ name: 'search', type: 'switch', label: 'Search', value: true }
 	]);
@@ -26,7 +26,7 @@
 	subtitle="Virtualized file trees with SSR markup, search, Git status, snippets, editing policies, and bindable imperative access."
 	component="Tree"
 	features={[
-		'@pierre/trees virtualization and keyboard model',
+		'@pierre/trees virtualization',
 		'SSR-first render with declarative shadow DOM',
 		'Search, selection, Git status, and row decorations',
 		'Header and context-menu snippets',
@@ -62,7 +62,7 @@
 
 	{#snippet examples()}
 		<ComponentCard
-			description="Drive Pierre Trees search from your own controls through bind:fileTree."
+			description="Drive Pierre Trees search from your own controls through bind:api."
 			class="!min-h-fit !items-stretch !justify-start"
 		>
 			<TreeCustomSearchDemo />

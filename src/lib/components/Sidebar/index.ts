@@ -1,13 +1,17 @@
 export { default as Sidebar } from './Sidebar.svelte';
 export { default as SidebarMenuButton } from './SidebarMenuButton.svelte';
 export type {
+	SidebarActiveVariant,
+	SidebarActivityBar,
+	SidebarActivityBarItem,
+	SidebarActivityBarSelectPayload,
 	SidebarApi,
-	SidebarCollapseIcon,
 	SidebarCollapsible,
 	SidebarDisplayState,
 	SidebarDensity,
 	SidebarGroup,
 	SidebarIcon,
+	SidebarIconVariant,
 	SidebarFrame,
 	SidebarMenuActionDescriptor,
 	SidebarMenuAlign,
@@ -29,7 +33,7 @@ export type {
 	SidebarTooltipMode,
 	SidebarTreeNode,
 	SidebarVariant,
-	SidebarWidthChangedPayload
+	SidebarWidthChangePayload
 } from './sidebar.props.js';
 export {
 	sidebarTheme,

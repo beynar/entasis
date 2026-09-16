@@ -2,20 +2,27 @@ import type { TransitionConfig } from 'svelte/transition';
 import { easingFunctions, type Easing } from './easingFunctions.js';
 import { useTheme } from '$lib/components/Theme/theme.state.svelte.js';
 import type { ThemeState } from '$lib/components/Theme/theme.state.svelte.js';
+import { resolveMotionTokens } from '$lib/tailwind/scales.js';
+
+const fallbackTokens = resolveMotionTokens();
 
 const split_css_unit = (value: string | number): [number, string] => {
 	const split = typeof value === 'string' && value.match(/^\s*(-?[\d.]+)([^\s]*)\s*$/);
 	return (split ? [parseFloat(split[1]), split[2] || 'px'] : [value, 'px']) as [number, string];
 };
-const resolveEasing = (easing: Easing | undefined, theme: ThemeState) => {
-	return easingFunctions[easing || theme.transition.easing];
+// Both fall back to the Theme's motion tokens: the `standard` easing role and the
+// `normal` duration step. `useTheme()` is typed as always present but returns
+// undefined outside a `<Theme>` (a bare component in a test, say), so the library
+// scale stands in.
+const resolveEasing = (easing: Easing | undefined, theme: ThemeState | undefined) => {
+	return easingFunctions[easing || theme?.motion.easing.standard || fallbackTokens.easing.standard];
 };
 
-const resolveDuration = (duration: number | undefined, theme: ThemeState) => {
-	if (theme.preferReducesMotion) {
+const resolveDuration = (duration: number | undefined, theme: ThemeState | undefined) => {
+	if (theme?.preferReducesMotion) {
 		return 0;
 	}
-	return duration ?? theme.transition.duration;
+	return duration ?? theme?.motion.duration.normal ?? fallbackTokens.duration.normal;
 };
 
 export type BaseTransitionParams = {
@@ -24,16 +31,21 @@ export type BaseTransitionParams = {
 	easing?: Easing;
 };
 
-export type SlideTransitionParams = FSOParams & {
-	axis?: 'x' | 'y';
-};
-
 export type FSOParams = BaseTransitionParams & {
 	x?: number | `${number}%`;
 	y?: number | `${number}%`;
 	scale?: number;
 	opacity?: number;
+	/**
+	 * Axis a `slide()` collapses along. Only `slide` reads it — `fso` ignores it —
+	 * but it lives here so a `motion()` preset can describe a slide the same way it
+	 * describes a fly.
+	 */
+	axis?: 'x' | 'y';
 };
+
+/** @deprecated `axis` now lives on {@link FSOParams}; this is the same type. */
+export type SlideTransitionParams = FSOParams;
 
 export type SlideTransitionProps =
 	| SlideTransitionParams
@@ -120,33 +132,7 @@ export const fso = () => {
 	};
 };
 
-type BgFadeOptions = {
-	delay?: number;
-	duration?: number;
-	easing?: Easing;
-};
-export const bgFade = () => {
-	const theme = useTheme();
-	return (node: HTMLElement, options: BgFadeOptions) => {
-		const rgba = getComputedStyle(node).backgroundColor;
-		const [r = 255, g = 255, b = 255, target_opacity = 1] = rgba.match(/\d+(\.\d+)?/g)!.map(Number);
-		node.style.removeProperty('background-color');
-
-		const od = target_opacity * (1 - 0);
-		return {
-			delay: options.delay,
-			duration: resolveDuration(options.duration, theme),
-			easing: resolveEasing(options.easing, theme),
-			css: (t: number, u: number) => {
-				const value = `background-color: rgba(${r},${g},${b},${target_opacity - od * u})`;
-				// console.log(value);
-				return value;
-			}
-		};
-	};
-};
-
-// Factory like `fso`/`bgFade`: `useTheme()` reads context, which only exists
+// Factory like `fso`: `useTheme()` reads context, which only exists
 // during component init — calling it inside the transition fn (which Svelte
 // invokes at animation time) throws lifecycle_outside_component.
 export const slide = () => {

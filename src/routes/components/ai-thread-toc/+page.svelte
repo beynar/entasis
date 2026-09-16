@@ -90,7 +90,7 @@
 		'Controlled state from AIThread or another transcript owner',
 		'80% container-height bound with scrollbar-free ScrollArea',
 		'Side-aware pin magnification and shared HoverCard preview',
-		'Keyboard, wheel, touch, and programmatic navigation'
+		'Wheel, touch, and programmatic navigation'
 	]}
 >
 	<ComponentCard
@@ -112,7 +112,7 @@ ${'</' + 'script>'}
 	>
 		<div class="grid w-full gap-3">
 			<div
-				class="relative w-full overflow-hidden rounded-lg border border-neutral-muted {heightClass}"
+				class="border-neutral-muted relative w-full overflow-hidden rounded-lg border {heightClass}"
 			>
 				<div
 					class="pointer-events-none absolute inset-y-0 flex items-center {side === 'left'
@@ -124,13 +124,13 @@ ${'</' + 'script>'}
 				<div class="grid h-full place-items-center px-16 text-center">
 					<div class="max-w-sm">
 						<p class="text-sm font-medium">{activeEntry?.title}</p>
-						<p class="mt-1 text-xs text-neutral/60">
+						<p class="text-neutral/70 mt-1 text-xs">
 							Select or focus a pin to navigate the controlled state.
 						</p>
 					</div>
 				</div>
 			</div>
-			<p class="truncate text-center text-xs text-neutral/60" aria-live="polite">
+			<p class="text-neutral/70 truncate text-center text-xs" aria-live="polite">
 				Active turn {activeIndex + 1} of {entries.length}
 			</p>
 		</div>

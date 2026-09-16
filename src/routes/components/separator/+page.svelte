@@ -26,7 +26,7 @@
 	subtitle="A visual divider between content or sections."
 	component="Separator"
 	features={[
-		'role=separator with aria-orientation',
+		{ label: 'role=separator with aria-orientation', test: 'a11y:separator.role' },
 		'decorative mode skips semantics',
 		'Horizontal & vertical orientations',
 		'Optional centred label slot'
@@ -38,7 +38,7 @@
 		code={`<div class="w-full max-w-xl">
 	<div class="space-y-1">
 		<h4 class="text-sm font-medium leading-none">Svelai</h4>
-		<p class="text-neutral/60 text-sm">The foundation for your design system.</p>
+		<p class="text-neutral/70 text-sm">The foundation for your design system.</p>
 	</div>
 	<Separator class="my-4" orientation="${controls.value.orientation}" decorative={${controls.value.decorative}} />
 	<p class="text-sm leading-relaxed">
@@ -52,8 +52,8 @@
 				: 'w-full max-w-xl'}
 		>
 			<div class="space-y-1">
-				<h4 class="text-sm font-medium leading-none">Svelai</h4>
-				<p class="text-neutral/60 text-sm">The foundation for your design system.</p>
+				<h4 class="text-sm leading-none font-medium">Svelai</h4>
+				<p class="text-neutral/70 text-sm">The foundation for your design system.</p>
 			</div>
 			<Separator
 				class={controls.value.orientation === 'vertical' ? 'mx-4 h-full' : 'my-4'}
@@ -161,7 +161,7 @@
 		</ComponentCard>
 
 		<ComponentCard description="Dividing groups inside a menu panel.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 border p-1">
+			<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-1">
 				<MenuOption prefix={userIcon} title="Profile" description="View your profile" />
 				<MenuOption prefix={gearIcon} title="Settings" description="Manage preferences" />
 

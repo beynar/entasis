@@ -156,10 +156,11 @@
 			};
 		});
 
+	// Anything that can change the editor's box re-measures the comfort spacer.
 	$effect(() => {
-		size;
-		isEmpty;
-		maxHeightCss;
+		void size;
+		void isEmpty;
+		void maxHeightCss;
 		scheduleRefresh?.();
 	});
 </script>

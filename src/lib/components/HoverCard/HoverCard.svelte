@@ -8,14 +8,13 @@
 	import Slot from '../Slot/Slot.svelte';
 	import type { ButtonProps } from '../Button/index.js';
 	import type { HoverCardProps, HoverCardTrigger } from './hoverCard.props.js';
-	import { useHoverCardTheme } from './hoverCard.theme.js';
+	import { useHoverCardMotion, useHoverCardTheme } from './hoverCard.theme.js';
 
 	let {
 		id: customId,
 		defaultOpen = false,
 		open = $bindable(),
 		trigger: triggerContent = 'Hover',
-		content,
 		children,
 		title,
 		description,
@@ -35,16 +34,13 @@
 		disabled = false,
 		class: className,
 		triggerClass,
-		popoverClass,
-		cardColor = 'neutral',
-		cardVariant = 'solid',
+		popover,
+		card,
 		showBorders = false,
 		onOpenChange,
 		onAfterOpen,
 		onAfterClose,
 		theme,
-		cardTheme,
-		popoverTheme,
 		...attachments
 	}: HoverCardProps = $props();
 	const openState = createBindableValue(
@@ -59,7 +55,12 @@
 	const generatedId = $props.id();
 	const id = $derived(customId || generatedId);
 	const classes = $derived(useHoverCardTheme(theme));
-	const cardContent = $derived(content ?? children);
+	// Own motion preset (ladder: registry → setHoverCardTheme → theme.motion → the
+	// `transition` prop), handed to the Popover as an already-resolved `{ in, out }`.
+	const resolveMotion = useHoverCardMotion();
+	const hoverCardTransition = $derived(
+		resolveMotion(undefined, { motion: theme?.motion, transition })
+	);
 
 	let openTimer: ReturnType<typeof setTimeout> | null = null;
 	let closeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -146,7 +147,7 @@
 	{id}
 	{position}
 	{offset}
-	{transition}
+	transition={hoverCardTransition}
 	{closeOnEscape}
 	{closeOnClickOutside}
 	{directedTransition}
@@ -155,16 +156,16 @@
 	closeOnMouseLeave={false}
 	lockScroll={false}
 	{size}
-	class={classes.popover({ className: popoverClass })}
-	theme={popoverTheme}
+	class={classes.popover({ className: popover?.class })}
+	theme={popover?.theme}
 	onOpenChange={setOpen}
 	onAfterOpen={() => onAfterOpen?.(payload)}
 	onAfterClose={() => onAfterClose?.(payload)}
 >
-	{#snippet trigger(popover)}
+	{#snippet trigger(anchor)}
 		{#if typeof triggerContent === 'string'}
 			<button
-				{@attach popover.reference}
+				{@attach anchor.reference}
 				type="button"
 				class={classes.trigger({ disabled, className: triggerClass })}
 				data-state={isOpen ? 'open' : 'closed'}
@@ -183,7 +184,7 @@
 			</button>
 		{:else}
 			<span
-				{@attach popover.reference}
+				{@attach anchor.reference}
 				class={classes.trigger({ disabled, className: triggerClass })}
 				data-state={isOpen ? 'open' : 'closed'}
 				role="presentation"
@@ -204,9 +205,9 @@
 					<Button
 						{...buttonProps}
 						disabled={disabled || isTriggerDisabled}
-						aria-haspopup="dialog"
-						aria-expanded={isOpen}
-						aria-controls={id}
+						haspopup="dialog"
+						expanded={isOpen}
+						controls={id}
 						onclick={(event) => {
 							onTriggerClick?.(event);
 							handleClick();
@@ -237,7 +238,7 @@
 		{/snippet}
 
 		{#snippet cardContentSlot()}
-			<Slot render={cardContent} {payload} />
+			<Slot render={children} {payload} />
 		{/snippet}
 
 		{#snippet cardFooter()}
@@ -247,14 +248,14 @@
 		<Card
 			{size}
 			{density}
-			color={cardColor}
-			variant={cardVariant}
+			color={card?.color ?? 'neutral'}
+			variant={card?.variant ?? 'solid'}
 			{showBorders}
 			class={classes.card({ size, className })}
-			theme={cardTheme}
+			theme={card?.theme}
 			title={title ? cardTitle : undefined}
 			description={description ? cardDescription : undefined}
-			content={cardContent ? cardContentSlot : undefined}
+			content={children ? cardContentSlot : undefined}
 			footer={footer ? cardFooter : undefined}
 		/>
 	</div>

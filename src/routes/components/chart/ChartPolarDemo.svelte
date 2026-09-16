@@ -32,8 +32,8 @@
 <Chart
 	data={capabilities}
 	{marks}
-	ariaLabel="Product capability profile"
+	label="Product capability profile"
 	ariaDescription="A radar chart compares five product capabilities on a zero to one hundred scale."
-	initialDimensions={{ width: 720, height: 480 }}
+	aspectRatio={720 / 480}
 	class="w-full"
 />

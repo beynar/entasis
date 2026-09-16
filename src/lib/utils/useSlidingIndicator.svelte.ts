@@ -7,7 +7,7 @@ type SlidingIndicatorOptions = {
 };
 
 export const useSlidingIndicator = (options: SlidingIndicatorOptions) => {
-	let itemElements: Array<HTMLElement | undefined> = [];
+	const itemElements: Array<HTMLElement | undefined> = [];
 	let resizeObserver: ResizeObserver | undefined;
 	let firstFrame: number | undefined;
 	let secondFrame: number | undefined;

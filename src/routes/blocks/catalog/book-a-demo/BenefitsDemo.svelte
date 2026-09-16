@@ -9,22 +9,22 @@
 	let draft = $state('');
 </script>
 
-<section class="mx-auto grid max-w-6xl gap-xl p-lg md:grid-cols-2 md:p-xl">
-	<div class="flex flex-col gap-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl md:grid-cols-2">
+	<div class="gap-xl flex flex-col">
 		<Chip class="self-start">A guided first look</Chip><Heading as="h2" size="h1" weight="bold"
 			>See what your team could do next.</Heading
 		>
 		<p class="text-neutral/70">A focused, 30-minute tour built around the way you work.</p>
-		<ul class="flex flex-col gap-lg">
+		<ul class="gap-lg flex flex-col">
 			{#each ['Walk through your real workflow', 'Explore the tools that matter to your team', 'Leave with a practical starting point'] as benefit (benefit)}<li
-					class="flex items-center gap-md"
+					class="gap-md flex items-center"
 				>
 					<span class="text-success">{@render checkCircleIcon()}</span>{benefit}
 				</li>{/each}
 		</ul>
-		<div class="flex items-center gap-md">
+		<div class="gap-md flex items-center">
 			<AvatarGroup items={[{ name: 'Maya Chen' }, { name: 'Theo Park' }, { name: 'Nora Ellis' }]} />
-			<p class="text-sm text-neutral/60">Talk with the people who build the product.</p>
+			<p class="text-neutral/70 text-sm">Talk with the people who build the product.</p>
 		</div>
 	</div>
 	<Card
@@ -40,9 +40,9 @@
 				}}
 				onSubmit={(values) => (draft = `${values.name} · ${values.company} · ${values.email}`)}
 				actions={[{ children: 'Review demo request', onAction: (form) => form.submit() }]}
-			/>{#if draft}<div class="rounded-lg bg-primary-muted p-md" role="status">
+			/>{#if draft}<div class="bg-primary-muted p-md rounded-lg" role="status">
 					<strong>Request draft</strong>
-					<p class="mt-sm break-words text-sm">{draft}</p>
+					<p class="mt-sm text-sm break-words">{draft}</p>
 				</div>{/if}</Stack
 		></Card
 	>

@@ -34,8 +34,8 @@
 	];
 </script>
 
-<section class="mx-auto grid max-w-6xl gap-xl p-lg md:grid-cols-3 md:p-xl">
-	<div class="flex flex-col items-start gap-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl md:grid-cols-3">
+	<div class="gap-xl flex flex-col items-start">
 		<Chip variant="outline">A connected practice</Chip><Heading as="h2" size="h2" weight="bold"
 			>Start with the challenge you have.</Heading
 		>
@@ -43,13 +43,13 @@
 			Explore the work inside each discipline and the result it should create.
 		</p>
 	</div>
-	<Accordion class="md:col-span-2" items={services} defaultValue={['strategy']} icon="math"
-		>{#snippet content({ item })}<div class="grid gap-lg sm:grid-cols-2">
-				<div class="flex flex-col gap-lg">
+	<Accordion class="md:col-span-2" items={services} defaultValue={['strategy']} icon="plus-minus"
+		>{#snippet content({ item })}<div class="gap-lg grid sm:grid-cols-2">
+				<div class="gap-lg flex flex-col">
 					<p class="text-neutral/70">{item.description}</p>
-					<ul class="flex flex-col gap-sm">
-						{#each item.scope as detail (detail)}<li class="flex gap-sm text-sm">
-								<span class="text-primary">{@render checkIcon()}</span>{detail}
+					<ul class="gap-sm flex flex-col">
+						{#each item.scope as detail (detail)}<li class="gap-sm flex text-sm">
+								<span class="text-primary-readable">{@render checkIcon()}</span>{detail}
 							</li>{/each}
 					</ul>
 				</div>

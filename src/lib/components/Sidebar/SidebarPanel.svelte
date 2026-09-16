@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { magnifyingGlassIcon } from '$lib/components/Icons/magnifyingGlass.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import type { DisclosureIndicator } from '$lib/types/theme.js';
 	import type {
+		SidebarActiveVariant,
 		SidebarApi,
-		SidebarCollapseIcon,
 		SidebarGroup,
 		SidebarMenuButtonItem,
 		SidebarMenuEntry,
@@ -32,7 +33,9 @@
 		collapseIcon,
 		tooltips,
 		size,
+		activeVariant,
 		density,
+		label,
 		theme
 	}: {
 		api: SidebarApi;
@@ -45,16 +48,21 @@
 		footerButton?: SidebarMenuButtonItem;
 		footerMenu?: SidebarMenuEntry[];
 		footer?: import('svelte').Snippet<[SidebarApi]>;
-		collapseIcon: SidebarCollapseIcon;
+		collapseIcon: DisclosureIndicator;
 		tooltips: SidebarTooltipMode;
 		size: SidebarSize;
+		activeVariant: SidebarActiveVariant;
 		density: SidebarDensity;
+		/** Accessible name for the body navigation landmark. */
+		label: string;
 		theme?: SidebarThemeProps;
 	} = $props();
 
 	const classes = $derived(useSidebarTheme(theme));
 	const t = $derived(useI18n());
-	const collapsed = $derived(api.displayState === 'collapsed' && !api.isMobile);
+	// A hover peek renders the collapsed panel at full width, so icon-mode behaviour has to
+	// stop with it: labels, badges, and inline submenus must match the width on screen.
+	const collapsed = $derived(api.displayState === 'collapsed' && !api.isMobile && !api.isPeeking);
 	let searchRef = $state<HTMLFormElement | null>(null);
 
 	$effect(() => {
@@ -79,10 +87,18 @@
 
 {#if headerButton || search || headerMenu || header}
 	<div data-slot="sidebar-header" data-sidebar="header" class={classes.header({ density })}>
+		<!--
+			The `header` snippet renders first, so a custom workspace card sits above the built-in
+			search and menu instead of under them. Consumers never need an order override.
+		-->
+		{#if header}
+			{@render header(api)}
+		{/if}
 		{#if headerButton}
 			<SidebarMenuButton
 				{...headerButton}
-				isMobile={api.isMobile}
+				{api}
+				mobile={api.isMobile}
 				defaultAlign="start"
 				{size}
 				{density}
@@ -118,17 +134,16 @@
 				{collapseIcon}
 				{tooltips}
 				{size}
+				{activeVariant}
 				{density}
 				{theme}
 			/>
 		{/if}
-		{#if header}
-			{@render header(api)}
-		{/if}
 	</div>
 {/if}
 
-<div data-slot="sidebar-nav" data-sidebar="nav" class={classes.nav({ density })}>
+<!-- The activity bar is a second nav landmark, so this one needs its own name to tell them apart. -->
+<nav data-slot="sidebar-nav" data-sidebar="nav" aria-label={label} class={classes.nav({ density })}>
 	{#if content}
 		{@render content(api)}
 	{:else if items}
@@ -140,17 +155,27 @@
 					class={classes.separator({ density })}
 				></div>
 			{/if}
-			<SidebarGroupComponent {group} {api} {collapseIcon} {tooltips} {size} {density} {theme} />
+			<SidebarGroupComponent
+				{group}
+				{api}
+				{collapseIcon}
+				{tooltips}
+				{size}
+				{activeVariant}
+				{density}
+				{theme}
+			/>
 		{/each}
 	{/if}
-</div>
+</nav>
 
 {#if footerButton || footerMenu || footer}
 	<div data-slot="sidebar-footer" data-sidebar="footer" class={classes.footer({ density })}>
 		{#if footerButton}
 			<SidebarMenuButton
 				{...footerButton}
-				isMobile={api.isMobile}
+				{api}
+				mobile={api.isMobile}
 				defaultAlign="end"
 				{size}
 				{density}
@@ -164,6 +189,7 @@
 				{collapseIcon}
 				{tooltips}
 				{size}
+				{activeVariant}
 				{density}
 				{theme}
 			/>

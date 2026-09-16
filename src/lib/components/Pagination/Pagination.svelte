@@ -9,13 +9,16 @@
 	import { caretLeftIcon } from '../Icons/caretLeft.js';
 	import { caretRightIcon } from '../Icons/caretRight.js';
 	import { dotsThreeIcon } from '../Icons/dotsThree.js';
-	import { PaginationState } from './pagination.state.svelte.js';
+	import { PaginationState, warnMissingPageCountOnce } from './pagination.state.svelte.js';
 	import type {
 		PaginationControlType,
 		PaginationProps,
 		PaginationSummaryPayload
 	} from './pagination.props.js';
 	import { usePaginationTheme } from './pagination.theme.js';
+	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 
 	type NavigationControlType = Exclude<PaginationControlType, 'page'>;
 	type PaginationRenderItem =
@@ -39,7 +42,8 @@
 
 	let {
 		ref = $bindable(),
-		page = $bindable(1),
+		value = $bindable(),
+		defaultValue = 1,
 		totalPages,
 		totalItems,
 		pageSize,
@@ -49,14 +53,15 @@
 		showPrevNext = true,
 		showSummary = false,
 		disabled = false,
-		color = 'primary',
+		color,
 		size = 'normal',
 		variant = 'pages',
 		controlVariant = 'ghost',
-		ariaLabel = 'Pagination',
+		label,
+		i18n,
 		getHref,
-		getItemAriaLabel,
-		onPageChange,
+		getItemLabel,
+		onValueChange,
 		class: className,
 		theme,
 		first,
@@ -70,13 +75,23 @@
 		...attachments
 	}: PaginationProps = $props();
 
+	const valueState = createBindableValue(
+		() => value,
+		(next) => {
+			value = next;
+		},
+		() => defaultValue
+	);
+
 	const classes = $derived(usePaginationTheme(theme));
+	const resolvedColor = $derived(useDefaultColor(color));
+	const t = $derived(useI18n(i18n));
 	const pagination = new PaginationState({
 		get page() {
-			return page;
+			return valueState.value;
 		},
-		set page(value) {
-			page = value;
+		set page(nextPage) {
+			valueState.value = nextPage;
 		},
 		get totalPages() {
 			return totalPages;
@@ -99,13 +114,24 @@
 		get getHref() {
 			return getHref;
 		},
-		get getItemAriaLabel() {
-			return getItemAriaLabel;
+		get getItemLabel() {
+			return getItemLabel;
 		},
-		get onPageChange() {
-			return onPageChange;
+		get onValueChange() {
+			return onValueChange;
+		},
+		get messages() {
+			return t;
 		}
 	});
+
+	// Neither form given: warn once so the silently empty render is traceable.
+	$effect(() => {
+		if (totalPages === undefined && (totalItems === undefined || pageSize === undefined)) {
+			warnMissingPageCountOnce();
+		}
+	});
+
 	const firstIcon = caretDoubleLeftIcon.withProps({});
 	const previousIcon = caretLeftIcon.withProps({});
 	const nextIcon = caretRightIcon.withProps({});
@@ -191,9 +217,9 @@
 {#if pagination.hasPages}
 	<nav
 		bind:this={ref}
-		aria-label={ariaLabel}
+		aria-label={label ?? t.pagination}
 		data-slot="pagination"
-		data-color={color}
+		data-color={resolvedColor}
 		data-size={size}
 		data-variant={variant}
 		data-control-variant={controlVariant}
@@ -242,7 +268,7 @@
 								data-disabled={item.disabled}
 								class={classes.control({
 									size,
-									color,
+									color: resolvedColor,
 									controlVariant,
 									active: false,
 									disabled: item.disabled,
@@ -275,10 +301,15 @@
 								data-page={item.pageNumber}
 								data-display={item.display}
 								class={item.display === 'dot'
-									? classes.dot({ size, color, active: isActive, disabled: isDisabled })
+									? classes.dot({
+											size,
+											color: resolvedColor,
+											active: isActive,
+											disabled: isDisabled
+										})
 									: classes.control({
 											size,
-											color,
+											color: resolvedColor,
 											controlVariant,
 											active: isActive,
 											disabled: isDisabled

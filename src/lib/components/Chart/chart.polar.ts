@@ -20,8 +20,7 @@ import type { CompiledMark } from './chart.cartesian.js';
 import type {
 	ChartNumericScaleDefinition,
 	ChartPolarMark,
-	ChartScaleDefinition,
-	ChartValue
+	ChartScaleDefinition
 } from './chart.props.js';
 import { compileChartCurve, compileChartScale } from './chart.scale.js';
 

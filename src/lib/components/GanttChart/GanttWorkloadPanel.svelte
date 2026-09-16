@@ -18,9 +18,9 @@
 	import type { GanttResource, GanttWorkloadBucket } from './ganttChart.types.js';
 
 	const WORKLOAD_METRICS: Record<Density, Readonly<{ headerHeight: number; rowHeight: number }>> = {
-		small: { headerHeight: 24, rowHeight: 28 },
+		compact: { headerHeight: 24, rowHeight: 28 },
 		normal: { headerHeight: 28, rowHeight: 32 },
-		large: { headerHeight: 32, rowHeight: 40 }
+		comfortable: { headerHeight: 32, rowHeight: 40 }
 	};
 
 	let {
@@ -159,7 +159,7 @@
 	style:height={`${height}px`}
 >
 	<div
-		class="absolute top-0 overflow-hidden bg-surface"
+		class="bg-surface absolute top-0 overflow-hidden"
 		style:left={`${frameLeft}px`}
 		style:width={`${effectiveViewportWidth}px`}
 		style:height={`${height}px`}
@@ -169,7 +169,7 @@
 		aria-rowcount={resourceView.resources.length + 1}
 	>
 		<div
-			class="relative border-b border-neutral-muted bg-surface-raised/95 font-semibold text-neutral/70"
+			class="border-neutral-muted bg-surface-raised/95 text-neutral/70 relative border-b font-semibold"
 			style:height={`${headerHeight}px`}
 			role="row"
 		>
@@ -188,7 +188,7 @@
 				</div>
 			{/each}
 			<div
-				class="absolute inset-y-0 z-20 flex w-36 items-center border-e border-neutral-muted bg-surface-raised/95 px-2"
+				class="border-neutral-muted bg-surface-raised/95 absolute inset-y-0 z-20 flex w-36 items-center border-e px-2"
 				class:left-0={chart.direction === 'ltr'}
 				class:right-0={chart.direction === 'rtl'}
 				role="columnheader"
@@ -200,7 +200,7 @@
 			<ScrollArea
 				bind:viewportRef={verticalViewport}
 				class="h-full min-w-0"
-				ariaLabel={chart.messages.ganttChartWorkload}
+				label={chart.messages.ganttChartWorkload}
 				type="hover"
 			>
 				<div class="relative" style:height={`${totalRowsHeight}px`} role="rowgroup">
@@ -211,7 +211,7 @@
 								data-gantt-chart-part="workload-row"
 								data-resource-id={resource.id}
 								data-resource-depth={resourceView.depthByResourceId.get(resource.id) ?? 0}
-								class="absolute inset-x-0 border-b border-neutral-muted/55"
+								class="border-neutral-muted/55 absolute inset-x-0 border-b"
 								style:top={`${virtualRow.start}px`}
 								style:height={`${resourceRowHeight}px`}
 								role="row"
@@ -230,7 +230,7 @@
 									/>
 								{/each}
 								<div
-									class="absolute inset-y-0 z-20 flex w-36 items-center gap-1.5 border-e border-neutral-muted bg-surface/95 px-2"
+									class="border-neutral-muted bg-surface/95 absolute inset-y-0 z-20 flex w-36 items-center gap-1.5 border-e px-2"
 									class:left-0={chart.direction === 'ltr'}
 									class:right-0={chart.direction === 'rtl'}
 									style:padding-inline-start={`${8 + (resourceView.depthByResourceId.get(resource.id) ?? 0) * 14}px`}

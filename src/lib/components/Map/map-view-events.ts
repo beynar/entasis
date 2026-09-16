@@ -3,9 +3,9 @@ import type { MapViewChangeArg } from './map-types.js';
 import type { MapLibreMap } from './maplibre-types.js';
 
 type MapViewEventCallbacks = {
-	onViewChange?: (view: MapViewChangeArg) => void;
-	onMoveEnd?: (view: MapViewChangeArg) => void;
-	onZoomEnd?: (view: MapViewChangeArg) => void;
+	onViewChange?: (payload: MapViewChangeArg) => void;
+	onMoveEnd?: (payload: MapViewChangeArg) => void;
+	onZoomEnd?: (payload: MapViewChangeArg) => void;
 };
 
 function createAnimationFrameScheduler(callback: () => void) {

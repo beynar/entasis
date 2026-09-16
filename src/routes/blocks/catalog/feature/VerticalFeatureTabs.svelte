@@ -9,7 +9,9 @@
 	import { Stat } from 'svelai/stat';
 	import { Tabbar } from 'svelai/tabbar';
 	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	let active = $state(0);
+	const tabs = ['Plan the work', 'Follow progress', 'Bring people in'];
+	let active = $state(tabs[0]);
+	const activeIndex = $derived(Math.max(0, tabs.indexOf(active)));
 	const descriptions = [
 		'Make the next step visible without losing sight of the bigger outcome.',
 		'Keep the useful signals close, so the team knows when to stay the course and when to adjust.',
@@ -17,37 +19,33 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl flex flex-col">
 	<Heading as="h2" size="h2" weight="bold">The right view for the work ahead.</Heading>
-	<div class="grid gap-xl md:grid-cols-3">
-		<div class="flex flex-col gap-xl">
-			<Tabbar
-				items={['Plan the work', 'Follow progress', 'Bring people in']}
-				bind:value={active}
-				orientation="vertical"
-			/>
-			<p class="text-neutral/70">{descriptions[active]}</p>
+	<div class="gap-xl grid md:grid-cols-3">
+		<div class="gap-xl flex flex-col">
+			<Tabbar items={tabs} bind:value={active} orientation="vertical" />
+			<p class="text-neutral/70">{descriptions[activeIndex]}</p>
 			<Button href="/blocks" variant="link" class="self-start" suffix={arrowRightIcon}
 				>Explore the patterns</Button
 			>
 		</div>
 		<Card
-			class="md:col-span-2 min-h-80"
+			class="min-h-80 md:col-span-2"
 			variant="outline"
-			title={['Project plan', 'Sprint overview', 'The project team'][active]}
+			title={['Project plan', 'Sprint overview', 'The project team'][activeIndex]}
 			><Stack gap="lg"
-				>{#if active === 0}<div class="grid gap-md sm:grid-cols-3">
+				>{#if active === 'Plan the work'}<div class="gap-md grid sm:grid-cols-3">
 						{#each ['Explore', 'Make', 'Refine'] as column, index (column)}<div
-								class="flex flex-col gap-md rounded-lg bg-surface-recessed p-lg"
+								class="gap-md bg-surface-recessed p-lg flex flex-col rounded-lg"
 							>
 								<Chip size="small" variant="outline">{column}</Chip>
-								<p class="rounded-lg bg-surface p-md text-sm">
+								<p class="bg-surface p-md rounded-lg text-sm">
 									{['Interview five customers', 'Build the core workflow', 'Review the details'][
 										index
 									]}
 								</p>
 							</div>{/each}
-					</div>{:else if active === 1}<div class="grid gap-lg sm:grid-cols-2">
+					</div>{:else if active === 'Follow progress'}<div class="gap-lg grid sm:grid-cols-2">
 						<Stat label="Completed" value="18 / 24" trend="A steady week" variant="ghost" /><Stat
 							label="Next review"
 							value="Friday"
@@ -55,16 +53,16 @@
 							variant="ghost"
 						/>
 					</div>
-					<Meter label="Sprint complete" value={{ value: 75, color: 'success' }} />{:else}<div
-						class="flex flex-col gap-lg"
+					<Meter label="Sprint complete" value={75} color="success" />{:else}<div
+						class="gap-lg flex flex-col"
 					>
 						{#each [{ name: 'Maya Chen', role: 'Product design' }, { name: 'Theo Park', role: 'Engineering' }, { name: 'Nora Ellis', role: 'Research' }] as person (person.name)}<div
-								class="flex items-center gap-lg"
+								class="gap-lg flex items-center"
 							>
-								<Avatar user={person} />
+								<Avatar name={person.name} />
 								<div class="flex-1">
 									<strong>{person.name}</strong>
-									<p class="text-sm text-neutral/60">{person.role}</p>
+									<p class="text-neutral/70 text-sm">{person.role}</p>
 								</div>
 								<Chip size="small" variant="soft">Member</Chip>
 							</div>{/each}

@@ -9,12 +9,14 @@ export type SegmentedControlVariant = 'normal' | 'pill';
 export type SegmentedControlItem<Value extends string = string> = {
 	/** Unique value used by the bound selection. */
 	value: Value;
-	/** Visible label rendered after the optional icon. */
+	/**
+	 * Label rendered after the optional icon, and the segment's accessible name. A string is
+	 * painted and spoken; a snippet is painted and names the segment through its own content. An
+	 * icon-only segment (no `label`) falls back to `value` for its name.
+	 */
 	label?: Slot;
 	/** Optional leading icon snippet. */
 	icon?: Slot;
-	/** Accessible name, especially useful for icon-only items. Defaults to the string label or value. */
-	ariaLabel?: string;
 	/** Prevents this item from being selected or focused. */
 	disabled?: boolean;
 };
@@ -41,7 +43,7 @@ export type SegmentedControlProps<
 	/** Disables every segment. */
 	disabled?: boolean;
 	/** Accessible name for the radiogroup. */
-	ariaLabel?: string;
+	label?: string;
 	/** Additional classes on the root track. */
 	class?: string;
 	/** Theme overrides for the component parts. */

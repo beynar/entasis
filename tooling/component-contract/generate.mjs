@@ -347,6 +347,7 @@ function metadataOutput(entries) {
 
 function inventoryPageOutput() {
 	return `<script lang="ts">
+\timport { resolveLink } from '../appNavigation.js';
 \timport { componentInventory } from '$lib/generated/componentContract.js';
 
 \tconst publicEntries = componentInventory.filter((entry) => entry.visibility === 'public');
@@ -400,7 +401,7 @@ function inventoryPageOutput() {
 \t\t\t\t</div>
 \t\t\t\t<div class="flex flex-wrap justify-end gap-2">
 \t\t\t\t\t{#each entry.docs as doc (doc.id)}
-\t\t\t\t\t\t<a class="text-primary text-sm font-medium hover:underline" href={doc.route}>{doc.label}</a>
+\t\t\t\t\t\t<a class="text-primary text-sm font-medium hover:underline" href={resolveLink(doc.route)}>{doc.label}</a>
 \t\t\t\t\t{:else}
 \t\t\t\t\t\t<span class="text-neutral/40 text-sm">—</span>
 \t\t\t\t\t{/each}
@@ -446,7 +447,9 @@ function skillInventory(entries) {
 		)
 		.join('\n');
 
+	// Blank lines around the marker comments keep the block Prettier-stable.
 	return `<!-- component-contract:inventory:start -->
+
 ## Generated Package Inventory
 
 This section is generated from \`tooling/component-contract/manifest.ts\`.
@@ -456,6 +459,7 @@ ${categorySections}
 ### Utilities and entrypoints
 
 ${moduleSection}
+
 <!-- component-contract:inventory:end -->`;
 }
 
@@ -526,10 +530,18 @@ await emit(
 );
 await emit('src/routes/components/+page.svelte', inventoryPageOutput());
 
+// `.claude/skills/svelai` is the canonical skill tree; `.agents/skills/svelai` is a
+// generated mirror so both agent runtimes read identical docs.
 const inventory = skillInventory(entries);
-for (const skillPath of ['.agents/skills/svelai/SKILL.md', '.claude/skills/svelai/SKILL.md']) {
-	const skill = await read(skillPath);
-	await emit(skillPath, updateSkillInventory(skill, inventory));
+const canonicalSkillDir = '.claude/skills/svelai';
+const mirrorSkillDir = '.agents/skills/svelai';
+await emit(
+	`${canonicalSkillDir}/SKILL.md`,
+	updateSkillInventory(await read(`${canonicalSkillDir}/SKILL.md`), inventory)
+);
+for (const file of await fs.readdir(path.join(root, canonicalSkillDir))) {
+	if (!file.endsWith('.md')) continue;
+	await emit(`${mirrorSkillDir}/${file}`, await read(`${canonicalSkillDir}/${file}`));
 }
 
 if (isCheck && changedFiles.length > 0) {

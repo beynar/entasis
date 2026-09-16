@@ -55,38 +55,38 @@
 		type NetworkIndicatorAnimationState
 	} from './networkIndicator.animation.js';
 	import type { NetworkIndicatorProps } from './networkIndicator.props.js';
-	import { useNetworkIndicatorTheme } from './networkIndicator.theme.js';
+	import { useNetworkIndicatorMotion, useNetworkIndicatorTheme } from './networkIndicator.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
-		delay = 300,
 		class: className = '',
 		color = 'neutral',
 		height = 3,
-		easing = 'cubicInOut',
 		loading = false,
 		variant = 'bar',
 		trailGap = 0,
-		trailDuration = 650,
-		label = 'Loading',
+		label,
 		ref = $bindable(),
 		theme,
 		...attachments
 	}: NetworkIndicatorProps = $props();
+	const t = $derived(useI18n());
 
 	const animationState: NetworkIndicatorAnimationState = {
 		node: null
 	};
-	let root = $state<HTMLDivElement | null>(null);
 	let show = $state<boolean>(false);
 	let shouldRender = $state(false);
 
 	const classes = $derived(useNetworkIndicatorTheme(theme));
+	// Pacing from `networkIndicatorTheme.motion`, keyed by `variant`, through the
+	// override ladder (registry → `setNetworkIndicatorTheme` → instance `theme.motion`).
+	const resolveMotion = useNetworkIndicatorMotion();
+	const indicatorMotion = $derived(resolveMotion({ variant }, { motion: theme?.motion }).in);
+	const duration = $derived(indicatorMotion.duration ?? 0);
+	const easing = $derived(indicatorMotion.easing ?? 'cubicInOut');
 	const isActive = $derived(!!(navigating.from || show || loading));
 	const isTrailVariant = $derived(variant === 'trail' || variant === 'trail-bounce');
-
-	$effect(() => {
-		ref = root;
-	});
 
 	$effect(() => {
 		if (isActive) {
@@ -95,11 +95,11 @@
 	});
 
 	$effect(() => {
-		const node = root;
+		const node = ref;
 		if (!node || !shouldRender) return;
 		const signature = isTrailVariant
-			? `${variant}:${trailDuration}:${trailGap}`
-			: `bar:${delay}:${easing}`;
+			? `${variant}:${duration}:${trailGap}`
+			: `bar:${duration}:${easing}`;
 
 		if (isTrailVariant) {
 			const trailMode = variant === 'trail-bounce' ? 'trail-bounce' : 'trail';
@@ -116,7 +116,7 @@
 			) {
 				stopNetworkIndicatorAnimation(animationState);
 				animationState.stop = startTrailAnimation(animationState, node, {
-					trailDuration,
+					trailDuration: duration,
 					trailGap,
 					shouldBounce: trailMode === 'trail-bounce'
 				});
@@ -133,7 +133,7 @@
 				animationState.signature !== signature
 			) {
 				stopNetworkIndicatorAnimation(animationState);
-				animationState.stop = startBarLoopAnimation(animationState, node, { delay, easing });
+				animationState.stop = startBarLoopAnimation(animationState, node, { duration, easing });
 				animationState.mode = 'bar-loop';
 				animationState.node = node;
 				animationState.signature = signature;
@@ -142,7 +142,7 @@
 		}
 		if (animationState.mode !== 'bar-finish') {
 			animationState.stop = finishBarAnimation(animationState, node, {
-				delay,
+				duration,
 				easing,
 				onFinish: () => {
 					shouldRender = false;
@@ -173,12 +173,12 @@
 
 {#if shouldRender}
 	<div
-		bind:this={root}
+		bind:this={ref}
 		data-slot="network-indicator"
 		data-color={color}
 		data-loading={isActive}
 		role="progressbar"
-		aria-label={label}
+		aria-label={label ?? t.loading}
 		class={classes.root({ color, variant, className })}
 		style:height="{height}px"
 		style:opacity={!isTrailVariant ? '0' : undefined}

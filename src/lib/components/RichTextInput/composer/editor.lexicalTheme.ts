@@ -14,7 +14,7 @@ export const RICH_TEXT_INPUT_LEXICAL_THEME = {
 		ul: 'list-disc pl-layout-sm'
 	},
 	paragraph: 'm-0',
-	quote: 'border-neutral-muted text-neutral/60 border-l-2 pl-lg',
+	quote: 'border-neutral-muted text-neutral/70 border-l-2 pl-lg',
 	text: {
 		bold: 'font-semibold',
 		code: 'bg-surface-canvas rounded-sm px-xs py-micro font-mono text-[0.9em]',

@@ -4,7 +4,7 @@
 	import DocPage from '../../DocPage.svelte';
 	import { ContextMenu } from '$lib/components/ContextMenu/index.js';
 	import type { MenuItem } from '$lib/components/Menu/menu.props.js';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities } from '$lib/utils/tokens.js';
 	import { copyIcon } from '$lib/components/Icons/copy.js';
 	import { scissorsIcon } from '$lib/components/Icons/scissors.js';
 	import { clipboardIcon } from '$lib/components/Icons/clipboard.js';
@@ -21,7 +21,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
 	]);
@@ -77,7 +77,7 @@
 	features={[
 		'Anchors at the pointer via a floating-ui virtual element',
 		'Reuses Menu — options, separators, submenus',
-		'Full keyboard navigation and highlighting',
+		{ label: 'Full keyboard navigation and highlighting', test: 'a11y:menu.arrow-keys' },
 		'Flips near viewport edges, closes on outside click / Esc'
 	]}
 >
@@ -100,7 +100,7 @@
 			>
 				{@render target('Right-click anywhere in this area')}
 			</ContextMenu>
-			<p class="text-neutral/60 mt-3 text-center text-xs">
+			<p class="text-neutral/70 mt-3 text-center text-xs">
 				Last action: <span class="text-neutral font-medium">{lastAction}</span>
 			</p>
 		</div>
@@ -113,7 +113,7 @@
 			</ContextMenu>
 		</ComponentCard>
 
-		<ComponentCard description="Flush at the cursor with no offset (popup={{ offset: 0 }}).">
+		<ComponentCard description={'Flush at the cursor with no offset (popup={{ offset: 0 }}).'}>
 			<ContextMenu items={basicItems} class="w-full" popup={{ offset: 0 }}>
 				{@render target('Right-click — menu opens flush at the pointer')}
 			</ContextMenu>

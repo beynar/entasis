@@ -7,4 +7,3 @@ export {
 	type TableTheme,
 	type TableThemeProps
 } from './table.theme.js';
-

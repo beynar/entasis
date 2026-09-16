@@ -40,22 +40,22 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-lg md:p-xl">
-	<div class="flex flex-wrap items-end justify-between gap-lg">
+<section class="gap-xl p-lg md:p-xl flex flex-col">
+	<div class="gap-lg flex flex-wrap items-end justify-between">
 		<div class="max-w-xl">
 			<Heading as="h2" size="h2" weight="bold">Find your kind of conversation.</Heading>
 			<p class="mt-lg text-neutral/70">Start wherever your curiosity takes you.</p>
 		</div>
 		<Chip variant="outline">Open by design</Chip>
 	</div>
-	<div class="grid gap-lg sm:grid-cols-2 lg:grid-cols-4">
+	<div class="gap-lg grid sm:grid-cols-2 lg:grid-cols-4">
 		{#each channels as channel (channel.title)}<Card variant="outline"
-				><div class="flex min-h-60 flex-col items-start gap-lg">
-					<span class="text-primary">{@render channel.icon({ size: 30 })}</span><Heading
+				><div class="gap-lg flex min-h-60 flex-col items-start">
+					<span class="text-primary-readable">{@render channel.icon({ size: 30 })}</span><Heading
 						as="h3"
 						size="h4">{channel.title}</Heading
 					>
-					<p class="flex-1 text-sm text-neutral/70">{channel.description}</p>
+					<p class="text-neutral/70 flex-1 text-sm">{channel.description}</p>
 					<Button href={channel.href} variant="link" suffix={arrowUpRightIcon}
 						>{channel.action}</Button
 					>

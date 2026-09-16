@@ -13,11 +13,12 @@
 	import type { VideoPlayerState } from './videoPlayer.state.svelte.js';
 	import type { useVideoPlayerTheme } from './videoPlayer.theme.js';
 	import { formatVideoPlayerTime } from './videoPlayer.time.js';
-	import VideoPlayerIconButton from './VideoPlayerIconButton.svelte';
+	import MediaIconButton from '../MediaVolume/MediaIconButton.svelte';
 	import VideoPlayerSecondaryControls from './VideoPlayerSecondaryControls.svelte';
 	import VideoPlayerSettings from './VideoPlayerSettings.svelte';
 	import VideoPlayerTimelineSlider from './VideoPlayerTimelineSlider.svelte';
 	import VideoPlayerTime from './VideoPlayerTime.svelte';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type VideoPlayerClasses = ReturnType<typeof useVideoPlayerTheme>;
 
@@ -35,6 +36,7 @@
 		seekStep,
 		volumeStep,
 		disabled,
+		hasSource,
 		visible,
 		onOverlayOpenChange
 	}: {
@@ -51,9 +53,11 @@
 		seekStep: number;
 		volumeStep: number;
 		disabled: boolean;
+		hasSource: boolean;
 		visible: boolean;
 		onOverlayOpenChange: (open: boolean) => void;
 	} = $props();
+	const t = $derived(useI18n());
 
 	const controlSet = $derived(new Set(controls));
 	const canSeek = $derived(player.duration > 0 && Number.isFinite(player.duration));
@@ -64,6 +68,10 @@
 				? player.currentSrc || src || sources[0]?.src || ''
 				: ''
 	);
+
+	// A status panel (no source, error, loading) sits in the centre of the frame, exactly where the
+	// compact transport floats; while one shows there is nothing to transport, so the buttons yield.
+	const statusShown = $derived(!hasSource || !!player.error || player.isLoading);
 
 	function hasControl(control: VideoPlayerControl) {
 		return controlSet.has(control);
@@ -78,40 +86,40 @@
 >
 	<div class={classes.controlsBackdrop()}></div>
 
-	{#if hasControl('seekBackward') || hasControl('play') || hasControl('seekForward')}
-		<div data-slot="video-player-compact-transport">
+	{#if !statusShown && (hasControl('seekBackward') || hasControl('play') || hasControl('seekForward'))}
+		<div data-slot="video-player-compact-transport" class={classes.compactTransport()}>
 			{#if hasControl('seekBackward')}
-				<VideoPlayerIconButton
-					{classes}
+				<MediaIconButton
 					{size}
-					label={`Rewind ${seekStep} seconds`}
+					class={classes.controlButton({ size, className: '!size-8 !min-w-8 [&_svg]:!size-4' })}
+					label={t.mediaRewind(seekStep)}
 					icon={rewindIcon}
 					disabled={disabled || !canSeek}
-					class="!size-8 !min-w-8 [&_svg]:!size-4"
 					onPress={() => player.runInteraction(() => player.seekBy(-seekStep))}
 				/>
 			{/if}
 
 			{#if hasControl('play')}
-				<VideoPlayerIconButton
-					{classes}
+				<MediaIconButton
 					{size}
-					label={player.paused || player.ended ? 'Play' : 'Pause'}
+					class={classes.controlButton({
+						size,
+						className: '!size-10 !min-w-10 !rounded-full !bg-white/15 [&_svg]:!size-5'
+					})}
+					label={player.paused || player.ended ? t.play : t.pause}
 					icon={player.paused || player.ended ? playIcon : pauseIcon}
 					{disabled}
-					class="!size-10 !min-w-10 !rounded-full !bg-white/15 [&_svg]:!size-5"
 					onPress={() => player.runInteraction(() => player.togglePlay())}
 				/>
 			{/if}
 
 			{#if hasControl('seekForward')}
-				<VideoPlayerIconButton
-					{classes}
+				<MediaIconButton
 					{size}
-					label={`Forward ${seekStep} seconds`}
+					class={classes.controlButton({ size, className: '!size-8 !min-w-8 [&_svg]:!size-4' })}
+					label={t.mediaForward(seekStep)}
 					icon={fastForwardIcon}
 					disabled={disabled || !canSeek}
-					class="!size-8 !min-w-8 [&_svg]:!size-4"
 					onPress={() => player.runInteraction(() => player.seekBy(seekStep))}
 				/>
 			{/if}
@@ -123,7 +131,7 @@
 			<VideoPlayerTimelineSlider
 				{classes}
 				{size}
-				label="Seek"
+				label={t.seek}
 				value={player.currentTime}
 				min={0}
 				max={player.duration}
@@ -150,10 +158,10 @@
 
 			<div data-slot="video-player-control-center" class={classes.controlCenter({ size })}>
 				{#if hasControl('seekBackward')}
-					<VideoPlayerIconButton
-						{classes}
+					<MediaIconButton
 						{size}
-						label={`Rewind ${seekStep} seconds`}
+						class={classes.controlButton({ size })}
+						label={t.mediaRewind(seekStep)}
 						icon={rewindIcon}
 						disabled={disabled || !canSeek}
 						onPress={() => player.runInteraction(() => player.seekBy(-seekStep))}
@@ -161,10 +169,10 @@
 				{/if}
 
 				{#if hasControl('play')}
-					<VideoPlayerIconButton
-						{classes}
+					<MediaIconButton
 						{size}
-						label={player.paused || player.ended ? 'Play' : 'Pause'}
+						class={classes.controlButton({ size })}
+						label={player.paused || player.ended ? t.play : t.pause}
 						icon={player.paused || player.ended ? playIcon : pauseIcon}
 						{disabled}
 						onPress={() => player.runInteraction(() => player.togglePlay())}
@@ -172,10 +180,10 @@
 				{/if}
 
 				{#if hasControl('seekForward')}
-					<VideoPlayerIconButton
-						{classes}
+					<MediaIconButton
 						{size}
-						label={`Forward ${seekStep} seconds`}
+						class={classes.controlButton({ size })}
+						label={t.mediaForward(seekStep)}
 						icon={fastForwardIcon}
 						disabled={disabled || !canSeek}
 						onPress={() => player.runInteraction(() => player.seekBy(seekStep))}
@@ -184,7 +192,7 @@
 			</div>
 
 			<div data-slot="video-player-control-end" class={classes.controlEnd({ size })}>
-				<div data-slot="video-player-secondary-controls" class="contents">
+				<div data-slot="video-player-secondary-controls" class={classes.secondaryControls()}>
 					<VideoPlayerSecondaryControls
 						{player}
 						{classes}
@@ -201,7 +209,7 @@
 					/>
 				</div>
 
-				<div data-slot="video-player-compact-settings" class="hidden">
+				<div data-slot="video-player-compact-settings" class={classes.compactSettings()}>
 					<VideoPlayerSettings
 						{player}
 						{classes}

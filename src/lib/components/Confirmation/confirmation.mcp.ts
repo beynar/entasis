@@ -40,4 +40,6 @@ A Promise that resolves to:
 - The dialog is modal and prevents interaction with the rest of the page until the user responds
 - If \`onConfirm\` is provided, the confirm button shows a loading state while the function executes
 - The dialog cannot be closed by clicking outside or pressing Escape (user must click a button)
+- Requests made before any \`<Confirmation />\` is mounted are queued and served by the first one that mounts
+- With several mounted, the most recently mounted one serves; when it unmounts the previous one takes over again
 `;

@@ -7,13 +7,6 @@ import { svelaiPropsDocs } from './tooling/props-docs/plugin.js';
 import { svelaiStructureDocs } from './tooling/structure-docs/plugin.js';
 
 export default defineConfig({
-	optimizeDeps: {
-		include: [
-			'@modelcontextprotocol/ext-apps',
-			'@modelcontextprotocol/ext-apps/app-bridge',
-			'@modelcontextprotocol/ext-apps/server'
-		]
-	},
 	plugins: [
 		font({
 			autoDetect: false,

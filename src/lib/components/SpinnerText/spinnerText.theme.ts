@@ -4,6 +4,7 @@ import {
 	useComponentTheme,
 	type InferComponentTheme
 } from '$lib/utils/cva/index.js';
+import { motion, useComponentMotion } from '$lib/utils/motion/index.js';
 
 const defaultRoot = cva({
 	base: 'inline-flex min-w-0 items-center align-middle',
@@ -29,6 +30,8 @@ const defaultRoot = cva({
 	}
 });
 
+// `--spinner-size` is INTERNAL — Spinner's own property, set here so the inline indicator
+// tracks the text size. Consumers change `size`, not the property.
 const defaultSpinner = cva({
 	base: 'inline-flex shrink-0 items-center justify-center',
 	variants: {
@@ -78,7 +81,29 @@ const defaultMessage = cva({
 	}
 });
 
+// Text swaps are slower than a normal enter/exit so the eye can follow the word: the
+// vertical slide runs on `slow`, the longer wipe on `slower`. Only `duration` /
+// `easing` are read — the geometry lives in `spinnerText.transition.ts`.
+export const defaultSpinnerTextMotion = motion({
+	base: {
+		in: {},
+		out: {},
+		duration: 'slow',
+		easing: 'standard'
+	},
+	variants: {
+		mode: {
+			vertical: {},
+			reveal: { duration: 'slower' }
+		}
+	},
+	defaultVariants: {
+		mode: 'vertical'
+	}
+});
+
 export const spinnerTextTheme = {
+	motion: defaultSpinnerTextMotion,
 	root: defaultRoot,
 	spinner: defaultSpinner,
 	viewport: defaultViewport,
@@ -94,3 +119,5 @@ export const useSpinnerTextTheme = useComponentTheme<SpinnerTextTheme>(
 	'spinnerText',
 	spinnerTextTheme
 );
+export const useSpinnerTextMotion = () =>
+	useComponentMotion('spinnerText', defaultSpinnerTextMotion);

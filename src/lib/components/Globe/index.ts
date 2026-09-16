@@ -1,10 +1,5 @@
 export { default as Globe } from './Globe.svelte';
-export type {
-	GlobeProps,
-	GlobeColor,
-	GlobeMarker,
-	GlobeScrollTo
-} from './globe.props.js';
+export type { GlobeProps, GlobeColor, GlobeMarker, GlobeScrollTo } from './globe.props.js';
 export {
 	globeTheme,
 	setGlobeTheme,

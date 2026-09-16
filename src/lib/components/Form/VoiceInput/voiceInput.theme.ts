@@ -25,12 +25,12 @@ const defaultRoot = cva({
 });
 
 const defaultInputContainer = cva({
-	base: 'relative ml-auto flex w-full min-w-0 items-center overflow-hidden rounded-md border border-neutral-muted bg-surface-raised px-lg transition-[max-width,background-color,border-color,box-shadow] duration-300 ease-out motion-reduce:transition-none focus-within:border-color/60 focus-within:ring-2 focus-within:ring-color/25',
+	base: 'relative ml-auto flex w-full min-w-0 items-center overflow-hidden rounded-md border border-neutral-muted bg-surface-raised px-lg transition-[max-width,background-color,border-color,box-shadow] duration-slow ease-standard motion-reduce:transition-none focus-within:border-color/60 focus-within:ring-2 focus-within:ring-focus/50',
 	variants: {
 		size: {
-			small: 'min-h-9 gap-sm py-sm',
-			normal: 'min-h-11 gap-md py-sm',
-			large: 'min-h-12 gap-md py-md'
+			small: 'min-h-row-sm gap-sm py-sm',
+			normal: 'min-h-row-md gap-md py-sm',
+			large: 'min-h-row-lg gap-md py-md'
 		},
 		recording: {
 			true: 'border-color/50',
@@ -41,7 +41,7 @@ const defaultInputContainer = cva({
 			false: null
 		},
 		error: {
-			true: 'border-danger focus-within:border-danger focus-within:ring-danger/25',
+			true: 'border-danger focus-within:border-danger focus-within:ring-danger/50',
 			false: null
 		},
 		disabled: {
@@ -137,7 +137,7 @@ const defaultInputContainer = cva({
 });
 
 const defaultContent = cva({
-	base: 'flex min-w-0 flex-1 items-center overflow-hidden transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none',
+	base: 'flex min-w-0 flex-1 items-center overflow-hidden transition-[opacity,transform] duration-normal ease-standard motion-reduce:transition-none',
 	variants: {
 		size: {
 			small: 'gap-sm',
@@ -184,7 +184,7 @@ const defaultAction = cva({
 			default: null,
 			expandable: null,
 			compact:
-				'relative isolate !m-0 !self-auto !rounded-full !overflow-visible before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-full before:border before:border-color/55 before:[opacity:calc(var(--voice-input-level)*0.7)] before:[transform:scale(calc(1+var(--voice-input-level)*0.55))] before:transition-[transform,opacity] before:duration-100 before:ease-out before:content-[""] after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-full after:border after:border-color/30 after:[opacity:calc(var(--voice-input-level)*0.45)] after:[transform:scale(calc(1+var(--voice-input-level)*1.05))] after:transition-[transform,opacity] after:duration-150 after:ease-out after:content-[""] motion-reduce:before:transition-none motion-reduce:after:transition-none'
+				'relative isolate !m-0 !self-auto !rounded-full !overflow-visible before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-full before:border before:border-color/55 before:[opacity:calc(var(--voice-input-level)*0.7)] before:[transform:scale(calc(1+var(--voice-input-level)*0.55))] before:transition-[transform,opacity] before:duration-fast before:ease-standard before:content-[""] after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-full after:border after:border-color/30 after:[opacity:calc(var(--voice-input-level)*0.45)] after:[transform:scale(calc(1+var(--voice-input-level)*1.05))] after:transition-[transform,opacity] after:duration-normal after:ease-standard after:content-[""] motion-reduce:before:transition-none motion-reduce:after:transition-none'
 		},
 		recording: {
 			true: null,
@@ -195,7 +195,7 @@ const defaultAction = cva({
 		{
 			variant: 'compact',
 			recording: true,
-			class: '!border-color !bg-color !text-color-contrast shadow-sm'
+			class: '!border-color !bg-color !text-color-contrast lift-1'
 		},
 		{ variant: 'compact', size: 'small', class: '!size-8' },
 		{ variant: 'compact', size: 'normal', class: '!size-9' },
@@ -270,7 +270,7 @@ const defaultWaveformContainer = cva({
 			large: null
 		},
 		interactive: {
-			true: 'cursor-pointer has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-color/60',
+			true: 'cursor-pointer has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-focus/50',
 			false: null
 		},
 		hidden: {
@@ -286,7 +286,7 @@ const defaultWaveformContainer = cva({
 });
 
 const defaultWaveform = cva({
-	base: 'block w-full min-w-0 text-neutral/60 transition-colors',
+	base: 'block w-full min-w-0 text-neutral/70 transition-colors',
 	variants: {
 		size: {
 			small: 'h-6',
@@ -314,7 +314,7 @@ const defaultWaveformInput = cva({
 });
 
 const defaultTimer = cva({
-	base: 'shrink-0 text-right font-medium tabular-nums text-neutral/60',
+	base: 'shrink-0 text-right font-medium tabular-nums text-neutral/70',
 	variants: {
 		size: {
 			small: 'min-w-8 text-xs',

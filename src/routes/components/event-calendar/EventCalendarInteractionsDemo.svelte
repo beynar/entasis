@@ -95,9 +95,9 @@
 		</div>
 	</div>
 	<div class="flex flex-wrap items-center gap-2 text-sm">
-		<span class="text-neutral/60">Drag into the calendar:</span>
+		<span class="text-neutral/70">Drag into the calendar:</span>
 		<div
-			class="cursor-grab rounded-md border border-info/30 bg-info/10 px-2.5 py-1.5 font-medium text-info active:cursor-grabbing"
+			class="border-info/30 bg-info/10 text-info cursor-grab rounded-md border px-2.5 py-1.5 font-medium active:cursor-grabbing"
 			{@attach externalEvent(createExternalItem)}
 		>
 			External focus block
@@ -118,7 +118,7 @@
 		allowOverlap={false}
 		{validateItemUpdate}
 		onItemsChange={handleItemsChange}
-		onSlotSelect={handleSlotSelect}
+		onSelect={handleSlotSelect}
 		class="h-[34rem] w-full"
 	/>
 </div>

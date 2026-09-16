@@ -4,6 +4,7 @@ import {
 	$isParagraphNode,
 	$isTextNode,
 	$nodesOfType,
+	SKIP_DOM_SELECTION_TAG,
 	type LexicalNode,
 	type LexicalEditor,
 	type EditorUpdateOptions
@@ -21,14 +22,27 @@ export function loadComposerMarkdown(
 	formats?: readonly RichTextInputFormat[],
 	options?: EditorUpdateOptions
 ) {
-	editor.update(() => {
-		const root = $getRoot();
-		root.clear();
-		$convertFromMarkdownString(markdown, getAIComposerMarkdownTransformers(formats), root, true);
-		const selection = root.selectEnd();
-		selection.setFormat(0);
-		selection.setStyle('');
-	}, options);
+	// `selectEnd()` dirties the selection, and Lexical then writes it into the DOM — which
+	// focuses the contenteditable and scrolls it into view. That is right while the user is
+	// typing, but seeding an unfocused editor (mount, external `value` change) must stay
+	// inert: a page with several composers would otherwise jump to the last one on load.
+	const rootElement = editor.getRootElement();
+	const hasFocus =
+		typeof document !== 'undefined' &&
+		rootElement !== null &&
+		rootElement.contains(document.activeElement);
+	const tags = [options?.tag ?? []].flat();
+	editor.update(
+		() => {
+			const root = $getRoot();
+			root.clear();
+			$convertFromMarkdownString(markdown, getAIComposerMarkdownTransformers(formats), root, true);
+			const selection = root.selectEnd();
+			selection.setFormat(0);
+			selection.setStyle('');
+		},
+		{ ...options, tag: hasFocus ? tags : [...tags, SKIP_DOM_SELECTION_TAG] }
+	);
 }
 
 function isBlankParagraph(node: LexicalNode) {

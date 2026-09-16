@@ -12,23 +12,21 @@
 </script>
 
 <Theme>
-	{#snippet children()}
-		<Dialog
-			{defaultOpen}
-			{onOpenChange}
-			{onAfterOpen}
-			{onAfterClose}
-			responsive={false}
-			transition={{ in: { duration: 0 }, out: { duration: 0 } }}
-			title="Disclosure law"
-		>
-			{#snippet trigger(dialog)}
-				<button type="button" onclick={dialog.open}>Open law dialog</button>
-			{/snippet}
+	<Dialog
+		{defaultOpen}
+		{onOpenChange}
+		{onAfterOpen}
+		{onAfterClose}
+		responsive={false}
+		transition={{ in: { duration: 0 }, out: { duration: 0 } }}
+		title="Disclosure law"
+	>
+		{#snippet trigger(dialog)}
+			<button type="button" onclick={dialog.open}>Open law dialog</button>
+		{/snippet}
 
-			{#snippet children(dialog)}
-				<button type="button" onclick={dialog.close}>Close law dialog</button>
-			{/snippet}
-		</Dialog>
-	{/snippet}
+		{#snippet children(dialog)}
+			<button type="button" onclick={dialog.close}>Close law dialog</button>
+		{/snippet}
+	</Dialog>
 </Theme>

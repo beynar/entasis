@@ -36,7 +36,7 @@ const defaultMeterContainer = cva({
 });
 
 const defaultMeterLabel = cva({
-	base: 'text-sm text-neutral/60',
+	base: 'text-sm text-neutral/70',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -47,7 +47,7 @@ const defaultMeterLabel = cva({
 });
 
 const defaultMeterHelper = cva({
-	base: 'text-sm text-neutral/60',
+	base: 'text-sm text-neutral/70',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -58,7 +58,7 @@ const defaultMeterHelper = cva({
 });
 
 const defaultMeterDescription = cva({
-	base: 'text-neutral/60 text-sm',
+	base: 'text-neutral/70 text-sm',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -125,7 +125,7 @@ const defaultMeterLegend = cva({
 });
 
 const defaultMeterLegendItem = cva({
-	base: 'flex items-center gap-md [&[data-color="danger"]_*]:text-danger-readable [&[data-color="warning"]_*]:text-warning-readable [&[data-color="success"]_*]:text-success-readable [&[data-color="info"]_*]:text-info-readable',
+	base: 'flex items-center gap-md [&_*]:text-color-readable',
 	variants: {
 		size: {
 			small: 'gap-sm',
@@ -147,7 +147,7 @@ const defaultMeterLegendIcon = cva({
 });
 
 const defaultMeterLegendLabel = cva({
-	base: 'text-neutral/60',
+	base: 'text-neutral/70',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -158,7 +158,7 @@ const defaultMeterLegendLabel = cva({
 });
 
 const defaultMeterLegendPercentage = cva({
-	base: 'text-neutral/60 font-medium',
+	base: 'text-neutral/70 font-medium',
 	variants: {
 		size: {
 			small: 'text-xs',

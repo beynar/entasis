@@ -58,7 +58,7 @@
 	subtitle="Numeric selection with single-thumb, range, multi-thumb, vertical, and draggable range modes."
 	component="Slider"
 	features={[
-		'ARIA slider thumbs',
+		{ label: 'ARIA slider thumbs', test: 'a11y:slider.thumbs' },
 		'Scalar or range values',
 		'Default, thick, and contained variants',
 		'Vertical orientation',

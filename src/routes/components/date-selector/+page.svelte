@@ -8,7 +8,7 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 
 	const day = (offset: number) => new Date(2026, 6, 15 + offset, 12);
 	const formatDate = (date: Date | null) =>
@@ -48,7 +48,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -78,7 +78,7 @@
 		'Configurable close on selection',
 		'Animated intrinsic height',
 		'Direction-aware month transitions',
-		'Keyboard calendar navigation',
+		{ label: 'Keyboard calendar navigation', test: 'a11y:calendar.roving-focus' },
 		'Optional mobile bottom sheet'
 	]}
 >
@@ -134,7 +134,7 @@
 						</Button>
 					{/snippet}
 				</DateSelector>
-				<p class="text-neutral/60 text-xs">Selected: {formatDate(selectedDate)}</p>
+				<p class="text-neutral/70 text-xs">Selected: {formatDate(selectedDate)}</p>
 			</div>
 		</ComponentCard>
 
@@ -145,7 +145,7 @@
 		>
 			<div class="flex flex-col items-center gap-3">
 				<DateSelector mode="range" bind:value={selectedRange} presets={rangePresets} />
-				<p class="text-neutral/60 text-xs">
+				<p class="text-neutral/70 text-xs">
 					{selectedRange?.[0]?.toLocaleDateString() ?? 'Start'} -
 					{selectedRange?.[1]?.toLocaleDateString() ?? 'End'}
 				</p>
@@ -159,7 +159,7 @@
 		>
 			<div class="flex flex-col items-center gap-3">
 				<DateSelector mode="multiple" bind:value={selectedDates} presets={multiplePresets} />
-				<p class="text-neutral/60 text-xs">
+				<p class="text-neutral/70 text-xs">
 					{selectedDates.length}
 					{selectedDates.length === 1 ? 'date' : 'dates'} selected
 				</p>
@@ -169,7 +169,7 @@
 		<ComponentCard
 			title="Close after selection"
 			description="Opt into dismissal after a date, complete range, preset, or multiple-date change."
-			code={`<DateSelector bind:value closeOnSelect />`}
+			code="<DateSelector bind:value closeOnSelect />"
 		>
 			<DateSelector bind:value={closingDate} closeOnSelect />
 		</ComponentCard>
@@ -195,7 +195,7 @@
 		<ComponentCard
 			title="Two months and mobile sheet"
 			description="The same primitive can show adjacent months and adopt Popover's mobile sheet rendering."
-			code={`<DateSelector bind:value view="double" mobileSheet />`}
+			code="<DateSelector bind:value view=&quot;double&quot; mobileSheet />"
 		>
 			<DateSelector bind:value={selectedDate} view="double" mobileSheet />
 		</ComponentCard>

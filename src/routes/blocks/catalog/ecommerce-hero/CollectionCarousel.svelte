@@ -26,7 +26,7 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
@@ -34,22 +34,22 @@
 	{/snippet}
 	<Carousel
 		items={collections}
-		layout={{ default: 1 }}
-		dots={{ color: 'primary' }}
+		layout={1}
+		pagination={{ variant: 'dots', color: 'primary' }}
 		navigationButton={{ color: 'neutral' }}
 		>{#snippet children({ item: collection, index })}<div
-				class="grid overflow-hidden rounded-lg bg-primary-muted md:grid-cols-[1.1fr_1fr]"
+				class="bg-primary-muted grid overflow-hidden rounded-lg md:grid-cols-[1.1fr_1fr]"
 			>
-				<div class="flex flex-col gap-xl justify-center p-xl">
-					<div class="flex gap-lg">
+				<div class="gap-xl p-xl flex flex-col justify-center">
+					<div class="gap-lg flex">
 						<Chip size="small" variant="soft">Collection 0{index + 1}</Chip><span
-							class="text-xs uppercase tracking-widest text-neutral/50">Field objects</span
+							class="text-neutral/65 text-xs tracking-widest uppercase">Field objects</span
 						>
 					</div>
 					<Heading size="h2" weight="normal">{collection.title}</Heading>
-					<p class="max-w-md text-lg text-neutral/65">{collection.description}</p>
+					<p class="text-neutral/65 max-w-md text-lg">{collection.description}</p>
 					<Button href="/components" class="self-start">Shop the collection ↗</Button>
-					<p class="text-xs text-neutral/50">Considered design. Everyday purpose.</p>
+					<p class="text-neutral/65 text-xs">Considered design. Everyday purpose.</p>
 				</div>
 				<div class="p-xl">{@render productArt(collection.shape, collection.color)}</div>
 			</div>{/snippet}</Carousel

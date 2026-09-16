@@ -50,15 +50,17 @@
 	let open = $state(false);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="flex gap-xl items-center justify-between flex-wrap">
-		<header class="flex flex-col gap-lg">
-			<p class="text-xs font-semibold uppercase tracking-widest text-primary">Field objects</p>
+	<div class="gap-xl flex flex-wrap items-center justify-between">
+		<header class="gap-lg flex flex-col">
+			<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+				Field objects
+			</p>
 			<Heading size="h2" weight="bold">Good things, collected.</Heading>
 		</header>
 		<Button variant="outline" onclick={() => (open = true)}>Open bag ({count})</Button>
@@ -68,17 +70,17 @@
 		bind:open
 		title={`Your bag (${count})`}
 		description="A few useful things for everyday."
-		><div class="flex flex-col gap-xl">
+		><div class="gap-xl flex flex-col">
 			{#each cart as product (product.id)}<article
-					class="grid grid-cols-[6rem_1fr] gap-lg rounded-lg border border-neutral/15 p-lg"
+					class="gap-lg border-neutral/15 p-lg grid grid-cols-[6rem_1fr] rounded-lg border"
 				>
 					<div>{@render productArt(product.shape, product.color)}</div>
-					<div class="flex flex-col gap-md">
-						<div class="flex gap-md justify-between">
+					<div class="gap-md flex flex-col">
+						<div class="gap-md flex justify-between">
 							<h3 class="text-sm font-semibold">{product.name}</h3>
 							<span class="text-sm">{money(product.price * product.quantity)}</span>
 						</div>
-						<p class="text-xs text-neutral/50">{product.color}</p>
+						<p class="text-neutral/65 text-xs">{product.color}</p>
 						<NumberInput
 							size="small"
 							label="Quantity"
@@ -100,7 +102,7 @@
 					title="Your bag is empty"
 					actions={[{ content: 'Restore sample bag', onclick: restore }]}
 				/>{/each}{#if cart.length}<div
-					class="flex justify-between border-t border-neutral/15 pt-xl text-lg font-semibold"
+					class="border-neutral/15 pt-xl flex justify-between border-t text-lg font-semibold"
 				>
 					<span>Subtotal</span><span>{money(subtotal)}</span>
 				</div>
@@ -112,13 +114,13 @@
 		bind:open={review}
 		title="Your bag, ready to review"
 		description="This is a local checkout preview. No order has been placed."
-		><div class="flex flex-col gap-xl">
-			{#each cart as product (product.id)}<div class="flex gap-lg justify-between text-sm">
+		><div class="gap-xl flex flex-col">
+			{#each cart as product (product.id)}<div class="gap-lg flex justify-between text-sm">
 					<span>{product.name} × {product.quantity}</span><span
 						>{money(product.price * product.quantity)}</span
 					>
 				</div>{/each}
-			<div class="flex justify-between border-t border-neutral/15 pt-lg font-semibold">
+			<div class="border-neutral/15 pt-lg flex justify-between border-t font-semibold">
 				<span>Estimated total</span><span>{money(subtotal + shipping)}</span>
 			</div>
 			<Button variant="outline" onclick={() => (review = false)}>Continue editing bag</Button>

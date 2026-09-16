@@ -71,8 +71,8 @@
 			]
 		}
 	]}
-	>{#snippet children(sidebar)}<Stack as="main" gap="lg" class="min-w-0 p-md sm:p-xl">
-			<div class="flex items-center gap-md">
+	>{#snippet children(sidebar)}<Stack as="main" gap="lg" class="p-md sm:p-xl min-w-0">
+			<div class="gap-md flex items-center">
 				<Button
 					label="Toggle file explorer"
 					prefix={sidebarIcon}
@@ -82,15 +82,15 @@
 			</div>
 			<Card title={file} description="Selected project file"
 				><Stack gap="lg">
-					<p class="text-sm text-neutral/65">
+					<p class="text-neutral/65 text-sm">
 						{descriptions[file] ?? 'A reusable interface component used by the website.'}
 					</p>
-					<div class="rounded-lg bg-surface-recessed p-lg font-mono text-sm leading-loose">
+					<div class="bg-surface-recessed p-lg rounded-lg font-mono text-sm leading-loose">
 						{#each contents[file] ?? ['Reusable component', 'Available in the component library'] as line, index (index)}<Stack
 								orientation="horizontal"
 								gap="lg"
 							>
-								<span class="text-neutral/40">{index + 1}</span><span class="whitespace-pre-wrap"
+								<span class="text-neutral/65">{index + 1}</span><span class="whitespace-pre-wrap"
 									>{line}</span
 								>
 							</Stack>{/each}

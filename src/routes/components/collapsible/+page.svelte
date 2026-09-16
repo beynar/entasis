@@ -45,9 +45,9 @@
 	features={[
 		'default & peek variants',
 		'bind:open — controlled or uncontrolled',
-		'caret / chevron / math or a custom icon',
+		'chevron / plus-minus / none or a custom icon',
 		'Slide transition, three sizes',
-		'aria-expanded / aria-controls, onOpenChange'
+		{ label: 'aria-expanded / aria-controls, onOpenChange', test: 'a11y:collapsible.aria-expanded' }
 	]}
 >
 	<ComponentCard
@@ -103,7 +103,7 @@
 					{#snippet trigger()}
 						<span>{peekOpen ? 'Show less' : 'Read more'}</span>
 					{/snippet}
-					<div class="text-neutral/60 flex flex-col gap-3 text-sm leading-relaxed">
+					<div class="text-neutral/70 flex flex-col gap-3 text-sm leading-relaxed">
 						<p>
 							By using this service you agree to be bound by the following terms. These terms govern
 							your access to and use of the product, including any content, functionality and
@@ -131,7 +131,7 @@
 	{#snippet trigger()}
 		<div class="flex flex-col items-start">
 			<span class="font-medium">Can I change my plan later?</span>
-			<span class="text-neutral/60 text-sm">Tap to read the answer</span>
+			<span class="text-neutral/70 text-sm">Tap to read the answer</span>
 		</div>
 	{/snippet}
 	<p>Yes — upgrade or downgrade at any time from billing settings.</p>
@@ -144,10 +144,10 @@
 					{#snippet trigger()}
 						<div class="flex flex-col items-start">
 							<span class="text-neutral font-medium">Can I change my plan later?</span>
-							<span class="text-neutral/60 text-sm">Tap to read the answer</span>
+							<span class="text-neutral/70 text-sm">Tap to read the answer</span>
 						</div>
 					{/snippet}
-					<p class="text-neutral/60 text-sm">
+					<p class="text-neutral/70 text-sm">
 						Yes — upgrade or downgrade at any time from your billing settings. Changes are prorated
 						to the day.
 					</p>
@@ -156,10 +156,10 @@
 					{#snippet trigger()}
 						<div class="flex flex-col items-start">
 							<span class="text-neutral font-medium">Do you offer refunds?</span>
-							<span class="text-neutral/60 text-sm">Tap to read the answer</span>
+							<span class="text-neutral/70 text-sm">Tap to read the answer</span>
 						</div>
 					{/snippet}
-					<p class="text-neutral/60 text-sm">
+					<p class="text-neutral/70 text-sm">
 						We offer a 30-day money-back guarantee, no questions asked.
 					</p>
 				</Collapsible>
@@ -177,11 +177,11 @@
 			<div class="flex w-[360px] flex-col gap-3">
 				{#each sizes as size (size)}
 					<div class="border-neutral-muted bg-surface rounded-xl border px-2 shadow-sm">
-						<Collapsible {size} icon="caret">
+						<Collapsible {size} icon="chevron">
 							{#snippet trigger()}
 								<span class="text-neutral capitalize">{size}</span>
 							{/snippet}
-							<p class="text-neutral/60 text-sm">This is a {size} collapsible.</p>
+							<p class="text-neutral/70 text-sm">This is a {size} collapsible.</p>
 						</Collapsible>
 					</div>
 				{/each}
@@ -194,18 +194,18 @@
 			class="!min-h-fit !justify-center"
 			code={`<script>
 	let open = $state(false);
-<\/script>
+</scr${'ipt'}>
 
 <Collapsible bind:open>…</Collapsible>
 <Button onclick={() => (open = !open)}>Toggle from outside</Button>`}
 		>
 			<div class="flex w-[360px] flex-col gap-4">
 				<div class="border-neutral-muted bg-surface rounded-xl border px-2 shadow-sm">
-					<Collapsible bind:open={controlledOpen} icon="math">
+					<Collapsible bind:open={controlledOpen} icon="plus-minus">
 						{#snippet trigger()}
 							<span class="text-neutral">Status: {controlledOpen ? 'Open' : 'Closed'}</span>
 						{/snippet}
-						<p class="text-neutral/60 text-sm">This panel's state lives in the parent.</p>
+						<p class="text-neutral/70 text-sm">This panel's state lives in the parent.</p>
 					</Collapsible>
 				</div>
 				<Button variant="soft" color="primary" onclick={() => (controlledOpen = !controlledOpen)}>
@@ -218,14 +218,14 @@
 			title="Disabled"
 			description="A disabled collapsible can't be toggled and dims its trigger."
 			class="!min-h-fit !justify-center"
-			code={`<Collapsible disabled icon="caret">…</Collapsible>`}
+			code="<Collapsible disabled icon=&quot;chevron&quot;>…</Collapsible>"
 		>
 			<div class="border-neutral-muted bg-surface w-[360px] rounded-xl border px-2 shadow-sm">
-				<Collapsible disabled icon="caret">
+				<Collapsible disabled icon="chevron">
 					{#snippet trigger()}
 						<span class="text-neutral">Disabled section</span>
 					{/snippet}
-					<p class="text-neutral/60 text-sm">You won't see this.</p>
+					<p class="text-neutral/70 text-sm">You won't see this.</p>
 				</Collapsible>
 			</div>
 		</ComponentCard>

@@ -24,9 +24,7 @@ export function normalizeMapBounds(bounds: MapBounds): MapLibreBounds {
 	return [west, south, east, north];
 }
 
-function isNestedMapBounds(
-	bounds: MapBounds
-): bounds is [[number, number], [number, number]] {
+function isNestedMapBounds(bounds: MapBounds): bounds is [[number, number], [number, number]] {
 	return Array.isArray(bounds[0]);
 }
 
@@ -60,7 +58,11 @@ export function mapBoundsEqual(
 	currentBounds: MapLibreBounds | undefined,
 	nextBounds: MapLibreBounds | null | undefined
 ): boolean {
-	return !!currentBounds && !!nextBounds && currentBounds.every((value, index) => value === nextBounds[index]);
+	return (
+		!!currentBounds &&
+		!!nextBounds &&
+		currentBounds.every((value, index) => value === nextBounds[index])
+	);
 }
 
 function expandMapBounds(bounds: MapLibreBounds): MapLibreBounds {

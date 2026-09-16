@@ -72,7 +72,7 @@
 				view: 'resource',
 				disabled,
 				class:
-					'border-e border-b border-neutral-muted px-2 py-1.5 text-center outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-color/60'
+					'border-neutral-muted focus-visible:ring-focus/50 border-e border-b px-2 py-1.5 text-center outline-none focus-visible:ring-2 focus-visible:ring-inset'
 			})}
 			style:grid-column={`${cell.columnStart + 2} / span ${cell.columnSpan}`}
 			style:grid-row={`${cell.depth + 1} / span ${cell.rowSpan}`}
@@ -95,7 +95,7 @@
 				density,
 				view: 'resource',
 				disabled,
-				class: 'border-e border-b border-neutral-muted px-2 py-1 text-center'
+				class: 'border-neutral-muted border-e border-b px-2 py-1 text-center'
 			})}
 			style:grid-column={`${cell.columnStart + 2} / span ${cell.columnSpan}`}
 			style:grid-row={`${cell.depth + 1} / span ${cell.rowSpan}`}

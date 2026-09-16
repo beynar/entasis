@@ -68,7 +68,7 @@
 	<div class="flex min-w-0 items-center gap-1.5">
 		{@render payload.renderDefault()}
 		{#if payload.filtered}
-			<span class="size-1.5 shrink-0 rounded-full bg-primary" aria-label="Filter active"></span>
+			<span class="bg-primary size-1.5 shrink-0 rounded-full" aria-label="Filter active"></span>
 		{/if}
 	</div>
 {/snippet}

@@ -43,22 +43,22 @@
 	];
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<div class="grid gap-xl md:grid-cols-3">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<div class="gap-xl grid md:grid-cols-3">
 		<Stack as="aside" gap="lg">
-			<Avatar user={{ name: 'Alex Morgan' }} size="large" />
+			<Avatar name="Alex Morgan" size="large" />
 			<div>
 				<h2 class="text-3xl font-semibold">Alex Morgan</h2>
-				<p class="mt-sm text-sm text-primary-readable">Product designer</p>
+				<p class="mt-sm text-primary-readable text-sm">Product designer</p>
 			</div>
-			<p class="text-sm text-neutral/65">
+			<p class="text-neutral/65 text-sm">
 				Making complex things feel simple, with good people and a little curiosity.
 			</p>
 			<Chip color="success">Open to collaboration</Chip>
 		</Stack>
 		<Card class="md:col-span-2"
 			><Stack gap="xl">
-				<nav class="flex flex-wrap gap-sm" aria-label="Career sections">
+				<nav class="gap-sm flex flex-wrap" aria-label="Career sections">
 					<Button
 						variant={view === 'Experience' ? 'soft' : 'ghost'}
 						onclick={() => (view = 'Experience')}>Experience</Button
@@ -70,7 +70,7 @@
 				<Timeline
 					items={view === 'Experience' ? experience : education}
 					variant="ghost"
-					density="large"
+					density="comfortable"
 				/>
 			</Stack></Card
 		>

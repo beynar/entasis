@@ -20,7 +20,9 @@ type MapInteractionHandlerName = (typeof mapInteractionHandlers)[number];
 type MapLibreMapWithInteractions = MapLibreMap &
 	Partial<Record<MapInteractionHandlerName, MapLibreInteractionHandler>>;
 
-export function getMapInteractionOptions(interactive: boolean | undefined): MapLibreInteractionOptions {
+export function getMapInteractionOptions(
+	interactive: boolean | undefined
+): MapLibreInteractionOptions {
 	if (interactive !== false) {
 		return {};
 	}

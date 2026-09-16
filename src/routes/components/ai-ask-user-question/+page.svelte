@@ -3,7 +3,7 @@
 	import type {
 		AIAskAnswers,
 		AIAskQuestion,
-		AIAskUserQuestionSubmitDetail
+		AIAskUserQuestionSubmitPayload
 	} from '$lib/components/AIAskUserQuestion/aiAskUserQuestion.props.js';
 	import TextArea from '$lib/components/Form/TextArea/TextArea.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
@@ -47,7 +47,7 @@
 		}
 	];
 	let answers = $state<AIAskAnswers>({});
-	let submitted = $state<AIAskUserQuestionSubmitDetail>();
+	let submitted = $state<AIAskUserQuestionSubmitPayload>();
 	const controls = createComponentControls([
 		{
 			name: 'question',
@@ -110,7 +110,7 @@ ${'</' + 'script>'}
 			/>
 			{#if submitted}
 				<pre
-					class="max-h-32 overflow-auto rounded border border-neutral-muted p-3 text-xs">{JSON.stringify(
+					class="border-neutral-muted max-h-32 overflow-auto rounded border p-3 text-xs">{JSON.stringify(
 						submitted,
 						null,
 						2

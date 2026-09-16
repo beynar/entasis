@@ -1,0 +1,12 @@
+[
+	{
+		"route": "^/components/tree",
+		"ruleId": "aria-required-children",
+		"reason": "@pierre/trees renders its search input inside the tree root"
+	},
+	{
+		"route": "^/components/diff",
+		"ruleId": "color-contrast",
+		"reason": "@pierre/diffs paints its own line-number and count colours inside the diffs-container shadow tree"
+	}
+]

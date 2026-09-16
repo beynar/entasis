@@ -2,35 +2,40 @@
 	import Dialog from '../Dialog/Dialog.svelte';
 	import Button from '../Button/Button.svelte';
 	import type { ButtonProps } from '../Button/button.props.js';
-	import type { ConfirmationDetail, ConfirmationState } from './confirmation.state.svelte.js';
+	import type { ConfirmationOutcome, ConfirmationState } from './confirmation.state.svelte.js';
+	import { registerConfirmationHost } from './confirmation.state.svelte.js';
+	import type { ConfirmationProps } from './confirmation.props.js';
+	import { useConfirmationTheme } from './confirmation.theme.js';
+	import { useTheme } from '../Theme/theme.state.svelte.js';
 	import { onMount, tick } from 'svelte';
-	import { MediaQuery } from 'svelte/reactivity';
+	let { theme }: ConfirmationProps = $props();
+
 	let confirmations = $state<ConfirmationState[]>([]);
 
-	const onConfirmation = (event: CustomEvent<ConfirmationDetail>) => {
-		if (event.detail) {
-			const confirmationDetail = event.detail;
-			const confirmationState = Object.assign(confirmationDetail, {
-				isOpen: false,
-				loading: false
-			}) satisfies ConfirmationState;
-			confirmations.push(confirmationState);
-			tick().then(() => {
-				confirmations.forEach((a) => {
-					if (a.id === confirmationState.id) {
-						a.isOpen = true;
-					}
-				});
-			});
-		}
-	};
+	const classes = $derived(useConfirmationTheme(theme));
+	const themeState = useTheme();
 
-	onMount(() => {
-		document.addEventListener('confirmation', onConfirmation);
-		return () => {
-			document.removeEventListener('confirmation', onConfirmation);
-		};
-	});
+	// Mounted first, then opened on the next tick so the Dialog plays its enter transition.
+	onMount(() =>
+		registerConfirmationHost(themeState, {
+			request: (detail) =>
+				new Promise<ConfirmationOutcome>((settle) => {
+					const confirmationState = Object.assign({}, detail, {
+						isOpen: false,
+						loading: false,
+						settle
+					}) satisfies ConfirmationState;
+					confirmations.push(confirmationState);
+					tick().then(() => {
+						confirmations.forEach((a) => {
+							if (a.id === confirmationState.id) {
+								a.isOpen = true;
+							}
+						});
+					});
+				})
+		})
+	);
 
 	const actionConfirmation =
 		(
@@ -40,26 +45,26 @@
 		): NonNullable<ButtonProps['onclick']> =>
 		async (event) => {
 			onclick?.(event);
-		let result;
-		if (continued) {
-			const res = confirmation.onConfirm?.();
-			confirmation.loading = !!res && res instanceof Promise;
-			result = continued && res ? await res : undefined;
-		}
-		confirmation.loading = false;
-		confirmation.isOpen = false;
-		document.dispatchEvent(
-			new CustomEvent('confirmation_received', {
-				detail: { id: confirmation.id, continued, result }
-			})
-		);
+			let result;
+			if (continued) {
+				const res = confirmation.onConfirm?.();
+				confirmation.loading = !!res && res instanceof Promise;
+				result = continued && res ? await res : undefined;
+			}
+			confirmation.loading = false;
+			confirmation.isOpen = false;
+			confirmation.settle({ confirmed: continued, result });
 		};
-	const isMobile = new MediaQuery('(max-width: 768px)');
+	// A Dialog sizes to its content, so it takes the device decision from JS rather than CSS — and
+	// from the SAME value the Dialog itself used to pick sheet-versus-floating, instead of a second
+	// hand-written `(max-width: 768px)` that can drift out of step with it.
+	const isMobile = $derived(themeState.isMobile);
 </script>
 
-{#each confirmations as confirmation}
+{#each confirmations as confirmation (confirmation.id)}
 	<Dialog
 		type="alert"
+		class={classes.root()}
 		onAfterClose={() => {
 			confirmations = confirmations.filter((a) => a.id !== confirmation.id);
 		}}
@@ -71,14 +76,14 @@
 		description={confirmation.description}
 	>
 		{#snippet footer()}
-			<div class={isMobile.current ? 'flex flex-col gap-4 p-2' : 'flex justify-end gap-2 p-2'}>
+			<div class={classes.footer({ layout: isMobile ? 'stacked' : 'inline' })}>
 				{#if typeof confirmation.cancel === 'object'}
 					<Button
 						disabled={confirmation.loading}
 						color="neutral"
 						{...confirmation.cancel}
 						onclick={actionConfirmation(confirmation, false, confirmation.cancel.onclick)}
-						fullWidth={isMobile.current}
+						fullWidth={isMobile}
 					>
 						{confirmation.cancel.text}
 					</Button>
@@ -87,7 +92,7 @@
 						disabled={confirmation.loading}
 						color="neutral"
 						onclick={actionConfirmation(confirmation, false)}
-						fullWidth={isMobile.current}
+						fullWidth={isMobile}
 					>
 						{confirmation.cancel}
 					</Button>
@@ -98,7 +103,7 @@
 						loading={confirmation.loading}
 						{...confirmation.confirm}
 						onclick={actionConfirmation(confirmation, true, confirmation.confirm.onclick)}
-						fullWidth={isMobile.current}
+						fullWidth={isMobile}
 					>
 						{confirmation.confirm.text}
 					</Button>
@@ -106,7 +111,7 @@
 					<Button
 						loading={confirmation.loading}
 						onclick={actionConfirmation(confirmation, true)}
-						fullWidth={isMobile.current}
+						fullWidth={isMobile}
 					>
 						{confirmation.confirm}
 					</Button>

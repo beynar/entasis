@@ -31,7 +31,7 @@
 	] satisfies PageShellAction[];
 </script>
 
-<div class="h-[460px] w-full overflow-auto rounded-lg border border-neutral-muted">
+<div class="border-neutral-muted h-[460px] w-full overflow-auto rounded-lg border">
 	<PageShell
 		title="Insights"
 		subtitle="Sticky header and footer with natural content flow"
@@ -41,33 +41,29 @@
 	>
 		{#snippet footer()}
 			<span>Updated just now</span>
-			<span class="font-medium text-primary">All systems healthy</span>
+			<span class="text-primary-readable font-medium">All systems healthy</span>
 		{/snippet}
 
-		{#snippet children()}
-			<div class="grid gap-4 lg:grid-cols-3">
-				{#each ['Revenue', 'Activation', 'Retention'] as metric, index}
-					<section class="rounded-lg border border-neutral-muted bg-surface-raised p-4">
-						<p class="text-sm font-medium text-neutral/60">{metric}</p>
-						<p class="mt-3 text-3xl font-semibold text-neutral">{[84, 67, 91][index]}%</p>
-						<p class="mt-2 text-sm text-neutral/60">Compared with the previous 30 days.</p>
-					</section>
-				{/each}
-
-				<section
-					class="rounded-lg border border-neutral-muted bg-surface-raised p-4 lg:col-span-3"
-				>
-					<p class="text-sm font-medium text-neutral">Activity feed</p>
-					<div class="mt-4 grid gap-3">
-						{#each ['Pipeline refreshed', 'Segment imported', 'Forecast recalculated', 'Report queued', 'Notebook synced'] as event}
-							<div class="flex items-center justify-between rounded-md bg-surface px-3 py-2">
-								<span class="text-sm text-neutral">{event}</span>
-								<span class="text-xs text-neutral/50">now</span>
-							</div>
-						{/each}
-					</div>
+		<div class="grid gap-4 lg:grid-cols-3">
+			{#each ['Revenue', 'Activation', 'Retention'] as metric, index (index)}
+				<section class="border-neutral-muted bg-surface-raised rounded-lg border p-4">
+					<p class="text-neutral/70 text-sm font-medium">{metric}</p>
+					<p class="text-neutral mt-3 text-3xl font-semibold">{[84, 67, 91][index]}%</p>
+					<p class="text-neutral/70 mt-2 text-sm">Compared with the previous 30 days.</p>
 				</section>
-			</div>
-		{/snippet}
+			{/each}
+
+			<section class="border-neutral-muted bg-surface-raised rounded-lg border p-4 lg:col-span-3">
+				<p class="text-neutral text-sm font-medium">Activity feed</p>
+				<div class="mt-4 grid gap-3">
+					{#each ['Pipeline refreshed', 'Segment imported', 'Forecast recalculated', 'Report queued', 'Notebook synced'] as event, index (index)}
+						<div class="bg-surface flex items-center justify-between rounded-md px-3 py-2">
+							<span class="text-neutral text-sm">{event}</span>
+							<span class="text-neutral/65 text-xs">now</span>
+						</div>
+					{/each}
+				</div>
+			</section>
+		</div>
 	</PageShell>
 </div>

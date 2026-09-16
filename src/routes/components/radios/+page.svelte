@@ -46,7 +46,7 @@
 	component="RadioInput"
 	features={[
 		'Fieldset groups mutually exclusive options',
-		'aria-label on each option button',
+		{ label: 'aria-label on each option button', test: 'a11y:radios.option-labels' },
 		'Bindable single value selection',
 		'Normal and card display modes',
 		'Hidden native radio inputs'
@@ -97,7 +97,7 @@
 					label="Choose your option"
 					required
 				/>
-				<div class="text-neutral/60 mt-4 text-sm">
+				<div class="text-neutral/70 mt-4 text-sm">
 					Selected: {selectedOptions.join(', ')}
 				</div>
 			</div>
@@ -146,7 +146,7 @@
 					label="Choose your card option"
 					required
 				/>
-				<div class="text-neutral/60 mt-4 text-sm">
+				<div class="text-neutral/70 mt-4 text-sm">
 					Selected: {cardSelectedOptions.join(', ')}
 				</div>
 			</div>

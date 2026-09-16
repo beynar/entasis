@@ -48,9 +48,9 @@
 	];
 
 	const densitySegments = [
-		{ value: 'small', label: 'Small' },
+		{ value: 'compact', label: 'Compact' },
 		{ value: 'normal', label: 'Normal' },
-		{ value: 'large', label: 'Large' }
+		{ value: 'comfortable', label: 'Comfortable' }
 	] as const satisfies ReadonlyArray<{ value: Density; label: string }>;
 	let listDensity = $state<Density>('normal');
 	const controls = createComponentControls([
@@ -66,7 +66,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: ['small', 'normal', 'large']
+			options: ['compact', 'normal', 'comfortable']
 		},
 		{
 			name: 'columns',
@@ -148,7 +148,7 @@
 	import { userIcon } from 'svelai/icons/user';
 	import { calendarIcon } from 'svelai/icons/calendar';
 	import { tagIcon } from 'svelai/icons/tag';
-<\/script>
+</scr${'ipt'}>
 
 <MetadataList
 	items={[
@@ -197,7 +197,7 @@
 		<!-- Example 6: Density -->
 		<ComponentCard
 			title="Density"
-			description="density scales the row and label gaps — small for dense panels, large for roomy detail surfaces. Combine freely with size."
+			description="density scales the row and label gaps — compact for dense panels, comfortable for roomy detail surfaces. Combine freely with size."
 			code={`<SegmentedControl items={densities} bind:value={density} />
 <MetadataList {density} items={ownerItems} />`}
 		>
@@ -206,7 +206,7 @@
 					items={densitySegments}
 					bind:value={listDensity}
 					size="small"
-					ariaLabel="List density"
+					label="List density"
 				/>
 				<MetadataList density={listDensity} title="Document" items={ownerItems} />
 			</div>

@@ -199,7 +199,7 @@ onValueChange?: (value: string) => void;
 		await runCheck(directory, 'tooling/check-public-api-contract.mjs');
 		await write(
 			'src/lib/components/Widget/payload.ts',
-			'export type Payload = { nested: Record<string, any> }; export type Handler = (payload: Payload) => void;'
+			'export type Payload = { nested: Record<string, any>; isPrimary?: boolean }; export type Handler = (payload: Payload) => void;'
 		);
 		await write(
 			'src/lib/components/Widget/widget.props.ts',
@@ -214,6 +214,7 @@ export interface WidgetProps extends Base {
 /** Rest callback. */ onSelect?: (...values: [string, number]) => void;
 /** Native callback. */ onclick?: (payload: string) => void;
 /** Physical size. */ size?: number;
+/** Active. */ isActive?: boolean;
 undocumented?: boolean;
 }`
 		);
@@ -232,9 +233,13 @@ undocumented?: boolean;
 			'lowercase callback onclick',
 			'numeric size WidgetProps.size',
 			'WidgetProps.undocumented has no public documentation',
+			'boolean prop WidgetProps.isActive restates its type in its name',
 			'Widget.inline has no public documentation'
 		])
 			assert.ok(rejected.includes(diagnostic), diagnostic);
+		// The boolean-prefix rule reads component props types only; a nested payload keeps its own
+		// vocabulary, so `Payload.isPrimary` is not reported.
+		assert.ok(!rejected.includes('isPrimary'), 'nested payload boolean is exempt');
 	});
 });
 
@@ -252,7 +257,7 @@ test('theme inventory rejects aliases hidden in Svelte, unowned parts, wrong own
 		);
 		await write(
 			'src/lib/components/Widget/spacing.ts',
-			"export const spacing = 'gap-3 rounded-2xl';"
+			"export const spacing = 'gap-3 rounded-5xl';"
 		);
 		await write(
 			'src/lib/components/Widget/wrong.theme.ts',
@@ -264,7 +269,7 @@ test('theme inventory rejects aliases hidden in Svelte, unowned parts, wrong own
 			'does not name a sibling component owner',
 			'unowned CVA part unused',
 			'numeric spacing utility gap-3',
-			'unsupported radius utility rounded-2xl'
+			'unsupported radius utility rounded-5xl'
 		])
 			assert.ok(rejected.includes(diagnostic), diagnostic);
 		await write(
@@ -282,6 +287,350 @@ test('theme inventory rejects aliases hidden in Svelte, unowned parts, wrong own
 		assert.match(
 			await runCheck(directory, 'tooling/check-semantic-theme-tokens.mjs', 1),
 			/Widget\.svelte: hidden theme definition/
+		);
+	});
+});
+
+// One value per drifting axis — focus-ring role, elevation, control and icon geometry, muted
+// ink, hover tint and selected fill — each enforced here so the sweep cannot regress. The
+// passing base carries the engine utilities the rules point at (`raised-*`/`lift-*`,
+// `h-control-*`/`h-row-*`, `size-icon-*`), which doubles as proof they do not trip any rule.
+const passingTheme =
+	'gap-md rounded-md state-layer h-control-md h-row-sm min-h-row-lg size-icon-xs size-icon-xl raised-2 lift-3 text-neutral/70 text-color-muted-readable/45 [&>svg]:size-icon-sm focus-visible:ring-2 focus-visible:ring-focus/50 data-[selected=true]:bg-selected-muted data-[selected=true]:text-selected-muted-readable';
+const themeSource = (classes) =>
+	`import { cva } from '$lib/utils/cva/index.js'; const root = cva({ base: '${classes}' }); export const widgetTheme = { root };`;
+const surfaceRules = [
+	{
+		rule: 'focus rings that name a fixed role',
+		classes: 'focus-visible:ring-primary/50',
+		diagnostic:
+			'focus ring focus-visible:ring-primary/50 — focus rings use the focus state role (ring-focus/50)'
+	},
+	{
+		// The rule the state roles introduced: the ring used to be the *current* role, which a
+		// theme could only move by moving every other current-role surface with it.
+		rule: 'focus rings that ride the current role instead of the focus state role',
+		classes: 'focus-visible:ring-color/50',
+		diagnostic:
+			'focus ring focus-visible:ring-color/50 — focus rings use the focus state role (ring-focus/50)'
+	},
+	{
+		// The ring is written on the box and the focus lands on the range input inside it, so the
+		// variant is composed. Reading the bare `focus*:` prefix alone left AudioPlayer's waveform
+		// and scrubber and VoiceInput's waveform on `ring-color/60` through the whole sweep.
+		rule: 'focus rings behind a composed focus variant',
+		classes: 'has-[input:focus-visible]:ring-color/60',
+		diagnostic:
+			'focus ring has-[input:focus-visible]:ring-color/60 — focus rings use the focus state role (ring-focus/50)'
+	},
+	{
+		rule: 'raw shadow utilities',
+		classes: 'hover:shadow-md',
+		diagnostic: 'raw shadow hover:shadow-md — elevation comes from raised-N'
+	},
+	{
+		rule: 'numeric icon sizes',
+		classes: '[&_svg]:size-4',
+		diagnostic: 'icon size [&_svg]:size-4 — icons are sized with size-icon-xs'
+	},
+	{
+		rule: 'numeric control heights',
+		classes: 'min-h-10',
+		diagnostic: 'numeric height min-h-10 — controls use h-control-*'
+	},
+	{
+		rule: 'muted text off the two-step scale',
+		classes: 'text-neutral/65',
+		diagnostic: 'muted text text-neutral/65 — secondary text is text-<role>/70'
+	},
+	{
+		rule: 'ad-hoc hover fills',
+		classes: 'hover:bg-neutral/10',
+		diagnostic: 'hover fill hover:bg-neutral/10 — interactive surfaces tint with state-layer'
+	},
+	{
+		rule: 'selected fills that name a fixed role',
+		classes: 'data-[selected=true]:bg-primary-muted/40',
+		diagnostic:
+			'selected fill data-[selected=true]:bg-primary-muted/40 — persistent selection uses the selected state role (selectedSoft / selectedSolid)'
+	},
+	{
+		// Same rule's second half: the current role is no longer enough either, because a theme
+		// that pins `selectedColor` must be able to move the selection without moving the chrome.
+		rule: 'selected fills that ride the current role instead of the selected state role',
+		classes: 'data-[state=checked]:bg-color-muted',
+		diagnostic:
+			'selected fill data-[state=checked]:bg-color-muted — persistent selection uses the selected state role (selectedSoft / selectedSolid)'
+	},
+	{
+		rule: 'resting rings written at an opacity',
+		classes: 'ring-1 ring-neutral/15',
+		diagnostic:
+			'resting ring ring-neutral/15 — ring-<role>/NN is a focus ring (focus*:ring-<role>/50); resting rings use ring-neutral-muted / ring-color-muted'
+	},
+	{
+		rule: 'resting rings written on the selected state role at an opacity',
+		classes: 'ring-1 ring-selected/15',
+		diagnostic: 'resting ring ring-selected/15 — ring-<role>/NN is a focus ring'
+	}
+];
+
+for (const { rule, classes, diagnostic } of surfaceRules)
+	test(`theme inventory rejects ${rule}`, async () => {
+		await fixture(async ({ directory, write }) => {
+			const tool = 'tooling/check-semantic-theme-tokens.mjs';
+			await write('src/lib/components/Widget/Widget.svelte', '<div>Widget</div>');
+			await write('src/lib/components/Widget/widget.theme.ts', themeSource(passingTheme));
+			await runCheck(directory, tool);
+			await write(
+				'src/lib/components/Widget/widget.theme.ts',
+				themeSource(`${passingTheme} ${classes}`)
+			);
+			const rejected = await runCheck(directory, tool, 1);
+			assert.ok(rejected.includes(diagnostic), diagnostic);
+		});
+	});
+
+// The selected fill has two spellings and the class-string rule above only reads one of them: a
+// Tailwind variant prefix (`data-active:bg-…`). Everywhere the library expresses selection as a
+// cva *variant key* — Pagination's current page, MenuBar's open trigger, the Calendar day — the
+// fill sits in a nested object no class string shows, so it is read off the AST instead.
+const selectedVariantSource = (variants) =>
+	`import { cva } from '$lib/utils/cva/index.js'; const root = cva({ base: 'gap-md', variants: ${JSON.stringify(
+		variants
+	)} }); export const widgetTheme = { root };`;
+
+test('theme inventory rejects a selected fill spelled as a cva variant key', async () => {
+	await fixture(async ({ directory, write }) => {
+		const tool = 'tooling/check-semantic-theme-tokens.mjs';
+		await write('src/lib/components/Widget/Widget.svelte', '<div>Widget</div>');
+		// The state role passes, and so do the two things that are not a selection surface: the
+		// resting step of the same variant, and a transient state layer painted over the selection.
+		await write(
+			'src/lib/components/Widget/widget.theme.ts',
+			selectedVariantSource({
+				active: {
+					true: 'bg-selected text-selected-contrast',
+					false: 'bg-neutral-muted'
+				},
+				checked: { true: 'before:bg-selected disabled:bg-neutral-muted' }
+			})
+		);
+		await runCheck(directory, tool);
+		for (const { rule, variants, diagnostic } of [
+			{
+				rule: 'the current role',
+				variants: { active: { true: 'border-color bg-color-muted text-color-muted-readable' } },
+				diagnostic:
+					'selected fill bg-color-muted on variant active:true — persistent selection uses the selected state role (selectedSoft / selectedSolid)'
+			},
+			{
+				rule: 'a fixed role',
+				variants: { selected: { true: 'bg-primary text-primary-contrast' } },
+				diagnostic: 'selected fill bg-primary on variant selected:true'
+			},
+			{
+				rule: 'the pseudo-element an indicator draws with',
+				variants: { checked: { true: 'before:bg-color' } },
+				diagnostic: 'selected fill before:bg-color on variant checked:true'
+			}
+		]) {
+			await write('src/lib/components/Widget/widget.theme.ts', selectedVariantSource(variants));
+			const rejected = await runCheck(directory, tool, 1);
+			assert.ok(rejected.includes(diagnostic), `${rule}: ${diagnostic}`);
+		}
+		// Same fill, written as a compound variant instead of a variant step.
+		await write(
+			'src/lib/components/Widget/widget.theme.ts',
+			`import { cva } from '$lib/utils/cva/index.js'; const root = cva({ base: 'gap-md', variants: { mode: { card: '' }, checked: { true: '' } }, compoundVariants: [{ mode: 'card', checked: true, class: 'bg-neutral-muted/40' }] }); export const widgetTheme = { root };`
+		);
+		assert.ok(
+			(await runCheck(directory, tool, 1)).includes(
+				'selected fill bg-neutral-muted/40 on a selected compound variant'
+			),
+			'compound variant'
+		);
+		// And the third spelling: the selection is its own part, named for the state it paints and
+		// merged over the resting part by the component (DocumentViewer's `thumbnailActive`).
+		await write(
+			'src/lib/components/Widget/widget.theme.ts',
+			`import { cva } from '$lib/utils/cva/index.js'; const root = cva({ base: 'gap-md' }); const rootActive = cva({ base: 'border-primary bg-primary-muted' }); export const widgetTheme = { root, rootActive };`
+		);
+		assert.ok(
+			(await runCheck(directory, tool, 1)).includes(
+				'selected fill bg-primary-muted on the rootActive part'
+			),
+			'selection-named part'
+		);
+	});
+});
+
+// The type ramp is the one axis that is a *relationship* between the three sizes rather than a
+// single token, so it is read off the `size` variant block instead of the class soup: a large
+// control grows its box (`h-control-lg`) and keeps its type, a content part takes the one step
+// to `text-base`, a display value rides its own ramp — and a size written as a length is off
+// the scale whatever it rounds to.
+const rampTheme = (sizes) =>
+	`import { cva } from '$lib/utils/cva/index.js'; const root = cva({ base: 'gap-md', variants: { size: ${JSON.stringify(sizes)} } }); export const widgetTheme = { root };`;
+
+test('theme inventory pins the type ramp a size variant walks', async () => {
+	await fixture(async ({ directory, write }) => {
+		const tool = 'tooling/check-semantic-theme-tokens.mjs';
+		await write('src/lib/components/Widget/Widget.svelte', '<div>Widget</div>');
+		for (const accepted of [
+			{
+				small: 'h-control-sm text-xs',
+				normal: 'h-control-md text-sm',
+				large: 'h-control-lg text-sm'
+			},
+			{ small: 'text-xs', normal: 'text-sm', large: 'text-base' },
+			{ small: 'text-xs', normal: 'text-xs', large: 'text-sm' },
+			{ small: 'text-xl', normal: 'text-2xl', large: 'text-3xl' }
+		]) {
+			await write('src/lib/components/Widget/widget.theme.ts', rampTheme(accepted));
+			await runCheck(directory, tool);
+		}
+		for (const { rule, sizes, diagnostic } of [
+			{
+				rule: 'a large size that grows the type instead of the box',
+				sizes: { small: 'text-sm', normal: 'text-base', large: 'text-lg' },
+				diagnostic:
+					/root type ramp sm\/base\/lg — a size variant walks one of xs\/sm\/sm \(control\)/
+			},
+			{
+				rule: 'a ramp only two of the three sizes name',
+				sizes: { small: 'text-xs', normal: 'text-sm', large: 'h-control-lg' },
+				diagnostic: /root names a type size on some sizes only \(large missing\)/
+			},
+			{
+				rule: 'a type size written as a length',
+				sizes: { small: 'text-[11px]', normal: 'text-xs', large: 'text-sm' },
+				diagnostic: /arbitrary type size text-\[11px\] — type comes from the text-xs…text-3xl scale/
+			}
+		]) {
+			await write('src/lib/components/Widget/widget.theme.ts', rampTheme(sizes));
+			assert.match(await runCheck(directory, tool, 1), diagnostic, rule);
+		}
+	});
+});
+
+// Elevation is the one surface rule that also reaches component markup and the `.mcp.ts`
+// snippets: a `class="shadow-lg"` in a template, or a snippet teaching `hover:shadow-lg`, puts
+// the raw value back in front of the reader exactly as loudly as a theme file would.
+test('elevation rule reaches component markup and mcp snippets', async () => {
+	await fixture(async ({ directory, write }) => {
+		const tool = 'tooling/check-semantic-theme-tokens.mjs';
+		await write('src/lib/components/Widget/Widget.svelte', '<div class="raised-2">Widget</div>');
+		await write(
+			'src/lib/components/Widget/widget.mcp.ts',
+			'export const widgetDescription = `<Widget class="lift-4" />`;'
+		);
+		await runCheck(directory, tool);
+
+		await write(
+			'src/lib/components/Widget/Widget.svelte',
+			'<div class="rounded-lg shadow-lg">Widget</div>'
+		);
+		assert.match(
+			await runCheck(directory, tool, 1),
+			/Widget\.svelte: raw shadow shadow-lg — elevation comes from raised-N/
+		);
+
+		await write('src/lib/components/Widget/Widget.svelte', '<div class="raised-2">Widget</div>');
+		await write(
+			'src/lib/components/Widget/widget.mcp.ts',
+			'export const widgetDescription = `<Widget class="shadow-md hover:shadow-lg" />`;'
+		);
+		const rejected = await runCheck(directory, tool, 1);
+		for (const diagnostic of [
+			'widget.mcp.ts: raw shadow shadow-md',
+			'widget.mcp.ts: raw shadow hover:shadow-lg'
+		])
+			assert.ok(rejected.includes(diagnostic), diagnostic);
+	});
+});
+
+// The layout axis: a component that fills its host reflows on the width it was handed, so its
+// breakpoints are container variants on an `@container` root. A viewport variant measures the
+// device instead and is pinned here in both places a class is written — the theme file and the
+// markup — with the app chrome and content-sized overlays that legitimately keep it listed by path
+// prefix in the checker's `viewportExceptions`.
+test('theme inventory rejects viewport breakpoints outside app chrome', async () => {
+	await fixture(async ({ directory, write }) => {
+		const tool = 'tooling/check-semantic-theme-tokens.mjs';
+		await write(
+			'src/lib/components/Widget/Widget.svelte',
+			'<div class="@container @md:flex @max-3xl:hidden">Widget</div>'
+		);
+		await write(
+			'src/lib/components/Widget/widget.theme.ts',
+			themeSource(`${passingTheme} @container @max-3xl:flex-col @min-[30rem]:grid`)
+		);
+		await runCheck(directory, tool);
+
+		await write(
+			'src/lib/components/Widget/widget.theme.ts',
+			themeSource(`${passingTheme} md:flex-row`)
+		);
+		assert.match(
+			await runCheck(directory, tool, 1),
+			/widget\.theme\.ts: viewport breakpoint md:flex-row — host-sized components lay out by container query \(@md: on an @container root\); only app chrome and content-sized overlays use the viewport, listed in viewportExceptions/
+		);
+
+		await write('src/lib/components/Widget/widget.theme.ts', themeSource(passingTheme));
+		await write(
+			'src/lib/components/Widget/Widget.svelte',
+			'<div class={`max-[360px]:hidden ${extra}`}>Widget</div>'
+		);
+		assert.match(
+			await runCheck(directory, tool, 1),
+			/Widget\.svelte: viewport breakpoint max-\[360px\]:hidden — host-sized components lay out by container query/
+		);
+	});
+});
+
+// The layout rule reaches the two places outside a theme file and a template where a class list is
+// written: a plain helper `.ts` that assembles classes in JS, and an `.mcp.ts` snippet an agent
+// pastes into consumer code. Both are string literals, so the sweep is AST-based — the `md:` a root
+// recipe's comment quotes to say what it replaced is prose and must stay silent.
+test('layout rule reaches helper .ts modules and mcp snippets, but not comments', async () => {
+	await fixture(async ({ directory, write }) => {
+		const tool = 'tooling/check-semantic-theme-tokens.mjs';
+		await write('src/lib/components/Widget/Widget.svelte', '<div class="@container">Widget</div>');
+		await write('src/lib/components/Widget/widget.theme.ts', themeSource(passingTheme));
+		await write(
+			'src/lib/components/Widget/widget-layout.ts',
+			[
+				'// Old: `md:flex-row` — the phone breakpoint. New: `@md:` on the @container root.',
+				"export const widgetLayout = (wide) => (wide ? '@md:flex-row' : 'flex-col');"
+			].join('\n')
+		);
+		await write(
+			'src/lib/components/Widget/widget.mcp.ts',
+			'export const widgetDescription = `<Widget theme={{ root: { base: "@container @md:grid-cols-2" } }} />`;'
+		);
+		await runCheck(directory, tool);
+
+		await write(
+			'src/lib/components/Widget/widget-layout.ts',
+			"export const widgetLayout = (wide) => (wide ? 'md:flex-row' : 'flex-col');"
+		);
+		assert.match(
+			await runCheck(directory, tool, 1),
+			/widget-layout\.ts: viewport breakpoint md:flex-row — host-sized components lay out by container query/
+		);
+
+		await write(
+			'src/lib/components/Widget/widget-layout.ts',
+			"export const widgetLayout = () => 'flex-col';"
+		);
+		await write(
+			'src/lib/components/Widget/widget.mcp.ts',
+			'export const widgetDescription = `<Widget theme={{ root: { base: "grid-cols-1 md:grid-cols-3" } }} />`;'
+		);
+		assert.match(
+			await runCheck(directory, tool, 1),
+			/widget\.mcp\.ts: viewport breakpoint md:grid-cols-3 — host-sized components lay out by container query/
 		);
 	});
 });

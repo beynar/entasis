@@ -8,6 +8,7 @@
 	import { usePasswordInputTheme } from './passwordInput.theme.js';
 	import { eyeClosedIcon } from '$lib/components/Icons/eyeClosed.js';
 	import { eyeIcon } from '$lib/components/Icons/eye.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		defaultValue = null,
@@ -24,6 +25,7 @@
 		visible,
 		...rest
 	}: PasswordInputProps = $props();
+	const t = $derived(useI18n());
 	if (value === undefined) value = untrack(() => defaultValue);
 
 	let showPassword = $state(false);
@@ -122,8 +124,8 @@
 	<FieldActionButton
 		active={showPassword}
 		size={rest.size}
-		label={showPassword ? 'Hide password' : 'Show password'}
-		aria-pressed={showPassword}
+		label={showPassword ? `${t.hide} ${t.password}` : `${t.show} ${t.password}`}
+		pressed={showPassword}
 		disabled={field.disabled}
 		prefix={showPassword ? eyeIcon : eyeClosedIcon}
 		onclick={togglePasswordVisibility}

@@ -1,27 +1,28 @@
 <script lang="ts">
 	import Button from '$lib/components/Button/Button.svelte';
-	import type { ButtonPrimitiveProps } from '$lib/components/Button/button.props.js';
+	import type { ButtonInternalProps } from '$lib/components/Button/button.props.js';
 	import type { WithAttachments } from '$lib/types/props.js';
 	import { useFieldTheme } from './field.theme.js';
 
 	type FieldActionButtonEdge = 'start' | 'end' | 'none';
 	type FieldActionButtonProps = WithAttachments<
 		Pick<
-			ButtonPrimitiveProps,
-			| 'aria-controls'
-			| 'aria-expanded'
-			| 'aria-haspopup'
-			| 'aria-pressed'
+			ButtonInternalProps,
+			| 'controls'
+			| 'expanded'
+			| 'haspopup'
+			| 'pressed'
 			| 'class'
 			| 'color'
 			| 'disabled'
 			| 'id'
-			| 'label'
 			| 'onclick'
 			| 'prefix'
 			| 'size'
 			| 'type'
 		> & {
+			/** Accessible label applied as aria-label on the action button. */
+			label?: string;
 			/** Marks the adjacent field action as active. */
 			active?: boolean;
 			/** Field edge whose padding the action occupies. */
@@ -41,10 +42,10 @@
 		prefix,
 		size,
 		type = 'button',
-		'aria-controls': ariaControls,
-		'aria-expanded': ariaExpanded,
-		'aria-haspopup': ariaHaspopup,
-		'aria-pressed': ariaPressed,
+		controls,
+		expanded,
+		haspopup,
+		pressed,
 		...attachments
 	}: FieldActionButtonProps = $props();
 
@@ -60,10 +61,10 @@
 	{size}
 	squared={true}
 	{label}
-	aria-haspopup={ariaHaspopup}
-	aria-expanded={ariaExpanded}
-	aria-controls={ariaControls}
-	aria-pressed={ariaPressed}
+	{haspopup}
+	{expanded}
+	{controls}
+	{pressed}
 	{disabled}
 	class={classes.actionButton({ size, edge, active, class: className })}
 	{prefix}

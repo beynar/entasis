@@ -15,17 +15,17 @@
 	const placements = ['top', 'bottom', 'left', 'right'] as const;
 	const controls = createComponentControls([
 		{
-			name: 'tabbarSize',
+			name: 'size',
 			type: 'segmented',
 			label: 'Size',
 			value: 'normal',
 			options: sizes
 		},
 		{
-			name: 'tabbarColor',
+			name: 'color',
 			type: 'segmented',
 			label: 'Color',
-			value: 'primary',
+			value: 'neutral',
 			options: colors
 		},
 		{
@@ -35,14 +35,33 @@
 			value: 'top',
 			options: placements
 		},
-		{ name: 'tabbarFullWidth', type: 'switch', label: 'Full width', value: false }
+		{ name: 'fullWidth', type: 'switch', label: 'Full width', value: false }
 	]);
 
-	let simpleActiveTab = $state(0);
-	let iconActiveTab = $state(0);
-	let programmaticActiveTab = $state(0);
-	let verticalActiveTab = $state(0);
-	let formActiveTab = $state(0);
+	let simpleActiveTab = $state('Overview');
+	let iconActiveTab = $state('Home');
+	let programmaticActiveTab = $state('Step 1');
+	let verticalActiveTab = $state('Dashboard');
+	let formActiveTab = $state('Personal Info');
+	let mountActiveTab = $state('Lazy');
+	const mountMode = 'once' as const;
+	const mountTabs = [
+		{
+			label: 'Lazy',
+			title: 'Lazy by default',
+			description: 'A panel is built the first time its tab is activated.'
+		},
+		{
+			label: 'Once',
+			title: 'Kept after the first visit',
+			description: 'mount="once" leaves the panel mounted when you move away.'
+		},
+		{
+			label: 'Eager',
+			title: 'Everything up front',
+			description: 'mount="eager" builds every panel with the component.'
+		}
+	];
 	let lastChangedTab = $state('Personal Info');
 
 	const simpleTabs = [
@@ -103,8 +122,8 @@
 		notifications: true
 	});
 
-	function handleTabChange(index: number) {
-		lastChangedTab = formTabs[index]?.label ?? '';
+	function handleTabChange({ item }: { item: (typeof formTabs)[number] }) {
+		lastChangedTab = item.label;
 	}
 </script>
 
@@ -113,9 +132,9 @@
 	subtitle="Tabbed navigation paired with animated content panels."
 	component="Tabs"
 	features={[
-		'WAI-ARIA tablist with tabpanels',
-		'Arrow-key navigation via useNavigation',
-		'bindable activeTab and stepper ref',
+		{ label: 'WAI-ARIA tablist with tabpanels', test: 'a11y:tabs.aria-wiring' },
+		{ label: 'Arrow-key navigation via useNavigation', test: 'a11y:tabs.arrow-keys' },
+		'bindable value and api handle',
 		'Animated panel transitions via Stepper',
 		'Top, bottom, left, right placement'
 	]}
@@ -126,14 +145,12 @@
 		code={`<Tabs
 	items={simpleTabs}
 	bind:value={activeTab}
-	tabbarSize="${controls.value.tabbarSize}"
-	tabbarColor="${controls.value.tabbarColor}"
 	placement="${controls.value.placement}"
-	tabbarFullWidth={${controls.value.tabbarFullWidth}}
+	tabbar={{ size: '${controls.value.size}', color: '${controls.value.color}', fullWidth: ${controls.value.fullWidth} }}
 >
 	{#snippet children({ item, index })}
 		<section class="space-y-2 p-6">
-			<p class="text-neutral/60 text-sm">Panel {index + 1}</p>
+			<p class="text-neutral/70 text-sm">Panel {index + 1}</p>
 			<h3 class="text-xl font-semibold">{item.title}</h3>
 			<p class="text-neutral/80">{item.description}</p>
 		</section>
@@ -141,17 +158,19 @@
 </Tabs>`}
 	>
 		<Tabs
-			class="w-full min-h-64"
+			class="min-h-64 w-full"
 			items={simpleTabs}
 			bind:value={simpleActiveTab}
-			tabbarSize={controls.value.tabbarSize}
-			tabbarColor={controls.value.tabbarColor}
 			placement={controls.value.placement}
-			tabbarFullWidth={controls.value.tabbarFullWidth}
+			tabbar={{
+				size: controls.value.size,
+				color: controls.value.color,
+				fullWidth: controls.value.fullWidth
+			}}
 		>
 			{#snippet children({ item, index })}
 				<section class="space-y-2 p-6">
-					<p class="text-neutral/60 text-sm">Panel {index + 1}</p>
+					<p class="text-neutral/70 text-sm">Panel {index + 1}</p>
 					<h3 class="text-xl font-semibold">{item.title}</h3>
 					<p class="text-neutral/80">{item.description}</p>
 				</section>
@@ -180,23 +199,20 @@
 			description="Control tab navigation programmatically through the snippet payload."
 		>
 			<Tabs items={programmaticTabs} bind:value={programmaticActiveTab}>
-				{#snippet children({ item, index, stepper })}
+				{#snippet children({ item, index, api })}
 					<section class="space-y-4 p-6">
 						<div>
 							<h3 class="text-xl font-semibold">{item.title}</h3>
 							<p class="text-neutral/80 mt-1">{item.description}</p>
 						</div>
 						<div class="flex gap-2">
-							<Button variant="outline" disabled={index === 0} onclick={() => stepper.previous()}>
+							<Button variant="outline" disabled={index === 0} onclick={() => api.previous()}>
 								Previous
 							</Button>
-							<Button
-								disabled={index === programmaticTabs.length - 1}
-								onclick={() => stepper.next()}
-							>
+							<Button disabled={index === programmaticTabs.length - 1} onclick={() => api.next()}>
 								Next
 							</Button>
-							<Button color="success" onclick={() => stepper.goTo(0)}>Start Over</Button>
+							<Button color="success" onclick={() => api.goTo(0)}>Start Over</Button>
 						</div>
 					</section>
 				{/snippet}
@@ -212,7 +228,7 @@
 							items={verticalTabs}
 							bind:value={verticalActiveTab}
 							placement="left"
-							tabbarSize="small"
+							tabbar={{ size: 'small' }}
 						>
 							{#snippet children({ item })}
 								<section class="space-y-2 p-6">
@@ -243,7 +259,7 @@
 				items={formTabs}
 				bind:value={formActiveTab}
 				onValueChange={handleTabChange}
-				tabbarColor="secondary"
+				tabbar={{ color: 'secondary' }}
 			>
 				{#snippet children({ item, index })}
 					<section class="space-y-4 p-6">
@@ -274,6 +290,31 @@
 		</ComponentCard>
 
 		<ComponentCard
+			title="Panel mounting"
+			description="mount decides when a panel's content exists. lazy (the default) builds a panel the first time it is activated and tears it down when the tab is left, once keeps it afterwards, eager builds all of them up front. Inactive panels are hidden and inert in every mode."
+			code={`<Tabs {items} mount="once" tabbar={{ variant: 'pill' }}>
+	{#snippet children({ item })}
+		<!-- Panel content -->
+	{/snippet}
+</Tabs>`}
+		>
+			<Tabs
+				class="w-full"
+				items={mountTabs}
+				bind:value={mountActiveTab}
+				mount={mountMode}
+				tabbar={{ variant: 'pill' }}
+			>
+				{#snippet children({ item })}
+					<section class="space-y-2 p-6">
+						<h3 class="text-xl font-semibold">{item.title}</h3>
+						<p class="text-neutral/80">{item.description}</p>
+					</section>
+				{/snippet}
+			</Tabs>
+		</ComponentCard>
+
+		<ComponentCard
 			description="Customize tabbar size, color, and alignment without changing panel composition."
 		>
 			<Tabs
@@ -281,9 +322,7 @@
 					{ label: 'Metrics', title: 'Metrics', description: 'Large success tabs centered.' },
 					{ label: 'Alerts', title: 'Alerts', description: 'The panel renderer stays unchanged.' }
 				]}
-				tabbarSize="large"
-				tabbarColor="success"
-				tabbarAlignment="center"
+				tabbar={{ size: 'large', color: 'success', alignment: 'center' }}
 			>
 				{#snippet children({ item })}
 					<section class="space-y-2 p-6 text-center">

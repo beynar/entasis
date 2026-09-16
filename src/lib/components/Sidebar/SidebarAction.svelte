@@ -55,7 +55,7 @@
 		type="button"
 		class={classes.actionTrigger({ componentSize: size })}
 		aria-label={actionLabel}
-		onclick={action.onclick}
+		onclick={(event) => action.onclick?.(event, api)}
 	>
 		<SidebarIcon icon={actionIcon} />
 		<span class="sr-only">{actionLabel}</span>

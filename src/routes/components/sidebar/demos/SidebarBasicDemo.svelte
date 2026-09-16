@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		Sidebar,
+		type SidebarActiveVariant,
 		type SidebarDensity,
 		type SidebarDisplayState,
 		type SidebarGroup,
@@ -14,22 +15,27 @@
 	import { chartBarIcon } from '$lib/components/Icons/chartBar.js';
 	import { commandIcon } from '$lib/components/Icons/command.js';
 	import { creditCardIcon } from '$lib/components/Icons/creditCard.js';
+	import { dotsSixVerticalIcon } from '$lib/components/Icons/dotsSixVertical.js';
 	import { dotsThreeIcon } from '$lib/components/Icons/dotsThree.js';
 	import { folderIcon } from '$lib/components/Icons/folder.js';
 	import { gearIcon } from '$lib/components/Icons/gear.js';
 	import { houseIcon } from '$lib/components/Icons/house.js';
 	import { plusIcon } from '$lib/components/Icons/plus.js';
+	import { rocketLaunchIcon } from '$lib/components/Icons/rocketLaunch.js';
 	import { signOutIcon } from '$lib/components/Icons/signOut.js';
+	import { sidebarSimpleIcon } from '$lib/components/Icons/sidebarSimple.js';
 	import { trayIcon } from '$lib/components/Icons/tray.js';
 
 	let {
 		variant = 'inset',
 		size = 'normal',
-		density = 'normal'
+		density = 'normal',
+		activeVariant = 'soft'
 	}: {
 		variant?: SidebarVariant;
 		size?: SidebarSize;
 		density?: SidebarDensity;
+		activeVariant?: SidebarActiveVariant;
 	} = $props();
 
 	let displayState = $state<SidebarDisplayState>('expanded');
@@ -66,6 +72,31 @@
 					action: { label: 'Project actions', icon: dotsThreeIcon, menu: projectMenu }
 				},
 				{ label: 'Analytics', href: '#analytics', icon: chartBarIcon }
+			]
+		},
+		{
+			label: 'Products',
+			separator: true,
+			// One group, two pinned affordances; each descriptor sizes its own ghost button.
+			action: [
+				{ icon: plusIcon, label: 'New product', menu: projectMenu },
+				{ icon: dotsSixVerticalIcon, label: 'Reorder products' }
+			],
+			items: [
+				{
+					label: 'Launchpad',
+					href: '#launchpad',
+					icon: rocketLaunchIcon,
+					iconColor: 'success',
+					iconVariant: 'tile'
+				},
+				{
+					label: 'Reports',
+					href: '#reports',
+					icon: chartBarIcon,
+					iconColor: 'info',
+					iconVariant: 'tile'
+				}
 			]
 		}
 	];
@@ -105,7 +136,7 @@
 </script>
 
 <div
-	class="h-[520px] w-full overflow-hidden rounded-lg border border-neutral-muted bg-neutral-muted"
+	class="border-neutral-muted bg-neutral-muted h-[520px] w-full overflow-hidden rounded-lg border"
 >
 	<Sidebar
 		bind:displayState
@@ -123,12 +154,18 @@
 			minWidth: '12rem',
 			maxWidth: '24rem'
 		}}
+		{activeVariant}
 		headerButton={{
 			icon: commandIcon,
 			title: 'Acme Studio',
 			subtitle: 'Operations',
-			menu: accountMenu,
-			menuShowLabel: true
+			// A descriptor trailing renders its own control, so the row stays separately clickable.
+			trailing: {
+				icon: sidebarSimpleIcon,
+				label: 'Collapse sidebar',
+				onclick: (_event, api) => api.toggle()
+			},
+			onclick: (_event, api) => api.toggle()
 		}}
 		footerButton={{
 			avatar: { fallback: 'AR' },
@@ -138,15 +175,13 @@
 			menuShowLabel: true
 		}}
 	>
-		{#snippet children()}
-			<div class="grid h-full min-w-0 place-items-center bg-surface p-8">
-				<div class="grid w-full max-w-2xl gap-3">
-					<Skeleton color="primary" class="h-3 w-11/12 rounded-full" />
-					<Skeleton class="h-3 w-8/12 rounded-full" />
-					<Skeleton class="h-3 w-full rounded-full" />
-					<Skeleton color="primary" class="h-3 w-7/12 rounded-full" />
-				</div>
+		<div class="bg-surface grid h-full min-w-0 place-items-center p-8">
+			<div class="grid w-full max-w-2xl gap-3">
+				<Skeleton color="primary" class="h-3 w-11/12 rounded-full" />
+				<Skeleton class="h-3 w-8/12 rounded-full" />
+				<Skeleton class="h-3 w-full rounded-full" />
+				<Skeleton color="primary" class="h-3 w-7/12 rounded-full" />
 			</div>
-		{/snippet}
+		</div>
 	</Sidebar>
 </div>

@@ -24,16 +24,18 @@ A read-only key/value metadata list, like Notion's page-properties panel. Each r
 
 ### Core Props
 - **items**: \`MetadataListItem[]\` (default: \`[]\`)
-  - The rows to display. Each item: \`{ id?, key?, title?, value?, type?, icon?, color?, href? }\`. The label resolves \`key ?? title ?? id\`. \`type\` is auto-detected from \`value\` when omitted.
+  - The rows to display. Each item: \`{ id?, key?, title?, value?, type?, icon?, color?, href? }\` — read-only display data; MetadataList never writes item values. The label resolves \`key ?? title ?? id\`. \`type\` is auto-detected from \`value\` when omitted.
 - **maxItems**: \`number\` (optional)
   - When set and \`items.length\` exceeds it, the extra items collapse behind an animated "Show N more" toggle.
 - **expanded**: \`boolean\` (bindable, default: \`false\`)
   - Open state of the "Show more" toggle.
+- **defaultExpanded**: \`boolean\` (default: \`false\`)
+  - Initial open state of the "Show more" toggle when \`expanded\` is omitted.
 
 ### Style Props
 - **size**: \`'small' | 'normal' | 'large'\` (default: \`'normal'\`)
   - Typography only: key/value/toggle text, key icons, and chip sizing.
-- **density**: \`'small' | 'normal' | 'large'\` (default: \`'normal'\`)
+- **density**: \`'compact' | 'normal' | 'comfortable'\` (default: \`'normal'\`)
   - Spacing only: section, row, label/value, and chip-list gaps. Combine freely with \`size\`.
 - **columns**: \`number\` (default: \`1\`)
   - Items flow into this many grid columns.

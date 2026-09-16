@@ -29,6 +29,8 @@ const defaultSpinner = cva({
 	}
 });
 
+// `--spinner-size` is INTERNAL: the indicator publishes its resolved diameter for `.ui-spinner`
+// and the dot/bar variants. It follows the `size` prop, which is the public way to change it.
 const defaultSpinnerIndicator = cva({
 	base: 'relative box-border shrink-0',
 	variants: {
@@ -53,7 +55,7 @@ const defaultSpinnerIndicator = cva({
 });
 
 const defaultSpinnerLabel = cva({
-	base: 'text-neutral/60',
+	base: 'text-neutral/70',
 	variants: {
 		size: {
 			small: 'text-xs',

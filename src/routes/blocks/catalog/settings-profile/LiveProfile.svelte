@@ -22,12 +22,12 @@
 	});
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<header>
-		<p class="text-sm text-primary-readable">Profile / Edit</p>
+		<p class="text-primary-readable text-sm">Profile / Edit</p>
 		<h2 class="mt-sm text-3xl font-semibold">Put your best self forward.</h2>
 	</header>
-	<div class="grid items-start gap-xl md:grid-cols-2">
+	<div class="gap-xl grid items-start md:grid-cols-2">
 		<Card title="Your details"
 			><Stack gap="lg"
 				><Form
@@ -50,19 +50,19 @@
 			></Card
 		>
 		<Stack as="aside" gap="lg">
-			<p class="text-sm text-neutral/60">LIVE PREVIEW</p>
+			<p class="text-neutral/70 text-sm">LIVE PREVIEW</p>
 			<Card
-				><div class="grid justify-items-center gap-lg text-center">
-					<div class="h-20 w-full rounded-lg bg-primary-muted"></div>
-					<Avatar user={{ name: profile.name || 'Your name' }} size="large" />
+				><div class="gap-lg grid justify-items-center text-center">
+					<div class="bg-primary-muted h-20 w-full rounded-lg"></div>
+					<Avatar name={profile.name || 'Your name'} size="large" />
 					<div>
 						<h3 class="text-xl font-semibold">{profile.name || 'Your name'}</h3>
-						<p class="mt-xs text-sm text-primary-readable">{profile.headline || 'Your headline'}</p>
+						<p class="mt-xs text-primary-readable text-sm">{profile.headline || 'Your headline'}</p>
 					</div>
-					<p class="max-w-sm text-sm text-neutral/65">
+					<p class="text-neutral/65 max-w-sm text-sm">
 						{profile.bio || 'Tell people what you care about.'}
 					</p>
-					<p class="text-xs text-neutral/60">{profile.location}</p>
+					<p class="text-neutral/70 text-xs">{profile.location}</p>
 					{#if profile.available}<Chip color="success">Open to collaboration</Chip>{/if}
 				</div></Card
 			>

@@ -11,12 +11,12 @@
 	};
 
 	const densityOptions: DensityOption[] = [
-		{ label: 'Compact', value: 'small' },
+		{ label: 'Compact', value: 'compact' },
 		{ label: 'Default', value: 'normal' },
-		{ label: 'Relaxed', value: 'large' }
+		{ label: 'Relaxed', value: 'comfortable' }
 	];
 
-	let density = $state<Density>('small');
+	let density = $state<Density>('compact');
 	let coloredIcons = $state(true);
 
 	const icons = $derived<FileTreeIcons>({
@@ -49,7 +49,7 @@
 
 <div class="grid w-full max-w-2xl gap-3">
 	<div
-		class="flex flex-wrap items-center gap-2 rounded-lg border border-neutral-muted bg-surface p-2"
+		class="border-neutral-muted bg-surface flex flex-wrap items-center gap-2 rounded-lg border p-2"
 	>
 		{@render segmented(density, densityOptions, (value) => (density = value))}
 		<Button

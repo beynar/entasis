@@ -1,13 +1,27 @@
 import { untrack } from 'svelte';
-import { bind, getSize } from './utils.js';
+import { bind } from './utils.js';
 import { Blossom } from '@blossom-carousel/core';
 import { on } from 'svelte/events';
-import { SvelteMap } from 'svelte/reactivity';
+import { MediaQuery, SvelteMap } from 'svelte/reactivity';
+import { resolveContainerBreakpoint, resolveResponsive } from '../Theme/responsive.js';
+import type { Breakpoint } from '../Theme/theme.js';
 import type { CarouselProps } from './carousel.props.js';
+import { en, type Messages } from '$lib/i18n/en.js';
 
-export type Sizes = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'default';
+// Blossom's drag-to-scroll is only wanted where there is a real pointer; touch panning is
+// native. Lazily built and shared: `MediaQuery` calls `window.matchMedia` in its constructor,
+// so it must not run on the server, and one instance owns the listener for every carousel.
+let finePointerQuery: MediaQuery | null = null;
+const hasFinePointer = () =>
+	(finePointerQuery ??= new MediaQuery('(hover: hover) and (pointer: fine)')).current;
 
-export type ResponsiveProperty<T = number> = Partial<Record<Sizes, T>> & { default: T };
+/**
+ * What a responsive prop resolves to at a breakpoint no key of it covers: `layout={{ md: 2 }}`
+ * shows one slide below 42rem of carousel width. These are the props' only defaults — the
+ * component declares no destructuring default — so an omitted prop and a record that starts at a
+ * wider key land on the same number.
+ */
+export const carouselFallbacks = { layout: 1, gaps: 20, partialDelta: 0 } as const;
 
 const memoizedDerived = <T>(fn: () => T) => {
 	let value = $state<T | null>(fn());
@@ -26,38 +40,14 @@ const memoizedDerived = <T>(fn: () => T) => {
 	};
 };
 
-type MakeRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
-
-type CarouselOptions = MakeRequired<
-	Pick<CarouselProps<unknown>, 'layout' | 'gaps' | 'partialDelta'>,
-	'layout' | 'gaps' | 'partialDelta'
->;
-export interface CarouselState extends CarouselOptions {}
-
-const resolver = <T>(
-	property: ResponsiveProperty<T> | undefined,
-	breakpoint: Sizes,
-	defaultValue: T
-): T => {
-	if (typeof property === 'object') {
-		const breakpoints = ['xl', 'lg', 'md', 'sm', 'xs'] as const;
-		const activeBreakpointValue = property?.[breakpoint];
-		if (activeBreakpointValue) return activeBreakpointValue;
-		const defaultBreakpointValue = property?.default;
-		if (defaultBreakpointValue) return defaultBreakpointValue;
-		let lastActiveBreakpointValue: T | null = null;
-		for (const bp of breakpoints) {
-			if (property?.[bp] !== undefined) {
-				lastActiveBreakpointValue = property?.[bp];
-				break;
-			}
-			if (bp === breakpoint) break;
-		}
-		if (lastActiveBreakpointValue) return lastActiveBreakpointValue;
-		return defaultValue;
-	}
-	return property as T;
+type CarouselOptions = Pick<CarouselProps<unknown>, 'layout' | 'gaps' | 'partialDelta'> & {
+	/** Active i18n catalog, used for the slide and navigation accessible names. */
+	messages?: Messages;
 };
+// `bind(this, options)` installs the option properties on the instance; this type-only base
+// class is what declares them to TypeScript. (Merging an empty `interface` into the class
+// would be unsafe declaration merging: the interface promises members the class never defines.)
+const CarouselOptionsBase = class {} as unknown as new () => CarouselOptions;
 
 type Slide = {
 	index: number;
@@ -66,16 +56,24 @@ type Slide = {
 	inView: boolean;
 };
 
-export class CarouselState {
+export class CarouselState extends CarouselOptionsBase {
 	container = $state<HTMLElement>();
 	scrollLeft = $state(0);
+	/**
+	 * How far the track can scroll: `scrollWidth - clientWidth`, re-read on every scroll and
+	 * resize because neither is reactive on its own. Zero on the server and for a track that
+	 * does not overflow, which is what makes `progress` start at 0 instead of dividing by it.
+	 */
+	scrollRange = $state(0);
 	slides = new SvelteMap<HTMLElement, Slide>();
 	slideWidth = $state(0);
 	slideHeight = $state(0);
 
-	breakpoint = $state<Sizes>('xs');
-	resolvedLayout = $derived(resolver(this.layout, this.breakpoint, 1));
-	resolvedGaps = $derived(resolver(this.gaps, this.breakpoint, 20));
+	breakpoint = $state<Breakpoint>('xs');
+	resolvedLayout = $derived(
+		resolveResponsive(this.layout, this.breakpoint, carouselFallbacks.layout)
+	);
+	resolvedGaps = $derived(resolveResponsive(this.gaps, this.breakpoint, carouselFallbacks.gaps));
 	sortedSlides = $derived(Array.from(this.slides.values()).sort((a, b) => a.index - b.index));
 
 	currentSlide = memoizedDerived<Slide | null>(() => {
@@ -87,6 +85,17 @@ export class CarouselState {
 		this.lastSlideInView && this.lastSlideInView.index < this.sortedSlides.length - 1
 	);
 	canScrollPrev = $derived(this.currentSlide.current && this.currentSlide.current.index > 0);
+
+	/**
+	 * Fraction of the scrollable range already scrolled: 0 with the first slide at the start
+	 * edge, 1 with the last slide fully in view. This is the progress line's only input, so it
+	 * follows a free drag and a momentum flick as closely as it follows `next()`. `scrollLeft`
+	 * is negative in RTL, where the range is walked from the other end, so its magnitude is
+	 * what counts. SSR renders 0: there is no track to measure yet.
+	 */
+	progress = $derived(
+		this.scrollRange > 0 ? Math.min(1, Math.abs(this.scrollLeft) / this.scrollRange) : 0
+	);
 
 	dots = $derived.by(() => {
 		const dotCounts = Math.ceil(this.sortedSlides.length / this.resolvedLayout);
@@ -105,8 +114,8 @@ export class CarouselState {
 				attributes: {
 					'data-active': active,
 					'aria-controls': `${this.id}-slide-${index + 1}`,
-					'aria-label': `Slide ${index + 1}`,
-					'aria-selected': active,
+					'aria-label': (this.messages ?? en).slideIndex(index + 1),
+					'aria-current': active ? ('true' as const) : undefined,
 					onclick: () => {
 						this.moveToSlide({ node: this.sortedSlides[index * this.resolvedLayout]?.node });
 					}
@@ -119,7 +128,7 @@ export class CarouselState {
 		return {
 			disabled: !this.canScrollNext,
 			'aria-controls': `${this.id}`,
-			'aria-label': 'Next slide',
+			'aria-label': `${(this.messages ?? en).next} ${(this.messages ?? en).slide}`,
 			onclick: () => {
 				this.next();
 			}
@@ -130,7 +139,7 @@ export class CarouselState {
 		return {
 			disabled: !this.canScrollPrev,
 			'aria-controls': `${this.id}`,
-			'aria-label': 'Previous slide',
+			'aria-label': `${(this.messages ?? en).previous} ${(this.messages ?? en).slide}`,
 			onclick: () => {
 				this.prev();
 			}
@@ -141,6 +150,7 @@ export class CarouselState {
 		public props: CarouselOptions,
 		public id: string
 	) {
+		super();
 		bind(this, props);
 	}
 
@@ -156,12 +166,16 @@ export class CarouselState {
 			node.setAttribute('aria-roledescription', 'slide');
 			node.setAttribute('role', 'tabpanel');
 			node.setAttribute('data-carousel-slide', index.toString());
-			node.setAttribute('aria-label', `Slide ${index + 1} of ${slideNodes.length}`);
+			node.setAttribute('aria-label', (this.messages ?? en).slideOf(index + 1, slideNodes.length));
 			this.slides.set(node, {
 				...slide,
 				index
 			});
 		});
+		// Appending or removing slides changes the track's scrollWidth without resizing the
+		// container's own border box, so the ResizeObserver never fires; re-measure here or
+		// `progress` keeps reporting the old range until the next scroll event.
+		this.measureScrollRange();
 	};
 
 	private onSlide = (node: HTMLElement) => {
@@ -201,16 +215,41 @@ export class CarouselState {
 		this.refreshSlideMetadata();
 	};
 
-	private onResize = () => {
-		this.breakpoint = getSize();
+	/**
+	 * The active breakpoint follows the carousel's own inline size, read through the shared
+	 * `containerBreakpoints` table so `sm` means the same box width here as in Grid and Stack.
+	 * What is measured is the ROOT (`[data-carousel]`), because the root is the element carrying
+	 * `@container/carousel` and its content box is what the `@container carousel (…)` rules in
+	 * Carousel.svelte resolve against — so the JS breakpoint and the CSS breakpoint flip on the
+	 * same pixel. The track itself would answer a different number: its border box is one bleed
+	 * allowance wider than the root on each side.
+	 *
+	 * Only the dot count and the `next()` / `prev()` step size need this: slides-per-view, gap and
+	 * peek are styled from the five custom properties the component writes on the server, so they
+	 * are already right on first paint, before this observer has ever fired.
+	 */
+	private measure = (width: number) => {
+		this.breakpoint = resolveContainerBreakpoint(width);
+		this.measureScrollRange();
+	};
+
+	/** Re-reads the track's scrollable range. Cheap, and the only way `progress` stays honest
+	 * when slides are added, the layout changes or the host is resized. */
+	private measureScrollRange = () => {
+		if (!this.container) return;
+		this.scrollRange = Math.max(0, this.container.scrollWidth - this.container.clientWidth);
 	};
 
 	private moveToSlide = (slide?: { node: HTMLElement }) => {
-		slide &&
-			this.container?.scrollTo({
-				left: slide.node.offsetLeft,
-				behavior: 'smooth'
-			});
+		if (!slide) return;
+		// `offsetLeft` is measured from the slider's padding edge, while a snap lands the slide at
+		// the scroll-padding edge; aim for the snap position so a bleed allowance never fights it.
+		const scrollPadding = this.container ? getComputedStyle(this.container).scrollPaddingLeft : '';
+		const scrollPaddingPx = scrollPadding.endsWith('px') ? parseFloat(scrollPadding) : 0;
+		this.container?.scrollTo({
+			left: slide.node.offsetLeft - scrollPaddingPx,
+			behavior: 'smooth'
+		});
 	};
 	next = (count: number = this.resolvedLayout) => {
 		if (!this.currentSlide.current || !this.canScrollNext) return;
@@ -267,25 +306,49 @@ export class CarouselState {
 
 	onScroll = (e: Event) => {
 		this.scrollLeft = (e.target as HTMLElement).scrollLeft;
+		this.measureScrollRange();
+	};
+
+	/** Keyboard navigation for the slider region: arrows (writing-direction aware), Home, End. */
+	onKeyDown = (event: KeyboardEvent) => {
+		const rtl = getComputedStyle(event.currentTarget as HTMLElement).direction === 'rtl';
+		const next = rtl ? 'ArrowLeft' : 'ArrowRight';
+		const prev = rtl ? 'ArrowRight' : 'ArrowLeft';
+		if (event.key === next) this.next();
+		else if (event.key === prev) this.prev();
+		else if (event.key === 'Home') this.moveToSlide(this.sortedSlides[0]);
+		else if (event.key === 'End') this.moveToSlide(this.sortedSlides.at(-1));
+		else return;
+		event.preventDefault();
 	};
 
 	attachment = (container: HTMLElement) => {
 		return untrack(() => {
 			this.container = container;
-			const hasMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+			const hasMouse = hasFinePointer();
 			const blossom = Blossom(container, {});
 			if (hasMouse) {
 				blossom.init();
 			}
-			const offResize = on(window, 'resize', this.onResize);
+			// The root is the query container; the track bleeds past it (see `measure`). A carousel
+			// built without that root — the state's own unit tests — falls back to the track.
+			const host = container.closest<HTMLElement>('[data-carousel]') ?? container;
+			const resizeObserver = new ResizeObserver(([entry]) => {
+				// Border box, not `contentRect`: the root takes no padding, and a track measured as the
+				// fallback takes `padding-inline: 50%` in repeat mode, which would otherwise report a
+				// content width far wider than the carousel.
+				this.measure(entry?.borderBoxSize?.[0]?.inlineSize ?? entry?.target.clientWidth ?? 0);
+			});
+			resizeObserver.observe(host, { box: 'border-box' });
 			const offScroll = on(container, 'scroll', this.onScroll);
-			this.onResize();
+			this.measure(host.clientWidth);
 			const offSlides = this.observeSlides(container);
+			this.measureScrollRange();
 			return () => {
 				if (hasMouse) {
 					blossom?.destroy();
 				}
-				offResize();
+				resizeObserver.disconnect();
 				offSlides();
 				offScroll();
 			};

@@ -1,4 +1,5 @@
 import { untrack } from 'svelte';
+import { createTypeahead } from './typeahead.js';
 
 type ListNavigationOptions<Value extends string = string> = {
 	/**
@@ -12,6 +13,11 @@ type ListNavigationOptions<Value extends string = string> = {
 	optionId?: (value: Value) => string;
 	/** Fires whenever the highlight moves (keyboard, hover, or re-anchoring). */
 	onHighlightChange?: (value: Value | undefined) => void;
+	/**
+	 * Type-to-highlight: printable keys jump to the next value whose text starts with the
+	 * typed buffer. Only for lists whose focus is NOT in a text input (Select, not Combobox).
+	 */
+	typeahead?: (value: Value) => string;
 	/** Fires on Enter with the highlighted value. */
 	onSelect?: (value: Value) => void;
 	/** Wrap around both ends when moving past them. Default `true`. */
@@ -87,8 +93,22 @@ export const useListNavigation = <Value extends string = string>(
 		if (values.length) highlight(values[values.length - 1]);
 	};
 
-	/** Keydown handler for the focused input: ArrowUp/Down, Home, End, Enter. */
+	const typeahead = opts.typeahead
+		? createTypeahead<Value>({
+				getItems: () => opts.values(),
+				getText: opts.typeahead,
+				getCurrentIndex: () =>
+					highlighted === undefined ? -1 : opts.values().indexOf(highlighted),
+				onMatch: (_index, value) => highlight(value)
+			})
+		: null;
+
+	/** Keydown handler for the focused input: ArrowUp/Down, Home, End, Enter, typeahead. */
 	const onKeydown = (event: KeyboardEvent) => {
+		if (typeahead?.handleKey(event)) {
+			event.preventDefault();
+			return;
+		}
 		switch (event.key) {
 			case 'ArrowDown':
 				event.preventDefault();

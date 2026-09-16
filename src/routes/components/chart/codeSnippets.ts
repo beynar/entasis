@@ -50,8 +50,8 @@ export const usageCode = `<script lang="ts">
   tooltip
   viewport
   legend={{ interactive: true, placement: 'bottom' }}
-  ariaLabel="Quarterly revenue line chart"
-  initialDimensions={{ width: 960, height: 480 }}
+  label="Quarterly revenue line chart"
+  aspectRatio={960 / 480}
 />`;
 
 export const layeredCode = `<script lang="ts">
@@ -98,7 +98,8 @@ export const layeredCode = `<script lang="ts">
         y: 'actual',
         stroke: 'primary',
         strokeWidth: 2.5,
-        points: true
+        // 'surface' is a ChartColor, resolved to var(--color-surface).
+        points: { fill: 'surface', stroke: 'primary', strokeWidth: 2, radius: 4 }
       }
     ] as const;
 </script>
@@ -109,8 +110,8 @@ export const layeredCode = `<script lang="ts">
   {y}
   {marks}
   tooltip
-  ariaLabel="Monthly actual and forecast revenue"
-  initialDimensions={{ width: 960, height: 420 }}
+  label="Monthly actual and forecast revenue"
+  aspectRatio={960 / 420}
 />`;
 
 export const barsCode = `<script lang="ts">
@@ -161,8 +162,8 @@ export const barsCode = `<script lang="ts">
     y={position.y}
     marks={groupedMarks}
     tooltip
-    ariaLabel="Revenue grouped by product"
-    initialDimensions={{ width: 520, height: 360 }}
+    label="Revenue grouped by product"
+    aspectRatio={520 / 360}
   />
   <Chart
     data={revenue}
@@ -170,8 +171,8 @@ export const barsCode = `<script lang="ts">
     y={position.y}
     marks={stackedMarks}
     tooltip
-    ariaLabel="Revenue stacked by product"
-    initialDimensions={{ width: 520, height: 360 }}
+    label="Revenue stacked by product"
+    aspectRatio={520 / 360}
   />
 </div>`;
 
@@ -204,8 +205,8 @@ export const polarCode = `<script lang="ts">
 <Chart
   data={capabilities}
   {marks}
-  ariaLabel="Product capability profile"
-  initialDimensions={{ width: 640, height: 480 }}
+  label="Product capability profile"
+  aspectRatio={640 / 480}
 />`;
 
 export const clientOnlyCode = `<script lang="ts">
@@ -234,12 +235,59 @@ export const clientOnlyCode = `<script lang="ts">
     }] as const;
 </script>
 
-<!-- No initialDimensions: the SVG mounts only in the browser. -->
+<!-- No height and no aspectRatio: the SVG mounts only in the browser. -->
 <Chart
   data={responseTimes}
   {x}
   {y}
   {marks}
   tooltip
-  ariaLabel="API response time"
+  label="API response time"
+/>`;
+
+export const wideStackCode = `<script lang="ts">
+  import { Chart, type ChartKey, type ChartProps } from 'svelai/chart';
+
+  type StatusRow = { month: string; completed: number; inProgress: number; pending: number };
+
+  // One row per month, one numeric column per status: no melting by hand.
+  const monthlyStatus: readonly StatusRow[] = [
+    { month: 'Jan', completed: 38, inProgress: 18, pending: 9 },
+    { month: 'Feb', completed: 42, inProgress: 21, pending: 7 }
+  ];
+
+  const marks: ChartProps<StatusRow>['marks'] = [{
+      type: 'bar',
+      variant: 'stack',
+      x: 'month',
+      y: ['completed', 'inProgress', 'pending'],
+      gap: 3,
+      radius: 3
+    }];
+
+  const palette: ChartProps<StatusRow>['palette'] = {
+    completed: 'secondary',
+    inProgress: 'primary',
+    pending: 'info'
+  };
+
+  const labels: Record<string, string> = {
+    completed: 'Completed',
+    inProgress: 'In progress',
+    pending: 'Pending'
+  };
+
+  let pinned = $state<ChartKey | null>('Mar');
+</script>
+
+<Chart
+  data={monthlyStatus}
+  {marks}
+  {palette}
+  legend={{ placement: 'top', align: 'right', interactive: true, format: (key) => labels[String(key)] }}
+  tooltip={{ groupBy: 'x', value: pinned, onValueChange: (value) => (pinned = value) }}
+  x={{ scale: { type: 'band', padding: 0.5 } }}
+  y={{ scale: { type: 'linear' }, grid: true }}
+  label="Task status over the last six months"
+  height={320}
 />`;

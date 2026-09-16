@@ -15,6 +15,7 @@
 	import { createVideoPlayerLifecycle } from './videoPlayer.lifecycle.svelte.js';
 	import { VideoPlayerState } from './videoPlayer.state.svelte.js';
 	import { useVideoPlayerTheme } from './videoPlayer.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		src,
@@ -195,7 +196,8 @@
 
 	const classes = $derived(useVideoPlayerTheme(theme));
 	const hasSource = $derived(Boolean(src || sources.length || children));
-	const resolvedLabel = $derived(label ?? title ?? 'Video player');
+	const t = $derived(useI18n());
+	const resolvedLabel = $derived(label ?? title ?? t.videoPlayer);
 	const fullscreenState = $derived(player.actualFullscreen ? 'fullscreen' : 'windowed');
 	const hasCustomControls = $derived(controls.length > 0);
 	const sourceSignature = $derived(
@@ -264,8 +266,10 @@
 		player,
 		sourceSignature: () => sourceSignature,
 		onElementsChange: (mediaElement, rootElement) => {
-			ref = mediaElement;
-			rootRef = rootElement;
+			// Write-only bindable handles: the identity guards keep a re-mount from
+			// republishing the same nodes to the parent binding.
+			if (ref !== mediaElement) ref = mediaElement;
+			if (rootRef !== rootElement) rootRef = rootElement;
 		}
 	});
 </script>
@@ -342,6 +346,7 @@
 			{seekStep}
 			{volumeStep}
 			{disabled}
+			{hasSource}
 			visible={controlsVisibility.visible}
 			onOverlayOpenChange={controlsVisibility.setOverlayOpen}
 		/>

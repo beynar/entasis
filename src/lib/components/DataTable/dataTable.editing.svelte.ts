@@ -1,12 +1,12 @@
-import type { Row } from '@tanstack/table-core';
 import { DEV } from 'esm-env';
 import { tick } from 'svelte';
-import { SvelteMap } from 'svelte/reactivity';
+import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import type { DataTableModel } from './dataTable.model.svelte.js';
+import type { DataTableRowInstance } from './dataTable.table.js';
 import type { DataTableCellCommit, DataTableEditorPayload } from './dataTable.props.js';
 
 type EditingState<TData> = {
-	row: Row<TData>;
+	row: DataTableRowInstance<TData>;
 	columnId: string;
 	previousValue: unknown;
 	draft: unknown;
@@ -27,7 +27,7 @@ const cellValuesEqual = (left: unknown, right: unknown) => {
 export class DataTableEditing<TData> {
 	editing = $state<EditingState<TData> | null>(null);
 	private readonly optimisticCells = new SvelteMap<string, OptimisticCell>();
-	private readonly warnedMissingCommitColumns = new Set<string>();
+	private readonly warnedMissingCommitColumns = new SvelteSet<string>();
 
 	constructor(private readonly model: DataTableModel<TData>) {}
 
@@ -35,7 +35,7 @@ export class DataTableEditing<TData> {
 		return this.optimisticCells.size;
 	}
 
-	getCellValue(row: Row<TData>, columnId: string) {
+	getCellValue(row: DataTableRowInstance<TData>, columnId: string) {
 		const key = this.getCellKey(row.id, columnId);
 		return this.optimisticCells.has(key)
 			? this.optimisticCells.get(key)?.value
@@ -45,7 +45,7 @@ export class DataTableEditing<TData> {
 	getPayload(): DataTableEditorPayload<TData> | null {
 		if (!this.editing) return null;
 		return {
-			row: this.editing.row.original,
+			row: this.editing.row.original as TData,
 			rowId: this.editing.row.id,
 			columnId: this.editing.columnId,
 			previousValue: this.editing.previousValue,
@@ -61,7 +61,7 @@ export class DataTableEditing<TData> {
 		};
 	}
 
-	start(row: Row<TData>, columnId: string) {
+	start(row: DataTableRowInstance<TData>, columnId: string) {
 		const column = this.model.getColumnConfig(columnId);
 		if (column?.editor && !this.model.props.onCellCommit) {
 			this.warnMissingCommit(columnId);
@@ -100,7 +100,7 @@ export class DataTableEditing<TData> {
 			return true;
 		}
 		const commit: DataTableCellCommit<TData> = {
-			row: editing.row.original,
+			row: editing.row.original as TData,
 			rowId: editing.row.id,
 			columnId: editing.columnId,
 			previousValue: editing.previousValue,

@@ -67,7 +67,7 @@ const defaultSeparator = cva({
 });
 
 const defaultSeparatorLabel = cva({
-	base: 'whitespace-nowrap text-[0.75rem] leading-tight flex-shrink-0',
+	base: 'whitespace-nowrap text-xs leading-tight flex-shrink-0',
 	variants: {
 		orientation: {
 			horizontal: '',

@@ -18,12 +18,12 @@
 	} satisfies FormInputs;
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<div class="mx-auto w-full max-w-md">
 		<Card title="Welcome back" description="Sign in to your Northstar workspace."
 			><Stack gap="lg">
 				<div
-					class="mx-auto grid size-12 place-items-center rounded-lg bg-primary text-xl font-bold text-primary-contrast"
+					class="bg-primary text-primary-contrast mx-auto grid size-12 place-items-center rounded-lg text-xl font-bold"
 				>
 					N
 				</div>
@@ -38,7 +38,7 @@
 						title="Demo result"
 						description={message}
 					/>{/if}
-				<p class="text-center text-xs text-neutral/60">
+				<p class="text-neutral/70 text-center text-xs">
 					Protected workspace · Local form demonstration
 				</p>
 			</Stack></Card

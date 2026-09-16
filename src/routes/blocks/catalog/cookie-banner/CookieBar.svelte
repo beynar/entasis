@@ -4,24 +4,24 @@
 	let choice = $state<string | null>(null);
 </script>
 
-<section class="flex min-h-64 flex-col justify-end gap-lg bg-surface-recessed p-lg">
-	<p class="text-center text-sm text-neutral/50">An example page</p>
+<section class="gap-lg bg-surface-recessed p-lg flex min-h-64 flex-col justify-end">
+	<p class="text-neutral/65 text-center text-sm">An example page</p>
 	{#if choice === null}<div
-			class="flex flex-wrap items-center justify-between gap-lg rounded-lg border border-neutral-muted bg-surface p-lg"
+			class="gap-lg border-neutral-muted bg-surface p-lg flex flex-wrap items-center justify-between rounded-lg border"
 		>
 			<div class="max-w-xl">
 				<Heading as="h2" size="h5">A little context about cookies</Heading>
-				<p class="mt-sm text-sm text-neutral/70">
+				<p class="mt-sm text-neutral/70 text-sm">
 					Essential cookies keep the site working. Optional analytics help us understand what is
 					useful.
 				</p>
 			</div>
-			<div class="flex flex-wrap gap-sm">
+			<div class="gap-sm flex flex-wrap">
 				<Button variant="outline" onclick={() => (choice = 'Essential only')}>Essential only</Button
 				><Button onclick={() => (choice = 'All cookies')}>Accept all</Button>
 			</div>
 		</div>{:else}<div
-			class="flex flex-wrap items-center justify-between gap-md rounded-lg bg-surface p-lg"
+			class="gap-md bg-surface p-lg flex flex-wrap items-center justify-between rounded-lg"
 			role="status"
 		>
 			<p class="text-sm">Preview preference: <strong>{choice}</strong></p>

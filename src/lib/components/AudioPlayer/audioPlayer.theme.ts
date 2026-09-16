@@ -1,8 +1,13 @@
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
+// The player lays itself out against its own width, not the viewport: the root carries `@container`
+// and every breakpoint below is a container query measured on the root's content box (inside `p-lg`).
+// `@lg:` (32rem) is where artwork + title/artist + the whole block transport row genuinely fit on one
+// header line; below it the controls drop to their own full-width line. `@md:` (28rem) is where the
+// inline layout's transport row plus a still-usable seek track fit side by side; below it they stack.
 const defaultAudioPlayerRoot = cva({
-	base: 'group/audio-player relative grid w-full min-w-0 gap-lg overflow-hidden rounded-md border border-neutral-muted bg-surface p-lg text-neutral shadow-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-color/60',
+	base: 'group/audio-player @container relative grid w-full min-w-0 gap-lg overflow-hidden rounded-lg bg-surface p-lg text-neutral raised-1 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-focus/50',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -10,7 +15,7 @@ const defaultAudioPlayerRoot = cva({
 			large: 'text-base'
 		},
 		disabled: {
-			true: 'cursor-not-allowed opacity-60',
+			true: 'cursor-not-allowed opacity-50',
 			false: ''
 		}
 	},
@@ -60,9 +65,9 @@ const defaultAudioPlayerTitle = cva({
 	base: 'truncate font-medium text-neutral',
 	variants: {
 		size: {
-			small: 'text-sm',
-			normal: 'text-base',
-			large: 'text-lg'
+			small: 'text-xs',
+			normal: 'text-sm',
+			large: 'text-base'
 		}
 	},
 	defaultVariants: {
@@ -71,11 +76,11 @@ const defaultAudioPlayerTitle = cva({
 });
 
 const defaultAudioPlayerArtist = cva({
-	base: 'truncate text-neutral/60',
+	base: 'truncate text-neutral/70',
 	variants: {
 		size: {
 			small: 'text-xs',
-			normal: 'text-sm',
+			normal: 'text-xs',
 			large: 'text-sm'
 		}
 	},
@@ -94,7 +99,7 @@ const defaultAudioPlayerControls = cva({
 		},
 		layout: {
 			block:
-				'grid flex-[1_1_100%] md:flex md:flex-[0_1_auto] md:flex-wrap md:items-center md:justify-end md:gap-xs',
+				'grid flex-[1_1_100%] @lg:flex @lg:flex-[0_1_auto] @lg:flex-wrap @lg:items-center @lg:justify-end @lg:gap-xs',
 			inline: 'flex shrink-0 flex-wrap items-center'
 		}
 	},
@@ -108,7 +113,7 @@ const defaultAudioPlayerControlGroup = cva({
 	base: 'flex min-w-0 flex-wrap items-center gap-xs',
 	variants: {
 		layout: {
-			block: 'w-full md:w-auto',
+			block: 'w-full @lg:w-auto',
 			inline: 'w-auto shrink-0'
 		}
 	},
@@ -118,7 +123,7 @@ const defaultAudioPlayerControlGroup = cva({
 });
 
 const defaultAudioPlayerControlButton = cva({
-	base: '!border-neutral-muted data-[active=true]:!bg-color/12 data-[active=true]:!text-color-readable',
+	base: '!border-neutral-muted data-[active=true]:!bg-selected/12 data-[active=true]:!text-selected-muted-readable',
 	variants: {
 		size: {
 			small: '!size-7 !min-w-7',
@@ -146,7 +151,7 @@ const defaultAudioPlayerPlayButton = cva({
 });
 
 const defaultAudioPlayerWaveform = cva({
-	base: 'relative h-24 min-w-0 overflow-hidden rounded-sm border border-neutral-muted bg-neutral-muted/45 p-lg outline-none has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-color/60',
+	base: 'relative h-24 min-w-0 overflow-hidden rounded-sm border border-neutral-muted bg-neutral-muted/45 p-lg outline-none has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-focus/50',
 	variants: {
 		size: {
 			small: 'h-20 p-md',
@@ -158,7 +163,7 @@ const defaultAudioPlayerWaveform = cva({
 			histogram: ''
 		},
 		disabled: {
-			true: 'cursor-not-allowed opacity-60',
+			true: 'cursor-not-allowed opacity-50',
 			false: 'cursor-pointer'
 		}
 	},
@@ -208,7 +213,7 @@ const defaultAudioPlayerWaveformInput = cva({
 });
 
 const defaultAudioPlayerTrack = cva({
-	base: 'relative min-w-0 rounded-full outline-none before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:rounded-full before:bg-neutral/15 has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-color/60',
+	base: 'relative min-w-0 rounded-full outline-none before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:rounded-full before:bg-neutral/15 has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-focus/50',
 	variants: {
 		size: {
 			small: 'h-8 before:h-1.5',
@@ -216,7 +221,7 @@ const defaultAudioPlayerTrack = cva({
 			large: 'h-12 before:h-2.5'
 		},
 		disabled: {
-			true: 'cursor-not-allowed opacity-60',
+			true: 'cursor-not-allowed opacity-50',
 			false: 'cursor-pointer'
 		}
 	},
@@ -259,7 +264,7 @@ const defaultAudioPlayerTrackInput = cva({
 });
 
 const defaultAudioPlayerInline = cva({
-	base: 'flex min-w-0 flex-col gap-md sm:flex-row sm:items-center',
+	base: 'flex min-w-0 flex-col gap-md @md:flex-row @md:items-center',
 	variants: {
 		size: {
 			small: 'gap-sm',
@@ -281,10 +286,10 @@ const defaultAudioPlayerInlineTrailing = cva({
 });
 
 const defaultAudioPlayerTime = cva({
-	base: 'min-w-fit tabular-nums text-neutral/60',
+	base: 'min-w-fit tabular-nums text-neutral/70',
 	variants: {
 		size: {
-			small: 'text-[10px]',
+			small: 'text-xs',
 			normal: 'text-xs',
 			large: 'text-sm'
 		}
@@ -340,7 +345,7 @@ const defaultAudioPlayerVolumeSlider = cva({
 });
 
 const defaultAudioPlayerStatus = cva({
-	base: 'rounded-sm border border-neutral-muted bg-surface px-md py-xs text-neutral/60',
+	base: 'rounded-sm border border-neutral-muted bg-surface px-md py-xs text-neutral/70',
 	variants: {
 		size: {
 			small: 'text-xs',

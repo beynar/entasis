@@ -7,4 +7,3 @@ export {
 	type ButtonTheme,
 	type ButtonThemeProps
 } from './button.theme.js';
-

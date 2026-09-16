@@ -33,20 +33,22 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Arc desk lamp</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Arc desk lamp
+		</p>
 		<Heading size="h2" weight="bold">The details, considered.</Heading>
 	</header>
 	<Chip class="w-fit" variant="soft">Technical specifications</Chip><Accordion
 		items={specifications}
-		variant="outlined"
+		variant="outline"
 		defaultValue={['0']}
-		>{#snippet content({ item: section })}<dl class="grid gap-lg">
+		>{#snippet content({ item: section })}<dl class="gap-lg grid">
 				{#each section.rows as row (row[0])}<div
-						class="grid grid-cols-2 gap-xl border-b border-neutral/10 py-lg"
+						class="gap-xl border-neutral/10 py-lg grid grid-cols-2 border-b"
 					>
-						<dt class="text-neutral/55">{row[0]}</dt>
+						<dt class="text-neutral/65">{row[0]}</dt>
 						<dd class="text-right">{row[1]}</dd>
 					</div>{/each}
 			</dl>{/snippet}</Accordion

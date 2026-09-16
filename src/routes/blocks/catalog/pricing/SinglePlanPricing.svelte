@@ -28,7 +28,7 @@
 	];
 </script>
 
-<section class="mx-auto flex max-w-5xl flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto flex max-w-5xl flex-col">
 	<div class="max-w-2xl">
 		<Chip variant="outline">One plan. Room to do good work.</Chip><Heading
 			as="h2"
@@ -38,29 +38,29 @@
 		>
 	</div>
 	<Card variant="outline"
-		><div class="grid gap-xl md:grid-cols-3">
-			<div class="flex flex-col items-start gap-xl">
+		><div class="gap-xl grid md:grid-cols-3">
+			<div class="gap-xl flex flex-col items-start">
 				<Heading as="h3" size="h3">The complete workspace</Heading>
-				<p class="text-sm text-neutral/60">For a small team with big ideas.</p>
+				<p class="text-neutral/70 text-sm">For a small team with big ideas.</p>
 				<div>
 					<strong class="text-5xl">$29</strong>
-					<p class="mt-sm text-sm text-neutral/60">per person, per month</p>
+					<p class="mt-sm text-neutral/70 text-sm">per person, per month</p>
 				</div>
 				<Button href="/docs" fullWidth>Explore the workspace</Button>
 			</div>
-			<div class="grid gap-xl md:col-span-2 sm:grid-cols-2">
-				{#each groups as group (group.title)}<div class="flex flex-col gap-lg">
+			<div class="gap-xl grid sm:grid-cols-2 md:col-span-2">
+				{#each groups as group (group.title)}<div class="gap-lg flex flex-col">
 						<Heading as="h4" size="h5">{group.title}</Heading>
-						<ul class="flex flex-col gap-lg">
-							{#each group.features as feature (feature)}<li class="flex gap-sm text-sm">
-									<span class="text-primary">{@render checkCircleIcon()}</span>{feature}
+						<ul class="gap-lg flex flex-col">
+							{#each group.features as feature (feature)}<li class="gap-sm flex text-sm">
+									<span class="text-primary-readable">{@render checkCircleIcon()}</span>{feature}
 								</li>{/each}
 						</ul>
 					</div>{/each}
 			</div>
 		</div></Card
 	>
-	<p class="text-center text-sm text-neutral/60">
+	<p class="text-neutral/70 text-center text-sm">
 		A straightforward example plan. All the context before the commitment.
 	</p>
 </section>

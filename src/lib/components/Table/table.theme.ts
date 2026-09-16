@@ -1,5 +1,6 @@
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
+import { selectedSoft } from '$lib/components/Theme/theme.recipes.js';
 
 const defaultTableContainer = cva({
 	base: 'relative w-full overflow-x-auto'
@@ -22,18 +23,25 @@ const defaultTableFoot = cva({
 });
 
 // `density` owns paddings and row heights only ('normal' keeps today's exact
-// values; small is one step tighter, large one step roomier).
+// values; small is one step tighter, large one step roomier). `selected` carries
+// the selection surface as a real variant, so a theme can restyle (or drop) it
+// without having to out-specify a `data-[state=selected]:` class in `base`.
 const defaultTableRow = cva({
-	base: 'state-layer data-[state=selected]:bg-neutral-muted data-[state=selected]:text-neutral-muted-readable border-b border-neutral-muted transition-colors',
+	base: 'state-layer border-b border-neutral-muted transition-colors',
 	variants: {
 		density: {
-			small: 'py-0',
+			compact: 'py-0',
 			normal: 'py-micro',
-			large: 'py-xs'
+			comfortable: 'py-xs'
+		},
+		selected: {
+			true: selectedSoft,
+			false: null
 		}
 	},
 	defaultVariants: {
-		density: 'normal'
+		density: 'normal',
+		selected: false
 	}
 });
 
@@ -41,9 +49,9 @@ const defaultTableHeadCell = cva({
 	base: 'text-neutral text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
 	variants: {
 		density: {
-			small: 'h-8 px-sm',
-			normal: 'h-10 px-md',
-			large: 'h-12 px-lg'
+			compact: 'h-row-sm px-sm',
+			normal: 'h-row-md px-md',
+			comfortable: 'h-row-lg px-lg'
 		}
 	},
 	defaultVariants: {
@@ -55,9 +63,9 @@ const defaultTableCell = cva({
 	base: 'align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
 	variants: {
 		density: {
-			small: 'px-sm py-xs',
+			compact: 'px-sm py-xs',
 			normal: 'p-md',
-			large: 'p-lg'
+			comfortable: 'p-lg'
 		}
 	},
 	defaultVariants: {
@@ -66,12 +74,12 @@ const defaultTableCell = cva({
 });
 
 const defaultTableCaption = cva({
-	base: 'text-neutral/60 text-sm',
+	base: 'text-neutral/70 text-sm',
 	variants: {
 		density: {
-			small: 'mt-lg',
+			compact: 'mt-lg',
 			normal: 'mt-xl',
-			large: 'mt-layout-md'
+			comfortable: 'mt-layout-md'
 		}
 	},
 	defaultVariants: {

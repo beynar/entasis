@@ -24,16 +24,16 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<div class="rounded-lg bg-primary p-xl text-primary-contrast">
-		<div class="grid gap-xl sm:grid-cols-3">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<div class="bg-primary p-xl text-primary-contrast rounded-lg">
+		<div class="gap-xl grid sm:grid-cols-3">
 			{#each guarantees.slice(0, 3) as guarantee (guarantee.title)}<div
-					class="flex flex-col gap-lg items-center text-center"
+					class="gap-lg flex flex-col items-center text-center"
 				>
 					{@render guarantee.icon({ size: 32 })}<Heading size="h5" weight="bold"
 						>{guarantee.title}</Heading
 					>
-					<p class="max-w-xs text-sm opacity-80">{guarantee.detail}</p>
+					<p class="max-w-xs text-sm">{guarantee.detail}</p>
 				</div>{/each}
 		</div>
 	</div>

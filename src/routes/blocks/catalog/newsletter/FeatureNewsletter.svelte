@@ -8,19 +8,19 @@
 	let draft = $state('');
 </script>
 
-<section class="mx-auto grid max-w-5xl gap-xl p-lg md:grid-cols-2 md:p-xl">
-	<div class="flex flex-col items-start gap-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto grid max-w-5xl md:grid-cols-2">
+	<div class="gap-xl flex flex-col items-start">
 		<Chip variant="outline">The Field Notes</Chip><Heading as="h2" size="h1" weight="bold"
 			>Useful things,<br />worth your time.</Heading
 		>
-		<ul class="flex flex-col gap-lg">
+		<ul class="gap-lg flex flex-col">
 			{#each ['One practical product idea', 'A pattern you can put to work', 'Something small worth noticing'] as promise (promise)}<li
-					class="flex items-center gap-md"
+					class="gap-md flex items-center"
 				>
-					<span class="text-primary">{@render checkCircleIcon()}</span>{promise}
+					<span class="text-primary-readable">{@render checkCircleIcon()}</span>{promise}
 				</li>{/each}
 		</ul>
-		<p class="text-sm text-neutral/60">Written with care. Read at your own pace.</p>
+		<p class="text-neutral/70 text-sm">Written with care. Read at your own pace.</p>
 	</div>
 	<Card
 		class="self-center"
@@ -36,10 +36,10 @@
 				onSubmit={(values) => (draft = `${values.name} · ${values.email}`)}
 				actions={[{ children: 'Review your subscription', onAction: (form) => form.submit() }]}
 			/>
-			<p class="text-xs text-neutral/60">Local preview. No subscription is sent.</p>
-			{#if draft}<div class="rounded-lg bg-surface p-lg" role="status">
+			<p class="text-neutral/70 text-xs">Local preview. No subscription is sent.</p>
+			{#if draft}<div class="bg-surface p-lg rounded-lg" role="status">
 					<strong>Your subscription draft</strong>
-					<p class="mt-sm break-words text-sm">{draft}</p>
+					<p class="mt-sm text-sm break-words">{draft}</p>
 				</div>{/if}</Stack
 		></Card
 	>

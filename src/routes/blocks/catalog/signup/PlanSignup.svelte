@@ -10,7 +10,7 @@
 	let plan = $state<string | null>('Starter');
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Stack gap="lg" class="mx-auto w-full max-w-2xl">
 		<div class="text-center">
 			<Chip color="primary">14-day trial preview</Chip>

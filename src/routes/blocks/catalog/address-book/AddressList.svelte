@@ -89,36 +89,38 @@
 		/>{/key}
 {/snippet}
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<div class="flex gap-xl items-center justify-between flex-wrap">
-		<header class="flex flex-col gap-lg">
-			<p class="text-xs font-semibold uppercase tracking-widest text-primary">Your account</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<div class="gap-xl flex flex-wrap items-center justify-between">
+		<header class="gap-lg flex flex-col">
+			<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+				Your account
+			</p>
 			<Heading size="h2" weight="bold">Address book.</Heading>
-			<p class="max-w-2xl text-neutral/65">Keep your usual delivery addresses close.</p>
+			<p class="text-neutral/65 max-w-2xl">Keep your usual delivery addresses close.</p>
 		</header>
 		<Button variant="outline" onclick={() => (editing = 'new')}>Add address +</Button>
 	</div>
-	{#if editing === 'new'}<div class="rounded-lg border border-neutral/15 p-xl">
+	{#if editing === 'new'}<div class="border-neutral/15 p-xl rounded-lg border">
 			{@render addressEditor()}
 		</div>{/if}
-	<div class="flex flex-col gap-xl">
+	<div class="gap-xl flex flex-col">
 		{#each addresses as address (address.id)}<article
-				class="rounded-lg border border-neutral/15 p-xl"
+				class="border-neutral/15 p-xl rounded-lg border"
 			>
 				{#if editing === address.id}{@render addressEditor()}{:else}<div
-						class="flex gap-xl items-start justify-between flex-wrap"
+						class="gap-xl flex flex-wrap items-start justify-between"
 					>
-						<div class="flex flex-col gap-lg">
-							<div class="flex gap-lg items-center">
+						<div class="gap-lg flex flex-col">
+							<div class="gap-lg flex items-center">
 								<h3 class="text-lg font-semibold">{address.label}</h3>
 								{#if preferred === address.id}<Chip size="small" variant="soft">Default</Chip>{/if}
 							</div>
-							<address class="text-sm not-italic leading-relaxed text-neutral/65">
+							<address class="text-neutral/65 text-sm leading-relaxed not-italic">
 								{address.name}<br />{address.street}<br />{address.postal}
 								{address.city}<br />{address.country}
 							</address>
 						</div>
-						<div class="flex gap-md flex-wrap">
+						<div class="gap-md flex flex-wrap">
 							<Button variant="outline" size="small" onclick={() => (editing = address.id)}
 								>Edit</Button
 							>{#if preferred !== address.id}<Button
@@ -130,5 +132,5 @@
 					</div>{/if}
 			</article>{/each}
 	</div>
-	<p class="text-xs text-neutral/45">Address changes are kept in this preview.</p>
+	<p class="text-neutral/65 text-xs">Address changes are kept in this preview.</p>
 </section>

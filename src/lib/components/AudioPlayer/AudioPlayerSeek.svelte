@@ -6,6 +6,7 @@
 	import type { useAudioPlayerTheme } from './audioPlayer.theme.js';
 	import AudioPlayerTrack from './AudioPlayerTrack.svelte';
 	import AudioPlayerWaveform from './AudioPlayerWaveform.svelte';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type AudioPlayerClasses = ReturnType<typeof useAudioPlayerTheme>;
 
@@ -32,6 +33,7 @@
 		title: string;
 		seek?: Snippet<[AudioPlayerState]>;
 	} = $props();
+	const t = $derived(useI18n());
 </script>
 
 {#if seek}
@@ -45,7 +47,7 @@
 		duration={player.duration}
 		buffered={player.buffered}
 		{disabled}
-		label={`Seek ${title}`}
+		label={t.seekTitle(title)}
 		onSeek={(time) => player.runInteraction(() => player.seekTo(time))}
 	/>
 {:else}
@@ -59,7 +61,7 @@
 		duration={player.duration}
 		buffered={player.buffered}
 		{disabled}
-		label={`Seek ${title}`}
+		label={t.seekTitle(title)}
 		onSeek={(time) => player.runInteraction(() => player.seekTo(time))}
 	/>
 {/if}

@@ -21,4 +21,3 @@ export type SkeletonProps = WithAttachments<{
 	 */
 	theme?: SkeletonThemeProps;
 }>;
-

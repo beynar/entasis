@@ -10,15 +10,15 @@
 	let submitted = $state(false);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card
 		class="mx-auto w-full max-w-xl"
 		title="Everything back on track?"
 		description="Your support request has been resolved in this sample workspace."
 		><Stack gap="lg">
-			<div class="rounded-lg bg-success-muted p-lg">
+			<div class="bg-success-muted p-lg rounded-lg">
 				<h3 class="font-semibold">Export issue resolved</h3>
-				<p class="mt-sm text-sm text-neutral/65">Maya helped you restore the project export.</p>
+				<p class="mt-sm text-neutral/65 text-sm">Maya helped you restore the project export.</p>
 			</div>
 			<Button onclick={() => (open = true)}
 				>{submitted ? 'Update feedback' : 'Share your feedback'}</Button

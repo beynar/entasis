@@ -22,9 +22,9 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 			A little something extra
 		</p>
 		<Heading size="h2" weight="bold">Good things come in pairs.</Heading>
@@ -36,20 +36,20 @@
 		bind:open
 		title="A little extra for your everyday"
 		description="Choose an offer to apply to this sample bag."
-		><div class="flex flex-col gap-xl">
+		><div class="gap-xl flex flex-col">
 			{#each offers as offer (offer.code)}<article
-					class="flex flex-col gap-lg p-xl rounded-lg bg-surface-recessed"
+					class="gap-lg p-xl bg-surface-recessed flex flex-col rounded-lg"
 				>
 					<Chip class="w-fit" variant="soft">{offer.label}</Chip>
 					<h3 class="text-xl font-semibold">{offer.title}</h3>
-					<p class="text-sm text-neutral/60">{offer.description}</p>
+					<p class="text-neutral/70 text-sm">{offer.description}</p>
 					<Button
 						variant={applied === offer.code ? 'soft' : 'outline'}
 						onclick={() => (applied = offer.code)}
 						>{applied === offer.code ? 'Selected ✓' : 'Use ' + offer.code}</Button
 					>
 				</article>{/each}
-			<p class="text-sm text-success" aria-live="polite">
+			<p class="text-success text-sm" aria-live="polite">
 				{applied
 					? `${applied} selected for the sample bag.`
 					: 'Choose the offer that fits your order.'}

@@ -33,25 +33,27 @@
 	let nextId = $state(1);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Delivery addresses</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Delivery addresses
+		</p>
 		<Heading size="h2" weight="bold">A place for every good thing.</Heading>
 	</header>
-	<div class="grid gap-xl sm:grid-cols-2 lg:grid-cols-3">
+	<div class="gap-xl grid sm:grid-cols-2 lg:grid-cols-3">
 		{#each addresses as address (address.id)}<Card
 				variant={preferred === address.id ? 'soft' : 'outline'}
 				color={preferred === address.id ? 'primary' : 'neutral'}
-				><div class="flex flex-col gap-xl">
-					<div class="flex gap-lg justify-between">
+				><div class="gap-xl flex flex-col">
+					<div class="gap-lg flex justify-between">
 						<h3 class="font-semibold">{address.label}</h3>
 						{#if preferred === address.id}<Chip size="small" variant="soft">Default</Chip>{/if}
 					</div>
-					<address class="text-sm not-italic leading-relaxed text-neutral/65">
+					<address class="text-neutral/65 text-sm leading-relaxed not-italic">
 						{address.name}<br />{address.street}<br />{address.postal}
 						{address.city}<br />{address.country}
 					</address>
-					<div class="flex gap-md">
+					<div class="gap-md flex">
 						<Button size="small" variant="outline" onclick={() => (editing = address.id)}
 							>Edit</Button
 						><Button

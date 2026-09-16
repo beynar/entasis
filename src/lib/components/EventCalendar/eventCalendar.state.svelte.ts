@@ -148,9 +148,9 @@ export type EventCalendarStateOptions<
 	direction: 'ltr' | 'rtl';
 	interactionOptions?: EventCalendarInteractionOptions;
 	allowOverlap: boolean | EventCalendarOverlapPredicate<TItemFields>;
-	canUpdateItem?: (proposal: EventCalendarProposedUpdate<TItemFields>) => boolean;
-	onItemUpdate?: (proposal: EventCalendarProposedUpdate<TItemFields>) => EventCalendarUpdateResult;
-	canSelectSlot?: (slot: EventCalendarSlot) => boolean;
+	canUpdateItem?: (payload: EventCalendarProposedUpdate<TItemFields>) => boolean;
+	onItemUpdate?: (payload: EventCalendarProposedUpdate<TItemFields>) => EventCalendarUpdateResult;
+	canSelectSlot?: (payload: EventCalendarSlot) => boolean;
 	recurrenceOptions?: EventCalendarRecurrenceOptions<TItemFields>;
 	historyLimit: number;
 	renderers: EventCalendarSnippetProps<TItemFields, TResourceFields>;

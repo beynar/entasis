@@ -99,7 +99,7 @@ export type AIComposerSubmitMeta = {
 
 export type AIComposerSubmitEvent = SubmitEvent | KeyboardEvent;
 export type AIComposerSubmitShortcut = RichTextInputSubmitShortcut;
-export type AIComposerSubmitDetail = AIComposerSubmitMeta & {
+export type AIComposerSubmitPayload = AIComposerSubmitMeta & {
 	event?: AIComposerSubmitEvent;
 	steered?: boolean;
 };
@@ -134,7 +134,7 @@ export type AIComposerTriggerSource<Item extends RichTextInputItem = RichTextInp
 > & {
 	items?: Item[];
 	tokenKind?: RichTextInputTokenKind | ((item: Item) => RichTextInputTokenKind);
-	onSearch?: (context: RichTextInputTriggerContext) => RichTextInputSearchResult<Item>;
+	onSearch?: (payload: RichTextInputTriggerContext) => RichTextInputSearchResult<Item>;
 	onSelect?(payload: { item: Item; context: RichTextInputTriggerContext }): void;
 	toToken?(payload: { item: Item; context: RichTextInputTriggerContext }): RichTextInputToken;
 };
@@ -146,7 +146,7 @@ export type AIComposerSuggestionLifecycleState = RichTextInputSuggestionLifecycl
 	trigger: AIComposerSuggestionTrigger;
 };
 export type AIComposerSuggestionLifecycleCallback = (
-	state: AIComposerSuggestionLifecycleState
+	payload: AIComposerSuggestionLifecycleState
 ) => void;
 
 export type AIComposerVoiceInputVariant = Exclude<VoiceInputVariant, 'default'>;
@@ -257,7 +257,7 @@ export type AIComposerProps = WithAttachments<
 		/** Model selector rendered in the default action row. */
 		modelSelector?: Slot;
 		/** Handles a submission, queued submission, or steering message. */
-		onSubmit?: (detail: AIComposerSubmitDetail) => void | Promise<void>;
+		onSubmit?: (payload: AIComposerSubmitPayload) => void | Promise<void>;
 		/** Requests that the active response stop. */
 		onStop?: () => void | Promise<void>;
 		/** Called with files rejected by count, type, or size constraints. */
@@ -267,11 +267,11 @@ export type AIComposerProps = WithAttachments<
 		/** Called with detailed file rejection reasons. */
 		onFileReject?: (rejections: FileRejection[]) => void;
 		/** Called for each new attachment record. */
-		onAttachmentAdd?: (attachment: AIComposerAttachment) => void;
+		onAttachmentAdd?: (payload: AIComposerAttachment) => void;
 		/** Retries a failed attachment. */
-		onAttachmentRetry?: (attachment: AIComposerAttachment) => void | Promise<void>;
+		onAttachmentRetry?: (payload: AIComposerAttachment) => void | Promise<void>;
 		/** Removes an attachment from the composer. */
-		onAttachmentRemove?: (attachment: AIComposerAttachment) => void;
+		onAttachmentRemove?: (payload: AIComposerAttachment) => void;
 		/** Called after queued submissions are added, reordered, or removed. */
 		onQueueChange?: (queue: AIComposerQueuedMessage[]) => void;
 		/** Called after a queued message is added. */
@@ -289,11 +289,11 @@ export type AIComposerProps = WithAttachments<
 		/** Called when a queued message is marked for steering. */
 		onSteer?: (payload: AIComposerQueuedMessagePayload) => void;
 		/** Called after a slash command is inserted. Trigger-source `onSelect` runs first. */
-		onCommandSelect?: (command: AIComposerCommand) => void;
+		onCommandInsert?: (payload: AIComposerCommand) => void;
 		/** Called after a mention or reference is inserted. Trigger-source `onSelect` runs first. */
-		onMentionSelect?: (item: AIComposerMentionItem) => void;
+		onMentionInsert?: (payload: AIComposerMentionItem) => void;
 		/** Called after a skill is inserted. Trigger-source `onSelect` runs first. */
-		onSkillSelect?: (skill: AIComposerSkillItem) => void;
+		onSkillInsert?: (payload: AIComposerSkillItem) => void;
 		/** Svelte Pro-compatible slash-command search callback. */
 		onCommandSearch?: AIComposerCommandSearch;
 		/** Svelte Pro-compatible mention/reference search callback. */

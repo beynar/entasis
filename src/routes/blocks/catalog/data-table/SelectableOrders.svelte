@@ -14,10 +14,10 @@
 	]);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<header>
 		<h2 class="text-3xl font-semibold">Orders, ready to move.</h2>
-		<p class="mt-sm text-sm text-neutral/60">Select sample orders and mark them fulfilled.</p>
+		<p class="mt-sm text-neutral/70 text-sm">Select sample orders and mark them fulfilled.</p>
 	</header>
 	<Card
 		><DataTable

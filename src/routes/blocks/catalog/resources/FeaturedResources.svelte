@@ -31,15 +31,15 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 			Learn something useful
 		</p>
 		<Heading size="h2" weight="bold">A little direction for your next idea.</Heading>
 	</header>
-	<div class="grid gap-xl lg:grid-cols-[1.4fr_1fr]">
-		<article class="flex flex-col gap-xl p-xl rounded-lg bg-primary-muted">
+	<div class="gap-xl grid lg:grid-cols-[1.4fr_1fr]">
+		<article class="gap-xl p-xl bg-primary-muted flex flex-col rounded-lg">
 			<img
 				src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&amp;fit=crop&amp;w=1100&amp;q=80"
 				alt="Mountain night"
@@ -53,13 +53,13 @@
 			</p>
 			<Button href="/docs" class="self-start">Read the guide ↗</Button>
 		</article>
-		<div class="flex flex-col gap-xl">
-			<p class="text-xs uppercase tracking-widest text-neutral/50">More useful reading</p>
-			{#each resources.slice(1) as resource (resource.title)}<article class="flex flex-col gap-lg">
+		<div class="gap-xl flex flex-col">
+			<p class="text-neutral/65 text-xs tracking-widest uppercase">More useful reading</p>
+			{#each resources.slice(1) as resource (resource.title)}<article class="gap-lg flex flex-col">
 					<Chip variant="outline" color="neutral" size="small" class="w-fit">{resource.type}</Chip
 					><a href="/docs" class="text-xl font-semibold">{resource.title}</a>
 					<p class="text-neutral/65">{resource.description}</p>
-					<p class="text-xs text-neutral/50">{resource.duration}</p>
+					<p class="text-neutral/65 text-xs">{resource.duration}</p>
 				</article>
 				<Separator />{/each}
 		</div>

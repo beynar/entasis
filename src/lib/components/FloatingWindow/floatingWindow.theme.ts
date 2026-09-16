@@ -1,19 +1,20 @@
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
+import { motion, useComponentMotion } from '$lib/utils/motion/index.js';
 
 const defaultFloatingWindow = cva({
-	base: 'bg-surface-floating text-neutral pointer-events-auto fixed isolate flex flex-col overflow-visible rounded-lg shadow-xl ring-1 ring-neutral/15 outline-none focus-visible:ring-2 focus-visible:ring-primary',
+	base: 'bg-surface-floating text-neutral pointer-events-auto fixed isolate flex flex-col overflow-visible rounded-xl lift-4 ring-1 ring-neutral-muted outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
 	variants: {
 		dragFrom: {
 			header: '',
 			window: 'cursor-move'
 		},
 		dragging: {
-			true: 'select-none shadow-2xl transition-none',
-			false: 'transition-[box-shadow] duration-150'
+			true: 'select-none lift-5 transition-none',
+			false: 'transition-[box-shadow] duration-normal'
 		},
 		resizing: {
-			true: 'select-none shadow-2xl transition-none',
+			true: 'select-none lift-5 transition-none',
 			false: ''
 		}
 	},
@@ -46,7 +47,7 @@ const defaultFloatingWindowActions = cva({
 });
 
 const defaultFloatingWindowControl = cva({
-	base: 'shrink-0 !p-sm text-neutral/65 hover:text-neutral'
+	base: 'shrink-0 !p-sm text-neutral/70 hover:text-neutral'
 });
 
 const defaultFloatingWindowScrollArea = cva({
@@ -76,21 +77,21 @@ const defaultFloatingWindowResizeHandle = cva({
 });
 
 const defaultFloatingWindowDockItem = cva({
-	base: 'bg-surface-floating text-neutral pointer-events-auto fixed flex touch-none items-center overflow-hidden shadow-lg ring-1 ring-neutral/15',
+	base: 'bg-surface-floating text-neutral pointer-events-auto fixed flex touch-none items-center overflow-hidden lift-4 ring-1 ring-neutral-muted',
 	variants: {
 		orientation: {
 			horizontal: 'h-9 flex-row',
 			vertical: 'w-9 flex-col'
 		},
 		side: {
-			top: 'rounded-t-none rounded-b-md',
-			right: 'rounded-r-none rounded-l-md',
-			bottom: 'rounded-t-md rounded-b-none',
-			left: 'rounded-r-md rounded-l-none'
+			top: 'rounded-t-none rounded-b-xl',
+			right: 'rounded-r-none rounded-l-xl',
+			bottom: 'rounded-t-xl rounded-b-none',
+			left: 'rounded-r-xl rounded-l-none'
 		},
 		dragging: {
 			true: 'cursor-grabbing select-none',
-			false: 'cursor-grab transition-[top,left,box-shadow] duration-200'
+			false: 'cursor-grab transition-[top,left,box-shadow] duration-normal'
 		}
 	},
 	defaultVariants: {
@@ -146,7 +147,28 @@ const defaultFloatingWindowDockActions = cva({
 	}
 });
 
+// The window and its dock pill are two halves of one crossfade: `flight` times the
+// shared transform between them, `enter` / `exit` the scale fallback used when there
+// is no counterpart to fly to. Only `duration` / `easing` are read from each.
+export const defaultFloatingWindowMotion = motion({
+	base: {
+		in: { x: 0, y: 0, scale: 0.97, opacity: 0 },
+		out: { x: 0, y: 0, scale: 0.97, opacity: 0 }
+	},
+	variants: {
+		phase: {
+			flight: { duration: 'slow', easing: 'enter' },
+			enter: { duration: 'normal', easing: 'enter' },
+			exit: { duration: 'fast', easing: 'exit' }
+		}
+	},
+	defaultVariants: {
+		phase: 'flight'
+	}
+});
+
 export const floatingWindowTheme = {
+	motion: defaultFloatingWindowMotion,
 	root: defaultFloatingWindow,
 	header: defaultFloatingWindowHeader,
 	title: defaultFloatingWindowTitle,
@@ -168,3 +190,5 @@ export const useFloatingWindowTheme = useComponentTheme<FloatingWindowTheme>(
 	'floating-window',
 	floatingWindowTheme
 );
+export const useFloatingWindowMotion = () =>
+	useComponentMotion('floating-window', defaultFloatingWindowMotion);

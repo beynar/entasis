@@ -1,5 +1,5 @@
 <script lang="ts" generics="TData">
-	import type { Column } from '@tanstack/table-core';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import Button from '../Button/Button.svelte';
 	import Checkbox from '../Form/Checkbox/Checkbox.svelte';
 	import CheckboxesInput from '../Form/CheckboxesInput/CheckboxesInput.svelte';
@@ -10,6 +10,7 @@
 	import Slot from '../Slot/Slot.svelte';
 	import type { DataTableClasses } from './dataTable.theme.js';
 	import type { DataTableModel } from './dataTable.model.svelte.js';
+	import type { DataTableColumnInstance } from './dataTable.table.js';
 
 	let {
 		column,
@@ -17,13 +18,17 @@
 		classes,
 		separated = false
 	}: {
-		column: Column<TData, unknown>;
+		column: DataTableColumnInstance<TData>;
 		model: DataTableModel<TData>;
 		classes: DataTableClasses;
 		separated?: boolean;
 	} = $props();
 
 	const config = $derived(model.getColumnConfig(column.id));
+	const t = $derived(useI18n());
+	// The filter row has no visible label per control, so the column name carries the
+	// accessible name of the controls that have no placeholder of their own.
+	const columnName = $derived(typeof config?.header === 'string' ? config.header : column.id);
 	const value = $derived(model.state.columnFilters.find((entry) => entry.id === column.id)?.value);
 	const active = $derived(
 		Array.isArray(value) ? value.length > 0 : value !== undefined && value !== null && value !== ''
@@ -79,7 +84,7 @@
 {#if config?.filter}
 	<div class={classes.filterPanel({ separated })}>
 		<div class={classes.filterHeader()}>
-			<span class={classes.filterLabel()}>Filter</span>
+			<span class={classes.filterLabel()}>{t.filter}</span>
 			<Button
 				type="button"
 				variant="ghost"
@@ -88,7 +93,7 @@
 				disabled={!active || model.props.disabled}
 				onclick={clearFilter}
 			>
-				Clear
+				{t.clear}
 			</Button>
 		</div>
 
@@ -97,7 +102,7 @@
 		{:else if config.filter.type === 'text'}
 			<TextInput
 				size="small"
-				placeholder={config.filter.placeholder ?? 'Filter values'}
+				placeholder={config.filter.placeholder ?? t.filterValues}
 				value={typeof value === 'string' ? value : ''}
 				disabled={model.props.disabled}
 				onValueChange={(next) => model.setColumnFilter(column.id, next || undefined)}
@@ -106,7 +111,7 @@
 			<div class={classes.filterFields()}>
 				<NumberInput
 					size="small"
-					placeholder="Minimum"
+					placeholder={t.minimumLabel}
 					min={config.filter.min}
 					max={config.filter.max}
 					value={(value as { min?: number } | undefined)?.min ?? null}
@@ -115,7 +120,7 @@
 				/>
 				<NumberInput
 					size="small"
-					placeholder="Maximum"
+					placeholder={t.maximumLabel}
 					min={config.filter.min}
 					max={config.filter.max}
 					value={(value as { max?: number } | undefined)?.max ?? null}
@@ -126,7 +131,8 @@
 		{:else if config.filter.type === 'select'}
 			<Select
 				size="small"
-				placeholder="All values"
+				placeholder={t.allValues}
+				label={`${t.filter} ${columnName}`}
 				items={[...config.filter.options]}
 				value={typeof value === 'string' ? value : null}
 				disabled={model.props.disabled}
@@ -153,7 +159,7 @@
 			<div class={classes.filterFields()}>
 				<DateInput
 					size="small"
-					placeholder="From"
+					placeholder={t.from}
 					minDate={config.filter.min}
 					maxDate={config.filter.max}
 					value={(value as { start?: Date } | undefined)?.start ?? null}
@@ -162,7 +168,7 @@
 				/>
 				<DateInput
 					size="small"
-					placeholder="To"
+					placeholder={t.to}
 					minDate={config.filter.min}
 					maxDate={config.filter.max}
 					value={(value as { end?: Date } | undefined)?.end ?? null}
@@ -174,20 +180,20 @@
 			<div class={classes.filterFields()}>
 				<Checkbox
 					mode="control"
-					ariaLabel={config.filter.trueLabel ?? 'True'}
+					label={config.filter.trueLabel ?? t.trueLabel}
 					value={value === true}
 					disabled={model.props.disabled}
 					onValueChange={(next) => model.setColumnFilter(column.id, next ? true : undefined)}
 				/>
-				<span>{config.filter.trueLabel ?? 'True'}</span>
+				<span>{config.filter.trueLabel ?? t.trueLabel}</span>
 				<Checkbox
 					mode="control"
-					ariaLabel={config.filter.falseLabel ?? 'False'}
+					label={config.filter.falseLabel ?? t.falseLabel}
 					value={value === false}
 					disabled={model.props.disabled}
 					onValueChange={(next) => model.setColumnFilter(column.id, next ? false : undefined)}
 				/>
-				<span>{config.filter.falseLabel ?? 'False'}</span>
+				<span>{config.filter.falseLabel ?? t.falseLabel}</span>
 			</div>
 		{/if}
 	</div>

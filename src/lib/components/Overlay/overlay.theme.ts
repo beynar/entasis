@@ -2,7 +2,7 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultOverlayRoot = cva({
-	base: 'pointer-events-none absolute inset-0 z-10 flex overflow-hidden rounded-[inherit] text-white opacity-100 transition-opacity duration-200 ease-out motion-reduce:transition-none',
+	base: 'pointer-events-none absolute inset-0 z-10 flex overflow-hidden rounded-[inherit] text-white opacity-100 transition-opacity duration-normal ease-standard motion-reduce:transition-none',
 	variants: {
 		position: {
 			fill: 'items-center',
@@ -35,8 +35,8 @@ const defaultOverlayScrim = cva({
 	variants: {
 		position: {
 			fill: 'bg-black/55',
-			top: '-z-[1] bg-gradient-to-b from-black/80 via-black/40 to-transparent',
-			bottom: '-z-[1] bg-gradient-to-t from-black/80 via-black/40 to-transparent'
+			top: '-z-[1] bg-linear-to-b from-black/80 via-black/40 to-transparent',
+			bottom: '-z-[1] bg-linear-to-t from-black/80 via-black/40 to-transparent'
 		}
 	},
 	defaultVariants: {
@@ -45,7 +45,7 @@ const defaultOverlayScrim = cva({
 });
 
 const defaultOverlayContent = cva({
-	base: 'relative z-[1] isolate flex w-full min-w-0 flex-col will-change-transform transition-transform duration-200 ease-out motion-reduce:transition-none',
+	base: 'relative z-[1] isolate flex w-full min-w-0 flex-col will-change-transform transition-transform duration-normal ease-standard motion-reduce:transition-none',
 	variants: {
 		size: {
 			small: 'gap-md p-xl',
@@ -107,9 +107,9 @@ const defaultOverlayTitle = cva({
 	base: 'font-semibold text-balance',
 	variants: {
 		size: {
-			small: 'text-sm',
-			normal: 'text-base',
-			large: 'text-lg'
+			small: 'text-xs',
+			normal: 'text-sm',
+			large: 'text-base'
 		}
 	},
 	defaultVariants: {
@@ -118,12 +118,12 @@ const defaultOverlayTitle = cva({
 });
 
 const defaultOverlayDescription = cva({
-	base: 'max-w-xl text-white/75 text-balance',
+	base: 'max-w-xl text-white/70 text-balance',
 	variants: {
 		size: {
 			small: 'text-xs/relaxed',
-			normal: 'text-sm/relaxed',
-			large: 'text-base/relaxed'
+			normal: 'text-xs/relaxed',
+			large: 'text-sm/relaxed'
 		}
 	},
 	defaultVariants: {
@@ -132,7 +132,7 @@ const defaultOverlayDescription = cva({
 });
 
 const defaultOverlayBody = cva({
-	base: 'max-w-xl text-white/90',
+	base: 'max-w-xl text-white',
 	variants: {
 		size: {
 			small: 'text-xs',

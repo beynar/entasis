@@ -108,107 +108,105 @@
 			<span>Draft saved 14:32</span>
 		{/snippet}
 
-		{#snippet children()}
-			<div class="grid gap-5">
-				<section
-					class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-neutral-muted bg-surface-raised p-4"
-				>
-					<div>
-						<p class="text-sm font-medium text-neutral">Header context</p>
-						<p class="mt-1 text-sm text-neutral/60">
-							Swap between collapsed breadcrumbs and an eyebrow without replacing the header.
-						</p>
-					</div>
-
-					<div class="inline-flex rounded-md border border-neutral-muted bg-surface p-1">
-						<button
-							type="button"
-							class="state-layer rounded px-3 py-1.5 text-sm font-medium transition {contextMode ===
-							'breadcrumbs'
-								? 'bg-primary text-primary-neutral'
-								: 'text-neutral/70'}"
-							aria-pressed={contextMode === 'breadcrumbs'}
-							onclick={() => (contextMode = 'breadcrumbs')}
-						>
-							Breadcrumbs
-						</button>
-						<button
-							type="button"
-							class="state-layer rounded px-3 py-1.5 text-sm font-medium transition {contextMode ===
-							'eyebrow'
-								? 'bg-primary text-primary-neutral'
-								: 'text-neutral/70'}"
-							aria-pressed={contextMode === 'eyebrow'}
-							onclick={() => (contextMode = 'eyebrow')}
-						>
-							Eyebrow
-						</button>
-					</div>
-				</section>
-
-				<div class="grid gap-4 md:grid-cols-3">
-					{#each metrics as metric}
-						<section class="rounded-lg border border-neutral-muted bg-surface-raised p-4">
-							<p class="text-sm font-medium text-neutral/70">{metric.label}</p>
-							<p class="mt-3 text-3xl font-semibold tracking-normal text-neutral">
-								{metric.value}
-							</p>
-							<p class="mt-1 text-sm text-primary">{metric.detail}</p>
-						</section>
-					{/each}
+		<div class="grid gap-5">
+			<section
+				class="border-neutral-muted bg-surface-raised flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4"
+			>
+				<div>
+					<p class="text-neutral text-sm font-medium">Header context</p>
+					<p class="text-neutral/70 mt-1 text-sm">
+						Swap between collapsed breadcrumbs and an eyebrow without replacing the header.
+					</p>
 				</div>
 
-				<section class="rounded-lg border border-neutral-muted bg-surface-raised p-4">
-					<div class="flex flex-wrap items-center justify-between gap-3">
-						<div>
-							<p class="text-sm font-medium text-neutral">Pipeline review</p>
-							<p class="mt-1 text-sm text-neutral/60">
-								Content uses the shell width and padding presets.
-							</p>
-						</div>
-						<span
-							class="rounded-full border border-neutral-muted bg-surface px-2.5 py-1 text-xs font-medium text-neutral/70"
-						>
-							Wide content
-						</span>
-					</div>
-
-					<div class="mt-4 grid gap-3 md:grid-cols-[1.2fr_0.8fr]">
-						<div class="rounded-md border border-neutral-muted bg-surface p-4">
-							<p class="text-sm font-medium text-neutral">Priority accounts</p>
-							<div class="mt-4 space-y-3">
-								{#each ['Mercury Health', 'Northstar', 'Falcon Works'] as account}
-									<div class="flex items-center justify-between gap-4">
-										<span class="text-sm text-neutral">{account}</span>
-										<span class="text-sm font-medium text-primary">Review</span>
-									</div>
-								{/each}
-							</div>
-						</div>
-
-						<div class="rounded-md border border-neutral-muted bg-surface p-4">
-							<p class="text-sm font-medium text-neutral">Next milestone</p>
-							<p class="mt-4 text-sm leading-6 text-neutral/70">
-								Confirm owner coverage, then publish the weekly customer-health summary.
-							</p>
-						</div>
-					</div>
-				</section>
-
-				<section class="rounded-lg border border-neutral-muted bg-surface-raised p-4">
-					<p class="text-sm font-medium text-neutral">Recent activity</p>
-					<div
-						class="mt-4 divide-y divide-neutral-muted overflow-hidden rounded-md border border-neutral-muted"
+				<div class="border-neutral-muted bg-surface inline-flex rounded-md border p-1">
+					<button
+						type="button"
+						class="state-layer rounded px-3 py-1.5 text-sm font-medium transition {contextMode ===
+						'breadcrumbs'
+							? 'bg-primary text-primary-neutral'
+							: 'text-neutral/70'}"
+						aria-pressed={contextMode === 'breadcrumbs'}
+						onclick={() => (contextMode = 'breadcrumbs')}
 					>
-						{#each activities as activity}
-							<div class="flex items-start gap-3 bg-surface px-4 py-3">
-								<span class="mt-2 size-2 shrink-0 rounded-full bg-primary"></span>
-								<p class="text-sm leading-6 text-neutral/70">{activity}</p>
-							</div>
-						{/each}
-					</div>
-				</section>
+						Breadcrumbs
+					</button>
+					<button
+						type="button"
+						class="state-layer rounded px-3 py-1.5 text-sm font-medium transition {contextMode ===
+						'eyebrow'
+							? 'bg-primary text-primary-neutral'
+							: 'text-neutral/70'}"
+						aria-pressed={contextMode === 'eyebrow'}
+						onclick={() => (contextMode = 'eyebrow')}
+					>
+						Eyebrow
+					</button>
+				</div>
+			</section>
+
+			<div class="grid gap-4 md:grid-cols-3">
+				{#each metrics as metric, index (index)}
+					<section class="border-neutral-muted bg-surface-raised rounded-lg border p-4">
+						<p class="text-neutral/70 text-sm font-medium">{metric.label}</p>
+						<p class="text-neutral mt-3 text-3xl font-semibold tracking-normal">
+							{metric.value}
+						</p>
+						<p class="text-primary-readable mt-1 text-sm">{metric.detail}</p>
+					</section>
+				{/each}
 			</div>
-		{/snippet}
+
+			<section class="border-neutral-muted bg-surface-raised rounded-lg border p-4">
+				<div class="flex flex-wrap items-center justify-between gap-3">
+					<div>
+						<p class="text-neutral text-sm font-medium">Pipeline review</p>
+						<p class="text-neutral/70 mt-1 text-sm">
+							Content uses the shell width and padding presets.
+						</p>
+					</div>
+					<span
+						class="border-neutral-muted bg-surface text-neutral/70 rounded-full border px-2.5 py-1 text-xs font-medium"
+					>
+						Wide content
+					</span>
+				</div>
+
+				<div class="mt-4 grid gap-3 md:grid-cols-[1.2fr_0.8fr]">
+					<div class="border-neutral-muted bg-surface rounded-md border p-4">
+						<p class="text-neutral text-sm font-medium">Priority accounts</p>
+						<div class="mt-4 space-y-3">
+							{#each ['Mercury Health', 'Northstar', 'Falcon Works'] as account, index (index)}
+								<div class="flex items-center justify-between gap-4">
+									<span class="text-neutral text-sm">{account}</span>
+									<span class="text-primary-readable text-sm font-medium">Review</span>
+								</div>
+							{/each}
+						</div>
+					</div>
+
+					<div class="border-neutral-muted bg-surface rounded-md border p-4">
+						<p class="text-neutral text-sm font-medium">Next milestone</p>
+						<p class="text-neutral/70 mt-4 text-sm leading-6">
+							Confirm owner coverage, then publish the weekly customer-health summary.
+						</p>
+					</div>
+				</div>
+			</section>
+
+			<section class="border-neutral-muted bg-surface-raised rounded-lg border p-4">
+				<p class="text-neutral text-sm font-medium">Recent activity</p>
+				<div
+					class="divide-neutral-muted border-neutral-muted mt-4 divide-y overflow-hidden rounded-md border"
+				>
+					{#each activities as activity, index (index)}
+						<div class="bg-surface flex items-start gap-3 px-4 py-3">
+							<span class="bg-primary mt-2 size-2 shrink-0 rounded-full"></span>
+							<p class="text-neutral/70 text-sm leading-6">{activity}</p>
+						</div>
+					{/each}
+				</div>
+			</section>
+		</div>
 	</AppShell>
 </div>

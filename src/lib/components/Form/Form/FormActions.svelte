@@ -10,7 +10,7 @@
 	import type { MaybePromise } from './form.js';
 
 	type Action = ButtonProps & {
-		onAction?: (form: State) => MaybePromise<unknown>;
+		onAction?: (payload: State) => MaybePromise<unknown>;
 	};
 
 	let {
@@ -74,7 +74,10 @@
 				hasError: false,
 				labelPosition: resolvedLabelPosition
 			}),
-			resolvedLabelPosition === 'left' && 'md:flex md:items-start md:gap-x-6'
+			// The action row rides the Field grid: in `left` mode that root is an inline-size
+			// container, so the label/buttons split below is a container query on the row's own
+			// width (`@lg` = 32rem) and the action label lines up with every other field label.
+			resolvedLabelPosition === 'left' && 'min-w-0'
 		)}
 	>
 		{#if label || description}
@@ -87,7 +90,7 @@
 						labelPosition: resolvedLabelPosition
 					}),
 					'grid items-start gap-1',
-					resolvedLabelPosition === 'left' && 'md:min-w-0 md:flex-1'
+					resolvedLabelPosition === 'left' && 'min-w-0'
 				)}
 			>
 				{#if label}
@@ -108,10 +111,10 @@
 					hasError: false,
 					labelPosition: resolvedLabelPosition
 				}),
-				resolvedLabelPosition === 'left' && 'md:w-auto md:flex-none md:shrink-0'
+				resolvedLabelPosition === 'left' && 'min-w-0'
 			)}
 		>
-			<div class={cx(className, resolvedLabelPosition === 'left' && 'md:w-auto md:flex-nowrap')}>
+			<div class={cx(className, resolvedLabelPosition === 'left' && '@lg:flex-nowrap')}>
 				{@render buttons()}
 			</div>
 		</div>

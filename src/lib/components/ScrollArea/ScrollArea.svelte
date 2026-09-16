@@ -5,11 +5,13 @@
 	import { useScrollAreaTheme } from './scrollArea.theme.js';
 	import { caretUpIcon } from '../Icons/caretUp.js';
 	import { caretDownIcon } from '../Icons/caretDown.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		ref = $bindable(null),
 		viewportRef = $bindable(null),
-		ariaLabel = 'Scrollable content',
+		label,
+		viewportRole = 'group',
 		class: className = '',
 		children,
 		delay = 0,
@@ -20,6 +22,7 @@
 		theme,
 		...attachments
 	}: ScrollAreaProps = $props();
+	const t = $derived(useI18n());
 
 	const componentId = $props.id();
 	const viewportId = `${componentId}-viewport`;
@@ -68,8 +71,8 @@
 		bind:this={viewportRef}
 		class={classes.viewport({ scrollFade: scrollFadeAxis })}
 		tabindex={scrollArea.viewportTabindex}
-		role="group"
-		aria-label={ariaLabel}
+		role={viewportRole}
+		aria-label={label ?? t.scrollableContent}
 		{onscroll}
 		{@attach scrollArea.viewportAttachment}
 		style:position="relative"

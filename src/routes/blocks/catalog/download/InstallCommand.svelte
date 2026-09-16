@@ -9,9 +9,13 @@
 	import { Tabbar } from 'svelai/tabbar';
 	import { arrowRightIcon } from 'svelai/icons/arrowRight';
 	import { copyIcon } from 'svelai/icons/copy';
-	let active = $state(0);
+	const commands: Record<string, string> = {
+		npm: 'npm install svelai',
+		pnpm: 'pnpm add svelai',
+		bun: 'bun add svelai'
+	};
+	let active = $state('npm');
 	let feedback = $state('');
-	const commands = ['npm install svelai', 'pnpm add svelai', 'bun add svelai'];
 	async function copyCommand() {
 		try {
 			await navigator.clipboard.writeText(commands[active]);
@@ -22,8 +26,8 @@
 	}
 </script>
 
-<section class="mx-auto grid max-w-5xl items-center gap-xl p-lg md:grid-cols-2 md:p-xl">
-	<div class="flex flex-col items-start gap-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto grid max-w-5xl items-center md:grid-cols-2">
+	<div class="gap-xl flex flex-col items-start">
 		<Chip variant="soft">Built for Svelte</Chip><Heading as="h2" size="h1" weight="bold"
 			>A good start is a simple one.</Heading
 		>
@@ -34,13 +38,13 @@
 	</div>
 	<Card title="Install the package" variant="outline"
 		><Stack gap="lg"
-			><Tabbar items={['npm', 'pnpm', 'bun']} bind:value={active} /><Code
+			><Tabbar items={Object.keys(commands)} bind:value={active} /><Code
 				language="shell"
 				code={commands[active]}
 			/><Button variant="outline" prefix={copyIcon} onclick={copyCommand}>Copy command</Button
-			>{#if feedback}<p class="text-sm text-neutral/60" role="status">{feedback}</p>{/if}<Separator
+			>{#if feedback}<p class="text-neutral/70 text-sm" role="status">{feedback}</p>{/if}<Separator
 			/>
-			<div class="flex flex-wrap gap-sm">
+			<div class="gap-sm flex flex-wrap">
 				<Chip size="small" variant="outline">Svelte 5</Chip><Chip size="small" variant="outline"
 					>TypeScript</Chip
 				><Chip size="small" variant="outline">One theme</Chip>

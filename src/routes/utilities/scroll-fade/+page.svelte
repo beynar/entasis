@@ -78,7 +78,7 @@
 <article class="text-neutral mx-auto grid max-w-3xl gap-4 pb-20">
 	<header class="grid gap-2">
 		<h1 class="text-3xl font-semibold">Scroll fade</h1>
-		<p class="text-neutral/60 text-balance">
+		<p class="text-neutral/70 text-balance">
 			Tailwind utilities for fading the edges of scroll containers without overlay colors.
 		</p>
 	</header>
@@ -128,11 +128,11 @@
 
 	<Separator class="my-2" children="Usage" />
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		Apply {@render ic('scroll-fade')} to the scrollable element, not the outer card. Keep backgrounds
 		and borders on a wrapper so the mask dissolves the content only.
 	</p>
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		{@render ic('scroll-fade-l')} and {@render ic('scroll-fade-r')} stay physical in RTL, while
 		{@render ic('scroll-fade-s')}, {@render ic('scroll-fade-e')}, and {@render ic('scroll-fade-x')}
 		follow the logical inline direction. Browsers without scroll-driven animations keep the configured
@@ -147,8 +147,8 @@
 					? 'bg-surface'
 					: 'bg-surface-canvas'}"
 			>
-				<code class="text-primary text-sm font-medium">{name}</code>
-				<p class="text-neutral/60 text-sm">{description}</p>
+				<code class="text-primary-readable text-sm font-medium">{name}</code>
+				<p class="text-neutral/70 text-sm">{description}</p>
 			</div>
 		{/each}
 	</div>

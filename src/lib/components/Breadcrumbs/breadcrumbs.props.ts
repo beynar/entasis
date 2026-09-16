@@ -1,10 +1,8 @@
 import type { Snippet } from 'svelte';
 import type { WithSlot, Slot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
-import type { MenuItem, MenuProps } from '../Menu/menu.props.js';
+import type { MenuItem } from '../Menu/menu.props.js';
 import type { BreadcrumbsThemeProps } from './breadcrumbs.theme.js';
-import type { Sizes } from '$lib/types/theme.js';
-import type { MenuOptionProps } from '../MenuOption/menuOption.props.js';
 
 export type BreadcrumbItemConfig = {
 	/**

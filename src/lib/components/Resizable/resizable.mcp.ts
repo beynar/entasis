@@ -23,7 +23,7 @@ grips, and RTL-aware horizontal resizing.
 		{ id: 'sidebar', defaultSize: 30, content: leftPanel },
 		{ id: 'content', defaultSize: 70, content: rightPanel }
 	]}
-	withHandle
+	handle
 	/>
 
 {#snippet leftPanel()}
@@ -45,7 +45,7 @@ grips, and RTL-aware horizontal resizing.
   when enabling persistence.
 - \`orientation\`: \`'horizontal' | 'vertical'\`. Horizontal lays panels left-to-right.
 - \`direction\`: Backward-compatible alias for \`orientation\`.
-- \`withHandle\`: Renders a visible grip in each separator.
+- \`handle\`: Renders a visible grip in each separator.
 - \`handleVariant\`: \`'grip' | 'thumb'\`. \`grip\` is the dotted handle; \`thumb\` is a compact
   pill-line affordance.
 - \`showLines\`: Shows the visible separator line while keeping the resize rail active. Defaults to

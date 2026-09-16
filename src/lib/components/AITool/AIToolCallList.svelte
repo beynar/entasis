@@ -102,6 +102,7 @@
 	>
 		<span
 			data-slot="ai-tool-call-status-indicator"
+			role="img"
 			aria-label={formatStatus(currentStatus)}
 			class={classes.indicator({ tone: getAIToolStatusTone(currentStatus) })}
 		>
@@ -191,8 +192,8 @@
 	oneAtATime={!multiple}
 	title={toolTitle}
 	content={toolContent}
-	icon={toggleIcon === 'none' ? false : toggleIcon}
-	variant={scope === 'single' ? 'outlined' : 'classic'}
-	density="small"
+	icon={toggleIcon}
+	variant={scope === 'single' ? 'outline' : 'classic'}
+	density="compact"
 	theme={accordionTheme}
 />

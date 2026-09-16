@@ -1,5 +1,5 @@
 export { default as Tabs } from './Tabs.svelte';
-export type { TabsProps, TabsPlacement, TabsRenderPayload } from './tabs.props.js';
+export type { TabsApi, TabsProps, TabsPlacement, TabsRenderPayload } from './tabs.props.js';
 export {
 	tabsTheme,
 	setTabsTheme,

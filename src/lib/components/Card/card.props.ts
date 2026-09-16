@@ -4,6 +4,7 @@ import type { WithAttachments } from '$lib/types/props.js';
 import type { CardThemeProps } from './card.theme.js';
 import type { ButtonProps } from '../Button/button.props.js';
 
+export type CardElevation = 1 | 2 | 3 | 4 | 5;
 export type CardVariant = 'solid' | 'outline' | 'soft' | 'ghost';
 
 /** @deprecated Use the shared `Density` type from svelai types instead. */
@@ -32,6 +33,11 @@ type CardBaseProps = {
 	 * Visual style variant of the card.
 	 */
 	variant?: CardVariant;
+	/**
+	 * Elevation step a `solid` card lifts by, on the theme's elevation scale (`lift-1` … `lift-5`).
+	 * Ignored by the other variants, which cast no shadow. @default 1
+	 */
+	elevation?: CardElevation;
 	/**
 	 * Size token controlling the typography scale (title, description, body).
 	 */

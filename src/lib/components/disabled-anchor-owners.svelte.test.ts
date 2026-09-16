@@ -115,7 +115,7 @@ describe('shared disabled anchor owners', () => {
 		render(Tabbar, {
 			props: {
 				items: [{ label: 'Tab destination', href: '#tab', disabled: true }, 'Enabled'],
-				defaultValue: 0,
+				defaultValue: 'Tab destination',
 				onValueChange
 			}
 		});

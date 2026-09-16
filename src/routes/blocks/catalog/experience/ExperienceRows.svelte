@@ -24,17 +24,19 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">A little background</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			A little background
+		</p>
 		<Heading size="h2" weight="bold">Experience, earned by doing.</Heading>
 	</header>
 	<div>
 		{#each roles as role (role.company)}<div
-				class="grid gap-lg border-t border-neutral/15 py-xl md:grid-cols-[12rem_1fr_auto]"
+				class="gap-lg border-neutral/15 py-xl grid border-t md:grid-cols-[12rem_1fr_auto]"
 			>
-				<p class="text-sm text-neutral/50">{role.dates}</p>
-				<div class="flex flex-col gap-md">
+				<p class="text-neutral/65 text-sm">{role.dates}</p>
+				<div class="gap-md flex flex-col">
 					<h3 class="text-xl font-semibold">{role.role}</h3>
 					<p class="text-neutral/65">{role.description}</p>
 				</div>

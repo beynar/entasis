@@ -38,8 +38,8 @@
 <div class="grid w-full max-w-6xl gap-12 p-2">
 	<section>
 		<div class="mb-5">
-			<p class="font-medium text-neutral">Automatic narrow collapse</p>
-			<p class="mt-1 text-sm text-neutral/60">
+			<p class="text-neutral font-medium">Automatic narrow collapse</p>
+			<p class="text-neutral/70 mt-1 text-sm">
 				The alternate layout collapses to one rail from its own container width.
 			</p>
 		</div>
@@ -56,8 +56,8 @@
 
 	<section>
 		<div class="mb-5">
-			<p class="font-medium text-neutral">Horizontal overflow</p>
-			<p class="mt-1 text-sm text-neutral/60">
+			<p class="text-neutral font-medium">Horizontal overflow</p>
+			<p class="text-neutral/70 mt-1 text-sm">
 				Scroll the focused timeline horizontally; the edge fade appears only when needed.
 			</p>
 		</div>

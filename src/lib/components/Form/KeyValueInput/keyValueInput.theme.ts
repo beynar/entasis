@@ -30,7 +30,7 @@ const defaultRow = cva({
 });
 
 const defaultInput = cva({
-	base: 'min-w-0 flex-1 appearance-none border border-neutral-muted bg-surface-raised px-lg text-neutral outline-none ring-0 transition-all rounded-md autofill:text-neutral focus-within:ring-2 focus-within:ring-primary/50',
+	base: 'min-w-0 flex-1 appearance-none border border-neutral-muted bg-surface-raised px-lg text-neutral outline-none ring-0 transition-[color,background-color,border-color,box-shadow] rounded-md autofill:text-neutral focus-within:ring-2 focus-within:ring-focus/50',
 	variants: {
 		size: {
 			small: 'h-control-sm text-xs placeholder:text-xs',
@@ -49,7 +49,7 @@ const defaultInput = cva({
 });
 
 const defaultRemoveButton = cva({
-	base: 'state-layer flex shrink-0 items-center justify-center bg-transparent text-neutral/60 outline-none transition-all rounded-md hover:text-danger-readable focus-visible:ring-2 focus-visible:ring-primary/50',
+	base: 'state-layer flex shrink-0 items-center justify-center bg-transparent text-neutral/70 outline-none transition-[color,background-color,box-shadow] rounded-md hover:text-danger-readable focus-visible:ring-2 focus-visible:ring-focus/50',
 	variants: {
 		size: {
 			small: 'h-control-sm w-[var(--control-height-sm)]',
@@ -68,7 +68,7 @@ const defaultRemoveButton = cva({
 });
 
 const defaultAddButton = cva({
-	base: 'state-layer flex w-full items-center justify-center gap-sm border border-dashed border-neutral-muted bg-transparent px-lg text-neutral/60 outline-none transition-all rounded-md hover:text-neutral focus-visible:ring-2 focus-visible:ring-primary/50',
+	base: 'state-layer flex w-full items-center justify-center gap-sm border border-dashed border-neutral-muted bg-transparent px-lg text-neutral/70 outline-none transition-[color,background-color,border-color,box-shadow] rounded-md hover:text-neutral focus-visible:ring-2 focus-visible:ring-focus/50',
 	variants: {
 		size: {
 			small: 'py-sm text-xs',

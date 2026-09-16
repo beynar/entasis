@@ -14,7 +14,7 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 
 	const controls = createComponentControls([
 		{
@@ -29,7 +29,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		}
 	]);
 
@@ -65,10 +65,10 @@
 	subtitle="A searchable, keyboard-navigable command palette — inline or as a ⌘K dialog."
 	component="Command"
 	features={[
-		'Listbox + combobox ARIA wiring',
+		{ label: 'Listbox + combobox ARIA wiring', test: 'a11y:command.aria' },
 		'Arrow, Home, End, Enter navigation',
 		'Optional dialog mode with ⌘K shortcut',
-		'bind:open and bind:value',
+		'bind:open, bind:value, and bind:search',
 		'Keyword-aware fuzzy filtering'
 	]}
 >
@@ -137,12 +137,12 @@
 					<Button variant="outline" onclick={() => open()}>
 						{@render magnifyingGlassIcon({ size: 16 })}
 						Search commands...
-						<span class="text-neutral/60 ml-2 text-xs tracking-widest">⌘K</span>
+						<span class="text-neutral/70 ml-2 text-xs tracking-widest">⌘K</span>
 					</Button>
 				{/snippet}
 				{#snippet footer({ close })}
 					<div
-						class="border-neutral-muted text-neutral/60 mt-1 flex items-center gap-3 border-t px-3 py-2 text-xs"
+						class="border-neutral-muted text-neutral/70 mt-1 flex items-center gap-3 border-t px-3 py-2 text-xs"
 					>
 						<span>↵ Select</span>
 						<span>↑↓ Navigate</span>

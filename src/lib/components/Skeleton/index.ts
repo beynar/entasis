@@ -7,5 +7,3 @@ export {
 	type SkeletonTheme,
 	type SkeletonThemeProps
 } from './skeleton.theme.js';
-
-

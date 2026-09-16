@@ -11,19 +11,21 @@
 	let added = $state('');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">A quick look</p>
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			A quick look
+		</p>
 		<Heading size="h2" weight="bold">Meet the everyday vessel.</Heading>
 	</header>
 	<div class="mx-auto w-full max-w-sm">
 		<Card
-			><div class="flex flex-col gap-xl">
+			><div class="gap-xl flex flex-col">
 				{@render productArt('vase', 'Clay')}
 				<div class="flex justify-between">
 					<h3 class="font-semibold">Everyday vessel</h3>
@@ -34,9 +36,9 @@
 		>
 	</div>
 	<Dialog bind:open title="Everyday vessel" description="Hand-finished stoneware · $38" size="large"
-		><div class="grid gap-xl sm:grid-cols-2">
+		><div class="gap-xl grid sm:grid-cols-2">
 			{@render productArt('vase', color)}
-			<div class="flex flex-col gap-xl">
+			<div class="gap-xl flex flex-col">
 				<Chip class="w-fit" variant="soft">Small batch</Chip>
 				<p class="text-neutral/65">
 					A versatile vessel for flowers, useful tools, or nothing at all.
@@ -46,7 +48,7 @@
 					bind:value={color}
 					items={['Clay', 'Sand', 'Chalk'].map((value) => ({ value, label: value }))}
 				/><Button onclick={() => (added = color)}>Add to sample bag</Button>{#if added}<p
-						class="text-sm text-success"
+						class="text-success text-sm"
 						role="status"
 					>
 						{added} vessel added.

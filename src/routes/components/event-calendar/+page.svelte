@@ -8,7 +8,7 @@
 	import EventCalendarLoadingRtlDemo from './EventCalendarLoadingRtlDemo.svelte';
 	import EventCalendarResourcesDemo from './EventCalendarResourcesDemo.svelte';
 	import EventCalendarViewsDemo from './EventCalendarViewsDemo.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities } from '$lib/utils/tokens.js';
 	import {
 		compositionCode,
 		interactionCode,
@@ -22,7 +22,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{ name: 'showWeekends', type: 'switch', label: 'Weekends', value: true },
 		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
@@ -36,7 +36,7 @@
 	features={[
 		'Month, week, day, N-day, agenda, and resource-day views',
 		'Timed, all-day, multi-day, background, and recurring items',
-		'Move, resize, range creation, keyboard, touch, and two-click selection',
+		'Move, resize, range creation, touch, and two-click selection',
 		'Explicit IANA time zones with DST-safe civil-day math',
 		'Typed snippets, resources, callbacks, and imperative API',
 		'Multi-resource assignment, per-resource constraints, copy/paste, and undo/redo',

@@ -16,7 +16,6 @@
 		inputValue = 'on',
 		checked = false,
 		indeterminate = false,
-		ariaLabel,
 		disabled = false,
 		mode = 'normal',
 		size = 'normal',
@@ -33,7 +32,6 @@
 		inputValue?: string;
 		checked?: boolean;
 		indeterminate?: boolean;
-		ariaLabel?: string;
 		disabled?: boolean;
 		mode?: CheckboxMode | 'control';
 		size?: Sizes;
@@ -51,6 +49,10 @@
 		onCheckedChange(indeterminate || !checked);
 	};
 
+	// `control` is the compact, label-less checkbox: a string name is spoken rather than painted,
+	// so the row keeps its accessible name without growing visible text.
+	const hiddenLabel = $derived(mode === 'control' && typeof label === 'string' ? label : undefined);
+
 	const syncIndeterminate: Attachment<HTMLInputElement> = (element) => {
 		$effect(() => {
 			element.indeterminate = indeterminate;
@@ -63,10 +65,9 @@
 	{id}
 	type="button"
 	role="checkbox"
-	aria-label={ariaLabel}
+	aria-label={hiddenLabel}
 	aria-checked={indeterminate ? 'mixed' : checked}
 	{disabled}
-	data-color="primary"
 	data-state={indeterminate ? 'mixed' : checked ? 'checked' : 'unchecked'}
 	onclick={toggle}
 	onfocus={onFocus}
@@ -110,6 +111,8 @@
 		{/if}
 	</div>
 
-	<Slot render={label} class={classes.checkboxesInputItemLabel({ size })} />
+	{#if !hiddenLabel}
+		<Slot render={label} class={classes.checkboxesInputItemLabel({ size })} />
+	{/if}
 	<Slot render={description} class={classes.checkboxesInputItemDescription({ mode, checked })} />
 </button>

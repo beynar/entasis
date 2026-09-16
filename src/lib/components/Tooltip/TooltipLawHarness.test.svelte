@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Theme from '../Theme/Theme.svelte';
 	import TooltipTarget from './TooltipTarget.test.svelte';
-	import type { TooltipProps } from './tooltip.svelte.js';
+	import type { TooltipOptions } from './tooltip.props.js';
 
-	const props: Pick<TooltipProps, 'onAfterOpen' | 'onAfterClose'> = $props();
+	const props: Pick<TooltipOptions, 'onAfterOpen' | 'onAfterClose'> = $props();
 </script>
 
 <Theme>

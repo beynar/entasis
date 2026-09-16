@@ -137,7 +137,9 @@ export function readMapClusterCount(feature: MapLibreMapGeoJSONFeature): number 
 	return null;
 }
 
-export function readMapFeatureCoordinates(feature: MapLibreMapGeoJSONFeature): [number, number] | null {
+export function readMapFeatureCoordinates(
+	feature: MapLibreMapGeoJSONFeature
+): [number, number] | null {
 	const geometry = feature.geometry;
 
 	if (geometry.type !== 'Point') {
@@ -152,7 +154,12 @@ export function readMapFeatureCoordinates(feature: MapLibreMapGeoJSONFeature): [
 
 	const [lng, lat] = coordinates;
 
-	if (typeof lng !== 'number' || typeof lat !== 'number' || !Number.isFinite(lng) || !Number.isFinite(lat)) {
+	if (
+		typeof lng !== 'number' ||
+		typeof lat !== 'number' ||
+		!Number.isFinite(lng) ||
+		!Number.isFinite(lat)
+	) {
 		return null;
 	}
 
@@ -322,7 +329,9 @@ async function resolveMapClusterRenderArg<TData>({
 	const coordinates = readMapFeatureCoordinates(feature);
 
 	if (clusterId === null || count === null || coordinates === null) {
-		reportError(new Error('MapLibre returned a cluster feature without id, count, or coordinates.'));
+		reportError(
+			new Error('MapLibre returned a cluster feature without id, count, or coordinates.')
+		);
 		return null;
 	}
 

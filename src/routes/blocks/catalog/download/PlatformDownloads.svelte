@@ -35,20 +35,20 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl flex flex-col">
 	<div class="max-w-2xl">
 		<Heading as="h2" size="h2" weight="bold">Your tools. Your environment.</Heading>
 		<p class="mt-lg text-neutral/70">
 			Save the setup notes for your machine and bring the same component library into your workflow.
 		</p>
 	</div>
-	<div class="grid gap-lg md:grid-cols-3">
+	<div class="gap-lg grid md:grid-cols-3">
 		{#each platforms as platform (platform.name)}<Card variant="outline"
-				><div class="flex min-h-72 flex-col items-start gap-xl">
-					<span class="text-primary">{@render platform.icon({ size: 38 })}</span>
+				><div class="gap-xl flex min-h-72 flex-col items-start">
+					<span class="text-primary-readable">{@render platform.icon({ size: 38 })}</span>
 					<div>
 						<Heading as="h3" size="h3">{platform.name}</Heading>
-						<p class="mt-md text-sm text-neutral/60">{platform.description}</p>
+						<p class="mt-md text-neutral/70 text-sm">{platform.description}</p>
 					</div>
 					<Chip variant="outline" size="small">Node.js + a Svelte project</Chip><Button
 						class="mt-auto"
@@ -60,7 +60,7 @@
 				</div></Card
 			>{/each}
 	</div>
-	<p class="text-sm text-neutral/60">
+	<p class="text-neutral/70 text-sm">
 		These downloads contain installation notes, not application binaries.
 	</p>
 </section>

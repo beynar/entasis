@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultGlobe = cva({
-	base: 'origin-center mx-auto block aspect-square size-[400px] max-w-full touch-none select-none transition-opacity duration-700 ease-out',
+	base: 'origin-center mx-auto block aspect-square size-[400px] max-w-full touch-none select-none transition-opacity duration-slower ease-enter',
 	variants: {
 		draggable: {
 			true: 'cursor-grab',

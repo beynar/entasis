@@ -1,35 +1,80 @@
-export type ThemeSpacing = 'small' | 'normal' | 'large' | number;
-export type ThemeRadius = 'none' | 'subtile' | 'small' | 'normal' | 'large' | 'round' | number;
-export type ThemeSpacingStep = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-export type ThemeSpacingScale = Record<ThemeSpacingStep, number>;
+import type { Colors } from '$lib/types/theme.js';
+import {
+	defaultThemeSpacingScale,
+	elevationVariables,
+	formatRem,
+	mergeMotionTokens,
+	motionVariables,
+	presetFactor,
+	radiusVariables,
+	spacingFactors,
+	spacingScaleVariables,
+	typeScalePresets,
+	typeScaleVariables,
+	type DeepPartial,
+	type MotionTokens,
+	type ThemeElevation,
+	type ThemeRadius,
+	type ThemeSpacing,
+	type ThemeSpacingScale,
+	type ThemeSpacingStep,
+	type TypeScaleOptions,
+	type TypeScalePreset,
+	type TypeScaleRatio
+} from '$lib/tailwind/scales.js';
 
-export type TypeScaleRatio =
-	| 'minorSecond'
-	| 'majorSecond'
-	| 'minorThird'
-	| 'majorThird'
-	| 'perfectFourth'
-	| 'augmentedFourth'
-	| 'perfectFifth'
-	| 'goldenRatio';
-
-export type TypeScaleOptions = {
-	baseMinPx?: number;
-	baseMaxPx?: number;
-	minViewport?: number;
-	maxViewport?: number;
-	scale?: TypeScaleRatio;
-	remValueInPx?: number;
+// The design scales live in `$lib/tailwind/scales` so the Tailwind plugin and this
+// runtime compiler emit identical variables; they are re-exported here because the
+// public `svelai/theme` entry point has always surfaced them from this module.
+export { defaultThemeSpacingScale, typeScalePresets };
+export type {
+	MotionTokens,
+	ThemeElevation,
+	ThemeRadius,
+	ThemeSpacing,
+	ThemeSpacingScale,
+	ThemeSpacingStep,
+	TypeScaleOptions,
+	TypeScalePreset,
+	TypeScaleRatio
 };
 
-export type TypeScalePreset = 'compact' | 'default' | 'comfortable' | 'large';
+export const themeColorRoles = [
+	'primary',
+	'secondary',
+	'danger',
+	'success',
+	'warning',
+	'info',
+	'neutral'
+] as const satisfies readonly Colors[];
 
 export type ThemeDesignTokens = {
 	spacing?: ThemeSpacing;
 	spacingScale?: Partial<ThemeSpacingScale>;
 	radius?: ThemeRadius;
 	typeScale?: TypeScalePreset | TypeScaleOptions;
+	elevation?: ThemeElevation;
+	/** Per-theme motion scale: `--duration-*` steps in ms and `--ease-*` roles. */
+	motion?: DeepPartial<MotionTokens>;
 	raisedWithBorder?: boolean;
+	/** Semantic role kit chrome inherits when a control omits `color`. Defaults to `neutral`. */
+	defaultColor?: Colors;
+	/**
+	 * State role — the focus ring. Pinned once here, every `ring-focus` in the library rings in
+	 * this role instead of the control's own. Omit and each ring keeps following `--color`.
+	 */
+	focusColor?: Colors;
+	/**
+	 * State role — persistent highlight: the active sidebar row, the current menu option, a
+	 * pressed toggle, a selected table row, the current pagination pill, a tabbar indicator.
+	 * Emits the whole `--color-selected*` kit so soft and solid selections stay legible.
+	 */
+	selectedColor?: Colors;
+	/** State role — the transient hover tint the `state-layer` paints. */
+	hoverColor?: Colors;
+	/** State role — the transient pressed tint; falls back to `hoverColor` when omitted. */
+	pressedColor?: Colors;
 };
 
 export type ThemeDesignTokenMap<T extends readonly string[] = readonly string[]> = Partial<
@@ -41,163 +86,80 @@ type CompileThemeDesignTokensOptions<T extends readonly string[]> = {
 	attribute: string;
 	value?: Partial<Record<T[number], string>>;
 	colorScheme?: Partial<Record<T[number], 'light' | 'dark' | 'normal'>>;
+	/**
+	 * The `<Theme motion>` scale. Emitted on `html` so the `duration-*` / `ease-*`
+	 * utilities follow the prop the same way `ThemeState.motion` does, and layered under
+	 * any per-theme `designTokens.motion` block.
+	 */
+	motion?: DeepPartial<MotionTokens>;
 };
 
-const spacingFactors = {
-	small: 0.8,
-	normal: 1,
-	large: 1.2
-} as const;
-
-export const defaultThemeSpacingScale = {
-	xs: 1,
-	sm: 1.5,
-	md: 2,
-	lg: 3,
-	xl: 4
-} as const satisfies ThemeSpacingScale;
-
-const radiusFactors = {
-	none: 0,
-	subtile: 0.5,
-	small: 0.75,
-	normal: 1,
-	large: 1.5,
-	round: 2.5
-} as const;
-
-const radiusScale = {
-	sm: 0.25,
-	md: 0.5,
-	lg: 0.75
-} as const;
-
-const typeScaleRatios = {
-	minorSecond: 1.067,
-	majorSecond: 1.125,
-	minorThird: 1.2,
-	majorThird: 1.25,
-	perfectFourth: 1.32,
-	augmentedFourth: 1.414,
-	perfectFifth: 1.5,
-	goldenRatio: 1.618
-} as const;
-
-export const typeScalePresets = {
-	compact: { baseMinPx: 14, baseMaxPx: 16, scale: 'minorThird' },
-	default: { baseMinPx: 16, baseMaxPx: 18, scale: 'majorThird' },
-	comfortable: { baseMinPx: 16, baseMaxPx: 20, scale: 'majorThird' },
-	large: { baseMinPx: 18, baseMaxPx: 22, scale: 'perfectFourth' }
-} as const satisfies Record<TypeScalePreset, TypeScaleOptions>;
-
-const typeScaleSteps = ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl'] as const;
 const themeNamePattern = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 const dataAttributePattern = /^data-[A-Za-z_][A-Za-z0-9_-]*$/;
 
-const finiteNumber = (value: number, name: string, minimum = 0) => {
-	if (!Number.isFinite(value) || value < minimum) {
-		throw new Error(`${name} must be a finite number greater than or equal to ${minimum}.`);
+// Every colour-valued token resolves the same way: a role from the kit, or a throw naming the
+// token that carried the unknown value.
+const resolveColorRole = (token: string, color: Colors): Colors => {
+	if (!(themeColorRoles as readonly string[]).includes(color)) {
+		throw new Error(`Unknown ${token} "${String(color)}".`);
 	}
-	return value;
+	return color;
 };
 
-const positiveNumber = (value: number, name: string) => {
-	if (!Number.isFinite(value) || value <= 0) {
-		throw new Error(`${name} must be a finite number greater than 0.`);
-	}
-	return value;
-};
+const resolveDefaultColor = (color?: Colors): Colors =>
+	color === undefined ? 'neutral' : resolveColorRole('defaultColor', color);
 
-const presetFactor = <Preset extends Record<string, number>>(
-	value: keyof Preset | number,
-	presets: Preset,
-	name: string
-) => {
-	if (typeof value === 'number') return finiteNumber(value, name);
-	const factor = presets[value];
-	if (factor === undefined) throw new Error(`Unknown ${name} preset "${String(value)}".`);
-	return factor;
-};
+const defaultColorVariables = (defaultColor: Colors) => ({
+	'--color': `var(--color-${defaultColor})`,
+	'--color-readable': `var(--color-${defaultColor}-readable)`,
+	'--color-muted-readable': `var(--color-${defaultColor}-muted-readable)`,
+	'--color-light': `var(--color-${defaultColor}-light)`,
+	'--color-lighter': `var(--color-${defaultColor}-lighter)`,
+	'--color-dark': `var(--color-${defaultColor}-dark)`,
+	'--color-muted': `var(--color-${defaultColor}-muted)`,
+	'--color-contrast': `var(--color-${defaultColor}-contrast)`,
+	'--default-color': defaultColor
+});
 
-const round = (value: number) => Number(value.toFixed(3));
-const formatRem = (value: number) => `${Number(value.toFixed(6))}rem`;
+// The four STATE ROLES. None of these variables exists until a theme pins one, and every use
+// site falls back to the current role — `ring-focus` to `--color`, `bg-selected-muted` to
+// `--color-muted`, the state layer to `currentColor` — so an unpinned theme renders exactly as
+// before and `[data-color]` keeps re-pointing the states along with `--color`.
+const focusColorVariables = (role: Colors) => ({ '--color-focus': `var(--color-${role})` });
+// `selected` is the one state role that paints a surface, so it emits the whole kit: the fill,
+// its muted tint, and the three inks tuned for them.
+const selectedColorVariables = (role: Colors) => ({
+	'--color-selected': `var(--color-${role})`,
+	'--color-selected-muted': `var(--color-${role}-muted)`,
+	'--color-selected-contrast': `var(--color-${role}-contrast)`,
+	'--color-selected-muted-readable': `var(--color-${role}-muted-readable)`,
+	'--color-selected-readable': `var(--color-${role}-readable)`
+});
+const hoverColorVariables = (role: Colors) => ({ '--color-hover': `var(--color-${role})` });
+const pressedColorVariables = (role: Colors) => ({ '--color-pressed': `var(--color-${role})` });
 
-const spacingScaleVariables = (spacingScale: Partial<ThemeSpacingScale>) => {
-	const resolvedScale: ThemeSpacingScale = {
-		...defaultThemeSpacingScale,
-		...spacingScale
-	};
-	const entries = Object.entries(resolvedScale) as [ThemeSpacingStep, number][];
-
-	entries.forEach(([step, value], index) => {
-		positiveNumber(value, `spacingScale.${step}`);
-		const previousEntry = entries[index - 1];
-		if (previousEntry && value <= previousEntry[1]) {
-			throw new Error(
-				`spacingScale.${step} must be greater than spacingScale.${previousEntry[0]}.`
-			);
-		}
-	});
-
-	return Object.fromEntries(
-		entries.map(([step, multiplier]) => [`--space-${step}`, `calc(var(--spacing) * ${multiplier})`])
-	);
-};
-
-const typeScaleVariables = (typeScale: TypeScalePreset | TypeScaleOptions) => {
-	const preset: TypeScaleOptions =
-		typeof typeScale === 'string' ? typeScalePresets[typeScale] : typeScale;
-	if (!preset) throw new Error(`Unknown typeScale preset "${String(typeScale)}".`);
-
-	const baseMinPx = positiveNumber(preset.baseMinPx ?? 16, 'typeScale.baseMinPx');
-	const baseMaxPx = positiveNumber(preset.baseMaxPx ?? 18, 'typeScale.baseMaxPx');
-	const minViewport = finiteNumber(preset.minViewport ?? 375, 'typeScale.minViewport');
-	const maxViewport = positiveNumber(preset.maxViewport ?? 1440, 'typeScale.maxViewport');
-	const remValueInPx = positiveNumber(preset.remValueInPx ?? 16, 'typeScale.remValueInPx');
-	const scale = preset.scale ?? 'majorThird';
-	const ratio = typeScaleRatios[scale];
-
-	if (!ratio) throw new Error(`Unknown typeScale ratio "${String(scale)}".`);
-	if (baseMaxPx < baseMinPx) {
-		throw new Error('typeScale.baseMaxPx must be greater than or equal to typeScale.baseMinPx.');
-	}
-	if (maxViewport <= minViewport) {
-		throw new Error('typeScale.maxViewport must be greater than typeScale.minViewport.');
-	}
-
-	return Object.fromEntries(
-		typeScaleSteps.map((step, index) => {
-			const multiplier = Math.pow(ratio, index - 2);
-			const minPx = index < 2 ? Math.max(baseMinPx * multiplier, 10) : baseMinPx * multiplier;
-			const maxPx = index < 2 ? Math.max(baseMaxPx * multiplier, 12) : baseMaxPx * multiplier;
-			const slope = (maxPx - minPx) / (maxViewport - minViewport);
-			const intercept = minPx - slope * minViewport;
-			const value = `clamp(${round(minPx / remValueInPx)}rem, ${round(slope * 100)}vw + ${round(intercept / remValueInPx)}rem, ${round(maxPx / remValueInPx)}rem)`;
-			return [`--text-${step}`, value];
-		})
-	);
-};
-
-const radiusVariables = (radius: ThemeRadius) => {
-	const factor = presetFactor(radius, radiusFactors, 'radius');
-	const sm = formatRem(radiusScale.sm * factor);
-	const md = formatRem(radiusScale.md * factor);
-	const lg = formatRem(radiusScale.lg * factor);
-
-	return {
-		'--radius': sm,
-		'--radius-xs': sm,
-		'--radius-sm': sm,
-		'--radius-md': md,
-		'--radius-lg': lg,
-		'--radius-xl': lg,
-		'--radius-2xl': lg,
-		'--radius-3xl': lg,
-		'--radius-4xl': lg
-	};
-};
-
-const tokenVariables = (tokens: ThemeDesignTokens, colorScheme: 'light' | 'dark' | 'normal') => ({
+const tokenVariables = (
+	tokens: ThemeDesignTokens,
+	colorScheme: 'light' | 'dark' | 'normal',
+	baseMotion?: DeepPartial<MotionTokens>
+) => ({
+	// Like every other token: omitted when the theme does not declare it, so a theme that
+	// only tweaks, say, `radius` inherits the default role instead of resetting it.
+	...(tokens.defaultColor === undefined
+		? {}
+		: defaultColorVariables(resolveDefaultColor(tokens.defaultColor))),
+	...(tokens.focusColor === undefined
+		? {}
+		: focusColorVariables(resolveColorRole('focusColor', tokens.focusColor))),
+	...(tokens.selectedColor === undefined
+		? {}
+		: selectedColorVariables(resolveColorRole('selectedColor', tokens.selectedColor))),
+	...(tokens.hoverColor === undefined
+		? {}
+		: hoverColorVariables(resolveColorRole('hoverColor', tokens.hoverColor))),
+	...(tokens.pressedColor === undefined
+		? {}
+		: pressedColorVariables(resolveColorRole('pressedColor', tokens.pressedColor))),
 	...(tokens.spacing === undefined
 		? {}
 		: {
@@ -206,6 +168,11 @@ const tokenVariables = (tokens: ThemeDesignTokens, colorScheme: 'light' | 'dark'
 	...(tokens.spacingScale === undefined ? {} : spacingScaleVariables(tokens.spacingScale)),
 	...(tokens.radius === undefined ? {} : radiusVariables(tokens.radius)),
 	...(tokens.typeScale === undefined ? {} : typeScaleVariables(tokens.typeScale)),
+	// Layered over the `<Theme motion>` prop so a theme that retunes one step keeps the
+	// rest of the prop's scale instead of falling back to the library defaults.
+	...(tokens.motion === undefined
+		? {}
+		: motionVariables(mergeMotionTokens(baseMotion, tokens.motion))),
 	...(tokens.raisedWithBorder === undefined
 		? {}
 		: {
@@ -213,7 +180,9 @@ const tokenVariables = (tokens: ThemeDesignTokens, colorScheme: 'light' | 'dark'
 					? '1px solid var(--current-border, var(--color-neutral-muted))'
 					: '0 solid transparent'
 			}),
-	...(colorScheme === 'dark' ? { '--dark-raised-shadow': 'none' } : {})
+	...(tokens.elevation === undefined
+		? {}
+		: elevationVariables(tokens.elevation, colorScheme === 'dark' ? 'dark' : 'light'))
 });
 
 const validateThemeName = (themeName: string) => {
@@ -237,22 +206,32 @@ export const compileThemeDesignTokens = <T extends readonly string[]>({
 	designTokens,
 	attribute,
 	value,
-	colorScheme
+	colorScheme,
+	motion
 }: CompileThemeDesignTokensOptions<T>) => {
-	if (!designTokens) return '';
-
-	return (Object.entries(designTokens) as [string, ThemeDesignTokens][])
-		.map(([themeName, tokens]) => {
-			const attributeValue = value?.[themeName as T[number]] ?? themeName;
-			const selector = themeSelector(attribute, attributeValue);
-			const scheme =
-				colorScheme?.[themeName as T[number]] ??
-				(themeName === 'light' || themeName === 'dark' ? themeName : 'normal');
-			const declarations = Object.entries(tokenVariables(tokens, scheme))
+	// The `<Theme motion>` prop rewrites the scale on `html`; the per-theme blocks below
+	// are more specific, so a theme that declares its own `motion` still wins.
+	const baseMotion = motion
+		? `html{${Object.entries(motionVariables(motion))
 				.map(([property, propertyValue]) => `${property}:${propertyValue};`)
-				.join('');
-			return declarations ? `${selector}{${declarations}}` : '';
-		})
+				.join('')}}`
+		: '';
+	if (!designTokens) return baseMotion;
+
+	return [baseMotion]
+		.concat(
+			(Object.entries(designTokens) as [string, ThemeDesignTokens][]).map(([themeName, tokens]) => {
+				const attributeValue = value?.[themeName as T[number]] ?? themeName;
+				const selector = themeSelector(attribute, attributeValue);
+				const scheme =
+					colorScheme?.[themeName as T[number]] ??
+					(themeName === 'light' || themeName === 'dark' ? themeName : 'normal');
+				const declarations = Object.entries(tokenVariables(tokens, scheme, motion))
+					.map(([property, propertyValue]) => `${property}:${propertyValue};`)
+					.join('');
+				return declarations ? `${selector}{${declarations}}` : '';
+			})
+		)
 		.filter(Boolean)
 		.join('\n');
 };

@@ -108,7 +108,7 @@ export type DocumentViewerProps = WithAttachments<
 			/** Toolbar control color. Defaults to `'neutral'`. */
 			color?: Colors;
 			/** Called after the active document model is ready. */
-			onLoad?: (viewer: DocumentViewerState) => void;
+			onLoad?: (payload: DocumentViewerState) => void;
 			/** Called when document loading or rendering fails. */
 			onError?: (error: Error) => void;
 			/** Called once for each distinct non-fatal fidelity warning. */

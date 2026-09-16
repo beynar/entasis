@@ -47,14 +47,14 @@
 	let current = $derived(messages.find((mail) => mail.id === selected));
 </script>
 
-<section class="grid min-h-screen bg-surface text-neutral md:grid-cols-[14rem_1fr]">
+<section class="bg-surface text-neutral grid min-h-screen md:grid-cols-[14rem_1fr]">
 	<Stack
 		as="aside"
 		gap="lg"
-		class="border-b border-neutral-muted bg-surface-recessed p-lg md:border-r"
+		class="border-neutral-muted bg-surface-recessed p-lg border-b md:border-r"
 	>
 		<strong class="text-xl">Northstar Mail</strong>
-		<nav class="grid gap-xs" aria-label="Mailboxes">
+		<nav class="gap-xs grid" aria-label="Mailboxes">
 			{#each ['Inbox', 'Archived'] as folder (folder)}<Button
 					fullWidth
 					variant={mailbox === folder ? 'soft' : 'ghost'}
@@ -66,10 +66,10 @@
 						.length})</Button
 				>{/each}
 		</nav>
-		<p class="text-xs text-neutral/60">Local inbox preview</p>
+		<p class="text-neutral/70 text-xs">Local inbox preview</p>
 	</Stack>
 	<main class="grid min-w-0 lg:grid-cols-2">
-		<Stack gap="md" class="border-b border-neutral-muted p-lg lg:border-r">
+		<Stack gap="md" class="border-neutral-muted p-lg border-b lg:border-r">
 			<h2 class="text-2xl font-semibold">{mailbox}</h2>
 			<TextInput
 				label="Search mail"
@@ -82,18 +82,18 @@
 					onclick={() => (selected = mail.id)}
 					><Stack gap="xs" class="w-full text-left">
 						<strong>{mail.sender}</strong><span class="text-sm">{mail.subject}</span><span
-							class="text-xs text-neutral/60">{mail.preview}</span
+							class="text-neutral/70 text-xs">{mail.preview}</span
 						>
 					</Stack></Button
-				>{:else}<p class="p-lg text-sm text-neutral/60">This mailbox is empty.</p>{/each}
+				>{:else}<p class="p-lg text-neutral/70 text-sm">This mailbox is empty.</p>{/each}
 		</Stack>
 		<Stack gap="lg" class="p-lg sm:p-xl">
-			{#if current}<div class="flex flex-wrap items-start justify-between gap-md">
-					<div class="flex items-center gap-md">
-						<Avatar user={{ name: current.sender }} />
+			{#if current}<div class="gap-md flex flex-wrap items-start justify-between">
+					<div class="gap-md flex items-center">
+						<Avatar name={current.sender} />
 						<div>
 							<strong>{current.sender}</strong>
-							<p class="text-xs text-neutral/60">Today, 10:42</p>
+							<p class="text-neutral/70 text-xs">Today, 10:42</p>
 						</div>
 					</div>
 					<Button
@@ -106,7 +106,7 @@
 					>
 				</div>
 				<h2 class="text-2xl font-semibold">{current.subject}</h2>
-				<p class="leading-relaxed text-neutral/70">{current.body}</p>
+				<p class="text-neutral/70 leading-relaxed">{current.body}</p>
 				<Separator /><Form
 					inputs={{
 						reply: {
@@ -122,9 +122,9 @@
 						color="info"
 						title="Draft saved in this preview"
 						description={draft}
-					/>{/if}{:else}<div class="grid min-h-64 place-content-center gap-md text-center">
+					/>{/if}{:else}<div class="gap-md grid min-h-64 place-content-center text-center">
 					<h2 class="text-xl font-semibold">A little breathing room.</h2>
-					<p class="text-sm text-neutral/60">Select a conversation to read it.</p>
+					<p class="text-neutral/70 text-sm">Select a conversation to read it.</p>
 				</div>{/if}
 		</Stack>
 	</main>

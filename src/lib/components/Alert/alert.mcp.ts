@@ -70,7 +70,7 @@ The Alert component uses a CSS Grid layout that automatically adapts based on ic
 <Alert>
 	<!-- Icon (optional) -->
 	{#snippet prefix()}
-		<Icon name="alert-circle" />
+		{@render warningCircleIcon()}
 	{/snippet}
 	
 	<!-- Title (optional) -->
@@ -111,9 +111,14 @@ The grid layout:
 
 ### Alert with Icon
 \`\`\`svelte
+<script lang="ts">
+	import { Alert } from 'svelai/alert';
+	import { infoIcon } from 'svelai/icons/info';
+</script>
+
 <Alert color="info">
 	{#snippet prefix()}
-		<Icon name="info" />
+		{@render infoIcon()}
 	{/snippet}
 	{#snippet title()}
 		Information
@@ -126,9 +131,14 @@ The grid layout:
 
 ### Success Alert
 \`\`\`svelte
+<script lang="ts">
+	import { Alert } from 'svelai/alert';
+	import { checkCircleIcon } from 'svelai/icons/checkCircle';
+</script>
+
 <Alert color="success">
 	{#snippet prefix()}
-		<Icon name="check-circle" />
+		{@render checkCircleIcon()}
 	{/snippet}
 	{#snippet title()}
 		Success!
@@ -141,9 +151,14 @@ The grid layout:
 
 ### Warning Alert
 \`\`\`svelte
+<script lang="ts">
+	import { Alert } from 'svelai/alert';
+	import { warningIcon } from 'svelai/icons/warning';
+</script>
+
 <Alert color="warning" variant="outline">
 	{#snippet prefix()}
-		<Icon name="alert-triangle" />
+		{@render warningIcon()}
 	{/snippet}
 	{#snippet title()}
 		Warning
@@ -156,9 +171,14 @@ The grid layout:
 
 ### Danger Alert
 \`\`\`svelte
+<script lang="ts">
+	import { Alert } from 'svelai/alert';
+	import { warningCircleIcon } from 'svelai/icons/warningCircle';
+</script>
+
 <Alert color="danger">
 	{#snippet prefix()}
-		<Icon name="alert-circle" />
+		{@render warningCircleIcon()}
 	{/snippet}
 	{#snippet title()}
 		Error
@@ -322,7 +342,7 @@ const customTheme: AlertThemeProps = {
       large: 'px-5 py-4 text-base'
     },
     disabled: {
-      true: 'opacity-55 cursor-not-allowed',
+      true: 'opacity-50 cursor-not-allowed',
       false: null
     },
     hasDescription: {
@@ -393,10 +413,15 @@ const customTheme: AlertThemeProps = {
 
 **Basic Theme Override**:
 \`\`\`svelte
+<script lang="ts">
+  import { Alert } from 'svelai/alert';
+  import { warningCircleIcon } from 'svelai/icons/warningCircle';
+</script>
+
 <Alert 
   theme={{
     root: {
-      base: 'rounded-xl shadow-lg',
+      base: 'rounded-xl raised-4',
       variant: {
         solid: 'border-2'
       }
@@ -433,7 +458,7 @@ const customTheme: AlertThemeProps = {
   }}
 >
   {#snippet prefix()}
-    <Icon name="alert-circle" />
+    {@render warningCircleIcon()}
   {/snippet}
   {#snippet title()}
     Error Alert
@@ -450,7 +475,7 @@ const customTheme: AlertThemeProps = {
     root: {
       base: 'rounded-lg transition-all',
       variant: {
-        solid: 'shadow-md',
+        solid: 'lift-3',
         outline: 'border-2',
         soft: 'bg-opacity-20'
       }

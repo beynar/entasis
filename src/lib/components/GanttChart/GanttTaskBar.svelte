@@ -484,11 +484,10 @@
 			closeDelay={120}
 			openOnFocus
 			size="small"
-			density="small"
+			density="compact"
 			disabled={chart.disabled || isInteractionActive}
 			triggerClass="pointer-events-auto size-full"
-			popoverClass="pointer-events-none"
-			popoverTheme={ganttTaskBarPopoverTheme}
+			popover={{ class: 'pointer-events-none', theme: ganttTaskBarPopoverTheme }}
 		>
 			{#snippet trigger()}
 				<button
@@ -600,7 +599,7 @@
 			{@attach chart.interaction.taskDrag(node.taskId, 'progress', rowTop)}
 		>
 			<span
-				class="pointer-events-none h-3 w-1 rounded-full bg-[var(--gantt-task-color)] shadow-sm"
+				class="lift-1 pointer-events-none h-3 w-1 rounded-full bg-[var(--gantt-task-color)]"
 				style:transform={`translateX(${progressVisualOffset}px)`}
 			></span>
 		</span>
@@ -622,7 +621,7 @@
 			})}
 		>
 			<span
-				class="size-2 rounded-full border border-[var(--gantt-task-color)] bg-surface"
+				class="bg-surface size-2 rounded-full border border-[var(--gantt-task-color)]"
 				style:transform={`translateX(${dependencyStartVisualOffset}px)`}
 			></span>
 		</span>
@@ -643,7 +642,7 @@
 			})}
 		>
 			<span
-				class="size-2 rounded-full border border-[var(--gantt-task-color)] bg-surface"
+				class="bg-surface size-2 rounded-full border border-[var(--gantt-task-color)]"
 				style:transform={`translateX(${dependencyEndVisualOffset}px)`}
 			></span>
 		</span>

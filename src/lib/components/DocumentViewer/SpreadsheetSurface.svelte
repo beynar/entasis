@@ -5,6 +5,7 @@
 	import type { SpreadsheetMerge } from './spreadsheetAdapter.js';
 	import { documentViewerScrollAreaTheme } from './documentViewer.theme.js';
 	import type { DocumentViewerState } from './documentViewer.state.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type Classes = {
 		grid: () => string;
@@ -13,6 +14,7 @@
 	};
 
 	let { viewer, classes }: { viewer: DocumentViewerState; classes: Classes } = $props();
+	const t = $derived(useI18n());
 	let viewport = $state<HTMLDivElement | null>(null);
 	let scrollLeft = $state(0);
 	let scrollTop = $state(0);
@@ -53,7 +55,7 @@
 	$effect(() => {
 		const currentSheet = spreadsheet;
 		const scrollElement = viewport;
-		viewer.scale;
+		void viewer.scale;
 		get(rowVirtualizer).setOptions({
 			count: currentSheet?.rowCount ?? 0,
 			getScrollElement: () => scrollElement,
@@ -140,7 +142,7 @@
 	bind:viewportRef={viewport}
 	class={classes.grid()}
 	type="hover"
-	ariaLabel="Spreadsheet grid"
+	label={t.spreadsheetGrid}
 	onscroll={onScroll}
 	theme={documentViewerScrollAreaTheme}
 >
@@ -164,7 +166,7 @@
 					<div
 						role="gridcell"
 						class={classes.gridCell({
-							className: isMatch ? 'ring-2 ring-inset ring-warning' : undefined
+							className: isMatch ? 'ring-warning ring-2 ring-inset' : undefined
 						})}
 						style="left: {rowHeaderWidth + column.start}px; top: {columnHeaderHeight +
 							row.start}px; width: {size.width}px; height: {size.height}px;"

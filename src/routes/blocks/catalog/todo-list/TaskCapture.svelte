@@ -16,24 +16,22 @@
 	]);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card
 		class="mx-auto w-full max-w-2xl"
 		title="Make a little progress"
 		description="A clear list for a focused day."
 		><Stack gap="lg">
 			<div class="flex justify-between text-sm">
-				<span class="text-neutral/60"
+				<span class="text-neutral/70"
 					>{tasks.filter((task) => task.done).length} of {tasks.length} complete</span
 				><Chip color="primary">Today</Chip>
 			</div>
 			<Meter
-				value={{
-					value: tasks.length ? (tasks.filter((task) => task.done).length / tasks.length) * 100 : 0,
-					color: 'primary'
-				}}
+				value={tasks.length ? (tasks.filter((task) => task.done).length / tasks.length) * 100 : 0}
+				color="primary"
 			/>{#each tasks as task (task)}<div
-					class="flex items-center justify-between gap-md border-b border-neutral-muted pb-md"
+					class="gap-md border-neutral-muted pb-md flex items-center justify-between border-b"
 				>
 					<Checkbox
 						label={task.title}
@@ -47,7 +45,7 @@
 						onclick={() => (tasks = tasks.filter((candidate) => candidate.id !== task.id))}
 						>Remove</Button
 					>
-				</div>{:else}<p class="py-lg text-sm text-neutral/60">
+				</div>{:else}<p class="py-lg text-neutral/70 text-sm">
 					A little breathing room. Add your next task below.
 				</p>{/each}<Form
 				inputs={{

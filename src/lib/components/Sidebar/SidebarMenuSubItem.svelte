@@ -1,16 +1,23 @@
 <script lang="ts">
-	import type { SidebarDensity, SidebarMenuSubEntry, SidebarSize } from './sidebar.props.js';
+	import type {
+		SidebarActiveVariant,
+		SidebarDensity,
+		SidebarMenuSubEntry,
+		SidebarSize
+	} from './sidebar.props.js';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import { useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 
 	let {
 		sub,
 		size,
+		activeVariant,
 		density,
 		theme
 	}: {
 		sub: SidebarMenuSubEntry;
 		size: SidebarSize;
+		activeVariant: SidebarActiveVariant;
 		density: SidebarDensity;
 		theme?: SidebarThemeProps;
 	} = $props();
@@ -43,10 +50,11 @@
 			data-sidebar="menu-sub-button"
 			data-size={componentSize}
 			data-active={sub.isActive ? 'true' : undefined}
+			data-active-variant={activeVariant}
 			aria-current={sub.isActive ? 'page' : undefined}
 			aria-disabled={sub.disabled || undefined}
 			tabindex={sub.disabled ? -1 : undefined}
-			class={classes.subButton({ componentSize, density, size: textSize })}
+			class={classes.subButton({ componentSize, activeVariant, density, size: textSize })}
 			onclick={handleClick}
 		>
 			<SidebarIcon icon={sub.icon} />
@@ -60,8 +68,9 @@
 			data-sidebar="menu-sub-button"
 			data-size={componentSize}
 			data-active={sub.isActive ? 'true' : undefined}
+			data-active-variant={activeVariant}
 			disabled={sub.disabled || undefined}
-			class={classes.subButton({ componentSize, density, size: textSize })}
+			class={classes.subButton({ componentSize, activeVariant, density, size: textSize })}
 			onclick={handleClick}
 		>
 			<SidebarIcon icon={sub.icon} />

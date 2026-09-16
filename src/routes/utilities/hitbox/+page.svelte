@@ -64,7 +64,7 @@
 			class="!min-h-fit"
 		>
 			<div class="flex min-h-40 w-full items-center justify-center gap-8">
-				{#each sizes as size}
+				{#each sizes as size, index (index)}
 					<div class="flex flex-col items-center gap-4">
 						<button
 							type="button"
@@ -74,7 +74,7 @@
 						>
 							<Hitbox {size} theme={visibleHitboxTheme} />
 						</button>
-						<span class="text-neutral/60 text-xs capitalize">{size}</span>
+						<span class="text-neutral/70 text-xs capitalize">{size}</span>
 					</div>
 				{/each}
 			</div>

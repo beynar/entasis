@@ -25,21 +25,21 @@
 	});
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<div class="overflow-hidden rounded-lg border border-neutral-muted">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<div class="border-neutral-muted overflow-hidden rounded-lg border">
 		<div
-			class="flex h-40 flex-wrap items-end justify-between gap-md bg-primary p-lg text-primary-contrast"
+			class="gap-md bg-primary p-lg text-primary-contrast flex h-40 flex-wrap items-end justify-between"
 		>
-			<span class="text-sm">Northstar / Your profile</span><Chip color="neutral"
+			<span class="text-sm">Northstar / Your profile</span><Chip color="neutral" variant="soft"
 				>Personal settings</Chip
 			>
 		</div>
 		<Stack gap="xl" class="bg-surface p-lg sm:p-xl">
-			<div class="flex flex-wrap items-center gap-lg">
-				<Avatar user={{ name: profile.name ?? 'Your name' }} size="large" />
+			<div class="gap-lg flex flex-wrap items-center">
+				<Avatar name={profile.name ?? 'Your name'} size="large" />
 				<div>
 					<h2 class="text-2xl font-semibold">{profile.name}</h2>
-					<p class="text-sm text-neutral/60">Make it easier for your team to know you.</p>
+					<p class="text-neutral/70 text-sm">Make it easier for your team to know you.</p>
 				</div>
 			</div>
 			<Form

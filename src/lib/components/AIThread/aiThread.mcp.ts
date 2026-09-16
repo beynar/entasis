@@ -1,7 +1,7 @@
 export const aiThreadDescription = `
 # AIThread
 
-Virtualized AI transcript with stable message keys, initial end anchoring, pinned append following, prepend preservation, message actions, AI SDK tool parts, ask-user-question flows, prompt suggestions, MCP Apps, and the standalone AIThreadToc primitive.
+Virtualized AI transcript with stable message keys, initial end anchoring, pinned append following, prepend preservation, message actions, AI SDK tool parts, ask-user-question flows, prompt suggestions, and the standalone AIThreadToc primitive.
 
 ## Basic usage
 
@@ -17,7 +17,7 @@ Virtualized AI transcript with stable message keys, initial end anchoring, pinne
   {messages}
   getMessageKey={(message) => message.id}
   liveText={announcement}
-  isStreaming={Boolean(announcement)}
+  streaming={Boolean(announcement)}
   showToc
 />
 \`\`\`
@@ -33,15 +33,15 @@ Virtualized AI transcript with stable message keys, initial end anchoring, pinne
 - \`{ type: 'tool', tool: AIToolCall }\`
 - AI SDK \`dynamic-tool\` and \`tool-*\` parts with \`toolCallId\`, \`state\`, \`input\`, \`output\`, \`structuredContent\`, \`result\`, \`error\`, and \`_meta\`
 
-When text parts are present, top-level message content is not rendered again. Consecutive ordinary tools are grouped through \`AITool\`; calls with MCP App resource metadata render individually through \`AIMcpApp\`.
+When text parts are present, top-level message content is not rendered again. Consecutive ordinary tools are grouped through \`AITool\`.
 
 ## Core props
 
 - **messages**: readonly TMessage[] - Direct transcript. Falls back to the nearest AIConversation.
 - **getMessageKey**: (message, index) => string | number | bigint | undefined - Stable virtualization key. Prefer persistent identifiers.
 - **liveText**: string - Screen-reader announcement. Falls back to AIConversation.
-- **isStreaming**: boolean - Sets the busy state. Falls back to AIConversation.
-- **density**: 'small' | 'normal' | 'large' - Transcript row and edge spacing. Default 'normal'.
+- **streaming**: boolean - Sets the busy state. Falls back to AIConversation.
+- **density**: 'compact' | 'normal' | 'comfortable' - Transcript row and edge spacing. Default 'normal'.
 - **messageSize**: 'small' | 'normal' | 'large' - Size forwarded to default AIMessage rows. Default 'normal'.
 - **messageVariant**: 'bubble' | 'minimal' - Presentation forwarded to default AIMessage rows. Default 'bubble'.
 - **followOutput**: boolean - Follow appended rows only while pinned. Default true.
@@ -64,7 +64,7 @@ When text parts are present, top-level message content is not rendered again. Co
 
 - **empty**: Slot - Replaces the empty state.
 - **suggestions**: readonly string[] - Default empty-state suggestions. Falls back to AIConversation.
-- **onSuggestionSelect**: (suggestion) => void - Takes precedence over the provider's default \`setInput\` behavior.
+- **onSelect**: (suggestion) => void - Pick event for an empty-state suggestion; takes precedence over the provider's default \`setInput\` behavior.
 
 ## Message composition
 
@@ -76,18 +76,16 @@ When text parts are present, top-level message content is not rendered again. Co
 - **messageCopyable**, **messageEditable**, **messageRetryable**: boolean
 - **onMessageCopy**, **onMessageEdit**, **onMessageRetry**: AIMessage action handlers.
 
-Assistant text that continues through tool or app rows into another assistant segment does not render
+Assistant text that continues through tool rows into another assistant segment does not render
 an action region. Actions belong to the terminal assistant segment for that user turn; completed
 historical turns retain hover actions.
 
-## Tool, marker, and MCP composition
+## Tool and marker composition
 
 - **tool**: Slot<{ tools, message, index }> - Replaces an ordinary grouped tool row.
 - **toolIcon**, **toolTitle**, **toolContent**, **toolInput**, **toolOutput**, **toolError**, **toolStatus** - Forwarded to the current AITool API.
 - **marker**: Slot<{ message, index }> - Replaces a complete context/marker row.
 - **markerIcon**, **markerContent** - Compose the default AIMarker.
-- **mcpHost**: AIMcpAppHostConfig - Host used by detected MCP App calls.
-- **app**: Slot<{ tool, message, index }> - Replaces individual MCP App rendering.
 
 ## Ask-user-question
 

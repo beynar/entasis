@@ -1,15 +1,19 @@
-import type { TabbarProps, TabItem, TabAlignment, TabOrientation } from '../Tabbar/tabbar.props.js';
+import type { ResponsiveProps } from '$lib/components/Theme/theme.js';
+import type { FSOProps } from '$lib/transitions/transition.js';
+import type { TabbarProps, TabItem } from '../Tabbar/tabbar.props.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { TabsThemeProps } from './tabs.theme.js';
-import type { Sizes, Colors } from '$lib/types/theme.js';
 import type { Snippet } from 'svelte';
 import type { StepperState } from '../Stepper/stepper.state.svelte.js';
-import type { TabbarThemeProps } from '../Tabbar/tabbar.theme.js';
+import type { StepperMount } from '../Stepper/stepper.props.js';
 
 export type TabsPlacement = 'top' | 'bottom' | 'left' | 'right';
 
+/** Instance handle exposed by `bind:api` and by the repeated `children` snippet. */
+export type TabsApi<Item extends TabItem = TabItem> = StepperState<Item>;
+
 export type TabsRenderPayload<Item extends TabItem = TabItem> = {
-	stepper: StepperState<Item>;
+	api: TabsApi<Item>;
 	item: Item;
 	index: number;
 };
@@ -21,17 +25,18 @@ export type TabsProps<Item extends TabItem = TabItem> = WithAttachments<{
 	 */
 	items: Item[];
 	/**
-	 * The index of the currently active tab. This is bindable.
-	 * @default 0
+	 * The `value` of the active tab (a string item resolves to itself; objects use `value`,
+	 * else their string label, else their index). Bindable.
+	 * @default the first tab's value
 	 */
-	value?: number;
-	/** Initial active tab index when `value` is omitted. */
-	defaultValue?: number;
+	value?: string;
+	/** Initial active tab value when `value` is omitted. */
+	defaultValue?: string;
 	/**
 	 * Callback function called when the active tab changes.
-	 * Receives the new tab index as an argument.
+	 * Receives the new tab's value and item.
 	 */
-	onValueChange?: (value: number) => void;
+	onValueChange?: (payload: { value: string; item: Item; index: number }) => void;
 	/**
 	 * The placement of the tabbar relative to the content.
 	 * @default 'top'
@@ -46,63 +51,42 @@ export type TabsProps<Item extends TabItem = TabItem> = WithAttachments<{
 	 */
 	theme?: TabsThemeProps;
 	/**
-	 * Bindable reference to the stepper state for programmatic control.
+	 * Bindable instance handle for programmatic control.
 	 * Provides methods like next(), previous(), goTo(index).
 	 */
-	stepper?: StepperState<Item>;
+	api?: TabsApi<Item>;
 	/**
-	 * Animation configuration for tab panel transitions.
-	 * @default { duration: 300, easing: 'ease-in-out', fill: 'both' }
+	 * Panel swap timing overrides. Only `duration` (ms) and `easing` are read; supports
+	 * responsive values and wins over the `motion` theme slot.
 	 */
-	keyFramesOptions?: {
-		/**
-		 * Animation duration in milliseconds.
-		 */
-		duration: number;
-		/**
-		 * CSS timing function used for tab panel opacity and height transitions.
-		 */
-		easing: string;
-		/**
-		 * Web Animations API fill mode applied to the tab panel translation animation.
-		 */
-		fill: 'auto' | 'backwards' | 'both' | 'forwards' | 'none';
-	};
+	transition?: ResponsiveProps<FSOProps>;
 	/**
-	 * The size of the tabs.
-	 * @default 'normal'
+	 * Props forwarded to the inner Tabbar. `orientation` falls back to the value implied by
+	 * `placement` (vertical for `left`/`right`).
 	 */
-	tabbarSize?: Sizes;
+	tabbar?: Pick<
+		TabbarProps,
+		| 'size'
+		| 'orientation'
+		| 'color'
+		| 'alignment'
+		| 'class'
+		| 'theme'
+		| 'fullWidth'
+		| 'label'
+		| 'variant'
+		| 'scrollFade'
+	>;
 	/**
-	 * The orientation of the tabbar.
-	 * @default 'horizontal'
+	 * When each panel's content is created.
+	 * `lazy` creates a panel the first time it is activated and destroys it when it is left,
+	 * `once` keeps it after the first activation, `eager` creates every panel up front.
+	 * Inactive panels are `hidden` and `inert` in every mode.
+	 * @default 'lazy'
 	 */
-	tabbarOrientation?: TabOrientation;
-	/**
-	 * The color scheme of the tabs.
-	 * @default 'primary'
-	 */
-	tabbarColor?: Colors;
-	/**
-	 * The alignment of the tabs within the container.
-	 * @default 'start'
-	 */
-	tabbarAlignment?: TabAlignment;
-	/**
-	 * Additional CSS classes for the tabbar container.
-	 */
-	tabbarClass?: string;
-	/**
-	 * Custom theme overrides for the tabbar.
-	 */
-	tabbarTheme?: TabbarThemeProps;
+	mount?: StepperMount;
 	/**
 	 * Repeated panel renderer. Called once for each item.
 	 */
 	children?: Snippet<[TabsRenderPayload<Item>]>;
-	/**
-	 * Whether the tabbar should be full width.
-	 * @default false
-	 */
-	tabbarFullWidth?: boolean;
 }>;

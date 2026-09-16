@@ -4,7 +4,7 @@ export type {
 	PaginationControlVariant,
 	PaginationGap,
 	PaginationItem,
-	PaginationItemAriaLabel,
+	PaginationItemLabel,
 	PaginationPageItemPayload,
 	PaginationProps,
 	PaginationSummaryPayload,

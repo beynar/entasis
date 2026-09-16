@@ -3,6 +3,7 @@ import { assertScheduleInstant, assertScheduleRange } from '$lib/scheduling/sche
 import type { Messages } from '$lib/i18n/en.js';
 import type { Density, Sizes } from '$lib/types/theme.js';
 import { bind } from '$lib/utils/state.svelte.js';
+import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 import { untrack } from 'svelte';
 import { applyGanttColumnEdit } from './ganttChart.columns.js';
 import { GanttChartA11y } from './ganttChart.a11y.svelte.js';
@@ -77,7 +78,7 @@ const DEFAULT_GANTT_TOUCH_ACTIVATION: GanttTouchActivation = Object.freeze({
 	touchDelayMs: 300,
 	touchTolerancePx: 8
 });
-const DEFAULT_GANTT_ROW_HEIGHT = { small: 28, normal: 32, large: 36 } as const;
+const DEFAULT_GANTT_ROW_HEIGHT = { compact: 28, normal: 32, comfortable: 36 } as const;
 const DEFAULT_GANTT_DISPLAY: GanttDisplayOptions = Object.freeze({
 	criticalPath: false,
 	baselines: true,
@@ -244,7 +245,7 @@ export class GanttChartState<
 		this.timelineOptions?.snapDuration ?? resolveGanttScaleSnapDuration(this.zoom, this.scales)
 	);
 	readonly touchActivation = DEFAULT_GANTT_TOUCH_ACTIVATION;
-	readonly color = 'primary' as const;
+	readonly color = useDefaultColor();
 	readonly themeVariants = $derived({
 		size: this.size,
 		density: this.density,

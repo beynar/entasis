@@ -24,13 +24,13 @@ const chart = {
 const RevenueChart = Chart as Component<ChartProps<Revenue>>;
 
 describe('Chart SSR', () => {
-	test('prerenders an accessible SVG at the requested initial dimensions', () => {
+	test('prerenders an accessible SVG at the requested aspect ratio', () => {
 		const output = render(RevenueChart, {
 			props: {
 				data,
 				...chart,
-				ariaLabel: 'Monthly revenue',
-				initialDimensions: { width: 800, height: 400 }
+				label: 'Monthly revenue',
+				aspectRatio: 2
 			}
 		});
 
@@ -38,11 +38,38 @@ describe('Chart SSR', () => {
 		expect(output.body).toContain('<svg');
 		expect(output.body).toContain('aria-label="Monthly revenue"');
 		expect(output.body).toContain('viewBox="0 0 800 400"');
+		expect(output.body).toContain('aspect-ratio:2');
 	});
 
-	test('renders only a stable host when initial dimensions are absent', () => {
+	test('prerenders and sizes the root from height alone', () => {
 		const output = render(RevenueChart, {
-			props: { data, ...chart, ariaLabel: 'Monthly revenue' }
+			props: { data, ...chart, label: 'Monthly revenue', height: 320 }
+		});
+
+		expect(output.body).toContain('viewBox="0 0 800 320"');
+		expect(output.body).toContain('height:320px');
+	});
+
+	test('rejects height combined with aspectRatio', () => {
+		let thrown: unknown;
+		try {
+			const output = render(RevenueChart, {
+				props: { data, ...chart, label: 'Monthly revenue', height: 320, aspectRatio: 2 }
+			});
+			void output.body;
+		} catch (error) {
+			thrown = error;
+		}
+
+		expect(thrown).toBeInstanceOf(TypeError);
+		expect((thrown as Error).message).toBe(
+			'[Chart] height cannot be combined with aspectRatio; each one sizes the chart on its own.'
+		);
+	});
+
+	test('renders only a stable host when no size is declared', () => {
+		const output = render(RevenueChart, {
+			props: { data, ...chart, label: 'Monthly revenue' }
 		});
 
 		expect(output.body).toContain('data-slot="chart"');
@@ -55,8 +82,8 @@ describe('Chart SSR', () => {
 			props: {
 				data: [],
 				...chart,
-				ariaLabel: 'Empty revenue',
-				initialDimensions: { width: 800, height: 400 }
+				label: 'Empty revenue',
+				aspectRatio: 2
 			}
 		});
 
@@ -64,16 +91,11 @@ describe('Chart SSR', () => {
 		expect(output.body).toContain('aria-label="Empty revenue"');
 	});
 
-	test('rejects non-positive initial dimensions', () => {
+	test('rejects a non-positive height', () => {
 		let thrown: unknown;
 		try {
 			const output = render(RevenueChart, {
-				props: {
-					data,
-					...chart,
-					ariaLabel: 'Monthly revenue',
-					initialDimensions: { width: 0, height: 400 }
-				}
+				props: { data, ...chart, label: 'Monthly revenue', height: 0 }
 			});
 			void output.body;
 		} catch (error) {
@@ -82,7 +104,7 @@ describe('Chart SSR', () => {
 
 		expect(thrown).toBeInstanceOf(TypeError);
 		expect((thrown as Error).message).toBe(
-			'[Chart] initialDimensions.width must be a finite number greater than 0.'
+			'[Chart] height must be a finite number of pixels greater than 0.'
 		);
 	});
 });

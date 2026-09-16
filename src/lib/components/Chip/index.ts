@@ -7,4 +7,3 @@ export {
 	type ChipTheme,
 	type ChipThemeProps
 } from './chip.theme.js';
-

@@ -47,36 +47,38 @@
 		}
 	];
 	let selectedOrder = $state<(typeof orders)[number] | null>(null);
-	let filter = $state(0);
+	let filter = $state('All orders');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Your account</p>
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Your account
+		</p>
 		<Heading size="h2" weight="bold">Good things, on their way.</Heading>
 	</header>
 	<Tabbar items={['All orders', 'In transit', 'Delivered']} bind:value={filter} />
-	<div class="flex flex-col gap-xl">
-		{#each orders.filter((order) => filter === 0 || order.status === ['', 'In transit', 'Delivered'][filter]) as order (order.id)}<article
-				class="overflow-hidden rounded-lg border border-neutral/15"
+	<div class="gap-xl flex flex-col">
+		{#each orders.filter((order) => filter === 'All orders' || order.status === filter) as order (order.id)}<article
+				class="border-neutral/15 overflow-hidden rounded-lg border"
 			>
-				<div class="flex gap-lg justify-between flex-wrap p-lg bg-surface-recessed text-sm">
+				<div class="gap-lg p-lg bg-surface-recessed flex flex-wrap justify-between text-sm">
 					<span><strong>{order.id}</strong> · {order.date}</span><Chip
 						size="small"
 						variant="soft"
 						color={order.status === 'Delivered' ? 'success' : 'info'}>{order.status}</Chip
 					>
 				</div>
-				<div class="grid items-center gap-xl p-xl sm:grid-cols-[7rem_1fr_auto]">
+				<div class="gap-xl p-xl grid items-center sm:grid-cols-[7rem_1fr_auto]">
 					<div>{@render productArt(order.shape, order.color)}</div>
 					<div>
 						<h3 class="font-semibold">{order.name}</h3>
-						<p class="mt-md text-sm text-neutral/55">{order.color} · Qty {order.quantity}</p>
+						<p class="mt-md text-neutral/65 text-sm">{order.color} · Qty {order.quantity}</p>
 						<p class="mt-sm text-sm">{money(order.price * order.quantity)}</p>
 					</div>
 					<Button variant="outline" size="small" onclick={() => (selectedOrder = order)}
@@ -92,10 +94,10 @@
 		}}
 		title={selectedOrder?.id ?? 'Order details'}
 		description="Sample order details"
-		>{#if selectedOrder}<div class="flex flex-col gap-xl">
+		>{#if selectedOrder}<div class="gap-xl flex flex-col">
 				{@render productArt(selectedOrder.shape, selectedOrder.color)}
 				<h3 class="text-xl font-semibold">{selectedOrder.name}</h3>
-				<dl class="flex flex-col gap-lg text-sm">
+				<dl class="gap-lg flex flex-col text-sm">
 					<div class="flex justify-between">
 						<dt>Status</dt>
 						<dd>{selectedOrder.status}</dd>

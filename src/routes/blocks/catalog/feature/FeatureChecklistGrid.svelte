@@ -41,7 +41,7 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl flex flex-col">
 	<div class="mx-auto max-w-2xl text-center">
 		<Chip variant="outline">A considered toolkit</Chip><Heading
 			as="h2"
@@ -50,17 +50,17 @@
 			class="mt-xl">Everything should work together.</Heading
 		>
 	</div>
-	<div class="grid gap-lg sm:grid-cols-2">
+	<div class="gap-lg grid sm:grid-cols-2">
 		{#each features as feature (feature.title)}<Card variant="outline"
 				><Stack gap="lg"
-					><span class="text-primary">{@render feature.icon({ size: 30 })}</span><Heading
+					><span class="text-primary-readable">{@render feature.icon({ size: 30 })}</span><Heading
 						as="h3"
 						size="h4">{feature.title}</Heading
 					>
-					<p class="text-neutral/60">{feature.description}</p>
+					<p class="text-neutral/70">{feature.description}</p>
 					<Separator />
-					<ul class="flex flex-col gap-md">
-						{#each feature.points as point (point)}<li class="flex gap-sm text-sm">
+					<ul class="gap-md flex flex-col">
+						{#each feature.points as point (point)}<li class="gap-sm flex text-sm">
 								<span class="text-success">{@render checkIcon()}</span>{point}
 							</li>{/each}
 					</ul></Stack

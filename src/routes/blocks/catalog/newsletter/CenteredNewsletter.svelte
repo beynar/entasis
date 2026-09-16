@@ -6,10 +6,10 @@
 	let email = $state('');
 </script>
 
-<section class="mx-auto flex max-w-2xl flex-col gap-xl p-xl">
+<section class="gap-xl p-xl mx-auto flex max-w-2xl flex-col">
 	<div class="text-center">
 		<div
-			class="mx-auto mb-xl flex size-16 items-center justify-center rounded-full bg-primary-muted text-primary"
+			class="mb-xl bg-primary-muted text-primary-muted-readable mx-auto flex size-16 items-center justify-center rounded-full"
 		>
 			{@render envelopeSimpleIcon({ size: 28 })}
 		</div>
@@ -32,7 +32,7 @@
 			{ children: 'Review subscription', fullWidth: true, onAction: (form) => form.submit() }
 		]}
 	/>
-	<p class="text-center text-xs text-neutral/50">
+	<p class="text-neutral/65 text-center text-xs">
 		This example prepares a local draft and sends no email.
 	</p>
 	{#if email}<Card variant="soft" color="primary"

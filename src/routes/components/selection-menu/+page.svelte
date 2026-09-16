@@ -40,14 +40,14 @@
 		return [
 			{
 				type: 'group',
-				ariaLabel: 'Inline formatting',
-				items: {
-					bold: { prefix: textBIcon, ariaLabel: 'Bold' },
-					italic: { prefix: textItalicIcon, ariaLabel: 'Italic' }
-				}
+				label: 'Inline formatting',
+				items: [
+					{ value: 'bold', prefix: textBIcon, label: 'Bold' },
+					{ value: 'italic', prefix: textItalicIcon, label: 'Italic' }
+				]
 			},
-			{ type: 'toggle', prefix: highlighterIcon, ariaLabel: 'Highlight selection' },
-			{ type: 'toggle', prefix: chatCircleIcon, ariaLabel: 'Comment on selection' }
+			{ type: 'toggle', prefix: highlighterIcon, label: 'Highlight selection' },
+			{ type: 'toggle', prefix: chatCircleIcon, label: 'Comment on selection' }
 		];
 	}
 
@@ -76,7 +76,7 @@
 \t\tSelect any passage in this editor.
 \t</article>
 
-\t<SelectionMenu bind:value={items} ariaLabel="Selection tools" size="${controls.value.size}" variant="${controls.value.variant}" color="${controls.value.color}" />
+\t<SelectionMenu bind:items label="Selection tools" size="${controls.value.size}" variant="${controls.value.variant}" color="${controls.value.color}" />
 </div>`}
 	>
 		<div class="mx-auto grid w-full max-w-2xl gap-4">
@@ -88,7 +88,7 @@
 				class="border-neutral-muted focus:ring-primary min-h-48 rounded-md border p-6 text-left outline-none focus:ring-1"
 			>
 				<h3 class="mb-3 text-lg font-semibold">Release note</h3>
-				<p class="text-neutral/60 leading-7">
+				<p class="text-neutral/70 leading-7">
 					Selection-aware controls should follow the passage being edited without coupling the
 					toolbar to a particular editor engine. The editor remains responsible for formatting state
 					and commands.
@@ -96,14 +96,14 @@
 			</div>
 
 			<SelectionMenu
-				bind:value={parentItems}
-				ariaLabel="Selection tools"
+				bind:items={parentItems}
+				label="Selection tools"
 				size={controls.value.size}
 				variant={controls.value.variant}
 				color={controls.value.color}
-				onSelectionChange={(selection) => (currentSelection = selection)}
+				onSelect={(selection) => (currentSelection = selection)}
 			/>
-			<p class="text-neutral/60 min-h-5 text-center text-xs" aria-live="polite">
+			<p class="text-neutral/70 min-h-5 text-center text-xs" aria-live="polite">
 				{currentSelection ? `${currentSelection.text.length} characters selected` : ''}
 			</p>
 		</div>
@@ -118,22 +118,22 @@
 
 <SelectionMenu
 \ttarget="#selection-source"
-\tbind:value={items}
-\tariaLabel="Quote tools"
+\tbind:items
+\tlabel="Quote tools"
 />`}
 		>
 			<div class="mx-auto grid w-full max-w-xl gap-4">
 				<blockquote
 					id="selection-menu-quote"
-					class="border-primary text-neutral/60 border-l-2 py-2 pl-5 text-left leading-7"
+					class="border-primary text-neutral/70 border-l-2 py-2 pl-5 text-left leading-7"
 				>
 					A selection menu knows where a range is. The editor still knows what that range means.
 				</blockquote>
 
 				<SelectionMenu
 					target="#selection-menu-quote"
-					bind:value={selectorItems}
-					ariaLabel="Quote tools"
+					bind:items={selectorItems}
+					label="Quote tools"
 				/>
 			</div>
 		</ComponentCard>

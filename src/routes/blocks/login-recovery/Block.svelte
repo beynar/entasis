@@ -37,16 +37,16 @@
 </script>
 
 <section
-	class="bg-surface flex min-h-96 w-full items-center justify-center rounded-lg p-lg sm:p-xl"
+	class="bg-surface p-lg sm:p-xl flex min-h-96 w-full items-center justify-center rounded-lg"
 	aria-label="Account access"
 >
-	<div class="grid w-full max-w-5xl items-stretch gap-xl lg:grid-cols-2">
+	<div class="gap-xl grid w-full max-w-5xl items-stretch lg:grid-cols-2">
 		<aside
-			class="bg-primary text-primary-contrast flex flex-col justify-between gap-xl rounded-lg p-xl"
+			class="bg-primary text-primary-contrast gap-xl p-xl flex flex-col justify-between rounded-lg"
 		>
 			<Stack gap="xl">
 				<Stack orientation="horizontal" align="center" gap="md">
-					<span class="bg-primary-contrast/15 flex rounded-full p-md text-xl">
+					<span class="bg-primary-contrast/15 p-md flex rounded-full text-xl">
 						{@render lockSimpleIcon()}
 					</span>
 					<span class="text-lg font-semibold tracking-tight">Northstar</span>
@@ -61,16 +61,16 @@
 					</p>
 				</Stack>
 
-				<Stack as="ul" gap="md">
-					<li class="flex items-center gap-md">
+				<ul class="gap-md flex flex-col">
+					<li class="gap-md flex items-center">
 						<span class="text-lg">{@render checkCircleIcon()}</span>
 						<span class="text-sm">Protected with secure account recovery</span>
 					</li>
-					<li class="flex items-center gap-md">
+					<li class="gap-md flex items-center">
 						<span class="text-lg">{@render checkCircleIcon()}</span>
 						<span class="text-sm">One link, sent only to your verified email</span>
 					</li>
-				</Stack>
+				</ul>
 			</Stack>
 
 			<Stack orientation="horizontal" align="center" gap="md">
@@ -93,7 +93,7 @@
 							</p>
 						</Stack>
 
-						<form class="flex flex-col gap-lg" onsubmit={submitLogin}>
+						<form class="gap-lg flex flex-col" onsubmit={submitLogin}>
 							<TextInput
 								label="Email address"
 								name="email"
@@ -118,7 +118,7 @@
 							<Button type="submit" fullWidth suffix={arrowRightIcon}>Sign in</Button>
 						</form>
 
-						<p class="text-neutral/60 text-center text-xs">
+						<p class="text-neutral/70 text-center text-xs">
 							Need an account?
 							<a class="text-primary-readable font-semibold hover:underline" href="#create-account">
 								Create one
@@ -128,7 +128,9 @@
 				{:else if view === 'recovery'}
 					<Stack gap="xl">
 						<Stack gap="sm">
-							<span class="bg-primary/10 text-primary flex w-fit rounded-full p-md text-xl">
+							<span
+								class="bg-primary/10 text-primary-readable p-md flex w-fit rounded-full text-xl"
+							>
 								{@render envelopeIcon()}
 							</span>
 							<Heading size="h2" weight="bold">Reset your password</Heading>
@@ -137,7 +139,7 @@
 							</p>
 						</Stack>
 
-						<form class="flex flex-col gap-lg" onsubmit={submitRecovery}>
+						<form class="gap-lg flex flex-col" onsubmit={submitRecovery}>
 							<TextInput
 								label="Email address"
 								name="recovery-email"
@@ -156,7 +158,7 @@
 					</Stack>
 				{:else}
 					<Stack align="center" gap="xl" class="text-center">
-						<span class="bg-success/10 text-success flex rounded-full p-lg text-4xl">
+						<span class="bg-success/10 text-success p-lg flex rounded-full text-4xl">
 							{@render checkCircleIcon()}
 						</span>
 						<Stack align="center" gap="sm">

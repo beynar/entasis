@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultCheckboxesInput = cva({
-	base: 'grid gap-lg ',
+	base: '',
 	variants: {
 		mode: {
 			card: '',
@@ -13,7 +13,7 @@ const defaultCheckboxesInput = cva({
 });
 
 const defaultCheckboxesInputItem = cva({
-	base: 'relative grid w-full cursor-pointer items-start gap-xs rounded-md pl-layout-xl text-left transition-all outline-none focus-visible:ring-2 focus-visible:ring-color/50',
+	base: 'relative grid w-full cursor-pointer items-start gap-xs rounded-md pl-layout-xl text-left transition-[color,background-color,box-shadow,opacity] outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
 	variants: {
 		mode: {
 			card: 'raised bg-surface-raised py-md',
@@ -21,9 +21,9 @@ const defaultCheckboxesInputItem = cva({
 			control: '!inline-grid !min-h-0 !grid-cols-1 !place-items-center !gap-0 !p-0 !pl-0'
 		},
 		size: {
-			small: 'min-h-8',
-			normal: 'min-h-10',
-			large: 'min-h-11'
+			small: 'min-h-row-sm',
+			normal: 'min-h-row-md',
+			large: 'min-h-row-lg'
 		},
 		checked: {
 			true: '',
@@ -41,7 +41,7 @@ const defaultCheckboxesInputItem = cva({
 		{
 			mode: 'card',
 			checked: true,
-			class: 'ring-2 ring-color bg-color-muted text-color-muted-readable'
+			class: 'ring-2 ring-selected bg-selected-muted text-selected-muted-readable'
 		},
 		{
 			mode: 'control',
@@ -92,20 +92,21 @@ const defaultCheckboxesInputItemTrack = cva({
 			normal: 'top-1',
 			control: '!static col-start-1 row-start-1'
 		},
+		// The item carries the disabled dimming; nested layers stay opaque so it applies once.
 		disabled: {
-			true: 'opacity-50',
+			true: '',
 			false: ''
 		}
 	}
 });
 
 const defaultCheckboxesInputItemThumb = cva({
-	base: `origin-center radio bg-neutral rounded-sm flex items-center justify-center transition-all content-[""] absolute left-2 scale-[85%] opacity-0
-	stroke-color-contrast [&>svg]:fill-color-contrast p-xs
-	`,
+	// The check/minus icons paint with `currentColor`, so the thumb's text colour is the
+	// mark colour: `selected-contrast` against the `bg-selected` fill it gets when checked.
+	base: 'origin-center radio rounded-sm flex items-center justify-center transition-[background-color,opacity,scale] content-[""] absolute left-2 scale-[85%] opacity-0 p-xs text-selected-contrast',
 	variants: {
 		checked: {
-			true: 'bg-color scale-[100%] opacity-100',
+			true: 'bg-selected scale-[100%] opacity-100',
 			false: ''
 		},
 		size: {
@@ -119,7 +120,7 @@ const defaultCheckboxesInputItemThumb = cva({
 			control: '!static col-start-1 row-start-1'
 		},
 		disabled: {
-			true: 'opacity-50',
+			true: '',
 			false: ''
 		}
 	}
@@ -130,7 +131,7 @@ const defaultCheckboxesInputItemIcon = cva({
 });
 
 const defaultCheckboxesInputItemDescription = cva({
-	base: 'text-xs text-neutral/60',
+	base: 'text-xs text-neutral/70',
 	variants: {
 		mode: {
 			card: '',
@@ -146,7 +147,7 @@ const defaultCheckboxesInputItemDescription = cva({
 		{
 			mode: 'card',
 			checked: true,
-			class: 'text-color-muted-readable/70'
+			class: 'text-color-muted-readable'
 		}
 	]
 });
@@ -160,7 +161,7 @@ const defaultCheckboxesInputContainer = cva({
 			control: '!inline-flex !w-auto !flex-none'
 		},
 		disabled: {
-			true: 'opacity-50',
+			true: '',
 			false: ''
 		}
 	}

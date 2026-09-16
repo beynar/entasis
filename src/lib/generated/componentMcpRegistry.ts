@@ -13,7 +13,6 @@ import { aiComposerDescription } from '$lib/components/AIComposer/aiComposer.mcp
 import { aiReasoningDescription } from '$lib/components/AIReasoning/aiReasoning.mcp.js';
 import { aiSuggestionDescription } from '$lib/components/AISuggestion/aiSuggestion.mcp.js';
 import { aiToolDescription } from '$lib/components/AITool/aiTool.mcp.js';
-import { aiMcpAppDescription } from '$lib/components/AIMcpApp/aiMcpApp.mcp.js';
 import { aiFilePreviewDescription } from '$lib/components/AIFilePreview/aiFilePreview.mcp.js';
 import { aspectRatioDescription } from '$lib/components/AspectRatio/aspectRatio.mcp.js';
 import { cardDescription } from '$lib/components/Card/card.mcp.js';
@@ -152,7 +151,6 @@ export const componentMcpRegistry = {
 	'ai-reasoning': aiReasoningDescription,
 	'ai-suggestion': aiSuggestionDescription,
 	'ai-tool': aiToolDescription,
-	'ai-mcp-app': aiMcpAppDescription,
 	'ai-file-preview': aiFilePreviewDescription,
 	'aspect-ratio': aspectRatioDescription,
 	card: cardDescription,

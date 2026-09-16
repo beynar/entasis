@@ -19,6 +19,7 @@ import type {
 	ChartTooltipDefinition,
 	ChartTooltipField
 } from './chart.props.js';
+import { en, type Messages } from '$lib/i18n/en.js';
 
 const GROUPED_TOOLTIP_PLACEMENTS = ['top', 'right', 'left', 'bottom'] as const;
 const PROPORTION_VALUE_FORMAT = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 });
@@ -37,7 +38,8 @@ export function compileChartTooltip<TRow extends object>(
 	definition: boolean | ChartTooltipDefinition<TRow> | undefined,
 	className: string | undefined,
 	groupBy: 'x' | 'y' | undefined,
-	specialization?: ChartTooltipSpecialization
+	specialization?: ChartTooltipSpecialization,
+	messages: Messages = en
 ): {
 	input: false | ChartTooltipInput<TRow, ChartValue, ChartValue, 'dom'>;
 	focus?: ChartFocusPreset;
@@ -94,9 +96,15 @@ export function compileChartTooltip<TRow extends object>(
 				context: ChartTooltipContentContext
 		  ) => ChartTooltipContent)
 		| undefined;
-	if (specialization?.type === 'distribution') content = compileDistributionTooltip;
-	if (specialization?.type === 'proportion') content = compileProportionTooltip;
-	if (specialization?.type === 'relation') content = compileRelationTooltip;
+	if (specialization?.type === 'distribution') {
+		content = (points, context) => compileDistributionTooltip(points, context, messages);
+	}
+	if (specialization?.type === 'proportion') {
+		content = (points, context) => compileProportionTooltip(points, context, messages);
+	}
+	if (specialization?.type === 'relation') {
+		content = (points, context) => compileRelationTooltip(points, context, messages);
+	}
 	if (specialization?.type === 'hexbin') content = compileHexbinTooltip;
 
 	return {
@@ -118,7 +126,8 @@ export function compileChartTooltip<TRow extends object>(
 
 function compileRelationTooltip<TRow extends object>(
 	points: readonly ChartPoint<TRow>[],
-	_context: ChartTooltipContentContext
+	_context: ChartTooltipContentContext,
+	messages: Messages
 ): ChartTooltipContent {
 	const point = points.find((candidate) => isRelationDatum(candidate.datum));
 	if (!point || !isRelationDatum(point.datum)) {
@@ -133,7 +142,7 @@ function compileRelationTooltip<TRow extends object>(
 					? []
 					: [
 							{
-								label: 'Value',
+								label: messages.valueLabel,
 								value: PROPORTION_VALUE_FORMAT.format(relation.value),
 								color: point.color
 							}
@@ -141,16 +150,22 @@ function compileRelationTooltip<TRow extends object>(
 		};
 	}
 	const rows: ChartTooltipRow[] = [];
-	if (relation.group !== undefined) rows.push({ label: 'Group', value: String(relation.group) });
+	if (relation.group !== undefined) {
+		rows.push({ label: messages.chartGroup, value: String(relation.group) });
+	}
 	if (relation.value !== undefined) {
-		rows.push({ label: 'Value', value: PROPORTION_VALUE_FORMAT.format(relation.value) });
+		rows.push({
+			label: messages.valueLabel,
+			value: PROPORTION_VALUE_FORMAT.format(relation.value)
+		});
 	}
 	return { title: relation.label, color: point.color, rows };
 }
 
 function compileProportionTooltip<TRow extends object>(
 	points: readonly ChartPoint<TRow>[],
-	_context: ChartTooltipContentContext
+	_context: ChartTooltipContentContext,
+	messages: Messages
 ): ChartTooltipContent {
 	const point = points.find((candidate) => isProportionDatum(candidate.datum));
 	if (!point || !isProportionDatum(point.datum)) {
@@ -160,8 +175,12 @@ function compileProportionTooltip<TRow extends object>(
 	return {
 		title: String(summary.category),
 		rows: [
-			{ label: 'Value', value: PROPORTION_VALUE_FORMAT.format(summary.value), color: point.color },
-			{ label: 'Share', value: PROPORTION_SHARE_FORMAT.format(summary.share) }
+			{
+				label: messages.valueLabel,
+				value: PROPORTION_VALUE_FORMAT.format(summary.value),
+				color: point.color
+			},
+			{ label: messages.chartShare, value: PROPORTION_SHARE_FORMAT.format(summary.share) }
 		]
 	};
 }
@@ -178,7 +197,8 @@ export function resolveChartTooltipGroupBy(configuration: {
 
 function compileDistributionTooltip<TRow extends object>(
 	points: readonly ChartPoint<TRow>[],
-	context: ChartTooltipContentContext
+	context: ChartTooltipContentContext,
+	messages: Messages
 ): ChartTooltipContent {
 	const point = points.find((candidate) => isDistributionSummary(candidate.datum));
 	if (!point || !isDistributionSummary(point.datum)) {
@@ -190,24 +210,24 @@ function compileDistributionTooltip<TRow extends object>(
 	let rows: readonly ChartTooltipRow[];
 	if (summary.variant === 'violin') {
 		rows = [
-			{ label: 'Samples', value: String(summary.count) },
-			{ label: 'Median', value: formatValue(summary.median), color: point.color }
+			{ label: messages.chartSamples, value: String(summary.count) },
+			{ label: messages.chartMedian, value: formatValue(summary.median), color: point.color }
 		];
 	} else if (summary.variant === 'box') {
 		rows = [
-			{ label: 'Samples', value: String(summary.count) },
-			{ label: 'Median', value: formatValue(summary.median), color: point.color },
+			{ label: messages.chartSamples, value: String(summary.count) },
+			{ label: messages.chartMedian, value: formatValue(summary.median), color: point.color },
 			{
-				label: 'Quartiles',
+				label: messages.chartQuartiles,
 				value: `${formatValue(summary.q1)} – ${formatValue(summary.q3)}`
 			},
-			{ label: 'Whiskers', value: range }
+			{ label: messages.chartWhiskers, value: range }
 		];
 	} else {
 		rows = [
-			{ label: 'Samples', value: String(summary.count) },
-			{ label: 'Mean', value: formatValue(summary.mean), color: point.color },
-			{ label: summary.intervalLabel ?? 'Interval', value: range }
+			{ label: messages.chartSamples, value: String(summary.count) },
+			{ label: messages.chartMean, value: formatValue(summary.mean), color: point.color },
+			{ label: summary.intervalLabel ?? messages.chartInterval, value: range }
 		];
 	}
 	return { title: String(summary.group), rows };

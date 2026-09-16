@@ -1,6 +1,7 @@
-import { cva } from '$lib/utils/cva/index.js';
+import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
+import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
-const heading = cva({
+const defaultHeading = cva({
 	base: '[text-box-edge:cap_alphabetic]',
 	variants: {
 		size: {
@@ -30,7 +31,7 @@ const heading = cva({
 			false: ''
 		},
 		muted: {
-			true: 'text-neutral/60',
+			true: 'text-neutral/70',
 			false: ''
 		},
 		trim: {
@@ -39,7 +40,23 @@ const heading = cva({
 			both: '[text-box-trim:trim-both]',
 			none: '[text-box-trim:none]'
 		}
+	},
+	defaultVariants: {
+		size: 'h2',
+		weight: 'normal',
+		align: 'left',
+		balanced: true,
+		underline: false,
+		muted: false,
+		trim: 'both'
 	}
 });
 
-export const headingTheme = { root: heading };
+export const headingTheme = {
+	root: defaultHeading
+};
+
+export type HeadingTheme = typeof headingTheme;
+export type HeadingThemeProps = InferComponentTheme<HeadingTheme>;
+export const setHeadingTheme = setComponentTheme<HeadingTheme>('heading');
+export const useHeadingTheme = useComponentTheme<HeadingTheme>('heading', headingTheme);

@@ -44,12 +44,12 @@ Extends all Field component props plus:
 - **separators**: boolean (default: true) - Render separators between consecutive groups
 
 ### Field Props (inherited)
-- **label**: string | Snippet - Field label
+- **label**: string | Snippet - Field label, and the trigger's accessible name; without it the trigger falls back to the placeholder
 - **description**: string | Snippet - Helper text
 - **required**: boolean - Mark as required
 - **disabled**: boolean - Disable the trigger
 - **size**: 'small' | 'normal' | 'large' - Trigger and dropdown size
-- **density**: 'small' | 'normal' | 'large' (default: 'normal') - Spacing density forwarded to the dropdown option rows (paddings, gaps, min-height)
+- **density**: 'compact' | 'normal' | 'comfortable' (default: 'normal') - Spacing density forwarded to the dropdown option rows (paddings, gaps, min-height)
 - **name**: string - Form field name; also renders a hidden input for native form posts
 
 ### Bindable Props
@@ -68,6 +68,7 @@ Extends all Field component props plus:
 
 - Closed: ArrowDown / ArrowUp / Enter / Space open the dropdown, anchored on the selected option
 - Open: ArrowDown / ArrowUp move the highlight (wrap-around), Home / End jump, Enter / Space select, Escape closes, Tab closes and moves focus on
+- Type-ahead: typing letters while the trigger has focus moves the highlight to the next option whose label starts with the typed text
 - Disabled options are skipped by the highlight
 
 ## Accessibility
@@ -76,6 +77,12 @@ ARIA 1.2 select-only combobox pattern: the trigger is a \`role="combobox"\` butt
 \`aria-haspopup="listbox"\`, \`aria-expanded\`, and \`aria-controls\`; DOM focus stays on the
 trigger while \`aria-activedescendant\` tracks the highlighted \`role="option"\` (virtual focus).
 The selected option shows a check indicator and \`aria-selected\`.
+
+The trigger always has an accessible name: \`label\` names it through the Field label (a string
+label as a \`<label for>\`, a snippet through \`aria-labelledby\`), and without one the trigger
+falls back to \`placeholder\`, then to the catalog's "Select an option". Pass \`label\` whenever
+an unlabelled select sits in a toolbar or filter row, so the name says which control it is
+rather than repeating the placeholder.
 
 ## Notes
 

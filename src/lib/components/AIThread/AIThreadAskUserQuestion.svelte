@@ -2,13 +2,14 @@
 	import AIAskUserQuestion from '../AIAskUserQuestion/AIAskUserQuestion.svelte';
 	import type {
 		AIAskAnswers,
-		AIAskUserQuestionSubmitDetail
+		AIAskUserQuestionSubmitPayload
 	} from '../AIAskUserQuestion/aiAskUserQuestion.props.js';
 	import type {
 		AIThreadAskUserQuestion as AIThreadAskUserQuestionRequest,
 		AIThreadItem,
 		AIThreadProps
 	} from './aiThread.props.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type Props<TMessage extends AIThreadItem> = Pick<
 		AIThreadProps<TMessage>,
@@ -24,7 +25,7 @@
 		onResolve: (payload: {
 			request: AIThreadAskUserQuestionRequest<TMessage>;
 			state: 'completed' | 'discarded';
-			detail?: AIAskUserQuestionSubmitDetail;
+			detail?: AIAskUserQuestionSubmitPayload;
 		}) => void | Promise<void>;
 	};
 
@@ -36,6 +37,7 @@
 		onValuesChange,
 		onResolve
 	}: Props<TMessage> = $props();
+	const t = $derived(useI18n());
 
 	const values = $derived(value ?? request.value ?? {});
 </script>
@@ -45,7 +47,7 @@
 		questions={request.questions}
 		value={values}
 		disabled={askUserQuestionDisabled}
-		title={request.title ?? 'Clarify before continuing'}
+		title={request.title ?? t.aiAskClarify}
 		requester={request.requester}
 		context={request.context}
 		submitLabel={request.submitLabel}
@@ -54,7 +56,7 @@
 		previousLabel={request.previousLabel}
 		discardLabel={request.discardLabel}
 		onValueChange={(values) => onValuesChange({ request, values })}
-		onSubmit={(detail: AIAskUserQuestionSubmitDetail) =>
+		onSubmit={(detail: AIAskUserQuestionSubmitPayload) =>
 			onResolve({ request, state: 'completed', detail })}
 		onDiscard={() => onResolve({ request, state: 'discarded' })}
 	/>

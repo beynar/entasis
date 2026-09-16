@@ -7,7 +7,5 @@
 </script>
 
 <Theme>
-	{#snippet children()}
-		<LinkPreview {...props} />
-	{/snippet}
+	<LinkPreview {...props} />
 </Theme>

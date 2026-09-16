@@ -8,9 +8,9 @@
 	let draft = $state('');
 </script>
 
-<section class="mx-auto grid max-w-4xl gap-xl p-lg md:grid-cols-2 md:p-xl">
-	<div class="flex flex-col items-start justify-center gap-xl">
-		<Avatar size="large" user={{ name: 'Nora Ellis' }} />
+<section class="gap-xl p-lg md:p-xl mx-auto grid max-w-4xl md:grid-cols-2">
+	<div class="gap-xl flex flex-col items-start justify-center">
+		<Avatar size="large" name="Nora Ellis" />
 		<div>
 			<Heading as="h2" size="h2" weight="bold">Hi, I'm Nora.</Heading>
 			<p class="mt-lg text-neutral/70">
@@ -18,7 +18,7 @@
 			</p>
 		</div>
 		<Chip color="success" variant="soft">Open for conversations</Chip>
-		<div class="flex flex-col gap-sm text-sm text-neutral/60">
+		<div class="gap-sm text-neutral/70 flex flex-col text-sm">
 			<p>Product strategist · Northstar</p>
 			<p>Based in Copenhagen</p>
 		</div>
@@ -33,8 +33,8 @@
 				onSubmit={(values) => (draft = values.question ?? '')}
 				actions={[{ children: 'Review your note', onAction: (form) => form.submit() }]}
 			/>
-			<p class="text-xs text-neutral/50">Local example. No email is sent.</p>
-			{#if draft}<blockquote class="rounded-lg bg-primary-muted p-lg" role="status">
+			<p class="text-neutral/65 text-xs">Local example. No email is sent.</p>
+			{#if draft}<blockquote class="bg-primary-muted p-lg rounded-lg" role="status">
 					{draft}
 				</blockquote>{/if}</Stack
 		></Card

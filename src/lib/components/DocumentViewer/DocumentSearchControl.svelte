@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { onDestroy } from 'svelte';
 	import Button from '../Button/Button.svelte';
 	import { caretDownIcon } from '../Icons/caretDown.js';
@@ -31,6 +32,7 @@
 	} = $props();
 
 	const buttonProps = $derived({ variant: 'ghost' as const, color, size, squared: true });
+	const t = $derived(useI18n());
 	const position = $derived.by(() => {
 		switch (toolbarPosition) {
 			case 'left':
@@ -95,7 +97,7 @@
 	{#snippet trigger(popover)}
 		<Button
 			{...buttonProps}
-			label="Search"
+			label={t.search}
 			disabled={!viewer.isReady}
 			onclick={popover.toggle}
 			prefix={magnifyingGlassIcon}
@@ -106,8 +108,8 @@
 	<input
 		class={classes.searchInput({ size })}
 		type="search"
-		placeholder="Search…"
-		aria-label="Search document"
+		placeholder={t.searchEllipsis}
+		aria-label={t.searchDocument}
 		autofocus
 		bind:value={query}
 		oninput={onSearchInput}
@@ -116,14 +118,14 @@
 	<span class={classes.searchCount()}>{searchCount}</span>
 	<Button
 		{...buttonProps}
-		label="Previous match"
+		label={`${t.previous} ${t.match}`}
 		disabled={!viewer.matches.length}
 		onclick={() => runViewerTask(viewer.previousMatch())}
 		prefix={caretUpIcon}
 	/>
 	<Button
 		{...buttonProps}
-		label="Next match"
+		label={`${t.next} ${t.match}`}
 		disabled={!viewer.matches.length}
 		onclick={() => runViewerTask(viewer.nextMatch())}
 		prefix={caretDownIcon}

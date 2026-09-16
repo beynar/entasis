@@ -40,10 +40,10 @@
 	);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Stack gap="xl" class="mx-auto w-full max-w-3xl">
 		<header class="text-center">
-			<p class="text-sm text-primary-readable">Help center</p>
+			<p class="text-primary-readable text-sm">Help center</p>
 			<h2 class="mt-sm text-4xl font-semibold">What’s on your mind?</h2>
 			<p class="mt-md text-neutral/65">Search for a question, a feature, or a workflow.</p>
 		</header>
@@ -52,7 +52,7 @@
 			placeholder="Try notifications, team, or exports"
 			bind:value={query}
 		/>
-		<p class="text-sm text-neutral/60" aria-live="polite">{matches.length} matching answers</p>
+		<p class="text-neutral/70 text-sm" aria-live="polite">{matches.length} matching answers</p>
 		{#if matches.length}<Accordion items={matches} oneAtATime variant="card" />{:else}<Card
 				title="No matching answers"
 				description="Try a shorter search or contact the team below."

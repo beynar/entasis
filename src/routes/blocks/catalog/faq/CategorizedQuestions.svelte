@@ -4,7 +4,8 @@
 	import { Heading } from 'svelai/heading';
 	import { Tabbar } from 'svelai/tabbar';
 	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	let active = $state(0);
+	const tabs = ['Getting started', 'Design', 'Development'];
+	let active = $state(tabs[0]);
 	const topics = [
 		[
 			{
@@ -48,21 +49,24 @@
 			}
 		]
 	];
+	const activeTopics = $derived(topics[Math.max(0, tabs.indexOf(active))]);
 </script>
 
-<section class="mx-auto flex max-w-4xl flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto flex max-w-4xl flex-col">
 	<div class="max-w-2xl">
 		<Heading as="h2" size="h2" weight="bold">Find the answer you need.</Heading>
 		<p class="mt-lg text-neutral/70">Start with a topic. Open a question. Keep moving.</p>
 	</div>
-	<Tabbar
-		items={['Getting started', 'Design', 'Development']}
-		bind:value={active}
-	/>{#key active}<Accordion items={topics[active]} variant="card" splitted icon="math" />{/key}
+	<Tabbar items={tabs} bind:value={active} />{#key active}<Accordion
+			items={activeTopics}
+			variant="card"
+			splitted
+			icon="plus-minus"
+		/>{/key}
 	<div
-		class="flex flex-wrap items-center justify-between gap-lg rounded-lg bg-surface-recessed p-lg"
+		class="gap-lg bg-surface-recessed p-lg flex flex-wrap items-center justify-between rounded-lg"
 	>
-		<p class="text-sm text-neutral/60">There is more context in the documentation.</p>
+		<p class="text-neutral/70 text-sm">There is more context in the documentation.</p>
 		<Button href="/docs" variant="link" suffix={arrowRightIcon}>Read the guides</Button>
 	</div>
 </section>

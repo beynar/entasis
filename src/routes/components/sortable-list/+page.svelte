@@ -108,7 +108,7 @@
 		<!-- Example 1: Handle-only drag -->
 		<ComponentCard
 			description="With handle, only the grip initiates the drag"
-			code={`<SortableList bind:items handle />`}
+			code="<SortableList bind:items handle />"
 		>
 			<SortableList bind:items={handleTasks} handle class="w-full max-w-md" />
 		</ComponentCard>
@@ -144,7 +144,7 @@
 						/>
 					</div>
 				</div>
-				<p class="text-neutral/60 text-xs">
+				<p class="text-neutral/70 text-xs">
 					{lastCrossMove || 'Drag a task into the other list to see onReceive.'}
 				</p>
 			</div>
@@ -153,7 +153,7 @@
 		<!-- Orientations -->
 		<ComponentCard
 			description="orientation='horizontal' lays rows in a line; before/after resolves on the horizontal axis"
-			code={`<SortableList bind:items orientation="horizontal" size="small" />`}
+			code="<SortableList bind:items orientation=&quot;horizontal&quot; size=&quot;small&quot; />"
 		>
 			<SortableList
 				bind:items={queue}
@@ -165,7 +165,7 @@
 
 		<ComponentCard
 			description="orientation='grid' wraps rows — drag across lines, the drop math follows the logical order. Override the root theme for a real CSS grid."
-			code={`<SortableList bind:items orientation="grid" size="small" />`}
+			code="<SortableList bind:items orientation=&quot;grid&quot; size=&quot;small&quot; />"
 		>
 			<SortableList bind:items={tiles} orientation="grid" size="small" class="w-full max-w-sm">
 				{#snippet item({ item })}
@@ -181,7 +181,7 @@
 	{#snippet item({ item })}
 		<div class="flex flex-col">
 			<span class="font-medium">{item.title}</span>
-			<span class="text-neutral/60 text-sm">{item.description}</span>
+			<span class="text-neutral/70 text-sm">{item.description}</span>
 		</div>
 	{/snippet}
 </SortableList>`}
@@ -190,7 +190,7 @@
 				{#snippet item({ item })}
 					<div class="flex flex-col">
 						<span class="font-medium">{item.title}</span>
-						<span class="text-neutral/60 text-sm">{item.description}</span>
+						<span class="text-neutral/70 text-sm">{item.description}</span>
 					</div>
 				{/snippet}
 			</SortableList>
@@ -218,14 +218,14 @@
 			code={`<script lang="ts">
 	let items = $state([...]);
 	const order = $derived(items.map((t) => t.label).join(' → '));
-<\/script>
+</scr${'ipt'}>
 
 <SortableList bind:items />
 <p>{order}</p>`}
 		>
 			<div class="flex w-full max-w-md flex-col gap-3">
 				<SortableList bind:items={bound} />
-				<p class="text-neutral/60 text-sm">{boundOrder}</p>
+				<p class="text-neutral/70 text-sm">{boundOrder}</p>
 			</div>
 		</ComponentCard>
 
@@ -246,7 +246,7 @@
 		<!-- Example 6: Disabled -->
 		<ComponentCard
 			description="Disabled renders the rows but blocks reordering"
-			code={`<SortableList bind:items disabled />`}
+			code="<SortableList bind:items disabled />"
 		>
 			<SortableList bind:items={disabledTasks} disabled class="w-full max-w-md" />
 		</ComponentCard>

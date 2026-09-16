@@ -6,7 +6,7 @@ import {
 } from '$lib/utils/cva/index.js';
 
 const defaultRoot = cva({
-	base: 'flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-md border border-neutral-muted bg-surface'
+	base: 'flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-lg border border-neutral-muted bg-surface'
 });
 const defaultHeader = cva({ base: 'shrink-0 border-b border-neutral-muted px-xl py-lg' });
 const defaultError = cva({ base: 'shrink-0 px-xl pt-lg' });

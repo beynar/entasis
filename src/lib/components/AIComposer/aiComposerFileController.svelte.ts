@@ -2,6 +2,7 @@ import type { FileRejection } from '../Form/File/fileAcceptance.js';
 import { FileDropzone } from '../Form/File/fileDropzone.svelte.js';
 import { getFilesFromClipboard } from '../Form/File/fileSelection.js';
 import type { AIComposerAttachment, AIComposerQueuedMessage } from './aiComposer.props.js';
+import { createId } from '$lib/utils/id.js';
 import { SvelteMap } from 'svelte/reactivity';
 
 type AIComposerFileControllerOptions = {
@@ -20,9 +21,9 @@ type AIComposerFileControllerOptions = {
 	onFilesRejected?: (files: File[]) => void;
 	onFilesChange?: (files: File[]) => void;
 	onFileReject?: (rejections: FileRejection[]) => void;
-	onAttachmentAdd?: (attachment: AIComposerAttachment) => void;
-	onAttachmentRetry?: (attachment: AIComposerAttachment) => void | Promise<void>;
-	onAttachmentRemove?: (attachment: AIComposerAttachment) => void;
+	onAttachmentAdd?: (payload: AIComposerAttachment) => void;
+	onAttachmentRetry?: (payload: AIComposerAttachment) => void | Promise<void>;
+	onAttachmentRemove?: (payload: AIComposerAttachment) => void;
 };
 
 export class AIComposerFileController {
@@ -219,20 +220,13 @@ export class AIComposerFileController {
 
 function createAttachment(file: File): AIComposerAttachment {
 	return {
-		id: createId(),
+		id: createId('ai-composer-file'),
 		file,
 		name: file.name,
 		size: file.size,
 		type: file.type,
 		status: 'pending'
 	};
-}
-
-function createId(): string {
-	if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-		return crypto.randomUUID();
-	}
-	return `ai-composer-file-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 }
 
 function getFileKey(file: Pick<File, 'name' | 'size' | 'type' | 'lastModified'>): string {

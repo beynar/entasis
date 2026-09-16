@@ -30,7 +30,7 @@ Headings without an \`id\` receive a stable slug id when discovered. Existing un
 - **levels**: \`readonly (1 | 2 | 3 | 4 | 5 | 6)[]\` (default: \`[2, 3, 4]\`) - Semantic heading levels included in document order.
 - **activationThresholds**: \`{ viewportInset?: number; scrollRootInset?: number; currentOffset?: number }\` - Controls the active region. Defaults are \`96\`, \`16\`, and \`48\` pixels respectively. Negative values clamp to zero; non-finite values use their default.
 - **scrollOffset**: \`number\` - Optional anchor landing offset in pixels. Applies \`scroll-margin-block-start\` to matched headings, clamps negative values to zero, and leaves existing heading styles untouched when omitted.
-- **density**: \`number | 'small' | 'normal' | 'large'\` (default: \`'normal'\`) - Row density preset or numeric density factor. Presets resolve to \`0.6\`, \`0.8\`, and \`1\` respectively. Negative factors clamp to \`0\`; non-finite factors resolve to the default.
+- **density**: \`number | 'compact' | 'normal' | 'comfortable'\` (default: \`'normal'\`) - Row density preset or numeric density factor. Presets resolve to \`0.6\`, \`0.8\`, and \`1\` respectively. Negative factors clamp to \`0\`; non-finite factors resolve to the default.
 - **size**: \`'small' | 'normal' | 'large'\` (default: \`'normal'\`) - Scales title typography, indentation, bends, connectors, strokes, and markers together. Rail geometry factors resolve to \`0.875\`, \`1\`, and \`1.125\` respectively.
 - **showRail**: \`boolean\` (default: \`true\`) - Shows the continuous measured rail path. Connectors and markers remain independently controlled by their own props.
 - **showMarkers**: \`boolean | 'active' | 'always'\` (default: \`true\`) - Controls marker visibility. \`true\` is an alias for active-only markers, \`'always'\` shows a marker for every item, and \`false\` hides them.
@@ -38,7 +38,7 @@ Headings without an \`id\` receive a stable slug id when discovered. Existing un
 - **indentSize**: \`number\` (default: \`14\`) - Base horizontal pixels added for each deeper semantic heading level before the size factor is applied. Invalid or negative values resolve to \`0\`.
 - **indentRadius**: \`number\` (default: \`6\`) - Base maximum pixel radius used when the rail bends between heading depths before the size factor is applied. The rendered radius is clamped to the available horizontal and vertical space. Use \`0\` for square corners.
 - **color**: semantic color token (default: \`'primary'\`) - Highlight color for visible labels, rail segments, and markers.
-- **ariaLabel**: \`string\` (default: \`'Table of contents'\`) - Accessible navigation landmark label.
+- **label**: \`string\` (default: \`'Table of contents'\`) - Accessible navigation landmark label.
 - **ref**: bindable \`HTMLElement | null\` - Root navigation reference.
 - **class**: \`string\` - Classes merged onto the root navigation element.
 - **theme**: \`TableOfContentsThemeProps\` - Per-instance theme overrides.
@@ -91,7 +91,7 @@ Array order is preserved, duplicate or empty ids are omitted, and \`levels\` sti
   showConnectors
   indentSize={20}
   indentRadius={0}
-  density="small"
+  density="compact"
   color="secondary"
 />
 \`\`\`

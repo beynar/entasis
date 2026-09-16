@@ -14,7 +14,7 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 
 	const commands: RichTextInputItem[] = [
 		{
@@ -149,7 +149,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -209,9 +209,9 @@
 				placeholder="Use / for commands, @ for files or references, $ for skills..."
 			/>
 			<div class="border-neutral-muted bg-surface-raised rounded-lg border p-3 text-sm">
-				<div class="text-neutral/60 mb-2 text-xs font-medium">Markdown value</div>
+				<div class="text-neutral/70 mb-2 text-xs font-medium">Markdown value</div>
 				<pre
-					class="text-neutral max-h-40 overflow-auto whitespace-pre-wrap break-words text-xs">{value}</pre>
+					class="text-neutral max-h-40 overflow-auto text-xs break-words whitespace-pre-wrap">{value}</pre>
 			</div>
 		</div>
 	</ComponentCard>
@@ -280,7 +280,7 @@
 		<ComponentCard
 			title="Native Form Value"
 			description="Pass name to mirror the markdown value through a hidden input."
-			code={`<RichTextInput name="prompt" bind:value placeholder="Prompt..." />`}
+			code="<RichTextInput name=&quot;prompt&quot; bind:value placeholder=&quot;Prompt...&quot; />"
 		>
 			<div class="w-full max-w-3xl">
 				<RichTextInput name="prompt" bind:value placeholder="Prompt..." />

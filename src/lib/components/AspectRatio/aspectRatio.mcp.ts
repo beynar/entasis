@@ -110,17 +110,15 @@ The outer container maintains the aspect ratio with overflow hidden to prevent c
 ### Card with Fixed Aspect Ratio
 \`\`\`svelte
 <Card>
-	<AspectRatio ratio="16x9">
-		{#snippet children()}
-			<div class="bg-gradient-to-br from-primary to-secondary flex h-full w-full items-center justify-center">
-				<span class="text-primary-contrast text-2xl font-bold">Content</span>
-			</div>
-		{/snippet}
-	</AspectRatio>
 	{#snippet title()}
 		Card Title
 	{/snippet}
 	{#snippet children()}
+		<AspectRatio ratio="16x9">
+			<div class="bg-gradient-to-br from-primary to-secondary flex h-full w-full items-center justify-center">
+				<span class="text-primary-contrast text-2xl font-bold">Content</span>
+			</div>
+		</AspectRatio>
 		<p>Card content below the aspect ratio container.</p>
 	{/snippet}
 </Card>
@@ -176,7 +174,7 @@ The theme object contains the following parts:
   ratio="16x9"
   theme={{
     root: {
-      base: 'rounded-lg overflow-hidden shadow-md'
+      base: 'rounded-lg overflow-hidden lift-3'
     },
     content: {
       base: 'bg-gradient-to-br from-primary to-secondary'
@@ -215,7 +213,7 @@ The theme object contains the following parts:
   
   setAspectRatioTheme({
     root: {
-      base: 'rounded-xl overflow-hidden shadow-lg'
+      base: 'rounded-xl overflow-hidden lift-4'
     },
     content: {
       base: 'transition-transform hover:scale-105'

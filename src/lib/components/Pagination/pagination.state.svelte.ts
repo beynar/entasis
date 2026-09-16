@@ -1,8 +1,9 @@
-import { bind } from '$lib/utils/state.svelte.js';
+import { createBindableStateClass } from '$lib/utils/state.svelte.js';
+import { en, type Messages } from '$lib/i18n/en.js';
 import type {
 	PaginationControlType,
 	PaginationItem,
-	PaginationItemAriaLabel,
+	PaginationItemLabel,
 	PaginationPageItemPayload,
 	PaginationSummaryPayload
 } from './pagination.props.js';
@@ -16,12 +17,27 @@ type PaginationStateOptions = {
 	boundaryCount: number;
 	disabled: boolean;
 	getHref?: (page: number) => string;
-	getItemAriaLabel?: (item: PaginationItemAriaLabel) => string;
-	onPageChange?: (page: number) => void;
+	getItemLabel?: (item: PaginationItemLabel) => string;
+	onValueChange?: (value: number) => void;
+	/** Active i18n catalog, used for the default control accessible names. */
+	messages?: Messages;
 };
 
-export interface PaginationState extends PaginationStateOptions {}
-export class PaginationState {
+let hasWarnedAboutMissingPageCount = false;
+
+/**
+ * Warns once per app session when a `<Pagination />` was given neither `totalPages` nor the
+ * `totalItems` + `pageSize` pair, which makes the page count 0 and renders nothing.
+ */
+export function warnMissingPageCountOnce() {
+	if (hasWarnedAboutMissingPageCount) return;
+	hasWarnedAboutMissingPageCount = true;
+	console.warn(
+		'svelai: <Pagination /> has no page count and renders nothing. Pass `totalPages`, or both `totalItems` and `pageSize`.'
+	);
+}
+
+export class PaginationState extends createBindableStateClass<PaginationStateOptions>() {
 	pageCount = $derived(getPageCount(this.totalPages, this.totalItems, this.pageSize));
 	clampPage = (nextPage: number) => {
 		return clampPage(nextPage, this.pageCount);
@@ -41,7 +57,7 @@ export class PaginationState {
 	isNextDisabled = $derived(this.disabled || !this.hasPages || this.currentPage >= this.pageCount);
 
 	constructor(options: PaginationStateOptions) {
-		bind(this, options);
+		super(options);
 	}
 
 	setPage = (nextPage: number) => {
@@ -51,7 +67,7 @@ export class PaginationState {
 		if (resolvedPage === this.page) return;
 
 		this.page = resolvedPage;
-		this.onPageChange?.(resolvedPage);
+		this.onValueChange?.(resolvedPage);
 	};
 
 	first = () => {
@@ -104,7 +120,7 @@ export class PaginationState {
 		isActive: boolean,
 		isDisabled: boolean
 	) => {
-		const ariaLabelItem = {
+		const labelItem = {
 			type,
 			page: this.clampPage(targetPage),
 			active: isActive,
@@ -112,7 +128,9 @@ export class PaginationState {
 			totalPages: this.pageCount
 		};
 
-		return (this.getItemAriaLabel ?? getDefaultItemAriaLabel)(ariaLabelItem);
+		return this.getItemLabel
+			? this.getItemLabel(labelItem)
+			: getDefaultItemLabel(labelItem, this.messages ?? en);
 	};
 }
 
@@ -139,36 +157,39 @@ function getPaginationItems(
 ): PaginationItem[] {
 	if (pageCount <= 0) return [];
 
-	const visiblePages = new Set<number>();
+	const visiblePages: number[] = [];
+	const addVisiblePage = (pageNumber: number) => {
+		if (!visiblePages.includes(pageNumber)) visiblePages.push(pageNumber);
+	};
 	for (
 		let pageNumber = 1;
 		pageNumber <= Math.min(activeBoundaryCount, pageCount);
 		pageNumber += 1
 	) {
-		visiblePages.add(pageNumber);
+		addVisiblePage(pageNumber);
 	}
 	for (
 		let pageNumber = Math.max(pageCount - activeBoundaryCount + 1, 1);
 		pageNumber <= pageCount;
 		pageNumber += 1
 	) {
-		visiblePages.add(pageNumber);
+		addVisiblePage(pageNumber);
 	}
 	for (
 		let pageNumber = Math.max(activePage - activeSiblingCount, 1);
 		pageNumber <= Math.min(activePage + activeSiblingCount, pageCount);
 		pageNumber += 1
 	) {
-		visiblePages.add(pageNumber);
+		addVisiblePage(pageNumber);
 	}
 	if (activePage <= activeBoundaryCount + 1 && activeBoundaryCount < pageCount) {
-		visiblePages.add(activeBoundaryCount + 1);
+		addVisiblePage(activeBoundaryCount + 1);
 	}
 	if (activePage >= pageCount - activeBoundaryCount && activeBoundaryCount < pageCount) {
-		visiblePages.add(pageCount - activeBoundaryCount);
+		addVisiblePage(pageCount - activeBoundaryCount);
 	}
 
-	const sortedPages = [...visiblePages].sort((left, right) => left - right);
+	const sortedPages = visiblePages.sort((left, right) => left - right);
 	const items: PaginationItem[] = [];
 	let previousPage = 0;
 
@@ -220,16 +241,16 @@ function getPaginationSummary(
 	};
 }
 
-function getDefaultItemAriaLabel(item: PaginationItemAriaLabel) {
+function getDefaultItemLabel(item: PaginationItemLabel, messages: Messages) {
 	if (item.type === 'page') {
-		return item.active ? `Page ${item.page}, current page` : `Go to page ${item.page}`;
+		return item.active ? messages.currentPage(item.page) : messages.goToPage(item.page);
 	}
 
-	const labelByType: Record<Exclude<PaginationItemAriaLabel['type'], 'page'>, string> = {
-		first: 'Go to first page',
-		previous: 'Go to previous page',
-		next: 'Go to next page',
-		last: 'Go to last page'
+	const labelByType: Record<Exclude<PaginationItemLabel['type'], 'page'>, string> = {
+		first: messages.goToFirstPage,
+		previous: messages.goToPreviousPage,
+		next: messages.goToNextPage,
+		last: messages.goToLastPage
 	};
 
 	return labelByType[item.type];

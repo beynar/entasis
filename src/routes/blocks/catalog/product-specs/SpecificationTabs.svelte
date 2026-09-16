@@ -33,15 +33,15 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<div class="grid gap-xl md:grid-cols-[1fr_2fr]">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<div class="gap-xl grid md:grid-cols-[1fr_2fr]">
 		<div>
-			<header class="flex flex-col gap-lg">
-				<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+			<header class="gap-lg flex flex-col">
+				<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 					Product information
 				</p>
 				<Heading size="h2" weight="bold">Everything you need to know.</Heading>
-				<p class="max-w-2xl text-neutral/65">
+				<p class="text-neutral/65 max-w-2xl">
 					Materials, dimensions, and the details behind the Arc desk lamp.
 				</p>
 			</header>
@@ -49,11 +49,11 @@
 		<Card class="min-w-0"
 			><Tabs items={specifications.map((section) => ({ ...section, label: section.title }))}
 				>{#snippet children({ item: section })}<div class="py-lg">
-						<dl class="grid gap-lg">
+						<dl class="gap-lg grid">
 							{#each section.rows as row (row[0])}<div
-									class="grid grid-cols-2 gap-xl border-b border-neutral/10 py-lg"
+									class="gap-xl border-neutral/10 py-lg grid grid-cols-2 border-b"
 								>
-									<dt class="text-neutral/55">{row[0]}</dt>
+									<dt class="text-neutral/65">{row[0]}</dt>
 									<dd class="text-right">{row[1]}</dd>
 								</div>{/each}
 						</dl>

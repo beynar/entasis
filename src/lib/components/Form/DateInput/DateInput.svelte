@@ -10,6 +10,7 @@
 	import type { PopoverState } from '../../Popover/popover.state.svelte.js';
 	import type { DateInputProps } from './dateInput.props.js';
 	import { useDateInputTheme } from './dateInput.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		defaultValue = null,
@@ -33,11 +34,12 @@
 		name,
 		onValidate,
 		onValueChange,
-		onCalendarSelect,
+		onSelect,
 		visible,
 		type = 'date',
 		...rest
 	}: DateInputProps = $props();
+	const t = $derived(useI18n());
 	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
@@ -209,7 +211,7 @@
 
 	const handleCalendarChange = (date: Date | null) => {
 		field.value = date;
-		onCalendarSelect?.(date);
+		onSelect?.(date);
 		field.focused = false;
 		syncInputValue(date);
 	};
@@ -236,7 +238,7 @@
 	{closeOnSelect}
 	{locale}
 	disabled={field.disabled}
-	calendarLabel="Choose date"
+	calendarLabel={`${t.choose} ${t.date}`}
 	onValueChange={handleCalendarChange}
 	class={classes.popover({ class: theme?.popover?.base })}
 >
@@ -272,8 +274,17 @@
 				oninput={handleInput}
 				onfocus={() => {
 					field.focused = true;
-					if (!field.disabled) {
-						isCalendarOpen = true;
+				}}
+				onclick={() => {
+					if (!field.disabled) isCalendarOpen = true;
+				}}
+				onkeydown={(event) => {
+					// Keyboard users open the calendar deliberately; tabbing through never pops it.
+					if ((event.key === 'ArrowDown' || event.altKey) && !field.disabled && !isCalendarOpen) {
+						if (event.key === 'ArrowDown') {
+							event.preventDefault();
+							isCalendarOpen = true;
+						}
 					}
 				}}
 				onblur={() => {
@@ -283,10 +294,10 @@
 			<FieldActionButton
 				active={isCalendarOpen}
 				size={rest.size}
-				label="Choose date"
-				aria-haspopup="dialog"
-				aria-expanded={isCalendarOpen}
-				aria-controls={isCalendarOpen ? `${id}-calendar-popover` : undefined}
+				label={`${t.choose} ${t.date}`}
+				haspopup="dialog"
+				expanded={isCalendarOpen}
+				controls={isCalendarOpen ? `${id}-calendar-popover` : undefined}
 				disabled={field.disabled}
 				prefix={calendarBlankIcon}
 				onclick={() => {

@@ -84,10 +84,10 @@
 			class="!min-h-fit"
 		>
 			<div class="grid w-full grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-6">
-				{#each spinnerVariants as variant}
+				{#each spinnerVariants as variant, index (index)}
 					<div class="flex min-w-0 flex-col items-center gap-3">
 						<Spinner {variant} size="large" color="primary" label={`${variant} loader`} />
-						<span class="text-neutral/60 text-xs font-medium capitalize">{variant}</span>
+						<span class="text-neutral/70 text-xs font-medium capitalize">{variant}</span>
 					</div>
 				{/each}
 			</div>
@@ -102,7 +102,7 @@
 			class="!min-h-fit"
 		>
 			<div class="flex flex-wrap items-center justify-center gap-6">
-				{#each sizes as size}
+				{#each sizes as size, index (index)}
 					<Spinner {size} text={size} />
 				{/each}
 			</div>
@@ -113,7 +113,7 @@
 			class="!min-h-fit"
 		>
 			<div class="flex flex-wrap items-center justify-center gap-4">
-				{#each colors as color}
+				{#each colors as color, index (index)}
 					<Spinner {color} label={`${color} loading`} />
 				{/each}
 			</div>
@@ -124,9 +124,7 @@
 			class="!min-h-fit"
 		>
 			<Spinner color="primary">
-				{#snippet children()}
-					<span class="text-neutral text-sm font-medium">Syncing workspace</span>
-				{/snippet}
+				<span class="text-neutral text-sm font-medium">Syncing workspace</span>
 			</Spinner>
 		</ComponentCard>
 

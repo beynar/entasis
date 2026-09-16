@@ -40,38 +40,38 @@
 	let votes = $state<number[]>([]);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 			From real everyday use
 		</p>
 		<Heading size="h2" weight="bold">The details people notice.</Heading>
 	</header>
-	<div class="grid gap-xl md:grid-cols-2">
+	<div class="gap-xl grid md:grid-cols-2">
 		{#each reviews.slice(0, 2) as review, i (review.id)}<article
-				class="flex flex-col gap-xl p-xl rounded-lg border border-neutral/15"
+				class="gap-xl p-xl border-neutral/15 flex flex-col rounded-lg border"
 			>
-				<div class="flex gap-md items-center">
-					<Avatar user={{ name: review.name }} />
+				<div class="gap-md flex items-center">
+					<Avatar name={review.name} />
 					<div>
 						<p class="font-medium">{review.name}</p>
-						<p class="text-xs text-neutral/50">{review.date}</p>
+						<p class="text-neutral/65 text-xs">{review.date}</p>
 					</div>
 				</div>
 				<Rating value={review.rating} size="small" />
 				<h3 class="text-lg font-semibold">{review.title}</h3>
 				<p class="text-neutral/65">{review.body}</p>
 				<div class="max-w-48">{@render productArt('lamp', i === 0 ? 'Sand' : 'Olive')}</div>
-				<div class="flex gap-lg items-center justify-between">
+				<div class="gap-lg flex items-center justify-between">
 					<Chip variant="soft" color="success" size="small">Verified buyer</Chip><Button
 						variant={votes.includes(review.id) ? 'soft' : 'outline'}
 						size="small"
-						aria-pressed={votes.includes(review.id)}
+						pressed={votes.includes(review.id)}
 						onclick={() =>
 							(votes = votes.includes(review.id)
 								? votes.filter((id) => id !== review.id)
@@ -81,7 +81,7 @@
 				</div>
 			</article>{/each}
 	</div>
-	<p class="text-xs text-neutral/45">Sample reviews and local helpful votes.</p>
+	<p class="text-neutral/65 text-xs">Sample reviews and local helpful votes.</p>
 </section>
 
 <style>

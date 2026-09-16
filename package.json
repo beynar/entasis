@@ -7,23 +7,26 @@
 		"build": "vite build && npm run prepack",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync",
-		"prepack": "svelte-kit sync && npm run check:component-contract && npm run check:semantic-theme-tokens && npm run check:public-api-contract && svelte-package && npm run check:packed-library && npm run check:package-consumer && node tooling/check-document-viewer-package.mjs && publint",
+		"prepack": "svelte-kit sync && npm run check:component-contract && npm run check:feature-chips && npm run check:semantic-theme-tokens && npm run check:template-purity && npm run check:public-api-contract && svelte-package && npm run check:packed-library && npm run check:package-consumer && npm run check:doc-fences && node tooling/check-document-viewer-package.mjs && publint",
 		"check:document-viewer-package": "node tooling/check-document-viewer-package.mjs",
 		"check:semantic-theme-tokens": "node tooling/check-semantic-theme-tokens.mjs",
+		"check:template-purity": "node tooling/check-template-purity.mjs",
 		"check:public-api-contract": "node tooling/check-public-api-contract.mjs",
 		"check:package-consumer": "node tooling/check-package-consumer.mjs",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
-		"generate-icons": "node generate-icons.js",
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run && npm run test:e2e",
 		"test:e2e": "playwright test",
 		"generate:component-contract": "node tooling/component-contract/generate.mjs",
 		"check:component-contract": "node tooling/component-contract/generate.mjs --check",
 		"check:packed-library": "node tooling/check-packed-library.mjs",
-		"test:contracts": "node --test tooling/component-contract/verify-checks.mjs"
+		"test:contracts": "node --test tooling/component-contract/verify-checks.mjs",
+		"check:doc-fences": "node tooling/check-doc-fences.mjs",
+		"check:feature-chips": "node tooling/check-feature-chips.mjs",
+		"release": "node tooling/release.mjs"
 	},
 	"files": [
 		"dist",
@@ -40,44 +43,53 @@
 		"tailwindcss": "^4.0.0"
 	},
 	"devDependencies": {
-		"@eslint/compat": "^2.1.0",
+		"@axe-core/playwright": "^4.13.0",
+		"@eslint/compat": "^2.1.1",
 		"@eslint/js": "^10.0.1",
-		"@playwright/test": "^1.61.1",
+		"@playwright/test": "^1.63.0",
 		"@svelte-plugin/font": "^0.0.6",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/adapter-cloudflare": "^7.2.9",
+		"@sveltejs/kit": "^2.70.3",
 		"@sveltejs/package": "^2.5.8",
-		"@sveltejs/vite-plugin-svelte": "^7.1.2",
-		"@tailwindcss/vite": "^4.3.2",
-		"@testing-library/jest-dom": "^6.9.1",
+		"@sveltejs/vite-plugin-svelte": "^7.3.0",
+		"@tailwindcss/vite": "^4.3.3",
+		"@testing-library/jest-dom": "^7.0.1",
 		"@testing-library/svelte": "^5.4.2",
 		"@types/d3-array": "3.2.2",
 		"@types/d3-force": "3.0.10",
 		"@types/d3-hierarchy": "3.1.7",
 		"@types/d3-sankey": "0.12.5",
 		"@types/d3-scale": "4.0.9",
-		"@types/d3-shape": "3.1.8",
-		"eslint": "^10.6.0",
+		"@types/d3-shape": "3.2.0",
+		"eslint": "^10.10.0",
 		"eslint-config-prettier": "^10.1.8",
-		"eslint-plugin-svelte": "^3.20.0",
-		"globals": "^17.7.0",
-		"jsdom": "^29.1.1",
-		"prettier": "^3.9.4",
+		"eslint-plugin-svelte": "^3.23.0",
+		"globals": "^17.12.0",
+		"jsdom": "^30.0.1",
+		"prettier": "^3.9.6",
 		"prettier-plugin-svelte": "^4.1.1",
-		"prettier-plugin-tailwindcss": "^0.8.0",
-		"publint": "^0.3.21",
-		"svelte": "^5.56.4",
-		"svelte-check": "^4.7.1",
-		"tailwindcss": "^4.3.2",
+		"prettier-plugin-tailwindcss": "^0.8.1",
+		"publint": "^0.3.24",
+		"svelte": "^5.57.0",
+		"svelte-check": "^4.7.6",
+		"svelte-mcp": "^0.0.5",
+		"tailwindcss": "^4.3.3",
 		"ts-morph": "^28.0.0",
 		"typescript": "^6.0.3",
-		"typescript-eslint": "^8.62.1",
-		"vite": "^8.1.3",
-		"vitest": "^4.1.9",
-		"wrangler": "^4.106.0"
+		"typescript-eslint": "^8.70.0",
+		"vite": "^8.3.0",
+		"vitest": "^5.0.0",
+		"wrangler": "^4.131.1",
+		"zod": "^4.6.2"
 	},
 	"keywords": [
-		"svelte"
+		"svelte",
+		"sveltekit",
+		"tailwindcss",
+		"components",
+		"design-system",
+		"accessibility"
 	],
 	"pnpm": {
 		"onlyBuiltDependencies": [
@@ -85,33 +97,28 @@
 		]
 	},
 	"dependencies": {
-		"@atlaskit/pragmatic-drag-and-drop": "^2.0.1",
-		"@atlaskit/pragmatic-drag-and-drop-auto-scroll": "^3.0.0",
-		"@blossom-carousel/core": "^1.1.7",
+		"@atlaskit/pragmatic-drag-and-drop": "^3.1.0",
+		"@atlaskit/pragmatic-drag-and-drop-auto-scroll": "^3.2.0",
+		"@blossom-carousel/core": "^1.1.8",
 		"@date-fns/tz": "^1.5.0",
-		"@floating-ui/dom": "^1.7.6",
-		"@lexical/history": "^0.45.0",
-		"@lexical/link": "^0.45.0",
-		"@lexical/list": "^0.45.0",
-		"@lexical/markdown": "^0.45.0",
-		"@lexical/rich-text": "^0.45.0",
-		"@lexical/selection": "^0.45.0",
-		"@lexical/utils": "^0.45.0",
-		"@maskito/core": "^5.3.1",
-		"@maskito/kit": "^5.3.1",
-		"@modelcontextprotocol/ext-apps": "^1.7.4",
-		"@modelcontextprotocol/sdk": "^1.29.0",
-		"@pierre/diffs": "^1.2.12",
-		"@pierre/trees": "1.0.0-beta.4",
-		"@sveltejs/kit": "^2.69.0",
-		"@tanstack/charts": "0.16.0",
-		"@tanstack/svelte-virtual": "3.13.32",
-		"@tanstack/table-core": "8.21.3",
-		"add": "^2.0.6",
-		"bits-ui": "^2.18.1",
-		"cnfast": "^0.0.8",
+		"@floating-ui/dom": "^1.8.0",
+		"@lexical/history": "^0.50.0",
+		"@lexical/link": "^0.50.0",
+		"@lexical/list": "^0.50.0",
+		"@lexical/markdown": "^0.50.0",
+		"@lexical/rich-text": "^0.50.0",
+		"@lexical/selection": "^0.50.0",
+		"@lexical/utils": "^0.50.0",
+		"@maskito/core": "^5.4.0",
+		"@maskito/kit": "^5.4.0",
+		"@pierre/diffs": "^1.4.2",
+		"@pierre/trees": "1.0.0-beta.6",
+		"@tanstack/charts": "0.18.0",
+		"@tanstack/highlight": "0.1.0",
+		"@tanstack/svelte-virtual": "3.13.38",
+		"@tanstack/table-core": "9.2.4",
+		"cn": "0.3.0",
 		"cobe": "^2.0.1",
-		"color2k": "^2.0.3",
 		"colorizr": "^5.1.1",
 		"d3-array": "3.2.4",
 		"d3-force": "3.0.0",
@@ -119,25 +126,15 @@
 		"d3-sankey": "0.12.3",
 		"d3-scale": "4.0.2",
 		"d3-shape": "3.2.0",
-		"embla-carousel": "^8.6.0",
-		"embla-carousel-auto-height": "^8.6.0",
-		"embla-carousel-autoplay": "^8.6.0",
-		"embla-carousel-wheel-gestures": "^8.1.0",
 		"esm-env": "^1.2.2",
-		"file-selector": "^2.1.2",
-		"lexical": "^0.45.0",
-		"libphonenumber-js": "^1.13.7",
+		"file-selector": "^5.0.1",
+		"lexical": "^0.50.0",
 		"lightgallery": "^2.9.0",
 		"melt": "^0.44.0",
-		"pnpm": "^11.9.0",
 		"runed": "^0.37.1",
-		"shiki": "^4.3.0",
-		"svelte-mcp": "^0.0.5",
-		"svelte-streamdown": "^3.1.2",
+		"svelte-streamdown": "^4.0.0",
 		"svelte-themes": "^2.0.10",
-		"type-fest": "^5.7.0",
-		"valibot": "^1.4.2",
-		"zod": "^4.4.3"
+		"valibot": "^1.5.0"
 	},
 	"exports": {
 		"./package.json": "./package.json",
@@ -210,11 +207,6 @@
 			"types": "./dist/components/AITool/index.d.ts",
 			"svelte": "./dist/components/AITool/index.js",
 			"default": "./dist/components/AITool/index.js"
-		},
-		"./ai-mcp-app": {
-			"types": "./dist/components/AIMcpApp/index.d.ts",
-			"svelte": "./dist/components/AIMcpApp/index.js",
-			"default": "./dist/components/AIMcpApp/index.js"
 		},
 		"./ai-file-preview": {
 			"types": "./dist/components/AIFilePreview/index.d.ts",
@@ -807,6 +799,10 @@
 			"types": "./dist/utils/cva/index.d.ts",
 			"default": "./dist/utils/cva/index.js"
 		},
+		"./motion": {
+			"types": "./dist/utils/motion/index.d.ts",
+			"default": "./dist/utils/motion/index.js"
+		},
 		"./scheduling": {
 			"types": "./dist/utils/scheduling/index.d.ts",
 			"default": "./dist/utils/scheduling/index.js"
@@ -819,10 +815,6 @@
 			"types": "./dist/attachments/spinnerOverlay.svelte.d.ts",
 			"svelte": "./dist/attachments/spinnerOverlay.svelte.js",
 			"default": "./dist/attachments/spinnerOverlay.svelte.js"
-		},
-		"./ai-mcp-app/sandbox": {
-			"types": "./dist/components/AIMcpApp/sandbox/index.d.ts",
-			"default": "./dist/components/AIMcpApp/sandbox/index.js"
 		}
 	},
 	"typesVersions": {
@@ -868,9 +860,6 @@
 			],
 			"ai-tool": [
 				"dist/components/AITool/index.d.ts"
-			],
-			"ai-mcp-app": [
-				"dist/components/AIMcpApp/index.d.ts"
 			],
 			"ai-file-preview": [
 				"dist/components/AIFilePreview/index.d.ts"
@@ -1229,6 +1218,9 @@
 			"cva": [
 				"dist/utils/cva/index.d.ts"
 			],
+			"motion": [
+				"dist/utils/motion/index.d.ts"
+			],
 			"scheduling": [
 				"dist/utils/scheduling/index.d.ts"
 			],
@@ -1237,9 +1229,6 @@
 			],
 			"spinner-overlay": [
 				"dist/attachments/spinnerOverlay.svelte.d.ts"
-			],
-			"ai-mcp-app/sandbox": [
-				"dist/components/AIMcpApp/sandbox/index.d.ts"
 			]
 		}
 	},
@@ -1247,5 +1236,14 @@
 		"tailwindcss": {
 			"optional": true
 		}
+	},
+	"description": "Configuration-over-markup Svelte 5 component library and design-system engine for SvelteKit and Tailwind 4",
+	"homepage": "https://github.com/beynar/ai2#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/beynar/ai2.git"
+	},
+	"bugs": {
+		"url": "https://github.com/beynar/ai2/issues"
 	}
 }

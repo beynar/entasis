@@ -20,7 +20,9 @@ const defaultInput = cva({
 });
 
 const defaultInputContainer = cva({
-	base: 'relative flex w-full items-center border border-neutral-muted bg-surface-raised px-lg text-neutral ring-0 transition-all rounded-md outline-none focus-within:ring-2 focus-within:ring-primary/50',
+	// A select only opens on click, so it hovers like the buttons beside it (`state-layer`), unlike
+	// the typed inputs that share this container shape.
+	base: 'state-layer flex w-full cursor-pointer items-center border border-neutral-muted bg-surface-raised px-lg text-neutral ring-0 transition-[color,background-color,border-color,box-shadow] rounded-md outline-none focus-within:ring-2 focus-within:ring-focus/50',
 	variants: {
 		size: {
 			small: 'h-control-sm text-xs',
@@ -46,7 +48,7 @@ const defaultValue = cva({
 			large: ''
 		},
 		placeholder: {
-			true: 'text-neutral/60',
+			true: 'text-neutral/70',
 			false: 'text-neutral'
 		}
 	},
@@ -57,7 +59,7 @@ const defaultValue = cva({
 });
 
 const defaultTriggerIcon = cva({
-	base: 'text-neutral/60 pointer-events-none shrink-0',
+	base: 'text-neutral/70 pointer-events-none shrink-0',
 	variants: {
 		size: {
 			small: 'size-icon-sm',
@@ -93,10 +95,10 @@ const defaultGroup = cva({
 });
 
 const defaultGroupLabel = cva({
-	base: 'text-neutral/60',
+	base: 'text-neutral/70',
 	variants: {
 		size: {
-			small: 'px-sm py-xs text-[0.6875rem]',
+			small: 'px-sm py-xs text-xs',
 			normal: 'px-sm py-xs text-xs',
 			large: 'px-sm py-xs text-xs'
 		}

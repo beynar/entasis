@@ -162,17 +162,17 @@ export type MapProps<TData = unknown> = Omit<
 	/** Geographic circles, lines, polygons, and rectangles to overlay. */
 	shapes?: MapShape[];
 	/** Called when a marker is activated, with its domain marker value. */
-	onMarkerClick?: (marker: MapMarker<TData>) => void;
+	onMarkerClick?: (payload: MapMarker<TData>) => void;
 	/** Called when a cluster is activated, with its members and geometry. */
-	onClusterClick?: (cluster: MapClusterSnippetArg<TData>) => void;
+	onClusterClick?: (payload: MapClusterSnippetArg<TData>) => void;
 	/** Called when the MapLibre instance is ready for consumer use. */
-	onReady?: (map: MapLibreMap) => void;
+	onReady?: (payload: MapLibreMap) => void;
 	/** Called with the current map viewport during movement. */
-	onViewChange?: (view: MapViewChangeArg) => void;
+	onViewChange?: (payload: MapViewChangeArg) => void;
 	/** Called with the viewport when map movement ends. */
-	onMoveEnd?: (view: MapViewChangeArg) => void;
+	onMoveEnd?: (payload: MapViewChangeArg) => void;
 	/** Called with the viewport when zooming ends. */
-	onZoomEnd?: (view: MapViewChangeArg) => void;
+	onZoomEnd?: (payload: MapViewChangeArg) => void;
 	/** Receives a map operation failure; unhandled failures are thrown. */
 	onError?: (error: Error) => void;
 	/** Additional classes on the map root element. */

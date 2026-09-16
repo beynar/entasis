@@ -8,6 +8,7 @@
 <script lang="ts" generics="T extends CalendarType, CalendarEvent extends Event">
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { transitionSize } from '$lib/attachments/transitionSize.js';
+	import { prefersReducedMotion } from '$lib/utils/motion.svelte.js';
 	import { useResizeObserver } from '$lib/utils/useResizeObserver.svelte.js';
 	import { cubicOut } from 'svelte/easing';
 	import type { CalendarPrimitiveProps, CalendarType } from './calendarInput.props.js';
@@ -18,6 +19,7 @@
 	import { caretRightIcon } from '$lib/components/Icons/caretRight.js';
 	import Chip from '$lib/components/Chip/Chip.svelte';
 	import CalendarMonthYearPicker from './CalendarMonthYearPicker.svelte';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		type,
@@ -34,7 +36,7 @@
 		today,
 		weekdayLength = 'narrow',
 		locale,
-		ariaLabel = 'Calendar',
+		label,
 		disabled = false,
 		class: className,
 		cell: renderCell,
@@ -67,6 +69,8 @@
 	let activeView = $state<'days' | 'picker'>('days');
 	const id = $props.id();
 	const pickerId = `${id}-month-year-picker`;
+	const t = $derived(useI18n());
+	const resolvedLabel = $derived(label ?? t.calendar);
 
 	const doubleViewMinWidth = 576;
 	const resolvedView = $derived(
@@ -154,20 +158,18 @@
 	);
 	const isRtl = $derived(rootElement ? getComputedStyle(rootElement).direction === 'rtl' : false);
 	const enterDirection = $derived(navigationDirection * (isRtl ? -1 : 1));
-	const reducedMotion =
-		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	const monthSlide = (
 		_node: Element,
 		{ direction, outgoing = false }: { direction: number; outgoing?: boolean }
 	) => ({
-		duration: direction === 0 || reducedMotion ? 0 : 200,
+		duration: direction === 0 || prefersReducedMotion() ? 0 : 200,
 		easing: cubicOut,
 		css: (_t: number, u: number) =>
 			`${outgoing ? 'position:absolute;top:0;inset-inline-start:0;width:100%;' : ''}transform: translateX(${direction * u * 100}%)`
 	});
 	const viewZoom = (_node: Element, { outgoing = false }: { outgoing?: boolean } = {}) => ({
-		duration: reducedMotion ? 0 : 180,
+		duration: prefersReducedMotion() ? 0 : 180,
 		easing: cubicOut,
 		css: (t: number, u: number) =>
 			`${outgoing ? 'position:absolute;top:0;inset-inline-start:0;width:100%;' : ''}opacity:${t};transform:scale(${0.985 + t * 0.015});filter:blur(${u * 3}px);transform-origin:center`
@@ -239,7 +241,7 @@
 	bind:this={rootElement}
 	role="group"
 	class={classes.root({ class: className })}
-	aria-label={ariaLabel}
+	aria-label={resolvedLabel}
 	aria-disabled={disabled}
 	{@attach containerResizeObserver.reference}
 	{@attach calendar.calendar}
@@ -251,7 +253,7 @@
 				size="small"
 				variant="ghost"
 				class="rotate-180"
-				label="Previous month"
+				label={`${t.previous} ${t.month}`}
 				{...buttonProps.prev}
 				type="button"
 				disabled={disabled ||
@@ -270,9 +272,11 @@
 			color="neutral"
 			class={classes.viewTrigger()}
 			{disabled}
-			label={`${activeView === 'picker' ? 'Show days for' : 'Choose month and year, currently'} ${calendar.displayedMonthLabel}`}
-			aria-expanded={activeView === 'picker'}
-			aria-controls={pickerId}
+			label={activeView === 'picker'
+				? t.calendarShowDaysFor(calendar.displayedMonthLabel)
+				: t.calendarChooseMonthAndYear(calendar.displayedMonthLabel)}
+			expanded={activeView === 'picker'}
+			controls={pickerId}
 			onclick={toggleActiveView}
 		>
 			<span aria-live="polite">{calendar.displayedMonthLabel}</span>
@@ -282,7 +286,7 @@
 				squared
 				size="small"
 				variant="ghost"
-				label="Next month"
+				label={`${t.next} ${t.month}`}
 				{...buttonProps.next}
 				type="button"
 				disabled={disabled ||
@@ -383,7 +387,7 @@
 								<Chip
 									size="small"
 									color="danger"
-									position="topRight"
+									position="top-right"
 									{...todayBadge}
 									class="top-1 right-1 aspect-square !size-2 min-h-2 min-w-2 {todayBadge.class}"
 								/>

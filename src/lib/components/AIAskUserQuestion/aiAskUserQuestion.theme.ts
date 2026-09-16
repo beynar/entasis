@@ -4,8 +4,10 @@ import {
 	useComponentTheme,
 	type InferComponentTheme
 } from '$lib/utils/cva/index.js';
+import { selectedSolid } from '$lib/components/Theme/theme.recipes.js';
+
 const defaultRoot = cva({
-	base: 'raised grid min-w-0 gap-lg rounded-md bg-surface-raised text-sm text-neutral'
+	base: 'raised grid min-w-0 gap-lg rounded-lg bg-surface-raised text-sm text-neutral'
 });
 const defaultHeader = cva({ base: 'grid min-w-0 px-lg pt-lg' });
 const defaultHeaderTop = cva({ base: 'flex min-w-0 items-start justify-between gap-lg' });
@@ -19,7 +21,7 @@ const defaultProgressGroup = cva({
 const defaultSteps = cva({ base: 'flex shrink-0 items-center gap-sm' });
 const defaultStep = cva({
 	base: 'state-layer size-2 rounded-full bg-neutral/20 text-neutral transition-colors disabled:pointer-events-none disabled:opacity-50',
-	variants: { active: { true: 'bg-primary text-primary-contrast', false: '' } }
+	variants: { active: { true: selectedSolid, false: '' } }
 });
 const defaultBody = cva({
 	base: 'grid min-w-0 gap-lg'
@@ -30,7 +32,7 @@ const defaultQuestionTitle = cva({
 	base: 'break-words text-sm font-medium leading-snug text-neutral [overflow-wrap:anywhere]'
 });
 const defaultQuestionDescription = cva({
-	base: 'break-words text-xs leading-relaxed text-neutral/60 [overflow-wrap:anywhere]'
+	base: 'break-words text-xs leading-relaxed text-neutral/70 [overflow-wrap:anywhere]'
 });
 const defaultTextArea = cva({ base: 'min-h-24 resize-none text-sm' });
 const defaultOptions = cva({ base: 'grid w-full min-w-0 gap-md' });
@@ -40,10 +42,10 @@ const defaultError = cva({ base: 'mx-lg min-w-0 text-sm' });
 const defaultFooter = cva({ base: 'flex min-w-0 items-center justify-between gap-md px-lg pb-lg' });
 const defaultProgress = cva({ base: 'sr-only' });
 const defaultTitle = cva({
-	base: 'break-words text-xs font-medium leading-snug text-neutral/60 [overflow-wrap:anywhere]'
+	base: 'break-words text-xs font-medium leading-snug text-neutral/70 [overflow-wrap:anywhere]'
 });
 const defaultDescription = cva({
-	base: 'break-words text-xs leading-relaxed text-neutral/60 [overflow-wrap:anywhere]'
+	base: 'break-words text-xs leading-relaxed text-neutral/70 [overflow-wrap:anywhere]'
 });
 export const aiAskUserQuestionTheme = {
 	root: defaultRoot,

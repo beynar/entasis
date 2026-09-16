@@ -9,9 +9,13 @@ import type {
 	AIConversationStatus
 } from './aiConversation.state.svelte.js';
 
+/** Instance handle exposed by `bind:api`. */
+export type AIConversationApi<TMessage extends AIThreadItem = AIThreadItem> =
+	AIConversationState<TMessage>;
+
 export type AIConversationProps<TMessage extends AIThreadItem = AIThreadItem> = Partial<{
-	/** Bindable state instance created and scoped by the provider. */
-	conversation: AIConversationState<TMessage>;
+	/** Bindable instance handle: the state created and scoped by the provider. */
+	api: AIConversationApi<TMessage>;
 	/** Bindable lifecycle status derived and updated by conversation mutations. */
 	status: AIConversationStatus;
 	/** Current conversation failure, if any. */
@@ -35,7 +39,7 @@ export type AIConversationProps<TMessage extends AIThreadItem = AIThreadItem> = 
 	/** Bindable selected model identifier. */
 	selectedModel: string;
 	/** Whether an assistant response is currently streaming. */
-	isStreaming: boolean;
+	streaming: boolean;
 	/** Active ask-user-question request derived from a tool call. */
 	activeAskUserQuestion: AIThreadAskUserQuestion<TMessage> | null;
 	/** Labels inherited by conversation-aware descendants. */

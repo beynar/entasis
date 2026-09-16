@@ -74,7 +74,7 @@
 					title={project.name}
 					description={active === 'People' ? 'Maya, Sam, and Alex' : project.status}
 					><Stack gap="lg">
-						<Meter label="Progress" value={{ value: project.progress, color: 'primary' }} /><Button
+						<Meter label="Progress" value={project.progress} color="primary" /><Button
 							variant="outline"
 							size="small"
 							onclick={() => {

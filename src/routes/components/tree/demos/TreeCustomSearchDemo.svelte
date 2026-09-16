@@ -37,16 +37,8 @@
 	}
 
 	function getSearchablePaths(paths: readonly string[]): string[] {
-		const searchablePaths = new Set<string>();
-
-		for (const path of paths) {
-			searchablePaths.add(path);
-			for (const directoryPath of getParentDirectoryPaths(path)) {
-				searchablePaths.add(directoryPath);
-			}
-		}
-
-		return [...searchablePaths];
+		// Built in one pass and never mutated afterwards, so it stays a plain Set.
+		return [...new Set(paths.flatMap((path) => [path, ...getParentDirectoryPaths(path)]))];
 	}
 
 	function getParentDirectoryPaths(path: string): string[] {
@@ -57,10 +49,10 @@
 
 <div class="grid w-full max-w-2xl gap-3">
 	<div
-		class="flex flex-wrap items-center gap-2 rounded-lg border border-neutral-muted bg-surface p-2"
+		class="border-neutral-muted bg-surface flex flex-wrap items-center gap-2 rounded-lg border p-2"
 	>
 		<div class="relative min-w-56 flex-1">
-			<span class="text-neutral/60 pointer-events-none absolute top-1/2 left-2 -translate-y-1/2">
+			<span class="text-neutral/70 pointer-events-none absolute top-1/2 left-2 -translate-y-1/2">
 				{@render magnifyingGlassIcon({ size: 16 })}
 			</span>
 			<input
@@ -68,11 +60,11 @@
 				type="search"
 				aria-label="Search tree paths"
 				placeholder="Search paths..."
-				class="border-neutral-muted bg-surface text-neutral placeholder:text-neutral/60 h-9 w-full rounded-md border pr-2 pl-8 text-sm outline-none focus:border-primary"
+				class="border-neutral-muted bg-surface text-neutral placeholder:text-neutral/70 focus:border-primary h-9 w-full rounded-md border pr-2 pl-8 text-sm outline-none"
 				oninput={(event) => setQuery(event.currentTarget.value)}
 			/>
 		</div>
-		<div class="text-neutral/60 min-w-20 text-right text-xs">{matchLabel}</div>
+		<div class="text-neutral/70 min-w-20 text-right text-xs">{matchLabel}</div>
 		<Button
 			size="small"
 			variant="outline"
@@ -97,7 +89,7 @@
 
 	<Tree
 		id="docs-tree-custom-search"
-		bind:fileTree
+		bind:api={fileTree}
 		paths={workspaceTreePaths}
 		height={320}
 		initialExpansion="open"

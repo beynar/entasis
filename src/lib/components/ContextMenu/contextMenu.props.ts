@@ -2,6 +2,7 @@ import type { Snippet } from 'svelte';
 import type { MenuItem, MenuProps } from '../Menu/menu.props.js';
 import type { PopupMenuProps } from '../PopupMenu/popupMenu.props.js';
 import type { WithAttachments } from '$lib/types/props.js';
+import type { ContextMenuThemeProps } from './contextMenu.theme.js';
 
 export type ContextMenuProps = WithAttachments<{
 	/**
@@ -44,6 +45,10 @@ export type ContextMenuProps = WithAttachments<{
 	 * The class name applied to the wrapper around the target content.
 	 */
 	class?: string;
+	/**
+	 * Theme overrides for the target wrapper and the popup panel.
+	 */
+	theme?: ContextMenuThemeProps;
 	/**
 	 * Additional PopupMenu/Popover overrides (position, offset, closeOnEscape, ...).
 	 */

@@ -1,0 +1,34 @@
+name: Release
+
+# Publishing is tag-driven: `npm run release <patch|minor|major>` (tooling/release.mjs) runs the
+# full prepack gate locally, moves CHANGELOG "Unreleased" under the new version, bumps package.json
+# and pushes a `v*` tag. This workflow re-runs the gate on CI and publishes with provenance.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - run: npm install --global pnpm@11
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: npm run check
+      - run: npm run test:unit -- --run
+      - run: npm run test:e2e
+      # prepack runs every contract, packed-library, consumer and doc-fence check before publint.
+      - run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

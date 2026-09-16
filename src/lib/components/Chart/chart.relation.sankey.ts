@@ -53,14 +53,14 @@ export function compileSankeyRelation<TRow extends object>(
 			[Math.max(labelSpace + 1, width - labelSpace), Math.max(top + 1, height - bottom)]
 		])
 		.iterations(32)({
-			nodes: compiled.nodes.map((node) => ({ ...node })),
-			links: relations.map((relation) => ({
-				source: relation.source.identity,
-				target: relation.target.identity,
-				value: relation.value ?? 0,
-				relation
-			}))
-		});
+		nodes: compiled.nodes.map((node) => ({ ...node })),
+		links: relations.map((relation) => ({
+			source: relation.source.identity,
+			target: relation.target.identity,
+			value: relation.value ?? 0,
+			relation
+		}))
+	});
 	const nodes = graph.nodes.map((node) => compileNode(node, width));
 	const links = graph.links.map(compileLink);
 	return compileSankeyMarks(nodes, links, mark, compiled.labels, path);
@@ -198,9 +198,7 @@ function resolveNodeBounds<TRow>(
 	return { x0: node.x0, x1: node.x1, y0: node.y0, y1: node.y1 };
 }
 
-function resolveAlignment(
-	align: ChartSankeyRelationMark<object>['align']
-): typeof sankeyLeft {
+function resolveAlignment(align: ChartSankeyRelationMark<object>['align']): typeof sankeyLeft {
 	switch (align) {
 		case undefined:
 		case 'justify':

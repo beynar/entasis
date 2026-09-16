@@ -36,8 +36,8 @@ floating-ui virtual element, so the menu appears exactly at the pointer (and fli
 - **open**: boolean - Open state of the context menu.
 - **defaultOpen**: boolean (default: false) - Initial state when open is not provided.
 - **onOpenChange**: (open: boolean) => void - Called once for each library-requested state change.
-- **onAfterOpen**: (popover) => void - Called after the open transition finishes.
-- **onAfterClose**: (popover) => void - Called after the close transition finishes.
+- **onAfterOpen**: (payload) => void - Called after the open transition finishes.
+- **onAfterClose**: (payload) => void - Called after the close transition finishes.
 
 ### Advanced Props
 - **menu**: Omit<MenuProps, 'items'> - Overrides forwarded to the underlying Menu (header, footer, theme).
@@ -47,6 +47,8 @@ floating-ui virtual element, so the menu appears exactly at the pointer (and fli
 ## Behavior
 
 - Right-click on the target opens the menu at the cursor via a virtual reference element.
+- Keyboard: Shift+F10 or the ContextMenu key, while focus is inside the target, opens the menu anchored to the focused element.
+- Touch: a 500 ms long-press opens the menu at the finger; moving or lifting the finger earlier cancels it.
 - A second right-click elsewhere re-mounts the menu at the new point.
 - Left-click outside, Escape, or selecting an item closes it.
 - Submenus, keyboard navigation, and highlighting are inherited from Menu.
@@ -54,8 +56,9 @@ floating-ui virtual element, so the menu appears exactly at the pointer (and fli
 ## Accessibility
 
 The menu is a role="menu" with role="menuitem" children and full keyboard navigation (arrows, Home/End,
-Enter, Escape, and ArrowRight/Left for submenus). The target wrapper is a plain element with an
-oncontextmenu handler.
+Enter, Escape, and ArrowRight/Left for submenus), plus type-ahead. Keyboard users open it with
+Shift+F10 or the ContextMenu key; touch users with a long-press. The target wrapper is a plain
+element with contextmenu, keydown, and pointer handlers.
 
 ## Notes
 

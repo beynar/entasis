@@ -13,19 +13,19 @@
 	const selected = $derived(methods.find((method) => method.id === editing));
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Your wallet</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">Your wallet</p>
 		<Heading size="h2" weight="bold">A card for every day.</Heading>
 	</header>
-	<div class="grid gap-xl sm:grid-cols-2">
-		{#each methods as method, i (method.id)}<article class="flex flex-col gap-xl">
+	<div class="gap-xl grid sm:grid-cols-2">
+		{#each methods as method, i (method.id)}<article class="gap-xl flex flex-col">
 				<div
 					class={i === 0
-						? 'flex flex-col gap-xl rounded-xl bg-primary p-xl text-primary-contrast'
-						: 'flex flex-col gap-xl rounded-xl bg-neutral p-xl text-neutral-contrast'}
+						? 'gap-xl bg-primary p-xl text-primary-contrast flex flex-col rounded-xl'
+						: 'gap-xl bg-neutral p-xl text-neutral-contrast flex flex-col rounded-xl'}
 				>
-					<div class="flex gap-xl justify-between">
+					<div class="gap-xl flex justify-between">
 						<span class="text-xl font-semibold">{method.brand}</span
 						>{#if preferred === method.id}<Chip color="neutral" size="small" variant="soft"
 								>Default</Chip
@@ -33,11 +33,11 @@
 					</div>
 					<div class="my-lg h-8 w-11 rounded-md border border-current opacity-50"></div>
 					<p class="text-2xl tracking-widest">•••• •••• •••• {method.last4}</p>
-					<div class="flex gap-lg justify-between text-xs uppercase tracking-widest">
+					<div class="gap-lg flex justify-between text-xs tracking-widest uppercase">
 						<span>{method.name}</span><span>{method.expiry}</span>
 					</div>
 				</div>
-				<div class="flex gap-lg justify-between">
+				<div class="gap-lg flex justify-between">
 					<Button variant="outline" size="small" onclick={() => (editing = method.id)}
 						>Edit nickname</Button
 					><Button
@@ -50,7 +50,7 @@
 				</div>
 			</article>{/each}
 	</div>
-	<p class="text-xs text-neutral/45">
+	<p class="text-neutral/65 text-xs">
 		Illustrative payment methods. No payment details are collected.
 	</p>
 	<Dialog

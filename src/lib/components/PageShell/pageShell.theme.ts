@@ -9,16 +9,20 @@ const defaultHeader = cva({
 	base: 'sticky top-[calc(var(--page-shell-edge-inset,0px)_+_var(--page-shell-chrome-block-gap,0px))] z-20 mx-[var(--page-shell-chrome-inline-gap,0px)] mt-[var(--page-shell-chrome-block-gap,0px)] mb-[var(--page-shell-chrome-block-gap,0px)] shrink-0 rounded-tl-[var(--page-shell-header-top-radius,inherit)] rounded-tr-[var(--page-shell-header-top-radius,inherit)] rounded-br-[var(--page-shell-header-bottom-radius,0px)] rounded-bl-[var(--page-shell-header-bottom-radius,0px)] border-b [border-bottom-color:var(--page-shell-chrome-divider,var(--color-neutral-muted))] bg-[var(--page-shell-chrome,var(--color-surface))] shadow-[var(--page-shell-chrome-shadow,none)] ring-1 ring-inset ring-[var(--page-shell-chrome-border,transparent)] backdrop-blur'
 });
 
+// The row wraps: the title keeps its natural width and the actions drop under it when they do not
+// fit, instead of the title being squeezed to an ellipsis by a wide actions block.
 const defaultHeaderInner = cva({
-	base: 'flex min-h-12 items-center justify-between gap-lg px-lg py-md md:px-xl'
+	base: 'flex min-h-row-lg flex-wrap items-center justify-between gap-x-lg gap-y-md px-lg py-md md:px-xl'
 });
 
+// `grow` (basis auto), not `flex-1` (basis 0): the stack must keep its content width so the flex
+// line wraps before the title is shrunk.
 const defaultTitleStack = cva({
-	base: 'grid min-w-0 gap-micro'
+	base: 'grid min-w-0 grow gap-micro'
 });
 
 const defaultMeta = cva({
-	base: 'flex min-w-0 items-center gap-sm text-xs leading-4 text-neutral/55'
+	base: 'flex min-w-0 items-center gap-sm text-xs leading-4 text-neutral/70'
 });
 
 const defaultBack = cva({
@@ -30,7 +34,7 @@ const defaultBreadcrumbs = cva({
 });
 
 const defaultEyebrow = cva({
-	base: 'truncate text-[0.6875rem] leading-4 font-medium tracking-normal text-neutral/55 uppercase'
+	base: 'truncate text-xs leading-4 font-medium tracking-normal text-neutral/70 uppercase'
 });
 
 const defaultTitle = cva({
@@ -38,7 +42,7 @@ const defaultTitle = cva({
 });
 
 const defaultSubtitle = cva({
-	base: 'truncate text-xs leading-4 text-neutral/60'
+	base: 'truncate text-xs leading-4 text-neutral/70'
 });
 
 const defaultActions = cva({
@@ -77,7 +81,7 @@ const defaultFooter = cva({
 });
 
 const defaultFooterInner = cva({
-	base: 'flex min-h-12 items-center justify-between gap-lg px-xl py-md text-sm text-neutral/70'
+	base: 'flex min-h-row-lg items-center justify-between gap-lg px-xl py-md text-sm text-neutral/70'
 });
 
 const defaultFooterContent = cva({

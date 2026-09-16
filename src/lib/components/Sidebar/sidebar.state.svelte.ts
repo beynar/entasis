@@ -14,6 +14,7 @@ type SidebarStateOptions = {
 	readonly displayState: SidebarDisplayState;
 	readonly side: SidebarSide;
 	readonly collapsible: SidebarCollapsible;
+	readonly peeking: boolean;
 	setDisplayState: (state: SidebarDisplayState) => void;
 };
 
@@ -30,40 +31,47 @@ function isEditableTarget(target: EventTarget | null) {
 	);
 }
 
+/** Live view of the controller, built outside the class so the getters close over a parameter instead of aliasing `this`. */
+function createSidebarApi(controller: SidebarStateController): SidebarApi {
+	return {
+		get open() {
+			return controller.open;
+		},
+		get state() {
+			return controller.state;
+		},
+		get displayState() {
+			return controller.displayState;
+		},
+		get isMobile() {
+			return controller.isMobile;
+		},
+		get openMobile() {
+			return controller.openMobile;
+		},
+		get collapsible() {
+			return controller.collapsible;
+		},
+		get isPeeking() {
+			return controller.isPeeking;
+		},
+		get side() {
+			return controller.side;
+		},
+		toggle: () => controller.toggle(),
+		setOpen: (open) => controller.setOpen(open),
+		setDisplayState: (state) => controller.setDisplayState(state),
+		setOpenMobile: (open) => controller.setOpenMobile(open)
+	};
+}
+
 export class SidebarStateController {
 	private mobileQuery = new MediaQuery('(max-width: 767px)');
 	openMobile = $state(false);
 	api: SidebarApi;
 
 	constructor(private options: SidebarStateOptions) {
-		const controller = this;
-		this.api = {
-			get open() {
-				return controller.open;
-			},
-			get state() {
-				return controller.state;
-			},
-			get displayState() {
-				return controller.displayState;
-			},
-			get isMobile() {
-				return controller.isMobile;
-			},
-			get openMobile() {
-				return controller.openMobile;
-			},
-			get collapsible() {
-				return controller.collapsible;
-			},
-			get side() {
-				return controller.side;
-			},
-			toggle: () => controller.toggle(),
-			setOpen: (open) => controller.setOpen(open),
-			setDisplayState: (state) => controller.setDisplayState(state),
-			setOpenMobile: (open) => controller.setOpenMobile(open)
-		};
+		this.api = createSidebarApi(this);
 
 		$effect(() => {
 			const shortcut = this.options.keyboardShortcut;
@@ -112,6 +120,15 @@ export class SidebarStateController {
 
 	get collapsible(): SidebarCollapsible {
 		return this.options.collapsible;
+	}
+
+	/**
+	 * A hover peek renders the collapsed panel at full width without touching the persisted
+	 * collapsed state, so `displayState` stays `'collapsed'` and this reports the rendered
+	 * width instead: everything that hides content in icon mode reads it.
+	 */
+	get isPeeking(): boolean {
+		return this.options.peeking && !this.isMobile;
 	}
 
 	setOpen = (open: boolean) => {

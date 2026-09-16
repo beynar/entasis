@@ -3,7 +3,7 @@ export const codeDescription = `
 
 Displays a syntax-highlighted code block with an optional header (language label
 + copy button), line numbers, and header/footer slots. Highlighting is powered by
-a bundled, SSR-safe Shiki highlighter with a CSS-variable syntax theme, so colors
+TanStack Highlight with every language bundled (synchronous, SSR-safe) and a CSS-variable token palette, so colors
 adapt to light and dark automatically from the design tokens.
 
 ## Basic Usage
@@ -16,7 +16,7 @@ adapt to light and dark automatically from the design tokens.
 
 ### Core Props
 - **code**: string (required) - Source code to highlight. Also what the copy button writes to the clipboard.
-- **language**: string (default: 'text') - Shiki grammar id (\`typescript\`, \`svelte\`, \`css\`, \`bash\`, \`json\`, \`python\`, …). Aliases like \`ts\`, \`js\`, \`sh\` resolve automatically; unknown ids fall back to plain text.
+- **language**: string (default: 'text') - Language id (\`ts\`, \`svelte\`, \`css\`, \`shell\`, \`json\`, \`python\`, …). Aliases like \`typescript\`, \`js\`, \`bash\` resolve automatically; every language TanStack Highlight ships is bundled, and unknown ids fall back to plain text.
 - **title**: string - Header label. Defaults to the language's display name (e.g. "TypeScript").
 
 ### Display Props
@@ -71,8 +71,8 @@ adapt to light and dark automatically from the design tokens.
 ## Theming
 
 The block chrome (border, header, footer, container) is styled with cva parts and
-uses \`bg-neutral-muted\` / \`text-neutral/60\` for the header and footer.
-The syntax colors are NOT part of cva — they come from the Shiki HTML plus the
+uses \`bg-neutral-muted\` / \`text-neutral/70\` for the header and footer.
+The syntax colors are NOT part of cva — they come from the highlighter's \`th-*\` token classes plus the
 colocated \`CodeTheme.svelte\`, which maps each \`--code-token-*\` variable onto our
 \`--color-*\` design tokens (keyword → primary, string → success, number → warning,
 function → info, tag → danger, …) and re-tunes a few roles under the dark selector.
@@ -90,7 +90,7 @@ function → info, tag → danger, …) and re-tunes a few roles under the dark 
 import type { CodeThemeProps } from 'svelai/code';
 
 const customTheme: CodeThemeProps = {
-  root: { base: 'rounded-xl shadow-lg' },
+  root: { base: 'rounded-xl raised-4' },
   header: { base: 'bg-primary text-primary-contrast px-4 py-2' }
 };
 \`\`\`

@@ -15,7 +15,14 @@ export type ScrollAreaProps = WithAttachments<
 		/** Bindable reference to the native scrolling viewport. */
 		viewportRef?: HTMLDivElement | null;
 		/** Accessible label applied to the native scrolling viewport. */
-		ariaLabel?: string;
+		label?: string;
+		/**
+		 * Role of the native scrolling viewport. Override it when the scroll area sits inside a
+		 * structural role whose children are constrained — a grid or treegrid, say, where the
+		 * viewport has to read as `rowgroup` rather than an unrelated group.
+		 * @default 'group'
+		 */
+		viewportRole?: string;
 		/**
 		 * Controls when the vertical scrollbar is shown (`hover`, `always`, `scroll`, or `auto`).
 		 * @default 'hover'

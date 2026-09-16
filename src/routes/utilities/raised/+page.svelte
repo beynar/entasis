@@ -38,7 +38,11 @@
 		['raised-sm | raised-md | raised-lg', 'Uses the matching Tailwind shadow scale.'],
 		['raised-xl | raised-2xl', 'Applies stronger elevation for prominent surfaces.'],
 		['raised-none', 'Removes the raised shadow and border.'],
-		['raisedWithBorder', 'Runtime design token that controls the border.']
+		['raisedWithBorder', 'Runtime design token that controls the border.'],
+		[
+			'--elevation-bleed-x | --elevation-bleed-y',
+			'How far the largest shadow on the scale reaches sideways and downwards (0px on flat); scroll and clip containers pay it as a bleed allowance so flush content is never cropped.'
+		]
 	];
 </script>
 
@@ -49,7 +53,7 @@
 <article class="text-neutral mx-auto grid max-w-3xl gap-4 pb-20">
 	<header class="grid gap-2">
 		<h1 class="text-3xl font-semibold">Raised</h1>
-		<p class="text-neutral/60 text-balance">
+		<p class="text-neutral/70 text-balance">
 			Tailwind utilities for giving surfaces theme-aware elevation.
 		</p>
 	</header>
@@ -67,7 +71,7 @@
 
 	<Separator class="my-2" children="Usage" />
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		Use {@render ic('raised')} on a surface. The utility maps to the Tailwind shadow scale and uses theme
 		variables for borders in light and dark modes.
 	</p>
@@ -80,8 +84,8 @@
 					? 'bg-surface'
 					: 'bg-surface-canvas'}"
 			>
-				<code class="text-primary text-sm font-medium">{name}</code>
-				<p class="text-neutral/60 text-sm">{description}</p>
+				<code class="text-primary-readable text-sm font-medium">{name}</code>
+				<p class="text-neutral/70 text-sm">{description}</p>
 			</div>
 		{/each}
 	</div>
@@ -103,7 +107,7 @@
 
 	<Separator class="my-2" children="Runtime token" />
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		Set {@render ic('raisedWithBorder')} per theme through {@render ic('Theme.designTokens')}. The
 		value can change at runtime without rebuilding Tailwind.
 	</p>

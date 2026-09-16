@@ -32,7 +32,7 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl flex flex-col">
 	<div class="max-w-xl">
 		<Chip variant="soft">Let's talk</Chip><Heading as="h2" size="h1" weight="bold" class="mt-xl"
 			>A good question opens a door.</Heading
@@ -42,14 +42,14 @@
 			pattern.
 		</p>
 	</div>
-	<div class="grid gap-lg md:grid-cols-3">
+	<div class="gap-lg grid md:grid-cols-3">
 		{#each channels as channel (channel.title)}<Card variant="outline"
-				><div class="flex min-h-60 flex-col items-start gap-lg">
-					<span class="text-primary">{@render channel.icon({ size: 32 })}</span><Heading
+				><div class="gap-lg flex min-h-60 flex-col items-start">
+					<span class="text-primary-readable">{@render channel.icon({ size: 32 })}</span><Heading
 						as="h3"
 						size="h4">{channel.title}</Heading
 					>
-					<p class="flex-1 text-neutral/70">{channel.description}</p>
+					<p class="text-neutral/70 flex-1">{channel.description}</p>
 					<Button href={channel.href} variant="link" suffix={arrowRightIcon}
 						>{channel.action}</Button
 					>

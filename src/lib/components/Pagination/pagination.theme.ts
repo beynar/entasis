@@ -1,5 +1,6 @@
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
+import { selectedSolid } from '$lib/components/Theme/theme.recipes.js';
 
 const defaultPagination = cva({
 	base: 'flex w-fit max-w-full flex-wrap items-center gap-lg'
@@ -52,7 +53,7 @@ const defaultPaginationItem = cva({
 });
 
 const defaultPaginationControl = cva({
-	base: 'inline-flex shrink-0 select-none items-center justify-center rounded-md border font-medium outline-none transition-all duration-100 ease-in-out focus-visible:ring-2 focus-visible:ring-color/50 [&:active]:translate-y-px [&_svg:not([class*=size-])]:size-icon-md',
+	base: 'inline-flex shrink-0 select-none items-center justify-center rounded-md border font-medium outline-none transition-[color,background-color,border-color,box-shadow,translate] duration-fast ease-standard focus-visible:ring-2 focus-visible:ring-focus/50 [&:active]:translate-y-px [&_svg:not([class*=size-])]:size-icon-md',
 	variants: {
 		size: {
 			small: 'h-control-sm min-size-hit-sm px-md text-xs',
@@ -74,12 +75,14 @@ const defaultPaginationControl = cva({
 			soft: 'state-layer border-transparent bg-color-muted text-color-muted-readable',
 			ghost: 'state-layer border-transparent bg-transparent text-color-readable'
 		},
+		// The current page is the one selected surface that stays solid (`selectedSolid`): it is the
+		// loudest thing in its group and carries no other affordance.
 		active: {
-			true: 'border-color bg-color text-color-contrast hover:text-color-contrast',
+			true: `border-selected ${selectedSolid} hover:text-selected-contrast`,
 			false: null
 		},
 		disabled: {
-			true: 'pointer-events-none cursor-not-allowed opacity-45',
+			true: 'pointer-events-none cursor-not-allowed opacity-50',
 			false: 'cursor-pointer'
 		},
 		control: {
@@ -89,17 +92,21 @@ const defaultPaginationControl = cva({
 	},
 	defaultVariants: {
 		size: 'normal',
-		color: 'primary',
+		color: 'neutral',
 		controlVariant: 'ghost',
 		active: false,
 		disabled: false,
 		control: 'page'
 	},
-	compoundVariants: []
+	compoundVariants: [
+		// Mirrors button.theme.ts: the neutral outline is chrome next to inputs and selects, which
+		// all draw a `neutral-muted` hairline; a full-strength neutral border made it the odd one out.
+		{ color: 'neutral', controlVariant: 'outline', class: 'border-neutral-muted' }
+	]
 });
 
 const defaultPaginationDot = cva({
-	base: "relative inline-flex shrink-0 items-center justify-center rounded-full outline-none transition-colors before:block before:rounded-full before:content-[''] before:transition-colors focus-visible:ring-2 focus-visible:ring-color/50",
+	base: "relative inline-flex shrink-0 items-center justify-center rounded-full outline-none transition-colors before:block before:rounded-full before:content-[''] before:transition-colors focus-visible:ring-2 focus-visible:ring-focus/50",
 	variants: {
 		size: {
 			small: 'size-3 before:size-1.5',
@@ -116,17 +123,17 @@ const defaultPaginationDot = cva({
 			info: null
 		},
 		active: {
-			true: 'before:bg-color',
+			true: 'before:bg-selected',
 			false: 'before:bg-neutral/30 hover:before:bg-color/50'
 		},
 		disabled: {
-			true: 'pointer-events-none cursor-not-allowed opacity-45',
+			true: 'pointer-events-none cursor-not-allowed opacity-50',
 			false: 'cursor-pointer'
 		}
 	},
 	defaultVariants: {
 		size: 'normal',
-		color: 'primary',
+		color: 'neutral',
 		active: false,
 		disabled: false
 	},
@@ -148,7 +155,7 @@ const defaultPaginationIcon = cva({
 });
 
 const defaultPaginationEllipsis = cva({
-	base: 'text-neutral/60 inline-flex shrink-0 items-center justify-center',
+	base: 'text-neutral/70 inline-flex shrink-0 items-center justify-center',
 	variants: {
 		size: {
 			small: 'h-control-sm min-w-[var(--control-height-sm)]',
@@ -162,7 +169,7 @@ const defaultPaginationEllipsis = cva({
 });
 
 const defaultPaginationSummary = cva({
-	base: 'text-neutral/60 shrink-0 whitespace-nowrap font-medium',
+	base: 'text-neutral/70 shrink-0 whitespace-nowrap font-medium',
 	variants: {
 		size: {
 			small: 'text-xs',

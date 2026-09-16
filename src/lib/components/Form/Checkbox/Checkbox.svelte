@@ -14,7 +14,6 @@
 		required = false,
 		mode = 'normal',
 		indeterminate = false,
-		ariaLabel,
 		theme,
 		disabled,
 		name,
@@ -114,7 +113,6 @@
 		inputValue="true"
 		checked={!!field.value}
 		{indeterminate}
-		{ariaLabel}
 		disabled={field.disabled}
 		{mode}
 		{size}

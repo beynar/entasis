@@ -60,7 +60,7 @@
 				description="Receive updates by email"
 				bind:value={email}
 			/>
-			<p class="text-neutral/60 mt-4 text-sm">Value: {email}</p>
+			<p class="text-neutral/70 mt-4 text-sm">Value: {email}</p>
 		</div>
 	</ComponentCard>
 
@@ -68,7 +68,7 @@
 		<ComponentCard description="A single boolean field.">
 			<div class="w-full max-w-md">
 				<Checkbox label="Email" description="Receive updates by email" bind:value={email} />
-				<p class="text-neutral/60 mt-4 text-sm">Value: {email}</p>
+				<p class="text-neutral/70 mt-4 text-sm">Value: {email}</p>
 			</div>
 		</ComponentCard>
 
@@ -96,7 +96,7 @@
 					mode="card"
 					bind:value={terms}
 				/>
-				<p class="text-neutral/60 mt-4 text-sm">Value: {terms}</p>
+				<p class="text-neutral/70 mt-4 text-sm">Value: {terms}</p>
 			</div>
 		</ComponentCard>
 

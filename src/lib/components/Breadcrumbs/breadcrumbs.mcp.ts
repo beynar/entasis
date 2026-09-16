@@ -25,13 +25,12 @@ A navigation component that displays a hierarchical path of links, helping users
 
 - **items**: BreadcrumbItem[] (required)
   - Array of breadcrumb items to display
-  - Each item can have: label, href, active, disabled, onclick, icon, menu
-  - Can be simple strings/snippets or full config objects
+  - Each item is a config object with: label, href, active, disabled, onclick, icon, menu
 
-- **home**: BreadcrumbItem (optional)
+- **home**: Omit<BreadcrumbItem, 'menu' | 'label'> & { label?: string | Snippet } (optional)
   - Optional home breadcrumb item to prepend to the items array
   - If provided, it will be rendered as the first breadcrumb
-  - Can be a simple string/snippet or a full config object
+  - When \`label\` is omitted a house icon is rendered
 
 - **maxItems**: number (optional)
   - Maximum number of items to show before using ellipsis
@@ -118,21 +117,23 @@ A navigation component that displays a hierarchical path of links, helping users
 </script>
 
 <Breadcrumbs home={{ label: 'Home', href: '/' }} {items} />
-<!-- Or with a simple string -->
-<Breadcrumbs home="Home" {items} />
+<!-- Or with the default house icon -->
+<Breadcrumbs home={{ href: '/' }} {items} />
 \`\`\`
 
 ### Breadcrumbs with Icons
 
 \`\`\`svelte
-<script>
+<script lang="ts">
   import { Breadcrumbs } from 'svelai/breadcrumbs';
-  import { Home, Folder, File } from 'svelai/icons';
+  import { houseIcon } from 'svelai/icons/house';
+  import { folderIcon } from 'svelai/icons/folder';
+  import { fileIcon } from 'svelai/icons/file';
   
   const items = [
-    { label: 'Home', href: '/', icon: Home },
-    { label: 'Documents', href: '/docs', icon: Folder },
-    { label: 'Report.pdf', href: '/docs/report', icon: File, active: true }
+    { label: 'Home', href: '/', icon: houseIcon },
+    { label: 'Documents', href: '/docs', icon: folderIcon },
+    { label: 'Report.pdf', href: '/docs/report', icon: fileIcon, active: true }
   ];
 </script>
 
@@ -142,10 +143,10 @@ A navigation component that displays a hierarchical path of links, helping users
 ### Breadcrumbs with Dropdown Menus
 
 \`\`\`svelte
-<script>
-  import { Breadcrumbs } from 'svelai/breadcrumbs';
+<script lang="ts">
+  import { Breadcrumbs, type BreadcrumbItem } from 'svelai/breadcrumbs';
   
-  const items = [
+  const items: BreadcrumbItem[] = [
     { label: 'Home', href: '/' },
     { 
       label: 'Products', 
@@ -177,7 +178,7 @@ A navigation component that displays a hierarchical path of links, helping users
 
 <Breadcrumbs {items}>
   {#snippet separator()}
-    <span class="text-neutral/60">›</span>
+    <span class="text-neutral/70">›</span>
   {/snippet}
 </Breadcrumbs>
 \`\`\`
@@ -202,17 +203,7 @@ A navigation component that displays a hierarchical path of links, helping users
 <Breadcrumbs {items} maxItems={3} />
 \`\`\`
 
-### Simple String Items
-
-\`\`\`svelte
-<script>
-  import { Breadcrumbs } from 'svelai/breadcrumbs';
-</script>
-
-<Breadcrumbs items={['Home', 'Products', 'Electronics']} />
-\`\`\`
-
-### Mixed Items (Strings and Configs)
+### Inline Items
 
 \`\`\`svelte
 <script>
@@ -221,10 +212,9 @@ A navigation component that displays a hierarchical path of links, helping users
 
 <Breadcrumbs
   items={[
-    'Home',
+    { label: 'Home', href: '/' },
     { label: 'Products', href: '/products' },
-    'Electronics',
-    { label: 'Details', href: '/products/details', active: true }
+    { label: 'Electronics', active: true }
   ]}
 />
 \`\`\`
@@ -284,12 +274,9 @@ A navigation component that displays a hierarchical path of links, helping users
 
 ## BreadcrumbItem Type
 
-Each item in the \`items\` array can be either:
+Each item in the \`items\` array is a config object with properties like \`label\`, \`href\`, \`active\`, etc.
 
-1. **A simple string or snippet**: \`'Home'\` or a snippet without parameters
-2. **A config object** with properties like \`label\`, \`href\`, \`active\`, etc.
-
-The \`label\` property in config objects can also be a string or snippet without parameters.
+The \`label\` property can be a string or a snippet without parameters.
 
 ## Keyboard Navigation
 

@@ -20,5 +20,5 @@ export type TextAreaProps = InputProps<'textarea'> & {
 	/** Native attributes applied to the underlying textarea control. */
 	textareaAttrs?: TextAreaAttributes;
 	/** Called when Enter is pressed without Shift; default submission is prevented. */
-	onPressEnter?: (field: FieldState<'textarea'>) => void;
+	onPressEnter?: (payload: FieldState<'textarea'>) => void;
 };

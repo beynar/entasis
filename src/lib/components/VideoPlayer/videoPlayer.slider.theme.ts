@@ -36,7 +36,7 @@ export function getVideoPlayerSliderTheme(
 			base: isVertical ? 'mt-xs ml-0' : 'ml-xs'
 		},
 		valueLabel: {
-			base: 'min-w-14 border-white/10 bg-white/10 text-center text-white/90'
+			base: 'min-w-14 border-white/10 bg-white/10 text-center text-white'
 		}
 	};
 }

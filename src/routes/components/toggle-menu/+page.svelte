@@ -92,37 +92,37 @@
 			{
 				type: 'toggle',
 				prefix: eyeIcon,
-				ariaLabel: 'Preview',
+				label: 'Preview',
 				value: true
 			},
 			{
 				type: 'group',
-				ariaLabel: 'Text formatting',
-				value: { bold: true },
-				items: {
-					bold: { prefix: textBIcon, ariaLabel: 'Bold' },
-					italic: { prefix: textItalicIcon, ariaLabel: 'Italic' },
-					underline: { prefix: textUnderlineIcon, ariaLabel: 'Underline' }
-				}
+				label: 'Text formatting',
+				value: ['bold'],
+				items: [
+					{ value: 'bold', prefix: textBIcon, label: 'Bold' },
+					{ value: 'italic', prefix: textItalicIcon, label: 'Italic' },
+					{ value: 'underline', prefix: textUnderlineIcon, label: 'Underline' }
+				]
 			},
 			{
 				type: 'radio-group',
-				ariaLabel: 'Text alignment',
+				label: 'Text alignment',
 				value: 'left',
-				items: {
-					left: { prefix: textAlignLeftIcon, ariaLabel: 'Align left' },
-					center: { prefix: textAlignCenterIcon, ariaLabel: 'Align center' },
-					right: { prefix: textAlignRightIcon, ariaLabel: 'Align right' }
-				}
+				items: [
+					{ value: 'left', prefix: textAlignLeftIcon, label: 'Align left' },
+					{ value: 'center', prefix: textAlignCenterIcon, label: 'Align center' },
+					{ value: 'right', prefix: textAlignRightIcon, label: 'Align right' }
+				]
 			},
-			{ type: 'toggle', prefix: listBulletsIcon, ariaLabel: 'Bulleted list' },
-			{ type: 'toggle', prefix: quotesIcon, ariaLabel: 'Block quote' },
-			{ type: 'toggle', prefix: linkIcon, ariaLabel: 'Link' },
-			{ type: 'toggle', prefix: highlighterIcon, ariaLabel: 'Highlight' },
-			{ type: 'toggle', prefix: chatCircleIcon, ariaLabel: 'Comments' },
+			{ type: 'toggle', prefix: listBulletsIcon, label: 'Bulleted list' },
+			{ type: 'toggle', prefix: quotesIcon, label: 'Block quote' },
+			{ type: 'toggle', prefix: linkIcon, label: 'Link' },
+			{ type: 'toggle', prefix: highlighterIcon, label: 'Highlight' },
+			{ type: 'toggle', prefix: chatCircleIcon, label: 'Comments' },
 			{
 				type: 'menu',
-				ariaLabel: 'Text color',
+				label: 'Text color',
 				prefix: paletteIcon,
 				menu: getTextColorOptions
 			}
@@ -135,31 +135,31 @@
 		{ type: 'toggle', prefix: eyeIcon, children: 'Preview', value: true },
 		{
 			type: 'group',
-			ariaLabel: 'Text formatting',
-			value: { bold: true },
-			items: {
-				bold: { prefix: textBIcon, children: 'Bold' },
-				italic: { prefix: textItalicIcon, children: 'Italic' }
-			}
+			label: 'Text formatting',
+			value: ['bold'],
+			items: [
+				{ value: 'bold', prefix: textBIcon, children: 'Bold' },
+				{ value: 'italic', prefix: textItalicIcon, children: 'Italic' }
+			]
 		},
 		{ type: 'toggle', prefix: chatCircleIcon, children: 'Comments' }
 	]);
 </script>
 
 {#snippet foregroundSwatch()}
-	<span class="size-3 rounded-full bg-neutral ring-1 ring-neutral-muted"></span>
+	<span class="bg-neutral ring-neutral-muted size-3 rounded-full ring-1"></span>
 {/snippet}
 
 {#snippet primarySwatch()}
-	<span class="size-3 rounded-full bg-primary ring-1 ring-neutral-muted"></span>
+	<span class="bg-primary ring-neutral-muted size-3 rounded-full ring-1"></span>
 {/snippet}
 
 {#snippet dangerSwatch()}
-	<span class="size-3 rounded-full bg-danger ring-1 ring-neutral-muted"></span>
+	<span class="bg-danger ring-neutral-muted size-3 rounded-full ring-1"></span>
 {/snippet}
 
 {#snippet warningSwatch()}
-	<span class="size-3 rounded-full bg-warning ring-1 ring-neutral-muted"></span>
+	<span class="bg-warning ring-neutral-muted size-3 rounded-full ring-1"></span>
 {/snippet}
 
 <DocPage
@@ -167,7 +167,7 @@
 	subtitle="An accessible toolbar of toggles, radio groups, menu buttons, and custom controls."
 	component="ToggleMenu"
 	features={[
-		'One roving keyboard tab stop',
+		{ label: 'One roving keyboard tab stop', test: 'a11y:toggle-menu.roving-tabindex' },
 		'Toolbar-specific radio group semantics',
 		'Logical groups stay intact during overflow',
 		'Persistent checkbox and radio More menu',
@@ -181,40 +181,40 @@
 		{controls}
 		description="Toggles, exclusive choices, independent groups, and menu buttons share one keyboard and overflow model."
 		code={`let items = $state([
-\t{ type: 'toggle', prefix: eyeIcon, ariaLabel: 'Preview', value: true },
+\t{ type: 'toggle', prefix: eyeIcon, label: 'Preview', value: true },
 \t{
 \t\ttype: 'group',
-\t\tariaLabel: 'Text formatting',
-\t\tvalue: { bold: true },
-\t\titems: {
-\t\t\tbold: { prefix: textBIcon, ariaLabel: 'Bold' },
-\t\t\titalic: { prefix: textItalicIcon, ariaLabel: 'Italic' },
-\t\t\tunderline: { prefix: textUnderlineIcon, ariaLabel: 'Underline' }
-\t\t}
+\t\tlabel: 'Text formatting',
+\t\tvalue: ['bold'],
+\t\titems: [
+\t\t\t{ value: 'bold', prefix: textBIcon, label: 'Bold' },
+\t\t\t{ value: 'italic', prefix: textItalicIcon, label: 'Italic' },
+\t\t\t{ value: 'underline', prefix: textUnderlineIcon, label: 'Underline' }
+\t\t]
 \t},
 \t{
 \t\ttype: 'radio-group',
-\t\tariaLabel: 'Text alignment',
+\t\tlabel: 'Text alignment',
 \t\tvalue: 'left',
-\t\titems: {
-\t\t\tleft: { prefix: textAlignLeftIcon, ariaLabel: 'Align left' },
-\t\t\tcenter: { prefix: textAlignCenterIcon, ariaLabel: 'Align center' },
-\t\t\tright: { prefix: textAlignRightIcon, ariaLabel: 'Align right' }
-\t\t}
+\t\titems: [
+\t\t\t{ value: 'left', prefix: textAlignLeftIcon, label: 'Align left' },
+\t\t\t{ value: 'center', prefix: textAlignCenterIcon, label: 'Align center' },
+\t\t\t{ value: 'right', prefix: textAlignRightIcon, label: 'Align right' }
+\t\t]
 \t},
 \t{
 \t\ttype: 'menu',
-\t\tariaLabel: 'Text color',
+\t\tlabel: 'Text color',
 \t\tprefix: paletteIcon,
 \t\tmenu: getTextColorOptions
 \t}
 ]);
 
-<ToggleMenu bind:value={items} ariaLabel="Editor tools" size="${controls.value.size}" variant="${controls.value.variant}" color="${controls.value.color}" disabled={${controls.value.disabled}} />`}
+<ToggleMenu bind:items label="Editor tools" size="${controls.value.size}" variant="${controls.value.variant}" color="${controls.value.color}" disabled={${controls.value.disabled}} />`}
 	>
 		<ToggleMenu
-			bind:value={editorItems}
-			ariaLabel="Editor tools"
+			bind:items={editorItems}
+			label="Editor tools"
 			size={controls.value.size}
 			variant={controls.value.variant}
 			color={controls.value.color}
@@ -228,11 +228,11 @@
 			description="When space runs out, complete logical groups move into More. Checked rows remain interactive and the menu stays open."
 			class="!min-h-fit"
 			code={`<div class="w-56">
-\t<ToggleMenu bind:value={items} ariaLabel="Compact editor tools" />
+\t<ToggleMenu bind:items label="Compact editor tools" />
 </div>`}
 		>
 			<div class="w-56 max-w-full">
-				<ToggleMenu bind:value={overflowItems} ariaLabel="Compact editor tools" />
+				<ToggleMenu bind:items={overflowItems} label="Compact editor tools" />
 			</div>
 		</ComponentCard>
 
@@ -242,7 +242,7 @@
 			class="!min-h-fit"
 		>
 			<div class="max-w-full">
-				<ToggleMenu bind:value={textItems} ariaLabel="Labeled editor tools" />
+				<ToggleMenu bind:items={textItems} label="Labeled editor tools" />
 			</div>
 		</ComponentCard>
 
@@ -250,7 +250,7 @@
 			title="Disabled"
 			description="Disabling the toolbar preserves every pressed state."
 		>
-			<ToggleMenu value={createEditorItems()} ariaLabel="Unavailable editor tools" disabled />
+			<ToggleMenu items={createEditorItems()} label="Unavailable editor tools" disabled />
 		</ComponentCard>
 	{/snippet}
 </DocPage>

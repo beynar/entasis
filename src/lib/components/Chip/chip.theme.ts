@@ -1,8 +1,9 @@
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
+import { selectedSoft } from '$lib/components/Theme/theme.recipes.js';
 
 const defaultChip = cva({
-	base: 'group/chip box-border w-fit max-w-fit min-w-min inline-flex items-center justify-center whitespace-nowrap rounded-full border border-transparent bg-clip-padding font-medium transition-all',
+	base: 'group/chip box-border w-fit max-w-fit min-w-min inline-flex items-center justify-center whitespace-nowrap rounded-full border border-transparent bg-clip-padding font-medium transition-colors',
 	variants: {
 		isLink: {
 			true: 'cursor-pointer',
@@ -14,8 +15,8 @@ const defaultChip = cva({
 		},
 		size: {
 			small: 'h-5 px-md gap-xs text-xs',
-			normal: 'h-6 px-md gap-sm text-xs',
-			large: 'h-7 px-lg gap-sm text-sm'
+			normal: 'h-6 px-md gap-sm text-sm',
+			large: 'h-control-sm px-lg gap-sm text-sm'
 		},
 		color: {
 			primary: 'bg-primary text-primary-contrast',
@@ -31,20 +32,31 @@ const defaultChip = cva({
 			outline: 'bg-color/0 text-color-readable border-color',
 			soft: 'bg-color-muted text-color-muted-readable'
 		},
+		// Driven by the `selected` prop, which also stamps `data-selected`. It paints the one
+		// shared soft selected recipe on top of whatever `variant` drew, so a chip list —
+		// TagGroup, a filter row — marks its chosen entries without re-deriving a fill.
+		selected: {
+			true: selectedSoft,
+			false: null
+		},
 		position: {
-			topRight: 'absolute z-10 top-0 right-0 translate-x-1/2 -translate-y-1/2',
-			topLeft: 'absolute z-10 top-0 left-0 -translate-x-1/2 -translate-y-1/2',
-			bottomRight: 'absolute z-10 right-0 bottom-0 translate-x-1/2 translate-y-1/2',
-			bottomLeft: 'absolute z-10 bottom-0 left-0 -translate-x-1/2 translate-y-1/2'
+			'top-right': 'absolute z-10 top-0 right-0 translate-x-1/2 -translate-y-1/2',
+			'top-left': 'absolute z-10 top-0 left-0 -translate-x-1/2 -translate-y-1/2',
+			'bottom-right': 'absolute z-10 right-0 bottom-0 translate-x-1/2 translate-y-1/2',
+			'bottom-left': 'absolute z-10 bottom-0 left-0 -translate-x-1/2 translate-y-1/2'
 		}
 	},
 	defaultVariants: {
-		color: 'primary',
-		variant: 'solid',
+		color: 'neutral',
+		variant: 'outline',
 		size: 'normal',
-		isEmpty: false
+		isEmpty: false,
+		selected: false
 	},
 	compoundVariants: [
+		// Mirrors button.theme.ts: the neutral outline is chrome next to inputs and selects, which
+		// all draw a `neutral-muted` hairline; a full-strength neutral border made it the odd one out.
+		{ color: 'neutral', variant: 'outline', class: 'border-neutral-muted' },
 		{
 			size: 'small',
 			isEmpty: true,
@@ -64,12 +76,12 @@ const defaultChip = cva({
 });
 
 const defaultChipPrefix = cva({
-	base: 'inline-flex items-center [&>svg]:size-3.5',
+	base: 'inline-flex items-center [&>svg]:size-icon-sm',
 	variants: {
 		size: {
-			normal: '[&>svg]:size-3.5',
-			large: '[&>svg]:size-4',
-			small: '[&>svg]:size-3'
+			normal: '[&>svg]:size-icon-sm',
+			large: '[&>svg]:size-icon-md',
+			small: '[&>svg]:size-icon-xs'
 		}
 	},
 	defaultVariants: {
@@ -78,12 +90,12 @@ const defaultChipPrefix = cva({
 });
 
 const defaultChipSuffix = cva({
-	base: 'inline-flex items-center [&>svg]:size-3.5',
+	base: 'inline-flex items-center [&>svg]:size-icon-sm',
 	variants: {
 		size: {
-			normal: '[&>svg]:size-3.5',
-			large: '[&>svg]:size-4',
-			small: '[&>svg]:size-3'
+			normal: '[&>svg]:size-icon-sm',
+			large: '[&>svg]:size-icon-md',
+			small: '[&>svg]:size-icon-xs'
 		}
 	},
 	defaultVariants: {

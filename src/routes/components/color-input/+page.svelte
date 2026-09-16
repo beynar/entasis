@@ -3,7 +3,7 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { ColorInput } from '$lib/components/Form/ColorInput/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let color = $state<string | null>('#6366f1');
@@ -20,7 +20,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -80,7 +80,7 @@
 			<div class="w-full max-w-md">
 				<ColorInput label="Brand color" bind:value={color} />
 				{#if color}
-					<p class="text-neutral/60 mt-2 text-xs">Value: {color}</p>
+					<p class="text-neutral/70 mt-2 text-xs">Value: {color}</p>
 				{/if}
 			</div>
 		</ComponentCard>
@@ -119,7 +119,7 @@
 		<!-- Example 4: Required / validation -->
 		<ComponentCard
 			description="Required marks the field and validates against a non-empty color"
-			code={`<ColorInput label="Accent color" required />`}
+			code="<ColorInput label=&quot;Accent color&quot; required />"
 		>
 			<div class="w-full max-w-md">
 				<ColorInput label="Accent color" required />
@@ -129,7 +129,7 @@
 		<!-- Example 5: Disabled -->
 		<ComponentCard
 			description="Disabled locks the swatch, input and picker"
-			code={`<ColorInput label="Locked" value="#ef4444" disabled />`}
+			code="<ColorInput label=&quot;Locked&quot; value=&quot;#ef4444&quot; disabled />"
 		>
 			<div class="w-full max-w-md">
 				<ColorInput label="Locked" value="#ef4444" disabled />

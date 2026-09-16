@@ -8,17 +8,19 @@
 	import { usersThreeIcon } from 'svelai/icons/usersThree';
 </script>
 
-<section class="mx-auto flex max-w-3xl flex-col items-center gap-xl p-xl text-center">
-	<div class="flex size-20 items-center justify-center rounded-2xl bg-primary-muted text-primary">
+<section class="gap-xl p-xl mx-auto flex max-w-3xl flex-col items-center text-center">
+	<div
+		class="bg-primary-muted text-primary-muted-readable flex size-20 items-center justify-center rounded-2xl"
+	>
 		{@render usersThreeIcon({ size: 38 })}
 	</div>
 	<Chip variant="outline">Better together</Chip><Heading as="h2" size="h1" weight="bold"
 		>A place for people who love making things.</Heading
 	>
-	<p class="max-w-xl text-lg text-neutral/70">
+	<p class="text-neutral/70 max-w-xl text-lg">
 		Bring a question, share a small win, or find a new way to solve an old problem.
 	</p>
-	<div class="flex flex-wrap justify-center gap-md">
+	<div class="gap-md flex flex-wrap justify-center">
 		<Button href="/components" variant="outline" prefix={puzzlePieceIcon}>Explore components</Button
 		><Button href="/docs" variant="outline" prefix={bookOpenIcon}>Read the guides</Button>
 	</div>
@@ -31,5 +33,5 @@
 			{ name: 'Nora Ellis' }
 		]}
 	/>
-	<p class="text-sm text-neutral/60">Different ideas. A shared love of the craft.</p>
+	<p class="text-neutral/70 text-sm">Different ideas. A shared love of the craft.</p>
 </section>

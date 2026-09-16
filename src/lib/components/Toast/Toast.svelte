@@ -9,7 +9,7 @@
 	import { xIcon } from '$lib/components/Icons/x.js';
 	import { checkCircleIconFill } from '$lib/components/Icons/checkCircle.js';
 	import { fso } from '$lib/transitions/transition.js';
-	import { useToastTheme, type ToastThemeProps } from './toast.theme.js';
+	import { mergeToastTheme, useToastTheme, type ToastThemeProps } from './toast.theme.js';
 	import type { WithAttachments } from '$lib/types/props.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { useDrag } from '$lib/utils/useDrag.svelte.js';
@@ -25,7 +25,7 @@
 		updateArea: () => void;
 		/** Toast state owned by the parent Toaster. */
 		toast: Toast;
-		/** Per-instance component theme overrides. */
+		/** The Toaster's component theme overrides. */
 		theme?: ToastThemeProps;
 	}> = $props();
 
@@ -34,7 +34,7 @@
 	// Beyond `visibleToasts`, a toast is faded out — it must also stop being
 	// interactive (no pointer events, not focusable) or it invisibly intercepts
 	// clicks and tab stops while aria-hidden.
-	const hidden = $derived(reversedIndex > toast.toaster.visibleToasts - 1);
+	const hidden = $derived(reversedIndex > (toast.toaster?.visibleToasts ?? 0) - 1);
 
 	// `prefix: false` explicitly disables the icon; otherwise a custom icon/prefix
 	// wins, then a semantic default per color.
@@ -53,7 +53,8 @@
 
 	const spinnerColor = $derived(toast.opts.color);
 
-	const classes = $derived(useToastTheme(theme));
+	// The per-toast `theme` option wins over the Toaster's, slot by slot.
+	const classes = $derived(useToastTheme(mergeToastTheme(theme, toast.opts.theme)));
 	const t = $derived(useI18n());
 
 	// Remaining duration as a percentage, driven by the (reactive, hover-pausable)
@@ -67,11 +68,12 @@
 	const in_out = fso();
 
 	const onPointerEnter = () => {
+		const toaster = toast.toaster;
 		const position = toast.opts.position;
-		if (toast.toaster.hovering === position) return;
-		toast.toaster.hovering = position;
+		if (!toaster || toaster.hovering === position) return;
+		toaster.hovering = position;
 		updateArea();
-		toast.toaster.toggleTimers(position, 'pause');
+		toaster.toggleTimers(position, 'pause');
 	};
 
 	// --- Swipe / drag to dismiss ------------------------------------------------
@@ -153,7 +155,7 @@
 	onoutroend={() => {
 		// The toaster dialog can only close once the LAST toast has finished its
 		// exit animation — checking on intro (as before) never fires with 0 toasts.
-		toast.toaster.maybeCloseToaster();
+		toast.toaster?.maybeCloseToaster();
 		updateArea();
 	}}
 	out:in_out={toast.animations.out}
@@ -162,7 +164,7 @@
 	aria-atomic="true"
 	role={toast.opts.important ? 'alert' : 'status'}
 	tabIndex={hidden ? -1 : 0}
-	aria-hidden={hidden}
+	inert={hidden}
 	style:opacity={hidden ? 0 : dragOpacity}
 	style:pointer-events={hidden ? 'none' : undefined}
 	style:touch-action={swipeEnabled ? 'none' : undefined}

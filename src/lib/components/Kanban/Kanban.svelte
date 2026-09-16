@@ -1,10 +1,13 @@
 <script lang="ts" generics="C extends KanbanCard">
 	import { useDndList } from '$lib/utils/useDndList.svelte.js';
+	import { useOverflowObserver } from '$lib/utils/useOverflowObserver.svelte.js';
+	import { prefersReducedMotion } from '$lib/utils/motion.svelte.js';
 	import { useKanbanTheme } from './kanban.theme.js';
 	import KanbanColumn from './KanbanColumn.svelte';
 	import type { KanbanCard, KanbanColumnData, KanbanProps } from './kanban.props.js';
 	import { flip } from 'svelte/animate';
 	import { cubicOut } from 'svelte/easing';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		columns = $bindable([]),
@@ -35,13 +38,12 @@
 	// Preview mode renders prospective arrays and uses FLIP to make room.
 	// Indicator mode keeps the real arrays in place and delegates insertion-line
 	// feedback to useDndList. Neither mode mutates bound state before drop.
-	const reducedMotion =
-		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-	const enabled = $derived(animated && !reducedMotion);
+	const enabled = $derived(animated && !prefersReducedMotion());
 	const flipParams = $derived({ duration: enabled ? 180 : 0, easing: cubicOut });
 
 	const uid = $props.id();
 	const classes = $derived(useKanbanTheme(theme));
+	const t = $derived(useI18n());
 
 	const updateCards = (columnId: string, cards: C[]) => {
 		columns = columns.map((column) => (column.id === columnId ? { ...column, cards } : column));
@@ -119,13 +121,25 @@
 			? columnsDnd.dragging
 			: (columnsDnd.over?.source.itemId ?? columnsDnd.dragging ?? null)
 	);
+
+	// The board scrolls horizontally once the columns outgrow it. A scroll container is only
+	// reachable by keyboard when it is focusable (WCAG SCR34), so the root becomes a named
+	// region with a tab stop exactly while it overflows — never a dead tab stop otherwise.
+	// The MutationObserver inside the hook is what re-measures when columns or cards change.
+	const overflow = useOverflowObserver({ axis: 'x' });
+	const overflows = $derived(overflow.overflowing);
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
 	bind:this={ref}
 	class={classes.root({ className })}
 	data-kanban={uid}
 	data-density={density}
+	role={overflows ? 'region' : undefined}
+	aria-label={overflows ? t.kanbanBoard : undefined}
+	tabindex={overflows ? 0 : undefined}
+	{@attach overflow.attachment}
 	{@attach columnsDnd.list}
 	{...attachments}
 >

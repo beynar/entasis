@@ -19,34 +19,35 @@
 	const sectionId = $props.id();
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<div class="grid gap-xl md:grid-cols-[12rem_1fr]">
-		<aside class="flex flex-col gap-xl md:sticky md:top-xl md:self-start">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<div class="gap-xl grid md:grid-cols-[12rem_1fr]">
+		<aside class="gap-xl md:top-xl flex flex-col md:sticky md:self-start">
 			<Chip variant="soft" class="w-fit">Field guide</Chip>
-			<nav aria-label="Guide outline" class="flex flex-col gap-lg">
+			<nav aria-label="Guide outline" class="gap-lg flex flex-col">
 				{#each sections as section, i (section.title)}<a
 						href={`#${sectionId}-${i}`}
-						class="text-sm text-neutral/60 hover:text-primary">0{i + 1} / {section.title}</a
+						class="text-neutral/70 hover:text-primary-readable text-sm"
+						>0{i + 1} / {section.title}</a
 					>{/each}
 			</nav>
 		</aside>
-		<article class="flex flex-col gap-xl max-w-3xl">
-			<header class="flex flex-col gap-lg">
-				<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+		<article class="gap-xl flex max-w-3xl flex-col">
+			<header class="gap-lg flex flex-col">
+				<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 					A practical perspective
 				</p>
 				<Heading size="h2" weight="bold">Design for the everyday.</Heading>
-				<p class="max-w-2xl text-neutral/65">
+				<p class="text-neutral/65 max-w-2xl">
 					A guide to making thoughtful decisions about the things around us.
 				</p>
 			</header>
 			<Separator />{#each sections as section, i (section.title)}<section
 					id={`${sectionId}-${i}`}
-					class="flex flex-col gap-xl"
+					class="gap-xl flex flex-col"
 				>
 					<Heading size="h3">{section.title}</Heading>
-					<p class="leading-relaxed text-neutral/70">{section.body}</p>
-					{#if i === 1}<blockquote class="border-l-2 border-primary pl-xl text-xl">
+					<p class="text-neutral/70 leading-relaxed">{section.body}</p>
+					{#if i === 1}<blockquote class="border-primary pl-xl border-l-2 text-xl">
 							The best design makes room for a life, rather than prescribing one.
 						</blockquote>{/if}
 				</section>{/each}

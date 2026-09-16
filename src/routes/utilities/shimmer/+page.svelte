@@ -20,7 +20,7 @@
 		off: 'shimmer-none'
 	} as const;
 
-	const usageCode = `<p class="shimmer text-neutral/60">
+	const usageCode = `<p class="shimmer text-neutral/70">
 	Generating response...
 </p>`;
 
@@ -64,7 +64,7 @@
 <article class="text-neutral mx-auto grid max-w-3xl gap-4 pb-20">
 	<header class="grid gap-2">
 		<h1 class="text-3xl font-semibold">Shimmer</h1>
-		<p class="text-neutral/60 text-balance">
+		<p class="text-neutral/70 text-balance">
 			Tailwind utilities for adding a shadcn-style shimmer effect to text.
 		</p>
 	</header>
@@ -75,14 +75,14 @@
 		code={usageCode}
 		class="!min-h-[220px]"
 	>
-		<p class="shimmer text-neutral/60 text-sm {effectClasses[controls.value.effect]}">
+		<p class="shimmer text-neutral/70 text-sm {effectClasses[controls.value.effect]}">
 			Generating response...
 		</p>
 	</ComponentCard>
 
 	<Separator class="my-2" children="Usage" />
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		Use {@render ic('shimmer')} on the text element. The highlight is based on
 		{@render ic('currentColor')}, so it follows semantic text classes.
 	</p>
@@ -95,8 +95,8 @@
 					? 'bg-surface'
 					: 'bg-surface-canvas'}"
 			>
-				<code class="text-primary text-sm font-medium">{name}</code>
-				<p class="text-neutral/60 text-sm">{description}</p>
+				<code class="text-primary-readable text-sm font-medium">{name}</code>
+				<p class="text-neutral/70 text-sm">{description}</p>
 			</div>
 		{/each}
 	</div>
@@ -109,8 +109,8 @@
 		class="!min-h-[240px]"
 	>
 		<div class="grid gap-3 text-sm">
-			<p class="shimmer shimmer-color-blue-500/60 text-neutral/60">Generating response...</p>
-			<p class="shimmer shimmer-color-[#378ADD]/25 text-neutral/60">Generating response...</p>
+			<p class="shimmer shimmer-color-blue-500/60 text-neutral/70">Generating response...</p>
+			<p class="shimmer shimmer-color-[#378ADD]/25 text-neutral/70">Generating response...</p>
 		</div>
 	</ComponentCard>
 
@@ -119,7 +119,7 @@
 		code={timingCode}
 		class="!min-h-[240px]"
 	>
-		<div class="grid gap-3 text-center text-sm text-neutral/60 sm:grid-cols-2">
+		<div class="text-neutral/70 grid gap-3 text-center text-sm sm:grid-cols-2">
 			<p class="shimmer shimmer-duration-1000">shimmer-duration-1000</p>
 			<p class="shimmer shimmer-spread-24 shimmer-angle-45">spread 24 / angle 45</p>
 			<p class="shimmer shimmer-spread-[15%]">spread 15%</p>

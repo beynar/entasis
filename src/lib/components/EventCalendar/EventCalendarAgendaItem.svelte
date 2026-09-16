@@ -131,7 +131,7 @@
 				selected: false,
 				disabled,
 				class:
-					'min-h-11 flex-1 rounded-none border-0 bg-transparent pe-4 ps-6 py-0 [--state-hover-opacity:0.06] focus-visible:ring-inset'
+					'min-h-11 flex-1 rounded-none border-0 bg-transparent py-0 ps-6 pe-4 [--state-hover-opacity:0.06] focus-visible:ring-inset'
 			})}
 			onclick={(event) => onActivate(occurrence, event)}
 			ondblclick={(event) => onDoubleClick?.({ occurrence, event })}
@@ -150,7 +150,7 @@
 					aria-label={messages.eventCalendarDetails(occurrence.item.title)}
 					aria-disabled={disabled}
 					tabindex={disabled ? -1 : 0}
-					class="state-layer grid size-9 cursor-pointer list-none place-items-center rounded outline-none marker:content-none text-neutral/55 focus-visible:ring-2 focus-visible:ring-color/60 [&::-webkit-details-marker]:hidden"
+					class="state-layer text-neutral/55 focus-visible:ring-focus/50 grid size-9 cursor-pointer list-none place-items-center rounded outline-none marker:content-none focus-visible:ring-2 [&::-webkit-details-marker]:hidden"
 					onclick={preventDisabledDisclosure}
 					onkeydown={preventDisabledDisclosure}
 				>
@@ -163,7 +163,7 @@
 						color: semanticColor,
 						view: 'agenda',
 						disabled,
-						class: 'mt-1 border-t border-neutral-muted px-2 py-2'
+						class: 'border-neutral-muted mt-1 border-t px-2 py-2'
 					})}
 				>
 					<Slot
@@ -191,7 +191,7 @@
 {/snippet}
 
 {#snippet titleContent()}
-	<span class="min-w-0 truncate text-sm font-normal text-neutral/90">
+	<span class="text-neutral/90 min-w-0 truncate text-sm font-normal">
 		{occurrence.item.title}
 	</span>
 {/snippet}
@@ -199,7 +199,7 @@
 {#snippet timeContent()}
 	<time
 		datetime={entry.segment.start.toISOString()}
-		class="truncate text-xs text-neutral/60 tabular-nums"
+		class="text-neutral/70 truncate text-xs tabular-nums"
 	>
 		{timeLabel}
 	</time>

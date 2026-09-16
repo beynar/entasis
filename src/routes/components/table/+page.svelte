@@ -5,14 +5,14 @@
 	import { Table } from '$lib/components/Table/index.js';
 	import { Button } from '$lib/components/Button/index.js';
 	import { TextInput } from '$lib/components/Form/TextInput/index.js';
-	import type { TableCell, TableRow } from '$lib/components/Table/index.js';
+	import type { TableRow } from '$lib/components/Table/index.js';
 	import SegmentedControl from '$lib/components/SegmentedControl/SegmentedControl.svelte';
 	import type { Density } from '$lib/types/theme.js';
 
 	const densitySegments = [
-		{ value: 'small', label: 'Small' },
+		{ value: 'compact', label: 'Compact' },
 		{ value: 'normal', label: 'Normal' },
-		{ value: 'large', label: 'Large' }
+		{ value: 'comfortable', label: 'Comfortable' }
 	] as const satisfies ReadonlyArray<{ value: Density; label: string }>;
 	let tableDensity = $state<Density>('normal');
 	const controls = createComponentControls([
@@ -21,7 +21,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: ['small', 'normal', 'large']
+			options: ['compact', 'normal', 'comfortable']
 		}
 	]);
 
@@ -187,7 +187,7 @@
 
 		<ComponentCard
 			title="Density"
-			description="density scales cell paddings and row heights — small for dense data grids, large for roomy detail surfaces."
+			description="density scales cell paddings and row heights — compact for dense data grids, comfortable for roomy detail surfaces."
 			code={`<SegmentedControl items={densities} bind:value={density} />
 <Table {density} header={basicHeader} items={basicRows} />`}
 		>
@@ -196,7 +196,7 @@
 					items={densitySegments}
 					bind:value={tableDensity}
 					size="small"
-					ariaLabel="Table density"
+					label="Table density"
 				/>
 				<Table density={tableDensity} header={basicHeader} items={basicRows} />
 			</div>

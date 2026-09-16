@@ -87,9 +87,15 @@
 	};
 
 	// Rotate the globe so a lat/lng faces the viewer. Pins until the next drag.
-	scrollTo = (latitude: number, longitude: number) => {
+	const scrollToCoordinate = (latitude: number, longitude: number) => {
 		pinned = [Math.PI - ((longitude * Math.PI) / 180 - Math.PI / 2), (latitude * Math.PI) / 180];
 	};
+	// Publish the imperative handle on the write-only bindable prop; the identity guard
+	// keeps it from republishing an identical function to the parent binding.
+	const publishScrollTo = () => {
+		if (scrollTo !== scrollToCoordinate) scrollTo = scrollToCoordinate;
+	};
+	publishScrollTo();
 
 	const globe = (canvas: HTMLCanvasElement) => {
 		return untrack(() => {

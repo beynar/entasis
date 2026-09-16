@@ -10,19 +10,21 @@
 	let previewed = $state(false);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="grid items-center gap-xl sm:grid-cols-2">
+	<div class="gap-xl grid items-center sm:grid-cols-2">
 		{@render productArt('bag', 'Olive')}
-		<div class="flex flex-col gap-xl">
-			<header class="flex flex-col gap-lg">
-				<p class="text-xs font-semibold uppercase tracking-widest text-primary">The Field circle</p>
+		<div class="gap-xl flex flex-col">
+			<header class="gap-lg flex flex-col">
+				<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+					The Field circle
+				</p>
 				<Heading size="h2" weight="bold">A little closer to the good things.</Heading>
-				<p class="max-w-2xl text-neutral/65">
+				<p class="text-neutral/65 max-w-2xl">
 					Early looks, considered offers, and a few extra reasons to keep in touch.
 				</p>
 			</header>
@@ -34,17 +36,17 @@
 		size="large"
 		title="Welcome to the Field circle"
 		description="A membership offer preview."
-		><div class="grid gap-xl sm:grid-cols-2">
-			<div class="flex flex-col gap-xl p-xl rounded-lg bg-primary-muted">
+		><div class="gap-xl grid sm:grid-cols-2">
+			<div class="gap-xl p-xl bg-primary-muted flex flex-col rounded-lg">
 				<Chip class="w-fit" variant="soft">The Field circle</Chip><Heading size="h3"
 					>Good things,<br />a little earlier.</Heading
 				>
 				<p>Early access to collections, member-only edits, and complimentary gift wrapping.</p>
-				<p class="text-sm text-neutral/60">
+				<p class="text-neutral/70 text-sm">
 					Free to join. This local preview does not create an account.
 				</p>
 			</div>
-			<div class="flex flex-col gap-xl justify-center">
+			<div class="gap-xl flex flex-col justify-center">
 				<Heading size="h4">What interests you?</Heading
 				>{#each ['New collections', 'Design stories', 'Member offers'] as interest (interest)}<Checkbox
 						label={interest}
@@ -55,7 +57,7 @@
 								: interests.filter((entry) => entry !== interest))}
 					/>{/each}<Button onclick={() => (previewed = true)} disabled={!interests.length}
 					>Preview my preferences</Button
-				>{#if previewed}<p class="text-sm text-success" role="status">
+				>{#if previewed}<p class="text-success text-sm" role="status">
 						Your selection: {interests.join(', ')}.
 					</p>{/if}
 			</div>

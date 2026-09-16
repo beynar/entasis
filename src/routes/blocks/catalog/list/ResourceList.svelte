@@ -45,11 +45,11 @@
 	let selected = $state<(typeof resources)[number] | null>(null);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<header class="flex flex-wrap items-end justify-between gap-lg">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<header class="gap-lg flex flex-wrap items-end justify-between">
 		<div>
 			<h2 class="text-3xl font-semibold">The things worth keeping.</h2>
-			<p class="mt-sm text-sm text-neutral/60">A shared shelf of useful team resources.</p>
+			<p class="mt-sm text-neutral/70 text-sm">A shared shelf of useful team resources.</p>
 		</div>
 		<Switch label="Saved only" bind:value={savedOnly} />
 	</header>
@@ -58,13 +58,13 @@
 			{#each resources.filter((resource) => (!savedOnly || resource.saved) && resource.title
 						.toLowerCase()
 						.includes((query ?? '').toLowerCase())) as resource (resource)}<div
-					class="flex flex-col items-start justify-between gap-md border-b sm:flex-row sm:items-center border-neutral-muted pb-lg"
+					class="gap-md border-neutral-muted pb-lg flex flex-col items-start justify-between border-b sm:flex-row sm:items-center"
 				>
-					<div class="flex items-center gap-md">
-						<span class="rounded-lg bg-primary-muted p-md text-2xl">{@render fileTextIcon()}</span>
+					<div class="gap-md flex items-center">
+						<span class="bg-primary-muted p-md rounded-lg text-2xl">{@render fileTextIcon()}</span>
 						<div>
 							<h3 class="font-semibold">{resource.title}</h3>
-							<p class="text-xs text-neutral/60">{resource.type} · Updated {resource.updated}</p>
+							<p class="text-neutral/70 text-xs">{resource.type} · Updated {resource.updated}</p>
 						</div>
 					</div>
 					<Stack orientation="horizontal" gap="sm">
@@ -74,7 +74,7 @@
 							>Read</Button
 						>
 					</Stack>
-				</div>{:else}<p class="p-lg text-sm text-neutral/60">
+				</div>{:else}<p class="p-lg text-neutral/70 text-sm">
 					No resources match this view.
 				</p>{/each}
 		</Stack></Card
@@ -84,6 +84,6 @@
 			if (!open) selected = null;
 		}}
 		title={selected?.title ?? 'Resource'}
-		>{#if selected}<p class="leading-relaxed text-neutral/70">{selected.content}</p>{/if}</Dialog
+		>{#if selected}<p class="text-neutral/70 leading-relaxed">{selected.content}</p>{/if}</Dialog
 	>
 </Stack>

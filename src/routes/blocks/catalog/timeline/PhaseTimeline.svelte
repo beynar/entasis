@@ -26,19 +26,21 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<div class="grid gap-xl md:grid-cols-[1fr_2fr]">
-		<div class="md:sticky md:top-xl md:self-start">
-			<header class="flex flex-col gap-lg">
-				<p class="text-xs font-semibold uppercase tracking-widest text-primary">How we get there</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<div class="gap-xl grid md:grid-cols-[1fr_2fr]">
+		<div class="md:top-xl md:sticky md:self-start">
+			<header class="gap-lg flex flex-col">
+				<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+					How we get there
+				</p>
 				<Heading size="h2" weight="bold">One useful step at a time.</Heading>
-				<p class="max-w-2xl text-neutral/65">
+				<p class="text-neutral/65 max-w-2xl">
 					A collaborative process that connects a good question to a working product.
 				</p>
 			</header>
 		</div>
-		<Timeline items={phases} variant="card" color="primary" density="large"
-			>{#snippet item({ item, index })}<div class="flex flex-col gap-lg">
+		<Timeline items={phases} variant="card" color="primary" density="comfortable"
+			>{#snippet item({ item, index })}<div class="gap-lg flex flex-col">
 					<Chip class="w-fit" size="small" variant="soft">Phase 0{index + 1} / {item.date}</Chip
 					><Heading size="h4">{item.title}</Heading>
 					<p class="text-neutral/65">{item.description}</p>

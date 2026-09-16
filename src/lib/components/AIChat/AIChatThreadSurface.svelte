@@ -7,7 +7,7 @@
 		AIThreadRenderPayload
 	} from '../AIThread/aiThread.props.js';
 	import Slot from '../Slot/Slot.svelte';
-	import type { AIChatAppPayload, AIChatProps, AIChatToolPayload } from './aiChat.props.js';
+	import type { AIChatProps, AIChatToolPayload } from './aiChat.props.js';
 	import { useAIChatTheme } from './aiChat.theme.js';
 
 	type Props<TMessage extends AIThreadItem> = Pick<
@@ -17,10 +17,8 @@
 		| 'message'
 		| 'tool'
 		| 'marker'
-		| 'app'
 		| 'suggestionsRegion'
 		| 'toc'
-		| 'mcpHost'
 		| 'showToc'
 		| 'tocSide'
 		| 'density'
@@ -34,7 +32,7 @@
 		| 'onMessageCopy'
 		| 'onMessageEdit'
 		| 'onMessageRetry'
-		| 'onSuggestionSelect'
+		| 'onSelect'
 		| 'theme'
 	> & {
 		conversation: AIConversationState<TMessage>;
@@ -48,10 +46,8 @@
 		message,
 		tool,
 		marker,
-		app,
 		suggestionsRegion,
 		toc,
-		mcpHost,
 		showToc = false,
 		tocSide = 'right',
 		density = 'normal',
@@ -65,7 +61,7 @@
 		onMessageCopy,
 		onMessageEdit,
 		onMessageRetry,
-		onSuggestionSelect,
+		onSelect,
 		onComposerFocus,
 		theme
 	}: Props<TMessage> = $props();
@@ -76,8 +72,8 @@
 	const classes = $derived(useAIChatTheme(theme));
 
 	function selectSuggestion(suggestion: string): void {
-		if (onSuggestionSelect) {
-			onSuggestionSelect(suggestion);
+		if (onSelect) {
+			onSelect(suggestion);
 			return;
 		}
 		conversation.setInput(suggestion);
@@ -107,17 +103,12 @@
 	<Slot render={marker} {payload} />
 {/snippet}
 
-{#snippet renderApp(payload: AIChatAppPayload<TMessage>)}
-	<Slot render={app} {payload} />
-{/snippet}
-
 {#if thread}
 	<div data-slot="ai-chat-thread" class={classes.thread()}>
 		<Slot render={thread} payload={conversation} />
 	</div>
 {:else}
 	<AIThread
-		{mcpHost}
 		{showToc}
 		{tocSide}
 		{density}
@@ -133,12 +124,11 @@
 		{onMessageRetry}
 		renderAskUserQuestion={false}
 		suggestions={suggestionsRegion ? [] : conversation.suggestions}
-		onSuggestionSelect={selectSuggestion}
+		onSelect={selectSuggestion}
 		empty={hasCustomEmpty ? renderEmpty : undefined}
 		message={message ? renderMessage : undefined}
 		tool={tool ? renderTool : undefined}
 		marker={marker ? renderMarker : undefined}
-		app={app ? renderApp : undefined}
 		{toc}
 		class={classes.thread()}
 	/>

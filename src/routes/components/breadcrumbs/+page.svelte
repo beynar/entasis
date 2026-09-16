@@ -3,7 +3,6 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import { Breadcrumbs } from '$lib/components/Breadcrumbs/index.js';
-	import type { BreadcrumbItem } from '$lib/components/Breadcrumbs/breadcrumbs.props.js';
 	import type { MenuItem } from '$lib/components/Menu/menu.props.js';
 
 	const controls = createComponentControls([
@@ -16,9 +15,9 @@
 	subtitle="Shows the current page's location within a navigational hierarchy."
 	component="Breadcrumbs"
 	features={[
-		'nav aria-label=Breadcrumbs',
-		'aria-current=page on active crumb',
-		'Horizontal keyboard navigation',
+		{ label: 'nav aria-label=Breadcrumbs', test: 'a11y:breadcrumbs.nav-label' },
+		{ label: 'aria-current=page on active crumb', test: 'a11y:breadcrumbs.aria-current' },
+		{ label: 'Horizontal keyboard navigation', test: 'a11y:breadcrumbs.arrow-keys' },
 		'maxItems ellipsis with dropdown menu',
 		'Custom separator and item snippets'
 	]}
@@ -114,7 +113,7 @@
 				]}
 			>
 				{#snippet separator()}
-					<span class="text-neutral/60">›</span>
+					<span class="text-neutral/70">›</span>
 				{/snippet}
 			</Breadcrumbs>
 		</ComponentCard>
@@ -192,7 +191,9 @@
 			/>
 		</ComponentCard>
 
-		<ComponentCard description="Edge case: maxItems >= items.length (shows all items, no ellipsis).">
+		<ComponentCard
+			description="Edge case: maxItems >= items.length (shows all items, no ellipsis)."
+		>
 			<Breadcrumbs
 				maxItems={5}
 				items={[

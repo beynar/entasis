@@ -2,7 +2,12 @@ import type { Colors } from '$lib/types/theme.js';
 
 export type ChartValue = number | string | Date;
 export type ChartKey = string | number;
-export type ChartColor = Colors | (string & {});
+
+/** Opaque elevation grades, resolved to `var(--color-<name>)` like the semantic roles. */
+export type ChartSurfaceColor =
+	'surface' | 'surface-recessed' | 'surface-canvas' | 'surface-raised' | 'surface-floating';
+
+export type ChartColor = Colors | ChartSurfaceColor | (string & {});
 
 type ChartField<TRow, TValue> = {
 	[TKey in Extract<keyof TRow, string>]-?: TRow[TKey] extends TValue | null | undefined
@@ -24,7 +29,14 @@ export type ChartRequiredChannel<TRow, TValue> =
 export type ChartVisual<TRow, TValue> =
 	TValue | ((row: TRow, index: number, rows: readonly TRow[]) => TValue);
 
-export type ChartInitialDimensions = Readonly<{ width: number; height: number }>;
+/**
+ * Wide numeric columns melted into one series per column, the series key being the
+ * field name. Accepted wherever a stacked mark reads its value channel.
+ */
+export type ChartValueFields<TRow> = readonly [
+	ChartField<TRow, number>,
+	...ChartField<TRow, number>[]
+];
 
 export type ChartMargin = { top: number; right: number; bottom: number; left: number };
 

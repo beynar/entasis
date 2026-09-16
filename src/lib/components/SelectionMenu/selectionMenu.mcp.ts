@@ -11,31 +11,31 @@ SelectionMenu renders ToggleMenu controls anchored to a non-collapsed document s
 	import type { ToggleMenuItem } from 'svelai/toggle-menu';
 
 	let items = $state<ToggleMenuItem[]>([
-		{ type: 'toggle', ariaLabel: 'Bold', prefix: boldIcon },
-		{ type: 'toggle', ariaLabel: 'Comment', prefix: commentIcon }
+		{ type: 'toggle', label: 'Bold', prefix: boldIcon },
+		{ type: 'toggle', label: 'Comment', prefix: commentIcon }
 	]);
 </script>
 
 <div>
 	<article>Select text in this article.</article>
-	<SelectionMenu bind:value={items} ariaLabel="Selection tools" />
+	<SelectionMenu bind:items label="Selection tools" />
 </div>
 \`\`\`
 
 With no target prop, SelectionMenu watches its parent. Pass a selector or an HTMLElement when the selection container is elsewhere:
 
 \`\`\`svelte
-<SelectionMenu target="#editor" bind:value={items} ariaLabel="Editor tools" />
-<SelectionMenu target={editorElement} bind:value={items} ariaLabel="Editor tools" />
+<SelectionMenu target="#editor" bind:items label="Editor tools" />
+<SelectionMenu target={editorElement} bind:items label="Editor tools" />
 \`\`\`
 
 ## Props
 
 - **target**: HTMLElement | string | null - Parent by default; selectors resolve in the same Document or ShadowRoot. Null disables tracking.
-- **items**: ToggleMenuItem[] - Bindable toolbar configuration passed directly to ToggleMenu.
-- **ariaLabel**: string - Accessible name passed directly to ToggleMenu.
+- **items**: ToggleMenuItem[] (bindable) - Canonical toolbar item list passed directly to ToggleMenu. Pressed state lives on the items.
+- **label**: string - Accessible name passed directly to ToggleMenu.
 - **color / variant / disabled**: ToggleMenu defaults inherited by every item.
-- **value / defaultValue / onValueChange**: Canonical ToggleMenu value state.
+- **onItemsChange**: (items) => void - Called with the complete updated item list after any control changes.
 - **class / theme**: ToggleMenu root class and theme overrides.
 - **children**: Optional temporary replacement for the ToggleMenu body while retaining the same selection tracker. Toolbar props remain required.
 - **enabled**: boolean = true - Temporarily suppresses the menu without changing the target.
@@ -46,12 +46,13 @@ With no target prop, SelectionMenu watches its parent. Pass a selector or an HTM
 - **directedTransition**: boolean = true - Enters from the resolved placement.
 - **closeOnEscape**: boolean = true - Escape dismisses the current selection.
 - **closeOnClickOutside**: boolean = true - Outside clicks dismiss the current selection.
-- **onSelectionChange**: (selection | null) => void - Receives cloned valid ranges and clear events.
+- **onSelect**: (payload: SelectionMenuSelection | null) => void - The pick event: receives cloned valid ranges and clear
+  events. Callback-naming decision: the document owns the text selection, so SelectionMenu has no
+  controlled \`selection\` prop to change and cannot use the \`onSelectionChange\` state family.
 - **onAfterOpen / onAfterClose**: post-transition lifecycle callbacks receiving SelectionMenuPayload.
-- **popoverClass**: string - Additional classes for the floating Popover panel.
+- **popover**: Props forwarded to the floating Popover panel as one object - \`{ class, theme }\`.
 - **contentClass**: string - Additional classes for the advanced custom-content wrapper.
 - **selectionTheme**: SelectionMenuThemeProps - Popover panel and custom-content theme overrides.
-- **popoverTheme**: PopoverThemeProps - Underlying Popover theme overrides.
 
 ## Target Resolution
 

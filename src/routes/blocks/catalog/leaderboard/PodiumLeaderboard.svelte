@@ -14,24 +14,25 @@
 	];
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<header class="text-center">
 		<Chip color="warning">The weekly leaderboard</Chip>
 		<h2 class="mt-lg text-3xl font-semibold">A little friendly momentum.</h2>
-		<p class="mt-sm text-sm text-neutral/60">Celebrate the people moving the team forward.</p>
+		<p class="mt-sm text-neutral/70 text-sm">Celebrate the people moving the team forward.</p>
 	</header>
-	<div class="grid items-end gap-lg sm:grid-cols-3">
+	<div class="gap-lg grid items-end sm:grid-cols-3">
 		{#each [leaders[1], leaders[0], leaders[2]] as member (member)}{#if member}<Card
 					variant={member.rank === 1 ? 'soft' : 'outline'}
 					color={member.rank === 1 ? 'primary' : 'neutral'}
-					><div class="grid justify-items-center gap-md py-lg text-center">
-						<Chip color={member.rank === 1 ? 'warning' : 'neutral'}>#{member.rank}</Chip><Avatar
-							user={{ name: member.name }}
-							size="large"
-						/>
+					><div class="gap-md py-lg grid justify-items-center text-center">
+						<Chip variant="soft" color={member.rank === 1 ? 'warning' : 'neutral'}
+							>#{member.rank}</Chip
+						><Avatar name={member.name} size="large" />
 						<h3 class="font-semibold">{member.name}</h3>
-						<strong class={member.rank === 1 ? 'text-4xl' : 'text-3xl'}>{member.points}</strong>
-						<p class="text-xs text-neutral/60">contribution points</p>
+						<strong class={member.rank === 1 ? 'text-4xl' : 'text-3xl'}
+							>{member.points.toLocaleString('en-US')}</strong
+						>
+						<p class="text-neutral/70 text-xs">contribution points</p>
 					</div></Card
 				>{/if}{/each}
 	</div>
@@ -43,7 +44,7 @@
 					rank: '#' + member.rank,
 					name: member.name,
 					team: member.team,
-					points: String(member.points)
+					points: member.points.toLocaleString('en-US')
 				}
 			}))}
 		/></Card

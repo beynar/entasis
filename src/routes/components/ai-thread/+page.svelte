@@ -181,7 +181,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: ['small', 'normal', 'large']
+			options: ['compact', 'normal', 'comfortable']
 		},
 		{
 			name: 'messageSize',
@@ -292,8 +292,8 @@
 {#snippet customPin(payload: AIThreadTocPinPayload)}
 	<span
 		class={payload.active
-			? 'block size-2 rounded-full bg-success'
-			: 'block size-1.5 rounded-sm bg-warning'}
+			? 'bg-success block size-2 rounded-full'
+			: 'bg-warning block size-1.5 rounded-sm'}
 	></span>
 {/snippet}
 
@@ -301,10 +301,10 @@
 	<div class="grid max-w-64 gap-1 text-left">
 		<strong class="truncate text-sm">{entry.title}</strong>
 		{#if entry.excerpt}
-			<p class="line-clamp-4 text-xs text-neutral/65">{entry.excerpt}</p>
+			<p class="text-neutral/65 line-clamp-4 text-xs">{entry.excerpt}</p>
 		{/if}
 		{#if entry.fileCount > 0}
-			<p class="text-xs text-neutral/50">
+			<p class="text-neutral/65 text-xs">
 				{entry.fileCount} attached {entry.fileCount === 1 ? 'file' : 'files'}
 			</p>
 		{/if}
@@ -334,9 +334,9 @@
 		'Bubble or minimal default message presentation',
 		'Pinned append and same-row growth following',
 		'Absolute-start and middle-position prepend preservation',
-		'Context markers, AI SDK tool parts, grouped tools, and MCP Apps',
-		'Screen-reader live announcements and standalone question flows',
-		'Focusable transcript and keyboard-accessible TOC previews'
+		'Context markers, AI SDK tool parts, and grouped tools',
+		'Standalone question flows',
+		'Scrollable transcript with TOC previews'
 	]}
 >
 	<ComponentCard
@@ -392,7 +392,7 @@ ${'</' + 'script>'}
 						onclick={resetQuestion}>Reset question</Button
 					>
 					{#if questionResolution}
-						<span class="text-xs text-neutral/60">{questionResolution}</span>
+						<span class="text-neutral/70 text-xs">{questionResolution}</span>
 					{/if}
 				{/if}
 			</div>
@@ -406,11 +406,11 @@ ${'</' + 'script>'}
 					{messageVariant}
 					showToc={mode === 'history' || mode === 'parts'}
 					liveText={mode === 'live' ? 'Assistant is drafting the next section.' : undefined}
-					isStreaming={mode === 'live'}
+					streaming={mode === 'live'}
 					suggestions={mode === 'empty' ? directSuggestions : undefined}
-					onSuggestionSelect={handleSuggestionSelect}
+					onSelect={handleSuggestionSelect}
 					onAskUserQuestionStateChange={handleQuestionStateChange}
-					class="rounded-lg border border-neutral-muted"
+					class="border-neutral-muted rounded-lg border"
 				/>
 			{/key}
 		</div>
@@ -445,7 +445,7 @@ ${'</' + 'script>'}
 					showToc
 					{tocSide}
 					toc={tocMode === 'custom' ? customToc : undefined}
-					class="h-full rounded-lg border border-neutral-muted"
+					class="border-neutral-muted h-full rounded-lg border"
 				/>
 			</div>
 		</ComponentCard>
@@ -459,7 +459,7 @@ ${'</' + 'script>'}
   <AIThread
     messages={[]}
     suggestions={directSuggestions}
-    onSuggestionSelect={handleSuggestionSelect}
+    onSelect={handleSuggestionSelect}
   />
 </AIConversation>`}
 		>
@@ -468,11 +468,11 @@ ${'</' + 'script>'}
 					<AIThread
 						messages={[]}
 						suggestions={suggestionSource === 'direct' ? directSuggestions : undefined}
-						onSuggestionSelect={handleSuggestionSelect}
-						class="rounded-lg border border-neutral-muted"
+						onSelect={handleSuggestionSelect}
+						class="border-neutral-muted rounded-lg border"
 					/>
 				</AIConversation>
-				<p class="truncate text-center text-xs text-neutral/60" aria-live="polite">
+				<p class="text-neutral/70 truncate text-center text-xs" aria-live="polite">
 					{selectedSuggestion ? `Selected: ${selectedSuggestion}` : ''}
 				</p>
 			</div>

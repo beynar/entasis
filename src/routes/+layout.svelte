@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
+	import { SvelteMap } from 'svelte/reactivity';
 	import { page } from '$app/state';
 	import {
 		AppShell,
@@ -29,12 +30,25 @@
 	import type { ThemeState } from '$lib/components/Theme/theme.state.svelte.js';
 	import { themeTransitions, type ThemeTransition } from '$lib/components/Theme/themeTransition.js';
 	import { tick } from 'svelte';
-	import { getSidebarGroups, headerLinks } from './appNavigation.js';
-	import { createRuntimeThemePlayground } from './runtimeThemePlayground.svelte.js';
+	import {
+		getSidebarGroups,
+		headerLinks,
+		resolveLink,
+		type AppNavigationLink
+	} from './appNavigation.js';
+	import {
+		PLAYGROUND_COOKIE,
+		createRuntimeThemePlayground
+	} from './runtimeThemePlayground.svelte.js';
+	import { runtimeColorPaletteVariables } from './playground/runtimeColorPalettes.js';
+	import PlaygroundPopover from './PlaygroundPopover.svelte';
 	import SidebarCommandPalette from './SidebarCommandPalette.svelte';
 
-	const { children: childrenSnippet } = $props();
+	const { children: childrenSnippet, data } = $props();
 	const runtimeThemePlayground = createRuntimeThemePlayground();
+	// Restore the footer levers synchronously from the cookie the server read, so the very
+	// first paint (SSR and hydration alike) already carries the chosen tokens — no flash.
+	if (data.playground) runtimeThemePlayground.restore(data.playground);
 
 	type SidebarFooterState = 'expanded' | 'icon' | 'hidden';
 
@@ -66,36 +80,51 @@
 			raisedWithBorder: true
 		}
 	} satisfies Record<TypeScalePreset, ThemeDesignTokens>;
-	const defaultDesignTokens = {
-		spacing: 'normal',
-		radius: 'normal',
-		raisedWithBorder: true
-	} satisfies ThemeDesignTokens;
 	const docsPageShellTheme = {
 		contentInner: {
 			padding: { large: 'p-5 md:p-5' }
 		}
 	} satisfies PageShellThemeProps;
-	const isPreviewRoute = $derived(page.route.id?.startsWith('/previews/') ?? false);
-	const activeDesignTokens = $derived(
-		page.route.id === '/fluid-scale'
-			? resolveRuntimeTokenPreset(page.url.searchParams.get('preset'))
-			: defaultDesignTokens
+	// Previews and full-page templates render bare: they own their own chrome and token scope.
+	// Only the template detail routes bypass the shell — `/templates` itself is a docs page.
+	const isPreviewRoute = $derived(
+		page.route.id?.startsWith('/previews/') || page.route.id?.startsWith('/templates/') || false
 	);
+	const activeDesignTokens = $derived(
+		resolveRuntimeTokenPreset(page.url.searchParams.get('preset'))
+	);
+	// The footer playground popover drives the same state on every docs page: `designTokens`
+	// writes the CSS variables, `motion` feeds `ThemeState.motion` (what Svelte transitions
+	// resolve against). Only the fluid-scale demo pins its own preset from the URL.
 	const designTokens = $derived(
-		page.route.id === '/playground'
-			? runtimeThemePlayground.designTokens
-			: ({
+		page.route.id === '/fluid-scale'
+			? ({
 					light: activeDesignTokens,
 					dark: activeDesignTokens
 				} satisfies ThemeDesignTokenMap<readonly ['light', 'dark']>)
+			: runtimeThemePlayground.designTokens
 	);
+	const motionTokens = $derived(runtimeThemePlayground.motion);
+	// Mirror every lever change into the cookie `+layout.server.ts` reads on the next request.
+	$effect(() => {
+		const snapshot = encodeURIComponent(JSON.stringify(runtimeThemePlayground.snapshot));
+		document.cookie = `${PLAYGROUND_COOKIE}=${snapshot}; path=/; max-age=31536000; SameSite=Lax`;
+	});
+	// Palette overrides are emitted as a head <style> on `html` so they are part of the
+	// server-rendered page and reach portaled overlays (dialogs, popovers, toasts). The
+	// plugin's own colour rules live inside Tailwind's cascade layers, so this unlayered
+	// rule wins without needing higher specificity.
+	const paletteCss = $derived.by(() => {
+		const variables = Object.entries(runtimeColorPaletteVariables(runtimeThemePlayground.palette));
+		if (variables.length === 0) return '';
+		return `html{${variables.map(([property, value]) => `${property}:${value}`).join(';')}}`;
+	});
 	let sidebarDisplayState = $state<SidebarDisplayState>('expanded');
 	let sidebarVariant = $state<SidebarVariant>('inset');
 	let sidebarCollapsedDisplayState = $state<Exclude<SidebarDisplayState, 'expanded'>>('hidden');
 	let sidebarWidth = $state('16rem');
 	let appShellRef = $state<HTMLElement | null>(null);
-	const pageScrollPositions = new Map<string, number>();
+	const pageScrollPositions = new SvelteMap<string, number>();
 
 	const sidebarGroups = $derived(getSidebarGroups(page.url.pathname));
 	const sidebarState = $derived<SidebarFooterState>(
@@ -196,15 +225,15 @@
 		rail: true,
 		edgeReveal: true,
 		width: sidebarWidth,
-		density: 'small',
+		density: 'compact',
 		size: 'small',
 		widthMobile: '18rem',
 		resizable: {
 			minWidth: '12rem',
 			maxWidth: '24rem',
 			storageKey: 'svelai-docs-sidebar-width',
-			onWidthChange: (nextWidth) => {
-				sidebarWidth = nextWidth;
+			onWidthChange: ({ width }) => {
+				sidebarWidth = width;
 			}
 		},
 		items: sidebarGroups,
@@ -217,12 +246,13 @@
 	});
 </script>
 
-{#snippet headerLink({ href, text }: { href: string; text: string })}
-	{@const isActive = page.url.pathname === href || page.url.pathname.startsWith(`${href}/`)}
+{#snippet headerLink({ href, text }: AppNavigationLink)}
+	{@const path = resolveLink(href)}
+	{@const isActive = page.url.pathname === path || page.url.pathname.startsWith(`${path}/`)}
 	<a
-		{href}
-		class="state-layer rounded-md px-2 py-1 text-sm font-medium text-neutral transition-colors hover:text-neutral {isActive
-			? 'bg-primary/15 text-primary'
+		href={path}
+		class="state-layer text-neutral hover:text-neutral rounded-md px-2 py-1 text-sm font-medium transition-colors {isActive
+			? 'bg-primary-muted text-primary-muted-readable'
 			: ''}"
 	>
 		{text}
@@ -232,9 +262,9 @@
 {#snippet shellFooter()}
 	<div class="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
 		<div class="flex min-w-0 flex-wrap items-center gap-1.5">
-			<span class="mr-1 text-xs font-medium text-neutral/60">Variant</span>
+			<span class="text-neutral/70 mr-1 text-xs font-medium">Variant</span>
 			<div class="flex flex-wrap items-center gap-1" role="group" aria-label="Sidebar variant">
-				{#each sidebarVariants as variant}
+				{#each sidebarVariants as variant, index (index)}
 					<Button
 						variant={sidebarVariant === variant ? 'solid' : 'ghost'}
 						size="small"
@@ -247,9 +277,9 @@
 		</div>
 
 		<div class="flex min-w-0 flex-wrap items-center gap-1.5">
-			<span class="mr-1 text-xs font-medium text-neutral/60">State</span>
+			<span class="text-neutral/70 mr-1 text-xs font-medium">State</span>
 			<div class="flex flex-wrap items-center gap-1" role="group" aria-label="Sidebar state">
-				{#each sidebarStates as state}
+				{#each sidebarStates as state, index (index)}
 					<Button
 						variant={sidebarState === state ? 'solid' : 'ghost'}
 						size="small"
@@ -260,6 +290,10 @@
 				{/each}
 			</div>
 		</div>
+
+		<div class="ml-auto">
+			<PlaygroundPopover />
+		</div>
 	</div>
 {/snippet}
 
@@ -269,7 +303,14 @@
 		collapsed={api.collapsible === 'icon' && api.state === 'collapsed' && !api.isMobile}
 	/>
 {/snippet}
-<Theme transition={themeTransition} {designTokens}>
+<svelte:head>
+	{#if paletteCss}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- built from the fixed palette table, never from user input -->
+		{@html `<s${'tyle'}>${paletteCss}</s${'tyle'}>`}
+	{/if}
+</svelte:head>
+
+<Theme transition={themeTransition} {designTokens} motion={motionTokens}>
 	{#snippet children(theme: ThemeState)}
 		<Ask />
 		{#if isPreviewRoute}
@@ -288,7 +329,7 @@
 							onclick={() => sidebar.toggle()}
 						/>
 						<nav aria-label="Primary" class="flex min-w-0 flex-wrap items-center gap-1">
-							{#each headerLinks as link}
+							{#each headerLinks as link, index (index)}
 								{@render headerLink(link)}
 							{/each}
 						</nav>
@@ -298,7 +339,10 @@
 						size="small"
 						onclick={() => (theme.theme = theme.resolvedTheme === 'dark' ? 'light' : 'dark')}
 					>
-						{theme.resolvedTheme === 'dark' ? 'Light' : 'Dark'}
+						<!-- Both labels are server-rendered; the dark variant picks one before hydration so
+						     the button never flips text once the client resolves the theme. -->
+						<span class="dark:hidden">Dark</span>
+						<span class="hidden dark:inline">Light</span>
 					</Button>
 				</div>
 			{/snippet}
@@ -315,9 +359,7 @@
 				contentWidth="wide"
 				pageShellTheme={docsPageShellTheme}
 			>
-				{#snippet children()}
-					{@render childrenSnippet()}
-				{/snippet}
+				{@render childrenSnippet()}
 			</AppShell>
 		{/if}
 	{/snippet}

@@ -1,4 +1,5 @@
 import type { Slot } from '$lib/components/Slot/slot.js';
+import type { DisclosureIndicator } from '$lib/types/theme.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { HTMLAttributes } from 'svelte/elements';
 import type { AIToolThemeProps } from './aiTool.theme.js';
@@ -14,7 +15,7 @@ export type AIToolStatus =
 	| (string & {});
 
 export type AIToolVariant = 'card' | 'ghost' | 'outline' | 'soft';
-export type AIToolToggleIcon = 'none' | 'chevron' | 'math';
+export type AIToolToggleIcon = DisclosureIndicator;
 
 export type AIToolCall = {
 	id?: string | number | bigint;

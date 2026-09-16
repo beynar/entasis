@@ -40,20 +40,20 @@
 	);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 			The everyday collection
 		</p>
 		<Heading size="h2" weight="bold">Useful things. Quiet details.</Heading>
 	</header>
-	<div class="flex gap-lg items-end justify-between flex-wrap">
-		<p class="text-sm text-neutral/55">{products.length} considered objects</p>
+	<div class="gap-lg flex flex-wrap items-end justify-between">
+		<p class="text-neutral/65 text-sm">{products.length} considered objects</p>
 		<Select
 			label="Sort products"
 			items={[
@@ -65,9 +65,9 @@
 			class="w-56"
 		/>
 	</div>
-	<div class="grid gap-xl sm:grid-cols-2 lg:grid-cols-4">
+	<div class="gap-xl grid sm:grid-cols-2 lg:grid-cols-4">
 		{#each sortedProducts as product (product.id)}<Card variant="ghost"
-				><div class="flex flex-col gap-lg">
+				><div class="gap-lg flex flex-col">
 					{@render productArt(product.shape, product.color)}<Chip
 						size="small"
 						color="neutral"
@@ -75,7 +75,7 @@
 						class="w-fit">{product.type}</Chip
 					>
 					<h3 class="font-semibold">{product.name}</h3>
-					<div class="flex gap-md items-center justify-between">
+					<div class="gap-md flex items-center justify-between">
 						<span>{money(product.price)}</span><Button
 							size="small"
 							variant="outline"
@@ -85,7 +85,7 @@
 				</div></Card
 			>{/each}
 	</div>
-	<p class="text-sm text-success" aria-live="polite">
+	<p class="text-success text-sm" aria-live="polite">
 		{added ? `${added} added to the sample bag.` : ''}
 	</p>
 </section>

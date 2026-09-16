@@ -584,7 +584,7 @@
 	>
 		<div
 			bind:this={stickyHeader}
-			class="sticky top-[var(--event-calendar-sticky-offset)] z-20 bg-surface"
+			class="bg-surface sticky top-[var(--event-calendar-sticky-offset)] z-20"
 		>
 			<div
 				data-event-calendar-part="time-header"
@@ -727,7 +727,7 @@
 {/snippet}
 
 {#if scrollMode === 'contained'}
-	<ScrollArea bind:viewportRef={scrollViewport} class="h-full min-h-0" ariaLabel={profile.title}>
+	<ScrollArea bind:viewportRef={scrollViewport} class="h-full min-h-0" label={profile.title}>
 		{@render timeGridContent()}
 	</ScrollArea>
 {:else}
@@ -737,7 +737,7 @@
 {/if}
 
 {#snippet defaultAllDay()}
-	<span class="px-1 text-xs text-neutral/70">{messages.eventCalendarAllDay}</span>
+	<span class="text-neutral/70 px-1 text-xs">{messages.eventCalendarAllDay}</span>
 {/snippet}
 
 {#snippet defaultNowIndicator()}

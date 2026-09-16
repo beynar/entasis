@@ -1,15 +1,13 @@
-<script lang="ts">
+<script lang="ts" generics="T = unknown, S = unknown">
 	import type { MeterProps, MeterStep } from './meter.props.js';
 	import { useMeterTheme } from './meter.theme.js';
 	import Slot from '../Slot/Slot.svelte';
 	import { useSpringState } from '$lib/utils/spring.svelte.js';
 	import { untrack } from 'svelte';
 
-	type T = $$Generic<Record<string, any> | undefined>;
-	type S = $$Generic<Record<string, any> | undefined>;
 	let {
 		value,
-		steps,
+		color = 'primary',
 		class: className,
 		showIndicatorAs = 'percentage',
 		showLegend = false,
@@ -18,7 +16,6 @@
 		stiffness = 0.05,
 		damping = 1,
 		precision = 0.001,
-		min = 0,
 		soft = 0.1,
 		max = 100,
 		header,
@@ -40,7 +37,13 @@
 		}
 	});
 
-	const meterSteps = $derived(Array.isArray(value) ? value : [value]);
+	const meterSteps: MeterStep<T>[] = $derived(
+		typeof value === 'number'
+			? [{ value, label: String(value) } as MeterStep<T>]
+			: Array.isArray(value)
+				? value
+				: [value]
+	);
 
 	const createMeterSprings = (steps: MeterStep<T>[]) =>
 		steps.map((step) => {
@@ -69,9 +72,7 @@
 
 	const classes = $derived(useMeterTheme(theme));
 
-	const labelsPositions = $derived(
-		Array.isArray(value) ? value.map((v) => v.position || 'top') : [value?.position || 'top']
-	);
+	const labelsPositions = $derived(meterSteps.map((step) => step.position || 'top'));
 	const labelsPosition: 'top' | 'bottom' | 'both' | undefined = $derived(
 		labelsPositions.includes('top') && labelsPositions.includes('bottom')
 			? 'both'
@@ -86,7 +87,7 @@
 	<div
 		data-first={index === 0}
 		data-last={index === springs.length - 1}
-		data-color={meter.color || 'info'}
+		data-color={meter.color ?? color}
 		style:width="{spring.width.current}%"
 		class={classes.container({ first: index === 0, last: index === springs.length - 1 })}
 	>
@@ -122,19 +123,15 @@
 		render={header ? header : label || helper ? headerSnippet : undefined}
 	/>
 	<div class={classes.track({ size, labelsPosition })}>
-		{#if !Array.isArray(value)}
-			{@render meter(0, value)}
-		{:else}
-			{#each value as v, i}
-				{@render meter(i, v)}
-			{/each}
-		{/if}
+		{#each meterSteps as step, i (i)}
+			{@render meter(i, step)}
+		{/each}
 	</div>
 	{#if showLegend}
 		<div class={classes.legend({ size })}>
-			{#each Array.isArray(value) ? value : [value] as meterItem, i}
+			{#each meterSteps as meterItem, i (i)}
 				{@const percentage = (meterItem.value / max) * 100}
-				<div data-color={meterItem.color || 'info'} class={classes.legendItem({ size })}>
+				<div data-color={meterItem.color ?? color} class={classes.legendItem({ size })}>
 					{#if meterItem.icon}
 						<div class={classes.legendIcon({ size })}>
 							{@render meterItem.icon()}

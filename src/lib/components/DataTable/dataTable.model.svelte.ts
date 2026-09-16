@@ -1,29 +1,31 @@
 import {
-	createTable,
+	constructAggregationFn,
+	constructTable,
 	functionalUpdate,
-	getCoreRowModel,
-	getExpandedRowModel,
-	getFacetedMinMaxValues,
-	getFacetedRowModel,
-	getFacetedUniqueValues,
-	getFilteredRowModel,
-	getGroupedRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	type ColumnDef,
 	type ExpandedState,
-	type Row,
-	type Table,
+	type RowSelectionState,
 	type Updater
 } from '@tanstack/table-core';
 import { DataTableEditing } from './dataTable.editing.svelte.js';
 import { DataTableFocus } from './dataTable.focus.svelte.js';
 import type {
 	DataTableColumn,
+	DataTablePinning,
 	DataTableProps,
 	DataTableRowPayload,
 	DataTableState
 } from './dataTable.props.js';
+import {
+	dataTableFeatures,
+	fromPinningPosition,
+	type DataTableCellInstance,
+	type DataTableColumnDef,
+	type DataTableColumnInstance,
+	type DataTableFeatures,
+	type DataTableRowData,
+	type DataTableRowInstance,
+	type DataTableTableInstance
+} from './dataTable.table.js';
 
 export const DATA_TABLE_SELECTION_COLUMN = '__selection';
 export const DATA_TABLE_ACTIONS_COLUMN = '__actions';
@@ -66,34 +68,29 @@ const valuesEqual = (left: readonly string[], right: readonly string[]) =>
 	left.length === right.length && left.every((value, index) => value === right[index]);
 
 export class DataTableModel<TData> {
-	readonly table: Table<TData>;
+	readonly table: DataTableTableInstance<TData>;
 	readonly editTransactions = new DataTableEditing(this);
 	readonly focus = new DataTableFocus(this);
 	private itemsSource: readonly TData[] | null = null;
-	private itemsCache: TData[] = [];
+	private itemsCache: DataTableRowData<TData>[] = [];
 	private columnsSource: readonly DataTableColumn<TData>[] | null = null;
 	private columnsSelectionMode: DataTableProps<TData>['selectionMode'] = undefined;
 	private columnsHaveActions = false;
 	private columnsProcessingMode: DataTableProps<TData>['processingMode'] = undefined;
-	private columnDefsCache: ColumnDef<TData, unknown>[] = [];
+	private columnDefsCache: DataTableColumnDef<TData>[] = [];
 
 	constructor(private readonly options: DataTableModelOptions<TData>) {
-		this.table = createTable<TData>({
+		// v9 builds the instance with `constructTable` and takes its row-model stages and
+		// function registries from the static `features` object instead of `get*RowModel`
+		// options. The top-level `onStateChange` option is gone; every controlled slice below
+		// pairs `state.<slice>` with its own `on<Slice>Change`.
+		this.table = constructTable<DataTableFeatures, DataTableRowData<TData>>({
+			features: dataTableFeatures,
 			renderFallbackValue: null,
 			data: [],
 			columns: [],
-			getCoreRowModel: getCoreRowModel(),
-			getFilteredRowModel: getFilteredRowModel(),
-			getFacetedRowModel: getFacetedRowModel(),
-			getFacetedUniqueValues: getFacetedUniqueValues(),
-			getFacetedMinMaxValues: getFacetedMinMaxValues(),
-			getSortedRowModel: getSortedRowModel(),
-			getGroupedRowModel: getGroupedRowModel(),
-			getExpandedRowModel: getExpandedRowModel(),
-			getPaginationRowModel: getPaginationRowModel(),
 			getRowId: (_, index) => String(index),
-			state: {},
-			onStateChange: () => {}
+			state: {}
 		});
 	}
 
@@ -121,7 +118,7 @@ export class DataTableModel<TData> {
 		return this.table
 			.getCoreRowModel()
 			.flatRows.filter((row) => this.state.rowSelection[row.id])
-			.map((row) => row.original);
+			.map((row) => row.original as TData);
 	}
 
 	get pendingCommitCount() {
@@ -144,13 +141,44 @@ export class DataTableModel<TData> {
 		return this.publicColumns.find((column) => column.id === columnId);
 	}
 
-	getCellValue(row: Row<TData>, columnId: string) {
+	getCellValue(row: DataTableRowInstance<TData>, columnId: string) {
 		return this.editTransactions.getCellValue(row, columnId);
 	}
 
-	getRowPayload(row: Row<TData>): DataTableRowPayload<TData> {
+	/** Logical `start`/`end` pinning read back in DataTable's public `left`/`right` spelling. */
+	getColumnPinning(column: DataTableColumnInstance<TData>): DataTablePinning {
+		return fromPinningPosition(column.getIsPinned());
+	}
+
+	/** Distance from the pinned edge for a sticky header or cell, in pixels. */
+	getColumnPinnedOffset(column: DataTableColumnInstance<TData>) {
+		const side = this.getColumnPinning(column);
+		if (side === 'left') return column.getStart('start');
+		if (side === 'right') return column.getAfter('end');
+		return 0;
+	}
+
+	get startPinnedColumns() {
+		return this.table.getStartVisibleLeafColumns();
+	}
+
+	get endPinnedColumns() {
+		return this.table.getEndVisibleLeafColumns();
+	}
+
+	/**
+	 * v9 narrowed `cell.getIsAggregated()` to "this column has an aggregation function and the
+	 * row groups a different column". DataTable's `aggregated` payload has always meant v8's
+	 * broader "this cell stands for the rows underneath it", which also covers hierarchical
+	 * parent rows and columns with no aggregation, so it is computed here instead.
+	 */
+	isCellAggregated(cell: DataTableCellInstance<TData>) {
+		return !cell.getIsGrouped() && !cell.getIsPlaceholder() && !!cell.row.subRows.length;
+	}
+
+	getRowPayload(row: DataTableRowInstance<TData>): DataTableRowPayload<TData> {
 		return {
-			row: row.original,
+			row: row.original as TData,
 			rowId: row.id,
 			selected: !!this.state.rowSelection[row.id],
 			expanded: !!this.state.expanded[row.id],
@@ -177,11 +205,11 @@ export class DataTableModel<TData> {
 			...state.columnOrder,
 			...(props.rowActions ? [DATA_TABLE_ACTIONS_COLUMN] : [])
 		];
-		const leftPinning = [
+		const startPinning = [
 			...(props.selectionMode !== 'none' ? [DATA_TABLE_SELECTION_COLUMN] : []),
 			...state.columnPinning.left
 		];
-		const rightPinning = [
+		const endPinning = [
 			...state.columnPinning.right,
 			...(props.rowActions ? [DATA_TABLE_ACTIONS_COLUMN] : [])
 		];
@@ -190,16 +218,18 @@ export class DataTableModel<TData> {
 			...previous,
 			data: this.getTableItems(),
 			columns: this.getColumnDefs(),
-			getRowId: (row, index, parent) => props.getRowId(row, index, parent?.original),
+			getRowId: (row, index, parent) => props.getRowId(row as TData, index, parent?.original),
 			getSubRows: props.getSubRows
-				? (row, index) => [...(props.getSubRows?.(row, index) ?? [])]
+				? (row, index) =>
+						[...(props.getSubRows?.(row as TData, index) ?? [])] as DataTableRowData<TData>[]
 				: undefined,
 			getRowCanExpand: (row) =>
-				props.canExpand?.(row.original) ?? (row.subRows.length > 0 || !!props.expandedContent),
+				props.canExpand?.(row.original as TData) ??
+				(row.subRows.length > 0 || !!props.expandedContent),
 			enableRowSelection: (row) =>
 				!props.disabled &&
 				props.selectionMode !== 'none' &&
-				(props.isRowSelectable?.(row.original) ?? true),
+				(props.isRowSelectable?.(row.original as TData) ?? true),
 			enableMultiRowSelection: props.selectionMode === 'multiple',
 			manualFiltering: isManual,
 			manualSorting: isManual,
@@ -221,10 +251,14 @@ export class DataTableModel<TData> {
 					pageIndex: Math.max(0, state.pagination.page - 1),
 					pageSize: state.pagination.pageSize
 				},
-				rowSelection: state.rowSelection,
+				// v9 narrowed the slice to the selected ids only (`Record<string, true>`). The public
+				// `DataTableState.rowSelection` keeps `Record<string, boolean>`; `false` entries read
+				// as unselected in both versions.
+				rowSelection: state.rowSelection as RowSelectionState,
 				columnVisibility: state.columnVisibility,
 				columnOrder,
-				columnPinning: { left: leftPinning, right: rightPinning },
+				// v9 pins into logical regions; the public state stays physical left/right.
+				columnPinning: { start: startPinning, end: endPinning },
 				columnSizing: state.columnSizing,
 				grouping: isManual ? [] : state.grouping,
 				expanded: state.expanded
@@ -245,7 +279,8 @@ export class DataTableModel<TData> {
 					pagination: { page: next.pageIndex + 1, pageSize: next.pageSize }
 				});
 			},
-			onRowSelectionChange: (updater) => this.updateSlice('rowSelection', updater),
+			onRowSelectionChange: (updater) =>
+				this.updateSlice('rowSelection', updater as Updater<Record<string, boolean>>),
 			onColumnVisibilityChange: (updater) => this.updateSlice('columnVisibility', updater),
 			onColumnOrderChange: (updater) => {
 				const next = functionalUpdate(updater, columnOrder).filter(
@@ -254,12 +289,12 @@ export class DataTableModel<TData> {
 				this.setState({ ...this.state, columnOrder: next });
 			},
 			onColumnPinningChange: (updater) => {
-				const next = functionalUpdate(updater, { left: leftPinning, right: rightPinning });
+				const next = functionalUpdate(updater, { start: startPinning, end: endPinning });
 				this.setState({
 					...this.state,
 					columnPinning: {
-						left: (next.left ?? []).filter((columnId) => !INTERNAL_COLUMNS.has(columnId)),
-						right: (next.right ?? []).filter((columnId) => !INTERNAL_COLUMNS.has(columnId))
+						left: (next.start ?? []).filter((columnId) => !INTERNAL_COLUMNS.has(columnId)),
+						right: (next.end ?? []).filter((columnId) => !INTERNAL_COLUMNS.has(columnId))
 					}
 				});
 			},
@@ -324,10 +359,9 @@ export class DataTableModel<TData> {
 
 	reorderColumns(columns: readonly DataTableColumn<TData>[]) {
 		const reorderedIds = columns.map((column) => column.id);
-		const reorderedSet = new Set(reorderedIds);
 		let nextIndex = 0;
 		const columnOrder = this.state.columnOrder.map((columnId) => {
-			if (!reorderedSet.has(columnId)) return columnId;
+			if (!reorderedIds.includes(columnId)) return columnId;
 			return reorderedIds[nextIndex++] ?? columnId;
 		});
 		this.setState({ ...this.state, columnOrder });
@@ -367,7 +401,7 @@ export class DataTableModel<TData> {
 		});
 	}
 
-	startEditing(row: Row<TData>, columnId: string) {
+	startEditing(row: DataTableRowInstance<TData>, columnId: string) {
 		this.editTransactions.start(row, columnId);
 	}
 
@@ -411,7 +445,7 @@ export class DataTableModel<TData> {
 	private getTableItems() {
 		if (this.itemsSource === this.props.items) return this.itemsCache;
 		this.itemsSource = this.props.items;
-		this.itemsCache = [...this.props.items];
+		this.itemsCache = [...this.props.items] as DataTableRowData<TData>[];
 		return this.itemsCache;
 	}
 
@@ -433,8 +467,8 @@ export class DataTableModel<TData> {
 		return this.columnDefsCache;
 	}
 
-	private createColumnDefs(): ColumnDef<TData, unknown>[] {
-		const definitions: ColumnDef<TData, unknown>[] = [];
+	private createColumnDefs(): DataTableColumnDef<TData>[] {
+		const definitions: DataTableColumnDef<TData>[] = [];
 		if (this.props.selectionMode !== 'none') {
 			definitions.push({
 				id: DATA_TABLE_SELECTION_COLUMN,
@@ -452,7 +486,10 @@ export class DataTableModel<TData> {
 		for (const column of this.publicColumns) {
 			const sorting = typeof column.sortable === 'function' ? column.sortable : null;
 			const accessor = column.accessor;
-			const accessorFn = typeof accessor === 'function' ? accessor : (row: TData) => row[accessor];
+			const accessorFn =
+				typeof accessor === 'function'
+					? (row: DataTableRowData<TData>, index: number) => accessor(row as TData, index)
+					: (row: DataTableRowData<TData>) => row[accessor];
 			definitions.push({
 				id: column.id,
 				accessorFn,
@@ -466,11 +503,15 @@ export class DataTableModel<TData> {
 				enableColumnFilter: !!column.filter,
 				enableGlobalFilter: true,
 				enableGrouping: this.props.processingMode !== 'manual' && !!column.groupable,
-				sortingFn: sorting
-					? (left, right) => sorting(left.original, right.original, column.id)
+				// v9 renamed the column-def sorting slot from `sortingFn` to `sortFn`.
+				sortFn: sorting
+					? (left, right) => sorting(left.original as TData, right.original as TData, column.id)
 					: 'auto',
 				filterFn: this.createFilterFn(column),
-				aggregationFn: this.createAggregationFn(column)
+				aggregationFn: this.createAggregationFn(column),
+				// v8 handed every aggregation the group's terminal leaf rows. v9 selects rows by
+				// depth and defaults to 0 (the group's direct rows), so ask for the full descent.
+				maxAggregationDepth: Number.POSITIVE_INFINITY
 			});
 		}
 
@@ -490,7 +531,7 @@ export class DataTableModel<TData> {
 		return definitions;
 	}
 
-	private createFilterFn(column: DataTableColumn<TData>): ColumnDef<TData>['filterFn'] {
+	private createFilterFn(column: DataTableColumn<TData>): DataTableColumnDef<TData>['filterFn'] {
 		const filter = column.filter;
 		if (!filter) return 'auto';
 		return (row, columnId, filterValue) => {
@@ -516,33 +557,42 @@ export class DataTableModel<TData> {
 						: filterValue.map(String).includes(String(value));
 				case 'date': {
 					if (!filterValue) return true;
-					const candidate = value instanceof Date ? value : new Date(String(value));
+					// `new Date(string)` and `Date.parse` share the same parsing algorithm, so working with
+					// timestamps keeps the comparisons identical without allocating a Date per row.
+					const candidateTime = value instanceof Date ? value.getTime() : Date.parse(String(value));
 					const range = filterValue as { start?: Date; end?: Date };
-					if (Number.isNaN(candidate.getTime())) return false;
-					if (range.start && candidate < range.start) return false;
+					if (Number.isNaN(candidateTime)) return false;
+					if (range.start && candidateTime < range.start.getTime()) return false;
 					if (range.end) {
+						// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Local end-of-day clone, never read reactively; SvelteDate would create/mutate state inside a derived filter.
 						const end = new Date(range.end);
 						end.setHours(23, 59, 59, 999);
-						if (candidate > end) return false;
+						if (candidateTime > end.getTime()) return false;
 					}
 					return true;
 				}
 				case 'boolean':
 					return filterValue === undefined || filterValue === null || value === filterValue;
 				case 'custom':
-					return filter.predicate(row.original, filterValue, value);
+					return filter.predicate(row.original as TData, filterValue, value);
 			}
 		};
 	}
 
-	private createAggregationFn(column: DataTableColumn<TData>): ColumnDef<TData>['aggregationFn'] {
+	private createAggregationFn(
+		column: DataTableColumn<TData>
+	): DataTableColumnDef<TData>['aggregationFn'] {
 		if (!column.aggregation) return undefined;
 		if (typeof column.aggregation === 'string') return column.aggregation;
 		const aggregate = column.aggregation;
-		return (columnId, leafRows) =>
-			aggregate(
-				leafRows.map((row) => row.getValue(columnId)),
-				leafRows.map((row) => row.original)
-			);
+		// v9 replaced the `(columnId, leafRows, childRows)` callable with a context object. No
+		// `merge` is supplied, so a nested group re-aggregates its terminal rows exactly as v8 did.
+		return constructAggregationFn({
+			aggregate: (context) =>
+				aggregate(
+					context.rows.map((row) => context.getValue(row)),
+					context.rows.map((row) => row.original as TData)
+				)
+		});
 	}
 }

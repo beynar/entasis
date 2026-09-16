@@ -30,17 +30,17 @@
 	let merged = $state(false);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<header>
 		<Chip color="warning">Possible duplicate</Chip>
 		<h2 class="mt-lg text-3xl font-semibold">Keep the right details.</h2>
-		<p class="mt-sm text-sm text-neutral/65">
+		<p class="mt-sm text-neutral/65 text-sm">
 			Choose which value to keep for each field. Both source records stay untouched in this preview.
 		</p>
 	</header>
 	<Card
 		><Stack gap="lg">
-			{#each fields as field (field)}<Stack gap="md" class="border-b border-neutral-muted pb-lg">
+			{#each fields as field (field)}<Stack gap="md" class="border-neutral-muted pb-lg border-b">
 					<h3 class="font-semibold">{field.label}</h3>
 					<RadioInput
 						label={`Keep ${field.label}`}

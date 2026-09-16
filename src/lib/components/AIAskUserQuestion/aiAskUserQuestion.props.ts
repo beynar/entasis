@@ -67,7 +67,7 @@ export type AIAskUserQuestionAnswer =
 			value: File[];
 	  };
 
-export type AIAskUserQuestionSubmitDetail = {
+export type AIAskUserQuestionSubmitPayload = {
 	answers: AIAskUserQuestionAnswer[];
 	values: AIAskAnswers;
 	questions: readonly AIAskQuestion[];
@@ -148,7 +148,7 @@ export type AIAskUserQuestionProps = WithAttachments<
 		/** Required-answer validation message or per-question formatter. */
 		requiredMessage?: string | ((question: AIAskQuestion) => string);
 		/** Called after all required answers validate. */
-		onSubmit?: (detail: AIAskUserQuestionSubmitDetail) => void | Promise<void>;
+		onSubmit?: (payload: AIAskUserQuestionSubmitPayload) => void | Promise<void>;
 		/** Called by the optional discard action. */
 		onDiscard?: () => void | Promise<void>;
 		/** Called once with the complete answer map after a user changes an answer. */

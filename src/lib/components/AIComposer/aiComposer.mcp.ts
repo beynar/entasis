@@ -15,7 +15,7 @@ AIComposer is a Markdown prompt composer built on the existing \`RichTextInput\`
     type AIComposerMentionItem,
     type AIComposerQueuedMessage,
     type AIComposerSkillItem,
-    type AIComposerSubmitDetail
+    type AIComposerSubmitPayload
   } from 'svelai/ai-composer';
 </script>
 \`\`\`
@@ -29,7 +29,7 @@ AIComposer is a Markdown prompt composer built on the existing \`RichTextInput\`
 
 ## Submission
 
-\`onSubmit\` receives \`AIComposerSubmitDetail\`: display \`markdown\`, model-ready \`modelInput\`, raw files, attachment records, normalized tokens, and command/file/mention/reference/skill id lists. Every submitted token has serialized MDX-style \`markdown\`.
+\`onSubmit\` receives \`AIComposerSubmitPayload\`: display \`markdown\`, model-ready \`modelInput\`, raw files, attachment records, normalized tokens, and command/file/mention/reference/skill id lists. Every submitted token has serialized MDX-style \`markdown\`.
 
 \`\`\`svelte
 <AIComposer
@@ -55,7 +55,11 @@ When no direct submit callback is supplied, the nearest conversation receives a 
 - Trigger-source objects support items, title, empty copy, grouping, token-kind resolution, custom token conversion, sync/async search, and selection.
 - Compatibility callbacks are \`onCommandSearch\`, \`onMentionSearch\`, and \`onSkillSearch\`. Mention search receives \`{ query, type }\`; skill search falls back to \`onMentionSearch({ query, type: 'skill' })\`.
 - Synchronous searches stay synchronous. Promise searches expose loading/error/request state through the reused RichTextInput lifecycle and ignore stale responses.
-- Selection callbacks and \`onSuggestionOpen\`, \`onSuggestionClose\`, \`onSuggestionQueryChange\`, and \`onSuggestionHighlightChange\` receive normalized source/lifecycle data.
+- A trigger source's \`onSelect({ item, context })\` is the pick event. The per-kind
+  \`onCommandInsert\`, \`onMentionInsert\`, and \`onSkillInsert\` callbacks run after the token is
+  inserted, so they are named for the insertion rather than the pick: \`onSelect\` is reserved for
+  "the user picked this item" and one component cannot own three of them.
+- Those callbacks and \`onSuggestionOpen\`, \`onSuggestionClose\`, \`onSuggestionQueryChange\`, and \`onSuggestionHighlightChange\` receive normalized source/lifecycle data.
 
 ## Files and attachments
 

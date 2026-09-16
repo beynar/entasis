@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { ComboboxProps, ComboboxOption } from './combobox.props.js';
@@ -29,8 +30,9 @@
 		items,
 		showAllOnFocus = false,
 		getValueOption,
-		loadingText = 'Loading...',
-		noOptionsText = 'No options found',
+		loadingText,
+		noOptionsText,
+		i18n,
 		theme,
 		disabled,
 		name,
@@ -45,6 +47,7 @@
 	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
+	const t = $derived(useI18n(i18n));
 	const listboxId = `${id}-listbox`;
 	const optionId = (value: string) => `${id}-option-${value.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
 	let currentOption = $state<ComboboxOption | null>(null);
@@ -123,7 +126,7 @@
 				} catch (error) {
 					return {
 						options: [] as ComboboxOption[],
-						error: error instanceof Error ? error.message : 'Failed to load options'
+						error: error instanceof Error ? error.message : t.failedToLoadOptions
 					};
 				} finally {
 					loading = false;
@@ -245,19 +248,24 @@
 </script>
 
 <Popover closeOnClickOutside={false} fitTrigger position="bottom" size="small" open={isOpen}>
-	<div id={listboxId} role="listbox" aria-label="Options" class="flex max-h-[200px] flex-col gap-1">
+	<div
+		id={listboxId}
+		role="listbox"
+		aria-label={t.options}
+		class="flex max-h-[200px] flex-col gap-1"
+	>
 		{#if loading}
 			<div class={classes.loading({ size })} role="status" aria-live="polite">
-				{loadingText}
+				{loadingText ?? t.loadingEllipsis}
 			</div>
 		{:else if optionsAsync.error}
 			<div class={classes.error({ size })} role="alert" aria-live="assertive">
 				{optionsAsync.error}
 			</div>
 		{:else if optionsAsync.options.length === 0 && searchValue}
-			<div class={classes.noOptions({ size })} role="status">{noOptionsText}</div>
+			<div class={classes.noOptions({ size })} role="status">{noOptionsText ?? t.noOptions}</div>
 		{:else if optionsAsync.options.length === 0 && !searchValue && showAllOnFocus}
-			<div class={classes.noOptions({ size })} role="status">{noOptionsText}</div>
+			<div class={classes.noOptions({ size })} role="status">{noOptionsText ?? t.noOptions}</div>
 		{:else if optionsAsync.options.length > 0}
 			<ScrollArea scrollOnEdges type="auto" class="flex max-h-[200px] flex-col gap-1">
 				{#each optionsAsync.options as option (option.value)}
@@ -332,7 +340,7 @@
 				<FieldActionButton
 					{size}
 					color="danger"
-					label="Clear selection"
+					label={`${t.clear} ${t.selection}`}
 					disabled={field.disabled}
 					prefix={xIcon}
 					onclick={handleClear}

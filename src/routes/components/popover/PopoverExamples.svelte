@@ -83,7 +83,7 @@
 {#snippet content(title: string, description = text)}
 	<div class="grid gap-2">
 		<h2 class="text-neutral text-base font-semibold">{title}</h2>
-		<p class="text-neutral/60 text-sm">{description}</p>
+		<p class="text-neutral/70 text-sm">{description}</p>
 	</div>
 {/snippet}
 
@@ -126,7 +126,7 @@
 	openOnHover
 	openOnClick={false}
 	closeOnMouseLeave
-	hoverDelay={150}
+	delay={150}
 	trigger={{ content: 'Hover', variant: 'soft' }}
 	position="top"
 >
@@ -141,7 +141,7 @@
 			openOnHover
 			openOnClick={false}
 			closeOnMouseLeave
-			hoverDelay={150}
+			delay={150}
 			trigger={{ content: 'Hover', color: 'secondary', variant: 'soft' }}
 			position="top"
 		>

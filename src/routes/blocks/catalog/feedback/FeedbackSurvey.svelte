@@ -9,17 +9,17 @@
 	let message = $state('');
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<div class="grid gap-xl md:grid-cols-3">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<div class="gap-xl grid md:grid-cols-3">
 		<aside>
 			<Chip color="primary">Two minutes well spent</Chip>
 			<h2 class="mt-lg text-3xl font-semibold">Help shape what comes next.</h2>
-			<p class="mt-md text-sm text-neutral/65">
+			<p class="mt-md text-neutral/65 text-sm">
 				Tell us what’s working and what could work better.
 			</p>
-			<div class="mt-xl flex items-center gap-md">
-				<Avatar user={{ name: 'Maya Chen' }} />
-				<p class="text-xs text-neutral/60">
+			<div class="mt-xl gap-md flex items-center">
+				<Avatar name="Maya Chen" />
+				<p class="text-neutral/70 text-xs">
 					Maya, product team<br />Every piece of feedback matters.
 				</p>
 			</div>

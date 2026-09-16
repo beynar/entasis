@@ -54,14 +54,14 @@ ${scriptCode}
 	);
 
 	const codeTabs = [{ label: 'Setup' }, { label: 'Full key set' }, { label: 'Per instance' }];
-	let codeTab = $state(0);
+	let codeTab = $state('Setup');
 </script>
 
 <I18n bind:locale>
 	<div class="mx-auto flex max-w-3xl flex-col gap-6 p-6">
 		<div>
-			<h1 class="text-2xl font-semibold text-neutral-light">Internationalization</h1>
-			<p class="mt-1 text-sm text-neutral/60">
+			<h1 class="text-neutral-light text-2xl font-semibold">Internationalization</h1>
+			<p class="text-neutral/70 mt-1 text-sm">
 				Wrap the app in <code>&lt;I18n&gt;</code> and every component translates. Switch the locale to
 				see it update — Arabic also flips the document direction to RTL.
 			</p>
@@ -71,30 +71,30 @@ ${scriptCode}
 			<span class="text-neutral-light">Locale</span>
 			<select
 				bind:value={locale}
-				class="rounded border border-neutral-muted bg-surface-raised px-3 py-2 text-neutral"
+				class="border-neutral-muted bg-surface-raised text-neutral rounded border px-3 py-2"
 			>
-				{#each localeList as l}
+				{#each localeList as l, index (index)}
 					<option value={l.code}>{l.name} ({l.code}{l.dir === 'rtl' ? ', rtl' : ''})</option>
 				{/each}
 			</select>
 		</label>
 
 		<div class="max-w-sm">
-			<h2 class="mb-2 text-sm font-medium text-neutral-light">
+			<h2 class="text-neutral-light mb-2 text-sm font-medium">
 				Live component — placeholder & empty state translate
 			</h2>
 			<Combobox placeholder={t.search} items={options} bind:value={comboValue} />
 		</div>
 
 		<div>
-			<h2 class="mb-2 text-sm font-medium text-neutral-light">Set the keys</h2>
+			<h2 class="text-neutral-light mb-2 text-sm font-medium">Set the keys</h2>
 			<Tabs items={codeTabs} bind:value={codeTab}>
 				{#snippet children({ index })}
 					<div class="p-4">
 						{#if index === 0}
 							<Code language="svelte" code={setupCode} />
 						{:else if index === 1}
-							<p class="mb-2 text-xs text-neutral/60">
+							<p class="text-neutral/70 mb-2 text-xs">
 								The complete key set for the selected locale ({Object.keys(t).length} keys) — copy it,
 								translate the values, keep the keys. Function keys are self-contained per locale.
 							</p>

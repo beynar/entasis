@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import Button from '../Button/Button.svelte';
-	import { arrowsInIcon } from '../Icons/arrowsIn.js';
+	import Dialog from '../Dialog/Dialog.svelte';
 	import { arrowsOutIcon } from '../Icons/arrowsOut.js';
 	import { cornersOutIcon } from '../Icons/cornersOut.js';
 	import { downloadSimpleIcon } from '../Icons/downloadSimple.js';
@@ -10,12 +11,14 @@
 	import type { MermaidProps } from './mermaid.props.js';
 	import { MermaidState } from './mermaid.state.svelte.js';
 	import { useMermaidTheme } from './mermaid.theme.js';
+	import Mermaid from './Mermaid.svelte';
 
 	let {
 		chart,
 		config,
 		controls = true,
 		mouseWheelZoom = true,
+		touchPan = false,
 		errorForgiving = false,
 		size = 'normal',
 		onRender,
@@ -25,7 +28,7 @@
 		...attachments
 	}: MermaidProps = $props();
 
-	const state = new MermaidState({
+	const diagram = new MermaidState({
 		get chart() {
 			return chart;
 		},
@@ -34,6 +37,9 @@
 		},
 		get mouseWheelZoom() {
 			return mouseWheelZoom;
+		},
+		get touchPan() {
+			return touchPan;
 		},
 		get errorForgiving() {
 			return errorForgiving;
@@ -47,6 +53,7 @@
 	});
 
 	const classes = $derived(useMermaidTheme(theme));
+	const t = $derived(useI18n());
 
 	// Resolve the granular control flags from the boolean-or-object prop.
 	const has = (name: 'fit' | 'zoomIn' | 'zoomOut' | 'expand' | 'download') => {
@@ -58,31 +65,61 @@
 			(has('fit') || has('zoomIn') || has('zoomOut') || has('expand') || has('download'))
 	);
 
-	const buttonProps = { variant: 'ghost' as const, color: 'neutral' as const, size: 'small' as const, squared: true };
+	const buttonProps = {
+		variant: 'ghost' as const,
+		color: 'neutral' as const,
+		size: 'small' as const,
+		squared: true
+	};
+
+	// Fullscreen is a `fullScreen` Dialog hosting a second instance of the same diagram
+	// (own panzoom, wheel zoom without the hover dwell, single-finger pan), so it gets
+	// the layer stack, focus trap, scroll lock and Escape handling for free.
+	let expanded = $state(false);
 </script>
 
 <div class={classes.root({ size, className })} {...attachments}>
 	{#if showBar}
 		<div class={classes.buttons()} data-panzoom-ignore>
 			{#if has('fit')}
-				<Button {...buttonProps} label="Zoom to fit" onclick={state.zoomToFit} prefix={cornersOutIcon} />
+				<Button
+					{...buttonProps}
+					label={t.zoomToFit}
+					onclick={diagram.zoomToFit}
+					prefix={cornersOutIcon}
+				/>
 			{/if}
 			{#if has('zoomOut')}
-				<Button {...buttonProps} label="Zoom out" onclick={state.zoomOut} prefix={magnifyingGlassMinusIcon} />
+				<Button
+					{...buttonProps}
+					label={t.zoomOut}
+					onclick={diagram.zoomOut}
+					prefix={magnifyingGlassMinusIcon}
+				/>
 			{/if}
 			{#if has('zoomIn')}
-				<Button {...buttonProps} label="Zoom in" onclick={state.zoomIn} prefix={magnifyingGlassPlusIcon} />
+				<Button
+					{...buttonProps}
+					label={t.zoomIn}
+					onclick={diagram.zoomIn}
+					prefix={magnifyingGlassPlusIcon}
+				/>
 			{/if}
 			{#if has('expand')}
 				<Button
 					{...buttonProps}
-					label={state.expanded ? 'Exit fullscreen' : 'Fullscreen'}
-					onclick={state.toggleExpand}
-					prefix={state.expanded ? arrowsInIcon : arrowsOutIcon}
+					label={t.fullscreen}
+					onclick={() => (expanded = true)}
+					prefix={arrowsOutIcon}
 				/>
 			{/if}
 			{#if has('download')}
-				<Button {...buttonProps} label="Download SVG" onclick={() => state.downloadSvg()} prefix={downloadSimpleIcon} />
+				<Button
+					{...buttonProps}
+					label={t.downloadSvg}
+					onclick={() => diagram.downloadSvg()}
+					prefix={downloadSimpleIcon}
+				/>
 			{/if}
 		</div>
 	{/if}
@@ -92,19 +129,40 @@
 		     as a phantom "Mermaid diagram" image next to the skeleton or alert. -->
 		<svg
 			class={classes.svg()}
-			{@attach state.svgAttachment}
+			{@attach diagram.svgAttachment}
 			role="img"
-			aria-label="Mermaid diagram"
-			aria-busy={state.loading}
-			aria-hidden={state.loading || !!state.error || !chart?.trim() ? 'true' : undefined}
+			aria-label={t.mermaidDiagram}
+			aria-busy={diagram.loading}
+			aria-hidden={diagram.loading || !!diagram.error || !chart?.trim() ? 'true' : undefined}
 		></svg>
 	</div>
 
-	{#if state.error}
+	{#if diagram.error}
 		<div class={classes.error()} role="alert" aria-live="assertive">
-			{state.error.message}
+			{diagram.error.message}
 		</div>
-	{:else if state.loading}
+	{:else if diagram.loading}
 		<Skeleton class={classes.skeleton()} />
 	{/if}
 </div>
+
+{#if has('expand')}
+	<Dialog type="fullScreen" bind:open={expanded} closable title={t.mermaidDiagram}>
+		<Mermaid
+			{chart}
+			{config}
+			{errorForgiving}
+			mouseWheelZoom
+			touchPan
+			controls={{
+				fit: has('fit'),
+				zoomIn: has('zoomIn'),
+				zoomOut: has('zoomOut'),
+				download: has('download'),
+				expand: false
+			}}
+			{theme}
+			class="min-h-0 flex-1"
+		/>
+	</Dialog>
+{/if}

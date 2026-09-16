@@ -46,7 +46,7 @@ VideoPlayer is a native HTML5 video player with Svelai chrome. It keeps the medi
 - **sources**: VideoPlayerSource[] - Multiple source candidates rendered as native \`<source>\` elements.
 - **tracks**: VideoPlayerTrack[] - Captions, subtitles, descriptions, chapters, or metadata tracks.
 - **poster**: string - Poster image.
-- **title** / **label**: string - Accessible media/player labels.
+- **title** / **label**: string - Accessible media/player labels; \`label\` overrides \`title\`.
 - **preload**: 'none' | 'metadata' | 'auto' = 'metadata'.
 - **crossOrigin**: 'anonymous' | 'use-credentials' | ''.
 - **playsInline**: boolean = true.
@@ -126,7 +126,7 @@ The component exports imperative methods:
 	src="/videos/demo.mp4"
 	bind:paused
 	bind:currentTime
-	onTimeUpdate={(snapshot) => console.log(snapshot.currentTime)}
+	onTimeUpdate={(payload) => console.log(payload.currentTime)}
 />
 \`\`\`
 

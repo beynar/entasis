@@ -3,7 +3,7 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { TextArea } from '$lib/components/Form/TextArea/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let message = $state('');
@@ -20,7 +20,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -39,7 +39,7 @@
 	component="TextArea"
 	features={[
 		'Autoresizes height with content',
-		'Bindable value, errors & focus',
+		'Bindable value, errors & focused state',
 		'maxLength character cap',
 		'Enter submits via onPressEnter'
 	]}

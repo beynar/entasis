@@ -1,8 +1,4 @@
-import {
-	MAP_SHAPE_ID_PREFIX,
-	getMapShapeSourceId,
-	safeMapShapeId
-} from './map-shape-geometry.js';
+import { MAP_SHAPE_ID_PREFIX, getMapShapeSourceId, safeMapShapeId } from './map-shape-geometry.js';
 import type { NormalizedMapShape } from './map-shapes.js';
 import type { MapLibreMap } from './maplibre-types.js';
 
@@ -23,7 +19,8 @@ export function syncMapShapeSourcesAndLayers(
 
 	for (const shape of nextShapes.values()) {
 		const existingSignature = appliedSignatures.get(shape.id);
-		const isApplied = map.getSource(shape.sourceId) && shape.layerIds.every((layerId) => map.getLayer(layerId));
+		const isApplied =
+			map.getSource(shape.sourceId) && shape.layerIds.every((layerId) => map.getLayer(layerId));
 
 		if (existingSignature === shape.signature && isApplied) {
 			continue;

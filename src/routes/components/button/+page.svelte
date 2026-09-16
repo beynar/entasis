@@ -46,7 +46,7 @@
 	subtitle="Triggers an action or event, with variants, sizes, and colors."
 	component="Button"
 	features={[
-		'role=button or link with aria-label',
+		{ label: 'role=button or link with aria-label', test: 'a11y:button.role-and-label' },
 		'Loading spinner overlay attachment',
 		'Bindable ref to root element',
 		'Renders as anchor when href set',

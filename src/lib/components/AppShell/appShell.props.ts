@@ -30,7 +30,11 @@ export type AppShellBack = AppShellRegion | PageShellAction;
 export type AppShellBreadcrumbs = AppShellRegion | BreadcrumbItem[];
 
 export type AppShellConfig = {
-	/** Shared Sidebar geometry and PageShell chrome treatment. */
+	/**
+	 * Shared Sidebar geometry and PageShell chrome treatment. `framed` draws one rounded app card on
+	 * the canvas around the sidebar and the page; the Sidebar's own `framed` variant paints its well
+	 * as an inset of that card.
+	 */
 	variant?: SidebarVariant;
 	/** Small metadata above the PageShell title. Ignored when breadcrumbs are provided. */
 	eyebrow?: PageShellTextRegion;
@@ -40,6 +44,8 @@ export type AppShellConfig = {
 	breadcrumbsMaxItems?: number;
 	/** Back affordance rendered before breadcrumbs or eyebrow. */
 	back?: AppShellBack;
+	/** Accessible name for the page's `main` landmark, forwarded to PageShell. */
+	label?: string;
 	/** Default PageShell title. */
 	title?: PageShellTextRegion;
 	/** Default PageShell subtitle. */
@@ -62,12 +68,7 @@ export type AppShellConfig = {
 	mobileActionCount?: PageShellMobileActionCount;
 };
 
-type AppShellRootAttributes = Partial<
-	Pick<
-		HTMLAttributes<HTMLDivElement>,
-		'id' | 'role' | 'style' | 'aria-label' | 'aria-labelledby' | 'aria-describedby'
-	>
-> & {
+type AppShellRootAttributes = Partial<Pick<HTMLAttributes<HTMLDivElement>, 'id' | 'style'>> & {
 	[dataAttribute: `data-${string}`]: string | number | boolean | null | undefined;
 };
 

@@ -1,8 +1,8 @@
 import type { Snippet } from 'svelte';
 import type { WithSlot } from '../Slot/slot.js';
-import type Slot from '../Slot/Slot.svelte';
 import type { DialogState } from './dialog.state.svelte.js';
 import type { ResponsiveProps } from '../Theme/theme.js';
+import type { Sizes } from '$lib/types/theme.js';
 import type { ButtonProps } from '../Button/index.js';
 import type { FSOProps } from '$lib/transitions/transition.js';
 import type { DialogThemeProps } from './dialog.theme.js';
@@ -15,7 +15,7 @@ export type DialogProps = WithSlot<
 		/** Stable DOM id for the portaled dialog root; falls back to a generated id when omitted. */
 		id?: string;
 		/** Presentation variant (modal, alert, fullScreen, or edge drawer); supports responsive
-		 *  values — pass a `(breakpoint) => DialogType` function for per-breakpoint control. */
+		 *  values — pass a `{ xs: 'drawerBottom', md: 'modal' }` record for per-breakpoint control. */
 		type?: ResponsiveProps<DialogType>;
 		/** When the resolved type is `modal`, collapse it into a bottom-sheet drawer on mobile
 		 *  (viewport < 768px), inheriting swipe-to-dismiss and the drag thumb. Default `true`. */
@@ -27,11 +27,11 @@ export type DialogProps = WithSlot<
 		/** Called once when the library requests an open-state change. */
 		onOpenChange?: (open: boolean) => void;
 		/** Called after the open transition finishes. */
-		onAfterOpen?: (dialog: DialogState) => void;
+		onAfterOpen?: (payload: DialogState) => void;
 		/** Called after the close transition finishes. */
-		onAfterClose?: (dialog: DialogState) => void;
+		onAfterClose?: (payload: DialogState) => void;
 		/** Content max-width for modal and alert types; supports responsive values. */
-		size?: ResponsiveProps<'small' | 'normal' | 'large'>;
+		size?: ResponsiveProps<Sizes>;
 		/** Where a dialog taller than the viewport scrolls: inside the card (`inner`, default) or the viewport (`outer`). */
 		scroll?: ResponsiveProps<'inner' | 'outer'>;
 		/** Fly/scale opacity transition overrides for open and close; supports responsive values. */

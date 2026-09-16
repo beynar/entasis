@@ -2,7 +2,7 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import DocPage from '../../DocPage.svelte';
 	import KeyValueInput from '$lib/components/Form/KeyValueInput/KeyValueInput.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	// State for each example
@@ -32,7 +32,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -89,7 +89,7 @@
 			<div class="w-full max-w-md">
 				<KeyValueInput bind:value={value1} />
 				{#if value1?.length}
-					<p class="text-neutral/60 mt-2 text-xs">
+					<p class="text-neutral/70 mt-2 text-xs">
 						Pairs: {value1.map((p) => `${p.key}=${p.value}`).join(', ')}
 					</p>
 				{/if}
@@ -130,7 +130,7 @@
 			<div class="w-full max-w-md">
 				<KeyValueInput maxRows={3} addLabel="Add field" bind:value={value3} />
 				{#if value3?.length}
-					<p class="text-neutral/60 mt-2 text-xs">{value3.length} / 3 rows</p>
+					<p class="text-neutral/70 mt-2 text-xs">{value3.length} / 3 rows</p>
 				{/if}
 			</div>
 		</ComponentCard>
@@ -141,7 +141,7 @@
 				<KeyValueInput label="Settings" bind:value={value4} />
 				{#if value4?.length}
 					<pre
-						class="border-neutral-muted text-neutral/60 mt-2 overflow-auto rounded border p-2 text-xs">{JSON.stringify(
+						class="border-neutral-muted text-neutral/70 mt-2 overflow-auto rounded border p-2 text-xs">{JSON.stringify(
 							Object.fromEntries(value4.map((p) => [p.key, p.value])),
 							null,
 							2

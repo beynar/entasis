@@ -102,7 +102,7 @@ export type InputProps<T extends InputType> = WithSlot<
 		size?: Sizes;
 		/** Internal spacing between field regions, labels, and adornments. */
 		density?: Density;
-		/** Places the field label above the control or to its left from the desktop breakpoint. */
+		/** Places the field label above the control, or to its left from 32rem of the field's own width. */
 		labelPosition?: FieldLabelPosition;
 		/** Whether the field is rendered; when false the field is hidden from the form. */
 		visible?: boolean;

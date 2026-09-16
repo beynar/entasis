@@ -6,7 +6,8 @@
 	import { Stat } from 'svelai/stat';
 	import { Tabbar } from 'svelai/tabbar';
 	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	let active = $state(0);
+	const tabs = ['Our purpose', 'Our people', 'Our approach'];
+	let active = $state(tabs[0]);
 	const panels = [
 		{
 			label: 'Purpose',
@@ -36,31 +37,31 @@
 			secondLabel: 'Feedback rhythm'
 		}
 	];
+	const panel = $derived(panels[Math.max(0, tabs.indexOf(active))]);
 </script>
 
-<section class="mx-auto grid max-w-6xl gap-xl p-lg md:grid-cols-2 md:p-xl">
-	<div class="flex flex-col gap-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl md:grid-cols-2">
+	<div class="gap-xl flex flex-col">
 		<Chip class="self-start" variant="soft">Inside Northstar</Chip><Heading
 			as="h2"
 			size="h1"
 			weight="bold">The people behind the product.</Heading
-		><Tabbar items={['Our purpose', 'Our people', 'Our approach']} bind:value={active} />
-		<p class="text-lg text-neutral/70">{panels[active].body}</p>
+		><Tabbar items={tabs} bind:value={active} />
+		<p class="text-neutral/70 text-lg">{panel.body}</p>
 		<Button href="/docs" variant="link" class="self-start" suffix={arrowRightIcon}
 			>Discover our approach</Button
 		>
 	</div>
 	<Card variant="soft" color="primary" class="min-h-80"
-		><div class="flex h-full flex-col justify-between gap-xl">
-			<span class="text-sm uppercase tracking-widest">{panels[active].label}</span><Heading
-				as="h3"
-				size="h2">{panels[active].quote}</Heading
+		><div class="gap-xl flex h-full flex-col justify-between">
+			<span class="text-sm tracking-widest uppercase">{panel.label}</span><Heading as="h3" size="h2"
+				>{panel.quote}</Heading
 			>
-			<div class="grid grid-cols-2 gap-md">
-				<Stat variant="ghost" label={panels[active].firstLabel} value={panels[active].first} /><Stat
+			<div class="gap-md grid grid-cols-2">
+				<Stat variant="ghost" label={panel.firstLabel} value={panel.first} /><Stat
 					variant="ghost"
-					label={panels[active].secondLabel}
-					value={panels[active].second}
+					label={panel.secondLabel}
+					value={panel.second}
 				/>
 			</div>
 		</div></Card

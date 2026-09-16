@@ -52,7 +52,7 @@
 <div class="grid w-full gap-3">
 	<div class="flex flex-wrap items-center justify-between gap-3">
 		<div class="flex flex-wrap items-center gap-2">
-			{#each presets as preset}
+			{#each presets as preset, index (index)}
 				<button
 					type="button"
 					class="state-layer border-neutral-muted inline-flex h-8 items-center rounded-md border px-3 text-sm font-medium transition {Math.abs(
@@ -68,7 +68,7 @@
 			{/each}
 		</div>
 
-		<label class="flex min-w-64 items-center gap-3 text-sm text-neutral/65">
+		<label class="text-neutral/65 flex min-w-64 items-center gap-3 text-sm">
 			<span class="tabular-nums">{frameWidth}px</span>
 			<input
 				class="accent-primary"
@@ -82,9 +82,9 @@
 		</label>
 	</div>
 
-	<div class="overflow-auto rounded-xl border border-neutral-muted bg-neutral-muted p-3">
+	<div class="border-neutral-muted bg-neutral-muted overflow-auto rounded-xl border p-3">
 		<div
-			class="relative mx-auto h-[640px] min-w-[320px] overflow-hidden rounded-lg border border-neutral-muted bg-surface shadow-sm"
+			class="border-neutral-muted bg-surface relative mx-auto h-[640px] min-w-[320px] overflow-hidden rounded-lg border shadow-sm"
 			style={`width: ${frameWidth}px;`}
 		>
 			<iframe
@@ -95,7 +95,7 @@
 			<button
 				type="button"
 				aria-label="Resize preview"
-				class="absolute inset-y-0 right-0 w-3 cursor-ew-resize border-l border-neutral-muted/70 bg-surface/40 transition hover:bg-primary/20 focus-visible:outline-2 focus-visible:outline-primary"
+				class="border-neutral-muted/70 bg-surface/40 hover:bg-primary/20 focus-visible:outline-primary absolute inset-y-0 right-0 w-3 cursor-ew-resize border-l transition focus-visible:outline-2"
 				onpointerdown={startResize}
 				onpointermove={resizeFrame}
 				onpointerup={stopResize}

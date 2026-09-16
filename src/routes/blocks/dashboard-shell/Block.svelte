@@ -93,7 +93,7 @@
 </script>
 
 <AppShell
-	class="min-h-screen overflow-hidden rounded-lg border border-neutral-muted"
+	class="border-neutral-muted min-h-screen overflow-hidden rounded-lg border"
 	variant="inset"
 	{sidebar}
 	eyebrow="Monday, September 7"
@@ -114,8 +114,8 @@
 		<Button prefix={downloadSimpleIcon} variant="outline">Export</Button>
 	{/snippet}
 
-	<div class="grid gap-xl">
-		<section class="grid gap-md sm:grid-cols-2 xl:grid-cols-4" aria-label="Key metrics">
+	<div class="gap-xl grid">
+		<section class="gap-md grid sm:grid-cols-2 xl:grid-cols-4" aria-label="Key metrics">
 			<Stat
 				label="Monthly revenue"
 				value="$84.2k"
@@ -161,53 +161,53 @@
 			</Stat>
 		</section>
 
-		<div class="grid gap-xl xl:grid-cols-3">
+		<div class="gap-xl grid xl:grid-cols-3">
 			<section
-				class="flex flex-col gap-lg rounded-lg border border-neutral-muted bg-surface-raised p-xl xl:col-span-2"
+				class="gap-lg border-neutral-muted bg-surface-raised p-xl flex flex-col rounded-lg border xl:col-span-2"
 			>
-				<header class="flex flex-wrap items-center justify-between gap-md">
-					<div class="flex flex-col gap-xs">
-						<h2 class="text-lg font-semibold text-neutral">Recent activity</h2>
-						<p class="text-sm text-neutral/60">Signals and milestones from your customers.</p>
+				<header class="gap-md flex flex-wrap items-center justify-between">
+					<div class="gap-xs flex flex-col">
+						<h2 class="text-neutral text-lg font-semibold">Recent activity</h2>
+						<p class="text-neutral/70 text-sm">Signals and milestones from your customers.</p>
 					</div>
 					<Button size="small" variant="ghost" prefix={arrowClockwiseIcon}>Refresh</Button>
 				</header>
 				<Timeline
 					items={activity}
 					variant="ghost"
-					density="large"
+					density="comfortable"
 					showConnectors
 					aria-label="Recent workspace activity"
 				/>
 			</section>
 
 			<aside
-				class="flex flex-col gap-lg rounded-lg border border-neutral-muted bg-surface-raised p-xl"
+				class="gap-lg border-neutral-muted bg-surface-raised p-xl flex flex-col rounded-lg border"
 			>
-				<header class="flex flex-col gap-xs">
-					<h2 class="text-lg font-semibold text-neutral">Today’s focus</h2>
-					<p class="text-sm text-neutral/60">Three accounts need attention.</p>
+				<header class="gap-xs flex flex-col">
+					<h2 class="text-neutral text-lg font-semibold">Today’s focus</h2>
+					<p class="text-neutral/70 text-sm">Three accounts need attention.</p>
 				</header>
-				<ul class="flex flex-col gap-md">
-					<li class="flex items-start gap-md rounded-md bg-warning-muted p-md">
+				<ul class="gap-md flex flex-col">
+					<li class="gap-md bg-warning-muted p-md flex items-start rounded-md">
 						{@render receiptIcon({ class: 'size-5 shrink-0 text-warning-muted-readable' })}
-						<div class="flex min-w-0 flex-col gap-xs">
-							<span class="text-sm font-medium text-neutral">Review overdue invoices</span>
-							<span class="text-sm text-neutral/60">4 customers · $8,240</span>
+						<div class="gap-xs flex min-w-0 flex-col">
+							<span class="text-neutral text-sm font-medium">Review overdue invoices</span>
+							<span class="text-neutral/70 text-sm">4 customers · $8,240</span>
 						</div>
 					</li>
-					<li class="flex items-start gap-md rounded-md bg-primary-muted p-md">
+					<li class="gap-md bg-primary-muted p-md flex items-start rounded-md">
 						{@render usersIcon({ class: 'size-5 shrink-0 text-primary-muted-readable' })}
-						<div class="flex min-w-0 flex-col gap-xs">
-							<span class="text-sm font-medium text-neutral">Follow up with trials</span>
-							<span class="text-sm text-neutral/60">9 trials end this week</span>
+						<div class="gap-xs flex min-w-0 flex-col">
+							<span class="text-neutral text-sm font-medium">Follow up with trials</span>
+							<span class="text-neutral/70 text-sm">9 trials end this week</span>
 						</div>
 					</li>
-					<li class="flex items-start gap-md rounded-md bg-info-muted p-md">
+					<li class="gap-md bg-info-muted p-md flex items-start rounded-md">
 						{@render chartBarIcon({ class: 'size-5 shrink-0 text-info-muted-readable' })}
-						<div class="flex min-w-0 flex-col gap-xs">
-							<span class="text-sm font-medium text-neutral">Share the weekly report</span>
-							<span class="text-sm text-neutral/60">Ready for stakeholder review</span>
+						<div class="gap-xs flex min-w-0 flex-col">
+							<span class="text-neutral text-sm font-medium">Share the weekly report</span>
+							<span class="text-neutral/70 text-sm">Ready for stakeholder review</span>
 						</div>
 					</li>
 				</ul>

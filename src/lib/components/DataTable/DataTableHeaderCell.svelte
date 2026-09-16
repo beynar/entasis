@@ -1,6 +1,6 @@
 <script lang="ts" generics="TData">
-	import type { Column } from '@tanstack/table-core';
 	import type { Attachment } from 'svelte/attachments';
+	import { createPointerDrag } from '$lib/utils/pointerDrag.js';
 	import Button from '../Button/Button.svelte';
 	import Hitbox from '../Hitbox/Hitbox.svelte';
 	import { arrowCounterClockwiseIcon } from '../Icons/arrowCounterClockwise.js';
@@ -19,6 +19,9 @@
 	import type { DataTableHeaderPayload } from './dataTable.props.js';
 	import type { DataTableClasses } from './dataTable.theme.js';
 	import type { DataTableModel } from './dataTable.model.svelte.js';
+	import type { DataTableColumnInstance } from './dataTable.table.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { useTheme } from '../Theme/theme.state.svelte.js';
 
 	let {
 		column,
@@ -30,15 +33,18 @@
 		revision,
 		dragAttachment
 	}: {
-		column: Column<TData, unknown>;
+		column: DataTableColumnInstance<TData>;
 		columnIndex: number;
 		gridColumn: number;
 		model: DataTableModel<TData>;
 		classes: DataTableClasses;
-		density: 'small' | 'normal' | 'large';
+		density: 'compact' | 'normal' | 'comfortable';
 		revision: number;
 		dragAttachment?: Attachment<HTMLElement>;
 	} = $props();
+	const t = $derived(useI18n());
+	// Sheet-versus-floating is the Popover's own device decision; the panel width follows it.
+	const theme = useTheme();
 
 	const config = $derived(model.getColumnConfig(column.id));
 	const sorted: DataTableHeaderPayload<TData>['sorted'] = $derived.by(() => {
@@ -50,21 +56,16 @@
 	const isPrimarySort = $derived(model.state.sorting[0]?.id === column.id);
 	const filtered = $derived(model.state.columnFilters.some((entry) => entry.id === column.id));
 	const pinning = $derived.by(() => {
-		revision;
-		model.state.columnPinning;
-		return column.getIsPinned();
+		void [revision, model.state.columnPinning];
+		return model.getColumnPinning(column);
 	});
 	const leftPinned = $derived.by(() => {
-		revision;
-		model.state.columnPinning;
-		model.state.columnVisibility;
-		return model.table.getLeftVisibleLeafColumns();
+		void [revision, model.state.columnPinning, model.state.columnVisibility];
+		return model.startPinnedColumns;
 	});
 	const rightPinned = $derived.by(() => {
-		revision;
-		model.state.columnPinning;
-		model.state.columnVisibility;
-		return model.table.getRightVisibleLeafColumns();
+		void [revision, model.state.columnPinning, model.state.columnVisibility];
+		return model.endPinnedColumns;
 	});
 	const boundary = $derived.by(() => {
 		if (pinning === 'left' && leftPinned.at(-1)?.id === column.id) return 'left';
@@ -72,16 +73,11 @@
 		return 'none';
 	});
 	const pinnedOffset = $derived.by(() => {
-		revision;
-		model.state.columnPinning;
-		model.state.columnSizing;
-		if (pinning === 'left') return column.getStart('left');
-		if (pinning === 'right') return column.getAfter('right');
-		return 0;
+		void [revision, model.state.columnPinning, model.state.columnSizing];
+		return model.getColumnPinnedOffset(column);
 	});
 	const columnSize = $derived.by(() => {
-		revision;
-		model.state.columnSizing;
+		void [revision, model.state.columnSizing];
 		return column.getSize();
 	});
 	const ariaSort = $derived.by(() => {
@@ -113,32 +109,34 @@
 
 	const menuItems = $derived.by(() => {
 		if (!config) return [];
-		model.state.columnVisibility;
-		model.state.columnPinning;
-		model.state.columnSizing;
-		model.state.grouping;
+		void [
+			model.state.columnVisibility,
+			model.state.columnPinning,
+			model.state.columnSizing,
+			model.state.grouping
+		];
 		const items: MenuItem[] = [];
 		if (config.pinnable !== false) {
 			items.push(
 				{
 					type: 'option',
-					title: 'Pin left',
+					title: t.dataTablePinLeft,
 					prefix: arrowLineLeftIcon,
 					selected: pinning === 'left',
 					suffix: pinning === 'left' ? checkIcon : undefined,
-					onclick: () => column.pin('left')
+					onclick: () => column.pin('start')
 				},
 				{
 					type: 'option',
-					title: 'Pin right',
+					title: t.dataTablePinRight,
 					prefix: arrowLineRightIcon,
 					selected: pinning === 'right',
 					suffix: pinning === 'right' ? checkIcon : undefined,
-					onclick: () => column.pin('right')
+					onclick: () => column.pin('end')
 				},
 				{
 					type: 'option',
-					title: 'Unpin',
+					title: t.dataTableUnpin,
 					prefix: pushPinSlashIcon,
 					disabled: !pinning,
 					onclick: () => column.pin(false)
@@ -148,14 +146,16 @@
 		if (model.props.processingMode !== 'manual' && config.groupable) {
 			items.push({
 				type: 'option',
-				title: model.state.grouping.includes(column.id) ? 'Stop grouping' : 'Group by this column',
+				title: model.state.grouping.includes(column.id)
+					? t.dataTableStopGrouping
+					: t.dataTableGroupByColumn,
 				onclick: () => column.toggleGrouping()
 			});
 		}
 		if (config.resizable !== false) {
 			items.push({
 				type: 'option',
-				title: 'Reset width',
+				title: t.dataTableResetWidth,
 				prefix: arrowCounterClockwiseIcon,
 				onclick: () => column.resetSize()
 			});
@@ -163,7 +163,7 @@
 		if (config.hideable !== false) {
 			items.push({
 				type: 'option',
-				title: 'Hide column',
+				title: t.dataTableHideColumn,
 				prefix: eyeSlashIcon,
 				disabled:
 					model.table.getVisibleLeafColumns().filter((entry) => model.getColumnConfig(entry.id))
@@ -176,11 +176,10 @@
 
 	const sortLabel = $derived.by(() => {
 		const name = typeof config?.header === 'string' ? config.header : column.id;
-		if (!sorted) return `Sort ${name}`;
-		const direction = sorted === 'asc' ? 'ascending' : 'descending';
-		return sortIndex > 0
-			? `${name}, sorted ${direction}, priority ${sortIndex + 1}`
-			: `${name}, sorted ${direction}`;
+		if (!sorted) return t.dataTableSort(name);
+		const sortedLabel =
+			sorted === 'asc' ? t.dataTableSortedAscending(name) : t.dataTableSortedDescending(name);
+		return sortIndex > 0 ? t.dataTableSortPriority(sortedLabel, sortIndex + 1) : sortedLabel;
 	});
 
 	const resizeWithKeyboard = (event: KeyboardEvent) => {
@@ -217,39 +216,22 @@
 	};
 
 	let resizing = $state(false);
-	const startResize = (event: PointerEvent) => {
-		if (event.button !== 0 || model.props.disabled) return;
-		event.preventDefault();
-		const startX = event.clientX;
-		const startSize = column.getSize();
-		const direction =
-			getComputedStyle(event.currentTarget as HTMLElement).direction === 'rtl' ? -1 : 1;
-		resizing = true;
-		const move = (moveEvent: PointerEvent) => {
-			model.setColumnSize(column.id, startSize + (moveEvent.clientX - startX) * direction);
-		};
-		const stop = () => {
-			resizing = false;
-			window.removeEventListener('pointermove', move);
-			window.removeEventListener('pointerup', stop);
-			window.removeEventListener('pointercancel', stop);
-		};
-		window.addEventListener('pointermove', move);
-		window.addEventListener('pointerup', stop, { once: true });
-		window.addEventListener('pointercancel', stop, { once: true });
-	};
-
-	const resizeAttachment: Attachment<HTMLElement> = (element) => {
-		const resetSize = () => column.resetSize();
-		element.addEventListener('pointerdown', startResize);
-		element.addEventListener('keydown', resizeWithKeyboard);
-		element.addEventListener('dblclick', resetSize);
-		return () => {
-			element.removeEventListener('pointerdown', startResize);
-			element.removeEventListener('keydown', resizeWithKeyboard);
-			element.removeEventListener('dblclick', resetSize);
-		};
-	};
+	let resizeStartSize = 0;
+	let resizeDirection = 1;
+	// `createPointerDrag` captures the pointer on the handle, so the drag keeps tracking once the
+	// pointer leaves the document and always ends (pointerup, cancel, lost capture, unmount).
+	const resizeDrag = createPointerDrag({
+		disabled: () => !!model.props.disabled,
+		onStart: ({ node }) => {
+			resizeStartSize = column.getSize();
+			resizeDirection = getComputedStyle(node).direction === 'rtl' ? -1 : 1;
+			resizing = true;
+		},
+		onMove: ({ deltaX }) => {
+			model.setColumnSize(column.id, resizeStartSize + deltaX * resizeDirection);
+		},
+		onEnd: () => (resizing = false)
+	});
 </script>
 
 {#snippet filterFooter()}
@@ -296,7 +278,9 @@
 			data-dnd-handle
 			disabled={model.props.disabled}
 			class={classes.dragHandle()}
-			aria-label={`Reorder ${typeof config.header === 'string' ? config.header : column.id} with left and right arrow keys`}
+			aria-label={t.dataTableReorderColumn(
+				typeof config.header === 'string' ? config.header : column.id
+			)}
 			onkeydown={reorderWithKeyboard}
 		>
 			<Hitbox size="small" />
@@ -334,24 +318,30 @@
 			<PopupMenu
 				closeOnItemClick={false}
 				mobileSheet
-				class={classes.headerMenuPanel()}
+				class={classes.headerMenuPanel({ sheet: theme.isMobile })}
 				menu={{
 					items: menuItems,
-					density: 'small',
+					density: 'compact',
 					footer: config?.filter ? filterFooter : undefined
 				}}
 			>
 				{#snippet trigger(popover)}
 					<Button
 						type="button"
-						label={`Column options for ${typeof config?.header === 'string' ? config.header : column.id}${filtered ? ', filter active' : ''}`}
+						label={filtered
+							? t.dataTableColumnOptionsFiltered(
+									typeof config?.header === 'string' ? config.header : column.id
+								)
+							: t.dataTableColumnOptions(
+									typeof config?.header === 'string' ? config.header : column.id
+								)}
 						prefix={dotsThreeVerticalIcon}
 						variant="ghost"
 						color={filtered ? 'primary' : 'neutral'}
 						size="small"
 						disabled={model.props.disabled}
-						aria-haspopup="menu"
-						aria-expanded={popover.isOpen}
+						haspopup="menu"
+						expanded={popover.isOpen}
 						class={classes.headerMenuButton({ active: filtered })}
 						onclick={() => popover.toggle()}
 						{@attach popover.reference}
@@ -362,10 +352,10 @@
 	</div>
 
 	{#if column.getCanResize()}
-		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+		<!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
 		<span
 			role="separator"
-			aria-label={`Resize ${typeof config?.header === 'string' ? config.header : column.id}`}
+			aria-label={`${t.resize} ${typeof config?.header === 'string' ? config.header : column.id}`}
 			aria-orientation="vertical"
 			aria-valuemin={column.columnDef.minSize ?? 80}
 			aria-valuemax={column.columnDef.maxSize ?? 640}
@@ -374,7 +364,9 @@
 			tabindex={model.props.disabled ? -1 : 0}
 			data-resizing={resizing}
 			class={classes.resizeHandle()}
-			{@attach resizeAttachment}
+			onkeydown={resizeWithKeyboard}
+			ondblclick={() => column.resetSize()}
+			{@attach resizeDrag}
 		></span>
 	{/if}
 </th>

@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { setContext } from 'svelte';
 import { render } from '@testing-library/svelte';
 import { cva } from './engine.js';
 import { setComponentTheme, useComponentTheme } from './theme.js';
@@ -156,6 +157,49 @@ describe('useComponentTheme', () => {
 			result = use({ button: { size: { sm: 'p-4' } } }).button({ size: 'sm' });
 		});
 		expect(result).toBe('rounded text-sm p-4');
+	});
+
+	// The `<Theme components>` registry is rung 2 of the ladder, under a `set*Theme`
+	// subtree — it layers, it is not replaced by it. `useComponentMotion` resolves the
+	// `motion` slot through the same three rungs.
+	const withRegistry = (component: string, entry: Record<string, unknown>, fn: () => void) =>
+		inComponent(() => {
+			setContext('sveltaiTheme', { componentThemes: { [component]: entry } });
+			fn();
+		});
+
+	it('merges a theme provided through the <Theme components> registry', () => {
+		const defaultTheme = makeTheme();
+		let result: string | undefined;
+		withRegistry('btnRegistry', { button: { base: 'ring-1' } }, () => {
+			const use = useComponentTheme('btnRegistry', defaultTheme);
+			result = use().button({ size: 'sm' });
+		});
+		expect(result).toBe('rounded text-sm ring-1');
+	});
+
+	it('keeps the registry underneath a subtree set*Theme instead of dropping it', () => {
+		const defaultTheme = { ...makeTheme(), icon: cva({ base: 'size-4' }) };
+		let root: string | undefined, icon: string | undefined;
+		withRegistry('btnRegistryCtx', { button: { base: 'ring-1' }, icon: { base: 'size-5' } }, () => {
+			setComponentTheme('btnRegistryCtx')({ button: { base: 'shadow' } });
+			const theme = useComponentTheme('btnRegistryCtx', defaultTheme)();
+			root = theme.button({ size: 'sm' });
+			icon = theme.icon({});
+		});
+		// Registry first, subtree second: the subtree wins a conflict but never erases the
+		// slot it did not mention.
+		expect(root).toBe('rounded text-sm ring-1 shadow');
+		expect(icon).toBe('size-5');
+	});
+
+	it('honours override declared on the registry entry', () => {
+		const defaultTheme = makeTheme();
+		let result: string | undefined;
+		withRegistry('btnRegistryOverride', { override: true, button: { base: 'shadow' } }, () => {
+			result = useComponentTheme('btnRegistryOverride', defaultTheme)().button({ size: 'sm' });
+		});
+		expect(result).toBe('shadow');
 	});
 
 	it('reads a theme from its exact component context', () => {

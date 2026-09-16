@@ -14,13 +14,13 @@
 	let preferences = $state({ ...defaults });
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<div class="grid gap-xl md:grid-cols-3">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<div class="gap-xl grid md:grid-cols-3">
 		<aside>
 			<h2 class="text-3xl font-semibold">A little less noise.</h2>
-			<p class="mt-md text-sm text-neutral/65">Choose the updates that deserve your attention.</p>
+			<p class="mt-md text-neutral/65 text-sm">Choose the updates that deserve your attention.</p>
 		</aside>
-		<div class="grid gap-lg md:col-span-2">
+		<div class="gap-lg grid md:col-span-2">
 			<Form
 				variant="sectioned"
 				inputs={{

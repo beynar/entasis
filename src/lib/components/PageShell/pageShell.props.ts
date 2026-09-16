@@ -81,12 +81,7 @@ export type PageShellApi = Readonly<PageShellConfig> & {
 	reset: () => void;
 };
 
-type PageShellRootAttributes = Partial<
-	Pick<
-		HTMLAttributes<HTMLDivElement>,
-		'id' | 'role' | 'style' | 'aria-label' | 'aria-labelledby' | 'aria-describedby'
-	>
-> & {
+type PageShellRootAttributes = Partial<Pick<HTMLAttributes<HTMLDivElement>, 'id' | 'style'>> & {
 	[dataAttribute: `data-${string}`]: string | number | boolean | null | undefined;
 };
 
@@ -97,6 +92,11 @@ export type PageShellProps = WithAttachments<
 			ref?: HTMLElement | null;
 			/** Classes applied to the root shell. */
 			class?: string;
+			/**
+			 * Accessible name for the page's `main` landmark, so a screen reader's landmark list
+			 * tells this region apart from another page's. Applied as `aria-label`.
+			 */
+			label?: string;
 			/** Main page content. Receives the resolved shell API. */
 			children: PageShellRegion;
 			/** Per-instance theme overrides. */

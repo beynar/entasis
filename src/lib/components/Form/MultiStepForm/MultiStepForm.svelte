@@ -124,45 +124,23 @@
 		render={header}
 		payload={form}
 		renderIf={showMeter || !!header}
-		class={cx(
-			isCard
-				? cardClasses.header({
-						density: 'normal',
-						hasAction: false,
-						hasBorder: true,
-						variant: 'solid'
-					})
-				: undefined,
-			classes.multiStepFormHeader()
-		)}
+		class={classes.multiStepFormHeader({ variant })}
 	>
 		{#if showMeter}
 			<Meter value={[form.progress]} steps={form.meterSteps} />
 		{/if}
 	</Slot>
-	<div
-		class={cx(
-			isCard
-				? cardClasses.content({
-						density: 'normal',
-						hasBorderTop: false,
-						hasBorderBottom: false
-					})
-				: undefined,
-			classes.multiStepFormContent()
-		)}
-	>
+	<div class={classes.multiStepFormContent()}>
 		<Stepper
-			bind:stepper={form.stepper}
+			bind:api={form.stepper}
 			bind:value={form.activeStep}
 			{items}
-			class={isCard ? '-mx-4 w-auto max-w-none' : undefined}
+			class={isCard ? '-mx-xl w-auto max-w-none' : undefined}
 		>
 			{#snippet children({ item, index })}
 				<div class={isCard ? 'min-w-0 pb-1' : 'min-w-0'}>
 					<FormCardSurfaceBoundary isOwned={isCard}>
 						<Form
-							class={isCard ? undefined : 'p-4'}
 							inputs={item.inputs}
 							onSubmit={() => form.submit()}
 							bind:form={() => form.getForm(index), (nextForm) => form.setForm(index, nextForm)}
@@ -181,14 +159,7 @@
 		</Stepper>
 		{@render children?.(form)}
 	</div>
-	<Slot
-		render={footer}
-		payload={form}
-		class={cx(
-			isCard ? cardClasses.footer({ density: 'normal', hasBorder: true }) : undefined,
-			classes.multiStepFormFooter()
-		)}
-	>
+	<Slot render={footer} payload={form} class={classes.multiStepFormFooter({ variant })}>
 		<Button
 			{...previousButton.forwardedProps}
 			prefix={arrowLeftIcon}

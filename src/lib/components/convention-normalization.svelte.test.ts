@@ -37,14 +37,14 @@ describe('component convention normalization', () => {
 		render(Chip, {
 			props: {
 				children: '7',
-				position: 'topRight',
+				position: 'top-right',
 				theme: {
 					root: { base: 'canonical-root-class' }
 				}
 			}
 		});
 
-		const chip = screen.getByText('7').closest('[data-chip-position="topRight"]');
+		const chip = screen.getByText('7').closest('[data-chip-position="top-right"]');
 		expect(chip).toHaveClass('canonical-root-class', 'absolute');
 	});
 
@@ -96,7 +96,12 @@ describe('component convention normalization', () => {
 			ratingCurrentTarget = event.currentTarget;
 		});
 		render(Stat, {
-			props: { label: 'Revenue', indicator: 'Open actions', onclick: onStatClick }
+			props: {
+				label: 'Revenue',
+				action: 'Open actions',
+				actionLabel: 'Open actions',
+				onAction: onStatClick
+			}
 		});
 		render(Rating, { props: { value: 3, onclick: onRatingClick } });
 

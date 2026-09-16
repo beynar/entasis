@@ -21,15 +21,15 @@
 			name: 'variant',
 			type: 'segmented',
 			label: 'Variant',
-			value: 'soft',
+			value: 'outline',
 			options: variants
 		},
 		{
 			name: 'color',
 			type: 'segmented',
 			label: 'Color',
-			value: 'success',
-			options: ['primary', 'success', 'info', 'warning', 'danger']
+			value: 'neutral',
+			options: ['neutral', 'primary', 'success', 'info', 'warning', 'danger']
 		},
 		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
 	]);
@@ -39,10 +39,10 @@
 
 <DocPage
 	title="Alert"
-	subtitle="Contextual banners that communicate status, warnings, or important messages. The `soft` variant is the tinted 'toast' look — a muted surface, colored border and filled status icon, readable in light and dark."
+	subtitle="Contextual banners that communicate status, warnings, or important messages. Outline is the quiet default — a hairline surface with a colored status icon only. Soft remains available for the tinted toast look."
 	component="Alert"
 	features={[
-		'soft variant: tinted surface + filled status icon',
+		'outline default: hairline surface, colored icon only',
 		'solid / outline / soft variants',
 		'Eight colors, three sizes',
 		'Optional dismiss button',
@@ -51,7 +51,7 @@
 >
 	<ComponentCard
 		{controls}
-		description="The soft variant gives the tinted status look. A matching filled icon is added automatically."
+		description="Outline is the quiet default: hairline surface, colored icon only. Soft stays available when you want a tinted surface."
 		code={`<Alert
 	size="${controls.value.size}"
 	variant="${controls.value.variant}"
@@ -143,7 +143,7 @@
 			class="!min-h-fit !items-stretch !justify-start"
 			code={`<script>
 	let dismissed = $state(false);
-<\/script>
+</scr${'ipt'}>
 
 {#if !dismissed}
 	<Alert
@@ -205,7 +205,7 @@
 			title="Title only"
 			description="Description is optional; a single-line alert vertically centers its icon."
 			class="!min-h-fit !items-stretch !justify-start"
-			code={`<Alert variant="soft" color="success" title="Profile updated" />`}
+			code="<Alert variant=&quot;soft&quot; color=&quot;success&quot; title=&quot;Profile updated&quot; />"
 		>
 			<div class="grid w-full max-w-md gap-3">
 				<Alert variant="soft" color="success" title="Profile updated" />

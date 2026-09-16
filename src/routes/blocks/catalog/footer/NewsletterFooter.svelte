@@ -5,11 +5,11 @@
 	let email = $state('');
 </script>
 
-<footer class="flex flex-col gap-xl border-t border-neutral-muted p-lg md:p-xl">
-	<div class="grid gap-xl md:grid-cols-2">
-		<div class="flex max-w-md flex-col gap-lg">
+<footer class="gap-xl border-neutral-muted p-lg md:p-xl flex flex-col border-t">
+	<div class="gap-xl grid md:grid-cols-2">
+		<div class="gap-lg flex max-w-md flex-col">
 			<Heading as="h2" size="h3">A note for curious minds.</Heading>
-			<p class="text-sm text-neutral/70">
+			<p class="text-neutral/70 text-sm">
 				Product ideas, useful patterns, and small things worth noticing.
 			</p>
 			<Form
@@ -19,33 +19,33 @@
 					{ children: 'Review subscription', variant: 'outline', onAction: (form) => form.submit() }
 				]}
 			/>
-			<p class="text-xs text-neutral/50">Local preview only; this example sends no subscription.</p>
-			{#if email}<p class="text-sm text-primary" role="status">
+			<p class="text-neutral/65 text-xs">Local preview only; this example sends no subscription.</p>
+			{#if email}<p class="text-primary-readable text-sm" role="status">
 					Subscription draft for {email}
 				</p>{/if}
 		</div>
-		<div class="grid grid-cols-2 gap-xl">
-			<nav aria-label="Product links" class="flex flex-col items-start gap-lg">
-				<strong>Build</strong><a href="/components" class="text-sm text-neutral/60 hover:underline"
+		<div class="gap-xl grid grid-cols-2">
+			<nav aria-label="Product links" class="gap-lg flex flex-col items-start">
+				<strong>Build</strong><a href="/components" class="text-neutral/70 text-sm hover:underline"
 					>Components</a
-				><a href="/blocks" class="text-sm text-neutral/60 hover:underline">Blocks</a><a
+				><a href="/blocks" class="text-neutral/70 text-sm hover:underline">Blocks</a><a
 					href="/colors"
-					class="text-sm text-neutral/60 hover:underline">Color system</a
+					class="text-neutral/70 text-sm hover:underline">Color system</a
 				>
 			</nav>
-			<nav aria-label="Learning links" class="flex flex-col items-start gap-lg">
-				<strong>Learn</strong><a href="/docs" class="text-sm text-neutral/60 hover:underline"
+			<nav aria-label="Learning links" class="gap-lg flex flex-col items-start">
+				<strong>Learn</strong><a href="/docs" class="text-neutral/70 text-sm hover:underline"
 					>Getting started</a
-				><a href="/components/form" class="text-sm text-neutral/60 hover:underline">Forms</a><a
+				><a href="/components/form" class="text-neutral/70 text-sm hover:underline">Forms</a><a
 					href="/docs"
-					class="text-sm text-neutral/60 hover:underline">Theming</a
+					class="text-neutral/70 text-sm hover:underline">Theming</a
 				>
 			</nav>
 		</div>
 	</div>
 	<Separator />
-	<div class="flex flex-wrap items-center justify-between gap-lg">
-		<strong class="text-2xl">Northstar®</strong><span class="text-xs text-neutral/50"
+	<div class="gap-lg flex flex-wrap items-center justify-between">
+		<strong class="text-2xl">Northstar®</strong><span class="text-neutral/65 text-xs"
 			>Good ideas, made useful.</span
 		>
 	</div>

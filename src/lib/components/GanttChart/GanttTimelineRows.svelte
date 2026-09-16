@@ -106,8 +106,8 @@
 				class={chart.classes.timelineRow({
 					...chart.themeVariants,
 					class: [
-						chart.selectedRowTaskId === node.taskId ? 'bg-color/4' : undefined,
-						isResourceGroupStart ? 'border-t border-t-neutral/20' : undefined
+						chart.selectedRowTaskId === node.taskId ? 'bg-selected/4' : undefined,
+						isResourceGroupStart ? 'border-t-neutral/20 border-t' : undefined
 					]
 				})}
 				style:top={`${virtualRow.start}px`}

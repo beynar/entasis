@@ -8,17 +8,15 @@
 	import type { SelectionMenuProps, SelectionMenuPayload } from './selectionMenu.props.js';
 	import { SelectionMenuState } from './selectionMenu.state.svelte.js';
 	import { useSelectionMenuTheme } from './selectionMenu.theme.js';
-	import { createBindableValue } from '$lib/utils/state.svelte.js';
 
 	let {
 		target,
-		defaultValue = [],
-		value = $bindable(),
-		ariaLabel,
+		items = $bindable(),
+		label,
 		color,
 		variant,
 		disabled = false,
-		onValueChange,
+		onItemsChange,
 		class: className,
 		theme: toggleMenuTheme,
 		children: content,
@@ -30,29 +28,21 @@
 		directedTransition = true,
 		closeOnEscape = true,
 		closeOnClickOutside = true,
-		popoverClass,
+		popover,
 		contentClass,
-		onSelectionChange,
+		onSelect,
 		onAfterOpen,
 		onAfterClose,
 		selectionTheme,
-		popoverTheme,
 		...attachments
 	}: SelectionMenuProps = $props();
-	const valueState = createBindableValue(
-		() => value,
-		(next) => {
-			value = next;
-		},
-		() => defaultValue
-	);
 
 	let open = $state(false);
 	let popoverState = $state<PopoverState | null>(null);
 	let contentElement = $state<HTMLElement | null>(null);
 
 	const classes = $derived(useSelectionMenuTheme(selectionTheme));
-	const selectionMenu = new SelectionMenuState(() => ({ target, onSelectionChange }));
+	const selectionMenu = new SelectionMenuState(() => ({ target, onSelect }));
 	const payload = $derived<SelectionMenuPayload>({
 		selection: selectionMenu.selection,
 		target: selectionMenu.targetElement,
@@ -130,34 +120,33 @@
 	{closeOnEscape}
 	{closeOnClickOutside}
 	lockScroll={false}
-	class={classes.popover({ className: popoverClass })}
-	theme={popoverTheme}
+	class={classes.popover({ className: popover?.class })}
+	theme={popover?.theme}
 	onAfterOpen={() => onAfterOpen?.(payload)}
 	onAfterClose={() => onAfterClose?.(payload)}
 >
-	{#snippet children(popover)}
+	{#snippet children(anchor)}
 		{#if content}
 			<div
 				data-slot="selection-menu-content"
 				class={classes.content({ className: contentClass })}
-				{@attach contentReference(popover)}
+				{@attach contentReference(anchor)}
 				{...attachments}
 			>
 				<Slot render={content} {payload} />
 			</div>
 		{:else}
 			<ToggleMenu
-				bind:value={valueState.value}
-				{defaultValue}
-				{ariaLabel}
+				bind:items
+				{label}
 				{size}
 				{color}
 				{variant}
 				{disabled}
-				{onValueChange}
+				{onItemsChange}
 				class={className}
 				theme={toggleMenuTheme}
-				{@attach contentReference(popover)}
+				{@attach contentReference(anchor)}
 				{...attachments}
 			/>
 		{/if}

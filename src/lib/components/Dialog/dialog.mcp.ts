@@ -31,7 +31,7 @@ The Dialog component (also known as Modal) displays content in a layer above the
   - drawerTop: Drawer sliding in from the top
   - alert: Alert-style dialog
   - modal: Standard modal dialog
-  - Supports responsive values: pass a \`(breakpoint) => DialogType\` function to vary the type per breakpoint (breakpoint is one of 'xs' | 'sm' | 'md' | 'lg' | 'xl', tracked live from the viewport)
+  - Supports responsive values: pass a \`Partial<Record<Breakpoint, DialogType>>\` record such as \`{ xs: 'drawerBottom', md: 'modal' }\` to vary the type per breakpoint (breakpoint is one of 'xs' | 'sm' | 'md' | 'lg' | 'xl', tracked live from the viewport; the nearest defined key at or below the active one wins)
 - **responsive**: boolean (default: true) - When the resolved type is \`modal\`, collapse it into a \`drawerBottom\` bottom sheet on mobile (viewport < 768px). The sheet inherits swipe-to-dismiss and the drag thumb. Set false to keep a centered modal on every screen size
 
 ### Layout Props
@@ -42,8 +42,8 @@ The Dialog component (also known as Modal) displays content in a layer above the
 
 ### Event Props
 - **onOpenChange**: (open: boolean) => void - Called once for each library-requested state change
-- **onAfterOpen**: (dialog: DialogState) => void - Called after the open transition finishes
-- **onAfterClose**: (dialog: DialogState) => void - Called after the close transition finishes
+- **onAfterOpen**: (payload: DialogState) => void - Called after the open transition finishes
+- **onAfterClose**: (payload: DialogState) => void - Called after the close transition finishes
 
 ### Slot Props
 - **title**: string | Snippet<[DialogState]> - Dialog title
@@ -226,13 +226,13 @@ size:"small"
 \`\`\`svelte
 <script>
 	import { Dialog } from 'svelai/dialog';
-	import { Icon } from 'svelai/icons';
+	import { warningIcon } from 'svelai/icons/warning';
 </script>
 
 <Dialog bind:open>
 	{#snippet header()}
 		<div class="flex items-center gap-2">
-			<Icon name="warning" />
+			{@render warningIcon()}
 			<h2>Warning</h2>
 		</div>
 	{/snippet}
@@ -254,8 +254,8 @@ size:"small"
 <Dialog 
 	bind:open
 	title="Lifecycle"
-	onAfterOpen={(dialog) => console.log('Dialog opened', dialog)}
-	onAfterClose={(dialog) => console.log('Dialog closed', dialog)}
+	onAfterOpen={(payload) => console.log('Dialog opened', payload)}
+	onAfterClose={(payload) => console.log('Dialog closed', payload)}
 >
 	Watch the console
 </Dialog>
@@ -273,11 +273,12 @@ The Dialog component uses a \`DialogState\` instance that is passed to all slot 
 
 ## Accessibility
 
-- Focus is trapped within the dialog when open
-- Escape key closes the dialog (when enabled)
+- Initial focus goes to an \`[autofocus]\` / \`[data-autofocus]\` element inside the dialog, else the first tabbable control (the close button is skipped), else the panel itself
+- Tab and Shift+Tab are contained inside the dialog, and the rest of the page is \`inert\` while a modal is open
+- Focus is restored to the opener after the close transition finishes, just before \`onAfterClose\`
+- \`aria-labelledby\` links the \`title\` and \`aria-describedby\` links the \`description\`
+- Escape closes only the topmost open layer and an outside press dismisses the layers above the one pressed; both honour \`closeOnEscape\` / \`closable\` / \`closeOnClickOutside\` through the shared layer stack
 - Body scroll is locked when dialog is open
-- Proper ARIA attributes for screen readers
-- Focus returns to trigger element on close
 
 ## Notes
 
@@ -294,6 +295,9 @@ The Dialog component uses a theme object that can be customized using the \`them
 ### Theme Structure
 
 The theme object contains the following parts:
+- **motion**: Open/close transition preset, keyed by \`type\` (drawers fly from their edge). Takes
+  \`in\` / \`out\` FSO params plus a \`duration\` / \`easing\` motion token; the \`transition\` prop wins
+  over it
 - **root**: Dialog overlay/backdrop styles
 - **content**: Dialog content container styles
 - **thumb**: Drag thumb bar styles (type variant controls per-side placement)
@@ -311,12 +315,13 @@ import type { DialogThemeProps } from 'svelai/dialog';
 // Example theme customization
 const customTheme: DialogThemeProps = {
   root: {
-    base: 'z-[+50] fixed py-4 left-0 flex bg-neutral/20',
-    size: {
-      small: 'max-w-screen max-h-screen',
-      normal: 'max-w-screen max-h-screen',
-      large: 'max-w-screen max-h-screen'
-    },
+    base: 'z-[+50] fixed inset-0 flex',
+    scroll: {
+      inner: 'overflow-hidden',
+      outer: 'overflow-auto'
+    }
+  },
+  align: {
     type: {
       fullScreen: 'justify-center items-center',
       drawerRight: 'justify-end',
@@ -410,7 +415,7 @@ const customTheme: DialogThemeProps = {
   title="Custom Dialog"
   theme={{
     content: {
-      base: 'rounded-2xl shadow-2xl',
+      base: 'rounded-2xl raised-5',
       size: {
         normal: 'max-w-2xl'
       }
@@ -429,14 +434,17 @@ const customTheme: DialogThemeProps = {
 <Dialog 
   type="drawerRight"
   theme={{
-    root: {
+    align: {
       type: {
-        drawerRight: 'justify-end bg-black/50'
+        drawerRight: 'justify-end'
       }
+    },
+    backdrop: {
+      base: 'bg-black/50'
     },
     content: {
       type: {
-        drawerRight: 'rounded-l-xl shadow-xl'
+        drawerRight: 'rounded-l-xl raised-5'
       }
     }
   }}
@@ -455,7 +463,7 @@ const customTheme: DialogThemeProps = {
       base: 'backdrop-blur-sm'
     },
     content: {
-      base: 'shadow-2xl border-2',
+      base: 'lift-5 border-2',
       size: {
         normal: 'max-w-2xl'
       }

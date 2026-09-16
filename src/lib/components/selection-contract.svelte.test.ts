@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
+import Command from './Command/Command.svelte';
 import SelectionLawHarness from './SelectionLawHarness.test.svelte';
 import Tabbar from './Tabbar/Tabbar.svelte';
 import ToggleButton from './ToggleButton/ToggleButton.svelte';
@@ -36,30 +37,30 @@ describe('selection contract', () => {
 
 	test('distinguishes suggestion activation from a selection state change', async () => {
 		const onValueChange = vi.fn();
-		const onSuggestionSelect = vi.fn();
+		const onSelect = vi.fn();
 		render(SelectionLawHarness, {
-			props: { scenario: 'ai-suggestions', onValueChange, onSuggestionSelect }
+			props: { scenario: 'ai-suggestions', onValueChange, onSelect }
 		});
 		await fireEvent.click(screen.getByRole('button', { name: 'Summarize' }));
 		expect(onValueChange).not.toHaveBeenCalled();
-		expect(onSuggestionSelect).toHaveBeenCalledExactlyOnceWith('Summarize');
+		expect(onSelect).toHaveBeenCalledExactlyOnceWith('Summarize');
 		await fireEvent.click(screen.getByRole('button', { name: 'Explain' }));
 		expect(onValueChange).toHaveBeenCalledExactlyOnceWith('Explain');
-		expect(onSuggestionSelect).toHaveBeenCalledTimes(2);
+		expect(onSelect).toHaveBeenCalledTimes(2);
 	});
 
 	test('uses a toggle default once and keeps later external changes silent', async () => {
 		const onValueChange = vi.fn();
 		const { rerender } = render(ToggleButton, {
-			props: { ariaLabel: 'Uncontrolled toggle', defaultValue: true, onValueChange }
+			props: { label: 'Uncontrolled toggle', defaultValue: true, onValueChange }
 		});
 		const button = screen.getByRole('button', { name: 'Uncontrolled toggle' });
-		await rerender({ ariaLabel: 'Uncontrolled toggle', defaultValue: false, onValueChange });
+		await rerender({ label: 'Uncontrolled toggle', defaultValue: false, onValueChange });
 		expect(button).toHaveAttribute('aria-pressed', 'true');
 		expect(onValueChange).not.toHaveBeenCalled();
 		await fireEvent.click(button);
 		expect(onValueChange).toHaveBeenCalledExactlyOnceWith(false);
-		await rerender({ ariaLabel: 'Uncontrolled toggle', defaultValue: true, onValueChange });
+		await rerender({ label: 'Uncontrolled toggle', defaultValue: true, onValueChange });
 		expect(button).toHaveAttribute('aria-pressed', 'false');
 		expect(onValueChange).toHaveBeenCalledOnce();
 	});
@@ -93,14 +94,53 @@ describe('selection contract', () => {
 		const onValueChange = vi.fn();
 		render(SelectionLawHarness, { props: { scenario: 'tabs', onValueChange } });
 		await fireEvent.click(screen.getByRole('tab', { name: 'Settings' }));
-		expect(onValueChange).toHaveBeenCalledExactlyOnceWith(1);
-		expect(screen.getByRole('status')).toHaveTextContent('1');
+		expect(onValueChange).toHaveBeenCalledExactlyOnceWith({
+			value: 'Settings',
+			item: 'Settings',
+			index: 1
+		});
+		expect(screen.getByRole('status')).toHaveTextContent('Settings');
 		await fireEvent.click(screen.getByRole('button', { name: 'Go to first panel' }));
 		expect(onValueChange).toHaveBeenCalledTimes(2);
-		expect(onValueChange).toHaveBeenLastCalledWith(0);
+		expect(onValueChange).toHaveBeenLastCalledWith({
+			value: 'Overview',
+			item: 'Overview',
+			index: 0
+		});
 		await fireEvent.click(screen.getByRole('button', { name: 'External tab change' }));
-		expect(screen.getByRole('status')).toHaveTextContent('1');
+		expect(screen.getByRole('status')).toHaveTextContent('Settings');
 		expect(onValueChange).toHaveBeenCalledTimes(2);
+	});
+
+	test('Command keeps its selected value distinct from activation', async () => {
+		const onValueChange = vi.fn();
+		const onSelect = vi.fn();
+		render(Command, {
+			props: {
+				items: [
+					{
+						items: [
+							{ value: 'open', label: 'Open' },
+							{ value: 'close', label: 'Close' }
+						]
+					}
+				],
+				onValueChange,
+				onSelect
+			}
+		});
+
+		await fireEvent.click(screen.getByRole('option', { name: 'Open' }));
+		expect(onValueChange).toHaveBeenCalledExactlyOnceWith('open');
+		expect(onSelect).toHaveBeenCalledExactlyOnceWith('open');
+
+		await fireEvent.click(screen.getByRole('option', { name: 'Open' }));
+		expect(onValueChange).toHaveBeenCalledOnce();
+		expect(onSelect).toHaveBeenCalledTimes(2);
+
+		await fireEvent.click(screen.getByRole('option', { name: 'Close' }));
+		expect(onValueChange).toHaveBeenCalledTimes(2);
+		expect(onValueChange).toHaveBeenLastCalledWith('close');
 	});
 
 	test('keeps externally controlled Accordion changes silent', async () => {
@@ -136,6 +176,29 @@ describe('selection contract', () => {
 		expect(screen.getByRole('status')).toHaveTextContent('false');
 		expect(onOpenChange).toHaveBeenCalledOnce();
 		expect(onDisplayStateChange).toHaveBeenCalledOnce();
+	});
+
+	// Selection has exactly two public callback names: `onSelect` for the event of picking one item
+	// and `onSelectionChange` for a selection-model state change. Qualified spellings
+	// (`onSuggestionSelect`, `onSlotSelect`, `onMenuSelect`, `onPick`, ...) drift apart across
+	// components, so the props files may not reintroduce them.
+	test('public props declare no selection callback outside onSelect and onSelectionChange', () => {
+		const propsFiles = import.meta.glob('./**/*.props.ts', {
+			query: '?raw',
+			import: 'default',
+			eager: true
+		}) as Record<string, string>;
+		const entries = Object.entries(propsFiles);
+		expect(entries.length).toBeGreaterThan(50);
+
+		const callback = /\bon[A-Za-z]*(?:Select|Pick|Choose)[A-Za-z]*(?=\??\s*[:(])/g;
+		const offenders = entries.flatMap(([file, source]) =>
+			[...source.matchAll(callback)]
+				.map((match) => match[0])
+				.filter((name) => name !== 'onSelect' && name !== 'onSelectionChange')
+				.map((name) => `${file}: ${name}`)
+		);
+		expect(offenders).toEqual([]);
 	});
 
 	test('navigates empty and newly disabled tab lists without looping or activation', async () => {

@@ -7,4 +7,3 @@ export {
 	type MenuOptionTheme,
 	type MenuOptionThemeProps
 } from './menuOption.theme.js';
-

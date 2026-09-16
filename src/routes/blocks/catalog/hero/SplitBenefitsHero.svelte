@@ -11,44 +11,44 @@
 	import { circleIcon } from 'svelai/icons/circle';
 </script>
 
-<section class="mx-auto grid max-w-6xl items-center gap-xl p-lg md:grid-cols-2 md:p-xl">
-	<div class="flex flex-col items-start gap-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl items-center md:grid-cols-2">
+	<div class="gap-xl flex flex-col items-start">
 		<Chip color="success" variant="soft">A calmer way to work</Chip><Heading
 			as="h2"
 			size="h1"
 			weight="bold">Give your team a clear next step.</Heading
 		>
-		<p class="text-lg text-neutral/70">
+		<p class="text-neutral/70 text-lg">
 			A shared place to turn good ideas into work you can actually move forward.
 		</p>
-		<ul class="flex flex-col gap-md">
+		<ul class="gap-md flex flex-col">
 			{#each ['The context stays with the work', 'Progress is easy to understand', 'Everyone knows where to begin'] as benefit (benefit)}<li
-					class="flex items-center gap-sm text-sm"
+					class="gap-sm flex items-center text-sm"
 				>
 					<span class="text-success">{@render checkCircleIcon()}</span>{benefit}
 				</li>{/each}
 		</ul>
 		<Button href="/blocks" size="large" suffix={arrowRightIcon}>Find your workflow</Button>
 	</div>
-	<div class="rounded-3xl bg-primary-muted p-lg md:p-xl">
+	<div class="bg-primary-muted p-lg md:p-xl rounded-3xl">
 		<Card title="A thoughtful product launch" description="Project brief · Shared with your team"
 			><Stack gap="lg"
 				><Chip class="self-start" color="success" size="small">On track</Chip>
-				<div class="flex flex-col gap-md">
+				<div class="gap-md flex flex-col">
 					{#each ['Understand the audience', 'Make a useful first version', 'Review with the team'] as task, index (task)}<div
-							class="flex items-center gap-md rounded-lg bg-surface-recessed p-md"
+							class="gap-md bg-surface-recessed p-md flex items-center rounded-lg"
 						>
-							<span class="text-primary"
+							<span class="text-primary-readable"
 								>{@render (index < 2 ? checkCircleIcon : circleIcon)()}</span
 							><span class="text-sm">{task}</span>
 						</div>{/each}
 				</div>
 				<Separator />
-				<div class="flex items-center justify-between gap-md">
+				<div class="gap-md flex items-center justify-between">
 					<AvatarGroup
 						size="small"
 						items={[{ name: 'Maya Chen' }, { name: 'Theo Park' }, { name: 'Nora Ellis' }]}
-					/><span class="text-xs text-neutral/60">Next review · Friday</span>
+					/><span class="text-neutral/70 text-xs">Next review · Friday</span>
 				</div></Stack
 			></Card
 		>

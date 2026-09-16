@@ -2,7 +2,7 @@
 	import Avatar from '$lib/components/Avatar/Avatar.svelte';
 	import Button from '$lib/components/Button/Button.svelte';
 	import HoverCard from '$lib/components/HoverCard/HoverCard.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
@@ -22,7 +22,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		}
 	]);
 	const stats = [
@@ -34,10 +34,10 @@
 
 {#snippet profileContent()}
 	<div class="flex items-start gap-3">
-		<Avatar user={{ name: 'Svelai' }} />
+		<Avatar name="Svelai" />
 		<div class="grid gap-1">
 			<p class="text-sm font-semibold">@svelai</p>
-			<p class="text-neutral/60 text-sm">
+			<p class="text-neutral/70 text-sm">
 				Configuration-first Svelte components with theme-aware primitives.
 			</p>
 		</div>
@@ -49,7 +49,7 @@
 	subtitle="A hover and focus preview composed from Popover positioning and Card content."
 	component="HoverCard"
 	features={[
-		'Opens on hover and keyboard focus',
+		{ label: 'Opens on hover and keyboard focus', test: 'a11y:hover-card.focus-opens' },
 		'Configurable open and close delays',
 		'Positioned by Popover with flip-aware transitions',
 		'Card-powered title, description, content and footer',
@@ -76,7 +76,7 @@
 			title="@svelai"
 			description="Configuration-first Svelte components."
 		>
-			<p class="text-neutral/60 text-sm">
+			<p class="text-neutral/70 text-sm">
 				Theme-aware primitives for building application interfaces.
 			</p>
 		</HoverCard>
@@ -88,21 +88,17 @@
 			description="Use snippet content for richer previews while the card still owns the surface."
 			class="!min-h-fit"
 			code={`<HoverCard trigger={{ content: 'Preview profile', variant: 'outline' }}>
-	{#snippet content()}
-		<div class="flex items-start gap-3">
-			<Avatar user={{ name: 'Svelai' }} />
-			<div>
-				<p>@svelai</p>
-				<p>Configuration-first Svelte components.</p>
-			</div>
+	<div class="flex items-start gap-3">
+		<Avatar name="Svelai" />
+		<div>
+			<p>@svelai</p>
+			<p>Configuration-first Svelte components.</p>
 		</div>
-	{/snippet}
+	</div>
 </HoverCard>`}
 		>
 			<HoverCard trigger={{ content: 'Preview profile', variant: 'outline' }}>
-				{#snippet content()}
-					{@render profileContent()}
-				{/snippet}
+				{@render profileContent()}
 			</HoverCard>
 		</ComponentCard>
 
@@ -198,12 +194,12 @@
 					{#each stats as stat (stat.label)}
 						<div class="bg-neutral-muted rounded-md p-2 text-center">
 							<div class="text-neutral text-sm font-semibold">{stat.value}</div>
-							<div class="text-neutral/60 text-xs">{stat.label}</div>
+							<div class="text-neutral/70 text-xs">{stat.label}</div>
 						</div>
 					{/each}
 				</div>
 				{#snippet footer()}
-					<span class="text-neutral/60 text-xs">Updated just now</span>
+					<span class="text-neutral/70 text-xs">Updated just now</span>
 				{/snippet}
 			</HoverCard>
 		</ComponentCard>
@@ -226,9 +222,7 @@
 				{#snippet trigger(hoverCard)}
 					<Button variant={hoverCard.isOpen ? 'solid' : 'outline'}>Preview</Button>
 				{/snippet}
-				<p class="text-neutral/60 text-sm">
-					The trigger snippet receives the hover card state.
-				</p>
+				<p class="text-neutral/70 text-sm">The trigger snippet receives the hover card state.</p>
 			</HoverCard>
 		</ComponentCard>
 	{/snippet}

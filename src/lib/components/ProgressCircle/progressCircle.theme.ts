@@ -5,6 +5,8 @@ import {
 	type InferComponentTheme
 } from '$lib/utils/cva/index.js';
 
+// `--progress-circle-size` is INTERNAL: the root publishes the resolved diameter for the svg
+// and label parts. It follows the `size` prop, which is the public way to change it.
 const defaultProgressCircleRoot = cva({
 	base: 'inline-flex shrink-0 items-center justify-center align-middle [--progress-circle-size:1.75rem]',
 	variants: {
@@ -25,7 +27,7 @@ const defaultProgressCircleRoot = cva({
 	},
 	defaultVariants: {
 		size: 'normal',
-		color: 'primary'
+		color: 'neutral'
 	}
 });
 
@@ -38,7 +40,7 @@ const defaultProgressCircleTrack = cva({
 });
 
 const defaultProgressCircleIndicator = cva({
-	base: 'origin-center -rotate-90 stroke-current transition-[stroke-dashoffset] duration-500 ease-out motion-reduce:transition-none'
+	base: 'origin-center -rotate-90 stroke-current transition-[stroke-dashoffset] duration-slower ease-standard motion-reduce:transition-none'
 });
 
 export const progressCircleTheme = {

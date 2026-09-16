@@ -1,4 +1,4 @@
-import { createChartRuntime } from '@tanstack/charts';
+import { createChartRuntime, type SceneNode } from '@tanstack/charts';
 import { render } from 'svelte/server';
 import type { Component } from 'svelte';
 import { describe, expect, test } from 'vitest';
@@ -22,7 +22,7 @@ function scene(mark: ChartMark<Row>, value?: readonly string[], legend?: ChartLe
 		y: { scale: { type: 'linear' } },
 		legend: { interactive: true, value, ...legend },
 		idPrefix: 'legend',
-		ariaLabel: 'Legend chart'
+		label: 'Legend chart'
 	});
 	return createChartRuntime<Row, ChartValue, ChartValue>().render(options.definition, {
 		width: 640,
@@ -30,23 +30,40 @@ function scene(mark: ChartMark<Row>, value?: readonly string[], legend?: ChartLe
 	});
 }
 
-describe('Chart native legend', () => {
-	test.each(['top', 'bottom'] as const)('aligns and stacks native controls at %s', (placement) => {
-		const mark: ChartMark<Row> = { type: 'series', x: 'x', y: 'y', series: 'group' };
-		const horizontal = scene(mark, undefined, { placement, orientation: 'horizontal' });
-		const vertical = scene(mark, undefined, { placement, orientation: 'vertical', align: 'right' });
-		expect(horizontal.controls?.[0]).toMatchObject({ columns: 2, bounds: { width: 228 } });
-		expect(vertical.controls?.[0]).toMatchObject({ columns: 1, bounds: { width: 110 } });
-		expect(vertical.points).toHaveLength(horizontal.points.length);
-		for (const interactive of [true, false]) {
-			const left = scene(mark, undefined, { placement, interactive, align: 'left' });
-			const center = scene(mark, undefined, { placement, interactive, align: 'center' });
-			const right = scene(mark, undefined, { placement, interactive, align: 'right' });
-			expect(JSON.stringify(center.nodes)).not.toEqual(JSON.stringify(left.nodes));
-			expect(JSON.stringify(right.nodes)).not.toEqual(JSON.stringify(center.nodes));
-			expect(center.scales.x.domain).toEqual(left.scales.x.domain);
+function legendNode(nodes: readonly SceneNode[]): SceneNode | undefined {
+	return nodes
+		.flatMap((node) => (node.kind === 'group' ? [node, ...legendNodes(node.children)] : [node]))
+		.find((node) => node.key === 'legend');
+}
+
+function legendNodes(nodes: readonly SceneNode[]): readonly SceneNode[] {
+	return nodes.flatMap((node) =>
+		node.kind === 'group' ? [node, ...legendNodes(node.children)] : [node]
+	);
+}
+
+describe('Chart legend ownership between the engine and the library', () => {
+	test.each(['top', 'bottom'] as const)(
+		'paints and reserves nothing for a categorical legend at %s',
+		(placement) => {
+			const mark: ChartMark<Row> = { type: 'series', x: 'x', y: 'y', series: 'group' };
+			for (const interactive of [true, false]) {
+				const plot = scene(mark, undefined, { placement, interactive });
+				// The engine keeps the visibility semantics and gives up the band and the DOM: the
+				// `legend` node is empty and no native control is registered.
+				expect(plot.controls ?? []).toEqual([]);
+				expect(legendNode(plot.nodes)).toMatchObject({ kind: 'group', children: [] });
+			}
+			// `align` and `orientation` are theme classes on the Svelte row now, so moving them
+			// cannot move the plot.
+			const left = scene(mark, undefined, { placement, align: 'left' });
+			const right = scene(mark, undefined, { placement, align: 'right', orientation: 'vertical' });
+			expect(JSON.stringify(right.nodes)).toEqual(JSON.stringify(left.nodes));
+			expect(right.scales.x.domain).toEqual(left.scales.x.domain);
+			expect(right.points).toHaveLength(left.points.length);
 		}
-	});
+	);
+
 	test.each([
 		{ type: 'series', x: 'x', y: 'y', colorBy: 'group', points: true },
 		{ type: 'series', x: 'x', y: 'y', series: 'group', area: true, points: true },
@@ -74,7 +91,7 @@ describe('Chart native legend', () => {
 		}
 	);
 
-	test('initial server output includes all series and their legend', () => {
+	test('server-renders the interactive legend as pressed toggle buttons', () => {
 		const TypedChart = Chart as Component<ChartProps<Row>>;
 		const html = render(TypedChart, {
 			props: {
@@ -82,15 +99,43 @@ describe('Chart native legend', () => {
 				marks: [{ type: 'series', x: 'x', y: 'y', series: 'group', points: true }],
 				x: { scale: { type: 'linear' } },
 				y: { scale: { type: 'linear' } },
-				legend: { interactive: true },
-				ariaLabel: 'Server legend',
-				initialDimensions: { width: 640, height: 360 }
+				legend: { interactive: true, format: (key) => `Series ${key}` },
+				label: 'Server legend',
+				aspectRatio: 640 / 360
 			}
 		}).body;
-		expect(html).toContain('First');
-		expect(html).toContain('Second');
+		expect(html).toContain('aria-label="Series visibility"');
+		expect(html).toContain('Series First');
+		expect(html).toContain('Series Second');
+		// Pressed is visible, and every series starts visible.
+		expect(html.match(/aria-pressed="true"/g)).toHaveLength(2);
+		// The swatch carries the colour the mark paints, not a legend colour of its own.
+		expect(html).toContain('background-color:var(--color-primary)');
+		expect(html).toContain('background-color:var(--color-secondary)');
 		expect(html).toContain('ts-chart__line');
-		expect(html).toContain('ts-chart__legend');
+		// The engine paints no legend of its own.
+		expect(html).not.toContain('ts-chart__legend');
+		expect(html).not.toContain('data-chart-legend-key');
+	});
+
+	test('server-renders a static legend as plain items, not buttons', () => {
+		const TypedChart = Chart as Component<ChartProps<Row>>;
+		const html = render(TypedChart, {
+			props: {
+				data: rows,
+				marks: [{ type: 'series', x: 'x', y: 'y', series: 'group' }],
+				x: { scale: { type: 'linear' } },
+				y: { scale: { type: 'linear' } },
+				legend: true,
+				label: 'Static legend',
+				aspectRatio: 640 / 360
+			}
+		}).body;
+		expect(html).toContain('aria-label="Chart legend"');
+		expect(html).toContain('data-chart-legend-swatch');
+		expect(html).toContain('First');
+		expect(html).not.toContain('aria-pressed');
+		expect(html).not.toContain('<button');
 	});
 
 	test('uses a quantitative legend for hexbin, not category buttons', () => {
@@ -100,6 +145,7 @@ describe('Chart native legend', () => {
 		expect(
 			(plot.controls ?? []).some((control) => control.extension.id === 'interactive-color-legend')
 		).toBe(false);
-		expect(JSON.stringify(plot.nodes)).toContain('legend');
+		// A colour ramp is not a control, so the engine still draws it into the scene.
+		expect(JSON.stringify(plot.nodes)).toContain('ts-chart__legend');
 	});
 });

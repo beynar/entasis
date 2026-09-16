@@ -1,10 +1,11 @@
 <script lang="ts" generics="TMessage extends AIThreadItem = AIThreadItem">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { aiThreadTocPopoverTheme } from './aiThreadToc.popover.theme.js';
 	import { aiThreadTocScrollAreaTheme } from './aiThreadToc.scrollArea.theme.js';
 	import { onDestroy } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { quintOut } from 'svelte/easing';
-	import { MediaQuery } from 'svelte/reactivity';
+	import { prefersReducedMotion } from '$lib/utils/motion.svelte.js';
 	import { scale } from 'svelte/transition';
 	import HoverCard from '../HoverCard/HoverCard.svelte';
 	import ScrollArea from '../ScrollArea/ScrollArea.svelte';
@@ -34,7 +35,7 @@
 		ref = $bindable(),
 		state: tocState,
 		maxPins = 96,
-		scrollAreaLabel = 'Thread minimap entries',
+		scrollAreaLabel,
 		side = 'left',
 		previewSide,
 		previewAlign = 'center',
@@ -59,7 +60,6 @@
 	let pointerFrame: number | undefined;
 	let previewOpenTimer: ReturnType<typeof setTimeout> | undefined;
 	let previewCloseTimer: ReturnType<typeof setTimeout> | undefined;
-	const prefersReducedMotion = new MediaQuery('(prefers-reduced-motion: reduce)');
 	const pins = $derived(
 		compactAIThreadTocEntries<TMessage>(tocState.entries, {
 			maxPins,
@@ -80,9 +80,10 @@
 		previewPinIndex >= 0 ? pinStackTopPercent(previewPinIndex, pins.length) : 50
 	);
 	const resolvedPreviewPosition = $derived(previewPosition());
-	const pinTransitionDuration = $derived(prefersReducedMotion.current ? 0 : 240);
-	const pinFlipDuration = $derived(prefersReducedMotion.current ? 0 : 170);
+	const pinTransitionDuration = $derived(prefersReducedMotion() ? 0 : 240);
+	const pinFlipDuration = $derived(prefersReducedMotion() ? 0 : 170);
 	const classes = $derived(useAIThreadTocTheme(theme));
+	const t = $derived(useI18n());
 
 	function offsetPercent(offset: number): number {
 		const rangeSize =
@@ -304,13 +305,13 @@
 <nav
 	bind:this={ref}
 	data-slot="ai-thread-toc"
-	aria-label="Thread minimap"
+	aria-label={t.threadMinimap}
 	class={classes.root({ side, className })}
 	{...rootAttributes}
 >
 	{#if pins.length > 0}
 		<ScrollArea
-			ariaLabel={scrollAreaLabel}
+			label={scrollAreaLabel ?? t.threadMinimapEntries}
 			class={classes.scrollArea()}
 			theme={aiThreadTocScrollAreaTheme}
 		>
@@ -387,7 +388,7 @@
 							<HoverCard
 								bind:open={previewOpen}
 								trigger={previewAnchor}
-								content={previewCard}
+								children={previewCard}
 								position={resolvedPreviewPosition}
 								offset={PREVIEW_GAP}
 								delay={0}
@@ -397,8 +398,10 @@
 								closeOnClickOutside={false}
 								class="w-80 max-w-[calc(100vw-8rem)]"
 								triggerClass={classes.previewAnchor({ side })}
-								popoverClass="pointer-events-none"
-								popoverTheme={aiThreadTocPopoverTheme}
+								popover={{
+									class: 'pointer-events-none',
+									theme: aiThreadTocPopoverTheme
+								}}
 								onAfterClose={() => {
 									if (!previewOpen) previewEntry = undefined;
 								}}

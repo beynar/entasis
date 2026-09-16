@@ -20,7 +20,7 @@ Extends all Field component props plus:
 ### Core Props
 - **value**: number | null (bindable, default null) - Current rating; null (or 0) means "no rating"
 - **max**: number (default: 5) - Number of stars, which is also the maximum value
-- **allowHalf**: boolean (default: false) - When true the value snaps to 0.5 increments (half stars)
+- **halfSteps**: boolean (default: false) - When true the value snaps to 0.5 increments (half stars)
 - **readonly**: boolean (default: false) - Displays the value without allowing interaction (aria-readonly=true); still shows the stars
 - **clearable**: boolean (default: true) - When true, clicking the exact current value clears it back to null
 - **dir**: 'ltr' | 'rtl' - Reading direction override; inherits the ambient direction when omitted
@@ -50,12 +50,12 @@ Extends all Field component props plus:
 
 ### Half Steps
 \`\`\`svelte
-<RatingInput label="Rating" bind:value={rating} allowHalf />
+<RatingInput label="Rating" bind:value={rating} halfSteps />
 \`\`\`
 
 ### Half Steps in RTL (fills from the right)
 \`\`\`svelte
-<RatingInput label="Rating" bind:value={rating} allowHalf dir="rtl" />
+<RatingInput label="Rating" bind:value={rating} halfSteps dir="rtl" />
 \`\`\`
 
 ### Custom Star Count
@@ -65,7 +65,7 @@ Extends all Field component props plus:
 
 ### Readonly
 \`\`\`svelte
-<RatingInput label="Average" value={4.5} allowHalf readonly />
+<RatingInput label="Average" value={4.5} halfSteps readonly />
 \`\`\`
 
 ### Disabled
@@ -75,16 +75,14 @@ Extends all Field component props plus:
 
 ### Required (inside a Form)
 \`\`\`svelte
-<Form>
-	<RatingInput name="rating" label="Rating" required />
-</Form>
+<Form inputs={{ rating: { type: 'rating', label: 'Rating', required: true } }} />
 \`\`\`
 
 ## Keyboard Interactions
 
 The rating row is a single tab stop with \`role="slider"\`.
 
-- **Arrow Right / Arrow Up**: Increase the value by the step (0.5 when allowHalf, else 1)
+- **Arrow Right / Arrow Up**: Increase the value by the step (0.5 when halfSteps, else 1)
 - **Arrow Left / Arrow Down**: Decrease the value by the step
 - **Home**: Clear the value (sets it to null)
 - **End**: Set the value to max
@@ -104,7 +102,7 @@ When the effective direction is RTL (via the \`dir\` prop or the inherited ambie
 
 ## Half Steps
 
-With \`allowHalf\`, the left half of a star (in the reading direction) selects n-0.5 and the right half selects n. The fill is rendered with an overflow-hidden clip whose width is the star's fill fraction, giving exact 0.5 (and arbitrary partial) fills.
+With \`halfSteps\`, the left half of a star (in the reading direction) selects n-0.5 and the right half selects n. The fill is rendered with an overflow-hidden clip whose width is the star's fill fraction, giving exact 0.5 (and arbitrary partial) fills.
 
 ## Theme Customization
 

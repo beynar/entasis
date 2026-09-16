@@ -27,6 +27,26 @@ export type PointerDragOptions<Node extends HTMLElement = HTMLElement> = {
 	canStart?: (event: PointerEvent) => boolean;
 	moveTolerance?: number;
 	activation?: () => PointerDragActivation;
+	/** When the node should capture the pointer. `immediate` (default) captures on pointerdown,
+	 *  which is right for a dedicated handle. `on-activate` defers the capture to the moment the
+	 *  session activates: a press that never becomes a drag leaves the pointer — and so the
+	 *  compatibility mouse events, the click and the text selection — with whatever was pressed.
+	 *  Use it when the node is a whole region rather than a handle. */
+	capture?: 'immediate' | 'on-activate';
+	/** Movement-driven activation, for gestures whose promotion rule is the consumer's own
+	 *  (an axis, a direction, what the press landed on). Called on every move while the session
+	 *  is still a candidate; return true to activate it there and then. A session that is never
+	 *  promoted simply ends on pointerup, without `onStart`/`onEnd`. Takes the place of
+	 *  `activation`, which promotes on distance and a touch hold instead. */
+	shouldActivate?: (payload: PointerDragPayload<Node>) => boolean;
+	/** While the drag is active, `touchmove` is prevented so the page cannot pan under it.
+	 *  Default true; set false when the consumer governs touch panning itself (`touch-action`)
+	 *  and native scrolling around the gesture must keep working. */
+	preventTouchMove?: boolean;
+	/** The press was accepted and the session created — before any activation, and before the
+	 *  pointer is captured under `capture: 'on-activate'`. Measure here what the gesture is
+	 *  relative to; nothing is committed yet. */
+	onDown?: (payload: PointerDragPayload<Node>) => void;
 	/** Deliver only the latest pointer move in each animation frame. The final
 	 * pointer is always available to `onEnd`; queued moves are discarded on end
 	 * or cancellation. */
@@ -49,6 +69,7 @@ type PointerDragSession<Node extends HTMLElement> = {
 	isActive: boolean;
 	usesActivation: boolean;
 	activationTimer: number | null;
+	detachWindowEnd: (() => void) | null;
 };
 
 const DEFAULT_MOVE_TOLERANCE = 2;
@@ -118,12 +139,26 @@ export const createPointerDrag = <Node extends HTMLElement = HTMLElement>(
 		currentSession.activationTimer = null;
 	};
 
+	/** Everything a terminating session has to let go of, whatever ends it. */
+	const teardown = (currentSession: PointerDragSession<Node>) => {
+		clearActivationTimer(currentSession);
+		currentSession.detachWindowEnd?.();
+		currentSession.detachWindowEnd = null;
+	};
+
 	const activate = (event: PointerEvent, currentSession: PointerDragSession<Node>): boolean => {
 		if (currentSession.isActive) return true;
 		clearActivationTimer(currentSession);
 		const payload = getPayload(event, currentSession);
 		if (options.onStart?.(payload) === false) return false;
 		currentSession.isActive = true;
+		if (options.capture === 'on-activate') {
+			try {
+				currentSession.node.setPointerCapture(currentSession.pointerId);
+			} catch {
+				/* the pointer may no longer be active (synthetic events) — capture is best-effort */
+			}
+		}
 		if (options.stopPropagation) event.stopPropagation();
 		event.preventDefault();
 		return true;
@@ -131,7 +166,7 @@ export const createPointerDrag = <Node extends HTMLElement = HTMLElement>(
 
 	const cancel = (event: PointerEvent, currentSession: PointerDragSession<Node>) => {
 		cancelPendingMove();
-		clearActivationTimer(currentSession);
+		teardown(currentSession);
 		const payload = getPayload(event, currentSession);
 		if (session === currentSession) session = null;
 		releasePointer(currentSession);
@@ -145,7 +180,7 @@ export const createPointerDrag = <Node extends HTMLElement = HTMLElement>(
 		const payload = getPayload(event, currentSession);
 		session = null;
 		cancelPendingMove();
-		clearActivationTimer(currentSession);
+		teardown(currentSession);
 		releasePointer(currentSession);
 		if (currentSession.isActive) options.onEnd?.(payload);
 		else options.onCancel?.(payload);
@@ -183,17 +218,31 @@ export const createPointerDrag = <Node extends HTMLElement = HTMLElement>(
 					hasMoved: false,
 					isActive: false,
 					usesActivation: false,
-					activationTimer: null
+					activationTimer: null,
+					detachWindowEnd: null
 				};
-				node.setPointerCapture(event.pointerId);
+				const deferCapture = options.capture === 'on-activate';
+				if (!deferCapture) node.setPointerCapture(event.pointerId);
 				session = nextSession;
+				if (deferCapture) {
+					// Without the capture the node stops seeing the pointer once it leaves: a press
+					// released outside would strand the session and deafen every later press.
+					const offUp = on(window, 'pointerup', end);
+					const offCancel = on(window, 'pointercancel', abort);
+					nextSession.detachWindowEnd = () => {
+						offUp();
+						offCancel();
+					};
+				}
+				options.onDown?.(getPayload(event, nextSession));
 				const activation = options.activation?.();
-				if (!activation) {
+				if (!activation && !options.shouldActivate) {
 					if (!activate(event, nextSession)) cancel(event, nextSession);
 					return;
 				}
 				nextSession.usesActivation = true;
-				if (event.pointerType !== 'touch') return;
+				// A consumer-driven promotion has nothing to start on a press: it waits for movement.
+				if (!activation || event.pointerType !== 'touch') return;
 				nextSession.activationTimer = window.setTimeout(() => {
 					if (session !== nextSession) return;
 					if (!activate(nextSession.lastEvent, nextSession)) {
@@ -208,8 +257,18 @@ export const createPointerDrag = <Node extends HTMLElement = HTMLElement>(
 				if (!session || event.pointerId !== session.pointerId) return;
 
 				const currentSession = session;
-				const activation = options.activation?.();
 				const payload = getPayload(event, currentSession);
+				// A candidate the consumer promotes itself: nothing moves until it says so.
+				if (options.shouldActivate && !currentSession.isActive) {
+					if (!options.shouldActivate(payload)) return;
+					if (!activate(event, currentSession)) {
+						cancel(event, currentSession);
+						return;
+					}
+					dispatchMove(getPayload(event, currentSession));
+					return;
+				}
+				const activation = options.activation?.();
 				if (!activation || currentSession.isActive) {
 					event.preventDefault();
 					dispatchMove(payload);
@@ -243,14 +302,17 @@ export const createPointerDrag = <Node extends HTMLElement = HTMLElement>(
 			const offPointerUp = on(node, 'pointerup', end);
 			const offPointerCancel = on(node, 'pointercancel', abort);
 			const offLostPointerCapture = on(node, 'lostpointercapture', abort);
-			const offTouchMove = on(
-				node,
-				'touchmove',
-				(event) => {
-					if (session?.node === node && session.isActive) event.preventDefault();
-				},
-				{ passive: false }
-			);
+			const offTouchMove =
+				options.preventTouchMove === false
+					? () => {}
+					: on(
+							node,
+							'touchmove',
+							(event) => {
+								if (session?.node === node && session.isActive) event.preventDefault();
+							},
+							{ passive: false }
+						);
 
 			return () => {
 				cleanup();

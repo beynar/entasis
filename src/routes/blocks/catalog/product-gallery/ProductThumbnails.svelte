@@ -7,31 +7,33 @@
 	let selected = $state(0);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Form & finish</p>
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Form & finish
+		</p>
 		<Heading size="h2" weight="bold">Find your favorite finish.</Heading>
 	</header>
-	<div class="grid gap-xl md:grid-cols-[10rem_1fr]">
-		<nav aria-label="Product finish views" class="flex gap-lg md:flex-col">
+	<div class="gap-xl grid md:grid-cols-[10rem_1fr]">
+		<nav aria-label="Product finish views" class="gap-lg flex md:flex-col">
 			{#each finishes as finish, i (finish)}<Button
 					variant={selected === i ? 'soft' : 'outline'}
 					class="flex-1 md:flex-none"
 					onclick={() => (selected = i)}
-					aria-pressed={selected === i}>{finish}</Button
+					pressed={selected === i}>{finish}</Button
 				>{/each}
 		</nav>
-		<figure class="flex flex-col gap-xl">
+		<figure class="gap-xl flex flex-col">
 			{@render productArt('vase', finishes[selected])}
-			<figcaption class="flex flex-wrap justify-between gap-lg">
+			<figcaption class="gap-lg flex flex-wrap justify-between">
 				<div>
 					<Heading size="h4">Everyday vessel / {finishes[selected]}</Heading>
-					<p class="mt-md text-neutral/55">
+					<p class="mt-md text-neutral/65">
 						Hand-finished glaze. Small variations make each piece its own.
 					</p>
 				</div>

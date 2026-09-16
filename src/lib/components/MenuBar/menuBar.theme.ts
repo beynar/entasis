@@ -1,5 +1,6 @@
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
+import { selectedSoft } from '$lib/components/Theme/theme.recipes.js';
 
 const defaultMenuBar = cva({
 	base: 'bg-surface inline-flex w-fit max-w-full items-center overflow-x-auto rounded-md scrollbar-none',
@@ -19,7 +20,7 @@ const defaultMenuBarTrigger = cva({
 	base: 'focus-visible:ring-inset',
 	variants: {
 		active: {
-			true: 'bg-neutral-muted text-neutral-muted-readable',
+			true: selectedSoft,
 			false: ''
 		}
 	},

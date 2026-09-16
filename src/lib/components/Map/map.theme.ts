@@ -5,7 +5,7 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 // live inside it. The cartographic colours themselves are driven by the tokenized
 // style (see map-token-style.ts), not by these classes.
 const defaultMapRoot = cva({
-	base: 'relative w-full overflow-hidden rounded-md border border-neutral-muted bg-neutral-muted',
+	base: 'relative w-full overflow-hidden rounded-lg border border-neutral-muted bg-neutral-muted',
 	variants: {
 		size: {
 			small: 'h-[240px] min-h-[200px]',

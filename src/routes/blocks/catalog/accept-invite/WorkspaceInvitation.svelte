@@ -10,16 +10,16 @@
 	let accepted = $state(false);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card
 		class="mx-auto w-full max-w-md"
 		title="Your seat is ready"
 		description="Maya invited you to the Northstar design workspace."
 		><Stack gap="lg" class="text-center">
-			<Avatar user={{ name: 'Maya Chen' }} size="large" class="mx-auto" />
-			<div class="rounded-lg bg-surface-recessed p-lg">
+			<Avatar name="Maya Chen" size="large" class="mx-auto" />
+			<div class="bg-surface-recessed p-lg rounded-lg">
 				<h3 class="font-semibold">Northstar Studio</h3>
-				<p class="mt-xs text-sm text-neutral/60">Product design · 12 members</p>
+				<p class="mt-xs text-neutral/70 text-sm">Product design · 12 members</p>
 				<Chip color="primary" class="mt-md">Editor access</Chip>
 			</div>
 			{#if accepted}<Alert

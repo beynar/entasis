@@ -26,7 +26,6 @@ HoverCard previews supplemental content when a trigger is hovered or focused. It
 - **open**: boolean - Bindable open state.
 - **defaultOpen**: boolean (default: false) - Initial state when open is not provided.
 - **trigger**: string | Snippet<[HoverCardPayload]> | ButtonProps - Trigger content. ButtonProps render a Svelai Button.
-- **content**: string | Snippet<[HoverCardPayload]> - Main card content. Alias for children.
 - **children**: string | Snippet<[HoverCardPayload]> - Main card content.
 - **title**: string | Snippet<[HoverCardPayload]> - Card title slot.
 - **description**: string | Snippet<[HoverCardPayload]> - Card description slot.
@@ -49,21 +48,18 @@ HoverCard previews supplemental content when a trigger is hovered or focused. It
 
 ### Styling Props
 - **size**: 'small' | 'normal' | 'large' (default: 'normal') - Controls Popover panel and Card sizing.
-- **density**: 'small' | 'normal' | 'large' (default: 'normal') - Controls inner Card padding and spacing.
+- **density**: 'compact' | 'normal' | 'comfortable' (default: 'normal') - Controls inner Card padding and spacing.
 - **class**: string - Extra classes on the inner Card.
 - **triggerClass**: string - Extra classes on the trigger wrapper.
-- **popoverClass**: string - Extra classes on the transparent Popover panel.
-- **cardColor**: Colors (default: 'neutral') - Card color token.
-- **cardVariant**: 'solid' | 'outline' | 'soft' | 'ghost' (default: 'solid') - Card variant.
+- **popover**: Props forwarded to the transparent Popover panel as one object - \`{ class, theme }\`.
+- **card**: Props forwarded to the inner Card as one object - \`{ color, variant, theme }\` (defaults: color 'neutral', variant 'solid').
 - **showBorders**: boolean (default: false) - Card section borders.
 - **theme**: HoverCardThemeProps - Theme overrides for HoverCard wrapper parts.
-- **cardTheme**: CardThemeProps - Theme overrides for the inner Card.
-- **popoverTheme**: PopoverThemeProps - Theme overrides for the underlying Popover.
 
 ### Callbacks
 - **onOpenChange**: (open: boolean) => void - Called once for each library-requested state change.
-- **onAfterOpen**: (hoverCard: HoverCardPayload) => void - Called after the open transition finishes.
-- **onAfterClose**: (hoverCard: HoverCardPayload) => void - Called after the close transition finishes.
+- **onAfterOpen**: (payload: HoverCardPayload) => void - Called after the open transition finishes.
+- **onAfterClose**: (payload: HoverCardPayload) => void - Called after the close transition finishes.
 
 ## Examples
 
@@ -81,9 +77,7 @@ HoverCard previews supplemental content when a trigger is hovered or focused. It
 		<button aria-expanded={hoverCard.isOpen}>Preview</button>
 	{/snippet}
 
-	{#snippet content()}
-		Preview content
-	{/snippet}
+	Preview content
 </HoverCard>
 \`\`\`
 
@@ -93,4 +87,11 @@ HoverCard previews supplemental content when a trigger is hovered or focused. It
 - Escape and outside click dismissal are delegated to Popover.
 - Button triggers receive aria-haspopup, aria-expanded, and aria-controls.
 - HoverCard is best for supplemental previews; primary content should remain reachable without hover.
+
+## Motion
+
+- **motion** theme slot: one preset (no variants) — a small lift plus scale on \`fast\` / \`enter\`.
+- Resolved by HoverCard and handed to the underlying Popover, replacing the popover preset.
+- Ladder: \`<Theme components={{ 'hover-card': { motion } }}>\` → \`setHoverCardTheme({ motion })\`
+  → \`theme.motion\` → the \`transition\` prop. Reduced motion collapses it to 0.
 `;

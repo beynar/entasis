@@ -11,7 +11,7 @@ AIAskUserQuestion renders a validated stepped answer flow for AI tools that need
     AIAskUserQuestion,
     aiAskUserQuestionToolInputSchema,
     type AIAskUserQuestionQuestion,
-    type AIAskUserQuestionSubmitDetail,
+    type AIAskUserQuestionSubmitPayload,
     type AIAskUserQuestionValues
   } from 'svelai/ai-ask-user-question';
 </script>

@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { untrack } from 'svelte';
+	import { SvelteMap } from 'svelte/reactivity';
 	import { warningIcon } from '../Icons/warning.js';
 	import ScrollArea from '../ScrollArea/ScrollArea.svelte';
 	import Skeleton from '../Skeleton/Skeleton.svelte';
@@ -156,14 +158,12 @@
 	});
 
 	const classes = $derived(useDocumentViewerTheme(theme));
-	let isSidebarOpen = $state(false);
-	$effect(() => {
-		isSidebarOpen = sidebar;
-	});
+	const t = $derived(useI18n());
+	let isSidebarOpen = $derived(sidebar);
 
 	const zoomGestures = (node: HTMLElement) =>
 		untrack(() => {
-			const pointers = new Map<number, PointerEvent>();
+			const pointers = new SvelteMap<number, PointerEvent>();
 			let startDistance = 0;
 			let startScale = 1;
 			const distance = () => {
@@ -217,9 +217,9 @@
 			return documentError.message;
 		}
 		if (documentError.name === 'PasswordException' || documentError.message.includes('password')) {
-			return 'This document is password-protected or the supplied password is incorrect.';
+			return t.documentPasswordIncorrect;
 		}
-		return 'The document could not be loaded.';
+		return t.pdfLoadError;
 	};
 </script>
 
@@ -250,15 +250,15 @@
 			{/if}
 			<div class={classes.workspace()}>
 				{#if sidebar && isSidebarOpen && viewer.capabilities.sidebar && viewer.totalPages}
-					<aside class={classes.sidebar()} aria-label="Document thumbnails">
+					<aside class={classes.sidebar()} aria-label={t.documentThumbnails}>
 						<ScrollArea
 							class="min-h-0 flex-1"
 							type="hover"
-							ariaLabel="Document thumbnail pages"
+							label={t.documentThumbnailPages}
 							theme={documentViewerScrollAreaTheme}
 						>
 							<div class={classes.thumbnails()}>
-								{#each Array(viewer.totalPages) as _, index (index)}
+								{#each Array(viewer.totalPages), index (index)}
 									<DocumentThumbnail {viewer} index={index + 1} {classes} {thumbnail} />
 								{/each}
 							</div>

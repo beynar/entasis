@@ -3,7 +3,7 @@ import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 
 // The panel wrapping every control, top to bottom.
 const defaultRoot = cva({
-	base: 'inline-flex flex-col rounded-lg border border-neutral/15 bg-surface-raised shadow-sm select-none',
+	base: 'inline-flex flex-col rounded-lg raised-1 bg-surface-raised select-none',
 	variants: {
 		size: {
 			small: 'w-52 gap-md p-md',
@@ -55,7 +55,7 @@ const defaultAreaValue = cva({
 
 // Draggable circular thumb inside the square (white ring, transparent center so the color shows through).
 const defaultAreaThumb = cva({
-	base: 'absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.35)] outline-none ring-primary/60 focus-visible:ring-2 cursor-grab active:cursor-grabbing',
+	base: 'absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.35)] outline-none ring-selected/60 focus-visible:ring-2 cursor-grab active:cursor-grabbing',
 	variants: {
 		size: {
 			small: 'size-3',
@@ -85,7 +85,7 @@ const defaultControls = cva({
 
 // Square outline button that launches the native EyeDropper.
 const defaultEyedropperButton = cva({
-	base: 'state-layer flex shrink-0 items-center justify-center rounded-sm border border-neutral/25 text-neutral/60 transition-colors hover:text-neutral focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-40',
+	base: 'state-layer flex shrink-0 items-center justify-center rounded-sm border border-neutral/25 text-neutral/70 transition-colors hover:text-neutral focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50',
 	variants: {
 		size: {
 			small: 'size-7',
@@ -160,7 +160,7 @@ const defaultAlphaGradient = cva({
 
 // Round white knob shared by the hue and alpha sliders.
 const defaultSliderThumb = cva({
-	base: 'absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)] outline-none ring-primary/60 focus-visible:ring-2 cursor-grab active:cursor-grabbing',
+	base: 'absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)] outline-none ring-selected/60 focus-visible:ring-2 cursor-grab active:cursor-grabbing',
 	variants: {
 		size: {
 			small: 'size-3.5',
@@ -192,12 +192,12 @@ const defaultInputs = cva({
 // Native <select> for the text format (hex / rgb / hsl). The native arrow is replaced by a slim
 // inline chevron so the control stays as narrow as its label.
 const defaultSelect = cva({
-	base: "shrink-0 appearance-none rounded-sm border border-neutral/25 bg-surface text-neutral outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-40 bg-no-repeat bg-[length:12px_12px] bg-[position:right_2px_center] bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23808080%22%20stroke-width=%222.5%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22m6%209%206%206%206-6%22/%3E%3C/svg%3E')]",
+	base: "shrink-0 appearance-none rounded-sm border border-neutral/25 bg-surface text-neutral outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 bg-no-repeat bg-[length:12px_12px] bg-[position:right_2px_center] bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23808080%22%20stroke-width=%222.5%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22m6%209%206%206%206-6%22/%3E%3C/svg%3E')]",
 	variants: {
 		size: {
-			small: 'h-7 pl-xs pr-lg text-xs',
-			normal: 'h-8 pl-xs pr-lg text-xs',
-			large: 'h-9 pl-sm pr-lg text-sm'
+			small: 'h-control-sm pl-xs pr-lg text-xs',
+			normal: 'h-control-md pl-xs pr-lg text-xs',
+			large: 'h-control-lg pl-sm pr-lg text-sm'
 		}
 	},
 	defaultVariants: {
@@ -208,12 +208,12 @@ const defaultSelect = cva({
 // The text input showing / accepting the color in the selected format. Negative word-spacing
 // halves the mono font's full-width spaces after rgb()/hsl() commas — the value text is unchanged.
 const defaultInput = cva({
-	base: 'min-w-0 flex-1 rounded-sm border border-neutral/25 bg-surface font-mono text-neutral outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-40 [word-spacing:-0.5ch]',
+	base: 'min-w-0 flex-1 rounded-sm border border-neutral/25 bg-surface font-mono text-neutral outline-none focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 [word-spacing:-0.5ch]',
 	variants: {
 		size: {
-			small: 'h-7 px-sm text-xs',
-			normal: 'h-8 px-sm text-xs',
-			large: 'h-9 px-md text-sm'
+			small: 'h-control-sm px-sm text-xs',
+			normal: 'h-control-md px-sm text-xs',
+			large: 'h-control-lg px-md text-sm'
 		}
 	},
 	defaultVariants: {
@@ -238,12 +238,12 @@ const defaultAlphaField = cva({
 
 // The 0–100 alpha percentage input (native number spinners hidden).
 const defaultAlphaInput = cva({
-	base: 'w-full rounded-sm border border-neutral/25 bg-surface text-neutral outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-40 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
+	base: 'w-full rounded-sm border border-neutral/25 bg-surface text-neutral outline-none focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
 	variants: {
 		size: {
-			small: 'h-7 pl-xs pr-lg text-xs',
-			normal: 'h-8 pl-sm pr-lg text-xs',
-			large: 'h-9 pl-sm pr-lg text-sm'
+			small: 'h-control-sm pl-xs pr-lg text-xs',
+			normal: 'h-control-md pl-sm pr-lg text-xs',
+			large: 'h-control-lg pl-sm pr-lg text-sm'
 		}
 	},
 	defaultVariants: {
@@ -253,7 +253,7 @@ const defaultAlphaInput = cva({
 
 // The static `%` glyph pinned to the trailing edge of the alpha input.
 const defaultAlphaSuffix = cva({
-	base: 'pointer-events-none absolute inset-y-0 flex items-center text-neutral/60',
+	base: 'pointer-events-none absolute inset-y-0 flex items-center text-neutral/70',
 	variants: {
 		size: {
 			small: 'right-1 text-xs',

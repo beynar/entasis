@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import 'lightgallery/css/lightgallery.css';
 	import 'lightgallery/css/lg-medium-zoom.css';
@@ -6,7 +7,7 @@
 	import { magnifyingGlassPlusIcon } from '../Icons/magnifyingGlassPlus.js';
 	import { ImageZoomState } from './imageZoom.state.svelte.js';
 	import type { ImageZoomProps } from './imageZoom.props.js';
-	import { useImageZoomTheme } from './imageZoom.theme.js';
+	import { useImageZoomMotion, useImageZoomTheme } from './imageZoom.theme.js';
 
 	let {
 		id: customId,
@@ -25,13 +26,12 @@
 		loading = 'lazy',
 		decoding = 'async',
 		zoomMargin = 40,
-		transitionDuration = 400,
 		closeOnClickOutside = true,
 		closeOnEscape = true,
 		closeOnScroll = true,
 		lockScroll = false,
-		buttonLabel = 'Zoom image',
-		closeLabel = 'Close image zoom',
+		buttonLabel,
+		closeLabel,
 		backgroundColor = 'var(--color-surface)',
 		licenseKey = '0000-0000-000-0000',
 		showIndicator = true,
@@ -55,6 +55,13 @@
 	const generatedId = $props.id();
 	const id = $derived(customId || generatedId);
 	const classes = $derived(useImageZoomTheme(theme));
+	const t = $derived(useI18n());
+	// Zoom duration from `imageZoomTheme.motion`, through the override ladder
+	// (registry → `setImageZoomTheme` → instance `theme.motion`).
+	const resolveMotion = useImageZoomMotion();
+	const transitionDuration = $derived(
+		resolveMotion(undefined, { motion: theme?.motion }).in.duration ?? 0
+	);
 	const state = new ImageZoomState({
 		get src() {
 			return src;
@@ -99,7 +106,10 @@
 			return lockScroll;
 		},
 		get closeLabel() {
-			return closeLabel;
+			return closeLabel ?? t.closeImageZoom;
+		},
+		get messages() {
+			return t;
 		},
 		get backgroundColor() {
 			return backgroundColor;
@@ -133,7 +143,7 @@
 		closeOnEscape,
 		closeOnScroll,
 		lockScroll,
-		closeLabel,
+		closeLabel: closeLabel ?? t.closeImageZoom,
 		backgroundColor,
 		licenseKey
 	})}
@@ -146,7 +156,7 @@
 		type="button"
 		class={classes.trigger()}
 		{disabled}
-		aria-label={buttonLabel}
+		aria-label={buttonLabel ?? t.zoomImage}
 		aria-haspopup="dialog"
 		aria-expanded={openState.value}
 		data-image-zoom-trigger

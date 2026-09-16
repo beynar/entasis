@@ -20,11 +20,13 @@
 	} from './tableOfContents.rail.js';
 	import { TableOfContentsState } from './tableOfContents.state.svelte.js';
 	import { useTableOfContentsTheme } from './tableOfContents.theme.js';
+	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	const densityFactors = {
-		small: 0.6,
+		compact: 0.6,
 		normal: 0.8,
-		large: 1
+		comfortable: 1
 	} as const;
 	const sizeFactors = {
 		small: 0.875,
@@ -72,18 +74,20 @@
 		showConnectors = true,
 		indentSize = 14,
 		indentRadius = 6,
-		color = 'primary',
-		ariaLabel = 'Table of contents',
+		color,
+		label,
 		class: className,
 		theme,
 		...attachments
 	}: TableOfContentsProps = $props();
+	const t = $derived(useI18n());
 
 	const componentId = $props.id();
 	const clipId = `${componentId}-active-rail`;
 	const prehydrationListId = `${componentId}-prehydration-list`;
 	const prehydrationRailId = `${componentId}-prehydration-rail`;
 	const classes = $derived(useTableOfContentsTheme(theme));
+	const resolvedColor = $derived(useDefaultColor(color));
 	const densityFactor = $derived(resolveDensityFactor(density));
 	const sizeFactor = $derived(sizeFactors[size]);
 	const markerVisibility = $derived(resolveMarkerVisibility(showMarkers));
@@ -177,8 +181,6 @@
 		}
 	});
 	const displayedItems = $derived(providedItems ?? state.items);
-
-	const getHref = (id: string) => `#${encodeURIComponent(id)}`;
 </script>
 
 {#if prehydrationScript}
@@ -188,9 +190,9 @@
 {#if hasSelectorFallback || displayedItems.length}
 	<nav
 		bind:this={ref}
-		aria-label={ariaLabel}
+		aria-label={label ?? t.tableOfContents}
 		data-slot="table-of-contents"
-		data-color={color}
+		data-color={resolvedColor}
 		data-density={density}
 		data-size={size}
 		data-rail={showRail}
@@ -317,7 +319,7 @@
 									data-slot="table-of-contents-link"
 									data-toc-id={item.id}
 									data-level={item.level}
-									href={getHref(item.id)}
+									href={`#${encodeURIComponent(item.id)}`}
 									aria-current={state.currentId === item.id ? 'location' : undefined}
 									class={classes.link({ size, highlighted })}
 									style:padding-inline-start={`${getTableOfContentsItemOffset(item.level, normalizedLevels, indentSize, sizeFactor, railGutter)}px`}

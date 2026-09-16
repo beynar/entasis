@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Slot from '../Slot/Slot.svelte';
 	import type { CollapsibleProps } from './collapsible.props.js';
-	import { useCollapsibleTheme } from './collapsible.theme.js';
-	import { slide, type SlideParams } from 'svelte/transition';
+	import { useCollapsibleMotion, useCollapsibleTheme } from './collapsible.theme.js';
+	import { slide } from '$lib/transitions/transition.js';
+	import { easingBezierStrings } from '$lib/transitions/easingFunctions.js';
 	import { caretDownIcon } from '../Icons/caretDown.js';
 	import { plusIcon } from '../Icons/plus.js';
 	import { minusIcon } from '../Icons/minus.js';
@@ -16,7 +17,7 @@
 		disabled = false,
 		onOpenChange,
 		size = 'normal',
-		icon = 'caret',
+		icon = 'chevron',
 		theme,
 		trigger,
 		children,
@@ -24,6 +25,7 @@
 		srOnlyContent,
 		variant = 'default',
 		peekHeight = 80,
+		transition,
 		...attachments
 	}: CollapsibleProps = $props();
 	const openState = createBindableValue(
@@ -56,25 +58,26 @@
 
 	const collapsibleState = $derived(isOpen ? 'open' : 'closed');
 
-	function reducedMotionSlide(node: Element, params?: SlideParams) {
-		const shouldReduceMotion = node.ownerDocument.defaultView?.matchMedia(
-			'(prefers-reduced-motion: reduce)'
-		).matches;
-		return slide(node, { ...params, duration: shouldReduceMotion ? 0 : params?.duration });
-	}
+	// Motion preset from `collapsibleTheme.motion`, through the override ladder
+	// (registry → `setCollapsibleTheme` → instance `theme.motion` → `transition` prop).
+	// `slide` is a factory: it captures the theme context at init because Svelte runs
+	// transition functions outside component initialisation.
+	const resolveMotion = useCollapsibleMotion();
+	const slideTransition = slide();
+	const contentMotion = $derived(resolveMotion({ variant }, { motion: theme?.motion, transition }));
 </script>
 
 {#snippet triggerIcon()}
-	{#if typeof icon === 'function'}
-		<Slot render={icon} class={classes.icon({ size })} payload={{ open: isOpen }} />
-	{:else if icon === 'math'}
-		<div style:transform="rotate({isOpen ? '180' : '0'}deg)" class={classes.icon({ size })}>
-			{@render (collapsibleState === 'open' ? plusIcon : minusIcon)({ size: 16 })}
-		</div>
-	{:else if icon === 'caret' || icon === 'chevron'}
+	{#if icon === 'chevron'}
 		<div style:transform="rotate({isOpen ? '180' : '0'}deg)" class={classes.icon({ size })}>
 			{@render caretDownIcon({ size: 16 })}
 		</div>
+	{:else if icon === 'plus-minus'}
+		<div style:transform="rotate({isOpen ? '180' : '0'}deg)" class={classes.icon({ size })}>
+			{@render (collapsibleState === 'open' ? plusIcon : minusIcon)({ size: 16 })}
+		</div>
+	{:else if icon !== 'none'}
+		<Slot render={icon} class={classes.icon({ size })} payload={{ open: isOpen }} />
 	{/if}
 {/snippet}
 
@@ -91,7 +94,11 @@
 		<div class="relative">
 			<div
 				id={contentId}
-				class="overflow-hidden transition-[max-height] duration-300 ease-out"
+				class="overflow-hidden transition-[max-height]"
+				style:transition-duration={`${contentMotion.in.duration ?? 0}ms`}
+				style:transition-timing-function={easingBezierStrings[
+					contentMotion.in.easing ?? 'cubicOut'
+				]}
 				style:max-height={isOpen ? `${contentHeight}px` : peekHeightCss}
 				style:-webkit-mask-image={isOpen ? undefined : maskGradient}
 				style:mask-image={isOpen ? undefined : maskGradient}
@@ -108,7 +115,7 @@
 					data-state={collapsibleState}
 					data-disabled={disabled ? '' : undefined}
 					{disabled}
-					class="state-layer border-neutral-muted bg-surface text-neutral/80 pointer-events-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-medium shadow-sm transition disabled:cursor-not-allowed disabled:opacity-55"
+					class="state-layer bg-surface text-neutral/80 raised-1 pointer-events-auto inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50"
 					onclick={handleToggle}
 				>
 					<Slot render={trigger} payload={{ open: isOpen }} />
@@ -146,7 +153,8 @@
 				data-state={collapsibleState}
 				data-disabled={disabled ? '' : undefined}
 				class={classes.content({ size })}
-				transition:reducedMotionSlide={{ duration: 200 }}
+				in:slideTransition={contentMotion.in}
+				out:slideTransition={contentMotion.out}
 			>
 				<Slot payload={{ open: isOpen }} render={children} />
 			</div>

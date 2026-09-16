@@ -8,7 +8,7 @@
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 	import Button from '$lib/components/Button/Button.svelte';
-	import { tooltip } from '$lib/components/Tooltip/tooltip.svelte.js';
+	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
 	import { sizes } from '$lib/utils/tokens.js';
 
 	const placements = ['top', 'bottom', 'left', 'right'] as const;
@@ -31,15 +31,11 @@
 
 	const text = `Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor`;
 
-	const wrapper2 = createRawSnippet<[Snippet]>((snippet) => {
+	const wrapper2 = createRawSnippet<[Snippet]>(() => {
 		return {
-			setup(element) {
-				// snippet()(element);
-			},
 			render() {
 				return `<div>
 					<h1>Hello</h1>
-					
 				</div>`;
 			}
 		};
@@ -64,8 +60,15 @@
 		'Positioned with Floating UI flip & offset',
 		'Bindable open, external ref support',
 		'Click, hover, or custom trigger snippet',
-		'Escape & click-outside dismissal, both toggleable',
-		'Directed enter/exit transitions by placement'
+		{
+			label: 'Escape & click-outside dismissal, both toggleable',
+			test: 'a11y:popover.dismissal-toggleable'
+		},
+		'Directed enter/exit transitions by placement',
+		{
+			label: 'Inline mode renders the panel in normal document flow',
+			test: 'a11y:popover.inline-in-flow'
+		}
 	]}
 >
 	<ComponentCard
@@ -99,6 +102,29 @@
 	</ComponentCard>
 
 	{#snippet examples()}
+		<ComponentCard
+			description="Inline (static): the panel renders in normal flow where the component sits — no portal, no floating placement — so an open panel can be shown in place."
+			code={`<Popover inline open trigger={false} size="normal">
+	<p>Rendered in place, no portal.</p>
+</Popover>`}
+		>
+			<div class="flex flex-wrap items-start gap-4">
+				<Popover inline open trigger={false} closeOnEscape={false} size="small">
+					<p class="text-sm">Inline small</p>
+				</Popover>
+				<Popover inline open trigger={false} closeOnEscape={false}>
+					<p class="text-sm">Inline normal, always visible.</p>
+				</Popover>
+				<Popover
+					inline
+					closeOnEscape={false}
+					trigger={{ content: 'Toggle inline', color: 'primary' }}
+				>
+					<p class="text-sm">The trigger still toggles an inline panel.</p>
+				</Popover>
+			</div>
+		</ComponentCard>
+
 		<ComponentCard
 			description="Positions, hover open, nested popovers, and custom triggers."
 			class="mt-40"
@@ -135,7 +161,7 @@
 			>
 				<div class="grid gap-2">
 					<h2 class="text-neutral text-base font-semibold">Mobile sheet</h2>
-					<p class="text-neutral/60 text-sm">{text}</p>
+					<p class="text-neutral/70 text-sm">{text}</p>
 				</div>
 			</Popover>
 
@@ -146,7 +172,7 @@
 			<Popover
 				closeOnMouseLeave={true}
 				openOnHover
-				hoverDelay={1000}
+				delay={1000}
 				trigger={{
 					content: 'hover open',
 					color: 'danger'

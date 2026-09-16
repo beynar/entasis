@@ -1,4 +1,4 @@
-import type { Attachment } from "svelte/attachments";
+import type { Attachment } from 'svelte/attachments';
 
 /**
  * Moves the node to `document.body` (or `target`) on mount and removes it on destroy.
@@ -6,8 +6,7 @@ import type { Attachment } from "svelte/attachments";
  */
 export function portal(target?: Element): Attachment<HTMLElement> {
 	return (node) => {
-		const mount =
-			target ?? (typeof document !== "undefined" ? document.body : undefined);
+		const mount = target ?? (typeof document !== 'undefined' ? document.body : undefined);
 		if (!mount) return;
 		mount.appendChild(node);
 		return () => node.remove();

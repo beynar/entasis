@@ -31,8 +31,8 @@
 	subtitle="A toggle for switching a single setting on or off."
 	component="Switch"
 	features={[
-		'role=switch with aria-checked',
-		'Enter & Space keyboard toggle',
+		{ label: 'role=switch with aria-checked', test: 'a11y:switch.role' },
+		{ label: 'Enter & Space keyboard toggle', test: 'a11y:switch.keyboard-toggle' },
 		'bind:value, errors, and focused',
 		'Hidden checkbox for form submit'
 	]}
@@ -65,7 +65,7 @@
 		<ComponentCard description="A boolean toggle with a label and description">
 			<div class="w-full max-w-md">
 				<Switch label="Notifications" description="Receive updates by email" bind:value={enabled} />
-				<p class="text-neutral/60 mt-2 text-xs">Value: {enabled}</p>
+				<p class="text-neutral/70 mt-2 text-xs">Value: {enabled}</p>
 			</div>
 		</ComponentCard>
 

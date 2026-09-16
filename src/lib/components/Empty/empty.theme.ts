@@ -91,7 +91,7 @@ const defaultEmptyTitle = cva({
 });
 
 const defaultEmptyDescription = cva({
-	base: 'text-neutral/60 [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary-readable',
+	base: 'text-neutral/70 [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary-readable',
 	variants: {
 		size: {
 			small: 'text-xs/relaxed',
@@ -136,10 +136,10 @@ const defaultEmptyActions = cva({
 // Trailing slot below the content — typically a "Learn more" link. Muted by default; link styling
 // matches the description part so an anchor reads the same.
 const defaultEmptyFooter = cva({
-	base: 'text-neutral/60 flex items-center justify-center [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary-readable',
+	base: 'text-neutral/70 flex items-center justify-center [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary-readable',
 	variants: {
 		size: {
-			small: 'text-[0.6875rem]',
+			small: 'text-xs',
 			normal: 'text-xs',
 			large: 'text-sm'
 		}

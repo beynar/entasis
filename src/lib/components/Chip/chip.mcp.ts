@@ -22,12 +22,18 @@ The Chip component is a compact element for displaying tags, labels, categories,
   - outline: Transparent background with colored border
   - soft: Semi-transparent background
 
+- **selected**: boolean (default: false)
+  - Sets \`data-selected\` and paints the shared soft selected fill on top of \`variant\`
+  - Also the chip's accessible state: \`aria-pressed\` on a chip that resolved to a button, \`aria-current\` on one that resolved to a link. Never pass either attribute yourself
+  - A chip with neither \`onclick\` nor \`href\` has no interactive role, so there \`selected\` is paint-only
+  - Use it for chip lists that mark their chosen entries (filters, tag pickers)
+
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
   - small: Compact size for dense layouts
   - normal: Standard size
   - large: Larger for emphasis
 
-- **position**: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' (optional)
+- **position**: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' (optional)
   - Turns the Chip into an absolutely positioned overlay anchored to the selected corner
   - Requires a containing element with a positioning context such as \`position: relative\`
 
@@ -91,15 +97,21 @@ The Chip component is a compact element for displaying tags, labels, categories,
 \`\`\`svelte
 <div class="relative">
 	<Button>Notifications</Button>
-	<Chip position="topRight" color="danger">3</Chip>
+	<Chip position="top-right" color="danger">3</Chip>
 </div>
 \`\`\`
 
 ### With Icons
 \`\`\`svelte
+<script lang="ts">
+	import { Chip } from 'svelai/chip';
+	import { tagIcon } from 'svelai/icons/tag';
+	import { xIcon } from 'svelai/icons/x';
+</script>
+
 <Chip>
 	{#snippet prefix()}
-		<Icon name="tag" />
+		{@render tagIcon()}
 	{/snippet}
 	Tagged
 </Chip>
@@ -107,7 +119,7 @@ The Chip component is a compact element for displaying tags, labels, categories,
 <Chip>
 	Category
 	{#snippet suffix()}
-		<Icon name="x" />
+		{@render xIcon()}
 	{/snippet}
 </Chip>
 \`\`\`
@@ -127,11 +139,14 @@ The Chip component is a compact element for displaying tags, labels, categories,
 
 ### Removable Chip
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import { Chip } from 'svelai/chip';
+	import { xIcon } from 'svelai/icons/x';
+
 	let tags = $state(['React', 'Vue', 'Svelte']);
-	
-	function removeTag(tag) {
-		tags = tags.filter(t => t !== tag);
+
+	function removeTag(tag: string) {
+		tags = tags.filter((t) => t !== tag);
 	}
 </script>
 
@@ -140,7 +155,7 @@ The Chip component is a compact element for displaying tags, labels, categories,
 		{tag}
 		{#snippet suffix()}
 			<button onclick={() => removeTag(tag)}>
-				<Icon name="x" size={12} />
+				{@render xIcon({ size: 12 })}
 			</button>
 		{/snippet}
 	</Chip>
@@ -163,7 +178,7 @@ The Chip component is a compact element for displaying tags, labels, categories,
 
 ### With Custom Styling
 \`\`\`svelte
-<Chip class="shadow-md hover:shadow-lg transition-shadow">
+<Chip class="lift-3 hover:lift-4 transition-shadow">
 	Custom Style
 </Chip>
 \`\`\`
@@ -177,9 +192,9 @@ The Chip component is a compact element for displaying tags, labels, categories,
 
 <div class="flex gap-2">
 	{#each filters as filter}
-		<Chip 
-			variant={selected === filter ? 'solid' : 'outline'}
-			color={selected === filter ? 'primary' : 'neutral'}
+		<Chip
+			selected={selected === filter}
+			variant={selected === filter ? 'soft' : 'outline'}
 			onclick={() => selected = filter}
 		>
 			{filter}
@@ -256,10 +271,10 @@ const customTheme: ChipThemeProps = {
       soft: 'bg-color-muted text-color'
 	},
 	position: {
-		topRight: 'absolute top-0 right-0 translate-x-1/2 -translate-y-1/2',
-		topLeft: 'absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2',
-		bottomRight: 'absolute right-0 bottom-0 translate-x-1/2 translate-y-1/2',
-		bottomLeft: 'absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2'
+		'top-right': 'absolute top-0 right-0 translate-x-1/2 -translate-y-1/2',
+		'top-left': 'absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2',
+		'bottom-right': 'absolute right-0 bottom-0 translate-x-1/2 translate-y-1/2',
+		'bottom-left': 'absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2'
     }
   },
   prefix: {
@@ -287,7 +302,7 @@ const customTheme: ChipThemeProps = {
   - size: 'small' | 'normal' | 'large' - Controls padding, height, text size, and gap
   - color: 'primary' | 'secondary' | 'neutral' | 'danger' | 'success' | 'warning' | 'info' - Color scheme
   - variant: 'solid' | 'outline' | 'soft' - Visual style variant
-  - position: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' - Optional absolute corner placement
+  - position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' - Optional absolute corner placement
 
 **prefix**:
 - base: Base classes for prefix content
@@ -306,7 +321,7 @@ const customTheme: ChipThemeProps = {
 <Chip 
   theme={{
     root: {
-      base: 'rounded-full shadow-md',
+      base: 'rounded-full lift-3',
       size: {
         large: 'px-4 py-2 min-h-8'
       }
@@ -343,7 +358,7 @@ const customTheme: ChipThemeProps = {
     root: {
       base: 'transition-all hover:scale-105',
       variant: {
-        solid: 'shadow-sm hover:shadow-md',
+        solid: 'lift-1 hover:lift-3',
         outline: 'state-layer border-2'
       }
     },

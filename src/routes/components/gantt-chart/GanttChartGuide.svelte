@@ -22,7 +22,7 @@
 		},
 		{
 			title: 'Application-owned dialogs',
-			body: 'GanttChart does not own create or edit dialogs. Compose events.onTaskDoubleClick or events.onEmptyRangeSelect with Svelai Dialog and Form controls, validate the domain record, then publish a fresh controlled array or call the imperative API. Persistence, fetching, retries, and conflict UI remain at the application boundary.'
+			body: 'GanttChart does not own create or edit dialogs. Compose events.onTaskDoubleClick or events.onSelect with Svelai Dialog and Form controls, validate the domain record, then publish a fresh controlled array or call the imperative API. Persistence, fetching, retries, and conflict UI remain at the application boundary.'
 		},
 		{
 			title: 'Composition, accessibility, and scale',
@@ -33,7 +33,7 @@
 
 <section aria-labelledby="gantt-chart-contract">
 	<h2 id="gantt-chart-contract" class="text-neutral text-xl font-semibold">Integration contract</h2>
-	<p class="text-neutral/60 mt-2 max-w-4xl text-sm leading-6">
+	<p class="text-neutral/70 mt-2 max-w-4xl text-sm leading-6">
 		All scheduled values are absolute <code>Date</code> instants and every range is half-open. Task,
 		dependency, resource, assignment, and calendar identifiers must be stable and unique. Invalid
 		hierarchies, graph cycles, missing references, contradictory schedules, and stale transactions

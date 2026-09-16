@@ -92,7 +92,7 @@ export const LOCALE = 'en-GB';
 		}
 	];
 
-	let selectedLines = $state<SelectedLineRange | null>(null);
+	let selection = $state<SelectedLineRange | null>(null);
 	let diffStyle = $state<'split' | 'unified'>('split');
 	let wrap = $state<'scroll' | 'wrap'>('scroll');
 	let gutter = $state<'on' | 'off'>('on');
@@ -135,7 +135,7 @@ export const LOCALE = 'en-GB';
 		'@pierre/diffs split & unified views',
 		'Shared Shiki syntax theme with Code',
 		'SSR pre-render via shadow DOM',
-		'bind:selectedLines for gutter selection',
+		'bind:selection for gutter line selection',
 		'role=alert surfaces render errors'
 	]}
 >
@@ -289,14 +289,14 @@ export const LOCALE = 'en-GB';
 		</ComponentCard>
 
 		<ComponentCard
-			description="Bind selectedLines to track the user's line selection. Colors auto-adapt to the active light/dark theme via the shared Code syntax palette."
+			description="Bind selection to track the user's line selection. Colors auto-adapt to the active light/dark theme via the shared Code syntax palette."
 			class="!min-h-fit"
 		>
 			<div class="grid w-full max-w-3xl gap-2">
-				<Diff files={greetFiles} bind:selectedLines />
-				<p class="text-neutral/60 text-xs">
-					Selection: {selectedLines
-						? `${selectedLines.start}–${selectedLines.end}`
+				<Diff files={greetFiles} bind:selection />
+				<p class="text-neutral/70 text-xs">
+					Selection: {selection
+						? `${selection.start}–${selection.end}`
 						: 'none — drag across the gutter to select lines'}
 				</p>
 			</div>

@@ -5,7 +5,7 @@
 	import PopupMenu from '../PopupMenu/PopupMenu.svelte';
 	import Slot from '../Slot/Slot.svelte';
 	import { useToggleButtonTheme, type ToggleButtonVariant } from '../ToggleButton/index.js';
-	import { tooltip } from '../Tooltip/tooltip.svelte.js';
+	import { tooltip } from '../Tooltip/tooltip.attachment.svelte.js';
 	import type { ToggleMenuMenuItem } from './toggleMenu.props.js';
 
 	let {
@@ -64,7 +64,7 @@
 		{#snippet trigger(popover)}
 			<button
 				type="button"
-				aria-label={item.ariaLabel}
+				aria-label={item.label}
 				aria-haspopup="menu"
 				aria-expanded={popover.isOpen}
 				data-color={resolvedColor}
@@ -81,8 +81,8 @@
 				})}
 				{@attach overflowed ? undefined : buttonReference}
 				{@attach overflowed ? undefined : popover.reference}
-				{@attach !item.children && item.ariaLabel && !popover.isOpen && !overflowed
-					? tooltip({ content: item.ariaLabel, delay: 350 })
+				{@attach !item.children && item.label && !popover.isOpen && !overflowed
+					? tooltip({ content: item.label, delay: 350 })
 					: undefined}
 				onclick={() => popover.toggle()}
 			>

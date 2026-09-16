@@ -139,10 +139,9 @@
 		animation-play-state: var(--marquee-animation-play-state, running);
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		:global(.animate-marquee-left),
-		:global(.animate-marquee-up) {
-			animation: none;
-		}
+	/* Theme mirrors the reduced-motion preference (OS setting or `reduceMotion` prop) onto <html>. */
+	:global(html[data-svelai-reduce-motion] .animate-marquee-left),
+	:global(html[data-svelai-reduce-motion] .animate-marquee-up) {
+		animation: none;
 	}
 </style>

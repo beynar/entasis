@@ -1,12 +1,12 @@
 <script lang="ts">
 	import PopupMenu from '$lib/components/PopupMenu/PopupMenu.svelte';
-	import { tooltip } from '$lib/components/Tooltip/tooltip.svelte.js';
+	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
 	import { caretRightIcon } from '$lib/components/Icons/caretRight.js';
 	import { fileIcon } from '$lib/components/Icons/file.js';
 	import { folderIcon } from '$lib/components/Icons/folder.js';
-	import { slide } from 'svelte/transition';
 	import type { MenuItem } from '$lib/components/Menu/menu.props.js';
 	import type {
+		SidebarActiveVariant,
 		SidebarApi,
 		SidebarDensity,
 		SidebarSize,
@@ -15,13 +15,15 @@
 	} from './sidebar.props.js';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import SidebarTreeNodeComponent from './SidebarTreeNode.svelte';
-	import { useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
+	import { slide } from '$lib/transitions/transition.js';
+	import { useSidebarMotion, useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 
 	let {
 		node,
 		api,
 		tooltips,
 		size,
+		activeVariant,
 		density,
 		depth = 0,
 		theme
@@ -30,6 +32,7 @@
 		api: SidebarApi;
 		tooltips: SidebarTooltipMode;
 		size: SidebarSize;
+		activeVariant: SidebarActiveVariant;
 		density: SidebarDensity;
 		depth?: number;
 		theme?: SidebarThemeProps;
@@ -40,17 +43,27 @@
 	let triggerRef = $state<HTMLButtonElement | null>(null);
 	let childrenRef = $state<HTMLUListElement | null>(null);
 	const classes = $derived(useSidebarTheme(theme));
+	// Motion preset from `sidebarTheme.motion`, through the override ladder
+	// (registry → `setSidebarTheme` → the instance `theme.motion` slot). `slide` is a
+	// factory: it must be created during init, because it reads the theme context.
+	const resolveMotion = useSidebarMotion();
+	const slideTransition = slide();
+	const collapseMotion = $derived(resolveMotion(undefined, { motion: theme?.motion }));
 	const isOpen = $derived(open ?? node.defaultOpen ?? false);
 	const hasChildren = $derived(!!node.children?.length);
-	const isIconCollapsed = $derived(api.displayState === 'collapsed' && !api.isMobile);
+	// A hover peek renders the collapsed panel at full width, so icon-mode behaviour has to
+	// stop with it: labels, badges, and inline submenus must match the width on screen.
+	const isIconCollapsed = $derived(
+		api.displayState === 'collapsed' && !api.isMobile && !api.isPeeking
+	);
 	const isSubNode = $derived(depth > 0);
 	const showChildren = $derived(hasChildren && isOpen && !isIconCollapsed);
 	const showTooltip = $derived((tooltips === 'always' || isIconCollapsed) && !api.isMobile);
 	const tooltipContent = $derived(showTooltip ? node.label : undefined);
 	const rowClass = $derived(
 		isSubNode
-			? classes.subButton({ componentSize: size, density })
-			: classes.menuButton({ componentSize: size, density })
+			? classes.subButton({ componentSize: size, activeVariant, density })
+			: classes.menuButton({ componentSize: size, activeVariant, density })
 	);
 	const rowSlot = $derived(isSubNode ? 'sidebar-menu-sub-button' : 'sidebar-menu-button');
 	const rowData = $derived(isSubNode ? 'menu-sub-button' : 'menu-button');
@@ -161,7 +174,8 @@
 				inert={showChildren ? undefined : true}
 				aria-hidden={showChildren ? undefined : 'true'}
 				class={classes.treeSubMenu({ density })}
-				transition:slide={{ duration: 180 }}
+				in:slideTransition={collapseMotion.in}
+				out:slideTransition={collapseMotion.out}
 			>
 				{#each node.children ?? [] as child, index (child.label + index)}
 					<SidebarTreeNodeComponent
@@ -169,6 +183,7 @@
 						{api}
 						{tooltips}
 						{size}
+						{activeVariant}
 						{density}
 						depth={depth + 1}
 						{theme}
@@ -177,11 +192,13 @@
 			</ul>
 		{/if}
 	{:else if node.href}
+		<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs; library links cannot depend on SvelteKit routing. -->
 		<a
 			href={node.href}
 			data-slot={rowSlot}
 			data-sidebar={rowData}
 			data-active={node.isActive ? 'true' : undefined}
+			data-active-variant={activeVariant}
 			aria-current={node.isActive ? 'page' : undefined}
 			class={rowClass}
 			{@attach tooltipContent ? tooltip({ content: tooltipContent, position: 'right' }) : undefined}
@@ -190,12 +207,14 @@
 			<SidebarIcon icon={node.icon ?? fileIcon} />
 			<span class={isSubNode ? undefined : classes.menuLabel()}>{node.label}</span>
 		</a>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	{:else}
 		<button
 			type="button"
 			data-slot={rowSlot}
 			data-sidebar={rowData}
 			data-active={node.isActive ? 'true' : undefined}
+			data-active-variant={activeVariant}
 			class={rowClass}
 			{@attach tooltipContent ? tooltip({ content: tooltipContent, position: 'right' }) : undefined}
 			onclick={node.onclick}

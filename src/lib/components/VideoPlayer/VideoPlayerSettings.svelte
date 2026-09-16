@@ -6,13 +6,14 @@
 	import PopupMenu from '../PopupMenu/PopupMenu.svelte';
 	import type { VideoPlayerTrack } from './videoPlayer.props.js';
 	import { getVideoPlayerSettingsMenuItems } from './videoPlayerSettingsMenu.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import {
 		videoPlayerSettingsMenuOptionTheme,
 		videoPlayerSettingsMenuSeparatorTheme
 	} from './videoPlayer.settingsMenu.theme.js';
 	import type { VideoPlayerState } from './videoPlayer.state.svelte.js';
 	import type { useVideoPlayerTheme } from './videoPlayer.theme.js';
-	import VideoPlayerIconButton from './VideoPlayerIconButton.svelte';
+	import MediaIconButton from '../MediaVolume/MediaIconButton.svelte';
 	import VideoPlayerSettingsVolumeFooter from './VideoPlayerSettingsVolumeFooter.svelte';
 
 	type VideoPlayerClasses = ReturnType<typeof useVideoPlayerTheme>;
@@ -33,7 +34,7 @@
 		includeDownload = false,
 		includeFullscreen = false,
 		downloadHref = '',
-		label = 'Settings',
+		label,
 		icon = gearIcon,
 		onOverlayOpenChange
 	}: {
@@ -56,6 +57,7 @@
 		icon?: Slot;
 		onOverlayOpenChange: (open: boolean) => void;
 	} = $props();
+	const t = $derived(useI18n());
 
 	let open = $state(false);
 	let lastReportedOpen = false;
@@ -74,7 +76,8 @@
 			includeDownload,
 			includeFullscreen,
 			downloadHref,
-			runIfEnabled
+			runIfEnabled,
+			messages: t
 		})
 	);
 	const hasMenuItems = $derived(menuItems.length > 0 || includeVolume);
@@ -123,14 +126,14 @@
 		}}
 	>
 		{#snippet trigger(popover)}
-			<VideoPlayerIconButton
-				{classes}
+			<MediaIconButton
 				{size}
-				{label}
+				class={classes.controlButton({ size })}
+				label={label ?? t.settings}
 				{icon}
 				{disabled}
-				aria-haspopup="menu"
-				aria-expanded={popover.isOpen}
+				haspopup="menu"
+				expanded={popover.isOpen}
 				onPress={() => popover.toggle()}
 				{@attach popover.reference}
 			/>

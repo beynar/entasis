@@ -1,4 +1,5 @@
-<script lang="ts" generics="const Items extends BreadcrumbItem[] = BreadcrumbItem[]">
+<script lang="ts" generics="Items extends BreadcrumbItem[] = BreadcrumbItem[]">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import PopupMenu from '../PopupMenu/PopupMenu.svelte';
 	import Slot from '../Slot/Slot.svelte';
 	import type { BreadcrumbsProps, BreadcrumbItem } from './breadcrumbs.props.js';
@@ -24,6 +25,7 @@
 	}: BreadcrumbsProps<Items> = $props();
 
 	const classes = $derived(useBreadcrumbsTheme(theme));
+	const t = $derived(useI18n());
 
 	const navigation = useNavigation({
 		orientation: 'horizontal',
@@ -73,13 +75,13 @@
 </script>
 
 <nav
-	aria-label="Breadcrumbs"
+	aria-label={t.breadcrumbs}
 	class={classes.root({ className })}
 	{@attach navigation.containerReference}
 	{...attachments}
 >
 	<ol class="flex flex-wrap items-center">
-		{#each displayItems as item, i}
+		{#each displayItems as item, i (i)}
 			<li
 				class={classes.item({
 					disabled: item.disabled,

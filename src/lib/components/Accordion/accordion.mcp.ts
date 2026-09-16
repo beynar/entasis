@@ -29,22 +29,22 @@ The Accordion component provides an interactive collapsible container for organi
 - **descriptionKey**: string - Key to extract description from items (default: 'description')
 
 ### Layout Props
-- **variant**: 'classic' | 'card' | 'outlined' (default: 'classic')
+- **variant**: 'classic' | 'card' | 'outline' (default: 'classic')
   - classic: flat rows separated by a muted border (nova/shadcn look) — the title underlines on hover, the chevron rotates
   - card: the rows wrapped in a raised surface (rows inset with px-4)
-  - outlined: the rows wrapped in a muted border (rows inset with px-4)
+  - outline: the rows wrapped in a muted border (rows inset with px-4)
 
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
   - Scales typography only: title, description and content text sizes plus the icon size. Spacing is controlled by density.
 
-- **density**: 'small' | 'normal' | 'large' (default: 'normal')
+- **density**: 'compact' | 'normal' | 'comfortable' (default: 'normal')
   - Scales paddings and gaps only: trigger vertical padding, content bottom padding, header gap, and the gap between splitted items. Combine freely with size.
 
-- **splitted**: boolean (default: false) - Breaks the list into one surface per item with a gap: each item gets its own raised card (card), its own border (outlined), or its own underline (classic)
+- **splitted**: boolean (default: false) - Breaks the list into one surface per item with a gap: each item gets its own raised card (card), its own border (outline), or its own underline (classic)
 
 ### Event Props
 - **onValueChange**: (value: string[]) => void - Called once when expanded item ids change
-- **onToggle**: (options: { item: Item; index: number; open: boolean }) => void - Callback when item is toggled
+- **onItemOpenChange**: (options: { item: Item; index: number; open: boolean }) => void - Called after one item's open state changes
 
 ### Slot Props
 - **title**: Snippet - Custom title rendering
@@ -56,13 +56,13 @@ The Accordion component provides an interactive collapsible container for organi
 - **oneAtATime**: boolean (default: true) - Whether only one item can be expanded at a time
 
 ### Visual Props
-- **icon**: 'chevron' | 'math' | Snippet | false (default: 'chevron')
+- **icon**: 'chevron' | 'plus-minus' | 'none' | Snippet (default: 'chevron')
   - chevron: Down chevron that rotates
-  - math: Plus/minus icon
+  - plus-minus: Plus/minus glyph
+  - none: Hide the indicator
   - Custom snippet for custom icons
-  - false: Hide icon
 
-- **transitions**: SlideTransitionProps - Transition configuration for accordion content
+- **transition**: ResponsiveProps<FSOProps> - Slide transition override for the expanded content; beats the \`motion\` theme slot
 
 ### Styling Props
 - **class**: string - Additional CSS classes
@@ -125,7 +125,6 @@ The Accordion component provides an interactive collapsible container for organi
 \`\`\`svelte
 <script>
 	import { Accordion } from 'svelai/accordion';
-	import { Icon } from 'svelai/icons';
 	
 	let items = [
 		{ 
@@ -157,7 +156,7 @@ The Accordion component provides an interactive collapsible container for organi
 <Accordion variant="card" {items} />
 
 <!-- Bordered container -->
-<Accordion variant="outlined" {items} />
+<Accordion variant="outline" {items} />
 
 <!-- One surface per item -->
 <Accordion variant="card" splitted {items} />
@@ -168,7 +167,7 @@ The Accordion component provides an interactive collapsible container for organi
 \`\`\`svelte
 <script>
 	import { Accordion } from 'svelai/accordion';
-	import { Icon } from 'svelai/icons';
+	import { starIcon } from 'svelai/icons/star';
 	
 	let items = [
 		{ title: 'Section 1', content: 'Content 1' }
@@ -178,13 +177,13 @@ The Accordion component provides an interactive collapsible container for organi
 <!-- Chevron icon -->
 <Accordion icon="chevron" {items} />
 
-<!-- Math (+/-) icon -->
-<Accordion icon="math" {items} />
+<!-- Plus/minus icon -->
+<Accordion icon="plus-minus" {items} />
 
-<!-- Custom icon -->
+<!-- Custom icon (a snippet, no payload) -->
 <Accordion {items}>
-	{#snippet icon({ open })}
-		<Icon name={open ? 'minus' : 'plus'} />
+	{#snippet icon()}
+		{@render starIcon()}
 	{/snippet}
 </Accordion>
 \`\`\`
@@ -224,7 +223,7 @@ The Accordion component provides an interactive collapsible container for organi
 
 <Accordion 
 	{items}
-	onToggle={handleToggle}
+	onItemOpenChange={handleToggle}
 />
 \`\`\`
 
@@ -263,7 +262,7 @@ The Accordion component provides an interactive collapsible container for organi
 
 - Items are automatically assigned IDs if not provided
 - Uses Melt UI's Accordion builder for accessibility
-- Smooth transitions with Svelte's slide transition
+- Smooth transitions with the library's themed slide transition
 - Supports bindable items for dynamic updates
 
 ## Theme Customization
@@ -288,16 +287,16 @@ The theme object contains the following parts:
 - base: Base classes for main container
 - Variants:
   - size: 'small' | 'normal' | 'large'
-  - density: 'small' | 'normal' | 'large' - Gap between splitted items (via compounds)
-  - variant: 'classic' | 'card' | 'outlined' - Container surface (raised / bordered / none)
+  - density: 'compact' | 'normal' | 'comfortable' - Gap between splitted items (via compounds)
+  - variant: 'classic' | 'card' | 'outline' - Container surface (raised / bordered / none)
   - splitted: boolean - Gap layout for per-item surfaces
 
 **item**:
 - base: Base classes for individual items (muted separator when not splitted; own surface when splitted)
 - Variants:
   - size: 'small' | 'normal' | 'large' - Item size
-  - density: 'small' | 'normal' | 'large'
-  - variant: 'classic' | 'card' | 'outlined' - Per-item surface when splitted
+  - density: 'compact' | 'normal' | 'comfortable'
+  - variant: 'classic' | 'card' | 'outline' - Per-item surface when splitted
   - splitted: boolean
   - expanded: boolean - Expanded state styling
 
@@ -305,14 +304,14 @@ The theme object contains the following parts:
 - base: Base classes for trigger button
 - Variants:
   - size: 'small' | 'normal' | 'large'
-  - density: 'small' | 'normal' | 'large' - Vertical padding
-  - variant: 'classic' | 'card' | 'outlined' - Horizontal inset on contained variants
+  - density: 'compact' | 'normal' | 'comfortable' - Vertical padding
+  - variant: 'classic' | 'card' | 'outline' - Horizontal inset on contained variants
 
 **header**:
 - base: Base classes for header section
 - Variants:
   - size: 'small' | 'normal' | 'large'
-  - density: 'small' | 'normal' | 'large' - Gap between title and description
+  - density: 'compact' | 'normal' | 'comfortable' - Gap between title and description
 
 **title**:
 - base: Base classes for title text (underlines on trigger hover)
@@ -333,8 +332,8 @@ The theme object contains the following parts:
 - base: Base classes for content panel
 - Variants:
   - size: 'small' | 'normal' | 'large' - Text size
-  - density: 'small' | 'normal' | 'large' - Bottom padding
-  - variant: 'classic' | 'card' | 'outlined' - Horizontal inset on contained variants
+  - density: 'compact' | 'normal' | 'comfortable' - Bottom padding
+  - variant: 'classic' | 'card' | 'outline' - Horizontal inset on contained variants
 
 ### Usage Examples
 
@@ -382,4 +381,11 @@ The theme object contains the following parts:
   });
 </script>
 \`\`\`
+
+## Motion
+
+- **motion** theme slot: a slide keyed by \`axis\` (\`y\` by default, \`x\` for a horizontal list).
+- Takes \`in\` / \`out\` slide params plus a \`duration\` / \`easing\` motion token.
+- Ladder: \`<Theme components={{ accordion: { motion } }}>\` → \`setAccordionTheme({ motion })\` →
+  \`theme.motion\` → the \`transition\` prop. Reduced motion collapses it to 0.
 `;

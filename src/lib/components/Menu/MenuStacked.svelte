@@ -14,9 +14,21 @@
 	import { getMenuMaxDepth } from './menuTree.js';
 
 	type SubmenuItem = Extract<MenuItem, { type: 'submenu' }>;
+	type SubmenuItemWithPopoverClass = SubmenuItem & { popoverClass?: string };
+
 	type MenuPathEntry = {
 		item: SubmenuItem;
 		parentNavigationIndex: number;
+	};
+
+	/** Copy without the listed keys, so spread props exclude them without unused destructured bindings. */
+	const omitKeys = <T extends object, K extends keyof T>(
+		source: T,
+		keys: readonly K[]
+	): Omit<T, K> => {
+		const result = { ...source } as Record<string, unknown>;
+		for (const key of keys) delete result[key as string];
+		return result as Omit<T, K>;
 	};
 
 	let {
@@ -40,6 +52,7 @@
 	const activeStep = $derived(path.length);
 
 	const navigation = useNavigation({
+		typeahead: true,
 		orientation: () => 'vertical',
 		loop: true,
 		id,
@@ -145,10 +158,9 @@
 		value={activeStep}
 		panelRole={null}
 		panelAriaLabelledby={false}
-		keyFramesOptions={{
-			duration: 240,
-			easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-			fill: 'both'
+		transition={{
+			in: { duration: 240, easing: 'quintOut' },
+			out: { duration: 240, easing: 'quintOut' }
 		}}
 	>
 		{#snippet children({ item: depth })}
@@ -176,7 +188,7 @@
 						<Slot render={header} renderIf={!!header} class={classes.header()} />
 					{/if}
 
-					{#each panelItems as item, index}
+					{#each panelItems as item, index (index)}
 						{#if item.type === 'button'}
 							<Button
 								role="menuitem"
@@ -186,9 +198,9 @@
 								{@attach attachPrevious}
 							/>
 						{:else if item.type === 'option'}
-							{@const { type: _type, ...optionProps } = item}
+							{@const optionProps = omitKeys(item, ['type'])}
 							<MenuOption
-								role="menuitem"
+								role={optionProps.selected !== undefined ? 'menuitemradio' : 'menuitem'}
 								{density}
 								{...optionProps}
 								theme={theme?.option}
@@ -198,20 +210,23 @@
 						{:else if item.type === 'separator'}
 							<Separator {...item} theme={theme?.separator} />
 						{:else if item.type === 'submenu'}
-							{@const submenuItem = item as typeof item & { popoverClass?: string }}
-							{@const {
-								type: _type,
-								menu: _menu,
-								openOnHover: _openOnHover,
-								openOnClick = true,
-								hoverDelay: _hoverDelay,
-								closeOnMouseLeave: _closeOnMouseLeave,
-								popoverClass: _popoverClass,
-								onclick: itemOnClick,
-								suffix,
-								attrs,
-								...itemProps
-							} = submenuItem}
+							{@const submenuItem = item as SubmenuItemWithPopoverClass}
+							{@const itemProps = omitKeys(submenuItem, [
+								'type',
+								'menu',
+								'openOnHover',
+								'openOnClick',
+								'delay',
+								'closeOnMouseLeave',
+								'popoverClass',
+								'onclick',
+								'suffix',
+								'attrs'
+							])}
+							{@const openOnClick = submenuItem.openOnClick ?? true}
+							{@const itemOnClick = submenuItem.onclick}
+							{@const suffix = submenuItem.suffix}
+							{@const attrs = submenuItem.attrs}
 							<MenuOption
 								role="menuitem"
 								{density}

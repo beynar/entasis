@@ -4,7 +4,7 @@
 	import DocPage from '../../DocPage.svelte';
 	import TableOfContentsDemo from './demos/TableOfContentsDemo.svelte';
 	import TableOfContentsPlayground from './demos/TableOfContentsPlayground.svelte';
-	import { colors, sizes } from '$lib/utils/tokens.js';
+	import { colors, densities, sizes } from '$lib/utils/tokens.js';
 
 	const controls = createComponentControls([
 		{
@@ -19,13 +19,13 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'color',
 			type: 'segmented',
 			label: 'Color',
-			value: 'primary',
+			value: 'neutral',
 			options: colors
 		}
 	]);
@@ -33,7 +33,7 @@
 	const usageCode = $derived(`<script lang="ts">
 	import { ScrollArea } from 'svelai/scroll-area';
 	import { TableOfContents } from 'svelai/table-of-contents';
-<\/script>
+</scr${'ipt'}>
 
 <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
 	<ScrollArea type="scroll" scrollFade class="h-[34rem]">
@@ -47,7 +47,7 @@
 	<aside>
 		<TableOfContents target="#article" levels={[2, 3, 4]} size="${controls.value.size}" density="${controls.value.density}" color="${controls.value.color}" />
 	</aside>
-</div>`;
+</div>`);
 
 	const itemsCode = `<script lang="ts">
 	import { TableOfContents, type TableOfContentsItem } from 'svelai/table-of-contents';
@@ -57,7 +57,7 @@
 		{ id: 'palette', level: 3, title: 'A semantic palette' },
 		{ id: 'roles', level: 4, title: 'Readable roles' }
 	];
-<\/script>
+</scr${'ipt'}>
 
 <TableOfContents {items} />
 
@@ -84,7 +84,7 @@
 	let scrollOffset = $state(64);
 	let levelPreset = $state<'2-4' | '2-3'>('2-4');
 	let color = $state<'primary' | 'secondary' | 'success' | 'info'>('primary');
-	let density = $state<'small' | 'normal' | 'large'>('normal');
+	let density = $state<'compact' | 'normal' | 'comfortable'>('normal');
 	let size = $state<'small' | 'normal' | 'large'>('normal');
 	const showMarkers = $derived(markerSetting === 'hidden' ? false : markerSetting);
 	const activationThresholds = $derived({
@@ -95,7 +95,7 @@
 	const levels = $derived(
 		levelPreset === '2-4' ? ([2, 3, 4] as const) : ([2, 3] as const)
 	);
-<\/script>
+</scr${'ipt'}>
 
 <Switch label="Rail" bind:value={showRail} />
 <SegmentedControl
@@ -105,7 +105,7 @@
 		{ value: 'always', label: 'Always' }
 	]}
 	bind:value={markerSetting}
-	ariaLabel="Marker visibility"
+	label="Marker visibility"
 />
 <Switch label="Connectors" bind:value={showConnectors} />
 <Slider label="Indentation" bind:value={indentSize} min={0} max={28} showValue />
@@ -214,7 +214,7 @@
 
 		<ComponentCard
 			title="Large"
-			description="Large typography and rail geometry combine with large density and a generous indentation step. Markers can be removed while preserving the active rail and title connectors."
+			description="Large typography and rail geometry combine with comfortable density and a generous indentation step. Markers can be removed while preserving the active rail and title connectors."
 			code={`<TableOfContents
 	target="#article"
 	size="large"
@@ -222,7 +222,7 @@
 	showConnectors
 	indentSize={22}
 	indentRadius={12}
-	density="large"
+	density="comfortable"
 	color="secondary"
 />`}
 			class="!min-h-fit items-stretch p-4 md:p-8"
@@ -233,13 +233,13 @@
 				showMarkers={false}
 				indentSize={22}
 				indentRadius={12}
-				density="large"
+				density="comfortable"
 			/>
 		</ComponentCard>
 
 		<ComponentCard
 			title="Small"
-			description="Small typography and rail geometry combine with small density and indentation. Always-visible markers remain independent from connectors, and a zero radius produces square depth changes."
+			description="Small typography and rail geometry combine with compact density and indentation. Always-visible markers remain independent from connectors, and a zero radius produces square depth changes."
 			code={`<TableOfContents
 	target="#article"
 	size="small"
@@ -247,7 +247,7 @@
 	showMarkers="always"
 	indentSize={8}
 	indentRadius={0}
-	density="small"
+	density="compact"
 	color="success"
 />`}
 			class="!min-h-fit items-stretch p-4 md:p-8"
@@ -259,7 +259,7 @@
 				showMarkers="always"
 				indentSize={8}
 				indentRadius={0}
-				density="small"
+				density="compact"
 			/>
 		</ComponentCard>
 

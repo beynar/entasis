@@ -15,12 +15,12 @@ export type AIReasoningLabels = {
 
 export type AIReasoningState = {
 	open: boolean;
-	isStreaming: boolean;
+	streaming: boolean;
 	duration: number | undefined;
 	message: string;
 	labels: AIReasoningLabels;
 };
-export type ReasoningProps = WithAttachments<
+export type AIReasoningProps = WithAttachments<
 	Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'class' | 'content'> & {
 		/** Bindable reference to the collapsible root. */
 		ref?: HTMLElement | null;
@@ -33,7 +33,7 @@ export type ReasoningProps = WithAttachments<
 		/** Called once after a user or stream lifecycle change updates `open`. */
 		onOpenChange?: (open: boolean) => void;
 		/** Keeps reasoning open and displays cycling progress labels. */
-		isStreaming?: boolean;
+		streaming?: boolean;
 		/** Elapsed reasoning duration in seconds; measured automatically when omitted. */
 		duration?: number;
 		/** Delay before the first streamed completion closes, in milliseconds. @default 1000 */

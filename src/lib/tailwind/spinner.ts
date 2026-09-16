@@ -1,5 +1,3 @@
-import type { ThemeOptions } from './theme.js';
-
 const dimension = 'min(var(--spinner-size, 20px), 65px)';
 export const spinners = {
 	spinlargeQuarter: {
@@ -135,6 +133,6 @@ export const spinners = {
 } as const;
 
 export type Spinner = keyof typeof spinners;
-export const getSpinner = (options?: ThemeOptions) => {
+export const getSpinner = (options?: { spinner?: Spinner }) => {
 	return spinners[options?.spinner || options?.spinner || 'spinDynamicThin'];
 };

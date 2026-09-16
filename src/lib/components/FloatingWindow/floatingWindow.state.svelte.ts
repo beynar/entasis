@@ -2,8 +2,9 @@ import { untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
 import { createPointerDrag, type PointerDragPayload } from '$lib/utils/pointerDrag.js';
-import { bind } from '$lib/utils/state.svelte.js';
+import { withOptions } from '$lib/utils/state.svelte.js';
 import { useTheme } from '../Theme/theme.state.svelte.js';
+import { useFocusScope } from '$lib/utils/useFocusScope.svelte.js';
 import type { FloatingWindowSurface } from '../Theme/theme.floatingWindows.js';
 import { FloatingWindowDockState } from './floatingWindow.dock.svelte.js';
 import { FLOATING_WINDOW_VIEWPORT_GAP, FloatingWindowGeometry } from './floatingWindow.geometry.js';
@@ -30,8 +31,8 @@ type FloatingWindowStateOptions = {
 	position?: FloatingWindowPosition;
 	dimensions: FloatingWindowDimensions;
 	onOpenChange?: (open: boolean) => void;
-	onMinimize?: (window: FloatingWindowPayload) => void;
-	onRestore?: (window: FloatingWindowPayload) => void;
+	onMinimize?: (payload: FloatingWindowPayload) => void;
+	onRestore?: (payload: FloatingWindowPayload) => void;
 	onMove?: (payload: { position: FloatingWindowPosition; window: FloatingWindowPayload }) => void;
 	onResize?: (payload: {
 		dimensions: FloatingWindowDimensions;
@@ -39,9 +40,11 @@ type FloatingWindowStateOptions = {
 	}) => void;
 };
 
-export interface FloatingWindowState extends FloatingWindowStateOptions {}
-
 const KEYBOARD_STEP = 10;
+
+// The resize-attachment cache is internal bookkeeping that no template reads, so it stays a plain
+// Map; this factory keeps that intent explicit instead of reaching for `svelte/reactivity`.
+const plainMap = <K, V>(entries?: Iterable<readonly [K, V]>): Map<K, V> => new Map(entries);
 
 const samePosition = (
 	a: FloatingWindowPosition | undefined,
@@ -57,7 +60,7 @@ const isInteractiveTarget = (target: EventTarget | null) =>
 		'button, a, input, select, textarea, [contenteditable="true"], [data-floating-window-no-drag], [data-floating-window-resize-handle]'
 	);
 
-export class FloatingWindowState {
+export class FloatingWindowState extends withOptions<FloatingWindowStateOptions>() {
 	readonly theme = useTheme();
 	rootNode = $state<HTMLDivElement | null>(null);
 	dockNode = $state<HTMLDivElement | null>(null);
@@ -69,22 +72,34 @@ export class FloatingWindowState {
 
 	private geometry: FloatingWindowGeometry;
 	private docking: FloatingWindowDockState;
-	private observedOpen: boolean;
-	private returnFocusElement: HTMLElement | null = null;
+	// Non-modal: focus lands on the window when it opens and returns to the opener on close.
+	private focusScope = useFocusScope({
+		isActive: () => this.open && !this.minimized,
+		trap: () => false,
+		initialFocus: () => 'container'
+	});
+	// Escape is dispatched by the shared layer stack to the topmost layer only.
+	private layer = this.theme.layers.register({
+		kind: 'floating-window',
+		isOpen: () => this.open && !this.minimized,
+		isModal: () => false,
+		dismissOnEscape: () =>
+			this.closeOnEscape && this.closable && this.theme.floatingWindows.isTopWindow(this.id),
+		onDismiss: () => this.close(),
+		state: this
+	});
 	private moveStartPosition: FloatingWindowPosition = { x: 0, y: 0 };
 	private resizeStartPosition: FloatingWindowPosition = { x: 0, y: 0 };
 	private resizeStartDimensions: FloatingWindowDimensions = { width: 0, height: 0 };
 	private activeResizeDirection: FloatingWindowResizeDirection | null = null;
-	private resizeAttachments = new Map<FloatingWindowResizeDirection, Attachment<HTMLElement>>();
+	private resizeAttachments = plainMap<FloatingWindowResizeDirection, Attachment<HTMLElement>>();
 
 	constructor(options: FloatingWindowStateOptions) {
-		bind(this, options);
+		super(options);
 		this.geometry = new FloatingWindowGeometry(this);
 		this.docking = new FloatingWindowDockState(this);
-		this.observedOpen = this.open;
 
 		if (typeof window !== 'undefined') {
-			if (this.open) this.captureReturnFocus();
 			this.updateViewport();
 			this.geometry.sync(this.dimensions, this.position);
 		}
@@ -97,16 +112,6 @@ export class FloatingWindowState {
 			const minimized = this.minimized;
 			if (!rootNode || !open || minimized) return;
 			untrack(() => this.geometry.sync(dimensions, position));
-		});
-
-		$effect(() => {
-			const open = this.open;
-			if (open === this.observedOpen) return;
-			untrack(() => {
-				this.observedOpen = open;
-				if (open) this.captureReturnFocus();
-				else this.restoreFocus();
-			});
 		});
 	}
 
@@ -167,26 +172,14 @@ export class FloatingWindowState {
 			this.updateViewport();
 			this.geometry.sync(this.dimensions, this.position);
 		});
-		const offKeydown = on(window, 'keydown', (event) => {
-			if (event.key !== 'Escape') return;
-			queueMicrotask(() => this.handleEscape(event));
-		});
-		queueMicrotask(() => {
-			if (
-				!node.isConnected ||
-				!this.open ||
-				this.minimized ||
-				node.contains(document.activeElement)
-			) {
-				return;
-			}
-			node.focus({ preventScroll: true });
-		});
+		const offLayer = this.layer.node(node);
+		const offFocus = this.focusScope.attachment(node);
 
 		return () => {
 			offPointerDown();
 			offResize();
-			offKeydown();
+			offLayer();
+			offFocus?.();
 			this.theme.floatingWindows.unregisterSurface(this.id, 'window');
 			if (this.rootNode === node) this.rootNode = null;
 		};
@@ -314,20 +307,6 @@ export class FloatingWindowState {
 		this.viewportHeight = window.innerHeight;
 	}
 
-	private handleEscape(event: KeyboardEvent) {
-		if (
-			event.defaultPrevented ||
-			!this.open ||
-			this.minimized ||
-			!this.closeOnEscape ||
-			!this.closable ||
-			!this.theme.floatingWindows.isTopWindow(this.id)
-		) {
-			return;
-		}
-		this.close();
-	}
-
 	private startMove(payload: PointerDragPayload) {
 		if (isInteractiveTarget(payload.event.target)) return false;
 		this.activateSurface('window');
@@ -391,26 +370,5 @@ export class FloatingWindowState {
 		if (this.open === nextOpen) return;
 		this.open = nextOpen;
 		this.onOpenChange?.(nextOpen);
-	}
-
-	private captureReturnFocus() {
-		const activeElement = document.activeElement;
-		this.returnFocusElement =
-			activeElement instanceof HTMLElement && activeElement !== document.body
-				? activeElement
-				: null;
-	}
-
-	private restoreFocus() {
-		const target = this.returnFocusElement;
-		this.returnFocusElement = null;
-		if (!target?.isConnected) return;
-		const activeElement = document.activeElement;
-		const shouldRestore =
-			activeElement === document.body ||
-			this.rootNode?.contains(activeElement) ||
-			this.dockNode?.contains(activeElement);
-		if (!shouldRestore) return;
-		queueMicrotask(() => target.isConnected && target.focus({ preventScroll: true }));
 	}
 }

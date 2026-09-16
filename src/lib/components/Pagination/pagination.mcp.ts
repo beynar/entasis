@@ -1,7 +1,7 @@
 export const paginationDescription = `
 # Pagination Component
 
-Pagination renders accessible page navigation for long lists, tables, and server-routed result pages. It is controlled through a one-based \`page\` value, accepts either an explicit \`totalPages\` count or \`totalItems\` plus \`pageSize\`, and supports numbered, count, compact, dots, or navigation-only layouts.
+Pagination renders accessible page navigation for long lists, tables, and server-routed result pages. It is controlled through a one-based \`value\`, sized by either an explicit \`totalPages\` count or \`totalItems\` plus \`pageSize\`, and supports numbered, count, compact, dots, or navigation-only layouts.
 
 ## Basic Usage
 
@@ -9,28 +9,31 @@ Pagination renders accessible page navigation for long lists, tables, and server
 <script lang="ts">
 	import { Pagination } from 'svelai/pagination';
 
-	let page = $state(1);
+	let value = $state(1);
 </script>
 
-<Pagination bind:page totalPages={12} />
+<Pagination bind:value totalPages={12} />
 \`\`\`
 
 ## Props
 
 ### Core Props
-- **page**: number (default: 1)
-  - One-based current page. Bind it with \`bind:page\` for local state.
-- **totalPages**: number
+- **value**: number (default: 1)
+  - One-based current page. Bind it with \`bind:value\` for local state.
+- **defaultValue**: number (default: 1)
+  - Initial one-based page when \`value\` is omitted.
+- **totalPages**: number (optional)
   - Total page count. Values below 1 render no pagination.
-- **totalItems**: number
-  - Total item count. With \`pageSize\`, derives \`totalPages\` when \`totalPages\` is omitted and feeds the summary slot.
-- **pageSize**: number
-  - Items per page. Required with \`totalItems\` when deriving page count.
-  - Also required with \`totalItems\` by the \`count\` variant.
+- **totalItems**: number (optional)
+  - Total item count. With \`pageSize\`, derives \`totalPages\` when \`totalPages\` is omitted, and feeds the summary slot.
+- **pageSize**: number (optional)
+  - Items per page. Pair it with \`totalItems\` to derive the page count, to render the summary, and for the \`count\` variant.
 - **siblingCount**: number (default: 1)
   - Number of pages shown on each side of the current page.
 - **boundaryCount**: number (default: 1)
   - Number of pages always shown at the start and end.
+
+Sizing: \`totalPages\`, \`totalItems\`, and \`pageSize\` are plain optional props — there is no discriminated union. Pass \`totalPages\`, or pass \`totalItems\` and \`pageSize\` together; \`totalPages\` wins when both are given. With neither, the page count is 0, nothing renders, and the component logs a one-time console warning.
 
 ### Control Props
 - **showFirstLast**: boolean (default: false)
@@ -43,10 +46,10 @@ Pagination renders accessible page navigation for long lists, tables, and server
   - Disables all controls.
 - **getHref**: (page: number) => string
   - When provided, controls render as anchors instead of buttons.
-- **getItemAriaLabel**: (item: PaginationItemAriaLabel) => string
+- **getItemLabel**: (item: PaginationItemLabel) => string
   - Returns localized aria labels for first, previous, page, next, and last controls.
-- **onPageChange**: (page: number) => void
-  - Called after an enabled control selects a different page.
+- **onValueChange**: (value: number) => void
+  - Called once after an enabled control selects a different page. External \`value\` updates stay silent.
 
 ### Style Props
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
@@ -59,7 +62,7 @@ Pagination renders accessible page navigation for long lists, tables, and server
 - **theme**: PaginationThemeProps
 
 ### Accessibility Props
-- **ariaLabel**: string (default: 'Pagination')
+- **label**: string (default: 'Pagination')
   - Accessible label for the root navigation landmark.
 
 ### Slot Props
@@ -76,7 +79,7 @@ Pagination renders accessible page navigation for long lists, tables, and server
   - Custom item range content rendered before the controls, or between them for the \`count\` variant.
 
 ### Pagination State
-The default child snippet receives a \`PaginationState\` instance. State is backed by the bindable \`page\` prop, so calling \`pagination.next()\`, \`pagination.previous()\`, or \`pagination.setPage(page)\` updates \`bind:page\` and fires \`onPageChange\`.
+The default child snippet receives a \`PaginationState\` instance. State is backed by the bindable \`value\` prop, so calling \`pagination.next()\`, \`pagination.previous()\`, or \`pagination.setPage(page)\` updates \`bind:value\` and fires \`onValueChange\`.
 
 Useful state fields and methods:
 - **currentPage**: clamped active page.
@@ -91,10 +94,10 @@ Useful state fields and methods:
 ### Controlled Pagination
 \`\`\`svelte
 <script lang="ts">
-	let page = $state(6);
+	let value = $state(6);
 </script>
 
-<Pagination bind:page totalPages={20} />
+<Pagination bind:value totalPages={20} />
 \`\`\`
 
 ### Layout Variants
@@ -102,38 +105,38 @@ Useful state fields and methods:
 \`pages\` renders numbered controls with ellipsis:
 
 \`\`\`svelte
-<Pagination variant="pages" bind:page totalPages={40} />
+<Pagination variant="pages" bind:value totalPages={40} />
 \`\`\`
 
 \`count\` renders the current item range:
 
 \`\`\`svelte
-<Pagination variant="count" bind:page totalItems={100} pageSize={10} />
+<Pagination variant="count" bind:value totalItems={100} pageSize={10} />
 \`\`\`
 
 \`compact\`, \`dots\`, and \`none\` reduce the visible navigation chrome:
 
 \`\`\`svelte
-<Pagination variant="compact" bind:page totalPages={10} />
-<Pagination variant="dots" bind:page totalPages={10} />
-<Pagination variant="none" bind:page totalPages={10} />
+<Pagination variant="compact" bind:value totalPages={10} />
+<Pagination variant="dots" bind:value totalPages={10} />
+<Pagination variant="none" bind:value totalPages={10} />
 \`\`\`
 
 Dot controls keep their compact visual marker while the shared \`Hitbox\` utility expands each pointer target. The list reserves the same dimensions, so adjacent page targets never overlap.
 
 ### Windowed Page Buttons
 \`\`\`svelte
-<Pagination bind:page totalPages={40} siblingCount={0} boundaryCount={1} size="small" />
+<Pagination bind:value totalPages={40} siblingCount={0} boundaryCount={1} size="small" />
 \`\`\`
 
 ### Full Controls
 \`\`\`svelte
-<Pagination page={12} totalPages={80} showFirstLast />
+<Pagination value={12} totalPages={80} showFirstLast />
 \`\`\`
 
 ### Item Count Summary
 \`\`\`svelte
-<Pagination bind:page totalItems={96} pageSize={10} showSummary>
+<Pagination bind:value totalItems={96} pageSize={10} showSummary>
 	{#snippet summary(range)}
 		{range.startItem}-{range.endItem} of {range.totalItems}
 	{/snippet}
@@ -143,7 +146,7 @@ Dot controls keep their compact visual marker while the shared \`Hitbox\` utilit
 ### Link Pagination
 \`\`\`svelte
 <Pagination
-	page={3}
+	value={3}
 	totalPages={10}
 	getHref={(page) => \`/invoices?page=\${page}\`}
 />
@@ -151,7 +154,7 @@ Dot controls keep their compact visual marker while the shared \`Hitbox\` utilit
 
 ### Custom Labels
 \`\`\`svelte
-<Pagination bind:page totalPages={8} previous="Prev" next="Next">
+<Pagination bind:value totalPages={8} previous="Prev" next="Next">
 	{#snippet pageItem(item)}
 		<span>{item.active ? 'p.' : ''}{item.page}</span>
 	{/snippet}
@@ -160,7 +163,7 @@ Dot controls keep their compact visual marker while the shared \`Hitbox\` utilit
 
 ### Custom Renderer With State
 \`\`\`svelte
-<Pagination bind:page totalPages={10}>
+<Pagination bind:value totalPages={10}>
 	{#snippet children(pagination)}
 		<button disabled={pagination.isPreviousDisabled} onclick={pagination.previous}>
 			Previous
@@ -176,9 +179,9 @@ Dot controls keep their compact visual marker while the shared \`Hitbox\` utilit
 ### Localized Aria Labels
 \`\`\`svelte
 <script lang="ts">
-	import type { PaginationItemAriaLabel } from 'svelai/pagination';
+	import type { PaginationItemLabel } from 'svelai/pagination';
 
-	const getItemAriaLabel = (item: PaginationItemAriaLabel) => {
+	const getItemLabel = (item: PaginationItemLabel) => {
 		if (item.type === 'page') {
 			return item.active ? \`Page \${item.page}, page courante\` : \`Aller a la page \${item.page}\`;
 		}
@@ -192,7 +195,7 @@ Dot controls keep their compact visual marker while the shared \`Hitbox\` utilit
 	};
 </script>
 
-<Pagination ariaLabel="Pagination des factures" totalPages={8} {getItemAriaLabel} />
+<Pagination label="Pagination des factures" totalPages={8} {getItemLabel} />
 \`\`\`
 
 ## Accessibility
@@ -201,7 +204,7 @@ Dot controls keep their compact visual marker while the shared \`Hitbox\` utilit
 - The active page sets \`aria-current="page"\`.
 - Disabled controls set \`aria-disabled\`; button controls also use the native \`disabled\` attribute.
 - First, previous, page, next, and last controls include descriptive aria labels.
-- \`getItemAriaLabel\` localizes all control labels without changing visible content.
+- \`getItemLabel\` localizes all control labels without changing visible content.
 
 ## Theme Customization
 

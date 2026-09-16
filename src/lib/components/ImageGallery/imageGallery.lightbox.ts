@@ -203,7 +203,7 @@ export class ImageGalleryLightbox {
 				startAnimationDuration: this.gallery.transitionDuration,
 				backdropDuration: Math.min(this.gallery.transitionDuration, 200),
 				speed: this.gallery.transitionDuration,
-				easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+				easing: this.gallery.transitionEasing,
 				closeOnTap: this.gallery.closeOnClickOutside,
 				escKey: this.gallery.closeOnEscape,
 				hideScrollbar: this.gallery.lockScroll,
@@ -228,12 +228,12 @@ export class ImageGalleryLightbox {
 				},
 				strings: {
 					closeGallery: this.gallery.closeLabel,
-					toggleMaximize: 'Toggle maximize',
+					toggleMaximize: this.gallery.messages.toggleMaximize,
 					previousSlide: this.gallery.previousLabel,
 					nextSlide: this.gallery.nextLabel,
-					download: 'Download',
-					playVideo: 'Play video',
-					mediaLoadingFailed: 'The image could not be loaded'
+					download: this.gallery.messages.download,
+					playVideo: this.gallery.messages.playVideo,
+					mediaLoadingFailed: this.gallery.messages.imageLoadError
 				}
 			});
 		} catch (error) {

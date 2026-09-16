@@ -24,10 +24,12 @@ export type TagGroupOption = {
 
 type TagGroupFieldProps = Omit<
 	InputProps<'tag-group'>,
-	'value' | 'onValueChange' | 'onValidate' | 'theme'
+	'value' | 'defaultValue' | 'onValueChange' | 'onValidate' | 'theme'
 > & {
-	/** Selected value. Single mode writes string|null; multiple mode writes string[]. */
+	/** Selected value. Single mode writes string|null; multiple mode writes string[]. Bindable. */
 	value?: TagGroupValue;
+	/** Initial selected value when `value` is omitted. */
+	defaultValue?: TagGroupValue;
 	/** Called when selection changes with the normalized value shape. */
 	onValueChange?: (value: TagGroupValue) => void;
 	/** Validates the normalized selected value. */

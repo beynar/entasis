@@ -35,31 +35,31 @@
 	];
 </script>
 
-<footer class="flex flex-col gap-xl bg-surface-recessed p-lg md:p-xl">
-	<div class="grid gap-xl md:grid-cols-2">
-		<div class="flex flex-col items-start gap-lg">
+<footer class="gap-xl bg-surface-recessed p-lg md:p-xl flex flex-col">
+	<div class="gap-xl grid md:grid-cols-2">
+		<div class="gap-lg flex flex-col items-start">
 			<Chip variant="outline">Stay curious</Chip><Heading as="h2" size="h2" weight="bold"
 				>The next good idea is one click away.</Heading
 			><Button href="/blocks" variant="outline" suffix={arrowRightIcon}
 				>Explore the possibilities</Button
 			>
 		</div>
-		<Accordion items={groups} icon="math" oneAtATime={false}
+		<Accordion items={groups} icon="plus-minus" oneAtATime={false}
 			>{#snippet content({ item })}<nav
 					aria-label={item.title + ' navigation'}
-					class="flex flex-wrap gap-lg"
+					class="gap-lg flex flex-wrap"
 				>
 					{#each item.links as link (link.href)}<a
 							href={link.href}
-							class="text-sm text-neutral/70 underline-offset-4 hover:underline">{link.label}</a
+							class="text-neutral/70 text-sm underline-offset-4 hover:underline">{link.label}</a
 						>{/each}
 				</nav>{/snippet}</Accordion
 		>
 	</div>
 	<Separator />
-	<div class="flex flex-wrap items-end justify-between gap-lg">
+	<div class="gap-lg flex flex-wrap items-end justify-between">
 		<span class="text-5xl font-semibold tracking-tighter sm:text-7xl">northstar.</span>
-		<p class="max-w-xs text-xs text-neutral/50">
+		<p class="text-neutral/65 max-w-xs text-xs">
 			A thoughtful foundation for the products, teams, and ideas that come next.
 		</p>
 	</div>

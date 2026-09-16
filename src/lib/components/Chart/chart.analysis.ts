@@ -171,5 +171,7 @@ function resolveReferenceChannel<TRow extends object>(
 		defaultAxis = (mark.direction ?? 'vertical') === 'vertical' ? 'y' : 'x';
 	}
 	const axis = requestedAxis ?? defaultAxis;
-	return axis === 'x' ? { value: mark.x, axis } : { value: mark.y, axis };
+	// Wide value fields are rejected above, so both positions are plain channels here.
+	const value = (axis === 'x' ? mark.x : mark.y) as ChartChannel<TRow, ChartValue>;
+	return { value, axis };
 }

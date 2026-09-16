@@ -1,7 +1,7 @@
-import type { Sizes } from '../../types/index.js';
-import type { Density } from '$lib/types/theme.js';
+import type { Density, DisclosureIndicator, Sizes } from '$lib/types/theme.js';
 import type { Slot, WithSlot } from '../Slot/slot.js';
-import type { SlideTransitionProps } from '$lib/transitions/transition.js';
+import type { FSOProps } from '$lib/transitions/transition.js';
+import type { ResponsiveProps } from '$lib/components/Theme/theme.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { AccordionThemeProps } from './accordion.theme.js';
 
@@ -29,9 +29,10 @@ export type AccordionProps<Item extends Record<string, unknown>> = WithAttachmen
 			/** Called after the expanded item ids change. */
 			onValueChange?: (value: string[]) => void;
 			/**
-			 * The function to call when the accordion item is toggled. Receives the item, index and open state.
+			 * Called after one item's open state changes. Receives the item, its index, and the
+			 * resulting open state; `onValueChange` reports the whole expanded set.
 			 */
-			onToggle?: (options: { item: Item; index: number; open: boolean }) => void;
+			onItemOpenChange?: (payload: { item: Item; index: number; open: boolean }) => void;
 			/**
 			 * Whether the accordion should only allow one item to be open at a time.
 			 */
@@ -52,10 +53,10 @@ export type AccordionProps<Item extends Record<string, unknown>> = WithAttachmen
 			 */
 			descriptionKey?: ConditionalKeys<Item, Slot>;
 			/**
-			 * The icon marking the expand state. A rotating "chevron" (default), a
-			 * plus/minus "math" icon, or a custom slot. Pass false to hide it.
+			 * The indicator marking the expand state: a rotating 'chevron' (default),
+			 * a 'plus-minus' glyph, or 'none' to hide it. Pass a Slot for a custom icon.
 			 */
-			icon?: 'math' | 'chevron' | Slot | false;
+			icon?: DisclosureIndicator | Slot;
 			/**
 			 * Size token controlling the typography scale (title, description,
 			 * content text and icon).
@@ -69,19 +70,25 @@ export type AccordionProps<Item extends Record<string, unknown>> = WithAttachmen
 			density?: Density;
 			/**
 			 * Visual variant: 'classic' is the flat default (rows with a muted
-			 * separator), 'card' wraps the rows in a raised surface, 'outlined' in a
+			 * separator), 'card' wraps the rows in a raised surface, 'outline' in a
 			 * muted border.
 			 */
-			variant?: 'classic' | 'card' | 'outlined';
+			variant?: 'classic' | 'card' | 'outline';
+			/**
+			 * Heading level announced for each item title (`aria-level` on the item heading).
+			 * @default 3
+			 */
+			headingLevel?: 2 | 3 | 4 | 5 | 6;
 			/**
 			 * Breaks the list into one surface per item (with a gap) instead of a
 			 * single shared container.
 			 */
 			splitted?: boolean;
 			/**
-			 * The transitions of the accordion.
+			 * Slide transition overrides for the expanded content; supports responsive
+			 * values and wins over the `motion` theme slot.
 			 */
-			transitions?: SlideTransitionProps;
+			transition?: ResponsiveProps<FSOProps>;
 			/**
 			 * Theme overrides for the accordion root and item sub-parts (header, trigger, title, description, icon, content).
 			 */

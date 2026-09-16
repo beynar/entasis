@@ -31,8 +31,8 @@ export type DateInputProps = InputProps<'date' | 'datetime'> & {
 	mobileSheet?: boolean;
 	/** Closes the calendar popover after selecting a date. Defaults to false. */
 	closeOnSelect?: boolean;
-	/** Called only when a date is chosen from the calendar or its presets. */
-	onCalendarSelect?: (value: Date | null) => void;
+	/** Fires only when a date is picked from the calendar or its presets. */
+	onSelect?: (value: Date | null) => void;
 	/** Theme overrides for the date input element and its field container. */
 	theme?: DateInputThemeProps & InputProps<'date' | 'datetime'>['theme'];
 };

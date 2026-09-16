@@ -10,26 +10,28 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">A closer look</p>
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			A closer look
+		</p>
 		<Heading size="h2" weight="bold">Arc, from every angle.</Heading>
 	</header>
 	<Carousel
 		items={views}
-		layout={{ default: 1, md: 2, lg: 2, xl: 2 }}
+		layout={{ xs: 1, md: 2, lg: 2, xl: 2 }}
 		navigationButton={{ color: 'neutral' }}
-		dots={{ color: 'primary' }}
-		>{#snippet children({ item: view, index })}<figure class="flex flex-col gap-lg">
+		pagination={{ variant: 'dots', color: 'primary' }}
+		>{#snippet children({ item: view, index })}<figure class="gap-lg flex flex-col">
 				<div style:transform={`rotate(${view.rotation}deg)`}>
 					{@render productArt('lamp', view.color)}
 				</div>
-				<figcaption class="flex justify-between gap-lg">
+				<figcaption class="gap-lg flex justify-between">
 					<span>{view.label}</span><Chip size="small" variant="soft">0{index + 1}</Chip>
 				</figcaption>
 			</figure>{/snippet}</Carousel

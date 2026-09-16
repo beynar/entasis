@@ -35,14 +35,14 @@
 		const spans: { t: string; cls: string }[] = [];
 		if (box.kind === 'slot') {
 			spans.push({ t: box.slot?.name ?? box.slot?.source ?? 'slot', cls: 'text-warning' });
-			if (box.slot?.payload) spans.push({ t: ` ${box.slot.payload}`, cls: 'text-neutral/50' });
+			if (box.slot?.payload) spans.push({ t: ` ${box.slot.payload}`, cls: 'text-neutral/65' });
 		} else {
 			const nameCls = box.kind === 'component' ? 'text-neutral' : 'text-neutral/70';
 			spans.push({ t: `<${box.tag}>`, cls: nameCls });
 		}
-		if (box.themePart) spans.push({ t: ` theme.${box.themePart}`, cls: 'text-primary' });
+		if (box.themePart) spans.push({ t: ` theme.${box.themePart}`, cls: 'text-primary-readable' });
 		if (box.defaultValue)
-			spans.push({ t: ` default: ${box.defaultValue}`, cls: 'text-neutral/40 italic' });
+			spans.push({ t: ` default: ${box.defaultValue}`, cls: 'text-neutral/65 italic' });
 		return spans;
 	}
 
@@ -62,7 +62,7 @@
 
 {#snippet row(box: Box, depth: number)}
 	{#if box.kind === 'control'}
-		<div class="mt-2 border-danger relative rounded-lg border border-dashed px-3 pt-5 pb-3">
+		<div class="border-danger relative mt-2 rounded-lg border border-dashed px-3 pt-5 pb-3">
 			<span
 				class="bg-danger-muted text-danger absolute top-0 left-3 -translate-y-1/2 rounded px-1.5 py-0.5 font-mono text-[11px]"
 			>
@@ -92,12 +92,12 @@
 {#if structure}
 	<div class="border-neutral-muted bg-surface w-full overflow-hidden rounded-xl border">
 		<div class="border-neutral-muted/60 flex items-center justify-between border-b px-6 py-3">
-			<span class="text-neutral/45 text-[10.5px] font-semibold tracking-[0.12em] uppercase">
+			<span class="text-neutral/65 text-[10.5px] font-semibold tracking-[0.12em] uppercase">
 				Structure
 			</span>
 			<span class="flex flex-wrap gap-3 font-mono text-[11px]">
 				<span class="text-warning">slot</span>
-				<span class="text-primary">theme.part</span>
+				<span class="text-primary-readable">theme.part</span>
 				<span class="text-danger">each / if</span>
 			</span>
 		</div>

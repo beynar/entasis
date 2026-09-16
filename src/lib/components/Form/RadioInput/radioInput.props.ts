@@ -1,5 +1,6 @@
 import type { Slot } from '../../Slot/slot.js';
 import type { InputProps } from '../Field/field.js';
+import type { RadioInputThemeProps } from './radioInput.theme.js';
 
 export type RadioOption = {
 	/** Display text for the option, rendered inside the option button. */
@@ -13,9 +14,17 @@ export type RadioOption = {
 	/** Prevents selecting this individual option. */
 	disabled?: boolean;
 };
-export type RadioInputProps<T extends RadioOption = RadioOption> = InputProps<'radio'> & {
+export type RadioInputProps<T extends RadioOption = RadioOption> = Omit<
+	InputProps<'radio'>,
+	'theme'
+> & {
 	/** Visual layout style for the radio group (`normal` or `card`). */
 	mode?: 'card' | 'normal';
 	/** Items to render as radio choices. */
 	items: T[];
+	/**
+	 * Theme overrides for the radio group's own slots plus the Field parts (label,
+	 * inputContainer, error, ...) the group is wrapped in.
+	 */
+	theme?: RadioInputThemeProps & InputProps<'radio'>['theme'];
 };

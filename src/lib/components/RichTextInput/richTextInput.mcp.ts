@@ -66,10 +66,10 @@ RichTextInput is a markdown rich text editor for AI-style composition. It suppor
 
 ### Suggestions
 - **triggers**: RichTextInputTriggers - Trigger configuration keyed by characters such as '/', '@', or '$'.
-- **onSuggestionOpen**: (state) => void - Called when a suggestion menu opens.
-- **onSuggestionClose**: (state) => void - Called when a suggestion menu closes.
-- **onSuggestionQueryChange**: (state) => void - Called when the active query changes.
-- **onSuggestionHighlightChange**: (state) => void - Called when highlighted suggestion changes.
+- **onSuggestionOpen**: (payload) => void - Called when a suggestion menu opens.
+- **onSuggestionClose**: (payload) => void - Called when a suggestion menu closes.
+- **onSuggestionQueryChange**: (payload) => void - Called when the active query changes.
+- **onSuggestionHighlightChange**: (payload) => void - Called when highlighted suggestion changes.
 
 ### Formatting
 - **toolbar**: 'hover' | 'fixed' | 'both' | 'none' (default: 'hover') - 'hover' shows controls for selected text, 'fixed' pins controls above the editor, 'both' enables both, and 'none' hides formatting controls.
@@ -77,7 +77,7 @@ RichTextInput is a markdown rich text editor for AI-style composition. It suppor
 - **toolbarClass**: string - Extra classes on the fixed toolbar wrapper.
 
 ### Events and Methods
-- **onValueChange**: (change: RichTextInputChange) => void - Receives markdown, tokens, and empty state.
+- **onValueChange**: (payload: RichTextInputChange) => void - Receives markdown, tokens, and empty state.
 - **submitShortcut**: 'enter' | 'shift-enter' | 'command-enter' | 'none' - Shortcut that calls onSubmitShortcut.
 - **onSubmitShortcut**: (event: KeyboardEvent) => void - Submit shortcut callback.
 - **focus()**, **clear()**, **insertText(text)**, **insertItem(trigger, item)**, **insertToken(token)** are exported component methods.

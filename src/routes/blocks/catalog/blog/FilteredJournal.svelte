@@ -42,22 +42,22 @@
 			excerpt: 'A practical guide to finding the real problem before drawing the first line.'
 		}
 	];
-	let selected = $state(0);
+	let selected = $state('All stories');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">The journal</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">The journal</p>
 		<Heading size="h2" weight="bold">Ideas for a more considered everyday.</Heading>
-		<p class="max-w-2xl text-neutral/65">
+		<p class="text-neutral/65 max-w-2xl">
 			Notes on design, culture, and the things we choose to keep.
 		</p>
 	</header>
 	<Tabbar items={['All stories', 'Design', 'Culture', 'Studio']} bind:value={selected} />
-	<div class="grid gap-xl sm:grid-cols-2 lg:grid-cols-3">
-		{#each posts.filter((post) => selected === 0 || post.category === ['', 'Design', 'Culture', 'Studio'][selected]) as post (post.title)}
+	<div class="gap-xl grid sm:grid-cols-2 lg:grid-cols-3">
+		{#each posts.filter((post) => selected === 'All stories' || post.category === selected) as post (post.title)}
 			<Card variant="ghost">
-				<div class="flex flex-col gap-lg">
+				<div class="gap-lg flex flex-col">
 					<img
 						src={`https://images.unsplash.com/photo-${post.photo}?auto=format&fit=crop&w=900&q=80`}
 						alt={post.title}
@@ -66,10 +66,8 @@
 					/><Chip size="small" variant="soft" class="w-fit">{post.category}</Chip>
 					<h3 class="text-xl font-semibold"><a href="/docs">{post.title}</a></h3>
 					<p class="text-neutral/65">{post.excerpt}</p>
-					<div class="flex gap-sm items-center">
-						<Avatar size="small" user={{ name: post.author }} /><span
-							>{post.author} · {post.time}</span
-						>
+					<div class="gap-sm flex items-center">
+						<Avatar size="small" name={post.author} /><span>{post.author} · {post.time}</span>
 					</div>
 				</div>
 			</Card>

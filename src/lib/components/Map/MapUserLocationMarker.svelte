@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import type { Snippet } from 'svelte';
 	import { fromAction, type Attachment } from 'svelte/attachments';
 	import type { MapUserLocation, MapUserLocationSnippetArg } from './map-types.js';
@@ -21,6 +22,7 @@
 
 	let lngLat = $derived(location.lngLat);
 	let snippetArg = $derived({ ...location, map });
+	const t = $derived(useI18n());
 
 	function resetMarkerRootAccessibility(markerElement: HTMLElement): void {
 		markerElement.removeAttribute('aria-label');
@@ -86,14 +88,13 @@
 	{:else}
 		<div
 			role="img"
-			aria-label="User location"
+			aria-label={`${t.user} ${t.location}`}
 			class="relative flex size-8 items-center justify-center rounded-full"
 		>
-			<span class="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-35"
+			<span class="bg-primary absolute inline-flex size-full animate-ping rounded-full opacity-35"
 			></span>
-			<span class="absolute size-7 rounded-full bg-primary/20"></span>
-			<span class="relative size-4 rounded-full border-2 border-surface bg-primary shadow-md"
-			></span>
+			<span class="bg-primary/20 absolute size-7 rounded-full"></span>
+			<span class="border-surface bg-primary lift-3 relative size-4 rounded-full border-2"></span>
 		</div>
 	{/if}
 </div>

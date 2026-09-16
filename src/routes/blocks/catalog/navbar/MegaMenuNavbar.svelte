@@ -38,18 +38,18 @@
 	];
 </script>
 
-<section class="min-h-96 bg-surface-recessed">
+<section class="bg-surface-recessed min-h-96">
 	<header
-		class="flex flex-wrap items-center justify-between gap-lg border-b border-neutral-muted bg-surface p-lg"
+		class="gap-lg border-neutral-muted bg-surface p-lg flex flex-wrap items-center justify-between border-b"
 	>
 		<a href="/" class="text-xl font-semibold">Northstar®</a>
-		<div class="flex items-center gap-sm">
+		<div class="gap-sm flex items-center">
 			<Popover
-				trigger={{ children: 'Explore', variant: 'ghost', suffix: caretDownIcon }}
+				trigger={{ content: 'Explore', variant: 'ghost', suffix: caretDownIcon }}
 				position="bottom"
 				lockScroll={false}
 				class="max-w-3xl"
-				><div class="grid gap-lg sm:grid-cols-3">
+				><div class="gap-lg grid sm:grid-cols-3">
 					<Card color="primary" variant="soft" class="sm:col-span-1" title="A thoughtful foundation"
 						><Stack gap="lg"
 							><p class="text-sm">
@@ -58,13 +58,15 @@
 							<Button href="/docs" variant="outline" size="small">Get started</Button></Stack
 						></Card
 					>
-					<nav aria-label="Product menu" class="grid gap-sm sm:col-span-2 sm:grid-cols-2">
-						{#each links as link (link.href)}<Card href={link.href} variant="ghost" density="small"
+					<nav aria-label="Product menu" class="gap-sm grid sm:col-span-2 sm:grid-cols-2">
+						{#each links as link (link.href)}<Card
+								href={link.href}
+								variant="ghost"
+								density="compact"
 								><Stack gap="lg"
-									><span class="text-primary">{@render link.icon({ size: 24 })}</span><strong
-										>{link.title}</strong
-									>
-									<p class="text-xs text-neutral/60">{link.description}</p></Stack
+									><span class="text-primary-readable">{@render link.icon({ size: 24 })}</span
+									><strong>{link.title}</strong>
+									<p class="text-neutral/70 text-xs">{link.description}</p></Stack
 								></Card
 							>{/each}
 					</nav>
@@ -74,12 +76,12 @@
 			>
 		</div>
 	</header>
-	<div class="mx-auto flex max-w-2xl flex-col gap-lg p-xl text-center">
+	<div class="gap-lg p-xl mx-auto flex max-w-2xl flex-col text-center">
 		<Chip class="self-center" variant="outline">Discover the details</Chip><Heading
 			as="h2"
 			size="h2">A clear path into the product.</Heading
 		>
-		<p class="text-neutral/60">
+		<p class="text-neutral/70">
 			Open Explore to find the component, pattern, or principle you need.
 		</p>
 	</div>

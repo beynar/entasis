@@ -275,7 +275,7 @@ export type EventCalendarSnippetProps<
 
 export type EventCalendarCallbackProps<TItemFields extends object = Record<never, never>> = {
 	/** Reports the view, anchor, zone, current/render/active/fetch ranges, and visible days. */
-	onRangeChange?: (info: EventCalendarRangeChangeInfo) => void;
+	onRangeChange?: (payload: EventCalendarRangeChangeInfo) => void;
 	/** Reports an accepted immutable item mutation with updated items and its guarded transaction. */
 	onItemsChange?: (payload: EventCalendarItemsChangePayload<TItemFields>) => void;
 	/** Reports a calendar-driven reassignment of the active view. */
@@ -285,19 +285,19 @@ export type EventCalendarCallbackProps<TItemFields extends object = Record<never
 	/** Reports a calendar-driven reassignment of the visible-day count. */
 	onDayCountChange?: (dayCount: number) => void;
 	/** Reports a calendar-driven reassignment of the selected item or slot. */
-	onSelectionChange?: (selection: EventCalendarSelection) => void;
+	onSelectionChange?: (payload: EventCalendarSelection) => void;
 	/** Reports an activated occurrence and its native pointer event. */
 	onItemClick?: (payload: EventCalendarItemClickPayload<TItemFields>) => void;
 	/** Reports a double-activated occurrence and its native pointer event. */
 	onItemDoubleClick?: (payload: EventCalendarItemClickPayload<TItemFields>) => void;
 	/** Reports an activated calendar slot and its native pointer event. */
 	onSlotClick?: (payload: EventCalendarSlotClickPayload) => void;
-	/** Reports a selected slot and the interaction source that selected it. */
-	onSlotSelect?: (payload: EventCalendarSlotSelectPayload) => void;
+	/** Reports the slot a user picked and the interaction source that picked it. */
+	onSelect?: (payload: EventCalendarSlotSelectPayload) => void;
 	/** Reports a month's hidden occurrences and pointer event; return `false` to prevent its popover. */
 	onMoreClick?: (payload: EventCalendarMoreClickPayload<TItemFields>) => false | void;
 	/** Reports a rejected item or slot interaction with its reason and interaction source. */
-	onInteractionBlocked?: (info: EventCalendarInteractionBlockedInfo<TItemFields>) => void;
+	onInteractionBlocked?: (payload: EventCalendarInteractionBlockedInfo<TItemFields>) => void;
 };
 
 /** Immutable collection and guarded transaction reported after an item mutation. */
@@ -320,7 +320,7 @@ export type EventCalendarSlotClickPayload = Readonly<{
 	event: MouseEvent;
 }>;
 
-/** Selected slot and interaction source reported by `onSlotSelect`. */
+/** Selected slot and interaction source reported by `onSelect`. */
 export type EventCalendarSlotSelectPayload = Readonly<{
 	slot: EventCalendarSlot;
 	info: EventCalendarSlotSelectInfo;
@@ -349,8 +349,10 @@ type EventCalendarOwnProps<
 		date: Date;
 		/** Bindable visible-day count for the `days` view. Defaults to `3`. */
 		dayCount?: number;
-		/** Bindable item or slot selection. Defaults to the empty selection. */
+		/** Bindable item or slot selection. Defaults to `defaultSelection`. */
 		selection?: EventCalendarSelection;
+		/** Initial item or slot selection when `selection` is omitted. Defaults to the empty selection. */
+		defaultSelection?: EventCalendarSelection;
 		/** Immutable flat resources whose `parentId` values form groups. Defaults to `[]`. */
 		resources?: EventCalendarResource<TResourceFields>[];
 		/** Marks content busy and blocks content interactions. Defaults to `false`. */
@@ -402,13 +404,13 @@ type EventCalendarOwnProps<
 		/** Foreground overlap policy. Defaults to `true`. */
 		allowOverlap?: boolean | EventCalendarOverlapPredicate<TItemFields>;
 		/** Synchronous live item-proposal validator. Defaults to allowing proposals. */
-		validateItemUpdate?: (proposal: EventCalendarProposedUpdate<TItemFields>) => boolean;
+		validateItemUpdate?: (payload: EventCalendarProposedUpdate<TItemFields>) => boolean;
 		/** Synchronous item-proposal commit policy and adjustment hook. Defaults to accept. */
 		resolveItemUpdate?: (
-			proposal: EventCalendarProposedUpdate<TItemFields>
+			payload: EventCalendarProposedUpdate<TItemFields>
 		) => EventCalendarUpdateResult;
 		/** Synchronous slot-range validator. Defaults to allowing slots. */
-		validateSlotSelection?: (slot: EventCalendarSlot) => boolean;
+		validateSlotSelection?: (payload: EventCalendarSlot) => boolean;
 		/** Recurrence mutation and expansion policy. */
 		recurrence?: EventCalendarRecurrenceOptions<TItemFields>;
 		/** Maximum undo entries; `0` disables history. Defaults to `50`. */

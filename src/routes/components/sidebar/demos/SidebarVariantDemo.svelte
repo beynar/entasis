@@ -46,9 +46,9 @@
 		{ value: 'large', label: 'Large' }
 	] as const satisfies ReadonlyArray<{ value: SidebarSize; label: string }>;
 	const sidebarDensities = [
-		{ value: 'small', label: 'Small' },
+		{ value: 'compact', label: 'Compact' },
 		{ value: 'normal', label: 'Normal' },
-		{ value: 'large', label: 'Large' }
+		{ value: 'comfortable', label: 'Comfortable' }
 	] as const satisfies ReadonlyArray<{ value: SidebarDensity; label: string }>;
 
 	const selectedRecipe = $derived(
@@ -134,8 +134,8 @@
 			minWidth: '12rem',
 			maxWidth: '24rem',
 			storageKey: 'sidebar-variant-demo-width',
-			onWidthChange: (nextWidth) => {
-				sidebarWidth = nextWidth;
+			onWidthChange: ({ width }) => {
+				sidebarWidth = width;
 			}
 		},
 		headerButton: {
@@ -149,7 +149,7 @@
 <div class="flex h-[560px] w-full flex-col gap-3">
 	<div class="flex flex-wrap items-center justify-center gap-4">
 		<div class="flex flex-wrap items-center gap-2" role="group" aria-label="Sidebar variant">
-			{#each variantRecipes as recipe}
+			{#each variantRecipes as recipe, index (index)}
 				<Button
 					variant={selectedRecipeId === recipe.id ? 'solid' : 'outline'}
 					size="small"
@@ -161,7 +161,7 @@
 		</div>
 
 		<div class="flex flex-wrap items-center gap-2" role="group" aria-label="Sidebar state">
-			{#each demoStates as state}
+			{#each demoStates as state, index (index)}
 				<Button
 					variant={sidebarState === state ? 'solid' : 'outline'}
 					size="small"
@@ -173,22 +173,22 @@
 		</div>
 
 		<div class="grid gap-1.5">
-			<span class="text-xs font-medium text-neutral/55">Size</span>
+			<span class="text-neutral/65 text-xs font-medium">Size</span>
 			<SegmentedControl
 				items={sidebarSizes}
 				bind:value={sidebarSize}
 				size="small"
-				ariaLabel="Sidebar size"
+				label="Sidebar size"
 			/>
 		</div>
 
 		<div class="grid gap-1.5">
-			<span class="text-xs font-medium text-neutral/55">Density</span>
+			<span class="text-neutral/65 text-xs font-medium">Density</span>
 			<SegmentedControl
 				items={sidebarDensities}
 				bind:value={sidebarDensity}
 				size="small"
-				ariaLabel="Sidebar density"
+				label="Sidebar density"
 			/>
 		</div>
 	</div>
@@ -208,16 +208,14 @@
 				}
 			}}
 		>
-			{#snippet children()}
-				<div class="grid min-h-[22rem] place-items-center">
-					<div class="grid w-full max-w-2xl gap-3">
-						<Skeleton color="primary" class="h-3 w-11/12 rounded-full" />
-						<Skeleton class="h-3 w-8/12 rounded-full" />
-						<Skeleton class="h-3 w-full rounded-full" />
-						<Skeleton color="primary" class="h-3 w-7/12 rounded-full" />
-					</div>
+			<div class="grid min-h-[22rem] place-items-center">
+				<div class="grid w-full max-w-2xl gap-3">
+					<Skeleton color="primary" class="h-3 w-11/12 rounded-full" />
+					<Skeleton class="h-3 w-8/12 rounded-full" />
+					<Skeleton class="h-3 w-full rounded-full" />
+					<Skeleton color="primary" class="h-3 w-7/12 rounded-full" />
 				</div>
-			{/snippet}
+			</div>
 		</AppShell>
 	</div>
 </div>

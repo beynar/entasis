@@ -30,6 +30,17 @@ export function startTrailAnimation(
 	const segment = node.querySelector<HTMLElement>('[data-slot="network-indicator-segment"]');
 	if (!segment) return () => {};
 
+	// A reduced-motion preference resolves the duration to 0; hold the trail at rest
+	// instead of looping a zero-length animation.
+	if (trailDuration <= 0) {
+		node.style.opacity = '1';
+		node.style.transform = 'none';
+		segment.style.left = '0';
+		segment.style.opacity = '1';
+		return () => {
+			segment.style.opacity = '0';
+		};
+	}
 	const travelDuration = Math.max(trailDuration, 1);
 	const gapDuration = Math.max(trailGap, 0);
 	const totalDuration = travelDuration + gapDuration;
@@ -90,13 +101,19 @@ export function startTrailAnimation(
 export function startBarLoopAnimation(
 	state: NetworkIndicatorAnimationState,
 	node: HTMLDivElement,
-	{ delay, easing }: { delay: number; easing: Easing }
+	{ duration, easing }: { duration: number; easing: Easing }
 ) {
 	let transform = Math.random() * 0.35;
 
 	state.animation?.cancel();
 	node.style.opacity = '1';
 	node.style.transform = 'scaleX(0)';
+
+	// Same reduced-motion guard as the trail: show a static half-filled bar.
+	if (duration <= 0) {
+		node.style.transform = 'scaleX(0.6)';
+		return () => {};
+	}
 
 	const animateBar = () => {
 		const barAnimation = node.animate(
@@ -105,7 +122,7 @@ export function startBarLoopAnimation(
 				transform: `scaleX(${transform})`
 			},
 			{
-				duration: delay,
+				duration,
 				easing: easingBezierStrings[easing],
 				fill: 'both'
 			}
@@ -129,7 +146,7 @@ export function startBarLoopAnimation(
 export function finishBarAnimation(
 	state: NetworkIndicatorAnimationState,
 	node: HTMLDivElement,
-	{ delay, easing, onFinish }: { delay: number; easing: Easing; onFinish: () => void }
+	{ duration, easing, onFinish }: { duration: number; easing: Easing; onFinish: () => void }
 ) {
 	const currentTransform = getComputedStyle(node).transform;
 	const startTransform = currentTransform === 'none' ? 'scaleX(0)' : currentTransform;
@@ -141,7 +158,7 @@ export function finishBarAnimation(
 			{ opacity: 0, transform: 'scaleX(1)', offset: 1 }
 		],
 		{
-			duration: Math.max(delay, 180),
+			duration: duration <= 0 ? 0 : Math.max(duration, 180),
 			easing: easingBezierStrings[easing],
 			fill: 'both'
 		}

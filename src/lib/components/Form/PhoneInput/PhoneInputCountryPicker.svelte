@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { on } from 'svelte/events';
 	import { setContext } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
@@ -42,6 +43,7 @@
 	const id = $derived(customId ?? generatedId);
 	const listboxId = $derived(`${id}-listbox`);
 	const classes = $derived(usePhoneInputTheme(theme));
+	const t = $derived(useI18n());
 	const filteredCountries = $derived(filterPhoneCountryOptions(countries, searchQuery));
 	const optionId = (iso2: string) => `${id}-option-${iso2}`;
 
@@ -143,7 +145,7 @@
 		type="auto"
 		class={classes.countryList({ class: theme?.countryList?.base })}
 	>
-		<div id={listboxId} role="listbox" aria-label="Countries" class={classes.countryListbox()}>
+		<div id={listboxId} role="listbox" aria-label={t.countries} class={classes.countryListbox()}>
 			{#each filteredCountries as country (country.iso2)}
 				{@const selected = country.iso2 === selectedCountry?.iso2}
 				{@const highlighted = nav.highlighted === country.iso2}
@@ -155,7 +157,7 @@
 					{size}
 					fullWidth
 					role="option"
-					aria-selected={selected}
+					{selected}
 					data-highlighted={highlighted ? 'true' : undefined}
 					tabindex={-1}
 					class={classes.countryOption({
@@ -189,7 +191,7 @@
 				</Button>
 			{:else}
 				<div class={classes.countryEmpty({ size, class: theme?.countryEmpty?.base })}>
-					No countries found
+					{t.noCountries}
 				</div>
 			{/each}
 		</div>

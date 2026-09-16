@@ -47,7 +47,15 @@
 		...attrs,
 		...(highlighted !== undefined ? { 'data-highlighted': highlighted ? 'true' : undefined } : {}),
 		...(selected !== undefined
-			? { 'aria-selected': selected, 'data-selected': selected || undefined }
+			? {
+					// Checkable roles announce `aria-checked`; listbox options announce `aria-selected`.
+					...(['menuitemcheckbox', 'menuitemradio', 'checkbox', 'radio', 'switch'].includes(
+						resolvedRole
+					)
+						? { 'aria-checked': selected }
+						: { 'aria-selected': selected }),
+					'data-selected': selected || undefined
+				}
 			: {}),
 		...(disabled ? { 'aria-disabled': true, onclick: handleClick } : {}),
 		...(disabled && elementType === 'button' ? { disabled: true } : {}),

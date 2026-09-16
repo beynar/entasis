@@ -48,19 +48,21 @@
 	let added = $state('');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Find your everyday</p>
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Find your everyday
+		</p>
 		<Heading size="h2" weight="bold">A collection for every corner.</Heading>
 	</header>
 	<Tabs items={collections}
-		>{#snippet children({ item: collection })}<div class="grid gap-xl pt-xl md:grid-cols-[1fr_2fr]">
-				<div class="flex flex-col gap-xl justify-center p-xl rounded-lg bg-primary-muted">
+		>{#snippet children({ item: collection })}<div class="gap-xl pt-xl grid md:grid-cols-[1fr_2fr]">
+				<div class="gap-xl p-xl bg-primary-muted flex flex-col justify-center rounded-lg">
 					<Chip variant="soft" class="w-fit">{collection.label}</Chip><Heading size="h3"
 						>{collection.title}</Heading
 					>
@@ -71,12 +73,12 @@
 				</div>
 				<Carousel
 					items={products.filter((product) => collection.types.includes(product.type))}
-					layout={{ default: 1, md: 2, lg: 2, xl: 2 }}
+					layout={{ xs: 1, md: 2, lg: 2, xl: 2 }}
 					navigationButton={{ color: 'neutral' }}
-					>{#snippet children({ item: product })}<div class="flex flex-col gap-lg">
+					>{#snippet children({ item: product })}<div class="gap-lg flex flex-col">
 							{@render productArt(product.shape, product.color)}
 							<h4 class="font-semibold">{product.name}</h4>
-							<div class="flex gap-md justify-between">
+							<div class="gap-md flex justify-between">
 								<span>{money(product.price)}</span><Button
 									variant="link"
 									size="small"
@@ -87,7 +89,7 @@
 				>
 			</div>{/snippet}</Tabs
 	>
-	<p class="text-sm text-success" aria-live="polite">
+	<p class="text-success text-sm" aria-live="polite">
 		{added ? `${added} added to the sample bag.` : ''}
 	</p>
 </section>

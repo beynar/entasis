@@ -3,7 +3,7 @@
 	import DocPage from '../../DocPage.svelte';
 	import { TimeInput } from '$lib/components/Form/TimeInput/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let openingTime = $state<number | null>(540);
@@ -20,7 +20,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',

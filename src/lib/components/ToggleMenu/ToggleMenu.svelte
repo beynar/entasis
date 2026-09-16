@@ -6,13 +6,13 @@
 	import type { MenuItem } from '../Menu/index.js';
 	import PopupMenu from '../PopupMenu/PopupMenu.svelte';
 	import ToggleButton from '../ToggleButton/ToggleButton.svelte';
-	import type { ToggleButtonGroupItem } from '../ToggleButtonGroup/index.js';
-	import { tooltip } from '../Tooltip/tooltip.svelte.js';
+	import { tooltip } from '../Tooltip/tooltip.attachment.svelte.js';
 	import ToggleMenuGroup from './ToggleMenuGroup.svelte';
 	import ToggleMenuMenu from './ToggleMenuMenu.svelte';
 	import ToggleMenuRadioGroup from './ToggleMenuRadioGroup.svelte';
 	import type {
 		ToggleMenuCustomItem,
+		ToggleMenuGroupButton,
 		ToggleMenuGroupItem,
 		ToggleMenuItem,
 		ToggleMenuMenuItem,
@@ -23,31 +23,23 @@
 	} from './toggleMenu.props.js';
 	import { useToggleMenuOverflow } from './toggleMenu.state.svelte.js';
 	import { useToggleMenuTheme } from './toggleMenu.theme.js';
-	import { createBindableValue } from '$lib/utils/state.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
-		defaultValue = [],
-		value = $bindable(),
-		ariaLabel,
+		items = $bindable(),
+		label,
 		size,
 		color,
 		variant,
 		disabled = false,
-		onValueChange,
+		onItemsChange,
 		class: className,
 		theme,
 		...attachments
 	}: ToggleMenuProps = $props();
-	const valueState = createBindableValue(
-		() => value,
-		(next) => {
-			value = next;
-		},
-		() => defaultValue
-	);
+	const t = $derived(useI18n());
 
 	const classes = $derived(useToggleMenuTheme(theme));
-	const currentValue = $derived(valueState.value);
 	const navigation = useNavigation({
 		orientation: 'horizontal',
 		loop: true,
@@ -62,11 +54,15 @@
 	}
 
 	function replaceItem(index: number, item: ToggleMenuItem): void {
-		const nextValue = currentValue.map((currentItem, currentIndex) =>
+		const nextItems = items.map((currentItem, currentIndex) =>
 			currentIndex === index ? item : currentItem
 		);
-		valueState.value = nextValue;
-		onValueChange?.(nextValue);
+		items = nextItems;
+		onItemsChange?.(nextItems);
+	}
+
+	function getGroupValue(item: ToggleMenuGroupItem): string[] {
+		return item.value ?? item.defaultValue ?? [];
 	}
 
 	function updateToggle(index: number, item: ToggleMenuToggleItem, nextValue: boolean): void {
@@ -77,17 +73,20 @@
 	function updateGroup(
 		index: number,
 		item: ToggleMenuGroupItem,
-		key: string,
+		buttonValue: string,
 		checked: boolean
 	): void {
-		const nextValue = { ...(item.value ?? item.defaultValue), [key]: checked };
+		const pressed = getGroupValue(item);
+		const nextValue = item.items
+			.filter((button) => (button.value === buttonValue ? checked : pressed.includes(button.value)))
+			.map((button) => button.value);
 		replaceItem(index, { ...item, value: nextValue });
-		item.items[key]?.onValueChange?.(checked);
+		item.items.find((button) => button.value === buttonValue)?.onValueChange?.(checked);
 		item.onValueChange?.(nextValue);
 	}
 
 	function updateRadioGroup(index: number, selectedValue: string): void {
-		const item = currentValue[index];
+		const item = items[index];
 		if (item?.type !== 'radio-group' || (item.value ?? item.defaultValue) === selectedValue) return;
 		replaceItem(index, { ...item, value: selectedValue });
 		item.onValueChange?.(selectedValue);
@@ -110,42 +109,42 @@
 	function createOverflowMenu(item: ToggleMenuMenuItem): MenuItem {
 		return {
 			type: 'submenu',
-			children: item.children ?? item.ariaLabel,
+			children: item.children ?? item.label,
 			prefix: item.prefix ?? item.suffix,
 			menu: getMenuItems(item),
 			size: item.size ?? size,
 			color: item.color ?? color,
 			disabled: disabled || !!item.disabled,
-			attrs: item.ariaLabel ? { 'aria-label': item.ariaLabel } : undefined
+			attrs: item.label ? { 'aria-label': item.label } : undefined
 		};
 	}
 
 	function createOverflowOption(
 		itemIndex: number,
-		button: ToggleButtonGroupItem | ToggleMenuToggleItem,
+		button: ToggleMenuGroupButton | ToggleMenuToggleItem,
 		checked: boolean,
 		group?: ToggleMenuGroupItem,
-		key?: string
+		groupButtonValue?: string
 	): MenuItem {
 		return {
 			type: 'option',
 			role: 'menuitemcheckbox',
 			attrs: {
 				'aria-checked': checked,
-				'aria-label': typeof button.children === 'string' ? button.children : button.ariaLabel
+				'aria-label': typeof button.children === 'string' ? button.children : button.label
 			},
-			children: button.children ?? button.ariaLabel,
+			children: button.children ?? button.label,
 			prefix: button.prefix,
 			suffix: checked ? checkIcon : undefined,
 			size: group?.size ?? size,
 			color: group?.color ?? color,
 			disabled: disabled || !!group?.disabled || !!button.disabled,
 			onclick: () => {
-				if (group && key !== undefined) {
-					updateGroup(itemIndex, group, key, !checked);
+				if (group && groupButtonValue !== undefined) {
+					updateGroup(itemIndex, group, groupButtonValue, !checked);
 					return;
 				}
-				const item = currentValue[itemIndex];
+				const item = items[itemIndex];
 				if (item?.type === 'toggle') updateToggle(itemIndex, item, !checked);
 			}
 		};
@@ -154,31 +153,30 @@
 	function createOverflowRadioOption(
 		itemIndex: number,
 		group: ToggleMenuRadioGroupItem,
-		key: string,
 		button: ToggleMenuRadioGroupButton
 	): MenuItem {
-		const checked = (group.value ?? group.defaultValue) === key;
+		const checked = (group.value ?? group.defaultValue) === button.value;
 		return {
 			type: 'option',
 			role: 'menuitemradio',
 			attrs: {
 				'aria-checked': checked,
-				'aria-label': typeof button.children === 'string' ? button.children : button.ariaLabel
+				'aria-label': typeof button.children === 'string' ? button.children : button.label
 			},
-			children: button.children ?? button.ariaLabel,
+			children: button.children ?? button.label,
 			prefix: button.prefix,
 			suffix: checked ? checkIcon : undefined,
 			size: group.size ?? size,
 			color: group.color ?? color,
 			disabled: disabled || !!group.disabled || !!button.disabled,
-			onclick: () => updateRadioGroup(itemIndex, key)
+			onclick: () => updateRadioGroup(itemIndex, button.value)
 		};
 	}
 
 	const overflowMenuItems = $derived.by(() => {
 		const menuItems: MenuItem[] = [];
 
-		currentValue.slice(overflow.visibleCount).forEach((item, overflowIndex) => {
+		items.slice(overflow.visibleCount).forEach((item, overflowIndex) => {
 			const itemIndex = overflow.visibleCount + overflowIndex;
 			const unitItems: MenuItem[] = [];
 
@@ -187,20 +185,21 @@
 					createOverflowOption(itemIndex, item, item.value ?? item.defaultValue ?? false)
 				);
 			} else if (item.type === 'group') {
-				Object.entries(item.items).forEach(([key, button]) => {
+				const pressed = getGroupValue(item);
+				item.items.forEach((button) => {
 					unitItems.push(
 						createOverflowOption(
 							itemIndex,
 							button,
-							item.value?.[key] ?? item.defaultValue?.[key] ?? false,
+							pressed.includes(button.value),
 							item,
-							key
+							button.value
 						)
 					);
 				});
 			} else if (item.type === 'radio-group') {
-				Object.entries(item.items).forEach(([key, button]) => {
-					unitItems.push(createOverflowRadioOption(itemIndex, item, key, button));
+				item.items.forEach((button) => {
+					unitItems.push(createOverflowRadioOption(itemIndex, item, button));
 				});
 			} else if (item.type === 'menu') {
 				unitItems.push(createOverflowMenu(item));
@@ -217,7 +216,7 @@
 	});
 
 	$effect(() => {
-		void currentValue;
+		void items;
 		void size;
 		void color;
 		void variant;
@@ -227,7 +226,7 @@
 
 <div
 	role="toolbar"
-	aria-label={ariaLabel}
+	aria-label={label}
 	aria-orientation="horizontal"
 	tabindex="-1"
 	class={classes.root({ className })}
@@ -236,7 +235,7 @@
 	{...attachments}
 >
 	<div class={classes.rail()} {@attach overflow.railReference}>
-		{#each currentValue as item, index (index)}
+		{#each items as item, index (index)}
 			{@const overflowed = overflow.isOverflowed(index)}
 			{#if item.type === 'group'}
 				<ToggleMenuGroup
@@ -249,7 +248,7 @@
 					unitClass={classes.unit()}
 					unitReference={overflow.unitReference(index)}
 					buttonReference={navigation.itemReference}
-					onToggle={({ key, value }) => updateGroup(index, item, key, value)}
+					onToggle={({ value, checked }) => updateGroup(index, item, value, checked)}
 				/>
 			{:else if item.type === 'radio-group'}
 				<ToggleMenuRadioGroup
@@ -311,8 +310,8 @@
 						value={item.value ?? item.defaultValue ?? false}
 						onValueChange={(checked) => updateToggle(index, item, checked)}
 						{@attach overflowed ? undefined : navigation.itemReference}
-						{@attach !item.children && item.ariaLabel && !overflowed
-							? tooltip({ content: item.ariaLabel, delay: 350 })
+						{@attach !item.children && item.label && !overflowed
+							? tooltip({ content: item.label, delay: 350 })
 							: undefined}
 					/>
 				</span>
@@ -340,7 +339,7 @@
 					{size}
 					{disabled}
 					squared
-					label="More tools"
+					label={t.moreTools}
 					prefix={dotsThreeIcon}
 					{@attach overflow.hasOverflow ? navigation.itemReference : undefined}
 					{@attach popover.reference}

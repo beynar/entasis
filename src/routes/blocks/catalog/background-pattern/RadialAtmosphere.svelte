@@ -5,7 +5,7 @@
 </script>
 
 <section
-	class="atmosphere relative isolate flex min-h-96 flex-col items-center justify-center gap-xl overflow-hidden p-xl text-center"
+	class="atmosphere gap-xl p-xl relative isolate flex min-h-96 flex-col items-center justify-center overflow-hidden text-center"
 >
 	<Chip variant="outline">A little room to think</Chip><Heading
 		as="h2"
@@ -13,7 +13,7 @@
 		weight="bold"
 		class="max-w-2xl">Turn an open canvas into your next chapter.</Heading
 	>
-	<p class="max-w-lg text-neutral/70">
+	<p class="text-neutral/70 max-w-lg">
 		A soft background that gives your message space, with colors drawn from your active theme.
 	</p>
 	<Button href="/components">Start exploring</Button>

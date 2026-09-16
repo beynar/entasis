@@ -1,55 +1,83 @@
 <script lang="ts">
-	import Popover from '../Popover/Popover.svelte';
-	import Slot from '../Slot/Slot.svelte';
+	import { untrack } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
+	import Button from '../Button/Button.svelte';
 	import { useTheme } from '../Theme/theme.state.svelte.js';
-	import { useTooltipTheme } from './tooltip.theme.js';
+	import type { TooltipProps } from './tooltip.props.js';
+	import { tooltip } from './tooltip.attachment.svelte.js';
+
+	let {
+		trigger,
+		open = $bindable(),
+		defaultOpen = false,
+		onOpenChange,
+		...options
+	}: TooltipProps = $props();
 
 	const theme = useTheme();
-	const id = $props.id();
-	let currentTooltip = $state(theme.tooltip);
+	const openState = createBindableValue(
+		() => open,
+		(next) => {
+			open = next;
+		},
+		() => defaultOpen
+	);
 
-	$effect.pre(() => {
-		if (theme.tooltip) currentTooltip = theme.tooltip;
+	// The primitive owns hover, focus and `aria-describedby`; the component only hands it an
+	// element and keeps that element around so `open` can seed the shared surface directly.
+	// The rest object from `$props()` stays reactive, so the primitive reads live option values.
+	// svelte-ignore state_referenced_locally
+	const attachTooltip = tooltip(options);
+	let element = $state<HTMLElement | null>(null);
+
+	const attach: Attachment<HTMLElement> = (node) => {
+		element = node;
+		const cleanup = attachTooltip(node);
+		return () => {
+			if (element === node) element = null;
+			cleanup?.();
+		};
+	};
+
+	// One surface is shared by every tooltip, and hover or focus can move it at any time. Both
+	// derived values are booleans that stay stable while this tooltip owns the surface, so seeding
+	// the surface below never re-triggers the effects that seeded it.
+	const displayed = $derived(theme.tooltip !== null && theme.tooltip.ref === element);
+	const surfaceTaken = $derived(theme.tooltip !== null && theme.tooltip.ref !== element);
+
+	// Hover and focus move the surface without asking, so mirror what it shows back into the
+	// controlled state. Only real surface changes are reported, never the caller's own request.
+	let shown = false;
+	$effect(() => {
+		const next = displayed;
+		if (next === shown) return;
+		shown = next;
+		untrack(() => {
+			if (openState.value === next) return;
+			openState.value = next;
+			onOpenChange?.(next);
+		});
 	});
 
-	function handleAfterClose() {
-		currentTooltip?.onAfterClose?.();
-		if (!theme.tooltip) currentTooltip = null;
-	}
-
-	function handleOpenChange(open: boolean) {
-		if (open) return;
-		theme.tooltip = null;
-		theme.lastTooltipClosed = Date.now();
-	}
-	const color = $derived(currentTooltip?.color ?? 'neutral');
-	const size = $derived(currentTooltip?.size ?? 'normal');
-	const variant = $derived(currentTooltip?.variant ?? 'solid');
-
-	const classes = $derived(useTooltipTheme(currentTooltip?.theme));
+	// `open` seeds the shared surface; a tooltip hovered elsewhere keeps it until it closes.
+	$effect(() => {
+		if (!element || !openState.value || surfaceTaken) return;
+		const ref = element;
+		theme.tooltip = { ...options, ref };
+		return () => {
+			if (theme.tooltip?.ref !== ref) return;
+			theme.tooltip = null;
+			theme.lastTooltipClosed = Date.now();
+		};
+	});
 </script>
 
-<Popover
-	{id}
-	open={!!theme.tooltip}
-	ref={currentTooltip?.ref}
-	lockScroll={false}
-	position={currentTooltip?.position}
-	transition={currentTooltip?.transition}
-	closeOnMouseLeave={false}
-	offset={currentTooltip?.offset}
-	onAfterOpen={currentTooltip?.onAfterOpen}
-	onAfterClose={handleAfterClose}
-	onOpenChange={handleOpenChange}
-	class="!w-fit !max-w-fit !bg-transparent !p-0 !shadow-none !ring-0"
->
-	<div
-		role="tooltip"
-		data-color={color}
-		data-size={size}
-		data-variant={variant}
-		class={classes.root({ color, size, variant, className: currentTooltip?.class })}
-	>
-		<Slot render={currentTooltip?.content} />
-	</div>
-</Popover>
+{#if typeof trigger === 'function'}
+	{@render trigger(attach)}
+{:else}
+	{@const { content: triggerContent, ...buttonProps } = trigger}
+	<Button {...buttonProps} {@attach attach}>
+		{triggerContent}
+	</Button>
+{/if}

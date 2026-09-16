@@ -14,27 +14,27 @@
 	let subtotal = $derived(lines.reduce((total, line) => total + line.quantity * line.rate, 0));
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card title="Invoice #INV-2026-048" description="Northstar Studio → Orbit Labs"
 		><Stack gap="lg">
-			<div class="flex flex-wrap justify-between gap-lg rounded-lg bg-surface-recessed p-lg">
+			<div class="gap-lg bg-surface-recessed p-lg flex flex-wrap justify-between rounded-lg">
 				<div>
-					<p class="text-xs text-neutral/60">BILL TO</p>
+					<p class="text-neutral/70 text-xs">BILL TO</p>
 					<p class="mt-sm font-semibold">Orbit Labs</p>
-					<p class="text-sm text-neutral/60">billing@example.com</p>
+					<p class="text-neutral/70 text-sm">billing@example.com</p>
 				</div>
 				<div>
-					<p class="text-xs text-neutral/60">DUE DATE</p>
+					<p class="text-neutral/70 text-xs">DUE DATE</p>
 					<p class="mt-sm font-semibold">July 15, 2026</p>
 					<Chip color="warning" class="mt-sm">Draft</Chip>
 				</div>
 			</div>
 			{#each lines as line (line)}<div
-					class="grid items-center gap-md border-b border-neutral-muted pb-lg sm:grid-cols-[1fr_8rem_7rem_auto]"
+					class="gap-md border-neutral-muted pb-lg grid items-center border-b sm:grid-cols-[1fr_8rem_7rem_auto]"
 				>
 					<div>
 						<strong>{line.name}</strong>
-						<p class="text-sm text-neutral/60">${line.rate} per {line.unit}</p>
+						<p class="text-neutral/70 text-sm">${line.rate} per {line.unit}</p>
 					</div>
 					<NumberInput
 						label={`Quantity: ${line.name}`}
@@ -70,7 +70,7 @@
 					<strong>Total</strong><strong>${(subtotal * 1.1).toLocaleString()}</strong>
 				</div>
 			</Stack>
-			<p class="text-xs text-neutral/60">Local invoice preview. No invoice has been sent.</p>
+			<p class="text-neutral/70 text-xs">Local invoice preview. No invoice has been sent.</p>
 		</Stack></Card
 	>
 </Stack>

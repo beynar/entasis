@@ -5,7 +5,7 @@
 	import Form from '$lib/components/Form/Form/Form.svelte';
 
 	import type { SelectItems } from '$lib/components/Form/Select/index.js';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	const roles = [
@@ -56,7 +56,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -74,11 +74,11 @@
 	subtitle="A dropdown for choosing one option from a list."
 	component="Select"
 	features={[
-		'role=combobox + listbox ARIA pattern',
-		'Arrow keys, Enter, Escape navigation',
+		{ label: 'role=combobox + listbox ARIA pattern', test: 'a11y:select.aria' },
+		{ label: 'Arrow keys, Enter, Escape navigation', test: 'a11y:select.keyboard' },
 		'Grouped options with separators',
 		'Bindable value with field validation',
-		'Virtual focus stays on trigger'
+		{ label: 'Virtual focus stays on trigger', test: 'a11y:select.virtual-focus' }
 	]}
 >
 	<ComponentCard
@@ -123,7 +123,7 @@
 			<div class="w-full max-w-md">
 				<Select label="Role" placeholder="Select a role" items={roles} bind:value />
 				{#if value}
-					<p class="text-neutral/60 mt-2 text-xs">Selected: {value}</p>
+					<p class="text-neutral/70 mt-2 text-xs">Selected: {value}</p>
 				{/if}
 			</div>
 		</ComponentCard>
@@ -139,7 +139,7 @@
 					bind:value={timezone}
 				/>
 				{#if timezone}
-					<p class="text-neutral/60 mt-2 text-xs">Selected: {timezone}</p>
+					<p class="text-neutral/70 mt-2 text-xs">Selected: {timezone}</p>
 				{/if}
 			</div>
 		</ComponentCard>

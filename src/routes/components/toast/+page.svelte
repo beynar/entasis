@@ -21,7 +21,7 @@
 			name: 'color',
 			type: 'segmented',
 			label: 'Color',
-			value: 'primary',
+			value: 'success',
 			options: ['primary', 'success', 'warning', 'danger', 'neutral']
 		},
 		{
@@ -131,7 +131,7 @@
 		description="Fire a toast from anywhere with the toast helper. Mount a single <Toaster /> once in your layout. Drag a toast toward its screen edge to dismiss it."
 		code={`<script>
 	import { Toaster, toast } from 'svelai/toast';
-<\/script>
+</scr${'ipt'}>
 
 <Toaster />
 
@@ -217,7 +217,7 @@ toast.success({ title: 'Saved', richColors: true });`}
 		>
 			<div class="flex flex-col items-stretch gap-6 sm:flex-row sm:gap-12">
 				<div class="flex flex-col items-center gap-2">
-					<span class="text-neutral/60 text-xs font-medium tracking-wide uppercase"> Default </span>
+					<span class="text-neutral/70 text-xs font-medium tracking-wide uppercase"> Default </span>
 					<div class="flex flex-wrap justify-center gap-2">
 						<Button
 							color="success"
@@ -243,7 +243,7 @@ toast.success({ title: 'Saved', richColors: true });`}
 					</div>
 				</div>
 				<div class="flex flex-col items-center gap-2">
-					<span class="text-neutral/60 text-xs font-medium tracking-wide uppercase">
+					<span class="text-neutral/70 text-xs font-medium tracking-wide uppercase">
 						Rich colors
 					</span>
 					<div class="flex flex-wrap justify-center gap-2">
@@ -376,7 +376,7 @@ toast.warning({ title: 'You are offline.', position: 'banner-bottom' });`}
 };`}
 		>
 			<div
-				class="border-neutral-muted w-full max-w-sm divide-y divide-neutral-muted rounded-lg border"
+				class="border-neutral-muted divide-neutral-muted w-full max-w-sm divide-y rounded-lg border"
 			>
 				{#each items as item (item.id)}
 					<div class="flex items-center justify-between gap-2 px-3 py-2 text-sm">
@@ -387,7 +387,7 @@ toast.warning({ title: 'You are offline.', position: 'banner-bottom' });`}
 					</div>
 				{/each}
 				{#if !items.length}
-					<p class="text-neutral/60 px-3 py-6 text-center text-sm">
+					<p class="text-neutral/70 px-3 py-6 text-center text-sm">
 						All items deleted. Reload the page to reset.
 					</p>
 				{/if}

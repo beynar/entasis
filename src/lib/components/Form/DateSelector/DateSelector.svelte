@@ -1,4 +1,5 @@
 <script lang="ts" generics="Mode extends DateSelectorMode">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Button from '$lib/components/Button/Button.svelte';
 	import { calendarBlankIcon } from '$lib/components/Icons/calendarBlank.js';
@@ -38,7 +39,8 @@
 		maxDate,
 		disabledDates = [],
 		disabled = false,
-		calendarLabel = 'Choose dates',
+		calendarLabel,
+		i18n,
 		id,
 		class: className,
 		onValueChange,
@@ -62,6 +64,7 @@
 	);
 
 	const classes = $derived(useDateSelectorTheme(theme));
+	const t = $derived(useI18n(i18n));
 	const calendarType = $derived(
 		(mode === 'date'
 			? 'calendar'
@@ -75,16 +78,16 @@
 	const defaultTriggerLabel = $derived.by(() => {
 		if (mode === 'date') {
 			const date = valueState.value as Date | null;
-			return date ? formatDay(date) : 'Choose dates';
+			return date ? formatDay(date) : t.chooseDates;
 		}
 		if (mode === 'range') {
 			const range = valueState.value as [Date | null, Date | null] | null;
-			if (!range || (!range[0] && !range[1])) return 'Choose dates';
+			if (!range || (!range[0] && !range[1])) return t.chooseDates;
 			const side = (date: Date | null) => (date ? formatDay(date) : '…');
 			return `${side(range[0])} – ${side(range[1])}`;
 		}
 		const dates = valueState.value as Date[] | undefined;
-		return dates?.length ? dates.map(formatDay).join(', ') : 'Choose dates';
+		return dates?.length ? dates.map(formatDay).join(', ') : t.chooseDates;
 	});
 	const resolvedTrigger = $derived(
 		trigger === undefined
@@ -194,7 +197,7 @@
 >
 	<div class={classes.root({ withPresets: presets.length > 0, view })}>
 		{#if presets.length > 0}
-			<div class={classes.presets()} aria-label="Preset dates">
+			<div class={classes.presets()} aria-label={t.presetDates}>
 				{#each presets as preset (preset.label)}
 					<Button
 						variant={isValueSelected(preset.value) ? 'soft' : 'ghost'}
@@ -221,7 +224,7 @@
 			{maxDate}
 			{disabledDates}
 			{disabled}
-			ariaLabel={calendarLabel}
+			label={calendarLabel ?? t.chooseDates}
 			theme={mergedCalendarTheme}
 			onValueChange={handleCalendarChange}
 		/>

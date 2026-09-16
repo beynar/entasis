@@ -1,5 +1,6 @@
 <script lang="ts" generics="TData = unknown">
 	import { mapPinIcon } from '../Icons/mapPin.js';
+	import MapHtmlText from './MapHtmlText.svelte';
 	import type { MapMarker } from './map-data.js';
 
 	type Props<TData = unknown> = {
@@ -11,7 +12,7 @@
 </script>
 
 <span
-	class="flex size-9 items-center justify-center text-surface drop-shadow-md ring-offset-surface group-focus-visible:ring-2 group-focus-visible:ring-primary group-focus-visible:ring-offset-2"
+	class="text-surface ring-offset-surface group-focus-visible:ring-focus/50 flex size-9 items-center justify-center drop-shadow-md group-focus-visible:ring-2 group-focus-visible:ring-offset-2"
 	style:color
 >
 	<span class="inline-flex items-center justify-center [&_svg]:size-9" aria-hidden="true"
@@ -20,8 +21,8 @@
 </span>
 {#if marker.label}
 	<span
-		class="mt-1 max-w-full truncate rounded-md bg-surface-floating/95 px-2 py-0.5 text-xs font-medium text-neutral shadow-sm ring-1 ring-neutral-muted"
+		class="bg-surface-floating/95 text-neutral ring-neutral-muted lift-1 mt-1 max-w-full truncate rounded-md px-2 py-0.5 text-xs font-medium ring-1"
 	>
-		{@html marker.label}
+		<MapHtmlText value={marker.label} />
 	</span>
 {/if}

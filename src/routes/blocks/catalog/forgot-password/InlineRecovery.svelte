@@ -8,16 +8,16 @@
 	let message = $state('');
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<div class="grid gap-xl md:grid-cols-3">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<div class="gap-xl grid md:grid-cols-3">
 		<div>
 			<Chip color="neutral">Account / Recovery</Chip>
 			<h2 class="mt-lg text-3xl font-semibold">A fresh start.</h2>
-			<p class="mt-md text-sm text-neutral/65">
+			<p class="mt-md text-neutral/65 text-sm">
 				Use the email you registered with. You’ll keep your projects and team access.
 			</p>
 		</div>
-		<div class="grid gap-lg md:col-span-2">
+		<div class="gap-lg grid md:col-span-2">
 			<Form
 				variant="sectioned"
 				title="Reset access"
@@ -36,7 +36,7 @@
 				/>{/if}<Card
 				title="Still having trouble?"
 				description="If you use your company’s single sign-on, contact your workspace administrator."
-				variant="soft"
+				variant="outline"
 			/>
 		</div>
 	</div>

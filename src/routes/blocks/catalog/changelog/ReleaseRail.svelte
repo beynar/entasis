@@ -30,27 +30,27 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Changelog</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">Changelog</p>
 		<Heading size="h2" weight="bold">Always getting a little better.</Heading>
-		<p class="max-w-2xl text-neutral/65">
+		<p class="text-neutral/65 max-w-2xl">
 			New capabilities, useful improvements, and the details in between.
 		</p>
 	</header>
 	{#each releases as release (release.version)}<article
-			class="grid gap-xl border-t border-neutral/15 pt-xl md:grid-cols-[12rem_1fr]"
+			class="gap-xl border-neutral/15 pt-xl grid border-t md:grid-cols-[12rem_1fr]"
 		>
-			<aside class="flex flex-col gap-md">
+			<aside class="gap-md flex flex-col">
 				<Chip variant="soft" class="w-fit">v{release.version}</Chip><time
-					class="text-sm text-neutral/50">{release.date}</time
+					class="text-neutral/65 text-sm">{release.date}</time
 				>
 			</aside>
-			<div class="flex flex-col gap-xl">
+			<div class="gap-xl flex flex-col">
 				<Heading size="h3">{release.title}</Heading>
 				<p class="text-neutral/65">{release.body}</p>
 				<Card variant="soft"
-					><ul class="flex flex-col gap-md list-inside list-disc">
+					><ul class="gap-md flex list-inside list-disc flex-col">
 						{#each release.changes as change (change)}<li>{change}</li>{/each}
 					</ul></Card
 				>

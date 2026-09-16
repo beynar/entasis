@@ -19,7 +19,7 @@
 
 	let {
 		ref = $bindable(),
-		fileTree = $bindable<FileTree | undefined>(),
+		api = $bindable<FileTree | undefined>(),
 		paths,
 		preparedInput,
 		options,
@@ -71,7 +71,7 @@
 	let errorMessage = $state<string | undefined>();
 	const classes = $derived(useTreeTheme(theme));
 	const renderer = new TreeRenderer();
-	const snippetRenderer = new TreeSnippetRenderer(() => fileTree);
+	const snippetRenderer = new TreeSnippetRenderer(() => api);
 	const serverMarkup = createInitialServerMarkup();
 	const heightStyle = $derived(typeof height === 'number' ? `${height}px` : height);
 	const hostClassName = $derived(classes.host({ className: hostClass }));
@@ -157,8 +157,8 @@
 	}
 
 	function setFileTree(nextFileTree: FileTree | undefined): void {
-		if (Object.is(fileTree, nextFileTree)) return;
-		fileTree = nextFileTree;
+		if (Object.is(api, nextFileTree)) return;
+		api = nextFileTree;
 	}
 
 	function createPropValues(): TreePropValues {
@@ -224,5 +224,9 @@
 		</div>
 	{/if}
 
+	<!-- Unavoidable: the initial rows are the SSR payload serialized by the tree engine
+	     (@pierre/trees/ssr), never caller supplied HTML; the client attachment then adopts
+	     this subtree, so it cannot be expressed as Svelte markup. -->
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	<div {@attach attachTree} class={classes.viewport()}>{@html serverMarkup}</div>
 </div>

@@ -24,6 +24,7 @@
 		mobileActionCount = 1,
 		children,
 		class: className,
+		label,
 		theme,
 		...attachments
 	}: PageShellProps = $props();
@@ -118,7 +119,12 @@
 		<PageShellHeader api={shell.api} {theme} />
 	{/if}
 
-	<main {@attach trackPageScroll} data-slot="page-shell-content" class={classes.content()}>
+	<main
+		{@attach trackPageScroll}
+		aria-label={label}
+		data-slot="page-shell-content"
+		class={classes.content()}
+	>
 		<div
 			data-slot="page-shell-content-inner"
 			class={classes.contentInner({

@@ -30,7 +30,7 @@
 	let hasNumber = $derived(/[0-9]/.test(values.password ?? ''));
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Grid columns={{ minWidth: 220, max: 2 }} gap="xl">
 		<Card title="Set a new password" description="Use a password you haven’t used here before."
 			><Stack gap="lg">
@@ -54,15 +54,15 @@
 					/>{/if}
 			</Stack></Card
 		>
-		<Stack as="aside" gap="lg" justify="center" class="rounded-lg bg-primary-muted p-xl">
+		<Stack as="aside" gap="lg" justify="center" class="bg-primary-muted p-xl rounded-lg">
 			<h3 class="text-xl font-semibold">A little stronger, a lot safer.</h3>
-			<p class="text-sm text-neutral/65">Use a unique phrase that’s easy for you to remember.</p>
-			<ul class="grid gap-md">
+			<p class="text-neutral/65 text-sm">Use a unique phrase that’s easy for you to remember.</p>
+			<ul class="gap-md grid">
 				<li>{(values.password?.length ?? 0) >= 8 ? '✓' : '○'} At least 8 characters</li>
 				<li>{hasUppercase ? '✓' : '○'} An uppercase letter</li>
 				<li>{hasNumber ? '✓' : '○'} A number</li>
 			</ul>
-			<p class="text-xs text-neutral/60">The checklist updates as you type.</p>
+			<p class="text-neutral/70 text-xs">The checklist updates as you type.</p>
 		</Stack>
 	</Grid>
 </Stack>

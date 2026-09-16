@@ -34,10 +34,10 @@ const defaultPanel = cva({
 	variants: {
 		variant: {
 			default: null,
-			splitted: 'border-neutral-muted bg-surface rounded-sm border shadow-sm'
+			splitted: 'bg-surface rounded-sm raised-1'
 		},
 		animating: {
-			true: 'motion-safe:will-change-[flex] motion-safe:transition-[flex] motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]',
+			true: 'motion-safe:will-change-[flex] motion-safe:transition-[flex] motion-safe:duration-slow motion-safe:ease-enter',
 			false: null
 		}
 	},
@@ -48,15 +48,16 @@ const defaultPanel = cva({
 });
 
 const defaultHandle = cva({
-	base: 'group/resizable-handle relative flex shrink-0 touch-none items-center justify-center outline-none transition-colors before:absolute after:absolute focus-visible:ring-2 focus-visible:ring-primary/40 data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50',
+	base: 'group/resizable-handle relative flex shrink-0 touch-none items-center justify-center outline-none transition-[color,background-color,border-color,opacity] before:absolute after:absolute focus-visible:ring-2 focus-visible:ring-focus/50 data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50',
 	variants: {
 		orientation: {
 			horizontal: 'cursor-col-resize',
 			vertical: 'cursor-row-resize'
 		},
 		variant: {
-			default: 'bg-neutral-muted hover:bg-primary/30 data-[dragging=true]:bg-primary/45',
-			splitted: 'bg-transparent hover:bg-transparent data-[dragging=true]:bg-transparent'
+			default:
+				'bg-neutral-muted opacity-70 hover:opacity-100 data-[dragging=true]:bg-primary/45 data-[dragging=true]:opacity-100',
+			splitted: 'bg-transparent data-[dragging=true]:bg-transparent'
 		},
 		lines: {
 			true: null,
@@ -136,7 +137,7 @@ const defaultGrip = cva({
 			vertical: null
 		},
 		handleVariant: {
-			grip: 'border-neutral-muted/80 bg-surface/95 text-neutral/70 grid place-items-center rounded-full border shadow-[0_1px_2px_rgb(0_0_0/0.12)] transition-colors group-hover/resizable-handle:border-primary/40 group-hover/resizable-handle:text-primary-readable/80 group-data-[dragging=true]/resizable-handle:border-primary/55 group-data-[dragging=true]/resizable-handle:text-primary-readable',
+			grip: 'border-neutral-muted/80 bg-surface/95 text-neutral/70 grid place-items-center rounded-full border shadow-[0_1px_2px_rgb(0_0_0/0.12)] transition-colors group-hover/resizable-handle:border-primary/40 group-hover/resizable-handle:text-primary-readable/70 group-data-[dragging=true]/resizable-handle:border-primary/55 group-data-[dragging=true]/resizable-handle:text-primary-readable',
 			thumb:
 				'bg-neutral/20 rounded-full transition-colors group-hover/resizable-handle:bg-primary/55 group-data-[dragging=true]/resizable-handle:bg-primary'
 		}

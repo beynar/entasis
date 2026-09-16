@@ -1,4 +1,4 @@
-import { bind } from '$lib/utils/state.svelte.js';
+import { withOptions } from '$lib/utils/state.svelte.js';
 import { onDestroy, tick, untrack } from 'svelte';
 import type {
 	TableOfContentsActivationThresholds,
@@ -40,17 +40,23 @@ const DEFAULT_ACTIVATION_THRESHOLDS = {
 
 const SCROLL_MARGIN_PROPERTY = 'scroll-margin-block-start';
 
-export class TableOfContentsState {
+// Internal bookkeeping collections are rebuilt wholesale and published through `$state` fields, so
+// they stay plain Map/Set; these factories keep that intent explicit instead of reaching for the
+// per-entry reactive wrappers in `svelte/reactivity`.
+const plainMap = <K, V>(entries?: Iterable<readonly [K, V]>): Map<K, V> => new Map(entries);
+const plainSet = <T>(values?: Iterable<T>): Set<T> => new Set(values);
+
+export class TableOfContentsState extends withOptions<TableOfContentsStateOptions>() {
 	items = $state<TableOfContentsItem[]>([]);
 	currentId = $state<string | null>(null);
-	highlightedIds = $state<Set<string>>(new Set());
+	highlightedIds = $state<Set<string>>(plainSet());
 	geometry = $state<TableOfContentsRailGeometry | null>(null);
 
 	private targetElement: HTMLElement | null = null;
 	private rootElement: HTMLElement | null = null;
 	private listElement: HTMLOListElement | null = null;
-	private headingElements = new Map<string, HTMLHeadingElement>();
-	private headingScrollMargins = new Map<HTMLHeadingElement, HeadingScrollMargin>();
+	private headingElements = plainMap<string, HTMLHeadingElement>();
+	private headingScrollMargins = plainMap<HTMLHeadingElement, HeadingScrollMargin>();
 	private targetScrollElements: HTMLElement[] = [];
 	private resolvedLevels: TableOfContentsLevel[] = [];
 	private resolvedProvidedItems: TableOfContentsItem[] | null = null;
@@ -64,7 +70,7 @@ export class TableOfContentsState {
 	private restoredHash = '';
 
 	constructor(options: TableOfContentsStateOptions) {
-		bind(this, options);
+		super(options);
 
 		$effect(() => {
 			const target = this.target;
@@ -159,7 +165,7 @@ export class TableOfContentsState {
 		this.sourceSignature = signature;
 
 		if (!levels.length || (providedItems === null && !targetElement)) {
-			this.setItems([], new Map());
+			this.setItems([], plainMap());
 			return;
 		}
 
@@ -224,13 +230,13 @@ export class TableOfContentsState {
 		}
 
 		if (!this.targetElement || !this.resolvedLevels.length) {
-			this.setItems([], new Map());
+			this.setItems([], plainMap());
 			return;
 		}
 
 		const selector = this.resolvedLevels.map((level) => `h${level}`).join(',');
-		const usedIds = new Set<string>();
-		const headingElements = new Map<string, HTMLHeadingElement>();
+		const usedIds = plainSet<string>();
+		const headingElements = plainMap<string, HTMLHeadingElement>();
 		const items: TableOfContentsItem[] = [];
 
 		for (const heading of this.targetElement.querySelectorAll<HTMLHeadingElement>(selector)) {
@@ -251,7 +257,7 @@ export class TableOfContentsState {
 	};
 
 	private syncProvidedItems(): void {
-		const headingElements = new Map<string, HTMLHeadingElement>();
+		const headingElements = plainMap<string, HTMLHeadingElement>();
 		const targetHeadings = this.targetElement ? getHeadingElementsById(this.targetElement) : null;
 
 		for (const item of this.resolvedProvidedItems ?? []) {
@@ -279,7 +285,7 @@ export class TableOfContentsState {
 		scrollOffset: number | undefined
 	): void {
 		const offset = normalizeScrollOffset(scrollOffset);
-		const currentHeadings = new Set(headingElements.values());
+		const currentHeadings = plainSet(headingElements.values());
 
 		for (const heading of [...this.headingScrollMargins.keys()]) {
 			if (offset !== null && currentHeadings.has(heading)) continue;
@@ -384,7 +390,7 @@ export class TableOfContentsState {
 	};
 
 	private updateActiveState(visibleIds: string[], currentId: string | null): void {
-		const highlightedIds = new Set(visibleIds.length ? visibleIds : currentId ? [currentId] : []);
+		const highlightedIds = plainSet(visibleIds.length ? visibleIds : currentId ? [currentId] : []);
 		if (!areSameIds(this.highlightedIds, highlightedIds)) this.highlightedIds = highlightedIds;
 
 		if (this.currentId !== currentId) {
@@ -466,8 +472,6 @@ export class TableOfContentsState {
 	}
 }
 
-export interface TableOfContentsState extends TableOfContentsStateOptions {}
-
 function resolveTarget(target: TableOfContentsTarget | undefined): HTMLElement | null {
 	if (typeof document === 'undefined' || !target) return null;
 	if (typeof target !== 'string') return target;
@@ -476,7 +480,7 @@ function resolveTarget(target: TableOfContentsTarget | undefined): HTMLElement |
 }
 
 function getHeadingElementsById(target: HTMLElement): Map<string, HTMLHeadingElement> {
-	const headings = new Map<string, HTMLHeadingElement>();
+	const headings = plainMap<string, HTMLHeadingElement>();
 	for (const heading of target.querySelectorAll<HTMLHeadingElement>(
 		'h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]'
 	)) {

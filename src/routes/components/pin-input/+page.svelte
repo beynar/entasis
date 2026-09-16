@@ -4,7 +4,7 @@
 	import Form from '$lib/components/Form/Form/Form.svelte';
 	import Button from '$lib/components/Button/Button.svelte';
 	import { PIN_INPUT_ALPHANUMERIC_PATTERN, PinInput } from '$lib/components/Form/PinInput/index.js';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let code = $state('');
@@ -31,7 +31,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -49,7 +49,7 @@
 	subtitle="One-time-code input with visible cells and one real form input."
 	component="PinInput"
 	features={[
-		'Native input owns focus and paste',
+		{ label: 'Native input owns focus and paste', test: 'a11y:pin-input.native-input' },
 		'OTP autocomplete',
 		'Bindable string value',
 		'Form integration'
@@ -146,7 +146,7 @@
 					{/snippet}
 				</Form>
 				{#if formValue}
-					<p class="text-neutral/60 text-sm">{formValue}</p>
+					<p class="text-neutral/70 text-sm">{formValue}</p>
 				{/if}
 			</div>
 		</ComponentCard>

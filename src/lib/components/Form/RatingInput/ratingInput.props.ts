@@ -8,7 +8,7 @@ export type RatingInputProps = InputProps<'rating'> & {
 	/** Number of stars, which is also the maximum selectable value. */
 	max?: number;
 	/** When true the value snaps to 0.5 increments (half stars). */
-	allowHalf?: boolean;
+	halfSteps?: boolean;
 	/** Displays the value without allowing interaction. */
 	readonly?: boolean;
 	/** When true, clicking the current value clears it back to null. */

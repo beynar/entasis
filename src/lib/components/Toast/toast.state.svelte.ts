@@ -1,13 +1,15 @@
 import { ThemeState, useTheme } from '../Theme/theme.state.svelte.js';
 import { Timer } from '$lib/utils/timer.svelte.js';
+import { DEV } from 'esm-env';
 import { onMount, untrack } from 'svelte';
 import type { ResponsiveProps } from '../Theme/theme.js';
 import type { Slot } from '../Slot/slot.js';
-import type { FSOProps } from '$lib/transitions/transition.js';
+import type { FSOParams, FSOProps } from '$lib/transitions/transition.js';
 import type { Colors, Sizes } from '$lib/types/theme.js';
 import type { ButtonProps } from '../Button/index.js';
-import { bind } from '$lib/utils/state.svelte.js';
-import { defaultToastAnimation, type ToastThemeProps } from './toast.theme.js';
+import { createId } from '$lib/utils/id.js';
+import { createBindableStateClass } from '$lib/utils/state.svelte.js';
+import { useToastMotion, type ToastThemeProps } from './toast.theme.js';
 
 export type ToastPosition =
 	| 'top-left'
@@ -60,8 +62,8 @@ type ToastOptions = {
 	actions?: ToastAction[];
 	/** Content of the close button. */
 	closeIcon?: Slot;
-	/** Enter and exit transition configuration. */
-	animation?: FSOProps;
+	/** Enter and exit transition overrides for this toast; wins over the `motion` slot. */
+	transition?: FSOProps;
 	/** Shows a loading indicator. */
 	loading?: boolean;
 	/** Shows the remaining automatic dismissal time as a progress bar. */
@@ -77,13 +79,15 @@ type ToastOptions = {
 	/** Icon text displayed before the toast content. */
 	icon?: string;
 	/** Called once for manual dismissal, including an action or remove(). */
-	onDismiss?: (toast: Toast) => void;
+	onDismiss?: (payload: Toast) => void;
 	/** Called after the toast's entry transition finishes. */
-	onAfterOpen?: (toast: Toast) => void;
+	onAfterOpen?: (payload: Toast) => void;
 	/** Called once when the duration expires; manual dismissal cancels it. */
-	onAutoDismiss?: (toast: Toast) => void;
+	onAutoDismiss?: (payload: Toast) => void;
 	/** Screen position for this toast. */
 	position?: ToastPosition;
+	/** Theme overrides for this toast alone, layered over the Toaster's `theme`. */
+	theme?: ToastThemeProps;
 };
 
 export type ToasterProps = Pick<
@@ -118,13 +122,15 @@ export type ToasterProps = Pick<
 	direction?: 'ltr' | 'rtl';
 	/** Responsive default screen position. */
 	position?: ResponsiveProps<ToastPosition>;
-	/** Transition configuration for each toast position. */
-	animation?: Partial<Record<ToastPosition, FSOProps>>;
+	/** Enter and exit transition overrides applied to every toast; the per-toast `transition` wins. */
+	transition?: FSOProps;
 	/** Stack perspective amount from 0 to 100. */
 	perspectiveAmount?: number;
 };
 
 type MakeRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+/** The options exactly as a `toast()` call supplied them, before Toaster defaults. */
+type ToastRequest = Omit<ToastOptions, 'id'> & { id: string };
 type ToasterOptions = Omit<
 	MakeRequired<
 		ToasterProps,
@@ -138,16 +144,22 @@ type ToasterOptions = Omit<
 		| 'perspectiveAmount'
 	>,
 	'theme'
->;
-export interface Toaster extends ToasterOptions {}
-
-export class Toaster {
+> & {
+	/** The Toaster's `theme.motion` slot, forwarded by `Toaster.svelte`. */
+	motion?: ToastThemeProps['motion'];
+};
+export class Toaster extends createBindableStateClass<ToasterOptions>() {
 	toasts = $state<Toast[]>([]);
 	element = $state<HTMLElement>();
 	hovering = $state<ToastPosition | null>(null);
 	polygon = $state<[number, number, number, number]>([0, 0, 0, 0]);
 	isOpen = $state(false);
 	theme = useTheme();
+	// Per-position preset from `toastTheme.motion`, through the override ladder
+	// (registry → `setToastTheme` → Toaster `theme.motion` → per-toast `transition`).
+	// Lives on the Toaster because `useComponentMotion` must run during init, while
+	// `Toast`s are constructed later by `addToast`.
+	resolveMotion = useToastMotion();
 
 	currentPosition = $derived(
 		typeof this.position === 'string'
@@ -178,10 +190,13 @@ export class Toaster {
 			: this.theme.resolveResponsiveProps(this.collapseHorizontalAxis, true)
 	);
 
-	constructor(opts: ToasterProps) {
-		bind(this, opts);
+	constructor(opts: ToasterProps & Pick<ToasterOptions, 'motion'>) {
+		// `Toaster.svelte` passes a live getter object that fills every option; the
+		// declared prop type keeps them optional for callers.
+		super(opts as ToasterOptions);
 		onMount(() => {
 			window.toaster = this;
+			flushPendingToasts(this);
 			return () => {
 				// Don't leave a dangling reference if this Toaster unmounts (another
 				// mounted Toaster may have already replaced it).
@@ -225,24 +240,34 @@ export class Toaster {
 		}
 	};
 
-	addToast = (opts: Omit<ToastOptions, 'id'> & { id?: string }) => {
-		const toast = new Toast(
-			{
-				...opts,
-				position: opts.position || this.currentPosition || 'bottom-right',
-				size: opts.size ?? this.size,
-				dismissible: opts.dismissible ?? this.dismissible,
-				closeOnClick: opts.closeOnClick ?? this.closeOnClick ?? false,
-				swipeToDismiss: opts.swipeToDismiss ?? this.swipeToDismiss ?? true,
-				duration: opts.duration ?? this.duration,
-				richColors: opts.richColors ?? this.richColors,
-				showCloseIcon: opts.showCloseIcon ?? this.showCloseIcon ?? true,
-				progress: opts.progress ?? this.progress ?? false,
-				id: opts.id || Math.random().toString(36).substring(7)
-			},
-			this,
-			this.theme
-		);
+	// Layers this Toaster's defaults under the options the `toast()` call supplied. Kept
+	// apart from `addToast` because a toast parked before any Toaster mounted still has to
+	// pick its defaults up here, from whichever Toaster ends up adopting it.
+	private resolveOptions = (opts: ToastRequest): MakeRequired<ToastOptions, 'position'> => ({
+		...opts,
+		position: opts.position || this.currentPosition || 'bottom-right',
+		size: opts.size ?? this.size,
+		dismissible: opts.dismissible ?? this.dismissible,
+		closeOnClick: opts.closeOnClick ?? this.closeOnClick ?? false,
+		swipeToDismiss: opts.swipeToDismiss ?? this.swipeToDismiss ?? true,
+		duration: opts.duration ?? this.duration,
+		richColors: opts.richColors ?? this.richColors,
+		showCloseIcon: opts.showCloseIcon ?? this.showCloseIcon ?? true,
+		progress: opts.progress ?? this.progress ?? false
+	});
+
+	addToast = (opts: Omit<ToastOptions, 'id'> & { id?: string }) =>
+		this.adoptToast(new Toast({ ...opts, id: opts.id || createId('toast') }));
+
+	/**
+	 * Attaches a toast to this Toaster: resolves its options against the Toaster's
+	 * defaults and pushes it onto the stack. Used both for a freshly created toast and
+	 * for one parked in the pending queue while no Toaster was mounted.
+	 */
+	adoptToast = (toast: Toast) => {
+		toast.toaster = this;
+		toast.theme = this.theme;
+		toast.opts = this.resolveOptions(toast.requested);
 		this.toasts.push(toast);
 		this.isOpen = true;
 		return toast;
@@ -263,6 +288,14 @@ export class Toaster {
 
 export class Toast {
 	id: string;
+	// Declared (not constructor parameter properties) so the `animations` field
+	// initializer below can reference them: `$derived` only reads them on demand.
+	// Both stay null until a Toaster adopts the toast — `toast()` called before
+	// `<Toaster />` mounts parks the instance in `pendingToasts` first.
+	toaster = $state<Toaster | null>(null);
+	theme: ThemeState | null = null;
+	/** The caller's own options; a Toaster layers its defaults over them on adoption. */
+	readonly requested: ToastRequest;
 	element = $state<HTMLElement>();
 	height = $state(0);
 	loading = $state(false);
@@ -271,32 +304,34 @@ export class Toast {
 	opts = $state<MakeRequired<ToastOptions, 'position'>>({
 		color: 'neutral',
 		position: 'bottom-center',
-		id: Math.random().toString(36).substring(7)
+		id: createId('toast')
 	});
 
-	// `addToast` always resolves a concrete position before constructing the Toast.
+	// Both the constructor and `adoptToast` resolve a concrete position.
 	position = $derived(this.opts.position);
 
-	constructor(
-		opts: MakeRequired<ToastOptions, 'position'>,
-		public toaster: Toaster,
-		public theme: ThemeState
-	) {
+	constructor(opts: ToastRequest) {
+		this.requested = opts;
 		this.id = opts.id;
-		this.opts = opts;
+		// Provisional until adoption resolves the Toaster's own defaults over it.
+		this.opts = { ...opts, position: opts.position ?? 'bottom-right' };
 		// Seed the reactive spinner flag from the initial options; callers can still
 		// flip `toast.loading` later (e.g. resolve a pending action to a result).
 		this.loading = opts.loading ?? false;
 	}
 
-	animations = $derived(
-		// @ts-ignore
-		this.theme.resolveTransitionProps(
-			this.opts.animation,
-			// @ts-ignore
-			this.toaster?.animation?.[this.opts.position!] || defaultToastAnimation[this.opts.position!]
-		)
-	);
+	// `$derived.by` (not `$derived`): `toaster` is assigned on adoption, so the
+	// reference has to sit inside a function the initializer only stores. Only ever read
+	// while the toast is rendered, i.e. once a Toaster owns it.
+	animations = $derived.by(() => {
+		const toaster = this.toaster;
+		// An unadopted toast is not rendered, so this pair is never actually played.
+		if (!toaster) return { in: {} as FSOParams, out: {} as FSOParams };
+		return toaster.resolveMotion(
+			{ position: this.opts.position },
+			{ motion: toaster.motion, transition: this.opts.transition ?? toaster.transition }
+		);
+	});
 
 	// Cache the last in-stack coordinates: once the toast is removed from the array
 	// (outro playing), indexOf returns -1 — without the cache the leaving toast would
@@ -323,7 +358,7 @@ export class Toast {
 			.toReversed()
 			.reduce((acc, toast, i) => {
 				if (i < this.indexInStack.reversedIndex) {
-					return (acc += toast.height + (this.toaster?.gap ?? 0));
+					return acc + toast.height + (this.toaster?.gap ?? 0);
 				}
 				return acc;
 			}, 0)
@@ -374,6 +409,10 @@ export class Toast {
 	remove = (reason: 'manual' | 'auto' = 'manual') => {
 		if (this.removed) return;
 		this.removed = true;
+		// A toast dismissed before any Toaster mounted is still parked in the pending queue.
+		// Leaving it there would have the first Toaster adopt an already-dismissed toast that
+		// nothing can dismiss again, since this method is idempotent.
+		dropPendingToast(this);
 		this.toaster?.removeToast(this);
 		this.timer?.destroy();
 		if (reason === 'auto') {
@@ -408,21 +447,60 @@ type ToastCreator = {
 	[key in Colors]: (t: Omit<Partial<ToastOptions>, 'color' | 'id'> & { id?: string }) => Toast;
 };
 
+// `toast()` can legitimately run before any `<Toaster />` has mounted — module
+// initialisation, a store subscription, a navigation that fires during hydration. Those
+// calls park their Toast here (in order) instead of throwing, and the first Toaster to
+// mount adopts the whole queue. The caller still gets its `Toast` handle straight away.
+const pendingToasts: Toast[] = [];
+// The queue exists for the gap before the first Toaster mounts, not as storage: past this many
+// the oldest are dropped, so a page that never mounts one cannot grow the array without bound.
+const pendingToastLimit = 50;
+let pendingWarningScheduled = false;
+
+const flushPendingToasts = (toaster: Toaster) => {
+	pendingWarningScheduled = false;
+	if (!pendingToasts.length) return;
+	for (const toast of pendingToasts.splice(0, pendingToasts.length)) toaster.adoptToast(toast);
+};
+
+/** Removes a toast dismissed while it was still waiting for a Toaster. */
+const dropPendingToast = (toast: Toast) => {
+	const index = pendingToasts.indexOf(toast);
+	if (index !== -1) pendingToasts.splice(index, 1);
+};
+
+// A queued toast is only a problem if no Toaster ever shows up; warn once, a tick later,
+// so a Toaster mounting in the same tick stays silent.
+const warnIfNothingMounts = () => {
+	if (pendingWarningScheduled) return;
+	pendingWarningScheduled = true;
+	setTimeout(() => {
+		if (!pendingWarningScheduled || !pendingToasts.length) return;
+		pendingWarningScheduled = false;
+		console.warn(
+			`svelai: ${pendingToasts.length} toast(s) are queued because no <Toaster /> is mounted. Add <Toaster /> to your root layout; they will appear as soon as one mounts.`
+		);
+	}, 0);
+};
+
 export const toast = new Proxy(
 	{},
 	{
 		get(_obj, key) {
 			if (typeof key === 'string') {
 				return (payload: Parameters<ToastCreator[Colors]>[0]) => {
-					if (typeof window === 'undefined' || !window.toaster) {
-						throw new Error(
-							'toast() called without a mounted <Toaster />. Add <Toaster /> to your root layout.'
-						);
-					}
-					const toast = window.toaster.addToast({
+					const toast = new Toast({
 						color: key as Colors,
-						...payload
+						...payload,
+						id: payload?.id || createId('toast')
 					});
+					// On the server nothing ever mounts a Toaster, so the queue would only retain
+					// toasts for the lifetime of the process. The caller still gets its handle.
+					if (typeof window === 'undefined') return toast;
+					if (window.toaster) return window.toaster.adoptToast(toast);
+					pendingToasts.push(toast);
+					if (pendingToasts.length > pendingToastLimit) pendingToasts.shift();
+					if (DEV) warnIfNothingMounts();
 					return toast;
 				};
 			}

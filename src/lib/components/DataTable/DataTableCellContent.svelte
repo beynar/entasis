@@ -1,12 +1,13 @@
 <script lang="ts" generics="TData">
-	import type { Cell, Row } from '@tanstack/table-core';
 	import Button from '../Button/Button.svelte';
 	import { caretDownIcon } from '../Icons/caretDown.js';
 	import { caretRightIcon } from '../Icons/caretRight.js';
 	import Slot from '../Slot/Slot.svelte';
 	import type { DataTableModel } from './dataTable.model.svelte.js';
+	import type { DataTableCellInstance, DataTableRowInstance } from './dataTable.table.js';
 	import type { DataTableCellPayload, DataTableColumn } from './dataTable.props.js';
 	import type { DataTableClasses } from './dataTable.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		row,
@@ -18,8 +19,8 @@
 		model,
 		classes
 	}: {
-		row: Row<TData>;
-		cell: Cell<TData, unknown>;
+		row: DataTableRowInstance<TData>;
+		cell: DataTableCellInstance<TData>;
 		payload: DataTableCellPayload<TData>;
 		config: DataTableColumn<TData>;
 		firstDataColumnId: string | undefined;
@@ -27,6 +28,7 @@
 		model: DataTableModel<TData>;
 		classes: DataTableClasses;
 	} = $props();
+	const t = $derived(useI18n());
 
 	const formatValue = (value: unknown) => {
 		if (value === null || value === undefined) return '';
@@ -39,7 +41,7 @@
 {#snippet renderDefault()}
 	{#if cell.getIsGrouped()}
 		<Button
-			label={rowExpanded ? 'Collapse group' : 'Expand group'}
+			label={rowExpanded ? t.dataTableCollapseGroup : t.dataTableExpandGroup}
 			prefix={rowExpanded ? caretDownIcon : caretRightIcon}
 			variant="ghost"
 			color="neutral"
@@ -50,7 +52,7 @@
 		/>
 		<span class={classes.groupValue()}>{formatValue(cell.getValue())}</span>
 		<span class={classes.groupCount()}>({row.subRows.length})</span>
-	{:else if cell.getIsAggregated()}
+	{:else if model.isCellAggregated(cell)}
 		{#if config.aggregatedCell}
 			<Slot render={config.aggregatedCell} {payload} class={classes.cellContent()} as="span" />
 		{:else}
@@ -62,7 +64,7 @@
 		{#if cell.column.id === firstDataColumnId && row.getCanExpand() && !row.getIsGrouped()}
 			<div aria-hidden="true" style:width={`${row.depth * 12}px`}></div>
 			<Button
-				label={rowExpanded ? 'Collapse row' : 'Expand row'}
+				label={rowExpanded ? t.dataTableCollapseRow : t.dataTableExpandRow}
 				prefix={rowExpanded ? caretDownIcon : caretRightIcon}
 				variant="ghost"
 				color="neutral"

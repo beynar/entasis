@@ -151,7 +151,7 @@
 				density,
 				view,
 				class:
-					'pointer-events-none absolute inset-inline-start-0 z-[2] w-[var(--event-calendar-time-gutter-width)] bg-surface/90'
+					'inset-inline-start-0 bg-surface/90 pointer-events-none absolute z-[2] w-[var(--event-calendar-time-gutter-width)]'
 			})}
 			style:top={`calc(${getEventCalendarElapsedMinutes(geometry.windowStart, localTimeLabel.instant) / calendar.interval} * var(--event-calendar-slot-height))`}
 			style:height="var(--event-calendar-slot-height)"
@@ -170,7 +170,7 @@
 			data-event-calendar-business-hours
 			data-start={businessWindow.start.toISOString()}
 			data-end={businessWindow.end.toISOString()}
-			class="pointer-events-none absolute inset-x-0 bg-color-muted/25"
+			class="bg-color-muted/25 pointer-events-none absolute inset-x-0"
 			style:top={`calc(${getEventCalendarElapsedMinutes(geometry.windowStart, businessWindow.start) / calendar.interval} * var(--event-calendar-slot-height))`}
 			style:height={`calc(${getEventCalendarElapsedMinutes(businessWindow.start, businessWindow.end) / calendar.interval} * var(--event-calendar-slot-height))`}
 		></div>
@@ -251,7 +251,7 @@
 			aria-hidden="true"
 			data-event-calendar-time-line
 			data-line-instant={instant.toISOString()}
-			class="pointer-events-none absolute inset-x-0 z-[1] border-t border-neutral-muted/60"
+			class="border-neutral-muted/60 pointer-events-none absolute inset-x-0 z-[1] border-t"
 			style:top={`calc(${getEventCalendarElapsedMinutes(geometry.windowStart, instant) / calendar.interval} * var(--event-calendar-slot-height))`}
 		></div>
 	{/each}
@@ -274,8 +274,7 @@
 				onControlFocus={() => a11y.handleTimeTargetFocus(targetKey)}
 				onControlKeydown={(event) => handleTargetKeydown(event, targetKey)}
 				onActivate={(event) => handleItemActivate(segment, event)}
-				onDoubleClick={(event) =>
-					onItemDoubleClick?.({ occurrence: segment.occurrence, event })}
+				onDoubleClick={(event) => onItemDoubleClick?.({ occurrence: segment.occurrence, event })}
 			/>
 		</div>
 	{/each}

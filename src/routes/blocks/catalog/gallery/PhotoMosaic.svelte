@@ -36,12 +36,14 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Light / Form / Place</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Light / Form / Place
+		</p>
 		<Heading size="h2" weight="bold">A different point of view.</Heading>
 	</header>
-	<div class="grid gap-lg sm:grid-cols-3">
+	<div class="gap-lg grid sm:grid-cols-3">
 		{#each photos.slice(0, 5) as photo, i (photo.title)}<figure
 				class={i === 0 ? 'relative sm:col-span-2 sm:row-span-2' : 'relative'}
 			>
@@ -53,7 +55,7 @@
 						class="aspect-square w-full rounded-lg object-cover"
 					/></ImageZoom
 				>
-				<figcaption class="pointer-events-none absolute bottom-lg left-lg">
+				<figcaption class="bottom-lg left-lg pointer-events-none absolute">
 					<Chip size="small" color="neutral" variant="solid">{photo.title}</Chip>
 				</figcaption>
 			</figure>{/each}

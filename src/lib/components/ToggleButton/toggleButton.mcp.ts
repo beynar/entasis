@@ -20,8 +20,9 @@ The ToggleButton component is a two-state button that can be toggled on and off,
 ### Core Props
 - **value**: boolean (bindable) - Toggle state
 - **defaultValue**: boolean (default: false) - Initial state when value is omitted
-- **ariaLabel**: string - Accessible name for icon-only buttons
+- **label**: string - Accessible name for icon-only buttons
 - **type**: 'button' | 'submit' | 'reset' (default: 'button') - Native button type. The default prevents accidental form submission.
+- **role**: 'radio' - Exposes the pressed state as \`aria-checked\` instead of \`aria-pressed\`. Set by ToggleButtonGroup in \`type="single"\` mode; rarely needed on a standalone button
 
 ### Visual Props
 - **color**: 'primary' | 'secondary' | 'neutral' | 'danger' | 'success' | 'warning' | 'info' (default: 'neutral')
@@ -58,13 +59,15 @@ The ToggleButton component is a two-state button that can be toggled on and off,
 
 ### With Icon
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import { textBIcon } from 'svelai/icons/textB';
+
 	let isBold = $state(false);
 </script>
 
 <ToggleButton bind:value={isBold}>
 	{#snippet prefix()}
-		<Icon name="bold" />
+		{@render textBIcon()}
 	{/snippet}
 	Bold
 </ToggleButton>
@@ -85,24 +88,28 @@ The ToggleButton component is a two-state button that can be toggled on and off,
 
 ### Toolbar Buttons
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import { textBIcon } from 'svelai/icons/textB';
+	import { textItalicIcon } from 'svelai/icons/textItalic';
+	import { textUnderlineIcon } from 'svelai/icons/textUnderline';
+
 	let format = $state({ bold: false, italic: false, underline: false });
 </script>
 
 <div class="flex gap-1">
 	<ToggleButton bind:value={format.bold}>
 		{#snippet prefix()}
-			<Icon name="bold" />
+			{@render textBIcon()}
 		{/snippet}
 	</ToggleButton>
 	<ToggleButton bind:value={format.italic}>
 		{#snippet prefix()}
-			<Icon name="italic" />
+			{@render textItalicIcon()}
 		{/snippet}
 	</ToggleButton>
 	<ToggleButton bind:value={format.underline}>
 		{#snippet prefix()}
-			<Icon name="underline" />
+			{@render textUnderlineIcon()}
 		{/snippet}
 	</ToggleButton>
 </div>
@@ -129,7 +136,7 @@ The ToggleButton component is a two-state button that can be toggled on and off,
 
 ## Accessibility
 
-- Exposes the checked state through \`aria-pressed\`
+- Exposes the checked state through \`aria-pressed\` (or \`aria-checked\` when \`role="radio"\`)
 - Renders \`type="button"\` unless explicitly overridden
 - Keyboard accessible (Space/Enter to toggle)
 - Focus states for keyboard navigation
@@ -202,6 +209,10 @@ The theme object contains the following parts:
 
 **Custom Checked State**:
 \`\`\`svelte
+<script lang="ts">
+  import { checkIcon } from 'svelai/icons/check';
+</script>
+
 <ToggleButton 
   bind:value
   variant="outline"
@@ -223,7 +234,7 @@ The theme object contains the following parts:
   }}
 >
   {#snippet prefix()}
-    <Icon name="check" />
+    {@render checkIcon()}
   {/snippet}
   Toggle
 </ToggleButton>

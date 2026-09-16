@@ -80,7 +80,10 @@ export function normalizeMapMarkers<TData>(
 	};
 }
 
-function validateMarkerId(markerId: MapMarker['id'] | null | undefined, index: number): MapMarker['id'] {
+function validateMarkerId(
+	markerId: MapMarker['id'] | null | undefined,
+	index: number
+): MapMarker['id'] {
 	if (markerId === null || markerId === undefined) {
 		throw new Error(`Map marker at index ${index} must include a non-null id.`);
 	}

@@ -2,7 +2,6 @@
 export const componentAliases = {
 	'svelai/tailwind-plugin/theme': './src/lib/tailwind/theme.ts',
 	'svelai/icons/*': './src/lib/components/Icons/*',
-	'svelai/ai-mcp-app/sandbox': './src/lib/components/AIMcpApp/sandbox/index.ts',
 	'svelai/ai-conversation': './src/lib/components/AIConversation/index.ts',
 	'svelai/ai-ask-user-question': './src/lib/components/AIAskUserQuestion/index.ts',
 	'svelai/ai-chat': './src/lib/components/AIChat/index.ts',
@@ -17,7 +16,6 @@ export const componentAliases = {
 	'svelai/ai-reasoning': './src/lib/components/AIReasoning/index.ts',
 	'svelai/ai-suggestion': './src/lib/components/AISuggestion/index.ts',
 	'svelai/ai-tool': './src/lib/components/AITool/index.ts',
-	'svelai/ai-mcp-app': './src/lib/components/AIMcpApp/index.ts',
 	'svelai/ai-file-preview': './src/lib/components/AIFilePreview/index.ts',
 	'svelai/aspect-ratio': './src/lib/components/AspectRatio/index.ts',
 	'svelai/card': './src/lib/components/Card/index.ts',
@@ -136,6 +134,7 @@ export const componentAliases = {
 	'svelai/tailwind-plugin': './src/lib/tailwind/index.ts',
 	'svelai/types': './src/lib/types/index.ts',
 	'svelai/cva': './src/lib/utils/cva/index.ts',
+	'svelai/motion': './src/lib/utils/motion/index.ts',
 	'svelai/scheduling': './src/lib/utils/scheduling/index.ts',
 	'svelai/spinner-overlay': './src/lib/attachments/spinnerOverlay.svelte.ts'
 };

@@ -30,8 +30,8 @@
 	];
 </script>
 
-<section class="mx-auto grid max-w-6xl gap-xl p-lg md:grid-cols-3 md:p-xl">
-	<div class="flex flex-col items-start gap-xl md:sticky md:top-0 md:self-start">
+<section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl md:grid-cols-3">
+	<div class="gap-xl flex flex-col items-start md:sticky md:top-0 md:self-start">
 		<Chip variant="outline">How we work</Chip><Heading as="h2" size="h2" weight="bold"
 			>A good process makes room for discovery.</Heading
 		>
@@ -42,13 +42,13 @@
 	</div>
 	<div class="flex flex-col md:col-span-2">
 		{#each steps as step, index (step.title)}<div
-				class="grid gap-lg border-t border-neutral-muted py-xl sm:grid-cols-4"
+				class="gap-lg border-neutral-muted py-xl grid border-t sm:grid-cols-4"
 			>
-				<div class="text-5xl font-light text-primary/60">0{index + 1}</div>
-				<div class="flex flex-col gap-lg sm:col-span-3">
+				<div class="text-primary-readable text-5xl font-light">0{index + 1}</div>
+				<div class="gap-lg flex flex-col sm:col-span-3">
 					<Heading as="h3" size="h3">{step.title}</Heading>
 					<p class="text-neutral/70">{step.description}</p>
-					<div class="flex flex-wrap gap-sm">
+					<div class="gap-sm flex flex-wrap">
 						{#each step.tags as tag (tag)}<Chip variant="outline" size="small">{tag}</Chip>{/each}
 					</div>
 				</div>

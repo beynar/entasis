@@ -138,7 +138,7 @@ function createResolvedOptions(
 	if (optionProps != null) {
 		setDefinedOption(resolvedOptions, 'composition', optionProps.composition);
 		if (optionProps.density !== undefined) {
-			const presets = { small: 'compact', normal: 'default', large: 'relaxed' } as const;
+			const presets = { compact: 'compact', normal: 'default', comfortable: 'relaxed' } as const;
 			resolvedOptions.density = presets[optionProps.density];
 		}
 		setDefinedOption(resolvedOptions, 'dragAndDrop', optionProps.dragAndDrop);

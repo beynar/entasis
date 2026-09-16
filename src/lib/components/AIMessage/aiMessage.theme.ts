@@ -50,10 +50,10 @@ const defaultBody = cva({
 	defaultVariants: { role: 'assistant', size: 'normal', variant: 'bubble' }
 });
 const defaultHeader = cva({
-	base: 'px-xs font-medium text-neutral/55',
+	base: 'px-xs font-medium text-neutral/70',
 	variants: {
 		size: {
-			small: 'text-[0.6875rem]',
+			small: 'text-xs',
 			normal: 'text-xs',
 			large: 'text-sm'
 		}
@@ -92,7 +92,7 @@ const defaultBubble = cva({
 			variant: 'minimal',
 			class: 'bg-neutral-muted text-neutral [&_*]:!text-neutral [&_code]:!bg-neutral/10'
 		},
-		{ role: 'system', size: 'small', class: 'px-md py-xs !text-[0.6875rem]' },
+		{ role: 'system', size: 'small', class: 'px-md py-xs !text-xs' },
 		{ role: 'system', size: 'normal', class: 'px-lg py-sm !text-xs' },
 		{ role: 'system', size: 'large', class: 'px-xl py-md !text-sm' },
 		{
@@ -108,8 +108,8 @@ const defaultMarkdown = cva({
 	variants: {
 		size: {
 			small: '!text-xs !leading-normal',
-			normal: '',
-			large: ''
+			normal: '!text-sm',
+			large: '!text-base'
 		}
 	},
 	defaultVariants: { size: 'normal' }

@@ -1,5 +1,3 @@
-import type { Breakpoint } from '$lib/components/Theme/theme.js';
-
 /** Semantic palette roles accepted by component `color` props. */
 export type Colors =
 	'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'info' | 'neutral';
@@ -31,24 +29,21 @@ export const deepMerge = <T>(a?: Partial<T>, b?: Partial<T>): T => {
 	return a as T;
 };
 
-export type Theme = {
-	radius: number;
-	shadows?: unknown;
-};
-export type Themes = Record<string, Theme>;
-
-export type DesignSystem = {
-	themes: Themes;
-};
-
 /** Component geometry scale. It does not change internal whitespace density. */
 export type Sizes = 'small' | 'normal' | 'large';
 
 /**
  * Spacing density of a component: paddings and gaps, independent of the
- * typography scale (`Sizes`) but sharing its vocabulary. 'small' for dense
- * dashboards, 'normal' for everyday UI, 'large' for roomy detail surfaces.
+ * typography scale (`Sizes`) and deliberately using a distinct vocabulary so a
+ * density value can never be mistaken for a size. 'compact' for dense
+ * dashboards, 'normal' for everyday UI, 'comfortable' for roomy detail surfaces.
  */
-export type Density = 'small' | 'normal' | 'large';
+export type Density = 'compact' | 'normal' | 'comfortable';
 
 export type Easing = 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'linear';
+
+/**
+ * Indicator drawn on a disclosure control (collapsible group, expandable row):
+ * a rotating chevron, a plus/minus glyph, or no indicator at all.
+ */
+export type DisclosureIndicator = 'chevron' | 'plus-minus' | 'none';

@@ -4,6 +4,7 @@ export type {
 	ToggleMenuItem,
 	ToggleMenuToggleItem,
 	ToggleMenuGroupItem,
+	ToggleMenuGroupButton,
 	ToggleMenuGroupButtons,
 	ToggleMenuRadioGroupItem,
 	ToggleMenuRadioGroupButton,

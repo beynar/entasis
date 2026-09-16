@@ -88,6 +88,9 @@
 		},
 		get swipeFrom() {
 			return swipeFrom;
+		},
+		get motion() {
+			return theme?.motion;
 		}
 	});
 
@@ -105,6 +108,7 @@
 			class={classes.closeButton({ size: dialog.computedSize })}
 			size="small"
 			variant="ghost"
+			{@attach (node) => node.setAttribute('data-autofocus-skip', '')}
 			onclick={() => dialog.close()}
 		>
 			{@render xIcon({ size: 20 })}
@@ -119,6 +123,8 @@
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby={title ? `${dialog.id}-label` : undefined}
+		aria-describedby={description ? `${dialog.id}-description` : undefined}
+		data-layer-root
 		class={classes.root({
 			scroll: dialog.computedScroll,
 			className
@@ -142,7 +148,10 @@
 				onoutrostart={() => {
 					dialog.hasTransitioned = false;
 				}}
-				onoutroend={() => onAfterClose?.(dialog)}
+				onoutroend={() => {
+					dialog.focusScope.restore();
+					onAfterClose?.(dialog);
+				}}
 				class={classes.content({
 					size: dialog.computedSize,
 					type: dialog.computedType,
@@ -150,7 +159,7 @@
 				})}
 			>
 				<div
-					class="flex flex-col will-change-[opacity] transition-opacity duration-200 ease-out"
+					class="duration-normal ease-standard flex min-h-0 flex-1 flex-col transition-opacity will-change-[opacity]"
 					style:opacity={dialog.stackOpacity}
 				>
 					{#if thumb && dialog.swipeEnabled}
@@ -177,7 +186,11 @@
 							class={classes.title({ size: dialog.computedSize })}
 							render={title}
 						/>
-						<Slot class={classes.description({ size: dialog.computedSize })} render={description} />
+						<Slot
+							attrs={{ id: `${dialog.id}-description` }}
+							class={classes.description({ size: dialog.computedSize })}
+							render={description}
+						/>
 						{#if closable}
 							{@render CLOSE_BUTTON()}
 						{/if}

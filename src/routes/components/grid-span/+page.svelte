@@ -69,12 +69,12 @@
 					class="bg-primary/12 border-primary/25 h-full rounded-lg border"
 				>
 					<Stack orientation="horizontal" justify="between" align="center">
-						<span class="text-primary text-xs font-semibold">Overview</span>
-						<span class="text-primary">{@render chartBarIcon({ class: 'size-5' })}</span>
+						<span class="text-primary-readable text-xs font-semibold">Overview</span>
+						<span class="text-primary-readable">{@render chartBarIcon({ class: 'size-5' })}</span>
 					</Stack>
 					<Stack gap="xs">
 						<strong class="text-neutral text-3xl">74%</strong>
-						<span class="text-neutral/60 text-xs">Quarterly target</span>
+						<span class="text-neutral/70 text-xs">Quarterly target</span>
 					</Stack>
 				</Stack>
 			</GridSpan>
@@ -89,7 +89,7 @@
 					<span class="text-success">{@render usersThreeIcon({ class: 'size-5' })}</span>
 					<Stack gap="xs">
 						<strong class="text-neutral text-sm">18 members</strong>
-						<span class="text-neutral/60 text-xs">3 online now</span>
+						<span class="text-neutral/70 text-xs">3 online now</span>
 					</Stack>
 				</Stack>
 			</GridSpan>
@@ -104,7 +104,7 @@
 					<span class="text-warning">{@render checksIcon({ class: 'size-5' })}</span>
 					<Stack gap="xs">
 						<strong class="text-neutral text-sm">32 completed</strong>
-						<span class="text-neutral/60 text-xs">8 remaining</span>
+						<span class="text-neutral/70 text-xs">8 remaining</span>
 					</Stack>
 				</Stack>
 			</GridSpan>
@@ -135,7 +135,9 @@
 		>
 			<Grid columns={4} gap="lg" width="100%" maxWidth={760}>
 				<GridSpan columns={2}>
-					<div class="bg-primary/15 text-primary rounded-md p-5 text-center text-sm font-medium">
+					<div
+						class="bg-primary/15 text-primary-readable rounded-md p-5 text-center text-sm font-medium"
+					>
 						Two columns
 					</div>
 				</GridSpan>
@@ -180,7 +182,7 @@
 			<Grid columns={3} rowHeight={44} gap="md" width="100%" maxWidth={700}>
 				<GridSpan rows={3}>
 					<div
-						class="bg-primary/12 text-primary flex h-full items-center justify-center rounded-md text-sm"
+						class="bg-primary/12 text-primary-readable flex h-full items-center justify-center rounded-md text-sm"
 					>
 						Tall
 					</div>

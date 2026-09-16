@@ -70,18 +70,25 @@ The ButtonGroup component displays a collection of related buttons as a cohesive
 
 ### With Icons
 \`\`\`svelte
+<script lang="ts">
+	import { ButtonGroup } from 'svelai/button-group';
+	import { textAlignLeftIcon } from 'svelai/icons/textAlignLeft';
+	import { textAlignCenterIcon } from 'svelai/icons/textAlignCenter';
+	import { textAlignRightIcon } from 'svelai/icons/textAlignRight';
+</script>
+
 <ButtonGroup 
 	items={[
 		{ 
-			prefix: () => '<Icon name="align-left" />',
+			prefix: textAlignLeftIcon,
 			children: 'Left' 
 		},
 		{ 
-			prefix: () => '<Icon name="align-center" />',
+			prefix: textAlignCenterIcon,
 			children: 'Center' 
 		},
 		{ 
-			prefix: () => '<Icon name="align-right" />',
+			prefix: textAlignRightIcon,
 			children: 'Right' 
 		}
 	]}
@@ -123,19 +130,26 @@ The ButtonGroup component displays a collection of related buttons as a cohesive
 
 ### Icon Only Buttons
 \`\`\`svelte
+<script lang="ts">
+	import { ButtonGroup } from 'svelai/button-group';
+	import { textBIcon } from 'svelai/icons/textB';
+	import { textItalicIcon } from 'svelai/icons/textItalic';
+	import { textUnderlineIcon } from 'svelai/icons/textUnderline';
+</script>
+
 <ButtonGroup 
 	items={[
 		{ 
 			squared: true,
-			prefix: () => '<Icon name="bold" />'
+			prefix: textBIcon
 		},
 		{ 
 			squared: true,
-			prefix: () => '<Icon name="italic" />'
+			prefix: textItalicIcon
 		},
 		{ 
 			squared: true,
-			prefix: () => '<Icon name="underline" />'
+			prefix: textUnderlineIcon
 		}
 	]}
 />

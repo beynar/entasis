@@ -26,6 +26,7 @@ The Card component is a flexible container component used to display content in 
   - Determines the color scheme of the card
 
 - **variant**: 'solid' | 'outline' | 'soft' | 'ghost' (default: 'solid')
+- **elevation**: 1 | 2 | 3 | 4 | 5 (default: 1) - Elevation step a solid card lifts by on the theme's elevation scale; other variants cast no shadow
   - solid: Filled background with shadow (raised effect)
   - outline: Transparent background with colored border
   - soft: Semi-transparent background with color
@@ -35,7 +36,7 @@ The Card component is a flexible container component used to display content in 
   - Scales the typography only: title (text-sm / text-base / text-lg), description and body text
   - Combine with density to control spacing independently
 
-- **density**: 'small' | 'normal' | 'large' (default: 'normal')
+- **density**: 'compact' | 'normal' | 'comfortable' (default: 'normal')
   - Controls paddings and gaps between header/content/footer
   - small: p-3 / gap-3 for dense dashboards
   - normal: p-4 / gap-4 everyday scale
@@ -135,6 +136,12 @@ The Card component uses a flexible slot-based structure:
 
 ### Card with Action Button (Snippet)
 \`\`\`svelte
+<script lang="ts">
+	import { Card } from 'svelai/card';
+	import { Button } from 'svelai/button';
+	import { dotsThreeVerticalIcon } from 'svelai/icons/dotsThreeVertical';
+</script>
+
 <Card>
 	{#snippet title()}
 		Settings
@@ -144,7 +151,7 @@ The Card component uses a flexible slot-based structure:
 	{/snippet}
 	{#snippet action()}
 		<Button variant="ghost" size="small">
-			<Icon name="more-vertical" />
+			{@render dotsThreeVerticalIcon()}
 		</Button>
 	{/snippet}
 	{#snippet children()}
@@ -260,9 +267,9 @@ The Card component uses a flexible slot-based structure:
 <Card size="large" title="Large type" />
 
 <!-- density scales the paddings and gaps -->
-<Card density="small" title="Dense dashboard card" />
+<Card density="compact" title="Dense dashboard card" />
 <Card density="normal" title="Everyday card (default)" />
-<Card density="large" title="Roomy detail card" />
+<Card density="comfortable" title="Roomy detail card" />
 \`\`\`
 
 ### Card with Border Separators
@@ -318,7 +325,7 @@ Enable edge-to-edge boundaries between sections using the \`showBorders\` prop.
 
 ## Notes
 
-- The \`solid\` variant includes a \`raised\` class for elevation effect
+- The \`solid\` variant draws a \`ring-neutral-muted\` hairline and lifts by \`elevation\` (\`lift-1\` … \`lift-5\`) on the theme's elevation scale
 - Header uses CSS Grid with container queries (@container) for responsive layout
 - Action slot is automatically positioned top-right when present (via \`hasAction\` variant)
 - Borders are optional and can be enabled with \`showBorders={true}\` (subtle neutral-muted, 1px)
@@ -360,15 +367,15 @@ const customTheme: CardThemeProps = {
 			neutral: 'bg-neutral text-neutral-contrast'
 		},
     variant: {
-      solid: 'bg-color border-color shadow-sm',
+      solid: 'bg-color border-color lift-1',
       outline: 'bg-transparent border-color'
     }
   },
   header: {
-    size: {
-      small: 'px-2 gap-1',
+    density: {
+      compact: 'px-2 gap-1',
       normal: 'px-4 gap-2',
-      large: 'px-6 gap-3'
+      comfortable: 'px-6 gap-3'
     },
     hasAction: {
       true: 'grid-cols-[1fr_auto]',
@@ -391,7 +398,7 @@ const customTheme: CardThemeProps = {
 - base: Base classes applied to all cards
 - Variants:
   - size: 'small' | 'normal' | 'large' - Typography scale
-  - density: 'small' | 'normal' | 'large' - Padding and gap spacing
+  - density: 'compact' | 'normal' | 'comfortable' - Padding and gap spacing
   - color: 'primary' | 'secondary' | 'neutral' | 'danger' | 'success' | 'warning' | 'info' - Color scheme
   - variant: 'solid' | 'outline' | 'soft' | 'ghost' - Visual style variant
   - clickable: boolean - Internal; set automatically when href/onclick is present (hover, press, focus ring)
@@ -443,7 +450,7 @@ const customTheme: CardThemeProps = {
     root: {
       base: 'border-2 border-dashed',
       variant: {
-        solid: 'shadow-xl'
+        solid: 'raised-5'
       }
     },
     title: {
@@ -471,14 +478,14 @@ const customTheme: CardThemeProps = {
       }
     },
     content: {
-      size: {
-        large: 'px-8 py-6'
+      density: {
+        comfortable: 'px-8 py-6'
       }
     }
   }}
 >
   {#snippet children()}
-    Custom outlined card
+    Custom outline card
   {/snippet}
 </Card>
 \`\`\`
@@ -492,12 +499,12 @@ const customTheme: CardThemeProps = {
     root: {
       base: 'rounded-2xl transition-all duration-300',
       variant: {
-        solid: 'shadow-lg hover:shadow-xl',
+        solid: 'raised-4 hover:raised-5',
         outline: 'border-2 hover:border-opacity-80'
       }
     },
     header: {
-      size: {
+      density: {
         normal: 'px-6 gap-3'
       }
     }

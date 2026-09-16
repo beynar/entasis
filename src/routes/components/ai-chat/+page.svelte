@@ -22,7 +22,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: ['small', 'normal', 'large']
+			options: ['compact', 'normal', 'comfortable']
 		},
 		{
 			name: 'messageSize',
@@ -146,17 +146,15 @@ ${'</' + 'script>'}
 				class="h-[420px] w-full"
 			>
 				{#snippet beforeThread(state)}
-					<div class="border-b border-neutral-muted px-4 py-2 text-xs text-neutral/65">
+					<div class="border-neutral-muted text-neutral/65 border-b px-4 py-2 text-xs">
 						{state.status} · {state.messages.length} messages
 					</div>
 				{/snippet}
 				{#snippet context(state)}
-					<span class="text-xs text-neutral/65"
-						>{state.contextUsage?.totalTokens ?? 0} tokens</span
-					>
+					<span class="text-neutral/65 text-xs">{state.contextUsage?.totalTokens ?? 0} tokens</span>
 				{/snippet}
 				{#snippet afterThread(state)}
-					<div class="border-t border-neutral-muted px-4 py-2 text-xs text-neutral/65">
+					<div class="border-neutral-muted text-neutral/65 border-t px-4 py-2 text-xs">
 						Latest role: {state.messages.at(-1)?.role ?? 'none'}
 					</div>
 				{/snippet}
@@ -169,7 +167,7 @@ ${'</' + 'script>'}
 			class="!min-h-0 p-3 sm:p-6"
 			code={`<AIChat
   {messages}
-  density="small"
+  density="compact"
   messageSize="small"
   messageVariant="minimal"
   showToc
@@ -188,7 +186,7 @@ ${'</' + 'script>'}
 						content: 'The private beta remains gated until the rollback drill passes.'
 					}
 				]}
-				density="small"
+				density="compact"
 				messageSize="small"
 				messageVariant="minimal"
 				showToc
@@ -212,7 +210,7 @@ ${'</' + 'script>'}
 					<AIThread
 						estimateSize={120}
 						overscan={8}
-						class="rounded-lg border border-neutral-muted"
+						class="border-neutral-muted rounded-lg border"
 					/>
 					<AIComposer toolbar="fixed" submitShortcut="command-enter" />
 				</AIConversation>

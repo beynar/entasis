@@ -8,17 +8,17 @@
 	const people = [
 		{
 			name: 'Guillermo Rauch',
-			avatar: 'https://avatars.githubusercontent.com/rauchg?s=96',
+			src: 'https://avatars.githubusercontent.com/rauchg?s=96',
 			status: 'online'
 		},
 		{
 			name: 'Sarah Drasner',
-			avatar: 'https://avatars.githubusercontent.com/sdras?s=96',
+			src: 'https://avatars.githubusercontent.com/sdras?s=96',
 			status: 'online'
 		},
 		{
 			name: 'Rich Harris',
-			avatar: 'https://avatars.githubusercontent.com/Rich-Harris?s=96',
+			src: 'https://avatars.githubusercontent.com/Rich-Harris?s=96',
 			status: 'away'
 		},
 		{ name: 'Maya Chen', status: 'offline' },
@@ -104,8 +104,8 @@
 			class="!min-h-fit"
 			code={`<AvatarGroup
 	items={[
-		{ name: 'Guillermo Rauch', avatar: '/guillermo.jpg' },
-		{ name: 'Sarah Drasner', avatar: '/sarah.jpg' },
+		{ name: 'Guillermo Rauch', src: '/guillermo.jpg' },
+		{ name: 'Sarah Drasner', src: '/sarah.jpg' },
 		{ name: 'Maya Chen' },
 		{ name: 'Noah Williams' }
 	]}
@@ -119,8 +119,8 @@
 			description="Use the avatar snippet to decorate each person while retaining shared group props."
 			class="!min-h-fit"
 			code={`<AvatarGroup items={people} max={4}>
-	{#snippet avatar({ user, avatarProps })}
-		<Avatar {...avatarProps} {user}>
+	{#snippet avatar({ item, avatarProps })}
+		<Avatar {...avatarProps} {...item}>
 			{#snippet suffix()}
 				<span class="size-full rounded-full bg-success"></span>
 			{/snippet}
@@ -129,10 +129,10 @@
 </AvatarGroup>`}
 		>
 			<AvatarGroup items={people} max={4}>
-				{#snippet avatar({ user, avatarProps })}
-					<Avatar {...avatarProps} {user}>
+				{#snippet avatar({ item, avatarProps })}
+					<Avatar {...avatarProps} {...item}>
 						{#snippet suffix()}
-							<span class="size-full rounded-full {statusColors[user.status]}"></span>
+							<span class="size-full rounded-full {statusColors[item.status]}"></span>
 						{/snippet}
 					</Avatar>
 				{/snippet}

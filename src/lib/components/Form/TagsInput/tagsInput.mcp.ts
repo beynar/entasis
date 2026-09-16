@@ -37,7 +37,7 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 
 ### Behavior Props
 
-- **allowCustom**: \`boolean\` (default: \`false\`)
+- **customTags**: \`boolean\` (default: \`false\`)
   - When \`items\` is provided, also allow Enter to add free text that is not in the option list.
 
 - **maxTags**: \`number\` (optional)
@@ -63,7 +63,7 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 - **required**: \`boolean\` (default: \`false\`)
 - **disabled**: \`boolean\`
 - **size**: \`'small' | 'normal' | 'large'\` (default: \`'normal'\`)
-- **density**: \`'small' | 'normal' | 'large'\` (default: \`'normal'\`) - Spacing density forwarded to the dropdown option rows (paddings, gaps, min-height)
+- **density**: \`'compact' | 'normal' | 'comfortable'\` (default: \`'normal'\`) - Spacing density forwarded to the dropdown option rows (paddings, gaps, min-height)
 - **name**: \`string\`
 - **errors**: \`string[] | boolean\` (bindable)
 - **focused**: \`boolean\` (bindable)
@@ -126,7 +126,7 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 ### Options Plus Free Text
 
 \`\`\`svelte
-<TagsInput items={items} allowCustom bind:value={value} />
+<TagsInput items={items} customTags bind:value={value} />
 \`\`\`
 
 ### Limited Number of Tags
@@ -150,7 +150,7 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 
 ## Keyboard Interactions
 
-- **Enter**: In free mode (or with \`allowCustom\`), adds the current trimmed text as a tag and clears the input. When the dropdown is open and an option is highlighted, adds that option instead.
+- **Enter**: In free mode (or with \`customTags\`), adds the current trimmed text as a tag and clears the input. When the dropdown is open and an option is highlighted, adds that option instead.
 - **Backspace** (input empty): Removes the last tag.
 - **ArrowDown / ArrowUp**: Move the dropdown highlight (wraps around). Restricted mode only.
 - **Home / End**: Highlight the first / last option. Restricted mode only.
@@ -169,7 +169,7 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 - **Deduplication invariant**: A tag can never appear twice. Duplicate adds (exact string match) simply clear the search. This is a hard requirement — duplicate keys in the keyed list crash the renderer.
 - **Fresh arrays**: The value array is never mutated in place. Every add/remove assigns a new array so binding, reactivity, and form updates fire correctly.
 - **Animations**: Tags animate on reorder (\`animate:flip\`) and on enter/leave (\`transition:scale\`).
-- **Free vs restricted mode**: Omitting \`items\` gives free-text entry. Providing \`items\` restricts entry to the option list; add \`allowCustom\` to permit free text alongside options.
+- **Free vs restricted mode**: Omitting \`items\` gives free-text entry. Providing \`items\` restricts entry to the option list; add \`customTags\` to permit free text alongside options.
 - **Label resolution**: A tag's chip label comes from static \`items\`, then a session cache of options picked from the dropdown, then \`getValueOption\` (resolved on mount for initial values), falling back to the raw value string.
 - **Dropdown filtering**: Options whose value is already selected are hidden from the dropdown.
 

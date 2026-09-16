@@ -26,7 +26,7 @@ exempt until they get the same treatment.
 
 - Semantic color props use the shared `Colors` roles.
 - Component geometry uses `size: 'small' | 'normal' | 'large'`.
-- Control height uses `h-control-sm/md/lg` (28 / 32 / 36). Button, ToggleButton, Pagination, and form field containers share that scale and `rounded-md`. Chip, Switch, and Avatar stay `rounded-full` on their own scales.
+- Control height uses `h-control-sm/md/lg` (28 / 32 / 36). Button, ToggleButton, Pagination, and form field containers share that scale and `rounded-md`. Chip, Switch, and Avatar stay `rounded-full` on their own scales. Default radius tokens are 4px (`sm`) and 8px (`md` and up); do not invent a larger surface radius.
 - Internal whitespace uses `density: 'small' | 'normal' | 'large'`.
 - Editable state uses `value`, `defaultValue`, and `onValueChange`.
 - Disclosure state uses `open`, `defaultOpen`, and `onOpenChange`.
@@ -47,6 +47,9 @@ Component CVA definitions live in `<owner>.theme.ts`. Consumer-specific theme pr
 `<consumer>.<role>.theme.ts`, geometry maps use `<owner>.geometry.ts`, and third-party adapters use
 explicit names such as `<owner>.lexicalTheme.ts`. Generated interfaces use semantic spacing
 tokens; `micro`, `layout-*`, and arbitrary spacing are internal implementation vocabulary.
+Kit chrome inherits `Theme.designTokens.defaultColor` (default `neutral`). Unset `primary`
+stays indigo. Resolve omitted `color` props with `useDefaultColor`. Alert, Toast, Rating,
+and field focus rings stay outside that knob.
 
 Documentation fonts are declared in `vite.config.ts`. Keep font auto-detection disabled: its
 full source scan on each hot update stalls large batches of component edits.

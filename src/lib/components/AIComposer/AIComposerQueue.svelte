@@ -8,6 +8,7 @@
 	import type { SortableListItemPayload } from '../SortableList/sortableList.props.js';
 	import type { AIComposerQueuedMessage } from './aiComposer.props.js';
 	import { useAIComposerTheme, type AIComposerThemeProps } from './aiComposer.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		messages,
@@ -30,6 +31,7 @@
 		onCancelEdit: () => void;
 		theme?: AIComposerThemeProps;
 	} = $props();
+	const t = $derived(useI18n());
 
 	const classes = $derived(useAIComposerTheme(theme));
 
@@ -38,7 +40,7 @@
 		for (const token of message.tokens) {
 			if (token.markdown) preview = preview.replaceAll(token.markdown, token.label);
 		}
-		return preview.replace(/\s+/g, ' ').trim() || 'Files only';
+		return preview.replace(/\s+/g, ' ').trim() || t.aiComposerFilesOnly;
 	}
 </script>
 
@@ -47,14 +49,14 @@
 		{#if editingMessage}
 			<div data-slot="ai-composer-queue-editing" class={classes.queueEditing()}>
 				<span class={classes.queueText()}>
-					Editing queued message: {getMessagePreview(editingMessage)}
+					{t.aiComposerEditingQueued(getMessagePreview(editingMessage))}
 				</span>
 				<Button
 					type="button"
 					squared
 					size="small"
 					variant="ghost"
-					label="Cancel queued message edit"
+					label={t.aiComposerCancelQueuedEdit}
 					{disabled}
 					onclick={onCancelEdit}
 				>
@@ -79,7 +81,7 @@
 					>
 						<div class={classes.queueText()}>{getMessagePreview(item)}</div>
 						{#if item.attachments.length > 0}
-							<span class="text-xs text-neutral/50">
+							<span class="text-neutral/50 text-xs">
 								{item.attachments.length} file{item.attachments.length === 1 ? '' : 's'}
 							</span>
 						{/if}
@@ -88,8 +90,8 @@
 							squared
 							size="small"
 							variant={item.steered ? 'soft' : 'ghost'}
-							label={`Steer queued message: ${getMessagePreview(item)}`}
-							aria-pressed={item.steered}
+							label={t.aiComposerSteerQueued(getMessagePreview(item))}
+							pressed={item.steered}
 							{disabled}
 							onclick={() => onSteer(item.id)}
 						>
@@ -100,7 +102,7 @@
 							squared
 							size="small"
 							variant="ghost"
-							label={`Edit queued message: ${getMessagePreview(item)}`}
+							label={t.aiComposerEditQueued(getMessagePreview(item))}
 							disabled={disabled || Boolean(editingMessage)}
 							onclick={() => onEdit(item.id)}
 						>
@@ -112,7 +114,7 @@
 							size="small"
 							variant="ghost"
 							color="danger"
-							label={`Cancel queued message: ${getMessagePreview(item)}`}
+							label={t.aiComposerCancelQueued(getMessagePreview(item))}
 							{disabled}
 							onclick={() => onCancel(item.id)}
 						>

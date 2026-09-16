@@ -27,10 +27,10 @@ export type SubMenuItemProps = Omit<
 	 */
 	openOnClick?: boolean;
 	/**
-	 * Hover delay in milliseconds.
+	 * Delay in milliseconds before the submenu opens on hover.
 	 * @default 100
 	 */
-	hoverDelay?: number;
+	delay?: number;
 	/**
 	 * Close when the pointer leaves the submenu prediction cone and rectangle tolerance.
 	 * @default true

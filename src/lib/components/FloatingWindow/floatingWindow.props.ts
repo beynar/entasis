@@ -96,13 +96,13 @@ export type FloatingWindowProps = WithAttachments<{
 	/** Called once when the library requests an open-state change. */
 	onOpenChange?: (open: boolean) => void;
 	/** Called after the open transition finishes. */
-	onAfterOpen?: (window: FloatingWindowPayload) => void;
+	onAfterOpen?: (payload: FloatingWindowPayload) => void;
 	/** Called after the close transition finishes. */
-	onAfterClose?: (window: FloatingWindowPayload) => void;
+	onAfterClose?: (payload: FloatingWindowPayload) => void;
 	/** Called after the minimize command updates state. */
-	onMinimize?: (window: FloatingWindowPayload) => void;
+	onMinimize?: (payload: FloatingWindowPayload) => void;
 	/** Called after the restore command updates state. */
-	onRestore?: (window: FloatingWindowPayload) => void;
+	onRestore?: (payload: FloatingWindowPayload) => void;
 	/** Called when a pointer or keyboard move commits. */
 	onMove?: (payload: FloatingWindowMovePayload) => void;
 	/** Called when a pointer or keyboard resize commits. */

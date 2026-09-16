@@ -66,7 +66,7 @@
 			height: 'min-h-[170px]',
 			card: 'border-primary/30 bg-primary/10',
 			accent: 'bg-primary',
-			text: 'text-primary',
+			text: 'text-primary-readable',
 			chips: ['shared state', 'compact']
 		},
 		{
@@ -101,7 +101,7 @@
 			height: 'min-h-[170px]',
 			card: 'border-primary/30 bg-primary/10',
 			accent: 'bg-primary',
-			text: 'text-primary'
+			text: 'text-primary-readable'
 		},
 		{
 			title: 'Expand with content',
@@ -121,7 +121,7 @@
 ${'</' + 'script>'}
 
 <Stepper {items} mode="${controls.value.mode}" class="w-full rounded-lg border border-neutral-muted bg-surface/30">
-	{#snippet children({ stepper, item, index })}
+	{#snippet children({ api, item, index })}
 		<div class="p-3">
 			<div class="{item.card} {item.height} grid gap-4 rounded-md border p-5">
 				<p class="{item.text} text-xs font-semibold uppercase tracking-wide">
@@ -130,16 +130,16 @@ ${'</' + 'script>'}
 				<h3 class="text-2xl font-semibold">{item.title}</h3>
 				<div class="mt-auto flex gap-2">
 					{#if index > 0}
-						<button onclick={() => stepper.previous()}>Previous</button>
+						<button onclick={() => api.previous()}>Previous</button>
 					{/if}
 					{#if index < items.length - 1}
-						<button class={item.accent} onclick={() => stepper.next()}>Next</button>
+						<button class={item.accent} onclick={() => api.next()}>Next</button>
 					{/if}
 				</div>
 			</div>
 		</div>
 	{/snippet}
-</Stepper>`;
+</Stepper>`);
 </script>
 
 <DocPage
@@ -147,7 +147,7 @@ ${'</' + 'script>'}
 	subtitle="Indicates progress through a sequence of steps."
 	component="Stepper"
 	features={[
-		'Bindable activeStep and stepper state',
+		'Bindable activeStep and api handle',
 		'tabpanel by default, neutral panels when needed',
 		'Animated height and horizontal slide',
 		'Repeated children snippet payload'
@@ -161,14 +161,14 @@ ${'</' + 'script>'}
 		<Stepper
 			items={syncedPanels}
 			mode={controls.value.mode}
-			class="w-full rounded-lg border border-neutral-muted bg-surface/30"
+			class="border-neutral-muted bg-surface/30 w-full rounded-lg border"
 		>
-			{#snippet children({ stepper, item, index })}
+			{#snippet children({ api, item, index })}
 				<div class="p-3">
 					<div class="{item.card} {item.height} grid gap-4 rounded-md border p-5">
 						<div class="flex items-start justify-between gap-4">
 							<div>
-								<p class="{item.text} text-xs font-semibold uppercase tracking-wide">
+								<p class="{item.text} text-xs font-semibold tracking-wide uppercase">
 									Usage / {item.eyebrow}
 								</p>
 								<h3 class="mt-1 text-2xl font-semibold">{item.title}</h3>
@@ -176,10 +176,10 @@ ${'</' + 'script>'}
 							<div class="{item.accent} h-12 w-12 rounded-full"></div>
 						</div>
 
-						<p class="text-neutral/60 max-w-xl">{item.description}</p>
+						<p class="text-neutral/70 max-w-xl">{item.description}</p>
 
 						<div class="flex flex-wrap gap-2">
-							{#each item.chips as chip}
+							{#each item.chips as chip, index (index)}
 								<span class="{item.text} bg-surface/60 rounded px-2 py-1 text-xs">
 									{chip}
 								</span>
@@ -188,12 +188,12 @@ ${'</' + 'script>'}
 
 						<div class="mt-auto flex gap-2">
 							{#if index > 0}
-								<button class="rounded bg-surface/70 px-3 py-1.5" onclick={() => stepper.previous()}
+								<button class="bg-surface/70 rounded px-3 py-1.5" onclick={() => api.previous()}
 									>previous</button
 								>
 							{/if}
 							{#if index < syncedPanels.length - 1}
-								<button class="{item.accent} rounded px-3 py-1.5" onclick={() => stepper.next()}
+								<button class="{item.accent} rounded px-3 py-1.5" onclick={() => api.next()}
 									>next</button
 								>
 							{/if}
@@ -211,12 +211,12 @@ ${'</' + 'script>'}
 		>
 			<div class="grid w-full gap-5">
 				<div class="flex flex-wrap gap-2">
-					{#each items as item, index}
+					{#each items as item, index (index)}
 						{@const panel = syncedPanels[index] ?? syncedPanels[0]}
 						<button
 							class="rounded border px-3 py-1.5 text-sm font-medium transition {syncedStep === index
 								? `${panel.card} ${panel.text}`
-								: 'border-neutral-muted bg-neutral-muted/60 text-neutral/60'}"
+								: 'border-neutral-muted bg-neutral-muted/60 text-neutral/70'}"
 							onclick={() => {
 								syncedStep = index;
 							}}
@@ -230,15 +230,15 @@ ${'</' + 'script>'}
 					<Stepper
 						bind:value={syncedStep}
 						{items}
-						class="rounded-lg border border-neutral-muted bg-surface/30"
+						class="border-neutral-muted bg-surface/30 rounded-lg border"
 					>
-						{#snippet children({ stepper, item, index })}
+						{#snippet children({ api, item, index })}
 							{@const panel = syncedPanels[index] ?? syncedPanels[0]}
 							<div class="p-3">
 								<div class="{panel.card} {panel.height} grid gap-4 rounded-md border p-5">
 									<div class="flex items-center justify-between gap-3">
 										<div>
-											<p class="{panel.text} text-xs font-semibold uppercase tracking-wide">
+											<p class="{panel.text} text-xs font-semibold tracking-wide uppercase">
 												Left stepper / {panel.eyebrow}
 											</p>
 											<h3 class="mt-1 text-2xl font-semibold">{item.title}</h3>
@@ -248,11 +248,11 @@ ${'</' + 'script>'}
 
 									<div class="grid gap-2">
 										<p class="text-lg font-medium">{panel.title}</p>
-										<p class="text-neutral/60 max-w-xl">{panel.description}</p>
+										<p class="text-neutral/70 max-w-xl">{panel.description}</p>
 									</div>
 
 									<div class="flex flex-wrap gap-2">
-										{#each panel.chips as chip}
+										{#each panel.chips as chip, index (index)}
 											<span class="{panel.text} bg-surface/60 rounded px-2 py-1 text-xs">
 												{chip}
 											</span>
@@ -262,14 +262,13 @@ ${'</' + 'script>'}
 									<div class="mt-auto flex gap-2">
 										{#if index > 0}
 											<button
-												class="rounded bg-surface/70 px-3 py-1.5"
-												onclick={() => stepper.previous()}>previous</button
+												class="bg-surface/70 rounded px-3 py-1.5"
+												onclick={() => api.previous()}>previous</button
 											>
 										{/if}
 										{#if index < items.length - 1}
-											<button
-												class="{panel.accent} rounded px-3 py-1.5"
-												onclick={() => stepper.next()}>next</button
+											<button class="{panel.accent} rounded px-3 py-1.5" onclick={() => api.next()}
+												>next</button
 											>
 										{/if}
 									</div>
@@ -281,15 +280,15 @@ ${'</' + 'script>'}
 					<Stepper
 						bind:value={syncedStep}
 						{items}
-						class="rounded-lg border border-neutral-muted bg-surface/30"
+						class="border-neutral-muted bg-surface/30 rounded-lg border"
 					>
-						{#snippet children({ stepper, item, index })}
+						{#snippet children({ api, item, index })}
 							{@const panel = syncedPanels[index] ?? syncedPanels[0]}
 							<div class="p-3">
 								<div class="{panel.card} {panel.height} grid gap-4 rounded-md border p-5">
 									<div class="flex items-center justify-between gap-3">
 										<div>
-											<p class="{panel.text} text-xs font-semibold uppercase tracking-wide">
+											<p class="{panel.text} text-xs font-semibold tracking-wide uppercase">
 												Right stepper / {panel.eyebrow}
 											</p>
 											<h3 class="mt-1 text-2xl font-semibold">{item.title}</h3>
@@ -299,7 +298,7 @@ ${'</' + 'script>'}
 
 									<div class="grid gap-2">
 										<p class="text-lg font-medium">{item.content}</p>
-										<p class="text-neutral/60 max-w-xl">{panel.detail}</p>
+										<p class="text-neutral/70 max-w-xl">{panel.detail}</p>
 									</div>
 
 									<div class="grid gap-2 text-sm">
@@ -309,20 +308,19 @@ ${'</' + 'script>'}
 												style:width={`${(index + 1) * 33.33}%`}
 											></div>
 										</div>
-										<p class="text-neutral/60">Active panel {index + 1} of 3</p>
+										<p class="text-neutral/70">Active panel {index + 1} of 3</p>
 									</div>
 
 									<div class="mt-auto flex gap-2">
 										{#if index > 0}
 											<button
-												class="rounded bg-surface/70 px-3 py-1.5"
-												onclick={() => stepper.previous()}>previous</button
+												class="bg-surface/70 rounded px-3 py-1.5"
+												onclick={() => api.previous()}>previous</button
 											>
 										{/if}
 										{#if index < items.length - 1}
-											<button
-												class="{panel.accent} rounded px-3 py-1.5"
-												onclick={() => stepper.next()}>next</button
+											<button class="{panel.accent} rounded px-3 py-1.5" onclick={() => api.next()}
+												>next</button
 											>
 										{/if}
 									</div>

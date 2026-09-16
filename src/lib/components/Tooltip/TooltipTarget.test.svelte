@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { tooltip } from './tooltip.svelte.js';
-	import type { TooltipProps } from './tooltip.svelte.js';
+	import { tooltip } from './tooltip.attachment.svelte.js';
+	import type { TooltipOptions } from './tooltip.props.js';
 
-	let { onAfterOpen, onAfterClose }: Pick<TooltipProps, 'onAfterOpen' | 'onAfterClose'> = $props();
+	let { onAfterOpen, onAfterClose }: Pick<TooltipOptions, 'onAfterOpen' | 'onAfterClose'> =
+		$props();
 </script>
 
 <button

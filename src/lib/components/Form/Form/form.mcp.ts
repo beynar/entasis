@@ -43,7 +43,7 @@ Form renders configured svelai fields inside a div, owns their state and validat
 	actions={[
 		{
 			children: 'Save',
-			onAction: (form) => form.submit()
+			onAction: (payload) => payload.submit()
 		}
 	]}
 	onSubmit={(validatedValue) => {
@@ -61,9 +61,9 @@ Form renders configured svelai fields inside a div, owns their state and validat
 - **form** (bindable): the FormState instance.
 - **onSubmit**: called with the validated visible payload. Its return value is ignored; rejected promises propagate.
 - **size**: small, normal (default), or large. Controls Form typography and becomes the fallback size for fields and actions. An explicit field or action size takes precedence.
-- **density**: small, normal (default), or large. Controls gaps between the Form header, fields, footer, and actions independently from size.
-- **variant**: plain (default), sectioned, or card. All variants consume the shared Card typography and header/footer density rules. Plain remains transparent without separators. Sectioned stays transparent and adds edge-to-edge separators between the header, visible top-level fields or groups, and footer. Card adds the same separators inside the Card surface and inset. Separators do not appear between fields inside a group.
-- **layout**: vertical (default) or horizontal. Horizontal keeps one field per row and places labels to the left from the desktop breakpoint; fields remain stacked on smaller screens.
+- **density**: compact, normal (default), or comfortable. Controls gaps between the Form header, fields, footer, and actions independently from size.
+- **variant**: plain (default), sectioned, or card. All variants consume the shared Card typography. Plain remains transparent without separators. Sectioned stays transparent and adds edge-to-edge separators between the header, visible top-level fields or groups, and footer. Card adds the same separators inside the Card surface and inset; Card header/footer padding applies only to that variant. Separators do not appear between fields inside a group.
+- **layout**: vertical (default) or horizontal. Horizontal keeps one field per row and places labels to the left once each field is at least 32rem wide; fields remain stacked in narrower forms.
 - **actions**: optional array of Button props. Each action's onAction receives the live FormState, so a submit action calls form.submit(). Actions are disabled while the form is submitting; their own loading and disabled props are composed with that protection.
 - **class**: additional classes on the root div.
 - **theme**: Form theme overrides for root, header, title, description, group, group label/description/fields, top-level items, custom entries, footer, and actions. Global Card typography and section-rhythm changes flow into all Form variants before Form-specific overrides are composed; Card surface changes apply only to the card variant.
@@ -153,20 +153,22 @@ Hidden field values are preserved privately and restored when shown again. Hidde
 All configured inputs inherit the Form layout through the shared Field wrapper. Set labelPosition: 'top' or 'left' on an individual input to override the Form layout without affecting value inference:
 
 \`\`\`ts
-const inputs = {
+export const inputs = {
 	name: { type: 'text', label: 'Name' },
 	notes: { type: 'textarea', label: 'Notes', labelPosition: 'top' }
 } as const;
 \`\`\`
 
-The left position becomes a two-column label/control layout at the desktop breakpoint and remains stacked on smaller screens. Form uses layout rather than orientation so controls such as Slider and RadioInput retain their own orientation prop.
+The left position becomes a two-column label/control layout once the field is at least 32rem wide and remains stacked in narrower forms. The breakpoint is a container query against the field, so a form in a narrow drawer stacks on any screen. Form uses layout rather than orientation so controls such as Slider retain their own orientation prop.
 
 ## Visual groups
 
 A group renders a transparent semantic fieldset with a required legend label and an optional description. Its label and description use the same size scale as ordinary fields; grouping does not add another card or padded container:
 
 \`\`\`ts
-const inputs = {
+import type { InferFormValue } from 'svelai/form';
+
+export const inputs = {
 	contact: {
 		type: 'group',
 		label: 'Contact details',
@@ -183,7 +185,7 @@ type Value = InferFormValue<typeof inputs>;
 // { email: string; phone: string | null }
 \`\`\`
 
-The group key is visual only and never appears in value or submission output. Descendant field names remain top-level, so duplicate names across groups are rejected. Group visibility hides all descendants, preserves field values in the private cache, and makes inferred field keys optional. In a vertical form layout, set columns to 1, 2, 3, or 4 to control the equal-width desktop grid; groups collapse to one column on smaller screens. Horizontal form layouts ignore columns and always render group entries in one column. A child class may span tracks when an entry needs more room. Groups may contain fields, action rows, and custom snippets; nested groups are intentionally unsupported.
+The group key is visual only and never appears in value or submission output. Descendant field names remain top-level, so duplicate names across groups are rejected. Group visibility hides all descendants, preserves field values in the private cache, and makes inferred field keys optional. In a vertical form layout, set columns to 1, 2, 3, or 4 to control the equal-width grid; the count is a container query against the form width (2 columns from 42rem, 3 from 56rem, 4 from 72rem), and groups collapse to one column in narrower forms. Horizontal form layouts ignore columns and always render group entries in one column. A child class may span tracks when an entry needs more room. Groups may contain fields, action rows, and custom snippets; nested groups are intentionally unsupported.
 
 ## Custom value fields
 
@@ -233,8 +235,8 @@ Use type: 'custom' to place a snippet in the flow. The snippet receives the live
 			label: 'Account actions',
 			description: 'Validate or save this account.',
 			actions: [
-				{ children: 'Validate', variant: 'soft', onAction: (form) => form.validate() },
-				{ children: 'Save', onAction: (form) => form.submit() }
+				{ children: 'Validate', variant: 'soft', onAction: (payload) => payload.validate() },
+				{ children: 'Save', onAction: (payload) => payload.submit() }
 			]
 		}
 	}}

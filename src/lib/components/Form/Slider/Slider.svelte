@@ -9,6 +9,7 @@
 	import { SliderState } from './slider.state.svelte.js';
 	import { useSliderTheme } from './slider.theme.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { useDefaultColor } from '../../Theme/theme.state.svelte.js';
 
 	let {
 		min = 0,
@@ -25,7 +26,7 @@
 		onValidate,
 		visible,
 		onValueChange,
-		color = 'primary',
+		color,
 		marks = [],
 		showValue = false,
 		formatValue,
@@ -46,6 +47,7 @@
 	if (value === undefined) value = untrack(() => defaultValue);
 
 	const t = $derived(useI18n(i18n));
+	const resolvedColor = $derived(useDefaultColor(color));
 
 	const id = $props.id();
 
@@ -214,7 +216,7 @@
 				{id}
 				{slider}
 				{classes}
-				{color}
+				color={resolvedColor}
 				{variant}
 				{size}
 				{marks}

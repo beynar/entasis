@@ -23,7 +23,7 @@ describe('state and event law', () => {
 	test('ToggleButton applies defaultValue and emits one value change', async () => {
 		const onValueChange = vi.fn();
 		render(ToggleButton, {
-			props: { ariaLabel: 'Preview', defaultValue: true, onValueChange }
+			props: { label: 'Preview', defaultValue: true, onValueChange }
 		});
 
 		const button = screen.getByRole('button', { name: 'Preview' });
@@ -61,7 +61,7 @@ describe('state and event law', () => {
 		render(Tabbar, {
 			props: {
 				items: ['Overview', 'Settings'],
-				defaultValue: 1,
+				defaultValue: 'Settings',
 				onValueChange
 			}
 		});
@@ -71,7 +71,7 @@ describe('state and event law', () => {
 
 		await fireEvent.click(screen.getByRole('tab', { name: 'Overview' }));
 		expect(onValueChange).toHaveBeenCalledOnce();
-		expect(onValueChange).toHaveBeenCalledWith(0);
+		expect(onValueChange).toHaveBeenCalledWith('Overview');
 	});
 
 	test('Collapsible applies defaultOpen and emits one disclosure change', async () => {
@@ -89,13 +89,13 @@ describe('state and event law', () => {
 		expect(onOpenChange).toHaveBeenCalledWith(false);
 	});
 
-	test('Command uses value for its editable query', async () => {
-		const onValueChange = vi.fn();
+	test('Command uses search for its editable query', async () => {
+		const onSearchChange = vi.fn();
 		render(Command, {
 			props: {
 				items: [],
-				defaultValue: 'initial',
-				onValueChange
+				defaultSearch: 'initial',
+				onSearchChange
 			}
 		});
 
@@ -103,8 +103,8 @@ describe('state and event law', () => {
 		expect(input).toHaveValue('initial');
 		await fireEvent.input(input, { target: { value: 'updated' } });
 
-		expect(onValueChange).toHaveBeenCalledOnce();
-		expect(onValueChange).toHaveBeenCalledWith('updated');
+		expect(onSearchChange).toHaveBeenCalledOnce();
+		expect(onSearchChange).toHaveBeenCalledWith('updated');
 	});
 
 	test('TextInput applies defaultValue and emits one value change', async () => {

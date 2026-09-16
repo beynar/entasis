@@ -54,51 +54,46 @@
 	/>
 </svelte:head>
 
-<article class="mx-auto flex w-full max-w-7xl flex-col gap-xl">
-	<header class="flex flex-col gap-xl border-b border-neutral-muted py-xl">
-		<div class="flex flex-wrap items-center gap-sm text-xs font-medium text-neutral/60">
-			<span class="size-1.5 rounded-full bg-primary"></span><span>THE SVELAI BLOCK LIBRARY</span>
+<article class="gap-xl mx-auto flex w-full max-w-7xl flex-col">
+	<header class="gap-xl border-neutral-muted py-xl flex flex-col border-b">
+		<div class="gap-sm text-neutral/70 flex flex-wrap items-center text-xs font-medium">
+			<span class="bg-primary size-1.5 rounded-full"></span><span>THE SVELAI BLOCK LIBRARY</span>
 		</div>
-		<div class="flex flex-wrap items-end justify-between gap-xl">
-			<div class="flex max-w-2xl flex-col gap-lg">
-				<h1 class="text-4xl font-semibold tracking-tight text-neutral md:text-5xl">
+		<div class="gap-xl flex flex-wrap items-end justify-between">
+			<div class="gap-lg flex max-w-2xl flex-col">
+				<h1 class="text-neutral text-4xl font-semibold tracking-tight md:text-5xl">
 					Small pieces. Complete interfaces.
 				</h1>
-				<p class="max-w-xl text-base leading-relaxed text-neutral/60">
+				<p class="text-neutral/70 max-w-xl text-base leading-relaxed">
 					From your first sign-in screen to the whole storefront. Explore complete layouts, make
 					them yours, and keep building.
 				</p>
 			</div>
-			<div class="flex items-center gap-xl pb-xs text-neutral">
-				<div class="flex flex-col gap-xs">
+			<div class="gap-xl pb-xs text-neutral flex items-center">
+				<div class="gap-xs flex flex-col">
 					<span class="text-2xl font-semibold tabular-nums">{blockCount}</span><span
-						class="text-xs text-neutral/50">blocks</span
+						class="text-neutral/65 text-xs">blocks</span
 					>
 				</div>
-				<div class="h-8 border-l border-neutral-muted"></div>
-				<div class="flex flex-col gap-xs">
+				<div class="border-neutral-muted h-8 border-l"></div>
+				<div class="gap-xs flex flex-col">
 					<span class="text-2xl font-semibold tabular-nums">{blockCategories.length}</span><span
-						class="text-xs text-neutral/50">categories</span
+						class="text-neutral/65 text-xs">categories</span
 					>
 				</div>
 			</div>
 		</div>
-		<div class="flex flex-wrap items-center gap-sm text-xs text-neutral/50">
+		<div class="gap-sm text-neutral/65 flex flex-wrap items-center text-xs">
 			<span>Live previews</span><span aria-hidden="true">/</span><span>Copyable Svelte</span><span
 				aria-hidden="true">/</span
 			><span>Your theme, throughout</span>
 		</div>
 	</header>
-	<section aria-label="Browse block categories" class="flex flex-col gap-xl">
-		<div class="flex flex-wrap items-center justify-between gap-lg">
-			<div role="group" aria-label="Block groups" class="flex flex-wrap gap-sm">
+	<section aria-label="Browse block categories" class="gap-xl flex flex-col">
+		<div class="gap-lg flex flex-wrap items-center justify-between">
+			<div role="group" aria-label="Block groups" class="gap-sm flex flex-wrap">
 				{#each filters as filter (filter)}
-					<Chip
-						variant={group === filter ? 'solid' : 'outline'}
-						color={group === filter ? 'primary' : 'neutral'}
-						aria-pressed={group === filter}
-						onclick={() => (group = filter)}>{filter}</Chip
-					>
+					<Chip selected={group === filter} onclick={() => (group = filter)}>{filter}</Chip>
 				{/each}
 			</div>
 			<TextInput
@@ -109,7 +104,7 @@
 				class="w-full sm:w-64"
 			/>
 		</div>
-		<div class="flex items-center justify-between gap-md text-xs text-neutral/50">
+		<div class="gap-md text-neutral/65 flex items-center justify-between text-xs">
 			<p role="status">
 				{filteredCategories.length}
 				{filteredCategories.length === 1 ? 'category' : 'categories'}{query.trim()
@@ -119,7 +114,7 @@
 			<span>2–5 layouts per category</span>
 		</div>
 		{#if filteredCategories.length}
-			<div class="grid min-w-0 gap-lg sm:grid-cols-2 xl:grid-cols-3">
+			<div class="gap-lg grid min-w-0 sm:grid-cols-2 xl:grid-cols-3">
 				{#each filteredCategories as category (category.slug)}<BlockCategoryCard
 						{category}
 					/>{/each}
@@ -141,22 +136,22 @@
 		{/if}
 	</section>
 	<section
-		class="flex flex-col gap-lg border-t border-neutral-muted py-xl"
+		class="gap-lg border-neutral-muted py-xl flex flex-col border-t"
 		aria-labelledby="workflow-heading"
 	>
-		<div class="flex flex-col gap-sm">
-			<h2 id="workflow-heading" class="text-xl font-semibold tracking-tight text-neutral">
+		<div class="gap-sm flex flex-col">
+			<h2 id="workflow-heading" class="text-neutral text-xl font-semibold tracking-tight">
 				Application workflows
 			</h2>
-			<p class="text-sm text-neutral/60">
+			<p class="text-neutral/70 text-sm">
 				Explore the original examples for forms, navigation, uploads, and asynchronous state.
 			</p>
 		</div>
-		<div class="grid gap-sm sm:grid-cols-2 lg:grid-cols-3">
+		<div class="gap-sm grid sm:grid-cols-2 lg:grid-cols-3">
 			{#each workflowBlocks as block (block.slug)}<a
 					href={resolve('/blocks/[category]', { category: block.slug })}
-					class="state-layer rounded-md border border-neutral-muted p-lg text-sm text-neutral"
-					>{block.title} <span class="text-neutral/40" aria-hidden="true">↗</span></a
+					class="state-layer border-neutral-muted p-lg text-neutral rounded-md border text-sm"
+					>{block.title} <span class="text-neutral/65" aria-hidden="true">↗</span></a
 				>{/each}
 		</div>
 	</section>

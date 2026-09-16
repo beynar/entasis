@@ -126,7 +126,7 @@
 		class:justify-self-end={isDateRow}
 		class="{eventTimeSizeClass} whitespace-nowrap tabular-nums {variant === 'soft'
 			? 'text-color-muted-readable/70'
-			: 'text-neutral/60'}"
+			: 'text-neutral/70'}"
 	>
 		{item.time}
 	</time>
@@ -157,7 +157,7 @@
 	{:else if item.status === 'current'}
 		<span
 			data-color={color}
-			class="relative z-10 grid size-[var(--timeline-marker-size)] shrink-0 place-items-center rounded-full bg-color text-color-contrast shadow-[0_0_0_4px_var(--color-surface)] [&>svg]:size-[58%]"
+			class="bg-color text-color-contrast relative z-10 grid size-[var(--timeline-marker-size)] shrink-0 place-items-center rounded-full shadow-[0_0_0_4px_var(--color-surface)] [&>svg]:size-[58%]"
 		>
 			{@render packageIcon()}
 		</span>
@@ -182,8 +182,8 @@
 	{/if}
 {/snippet}
 
-<div class="w-full max-w-5xl rounded-2xl bg-surface p-4 sm:p-7">
-	<p class="mb-7 text-lg font-semibold text-neutral">
+<div class="bg-surface w-full max-w-5xl rounded-2xl p-4 sm:p-7">
+	<p class="text-neutral mb-7 text-lg font-semibold">
 		{showDateTime ? 'Arriving on Tuesday, 28 July' : 'Order progress'}
 	</p>
 

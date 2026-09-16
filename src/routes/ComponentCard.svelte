@@ -26,6 +26,10 @@
 		code?: string;
 		/** Highlighting language for `code`. Defaults to svelte. */
 		language?: string;
+		// Doc pages declare their demo snippets inside <ComponentCard>, so every extra prop lands
+		// here. `any` keeps those snippet locals typed by their own declaration; `unknown` would
+		// widen them and break every nested component that receives one.
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		[key: string]: any;
 	} = $props();
 
@@ -39,7 +43,7 @@
 				<Heading>{title}</Heading>
 			{/if}
 			{#if description}
-				<p class="text-neutral/60 mt-1 text-sm">{description}</p>
+				<p class="text-neutral/70 mt-1 text-sm">{description}</p>
 			{/if}
 		</div>
 	{/if}
@@ -58,7 +62,7 @@
 					<ComponentControls {controls} />
 				</div>
 			{/if}
-			<div class="z-10 mx-auto flex min-w-0 w-full flex-1 items-center justify-center gap-4">
+			<div class="z-10 mx-auto flex w-full min-w-0 flex-1 items-center justify-center gap-4">
 				{@render children()}
 			</div>
 		</div>

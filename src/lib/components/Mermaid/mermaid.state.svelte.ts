@@ -1,4 +1,6 @@
-import { bind } from '$lib/utils/state.svelte.js';
+import { observeThemeTokens } from '$lib/utils/observeThemeTokens.js';
+import { createId } from '$lib/utils/id.js';
+import { createBindableStateClass } from '$lib/utils/state.svelte.js';
 import { usePanzoom } from '$lib/utils/usePanzoom.svelte.js';
 import { onDestroy, untrack } from 'svelte';
 import { on } from 'svelte/events';
@@ -54,7 +56,6 @@ const loadMermaid = (): Promise<MermaidModule> => {
 			`script[data-mermaid-cdn="${MERMAID_CDN_VERSION}"]`
 		);
 		const scriptEl = existing ?? document.createElement('script');
-		let timeout: ReturnType<typeof setTimeout>;
 		const settle = () => {
 			clearTimeout(timeout);
 			if (w.mermaid) resolve(w.mermaid);
@@ -67,7 +68,7 @@ const loadMermaid = (): Promise<MermaidModule> => {
 			reject(err);
 		};
 		// Wall-clock guard: a stalled cdnjs request may never fire load/error.
-		timeout = setTimeout(() => fail(new Error('mermaid load timed out')), 30000);
+		const timeout = setTimeout(() => fail(new Error('mermaid load timed out')), 30000);
 
 		if (existing) {
 			if (w.mermaid) {
@@ -75,9 +76,13 @@ const loadMermaid = (): Promise<MermaidModule> => {
 				return resolve(w.mermaid);
 			}
 			existing.addEventListener('load', settle, { once: true });
-			existing.addEventListener('error', () => fail(new Error('Failed to load mermaid from cdnjs')), {
-				once: true
-			});
+			existing.addEventListener(
+				'error',
+				() => fail(new Error('Failed to load mermaid from cdnjs')),
+				{
+					once: true
+				}
+			);
 			return;
 		}
 		scriptEl.src = MERMAID_CDN;
@@ -110,6 +115,7 @@ export const sanitizeMermaidCode = (code: string): string => {
 		// 3. Remove invisible/zero-width characters
 		sanitized = sanitized.replace(/[\u200B-\u200F\u2028-\u202F\u205F-\u206F]/g, '');
 		// 4. Remove control characters (except tab, line feed, carriage return)
+		// eslint-disable-next-line no-control-regex -- stripping raw control characters is the point
 		sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
 		// 5. Normalize line endings to LF
 		sanitized = sanitized.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -161,7 +167,7 @@ export const sanitizeMermaidCode = (code: string): string => {
 		sanitized = sanitized.replace(/;+\s*$/gm, '');
 		// 14. Ensure proper spacing in flowchart arrow syntax
 		sanitized = sanitized.replace(
-			/([A-Za-z0-9_]+)(\-\-|\-\-\>|\-\.\-|\-\.\-\>|\=\=|\=\=\>|\=\.\=\>|\=\.\-\>)/g,
+			/([A-Za-z0-9_]+)(--|-->|-\.-|-\.->|==|==>|=\.=>|=\.->)/g,
 			'$1 $2'
 		);
 
@@ -324,13 +330,14 @@ const buildScopedStyle = (id: string): string =>
 	`#${id} .node rect,#${id} .cluster rect,#${id} rect.actor{stroke-width:1px}` +
 	`#${id} .edgePath path,#${id} .flowchart-link{stroke-width:1.5px}`;
 
-interface MermaidOptions
-	extends Pick<
-		MermaidProps,
-		'chart' | 'config' | 'mouseWheelZoom' | 'errorForgiving' | 'onRender' | 'onError'
-	> {}
+type MermaidOptions = Pick<
+	MermaidProps,
+	'chart' | 'config' | 'mouseWheelZoom' | 'touchPan' | 'errorForgiving' | 'onRender' | 'onError'
+>;
 
-export class MermaidState {
+/** The bound option props are declared by the base class, so `this.chart` & co. are typed
+ *  without merging an interface into the class declaration. */
+export class MermaidState extends createBindableStateClass<MermaidOptions>() {
 	// The library instance once loaded from cdnjs.
 	mermaid: MermaidModule | null = $state.raw(null);
 	loading = $state(true);
@@ -339,9 +346,13 @@ export class MermaidState {
 	private theme = useTheme();
 	// The <svg> host we render into, and the wrapper the panzoom transforms.
 	private svgHost: SVGSVGElement | null = null;
-	// The styled root (carries the fullscreen data-expanded CSS); resolved on attach.
-	private rootEl: HTMLElement | null = null;
 	private renderToken = 0;
+	/** The derived themeVariables last handed to mermaid, to skip no-op re-renders. */
+	private themeSignature = '';
+
+	private get fontFamily() {
+		return this.config?.fontFamily || 'ui-sans-serif, system-ui, -apple-system, sans-serif';
+	}
 	private mounted = false;
 	// Hover gating: only enable wheel-zoom after the pointer has dwelled a moment,
 	// so scrolling the page past the diagram doesn't hijack the wheel.
@@ -351,7 +362,7 @@ export class MermaidState {
 	panzoom: ReturnType<typeof usePanzoom>;
 
 	constructor(options: MermaidOptions) {
-		bind(this, options);
+		super(options);
 
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const self = this;
@@ -363,11 +374,8 @@ export class MermaidState {
 			get activateMouseWheel() {
 				return self.mouseWheelZoom !== false && self.hovering;
 			},
-			// The <svg> host's grandparent is the styled root that carries the
-			// fullscreen CSS; the panzoom attaches to the svg (its parent is the
-			// container), so it can't derive the root itself.
-			get expandTarget() {
-				return self.rootEl;
+			get touchPan() {
+				return self.touchPan === true;
 			}
 		});
 
@@ -378,28 +386,25 @@ export class MermaidState {
 
 		// Re-render when the chart or config changes.
 		$effect(() => {
-			this.chart;
-			this.config;
+			void this.chart;
+			void this.config;
 			untrack(() => {
 				if (this.mounted) void this.render();
 			});
 		});
 
-		// Re-render on light/dark switch. We observe the `data-theme`/`class` attribute
-		// directly rather than the reactive `resolvedTheme`, because that reactive value
-		// changes *before* the attribute (and therefore the resolved --color-* tokens) does —
-		// re-rendering off it would read the old theme's colors.
-		$effect(() => {
-			if (typeof window === 'undefined') return;
-			const observer = new MutationObserver(() => {
-				if (this.mounted) void this.render();
-			});
-			observer.observe(document.documentElement, {
-				attributes: true,
-				attributeFilter: ['data-theme', 'class']
-			});
-			return () => observer.disconnect();
-		});
+		// Re-render when the resolved --color-* tokens change: a light/dark flip, a palette
+		// swap or runtime design-token edits. Tokens are read from the DOM rather than from
+		// the reactive `resolvedTheme`, which flips before the attribute (and the colours) do.
+		// `<head>` also mutates on plain navigation, so only re-render when the derived
+		// variables actually differ from the ones last handed to mermaid.
+		$effect(() =>
+			observeThemeTokens(() => {
+				if (!this.mounted) return;
+				if (JSON.stringify(buildThemeVariables(this.fontFamily)) === this.themeSignature) return;
+				void this.render();
+			})
+		);
 
 		onDestroy(() => {
 			this.renderToken++;
@@ -451,11 +456,12 @@ export class MermaidState {
 				return;
 			}
 
-			const fontFamily =
-				this.config?.fontFamily || 'ui-sans-serif, system-ui, -apple-system, sans-serif';
+			const fontFamily = this.fontFamily;
 			// Pull the caller's themeVariables out so they merge per-key over the brand
 			// mapping instead of the trailing spread clobbering the whole object.
 			const { themeVariables: userThemeVars, ...restConfig } = this.config ?? {};
+			const themeVariables = buildThemeVariables(fontFamily);
+			this.themeSignature = JSON.stringify(themeVariables);
 			const config: MermaidConfig = {
 				theme: 'base',
 				startOnLoad: false,
@@ -463,7 +469,7 @@ export class MermaidState {
 				flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
 				...restConfig,
 				themeVariables: {
-					...buildThemeVariables(fontFamily),
+					...themeVariables,
 					...(userThemeVars || {})
 				},
 				// Hard-pinned last so caller config can't downgrade the sandbox: the rendered
@@ -473,7 +479,7 @@ export class MermaidState {
 			};
 			this.mermaid.initialize(config);
 
-			const id = `dmm-${token}-${Math.random().toString(36).slice(2, 9)}`;
+			const id = createId(`dmm-${token}`);
 			tempId = `d${id}`;
 			this.lastTempId = tempId;
 			const { svg } = await this.mermaid.render(id, sanitized);
@@ -518,8 +524,6 @@ export class MermaidState {
 	svgAttachment = (node: SVGSVGElement) => {
 		return untrack(() => {
 			this.svgHost = node;
-			// DOM: root (fullscreen CSS) > container > svg host.
-			this.rootEl = (node.parentElement?.parentElement as HTMLElement | null) ?? null;
 			const cleanupPanzoom = this.panzoom.attach(node);
 			void this.render();
 
@@ -541,7 +545,6 @@ export class MermaidState {
 				offEnter();
 				offLeave();
 				this.svgHost = null;
-				this.rootEl = null;
 			};
 		});
 	};
@@ -549,10 +552,6 @@ export class MermaidState {
 	zoomIn = () => this.panzoom.zoomIn();
 	zoomOut = () => this.panzoom.zoomOut();
 	zoomToFit = () => this.panzoom.zoomToFit();
-	toggleExpand = () => this.panzoom.toggleExpand();
-	get expanded() {
-		return this.panzoom.expanded;
-	}
 
 	private getSvg = (): SVGSVGElement | null => this.svgHost?.querySelector('svg') ?? null;
 
@@ -589,6 +588,3 @@ export class MermaidState {
 		this.triggerDownload(url, filename, true);
 	};
 }
-
-// Interface merging for the bound options.
-export interface MermaidState extends MermaidOptions {}

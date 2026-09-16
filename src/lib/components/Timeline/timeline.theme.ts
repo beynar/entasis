@@ -15,8 +15,11 @@ const colorVariants = {
 	neutral: ''
 } as const;
 
+// The `--timeline-*` properties are INTERNAL: the root publishes marker size, spacing and the
+// title/surface offsets so the connector, marker and content parts line up on one midline.
+// `orientation` and `size` drive them; they are not a consumer hook.
 const defaultRoot = cva({
-	base: 'relative min-w-0 list-none p-0 text-neutral outline-none [container-type:inline-size] focus-visible:ring-2 focus-visible:ring-primary/50',
+	base: 'relative min-w-0 list-none p-0 text-neutral outline-none [container-type:inline-size] focus-visible:ring-2 focus-visible:ring-focus/50',
 	variants: {
 		orientation: {
 			vertical: 'grid w-full overflow-visible',
@@ -29,11 +32,11 @@ const defaultRoot = cva({
 			large: '[--timeline-marker-size:1.375rem] [--timeline-title-center-offset:0.109375rem]'
 		},
 		density: {
-			small:
+			compact:
 				'[--timeline-space:0.75rem] [--timeline-item-gap:1rem] [--timeline-item-min-width:12rem]',
 			normal:
 				'[--timeline-space:1rem] [--timeline-item-gap:1.5rem] [--timeline-item-min-width:16rem]',
-			large:
+			comfortable:
 				'[--timeline-space:1.5rem] [--timeline-item-gap:2rem] [--timeline-item-min-width:20rem]'
 		},
 		scrollFade: {
@@ -72,9 +75,9 @@ const defaultItem = cva({
 			soft: ''
 		},
 		density: {
-			small: '',
+			compact: '',
 			normal: '',
-			large: ''
+			comfortable: ''
 		},
 		isLast: {
 			true: '',
@@ -101,7 +104,7 @@ const defaultItem = cva({
 		{
 			orientation: 'vertical',
 			variant: ['card', 'outline', 'soft'],
-			density: 'small',
+			density: 'compact',
 			class: '[--timeline-surface-offset:0.375rem]'
 		},
 		{
@@ -113,7 +116,7 @@ const defaultItem = cva({
 		{
 			orientation: 'vertical',
 			variant: ['card', 'outline', 'soft'],
-			density: 'large',
+			density: 'comfortable',
 			class: '[--timeline-surface-offset:0.625rem]'
 		},
 		{
@@ -139,7 +142,7 @@ const defaultItem = cva({
 });
 
 const defaultOpposite = cva({
-	base: 'z-10 min-w-0 self-start text-neutral/60 tabular-nums',
+	base: 'z-10 min-w-0 self-start text-neutral/70 tabular-nums',
 	variants: {
 		orientation: {
 			vertical:
@@ -151,9 +154,9 @@ const defaultOpposite = cva({
 			end: ''
 		},
 		density: {
-			small: '',
+			compact: '',
 			normal: '',
-			large: ''
+			comfortable: ''
 		}
 	},
 	compoundVariants: [
@@ -169,7 +172,7 @@ const defaultOpposite = cva({
 		},
 		{
 			orientation: 'vertical',
-			density: 'small',
+			density: 'compact',
 			class: '@max-[40rem]:min-h-[calc(var(--timeline-marker-size)+0.375rem)] @max-[40rem]:pb-sm'
 		},
 		{
@@ -179,7 +182,7 @@ const defaultOpposite = cva({
 		},
 		{
 			orientation: 'vertical',
-			density: 'large',
+			density: 'comfortable',
 			class: '@max-[40rem]:min-h-[calc(var(--timeline-marker-size)+0.75rem)] @max-[40rem]:pb-lg'
 		},
 		{
@@ -221,9 +224,9 @@ const defaultAxis = cva({
 			soft: ''
 		},
 		density: {
-			small: '',
+			compact: '',
 			normal: '',
-			large: ''
+			comfortable: ''
 		},
 		hasDate: {
 			true: '',
@@ -280,7 +283,7 @@ const defaultConnector = cva({
 });
 
 const defaultMarker = cva({
-	base: 'relative z-10 grid shrink-0 place-items-center rounded-full bg-surface text-color-readable ring-1 ring-color/45 shadow-[0_0_0_3px_var(--color-surface)] [&>svg]:size-[58%] [&_[data-slot=timeline-dot]]:block [&_[data-slot=timeline-dot]]:size-[38%] [&_[data-slot=timeline-dot]]:rounded-full [&_[data-slot=timeline-dot]]:bg-color',
+	base: 'relative z-10 grid shrink-0 place-items-center rounded-full bg-surface text-color-readable ring-1 ring-selected/45 shadow-[0_0_0_3px_var(--color-surface)] [&>svg]:size-[58%] [&_[data-slot=timeline-dot]]:block [&_[data-slot=timeline-dot]]:size-[38%] [&_[data-slot=timeline-dot]]:rounded-full [&_[data-slot=timeline-dot]]:bg-color',
 	variants: {
 		size: {
 			small: 'size-3.5',
@@ -313,14 +316,14 @@ const defaultContent = cva({
 		},
 		variant: {
 			ghost: 'bg-transparent text-neutral',
-			card: 'rounded-lg bg-surface-raised text-neutral ring-1 ring-neutral/10 shadow-xs',
+			card: 'rounded-lg bg-surface-raised text-neutral raised-1',
 			outline: 'rounded-lg bg-transparent text-neutral ring-1 ring-color',
 			soft: 'rounded-lg bg-color-muted text-color-muted-readable'
 		},
 		density: {
-			small: '',
+			compact: '',
 			normal: '',
-			large: ''
+			comfortable: ''
 		},
 		color: colorVariants
 	},
@@ -361,9 +364,9 @@ const defaultContent = cva({
 			side: 'end',
 			class: 'row-start-3 self-start mt-[var(--timeline-space)]'
 		},
-		{ variant: ['card', 'outline', 'soft'], density: 'small', class: 'p-lg' },
+		{ variant: ['card', 'outline', 'soft'], density: 'compact', class: 'p-lg' },
 		{ variant: ['card', 'outline', 'soft'], density: 'normal', class: 'p-xl' },
-		{ variant: ['card', 'outline', 'soft'], density: 'large', class: 'p-layout-sm' }
+		{ variant: ['card', 'outline', 'soft'], density: 'comfortable', class: 'p-layout-sm' }
 	],
 	defaultVariants: {
 		orientation: 'vertical',
@@ -379,31 +382,31 @@ const defaultDate = cva({
 	base: 'block leading-normal tabular-nums',
 	variants: {
 		size: {
-			small: 'text-[0.6875rem]',
-			normal: 'text-[0.8125rem]',
-			large: 'text-[0.9375rem]'
+			small: 'text-xs',
+			normal: 'text-xs',
+			large: 'text-sm'
 		},
 		density: {
-			small: '',
+			compact: '',
 			normal: '',
-			large: ''
+			comfortable: ''
 		},
 		placement: {
-			start: 'text-neutral/60',
-			end: 'text-neutral/60',
-			alternate: 'text-neutral/60'
+			start: 'text-neutral/70',
+			end: 'text-neutral/70',
+			alternate: 'text-neutral/70'
 		},
 		variant: {
 			ghost: '',
 			card: '',
 			outline: '',
-			soft: 'text-color-muted-readable/70'
+			soft: 'text-color-muted-readable'
 		}
 	},
 	compoundVariants: [
-		{ placement: ['start', 'end'], density: 'small', class: 'mb-xs' },
+		{ placement: ['start', 'end'], density: 'compact', class: 'mb-xs' },
 		{ placement: ['start', 'end'], density: 'normal', class: 'mb-sm' },
-		{ placement: ['start', 'end'], density: 'large', class: 'mb-md' }
+		{ placement: ['start', 'end'], density: 'comfortable', class: 'mb-md' }
 	],
 	defaultVariants: {
 		size: 'normal',
@@ -421,9 +424,9 @@ const defaultTitle = cva({
 	base: 'min-w-0 font-medium leading-snug',
 	variants: {
 		size: {
-			small: 'text-[0.8125rem]',
-			normal: 'text-[0.9375rem]',
-			large: 'text-[1.0625rem]'
+			small: 'text-xs',
+			normal: 'text-sm',
+			large: 'text-base'
 		},
 		variant: {
 			ghost: 'text-neutral',
@@ -442,20 +445,20 @@ const defaultDescription = cva({
 	base: 'leading-relaxed',
 	variants: {
 		size: {
-			small: 'text-[0.6875rem]',
-			normal: 'text-[0.8125rem]',
-			large: 'text-[0.9375rem]'
+			small: 'text-xs',
+			normal: 'text-xs',
+			large: 'text-sm'
 		},
 		density: {
-			small: 'mt-xs',
+			compact: 'mt-xs',
 			normal: 'mt-sm',
-			large: 'mt-md'
+			comfortable: 'mt-md'
 		},
 		variant: {
-			ghost: 'text-neutral/65',
-			card: 'text-neutral/65',
-			outline: 'text-neutral/65',
-			soft: 'text-color-muted-readable/70'
+			ghost: 'text-neutral/70',
+			card: 'text-neutral/70',
+			outline: 'text-neutral/70',
+			soft: 'text-color-muted-readable'
 		}
 	},
 	defaultVariants: {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import type { Attachment } from 'svelte/attachments';
 	import { checkIcon } from '../Icons/check.js';
 	import { linkBreakIcon } from '../Icons/linkBreak.js';
@@ -19,9 +20,10 @@
 
 	let { size, theme, linkUrl, onApply, onRemove, onCancel }: Props = $props();
 
-	let draftLink = $state('');
+	let draftLink = $derived(linkUrl);
 
 	const classes = $derived(useRichTextInputTheme(theme));
+	const t = $derived(useI18n());
 	const canRemoveLink = $derived(linkUrl.trim().length > 0);
 	const autofocusLinkInput: Attachment<HTMLInputElement> = (node) => {
 		const focusTimeout = setTimeout(() => {
@@ -29,10 +31,6 @@
 		}, 0);
 		return () => clearTimeout(focusTimeout);
 	};
-
-	$effect(() => {
-		draftLink = linkUrl;
-	});
 
 	function submitLink(event: SubmitEvent) {
 		event.preventDefault();
@@ -50,8 +48,8 @@
 	<input
 		{@attach autofocusLinkInput}
 		bind:value={draftLink}
-		aria-label="Link URL"
-		placeholder="Paste link"
+		aria-label={t.linkUrl}
+		placeholder={t.pasteLink}
 		class={classes.linkInput({ size })}
 		onkeydown={handleKeydown}
 	/>
@@ -59,7 +57,7 @@
 		<RichTextInputToolbarButton
 			{size}
 			{theme}
-			label="Remove link"
+			label={t.removeLink}
 			icon={linkBreakIcon}
 			active={false}
 			onSelect={onRemove}
@@ -68,7 +66,7 @@
 	<RichTextInputToolbarButton
 		{size}
 		{theme}
-		label="Apply link"
+		label={t.applyLink}
 		icon={checkIcon}
 		active={false}
 		onSelect={() => onApply(draftLink)}
@@ -76,7 +74,7 @@
 	<RichTextInputToolbarButton
 		{size}
 		{theme}
-		label="Cancel link edit"
+		label={t.cancelLinkEdit}
 		icon={xIcon}
 		active={false}
 		onSelect={onCancel}

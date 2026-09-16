@@ -25,11 +25,13 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">One useful pattern</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			One useful pattern
+		</p>
 		<Heading size="h2" weight="bold">Speak your language.</Heading>
-		<p class="max-w-2xl text-neutral/65">The same collection filter in three familiar languages.</p>
+		<p class="text-neutral/65 max-w-2xl">The same collection filter in three familiar languages.</p>
 	</header>
 	<Chip size="small" variant="soft" class="w-fit">Local collection example</Chip><Tabs
 		items={examples}

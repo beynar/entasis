@@ -47,6 +47,7 @@ TagGroup renders a finite set of selectable tags as chips. It is a form input fo
 ### Core Props
 - **items**: TagGroupOption[] - Options rendered as selectable chips.
 - **value**: string | string[] | null - Bindable selection. Single mode writes string|null; multiple mode writes string[].
+- **defaultValue**: string | string[] | null - Initial selection used only when \`value\` is omitted.
 - **multiple**: boolean (default: false) - Enables selecting multiple tags.
 - **label**: Slot - Field label.
 - **name**: string - Form field name.
@@ -65,8 +66,8 @@ TagGroup renders a finite set of selectable tags as chips. It is a form input fo
 - **size**: 'small' | 'normal' | 'large' (default: 'normal') - Controls chip density.
 - **color**: Colors (default: 'primary') - Selected chip color.
 - **unselectedColor**: Colors (default: 'neutral') - Unselected chip color.
-- **selectedVariant**: 'solid' | 'outline' | 'soft' (default: 'solid') - Selected chip variant.
-- **unselectedVariant**: 'solid' | 'outline' | 'soft' (default: 'soft') - Unselected chip variant.
+- **selectedVariant**: 'solid' | 'outline' | 'soft' (default: 'soft') - Selected chip variant. The selected fill itself comes from the shared soft selected recipe on the item class.
+- **unselectedVariant**: 'solid' | 'outline' | 'soft' (default: 'outline') - Unselected chip variant. Outline by default so an unselected tag stays distinct from the soft selected fill at the neutral role.
 - **theme**: TagGroupThemeProps - Theme overrides for TagGroup and Field parts.
 - **chipTheme**: ChipThemeProps - Theme overrides forwarded to each Chip.
 

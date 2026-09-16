@@ -30,18 +30,18 @@
 	let message = $state('');
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<header>
-		<p class="text-sm text-primary-readable">We’re here to help</p>
+		<p class="text-primary-readable text-sm">We’re here to help</p>
 		<h2 class="mt-sm text-3xl font-semibold">Let’s get you unstuck.</h2>
 	</header>
-	<div class="grid items-start gap-xl md:grid-cols-2">
+	<div class="gap-xl grid items-start md:grid-cols-2">
 		<Stack gap="lg">
 			<h3 class="text-xl font-semibold">A few quick answers</h3>
 			<Accordion items={questions} oneAtATime /><Card
 				title="A useful support request"
 				variant="soft"
-				><p class="text-sm text-neutral/65">
+				><p class="text-neutral/65 text-sm">
 					Tell us what you expected, what happened, and the steps that led there.
 				</p></Card
 			>

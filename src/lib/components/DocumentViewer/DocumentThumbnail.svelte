@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import Slot from '../Slot/Slot.svelte';
@@ -26,6 +27,7 @@
 	} = $props();
 
 	let button = $state<HTMLButtonElement | null>(null);
+	const t = $derived(useI18n());
 	let canvas = $state<HTMLCanvasElement | null>(null);
 	let isVisible = $state(false);
 	let renderError = $state(false);
@@ -58,7 +60,7 @@
 	};
 
 	$effect(() => {
-		viewer.model;
+		void viewer.model;
 		const revision = viewer.surfaceRevision;
 		const shouldRender = isVisible;
 		const target = canvas;
@@ -92,7 +94,7 @@
 	bind:this={button}
 	type="button"
 	class={classes.thumbnail({ className: isActive ? classes.thumbnailActive() : undefined })}
-	aria-label="Go to {viewer.unit} {index}"
+	aria-label={`${t.goTo} ${viewer.unit === 'slide' ? t.slide : t.page} ${index}`}
 	aria-current={isActive ? 'page' : undefined}
 	onclick={() => viewer.goTo(index)}
 	{@attach observe}
@@ -105,7 +107,7 @@
 					{legacyUnit.text}
 				</div>
 			{:else if renderError}
-				<span class="m-auto text-center text-danger-readable">Preview unavailable</span>
+				<span class="text-danger-readable m-auto text-center">Preview unavailable</span>
 			{:else}
 				<canvas bind:this={canvas} class={classes.thumbnailCanvas()} aria-hidden="true"></canvas>
 			{/if}

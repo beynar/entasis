@@ -1,7 +1,7 @@
 export { default as Grid } from './Grid.svelte';
 export { default as GridSpan } from './GridSpan.svelte';
 export type { GridAlignment, GridColumns, GridProps, GridRepeat } from './grid.props.js';
-export type { GridSpanProps } from './gridSpan.props.js';
+export type { GridSpanColumns, GridSpanProps } from './gridSpan.props.js';
 export type { LayoutSpacing } from '../Layout/layoutSpacing.js';
 export {
 	gridTheme,

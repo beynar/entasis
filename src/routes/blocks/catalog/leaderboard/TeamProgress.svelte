@@ -20,10 +20,10 @@
 	);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card title="A team moving forward" description="Weekly contributions toward our shared goals."
 		><Stack gap="lg">
-			<div class="flex flex-wrap items-center justify-between gap-md">
+			<div class="gap-md flex flex-wrap items-center justify-between">
 				<Chip color="primary">Top contributors</Chip><Select
 					label="Period"
 					bind:value={period}
@@ -35,22 +35,23 @@
 			</div>
 			{#each ranked as member, index (member)}<Stack
 					gap="md"
-					class="border-b border-neutral-muted pb-lg"
+					class="border-neutral-muted pb-lg border-b"
 				>
-					<div class="flex flex-wrap items-center justify-between gap-md">
-						<div class="flex items-center gap-md">
-							<span class="w-6 text-sm font-semibold text-neutral/50">{index + 1}</span><Avatar
-								user={{ name: member.name }}
+					<div class="gap-md flex flex-wrap items-center justify-between">
+						<div class="gap-md flex items-center">
+							<span class="text-neutral/65 w-6 text-sm font-semibold">{index + 1}</span><Avatar
+								name={member.name}
 							/>
 							<div>
 								<strong class="text-sm">{member.name}</strong>
-								<p class="text-xs text-neutral/60">{member.team}</p>
+								<p class="text-neutral/70 text-xs">{member.team}</p>
 							</div>
 						</div>
 						<strong class="tabular-nums">{member.score} pts</strong>
 					</div>
 					<Meter
-						value={{ value: member.score, color: index === 0 ? 'primary' : 'neutral' }}
+						value={member.score}
+						color={index === 0 ? 'primary' : 'neutral'}
 						max={period === 'week' ? 100 : 400}
 					/>
 				</Stack>{/each}

@@ -150,12 +150,14 @@
 		render={header ? header : title || description ? headerSnippet : undefined}
 		payload={formState}
 		class={cx(
-			cardClasses.header({
-				density,
-				hasAction: false,
-				hasBorder: hasSectionBorders,
-				variant: cardTextVariant
-			}),
+			variant === 'card'
+				? cardClasses.header({
+						density,
+						hasAction: false,
+						hasBorder: hasSectionBorders,
+						variant: cardTextVariant
+					})
+				: undefined,
 			classes.formHeader({ density, variant })
 		)}
 	/>
@@ -193,7 +195,9 @@
 	{#if footer || actions?.length}
 		<div
 			class={cx(
-				cardClasses.footer({ density, hasBorder: hasSectionBorders }),
+				variant === 'card'
+					? cardClasses.footer({ density, hasBorder: hasSectionBorders })
+					: undefined,
 				classes.formFooter({ density, variant })
 			)}
 		>

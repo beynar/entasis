@@ -1,13 +1,13 @@
 export const fileInputDescription = `
 # FileInput Component
 
-The FileInput component provides file upload functionality with drag-and-drop support, file preview, and progress tracking. Supports both single and multiple file uploads.
+The FileInput component provides file upload functionality with drag-and-drop support and an inline list of the selected files (image files get a thumbnail preview). It supports a single-file mode and a multiple-file mode.
 
 ## Basic Usage
 
 \`\`\`svelte
-<script>
-	let file = $state(null);
+<script lang="ts">
+	let file = $state<File | null>(null);
 </script>
 
 <FileInput label="Upload File" bind:value={file} />
@@ -18,26 +18,30 @@ The FileInput component provides file upload functionality with drag-and-drop su
 Extends all Field component props plus:
 
 ### Core Props
-- **value**: File | File[] (bindable) - Selected file(s)
-- **type**: 'file' | 'files' - Single or multiple file mode
-- **accept**: string - Accepted file types (e.g., 'image/*', '.pdf,.doc')
-- **maxSize**: number - Maximum file size in bytes
-- **multiple**: boolean - Allow multiple files (when type='files')
+- **mode**: 'single' | 'multiple' (default: 'single') - Single-file or multiple-file mode
+- **value**: File | null in single mode, File[] | null in multiple mode (bindable) - Selected file(s)
+- **defaultValue**: same type as \`value\` - Initial selection when \`value\` is omitted
+- **types**: string[] (default: ['image/*']) - Accepted MIME types or extensions (e.g. ['image/*'], ['.pdf', '.docx']); used for the native \`accept\` attribute and drag validation
+- **maxSize**: number (default: 50 MB) - Maximum file size in bytes; larger files are rejected
+- **maxFiles**: number (default: 1) - Maximum number of files (multiple mode caps the combined selection)
+- **clickable**: boolean (default: true) - Whether clicking the dropzone opens the native file picker
 
 ### Display Props
-- **showPreview**: boolean (default: true) - Show file preview
-- **placeholder**: string - Placeholder text for drop zone
+- **placeholder**: string (default: 'Click or drag files here') - Text shown in the empty dropzone
+- **fileList**: Snippet - Custom rendering of the selected files list
+- **file**: Snippet - Custom rendering of each selected file row
+- **fileListClass** / **fileClass** / **placeholderClass**: string - Extra classes for those parts
 
 ### Field Props (inherited)
 - **label**: string | Snippet - Field label
 - **description**: string | Snippet - Helper text
-- **error**: string - Error message
 - **required**: boolean - Mark as required
 - **disabled**: boolean - Disable input
 - **size**: 'small' | 'normal' | 'large'
 
 ### Event Props
-- **onUpload**: (files: File | File[]) => void - Called when files are selected
+- **onValueChange**: (value: File | null) => void in single mode, (value: File[] | null) => void in multiple mode - Called when the selection changes
+- **onReject**: (rejections: { file: File; reason: 'type' | 'size' | 'duplicate' | 'limit' }[]) => void - Called with the files rejected by type, size, duplicate or count validation
 
 ### Styling Props
 - **class**: string - Additional CSS classes
@@ -49,11 +53,13 @@ Extends all Field component props plus:
 <Field>
 	<Label />
 	<Description />
-	<FileDropZone>
-		<FilePreview />
-		<UploadButton />
-		<FileList />
-	</FileDropZone>
+	<Dropzone>            <!-- inputContainer -->
+		<Placeholder />     <!-- shown while no file is selected -->
+		<FileList>          <!-- shown once files are selected -->
+			<File />          <!-- thumbnail, name, size, remove button -->
+			<AddMoreButton /> <!-- multiple mode, while below maxFiles -->
+		</FileList>
+	</Dropzone>
 	<Error />
 </Field>
 \`\`\`
@@ -62,56 +68,69 @@ Extends all Field component props plus:
 
 ### Basic File Input
 \`\`\`svelte
-<script>
-	let file = $state(null);
+<script lang="ts">
+	let file = $state<File | null>(null);
 </script>
 
-<FileInput 
+<FileInput
 	label="Upload Document"
+	types={['.pdf', '.doc', '.docx']}
 	bind:value={file}
 />
 \`\`\`
 
 ### Multiple Files
 \`\`\`svelte
-<script>
-	let files = $state([]);
+<script lang="ts">
+	let files = $state<File[]>([]);
 </script>
 
-<FileInput 
-	type="files"
+<FileInput
+	mode="multiple"
+	maxFiles={5}
 	label="Upload Documents"
+	types={['.pdf', '.doc', '.docx']}
 	bind:value={files}
-	multiple
 />
 \`\`\`
 
 ### Image Upload with Preview
 \`\`\`svelte
-<FileInput 
+<script lang="ts">
+	let avatar = $state<File | null>(null);
+</script>
+
+<FileInput
 	label="Profile Picture"
 	bind:value={avatar}
-	accept="image/*"
-	showPreview
+	types={['image/*']}
 />
 \`\`\`
 
 ### Restrict File Types
 \`\`\`svelte
-<FileInput 
+<script lang="ts">
+	let document = $state<File | null>(null);
+</script>
+
+<FileInput
 	label="Upload PDF"
 	bind:value={document}
-	accept=".pdf"
+	types={['.pdf']}
 	description="PDF files only"
 />
 \`\`\`
 
 ### With File Size Limit
 \`\`\`svelte
-<FileInput 
+<script lang="ts">
+	let image = $state<File | null>(null);
+</script>
+
+<FileInput
 	label="Upload Image"
 	bind:value={image}
-	accept="image/*"
+	types={['image/*']}
 	maxSize={5 * 1024 * 1024}
 	description="Maximum 5MB"
 />
@@ -119,17 +138,21 @@ Extends all Field component props plus:
 
 ### Required File
 \`\`\`svelte
-<FileInput 
+<script lang="ts">
+	let resume = $state<File | null>(null);
+</script>
+
+<FileInput
 	label="Resume"
 	bind:value={resume}
-	accept=".pdf,.doc,.docx"
+	types={['.pdf', '.doc', '.docx']}
 	required
 />
 \`\`\`
 
 ### Disabled State
 \`\`\`svelte
-<FileInput 
+<FileInput
 	label="Uploaded File"
 	value={existingFile}
 	disabled
@@ -138,37 +161,62 @@ Extends all Field component props plus:
 
 ### Avatar Upload
 \`\`\`svelte
-<script>
-	let avatar = $state(null);
-	
-	function handleUpload(file) {
-		console.log('Uploading:', file);
+<script lang="ts">
+	let avatar = $state<File | null>(null);
+
+	function handleUpload(file: File | null) {
+		if (!file) return;
+		console.log('Uploading:', file.name);
 		// Upload to server
 	}
 </script>
 
-<FileInput 
+<FileInput
 	label="Profile Picture"
 	bind:value={avatar}
-	accept="image/png,image/jpeg"
+	types={['image/png', 'image/jpeg']}
 	maxSize={2 * 1024 * 1024}
 	description="PNG or JPEG, max 2MB"
-	showPreview
-	onUpload={handleUpload}
+	onValueChange={handleUpload}
 />
+\`\`\`
+
+### Handling Rejected Files
+\`\`\`svelte
+<script lang="ts">
+	let image = $state<File | null>(null);
+	let rejectionMessage = $state('');
+</script>
+
+<FileInput
+	label="Upload Image"
+	bind:value={image}
+	types={['image/*']}
+	maxSize={1024 * 1024}
+	onReject={(rejections) => {
+		rejectionMessage = rejections
+			.map((rejection) => \`\${rejection.file.name}: \${rejection.reason}\`)
+			.join(', ');
+	}}
+/>
+
+{#if rejectionMessage}
+	<p class="text-danger-readable text-sm">{rejectionMessage}</p>
+{/if}
 \`\`\`
 
 ### Document Upload Form
 \`\`\`svelte
-<script>
-	let documents = $state([]);
-	
-	async function handleSubmit() {
+<script lang="ts">
+	let documents = $state<File[]>([]);
+
+	async function handleSubmit(event: SubmitEvent) {
+		event.preventDefault();
 		const formData = new FormData();
 		documents.forEach((file, i) => {
 			formData.append(\`document\${i}\`, file);
 		});
-		
+
 		await fetch('/api/upload', {
 			method: 'POST',
 			body: formData
@@ -177,15 +225,16 @@ Extends all Field component props plus:
 </script>
 
 <form onsubmit={handleSubmit}>
-	<FileInput 
-		type="files"
+	<FileInput
+		mode="multiple"
+		maxFiles={10}
 		label="Supporting Documents"
 		bind:value={documents}
-		accept=".pdf,.doc,.docx"
+		types={['.pdf', '.doc', '.docx']}
 		description="Upload relevant documents"
 		required
 	/>
-	
+
 	<Button type="submit" disabled={documents.length === 0}>
 		Submit Application
 	</Button>
@@ -194,19 +243,18 @@ Extends all Field component props plus:
 
 ### Image Gallery Upload
 \`\`\`svelte
-<script>
-	let images = $state([]);
+<script lang="ts">
+	let images = $state<File[]>([]);
 </script>
 
-<FileInput 
-	type="files"
+<FileInput
+	mode="multiple"
+	maxFiles={20}
 	label="Upload Photos"
 	bind:value={images}
-	accept="image/*"
-	multiple
+	types={['image/*']}
 	maxSize={10 * 1024 * 1024}
 	description="Select multiple images (max 10MB each)"
-	showPreview
 />
 
 <p>Selected: {images.length} images</p>
@@ -214,18 +262,19 @@ Extends all Field component props plus:
 
 ### With Upload Progress
 \`\`\`svelte
-<script>
-	let file = $state(null);
+<script lang="ts">
+	let file = $state<File | null>(null);
 	let progress = $state(0);
 	let uploading = $state(false);
-	
-	async function handleUpload(selectedFile) {
+
+	async function handleUpload(selectedFile: File | null) {
+		if (!selectedFile) return;
 		uploading = true;
 		progress = 0;
-		
+
 		const formData = new FormData();
 		formData.append('file', selectedFile);
-		
+
 		// Simulate upload progress
 		const interval = setInterval(() => {
 			progress += 10;
@@ -237,24 +286,28 @@ Extends all Field component props plus:
 	}
 </script>
 
-<FileInput 
+<FileInput
 	label="Upload File"
 	bind:value={file}
-	onUpload={handleUpload}
+	onValueChange={handleUpload}
 	disabled={uploading}
 />
 
 {#if uploading}
-	<Meter value={{ value: progress }} />
+	<Meter value={progress} />
 {/if}
 \`\`\`
 
 ### CV Upload
 \`\`\`svelte
-<FileInput 
+<script lang="ts">
+	let cv = $state<File | null>(null);
+</script>
+
+<FileInput
 	label="Upload CV/Resume"
 	bind:value={cv}
-	accept=".pdf,.doc,.docx"
+	types={['.pdf', '.doc', '.docx']}
 	maxSize={5 * 1024 * 1024}
 	description="PDF or Word document, max 5MB"
 	required
@@ -263,19 +316,20 @@ Extends all Field component props plus:
 
 ### Attachment Field
 \`\`\`svelte
-<script>
-	let attachments = $state([]);
-	
-	function removeFile(index) {
+<script lang="ts">
+	let attachments = $state<File[]>([]);
+
+	function removeFile(index: number) {
 		attachments = attachments.filter((_, i) => i !== index);
 	}
 </script>
 
-<FileInput 
-	type="files"
+<FileInput
+	mode="multiple"
+	maxFiles={Infinity}
 	label="Attachments"
+	types={['*/*']}
 	bind:value={attachments}
-	multiple
 	description="Add any supporting files"
 />
 
@@ -284,8 +338,8 @@ Extends all Field component props plus:
 		{#each attachments as file, i}
 			<div class="file-item">
 				<span>{file.name}</span>
-				<Button 
-					size="small" 
+				<Button
+					size="small"
 					variant="ghost"
 					onclick={() => removeFile(i)}
 				>
@@ -301,35 +355,40 @@ Extends all Field component props plus:
 
 FileInput supports drag-and-drop:
 - Drag files over the drop zone
-- Visual feedback on hover
+- Visual feedback while dragging (the dropzone reflects an idle / potential / valid / invalid state)
 - Drop to select files
-- Works alongside click-to-browse
+- Works alongside click-to-browse (disable with \`clickable={false}\`)
 
-## File Preview
+## File List
 
-When \`showPreview={true}\`:
-- Images show thumbnail preview
-- Other files show icon and name
+Once files are selected the dropzone shows them inline:
+- Images show a thumbnail preview
+- Other files show their name
 - File size displayed
 - Remove button for each file
+- In multiple mode, an "Add more files" button appears while below \`maxFiles\`
 
 ## Validation
 
 FileInput validates:
 - **required**: At least one file selected
-- **accept**: File type matches accepted types
-- **maxSize**: File size within limit
-- **multiple**: Number of files (if limited)
+- **types**: File type matches the accepted types (rejected with reason 'type')
+- **maxSize**: File size within limit (rejected with reason 'size')
+- **maxFiles**: Number of files in multiple mode (rejected with reason 'limit')
+- Duplicate files (same name and size) are rejected with reason 'duplicate'
+
+Rejected files never enter \`value\`; listen to \`onReject\` to surface them.
 
 ## File Type Patterns
 
-Common accept patterns:
-- \`image/*\` - All images
-- \`image/png,image/jpeg\` - Specific image types
-- \`.pdf\` - PDF files
-- \`.pdf,.doc,.docx\` - Documents
-- \`video/*\` - Videos
-- \`audio/*\` - Audio files
+Entries accepted in \`types\`:
+- \`'image/*'\` - All images
+- \`'image/png'\`, \`'image/jpeg'\` - Specific image types
+- \`'.pdf'\` - PDF files
+- \`'.pdf'\`, \`'.doc'\`, \`'.docx'\` - Documents
+- \`'video/*'\` - Videos
+- \`'audio/*'\` - Audio files
+- \`'*/*'\` - Any file
 
 ## Accessibility
 
@@ -355,40 +414,49 @@ The FileInput component uses a theme object that can be customized using the \`t
 ### Theme Structure
 
 The theme object contains the following parts:
-- **fileInput**: Main file input container styles
-- **fileInputDropzone**: Drop zone area styles
-- **fileInputPreview**: File preview container styles
-- **fileInputPreviewItem**: Individual file preview item styles
+- **inputContainer**: The dropzone container
+- **placeholder**: The empty-state placeholder (icon and text)
+- **fileList**: The list wrapping the selected files
+- **file**: Each selected file row
+
+Field theme parts (label, description, error, ...) are also accepted on the same \`theme\` prop.
 
 ### Available Variants
 
-**fileInput**:
-- base: Base classes for main container
-
-**fileInputDropzone**:
-- base: Base classes for drag-and-drop zone
+**inputContainer**:
+- base: Base classes for the dropzone
 - Variants:
+  - size: 'small' | 'normal' | 'large' - Minimum height
+  - state: 'idle' | 'potential' | 'valid' | 'invalid' - Drag state styling
   - disabled: boolean - Disabled state styling
-  - dragging: boolean - Active drag state styling
 
-**fileInputPreview**:
-- base: Base classes for preview container
+**placeholder**:
+- base: Base classes for the placeholder
+- Variants:
+  - size: 'small' | 'normal' | 'large' - Text size and gap
 
-**fileInputPreviewItem**:
-- base: Base classes for individual preview items
+**fileList**:
+- base: Base classes for the file list
+- Variants:
+  - size: 'small' | 'normal' | 'large' - Gap between rows
+
+**file**:
+- base: Base classes for each file row
+- Variants:
+  - size: 'small' | 'normal' | 'large' - Padding, text size and gap
 
 ### Usage Examples
 
 **Basic Theme Override**:
 \`\`\`svelte
-<FileInput 
+<FileInput
   label="Upload Files"
   bind:value={files}
   theme={{
-    fileInputDropzone: {
+    inputContainer: {
       base: 'border-2 border-dashed rounded-lg',
-      dragging: {
-        true: 'border-primary bg-primary/10'
+      state: {
+        valid: 'border-primary bg-primary/10'
       }
     }
   }}
@@ -397,18 +465,23 @@ The theme object contains the following parts:
 
 **Custom Dropzone Styling**:
 \`\`\`svelte
-<FileInput 
+<FileInput
   label="Custom Upload"
   bind:value={files}
   theme={{
-    fileInputDropzone: {
-      base: 'border-2 border-dashed border-gray-300 rounded-xl p-8 hover:border-primary transition-colors',
-      dragging: {
-        true: 'border-primary bg-blue-50'
+    inputContainer: {
+      base: 'border-2 border-dashed border-neutral-muted rounded-xl p-8 hover:border-primary transition-colors',
+      state: {
+        potential: 'border-primary',
+        valid: 'border-primary bg-primary/5',
+        invalid: 'border-danger bg-danger/5'
       }
     },
-    fileInputPreview: {
+    fileList: {
       base: 'mt-4 grid grid-cols-2 gap-4'
+    },
+    file: {
+      base: 'rounded-md border border-neutral-muted'
     }
   }}
 />
@@ -418,15 +491,15 @@ The theme object contains the following parts:
 \`\`\`svelte
 <script>
   import { setFileInputTheme } from 'svelai/file-input';
-  
+
   setFileInputTheme({
-    fileInputDropzone: {
+    inputContainer: {
       base: 'border-2 border-dashed rounded-lg transition-all',
-      dragging: {
-        true: 'border-primary bg-primary/5'
+      state: {
+        valid: 'border-primary bg-primary/5'
       }
     },
-    fileInputPreview: {
+    fileList: {
       base: 'mt-4'
     }
   });

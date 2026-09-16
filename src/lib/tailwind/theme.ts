@@ -2,6 +2,7 @@ import plugin from 'tailwindcss/plugin.js';
 import { generateColorPalette, toTailwindCssTheme, type ColorTheme } from './colors.js';
 import type { Spinner } from './spinner.js';
 import { applyGlobalEngine, globalKeyframes } from './global.js';
+import type { EngineOptions } from './scales.js';
 
 export type ThemeOptions = Partial<{
 	name: string;
@@ -14,6 +15,8 @@ export type ThemeOptions = Partial<{
 	prefersDark?: boolean;
 	spinner?: Spinner;
 }> &
+	// Scale options only apply on the block that bootstraps the engine (`default: true`).
+	EngineOptions &
 	ColorTheme;
 
 export default plugin.withOptions<ThemeOptions>(

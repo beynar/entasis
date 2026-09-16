@@ -11,6 +11,7 @@
 		PageShellMobileActionCount
 	} from './pageShell.props.js';
 	import { usePageShellTheme, type PageShellThemeProps } from './pageShell.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		api,
@@ -25,6 +26,7 @@
 		mobileActionCount?: PageShellMobileActionCount;
 		theme?: PageShellThemeProps;
 	} = $props();
+	const t = $derived(useI18n());
 
 	const classes = $derived(usePageShellTheme(theme));
 	const actionItems = $derived(Array.isArray(actions) ? actions : []);
@@ -38,7 +40,8 @@
 	const overflowItems = $derived(overflowActions.map(toMenuItem));
 
 	function toMenuItem(action: PageShellAction): MenuItem {
-		const { content, type: _buttonType, ...buttonProps } = action;
+		// `type` is dropped here and forced to 'button' below: a menu item is never a link.
+		const { content, ...buttonProps } = action;
 		return {
 			...buttonProps,
 			type: 'button',
@@ -68,7 +71,7 @@
 						<Button
 							variant="outline"
 							squared
-							label="More actions"
+							label={t.moreActions}
 							prefix={dotsThreeIcon}
 							class={classes.overflowTrigger()}
 							{@attach popover.reference}

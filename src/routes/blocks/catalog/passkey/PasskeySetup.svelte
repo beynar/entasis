@@ -8,31 +8,31 @@
 	let message = $state('');
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Stack gap="lg" class="mx-auto w-full max-w-xl">
-		<div class="flex items-start gap-lg">
-			<div class="rounded-lg bg-primary-muted p-md text-3xl">{@render fingerprintIcon()}</div>
+		<div class="gap-lg flex items-start">
+			<div class="bg-primary-muted p-md rounded-lg text-3xl">{@render fingerprintIcon()}</div>
 			<div>
 				<h2 class="text-2xl font-semibold">Skip the password next time.</h2>
-				<p class="mt-sm text-sm text-neutral/60">Create a passkey on a device you trust.</p>
+				<p class="mt-sm text-neutral/70 text-sm">Create a passkey on a device you trust.</p>
 			</div>
 		</div>
 		<Card
-			><ol class="grid gap-lg">
-				<li class="flex gap-md">
+			><ol class="gap-lg grid">
+				<li class="gap-md flex">
 					<Chip>1</Chip>
 					<div>
 						<strong>Use a personal device</strong>
-						<p class="text-sm text-neutral/60">
+						<p class="text-neutral/70 text-sm">
 							Your passkey lives in your device’s secure credential manager.
 						</p>
 					</div>
 				</li>
-				<li class="flex gap-md">
+				<li class="gap-md flex">
 					<Chip>2</Chip>
 					<div>
 						<strong>Confirm it’s you</strong>
-						<p class="text-sm text-neutral/60">
+						<p class="text-neutral/70 text-sm">
 							Unlock with your fingerprint, face, or device PIN.
 						</p>
 					</div>

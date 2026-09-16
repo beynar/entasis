@@ -35,16 +35,18 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Collected moments</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Collected moments
+		</p>
 		<Heading size="h2" weight="bold">The places between.</Heading>
-		<p class="max-w-2xl text-neutral/65">
+		<p class="text-neutral/65 max-w-2xl">
 			A small collection of landscapes, light, and places to pause.
 		</p>
 	</header>
-	<div class="grid gap-xl sm:grid-cols-2 lg:grid-cols-3">
-		{#each photos as photo, i (photo.title)}<figure class="flex flex-col gap-lg">
+	<div class="gap-xl grid sm:grid-cols-2 lg:grid-cols-3">
+		{#each photos as photo, i (photo.title)}<figure class="gap-lg flex flex-col">
 				<ImageZoom
 					><img
 						src={photo.src}
@@ -53,8 +55,8 @@
 						class="aspect-[4/5] w-full rounded-lg object-cover"
 					/></ImageZoom
 				>
-				<figcaption class="flex justify-between gap-md text-sm">
-					<span>{photo.title}</span><span class="text-neutral/40">0{i + 1}</span>
+				<figcaption class="gap-md flex justify-between text-sm">
+					<span>{photo.title}</span><span class="text-neutral/65">0{i + 1}</span>
 				</figcaption>
 			</figure>{/each}
 	</div>

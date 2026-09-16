@@ -172,7 +172,7 @@
 			size={chart.size}
 			density={chart.density}
 			disabled={chart.disabled}
-			triggerAttrs={{ 'aria-label': messages.ganttChartZoomLevel }}
+			label={messages.ganttChartZoomLevel}
 			onValueChange={(zoom) => chart.setZoom(zoom as GanttZoomLevel)}
 		/>
 	</div>

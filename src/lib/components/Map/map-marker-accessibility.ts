@@ -25,9 +25,7 @@ export function applyMapMarkerTriggerAccessibility(
 	}
 
 	if (!isNativeInteractiveElement(trigger)) {
-		cleanups.push(
-			setManagedAttribute(trigger, 'role', options.isInteractive ? 'button' : 'img')
-		);
+		cleanups.push(setManagedAttribute(trigger, 'role', options.isInteractive ? 'button' : 'img'));
 
 		if (options.isFocusable) {
 			cleanups.push(setManagedAttribute(trigger, 'tabindex', '0'));
@@ -73,11 +71,7 @@ function isNativeInteractiveElement(element: HTMLElement): boolean {
 	);
 }
 
-function setManagedAttribute(
-	element: HTMLElement,
-	name: string,
-	value: string
-): () => void {
+function setManagedAttribute(element: HTMLElement, name: string, value: string): () => void {
 	const previous: ManagedAttribute = {
 		name,
 		hadValue: element.hasAttribute(name),

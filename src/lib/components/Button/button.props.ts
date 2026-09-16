@@ -12,15 +12,7 @@ import type {
 export type ButtonVariant = 'solid' | 'outline' | 'soft' | 'ghost' | 'link';
 type ButtonForwardedAttributes = Pick<
 	HTMLButtonAttributes,
-	| 'id'
-	| 'type'
-	| 'tabindex'
-	| 'onpointermove'
-	| 'aria-haspopup'
-	| 'aria-expanded'
-	| 'aria-controls'
-	| 'aria-selected'
-	| 'aria-pressed'
+	'id' | 'type' | 'tabindex' | 'onpointermove'
 >;
 type ButtonEventAttributes = {
 	/** Native click handler receiving the root element's MouseEvent. */
@@ -35,7 +27,9 @@ export type ButtonPrimitiveProps = WithAttachments<
 	WithSlot<
 		{
 			/**
-			 * Accessible label applied as aria-label on the root element.
+			 * Accessible name, applied as `aria-label` on the root element. A Button paints its
+			 * visible text with `children`, so `label` is free to name an icon-only button (or to
+			 * override the rendered text for assistive technology).
 			 */
 			label?: string;
 			/**
@@ -43,6 +37,27 @@ export type ButtonPrimitiveProps = WithAttachments<
 			 * Pass `menuitem` when the button is an item inside a `menu`.
 			 */
 			role?: string;
+			/**
+			 * Toggle state of a button that stays on or off — a bold button in a toolbar, a
+			 * "show password" eye. Rendered as `aria-pressed`.
+			 */
+			pressed?: boolean;
+			/**
+			 * Chosen state of a button acting as one option among several — a tab, a listbox
+			 * option. Rendered as `aria-selected`.
+			 */
+			selected?: boolean;
+			/**
+			 * Whether the surface this button opens is currently showing. Rendered as
+			 * `aria-expanded`. A svelai surface (Popover, PopupMenu, Select, Combobox) sets this
+			 * on its own trigger; pass it only for a surface you open yourself.
+			 */
+			expanded?: boolean;
+			/**
+			 * What the surface this button opens contains, when it is a trigger. Rendered as
+			 * `aria-haspopup`. A svelai surface sets this on its own trigger.
+			 */
+			haspopup?: 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid' | true;
 			/**
 			 * Bindable reference to the root button or anchor element.
 			 */
@@ -117,3 +132,13 @@ export type ButtonPrimitiveProps = WithAttachments<
 >;
 
 export type ButtonProps = Omit<ButtonPrimitiveProps, 'as'>;
+
+/**
+ * Button props plus the id plumbing the library wires between a surface and its own trigger.
+ * Deliberately absent from the package's public exports: `controls` is an element id the
+ * consumer never has to know, because the surface that owns the trigger supplies it.
+ */
+export type ButtonInternalProps = ButtonPrimitiveProps & {
+	/** DOM id of the surface this button controls while it is open; rendered as `aria-controls`. */
+	controls?: string;
+};

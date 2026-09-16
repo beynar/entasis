@@ -1,6 +1,6 @@
 import type { Slot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments, WithoutAttachments } from '$lib/types/props.js';
-import type { PopoverProps, PopoverThemeProps } from '../Popover/index.js';
+import type { PopoverProps } from '../Popover/index.js';
 import type { ToggleMenuProps } from '../ToggleMenu/index.js';
 import type { SelectionMenuThemeProps } from './selectionMenu.theme.js';
 
@@ -26,15 +26,7 @@ export type SelectionMenuPayload = {
 
 type ToggleMenuPassThroughProps = Pick<
 	WithoutAttachments<ToggleMenuProps>,
-	| 'value'
-	| 'defaultValue'
-	| 'ariaLabel'
-	| 'color'
-	| 'variant'
-	| 'disabled'
-	| 'onValueChange'
-	| 'class'
-	| 'theme'
+	'items' | 'label' | 'color' | 'variant' | 'disabled' | 'onItemsChange' | 'class' | 'theme'
 >;
 
 type SelectionMenuBaseProps = {
@@ -61,20 +53,22 @@ type SelectionMenuBaseProps = {
 	closeOnEscape?: PopoverProps['closeOnEscape'];
 	/** When true, clicking outside dismisses the menu until the selection changes. */
 	closeOnClickOutside?: PopoverProps['closeOnClickOutside'];
-	/** Additional classes merged onto the floating Popover panel. */
-	popoverClass?: string;
+	/** Props forwarded to the floating Popover panel. */
+	popover?: Pick<PopoverProps, 'class' | 'theme'>;
 	/** Additional classes merged onto the custom-content wrapper. */
 	contentClass?: string;
-	/** Called when a valid selection is created, changed, or cleared. */
-	onSelectionChange?: (selection: SelectionMenuSelection | null) => void;
+	/**
+	 * Fires when the user picks a valid selection, picks a different one, or clears it (`null`).
+	 * The document owns the selection, so there is no controlled `selection` prop to change and
+	 * this is the pick event rather than an `onSelectionChange` state callback.
+	 */
+	onSelect?: (payload: SelectionMenuSelection | null) => void;
 	/** Called after the opening transition completes. */
-	onAfterOpen?: (selectionMenu: SelectionMenuPayload) => void;
+	onAfterOpen?: (payload: SelectionMenuPayload) => void;
 	/** Called after the closing transition completes. */
-	onAfterClose?: (selectionMenu: SelectionMenuPayload) => void;
+	onAfterClose?: (payload: SelectionMenuPayload) => void;
 	/** Theme overrides for the selection Popover panel and custom-content wrapper. */
 	selectionTheme?: SelectionMenuThemeProps;
-	/** Theme overrides passed to the underlying Popover. */
-	popoverTheme?: PopoverThemeProps;
 };
 
 export type SelectionMenuProps = WithAttachments<

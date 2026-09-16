@@ -37,30 +37,32 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">From the community</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			From the community
+		</p>
 		<Heading size="h2" weight="bold">Good places. Good company.</Heading>
-		<p class="max-w-2xl text-neutral/65">
+		<p class="text-neutral/65 max-w-2xl">
 			A collection of moments shared by the Fieldnotes community.
 		</p>
 	</header>
 	<Carousel
 		items={photos}
-		layout={{ default: 1, sm: 2, md: 2, lg: 3, xl: 3 }}
+		layout={{ xs: 1, sm: 2, md: 2, lg: 3, xl: 3 }}
 		navigationButton={{ color: 'neutral' }}
-		>{#snippet children({ item: photo, index })}<article class="flex flex-col gap-lg">
+		>{#snippet children({ item: photo, index })}<article class="gap-lg flex flex-col">
 				<img
 					src={photo.src}
 					alt={photo.title}
 					loading="lazy"
 					class="aspect-[3/4] w-full rounded-lg object-cover"
 				/>
-				<div class="flex gap-md items-center justify-between">
-					<div class="flex gap-md items-center">
+				<div class="gap-md flex items-center justify-between">
+					<div class="gap-md flex items-center">
 						<Avatar
 							size="small"
-							user={{ name: ['Maya Chen', 'Sam Rivera', 'Alex Morgan'][index % 3] }}
+							name={['Maya Chen', 'Sam Rivera', 'Alex Morgan'][index % 3]}
 						/><span class="text-sm"
 							>@{['mayainframes', 'samoutside', 'alexwanders'][index % 3]}</span
 						>

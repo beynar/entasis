@@ -9,8 +9,8 @@
 	let showEmail = $state(false);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<div class="grid overflow-hidden rounded-lg border border-neutral-muted md:grid-cols-2">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<div class="border-neutral-muted grid overflow-hidden rounded-lg border md:grid-cols-2">
 		<Stack
 			as="aside"
 			gap="xl"
@@ -19,12 +19,12 @@
 		>
 			<strong class="text-xl">northstar / workspace</strong>
 			<div>
-				<p class="mb-md text-sm opacity-70">LESS ADMIN. MORE MOMENTUM.</p>
+				<p class="mb-md text-sm">LESS ADMIN. MORE MOMENTUM.</p>
 				<h2 class="text-4xl font-semibold tracking-tight">
 					Your team’s next great idea starts here.
 				</h2>
 			</div>
-			<p class="text-sm opacity-75">A shared space for thoughtful work.</p>
+			<p class="text-sm">A shared space for thoughtful work.</p>
 		</Stack>
 		<Stack gap="lg" justify="center" class="bg-surface p-lg sm:p-xl">
 			<h2 class="text-2xl font-semibold">Find your workspace</h2>

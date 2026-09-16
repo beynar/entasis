@@ -16,6 +16,7 @@ import { AudioPlayer } from 'svelai/audio-player';
 - **src**: string - Single audio source URL.
 - **sources**: AudioPlayerSource[] - Multiple native source candidates.
 - **title**: string - Track title.
+- **label**: string - Accessible player label; falls back to \`title\`.
 - **artist**: string - Secondary metadata line.
 - **artwork**: string | false - Optional artwork image URL. Omitted artwork renders no fallback.
 - **variant**: 'waveform' | 'track' - Primary progress surface.

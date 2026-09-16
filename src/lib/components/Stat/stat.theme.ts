@@ -13,9 +13,9 @@ const defaultStatRoot = cva({
 			large: 'rounded-lg'
 		},
 		density: {
-			small: 'gap-x-lg gap-y-xs p-lg',
+			compact: 'gap-x-lg gap-y-xs p-lg',
 			normal: 'gap-x-xl gap-y-xs p-xl',
-			large: 'gap-x-layout-sm gap-y-sm p-layout-sm'
+			comfortable: 'gap-x-layout-sm gap-y-sm p-layout-sm'
 		},
 		color: {
 			primary: 'border-primary',
@@ -59,13 +59,37 @@ const defaultStatRoot = cva({
 	]
 });
 
+// Column placement is owned by one part instead of being baked into each region, so `order`
+// can move a region through the flow without rewriting its own theme. The first two regions
+// sit beside the aside (column 1); everything after clears it and spans the full width.
+const defaultStatRegion = cva({
+	base: 'col-start-1',
+	variants: {
+		span: {
+			narrow: 'col-end-2',
+			wide: 'col-end-3'
+		}
+	},
+	defaultVariants: {
+		span: 'wide'
+	}
+});
+
 const defaultStatLabel = cva({
-	base: 'col-start-1 min-w-0 font-medium leading-tight text-current/65',
+	base: 'min-w-0 font-medium leading-tight text-current/70',
 	variants: {
 		size: {
 			small: 'text-xs',
 			normal: 'text-sm',
 			large: 'text-base'
+		},
+		// Solid and soft surfaces start from an on-colour text that is already near the AA floor,
+		// so the label cannot afford an opacity fade there.
+		variant: {
+			solid: 'text-current',
+			soft: 'text-current',
+			outline: '',
+			ghost: ''
 		}
 	},
 	defaultVariants: {
@@ -74,7 +98,7 @@ const defaultStatLabel = cva({
 });
 
 const defaultStatValue = cva({
-	base: 'col-start-1 min-w-0 font-semibold leading-none tracking-tight text-current',
+	base: 'gap-xs flex min-w-0 items-baseline font-semibold leading-none tracking-tight text-current',
 	variants: {
 		size: {
 			small: 'text-xl',
@@ -87,25 +111,68 @@ const defaultStatValue = cva({
 	}
 });
 
-const defaultStatIndicator = cva({
-	base: 'col-start-2 row-span-2 row-start-1 inline-flex shrink-0 items-center justify-center self-start justify-self-end text-current/70 [&_svg]:pointer-events-none [&_svg]:shrink-0',
+// The unit rides the value baseline one type step down, so `147 task` reads as a number with a
+// suffix instead of two equal-weight words.
+const defaultStatUnit = cva({
+	base: 'min-w-0 font-medium leading-none tracking-normal text-current/70',
 	variants: {
 		size: {
-			small: '[&_svg]:size-4',
-			normal: '[&_svg]:size-5',
-			large: '[&_svg]:size-6'
+			small: 'text-xs',
+			normal: 'text-sm',
+			large: 'text-base'
+		}
+	},
+	defaultVariants: {
+		size: 'normal'
+	}
+});
+
+// Action and indicator share column 2: the action button on top, the decorative indicator under
+// it, both pinned to the first rows so they stay level with the label/value block.
+const defaultStatAside = cva({
+	base: 'gap-sm col-start-2 row-start-1 flex flex-col items-end self-start justify-self-end',
+	variants: {
+		rows: {
+			single: 'row-span-1',
+			pair: 'row-span-2'
+		}
+	},
+	defaultVariants: {
+		rows: 'pair'
+	}
+});
+
+const defaultStatAction = cva({
+	base: 'state-layer inline-flex shrink-0 items-center justify-center border border-transparent bg-transparent text-current/70 transition-colors focus-visible:ring-2 focus-visible:ring-focus/50 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0',
+	variants: {
+		size: {
+			small: 'size-7 rounded-md [&_svg]:size-icon-sm',
+			normal: 'size-8 rounded-md [&_svg]:size-icon-md',
+			large: 'size-10 rounded-xl [&_svg]:size-icon-lg'
+		}
+	},
+	defaultVariants: {
+		size: 'normal'
+	}
+});
+
+const defaultStatIndicator = cva({
+	base: 'inline-flex shrink-0 items-center justify-center text-current/70 [&_svg]:pointer-events-none [&_svg]:shrink-0',
+	variants: {
+		size: {
+			small: '[&_svg]:size-icon-md',
+			normal: '[&_svg]:size-icon-lg',
+			large: '[&_svg]:size-icon-xl'
 		},
 		variant: {
 			default: '',
 			icon: 'border border-current/15 bg-current/5',
-			badge: 'border border-current/15 bg-current/5 font-medium',
-			action:
-				'state-layer border border-transparent bg-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:pointer-events-none disabled:opacity-50'
+			badge: 'border border-current/15 bg-current/5 font-medium'
 		},
 		color: {
 			primary: 'text-primary-readable',
 			secondary: 'text-secondary-readable',
-			neutral: 'text-neutral/60',
+			neutral: 'text-neutral/70',
 			danger: 'text-danger-readable',
 			success: 'text-success-readable',
 			warning: 'text-warning-readable',
@@ -118,54 +185,74 @@ const defaultStatIndicator = cva({
 		color: 'neutral'
 	},
 	compoundVariants: [
-		{ variant: ['icon', 'action'], size: 'small', class: 'size-7 rounded-md [&_svg]:size-3.5' },
-		{ variant: ['icon', 'action'], size: 'normal', class: 'size-8 rounded-md [&_svg]:size-4' },
-		{ variant: ['icon', 'action'], size: 'large', class: 'size-10 rounded-lg [&_svg]:size-5' },
+		{ variant: 'icon', size: 'small', class: 'size-7 rounded-md [&_svg]:size-icon-sm' },
+		{ variant: 'icon', size: 'normal', class: 'size-8 rounded-md [&_svg]:size-icon-md' },
+		{ variant: 'icon', size: 'large', class: 'size-10 rounded-xl [&_svg]:size-icon-lg' },
 		{
 			variant: 'badge',
 			size: 'small',
-			class: 'h-5 min-w-5 rounded-sm px-sm text-[11px] [&_svg]:size-3'
+			class: 'h-5 min-w-5 rounded-sm px-sm text-xs [&_svg]:size-icon-xs'
 		},
 		{
 			variant: 'badge',
 			size: 'normal',
-			class: 'h-6 min-w-6 rounded-sm px-md text-xs [&_svg]:size-3.5'
+			class: 'h-6 min-w-6 rounded-sm px-md text-xs [&_svg]:size-icon-sm'
 		},
 		{
 			variant: 'badge',
 			size: 'large',
-			class: 'h-7 min-w-7 rounded-md px-md text-sm [&_svg]:size-4'
+			class: 'h-control-sm min-w-7 rounded-md px-md text-sm [&_svg]:size-icon-md'
 		}
 	]
 });
 
+// The trend row itself stays neutral: only `trendText` (the text plus the direction arrow the
+// component appends) carries the up/down colour, so a leading `trendIcon` reads as plain ink.
 const defaultStatTrend = cva({
-	base: 'col-span-2 inline-flex min-w-0 items-center gap-xs font-medium leading-none [&_svg]:pointer-events-none [&_svg]:shrink-0',
+	base: 'gap-xs flex min-w-0 items-center font-medium leading-none [&_svg]:pointer-events-none [&_svg]:shrink-0',
 	variants: {
 		size: {
-			small: 'text-[11px] [&_svg]:size-3',
-			normal: 'text-xs [&_svg]:size-3',
-			large: 'text-sm [&_svg]:size-3.5'
-		},
-		trend: {
-			up: 'text-success-readable',
-			down: 'text-danger-readable',
-			neutral: 'text-current/60'
+			small: 'text-xs [&_svg]:size-icon-xs',
+			normal: 'text-xs [&_svg]:size-icon-xs',
+			large: 'text-sm [&_svg]:size-icon-sm'
 		}
 	},
 	defaultVariants: {
-		size: 'normal',
+		size: 'normal'
+	}
+});
+
+const defaultStatTrendIcon = cva({
+	base: 'inline-flex shrink-0 items-center text-current/70'
+});
+
+const defaultStatTrendText = cva({
+	base: 'gap-xs inline-flex min-w-0 items-center',
+	variants: {
+		trend: {
+			up: 'text-success-readable',
+			down: 'text-danger-readable',
+			neutral: 'text-current/70'
+		}
+	},
+	defaultVariants: {
 		trend: 'neutral'
 	}
 });
 
 const defaultStatDescription = cva({
-	base: 'col-span-2 min-w-0 text-current/60',
+	base: 'min-w-0 text-current/70',
 	variants: {
 		size: {
-			small: 'text-[11px]',
+			small: 'text-xs',
 			normal: 'text-xs',
 			large: 'text-sm'
+		},
+		variant: {
+			solid: 'text-current',
+			soft: 'text-current',
+			outline: '',
+			ghost: ''
 		}
 	},
 	defaultVariants: {
@@ -174,12 +261,12 @@ const defaultStatDescription = cva({
 });
 
 const defaultStatSeparator = cva({
-	base: 'col-span-2',
+	base: '',
 	variants: {
 		density: {
-			small: 'my-xs',
+			compact: 'my-xs',
 			normal: 'my-md',
-			large: 'my-lg'
+			comfortable: 'my-lg'
 		}
 	},
 	defaultVariants: {
@@ -189,10 +276,16 @@ const defaultStatSeparator = cva({
 
 export const statTheme = {
 	root: defaultStatRoot,
+	region: defaultStatRegion,
 	label: defaultStatLabel,
 	value: defaultStatValue,
+	unit: defaultStatUnit,
+	aside: defaultStatAside,
+	action: defaultStatAction,
 	indicator: defaultStatIndicator,
 	trend: defaultStatTrend,
+	trendIcon: defaultStatTrendIcon,
+	trendText: defaultStatTrendText,
 	description: defaultStatDescription,
 	separator: defaultStatSeparator
 };

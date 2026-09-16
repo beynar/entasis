@@ -11,39 +11,39 @@
 	let message = $state('');
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<div class="grid gap-xl md:grid-cols-3">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<div class="gap-xl grid md:grid-cols-3">
 		<Card class="md:col-span-1"
 			><Stack gap="lg">
-				<Avatar user={{ name: 'Sam Rivera' }} size="large" /><Chip color="success"
+				<Avatar name="Sam Rivera" size="large" /><Chip color="success"
 					>Available for select projects</Chip
 				>
 				<h2 class="text-3xl font-semibold">Sam Rivera</h2>
-				<p class="text-sm text-primary-readable">Independent designer & developer</p>
-				<p class="text-sm leading-relaxed text-neutral/65">
+				<p class="text-primary-readable text-sm">Independent designer & developer</p>
+				<p class="text-neutral/65 text-sm leading-relaxed">
 					I help early teams turn ambitious ideas into thoughtful digital products.
 				</p>
 				<Separator />
-				<div class="flex flex-wrap justify-between gap-sm text-sm">
-					<span class="text-neutral/60">Based in</span><strong>Barcelona, ES</strong>
+				<div class="gap-sm flex flex-wrap justify-between text-sm">
+					<span class="text-neutral/70">Based in</span><strong>Barcelona, ES</strong>
 				</div>
-				<div class="flex flex-wrap justify-between gap-sm text-sm">
-					<span class="text-neutral/60">Experience</span><strong>8 years</strong>
+				<div class="gap-sm flex flex-wrap justify-between text-sm">
+					<span class="text-neutral/70">Experience</span><strong>8 years</strong>
 				</div>
 			</Stack></Card
 		>
-		<div class="grid gap-lg md:col-span-2">
+		<div class="gap-lg grid md:col-span-2">
 			<Card title="How I can help"
 				><Grid columns={{ minWidth: 220, max: 2 }} gap="lg">
 					<div>
 						<h3 class="font-semibold">Product design</h3>
-						<p class="mt-sm text-sm text-neutral/65">
+						<p class="mt-sm text-neutral/65 text-sm">
 							Strategy, prototypes, and interfaces that make sense.
 						</p>
 					</div>
 					<div>
 						<h3 class="font-semibold">Web development</h3>
-						<p class="mt-sm text-sm text-neutral/65">
+						<p class="mt-sm text-neutral/65 text-sm">
 							Accessible, responsive products built with care.
 						</p>
 					</div>

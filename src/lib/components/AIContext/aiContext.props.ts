@@ -30,7 +30,7 @@ export type AIContextLabels = {
 	/** Summary label for the context-window limit. */
 	maximum: string;
 	/** Formats the trigger's accessible name from formatted token counts. */
-	ariaLabel: (used: string, maximum: string, remaining: string) => string;
+	label: (used: string, maximum: string, remaining: string) => string;
 };
 export type AIContextState = {
 	maxTokens: number;

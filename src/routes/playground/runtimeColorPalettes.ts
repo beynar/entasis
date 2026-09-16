@@ -6,6 +6,7 @@ type RuntimeColorPalette = {
 };
 
 export const runtimeColorPaletteNames = [
+	'default',
 	'graphite',
 	'violet',
 	'indigo',
@@ -19,6 +20,12 @@ export const runtimeColorPaletteNames = [
 export type RuntimeColorPaletteName = (typeof runtimeColorPaletteNames)[number];
 
 export const runtimeColorPalettes = {
+	default: {
+		label: 'Engine default',
+		primary: 'var(--color-primary)',
+		secondary: 'var(--color-secondary)',
+		contrast: 'var(--color-primary-contrast)'
+	},
 	graphite: {
 		label: 'Graphite',
 		primary: 'light-dark(#475569, #94a3b8)',
@@ -84,14 +91,19 @@ const semanticColorVariables = (
 	[`--color-${name}-muted-readable`]: `color-mix(in oklab, ${color} 50%, light-dark(black, white))`
 });
 
-export const runtimeColorPaletteStyle = (paletteName: RuntimeColorPaletteName) => {
+/** CSS custom properties a palette overrides; empty for the engine default (no overrides). */
+export const runtimeColorPaletteVariables = (
+	paletteName: RuntimeColorPaletteName
+): Record<string, string> => {
+	if (paletteName === 'default') return {};
 	const palette = runtimeColorPalettes[paletteName];
-	const variables = {
+	return {
 		...semanticColorVariables('primary', palette.primary, palette.contrast),
 		...semanticColorVariables('secondary', palette.secondary, palette.contrast)
 	};
+};
 
-	return Object.entries(variables)
+export const runtimeColorPaletteStyle = (paletteName: RuntimeColorPaletteName) =>
+	Object.entries(runtimeColorPaletteVariables(paletteName))
 		.map(([property, value]) => `${property}:${value}`)
 		.join(';');
-};

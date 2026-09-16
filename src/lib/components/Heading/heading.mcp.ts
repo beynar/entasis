@@ -21,7 +21,7 @@ The Heading component renders semantic heading elements (h1-h6) with consistent 
   - Use when visual size should differ from semantic level
 
 ### Visual Props
-- **weight**: 'light' | 'normal' | 'medium' | 'semibold' | 'bold' (default: 'normal')
+- **weight**: 'light' | 'normal' | 'bold' (default: 'normal')
   - Font weight of the heading
 
 - **align**: 'left' | 'center' | 'right' (default: 'left')
@@ -41,6 +41,7 @@ The Heading component renders semantic heading elements (h1-h6) with consistent 
 
 ### Styling Props
 - **class**: string - Additional CSS classes
+- **theme**: HeadingThemeProps - Per-instance theme overrides
 
 ## Examples
 
@@ -66,8 +67,6 @@ The Heading component renders semantic heading elements (h1-h6) with consistent 
 \`\`\`svelte
 <Heading weight="light">Light Heading</Heading>
 <Heading weight="normal">Normal Heading</Heading>
-<Heading weight="medium">Medium Heading</Heading>
-<Heading weight="semibold">Semibold Heading</Heading>
 <Heading weight="bold">Bold Heading</Heading>
 \`\`\`
 
@@ -160,11 +159,11 @@ The Heading component uses a theme object that can be customized using the \`the
 ### Theme Structure
 
 The theme object contains the following parts:
-- **heading**: Main heading element styles
+- **root**: Main heading element styles
 
 ### Available Variants
 
-**heading**:
+**root**:
 - base: Base classes applied to all headings
 - Variants:
   - size: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' - Text size based on heading level
@@ -173,6 +172,7 @@ The theme object contains the following parts:
   - balanced: boolean - Text balancing (text-wrap: balance)
   - underline: boolean - Underline decoration
   - muted: boolean - Reduced opacity for secondary headings
+  - trim: 'none' | 'start' | 'end' | 'both' - Cap/baseline text trimming
 
 ### Usage Examples
 
@@ -181,8 +181,8 @@ The theme object contains the following parts:
 <Heading 
   size="h1"
   theme={{
-    heading: {
-      base: 'gradient-text bg-clip-text',
+    root: {
+      base: 'bg-clip-text',
       size: {
         h1: 'text-5xl font-extrabold'
       }
@@ -197,8 +197,9 @@ The theme object contains the following parts:
 \`\`\`svelte
 <Heading 
   size="h2"
+  weight="bold"
   theme={{
-    heading: {
+    root: {
       size: {
         h2: 'text-4xl'
       },
@@ -218,7 +219,7 @@ The theme object contains the following parts:
   import { setHeadingTheme } from 'svelai/heading';
   
   setHeadingTheme({
-    heading: {
+    root: {
       base: 'tracking-tight',
       size: {
         h1: 'text-5xl',

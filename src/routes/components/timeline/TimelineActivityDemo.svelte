@@ -51,12 +51,12 @@
 	];
 </script>
 
-<div class="w-full max-w-3xl rounded-2xl bg-surface p-4 sm:p-7">
-	<Timeline items={activities} density="large" aria-label="Repository activity">
+<div class="bg-surface w-full max-w-3xl rounded-2xl p-4 sm:p-7">
+	<Timeline items={activities} density="comfortable" aria-label="Repository activity">
 		{#snippet item({ item, defaultContent })}
 			<div class="space-y-2" class:opacity-70={item.state === 'active'}>
 				{@render defaultContent()}
-				<p class="text-xs text-neutral/55 tabular-nums">{item.relativeTime}</p>
+				<p class="text-neutral/65 text-xs tabular-nums">{item.relativeTime}</p>
 			</div>
 		{/snippet}
 
@@ -66,7 +66,7 @@
 			{:else if item.activityIcon}
 				<span
 					data-color={color}
-					class="relative z-10 grid size-7 shrink-0 place-items-center rounded-full bg-color-muted text-color-muted-readable shadow-[0_0_0_3px_var(--color-surface)] [&>svg]:size-4"
+					class="bg-color-muted text-color-muted-readable relative z-10 grid size-7 shrink-0 place-items-center rounded-full shadow-[0_0_0_3px_var(--color-surface)] [&>svg]:size-4"
 				>
 					{@render item.activityIcon()}
 				</span>

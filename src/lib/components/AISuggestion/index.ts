@@ -1,10 +1,7 @@
-export { default as Suggestion } from './Suggestion.svelte';
-export { default as Suggestions } from './Suggestions.svelte';
-export type {
-	SuggestionProps,
-	SuggestionRenderPayload,
-	SuggestionsProps
-} from './aiSuggestion.props.js';
+export { default as AISuggestion } from './AISuggestion.svelte';
+export { default as AISuggestions } from './AISuggestions.svelte';
+export type { AISuggestionProps, AISuggestionRenderPayload } from './aiSuggestion.props.js';
+export type { AISuggestionsProps } from './aiSuggestions.props.js';
 export {
 	aiSuggestionTheme,
 	setAISuggestionTheme,

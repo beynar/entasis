@@ -41,7 +41,7 @@ import { Dialog } from 'svelai/dialog';`;
 
 	setButtonTheme({
 		root: { base: 'rounded-full' },
-		prefix: { base: 'text-primary' }
+		prefix: { base: 'text-primary-readable' }
 	});
 	</` +
 		`script>
@@ -61,7 +61,13 @@ bind:open`;
 
 	const eventCode = `onOpenChange={(open) => ...}
 onValueChange={(value) => ...}
+
+// Picking one item is an event: onSelect receives the picked item or value.
 onSelect={(value) => ...}
+
+// A selection model is state: onSelectionChange receives the new selection and
+// always comes with a controlled selection prop and its default.
+onSelectionChange={(selection) => ...}
 
 // Native DOM handlers use Svelte 5 lowercase attributes.
 onclick={(event) => ...}
@@ -76,7 +82,7 @@ onscroll={(event) => ...}`;
 <article class="text-neutral mx-auto grid max-w-3xl gap-4 pb-20">
 	<header class="grid gap-2">
 		<h1 class="text-3xl font-semibold">Conventions</h1>
-		<p class="text-neutral/60 text-balance">
+		<p class="text-neutral/70 text-balance">
 			This is the public API contract. When writing code, examples, or generated output, copy these
 			shapes first.
 		</p>
@@ -84,7 +90,7 @@ onscroll={(event) => ...}`;
 
 	<Separator class="my-2" children="Imports" />
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		Package paths use kebab-case. Exported component names use PascalCase.
 	</p>
 
@@ -92,12 +98,12 @@ onscroll={(event) => ...}`;
 
 	<Separator class="my-2" children="Props and bindings" />
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		Public props use the shortest platform-shaped name that is still precise. Bindings use the same
 		name as the prop.
 	</p>
 
-	<ul class="text-neutral/60 grid gap-2 text-sm">
+	<ul class="text-neutral/70 grid gap-2 text-sm">
 		<li>Overlay state: {@render ic('open')} and {@render ic('bind:open')}.</li>
 		<li>
 			Editable and selected state: {@render ic('value')}, {@render ic('defaultValue')}, {@render ic(
@@ -115,7 +121,7 @@ onscroll={(event) => ...}`;
 
 	<Separator class="my-2" children="Collections" />
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		The top-level prop for a repeated rendered collection is {@render ic('items')}. The item type
 		carries the domain meaning: {@render ic('RadioOption')}, {@render ic('TabItem')}, {@render ic(
 			'TableRow'
@@ -129,7 +135,7 @@ onscroll={(event) => ...}`;
 
 	<Separator class="my-2" children="Snippets" />
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		Snippet names describe the public part they fill: {@render ic('prefix')}, {@render ic(
 			'suffix'
 		)}, {@render ic('trigger')}, {@render ic('title')}, {@render ic('description')}, {@render ic(
@@ -142,7 +148,7 @@ onscroll={(event) => ...}`;
 
 	<Separator class="my-2" children="Themes" />
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		Theme keys describe public classable parts. The outermost component part is {@render ic(
 			'root'
 		)}. Nested parts use stable nouns: {@render ic('trigger')}, {@render ic('content')}, {@render ic(
@@ -154,16 +160,26 @@ onscroll={(event) => ...}`;
 
 	<Separator class="my-2" children="Events" />
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		Change callbacks describe semantic state. Native DOM handlers use lowercase Svelte 5 attributes
 		and receive the real event object. Domain actions keep explicit verb names.
+	</p>
+
+	<p class="text-neutral/70">
+		Selection has exactly two callback names. {@render ic('onSelect')} is the event of picking one item
+		and receives that item or value. {@render ic('onSelectionChange')} is the state change of a selection
+		model and receives the new selection; it always ships with a controlled {@render ic(
+			'selection'
+		)} prop and its {@render ic('defaultSelection')}, like every other state trio. No component
+		qualifies either name ({@render ic('onSuggestionSelect')}, {@render ic('onSlotSelect')},
+		{@render ic('onMenuSelect')} are not used).
 	</p>
 
 	<Code language="ts" code={eventCode} />
 
 	<Separator class="my-2" children="Canonical names" />
 
-	<p class="text-neutral/60">Use the exact public spellings from the docs and exports.</p>
+	<p class="text-neutral/70">Use the exact public spellings from the docs and exports.</p>
 
 	<Code language="txt" code={namesCode} />
 </article>

@@ -6,8 +6,8 @@
 	let period = $state<'month' | 'quarter'>('month');
 </script>
 
-<section class="mx-auto grid max-w-6xl items-center gap-xl p-lg md:grid-cols-2 md:p-xl">
-	<div class="flex flex-col items-start gap-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl items-center md:grid-cols-2">
+	<div class="gap-xl flex flex-col items-start">
 		<Chip variant="soft">Keep the useful signals close</Chip><Heading
 			as="h2"
 			size="h2"
@@ -17,7 +17,7 @@
 			Switch the period to see how a few steady weeks add up to a meaningful quarter.
 		</p>
 		<SegmentedControl
-			ariaLabel="Reporting period"
+			label="Reporting period"
 			bind:value={period}
 			items={[
 				{ value: 'month', label: 'This month' },
@@ -25,14 +25,13 @@
 			]}
 		/>
 	</div>
-	<div class="grid gap-md sm:grid-cols-2">
+	<div class="gap-md grid sm:grid-cols-2">
 		<Stat
 			label="Projects completed"
 			value={period === 'month' ? '8' : '24'}
 			trend={period === 'month' ? '+2 from last month' : '+6 from last quarter'}
 			trendDirection="up"
-			variant="soft"
-			color="primary"
+			variant="outline"
 		/><Stat
 			label="Customer conversations"
 			value={period === 'month' ? '32' : '104'}

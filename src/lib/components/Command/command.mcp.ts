@@ -8,8 +8,8 @@ default, or inside a modal Dialog (⌘K style) with \`dialog\`.
 
 \`\`\`svelte
 <script>
-	import Command from '$lib/components/Command/Command.svelte';
-	import { calendarIcon } from '$lib/components/Icons/calendar.js';
+	import { Command } from 'svelai/command';
+	import { calendarIcon } from 'svelai/icons/calendar';
 
 	const items = [
 		{
@@ -41,7 +41,7 @@ default, or inside a modal Dialog (⌘K style) with \`dialog\`.
 		<Button variant="outline" onclick={open}>Search... ⌘K</Button>
 	{/snippet}
 	{#snippet footer({ close })}
-		<div class="border-neutral-muted text-neutral/60 border-t px-3 py-2 text-xs">
+		<div class="border-neutral-muted text-neutral/70 border-t px-3 py-2 text-xs">
 			↵ Select · Esc Close
 		</div>
 	{/snippet}
@@ -56,7 +56,7 @@ default, or inside a modal Dialog (⌘K style) with \`dialog\`.
   - \`CommandItem\`: \`{ value: string; label: string; icon?: Slot; shortcut?: string; keywords?: string[]; disabled?: boolean; href?: string; onSelect?: (value) => void; class?: string }\`
   - Items with \`href\` render as \`<a>\` and navigate on click/Enter.
 - **size**: 'small' | 'normal' | 'large' (default: 'normal') - Typography and spacing scale.
-- **density**: 'small' | 'normal' | 'large' (default: 'normal') - Spacing density forwarded to the option rows (paddings, gaps, min-height).
+- **density**: 'compact' | 'normal' | 'comfortable' (default: 'normal') - Spacing density forwarded to the option rows (paddings, gaps, min-height).
 
 ### Dialog Mode Props
 - **dialog**: boolean (default: false) - Render inside a modal Dialog instead of inline.
@@ -66,10 +66,16 @@ default, or inside a modal Dialog (⌘K style) with \`dialog\`.
 - **shortcut**: string | false (default: false) - ⌘/Ctrl + key toggles the dialog (e.g. 'k').
 - **closeOnSelect**: boolean (default: true) - Close the dialog when an item is selected.
 
+### Selection Props
+- **value**: string | null (bindable, default: null) - Value of the selected command.
+- **defaultValue**: string | null (default: null) - Initial selected value when value is omitted.
+- **onValueChange**: (value: string | null) => void - Fires once when the selected value changes.
+  Selecting the same command again is silent; use onSelect for every activation.
+
 ### Search / Filtering Props
-- **value**: string (bindable, default: '') - Search query.
-- **defaultValue**: string (default: '') - Initial query when value is omitted.
-- **onValueChange**: (value: string) => void - Fires once when the query changes.
+- **search**: string (bindable, default: '') - Search query.
+- **defaultSearch**: string (default: '') - Initial query when search is omitted.
+- **onSearchChange**: (search: string) => void - Fires once when the query changes.
 - **placeholder**: string (default: 'Type a command or search...')
 - **showInput**: boolean (default: true) - Render the search input row.
 - **shouldFilter**: boolean (default: true) - Filter internally; set false to filter externally.
@@ -77,7 +83,10 @@ default, or inside a modal Dialog (⌘K style) with \`dialog\`.
   substring match on label + keywords + value).
 
 ### Event Props
-- **onSelect**: (value: string) => void - Fires for any selected item (after the item's own onSelect).
+- **onSelect**: (value: string) => void - Activation callback: fires for every selected item (after the item's own onSelect), including a repeat selection of the already-selected command.
+- Callback-naming decision: Command owns a selected-value state, so the state change keeps the
+  \`value\`/\`defaultValue\`/\`onValueChange\` trio and \`onSelect\` stays the pick event — the
+  \`onSelect\` name is reserved for "the user picked this item", never for a value change.
 - **onHighlightChange**: (value: string | undefined) => void - Fires when the highlighted option moves.
 
 ### Content Props (Slots)
@@ -110,4 +119,11 @@ default, or inside a modal Dialog (⌘K style) with \`dialog\`.
 - Filtering happens per group; groups with no matching items are hidden and separators stay contiguous.
 - Dialog mode reuses the Dialog component (modal type) with padding stripped and its close button hidden.
 - Disabled items render dimmed and are skipped by keyboard navigation.
+
+## Motion
+
+- In \`dialog\` mode the palette rides the Dialog's **motion** slot: \`commandDialogTheme.motion\`
+  drops it in from just above its resting place on \`duration: 'fast'\`.
+- Retune it with \`<Theme components={{ dialog: { motion } }}>\` or \`setDialogTheme({ motion })\`;
+  reduced motion collapses it to 0.
 `;

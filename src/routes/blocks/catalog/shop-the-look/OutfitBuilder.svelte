@@ -25,30 +25,32 @@
 	);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Shop the look</p>
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Shop the look
+		</p>
 		<Heading size="h2" weight="bold">Ready for the everyday.</Heading>
-		<p class="max-w-2xl text-neutral/65">
+		<p class="text-neutral/65 max-w-2xl">
 			Three easy pieces, thoughtfully put together. Make the combination your own.
 		</p>
 	</header>
-	<div class="grid gap-xl md:grid-cols-[1.2fr_1fr]">
-		<div class="grid grid-cols-2 gap-lg rounded-lg bg-primary-muted p-xl">
+	<div class="gap-xl grid md:grid-cols-[1.2fr_1fr]">
+		<div class="gap-lg bg-primary-muted p-xl grid grid-cols-2 rounded-lg">
 			<div class="col-span-2">{@render productArt('shirt', 'Olive')}</div>
 			<div>{@render productArt('bag', 'Sand')}</div>
 			<div>{@render productArt('cup', 'Chalk')}</div>
 		</div>
-		<div class="flex flex-col gap-xl">
+		<div class="gap-xl flex flex-col">
 			{#each outfit as piece (piece.id)}<div
-					class="flex flex-col gap-lg border-b border-neutral/15 pb-xl"
+					class="gap-lg border-neutral/15 pb-xl flex flex-col border-b"
 				>
-					<div class="flex gap-lg justify-between">
+					<div class="gap-lg flex justify-between">
 						<Checkbox
 							label={piece.name}
 							value={selected.includes(piece.id)}
@@ -62,7 +64,7 @@
 							label="T-shirt size"
 							bind:value={size}
 							items={['S', 'M', 'L', 'XL'].map((value) => ({ value, label: value }))}
-						/>{:else}<p class="text-sm text-neutral/55">{piece.description}</p>{/if}
+						/>{:else}<p class="text-neutral/65 text-sm">{piece.description}</p>{/if}
 				</div>{/each}
 			<div class="flex justify-between text-xl font-semibold">
 				<span>Your look</span><span>{money(total)}</span>
@@ -74,7 +76,7 @@
 					(added = `${selected.length} pieces${selected.includes('tee') ? ' · Tee size ' + size : ''}`)}
 				>Add selected pieces</Button
 			>
-			<p class="text-sm text-success" aria-live="polite">
+			<p class="text-success text-sm" aria-live="polite">
 				{added ? `${added} added to sample bag.` : ''}
 			</p>
 		</div>

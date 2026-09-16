@@ -41,7 +41,7 @@ export type DiffProps = WithAttachments<
 			diffIndicators?: DiffOptionProps['diffIndicators'];
 
 			/** Escape hatch: full `FileDiffOptions` forwarded to each `@pierre/diffs` `FileDiff`. */
-			options?: FileDiffOptions<undefined>;
+			options?: FileDiffOptions<undefined, undefined>;
 
 			/** Diff-side line annotations passed to the renderer. */
 			lineAnnotations?: DiffLineAnnotation<undefined>[];
@@ -49,9 +49,11 @@ export type DiffProps = WithAttachments<
 			renderAnnotationClass?: string;
 
 			/** Controlled selected line range. Bindable; use `null` to clear the selection. */
-			selectedLines?: SelectedLineRange | null;
-			/** Called when the diff reports a selected line range change. */
-			onSelectedLinesChange?: (selectedLines: SelectedLineRange | null) => void;
+			selection?: SelectedLineRange | null;
+			/** Initial selected line range when `selection` is omitted. */
+			defaultSelection?: SelectedLineRange | null;
+			/** Called once for each diff-driven change to the selected line range. */
+			onSelectionChange?: (payload: SelectedLineRange | null) => void;
 
 			/** Extra classes for each per-file wrapper. */
 			fileClass?: string;

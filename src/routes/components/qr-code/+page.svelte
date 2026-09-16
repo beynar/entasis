@@ -53,7 +53,7 @@
 	component="QRCode"
 	features={[
 		'Encoded with vendored qrcodegen library',
-		'role=img with configurable ariaLabel',
+		'role=img with configurable label',
 		'SVG, PNG, and JPEG download',
 		'Custom module and finder styles',
 		'Linear and radial gradient fills'

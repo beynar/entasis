@@ -8,7 +8,7 @@ const defaultRoot = cva({ base: 'relative flex min-h-0 min-w-0 flex-1 flex-col' 
 const defaultHeader = cva({ base: 'shrink-0' });
 const defaultBody = cva({ base: 'relative flex min-h-0 min-w-0 flex-1' });
 const defaultViewport = cva({
-	base: 'min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+	base: 'min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
 	variants: {
 		tocSide: {
 			left: 'pl-layout-lg',
@@ -21,9 +21,9 @@ const defaultItem = cva({
 	base: 'absolute top-0 left-0 z-0 w-full has-[[data-actions-visibility=always]]:z-10 hover:!z-20 focus-within:!z-20',
 	variants: {
 		density: {
-			small: 'px-lg py-micro',
+			compact: 'px-lg py-micro',
 			normal: 'px-xl py-md',
-			large: 'px-layout-sm py-lg'
+			comfortable: 'px-layout-sm py-lg'
 		}
 	},
 	defaultVariants: { density: 'normal' }

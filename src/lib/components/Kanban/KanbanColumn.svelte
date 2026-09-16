@@ -1,11 +1,11 @@
 <script lang="ts" generics="C extends KanbanCard">
 	import { useDndList } from '$lib/utils/useDndList.svelte.js';
 	import { dotsSixVerticalIcon } from '../Icons/dotsSixVertical.js';
+	import Slot from '../Slot/Slot.svelte';
 	import { flip } from 'svelte/animate';
-	import type { Snippet } from 'svelte';
 	import type { Density } from '$lib/types/theme.js';
 	import type { useKanbanTheme } from './kanban.theme.js';
-	import type { KanbanCard, KanbanColumnData } from './kanban.props.js';
+	import type { KanbanCard, KanbanColumnData, KanbanProps } from './kanban.props.js';
 
 	let {
 		column,
@@ -43,11 +43,11 @@
 		columnHeight?: string;
 		indicator: boolean;
 		disabled: boolean;
-		canDrag?: (detail: { card: C; column: KanbanColumnData<C> }) => boolean;
+		canDrag?: (payload: { card: C; column: KanbanColumnData<C> }) => boolean;
 		cardHandle: boolean;
 		density: Density;
 		flipParams: { duration: number; easing: (t: number) => number };
-		accepts?: (detail: { card: C; from: KanbanColumnData<C>; to: KanbanColumnData<C> }) => boolean;
+		accepts?: (payload: { card: C; from: KanbanColumnData<C>; to: KanbanColumnData<C> }) => boolean;
 		getColumn: (id: string) => KanbanColumnData<C> | undefined;
 		updateCards: (columnId: string, cards: C[]) => void;
 		applyReorder: (
@@ -55,39 +55,18 @@
 			cards: C[],
 			detail: { item: C; from: number; to: number }
 		) => void;
-		applyTransfer: (detail: {
+		applyTransfer: (payload: {
 			card: C;
 			from: { columnId: string; index: number };
 			to: { columnId: string; index: number };
 		}) => void;
-		onCardDragStart?: (detail: { card: C; column: KanbanColumnData<C>; index: number }) => void;
-		onCardDragEnd?: (detail: { card: C; dropped: boolean }) => void;
-		card?: Snippet<
-			[
-				{
-					card: C;
-					column: KanbanColumnData<C>;
-					index: number;
-					columnIndex: number;
-					isDragging: boolean;
-					handle: Snippet;
-				}
-			]
-		>;
-		columnHeader?: Snippet<[{ column: KanbanColumnData<C>; index: number }]>;
-		columnFooter?: Snippet<[{ column: KanbanColumnData<C>; index: number }]>;
-		columnContent?: Snippet<
-			[
-				{
-					column: KanbanColumnData<C>;
-					index: number;
-					header: Snippet;
-					items: Snippet;
-					footer: Snippet;
-				}
-			]
-		>;
-		empty?: Snippet<[{ column: KanbanColumnData<C> }]>;
+		onCardDragStart?: (payload: { card: C; column: KanbanColumnData<C>; index: number }) => void;
+		onCardDragEnd?: (payload: { card: C; dropped: boolean }) => void;
+		card?: KanbanProps<C>['card'];
+		columnHeader?: KanbanProps<C>['columnHeader'];
+		columnFooter?: KanbanProps<C>['columnFooter'];
+		columnContent?: KanbanProps<C>['column'];
+		empty?: KanbanProps<C>['empty'];
 	} = $props();
 
 	// The column id is stable for the lifetime of this instance (the parent
@@ -166,7 +145,7 @@
 			data-dnd-handle={sortableColumns ? '' : undefined}
 		>
 			{#if columnHeader}
-				{@render columnHeader({ column, index })}
+				<Slot render={columnHeader} payload={{ column, index }} />
 			{:else}
 				{#if column.color}
 					<span class={classes.columnDot()} aria-hidden="true"></span>
@@ -204,14 +183,17 @@
 					{@attach dnd.item(item)}
 				>
 					{#if card}
-						{@render card({
-							card: item,
-							column,
-							index: cardIndex,
-							columnIndex: index,
-							isDragging: item.id === draggingId,
-							handle: cardGrip
-						})}
+						<Slot
+							render={card}
+							payload={{
+								card: item,
+								column,
+								index: cardIndex,
+								columnIndex: index,
+								isDragging: item.id === draggingId,
+								handle: cardGrip
+							}}
+						/>
 					{:else}
 						<div class={classes.card({ density, handle: cardHandle })}>
 							{#if cardHandle}
@@ -233,23 +215,19 @@
 				</div>
 			{/each}
 			{#if empty && renderedCards.length === 0}
-				<div class={classes.empty()}>
-					{@render empty({ column })}
-				</div>
+				<Slot render={empty} payload={{ column }} class={classes.empty()} />
 			{/if}
 		</div>
 	{/snippet}
 
 	{#snippet footer()}
 		{#if columnFooter}
-			<div class={classes.footer({ density })}>
-				{@render columnFooter({ column, index })}
-			</div>
+			<Slot render={columnFooter} payload={{ column, index }} class={classes.footer({ density })} />
 		{/if}
 	{/snippet}
 
 	{#if columnContent}
-		{@render columnContent({ column, index, header, items, footer })}
+		<Slot render={columnContent} payload={{ column, index, header, items, footer }} />
 	{:else}
 		{@render header()}
 		{@render items()}

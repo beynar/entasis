@@ -7,4 +7,3 @@ export {
 	type DialogTheme,
 	type DialogThemeProps
 } from './dialog.theme.js';
-

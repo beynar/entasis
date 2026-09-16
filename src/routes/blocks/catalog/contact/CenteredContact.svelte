@@ -7,7 +7,7 @@
 	let draft = $state('');
 </script>
 
-<section class="mx-auto flex max-w-2xl flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto flex max-w-2xl flex-col">
 	<div class="text-center">
 		<Chip variant="outline">Say hello</Chip><Heading as="h2" size="h2" weight="bold" class="mt-xl"
 			>What are you working on?</Heading
@@ -32,8 +32,8 @@
 					{ children: 'Review message', fullWidth: true, onAction: (form) => form.submit() }
 				]}
 			/>
-			<p class="text-xs text-neutral/60">This example prepares a draft; no message is sent.</p>
-			{#if draft}<div class="rounded-lg bg-primary-muted p-lg" role="status">
+			<p class="text-neutral/70 text-xs">This example prepares a draft; no message is sent.</p>
+			{#if draft}<div class="bg-primary-muted p-lg rounded-lg" role="status">
 					<strong>Message draft</strong>
 					<p class="mt-sm whitespace-pre-wrap">{draft}</p>
 				</div>{/if}</Stack

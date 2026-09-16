@@ -57,12 +57,12 @@
 	function getAutoLaneSlots(
 		monthHeight: number,
 		weekCount: number,
-		density: 'small' | 'normal' | 'large'
+		density: 'compact' | 'normal' | 'comfortable'
 	): number {
 		if (monthHeight <= 0 || weekCount <= 0) return 3;
-		const headerHeight = density === 'small' ? 24 : density === 'large' ? 36 : 30;
-		const itemHeight = density === 'small' ? 20 : density === 'large' ? 28 : 24;
-		const dayChrome = density === 'small' ? 30 : density === 'large' ? 42 : 36;
+		const headerHeight = density === 'compact' ? 24 : density === 'comfortable' ? 36 : 30;
+		const itemHeight = density === 'compact' ? 20 : density === 'comfortable' ? 28 : 24;
+		const dayChrome = density === 'compact' ? 30 : density === 'comfortable' ? 42 : 36;
 		const rowHeight = (monthHeight - headerHeight) / weekCount;
 		return Math.max(1, Math.floor((rowHeight - dayChrome) / itemHeight));
 	}

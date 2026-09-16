@@ -20,6 +20,7 @@ import {
 	type AIConversationToolUpdate,
 	type AIConversationToolUpdateChange
 } from './AIConversationToolLifecycle.js';
+import { en, type Messages } from '$lib/i18n/en.js';
 
 export const AI_CONVERSATION_CONTEXT_KEY = 'ai-conversation';
 
@@ -49,13 +50,13 @@ export type AIConversationMessageTarget<TMessage extends AIThreadItem = AIThread
 	| { where: (message: TMessage, index: number) => boolean };
 export type AIConversationMessageUpdate<TMessage extends AIThreadItem = AIThreadItem> =
 	TMessage | ((message: TMessage, index: number) => TMessage);
-export type AIConversationSubmitDetail<TMessage extends AIThreadItem = AIThreadItem> = {
+export type AIConversationSubmitOptions<TMessage extends AIThreadItem = AIThreadItem> = {
 	message: TMessage;
 	value?: string;
 	event?: AIComposerSubmitEvent;
 	meta?: AIComposerSubmitMeta;
 };
-export type AIConversationRetryDetail<TMessage extends AIThreadItem = AIThreadItem> = {
+export type AIConversationRetryOptions<TMessage extends AIThreadItem = AIThreadItem> = {
 	target?: AIConversationMessageTarget<TMessage>;
 	message?: TMessage;
 };
@@ -71,21 +72,22 @@ export type AIConversationValueChangePayload<
 }>;
 
 /** Derived status transition reported by `onStatusChange`. */
-export type AIConversationStatusChangePayload<
-	TMessage extends AIThreadItem = AIThreadItem
-> = Readonly<{
-	status: AIConversationStatus;
-	previousStatus: AIConversationStatus;
-	conversation: AIConversationState<TMessage>;
-}>;
+export type AIConversationStatusChangePayload<TMessage extends AIThreadItem = AIThreadItem> =
+	Readonly<{
+		status: AIConversationStatus;
+		previousStatus: AIConversationStatus;
+		conversation: AIConversationState<TMessage>;
+	}>;
 
 /** Submitted message details and their owning conversation. */
-export type AIConversationSubmitPayload<TMessage extends AIThreadItem = AIThreadItem> =
-	Readonly<AIConversationSubmitDetail<TMessage> & { conversation: AIConversationState<TMessage> }>;
+export type AIConversationSubmitPayload<TMessage extends AIThreadItem = AIThreadItem> = Readonly<
+	AIConversationSubmitOptions<TMessage> & { conversation: AIConversationState<TMessage> }
+>;
 
 /** Retry request and its owning conversation. */
-export type AIConversationRetryPayload<TMessage extends AIThreadItem = AIThreadItem> =
-	Readonly<AIConversationRetryDetail<TMessage> & { conversation: AIConversationState<TMessage> }>;
+export type AIConversationRetryPayload<TMessage extends AIThreadItem = AIThreadItem> = Readonly<
+	AIConversationRetryOptions<TMessage> & { conversation: AIConversationState<TMessage> }
+>;
 
 /** Conversation error and the state that owns it. */
 export type AIConversationErrorPayload<TMessage extends AIThreadItem = AIThreadItem> = Readonly<{
@@ -101,30 +103,27 @@ export type AIConversationMessagePayload<TMessage extends AIThreadItem = AIThrea
 }>;
 
 /** Message replacement with its previous value and index. */
-export type AIConversationMessageUpdatePayload<
-	TMessage extends AIThreadItem = AIThreadItem
-> = Readonly<{
-	message: TMessage;
-	previousMessage: TMessage;
-	index: number;
-	conversation: AIConversationState<TMessage>;
-}>;
+export type AIConversationMessageUpdatePayload<TMessage extends AIThreadItem = AIThreadItem> =
+	Readonly<{
+		message: TMessage;
+		previousMessage: TMessage;
+		index: number;
+		conversation: AIConversationState<TMessage>;
+	}>;
 
 /** Queued message action and its owning conversation. */
-export type AIConversationQueuedMessagePayload<
-	TMessage extends AIThreadItem = AIThreadItem
-> = Readonly<{
-	message: TMessage;
-	conversation: AIConversationState<TMessage>;
-}>;
+export type AIConversationQueuedMessagePayload<TMessage extends AIThreadItem = AIThreadItem> =
+	Readonly<{
+		message: TMessage;
+		conversation: AIConversationState<TMessage>;
+	}>;
 
 /** Tool mutation and its owning conversation. */
-export type AIConversationToolUpdatePayload<
-	TMessage extends AIThreadItem = AIThreadItem
-> = Readonly<{
-	change: AIConversationToolUpdateChange<TMessage>;
-	conversation: AIConversationState<TMessage>;
-}>;
+export type AIConversationToolUpdatePayload<TMessage extends AIThreadItem = AIThreadItem> =
+	Readonly<{
+		change: AIConversationToolUpdateChange<TMessage>;
+		conversation: AIConversationState<TMessage>;
+	}>;
 
 /** Ask-user-question transition and its owning conversation. */
 export type AIConversationAskUserQuestionChangePayload<
@@ -146,7 +145,7 @@ export type AIConversationBindableState<TMessage extends AIThreadItem = AIThread
 	suggestions: string[];
 	contextUsage: AIContextUsage | undefined;
 	selectedModel: string | undefined;
-	isStreaming: boolean;
+	streaming: boolean;
 	activeAskUserQuestion: AIThreadAskUserQuestion<TMessage> | null;
 };
 
@@ -156,7 +155,7 @@ export type AIConversationStateEvents<TMessage extends AIThreadItem = AIThreadIt
 	/** Handles a submitted or steered message without imposing a transport. */
 	onSubmit?: (payload: AIConversationSubmitPayload<TMessage>) => void;
 	/** Requests that the active response stop. */
-	onStop?: (state: AIConversationState<TMessage>) => void;
+	onStop?: (payload: AIConversationState<TMessage>) => void;
 	/** Requests regeneration for an optional message target. */
 	onRetry?: (payload: AIConversationRetryPayload<TMessage>) => void;
 	/** Called when the conversation enters an error state. */
@@ -229,7 +228,7 @@ const bindableStateKeys: Array<keyof AIConversationBindableState> = [
 	'suggestions',
 	'contextUsage',
 	'selectedModel',
-	'isStreaming',
+	'streaming',
 	'activeAskUserQuestion'
 ];
 
@@ -247,7 +246,7 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 	declare suggestions: string[];
 	declare contextUsage: AIContextUsage | undefined;
 	declare selectedModel: string | undefined;
-	declare isStreaming: boolean;
+	declare streaming: boolean;
 	declare activeAskUserQuestion: AIThreadAskUserQuestion<TMessage> | null;
 	declare onStatusChange: AIConversationStateEvents<TMessage>['onStatusChange'];
 	declare onSubmit: AIConversationStateEvents<TMessage>['onSubmit'];
@@ -378,7 +377,7 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 	};
 	submitMessage = (
 		message: TMessage,
-		detail: Omit<AIConversationSubmitDetail<TMessage>, 'message'> = {}
+		detail: Omit<AIConversationSubmitOptions<TMessage>, 'message'> = {}
 	) => {
 		this.queueMessage(message);
 		const committed = this.commitQueuedMessage();
@@ -425,15 +424,15 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 		this.clearErrorValue();
 		this.setStreaming(true);
 		this.setStatus('streaming');
-		return this.isStreaming;
+		return this.streaming;
 	};
 	stopStreaming = () => {
 		this.setStreaming(false);
 		this.syncStatus();
-		return this.isStreaming;
+		return this.streaming;
 	};
 	requestStop = () => {
-		if (this.status === 'stopping' || (!this.isStreaming && this.status !== 'streaming'))
+		if (this.status === 'stopping' || (!this.streaming && this.status !== 'streaming'))
 			return this.status;
 		this.setStatus('stopping');
 		this.onStop?.(this);
@@ -530,22 +529,22 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 		return status;
 	}
 	private setStreaming(value: boolean) {
-		const previous = this.isStreaming;
+		const previous = this.streaming;
 		if (previous !== value) {
-			this.isStreaming = value;
+			this.streaming = value;
 			this.onStreamingChange?.({ value, previousValue: previous, conversation: this });
 		}
 		return value;
 	}
 	private syncStatus() {
 		if (this.error !== undefined) return this.setStatus('error');
-		if (this.status === 'stopping' && this.isStreaming) return this.status;
+		if (this.status === 'stopping' && this.streaming) return this.status;
 		return this.setStatus(this.deriveStatus());
 	}
 	private deriveStatus(): AIConversationStatus {
 		if (this.error !== undefined) return 'error';
 		if (this.activeAskUserQuestion) return 'asking-user';
-		if (this.isStreaming) return 'streaming';
+		if (this.streaming) return 'streaming';
 		if (this.queuedMessage) return 'queued';
 		return 'idle';
 	}
@@ -576,11 +575,18 @@ export class AIConversationState<TMessage extends AIThreadItem = AIThreadItem>
 }
 
 export function resolveAIConversationLabels(
-	labels?: AIConversationLabelOverrides
+	labels?: AIConversationLabelOverrides,
+	messages: Messages = en
 ): AIConversationLabels {
 	return {
-		composer: { ...DEFAULT_AI_CONVERSATION_LABELS.composer, ...labels?.composer },
-		modelSelector: { ...DEFAULT_AI_CONVERSATION_LABELS.modelSelector, ...labels?.modelSelector }
+		composer: {
+			placeholder: messages.aiComposerPlaceholder,
+			submitLabel: messages.aiComposerSend,
+			stopLabel: messages.aiComposerStop,
+			attachLabel: messages.aiComposerAttach,
+			...labels?.composer
+		},
+		modelSelector: { placeholder: messages.aiModelSelectorPlaceholder, ...labels?.modelSelector }
 	};
 }
 export function getAIConversation<TMessage extends AIThreadItem = AIThreadItem>() {

@@ -4,7 +4,7 @@
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 	import { PopupMenu, type MenuItem } from '$lib/components/PopupMenu/index.js';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { userIcon } from '$lib/components/Icons/user.js';
 	import { gearIcon } from '$lib/components/Icons/gear.js';
 	import { signOutIcon } from '$lib/components/Icons/signOut.js';
@@ -36,7 +36,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		}
 	]);
 
@@ -210,7 +210,11 @@
 	features={[
 		'Popover + Menu composition',
 		'Bindable open for external control',
-		'Hover or click open, escape dismiss',
+		{ label: 'Hover or click open, escape dismiss', test: 'a11y:popup-menu.escape' },
+		{
+			label: 'Trigger carries aria-haspopup, aria-expanded, aria-controls',
+			test: 'a11y:popup-menu.trigger-aria'
+		},
 		'Mobile-sheet submenus stack automatically',
 		'Closes on item click by default',
 		'Context menu via external ref'
@@ -368,7 +372,7 @@
 					trigger={{ content: 'Hover Me', variant: 'ghost' }}
 					openOnHover={true}
 					openOnClick={false}
-					hoverDelay={200}
+					delay={200}
 					closeOnMouseLeave={true}
 					menu={{ items: settingsItems }}
 				/>
@@ -433,7 +437,7 @@
 			<div
 				role="region"
 				aria-label="Context menu demo area"
-				class="bg-surface-raised rounded-xl border-neutral-muted flex h-48 w-full cursor-context-menu items-center justify-center border"
+				class="bg-surface-raised border-neutral-muted flex h-48 w-full cursor-context-menu items-center justify-center rounded-xl border"
 				oncontextmenu={handleContextMenu}
 			>
 				<p class="text-neutral/70">Right-click anywhere in this area</p>
@@ -534,7 +538,7 @@
 		</ComponentCard>
 
 		<ComponentCard description="Application toolbar with multiple nested popup menus.">
-			<div class="bg-surface rounded-xl border-neutral-muted flex gap-1 border p-1">
+			<div class="bg-surface border-neutral-muted flex gap-1 rounded-xl border p-1">
 				<PopupMenu
 					trigger={{ content: 'File', variant: 'ghost', size: 'small' }}
 					position="bottom-start"

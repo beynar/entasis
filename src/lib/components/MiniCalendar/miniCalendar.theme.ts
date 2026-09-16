@@ -21,7 +21,7 @@ const defaultRoot = cva({
 });
 
 const defaultNavButton = cva({
-	base: 'state-layer inline-flex shrink-0 items-center justify-center rounded-lg text-neutral/60 outline-none transition-colors hover:text-neutral focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none',
+	base: 'state-layer inline-flex shrink-0 items-center justify-center rounded-md text-neutral/70 outline-none transition-colors hover:text-neutral focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none',
 	variants: {
 		size: {
 			small: 'size-7',
@@ -55,7 +55,7 @@ const defaultTrack = cva({
 });
 
 const defaultDay = cva({
-	base: 'state-layer relative inline-flex shrink-0 flex-col items-center justify-center rounded-lg leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none',
+	base: 'state-layer relative inline-flex shrink-0 flex-col items-center justify-center rounded-md leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none',
 	variants: {
 		size: {
 			small: 'min-w-11 gap-micro px-md py-xs',
@@ -139,7 +139,7 @@ const defaultDay = cva({
 	],
 	defaultVariants: {
 		size: 'normal',
-		color: 'primary',
+		color: 'neutral',
 		selected: false,
 		today: false,
 		disabled: false
@@ -150,7 +150,7 @@ const defaultDayMonth = cva({
 	base: 'font-medium uppercase tracking-wide opacity-70',
 	variants: {
 		size: {
-			small: 'text-[10px]',
+			small: 'text-xs',
 			normal: 'text-xs',
 			large: 'text-sm'
 		}
@@ -164,9 +164,9 @@ const defaultDayNumber = cva({
 	base: 'font-semibold tabular-nums',
 	variants: {
 		size: {
-			small: 'text-sm',
-			normal: 'text-base',
-			large: 'text-lg'
+			small: 'text-xs',
+			normal: 'text-sm',
+			large: 'text-sm'
 		}
 	},
 	defaultVariants: {

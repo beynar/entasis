@@ -1,3 +1,5 @@
+import { useResizeObserver } from './useResizeObserver.svelte.js';
+
 const defaultRect = {
 	top: 0,
 	bottom: 0,
@@ -15,20 +17,23 @@ export const useBoundingClientRect = () => {
 			return defaultRect;
 		}
 	});
+	const resize = useResizeObserver({
+		isActive: () => true,
+		// `contentRect` is relative to the element's own padding box, so re-read the
+		// viewport-relative rect from the observed node instead.
+		callback: (entry) => {
+			rect = entry.target.getBoundingClientRect();
+		}
+	});
 
 	return {
 		get current() {
 			return rect;
 		},
 		reference: (ref: HTMLElement) => {
-			const resizeObserver = new ResizeObserver(() => {
-				rect = ref.getBoundingClientRect();
-			});
-			resizeObserver.observe(ref);
+			const cleanup = resize.reference(ref);
 			rect = ref.getBoundingClientRect();
-			return () => {
-				resizeObserver.disconnect();
-			};
+			return cleanup;
 		}
 	};
 };

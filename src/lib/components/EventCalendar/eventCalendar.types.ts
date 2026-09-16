@@ -255,7 +255,7 @@ export type EventCalendarOverlapPredicate<TItemFields extends object = Record<ne
 ) => boolean;
 
 export type EventCalendarRecurrenceExpander<TItemFields extends object = Record<never, never>> =
-	(info: {
+	(payload: {
 		item: EventCalendarItem<TItemFields>;
 		range: EventCalendarRange;
 		displayTimeZone: string;

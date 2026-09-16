@@ -58,7 +58,7 @@ export type FormProps<I extends FormInputs> = WithSlot<
 		 */
 		variant?: FormVariant;
 		/**
-		 * Field layout; horizontal places labels to the left from the desktop breakpoint.
+		 * Field layout; horizontal places labels to the left from 32rem of the field's own width.
 		 */
 		layout?: FormLayout;
 		/**

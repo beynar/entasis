@@ -10,7 +10,7 @@
 			variant="trail"
 			color="primary"
 			height={4}
-			trailDuration={650}
+			theme={{ motion: { duration: 650 } }}
 			trailGap={0}
 			class="!absolute !z-10"
 		/>
@@ -21,7 +21,7 @@
 			variant="trail"
 			color="success"
 			height={5}
-			trailDuration={450}
+			theme={{ motion: { duration: 450 } }}
 			trailGap={120}
 			class="!absolute !z-10"
 		/>
@@ -32,7 +32,7 @@
 			variant="trail-bounce"
 			color="info"
 			height={4}
-			trailDuration={700}
+			theme={{ motion: { duration: 700 } }}
 			trailGap={80}
 			class="!absolute !z-10"
 		/>

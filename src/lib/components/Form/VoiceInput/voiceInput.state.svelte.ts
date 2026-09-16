@@ -2,6 +2,7 @@ import { untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 import type { VoiceInputResult } from './voiceInput.props.js';
 import { drawVoiceInputWaveform, resizeVoiceInputCanvas } from './voiceInput.waveform.js';
+import { en, type Messages } from '$lib/i18n/en.js';
 
 export type VoiceInputStatus = 'idle' | 'requesting' | 'recording' | 'stopping' | 'error';
 
@@ -15,8 +16,10 @@ type VoiceInputStateOptions = {
 	setValue: (value: Blob | null) => void;
 	setDuration: (duration: number) => void;
 	onStart?: () => void;
-	onStop?: (result: VoiceInputResult) => void;
+	onStop?: (payload: VoiceInputResult) => void;
 	onError?: (error: Error) => void;
+	/** Active i18n catalog, used for the user-facing recorder error messages. */
+	getMessages?: () => Messages;
 };
 
 type WindowWithWebkitAudioContext = Window &
@@ -39,6 +42,10 @@ export class VoiceInputState {
 	playbackCurrentTime = $state(0);
 	playbackDuration = $state(0);
 	samples = $state<number[]>([]);
+
+	private get messages() {
+		return this.options.getMessages?.() ?? en;
+	}
 
 	private ownerWindow: WindowWithWebkitAudioContext | null = null;
 	private recorder: MediaRecorder | null = null;
@@ -151,15 +158,15 @@ export class VoiceInputState {
 		const ownerWindow = this.ownerWindow;
 		const AudioContextConstructor = ownerWindow?.AudioContext ?? ownerWindow?.webkitAudioContext;
 		if (!ownerWindow?.navigator.mediaDevices?.getUserMedia) {
-			this.fail(new Error('Microphone access requires a secure context and a supported browser.'));
+			this.fail(new Error(this.messages.voiceInputErrorUnsupportedContext));
 			return;
 		}
 		if (!ownerWindow.MediaRecorder) {
-			this.fail(new Error('Audio recording is not supported by this browser.'));
+			this.fail(new Error(this.messages.voiceInputErrorUnsupportedRecorder));
 			return;
 		}
 		if (!AudioContextConstructor) {
-			this.fail(new Error('Live microphone visualization requires Web Audio API.'));
+			this.fail(new Error(this.messages.voiceInputErrorUnsupportedAudio));
 			return;
 		}
 
@@ -209,7 +216,7 @@ export class VoiceInputState {
 			this.options.onStart?.();
 		} catch (cause) {
 			if (requestVersion !== this.requestVersion) return;
-			this.fail(toVoiceInputError(cause));
+			this.fail(toVoiceInputError(cause, this.messages));
 		}
 	};
 
@@ -217,7 +224,7 @@ export class VoiceInputState {
 		if (!this.isRecording) return;
 		const recorder = this.recorder;
 		if (!recorder || recorder.state === 'inactive') {
-			this.fail(new Error('The microphone recorder stopped unexpectedly.'));
+			this.fail(new Error(this.messages.voiceInputErrorStopped));
 			return;
 		}
 
@@ -451,7 +458,7 @@ export class VoiceInputState {
 		if (this.playbackFailed) return;
 		this.playbackFailed = true;
 		this.isPlaying = false;
-		const error = cause instanceof Error ? cause : new Error('The recording could not be played.');
+		const error = cause instanceof Error ? cause : new Error(this.messages.voiceInputErrorPlayback);
 		this.errorMessage = error.message;
 		this.status = 'error';
 		this.options.onError?.(error);
@@ -514,7 +521,7 @@ export class VoiceInputState {
 
 	private handleRecorderError = (event: Event) => {
 		const cause = event instanceof ErrorEvent ? event.error : undefined;
-		this.fail(cause instanceof Error ? cause : new Error('Audio recording failed.'));
+		this.fail(cause instanceof Error ? cause : new Error(this.messages.voiceInputErrorFailed));
 	};
 
 	private fail(error: Error) {
@@ -564,19 +571,19 @@ function stopStream(stream: MediaStream | null) {
 	stream?.getTracks().forEach((track) => track.stop());
 }
 
-function toVoiceInputError(cause: unknown) {
+function toVoiceInputError(cause: unknown, messages: Messages) {
 	if (!(cause instanceof DOMException)) {
-		return cause instanceof Error ? cause : new Error('Could not start microphone recording.');
+		return cause instanceof Error ? cause : new Error(messages.voiceInputErrorStart);
 	}
 
 	if (cause.name === 'NotAllowedError' || cause.name === 'SecurityError') {
-		return new Error('Microphone access was denied.');
+		return new Error(messages.voiceInputErrorDenied);
 	}
-	if (cause.name === 'NotFoundError') return new Error('No microphone was found.');
+	if (cause.name === 'NotFoundError') return new Error(messages.voiceInputErrorNotFound);
 	if (cause.name === 'NotReadableError') {
-		return new Error('The microphone is already in use or unavailable.');
+		return new Error(messages.voiceInputErrorUnavailable);
 	}
-	return new Error(cause.message || 'Could not start microphone recording.');
+	return new Error(cause.message || messages.voiceInputErrorStart);
 }
 
 function clamp(value: number, min: number, max: number) {

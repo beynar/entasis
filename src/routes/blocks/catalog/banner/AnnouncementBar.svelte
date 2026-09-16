@@ -8,9 +8,9 @@
 
 <div class="p-lg">
 	{#if visible}<div
-			class="flex flex-wrap items-center justify-between gap-md rounded-lg bg-primary-muted p-lg"
+			class="gap-md bg-primary-muted p-lg flex flex-wrap items-center justify-between rounded-lg"
 		>
-			<div class="flex flex-wrap items-center gap-md">
+			<div class="gap-md flex flex-wrap items-center">
 				<Chip color="primary" variant="solid" size="small">New release</Chip>
 				<p>Meet the next generation of our component library.</p>
 				<Button href="/components" variant="link" suffix={arrowRightIcon}>See what is new</Button>

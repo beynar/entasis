@@ -1,6 +1,7 @@
 # Component Refactoring Prompt: Standardize Component Structure
 
 ## Objective
+
 Refactor all non-Form components to follow the same standardized file structure pattern that was applied to Form components. Each component should have separate files for props, theme, and a unified index.ts export file.
 
 ## Standard Component Structure Pattern
@@ -20,23 +21,26 @@ ComponentName/
 ## Required File Contents
 
 ### 1. `componentName.props.ts`
+
 - Extract all prop types from the component's main types file
 - Should export the main component props type (e.g., `ButtonProps`, `AvatarProps`)
 - Import any dependencies needed for the props (e.g., `WithSlot`, `Colors`, etc.)
 - Import theme types from `componentName.theme.ts` if theme is part of props
 
 **Example structure:**
+
 ```typescript
 import type { SomeDependency } from '../somewhere.js';
 import type { ComponentThemeProps } from './componentName.theme.js';
 
 export type ComponentProps = {
-  // ... props definition
-  theme?: ComponentThemeProps;
+	// ... props definition
+	theme?: ComponentThemeProps;
 };
 ```
 
 ### 2. `componentName.theme.ts`
+
 - Extract all theme-related code (CVA definitions, theme object, theme functions)
 - Should export:
   - Theme object (e.g., `componentTheme`)
@@ -46,6 +50,7 @@ export type ComponentProps = {
   - `useComponentTheme` hook (`useComponentTheme`)
 
 **Example structure:**
+
 ```typescript
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva.js';
@@ -67,55 +72,61 @@ export const useComponentTheme = useComponentTheme('component', componentTheme);
 ```
 
 ### 3. `index.ts`
+
 - Export the component as default: `export { default as ComponentName } from './ComponentName.svelte';`
 - Export props types: `export type { ComponentProps } from './componentName.props.js';`
 - Export theme functions and types: `export { componentTheme, setComponentTheme, useComponentTheme, type ComponentTheme, type ComponentThemeProps } from './componentName.theme.js';`
 - Export any other public types/utilities if needed
 
 **Example structure:**
+
 ```typescript
 export { default as ComponentName } from './ComponentName.svelte';
 export type { ComponentProps } from './componentName.props.js';
 export {
-  componentTheme,
-  setComponentTheme,
-  useComponentTheme,
-  type ComponentTheme,
-  type ComponentThemeProps
+	componentTheme,
+	setComponentTheme,
+	useComponentTheme,
+	type ComponentTheme,
+	type ComponentThemeProps
 } from './componentName.theme.js';
 ```
 
 ### 4. Component `.svelte` file
+
 - Remove any `<script lang="ts" module>` blocks that export theme functions
 - Import theme functions from `./componentName.theme.js` instead
 - Import props types from `./componentName.props.js` instead of the main types file
 - Update all imports to use the new separate files
 
 **Before:**
+
 ```svelte
 <script lang="ts" module>
-  import { setComponentTheme, useComponentTheme } from '$lib/utils/cva.js';
-  import { componentTheme } from './component.ts';
-  export const setComponentTheme = setComponentTheme<typeof componentTheme>('component');
-  export const useComponentTheme = useComponentTheme('component', componentTheme);
+	import { setComponentTheme, useComponentTheme } from '$lib/utils/cva.js';
+	import { componentTheme } from './component.ts';
+	export const setComponentTheme = setComponentTheme<typeof componentTheme>('component');
+	export const useComponentTheme = useComponentTheme('component', componentTheme);
 </script>
 
 <script lang="ts">
-  import type { ComponentProps } from './component.ts';
-  // ...
+	import type { ComponentProps } from './component.ts';
+	// ...
 </script>
 ```
 
 **After:**
+
 ```svelte
 <script lang="ts">
-  import type { ComponentProps } from './componentName.props.js';
-  import { useComponentTheme } from './componentName.theme.js';
-  // ...
+	import type { ComponentProps } from './componentName.props.js';
+	import { useComponentTheme } from './componentName.theme.js';
+	// ...
 </script>
 ```
 
 ### 5. Original types file (e.g., `component.ts` or `componentName.ts`)
+
 - Keep only shared types that are used by OTHER components
 - Remove props types (moved to `componentName.props.ts`)
 - Remove theme code (moved to `componentName.theme.ts`)
@@ -126,7 +137,13 @@ export {
   ```typescript
   // Re-export for backwards compatibility
   export type { ComponentProps } from './componentName.props.js';
-  export { componentTheme, setComponentTheme, useComponentTheme, type ComponentTheme, type ComponentThemeProps } from './componentName.theme.js';
+  export {
+  	componentTheme,
+  	setComponentTheme,
+  	useComponentTheme,
+  	type ComponentTheme,
+  	type ComponentThemeProps
+  } from './componentName.theme.js';
   ```
 
 ## Components to Refactor
@@ -134,6 +151,7 @@ export {
 Refactor the following components (verify each has the standard structure):
 
 ### Non-Form Components:
+
 - Avatar
 - Badge
 - Button
@@ -156,11 +174,13 @@ Refactor the following components (verify each has the standard structure):
 - Toast
 
 ### Field Component (if it should be exported):
+
 - Field (currently internal, verify if it needs refactoring)
 
 ## Package.json Updates
 
 ### Exports Section
+
 For each component, ensure the export follows this pattern:
 
 ```json
@@ -172,17 +192,21 @@ For each component, ensure the export follows this pattern:
 ```
 
 **Rules:**
+
 - Use kebab-case for export names (e.g., `./button`, `./avatar`, `./dialog`)
 - All paths should point to `index.js` and `index.d.ts` files
 - Remove any old exports pointing directly to `.svelte` files
 
 ### typesVersion Section
+
 Update the `typesVersion` section to:
+
 - Use kebab-case export names
 - Point to `index.d.ts` files instead of `.svelte.d.ts` files
 - Only include components that are actually exported
 
 **Example:**
+
 ```json
 "./button": [
   "./dist/components/Button/index.d.ts"
@@ -241,15 +265,19 @@ Update the `typesVersion` section to:
 ## Special Cases
 
 ### Components with Multiple Exports
+
 Some components like `Calendar` export multiple components (e.g., `CalendarInput` and `CalendarPrimitive`). Keep this pattern but ensure the structure is consistent.
 
 ### Components without Themes
+
 If a component doesn't have a theme file, that's okay. Just ensure:
+
 - `index.ts` exports the component
 - Props are in `componentName.props.ts`
 - Package.json points to `index.js`
 
 ### Components with Complex State
+
 Keep state files separate (e.g., `componentState.svelte.ts`). Don't move them into props or theme files.
 
 ## Verification Checklist
@@ -277,9 +305,9 @@ After refactoring each component, verify:
 ## Expected Outcome
 
 After refactoring:
+
 - All components follow the same file structure
 - Props and themes are cleanly separated
 - Package.json exports are consistent with kebab-case naming
 - All exports point to `index.js` files
 - Code is more maintainable and follows clear separation of concerns
-

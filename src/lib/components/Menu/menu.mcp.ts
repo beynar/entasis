@@ -6,15 +6,17 @@ The Menu component is a flexible container that renders an array of menu items i
 ## Basic Usage
 
 \`\`\`svelte
-<script>
-	import { Menu } from '$lib/components/Menu';
+<script lang="ts">
+	import { Menu, type MenuItem } from 'svelai/menu';
+	import { userIcon } from 'svelai/icons/user';
+	import { gearIcon } from 'svelai/icons/gear';
 	
 	const items = [
 		{ type: 'option', title: 'Profile', prefix: userIcon },
-		{ type: 'option', title: 'Settings', prefix: settingsIcon },
+		{ type: 'option', title: 'Settings', prefix: gearIcon },
 		{ type: 'separator' },
 		{ type: 'button', children: 'Logout', color: 'danger', variant: 'ghost' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <Menu {items} />
@@ -44,7 +46,7 @@ The Menu component is a flexible container that renders an array of menu items i
 
 - **class**: string - Additional CSS classes for the menu container
 
-- **density**: 'small' | 'normal' | 'large' (default: 'normal') - Spacing density: controls the gap between rows and is forwarded to every MenuOption row (option, submenu trigger, back control); a per-item \`density\` wins. Items of type 'button' render a Button, which has no density axis and is unaffected.
+- **density**: 'compact' | 'normal' | 'comfortable' (default: 'normal') - Spacing density: controls the gap between rows and is forwarded to every MenuOption row (option, submenu trigger, back control); a per-item \`density\` wins. Items of type 'button' render a Button, which has no density axis and is unaffected.
 
 - **header**: Snippet - Optional header content rendered at the top of the menu
 
@@ -113,7 +115,7 @@ const submenuItem = {
 		{ type: 'option', title: 'Privacy' }
 	],
 	openOnHover: true,
-	hoverDelay: 100
+	delay: 100
 } satisfies MenuItem;
 \`\`\`
 
@@ -136,13 +138,17 @@ The menu follows this DOM structure:
 
 ### Simple Menu
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+	import { fileIcon } from 'svelai/icons/file';
+	import { folderIcon } from 'svelai/icons/folder';
+
 	const items = [
 		{ type: 'option', title: 'New File', prefix: fileIcon },
 		{ type: 'option', title: 'Open...', prefix: folderIcon },
 		{ type: 'separator' },
 		{ type: 'option', title: 'Exit', color: 'danger' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <Menu {items} />
@@ -150,11 +156,13 @@ The menu follows this DOM structure:
 
 ### Menu with Buttons
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+
 	const items = [
 		{ type: 'button', children: 'Save', variant: 'solid', color: 'primary' },
 		{ type: 'button', children: 'Cancel', variant: 'ghost' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <Menu {items} />
@@ -162,7 +170,12 @@ The menu follows this DOM structure:
 
 ### Menu with Descriptions
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+	import { starIcon } from 'svelai/icons/star';
+	import { checkIcon } from 'svelai/icons/check';
+	import { buildingIcon } from 'svelai/icons/building';
+
 	const items = [
 		{ 
 			type: 'option',
@@ -177,7 +190,7 @@ The menu follows this DOM structure:
 			description: 'For large organizations',
 			prefix: buildingIcon
 		}
-	];
+	] satisfies MenuItem[];
 </script>
 
 <Menu {items} />
@@ -185,7 +198,9 @@ The menu follows this DOM structure:
 
 ### Menu with Event Handlers
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+
 	function handleProfile() {
 		console.log('Profile clicked');
 	}
@@ -198,7 +213,7 @@ The menu follows this DOM structure:
 		{ type: 'option', title: 'Profile', onclick: handleProfile },
 		{ type: 'separator' },
 		{ type: 'button', children: 'Logout', onclick: handleLogout, color: 'danger' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <Menu {items} />
@@ -206,7 +221,9 @@ The menu follows this DOM structure:
 
 ### Custom Theme
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+
 	const customTheme = {
 		root: {
 			base: 'gap-3' // More spacing between items
@@ -221,7 +238,7 @@ The menu follows this DOM structure:
 	const items = [
 		{ type: 'option', title: 'Option 1' },
 		{ type: 'option', title: 'Option 2' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <Menu {items} theme={customTheme} />
@@ -229,13 +246,15 @@ The menu follows this DOM structure:
 
 ### Menu with Links
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+
 	const items = [
 		{ type: 'option', title: 'Dashboard', href: '/dashboard' },
 		{ type: 'option', title: 'Profile', href: '/profile' },
 		{ type: 'separator' },
 		{ type: 'button', children: 'External Link', href: 'https://example.com', target: '_blank' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <Menu {items} />
@@ -243,8 +262,9 @@ The menu follows this DOM structure:
 
 ### Menu with Submenus
 \`\`\`svelte
-<script>
-	import { gearIcon } from '$lib/components/Icons';
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+	import { gearIcon } from 'svelai/icons/gear';
 	
 	const items = [
 		{ type: 'option', title: 'Dashboard' },
@@ -261,7 +281,7 @@ The menu follows this DOM structure:
 		},
 		{ type: 'separator' },
 		{ type: 'option', title: 'Log Out', color: 'danger' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <Menu {items} />
@@ -274,7 +294,9 @@ The menu follows this DOM structure:
 
 ### Nested Submenus
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+
 	const items = [
 		{ type: 'option', title: 'New File' },
 		{
@@ -295,7 +317,7 @@ The menu follows this DOM structure:
 		},
 		{ type: 'separator' },
 		{ type: 'option', title: 'Save' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <Menu {items} />
@@ -303,7 +325,9 @@ The menu follows this DOM structure:
 
 ### Submenu with Custom Trigger Behavior
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+
 	const items = [
 		{ type: 'option', title: 'Option 1' },
 		{
@@ -320,13 +344,13 @@ The menu follows this DOM structure:
 			type: 'submenu',
 			title: 'Hover with Delay',
 			openOnHover: true,
-			hoverDelay: 500,
+			delay: 500,
 			menu: [
 				{ type: 'option', title: 'Sub Option 1' },
 				{ type: 'option', title: 'Sub Option 2' }
 			]
 		}
-	];
+	] satisfies MenuItem[];
 </script>
 
 <Menu {items} />
@@ -334,13 +358,15 @@ The menu follows this DOM structure:
 
 ### Menu with Header
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+
 	const items = [
 		{ type: 'option', title: 'Profile' },
 		{ type: 'option', title: 'Settings' },
 		{ type: 'separator' },
 		{ type: 'option', title: 'Log Out', color: 'danger' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <Menu {items}>
@@ -355,12 +381,14 @@ The menu follows this DOM structure:
 
 ### Menu with Footer
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+
 	const items = [
 		{ type: 'option', title: 'Item 1' },
 		{ type: 'option', title: 'Item 2' },
 		{ type: 'option', title: 'Item 3' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <Menu {items}>
@@ -374,13 +402,18 @@ The menu follows this DOM structure:
 
 ### Menu with Header and Footer
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+	import { userIcon } from 'svelai/icons/user';
+	import { gearIcon } from 'svelai/icons/gear';
+	import { signOutIcon } from 'svelai/icons/signOut';
+
 	const items = [
 		{ type: 'option', prefix: userIcon, title: 'Profile' },
 		{ type: 'option', prefix: gearIcon, title: 'Settings' },
 		{ type: 'separator' },
 		{ type: 'option', prefix: signOutIcon, title: 'Log Out', color: 'danger' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <Menu {items}>
@@ -409,14 +442,16 @@ The menu follows this DOM structure:
 
 ### Mixed Size Items
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+
 	const items = [
 		{ type: 'option', title: 'Small Option', size: 'small' },
 		{ type: 'option', title: 'Normal Option', size: 'normal' },
 		{ type: 'option', title: 'Large Option', size: 'large' },
 		{ type: 'separator' },
 		{ type: 'button', children: 'Large Button', size: 'large', variant: 'solid' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <Menu {items} />
@@ -426,15 +461,17 @@ The menu follows this DOM structure:
 \`\`\`svelte
 <!-- density tightens/loosens the row gap and every option row's paddings.
      Button items are unaffected (Button has no density axis). -->
-<Menu {items} density="small" />
+<Menu {items} density="compact" />
 <Menu {items} density="normal" />
-<Menu {items} density="large" />
+<Menu {items} density="comfortable" />
 \`\`\`
 
 ## Accessibility
 
 - Automatically sets \`role="menu"\` on the container
-- Individual items set appropriate roles based on their type
+- Option items render \`role="menuitem"\`; an option that passes \`selected\` (true or false) renders \`role="menuitemradio"\` with \`aria-checked\`, so a check-marked choice is announced as checked rather than as a plain command
+- ArrowUp / ArrowDown move the highlight, Home / End jump, Enter or Space activates, ArrowRight opens a submenu and ArrowLeft closes it (mirrored in RTL)
+- Type-ahead: typing letters moves the highlight to the next item whose label starts with the typed text
 - Supports keyboard navigation through child components
 - MenuOption and Button items handle interactive states
 
@@ -498,9 +535,9 @@ const customTheme: MenuThemeProps = {
   root: {
     base: 'flex flex-col w-full',
     density: {
-      small: 'gap-0',
+      compact: 'gap-0',
       normal: 'gap-0.5',
-      large: 'gap-1'
+      comfortable: 'gap-1'
     }
   },
   button: {
@@ -528,7 +565,7 @@ const customTheme: MenuThemeProps = {
 **root**:
 - base: Base classes for menu container
 - Variants:
-  - density: 'small' | 'normal' | 'large' - Spacing between menu items
+  - density: 'compact' | 'normal' | 'comfortable' - Spacing between menu items
 
 **button** (optional):
 - Forwards theme to all Button items in the menu
@@ -569,7 +606,7 @@ const customTheme: MenuThemeProps = {
   theme={{
     root: {
       density: {
-        large: 'gap-3'
+        comfortable: 'gap-3'
       }
     },
     option: {
@@ -598,19 +635,22 @@ const customTheme: MenuThemeProps = {
 \`\`\`svelte
 <script>
   import { setMenuTheme } from 'svelai/menu';
+  import { setMenuOptionTheme } from 'svelai/menu-option';
   
+  // The global menu theme covers the container parts (root, header, footer).
+  // Option rows are themed globally through MenuOption's own setter.
   setMenuTheme({
     root: {
       density: {
         normal: 'gap-2'
       }
-    },
-    option: {
-      root: {
-        base: 'rounded-lg',
-        density: {
-          normal: 'px-3 py-2'
-        }
+    }
+  });
+  setMenuOptionTheme({
+    root: {
+      base: 'rounded-lg',
+      density: {
+        normal: 'px-3 py-2'
       }
     }
   });

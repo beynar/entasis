@@ -8,17 +8,17 @@
 	let email = $state('');
 </script>
 
-<section class="mx-auto flex max-w-2xl flex-col gap-xl p-xl">
-	<div class="flex flex-col items-center gap-xl text-center">
+<section class="gap-xl p-xl mx-auto flex max-w-2xl flex-col">
+	<div class="gap-xl flex flex-col items-center text-center">
 		<Chip variant="outline">Something thoughtful is taking shape</Chip><Heading
 			as="h2"
 			size="h1"
 			weight="bold">Be there for the next beginning.</Heading
 		>
-		<p class="text-lg text-neutral/70">
+		<p class="text-neutral/70 text-lg">
 			A calmer workspace for the plans, people, and ideas you want to move forward.
 		</p>
-		<div class="flex flex-wrap items-center justify-center gap-md">
+		<div class="gap-md flex flex-wrap items-center justify-center">
 			<AvatarGroup
 				size="small"
 				items={[
@@ -28,7 +28,7 @@
 					{ name: 'Ari Costa' }
 				]}
 			/>
-			<p class="text-sm text-neutral/60">Made for curious, thoughtful teams.</p>
+			<p class="text-neutral/70 text-sm">Made for curious, thoughtful teams.</p>
 		</div>
 	</div>
 	<Card variant="outline"
@@ -44,10 +44,10 @@
 					}
 				]}
 			/>
-			<p class="text-center text-xs text-neutral/50">
+			<p class="text-neutral/65 text-center text-xs">
 				This preview keeps your request local. Nothing is sent.
 			</p>
-			{#if email}<p class="rounded-lg bg-primary-muted p-md text-sm" role="status">
+			{#if email}<p class="bg-primary-muted p-md rounded-lg text-sm" role="status">
 					Early-access request draft for <strong>{email}</strong>.
 				</p>{/if}</Stack
 		></Card

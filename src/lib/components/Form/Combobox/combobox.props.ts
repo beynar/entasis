@@ -1,4 +1,5 @@
 import type { Density } from '$lib/types/theme.js';
+import type { Messages } from '$lib/i18n/en.js';
 import type { InputProps } from '../Field/field.js';
 import type { ComboboxThemeProps } from './combobox.theme.js';
 import type { Snippet } from 'svelte';
@@ -59,4 +60,6 @@ export type ComboboxProps = Omit<InputProps<'combobox'>, 'prefix' | 'onValueChan
 	noOptionsText?: string;
 	/** Theme overrides for the combobox dropdown, options, and field parts. */
 	theme?: ComboboxThemeProps & InputProps<'combobox'>['theme'];
+	/** Per-instance i18n overrides merged over the global catalog. */
+	i18n?: Partial<Messages>;
 };

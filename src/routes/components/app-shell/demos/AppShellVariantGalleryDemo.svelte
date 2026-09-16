@@ -153,8 +153,8 @@
 		resizable: {
 			minWidth: '12rem',
 			maxWidth: '24rem',
-			onWidthChange: (nextWidth) => {
-				sidebarWidth = nextWidth;
+			onWidthChange: ({ width }) => {
+				sidebarWidth = width;
 			}
 		},
 		headerButton: {
@@ -174,7 +174,7 @@
 
 <div class="grid gap-4">
 	<div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-		{#each variantRecipes as recipe}
+		{#each variantRecipes as recipe, index (index)}
 			<button
 				type="button"
 				class="rounded-lg border p-3 text-left transition {selectedRecipeId === recipe.id
@@ -191,57 +191,57 @@
 
 	<section
 		aria-label="App shell layout controls"
-		class="grid gap-4 rounded-lg border border-neutral-muted bg-surface p-4 lg:grid-cols-2"
+		class="border-neutral-muted bg-surface grid gap-4 rounded-lg border p-4 lg:grid-cols-2"
 	>
 		<div class="grid gap-2">
-			<span class="text-sm font-medium text-neutral">Content width</span>
+			<span class="text-neutral text-sm font-medium">Content width</span>
 			<SegmentedControl
 				items={contentWidthItems}
 				bind:value={contentWidth}
 				size="small"
-				ariaLabel="Content width"
+				label="Content width"
 			/>
 		</div>
 		<div class="grid gap-2">
-			<span class="text-sm font-medium text-neutral">Content padding</span>
+			<span class="text-neutral text-sm font-medium">Content padding</span>
 			<SegmentedControl
 				items={contentPaddingItems}
 				bind:value={contentPadding}
 				size="small"
-				ariaLabel="Content padding"
+				label="Content padding"
 			/>
 		</div>
 		<div class="grid gap-2">
-			<span class="text-sm font-medium text-neutral">Action overflow</span>
+			<span class="text-neutral text-sm font-medium">Action overflow</span>
 			<SegmentedControl
 				items={actionOverflowItems}
 				bind:value={actionOverflow}
 				size="small"
-				ariaLabel="Action overflow"
+				label="Action overflow"
 			/>
 		</div>
 		<div class="grid gap-2">
-			<span class="text-sm font-medium text-neutral">Mobile inline actions</span>
+			<span class="text-neutral text-sm font-medium">Mobile inline actions</span>
 			<SegmentedControl
 				items={mobileActionCountItems}
 				bind:value={mobileActionCountOption}
 				size="small"
-				ariaLabel="Mobile inline actions"
+				label="Mobile inline actions"
 			/>
 		</div>
 	</section>
 
 	<div class="grid gap-2 md:grid-cols-2">
-		<div class="rounded-lg border border-neutral-muted bg-surface-raised p-3">
-			<p class="text-sm font-semibold text-neutral">Icon rail is a state</p>
-			<p class="mt-1 text-xs leading-5 text-neutral/65">
+		<div class="border-neutral-muted bg-surface-raised rounded-lg border p-3">
+			<p class="text-neutral text-sm font-semibold">Icon rail is a state</p>
+			<p class="text-neutral/65 mt-1 text-xs leading-5">
 				Use <code>collapsible="icon"</code>, <code>rail</code>, and optionally
 				<code>displayState="collapsed"</code> on the inset, floating, or split variant.
 			</p>
 		</div>
-		<div class="rounded-lg border border-neutral-muted bg-surface-raised p-3">
-			<p class="text-sm font-semibold text-neutral">Docs prose is page layout</p>
-			<p class="mt-1 text-xs leading-5 text-neutral/65">
+		<div class="border-neutral-muted bg-surface-raised rounded-lg border p-3">
+			<p class="text-neutral text-sm font-semibold">Docs prose is page layout</p>
+			<p class="text-neutral/65 mt-1 text-xs leading-5">
 				It is mainly <code>contentWidth="prose"</code> plus larger PageShell padding, not a separate AppShell
 				shape.
 			</p>
@@ -264,44 +264,42 @@
 		>
 			{#snippet footer()}
 				<div class="flex items-center gap-2">
-					<span class="size-1.5 rounded-full bg-success"></span>
+					<span class="bg-success size-1.5 rounded-full"></span>
 					<span>{selectedRecipe.name} workspace ready</span>
 				</div>
 			{/snippet}
 
-			{#snippet children()}
-				<div class="grid gap-4">
-					<section class="rounded-lg border border-neutral-muted bg-surface-raised p-4">
-						<p class="text-sm font-medium text-neutral">Recipe anatomy</p>
-						<div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-							{#each [['Sidebar', selectedRecipe.variant], ['Collapse', selectedRecipe.sidebar.collapsible], ['Rail', selectedRecipe.sidebar.rail ? 'edge toggle' : 'none'], ['Content', contentWidth]] as detail}
-								<div class="rounded-md border border-neutral-muted bg-surface p-3">
-									<p class="text-xs font-medium uppercase tracking-normal text-neutral/50">
-										{detail[0]}
-									</p>
-									<p class="mt-2 text-sm font-semibold text-neutral">{detail[1]}</p>
-								</div>
-							{/each}
-						</div>
-					</section>
+			<div class="grid gap-4">
+				<section class="border-neutral-muted bg-surface-raised rounded-lg border p-4">
+					<p class="text-neutral text-sm font-medium">Recipe anatomy</p>
+					<div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+						{#each [['Sidebar', selectedRecipe.variant], ['Collapse', selectedRecipe.sidebar.collapsible], ['Rail', selectedRecipe.sidebar.rail ? 'edge toggle' : 'none'], ['Content', contentWidth]] as detail, index (index)}
+							<div class="border-neutral-muted bg-surface rounded-md border p-3">
+								<p class="text-neutral/65 text-xs font-medium tracking-normal uppercase">
+									{detail[0]}
+								</p>
+								<p class="text-neutral mt-2 text-sm font-semibold">{detail[1]}</p>
+							</div>
+						{/each}
+					</div>
+				</section>
 
-					<section class="rounded-lg border border-neutral-muted bg-surface-raised p-4">
-						<p class="text-sm font-medium text-neutral">Primary surface</p>
-						<p class="mt-3 text-sm leading-6 text-neutral/70">
-							{selectedRecipe.description} This preview keeps the same AppShell component and only switches
-							Sidebar and PageShell props.
-						</p>
-						<div class="mt-5 grid gap-3 sm:grid-cols-3">
-							{#each ['Pipeline', 'Quality', 'Velocity'] as metric, index}
-								<div class="rounded-md border border-neutral-muted bg-surface p-3">
-									<p class="text-sm text-neutral/60">{metric}</p>
-									<p class="mt-2 text-2xl font-semibold text-neutral">{82 + index * 6}%</p>
-								</div>
-							{/each}
-						</div>
-					</section>
-				</div>
-			{/snippet}
+				<section class="border-neutral-muted bg-surface-raised rounded-lg border p-4">
+					<p class="text-neutral text-sm font-medium">Primary surface</p>
+					<p class="text-neutral/70 mt-3 text-sm leading-6">
+						{selectedRecipe.description} This preview keeps the same AppShell component and only switches
+						Sidebar and PageShell props.
+					</p>
+					<div class="mt-5 grid gap-3 sm:grid-cols-3">
+						{#each ['Pipeline', 'Quality', 'Velocity'] as metric, index (index)}
+							<div class="border-neutral-muted bg-surface rounded-md border p-3">
+								<p class="text-neutral/70 text-sm">{metric}</p>
+								<p class="text-neutral mt-2 text-2xl font-semibold">{82 + index * 6}%</p>
+							</div>
+						{/each}
+					</div>
+				</section>
+			</div>
 		</AppShell>
 	</div>
 </div>

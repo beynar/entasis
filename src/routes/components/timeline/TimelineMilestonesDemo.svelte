@@ -77,7 +77,7 @@
 		items={milestones}
 		placement="alternate"
 		variant="card"
-		density="large"
+		density="comfortable"
 		aria-label="Company milestones"
 	>
 		{#snippet item({ item, defaultContent })}
@@ -87,7 +87,7 @@
 				{#if item.media}
 					<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
 						{#each item.media as media (media.label)}
-							<figure class="relative aspect-[4/3] overflow-hidden rounded-lg bg-surface-raised">
+							<figure class="bg-surface-raised relative aspect-[4/3] overflow-hidden rounded-lg">
 								<img src={media.src} alt="" class="size-full object-cover" />
 								<figcaption
 									class="absolute inset-x-0 bottom-0 bg-black/45 px-2 py-1.5 text-xs font-medium text-white"
@@ -103,11 +103,11 @@
 					<div class="grid gap-2">
 						{#each item.highlights as highlight (highlight.name)}
 							<div class="flex items-center gap-3">
-								<span data-color={highlight.color} class="size-9 shrink-0 rounded-lg bg-color-muted"
+								<span data-color={highlight.color} class="bg-color-muted size-9 shrink-0 rounded-lg"
 								></span>
 								<div class="min-w-0">
-									<p class="truncate text-sm font-medium text-neutral">{highlight.name}</p>
-									<p class="truncate text-xs text-neutral/60">{highlight.detail}</p>
+									<p class="text-neutral truncate text-sm font-medium">{highlight.name}</p>
+									<p class="text-neutral/70 truncate text-xs">{highlight.detail}</p>
 								</div>
 							</div>
 						{/each}

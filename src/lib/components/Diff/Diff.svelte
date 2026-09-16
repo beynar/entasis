@@ -2,7 +2,7 @@
 	import { untrack, type Snippet } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import { BROWSER } from 'esm-env';
-	import type { DiffLineAnnotation, FileDiffOptions } from '@pierre/diffs';
+	import type { DiffLineAnnotation, FileDiffOptions, SelectedLineRange } from '@pierre/diffs';
 	import type { DiffProps } from './diff.props.js';
 	import type { DiffInput, PreloadedDiffRenderItem } from './diff-input.js';
 	import type { DiffOptionProps } from './diff-theme.js';
@@ -12,6 +12,8 @@
 	import { DiffRenderer } from './DiffRenderer.js';
 	import { DiffAnnotationRenderer } from './DiffAnnotationRenderer.js';
 	import CodeTheme from '../Code/CodeTheme.svelte';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 
 	let {
 		patch,
@@ -27,8 +29,9 @@
 		lineAnnotations,
 		renderAnnotation,
 		renderAnnotationClass,
-		selectedLines = $bindable(undefined),
-		onSelectedLinesChange,
+		selection = $bindable(undefined),
+		defaultSelection,
+		onSelectionChange,
 		fileClass,
 		class: className,
 		theme,
@@ -36,6 +39,14 @@
 	}: DiffProps = $props();
 
 	const classes = $derived(useDiffTheme(theme));
+	const t = $derived(useI18n());
+	const selectionState = createBindableValue<SelectedLineRange | null | undefined>(
+		() => selection,
+		(next) => {
+			selection = next;
+		},
+		() => defaultSelection
+	);
 
 	// `WithSlot` widens the slot to `string | Snippet`; annotations are always a
 	// snippet, so narrow it for the imperative renderer.
@@ -132,15 +143,17 @@
 
 	function createInteractiveOptions(
 		annotationRenderer: DiffAnnotationRenderer
-	): FileDiffOptions<undefined> | undefined {
+	): FileDiffOptions<undefined, undefined> | undefined {
 		const renderAnnotationCallback =
 			annotationSnippet == null ? options?.renderAnnotation : annotationRenderer.render;
 
-		// Selection is "controlled" when the consumer opts in via `selectedLines` or
-		// `onSelectedLinesChange`. `enableLineSelection` gates all of @pierre's pointer
-		// selection, so it must be turned on for either to do anything.
+		// Selection is "controlled" when the consumer opts in via `selection`,
+		// `defaultSelection`, or `onSelectionChange`. `enableLineSelection` gates all of
+		// @pierre's pointer selection, so it must be turned on for any of them to do anything.
 		const controlled =
-			selectedLines !== undefined || onSelectedLinesChange != null || options?.controlledSelection;
+			selectionState.value !== undefined ||
+			onSelectionChange != null ||
+			options?.controlledSelection;
 
 		if (!controlled && renderAnnotationCallback === options?.renderAnnotation) {
 			return options;
@@ -153,17 +166,17 @@
 			renderAnnotation: renderAnnotationCallback,
 			onLineSelected: (range) => {
 				options?.onLineSelected?.(range);
-				// Write back so `bind:selectedLines` works; the sync `$effect` below then
+				// Write back so `bind:selection` works; the sync `$effect` below then
 				// pushes it to the instances with `notify: false` (idempotent, no loop).
-				selectedLines = range ?? undefined;
-				onSelectedLinesChange?.(range);
+				selectionState.value = range ?? undefined;
+				onSelectionChange?.(range);
 			}
 		};
 	}
 
 	// The attachment mounts/hydrates the `@pierre/diffs` instances on the client and
 	// tears them down on cleanup.
-	// NB: `selectedLines` is intentionally NOT read here — a selection change must not
+	// NB: `selection` is intentionally NOT read here — a selection change must not
 	// rebuild the whole diff DOM; it is pushed incrementally via the `$effect` below.
 	const attachDiff = $derived.by<Attachment<HTMLDivElement>>(() => {
 		// Read every rebuild-worthy input up front so the attachment re-runs when they change.
@@ -173,6 +186,7 @@
 		const annotations = lineAnnotations;
 		const snippet = annotationSnippet;
 		const annotationClass = renderAnnotationClass;
+		const labelFile = (file: string) => t.diffFileContent(file);
 		void options;
 
 		return (node) => {
@@ -184,15 +198,15 @@
 					const diffOptions = createDiffOptions(currentOptions, optionProps);
 					errorMessage = undefined;
 					const items = createDiffRenderItems(input, diffOptions);
-					const state = { lineAnnotations: annotations, selectedLines };
+					const state = { lineAnnotations: annotations, selectedLines: selectionState.value };
 
 					// First client pass: hydrate the server-rendered shadow DOM in place.
 					const preloaded = hasHydrated ? undefined : readServerPreloaded(node);
 					hasHydrated = true;
 					if (preloaded) {
-						renderer.hydrate(node, preloaded, diffOptions, wrapperClass, state);
+						renderer.hydrate(node, preloaded, diffOptions, wrapperClass, state, labelFile);
 					} else {
-						renderer.render(node, items, diffOptions, wrapperClass, state);
+						renderer.render(node, items, diffOptions, wrapperClass, state, labelFile);
 					}
 				} catch (error) {
 					renderer.cleanUp();
@@ -209,11 +223,11 @@
 		};
 	});
 
-	// Push external `selectedLines` changes into the existing instances incrementally
+	// Push external `selection` changes into the existing instances incrementally
 	// (no rebuild). Idempotent when the change originated from an internal drag.
 	$effect(() => {
-		const selection = selectedLines;
-		untrack(() => renderer.setSelectedLines(selection ?? null));
+		const nextSelection = selectionState.value;
+		untrack(() => renderer.setSelectedLines(nextSelection ?? null));
 	});
 </script>
 
@@ -235,6 +249,7 @@
 		{@attach attachDiff}
 		class="min-w-0 [--diffs-addition-color-override:var(--color-success)] [--diffs-deletion-color-override:var(--color-danger)] [--diffs-modified-color-override:var(--color-warning)]"
 	>
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- SSR-only declarative shadow DOM built by `createPreloadedMarkup` from the diff renderer's own escaped output; there is no non-`@html` way to emit a `<template shadowrootmode>`. -->
 		{@html serverMarkup}
 	</div>
 </div>

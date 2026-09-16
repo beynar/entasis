@@ -21,7 +21,6 @@
 		size = 'normal',
 		label,
 		labelPosition,
-		ariaLabel,
 		onValueChange,
 		...rest
 	}: SwitchProps = $props();
@@ -124,12 +123,10 @@
 		id={field.id}
 		data-checked={!!value}
 		aria-checked={!!value}
-		aria-label={ariaLabel}
-		aria-labelledby={!ariaLabel && label ? field.labelId : undefined}
+		aria-labelledby={label ? field.labelId : undefined}
 		aria-disabled={field.disabled || undefined}
 		role="switch"
 		tabindex={field.disabled ? -1 : 0}
-		data-color="primary"
 		class={classes.toggle({ checked: !!value, size, disabled })}
 		{onclick}
 		onkeydown={onKeydown}

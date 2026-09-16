@@ -18,6 +18,7 @@
 	} from './phoneInputCountry.js';
 	import { untrack } from 'svelte';
 	import { on } from 'svelte/events';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		defaultValue = null,
@@ -28,8 +29,8 @@
 		iti = $bindable<IntlTelInputInstance | undefined>(),
 		required = false,
 		strict = true,
-		searchPlaceholder = 'Search',
-		placeholder = 'Phone number',
+		searchPlaceholder,
+		placeholder,
 		theme,
 		disabled,
 		name,
@@ -41,6 +42,9 @@
 	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
+	const t = $derived(useI18n());
+	const resolvedPlaceholder = $derived(placeholder ?? t.phoneNumber);
+	const resolvedSearchPlaceholder = $derived(searchPlaceholder ?? t.search);
 	const countryPickerId = `${id}-country-picker`;
 	let countryPickerOpen = $state(false);
 	let phoneInputNode = $state<HTMLInputElement | null>(null);
@@ -105,7 +109,7 @@
 			const customErrors = onValidate?.(value);
 			if (!iti || !library?.utils) return customErrors;
 			const isValid = Boolean(country && iti.isValidNumber());
-			return customErrors || (isValid ? [] : ['Invalid phone number']);
+			return customErrors || (isValid ? [] : [t.invalidPhoneNumber]);
 		},
 		get visible() {
 			return visible;
@@ -229,7 +233,7 @@
 		id={countryPickerId}
 		countries={countryOptions}
 		{selectedCountry}
-		{searchPlaceholder}
+		searchPlaceholder={resolvedSearchPlaceholder}
 		size={rest.size}
 		{theme}
 		onSelectCountry={selectCountry}
@@ -272,7 +276,7 @@
 				{id}
 				name={field.name}
 				bind:this={field.node}
-				{placeholder}
+				placeholder={resolvedPlaceholder}
 				class={classes.input({ disabled: field.disabled, size: rest.size })}
 				disabled={field.disabled}
 			/>

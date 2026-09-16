@@ -1,8 +1,7 @@
 <script lang="ts">
 	import Slot from '../Slot/Slot.svelte';
-	import { toLayoutSpacingKey } from '../Layout/layoutSpacing.js';
 	import type { GridProps } from './grid.props.js';
-	import { getGridTemplate } from './gridTemplate.js';
+	import { getGridVariables, toInlineVariables } from './gridTemplate.js';
 	import { useGridTheme } from './grid.theme.js';
 
 	let {
@@ -26,8 +25,11 @@
 	}: GridProps = $props();
 
 	const classes = $derived(useGridTheme(theme));
-	const resolvedColumnGap = $derived(columnGap ?? gap);
-	const template = $derived(getGridTemplate(columns, resolvedColumnGap));
+	// Resolved for all five breakpoints here, on the server, and picked by the container rules in
+	// grid.theme.ts — the grid never measures itself and is right on first paint.
+	const variables = $derived(
+		toInlineVariables(getGridVariables({ columns, gap, rowGap, columnGap }))
+	);
 	const autoRows = $derived(
 		rowHeight !== undefined && Number.isFinite(rowHeight) && rowHeight >= 0
 			? `${rowHeight}px`
@@ -42,21 +44,19 @@
 	data-slot="grid"
 	data-columns={typeof columns === 'number' ? columns : 'responsive'}
 	{style}
-	style:grid-template-columns={template}
-	style:grid-auto-rows={autoRows}
 	style:width={cssSize(width)}
 	style:height={cssSize(height)}
 	style:max-width={cssSize(maxWidth)}
 	style:min-height={cssSize(minHeight)}
-	class={classes.root({
-		gap: toLayoutSpacingKey(gap),
-		rowGap: rowGap === undefined ? undefined : toLayoutSpacingKey(rowGap),
-		columnGap: columnGap === undefined ? undefined : toLayoutSpacingKey(columnGap),
-		align,
-		justify,
-		className
-	})}
+	class={classes.root({ className })}
 	{...attributes}
 >
-	<Slot render={children} />
+	<div
+		data-slot="grid-tracks"
+		style={variables}
+		style:grid-auto-rows={autoRows}
+		class={classes.tracks({ align, justify })}
+	>
+		<Slot render={children} />
+	</div>
 </div>

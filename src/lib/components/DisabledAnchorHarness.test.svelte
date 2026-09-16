@@ -40,7 +40,7 @@
 					title: 'Disabled submenu',
 					disabled,
 					openOnHover: true,
-					hoverDelay: 0,
+					delay: 0,
 					menu: [{ type: 'option', title: 'Nested action', onclick }]
 				}
 			]}

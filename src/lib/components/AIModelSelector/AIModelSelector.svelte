@@ -19,6 +19,7 @@
 	} from './aiModelSelector.props.js';
 	import { useAIModelSelectorTheme } from './aiModelSelector.theme.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		ref = $bindable(),
@@ -45,6 +46,7 @@
 		theme,
 		...attachments
 	}: AIModelSelectorProps = $props();
+	const t = $derived(useI18n());
 	const valueState = createBindableValue<string | null | undefined>(
 		() => value,
 		(nextValue) => (value = nextValue),
@@ -78,12 +80,14 @@
 	const resolvedLabels = $derived<AIModelSelectorLabels>({
 		placeholder:
 			(placeholder === undefined
-				? (labels?.placeholder ?? conversation?.labels.modelSelector.placeholder ?? 'Select model')
+				? (labels?.placeholder ??
+					conversation?.labels.modelSelector.placeholder ??
+					t.aiModelSelectorPlaceholder)
 				: placeholder) ?? '',
-		triggerAriaLabel: labels?.triggerAriaLabel ?? 'Select model',
-		searchPlaceholder: searchPlaceholder ?? labels?.searchPlaceholder ?? 'Search models...',
-		empty: emptyLabel ?? labels?.empty ?? 'No models found',
-		providerFallback: labels?.providerFallback ?? 'Models'
+		triggerAriaLabel: labels?.triggerAriaLabel ?? t.aiModelSelectorPlaceholder,
+		searchPlaceholder: searchPlaceholder ?? labels?.searchPlaceholder ?? t.aiModelSelectorSearch,
+		empty: emptyLabel ?? labels?.empty ?? t.aiModelSelectorEmpty,
+		providerFallback: labels?.providerFallback ?? t.aiModelSelectorProviders
 	});
 	const classes = $derived(useAIModelSelectorTheme(theme));
 	const selectorState = $derived<AIModelSelectorState>({
@@ -317,8 +321,8 @@
 			variant="soft"
 			size="small"
 			{disabled}
-			aria-haspopup="menu"
-			aria-expanded={openState.value}
+			haspopup="menu"
+			expanded={openState.value}
 			label={selectedModel || resolvedLabels.placeholder
 				? undefined
 				: resolvedLabels.triggerAriaLabel}

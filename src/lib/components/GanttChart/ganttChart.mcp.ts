@@ -56,6 +56,7 @@ The required timeZone must be UTC or an explicit IANA zone. Contained scrolling 
 - GanttDependency<TDependencyFields> supports finish-start, start-start, finish-finish, and start-finish links plus signed minute/hour/day/week lag. Duplicate ids, missing endpoints, self-links, duplicate semantic links, and cycles throw GanttChartError.
 - GanttResource<TResourceFields>, GanttAssignment<TAssignmentFields>, and GanttCalendar are explicit typed inputs. Assignment units are 0 through 1. Calendars use IANA zones, weekday intervals, and civil-date exceptions.
 - tasks, dependencies, assignments, expandedTaskIds, selection, and zoom are bindable. resources and calendars are immutable inputs. Every accepted mutation publishes a fresh outer array and fresh changed objects.
+- Selection-callback naming: events.onSelect(payload) is the pick event -- the range a user picked on an empty row -- and events.onSelectionChange(payload) is the state change of the selection model, completed by the bindable selection prop and its defaultSelection initial value.
 - Selection is empty, a task, a dependency, or a tree cell. Query resolved nodes for WBS, derived summary values, elapsed/working duration, earliest/latest dates, total/free slack, critical state, and violations; those values never mutate definitions.
 
 Consumer field generics appear in props, layout columns, render snippets, proposals, mutation policies, events, change records, resolved nodes, and API queries/mutations. A custom field cannot shadow an owned key, and index-signature custom objects are rejected by the type surface.
@@ -91,6 +92,8 @@ Tree cells, task controls, and dependency controls use roving focus across virtu
 
 Treegrid/timeline roles, expanded/selected/grabbed state, focus restoration, 24px handle hit targets, high contrast, reduced motion, touch long-press/tolerance, and live announcements remain component-owned. Snippets cannot replace these semantic or interaction owners.
 
+The task grid is a \`treegrid\` whose direct children are two \`rowgroup\`s — the sticky header band and the scrolling body — so every \`row\` stays inside a valid parent. A \`gridHeader\` snippet renders decoratively inside the header row and must not introduce roles of its own.
+
 ## Render snippets
 
 The render object provides typed Svelte 5 snippets for header, actions, gridHeader, columnHeader, treeCell, taskRow, timeHeader, task, taskLabel, taskTooltip, dependencyTooltip, progress, baseline, deadline, nonWorkingTime, resourceAssignments, workloadCell, dragPreview, empty, and loadingContent. The task payload identifies leaf, summary, and milestone nodes. The timeHeader payload identifies its upper or lower level. Payloads include ready-made defaultContent where meaningful. Header payloads expose owned today, fit-project, zoom, and action snippets; render.header can be false.
@@ -107,5 +110,5 @@ Bind the component instance as GanttChartApi. Real methods include:
 
 ## Application-owned editors and non-goals
 
-GanttChart does not own task creation/edit dialogs. Compose events.onTaskDoubleClick or events.onEmptyRangeSelect with Svelai Dialog and Form controls, validate the definition, then publish a fresh controlled array or call the API. Network fetching, persistence, retries, collaboration, recurrence, automatic resource leveling, proprietary import/export, and deployment are outside this package.
+GanttChart does not own task creation/edit dialogs. Compose events.onTaskDoubleClick or events.onSelect with Svelai Dialog and Form controls, validate the definition, then publish a fresh controlled array or call the API. Network fetching, persistence, retries, collaboration, recurrence, automatic resource leveling, proprietary import/export, and deployment are outside this package.
 `;

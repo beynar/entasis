@@ -34,15 +34,15 @@ const defaultInput = cva({
 });
 
 const defaultCell = cva({
-	base: 'relative grid shrink-0 place-items-center overflow-hidden border border-neutral-muted bg-surface-raised font-mono font-medium tabular-nums text-neutral shadow-sm transition-all',
+	base: 'relative grid shrink-0 place-items-center overflow-hidden raised-1 bg-surface-raised font-mono font-medium tabular-nums text-neutral transition-[color,background-color,border-color,box-shadow]',
 	variants: {
 		size: {
-			small: 'size-8 rounded-md text-sm',
-			normal: 'size-10 rounded-md text-base',
-			large: 'size-12 rounded-md text-lg'
+			small: 'size-8 rounded-md text-xs',
+			normal: 'size-10 rounded-md text-sm',
+			large: 'size-12 rounded-md text-sm'
 		},
 		active: {
-			true: 'border-primary ring-2 ring-primary/50',
+			true: '[--raised-border:1px_solid_var(--color-neutral)] ring-2 ring-selected/40',
 			false: ''
 		},
 		disabled: {

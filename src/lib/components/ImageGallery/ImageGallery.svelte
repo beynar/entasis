@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import 'lightgallery/css/lightgallery.css';
 	import 'lightgallery/css/lg-thumbnail.css';
@@ -6,7 +7,8 @@
 	import Slot from '../Slot/Slot.svelte';
 	import { ImageGalleryState } from './imageGallery.state.svelte.js';
 	import type { ImageGalleryProps } from './imageGallery.props.js';
-	import { useImageGalleryTheme } from './imageGallery.theme.js';
+	import { easingBezierStrings } from '$lib/transitions/easingFunctions.js';
+	import { useImageGalleryMotion, useImageGalleryTheme } from './imageGallery.theme.js';
 
 	let {
 		id: customId,
@@ -16,14 +18,13 @@
 		imageSelector = 'img',
 		disabled = false,
 		zoomMargin = 32,
-		transitionDuration = 240,
 		closeOnClickOutside = true,
 		closeOnEscape = true,
 		lockScroll = true,
-		buttonLabel = 'Open image gallery',
-		closeLabel = 'Close image gallery',
-		previousLabel = 'Previous image',
-		nextLabel = 'Next image',
+		buttonLabel,
+		closeLabel,
+		previousLabel,
+		nextLabel,
 		licenseKey = '0000-0000-000-0000',
 		class: className,
 		onOpenChange,
@@ -44,6 +45,13 @@
 	const generatedId = $props.id();
 	const id = $derived(customId || generatedId);
 	const classes = $derived(useImageGalleryTheme(theme));
+	const t = $derived(useI18n());
+	// Lightbox timing from `imageGalleryTheme.motion`, through the override ladder
+	// (registry → `setImageGalleryTheme` → instance `theme.motion`).
+	const resolveMotion = useImageGalleryMotion();
+	const galleryMotion = $derived(resolveMotion(undefined, { motion: theme?.motion }).in);
+	const transitionDuration = $derived(galleryMotion.duration ?? 0);
+	const transitionEasing = $derived(easingBezierStrings[galleryMotion.easing ?? 'cubicOut']);
 	const state = new ImageGalleryState({
 		get imageSelector() {
 			return imageSelector;
@@ -69,6 +77,9 @@
 		get transitionDuration() {
 			return transitionDuration;
 		},
+		get transitionEasing() {
+			return transitionEasing;
+		},
 		get closeOnClickOutside() {
 			return closeOnClickOutside;
 		},
@@ -79,16 +90,19 @@
 			return lockScroll;
 		},
 		get buttonLabel() {
-			return buttonLabel;
+			return buttonLabel ?? t.openImageGallery;
 		},
 		get closeLabel() {
-			return closeLabel;
+			return closeLabel ?? t.closeImageGallery;
 		},
 		get previousLabel() {
-			return previousLabel;
+			return previousLabel ?? t.previousImage;
 		},
 		get nextLabel() {
-			return nextLabel;
+			return nextLabel ?? t.nextImage;
+		},
+		get messages() {
+			return t;
 		},
 		get licenseKey() {
 			return licenseKey;
@@ -117,13 +131,14 @@
 		disabled,
 		zoomMargin,
 		transitionDuration,
+		transitionEasing,
 		closeOnClickOutside,
 		closeOnEscape,
 		lockScroll,
-		buttonLabel,
-		closeLabel,
-		previousLabel,
-		nextLabel,
+		buttonLabel: buttonLabel ?? t.openImageGallery,
+		closeLabel: closeLabel ?? t.closeImageGallery,
+		previousLabel: previousLabel ?? t.previousImage,
+		nextLabel: nextLabel ?? t.nextImage,
 		licenseKey,
 		hasCustomCaption: caption !== undefined
 	})}

@@ -24,8 +24,8 @@
 	];
 </script>
 
-<section class="mx-auto grid max-w-6xl gap-xl p-lg md:grid-cols-3 md:p-xl">
-	<div class="flex flex-col items-start gap-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl md:grid-cols-3">
+	<div class="gap-xl flex flex-col items-start">
 		<Chip variant="outline">Built for real work</Chip><Heading as="h2" size="h2" weight="bold"
 			>Different fields.<br />Shared possibilities.</Heading
 		>
@@ -36,14 +36,14 @@
 	</div>
 	<div class="md:col-span-2">
 		{#each industries as industry, index (industry.name)}<div
-				class="grid gap-lg border-t border-neutral-muted py-xl sm:grid-cols-2"
+				class="gap-lg border-neutral-muted py-xl grid border-t sm:grid-cols-2"
 			>
-				<div class="flex items-center gap-lg">
-					<span class="text-xs text-neutral/40">0{index + 1}</span><Heading as="h3" size="h4"
+				<div class="gap-lg flex items-center">
+					<span class="text-neutral/65 text-xs">0{index + 1}</span><Heading as="h3" size="h4"
 						>{industry.name}</Heading
 					>
 				</div>
-				<p class="text-sm text-neutral/70">{industry.description}</p>
+				<p class="text-neutral/70 text-sm">{industry.description}</p>
 			</div>{/each}
 	</div>
 </section>

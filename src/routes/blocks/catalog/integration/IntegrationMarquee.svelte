@@ -19,7 +19,7 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl overflow-hidden p-xl">
+<section class="gap-xl p-xl flex flex-col overflow-hidden">
 	<div class="mx-auto max-w-2xl text-center">
 		<Chip variant="outline">Your tools, together</Chip><Heading
 			as="h2"
@@ -32,11 +32,11 @@
 		</p>
 	</div>
 	<Marquee speed="slow" fade innerClass="gap-lg"
-		><div class="flex gap-lg">
+		><div class="gap-lg flex">
 			{#each integrations as integration (integration.name)}<div
-					class="flex min-w-48 items-center gap-lg rounded-xl border border-neutral-muted bg-surface p-xl"
+					class="gap-lg border-neutral-muted bg-surface p-xl flex min-w-48 items-center rounded-xl border"
 				>
-					<span class="text-primary">{@render integration.icon({ size: 30 })}</span><strong
+					<span class="text-primary-readable">{@render integration.icon({ size: 30 })}</span><strong
 						>{integration.name}</strong
 					>
 				</div>{/each}

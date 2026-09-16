@@ -16,13 +16,11 @@ type ChartMatrixBase<TRow> = ChartDataMarkProps<TRow> & {
 	radius?: number;
 };
 
-type ChartGridMatrixMark<TRow> = ChartMatrixBase<TRow> &
-	{
-		variant?: 'grid';
-		x: ChartChannel<TRow, ChartValue>;
-		y: ChartChannel<TRow, ChartValue>;
-	} &
-	(
+type ChartGridMatrixMark<TRow> = ChartMatrixBase<TRow> & {
+	variant?: 'grid';
+	x: ChartChannel<TRow, ChartValue>;
+	y: ChartChannel<TRow, ChartValue>;
+} & (
 		| {
 				value?: never;
 				color?: never;

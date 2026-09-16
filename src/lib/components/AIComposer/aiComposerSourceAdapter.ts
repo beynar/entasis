@@ -1,3 +1,4 @@
+import { en, type Messages } from '$lib/i18n/en.js';
 import type {
 	RichTextInputItem,
 	RichTextInputSuggestionLifecycleState,
@@ -23,18 +24,20 @@ import type {
 type MentionKind = 'mention' | 'file' | 'reference' | 'skill';
 
 export type AIComposerSourceOptions = {
+	/** Active i18n catalog, used for the default trigger titles and group headings. */
+	messages?: Messages;
 	commands?: AIComposerTriggerSource<AIComposerCommand> | readonly AIComposerCommand[];
 	mentionItems?: readonly AIComposerMentionItem[];
 	mentions?: AIComposerTriggerSource<AIComposerMentionItem>;
 	references?: AIComposerTriggerSource<AIComposerMentionItem>;
 	skills?: AIComposerTriggerSource<AIComposerSkillItem> | readonly AIComposerSkillItem[];
-	onCommandSelect?: (command: AIComposerCommand) => void;
-	onMentionSelect?: (item: AIComposerMentionItem) => void;
-	onSkillSelect?: (skill: AIComposerSkillItem) => void;
+	onCommandInsert?: (payload: AIComposerCommand) => void;
+	onMentionInsert?: (payload: AIComposerMentionItem) => void;
+	onSkillInsert?: (payload: AIComposerSkillItem) => void;
 	onCommandSearch?: AIComposerCommandSearch;
 	onMentionSearch?: AIComposerMentionSearch;
 	onSkillSearch?: AIComposerSkillSearch;
-	onItemSelect?: (payload: { item: RichTextInputItem; kind: RichTextInputTokenKind }) => void;
+	onItemInsert?: (payload: { item: RichTextInputItem; kind: RichTextInputTokenKind }) => void;
 };
 
 export type AIComposerResolvedSources = {
@@ -83,12 +86,12 @@ function resolveCommands(
 	if (!source && !options.onCommandSearch) return undefined;
 	return mergeSource(source, {
 		kind: 'command',
-		title: 'AI commands',
-		empty: 'No commands found.',
+		title: (options.messages ?? en).aiComposerCommands,
+		empty: (options.messages ?? en).aiComposerNoCommands,
 		onSearch: options.onCommandSearch,
 		onSelect: (item) => {
-			options.onCommandSelect?.(item);
-			options.onItemSelect?.({ item, kind: 'command' });
+			options.onCommandInsert?.(item);
+			options.onItemInsert?.({ item, kind: 'command' });
 		}
 	});
 }
@@ -103,15 +106,15 @@ function resolveMentions(
 		const kind = getAIComposerMentionKind(item, 'mention');
 		const matches = group === 'mention' ? kind === 'mention' || kind === 'file' : kind === group;
 		if (!matches) return [];
-		return [{ ...item, kind, group: item.group ?? defaultGroup(kind) }];
+		return [{ ...item, kind, group: item.group ?? defaultGroup(kind, options.messages ?? en) }];
 	});
 	if (!source && items.length === 0) return undefined;
 	return mergeSource(source, {
 		kind: group,
 		items,
 		onSelect: (item) => {
-			options.onMentionSelect?.(item);
-			options.onItemSelect?.({ item, kind: itemKind(item, group) });
+			options.onMentionInsert?.(item);
+			options.onItemInsert?.({ item, kind: itemKind(item, group) });
 		}
 	});
 }
@@ -120,23 +123,25 @@ function resolveSkills(
 	options: AIComposerSourceOptions
 ): AIComposerTriggerSource<AIComposerSkillItem> | undefined {
 	const source = toSource(options.skills);
-	const items = toSkills(options.mentionItems ?? []);
+	const items = toSkills(options.mentionItems ?? [], options.messages ?? en);
 	let search = options.onSkillSearch;
 	if (!search && options.onMentionSearch) {
 		const mentionSearch = options.onMentionSearch;
 		search = (query) =>
-			mapSearchResult(searchMentions(mentionSearch, query, 'skill'), (items) => toSkills(items));
+			mapSearchResult(searchMentions(mentionSearch, query, 'skill'), (items) =>
+				toSkills(items, options.messages ?? en)
+			);
 	}
 	if (!source && items.length === 0 && !search) return undefined;
 	return mergeSource(source, {
 		kind: 'skill',
-		title: 'Skills',
-		empty: 'No skills found.',
+		title: (options.messages ?? en).aiComposerSkills,
+		empty: (options.messages ?? en).aiComposerNoSkills,
 		items,
 		onSearch: search,
 		onSelect: (item) => {
-			options.onSkillSelect?.(item);
-			options.onItemSelect?.({ item, kind: 'skill' });
+			options.onSkillInsert?.(item);
+			options.onItemInsert?.({ item, kind: 'skill' });
 		}
 	});
 }
@@ -210,9 +215,7 @@ function toTrigger<Item extends RichTextInputItem>(
 					mapSearchResult(source.onSearch?.(context) ?? [], (items) => withKind(items, kind))
 			: undefined,
 		onSelect: ({ item, context }) => source.onSelect?.({ item: item as Item, context }),
-		toToken: toToken
-			? ({ item, context }) => toToken({ item: item as Item, context })
-			: undefined
+		toToken: toToken ? ({ item, context }) => toToken({ item: item as Item, context }) : undefined
 	};
 }
 
@@ -222,7 +225,7 @@ function toAtTrigger(
 	options: AIComposerSourceOptions
 ): RichTextInputTriggerConfig {
 	return {
-		title: 'Mentions and references',
+		title: (options.messages ?? en).aiComposerMentions,
 		empty: mentions?.empty ?? references?.empty,
 		items: dedupe([
 			...withKind(mentions?.items, 'mention'),
@@ -301,10 +304,15 @@ function toSource<Item extends RichTextInputItem>(
 	return source as AIComposerTriggerSource<Item>;
 }
 
-function toSkills(items: readonly AIComposerMentionItem[]): AIComposerSkillItem[] {
+function toSkills(
+	items: readonly AIComposerMentionItem[],
+	messages: Messages
+): AIComposerSkillItem[] {
 	return items.flatMap((item) => {
 		if (getAIComposerMentionKind(item, 'mention') !== 'skill') return [];
-		return [{ ...item, type: 'skill', kind: 'skill', group: item.group ?? 'Skills' }];
+		return [
+			{ ...item, type: 'skill', kind: 'skill', group: item.group ?? messages.aiComposerSkills }
+		];
 	});
 }
 
@@ -372,10 +380,10 @@ function isAtMention(item: AIComposerMentionItem): boolean {
 	return kind === 'mention' || kind === 'file' || kind === 'reference';
 }
 
-function defaultGroup(kind: MentionKind): string | undefined {
-	if (kind === 'file') return 'Files';
-	if (kind === 'reference') return 'References';
-	if (kind === 'skill') return 'Skills';
+function defaultGroup(kind: MentionKind, messages: Messages): string | undefined {
+	if (kind === 'file') return messages.aiComposerFiles;
+	if (kind === 'reference') return messages.aiComposerReferences;
+	if (kind === 'skill') return messages.aiComposerSkills;
 	return undefined;
 }
 

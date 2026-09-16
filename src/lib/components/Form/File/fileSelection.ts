@@ -1,8 +1,9 @@
-import { fromEvent } from 'file-selector';
+import { fromEvent, type FileWithPath } from 'file-selector';
 
 export async function getFilesFromEvent(event: Event): Promise<File[]> {
 	const entries = await fromEvent(event);
-	return entries.filter((entry): entry is File => entry instanceof File);
+	// file-selector 5 yields FileWithPath | DataTransferItem; keep the File subset.
+	return entries.filter((entry): entry is FileWithPath => entry instanceof File);
 }
 
 export function getFilesFromClipboard(event: ClipboardEvent): File[] {

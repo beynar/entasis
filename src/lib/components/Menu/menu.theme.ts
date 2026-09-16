@@ -10,9 +10,9 @@ const defaultMenu = cva({
 	base: 'flex flex-col w-full',
 	variants: {
 		density: {
-			small: 'gap-0',
+			compact: 'gap-0',
 			normal: 'gap-micro',
-			large: 'gap-xs'
+			comfortable: 'gap-xs'
 		}
 	},
 	defaultVariants: {

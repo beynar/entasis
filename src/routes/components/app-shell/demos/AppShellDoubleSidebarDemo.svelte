@@ -38,9 +38,7 @@
 	];
 </script>
 
-<div
-	class="h-[560px] w-full overflow-auto rounded-lg border border-neutral-muted bg-neutral-muted"
->
+<div class="border-neutral-muted bg-neutral-muted h-[560px] w-full overflow-auto rounded-lg border">
 	<Sidebar
 		open={leftOpen}
 		onOpenChange={(nextOpen: boolean) => (leftOpen = nextOpen)}
@@ -58,87 +56,76 @@
 			subtitle: 'Workspace'
 		}}
 	>
-		{#snippet children()}
-			<Sidebar
-				open={rightOpen}
-				onOpenChange={(nextOpen: boolean) => (rightOpen = nextOpen)}
-				items={rightItems}
-				side="right"
-				collapsible="icon"
-				variant="admin"
-				frame="contained"
-				width="16rem"
-				widthIcon="3.5rem"
-				edgeReveal={false}
-				keyboardShortcut={false}
-				headerButton={{
-					icon: articleIcon,
-					title: 'Inspector',
-					subtitle: 'Context'
-				}}
+		<Sidebar
+			open={rightOpen}
+			onOpenChange={(nextOpen: boolean) => (rightOpen = nextOpen)}
+			items={rightItems}
+			side="right"
+			collapsible="icon"
+			variant="admin"
+			frame="contained"
+			width="16rem"
+			widthIcon="3.5rem"
+			edgeReveal={false}
+			keyboardShortcut={false}
+			headerButton={{
+				icon: articleIcon,
+				title: 'Inspector',
+				subtitle: 'Context'
+			}}
+		>
+			<PageShell
+				eyebrow="Double sidebar"
+				title="Customer workspace"
+				subtitle="Primary navigation on the left, contextual navigation on the right."
+				contentPadding="normal"
+				contentWidth="full"
 			>
-				{#snippet children()}
-					<PageShell
-						eyebrow="Double sidebar"
-						title="Customer workspace"
-						subtitle="Primary navigation on the left, contextual navigation on the right."
-						contentPadding="normal"
-						contentWidth="full"
+				{#snippet headerActions()}
+					<Button
+						size="small"
+						variant="outline"
+						prefix={sidebarSimpleIcon}
+						label="Toggle left sidebar"
+						onclick={() => (leftOpen = !leftOpen)}
 					>
-						{#snippet headerActions()}
-							<Button
-								size="small"
-								variant="outline"
-								prefix={sidebarSimpleIcon}
-								label="Toggle left sidebar"
-								onclick={() => (leftOpen = !leftOpen)}
-							>
-								Left
-							</Button>
-							<Button
-								size="small"
-								variant="outline"
-								prefix={sidebarSimpleIcon}
-								label="Toggle right sidebar"
-								onclick={() => (rightOpen = !rightOpen)}
-							>
-								Right
-							</Button>
-						{/snippet}
-
-						{#snippet footer()}
-							<span>
-								Left sidebar is {leftOpen ? 'expanded' : 'collapsed'}; right sidebar is
-								{rightOpen ? 'expanded' : 'collapsed'}.
-							</span>
-						{/snippet}
-
-						{#snippet children()}
-							<div class="grid gap-4 lg:grid-cols-3">
-								{#each ['Pipeline', 'Expansion', 'Risk'] as metric, index}
-									<section
-										class="rounded-lg border border-neutral-muted bg-surface-raised p-4"
-									>
-										<p class="text-sm font-medium text-neutral/70">{metric}</p>
-										<p class="mt-3 text-2xl font-semibold text-neutral">{76 + index * 8}%</p>
-									</section>
-								{/each}
-							</div>
-
-							<section
-								class="mt-4 rounded-lg border border-neutral-muted bg-surface-raised p-4"
-							>
-								<p class="text-sm font-medium text-neutral">Manual shell composition</p>
-								<p class="mt-2 text-sm leading-6 text-neutral/70">
-									This keeps AppShell simple while still allowing advanced layouts. Promote this to
-									a first-class AppShell API if both sidebars need coordinated collapse and mobile
-									behavior.
-								</p>
-							</section>
-						{/snippet}
-					</PageShell>
+						Left
+					</Button>
+					<Button
+						size="small"
+						variant="outline"
+						prefix={sidebarSimpleIcon}
+						label="Toggle right sidebar"
+						onclick={() => (rightOpen = !rightOpen)}
+					>
+						Right
+					</Button>
 				{/snippet}
-			</Sidebar>
-		{/snippet}
+
+				{#snippet footer()}
+					<span>
+						Left sidebar is {leftOpen ? 'expanded' : 'collapsed'}; right sidebar is
+						{rightOpen ? 'expanded' : 'collapsed'}.
+					</span>
+				{/snippet}
+
+				<div class="grid gap-4 lg:grid-cols-3">
+					{#each ['Pipeline', 'Expansion', 'Risk'] as metric, index (index)}
+						<section class="border-neutral-muted bg-surface-raised rounded-lg border p-4">
+							<p class="text-neutral/70 text-sm font-medium">{metric}</p>
+							<p class="text-neutral mt-3 text-2xl font-semibold">{76 + index * 8}%</p>
+						</section>
+					{/each}
+				</div>
+
+				<section class="border-neutral-muted bg-surface-raised mt-4 rounded-lg border p-4">
+					<p class="text-neutral text-sm font-medium">Manual shell composition</p>
+					<p class="text-neutral/70 mt-2 text-sm leading-6">
+						This keeps AppShell simple while still allowing advanced layouts. Promote this to a
+						first-class AppShell API if both sidebars need coordinated collapse and mobile behavior.
+					</p>
+				</section>
+			</PageShell>
+		</Sidebar>
 	</Sidebar>
 </div>

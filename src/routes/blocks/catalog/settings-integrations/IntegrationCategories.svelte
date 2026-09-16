@@ -40,13 +40,13 @@
 	let selected = $state<(typeof tools)[number] | null>(null);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<header>
-		<p class="text-sm text-primary-readable">Workspace settings</p>
+		<p class="text-primary-readable text-sm">Workspace settings</p>
 		<h2 class="mt-sm text-3xl font-semibold">Tools that work together.</h2>
 	</header>
-	<div class="grid gap-xl md:grid-cols-[12rem_1fr]">
-		<nav class="grid content-start gap-xs" aria-label="Integration categories">
+	<div class="gap-xl grid md:grid-cols-[12rem_1fr]">
+		<nav class="gap-xs grid content-start" aria-label="Integration categories">
 			{#each ['All', 'Design', 'Development', 'Communication'] as name (name)}<Button
 					variant={category === name ? 'soft' : 'ghost'}
 					onclick={() => (category = name)}>{name}</Button
@@ -55,16 +55,16 @@
 		<Stack gap="lg">
 			{#each tools.filter((tool) => category === 'All' || tool.category === category) as tool (tool)}<Card
 					><div
-						class="flex flex-col items-start justify-between gap-md sm:flex-row sm:items-center"
+						class="gap-md flex flex-col items-start justify-between sm:flex-row sm:items-center"
 					>
-						<div class="flex items-center gap-md">
+						<div class="gap-md flex items-center">
 							<span
-								class="grid size-12 place-items-center rounded-lg bg-surface-recessed font-semibold"
+								class="bg-surface-recessed grid size-12 place-items-center rounded-lg font-semibold"
 								>{tool.name.slice(0, 1)}</span
 							>
 							<div>
 								<strong>{tool.name}</strong>
-								<p class="text-sm text-neutral/60">{tool.description}</p>
+								<p class="text-neutral/70 text-sm">{tool.description}</p>
 							</div>
 						</div>
 						<Button variant="outline" size="small" onclick={() => (selected = tool)}

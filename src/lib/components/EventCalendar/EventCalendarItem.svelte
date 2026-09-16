@@ -235,11 +235,11 @@
 			closeDelay={100}
 			openOnFocus
 			size="small"
-			density="small"
+			density="compact"
 			transition={{ out: { duration: 0 } }}
 			disabled={disabled || isInteractionActive}
 			trigger={hoverCardTrigger}
-			content={resolvedTooltip}
+			children={resolvedTooltip}
 			triggerClass="block h-full w-full"
 		/>
 	{:else}
@@ -397,11 +397,11 @@
 	<div class="grid gap-1 text-start">
 		<strong class="text-xs leading-4" style:color={hoverCardColor}>{occurrence.item.title}</strong>
 		{#if occurrence.item.description}
-			<p class="whitespace-pre-wrap text-xs leading-4 text-neutral/75">
+			<p class="text-neutral/75 text-xs leading-4 whitespace-pre-wrap">
 				{occurrence.item.description}
 			</p>
 		{/if}
-		<p class="text-[0.6875rem] leading-3 text-neutral/55 tabular-nums">{dateRangeLabel}</p>
+		<p class="text-neutral/55 text-[0.6875rem] leading-3 tabular-nums">{dateRangeLabel}</p>
 	</div>
 {/snippet}
 

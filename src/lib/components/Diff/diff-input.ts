@@ -41,7 +41,7 @@ export type DiffRenderState = {
  */
 export function createDiffRenderItems(
 	input: DiffInput,
-	options: FileDiffOptions<undefined>
+	options: FileDiffOptions<undefined, undefined>
 ): DiffRenderItem[] {
 	const hasPatch = input.patch != null && input.patch.trim().length > 0;
 	const hasFiles = input.files != null;

@@ -10,21 +10,19 @@
 	let message = $state('');
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Grid columns={{ minWidth: 220, max: 2 }} gap="xl">
-		<Stack as="aside" gap="lg" justify="center" class="rounded-lg bg-primary-muted p-xl">
-			<Chip color="primary">Invitation from Maya Chen</Chip>
+		<Stack as="aside" gap="lg" justify="center" class="bg-primary-muted p-xl rounded-lg">
+			<Chip color="primary" variant="solid">Invitation from Maya Chen</Chip>
 			<h2 class="text-3xl font-semibold">Good work happens together.</h2>
 			<p class="text-neutral/65">Join the team building a calmer way to work.</p>
-			<ul class="grid gap-md text-sm">
+			<ul class="gap-md grid text-sm">
 				<li>✓ Shared projects and decisions</li>
 				<li>✓ One home for your team’s knowledge</li>
 				<li>✓ Editor access to the Design workspace</li>
 			</ul>
 			<Stack orientation="horizontal" gap="sm">
-				{#each ['Maya Chen', 'Sam Rivera', 'Alex Park'] as name (name)}<Avatar
-						user={{ name }}
-					/>{/each}
+				{#each ['Maya Chen', 'Sam Rivera', 'Alex Park'] as name (name)}<Avatar {name} />{/each}
 			</Stack>
 		</Stack>
 		<Card title="Join Northstar" description="Create your local preview profile."

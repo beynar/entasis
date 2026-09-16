@@ -50,7 +50,7 @@
 	<div class="border-neutral-muted bg-surface mt-12 w-full overflow-hidden rounded-xl border">
 		{#if docs.htmlAttributes.length > 0}
 			<div class="border-neutral-muted/40 flex items-center gap-2 border-b px-6 py-3">
-				<span class="text-neutral/45 text-[10.5px] font-semibold tracking-[0.12em] uppercase">
+				<span class="text-neutral/65 text-[10.5px] font-semibold tracking-[0.12em] uppercase">
 					Extends
 				</span>
 				{#each docs.htmlAttributes as htmlAttributes (htmlAttributes)}
@@ -60,14 +60,14 @@
 				{/each}
 			</div>
 		{/if}
-		<div class="overflow-x-auto">
+		<div class="overflow-x-auto" role="region" aria-label="Props table" tabindex="0">
 			<table class="w-full border-collapse text-left">
 				{#each sections as section (section.label)}
 					<tbody>
 						<tr>
 							<th
 								colspan="3"
-								class="text-neutral/45 px-6 pt-5 pb-1.5 text-left text-[10.5px] font-semibold tracking-[0.12em] uppercase"
+								class="text-neutral/65 px-6 pt-5 pb-1.5 text-left text-[10.5px] font-semibold tracking-[0.12em] uppercase"
 							>
 								<span class="flex items-center gap-1.5">
 									{@render section.icon({ size: 13, color: section.color })}
@@ -76,17 +76,13 @@
 							</th>
 						</tr>
 						{#each section.props as prop (prop.name)}
-							<tr
-								class="state-layer border-neutral-muted/40 border-t align-top transition-colors"
-							>
+							<tr class="state-layer border-neutral-muted/40 border-t align-top transition-colors">
 								<td class="px-6 py-3.5 whitespace-nowrap">
 									<span class="inline-flex items-center gap-2">
-										<span class="text-neutral font-mono text-[13px] font-medium"
-											>{prop.name}</span
-										>
+										<span class="text-neutral font-mono text-[13px] font-medium">{prop.name}</span>
 										{#if !prop.optional}
 											<span
-												class="bg-primary/10 text-primary rounded-full px-1.5 py-0.5 text-[10px] font-medium tracking-wide uppercase"
+												class="bg-primary/10 text-primary-readable rounded-full px-1.5 py-0.5 text-[10px] font-medium tracking-wide uppercase"
 											>
 												Required
 											</span>
@@ -98,7 +94,7 @@
 										<Popover
 											openOnHover
 											openOnClick
-											hoverDelay={150}
+											delay={150}
 											position="bottom"
 											closeOnMouseLeave
 										>
@@ -107,7 +103,7 @@
 													type="button"
 													{@attach popover.reference}
 													onclick={() => popover.toggle()}
-													class="text-primary/90 hover:text-primary decoration-primary/30 hover:decoration-primary/60 cursor-help bg-transparent p-0 text-left font-mono text-[13px] underline decoration-dotted underline-offset-[3px] transition-colors"
+													class="text-primary/90 hover:text-primary-readable decoration-primary/30 hover:decoration-primary/60 cursor-help bg-transparent p-0 text-left font-mono text-[13px] underline decoration-dotted underline-offset-[3px] transition-colors"
 												>
 													{prop.value}
 												</button>

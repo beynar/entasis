@@ -1,9 +1,4 @@
-import type {
-	ChartChannel,
-	ChartColor,
-	ChartKey,
-	ChartRequiredChannel
-} from './chart.core.js';
+import type { ChartChannel, ChartColor, ChartKey, ChartRequiredChannel } from './chart.core.js';
 
 export type ChartRelationVariant = 'network' | 'tree' | 'sankey';
 
@@ -82,6 +77,4 @@ export type ChartSankeyRelationMark<TRow> = ChartRelationBase<TRow> & {
 };
 
 export type ChartRelationMark<TRow> =
-	| ChartTreeRelationMark<TRow>
-	| ChartNetworkRelationMark<TRow>
-	| ChartSankeyRelationMark<TRow>;
+	ChartTreeRelationMark<TRow> | ChartNetworkRelationMark<TRow> | ChartSankeyRelationMark<TRow>;

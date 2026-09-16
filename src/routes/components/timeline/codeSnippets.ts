@@ -159,7 +159,7 @@ export const milestonesCode = [
 ].join('\n');
 
 export const minimalCode = [
-	'<Timeline items={releases} density="large">',
+	'<Timeline items={releases} density="comfortable">',
 	'  {#snippet marker({ index, defaultMarker })}',
 	'    {#if index < 2}',
 	'      <span class="hollow-marker"></span>',
@@ -169,7 +169,7 @@ export const minimalCode = [
 	'  {/snippet}',
 	'</Timeline>',
 	'',
-	'<Timeline items={roadmap} size="small" density="small">',
+	'<Timeline items={roadmap} size="small" density="compact">',
 	'  {#snippet marker({ color })}',
 	'    <span data-color={color} class="size-2.5 rounded-full bg-color"></span>',
 	'  {/snippet}',
@@ -183,7 +183,7 @@ export const activityCode = [
 	"  state: 'complete' | 'active';",
 	'};',
 	'',
-	'<Timeline items={activities} density="large">',
+	'<Timeline items={activities} density="comfortable">',
 	'  {#snippet item({ item, defaultContent })}',
 	'    {@render defaultContent()}',
 	'    <p>{item.relativeTime}</p>',
@@ -209,7 +209,7 @@ export const variantsCode = [
 	'    items={events}',
 	'    {variant}',
 	'    size="small"',
-	'    density="small"',
+	'    density="compact"',
 	'  />',
 	'{/each}'
 ].join('\n');

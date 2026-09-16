@@ -1,5 +1,6 @@
 import { onDestroy, untrack } from 'svelte';
 import { on } from 'svelte/events';
+import { SvelteMap } from 'svelte/reactivity';
 import { BROWSER } from 'esm-env';
 
 type Point = {
@@ -143,11 +144,11 @@ export const useSafeArea = (opts: {
 	debug?: SafeAreaDebugOption;
 	trackPosition?: boolean;
 }) => {
-	let refs = new Map<HTMLElement, SafeAreaRole>();
-	let observerOffs = new Map<HTMLElement, () => void>();
+	const refs = new SvelteMap<HTMLElement, SafeAreaRole>();
+	const observerOffs = new SvelteMap<HTMLElement, () => void>();
 	let pointerOff: (() => void) | null = null;
-	let rects = new Map<HTMLElement, SafeRect>();
-	const rectDebugs = new Map<HTMLElement, SVGSVGElement>();
+	const rects = new SvelteMap<HTMLElement, SafeRect>();
+	const rectDebugs = new SvelteMap<HTMLElement, SVGSVGElement>();
 	let coneDebug: SVGSVGElement | null = null;
 	let lastSafePoint: Point | null = null;
 	let lastSafeRole: 'anchor' | 'floating' | null = null;

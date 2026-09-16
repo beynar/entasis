@@ -1,10 +1,10 @@
-import { bind } from '$lib/utils/state.svelte.js';
+import { createBindableStateClass } from '$lib/utils/state.svelte.js';
 import { useListNavigation } from '$lib/utils/useListNavigation.svelte.js';
 import { untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 import type { CommandGroup, CommandItem, CommandProps } from './command.props.js';
 
-interface CommandOptions<Value extends string = string> extends Pick<
+type CommandOptions<Value extends string = string> = Pick<
 	CommandProps<Value>,
 	| 'items'
 	| 'dialog'
@@ -16,21 +16,35 @@ interface CommandOptions<Value extends string = string> extends Pick<
 	| 'onHighlightChange'
 	| 'onOpenChange'
 	| 'onValueChange'
-> {
+	| 'onSearchChange'
+> & {
 	id: string;
 	isOpen: boolean;
-	value: string;
-}
+	/** Live search query. */
+	search: string;
+	/** Value of the selected command, or null when nothing has been selected. */
+	value: Value | null;
+};
 
-export interface CommandState<Value extends string = string> extends CommandOptions<Value> {}
-export class CommandState<Value extends string = string> {
+// `bind()` copies the option accessors onto the instance; this typed base is what declares
+// them on `this`. A generic class cannot call a mixin factory in its `extends` clause, and
+// merging an interface into the class declaration would be unsafe declaration merging.
+const BoundCommandOptions = createBindableStateClass<object>() as unknown as new <
+	Options extends object
+>(
+	options: Options
+) => Options;
+
+export class CommandState<Value extends string = string> extends BoundCommandOptions<
+	CommandOptions<Value>
+> {
 	private triggerElement = $state<HTMLElement | null>(null);
 
 	listId = $derived(`${this.id}-list`);
 
 	/** Groups whose items match the current search query (or all groups when filtering is off). */
 	filteredGroups: CommandGroup<Value>[] = $derived.by(() => {
-		const query = this.value.trim();
+		const query = this.search.trim();
 		if (!this.shouldFilter || query === '') return this.items;
 		const match = this.filter ?? this.defaultMatch;
 		return this.items
@@ -64,7 +78,7 @@ export class CommandState<Value extends string = string> {
 	}
 
 	constructor(options: CommandOptions<Value>) {
-		bind(this, options);
+		super(options);
 
 		// ⌘/Ctrl + shortcut toggles the palette. Dialog mode only.
 		$effect(() => {
@@ -119,6 +133,9 @@ export class CommandState<Value extends string = string> {
 
 	select = (item: CommandItem<Value>) => {
 		if (item.disabled) return;
+		// Selection state and activation are distinct: `value` only moves when the
+		// selected command actually changes, while `onSelect` reports every activation.
+		this.setValue(item.value);
 		item.onSelect?.(item.value);
 		this.onSelect?.(item.value);
 		if (this.dialog && this.closeOnSelect) this.close();
@@ -140,10 +157,16 @@ export class CommandState<Value extends string = string> {
 		return true;
 	};
 
-	setValue = (value: string) => {
+	setValue = (value: Value | null) => {
 		if (value === this.value) return;
 		this.value = value;
 		this.onValueChange?.(value);
+	};
+
+	setSearch = (search: string) => {
+		if (search === this.search) return;
+		this.search = search;
+		this.onSearchChange?.(search);
 	};
 
 	open = () => {

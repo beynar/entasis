@@ -1,6 +1,5 @@
 export { default as LinkPreview } from './LinkPreview.svelte';
 export type {
-	LinkPreviewCardVariant,
 	LinkPreviewFetch,
 	LinkPreviewHoverCardPayload,
 	LinkPreviewMetadata,
@@ -8,9 +7,7 @@ export type {
 	LinkPreviewPayload,
 	LinkPreviewPosition,
 	LinkPreviewProps,
-	LinkPreviewStatus,
-	LinkPreviewTransition,
-	LinkPreviewTransitionParams
+	LinkPreviewStatus
 } from './linkPreview.props.js';
 export {
 	linkPreviewTheme,

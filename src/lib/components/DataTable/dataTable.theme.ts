@@ -5,8 +5,14 @@ import {
 	useComponentTheme
 } from '$lib/utils/cva/index.js';
 
+// The table sizes its chrome against its OWN width: a DataTable is as often a panel in a split
+// view as it is a full page. `@container` on the root (it already fills its host as a block-level
+// flex column) is the query container for the toolbar; the scrollable `viewport` below declares its
+// own container for cell-level queries. Breakpoint: `@md` (>= 28rem / 448px) is where the 16rem
+// search field can share the toolbar row with the density/column/export buttons — narrower than
+// that it takes the whole row instead.
 const root = cva({
-	base: 'relative flex min-w-0 flex-col gap-lg',
+	base: '@container relative flex min-w-0 flex-col gap-lg',
 	variants: {
 		fill: {
 			true: 'h-full min-h-0',
@@ -19,9 +25,9 @@ const toolbar = cva({
 	base: 'flex min-w-0 flex-wrap items-center justify-between gap-md'
 });
 const toolbarGroup = cva({ base: 'flex min-w-0 flex-wrap items-center gap-md' });
-const search = cva({ base: 'w-full sm:w-64' });
+const search = cva({ base: 'w-full @md:w-64' });
 const viewport = cva({
-	base: 'relative isolate overflow-hidden rounded-sm border border-neutral-muted bg-surface [container-type:inline-size]',
+	base: 'relative isolate overflow-hidden rounded-lg border border-neutral-muted bg-surface [container-type:inline-size]',
 	variants: {
 		fill: {
 			true: 'min-h-0 flex-1',
@@ -34,9 +40,9 @@ const savingIndicator = cva({ base: '!absolute !z-30 !rounded-none' });
 const scrollArea = cva({ base: 'h-full' });
 const virtualTable = cva({ base: 'grid min-w-full table-fixed text-sm' });
 const caption = cva({
-	base: 'text-sm text-neutral/60',
+	base: 'text-sm text-neutral/70',
 	variants: {
-		density: { small: 'mt-lg', normal: 'mt-xl', large: 'mt-layout-md' }
+		density: { compact: 'mt-lg', normal: 'mt-xl', comfortable: 'mt-layout-md' }
 	},
 	defaultVariants: { density: 'normal' }
 });
@@ -48,9 +54,9 @@ const headerCell = cva({
 	base: 'group/data-table-header relative flex min-w-0 items-center gap-xs overflow-visible border-neutral-muted font-medium whitespace-nowrap',
 	variants: {
 		density: {
-			small: 'h-8 px-sm',
-			normal: 'h-10 px-md',
-			large: 'h-12 px-lg'
+			compact: 'h-row-sm px-sm',
+			normal: 'h-row-md px-md',
+			comfortable: 'h-row-lg px-lg'
 		},
 		align: {
 			start: 'justify-start text-left',
@@ -65,12 +71,25 @@ const headerContent = cva({
 	base: 'flex min-w-0 flex-1 items-center gap-xs'
 });
 const headerButton = cva({
-	base: 'flex min-w-0 flex-1 items-center gap-xs rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary [&_svg]:size-3.5 [&_svg]:shrink-0'
+	base: 'flex min-w-0 flex-1 items-center gap-xs rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus/50 [&_svg]:size-icon-sm [&_svg]:shrink-0'
 });
 const headerLabel = cva({ base: 'truncate' });
 const headerActions = cva({ base: 'ml-auto flex shrink-0 items-center' });
+// The column header menu panel is handed to a `PopupMenu` with `mobileSheet`, so it lands on a
+// Popover panel that is portaled out of the table (the floating layer, or a Dialog when it becomes
+// a bottom sheet). No ancestor of it is the DataTable root and it sizes to its own content, so
+// there is nothing to container-query: the width is chosen from the mode the Popover has already
+// picked. That decision lives in JS (`useTheme().isMobile`, < 768px), and reading it here keeps the
+// two in step — the old `sm:` guard fired at 640px, so between 640px and 768px the panel was a
+// sheet wearing a floating panel's width.
 const headerMenuPanel = cva({
-	base: 'w-full max-w-none sm:w-72 sm:max-w-[calc(100vw-2rem)]'
+	variants: {
+		sheet: {
+			true: 'w-full max-w-none',
+			false: 'w-72 max-w-[calc(100vw-2rem)]'
+		}
+	},
+	defaultVariants: { sheet: false }
 });
 const headerMenuButton = cva({
 	base: 'pointer-events-none opacity-0 group-hover/data-table-header:pointer-events-auto group-hover/data-table-header:opacity-100 group-focus-within/data-table-header:pointer-events-auto group-focus-within/data-table-header:opacity-100 focus-visible:pointer-events-auto focus-visible:opacity-100',
@@ -83,19 +102,23 @@ const headerMenuButton = cva({
 	defaultVariants: { active: false }
 });
 const dragHandle = cva({
-	base: 'pointer-events-none absolute -top-1.5 start-1/2 z-30 grid h-4 w-8 -translate-x-1/2 cursor-grab place-items-center text-neutral/60 opacity-0 outline-none transition-[color,opacity] group-hover/data-table-header:pointer-events-auto group-hover/data-table-header:opacity-100 hover:text-neutral focus-visible:pointer-events-auto focus-visible:text-primary-readable focus-visible:opacity-100 active:cursor-grabbing disabled:pointer-events-none'
+	base: 'pointer-events-none absolute -top-1.5 start-1/2 z-30 grid h-4 w-8 -translate-x-1/2 cursor-grab place-items-center text-neutral/70 opacity-0 outline-none transition-[color,opacity] group-hover/data-table-header:pointer-events-auto group-hover/data-table-header:opacity-100 hover:text-neutral focus-visible:pointer-events-auto focus-visible:text-primary-readable focus-visible:opacity-100 active:cursor-grabbing disabled:pointer-events-none'
 });
 const dragThumb = cva({
 	base: 'h-1 w-5 rounded-full bg-current shadow-[0_0_0_1px_var(--color-surface)]'
 });
 const resizeHandle = cva({
-	base: 'absolute inset-y-1 end-0 z-40 w-1 cursor-col-resize touch-none rounded-full outline-none hover:bg-primary focus-visible:bg-primary data-[resizing=true]:bg-primary'
+	base: 'absolute inset-y-1 end-0 z-40 w-1 cursor-col-resize touch-none rounded-full bg-primary opacity-0 outline-none hover:opacity-100 focus-visible:opacity-100 data-[resizing=true]:opacity-100'
 });
 const body = cva({ base: 'relative z-0 grid' });
+// The selected row paints the shared soft selected recipe (`selectedSoft` in
+// `src/lib/components/Theme/theme.recipes.ts`): `bg-selected-muted text-selected-muted-readable`.
+// Spelled out with the `data-[selected=true]:` prefix rather than imported — a Tailwind variant
+// prefix only applies to the first class of a string, so it cannot be composed from a constant.
 const row = cva({
-	base: 'state-layer grid min-w-full border-b border-neutral-muted transition-colors last:border-b-0 data-[selected=true]:bg-primary-muted/40',
+	base: 'state-layer grid min-w-full border-b border-neutral-muted transition-colors last:border-b-0 data-[selected=true]:bg-selected-muted data-[selected=true]:text-selected-muted-readable',
 	variants: {
-		density: { small: 'min-h-8', normal: 'min-h-10', large: 'min-h-12' },
+		density: { compact: 'min-h-row-sm', normal: 'min-h-row-md', comfortable: 'min-h-row-lg' },
 		grouped: { true: 'bg-surface-raised font-medium', false: '' }
 	},
 	defaultVariants: { density: 'normal', grouped: false }
@@ -104,9 +127,9 @@ const cell = cva({
 	base: 'relative flex min-w-0 items-center overflow-hidden border-neutral-muted outline-none',
 	variants: {
 		density: {
-			small: 'min-h-8 px-sm py-xs',
-			normal: 'min-h-10 p-md',
-			large: 'min-h-12 p-lg'
+			compact: 'min-h-row-sm px-sm py-xs',
+			normal: 'min-h-row-md p-md',
+			comfortable: 'min-h-row-lg p-lg'
 		},
 		align: {
 			start: 'justify-start text-left',
@@ -115,7 +138,7 @@ const cell = cva({
 		},
 		pinned: { true: 'z-10 bg-surface', false: '' },
 		focused: {
-			true: 'z-20 bg-primary-muted/20 ring-2 ring-inset ring-primary/70',
+			true: 'z-20 bg-selected-muted/20 ring-2 ring-inset ring-selected/70',
 			false: ''
 		},
 		editing: { true: 'overflow-visible p-0 ring-1 ring-inset ring-primary', false: '' }
@@ -144,9 +167,9 @@ const detailCell = cva({
 	base: 'min-w-0 overflow-hidden',
 	variants: {
 		density: {
-			small: 'px-layout-lg py-md',
+			compact: 'px-layout-lg py-md',
 			normal: 'px-layout-lg py-lg',
-			large: 'px-layout-xl py-xl'
+			comfortable: 'px-layout-xl py-xl'
 		}
 	},
 	defaultVariants: { density: 'normal' }
@@ -154,7 +177,7 @@ const detailCell = cva({
 const spacer = cva({ base: 'pointer-events-none grid border-0' });
 const expander = cva({ base: 'mr-xs shrink-0' });
 const groupValue = cva({ base: 'min-w-0 truncate' });
-const groupCount = cva({ base: 'ml-xs text-xs font-normal text-neutral/60' });
+const groupCount = cva({ base: 'ml-xs text-xs font-normal text-neutral/70' });
 const pinnedBoundary = cva({
 	base: 'after:pointer-events-none after:absolute after:inset-y-0 after:w-px after:bg-neutral-muted',
 	variants: {
@@ -174,14 +197,17 @@ const editorInputContainer = cva({
 	base: 'w-full rounded-none border-0 bg-transparent shadow-none transition-none focus-within:ring-0',
 	variants: {
 		density: {
-			small: 'min-h-8 px-sm py-xs',
-			normal: 'min-h-10 p-md',
-			large: 'min-h-12 p-lg'
+			compact: 'min-h-row-sm px-sm py-xs',
+			normal: 'min-h-row-md p-md',
+			comfortable: 'min-h-row-lg p-lg'
 		}
 	},
 	defaultVariants: { density: 'normal' }
 });
 const editorSwitchContainer = cva({ base: 'justify-center' });
+// The cell already carries its column header, so the editor's `label` is its accessible name
+// only: rendered for assistive technology, kept out of the cell's layout.
+const editorFieldLabel = cva({ base: 'sr-only' });
 const editorError = cva({
 	base: 'absolute top-full left-0 z-50 mt-xs rounded-sm bg-danger px-md py-xs text-xs text-danger-contrast shadow'
 });
@@ -196,11 +222,11 @@ const filterPanel = cva({
 	defaultVariants: { separated: false }
 });
 const filterHeader = cva({ base: 'flex items-center justify-between gap-lg' });
-const filterLabel = cva({ base: 'text-xs font-medium text-neutral/60' });
+const filterLabel = cva({ base: 'text-xs font-medium text-neutral/70' });
 const filterFields = cva({ base: 'grid grid-cols-2 gap-md' });
 const filterCheckboxGroup = cva({ base: '!gap-xs' });
 const filterCheckboxContainer = cva({ base: '!gap-xs' });
-const filterCheckboxItem = cva({ base: '!min-h-8 !py-xs !pl-layout-lg' });
+const filterCheckboxItem = cva({ base: '!min-h-row-sm !py-xs !pl-layout-lg' });
 const filterCheckboxIndicator = cva({ base: '!top-2 !size-4' });
 const stateRow = cva({ base: 'grid min-h-40' });
 const stateCell = cva({ base: 'relative grid min-w-0' });
@@ -208,9 +234,9 @@ const stateContent = cva({
 	base: 'sticky start-0 grid w-[100cqw] place-items-center p-layout-md text-center'
 });
 const skeletonList = cva({ base: 'grid w-full max-w-3xl gap-lg' });
-const skeletonBar = cva({ base: 'h-8 w-full' });
+const skeletonBar = cva({ base: 'h-row-sm w-full' });
 const footer = cva({ base: 'flex flex-wrap items-center justify-between gap-lg' });
-const summary = cva({ base: 'text-sm text-neutral/60' });
+const summary = cva({ base: 'text-sm text-neutral/70' });
 
 export const dataTableTheme = {
 	root,
@@ -256,6 +282,7 @@ export const dataTableTheme = {
 	editorInput,
 	editorInputContainer,
 	editorSwitchContainer,
+	editorFieldLabel,
 	editorError,
 	filterPanel,
 	filterHeader,

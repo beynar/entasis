@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { untrack } from 'svelte';
 	import type {
 		PDFAnnotation,
@@ -9,6 +10,9 @@
 	} from './pdfViewer.state.svelte.js';
 
 	type ClassFn = () => string;
+
+	/** Reads the given values so the enclosing `$effect` depends on them. */
+	const track = (...values: unknown[]) => values;
 
 	let {
 		viewer,
@@ -21,6 +25,7 @@
 	} = $props();
 
 	let canvasEl = $state<HTMLCanvasElement | null>(null);
+	const t = $derived(useI18n());
 	let textEl = $state<HTMLDivElement | null>(null);
 	let rendered = $state(false);
 	let renderedW = $state(0);
@@ -57,10 +62,7 @@
 	// and re-render on scale / rotation changes.
 	$effect(() => {
 		const should = viewer.renderPages.has(pageNumber);
-		viewer.scale;
-		viewer.rotation;
-		viewer.doc;
-		viewer.pdfjs;
+		track(viewer.scale, viewer.rotation, viewer.doc, viewer.pdfjs);
 		untrack(() => {
 			if (should) void render();
 			else teardown();
@@ -69,8 +71,7 @@
 
 	// Re-apply search highlights when matches change (if this page has text).
 	$effect(() => {
-		viewer.matches;
-		viewer.activeMatch;
+		track(viewer.matches, viewer.activeMatch);
 		untrack(() => applyHighlights());
 	});
 
@@ -129,6 +130,7 @@
 		const pdfjs = viewer.pdfjs;
 		if (!pdfjs || !textEl) return;
 		textLayer?.cancel();
+		// eslint-disable-next-line svelte/no-dom-manipulating -- the text layer's children are created and owned by pdf.js, not by Svelte.
 		textEl.replaceChildren();
 		pdfjs.setLayerDimensions(textEl, viewport);
 		const content = await page.getTextContent();
@@ -185,6 +187,7 @@
 			canvasEl.style.width = '';
 			canvasEl.style.height = '';
 		}
+		// eslint-disable-next-line svelte/no-dom-manipulating -- the text layer's children are created and owned by pdf.js, not by Svelte.
 		textEl?.replaceChildren();
 		links = [];
 		rendered = false;
@@ -258,14 +261,14 @@
 			<a
 				href={link.url}
 				target="_blank"
-				rel="noopener noreferrer"
-				aria-label="Link to {link.url}"
+				rel="noopener noreferrer external"
+				aria-label={t.linkTo(link.url)}
 				style="left:{link.left}px;top:{link.top}px;width:{link.width}px;height:{link.height}px;"
 			></a>
 		{/each}
 	</div>
 	{#if pageError}
-		<div class={classes.pageError()}>Could not render page {pageNumber}</div>
+		<div class={classes.pageError()}>{t.pageRenderError(pageNumber)}</div>
 	{/if}
 </div>
 

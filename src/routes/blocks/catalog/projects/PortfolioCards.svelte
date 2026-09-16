@@ -33,13 +33,15 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Selected work</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Selected work
+		</p>
 		<Heading size="h2" weight="bold">Good things, made together.</Heading>
 	</header>
-	<div class="grid gap-xl md:grid-cols-2">
-		{#each projects as project (project.title)}<a href="/docs" class="group flex flex-col gap-lg"
+	<div class="gap-xl grid md:grid-cols-2">
+		{#each projects as project (project.title)}<a href="/docs" class="group gap-lg flex flex-col"
 				><div class="overflow-hidden rounded-lg">
 					<img
 						src={`https://images.unsplash.com/photo-${project.photo}?auto=format&fit=crop&w=900&q=80`}
@@ -48,10 +50,10 @@
 						class="aspect-[4/3] w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-105"
 					/>
 				</div>
-				<div class="flex gap-lg items-center justify-between">
+				<div class="gap-lg flex items-center justify-between">
 					<div>
 						<h3 class="text-xl font-semibold">{project.title}</h3>
-						<p class="mt-sm text-sm text-neutral/55">{project.category}</p>
+						<p class="mt-sm text-neutral/65 text-sm">{project.category}</p>
 					</div>
 					<Chip variant="outline" color="neutral" size="small">{project.year} ↗</Chip>
 				</div></a

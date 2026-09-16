@@ -5,6 +5,7 @@
 	import type { PhoneInputThemeProps } from './phoneInput.theme.js';
 	import { usePhoneInputTheme } from './phoneInput.theme.js';
 	import type { PhoneCountryOption } from './phoneInputCountry.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type PhoneInputCountryTriggerProps = {
 		country: PhoneCountryOption | null;
@@ -20,8 +21,9 @@
 		$props();
 
 	const classes = $derived(usePhoneInputTheme(theme));
+	const t = $derived(useI18n());
 	const label = $derived(
-		country ? `Change country, ${country.name} +${country.dialCode}` : 'Choose country'
+		country ? t.changeCountry(country.name, country.dialCode) : `${t.choose} ${t.country}`
 	);
 </script>
 
@@ -32,9 +34,9 @@
 	{size}
 	{disabled}
 	{label}
-	aria-haspopup="dialog"
-	aria-expanded={open}
-	aria-controls={open ? controls : undefined}
+	haspopup="dialog"
+	expanded={open}
+	controls={open ? controls : undefined}
 	class={classes.countryTrigger({
 		size,
 		open,

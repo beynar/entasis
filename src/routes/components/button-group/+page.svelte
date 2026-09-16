@@ -39,7 +39,7 @@
 	features={[
 		'Composes shared Button primitives',
 		'Joined segments with shared borders',
-		'focus-visible ring lifts above neighbors',
+		'Active segment ring lifts above neighbors',
 		'Shared size, color & variant props'
 	]}
 >

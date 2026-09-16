@@ -13,7 +13,7 @@
 	import type { PopoverState } from '../Popover/popover.state.svelte.js';
 	import Separator from '../Separator/Separator.svelte';
 	import Slot from '../Slot/Slot.svelte';
-	import type { Breakpoint } from '../Theme/theme.js';
+	import type { ResponsiveProps } from '../Theme/theme.js';
 	import type { MenuProps } from './menu.props.js';
 	import { useMenuTheme } from './menu.theme.js';
 
@@ -35,8 +35,12 @@
 	const isInMobileSheet = $derived(parentPopover?.isMobileSheet ?? false);
 	const hasParentMenu = $derived(!!parentPopover?.parent);
 	const showBackControl = $derived(isInMobileSheet && hasParentMenu);
-	const submenuPosition = (breakpoint: Breakpoint): Placement =>
-		breakpoint === 'xs' || breakpoint === 'sm' ? 'bottom-start' : 'right-start';
+	// Narrow viewports have no room beside the parent panel, so the submenu drops below it
+	// instead; `md` up it flies out to the side. The nearest-below cascade covers `sm` from `xs`.
+	const submenuPosition: ResponsiveProps<Placement> = {
+		xs: 'bottom-start',
+		md: 'right-start'
+	};
 
 	let submenuPopovers = $state<Record<number, PopoverState>>({});
 	// Derived from the popovers' own isOpen (which flips the instant open()/close()
@@ -45,6 +49,7 @@
 	const anySubmenuOpen = $derived(Object.values(submenuPopovers).some((p) => p.isOpen));
 
 	const navigation = useNavigation({
+		typeahead: true,
 		enabled: () => {
 			if (parentPopover?.hasChildOpen || anySubmenuOpen) return false;
 			return true;
@@ -156,7 +161,7 @@
 			<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -- Remove the menu discriminant before forwarding native element props. -->
 			{@const { type: _type, ...optionProps } = item}
 			<MenuOption
-				role="menuitem"
+				role={optionProps.selected !== undefined ? 'menuitemradio' : 'menuitem'}
 				{density}
 				{...optionProps}
 				theme={theme?.option}
@@ -177,7 +182,7 @@
 				menu,
 				openOnHover = true,
 				openOnClick = true,
-				hoverDelay = 100,
+				delay = 100,
 				closeOnMouseLeave = true,
 				debugSafeArea = false,
 				popoverClass,
@@ -192,7 +197,7 @@
 				position={submenuPosition}
 				openOnHover={openOnHover && !item.disabled && !isInMobileSheet}
 				{openOnClick}
-				{hoverDelay}
+				{delay}
 				{closeOnMouseLeave}
 				{debugSafeArea}
 				closeOnEscape={true}
@@ -217,8 +222,6 @@
 						active={popover.isOpen}
 						attrs={{
 							...attrs,
-							'aria-haspopup': 'menu',
-							'aria-expanded': popover.isOpen ? 'true' : 'false',
 							'data-menu-keep-open': 'true'
 						}}
 						onclick={(event) => {

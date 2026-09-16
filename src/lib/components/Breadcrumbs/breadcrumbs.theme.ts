@@ -1,8 +1,12 @@
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 
+// No `@container` here: the trail is inline-sized in practice — `PageShellHeader` renders it as a
+// flex item next to the back button, so it is sized by its own content and inline-size containment
+// would collapse it to nothing. The gap is therefore a single unconditional value instead of a
+// responsive one; the link padding and the caret separator carry the rhythm at every width.
 const defaultBreadcrumbsContainer = cva({
-	base: 'text-neutral/60 flex flex-wrap items-center gap-sm text-sm break-words sm:gap-xl',
+	base: 'text-neutral/70 flex flex-wrap items-center gap-sm text-sm break-words',
 	variants: {},
 	defaultVariants: {}
 });
@@ -11,7 +15,7 @@ const defaultBreadcrumbsItem = cva({
 	base: 'inline-flex items-center gap-sm',
 	variants: {
 		disabled: {
-			true: 'text-neutral/50 cursor-not-allowed *:pointer-events-none',
+			true: 'text-neutral/70 cursor-not-allowed *:pointer-events-none',
 			false: 'cursor-pointer'
 		},
 		active: {
@@ -23,7 +27,7 @@ const defaultBreadcrumbsItem = cva({
 });
 
 const defaultBreadcrumbsLink = cva({
-	base: 'px-md py-micro  outline-none focus-visible:ring-1 focus-visible:ring-neutral focus-visible:ring-offset-1 ring-offset-surface rounded-sm',
+	base: 'px-md py-micro  outline-none focus-visible:ring-1 focus-visible:ring-focus/50 focus-visible:ring-offset-1 ring-offset-surface rounded-sm',
 	variants: {
 		disabled: {
 			true: '',
@@ -40,7 +44,7 @@ const defaultBreadcrumbsLink = cva({
 });
 
 const defaultBreadcrumbsSeparator = cva({
-	base: 'flex items-center text-neutral/60 [&>svg]:size-3.5',
+	base: 'flex items-center text-neutral/70 [&>svg]:size-icon-sm',
 	variants: {},
 	defaultVariants: {}
 });

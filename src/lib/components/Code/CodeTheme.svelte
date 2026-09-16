@@ -1,12 +1,15 @@
 <!--
-	Defines every `--code-token-*` CSS variable consumed by the Shiki syntax theme
-	(see `code.syntax-theme.ts`) in terms of our `--color-*` design tokens. Because
-	those design tokens already switch per theme, the light block covers both modes
-	for hues that read well in both; the dark override block only re-tunes the few
+	Defines every `--code-token-*` CSS variable in terms of our `--color-*` design
+	tokens and maps the highlighter's `th-*` token classes onto them. Because the
+	design tokens already switch per theme, the light block covers both modes for
+	hues that read well in both; the dark override block only re-tunes the few
 	roles that need a lighter treatment on the dark surface (notably `tag`, whose
 	dark `--color-danger` is very dark).
 
-	All selectors are `:global` so the styles reach the `{@html}` Shiki output.
+	The Diff component's Shiki theme (`Diff/diff.syntax-theme.ts`) references the
+	same variables, so diffs and code blocks share one palette.
+
+	All selectors are `:global` so the styles reach the `{@html}` highlighter output.
 	Mounting this component multiple times is harmless — the declarations are
 	idempotent.
 -->
@@ -20,20 +23,20 @@
 			var(--color-neutral) 72%,
 			var(--code-token-surface)
 		);
-		--code-token-keyword: var(--color-primary);
-		--code-token-string: var(--color-success);
-		--code-token-number: var(--color-warning);
-		--code-token-constant: var(--color-warning);
-		--code-token-function: var(--color-info);
+		--code-token-keyword: var(--color-primary-readable);
+		--code-token-string: var(--color-success-readable);
+		--code-token-number: var(--color-warning-readable);
+		--code-token-constant: var(--color-warning-readable);
+		--code-token-function: var(--color-info-readable);
 		--code-token-variable: color-mix(in oklab, var(--color-neutral) 88%, var(--color-info));
 		--code-token-property: color-mix(in oklab, var(--color-info) 60%, var(--color-neutral));
-		--code-token-tag: var(--color-danger);
-		--code-token-regex: var(--color-success);
-		--code-token-escape: var(--color-warning);
-		--code-token-error: var(--color-danger);
-		--code-token-inserted: var(--color-success);
-		--code-token-deleted: var(--color-danger);
-		--code-token-changed: var(--color-warning);
+		--code-token-tag: var(--color-danger-readable);
+		--code-token-regex: var(--color-success-readable);
+		--code-token-escape: var(--color-warning-readable);
+		--code-token-error: var(--color-danger-readable);
+		--code-token-inserted: var(--color-success-readable);
+		--code-token-deleted: var(--color-danger-readable);
+		--code-token-changed: var(--color-warning-readable);
 		--code-token-inserted-surface: color-mix(in oklab, var(--color-success) 14%, transparent);
 		--code-token-deleted-surface: color-mix(in oklab, var(--color-danger) 14%, transparent);
 		--code-token-changed-surface: color-mix(in oklab, var(--color-warning) 14%, transparent);
@@ -49,49 +52,100 @@
 		--code-token-property: color-mix(in oklab, var(--color-info) 70%, var(--color-neutral));
 	}
 
-	/* Shiki output uses inline `style="color:var(--code-token-*)"`, so no per-span
-	   rule is needed. Keep the pre transparent so the container background shows. */
-	:global([data-slot='code'] pre.shiki) {
-		background-color: transparent !important;
+	/* The pre stays transparent so the container background shows through. */
+	:global([data-slot='code'] pre.th-code) {
 		margin: 0;
+		background-color: transparent;
+		color: var(--code-token-plain);
 	}
 
-	/* Smooth the color transition when the theme flips. */
-	@media (prefers-reduced-motion: no-preference) {
-		:global([data-slot='code'] .shiki span) {
-			transition: color 160ms ease;
-		}
+	/* Token classes emitted by TanStack Highlight (`th-token th-<role>`), mapped to our roles. */
+	:global([data-slot='code'] .th-token) {
+		color: var(--code-token-plain);
+	}
+	:global([data-slot='code'] .th-keyword) {
+		color: var(--code-token-keyword);
+	}
+	:global([data-slot='code'] .th-heading) {
+		color: var(--code-token-keyword);
+		font-weight: 600;
+	}
+	:global([data-slot='code'] .th-string),
+	:global([data-slot='code'] .th-code-inline) {
+		color: var(--code-token-string);
+	}
+	:global([data-slot='code'] .th-number) {
+		color: var(--code-token-number);
+	}
+	:global([data-slot='code'] .th-literal) {
+		color: var(--code-token-constant);
+	}
+	:global([data-slot='code'] .th-comment) {
+		color: var(--code-token-comment);
+		font-style: italic;
+	}
+	:global([data-slot='code'] .th-meta) {
+		color: var(--code-token-comment);
+	}
+	:global([data-slot='code'] .th-function),
+	:global([data-slot='code'] .th-command),
+	:global([data-slot='code'] .th-type) {
+		color: var(--code-token-function);
+	}
+	:global([data-slot='code'] .th-variable) {
+		color: var(--code-token-variable);
+	}
+	:global([data-slot='code'] .th-property),
+	:global([data-slot='code'] .th-attr) {
+		color: var(--code-token-property);
+	}
+	:global([data-slot='code'] .th-tag),
+	:global([data-slot='code'] .th-selector) {
+		color: var(--code-token-tag);
+	}
+	:global([data-slot='code'] .th-operator) {
+		color: var(--code-token-punctuation);
+	}
+	:global([data-slot='code'] .th-link) {
+		color: var(--code-token-regex);
+		text-decoration: underline;
+	}
+	:global([data-slot='code'] .th-inserted) {
+		color: var(--code-token-inserted);
+		background-color: var(--code-token-inserted-surface);
+	}
+	:global([data-slot='code'] .th-deleted) {
+		color: var(--code-token-deleted);
+		background-color: var(--code-token-deleted-surface);
 	}
 
-	/* Line-number gutter — driven by a CSS counter so numbers stay in sync
-	   regardless of wrapping. Only active when the highlighter tagged the code
-	   with `data-line-numbers`. */
-	:global([data-slot='code'] code[data-line-numbers]) {
-		counter-reset: code-line;
+	/* Smooth the color transition when the theme flips, unless Theme has flagged
+	   reduced motion on <html> (OS setting or `reduceMotion` prop). */
+	:global(html:not([data-svelai-reduce-motion]) [data-slot='code'] .th-code span) {
+		transition: color 160ms ease;
 	}
 
-	:global([data-slot='code'] code[data-line-numbers] [data-line]) {
-		counter-increment: code-line;
-	}
-
-	:global([data-slot='code'] code[data-line-numbers] [data-line]) {
+	/* Line-number gutter — the highlighter wraps every line in `.th-line` carrying
+	   its one-based number in `data-line`, so the gutter is a pseudo-element reading
+	   that attribute and stays in sync regardless of wrapping. */
+	:global([data-slot='code'] .th-code--line-numbers .th-line) {
 		display: block;
 	}
 
 	/* Reserve the gutter on every visual row when a numbered line wraps. The
-	   negative margin pulls the counter into that reserved space on row one. */
-	:global([data-slot='code'] code[data-line-numbers][data-wrap] [data-line]) {
+	   negative margin pulls the number into that reserved space on row one. */
+	:global([data-slot='code'] .th-code--line-numbers[data-wrap] .th-line) {
 		padding-left: 4rem;
 	}
 
-	:global([data-slot='code'] code[data-line-numbers][data-wrap] [data-line])::before {
+	:global([data-slot='code'] .th-code--line-numbers[data-wrap] .th-line)::before {
 		margin-left: -4rem;
 	}
 
 	/* `sticky; left: 0` pins the gutter to the left edge so it stays visible while a long
 	   line scrolls horizontally under it; the background strip masks the code sliding behind. */
-	:global([data-slot='code'] code[data-line-numbers] [data-line])::before {
-		content: counter(code-line);
+	:global([data-slot='code'] .th-code--line-numbers .th-line)::before {
+		content: attr(data-line);
 		position: sticky;
 		left: 0;
 		display: inline-block;

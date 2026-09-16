@@ -165,10 +165,10 @@
 	}
 </script>
 
-<section class="mx-auto grid w-full max-w-6xl gap-xl lg:grid-cols-3">
-	<aside class="flex min-w-0 flex-col gap-lg lg:col-span-1">
-		<div class="flex items-start justify-between gap-md">
-			<div class="flex min-w-0 flex-col gap-sm">
+<section class="gap-xl mx-auto grid w-full max-w-6xl lg:grid-cols-3">
+	<aside class="gap-lg flex min-w-0 flex-col lg:col-span-1">
+		<div class="gap-md flex items-start justify-between">
+			<div class="gap-sm flex min-w-0 flex-col">
 				<p class="text-neutral text-lg font-semibold">Records</p>
 				<p class="text-neutral/65 text-sm">Choose a record to edit or create a new one.</p>
 			</div>
@@ -179,7 +179,7 @@
 
 		<nav
 			aria-label="Records"
-			class="border-neutral-muted bg-surface flex flex-col gap-sm rounded-lg border p-md"
+			class="border-neutral-muted bg-surface gap-sm p-md flex flex-col rounded-lg border"
 		>
 			{#each records as record (record.id)}
 				<MenuOption
@@ -193,7 +193,7 @@
 			{/each}
 
 			{#if records.length === 0}
-				<div class="flex flex-col gap-sm p-lg text-center">
+				<div class="gap-sm p-lg flex flex-col text-center">
 					<p class="text-neutral font-medium">No records yet</p>
 					<p class="text-neutral/65 text-sm">Create the first record to get started.</p>
 				</div>
@@ -239,7 +239,7 @@
 		>
 			{#if savedMessage}
 				<div
-					class="border-success/30 bg-success/10 text-success-dark flex items-center gap-sm rounded-md border p-md text-sm"
+					class="border-success/30 bg-success/10 text-success-dark gap-sm p-md flex items-center rounded-md border text-sm"
 					role="status"
 				>
 					<span class="shrink-0">{@render checkCircleIcon()}</span>

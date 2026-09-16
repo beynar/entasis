@@ -53,8 +53,9 @@ Or render a unified patch string (can contain multiple files):
 - **renderAnnotationClass**: string - Classes merged onto the annotation snippet host element.
 
 ### Selection Props
-- **selectedLines**: SelectedLineRange | null (bindable) - Controlled selected line range (\`{ start, end, side?, endSide? }\`). Use \`null\` to clear.
-- **onSelectedLinesChange**: (range: SelectedLineRange | null) => void - Fires when the selection changes.
+- **selection**: SelectedLineRange | null (bindable) - Controlled selected line range (\`{ start, end, side?, endSide? }\`). Use \`null\` to clear.
+- **defaultSelection**: SelectedLineRange | null - Initial selected line range when \`selection\` is omitted.
+- **onSelectionChange**: (payload: SelectedLineRange | null) => void - Fires once for each diff-driven selection change. Line selection is a selection model, so it uses the \`onSelectionChange\` state family, not \`onSelect\`.
 
 ### Advanced Props
 - **options**: FileDiffOptions - Escape hatch forwarded to each \`@pierre/diffs\` \`FileDiff\`. The ergonomic props above win over matching fields.
@@ -88,10 +89,10 @@ Or render a unified patch string (can contain multiple files):
 
 \`\`\`svelte
 <script>
-  let selectedLines = $state(null);
+  let selection = $state(null);
 </script>
 
-<Diff {files} bind:selectedLines onSelectedLinesChange={(r) => console.log(r)} />
+<Diff {files} bind:selection onSelectionChange={(r) => console.log(r)} />
 \`\`\`
 
 ## Structure
@@ -108,4 +109,5 @@ div[data-slot="diff"]           ← root (theme.diff)
 - Rendering is client-only; on the server the mount container is empty and fills in on mount.
 - Colors come from the shared Code syntax theme — the component renders \`<CodeTheme />\` so the \`--code-token-*\` variables exist wherever \`Diff\` is used, and light/dark adaptation is automatic.
 - Invalid input (both \`patch\` and \`files\`, an empty patch, or unparseable content) is caught and shown in the error surface instead of throwing.
+- Each file's code column scrolls horizontally inside the \`@pierre/diffs\` shadow root; while it overflows the component names it as a \`role="region"\` and gives it a tab stop, so long lines are reachable from the keyboard.
 `;

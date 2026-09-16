@@ -5,17 +5,25 @@ import {
 	useComponentTheme
 } from '$lib/utils/cva/index.js';
 
+// A Field lays itself out against its OWN width, not the viewport: the `left` (horizontal)
+// label layout turns the root into an inline-size container and every breakpoint below is a
+// container query, so a narrow Field on a wide screen still stacks its label above the control.
+// `@lg:` = 32rem of field width — the label track is `minmax(8rem, 0.4fr)`, so at 32rem the
+// control still gets ~19rem, the narrowest width at which a text input, a select or a date
+// control reads as a real control rather than a squeezed box. Below that the two-column grid
+// collapses: every part spans both tracks (`col-start-1 col-end-3`) and stacks in source order.
+// `top` never queries anything, so it never pays for containment.
 const defaultField = cva({
 	base: 'grid min-w-0',
 	variants: {
 		density: {
-			small: 'gap-xs',
-			normal: 'gap-md',
-			large: 'gap-lg'
+			compact: 'gap-xs [&>legend]:mb-xs',
+			normal: 'gap-md [&>legend]:mb-md',
+			comfortable: 'gap-lg [&>legend]:mb-lg'
 		},
 		labelPosition: {
 			top: 'grid-cols-1',
-			left: 'grid-cols-1 md:grid-cols-[minmax(8rem,0.4fr)_minmax(0,1fr)] md:gap-x-layout-md'
+			left: '@container grid-cols-[minmax(8rem,0.4fr)_minmax(0,1fr)] gap-x-layout-md'
 		},
 		hasError: {
 			true: 'text-danger-readable',
@@ -33,12 +41,12 @@ const defaultFieldHeader = cva({
 	variants: {
 		labelPosition: {
 			top: '',
-			left: 'md:col-start-1 md:row-start-1 md:self-start md:pt-md'
+			left: 'col-start-1 col-end-3 @lg:col-end-2 @lg:row-start-1 @lg:self-start @lg:pt-md'
 		},
 		density: {
-			small: 'gap-xs',
+			compact: 'gap-xs',
 			normal: 'gap-md',
-			large: 'gap-lg'
+			comfortable: 'gap-lg'
 		},
 		required: {
 			false: ''
@@ -73,9 +81,9 @@ const defaultFieldActions = cva({
 	base: 'flex items-start gap-md',
 	variants: {
 		density: {
-			small: 'gap-xs',
+			compact: 'gap-xs',
 			normal: 'gap-md',
-			large: 'gap-lg'
+			comfortable: 'gap-lg'
 		}
 	}
 });
@@ -85,7 +93,7 @@ const defaultFieldErrorsContainer = cva({
 	variants: {
 		labelPosition: {
 			top: '',
-			left: 'md:col-start-2'
+			left: 'col-start-1 col-end-3 @lg:col-start-2'
 		},
 		size: {
 			small: 'text-xs',
@@ -111,12 +119,12 @@ const defaultFieldInputContainer = cva({
 	variants: {
 		labelPosition: {
 			top: '',
-			left: 'md:col-start-2 md:row-start-1 md:self-center'
+			left: 'col-start-1 col-end-3 @lg:col-start-2 @lg:row-start-1 @lg:self-center'
 		},
 		density: {
-			small: 'gap-xs',
+			compact: 'gap-xs',
 			normal: 'gap-md',
-			large: 'gap-lg'
+			comfortable: 'gap-lg'
 		},
 		hasError: {
 			true: '!ring-danger rounded-md !ring-2 ring-offset-2',
@@ -129,9 +137,9 @@ const defaultFieldPrefix = cva({
 	base: 'flex items-center gap-md',
 	variants: {
 		density: {
-			small: 'gap-xs',
+			compact: 'gap-xs',
 			normal: 'gap-md',
-			large: 'gap-lg'
+			comfortable: 'gap-lg'
 		}
 	}
 });
@@ -140,9 +148,9 @@ const defaultFieldSuffix = cva({
 	base: 'flex items-center gap-md',
 	variants: {
 		density: {
-			small: 'gap-xs',
+			compact: 'gap-xs',
 			normal: 'gap-md',
-			large: 'gap-lg'
+			comfortable: 'gap-lg'
 		}
 	}
 });
@@ -177,18 +185,18 @@ const defaultFieldFooter = cva({
 	variants: {
 		labelPosition: {
 			top: '',
-			left: 'md:col-start-2'
+			left: 'col-start-1 col-end-3 @lg:col-start-2'
 		},
 		density: {
-			small: 'gap-xs',
+			compact: 'gap-xs',
 			normal: 'gap-md',
-			large: 'gap-lg'
+			comfortable: 'gap-lg'
 		}
 	}
 });
 
 const defaultFieldDescription = cva({
-	base: 'text-neutral/60 text-xs leading-3 flex-1',
+	base: 'text-neutral/70 text-xs leading-3 flex-1',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -199,7 +207,7 @@ const defaultFieldDescription = cva({
 });
 
 const defaultFieldHelper = cva({
-	base: 'text-neutral/60 text-xs leading-3',
+	base: 'text-neutral/70 text-xs leading-3',
 	variants: {
 		size: {
 			small: 'text-xs',

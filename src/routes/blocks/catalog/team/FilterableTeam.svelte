@@ -8,7 +8,7 @@
 	import { Tabbar } from 'svelai/tabbar';
 	import { TextInput } from 'svelai/text-input';
 	let query = $state<string | null>('');
-	let active = $state(0);
+	let active = $state('Everyone');
 	const departments = ['Everyone', 'Design', 'Engineering', 'Research'];
 	const people = [
 		{ name: 'Maya Chen', role: 'Product designer', department: 'Design', city: 'Paris' },
@@ -21,29 +21,31 @@
 	const filtered = $derived(
 		people.filter(
 			(person) =>
-				(active === 0 || person.department === departments[active]) &&
+				(active === 'Everyone' || person.department === active) &&
 				`${person.name} ${person.role}`.toLowerCase().includes((query ?? '').toLowerCase())
 		)
 	);
 </script>
 
-<section class="flex flex-col gap-xl p-lg md:p-xl">
-	<div class="flex flex-wrap items-end justify-between gap-lg">
+<section class="gap-xl p-lg md:p-xl flex flex-col">
+	<div class="gap-lg flex flex-wrap items-end justify-between">
 		<Heading as="h2" size="h2" weight="bold">Meet the people making it happen.</Heading><TextInput
 			label="Search the team"
 			placeholder="Name or role"
 			bind:value={query}
 		/>
 	</div>
-	<Tabbar items={['Everyone', 'Design', 'Engineering', 'Research']} bind:value={active} />
-	<div class="grid gap-lg sm:grid-cols-2 lg:grid-cols-3">
+	<Tabbar items={departments} bind:value={active} />
+	<div class="gap-lg grid sm:grid-cols-2 lg:grid-cols-3">
 		{#each filtered as person (person.name)}<Card variant="outline"
 				><Stack gap="lg"
-					><Avatar size="large" user={person} /><Heading as="h3" size="h4">{person.name}</Heading>
-					<p class="text-sm text-neutral/60">{person.role}</p>
-					<div class="flex items-center justify-between gap-sm">
+					><Avatar size="large" name={person.name} /><Heading as="h3" size="h4"
+						>{person.name}</Heading
+					>
+					<p class="text-neutral/70 text-sm">{person.role}</p>
+					<div class="gap-sm flex items-center justify-between">
 						<Chip size="small" variant="soft">{person.department}</Chip><span
-							class="text-xs text-neutral/50">{person.city}</span
+							class="text-neutral/65 text-xs">{person.city}</span
 						>
 					</div></Stack
 				></Card
@@ -52,13 +54,13 @@
 	{#if filtered.length === 0}<Card variant="soft"
 			><Stack gap="lg"
 				><Heading as="h3" size="h4">No teammates match that search.</Heading>
-				<p class="text-neutral/60">Try a different name or choose another department.</p>
+				<p class="text-neutral/70">Try a different name or choose another department.</p>
 				<Button
 					variant="outline"
 					class="self-start"
 					onclick={() => {
 						query = '';
-						active = 0;
+						active = 'Everyone';
 					}}>Clear filters</Button
 				></Stack
 			></Card

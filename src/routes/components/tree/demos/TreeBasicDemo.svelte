@@ -6,7 +6,7 @@
 		density = 'normal',
 		search = true
 	}: {
-		density?: 'small' | 'normal' | 'large';
+		density?: 'compact' | 'normal' | 'comfortable';
 		search?: boolean;
 	} = $props();
 </script>

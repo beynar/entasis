@@ -242,7 +242,8 @@ function surfaceNode(node: RawNode): StructureNode[] {
 export function readThemeParts(project: Project, themeFilePath: string): ThemePart[] {
 	const sourceFile =
 		project.getSourceFile(themeFilePath) ?? project.addSourceFileAtPath(themeFilePath);
-	const cvaConfigs = collectCvaConfigs(sourceFile);
+	const cvaConfigs = collectFactoryConfigs(sourceFile, 'cva');
+	const motionConfigs = collectFactoryConfigs(sourceFile, 'motion');
 
 	for (const decl of sourceFile.getVariableDeclarations()) {
 		if (!decl.isExported() || !/Theme$/.test(decl.getName())) continue;
@@ -259,6 +260,11 @@ export function readThemeParts(project: Project, themeFilePath: string): ThemePa
 				: initializer && Node.isIdentifier(initializer)
 					? initializer.getText()
 					: undefined;
+			const motionConfig = target ? motionConfigs.get(target) : undefined;
+			if (motionConfig) {
+				parts.push({ name, kind: 'motion', used: false, ...parseMotionConfig(motionConfig) });
+				continue;
+			}
 			const config = target ? cvaConfigs.get(target) : undefined;
 			parts.push({ name, used: false, ...(config ? parseCvaConfig(config) : {}) });
 		}
@@ -289,12 +295,20 @@ export function readThemeSetter(project: Project, themeFilePath: string): string
 	return undefined;
 }
 
-/** Map of local `const name = cva({..})` declarations to their config object literal. */
-function collectCvaConfigs(sourceFile: SourceFile): Map<string, ObjectLiteralExpression> {
+/**
+ * Map of local `const name = <factory>({..})` declarations to their config object
+ * literal, for a theme factory (`cva` for class slots, `motion` for the reserved
+ * `motion` slot).
+ */
+function collectFactoryConfigs(
+	sourceFile: SourceFile,
+	factory: 'cva' | 'motion'
+): Map<string, ObjectLiteralExpression> {
 	const configs = new Map<string, ObjectLiteralExpression>();
 	for (const decl of sourceFile.getVariableDeclarations()) {
 		const init = decl.getInitializer();
-		if (!init || !Node.isCallExpression(init) || init.getExpression().getText() !== 'cva') continue;
+		if (!init || !Node.isCallExpression(init) || init.getExpression().getText() !== factory)
+			continue;
 		const arg = init.getArguments()[0];
 		if (arg && Node.isObjectLiteralExpression(arg)) configs.set(decl.getName(), arg);
 	}
@@ -314,6 +328,49 @@ function parseCvaConfig(config: ObjectLiteralExpression): Partial<ThemePart> {
 		...(variants.length && { variants }),
 		...(Object.keys(defaultVariants).length && { defaultVariants })
 	};
+}
+
+/**
+ * A `motion({ base, variants, defaultVariants })` preset. Specs are objects rather
+ * than class strings, so each one is kept as authored (whitespace normalised) and an
+ * empty variant spec (`modal: {}`, which only inherits the base) is preserved.
+ */
+function parseMotionConfig(config: ObjectLiteralExpression): Partial<ThemePart> {
+	const base = objectProp(config, 'base');
+	const variantsObj = objectProp(config, 'variants');
+	const defaultsObj = objectProp(config, 'defaultVariants');
+	const variants: ThemeVariant[] = [];
+
+	for (const prop of variantsObj?.getProperties() ?? []) {
+		if (!Node.isPropertyAssignment(prop)) continue;
+		const optionsObj = prop.getInitializer();
+		if (!optionsObj || !Node.isObjectLiteralExpression(optionsObj)) continue;
+		const options = optionsObj
+			.getProperties()
+			.filter(Node.isPropertyAssignment)
+			.map((option) => ({
+				value: option.getName(),
+				classes: compactSource(option.getInitializer()?.getText())
+			}));
+		if (options.length) variants.push({ name: prop.getName(), options });
+	}
+
+	const defaultVariants = defaultsObj ? parseDefaults(defaultsObj) : {};
+	return {
+		...(base && { base: compactSource(base.getText()) }),
+		...(variants.length && { variants }),
+		...(Object.keys(defaultVariants).length && { defaultVariants })
+	};
+}
+
+/** Source text on one line: comments dropped, runs of whitespace collapsed. */
+function compactSource(text: string | undefined): string {
+	return (text ?? '')
+		.replace(/\/\*[\s\S]*?\*\//g, '')
+		.replace(/\/\/[^\n]*/g, '')
+		.replace(/\s+/g, ' ')
+		.replace(/\{ \}/g, '{}')
+		.trim();
 }
 
 /** Each variant axis (`size`) with the non-empty options it defines (`small` -> classes). */

@@ -41,27 +41,30 @@
 	const discount = $derived(selected.length >= 3 ? 0.15 : selected.length >= 2 ? 0.1 : 0);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Better together</p>
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Better together
+		</p>
 		<Heading size="h2" weight="bold">Build a little collection.</Heading>
-		<p class="max-w-2xl text-neutral/65">
+		<p class="text-neutral/65 max-w-2xl">
 			Pick two objects and save 10%. Pick three or more and save 15%.
 		</p>
 	</header>
 	<Meter
-		value={{ value: selected.length, color: 'primary' }}
+		value={selected.length}
+		color="primary"
 		max={3}
 		label={`${selected.length} objects selected`}
 	/>
-	<div class="grid gap-xl sm:grid-cols-2 lg:grid-cols-4">
+	<div class="gap-xl grid sm:grid-cols-2 lg:grid-cols-4">
 		{#each products as product (product.id)}<article
-				class="flex flex-col gap-lg p-lg rounded-lg border border-neutral/15"
+				class="gap-lg p-lg border-neutral/15 flex flex-col rounded-lg border"
 			>
 				{@render productArt(product.shape, product.color)}<Checkbox
 					label={product.name}
@@ -70,22 +73,22 @@
 						(selected = value
 							? [...selected, product.id]
 							: selected.filter((id) => id !== product.id))}
-				/><span class="text-sm text-neutral/55">{money(product.price)}</span>
+				/><span class="text-neutral/65 text-sm">{money(product.price)}</span>
 			</article>{/each}
 	</div>
-	<div class="flex gap-xl items-center justify-between flex-wrap p-xl rounded-lg bg-primary-muted">
+	<div class="gap-xl p-xl bg-primary-muted flex flex-wrap items-center justify-between rounded-lg">
 		<div>
 			<Chip variant="soft" class="mb-lg w-fit">{Math.round(discount * 100)}% bundle saving</Chip>
 			<p class="text-2xl font-semibold">
 				{money(total * (1 - discount))}
-				{#if discount}<s class="text-lg font-normal text-neutral/45">{money(total)}</s>{/if}
+				{#if discount}<s class="text-neutral/65 text-lg font-normal">{money(total)}</s>{/if}
 			</p>
 		</div>
 		<Button disabled={!selected.length} onclick={() => (added = selected.length)}
 			>Add collection to bag</Button
 		>
 	</div>
-	<p class="text-sm text-success" aria-live="polite">
+	<p class="text-success text-sm" aria-live="polite">
 		{added ? `${added} objects added to the sample bag.` : ''}
 	</p>
 </section>

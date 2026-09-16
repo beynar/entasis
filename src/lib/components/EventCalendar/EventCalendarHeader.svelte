@@ -81,7 +81,6 @@
 		calendar.enabledViews.map((enabledView) => ({
 			value: enabledView,
 			label: viewLabels[enabledView],
-			ariaLabel: viewLabels[enabledView],
 			disabled
 		}))
 	);
@@ -194,12 +193,12 @@
 				items={viewItems}
 				value={calendar.view}
 				size="small"
-				ariaLabel={messages.eventCalendarViewSwitcher}
+				label={messages.eventCalendarViewSwitcher}
 				onValueChange={(nextView) => calendar.setView(nextView)}
 			/>
 		</div>
 		<div class="@[40rem]:hidden">
-			<PopupMenu position="bottom-end" menu={{ items: viewMenuItems, density: 'small' }}>
+			<PopupMenu position="bottom-end" menu={{ items: viewMenuItems, density: 'compact' }}>
 				{#snippet trigger(popover)}
 					<Button
 						type="button"
@@ -207,8 +206,8 @@
 						variant="outline"
 						suffix={caretDownIcon}
 						label={messages.eventCalendarViewMenu}
-						aria-haspopup="menu"
-						aria-expanded={popover.isOpen}
+						haspopup="menu"
+						expanded={popover.isOpen}
 						{disabled}
 						onclick={() => popover.toggle()}
 						{@attach popover.reference}
@@ -233,8 +232,8 @@
 					color="neutral"
 					prefix={calendarIcon}
 					label={messages.eventCalendarChooseDate}
-					aria-haspopup="dialog"
-					aria-expanded={popover.isOpen}
+					haspopup="dialog"
+					expanded={popover.isOpen}
 					{disabled}
 					onclick={() => {
 						calendar.refreshNow();
@@ -253,7 +252,7 @@
 					minDate={pickerBounds.minDate}
 					maxDate={pickerBounds.maxDate}
 					disabledDates={pickerDisabledDates}
-					ariaLabel={messages.eventCalendarChooseDate}
+					label={messages.eventCalendarChooseDate}
 					{disabled}
 					onViewChange={({ startYear, startMonth }) => {
 						pickerYear = startYear;

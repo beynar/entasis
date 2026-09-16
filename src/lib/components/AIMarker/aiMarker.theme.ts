@@ -6,7 +6,7 @@ import {
 } from '$lib/utils/cva/index.js';
 
 const defaultRoot = cva({
-	base: 'group/ai-marker relative flex min-h-4 w-full items-center gap-md text-left text-sm text-neutral/60 [&_svg:not([class*=size-])]:size-4',
+	base: 'group/ai-marker relative flex min-h-4 w-full items-center gap-md text-left text-sm text-neutral/70 [&_svg:not([class*=size-])]:size-4',
 	variants: {
 		variant: {
 			default: null,

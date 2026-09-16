@@ -5,7 +5,7 @@
 	import type { ToggleButtonVariant } from '../ToggleButton/index.js';
 	import { useToggleButtonTheme } from '../ToggleButton/toggleButton.theme.js';
 	import { useToggleButtonGroupTheme } from '../ToggleButtonGroup/toggleButtonGroup.theme.js';
-	import { tooltip } from '../Tooltip/tooltip.svelte.js';
+	import { tooltip } from '../Tooltip/tooltip.attachment.svelte.js';
 	import type { ToggleMenuRadioGroupButton, ToggleMenuRadioGroupItem } from './toggleMenu.props.js';
 
 	let {
@@ -45,7 +45,7 @@
 
 <div
 	role="radiogroup"
-	aria-label={item.ariaLabel}
+	aria-label={item.label}
 	aria-hidden={overflowed || undefined}
 	inert={overflowed || undefined}
 	data-overflowed={overflowed || undefined}
@@ -56,16 +56,16 @@
 	})}
 	{@attach unitReference}
 >
-	{#each Object.entries(item.items) as [key, button]}
+	{#each item.items as button (button.value)}
 		{@const resolvedSize = item.size ?? size ?? 'normal'}
 		{@const resolvedColor = item.color ?? color ?? 'neutral'}
 		{@const resolvedVariant = item.variant ?? variant ?? 'ghost'}
 		{@const isDisabled = disabled || !!item.disabled || !!button.disabled}
-		{@const isChecked = (item.value ?? item.defaultValue) === key}
+		{@const isChecked = (item.value ?? item.defaultValue) === button.value}
 		<button
 			type="button"
 			role="radio"
-			aria-label={button.ariaLabel}
+			aria-label={button.label}
 			aria-checked={isChecked}
 			data-color={resolvedColor}
 			data-checked={isChecked}
@@ -79,10 +79,10 @@
 				disabled: isDisabled,
 				className: button.class
 			})}
-			onclick={() => onValueChange(key)}
+			onclick={() => onValueChange(button.value)}
 			{@attach overflowed ? undefined : buttonReference}
-			{@attach !button.children && button.ariaLabel && !overflowed
-				? tooltip({ content: button.ariaLabel, delay: 350 })
+			{@attach !button.children && button.label && !overflowed
+				? tooltip({ content: button.label, delay: 350 })
 				: undefined}
 		>
 			<Slot

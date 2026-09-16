@@ -52,8 +52,8 @@
 		}
 	]}
 	footerButton={{ title: 'Alex Morgan', subtitle: 'Available', avatar: { fallback: 'AM' } }}
-	>{#snippet children(sidebar)}<main class="flex min-h-screen flex-col gap-lg p-lg">
-			<header class="flex items-center gap-md border-b border-neutral-muted pb-lg">
+	>{#snippet children(sidebar)}<main class="gap-lg p-lg flex min-h-screen flex-col">
+			<header class="gap-md border-neutral-muted pb-lg flex items-center border-b">
 				<Button
 					label="Toggle channels"
 					prefix={sidebarIcon}
@@ -62,19 +62,19 @@
 				/>
 				<div>
 					<h2 class="text-xl font-semibold">{channel}</h2>
-					<p class="text-xs text-neutral/60">A local conversation preview</p>
+					<p class="text-neutral/70 text-xs">A local conversation preview</p>
 				</div>
 			</header>
-			<div class="grid flex-1 content-start gap-lg">
+			<div class="gap-lg grid flex-1 content-start">
 				{#each messages.filter((message) => message.channel === channel) as message (message)}<div
-						class="flex items-start gap-md"
+						class="gap-md flex items-start"
 					>
-						<Avatar user={{ name: message.name }} />
+						<Avatar name={message.name} />
 						<div>
 							<strong class="text-sm">{message.name}</strong>
-							<p class="mt-xs text-sm text-neutral/70">{message.text}</p>
+							<p class="mt-xs text-neutral/70 text-sm">{message.text}</p>
 						</div>
-					</div>{:else}<p class="text-sm text-neutral/60">
+					</div>{:else}<p class="text-neutral/70 text-sm">
 						Start a conversation in {channel}.
 					</p>{/each}
 			</div>

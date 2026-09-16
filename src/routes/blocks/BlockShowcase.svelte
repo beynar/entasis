@@ -17,8 +17,8 @@
 	<meta name="description" content={description} />
 </svelte:head>
 
-<article class="mx-auto flex w-full max-w-7xl flex-col gap-xl">
-	<header class="flex max-w-3xl flex-col gap-sm">
+<article class="gap-xl mx-auto flex w-full max-w-7xl flex-col">
+	<header class="gap-sm flex max-w-3xl flex-col">
 		<a class="text-primary-readable text-sm font-medium hover:underline" href={resolve('/blocks')}
 			>Blocks</a
 		>
@@ -27,14 +27,14 @@
 	</header>
 
 	<section class="border-neutral-muted bg-surface-canvas overflow-hidden rounded-lg border">
-		<div class="min-h-96 p-xl">
+		<div class="p-xl min-h-96">
 			{@render children()}
 		</div>
 	</section>
 
 	<details class="border-neutral-muted bg-surface-canvas overflow-hidden rounded-lg border">
-		<summary class="cursor-pointer px-xl py-lg font-medium">View source</summary>
-		<pre class="border-neutral-muted overflow-auto border-t p-xl text-sm"><code>{source}</code
+		<summary class="px-xl py-lg cursor-pointer font-medium">View source</summary>
+		<pre class="border-neutral-muted p-xl overflow-auto border-t text-sm"><code>{source}</code
 			></pre>
 	</details>
 </article>

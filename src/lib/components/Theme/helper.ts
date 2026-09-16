@@ -42,8 +42,8 @@ type ThemeBlockingScriptOptions = {
 	themes?: readonly string[];
 	validThemes: readonly string[];
 	storageKey: string;
-	enableSystem: boolean;
-	enableColorScheme: boolean;
+	systemTheme: boolean;
+	syncColorScheme: boolean;
 	forcedTheme?: string;
 	defaultTheme: string;
 	attribute: string;
@@ -56,8 +56,8 @@ export const compileThemeBlockingScript = ({
 	themes,
 	validThemes,
 	storageKey,
-	enableSystem,
-	enableColorScheme,
+	systemTheme,
+	syncColorScheme,
 	forcedTheme,
 	defaultTheme,
 	attribute
@@ -65,18 +65,18 @@ export const compileThemeBlockingScript = ({
 	const classNames = !value ? [...(themes ?? [])] : Object.values(value);
 	const escapedDefaultTheme = escapeJsString(defaultTheme);
 	const escapedStorageKey = escapeJsString(storageKey);
-	const systemThemeExpr = enableSystem
+	const systemThemeExpr = systemTheme
 		? `window.matchMedia('${MEDIA}').matches ? 'dark' : 'light'`
 		: "'normal'";
 	const resolvedThemeExpr = forcedTheme
 		? `'${escapeJsString(forcedTheme)}'`
 		: `isSystemTheme ? systemTheme : currentTheme`;
-	const colorSchemeStmt = enableColorScheme
+	const colorSchemeStmt = syncColorScheme
 		? `d.style.setProperty('color-scheme', colorSchemeMode);`
 		: '';
 	const classRemoveStmt =
 		attribute === 'class'
-			? `d.classList.remove(${classNames.map((name) => `'${escapeJsString(name)}'`).join(',')})`
+			? `d.classList.remove(${classNames.map((name) => `'${escapeJsString(name ?? '')}'`).join(',')})`
 			: '';
 	const applyStmt =
 		attribute === 'class'
@@ -92,13 +92,13 @@ export const compileThemeBlockingScript = ({
 		var localStorageTheme; try { localStorageTheme = localStorage.getItem('${escapedStorageKey}'); } catch(e) { localStorageTheme = null; }
 		var systemTheme = ${systemThemeExpr};
 		var isValidTheme = validThemes.indexOf(localStorageTheme) !== -1;
-		var isSystemThemeButDisabled = localStorageTheme === 'system' && ${!enableSystem};
+		var isSystemThemeButDisabled = localStorageTheme === 'system' && ${!systemTheme};
 		var currentTheme = isValidTheme ? localStorageTheme : '${escapedDefaultTheme}';
 		if (isSystemThemeButDisabled) {
 			currentTheme = '${escapedDefaultTheme}';
 			try { localStorage.setItem('${escapedStorageKey}', currentTheme); } catch(e) {}
 		}
-		var isSystemTheme = ${enableSystem ? "currentTheme === 'system'" : 'false'};
+		var isSystemTheme = ${systemTheme ? "currentTheme === 'system'" : 'false'};
 		var resolvedTheme = ${resolvedThemeExpr};
 		var colorSchemeMode = y[resolvedTheme] || (resolvedTheme === 'light' || resolvedTheme === 'dark' ? resolvedTheme : 'normal');
 		var val = x[resolvedTheme] || resolvedTheme;

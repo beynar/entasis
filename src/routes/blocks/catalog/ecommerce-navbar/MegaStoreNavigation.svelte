@@ -34,29 +34,29 @@
 	let query = $state('');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="overflow-hidden rounded-lg border border-neutral/15">
-		<p class="bg-primary py-lg text-center text-xs text-primary-contrast">
+	<div class="border-neutral/15 overflow-hidden rounded-lg border">
+		<p class="bg-primary py-lg text-primary-contrast text-center text-xs">
 			A little something for everyday. Free delivery over $150.
 		</p>
 		<header
-			class="flex gap-xl items-center justify-between flex-wrap p-xl border-b border-neutral/15"
+			class="gap-xl p-xl border-neutral/15 flex flex-wrap items-center justify-between border-b"
 		>
 			<a href="/components" class="text-xl font-semibold tracking-tight">FIELD OBJECTS</a>
-			<nav aria-label="Store categories" class="flex gap-md items-center flex-wrap">
+			<nav aria-label="Store categories" class="gap-md flex flex-wrap items-center">
 				<Popover
 					size="large"
 					position="bottom-start"
 					mobileSheet
 					trigger={{ content: 'Shop collection', variant: 'ghost', color: 'neutral' }}
-					><div class="grid gap-xl sm:grid-cols-2">
-						<div class="flex flex-col gap-md">
-							<p class="text-xs uppercase tracking-widest text-neutral/50">Explore</p>
+					><div class="gap-xl grid sm:grid-cols-2">
+						<div class="gap-md flex flex-col">
+							<p class="text-neutral/65 text-xs tracking-widest uppercase">Explore</p>
 							{#each ['All objects', 'Lighting', 'Ceramics', 'Everyday carry', 'New arrivals'] as link (link)}<Button
 									href="/components"
 									variant="ghost"
@@ -64,10 +64,10 @@
 									class="justify-start">{link} ↗</Button
 								>{/each}
 						</div>
-						<div class="flex flex-col gap-lg">
+						<div class="gap-lg flex flex-col">
 							{@render productArt('vase', 'Clay')}
 							<p class="font-medium">The everyday vessel</p>
-							<p class="text-sm text-neutral/55">Small things, well made.</p>
+							<p class="text-neutral/65 text-sm">Small things, well made.</p>
 						</div>
 					</div></Popover
 				><Button href="/docs" variant="ghost" color="neutral">Our story</Button><Button
@@ -77,7 +77,7 @@
 				>
 			</nav>
 			<Popover size="normal" trigger={{ content: 'Search', variant: 'outline', size: 'small' }}
-				><div class="flex flex-col gap-lg">
+				><div class="gap-lg flex flex-col">
 					<TextInput
 						label="Search collection"
 						placeholder="Product name"
@@ -89,15 +89,15 @@
 							variant="ghost"
 							color="neutral"
 							class="justify-start">{product.name} · {money(product.price)}</Button
-						>{:else}<p class="text-sm text-neutral/55">No matching objects.</p>{/each}
+						>{:else}<p class="text-neutral/65 text-sm">No matching objects.</p>{/each}
 				</div></Popover
 			>
 		</header>
-		<div class="flex flex-col gap-xl p-xl bg-surface-recessed">
+		<div class="gap-xl p-xl bg-surface-recessed flex flex-col">
 			<Chip variant="soft" class="w-fit">New season</Chip><Heading size="h3"
 				>Good things start with a little curiosity.</Heading
 			>
-			<p class="max-w-xl text-neutral/60">Explore the collection through the menu above.</p>
+			<p class="text-neutral/70 max-w-xl">Explore the collection through the menu above.</p>
 		</div>
 	</div>
 </section>

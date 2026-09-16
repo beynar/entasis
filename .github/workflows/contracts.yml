@@ -16,14 +16,20 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
-      - run: npm install --global pnpm@10.32.1
+      - run: npm install --global pnpm@11
       - run: pnpm install --frozen-lockfile
       - run: npm run check:component-contract
+      - run: npm run check:feature-chips
       - run: npm run check:semantic-theme-tokens
+      - run: npm run check:template-purity
       - run: npm run check:public-api-contract
       - run: npm run test:contracts
       - run: npm run check
       - run: npm run test:unit -- --run
       - run: pnpm exec svelte-package
       - run: npm run check:packed-library
+      - run: npm run check:package-consumer
+      - run: npm run check:doc-fences
       - run: pnpm exec publint
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: npm run test:e2e

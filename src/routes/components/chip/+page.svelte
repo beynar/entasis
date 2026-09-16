@@ -8,11 +8,14 @@
 	import ChipPositionSurface from './ChipPositionSurface.svelte';
 
 	const positions = [
-		{ value: 'topLeft', label: 'Top left' },
-		{ value: 'topRight', label: 'Top right' },
-		{ value: 'bottomLeft', label: 'Bottom left' },
-		{ value: 'bottomRight', label: 'Bottom right' }
+		{ value: 'top-left', label: 'Top left' },
+		{ value: 'top-right', label: 'Top right' },
+		{ value: 'bottom-left', label: 'Bottom left' },
+		{ value: 'bottom-right', label: 'Bottom right' }
 	] as const;
+	const filters = ['All', 'Design', 'Engineering', 'Research'] as const;
+	let selectedFilter = $state<(typeof filters)[number]>('All');
+
 	const controls = createComponentControls([
 		{
 			name: 'size',
@@ -25,15 +28,15 @@
 			name: 'variant',
 			type: 'segmented',
 			label: 'Variant',
-			value: 'solid',
+			value: 'outline',
 			options: variants
 		},
 		{
 			name: 'color',
 			type: 'segmented',
 			label: 'Color',
-			value: 'primary',
-			options: ['primary', 'success', 'warning', 'danger']
+			value: 'neutral',
+			options: ['neutral', 'primary', 'success', 'warning', 'danger']
 		}
 	]);
 </script>
@@ -95,6 +98,24 @@
 		</ComponentCard>
 
 		<ComponentCard
+			title="Selected"
+			description="selected paints the shared soft selected fill on top of the variant and stamps data-selected, so a chip list can mark its chosen entries."
+			code={`<Chip selected variant="soft" onclick={() => {}}>Design</Chip>`}
+		>
+			<div class="flex flex-wrap items-center justify-center gap-3">
+				{#each filters as filter (filter)}
+					<Chip
+						selected={selectedFilter === filter}
+						variant={selectedFilter === filter ? 'soft' : 'outline'}
+						onclick={() => (selectedFilter = filter)}
+					>
+						{filter}
+					</Chip>
+				{/each}
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
 			title="Positioned overlay"
 			description="Set position to anchor the Chip over a corner of a relatively positioned container."
 			class="!min-h-fit py-12"
@@ -102,13 +123,13 @@
 	<Card title="Atlas launch" description="Product design">
 		<!-- Card content -->
 	</Card>
-	<Chip position="topRight" color="success" variant="soft">
+	<Chip position="top-right" color="success" variant="soft">
 		On track
 	</Chip>
 </div>`}
 		>
 			<ChipPositionSurface>
-				<Chip position="topRight" color="success" variant="soft">On track</Chip>
+				<Chip position="top-right" color="success" variant="soft">On track</Chip>
 			</ChipPositionSurface>
 		</ComponentCard>
 
@@ -117,7 +138,7 @@
 			description="Each position overlaps its selected corner by half the Chip dimensions."
 			class="!min-h-fit py-12"
 			code={`<div class="relative">
-	<Chip position="bottomRight">Bottom right</Chip>
+	<Chip position="bottom-right">Bottom right</Chip>
 </div>`}
 		>
 			<div class="grid w-full max-w-3xl gap-10 sm:grid-cols-2">

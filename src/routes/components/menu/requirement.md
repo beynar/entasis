@@ -1,7 +1,7 @@
 should accept
-attachements props 
+attachements props
 theme props with key for button option and separator
-array of items that can then render 
+array of items that can then render
 {type "button" } & ButtonProps
 {type "option"} & MenuOptionProps
 {type "separator" }& SeparatorProps

@@ -1,8 +1,7 @@
 import plugin, { type Config } from 'tailwindcss/plugin';
-import type { ThemeOptions } from './theme.js';
-import { applyGlobalEngine, globalKeyframes } from './global.js';
+import { applyGlobalEngine, globalKeyframes, type GlobalEngineOptions } from './global.js';
 
-export default plugin.withOptions<ThemeOptions>(
+export default plugin.withOptions<GlobalEngineOptions>(
 	(options) => (api) => applyGlobalEngine(api, options),
 	(options) =>
 		({

@@ -1,20 +1,24 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import DocPage from '../../DocPage.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
+	import SidebarActivityBarDemo from './demos/SidebarActivityBarDemo.svelte';
 	import SidebarBasicDemo from './demos/SidebarBasicDemo.svelte';
 	import SidebarIconDemo from './demos/SidebarIconDemo.svelte';
 	import SidebarPanelModeDemo from './demos/SidebarPanelModeDemo.svelte';
 	import SidebarTreeDemo from './demos/SidebarTreeDemo.svelte';
 	import SidebarVariantDemo from './demos/SidebarVariantDemo.svelte';
 	import ShellMentalModel from '../ShellMentalModel.svelte';
+	import rawActivityBarCode from './demos/SidebarActivityBarDemo.svelte?raw';
 	import rawIconCode from './demos/SidebarIconDemo.svelte?raw';
 	import rawPanelModeCode from './demos/SidebarPanelModeDemo.svelte?raw';
 	import rawTreeCode from './demos/SidebarTreeDemo.svelte?raw';
 	import rawVariantCode from './demos/SidebarVariantDemo.svelte?raw';
 	import { createComponentControls } from '../../componentControls.svelte.js';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 
-	const sidebarVariants = ['admin', 'floating', 'inset', 'split'] as const;
+	const sidebarVariants = ['admin', 'floating', 'inset', 'split', 'framed'] as const;
+	const activeVariants = ['soft', 'outline', 'solid'] as const;
 	const controls = createComponentControls([
 		{
 			name: 'variant',
@@ -35,10 +39,18 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
+		},
+		{
+			name: 'activeVariant',
+			type: 'segmented',
+			label: 'Active',
+			value: 'soft',
+			options: activeVariants
 		}
 	]);
 
+	const activityBarCode = toPublicExampleCode(rawActivityBarCode);
 	const iconCode = toPublicExampleCode(rawIconCode);
 	const panelModeCode = toPublicExampleCode(rawPanelModeCode);
 	const treeCode = toPublicExampleCode(rawTreeCode);
@@ -62,28 +74,42 @@
 	component="Sidebar"
 	features={[
 		'Desktop icon and offcanvas collapse modes',
-		'Resizable desktop panels with drag and keyboard handles',
+		'Resizable desktop panels with drag handles',
 		'Hidden offcanvas sidebars reveal, resize, and dismiss through a safe hover area',
+		{
+			label: 'Hover peek keeps focus inside the panel',
+			test: 'a11y:sidebar.peek-keeps-focus'
+		},
+		{
+			label: 'Hover peek stays open while a row menu is open',
+			test: 'a11y:sidebar.peek-keeps-open-menu'
+		},
+		{ label: 'Activity bar keyboard navigation', test: 'a11y:sidebar.activity-bar' },
+		'Activity bar icon rail pinned outside the panel in every display state',
 		'Mobile drawer state through the same API',
 		'Panel mode and contained frames for embedded previews',
 		'Header, footer, search, menu, and action rows',
 		'Recursive tree groups with inline and icon-popover navigation',
-		'Independent item size and spacing density'
+		'Independent item size and spacing density',
+		'Soft, outline, or solid active rows through one activeVariant axis',
+		'Tinted icon tiles and multiple pinned group actions from typed props'
 	]}
 >
 	<ShellMentalModel current="sidebar" />
 
-	<section
-		class="rounded-xl border border-neutral-muted bg-surface p-4 text-sm text-neutral/70"
-	>
+	<section class="border-neutral-muted bg-surface text-neutral/70 rounded-xl border p-4 text-sm">
 		<p>
 			These examples keep the page side inert with skeleton content so the focus stays on Sidebar.
 			Sidebar owns navigation, state, resizing, the application wall, and variant surfaces. AppShell
 			composes the same variant with PageShell and forwards its variant to Sidebar. For full
 			application layouts, compose it through
-			<a class="font-medium text-primary hover:underline" href="/components/app-shell">AppShell</a>.
-			For page headers, content width, and page footers, use
-			<a class="font-medium text-primary hover:underline" href="/components/page-shell">PageShell</a
+			<a
+				class="text-primary-readable font-medium hover:underline"
+				href={resolve('/components/app-shell')}>AppShell</a
+			>. For page headers, content width, and page footers, use
+			<a
+				class="text-primary-readable font-medium hover:underline"
+				href={resolve('/components/page-shell')}>PageShell</a
 			>.
 		</p>
 	</section>
@@ -96,6 +122,7 @@
 	variant="${controls.value.variant}"
 	size="${controls.value.size}"
 	density="${controls.value.density}"
+	activeVariant="${controls.value.activeVariant}"
 	collapsible="icon"
 	frame="contained"
 	rail="thumb"
@@ -110,6 +137,7 @@
 			variant={controls.value.variant}
 			size={controls.value.size}
 			density={controls.value.density}
+			activeVariant={controls.value.activeVariant}
 		/>
 	</ComponentCard>
 
@@ -136,6 +164,14 @@
 			code={iconCode}
 		>
 			<SidebarIconDemo />
+		</ComponentCard>
+
+		<ComponentCard
+			description="An activity bar pins an icon rail outside the panel, so it stays on screen in every display state. With expandOnHover the icon-collapsed panel peeks open over the page and collapses again once the pointer, focus, and any menu opened inside it are gone."
+			class="!min-h-fit !items-start !p-4"
+			code={activityBarCode}
+		>
+			<SidebarActivityBarDemo />
 		</ComponentCard>
 
 		<ComponentCard

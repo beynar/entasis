@@ -59,7 +59,7 @@
 		'Automatic first-child parent positioning',
 		'Fill, top, and bottom treatments',
 		'Direction-aware edge reveal motion',
-		'Always, hover, or focus reveal',
+		'Reveal modes: always, hover, or on interaction',
 		'Composable content and Button actions'
 	]}
 >

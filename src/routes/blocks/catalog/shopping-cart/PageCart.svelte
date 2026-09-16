@@ -50,28 +50,30 @@
 	}
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="flex gap-xl items-center justify-between flex-wrap">
-		<header class="flex flex-col gap-lg">
-			<p class="text-xs font-semibold uppercase tracking-widest text-primary">Your shopping bag</p>
+	<div class="gap-xl flex flex-wrap items-center justify-between">
+		<header class="gap-lg flex flex-col">
+			<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+				Your shopping bag
+			</p>
 			<Heading size="h2" weight="bold">A few good choices.</Heading>
 		</header>
 		<Chip variant="soft">{count} items</Chip>
 	</div>
-	{#if cart.length}<div class="grid gap-xl lg:grid-cols-[1fr_20rem]">
+	{#if cart.length}<div class="gap-xl grid lg:grid-cols-[1fr_20rem]">
 			<div>
 				{#each cart as product (product.id)}<article
-						class="grid gap-xl border-t border-neutral/15 py-xl sm:grid-cols-[8rem_1fr_auto]"
+						class="gap-xl border-neutral/15 py-xl grid border-t sm:grid-cols-[8rem_1fr_auto]"
 					>
 						<div>{@render productArt(product.shape, product.color)}</div>
-						<div class="flex flex-col gap-lg">
+						<div class="gap-lg flex flex-col">
 							<h3 class="font-semibold">{product.name}</h3>
-							<p class="text-sm text-neutral/55">{product.color} / {product.type}</p>
+							<p class="text-neutral/65 text-sm">{product.color} / {product.type}</p>
 							<NumberInput
 								label="Quantity"
 								size="small"
@@ -83,7 +85,7 @@
 								class="max-w-36"
 							/>
 						</div>
-						<div class="flex flex-col gap-lg items-end justify-between">
+						<div class="gap-lg flex flex-col items-end justify-between">
 							<span>{money(product.price * product.quantity)}</span><Button
 								size="small"
 								variant="ghost"
@@ -95,15 +97,16 @@
 					</article>{/each}
 			</div>
 			<Card title="Order summary" class="h-fit"
-				><div class="flex flex-col gap-xl">
+				><div class="gap-xl flex flex-col">
 					<Meter
-						value={{ value: Math.min(subtotal, 150), color: 'primary' }}
+						value={Math.min(subtotal, 150)}
+						color="primary"
 						max={150}
 						label={subtotal >= 150
 							? 'Your delivery is on us'
 							: `${money(150 - subtotal)} to free delivery`}
 					/>
-					<dl class="flex flex-col gap-lg text-sm">
+					<dl class="gap-lg flex flex-col text-sm">
 						<div class="flex justify-between">
 							<dt>Subtotal</dt>
 							<dd>{money(subtotal)}</dd>
@@ -113,14 +116,14 @@
 							<dd>{shipping ? money(shipping) : 'Complimentary'}</dd>
 						</div>
 						<div
-							class="flex justify-between border-t border-neutral/15 pt-lg text-lg font-semibold"
+							class="border-neutral/15 pt-lg flex justify-between border-t text-lg font-semibold"
 						>
 							<dt>Total</dt>
 							<dd>{money(subtotal + shipping)}</dd>
 						</div>
 					</dl>
 					<Button fullWidth onclick={() => (review = true)}>Review checkout →</Button>
-					<p class="text-xs text-neutral/50">Taxes calculated by your store at checkout.</p>
+					<p class="text-neutral/65 text-xs">Taxes calculated by your store at checkout.</p>
 				</div></Card
 			>
 		</div>{:else}<Empty
@@ -131,13 +134,13 @@
 		bind:open={review}
 		title="Your bag, ready to review"
 		description="This is a local checkout preview. No order has been placed."
-		><div class="flex flex-col gap-xl">
-			{#each cart as product (product.id)}<div class="flex gap-lg justify-between text-sm">
+		><div class="gap-xl flex flex-col">
+			{#each cart as product (product.id)}<div class="gap-lg flex justify-between text-sm">
 					<span>{product.name} × {product.quantity}</span><span
 						>{money(product.price * product.quantity)}</span
 					>
 				</div>{/each}
-			<div class="flex justify-between border-t border-neutral/15 pt-lg font-semibold">
+			<div class="border-neutral/15 pt-lg flex justify-between border-t font-semibold">
 				<span>Estimated total</span><span>{money(subtotal + shipping)}</span>
 			</div>
 			<Button variant="outline" onclick={() => (review = false)}>Continue editing bag</Button>

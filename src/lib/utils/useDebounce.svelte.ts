@@ -1,6 +1,6 @@
 import { onDestroy } from 'svelte';
 
-export const useDebounce = <T extends any[]>(callback: (...args: T) => void, delay: number) => {
+export const useDebounce = <T extends unknown[]>(callback: (...args: T) => void, delay: number) => {
 	let timeout: ReturnType<typeof setTimeout>;
 
 	onDestroy(() => {

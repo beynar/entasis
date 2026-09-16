@@ -26,11 +26,13 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">From idea to launch</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			From idea to launch
+		</p>
 		<Heading size="h2" weight="bold">A clear path through the work.</Heading>
-		<p class="max-w-2xl text-neutral/65">
+		<p class="text-neutral/65 max-w-2xl">
 			Six focused weeks, with room for the questions that matter.
 		</p>
 	</header>
@@ -39,6 +41,6 @@
 		orientation="horizontal"
 		variant="outline"
 		color="primary"
-		density="large"
+		density="comfortable"
 	/>
 </section>

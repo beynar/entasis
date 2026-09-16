@@ -40,20 +40,22 @@
 	);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Better together</p>
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Better together
+		</p>
 		<Heading size="h2" weight="bold">Make yourself a good morning.</Heading>
-		<p class="max-w-2xl text-neutral/65">A few favorites that feel even better in company.</p>
+		<p class="text-neutral/65 max-w-2xl">A few favorites that feel even better in company.</p>
 	</header>
-	<div class="grid gap-xl lg:grid-cols-[2fr_1fr]">
-		<div class="grid gap-xl sm:grid-cols-3">
-			{#each bundle as product (product.id)}<article class="flex flex-col gap-lg">
+	<div class="gap-xl grid lg:grid-cols-[2fr_1fr]">
+		<div class="gap-xl grid sm:grid-cols-3">
+			{#each bundle as product (product.id)}<article class="gap-lg flex flex-col">
 					{@render productArt(product.shape, product.color)}<Checkbox
 						label={product.name}
 						value={selected.includes(product.id)}
@@ -62,23 +64,23 @@
 								? [...selected, product.id]
 								: selected.filter((id) => id !== product.id))}
 					/>
-					<p class="text-sm text-neutral/55">{money(product.price)}</p>
+					<p class="text-neutral/65 text-sm">{money(product.price)}</p>
 				</article>{/each}
 		</div>
-		<div class="flex flex-col gap-xl justify-center p-xl rounded-lg bg-surface-recessed">
+		<div class="gap-xl p-xl bg-surface-recessed flex flex-col justify-center rounded-lg">
 			<Chip variant="soft" class="w-fit">Save 10% with all three</Chip><Heading size="h3"
 				>Your everyday set</Heading
 			>
-			<p class="text-neutral/60">{selected.length} of 3 pieces selected</p>
+			<p class="text-neutral/70">{selected.length} of 3 pieces selected</p>
 			<p class="text-3xl font-semibold">{money(total * (selected.length === 3 ? 0.9 : 1))}</p>
-			{#if selected.length === 3}<p class="text-sm text-success">
+			{#if selected.length === 3}<p class="text-success-readable text-sm">
 					You save {money(total * 0.1)}
 				</p>{/if}<Button
 				fullWidth
 				disabled={!selected.length}
 				onclick={() => (added = selected.length)}>Add selected to bag</Button
 			>
-			<p aria-live="polite" class="text-xs text-neutral/55">
+			<p aria-live="polite" class="text-neutral/65 text-xs">
 				{added ? `${added} pieces added to sample bag.` : 'Choose the pieces you would like.'}
 			</p>
 		</div>

@@ -216,7 +216,7 @@
 		bind:offsetHeight={labelHeight}
 		data-gantt-chart-part="drag-preview-label"
 		data-side={labelPlacement.side}
-		class="pointer-events-none absolute z-50 grid max-w-72 gap-0.5 rounded-md border border-neutral-muted bg-surface-raised/95 px-2 py-1 text-xs text-neutral shadow-lg backdrop-blur"
+		class="bg-surface-raised/95 text-neutral raised-4 pointer-events-none absolute z-50 grid max-w-72 gap-0.5 rounded-md px-2 py-1 text-xs backdrop-blur"
 		style:left={`${labelPlacement.left}px`}
 		style:top={`${labelPlacement.top}px`}
 		aria-hidden="true"
@@ -226,7 +226,7 @@
 		{:else}
 			{#if proposedTask}<strong class="truncate">{proposedTask.title}</strong>{/if}
 			<span class="whitespace-nowrap">{rangeLabel}</span>
-			<span class="tabular-nums text-neutral/70">{durationLabel}</span>
+			<span class="text-neutral/70 tabular-nums">{durationLabel}</span>
 		{/if}
 	</div>
 {/if}

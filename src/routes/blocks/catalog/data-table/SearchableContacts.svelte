@@ -26,10 +26,10 @@
 	}));
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<header class="flex flex-wrap items-end justify-between gap-lg">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<header class="gap-lg flex flex-wrap items-end justify-between">
 		<div>
-			<p class="text-sm text-primary-readable">People / Directory</p>
+			<p class="text-primary-readable text-sm">People / Directory</p>
 			<h2 class="mt-sm text-3xl font-semibold">Good people. Great work.</h2>
 		</div>
 		<Chip color="neutral">{contacts.length} contacts</Chip>

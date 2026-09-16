@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { cubicOut } from 'svelte/easing';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
+	import { prefersReducedMotion } from '$lib/utils/motion.svelte.js';
 	import Slot from '../Slot/Slot.svelte';
 	import { caretLeftIcon } from '../Icons/caretLeft.js';
 	import { caretRightIcon } from '../Icons/caretRight.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import type { MiniCalendarDayPayload, MiniCalendarProps } from './miniCalendar.props.js';
 	import { useMiniCalendarTheme } from './miniCalendar.theme.js';
+	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 
 	// Noon avoids DST / timezone day-boundary shifts, mirroring Form/Calendar's date handling.
 	const atNoon = (year: number, month: number, day: number) =>
@@ -25,7 +27,7 @@
 		startDate = $bindable(),
 		days = 5,
 		size = 'normal',
-		color = 'primary',
+		color,
 		disabled = false,
 		locale,
 		i18n,
@@ -55,6 +57,7 @@
 
 	const t = $derived(useI18n(i18n));
 	const classes = $derived(useMiniCalendarTheme(theme));
+	const resolvedColor = $derived(useDefaultColor(color));
 
 	// Explicit prop wins, else the active i18n catalog's locale (reactive to runtime switches).
 	const resolvedLocale = $derived(locale ?? t.locale);
@@ -105,14 +108,12 @@
 	// Direction of the last chevron navigation; drives the slide. Stays 0 until the first
 	// shift so the initial mount does not animate.
 	let shiftDir = $state(0);
-	const reducedMotion =
-		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	// Full-width push with no fade: the strip slides one viewport width, so the old range exits
 	// through one edge while the new one enters through the other, clipped by the days viewport.
 	// `dir` is the edge the track enters from / exits to (+1 right, -1 left), mirrored in RTL.
 	const push = (_node: Element, { dir }: { dir: number }) => ({
-		duration: dir === 0 || reducedMotion ? 0 : 200,
+		duration: dir === 0 || prefersReducedMotion() ? 0 : 200,
 		easing: cubicOut,
 		css: (_t: number, u: number) => `transform: translateX(${dir * u * 100}%)`
 	});
@@ -164,7 +165,7 @@
 						data-selected={cell.selected ? '' : undefined}
 						class={classes.day({
 							size,
-							color,
+							color: resolvedColor,
 							selected: cell.selected,
 							today: cell.today,
 							disabled

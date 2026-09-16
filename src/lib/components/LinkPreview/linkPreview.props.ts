@@ -1,46 +1,17 @@
 import type { Slot } from '$lib/components/Slot/slot.js';
 import type { ResponsiveProps } from '$lib/components/Theme/theme.js';
-import type { Easing } from '$lib/transitions/easingFunctions.js';
+import type { FSOProps } from '$lib/transitions/transition.js';
 import type { WithAttachments } from '$lib/types/props.js';
-import type { Colors, Sizes } from '$lib/types/theme.js';
+import type { Sizes } from '$lib/types/theme.js';
 import type { Placement } from '@floating-ui/dom';
-import type { CardThemeProps } from '../Card/card.theme.js';
+import type { CardProps } from '../Card/index.js';
 import type { HoverCardThemeProps } from '../HoverCard/hoverCard.theme.js';
-import type { PopoverThemeProps } from '../Popover/popover.theme.js';
+import type { PopoverProps } from '../Popover/index.js';
 import type { LinkPreviewThemeProps } from './linkPreview.theme.js';
 
 export type LinkPreviewStatus = 'idle' | 'loading' | 'loaded' | 'error';
 
-export type LinkPreviewCardVariant = 'solid' | 'outline' | 'soft' | 'ghost';
-
 export type LinkPreviewPosition = ResponsiveProps<Placement>;
-
-export type LinkPreviewTransitionParams = {
-	/** Transition delay in milliseconds. */
-	delay?: number;
-	/** Transition duration in milliseconds. */
-	duration?: number;
-	/** Transition easing token. */
-	easing?: Easing;
-	/** Horizontal fly offset. */
-	x?: number | `${number}%`;
-	/** Vertical fly offset. */
-	y?: number | `${number}%`;
-	/** Scale amount used during the transition. */
-	scale?: number;
-	/** Opacity amount used during the transition. */
-	opacity?: number;
-};
-
-export type LinkPreviewTransition = ResponsiveProps<
-	| LinkPreviewTransitionParams
-	| {
-			/** Transition settings used when opening. */
-			in?: LinkPreviewTransitionParams;
-			/** Transition settings used when closing. */
-			out?: LinkPreviewTransitionParams;
-	  }
->;
 
 export type LinkPreviewHoverCardPayload = {
 	/** Stable DOM id used by the underlying HoverCard surface. */
@@ -142,22 +113,18 @@ export type LinkPreviewProps = WithAttachments<{
 	closeOnClickOutside?: boolean;
 	/** When true, enter and exit transitions slide from the placement direction. */
 	directedTransition?: boolean;
-	/** Fly/scale opacity transition overrides passed to HoverCard. */
-	transition?: LinkPreviewTransition;
+	/** Fly/scale opacity transition overrides passed to HoverCard; supports responsive values. */
+	transition?: ResponsiveProps<FSOProps>;
 	/** Visual size shared by the HoverCard panel and preview content. */
 	size?: Sizes;
 	/** When true, prevents opening and marks the trigger as disabled. */
 	disabled?: boolean;
 	/** Additional CSS classes merged onto the trigger anchor. */
 	class?: string;
-	/** Additional CSS classes merged onto the HoverCard surface. */
-	cardClass?: string;
-	/** Additional CSS classes merged onto the transparent Popover panel. */
-	popoverClass?: string;
-	/** Theme color token applied to the inner Card. */
-	cardColor?: Colors;
-	/** Visual variant applied to the inner Card. */
-	cardVariant?: LinkPreviewCardVariant;
+	/** Props forwarded to the inner Card surface. */
+	card?: Pick<CardProps, 'class' | 'color' | 'variant' | 'theme'>;
+	/** Props forwarded to the transparent Popover panel. */
+	popover?: Pick<PopoverProps, 'class' | 'theme'>;
 	/** Show subtle borders between Card sections. */
 	showBorders?: boolean;
 	/** Called once when the library requests an open-state change. */
@@ -167,15 +134,11 @@ export type LinkPreviewProps = WithAttachments<{
 	/** Callback after the close transition finishes. */
 	onAfterClose?: (payload: LinkPreviewPayload) => void;
 	/** Callback fired after metadata loads successfully. */
-	onLoad?: (metadata: LinkPreviewMetadata) => void;
+	onLoad?: (payload: LinkPreviewMetadata) => void;
 	/** Callback fired after metadata loading fails. */
 	onError?: (error: Error) => void;
 	/** Theme overrides for LinkPreview parts. */
 	theme?: LinkPreviewThemeProps;
 	/** Theme overrides for the HoverCard wrapper. */
 	hoverCardTheme?: HoverCardThemeProps;
-	/** Theme overrides for the inner Card. */
-	cardTheme?: CardThemeProps;
-	/** Theme overrides for the underlying Popover. */
-	popoverTheme?: PopoverThemeProps;
 }>;

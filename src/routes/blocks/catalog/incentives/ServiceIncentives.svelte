@@ -24,20 +24,20 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 			Good things, from start to finish
 		</p>
 		<Heading size="h2" weight="bold">A little extra care.</Heading>
 	</header>
-	<div class="grid gap-xl sm:grid-cols-2 lg:grid-cols-4">
+	<div class="gap-xl grid sm:grid-cols-2 lg:grid-cols-4">
 		{#each guarantees as guarantee (guarantee.title)}<div
-				class="flex flex-col gap-lg border-t border-neutral/15 pt-xl"
+				class="gap-lg border-neutral/15 pt-xl flex flex-col border-t"
 			>
-				<div class="text-primary">{@render guarantee.icon({ size: 28 })}</div>
+				<div class="text-primary-readable">{@render guarantee.icon({ size: 28 })}</div>
 				<h3 class="font-semibold">{guarantee.title}</h3>
-				<p class="text-sm leading-relaxed text-neutral/60">{guarantee.detail}</p>
+				<p class="text-neutral/70 text-sm leading-relaxed">{guarantee.detail}</p>
 			</div>{/each}
 	</div>
 </section>

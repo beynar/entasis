@@ -41,10 +41,10 @@ FloatingWindow renders a non-modal, portaled utility window that can be moved, r
 - **theme**: FloatingWindowThemeProps - Per-instance theme overrides.
 - **ref**: HTMLDivElement - Bindable reference to the visible window or minimized dock item.
 - **onOpenChange**: (open: boolean) => void - Runs once for each library-requested state change.
-- **onAfterOpen**: (window) => void - Runs after the open transition finishes.
-- **onAfterClose**: (window) => void - Runs after the close transition finishes.
-- **onMinimize**: (window) => void - Runs after minimize state updates.
-- **onRestore**: (window) => void - Runs after restore state updates.
+- **onAfterOpen**: (payload) => void - Runs after the open transition finishes.
+- **onAfterClose**: (payload) => void - Runs after the close transition finishes.
+- **onMinimize**: (payload) => void - Runs after minimize state updates.
+- **onRestore**: (payload) => void - Runs after restore state updates.
 - **onMove**: ({ position, window }) => void - Runs when a move commits.
 - **onResize**: ({ dimensions, window }) => void - Runs when a pointer or keyboard resize commits.
 
@@ -76,4 +76,12 @@ Header dragging is the default because it preserves text selection and content i
 - **dockTitle**: Full-width restore button in the dock item.
 - **dockTitleText**: Truncated title text and lateral writing direction.
 - **dockActions**: Dock restore and close controls.
+
+## Motion
+
+- **motion** theme slot, keyed by \`phase\`: \`flight\` times the crossfade between window and
+  dock pill, \`enter\` / \`exit\` the scale fallback when there is no counterpart.
+- Only \`duration\` / \`easing\` (plus the fallback's \`scale\` / \`opacity\`) are read.
+- Ladder: \`<Theme components={{ 'floating-window': { motion } }}>\` →
+  \`setFloatingWindowTheme({ motion })\` → \`theme.motion\`. Read once, at mount.
 `;

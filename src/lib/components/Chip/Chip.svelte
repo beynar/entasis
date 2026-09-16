@@ -2,9 +2,11 @@
 	import Slot from '../Slot/Slot.svelte';
 	import type { ChipProps } from './chip.props.js';
 	import { useChipTheme } from './chip.theme.js';
+	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 	const {
-		color = 'primary',
-		variant = 'solid',
+		color,
+		variant = 'outline',
+		selected,
 		children,
 		size = 'normal',
 		position,
@@ -19,13 +21,12 @@
 		href,
 		type = 'button',
 		disabled,
-		'aria-pressed': ariaPressed,
-		'aria-disabled': ariaDisabled,
 		theme,
 		...attachments
 	}: ChipProps = $props();
 
 	const classes = $derived(useChipTheme(theme));
+	const resolvedColor = $derived(useDefaultColor(color));
 	const as = $derived(href ? 'a' : onclick || onpointerenter || onpointerleave ? 'button' : 'div');
 	const isEmpty = $derived(!children && !prefix && !suffix);
 </script>
@@ -34,7 +35,8 @@
 	this={as}
 	role={as === 'button' ? 'button' : as === 'a' ? 'link' : 'none'}
 	data-variant={variant}
-	data-color={color}
+	data-selected={selected || undefined}
+	data-color={resolvedColor}
 	data-size={size}
 	data-position={position}
 	data-chip-position={position}
@@ -43,12 +45,22 @@
 	{href}
 	type={as === 'button' ? type : undefined}
 	disabled={as === 'button' ? disabled : undefined}
-	aria-pressed={ariaPressed}
-	aria-disabled={ariaDisabled}
+	aria-pressed={as === 'button' ? selected : undefined}
+	aria-current={as === 'a' && selected ? true : undefined}
+	aria-disabled={as !== 'button' && disabled ? true : undefined}
 	{onclick}
 	{onpointerenter}
 	{onpointerleave}
-	class={classes.root({ color, variant, size, position, className, isLink: as === 'a', isEmpty })}
+	class={classes.root({
+		color: resolvedColor,
+		variant,
+		selected,
+		size,
+		position,
+		className,
+		isLink: as === 'a',
+		isEmpty
+	})}
 	{...attachments}
 >
 	<Slot render={prefix} class={classes.prefix({ size })} />

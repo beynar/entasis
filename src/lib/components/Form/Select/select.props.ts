@@ -1,4 +1,5 @@
 import type { Density } from '$lib/types/theme.js';
+import type { Messages } from '$lib/i18n/en.js';
 import type { InputProps } from '../Field/field.js';
 import type { SelectThemeProps } from './select.theme.js';
 import type { HTMLButtonAttributes } from 'svelte/elements';
@@ -52,4 +53,6 @@ export type SelectProps = InputProps<'select'> & {
 	separators?: boolean;
 	/** Native attributes applied to the combobox trigger button. */
 	triggerAttrs?: SelectTriggerAttributes;
+	/** Per-instance i18n overrides merged over the global catalog. */
+	i18n?: Partial<Messages>;
 };

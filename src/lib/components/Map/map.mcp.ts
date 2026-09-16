@@ -51,10 +51,10 @@ An interactive vector map (pan, zoom, markers, clustering, shapes, geolocation) 
 - **controlButton**: Snippet - Custom control button; receives \`{ action, label, disabled, active, onclick }\`.
 
 ### Event Props
-- **onMarkerClick**: (marker) => void
-- **onClusterClick**: (cluster) => void
-- **onReady**: (map) => void - The MapLibre map instance is ready.
-- **onViewChange** / **onMoveEnd** / **onZoomEnd**: (view) => void
+- **onMarkerClick**: (payload) => void
+- **onClusterClick**: (payload) => void
+- **onReady**: (payload) => void - The MapLibre map instance is ready.
+- **onViewChange** / **onMoveEnd** / **onZoomEnd**: (payload) => void
 - **onError**: (error: Error) => void - Loading, style, or runtime errors (otherwise logged to console).
 
 ### Advanced Props
@@ -63,7 +63,7 @@ An interactive vector map (pan, zoom, markers, clustering, shapes, geolocation) 
 
 ## Theming
 
-The base style is generated at runtime from the current svelai \`--color-*\` tokens (surface elevation, neutral, primary, secondary, success, info, and danger) and re-generated when the theme flips. To fully override the cartography, pass \`styleUrl\` or \`styles\`.
+The base style is generated at runtime from the current svelai \`--color-*\` tokens and re-generated whenever they change (theme flip, palette swap, runtime token edits): \`primary\` tints land, buildings and water like a monochrome basemap, \`success\` paints parks and points of interest, \`danger\` draws boundaries and \`neutral\` carries roads and labels on \`surface\`. To fully override the cartography, pass \`styleUrl\` or \`styles\`.
 
 ## Accessibility
 

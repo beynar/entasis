@@ -38,7 +38,7 @@ The QRCode component renders a customizable QR code as an SVG. It supports theme
 - **theme**: QRCodeTheme - Theme overrides.
 
 ### Accessibility Props
-- **ariaLabel**: string (default: 'QR Code') - Accessible label of the SVG.
+- **label**: string (default: 'QR Code') - Accessible label of the SVG.
 
 ### Advanced Props
 - **ref**: SVGSVGElement | null (bindable) - The rendered SVG element.
@@ -92,7 +92,7 @@ Bind the component instance to access:
 
 ## Accessibility
 
-- The SVG has \`role="img"\` and an \`aria-label\` (customizable via the \`ariaLabel\` prop).
+- The SVG has \`role="img"\` and an \`aria-label\` (customizable via the \`label\` prop).
 
 ## Notes
 

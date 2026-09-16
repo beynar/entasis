@@ -2,6 +2,7 @@
 	import { flip } from 'svelte/animate';
 	import { cubicOut } from 'svelte/easing';
 	import { useDndList } from '$lib/utils/useDndList.svelte.js';
+	import { prefersReducedMotion } from '$lib/utils/motion.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import Slot from '../Slot/Slot.svelte';
 	import { dotsSixVerticalIcon } from '../Icons/dotsSixVertical.js';
@@ -116,9 +117,7 @@
 	const renderedItems = $derived(indicator ? items : previewItems);
 	const draggingId = $derived(indicator ? dnd.dragging : (dnd.over?.source.itemId ?? null));
 
-	const reducedMotion =
-		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-	const flipParams = { duration: reducedMotion ? 0 : 180, easing: cubicOut };
+	const flipParams = $derived({ duration: prefersReducedMotion() ? 0 : 180, easing: cubicOut });
 
 	// Grip glyph size per token.
 	const gripClass = $derived(size === 'large' ? 'size-5' : 'size-4');

@@ -25,16 +25,16 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 			Anatomy of a component
 		</p>
 		<Heading size="h2" weight="bold">Small files. Clear responsibilities.</Heading>
 	</header>
-	<div class="grid overflow-hidden rounded-lg border border-neutral/15 md:grid-cols-[13rem_1fr]">
-		<nav aria-label="Example files" class="flex flex-col gap-sm p-lg bg-surface-recessed">
-			<span class="mb-lg text-xs uppercase tracking-widest text-neutral/50">counter/</span
+	<div class="border-neutral/15 grid overflow-hidden rounded-lg border md:grid-cols-[13rem_1fr]">
+		<nav aria-label="Example files" class="gap-sm p-lg bg-surface-recessed flex flex-col">
+			<span class="mb-lg text-neutral/65 text-xs tracking-widest uppercase">counter/</span
 			>{#each files as file, i (file.name)}<Button
 					variant={selected === i ? 'soft' : 'ghost'}
 					color={selected === i ? 'primary' : 'neutral'}
@@ -42,14 +42,14 @@
 					class="justify-start">{file.name}</Button
 				>{/each}
 		</nav>
-		<div class="min-w-0 p-lg">
+		<div class="p-lg min-w-0">
 			<Code
 				code={files[selected].code}
 				language={files[selected].language}
 				title={files[selected].name}
 				showLineNumbers
 			/>
-			<p class="mt-lg text-sm text-neutral/60">{files[selected].note}</p>
+			<p class="mt-lg text-neutral/70 text-sm">{files[selected].note}</p>
 		</div>
 	</div>
 </section>

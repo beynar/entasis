@@ -10,9 +10,9 @@
 	let editing = $state(false);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Stack gap="lg" class="mx-auto w-full max-w-xl text-center">
-		<div class="mx-auto rounded-full bg-primary-muted p-xl text-4xl">{@render envelopeIcon()}</div>
+		<div class="bg-primary-muted p-xl mx-auto rounded-full text-4xl">{@render envelopeIcon()}</div>
 		<h2 class="text-3xl font-semibold">You’re one click away.</h2>
 		<p class="text-neutral/65">
 			A verification email would arrive at <strong class="text-neutral">{address}</strong>.
@@ -24,7 +24,7 @@
 		/><Card
 			><Stack gap="lg" class="text-left">
 				<h3 class="font-semibold">Can’t find the email?</h3>
-				<p class="text-sm text-neutral/65">
+				<p class="text-neutral/65 text-sm">
 					Check your spam folder, or confirm you entered the right address.
 				</p>
 				<Button variant="outline" onclick={() => (editing = !editing)}>Change email address</Button

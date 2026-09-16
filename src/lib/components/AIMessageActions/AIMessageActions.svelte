@@ -11,6 +11,7 @@
 	import { getAIConversation } from '../AIConversation/aiConversation.state.svelte.js';
 	import type { AIMessageActionState, AIMessageActionsProps } from './aiMessageActions.props.js';
 	import { useAIMessageActionsTheme } from './aiMessageActions.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		ref = $bindable(),
@@ -37,6 +38,7 @@
 		theme,
 		...attachments
 	}: AIMessageActionsProps<TMessage> = $props();
+	const t = $derived(useI18n());
 	const clipboard = useClipboard();
 	const contextConversation = getAIConversation<TMessage>();
 	const conversation = $derived(
@@ -166,7 +168,7 @@
 					squared
 					size={buttonSize}
 					variant="ghost"
-					label={actionState.copied ? 'Copied' : 'Copy'}
+					label={actionState.copied ? t.copied : t.copy}
 					onclick={() => void handleCopy()}
 					class={classes.button({ size })}
 					>{@render (actionState.copied ? checkIcon : copyIcon)({ size: 14 })}</Button
@@ -176,7 +178,7 @@
 					squared
 					size={buttonSize}
 					variant="ghost"
-					label="Edit message"
+					label={t.aiMessageEdit}
 					onclick={() => void handleEdit()}
 					class={classes.button({ size })}>{@render pencilSimpleIcon({ size: 14 })}</Button
 				>{/if}
@@ -185,7 +187,7 @@
 					squared
 					size={buttonSize}
 					variant="ghost"
-					label="Retry response"
+					label={t.aiMessageRetry}
 					onclick={() => void handleRetry()}
 					class={classes.button({ size })}>{@render arrowsClockwiseIcon({ size: 14 })}</Button
 				>{/if}

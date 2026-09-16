@@ -16,30 +16,30 @@
 	let added = $state(0);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="grid gap-xl md:grid-cols-2">
-		<div class="flex flex-col gap-xl">
+	<div class="gap-xl grid md:grid-cols-2">
+		<div class="gap-xl flex flex-col">
 			{@render productArt('lamp', 'Sand')}
-			<div class="grid grid-cols-3 gap-lg text-center text-xs text-neutral/60">
+			<div class="gap-lg text-neutral/70 grid grid-cols-3 text-center text-xs">
 				<span>Warm 2700K light</span><span>Touch dimming</span><span>5-year warranty</span>
 			</div>
 		</div>
-		<div class="flex flex-col gap-xl">
+		<div class="gap-xl flex flex-col">
 			<Chip class="w-fit" variant="soft">Field objects / Lighting</Chip><Heading size="h2"
 				>Arc desk lamp</Heading
 			>
-			<div class="flex gap-lg items-center">
-				<Rating value={4.8} size="small" /><span class="text-sm text-neutral/55"
+			<div class="gap-lg flex items-center">
+				<Rating value={4.8} size="small" /><span class="text-neutral/65 text-sm"
 					>4.8 · 128 reviews</span
 				>
 			</div>
 			<p class="text-2xl font-semibold">$148</p>
-			<p class="leading-relaxed text-neutral/65">
+			<p class="text-neutral/65 leading-relaxed">
 				A simple silhouette and a warm, adjustable light. Designed to feel at home on a working desk
 				or a quiet bedside table.
 			</p>
@@ -54,7 +54,7 @@
 			/><Button fullWidth onclick={() => (added += quantity)}
 				>Add to bag · {money(quantity * 148)}</Button
 			>
-			<p class="text-sm text-success" aria-live="polite">
+			<p class="text-success-readable text-sm" aria-live="polite">
 				{added ? `${added} in your sample bag` : 'In stock · Ready to dispatch'}
 			</p>
 			<Accordion

@@ -1,6 +1,7 @@
 import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
 import { SvelteMap } from 'svelte/reactivity';
+import { useDirection } from '$lib/utils/useDirection.svelte.js';
 import { createPointerDrag, type PointerDragPayload } from '$lib/utils/pointerDrag.js';
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
 import type { FieldValue } from '../Field/field.js';
@@ -435,14 +436,20 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 		this.dragState = null;
 	}
 
+	private getDirection = useDirection(() => this.trackNode);
+
 	applyThumbKey(index: number, key: string, shiftKey: boolean) {
 		const currentValue = this.values[index] ?? this.minValue;
 		const stepSize = shiftKey ? this.stepValue * 10 : this.stepValue;
 		let nextValue: number;
+		// Horizontal arrows follow the writing direction: in RTL, ArrowRight decreases.
+		const rtl = this.orientationValue !== 'vertical' && this.getDirection() === 'rtl';
+		const increase = rtl ? 'ArrowLeft' : 'ArrowRight';
+		const decrease = rtl ? 'ArrowRight' : 'ArrowLeft';
 
-		if (key === 'ArrowRight' || key === 'ArrowUp') {
+		if (key === increase || key === 'ArrowUp') {
 			nextValue = currentValue + stepSize;
-		} else if (key === 'ArrowLeft' || key === 'ArrowDown') {
+		} else if (key === decrease || key === 'ArrowDown') {
 			nextValue = currentValue - stepSize;
 		} else if (key === 'PageUp') {
 			nextValue = currentValue + this.stepValue * 10;

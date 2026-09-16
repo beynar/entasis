@@ -147,7 +147,7 @@
 <ScrollArea
 	type="hover"
 	class={classes.surface()}
-	ariaLabel="PDF pages"
+	label="PDF pages"
 	theme={documentViewerScrollAreaTheme}
 >
 	{#if pdf.mode === 'single'}
@@ -167,14 +167,14 @@
 	{:else if pdf.orientation === 'horizontal'}
 		<div class={classes.scroller()}>
 			<div class={classes.pages({ orientation: 'horizontal' })} {@attach pdf.attach}>
-				{#each Array(pdf.totalPages) as _, index (index)}
+				{#each Array(pdf.totalPages), index (index)}
 					<PDFPage viewer={pdf} pageNumber={index + 1} classes={pageClasses} />
 				{/each}
 			</div>
 		</div>
 	{:else}
 		<div class={classes.pages({ orientation: 'vertical' })} {@attach pdf.attach}>
-			{#each Array(pdf.totalPages) as _, index (index)}
+			{#each Array(pdf.totalPages), index (index)}
 				<PDFPage viewer={pdf} pageNumber={index + 1} classes={pageClasses} />
 			{/each}
 		</div>

@@ -17,7 +17,7 @@
 	let added = $state('');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
@@ -25,17 +25,17 @@
 	{/snippet}
 	<div class="mx-auto w-full max-w-md">
 		<Card
-			><div class="flex flex-col gap-xl">
+			><div class="gap-xl flex flex-col">
 				{@render productArt('shirt', 'Olive')}
-				<div class="flex gap-lg justify-between">
+				<div class="gap-lg flex justify-between">
 					<div>
 						<Chip variant="soft" size="small" class="mb-md w-fit">New season</Chip>
 						<h3 class="text-xl font-semibold">The everyday tee</h3>
 					</div>
 					<span class="text-xl">$48</span>
 				</div>
-				<p class="text-neutral/60">Heavyweight organic cotton, cut for everyday comfort.</p>
-				{#if expanded}<div class="grid grid-cols-2 gap-lg">
+				<p class="text-neutral/70">Heavyweight organic cotton, cut for everyday comfort.</p>
+				{#if expanded}<div class="gap-lg grid grid-cols-2">
 						<Select
 							label="Size"
 							items={['XS', 'S', 'M', 'L', 'XL'].map((value) => ({ label: value, value }))}
@@ -55,7 +55,7 @@
 						>Close options</Button
 					>{:else}<Button variant="outline" fullWidth onclick={() => (expanded = true)}
 						>Choose size and quantity</Button
-					>{/if}{#if added}<p role="status" class="text-sm text-success">
+					>{/if}{#if added}<p role="status" class="text-success text-sm">
 						Added {added} to the sample bag.
 					</p>{/if}
 			</div></Card

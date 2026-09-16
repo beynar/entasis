@@ -10,6 +10,7 @@
 		AIContextUsage
 	} from './aiContext.props.js';
 	import { useAIContextTheme } from './aiContext.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		ref = $bindable(),
@@ -30,6 +31,7 @@
 	}: AIContextProps = $props();
 
 	const conversation = getAIConversation();
+	const t = $derived(useI18n());
 	const resolvedUsage = $derived(
 		usage === undefined ? conversation?.contextUsage : (usage ?? undefined)
 	);
@@ -42,18 +44,15 @@
 	const remainingTokens = $derived(Math.max(0, resolvedMaxTokens - resolvedUsedTokens));
 	const tone = $derived<AIContextState['tone']>(resolveTone(percent));
 	const resolvedLabels = $derived<AIContextLabels>({
-		title: labels?.title ?? 'Context window',
-		remaining: labels?.remaining ?? ((tokens) => `${tokens} tokens remaining`),
-		input: labels?.input ?? 'Input',
-		output: labels?.output ?? 'Output',
-		reasoning: labels?.reasoning ?? 'Reasoning',
-		cachedInput: labels?.cachedInput ?? 'Cached input',
-		used: labels?.used ?? 'Used',
-		maximum: labels?.maximum ?? 'Maximum',
-		ariaLabel:
-			labels?.ariaLabel ??
-			((used, maximum, remaining) =>
-				`Context usage: ${used} of ${maximum} tokens used. ${remaining} tokens remaining.`)
+		title: labels?.title ?? t.aiContextTitle,
+		remaining: labels?.remaining ?? t.aiContextRemaining,
+		input: labels?.input ?? t.aiContextInput,
+		output: labels?.output ?? t.aiContextOutput,
+		reasoning: labels?.reasoning ?? t.aiContextReasoning,
+		cachedInput: labels?.cachedInput ?? t.aiContextCachedInput,
+		used: labels?.used ?? t.aiContextUsed,
+		maximum: labels?.maximum ?? t.maximumLabel,
+		label: labels?.label ?? t.aiContextUsage
 	});
 	const state = $derived<AIContextState>({
 		maxTokens: resolvedMaxTokens,
@@ -131,7 +130,7 @@
 			data-slot="ai-context-trigger"
 			data-compact={compact || undefined}
 			data-tone={tone}
-			aria-label={resolvedLabels.ariaLabel(
+			aria-label={resolvedLabels.label(
 				state.formattedUsed,
 				state.formattedMax,
 				state.formattedRemaining
@@ -210,12 +209,12 @@
 >
 	<HoverCard
 		{trigger}
-		content={details}
+		children={details}
 		position="top-end"
 		delay={120}
 		closeDelay={120}
 		class={classes.card()}
-		popoverClass={classes.popover()}
-		cardTheme={{ content: { base: classes.cardContent() } }}
+		popover={{ class: classes.popover() }}
+		card={{ theme: { content: { base: classes.cardContent() } } }}
 	/>
 </div>

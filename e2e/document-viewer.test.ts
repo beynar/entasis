@@ -22,9 +22,10 @@ test('loads the PDF runtime without fetching another format engine', async ({ pa
 	await viewer.getByLabel('Search').click();
 	const search = page.getByLabel('Search document');
 	await search.fill('document');
-	await expect(viewer.getByText('1 / 8', { exact: true })).toBeVisible();
+	// The search field and its match counter live in a portaled popover, outside the viewer node.
+	await expect(page.getByText('1 / 8', { exact: true })).toBeVisible();
 	await search.press('Enter');
-	await expect(viewer.getByText('2 / 8', { exact: true })).toBeVisible();
+	await expect(page.getByText('2 / 8', { exact: true })).toBeVisible();
 	await search.press('Escape');
 
 	const pageInfo = viewer.locator('[aria-live="polite"]').first();

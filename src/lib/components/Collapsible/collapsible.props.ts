@@ -1,4 +1,6 @@
-import type { Sizes } from '$lib/types/theme.js';
+import type { DisclosureIndicator, Sizes } from '$lib/types/theme.js';
+import type { ResponsiveProps } from '$lib/components/Theme/theme.js';
+import type { FSOProps } from '$lib/transitions/transition.js';
 import type { WithSlot, Slot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { CollapsibleThemeProps } from './collapsible.theme.js';
@@ -33,10 +35,10 @@ type CollapsibleBaseProps = {
 	 */
 	size?: Sizes;
 	/**
-	 * The icon to display. `caret`/`chevron` rotate a chevron; `math` swaps a plus/minus.
-	 * Pass a Slot for a custom icon (receives `{ open }`), or `false` to hide it.
+	 * The disclosure indicator: `chevron` rotates a chevron, `plus-minus` swaps a
+	 * plus/minus glyph, `none` hides it. Pass a Slot for a custom icon (receives `{ open }`).
 	 */
-	icon?: 'chevron' | 'caret' | 'math' | Slot | false;
+	icon?: DisclosureIndicator | Slot;
 	/**
 	 * Theme configuration overrides.
 	 */
@@ -56,6 +58,11 @@ type CollapsibleBaseProps = {
 	 * Height of the collapsed preview for the `peek` variant. A number is px.
 	 */
 	peekHeight?: number | string;
+	/**
+	 * Slide transition overrides for the content; supports responsive values and wins
+	 * over the `motion` theme slot.
+	 */
+	transition?: ResponsiveProps<FSOProps>;
 };
 
 type CollapsibleSlotProps = WithSlot<

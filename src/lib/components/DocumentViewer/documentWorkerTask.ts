@@ -26,7 +26,7 @@ export const runDocumentWorker = <Input, Output>(
 	} catch (error) {
 		URL.revokeObjectURL(blobUrl);
 		const message = error instanceof Error ? error.message : String(error);
-		throw new Error(`The document worker could not start: ${message}`);
+		throw new Error(`The document worker could not start: ${message}`, { cause: error });
 	}
 	let settled = false;
 	let rejectTask: (reason: Error) => void = () => undefined;

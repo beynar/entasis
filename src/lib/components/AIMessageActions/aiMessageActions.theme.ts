@@ -5,7 +5,7 @@ import {
 	type InferComponentTheme
 } from '$lib/utils/cva/index.js';
 const defaultRoot = cva({
-	base: 'flex min-h-7 w-full flex-wrap items-center gap-xs px-xs transition-opacity motion-reduce:transition-none',
+	base: 'flex min-h-[var(--control-height-sm)] w-full flex-wrap items-center gap-xs px-xs transition-opacity motion-reduce:transition-none',
 	variants: {
 		role: {
 			user: 'justify-end',
@@ -21,14 +21,14 @@ const defaultRoot = cva({
 		},
 		size: {
 			small: 'min-h-6 gap-micro px-micro',
-			normal: 'min-h-7 gap-xs px-xs',
-			large: 'min-h-8 gap-sm px-xs'
+			normal: 'min-h-[var(--control-height-sm)] gap-xs px-xs',
+			large: 'min-h-[var(--control-height-md)] gap-sm px-xs'
 		}
 	},
 	defaultVariants: { role: 'assistant', visibility: 'always', size: 'normal' }
 });
 const defaultButton = cva({
-	base: 'text-neutral/60 hover:text-neutral',
+	base: 'text-neutral/70 hover:text-neutral',
 	variants: {
 		size: {
 			small: '!h-6 [&_svg]:!size-3',

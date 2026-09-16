@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 
 const defaultInputContainer = cva({
-	base: 'w-full rounded-sm text-neutral transition-all flex items-center gap-lg',
+	base: 'w-full rounded-sm text-neutral transition-[color,opacity] flex items-center gap-lg',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -98,7 +98,7 @@ const defaultControl = cva({
 });
 
 const defaultTrack = cva({
-	base: 'relative touch-none select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+	base: 'relative touch-none select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-focus/50 focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
 	variants: {
 		orientation: {
 			horizontal: 'w-full min-w-40',
@@ -119,7 +119,7 @@ const defaultTrack = cva({
 			neutral: 'text-neutral'
 		},
 		disabled: {
-			true: 'cursor-not-allowed opacity-60',
+			true: 'cursor-not-allowed opacity-50',
 			false: 'cursor-pointer'
 		},
 		variant: {
@@ -131,7 +131,7 @@ const defaultTrack = cva({
 	defaultVariants: {
 		orientation: 'horizontal',
 		size: 'normal',
-		color: 'primary',
+		color: 'neutral',
 		disabled: false,
 		variant: 'default'
 	},
@@ -282,7 +282,7 @@ const defaultThumb = cva({
 		orientation: 'horizontal',
 		size: 'normal',
 		disabled: false,
-		color: 'primary',
+		color: 'neutral',
 		variant: 'default'
 	}
 });
@@ -318,7 +318,7 @@ const defaultThumbHitbox = cva({
 });
 
 const defaultThumbVisual = cva({
-	base: 'pointer-events-none rounded-full border-2 border-surface bg-current shadow-sm ring-offset-surface transition-[box-shadow,transform] group-focus-visible:ring-2 group-focus-visible:ring-current group-focus-visible:ring-offset-2',
+	base: 'pointer-events-none rounded-full border-2 border-surface bg-current lift-1 ring-offset-surface transition-[box-shadow,transform] group-focus-visible:ring-2 group-focus-visible:ring-focus/50 group-focus-visible:ring-offset-2',
 	variants: {
 		orientation: {
 			horizontal: '',
@@ -347,7 +347,7 @@ const defaultThumbVisual = cva({
 	defaultVariants: {
 		orientation: 'horizontal',
 		size: 'normal',
-		color: 'primary',
+		color: 'neutral',
 		variant: 'default'
 	},
 	compoundVariants: [
@@ -368,7 +368,7 @@ const defaultThumbVisual = cva({
 		{
 			variant: 'contained',
 			class:
-				'bg-neutral/45 scale-75 border-0 shadow-none transition-[background-color,transform] duration-150 ease-out group-focus-visible:scale-100 group-focus-visible:bg-neutral/80'
+				'bg-neutral/45 scale-75 border-0 shadow-none transition-[background-color,transform] duration-normal ease-standard group-focus-visible:scale-100 group-focus-visible:bg-neutral/80'
 		},
 		{ orientation: 'horizontal', variant: 'contained', size: 'small', class: 'h-5 w-1' },
 		{ orientation: 'horizontal', variant: 'contained', size: 'normal', class: 'h-7 w-1.5' },
@@ -497,7 +497,7 @@ const defaultValueLabel = cva({
 });
 
 const defaultContainedLabel = cva({
-	base: 'text-neutral/60 pointer-events-none absolute top-0 left-0 z-30 flex max-w-[55%] min-w-0 items-center truncate font-medium',
+	base: 'text-neutral/70 pointer-events-none absolute top-0 left-0 z-30 flex max-w-[55%] min-w-0 items-center truncate font-medium',
 	variants: {
 		size: {
 			small: 'h-8 pl-lg text-xs',
@@ -597,7 +597,7 @@ const defaultMarkDot = cva({
 });
 
 const defaultMarkLabel = cva({
-	base: 'text-neutral/60 leading-none whitespace-nowrap tabular-nums'
+	base: 'text-neutral/70 leading-none whitespace-nowrap tabular-nums'
 });
 
 export const sliderTheme = {

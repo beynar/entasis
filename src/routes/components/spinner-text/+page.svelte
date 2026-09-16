@@ -103,11 +103,11 @@ ${'</' + 'script>'}
 		>
 			<div class="flex flex-col items-start gap-8 sm:flex-row sm:items-center sm:gap-16">
 				<div class="grid gap-2">
-					<span class="text-neutral/60 text-xs font-medium">Vertical</span>
+					<span class="text-neutral/70 text-xs font-medium">Vertical</span>
 					<SpinnerText texts={messages} delay={1800} transition="vertical" />
 				</div>
 				<div class="grid gap-2">
-					<span class="text-neutral/60 text-xs font-medium">Reveal</span>
+					<span class="text-neutral/70 text-xs font-medium">Reveal</span>
 					<SpinnerText texts={messages} delay={1800} transition="reveal" />
 				</div>
 			</div>
@@ -122,7 +122,7 @@ ${'</' + 'script>'}
 			class="!min-h-[240px]"
 		>
 			<div class="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:gap-10">
-				{#each sizes as size}
+				{#each sizes as size, index (index)}
 					<SpinnerText texts={['Loading', 'Almost ready']} delay={1900} {size} />
 				{/each}
 			</div>

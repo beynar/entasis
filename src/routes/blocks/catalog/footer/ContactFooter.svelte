@@ -6,9 +6,9 @@
 	import { arrowUpRightIcon } from 'svelai/icons/arrowUpRight';
 </script>
 
-<footer class="flex flex-col gap-xl bg-primary-muted p-lg md:p-xl">
-	<div class="grid items-end gap-xl md:grid-cols-3">
-		<div class="flex flex-col items-start gap-xl md:col-span-2">
+<footer class="gap-xl bg-primary-muted p-lg md:p-xl flex flex-col">
+	<div class="gap-xl grid items-end md:grid-cols-3">
+		<div class="gap-xl flex flex-col items-start md:col-span-2">
 			<Chip variant="outline">The next thing starts here</Chip><Heading
 				as="h2"
 				size="h1"
@@ -17,7 +17,7 @@
 				>Find your starting point</Button
 			>
 		</div>
-		<nav aria-label="Explore the toolkit" class="grid grid-cols-2 gap-lg text-sm">
+		<nav aria-label="Explore the toolkit" class="gap-lg grid grid-cols-2 text-sm">
 			<a href="/docs" class="hover:underline">Documentation</a><a
 				href="/components"
 				class="hover:underline">Components</a
@@ -27,9 +27,9 @@
 		</nav>
 	</div>
 	<Separator />
-	<div class="flex flex-wrap items-center justify-between gap-lg">
+	<div class="gap-lg flex flex-wrap items-center justify-between">
 		<Heading as="h3" size="h4">Northstar®</Heading>
-		<p class="text-sm text-neutral/60">Independent thinking. Shared direction.</p>
-		<p class="text-xs text-neutral/50">An example brand, built with Svelai.</p>
+		<p class="text-neutral/70 text-sm">Independent thinking. Shared direction.</p>
+		<p class="text-neutral/65 text-xs">An example brand, built with Svelai.</p>
 	</div>
 </footer>

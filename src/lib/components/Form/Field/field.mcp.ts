@@ -35,8 +35,8 @@ flag and schema-normalized value.
 - as: native wrapper element; defaults to div. Use fieldset for grouped controls.
 - labelFor: associated control ID, or false for aria-labelledby; defaults to field.id.
 - size: small, normal, or large control geometry and label typography.
-- density: small, normal, or large internal spacing, independent of size.
-- labelPosition: top or left; left switches to side labels on desktop.
+- density: compact, normal, or comfortable internal spacing, independent of size.
+- labelPosition: top or left; left switches to side labels once the field itself is at least 32rem wide (a container query on the field, not the viewport).
 - fieldAttrs: native attributes for the wrapper. Put native control attributes on the control.
 - class and theme: wrapper classes and Field part overrides.
 

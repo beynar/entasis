@@ -17,8 +17,8 @@
 			name: 'color',
 			type: 'segmented',
 			label: 'Color',
-			value: 'primary',
-			options: ['primary', 'success', 'warning', 'danger', 'info']
+			value: 'neutral',
+			options: ['neutral', 'primary', 'success', 'warning', 'danger', 'info']
 		},
 		{
 			name: 'value',
@@ -66,7 +66,7 @@
 	{#snippet examples()}
 		<ComponentCard description="Semantic color tokens." class="!min-h-fit">
 			<div class="flex flex-wrap items-center justify-center gap-6">
-				{#each colors as color}
+				{#each colors as color, index (index)}
 					<ProgressCircle value={65} {color} label={`${color} progress`} />
 				{/each}
 			</div>

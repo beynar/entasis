@@ -13,7 +13,7 @@
 	] satisfies PageShellAction[];
 </script>
 
-<div class="h-[420px] w-full max-w-[390px] overflow-auto rounded-lg border border-neutral-muted">
+<div class="border-neutral-muted h-[420px] w-full max-w-[390px] overflow-auto rounded-lg border">
 	<PageShell
 		title="Reports"
 		subtitle="Mobile overflow keeps dense action rows usable."
@@ -21,15 +21,13 @@
 		mobileActionCount={1}
 		contentPadding="normal"
 	>
-		{#snippet children()}
-			<div class="grid gap-3">
-				{#each ['MRR by segment', 'Activation by cohort', 'Churn forecast'] as report}
-					<section class="rounded-lg border border-neutral-muted bg-surface-raised p-4">
-						<p class="text-sm font-medium text-neutral">{report}</p>
-						<p class="mt-2 text-sm text-neutral/60">Ready to export.</p>
-					</section>
-				{/each}
-			</div>
-		{/snippet}
+		<div class="grid gap-3">
+			{#each ['MRR by segment', 'Activation by cohort', 'Churn forecast'] as report, index (index)}
+				<section class="border-neutral-muted bg-surface-raised rounded-lg border p-4">
+					<p class="text-neutral text-sm font-medium">{report}</p>
+					<p class="text-neutral/70 mt-2 text-sm">Ready to export.</p>
+				</section>
+			{/each}
+		</div>
 	</PageShell>
 </div>

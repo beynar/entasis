@@ -3,15 +3,7 @@ import type { WithAttachments } from '$lib/types/props.js';
 import type { AspectRatioThemeProps } from './aspectRatio.theme.js';
 
 export type AspectRatioRatio =
-	| '2x1'
-	| '2x3'
-	| '16x9'
-	| '4x3'
-	| '1x1'
-	| '3x4'
-	| '3x2'
-	| '9x16'
-	| '1x2';
+	'2x1' | '2x3' | '16x9' | '4x3' | '1x1' | '3x4' | '3x2' | '9x16' | '1x2';
 
 type AspectRatioBaseProps = {
 	/**

@@ -41,15 +41,15 @@
 	};
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<header class="flex flex-wrap items-center justify-between gap-lg">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<header class="gap-lg flex flex-wrap items-center justify-between">
 		<div>
-			<p class="text-sm text-primary-readable">My work / Today</p>
+			<p class="text-primary-readable text-sm">My work / Today</p>
 			<h2 class="mt-sm text-3xl font-semibold">A clear view of what matters.</h2>
 		</div>
 		<Button onclick={() => (adding = !adding)}>{adding ? 'Close form' : 'New task'}</Button>
 	</header>
-	<nav class="flex flex-wrap gap-sm" aria-label="Priority filter">
+	<nav class="gap-sm flex flex-wrap" aria-label="Priority filter">
 		{#each ['All', 'High', 'Medium', 'Low'] as priority (priority)}<Button
 				size="small"
 				variant={filter === priority ? 'soft' : 'ghost'}
@@ -85,20 +85,20 @@
 				><Stack gap="md">
 					{#each tasks.filter((task) => task.done === (status === 'Complete') && (filter === 'All' || task.priority === filter)) as task (task)}<Stack
 							gap="md"
-							class="rounded-lg bg-surface-recessed p-md"
+							class="bg-surface-recessed p-md rounded-lg"
 						>
 							<Checkbox
 								label={task.title}
 								value={task.done}
 								onValueChange={(done) => (task.done = Boolean(done))}
 							/>
-							<div class="flex justify-between gap-md">
-								<span class="text-xs text-neutral/60">{task.project}</span><Chip
+							<div class="gap-md flex justify-between">
+								<span class="text-neutral/70 text-xs">{task.project}</span><Chip
 									size="small"
 									color={priorityColors[task.priority]}>{task.priority}</Chip
 								>
 							</div>
-						</Stack>{:else}<p class="p-lg text-sm text-neutral/60">No tasks in this view.</p>{/each}
+						</Stack>{:else}<p class="p-lg text-neutral/70 text-sm">No tasks in this view.</p>{/each}
 				</Stack></Card
 			>{/each}
 	</Grid>

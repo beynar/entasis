@@ -61,7 +61,7 @@ MultiStepForm owns one Form per step, displays them through Stepper, validates v
 - **showMeter**: whether to render the progress meter. Defaults to true.
 - **meterColor**: meter color token. Defaults to neutral.
 - **previousText**, **nextText**, **submitText**: navigation labels.
-- **variant**: visual presentation of the multi-step shell. Card renders one shared Card surface around the fixed meter, transitioning step content, and navigation footer. Each step reuses Form's card spacing and edge-to-edge separator rules without creating another Card surface. Supports plain, sectioned, and card; defaults to plain.
+- **variant**: visual presentation of the multi-step shell. Card renders one shared Card surface around the fixed meter, transitioning step content, and navigation footer. Header, meter, step fields, and footer share one horizontal inset in every variant. Each step reuses Form's card spacing and edge-to-edge separator rules without creating another Card surface. Supports plain, sectioned, and card; defaults to plain.
 - **previousButtonProps**, **nextButtonProps**, **submitButtonProps**: Button props. Custom click handlers are composed with internal behavior; disabled and loading protection cannot be overridden.
 - **class**: additional classes on the root.
 - **theme**: MultiStepForm theme overrides plus optional nested form theme overrides.

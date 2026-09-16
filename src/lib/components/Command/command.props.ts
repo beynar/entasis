@@ -83,15 +83,26 @@ export type CommandProps<Value extends string = string> = WithAttachments<
 			 */
 			closeOnSelect?: boolean;
 			/**
+			 * Value of the selected command. Bindable; set by every selection (click or Enter).
+			 */
+			value?: Value | null;
+			/** Initial selected command value when `value` is omitted. */
+			defaultValue?: Value | null;
+			/**
+			 * Fires once after a selection changes the selected value. Re-selecting the
+			 * current value and external updates stay silent; use `onSelect` for activations.
+			 */
+			onValueChange?: (value: Value | null) => void;
+			/**
 			 * Search query. Bindable.
 			 */
-			value?: string;
-			/** Initial search query when `value` is omitted. */
-			defaultValue?: string;
+			search?: string;
+			/** Initial search query when `search` is omitted. */
+			defaultSearch?: string;
 			/**
 			 * Fires once after user input changes the search query. External updates are silent.
 			 */
-			onValueChange?: (value: string) => void;
+			onSearchChange?: (search: string) => void;
 			/**
 			 * Search input placeholder.
 			 */
@@ -109,7 +120,8 @@ export type CommandProps<Value extends string = string> = WithAttachments<
 			 */
 			filter?: (item: CommandItem<Value>, search: string) => boolean;
 			/**
-			 * Fires for any selected item, after the item's own `onSelect`.
+			 * Activation callback: fires for every selected item, after the item's own
+			 * `onSelect`, including when the same item is selected again.
 			 */
 			onSelect?: (value: Value) => void;
 			/**

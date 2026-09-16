@@ -29,6 +29,7 @@
 	import Skeleton from '../Skeleton/Skeleton.svelte';
 	import type { AIChatSkeletonProps } from './aiChatSkeleton.props.js';
 	import { useAIChatTheme } from './aiChat.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		ref = $bindable(),
@@ -37,12 +38,13 @@
 		showComposer = true,
 		showFooter = false,
 		role = 'status',
-		'aria-label': ariaLabel = 'Connecting chat',
+		'aria-label': label,
 		'aria-busy': ariaBusy = 'true',
 		class: className,
 		theme,
 		...rootAttributes
 	}: AIChatSkeletonProps = $props();
+	const t = $derived(useI18n());
 	const rows = $derived(createSkeletonRows(messageCount));
 	const classes = $derived(useAIChatTheme(theme));
 </script>
@@ -52,7 +54,7 @@
 	bind:this={ref}
 	data-slot="ai-chat-skeleton"
 	{role}
-	aria-label={ariaLabel}
+	aria-label={label ?? t.aiChatConnecting}
 	aria-busy={ariaBusy}
 	class={classes.root({ className })}
 >

@@ -5,9 +5,9 @@
 	const playground = useRuntimeThemePlayground();
 </script>
 
-<div class="grid gap-md">
+<div class="gap-md grid">
 	<span class="text-sm font-medium">Color palette</span>
-	<div class="flex flex-wrap gap-md">
+	<div class="gap-md flex flex-wrap">
 		{#each runtimeColorPaletteNames as paletteName (paletteName)}
 			{@const palette = runtimeColorPalettes[paletteName]}
 			<button
@@ -15,7 +15,7 @@
 				title={palette.label}
 				aria-label={palette.label}
 				aria-pressed={playground.palette === paletteName}
-				class="state-layer border-neutral-muted grid size-9 place-items-center rounded-full border transition-transform aria-pressed:scale-110 aria-pressed:ring-2 aria-pressed:ring-primary aria-pressed:ring-offset-2 aria-pressed:ring-offset-surface-raised"
+				class="state-layer border-neutral-muted aria-pressed:ring-primary aria-pressed:ring-offset-surface-raised grid size-9 place-items-center rounded-full border transition-transform aria-pressed:scale-110 aria-pressed:ring-2 aria-pressed:ring-offset-2"
 				onclick={() => (playground.palette = paletteName)}
 			>
 				<span

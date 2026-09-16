@@ -107,7 +107,7 @@
 	{#snippet popup(arg)}
 		<div class="space-y-1">
 			<p class="font-medium leading-none">{arg.marker.label}</p>
-			<p class="text-neutral/60">{arg.marker.description}</p>
+			<p class="text-neutral/70">{arg.marker.description}</p>
 			<p class="text-xs">{arg.data?.team} / {arg.data?.headcount} people</p>
 		</div>
 	{/snippet}

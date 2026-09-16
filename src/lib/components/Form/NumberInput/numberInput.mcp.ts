@@ -303,13 +303,18 @@ The theme object contains the following parts:
 \`\`\`
 
 **Focus State Customization**:
+
+To recolor every focus ring in the app at once, set \`designTokens.focusColor\` on \`Theme\`
+instead of overriding per component. \`ring-focus\` is the focus state role and falls back to the
+current role, so it never hard-pins a color.
+
 \`\`\`svelte
 <NumberInput 
   label="Custom Number"
   bind:value={value}
   theme={{
     inputContainer: {
-      base: 'focus-within:ring-2 focus-within:ring-primary focus-within:border-primary'
+      base: 'focus-within:ring-2 focus-within:ring-focus/50 focus-within:border-focus'
     }
   }}
 />

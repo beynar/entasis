@@ -65,3 +65,22 @@ export function createPeople(count: number): Person[] {
 		};
 	});
 }
+
+const salaryFormatter = new Intl.NumberFormat('en-US', {
+	style: 'currency',
+	currency: 'USD',
+	maximumFractionDigits: 0
+});
+const joinedAtFormatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' });
+
+export const formatSalary = (value: unknown) =>
+	typeof value === 'number' && Number.isFinite(value) ? salaryFormatter.format(value) : '';
+
+export const formatJoinedAt = (value: unknown) =>
+	value instanceof Date ? joinedAtFormatter.format(value) : '';
+
+export const statusColor = (status: PersonStatus): 'success' | 'warning' | 'info' => {
+	if (status === 'Active') return 'success';
+	if (status === 'Suspended') return 'warning';
+	return 'info';
+};

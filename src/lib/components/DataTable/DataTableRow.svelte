@@ -1,5 +1,4 @@
 <script lang="ts" generics="TData">
-	import type { Column, Row } from '@tanstack/table-core';
 	import type { Attachment } from 'svelte/attachments';
 	import Slot from '../Slot/Slot.svelte';
 	import DataTableCellContent from './DataTableCellContent.svelte';
@@ -10,8 +9,10 @@
 		DATA_TABLE_SELECTION_COLUMN,
 		type DataTableModel
 	} from './dataTable.model.svelte.js';
+	import type { DataTableColumnInstance, DataTableRowInstance } from './dataTable.table.js';
 	import type { DataTableClasses } from './dataTable.theme.js';
 	import type { DataTableCellPayload } from './dataTable.props.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		row,
@@ -29,25 +30,25 @@
 		detailMeasureAttachment,
 		onNavigate
 	}: {
-		row: Row<TData>;
+		row: DataTableRowInstance<TData>;
 		rowIndex: number;
 		ariaRowIndex: number;
-		columns: Column<TData, unknown>[];
-		allColumns: Column<TData, unknown>[];
+		columns: DataTableColumnInstance<TData>[];
+		allColumns: DataTableColumnInstance<TData>[];
 		gridTemplate: string;
 		model: DataTableModel<TData>;
 		classes: DataTableClasses;
-		density: 'small' | 'normal' | 'large';
+		density: 'compact' | 'normal' | 'comfortable';
 		interactionMode: 'table' | 'grid';
 		revision: number;
 		measureAttachment: Attachment<HTMLElement>;
 		detailMeasureAttachment: Attachment<HTMLElement>;
 		onNavigate: (rowIndex: number, columnIndex: number, event: KeyboardEvent) => void;
 	} = $props();
+	const t = $derived(useI18n());
 
 	const rowPayload = $derived.by(() => {
-		model.state.rowSelection;
-		model.state.expanded;
+		void [model.state.rowSelection, model.state.expanded];
 		return model.getRowPayload(row);
 	});
 	const rowSelected = $derived.by(() => {
@@ -64,22 +65,22 @@
 		)?.id
 	);
 	const pinnedCellLayouts = $derived.by(() => {
-		revision;
-		model.state.columnPinning;
-		model.state.columnSizing;
-		model.state.columnVisibility;
-		const leftColumns = model.table.getLeftVisibleLeafColumns();
-		const rightColumns = model.table.getRightVisibleLeafColumns();
+		void [
+			revision,
+			model.state.columnPinning,
+			model.state.columnSizing,
+			model.state.columnVisibility
+		];
+		const leftColumns = model.startPinnedColumns;
+		const rightColumns = model.endPinnedColumns;
 
 		return new Map(
 			columns.map((column) => {
-				const side = column.getIsPinned();
+				const side = model.getColumnPinning(column);
 				let boundary: 'left' | 'right' | 'none' = 'none';
-				let offset = 0;
 				if (side === 'left' && leftColumns.at(-1)?.id === column.id) boundary = 'left';
 				if (side === 'right' && rightColumns[0]?.id === column.id) boundary = 'right';
-				if (side === 'left') offset = column.getStart('left');
-				if (side === 'right') offset = column.getAfter('right');
+				const offset = model.getColumnPinnedOffset(column);
 
 				return [
 					column.id,
@@ -100,7 +101,7 @@
 			...rowPayload,
 			columnId,
 			value: model.getCellValue(row, columnId),
-			aggregated: cell.getIsAggregated(),
+			aggregated: model.isCellAggregated(cell),
 			grouped: cell.getIsGrouped(),
 			startEditing: () => model.startEditing(row, columnId)
 		};
@@ -108,7 +109,7 @@
 
 	const handleCellKeydown = (
 		event: KeyboardEvent,
-		column: Column<TData, unknown>,
+		column: DataTableColumnInstance<TData>,
 		columnIndex: number
 	) => {
 		if (interactionMode !== 'grid') return;
@@ -234,7 +235,7 @@
 		>
 			{#if column.id === DATA_TABLE_SELECTION_COLUMN}
 				<DataTableSelectionCheckbox
-					ariaLabel={`Select row ${rowIndex + 1}`}
+					label={t.dataTableSelectRow(rowIndex + 1)}
 					value={rowSelected}
 					disabled={model.props.disabled || !row.getCanSelect()}
 					onValueChange={(checked) => row.toggleSelected(checked)}

@@ -14,6 +14,7 @@
 		resolveAIToolStatus
 	} from './toolRendering.js';
 	import AIToolCallList from './AIToolCallList.svelte';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type ToolGroupAccordionItem = { id: string; tools: readonly AIToolCall[] };
 
@@ -42,6 +43,7 @@
 		theme,
 		...rootAttributes
 	}: AIToolProps = $props();
+	const t = $derived(useI18n());
 	const valueState = createBindableValue(
 		() => value,
 		(next) => {
@@ -59,12 +61,12 @@
 			: []
 	);
 	const resolvedLabels = $derived<AIToolLabels>({
-		fallbackTitle: labels?.fallbackTitle ?? 'Tool call',
-		group: labels?.group ?? ((count) => `${count} tool calls`),
-		input: labels?.input ?? 'Input',
-		output: labels?.output ?? 'Output',
-		error: labels?.error ?? 'Error',
-		empty: labels?.empty ?? 'No input or output yet.'
+		fallbackTitle: labels?.fallbackTitle ?? t.aiToolCall,
+		group: labels?.group ?? t.aiToolCalls,
+		input: labels?.input ?? t.aiToolInput,
+		output: labels?.output ?? t.aiToolOutput,
+		error: labels?.error ?? t.aiToolError,
+		empty: labels?.empty ?? t.aiToolEmpty
 	});
 	const resolvedStatus = $derived(
 		singleTool ? resolveAIToolStatus(singleTool) : resolveAIToolGroupStatus(resolvedTools)
@@ -86,6 +88,7 @@
 	<div data-slot="ai-tool-group-trigger-content" class={classes.title()}>
 		<span
 			data-slot="ai-tool-group-icon"
+			role="img"
 			aria-label={formatStatus(currentStatus)}
 			class={classes.groupIcon({ tone: getAIToolStatusTone(currentStatus) })}
 		>
@@ -171,9 +174,9 @@
 			oneAtATime={!multiple}
 			title={groupTitle}
 			content={groupContent}
-			icon={toggleIcon === 'none' ? false : toggleIcon}
+			icon={toggleIcon}
 			variant="classic"
-			density="small"
+			density="compact"
 			theme={groupAccordionTheme}
 		/>
 	</div>

@@ -7,4 +7,3 @@ export {
 	type ButtonGroupTheme,
 	type ButtonGroupThemeProps
 } from './buttonGroup.theme.js';
-

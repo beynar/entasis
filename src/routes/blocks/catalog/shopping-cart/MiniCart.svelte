@@ -43,14 +43,14 @@
 	}
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 			Your everyday essentials
 		</p>
 		<Heading size="h2" weight="bold">A little bag of good things.</Heading>
@@ -59,17 +59,17 @@
 		size="large"
 		mobileSheet
 		trigger={{ content: `Shopping bag (${count})`, variant: 'outline' }}
-		><div class="flex flex-col gap-xl">
-			<div class="flex gap-md justify-between">
+		><div class="gap-xl flex flex-col">
+			<div class="gap-md flex justify-between">
 				<Heading size="h4">Your bag</Heading><Chip size="small" variant="soft">{count} items</Chip>
 			</div>
 			{#each cart as product (product.id)}<div
-					class="grid grid-cols-[4rem_1fr_auto] items-center gap-lg"
+					class="gap-lg grid grid-cols-[4rem_1fr_auto] items-center"
 				>
 					<div>{@render productArt(product.shape, product.color)}</div>
 					<div>
 						<p class="text-sm font-medium">{product.name}</p>
-						<p class="mt-sm text-xs text-neutral/50">
+						<p class="mt-sm text-neutral/65 text-xs">
 							{product.quantity} × {money(product.price)}
 						</p>
 					</div>
@@ -84,12 +84,12 @@
 					description="Your sample bag is empty."
 					actions={[{ content: 'Restore bag', onclick: restore }]}
 				/>{/each}{#if cart.length}<div
-					class="flex justify-between border-t border-neutral/15 pt-lg font-semibold"
+					class="border-neutral/15 pt-lg flex justify-between border-t font-semibold"
 				>
 					<span>Subtotal</span><span>{money(subtotal)}</span>
 				</div>
 				<Button fullWidth onclick={() => (review = true)}>Review bag →</Button>
-				<p class="text-center text-xs text-neutral/45">
+				<p class="text-neutral/65 text-center text-xs">
 					{shipping ? 'Delivery ' + money(shipping) : 'Complimentary delivery'}
 				</p>{/if}
 		</div></Popover
@@ -97,13 +97,13 @@
 		bind:open={review}
 		title="Your bag, ready to review"
 		description="This is a local checkout preview. No order has been placed."
-		><div class="flex flex-col gap-xl">
-			{#each cart as product (product.id)}<div class="flex gap-lg justify-between text-sm">
+		><div class="gap-xl flex flex-col">
+			{#each cart as product (product.id)}<div class="gap-lg flex justify-between text-sm">
 					<span>{product.name} × {product.quantity}</span><span
 						>{money(product.price * product.quantity)}</span
 					>
 				</div>{/each}
-			<div class="flex justify-between border-t border-neutral/15 pt-lg font-semibold">
+			<div class="border-neutral/15 pt-lg flex justify-between border-t font-semibold">
 				<span>Estimated total</span><span>{money(subtotal + shipping)}</span>
 			</div>
 			<Button variant="outline" onclick={() => (review = false)}>Continue editing bag</Button>

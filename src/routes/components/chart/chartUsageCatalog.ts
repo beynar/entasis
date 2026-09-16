@@ -16,7 +16,8 @@ export type MetricChartUsageType = 'series' | 'bar' | 'facet';
 type ChartUsageMetadata = {
 	label: string;
 	description: string;
-	ariaLabel: string;
+	/** Accessible name handed to the demo's Chart. */
+	chartLabel: string;
 };
 
 export const chartUsageMetadata = {
@@ -24,51 +25,51 @@ export const chartUsageMetadata = {
 		label: 'Series',
 		description:
 			'A series switches between area and interval while composing line and point layers.',
-		ariaLabel: 'Quarterly revenue series chart'
+		chartLabel: 'Quarterly revenue series chart'
 	},
 	bar: {
 		label: 'Bar',
 		description: 'One bar mark switches between grouped and stacked layouts.',
-		ariaLabel: 'Quarterly revenue bar chart'
+		chartLabel: 'Quarterly revenue bar chart'
 	},
 	scatter: {
 		label: 'Scatter',
 		description:
 			'The same numeric observations switch between points and responsive hexagonal bins with native x-axis brush zoom.',
-		ariaLabel: 'Quarterly revenue bubble chart'
+		chartLabel: 'Quarterly revenue bubble chart'
 	},
 	distribution: {
 		label: 'Distribution',
 		description:
 			'Grouped raw samples switch between summaries, frequency, density, and cumulative rank.',
-		ariaLabel: 'Response time distribution chart'
+		chartLabel: 'Response time distribution chart'
 	},
 	matrix: {
 		label: 'Matrix',
 		description:
 			'A matrix uses explicit grid channels or derives a contribution calendar from dates.',
-		ariaLabel: 'Contribution calendar heatmap'
+		chartLabel: 'Contribution calendar heatmap'
 	},
 	facet: {
 		label: 'Facet',
 		description: 'A facet mark repeats the same nested series over data subsets.',
-		ariaLabel: 'Quarterly revenue faceted chart'
+		chartLabel: 'Quarterly revenue faceted chart'
 	},
 	polar: {
 		label: 'Polar',
 		description:
 			'Polar variants share angle and radius channels, with boolean path layers where relevant.',
-		ariaLabel: 'Quarterly revenue polar chart'
+		chartLabel: 'Quarterly revenue polar chart'
 	},
 	proportion: {
 		label: 'Proportion',
 		description: 'The same category values switch between pie, donut, and waffle layouts.',
-		ariaLabel: 'Revenue share proportion chart'
+		chartLabel: 'Revenue share proportion chart'
 	},
 	relation: {
 		label: 'Relation',
 		description: 'The same node rows switch between tree, force-network, and Sankey layouts.',
-		ariaLabel: 'Business relation chart'
+		chartLabel: 'Business relation chart'
 	}
 } satisfies Record<ChartUsageType, ChartUsageMetadata>;
 

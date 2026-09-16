@@ -11,9 +11,11 @@ export type VoiceInputResult = {
 export type VoiceInputVariant = 'default' | 'expandable' | 'compact';
 
 export type VoiceInputProps = WithAttachments<
-	Omit<InputProps<'voice'>, 'onValueChange' | 'theme' | 'value'> & {
-		/** Recorded audio. Starting a new recording clears the previous value. */
+	Omit<InputProps<'voice'>, 'onValueChange' | 'theme' | 'value' | 'defaultValue'> & {
+		/** Recorded audio. Starting a new recording clears the previous value. Bindable. */
 		value?: Blob | null;
+		/** Initial recorded audio when `value` is omitted. */
+		defaultValue?: Blob | null;
 		/** Recording duration in seconds. Bind to retain it alongside the Blob value. */
 		duration?: number;
 		/** Minimum accepted recording duration in seconds. */
@@ -24,8 +26,8 @@ export type VoiceInputProps = WithAttachments<
 		color?: Colors;
 		/** Chooses a full waveform, a recording-only expansion, or a mic-only level indicator. */
 		variant?: VoiceInputVariant;
-		/** Accessible label and tooltip for the microphone trigger. */
-		ariaLabel?: string;
+		/** Accessible label and tooltip for the microphone trigger that starts recording. */
+		startLabel?: string;
 		/** Accessible label and tooltip for the stop action. */
 		stopLabel?: string;
 		/** Accessible label and tooltip for playing the finalized recording. */
@@ -41,7 +43,7 @@ export type VoiceInputProps = WithAttachments<
 		/** Called after microphone capture has started. */
 		onStart?: () => void;
 		/** Called after the recording has been finalized. */
-		onStop?: (result: VoiceInputResult) => void;
+		onStop?: (payload: VoiceInputResult) => void;
 		/** Called when microphone access or recording fails. */
 		onError?: (error: Error) => void;
 		/** Theme overrides for the voice input and inherited Field parts. */

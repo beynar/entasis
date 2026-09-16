@@ -24,8 +24,8 @@ function compileInvalidDefinition(definition: unknown): unknown {
 			props: {
 				data: rows,
 				...(definition as ChartConfiguration<Row>),
-				ariaLabel: 'Invalid chart',
-				initialDimensions: { width: 640, height: 360 }
+				label: 'Invalid chart',
+				aspectRatio: 640 / 360
 			}
 		});
 		void output.body;

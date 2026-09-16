@@ -32,7 +32,7 @@ high-resolution sources, slots, focus restoration, and configurable dismissal.
 - **disabled**: boolean (default: false) - Prevents opening.
 - **width / height / srcset / sizes / loading / decoding** - Forwarded to the thumbnail image.
 - **zoomMargin**: number (default: 40) - Minimum viewport margin around the zoomed image.
-- **transitionDuration**: number (default: 400) - Zoom animation duration in milliseconds. Matches LightGallery's Medium Zoom default and respects reduced-motion preferences.
+- Zoom animation duration now comes from the \`motion\` theme slot (default token \`slower\`); see Motion below.
 - **closeOnClickOutside**: boolean (default: true) - Closes from the backdrop.
 - **closeOnEscape**: boolean (default: true) - Closes on Escape.
 - **closeOnScroll**: boolean (default: true) - Closes on wheel, touch-scroll, page scroll, or nested-container scroll.
@@ -117,4 +117,11 @@ high-resolution sources, slots, focus restoration, and configurable dismissal.
 	{/snippet}
 </ImageZoom>
 \`\`\`
+
+## Motion
+
+- **motion** theme slot: one preset (no variants). Only its resolved \`duration\` is used — it
+  becomes LightGallery's zoom animation duration (default token \`slower\`).
+- Ladder: \`<Theme components={{ 'image-zoom': { motion } }}>\` → \`setImageZoomTheme({ motion })\`
+  → \`theme={{ motion: { duration: 250 } }}\`. Reduced motion collapses it to 0.
 `;

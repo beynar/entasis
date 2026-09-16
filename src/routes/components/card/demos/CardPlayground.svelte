@@ -27,9 +27,9 @@
 	] as const satisfies ReadonlyArray<{ value: Sizes; label: string }>;
 
 	const densityItems = [
-		{ value: 'small', label: 'Small' },
+		{ value: 'compact', label: 'Compact' },
 		{ value: 'normal', label: 'Normal' },
-		{ value: 'large', label: 'Large' }
+		{ value: 'comfortable', label: 'Comfortable' }
 	] as const satisfies ReadonlyArray<{ value: CardDensity; label: string }>;
 
 	type PlaygroundColor = (typeof colorItems)[number]['value'];
@@ -51,16 +51,11 @@
 		<div class="grid gap-5 sm:grid-cols-2">
 			<div class="grid gap-2">
 				<span class="text-neutral text-sm font-medium">Variant</span>
-				<SegmentedControl
-					items={variantItems}
-					bind:value={variant}
-					size="small"
-					ariaLabel="Variant"
-				/>
+				<SegmentedControl items={variantItems} bind:value={variant} size="small" label="Variant" />
 			</div>
 			<div class="grid gap-2">
 				<span class="text-neutral text-sm font-medium">Color</span>
-				<SegmentedControl items={colorItems} bind:value={color} size="small" ariaLabel="Color" />
+				<SegmentedControl items={colorItems} bind:value={color} size="small" label="Color" />
 			</div>
 			<div class="grid gap-2">
 				<span class="text-neutral text-sm font-medium">Size</span>
@@ -68,7 +63,7 @@
 					items={sizeItems}
 					bind:value={size}
 					size="small"
-					ariaLabel="Typography size"
+					label="Typography size"
 				/>
 			</div>
 			<div class="grid gap-2">
@@ -77,7 +72,7 @@
 					items={densityItems}
 					bind:value={density}
 					size="small"
-					ariaLabel="Spacing density"
+					label="Spacing density"
 				/>
 			</div>
 		</div>
@@ -108,9 +103,7 @@
 			{#snippet action()}
 				<Button variant="ghost" size="small">Edit</Button>
 			{/snippet}
-			{#snippet children()}
-				<p>12 members · 4 pending invitations. Changes apply to new members immediately.</p>
-			{/snippet}
+			<p>12 members · 4 pending invitations. Changes apply to new members immediately.</p>
 			{#snippet footer()}
 				<Button size="small">Invite people</Button>
 				<Button size="small" variant="outline">Manage roles</Button>

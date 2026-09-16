@@ -4,6 +4,7 @@
 >
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import Slot from '$lib/components/Slot/Slot.svelte';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { onMount } from 'svelte';
 	import EventCalendarContent from './EventCalendarContent.svelte';
 	import EventCalendarHeader from './EventCalendarHeader.svelte';
@@ -23,6 +24,7 @@
 		EventCalendarState
 	} from './eventCalendar.state.svelte.js';
 	import { useEventCalendarTheme } from './eventCalendar.theme.js';
+	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 	import type {
 		EventCalendarItem,
 		EventCalendarSelection,
@@ -37,7 +39,8 @@
 		views = [...DEFAULT_VIEWS],
 		date = $bindable(),
 		dayCount = $bindable(3),
-		selection = $bindable<EventCalendarSelection>(EMPTY_EVENT_CALENDAR_SELECTION),
+		selection = $bindable<EventCalendarSelection>(),
+		defaultSelection = EMPTY_EVENT_CALENDAR_SELECTION,
 		resources = [],
 		loading = false,
 		disabled = false,
@@ -93,7 +96,7 @@
 		onItemClick,
 		onItemDoubleClick,
 		onSlotClick,
-		onSlotSelect,
+		onSelect,
 		onMoreClick,
 		onInteractionBlocked,
 		onkeydown: onRootKeydown,
@@ -102,9 +105,17 @@
 
 	const messages = $derived(useI18n(i18n));
 	const componentId = $props.id();
+	const selectionState = createBindableValue(
+		() => selection,
+		(next) => {
+			selection = next;
+		},
+		() => defaultSelection
+	);
 	let ambientDirection = $state<'ltr' | 'rtl' | null>(null);
 	const resolvedDirection = $derived(dir ?? ambientDirection ?? 'ltr');
 	const classes = $derived(useEventCalendarTheme(theme));
+	const resolvedColor = $derived(useDefaultColor());
 	const renderers = $derived<EventCalendarSnippetProps<TItemFields, TResourceFields>>({
 		header,
 		actions,
@@ -133,7 +144,7 @@
 		onItemClick,
 		onItemDoubleClick,
 		onSlotClick,
-		onSlotSelect,
+		onSelect,
 		onMoreClick,
 		onInteractionBlocked
 	});
@@ -166,10 +177,10 @@
 			dayCount = value;
 		},
 		get selection() {
-			return selection;
+			return selectionState.value;
 		},
 		set selection(value) {
-			selection = value;
+			selectionState.value = value;
 		},
 		get resources() {
 			return resources;
@@ -395,7 +406,7 @@
 	aria-label={rootAttributes['aria-label'] ?? messages.eventCalendarLabel}
 	data-event-calendar-part="root"
 	data-density={density}
-	data-color="primary"
+	data-color={resolvedColor}
 	data-view={calendar.view}
 	data-direction={resolvedDirection}
 	data-loading={loading || undefined}
@@ -492,14 +503,14 @@
 			)}
 			<span
 				data-event-calendar-part="drag-preview-date"
-				class="block whitespace-nowrap text-[0.6875rem] leading-4 text-neutral/60 tabular-nums"
+				class="text-neutral/70 block text-[0.6875rem] leading-4 whitespace-nowrap tabular-nums"
 			>
 				{dragPreviewDateFormatter.formatRange(start, inclusiveEnd)}
 			</span>
 		{:else}
 			<span
 				data-event-calendar-part="drag-preview-time"
-				class="block whitespace-nowrap text-[0.6875rem] leading-4 text-neutral/60 tabular-nums"
+				class="text-neutral/70 block text-[0.6875rem] leading-4 whitespace-nowrap tabular-nums"
 			>
 				{dragPreviewDateTimeFormatter.formatRange(proposal.item.start, proposal.item.end)}
 			</span>

@@ -64,7 +64,7 @@
 		{#if header && headerKeys.length > 0}
 			<thead class={classes.thead()}>
 				<tr class={classes.row({ density })}>
-					{#each headerKeys as key}
+					{#each headerKeys as key (key)}
 						{@render renderCell(header[key]!, true)}
 					{/each}
 				</tr>
@@ -73,19 +73,22 @@
 
 		{#if items && items.length > 0}
 			<tbody class={classes.tbody()}>
-				{#each items as row}
-					<tr class={classes.row({ density, class: row.class })}>
+				{#each items as row, index (index)}
+					<tr
+						data-state={row.selected ? 'selected' : undefined}
+						class={classes.row({ density, selected: !!row.selected, class: row.class })}
+					>
 						{#if row.content}
 							<Slot render={row.content} />
 						{:else if row.cells}
 							{#if headerKeys.length > 0}
-								{#each headerKeys as key}
+								{#each headerKeys as key (key)}
 									{#if row.cells[key]}
 										{@render renderCell(row.cells[key]!, false)}
 									{/if}
 								{/each}
 							{:else}
-								{#each Object.keys(row.cells) as key}
+								{#each Object.keys(row.cells) as key (key)}
 									{@render renderCell(row.cells[key]!, false)}
 								{/each}
 							{/if}
@@ -99,13 +102,13 @@
 			<tfoot class={classes.tfoot()}>
 				<tr class={classes.row({ density })}>
 					{#if headerKeys.length > 0}
-						{#each headerKeys as key}
+						{#each headerKeys as key (key)}
 							{#if footer[key]}
 								{@render renderCell(footer[key]!, false)}
 							{/if}
 						{/each}
 					{:else}
-						{#each Object.keys(footer) as key}
+						{#each Object.keys(footer) as key (key)}
 							{@render renderCell(footer[key]!, false)}
 						{/each}
 					{/if}

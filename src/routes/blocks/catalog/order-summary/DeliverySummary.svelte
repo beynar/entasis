@@ -5,20 +5,20 @@
 	import { Card } from 'svelai/card';
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="grid gap-xl md:grid-cols-[1.3fr_1fr]">
-		<div class="flex flex-col gap-xl">
-			<header class="flex flex-col gap-lg">
-				<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+	<div class="gap-xl grid md:grid-cols-[1.3fr_1fr]">
+		<div class="gap-xl flex flex-col">
+			<header class="gap-lg flex flex-col">
+				<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 					Sample order FLD-1026
 				</p>
 				<Heading size="h2" weight="bold">Your vessels are on the move.</Heading>
-				<p class="max-w-2xl text-neutral/65">A little closer to their new home.</p>
+				<p class="text-neutral/65 max-w-2xl">A little closer to their new home.</p>
 			</header>
 			<Timeline
 				color="primary"
@@ -51,14 +51,14 @@
 		</div>
 		<aside>
 			<Card title="Your order" description="Two good things, together"
-				><div class="flex flex-col gap-xl">
+				><div class="gap-xl flex flex-col">
 					{@render productArt('vase', 'Clay')}
 					<div class="flex justify-between">
 						<h3 class="font-semibold">Everyday vessel</h3>
 						<span>$76</span>
 					</div>
-					<p class="text-sm text-neutral/55">Clay · Quantity 2</p>
-					<dl class="flex flex-col gap-lg border-t border-neutral/15 pt-lg text-sm">
+					<p class="text-neutral/65 text-sm">Clay · Quantity 2</p>
+					<dl class="gap-lg border-neutral/15 pt-lg flex flex-col border-t text-sm">
 						<div class="flex justify-between">
 							<dt>Delivery</dt>
 							<dd>$8</dd>

@@ -39,7 +39,7 @@ Images are discovered from the DOM with \`imageSelector\`, defaulting to \`img\`
 - **imageSelector**: string (default: "img") - Selector used inside the wrapper.
 - **disabled**: boolean (default: false) - Prevents image enhancement and opening.
 - **zoomMargin**: number (default: 32) - Minimum viewport margin around the zoomed image.
-- **transitionDuration**: number (default: 240) - Zoom animation duration in milliseconds.
+- Zoom animation duration and easing now come from the \`motion\` theme slot (default tokens \`normal\` / \`enter\`); see Motion below.
 - **closeOnClickOutside**: boolean (default: true) - Closes from the backdrop.
 - **closeOnEscape**: boolean (default: true) - Closes on Escape.
 - **lockScroll**: boolean (default: true) - Locks page scroll while open.
@@ -103,4 +103,11 @@ Images are discovered from the DOM with \`imageSelector\`, defaulting to \`img\`
 	{/snippet}
 </ImageGallery>
 \`\`\`
+
+## Motion
+
+- **motion** theme slot: one preset (no variants). Its resolved \`duration\` / \`easing\` become
+  the lightbox's animation duration and CSS easing (default tokens \`normal\` / \`enter\`).
+- Ladder: \`<Theme components={{ 'image-gallery': { motion } }}>\` →
+  \`setImageGalleryTheme({ motion })\` → \`theme.motion\`. Reduced motion collapses it to 0.
 `;

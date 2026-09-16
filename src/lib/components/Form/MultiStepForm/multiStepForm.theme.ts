@@ -5,8 +5,8 @@ const defaultMultiStep = cva({
 	base: 'relative flex min-w-0 flex-col',
 	variants: {
 		variant: {
-			plain: 'p-md',
-			sectioned: 'p-md',
+			plain: 'gap-xl',
+			sectioned: 'gap-xl',
 			card: ''
 		}
 	},
@@ -16,15 +16,35 @@ const defaultMultiStep = cva({
 });
 
 const defaultMultiStepHeader = cva({
-	base: ''
+	base: 'px-xl',
+	variants: {
+		variant: {
+			plain: '',
+			sectioned: '',
+			card: 'border-b border-neutral-muted pb-xl'
+		}
+	},
+	defaultVariants: {
+		variant: 'plain'
+	}
 });
 
 const defaultMultiStepContent = cva({
-	base: 'min-w-0'
+	base: 'min-w-0 px-xl'
 });
 
 const defaultMultiStepFooter = cva({
-	base: 'flex justify-between gap-md'
+	base: 'flex justify-between gap-md px-xl',
+	variants: {
+		variant: {
+			plain: '',
+			sectioned: '',
+			card: 'border-t border-neutral-muted pt-xl'
+		}
+	},
+	defaultVariants: {
+		variant: 'plain'
+	}
 });
 
 export const multiStepFormTheme = {

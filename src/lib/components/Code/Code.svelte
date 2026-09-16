@@ -10,6 +10,7 @@
 	import { copyIcon } from '../Icons/copy.js';
 	import { checkIcon } from '../Icons/check.js';
 	import { useClipboard } from '$lib/utils/useClipboard.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		code,
@@ -27,6 +28,7 @@
 		theme,
 		...attachments
 	}: CodeProps = $props();
+	const t = $derived(useI18n());
 
 	const classes = $derived(useCodeTheme(theme));
 
@@ -46,9 +48,7 @@
 
 	// Clear the "copied" feedback whenever the displayed block changes.
 	$effect(() => {
-		code;
-		language;
-		showLineNumbers;
+		void [code, language, showLineNumbers];
 		clipboard.reset();
 	});
 </script>
@@ -62,7 +62,7 @@
 		size="small"
 		squared
 		onclick={copy}
-		label={clipboard.copied ? 'Copied' : 'Copy'}
+		label={clipboard.copied ? t.copied : t.copy}
 	>
 		{#if clipboard.copied}
 			{@render checkIcon({ size: 14 })}
@@ -74,6 +74,7 @@
 
 {#snippet codeBody()}
 	<div class={classes.container()}>
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- `codeToHtml` builds this markup itself and escapes every token's text; rendering highlighted code is the component's entire contract. -->
 		{@html highlightedHtml}
 	</div>
 {/snippet}

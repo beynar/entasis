@@ -56,24 +56,24 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Our story</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">Our story</p>
 		<Heading size="h2" weight="bold">A few chapters. One simple idea.</Heading>
 	</header>
 	<Tabs items={chapters}
-		>{#snippet children({ item: chapter, index })}<div class="grid gap-xl py-xl md:grid-cols-2">
+		>{#snippet children({ item: chapter, index })}<div class="gap-xl py-xl grid md:grid-cols-2">
 				<img
 					src={photos[index].src}
 					alt={photos[index].title}
 					loading="lazy"
 					class="aspect-[4/3] w-full rounded-lg object-cover"
 				/>
-				<div class="flex flex-col gap-xl justify-center">
+				<div class="gap-xl flex flex-col justify-center">
 					<Chip class="w-fit" variant="soft">{chapter.tag}</Chip><Heading size="h3"
 						>{chapter.title}</Heading
 					>
-					<p class="text-lg leading-relaxed text-neutral/65">{chapter.body}</p>
+					<p class="text-neutral/65 text-lg leading-relaxed">{chapter.body}</p>
 				</div>
 			</div>{/snippet}</Tabs
 	>

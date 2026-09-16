@@ -1,10 +1,11 @@
 <script lang="ts" generics="Option extends TagGroupOption">
-	import { untrack } from 'svelte';
 	import Chip from '../../Chip/Chip.svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { TagGroupOption, TagGroupProps, TagGroupValue } from './tagGroup.props.js';
 	import { useTagGroupTheme } from './tagGroup.theme.js';
+	import { useDefaultColor } from '../../Theme/theme.state.svelte.js';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 
 	let {
 		defaultValue = null,
@@ -14,10 +15,10 @@
 		required = false,
 		items,
 		multiple = false,
-		color = 'primary',
+		color,
 		unselectedColor = 'neutral',
-		selectedVariant = 'solid',
-		unselectedVariant = 'soft',
+		selectedVariant = 'soft',
+		unselectedVariant = 'outline',
 		size = 'normal',
 		theme,
 		chipTheme,
@@ -31,9 +32,16 @@
 		class: className,
 		...rest
 	}: TagGroupProps<Option> = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	const valueState = createBindableValue<TagGroupValue>(
+		() => value,
+		(next) => {
+			value = next;
+		},
+		() => defaultValue
+	);
 
 	const id = $props.id();
+	const resolvedColor = $derived(useDefaultColor(color));
 
 	const toValues = (nextValue: TagGroupValue | undefined) => {
 		const values = Array.isArray(nextValue) ? nextValue : nextValue ? [nextValue] : [];
@@ -45,17 +53,17 @@
 		return multiple ? values : (values[0] ?? null);
 	};
 
-	const normalizedValue = $derived(normalizeValue(value));
+	const normalizedValue = $derived(normalizeValue(valueState.value));
 	const selectedValues = $derived(toValues(normalizedValue));
 	const classes = $derived(useTagGroupTheme(theme));
 
 	const field = createFieldState({
 		id,
 		get value() {
-			return value === undefined ? undefined : normalizedValue;
+			return normalizedValue;
 		},
 		set value(nextValue) {
-			value = normalizeValue(nextValue);
+			valueState.value = normalizeValue(nextValue);
 		},
 		get errors() {
 			return errors;
@@ -159,13 +167,12 @@
 			<Chip
 				{size}
 				type="button"
-				color={option.color ?? (selected ? color : unselectedColor)}
+				color={option.color ?? (selected ? resolvedColor : unselectedColor)}
 				variant={option.variant ?? (selected ? selectedVariant : unselectedVariant)}
 				prefix={option.icon}
 				theme={chipTheme}
-				class={classes.item({ selected, className: classes.chip() })}
-				aria-pressed={selected}
-				aria-disabled={itemDisabled}
+				{selected}
+				class={classes.item({ className: classes.chip() })}
 				disabled={itemDisabled}
 				onclick={() => setSelected(option)}
 			>

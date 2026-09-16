@@ -86,7 +86,7 @@ You can also use the full object syntax when you need additional properties:
 - **caption**: Slot (optional) - Table caption rendered as a <caption> element
 
 ### Styling Props
-- **density**: 'small' | 'normal' | 'large' (optional, default: 'normal') - Spacing density controlling cell paddings and row heights only
+- **density**: 'compact' | 'normal' | 'comfortable' (optional, default: 'normal') - Spacing density controlling cell paddings and row heights only
   - 'small' for dense data grids, 'normal' is the everyday scale, 'large' for roomy detail surfaces
   - Cascades from the root to header cells, body cells, rows, and caption; the wrapper exposes it as a \`data-density\` attribute
 - **class**: string (optional) - Additional CSS classes applied to the table wrapper
@@ -127,6 +127,7 @@ type TableRow = {
 	cells?: Record<string, TableCellValue>;  // Object of cells keyed by column name (structured mode)
 	content?: Slot;                            // Direct content slot (flexible mode)
 	class?: string;                            // Optional CSS classes for the row
+	selected?: boolean;                        // Drives the row theme's selected variant
 };
 \`\`\`
 
@@ -139,7 +140,7 @@ type TableRow = {
 ## Structure
 
 \`\`\`
-<div data-slot="table-wrapper" data-density="small | normal | large">
+<div data-slot="table-wrapper" data-density="compact | normal | comfortable">
 	{#if prefix}
 		<div data-slot="table-prefix">
 			<Prefix />
@@ -419,28 +420,28 @@ type TableRow = {
 </script>
 
 <!-- Dense data grid -->
-<Table {header} items={rows} density="small" />
+<Table {header} items={rows} density="compact" />
 
 <!-- Default everyday scale -->
 <Table {header} items={rows} density="normal" />
 
 <!-- Roomy detail surface -->
-<Table {header} items={rows} density="large" />
+<Table {header} items={rows} density="comfortable" />
 \`\`\`
 
 ### Table with RowSpan and ColSpan
 
 \`\`\`svelte
-<script>
-	import { Table } from 'svelai/table';
-	
+<script lang="ts">
+	import { Table, type TableRow } from 'svelai/table';
+
 	const header = {
 		name: { content: 'Name' },
 		details: { content: 'Details' },
 		status: { content: 'Status' }
 	};
-	
-	const rows = [
+
+	const rows: TableRow[] = [
 		{
 			cells: {
 				name: { content: 'John Doe', rowSpan: 2 },
@@ -519,23 +520,23 @@ The theme object contains the following parts:
 **row**:
 - base: Base classes for table rows
 - Variants:
-  - density: 'small' | 'normal' | 'large' - Vertical row padding (py-0 / py-0.5 / py-1)
-  - selected: boolean - Selected row styling (via data-state)
+  - density: 'compact' | 'normal' | 'comfortable' - Vertical row padding (py-0 / py-0.5 / py-1)
+  - selected: boolean - Selected row styling, driven by the row's \`selected\` flag (which also sets \`data-state="selected"\`)
 
 **head**:
 - base: Base classes for header cells
 - Variants:
-  - density: 'small' | 'normal' | 'large' - Header cell height and horizontal padding (h-8 px-1.5 / h-10 px-2 / h-12 px-3)
+  - density: 'compact' | 'normal' | 'comfortable' - Header cell height and horizontal padding (h-8 px-1.5 / h-10 px-2 / h-12 px-3)
 
 **cell**:
 - base: Base classes for data cells
 - Variants:
-  - density: 'small' | 'normal' | 'large' - Cell padding (px-1.5 py-1 / p-2 / p-3)
+  - density: 'compact' | 'normal' | 'comfortable' - Cell padding (px-1.5 py-1 / p-2 / p-3)
 
 **caption**:
 - base: Base classes for table caption
 - Variants:
-  - density: 'small' | 'normal' | 'large' - Caption top margin (mt-3 / mt-4 / mt-6)
+  - density: 'compact' | 'normal' | 'comfortable' - Caption top margin (mt-3 / mt-4 / mt-6)
 
 **prefix**:
 - base: Base classes for prefix slot

@@ -29,32 +29,34 @@
 			]
 		}
 	];
-	let filter = $state(0);
+	let filter = $state('All updates');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Product updates</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Product updates
+		</p>
 		<Heading size="h2" weight="bold">What’s new around here.</Heading>
 	</header>
 	<Tabbar items={['All updates', 'New', 'Improved']} bind:value={filter} />
-	<div class="grid gap-xl md:grid-cols-2">
-		{#each releases.filter((release) => filter === 0 || release.type === ['', 'New', 'Improved'][filter]) as release (release.version)}<article
-				class="flex flex-col gap-xl p-xl rounded-lg border border-neutral/15"
+	<div class="gap-xl grid md:grid-cols-2">
+		{#each releases.filter((release) => filter === 'All updates' || release.type === filter) as release (release.version)}<article
+				class="gap-xl p-xl border-neutral/15 flex flex-col rounded-lg border"
 			>
-				<div class="flex gap-md justify-between">
+				<div class="gap-md flex justify-between">
 					<Chip size="small" variant="soft" color={release.type === 'New' ? 'primary' : 'success'}
 						>{release.type}</Chip
-					><span class="text-xs text-neutral/50">{release.date}</span>
+					><span class="text-neutral/65 text-xs">{release.date}</span>
 				</div>
 				<h3 class="text-2xl font-semibold">{release.title}</h3>
 				<p class="text-neutral/65">{release.body}</p>
-				<ul class="flex flex-col gap-md list-inside list-disc text-sm">
+				<ul class="gap-md flex list-inside list-disc flex-col text-sm">
 					{#each release.changes as change (change)}<li>{change}</li>{/each}
 				</ul>
-				<div class="flex gap-md items-center mt-auto border-t border-neutral/15 pt-lg">
-					<Avatar size="small" user={{ name: 'The product team' }} /><span
-						class="text-xs text-neutral/55">The product team · v{release.version}</span
+				<div class="gap-md border-neutral/15 pt-lg mt-auto flex items-center border-t">
+					<Avatar size="small" name="The product team" /><span class="text-neutral/65 text-xs"
+						>The product team · v{release.version}</span
 					>
 				</div>
 			</article>{/each}

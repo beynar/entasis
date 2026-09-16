@@ -42,8 +42,8 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-lg md:p-xl">
-	<div class="flex flex-wrap items-end justify-between gap-xl">
+<section class="gap-xl p-lg md:p-xl flex flex-col">
+	<div class="gap-xl flex flex-wrap items-end justify-between">
 		<div class="max-w-xl">
 			<Heading as="h2" size="h2" weight="bold">The details that make a product feel right.</Heading>
 			<p class="mt-lg text-neutral/70">
@@ -53,13 +53,13 @@
 		<Button href="/components" variant="outline">Explore every component</Button>
 	</div>
 	<Separator />
-	<div class="grid gap-xl sm:grid-cols-2 lg:grid-cols-3">
-		{#each features as feature (feature.title)}<div class="flex flex-col items-start gap-lg">
-				<div class="rounded-lg bg-primary-muted p-md text-primary">
+	<div class="gap-xl grid sm:grid-cols-2 lg:grid-cols-3">
+		{#each features as feature (feature.title)}<div class="gap-lg flex flex-col items-start">
+				<div class="bg-primary-muted p-md text-primary-readable rounded-lg">
 					{@render feature.icon({ size: 26 })}
 				</div>
 				<Heading as="h3" size="h4">{feature.title}</Heading>
-				<p class="text-sm text-neutral/70">{feature.description}</p>
+				<p class="text-neutral/70 text-sm">{feature.description}</p>
 			</div>{/each}
 	</div>
 </section>

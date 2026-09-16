@@ -65,13 +65,11 @@
 			}
 		}}
 	>
-		{#snippet children()}
-			<section class="rounded-lg border border-neutral-muted bg-surface-raised p-5">
-				<p class="text-sm font-medium text-neutral">AppShell array actions</p>
-				<p class="mt-2 text-sm text-neutral/60">
-					Use arrays for normal buttons, snippets when actions need Sidebar API access.
-				</p>
-			</section>
-		{/snippet}
+		<section class="border-neutral-muted bg-surface-raised rounded-lg border p-5">
+			<p class="text-neutral text-sm font-medium">AppShell array actions</p>
+			<p class="text-neutral/70 mt-2 text-sm">
+				Use arrays for normal buttons, snippets when actions need Sidebar API access.
+			</p>
+		</section>
 	</AppShell>
 </div>

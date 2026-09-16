@@ -4,25 +4,27 @@
 	name: light;
 	default: true;
 	colorscheme: light;
-	surface: #f7fafa;
-	neutral: #1b1d29;
-	primary: #6366f1;
+	surface: #fafafa;
+	neutral: #18181b;
+	primary: #5f62ef;
+	secondary: #e4e4e7;
 	danger: #dc2626;
-	success: #16a34a;
-	warning: #d97706;
-	info: #0284c7;
+	success: #15803d;
+	warning: #f59e0b;
+	info: #2563eb;
 }
 @plugin './lib/tailwind/theme' {
 	name: dark;
 	colorscheme: dark;
-	surface: #15161c;
-	surface-floating: #27282f;
-	neutral: #ffffff;
-	primary: #6b77ff;
-	danger: #7f1d1d;
-	success: #22c55e;
-	warning: #f5a623;
-	info: #38bdf8;
+	surface: #09090b;
+	surface-floating: #27272a;
+	neutral: #fafafa;
+	primary: #5f62ef;
+	secondary: #27272a;
+	danger: #dc2626;
+	success: #15803d;
+	warning: #f59e0b;
+	info: #2563eb;
 	state-hover-opacity: 0.16;
 	state-pressed-opacity: 0.32;
 }
@@ -41,72 +43,6 @@
 	scrollbar-width: none;
 	&::-webkit-scrollbar {
 		display: none;
-	}
-}
-
-[data-slot='video-player'] {
-	container: video-player / inline-size;
-}
-
-[data-slot='video-player-compact-transport'],
-[data-slot='video-player-compact-play'],
-[data-slot='video-player-compact-settings'] {
-	display: none;
-}
-
-@container video-player (max-width: 720px) {
-	[data-slot='video-player-compact-transport'] {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		z-index: 30;
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		transform: translate(-50%, -50%);
-	}
-
-	[data-slot='video-player-controls-bar'] {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-	}
-
-	[data-slot='video-player-timeline-slider'] {
-		flex: 1 1 auto;
-		min-width: 0;
-	}
-
-	[data-slot='video-player-timeline-rail'] {
-		top: 50%;
-		bottom: auto;
-		transform: translateY(-50%);
-	}
-
-	[data-slot='video-player-timeline-thumb'] {
-		top: 50%;
-		bottom: auto;
-		transform: translate(-50%, -50%);
-	}
-
-	[data-slot='video-player-control-row'] {
-		display: contents;
-	}
-
-	[data-slot='video-player-control-end'] {
-		flex: 0 0 auto;
-		min-width: fit-content;
-		margin-left: 0;
-	}
-
-	[data-slot='video-player-control-start'],
-	[data-slot='video-player-control-center'],
-	[data-slot='video-player-secondary-controls'] {
-		display: none;
-	}
-
-	[data-slot='video-player-compact-settings'] {
-		display: flex;
 	}
 }
 

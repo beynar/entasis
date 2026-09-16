@@ -19,7 +19,7 @@
 		onValueChange,
 		visible,
 		max = 5,
-		allowHalf = false,
+		halfSteps = false,
 		readonly = false,
 		clearable = true,
 		dir,
@@ -94,12 +94,12 @@
 
 	// Field connects a visible label through aria-labelledby because this role="slider" element is
 	// not labelable. Use a translated fallback when no visible label is present.
-	const ariaLabel = $derived(typeof label === 'string' ? label : t.rating);
+	const resolvedLabel = $derived(typeof label === 'string' ? label : t.rating);
 
 	// While hovering, preview the hovered value; otherwise show the committed value.
 	let previewValue = $state<number | null>(null);
 	const displayValue = $derived(previewValue ?? field.value ?? 0);
-	const step = $derived(allowHalf ? 0.5 : 1);
+	const step = $derived(halfSteps ? 0.5 : 1);
 	const interactive = $derived(!readonly && !field.disabled);
 
 	// Resolve the effective reading direction: explicit prop, else the ambient direction.
@@ -112,7 +112,7 @@
 	// Compute the value a pointer event over `starIndex` (1-based) points at, honouring
 	// half steps and the effective reading direction.
 	const valueFromPointer = (event: MouseEvent, starIndex: number, element: HTMLElement) => {
-		if (!allowHalf) return starIndex;
+		if (!halfSteps) return starIndex;
 		const rect = element.getBoundingClientRect();
 		const ratio = (event.clientX - rect.left) / rect.width;
 		const leadingHalf = isRtl() ? ratio > 0.5 : ratio < 0.5;
@@ -194,7 +194,7 @@
 		{id}
 		role="slider"
 		tabindex={readonly || field.disabled ? -1 : 0}
-		aria-label={label ? undefined : ariaLabel}
+		aria-label={label ? undefined : resolvedLabel}
 		aria-valuemin={0}
 		aria-valuemax={max}
 		aria-valuenow={field.value ?? 0}

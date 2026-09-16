@@ -12,27 +12,28 @@
 	let address = $state({ street: '', city: '', postal: '', country: 'France' });
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="flex flex-col gap-xl mx-auto w-full max-w-4xl">
-		<header class="flex flex-col gap-lg">
-			<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+	<div class="gap-xl mx-auto flex w-full max-w-4xl flex-col">
+		<header class="gap-lg flex flex-col">
+			<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 				Secure checkout preview
 			</p>
 			<Heading size="h2" weight="bold">Just a few useful details.</Heading>
 		</header>
 		<Meter
-			value={{ value: step + 1, color: 'primary' }}
+			value={step + 1}
+			color="primary"
 			max={3}
 			label={`Step ${step + 1} of 3 · ${['Contact', 'Delivery', 'Review'][step]}`}
 		/>
-		<div class="grid gap-xl md:grid-cols-[1fr_16rem]">
-			<div class="flex flex-col gap-xl">
-				<nav aria-label="Checkout steps" class="flex gap-md flex-wrap">
+		<div class="gap-xl grid md:grid-cols-[1fr_16rem]">
+			<div class="gap-xl flex flex-col">
+				<nav aria-label="Checkout steps" class="gap-md flex flex-wrap">
 					{#each ['Contact', 'Delivery', 'Review'] as label, index (label)}<Button
 							size="small"
 							variant={index === step ? 'soft' : 'ghost'}
@@ -108,14 +109,14 @@
 					/>{:else}<Card
 						title="Review your details"
 						description="No payment or order has been submitted."
-						><div class="flex flex-col gap-xl">
+						><div class="gap-xl flex flex-col">
 							<div>
 								<h3 class="font-medium">Contact</h3>
-								<p class="mt-lg text-sm text-neutral/60">{contact.name}<br />{contact.email}</p>
+								<p class="mt-lg text-neutral/70 text-sm">{contact.name}<br />{contact.email}</p>
 							</div>
 							<div>
 								<h3 class="font-medium">Delivery</h3>
-								<address class="mt-lg text-sm not-italic text-neutral/60">
+								<address class="mt-lg text-neutral/70 text-sm not-italic">
 									{address.street}<br />{address.postal}
 									{address.city}<br />{address.country}
 								</address>
@@ -128,11 +129,11 @@
 			</div>
 			<aside>
 				<Card title="Your order"
-					><div class="flex flex-col gap-xl">
+					><div class="gap-xl flex flex-col">
 						{@render productArt('lamp', 'Sand')}
 						<h3 class="font-medium">Arc desk lamp</h3>
-						<p class="text-sm text-neutral/55">Sand · Quantity 1</p>
-						<dl class="flex flex-col gap-lg text-sm">
+						<p class="text-neutral/65 text-sm">Sand · Quantity 1</p>
+						<dl class="gap-lg flex flex-col text-sm">
 							<div class="flex justify-between">
 								<dt>Subtotal</dt>
 								<dd>$148</dd>
@@ -141,7 +142,7 @@
 								<dt>Delivery</dt>
 								<dd>$8</dd>
 							</div>
-							<div class="flex justify-between border-t border-neutral/15 pt-lg font-semibold">
+							<div class="border-neutral/15 pt-lg flex justify-between border-t font-semibold">
 								<dt>Total</dt>
 								<dd>$156</dd>
 							</div>

@@ -34,18 +34,20 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Customer stories</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Customer stories
+		</p>
 		<Heading size="h2" weight="bold">Small details. Real impact.</Heading>
-		<p class="max-w-2xl text-neutral/65">
+		<p class="text-neutral/65 max-w-2xl">
 			Three teams, three different challenges, one considered approach.
 		</p>
 	</header>
-	<div class="grid gap-xl md:grid-cols-3">
+	<div class="gap-xl grid md:grid-cols-3">
 		{#each stories as story (story.company)}<Card
-				><div class="flex flex-col gap-xl">
-					<div class="flex gap-md items-center justify-between">
+				><div class="gap-xl flex flex-col">
+					<div class="gap-md flex items-center justify-between">
 						<h3 class="text-xl font-semibold">{story.company}</h3>
 						<Chip size="small" variant="soft" color="neutral">{story.category}</Chip>
 					</div>
@@ -57,9 +59,8 @@
 					/>
 					<h4 class="text-lg font-medium">{story.title}</h4>
 					<p>
-						<strong class="text-3xl font-semibold text-primary">{story.metric}</strong><br /><span
-							class="text-neutral/60">{story.label}</span
-						>
+						<strong class="text-primary-readable text-3xl font-semibold">{story.metric}</strong><br
+						/><span class="text-neutral/70">{story.label}</span>
 					</p>
 					<Button href="/docs" variant="link" class="self-start">Read story ↗</Button>
 				</div></Card

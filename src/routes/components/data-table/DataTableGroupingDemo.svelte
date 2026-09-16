@@ -1,6 +1,10 @@
 <script lang="ts">
-	import { DataTable, type DataTableColumn } from '$lib/components/DataTable/index.js';
-	import { createPeople, type Person } from './exampleData.js';
+	import {
+		DataTable,
+		type DataTableCellPayload,
+		type DataTableColumn
+	} from '$lib/components/DataTable/index.js';
+	import { createPeople, formatSalary, type Person } from './exampleData.js';
 
 	const people = createPeople(90);
 	const columns: DataTableColumn<Person>[] = [
@@ -33,6 +37,8 @@
 			accessor: 'salary',
 			header: 'Average salary',
 			aggregation: 'mean',
+			cell: salaryCell,
+			aggregatedCell: salaryCell,
 			sortable: true,
 			align: 'end',
 			width: 170
@@ -46,6 +52,10 @@
 		}
 	];
 </script>
+
+{#snippet salaryCell(payload: DataTableCellPayload<Person>)}
+	{formatSalary(payload.value)}
+{/snippet}
 
 <DataTable
 	items={people}

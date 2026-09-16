@@ -3,7 +3,7 @@
 	import DocPage from '../../DocPage.svelte';
 	import { FileInput } from '$lib/components/Form/File/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let single = $state<File | null>(null);
@@ -21,7 +21,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -81,7 +81,7 @@
 			<div class="w-full max-w-md">
 				<FileInput label="Avatar" mode="single" types={['image/*']} bind:value={single} />
 				{#if single}
-					<p class="text-neutral/60 mt-2 text-xs">Selected: {single.name}</p>
+					<p class="text-neutral/70 mt-2 text-xs">Selected: {single.name}</p>
 				{/if}
 			</div>
 		</ComponentCard>

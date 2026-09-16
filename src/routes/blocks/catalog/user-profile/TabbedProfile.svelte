@@ -10,22 +10,22 @@
 	let view = $state('Projects');
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<div class="overflow-hidden rounded-lg border border-neutral-muted">
-		<div class="flex h-40 items-end bg-primary p-lg text-primary-contrast">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<div class="border-neutral-muted overflow-hidden rounded-lg border">
+		<div class="bg-primary p-lg text-primary-contrast flex h-40 items-end">
 			<p class="text-sm">Design, with a little more purpose.</p>
 		</div>
 		<Stack gap="xl" class="bg-surface p-lg sm:p-xl">
-			<header class="flex flex-col items-start gap-lg sm:flex-row sm:flex-wrap sm:items-center">
-				<Avatar user={{ name: 'Maya Chen' }} size="large" />
+			<header class="gap-lg flex flex-col items-start sm:flex-row sm:flex-wrap sm:items-center">
+				<Avatar name="Maya Chen" size="large" />
 				<div class="flex-1">
 					<h2 class="text-3xl font-semibold">Maya Chen</h2>
-					<p class="mt-sm text-sm text-neutral/60">Design lead at Northstar · London, UK</p>
+					<p class="mt-sm text-neutral/70 text-sm">Design lead at Northstar · London, UK</p>
 				</div>
 				<Chip color="success">Open to mentoring</Chip>
 			</header>
 			<nav
-				class="flex flex-wrap gap-sm border-b border-neutral-muted pb-lg"
+				class="gap-sm border-neutral-muted pb-lg flex flex-wrap border-b"
 				aria-label="Profile sections"
 			>
 				{#each ['Projects', 'Activity', 'About'] as section (section)}<Button
@@ -37,7 +37,7 @@
 					{#each [{ title: 'A calmer onboarding', description: 'Helping new teams get started with confidence.' }, { title: 'A shared design language', description: 'A system that gives teams room to create.' }] as project (project)}<Card
 							title={project.title}
 							description={project.description}
-							><div class="h-28 rounded-lg bg-primary-muted"></div></Card
+							><div class="bg-primary-muted h-28 rounded-lg"></div></Card
 						>{/each}
 				</Grid>{:else if view === 'Activity'}<Timeline
 					items={[
@@ -62,7 +62,7 @@
 					]}
 				/>{:else}<Stack gap="lg">
 					<h3 class="text-xl font-semibold">Make useful things. Stay curious.</h3>
-					<p class="max-w-2xl leading-relaxed text-neutral/65">
+					<p class="text-neutral/65 max-w-2xl leading-relaxed">
 						I’m a design lead who cares about clear thinking, thoughtful craft, and helping teams do
 						their best work. Outside work, you’ll find me walking, reading, or making something with
 						my hands.

@@ -30,12 +30,13 @@ The Popover component displays floating content positioned relative to a trigger
 - **offset**: number - Distance in pixels from the reference element
 - **fitTrigger**: boolean (default: false) - Whether popover should match the width of the trigger element
 - **mobileSheet**: boolean (default: false) - On mobile viewports (<768px), render as a bottom sheet instead of an anchored floating panel
+- **inline**: boolean (default: false) - Render the panel in normal document flow where the component sits instead of portaling to the viewport-fixed layer: no floating-ui positioning, no scroll lock, no outside-press dismissal (Escape still closes it). Same panel classes and motion, and the trigger still toggles it. Wins over \`mobileSheet\`
 - **mobileSheetSizeTransition**: boolean (default: true) - Whether mobile-sheet panels animate intrinsic size changes
 
 ### Event Props
 - **onOpenChange**: (open: boolean) => void - Called once for each library-requested state change
-- **onAfterOpen**: (popover: PopoverState) => void - Called after the open transition finishes
-- **onAfterClose**: (popover: PopoverState) => void - Called after the close transition finishes
+- **onAfterOpen**: (payload: PopoverState) => void - Called after the open transition finishes
+- **onAfterClose**: (payload: PopoverState) => void - Called after the close transition finishes
 
 ### Slot Props
 - **children**: Snippet<[PopoverState]> - Popover content
@@ -47,11 +48,25 @@ The Popover component displays floating content positioned relative to a trigger
 ### Interaction Props
 - **openOnHover**: boolean (default: false) - Open on mouse hover
 - **openOnClick**: boolean (default: true) - Open on click
-- **hoverDelay**: number (default: 100) - Delay in ms before opening on hover
-- **closeOnEscape**: boolean (default: true) - Close on Escape key
-- **closeOnClickOutside**: boolean (default: true) - Close when clicking outside
+- **delay**: number (default: 100) - Delay in ms before opening on hover
+- **closeOnEscape**: boolean (default: true) - Close on Escape. Only the topmost open layer closes, so Escape inside a nested popover leaves its parent open
+- **closeOnClickOutside**: boolean (default: true) - Close on an outside press. A press dismisses this popover and every layer stacked above it, but never the layer that was pressed
 - **closeOnMouseLeave**: boolean (default: false) - Close when the pointer leaves the hover safe area. The safe area is the trigger, the panel, and a prediction cone toward the panel, so a diagonal move to the panel keeps it open.
 - **debugSafeArea**: boolean (default: false) - Show hover safe-area overlays. Trigger/panel rectangles render in blue; the prediction cone toward the panel renders in orange.
+
+### Focus & ARIA Props
+- **focusOnOpen**: 'first' | 'container' | false (default: false) - Where focus goes when the panel opens: \`'first'\` moves it to an \`[autofocus]\` / \`[data-autofocus]\` target or the first tabbable control, \`'container'\` focuses the panel itself, \`false\` keeps it on the trigger. Focus always returns to the trigger when the popover closes (Escape or outside press)
+- **haspopup**: 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid' | true (default: 'dialog') - Value of \`aria-haspopup\` on the trigger, describing what the panel contains. \`aria-expanded\` and \`aria-controls\` are managed automatically alongside it, for the built-in Button trigger and for a snippet trigger using \`{@attach popover.reference}\`
+
+\`\`\`svelte
+<script>
+	import { Popover } from 'svelai/popover';
+</script>
+
+<Popover focusOnOpen="first" haspopup="listbox" trigger={{ content: 'Pick one' }}>
+	<ul role="listbox"><li role="option" tabindex="0">First</li></ul>
+</Popover>
+\`\`\`
 
 ### Visual Props
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
@@ -91,9 +106,11 @@ The Popover component displays floating content positioned relative to a trigger
 	import { Button } from 'svelai/button';
 </script>
 
+<!-- {@attach popover.reference} anchors the panel to the element and keeps
+     aria-haspopup / aria-expanded / aria-controls in sync on it -->
 <Popover>
 	{#snippet trigger(popover)}
-		<Button onclick={() => popover.open()}>Open</Button>
+		<Button onclick={() => popover.toggle()} {@attach popover.reference}>Open</Button>
 	{/snippet}
 	
 	<p>This is a popover!</p>
@@ -173,7 +190,7 @@ The Popover component displays floating content positioned relative to a trigger
 	trigger={{ content: "Hover Me" }}
 	openOnHover
 	openOnClick={false}
-	hoverDelay={200}
+	delay={200}
 >
 	Hover content
 </Popover>
@@ -207,6 +224,24 @@ The Popover component displays floating content positioned relative to a trigger
 	fitTrigger
 >
 	Popover matches trigger width
+</Popover>
+\`\`\`
+
+### Inline (static, in flow)
+
+\`\`\`svelte
+<script>
+	import { Popover } from 'svelai/popover';
+</script>
+
+<!-- Open in place, no portal: useful for docs, visual tests, or an always-visible panel -->
+<Popover inline open trigger={false}>
+	<p>Rendered where the component sits.</p>
+</Popover>
+
+<!-- The trigger still toggles an inline panel -->
+<Popover inline trigger={{ content: 'Toggle' }}>
+	<p>Expands below the trigger, in the flow.</p>
 </Popover>
 \`\`\`
 
@@ -269,8 +304,8 @@ The Popover component displays floating content positioned relative to a trigger
 
 <Popover 
 	trigger={{ content: "Trigger" }}
-	onAfterOpen={(popover) => console.log('Popover opened', popover)}
-	onAfterClose={(popover) => console.log('Popover closed', popover)}
+	onAfterOpen={(payload) => console.log('Popover opened', payload)}
+	onAfterClose={(payload) => console.log('Popover closed', payload)}
 >
 	Watch the console
 </Popover>
@@ -279,17 +314,19 @@ The Popover component displays floating content positioned relative to a trigger
 ### User Card Popover with External Ref
 
 \`\`\`svelte
-<script>
+<script lang="ts">
 	import { Popover } from 'svelai/popover';
 	import { Button } from 'svelai/button';
 	import { Avatar } from 'svelai/avatar';
-	
-	let avatarRef;
+
+	let avatarRef = $state<HTMLElement | null>(null);
 	let open = $state(false);
-	let user = { name: 'John Doe', email: 'john@example.com' };
+	const user = { name: 'John Doe', email: 'john@example.com' };
 </script>
 
-<Avatar bind:ref={avatarRef} user={user} onclick={() => open = !open} />
+<button type="button" bind:this={avatarRef} onclick={() => (open = !open)}>
+	<Avatar name={user.name} />
+</button>
 
 <Popover bind:open ref={avatarRef} position="bottom">
 	<div class="p-4">
@@ -310,18 +347,20 @@ The Popover component uses a \`PopoverState\` instance that is passed to all slo
 - **offset**: number - Current offset value
 - **open()**: () => void - Method to open the popover
 - **close()**: () => void - Method to close the popover
+- **toggle()**: () => void - Method to toggle the popover
+- **reference**: attachment for a custom trigger element (\`{@attach popover.reference}\`); anchors the panel to it and keeps its \`aria-haspopup\`, \`aria-expanded\`, and \`aria-controls\` in sync
 
 ## Accessibility
 
-- Focus trap when open
-- Escape key to close
-- Click outside to close
-- Proper ARIA attributes
+- The trigger carries \`aria-haspopup\` (from \`haspopup\`), \`aria-expanded\`, and \`aria-controls\` — automatically for the built-in Button and for a snippet trigger using \`{@attach popover.reference}\`
+- \`focusOnOpen\` decides where focus lands on open; focus returns to the trigger on close, whether by Escape or an outside press
+- Non-modal: Tab is not contained and the page is not made inert (use Dialog for that)
+- Escape closes only the topmost open layer; an outside press dismisses every layer stacked above the one pressed. Popovers, menus, and dialogs share one layer stack
 - Keyboard navigation support
 
 ## Notes
 
-- Popover is positioned using floating-ui
+- Popover is positioned using floating-ui, except with \`inline\`, where the document lays the panel out
 - Automatically adjusts position to stay in viewport
 - Multiple popovers can be stacked
 - Scroll locking prevents background scroll (when enabled)
@@ -334,6 +373,9 @@ The Popover component uses a theme object that can be customized using the \`the
 ### Theme Structure
 
 The theme object contains the following parts:
+- **motion**: Open/close transition preset, keyed by \`mode\` (a floating panel scales, the mobile
+  sheet slides up). Takes \`in\` / \`out\` FSO params plus a \`duration\` / \`easing\` motion token;
+  the \`transition\` prop wins over it
 - **popover**: Main popover container styles
 
 ### Theme Type Definition
@@ -360,6 +402,7 @@ const customTheme: PopoverThemeProps = {
 - base: Base classes applied to all popovers
 - Variants:
   - size: 'small' | 'normal' | 'large' - Controls max-width, width, and padding
+  - mode: 'floating' | 'inline' | 'mobileSheet' - Set from \`inline\` / \`mobileSheet\`; \`root\` positions the wrapper (fixed, in flow, or full-screen sheet)
 
 ### Usage Examples
 
@@ -369,7 +412,7 @@ const customTheme: PopoverThemeProps = {
   trigger={{ content: "Click Me" }}
   theme={{
     popover: {
-      base: 'rounded-xl shadow-xl border-2 border-primary',
+      base: 'rounded-xl lift-5 border-2 border-primary',
       size: {
         normal: 'max-w-md p-4'
       }
@@ -404,7 +447,7 @@ const customTheme: PopoverThemeProps = {
   
   setPopoverTheme({
     popover: {
-      base: 'rounded-lg shadow-2xl backdrop-blur-sm bg-white/95',
+      base: 'rounded-lg lift-5 backdrop-blur-sm bg-white/95',
       size: {
         normal: 'max-w-sm p-4'
       }

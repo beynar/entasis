@@ -1,6 +1,7 @@
 <script lang="ts" generics="Item extends TimelineItem = TimelineItem">
 	import TimelineEntry from './TimelineEntry.svelte';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { useOverflowObserver } from '$lib/utils/useOverflowObserver.svelte.js';
 	import { resolveTimelineItems } from './timeline.items.js';
 	import type { TimelineItem, TimelineProps } from './timeline.props.js';
 	import { useTimelineTheme } from './timeline.theme.js';
@@ -33,50 +34,18 @@
 		resolveTimelineItems(items, orientation, placement, color, connectorColor)
 	);
 
-	let isOverflowing = $state(false);
+	const overflow = useOverflowObserver({
+		axis: 'x',
+		selector: '[data-slot="timeline-item"]',
+		enabled: () => orientation === 'horizontal'
+	});
+	const isOverflowing = $derived(overflow.overflowing);
 	const scrollFadeAxis = $derived(
 		scrollFade && orientation === 'horizontal' && isOverflowing ? 'x' : 'none'
 	);
 	const resolvedTabindex = $derived(
 		tabindex ?? (orientation === 'horizontal' && isOverflowing ? 0 : undefined)
 	);
-
-	$effect(() => {
-		const node = ref;
-		if (!node || orientation !== 'horizontal') {
-			isOverflowing = false;
-			return;
-		}
-
-		let frame: number | undefined;
-		const measure = () => {
-			frame = undefined;
-			isOverflowing = node.scrollWidth > node.clientWidth + 1;
-		};
-		const schedule = () => {
-			if (frame !== undefined) cancelAnimationFrame(frame);
-			frame = requestAnimationFrame(measure);
-		};
-		const resizeObserver = new ResizeObserver(schedule);
-		const observeLayout = () => {
-			resizeObserver.disconnect();
-			resizeObserver.observe(node);
-			node
-				.querySelectorAll<HTMLElement>('[data-slot="timeline-item"]')
-				.forEach((timelineItem) => resizeObserver.observe(timelineItem));
-			schedule();
-		};
-		const mutationObserver = new MutationObserver(observeLayout);
-
-		mutationObserver.observe(node, { childList: true, characterData: true, subtree: true });
-		observeLayout();
-
-		return () => {
-			if (frame !== undefined) cancelAnimationFrame(frame);
-			mutationObserver.disconnect();
-			resizeObserver.disconnect();
-		};
-	});
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
@@ -84,6 +53,7 @@
 	{...rootAttributes}
 	bind:this={ref}
 	tabindex={resolvedTabindex}
+	{@attach overflow.attachment}
 	data-slot="timeline"
 	data-orientation={orientation}
 	data-placement={placement}

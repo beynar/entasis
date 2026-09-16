@@ -40,9 +40,9 @@
 			label: 'Density',
 			value: 'normal',
 			options: [
-				{ value: 'small', label: 'Small' },
+				{ value: 'compact', label: 'Compact' },
 				{ value: 'normal', label: 'Normal' },
-				{ value: 'large', label: 'Large' }
+				{ value: 'comfortable', label: 'Comfortable' }
 			]
 		},
 		{

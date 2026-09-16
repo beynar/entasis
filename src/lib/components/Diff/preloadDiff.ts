@@ -15,7 +15,7 @@ import {
  */
 export async function preloadDiff(
 	input: DiffInput,
-	options: FileDiffOptions<undefined> | undefined,
+	options: FileDiffOptions<undefined, undefined> | undefined,
 	state: Pick<DiffRenderState, 'lineAnnotations'>,
 	optionProps: DiffOptionProps
 ): Promise<PreloadedDiffRenderItem[]> {

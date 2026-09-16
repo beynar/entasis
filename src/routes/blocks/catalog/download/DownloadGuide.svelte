@@ -12,28 +12,28 @@
 		);
 </script>
 
-<section class="mx-auto flex max-w-3xl flex-col items-center gap-xl p-xl text-center">
+<section class="gap-xl p-xl mx-auto flex max-w-3xl flex-col items-center text-center">
 	<Chip variant="outline">Start with clarity</Chip><Heading as="h2" size="h2" weight="bold"
 		>A better brief makes a better beginning.</Heading
 	>
-	<p class="max-w-xl text-neutral/70">
+	<p class="text-neutral/70 max-w-xl">
 		A compact set of questions to help your team agree on the problem, the people, and the outcome.
 	</p>
 	<Card class="w-full max-w-md" variant="outline"
-		><div class="flex flex-col items-center gap-xl">
+		><div class="gap-xl flex flex-col items-center">
 			<div
-				class="flex size-20 items-center justify-center rounded-2xl bg-primary-muted text-primary"
+				class="bg-primary-muted text-primary-muted-readable flex size-20 items-center justify-center rounded-2xl"
 			>
 				{@render fileTextIcon({ size: 36 })}
 			</div>
 			<div>
 				<Heading as="h3" size="h4">The project starting brief</Heading>
-				<p class="mt-sm text-sm text-neutral/60">Plain text · 6 questions · Version 1.0</p>
+				<p class="mt-sm text-neutral/70 text-sm">Plain text · 6 questions · Version 1.0</p>
 			</div>
 			<Button href={downloadHref} download="project-brief.txt" fullWidth prefix={downloadSimpleIcon}
 				>Download the brief</Button
 			>
 		</div></Card
 	>
-	<p class="text-sm text-neutral/60">No account. Just a useful place to start.</p>
+	<p class="text-neutral/70 text-sm">No account. Just a useful place to start.</p>
 </section>

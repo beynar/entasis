@@ -5,7 +5,7 @@
 	import { Stat } from 'svelai/stat';
 </script>
 
-<section class="mx-auto flex max-w-5xl flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto flex max-w-5xl flex-col">
 	<div class="text-center">
 		<Chip variant="outline">A quarter in perspective</Chip><Heading
 			as="h2"
@@ -14,15 +14,15 @@
 			class="mt-xl">See the progress behind the plans.</Heading
 		>
 	</div>
-	<div class="grid items-center gap-xl md:grid-cols-2">
+	<div class="gap-xl grid items-center md:grid-cols-2">
 		<div class="relative mx-auto flex size-72 items-center justify-center">
 			<ProgressCircle value={84} diameter={280} label="84 percent of quarterly goals complete" />
 			<div class="absolute text-center">
 				<strong class="text-6xl">84%</strong>
-				<p class="mt-sm text-sm text-neutral/60">of quarterly goals</p>
+				<p class="mt-sm text-neutral/70 text-sm">of quarterly goals</p>
 			</div>
 		</div>
-		<div class="flex flex-col gap-lg">
+		<div class="gap-lg flex flex-col">
 			<Stat
 				label="Outcomes delivered"
 				value="21 of 25"
@@ -42,5 +42,5 @@
 			/>
 		</div>
 	</div>
-	<p class="text-center text-xs text-neutral/50">Illustrative workspace metrics.</p>
+	<p class="text-neutral/65 text-center text-xs">Illustrative workspace metrics.</p>
 </section>

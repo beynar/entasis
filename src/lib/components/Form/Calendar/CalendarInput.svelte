@@ -27,7 +27,7 @@
 		today,
 		weekdayLength,
 		locale,
-		ariaLabel,
+		label,
 		minDate,
 		maxDate,
 		cell,
@@ -92,7 +92,7 @@
 	});
 </script>
 
-<Field as="fieldset" {field} theme={theme?.field} {...rest}>
+<Field as="fieldset" {field} {label} theme={theme?.field} {...rest}>
 	<!-- display:contents wrapper: zero layout impact, catches bubbled focus so
 	     bind:focused works like on the text inputs. -->
 	<div
@@ -120,7 +120,7 @@
 			{today}
 			{weekdayLength}
 			{locale}
-			{ariaLabel}
+			label={typeof label === 'string' ? label : undefined}
 			disabled={field.disabled}
 			{cell}
 			{buttons}

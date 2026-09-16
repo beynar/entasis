@@ -1,21 +1,25 @@
 <script lang="ts">
 	import type { ProgressCircleProps } from './progressCircle.props.js';
 	import { useProgressCircleTheme } from './progressCircle.theme.js';
+	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		ref = $bindable(),
 		class: className,
-		color = 'primary',
+		color,
 		size = 'normal',
 		diameter,
 		value = 0,
-		label = 'Progress',
+		label,
 		decorative = false,
 		theme,
 		...attachments
 	}: ProgressCircleProps = $props();
+	const t = $derived(useI18n());
 
 	const classes = $derived(useProgressCircleTheme(theme));
+	const resolvedColor = $derived(useDefaultColor(color));
 	const pixelDiameter = $derived(
 		diameter !== undefined
 			? `${Number.isFinite(diameter) ? Math.max(diameter, 1) : 28}px`
@@ -28,15 +32,15 @@
 <span
 	bind:this={ref}
 	data-slot="progress-circle"
-	data-color={color}
+	data-color={resolvedColor}
 	data-size={size}
 	role={decorative ? undefined : 'progressbar'}
 	aria-hidden={decorative ? 'true' : undefined}
-	aria-label={decorative ? undefined : label}
+	aria-label={decorative ? undefined : (label ?? t.progress)}
 	aria-valuemin={decorative ? undefined : 0}
 	aria-valuemax={decorative ? undefined : 100}
 	aria-valuenow={decorative ? undefined : progressValue}
-	class={classes.root({ size, color, className })}
+	class={classes.root({ size, color: resolvedColor, className })}
 	style:--progress-circle-size={pixelDiameter}
 	{...attachments}
 >

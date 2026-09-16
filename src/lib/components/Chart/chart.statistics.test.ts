@@ -9,7 +9,7 @@ function definition<TRow extends object>(configuration: Configuration<TRow>) {
 	return createChartOptions({
 		...configuration,
 		tooltip: false,
-		ariaLabel: 'Statistical chart',
+		label: 'Statistical chart',
 		idPrefix: 'statistics'
 	}).definition;
 }

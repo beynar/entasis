@@ -5,7 +5,8 @@
 	import { useAIComposerTheme, type AIComposerThemeProps } from './aiComposer.theme.js';
 	import { flip } from 'svelte/animate';
 	import { quintOut } from 'svelte/easing';
-	import { MediaQuery } from 'svelte/reactivity';
+	import { prefersReducedMotion } from '$lib/utils/motion.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		files,
@@ -24,10 +25,10 @@
 		onRetry: (attachmentId: string) => void;
 		theme?: AIComposerThemeProps;
 	} = $props();
+	const t = $derived(useI18n());
 
 	const classes = $derived(useAIComposerTheme(theme));
-	const prefersReducedMotion = new MediaQuery('(prefers-reduced-motion: reduce)');
-	const flipDuration = $derived(prefersReducedMotion.current ? 0 : 180);
+	const flipDuration = $derived(prefersReducedMotion() ? 0 : 180);
 
 	function getAttachment(file: File): AIComposerAttachment | undefined {
 		const key = getFileKey(file);
@@ -40,7 +41,7 @@
 </script>
 
 {#if files.length > 0}
-	<ScrollArea scrollFade class="max-w-full" ariaLabel="Attached files">
+	<ScrollArea scrollFade class="max-w-full" label={t.aiComposerAttachedFiles}>
 		<div data-slot="ai-composer-files" role="list" class={classes.files()}>
 			{#each files as file (getFileKey(file))}
 				{@const attachment = getAttachment(file)}

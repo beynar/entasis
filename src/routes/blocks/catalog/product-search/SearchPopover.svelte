@@ -41,33 +41,35 @@
 	);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Find a good thing</p>
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Find a good thing
+		</p>
 		<Heading size="h2" weight="bold">What are you looking for?</Heading>
 	</header>
 	<Popover
 		size="large"
 		mobileSheet
 		trigger={{ content: 'Search the collection', variant: 'outline' }}
-		><div class="flex flex-col gap-xl">
+		><div class="gap-xl flex flex-col">
 			<TextInput label="Search products" placeholder="Try “lamp”" bind:value={query} />
-			<p class="text-xs uppercase tracking-widest text-neutral/50">
+			<p class="text-neutral/65 text-xs tracking-widest uppercase">
 				{query ? 'Search results' : 'Popular products'}
 			</p>
-			<div class="flex flex-col gap-lg">
+			<div class="gap-lg flex flex-col">
 				{#each matches as product (product.id)}<div
-						class="grid grid-cols-[5rem_1fr_auto] items-center gap-lg rounded-lg bg-surface-recessed p-lg"
+						class="gap-lg bg-surface-recessed p-lg grid grid-cols-[5rem_1fr_auto] items-center rounded-lg"
 					>
 						<div>{@render productArt(product.shape, product.color)}</div>
 						<div>
 							<h3 class="text-sm font-semibold">{product.name}</h3>
-							<p class="mt-sm text-xs text-neutral/55">{product.type} · {money(product.price)}</p>
+							<p class="mt-sm text-neutral/65 text-xs">{product.type} · {money(product.price)}</p>
 						</div>
 						<Button variant="ghost" size="small" onclick={() => (added = product.name)}>Add</Button>
 					</div>{:else}<Empty
@@ -75,12 +77,12 @@
 						description="Try lamp, vessel, tote, or cup."
 					/>{/each}
 			</div>
-			<p class="text-xs text-success" aria-live="polite">
+			<p class="text-success text-xs" aria-live="polite">
 				{added ? `${added} added to sample bag.` : `${matches.length} products`}
 			</p>
 		</div></Popover
 	>
-	<div class="flex gap-md flex-wrap">
+	<div class="gap-md flex flex-wrap">
 		{#each ['Lighting', 'Objects', 'Carry'] as category (category)}<Chip
 				size="small"
 				variant="soft"

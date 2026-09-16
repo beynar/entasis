@@ -75,9 +75,7 @@ export function compileNetworkRelation<TRow extends object>(
 			labelAnchor: 'middle'
 		};
 	});
-	const positionByIdentity = new Map(
-		positionedNodes.map((node) => [node.identity, node] as const)
-	);
+	const positionByIdentity = new Map(positionedNodes.map((node) => [node.identity, node] as const));
 	const positionedLinks: RelationLinkDatum[] = links.map((link) => {
 		const source = resolveForceNode(link.source, 'source');
 		const target = resolveForceNode(link.target, 'target');
@@ -102,13 +100,7 @@ export function compileNetworkRelation<TRow extends object>(
 			width: linkWidth(link.relation.value)
 		};
 	});
-	return compileRelationPointMarks(
-		positionedNodes,
-		positionedLinks,
-		mark,
-		compiled.labels,
-		path
-	);
+	return compileRelationPointMarks(positionedNodes, positionedLinks, mark, compiled.labels, path);
 }
 
 function resolveForceNode<TRow>(
@@ -121,7 +113,9 @@ function resolveForceNode<TRow>(
 
 function coordinate(value: number | undefined, nodeId: string | number, axis: 'x' | 'y'): number {
 	if (value !== undefined && Number.isFinite(value)) return value;
-	throw new TypeError(`[Chart] Network layout produced no ${axis} coordinate for ${String(nodeId)}.`);
+	throw new TypeError(
+		`[Chart] Network layout produced no ${axis} coordinate for ${String(nodeId)}.`
+	);
 }
 
 function linkWidth(value: number | undefined): number {

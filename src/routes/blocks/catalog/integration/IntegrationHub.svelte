@@ -46,8 +46,8 @@
 	];
 </script>
 
-<section class="mx-auto grid max-w-6xl items-center gap-xl p-lg md:grid-cols-2 md:p-xl">
-	<div class="flex flex-col gap-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl items-center md:grid-cols-2">
+	<div class="gap-xl flex flex-col">
 		<Chip class="self-start" variant="outline">One connected picture</Chip><Heading
 			as="h2"
 			size="h2"
@@ -62,10 +62,10 @@
 		>
 	</div>
 	<div
-		class="relative grid min-h-96 grid-cols-3 items-center gap-lg rounded-2xl bg-surface-recessed p-lg"
+		class="gap-lg bg-surface-recessed p-lg relative grid min-h-96 grid-cols-3 items-center rounded-2xl"
 	>
-		<div class="absolute inset-x-0 top-1/2 h-px bg-neutral-muted" aria-hidden="true"></div>
-		<div class="relative flex flex-col gap-xl">
+		<div class="bg-neutral-muted absolute inset-x-0 top-1/2 h-px" aria-hidden="true"></div>
+		<div class="gap-xl relative flex flex-col">
 			{#each tools.slice(0, 3) as tool, index (tool.title)}<Button
 					variant={active === index ? 'solid' : 'outline'}
 					onclick={() => (active = index)}
@@ -74,12 +74,12 @@
 		</div>
 		<div class="relative flex justify-center">
 			<div
-				class="flex size-20 items-center justify-center rounded-2xl bg-primary text-primary-contrast"
+				class="bg-primary text-primary-contrast flex size-20 items-center justify-center rounded-2xl"
 			>
 				{@render puzzlePieceIcon({ size: 36 })}
 			</div>
 		</div>
-		<div class="relative flex flex-col gap-xl">
+		<div class="gap-xl relative flex flex-col">
 			{#each tools.slice(3) as tool, index (tool.title)}<Button
 					variant={active === index + 3 ? 'solid' : 'outline'}
 					onclick={() => (active = index + 3)}

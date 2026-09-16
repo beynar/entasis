@@ -13,7 +13,7 @@ The Separator component is a visual divider that separates content in an interfa
 
 ### Core Props
 - **orientation**: 'horizontal' | 'vertical' (default: 'horizontal') - The direction of the separator
-- **color**: Colors | 'neutral' (default: 'neutral') - The color of the separator line
+- **color**: Colors (default: 'neutral') - The color of the separator line
   - Available: primary, secondary, success, warning, danger, info, neutral
 - **thickness**: number (default: 1) - The thickness of the separator in pixels
 - **decorative**: boolean (default: false) - Whether the separator is purely decorative (affects ARIA role)
@@ -184,7 +184,7 @@ The Separator component is a visual divider that separates content in an interfa
 ### With Attachments
 \`\`\`svelte
 <script>
-	import { spinnerOverlay } from '$lib/attachments/spinnerOverlay.svelte.js';
+	import { spinnerOverlay } from 'svelai/spinner-overlay';
 	
 	let loading = $state(false);
 </script>
@@ -295,7 +295,7 @@ The theme object contains the following parts:
         vertical: 'mx-3'
       },
       color: {
-        background: 'before:border-gray-300 after:border-gray-300'
+        neutral: 'before:border-neutral/30 after:border-neutral/30'
       }
     }
   });

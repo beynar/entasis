@@ -31,27 +31,25 @@
 	];
 </script>
 
-<section class="mx-auto flex max-w-6xl flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto flex max-w-6xl flex-col">
 	<Heading as="h2" size="h2" weight="bold">A clear path from idea to interface.</Heading
 	>{#each steps as step, index (step.title)}<div
-			class="grid items-center gap-xl border-t border-neutral-muted py-xl md:grid-cols-2"
+			class="gap-xl border-neutral-muted py-xl grid items-center border-t md:grid-cols-2"
 		>
-			<div class="flex gap-lg">
+			<div class="gap-lg flex">
 				<Chip variant="outline" class="self-start">0{index + 1}</Chip>
 				<div>
 					<Heading as="h3" size="h3">{step.title}</Heading>
 					<p class="mt-lg text-neutral/70">{step.description}</p>
 				</div>
 			</div>
-			<Card variant="soft" color={index === 1 ? 'secondary' : 'primary'}
-				><div class="flex flex-col gap-lg">
-					<span class="text-xs uppercase tracking-widest">{step.label}</span><Heading
+			<Card variant="outline" color={index === 1 ? 'secondary' : 'primary'}
+				><div class="gap-lg flex flex-col">
+					<span class="text-xs tracking-widest uppercase">{step.label}</span><Heading
 						as="h4"
 						size="h4">{step.preview}</Heading
-					><Meter
-						value={{ value: (index + 1) * 32, color: index === 1 ? 'secondary' : 'primary' }}
-					/>
-					<div class="flex gap-sm">
+					><Meter value={(index + 1) * 32} color={index === 1 ? 'secondary' : 'primary'} />
+					<div class="gap-sm flex">
 						{#each step.tags as tag (tag)}<Chip size="small" variant="outline">{tag}</Chip>{/each}
 					</div>
 				</div></Card

@@ -79,7 +79,7 @@
 		<ComponentCard description="A list of checkable options">
 			<div class="w-full max-w-md">
 				<CheckboxesInput label="Notifications" mode="normal" {items} bind:value={selected} />
-				<p class="text-neutral/60 mt-4 text-sm">Selected: {selected.join(', ') || 'none'}</p>
+				<p class="text-neutral/70 mt-4 text-sm">Selected: {selected.join(', ') || 'none'}</p>
 			</div>
 		</ComponentCard>
 
@@ -102,7 +102,7 @@
 		<ComponentCard description="Options rendered as selectable cards">
 			<div class="w-full max-w-md">
 				<CheckboxesInput label="Notifications" mode="card" {items} bind:value={cardSelected} />
-				<p class="text-neutral/60 mt-4 text-sm">
+				<p class="text-neutral/70 mt-4 text-sm">
 					Selected: {cardSelected.join(', ') || 'none'}
 				</p>
 			</div>

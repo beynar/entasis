@@ -57,14 +57,14 @@
 <div
 	bind:this={container}
 	bind:clientWidth={width}
-	class="relative overflow-hidden bg-surface-canvas {thumbnail ? 'thumbnail' : 'interactive'}"
+	class="bg-surface-canvas relative overflow-hidden {thumbnail ? 'thumbnail' : 'interactive'}"
 	class:mobile={!thumbnail && device === 'mobile'}
 	style:min-height={thumbnail ? undefined : `${height}px`}
 	aria-hidden={thumbnail ? 'true' : undefined}
 	inert={thumbnail}
 >
 	{#if !loaded}
-		<div class="absolute inset-0 flex flex-col justify-center gap-lg p-xl" aria-hidden="true">
+		<div class="gap-lg p-xl absolute inset-0 flex flex-col justify-center" aria-hidden="true">
 			<Skeleton class="h-3 w-1/4" />
 			<Skeleton class="h-7 w-2/3" />
 			<Skeleton class="h-3 w-1/2" />
@@ -77,7 +77,7 @@
 			title={`${title} ${thumbnail ? 'thumbnail' : 'preview'}`}
 			{...thumbnail ? { tabindex: -1 } : {}}
 			loading="lazy"
-			class="block border-0 bg-surface-canvas {loaded ? 'opacity-100' : 'opacity-0'}"
+			class="bg-surface-canvas block border-0 {loaded ? 'opacity-100' : 'opacity-0'}"
 			style:width={thumbnail ? '1100px' : '100%'}
 			style:height={thumbnail ? '760px' : `${height}px`}
 			style:transform={thumbnail ? `scale(${width / 1100})` : undefined}

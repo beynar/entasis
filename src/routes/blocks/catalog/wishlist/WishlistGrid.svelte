@@ -34,29 +34,31 @@
 	let bag = $state(0);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="flex gap-xl justify-between flex-wrap">
-		<header class="flex flex-col gap-lg">
-			<p class="text-xs font-semibold uppercase tracking-widest text-primary">Saved for later</p>
+	<div class="gap-xl flex flex-wrap justify-between">
+		<header class="gap-lg flex flex-col">
+			<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+				Saved for later
+			</p>
 			<Heading size="h2" weight="bold">A few things worth remembering.</Heading>
 		</header>
 		<Chip variant="soft">{saved.length} favorites</Chip>
 	</div>
-	<div class="grid gap-xl sm:grid-cols-2 lg:grid-cols-3">
+	<div class="gap-xl grid sm:grid-cols-2 lg:grid-cols-3">
 		{#each saved as product (product.id)}<Card
-				><div class="flex flex-col gap-xl">
+				><div class="gap-xl flex flex-col">
 					<div class="relative">
 						{@render productArt(product.shape, product.color)}
-						<div class="absolute left-lg top-lg">
+						<div class="left-lg top-lg absolute">
 							<Chip color="danger" size="small">Price drop</Chip>
 						</div>
 						<Button
-							class="absolute right-lg top-lg"
+							class="right-lg top-lg absolute"
 							variant="soft"
 							color="neutral"
 							size="small"
@@ -65,9 +67,9 @@
 						>
 					</div>
 					<h3 class="text-lg font-semibold">{product.name}</h3>
-					<div class="flex gap-md items-center">
+					<div class="gap-md flex items-center">
 						<span class="font-semibold">{money(product.price)}</span><s
-							class="text-sm text-neutral/45">{money(product.price * 1.2)}</s
+							class="text-neutral/65 text-sm">{money(product.price * 1.2)}</s
 						>
 					</div>
 					<Button
@@ -86,7 +88,7 @@
 			description="Restore the sample list to keep exploring."
 			actions={[{ content: 'Restore favorites', onclick: () => (saved = products) }]}
 		/>{/if}
-	<p class="text-sm text-success" aria-live="polite">
+	<p class="text-success text-sm" aria-live="polite">
 		{bag ? `${bag} items moved to the sample bag.` : ''}
 	</p>
 </section>

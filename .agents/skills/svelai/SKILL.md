@@ -11,6 +11,7 @@ A configuration-over-markup component library for SvelteKit. Components are styl
 
 - [Import Convention](#import-convention)
 - [Common Props](#common-props)
+- [Accessibility](#accessibility)
 - [Snippet Pattern](#snippet-pattern)
 - [Theme System](#theme-system)
 - [Color Tokens](#color-tokens)
@@ -20,7 +21,7 @@ A configuration-over-markup component library for SvelteKit. Components are styl
 
 ## Import Convention
 
-All components use kebab-case package paths with PascalCase component names:
+All components use kebab-case package paths with PascalCase component names. There is no root `svelai` export; always import from the subpath.
 
 ```svelte
 <script>
@@ -39,6 +40,8 @@ Most components share these prop patterns:
 
 `color`: `'primary'` | `'secondary'` | `'success'` | `'warning'` | `'danger'` | `'info'` | `'neutral'`
 
+When `color` is omitted, controls inherit the theme's `defaultColor` (`'neutral'` unless changed via `<Theme designTokens>`).
+
 ### Sizes
 
 `size`: `'small'` | `'normal'` | `'large'`
@@ -53,6 +56,64 @@ Most components share these prop patterns:
 - `theme`: ComponentTheme - Per-instance theme overrides
 - `ref`: HTMLElement - Bind to underlying DOM element
 - `disabled`: boolean
+- `data-*`: every component accepts arbitrary `data-*` attributes and forwards them to its root
+  element, so test hooks and analytics markers like `<Button data-testid="save">` always work.
+
+### Naming rules
+
+The same word means the same thing on every component; `tooling/check-public-api-contract.mjs`
+fails the build when it does not.
+
+- **State comes in threes.** A bindable `value` always ships with `defaultValue` and
+  `onValueChange`; a bindable `open` always ships with `defaultOpen` and `onOpenChange`. Bind one,
+  or drive it with the pair. Rating, Meter, ProgressCircle, and QRCode display a value they never
+  edit and are marked `@readonly-value` in their props file.
+- **Callbacks name the change, not the gesture**, take one payload object, and are present tense:
+  `onValueChange`, `onOpenChange`, `onWidthChange`, `onSearchChange`. Never `onChange`, `onClick`,
+  `onToggle`, `onPageChange`, or `onWidthChanged`.
+- **`api` is the instance handle.** `bind:api` on Tabs, Stepper, DataTable, Tree, AIChat, and
+  AIConversation gives the state object; the exported types are `TabsApi`, `StepperApi`,
+  `DataTableApi`, `AIConversationApi`.
+- **`label` is the one prop that names a component.** It is painted where the component has a
+  visible label (every Field input, Select, Checkbox, Switch, Slider, Rating, Meter, Stat) and
+  spoken where it has none (Button, ToggleButton, SegmentedControl, Pagination, Chart, ScrollArea,
+  AudioPlayer, VideoPlayer, QRCode, field actions). There is no `ariaLabel` prop anywhere. A
+  hidden visible label still names its control: Checkbox `mode="control"` speaks its string
+  `label` instead of painting it. Omit `label` and the component falls back to a sensible default
+  from the i18n catalog where it has one.
+- **`size` is `'small' | 'normal' | 'large'`** (the exported `Sizes`) everywhere. `xs`/`sm`/`md`/
+  `lg`/`xl` are Tailwind breakpoint and spacing words, never a component size.
+- **Literal unions are kebab-case**: `position="top-right"`, `variant="outline"`,
+  `icon="plus-minus"`. Disclosure controls (Accordion, Collapsible, AITool, Sidebar) share one
+  `DisclosureIndicator` union: `'chevron' | 'plus-minus' | 'none'`.
+- **Hover-opened surfaces delay with `delay`** (Popover, Menu submenus, PopupMenu), not
+  `hoverDelay`.
+
+## Accessibility
+
+Accessibility is the library's job. Never pass an `aria-*` attribute to a svelai component: describe
+the meaning and the component writes the attribute.
+
+| You pass                                             | The component renders                                                                                |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `<Button pressed={bold} />`                          | `aria-pressed`                                                                                       |
+| `<Button selected={isActive} role="tab" />`          | `aria-selected`                                                                                      |
+| `<Button expanded={open} haspopup="menu" />`         | `aria-expanded`, `aria-haspopup`                                                                     |
+| `<Chip selected={filter === group} />`               | `aria-pressed` on a button chip, `aria-current` on a link chip (and `aria-disabled` from `disabled`) |
+| `<Tabbar label="Sections" orientation="vertical" />` | `role="tablist"`, `aria-label`, `aria-orientation`                                                   |
+| `<PageShell label="Invoice detail" />`               | `aria-label` on the `<main>` landmark                                                                |
+
+An accessible name is always `label` — never `aria-label`, never `ariaLabel`.
+
+`aria-controls` has no public prop. A trigger inside a Popover, PopupMenu, Select or Combobox is
+wired by the surface itself: the built-in Button trigger gets `{...popover.triggerProps}`, and a
+custom snippet trigger gets the same state through `{@attach popover.reference}`. Never set
+`aria-haspopup` / `aria-expanded` / `aria-controls` on such a trigger by hand.
+
+Escape hatches that still take raw attributes, because they are attribute bags spread onto a DOM
+node rather than props: `MenuOption`'s `attrs`, `Field`'s `fieldAttrs`, `Select`'s `triggerAttrs`,
+and the `attributes` object a `Carousel` dot hands its snippet. Map marker `label`, `popup` and
+`tooltip` strings are likewise rendered as HTML — pass a snippet when the content is user-supplied.
 
 ## Snippet Pattern
 
@@ -74,25 +135,40 @@ Most components accept `prefix` and `suffix` snippets for composable content:
 
 ## Theme System
 
-Three layers: Tailwind plugin (colors/tokens), `<Theme>` component (wraps app), `useTheme()` (runtime access).
+Three layers: the Tailwind theme plugin (palette + engine utilities), the `<Theme>` component (wraps the app, runtime design tokens, light/dark switching), and the `ThemeState` it hands to its `children` snippet. The `@source` line lets Tailwind see the classes used inside the packaged components.
 
 ```css
-/* Tailwind plugin - defines colors and design tokens */
-@plugin 'svelai/tailwind-plugin' {
-	name: custom;
+/* app.css - one @plugin block per theme; the default one also bootstraps the engine */
+@import 'tailwindcss';
+@source '../node_modules/svelai/dist';
+
+@plugin 'svelai/tailwind-plugin/theme' {
+	name: light;
 	default: true;
 	colorscheme: light;
-	primary: #6366f1;
-	secondary: #8b5cf6;
-	danger: #ef4444;
-	success: #22c55e;
-	warning: #f59e0b;
-	info: #3b82f6;
 	surface: #fafafa;
-	neutral: #121212;
-	radius: normal;
-	spacing: large;
-	scale: majorThird;
+	neutral: #18181b;
+	primary: #5f62ef;
+	secondary: #e4e4e7;
+	danger: #dc2626;
+	success: #15803d;
+	warning: #f59e0b;
+	info: #2563eb;
+}
+@plugin 'svelai/tailwind-plugin/theme' {
+	name: dark;
+	colorscheme: dark;
+	surface: #09090b;
+	surface-floating: #27272a;
+	neutral: #fafafa;
+	primary: #5f62ef;
+	secondary: #27272a;
+	danger: #dc2626;
+	success: #15803d;
+	warning: #f59e0b;
+	info: #2563eb;
+	state-hover-opacity: 0.16;
+	state-pressed-opacity: 0.32;
 }
 ```
 
@@ -100,46 +176,78 @@ Three layers: Tailwind plugin (colors/tokens), `<Theme>` component (wraps app), 
 <!-- +layout.svelte - wrap app once -->
 <script>
 	import { Theme } from 'svelai/theme';
+
+	let { children } = $props();
 </script>
 
-<Theme colorScheme="auto">{@render children()}</Theme>
+<Theme>{@render children()}</Theme>
 ```
 
-Dark theme via `prefersDark: true` or named theme with `colorscheme: dark`. See [theming.md](theming.md) for full details.
+Themes are applied as `html[data-theme="<name>"]`; `<Theme>` persists the choice in `localStorage` and follows the system preference by default. See [theming.md](theming.md) for full details.
 
 ## Color Tokens
 
-Each semantic color (`primary`, `secondary`, `danger`, `success`, `warning`, `info`, `neutral`) generates variants: `{color}-light` (+15%), `{color}-lighter` (+25%), `{color}-dark` (-15%), `{color}-muted` (mixed with the base surface), `{color}-contrast` (auto contrast). All are overridable in plugin config.
+Each semantic color (`primary`, `secondary`, `danger`, `success`, `warning`, `info`, `neutral`) generates variants: `{color}-light` (+15%), `{color}-lighter` (+25%), `{color}-dark` (-15%), `{color}-muted` (mixed with the base surface), `{color}-contrast` (auto contrast). All are overridable in the plugin block. Two read-only text variants are also generated: `{color}-readable` (colored text on the surface) and `{color}-muted-readable` (colored text on the muted tint).
 
-Usage: `bg-primary`, `text-primary-contrast`, `border-danger-dark`, `bg-neutral-muted`.
+Usage: `bg-primary`, `text-primary-contrast`, `border-danger-dark`, `bg-neutral-muted`, `text-primary-readable`.
 
-Opaque surfaces use `surface-recessed` for inset wells and grouped-control tracks, followed by the elevation ladder `surface-canvas`, `surface`, `surface-raised`, and `surface-floating`. Transient hover, virtual focus, and press use the global `state-layer` utility, which composites `currentColor` without changing the resting surface. Use focus rings for focus and `*-muted` or solid colors for persistent selected, checked, open, or semantic states.
+Opaque surfaces use `surface-recessed` for inset wells and grouped-control tracks, followed by the elevation ladder `surface-canvas`, `surface`, `surface-raised`, and `surface-floating` (`bg-surface`, `bg-surface-raised`, ...). Transient hover, virtual focus, and press use the global `state-layer` utility, which composites `currentColor` without changing the resting surface. Use focus rings for focus and `*-muted` or solid colors for persistent selected, checked, open, or semantic states.
 
 ```svelte
 <button class="state-layer bg-primary text-primary-contrast">Save</button>
 ```
 
-`state-hover-opacity` and `state-pressed-opacity` can be overridden per theme. Their light-theme defaults are 0.05 and 0.10; their dark-theme defaults are 0.16 and 0.32.
+`state-hover-opacity` and `state-pressed-opacity` can be overridden per theme block. Their light-theme defaults are 0.05 and 0.10; their dark-theme defaults are 0.16 and 0.32.
 
 ## Design Tokens
 
-| Token                   | Values                                                                                                 | Default                    |
-| ----------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------- |
-| `radius`                | `none` \| `subtile` \| `small` \| `normal` \| `large` \| `round` \| number                             | `normal`                   |
-| `spacing`               | `small` \| `normal` \| `large` \| number                                                               | `normal`                   |
-| `scale`                 | `minorSecond` \| `majorSecond` \| `minorThird` \| `majorThird` \| `perfectFourth` \| `augmentedFourth` | `majorThird`               |
-| `raised-with-border`    | boolean                                                                                                | `false`                    |
-| `state-hover-opacity`   | number                                                                                                 | `0.05` light / `0.16` dark |
-| `state-pressed-opacity` | number                                                                                                 | `0.10` light / `0.32` dark |
+Geometry tokens are runtime values passed to `<Theme designTokens={...}>`, keyed by theme name (they are not plugin options):
+
+| Token              | Values                                                                                       | Default     |
+| ------------------ | -------------------------------------------------------------------------------------------- | ----------- |
+| `radius`           | `none` \| `subtile` \| `small` \| `normal` \| `large` \| `round` \| number                   | `normal`    |
+| `spacing`          | `small` \| `normal` \| `large` \| number                                                     | `normal`    |
+| `spacingScale`     | `{ xs?, sm?, md?, lg?, xl? }` multipliers of `--spacing`                                     | 1/1.5/2/3/4 |
+| `typeScale`        | `compact` \| `default` \| `comfortable` \| `large` \| `{ baseMinPx, baseMaxPx, scale, ... }` | unset       |
+| `raisedWithBorder` | boolean                                                                                      | unset       |
+| `defaultColor`     | `primary` \| `secondary` \| `danger` \| `success` \| `warning` \| `info` \| `neutral`        | `neutral`   |
+| `focusColor`       | any color role -- pins every focus ring                                                      | unset       |
+| `selectedColor`    | any color role -- pins every persistent selection fill                                       | unset       |
+| `hoverColor`       | any color role -- pins the transient hover layer                                             | unset       |
+| `pressedColor`     | any color role -- pins the transient pressed layer (falls back to `hoverColor`)              | unset       |
+
+`focusColor`, `selectedColor`, `hoverColor` and `pressedColor` are the four **state roles**. Left
+unset, each state falls back to the current role (`ring-focus` resolves to
+`var(--color-focus, var(--color))`), so nothing changes visually; pin one and that state stops
+following the control's own color everywhere at once. Theme-level only -- no per-component
+override. See `theming.md` "State colours".
+
+```svelte
+<script lang="ts">
+	import { Theme, type ThemeDesignTokenMap } from 'svelai/theme';
+
+	let { children } = $props();
+	const designTokens: ThemeDesignTokenMap = {
+		light: { radius: 'large', spacing: 'normal', defaultColor: 'primary' },
+		dark: { radius: 'large', spacing: 'normal', defaultColor: 'primary' }
+	};
+</script>
+
+<Theme {designTokens}>{@render children()}</Theme>
+```
 
 ## Component Theme Customization
 
-Every component has a theme object with parts (e.g., `button`, `prefix`, `suffix`). Each part has `base` classes and variant maps.
+Every component has a theme object with slots (e.g., `root`, `prefix`, `suffix`). Each slot has `base` classes plus one map per variant (`color`, `variant`, `size`, ...) keyed directly by variant value.
 
 ### Per-instance override
 
 ```svelte
-<Button theme={{ button: { base: 'rounded-full shadow-lg' } }}>Custom</Button>
+<script>
+	import { Button } from 'svelai/button';
+</script>
+
+<Button theme={{ root: { base: 'rounded-full shadow-lg' } }}>Custom</Button>
 ```
 
 ### Global override
@@ -149,28 +257,30 @@ Every component has a theme object with parts (e.g., `button`, `prefix`, `suffix
 	import { setButtonTheme } from 'svelai/button';
 
 	setButtonTheme({
-		button: {
-			variant: { solid: 'shadow-md hover:shadow-lg transition-shadow' }
+		root: {
+			base: 'tracking-wide',
+			variant: { solid: 'shadow-md hover:shadow-lg transition-shadow' },
+			color: { primary: 'ring-1 ring-primary/30' }
 		}
 	});
 </script>
 ```
 
-Pattern: `import { set{Component}Theme } from 'svelai/{kebab-name}'`
+Pattern: `import { set{Component}Theme } from 'svelai/{kebab-name}'`. Overrides are appended to the defaults; pass `override: true` to drop the defaults entirely.
 
 ## Component References
 
 **Theming & Config**: See [theming.md](theming.md) for full Tailwind plugin config and Theme component details.
 
-**Display**: See [display.md](display.md) for Button, ButtonGroup, Badge, Avatar, Chip, Heading, Code, Meter, ToggleButton, ToggleButtonGroup, QRCode, DocumentViewer, Icons.
+**Display**: See [display.md](display.md) for Button, ButtonGroup, Avatar, Chip, Heading, Code, Meter, MetadataList, Rating, ToggleButton, ToggleButtonGroup, QRCode, DocumentViewer, Icons.
 
-**Form Inputs**: See [form-inputs.md](form-inputs.md) for TextInput, TextArea, NumberInput, PasswordInput, PhoneInput, DateInput, TimeInput, Select, Combobox, Switch, RadioInput, CheckboxesInput, FileInput, Calendar, Form, MultiStepForm.
+**Form Inputs**: See [form-inputs.md](form-inputs.md) for TextInput, TextArea, NumberInput, RatingInput, PasswordInput, PhoneInput, DateInput, TimeInput, ColorInput, ColorPicker, Select, Combobox, TagsInput, KeyValueInput, Switch, RadioInput, CheckboxesInput, FileInput, Calendar, MiniCalendar, Form, MultiStepForm.
 
-**Layout & Navigation**: See [layout.md](layout.md) for Tabs, Tabbar, Stepper, Breadcrumbs, Accordion, Collapsible, Separator, Menu, PopupMenu, MenuOption, Carousel, ScrollArea, AspectRatio, Marquee.
+**Layout & Navigation**: See [layout.md](layout.md) for Tabs, Tabbar, Stepper, Breadcrumbs, Accordion, Collapsible, Separator, Menu, PopupMenu, MenuOption, Carousel, ScrollArea, AspectRatio, Marquee, Sidebar, AppShell, Grid/GridSpan — including `AppShell variant="framed"`, `Sidebar activeVariant`, and the `mount` axis on Tabs and Stepper.
 
 **Overlays & Feedback**: See [overlays.md](overlays.md) for Dialog, Popover, Tooltip, Toast, Confirmation, Alert, NetworkIndicator.
 
-**Data & Utility**: See [data-utility.md](data-utility.md) for Table, Card, Skeleton, Slot.
+**Data & Utility**: See [data-utility.md](data-utility.md) for Table, DataTable, SortableList, Card, Skeleton, Slot.
 
 ## Quick Patterns
 
@@ -180,6 +290,10 @@ Pattern: `import { set{Component}Theme } from 'svelai/{kebab-name}'`
 <script>
 	import { Form } from 'svelai/form';
 	import { Button } from 'svelai/button';
+
+	const handleSubmit = async (value) => {
+		console.log(value);
+	};
 </script>
 
 <Form
@@ -189,8 +303,8 @@ Pattern: `import { set{Component}Theme } from 'svelai/{kebab-name}'`
 	}}
 	onSubmit={handleSubmit}
 >
-	{#snippet footer({ form })}
-		<Button type="submit" disabled={!form.isValid}>Submit</Button>
+	{#snippet footer(form)}
+		<Button type="submit" loading={form.loading}>Submit</Button>
 	{/snippet}
 </Form>
 ```
@@ -199,6 +313,8 @@ Pattern: `import { set{Component}Theme } from 'svelai/{kebab-name}'`
 
 ```typescript
 import { confirmation } from 'svelai/confirmation';
+
+declare function deleteItem(): Promise<void>;
 
 const { confirmed, result } = await confirmation({
 	title: 'Delete item?',
@@ -216,6 +332,8 @@ const { confirmed, result } = await confirmation({
 ```typescript
 import { toast } from 'svelai/toast';
 
+declare function upload(): Promise<void>;
+
 toast.success({ title: 'Saved!' });
 toast.danger({ title: 'Error', description: 'Something went wrong.' });
 
@@ -227,6 +345,7 @@ toast.success({ title: 'Done!' });
 ```
 
 <!-- component-contract:inventory:start -->
+
 ## Generated Package Inventory
 
 This section is generated from `tooling/component-contract/manifest.ts`.
@@ -247,7 +366,6 @@ This section is generated from `tooling/component-contract/manifest.ts`.
 - `svelai/ai-reasoning` — Reasoning (/components/ai-reasoning)
 - `svelai/ai-suggestion` — Suggestion (/components/ai-suggestion)
 - `svelai/ai-tool` — Tool (/components/ai-tool)
-- `svelai/ai-mcp-app` — MCP App (/components/ai-mcp-app)
 
 ### Layout
 
@@ -415,4 +533,5 @@ This section is generated from `tooling/component-contract/manifest.ts`.
 - `svelai/scheduling` — scheduling, utility
 - `svelai/icons/*` — icons, snippet, wildcard-export
 - `svelai/spinner-overlay` — attachment, feedback
+
 <!-- component-contract:inventory:end -->

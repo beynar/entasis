@@ -130,7 +130,7 @@ import type { KbdThemeProps } from 'svelai/kbd';
 
 const customTheme: KbdThemeProps = {
 	root: {
-		base: 'rounded border border-neutral-muted shadow-sm',
+		base: 'rounded raised-1',
 		size: {
 			small: 'h-4 min-w-4 px-0.5 text-[0.625rem]',
 			normal: 'h-5 min-w-5 px-1 text-xs',
@@ -169,7 +169,7 @@ const customTheme: KbdThemeProps = {
 
 **Basic Theme Override**:
 \`\`\`svelte
-<Kbd theme={{ root: { base: 'border border-neutral-muted shadow-sm' } }}>
+<Kbd theme={{ root: { base: 'raised-1' } }}>
 	Esc
 </Kbd>
 \`\`\`

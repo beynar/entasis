@@ -7,7 +7,14 @@
 	import { colors, sizes } from '$lib/utils/tokens.js';
 	import type { SpinnerVariant } from '$lib/components/Spinner/spinner.props.js';
 
-	const spinnerVariants = ['default', 'grid', 'pulse', 'puff', 'lines', 'circles'] as const satisfies readonly SpinnerVariant[];
+	const spinnerVariants = [
+		'default',
+		'grid',
+		'pulse',
+		'puff',
+		'lines',
+		'circles'
+	] as const satisfies readonly SpinnerVariant[];
 	const controls = createComponentControls([
 		{
 			name: 'size',
@@ -63,7 +70,7 @@
 >
 	<Button fullWidth>Submit</Button>
 </div>`}
-		class="raised bg-amber-100 p-2"
+		class="raised bg-surface-recessed p-2"
 	>
 		<div
 			class="w-full"
@@ -75,19 +82,18 @@
 				variant: controls.value.variant
 			})}
 		>
-			<Button fullWidth>Submit caca</Button>
+			<Button fullWidth>Submit</Button>
 		</div>
 	</ComponentCard>
 
 	{#snippet examples()}
 		<ComponentCard
 			description="Toggle loading state and text interactively."
-			class="raised bg-amber-100 p-2"
+			class="raised bg-surface-recessed p-2"
 		>
 			<div class="flex w-full flex-col gap-4">
 				<input placeholder="Loading text" bind:value={loadingText} />
 				<input type="checkbox" bind:checked={isLoading} />
-				<label for="isLoading"></label>
 
 				{#if show}
 					<div
@@ -97,7 +103,7 @@
 							text: loadingText
 						})}
 					>
-						<Button fullWidth>Submit caca</Button>
+						<Button fullWidth>Submit</Button>
 					</div>
 				{/if}
 

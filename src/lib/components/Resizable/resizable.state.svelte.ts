@@ -1,7 +1,7 @@
 import { untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 import { createPointerDrag, type PointerDragPayload } from '$lib/utils/pointerDrag.js';
-import { bind } from '$lib/utils/state.svelte.js';
+import { withOptions } from '$lib/utils/state.svelte.js';
 import { ResizableLayoutAnimation } from './resizable.animation.svelte.js';
 import {
 	SIZE_EPSILON,
@@ -52,8 +52,6 @@ type ResizableStateOptions = {
 	onCollapsedPanelsChange?: (panelIds: string[]) => void;
 };
 
-export interface ResizableState extends ResizableStateOptions {}
-
 type PairResizeResult = {
 	sizeA: number;
 	sizeB: number;
@@ -63,21 +61,27 @@ type PairResizeResult = {
 
 const DEFAULT_KEYBOARD_STEP = 10;
 
-export class ResizableState {
+// Internal bookkeeping collections are rebuilt wholesale and published through `$state` fields, so
+// they stay plain Map/Set; these factories keep that intent explicit instead of reaching for the
+// per-entry reactive wrappers in `svelte/reactivity`.
+const plainMap = <K, V>(entries?: Iterable<readonly [K, V]>): Map<K, V> => new Map(entries);
+const plainSet = <T>(values?: Iterable<T>): Set<T> => new Set(values);
+
+export class ResizableState extends withOptions<ResizableStateOptions>() {
 	groupNode = $state<HTMLElement | null>(null);
 	dragIndex = $state<number | null>(null);
 	resolvedDir = $state<ResizableDir>('ltr');
 	private startSizes: number[] = [];
 	private groupSize = 0;
-	private defaultCollapsedPanelIds = new Set<string>();
+	private defaultCollapsedPanelIds = plainSet<string>();
 	private dragMoved = false;
 	private ignoreNextClick = false;
-	private handleAttachments = new Map<number, Attachment<HTMLElement>>();
+	private handleAttachments = plainMap<number, Attachment<HTMLElement>>();
 	private resizeObserver: ResizeObserver | null = null;
 	private animation = new ResizableLayoutAnimation();
 
 	constructor(options: ResizableStateOptions) {
-		bind(this, options);
+		super(options);
 		this.loadStoredLayout(this.storageKey);
 		this.syncLayout();
 
@@ -412,7 +416,7 @@ export class ResizableState {
 		resize: PairResizeResult,
 		nextSizes: number[]
 	) {
-		const nextCollapsedPanelIds = new Set(this.collapsedPanels);
+		const nextCollapsedPanelIds = plainSet(this.collapsedPanels);
 		const panels = this.layoutPanels;
 		for (const panelIndex of [handleIndex, handleIndex + 1]) {
 			const panel = panels[panelIndex];
@@ -481,7 +485,7 @@ export class ResizableState {
 	}
 
 	private getNormalizedCollapsedPanelIds(panels: ResizableLayoutPanel[], panelIds: string[]) {
-		const requestedIds = new Set(panelIds);
+		const requestedIds = plainSet(panelIds);
 		for (let index = 0; index < panels.length; index += 1) {
 			const panel = panels[index];
 			const panelId = this.panelIdFor(panels, index);

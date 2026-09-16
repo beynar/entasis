@@ -550,19 +550,19 @@ export type EventCalendarCallbackProps<TItemFields extends object = Record<never
 };
 ```
 
-| Callback                               | Purpose                                                                                                                     |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `onItemsChange({ items, change })`     | Carries the current item collection and guarded mutation transaction; fires after one accepted reassignment.               |
-| `onViewChange(view)`                   | Reports component-originated view changes.                                                                                  |
-| `onDateChange(date)`                   | Reports component-originated anchor changes.                                                                                |
-| `onDayCountChange(dayCount)`           | Reports N-day changes.                                                                                                      |
-| `onSelectionChange(selection)`         | Reports event or slot selection changes.                                                                                    |
-| `onItemClick({ occurrence, event })`   | Event-chip click before built-in selection; `event.preventDefault()` suppresses that selection.                             |
-| `onItemDoubleClick({ occurrence, event })` | Event-chip double click.                                                                                                |
-| `onSlotClick({ slot, event })`         | Empty point click before built-in slot selection; `event.preventDefault()` suppresses that selection.                       |
-| `onSlotSelect({ slot, info })`         | Completed range; `info.source` identifies drag-create, keyboard, or single-pointer input.                                   |
-| `onMoreClick({ day, occurrences, event })` | Month overflow trigger; returning `false` suppresses the built-in popover.                                             |
-| `onInteractionBlocked(info)`           | Receives `EventCalendarInteractionBlockedInfo<TItemFields>` once per rejected attempted gesture.                            |
+| Callback                                   | Purpose                                                                                                      |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `onItemsChange({ items, change })`         | Carries the current item collection and guarded mutation transaction; fires after one accepted reassignment. |
+| `onViewChange(view)`                       | Reports component-originated view changes.                                                                   |
+| `onDateChange(date)`                       | Reports component-originated anchor changes.                                                                 |
+| `onDayCountChange(dayCount)`               | Reports N-day changes.                                                                                       |
+| `onSelectionChange(selection)`             | Reports event or slot selection changes.                                                                     |
+| `onItemClick({ occurrence, event })`       | Event-chip click before built-in selection; `event.preventDefault()` suppresses that selection.              |
+| `onItemDoubleClick({ occurrence, event })` | Event-chip double click.                                                                                     |
+| `onSlotClick({ slot, event })`             | Empty point click before built-in slot selection; `event.preventDefault()` suppresses that selection.        |
+| `onSlotSelect({ slot, info })`             | Completed range; `info.source` identifies drag-create, keyboard, or single-pointer input.                    |
+| `onMoreClick({ day, occurrences, event })` | Month overflow trigger; returning `false` suppresses the built-in popover.                                   |
+| `onInteractionBlocked(info)`               | Receives `EventCalendarInteractionBlockedInfo<TItemFields>` once per rejected attempted gesture.             |
 
 `EventCalendarProposedUpdate.source` is a discriminated value: `'drag'`, `'resize-start'`, `'resize-end'`, `'keyboard'`, `'single-pointer'`, or `'api'`.
 

@@ -9,32 +9,28 @@ import type {
 	ToggleButtonVariant
 } from '../ToggleButton/index.js';
 import type {
-	ToggleButtonGroupItems,
-	ToggleButtonGroupThemeProps,
-	ToggleButtonGroupValue
+	ToggleButtonGroupItem,
+	ToggleButtonGroupThemeProps
 } from '../ToggleButtonGroup/index.js';
 import type { ToggleMenuThemeProps } from './toggleMenu.theme.js';
 
-export type ToggleMenuGroupButtons = ToggleButtonGroupItems;
+export type ToggleMenuGroupButton = ToggleButtonGroupItem;
+
+export type ToggleMenuGroupButtons = ToggleMenuGroupButton[];
 
 export type ToggleMenuRadioGroupButton = Pick<
 	WithoutAttachments<ToggleButtonProps>,
-	'ariaLabel' | 'prefix' | 'suffix' | 'children' | 'disabled' | 'class'
->;
+	'label' | 'prefix' | 'suffix' | 'children' | 'disabled' | 'class'
+> & {
+	/** Value identifying this radio inside the group value. Must be unique. */
+	value: string;
+};
 
-export type ToggleMenuRadioGroupButtons = Record<string, ToggleMenuRadioGroupButton>;
+export type ToggleMenuRadioGroupButtons = ToggleMenuRadioGroupButton[];
 
 export type ToggleMenuMenuItem = Pick<
 	WithoutAttachments<ToggleButtonProps>,
-	| 'ariaLabel'
-	| 'prefix'
-	| 'suffix'
-	| 'children'
-	| 'size'
-	| 'color'
-	| 'variant'
-	| 'disabled'
-	| 'class'
+	'label' | 'prefix' | 'suffix' | 'children' | 'size' | 'color' | 'variant' | 'disabled' | 'class'
 > & {
 	type: 'menu';
 	/** Menu rows, or a reactive factory when row state changes independently of the toolbar items. */
@@ -64,13 +60,18 @@ export type ToggleMenuToggleItem = Omit<WithoutAttachments<ToggleButtonProps>, '
 	type: 'toggle';
 };
 
-export type ToggleMenuGroupItem<Items extends ToggleMenuGroupButtons = ToggleMenuGroupButtons> = {
+export type ToggleMenuGroupItem = {
 	type: 'group';
-	items: Items;
-	ariaLabel: string;
-	value?: ToggleButtonGroupValue<Items>;
-	defaultValue?: ToggleButtonGroupValue<Items>;
-	onValueChange?: (value: ToggleButtonGroupValue<Items>) => void;
+	/** Ordered button configurations. Each carries its own `value`; pressed state lives on the group value. */
+	items: ToggleMenuGroupButtons;
+	/** Accessible name for the group. */
+	label: string;
+	/** Pressed values of this group. */
+	value?: string[];
+	/** Initial pressed values when `value` is omitted. */
+	defaultValue?: string[];
+	/** Called with the updated pressed values after any button in this group toggles. */
+	onValueChange?: (value: string[]) => void;
 	joined?: boolean;
 	size?: Sizes;
 	color?: Colors;
@@ -80,15 +81,18 @@ export type ToggleMenuGroupItem<Items extends ToggleMenuGroupButtons = ToggleMen
 	theme?: ToggleButtonGroupThemeProps;
 };
 
-export type ToggleMenuRadioGroupItem<
-	Items extends ToggleMenuRadioGroupButtons = ToggleMenuRadioGroupButtons
-> = {
+export type ToggleMenuRadioGroupItem = {
 	type: 'radio-group';
-	items: Items;
-	ariaLabel: string;
-	value?: Extract<keyof Items, string>;
-	defaultValue?: Extract<keyof Items, string>;
-	onValueChange?: (value: Extract<keyof Items, string>) => void;
+	/** Ordered radio configurations. Each carries its own `value`. */
+	items: ToggleMenuRadioGroupButtons;
+	/** Accessible name for the radio group. */
+	label: string;
+	/** Checked value of this group. */
+	value?: string;
+	/** Initial checked value when `value` is omitted. */
+	defaultValue?: string;
+	/** Called with the newly checked value. */
+	onValueChange?: (value: string) => void;
 	joined?: boolean;
 	size?: Sizes;
 	color?: Colors;
@@ -119,12 +123,10 @@ export type ToggleMenuItem =
 	| ToggleMenuCustomItem;
 
 export type ToggleMenuProps = WithAttachments<{
-	/** Bindable ordered toggles, groups, menu buttons, and custom controls. */
-	value?: ToggleMenuItem[];
-	/** Initial toolbar value when `value` is omitted. */
-	defaultValue?: ToggleMenuItem[];
+	/** Bindable ordered toggles, groups, menu buttons, and custom controls. Pressed state lives on the items. */
+	items: ToggleMenuItem[];
 	/** Accessible name for the toolbar. */
-	ariaLabel: string;
+	label: string;
 	/** Default size inherited by every item. */
 	size?: Sizes;
 	/** Default color inherited by every item. */
@@ -133,8 +135,8 @@ export type ToggleMenuProps = WithAttachments<{
 	variant?: ToggleButtonVariant;
 	/** When true, disables every item in the menu. */
 	disabled?: boolean;
-	/** Called once with the complete updated value after any control state changes. */
-	onValueChange?: (value: ToggleMenuItem[]) => void;
+	/** Called once with the complete updated item list after any control state changes. */
+	onItemsChange?: (items: ToggleMenuItem[]) => void;
 	/** Class name on the root toolbar element. */
 	class?: string;
 	/** Theme overrides for the toolbar root, rail, units, and overflow trigger. */

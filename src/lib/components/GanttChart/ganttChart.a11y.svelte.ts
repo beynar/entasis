@@ -4,6 +4,8 @@ import { GanttChartError } from './ganttChart.error.js';
 import type { GanttModelCommit } from './ganttChart.history.svelte.js';
 import { getGanttValueSignature } from './ganttChart.signature.js';
 import type { GanttChartState } from './ganttChart.state.svelte.js';
+import { useLiveAnnouncer, type LiveAnnouncer } from '$lib/utils/useLiveAnnouncer.svelte.js';
+import { clampRovingKey } from '$lib/utils/useRovingRegistry.svelte.js';
 import type {
 	GanttDependencyEndpoint,
 	GanttInteractionBlockedInfo,
@@ -39,7 +41,6 @@ export class GanttChartA11y<
 	TResourceFields extends object,
 	TAssignmentFields extends object
 > {
-	announcement = $state('');
 	activeTarget = $state.raw<GanttFocusTarget | null>(null);
 	readonly keyboardMode: KeyboardMode | null = $derived.by(() => {
 		const active = this.chart.interaction.active;
@@ -70,12 +71,12 @@ export class GanttChartA11y<
 	});
 	readonly liveRegionId: string;
 	readonly instructionsId: string;
+	readonly #announcer: LiveAnnouncer;
 	#root: HTMLElement | null = null;
 	#rowTaskIds: readonly string[] = [];
 	#columnIds: readonly string[] = [];
 	#dependencyIds: readonly string[] = [];
 	#rowHeight = 32;
-	#announcementRevision = 0;
 	#lastInteractionKey = '';
 	#focusFrames: number[] = [];
 	#dismissTimer: ReturnType<typeof setTimeout> | null = null;
@@ -88,7 +89,8 @@ export class GanttChartA11y<
 			TAssignmentFields
 		>
 	) {
-		this.liveRegionId = `${chart.rootId}-live`;
+		this.#announcer = useLiveAnnouncer(chart.rootId, 'live');
+		this.liveRegionId = this.#announcer.regionId;
 		this.instructionsId = `${chart.rootId}-instructions`;
 	}
 
@@ -343,12 +345,12 @@ export class GanttChartA11y<
 		this.announce(this.chart.messages.ganttChartMutationReverted(title));
 	}
 
+	get announcement(): string {
+		return this.#announcer.message;
+	}
+
 	announce(message: string): void {
-		const revision = ++this.#announcementRevision;
-		this.announcement = '';
-		queueMicrotask(() => {
-			if (revision === this.#announcementRevision) this.announcement = message;
-		});
+		this.#announcer.announce(message);
 	}
 
 	announceInteractionCancelled(status: GanttActiveInteraction<TTaskFields>): void {
@@ -602,9 +604,11 @@ export class GanttChartA11y<
 				: this.#rowTaskIds.includes(target.taskId);
 		if (isCurrent && (target.kind !== 'cell' || this.#columnIds.includes(target.columnId))) return;
 		if (target.kind === 'dependency' && this.#dependencyIds.length > 0) {
-			const previousIndex = Math.max(0, previousDependencyIds.indexOf(target.dependencyId));
-			const dependencyId =
-				this.#dependencyIds[Math.min(previousIndex, this.#dependencyIds.length - 1)];
+			const dependencyId = clampRovingKey(
+				previousDependencyIds,
+				target.dependencyId,
+				this.#dependencyIds
+			);
 			if (dependencyId) {
 				this.activeTarget = { kind: 'dependency', dependencyId };
 				this.focusDependency(dependencyId);
@@ -613,8 +617,7 @@ export class GanttChartA11y<
 			}
 		}
 		const previousTaskId = target.kind === 'dependency' ? null : target.taskId;
-		const previousRowIndex = Math.max(0, previousRowTaskIds.indexOf(previousTaskId ?? ''));
-		const taskId = this.#rowTaskIds[Math.min(previousRowIndex, this.#rowTaskIds.length - 1)];
+		const taskId = clampRovingKey(previousRowTaskIds, previousTaskId ?? '', this.#rowTaskIds);
 		if (!taskId) {
 			this.activeTarget = null;
 			return;
@@ -624,10 +627,12 @@ export class GanttChartA11y<
 			this.announceFocusRestored(taskId);
 			return;
 		}
-		const previousColumnIndex =
-			target.kind === 'cell' ? Math.max(0, previousColumnIds.indexOf(target.columnId)) : 0;
 		const columnId =
-			this.#columnIds[Math.min(previousColumnIndex, this.#columnIds.length - 1)] ?? 'title';
+			clampRovingKey(
+				previousColumnIds,
+				target.kind === 'cell' ? target.columnId : '',
+				this.#columnIds
+			) ?? 'title';
 		this.focusCell(taskId, columnId);
 		this.announceFocusRestored(taskId);
 	}

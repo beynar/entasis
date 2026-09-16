@@ -14,28 +14,28 @@
 	];
 </script>
 
-<section class="mx-auto flex max-w-6xl flex-col gap-xl p-lg md:p-xl">
-	<div class="flex flex-wrap items-end justify-between gap-lg">
+<section class="gap-xl p-lg md:p-xl mx-auto flex max-w-6xl flex-col">
+	<div class="gap-lg flex flex-wrap items-end justify-between">
 		<div>
 			<Chip variant="soft">One team</Chip><Heading as="h2" size="h2" weight="bold" class="mt-xl"
 				>The right people, close to the work.</Heading
 			>
 		</div>
-		<p class="max-w-sm text-sm text-neutral/60">
+		<p class="text-neutral/70 max-w-sm text-sm">
 			A connected mix of designers, engineers, and curious minds.
 		</p>
 	</div>
-	<div class="grid gap-md sm:grid-cols-2 lg:grid-cols-3">
-		{#each people as person (person.name)}<Card variant="outline" density="small"
+	<div class="gap-md grid sm:grid-cols-2 lg:grid-cols-3">
+		{#each people as person (person.name)}<Card variant="outline" density="compact"
 				><Stack gap="lg"
-					><div class="flex items-center gap-lg">
-						<Avatar user={person} />
+					><div class="gap-lg flex items-center">
+						<Avatar name={person.name} />
 						<div class="min-w-0 flex-1">
 							<Heading as="h3" size="h5">{person.name}</Heading>
-							<p class="mt-sm text-xs text-neutral/60">{person.role}</p>
+							<p class="mt-sm text-neutral/70 text-xs">{person.role}</p>
 						</div>
 					</div>
-					<div class="flex items-center justify-between gap-md">
+					<div class="gap-md flex items-center justify-between">
 						<Chip
 							size="small"
 							variant="soft"
@@ -44,7 +44,7 @@
 								: person.department === 'Engineering'
 									? 'secondary'
 									: 'neutral'}>{person.department}</Chip
-						><span class="text-xs text-neutral/50">{person.city}</span>
+						><span class="text-neutral/65 text-xs">{person.city}</span>
 					</div></Stack
 				></Card
 			>{/each}

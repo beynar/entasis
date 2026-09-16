@@ -7,4 +7,3 @@ export {
 	type ToggleButtonTheme,
 	type ToggleButtonThemeProps
 } from './toggleButton.theme.js';
-

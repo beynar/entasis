@@ -1,5 +1,4 @@
 import type { AIToolCall, AIToolStatus } from '../AITool/aiTool.props.js';
-import type { AIMcpToolCall } from '../AIMcpApp/aiMcpApp.props.js';
 import type {
 	AIThreadAskUserQuestion,
 	AIThreadItem,
@@ -23,18 +22,10 @@ export type AIThreadRenderItem<TMessage extends AIThreadItem = AIThreadItem> =
 			message: TMessage;
 			messageIndex: number;
 			tools: AIToolCall[];
-	  }
-	| {
-			kind: 'app';
-			key: string;
-			message: TMessage;
-			messageIndex: number;
-			tool: AIMcpToolCall;
 	  };
 
 export type DeriveAIThreadRenderItemsOptions<TMessage extends AIThreadItem> = {
 	getMessageKey: (message: TMessage, index: number) => string;
-	isAppTool?: (tool: AIToolCall) => tool is AIMcpToolCall;
 	activeQuestion?: AIThreadAskUserQuestion<TMessage> | null;
 	splitMessageParts?: boolean;
 };
@@ -95,17 +86,6 @@ export function deriveAIThreadRenderItems<TMessage extends AIThreadItem>(
 		const normalizedTool = normalizeToolCall(tool, `${messageKey}:tool-${toolIndex}`);
 		if (isQuestionTool(options.activeQuestion, messageIndex, normalizedTool, toolIndex)) {
 			flushTools();
-			return;
-		}
-		if (options.isAppTool?.(normalizedTool)) {
-			flushTools();
-			items.push({
-				kind: 'app',
-				key: `${messageKey}:app:${toolKey(normalizedTool, toolIndex)}`,
-				message,
-				messageIndex,
-				tool: normalizedTool
-			});
 			return;
 		}
 		pendingTools ??= {
@@ -290,8 +270,4 @@ function isQuestionTool<TMessage extends AIThreadItem>(
 	if (request.tool.id !== undefined && tool.id !== undefined) return request.tool.id === tool.id;
 	if (request.toolIndex !== undefined) return request.toolIndex === toolIndex;
 	return request.tool === tool;
-}
-
-function toolKey(tool: AIToolCall, index: number): string {
-	return tool.id !== undefined ? String(tool.id) : `${tool.name ?? tool.title ?? 'tool'}:${index}`;
 }

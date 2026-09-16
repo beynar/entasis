@@ -2,7 +2,6 @@ import type { WithAttachments } from '$lib/types/props.js';
 import type { ChartThemeProps } from './chart.theme.js';
 import type {
 	ChartColor,
-	ChartInitialDimensions,
 	ChartKey,
 	ChartMargin,
 	ChartPositionDefinition,
@@ -54,6 +53,17 @@ export type ChartTooltipDefinition<TRow> = {
 	groupBy?: 'x' | 'y' | false;
 	placement?: ChartTooltipPlacement;
 	offset?: number;
+	/**
+	 * Controlled pinned row. A pinned row shows its tooltip without hover, hover moves the
+	 * tooltip normally, and pointer leave restores the pinned row. The row is identified by
+	 * the mark's `key` channel when it has one and by its x value otherwise; `null` pins
+	 * nothing.
+	 */
+	value?: ChartKey | null;
+	/** Initially pinned row. Omit to start with no pinned row. */
+	defaultValue?: ChartKey | null;
+	/** Called after a click proposes a new pinned row, `null` when the row is unpinned. */
+	onValueChange?: (value: ChartKey | null) => void;
 };
 
 export type ChartLegendDefinition = {
@@ -65,6 +75,8 @@ export type ChartLegendDefinition = {
 	orientation?: 'horizontal' | 'vertical';
 	/** Legend title, or accessible name for the series visibility controls. */
 	label?: string;
+	/** Display text for one series key, in the legend and in the tooltip series label. */
+	format?: (key: ChartKey) => string;
 	/** Let users hide and show categorical series. Numeric legends stay static. */
 	interactive?: boolean;
 	/** Controlled visible series keys. Omit to let Chart own visibility. */
@@ -76,6 +88,13 @@ export type ChartLegendDefinition = {
 };
 
 export type ChartLegend = boolean | ChartLegendDefinition;
+
+/**
+ * Series colors. The array form is consumed in series-discovery order; the record form
+ * names a color per series key and falls back to the default palette for the rest.
+ */
+export type ChartPalette =
+	readonly [ChartColor, ...ChartColor[]] | Readonly<Record<string, ChartColor>>;
 
 export type ChartProps<TRow extends object> = WithAttachments<{
 	/** Rows shared by the chart marks; accessors read from this collection. */
@@ -94,8 +113,8 @@ export type ChartProps<TRow extends object> = WithAttachments<{
 	frame?: boolean | ChartFrameDefinition;
 	/** Outer plot margins in pixels, applied uniformly or per edge. */
 	margin?: number | Partial<ChartMargin>;
-	/** Ordered colors used when assigning series colors. */
-	palette?: readonly [ChartColor, ...ChartColor[]];
+	/** Series colors, ordered by series discovery or named per series key. */
+	palette?: ChartPalette;
 	/** Show a color legend or configure categorical series visibility. */
 	legend?: ChartLegend;
 	/** Enable tooltips or configure their fields, grouping, and placement. */
@@ -103,11 +122,13 @@ export type ChartProps<TRow extends object> = WithAttachments<{
 	/** Interactive viewport, zoom bounds, and pan configuration. */
 	viewport?: ChartViewport;
 	/** Required accessible name for the chart. */
-	ariaLabel: string;
+	label: string;
 	/** Additional accessible description of the plotted data. */
 	ariaDescription?: string;
-	/** Plot dimensions used before the browser measures its container. */
-	initialDimensions?: ChartInitialDimensions;
+	/** Plot height in pixels. Sizes the chart and its server-rendered SVG. */
+	height?: number;
+	/** Plot width-to-height ratio. Sizes the chart and its server-rendered SVG. */
+	aspectRatio?: number;
 	/** Bindable reference to the chart root element. */
 	ref?: HTMLElement | null;
 	/** Additional classes on the chart root. */

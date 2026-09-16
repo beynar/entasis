@@ -1,18 +1,20 @@
 export const avatarDescription = `
 # Avatar Component
 
-The Avatar component displays a user's profile picture with fallback initials. It supports loading states, various sizes, and badges (prefix/suffix). The AvatarGroup component displays multiple avatars with overlap.
+The Avatar component displays a user's profile picture with fallback initials. It supports a bindable loading flag, various sizes, and badges (prefix/suffix). The AvatarGroup component displays multiple avatars with overlap.
 
 ## Basic Usage
 
 \`\`\`svelte
-<Avatar user={{ name: 'John Doe', avatar: 'https://example.com/avatar.png' }} />
+<Avatar name="John Doe" src="https://example.com/avatar.png" />
 \`\`\`
 
 ## Props
 
 ### Core Props
-- **user**: { name: string; avatar?: string } & T (required) - User object with name and optional avatar URL
+- **name**: string (required) - Display name; its initials are the fallback when no image renders
+- **src**: string - Image URL; omit it, or let it fail, to render the initials instead
+- **alt**: string - Alternative text for the image (defaults to \`name\`)
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
   - small: 24px (1.5rem)
   - normal: 32px (2rem)
@@ -20,11 +22,11 @@ The Avatar component displays a user's profile picture with fallback initials. I
 
 ### Loading Props
 - **delay**: number (default: 0) - Delay in milliseconds before showing avatar
-- **loadingState**: 'waiting' | 'loading' | 'errored' | 'success' (default: 'waiting') - Current loading state, can be bindable
+- **loading**: boolean (default: false, bindable) - True while the image request is in flight; false with no \`src\`, and false once the image has loaded or failed. A failed image is reported by rendering the initials.
 
 ### Content Slots
-- **prefix**: Snippet<{ name: string; avatar?: string }> - Badge/icon positioned at bottom-left
-- **suffix**: Snippet<{ name: string; avatar?: string }> - Badge/icon positioned at bottom-right
+- **prefix**: Slot - Badge/icon positioned at bottom-left
+- **suffix**: Slot - Badge/icon positioned at bottom-right
 
 ### Styling Props
 - **class**: string - Additional CSS classes
@@ -44,12 +46,12 @@ The Avatar component displays a user's profile picture with fallback initials. I
 ## AvatarGroup Props
 
 ### Core Props
-- **items**: Array<{ name: string; avatar?: string } & T> (required) - Array of user objects
+- **items**: Array<{ src?: string; alt?: string; name: string } & T> (required) - Avatar items
 - **max**: number - Maximum number of avatars to show before "+N" indicator
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
 
 ### Content Slots
-- **root**: Snippet<{ user: T; index: number; avatarProps }> - Custom avatar rendering
+- **avatar**: Snippet<{ item: T; index: number; avatarProps }> - Custom avatar rendering
 - **remainingCount**: Snippet<{ items: T[]; remaining: number }> - Custom "+N" counter rendering
 
 ### Styling Props
@@ -71,25 +73,25 @@ The Avatar component displays a user's profile picture with fallback initials. I
 
 ### Basic Avatar
 \`\`\`svelte
-<Avatar user={{ name: 'Jane Smith', avatar: '/images/jane.jpg' }} />
+<Avatar name="Jane Smith" src="/images/jane.jpg" />
 \`\`\`
 
 ### Without Image (Initials)
 \`\`\`svelte
-<Avatar user={{ name: 'John Doe' }} />
+<Avatar name="John Doe" />
 <!-- Displays "JD" -->
 \`\`\`
 
 ### Different Sizes
 \`\`\`svelte
-<Avatar size="small" user={{ name: 'Small User' }} />
-<Avatar size="normal" user={{ name: 'Normal User' }} />
-<Avatar size="large" user={{ name: 'Large User' }} />
+<Avatar size="small" name="Small User" />
+<Avatar size="normal" name="Normal User" />
+<Avatar size="large" name="Large User" />
 \`\`\`
 
 ### With Status Badge (Prefix)
 \`\`\`svelte
-<Avatar user={{ name: 'John Doe' }}>
+<Avatar name="John Doe">
 	{#snippet prefix()}
 		<div class="w-2 h-2 rounded-full bg-success"></div>
 	{/snippet}
@@ -98,33 +100,35 @@ The Avatar component displays a user's profile picture with fallback initials. I
 
 ### With Icon Badge (Suffix)
 \`\`\`svelte
-<Avatar user={{ name: 'Jane Smith' }}>
+<script lang="ts">
+	import { Avatar } from 'svelai/avatar';
+	import { checkIcon } from 'svelai/icons/check';
+</script>
+
+<Avatar name="Jane Smith">
 	{#snippet suffix()}
-		<Icon name="check" class="text-success" />
+		{@render checkIcon({ class: 'text-success' })}
 	{/snippet}
 </Avatar>
 \`\`\`
 
 ### With Loading State
 \`\`\`svelte
-<script>
-	let loadingState = $state('loading');
+<script lang="ts">
+	let loading = $state(false);
 </script>
 
-<Avatar 
-	user={{ name: 'John Doe', avatar: '/avatar.jpg' }}
-	bind:loadingState
-/>
-{loadingState}
+<Avatar name="John Doe" src="/avatar.jpg" bind:loading />
+{loading}
 \`\`\`
 
 ### Avatar Group
 \`\`\`svelte
 <script>
 	let items = [
-		{ name: 'John Doe', avatar: '/john.jpg' },
-		{ name: 'Jane Smith', avatar: '/jane.jpg' },
-		{ name: 'Bob Johnson', avatar: '/bob.jpg' }
+		{ name: 'John Doe', src: '/john.jpg' },
+		{ name: 'Jane Smith', src: '/jane.jpg' },
+		{ name: 'Bob Johnson', src: '/bob.jpg' }
 	];
 </script>
 
@@ -148,9 +152,15 @@ The Avatar component displays a user's profile picture with fallback initials. I
 
 ### Custom Avatar in Group
 \`\`\`svelte
+<script lang="ts">
+	import { Avatar, AvatarGroup } from 'svelai/avatar';
+
+	let items = [{ name: 'John Doe' }, { name: 'Jane Smith' }];
+</script>
+
 <AvatarGroup {items}>
-	{#snippet avatar({ user, index, avatarProps })}
-		<Avatar {...avatarProps} user={user}>
+	{#snippet avatar({ item, index, avatarProps })}
+		<Avatar {...avatarProps} {...item}>
 			{#snippet suffix()}
 				<span class="text-xs">{index + 1}</span>
 			{/snippet}
@@ -161,8 +171,14 @@ The Avatar component displays a user's profile picture with fallback initials. I
 
 ### Custom Remaining Count
 \`\`\`svelte
+<script lang="ts">
+	import { AvatarGroup } from 'svelai/avatar';
+
+	let items = [{ name: 'User 1' }, { name: 'User 2' }, { name: 'User 3' }, { name: 'User 4' }];
+</script>
+
 <AvatarGroup {items} max={3}>
-	{#snippet remainingCount({ remaining, items })}
+	{#snippet remainingCount({ remaining })}
 		<div class="avatar-count">
 			+{remaining} more
 		</div>
@@ -172,13 +188,13 @@ The Avatar component displays a user's profile picture with fallback initials. I
 
 ### Status Indicators
 \`\`\`svelte
-<Avatar user={{ name: 'Online User' }}>
+<Avatar name="Online User">
 	{#snippet suffix()}
 		<div class="w-3 h-3 rounded-full bg-success border-2 border-surface"></div>
 	{/snippet}
 </Avatar>
 
-<Avatar user={{ name: 'Away User' }}>
+<Avatar name="Away User">
 	{#snippet suffix()}
 		<div class="w-3 h-3 rounded-full bg-warning border-2 border-surface"></div>
 	{/snippet}
@@ -187,10 +203,10 @@ The Avatar component displays a user's profile picture with fallback initials. I
 
 ## Accessibility
 
-- Automatically generates alt text from user name
+- \`alt\` defaults to \`name\`, so the image always carries alt text
 - Fallback to initials when image fails to load
 - Proper foreground for initials display
-- Image loading states are tracked
+- The image loading flag is bindable
 
 ## Notes
 
@@ -199,7 +215,8 @@ The Avatar component displays a user's profile picture with fallback initials. I
 - Prefix badge is positioned at bottom-left, behind the image
 - Suffix badge is positioned at bottom-right, absolute positioning
 - Avatar group creates overlapping effect with negative margins
-- Loading states: waiting → loading → success/errored
+- \`loading\` is true only while the image request is in flight; a failed image falls back to the initials
+- Each new \`src\` is loaded from scratch: \`loading\` goes true again and a working URL recovers the picture after a broken one
 
 ## Theme Customization
 
@@ -292,7 +309,7 @@ const customTheme: AvatarThemeProps = {
 **Basic Theme Override**:
 \`\`\`svelte
 <Avatar 
-  user={{ name: 'John Doe' }}
+  name="John Doe"
   theme={{
     root: {
       base: 'ring-2 ring-primary',
@@ -311,18 +328,18 @@ const customTheme: AvatarThemeProps = {
 
 **Custom Badge Styling**:
 \`\`\`svelte
-<Avatar user={{ name: 'Jane Smith' }}>
+<Avatar
+  name="Jane Smith"
+  theme={{
+    avatarSuffix: {
+      size: {
+        normal: 'size-5 ring-2 ring-white'
+      }
+    }
+  }}
+>
   {#snippet suffix()}
     <div class="w-3 h-3 bg-success rounded-full"></div>
-  {/snippet}
-  {#snippet theme()}
-    {{
-      avatarSuffix: {
-        size: {
-          normal: 'size-5 ring-2 ring-white'
-        }
-      }
-    }}
   {/snippet}
 </Avatar>
 \`\`\`

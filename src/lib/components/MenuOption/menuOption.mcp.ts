@@ -17,7 +17,7 @@ The MenuOption component is a flexible menu item that can be used in dropdown me
 
 ### Core Props
 - **size**: 'small' | 'normal' | 'large' (default: 'normal') - Scales typography and icons only
-- **density**: 'small' | 'normal' | 'large' (default: 'normal') - Owns paddings, gaps and min-height; reflected as \`data-density\` on the row. Combine freely with size.
+- **density**: 'compact' | 'normal' | 'comfortable' (default: 'normal') - Owns paddings, gaps and min-height; reflected as \`data-density\` on the row. Combine freely with size.
 - **color**: Colors (default: 'primary') - Sets the semantic text color and persistent active tint
   - Available: primary, secondary, success, warning, danger, info, neutral
 
@@ -43,9 +43,9 @@ Either use **title/description** OR **children** (mutually exclusive):
 
 ### Listbox / option props
 MenuOption is also the shared row primitive for the listbox family (Command, Select, Combobox).
-- **role**: string - ARIA role override. Defaults to button/link/menuitem; pass \`option\` inside a \`listbox\`.
+- **role**: string - ARIA role override. Defaults to button/link/menuitem; pass \`option\` inside a \`listbox\`. Menu passes \`menuitemradio\` for option items that set \`selected\`.
 - **highlighted**: boolean - Keyboard-active state (virtual focus). Applies the highlight background and reflects to \`data-highlighted\`. Menus omit this and rely on \`useNavigation\` setting \`data-highlighted\` imperatively.
-- **selected**: boolean - Sets \`aria-selected\`/\`data-selected\` for single-select listboxes (pass a check icon via \`suffix\`).
+- **selected**: boolean - Sets \`data-selected\` plus the role-appropriate state: \`aria-checked\` for checkable roles (\`menuitemradio\`, \`menuitemcheckbox\`, \`checkbox\`, \`radio\`, \`switch\`) and \`aria-selected\` for listbox \`option\` rows (pass a check icon via \`suffix\`).
 - **disabled**: boolean - Dims the row, sets \`aria-disabled\`, blocks pointer/click.
 - **attrs**: Record<string, any> - Extra attributes/handlers spread onto the row (\`id\`, \`data-value\`, \`tabindex\`, \`onpointermove\`, \`onmousedown\`).
 
@@ -92,13 +92,14 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 
 ### Menu Item with Prefix Icon
 \`\`\`svelte
-<script>
-	import { Settings } from '$lib/components/Icons/index.svelte.js';
+<script lang="ts">
+	import { MenuOption } from 'svelai/menu-option';
+	import { gearIcon } from 'svelai/icons/gear';
 </script>
 
 <MenuOption>
 	{#snippet prefix()}
-		<Settings />
+		{@render gearIcon()}
 	{/snippet}
 	{#snippet title()}
 		Settings
@@ -108,8 +109,9 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 
 ### Menu Item with Suffix Icon
 \`\`\`svelte
-<script>
-	import { ChevronRight } from '$lib/components/Icons/index.svelte.js';
+<script lang="ts">
+	import { MenuOption } from 'svelai/menu-option';
+	import { caretRightIcon } from 'svelai/icons/caretRight';
 </script>
 
 <MenuOption>
@@ -117,26 +119,28 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 		More Options
 	{/snippet}
 	{#snippet suffix()}
-		<ChevronRight />
+		{@render caretRightIcon()}
 	{/snippet}
 </MenuOption>
 \`\`\`
 
 ### Menu Item with Both Icons
 \`\`\`svelte
-<script>
-	import { User, Check } from '$lib/components/Icons/index.svelte.js';
+<script lang="ts">
+	import { MenuOption } from 'svelai/menu-option';
+	import { userIcon } from 'svelai/icons/user';
+	import { checkIcon } from 'svelai/icons/check';
 </script>
 
 <MenuOption>
 	{#snippet prefix()}
-		<User />
+		{@render userIcon()}
 	{/snippet}
 	{#snippet title()}
 		John Doe
 	{/snippet}
 	{#snippet suffix()}
-		<Check class="text-success" />
+		{@render checkIcon({ class: 'text-success' })}
 	{/snippet}
 </MenuOption>
 \`\`\`
@@ -159,7 +163,7 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 ### Different Densities
 \`\`\`svelte
 <!-- density scales paddings/gaps/min-height; size scales text/icons -->
-<MenuOption density="small">
+<MenuOption density="compact">
 	{#snippet title()}Small row{/snippet}
 </MenuOption>
 
@@ -167,7 +171,7 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 	{#snippet title()}Normal row{/snippet}
 </MenuOption>
 
-<MenuOption density="large">
+<MenuOption density="comfortable">
 	{#snippet title()}Large row{/snippet}
 </MenuOption>
 \`\`\`
@@ -227,6 +231,11 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 
 ### External Link
 \`\`\`svelte
+<script lang="ts">
+	import { MenuOption } from 'svelai/menu-option';
+	import { arrowSquareOutIcon } from 'svelai/icons/arrowSquareOut';
+</script>
+
 <MenuOption 
 	href="https://example.com" 
 	target="_blank" 
@@ -236,7 +245,7 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 		Visit External Site
 	{/snippet}
 	{#snippet suffix()}
-		<ExternalLink />
+		{@render arrowSquareOutIcon()}
 	{/snippet}
 </MenuOption>
 \`\`\`
@@ -258,32 +267,36 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 
 ### Menu with Multiple Options
 \`\`\`svelte
-<script>
-	import { Settings, User, LogOut, HelpCircle } from '$lib/components/Icons/index.svelte.js';
+<script lang="ts">
+	import { MenuOption } from 'svelai/menu-option';
+	import { gearIcon } from 'svelai/icons/gear';
+	import { userIcon } from 'svelai/icons/user';
+	import { signOutIcon } from 'svelai/icons/signOut';
+	import { questionIcon } from 'svelai/icons/question';
 </script>
 
 <div class="w-64 bg-surface rounded-xl border border-neutral-muted p-1">
 	<MenuOption>
-		{#snippet prefix()}<User />{/snippet}
+		{#snippet prefix()}{@render userIcon()}{/snippet}
 		{#snippet title()}Profile{/snippet}
 		{#snippet description()}View and edit your profile{/snippet}
 	</MenuOption>
 	
 	<MenuOption>
-		{#snippet prefix()}<Settings />{/snippet}
+		{#snippet prefix()}{@render gearIcon()}{/snippet}
 		{#snippet title()}Settings{/snippet}
 		{#snippet description()}Manage your preferences{/snippet}
 	</MenuOption>
 	
 	<MenuOption>
-		{#snippet prefix()}<HelpCircle />{/snippet}
+		{#snippet prefix()}{@render questionIcon()}{/snippet}
 		{#snippet title()}Help & Support{/snippet}
 	</MenuOption>
 	
 	<div class="border-t border-neutral-muted my-1"></div>
 	
 	<MenuOption color="danger">
-		{#snippet prefix()}<LogOut />{/snippet}
+		{#snippet prefix()}{@render signOutIcon()}{/snippet}
 		{#snippet title()}Log Out{/snippet}
 	</MenuOption>
 </div>
@@ -305,8 +318,9 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 
 ### With Attachments
 \`\`\`svelte
-<script>
-	import { spinnerOverlay } from '$lib/attachments/spinnerOverlay.svelte.js';
+<script lang="ts">
+	import { MenuOption } from 'svelai/menu-option';
+	import { spinnerOverlay } from 'svelai/spinner-overlay';
 	
 	let loading = $state(false);
 	
@@ -383,7 +397,7 @@ The theme object contains the following parts:
 - base: Base classes applied to all menu options
 - Variants:
   - size: 'small' | 'normal' | 'large' - Text size
-  - density: 'small' | 'normal' | 'large' - Padding, gap, and min-height
+  - density: 'compact' | 'normal' | 'comfortable' - Padding, gap, and min-height
   - color: 'primary' | 'secondary' | 'neutral' | 'danger' | 'success' | 'warning' | 'info' - Color scheme and hover states
 
 **title**:
@@ -410,7 +424,7 @@ The theme object contains the following parts:
 **content**:
 - base: Base classes for content wrapper
 - Variants:
-  - density: 'small' | 'normal' | 'large' - Gap spacing between title and description
+  - density: 'compact' | 'normal' | 'comfortable' - Gap spacing between title and description
 
 ### Usage Examples
 
@@ -421,7 +435,7 @@ The theme object contains the following parts:
     root: {
       base: 'rounded-lg',
       density: {
-        large: 'px-4 py-3 min-h-12'
+        comfortable: 'px-4 py-3 min-h-12'
       }
     },
     title: {

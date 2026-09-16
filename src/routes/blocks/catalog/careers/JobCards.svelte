@@ -40,24 +40,26 @@
 	let selectedJob = $state<(typeof jobs)[number] | null>(null);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Make your next move</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Make your next move
+		</p>
 		<Heading size="h2" weight="bold">Work that leaves a mark.</Heading>
-		<p class="max-w-2xl text-neutral/65">Bring your craft, your questions, and a point of view.</p>
+		<p class="text-neutral/65 max-w-2xl">Bring your craft, your questions, and a point of view.</p>
 	</header>
-	<div class="grid gap-xl rounded-lg border border-dashed border-neutral/25 p-xl sm:grid-cols-2">
+	<div class="gap-xl border-neutral/25 p-xl grid rounded-lg border border-dashed sm:grid-cols-2">
 		{#each jobs as job (job.title)}<Card
-				><div class="flex flex-col gap-xl">
-					<div class="flex gap-md items-center justify-between">
-						<Chip size="small" variant="soft">{job.team}</Chip><span class="text-xs text-neutral/50"
+				><div class="gap-xl flex flex-col">
+					<div class="gap-md flex items-center justify-between">
+						<Chip size="small" variant="soft">{job.team}</Chip><span class="text-neutral/65 text-xs"
 							>{job.type}</span
 						>
 					</div>
 					<h3 class="text-xl font-semibold">{job.title}</h3>
 					<p class="text-neutral/65">{job.detail}</p>
-					<div class="flex gap-md items-center justify-between">
-						<span class="text-sm text-neutral/55">{job.location}</span><Button
+					<div class="gap-md flex items-center justify-between">
+						<span class="text-neutral/65 text-sm">{job.location}</span><Button
 							variant="outline"
 							size="small"
 							onclick={() => (selectedJob = job)}>Explore role</Button
@@ -73,9 +75,9 @@
 		}}
 		title={selectedJob?.title ?? 'Position details'}
 		description={selectedJob?.location}
-		><div class="flex flex-col gap-lg">
+		><div class="gap-lg flex flex-col">
 			<p>{selectedJob?.detail}</p>
-			<p class="text-sm text-neutral/60">
+			<p class="text-neutral/70 text-sm">
 				This example shows the role details. Connect your application workflow when using this
 				block.
 			</p>

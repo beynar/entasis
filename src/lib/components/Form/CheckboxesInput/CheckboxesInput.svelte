@@ -109,7 +109,6 @@
 		<button
 			type="button"
 			role="checkbox"
-			data-color="primary"
 			aria-checked={checked}
 			disabled={optionDisabled}
 			onclick={() => {

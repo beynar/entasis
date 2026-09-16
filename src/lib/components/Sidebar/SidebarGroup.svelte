@@ -1,19 +1,21 @@
 <script lang="ts">
+	import type { DisclosureIndicator } from '$lib/types/theme.js';
 	import type {
+		SidebarActiveVariant,
 		SidebarApi,
-		SidebarCollapseIcon,
 		SidebarDensity,
 		SidebarGroup,
+		SidebarMenuActionDescriptor,
 		SidebarSize,
 		SidebarTooltipMode
 	} from './sidebar.props.js';
 	import { caretRightIcon } from '$lib/components/Icons/caretRight.js';
-	import { slide } from 'svelte/transition';
 	import SidebarAction from './SidebarAction.svelte';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import SidebarMenuList from './SidebarMenuList.svelte';
 	import SidebarTreeNode from './SidebarTreeNode.svelte';
-	import { useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
+	import { slide } from '$lib/transitions/transition.js';
+	import { useSidebarMotion, useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 
 	let {
 		group,
@@ -21,25 +23,44 @@
 		collapseIcon,
 		tooltips,
 		size,
+		activeVariant,
 		density,
 		theme
 	}: {
 		group: SidebarGroup;
 		api: SidebarApi;
-		collapseIcon: SidebarCollapseIcon;
+		collapseIcon: DisclosureIndicator;
 		tooltips: SidebarTooltipMode;
 		size: SidebarSize;
+		activeVariant: SidebarActiveVariant;
 		density: SidebarDensity;
 		theme?: SidebarThemeProps;
 	} = $props();
+
+	// One descriptor or several: the group pins a row of affordances, each in its own box.
+	const actions = $derived<
+		(SidebarMenuActionDescriptor | import('svelte').Snippet<[SidebarApi]>)[]
+	>(group.action == null ? [] : Array.isArray(group.action) ? group.action : [group.action]);
+	const actionSize = (action: (typeof actions)[number]) =>
+		typeof action === 'function' ? size : (action.size ?? size);
 
 	let open = $state<boolean | undefined>();
 	let labelRef = $state<HTMLButtonElement | null>(null);
 	let actionRef = $state<HTMLElement | null>(null);
 	let contentRef = $state<HTMLElement | null>(null);
 	const classes = $derived(useSidebarTheme(theme));
+	// Motion preset from `sidebarTheme.motion`, through the override ladder
+	// (registry → `setSidebarTheme` → the instance `theme.motion` slot). `slide` is a
+	// factory: it must be created during init, because it reads the theme context.
+	const resolveMotion = useSidebarMotion();
+	const slideTransition = slide();
+	const collapseMotion = $derived(resolveMotion(undefined, { motion: theme?.motion }));
 	const isOpen = $derived(open ?? group.defaultOpen ?? true);
-	const isIconCollapsed = $derived(api.displayState === 'collapsed' && !api.isMobile);
+	// A hover peek renders the collapsed panel at full width, so icon-mode behaviour has to
+	// stop with it: labels, badges, and inline submenus must match the width on screen.
+	const isIconCollapsed = $derived(
+		api.displayState === 'collapsed' && !api.isMobile && !api.isPeeking
+	);
 	const showGroupContent = $derived(!group.collapsible || isIconCollapsed || isOpen);
 
 	function focusFirstMenuRow() {
@@ -81,12 +102,13 @@
 		inert={showGroupContent ? undefined : true}
 		aria-hidden={showGroupContent ? undefined : 'true'}
 		class={classes.groupContent({ size })}
-		transition:slide={{ duration: 180 }}
+		in:slideTransition={collapseMotion.in}
+		out:slideTransition={collapseMotion.out}
 	>
 		{#if group.tree}
 			<ul data-slot="sidebar-menu" data-sidebar="menu" class={classes.menu({ density })}>
 				{#each group.tree as node, index (node.label + index)}
-					<SidebarTreeNode {node} {api} {tooltips} {size} {density} {theme} />
+					<SidebarTreeNode {node} {api} {tooltips} {size} {activeVariant} {density} {theme} />
 				{/each}
 			</ul>
 		{:else}
@@ -96,6 +118,7 @@
 				{collapseIcon}
 				{tooltips}
 				{size}
+				{activeVariant}
 				{density}
 				{theme}
 			/>
@@ -125,7 +148,7 @@
 				class="ml-auto transition-transform {isOpen ? 'rotate-90' : ''}"
 			/>
 		</button>
-		{#if group.action}
+		{#if actions.length}
 			<div
 				bind:this={actionRef}
 				data-slot="sidebar-group-action"
@@ -138,7 +161,11 @@
 					hasToggle: true
 				})}
 			>
-				<SidebarAction action={group.action} {api} {size} {theme} />
+				{#each actions as action, index (index)}
+					<div class={classes.actionSlot({ componentSize: actionSize(action) })}>
+						<SidebarAction {action} {api} size={actionSize(action)} {theme} />
+					</div>
+				{/each}
 			</div>
 		{/if}
 		{#if showGroupContent}
@@ -161,7 +188,7 @@
 				{group.label}
 			</div>
 		{/if}
-		{#if group.action}
+		{#if actions.length}
 			<div
 				bind:this={actionRef}
 				data-slot="sidebar-group-action"
@@ -170,7 +197,11 @@
 				aria-hidden={isIconCollapsed ? 'true' : undefined}
 				class={classes.groupAction({ componentSize: size, density, hasToggle: false })}
 			>
-				<SidebarAction action={group.action} {api} {size} {theme} />
+				{#each actions as action, index (index)}
+					<div class={classes.actionSlot({ componentSize: actionSize(action) })}>
+						<SidebarAction {action} {api} size={actionSize(action)} {theme} />
+					</div>
+				{/each}
 			</div>
 		{/if}
 		{@render groupMenu()}

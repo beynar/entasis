@@ -13,11 +13,11 @@
 	]);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<header class="flex flex-wrap items-end justify-between gap-lg">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<header class="gap-lg flex flex-wrap items-end justify-between">
 		<div>
 			<h2 class="text-3xl font-semibold">Better together.</h2>
-			<p class="mt-sm text-sm text-neutral/60">Invite people to your demo workspace.</p>
+			<p class="mt-sm text-neutral/70 text-sm">Invite people to your demo workspace.</p>
 		</div>
 		<Button onclick={() => (open = true)}>Invite a teammate</Button>
 	</header>

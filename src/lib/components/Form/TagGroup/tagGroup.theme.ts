@@ -32,17 +32,12 @@ const defaultTagGroupList = cva({
 	}
 });
 
+// The selected fill is the Chip's own `selected` prop, so the recipe lives in one place. The
+// item class only carries what the chip cannot know about: the group's focus ring and the
+// disabled dimming. `selectedVariant` defaults to 'soft' so the chip's variant agrees with the
+// selected fill, `unselectedVariant` to 'outline' so an unselected tag stays distinct.
 const defaultTagGroupItem = cva({
-	base: 'outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-	variants: {
-		selected: {
-			true: '',
-			false: ''
-		}
-	},
-	defaultVariants: {
-		selected: false
-	}
+	base: 'outline-none focus-visible:ring-2 focus-visible:ring-focus/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
 });
 
 const defaultTagGroupChip = cva({

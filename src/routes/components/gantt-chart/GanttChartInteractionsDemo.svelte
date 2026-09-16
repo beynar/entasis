@@ -103,7 +103,7 @@
 		}}
 		mutations={{ task: { onTasksChange: handleTasksChange } }}
 		events={{
-			onEmptyRangeSelect: handleRange,
+			onSelect: handleRange,
 			onInteractionBlocked: (info) => (status = info.message)
 		}}
 		class="h-[31rem] w-full"

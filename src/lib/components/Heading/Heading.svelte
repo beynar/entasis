@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { HeadingProps } from './heading.props.js';
-	import { headingTheme } from './heading.theme.js';
+	import { useHeadingTheme } from './heading.theme.js';
 	let {
 		class: className = '',
 		underline = false,
@@ -12,8 +12,11 @@
 		balanced = true,
 		align = 'left',
 		muted = false,
+		theme,
 		...attachments
 	}: HeadingProps = $props();
+
+	const classes = $derived(useHeadingTheme(theme));
 </script>
 
 <svelte:element
@@ -25,7 +28,7 @@
 	data-muted={muted}
 	data-align={align}
 	data-weight={weight}
-	class={headingTheme.root({ size, weight, align, balanced, underline, muted, trim, className })}
+	class={classes.root({ size, weight, align, balanced, underline, muted, trim, className })}
 	{...attachments}
 >
 	{#if children}

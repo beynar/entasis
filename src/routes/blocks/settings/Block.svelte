@@ -7,7 +7,17 @@
 	import { envelopeIcon } from 'svelai/icons/envelope';
 	import { floppyDiskIcon } from 'svelai/icons/floppyDisk';
 	import { moonIcon } from 'svelai/icons/moon';
+	import { shieldCheckIcon } from 'svelai/icons/shieldCheck';
 	import { sunIcon } from 'svelai/icons/sun';
+
+	// Every notification row reserves the same icon column, so the toggles and
+	// labels stay aligned whether or not a row declares a prefix icon.
+	const notificationSwitchTheme = {
+		inputContainer: {
+			base: 'grid grid-cols-[1.5rem_auto_1fr] gap-md [&>[role=switch]]:col-start-2 [&>:last-child]:col-start-3'
+		},
+		prefix: { base: 'justify-center' }
+	};
 
 	const settingsInputs = {
 		account: {
@@ -61,20 +71,24 @@
 					type: 'switch',
 					label: 'Product updates',
 					description: 'New features, improvements, and release notes.',
-					prefix: bellIcon
+					prefix: bellIcon,
+					theme: notificationSwitchTheme
 				},
 				weeklyDigest: {
 					type: 'switch',
 					label: 'Weekly digest',
 					description: 'A Monday summary of activity in your workspace.',
-					prefix: envelopeIcon
+					prefix: envelopeIcon,
+					theme: notificationSwitchTheme
 				},
 				securityAlerts: {
 					type: 'switch',
 					label: 'Security alerts',
 					description: 'Important sign-in and account protection notices.',
+					prefix: shieldCheckIcon,
 					disabled: true,
-					value: true
+					value: true,
+					theme: notificationSwitchTheme
 				}
 			}
 		},
@@ -145,8 +159,8 @@
 	}
 </script>
 
-<section class="mx-auto flex w-full max-w-4xl flex-col gap-lg">
-	<div class="flex flex-col gap-sm">
+<section class="gap-lg mx-auto flex w-full max-w-4xl flex-col">
+	<div class="gap-sm flex flex-col">
 		<p class="text-neutral text-lg font-semibold">Workspace preferences</p>
 		<p class="text-neutral/65 text-sm">Changes apply to this account across desktop and mobile.</p>
 	</div>
@@ -175,7 +189,7 @@
 	>
 		{#if savedMessage}
 			<div
-				class="border-success/30 bg-success/10 text-success-dark flex items-center gap-sm rounded-md border p-md text-sm"
+				class="border-success/30 bg-success/10 text-success-dark gap-sm p-md flex items-center rounded-md border text-sm"
 				role="status"
 			>
 				<span class="shrink-0">{@render checkCircleIcon()}</span>

@@ -119,7 +119,7 @@
 	);
 
 	$effect(() => {
-		activeDocument.format;
+		void activeDocument.format;
 		page = 1;
 		sheet = 1;
 	});
@@ -139,7 +139,7 @@
 >
 	<ComponentCard
 		{controls}
-		class="!min-h-fit !items-stretch !justify-start max-w-[90vw]"
+		class="!min-h-fit max-w-[90vw] !items-stretch !justify-start"
 		code={`<div class="h-[720px]">
   <DocumentViewer
     src="${activeDocument.src}"
@@ -159,16 +159,16 @@
 					<Select label="Preview format" items={demoItems} bind:value={selectedFormat} />
 				</div>
 				<div class="flex shrink-0 flex-col gap-1.5">
-					<span class="text-sm font-medium text-neutral">Navigation</span>
+					<span class="text-neutral text-sm font-medium">Navigation</span>
 					<SegmentedControl
 						items={modeItems}
 						bind:value={mode}
 						size="small"
-						ariaLabel="Document navigation mode"
+						label="Document navigation mode"
 					/>
 				</div>
 				<p class="text-neutral/65 pb-2 text-sm sm:min-w-0 sm:flex-1">
-					<span class="font-semibold text-neutral">{activeDocument.label}</span>
+					<span class="text-neutral font-semibold">{activeDocument.label}</span>
 					— {activeDocument.description}
 				</p>
 			</div>
@@ -193,7 +193,7 @@
 	{#snippet examples()}
 		<ComponentCard
 			description="The filename can provide the format when the source is an anonymous Blob or byte buffer."
-			class="!min-h-fit !items-stretch !justify-start max-w-[90vw]"
+			class="!min-h-fit max-w-[90vw] !items-stretch !justify-start"
 			code={`<div class="h-[600px]">
   <DocumentViewer
     src={bytes}
@@ -213,7 +213,7 @@
 
 		<ComponentCard
 			description="Self-host every runtime asset by overriding only the relevant URLs."
-			class="!min-h-fit !items-stretch !justify-start max-w-[90vw]"
+			class="!min-h-fit max-w-[90vw] !items-stretch !justify-start"
 			code={`<DocumentViewer
   src="/deck.pptx"
   assets={{

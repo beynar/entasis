@@ -41,23 +41,25 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Selected writing</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Selected writing
+		</p>
 		<Heading size="h2" weight="bold">The archive.</Heading>
-		<p class="max-w-2xl text-neutral/65">Collected notes, essays, and useful observations.</p>
+		<p class="text-neutral/65 max-w-2xl">Collected notes, essays, and useful observations.</p>
 	</header>
 	{#each ['2026', '2025'] as year, yearIndex (year)}<div
-			class="grid gap-xl md:grid-cols-[9rem_1fr]"
+			class="gap-xl grid md:grid-cols-[9rem_1fr]"
 		>
-			<p class="text-4xl font-light text-neutral/35">{year}</p>
+			<p class="text-neutral/65 text-4xl font-light">{year}</p>
 			<div>
 				{#each posts.slice(yearIndex, yearIndex + 3) as post (post.title)}<a
 						href="/docs"
-						class="group flex items-center justify-between gap-lg border-b border-neutral/15 py-xl"
-						><div class="flex flex-col gap-sm">
-							<span class="text-xs text-neutral/60">{post.date.slice(0, 5)}</span>
-							<h3 class="text-lg font-medium group-hover:text-primary">{post.title}</h3>
+						class="group gap-lg border-neutral/15 py-xl flex items-center justify-between border-b"
+						><div class="gap-sm flex flex-col">
+							<span class="text-neutral/70 text-xs">{post.date.slice(0, 5)}</span>
+							<h3 class="group-hover:text-primary-readable text-lg font-medium">{post.title}</h3>
 						</div>
 						<Chip color="neutral" variant="outline" size="small">{post.category}</Chip></a
 					>{/each}

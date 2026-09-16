@@ -4,17 +4,17 @@
 	import { Heading } from 'svelai/heading';
 </script>
 
-<section class="flex flex-col gap-xl p-lg md:p-xl">
-	<div class="grid gap-xl md:grid-cols-2">
+<section class="gap-xl p-lg md:p-xl flex flex-col">
+	<div class="gap-xl grid md:grid-cols-2">
 		<Heading as="h2" size="h1" weight="bold">Less friction.<br />More possibility.</Heading>
-		<p class="self-end text-lg text-neutral/70">
+		<p class="text-neutral/70 self-end text-lg">
 			We believe a small team with the right tools can do extraordinary work. Our job is to put
 			those tools within reach.
 		</p>
 	</div>
-	<div class="grid gap-lg md:grid-cols-2">
+	<div class="gap-lg grid md:grid-cols-2">
 		<Card color="primary" variant="soft" title="What drives us"
-			><div class="flex flex-col gap-xl">
+			><div class="gap-xl flex flex-col">
 				<span class="text-6xl font-light">01</span><Heading as="h3" size="h3"
 					>Clarity is a competitive advantage.</Heading
 				>
@@ -25,7 +25,7 @@
 			</div></Card
 		>
 		<Card variant="outline" title="How we work"
-			><div class="flex flex-col gap-xl">
+			><div class="gap-xl flex flex-col">
 				<span class="text-6xl font-light">02</span><Heading as="h3" size="h3"
 					>Care is in the details.</Heading
 				>

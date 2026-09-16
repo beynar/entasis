@@ -35,18 +35,20 @@
 			category: 'Coast'
 		}
 	];
-	let category = $state(0);
+	let category = $state('All');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Image library</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Image library
+		</p>
 		<Heading size="h2" weight="bold">Places, carefully collected.</Heading>
 	</header>
 	<Tabbar items={['All', 'Landscape', 'Coast', 'Architecture']} bind:value={category} />
-	<div class="grid gap-xl sm:grid-cols-2 lg:grid-cols-3">
-		{#each photos.filter((photo) => category === 0 || photo.category === ['', 'Landscape', 'Coast', 'Architecture'][category]) as photo (photo.title)}<figure
-				class="flex flex-col gap-lg"
+	<div class="gap-xl grid sm:grid-cols-2 lg:grid-cols-3">
+		{#each photos.filter((photo) => category === 'All' || photo.category === category) as photo (photo.title)}<figure
+				class="gap-lg flex flex-col"
 			>
 				<ImageZoom
 					><img
@@ -56,7 +58,7 @@
 						class="aspect-square w-full rounded-lg object-cover"
 					/></ImageZoom
 				>
-				<figcaption class="flex items-center justify-between gap-md">
+				<figcaption class="gap-md flex items-center justify-between">
 					<h3 class="font-medium">{photo.title}</h3>
 					<Chip size="small" variant="soft" color="neutral">{photo.category}</Chip>
 				</figcaption>

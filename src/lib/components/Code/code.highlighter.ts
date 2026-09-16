@@ -1,30 +1,29 @@
-import type { HighlighterCore, ShikiTransformer } from 'shiki';
-import { createHighlighterCoreSync } from 'shiki/core';
-import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
-import { bundledCodeLanguages, resolveLanguage } from './highlighter/code-languages.js';
-import { CODE_SYNTAX_THEME_NAME, getCodeSyntaxTheme } from './code.syntax-theme.js';
+import { createHighlighter, type Highlighter } from '@tanstack/highlight/core';
+import {
+	PLAIN_TEXT_LANGUAGE,
+	bundledCodeLanguages,
+	resolveLanguage
+} from './highlighter/code-languages.js';
 
 /**
- * Singleton synchronous highlighter. Constructed at module load with the
- * JavaScript regex engine (`forgiving: true`), the bundled grammar set, and the
- * CSS-variable syntax theme. Fully SSR-safe: no top-level await, no browser-only
- * APIs — the same highlighter runs on the server and the client.
+ * Singleton synchronous highlighter (TanStack Highlight) with every shipped
+ * language registered. Fully SSR-safe: no top-level await, no WebAssembly, no
+ * browser-only APIs — the same instance runs on the server and the client.
  */
-let highlighter: HighlighterCore | undefined;
+let highlighter: Highlighter | undefined;
 
-function getHighlighter(): HighlighterCore {
-	highlighter ??= createHighlighterCoreSync({
-		engine: createJavaScriptRegexEngine({ forgiving: true }),
-		themes: [getCodeSyntaxTheme()],
-		langs: bundledCodeLanguages
+function getHighlighter(): Highlighter {
+	highlighter ??= createHighlighter({
+		languages: bundledCodeLanguages,
+		fallbackLanguage: PLAIN_TEXT_LANGUAGE
 	});
 	return highlighter;
 }
 
 export type HighlightOptions = {
 	/**
-	 * When true, tags `<code>` with `data-line-numbers` and each line with
-	 * `data-line` so the CSS gutter (in `CodeTheme.svelte`) can render numbers.
+	 * When true, the highlighter wraps every line in a `.th-line` span carrying
+	 * `data-line`, which the CSS gutter (in `CodeTheme.svelte`) renders as numbers.
 	 */
 	lineNumbers?: boolean;
 	/**
@@ -33,65 +32,40 @@ export type HighlightOptions = {
 	wrap?: boolean;
 };
 
-// Applied to the Shiki `<pre>`. Scrolling is owned by the wrapping ScrollArea (see Code.svelte),
-// so the pre itself does not scroll: when not wrapping it takes its natural (max-content) width
-// so the ScrollArea sees the horizontal overflow; when wrapping it fills and soft-wraps.
-// `has-[[data-line-numbers]]:px-0` lets the gutter sit flush against the edge.
+// Applied to the highlighter's `<pre>`. Scrolling is owned by the wrapping ScrollArea (see
+// Code.svelte), so the pre itself does not scroll: when not wrapping it takes its natural
+// (max-content) width so the ScrollArea sees the horizontal overflow; when wrapping it fills
+// and soft-wraps. `has-[.th-line]:px-0` lets the gutter sit flush against the edge.
 const preClass = (wrap: boolean) =>
 	[
-		'px-4 py-3.5 outline-none has-[[data-line-numbers]]:px-0',
+		'px-4 py-3.5 outline-none has-[.th-line]:px-0',
 		wrap ? 'w-full whitespace-pre-wrap break-words' : 'w-max'
 	].join(' ');
 
-function transformers(lineNumbers: boolean, wrap: boolean): ShikiTransformer[] {
-	const PRE_CLASS = preClass(wrap);
-	return [
-		{
-			pre(node) {
-				const existing = node.properties['class'];
-				node.properties['class'] =
-					typeof existing === 'string' && existing.length > 0
-						? `${existing} ${PRE_CLASS}`
-						: PRE_CLASS;
-				// The ScrollArea is the focusable scroll region; drop Shiki's tabindex so the
-				// pre isn't a second, dead tab stop.
-				delete node.properties['tabindex'];
-			},
-			...(lineNumbers
-				? {
-						code(node) {
-							node.properties['data-line-numbers'] = '';
-							if (wrap) node.properties['data-wrap'] = '';
-							// Shiki separates line <span>s with literal "\n" text nodes. Once the
-							// gutter makes each line `display: block`, those preserved newlines
-							// would double the line spacing — drop them; the block breaks suffice.
-							node.children = node.children.filter(
-								(child) => !(child.type === 'text' && child.value === '\n')
-							);
-						},
-						line(node) {
-							node.properties['data-line'] = '';
-						}
-					}
-				: {})
-		}
-	];
-}
-
 /**
- * Highlights `code` to a `<pre><code>…</code></pre>` HTML string using the
- * singleton highlighter. `language` is normalized/aliased via `resolveLanguage`
- * (falls back to `text`). Colors come out as `var(--code-token-*)` references,
- * so the result adapts to light/dark once `CodeTheme.svelte` is mounted.
+ * Highlights `code` to a `<pre class="th-code"><code>…</code></pre>` HTML string
+ * using the singleton highlighter. `language` is normalized/aliased via
+ * `resolveLanguage` (falls back to plain text). Tokens come out as `th-*`
+ * classes whose colors `CodeTheme.svelte` maps to `--code-token-*` variables,
+ * so the result adapts to light/dark for free.
  */
 export function codeToHtml(
 	code: string,
 	options: { language?: string } & HighlightOptions = {}
 ): string {
 	const { language, lineNumbers = false, wrap = false } = options;
-	return getHighlighter().codeToHtml(code, {
+	let html = getHighlighter().highlight(code, {
 		lang: resolveLanguage(language),
-		theme: CODE_SYNTAX_THEME_NAME,
-		transformers: transformers(lineNumbers, wrap)
-	});
+		lineNumbers
+	}).html;
+	// The renderer owns the `<pre>` markup; layout classes and the wrap flag ride on it so
+	// CodeTheme's selectors can target them.
+	html = html.replace(/^<pre class="/, `<pre class="${preClass(wrap)} `);
+	if (wrap) html = html.replace(/^(<pre[^>]*)>/, '$1 data-wrap>');
+	if (lineNumbers) {
+		// Lines are separated by literal "\n" text. Once the gutter makes each line
+		// `display: block`, those preserved newlines would double the line spacing.
+		html = html.replace(/<\/span>\n<span class="th-line"/g, '</span><span class="th-line"');
+	}
+	return html;
 }

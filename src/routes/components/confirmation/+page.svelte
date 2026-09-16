@@ -59,7 +59,10 @@
 	features={[
 		'Promise-based imperative API — no local state',
 		'Async onConfirm with an automatic loading state',
-		'Modal: cannot be dismissed by escape or click-outside',
+		{
+			label: 'Modal: cannot be dismissed by escape or click-outside',
+			test: 'a11y:confirmation.modal'
+		},
 		'Rendered by a single <Confirmation /> mounted at the app root'
 	]}
 >
@@ -84,7 +87,7 @@ const { confirmed } = await confirmation({
 	>
 		<div class="flex flex-col items-center gap-4">
 			<Button color={controls.value.color} onclick={showConfirmation}>Open confirmation</Button>
-			<p class="text-neutral/60 text-sm">Last result: {lastResult}</p>
+			<p class="text-neutral/70 text-sm">Last result: {lastResult}</p>
 		</div>
 	</ComponentCard>
 
@@ -104,7 +107,7 @@ const { confirmed } = await confirmation({
 		>
 			<div class="flex flex-col items-center gap-4">
 				<Button color="primary" onclick={confirmAsync}>Publish changes</Button>
-				<p class="text-neutral/60 text-sm">Last result: {lastResult}</p>
+				<p class="text-neutral/70 text-sm">Last result: {lastResult}</p>
 			</div>
 		</ComponentCard>
 
@@ -117,7 +120,7 @@ import { Confirmation } from 'svelai/confirmation';
 // <slot />
 // <Confirmation />`}
 		>
-			<p class="text-neutral/60 text-sm">Already mounted in this docs app's root layout.</p>
+			<p class="text-neutral/70 text-sm">Already mounted in this docs app's root layout.</p>
 		</ComponentCard>
 	{/snippet}
 </DocPage>

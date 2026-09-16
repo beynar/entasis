@@ -8,7 +8,7 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 
 	const date = (day: number) => new Date(2026, 6, day, 12);
 	const events: CalendarEvent[] = [
@@ -32,7 +32,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -70,7 +70,7 @@
 	features={[
 		'Single, range, and multiple selection',
 		'Quick month and year selection',
-		'Roving keyboard focus',
+		{ label: 'Roving keyboard focus', test: 'a11y:calendar.roving-focus' },
 		'Synchronized month and height transitions',
 		'Disabled dates and date bounds',
 		'Container-responsive double view',
@@ -131,7 +131,7 @@
 		<ComponentCard
 			title="Two months"
 			description="Two months share one navigation surface and automatically fall back to one below 576px."
-			code={`<CalendarPrimitive type="calendar" bind:value view="double" />`}
+			code="<CalendarPrimitive type=&quot;calendar&quot; bind:value view=&quot;double&quot; />"
 		>
 			<div class="w-full max-w-2xl">
 				<CalendarPrimitive type="calendar" bind:value={selectedDate} view="double" />
@@ -151,7 +151,7 @@
 		<ComponentCard
 			title="Field integration"
 			description="CalendarInput keeps the existing Form Field contract for single and range values."
-			code={`<CalendarInput label="Availability" type="calendar-range" bind:value />`}
+			code="<CalendarInput label=&quot;Availability&quot; type=&quot;calendar-range&quot; bind:value />"
 		>
 			<div class="w-full max-w-md">
 				<CalendarInput label="Availability" type="calendar-range" bind:value={selectedRange} />

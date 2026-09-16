@@ -6,7 +6,7 @@
 	import { arrowRightIcon } from 'svelai/icons/arrowRight';
 </script>
 
-<section class="mx-auto flex max-w-6xl flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto flex max-w-6xl flex-col">
 	<div class="max-w-2xl">
 		<Chip variant="outline">The shape of progress</Chip><Heading
 			as="h2"
@@ -16,7 +16,7 @@
 		>
 		<p class="mt-lg text-neutral/70">An example snapshot of a team finding its rhythm.</p>
 	</div>
-	<div class="grid gap-lg border-y border-neutral-muted py-xl md:grid-cols-3">
+	<div class="gap-lg border-neutral-muted py-xl grid border-y md:grid-cols-3">
 		<Stat
 			label="Projects brought to life"
 			value="42"

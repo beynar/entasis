@@ -52,7 +52,10 @@
 
 		const currentLabelledByIds =
 			control.getAttribute('aria-labelledby')?.split(/\s+/).filter(Boolean) ?? [];
-		let labelledByIds = currentLabelledByIds.filter((id) => id !== field.labelId);
+		// A control that declared its own labelledby (Switch's inline label) keeps it; only the
+		// id this effect adds is subject to removal.
+		const ownedByControl = initialLabelledBy?.split(/\s+/).includes(field.labelId) ?? false;
+		let labelledByIds = currentLabelledByIds.filter((id) => id !== field.labelId || ownedByControl);
 		if (label && labelFor === false && as !== 'fieldset') {
 			labelledByIds = [...labelledByIds, field.labelId];
 		}

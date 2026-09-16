@@ -1,4 +1,5 @@
 import type { MapControlAction } from './map-types.js';
+import { en, type Messages } from '$lib/i18n/en.js';
 
 export const DEFAULT_MAP_CONTROL_ACTIONS: MapControlAction[] = [
 	'zoom-in',
@@ -12,18 +13,21 @@ export function resolveMapControlActions(controls: true | MapControlAction[]): M
 	return controls === true ? DEFAULT_MAP_CONTROL_ACTIONS : [...new Set(controls)];
 }
 
-export function getMapControlActionLabel(action: MapControlAction): string {
+export function getMapControlActionLabel(
+	action: MapControlAction,
+	messages: Messages = en
+): string {
 	switch (action) {
 		case 'zoom-in':
-			return 'Zoom in';
+			return messages.zoomIn;
 		case 'zoom-out':
-			return 'Zoom out';
+			return messages.zoomOut;
 		case 'fit-markers':
-			return 'Fit markers';
+			return messages.fitMarkers;
 		case 'geolocate':
-			return 'Show user location';
+			return messages.showUserLocation;
 		case 'reset':
-			return 'Reset map view';
+			return messages.resetMapView;
 	}
 }
 

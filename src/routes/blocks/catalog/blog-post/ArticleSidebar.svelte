@@ -20,32 +20,32 @@
 	const sectionId = $props.id();
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<div class="grid gap-xl md:grid-cols-[12rem_1fr]">
-		<aside class="flex flex-col gap-xl md:sticky md:top-xl md:self-start">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<div class="gap-xl grid md:grid-cols-[12rem_1fr]">
+		<aside class="gap-xl md:top-xl flex flex-col md:sticky md:self-start">
 			<Chip variant="soft" class="w-fit">Design journal</Chip>
-			<p class="text-xs uppercase tracking-widest text-neutral/50">On this page</p>
-			<nav aria-label="Article sections" class="flex flex-col gap-lg">
+			<p class="text-neutral/65 text-xs tracking-widest uppercase">On this page</p>
+			<nav aria-label="Article sections" class="gap-lg flex flex-col">
 				{#each sections as section, i (section.title)}<a
 						href={`#${sectionId}-${i}`}
-						class="text-sm hover:text-primary">{section.title}</a
+						class="hover:text-primary-readable text-sm">{section.title}</a
 					>{/each}
 			</nav>
-			<div class="flex gap-md items-center">
-				<Avatar user={{ name: 'Maya Chen' }} />
+			<div class="gap-md flex items-center">
+				<Avatar name="Maya Chen" />
 				<div class="text-sm">
 					<p>Maya Chen</p>
-					<p class="text-neutral/50">6 min read</p>
+					<p class="text-neutral/65">6 min read</p>
 				</div>
 			</div>
 		</aside>
-		<article class="flex flex-col gap-xl">
-			<header class="flex flex-col gap-lg">
-				<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+		<article class="gap-xl flex flex-col">
+			<header class="gap-lg flex flex-col">
+				<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 					Design / June 2026
 				</p>
 				<Heading size="h2" weight="bold">The art of making room.</Heading>
-				<p class="max-w-2xl text-neutral/65">
+				<p class="text-neutral/65 max-w-2xl">
 					How a little less can make space for a little more living.
 				</p>
 			</header>
@@ -56,10 +56,10 @@
 				class="aspect-video w-full rounded-lg object-cover"
 			/>{#each sections as section, i (section.title)}<section
 					id={`${sectionId}-${i}`}
-					class="flex flex-col gap-lg scroll-mt-xl"
+					class="gap-lg scroll-mt-xl flex flex-col"
 				>
 					<Heading size="h3">{section.title}</Heading>
-					<p class="max-w-prose leading-relaxed text-neutral/75">{section.body}</p>
+					<p class="text-neutral/75 max-w-prose leading-relaxed">{section.body}</p>
 				</section>{/each}<Button href="/docs" variant="link" class="self-start"
 				>More from the journal ↗</Button
 			>

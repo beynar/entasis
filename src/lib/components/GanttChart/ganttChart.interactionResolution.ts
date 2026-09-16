@@ -1,29 +1,25 @@
+import {
+	acceptInteraction,
+	pendingInteraction,
+	rejectInteraction,
+	type InteractionResolution
+} from '$lib/utils/interactionResolution.js';
 import type { GanttInteractionBlockedInfo } from './ganttChart.types.js';
 
-export type GanttInteractionResolution<TProposal> =
-	| Readonly<{ state: 'pending' }>
-	| Readonly<{ state: 'accepted'; proposal: TProposal }>
-	| Readonly<{
-			state: 'rejected';
-			proposal: TProposal | null;
-			reason: GanttInteractionBlockedInfo['reason'];
-			message: string;
-	  }>;
+export type GanttInteractionResolution<TProposal> = InteractionResolution<
+	TProposal,
+	GanttInteractionBlockedInfo['reason']
+>;
 
-export const pendingGanttInteraction: GanttInteractionResolution<never> = {
-	state: 'pending'
-};
+export const pendingGanttInteraction = pendingInteraction;
 
-export function acceptGanttInteraction<TProposal>(
-	proposal: TProposal
-): GanttInteractionResolution<TProposal> {
-	return { state: 'accepted', proposal };
-}
+export const acceptGanttInteraction = acceptInteraction;
 
+/** The chart passes its own message (usually from the thrown scheduling error). */
 export function rejectGanttInteraction<TProposal>(
 	reason: GanttInteractionBlockedInfo['reason'],
 	message: string,
 	proposal: TProposal | null = null
 ): GanttInteractionResolution<TProposal> {
-	return { state: 'rejected', proposal, reason, message };
+	return rejectInteraction(reason, message, proposal);
 }

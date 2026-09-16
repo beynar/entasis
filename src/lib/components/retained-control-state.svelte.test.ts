@@ -3,26 +3,26 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { describe, expect, test, vi } from 'vitest';
 import Command from './Command/commandLawHarness.test.svelte';
 import MiniCalendar from './MiniCalendar/MiniCalendar.svelte';
-import Reasoning from './AIReasoning/Reasoning.svelte';
+import AIReasoning from './AIReasoning/AIReasoning.svelte';
 
 describe('retained control state', () => {
 	test('keeps Command query edits and dialog transitions across props updates', async () => {
-		const onValueChange = vi.fn();
+		const onSearchChange = vi.fn();
 		const onOpenChange = vi.fn();
 		const { rerender } = render(Command, {
 			props: {
 				items: [],
 				dialog: true,
 				defaultOpen: true,
-				defaultValue: 'Initial',
-				onValueChange,
+				defaultSearch: 'Initial',
+				onSearchChange,
 				onOpenChange
 			}
 		});
 		const input = screen.getByRole('combobox');
 		await fireEvent.input(input, { target: { value: 'Edited' } });
-		expect(onValueChange).toHaveBeenCalledExactlyOnceWith('Edited');
-		await rerender({ defaultValue: 'Ignored', defaultOpen: false, class: 'updated' });
+		expect(onSearchChange).toHaveBeenCalledExactlyOnceWith('Edited');
+		await rerender({ defaultSearch: 'Ignored', defaultOpen: false, class: 'updated' });
 		expect(input).toHaveValue('Edited');
 		expect(screen.getByRole('dialog')).toBeInTheDocument();
 		expect(onOpenChange).not.toHaveBeenCalled();
@@ -38,7 +38,7 @@ describe('retained control state', () => {
 
 	test('keeps a reasoning disclosure default and later user edit across props updates', async () => {
 		const onOpenChange = vi.fn();
-		const { rerender } = render(Reasoning, {
+		const { rerender } = render(AIReasoning, {
 			props: { defaultOpen: true, children: 'Reasoning body', onOpenChange }
 		});
 		const trigger = screen.getByRole('button');
@@ -54,13 +54,13 @@ describe('retained control state', () => {
 
 	test('emits reasoning stream transitions once', async () => {
 		const onOpenChange = vi.fn();
-		const { rerender } = render(Reasoning, {
+		const { rerender } = render(AIReasoning, {
 			props: { children: 'Reasoning body', autoCloseDelay: 0, onOpenChange }
 		});
-		await rerender({ isStreaming: true });
+		await rerender({ streaming: true });
 		expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'true');
 		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(true);
-		await rerender({ isStreaming: false });
+		await rerender({ streaming: false });
 		await waitFor(() =>
 			expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'false')
 		);

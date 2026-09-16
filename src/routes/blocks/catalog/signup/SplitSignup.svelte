@@ -8,8 +8,8 @@
 	let message = $state('');
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<div class="grid overflow-hidden rounded-lg border border-neutral-muted md:grid-cols-2">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<div class="border-neutral-muted grid overflow-hidden rounded-lg border md:grid-cols-2">
 		<Stack gap="lg" class="p-lg sm:p-xl">
 			<strong class="text-lg">Northstar</strong>
 			<h2 class="text-3xl font-semibold">Make room for better work.</h2>
@@ -44,15 +44,16 @@
 						<span>Launch readiness</span><strong>75%</strong>
 					</div>
 					<Meter
-						value={{ value: 75, color: 'primary' }}
+						value={75}
+						color="primary"
 					/>{#each ['Research complete', 'Design review complete', 'Build in progress'] as label (label)}<div
-							class="rounded-md bg-surface-recessed p-md text-sm"
+							class="bg-surface-recessed p-md rounded-md text-sm"
 						>
 							{label}
 						</div>{/each}
 				</Stack></Card
 			>
-			<p class="text-sm text-neutral/60">Plan, create, and make progress together.</p>
+			<p class="text-neutral/70 text-sm">Plan, create, and make progress together.</p>
 		</Stack>
 	</div>
 </Stack>

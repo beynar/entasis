@@ -1,4 +1,5 @@
 <script lang="ts" generics="TData = unknown">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import type { Snippet } from 'svelte';
 	import { fromAction, type Attachment } from 'svelte/attachments';
 	import { arrowsInIcon } from '../Icons/arrowsIn.js';
@@ -63,6 +64,7 @@
 	let isLocating = false;
 	let hasUserLocation = false;
 	let actionList = $derived(resolveMapControlActions(controls));
+	const t = $derived(useI18n());
 
 	function reportError(error: Error): void {
 		reportMapError(error, onError);
@@ -83,7 +85,7 @@
 			action,
 			disabled,
 			active: isActionActive(action),
-			label: getMapControlActionLabel(action),
+			label: getMapControlActionLabel(action, t),
 			onclick: (event: MouseEvent) => handleActionClick(event, action, disabled)
 		};
 	}
@@ -226,8 +228,8 @@
 	{@attach attachControlElement}
 	data-slot="map-control"
 	role="group"
-	aria-label="Map controls"
-	class="maplibregl-ctrl flex flex-col overflow-hidden rounded-md border border-neutral-muted bg-surface-floating text-neutral shadow-sm"
+	aria-label={`${t.map} ${t.controls}`}
+	class="maplibregl-ctrl bg-surface-floating text-neutral raised-1 flex flex-col overflow-hidden rounded-md"
 >
 	{#each actionList as action (action)}
 		{@const disabled = isActionDisabled(action)}
@@ -235,14 +237,14 @@
 		{#if controlButton}
 			<div
 				{@attach customMapControlEvents(buttonArg.onclick)}
-				class="border-b border-neutral-muted last:border-b-0"
+				class="border-neutral-muted border-b last:border-b-0"
 			>
 				{@render controlButton(buttonArg)}
 			</div>
 		{:else}
 			<button
 				type="button"
-				class="state-layer flex size-8 items-center justify-center border-b border-neutral-muted bg-surface-floating outline-none transition-colors last:border-b-0 hover:text-neutral focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-neutral"
+				class="state-layer border-neutral-muted bg-surface-floating hover:text-neutral focus-visible:ring-focus/50 disabled:hover:text-neutral flex size-8 items-center justify-center border-b transition-colors outline-none last:border-b-0 focus-visible:z-10 focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
 				aria-label={buttonArg.label}
 				{disabled}
 				onpointerdown={stopMapControlEvent}

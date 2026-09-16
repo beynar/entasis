@@ -2,10 +2,10 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 
 const defaultSwitchToggle = cva({
-	base: 'relative inline-flex shrink-0 cursor-pointer items-center rounded-full border p-micro transition-colors duration-200 ease-in-out outline-none focus-visible:ring-2 focus-visible:ring-color/50 disabled:cursor-not-allowed disabled:opacity-50',
+	base: 'relative inline-flex shrink-0 cursor-pointer items-center rounded-full border p-micro transition-colors duration-normal ease-standard outline-none focus-visible:ring-2 focus-visible:ring-focus/50 disabled:cursor-not-allowed disabled:opacity-50',
 	variants: {
 		checked: {
-			true: 'bg-color border-color',
+			true: 'bg-selected border-selected',
 			false: 'bg-neutral-muted border-neutral-muted'
 		},
 		size: {
@@ -26,7 +26,7 @@ const defaultSwitchToggle = cva({
 });
 
 const defaultSwitchThumb = cva({
-	base: 'pointer-events-none block rounded-full bg-surface-floating shadow-sm ring-0 transition-transform duration-200 ease-in-out',
+	base: 'pointer-events-none block rounded-full bg-surface-floating lift-1 ring-0 transition-transform duration-normal ease-standard',
 	variants: {
 		checked: {
 			true: '',
@@ -69,8 +69,9 @@ const defaultSwitchContainer = cva({
 			normal: 'gap-xl',
 			large: 'gap-xl'
 		},
+		// The toggle carries the disabled dimming; the row stays opaque so it applies once.
 		disabled: {
-			true: 'opacity-50',
+			true: '',
 			false: ''
 		}
 	},

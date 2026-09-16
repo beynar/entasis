@@ -51,22 +51,30 @@ function createMapLibreScriptPromise(): Promise<MapLibreLibrary> {
 		const script =
 			existingScript instanceof HTMLScriptElement ? existingScript : createMapLibreScript();
 
-		script.addEventListener('load', () => {
-			script.dataset.status = 'loaded';
-			const mapLibre = readWindowMapLibre();
+		script.addEventListener(
+			'load',
+			() => {
+				script.dataset.status = 'loaded';
+				const mapLibre = readWindowMapLibre();
 
-			if (!mapLibre) {
+				if (!mapLibre) {
+					script.remove();
+					reject(new Error('MapLibre CDN script loaded without exposing window.maplibregl.'));
+					return;
+				}
+
+				resolve(mapLibre);
+			},
+			{ once: true }
+		);
+		script.addEventListener(
+			'error',
+			() => {
 				script.remove();
-				reject(new Error('MapLibre CDN script loaded without exposing window.maplibregl.'));
-				return;
-			}
-
-			resolve(mapLibre);
-		}, { once: true });
-		script.addEventListener('error', () => {
-			script.remove();
-			reject(new Error(`Failed to load MapLibre from ${MAPLIBRE_SCRIPT_URL}.`));
-		}, { once: true });
+				reject(new Error(`Failed to load MapLibre from ${MAPLIBRE_SCRIPT_URL}.`));
+			},
+			{ once: true }
+		);
 
 		if (!existingScript) {
 			document.head.append(script);

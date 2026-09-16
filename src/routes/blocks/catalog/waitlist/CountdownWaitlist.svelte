@@ -21,22 +21,22 @@
 	});
 </script>
 
-<section class="flex flex-col items-center gap-xl bg-primary-muted p-xl text-center">
+<section class="gap-xl bg-primary-muted p-xl flex flex-col items-center text-center">
 	<Chip variant="outline">Northstar · The next chapter</Chip><Heading
 		as="h2"
 		size="h1"
 		weight="bold"
 		class="max-w-2xl">A new space for good work is on its way.</Heading
 	>
-	<p class="max-w-xl text-neutral/70">
+	<p class="text-neutral/70 max-w-xl">
 		An illustrative launch, set for December 1, 2026. Be ready for a clearer place to begin.
 	</p>
-	<div class="grid w-full max-w-xl grid-cols-4 gap-sm" aria-label="Time until the example launch">
-		{#each countdown as part (part.label)}<Card variant="outline" density="small"
+	<div class="gap-sm grid w-full max-w-xl grid-cols-4" aria-label="Time until the example launch">
+		{#each countdown as part (part.label)}<Card variant="outline" density="compact"
 				><Stack gap="sm"
 					><strong class="text-3xl tabular-nums md:text-5xl"
 						>{String(part.value).padStart(2, '0')}</strong
-					><span class="text-xs text-neutral/60">{part.label}</span></Stack
+					><span class="text-neutral/70 text-xs">{part.label}</span></Stack
 				></Card
 			>{/each}
 	</div>
@@ -49,8 +49,8 @@
 					{ children: 'Review launch reminder', fullWidth: true, onAction: (form) => form.submit() }
 				]}
 			/>
-			<p class="text-xs text-neutral/50">Local preview only. No reminder is scheduled.</p>
-			{#if email}<p class="text-sm text-primary" role="status">
+			<p class="text-neutral/65 text-xs">Local preview only. No reminder is scheduled.</p>
+			{#if email}<p class="text-primary-readable text-sm" role="status">
 					Reminder draft for {email}.
 				</p>{/if}</Stack
 		></Card

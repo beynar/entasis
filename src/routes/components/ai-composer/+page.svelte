@@ -3,7 +3,7 @@
 	import AIConversation from '$lib/components/AIConversation/AIConversation.svelte';
 	import type {
 		AIComposerQueuedMessage,
-		AIComposerSubmitDetail,
+		AIComposerSubmitPayload,
 		AIComposerVoiceInputVariant
 	} from '$lib/components/AIComposer/aiComposer.props.js';
 	import Switch from '$lib/components/Form/Switch/Switch.svelte';
@@ -36,9 +36,9 @@
 	const skills = {
 		items: [{ id: 'review', label: 'Review', description: 'Review for omissions.' }]
 	};
-	let submitted = $state<AIComposerSubmitDetail>();
+	let submitted = $state<AIComposerSubmitPayload>();
 	let voiceInputStatus = $state('Ready to record');
-	let isStreaming = $state(true);
+	let streaming = $state(true);
 	let queuedMessages = $state<AIComposerQueuedMessage[]>([]);
 	async function processVoiceInput(audioBuffer: ArrayBuffer): Promise<void> {
 		voiceInputStatus = `Processing ${audioBuffer.byteLength} bytes`;
@@ -85,7 +85,7 @@
 		'Compact or expandable voice capture',
 		'Explicit attachment upload states',
 		'Sortable queued messages',
-		'Imperative insertion and focus methods'
+		'Imperative insertion methods'
 	]}
 >
 	<ComponentCard
@@ -133,10 +133,10 @@ ${'</' + 'script>'}
 					submitted = detail;
 				}}
 			/>
-			<span class="text-neutral/60 text-xs" aria-live="polite">{voiceInputStatus}</span>
+			<span class="text-neutral/70 text-xs" aria-live="polite">{voiceInputStatus}</span>
 			{#if submitted}
 				<pre
-					class="max-h-28 overflow-auto rounded border border-neutral-muted p-3 text-xs">{JSON.stringify(
+					class="border-neutral-muted max-h-28 overflow-auto rounded border p-3 text-xs">{JSON.stringify(
 						{ modelInput: submitted.modelInput, tokens: submitted.tokens },
 						null,
 						2
@@ -161,10 +161,10 @@ ${'</' + 'script>'}
 		>
 			<AIComposer fileDropzone class="w-full max-w-3xl">
 				{#snippet footerStart({ files })}
-					<span class="text-neutral/60 text-xs">{files.length} files</span>
+					<span class="text-neutral/70 text-xs">{files.length} files</span>
 				{/snippet}
 				{#snippet actions({ isBusy })}
-					<span class="text-neutral/60 text-xs">{isBusy ? 'Streaming' : 'Ready'}</span>
+					<span class="text-neutral/70 text-xs">{isBusy ? 'Streaming' : 'Ready'}</span>
 				{/snippet}
 			</AIComposer>
 		</ComponentCard>
@@ -173,7 +173,7 @@ ${'</' + 'script>'}
 			title="Conversation queue"
 			description="When the provider is busy, queueWhileBusy stores sortable messages instead of dispatching them immediately."
 			class="!min-h-[300px] p-4"
-			code={`<AIConversation bind:isStreaming>
+			code={`<AIConversation bind:streaming>
 	  <AIComposer
 	    bind:queue={queuedMessages}
 	    queueWhileBusy
@@ -183,12 +183,12 @@ ${'</' + 'script>'}
 		>
 			<div class="grid w-full max-w-3xl gap-3">
 				<div class="flex flex-wrap items-center justify-between gap-3">
-					<Switch size="small" label="Conversation streaming" bind:value={isStreaming} />
-					<span class="text-neutral/60 text-xs">
+					<Switch size="small" label="Conversation streaming" bind:value={streaming} />
+					<span class="text-neutral/70 text-xs">
 						{queuedMessages.length} queued
 					</span>
 				</div>
-				<AIConversation bind:isStreaming>
+				<AIConversation bind:streaming>
 					<AIComposer bind:queue={queuedMessages} queueWhileBusy submitShortcut="enter" />
 				</AIConversation>
 			</div>

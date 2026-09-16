@@ -44,7 +44,7 @@
 		cachedInput: 'Cache',
 		used: 'Consumed',
 		maximum: 'Limit',
-		ariaLabel: (used: string, maximum: string, remaining: string) =>
+		label: (used: string, maximum: string, remaining: string) =>
 			used + ' of ' + maximum + ' consumed; ' + remaining + ' available.'
 	};
 	const examples = {
@@ -94,7 +94,7 @@
     cachedInput: 'Cache',
     used: 'Consumed',
     maximum: 'Limit',
-    ariaLabel: (used, maximum, remaining) =>
+    label: (used, maximum, remaining) =>
       used + ' of ' + maximum + ' consumed; ' + remaining + ' available.'
   }}
 />`
@@ -155,7 +155,7 @@ ${'</' + 'script>'}
 							class="state-layer border-neutral-muted inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium"
 						>
 							<span>{Math.round(percent)}% used</span>
-							<span class="text-neutral/55 capitalize">{tone}</span>
+							<span class="text-neutral/65 capitalize">{tone}</span>
 						</button>
 					{/snippet}
 					{#snippet content({ formattedUsed, formattedMax, formattedRemaining })}

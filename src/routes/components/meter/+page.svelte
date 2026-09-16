@@ -78,7 +78,8 @@
 		{controls}
 		description="Simple meter with percentage indicator."
 		code={`<Meter
-	value={{ value: ${controls.value.value}, color: '${controls.value.color}' }}
+	value={${controls.value.value}}
+	color="${controls.value.color}"
 	size="${controls.value.size}"
 	showIndicatorAs={${controls.value.indicator === 'hidden' ? 'undefined' : `'${controls.value.indicator}'`}}
 	label="Progress"
@@ -86,7 +87,8 @@
 />`}
 	>
 		<Meter
-			value={{ value: controls.value.value, color: controls.value.color }}
+			value={controls.value.value}
+			color={controls.value.color}
 			size={controls.value.size}
 			showIndicatorAs={controls.value.indicator === 'hidden' ? undefined : controls.value.indicator}
 			label="Progress"
@@ -97,19 +99,19 @@
 	{#snippet examples()}
 		<ComponentCard description="Progress bars in small, normal, and large sizes.">
 			<div class="grid w-full gap-6">
-				<Meter value={{ value: 60 }} size="small" showIndicatorAs={undefined} />
-				<Meter value={{ value: 60 }} size="normal" showIndicatorAs={undefined} />
-				<Meter value={{ value: 60 }} size="large" showIndicatorAs={undefined} />
+				<Meter value={60} size="small" showIndicatorAs={undefined} />
+				<Meter value={60} size="normal" showIndicatorAs={undefined} />
+				<Meter value={60} size="large" showIndicatorAs={undefined} />
 			</div>
 		</ComponentCard>
 
 		<ComponentCard description="Simple meter with percentage indicator.">
-			<Meter value={{ value: value1 }} label="Progress" helper="65% complete" />
+			<Meter value={value1} label="Progress" helper="65% complete" />
 		</ComponentCard>
 
 		<ComponentCard description="Meter showing the raw value instead of a percentage.">
 			<Meter
-				value={{ value: value2 }}
+				value={value2}
 				showIndicatorAs="value"
 				label="Score"
 				description="Current score out of 100"
@@ -118,7 +120,7 @@
 
 		<ComponentCard description="Meter with colored threshold steps on the track.">
 			<Meter
-				value={{ value: value3 }}
+				value={value3}
 				label="Performance Level"
 				helper="Excellent!"
 				steps={[
@@ -128,6 +130,12 @@
 					{ label: 'Excellent', start: 75, end: 100, color: 'info' }
 				]}
 			/>
+		</ComponentCard>
+
+		<ComponentCard
+			description="A plain number renders one segment; its legend label defaults to that number."
+		>
+			<Meter value={42} color="success" showLegend label="Uptime budget" />
 		</ComponentCard>
 
 		<ComponentCard description="Multiple stacked meters in a single track.">
@@ -164,7 +172,8 @@
 
 		<ComponentCard description="Spring-animated meter that cycles through values.">
 			<Meter
-				value={{ value: animatedValue, color: 'info' }}
+				value={animatedValue}
+				color="info"
 				label="Loading Progress"
 				helper="Watch it animate!"
 				stiffness={0.1}
@@ -173,17 +182,13 @@
 		</ComponentCard>
 
 		<ComponentCard description="Compact small-size meter.">
-			<Meter
-				size="small"
-				value={{ value: 45, color: 'success' }}
-				label="Storage Used"
-				helper="45GB of 100GB"
-			/>
+			<Meter size="small" value={45} color="success" label="Storage Used" helper="45GB of 100GB" />
 		</ComponentCard>
 
 		<ComponentCard description="Meter with the value indicator hidden.">
 			<Meter
-				value={{ value: 75, color: 'warning' }}
+				value={75}
+				color="warning"
 				showIndicatorAs={undefined}
 				label="Battery Level"
 				description="Indicator text hidden"
@@ -192,16 +197,16 @@
 
 		<ComponentCard description="Meters in danger, warning, success, and info colors.">
 			<div class="grid w-full gap-4">
-				<Meter value={{ value: 60, color: 'danger' }} label="Danger" size="small" />
-				<Meter value={{ value: 70, color: 'warning' }} label="Warning" size="small" />
-				<Meter value={{ value: 80, color: 'success' }} label="Success" size="small" />
-				<Meter value={{ value: 90, color: 'info' }} label="Info" size="small" />
+				<Meter value={60} color="danger" label="Danger" size="small" />
+				<Meter value={70} color="warning" label="Warning" size="small" />
+				<Meter value={80} color="success" label="Success" size="small" />
+				<Meter value={90} color="info" label="Info" size="small" />
 			</div>
 		</ComponentCard>
 
 		<ComponentCard description="Custom scale from 0 to 1000.">
 			<Meter
-				value={{ value: 750 }}
+				value={750}
 				min={0}
 				max={1000}
 				showIndicatorAs="value"

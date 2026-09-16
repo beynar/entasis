@@ -8,15 +8,17 @@
 	let revealed = $state(false);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">A warm welcome</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			A warm welcome
+		</p>
 		<Heading size="h2" weight="bold">Your first good thing awaits.</Heading>
 	</header>
 	<Button class="self-start" variant="outline" onclick={() => (open = true)}
 		>Open welcome offer</Button
 	><Dialog bind:open title="A little welcome gift" description="Discover 15% off your first order."
-		><div class="flex flex-col gap-xl">
+		><div class="gap-xl flex flex-col">
 			<Chip class="w-fit" variant="soft">For your first order</Chip><Heading size="h2"
 				>Good things.<br />15% less.</Heading
 			>
@@ -24,8 +26,8 @@
 				Enter an email to preview the welcome offer. This example does not subscribe you to a
 				mailing list.
 			</p>
-			{#if revealed}<div class="rounded-lg border border-dashed border-primary p-xl text-center">
-					<p class="text-xs uppercase tracking-widest text-neutral/50">Your welcome code</p>
+			{#if revealed}<div class="border-primary p-xl rounded-lg border border-dashed text-center">
+					<p class="text-neutral/65 text-xs tracking-widest uppercase">Your welcome code</p>
 					<p class="mt-lg text-3xl font-semibold tracking-widest">WELCOME15</p>
 				</div>{:else}<Form
 					inputs={{

@@ -42,15 +42,17 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">From the studio</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			From the studio
+		</p>
 		<Heading size="h2" weight="bold">Stories worth your time.</Heading>
-		<p class="max-w-2xl text-neutral/65">Explore our latest thinking and practical field notes.</p>
+		<p class="text-neutral/65 max-w-2xl">Explore our latest thinking and practical field notes.</p>
 	</header>
-	<div class="flex flex-col gap-xl">
+	<div class="gap-xl flex flex-col">
 		{#each posts.slice(0, 3) as post (post.title)}<article
-				class="grid gap-lg border-t border-neutral/15 pt-xl sm:grid-cols-[14rem_1fr_auto]"
+				class="gap-lg border-neutral/15 pt-xl grid border-t sm:grid-cols-[14rem_1fr_auto]"
 			>
 				<img
 					src={`https://images.unsplash.com/photo-${post.photo}?auto=format&fit=crop&w=900&q=80`}
@@ -58,11 +60,11 @@
 					loading="lazy"
 					class="aspect-[3/2] w-full rounded-lg object-cover"
 				/>
-				<div class="flex flex-col gap-md items-start">
+				<div class="gap-md flex flex-col items-start">
 					<Chip size="small" color="neutral" variant="soft">{post.category}</Chip>
 					<h3 class="text-xl font-semibold">{post.title}</h3>
-					<p class="text-neutral/60">{post.excerpt}</p>
-					<p class="text-xs text-neutral/50">{post.author} · {post.time}</p>
+					<p class="text-neutral/70">{post.excerpt}</p>
+					<p class="text-neutral/65 text-xs">{post.author} · {post.time}</p>
 				</div>
 				<Button href="/docs" variant="outline" class="self-center">Read ↗</Button>
 			</article>{/each}

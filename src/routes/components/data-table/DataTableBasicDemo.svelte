@@ -1,8 +1,22 @@
 <script lang="ts">
-	import { DataTable, type DataTableColumn } from '$lib/components/DataTable/index.js';
+	import { Chip } from '$lib/components/Chip/index.js';
+	import {
+		DataTable,
+		type DataTableCellPayload,
+		type DataTableColumn
+	} from '$lib/components/DataTable/index.js';
 	import type { DataTableSelectionMode } from '$lib/components/DataTable/dataTable.props.js';
+	import { checkIcon } from '$lib/components/Icons/check.js';
 	import type { Density } from '$lib/types/theme.js';
-	import { createPeople, departments, statuses, type Person } from './exampleData.js';
+	import {
+		createPeople,
+		departments,
+		formatJoinedAt,
+		formatSalary,
+		statusColor,
+		statuses,
+		type Person
+	} from './exampleData.js';
 
 	let {
 		density = 'normal',
@@ -44,6 +58,7 @@
 				type: 'multi-select',
 				options: statuses.map((status) => ({ value: status, label: status }))
 			},
+			cell: statusCell,
 			width: 140
 		},
 		{
@@ -52,6 +67,7 @@
 			header: 'Salary',
 			sortable: true,
 			filter: { type: 'number', min: 0 },
+			cell: salaryCell,
 			align: 'end',
 			width: 130
 		},
@@ -61,6 +77,7 @@
 			header: 'Joined',
 			sortable: true,
 			filter: { type: 'date' },
+			cell: joinedCell,
 			width: 150
 		},
 		{
@@ -68,11 +85,36 @@
 			accessor: 'verified',
 			header: 'Verified',
 			filter: { type: 'boolean', trueLabel: 'Verified', falseLabel: 'Unverified' },
+			cell: verifiedCell,
 			align: 'center',
 			width: 120
 		}
 	];
 </script>
+
+{#snippet statusCell(payload: DataTableCellPayload<Person>)}
+	<Chip size="small" variant="soft" color={statusColor(payload.row.status)}>
+		{payload.row.status}
+	</Chip>
+{/snippet}
+
+{#snippet salaryCell(payload: DataTableCellPayload<Person>)}
+	{formatSalary(payload.value)}
+{/snippet}
+
+{#snippet joinedCell(payload: DataTableCellPayload<Person>)}
+	{formatJoinedAt(payload.value)}
+{/snippet}
+
+{#snippet verifiedCell(payload: DataTableCellPayload<Person>)}
+	{#if payload.value}
+		<span class="text-success inline-flex" role="img" aria-label="Verified">
+			{@render checkIcon()}
+		</span>
+	{:else}
+		<span class="text-neutral/65" role="img" aria-label="Unverified">—</span>
+	{/if}
+{/snippet}
 
 <div class="h-[440px]">
 	<DataTable

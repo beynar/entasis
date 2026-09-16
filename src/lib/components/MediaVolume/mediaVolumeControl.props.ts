@@ -21,8 +21,8 @@ export type MediaVolumeControlButtonPayload = {
 export type MediaVolumeControlTriggerPayload = MediaVolumeControlButtonPayload & {
 	isOpen: boolean;
 	reference: Attachment<HTMLElement>;
-	ariaHaspopup: 'dialog';
-	ariaExpanded: boolean;
+	haspopup: 'dialog';
+	expanded: boolean;
 };
 
 export type MediaVolumeControlProps = {
@@ -60,8 +60,8 @@ export type MediaVolumeControlProps = {
 	position?: PopoverProps['position'];
 	/** Popover offset from its trigger. */
 	offset?: number;
-	/** Popover size token. */
-	popoverSize?: PopoverProps['size'];
+	/** Props forwarded to the Popover panel. */
+	popover?: Pick<PopoverProps, 'class' | 'size'>;
 	/** Render popover content as a mobile bottom sheet below the popover breakpoint. */
 	mobileSheet?: boolean;
 	/** Whether clicking the muted trigger immediately unmutes before opening. */
@@ -78,8 +78,10 @@ export type MediaVolumeControlProps = {
 	lowVolumeThreshold?: number;
 	/** Root class override. */
 	class?: string;
-	/** Popover panel class override. */
-	popoverClass?: string;
+	/** Class applied to the default trigger and mute buttons. */
+	buttonClass?: string;
+	/** Color of the default trigger and mute buttons while active. Defaults to `color`. */
+	buttonColor?: Colors;
 	/** Panel class override. */
 	panelClass?: string;
 	/** Slider wrapper class override. */

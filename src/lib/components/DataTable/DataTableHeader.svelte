@@ -1,11 +1,12 @@
 <script lang="ts" generics="TData">
-	import type { Column } from '@tanstack/table-core';
 	import { useDndList } from '$lib/utils/useDndList.svelte.js';
+	import type { DataTableColumnInstance } from './dataTable.table.js';
 	import DataTableHeaderCell from './DataTableHeaderCell.svelte';
 	import DataTableSelectionCheckbox from './DataTableSelectionCheckbox.svelte';
 	import type { DataTableClasses } from './dataTable.theme.js';
 	import type { DataTableModel } from './dataTable.model.svelte.js';
 	import type { DataTableColumn } from './dataTable.props.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		columns,
@@ -17,15 +18,16 @@
 		sticky,
 		revision
 	}: {
-		columns: Column<TData, unknown>[];
-		allColumns: Column<TData, unknown>[];
+		columns: DataTableColumnInstance<TData>[];
+		allColumns: DataTableColumnInstance<TData>[];
 		gridTemplate: string;
 		model: DataTableModel<TData>;
 		classes: DataTableClasses;
-		density: 'small' | 'normal' | 'large';
+		density: 'compact' | 'normal' | 'comfortable';
 		sticky: boolean;
 		revision: number;
 	} = $props();
+	const t = $derived(useI18n());
 
 	const orderedPublicColumns = $derived(
 		columns
@@ -39,12 +41,10 @@
 		return 'center';
 	};
 
-	const pinnedBoundaryFor = (column: Column<TData, unknown>) => {
-		const pinning = column.getIsPinned();
-		if (pinning === 'left' && model.table.getLeftVisibleLeafColumns().at(-1)?.id === column.id)
-			return 'left';
-		if (pinning === 'right' && model.table.getRightVisibleLeafColumns()[0]?.id === column.id)
-			return 'right';
+	const pinnedBoundaryFor = (column: DataTableColumnInstance<TData>) => {
+		const pinning = model.getColumnPinning(column);
+		if (pinning === 'left' && model.startPinnedColumns.at(-1)?.id === column.id) return 'left';
+		if (pinning === 'right' && model.endPinnedColumns[0]?.id === column.id) return 'right';
 		return 'none';
 	};
 
@@ -70,13 +70,15 @@
 	});
 
 	const pageRows = $derived.by(() => {
-		revision;
-		model.state.pagination;
-		model.state.sorting;
-		model.state.columnFilters;
-		model.state.globalFilter;
-		model.state.grouping;
-		model.state.expanded;
+		void [
+			revision,
+			model.state.pagination,
+			model.state.sorting,
+			model.state.columnFilters,
+			model.state.globalFilter,
+			model.state.grouping,
+			model.state.expanded
+		];
 		return model.table.getRowModel().rows;
 	});
 	const selectableRows = $derived(pageRows.filter((row) => row.getCanSelect()));
@@ -103,7 +105,7 @@
 	<tr class={classes.headerRow()} style:grid-template-columns={gridTemplate} {@attach dnd.list}>
 		{#each columns as column (column.id)}
 			{@const allIndex = allColumns.findIndex((entry) => entry.id === column.id)}
-			{@const gridColumn = allIndex + 1 + (column.getIsPinned() === 'right' ? 1 : 0)}
+			{@const gridColumn = allIndex + 1 + (model.getColumnPinning(column) === 'right' ? 1 : 0)}
 			{#if column.id === '__selection'}
 				<th
 					role="columnheader"
@@ -119,11 +121,11 @@
 					})}
 					style:grid-column={gridColumn}
 					style:position="sticky"
-					style:inset-inline-start={`${column.getStart('left')}px`}
+					style:inset-inline-start={`${model.getColumnPinnedOffset(column)}px`}
 				>
 					{#if model.props.selectionMode === 'multiple'}
 						<DataTableSelectionCheckbox
-							ariaLabel="Select current page"
+							label={t.dataTableSelectPage}
 							value={allSelected}
 							indeterminate={someSelected}
 							disabled={model.props.disabled || selectableRows.length === 0}

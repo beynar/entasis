@@ -117,20 +117,19 @@
   import { AIComposer } from 'svelai/ai-composer';
 ${'</' + 'script>'}
 
-<AIConversation bind:conversation bind:messages onSubmit={sendMessage}>
+<AIConversation bind:api={conversation} bind:messages onSubmit={sendMessage}>
   <AIThread />
   <AIComposer />
 </AIConversation>`}
 	>
 		<div class="grid h-[520px] w-full grid-rows-[auto_minmax(0,1fr)_auto] gap-3">
 			<div class="flex items-center justify-between gap-3">
-				<span class="text-sm text-neutral/65"
-					>Status: {conversation?.status ?? 'initializing'}</span
+				<span class="text-neutral/65 text-sm">Status: {conversation?.status ?? 'initializing'}</span
 				>
 				<Button size="small" variant="outline" onclick={appendSystemMessage}>Append event</Button>
 			</div>
-			<AIConversation bind:conversation bind:messages bind:status={controls.value.status}>
-				<AIThread class="rounded-lg border border-neutral-muted" />
+			<AIConversation bind:api={conversation} bind:messages bind:status={controls.value.status}>
+				<AIThread class="border-neutral-muted rounded-lg border" />
 				<AIComposer />
 			</AIConversation>
 		</div>
@@ -138,27 +137,27 @@ ${'</' + 'script>'}
 
 	<section aria-labelledby="conversation-methods" class="grid gap-5">
 		<div>
-			<h2 id="conversation-methods" class="text-xl font-semibold text-neutral">State methods</h2>
-			<p class="mt-1 text-sm text-neutral/65">
+			<h2 id="conversation-methods" class="text-neutral text-xl font-semibold">State methods</h2>
+			<p class="text-neutral/65 mt-1 text-sm">
 				Message and tool targets must resolve exactly one item. Missing or ambiguous targets throw.
 			</p>
 		</div>
 		{#each methodGroups as group (group.label)}
-			<div class="overflow-hidden rounded-lg border border-neutral-muted">
+			<div class="border-neutral-muted overflow-hidden rounded-lg border">
 				<div
-					class="border-b border-neutral-muted bg-neutral-muted/25 px-4 py-2 text-sm font-semibold"
+					class="border-neutral-muted bg-neutral-muted/25 border-b px-4 py-2 text-sm font-semibold"
 				>
 					{group.label}
 				</div>
 				<div class="overflow-x-auto">
 					<table class="w-full min-w-[640px] text-left text-sm">
-						<tbody class="divide-y divide-neutral-muted">
+						<tbody class="divide-neutral-muted divide-y">
 							{#each group.methods as method (method[0])}
 								<tr>
 									<td class="w-[46%] px-4 py-3 align-top"
-										><code class="text-xs text-primary">{method[0]}</code></td
+										><code class="text-primary-readable text-xs">{method[0]}</code></td
 									>
-									<td class="px-4 py-3 text-neutral/70">{method[1]}</td>
+									<td class="text-neutral/70 px-4 py-3">{method[1]}</td>
 								</tr>
 							{/each}
 						</tbody>
@@ -180,7 +179,7 @@ ${'</' + 'script>'}
 }`}
 			language="typescript"
 		>
-			<p class="max-w-xl text-sm text-neutral/70">
+			<p class="text-neutral/70 max-w-xl text-sm">
 				The state object never reports a successful mutation when the requested target was not
 				changed.
 			</p>

@@ -10,9 +10,9 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<footer class="flex flex-col gap-xl">
-		<div class="grid items-center gap-xl rounded-lg bg-primary-muted p-xl sm:grid-cols-[1fr_auto]">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<footer class="gap-xl flex flex-col">
+		<div class="gap-xl bg-primary-muted p-xl grid items-center rounded-lg sm:grid-cols-[1fr_auto]">
 			<div>
 				<Heading size="h3">A little inspiration for your inbox.</Heading>
 				<p class="mt-lg text-neutral/65">
@@ -21,11 +21,11 @@
 			</div>
 			<Button href="/docs">Read the latest issue ↗</Button>
 		</div>
-		<div class="grid gap-xl md:grid-cols-[1fr_2fr]">
-			<div class="flex flex-col gap-xl">
+		<div class="gap-xl grid md:grid-cols-[1fr_2fr]">
+			<div class="gap-xl flex flex-col">
 				<a href="/components" class="text-3xl font-semibold tracking-widest">FIELD</a>
-				<p class="max-w-xs text-neutral/60">Everyday objects.<br />Extraordinary attention.</p>
-				<div class="flex gap-md">
+				<p class="text-neutral/70 max-w-xs">Everyday objects.<br />Extraordinary attention.</p>
+				<div class="gap-md flex">
 					<Chip size="small" variant="soft" color="neutral">Visa</Chip><Chip
 						size="small"
 						variant="soft"
@@ -36,16 +36,16 @@
 			<Accordion items={groups}
 				>{#snippet content({ item: group })}<nav
 						aria-label={group.title}
-						class="grid grid-cols-2 gap-lg"
+						class="gap-lg grid grid-cols-2"
 					>
 						{#each group.links as link (link)}<a
 								href="/docs"
-								class="text-sm text-neutral/65 hover:text-primary">{link} ↗</a
+								class="text-neutral/65 hover:text-primary-readable text-sm">{link} ↗</a
 							>{/each}
 					</nav>{/snippet}</Accordion
 			>
 		</div>
-		<p class="border-t border-neutral/15 pt-xl text-xs text-neutral/50">
+		<p class="border-neutral/15 pt-xl text-neutral/65 border-t text-xs">
 			© 2026 Field Objects. Made with care.
 		</p>
 	</footer>

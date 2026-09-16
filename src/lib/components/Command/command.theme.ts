@@ -1,8 +1,15 @@
+import { selectedSoft } from '$lib/components/Theme/theme.recipes.js';
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
+// A palette is sized by whatever hosts it — a `max-w-xl` dialog, an 18rem mention popover, an
+// inline card — so it reads its OWN width rather than the viewport. `@container` is safe on the
+// root because it is always `w-full`/`h-full` inside a host with a definite width; it never sizes
+// to its own content. Breakpoint: `@sm` (>= 24rem / 384px) is where an item row still has room for
+// its label after the right-aligned shortcut; a phone-width palette (~21.5rem) stays below it and
+// hides the shortcut.
 const defaultCommand = cva({
-	base: 'bg-surface text-neutral flex h-full w-full flex-col overflow-hidden rounded-lg p-xs',
+	base: '@container bg-transparent text-neutral flex h-full w-full flex-col overflow-hidden rounded-lg p-xs',
 	variants: {
 		size: {
 			small: '',
@@ -27,9 +34,9 @@ const defaultCommandInputGroup = cva({
 	base: 'flex items-center gap-md px-md',
 	variants: {
 		size: {
-			small: 'h-7',
-			normal: 'h-8',
-			large: 'h-9'
+			small: 'h-control-sm',
+			normal: 'h-control-md',
+			large: 'h-control-lg'
 		}
 	}
 });
@@ -46,7 +53,7 @@ const defaultCommandInputIcon = cva({
 });
 
 const defaultCommandInput = cva({
-	base: 'placeholder:text-neutral/60 w-full min-w-0 flex-1 bg-transparent outline-none',
+	base: 'placeholder:text-neutral/70 w-full min-w-0 flex-1 bg-transparent outline-none',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -90,10 +97,10 @@ const defaultCommandGroup = cva({
 });
 
 const defaultCommandGroupHeading = cva({
-	base: 'text-neutral/60 font-medium',
+	base: 'text-neutral/70 font-medium',
 	variants: {
 		size: {
-			small: 'px-md py-xs text-[0.6875rem]',
+			small: 'px-md py-xs text-xs',
 			normal: 'px-md py-sm text-xs',
 			large: 'px-md py-md text-sm'
 		}
@@ -111,17 +118,38 @@ const defaultCommandSeparator = cva({
 	}
 });
 
-const defaultCommandShortcut = cva({
-	base: 'ml-auto hidden tracking-widest sm:inline',
+const defaultCommandItem = cva({
+	base: '',
 	variants: {
 		size: {
-			small: 'text-[0.6875rem]',
+			small: '',
+			normal: '',
+			large: ''
+		},
+		highlighted: {
+			// The keyboard cursor is a persistent selection, not a hover: it paints the shared soft
+			// selected recipe in the current role, like a sidebar row or a toggle button.
+			true: selectedSoft,
+			false: ''
+		}
+	},
+	defaultVariants: {
+		size: 'normal',
+		highlighted: false
+	}
+});
+
+const defaultCommandShortcut = cva({
+	base: 'ml-auto hidden tracking-widest @sm:inline',
+	variants: {
+		size: {
+			small: 'text-xs',
 			normal: 'text-xs',
 			large: 'text-sm'
 		},
 		highlighted: {
-			true: 'text-neutral',
-			false: 'text-neutral/60'
+			true: 'text-current/70',
+			false: 'text-neutral/70'
 		}
 	},
 	defaultVariants: {
@@ -158,6 +186,7 @@ export const commandTheme = {
 	group: defaultCommandGroup,
 	groupHeading: defaultCommandGroupHeading,
 	separator: defaultCommandSeparator,
+	item: defaultCommandItem,
 	shortcut: defaultCommandShortcut,
 	footer: defaultCommandFooter,
 	trigger: defaultCommandTrigger

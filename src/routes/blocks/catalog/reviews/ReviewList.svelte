@@ -37,34 +37,34 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<div class="flex gap-xl items-end justify-between flex-wrap">
-		<header class="flex flex-col gap-lg">
-			<p class="text-xs font-semibold uppercase tracking-widest text-primary">Community notes</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<div class="gap-xl flex flex-wrap items-end justify-between">
+		<header class="gap-lg flex flex-col">
+			<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+				Community notes
+			</p>
 			<Heading size="h2" weight="bold">Good things, in good company.</Heading>
 		</header>
-		<div class="flex flex-col gap-md">
+		<div class="gap-md flex flex-col">
 			<Rating value={4.8} />
-			<p class="text-sm text-neutral/55">4.8 out of 5 · 128 sample reviews</p>
+			<p class="text-neutral/65 text-sm">4.8 out of 5 · 128 sample reviews</p>
 		</div>
 	</div>
 	{#each reviews as review (review.id)}<article
-			class="grid gap-xl border-t border-neutral/15 pt-xl md:grid-cols-[12rem_1fr]"
+			class="gap-xl border-neutral/15 pt-xl grid border-t md:grid-cols-[12rem_1fr]"
 		>
-			<div class="flex flex-col gap-lg">
-				<div class="flex gap-md items-center">
-					<Avatar user={{ name: review.name }} /><span class="text-sm font-medium"
-						>{review.name}</span
-					>
+			<div class="gap-lg flex flex-col">
+				<div class="gap-md flex items-center">
+					<Avatar name={review.name} /><span class="text-sm font-medium">{review.name}</span>
 				</div>
 				<Chip class="w-fit" color="success" variant="soft" size="small">Verified buyer</Chip><time
-					class="text-xs text-neutral/45">{review.date}</time
+					class="text-neutral/65 text-xs">{review.date}</time
 				>
 			</div>
-			<div class="flex flex-col gap-lg">
+			<div class="gap-lg flex flex-col">
 				<Rating value={review.rating} size="small" />
 				<h3 class="text-lg font-semibold">{review.title}</h3>
-				<p class="leading-relaxed text-neutral/65">{review.body}</p>
+				<p class="text-neutral/65 leading-relaxed">{review.body}</p>
 			</div>
 		</article>{/each}
 </section>

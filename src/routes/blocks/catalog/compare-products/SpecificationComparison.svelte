@@ -14,14 +14,16 @@
 	let selected = $state('');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Side by side</p>
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Side by side
+		</p>
 		<Heading size="h2" weight="bold">Choose the one that feels right.</Heading>
 	</header>
 	<Checkbox label="Show differences only" bind:value={differences} />
@@ -29,12 +31,12 @@
 		<table class="w-full min-w-[32rem] text-left text-sm">
 			<thead
 				><tr
-					><th class="w-1/3 pb-xl font-normal text-neutral/55">Arc collection</th><th
-						class="w-1/3 pb-xl text-center"
+					><th class="pb-xl text-neutral/65 w-1/3 font-normal">Arc collection</th><th
+						class="pb-xl w-1/3 text-center"
 						><div>{@render productArt('lamp', 'Chalk')}</div>
 						<p class="mt-lg text-lg">Arc mini</p>
 						<p class="mt-sm font-normal">$98</p></th
-					><th class="w-1/3 pb-xl text-center"
+					><th class="pb-xl w-1/3 text-center"
 						><div>{@render productArt('lamp', 'Sand')}</div>
 						<p class="mt-lg text-lg">Arc original</p>
 						<p class="mt-sm font-normal">$148</p></th
@@ -42,8 +44,8 @@
 				></thead
 			><tbody
 				>{#each rows.filter((row) => !differences || row[1] !== row[2]) as row (row[0])}<tr
-						class="border-t border-neutral/15"
-						><th class="py-lg font-normal text-neutral/60">{row[0]}</th><td class="text-center"
+						class="border-neutral/15 border-t"
+						><th class="py-lg text-neutral/70 font-normal">{row[0]}</th><td class="text-center"
 							>{row[1]}</td
 						><td class="text-center">{row[2]}</td></tr
 					>{/each}<tr
@@ -59,7 +61,7 @@
 			>
 		</table>
 	</div>
-	<p class="text-sm text-success" aria-live="polite">
+	<p class="text-success text-sm" aria-live="polite">
 		{selected ? `${selected} selected for the sample bag.` : ''}
 	</p>
 </section>

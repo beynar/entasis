@@ -179,7 +179,7 @@
 							: 'var(--color)'}
 					<div
 						aria-hidden="true"
-						class="pointer-events-none absolute inset-inline-start-0 z-20 h-[var(--event-calendar-item-min-height)] px-0.5 transition-[top] duration-150 motion-reduce:transition-none"
+						class="inset-inline-start-0 duration-fast pointer-events-none absolute z-20 h-[var(--event-calendar-item-min-height)] px-0.5 transition-[top] motion-reduce:transition-none"
 						style:top={`calc(${insertion.lane} * var(--event-calendar-item-min-height))`}
 						style:width={getAllDayBarWidth(insertion.startIndex, insertion.endIndex)}
 					>
@@ -201,7 +201,7 @@
 				{@const segment = getPlacementSegment(placement.segments)}
 				{@const itemTargetKey = `all-day-item:${placement.key}`}
 				<div
-					class="pointer-events-auto absolute z-10 px-0.5 transition-[top,opacity] duration-150 motion-reduce:transition-none"
+					class="duration-fast pointer-events-auto absolute z-10 px-0.5 transition-[top,opacity] motion-reduce:transition-none"
 					class:pointer-events-none={placement.occurrence.key === draggingOccurrenceKey}
 					class:opacity-0={placement.occurrence.key === draggingOccurrenceKey}
 					style:top={`calc(${placement.lane} * var(--event-calendar-item-min-height))`}

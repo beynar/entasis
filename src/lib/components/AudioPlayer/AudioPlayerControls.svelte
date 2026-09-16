@@ -14,9 +14,10 @@
 	} from './audioPlayer.props.js';
 	import type { AudioPlayerState } from './audioPlayer.state.svelte.js';
 	import type { useAudioPlayerTheme } from './audioPlayer.theme.js';
-	import AudioPlayerIconButton from './AudioPlayerIconButton.svelte';
+	import MediaIconButton from '../MediaVolume/MediaIconButton.svelte';
 	import AudioPlayerTime from './AudioPlayerTime.svelte';
 	import AudioPlayerVolumeControl from './AudioPlayerVolumeControl.svelte';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type AudioPlayerClasses = ReturnType<typeof useAudioPlayerTheme>;
 
@@ -49,6 +50,7 @@
 		volumeStep: number;
 		disabled: boolean;
 	} = $props();
+	const t = $derived(useI18n());
 
 	const controlSet = $derived(new Set(controls));
 	const canSeek = $derived(player.duration > 0 && Number.isFinite(player.duration));
@@ -68,11 +70,11 @@
 <div data-slot="audio-player-controls" class={classes.controls({ size, layout })}>
 	<div data-slot="audio-player-primary-controls" class={classes.controlGroup({ layout })}>
 		{#if hasControl('seekBackward')}
-			<AudioPlayerIconButton
-				{classes}
+			<MediaIconButton
 				{size}
 				{color}
-				label={`Back ${seekStep} seconds`}
+				class={classes.controlButton({ size })}
+				label={t.mediaBack(seekStep)}
 				icon={skipBackIcon}
 				disabled={disabled || !canSeek}
 				onPress={() => player.runInteraction(() => player.seekBy(-seekStep))}
@@ -80,12 +82,12 @@
 		{/if}
 
 		{#if hasControl('play')}
-			<AudioPlayerIconButton
-				{classes}
+			<MediaIconButton
 				{size}
 				{color}
-				play
-				label={player.paused || player.ended ? 'Play' : 'Pause'}
+				variant="solid"
+				class={classes.playButton({ size })}
+				label={player.paused || player.ended ? t.play : t.pause}
 				icon={player.paused || player.ended ? playIcon : pauseIcon}
 				{disabled}
 				onPress={() => player.runInteraction(() => player.togglePlay())}
@@ -93,11 +95,11 @@
 		{/if}
 
 		{#if hasControl('seekForward')}
-			<AudioPlayerIconButton
-				{classes}
+			<MediaIconButton
 				{size}
 				{color}
-				label={`Forward ${seekStep} seconds`}
+				class={classes.controlButton({ size })}
+				label={t.mediaForward(seekStep)}
 				icon={skipForwardIcon}
 				disabled={disabled || !canSeek}
 				onPress={() => player.runInteraction(() => player.seekBy(seekStep))}
@@ -129,11 +131,11 @@
 		{/if}
 
 		{#if hasControl('loop')}
-			<AudioPlayerIconButton
-				{classes}
+			<MediaIconButton
 				{size}
 				{color}
-				label={player.loop ? 'Disable loop' : 'Loop'}
+				class={classes.controlButton({ size })}
+				label={player.loop ? t.disableLoop : t.loop}
 				icon={repeatIcon}
 				active={player.loop}
 				pressed={player.loop}
@@ -143,11 +145,11 @@
 		{/if}
 
 		{#if hasControl('download') && downloadHref}
-			<AudioPlayerIconButton
-				{classes}
+			<MediaIconButton
 				{size}
 				{color}
-				label="Download"
+				class={classes.controlButton({ size })}
+				label={t.download}
 				icon={downloadSimpleIcon}
 				href={disabled ? undefined : downloadHref}
 				download={true}

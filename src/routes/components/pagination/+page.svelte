@@ -4,7 +4,7 @@
 	import Table from '$lib/components/Table/Table.svelte';
 	import type {
 		PaginationControlVariant,
-		PaginationItemAriaLabel,
+		PaginationItemLabel,
 		PaginationPageItemPayload,
 		PaginationSummaryPayload,
 		PaginationVariant
@@ -14,7 +14,13 @@
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 
-	const variants = ['pages', 'count', 'compact', 'dots', 'none'] as const satisfies readonly PaginationVariant[];
+	const variants = [
+		'pages',
+		'count',
+		'compact',
+		'dots',
+		'none'
+	] as const satisfies readonly PaginationVariant[];
 	const controlVariants = [
 		'solid',
 		'outline',
@@ -80,7 +86,7 @@
 		}
 	];
 
-	let page = $state(6);
+	let value = $state(6);
 	let variantPage = $state(8);
 	let windowedPage = $state(18);
 	let tablePage = $state(2);
@@ -88,12 +94,12 @@
 	let itemCountPage = $state(4);
 
 	const getHref = (nextPage: number) => `/components/pagination?page=${nextPage}`;
-	const getFrenchPaginationLabel = (item: PaginationItemAriaLabel) => {
+	const getFrenchPaginationLabel = (item: PaginationItemLabel) => {
 		if (item.type === 'page') {
 			return item.active ? `Page ${item.page}, page courante` : `Aller a la page ${item.page}`;
 		}
 
-		const labelByType: Record<Exclude<PaginationItemAriaLabel['type'], 'page'>, string> = {
+		const labelByType: Record<Exclude<PaginationItemLabel['type'], 'page'>, string> = {
 			first: 'Aller a la premiere page',
 			previous: 'Aller a la page precedente',
 			next: 'Aller a la page suivante',
@@ -114,14 +120,14 @@
 		'Expanded dot hitboxes',
 		'Ellipsis windowing',
 		'Button or anchor controls',
-		'Localized aria labels'
+		{ label: 'Localized aria labels', test: 'a11y:pagination.aria-labels' }
 	]}
 >
 	<ComponentCard
 		{controls}
 		description="A controlled pagination bar with previous and next controls."
 		code={`<Pagination
-	bind:page
+	bind:value
 	totalPages={20}
 	size="${controls.value.size}"
 	variant="${controls.value.variant}"
@@ -131,7 +137,7 @@
 	>
 		<div class="flex w-full flex-col items-center justify-center gap-4">
 			<Pagination
-				bind:page
+				bind:value
 				totalPages={20}
 				totalItems={200}
 				pageSize={10}
@@ -140,15 +146,15 @@
 				controlVariant={controls.value.controlVariant}
 				color={controls.value.color}
 			/>
-			<Chip color="neutral" variant="soft">Page {page} of 20</Chip>
+			<Chip color="neutral" variant="soft">Page {value} of 20</Chip>
 		</div>
 	</ComponentCard>
 
 	{#snippet examples()}
 		<ComponentCard description="Size tokens adjust control dimensions." class="!min-h-fit">
 			<div class="flex flex-col items-center gap-5">
-				{#each sizes as size}
-					<Pagination {size} page={3} totalPages={8} />
+				{#each sizes as size, index (index)}
+					<Pagination {size} value={3} totalPages={8} />
 				{/each}
 			</div>
 		</ComponentCard>
@@ -163,12 +169,12 @@
 <Pagination variant="none" totalPages={10} />`}
 		>
 			<div class="grid w-full gap-6 sm:grid-cols-2">
-				{#each variants as variant}
+				{#each variants as variant, index (index)}
 					<div class="flex min-h-24 flex-col items-center justify-center gap-3">
-						<span class="text-neutral/60 text-xs font-medium capitalize">{variant}</span>
+						<span class="text-neutral/70 text-xs font-medium capitalize">{variant}</span>
 						<Pagination
 							{variant}
-							bind:page={variantPage}
+							bind:value={variantPage}
 							totalItems={100}
 							pageSize={10}
 							color="neutral"
@@ -183,8 +189,8 @@
 			class="!min-h-fit"
 		>
 			<div class="flex flex-col items-center gap-5">
-				{#each controlVariants as controlVariant}
-					<Pagination {controlVariant} color="primary" page={4} totalPages={9} />
+				{#each controlVariants as controlVariant, index (index)}
+					<Pagination {controlVariant} color="primary" value={4} totalPages={9} />
 				{/each}
 			</div>
 		</ComponentCard>
@@ -194,8 +200,8 @@
 			class="!min-h-fit"
 		>
 			<div class="grid gap-4">
-				{#each colors as color}
-					<Pagination {color} page={2} totalPages={5} siblingCount={0} />
+				{#each colors as color, index (index)}
+					<Pagination {color} value={2} totalPages={5} siblingCount={0} />
 				{/each}
 			</div>
 		</ComponentCard>
@@ -206,7 +212,7 @@
 		>
 			<div class="flex flex-col items-center gap-4">
 				<Pagination
-					bind:page={windowedPage}
+					bind:value={windowedPage}
 					totalPages={40}
 					siblingCount={0}
 					boundaryCount={1}
@@ -219,14 +225,14 @@
 		<ComponentCard
 			description="First and last controls can be enabled when the page count is high."
 		>
-			<Pagination page={12} totalPages={80} showFirstLast />
+			<Pagination value={12} totalPages={80} showFirstLast />
 		</ComponentCard>
 
 		<ComponentCard
 			description="Totals can derive page count and render a range summary."
 			class="!min-h-fit"
 		>
-			<Pagination bind:page={itemCountPage} totalItems={96} pageSize={10} showSummary>
+			<Pagination bind:value={itemCountPage} totalItems={96} pageSize={10} showSummary>
 				{#snippet summary(range: PaginationSummaryPayload)}
 					<Chip color="neutral" variant="soft">
 						{range.startItem}-{range.endItem} of {range.totalItems} invoices
@@ -239,7 +245,7 @@
 			description="Page item content can be customized through the pageItem slot."
 			class="!min-h-fit"
 		>
-			<Pagination page={8} totalPages={14}>
+			<Pagination value={8} totalPages={14}>
 				{#snippet pageItem(item: PaginationPageItemPayload)}
 					<span class="tabular-nums">{item.active ? 'p.' : ''}{item.page}</span>
 				{/snippet}
@@ -250,12 +256,12 @@
 			description="A default child snippet can replace the renderer while reusing pagination state."
 			class="!min-h-fit"
 		>
-			<Pagination bind:page={itemCountPage} totalPages={10}>
+			<Pagination bind:value={itemCountPage} totalPages={10}>
 				{#snippet children(pagination)}
 					<div class="flex items-center gap-3">
 						<button
 							type="button"
-							class="text-neutral/60 hover:text-neutral text-sm font-medium disabled:opacity-45"
+							class="text-neutral/70 hover:text-neutral text-sm font-medium disabled:opacity-45"
 							disabled={pagination.isPreviousDisabled}
 							onclick={pagination.previous}
 						>
@@ -266,7 +272,7 @@
 						</Chip>
 						<button
 							type="button"
-							class="text-neutral/60 hover:text-neutral text-sm font-medium disabled:opacity-45"
+							class="text-neutral/70 hover:text-neutral text-sm font-medium disabled:opacity-45"
 							disabled={pagination.isNextDisabled}
 							onclick={pagination.next}
 						>
@@ -282,7 +288,7 @@
 			class="!min-h-fit"
 		>
 			<div class="flex flex-col items-center gap-4">
-				<Pagination bind:page={linkedPage} totalPages={10} {getHref} />
+				<Pagination bind:value={linkedPage} totalPages={10} {getHref} />
 				<Chip color="neutral" variant="soft">
 					Next links point at {getHref(Math.min(linkedPage + 1, 10))}
 				</Chip>
@@ -291,10 +297,10 @@
 
 		<ComponentCard description="aria labels can be localized without changing visible content.">
 			<Pagination
-				page={3}
+				value={3}
 				totalPages={9}
-				ariaLabel="Pagination des factures"
-				getItemAriaLabel={getFrenchPaginationLabel}
+				label="Pagination des factures"
+				getItemLabel={getFrenchPaginationLabel}
 			/>
 		</ComponentCard>
 
@@ -303,7 +309,7 @@
 				{#snippet suffix()}
 					<div class="mt-4 flex flex-wrap items-center justify-between gap-3">
 						<Pagination
-							bind:page={tablePage}
+							bind:value={tablePage}
 							totalItems={72}
 							pageSize={9}
 							size="small"

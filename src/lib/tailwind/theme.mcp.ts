@@ -12,17 +12,19 @@ and keyframes.
 	name: light;
 	default: true;
 	colorscheme: light;
-	primary: #6366f1;
-	surface: #ffffff;
-	neutral: #121212;
+	primary: #5f62ef;
+	secondary: #e4e4e7;
+	surface: #fafafa;
+	neutral: #18181b;
 }
 
 @plugin 'svelai/tailwind-plugin/theme' {
 	name: dark;
 	colorscheme: dark;
-	primary: #818cf8;
-	surface: #15161c;
-	neutral: #ffffff;
+	primary: #5f62ef;
+	secondary: #27272a;
+	surface: #09090b;
+	neutral: #fafafa;
 }
 \`\`\`
 
@@ -48,9 +50,10 @@ Each semantic color supports explicit \`-light\`, \`-lighter\`, \`-dark\`, \`-mu
 
 ## Runtime boundary
 
-Spacing, radius, typography scale, and raised borders are not plugin options. Configure them with
-the \`designTokens\` prop on \`Theme\`. Tailwind still discovers and compiles the finite utility
-names; runtime theming changes the CSS variables those utilities consume.
+Spacing, radius, typography scale, raised borders, \`defaultColor\` and the four state roles
+(\`focusColor\`, \`selectedColor\`, \`hoverColor\`, \`pressedColor\`) are not plugin options.
+Configure them with the \`designTokens\` prop on \`Theme\`. Tailwind still discovers and compiles
+the finite utility names; runtime theming changes the CSS variables those utilities consume.
 
 The public spacing vocabulary is \`xs | sm | md | lg | xl\`, available through named gap, padding,
 and margin utilities such as \`gap-md\` and \`px-lg\`. The \`micro\` and \`layout-*\` values are
@@ -61,7 +64,7 @@ Color variables can also be overridden directly at runtime:
 
 \`\`\`css
 html[data-theme='light'] {
-	--color-primary: oklab(0.58 0.12 -0.2);
+	--color-primary: oklab(0.21 0.01 -0.03);
 }
 \`\`\`
 `;

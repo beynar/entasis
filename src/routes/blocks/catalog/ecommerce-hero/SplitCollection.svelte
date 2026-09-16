@@ -30,36 +30,36 @@
 		}).format(amount);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="grid gap-xl lg:grid-cols-[1fr_1.2fr]">
-		<div class="flex flex-col gap-xl justify-between p-xl rounded-lg bg-primary-muted">
+	<div class="gap-xl grid lg:grid-cols-[1fr_1.2fr]">
+		<div class="gap-xl p-xl bg-primary-muted flex flex-col justify-between rounded-lg">
 			<Chip variant="soft" class="w-fit">The everyday collection</Chip>
-			<div class="flex flex-col gap-xl">
+			<div class="gap-xl flex flex-col">
 				<Heading size="h2">Good things.<br />For ordinary days.</Heading>
-				<p class="max-w-md text-lg text-neutral/65">
+				<p class="text-neutral/65 max-w-md text-lg">
 					Useful objects, thoughtful materials, and a little attention to the details you touch
 					every day.
 				</p>
 				<Button href="/components" class="self-start">Discover the collection ↗</Button>
 			</div>
-			<p class="text-xs uppercase tracking-widest text-neutral/50">Made to use. Made to keep.</p>
+			<p class="text-neutral/65 text-xs tracking-widest uppercase">Made to use. Made to keep.</p>
 		</div>
 		<Carousel
 			items={products}
-			layout={{ default: 1 }}
+			layout={1}
 			navigationButton={{ color: 'neutral' }}
-			dots={{ color: 'primary' }}
-			>{#snippet children({ item: product })}<div class="flex flex-col gap-xl">
+			pagination={{ variant: 'dots', color: 'primary' }}
+			>{#snippet children({ item: product })}<div class="gap-xl flex flex-col">
 					{@render productArt(product.shape, product.color)}
-					<div class="flex gap-lg items-center justify-between">
+					<div class="gap-lg flex items-center justify-between">
 						<div>
 							<h3 class="text-xl font-medium">{product.name}</h3>
-							<p class="mt-sm text-sm text-neutral/55">{product.color} / {product.type}</p>
+							<p class="mt-sm text-neutral/65 text-sm">{product.color} / {product.type}</p>
 						</div>
 						<span>{money(product.price)}</span>
 					</div>

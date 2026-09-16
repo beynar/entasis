@@ -22,7 +22,7 @@
 	} satisfies FormInputs;
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<div class="mx-auto w-full max-w-md">
 		<Card title="Set a new password" description="Use a password you haven’t used here before."
 			><Stack gap="lg">

@@ -6,16 +6,19 @@ The PopupMenu component is a wrapper around Popover that renders a Menu inside. 
 ## Basic Usage
 
 \`\`\`svelte
-<script>
-	import { PopupMenu } from '$lib/components/PopupMenu';
-	import { userIcon, gearIcon, signOutIcon } from '$lib/components/Icons';
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+	import { PopupMenu } from 'svelai/popup-menu';
+	import { userIcon } from 'svelai/icons/user';
+	import { gearIcon } from 'svelai/icons/gear';
+	import { signOutIcon } from 'svelai/icons/signOut';
 	
 	const menuItems = [
 		{ type: 'option', prefix: userIcon, title: 'Profile' },
 		{ type: 'option', prefix: gearIcon, title: 'Settings' },
 		{ type: 'separator' },
 		{ type: 'option', prefix: signOutIcon, title: 'Logout', color: 'danger' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <PopupMenu
@@ -63,7 +66,7 @@ The PopupMenu component is a wrapper around Popover that renders a Menu inside. 
 
 - **openOnHover**: boolean (default: false) - Open on trigger hover
 
-- **hoverDelay**: number (default: 100) - Delay before opening on hover (ms)
+- **delay**: number (default: 100) - Delay before opening on hover (ms)
 
 - **closeOnClickOutside**: boolean (default: true) - Close when clicking outside
 
@@ -112,14 +115,15 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 
 ### Basic Dropdown Menu
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
 	const items = [
 		{ type: 'option', title: 'New File' },
 		{ type: 'option', title: 'Open...' },
 		{ type: 'option', title: 'Save' },
 		{ type: 'separator' },
 		{ type: 'option', title: 'Exit' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <PopupMenu
@@ -131,8 +135,12 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 
 ### User Profile Menu
 \`\`\`svelte
-<script>
-	import { userIcon, gearIcon, questionIcon, signOutIcon } from '$lib/components/Icons';
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+	import { userIcon } from 'svelai/icons/user';
+	import { gearIcon } from 'svelai/icons/gear';
+	import { questionIcon } from 'svelai/icons/question';
+	import { signOutIcon } from 'svelai/icons/signOut';
 	
 	const items = [
 		{ type: 'option', prefix: userIcon, title: 'Profile', href: '/profile' },
@@ -140,7 +148,7 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 		{ type: 'option', prefix: questionIcon, title: 'Help' },
 		{ type: 'separator' },
 		{ type: 'option', prefix: signOutIcon, title: 'Log Out', color: 'danger' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <PopupMenu
@@ -153,7 +161,10 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 ### Context Menu (Right Click)
 \`\`\`svelte
 <script lang="ts">
-	import { trashIcon, copyIcon, shareIcon } from '$lib/components/Icons';
+	import type { MenuItem } from 'svelai/menu';
+	import { trashIcon } from 'svelai/icons/trash';
+	import { copyIcon } from 'svelai/icons/copy';
+	import { shareIcon } from 'svelai/icons/share';
 	
 	let open = $state(false);
 	let contextMenuRef = $state<HTMLElement | null>(null);
@@ -170,7 +181,7 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 		{ type: 'option', prefix: shareIcon, title: 'Share' },
 		{ type: 'separator' },
 		{ type: 'option', prefix: trashIcon, title: 'Delete', color: 'danger' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <div oncontextmenu={handleContextMenu}>
@@ -188,13 +199,14 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 
 ### With Custom Trigger Snippet
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
 	let open = $state(false);
 
 	const items = [
 		{ type: 'option', title: 'Option 1' },
 		{ type: 'option', title: 'Option 2' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <PopupMenu bind:open position="bottom" menu={{ items }}>
@@ -208,18 +220,19 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 
 ### Hover Menu
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
 	const items = [
 		{ type: 'option', title: 'Quick Action 1' },
 		{ type: 'option', title: 'Quick Action 2' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <PopupMenu
 	trigger={{ content: 'Hover Me', variant: 'ghost' }}
 	openOnHover={true}
 	openOnClick={false}
-	hoverDelay={200}
+	delay={200}
 	closeOnMouseLeave={true}
 	menu={{ items }}
 />
@@ -227,13 +240,14 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 
 ### Actions Menu with Buttons
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
 	const items = [
 		{ type: 'button', children: 'Save Draft', variant: 'ghost', fullWidth: true },
 		{ type: 'button', children: 'Publish', variant: 'solid', color: 'primary', fullWidth: true },
 		{ type: 'separator' },
 		{ type: 'button', children: 'Delete', variant: 'soft', color: 'danger', fullWidth: true }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <PopupMenu
@@ -245,13 +259,14 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 
 ### External Control with Bindable State
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
 	let menuOpen = $state(false);
 	
 	const items = [
 		{ type: 'option', title: 'Item 1' },
 		{ type: 'option', title: 'Item 2' }
-	];
+	] satisfies MenuItem[];
 	
 	function openMenu() {
 		menuOpen = true;
@@ -269,11 +284,12 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 
 ### Positioned Menu
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
 	const items = [
 		{ type: 'option', title: 'Top Start' },
 		{ type: 'option', title: 'Example' }
-	];
+	] satisfies MenuItem[];
 </script>
 
 <div class="flex gap-2">
@@ -285,11 +301,12 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 
 ### With Custom Theme
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
 	const items = [
 		{ type: 'option', title: 'Themed Option 1' },
 		{ type: 'option', title: 'Themed Option 2' }
-	];
+	] satisfies MenuItem[];
 	
 	const menuTheme = {
 		root: { base: 'gap-3' },
@@ -307,8 +324,9 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 
 ### Keep Menu Open for Multiple Interactions
 \`\`\`svelte
-<script>
-	let selections = $state([]);
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+	let selections = $state<string[]>([]);
 	
 	const items = [
 		{ 
@@ -328,7 +346,7 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 			variant: 'solid',
 			fullWidth: true
 		}
-	];
+	] satisfies MenuItem[];
 </script>
 
 <PopupMenu
@@ -340,45 +358,32 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 
 ### Nested Submenus
 \`\`\`svelte
-<script>
-	import { caretRightIcon } from '$lib/components/Icons';
-	
-	let submenuOpen = $state(false);
-	
-	const mainItems = [
+<script lang="ts">
+	import type { MenuItem } from 'svelai/menu';
+
+	const items = [
 		{ type: 'option', title: 'New File' },
-		{ type: 'option', title: 'More Options', suffix: caretRightIcon, onclick: () => submenuOpen = true }
-	];
-	
-	const subItems = [
-		{ type: 'option', title: 'Sub Option 1' },
-		{ type: 'option', title: 'Sub Option 2' }
-	];
+		{
+			type: 'submenu',
+			title: 'More Options',
+			menu: [
+				{ type: 'option', title: 'Sub Option 1' },
+				{ type: 'option', title: 'Sub Option 2' }
+			]
+		}
+	] satisfies MenuItem[];
 </script>
 
-<PopupMenu
-	trigger={{ content: 'Main Menu' }}
-	position="bottom-start"
-	menu={{ items: mainItems }}
-/>
-
-{#if submenuOpen}
-	<PopupMenu
-		trigger={false}
-		bind:open={submenuOpen}
-		position="right-start"
-		menu={{ items: subItems }}
-	/>
-{/if}
+<PopupMenu trigger={{ content: 'Main Menu' }} position="bottom-start" menu={{ items }} />
 \`\`\`
 
 ## Accessibility
 
-- Inherits all Popover accessibility features
-- Menu items have appropriate roles and keyboard navigation
-- Escape key closes the menu (configurable)
-- Click outside closes the menu (configurable)
-- Focus trap available through Popover
+- Inherits all Popover accessibility features: the trigger carries \`aria-haspopup="menu"\`, \`aria-expanded\`, and \`aria-controls\`, and focus returns to it on close
+- Menu items have appropriate roles (\`menuitem\`, or \`menuitemradio\` with \`aria-checked\` for options that set \`selected\`) and keyboard navigation
+- Type-ahead: typing letters moves the highlight to the next matching item
+- Escape closes only the topmost open layer, so a submenu closes before its parent (configurable)
+- An outside press closes every layer above the one pressed (configurable)
 
 ## Notes
 

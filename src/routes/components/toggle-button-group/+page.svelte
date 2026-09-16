@@ -9,11 +9,11 @@
 	import DocPage from '../../DocPage.svelte';
 
 	const variants = ['ghost', 'outline'] as const;
-	const formattingItems = {
-		bold: { prefix: textBIcon, ariaLabel: 'Bold' },
-		italic: { prefix: textItalicIcon, ariaLabel: 'Italic' },
-		underline: { prefix: textUnderlineIcon, ariaLabel: 'Underline' }
-	};
+	const formattingItems = [
+		{ value: 'bold', prefix: textBIcon, label: 'Bold' },
+		{ value: 'italic', prefix: textItalicIcon, label: 'Italic' },
+		{ value: 'underline', prefix: textUnderlineIcon, label: 'Underline' }
+	];
 	const controls = createComponentControls([
 		{
 			name: 'size',
@@ -39,7 +39,7 @@
 		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
 	]);
 
-	let formatting = $state({ bold: true, italic: false, underline: false });
+	let formatting = $state(['bold']);
 </script>
 
 <DocPage
@@ -47,41 +47,41 @@
 	subtitle="A labeled group of independent pressed buttons."
 	component="ToggleButtonGroup"
 	features={[
-		'Value is the single checked-state source',
+		'Value is the single pressed-state source',
 		'Optional joined button layout',
-		'onValueChange emits the checked map',
+		'onValueChange emits the pressed values',
 		'Composes ToggleButton primitives'
 	]}
 >
 	<ComponentCard
 		{controls}
-		code={`let formatting = $state({ bold: true });
+		code={`let formatting = $state(['bold']);
 
 <ToggleButtonGroup
 \tbind:value={formatting}
-\tariaLabel="Text formatting"
+\tlabel="Text formatting"
 \tsize="${controls.value.size}"
 \tvariant="${controls.value.variant}"
 \tcolor="${controls.value.color}"
 \tdisabled={${controls.value.disabled}}
-\titems={{
-\t\tbold: { prefix: textBIcon, ariaLabel: 'Bold' },
-\t\titalic: { prefix: textItalicIcon, ariaLabel: 'Italic' },
-\t\tunderline: { prefix: textUnderlineIcon, ariaLabel: 'Underline' }
-\t}}
+\titems={[
+\t\t{ value: 'bold', prefix: textBIcon, label: 'Bold' },
+\t\t{ value: 'italic', prefix: textItalicIcon, label: 'Italic' },
+\t\t{ value: 'underline', prefix: textUnderlineIcon, label: 'Underline' }
+\t]}
 />`}
 	>
 		<div class="flex flex-col items-center gap-3">
 			<ToggleButtonGroup
 				bind:value={formatting}
-				ariaLabel="Text formatting"
+				label="Text formatting"
 				size={controls.value.size}
 				variant={controls.value.variant}
 				color={controls.value.color}
 				disabled={controls.value.disabled}
 				items={formattingItems}
 			/>
-			<code class="text-neutral/60 text-xs">{JSON.stringify(formatting)}</code>
+			<code class="text-neutral/70 text-xs">{JSON.stringify(formatting)}</code>
 		</div>
 	</ComponentCard>
 
@@ -92,7 +92,7 @@
 			class="!min-h-fit"
 			code={`<ToggleButtonGroup
 \tjoined
-\tariaLabel="Text formatting"
+\tlabel="Text formatting"
 \titems={formattingItems}
 />`}
 		>
@@ -101,10 +101,10 @@
 					<ToggleButtonGroup
 						{variant}
 						joined
-						ariaLabel={`${variant} text formatting`}
+						label={`${variant} text formatting`}
 						color="neutral"
 						items={formattingItems}
-						value={{ bold: true }}
+						value={['bold']}
 					/>
 				{/each}
 			</div>
@@ -118,9 +118,12 @@
 				{#each colors as color (color)}
 					<ToggleButtonGroup
 						{color}
-						ariaLabel={`${color} options`}
-						items={{ one: { children: 'One' }, two: { children: 'Two' } }}
-						value={{ one: true }}
+						label={`${color} options`}
+						items={[
+							{ value: 'one', children: 'One' },
+							{ value: 'two', children: 'Two' }
+						]}
+						value={['one']}
 					/>
 				{/each}
 			</div>
@@ -134,13 +137,13 @@
 				{#each sizes as size (size)}
 					<ToggleButtonGroup
 						{size}
-						ariaLabel={`${size} text formatting`}
+						label={`${size} text formatting`}
 						color="neutral"
-						items={{
-							bold: { prefix: textBIcon, children: 'Bold' },
-							italic: { prefix: textItalicIcon, children: 'Italic' }
-						}}
-						value={{ bold: true }}
+						items={[
+							{ value: 'bold', prefix: textBIcon, children: 'Bold' },
+							{ value: 'italic', prefix: textItalicIcon, children: 'Italic' }
+						]}
+						value={['bold']}
 					/>
 				{/each}
 			</div>
@@ -152,10 +155,10 @@
 			class="!min-h-fit"
 		>
 			<ToggleButtonGroup
-				ariaLabel="Disabled text formatting"
+				label="Disabled text formatting"
 				disabled
 				items={formattingItems}
-				value={{ bold: true }}
+				value={['bold']}
 			/>
 		</ComponentCard>
 	{/snippet}

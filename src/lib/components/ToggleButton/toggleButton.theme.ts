@@ -1,8 +1,9 @@
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
+import { selectedSoft } from '$lib/components/Theme/theme.recipes.js';
 
 const defaultButton = cva({
-	base: 'group/toggle relative inline-flex shrink-0 cursor-pointer select-none items-center justify-center overflow-hidden whitespace-nowrap rounded-md border border-transparent bg-clip-padding text-sm font-medium outline-none transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:ring-color/50 [&_svg:not([class*=size-])]:size-icon-md',
+	base: 'group/toggle relative inline-flex shrink-0 cursor-pointer select-none items-center justify-center overflow-hidden whitespace-nowrap rounded-md border border-transparent bg-clip-padding text-sm font-medium outline-none transition-colors duration-normal ease-standard focus-visible:ring-2 focus-visible:ring-focus/50 [&_svg:not([class*=size-])]:size-icon-md',
 	variants: {
 		checked: {
 			true: '',
@@ -42,15 +43,19 @@ const defaultButton = cva({
 		color: 'neutral'
 	},
 	compoundVariants: [
+		// Mirrors button.theme.ts: the neutral outline is toolbar chrome next to inputs and selects,
+		// which all draw a `neutral-muted` hairline; a full-strength neutral border made it the odd
+		// one out.
+		{ color: 'neutral', variant: 'outline', class: 'border-neutral-muted' },
 		{
 			variant: 'ghost',
 			checked: true,
-			class: 'bg-color-muted text-color-muted-readable'
+			class: selectedSoft
 		},
 		{
 			variant: 'outline',
 			checked: true,
-			class: 'bg-color-muted text-color-muted-readable border-color'
+			class: `${selectedSoft} border-color`
 		}
 	]
 });

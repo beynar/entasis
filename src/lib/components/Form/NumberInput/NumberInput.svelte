@@ -7,6 +7,7 @@
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { NumberInputProps } from './numberInput.props.js';
 	import { useNumberInputTheme } from './numberInput.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		defaultValue = null,
@@ -28,6 +29,7 @@
 		showControls = true,
 		...rest
 	}: NumberInputProps = $props();
+	const t = $derived(useI18n());
 	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
@@ -176,14 +178,14 @@
 			<FieldActionButton
 				size={rest.size}
 				edge="none"
-				label="Decrease value"
+				label={`${t.decrease} ${t.value}`}
 				disabled={!canDecrement}
 				prefix={minusIcon}
 				onclick={() => changeValue(-1)}
 			/>
 			<FieldActionButton
 				size={rest.size}
-				label="Increase value"
+				label={`${t.increase} ${t.value}`}
 				disabled={!canIncrement}
 				prefix={plusIcon}
 				onclick={() => changeValue(1)}

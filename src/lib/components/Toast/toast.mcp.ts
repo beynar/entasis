@@ -34,9 +34,9 @@ toast.warning({
   title: 'Warning',
   description: 'This action cannot be undone.',
   duration: 6000,
-  onAfterOpen: (toast) => console.log('Toast opened:', toast.id),
-  onDismiss: (toast) => console.log('Toast dismissed:', toast.id),
-  onAutoDismiss: (toast) => console.log('Toast timed out:', toast.id)
+  onAfterOpen: (payload) => console.log('Toast opened:', payload.id),
+  onDismiss: (payload) => console.log('Toast dismissed:', payload.id),
+  onAutoDismiss: (payload) => console.log('Toast timed out:', payload.id)
 });
 \`\`\`
 
@@ -69,18 +69,19 @@ toast.warning({
 - \`closeIcon\` (Slot, optional): Custom close button component
 - \`icon\` (string, optional): Icon name to display before the toast text
 - \`important\` (boolean, optional): Uses \`role="alert"\` + assertive announcements for screen readers
-- \`animation\` (FSOProps, optional): Custom animation for this toast
+- \`transition\` (FSOProps, optional): Enter/exit transition override for this toast
+- \`theme\` (ToastThemeProps, optional): Theme overrides for this toast alone, layered over the \`<Toaster theme>\` object (\`base\` classes are appended, so the per-toast ones win)
 - \`id\` (string, optional): Custom ID for the toast. Auto-generated if not provided
-- \`onAfterOpen\` (function, optional): Called once the toast finishes entering: \`(toast: Toast) => void\`
-- \`onDismiss\` (function, optional): Called on manual dismiss (close button, an action, or \`toast.remove()\`). Not called on timeout: \`(toast: Toast) => void\`
-- \`onAutoDismiss\` (function, optional): Called only when the toast times out after \`duration\`. Put deferred irreversible work here; it never runs if the toast is dismissed first: \`(toast: Toast) => void\`
+- \`onAfterOpen\` (function, optional): Called once the toast finishes entering: \`(payload: Toast) => void\`
+- \`onDismiss\` (function, optional): Called on manual dismiss (close button, an action, or \`toast.remove()\`). Not called on timeout: \`(payload: Toast) => void\`
+- \`onAutoDismiss\` (function, optional): Called only when the toast times out after \`duration\`. Put deferred irreversible work here; it never runs if the toast is dismissed first: \`(payload: Toast) => void\`
 
 ### Undo / deferred-commit pattern
 
 Remove the item from the UI immediately, defer the real irreversible action to \`onAutoDismiss\`, and offer an \`Undo\` action. Undo dismisses the toast manually, so \`onAutoDismiss\` never fires:
 
 \`\`\`ts
-function deleteItem(item) {
+function deleteItemWithUndo(item) {
   removeFromUI(item);                       // optimistic
   toast.neutral({
     title: \`Deleted "\${item.name}"\`,
@@ -91,6 +92,8 @@ function deleteItem(item) {
 }
 \`\`\`
 
+**Mounting order:** \`toast()\` never throws when no \`<Toaster />\` is mounted yet — the toast is queued and shown by the first Toaster that mounts. In development, a single \`console.warn\` reports a queue that is still waiting a tick later. Dismissing a queued toast drops it from the queue, and a \`toast()\` call made during SSR is discarded instead of queued.
+
 **Returns:**
 A \`Toast\` instance that you can use to programmatically control the root:
 - \`toast.remove()\` - Remove the toast manually
@@ -99,6 +102,8 @@ A \`Toast\` instance that you can use to programmatically control the root:
 
 **Notes:**
 - Toasts are non-blocking and don't prevent user interaction
+- The toaster is a \`role="region"\` landmark named "Notifications" (not a \`<dialog>\`); pressing F6 anywhere moves focus into it. Each toast is \`role="status"\`, or \`role="alert"\` when \`important\`
+- Toasts stacked away behind the front one are \`inert\` (rather than \`aria-hidden\`), so they take no clicks or tab stops until they surface
 - Multiple toasts can be displayed simultaneously and will stack based on position
 - Toasts pause their auto-close timer when hovered
 - Toasts can be dismissed by clicking the close icon, clicking the toast (if \`closeOnClick\` is true), or automatically after the duration expires
@@ -110,6 +115,10 @@ The Toast component uses a theme object that can be customized using the \`theme
 ### Theme Structure
 
 The theme object contains the following parts:
+- **motion**: Enter/exit transition preset, keyed by \`position\` (each toast flies in from the
+  edge it is pinned to). Takes \`in\` / \`out\` FSO params plus a \`duration\` / \`easing\` motion
+  token; overrides ladder \`<Theme components={{ toast }}>\` → \`setToastTheme\` → \`theme.motion\`
+  → the Toaster's \`transition\` prop → a toast's own \`transition\`
 - **root**: Main toast container styles
 - **prefix**: Prefix icon/content styles
 - **suffix**: Suffix content styles
@@ -179,7 +188,7 @@ toast.success({
   description: 'Operation completed',
   theme: {
     root: {
-      base: 'rounded-xl shadow-xl',
+      base: 'rounded-xl raised-5',
       size: {
         normal: 'px-4 py-3'
       }
@@ -214,7 +223,7 @@ toast.danger({
   
   setToastTheme({
     root: {
-      base: 'rounded-lg shadow-lg border',
+      base: 'rounded-lg raised-4',
       size: {
         normal: 'px-3 py-2'
       }

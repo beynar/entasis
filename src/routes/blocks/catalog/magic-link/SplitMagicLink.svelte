@@ -8,20 +8,20 @@
 	let message = $state('');
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<div class="grid overflow-hidden rounded-lg border border-neutral-muted md:grid-cols-2">
-		<aside class="flex flex-col justify-between gap-xl bg-surface-recessed p-lg sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<div class="border-neutral-muted grid overflow-hidden rounded-lg border md:grid-cols-2">
+		<aside class="gap-xl bg-surface-recessed p-lg sm:p-xl flex flex-col justify-between">
 			<span class="text-lg font-semibold">Northstar</span>
 			<div>
-				<p class="text-4xl font-light sm:text-5xl leading-tight">
+				<p class="text-4xl leading-tight font-light sm:text-5xl">
 					The right work.<br />The right people.<br /><span class="text-primary-readable"
 						>One place.</span
 					>
 				</p>
 			</div>
-			<div class="flex items-center gap-md">
-				<Avatar user={{ name: 'Alex Morgan' }} />
-				<p class="text-sm text-neutral/60">
+			<div class="gap-md flex items-center">
+				<Avatar name="Alex Morgan" />
+				<p class="text-neutral/70 text-sm">
 					“Back to the work that matters.”<br />Alex, product designer
 				</p>
 			</div>
@@ -46,7 +46,7 @@
 					title="Demo result"
 					description={message}
 				/>{/if}
-			<p class="text-xs text-neutral/60">Local demonstration. No email is sent.</p>
+			<p class="text-neutral/70 text-xs">Local demonstration. No email is sent.</p>
 		</Stack>
 	</div>
 </Stack>

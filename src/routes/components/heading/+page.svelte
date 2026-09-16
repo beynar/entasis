@@ -75,7 +75,7 @@
 	{#snippet examples()}
 		<ComponentCard description="Every visual size (h1–h6).">
 			<div class="flex w-full flex-col gap-3">
-				{#each sizes as size}
+				{#each sizes as size, index (index)}
 					<Heading {size}>{size} — The quick brown fox</Heading>
 				{/each}
 			</div>
@@ -83,7 +83,7 @@
 
 		<ComponentCard description="Font weights.">
 			<div class="flex w-full flex-col gap-3">
-				{#each weights as weight}
+				{#each weights as weight, index (index)}
 					<Heading size="h3" {weight}>{weight} weight</Heading>
 				{/each}
 			</div>
@@ -91,7 +91,7 @@
 
 		<ComponentCard description="Alignment.">
 			<div class="flex w-full flex-col gap-3">
-				{#each aligns as align}
+				{#each aligns as align, index (index)}
 					<Heading size="h3" {align} class="w-full">{align} aligned</Heading>
 				{/each}
 			</div>

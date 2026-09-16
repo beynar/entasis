@@ -34,6 +34,17 @@ export const bind = (ref: object, props: object) => {
 	}
 };
 
+/**
+ * Base class whose constructor copies the option property descriptors onto the instance, so a state
+ * class reads its options as own members without class/interface declaration merging.
+ */
+export const withOptions = <Options extends object>() =>
+	class {
+		constructor(options: Options) {
+			bind(this, options);
+		}
+	} as unknown as new (options: Options) => Options;
+
 class BindableStateClass<P extends object> {
 	constructor(props: P) {
 		bind(this, props);

@@ -9,16 +9,18 @@
 	import AudioPlayerShell from './AudioPlayerShell.svelte';
 	import { AudioPlayerState } from './audioPlayer.state.svelte.js';
 	import { useAudioPlayerTheme } from './audioPlayer.theme.js';
+	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 	import {
 		generateAudioPlayerWaveformSamples,
 		getAudioPlayerWaveformSamples
 	} from './audioPlayer.waveform.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		src,
 		srcType,
 		sources = [],
-		title = 'Untitled audio',
+		title,
 		artist,
 		artwork,
 		label,
@@ -28,7 +30,7 @@
 		controls = DEFAULT_CONTROLS,
 		variant = 'waveform',
 		layout = 'block',
-		color = 'primary',
+		color,
 		waveform,
 		waveformVariant = 'centered',
 		waveformBars = 72,
@@ -154,8 +156,11 @@
 	let waveformGenerationId = 0;
 
 	const classes = $derived(useAudioPlayerTheme(theme));
+	const resolvedColor = $derived(useDefaultColor(color));
 	const hasSource = $derived(Boolean(src || sources.length || children));
-	const resolvedLabel = $derived(label ?? title ?? 'Audio player');
+	const t = $derived(useI18n());
+	const resolvedTitle = $derived(title ?? t.untitledAudio);
+	const resolvedLabel = $derived(label ?? resolvedTitle ?? t.audioPlayer);
 	const shellAttachments = $derived(attachments as Record<string, unknown>);
 	const sourceSignature = $derived(
 		JSON.stringify({ src, srcType, sources, children: Boolean(children) })
@@ -167,7 +172,7 @@
 		getAudioPlayerWaveformSamples(
 			displayedWaveformSamples,
 			waveformBars,
-			`${waveformSource ?? ''}:${title}:${artist ?? ''}`
+			`${waveformSource ?? ''}:${resolvedTitle}:${artist ?? ''}`
 		)
 	);
 
@@ -203,8 +208,8 @@
 	}
 
 	$effect(() => {
-		ref = player.mediaElement;
-		rootRef = player.rootElement;
+		if (ref !== player.mediaElement) ref = player.mediaElement;
+		if (rootRef !== player.rootElement) rootRef = player.rootElement;
 	});
 
 	$effect(() => {
@@ -259,7 +264,7 @@
 	{player}
 	{classes}
 	{size}
-	{color}
+	color={resolvedColor}
 	{disabled}
 	{className}
 	attachments={shellAttachments}
@@ -275,7 +280,7 @@
 	{muted}
 	{loop}
 	{children}
-	{title}
+	title={resolvedTitle}
 	{artist}
 	{artwork}
 	{header}

@@ -3,6 +3,7 @@ export type {
 	ToggleButtonGroupItem,
 	ToggleButtonGroupItems,
 	ToggleButtonGroupProps,
+	ToggleButtonGroupType,
 	ToggleButtonGroupValue
 } from './toggleButtonGroup.props.js';
 export {

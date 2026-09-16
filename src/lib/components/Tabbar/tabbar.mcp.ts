@@ -7,7 +7,7 @@ The Tabbar component is a flexible navigation component that displays a list of 
 
 \`\`\`svelte
 <script>
-	let activeTab = $state(0);
+	let activeTab = $state('Home');
 </script>
 
 <Tabbar items={['Home', 'Profile', 'Settings']} bind:value={activeTab} />
@@ -19,16 +19,17 @@ The Tabbar component is a flexible navigation component that displays a list of 
 - **items**: Array<string | TabItem> (required)
   - Array of tab items. Each item can be:
     - A simple string (e.g., "Home")
-    - A TabItem object with: { label, prefix?, suffix?, href?, disabled?, target?, rel? }
-  
-- **value**: number (default: 0, bindable)
-  - The index of the currently active tab
-  - Can be bound with \`bind:value\`
-- **defaultValue**: number (default: 0) - Initial active index when value is omitted
+    - A TabItem object with: { value?, label, prefix?, suffix?, href?, disabled?, target?, rel? }
+  - Every tab resolves to a string value: its \`value\`, else its string label, else its index as a string (\`getTabValue(item, index)\` is exported from \`svelai/tabbar\`)
 
-- **onValueChange**: (value: number) => void
+- **value**: string (default: the first tab's value, bindable)
+  - The value of the currently active tab (a string item is its own value)
+  - Can be bound with \`bind:value\`
+- **defaultValue**: string - Initial active tab value when value is omitted
+
+- **onValueChange**: (value: string) => void
   - Callback function called when the active tab changes
-  - Receives the new tab index as an argument
+  - Receives the new tab's value as an argument; not called when the current tab is re-selected
 
 ### Styling Props
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
@@ -62,11 +63,14 @@ The Tabbar component is a flexible navigation component that displays a list of 
   - Applies the shared logical-axis scroll fade only while the tab list overflows
 
 ### Advanced Props
+- **label**: string - Accessible name for the tab list, applied as aria-label. Give one to every page that shows more than one set of tabs
+- **id**: string - DOM id prefix for the tabs; each tab renders as \`{id}-tab-{index}\`. Generated when omitted
+- **controlsPanels**: boolean (default: false) - Adds \`aria-controls="{id}-panel-{index}"\` to every tab. \`Tabs\` sets it and renders the matching panels; only enable it yourself when you render panels with those ids
 - **ref**: HTMLDivElement | null (bindable) - Reference to the tab list element
 - **class**: string - Additional CSS classes for the tabbar container
 - **theme**: TabbarThemeProps - Custom theme overrides
 
-Native div attributes and attachments are forwarded to the root. Horizontal and vertical overflow use the shared \`scroll-fade-x\` and \`scroll-fade-y\` utilities by default; non-overflowing tab lists remain unmasked, including in no-support fallback browsers.
+Native div attributes and attachments are forwarded to the root, minus the ARIA the tab list owns: \`role\`, \`aria-orientation\` (from \`orientation\`), and its accessible name (from \`label\`) are written by the component and cannot be overridden. Horizontal and vertical overflow use the shared \`scroll-fade-x\` and \`scroll-fade-y\` utilities by default; non-overflowing tab lists remain unmasked, including in no-support fallback browsers.
 
 ## TabItem Structure
 
@@ -74,6 +78,7 @@ When using object format for items:
 
 \`\`\`typescript
 type TabItem = {
+  value?: string;                // Stable identifier; defaults to the string label
   label: string | Snippet;      // Tab label (required)
   prefix?: Snippet;              // Icon or content before label
   suffix?: Snippet;              // Icon or content after label
@@ -82,13 +87,13 @@ type TabItem = {
   target?: string;               // Link target (e.g., "_blank")
   rel?: string;                  // Link relationship
   menu?: string[];               // Entries shown in a popover menu (overflow pattern)
-  onMenuSelect?: (menuIndex: number) => void; // Called when a menu entry is picked
+  onSelect?: (menuIndex: number) => void; // Called when a menu entry is picked
 }
 \`\`\`
 
 ### Menu tab (overflow pattern)
 
-A tab with \`menu\` renders with a chevron and opens a popover menu instead of activating directly. Selecting an entry activates the tab, displays the entry's label on it (the tab's own label becomes the menu header), slides the indicator to it, and calls \`onMenuSelect(menuIndex)\`. The selected entry shows a check mark in the menu.
+A tab with \`menu\` renders with a chevron and opens a popover menu instead of activating directly. Selecting an entry activates the tab, displays the entry's label on it (the tab's own label becomes the menu header), slides the indicator to it, and calls \`onSelect(menuIndex)\`. The selected entry shows a check mark in the menu.
 
 \`\`\`svelte
 <Tabbar
@@ -118,7 +123,7 @@ The tabbar follows this DOM structure:
 ### Simple String Tabs
 \`\`\`svelte
 <script>
-	let activeTab = $state(0);
+	let activeTab = $state('Home');
 </script>
 
 <Tabbar 
@@ -130,15 +135,17 @@ The tabbar follows this DOM structure:
 
 ### Tabs with Icons
 \`\`\`svelte
-<script>
-	import { homeIcon, userIcon, settingsIcon } from './icons';
-	
-	let activeTab = $state(0);
-	
+<script lang="ts">
+	import { houseIcon } from 'svelai/icons/house';
+	import { userIcon } from 'svelai/icons/user';
+	import { gearIcon } from 'svelai/icons/gear';
+
+	let activeTab = $state('Home');
+
 	const tabs = [
 		{
 			label: 'Home',
-			prefix: homeIcon
+			prefix: houseIcon
 		},
 		{
 			label: 'Profile',
@@ -146,7 +153,7 @@ The tabbar follows this DOM structure:
 		},
 		{
 			label: 'Settings',
-			prefix: settingsIcon
+			prefix: gearIcon
 		}
 	];
 </script>
@@ -170,7 +177,7 @@ The tabbar follows this DOM structure:
 ### Tabs with Disabled State
 \`\`\`svelte
 <script>
-	let activeTab = $state(0);
+	let activeTab = $state('Enabled Tab');
 	
 	const tabs = [
 		{ label: 'Enabled Tab' },
@@ -185,7 +192,7 @@ The tabbar follows this DOM structure:
 ### Vertical Orientation
 \`\`\`svelte
 <script>
-	let activeTab = $state(0);
+	let activeTab = $state('First');
 </script>
 
 <Tabbar 
@@ -198,7 +205,7 @@ The tabbar follows this DOM structure:
 ### Different Alignments
 \`\`\`svelte
 <script>
-	let activeTab = $state(0);
+	let activeTab = $state('One');
 </script>
 
 <!-- Centered tabs -->
@@ -211,7 +218,7 @@ The tabbar follows this DOM structure:
 ### Full Width Tabs
 \`\`\`svelte
 <script>
-	let activeTab = $state(0);
+	let activeTab = $state('Tab 1');
 </script>
 
 <!-- Full width tabbar where tabs expand to fill available space -->
@@ -221,10 +228,10 @@ The tabbar follows this DOM structure:
 ### With onValueChange Callback
 \`\`\`svelte
 <script lang="ts">
-	let activeTab = $state(0);
+	let activeTab = $state('Tab 1');
 	
-	function handleTabChange(index: number) {
-		console.log('Active tab changed to:', index);
+	function handleTabChange(value: string) {
+		console.log('Active tab changed to:', value); // e.g. 'Tab 2'
 	}
 </script>
 
@@ -238,7 +245,7 @@ The tabbar follows this DOM structure:
 ### Different Sizes and Colors
 \`\`\`svelte
 <script>
-	let activeTab = $state(0);
+	let activeTab = $state('Small');
 </script>
 
 <!-- Small size with secondary color -->
@@ -263,7 +270,7 @@ The tabbar follows this DOM structure:
 <script>
 	import { Chip } from 'svelai/chip';
 	
-	let activeTab = $state(0);
+	let activeTab = $state('Inbox');
 </script>
 
 {#snippet unreadCount()}
@@ -296,6 +303,7 @@ The Tabbar component follows WAI-ARIA best practices for tablist patterns:
 - Sets \`role="tablist"\` on the container
 - Sets \`role="tab"\` on each tab button
 - Sets \`aria-selected="true"\` on the active tab, \`"false"\` on others
+- Gives each tab a stable \`id\` (\`{id}-tab-{index}\`) and, with \`controlsPanels\`, an \`aria-controls\` pointing at its panel
 - Sets \`aria-disabled="true"\` on disabled tabs
 - Sets \`aria-activedescendant\` on the container to reference the active tab
 - Implements roving tabindex pattern (active tab has \`tabindex="0"\`, others have \`tabindex="-1"\`)
@@ -335,7 +343,7 @@ Full keyboard support following WAI-ARIA best practices:
 
 - When \`href\` is provided in a tab, it renders as an \`<a>\` tag, otherwise as a \`<button>\`
 - Disabled tabs cannot be clicked and do not trigger \`onValueChange\`
-- Active tab index is zero-based (first tab = 0)
+- The active tab is identified by its string value (a string item's label, or an object item's \`value\` / string label); give object items an explicit \`value\` when labels may change or are snippets
 - The \`value\` prop is bindable for two-way data binding
 - Tabs with \`href\` will not update \`value\` on click (they navigate instead)
 - Icon/content sizing is automatically adjusted based on tab size
@@ -349,11 +357,11 @@ The Tabbar component uses a theme object that can be customized using the \`them
 
 The theme object contains the following parts:
 - **root**: Main tabbar container styles
-- **tabbarItem**: Individual tab item styles
-- **tabbarItemLabel**: Tab label text styles
-- **tabbarItemPrefix**: Prefix icon/content styles
-- **tabbarItemSuffix**: Suffix icon/content styles
-- **tabbarIndicator**: Active indicator styles
+- **tab**: Individual tab styles
+- **indicator**: The single measured active indicator that slides between tabs
+- **staticIndicator**: The CSS-only indicator rendered inside the active tab for SSR / pre-hydration
+- **prefix**: Prefix icon/content styles
+- **suffix**: Suffix icon/content styles
 
 ### Available Variants
 
@@ -361,38 +369,45 @@ The theme object contains the following parts:
 - base: Base classes for tabbar container
 - Variants:
   - orientation: 'horizontal' | 'vertical' - Tab orientation
-  - size: 'small' | 'normal' | 'large' - Tab size
-  - color: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info' | 'neutral' - Color scheme
+  - scrollFade: 'none' | 'x' | 'y' - Logical-axis scroll fade, applied only while the list overflows
+  - alignment: 'start' | 'center' | 'end' - Tab alignment
+  - size: 'small' | 'normal' | 'large' - Gap between tabs
+  - variant: 'underline' | 'pill' - Track styling
+  - fullWidth: boolean - Expand the tabbar to fill its container
 
-**tabbarItem**:
+**tab**:
 - base: Base classes for tab items
 - Variants:
-  - active: boolean - Active state styling
-  - disabled: boolean - Disabled state styling
-  - size: 'small' | 'normal' | 'large' - Item size
+  - size: 'small' | 'normal' | 'large' - Padding, text size and gap
   - color: Color variants
-
-**tabbarItemLabel**:
-- base: Base classes for label text
-- Variants:
-  - size: 'small' | 'normal' | 'large' - Text size
   - active: boolean - Active state styling
+  - focused: boolean - Keyboard-focused state styling
+  - disabled: boolean - Disabled state styling
+  - orientation: 'horizontal' | 'vertical'
+  - position: 'top' | 'bottom' | 'left' | 'right' - Indicator edge
+  - variant: 'underline' | 'pill'
+  - fullWidth: boolean
 
-**tabbarItemPrefix**:
+**indicator**:
+- base: Base classes for the sliding active indicator
+- Variants:
+  - variant: 'underline' | 'pill' - Bar or raised pill
+
+**staticIndicator**:
+- base: Base classes for the SSR indicator
+- Variants:
+  - variant: 'underline' | 'pill'
+  - position: 'top' | 'bottom' | 'left' | 'right' - Which tab edge the underline sits on
+
+**prefix**:
 - base: Base classes for prefix content
 - Variants:
   - size: 'small' | 'normal' | 'large' - Icon size
 
-**tabbarItemSuffix**:
+**suffix**:
 - base: Base classes for suffix content
 - Variants:
   - size: 'small' | 'normal' | 'large' - Icon size
-
-**tabbarIndicator**:
-- base: Base classes for active indicator
-- Variants:
-  - orientation: 'horizontal' | 'vertical' - Indicator direction
-  - color: Color variants
 
 ### Usage Examples
 
@@ -407,7 +422,7 @@ The theme object contains the following parts:
         normal: 'gap-4'
       }
     },
-    tabbarItem: {
+    tab: {
       active: {
         true: 'border-b-2 border-primary'
       }
@@ -421,12 +436,12 @@ The theme object contains the following parts:
 <Tabbar items={tabs}
   bind:value={activeTab}
   theme={{
-    tabbarItem: {
+    tab: {
       active: {
         true: 'bg-primary text-white rounded-t-lg'
       }
     },
-    tabbarIndicator: {
+    indicator: {
       base: 'bg-primary h-1 rounded-full'
     }
   }}
@@ -445,7 +460,7 @@ The theme object contains the following parts:
         normal: 'gap-2'
       }
     },
-    tabbarItem: {
+    tab: {
       base: 'transition-colors',
       active: {
         true: 'text-primary border-b-2 border-primary'

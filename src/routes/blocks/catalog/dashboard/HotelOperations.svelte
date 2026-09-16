@@ -16,10 +16,10 @@
 	]);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<header class="flex flex-wrap items-center justify-between gap-lg">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<header class="gap-lg flex flex-wrap items-center justify-between">
 		<div>
-			<p class="text-sm text-primary-readable">The Linden House / Front desk</p>
+			<p class="text-primary-readable text-sm">The Linden House / Front desk</p>
 			<h2 class="mt-sm text-3xl font-semibold">A warm welcome, every time.</h2>
 		</div>
 		<Chip color="neutral">Monday, June 15</Chip>
@@ -30,20 +30,20 @@
 			value={String(guests.filter((guest) => !guest.checkedIn).length)}
 		/><Stat label="Rooms ready" value="12" />
 	</Grid>
-	<div class="grid gap-lg lg:grid-cols-3">
+	<div class="gap-lg grid lg:grid-cols-3">
 		<Card
 			title="Today’s arrivals"
 			description="Check guests in to update this local desk."
 			class="lg:col-span-2"
 			><Stack gap="lg">
 				{#each guests as guest (guest)}<div
-						class="flex flex-wrap items-center justify-between gap-md border-b border-neutral-muted pb-lg"
+						class="gap-md border-neutral-muted pb-lg flex flex-wrap items-center justify-between border-b"
 					>
-						<div class="flex items-center gap-md">
-							<Avatar user={{ name: guest.name }} />
+						<div class="gap-md flex items-center">
+							<Avatar name={guest.name} />
 							<div>
 								<strong class="text-sm">{guest.name}</strong>
-								<p class="text-xs text-neutral/60">Room {guest.room} · {guest.nights} nights</p>
+								<p class="text-neutral/70 text-xs">Room {guest.room} · {guest.nights} nights</p>
 							</div>
 						</div>
 						<Button
@@ -59,18 +59,15 @@
 		<Stack gap="lg">
 			<Card title="Room readiness"
 				><Stack gap="lg">
-					<Meter
-						label="Clean and inspected"
-						value={{ value: 38, color: 'success' }}
+					<Meter label="Clean and inspected" value={38} color="success" max={48} /><Meter
+						label="Housekeeping"
+						value={7}
+						color="warning"
 						max={48}
-					/><Meter label="Housekeeping" value={{ value: 7, color: 'warning' }} max={48} /><Meter
-						label="Maintenance"
-						value={{ value: 3, color: 'neutral' }}
-						max={48}
-					/>
+					/><Meter label="Maintenance" value={3} color="neutral" max={48} />
 				</Stack></Card
 			><Card title="Front desk note" description="A small detail makes a memorable stay."
-				><p class="text-sm text-neutral/65">
+				><p class="text-neutral/65 text-sm">
 					Room 204 is celebrating an anniversary. A welcome note is ready at reception.
 				</p></Card
 			>

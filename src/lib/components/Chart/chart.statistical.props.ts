@@ -28,10 +28,7 @@ export type ChartDistributionMark<TRow> = ChartDataMarkProps<TRow> & {
 	value: ChartChannel<TRow, number>;
 	direction?: 'vertical' | 'horizontal';
 	color?: ChartColor;
-	analysis?: readonly [
-		ChartDistributionReferenceAnalysis,
-		...ChartDistributionReferenceAnalysis[]
-	];
+	analysis?: readonly [ChartDistributionReferenceAnalysis, ...ChartDistributionReferenceAnalysis[]];
 };
 
 export type ChartProportionVariant =

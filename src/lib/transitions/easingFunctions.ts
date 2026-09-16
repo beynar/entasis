@@ -130,10 +130,10 @@ export const easingFunctions = (<const>{
 		x === 0
 			? 0
 			: x === 1
-			? 1
-			: x < 0.5
-			? -(pow(2, 20 * x - 10) * sin((20 * x - 11.125) * c5)) / 2
-			: (pow(2, -20 * x + 10) * sin((20 * x - 11.125) * c5)) / 2 + 1,
+				? 1
+				: x < 0.5
+					? -(pow(2, 20 * x - 10) * sin((20 * x - 11.125) * c5)) / 2
+					: (pow(2, -20 * x + 10) * sin((20 * x - 11.125) * c5)) / 2 + 1,
 	bounceIn: (x) => 1 - bounceOut(1 - x),
 	bounceOut,
 	bounceInOut: (x) => (x < 0.5 ? (1 - bounceOut(1 - 2 * x)) / 2 : (1 + bounceOut(2 * x - 1)) / 2)

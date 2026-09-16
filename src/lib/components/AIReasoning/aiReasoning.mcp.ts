@@ -1,5 +1,5 @@
 export const aiReasoningDescription = `
-# Reasoning
+# AIReasoning
 
 AIReasoning renders an AI reasoning trace in the Svelai Collapsible primitive. It opens when a stream starts, measures elapsed time in seconds, and closes shortly after the first streamed completion.
 
@@ -7,16 +7,16 @@ AIReasoning renders an AI reasoning trace in the Svelai Collapsible primitive. I
 
 \`\`\`svelte
 <script lang="ts">
-	import { Reasoning } from 'svelai/ai-reasoning';
+	import { AIReasoning } from 'svelai/ai-reasoning';
 </script>
 \`\`\`
 
 ## Basic usage
 
 \`\`\`svelte
-<Reasoning
+<AIReasoning
 	content={reasoningText}
-	{isStreaming}
+	{streaming}
 	thinkingMessages={['Planning', 'Checking constraints', 'Preparing response']}
 />
 \`\`\`
@@ -25,7 +25,7 @@ The default trigger displays a brain icon and a shimmer-only \`SpinnerText\` lab
 
 ## Streaming lifecycle
 
-- \`open\` starts from \`defaultOpen ?? isStreaming\`.
+- \`open\` starts from \`defaultOpen ?? streaming\`.
 - At the start of a streaming session, the component auto-opens once unless \`defaultOpen={false}\`.
 - Closing the panel manually during that stream keeps it closed; streaming does not force it open again.
 - When streaming ends, the measured duration is rounded up to whole seconds.
@@ -35,7 +35,7 @@ The default trigger displays a brain icon and a shimmer-only \`SpinnerText\` lab
 Use \`defaultOpen={false}\` to opt out of streaming auto-open without disabling manual toggling:
 
 \`\`\`svelte
-<Reasoning content={reasoningText} isStreaming defaultOpen={false} />
+<AIReasoning content={reasoningText} streaming defaultOpen={false} />
 \`\`\`
 
 ## Controlled state
@@ -52,7 +52,7 @@ Use \`defaultOpen={false}\` to opt out of streaming auto-open without disabling 
 	}
 </script>
 
-<Reasoning
+<AIReasoning
 	content={reasoningText}
 	duration={8}
 	bind:open
@@ -63,13 +63,13 @@ Use \`defaultOpen={false}\` to opt out of streaming auto-open without disabling 
 
 ## Custom trigger and body
 
-A custom \`trigger\` replaces the complete default row, including its default label and caret. The Collapsible button remains the interactive and accessible owner. The trigger payload is \`{ open, isStreaming, duration, message }\`, where \`message\` is the currently displayed thinking label.
+A custom \`trigger\` replaces the complete default row, including its default label and caret. The Collapsible button remains the interactive and accessible owner. The trigger payload is \`{ open, streaming, duration, message }\`, where \`message\` is the currently displayed thinking label.
 
 \`\`\`svelte
-<Reasoning isStreaming thinkingMessages={['Planning', 'Checking']}>
-	{#snippet trigger({ open, isStreaming, duration, message })}
+<AIReasoning streaming thinkingMessages={['Planning', 'Checking']}>
+	{#snippet trigger({ open, streaming, duration, message })}
 		<span class="flex w-full items-center justify-between">
-			{#if isStreaming}
+			{#if streaming}
 				<span>{message}</span>
 			{:else if duration !== undefined}
 				<span>Thought for {duration}s</span>
@@ -81,15 +81,15 @@ A custom \`trigger\` replaces the complete default row, including its default la
 	{#snippet children({ message })}
 		<p>Current step: {message}</p>
 	{/snippet}
-</Reasoning>
+</AIReasoning>
 \`\`\`
 
 \`content\` is optional. When it is non-null, it is rendered as Markdown and takes precedence over \`children\`:
 
 \`\`\`svelte
-<Reasoning content="**This Markdown is rendered.**" defaultOpen>
+<AIReasoning content="**This Markdown is rendered.**" defaultOpen>
 	<p>This custom body is ignored because content was supplied.</p>
-</Reasoning>
+</AIReasoning>
 \`\`\`
 
 ## Markdown safety
@@ -97,7 +97,7 @@ A custom \`trigger\` replaces the complete default row, including its default la
 Pass Markdown options through \`markdown\`. AIReasoning owns \`content\` and always forces \`renderHtml={false}\`, even if renderer options are spread into Markdown.
 
 \`\`\`svelte
-<Reasoning content={reasoningText} markdown={markdownOptions} />
+<AIReasoning content={reasoningText} markdown={markdownOptions} />
 \`\`\`
 
 ## Theme slots
@@ -105,7 +105,7 @@ Pass Markdown options through \`markdown\`. AIReasoning owns \`content\` and alw
 The AIReasoning \`trigger\` and \`content\` theme slots are composed into the actual Collapsible trigger button and content panel. \`root\` styles the Collapsible root; \`icon\`, \`status\`, and \`duration\` style the default trigger regions.
 
 \`\`\`svelte
-<Reasoning
+<AIReasoning
 	content={reasoningText}
 	defaultOpen
 	theme={{
@@ -121,7 +121,7 @@ Global overrides use \`setAIReasoningTheme\` from the same package entry.
 ## Props
 
 - \`content?: string\`: Markdown trace. Takes precedence over custom children.
-- \`isStreaming?: boolean\`: Drives status labels, auto-open, duration measurement, and completion close.
+- \`streaming?: boolean\`: Drives status labels, auto-open, duration measurement, and completion close.
 - \`thinkingMessages?: readonly string[]\`: Optional labels cycled every two seconds while streaming; takes precedence over \`labels.thinking\`.
 - \`labels?: Partial<AIReasoningLabels>\`: Default thinking text, unknown-duration text, and duration formatter.
 - \`open?: boolean\`: Bindable open state.

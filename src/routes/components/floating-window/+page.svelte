@@ -79,7 +79,7 @@
 
 {#snippet inspectorTitle()}
 	<span class="flex min-w-0 items-center gap-2">
-		<span class="text-primary shrink-0">{@render terminalWindowIcon({ size: 17 })}</span>
+		<span class="text-primary-readable shrink-0">{@render terminalWindowIcon({ size: 17 })}</span>
 		<span class="truncate">Build inspector</span>
 	</span>
 {/snippet}
@@ -91,13 +91,12 @@
 	features={[
 		'Non-modal portaled surface',
 		'Header or whole-window dragging',
-		'Pointer and keyboard resizing',
-		'Keyboard movement and focus restoration',
+		'Pointer resizing from edges and corners',
 		'Viewport-safe geometry',
 		'Crossfaded minimize and restore transitions',
 		'Theme-scoped z-order and configurable edge docks',
 		'Dialog-safe layer ordering',
-		'Topmost Escape dismissal',
+		{ label: 'Topmost Escape dismissal', test: 'a11y:floating-window.escape' },
 		'Bindable position, dimensions, and visibility'
 	]}
 >
@@ -121,7 +120,7 @@
 		<div class="grid max-w-md justify-items-center gap-3 text-center">
 			<div>
 				<p class="font-medium">Project notes</p>
-				<p class="text-neutral/60 mt-1 text-sm">A focused utility window without modal blocking.</p>
+				<p class="text-neutral/70 mt-1 text-sm">A focused utility window without modal blocking.</p>
 			</div>
 			<Button onclick={openNotes}>Open project notes</Button>
 		</div>
@@ -209,7 +208,7 @@
 </FloatingWindow>`}
 		>
 			<div class="grid justify-items-center gap-3 text-center">
-				<p class="text-neutral/60 max-w-lg text-sm">
+				<p class="text-neutral/70 max-w-lg text-sm">
 					Open both windows, minimize them, then drag a title horizontally or restore either window.
 				</p>
 				<Button variant="outline" onclick={openDockExample}>Open both windows</Button>
@@ -225,11 +224,11 @@
 				<div class="grid gap-3 text-sm">
 					<div class="border-neutral-muted rounded-lg border p-3">
 						<p class="font-medium">Design review</p>
-						<p class="text-neutral/60 mt-1">Three new comments on the floating window API.</p>
+						<p class="text-neutral/70 mt-1">Three new comments on the floating window API.</p>
 					</div>
 					<div class="border-neutral-muted rounded-lg border p-3">
 						<p class="font-medium">Release checklist</p>
-						<p class="text-neutral/60 mt-1">Visual QA is ready for review.</p>
+						<p class="text-neutral/70 mt-1">Visual QA is ready for review.</p>
 					</div>
 				</div>
 			</FloatingWindow>
@@ -263,12 +262,12 @@
 </FloatingWindow>`}
 		>
 			<div class="grid justify-items-center gap-4 text-center">
-				<p class="text-neutral/60 max-w-xl text-sm">
+				<p class="text-neutral/70 max-w-xl text-sm">
 					Open a minimized window at any edge placement, then restore and minimize it to check the
 					crossfade path.
 				</p>
 				<div class="flex max-w-2xl flex-wrap justify-center gap-2">
-					{#each dockPlacements as placement}
+					{#each dockPlacements as placement, index (index)}
 						<Button size="small" variant="outline" onclick={() => openPlacementExample(placement)}>
 							{placement}
 						</Button>
@@ -313,11 +312,11 @@
 				<div data-floating-window-no-drag class="grid gap-4">
 					<div class="grid grid-cols-2 gap-3 text-sm">
 						<div class="bg-surface-recessed rounded-lg p-3">
-							<p class="text-neutral/60 text-xs">Bundle</p>
+							<p class="text-neutral/70 text-xs">Bundle</p>
 							<p class="mt-1 font-medium">42.8 kB</p>
 						</div>
 						<div class="bg-surface-recessed rounded-lg p-3">
-							<p class="text-neutral/60 text-xs">Modules</p>
+							<p class="text-neutral/70 text-xs">Modules</p>
 							<p class="mt-1 font-medium">18</p>
 						</div>
 					</div>

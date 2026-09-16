@@ -2,7 +2,7 @@ import type { AIConversationState } from '../AIConversation/aiConversation.state
 import type { AIThreadItem } from '../AIThread/aiThread.props.js';
 import type {
 	AIComposerProps,
-	AIComposerSubmitDetail,
+	AIComposerSubmitPayload,
 	AIComposerSubmitEvent,
 	AIComposerSubmitMeta
 } from './aiComposer.props.js';
@@ -84,7 +84,7 @@ export class AIComposerSubmitController {
 		event: AIComposerSubmitEvent | undefined
 	): Promise<boolean> {
 		const options = this.options;
-		const detail: AIComposerSubmitDetail = { ...meta, event, steered: false };
+		const detail: AIComposerSubmitPayload = { ...meta, event, steered: false };
 		if (options.onSubmit) {
 			await options.onSubmit(detail);
 			return false;

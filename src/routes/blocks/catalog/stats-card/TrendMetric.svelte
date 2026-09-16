@@ -13,7 +13,7 @@
 	let previous = $state(false);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card class="mx-auto w-full max-w-md"
 		><Stack gap="lg">
 			<div class="flex items-center justify-between">
@@ -38,9 +38,9 @@
 						curve: 'monotone-x'
 					}
 				]}
-				ariaLabel="Revenue sparkline"
+				label="Revenue sparkline"
 			/><Switch label="Show previous period" bind:value={previous} />
-			<p class="text-xs text-neutral/60">Sample revenue, January–June 2026.</p>
+			<p class="text-neutral/70 text-xs">Sample revenue, January–June 2026.</p>
 		</Stack></Card
 	>
 </Stack>

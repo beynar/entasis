@@ -12,20 +12,20 @@ const defaultTriggerIcon = cva({
 });
 const defaultTriggerLabel = cva({
 	base: 'min-w-0 truncate',
-	variants: { selected: { true: 'text-neutral', false: 'text-neutral/60' } },
+	variants: { selected: { true: 'text-neutral', false: 'text-neutral/70' } },
 	defaultVariants: { selected: false }
 });
 const defaultSearch = cva({ base: 'p-xs' });
 const defaultPopover = cva({ base: 'min-w-56' });
 const defaultMenu = cva({ base: 'min-w-56' });
-const defaultProvider = cva({ base: 'justify-start text-xs font-semibold text-neutral/55' });
+const defaultProvider = cva({ base: 'justify-start text-xs font-semibold text-neutral/70' });
 const defaultOption = cva({
 	base: '',
 	variants: { selected: { true: '', false: '' } },
 	defaultVariants: { selected: false }
 });
 const defaultGroup = cva({ base: '' });
-const defaultEmpty = cva({ base: 'justify-start text-neutral/55' });
+const defaultEmpty = cva({ base: 'justify-start text-neutral/70' });
 export const aiModelSelectorTheme = {
 	root: defaultRoot,
 	trigger: defaultTrigger,

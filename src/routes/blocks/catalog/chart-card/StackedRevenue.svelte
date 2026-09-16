@@ -13,7 +13,7 @@
 	let visible = $derived(revenue.slice(quarter === 'Q1' ? 0 : 9, quarter === 'Q1' ? 9 : 18));
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card
 		class="mx-auto w-full max-w-2xl"
 		title="A healthy mix"
@@ -46,9 +46,9 @@
 						radius: 3
 					}
 				]}
-				ariaLabel="Revenue stacked by subscription plan"
+				label="Revenue stacked by subscription plan"
 			/>
-			<p class="text-sm text-neutral/60">
+			<p class="text-neutral/70 text-sm">
 				Team subscriptions account for the largest share of recurring revenue.
 			</p>
 		</Stack></Card

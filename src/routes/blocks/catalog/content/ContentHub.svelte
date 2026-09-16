@@ -11,16 +11,16 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">The library</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">The library</p>
 		<Heading size="h2" weight="bold">A useful place to start.</Heading>
-		<p class="max-w-2xl text-neutral/65">
+		<p class="text-neutral/65 max-w-2xl">
 			Practical ideas, clear explanations, and a few good questions for your next project.
 		</p>
 	</header>
-	<div class="grid gap-xl md:grid-cols-2">
-		<div class="flex flex-col gap-xl p-xl rounded-lg bg-primary-muted">
+	<div class="gap-xl grid md:grid-cols-2">
+		<div class="gap-xl p-xl bg-primary-muted flex flex-col rounded-lg">
 			<Chip class="w-fit" variant="soft">Start here</Chip><Heading size="h3"
 				>Good design is a series of good decisions.</Heading
 			>
@@ -30,12 +30,12 @@
 			</p>
 			<Button href="/docs" class="self-start">Explore the guide ↗</Button>
 		</div>
-		<div class="grid gap-lg sm:grid-cols-2">
+		<div class="gap-lg grid sm:grid-cols-2">
 			{#each topics as topic (topic.title)}<Card
 					href="/docs"
 					title={topic.title}
 					description={topic.description}
-					><p class="text-xs uppercase tracking-widest text-primary">
+					><p class="text-primary-readable text-xs tracking-widest uppercase">
 						{topic.count} articles ↗
 					</p></Card
 				>{/each}

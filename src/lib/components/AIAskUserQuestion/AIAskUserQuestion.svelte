@@ -23,6 +23,7 @@
 		AIAskUserQuestionState
 	} from './aiAskUserQuestion.props.js';
 	import { useAIAskUserQuestionTheme } from './aiAskUserQuestion.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		ref = $bindable<HTMLDivElement | null>(null),
@@ -36,19 +37,19 @@
 		autoAdvanceSingleDelay,
 		disabled = false,
 		submitting = false,
-		title = 'Answer request',
+		title,
 		requester,
 		context,
-		submitLabel = 'Submit',
-		submittingLabel = 'Submitting...',
-		discardLabel = 'Dismiss',
-		previousLabel = 'Previous question',
-		nextLabel = 'Continue',
+		submitLabel,
+		submittingLabel,
+		discardLabel,
+		previousLabel,
+		nextLabel,
 		emptyLabel,
 		emptyTitle,
-		emptyDescription = 'There is nothing to answer right now.',
+		emptyDescription,
 		progressLabel = (active: number, total: number) => `${active}/${total}`,
-		requiredMessage = 'Answer required.',
+		requiredMessage,
 		onSubmit,
 		onDiscard,
 		onValueChange,
@@ -61,6 +62,7 @@
 		theme,
 		...attachments
 	}: AIAskUserQuestionProps = $props();
+	const t = $derived(useI18n());
 	const valueState = createBindableValue(
 		() => value,
 		(nextValue) => {
@@ -79,7 +81,7 @@
 	const resolvedValues = $derived(valueState.value);
 	const shouldAutoAdvance = $derived(autoAdvance ?? autoAdvanceSingle ?? true);
 	const resolvedAutoAdvanceDelay = $derived(autoAdvanceDelay ?? autoAdvanceSingleDelay ?? 280);
-	const resolvedEmptyLabel = $derived(emptyLabel ?? emptyTitle ?? 'No questions');
+	const resolvedEmptyLabel = $derived(emptyLabel ?? emptyTitle ?? t.aiAskNoQuestions);
 	const activeQuestion = $derived(
 		questionItems[Math.max(0, Math.min(activeIndex, questionItems.length - 1))]
 	);
@@ -170,6 +172,7 @@
 	}
 
 	function resolveRequiredMessage(question: AIAskQuestion): string {
+		if (requiredMessage === undefined) return t.aiAskRequired;
 		return typeof requiredMessage === 'function' ? requiredMessage(question) : requiredMessage;
 	}
 
@@ -247,7 +250,7 @@
 				bordered
 				size="small"
 				title={resolvedEmptyLabel}
-				description={emptyDescription}
+				description={emptyDescription ?? t.aiAskEmptyDescription}
 				class={classes.empty()}
 			/>
 		{/if}
@@ -258,7 +261,7 @@
 			<AIAskUserQuestionHeader
 				questions={questionItems}
 				{activeIndex}
-				{title}
+				title={title ?? t.aiAskTitle}
 				{requester}
 				{context}
 				disabled={controlsDisabled}
@@ -309,11 +312,11 @@
 				isSubmitting={resolvedIsSubmitting}
 				{isDiscarding}
 				canDiscard={Boolean(onDiscard)}
-				{previousLabel}
-				{nextLabel}
-				{submitLabel}
-				{submittingLabel}
-				{discardLabel}
+				previousLabel={previousLabel ?? t.aiAskPrevious}
+				nextLabel={nextLabel ?? t.aiAskNext}
+				submitLabel={submitLabel ?? t.submit}
+				submittingLabel={submittingLabel ?? t.aiAskSubmitting}
+				discardLabel={discardLabel ?? t.dismiss}
 				onPrevious={() => goTo(activeIndex - 1)}
 				onNext={() => goTo(activeIndex + 1)}
 				onPrimary={nextOrSubmit}

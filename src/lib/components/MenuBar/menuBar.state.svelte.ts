@@ -5,6 +5,9 @@ import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
 import type { MenuProps } from '../Menu/menu.props.js';
 import type { MenuBarMenu } from './menuBar.props.js';
 
+/** Keys of a `MenuBarMenu` that drive the trigger button and must not reach the `<Menu />`. */
+type MenuBarTriggerKeys = 'label' | 'prefix' | 'suffix' | 'disabled';
+
 export function useMenuBarState(
 	getMenus: () => MenuBarMenu[],
 	getDirection: () => 'ltr' | 'rtl',
@@ -12,17 +15,18 @@ export function useMenuBarState(
 ) {
 	const menuAttachmentKey = createAttachmentKey();
 	const navigation = useNavigation({
+		typeahead: true,
 		orientation: 'horizontal',
 		loop: true,
 		id,
 		enableHoverFocus: false
 	});
 
-	let openStates = $state(untrack(() => getMenus().map(() => false)));
+	const openStates = $state(untrack(() => getMenus().map(() => false)));
 	let keyboardOpen = $state(false);
 	let openedByTrigger = $state(false);
 	let lastActiveIndex = $state<number | null>(null);
-	let triggerElements = $state<Array<HTMLElement | undefined>>([]);
+	const triggerElements = $state<Array<HTMLElement | undefined>>([]);
 	const activeIndex = $derived.by(() => {
 		const index = openStates.findIndex(Boolean);
 		return index === -1 ? null : index;
@@ -160,7 +164,13 @@ export function useMenuBarState(
 			);
 
 	function getMenuProps(menu: MenuBarMenu, index: number): MenuProps {
-		const { label: _label, prefix: _prefix, suffix: _suffix, disabled: _disabled, ...props } = menu;
+		// `label`, `prefix`, `suffix` and `disabled` belong to the trigger button, not the menu.
+		const props: Omit<MenuBarMenu, MenuBarTriggerKeys> &
+			Partial<Pick<MenuBarMenu, MenuBarTriggerKeys>> = { ...menu };
+		delete props.label;
+		delete props.prefix;
+		delete props.suffix;
+		delete props.disabled;
 		return {
 			...props,
 			focusOnMount: keyboardOpen && activeIndex === index ? true : 'container',

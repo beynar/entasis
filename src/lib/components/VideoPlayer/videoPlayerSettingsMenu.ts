@@ -11,6 +11,7 @@ import { subtitlesSlashIcon } from '../Icons/subtitlesSlash.js';
 import type { VideoPlayerTrack } from './videoPlayer.props.js';
 import type { VideoPlayerState } from './videoPlayer.state.svelte.js';
 import type { useVideoPlayerTheme } from './videoPlayer.theme.js';
+import { en, type Messages } from '$lib/i18n/en.js';
 
 type VideoPlayerClasses = ReturnType<typeof useVideoPlayerTheme>;
 type CaptionTrackOption = {
@@ -35,6 +36,8 @@ type VideoPlayerSettingsMenuOptions = {
 	includeFullscreen: boolean;
 	downloadHref: string;
 	runIfEnabled: (action: () => void) => void;
+	/** Active i18n catalog, used for the menu item titles. */
+	messages?: Messages;
 };
 
 export function getVideoPlayerSettingsMenuItems({
@@ -50,23 +53,24 @@ export function getVideoPlayerSettingsMenuItems({
 	includeDownload,
 	includeFullscreen,
 	downloadHref,
-	runIfEnabled
+	runIfEnabled,
+	messages = en
 }: VideoPlayerSettingsMenuOptions): MenuItem[] {
 	const items: MenuItem[] = [];
 	const availableRates = getAvailablePlaybackRates(playbackRates);
-	const captionTracks = getCaptionTrackOptions(tracks);
+	const captionTracks = getCaptionTrackOptions(tracks, messages);
 
 	if (includeRate && availableRates.length > 0) {
 		const speedItem: VideoPlayerSubmenuItem = {
 			type: 'submenu',
-			title: 'Speed',
+			title: messages.mediaSpeedLabel,
 			prefix: speedometerIcon,
-			suffix: formatPlaybackRate(player.playbackRate),
+			suffix: formatPlaybackRate(player.playbackRate, messages),
 			disabled,
 			popoverClass: classes.popoverPanel({ className: 'p-1' }),
 			menu: availableRates.map((rate) => ({
 				type: 'option',
-				title: formatPlaybackRate(rate),
+				title: formatPlaybackRate(rate, messages),
 				disabled,
 				selected: player.playbackRate === rate,
 				suffix: player.playbackRate === rate ? checkIcon : undefined,
@@ -79,7 +83,7 @@ export function getVideoPlayerSettingsMenuItems({
 	if (includeLoop) {
 		items.push({
 			type: 'option',
-			title: 'Loop',
+			title: messages.loop,
 			prefix: repeatIcon,
 			disabled,
 			selected: player.loop,
@@ -89,7 +93,9 @@ export function getVideoPlayerSettingsMenuItems({
 	}
 
 	if (includeCaptions) {
-		items.push(getCaptionsMenuItem({ player, classes, disabled, captionTracks, runIfEnabled }));
+		items.push(
+			getCaptionsMenuItem({ player, classes, disabled, captionTracks, runIfEnabled, messages })
+		);
 	}
 
 	const actionItems = getActionMenuItems({
@@ -99,7 +105,8 @@ export function getVideoPlayerSettingsMenuItems({
 		includeDownload,
 		includeFullscreen,
 		downloadHref,
-		runIfEnabled
+		runIfEnabled,
+		messages
 	});
 
 	if (actionItems.length > 0) {
@@ -116,19 +123,19 @@ function getAvailablePlaybackRates(playbackRates: number[]) {
 		.filter((rate, index, rates) => rates.indexOf(rate) === index);
 }
 
-function getCaptionTrackOptions(tracks: VideoPlayerTrack[]) {
+function getCaptionTrackOptions(tracks: VideoPlayerTrack[], messages: Messages) {
 	return tracks
-		.map((track, index) => getCaptionTrackOption(track, index))
+		.map((track, index) => getCaptionTrackOption(track, index, messages))
 		.filter((track): track is CaptionTrackOption => track !== null);
 }
 
-function getCaptionTrackOption(track: VideoPlayerTrack, index: number) {
+function getCaptionTrackOption(track: VideoPlayerTrack, index: number, messages: Messages) {
 	const kind = track.kind ?? 'subtitles';
 	if (kind !== 'captions' && kind !== 'subtitles') return null;
 	const value = track.id ?? track.label ?? track.srclang ?? `${kind}:${index}`;
 	return {
 		value,
-		label: track.label ?? track.srclang ?? `Track ${index + 1}`
+		label: track.label ?? track.srclang ?? messages.mediaTrack(index + 1)
 	};
 }
 
@@ -137,21 +144,23 @@ function getCaptionsMenuItem({
 	classes,
 	disabled,
 	captionTracks,
-	runIfEnabled
+	runIfEnabled,
+	messages
 }: Pick<VideoPlayerSettingsMenuOptions, 'player' | 'classes' | 'disabled' | 'runIfEnabled'> & {
 	captionTracks: CaptionTrackOption[];
+	messages: Messages;
 }): VideoPlayerSubmenuItem {
 	const captionsDisabled = disabled || captionTracks.length === 0;
 	return {
 		type: 'submenu',
-		title: 'Captions',
+		title: messages.captions,
 		prefix: player.captionsEnabled ? closedCaptioningIcon : subtitlesSlashIcon,
 		disabled: captionsDisabled,
 		popoverClass: classes.popoverPanel({ className: 'p-1' }),
 		menu: [
 			{
 				type: 'option',
-				title: 'Off',
+				title: messages.captionsOff,
 				disabled: captionsDisabled,
 				selected: !player.captionsEnabled,
 				suffix: !player.captionsEnabled ? checkIcon : undefined,
@@ -176,7 +185,8 @@ function getActionMenuItems({
 	includeDownload,
 	includeFullscreen,
 	downloadHref,
-	runIfEnabled
+	runIfEnabled,
+	messages
 }: Pick<
 	VideoPlayerSettingsMenuOptions,
 	| 'player'
@@ -186,13 +196,15 @@ function getActionMenuItems({
 	| 'includeFullscreen'
 	| 'downloadHref'
 	| 'runIfEnabled'
->): MenuItem[] {
+> & { messages: Messages }): MenuItem[] {
 	const actionItems: MenuItem[] = [];
 
 	if (includePictureInPicture) {
 		actionItems.push({
 			type: 'option',
-			title: player.actualPictureInPicture ? 'Exit Picture-in-Picture' : 'Picture-in-Picture',
+			title: player.actualPictureInPicture
+				? messages.exitPictureInPicture
+				: messages.pictureInPicture,
 			prefix: pictureInPictureIcon,
 			disabled: disabled || !player.supportsPictureInPicture,
 			selected: player.actualPictureInPicture,
@@ -204,7 +216,7 @@ function getActionMenuItems({
 	if (includeDownload && downloadHref) {
 		actionItems.push({
 			type: 'option',
-			title: 'Download',
+			title: messages.download,
 			prefix: downloadSimpleIcon,
 			disabled: disabled || !downloadHref,
 			href: disabled ? undefined : downloadHref,
@@ -215,7 +227,7 @@ function getActionMenuItems({
 	if (includeFullscreen) {
 		actionItems.push({
 			type: 'option',
-			title: player.actualFullscreen ? 'Exit fullscreen' : 'Fullscreen',
+			title: player.actualFullscreen ? messages.exitFullscreen : messages.fullscreen,
 			prefix: player.actualFullscreen ? cornersInIcon : cornersOutIcon,
 			disabled: disabled || !player.supportsFullscreen,
 			selected: player.actualFullscreen,
@@ -227,6 +239,6 @@ function getActionMenuItems({
 	return actionItems;
 }
 
-function formatPlaybackRate(rate: number) {
-	return rate === 1 ? 'Normal' : `${rate}x`;
+function formatPlaybackRate(rate: number, messages: Messages) {
+	return rate === 1 ? messages.mediaNormalSpeed : `${rate}x`;
 }

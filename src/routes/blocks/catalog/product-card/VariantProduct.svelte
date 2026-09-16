@@ -7,7 +7,7 @@
 	let added = $state('');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
@@ -15,38 +15,38 @@
 	{/snippet}
 	<div class="mx-auto w-full max-w-md">
 		<Card variant="ghost"
-			><div class="flex flex-col gap-xl">
+			><div class="gap-xl flex flex-col">
 				<div class="relative">
 					{@render productArt('vase', color)}<Button
-						class="absolute right-lg top-lg"
+						class="right-lg top-lg absolute"
 						size="small"
 						variant="soft"
 						color={saved ? 'primary' : 'neutral'}
-						aria-pressed={saved}
+						pressed={saved}
 						onclick={() => (saved = !saved)}>{saved ? 'Saved ♥' : 'Save ♡'}</Button
 					>
 				</div>
-				<div class="flex gap-xl justify-between">
+				<div class="gap-xl flex justify-between">
 					<div>
 						<h3 class="text-xl font-semibold">Everyday vessel</h3>
-						<p class="mt-sm text-sm text-neutral/55">Hand-finished stoneware</p>
+						<p class="mt-sm text-neutral/65 text-sm">Hand-finished stoneware</p>
 					</div>
 					<span class="text-lg">$38</span>
 				</div>
-				<div class="flex flex-col gap-md">
+				<div class="gap-md flex flex-col">
 					<p class="text-sm">Finish: <strong>{color}</strong></p>
-					<div class="flex gap-md flex-wrap">
+					<div class="gap-md flex flex-wrap">
 						{#each ['Sand', 'Clay', 'Olive', 'Chalk'] as finish (finish)}<Button
 								size="small"
 								variant={color === finish ? 'solid' : 'outline'}
 								color={color === finish ? 'primary' : 'neutral'}
 								onclick={() => (color = finish)}
-								aria-pressed={color === finish}>{finish}</Button
+								pressed={color === finish}>{finish}</Button
 							>{/each}
 					</div>
 				</div>
 				<Button variant="outline" fullWidth onclick={() => (added = color)}>Add to bag →</Button
-				>{#if added}<p aria-live="polite" class="text-sm text-success">
+				>{#if added}<p aria-live="polite" class="text-success text-sm">
 						{added} vessel added to the sample bag.
 					</p>{/if}
 			</div></Card

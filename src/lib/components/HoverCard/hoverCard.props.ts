@@ -2,8 +2,8 @@ import type { Slot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { Density, Sizes } from '$lib/types/theme.js';
 import type { ButtonProps } from '../Button/index.js';
-import type { CardProps, CardThemeProps } from '../Card/index.js';
-import type { PopoverProps, PopoverThemeProps } from '../Popover/index.js';
+import type { CardProps } from '../Card/index.js';
+import type { PopoverProps } from '../Popover/index.js';
 import type { HoverCardThemeProps } from './hoverCard.theme.js';
 
 export type HoverCardPayload = {
@@ -30,8 +30,6 @@ export type HoverCardProps = WithAttachments<{
 	defaultOpen?: boolean;
 	/** Trigger content. Strings and snippets are wrapped; ButtonProps render a Button. */
 	trigger?: HoverCardTrigger;
-	/** Main card content. Alias for children, useful when mirroring other hover-card APIs. */
-	content?: Slot<HoverCardPayload>;
 	/** Main card content. Receives the hover card payload when rendered as a snippet. */
 	children?: Slot<HoverCardPayload>;
 	/** Card title rendered through the Card title slot. */
@@ -70,24 +68,18 @@ export type HoverCardProps = WithAttachments<{
 	class?: string;
 	/** Additional CSS classes merged onto the trigger wrapper. */
 	triggerClass?: string;
-	/** Additional CSS classes merged onto the transparent Popover panel. */
-	popoverClass?: string;
-	/** Theme color token applied to the inner Card. */
-	cardColor?: CardProps['color'];
-	/** Visual variant applied to the inner Card. */
-	cardVariant?: CardProps['variant'];
+	/** Props forwarded to the transparent Popover panel. */
+	popover?: Pick<PopoverProps, 'class' | 'theme'>;
+	/** Props forwarded to the inner Card. */
+	card?: Pick<CardProps, 'color' | 'variant' | 'theme'>;
 	/** Show subtle borders between Card sections. */
 	showBorders?: CardProps['showBorders'];
 	/** Called once when the library requests an open-state change. */
 	onOpenChange?: (open: boolean) => void;
 	/** Callback after the open transition finishes. */
-	onAfterOpen?: (hoverCard: HoverCardPayload) => void;
+	onAfterOpen?: (payload: HoverCardPayload) => void;
 	/** Callback after the close transition finishes. */
-	onAfterClose?: (hoverCard: HoverCardPayload) => void;
+	onAfterClose?: (payload: HoverCardPayload) => void;
 	/** Theme overrides for HoverCard wrapper parts. */
 	theme?: HoverCardThemeProps;
-	/** Theme overrides for the inner Card. */
-	cardTheme?: CardThemeProps;
-	/** Theme overrides for the underlying Popover. */
-	popoverTheme?: PopoverThemeProps;
 }>;

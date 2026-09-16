@@ -62,7 +62,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: ['small', 'normal', 'large']
+			options: ['compact', 'normal', 'comfortable']
 		},
 		{ name: 'cardHandle', type: 'switch', label: 'Card handle', value: false },
 		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
@@ -97,9 +97,9 @@
 	let lastMove = $state<KanbanCardMove<Card> | null>(null);
 	// Density + card handle playground
 	const densitySegments = [
-		{ value: 'small', label: 'Small' },
+		{ value: 'compact', label: 'Compact' },
 		{ value: 'normal', label: 'Normal' },
-		{ value: 'large', label: 'Large' }
+		{ value: 'comfortable', label: 'Comfortable' }
 	];
 	let boardDensity = $state<Density>('normal');
 	let withCardHandle = $state<boolean | null>(false);
@@ -254,7 +254,7 @@
 				disabled={controls.value.disabled}
 				onCardMove={(move) => (lastMove = move)}
 			/>
-			<p class="text-neutral/60 mt-3 text-xs">
+			<p class="text-neutral/70 mt-3 text-xs">
 				{#if lastMove}
 					Last move: "{lastMove.card.title}" — {lastMove.from.columnId} #{lastMove.from.index} → {lastMove
 						.to.columnId} #{lastMove.to.index}
@@ -269,7 +269,7 @@
 		<ComponentCard
 			title="Scrollable columns"
 			description="columnHeight fixes the column height; long card lists scroll inside it and auto-scroll while you drag near their top or bottom edge, so a card can be dropped anywhere in the column."
-			code={`<Kanban bind:columns columnHeight="26rem" />`}
+			code="<Kanban bind:columns columnHeight=&quot;26rem&quot; />"
 		>
 			<div class="w-full">
 				<Kanban bind:columns={teamColumns} columnHeight="26rem" sortableColumns={false}>
@@ -277,10 +277,10 @@
 						<div
 							class="bg-surface-floating ring-neutral/10 flex cursor-grab items-center gap-3 rounded-lg px-3 py-2 shadow-xs ring-1 select-none"
 						>
-							<Avatar size="small" user={{ name: card.title }} />
+							<Avatar size="small" name={card.title} />
 							<div class="min-w-0">
 								<div class="text-neutral truncate text-sm font-medium">{card.title}</div>
-								<div class="text-neutral/60 truncate text-xs">{card.description}</div>
+								<div class="text-neutral/70 truncate text-xs">{card.description}</div>
 							</div>
 						</div>
 					{/snippet}
@@ -308,7 +308,7 @@
 		<ComponentCard
 			title="Density and card handle"
 			description="density scales header, list and card spacing; cardHandle restricts card dragging to a grip — handy when cards contain interactive content."
-			code={`<Kanban bind:columns density="small" cardHandle />`}
+			code="<Kanban bind:columns density=&quot;compact&quot; cardHandle />"
 		>
 			<div class="flex w-full flex-col items-center gap-5">
 				<div class="flex items-center gap-6">
@@ -316,7 +316,7 @@
 						items={densitySegments}
 						bind:value={boardDensity}
 						size="small"
-						ariaLabel="Board density"
+						label="Board density"
 					/>
 					<Switch bind:value={withCardHandle} label="Card handle" size="small" />
 				</div>
@@ -350,7 +350,7 @@
 						<div class="p-2 pt-1">
 							<button
 								type="button"
-								class="state-layer text-neutral/60 hover:text-neutral w-full cursor-pointer rounded-lg px-3 py-1.5 text-left text-sm transition-colors"
+								class="state-layer text-neutral/70 hover:text-neutral w-full cursor-pointer rounded-lg px-3 py-1.5 text-left text-sm transition-colors"
 								onclick={() => addCard(column.id)}
 							>
 								+ Add card

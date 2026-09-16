@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 
 const defaultContainer = cva({
-	base: 'inline-flex items-center rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-all',
+	base: 'inline-flex items-center rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-focus/50 transition-[box-shadow,opacity]',
 	variants: {
 		size: {
 			small: 'gap-micro',
@@ -39,7 +39,7 @@ const defaultStar = cva({
 });
 
 const defaultStarBase = cva({
-	base: 'absolute inset-0 text-neutral/40'
+	base: 'absolute inset-0 text-neutral/45'
 });
 
 const defaultStarFill = cva({

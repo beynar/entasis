@@ -188,8 +188,8 @@ void main() {
 	});
 </script>
 
-<section class="grid gap-xl p-lg md:grid-cols-3 md:p-xl">
-	<div class="flex flex-col items-start gap-xl">
+<section class="gap-xl p-lg md:p-xl grid md:grid-cols-3">
+	<div class="gap-xl flex flex-col items-start">
 		<Chip variant="outline">Motion study · 02</Chip><Heading as="h2" size="h2" weight="bold"
 			>Patterns, with a point of view.</Heading
 		>
@@ -226,19 +226,19 @@ void main() {
 				></Stack
 			></Card
 		>
-		<p class="text-xs text-neutral/50" role="status">
+		<p class="text-neutral/65 text-xs" role="status">
 			{failure ||
 				(reducedMotion
 					? 'A still composition follows your motion preference.'
 					: 'Rendered live, with colors from the active theme.')}
 		</p>
 	</div>
-	<div class="relative overflow-hidden rounded-3xl border border-neutral-muted md:col-span-2">
+	<div class="border-neutral-muted relative overflow-hidden rounded-3xl border md:col-span-2">
 		<canvas
 			bind:this={canvas}
-			class="block h-96 w-full bg-surface text-primary md:h-full md:min-h-96"
+			class="bg-surface text-primary-readable block h-96 w-full md:h-full md:min-h-96"
 			aria-label="Animated symmetrical kaleidoscope using the current theme colors"
-		></canvas><span bind:this={secondaryColor} class="hidden text-secondary" aria-hidden="true"
+		></canvas><span bind:this={secondaryColor} class="text-secondary hidden" aria-hidden="true"
 		></span>
 	</div>
 </section>

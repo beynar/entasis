@@ -3,6 +3,7 @@
 	import Popover from '../Popover/Popover.svelte';
 	import Menu from '../Menu/Menu.svelte';
 	import type { PopupMenuProps } from './popupMenu.props.js';
+	import { usePopupMenuTheme } from './popupMenu.theme.js';
 	import { on } from 'svelte/events';
 	import type { PopoverState } from '../Popover/popover.state.svelte.js';
 	import { hasSubmenuItems } from '../Menu/menuTree.js';
@@ -17,8 +18,10 @@
 		mobileSheet,
 		mobileSheetSizeTransition,
 		class: className,
+		theme,
 		...popoverProps
 	}: PopupMenuProps = $props();
+	const classes = $derived(usePopupMenuTheme(theme));
 	const openState = createBindableValue(
 		() => open,
 		(next) => {
@@ -27,9 +30,10 @@
 		() => defaultOpen
 	);
 
-	// A menu-appropriate min-width so short-label menus (e.g. context menus) don't collapse to their
-	// content. Overridable — a consumer `class` wins via tailwind-merge.
-	const panelClass = $derived(['min-w-44', className].filter(Boolean).join(' '));
+	// The panel slot carries the menu-appropriate min-width so short-label menus (e.g. context
+	// menus) don't collapse to their content. Overridable — Popover runs this through `cx`
+	// (the cn merge engine), where the consumer `class` comes last and wins.
+	const panelClass = $derived(classes.panel({ className }));
 	const menuSubmenuMode = $derived(menu.submenuMode ?? 'auto');
 	const usesStackedSubmenus = $derived(
 		hasSubmenuItems(menu.items) &&
@@ -68,11 +72,13 @@
 <Popover
 	open={openState.value}
 	onOpenChange={setOpen}
+	haspopup="menu"
 	size="small"
 	{closeOnEscape}
 	{mobileSheet}
 	mobileSheetSizeTransition={resolvedMobileSheetSizeTransition}
 	class={panelClass}
+	{theme}
 	{...popoverProps}
 >
 	{#snippet children(popover)}

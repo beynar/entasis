@@ -1,6 +1,7 @@
 <script lang="ts" generics="TData = unknown">
 	import type { Snippet } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
+	import MapHtmlText from './MapHtmlText.svelte';
 	import Popover from '../Popover/Popover.svelte';
 	import type { MapMarkerPopupContentArg, MapMarkerSnippetArg } from './map-types.js';
 
@@ -31,7 +32,7 @@
 	openOnClick
 	closeOnClickOutside
 	closeOnEscape
-	class="z-50 w-72 rounded-md border border-neutral-muted bg-surface-floating p-3 text-sm text-neutral shadow-md outline-none"
+	class="bg-surface-floating text-neutral raised-3 z-50 w-72 rounded-md p-3 text-sm outline-none"
 >
 	{#snippet trigger(popover)}
 		{@render children(popover.reference)}
@@ -39,19 +40,19 @@
 
 	{#if content === true}
 		<div class="space-y-1">
-			<p class="font-medium leading-none">
+			<p class="leading-none font-medium">
 				{#if args.marker.label}
-					{@html args.marker.label}
+					<MapHtmlText value={args.marker.label} />
 				{:else}
 					{args.marker.id}
 				{/if}
 			</p>
 			{#if args.marker.description}
-				<p class="text-neutral/60">{args.marker.description}</p>
+				<p class="text-neutral/70">{args.marker.description}</p>
 			{/if}
 		</div>
 	{:else if typeof content === 'string'}
-		{@html content}
+		<MapHtmlText value={content} />
 	{:else}
 		{@render content(popupArg)}
 	{/if}

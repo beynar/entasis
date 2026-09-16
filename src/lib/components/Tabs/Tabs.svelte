@@ -1,81 +1,95 @@
 <script lang="ts" generics="Item extends TabItem = TabItem">
 	import { Tabbar } from '$lib/components/Tabbar/index.js';
 	import { Stepper } from '$lib/components/Stepper/index.js';
-	import type { StepperValueChangePayload } from '$lib/components/Stepper/index.js';
-	import type { TabItem } from '$lib/components/Tabbar/tabbar.props.js';
+	import { getTabValue, type TabItem } from '$lib/components/Tabbar/tabbar.props.js';
 	import { StepperState } from '../Stepper/stepper.state.svelte.js';
 	import type { TabsProps } from './tabs.props.js';
-	import { useTabsTheme } from './tabs.theme.js';
+	import { useTabsMotion, useTabsTheme } from './tabs.theme.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 
 	let {
 		items,
-		defaultValue = 0,
+		defaultValue,
 		value = $bindable(),
 		onValueChange,
 		placement = 'top',
 		class: className = '',
 		theme,
-		stepper = $bindable<StepperState<Item>>(),
-		keyFramesOptions = {
-			duration: 300,
-			easing: 'ease-in-out',
-			fill: 'both'
-		},
-		tabbarSize,
-		tabbarOrientation,
-		tabbarColor,
-		tabbarAlignment,
-		tabbarClass,
-		tabbarTheme,
-		tabbarFullWidth,
-		children: panel
+		api = $bindable<StepperState<Item>>(),
+		transition,
+		tabbar,
+		mount = 'lazy',
+		children: panel,
+		...attachments
 	}: TabsProps<Item> = $props();
 	const valueState = createBindableValue(
 		() => value,
 		(next) => {
 			value = next;
 		},
-		() => defaultValue
+		() => defaultValue ?? (items[0] === undefined ? '' : getTabValue(items[0], 0))
 	);
 
+	const id = $props.id();
+	const tabValues = $derived(items.map(getTabValue));
+	// Stepper works in indexes; Tabs speaks values. Map both ways here, once.
+	const activeIndex = $derived(Math.max(0, tabValues.indexOf(valueState.value)));
+	const setActiveIndex = (index: number) => {
+		const next = tabValues[index];
+		if (next !== undefined && next !== valueState.value) valueState.value = next;
+	};
+	const emitChange = (index: number) => {
+		onValueChange?.({ value: tabValues[index], item: items[index], index });
+	};
+
 	const classes = $derived(useTabsTheme(theme));
+	// Tabs owns its own motion preset and forwards the resolved `{ in, out }` to the
+	// Stepper, where it lands on the Stepper's `transition` prop and wins over the
+	// stepper preset.
+	const resolveMotion = useTabsMotion();
+	const panelTransition = $derived(resolveMotion(undefined, { motion: theme?.motion, transition }));
 
 	// Auto-set tabbar orientation based on placement if not explicitly provided
 	const effectiveTabbarOrientation = $derived(
-		tabbarOrientation ?? (placement === 'left' || placement === 'right' ? 'vertical' : 'horizontal')
+		tabbar?.orientation ??
+			(placement === 'left' || placement === 'right' ? 'vertical' : 'horizontal')
 	);
 
-	function handleTabChange(index: number) {
-		onValueChange?.(index);
-	}
-
-	function handleStepChange({ value: nextValue }: StepperValueChangePayload<Item>) {
-		onValueChange?.(nextValue);
+	function handleTabChange(nextValue: string) {
+		emitChange(tabValues.indexOf(nextValue));
 	}
 </script>
 
-<div class={classes.root({ placement, className })}>
+<div class={classes.root({ placement, className })} {...attachments}>
 	<Tabbar
-		fullWidth={tabbarFullWidth}
+		id={`${id}-tabs`}
+		controlsPanels
+		fullWidth={tabbar?.fullWidth}
+		label={tabbar?.label}
 		onValueChange={handleTabChange}
 		{items}
 		bind:value={valueState.value}
-		size={tabbarSize}
+		size={tabbar?.size}
 		orientation={effectiveTabbarOrientation}
-		color={tabbarColor}
-		alignment={tabbarAlignment}
+		color={tabbar?.color}
+		alignment={tabbar?.alignment}
+		variant={tabbar?.variant}
+		scrollFade={tabbar?.scrollFade}
 		position={placement}
-		class={tabbarClass}
-		theme={tabbarTheme}
+		class={tabbar?.class}
+		theme={tabbar?.theme}
 	/>
 	<Stepper
 		class={classes.content({ placement })}
-		bind:stepper
+		bind:api
 		{items}
-		bind:value={valueState.value}
-		onValueChange={handleStepChange}
-		{keyFramesOptions}
+		bind:value={() => activeIndex, setActiveIndex}
+		onValueChange={({ value: index }) => emitChange(index)}
+		panelRole="tabpanel"
+		panelId={(index) => `${id}-tabs-panel-${index}`}
+		panelAriaLabelledby={({ index }) => `${id}-tabs-tab-${index}`}
+		transition={panelTransition}
+		{mount}
 	>
 		{#snippet children(payload)}
 			{@render panel?.(payload)}

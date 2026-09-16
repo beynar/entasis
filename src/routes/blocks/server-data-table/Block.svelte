@@ -207,7 +207,7 @@
 			{String(payload.value)}
 		</Chip>
 	{:else if payload.columnId === 'monthlySpend'}
-		<span class="font-medium tabular-nums text-neutral">
+		<span class="text-neutral font-medium tabular-nums">
 			{formatCurrency(Number(payload.value))}
 		</span>
 	{:else}
@@ -218,7 +218,7 @@
 {#snippet rowActions(payload: DataTableRowPayload<Customer>)}
 	<PopupMenu
 		position="bottom-end"
-		menu={{ items: createRowMenu(payload.row), density: 'small' }}
+		menu={{ items: createRowMenu(payload.row), density: 'compact' }}
 		trigger={{
 			label: `Actions for ${payload.row.name}`,
 			prefix: dotsThreeIcon,
@@ -242,7 +242,7 @@
 {/snippet}
 
 {#snippet loadingContent()}
-	<div class="flex justify-center p-xl">
+	<div class="p-xl flex justify-center">
 		<SpinnerText
 			texts={['Querying customer service', 'Loading the current page']}
 			delay={900}
@@ -251,16 +251,16 @@
 	</div>
 {/snippet}
 
-<section class="flex flex-col gap-lg rounded-lg border border-neutral-muted bg-surface-raised p-lg">
-	<header class="flex flex-wrap items-end justify-between gap-md">
-		<div class="flex flex-col gap-xs">
-			<p class="text-sm font-medium text-primary-readable">Customer operations</p>
-			<h2 class="text-2xl font-semibold tracking-tight text-neutral">Accounts</h2>
-			<p class="text-sm text-neutral/60">
+<section class="gap-lg border-neutral-muted bg-surface-raised p-lg flex flex-col rounded-lg border">
+	<header class="gap-md flex flex-wrap items-end justify-between">
+		<div class="gap-xs flex flex-col">
+			<p class="text-primary-readable text-sm font-medium">Customer operations</p>
+			<h2 class="text-neutral text-2xl font-semibold tracking-tight">Accounts</h2>
+			<p class="text-neutral/70 text-sm">
 				Search, sort, and page through records processed by a simulated remote service.
 			</p>
 		</div>
-		<div class="flex flex-col items-end gap-xs text-sm text-neutral/60">
+		<div class="gap-xs text-neutral/70 flex flex-col items-end text-sm">
 			<span>{rowCount} matching records</span>
 			<span>Last synced: {lastSynced}</span>
 		</div>
@@ -288,5 +288,5 @@
 		caption="Remote customer directory"
 	/>
 
-	<p class="text-sm text-neutral/60" aria-live="polite">{actionMessage}</p>
+	<p class="text-neutral/70 text-sm" aria-live="polite">{actionMessage}</p>
 </section>

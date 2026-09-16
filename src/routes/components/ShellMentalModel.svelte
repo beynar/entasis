@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { resolveLink } from '../appNavigation.js';
+	import type { RouteId } from '$app/types';
 	type ShellComponentId = 'app-shell' | 'sidebar' | 'page-shell';
 
 	let { current }: { current: ShellComponentId } = $props();
@@ -6,7 +8,7 @@
 	const items: {
 		id: ShellComponentId;
 		label: string;
-		href: string;
+		href: RouteId;
 		responsibility: string;
 		use: string;
 		how: string;
@@ -43,10 +45,10 @@
 
 <section
 	aria-labelledby="shell-mental-model-title"
-	class="grid gap-3 rounded-xl border border-neutral-muted bg-surface p-4 text-sm text-neutral/70"
+	class="border-neutral-muted bg-surface text-neutral/70 grid gap-3 rounded-xl border p-4 text-sm"
 >
 	<div class="grid gap-1">
-		<p id="shell-mental-model-title" class="font-medium text-neutral">Shell mental model</p>
+		<p id="shell-mental-model-title" class="text-neutral font-medium">Shell mental model</p>
 		<p>
 			Sidebar moves and paints the application frame; AppShell composes it with PageShell; PageShell
 			shapes the page. Each card links to the component that owns that layer.
@@ -54,22 +56,22 @@
 	</div>
 
 	<div class="grid gap-3 md:grid-cols-3">
-		{#each items as item}
+		{#each items as item, index (index)}
 			<a
-				href={item.href}
+				href={resolveLink(item.href)}
 				aria-current={current === item.id ? 'page' : undefined}
 				class="rounded-lg border p-3 transition {current === item.id
 					? 'border-primary bg-primary/10 text-neutral'
 					: 'border-neutral-muted bg-surface-raised text-neutral/75 hover:border-primary/50 hover:text-neutral'}"
 			>
-				<span class="block font-medium text-neutral">{item.label}</span>
+				<span class="text-neutral block font-medium">{item.label}</span>
 				<span class="mt-2 block">{item.responsibility}</span>
 				<span class="mt-2 block">
-					<span class="font-medium text-neutral">Use:</span>
+					<span class="text-neutral font-medium">Use:</span>
 					{item.use}
 				</span>
 				<span class="mt-1 block">
-					<span class="font-medium text-neutral">How:</span>
+					<span class="text-neutral font-medium">How:</span>
 					{item.how}
 				</span>
 			</a>

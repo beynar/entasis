@@ -37,7 +37,7 @@ export async function getUser(id: string): Promise<User> {
 	const svelteCode = `<script lang="ts">
 	let count = $state(0);
 	const double = $derived(count * 2);
-<\/script>
+</scr${'ipt'}>
 
 <button onclick={() => count++}>
 	clicked {count} {count === 1 ? 'time' : 'times'}
@@ -64,7 +64,7 @@ export async function getUser(id: string): Promise<User> {
 		"build": "vite build"
 	},
 	"dependencies": {
-		"shiki": "^4.3.0"
+		"@tanstack/highlight": "^0.1.0"
 	}
 }`;
 
@@ -95,7 +95,7 @@ print(f"distance = {origin.distance(Point(3, 4))}")`;
 	subtitle="Syntax-highlighted code blocks with a copy button, optional line numbers, and header/footer slots. Colors adapt to light and dark automatically from the design tokens."
 	component="Code"
 	features={[
-		'Shiki highlighting with bundled grammars',
+		'TanStack Highlight with every language bundled',
 		'SSR-safe synchronous highlighter',
 		'One-click copy with copied feedback',
 		'ScrollArea for long code blocks',

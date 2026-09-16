@@ -1,7 +1,7 @@
 import { cva, setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultSpinnerOverlay = cva({
-	base: 'absolute overflow-hidden flex gap-sm flex-col items-center justify-center backdrop-blur-[10px] z-10 w-full h-full rounded-[inherit] inset-0 bg-color/20 '
+	base: 'absolute overflow-hidden flex gap-sm flex-col items-center justify-center backdrop-blur-[10px] z-10 w-full h-full rounded-[inherit] inset-0 bg-surface/85'
 });
 
 const defaultSpinnerOverlaySpinner = cva({
@@ -29,12 +29,12 @@ const defaultSpinnerOverlaySpinner = cva({
 });
 
 const defaultSpinnerOverlayText = cva({
-	base: 'text-sm order-1',
+	base: 'order-1 rounded-md bg-surface px-sm py-xs text-sm',
 	variants: {
 		size: {
-			small: 'text-sm',
-			normal: 'text-base',
-			large: 'text-lg'
+			small: 'text-xs',
+			normal: 'text-sm',
+			large: 'text-base'
 		},
 		color: {
 			primary: 'text-primary-readable',

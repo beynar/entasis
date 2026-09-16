@@ -24,14 +24,16 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<div class="grid gap-xl md:grid-cols-[1fr_2fr]">
-		<div class="flex flex-col gap-xl md:sticky md:top-xl md:self-start">
-			<Avatar size="large" user={{ name: 'Alex Morgan' }} />
-			<header class="flex flex-col gap-lg">
-				<p class="text-xs font-semibold uppercase tracking-widest text-primary">Designer & maker</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<div class="gap-xl grid md:grid-cols-[1fr_2fr]">
+		<div class="gap-xl md:top-xl flex flex-col md:sticky md:self-start">
+			<Avatar size="large" name="Alex Morgan" />
+			<header class="gap-lg flex flex-col">
+				<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+					Designer & maker
+				</p>
 				<Heading size="h2" weight="bold">Always a work in progress.</Heading>
-				<p class="max-w-2xl text-neutral/65">
+				<p class="text-neutral/65 max-w-2xl">
 					I build thoughtful digital experiences with teams who care about the details.
 				</p>
 			</header>
@@ -45,7 +47,7 @@
 			}))}
 			variant="outline"
 			color="primary"
-			density="large"
+			density="comfortable"
 		/>
 	</div>
 </section>

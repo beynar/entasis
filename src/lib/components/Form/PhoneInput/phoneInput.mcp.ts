@@ -19,7 +19,7 @@ Extends all Field component props plus:
 
 ### Core Props
 - **value**: string (bindable) - Phone number value
-- **defaultCountry**: string (default: 'US') - Default country code
+- **country**: string (bindable, default: 'fr') - ISO country code selected in the country picker
 - **placeholder**: string - Placeholder text
 
 ### Field Props (inherited)
@@ -67,7 +67,7 @@ Extends all Field component props plus:
 <PhoneInput 
 	label="Phone Number"
 	bind:value={phone}
-	defaultCountry="GB"
+	country="gb"
 />
 \`\`\`
 
@@ -198,19 +198,19 @@ Extends all Field component props plus:
 <PhoneInput 
 	label="US Number"
 	bind:value={phoneNumbers.us}
-	defaultCountry="US"
+	country="us"
 />
 
 <PhoneInput 
 	label="UK Number"
 	bind:value={phoneNumbers.uk}
-	defaultCountry="GB"
+	country="gb"
 />
 
 <PhoneInput 
 	label="France Number"
 	bind:value={phoneNumbers.fr}
-	defaultCountry="FR"
+	country="fr"
 />
 \`\`\`
 
@@ -333,13 +333,18 @@ The theme object contains the following parts:
 \`\`\`
 
 **Focus State Customization**:
+
+To recolor every focus ring in the app at once, set \`designTokens.focusColor\` on \`Theme\`
+instead of overriding per component. \`ring-focus\` is the focus state role and falls back to the
+current role, so it never hard-pins a color.
+
 \`\`\`svelte
 <PhoneInput 
   label="Contact Phone"
   bind:value={phone}
   theme={{
     inputContainer: {
-      base: 'focus-within:ring-2 focus-within:ring-primary focus-within:border-primary'
+      base: 'focus-within:ring-2 focus-within:ring-focus/50 focus-within:border-focus'
     }
   }}
 />

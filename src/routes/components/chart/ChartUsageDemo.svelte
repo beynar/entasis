@@ -98,7 +98,7 @@
 		barAnalysis
 	});
 	const polarOptions = $derived({ line, area, points, guides, tooltip });
-	const initialDimensions = { width: 960, height: 480 } as const;
+	const aspectRatio = 960 / 480;
 	const legendOptions: ChartLegend = $derived.by(() => {
 		if (!legend || chartType === 'facet') return false;
 		let label: string | undefined;
@@ -114,8 +114,8 @@
 	});
 </script>
 
-<div class="grid min-w-0 w-full gap-4">
-	<p class="text-neutral/60 mx-auto max-w-3xl text-center text-sm leading-6">
+<div class="grid w-full min-w-0 gap-4">
+	<p class="text-neutral/70 mx-auto max-w-3xl text-center text-sm leading-6">
 		{activeMetadata.description}
 	</p>
 
@@ -127,8 +127,8 @@
 				{...example.props}
 				legend={legendOptions}
 				viewport={chartType === 'series' || chartType === 'bar' ? brushZoom : false}
-				ariaLabel={activeMetadata.ariaLabel}
-				{initialDimensions}
+				label={activeMetadata.chartLabel}
+				{aspectRatio}
 				class="w-full"
 			/>
 		{:else if chartType === 'scatter'}
@@ -143,8 +143,8 @@
 				{...example.props}
 				legend={legendOptions}
 				viewport={brushZoom}
-				ariaLabel={activeMetadata.ariaLabel}
-				{initialDimensions}
+				label={activeMetadata.chartLabel}
+				{aspectRatio}
 				class="w-full"
 			/>
 		{:else if chartType === 'matrix'}
@@ -154,8 +154,8 @@
 				{...example.props}
 				legend={legendOptions}
 				viewport={matrixVariant === 'grid' && brushZoom}
-				ariaLabel={activeMetadata.ariaLabel}
-				{initialDimensions}
+				label={activeMetadata.chartLabel}
+				{aspectRatio}
 				class="w-full"
 			/>
 		{:else if chartType === 'distribution'}
@@ -169,8 +169,8 @@
 				{...example.props}
 				legend={legendOptions}
 				viewport={brushZoom}
-				ariaLabel={activeMetadata.ariaLabel}
-				{initialDimensions}
+				label={activeMetadata.chartLabel}
+				{aspectRatio}
 				class="w-full"
 			/>
 		{:else if chartType === 'proportion'}
@@ -179,8 +179,8 @@
 				data={example.data}
 				{...example.props}
 				legend={legendOptions}
-				ariaLabel={activeMetadata.ariaLabel}
-				{initialDimensions}
+				label={activeMetadata.chartLabel}
+				{aspectRatio}
 				class="w-full"
 			/>
 		{:else if chartType === 'polar'}
@@ -189,8 +189,8 @@
 				data={example.data}
 				{...example.props}
 				legend={legendOptions}
-				ariaLabel={activeMetadata.ariaLabel}
-				{initialDimensions}
+				label={activeMetadata.chartLabel}
+				{aspectRatio}
 				class="w-full"
 			/>
 		{:else if chartType === 'relation'}
@@ -199,8 +199,8 @@
 				data={example.data}
 				{...example.props}
 				legend={legendOptions}
-				ariaLabel={activeMetadata.ariaLabel}
-				{initialDimensions}
+				label={activeMetadata.chartLabel}
+				{aspectRatio}
 				class="w-full"
 			/>
 		{/if}

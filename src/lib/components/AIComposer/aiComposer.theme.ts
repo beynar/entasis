@@ -5,7 +5,7 @@ import {
 	type InferComponentTheme
 } from '$lib/utils/cva/index.js';
 const defaultRoot = cva({
-	base: 'relative grid min-w-0 grid-cols-[minmax(0,1fr)] gap-xs rounded-md border border-neutral-muted bg-surface p-sm transition-colors focus-within:ring-2 focus-within:ring-primary/30',
+	base: 'relative grid min-w-0 grid-cols-[minmax(0,1fr)] gap-xs rounded-md border border-neutral-muted bg-surface p-sm transition-colors focus-within:ring-2 focus-within:ring-focus/50',
 	variants: {
 		dragState: {
 			idle: '',
@@ -16,7 +16,7 @@ const defaultRoot = cva({
 	}
 });
 const defaultDropzone = cva({
-	base: 'pointer-events-none absolute inset-1 z-20 flex items-center justify-center gap-md rounded-sm border border-dashed bg-surface/95 px-lg text-center text-sm font-medium shadow-sm',
+	base: 'pointer-events-none absolute inset-1 z-20 flex items-center justify-center gap-md rounded-sm border border-dashed bg-surface/95 px-lg text-center text-sm font-medium lift-1',
 	variants: {
 		state: {
 			idle: '',
@@ -34,7 +34,7 @@ const defaultEditor = cva({
 	base: 'py-xs',
 	variants: {
 		autoresize: {
-			true: 'min-h-10',
+			true: 'min-h-row-md',
 			false: 'h-24 min-h-24'
 		}
 	}
@@ -65,11 +65,11 @@ const defaultVoiceInput = cva({
 });
 const defaultQueue = cva({ base: 'grid gap-xs border-b border-neutral-muted pb-md' });
 const defaultQueueEditing = cva({
-	base: 'flex min-w-0 items-center justify-between gap-md rounded-sm bg-neutral-muted/50 px-md py-xs text-sm text-neutral/75'
+	base: 'flex min-w-0 items-center justify-between gap-md rounded-sm bg-neutral-muted/50 px-md py-xs text-sm text-neutral/70'
 });
 const defaultQueueList = cva({ base: 'grid gap-xs' });
 const defaultQueueItem = cva({ base: 'flex min-w-0 flex-1 items-center gap-md' });
-const defaultQueueText = cva({ base: 'min-w-0 flex-1 truncate text-sm text-neutral/75' });
+const defaultQueueText = cva({ base: 'min-w-0 flex-1 truncate text-sm text-neutral/70' });
 export const aiComposerTheme = {
 	root: defaultRoot,
 	dropzone: defaultDropzone,

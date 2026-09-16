@@ -47,10 +47,10 @@
 	]);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<header>
 		<h2 class="text-3xl font-semibold">A little more connected.</h2>
-		<p class="mt-sm text-sm text-neutral/60">
+		<p class="mt-sm text-neutral/70 text-sm">
 			Bring your tools into one workspace. Connection states are local demonstrations.
 		</p>
 	</header>
@@ -62,9 +62,9 @@
 				title={tool.name}
 				description={tool.description}
 				><Stack gap="lg">
-					<div class="flex flex-wrap items-center justify-between gap-md">
+					<div class="gap-md flex flex-wrap items-center justify-between">
 						<span
-							class="grid size-12 place-items-center rounded-lg bg-primary-muted text-lg font-semibold"
+							class="bg-primary-muted grid size-12 place-items-center rounded-lg text-lg font-semibold"
 							>{tool.name.slice(0, 1)}</span
 						><Chip color={tool.connected ? 'success' : 'neutral'}
 							>{tool.connected ? 'Enabled in demo' : tool.category}</Chip
@@ -76,6 +76,6 @@
 						>{tool.connected ? 'Disable demo' : 'Enable demo'}</Button
 					>
 				</Stack></Card
-			>{:else}<p class="text-sm text-neutral/60">No tools match your search.</p>{/each}
+			>{:else}<p class="text-neutral/70 text-sm">No tools match your search.</p>{/each}
 	</Grid>
 </Stack>

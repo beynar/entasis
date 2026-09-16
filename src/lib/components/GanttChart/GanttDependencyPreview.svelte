@@ -65,7 +65,7 @@
 			cx={status.toX}
 			cy={status.toY}
 			r="5"
-			class="fill-[var(--color)] stroke-surface stroke-2"
+			class="stroke-surface fill-[var(--color)] stroke-2"
 		></circle>
 	{/if}
 </svg>

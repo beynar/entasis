@@ -61,7 +61,7 @@
 		bind:tasks
 		timeZone="UTC"
 		zoom="month"
-		density="small"
+		density="compact"
 		class="h-[30rem] w-full"
 	/>
 </div>

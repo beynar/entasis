@@ -39,27 +39,27 @@
 	let selectedJob = $state<(typeof jobs)[number] | null>(null);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 			Build something useful
 		</p>
 		<Heading size="h2" weight="bold">Good people. Meaningful work.</Heading>
-		<p class="max-w-2xl text-neutral/65">
+		<p class="text-neutral/65 max-w-2xl">
 			A small, curious team making software feel a little more human.
 		</p>
 	</header>
-	{#each ['Design', 'Engineering'] as team (team)}<div class="grid gap-xl md:grid-cols-[12rem_1fr]">
+	{#each ['Design', 'Engineering'] as team (team)}<div class="gap-xl grid md:grid-cols-[12rem_1fr]">
 			<h3 class="text-xl font-semibold">{team}</h3>
 			<div>
 				{#each jobs.filter((job) => job.team === team) as job (job.title)}<article
-						class="flex gap-lg items-center justify-between flex-wrap py-xl border-b border-neutral/15"
+						class="gap-lg py-xl border-neutral/15 flex flex-wrap items-center justify-between border-b"
 					>
-						<div class="flex flex-col gap-sm">
+						<div class="gap-sm flex flex-col">
 							<h4 class="text-lg font-medium">{job.title}</h4>
-							<p class="text-sm text-neutral/60">{job.location}</p>
+							<p class="text-neutral/70 text-sm">{job.location}</p>
 						</div>
-						<div class="flex gap-lg items-center">
+						<div class="gap-lg flex items-center">
 							<Chip size="small" variant="soft" color="neutral">{job.type}</Chip><Button
 								variant="ghost"
 								onclick={() => (selectedJob = job)}>Details ↗</Button
@@ -74,9 +74,9 @@
 		}}
 		title={selectedJob?.title ?? 'Position details'}
 		description={selectedJob?.location}
-		><div class="flex flex-col gap-lg">
+		><div class="gap-lg flex flex-col">
 			<p>{selectedJob?.detail}</p>
-			<p class="text-sm text-neutral/60">
+			<p class="text-neutral/70 text-sm">
 				This example shows the role details. Connect your application workflow when using this
 				block.
 			</p>

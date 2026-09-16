@@ -8,14 +8,14 @@
 	import { arrowRightIcon } from 'svelai/icons/arrowRight';
 </script>
 
-<section class="mx-auto grid max-w-6xl gap-xl p-lg md:grid-cols-3 md:p-xl">
-	<div class="flex flex-col gap-xl md:col-span-2">
+<section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl md:grid-cols-3">
+	<div class="gap-xl flex flex-col md:col-span-2">
 		<Chip class="self-start" variant="outline">Interface design</Chip><Heading
 			as="h2"
 			size="h1"
 			weight="bold">Make the useful feel effortless.</Heading
 		>
-		<p class="text-lg text-neutral/70">
+		<p class="text-neutral/70 text-lg">
 			A good interface carries the context, makes the choice clear, and gets out of the way at the
 			right moment.
 		</p>
@@ -44,18 +44,18 @@
 						'The feedback, empty states, and transitions that help people move with confidence.'
 				}
 			]}
-			icon="math"
+			icon="plus-minus"
 		/>
 	</div>
-	<aside class="flex flex-col gap-lg">
+	<aside class="gap-lg flex flex-col">
 		<Card variant="soft" color="primary" title="The engagement"
 			><Stack gap="lg"
-				><dl class="grid gap-md text-sm">
-					<dt class="text-neutral/60">Typical focus</dt>
+				><dl class="gap-md grid text-sm">
+					<dt class="text-neutral/70">Typical focus</dt>
 					<dd>One core product workflow</dd>
-					<dt class="text-neutral/60">Working rhythm</dt>
+					<dt class="text-neutral/70">Working rhythm</dt>
 					<dd>Weekly review sessions</dd>
-					<dt class="text-neutral/60">Outputs</dt>
+					<dt class="text-neutral/70">Outputs</dt>
 					<dd>Designs, prototype, and system notes</dd>
 				</dl>
 				<Button href="/blocks" variant="outline">See interface examples</Button></Stack

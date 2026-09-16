@@ -3,7 +3,7 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { NumberInput } from '$lib/components/Form/NumberInput/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let quantity = $state<number | null>(1);
@@ -20,7 +20,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -39,7 +39,7 @@
 	component="NumberInput"
 	features={[
 		'Native min, max & step plus +/- controls',
-		'Bindable value, errors & focus',
+		'Bindable value, errors & focused state',
 		'Min/max checked in onValidate',
 		'Label linked via Field wrapper'
 	]}
@@ -77,7 +77,7 @@
 			<div class="w-full max-w-md">
 				<NumberInput label="Quantity" placeholder="0" bind:value={quantity} />
 				{#if quantity !== null}
-					<p class="text-neutral/60 mt-2 text-xs">Value: {quantity}</p>
+					<p class="text-neutral/70 mt-2 text-xs">Value: {quantity}</p>
 				{/if}
 			</div>
 		</ComponentCard>

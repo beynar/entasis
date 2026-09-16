@@ -21,7 +21,7 @@ const defaultInput = cva({
 });
 
 const defaultInputContainer = cva({
-	base: 'flex w-full flex-wrap items-center justify-start border border-neutral-muted bg-surface-raised px-lg text-neutral ring-0 transition-all rounded-md outline-none focus-within:ring-2 focus-within:ring-primary/50',
+	base: 'flex w-full flex-wrap items-center justify-start border border-neutral-muted bg-surface-raised px-lg text-neutral ring-0 transition-[color,background-color,border-color,box-shadow] rounded-md outline-none focus-within:ring-2 focus-within:ring-focus/50',
 	variants: {
 		size: {
 			small: 'min-h-[var(--control-height-sm)] py-xs text-xs gap-xs',
@@ -54,7 +54,7 @@ const defaultTag = cva({
 });
 
 const defaultLoading = cva({
-	base: 'text-neutral/60 p-md text-sm',
+	base: 'text-neutral/70 p-md text-sm',
 	variants: {
 		size: {
 			small: 'text-xs p-sm',
@@ -76,7 +76,7 @@ const defaultError = cva({
 });
 
 const defaultNoOptions = cva({
-	base: 'text-neutral/60 p-md text-sm',
+	base: 'text-neutral/70 p-md text-sm',
 	variants: {
 		size: {
 			small: 'text-xs p-sm',

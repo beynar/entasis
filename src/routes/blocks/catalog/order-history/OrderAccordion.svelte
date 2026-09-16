@@ -51,14 +51,16 @@
 	let query = $state('');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Order history</p>
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Order history
+		</p>
 		<Heading size="h2" weight="bold">Your collection, so far.</Heading>
 	</header>
 	<TextInput
@@ -72,24 +74,24 @@
 				(order.id + ' ' + order.name).toLowerCase().includes((query ?? '').toLowerCase())
 			)
 			.map((order) => ({ ...order, title: order.id, description: order.date }))}
-		variant="outlined"
+		variant="outline"
 		splitted
-		>{#snippet title({ item: order })}<div class="flex gap-lg items-center">
+		>{#snippet title({ item: order })}<div class="gap-lg flex items-center">
 				<span>{order.id}</span><Chip
 					size="small"
 					variant="soft"
 					color={order.status === 'Delivered' ? 'success' : 'info'}>{order.status}</Chip
 				>
 			</div>{/snippet}{#snippet content({ item: order })}<div
-				class="grid items-center gap-xl sm:grid-cols-[7rem_1fr_auto]"
+				class="gap-xl grid items-center sm:grid-cols-[7rem_1fr_auto]"
 			>
 				<div>{@render productArt(order.shape, order.color)}</div>
 				<div>
 					<h3 class="font-medium">{order.name}</h3>
-					<p class="mt-md text-sm text-neutral/55">
+					<p class="mt-md text-neutral/65 text-sm">
 						{order.quantity} × {money(order.price)} · {order.color}
 					</p>
-					<p class="mt-sm text-xs text-neutral/45">{order.delivery}</p>
+					<p class="mt-sm text-neutral/65 text-xs">{order.delivery}</p>
 				</div>
 				<Button variant="outline" size="small" onclick={() => (selectedOrder = order)}
 					>View details</Button
@@ -102,10 +104,10 @@
 		}}
 		title={selectedOrder?.id ?? 'Order details'}
 		description="Sample order details"
-		>{#if selectedOrder}<div class="flex flex-col gap-xl">
+		>{#if selectedOrder}<div class="gap-xl flex flex-col">
 				{@render productArt(selectedOrder.shape, selectedOrder.color)}
 				<h3 class="text-xl font-semibold">{selectedOrder.name}</h3>
-				<dl class="flex flex-col gap-lg text-sm">
+				<dl class="gap-lg flex flex-col text-sm">
 					<div class="flex justify-between">
 						<dt>Status</dt>
 						<dd>{selectedOrder.status}</dd>

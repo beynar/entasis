@@ -63,16 +63,16 @@
 	}
 </script>
 
-<section id={block.id} class="flex min-w-0 scroll-mt-8 flex-col gap-lg">
-	<header class="flex flex-wrap items-start justify-between gap-md">
-		<div class="flex flex-col gap-xs">
+<section id={block.id} class="gap-lg flex min-w-0 scroll-mt-8 flex-col">
+	<header class="gap-md flex flex-wrap items-start justify-between">
+		<div class="gap-xs flex flex-col">
 			<a
 				href={resolve('/blocks/[category]/[block]', { category, block: block.id })}
 				class="w-fit hover:underline"
 			>
-				<h2 class="text-lg font-semibold tracking-tight text-neutral">{block.title}</h2>
+				<h2 class="text-neutral text-lg font-semibold tracking-tight">{block.title}</h2>
 			</a>
-			<p class="max-w-3xl text-sm text-neutral/60">{block.description}</p>
+			<p class="text-neutral/70 max-w-3xl text-sm">{block.description}</p>
 		</div>
 		<Button
 			href={block.reference}
@@ -81,14 +81,14 @@
 			variant="link"
 			size="small"
 			suffix={arrowUpRightIcon}
-			class="text-neutral/50"
+			class="text-neutral/65"
 		>
 			Reference
 		</Button>
 	</header>
-	<div class="overflow-hidden rounded-lg border border-neutral-muted bg-surface-canvas">
+	<div class="border-neutral-muted bg-surface-canvas overflow-hidden rounded-lg border">
 		<div
-			class="flex flex-wrap items-center justify-between gap-md border-b border-neutral-muted p-md"
+			class="gap-md border-neutral-muted p-md flex flex-wrap items-center justify-between border-b"
 		>
 			<SegmentedControl
 				items={[
@@ -97,19 +97,19 @@
 				]}
 				value={view}
 				onValueChange={showSource}
-				ariaLabel={`${block.title} view`}
+				label={`${block.title} view`}
 				size="small"
 			/>
-			<div class="flex flex-wrap items-center gap-sm">
+			<div class="gap-sm flex flex-wrap items-center">
 				{#if view === 'preview'}
 					<div class="hidden sm:block">
 						<SegmentedControl
 							items={[
-								{ value: 'desktop', icon: desktopIcon, ariaLabel: 'Desktop preview' },
-								{ value: 'mobile', icon: deviceMobileIcon, ariaLabel: 'Mobile preview' }
+								{ value: 'desktop', icon: desktopIcon, label: 'Desktop preview' },
+								{ value: 'mobile', icon: deviceMobileIcon, label: 'Mobile preview' }
 							] as const}
 							bind:value={device}
-							ariaLabel={`${block.title} viewport`}
+							label={`${block.title} viewport`}
 							size="small"
 						/>
 					</div>
@@ -136,17 +136,17 @@
 				</Button>
 			</div>
 		</div>
-		{#if copyError}<p role="alert" class="p-lg text-sm text-danger-readable">{copyError}</p>{/if}
+		{#if copyError}<p role="alert" class="p-lg text-danger-readable text-sm">{copyError}</p>{/if}
 		{#if view === 'source'}
 			{#if sourceError}
-				<div class="flex flex-col items-start gap-md p-xl">
-					<p role="alert" class="text-sm text-danger-readable">{sourceError}</p>
+				<div class="gap-md p-xl flex flex-col items-start">
+					<p role="alert" class="text-danger-readable text-sm">{sourceError}</p>
 					<Button variant="outline" onclick={() => showSource('source')}>Retry</Button>
 				</div>
 			{:else if source !== undefined}
 				<Code code={source} language="svelte" showHeader={false} showLineNumbers maxHeight={640} />
 			{:else}
-				<p role="status" class="p-xl text-sm text-neutral/60">Loading source…</p>
+				<p role="status" class="p-xl text-neutral/70 text-sm">Loading source…</p>
 			{/if}
 		{:else}
 			<div class="bg-surface-recessed">
@@ -156,5 +156,5 @@
 			</div>
 		{/if}
 	</div>
-	<p class="text-xs text-neutral/50">Built with {block.components.join(' · ')}</p>
+	<p class="text-neutral/65 text-xs">Built with {block.components.join(' · ')}</p>
 </section>

@@ -3,7 +3,7 @@ import type { Colors, Sizes } from '../../types/theme.js';
 import type { Slot, WithSlot } from '../Slot/slot.js';
 import type { MeterThemeProps } from './meter.theme.js';
 
-export type MeterStep<T extends Record<string, any> | undefined> = {
+export type MeterStep<T = unknown> = {
 	/**
 	 * Label shown for this segment in the legend when `showLegend` is enabled.
 	 */
@@ -30,7 +30,7 @@ export type MeterStep<T extends Record<string, any> | undefined> = {
 	data?: T;
 };
 
-type Step<T extends Record<string, any> | undefined> = {
+type Step<T = unknown> = {
 	/**
 	 * Scale value where this background step segment begins.
 	 */
@@ -65,10 +65,7 @@ type Step<T extends Record<string, any> | undefined> = {
 	data?: T;
 };
 
-export type MeterProps<
-	T extends Record<string, any> | undefined,
-	S extends Record<string, any> | undefined
-> = WithSlot<
+export type MeterProps<T = unknown, S = unknown> = WithSlot<
 	WithSlot<
 		{
 			/**
@@ -80,9 +77,18 @@ export type MeterProps<
 			 */
 			showIndicatorAs?: 'value' | 'percentage';
 			/**
-			 * One meter segment or a stacked set of segments to render on the track.
+			 * A plain number, one meter segment, or a stacked set of segments to render
+			 * on the track. A number renders a single segment coloured by `color` whose
+			 * legend label defaults to the number itself.
+			 *
+			 * @readonly-value Meter draws a measurement it never edits.
 			 */
-			value: MeterStep<T> | MeterStep<T>[];
+			value: number | MeterStep<T> | MeterStep<T>[];
+			/**
+			 * Theme color of the meter, used for a numeric `value` and as the fallback
+			 * for segments that declare no color of their own.
+			 */
+			color?: Colors;
 			/**
 			 * Colored range segments overlaid along the meter scale.
 			 */

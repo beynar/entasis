@@ -41,18 +41,18 @@
 	);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<header>
 		<Chip color="primary">Project checklist</Chip>
 		<h2 class="mt-lg text-3xl font-semibold">Big work. Smaller steps.</h2>
-		<p class="mt-sm text-sm text-neutral/60">{completed} of {total} steps complete</p>
+		<p class="mt-sm text-neutral/70 text-sm">{completed} of {total} steps complete</p>
 	</header>
-	<Meter value={{ value: total ? (completed / total) * 100 : 0, color: 'primary' }} /><Accordion
+	<Meter value={total ? (completed / total) * 100 : 0} color="primary" /><Accordion
 		items={projects}
 		oneAtATime
-		variant="outlined"
+		variant="outline"
 		defaultValue={['website']}
-		>{#snippet title({ item })}<div class="flex flex-wrap items-center justify-between gap-md">
+		>{#snippet title({ item })}<div class="gap-md flex flex-wrap items-center justify-between">
 				<strong>{item.title}</strong><Chip
 					size="small"
 					color={item.tasks.every((task) => task.done) ? 'success' : 'neutral'}

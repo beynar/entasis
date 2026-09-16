@@ -12,6 +12,7 @@ import { textHTwoIcon } from '../Icons/textHTwo.js';
 import { textItalicIcon } from '../Icons/textItalic.js';
 import { textStrikethroughIcon } from '../Icons/textStrikethrough.js';
 import type { RichTextInputFormat } from './richTextInput.props.js';
+import type { Messages } from '$lib/i18n/en.js';
 import type {
 	AIComposerSelectionBlockType,
 	AIComposerSelectionFormat,
@@ -34,40 +35,41 @@ export function getRichTextInputBlockControls(options: {
 	hasFormat: HasFormat;
 	blockType: AIComposerSelectionBlockType;
 	onBlock: (blockType: AIComposerSelectionBlockType) => void;
+	messages: Messages;
 }): RichTextInputToolbarButtonConfig[] {
-	const { hasFormat, blockType, onBlock } = options;
+	const { hasFormat, blockType, onBlock, messages } = options;
 	return [
 		{
 			id: 'paragraph',
-			label: 'Paragraph',
+			label: messages.richTextParagraph,
 			icon: paragraphIcon,
 			active: blockType === 'paragraph',
 			onSelect: () => onBlock('paragraph')
 		},
 		...optionalControl(hasFormat('heading1'), {
 			id: 'heading1',
-			label: 'Heading 1',
+			label: messages.richTextHeading(1),
 			icon: textHOneIcon,
 			active: blockType === 'heading1',
 			onSelect: () => onBlock('heading1')
 		}),
 		...optionalControl(hasFormat('heading2'), {
 			id: 'heading2',
-			label: 'Heading 2',
+			label: messages.richTextHeading(2),
 			icon: textHTwoIcon,
 			active: blockType === 'heading2',
 			onSelect: () => onBlock('heading2')
 		}),
 		...optionalControl(hasFormat('heading3'), {
 			id: 'heading3',
-			label: 'Heading 3',
+			label: messages.richTextHeading(3),
 			icon: textHThreeIcon,
 			active: blockType === 'heading3',
 			onSelect: () => onBlock('heading3')
 		}),
 		...optionalControl(hasFormat('quote'), {
 			id: 'quote',
-			label: 'Block quote',
+			label: messages.richTextBlockQuote,
 			icon: quotesIcon,
 			active: blockType === 'quote',
 			onSelect: () => onBlock('quote')
@@ -81,12 +83,13 @@ export function getRichTextInputInlineControls(options: {
 	hasActiveLink: boolean;
 	onFormat: (format: AIComposerSelectionFormat) => void;
 	onLink: () => void;
+	messages: Messages;
 }): RichTextInputToolbarButtonConfig[] {
-	const { hasFormat, formats, hasActiveLink, onFormat, onLink } = options;
+	const { hasFormat, formats, hasActiveLink, onFormat, onLink, messages } = options;
 	return [
 		...optionalControl(hasFormat('bold'), {
 			id: 'bold',
-			label: 'Bold',
+			label: messages.richTextBold,
 			icon: textBIcon,
 			active: formats.bold,
 			shortcut: 'Mod+B',
@@ -94,7 +97,7 @@ export function getRichTextInputInlineControls(options: {
 		}),
 		...optionalControl(hasFormat('italic'), {
 			id: 'italic',
-			label: 'Italic',
+			label: messages.richTextItalic,
 			icon: textItalicIcon,
 			active: formats.italic,
 			shortcut: 'Mod+I',
@@ -102,28 +105,28 @@ export function getRichTextInputInlineControls(options: {
 		}),
 		...optionalControl(hasFormat('code'), {
 			id: 'code',
-			label: 'Inline code',
+			label: messages.richTextInlineCode,
 			icon: codeIcon,
 			active: formats.code,
 			onSelect: () => onFormat('code')
 		}),
 		...optionalControl(hasFormat('strikethrough'), {
 			id: 'strikethrough',
-			label: 'Strikethrough',
+			label: messages.richTextStrikethrough,
 			icon: textStrikethroughIcon,
 			active: formats.strikethrough,
 			onSelect: () => onFormat('strikethrough')
 		}),
 		...optionalControl(hasFormat('highlight'), {
 			id: 'highlight',
-			label: 'Highlight',
+			label: messages.richTextHighlight,
 			icon: highlighterIcon,
 			active: formats.highlight,
 			onSelect: () => onFormat('highlight')
 		}),
 		...optionalControl(hasFormat('link'), {
 			id: 'link',
-			label: 'Link',
+			label: messages.richTextLink,
 			icon: linkIcon,
 			active: hasActiveLink,
 			onSelect: onLink
@@ -135,19 +138,20 @@ export function getRichTextInputListControls(options: {
 	hasFormat: HasFormat;
 	listType: AIComposerSelectionListType | null;
 	onList: (listType: AIComposerSelectionListType) => void;
+	messages: Messages;
 }): RichTextInputToolbarButtonConfig[] {
-	const { hasFormat, listType, onList } = options;
+	const { hasFormat, listType, onList, messages } = options;
 	return [
 		...optionalControl(hasFormat('bulletList'), {
 			id: 'bulletList',
-			label: 'Unordered list',
+			label: messages.richTextBulletList,
 			icon: listBulletsIcon,
 			active: listType === 'bullet',
 			onSelect: () => onList('bullet')
 		}),
 		...optionalControl(hasFormat('orderedList'), {
 			id: 'orderedList',
-			label: 'Ordered list',
+			label: messages.richTextOrderedList,
 			icon: listNumbersIcon,
 			active: listType === 'number',
 			onSelect: () => onList('number')

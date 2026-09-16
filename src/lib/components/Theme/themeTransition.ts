@@ -134,8 +134,7 @@ function canAnimateThemeChange(
 		transition &&
 		typeof document !== 'undefined' &&
 		document.visibilityState === 'visible' &&
-		typeof document.startViewTransition === 'function' &&
-		!window.matchMedia('(prefers-reduced-motion: reduce)').matches
+		typeof document.startViewTransition === 'function'
 	);
 }
 

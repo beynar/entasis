@@ -52,7 +52,7 @@
 				prefix={iconFor(button.action)}
 				label={button.label}
 				disabled={button.disabled}
-				class={`size-9 rounded-none bg-surface/95 ${button.active ? 'text-primary' : ''}`}
+				class={`bg-surface/95 size-9 rounded-none ${button.active ? 'text-primary-readable' : ''}`}
 			/>
 		{/snippet}
 	</Map>

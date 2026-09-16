@@ -7,7 +7,7 @@
 	let visible = $state(true);
 </script>
 
-<div class="flex min-h-72 items-end justify-end bg-surface-recessed p-xl">
+<div class="bg-surface-recessed p-xl flex min-h-72 items-end justify-end">
 	<Card
 		class="w-full max-w-sm"
 		title="A fresh perspective"
@@ -25,7 +25,7 @@
 				</p>
 				<Button href="/components" variant="outline" fullWidth suffix={arrowRightIcon}
 					>Explore the library</Button
-				>{:else}<p class="text-sm text-neutral/60">Release note dismissed.</p>
+				>{:else}<p class="text-neutral/70 text-sm">Release note dismissed.</p>
 				<Button variant="link" onclick={() => (visible = true)}>Show again</Button>{/if}</Stack
 		></Card
 	>

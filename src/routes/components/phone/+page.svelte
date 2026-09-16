@@ -3,7 +3,7 @@
 	import DocPage from '../../DocPage.svelte';
 	import { PhoneInput } from '$lib/components/Form/PhoneInput/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let phone = $state('');
@@ -20,7 +20,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -42,7 +42,7 @@
 		'Bindable value, errors & country',
 		'Formats number as you type',
 		'Validates with isValidNumber()',
-		'Country list with aria label'
+		'Searchable country dropdown'
 	]}
 >
 	<ComponentCard

@@ -5,7 +5,7 @@
 	import { MenuOption } from '$lib/components/MenuOption/index.js';
 	import SegmentedControl from '$lib/components/SegmentedControl/SegmentedControl.svelte';
 	import type { Density } from '$lib/types/theme.js';
-	import { colors, sizes } from '$lib/utils/tokens.js';
+	import { colors, densities, sizes } from '$lib/utils/tokens.js';
 	import { checkIcon } from '$lib/components/Icons/check.js';
 	import { gearIcon } from '$lib/components/Icons/gear.js';
 	import { userIcon } from '$lib/components/Icons/user.js';
@@ -29,7 +29,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'color',
@@ -42,9 +42,9 @@
 	]);
 
 	const densitySegments = [
-		{ value: 'small', label: 'Small' },
+		{ value: 'compact', label: 'Compact' },
 		{ value: 'normal', label: 'Normal' },
-		{ value: 'large', label: 'Large' }
+		{ value: 'comfortable', label: 'Comfortable' }
 	] as const satisfies ReadonlyArray<{ value: Density; label: string }>;
 	let rowDensity = $state<Density>('normal');
 </script>
@@ -55,8 +55,8 @@
 	component="MenuOption"
 	features={[
 		'Auto button, link, or menuitem role',
-		'aria-disabled and aria-selected support',
-		'data-highlighted for keyboard focus',
+		{ label: 'aria-disabled and aria-selected support', test: 'a11y:menu-option.aria-state' },
+		{ label: 'data-highlighted for keyboard focus', test: 'a11y:menu-option.data-highlighted' },
 		'Prefix, suffix, title, description slots'
 	]}
 >
@@ -73,7 +73,7 @@
 	description="View and edit your profile"
 />`}
 	>
-		<div class="bg-surface rounded-xl border-neutral-muted w-64 space-y-1 border p-1">
+		<div class="bg-surface border-neutral-muted w-64 space-y-1 rounded-xl border p-1">
 			<MenuOption
 				size={controls.value.size}
 				density={controls.value.density}
@@ -88,7 +88,7 @@
 
 	{#snippet examples()}
 		<ComponentCard description="Basic menu items with optional description.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 space-y-1 border p-1">
+			<div class="bg-surface border-neutral-muted w-64 space-y-1 rounded-xl border p-1">
 				<MenuOption title="Simple Menu Item" />
 
 				<MenuOption title="With Description" description="This is a helpful description" />
@@ -96,7 +96,7 @@
 		</ComponentCard>
 
 		<ComponentCard description="Prefix and suffix icon slots.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 space-y-1 border p-1">
+			<div class="bg-surface border-neutral-muted w-64 space-y-1 rounded-xl border p-1">
 				<MenuOption prefix={userIcon} title="Profile" description="View and edit your profile" />
 
 				<MenuOption prefix={gearIcon} suffix={caretRightIcon} title="Settings" />
@@ -106,7 +106,7 @@
 		</ComponentCard>
 
 		<ComponentCard description="Small, normal, and large sizes.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 space-y-1 border p-1">
+			<div class="bg-surface border-neutral-muted w-64 space-y-1 rounded-xl border p-1">
 				<MenuOption size="small" prefix={userIcon} title="Small Menu Item" />
 
 				<MenuOption size="normal" prefix={userIcon} title="Normal Menu Item" />
@@ -117,7 +117,7 @@
 
 		<ComponentCard
 			title="Density"
-			description="density scales paddings, gaps, and min-height while size keeps the typography — small for dense menus, large for roomy ones."
+			description="density scales paddings, gaps, and min-height while size keeps the typography — compact for dense menus, comfortable for roomy ones."
 			code={`<SegmentedControl items={densities} bind:value={density} />
 <MenuOption {density} prefix={userIcon} title="Row" description="..." />`}
 		>
@@ -126,9 +126,9 @@
 					items={densitySegments}
 					bind:value={rowDensity}
 					size="small"
-					ariaLabel="Row density"
+					label="Row density"
 				/>
-				<div class="bg-surface rounded-xl border-neutral-muted w-64 space-y-1 border p-1">
+				<div class="bg-surface border-neutral-muted w-64 space-y-1 rounded-xl border p-1">
 					<MenuOption
 						density={rowDensity}
 						prefix={userIcon}
@@ -142,7 +142,7 @@
 		</ComponentCard>
 
 		<ComponentCard description="Semantic color variants.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 space-y-1 border p-1">
+			<div class="bg-surface border-neutral-muted w-64 space-y-1 rounded-xl border p-1">
 				<MenuOption color="primary" title="Primary" />
 
 				<MenuOption color="secondary" title="Secondary" />
@@ -156,7 +156,7 @@
 		</ComponentCard>
 
 		<ComponentCard description="Click, hover, and link interactions.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 space-y-1 border p-1">
+			<div class="bg-surface border-neutral-muted w-64 space-y-1 rounded-xl border p-1">
 				<MenuOption onclick={() => clickCount++} title="Clicked {clickCount} times" />
 
 				<MenuOption
@@ -174,7 +174,7 @@
 		</ComponentCard>
 
 		<ComponentCard description="Complete menu with dividers and a danger action.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-72 border p-1">
+			<div class="bg-surface border-neutral-muted w-72 rounded-xl border p-1">
 				<MenuOption prefix={userIcon} title="John Doe" description="john@example.com" />
 
 				<div class="border-neutral-muted my-1 border-t"></div>

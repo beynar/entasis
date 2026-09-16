@@ -38,8 +38,8 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl overflow-hidden p-lg md:p-xl">
-	<div class="flex flex-wrap items-end justify-between gap-lg">
+<section class="gap-xl p-lg md:p-xl flex flex-col overflow-hidden">
+	<div class="gap-lg flex flex-wrap items-end justify-between">
 		<div class="max-w-xl">
 			<Chip variant="outline">Meet your collaborators</Chip><Heading
 				as="h2"
@@ -52,23 +52,23 @@
 	</div>
 	<Carousel
 		items={people}
-		layout={{ default: 1, md: 2, lg: 3 }}
+		layout={{ xs: 1, md: 2, lg: 3 }}
 		navigationButton={{ color: 'neutral' }}
-		dots={{ color: 'primary' }}
+		pagination={{ variant: 'dots', color: 'primary' }}
 		>{#snippet children({ item })}<Card variant="outline"
-				><div class="flex min-h-80 flex-col gap-xl">
-					<div class="flex items-start justify-between gap-lg">
-						<Avatar size="large" user={item} /><Chip size="small" variant="outline"
+				><div class="gap-xl flex min-h-80 flex-col">
+					<div class="gap-lg flex items-start justify-between">
+						<Avatar size="large" name={item.name} /><Chip size="small" variant="outline"
 							>{item.experience}</Chip
 						>
 					</div>
 					<div>
 						<Heading as="h3" size="h3">{item.name}</Heading>
-						<p class="mt-md text-sm text-primary">{item.role}</p>
+						<p class="mt-md text-primary-readable text-sm">{item.role}</p>
 					</div>
-					<p class="flex-1 text-neutral/70">{item.bio}</p>
+					<p class="text-neutral/70 flex-1">{item.bio}</p>
 					<Separator />
-					<p class="text-xs text-neutral/50">{item.focus}</p>
+					<p class="text-neutral/65 text-xs">{item.focus}</p>
 				</div></Card
 			>{/snippet}</Carousel
 	>

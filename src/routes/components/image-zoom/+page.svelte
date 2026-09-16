@@ -93,9 +93,9 @@
 		'Controlled or uncontrolled open state',
 		'LightGallery Medium Zoom origin transition',
 		'Optional high-resolution zoom source',
-		'Configurable image, backdrop, and Escape dismissal',
+		'Configurable image, backdrop, and dismissal',
 		'Scroll dismissal for page and nested scroll containers',
-		'Focus restoration and reduced-motion support'
+		'Reduced-motion support'
 	]}
 >
 	<ComponentCard
@@ -116,12 +116,12 @@
 	>
 		<article class="mx-auto max-w-2xl py-4 text-left">
 			<header class="grid gap-2">
-				<p class="text-primary text-sm font-medium">Field notes</p>
+				<p class="text-primary-readable text-sm font-medium">Field notes</p>
 				<h2 class="text-neutral text-3xl font-semibold">Along the waterline</h2>
-				<p class="text-neutral/60 text-sm">Three images embedded in a reading flow.</p>
+				<p class="text-neutral/70 text-sm">Three images embedded in a reading flow.</p>
 			</header>
 
-			<p class="text-neutral/60 my-6 text-base leading-7">
+			<p class="text-neutral/70 my-6 text-base leading-7">
 				The path narrowed as it reached the lake. Click any photograph to expand it directly from
 				its position in the article.
 			</p>
@@ -136,7 +136,7 @@
 				disabled={controls.value.disabled}
 			/>
 
-			<p class="text-neutral/60 my-6 text-base leading-7">
+			<p class="text-neutral/70 my-6 text-base leading-7">
 				Farther north, the shoreline became rougher and the horizon less certain. The larger source
 				replaces the thumbnail without changing its final rectangle.
 			</p>
@@ -151,7 +151,7 @@
 				disabled={controls.value.disabled}
 			/>
 
-			<p class="text-neutral/60 my-6 text-base leading-7">
+			<p class="text-neutral/70 my-6 text-base leading-7">
 				The final image sits inside the prose rather than taking the full column. Its portrait
 				geometry uses the same origin transition as the wider photographs.
 			</p>
@@ -168,7 +168,7 @@
 				/>
 			</div>
 
-			<p class="text-neutral/60 text-base leading-7">
+			<p class="text-neutral/70 text-base leading-7">
 				The forest held the remaining light above the trail. Beneath it, the air cooled quickly and
 				the details disappeared into a single dark plane.
 			</p>
@@ -295,20 +295,18 @@
 </ImageZoom>`}
 		>
 			<ImageZoom>
-				{#snippet children()}
-					<div class="relative aspect-[4/3] w-72 overflow-hidden rounded-xl">
-						<img
-							src={mountainThumb}
-							alt="Mountain valley at sunrise"
-							class="h-full w-full object-cover"
-						/>
-						<span
-							class="bg-surface/85 text-neutral absolute right-3 bottom-3 rounded-full px-3 py-1 text-xs font-medium shadow-sm backdrop-blur-md"
-						>
-							Open detail
-						</span>
-					</div>
-				{/snippet}
+				<div class="relative aspect-[4/3] w-72 overflow-hidden rounded-xl">
+					<img
+						src={mountainThumb}
+						alt="Mountain valley at sunrise"
+						class="h-full w-full object-cover"
+					/>
+					<span
+						class="bg-surface/85 text-neutral absolute right-3 bottom-3 rounded-full px-3 py-1 text-xs font-medium shadow-sm backdrop-blur-md"
+					>
+						Open detail
+					</span>
+				</div>
 			</ImageZoom>
 		</ComponentCard>
 

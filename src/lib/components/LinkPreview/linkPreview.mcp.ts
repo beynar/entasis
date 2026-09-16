@@ -80,20 +80,16 @@ By default, LinkPreview requests \`/api/link-metadata?url=<href>\` when the card
 - **size**: 'small' | 'normal' | 'large' - Preview card size.
 - **disabled**: boolean - Disable opening and link navigation.
 - **class**: string - Trigger anchor classes.
-- **cardClass**: string - HoverCard surface classes.
-- **popoverClass**: string - Popover panel classes.
-- **cardColor**: Colors - Inner Card color.
-- **cardVariant**: 'solid' | 'outline' | 'soft' | 'ghost' - Inner Card variant.
+- **card**: Props forwarded to the inner Card as one object - \`{ class, color, variant, theme }\` (defaults: color 'neutral', variant 'solid').
+- **popover**: Props forwarded to the Popover panel as one object - \`{ class, theme }\`.
 - **showBorders**: boolean - Show Card section borders.
 - **onOpenChange**: (open: boolean) => void - Called once for each library-requested state change.
 - **onAfterOpen**: (payload) => void - Called after open transition.
 - **onAfterClose**: (payload) => void - Called after close transition.
-- **onLoad**: (metadata) => void - Called after metadata loads.
+- **onLoad**: (payload) => void - Called after metadata loads.
 - **onError**: (error) => void - Called after metadata loading fails.
 - **theme**: LinkPreviewThemeProps - LinkPreview theme overrides.
 - **hoverCardTheme**: HoverCardThemeProps - HoverCard wrapper theme overrides.
-- **cardTheme**: CardThemeProps - Inner Card theme overrides.
-- **popoverTheme**: PopoverThemeProps - Popover theme overrides.
 
 ## Metadata Shape
 
@@ -134,4 +130,11 @@ The default endpoint should return JSON matching LinkPreviewMetadata. Non-2xx re
 - **url** - URL display line.
 - **loading** - Skeleton stack.
 - **error** - Error state container.
+
+## Motion
+
+- LinkPreview has no preset of its own: it forwards \`transition\` (now a plain \`FSOProps\`,
+  responsive) to HoverCard, whose **motion** slot owns the preset.
+- Retune it with \`<Theme components={{ 'hover-card': { motion } }}>\` or
+  \`setHoverCardTheme({ motion })\`; the \`transition\` prop still wins per instance.
 `;

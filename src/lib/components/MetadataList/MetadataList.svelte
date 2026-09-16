@@ -11,6 +11,7 @@
 		MetadataListProps
 	} from './metadataList.props.js';
 	import { useMetadataListTheme } from './metadataList.theme.js';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 
 	let {
 		ref = $bindable(null),
@@ -20,7 +21,8 @@
 		density = 'normal',
 		columns = 1,
 		maxItems,
-		expanded = $bindable(false),
+		expanded = $bindable(),
+		defaultExpanded = false,
 		i18n,
 		theme,
 		title,
@@ -29,6 +31,14 @@
 		value,
 		...attachments
 	}: MetadataListProps = $props();
+
+	const expandedState = createBindableValue(
+		() => expanded,
+		(next) => {
+			expanded = next;
+		},
+		() => defaultExpanded
+	);
 
 	const t = $derived(useI18n(i18n));
 	const classes = $derived(useMetadataListTheme(theme));
@@ -108,32 +118,26 @@
 
 {#snippet valueContent(item: MetadataListItem, type: MetadataListItemType, formatted: string)}
 	{#if item.value === null || item.value === undefined}
-		<span class="text-neutral/60">—</span>
+		<span class="text-neutral/70">—</span>
 	{:else if type === 'url' || type === 'email' || type === 'phone'}
+		<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs (and mailto:/tel: links); library links cannot depend on SvelteKit routing. -->
 		<a
 			href={resolveHref(item, type)}
 			class={classes.link()}
 			target={type === 'url' ? '_blank' : undefined}
 			rel={type === 'url' ? 'noopener noreferrer' : undefined}>{formatted}</a
 		>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	{:else if type === 'boolean'}
-		<Chip
-			variant="soft"
-			size={chipSize}
-			color={item.color ?? (item.value ? 'success' : 'neutral')}
-		>
+		<Chip variant="soft" size={chipSize} color={item.color ?? (item.value ? 'success' : 'neutral')}>
 			{item.value ? t.trueLabel : t.falseLabel}
 		</Chip>
 	{:else if type === 'chip'}
-		<Chip variant="soft" size={chipSize} color={item.color ?? 'neutral'}
-			>{String(item.value)}</Chip
-		>
+		<Chip variant="soft" size={chipSize} color={item.color ?? 'neutral'}>{String(item.value)}</Chip>
 	{:else if type === 'chips'}
 		<div class={classes.chips({ density })}>
 			{#each Array.isArray(item.value) ? item.value : [item.value] as entry, i (i)}
-				<Chip variant="soft" size={chipSize} color={item.color ?? 'neutral'}
-					>{String(entry)}</Chip
-				>
+				<Chip variant="soft" size={chipSize} color={item.color ?? 'neutral'}>{String(entry)}</Chip>
 			{/each}
 		</div>
 	{:else}
@@ -179,7 +183,7 @@
 			{@render row(item, index)}
 		{/each}
 
-		{#if hiddenItems.length && expanded}
+		{#if hiddenItems.length && expandedState.value}
 			<!-- Block B: a full-span nested grid mirrors the dl columns; slide needs a block box (not display:contents). -->
 			<div
 				class={classes.list({ density })}
@@ -196,15 +200,15 @@
 	{#if hasMore}
 		<button
 			type="button"
-			aria-expanded={expanded}
+			aria-expanded={expandedState.value}
 			class={classes.toggle({ size, density })}
-			onclick={() => (expanded = !expanded)}
+			onclick={() => (expandedState.value = !expandedState.value)}
 		>
 			<!-- The rotation class lives on a span (plain reactive attribute), not on the icon snippet's props. -->
-			<span class={classes.toggleIcon({ expanded })} aria-hidden="true">
+			<span class={classes.toggleIcon({ expanded: expandedState.value })} aria-hidden="true">
 				{@render caretDownIcon({})}
 			</span>
-			{expanded ? t.showLess : t.showMoreItems(items.length - (maxItems ?? 0))}
+			{expandedState.value ? t.showLess : t.showMoreItems(items.length - (maxItems ?? 0))}
 		</button>
 	{/if}
 </div>

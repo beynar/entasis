@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolveLink } from './appNavigation.js';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import Tabbar from '$lib/components/Tabbar/Tabbar.svelte';
@@ -23,7 +24,8 @@
 		/** Secondary public components documented on the same package page. */
 		relatedComponents?: string[];
 		/** 2-6 highlights: accessibility, underlying library, ergonomics. */
-		features?: string[];
+		/** Plain strings are informational; `{ label, test }` chips are verified by the named test. */
+		features?: (string | { label: string; test: string })[];
 		/** Usage tab: a simple demo of the component. */
 		children: Snippet;
 		/** Examples tab: every meaningful variation. */
@@ -31,7 +33,7 @@
 	} = $props();
 
 	const tabs = ['Usage', 'Examples', 'Structure'];
-	let tabValue = $state(0);
+	let tabValue = $state('Usage');
 	const contractEntry = $derived(
 		componentInventory.find((entry) => entry.docs.some((doc) => doc.route === page.url.pathname))
 	);
@@ -47,6 +49,10 @@
 	);
 </script>
 
+<svelte:head>
+	<title>{title} · svelai</title>
+</svelte:head>
+
 <article class="mx-auto w-full max-w-6xl">
 	<header class="mb-6">
 		<h1 class="text-neutral text-3xl font-bold tracking-tight">{title}</h1>
@@ -57,23 +63,29 @@
 
 	{#if features && features.length}
 		<ul class="mb-8 flex flex-wrap gap-2">
-			{#each features as feature (feature)}
+			{#each features as feature (typeof feature === 'string' ? feature : feature.test)}
+				{@const verified = typeof feature !== 'string'}
 				<li
 					class="border-neutral-muted bg-surface text-neutral/80 inline-flex items-center gap-1.5 rounded-full border py-1 pr-3 pl-2 text-xs"
+					title={verified ? `Verified by test ${feature.test}` : undefined}
 				>
-					<svg
-						class="text-primary size-3.5 shrink-0"
-						viewBox="0 0 20 20"
-						fill="currentColor"
-						aria-hidden="true"
-					>
-						<path
-							fill-rule="evenodd"
-							d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 0 1 1.4-1.4l3.8 3.8 6.8-6.8a1 1 0 0 1 1.4 0Z"
-							clip-rule="evenodd"
-						/>
-					</svg>
-					{feature}
+					{#if verified}
+						<svg
+							class="text-primary-readable size-3.5 shrink-0"
+							viewBox="0 0 20 20"
+							fill="currentColor"
+							aria-hidden="true"
+						>
+							<path
+								fill-rule="evenodd"
+								d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 0 1 1.4-1.4l3.8 3.8 6.8-6.8a1 1 0 0 1 1.4 0Z"
+								clip-rule="evenodd"
+							/>
+						</svg>
+					{:else}
+						<span class="bg-neutral/40 size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+					{/if}
+					{typeof feature === 'string' ? feature : feature.label}
 				</li>
 			{/each}
 		</ul>
@@ -82,7 +94,7 @@
 	<Tabbar items={tabs} bind:value={tabValue} />
 
 	<div class="mt-8">
-		{#if tabValue === 0}
+		{#if tabValue === 'Usage'}
 			<div class="grid gap-10">
 				{@render children()}
 			</div>
@@ -95,13 +107,13 @@
 					<PropsTable component={relatedComponent} />
 				</section>
 			{/each}
-		{:else if tabValue === 1}
+		{:else if tabValue === 'Examples'}
 			{#if examples}
 				<div class="grid gap-10">
 					{@render examples()}
 				</div>
 			{:else}
-				<p class="text-neutral/60 text-sm">No examples yet for this component.</p>
+				<p class="text-neutral/70 text-sm">No examples yet for this component.</p>
 			{/if}
 		{:else if component}
 			<div class="grid gap-8">
@@ -109,18 +121,18 @@
 				<ThemeSchema {component} />
 			</div>
 		{:else}
-			<p class="text-neutral/60 text-sm">No structural schema for this component.</p>
+			<p class="text-neutral/70 text-sm">No structural schema for this component.</p>
 		{/if}
 	</div>
 
 	{#if relatedEntries.length}
-		<nav class="border-neutral-muted mt-xl border-t pt-xl" aria-label="Related components">
+		<nav class="border-neutral-muted mt-xl pt-xl border-t" aria-label="Related components">
 			<h2 class="text-neutral text-lg font-semibold">Related components</h2>
-			<div class="mt-sm flex flex-wrap gap-sm">
+			<div class="mt-sm gap-sm flex flex-wrap">
 				{#each relatedEntries as entry (entry.id)}
 					<a
-						class="border-neutral-muted text-primary-readable hover:border-primary/50 rounded-sm border px-md py-sm text-sm font-medium"
-						href={entry.route}
+						class="border-neutral-muted text-primary-readable hover:border-primary/50 px-md py-sm rounded-sm border text-sm font-medium"
+						href={resolveLink(entry.route)}
 					>
 						{entry.label}
 					</a>

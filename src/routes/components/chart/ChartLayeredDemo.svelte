@@ -85,7 +85,9 @@
 			y: 'actual',
 			stroke: 'primary',
 			strokeWidth: 2.5,
-			points: true
+			// A surface grade is a ChartColor like any semantic role: it resolves to
+			// var(--color-surface), so the marker knocks the line out against the card.
+			points: { fill: 'surface', stroke: 'primary', strokeWidth: 2, radius: 4 }
 		}
 	] as const;
 </script>
@@ -96,8 +98,8 @@
 	{y}
 	{marks}
 	tooltip
-	ariaLabel="Monthly actual and forecast revenue"
+	label="Monthly actual and forecast revenue"
 	ariaDescription="Actual revenue is shown over a forecast line and its confidence interval."
-	initialDimensions={{ width: 960, height: 420 }}
+	aspectRatio={960 / 420}
 	class="w-full"
 />

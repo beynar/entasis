@@ -29,7 +29,7 @@
 		<Button size="small" variant="outline" onclick={() => (loading = !loading)}>
 			{loading ? 'إنهاء التحميل' : 'محاكاة التحميل'}
 		</Button>
-		<code class="text-neutral/60 overflow-hidden text-xs text-ellipsis">{rangeLabel}</code>
+		<code class="text-neutral/70 overflow-hidden text-xs text-ellipsis">{rangeLabel}</code>
 	</div>
 	<EventCalendar
 		bind:items

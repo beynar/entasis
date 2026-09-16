@@ -9,17 +9,17 @@
 	let added = $state(0);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="grid items-center gap-xl sm:grid-cols-2">
+	<div class="gap-xl grid items-center sm:grid-cols-2">
 		<div>{@render productArt('lamp', 'Sand')}</div>
-		<div class="flex flex-col gap-xl">
-			<header class="flex flex-col gap-lg">
-				<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+		<div class="gap-xl flex flex-col">
+			<header class="gap-lg flex flex-col">
+				<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 					Lighting / New season
 				</p>
 				<Heading size="h2" weight="bold">A better light for your everyday.</Heading>
@@ -30,9 +30,9 @@
 		</div>
 	</div>
 	<Dialog type="drawerRight" bind:open title="Arc desk lamp" description="Field objects / Lighting"
-		><div class="flex flex-col gap-xl">
+		><div class="gap-xl flex flex-col">
 			{@render productArt('lamp', 'Sand')}
-			<div class="flex gap-lg items-center justify-between">
+			<div class="gap-lg flex items-center justify-between">
 				<p class="text-2xl">$148</p>
 				<Rating value={4.8} size="small" />
 			</div>
@@ -48,7 +48,7 @@
 					{ title: 'Materials', content: 'Powder-coated aluminum with a weighted steel base.' }
 				]}
 			/><Button fullWidth onclick={() => (added += 1)}>Add to bag</Button>
-			<p class="text-sm text-success" aria-live="polite">
+			<p class="text-success text-sm" aria-live="polite">
 				{added ? `${added} in the sample bag` : 'In stock'}
 			</p>
 		</div></Dialog

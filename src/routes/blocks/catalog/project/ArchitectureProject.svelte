@@ -35,13 +35,13 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 			Architecture / Residential
 		</p>
 		<Heading size="h2" weight="bold">A place to pause.</Heading>
-		<p class="max-w-2xl text-neutral/65">
+		<p class="text-neutral/65 max-w-2xl">
 			A small residence with a generous relationship to its surroundings.
 		</p>
 	</header>
@@ -49,9 +49,9 @@
 		items={photos.filter(
 			(photo) => photo.category === 'Architecture' || photo.category === 'Landscape'
 		)}
-		layout={{ default: 1 }}
+		layout={1}
 		navigationButton={{ color: 'neutral' }}
-		dots={{ color: 'primary' }}
+		pagination={{ variant: 'dots', color: 'primary' }}
 		>{#snippet children({ item: photo })}<img
 				src={photo.src}
 				alt={photo.title}
@@ -59,28 +59,28 @@
 				class="aspect-[16/7] w-full rounded-lg object-cover"
 			/>{/snippet}</Carousel
 	>
-	<div class="grid gap-xl md:grid-cols-[1fr_2fr]">
-		<dl class="grid grid-cols-2 gap-xl text-sm">
+	<div class="gap-xl grid md:grid-cols-[1fr_2fr]">
+		<dl class="gap-xl grid grid-cols-2 text-sm">
 			<div>
-				<dt class="text-neutral/50">Area</dt>
+				<dt class="text-neutral/65">Area</dt>
 				<dd>180 m²</dd>
 			</div>
 			<div>
-				<dt class="text-neutral/50">Completed</dt>
+				<dt class="text-neutral/65">Completed</dt>
 				<dd>2026</dd>
 			</div>
 			<div>
-				<dt class="text-neutral/50">Studio</dt>
+				<dt class="text-neutral/65">Studio</dt>
 				<dd>Field Architecture</dd>
 			</div>
 			<div>
-				<dt class="text-neutral/50">Approach</dt>
+				<dt class="text-neutral/65">Approach</dt>
 				<dd>Adaptive reuse</dd>
 			</div>
 		</dl>
-		<div class="flex flex-col gap-xl">
+		<div class="gap-xl flex flex-col">
 			<Heading size="h3">A dialogue with the landscape.</Heading>
-			<p class="leading-relaxed text-neutral/65">
+			<p class="text-neutral/65 leading-relaxed">
 				The project makes the most of what was already there. Existing walls frame new views,
 				natural materials meet simple details, and every room finds a different quality of light.
 			</p>

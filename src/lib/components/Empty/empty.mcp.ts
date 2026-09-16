@@ -91,7 +91,7 @@ All slots accept a string or a snippet.
 \`\`\`svelte
 <Empty title="No results" description="Try adjusting your search filters.">
 	{#snippet media()}
-		{@render magnifyingGlassIcon({ class: 'size-10 text-neutral/60' })}
+		{@render magnifyingGlassIcon({ class: 'size-10 text-neutral/70' })}
 	{/snippet}
 </Empty>
 \`\`\`

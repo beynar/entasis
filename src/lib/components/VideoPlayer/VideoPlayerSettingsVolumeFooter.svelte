@@ -4,7 +4,6 @@
 	import { getVideoPlayerSliderTheme } from './videoPlayer.slider.theme.js';
 	import type { VideoPlayerState } from './videoPlayer.state.svelte.js';
 	import type { useVideoPlayerTheme } from './videoPlayer.theme.js';
-	import VideoPlayerIconButton from './VideoPlayerIconButton.svelte';
 
 	type VideoPlayerClasses = ReturnType<typeof useVideoPlayerTheme>;
 
@@ -34,24 +33,13 @@
 		{volumeStep}
 		{disabled}
 		color="primary"
+		buttonColor="neutral"
+		buttonClass={classes.controlButton({ size })}
 		orientation="horizontal"
 		panelClass={classes.volumePanel()}
 		sliderClass={classes.slider({ size, disabled })}
 		sliderTheme={volumeSliderTheme}
 		onToggleMuted={() => player.runInteraction(() => player.toggleMuted())}
 		onVolumeChange={(nextVolume) => player.runInteraction(() => player.setVolume(nextVolume))}
-	>
-		{#snippet toggleButton(context)}
-			<VideoPlayerIconButton
-				{classes}
-				{size}
-				label={context.label}
-				icon={context.icon}
-				active={context.active}
-				pressed={context.pressed}
-				{disabled}
-				onPress={context.activate}
-			/>
-		{/snippet}
-	</MediaVolumeControl>
+	/>
 </div>

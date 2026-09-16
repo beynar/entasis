@@ -53,7 +53,10 @@ export function createLineLayer(
 	};
 }
 
-export function createCircleCoordinates(center: [number, number], radiusMeters: number): [number, number][][] {
+export function createCircleCoordinates(
+	center: [number, number],
+	radiusMeters: number
+): [number, number][][] {
 	const [lng, lat] = center;
 	const latRadians = toRadians(lat);
 	const lngRadians = toRadians(lng);
@@ -80,7 +83,9 @@ export function createCircleCoordinates(center: [number, number], radiusMeters: 
 	return [ring];
 }
 
-export function createRectangleCoordinates(bounds: [number, number, number, number]): [number, number][][] {
+export function createRectangleCoordinates(
+	bounds: [number, number, number, number]
+): [number, number][][] {
 	const [west, south, east, north] = bounds;
 
 	return [
@@ -134,7 +139,9 @@ export function validateLineCoordinates(
 	index: number
 ): [number, number][] {
 	if (!Array.isArray(coordinates) || coordinates.length < 2) {
-		throw new Error(`Map polyline shape "${id}" at index ${index} must include at least two coordinates.`);
+		throw new Error(
+			`Map polyline shape "${id}" at index ${index} must include at least two coordinates.`
+		);
 	}
 
 	return coordinates.map((coordinate, coordinateIndex) =>
@@ -142,7 +149,10 @@ export function validateLineCoordinates(
 	);
 }
 
-export function validateShapeId(shapeId: MapShape['id'] | null | undefined, index: number): MapShape['id'] {
+export function validateShapeId(
+	shapeId: MapShape['id'] | null | undefined,
+	index: number
+): MapShape['id'] {
 	if (shapeId === null || shapeId === undefined) {
 		throw new Error(`Map shape at index ${index} must include a non-null id.`);
 	}
@@ -150,23 +160,41 @@ export function validateShapeId(shapeId: MapShape['id'] | null | undefined, inde
 	return shapeId;
 }
 
-export function validateLngLat(value: [number, number], name: string, id: string, index: number): [number, number] {
+export function validateLngLat(
+	value: [number, number],
+	name: string,
+	id: string,
+	index: number
+): [number, number] {
 	if (!Array.isArray(value) || value.length !== 2) {
-		throw new Error(`Map shape "${id}" at index ${index} has invalid ${name}: expected [lng, lat].`);
+		throw new Error(
+			`Map shape "${id}" at index ${index} has invalid ${name}: expected [lng, lat].`
+		);
 	}
 
 	return [validateLng(value[0], name, id, index), validateLat(value[1], name, id, index)];
 }
 
-export function validatePositiveNumber(value: number, name: string, id: string, index: number): number {
+export function validatePositiveNumber(
+	value: number,
+	name: string,
+	id: string,
+	index: number
+): number {
 	if (!Number.isFinite(value) || value <= 0) {
-		throw new Error(`Map shape "${id}" at index ${index} has invalid ${name}: expected a positive finite number.`);
+		throw new Error(
+			`Map shape "${id}" at index ${index} has invalid ${name}: expected a positive finite number.`
+		);
 	}
 
 	return value;
 }
 
-export function validateOptionalOpacity(value: number | undefined, id: string, index: number): number | undefined {
+export function validateOptionalOpacity(
+	value: number | undefined,
+	id: string,
+	index: number
+): number | undefined {
 	if (value === undefined) {
 		return undefined;
 	}
@@ -189,7 +217,9 @@ export function validateOptionalString(
 	}
 
 	if (typeof value !== 'string' || value.length === 0) {
-		throw new Error(`Map shape "${id}" at index ${index} has invalid ${name}: expected a non-empty string.`);
+		throw new Error(
+			`Map shape "${id}" at index ${index} has invalid ${name}: expected a non-empty string.`
+		);
 	}
 
 	return value;
@@ -248,7 +278,9 @@ function validateCoordinate(
 	index: number
 ): number {
 	if (!Number.isFinite(value)) {
-		throw new Error(`Map shape "${id}" at index ${index} has invalid ${name}: expected a finite number.`);
+		throw new Error(
+			`Map shape "${id}" at index ${index} has invalid ${name}: expected a finite number.`
+		);
 	}
 
 	if (value < min || value > max) {

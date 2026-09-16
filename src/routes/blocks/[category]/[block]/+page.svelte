@@ -11,15 +11,15 @@
 	<meta name="description" content={data.block.description} />
 </svelte:head>
 
-<article class="mx-auto flex w-full max-w-7xl flex-col gap-xl">
-	<header class="flex flex-col items-start gap-lg py-lg">
+<article class="gap-xl mx-auto flex w-full max-w-7xl flex-col">
+	<header class="gap-lg py-lg flex flex-col items-start">
 		<Button
 			href={`/blocks/${data.category.slug}`}
 			prefix={arrowLeftIcon}
 			variant="link"
 			size="small">{data.category.title} blocks</Button
 		>
-		<h1 class="text-3xl font-semibold tracking-tight text-neutral">{data.block.title}</h1>
+		<h1 class="text-neutral text-3xl font-semibold tracking-tight">{data.block.title}</h1>
 	</header>
 	{#key `${data.category.slug}/${data.block.id}`}<BlockPreview
 			category={data.category.slug}

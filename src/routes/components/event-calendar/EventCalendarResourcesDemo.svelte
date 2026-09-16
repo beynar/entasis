@@ -29,11 +29,11 @@
 		<div class="grid min-w-0 gap-0.5">
 			{@render defaultContent()}
 			{#if resource?.capacity}
-				<span class="text-neutral/55 text-xs">
+				<span class="text-neutral/65 text-xs">
 					Floor {resource.floor} · {resource.capacity} seats
 				</span>
 			{:else if isUnassigned}
-				<span class="text-neutral/55 text-xs">No leaf resource</span>
+				<span class="text-neutral/65 text-xs">No leaf resource</span>
 			{/if}
 		</div>
 	{/snippet}

@@ -6,6 +6,7 @@
 	import { toMapError } from './map-errors.js';
 	import type { MapClusterSnippetArg } from './map-types.js';
 	import type { MapLibreMap, MapLibreMarker, MapLibreMarkerConstructor } from './maplibre-types.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type Props<TData = unknown> = {
 		map: MapLibreMap;
@@ -25,6 +26,7 @@
 
 	let { map, Marker, cluster, content, zoomOnClick, onClusterClick, onError }: Props<TData> =
 		$props();
+	const t = $derived(useI18n());
 
 	let lngLat = $derived(cluster.coordinates);
 	let defaultClusterClass = $derived(getDefaultClusterClass(cluster.count));
@@ -136,10 +138,10 @@
 		<button
 			type="button"
 			class={cn(
-				'flex items-center justify-center rounded-full border-2 border-surface text-sm font-semibold tabular-nums shadow-md ring-4 outline-none transition-transform hover:scale-105 focus-visible:ring-primary',
+				'border-surface focus-visible:ring-focus/50 lift-3 flex items-center justify-center rounded-full border-2 text-sm font-semibold tabular-nums ring-4 transition-transform outline-none hover:scale-105',
 				defaultClusterClass
 			)}
-			aria-label={`Cluster of ${cluster.count} markers`}
+			aria-label={t.clusterOfMarkers(cluster.count)}
 		>
 			{cluster.count}
 		</button>

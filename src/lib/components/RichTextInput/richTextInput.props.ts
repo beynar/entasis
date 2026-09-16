@@ -67,7 +67,7 @@ export type RichTextInputTriggerConfig = {
 	items?: RichTextInputItem[];
 	tokenKind?: RichTextInputTokenKind | ((item: RichTextInputItem) => RichTextInputTokenKind);
 	group?: string | ((item: RichTextInputItem) => string | undefined);
-	onSearch?: (context: RichTextInputTriggerContext) => RichTextInputSearchResult<RichTextInputItem>;
+	onSearch?: (payload: RichTextInputTriggerContext) => RichTextInputSearchResult<RichTextInputItem>;
 	onSelect?: (payload: RichTextInputItemContext) => void;
 	toToken?: (payload: RichTextInputItemContext) => RichTextInputToken;
 };
@@ -85,7 +85,7 @@ export type RichTextInputSuggestionLifecycleState = {
 };
 
 export type RichTextInputSuggestionLifecycleCallback = (
-	state: RichTextInputSuggestionLifecycleState
+	payload: RichTextInputSuggestionLifecycleState
 ) => void;
 
 export type RichTextInputHandle = {
@@ -119,7 +119,7 @@ export type RichTextInputProps = WithAttachments<
 		/** Called when keyboard, pointer, or result updates move the highlighted suggestion. */
 		onSuggestionHighlightChange?: RichTextInputSuggestionLifecycleCallback;
 		/** Called after editor updates with markdown, token metadata, and empty state. */
-		onValueChange?: (change: RichTextInputChange) => void;
+		onValueChange?: (payload: RichTextInputChange) => void;
 		/** Called when `submitShortcut` is pressed and the suggestion popup did not handle it first. */
 		onSubmitShortcut?: (event: KeyboardEvent) => void;
 		/** Keyboard shortcut that calls `onSubmitShortcut`. */

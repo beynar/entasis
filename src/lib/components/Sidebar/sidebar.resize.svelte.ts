@@ -1,5 +1,7 @@
 import { untrack } from 'svelte';
-import { bind } from '$lib/utils/state.svelte.js';
+import type { Attachment } from 'svelte/attachments';
+import { createPointerDrag } from '$lib/utils/pointerDrag.js';
+import { withOptions } from '$lib/utils/state.svelte.js';
 import type {
 	SidebarCollapsible,
 	SidebarDisplayState,
@@ -28,9 +30,7 @@ type SidebarResizeStateOptions = {
 const DEFAULT_KEYBOARD_STEP = 16;
 const DEFAULT_COLLAPSE_DRAG_RATIO = 0.75;
 
-export interface SidebarResizeState extends SidebarResizeStateOptions {}
-
-export class SidebarResizeState {
+export class SidebarResizeState extends withOptions<SidebarResizeStateOptions>() {
 	panelNode = $state<HTMLElement | null>(null);
 	isDragging = $state(false);
 	isKeyboardResizing = $state(false);
@@ -38,18 +38,17 @@ export class SidebarResizeState {
 	isWidthInitializing = $state(false);
 	isEdgeRevealSuppressed = $state(false);
 	private startWidth = 0;
-	private startX = 0;
 	private didDrag = false;
 	private suppressNextClick = false;
 	private initialStorageKey: string | null = null;
 	private initialStoredWidth: number | null = null;
 	private keyboardResizeTimeout: ReturnType<typeof setTimeout> | null = null;
 	private stateTransitionTimeout: ReturnType<typeof setTimeout> | null = null;
-	private activeDragCleanup: (() => void) | null = null;
-	private loadedStorageKeys = new Set<string>();
+	private isRestoringWidth = false;
+	private loadedStorageKeys: string[] = [];
 
 	constructor(options: SidebarResizeStateOptions) {
-		bind(this, options);
+		super(options);
 		this.initialStorageKey = this.resizeOptions?.storageKey ?? null;
 		if (this.initialStorageKey) {
 			this.initialStoredWidth = readSidebarStoredWidth(this.initialStorageKey);
@@ -151,50 +150,27 @@ export class SidebarResizeState {
 		this.resizeToRequestedWidth(nextWidth, true);
 	}
 
-	handlePointerdown(event: PointerEvent, node: HTMLElement) {
-		if (!node || event.button !== 0 || !this.enabled) return;
+	/**
+	 * Pointer drag for the resize handle. `createPointerDrag` owns pointer capture, so a drag
+	 * survives the pointer leaving the document, and releases it on end/cancel/lost capture.
+	 * Width only starts tracking after the 3px `didDrag` threshold (see `updateDrag`), which is
+	 * what separates a resize from a click on a combined rail handle.
+	 */
+	handleAttachment: Attachment<HTMLElement> = createPointerDrag({
+		disabled: () => !this.enabled,
+		onStart: ({ node }) => {
+			const panelNode = this.resolvePanelNode(node);
+			if (!panelNode) return false;
 
-		const panelNode = this.resolvePanelNode(node);
-		if (!panelNode) return;
-
-		this.activeDragCleanup?.();
-		event.preventDefault();
-		node.focus();
-		this.startX = event.clientX;
-		this.startWidth = panelNode.getBoundingClientRect().width;
-		this.didDrag = false;
-		this.suppressNextClick = false;
-		this.isDragging = true;
-
-		const pointerId = event.pointerId;
-		node.setPointerCapture(pointerId);
-		const onMove = (moveEvent: PointerEvent) => {
-			if (moveEvent.pointerId !== pointerId) return;
-			moveEvent.preventDefault();
-			this.updateDrag(moveEvent.clientX - this.startX);
-		};
-		const onEnd = (endEvent: PointerEvent) => {
-			if (endEvent.pointerId !== pointerId) return;
-			this.cleanupDrag(node, pointerId);
-			this.endDrag(node);
-		};
-		const onLostPointerCapture = () => {
-			this.cleanupDrag(node, pointerId);
-			this.endDrag(node);
-		};
-
-		this.activeDragCleanup = () => {
-			window.removeEventListener('pointermove', onMove);
-			window.removeEventListener('pointerup', onEnd);
-			window.removeEventListener('pointercancel', onEnd);
-			node.removeEventListener('lostpointercapture', onLostPointerCapture);
-		};
-
-		window.addEventListener('pointermove', onMove);
-		window.addEventListener('pointerup', onEnd);
-		window.addEventListener('pointercancel', onEnd);
-		node.addEventListener('lostpointercapture', onLostPointerCapture);
-	}
+			node.focus();
+			this.startWidth = panelNode.getBoundingClientRect().width;
+			this.didDrag = false;
+			this.suppressNextClick = false;
+			this.isDragging = true;
+		},
+		onMove: ({ deltaX }) => this.updateDrag(deltaX),
+		onEnd: ({ node }) => this.endDrag(node)
+	});
 
 	private resolvePanelNode(handleNode: HTMLElement) {
 		if (this.panelNode) return this.panelNode;
@@ -204,14 +180,6 @@ export class SidebarResizeState {
 			?.querySelector<HTMLElement>('[data-slot="sidebar-container"]');
 		this.panelNode = panelNode ?? null;
 		return this.panelNode;
-	}
-
-	private cleanupDrag(node: HTMLElement, pointerId: number) {
-		this.activeDragCleanup?.();
-		this.activeDragCleanup = null;
-		if (node.hasPointerCapture(pointerId)) {
-			node.releasePointerCapture(pointerId);
-		}
 	}
 
 	private updateDrag(deltaX: number) {
@@ -228,7 +196,7 @@ export class SidebarResizeState {
 
 		this.isDragging = false;
 		this.suppressNextClick = this.didDrag;
-		if (this.didDrag) this.commitWidth(true);
+		if (this.didDrag) this.commitWidth();
 		if (document.activeElement === node) node.blur();
 	}
 
@@ -249,9 +217,12 @@ export class SidebarResizeState {
 		if (widthValue === this.width) return;
 
 		this.setWidth(widthValue);
-		this.resizeOptions?.onWidthChange?.(widthValue);
+		this.resizeOptions?.onWidthChange?.({
+			width: widthValue,
+			isUserInteraction: !this.isRestoringWidth
+		});
 		if (commit) {
-			this.commitWidth(true);
+			this.commitWidth();
 		}
 	}
 
@@ -270,7 +241,7 @@ export class SidebarResizeState {
 			}
 			this.startStateTransition();
 			this.setDisplayState(collapsedState);
-			this.commitWidth(true);
+			this.commitWidth();
 			return;
 		}
 
@@ -291,9 +262,7 @@ export class SidebarResizeState {
 		return this.collapsible === 'icon' ? 'collapsed' : 'hidden';
 	}
 
-	private commitWidth(isUserInteraction: boolean) {
-		const width = this.width;
-		this.resizeOptions?.onWidthChanged?.({ width, isUserInteraction });
+	private commitWidth() {
 		this.writeStoredWidth();
 	}
 
@@ -363,8 +332,8 @@ export class SidebarResizeState {
 	}
 
 	private loadStoredWidth(storageKey: string) {
-		if (this.loadedStorageKeys.has(storageKey)) return;
-		this.loadedStorageKeys.add(storageKey);
+		if (this.loadedStorageKeys.includes(storageKey)) return;
+		this.loadedStorageKeys.push(storageKey);
 
 		try {
 			const storedWidth =
@@ -372,9 +341,11 @@ export class SidebarResizeState {
 					? this.initialStoredWidth
 					: readSidebarStoredWidth(storageKey);
 			if (!storedWidth) return;
+			this.isRestoringWidth = true;
 			this.setWidthPixels(storedWidth, false);
-			this.commitWidth(false);
+			this.commitWidth();
 		} finally {
+			this.isRestoringWidth = false;
 			this.releaseWidthPrehydrationLock();
 		}
 	}

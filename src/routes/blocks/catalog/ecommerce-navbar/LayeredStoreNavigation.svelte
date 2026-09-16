@@ -10,15 +10,15 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<div class="overflow-hidden rounded-lg border border-neutral/15">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<div class="border-neutral/15 overflow-hidden rounded-lg border">
 		<div
-			class="flex gap-lg justify-between flex-wrap px-xl py-lg bg-surface-recessed text-xs text-neutral/60"
+			class="gap-lg px-xl py-lg bg-surface-recessed text-neutral/70 flex flex-wrap justify-between text-xs"
 		>
 			<span>Free delivery over $150</span>
-			<div class="flex gap-xl"><a href="/docs">Store guide</a><a href="/docs">Support</a></div>
+			<div class="gap-xl flex"><a href="/docs">Store guide</a><a href="/docs">Support</a></div>
 		</div>
-		<div class="flex gap-xl items-center justify-between flex-wrap p-xl">
+		<div class="gap-xl p-xl flex flex-wrap items-center justify-between">
 			<Button href="/docs" variant="ghost" color="neutral" size="small">Find a store</Button><a
 				href="/components"
 				class="text-2xl font-semibold tracking-widest">FIELD</a
@@ -26,13 +26,13 @@
 		</div>
 		<nav
 			aria-label="Product categories"
-			class="flex gap-lg justify-center flex-wrap p-lg border-y border-neutral/15"
+			class="gap-lg p-lg border-neutral/15 flex flex-wrap justify-center border-y"
 		>
 			{#each groups as group (group.title)}<Popover
 					position="bottom"
 					trigger={{ content: group.title, variant: 'ghost', color: 'neutral' }}
-					><div class="flex flex-col gap-md">
-						<p class="px-lg text-xs uppercase tracking-widest text-neutral/50">{group.title}</p>
+					><div class="gap-md flex flex-col">
+						<p class="px-lg text-neutral/65 text-xs tracking-widest uppercase">{group.title}</p>
 						{#each group.links as link (link)}<Button
 								href="/components"
 								variant="ghost"
@@ -42,11 +42,11 @@
 					</div></Popover
 				>{/each}<Button href="/docs" variant="ghost" color="danger">Archive sale</Button>
 		</nav>
-		<div class="flex flex-col gap-xl items-center p-xl text-center">
+		<div class="gap-xl p-xl flex flex-col items-center text-center">
 			<Chip class="w-fit" variant="soft">Considered essentials</Chip><Heading size="h3"
 				>Find something worth keeping.</Heading
 			>
-			<p class="text-neutral/60">Explore lighting, objects, and useful everyday companions.</p>
+			<p class="text-neutral/70">Explore lighting, objects, and useful everyday companions.</p>
 		</div>
 	</div>
 </section>

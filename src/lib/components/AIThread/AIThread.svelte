@@ -9,10 +9,9 @@
 	import { arrowDownIcon } from '../Icons/arrowDown.js';
 	import type {
 		AIAskAnswers,
-		AIAskUserQuestionSubmitDetail
+		AIAskUserQuestionSubmitPayload
 	} from '../AIAskUserQuestion/aiAskUserQuestion.props.js';
 	import { getAIConversation } from '../AIConversation/aiConversation.state.svelte.js';
-	import { isAIMcpToolCall } from '../AIMcpApp/aiMcpResource.js';
 	import AIThreadToc from '../AIThreadToc/AIThreadToc.svelte';
 	import { buildAIThreadTocState } from '../AIThreadToc/aiThreadToc.js';
 	import Slot from '../Slot/Slot.svelte';
@@ -31,15 +30,20 @@
 	import { AIThreadAskUserQuestionPublisher } from './threadAskUserQuestionPublisher.js';
 	import { deriveAIThreadRenderItems } from './threadRenderItems.js';
 	import { AIThreadScrollController } from './threadScrollController.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type EndStateVirtualizer = {
 		isAtEnd: (threshold?: number) => boolean;
 	};
-	const DENSITY_PADDING: Record<AIThreadDensity, number> = { small: 8, normal: 16, large: 24 };
+	const DENSITY_PADDING: Record<AIThreadDensity, number> = {
+		compact: 8,
+		normal: 16,
+		comfortable: 24
+	};
 	const DENSITY_ESTIMATE_SIZE: Record<AIThreadDensity, number> = {
-		small: 80,
+		compact: 80,
 		normal: 96,
-		large: 120
+		comfortable: 120
 	};
 	const MESSAGE_ACTION_HEIGHT: Record<AIMessageSize, number> = {
 		small: 24,
@@ -52,12 +56,15 @@
 		large: 10
 	};
 	const ITEM_BOTTOM_PADDING: Record<AIThreadDensity, number> = {
-		small: 2,
+		compact: 2,
 		normal: 8,
-		large: 14
+		comfortable: 14
 	};
 	function normalizeThreadScale(value: unknown): 'small' | 'normal' | 'large' {
 		return value === 'small' || value === 'large' ? value : 'normal';
+	}
+	function normalizeThreadDensity(value: unknown): AIThreadDensity {
+		return value === 'compact' || value === 'comfortable' ? value : 'normal';
 	}
 
 	let {
@@ -65,7 +72,7 @@
 		messages,
 		getMessageKey,
 		liveText,
-		isStreaming,
+		streaming,
 		density = 'normal',
 		messageSize = 'normal',
 		messageVariant = 'bubble',
@@ -83,12 +90,11 @@
 		tocSide = 'left',
 		tocMaxPins,
 		tocTheme,
-		mcpHost,
 		activeAskUserQuestion,
 		renderAskUserQuestion = true,
 		askUserQuestionDisabled = false,
 		suggestions,
-		onSuggestionSelect,
+		onSelect,
 		empty,
 		message: messageSlot,
 		messageActions,
@@ -110,19 +116,19 @@
 		marker: markerSlot,
 		markerIcon,
 		markerContent,
-		app: appSlot,
 		onAskUserQuestionStateChange,
 		header,
 		footer,
 		toc,
 		role = 'log',
-		viewportLabel = 'Conversation transcript',
+		viewportLabel,
 		onscroll,
 		onwheel: onWheel,
 		class: className,
 		theme,
 		...rootAttributes
 	}: AIThreadProps<TMessage> = $props();
+	const t = $derived(useI18n());
 
 	const conversation = getAIConversation<TMessage>();
 	const generatedKeys = new WeakMap<object, string>();
@@ -145,7 +151,7 @@
 	let prependScrollTarget: 'start' | 'end' | undefined;
 	let initialEndFrame: number | undefined;
 	let initialEndSchedule = 0;
-	const resolvedDensity: AIThreadDensity = $derived(normalizeThreadScale(density));
+	const resolvedDensity: AIThreadDensity = $derived(normalizeThreadDensity(density));
 	const resolvedMessageSize: AIMessageSize = $derived(normalizeThreadScale(messageSize));
 	const resolvedEstimateSize = $derived(
 		Math.max(1, estimateSize ?? DENSITY_ESTIMATE_SIZE[resolvedDensity])
@@ -168,7 +174,7 @@
 
 	const resolvedMessages = $derived<readonly TMessage[]>(messages ?? conversation?.messages ?? []);
 	const resolvedLiveText = $derived(liveText ?? conversation?.liveText);
-	const resolvedStreaming = $derived(isStreaming ?? conversation?.isStreaming ?? false);
+	const resolvedStreaming = $derived(streaming ?? conversation?.streaming ?? false);
 	const resolvedSuggestions = $derived(suggestions ?? conversation?.suggestions ?? []);
 	const messageKeys = $derived.by(() => createMessageKeys(resolvedMessages));
 	const detectedQuestion = $derived<AIThreadAskUserQuestion<TMessage> | null>(
@@ -191,7 +197,6 @@
 	const renderItems = $derived.by(() => {
 		return deriveAIThreadRenderItems(resolvedMessages, {
 			getMessageKey: (_message, index) => messageKeys[index] ?? `missing:${index}`,
-			isAppTool: isAIMcpToolCall,
 			activeQuestion: resolvedQuestion,
 			splitMessageParts: !messageSlot
 		});
@@ -416,9 +421,7 @@
 		return Math.max(distanceFromEnd, 0) <= Math.max(0, bottomThreshold);
 	}
 
-	function handleScroll(
-		event: UIEvent & { currentTarget: EventTarget & HTMLDivElement }
-	): void {
+	function handleScroll(event: UIEvent & { currentTarget: EventTarget & HTMLDivElement }): void {
 		syncThreadPosition(get(virtualizerStore));
 		onscroll?.(event);
 	}
@@ -471,8 +474,8 @@
 	}
 
 	function handleSuggestionSelect(suggestion: string): void {
-		if (onSuggestionSelect) {
-			onSuggestionSelect(suggestion);
+		if (onSelect) {
+			onSelect(suggestion);
 			return;
 		}
 		conversation?.setInput(suggestion);
@@ -495,7 +498,7 @@
 	}: {
 		request: AIThreadAskUserQuestion<TMessage>;
 		state: 'completed' | 'discarded';
-		detail?: AIAskUserQuestionSubmitDetail;
+		detail?: AIAskUserQuestionSubmitPayload;
 	}): Promise<void> {
 		errorMessage = undefined;
 		questionStates = { ...questionStates, [request.key]: state };
@@ -552,7 +555,7 @@
 				tocSide: shouldRenderToc && !toc ? tocSide : undefined
 			})}
 			tabindex="0"
-			aria-label={viewportLabel}
+			aria-label={viewportLabel ?? t.aiThreadTranscript}
 			onscroll={handleScroll}
 		>
 			<AIThreadItems
@@ -564,7 +567,7 @@
 				messageSize={resolvedMessageSize}
 				{messageVariant}
 				suggestions={resolvedSuggestions}
-				onSuggestionSelect={handleSuggestionSelect}
+				onSelect={handleSuggestionSelect}
 				{empty}
 				message={messageSlot}
 				{messageActions}
@@ -586,8 +589,6 @@
 				marker={markerSlot}
 				{markerIcon}
 				{markerContent}
-				app={appSlot}
-				{mcpHost}
 				{theme}
 			/>
 		</div>
@@ -607,7 +608,7 @@
 				squared
 				size="small"
 				variant="soft"
-				label="Scroll to latest message"
+				label={t.aiThreadScrollToLatest}
 				class={classes.scrollButton({ position: scrollButtonPosition })}
 				onclick={() => scrollToBottom()}
 			>

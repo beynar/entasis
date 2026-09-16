@@ -21,7 +21,16 @@
 - Rendering and overflow checks do not establish good spacing. For layout regressions, measure
   the visible distance between content groups and inspect every requested example at desktop
   and mobile widths. Verify that gaps belong to the actual parent of those groups; a component's
-  outer gap may only separate slots and leave the slot's children touching.
+  outer gap may only separate slots and leave the slot's children touching. A Field
+  `fieldset > legend` does not take grid `gap` (`legendToContainer` stays 0 even when
+  `float` is set — grid items ignore float). Measure legend bottom to the input container,
+  not option title to description. Density-matched `[&>legend]:mb-*` on the Field root is
+  the owner. `p-0` does not override Dialog `px-xl py-md` through cnfast; Command must
+  set `!px-0 !py-0` and must not paint `bg-surface` on a `bg-surface-floating` dialog.
+  A white Command dialog with a pale selected row is the MenuOption `state-layer`
+  (`::before` at `--state-hover-opacity` 0.05), not a leftover panel fill. Measure the
+  highlighted option's `background-color` and `::before` opacity. Command owns a solid
+  `bg-color` / `text-color-contrast` item recipe so the row is not a grey stain.
 - A successful package command can still omit declaration files. Inspect declaration warnings
   and compile a consumer installed from the actual tarball before reporting a package as
   validated. Import resolution and syntax parsing alone do not prove component prop contracts.
@@ -42,7 +51,7 @@
   break hydration despite a successful build. Use an isolated source copy for release validation
   when another task needs the shared checkout, and verify browser hydration before reporting it.
 - A docs-app navigation crash that logs `Failed to fetch dynamically imported module:
-  .svelte-kit/generated/client/nodes/*.js` after `optimized dependencies changed. reloading` is
+.svelte-kit/generated/client/nodes/*.js` after `optimized dependencies changed. reloading` is
   a missing `optimizeDeps.include` entry, not a Svelte runtime bug. Search the Vite log for
   `dependency optimized:` to find the subpath. Prefer loading heavy optional libraries from a
   CDN at runtime (MapLibre, intl-tel-input) so they never enter the module graph. `state_referenced_locally` warnings

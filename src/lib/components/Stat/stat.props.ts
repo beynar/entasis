@@ -5,8 +5,19 @@ import type { HTMLButtonAttributes } from 'svelte/elements';
 import type { StatThemeProps } from './stat.theme.js';
 
 export type StatVariant = 'solid' | 'outline' | 'soft' | 'ghost';
-export type StatIndicatorVariant = 'default' | 'icon' | 'badge' | 'action';
+export type StatIndicatorVariant = 'default' | 'icon' | 'badge';
 export type StatTrendDirection = 'up' | 'down' | 'neutral';
+/** A region the `order` prop can place — and, by omission, hide. */
+export type StatPart = 'label' | 'value' | 'indicator' | 'separator' | 'trend' | 'description';
+
+/** Order used when `order` is not supplied; the separator is opt-in. */
+export const statDefaultOrder = [
+	'label',
+	'value',
+	'indicator',
+	'trend',
+	'description'
+] as const satisfies readonly StatPart[];
 
 type StatBaseProps = {
 	/** Bindable reference to the root stat element. */
@@ -31,23 +42,35 @@ type StatBaseProps = {
 export type StatProps = WithAttachments<
 	WithSlot<
 		StatBaseProps & {
-			/** Tone applied to the `trend` slot. */
+			/**
+			 * Regions to render, in order. A region absent from the list is not rendered, so the
+			 * separator appears only when 'separator' is listed. `indicator` always sits in column 2
+			 * whatever its position in the list; the first two listed regions sit beside it and the
+			 * rest span the full width.
+			 * @default ['label', 'value', 'indicator', 'trend', 'description']
+			 */
+			order?: readonly StatPart[];
+			/** Tone applied to the `trend` text and to the direction arrow the component appends. */
 			trendDirection?: StatTrendDirection;
-			/** Presentation variant for the `indicator` slot. */
+			/** Presentation variant for the decorative `indicator` slot. */
 			indicatorVariant?: StatIndicatorVariant;
 			/** Semantic color token for the `indicator` slot. */
 			indicatorColor?: Colors;
-			/** Native click handler for an action indicator; renders the indicator as a button. */
-			onclick?: (event: MouseEvent) => void;
-			/** Accessible name for icon-only action indicators. */
-			indicatorLabel?: HTMLButtonAttributes['aria-label'];
-			/** Native button type used when the indicator is clickable. */
-			indicatorType?: HTMLButtonAttributes['type'];
-			/** Disabled state used when the indicator is clickable. */
-			indicatorDisabled?: HTMLButtonAttributes['disabled'];
-			/** Renders a separator between primary and supporting stat content. */
-			showSeparator?: boolean;
+			/** Click handler for the `action` button in the top-right corner. */
+			onAction?: (event: MouseEvent) => void;
+			/** Accessible name for the `action` button. Required when the action renders an icon only. */
+			actionLabel?: HTMLButtonAttributes['aria-label'];
+			/** Disabled state for the `action` button. */
+			actionDisabled?: HTMLButtonAttributes['disabled'];
 		},
-		'children' | 'label' | 'value' | 'indicator' | 'trend' | 'description'
+		| 'children'
+		| 'label'
+		| 'value'
+		| 'unit'
+		| 'indicator'
+		| 'action'
+		| 'trendIcon'
+		| 'trend'
+		| 'description'
 	>
 >;

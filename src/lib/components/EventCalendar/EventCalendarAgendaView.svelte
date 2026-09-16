@@ -128,16 +128,16 @@
 						aria-disabled={disabled}
 						tabindex={disabled ? -1 : 0}
 						data-event-calendar-agenda-date-gutter
-						class="state-layer sticky top-[var(--event-calendar-sticky-offset)] z-20 flex min-h-10 cursor-pointer list-none items-center justify-between gap-4 bg-surface-raised/45 px-4 py-2 text-xs outline-none marker:content-none [--state-hover-opacity:0] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-color/60 [&::-webkit-details-marker]:hidden"
+						class="state-layer bg-surface-raised/45 focus-visible:ring-focus/50 sticky top-[var(--event-calendar-sticky-offset)] z-20 flex min-h-10 cursor-pointer list-none items-center justify-between gap-4 px-4 py-2 text-xs outline-none [--state-hover-opacity:0] marker:content-none focus-visible:ring-2 focus-visible:ring-inset [&::-webkit-details-marker]:hidden"
 						onclick={preventDisabledDisclosure}
 						onkeydown={preventDisabledDisclosure}
 						{@attach registerAgendaDay(group.day)}
 					>
 						<time datetime={group.day} class="contents" aria-hidden="true">
-							<span class="min-w-0 truncate font-semibold text-neutral/90">
+							<span class="text-neutral/90 min-w-0 truncate font-semibold">
 								{weekdayFormatter.format(dayStart)}
 							</span>
-							<span class="shrink-0 text-neutral/55 tabular-nums">
+							<span class="text-neutral/55 shrink-0 tabular-nums">
 								{dateFormatter.format(dayStart)}
 							</span>
 						</time>
@@ -164,7 +164,7 @@
 {/snippet}
 
 {#if scrollMode === 'contained'}
-	<ScrollArea class="h-full min-h-0" ariaLabel={profile.title}>
+	<ScrollArea class="h-full min-h-0" label={profile.title}>
 		{@render agendaContent()}
 	</ScrollArea>
 {:else}

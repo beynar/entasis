@@ -1,15 +1,22 @@
-/* eslint-disable @typescript-eslint/ban-types */
-import { toHex, hasBadContrast } from 'color2k';
 import {
+	contrast,
+	convertCSS,
+	formatHex,
 	darken,
 	lighten,
 	saturate,
 	formatCSS,
 	hex2oklch,
 	oklch2hex,
-	toGamut,
-	mix as mixPerceptual
+	toGamut
 } from 'colorizr';
+
+/** Any CSS color (hex, rgb(), hsl(), named) as a 6-digit hex string. */
+const toHex = (color: string) =>
+	color.startsWith('#') ? formatHex(color) : convertCSS(color, 'hex');
+/** WCAG contrast below `threshold` (3:1 for large/UI, 4.5:1 for body text). */
+const hasBadContrast = (foreground: string, background: string, threshold = 3) =>
+	contrast(foreground, background) < threshold;
 
 const isHex = (color: string): color is `#${string}` => {
 	if (!color) {
@@ -17,10 +24,9 @@ const isHex = (color: string): color is `#${string}` => {
 	}
 	return color.startsWith('#');
 };
-const readableColorIsBlack = (color: string) => {
-	const badContrast = hasBadContrast('#FAFAFA', 'readable', color);
-	return badContrast;
-};
+// Solid surfaces carry body-size text (buttons, badges), so the on-colour text must clear AA:
+// white when it reaches 4.5:1, otherwise black (amber, lime, yellow).
+const readableColorIsBlack = (color: string) => hasBadContrast(baseWhiteColor, color, 4.5);
 
 export const tailwindColors = {
 	slate: {
@@ -237,7 +243,7 @@ export const tailwindColors = {
 		'200': '#c7d2fe',
 		'300': '#a5b4fc',
 		'400': '#818cf8',
-		'500': '#6366f1',
+		'500': '#5f62ef',
 		'600': '#4f46e5',
 		'700': '#4338ca',
 		'800': '#3730a3',
@@ -390,37 +396,26 @@ export const colors = [
 
 const baseBlackColor = '#000000';
 const baseWhiteColor = '#FFFFFF';
-const neutralChromaThreshold = 0.03;
-
-const generateComplementaryAccent = (primary: string) => {
-	const primaryHex = toHex(primary);
-	const { l, c, h } = hex2oklch(primaryHex);
-
-	if (c < neutralChromaThreshold) {
-		return primaryHex;
-	}
-
-	const accent = formatCSS({ l, c, h: (h + 180) % 360 }, { format: 'oklch' });
-	return toGamut(accent, 'hex');
-};
+const defaultSurfaceLight = '#fafafa';
+const defaultSurfaceDark = '#09090b';
 
 const defaultColorsLight = {
-	primary: '#6366f1',
-	secondary: '#6366f1',
-	danger: '#ff0000',
-	success: '#0070f3',
-	warning: '#f5a623',
-	info: '#50e3c2',
-	neutral: baseBlackColor
+	primary: '#5f62ef',
+	secondary: '#e4e4e7',
+	danger: '#dc2626',
+	success: '#15803d',
+	warning: '#f59e0b',
+	info: '#2563eb',
+	neutral: '#18181b'
 } as const;
 const defaultColorsDark = {
-	primary: '#6366f1',
-	secondary: '#6366f1',
-	danger: '#ff0000',
-	success: '#0070f3',
-	warning: '#f5a623',
-	info: '#50e3c2',
-	neutral: baseWhiteColor
+	primary: '#5f62ef',
+	secondary: '#27272a',
+	danger: '#dc2626',
+	success: '#15803d',
+	warning: '#f59e0b',
+	info: '#2563eb',
+	neutral: '#fafafa'
 } as const;
 
 type ColorThemeOption = {
@@ -432,7 +427,7 @@ type ColorThemeOption = {
 } & ColorTheme;
 
 export const generateBaseColors = (theme: ColorThemeOption) => {
-	const defaultSurface = theme.colorscheme === 'dark' ? baseBlackColor : baseWhiteColor;
+	const defaultSurface = theme.colorscheme === 'dark' ? defaultSurfaceDark : defaultSurfaceLight;
 	const surface = {
 		DEFAULT: theme.surface || defaultSurface,
 		recessed: theme['surface-recessed'] || null,
@@ -445,7 +440,7 @@ export const generateBaseColors = (theme: ColorThemeOption) => {
 			const configuredColor = theme[color];
 			const isTailwindColor = configuredColor && configuredColor in tailwindColors;
 			const isHexColor = isHex(configuredColor || '');
-			let defaultColor = isHexColor
+			const defaultColor = isHexColor
 				? configuredColor
 				: isTailwindColor
 					? tailwindColors[configuredColor as TailwindColor]['500']
@@ -477,10 +472,6 @@ export const generateBaseColors = (theme: ColorThemeOption) => {
 		} as Colors
 	);
 
-	if (!theme.secondary) {
-		baseColors.secondary.DEFAULT = generateComplementaryAccent(baseColors.primary.DEFAULT);
-	}
-
 	return { colors: baseColors, surface };
 };
 
@@ -508,9 +499,12 @@ export const generateColorPalette = (opts: ColorThemeOption) => {
 	const readableOn = (accent: string, surface: string) => {
 		const { h, c } = hex2oklch(toHex(accent));
 		const surfaceHex = toHex(surface);
-		let l = isDark ? 0.78 : 0.55;
+		// Achromatic roles (neutral, secondary) have no hue to carry legibility, so start them
+		// darker — a -700 grey rather than a -500 — or they fail AA on any tinted surface.
+		let l = isDark ? 0.78 : c < 0.03 ? 0.4 : 0.55;
 		let text = oklch2hex({ l, c, h });
-		while (hasBadContrast(surfaceHex, 'readable', text) && l > 0.15 && l < 0.95) {
+		// `-readable` is body text on this surface, so it must clear AA (4.5:1) with headroom for browser colour-space rounding.
+		while (hasBadContrast(surfaceHex, text, 4.75) && l > 0.15 && l < 0.95) {
 			l += isDark ? 0.02 : -0.02;
 			text = oklch2hex({ l, c, h });
 		}
@@ -537,14 +531,20 @@ export const generateColorPalette = (opts: ColorThemeOption) => {
 	};
 	const baseSurface = surfacePalette.DEFAULT;
 
+	// Soft/muted tint: the surface nudged toward the role at a FIXED perceptual lightness
+	// step with capped chroma, so a near-black neutral and a vivid indigo produce tints of
+	// the same weight. (A fixed mix ratio made neutral's tint 3-4× heavier than the others.)
+	const mutedOn = (accent: string, surface: string) => {
+		const { l: surfaceL } = hex2oklch(toHex(surface));
+		const { c, h } = hex2oklch(toHex(accent));
+		const l = isDark ? surfaceL + 0.06 : surfaceL - 0.045;
+		const chroma = Math.min(c * 0.3, isDark ? 0.06 : 0.045);
+		return toGamut(formatCSS({ l, c: chroma, h }, { format: 'oklch' }), 'hex');
+	};
+
 	const generateSemanticPalette = (color: ColorRecord, surface: string) => {
 		const baseColor = adjustColor(color.DEFAULT as string);
-		const muted =
-			color.muted ||
-			mixPerceptual(surface, baseColor, isDark ? 0.2 : 0.1, {
-				space: 'oklab',
-				format: 'hex'
-			});
+		const muted = color.muted || mutedOn(baseColor, surface);
 		return {
 			DEFAULT: color.DEFAULT,
 			dark: color.dark || darken(baseColor, 15),
@@ -562,12 +562,7 @@ export const generateColorPalette = (opts: ColorThemeOption) => {
 		const baseColor = opts.neutral
 			? adjustColor(color.DEFAULT)
 			: setPerceptualLightness(surface.DEFAULT, isDark ? 0.96 : 0.22);
-		const muted =
-			color.muted ||
-			mixPerceptual(baseSurface, baseColor, isDark ? 0.2 : 0.1, {
-				space: 'oklab',
-				format: 'hex'
-			});
+		const muted = color.muted || mutedOn(baseColor, baseSurface);
 		return {
 			DEFAULT: baseColor,
 			dark: color.dark || darken(baseColor, 2),

@@ -71,12 +71,12 @@ const defaultTab = cva({
 	// scroll) rather than compress when they don't fit. transition-colors (NOT
 	// transition-all) eases only the label colour as the indicator slides — scoped
 	// to colour so it never lags a layout/transform change.
-	base: 'rounded-sm relative cursor-pointer inline-flex items-center justify-center outline-none whitespace-nowrap text-neutral/70 transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-color/45',
+	base: 'rounded-sm relative cursor-pointer inline-flex items-center justify-center outline-none whitespace-nowrap text-neutral/70 transition-colors duration-normal focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus/50',
 	variants: {
 		size: {
 			small: 'px-md py-xs text-xs gap-xs',
-			normal: 'px-lg py-xs text-sm gap-md ',
-			large: 'px-xl py-xs text-base gap-md '
+			normal: 'px-lg py-xs text-sm gap-md',
+			large: 'px-xl py-xs text-sm gap-md'
 		},
 		color: {
 			primary: '',
@@ -122,7 +122,7 @@ const defaultTab = cva({
 		}
 	},
 	defaultVariants: {
-		color: 'primary',
+		color: 'neutral',
 		size: 'normal',
 		active: false,
 		focused: false,
@@ -134,10 +134,10 @@ const defaultTab = cva({
 	compoundVariants: [
 		// The moving indicator (see the `indicator` part) carries the underline/pill
 		// visuals. Active-tab text: the underline leaves it on the page surface (full
-		// contrast foreground); the pill sits on a `color`-filled surface, so its text
-		// flips to that color's contrast tone.
+		// contrast foreground); the pill sits on a `selected`-filled surface, so its text
+		// flips to that role's contrast tone.
 		{ active: true, variant: 'underline', class: 'text-neutral' },
-		{ active: true, variant: 'pill', class: 'text-color-contrast' }
+		{ active: true, variant: 'pill', class: 'text-selected-contrast' }
 	]
 });
 
@@ -146,13 +146,13 @@ const defaultTab = cva({
 // enables the transition only after the first placement so mount doesn't animate
 // from the origin.
 const defaultTabIndicator = cva({
-	base: 'pointer-events-none absolute left-0 top-0 will-change-transform data-[ready=true]:transition-[transform,width,height] data-[ready=true]:duration-300 data-[ready=true]:ease-[cubic-bezier(0.4,0,0.2,1)]',
+	base: 'pointer-events-none absolute left-0 top-0 will-change-transform data-[ready=true]:transition-[transform,width,height] data-[ready=true]:duration-slow data-[ready=true]:ease-standard',
 	variants: {
 		variant: {
-			underline: 'rounded-full bg-color',
+			underline: 'rounded-full bg-selected',
 			// Colored raised pill (driven by data-color on the indicator). color
 			// 'neutral' gives the neutral segmented-control look.
-			pill: 'rounded-full bg-color shadow-sm'
+			pill: 'rounded-full bg-selected lift-1'
 		}
 	},
 	defaultVariants: {
@@ -165,11 +165,11 @@ const defaultTabIndicator = cva({
 // it renders at the correct place on the server. Once hydrated, the component
 // swaps it for the measured `indicator` above at the identical spot.
 const defaultTabStaticIndicator = cva({
-	base: 'pointer-events-none absolute bg-color',
+	base: 'pointer-events-none absolute bg-selected',
 	variants: {
 		variant: {
 			underline: 'rounded-full',
-			pill: 'inset-0 -z-10 rounded-full shadow-sm'
+			pill: 'inset-0 -z-10 rounded-full lift-1'
 		},
 		// Only consulted for the underline variant (pill covers the whole tab).
 		position: {

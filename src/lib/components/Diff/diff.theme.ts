@@ -14,12 +14,12 @@ const defaultDiffRoot = cva({
 
 /** Per-file wrapper: a rounded, bordered surface around each rendered file diff. */
 const defaultDiffFile = cva({
-	base: 'overflow-hidden rounded-md border border-neutral-muted bg-surface'
+	base: 'overflow-hidden rounded-lg border border-neutral-muted bg-surface'
 });
 
 /** Error surface shown when parsing/rendering the diff throws. */
 const defaultDiffError = cva({
-	base: 'rounded-md border border-danger/40 bg-danger-muted px-xl py-lg text-sm text-danger-muted-readable'
+	base: 'rounded-lg border border-danger/40 bg-danger-muted px-xl py-lg text-sm text-danger-muted-readable'
 });
 
 export const diffTheme = {

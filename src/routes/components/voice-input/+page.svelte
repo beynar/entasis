@@ -4,7 +4,7 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 
 	let recording = $state<Blob | null>(null);
 	let duration = $state(0);
@@ -21,7 +21,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -68,20 +68,20 @@ ${'</' + 'script>'}
 />`;
 
 	const sizeCode = `<div class="grid w-full gap-6">
-	<VoiceInput size="small" ariaLabel="Start small recording" />
-	<VoiceInput size="normal" ariaLabel="Start normal recording" />
-	<VoiceInput size="large" ariaLabel="Start large recording" />
+	<VoiceInput size="small" startLabel="Start small recording" />
+	<VoiceInput size="normal" startLabel="Start normal recording" />
+	<VoiceInput size="large" startLabel="Start large recording" />
 </div>`;
 
 	const expandableCode = `<VoiceInput
 	class="max-w-2xl"
 	variant="expandable"
-	ariaLabel="Start voice message"
+	startLabel="Start voice message"
 />`;
 
 	const compactCode = `<VoiceInput
 	variant="compact"
-	ariaLabel="Start compact recording"
+	startLabel="Start compact recording"
 />`;
 
 	const formCode = `<Form
@@ -112,7 +112,7 @@ ${'</' + 'script>'}
 		'Optional left-expanding recording surface',
 		'Mic-only level rings for compact interfaces',
 		'Play, pause, scrub, and clear finalized recordings',
-		'Native pointer and keyboard waveform seeking',
+		'Native range input for waveform seeking',
 		'Bindable Blob value and recording duration',
 		'Permission, recorder, timer, and stream lifecycle handling',
 		'Field validation and configuration-driven Form support'
@@ -139,7 +139,7 @@ ${'</' + 'script>'}
 				maxDuration={60}
 			/>
 			{#if recording}
-				<p class="mt-2 text-xs text-neutral/60">
+				<p class="text-neutral/70 mt-2 text-xs">
 					Recording ready · {formatSize(recording.size)} · {duration.toFixed(1)}s
 				</p>
 			{/if}
@@ -162,7 +162,7 @@ ${'</' + 'script>'}
 			class="!min-h-fit"
 			code={expandableCode}
 		>
-			<VoiceInput class="max-w-2xl" variant="expandable" ariaLabel="Start voice message" />
+			<VoiceInput class="max-w-2xl" variant="expandable" startLabel="Start voice message" />
 		</ComponentCard>
 
 		<ComponentCard
@@ -170,7 +170,7 @@ ${'</' + 'script>'}
 			class="!min-h-fit"
 			code={compactCode}
 		>
-			<VoiceInput variant="compact" ariaLabel="Start compact recording" />
+			<VoiceInput variant="compact" startLabel="Start compact recording" />
 		</ComponentCard>
 
 		<ComponentCard
@@ -179,9 +179,9 @@ ${'</' + 'script>'}
 			code={sizeCode}
 		>
 			<div class="grid w-full max-w-3xl gap-6">
-				<VoiceInput size="small" ariaLabel="Start small recording" />
-				<VoiceInput size="normal" ariaLabel="Start normal recording" />
-				<VoiceInput size="large" ariaLabel="Start large recording" />
+				<VoiceInput size="small" startLabel="Start small recording" />
+				<VoiceInput size="normal" startLabel="Start normal recording" />
+				<VoiceInput size="large" startLabel="Start large recording" />
 			</div>
 		</ComponentCard>
 

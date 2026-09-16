@@ -31,30 +31,30 @@
 	];
 </script>
 
-<footer class="flex flex-col gap-xl border-t border-neutral-muted p-lg md:p-xl">
-	<div class="grid gap-xl md:grid-cols-5">
-		<div class="flex flex-col items-start gap-lg md:col-span-2">
+<footer class="gap-xl border-neutral-muted p-lg md:p-xl flex flex-col border-t">
+	<div class="gap-xl grid md:grid-cols-5">
+		<div class="gap-lg flex flex-col items-start md:col-span-2">
 			<Heading as="h2" size="h3" weight="bold">Northstar®</Heading>
-			<p class="max-w-xs text-sm text-neutral/60">
+			<p class="text-neutral/70 max-w-xs text-sm">
 				Thoughtful tools for the people building what comes next.
 			</p>
 			<Chip size="small" variant="outline">Made with Svelai</Chip>
 		</div>
 		{#each columns as column (column.title)}<nav
 				aria-label={column.title + ' footer links'}
-				class="flex flex-col items-start gap-md"
+				class="gap-md flex flex-col items-start"
 			>
 				<strong class="text-sm">{column.title}</strong>{#each column.links as link (link.href)}<a
 						href={link.href}
-						class="text-sm text-neutral/60 underline-offset-4 hover:text-primary hover:underline"
+						class="text-neutral/70 hover:text-primary-readable text-sm underline-offset-4 hover:underline"
 						>{link.label}</a
 					>{/each}
 			</nav>{/each}
 	</div>
 	<Separator />
-	<div class="flex flex-wrap justify-between gap-md text-xs text-neutral/50">
+	<div class="gap-md text-neutral/65 flex flex-wrap justify-between text-xs">
 		<p>© {year} Northstar. An example brand.</p>
 		<p>A clear foundation for your next idea.</p>
-		<a href="/docs" class="hover:text-primary">Documentation</a>
+		<a href="/docs" class="hover:text-primary-readable">Documentation</a>
 	</div>
 </footer>

@@ -118,7 +118,7 @@ ${'</' + 'script>'}
 			>
 				{#snippet children({ role: messageRole, content, size, variant })}
 					<div class="grid gap-1">
-						<span class="text-xs font-semibold uppercase text-neutral/55"
+						<span class="text-neutral/65 text-xs font-semibold uppercase"
 							>{messageRole} · {size} · {variant}</span
 						>
 						<span>{content}</span>

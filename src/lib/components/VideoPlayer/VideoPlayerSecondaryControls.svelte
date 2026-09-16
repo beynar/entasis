@@ -15,9 +15,10 @@
 	} from './videoPlayer.props.js';
 	import type { VideoPlayerState } from './videoPlayer.state.svelte.js';
 	import type { useVideoPlayerTheme } from './videoPlayer.theme.js';
-	import VideoPlayerIconButton from './VideoPlayerIconButton.svelte';
+	import MediaIconButton from '../MediaVolume/MediaIconButton.svelte';
 	import VideoPlayerSettings from './VideoPlayerSettings.svelte';
 	import VideoPlayerVolumeControl from './VideoPlayerVolumeControl.svelte';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type VideoPlayerClasses = ReturnType<typeof useVideoPlayerTheme>;
 
@@ -48,6 +49,7 @@
 		disabled: boolean;
 		onOverlayOpenChange: (open: boolean) => void;
 	} = $props();
+	const t = $derived(useI18n());
 
 	const controlSet = $derived(new Set(controls));
 	const hasCaptionTracks = $derived(
@@ -91,17 +93,17 @@
 		includeRate
 		includeLoop={false}
 		includeCaptions={false}
-		label={`Speed ${player.playbackRate}x`}
+		label={t.mediaSpeed(player.playbackRate)}
 		icon={speedometerIcon}
 		{onOverlayOpenChange}
 	/>
 {/if}
 
 {#if hasControl('loop')}
-	<VideoPlayerIconButton
-		{classes}
+	<MediaIconButton
 		{size}
-		label={player.loop ? 'Disable loop' : 'Enable loop'}
+		class={classes.controlButton({ size })}
+		label={player.loop ? t.disableLoop : t.enableLoop}
 		icon={repeatIcon}
 		active={player.loop}
 		pressed={player.loop}
@@ -111,10 +113,10 @@
 {/if}
 
 {#if hasControl('captions')}
-	<VideoPlayerIconButton
-		{classes}
+	<MediaIconButton
 		{size}
-		label={player.captionsEnabled ? 'Disable captions' : 'Enable captions'}
+		class={classes.controlButton({ size })}
+		label={player.captionsEnabled ? t.disableCaptions : t.enableCaptions}
 		icon={player.captionsEnabled ? closedCaptioningIcon : subtitlesSlashIcon}
 		active={player.captionsEnabled}
 		pressed={player.captionsEnabled}
@@ -139,37 +141,35 @@
 {/if}
 
 {#if hasControl('pictureInPicture')}
-	<VideoPlayerIconButton
-		{classes}
+	<MediaIconButton
 		{size}
-		label={player.actualPictureInPicture ? 'Exit Picture-in-Picture' : 'Picture-in-Picture'}
+		class={classes.controlButton({ size })}
+		label={player.actualPictureInPicture ? t.exitPictureInPicture : t.pictureInPicture}
 		icon={pictureInPictureIcon}
 		active={player.actualPictureInPicture}
 		pressed={player.actualPictureInPicture}
 		disabled={disabled || !player.supportsPictureInPicture}
-		class="max-[360px]:hidden"
 		onPress={() => player.runInteraction(() => player.togglePictureInPicture())}
 	/>
 {/if}
 
 {#if hasControl('download') && downloadHref}
-	<VideoPlayerIconButton
-		{classes}
+	<MediaIconButton
 		{size}
-		label="Download"
+		class={classes.controlButton({ size })}
+		label={t.download}
 		icon={downloadSimpleIcon}
 		disabled={disabled || !downloadHref}
 		href={disabled ? undefined : downloadHref}
 		download={true}
-		class="max-[360px]:hidden"
 	/>
 {/if}
 
 {#if hasControl('fullscreen')}
-	<VideoPlayerIconButton
-		{classes}
+	<MediaIconButton
 		{size}
-		label={player.actualFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+		class={classes.controlButton({ size })}
+		label={player.actualFullscreen ? t.exitFullscreen : t.fullscreen}
 		icon={player.actualFullscreen ? cornersInIcon : cornersOutIcon}
 		active={player.actualFullscreen}
 		pressed={player.actualFullscreen}

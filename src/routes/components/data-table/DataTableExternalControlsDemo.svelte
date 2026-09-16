@@ -32,11 +32,11 @@
 		{#if dataTable}
 			<Pagination
 				totalPages={dataTable.totalPages}
-				page={dataTable.state.pagination.page}
+				value={dataTable.state.pagination.page}
 				variant="pages"
 				controlVariant="ghost"
 				size="small"
-				onPageChange={dataTable.setPage}
+				onValueChange={dataTable.setPage}
 			/>
 		{/if}
 	</div>
@@ -47,7 +47,7 @@
 			{columns}
 			getRowId={(person) => person.id}
 			bind:state={tableState}
-			bind:dataTable
+			bind:api={dataTable}
 			pagination={{ pageSize: 10, pageSizes: [10, 25], showControls: false }}
 		/>
 	</div>

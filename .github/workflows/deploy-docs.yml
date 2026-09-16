@@ -1,0 +1,30 @@
+name: Deploy docs
+
+# The docs app (this SvelteKit project with adapter-cloudflare, see wrangler.jsonc) deploys on
+# every push to master. Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID as repository secrets;
+# the resulting URL is the `homepage` in package.json.
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm install --global pnpm@11
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec svelte-kit sync
+      - run: pnpm exec vite build
+      - run: pnpm exec wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

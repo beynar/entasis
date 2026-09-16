@@ -28,14 +28,14 @@
 <div class="grid w-full max-w-6xl gap-8 p-2 sm:grid-cols-2">
 	{#each variants as variant (variant)}
 		<section>
-			<p class="mb-4 font-mono text-xs font-medium tracking-wider text-neutral/55 uppercase">
+			<p class="text-neutral/65 mb-4 font-mono text-xs font-medium tracking-wider uppercase">
 				{variant}
 			</p>
 			<Timeline
 				{items}
 				{variant}
 				size="small"
-				density="small"
+				density="compact"
 				aria-label={`${variant} timeline variant`}
 			/>
 		</section>

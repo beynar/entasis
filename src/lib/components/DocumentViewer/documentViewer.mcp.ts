@@ -6,17 +6,21 @@ A client-only, read-only viewer for PDF, DOCX/DOC, XLSX/XLS, CSV, and PPTX/PPT. 
 ## Basic usage
 
 \`\`\`svelte
-<script>
+<script lang="ts">
 	import { DocumentViewer } from 'svelai/document-viewer';
+
+	let file: File | undefined = $state();
 </script>
 
 <div class="h-[600px]">
 	<DocumentViewer src="/report.pdf" />
 </div>
 
-<div class="h-[600px]">
-	<DocumentViewer src={file} fileName={file.name} />
-</div>
+{#if file}
+	<div class="h-[600px]">
+		<DocumentViewer src={file} fileName={file.name} />
+	</div>
+{/if}
 \`\`\`
 
 ## Source and format

@@ -50,7 +50,6 @@
 	{...attachments}
 >
 	{#each Array.from({ length: max }, (_, index) => index + 1) as starIndex (starIndex)}
-		<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 		<span
 			aria-hidden="true"
 			data-star-index={starIndex}

@@ -25,11 +25,11 @@
 	let selected = $state<(typeof members)[number] | null>(null);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<header class="flex flex-wrap items-center justify-between gap-lg">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<header class="gap-lg flex flex-wrap items-center justify-between">
 		<div>
 			<h2 class="text-3xl font-semibold">One team, many strengths.</h2>
-			<p class="mt-sm text-sm text-neutral/60">Browse your team and inspect member permissions.</p>
+			<p class="mt-sm text-neutral/70 text-sm">Browse your team and inspect member permissions.</p>
 		</div>
 		<Select
 			label="Show role"
@@ -44,10 +44,10 @@
 	</header>
 	<Grid columns={{ minWidth: 220, max: 3 }} gap="lg">
 		{#each members.filter((member) => filter === 'All' || member.role === filter) as member (member)}<Card
-				><div class="grid justify-items-center gap-md text-center">
-					<Avatar user={{ name: member.name }} size="large" />
+				><div class="gap-md grid justify-items-center text-center">
+					<Avatar name={member.name} size="large" />
 					<h3 class="font-semibold">{member.name}</h3>
-					<p class="text-sm text-neutral/60">{member.email}</p>
+					<p class="text-neutral/70 text-sm">{member.email}</p>
 					<Chip color={member.role === 'Admin' ? 'primary' : 'neutral'}>{member.role}</Chip><Button
 						fullWidth
 						variant="outline"
@@ -55,7 +55,7 @@
 						onclick={() => (selected = member)}>Manage permissions</Button
 					>
 				</div></Card
-			>{:else}<p class="text-sm text-neutral/60">No members have this role.</p>{/each}
+			>{:else}<p class="text-neutral/70 text-sm">No members have this role.</p>{/each}
 	</Grid>
 	<Dialog
 		open={selected !== null}

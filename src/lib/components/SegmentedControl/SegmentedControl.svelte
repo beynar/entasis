@@ -1,6 +1,6 @@
 <script
 	lang="ts"
-	generics="const Items extends readonly SegmentedControlItem[] = readonly SegmentedControlItem[]"
+	generics="Value extends string = string, Items extends readonly SegmentedControlItem<Value>[] = readonly SegmentedControlItem<Value>[]"
 >
 	import Slot from '../Slot/Slot.svelte';
 	import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
@@ -8,6 +8,8 @@
 	import type { SegmentedControlItem, SegmentedControlProps } from './segmentedControl.props.js';
 	import { useSegmentedControlTheme } from './segmentedControl.theme.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
+	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		items,
@@ -16,14 +18,15 @@
 		onValueChange,
 		item: itemRenderer,
 		size = 'normal',
-		color = 'neutral',
+		color,
 		variant = 'normal',
 		disabled = false,
-		ariaLabel = 'Segmented control',
+		label,
 		class: className,
 		theme,
 		...attachments
 	}: SegmentedControlProps<Items> = $props();
+	const t = $derived(useI18n());
 	const valueState = createBindableValue(
 		() => value,
 		(next) => {
@@ -34,11 +37,19 @@
 
 	const id = $props.id();
 	const classes = $derived(useSegmentedControlTheme(theme));
+	const resolvedColor = $derived(useDefaultColor(color));
 	const selectedIndex = $derived(items.findIndex((item) => item.value === valueState.value));
 	const firstEnabledIndex = $derived(items.findIndex((item) => !item.disabled));
 	const tabStopIndex = $derived(
 		selectedIndex >= 0 && !items[selectedIndex]?.disabled ? selectedIndex : firstEnabledIndex
 	);
+
+	// A painted snippet label names its own segment; a string label is painted and spoken, and an
+	// icon-only segment borrows its value.
+	function itemLabel(segment: SegmentedControlItem) {
+		if (typeof segment.label === 'string') return segment.label;
+		return segment.label ? undefined : segment.value;
+	}
 
 	function selectItem(index: number) {
 		const selectedItem = items[index];
@@ -76,11 +87,11 @@
 
 <div
 	role="radiogroup"
-	aria-label={ariaLabel}
+	aria-label={label ?? t.segmentedControl}
 	aria-orientation="horizontal"
 	aria-disabled={disabled || undefined}
 	tabindex="-1"
-	data-color={color}
+	data-color={resolvedColor}
 	class={classes.root({ size, variant, disabled, className })}
 	{@attach navigation.containerReference}
 	{@attach indicator.containerReference}
@@ -88,7 +99,7 @@
 >
 	{#if indicator.isHydrated && selectedIndex >= 0}
 		<span
-			class={classes.indicator({ variant, color })}
+			class={classes.indicator({ variant, color: resolvedColor })}
 			style={indicator.style}
 			data-ready={indicator.isReady ? 'true' : 'false'}
 			aria-hidden="true"
@@ -103,13 +114,18 @@
 			type="button"
 			role="radio"
 			aria-checked={isSelected}
-			aria-label={controlItem.ariaLabel ??
-				(typeof controlItem.label === 'string' ? controlItem.label : controlItem.value)}
+			aria-label={itemLabel(controlItem)}
 			disabled={isDisabled}
 			tabindex={isFocused || (navigation.focusedIndex === null && tabStopIndex === index) ? 0 : -1}
 			data-value={controlItem.value}
 			data-selected={isSelected ? 'true' : 'false'}
-			class={classes.item({ size, variant, color, selected: isSelected, disabled: isDisabled })}
+			class={classes.item({
+				size,
+				variant,
+				color: resolvedColor,
+				selected: isSelected,
+				disabled: isDisabled
+			})}
 			onclick={() => {
 				selectItem(index);
 				navigation.focusItem(index);
@@ -118,7 +134,8 @@
 			{@attach indicator.itemReference(index)}
 		>
 			{#if !indicator.isHydrated && isSelected}
-				<span class={classes.staticIndicator({ variant, color })} aria-hidden="true"></span>
+				<span class={classes.staticIndicator({ variant, color: resolvedColor })} aria-hidden="true"
+				></span>
 			{/if}
 
 			{#if itemRenderer}

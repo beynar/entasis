@@ -11,29 +11,31 @@
 	let index = $state(0);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Activity preview</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Activity preview
+		</p>
 		<Heading size="h2" weight="bold">Good company for your good taste.</Heading>
 	</header>
-	<div class="flex flex-col gap-xl">
+	<div class="gap-xl flex flex-col">
 		<div
-			class="flex gap-lg items-center flex-wrap px-xl py-lg w-fit max-w-full rounded-full border border-neutral/15 bg-surface-raised shadow-sm"
+			class="gap-lg px-xl py-lg border-neutral/15 bg-surface-raised flex w-fit max-w-full flex-wrap items-center rounded-full border shadow-sm"
 		>
-			<Avatar size="small" user={{ name: activity[index].name }} />
+			<Avatar size="small" name={activity[index].name} />
 			<div class="text-sm">
-				<strong>{activity[index].name}</strong><span class="text-neutral/60">
+				<strong>{activity[index].name}</strong><span class="text-neutral/70">
 					in {activity[index].city} chose
 				</span><strong>{activity[index].product}</strong>
 			</div>
 			<Chip variant="soft" color="success" size="small">Sample</Chip>
 		</div>
-		<div class="flex gap-md">
+		<div class="gap-md flex">
 			{#each activity as purchase, i (purchase.name)}<Button
 					variant={index === i ? 'soft' : 'ghost'}
 					size="small"
 					onclick={() => (index = i)}
-					aria-pressed={index === i}>Activity {i + 1}</Button
+					pressed={index === i}>Activity {i + 1}</Button
 				>{/each}
 		</div>
 	</div>

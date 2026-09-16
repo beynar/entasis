@@ -1,5 +1,5 @@
-import { onDestroy } from 'svelte';
 import { on } from 'svelte/events';
+import { SvelteSet } from 'svelte/reactivity';
 
 type UseDragOptions = {
 	onDragStart?: (event: PointerEvent) => void;
@@ -8,8 +8,7 @@ type UseDragOptions = {
 	isActive?: boolean;
 };
 export const useDrag = (opts: UseDragOptions) => {
-	let offs = new Set<() => void>();
-	let reference: HTMLElement | null = null;
+	const offs = new SvelteSet<() => void>();
 	let isDragging = $state(false);
 	let moveOff: (() => void) | null = null;
 	let upOff: (() => void) | null = null;
@@ -51,7 +50,6 @@ export const useDrag = (opts: UseDragOptions) => {
 		get reference() {
 			if (!opts.isActive) return null;
 			return (ref: HTMLElement) => {
-				reference = ref;
 				const offDown = on(ref, 'pointerdown', onDown);
 				offs.add(offDown);
 				return () => {

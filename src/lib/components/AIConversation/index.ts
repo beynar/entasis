@@ -19,13 +19,13 @@ export type {
 	AIConversationMessagePayload,
 	AIConversationMessageUpdatePayload,
 	AIConversationQueuedMessagePayload,
-	AIConversationRetryDetail,
+	AIConversationRetryOptions,
 	AIConversationRetryPayload,
 	AIConversationStateEvents,
 	AIConversationStateOptions,
 	AIConversationStatus,
 	AIConversationStatusChangePayload,
-	AIConversationSubmitDetail,
+	AIConversationSubmitOptions,
 	AIConversationSubmitPayload,
 	AIConversationToolUpdatePayload,
 	AIConversationValueChangePayload
@@ -35,3 +35,10 @@ export type {
 	AIConversationToolUpdate,
 	AIConversationToolUpdateChange
 } from './AIConversationToolLifecycle.js';
+export {
+	aiConversationTheme,
+	setAIConversationTheme,
+	useAIConversationTheme,
+	type AIConversationTheme,
+	type AIConversationThemeProps
+} from './aiConversation.theme.js';

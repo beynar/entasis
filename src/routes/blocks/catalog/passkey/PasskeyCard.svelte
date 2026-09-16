@@ -8,16 +8,16 @@
 	let fallback = $state(false);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card
 		class="mx-auto w-full max-w-md"
 		title="Sign in with a passkey"
 		description="A familiar gesture. A more secure sign-in."
 		><Stack gap="lg" class="text-center">
-			<div class="mx-auto grid size-20 place-items-center rounded-full bg-primary-muted text-4xl">
+			<div class="bg-primary-muted mx-auto grid size-20 place-items-center rounded-full text-4xl">
 				{@render fingerprintIcon()}
 			</div>
-			<p class="text-sm text-neutral/65">
+			<p class="text-neutral/65 text-sm">
 				Use your fingerprint, face, or device PIN to access Northstar.
 			</p>
 			<Button onclick={() => (message = 'Passkey sign-in is not available in this demo.')}

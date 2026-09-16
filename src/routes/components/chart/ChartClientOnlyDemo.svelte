@@ -43,7 +43,7 @@
 	{y}
 	{marks}
 	tooltip
-	ariaLabel="API response time"
+	label="API response time"
 	ariaDescription="Response time measured every five minutes."
 	class="w-full"
 />

@@ -9,7 +9,7 @@ export type DiscoveredImage = ImageGalleryImage & {
 type RestoredImageAttributes = {
 	role: string | null;
 	tabindex: string | null;
-	ariaLabel: string | null;
+	label: string | null;
 	dataGalleryImage: string | null;
 	dataSrc: string | null;
 	dataThumb: string | null;
@@ -80,7 +80,7 @@ export class ImageGalleryImages {
 			this.enhancedImages.set(imageElement, {
 				role: imageElement.getAttribute('role'),
 				tabindex: imageElement.getAttribute('tabindex'),
-				ariaLabel: imageElement.getAttribute('aria-label'),
+				label: imageElement.getAttribute('aria-label'),
 				dataGalleryImage: imageElement.getAttribute('data-image-gallery-image'),
 				dataSrc: imageElement.getAttribute('data-src'),
 				dataThumb: imageElement.getAttribute('data-thumb'),
@@ -111,7 +111,7 @@ export class ImageGalleryImages {
 		if (!previousAttributes) return;
 		this.restoreAttribute(imageElement, 'role', previousAttributes.role);
 		this.restoreAttribute(imageElement, 'tabindex', previousAttributes.tabindex);
-		this.restoreAttribute(imageElement, 'aria-label', previousAttributes.ariaLabel);
+		this.restoreAttribute(imageElement, 'aria-label', previousAttributes.label);
 		this.restoreAttribute(
 			imageElement,
 			'data-image-gallery-image',

@@ -1,10 +1,11 @@
 import { onDestroy, untrack } from 'svelte';
+import { SvelteSet } from 'svelte/reactivity';
 
 /**
  * A minimal, framework-agnostic pan/zoom controller for a single DOM or SVG
  * root. It applies a CSS `translate3d + scale` transform to the attached node,
  * listens on the node's parent (the "owner" viewport) for drag / wheel / pinch,
- * and exposes imperative zoom/fit/expand controls.
+ * and exposes imperative zoom/fit controls.
  *
  * Ported from svelte-streamdown's panzoom utility and adapted to the svelai
  * conventions (attachment returns a cleanup, `untrack` around setup, options via
@@ -29,12 +30,11 @@ export interface PanzoomOptions {
 	 */
 	activateMouseWheel?: boolean;
 	/**
-	 * Element that receives `data-expanded` and the fullscreen overlay CSS. Defaults
-	 * to the event target (the panned node's parent). Pass the styled root when the
-	 * fullscreen styles live on an ancestor of the event target. Getter so it can be
-	 * resolved after `attach`.
+	 * Capture single-finger touch as a pan. Off by default so an inline diagram never
+	 * traps the page scroll; turn it on inside a dialog or any other surface that owns
+	 * the viewport. Pinch-zoom always works. Getter-friendly like `activateMouseWheel`.
 	 */
-	expandTarget?: HTMLElement | null;
+	touchPan?: boolean;
 }
 
 export const usePanzoom = (opts: PanzoomOptions = {}) => {
@@ -50,9 +50,7 @@ export const usePanzoom = (opts: PanzoomOptions = {}) => {
 
 	let node: HTMLElement | SVGSVGElement | null = null;
 	let eventTarget: HTMLElement | null = null;
-	// The scroll/touch surface (== eventTarget); kept so expand() can toggle touchAction.
-	let surface: HTMLElement | null = null;
-	const listeners = new Set<() => void>();
+	const listeners = new SvelteSet<() => void>();
 
 	// drag state
 	let dragging = false;
@@ -65,21 +63,11 @@ export const usePanzoom = (opts: PanzoomOptions = {}) => {
 	let touchMode: 'none' | 'pan' | 'pinch' = 'none';
 	let pinchDistance = 0;
 
-	// expand/collapse state
-	let isExpanded = $state(false);
-	let animating = false;
-
-	const onKeyDown = (e: KeyboardEvent) => {
-		if (e.key === 'Escape' && isExpanded && !animating) void expand(false);
-	};
-
 	const destroy = () => {
 		listeners.forEach((off) => off());
 		listeners.clear();
 		if (dragOffMove) dragOffMove();
 		if (dragOffUp) dragOffUp();
-		// Don't leave the page scroll-locked if we're torn down mid-fullscreen.
-		if (isExpanded && typeof document !== 'undefined') document.body.style.overflow = '';
 	};
 
 	onDestroy(destroy);
@@ -125,7 +113,6 @@ export const usePanzoom = (opts: PanzoomOptions = {}) => {
 		if (!opts.activateMouseWheel || !node) return;
 		e.preventDefault();
 		e.stopPropagation();
-		if (animating) return;
 		zoomAt(e.clientX, e.clientY, kineticWheel(e.deltaY * (e.deltaMode ? 100 : 1)));
 	};
 
@@ -149,7 +136,6 @@ export const usePanzoom = (opts: PanzoomOptions = {}) => {
 	};
 
 	const startDrag = (e: MouseEvent) => {
-		if (animating) return void e.preventDefault();
 		if (e.button !== 0) return;
 		const t = e.target as Element | null;
 		// Don't start a pan from a control (buttons carry data-panzoom-ignore).
@@ -191,14 +177,13 @@ export const usePanzoom = (opts: PanzoomOptions = {}) => {
 	};
 
 	const onTouchStart = (e: TouchEvent) => {
-		if (!node || animating) return;
-		// Inline (not fullscreen), a single-finger touch must fall through to native
-		// page scroll — otherwise the diagram traps the user's swipe. Only capture
-		// touch panning once expanded; pinch-zoom still needs two fingers.
-		if (!isExpanded) return;
+		if (!node) return;
 		const t0 = e.target as Element | null;
 		if (t0 && t0.closest('[data-panzoom-ignore]')) return;
 		if (e.touches.length === 1) {
+			// A single finger falls through to native page scroll unless the caller owns
+			// the viewport; pinch-zoom still needs two fingers.
+			if (!opts.touchPan) return;
 			touchMode = 'pan';
 			lastClientX = e.touches[0].clientX;
 			lastClientY = e.touches[0].clientY;
@@ -251,7 +236,11 @@ export const usePanzoom = (opts: PanzoomOptions = {}) => {
 			eventTarget = (target.parentElement as HTMLElement | null) ?? (target as HTMLElement);
 			apply();
 
-			const add = (type: string, handler: (e: any) => void, options?: AddEventListenerOptions) => {
+			const add = <E extends Event>(
+				type: string,
+				handler: (e: E) => void,
+				options?: AddEventListenerOptions
+			) => {
 				const n = (eventTarget ?? (node as HTMLElement)) as HTMLElement;
 				n.addEventListener(type, handler as EventListener, options);
 				const off = () => n.removeEventListener(type, handler as EventListener, options);
@@ -262,13 +251,11 @@ export const usePanzoom = (opts: PanzoomOptions = {}) => {
 			add('wheel', onWheel, { passive: false, capture: true });
 			add('dblclick', onDblClick, { passive: false });
 			add('touchstart', onTouchStart, { passive: false });
-			window.addEventListener('keydown', onKeyDown, { passive: true });
-			listeners.add(() => window.removeEventListener('keydown', onKeyDown));
 
-			surface = (eventTarget ?? node) as HTMLElement;
+			const surface = (eventTarget ?? node) as HTMLElement;
 			surface.style.userSelect = 'none';
-			// Leave native scroll intact inline; expand() sets 'none' when fullscreen.
-			surface.style.touchAction = isExpanded ? 'none' : '';
+			// Native scroll stays intact unless the caller captures single-finger panning.
+			surface.style.touchAction = opts.touchPan ? 'none' : '';
 			surface.style.cursor = 'grab';
 			surface.style.overscrollBehavior = 'contain';
 			if (isSVG) (node.style as CSSStyleDeclaration).transformBox = 'fill-box';
@@ -311,77 +298,14 @@ export const usePanzoom = (opts: PanzoomOptions = {}) => {
 		if (factor > 0) zoomBy(1 / factor);
 	};
 
-	// Toggle the fullscreen overlay. `data-expanded` + the fixed-overlay CSS live on
-	// `expandTarget` (defaults to the eventTarget, but for nested layouts the styled
-	// root is an ancestor). FLIP-animates the change.
-	const expand = (next: boolean) => {
-		const target = (opts.expandTarget ?? eventTarget) as HTMLElement | null;
-		if (!target || animating) return;
-		const first = target.getBoundingClientRect();
-		animating = true;
-
-		if (next) {
-			// Reserve the collapsed height on the parent so the page doesn't jump when
-			// the target leaves flow, and lock body scroll behind the overlay.
-			const parent = target.parentElement;
-			if (parent) parent.style.height = getComputedStyle(target).getPropertyValue('height');
-			if (typeof document !== 'undefined') document.body.style.overflow = 'hidden';
-			target.dataset.expanded = 'true';
-			isExpanded = true;
-			if (surface) surface.style.touchAction = 'none';
-			zoomToFit();
-		} else {
-			target.dataset.expanded = 'false';
-			isExpanded = false;
-			if (surface) surface.style.touchAction = '';
-			if (typeof document !== 'undefined') document.body.style.overflow = '';
-			const parent = target.parentElement;
-			if (parent) parent.style.height = '';
-		}
-
-		const last = target.getBoundingClientRect();
-		const deltaX = first.left - last.left;
-		const deltaY = first.top - last.top;
-		const deltaW = last.width ? first.width / last.width : 1;
-		const deltaH = last.height ? first.height / last.height : 1;
-
-		const reduce =
-			typeof window !== 'undefined' &&
-			window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
-		const animation = target.animate(
-			[
-				{
-					transformOrigin: '0 0',
-					transform: `translate(${deltaX}px, ${deltaY}px) scale(${deltaW}, ${deltaH})`
-				},
-				{ transformOrigin: '0 0', transform: 'translate(0px, 0px) scale(1, 1)' }
-			],
-			{ duration: reduce ? 0 : 300, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', fill: 'both' }
-		);
-		animation.finished
-			.then(() => animation.cancel())
-			.finally(() => {
-				animating = false;
-				zoomToFit();
-			});
-	};
-
-	const toggleExpand = () => expand(!isExpanded);
-
 	return {
 		attach,
 		zoomToFit,
 		zoomIn,
 		zoomOut,
 		zoomBy,
-		expand,
-		toggleExpand,
 		get transform() {
 			return { x, y, scale } as const;
-		},
-		get expanded() {
-			return isExpanded;
 		}
 	};
 };

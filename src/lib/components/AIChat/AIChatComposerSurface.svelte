@@ -2,7 +2,7 @@
 	import AIAskUserQuestion from '../AIAskUserQuestion/AIAskUserQuestion.svelte';
 	import type {
 		AIAskAnswers,
-		AIAskUserQuestionSubmitDetail
+		AIAskUserQuestionSubmitPayload
 	} from '../AIAskUserQuestion/aiAskUserQuestion.props.js';
 	import AIComposer from '../AIComposer/AIComposer.svelte';
 	import type {
@@ -16,6 +16,7 @@
 	import Slot from '../Slot/Slot.svelte';
 	import type { AIChatProps } from './aiChat.props.js';
 	import { useAIChatTheme } from './aiChat.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type Props<TMessage extends AIThreadItem> = Pick<
 		AIChatProps<TMessage>,
@@ -94,6 +95,7 @@
 		onSteer,
 		theme
 	}: Props<TMessage> = $props();
+	const t = $derived(useI18n());
 
 	let composerHandle = $state<AIComposerHandle>();
 	let askUserQuestionValues = $state<Record<string, AIAskAnswers | undefined>>({});
@@ -118,7 +120,7 @@
 	async function resolveAskUserQuestion(
 		request: AIThreadAskUserQuestion<TMessage>,
 		state: 'completed' | 'discarded',
-		detail?: AIAskUserQuestionSubmitDetail
+		detail?: AIAskUserQuestionSubmitPayload
 	): Promise<void> {
 		await conversation.resolveAskUserQuestion(
 			state,
@@ -157,7 +159,7 @@
 			questions={request.questions}
 			value={askUserQuestionValue(request)}
 			{disabled}
-			title={request.title ?? 'Clarify before continuing'}
+			title={request.title ?? t.aiAskClarify}
 			requester={request.requester}
 			context={request.context}
 			submitLabel={request.submitLabel}

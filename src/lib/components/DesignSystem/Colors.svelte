@@ -103,7 +103,7 @@
 <div class="grid gap-8 p-10">
 	<section class="grid gap-3">
 		<Heading class="text-neutral">Surface elevation</Heading>
-		<p class="max-w-3xl text-sm text-neutral/60">
+		<p class="text-neutral/70 max-w-3xl text-sm">
 			Surface tokens describe resting elevation only: the app canvas, ordinary surfaces, raised
 			containers, and floating overlays.
 		</p>
@@ -111,7 +111,7 @@
 			{#each surfaceList as surface (surface.name)}
 				<div class="h-auto rounded-lg">
 					<div class={`raised h-[100px] w-full rounded-lg ${surface.background}`}></div>
-					<div class="p-2 text-center text-sm text-neutral">{surface.name}</div>
+					<div class="text-neutral p-2 text-center text-sm">{surface.name}</div>
 				</div>
 			{/each}
 		</div>
@@ -124,7 +124,7 @@
 				{#each variants as variant (variant)}
 					<div class="h-auto rounded-lg">
 						<div class={`raised h-[100px] w-full rounded-lg ${variant}`}></div>
-						<div class="p-2 text-center text-sm text-neutral">{variant.replace('bg-', '')}</div>
+						<div class="text-neutral p-2 text-center text-sm">{variant.replace('bg-', '')}</div>
 					</div>
 				{/each}
 			</div>
@@ -133,17 +133,17 @@
 
 	<section class="mt-2 grid gap-3">
 		<Heading class="text-neutral">Surface interaction</Heading>
-		<p class="max-w-3xl text-sm text-neutral/60">
+		<p class="text-neutral/70 max-w-3xl text-sm">
 			The state layer uses the element's current text color. It darkens light surfaces with dark
 			content and lightens dark surfaces with light content without changing elevation.
 		</p>
 		<div class="grid grid-cols-[minmax(9rem,1fr)_repeat(3,minmax(6rem,1fr))] gap-2 text-sm">
 			<div></div>
-			<div class="p-2 text-center text-neutral/60">Rest</div>
-			<div class="p-2 text-center text-neutral/60">Hover</div>
-			<div class="p-2 text-center text-neutral/60">Pressed</div>
+			<div class="text-neutral/70 p-2 text-center">Rest</div>
+			<div class="text-neutral/70 p-2 text-center">Hover</div>
+			<div class="text-neutral/70 p-2 text-center">Pressed</div>
 			{#each surfaceList as surface (surface.name)}
-				<div class="flex items-center font-medium text-neutral">{surface.name}</div>
+				<div class="text-neutral flex items-center font-medium">{surface.name}</div>
 				{@render interactionCell(surface.background, 'text-neutral', 'Rest')}
 				{@render interactionCell(surface.background, 'text-neutral', 'Hover', 'hover')}
 				{@render interactionCell(surface.background, 'text-neutral', 'Pressed', 'pressed')}
@@ -155,11 +155,11 @@
 		<Heading class="text-neutral">Semantic interaction</Heading>
 		<div class="grid grid-cols-[minmax(9rem,1fr)_repeat(3,minmax(6rem,1fr))] gap-2 text-sm">
 			<div></div>
-			<div class="p-2 text-center text-neutral/60">Rest</div>
-			<div class="p-2 text-center text-neutral/60">Hover</div>
-			<div class="p-2 text-center text-neutral/60">Pressed</div>
+			<div class="text-neutral/70 p-2 text-center">Rest</div>
+			<div class="text-neutral/70 p-2 text-center">Hover</div>
+			<div class="text-neutral/70 p-2 text-center">Pressed</div>
 			{#each semanticInteractionRows as row (row.name)}
-				<div class="flex items-center font-medium text-neutral">{row.name}</div>
+				<div class="text-neutral flex items-center font-medium">{row.name}</div>
 				{@render interactionCell(row.background, row.content, 'Rest')}
 				{@render interactionCell(row.background, row.content, 'Hover', 'hover')}
 				{@render interactionCell(row.background, row.content, 'Pressed', 'pressed')}

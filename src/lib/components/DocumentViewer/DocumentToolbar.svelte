@@ -20,6 +20,7 @@
 	import DocumentSearchControl from './DocumentSearchControl.svelte';
 	import type { DocumentToolbarPosition, DocumentViewerControl } from './documentViewer.props.js';
 	import type { DocumentViewerState } from './documentViewer.state.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type Classes = {
 		toolbar: (options: { size: Sizes; position: DocumentToolbarPosition }) => string;
@@ -54,7 +55,8 @@
 	const has = (control: DocumentViewerControl) =>
 		controls !== false && controls.includes(control) && viewer.capabilities[control];
 	const buttonProps = $derived({ variant: 'ghost' as const, color, size, squared: true });
-	const unitLabel = $derived(viewer.unit ?? 'page');
+	const t = $derived(useI18n());
+	const unitLabel = $derived(t[viewer.unit ?? 'page']);
 
 	const runViewerTask = (task: Promise<void>) => {
 		void task.catch((taskError: unknown) => {
@@ -74,7 +76,7 @@
 		{#if has('sidebar') && sidebar}
 			<Button
 				{...buttonProps}
-				label={isSidebarOpen ? 'Hide page thumbnails' : 'Show page thumbnails'}
+				label={isSidebarOpen ? t.hidePageThumbnails : t.showPageThumbnails}
 				variant={isSidebarOpen ? 'soft' : 'ghost'}
 				onclick={() => (isSidebarOpen = !isSidebarOpen)}
 				prefix={sidebarSimpleIcon}
@@ -83,14 +85,14 @@
 		{#if has('navigation')}
 			<Button
 				{...buttonProps}
-				label="Previous {unitLabel}"
+				label={`${t.previous} ${unitLabel}`}
 				disabled={!viewer.canGoPrevious}
 				onclick={viewer.previous}
 				prefix={caretLeftIcon}
 			/>
 			<Button
 				{...buttonProps}
-				label="Next {unitLabel}"
+				label={`${t.next} ${unitLabel}`}
 				disabled={!viewer.canGoNext}
 				onclick={viewer.next}
 				prefix={caretRightIcon}
@@ -104,14 +106,14 @@
 		{#if has('zoom')}
 			<Button
 				{...buttonProps}
-				label="Zoom out"
+				label={t.zoomOut}
 				disabled={!viewer.canZoomOut}
 				onclick={viewer.zoomOut}
 				prefix={magnifyingGlassMinusIcon}
 			/>
 			<Button
 				{...buttonProps}
-				label="Zoom in"
+				label={t.zoomIn}
 				disabled={!viewer.canZoomIn}
 				onclick={viewer.zoomIn}
 				prefix={magnifyingGlassPlusIcon}
@@ -121,7 +123,7 @@
 			<Button
 				{...buttonProps}
 				variant={viewer.fit === 'width' ? 'soft' : 'ghost'}
-				label="Fit to width"
+				label={t.fitToWidth}
 				onclick={() => viewer.setFit(viewer.fit === 'width' ? null : 'width')}
 				prefix={arrowsHorizontalIcon}
 			/>
@@ -130,8 +132,8 @@
 			<Button
 				{...buttonProps}
 				label={viewer.mode === 'scroll'
-					? `Switch to single ${unitLabel}`
-					: 'Switch to continuous scroll'}
+					? t.switchToSingleUnit(unitLabel)
+					: t.switchToContinuousScroll}
 				onclick={viewer.toggleMode}
 				prefix={viewer.mode === 'scroll' ? scrollIcon : fileIcon}
 			/>
@@ -140,8 +142,8 @@
 			<Button
 				{...buttonProps}
 				label={viewer.orientation === 'vertical'
-					? 'Switch to horizontal layout'
-					: 'Switch to vertical layout'}
+					? t.switchToHorizontalLayout
+					: t.switchToVerticalLayout}
 				onclick={viewer.toggleOrientation}
 				prefix={viewer.orientation === 'vertical' ? arrowsDownUpIcon : arrowsLeftRightIcon}
 			/>
@@ -149,13 +151,13 @@
 		{#if has('rotate')}
 			<Button
 				{...buttonProps}
-				label="Rotate counterclockwise"
+				label={`${t.rotate} ${t.counterclockwise}`}
 				onclick={() => viewer.rotate(-90)}
 				prefix={arrowCounterClockwiseIcon}
 			/>
 			<Button
 				{...buttonProps}
-				label="Rotate clockwise"
+				label={`${t.rotate} ${t.clockwise}`}
 				onclick={() => viewer.rotate(90)}
 				prefix={arrowClockwiseIcon}
 			/>
@@ -166,7 +168,7 @@
 		{#if has('download')}
 			<Button
 				{...buttonProps}
-				label="Download"
+				label={t.download}
 				disabled={!viewer.isReady}
 				onclick={viewer.download}
 				prefix={downloadSimpleIcon}
@@ -175,7 +177,7 @@
 		{#if has('print')}
 			<Button
 				{...buttonProps}
-				label="Print"
+				label={t.print}
 				disabled={!viewer.isReady}
 				onclick={() => runViewerTask(viewer.print())}
 				prefix={printerIcon}

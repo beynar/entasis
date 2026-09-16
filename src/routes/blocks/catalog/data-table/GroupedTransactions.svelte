@@ -17,10 +17,10 @@
 	let visible = $derived(ledger.filter((entry) => range === 'all' || entry.date === range));
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<header class="flex flex-wrap items-end justify-between gap-lg">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<header class="gap-lg flex flex-wrap items-end justify-between">
 		<div>
-			<p class="text-sm text-neutral/60">Finance / Activity</p>
+			<p class="text-neutral/70 text-sm">Finance / Activity</p>
 			<h2 class="mt-sm text-3xl font-semibold">Every movement, accounted for.</h2>
 		</div>
 		<Select

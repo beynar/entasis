@@ -1,33 +1,24 @@
+import {
+	acceptInteraction,
+	createRejectInteraction,
+	pendingInteraction,
+	type InteractionResolution
+} from '$lib/utils/interactionResolution.js';
 import type { EventCalendarInteractionBlockedInfo } from './eventCalendar.types.js';
 
-export type EventCalendarInteractionResolution<TProposal> =
-	| Readonly<{ state: 'pending' }>
-	| Readonly<{ state: 'accepted'; proposal: TProposal }>
-	| Readonly<{
-			state: 'rejected';
-			proposal: TProposal | null;
-			reason: EventCalendarInteractionBlockedInfo['reason'];
-			message: string;
-	  }>;
+type Reason = EventCalendarInteractionBlockedInfo['reason'];
 
-export const pendingEventCalendarInteraction: EventCalendarInteractionResolution<never> = {
-	state: 'pending'
-};
+export type EventCalendarInteractionResolution<TProposal> = InteractionResolution<
+	TProposal,
+	Reason
+>;
 
-export function acceptEventCalendarInteraction<TProposal>(
-	proposal: TProposal
-): EventCalendarInteractionResolution<TProposal> {
-	return { state: 'accepted', proposal };
-}
+export const pendingEventCalendarInteraction = pendingInteraction;
 
-export function rejectEventCalendarInteraction<TProposal>(
-	reason: EventCalendarInteractionBlockedInfo['reason'],
-	proposal: TProposal | null = null
-): EventCalendarInteractionResolution<TProposal> {
-	return { state: 'rejected', proposal, reason, message: getRejectionMessage(reason) };
-}
+export const acceptEventCalendarInteraction = acceptInteraction;
 
-function getRejectionMessage(reason: EventCalendarInteractionBlockedInfo['reason']): string {
+/** The calendar owns its rejection copy, so the reason alone is enough at the call sites. */
+export const rejectEventCalendarInteraction = createRejectInteraction<Reason>((reason) => {
 	switch (reason) {
 		case 'business-hours':
 			return 'The proposal is outside business hours.';
@@ -46,4 +37,4 @@ function getRejectionMessage(reason: EventCalendarInteractionBlockedInfo['reason
 		case 'valid-range':
 			return 'The proposal is outside the valid calendar range.';
 	}
-}
+});

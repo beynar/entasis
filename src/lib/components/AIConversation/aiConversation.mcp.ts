@@ -17,13 +17,13 @@ Scoped, transport-agnostic conversation state for AI surfaces. Descendant AIThre
 
 ## Provider state
 
-All state props are bindable: \`conversation\`, \`status\`, \`error\`, \`messages\`, \`queuedMessage\`, \`currentInput\`, \`files\`, \`attachments\`, \`liveText\`, \`suggestions\`, \`contextUsage\`, \`selectedModel\`, \`isStreaming\`, and \`activeAskUserQuestion\`.
+All state props are bindable: \`api\` (the instance handle), \`status\`, \`error\`, \`messages\`, \`queuedMessage\`, \`currentInput\`, \`files\`, \`attachments\`, \`liveText\`, \`suggestions\`, \`contextUsage\`, \`selectedModel\`, \`streaming\`, and \`activeAskUserQuestion\`.
 
 \`status\` is one of \`idle\`, \`queued\`, \`asking-user\`, \`streaming\`, \`stopping\`, or \`error\`. Use \`labels\` to override composer and model-selector text. AIConversation does not send network requests.
 
 \`\`\`svelte
 <AIConversation
-  bind:conversation
+  bind:api
   bind:messages
   bind:status
   onSubmit={({ message, meta, conversation }) => sendMessage(message, meta, conversation)}

@@ -3,13 +3,18 @@ import type { HTMLAttributes } from 'svelte/elements';
 import type { Slot } from '$lib/components/Slot/slot.js';
 import type { MenuItem } from '$lib/components/Menu/menu.props.js';
 import type { WithAttachments } from '$lib/types/props.js';
-import type { Density, Sizes } from '$lib/types/theme.js';
+import type { Colors, Density, DisclosureIndicator, Sizes } from '$lib/types/theme.js';
 import type { SidebarThemeProps } from './sidebar.theme.js';
 
 export type SidebarDisplayState = 'expanded' | 'collapsed' | 'hidden';
 export type SidebarState = SidebarDisplayState;
 export type SidebarSide = 'left' | 'right';
-export type SidebarVariant = 'admin' | 'floating' | 'inset' | 'split';
+/**
+ * Sidebar geometry. `admin`, `floating`, `inset` and `split` sit on the canvas; `framed` is the
+ * admin geometry for a sidebar hosted inside a raised card (AppShell `variant="framed"`), whose
+ * well is `surface-recessed` so it reads as an inset of that card rather than as the canvas.
+ */
+export type SidebarVariant = 'admin' | 'floating' | 'inset' | 'split' | 'framed';
 export type SidebarSize = Sizes;
 export type SidebarDensity = Density;
 export type SidebarCollapsible = 'offcanvas' | 'icon' | 'none';
@@ -17,15 +22,18 @@ export type SidebarMode = 'layout' | 'panel';
 export type SidebarFrame = 'viewport' | 'contained';
 export type SidebarMenuButtonVariant = 'default' | 'outline';
 export type SidebarMenuButtonSize = Sizes;
-export type SidebarCollapseIcon = 'chevron' | 'plus-minus';
 export type SidebarTooltipMode = 'auto' | 'always';
 export type SidebarRail = boolean | 'line' | 'thumb';
 export type SidebarMenuSide = 'top' | 'right' | 'bottom' | 'left';
 export type SidebarMenuAlign = 'start' | 'center' | 'end';
 export type SidebarIcon = Slot | string;
+/** How an active row is painted. Soft is the shared selected recipe, solid its loud counterpart. */
+export type SidebarActiveVariant = 'soft' | 'outline' | 'solid';
+/** How a menu entry's leading icon is drawn: bare glyph, or a tinted rounded square around it. */
+export type SidebarIconVariant = 'bare' | 'tile';
 
-export type SidebarWidthChangedPayload = {
-	/** Committed expanded width. */
+export type SidebarWidthChangePayload = {
+	/** The sidebar's expanded width after the change. */
 	width: string;
 	/** True when the width changed because of direct pointer or keyboard input. */
 	isUserInteraction: boolean;
@@ -42,10 +50,12 @@ export type SidebarResizableOptions = {
 	keyboardStep?: number;
 	/** Optional localStorage key used to persist the expanded width. */
 	storageKey?: string;
-	/** Fires continuously while the user resizes. */
-	onWidthChange?: (width: string) => void;
-	/** Fires when a resize interaction is committed or a stored width is restored. */
-	onWidthChanged?: (payload: SidebarWidthChangedPayload) => void;
+	/**
+	 * Fires on every expanded-width change: continuously while the user resizes
+	 * (`isUserInteraction: true`) and once when a stored width is restored
+	 * (`isUserInteraction: false`).
+	 */
+	onWidthChange?: (payload: SidebarWidthChangePayload) => void;
 };
 
 export type SidebarResizable = boolean | SidebarResizableOptions;
@@ -57,6 +67,8 @@ export type SidebarApi = {
 	readonly state: SidebarState;
 	/** Semantic desktop display state, with offcanvas collapse reported as hidden. */
 	readonly displayState: SidebarDisplayState;
+	/** True while a hover peek renders the collapsed panel at full width over the page. */
+	readonly isPeeking: boolean;
 	/** Whether the viewport is below the mobile breakpoint. */
 	readonly isMobile: boolean;
 	/** Mobile drawer open state. */
@@ -75,15 +87,70 @@ export type SidebarApi = {
 	setOpenMobile: (open: boolean) => void;
 };
 
+export type SidebarActivityBarItem = {
+	/** Stable identity used as the render key. Defaults to the label and index. */
+	id?: string;
+	/** Icon rendered inside the square. Required: the row has no visible label. */
+	icon: Slot | string;
+	/** Accessible name, and the default tooltip text. */
+	label: string;
+	/** Link href. Renders an anchor instead of a button. */
+	href?: string;
+	/** Anchor target, used only with href. */
+	target?: string;
+	/** Anchor rel, used only with href. */
+	rel?: string;
+	/** Native click handler. */
+	onclick?: (event: MouseEvent) => void;
+	/** Whether this item represents the current page. Adds aria-current="page". */
+	isActive?: boolean;
+	/**
+	 * Badge rendered at the outer top corner. An empty string renders a bare dot; any other
+	 * value renders as the badge content. A string or number badge joins the accessible name;
+	 * a dot is decorative, so put its meaning in `label`.
+	 */
+	badge?: Slot | string | number;
+	/** Disable interaction. */
+	disabled?: boolean;
+	/** Tooltip text. Defaults to label; set false to suppress the tooltip. */
+	tooltip?: string | false;
+};
+
+export type SidebarActivityBarSelectPayload = {
+	/** The activated item. */
+	item: SidebarActivityBarItem;
+	/** Position in the rendered column, counting items then footerItems. */
+	index: number;
+};
+
+export type SidebarActivityBar = {
+	/** Items rendered from the top of the column. */
+	items: SidebarActivityBarItem[];
+	/** Items pinned to the end of the column. */
+	footerItems?: SidebarActivityBarItem[];
+	/** Custom content rendered before the first item. */
+	header?: Snippet;
+	/** Custom content rendered after the pinned items. */
+	footer?: Snippet;
+	/** Column thickness. Defaults to '3rem'. */
+	width?: string;
+	/** Accessible name for the column landmark. */
+	label?: string;
+	/** Fires when an item is activated, with the item and its position in one payload. */
+	onSelect?: (payload: SidebarActivityBarSelectPayload) => void;
+};
+
 export type SidebarMenuActionDescriptor = {
 	/** Trigger icon. Defaults to the horizontal dots icon. */
 	icon?: SidebarIcon;
 	/** Accessible label for the trigger. */
 	label?: string;
+	/** Icon-only ghost button scale. Defaults to the Sidebar size, so the trigger matches the row. */
+	size?: Sizes;
 	/** Menu items rendered in a PopupMenu. */
 	menu?: MenuItem[];
-	/** Native click handler for a plain action button. */
-	onclick?: (event: MouseEvent) => void;
+	/** Native click handler for a plain action button, with the Sidebar API beside the event. */
+	onclick?: (event: MouseEvent, api: SidebarApi) => void;
 	/** Classes applied to the popup menu surface. */
 	menuClass?: string;
 	/** Preferred popup side. */
@@ -114,6 +181,10 @@ type SidebarMenuEntryBase = {
 	label: string;
 	/** Leading icon. */
 	icon?: SidebarIcon;
+	/** Role tint applied to the leading icon, through `data-color`. */
+	iconColor?: Colors;
+	/** Leading icon treatment. 'tile' paints a tinted rounded square around the glyph. */
+	iconVariant?: SidebarIconVariant;
 	/** Whether this entry represents the current page. */
 	isActive?: boolean;
 	/** Trailing badge hidden in icon-collapsed mode. */
@@ -197,8 +268,8 @@ export type SidebarTreeNode = {
 export type SidebarGroup = {
 	/** Group label. Hidden in icon-collapsed mode. */
 	label?: string;
-	/** Group action pinned to the top-right corner. */
-	action?: Snippet<[SidebarApi]> | SidebarMenuActionDescriptor;
+	/** Group actions pinned to the top-right corner. Pass an array to pin several. */
+	action?: Snippet<[SidebarApi]> | SidebarMenuActionDescriptor | SidebarMenuActionDescriptor[];
 	/** Menu entries in this group. */
 	items?: SidebarMenuEntry[];
 	/** Recursive tree nodes rendered instead of items. */
@@ -224,8 +295,12 @@ type SidebarMenuButtonItemBase = {
 	title: string;
 	/** Secondary line. Ignored for compact variant. */
 	subtitle?: string;
-	/** Trailing icon. Defaults to a chevron when a menu is set. */
-	trailing?: SidebarIcon | false;
+	/**
+	 * Trailing content. An icon is decorative; an action descriptor renders its own icon-only
+	 * ghost button beside the row, so the row and its trailing control stay separately clickable.
+	 * Defaults to a chevron when a menu is set.
+	 */
+	trailing?: SidebarIcon | false | SidebarMenuActionDescriptor;
 	/** Preferred popup side. */
 	menuSide?: SidebarMenuSide;
 	/** Preferred popup alignment. */
@@ -252,8 +327,8 @@ type SidebarMenuButtonLinkItem = SidebarMenuButtonItemBase & {
 };
 
 type SidebarMenuButtonActionItem = SidebarMenuButtonItemBase & {
-	/** Native click handler. Mutually exclusive with menu/href. */
-	onclick?: (event: MouseEvent) => void;
+	/** Native click handler, with the Sidebar API beside the event. Mutually exclusive with menu/href. */
+	onclick?: (event: MouseEvent, api: SidebarApi) => void;
 	href?: never;
 	menu?: never;
 };
@@ -287,6 +362,8 @@ type SidebarOwnProps = {
 	variant?: SidebarVariant;
 	/** Typography, icon, and item-height scale. */
 	size?: SidebarSize;
+	/** How active rows are painted. Defaults to 'soft', the shared selected recipe. */
+	activeVariant?: SidebarActiveVariant;
 	/** Spacing density for section padding, gaps, and nested navigation. */
 	density?: SidebarDensity;
 	/** Collapse behavior. Icon mode falls back to offcanvas when a data-driven row has no icon. */
@@ -311,12 +388,16 @@ type SidebarOwnProps = {
 	rail?: SidebarRail;
 	/** Open hidden offcanvas sidebars when the pointer reaches the screen edge. */
 	edgeReveal?: boolean;
+	/** Temporarily expand an icon-collapsed sidebar while the pointer or focus is inside it. */
+	expandOnHover?: boolean;
+	/** Icon rail pinned outside the sidebar panel, visible in every display state. Layout mode only. */
+	activityBar?: SidebarActivityBar;
 	/** Items rendered in the scrollable body. Each item is a labelled sidebar group. */
 	items?: SidebarGroup[];
 	/** Classes applied to the outer wrapper. */
 	class?: string;
 	/** Indicator style for collapsible menu items. */
-	collapseIcon?: SidebarCollapseIcon;
+	collapseIcon?: DisclosureIndicator;
 	/** Tooltip behavior for icon rows. */
 	tooltips?: SidebarTooltipMode;
 	/** Sticky top large menu row. */
@@ -344,10 +425,7 @@ type SidebarOwnProps = {
 };
 
 type SidebarRootAttributes = Partial<
-	Pick<
-		HTMLAttributes<HTMLDivElement>,
-		'id' | 'role' | 'style' | 'title' | 'aria-label' | 'aria-labelledby' | 'aria-describedby'
-	>
+	Pick<HTMLAttributes<HTMLDivElement>, 'id' | 'style' | 'title'>
 > & {
 	[dataAttribute: `data-${string}`]: string | number | boolean | null | undefined;
 };

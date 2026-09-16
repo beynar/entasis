@@ -20,7 +20,6 @@ Extends all TextInput component props:
 ### Core Props
 - **value**: string (bindable) - Password value
 - **placeholder**: string - Placeholder text
-- **showToggle**: boolean (default: true) - Show visibility toggle button
 
 ### Field Props (inherited)
 - **label**: string | Snippet - Field label
@@ -90,20 +89,17 @@ Extends all TextInput component props:
 />
 \`\`\`
 
-### Without Visibility Toggle
-\`\`\`svelte
-<PasswordInput 
-	label="Password"
-	bind:value={password}
-	showToggle={false}
-/>
-\`\`\`
-
 ### With Prefix Icon
 \`\`\`svelte
+<script lang="ts">
+	import { lockIcon } from 'svelai/icons/lock';
+
+	let password = $state('');
+</script>
+
 <PasswordInput label="Password" bind:value={password}>
 	{#snippet prefix()}
-		<Icon name="lock" />
+		{@render lockIcon()}
 	{/snippet}
 </PasswordInput>
 \`\`\`
@@ -177,7 +173,7 @@ Extends all TextInput component props:
 />
 
 <Meter 
-	value={{ value: strength.strength * 33.33 }}
+	value={strength.strength * 33.33}
 	max={100}
 />
 \`\`\`
@@ -285,7 +281,7 @@ The visibility toggle button:
 - Shows an eye icon when password is hidden
 - Shows an eye-off icon when password is visible
 - Toggles between \`type="password"\` and \`type="text"\`
-- Can be disabled with \`showToggle={false}\`
+- Is always rendered; there is no prop to hide it
 
 ## Validation
 
@@ -366,13 +362,18 @@ The theme object contains the following parts:
 \`\`\`
 
 **Focus State Customization**:
+
+To recolor every focus ring in the app at once, set \`designTokens.focusColor\` on \`Theme\`
+instead of overriding per component. \`ring-focus\` is the focus state role and falls back to the
+current role, so it never hard-pins a color.
+
 \`\`\`svelte
 <PasswordInput 
   label="Secure Password"
   bind:value={password}
   theme={{
     inputContainer: {
-      base: 'focus-within:ring-2 focus-within:ring-primary focus-within:border-primary'
+      base: 'focus-within:ring-2 focus-within:ring-focus/50 focus-within:border-focus'
     }
   }}
 />

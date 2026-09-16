@@ -3,6 +3,7 @@
 	generics="TTaskFields extends object = Record<never, never>, TDependencyFields extends object = Record<never, never>, TResourceFields extends object = Record<never, never>, TAssignmentFields extends object = Record<never, never>"
 >
 	import { useI18n, useI18nDirection } from '$lib/i18n/context.svelte.js';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { onMount } from 'svelte';
 	import GanttChartHeader from './GanttChartHeader.svelte';
 	import GanttChartShell from './GanttChartShell.svelte';
@@ -30,7 +31,8 @@
 		expandedTaskIds = $bindable<string[]>(
 			tasks.flatMap((task) => (task.type === 'summary' ? [task.id] : []))
 		),
-		selection = $bindable<GanttSelection>(EMPTY_GANTT_SELECTION),
+		selection = $bindable<GanttSelection>(),
+		defaultSelection = EMPTY_GANTT_SELECTION,
 		zoom = $bindable<GanttZoomLevel>('week'),
 		timeZone,
 		i18n,
@@ -63,6 +65,14 @@
 		typeof rootAttributes['aria-label'] === 'string'
 			? rootAttributes['aria-label']
 			: messages.ganttChartLabel
+	);
+
+	const selectionState = createBindableValue(
+		() => selection,
+		(next) => {
+			selection = next;
+		},
+		() => defaultSelection
 	);
 
 	const chart = new GanttChartState<
@@ -102,10 +112,10 @@
 			expandedTaskIds = value;
 		},
 		get selection() {
-			return selection;
+			return selectionState.value;
 		},
 		set selection(value) {
-			selection = value;
+			selectionState.value = value;
 		},
 		get zoom() {
 			return zoom;

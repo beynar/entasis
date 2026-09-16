@@ -148,7 +148,7 @@
 						<div
 							class="bg-surface-raised border-neutral-muted text-neutral flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"
 						>
-							<span data-dnd-handle class="text-neutral/60 cursor-grab">
+							<span data-dnd-handle class="text-neutral/70 cursor-grab">
 								{@render dotsSixVerticalIcon({ class: 'size-4' })}
 							</span>
 							{item.title}
@@ -216,7 +216,7 @@
 						<div
 							class="bg-surface-raised border-neutral-muted text-neutral flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"
 						>
-							<span data-dnd-handle class="text-neutral/60 cursor-grab">
+							<span data-dnd-handle class="text-neutral/70 cursor-grab">
 								{@render dotsSixVerticalIcon({ class: 'size-4' })}
 							</span>
 							{item.title}

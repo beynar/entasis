@@ -74,19 +74,19 @@
 					src={landscapeOne}
 					alt="Desert road with sandstone formations"
 					title="Desert road with sandstone formations"
-					class="w-full rounded-xl object-cover h-auto"
+					class="h-auto w-full rounded-xl object-cover"
 				/>
 				<img
 					src={landscapeTwo}
 					alt="Clear turquoise ocean water at a beach"
 					title="Clear turquoise ocean water"
-					class="w-full rounded-xl object-cover h-auto"
+					class="h-auto w-full rounded-xl object-cover"
 				/>
 				<img
 					src={landscapeThree}
 					alt="Night sky over snowy mountains"
 					title="Night sky over snowy mountains"
-					class="w-full rounded-xl object-cover h-auto"
+					class="h-auto w-full rounded-xl object-cover"
 				/>
 			</div>
 		</ImageGallery>
@@ -109,9 +109,9 @@
 			<ImageGallery>
 				<article class="grid gap-5">
 					<div>
-						<p class="text-neutral/60 text-sm font-medium">Field notes</p>
+						<p class="text-neutral/70 text-sm font-medium">Field notes</p>
 						<h3 class="mt-1 text-2xl font-semibold">Two scenes, one gallery</h3>
-						<p class="text-neutral/60 mt-2 max-w-prose">
+						<p class="text-neutral/70 mt-2 max-w-prose">
 							The wrapper keeps the article structure intact while image descendants become gallery
 							triggers.
 						</p>

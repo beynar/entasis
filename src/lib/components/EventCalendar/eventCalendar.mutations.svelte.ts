@@ -1,4 +1,5 @@
 /* eslint-disable svelte/prefer-svelte-reactivity -- History and clipboard hold immutable session snapshots. */
+import { useUndoStack } from '$lib/utils/useUndoStack.svelte.js';
 import {
 	addCivilDays,
 	civilDayDifference,
@@ -68,9 +69,10 @@ const MINUTE_MS = 60_000;
 /** Owns validation, immutable controlled writes, history, clipboard, and guarded revert. */
 export class EventCalendarMutations<TItemFields extends object, TResourceFields extends object> {
 	private clipboardItem: EventCalendarItem<TItemFields> | null = null;
-	private historyPast: EventCalendarHistoryEntry<TItemFields>[] = [];
-	private historyFuture: EventCalendarHistoryEntry<TItemFields>[] = [];
-	private historyRevision = $state(0);
+	/** No signature dedupe here: entries are identified by object, staleness by model boundary. */
+	private readonly history = useUndoStack<EventCalendarHistoryEntry<TItemFields>>({
+		limit: () => this.calendar.historyLimit
+	});
 
 	constructor(private readonly calendar: EventCalendarState<TItemFields, TResourceFields>) {}
 
@@ -195,14 +197,12 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 	}
 
 	canUndo(): boolean {
-		void this.historyRevision;
-		const entry = this.historyPast.at(-1);
+		const entry = this.history.peekPast();
 		return Boolean(entry && this.calendar.isModelBoundaryCurrent(entry.expectedBoundary));
 	}
 
 	canRedo(): boolean {
-		void this.historyRevision;
-		const entry = this.historyFuture.at(-1);
+		const entry = this.history.peekFuture();
 		return Boolean(entry && this.calendar.isModelBoundaryCurrent(entry.expectedBoundary));
 	}
 
@@ -622,13 +622,10 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 					);
 				}
 				wasReverted = true;
-				if (historyEntry) {
-					const index = this.historyPast.lastIndexOf(historyEntry);
-					if (index >= 0) this.historyPast.splice(index, 1);
-				}
+				if (historyEntry) this.history.remove(historyEntry);
 				mutation.onRevert?.();
 				this.synchronizeHistoryBoundary();
-				this.historyRevision += 1;
+				this.history.touch();
 				this.calendar.notifyInteractionStatus({ type: 'revert', ...committedStatus });
 			}
 		);
@@ -693,20 +690,13 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 		const limit = this.calendar.historyLimit;
 		if (limit === 0 || beforeItems === afterItems) return null;
 		const entry = { beforeItems, afterItems, expectedBoundary };
-		this.historyPast.push(entry);
-		if (this.historyPast.length > limit) {
-			this.historyPast.splice(0, this.historyPast.length - limit);
-		}
-		this.historyFuture = [];
-		this.historyRevision += 1;
+		this.history.push(entry);
 		return entry;
 	}
 
 	private applyHistory(direction: 'undo' | 'redo'): boolean {
 		if (this.calendar.disabled) return false;
-		const from = direction === 'undo' ? this.historyPast : this.historyFuture;
-		const to = direction === 'undo' ? this.historyFuture : this.historyPast;
-		const entry = from.at(-1);
+		const entry = direction === 'undo' ? this.history.peekPast() : this.history.peekFuture();
 		if (!entry) return false;
 		if (!this.calendar.isModelBoundaryCurrent(entry.expectedBoundary)) {
 			this.reportBlocked({ reason: 'stale', source: 'history' });
@@ -719,29 +709,25 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 			source: 'history',
 			createChange: (revert) => ({ kind: 'history', source: 'history', direction, revert }),
 			recordHistory: false,
+			// Reverting a published undo/redo puts the entry back on the stack it came from.
 			onRevert: () => {
-				if (direction === 'undo' && this.historyFuture.at(-1) === entry) {
-					this.historyFuture.pop();
-					this.historyPast.push(entry);
-				} else if (direction === 'redo' && this.historyPast.at(-1) === entry) {
-					this.historyPast.pop();
-					this.historyFuture.push(entry);
-				}
+				if (direction === 'undo' && this.history.peekFuture() === entry) this.history.redo();
+				else if (direction === 'redo' && this.history.peekPast() === entry) this.history.undo();
 			}
 		});
 		if (!committedBoundary) return false;
-		from.pop();
-		to.push(entry);
+		if (direction === 'undo') this.history.undo();
+		else this.history.redo();
 		this.synchronizeHistoryBoundary(committedBoundary);
-		this.historyRevision += 1;
+		this.history.touch();
 		return true;
 	}
 
 	private synchronizeHistoryBoundary(
 		boundary: EventCalendarModelBoundary<TItemFields> = this.calendar.modelBoundary
 	): void {
-		const pastEntry = this.historyPast.at(-1);
-		const futureEntry = this.historyFuture.at(-1);
+		const pastEntry = this.history.peekPast();
+		const futureEntry = this.history.peekFuture();
 		if (pastEntry) pastEntry.expectedBoundary = boundary;
 		if (futureEntry) futureEntry.expectedBoundary = boundary;
 	}

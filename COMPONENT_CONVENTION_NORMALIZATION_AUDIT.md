@@ -193,13 +193,13 @@ Suggestion:
 
 Pick one canonical public noun per component and derive every symbol from it:
 
-| Current area | Suggested normal form |
-| --- | --- |
-| `Switch` component | `Switch`, `SwitchProps`, `switchTheme`, context `switch` |
-| `RadioInput` component | `RadioInput`, `RadioInputProps`, `RadioInputTheme`, context `radio-input` |
-| Radio option type | `RadioOption`, not `RadiosOption` |
-| Checkboxes component | `CheckboxesInput`, `CheckboxesInputProps`, `CheckboxesInputTheme`, context `checkboxes-input` |
-| Checkbox option type | `CheckboxOption`, not `CheckBoxesOption` |
+| Current area           | Suggested normal form                                                                         |
+| ---------------------- | --------------------------------------------------------------------------------------------- |
+| `Switch` component     | `Switch`, `SwitchProps`, `switchTheme`, context `switch`                                      |
+| `RadioInput` component | `RadioInput`, `RadioInputProps`, `RadioInputTheme`, context `radio-input`                     |
+| Radio option type      | `RadioOption`, not `RadiosOption`                                                             |
+| Checkboxes component   | `CheckboxesInput`, `CheckboxesInputProps`, `CheckboxesInputTheme`, context `checkboxes-input` |
+| Checkbox option type   | `CheckboxOption`, not `CheckBoxesOption`                                                      |
 
 The important part is not the exact noun above. The important part is one source of truth:
 
@@ -311,10 +311,7 @@ Use `Slot` itself as the normalization layer. For part-level slots, prefer this 
 That gives the consumer a custom snippet while preserving the library-owned structural element and class contract. It also means `<slotName>Class` can be merged at exactly one place:
 
 ```svelte
-<Slot
-	render={header}
-	class={classes.header({ size, class: headerClass })}
-/>
+<Slot render={header} class={classes.header({ size, class: headerClass })} />
 ```
 
 Make slot categories explicit:

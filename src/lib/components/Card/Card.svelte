@@ -11,6 +11,7 @@
 		disabled = false,
 		color = 'neutral',
 		variant = 'solid',
+		elevation = 1,
 		size = 'normal',
 		density = 'normal',
 		href,
@@ -107,13 +108,14 @@
 	data-size={size}
 	data-density={density}
 	data-variant={variant}
+	data-elevation={elevation}
 	data-clickable={clickable}
 	href={href && !disabled ? href : undefined}
 	{target}
 	{rel}
 	{role}
 	tabindex={href ? (disabled ? -1 : undefined) : onclick && !disabled ? 0 : undefined}
-	class={classes.root({ color, variant, size, density, clickable, disabled, className })}
+	class={classes.root({ color, variant, size, density, clickable, disabled, elevation, className })}
 	onclick={handleClick}
 	onkeydown={handleKeydown}
 	onpointerenter={handleEnter}

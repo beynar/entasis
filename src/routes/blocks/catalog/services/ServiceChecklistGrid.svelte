@@ -35,7 +35,7 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl flex flex-col">
 	<div class="max-w-2xl">
 		<Chip variant="outline">How we can help</Chip><Heading
 			as="h2"
@@ -47,20 +47,20 @@
 			A small set of disciplines, connected by a shared focus on useful outcomes.
 		</p>
 	</div>
-	<div class="grid gap-lg md:grid-cols-3">
+	<div class="gap-lg grid md:grid-cols-3">
 		{#each services as service (service.title)}<Card variant="outline"
 				><Stack gap="lg"
-					><span class="text-primary">{@render service.icon({ size: 32 })}</span><Heading
+					><span class="text-primary-readable">{@render service.icon({ size: 32 })}</span><Heading
 						as="h3"
 						size="h4">{service.title}</Heading
 					>
-					<p class="text-sm text-neutral/60">{service.description}</p>
+					<p class="text-neutral/70 text-sm">{service.description}</p>
 					<Separator />
-					<ul class="flex flex-col gap-md">
+					<ul class="gap-md flex flex-col">
 						{#each service.deliverables as deliverable (deliverable)}<li
-								class="flex gap-sm text-sm"
+								class="gap-sm flex text-sm"
 							>
-								<span class="text-primary">{@render checkIcon()}</span>{deliverable}
+								<span class="text-primary-readable">{@render checkIcon()}</span>{deliverable}
 							</li>{/each}
 					</ul>
 					<Button href={service.href} variant="link" class="self-start" suffix={arrowRightIcon}

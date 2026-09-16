@@ -1,5 +1,5 @@
-export { default as Reasoning } from './Reasoning.svelte';
-export type { AIReasoningLabels, AIReasoningState, ReasoningProps } from './aiReasoning.props.js';
+export { default as AIReasoning } from './AIReasoning.svelte';
+export type { AIReasoningLabels, AIReasoningProps, AIReasoningState } from './aiReasoning.props.js';
 export {
 	aiReasoningTheme,
 	setAIReasoningTheme,

@@ -27,16 +27,16 @@
 	let reviewDetails = $state({ name: '', email: '', street: '', city: '', postal: '' });
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="grid gap-xl lg:grid-cols-[1.3fr_1fr]">
-		<div class="flex flex-col gap-xl">
-			<header class="flex flex-col gap-lg">
-				<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+	<div class="gap-xl grid lg:grid-cols-[1.3fr_1fr]">
+		<div class="gap-xl flex flex-col">
+			<header class="gap-lg flex flex-col">
+				<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 					Field objects / Checkout
 				</p>
 				<Heading size="h2" weight="bold">One step closer to a good thing.</Heading>
@@ -73,34 +73,34 @@
 				}}
 				actions={[{ children: 'Review order', onAction: (form) => form.submit() }]}
 			/>
-			<p class="text-xs text-neutral/45">
+			<p class="text-neutral/65 text-xs">
 				This preview collects local form state. No order is placed and no payment is taken.
 			</p>
 		</div>
-		<aside class="flex flex-col gap-xl p-xl rounded-lg bg-surface-recessed">
+		<aside class="gap-xl p-xl bg-surface-recessed flex flex-col rounded-lg">
 			<Heading size="h3">Order summary</Heading>{#each products as product (product.id)}<div
-					class="grid grid-cols-[6rem_1fr_auto] items-center gap-lg"
+					class="gap-lg grid grid-cols-[6rem_1fr_auto] items-center"
 				>
 					<div>{@render productArt(product.shape, product.color)}</div>
 					<div>
 						<h3 class="text-sm font-semibold">{product.name}</h3>
-						<p class="mt-sm text-xs text-neutral/50">{product.color} · Qty 1</p>
+						<p class="mt-sm text-neutral/65 text-xs">{product.color} · Qty 1</p>
 					</div>
 					<span class="text-sm">{money(product.price)}</span>
 				</div>{/each}
-			<div class="flex flex-col gap-lg border-t border-neutral/15 pt-xl">
+			<div class="gap-lg border-neutral/15 pt-xl flex flex-col border-t">
 				<h3 class="text-sm font-semibold">Delivery method</h3>
 				{#each [{ name: 'Standard delivery', days: '3–5 working days', price: 8 }, { name: 'Express delivery', days: '1–2 working days', price: 18 }] as method, i (method.name)}<Button
 						variant={delivery === i ? 'soft' : 'outline'}
 						color={delivery === i ? 'primary' : 'neutral'}
 						onclick={() => (delivery = i)}
-						class="h-auto! justify-between py-lg text-left"
-						aria-pressed={delivery === i}
+						class="py-lg h-auto! justify-between text-left"
+						pressed={delivery === i}
 						><span>{method.name}<br /><span class="text-xs font-normal">{method.days}</span></span
 						><span>{money(method.price)}</span></Button
 					>{/each}
 			</div>
-			<dl class="flex flex-col gap-lg border-t border-neutral/15 pt-xl text-sm">
+			<dl class="gap-lg border-neutral/15 pt-xl flex flex-col border-t text-sm">
 				<div class="flex justify-between">
 					<dt>Subtotal</dt>
 					<dd>$102</dd>
@@ -121,14 +121,14 @@
 		bind:open
 		title="Your order review"
 		description="Your details passed validation. No order has been placed."
-		><div class="flex flex-col gap-xl">
+		><div class="gap-xl flex flex-col">
 			<p class="text-neutral/65">
 				2 objects · {delivery === 0 ? 'Standard' : 'Express'} delivery
 			</p>
 			<p class="text-3xl font-semibold">{money(102 + (delivery === 0 ? 8 : 18))}</p>
-			<div class="flex flex-col gap-lg text-sm">
+			<div class="gap-lg flex flex-col text-sm">
 				<p><strong>{reviewDetails.name}</strong><br />{reviewDetails.email}</p>
-				<address class="not-italic text-neutral/65">
+				<address class="text-neutral/65 not-italic">
 					{reviewDetails.street}<br />{reviewDetails.postal}
 					{reviewDetails.city}
 				</address>

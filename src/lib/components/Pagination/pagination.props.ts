@@ -1,6 +1,7 @@
 import type { Snippet } from 'svelte';
 import type { Colors, Sizes } from '$lib/types/index.js';
 import type { Slot } from '$lib/components/Slot/slot.js';
+import type { Messages } from '$lib/i18n/en.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { PaginationThemeProps } from './pagination.theme.js';
 import type { PaginationState } from './pagination.state.svelte.js';
@@ -15,7 +16,7 @@ export type PaginationItem = number | PaginationGap;
 
 export type PaginationControlType = 'first' | 'previous' | 'page' | 'next' | 'last';
 
-export type PaginationItemAriaLabel = {
+export type PaginationItemLabel = {
 	/**
 	 * Control being labelled.
 	 */
@@ -84,49 +85,35 @@ export type PaginationSummaryPayload = {
 	endItem: number;
 };
 
-type PaginationTotalPagesProps = {
-	/**
-	 * Total page count. Values below 1 render no pagination.
-	 */
-	totalPages: number;
-	/**
-	 * Total item count used by the summary slot.
-	 */
-	totalItems?: number;
-	/**
-	 * Items per page used by the summary slot.
-	 */
-	pageSize?: number;
-};
-
-type PaginationTotalItemsProps = {
-	/**
-	 * Total page count. When omitted, totalItems/pageSize derive it.
-	 */
-	totalPages?: number;
-	/**
-	 * Total item count used to derive totalPages and summary ranges.
-	 */
-	totalItems: number;
-	/**
-	 * Items per page used to derive totalPages and summary ranges.
-	 */
-	pageSize: number;
-};
-
-type PaginationBaseProps = {
+type PaginationOwnProps = {
 	/**
 	 * Bindable reference to the root navigation element.
 	 */
 	ref?: HTMLElement | null;
 	/**
+	 * Total page count. When omitted, `totalItems` and `pageSize` derive it.
+	 * Values below 1 render no pagination.
+	 */
+	totalPages?: number;
+	/**
+	 * Total item count. Derives `totalPages` with `pageSize` and feeds the summary slot.
+	 */
+	totalItems?: number;
+	/**
+	 * Items per page. Derives `totalPages` with `totalItems` and feeds the summary slot.
+	 */
+	pageSize?: number;
+	/**
 	 * The class name of the pagination. First element that the component outputs in the DOM.
 	 */
 	class?: string;
 	/**
-	 * Current page, one-based. Bind this prop to keep parent state in sync.
+	 * Current page, one-based. Bindable.
+	 * @default 1
 	 */
-	page?: number;
+	value?: number;
+	/** Initial page, one-based, when `value` is omitted. */
+	defaultValue?: number;
 	/**
 	 * Number of pages shown on each side of the current page.
 	 */
@@ -170,7 +157,7 @@ type PaginationBaseProps = {
 	/**
 	 * Accessible label for the pagination navigation landmark.
 	 */
-	ariaLabel?: string;
+	label?: string;
 	/**
 	 * Returns an href for a page. When omitted, controls render as buttons.
 	 */
@@ -178,11 +165,14 @@ type PaginationBaseProps = {
 	/**
 	 * Returns localized aria labels for first/previous/page/next/last controls.
 	 */
-	getItemAriaLabel?: (item: PaginationItemAriaLabel) => string;
+	getItemLabel?: (item: PaginationItemLabel) => string;
+	/** Per-instance i18n overrides merged over the global catalog. */
+	i18n?: Partial<Messages>;
 	/**
-	 * Called after an enabled control selects a different page.
+	 * Called once after an enabled control selects a different page, with the new
+	 * one-based page number. External `value` updates stay silent.
 	 */
-	onPageChange?: (page: number) => void;
+	onValueChange?: (value: number) => void;
 	/**
 	 * Theme overrides for pagination parts.
 	 */
@@ -221,6 +211,4 @@ type PaginationBaseProps = {
 	summary?: Slot<PaginationSummaryPayload>;
 };
 
-export type PaginationProps = WithAttachments<
-	PaginationBaseProps & (PaginationTotalPagesProps | PaginationTotalItemsProps)
->;
+export type PaginationProps = WithAttachments<PaginationOwnProps>;

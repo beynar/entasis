@@ -10,7 +10,7 @@ The Switch component is a toggle control for boolean settings, providing a visua
 	let enabled = $state(false);
 </script>
 
-<Switch label="Enable notifications" bind:checked={enabled} />
+<Switch label="Enable notifications" bind:value={enabled} />
 \`\`\`
 
 ## Props
@@ -18,8 +18,7 @@ The Switch component is a toggle control for boolean settings, providing a visua
 Extends all Field component props plus:
 
 ### Core Props
-- **checked**: boolean (bindable) - Toggle state
-- **value**: boolean | null (bindable) - Current switch value
+- **value**: boolean | null (bindable) - Toggle state (bind with \`bind:value\`)
 - **defaultValue**: boolean | null (default: null) - Initial value when value is omitted
 
 ### Field Props (inherited)
@@ -31,7 +30,7 @@ Extends all Field component props plus:
 - **size**: 'small' | 'normal' | 'large' - Switch size
 
 ### Event Props
-- **onValueChange**: (checked: boolean) => void - Called when toggled
+- **onValueChange**: (value: boolean) => void - Called when toggled
 
 ### Styling Props
 - **class**: string - Additional CSS classes
@@ -62,7 +61,7 @@ Extends all Field component props plus:
 
 <Switch 
 	label="Enable Notifications"
-	bind:checked={notifications}
+	bind:value={notifications}
 />
 \`\`\`
 
@@ -71,7 +70,7 @@ Extends all Field component props plus:
 <Switch 
 	label="Auto-save"
 	description="Automatically save your work every 5 minutes"
-	bind:checked={autoSave}
+	bind:value={autoSave}
 />
 \`\`\`
 
@@ -79,7 +78,7 @@ Extends all Field component props plus:
 \`\`\`svelte
 <Switch 
 	label="I agree to the terms and conditions"
-	bind:checked={agreedToTerms}
+	bind:value={agreedToTerms}
 	required
 />
 \`\`\`
@@ -88,7 +87,7 @@ Extends all Field component props plus:
 \`\`\`svelte
 <Switch 
 	label="Premium Feature"
-	checked={false}
+	value={false}
 	disabled
 	description="Upgrade to unlock this feature"
 />
@@ -96,9 +95,9 @@ Extends all Field component props plus:
 
 ### Different Sizes
 \`\`\`svelte
-<Switch size="small" label="Small Switch" bind:checked={val1} />
-<Switch size="normal" label="Normal Switch" bind:checked={val2} />
-<Switch size="large" label="Large Switch" bind:checked={val3} />
+<Switch size="small" label="Small Switch" bind:value={val1} />
+<Switch size="normal" label="Normal Switch" bind:value={val2} />
+<Switch size="large" label="Large Switch" bind:value={val3} />
 \`\`\`
 
 ### With Change Handler
@@ -112,7 +111,7 @@ Extends all Field component props plus:
 
 <Switch 
 	label="Dark Mode"
-	bind:checked={darkMode}
+	bind:value={darkMode}
 	onValueChange={handleToggle}
 />
 \`\`\`
@@ -132,25 +131,25 @@ Extends all Field component props plus:
 	<Switch 
 		label="Push Notifications"
 		description="Receive notifications on your device"
-		bind:checked={settings.notifications}
+		bind:value={settings.notifications}
 	/>
 	
 	<Switch 
 		label="Email Updates"
 		description="Get weekly email summaries"
-		bind:checked={settings.emailUpdates}
+		bind:value={settings.emailUpdates}
 	/>
 	
 	<Switch 
 		label="Auto-play Videos"
 		description="Videos start playing automatically"
-		bind:checked={settings.autoPlay}
+		bind:value={settings.autoPlay}
 	/>
 	
 	<Switch 
 		label="Show Preview"
 		description="Display content previews"
-		bind:checked={settings.showPreview}
+		bind:value={settings.showPreview}
 	/>
 </div>
 \`\`\`
@@ -163,20 +162,20 @@ Extends all Field component props plus:
 	<Switch 
 		label="Profile Visibility"
 		description="Make your profile visible to other users"
-		bind:checked={privacy.profileVisible}
+		bind:value={privacy.profileVisible}
 	/>
 	
 	<Switch 
 		label="Show Email"
 		description="Display your email on your profile"
-		bind:checked={privacy.showEmail}
+		bind:value={privacy.showEmail}
 		disabled={!privacy.profileVisible}
 	/>
 	
 	<Switch 
 		label="Activity Status"
 		description="Show when you're online"
-		bind:checked={privacy.showActivity}
+		bind:value={privacy.showActivity}
 	/>
 	
 	<Button type="submit">Save Settings</Button>
@@ -205,19 +204,19 @@ Extends all Field component props plus:
 	<Switch 
 		label="Experimental Features"
 		description="⚠️ Use at your own risk"
-		bind:checked={features.experimental}
+		bind:value={features.experimental}
 	/>
 	
 	<Switch 
 		label="Beta Features"
 		description="Try new features before they're released"
-		bind:checked={features.beta}
+		bind:value={features.beta}
 	/>
 	
 	<Switch 
 		label="Analytics"
 		description="Help us improve by sharing usage data"
-		bind:checked={features.analytics}
+		bind:value={features.analytics}
 	/>
 </div>
 \`\`\`
@@ -231,7 +230,7 @@ Extends all Field component props plus:
 <Switch 
 	label="Advanced Mode"
 	description="Show advanced options"
-	bind:checked={advancedMode}
+	bind:value={advancedMode}
 />
 
 {#if advancedMode}
@@ -321,7 +320,7 @@ The theme object contains the following parts:
 \`\`\`svelte
 <Switch 
   label="Enable Feature"
-  bind:checked={enabled}
+  bind:value={enabled}
   theme={{
     toggle: {
       base: 'rounded-full transition-all',
@@ -345,7 +344,7 @@ The theme object contains the following parts:
 \`\`\`svelte
 <Switch 
   label="Custom Switch"
-  bind:checked={checked}
+  bind:value={checked}
   theme={{
     toggle: {
       checked: {
@@ -372,14 +371,14 @@ The theme object contains the following parts:
     toggle: {
       base: 'transition-all duration-300',
       checked: {
-        true: 'bg-primary border-primary shadow-md'
+        true: 'bg-primary border-primary lift-3'
       },
       size: {
         normal: 'h-6 w-12'
       }
     },
     thumb: {
-      base: 'shadow-lg',
+      base: 'lift-4',
       size: {
         normal: 'h-5 w-5'
       }

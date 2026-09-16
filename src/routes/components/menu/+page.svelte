@@ -4,7 +4,7 @@
 	import { Menu, type MenuItem } from '$lib/components/Menu/index.js';
 	import SegmentedControl from '$lib/components/SegmentedControl/SegmentedControl.svelte';
 	import type { Density } from '$lib/types/theme.js';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import { userIcon } from '$lib/components/Icons/user.js';
 	import { gearIcon } from '$lib/components/Icons/gear.js';
@@ -18,7 +18,6 @@
 	import { houseIcon } from '$lib/components/Icons/house.js';
 
 	let clickCount = $state(0);
-	let selectedOption = $state('Option 1');
 
 	const submenuModes = ['auto', 'popover', 'stack'] as const;
 	const controls = createComponentControls([
@@ -27,7 +26,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'submenuMode',
@@ -39,9 +38,9 @@
 	]);
 
 	const densitySegments = [
-		{ value: 'small', label: 'Small' },
+		{ value: 'compact', label: 'Compact' },
 		{ value: 'normal', label: 'Normal' },
-		{ value: 'large', label: 'Large' }
+		{ value: 'comfortable', label: 'Comfortable' }
 	] as const satisfies ReadonlyArray<{ value: Density; label: string }>;
 	let menuDensity = $state<Density>('normal');
 
@@ -219,7 +218,7 @@
 	component="Menu"
 	features={[
 		'role=menu with menuitem children',
-		'Arrow key navigation with loop',
+		{ label: 'Arrow key navigation with loop', test: 'a11y:menu.arrow-keys' },
 		'Submenus as popovers or stacked views',
 		'Options, buttons, separators, submenus',
 		'Optional header and footer snippets'
@@ -239,7 +238,7 @@
 	]}
 />`}
 	>
-		<div class="bg-surface rounded-xl border-neutral-muted w-64 border p-2">
+		<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
 			<Menu
 				items={basicItems}
 				density={controls.value.density}
@@ -250,25 +249,25 @@
 
 	{#snippet examples()}
 		<ComponentCard description="A simple vertical list of menu options.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 border p-2">
+			<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
 				<Menu items={basicItems} />
 			</div>
 		</ComponentCard>
 
 		<ComponentCard description="Menu options with prefix icons and descriptions.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-72 border p-2">
+			<div class="bg-surface border-neutral-muted w-72 rounded-xl border p-2">
 				<Menu items={iconItems} />
 			</div>
 		</ComponentCard>
 
 		<ComponentCard description="Menu items rendered as full-width buttons.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 border p-2">
+			<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
 				<Menu items={buttonItems} />
 			</div>
 		</ComponentCard>
 
 		<ComponentCard description="Options, separators, and action buttons in one menu.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-72 border p-2">
+			<div class="bg-surface border-neutral-muted w-72 rounded-xl border p-2">
 				<Menu items={mixedItems} />
 			</div>
 		</ComponentCard>
@@ -277,19 +276,19 @@
 			<div class="flex gap-4">
 				<div class="flex-1">
 					<h3 class="text-neutral/70 mb-2 text-sm">Small</h3>
-					<div class="bg-surface rounded-xl border-neutral-muted border p-2">
+					<div class="bg-surface border-neutral-muted rounded-xl border p-2">
 						<Menu items={smallItems} />
 					</div>
 				</div>
 				<div class="flex-1">
 					<h3 class="text-neutral/70 mb-2 text-sm">Normal</h3>
-					<div class="bg-surface rounded-xl border-neutral-muted border p-2">
+					<div class="bg-surface border-neutral-muted rounded-xl border p-2">
 						<Menu items={normalItems} />
 					</div>
 				</div>
 				<div class="flex-1">
 					<h3 class="text-neutral/70 mb-2 text-sm">Large</h3>
-					<div class="bg-surface rounded-xl border-neutral-muted border p-2">
+					<div class="bg-surface border-neutral-muted rounded-xl border p-2">
 						<Menu items={largeItems} />
 					</div>
 				</div>
@@ -298,7 +297,7 @@
 
 		<ComponentCard
 			title="Density"
-			description="density scales the row gap and every option's paddings — small for dense menus, large for roomy ones. Combine freely with size."
+			description="density scales the row gap and every option's paddings — compact for dense menus, comfortable for roomy ones. Combine freely with size."
 			code={`<SegmentedControl items={densities} bind:value={density} />
 <Menu items={...} {density} />`}
 		>
@@ -307,22 +306,22 @@
 					items={densitySegments}
 					bind:value={menuDensity}
 					size="small"
-					ariaLabel="Menu density"
+					label="Menu density"
 				/>
-				<div class="bg-surface rounded-xl border-neutral-muted w-64 border p-2">
+				<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
 					<Menu items={densityItems} density={menuDensity} />
 				</div>
 			</div>
 		</ComponentCard>
 
 		<ComponentCard description="Semantic color variants on menu options.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 border p-2">
+			<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
 				<Menu items={colorItems} />
 			</div>
 		</ComponentCard>
 
 		<ComponentCard description="Menu items that update state on each click.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 border p-2">
+			<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
 				<Menu items={interactiveItems} />
 			</div>
 		</ComponentCard>
@@ -330,26 +329,26 @@
 		<ComponentCard
 			description="Full application menu with profile, navigation, and account actions."
 		>
-			<div class="bg-surface rounded-xl border-neutral-muted w-80 border p-2">
+			<div class="bg-surface border-neutral-muted w-80 rounded-xl border p-2">
 				<Menu items={appMenuItems} />
 			</div>
 		</ComponentCard>
 
 		<ComponentCard description="Typical right-click context menu actions.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 border p-2">
+			<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
 				<Menu items={contextMenuItems} />
 			</div>
 		</ComponentCard>
 
 		<ComponentCard description="Wider spacing between items via a custom gap class.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 border p-2">
+			<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
 				<Menu items={customGapItems} class="gap-2" />
 			</div>
 		</ComponentCard>
 
 		<ComponentCard description="File, edit, and view menus side by side.">
 			<div class="flex gap-4">
-				<div class="bg-surface rounded-xl border-neutral-muted flex-1 border p-2">
+				<div class="bg-surface border-neutral-muted flex-1 rounded-xl border p-2">
 					<h3 class="mb-2 px-2 text-sm font-semibold">File Menu</h3>
 					<Menu
 						items={[
@@ -361,7 +360,7 @@
 						]}
 					/>
 				</div>
-				<div class="bg-surface rounded-xl border-neutral-muted flex-1 border p-2">
+				<div class="bg-surface border-neutral-muted flex-1 rounded-xl border p-2">
 					<h3 class="mb-2 px-2 text-sm font-semibold">Edit Menu</h3>
 					<Menu
 						items={[
@@ -374,7 +373,7 @@
 						]}
 					/>
 				</div>
-				<div class="bg-surface rounded-xl border-neutral-muted flex-1 border p-2">
+				<div class="bg-surface border-neutral-muted flex-1 rounded-xl border p-2">
 					<h3 class="mb-2 px-2 text-sm font-semibold">View Menu</h3>
 					<Menu
 						items={[
@@ -389,7 +388,7 @@
 		</ComponentCard>
 
 		<ComponentCard description="Nested submenu opened from a menu option.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 border p-2">
+			<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
 				<Menu
 					items={[
 						{ type: 'option', prefix: houseIcon, title: 'Dashboard' },
@@ -414,7 +413,7 @@
 		</ComponentCard>
 
 		<ComponentCard description="Submenus nested two levels deep.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 border p-2">
+			<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
 				<Menu
 					items={[
 						{ type: 'option', title: 'New File' },
@@ -445,7 +444,7 @@
 		</ComponentCard>
 
 		<ComponentCard description="Submenus can render as stacked views inside one menu surface.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-80 border p-2">
+			<div class="bg-surface border-neutral-muted w-80 rounded-xl border p-2">
 				<Menu items={stackedItems} submenuMode="stack" />
 			</div>
 		</ComponentCard>
@@ -454,7 +453,7 @@
 			<div class="flex gap-4">
 				<div class="flex-1">
 					<h3 class="text-neutral/70 mb-2 text-sm">Hover Only (default)</h3>
-					<div class="bg-surface rounded-xl border-neutral-muted border p-2">
+					<div class="bg-surface border-neutral-muted rounded-xl border p-2">
 						<Menu
 							items={[
 								{ type: 'option', title: 'Option 1' },
@@ -474,7 +473,7 @@
 				</div>
 				<div class="flex-1">
 					<h3 class="text-neutral/70 mb-2 text-sm">Click Only</h3>
-					<div class="bg-surface rounded-xl border-neutral-muted border p-2">
+					<div class="bg-surface border-neutral-muted rounded-xl border p-2">
 						<Menu
 							items={[
 								{ type: 'option', title: 'Option 1' },
@@ -498,7 +497,7 @@
 		<ComponentCard
 			description="Debug overlays show the trigger/submenu safe-area rectangles in blue and the prediction cone in orange — it keeps the submenu open during the diagonal move while the other options stay hoverable."
 		>
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 border p-2">
+			<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
 				<Menu
 					items={[
 						{ type: 'option', title: 'Option 1' },
@@ -522,7 +521,7 @@
 		<ComponentCard
 			description="Every item type in a single menu: options, submenus, buttons, separators."
 		>
-			<div class="bg-surface rounded-xl border-neutral-muted w-72 border p-2">
+			<div class="bg-surface border-neutral-muted w-72 rounded-xl border p-2">
 				<Menu
 					items={[
 						{
@@ -565,7 +564,7 @@
 		</ComponentCard>
 
 		<ComponentCard description="Custom header content above menu items.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-72 border p-2">
+			<div class="bg-surface border-neutral-muted w-72 rounded-xl border p-2">
 				<Menu items={iconItems}>
 					{#snippet header()}
 						<div class="border-neutral-muted mb-2 border-b pb-2">
@@ -580,11 +579,11 @@
 		</ComponentCard>
 
 		<ComponentCard description="Custom footer content below menu items.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-64 border p-2">
+			<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
 				<Menu items={basicItems}>
 					{#snippet footer()}
 						<div class="border-neutral-muted mt-2 border-t pt-2">
-							<div class="text-neutral/60 px-2 text-xs">Version 1.0.0</div>
+							<div class="text-neutral/70 px-2 text-xs">Version 1.0.0</div>
 						</div>
 					{/snippet}
 				</Menu>
@@ -592,7 +591,7 @@
 		</ComponentCard>
 
 		<ComponentCard description="Header and footer slots combined in one menu.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-72 border p-2">
+			<div class="bg-surface border-neutral-muted w-72 rounded-xl border p-2">
 				<Menu items={iconItems}>
 					{#snippet header()}
 						<div class="border-neutral-muted mb-2 border-b pb-2">
@@ -611,10 +610,10 @@
 					{/snippet}
 					{#snippet footer()}
 						<div class="border-neutral-muted mt-2 border-t pt-2">
-							<div class="text-neutral/60 px-2 text-center text-xs">
-								<a href="/privacy" class="hover:text-neutral hover:underline">Privacy</a>
+							<div class="text-neutral/70 px-2 text-center text-xs">
+								<a href="#privacy" class="hover:text-neutral hover:underline">Privacy</a>
 								·
-								<a href="/terms" class="hover:text-neutral hover:underline">Terms</a>
+								<a href="#terms" class="hover:text-neutral hover:underline">Terms</a>
 							</div>
 						</div>
 					{/snippet}
@@ -623,7 +622,7 @@
 		</ComponentCard>
 
 		<ComponentCard description="Minimal three-item menu.">
-			<div class="bg-surface rounded-xl border-neutral-muted w-48 border p-2">
+			<div class="bg-surface border-neutral-muted w-48 rounded-xl border p-2">
 				<Menu
 					items={[
 						{ type: 'option', title: 'Item 1' },

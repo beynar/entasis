@@ -1,6 +1,7 @@
 import { untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
-import { bind } from '$lib/utils/state.svelte.js';
+import { createBindableStateClass } from '$lib/utils/state.svelte.js';
+import type { Messages } from '$lib/i18n/en.js';
 import { ImageGalleryImages, type DiscoveredImage } from './imageGallery.images.js';
 import { ImageGalleryLightbox } from './imageGallery.lightbox.js';
 import type {
@@ -17,7 +18,6 @@ type ImageGalleryStateOptions = MakeRequired<
 		| 'imageSelector'
 		| 'disabled'
 		| 'zoomMargin'
-		| 'transitionDuration'
 		| 'closeOnClickOutside'
 		| 'closeOnEscape'
 		| 'lockScroll'
@@ -34,7 +34,6 @@ type ImageGalleryStateOptions = MakeRequired<
 	| 'imageSelector'
 	| 'disabled'
 	| 'zoomMargin'
-	| 'transitionDuration'
 	| 'closeOnClickOutside'
 	| 'closeOnEscape'
 	| 'lockScroll'
@@ -45,8 +44,14 @@ type ImageGalleryStateOptions = MakeRequired<
 	| 'licenseKey'
 > & {
 	isOpen: boolean;
+	/** Lightbox animation duration in ms, resolved from the `motion` theme slot. */
+	transitionDuration: number;
+	/** Lightbox CSS easing, resolved from the `motion` theme slot. */
+	transitionEasing: string;
 	activeIndex: number;
 	hasCustomCaption: boolean;
+	/** Active i18n catalog, used for the lightbox chrome strings. */
+	messages: Messages;
 };
 
 type ImageGalleryAttachmentConfig = Pick<
@@ -55,6 +60,7 @@ type ImageGalleryAttachmentConfig = Pick<
 	| 'disabled'
 	| 'zoomMargin'
 	| 'transitionDuration'
+	| 'transitionEasing'
 	| 'closeOnClickOutside'
 	| 'closeOnEscape'
 	| 'lockScroll'
@@ -66,23 +72,24 @@ type ImageGalleryAttachmentConfig = Pick<
 	| 'hasCustomCaption'
 >;
 
-export interface ImageGalleryState extends ImageGalleryStateOptions {}
-
-export class ImageGalleryState {
+/** The bound option props are declared by the base class, so `this.isOpen` & co. are typed
+ *  without merging an interface into the class declaration. */
+export class ImageGalleryState extends createBindableStateClass<ImageGalleryStateOptions>() {
 	rootElement: HTMLElement | null = $state(null);
 	discoveredImages = $state<DiscoveredImage[]>([]);
 	readonly imageRegistry = new ImageGalleryImages(this);
 	private lightbox = new ImageGalleryLightbox(this);
 
+	// The DOM handle stays internal: the public payload is data only.
 	images = $derived<ImageGalleryImage[]>(
-		this.discoveredImages.map(({ element: _element, ...image }) => image)
+		this.discoveredImages.map(({ src, alt, caption, index }) => ({ src, alt, caption, index }))
 	);
 	activeImage = $derived(this.images[this.activeIndex] ?? null);
 	canPrevious = $derived(this.activeIndex > 0);
 	canNext = $derived(this.activeIndex < this.images.length - 1);
 
 	constructor(options: ImageGalleryStateOptions) {
-		bind(this, options);
+		super(options);
 
 		$effect(() => {
 			const isOpen = this.isOpen;

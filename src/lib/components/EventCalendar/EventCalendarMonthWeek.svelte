@@ -297,7 +297,7 @@
 						aria-hidden="true"
 						data-event-calendar-background
 						data-occurrence-key={segment.occurrence.key}
-						class="pointer-events-none absolute inset-x-0 bottom-0 top-7 bg-[var(--event-calendar-item-color)] opacity-20"
+						class="pointer-events-none absolute inset-x-0 top-7 bottom-0 bg-[var(--event-calendar-item-color)] opacity-20"
 						style:--event-calendar-item-color={getEventCalendarItemColor(segment.occurrence)}
 					></div>
 				{/each}
@@ -314,7 +314,7 @@
 								: 'var(--color)'}
 						<div
 							aria-hidden="true"
-							class="pointer-events-none absolute inset-inline-start-0 z-20 h-[var(--event-calendar-item-min-height)] px-1 transition-[top] duration-150 motion-reduce:transition-none"
+							class="inset-inline-start-0 duration-fast pointer-events-none absolute z-20 h-[var(--event-calendar-item-min-height)] px-1 transition-[top] motion-reduce:transition-none"
 							style:top={`calc(1.75rem + ${insertion.lane} * var(--event-calendar-item-min-height))`}
 							style:width={getMonthBarWidth(insertion.startIndex, insertion.endIndex)}
 						>
@@ -336,7 +336,7 @@
 				{#each layout.placements.filter((placement) => placement.startIndex === gridDayIndex && placement.lane < visibleLaneCount) as placement (`${weekIndex}:${placement.key}`)}
 					{@const segment = getPlacementSegment(placement.segments)}
 					<div
-						class="pointer-events-auto absolute inset-inline-start-0 z-10 h-[var(--event-calendar-item-min-height)] px-1 transition-[top,opacity] duration-150 motion-reduce:transition-none"
+						class="inset-inline-start-0 duration-fast pointer-events-auto absolute z-10 h-[var(--event-calendar-item-min-height)] px-1 transition-[top,opacity] motion-reduce:transition-none"
 						class:pointer-events-none={placement.occurrence.key === draggingOccurrenceKey}
 						class:opacity-0={placement.occurrence.key === draggingOccurrenceKey}
 						style:top={`calc(1.75rem + ${placement.lane} * var(--event-calendar-item-min-height))`}

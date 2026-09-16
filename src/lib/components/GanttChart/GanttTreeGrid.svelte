@@ -293,8 +293,12 @@
 	aria-rowcount={rowModel.rows.length + 1}
 	aria-colcount={rowModel.visibleColumns.length}
 >
+	<!-- The treegrid owns two rowgroups: this header band, and the scrolling body below. Anything
+	     else with a role between the treegrid and its rows breaks the owned-children chain
+	     (axe: aria-required-children / aria-required-parent). -->
 	<div
-		class="sticky top-0 z-30 h-[var(--gantt-header-height)] overflow-x-clip bg-surface-raised/95 backdrop-blur"
+		role="rowgroup"
+		class="bg-surface-raised/95 sticky top-0 z-30 h-[var(--gantt-header-height)] overflow-x-clip backdrop-blur"
 		dir={chart.direction}
 	>
 		<div
@@ -328,7 +332,8 @@
 		<ScrollArea
 			bind:viewportRef={horizontalViewport}
 			class="h-full min-w-0"
-			ariaLabel={chart.messages.ganttChartGrid}
+			label={chart.messages.ganttChartGrid}
+			viewportRole="rowgroup"
 			type="hover"
 			onscroll={handleHorizontalScroll}
 		>
@@ -373,7 +378,7 @@
 							aria-hidden="true"
 						>
 							<span
-								class="absolute -start-1.5 top-1/2 size-3 -translate-y-1/2 rounded-full border-2 border-color bg-surface"
+								class="border-color bg-surface absolute -start-1.5 top-1/2 size-3 -translate-y-1/2 rounded-full border-2"
 							></span>
 						</div>
 					{/if}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import Code from '$lib/components/Code/Code.svelte';
 	import Separator from '$lib/components/Separator/Separator.svelte';
 
@@ -91,25 +92,24 @@
 	default: true;
 	colorscheme: light;
 
-	/* hex or a Tailwind color name (e.g. \`indigo\`) */
-	primary: #6366f1;
-	secondary: #8b5cf6;
-	danger: #ef4444;
-	success: #22c55e;
+	/* hex or a Tailwind color name (e.g. \`zinc\`) */
+	primary: #5f62ef;
+	secondary: #e4e4e7;
+	danger: #dc2626;
+	success: #15803d;
 	warning: #f59e0b;
-	info: #3b82f6;
+	info: #2563eb;
 
 	/* surface drives elevation; neutral is the achromatic semantic color */
-	surface: #ffffff;
-	neutral: #0a0a0a;
+	surface: #fafafa;
+	neutral: #18181b;
 
 	/* optional interaction calibration */
 	state-hover-opacity: 0.05;
 	state-pressed-opacity: 0.10;
 
 	/* optional per-variant overrides */
-	primary-dark: #4338ca;
-	primary-contrast: #ffffff;
+	primary-contrast: #fafafa;
 }`;
 
 	const usageCode = `<button class="state-layer bg-primary text-primary-contrast rounded-sm px-lg py-sm">
@@ -118,11 +118,11 @@
 
 <div class="bg-surface-canvas border-neutral-muted rounded-lg border p-xl">
 	<p class="text-neutral">Title</p>
-	<p class="text-neutral/60">Muted body copy</p>
+	<p class="text-neutral/70">Muted body copy</p>
 </div>
 
 <!-- opacity modifiers work on every token -->
-<span class="bg-primary/20 text-primary">Soft badge</span>`;
+<span class="bg-primary/20 text-primary-readable">Soft badge</span>`;
 
 	const themeToggleCode = `<html data-theme="dark">
 	<!-- or toggle the \`.dark\` class -->
@@ -138,14 +138,16 @@
 			spacingScale: { xs: 1, sm: 1.5, md: 2, lg: 3, xl: 4 },
 			radius: 'normal',
 			typeScale: 'default',
-			raisedWithBorder: true
+			raisedWithBorder: true,
+			defaultColor: 'neutral'
 		},
 		dark: {
 			spacing,
 			spacingScale: { xs: 1, sm: 1.5, md: 2, lg: 3, xl: 4 },
 			radius: 'small',
 			typeScale: 'compact',
-			raisedWithBorder: false
+			raisedWithBorder: false,
+			defaultColor: 'neutral'
 		}
 	} satisfies ThemeDesignTokenMap<readonly ['light', 'dark']>);
 </${'script'}>
@@ -160,14 +162,14 @@
 </Theme>`;
 </script>
 
-{#snippet ic(text: string)}<code class="bg-neutral-muted rounded-sm px-xs py-micro text-sm"
+{#snippet ic(text: string)}<code class="bg-neutral-muted px-xs py-micro rounded-sm text-sm"
 		>{text}</code
 	>{/snippet}
 
 <article class="text-neutral mx-auto grid max-w-3xl gap-4 pb-20">
 	<header class="grid gap-2">
 		<h1 class="text-3xl font-semibold">Getting started</h1>
-		<p class="text-neutral/60 text-balance">
+		<p class="text-neutral/70 text-balance">
 			This library combines a Tailwind color engine with runtime design tokens managed by the
 			{@render ic('<Theme>')} component.
 		</p>
@@ -175,10 +177,10 @@
 
 	<Separator class="my-2" children="Installation" />
 
-	<p class="text-neutral/60">Install Tailwind and its Vite plugin.</p>
+	<p class="text-neutral/70">Install Tailwind and its Vite plugin.</p>
 	<Code language="bash" code={installCode} />
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		Then wire up the theme in your {@render ic('src/app.css')}. Declare the {@render ic(
 			"@plugin 'svelai/tailwind-plugin/theme'"
 		)} block once per theme — each generates a scoped color palette. The block marked
@@ -190,11 +192,11 @@
 
 	<Separator class="my-2" children="Build-time color options" />
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		Every key below is passed inside the {@render ic("@plugin 'svelai/tailwind-plugin/theme'")} block.
 	</p>
 
-	<div class="border-neutral-muted rounded-xl overflow-hidden border">
+	<div class="border-neutral-muted overflow-hidden rounded-xl border">
 		{#each themeOptions as option, i (option.name)}
 			<div
 				class="grid grid-cols-[1fr_1.4fr] gap-4 p-3 {i % 2 === 0
@@ -202,16 +204,16 @@
 					: 'bg-surface-canvas'}"
 			>
 				<div class="grid content-start gap-1">
-					<code class="text-primary text-sm font-medium">{option.name}</code>
-					<code class="text-neutral/60 text-xs">{option.type}</code>
-					<span class="text-neutral/60 text-xs">default: {option.def}</span>
+					<code class="text-primary-readable text-sm font-medium">{option.name}</code>
+					<code class="text-neutral/70 text-xs">{option.type}</code>
+					<span class="text-neutral/70 text-xs">default: {option.def}</span>
 				</div>
-				<p class="text-neutral/60 text-sm">{option.desc}</p>
+				<p class="text-neutral/70 text-sm">{option.desc}</p>
 			</div>
 		{/each}
 	</div>
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		Each base color ({@render ic('primary')}, {@render ic('danger')}, …) accepts a hex value or a
 		Tailwind color name. Variants ({@render ic('-light')}, {@render ic('-dark')}, {@render ic(
 			'-muted'
@@ -221,14 +223,14 @@
 
 	<Separator class="my-2" children="Runtime design tokens" />
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		Pass {@render ic('designTokens')} to {@render ic('<Theme>')} to control spacing, radius, fluid typography
 		and raised borders for each logical theme. The object is reactive: changing a value updates existing
 		{@render ic('p-*')}, {@render ic('gap-*')}, {@render ic('rounded-*')} and
 		{@render ic('text-*')} utilities without rebuilding Tailwind.
 	</p>
 	<Code language="svelte" code={runtimeThemeCode} />
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		This replaces the former {@render ic('spacing')}, {@render ic('radius')}, {@render ic('scale')}
 		and {@render ic('raised-with-border')} plugin options. Component density variants remain local choices;
 		their spacing utilities inherit the active runtime spacing scale.
@@ -236,7 +238,7 @@
 
 	<Separator class="my-2" children="Color tokens" />
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		The palette exposes seven semantic colors, each with five variants. Use them like any Tailwind
 		color: {@render ic('bg-primary')}, {@render ic('text-danger-contrast')}, {@render ic(
 			'border-neutral-muted'
@@ -246,7 +248,7 @@
 	<div class="grid gap-3">
 		{#each semanticColors as color (color)}
 			<div class="grid gap-1">
-				<span class="text-neutral/60 text-xs font-medium">{color}</span>
+				<span class="text-neutral/70 text-xs font-medium">{color}</span>
 				<div class="flex flex-wrap gap-2">
 					{#each variants as variant (variant)}
 						{@const token = variant === 'DEFAULT' ? color : `${color}-${variant}`}
@@ -264,11 +266,12 @@
 		{/each}
 	</div>
 
-	<p class="text-neutral/60">
-		See the <a class="text-primary underline" href="/colors">Colors</a> page for the full palette.
+	<p class="text-neutral/70">
+		See the <a class="text-primary-readable underline" href={resolve('/colors')}>Colors</a> page for the
+		full palette.
 	</p>
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		Use {@render ic('surface-recessed')} for inset wells, then the {@render ic('surface-canvas')} → {@render ic(
 			'surface-floating'
 		)}
@@ -284,7 +287,7 @@
 
 	<Separator class="my-2" children="Dark mode" />
 
-	<p class="text-neutral/60">
+	<p class="text-neutral/70">
 		Any non-default theme is applied through its {@render ic('data-theme')} attribute or a matching class.
 		Toggle it on {@render ic('<html>')} to switch themes. Add {@render ic('prefersDark: true;')} to follow
 		the system setting automatically.

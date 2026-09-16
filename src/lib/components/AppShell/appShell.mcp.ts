@@ -30,7 +30,7 @@ Sidebar and PageShell directly when the frame needs custom composition.
 	};
 </script>
 
-<AppShell variant="inset" {sidebar} title="Dashboard" subtitle="Operational overview">
+<AppShell variant="framed" {sidebar} title="Dashboard" subtitle="Operational overview">
 	{#snippet children({ sidebar })}
 		<button type="button" onclick={sidebar.toggle}>Toggle sidebar</button>
 	{/snippet}
@@ -59,7 +59,7 @@ AppShell renders PageShell internally, so child pages can use the PageShell cont
 
 ## Props
 
-- **variant**: 'admin' | 'floating' | 'inset' | 'split' - Shared shell treatment forwarded to Sidebar and PageShell chrome. Admin chrome uses the Sidebar canvas surface; floating chrome uses detached raised, rounded surfaces.
+- **variant**: 'admin' | 'floating' | 'inset' | 'split' | 'framed' - Shared shell treatment forwarded to Sidebar and PageShell chrome. Admin chrome uses the Sidebar canvas surface; floating chrome uses detached raised, rounded surfaces. \`framed\` draws one rounded card (\`rounded-xl\` + \`raised-1\`, so the border and elevation come from the elevation engine) around both the sidebar and the page; the Sidebar's own \`framed\` variant paints its navigation well as \`surface-recessed\`, an inset of that card, and the page header sits on the page surface.
 - **sidebar**: AppShellSidebarProps - Sidebar props except \`children\`, \`mode\`, \`frame\`, and \`variant\`.
   Configure Sidebar \`size\` and \`density\` independently inside this object.
 - **eyebrow**: string | Snippet<[PageShellApi]> - Small metadata above the PageShell title.
@@ -76,7 +76,7 @@ AppShell renders PageShell internally, so child pages can use the PageShell cont
 - **contentPadding**: 'none' | 'small' | 'normal' | 'large' - PageShell content padding preset.
 - **contentWidth**: 'full' | 'narrow' | 'normal' | 'wide' | 'prose' - PageShell content width preset.
 - **pageShellTheme**: PageShellThemeProps - PageShell theme overrides.
-- **theme**: AppShellThemeProps - AppShell root and PageShell surface-token overrides. Sidebar owns the wall and shell geometry.
+- **theme**: AppShellThemeProps - AppShell \`root\`, \`frame\` and \`page\` surface-token overrides. Sidebar owns the wall and shell geometry.
 
 ## Accessibility
 

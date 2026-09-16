@@ -1,4 +1,5 @@
 <script lang="ts" generics="TMessage extends AIThreadItem = AIThreadItem">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import Alert from '../Alert/Alert.svelte';
 	import type { WithAttachments } from '$lib/types/props.js';
 	import type { AIComposerQueuedMessage } from '../AIComposer/aiComposer.props.js';
@@ -44,8 +45,7 @@
 			| 'mentions'
 			| 'references'
 			| 'skills'
-			| 'mcpHost'
-			| 'onSuggestionSelect'
+			| 'onSelect'
 			| 'onFilesRejected'
 			| 'onFileReject'
 			| 'onAttachmentAdd'
@@ -72,7 +72,6 @@
 			| 'message'
 			| 'tool'
 			| 'marker'
-			| 'app'
 			| 'suggestionsRegion'
 			| 'toc'
 			| 'composer'
@@ -115,8 +114,7 @@
 		mentions,
 		references,
 		skills,
-		mcpHost,
-		onSuggestionSelect,
+		onSelect,
 		onFilesRejected,
 		onFileReject,
 		onAttachmentAdd,
@@ -143,7 +141,6 @@
 		message,
 		tool,
 		marker,
-		app,
 		suggestionsRegion,
 		toc,
 		composer,
@@ -155,11 +152,12 @@
 
 	let composerSurface = $state<{ focus: () => void }>();
 	const classes = $derived(useAIChatTheme(theme));
+	const t = $derived(useI18n());
 
 	function displayError(value: unknown): string {
 		if (value instanceof Error && value.message) return value.message;
 		if (typeof value === 'string' && value) return value;
-		return 'The conversation encountered an error.';
+		return t.aiChatErrorDescription;
 	}
 </script>
 
@@ -180,7 +178,7 @@
 					<Alert
 						color="danger"
 						variant="soft"
-						title="Conversation error"
+						title={t.aiChatErrorTitle}
 						description={displayError(conversation.error)}
 					/>
 				{/if}
@@ -198,10 +196,8 @@
 			{message}
 			{tool}
 			{marker}
-			{app}
 			{suggestionsRegion}
 			{toc}
-			{mcpHost}
 			{showToc}
 			{tocSide}
 			{density}
@@ -215,7 +211,7 @@
 			{onMessageCopy}
 			{onMessageEdit}
 			{onMessageRetry}
-			{onSuggestionSelect}
+			{onSelect}
 			onComposerFocus={() => composerSurface?.focus()}
 			{theme}
 		/>

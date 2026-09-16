@@ -2,26 +2,30 @@
 	import type { WithAttachments } from '$lib/types/props.js';
 	import { caretLeftIcon } from '../Icons/caretLeft.js';
 	import { caretRightIcon } from '../Icons/caretRight.js';
-	import { CarouselState } from './carousel.state.svelte.js';
+	import { CarouselState, carouselFallbacks } from './carousel.state.svelte.js';
+	import { responsiveVariables } from '../Theme/responsive.js';
 	import type { CarouselProps } from './carousel.props.js';
 	import { useCarouselTheme } from './carousel.theme.js';
+	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		class: className,
 		dragFree = false,
 		items = [] as Item[],
-		layout = { default: 1 },
-		gaps: gap = { default: 20 },
-		partialDelta = { default: 0 },
-		dots: dotsSnippet,
+		layout,
+		gaps,
+		partialDelta,
+		pagination = { variant: 'line' },
 		theme,
 		children: slide,
-		navigationButton,
+		navigationButton = { color: 'neutral' },
 		snapAlign = 'center',
 		...attachments
 	}: WithAttachments<CarouselProps<Item>> = $props();
 
 	let id = $props.id();
+	const t = $derived(useI18n());
 
 	const carousel = new CarouselState(
 		{
@@ -29,125 +33,190 @@
 				return layout;
 			},
 			get gaps() {
-				return gap;
+				return gaps;
 			},
 			get partialDelta() {
 				return partialDelta;
+			},
+			get messages() {
+				return t;
 			}
 		},
 		id
 	);
 
 	const classes = $derived(useCarouselTheme(theme));
+	/** The built-in prev/next pair, or `undefined` when a snippet or `false` was passed instead. */
+	const buttonOptions = $derived(
+		navigationButton && typeof navigationButton === 'object' ? navigationButton : undefined
+	);
+	const navigationSnippet = $derived(
+		typeof navigationButton === 'function' ? navigationButton : undefined
+	);
+	/** The built-in pagination options, or `undefined` for a snippet or `false`. */
+	const paginationOptions = $derived(
+		pagination && typeof pagination === 'object' ? pagination : undefined
+	);
+	const paginationSnippet = $derived(typeof pagination === 'function' ? pagination : undefined);
+	const resolvedNavigationColor = $derived(useDefaultColor(buttonOptions?.color));
+	const resolvedPaginationColor = $derived(useDefaultColor(paginationOptions?.color));
 
-	const percent = (n: number) => {
-		return (100 / n).toFixed(2);
-	};
+	/**
+	 * Slides-per-view, gap and peek for ALL FIVE breakpoints, written as custom properties on the
+	 * track. The `@container carousel (…)` rules below pick the pair matching the width the host
+	 * actually gave the carousel, so the first painted frame — and the server-rendered HTML — is
+	 * already laid out correctly, with no measurement and no JS. The ResizeObserver in
+	 * `carousel.state.svelte.ts` exists only for what CSS cannot answer: how many dots there are
+	 * and how far `next()` jumps.
+	 */
+	const trackStyle = $derived(
+		Object.entries({
+			...responsiveVariables(
+				'carousel-layout',
+				layout,
+				carouselFallbacks.layout,
+				// A slide is a fraction of the track, so the count becomes a percentage width.
+				(slides) => `${(100 / slides).toFixed(2)}%`
+			),
+			...responsiveVariables('carousel-gap', gaps, carouselFallbacks.gaps, (px) => `${px}px`),
+			...responsiveVariables(
+				'carousel-partial-delta',
+				partialDelta,
+				carouselFallbacks.partialDelta,
+				(px) => `${px}px`
+			),
+			'--carousel-snap-align': snapAlign
+		})
+			.map(([property, value]) => `${property}:${value}`)
+			.join(';')
+	);
 
-	const canNavigate = $derived(carousel.dots.length > 1);
+	/**
+	 * Chrome is worth showing unless there is provably exactly one page to show it for. The dot
+	 * count is 0 on the server and until the slides register, so `!== 1` (rather than `> 1`)
+	 * keeps the footer in the server-rendered HTML and only drops it once a single-page carousel
+	 * has actually measured itself — the footer never appears after hydration, it only leaves.
+	 */
+	const canNavigate = $derived(carousel.dots.length !== 1);
+	const hasFooter = $derived(
+		Boolean(paginationOptions || paginationSnippet || buttonOptions || navigationSnippet) &&
+			canNavigate
+	);
+	const progressPercent = $derived(carousel.progress * 100);
 </script>
 
 <!-- {carousel.currentSlide?.index} -->
 <div data-carousel class={classes.root({ class: className })} {...attachments}>
 	<div
 		{id}
+		role="region"
 		aria-roledescription="carousel"
+		tabindex="0"
+		onkeydown={carousel.onKeyDown}
 		{@attach carousel.attachment}
 		data-carousel-slider
 		data-drag-free={dragFree}
 		data-can-scroll-next={carousel.canScrollNext}
 		data-can-scroll-prev={carousel.canScrollPrev}
-		data-axis={'x'}
+		data-axis="x"
 		class={classes.slider()}
-		style:--gap-xs={`${gap.xs ?? gap.default ?? 20}px`}
-		style:--gap-sm={`${gap.sm ?? gap.default ?? 20}px`}
-		style:--gap-md={`${gap.md ?? gap.default ?? 20}px`}
-		style:--gap-lg={`${gap.lg ?? gap.default ?? 20}px`}
-		style:--gap-xl={`${gap.xl ?? gap.default ?? 20}px`}
-		style:--layout-xs={`${percent(layout.xs ?? layout.default ?? 1)}%`}
-		style:--layout-sm={`${percent(layout.sm ?? layout.default ?? 2)}%`}
-		style:--layout-md={`${percent(layout.md ?? layout.default ?? 2)}%`}
-		style:--layout-lg={`${percent(layout.lg ?? layout.default ?? 3)}%`}
-		style:--layout-xl={`${percent(layout.xl ?? layout.default ?? 4)}%`}
-		style:--partial-delta-xs={`${partialDelta.xs ?? partialDelta.default ?? 0}px`}
-		style:--partial-delta-sm={`${partialDelta.sm ?? partialDelta.default ?? 0}px`}
-		style:--partial-delta-md={`${partialDelta.md ?? partialDelta.default ?? 0}px`}
-		style:--partial-delta-lg={`${partialDelta.lg ?? partialDelta.default ?? 0}px`}
-		style:--partial-delta-xl={`${partialDelta.xl ?? partialDelta.default ?? 0}px`}
-		style:width="100%"
-		style:--snap-align={snapAlign}
+		style={trackStyle}
 	>
-		{#each items as item, index}
+		{#each items as item, index (index)}
 			<div class={classes.slide()}>
 				{@render slide?.({ carousel, item, index })}
 			</div>
 		{/each}
 	</div>
 
-	{#if navigationButton && canNavigate}
-		{#if typeof navigationButton === 'object'}
-			<button
-				data-color={navigationButton.color || 'primary'}
-				{...carousel.prevButton}
-				class={classes.navigationButton({
-					...navigationButton,
-					disabled: carousel.prevButton.disabled,
-					direction: 'previous'
-				})}
-			>
-				{@render caretLeftIcon()}
-			</button>
-
-			<button
-				data-color={navigationButton.color || 'primary'}
-				{...carousel.nextButton}
-				class={classes.navigationButton({
-					...navigationButton,
-					disabled: carousel.nextButton.disabled,
-					direction: 'next'
-				})}
-			>
-				{@render caretRightIcon()}
-			</button>
-		{:else}
-			{@render navigationButton(
-				carousel,
-				{
-					'aria-controls': carousel.id,
-					'aria-label': 'Previous slide'
-				},
-				'prev'
-			)}
-
-			{@render navigationButton(
-				carousel,
-				{
-					'aria-controls': carousel.id,
-					'aria-label': 'Next slide'
-				},
-				'next'
-			)}
-		{/if}
-	{/if}
-
-	{#if dotsSnippet && canNavigate}
-		{#if typeof dotsSnippet === 'object'}
-			<div class={classes.dots()}>
-				{#each carousel.dots as dotItem}
-					<button
-						data-color={dotsSnippet.color || 'primary'}
-						{...dotItem.attributes}
-						class={classes.dot({
-							...dotsSnippet,
-							active: dotItem.active
-						})}
+	{#if hasFooter}
+		<div data-carousel-footer class={classes.footer()}>
+			{#if paginationOptions}
+				{#if paginationOptions.variant === 'dots'}
+					<div data-carousel-dots class={classes.dots({ size: paginationOptions.size })}>
+						{#each carousel.dots as dotItem, dotIndex (dotIndex)}
+							<button
+								data-color={resolvedPaginationColor}
+								{...dotItem.attributes}
+								class={classes.dot({
+									color: paginationOptions.color,
+									size: paginationOptions.size,
+									active: dotItem.active
+								})}
+							>
+							</button>
+						{/each}
+					</div>
+				{:else}
+					<!-- A readout, not a control: it reports where the track is, it does not move it. -->
+					<div
+						data-carousel-progress
+						data-color={resolvedPaginationColor}
+						role="progressbar"
+						aria-controls={carousel.id}
+						aria-label={t.carouselProgress}
+						aria-valuemin={0}
+						aria-valuemax={100}
+						aria-valuenow={Math.round(progressPercent)}
+						class={classes.progress({ size: paginationOptions.size })}
 					>
-					</button>
-				{/each}
-			</div>
-		{:else}
-			{@render dotsSnippet(carousel, carousel.dots)}
-		{/if}
+						<div
+							data-carousel-progress-fill
+							class={classes.progressFill({ color: paginationOptions.color })}
+							style:width="{progressPercent}%"
+						></div>
+					</div>
+				{/if}
+			{:else if paginationSnippet}
+				{@render paginationSnippet(carousel, carousel.dots)}
+			{/if}
+
+			{#if buttonOptions || navigationSnippet}
+				<div data-carousel-navigation class={classes.navigation()}>
+					{#if buttonOptions}
+						<button
+							data-color={resolvedNavigationColor}
+							{...carousel.prevButton}
+							class={classes.navigationButton({
+								...buttonOptions,
+								disabled: carousel.prevButton.disabled
+							})}
+						>
+							{@render caretLeftIcon()}
+						</button>
+
+						<button
+							data-color={resolvedNavigationColor}
+							{...carousel.nextButton}
+							class={classes.navigationButton({
+								...buttonOptions,
+								disabled: carousel.nextButton.disabled
+							})}
+						>
+							{@render caretRightIcon()}
+						</button>
+					{:else if navigationSnippet}
+						{@render navigationSnippet(
+							carousel,
+							{
+								'aria-controls': carousel.id,
+								'aria-label': `${t.previous} ${t.slide}`
+							},
+							'prev'
+						)}
+
+						{@render navigationSnippet(
+							carousel,
+							{
+								'aria-controls': carousel.id,
+								'aria-label': `${t.next} ${t.slide}`
+							},
+							'next'
+						)}
+					{/if}
+				</div>
+			{/if}
+		</div>
 	{/if}
 </div>
 
@@ -156,7 +225,7 @@
 		scroll-snap-type: x mandatory;
 
 		:global(& > *) {
-			scroll-snap-align: var(--snap-align);
+			scroll-snap-align: var(--carousel-snap-align);
 		}
 	}
 
@@ -169,11 +238,52 @@
 		scroll-behavior: smooth;
 		overscroll-behavior-x: contain;
 		inline-size: 100%;
-		max-inline-size: 100vw;
+		max-inline-size: 100%;
 		box-sizing: border-box;
 		scrollbar-width: none;
 		&::-webkit-scrollbar {
 			display: none;
+		}
+
+		/*
+		 * The bleed is a hole punched in the page's hit-testing, so it must not take pointer input:
+		 * the padding zone below carries no slide, yet it is part of the scroll container's box and
+		 * would sit on top of whatever the host drew there — a tab bar above, the footer row below —
+		 * and swallow its clicks. Input starting on a SLIDE still reaches the scroller by bubbling,
+		 * which is all the drag needs: blossom-carousel binds `pointerdown` and `wheel` on this
+		 * element and then listens for `pointermove`/`pointerup` on the window, with no pointer
+		 * capture, so a press that begins on a slide drives the drag exactly as before. `cursor` is
+		 * inherited, so the grab cursor still shows over the slides and correctly does not show over
+		 * the bleed.
+		 */
+		pointer-events: none;
+
+		/* Bleed allowance for the first and last slides' rings and shadows; see carousel.theme.ts. */
+		&:not([has-repeat='true']) {
+			/* At least a ring's worth of room, or as far as the elevation scale's largest shadow. */
+			--carousel-bleed-x: max(var(--space-sm), var(--elevation-bleed-x, 0px));
+			--carousel-bleed-y: max(var(--space-sm), var(--elevation-bleed-y, 0px));
+			/*
+			 * The negative inline margins let the border box grow PAST the host by the bleed on each
+			 * side, and the matching padding puts the slides back on the host's edges: the clip edge
+			 * (the border box, where a partly visible slide is cut) ends up `--carousel-bleed-x`
+			 * outside the root, and the content box ends up flush with it. That only holds while the
+			 * track is free to take its stretch size — an `inline-size: 100%` would pin the border
+			 * box to the root's width and the margins would merely SHIFT it, leaving the clip edge
+			 * two bleeds short of the arrows. Hence `inline-size: auto` here and no inline width in
+			 * the markup.
+			 */
+			margin-inline: calc(var(--carousel-bleed-x) * -1);
+			padding-inline: var(--carousel-bleed-x);
+			scroll-padding-inline: var(--carousel-bleed-x);
+			/* Net block padding stays `--space-xl` (room for the dots); the bleed hides in the margin. */
+			margin-block: calc(var(--space-xl) - var(--carousel-bleed-y));
+			padding-block: var(--carousel-bleed-y);
+			/* A flex basis of 0 lets the negative margins grow the border box by the bleed. */
+			flex: 1 1 0%;
+			inline-size: auto;
+			min-inline-size: 0;
+			max-inline-size: none;
 		}
 
 		:global(&[has-repeat='true']) {
@@ -200,6 +310,8 @@
 			display: inline-block;
 			white-space: initial;
 			vertical-align: top;
+			/* The slides are the only part of the track that takes input; see `pointer-events` above. */
+			pointer-events: auto;
 		}
 
 		/* prevent drag interaction on children */
@@ -210,51 +322,65 @@
 		}
 	}
 
-	[data-carousel-slider][data-axis='x'] {
-		grid-auto-flow: column;
-	}
 	[data-carousel-slider][data-axis='y'] {
 		grid-auto-flow: row;
 	}
 
-	/* xs */
-	@media (max-width: 640px) {
+	/*
+	 * Slides-per-view is chosen from the CAROUSEL's own width (the root carries
+	 * `@container/carousel`), never from the viewport: a narrow carousel in a sidebar of a wide
+	 * page shows one slide, and the same carousel run full-bleed shows four.
+	 *
+	 * The four thresholds are the SHARED `containerBreakpoints` table exported from Theme, the one
+	 * Grid and Stack query too, so `sm` means the same box width in every host-sized component.
+	 * A Svelte <style> block cannot import a value, so they are hand-written here; utils.test.ts
+	 * parses this block and fails if it drifts from the table.
+	 *
+	 * Each `--carousel-*-<step>` property already carries its breakpoint's effective value — the
+	 * nearest-below cascade is flattened in `responsiveVariables` before it reaches CSS — so a rule
+	 * reads one property and never has to fall back through the others.
+	 */
+	[data-carousel-slider][data-axis='x'] {
+		grid-auto-flow: column;
+		grid-auto-columns: calc(
+			var(--carousel-layout-xs) - var(--carousel-gap-xs) - var(--carousel-partial-delta-xs)
+		);
+		column-gap: var(--carousel-gap-xs);
+	}
+
+	@container carousel (width >= 36rem) {
 		[data-carousel-slider][data-axis='x'] {
-			grid-auto-columns: calc(var(--layout-xs) - calc(var(--gap-xs)) - var(--partial-delta-xs));
-			column-gap: var(--gap-xs);
+			grid-auto-columns: calc(
+				var(--carousel-layout-sm) - var(--carousel-gap-sm) - var(--carousel-partial-delta-sm)
+			);
+			column-gap: var(--carousel-gap-sm);
 		}
 	}
 
-	/* sm */
-	@media (min-width: 640px) {
+	@container carousel (width >= 42rem) {
 		[data-carousel-slider][data-axis='x'] {
-			grid-auto-columns: calc(var(--layout-sm) - calc(var(--gap-sm)) - var(--partial-delta-sm));
-			column-gap: var(--gap-sm);
+			grid-auto-columns: calc(
+				var(--carousel-layout-md) - var(--carousel-gap-md) - var(--carousel-partial-delta-md)
+			);
+			column-gap: var(--carousel-gap-md);
 		}
 	}
 
-	/* md */
-	@media (min-width: 768px) {
+	@container carousel (width >= 56rem) {
 		[data-carousel-slider][data-axis='x'] {
-			grid-auto-columns: calc(var(--layout-md) - calc(var(--gap-md)) - var(--partial-delta-md));
-			column-gap: var(--gap-md);
+			grid-auto-columns: calc(
+				var(--carousel-layout-lg) - var(--carousel-gap-lg) - var(--carousel-partial-delta-lg)
+			);
+			column-gap: var(--carousel-gap-lg);
 		}
 	}
 
-	/* lg */
-	@media (min-width: 1024px) {
+	@container carousel (width >= 72rem) {
 		[data-carousel-slider][data-axis='x'] {
-			grid-auto-columns: calc(var(--layout-lg) - calc(var(--gap-lg)) - var(--partial-delta-lg));
-			column-gap: var(--gap-lg);
-		}
-	}
-
-	/* xl */
-	@media (min-width: 1280px) {
-		[data-carousel-slider][data-axis='x'] {
-			grid-auto-columns: calc(var(--layout-xl) - calc(var(--gap-xl)) - var(--partial-delta-xl));
-
-			column-gap: var(--gap-xl);
+			grid-auto-columns: calc(
+				var(--carousel-layout-xl) - var(--carousel-gap-xl) - var(--carousel-partial-delta-xl)
+			);
+			column-gap: var(--carousel-gap-xl);
 		}
 	}
 

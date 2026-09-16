@@ -27,7 +27,7 @@
 	];
 </script>
 
-<div class="grid gap-lg">
+<div class="gap-lg grid">
 	<h2 class="text-xl font-semibold">Map card</h2>
 	<Card variant="solid" showBorders>
 		{#snippet title()}European offices{/snippet}

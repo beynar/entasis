@@ -40,7 +40,7 @@
 	];
 </script>
 
-<section class="mx-auto flex max-w-5xl flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto flex max-w-5xl flex-col">
 	<div class="max-w-2xl">
 		<Chip variant="soft">A flexible foundation</Chip><Heading
 			as="h2"
@@ -49,20 +49,20 @@
 			class="mt-xl">Find the shape that fits your work.</Heading
 		>
 	</div>
-	<Accordion items={industries} defaultValue={['product']} variant="outlined" icon="math"
-		>{#snippet content({ item })}<div class="grid items-center gap-xl md:grid-cols-2">
-				<div class="flex flex-col items-start gap-lg">
+	<Accordion items={industries} defaultValue={['product']} variant="outline" icon="plus-minus"
+		>{#snippet content({ item })}<div class="gap-xl grid items-center md:grid-cols-2">
+				<div class="gap-lg flex flex-col items-start">
 					<p class="text-neutral/70">{item.description}</p>
 					<Button href="/blocks" variant="link" suffix={arrowRightIcon}>See working examples</Button
 					>
 				</div>
 				<Card variant="soft" color="primary"
 					><Stack gap="lg"
-						><span class="text-primary">{@render item.icon({ size: 32 })}</span><Heading
+						><span class="text-primary-readable">{@render item.icon({ size: 32 })}</span><Heading
 							as="h3"
 							size="h4">{item.outcome}</Heading
 						>
-						<div class="flex flex-wrap gap-sm">
+						<div class="gap-sm flex flex-wrap">
 							{#each item.tags as tag (tag)}<Chip size="small" variant="outline">{tag}</Chip>{/each}
 						</div></Stack
 					></Card

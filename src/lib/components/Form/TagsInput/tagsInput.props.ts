@@ -1,4 +1,5 @@
 import type { Density } from '$lib/types/theme.js';
+import type { Messages } from '$lib/i18n/en.js';
 import type { InputProps } from '../Field/field.js';
 import type { ComboboxOption, MaybePromise } from '../Combobox/combobox.props.js';
 import type { TagsInputThemeProps } from './tagsInput.theme.js';
@@ -20,7 +21,7 @@ export type TagsInputProps = Omit<InputProps<'tag'>, 'onValueChange'> & {
 	 */
 	density?: Density;
 	/** When items is provided, also allow Enter to add free text that is not in the option list. */
-	allowCustom?: boolean;
+	customTags?: boolean;
 	/** Maximum number of tags allowed; further adds are ignored once reached. */
 	maxTags?: number;
 	/** When true, shows all options on focus without a search query (static arrays only). */
@@ -36,4 +37,6 @@ export type TagsInputProps = Omit<InputProps<'tag'>, 'onValueChange'> & {
 	noOptionsText?: string;
 	/** Theme overrides for the tags input container, tags, dropdown, and field parts. */
 	theme?: TagsInputThemeProps & InputProps<'tag'>['theme'];
+	/** Per-instance i18n overrides merged over the global catalog. */
+	i18n?: Partial<Messages>;
 };

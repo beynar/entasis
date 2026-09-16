@@ -1,15 +1,15 @@
 <script lang="ts">
 	import PopupMenu from '$lib/components/PopupMenu/PopupMenu.svelte';
-	import { tooltip } from '$lib/components/Tooltip/tooltip.svelte.js';
+	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
 	import { caretRightIcon } from '$lib/components/Icons/caretRight.js';
 	import { dotsThreeIcon } from '$lib/components/Icons/dotsThree.js';
 	import { minusIcon } from '$lib/components/Icons/minus.js';
 	import { plusIcon } from '$lib/components/Icons/plus.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
-	import { slide } from 'svelte/transition';
+	import type { DisclosureIndicator } from '$lib/types/theme.js';
 	import type {
+		SidebarActiveVariant,
 		SidebarApi,
-		SidebarCollapseIcon,
 		SidebarDensity,
 		SidebarMenuEntry,
 		SidebarSize,
@@ -19,7 +19,8 @@
 	import SidebarAction from './SidebarAction.svelte';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import SidebarMenuSubItem from './SidebarMenuSubItem.svelte';
-	import { useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
+	import { slide } from '$lib/transitions/transition.js';
+	import { useSidebarMotion, useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 
 	let {
 		item,
@@ -27,14 +28,16 @@
 		collapseIcon,
 		tooltips,
 		size,
+		activeVariant,
 		density,
 		theme
 	}: {
 		item: SidebarMenuEntry;
 		api: SidebarApi;
-		collapseIcon: SidebarCollapseIcon;
+		collapseIcon: DisclosureIndicator;
 		tooltips: SidebarTooltipMode;
 		size: SidebarSize;
+		activeVariant: SidebarActiveVariant;
 		density: SidebarDensity;
 		theme?: SidebarThemeProps;
 	} = $props();
@@ -45,15 +48,28 @@
 	let submenuRef = $state<HTMLUListElement | null>(null);
 	let actionRef = $state<HTMLElement | null>(null);
 	const classes = $derived(useSidebarTheme(theme));
+	// Motion preset from `sidebarTheme.motion`, through the override ladder
+	// (registry → `setSidebarTheme` → the instance `theme.motion` slot). `slide` is a
+	// factory: it must be created during init, because it reads the theme context.
+	const resolveMotion = useSidebarMotion();
+	const slideTransition = slide();
+	const collapseMotion = $derived(resolveMotion(undefined, { motion: theme?.motion }));
 	const menuSize = $derived(
 		item.size ? ({ small: 'sm', normal: 'default', large: 'lg' } as const)[item.size] : undefined
 	);
 	const t = $derived(useI18n());
 	const isOpen = $derived(open ?? item.defaultOpen ?? false);
-	const isIconCollapsed = $derived(api.displayState === 'collapsed' && !api.isMobile);
+	// A hover peek renders the collapsed panel at full width, so icon-mode behaviour has to
+	// stop with it: labels, badges, and inline submenus must match the width on screen.
+	const isIconCollapsed = $derived(
+		api.displayState === 'collapsed' && !api.isMobile && !api.isPeeking
+	);
 	const showTooltip = $derived((tooltips === 'always' || isIconCollapsed) && !api.isMobile);
 	const tooltipContent = $derived(showTooltip ? (item.tooltip ?? item.label) : undefined);
 	const hasSubmenu = $derived(!!item.items?.length);
+	// A bare glyph stays bare: the wrapper only appears when the entry asks for a role tint or a
+	// tile, so an untinted row never inherits the ambient `data-color`.
+	const hasIconSurface = $derived(!!item.icon && (item.iconVariant === 'tile' || !!item.iconColor));
 	const showSubmenu = $derived(
 		hasSubmenu && !isIconCollapsed && (item.collapsible === false || isOpen)
 	);
@@ -88,12 +104,24 @@
 </script>
 
 {#snippet entryContent()}
-	<SidebarIcon icon={item.icon} />
+	{#if hasIconSurface}
+		<span
+			data-slot="sidebar-menu-icon"
+			data-color={item.iconColor}
+			class={classes.menuIcon({ variant: item.iconVariant ?? 'bare', componentSize: size })}
+		>
+			<SidebarIcon icon={item.icon} />
+		</span>
+	{:else}
+		<SidebarIcon icon={item.icon} />
+	{/if}
 	<span class={classes.menuLabel()}>{item.label}</span>
 {/snippet}
 
 {#snippet indicator()}
-	{#if collapseIcon === 'plus-minus'}
+	{#if collapseIcon === 'none'}
+		<!-- No disclosure indicator. -->
+	{:else if collapseIcon === 'plus-minus'}
 		<SidebarIcon
 			icon={isOpen ? minusIcon : plusIcon}
 			class={classes.menuTrailing({ componentSize: size })}
@@ -120,11 +148,13 @@
 			data-sidebar="menu-button"
 			data-size={item.size ?? 'normal'}
 			data-active={item.isActive ? 'true' : undefined}
+			data-active-variant={activeVariant}
 			aria-current={item.isActive ? 'page' : undefined}
 			aria-disabled={item.disabled || undefined}
 			tabindex={item.disabled ? -1 : undefined}
 			class={classes.menuButton({
 				variant: item.variant,
+				activeVariant,
 				componentSize: size,
 				density,
 				size: menuSize,
@@ -144,10 +174,12 @@
 			data-sidebar="menu-button"
 			data-size={item.size ?? 'normal'}
 			data-active={item.isActive ? 'true' : undefined}
+			data-active-variant={activeVariant}
 			aria-current={item.isActive ? 'page' : undefined}
 			disabled={item.disabled || undefined}
 			class={classes.menuButton({
 				variant: item.variant,
+				activeVariant,
 				componentSize: size,
 				density,
 				size: menuSize,
@@ -174,9 +206,11 @@
 				data-slot="sidebar-menu-button"
 				data-sidebar="menu-button"
 				data-size={item.size ?? 'normal'}
+				data-active-variant={activeVariant}
 				disabled={item.disabled || undefined}
 				class={classes.menuButton({
 					variant: item.variant,
+					activeVariant,
 					componentSize: size,
 					density,
 					size: menuSize,
@@ -206,10 +240,11 @@
 		inert={showSubmenu ? undefined : true}
 		aria-hidden={showSubmenu ? undefined : 'true'}
 		class={classes.subMenu({ density, className: item.subClass })}
-		transition:slide={{ duration: 180 }}
+		in:slideTransition={collapseMotion.in}
+		out:slideTransition={collapseMotion.out}
 	>
 		{#each item.items ?? [] as sub, index (sub.label + index)}
-			<SidebarMenuSubItem {sub} {size} {density} {theme} />
+			<SidebarMenuSubItem {sub} {size} {activeVariant} {density} {theme} />
 		{/each}
 	</ul>
 {/snippet}
@@ -229,7 +264,7 @@
 					class={classes.menuAction({
 						componentSize: size,
 						density,
-						className: 'left-1 right-auto bg-neutral-muted data-[open=true]:rotate-90'
+						className: 'bg-neutral-muted right-auto left-1 data-[open=true]:rotate-90'
 					})}
 					data-open={isOpen ? 'true' : undefined}
 					aria-label={`${t.toggle} ${t.submenu}`}
@@ -247,9 +282,11 @@
 					data-sidebar="menu-button"
 					data-size={item.size ?? 'normal'}
 					data-active={item.isActive ? 'true' : undefined}
+					data-active-variant={activeVariant}
 					disabled={item.disabled || undefined}
 					class={classes.menuButton({
 						variant: item.variant,
+						activeVariant,
 						componentSize: size,
 						density,
 						size: menuSize,

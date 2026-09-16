@@ -70,21 +70,21 @@ export type SortableListProps<T> = WithAttachments<
 			 * false to reject (no preview, drop ignored). `from` is the source
 			 * list's `name`. Defaults to accepting everything in the group.
 			 */
-			accepts?: (detail: { item: T; from: string }) => boolean;
+			accepts?: (payload: { item: T; from: string }) => boolean;
 			/** Called once when a drag ends and the order changed. */
 			onReorder?: (payload: SortableListReorderPayload<T>) => void;
 			/** A row from another list of the group was dropped here at `index`. `items` is already updated — this is a notification. `from.index` is the row's index in the source list at drag start. */
-			onReceive?: (detail: {
+			onReceive?: (payload: {
 				item: T;
 				index: number;
 				from: { list: string; index: number };
 			}) => void;
 			/** One of this list's rows was dropped into another list of the group. `items` is already updated — this is a notification. `index` is the row's index here at the moment of drop. */
-			onRemove?: (detail: { item: T; index: number; to: { list: string } }) => void;
+			onRemove?: (payload: { item: T; index: number; to: { list: string } }) => void;
 			/** A drag of one of this list's rows started. */
-			onDragStart?: (detail: { item: T; index: number }) => void;
+			onDragStart?: (payload: { item: T; index: number }) => void;
 			/** The drag of one of this list's rows ended (drop or cancel), after state updates. `dropped` is true when it landed on an accepting list. */
-			onDragEnd?: (detail: { item: T; dropped: boolean }) => void;
+			onDragEnd?: (payload: { item: T; dropped: boolean }) => void;
 			/**
 			 * Rendered inside the list when it has no rows (snippet or string).
 			 * Grouped lists should provide it — it gives an empty list a visible,

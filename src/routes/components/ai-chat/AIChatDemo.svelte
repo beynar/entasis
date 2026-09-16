@@ -8,7 +8,7 @@
 		AIMessageSize,
 		AIMessageVariant
 	} from '$lib/components/AIMessage/aiMessage.props.js';
-	import AIReasoning from '$lib/components/AIReasoning/Reasoning.svelte';
+	import AIReasoning from '$lib/components/AIReasoning/AIReasoning.svelte';
 	import type { AIConversationState } from '$lib/components/AIConversation/aiConversation.state.svelte.js';
 	import type { AIThreadDensity, AIThreadItem } from '$lib/components/AIThread/aiThread.props.js';
 	import type { AIToolCall } from '$lib/components/AITool/aiTool.props.js';
@@ -172,7 +172,7 @@
 </script>
 
 <AIChat
-	bind:conversation
+	bind:api={conversation}
 	bind:messages
 	bind:selectedModel
 	bind:contextUsage
@@ -195,7 +195,7 @@
 		<div class="flex flex-wrap items-center justify-between gap-3">
 			<div>
 				<div class="text-sm font-semibold">Launch workspace</div>
-				<div class="text-xs text-neutral/60">{state.messages.length} transcript items</div>
+				<div class="text-neutral/70 text-xs">{state.messages.length} transcript items</div>
 			</div>
 			<Button size="small" variant="outline" onclick={askForInput}>Ask for input</Button>
 		</div>
@@ -222,7 +222,7 @@
 				description="The conversation is waiting for a required answer."
 			/>
 		{:else}
-			<div class="text-xs text-neutral/55">State: {state.status}</div>
+			<div class="text-neutral/65 text-xs">State: {state.status}</div>
 		{/if}
 	{/snippet}
 </AIChat>

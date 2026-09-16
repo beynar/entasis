@@ -9,9 +9,9 @@ const defaultRoot = cva({
 	base: 'flex flex-col',
 	variants: {
 		density: {
-			small: 'gap-md',
+			compact: 'gap-md',
 			normal: 'gap-lg',
-			large: 'gap-xl'
+			comfortable: 'gap-xl'
 		}
 	},
 	defaultVariants: {
@@ -23,9 +23,9 @@ const defaultHeader = cva({
 	base: 'flex flex-col',
 	variants: {
 		density: {
-			small: 'gap-micro',
+			compact: 'gap-micro',
 			normal: 'gap-xs',
-			large: 'gap-xs'
+			comfortable: 'gap-xs'
 		}
 	},
 	defaultVariants: {
@@ -37,9 +37,9 @@ const defaultTitle = cva({
 	base: 'font-medium text-neutral',
 	variants: {
 		size: {
-			small: 'text-sm',
-			normal: 'text-base',
-			large: 'text-lg'
+			small: 'text-xs',
+			normal: 'text-sm',
+			large: 'text-base'
 		}
 	},
 	defaultVariants: {
@@ -48,11 +48,11 @@ const defaultTitle = cva({
 });
 
 const defaultDescription = cva({
-	base: 'text-neutral/60',
+	base: 'text-neutral/70',
 	variants: {
 		size: {
 			small: 'text-xs',
-			normal: 'text-sm',
+			normal: 'text-xs',
 			large: 'text-sm'
 		}
 	},
@@ -65,9 +65,9 @@ const defaultList = cva({
 	base: 'grid',
 	variants: {
 		density: {
-			small: 'gap-x-xl gap-y-md',
+			compact: 'gap-x-xl gap-y-md',
 			normal: 'gap-x-layout-md gap-y-md',
-			large: 'gap-x-layout-lg gap-y-lg'
+			comfortable: 'gap-x-layout-lg gap-y-lg'
 		}
 	},
 	defaultVariants: {
@@ -79,9 +79,9 @@ const defaultItem = cva({
 	base: 'flex items-start',
 	variants: {
 		density: {
-			small: 'gap-md',
+			compact: 'gap-md',
 			normal: 'gap-lg',
-			large: 'gap-xl'
+			comfortable: 'gap-xl'
 		}
 	},
 	defaultVariants: {
@@ -90,7 +90,7 @@ const defaultItem = cva({
 });
 
 const defaultKey = cva({
-	base: 'flex items-center w-[35%] min-w-24 shrink-0 text-neutral/60',
+	base: 'flex items-center w-[35%] min-w-24 shrink-0 text-neutral/70',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -98,9 +98,9 @@ const defaultKey = cva({
 			large: 'text-base'
 		},
 		density: {
-			small: 'gap-sm',
+			compact: 'gap-sm',
 			normal: 'gap-md',
-			large: 'gap-md'
+			comfortable: 'gap-md'
 		}
 	},
 	defaultVariants: {
@@ -145,9 +145,9 @@ const defaultChips = cva({
 	base: 'flex flex-wrap',
 	variants: {
 		density: {
-			small: 'gap-xs',
+			compact: 'gap-xs',
 			normal: 'gap-sm',
-			large: 'gap-md'
+			comfortable: 'gap-md'
 		}
 	},
 	defaultVariants: {
@@ -156,7 +156,7 @@ const defaultChips = cva({
 });
 
 const defaultToggle = cva({
-	base: 'inline-flex items-center self-start cursor-pointer rounded-sm text-neutral/60 outline-none transition-colors hover:text-neutral focus-visible:ring-2 focus-visible:ring-primary/50',
+	base: 'inline-flex items-center self-start cursor-pointer rounded-sm text-neutral/70 outline-none transition-colors hover:text-neutral focus-visible:ring-2 focus-visible:ring-focus/50',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -164,9 +164,9 @@ const defaultToggle = cva({
 			large: 'text-base'
 		},
 		density: {
-			small: 'gap-xs',
+			compact: 'gap-xs',
 			normal: 'gap-sm',
-			large: 'gap-md'
+			comfortable: 'gap-md'
 		}
 	},
 	defaultVariants: {
@@ -176,7 +176,7 @@ const defaultToggle = cva({
 });
 
 const defaultToggleIcon = cva({
-	base: 'inline-flex transition-transform duration-200',
+	base: 'inline-flex transition-transform duration-normal',
 	variants: {
 		expanded: {
 			true: 'rotate-180',

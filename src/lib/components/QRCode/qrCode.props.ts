@@ -164,6 +164,8 @@ export type QRCodeProps = WithAttachments<{
 	/**
 	 * The value to encode into the QR Code. An array of strings can be passed
 	 * in to represent multiple segments to further optimize the QR Code.
+	 *
+	 * @readonly-value QRCode encodes the supplied content and never edits it.
 	 */
 	value: string | string[];
 	/**
@@ -234,7 +236,7 @@ export type QRCodeProps = WithAttachments<{
 	 * The accessible label of the QR code.
 	 * @default 'QR Code'
 	 */
-	ariaLabel?: string;
+	label?: string;
 	/**
 	 * The class name of the QR code. First element that the component outputs in the DOM.
 	 */

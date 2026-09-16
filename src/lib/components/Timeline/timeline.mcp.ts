@@ -41,7 +41,7 @@ The default configuration is a vertical timeline with all content on the logical
 - **placement**: \`'start' | 'end' | 'alternate'\` (default: \`'end'\`) — logical side used for item surfaces. Alternate placement starts on \`end\`, then alternates by array index.
 - **variant**: \`'ghost' | 'card' | 'outline' | 'soft'\` (default: \`'ghost'\`) — global surface treatment for all entries.
 - **size**: \`'small' | 'normal' | 'large'\` (default: \`'normal'\`) — title and description typography, marker and icon scale, and loading Spinner scale.
-- **density**: \`'small' | 'normal' | 'large'\` (default: \`'normal'\`) — item gaps, surface padding, connector spacing, and horizontal item minimum width.
+- **density**: \`'compact' | 'normal' | 'comfortable'\` (default: \`'normal'\`) — item gaps, surface padding, connector spacing, and horizontal item minimum width.
 - **color**: Svelai semantic color (default: \`'neutral'\`) — default marker and outline or soft surface accent.
 - **connectorColor**: Svelai semantic color (default: \`'neutral'\`) — default outgoing connector color.
 - **showConnectors**: \`boolean\` (default: \`true\`) — shows connector segments between markers.
@@ -121,7 +121,7 @@ Application item types can extend \`TimelineItem\`. The extended type remains av
   {#snippet item({ item, defaultContent })}
     <a href={item.href} class="block">
       {@render defaultContent()}
-      <span class="text-neutral/60 text-xs">{item.version}</span>
+      <span class="text-neutral/70 text-xs">{item.version}</span>
     </a>
   {/snippet}
 </Timeline>

@@ -18,10 +18,18 @@ export type ChipProps = WithAttachments<
 			/** Visual style variant of the chip. */
 			variant?: 'solid' | 'outline' | 'soft';
 			/**
+			 * Selected state. Sets `data-selected` and paints the shared soft selected fill on top
+			 * of `variant`, so a chip list marks its chosen entries without a theme override. It is
+			 * also the chip's accessible state: `aria-pressed` when the chip resolves to a button,
+			 * `aria-current` when it resolves to a link. A chip with neither `onclick` nor `href`
+			 * has no interactive role to carry a state, so there it stays paint-only.
+			 */
+			selected?: boolean;
+			/**
 			 * Corner anchor that turns the chip into an absolutely positioned overlay.
 			 * The containing element must establish a positioning context.
 			 */
-			position?: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
+			position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 			/** URL rendered as a link when set; chip becomes an anchor. */
 			href?: string;
 			/** Link target attribute when href is set. */
@@ -34,10 +42,6 @@ export type ChipProps = WithAttachments<
 			type?: HTMLButtonAttributes['type'];
 			/** Disabled state when the chip renders as a button. */
 			disabled?: HTMLButtonAttributes['disabled'];
-			/** Pressed state for selectable chip buttons. */
-			'aria-pressed'?: HTMLButtonAttributes['aria-pressed'];
-			/** ARIA disabled marker for selectable chip buttons. */
-			'aria-disabled'?: HTMLButtonAttributes['aria-disabled'];
 			/** Native pointer enter handler. */
 			onpointerenter?: (event: PointerEvent) => void;
 			/** Native pointer leave handler. */

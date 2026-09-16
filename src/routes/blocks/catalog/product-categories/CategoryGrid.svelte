@@ -14,24 +14,26 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Find your corner</p>
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Find your corner
+		</p>
 		<Heading size="h2" weight="bold">Shop by collection.</Heading>
 	</header>
-	<div class="grid gap-xl sm:grid-cols-3">
+	<div class="gap-xl grid sm:grid-cols-3">
 		{#each categories as category (category.title)}<Card href="/components" variant="ghost"
-				><div class="flex flex-col gap-xl">
+				><div class="gap-xl flex flex-col">
 					{@render productArt(category.shape, category.color)}
-					<div class="flex gap-lg justify-between">
+					<div class="gap-lg flex justify-between">
 						<div>
 							<h3 class="text-xl font-semibold">{category.title}</h3>
-							<p class="mt-md text-sm text-neutral/55">{category.description}</p>
+							<p class="mt-md text-neutral/65 text-sm">{category.description}</p>
 						</div>
 						<span class="text-xl" aria-hidden="true">↗</span>
 					</div>

@@ -154,9 +154,9 @@
 			]
 		}
 	];
-<\/script>
+</scr${'ipt'}>
 
-<MenuBar {menus} size="${controls.value.size}" />`;
+<MenuBar {menus} size="${controls.value.size}" />`);
 </script>
 
 <DocPage
@@ -165,8 +165,11 @@
 	component="MenuBar"
 	features={[
 		'Composes PopupMenu and Menu',
-		'Roving horizontal keyboard focus',
-		'Hover and focus switch an open menu',
+		{ label: 'Roving horizontal keyboard focus', test: 'a11y:menu-bar.arrow-keys' },
+		{
+			label: 'Hover and focus switch an open menu',
+			test: 'a11y:menu-bar.focus-switches-open-menu'
+		},
 		'Nested submenu navigation is preserved',
 		'RTL and disabled-menu support'
 	]}
@@ -183,12 +186,12 @@
 		>
 			<header class="border-neutral-muted flex items-center justify-between border-b px-3 py-2">
 				<MenuBar menus={applicationMenus} size={controls.value.size} />
-				<span class="text-neutral/60 hidden text-xs sm:block">{lastAction}</span>
+				<span class="text-neutral/70 hidden text-xs sm:block">{lastAction}</span>
 			</header>
 			<div class="min-h-64 px-8 py-10 sm:px-12">
-				<p class="text-neutral/60 text-xs font-medium uppercase">Untitled document</p>
+				<p class="text-neutral/70 text-xs font-medium uppercase">Untitled document</p>
 				<h2 class="text-neutral mt-4 text-2xl font-semibold">A quieter place to think.</h2>
-				<p class="text-neutral/60 mt-3 max-w-lg text-sm leading-6">
+				<p class="text-neutral/70 mt-3 max-w-lg text-sm leading-6">
 					The menu bar remains idle until one menu opens. After that, adjacent menus follow pointer
 					and keyboard focus without another click.
 				</p>

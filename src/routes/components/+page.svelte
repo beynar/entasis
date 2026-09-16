@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolveLink } from '../appNavigation.js';
 	import { componentInventory } from '$lib/generated/componentContract.js';
 
 	const publicEntries = componentInventory.filter((entry) => entry.visibility === 'public');
@@ -25,7 +26,7 @@
 
 	<div class="border-neutral-muted overflow-hidden rounded-xl border">
 		<div
-			class="bg-surface-recessed text-neutral/60 grid grid-cols-[minmax(12rem,1fr)_minmax(12rem,1fr)_auto] gap-4 border-b px-4 py-3 text-xs font-semibold uppercase tracking-wide"
+			class="bg-surface-recessed text-neutral/60 grid grid-cols-[minmax(12rem,1fr)_minmax(12rem,1fr)_auto] gap-4 border-b px-4 py-3 text-xs font-semibold tracking-wide uppercase"
 		>
 			<span>Entrypoint</span>
 			<span>Capabilities</span>
@@ -54,8 +55,9 @@
 				</div>
 				<div class="flex flex-wrap justify-end gap-2">
 					{#each entry.docs as doc (doc.id)}
-						<a class="text-primary text-sm font-medium hover:underline" href={doc.route}
-							>{doc.label}</a
+						<a
+							class="text-primary text-sm font-medium hover:underline"
+							href={resolveLink(doc.route)}>{doc.label}</a
 						>
 					{:else}
 						<span class="text-neutral/40 text-sm">—</span>

@@ -64,9 +64,9 @@
 	let selected = $state<(typeof categories)[number] | null>(null);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<header class="rounded-lg bg-primary-muted p-xl text-center">
-		<Chip color="primary">Northstar help center</Chip>
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<header class="bg-primary-muted p-xl rounded-lg text-center">
+		<Chip color="primary" variant="solid">Northstar help center</Chip>
 		<h2 class="mt-lg text-4xl font-semibold">A little guidance goes a long way.</h2>
 		<p class="mt-md text-neutral/65">Find your footing, build your workflow, and keep moving.</p>
 	</header>
@@ -75,13 +75,13 @@
 				>← All categories</Button
 			>
 			<h3 class="text-2xl font-semibold">{selected.title}</h3>
-			<Accordion items={selected.articles} oneAtATime variant="outlined" />
+			<Accordion items={selected.articles} oneAtATime variant="outline" />
 		</Stack>{:else}<Grid columns={{ minWidth: 220, max: 3 }} gap="lg">
 			{#each categories as category (category)}<Card
 					title={category.title}
 					description={category.description}
 					><Stack gap="lg">
-						<div class="text-3xl text-primary-readable">{@render category.icon()}</div>
+						<div class="text-primary-readable text-3xl">{@render category.icon()}</div>
 						<Button variant="outline" onclick={() => (selected = category)}
 							>Browse {category.articles.length} articles</Button
 						>

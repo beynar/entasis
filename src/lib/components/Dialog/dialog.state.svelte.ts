@@ -1,12 +1,11 @@
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
+import { createPointerDrag } from '$lib/utils/pointerDrag.js';
 // import { useTheme } from '$lib/utils/theme.svelte.js';
 import { getContext, onMount, setContext, untrack } from 'svelte';
 import { useTheme } from '../Theme/theme.state.svelte.js';
 import type { DialogProps } from './dialog.props.js';
-import { useKeyDown } from '$lib/utils/useKeyDown.svelte.js';
-import { useClickOutside } from '$lib/utils/useClickOutside.svelte.js';
-import { useFocusTrap } from '$lib/utils/useFocusTrap.svelte.js';
-import { DIALOG_Z_BASE, DIALOG_Z_STEP } from '../Theme/theme.layers.js';
+import { useFocusScope } from '$lib/utils/useFocusScope.svelte.js';
+import { useDialogMotion, type DialogThemeProps } from './dialog.theme.js';
 
 export { DIALOG_Z_BASE, DIALOG_Z_STEP } from '../Theme/theme.layers.js';
 
@@ -33,131 +32,40 @@ interface DialogOptions extends MakeRequired<
 > {
 	isOpen: boolean;
 	onOpenChange?: (open: boolean) => void;
+	/** The instance `theme.motion` slot; the `transition` prop still wins over it. */
+	motion?: DialogThemeProps['motion'];
 }
-
-const defaultTransition = {
-	modal: {
-		in: {
-			x: 0,
-			y: 0,
-			scale: 0.98,
-			opacity: 0
-		},
-		out: {
-			x: 0,
-			y: 0,
-			scale: 0.98,
-			opacity: 0
-		}
-	},
-	fullScreen: {
-		in: {
-			x: 0,
-			y: 0,
-			scale: 0.98,
-			opacity: 0
-		},
-		out: {
-			x: 0,
-			y: 0,
-			scale: 0.98,
-			opacity: 0
-		}
-	},
-	drawerRight: {
-		in: {
-			x: '100%',
-			y: 0,
-			scale: 0.98,
-			opacity: 0
-		},
-		out: {
-			x: '100%',
-			y: 0,
-			scale: 0.98,
-			opacity: 0
-		}
-	},
-	drawerLeft: {
-		in: {
-			x: '-100%',
-			y: 0,
-			scale: 0.98,
-			opacity: 0
-		},
-		out: {
-			x: '-100%',
-			y: 0,
-			scale: 0.98,
-			opacity: 0
-		}
-	},
-	drawerBottom: {
-		in: {
-			x: 0,
-			y: '100%',
-			scale: 0.98,
-			opacity: 0
-		},
-		out: {
-			x: 0,
-			y: '100%',
-			scale: 0.98,
-			opacity: 0
-		}
-	},
-	drawerTop: {
-		in: {
-			x: 0,
-			y: '-100%',
-			scale: 0.98,
-			opacity: 0
-		},
-		out: {
-			x: 0,
-			y: '-100%',
-			scale: 0.98,
-			opacity: 0
-		}
-	},
-	alert: {
-		in: {
-			x: 0,
-			y: -100,
-			scale: 0.98,
-			opacity: 0
-		},
-		out: {
-			x: 0,
-			y: -100,
-			scale: 0.98,
-			opacity: 0
-		}
-	}
-} as const;
 
 export class DialogState extends createBindableStateClass<DialogOptions>() {
 	parent = getContext<DialogState | null>('dialog');
 	children = $state<DialogState[]>([]);
 	hasTransitioned = $state(false);
 	theme = useTheme();
-	openOrder = $state(0);
+	// Registered in the shared layer stack, which owns Escape / outside-press dismissal,
+	// open ordering and z-index for every overlay kind.
+	layer = this.theme.layers.register({
+		kind: 'dialog',
+		isOpen: () => this.isOpen,
+		isModal: () => true,
+		dismissOnEscape: () => this.closeOnEscape && this.closable,
+		dismissOnOutside: () => this.closeOnClickOutside && this.hasTransitioned,
+		onDismiss: () => this.close(),
+		state: this
+	});
 
-	// Position of this dialog within the globally-ordered open stack.
-	stackIndex = $derived(this.theme.openDialogs.indexOf(this));
-	stackDepth = $derived(
-		this.stackIndex < 0 ? 0 : this.theme.openDialogs.length - 1 - this.stackIndex
-	);
-	isTop = $derived(this.isOpen && this.stackIndex === this.theme.openDialogs.length - 1);
+	/** How many open dialogs sit above this one. */
+	stackDepth = $derived(this.layer.kindDepth);
+	/** Topmost dialog (popovers opened above it do not count). */
+	isTop = $derived(this.layer.isTopOfKind);
 
 	// Topmost dialog renders at full size; parents scale down and fade behind it.
-	zIndex = $derived(DIALOG_Z_BASE + this.openOrder * DIALOG_Z_STEP);
+	zIndex = $derived(this.layer.zIndex);
 	stackScale = $derived(Math.max(0, 1 - this.stackDepth * 0.06));
 	stackOpacity = $derived(this.stackDepth === 0 ? 1 : Math.max(0.4, 1 - this.stackDepth * 0.35));
 
 	computedSize = $derived(this.theme.resolveResponsiveProps(this.size, 'normal'));
 	// A `modal` collapses into a bottom sheet on mobile unless `responsive` is off. This
-	// runs after `resolveResponsiveProps`, so an explicit responsive `type` function still
+	// runs after `resolveResponsiveProps`, so an explicit responsive `type` record still
 	// wins for every band it names — only a resolved `modal` is rebound. The sheet then
 	// inherits swipe-to-dismiss + the thumb for free (see `isDrawer`).
 	computedType = $derived.by(() => {
@@ -169,8 +77,14 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 	});
 	computedScroll = $derived(this.theme.resolveResponsiveProps(this.scroll, 'inner'));
 
+	// Per-type preset from `dialogTheme.motion`, through the override ladder
+	// (registry → `setDialogTheme` → instance `theme.motion` → `transition` prop).
+	private resolveMotion = useDialogMotion();
 	computedTransition = $derived(
-		this.theme.resolveTransitionProps(this.transition, defaultTransition[this.computedType])
+		this.resolveMotion(
+			{ type: this.computedType },
+			{ motion: this.motion, transition: this.transition }
+		)
 	);
 
 	// --- Swipe to dismiss (drawer types) ---
@@ -196,14 +110,10 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 		return `translate3d(${this.swipeAxis === 'x' ? this.dragOffset : 0}px, ${this.swipeAxis === 'y' ? this.dragOffset : 0}px, 0) scale(${this.stackScale})`;
 	});
 
-	// Hook instances
-	clickOutside = useClickOutside({
-		isActive: () => this.closeOnClickOutside && this.isTop && this.hasTransitioned,
-		callback: () => this.close()
-	});
-
-	focusTrap = useFocusTrap({
-		isActive: () => this.isTop
+	// Initial focus, Tab containment, `inert` page behind, focus restore to the opener.
+	focusScope = useFocusScope({
+		isActive: () => this.isTop,
+		inertSiblings: () => true
 	});
 
 	addChild = (child: DialogState) => () => {
@@ -216,32 +126,7 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 	constructor(options: DialogOptions) {
 		super(options);
 		setContext('dialog', this);
-		onMount(this.theme.addDialog(this));
 		if (this.parent) onMount(this.parent.addChild(this));
-
-		// Assign a fresh open-order each time the dialog opens so it stacks on top.
-		$effect(() => {
-			if (this.isOpen) {
-				untrack(() => {
-					this.openOrder = ++this.theme.dialogSeq;
-				});
-			}
-		});
-
-		// Initialize hooks that don't return references
-		useKeyDown({
-			isActive: () => this.isOpen,
-			onWindow: () => true,
-			keys: ['Escape'],
-			callback: (e) => {
-				if (this.isOpen) {
-					e.preventDefault();
-				}
-				if (this.closeOnEscape && this.closable && this.isTop) {
-					this.close();
-				}
-			}
-		});
 	}
 
 	toggle = () => {
@@ -264,8 +149,8 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 	contentAttachment = (node: HTMLElement) => {
 		return untrack(() => {
 			const cleanups: Array<(() => void) | void> = [];
-			cleanups.push(this.focusTrap.attachment?.(node));
-			cleanups.push(this.clickOutside.reference?.(node));
+			cleanups.push(this.focusScope.attachment(node));
+			cleanups.push(this.layer.node(node));
 			cleanups.push(this.swipeAttachment(node));
 			return () => {
 				cleanups.forEach((cleanup) => cleanup?.());
@@ -288,9 +173,7 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 	// Vaul-style drag-to-dismiss for drawer types. Pointer-event driven so it works for
 	// mouse and touch; inner scroll wins over the swipe (see swipeOwnsGesture).
 	private swipeAttachment = (node: HTMLElement) => {
-		let pointerId: number | null = null;
 		let candidate = false;
-		let downTarget: EventTarget | null = null;
 		let startPos = 0;
 		let lastPos = 0;
 		let lastTime = 0;
@@ -328,78 +211,12 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 			return false;
 		};
 
-		// Gesture termination listens on `window`: before promotion there's no pointer
-		// capture, so a press released outside the panel would otherwise strand the gesture.
-		const addEndListeners = () => {
-			window.addEventListener('pointerup', onUp);
-			window.addEventListener('pointercancel', onCancel);
-		};
-		const removeEndListeners = () => {
-			window.removeEventListener('pointerup', onUp);
-			window.removeEventListener('pointercancel', onCancel);
-		};
-
-		const onDown = (e: PointerEvent) => {
-			// Primary button only; a second concurrent pointer must not hijack a drag in flight.
-			if (!this.swipeEnabled || !this.isTop || e.button !== 0 || pointerId !== null) return;
-			pointerId = e.pointerId;
-			candidate = true;
-			downTarget = e.target; // fix the gesture's intent to where it started
-			startPos = lastPos = axisPos(e);
-			lastTime = e.timeStamp;
-			velocity = 0;
-			this.dragSize = this.swipeAxis === 'y' ? node.offsetHeight : node.offsetWidth;
-			addEndListeners();
-		};
-
-		const onMove = (e: PointerEvent) => {
-			if (pointerId !== e.pointerId) return;
-			const pos = axisPos(e);
-			const delta = (pos - startPos) * this.swipeSign; // + = dismiss direction
-			if (!this.dragging) {
-				if (!candidate || !this.isOpen) return;
-				// Handles (thumb, header) always drag — even when a scrolled body would own
-				// the gesture. The body only drags in `panel` mode, and never over a region
-				// that can still scroll along the axis.
-				const onHandle =
-					downTarget instanceof Element && !!downTarget.closest('[data-drag-handle]');
-				const eligible =
-					onHandle || ((this.swipeFrom ?? 'panel') === 'panel' && !ownsGesture(downTarget));
-				if (delta > 4 && eligible) {
-					this.dragging = true;
-					try {
-						node.setPointerCapture(e.pointerId);
-					} catch {
-						/* pointer may be inactive (synthetic events) — capture is best-effort */
-					}
-				} else if (Math.abs(pos - startPos) > 4) {
-					candidate = false; // wrong direction or the target owns the gesture
-					return;
-				} else {
-					return;
-				}
-			}
-			e.preventDefault();
-			this.dragOffset = this.swipeSign * Math.max(0, delta); // clamp: can't drag past open
-			// Resample velocity on ~frame intervals so a single sub-frame move can't spike it.
-			const dt = e.timeStamp - lastTime;
-			if (dt >= 8) {
-				velocity = ((pos - lastPos) * this.swipeSign) / dt;
-				lastPos = pos;
-				lastTime = e.timeStamp;
-			}
-		};
-
-		const endDrag = (e: PointerEvent, cancelled: boolean) => {
-			if (pointerId !== e.pointerId) return;
-			removeEndListeners();
-			pointerId = null;
+		const endDrag = (event: PointerEvent, cancelled: boolean) => {
 			candidate = false;
-			downTarget = null;
 			if (!this.dragging) return;
 			this.dragging = false;
 			// A long stationary hold is not a flick — the last velocity sample may be old.
-			if (e.timeStamp - lastTime > 100) velocity = 0;
+			if (event.timeStamp - lastTime > 100) velocity = 0;
 			const shouldClose =
 				!cancelled &&
 				this.isOpen &&
@@ -409,18 +226,61 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 			if (shouldClose) this.close();
 			else requestAnimationFrame(() => (this.dragOffset = 0));
 		};
-		const onUp = (e: PointerEvent) => endDrag(e, false);
-		const onCancel = (e: PointerEvent) => endDrag(e, true);
+
+		const drag = createPointerDrag({
+			disabled: () => !this.swipeEnabled || !this.isTop,
+			// The panel is the whole drawer, not a handle: capturing every press would retarget the
+			// compatibility mouse events and steal clicks from the buttons and inputs inside it.
+			capture: 'on-activate',
+			// Touch panning is already governed by `touch-action` on the handles and by `ownsGesture`,
+			// which only promotes where nothing else can still scroll along the axis.
+			preventTouchMove: false,
+			onDown: ({ event }) => {
+				candidate = true;
+				startPos = lastPos = axisPos(event);
+				lastTime = event.timeStamp;
+				velocity = 0;
+				this.dragSize = this.swipeAxis === 'y' ? node.offsetHeight : node.offsetWidth;
+			},
+			// The press becomes a drag once it has moved past 4px toward the dismissing edge.
+			shouldActivate: ({ event, startTarget }) => {
+				if (!candidate || !this.isOpen) return false;
+				const pos = axisPos(event);
+				const delta = (pos - startPos) * this.swipeSign; // + = dismiss direction
+				// Handles (thumb, header) always drag — even when a scrolled body would own the
+				// gesture. The body only drags in `panel` mode, and never over a region that can
+				// still scroll along the axis. The intent is fixed to where the press started.
+				const onHandle =
+					startTarget instanceof Element && !!startTarget.closest('[data-drag-handle]');
+				const eligible =
+					onHandle || ((this.swipeFrom ?? 'panel') === 'panel' && !ownsGesture(startTarget));
+				if (delta > 4 && eligible) return true;
+				// Wrong direction, or the target owns the gesture: the press is spent. The session
+				// itself stays until the pointer lifts, so a second finger cannot take over mid-press.
+				if (Math.abs(pos - startPos) > 4) candidate = false;
+				return false;
+			},
+			onStart: () => {
+				this.dragging = true;
+			},
+			onMove: ({ event }) => {
+				const pos = axisPos(event);
+				this.dragOffset = this.swipeSign * Math.max(0, (pos - startPos) * this.swipeSign); // clamp: can't drag past open
+				// Resample velocity on ~frame intervals so a single sub-frame move can't spike it.
+				const dt = event.timeStamp - lastTime;
+				if (dt >= 8) {
+					velocity = ((pos - lastPos) * this.swipeSign) / dt;
+					lastPos = pos;
+					lastTime = event.timeStamp;
+				}
+			},
+			onEnd: ({ event }) => endDrag(event, false),
+			onCancel: ({ event }) => endDrag(event, true)
+		});
 
 		// Fresh mount = fresh open: clear any offset left over from a drag-dismiss.
 		this.dragOffset = 0;
 		this.dragging = false;
-		node.addEventListener('pointerdown', onDown);
-		node.addEventListener('pointermove', onMove);
-		return () => {
-			node.removeEventListener('pointerdown', onDown);
-			node.removeEventListener('pointermove', onMove);
-			removeEndListeners();
-		};
+		return drag(node);
 	};
 }

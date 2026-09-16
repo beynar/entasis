@@ -21,33 +21,33 @@
 	];
 </script>
 
-<section class="mx-auto grid max-w-6xl items-center gap-xl p-lg md:grid-cols-2 md:p-xl">
-	<div class="flex flex-col items-start gap-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl items-center md:grid-cols-2">
+	<div class="gap-xl flex flex-col items-start">
 		<Chip variant="outline">Made to work together</Chip><Heading as="h2" size="h1" weight="bold"
 			>Your next idea.<br />All the right pieces.</Heading
 		>
-		<p class="text-lg text-neutral/70">
+		<p class="text-neutral/70 text-lg">
 			Compose a product from thoughtful components that share one visual language.
 		</p>
-		<div class="flex flex-wrap gap-md">
+		<div class="gap-md flex flex-wrap">
 			<Button href="/components" suffix={arrowRightIcon}>Explore components</Button><Button
 				href="/docs"
 				variant="outline">Get started</Button
 			>
 		</div>
-		<p class="text-sm text-neutral/50">Small pieces. A world of possibilities.</p>
+		<p class="text-neutral/65 text-sm">Small pieces. A world of possibilities.</p>
 	</div>
 	<div
-		class="orbit relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl bg-surface-recessed"
+		class="orbit bg-surface-recessed relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl"
 	>
-		<div class="absolute size-3/4 rounded-full border border-primary/20"></div>
-		<div class="absolute size-1/2 rounded-full border border-primary/20"></div>
+		<div class="border-primary/20 absolute size-3/4 rounded-full border"></div>
+		<div class="border-primary/20 absolute size-1/2 rounded-full border"></div>
 		<Card color="primary" variant="soft" class="z-10"
-			><div class="flex flex-col items-center gap-md">
+			><div class="gap-md flex flex-col items-center">
 				{@render puzzlePieceIcon({ size: 44 })}<strong>Svelai</strong>
 			</div></Card
 		>{#each icons as icon, index (icon)}<div
-				class="absolute flex size-16 items-center justify-center rounded-2xl border border-neutral-muted bg-surface text-primary shadow-sm"
+				class="border-neutral-muted bg-surface text-primary-readable absolute flex size-16 items-center justify-center rounded-2xl border shadow-sm"
 				style:left={50 + 34 * Math.cos((index * Math.PI) / 3) + '%'}
 				style:top={50 + 34 * Math.sin((index * Math.PI) / 3) + '%'}
 				style:transform="translate(-50%, -50%)"

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Reasoning from '$lib/components/AIReasoning/Reasoning.svelte';
+	import AIReasoning from '$lib/components/AIReasoning/AIReasoning.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
@@ -13,13 +13,13 @@
 		duration: (seconds: number) => 'Completed in ' + seconds + 's'
 	};
 	const mainCode = `<script lang="ts">
-  import { Reasoning } from 'svelai/ai-reasoning';
+  import { AIReasoning } from 'svelai/ai-reasoning';
 
-  let isStreaming = $state(true);
+  let streaming = $state(true);
   const thinkingMessages = ['Planning', 'Checking constraints', 'Preparing response'];
 ${'</' + 'script>'}
 
-<Reasoning {content} {isStreaming} {thinkingMessages} />`;
+<AIReasoning {content} {streaming} {thinkingMessages} />`;
 	const exampleOptions = [
 		{ value: 'duration', label: 'Duration' },
 		{ value: 'opt-out', label: 'Auto-open off' },
@@ -31,35 +31,35 @@ ${'</' + 'script>'}
 		duration: {
 			title: 'Known duration',
 			description: 'Completed traces accept an explicit duration in seconds.',
-			code: `<Reasoning {content} duration={8} defaultOpen />`
+			code: `<AIReasoning {content} duration={8} defaultOpen />`
 		},
 		'opt-out': {
 			title: 'Auto-open opt-out',
 			description: 'defaultOpen=false keeps a streaming trace closed until the user opens it.',
-			code: `<Reasoning {content} isStreaming defaultOpen={false} />`
+			code: `<AIReasoning {content} streaming defaultOpen={false} />`
 		},
 		controlled: {
 			title: 'Controlled state',
 			description: 'Bind open and observe user toggles through onOpenChange.',
-			code: `<Reasoning {content} duration={8} bind:open onOpenChange={handleOpenChange} />`
+			code: `<AIReasoning {content} duration={8} bind:open onOpenChange={handleOpenChange} />`
 		},
 		custom: {
 			title: 'Custom trigger and body',
 			description: 'The custom trigger replaces the default row and receives the current message.',
-			code: `<Reasoning isStreaming thinkingMessages={['Planning', 'Checking constraints']}>
+			code: `<AIReasoning streaming thinkingMessages={['Planning', 'Checking constraints']}>
   {#snippet trigger({ message, open })}
     <span>{message} · {open ? 'Hide' : 'Show'}</span>
   {/snippet}
   {#snippet children({ message })}
     <p>Current step: {message}</p>
   {/snippet}
-</Reasoning>`
+</AIReasoning>`
 		},
 		labels: {
 			title: 'Custom labels',
 			description:
 				'Override the default streaming, unknown-duration, and duration-dependent copy together.',
-			code: `<Reasoning
+			code: `<AIReasoning
   {content}
   duration={8}
   defaultOpen
@@ -99,7 +99,7 @@ ${'</' + 'script>'}
 		}
 	]);
 	let controlledOpen = $derived(exampleControls.value.controlledMode === 'open');
-	const isStreaming = $derived(controls.value.mode === 'streaming');
+	const streaming = $derived(controls.value.mode === 'streaming');
 	const selectedExample = $derived(examples[exampleControls.value.example]);
 
 	function handleControlledOpenChange(nextOpen: boolean) {
@@ -111,7 +111,7 @@ ${'</' + 'script>'}
 <DocPage
 	title="AI Reasoning"
 	subtitle="Streaming-aware collapsible reasoning with elapsed duration and cycling progress labels."
-	component="Reasoning"
+	component="AIReasoning"
 	features={[
 		'Optional Markdown or custom content',
 		'Seconds-based controlled or measured duration',
@@ -128,7 +128,7 @@ ${'</' + 'script>'}
 		class="!min-h-[280px]"
 		code={mainCode}
 	>
-		<Reasoning {content} {isStreaming} {thinkingMessages} class="w-full max-w-2xl" />
+		<AIReasoning {content} {streaming} {thinkingMessages} class="w-full max-w-2xl" />
 	</ComponentCard>
 
 	{#snippet examples()}
@@ -140,11 +140,11 @@ ${'</' + 'script>'}
 			code={selectedExample.code}
 		>
 			{#if exampleControls.value.example === 'duration'}
-				<Reasoning {content} duration={8} defaultOpen class="w-full max-w-2xl" />
+				<AIReasoning {content} duration={8} defaultOpen class="w-full max-w-2xl" />
 			{:else if exampleControls.value.example === 'opt-out'}
-				<Reasoning {content} isStreaming defaultOpen={false} class="w-full max-w-2xl" />
+				<AIReasoning {content} streaming defaultOpen={false} class="w-full max-w-2xl" />
 			{:else if exampleControls.value.example === 'controlled'}
-				<Reasoning
+				<AIReasoning
 					{content}
 					duration={8}
 					bind:open={controlledOpen}
@@ -152,23 +152,23 @@ ${'</' + 'script>'}
 					class="w-full max-w-2xl"
 				/>
 			{:else if exampleControls.value.example === 'custom'}
-				<Reasoning
-					isStreaming
+				<AIReasoning
+					streaming
 					thinkingMessages={['Planning', 'Checking constraints']}
 					class="w-full max-w-2xl"
 				>
 					{#snippet trigger({ message, open })}
 						<span class="flex w-full items-center justify-between gap-3 font-medium">
 							<span>{message}</span>
-							<span class="text-neutral/50 text-xs">{open ? 'Hide' : 'Show'}</span>
+							<span class="text-neutral/65 text-xs">{open ? 'Hide' : 'Show'}</span>
 						</span>
 					{/snippet}
 					{#snippet children({ message })}
 						<p class="text-sm leading-6">Current step: {message}</p>
 					{/snippet}
-				</Reasoning>
+				</AIReasoning>
 			{:else}
-				<Reasoning
+				<AIReasoning
 					{content}
 					duration={8}
 					defaultOpen

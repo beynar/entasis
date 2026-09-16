@@ -15,8 +15,8 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-lg md:p-xl">
-	<div class="flex flex-wrap items-end justify-between gap-xl">
+<section class="gap-xl p-lg md:p-xl flex flex-col">
+	<div class="gap-xl flex flex-wrap items-end justify-between">
 		<div>
 			<Heading as="h2" size="h2" weight="bold">The details, side by side.</Heading>
 			<p class="mt-lg text-neutral/70">
@@ -25,7 +25,7 @@
 		</div>
 		<Switch label="Annual billing" bind:value={annual} />
 	</div>
-	<div class="overflow-x-auto rounded-xl border border-neutral-muted">
+	<div class="border-neutral-muted overflow-x-auto rounded-xl border">
 		<Table
 			header={{
 				feature: 'Included in your plan',
@@ -43,8 +43,8 @@
 			}))}
 		/>
 	</div>
-	<div class="flex flex-wrap items-center justify-between gap-lg">
-		<p class="text-sm text-neutral/60">
+	<div class="gap-lg flex flex-wrap items-center justify-between">
+		<p class="text-neutral/70 text-sm">
 			{annual
 				? 'Example annual prices are billed for 12 months.'
 				: 'Example monthly prices have no annual commitment.'}

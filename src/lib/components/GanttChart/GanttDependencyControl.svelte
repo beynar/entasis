@@ -150,7 +150,7 @@
 		closeDelay={120}
 		openOnFocus
 		size="small"
-		density="small"
+		density="compact"
 		triggerClass="size-full"
 	>
 		{#snippet trigger()}
@@ -168,7 +168,7 @@
 						tabindex={isTabStop && !chart.disabled ? 0 : -1}
 						data-gantt-chart-part="connector-control"
 						data-dependency-id={dependency.dependency.id}
-						class="relative size-full rounded-full bg-transparent opacity-0 outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-color/60"
+						class="focus-visible:ring-focus/50 relative size-full rounded-full bg-transparent opacity-0 outline-none focus-visible:opacity-100 focus-visible:ring-2"
 						onclick={onActivate}
 						onfocus={() => chart.a11y.setDependencyTarget(dependency.dependency.id)}
 						ondblclick={(event) => {

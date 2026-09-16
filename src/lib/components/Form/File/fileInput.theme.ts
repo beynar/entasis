@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 
 const defaultInputContainer = cva({
-	base: 'flex min-h-32 w-full cursor-pointer flex-col items-center justify-center border border-neutral-muted bg-surface-raised px-lg py-md text-neutral ring-0 transition-all rounded-md outline-none focus-within:ring-2 focus-within:ring-primary/50',
+	base: 'flex min-h-32 w-full cursor-pointer flex-col items-center justify-center border border-neutral-muted bg-surface-raised px-lg py-md text-neutral ring-0 transition-[color,background-color,border-color,box-shadow] rounded-md outline-none focus-within:ring-2 focus-within:ring-focus/50',
 	variants: {
 		size: {
 			small: 'min-h-24',
@@ -26,7 +26,7 @@ const defaultInputContainer = cva({
 });
 
 const defaultPlaceholder = cva({
-	base: 'flex flex-col items-center justify-center gap-md text-neutral/60',
+	base: 'flex flex-col items-center justify-center gap-md text-neutral/70',
 	variants: {
 		size: {
 			small: 'text-xs gap-xs',

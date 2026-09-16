@@ -2,7 +2,7 @@
 	import type { Attachment } from 'svelte/attachments';
 	import Button from '../Button/Button.svelte';
 	import type { textBIcon } from '../Icons/textB.js';
-	import { tooltip } from '../Tooltip/tooltip.svelte.js';
+	import { tooltip } from '../Tooltip/tooltip.attachment.svelte.js';
 	import type { Sizes } from '$lib/types/theme.js';
 	import type { RichTextInputThemeProps } from './richTextInput.theme.js';
 	import { useRichTextInputTheme } from './richTextInput.theme.js';
@@ -37,7 +37,7 @@
 	variant={active ? 'soft' : 'ghost'}
 	{size}
 	{label}
-	aria-pressed={active || undefined}
+	pressed={active || undefined}
 	class={`${classes.toolbarButton({ size })} rich-text-input-toolbar-control`}
 	prefix={iconSlot}
 	onclick={onSelect}

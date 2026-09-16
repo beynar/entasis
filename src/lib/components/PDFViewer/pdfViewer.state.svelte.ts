@@ -1,4 +1,4 @@
-import { bind } from '$lib/utils/state.svelte.js';
+import { createBindableStateClass } from '$lib/utils/state.svelte.js';
 import { BROWSER } from 'esm-env';
 import { onDestroy, untrack } from 'svelte';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
@@ -87,11 +87,14 @@ export type PDFOrientation = 'vertical' | 'horizontal';
 
 const ZOOM_STEP = 0.25;
 
+/** Reads the given values so the enclosing `$effect` depends on them. */
+const track = (...values: unknown[]) => values;
+
 interface PDFViewerOptions {
 	src: string | URL | Uint8Array | ArrayBuffer;
 	password?: string;
 	downloadFileName?: string;
-	onLoad?: (viewer: PDFViewerState) => void;
+	onLoad?: (payload: PDFViewerState) => void;
 	onError?: (error: Error) => void;
 	onPageChange?: (page: number) => void;
 	page: number;
@@ -106,7 +109,7 @@ interface PDFViewerOptions {
 	runtimeAssets?: DocumentViewerAssets['pdf'];
 }
 
-export class PDFViewerState {
+export class PDFViewerState extends createBindableStateClass<PDFViewerOptions>() {
 	// Reactive state
 	pdfjs: PDFJSModule | null = $state.raw(null);
 	doc: PDFDocumentProxy | null = $state.raw(null);
@@ -135,7 +138,8 @@ export class PDFViewerState {
 	private io: IntersectionObserver | null = null;
 	private resizeObserver: ResizeObserver | null = null;
 	private pageEls = new SvelteMap<number, HTMLElement>();
-	private textCache = new Map<number, string[]>();
+	/** Per-page text items, keyed by page number. Plain object: never read reactively. */
+	private textCache: Record<number, string[]> = {};
 	private scrollRaf = 0;
 	private searchToken = 0;
 	/** True when `page` was updated by scrolling, so the effect must not scroll back. */
@@ -183,20 +187,18 @@ export class PDFViewerState {
 	}
 
 	constructor(options: PDFViewerOptions) {
-		bind(this, options);
+		super(options);
 
 		// Reload when the source or password changes
 		$effect(() => {
-			this.src;
-			this.password;
+			track(this.src, this.password);
 			untrack(() => void this.load());
 		});
 
 		// Re-render all visible pages when scale or rotation changes; keep the
 		// current page anchored so zoom doesn't scroll away.
 		$effect(() => {
-			this.scale;
-			this.rotation;
+			track(this.scale, this.rotation);
 			untrack(() => this.anchorAfterReflow());
 		});
 
@@ -221,16 +223,14 @@ export class PDFViewerState {
 		// Re-apply fit when the fit mode or rotation changes (resize is handled
 		// by the ResizeObserver in viewportAttachment).
 		$effect(() => {
-			this.fit;
-			this.rotation;
+			track(this.fit, this.rotation);
 			untrack(() => this.applyFit());
 		});
 
 		// When the view mode or orientation changes the scroller is swapped and
 		// scroll resets — keep the current page rendered and scrolled into view.
 		$effect(() => {
-			this.mode;
-			this.orientation;
+			track(this.mode, this.orientation);
 			untrack(() => {
 				this.ensureRendered(this.page);
 				// Re-fit after the layout settles (single mode fits differently).
@@ -261,7 +261,7 @@ export class PDFViewerState {
 		this.baseWidth = 0;
 		this.baseHeight = 0;
 		this.renderPages.clear();
-		this.textCache.clear();
+		this.textCache = {};
 		this.clearSearch();
 		this.loading = true;
 		this.error = null;
@@ -571,14 +571,14 @@ export class PDFViewerState {
 
 	/** The text of a page as an array of per-item strings (aligned with the text layer). */
 	private async pageText(pageNumber: number): Promise<string[]> {
-		const cached = this.textCache.get(pageNumber);
+		const cached = this.textCache[pageNumber];
 		if (cached) return cached;
 		const document = this.doc;
 		if (!document) throw new Error('No PDF document is loaded.');
 		const page = await document.getPage(pageNumber);
 		const content = await page.getTextContent();
 		const strs = content.items.map((i) => i.str);
-		this.textCache.set(pageNumber, strs);
+		this.textCache[pageNumber] = strs;
 		return strs;
 	}
 
@@ -719,6 +719,3 @@ export class PDFViewerState {
 		this.printFrame = iframe;
 	};
 }
-
-// Interface merging for the bound options
-export interface PDFViewerState extends PDFViewerOptions {}

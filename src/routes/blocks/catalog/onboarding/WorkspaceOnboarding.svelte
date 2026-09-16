@@ -8,13 +8,13 @@
 	let message = $state('');
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<div class="grid gap-xl md:grid-cols-3">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<div class="gap-xl grid md:grid-cols-3">
 		<aside>
 			<Chip color="primary">A good beginning</Chip>
 			<h2 class="mt-lg text-3xl font-semibold">Let’s make this space yours.</h2>
-			<p class="mt-md text-sm text-neutral/65">A few details help your team get started.</p>
-			<div class="mt-xl rounded-lg bg-primary-muted p-lg text-sm">
+			<p class="mt-md text-neutral/65 text-sm">A few details help your team get started.</p>
+			<div class="mt-xl bg-primary-muted p-lg rounded-lg text-sm">
 				Your progress stays here while you complete the steps.
 			</div>
 		</aside>

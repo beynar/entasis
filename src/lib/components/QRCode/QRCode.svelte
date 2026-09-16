@@ -36,7 +36,7 @@
 		finderPatternOuterSettings,
 		finderPatternInnerSettings,
 		imageSettings,
-		ariaLabel = 'QR Code',
+		label = 'QR Code',
 		class: className,
 		theme,
 		...attachments
@@ -128,7 +128,7 @@
 	bind:this={ref}
 	viewBox="0 0 {numCells} {numCells}"
 	role="img"
-	aria-label={ariaLabel}
+	aria-label={label}
 	class={classes.root({ size, color, className })}
 	{...attachments}
 >

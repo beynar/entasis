@@ -193,7 +193,7 @@ or use snippets for rich content:
 ```svelte
 <Stat value="$45,231">
 	{#snippet label()}
-		<span class="uppercase tracking-wide">Revenue</span>
+		<span class="tracking-wide uppercase">Revenue</span>
 	{/snippet}
 </Stat>
 ```
@@ -792,7 +792,7 @@ If a region needs custom markup, keep the same prop name and use a snippet:
 ```svelte
 <Stat value="$45,231">
 	{#snippet label()}
-		<span class="uppercase tracking-wide">Revenue</span>
+		<span class="tracking-wide uppercase">Revenue</span>
 	{/snippet}
 </Stat>
 ```

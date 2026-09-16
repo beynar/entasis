@@ -2,11 +2,11 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultKbd = cva({
-	base: 'border-neutral/20 shadow-neutral/20 pointer-events-none inline-flex w-fit items-center justify-center rounded-sm border font-sans font-medium shadow-[0_1px_0] select-none',
+	base: 'border-neutral-muted shadow-neutral/20 pointer-events-none inline-flex w-fit items-center justify-center rounded-sm border font-sans font-medium shadow-[0_1px_0] select-none',
 	variants: {
 		size: {
-			small: 'h-4 min-w-4 gap-micro px-xs text-[0.625rem] [&_svg:not([class*=size-])]:size-2.5',
-			normal: 'h-5 min-w-5 gap-xs px-xs text-xs [&_svg:not([class*=size-])]:size-3',
+			small: 'h-4 min-w-4 gap-micro px-xs text-xs [&_svg:not([class*=size-])]:size-2.5',
+			normal: 'h-5 min-w-5 gap-xs px-xs text-sm [&_svg:not([class*=size-])]:size-3',
 			large: 'h-6 min-w-6 gap-xs px-sm text-sm [&_svg:not([class*=size-])]:size-3.5'
 		},
 		color: {
@@ -41,10 +41,10 @@ const defaultKbdGroup = cva({
 });
 
 const defaultKbdSeparator = cva({
-	base: 'text-neutral/60 select-none',
+	base: 'text-neutral/70 select-none',
 	variants: {
 		size: {
-			small: 'text-[0.625rem]',
+			small: 'text-xs',
 			normal: 'text-xs',
 			large: 'text-sm'
 		}

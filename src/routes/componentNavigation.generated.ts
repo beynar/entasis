@@ -58,10 +58,6 @@ export const componentNavigationSections = [
 			{
 				href: '/components/ai-tool',
 				text: 'Tool'
-			},
-			{
-				href: '/components/ai-mcp-app',
-				text: 'MCP App'
 			}
 		]
 	},

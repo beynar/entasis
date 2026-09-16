@@ -103,7 +103,9 @@ function getMapClusterHullSource(map: MapLibreMap): MapLibrePlainGeoJSONSource |
 	}
 
 	if (source.type !== 'geojson' || !('setData' in source)) {
-		throw new Error(`Map cluster hull source "${MAP_CLUSTER_HULL_SOURCE_ID}" is not a GeoJSON source.`);
+		throw new Error(
+			`Map cluster hull source "${MAP_CLUSTER_HULL_SOURCE_ID}" is not a GeoJSON source.`
+		);
 	}
 
 	return source as MapLibrePlainGeoJSONSource;
@@ -209,7 +211,10 @@ function cross(
 	second: MapClusterHullPoint
 ): number {
 	if (!origin || !first) return 0;
-	return (first[0] - origin[0]) * (second[1] - origin[1]) - (first[1] - origin[1]) * (second[0] - origin[0]);
+	return (
+		(first[0] - origin[0]) * (second[1] - origin[1]) -
+		(first[1] - origin[1]) * (second[0] - origin[0])
+	);
 }
 
 function readClusterHullColor(): string {

@@ -52,8 +52,8 @@ The overlay must be the direct first child of the surface it covers:
 
 \`\`\`svelte
 <div class="overflow-hidden rounded-lg">
-\t<Overlay position="bottom" title="Golden hour" />
-\t<img src="/photo.jpg" alt="Golden hour over a valley" />
+	<Overlay position="bottom" title="Golden hour" />
+	<img src="/photo.jpg" alt="Golden hour over a valley" />
 </div>
 \`\`\`
 
@@ -65,13 +65,13 @@ Top and bottom content enters from its corresponding edge while the scrim fades 
 
 \`\`\`svelte
 <div class="aspect-video overflow-hidden rounded-lg">
-\t<Overlay
-\t\tshowOn="hover"
-\t\tposition="bottom"
-\t\ttitle="Mountain archive"
-\t\tactions={[{ content: 'View collection', color: 'neutral', variant: 'soft' }]}
-\t/>
-\t<img src="/mountain.jpg" alt="Snow-covered mountain" />
+	<Overlay
+		showOn="hover"
+		position="bottom"
+		title="Mountain archive"
+		actions={[{ content: 'View collection', color: 'neutral', variant: 'soft' }]}
+	/>
+	<img src="/mountain.jpg" alt="Snow-covered mountain" />
 </div>
 \`\`\`
 

@@ -16,12 +16,10 @@
 	]);
 	const user = {
 		name: 'Guillermo Rauch',
-		avatar: 'https://avatars.githubusercontent.com/rauchg?s=64',
-		i: 'e'
+		src: 'https://avatars.githubusercontent.com/rauchg?s=64'
 	};
 	const user2 = {
-		name: 'Guillermo Rauch',
-		avatar: undefined
+		name: 'Guillermo Rauch'
 	};
 </script>
 
@@ -32,7 +30,7 @@
 	features={[
 		'Image with initials fallback',
 		'Configurable delay before reveal',
-		'bindable loadingState',
+		'bindable loading flag',
 		'Prefix and suffix overlays'
 	]}
 >
@@ -41,26 +39,24 @@
 		description="Avatar with image and delay before reveal."
 		code={`<Avatar
 	delay={1000}
-	user={{
-		name: 'Guillermo Rauch',
-		avatar: 'https://avatars.githubusercontent.com/rauchg?s=64'
-	}}
+	name="Guillermo Rauch"
+	src="https://avatars.githubusercontent.com/rauchg?s=64"
 	size="${controls.value.size}"
 />`}
 	>
-		<Avatar delay={1000} {user} size={controls.value.size} />
+		<Avatar delay={1000} {...user} size={controls.value.size} />
 	</ComponentCard>
 
 	{#snippet examples()}
 		<ComponentCard description="Sizes with image and initials-only fallback.">
 			<div class="flex items-center justify-center gap-4">
-				{#each sizes as size}
-					<Avatar delay={1000} {user} {size} />
+				{#each sizes as size, index (index)}
+					<Avatar delay={1000} {...user} {size} />
 				{/each}
 			</div>
 			<div class="flex items-center justify-center gap-4">
-				{#each sizes as size}
-					<Avatar user={user2} {size} />
+				{#each sizes as size, index (index)}
+					<Avatar {...user2} {size} />
 				{/each}
 			</div>
 		</ComponentCard>

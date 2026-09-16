@@ -1,5 +1,6 @@
 import { onDestroy, untrack } from 'svelte';
 import { on } from 'svelte/events';
+import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
 type HoverActionHandlerOptions = {
 	isActive: () => boolean;
@@ -9,8 +10,8 @@ type HoverActionHandlerOptions = {
 };
 type Timeout = ReturnType<typeof setTimeout>;
 export const useHoverAction = (props: HoverActionHandlerOptions) => {
-	let timeouts = new Map<HTMLElement, Timeout>();
-	let offs = new Set<() => void>();
+	const timeouts = new SvelteMap<HTMLElement, Timeout>();
+	const offs = new SvelteSet<() => void>();
 	let isHovered = $state(false);
 	const wait = async (ref: HTMLElement) => {
 		return new Promise((resolve) => {
@@ -29,11 +30,11 @@ export const useHoverAction = (props: HoverActionHandlerOptions) => {
 		}
 		if (props.delay) {
 			wait(this).then(() => {
-				props.isActive() && props.onMouseEnter?.();
+				if (props.isActive()) props.onMouseEnter?.();
 				isHovered = true;
 			});
 		} else {
-			props.isActive() && props.onMouseEnter?.();
+			if (props.isActive()) props.onMouseEnter?.();
 			isHovered = true;
 		}
 	}
@@ -42,7 +43,7 @@ export const useHoverAction = (props: HoverActionHandlerOptions) => {
 			clearTimeout(timeouts.get(this));
 			timeouts.delete(this);
 		}
-		props.isActive() && props.onMouseLeave?.();
+		if (props.isActive()) props.onMouseLeave?.();
 		isHovered = false;
 	}
 

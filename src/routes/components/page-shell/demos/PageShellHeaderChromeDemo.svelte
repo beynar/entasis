@@ -16,7 +16,7 @@
 	] satisfies PageShellAction[];
 </script>
 
-<div class="h-[420px] w-full overflow-auto rounded-lg border border-neutral-muted">
+<div class="border-neutral-muted h-[420px] w-full overflow-auto rounded-lg border">
 	<PageShell
 		title="Acme Group"
 		subtitle="Enterprise account"
@@ -26,14 +26,11 @@
 		contentPadding="normal"
 		contentWidth="normal"
 	>
-		{#snippet children()}
-			<section class="rounded-lg border border-neutral-muted bg-surface-raised p-5">
-				<p class="text-sm font-medium text-neutral">Header chrome</p>
-				<p class="mt-2 text-sm text-neutral/60">
-					Breadcrumbs take precedence over eyebrow text and the back affordance uses a default
-					arrow.
-				</p>
-			</section>
-		{/snippet}
+		<section class="border-neutral-muted bg-surface-raised rounded-lg border p-5">
+			<p class="text-neutral text-sm font-medium">Header chrome</p>
+			<p class="text-neutral/70 mt-2 text-sm">
+				Breadcrumbs take precedence over eyebrow text and the back affordance uses a default arrow.
+			</p>
+		</section>
 	</PageShell>
 </div>

@@ -36,22 +36,22 @@
 	});
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card
 		title="Give your columns a home"
 		description="Map columns from contacts.csv to the fields in your workspace."
 		><Stack gap="lg">
-			<div class="flex flex-wrap items-center gap-md rounded-lg bg-surface-recessed p-md">
-				<Chip color="primary">contacts.csv</Chip><span class="text-sm text-neutral/60"
+			<div class="gap-md bg-surface-recessed p-md flex flex-wrap items-center rounded-lg">
+				<Chip color="primary">contacts.csv</Chip><span class="text-neutral/70 text-sm"
 					>3 sample rows · 3 columns</span
 				>
 			</div>
 			{#each mappings as mapping (mapping)}<div
-					class="grid items-center gap-lg border-b border-neutral-muted pb-lg sm:grid-cols-2"
+					class="gap-lg border-neutral-muted pb-lg grid items-center border-b sm:grid-cols-2"
 				>
 					<div>
 						<strong class="text-sm">{mapping.source}</strong>
-						<p class="mt-xs text-xs text-neutral/60">Example: {mapping.sample}</p>
+						<p class="mt-xs text-neutral/70 text-xs">Example: {mapping.sample}</p>
 					</div>
 					<Select label={`Map ${mapping.source} to`} items={fields} bind:value={mapping.target} />
 				</div>{/each}<Alert

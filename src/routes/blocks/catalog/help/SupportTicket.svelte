@@ -7,21 +7,21 @@
 	let message = $state('');
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<div class="grid gap-xl md:grid-cols-3">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<div class="gap-xl grid md:grid-cols-3">
 		<aside>
 			<h2 class="text-3xl font-semibold">What can we help with?</h2>
-			<p class="mt-md text-sm text-neutral/65">
+			<p class="mt-md text-neutral/65 text-sm">
 				A little context helps us find the right answer faster.
 			</p>
 			<Stack gap="lg" class="mt-xl">
 				<div>
 					<strong class="text-sm">Product questions</strong>
-					<p class="text-xs text-neutral/60">Features, workflows, and getting started.</p>
+					<p class="text-neutral/70 text-xs">Features, workflows, and getting started.</p>
 				</div>
 				<div>
 					<strong class="text-sm">Technical issues</strong>
-					<p class="text-xs text-neutral/60">Something broken or behaving unexpectedly.</p>
+					<p class="text-neutral/70 text-xs">Something broken or behaving unexpectedly.</p>
 				</div>
 			</Stack>
 		</aside>

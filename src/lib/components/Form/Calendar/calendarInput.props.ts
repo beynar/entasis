@@ -22,6 +22,11 @@ export type CalendarPrimitiveProps<
 	E extends Event,
 	T extends CalendarType
 > = BaseCalendarProps<E> & {
+	/**
+	 * Accessible name for the calendar group. Defaults to the catalog's `calendar` wording; the
+	 * month grids inside name themselves with their month and year.
+	 */
+	label?: string;
 	/** Selection model used by the calendar. */
 	type: T;
 	/** Current selection for the chosen calendar type. */
@@ -44,8 +49,6 @@ export type BaseCalendarProps<E extends Event> = WithSlot<
 		today?: Date;
 		/** Locale used for month, weekday, and accessible day labels. */
 		locale?: string;
-		/** Accessible label applied to the calendar group. Visible month grids use their month and year. */
-		ariaLabel?: string;
 		/** Disables navigation, focus, and date selection. */
 		disabled?: boolean;
 		/** Earliest date that can be selected. */
@@ -76,7 +79,7 @@ export type BaseCalendarProps<E extends Event> = WithSlot<
 			  }
 			| ButtonProps;
 		/** Called after the visible month changes through pointer, keyboard, or controlled-value navigation. */
-		onViewChange?: (params: {
+		onViewChange?: (payload: {
 			/** Year of the first visible month. */
 			startYear: number;
 			/** Month index (0–11) of the first visible month. */
@@ -90,9 +93,9 @@ export type BaseCalendarProps<E extends Event> = WithSlot<
 	'header'
 >;
 
-export type CalendarInputProps<T extends 'calendar' | 'calendar-range'> = CalendarPrimitiveProps<
-	Event,
-	T
+export type CalendarInputProps<T extends 'calendar' | 'calendar-range'> = Omit<
+	CalendarPrimitiveProps<Event, T>,
+	'label'
 > &
 	Omit<InputProps<T>, 'children' | 'type' | 'theme'> & {
 		/** Theme overrides for the calendar and its field wrapper. */

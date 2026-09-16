@@ -94,7 +94,7 @@
 {#snippet customTreeCell(payload: TreeCellPayload)}
 	{@render payload.defaultContent()}
 	{#if payload.column.id === 'title'}
-		<span class="text-neutral/45 ms-auto text-[0.65rem] uppercase">
+		<span class="text-neutral/65 ms-auto text-[0.65rem] uppercase">
 			{payload.node.task.discipline}
 		</span>
 	{/if}
@@ -106,7 +106,7 @@
 
 {#snippet customTaskTooltip(payload: TaskTooltipPayload)}
 	{@render payload.defaultContent()}
-	<p class="text-neutral/60 mt-1 text-xs">
+	<p class="text-neutral/70 mt-1 text-xs">
 		Owned by {payload.node.task.owner} · {payload.node.task.discipline}
 	</p>
 {/snippet}

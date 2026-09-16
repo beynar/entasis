@@ -81,4 +81,11 @@ Standard Svelte attachments are spread onto the root status element.
 - **sizer** - Hidden grid that reserves the longest message width.
 - **sizerItem** - Individual hidden sizing message.
 - **message** - Active visual message and optional shimmer state.
+
+## Motion
+
+- **motion** theme slot, keyed by \`mode\`: the \`vertical\` slide runs on \`slow\`, the \`reveal\`
+  wipe on \`slower\`. Only \`duration\` / \`easing\` are read; the geometry is fixed.
+- Ladder: \`<Theme components={{ spinnerText: { motion } }}>\` → \`setSpinnerTextTheme({ motion })\`
+  → \`theme.motion\`. Reduced motion collapses it to 0 (the text swaps instantly).
 `;

@@ -110,19 +110,32 @@ Extends all Field component props plus:
 
 ### With Prefix Icon
 \`\`\`svelte
+<script lang="ts">
+	import { magnifyingGlassIcon } from 'svelai/icons/magnifyingGlass';
+
+	let search = $state('');
+</script>
+
 <TextInput label="Search" bind:value={search}>
 	{#snippet prefix()}
-		<Icon name="search" />
+		{@render magnifyingGlassIcon()}
 	{/snippet}
 </TextInput>
 \`\`\`
 
 ### With Suffix Button
 \`\`\`svelte
+<script lang="ts">
+	import { copyIcon } from 'svelai/icons/copy';
+
+	let apiKey = $state('');
+	const copyToClipboard = () => navigator.clipboard.writeText(apiKey);
+</script>
+
 <TextInput label="API Key" bind:value={apiKey}>
 	{#snippet suffix()}
 		<Button size="small" squared onclick={copyToClipboard}>
-			<Icon name="copy" />
+			{@render copyIcon()}
 		</Button>
 	{/snippet}
 </TextInput>
@@ -130,12 +143,18 @@ Extends all Field component props plus:
 
 ### With Both Prefix and Suffix
 \`\`\`svelte
+<script lang="ts">
+	import { arrowSquareOutIcon } from 'svelai/icons/arrowSquareOut';
+
+	let url = $state('');
+</script>
+
 <TextInput label="Website" bind:value={url}>
 	{#snippet prefix()}
 		<span class="text-muted">https://</span>
 	{/snippet}
 	{#snippet suffix()}
-		<Icon name="external-link" />
+		{@render arrowSquareOutIcon()}
 	{/snippet}
 </TextInput>
 \`\`\`
@@ -167,7 +186,10 @@ Extends all Field component props plus:
 
 ### Login Form
 \`\`\`svelte
-<script>
+<script lang="ts">
+	import { envelopeIcon } from 'svelai/icons/envelope';
+	import { lockIcon } from 'svelai/icons/lock';
+
 	let email = $state('');
 	let password = $state('');
 </script>
@@ -181,7 +203,7 @@ Extends all Field component props plus:
 		required
 	>
 		{#snippet prefix()}
-			<Icon name="mail" />
+			{@render envelopeIcon()}
 		{/snippet}
 	</TextInput>
 	
@@ -191,7 +213,7 @@ Extends all Field component props plus:
 		required
 	>
 		{#snippet prefix()}
-			<Icon name="lock" />
+			{@render lockIcon()}
 		{/snippet}
 	</PasswordInput>
 	
@@ -272,13 +294,18 @@ The theme object contains the following parts:
 \`\`\`
 
 **Focus State Customization**:
+
+To recolor every focus ring in the app at once, set \`designTokens.focusColor\` on \`Theme\`
+instead of overriding per component. \`ring-focus\` is the focus state role and falls back to the
+current role, so it never hard-pins a color.
+
 \`\`\`svelte
 <TextInput 
   label="Styled Input"
   bind:value={value}
   theme={{
     inputContainer: {
-      base: 'focus-within:ring-2 focus-within:ring-primary focus-within:border-primary'
+      base: 'focus-within:ring-2 focus-within:ring-focus/50 focus-within:border-focus'
     }
   }}
 />

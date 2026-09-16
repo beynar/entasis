@@ -48,7 +48,7 @@
 		prefix?: SlotType;
 		suffix?: SlotType;
 		onSubmit: (event: KeyboardEvent) => void;
-		onValueChange: (change: RichTextInputChange) => void;
+		onValueChange: (payload: RichTextInputChange) => void;
 		onSuggestionOpen?: AIComposerSuggestionLifecycleCallback;
 		onSuggestionClose?: AIComposerSuggestionLifecycleCallback;
 		onSuggestionQueryChange?: AIComposerSuggestionLifecycleCallback;

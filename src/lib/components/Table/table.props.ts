@@ -51,6 +51,11 @@ export type TableRow = {
 	 * Optional CSS classes to apply to the row.
 	 */
 	class?: string;
+	/**
+	 * Marks the row as selected: drives the row theme's `selected` variant and the
+	 * `data-state="selected"` attribute.
+	 */
+	selected?: boolean;
 };
 
 export type TableProps = WithAttachments<{

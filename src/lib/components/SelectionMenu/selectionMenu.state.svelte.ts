@@ -6,7 +6,7 @@ import type {
 	SelectionMenuTarget
 } from './selectionMenu.props.js';
 
-type SelectionMenuOptions = Pick<SelectionMenuProps, 'target' | 'onSelectionChange'>;
+type SelectionMenuOptions = Pick<SelectionMenuProps, 'target' | 'onSelect'>;
 type SelectionMenuOptionsSource = () => SelectionMenuOptions;
 
 export class SelectionMenuState {
@@ -20,10 +20,11 @@ export class SelectionMenuState {
 	anchor: VirtualElement;
 
 	constructor(private optionsSource: SelectionMenuOptionsSource) {
-		const state = this;
+		// Object-literal getters cannot be arrows, so the instance read goes through one.
+		const getContextElement = () => this.targetElement ?? undefined;
 		this.anchor = {
 			get contextElement() {
-				return state.targetElement ?? undefined;
+				return getContextElement();
 			},
 			getBoundingClientRect: () => this.getRangeRect(),
 			getClientRects: () => this.getRangeRects()
@@ -97,7 +98,7 @@ export class SelectionMenuState {
 		}
 		this.selection = selection;
 		this.revision += 1;
-		this.optionsSource().onSelectionChange?.(selection);
+		this.optionsSource().onSelect?.(selection);
 	}
 
 	private getRangeRects() {

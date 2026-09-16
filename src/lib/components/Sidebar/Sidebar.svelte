@@ -9,6 +9,7 @@
 		SidebarMenuEntry,
 		SidebarProps
 	} from './sidebar.props.js';
+	import SidebarActivityBar from './SidebarActivityBar.svelte';
 	import SidebarDesktopShell from './SidebarDesktopShell.svelte';
 	import SidebarMobileDrawer from './SidebarMobileDrawer.svelte';
 	import SidebarPanel from './SidebarPanel.svelte';
@@ -17,6 +18,7 @@
 	import { SidebarResizeState } from './sidebar.resize.svelte.js';
 	import { SidebarStateController } from './sidebar.state.svelte.js';
 	import { useSidebarTheme } from './sidebar.theme.js';
+	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 	let {
 		id: customId,
 		ref = $bindable(),
@@ -28,6 +30,7 @@
 		side = 'left',
 		variant = 'admin',
 		size = 'normal',
+		activeVariant = 'soft',
 		density = 'normal',
 		collapsible = 'offcanvas',
 		mode = 'layout',
@@ -40,6 +43,8 @@
 		keyboardShortcut = 'b',
 		rail = false,
 		edgeReveal = true,
+		expandOnHover = false,
+		activityBar,
 		items,
 		class: className,
 		collapseIcon = 'chevron',
@@ -79,6 +84,12 @@
 		});
 	});
 	let edgeRevealed = $state(false);
+	// The desktop shell drives this; the controller turns it into `api.isPeeking` so the panel
+	// contents render expanded whenever the peek renders them at full width.
+	let hoverExpanded = $state(false);
+	const activityBarWidth = $derived(activityBar?.width ?? '3rem');
+	// `0px` (not `0`) so the `calc()` in the spacer/container classes stays valid without a unit.
+	const activityBarOffset = $derived(activityBar ? activityBarWidth : '0px');
 	function setOpen(nextOpen: boolean) {
 		openState.value = nextOpen;
 	}
@@ -86,7 +97,11 @@
 		width = nextWidth;
 	}
 	const t = $derived(useI18n());
+	// A second nav landmark needs its own name; `activityBar.label` overrides this default.
+	const activityBarLabel = $derived(`${t.sidebar} ${t.actions}`);
+	const navLabel = $derived(`${t.sidebar} ${t.navigation}`);
 	const classes = $derived(useSidebarTheme(theme));
+	const resolvedColor = $derived(useDefaultColor());
 	const canCollapseToIcon = $derived.by(() => {
 		if (content) return false;
 
@@ -141,6 +156,9 @@
 		},
 		get collapsible() {
 			return resolvedCollapsible;
+		},
+		get peeking() {
+			return hoverExpanded;
 		},
 		setDisplayState: displayStateBridge.setDisplayState
 	});
@@ -221,9 +239,16 @@
 		{collapseIcon}
 		{tooltips}
 		{size}
+		{activeVariant}
 		{density}
+		label={navLabel}
 		{theme}
 	/>
+{/snippet}
+{#snippet staticActivityBar()}
+	{#if activityBar}
+		<SidebarActivityBar {activityBar} {side} {size} {density} label={activityBarLabel} {theme} />
+	{/if}
 {/snippet}
 {#if mode === 'panel'}
 	<div
@@ -231,6 +256,7 @@
 		bind:this={ref}
 		data-slot="sidebar"
 		data-sidebar="sidebar"
+		data-color={resolvedColor}
 		data-state={controller.state}
 		data-display-state={controller.displayState}
 		data-collapsible={collapsibleState}
@@ -261,9 +287,12 @@
 		data-frame={frame}
 		data-size={size}
 		data-density={density}
+		data-activity-bar={activityBar ? 'true' : undefined}
 		data-width-prehydrating={resize.isWidthInitializing ? 'true' : undefined}
 		style:--sidebar-width={resize.renderWidth}
 		style:--sidebar-width-icon={widthIcon}
+		style:--sidebar-width-activity={activityBarWidth}
+		style:--sidebar-activity-offset={activityBarOffset}
 		style:--sidebar-width-mobile={widthMobile}
 		class={rootClass}
 		{...attachments}
@@ -279,20 +308,38 @@
 					{dir}
 					{size}
 					{density}
-					label={`${t.sidebar} ${t.navigation}`}
+					label={navLabel}
 					{theme}
 				>
+					{#if activityBar}
+						<SidebarActivityBar
+							{activityBar}
+							{side}
+							{size}
+							{density}
+							orientation="horizontal"
+							label={activityBarLabel}
+							{theme}
+						/>
+					{/if}
 					{@render panel()}
 				</SidebarMobileDrawer>
 			{:else if resolvedCollapsible === 'none'}
+				{#if activityBar && side === 'left'}
+					{@render staticActivityBar()}
+				{/if}
 				<div
 					data-slot="sidebar"
 					data-sidebar="sidebar"
+					data-color={resolvedColor}
 					data-side={side}
 					class={classes.panel({ variant, placement: 'static', size, density })}
 				>
 					{@render panel()}
 				</div>
+				{#if activityBar && side === 'right'}
+					{@render staticActivityBar()}
+				{/if}
 			{:else}
 				<SidebarDesktopShell
 					sidebarState={controller.state}
@@ -305,6 +352,9 @@
 					{density}
 					{rail}
 					{edgeReveal}
+					{expandOnHover}
+					{activityBar}
+					{activityBarLabel}
 					toggleLabel={`${t.toggle} ${t.sidebar}`}
 					resizeLabel={`${t.resize} ${t.sidebar}`}
 					collapsedResizeLabel={`${t.expand} ${t.sidebar}`}
@@ -314,6 +364,7 @@
 					{resize}
 					{theme}
 					bind:edgeRevealed
+					bind:hoverExpanded
 				>
 					{@render panel()}
 				</SidebarDesktopShell>

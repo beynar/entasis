@@ -8,16 +8,16 @@
 	import { Stat } from 'svelai/stat';
 </script>
 
-<section class="flex flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl flex flex-col">
 	<div class="max-w-xl">
 		<Heading as="h2" size="h2" weight="bold">From the first brief to the final detail.</Heading>
 		<p class="mt-lg text-neutral/70">Give every part of the project a clear home.</p>
 	</div>
-	<div class="grid gap-lg md:grid-cols-2">
+	<div class="gap-lg grid md:grid-cols-2">
 		<Card title="A clear path forward" description="Turn a big idea into small, useful steps."
-			><div class="flex flex-col gap-sm">
+			><div class="gap-sm flex flex-col">
 				{#each ['Write the brief', 'Explore directions', 'Review the prototype'] as task, index (task)}<div
-						class="flex items-center gap-md rounded-lg bg-surface-recessed p-md"
+						class="gap-md bg-surface-recessed p-md flex items-center rounded-lg"
 					>
 						<Chip size="small" color={index < 2 ? 'success' : 'primary'}
 							>{index < 2 ? 'Done' : 'Next'}</Chip
@@ -29,23 +29,24 @@
 			><Stack gap="lg"
 				><Stat label="Available this month" value="$8,420" variant="ghost" /><Meter
 					label="Budget allocated"
-					value={{ value: 64, color: 'primary' }}
+					value={64}
+					color="primary"
 				/>
-				<p class="text-sm text-neutral/60">$15,000 of $23,420 allocated</p></Stack
+				<p class="text-neutral/70 text-sm">$15,000 of $23,420 allocated</p></Stack
 			></Card
 		>
 		<Card title="The right rhythm" variant="soft" color="primary"
 			><Stack gap="lg"
-				><div class="grid grid-cols-5 gap-sm">
+				><div class="gap-sm grid grid-cols-5">
 					{#each ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] as day, index (day)}<div
-							class="flex flex-col items-center gap-md min-w-0 rounded-lg bg-surface px-xs py-md"
+							class="gap-md bg-surface px-xs py-md flex min-w-0 flex-col items-center rounded-lg"
 						>
-							<span class="text-xs text-neutral/60">{day}</span><strong class="text-2xl"
+							<span class="text-neutral/70 text-xs">{day}</span><strong class="text-2xl"
 								>{14 + index}</strong
 							><span
 								class={index === 2
-									? 'size-2 rounded-full bg-primary'
-									: 'size-2 rounded-full bg-neutral-muted'}
+									? 'bg-primary size-2 rounded-full'
+									: 'bg-neutral-muted size-2 rounded-full'}
 							></span>
 						</div>{/each}
 				</div>

@@ -1,23 +1,25 @@
 import type { ChartControl, ChartScene, ChartValue as TanStackValue } from '@tanstack/charts';
 import { brushX, type BrushRange, type BrushXChange } from '@tanstack/charts/interaction/brush';
 import { controlledSignal } from '@tanstack/charts/interaction/signal';
-import { bind } from '$lib/utils/state.svelte.js';
 import type { ChartValue } from './chart.core.js';
 import type { ChartState } from './chart.state.svelte.js';
 import { resolveChartViewport, sameChartViewportDomain } from './chart.viewport.js';
 
-export interface ChartViewportState<TRow extends object> {
-	readonly chart: ChartState<TRow>;
-}
-
 export class ChartViewportState<TRow extends object> {
+	readonly #chart: ChartState<TRow>;
+	/** The chart this viewport belongs to. */
+	get chart(): ChartState<TRow> {
+		return this.#chart;
+	}
 	xDomain = $state<readonly ChartValue[] | undefined>();
 	fullDomain = $state<readonly ChartValue[]>([]);
 	range = $state<BrushRange<ChartValue> | undefined>();
 	isBrushing = $state(false);
 
 	readonly currentDomain = $derived(this.xDomain ?? this.fullDomain);
-	readonly configuration = $derived(resolveChartViewport(this.chart.viewport, this.chart.x));
+	readonly configuration = $derived(
+		resolveChartViewport(this.chart.viewport, this.chart.x, this.chart.viewportMotion)
+	);
 	readonly axis = $derived(this.configuration ? 'x' : undefined);
 	readonly isEnabled = $derived(this.configuration !== undefined);
 	readonly isZoomed = $derived(this.xDomain !== undefined);
@@ -27,11 +29,7 @@ export class ChartViewportState<TRow extends object> {
 	readonly status = $derived(this.isZoomed ? 'Chart zoomed on the x axis.' : '');
 
 	constructor(chart: ChartState<TRow>) {
-		bind(this, {
-			get chart() {
-				return chart;
-			}
-		});
+		this.#chart = chart;
 		$effect(() => {
 			if (this.configuration) return;
 			this.xDomain = undefined;
@@ -63,7 +61,7 @@ export class ChartViewportState<TRow extends object> {
 		if (!this.configuration || !this.range) return undefined;
 		const isFullRange = sameRange(this.range, domainRange(this.currentDomain));
 		const options = {
-			ariaLabel: 'Chart zoom range',
+			label: 'Chart zoom range',
 			startAriaLabel: 'Zoom range start',
 			endAriaLabel: 'Zoom range end',
 			format: formatBrushValue,

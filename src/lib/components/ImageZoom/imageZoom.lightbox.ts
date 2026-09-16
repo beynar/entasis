@@ -123,9 +123,9 @@ export class ImageZoomLightbox {
 		if (!this.refreshMetadata()) return;
 		this.attachEvents(root, imageElement);
 
-		const transitionDuration = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-			? 0
-			: Math.max(0, this.zoom.transitionDuration);
+		// Already 0 when the Theme reports a reduced-motion preference: the duration
+		// comes from the resolved `motion` slot.
+		const transitionDuration = Math.max(0, this.zoom.transitionDuration);
 
 		let instance: LightGallery;
 		try {
@@ -140,12 +140,12 @@ export class ImageZoomLightbox {
 				backgroundColor: this.zoom.backgroundColor,
 				strings: {
 					closeGallery: this.zoom.closeLabel,
-					toggleMaximize: 'Toggle maximize',
-					previousSlide: 'Previous image',
-					nextSlide: 'Next image',
-					download: 'Download',
-					playVideo: 'Play video',
-					mediaLoadingFailed: 'The image could not be loaded'
+					toggleMaximize: this.zoom.messages.toggleMaximize,
+					previousSlide: this.zoom.messages.previousImage,
+					nextSlide: this.zoom.messages.nextImage,
+					download: this.zoom.messages.download,
+					playVideo: this.zoom.messages.playVideo,
+					mediaLoadingFailed: this.zoom.messages.imageLoadError
 				}
 			});
 		} catch (error) {

@@ -3,19 +3,19 @@ import type { SeparatorThemeProps } from '../Separator/separator.theme.js';
 
 export const videoPlayerSettingsMenuOptionTheme = {
 	root: {
-		base: 'text-white/85 highlight:bg-white/10 highlight:text-white',
+		base: 'text-white highlight:bg-white/10 highlight:text-white',
 		active: {
 			true: 'bg-white/10 text-white'
 		},
 		disabled: {
-			true: 'pointer-events-none text-white/35 opacity-100'
+			true: 'pointer-events-none text-white/45 opacity-100'
 		}
 	},
 	prefix: {
-		base: 'text-white/65'
+		base: 'text-white/70'
 	},
 	suffix: {
-		base: 'text-white/65'
+		base: 'text-white/70'
 	}
 } satisfies MenuOptionThemeProps;
 

@@ -3,35 +3,33 @@ import { on } from 'svelte/events';
 
 export type HotKeyModifier = 'mod' | 'alt' | 'ctrl' | 'shift';
 
-const letter = new Set([
-	'a',
-	'b',
-	'c',
-	'd',
-	'e',
-	'f',
-	'g',
-	'h',
-	'i',
-	'j',
-	'k',
-	'l',
-	'm',
-	'n',
-	'o',
-	'p',
-	'q',
-	'r',
-	's',
-	't',
-	'u',
-	'v',
-	'w',
-	'x',
-	'y',
-	'z'
-] as const);
-type Letter = typeof letter extends Set<infer T> ? T : never;
+type Letter =
+	| 'a'
+	| 'b'
+	| 'c'
+	| 'd'
+	| 'e'
+	| 'f'
+	| 'g'
+	| 'h'
+	| 'i'
+	| 'j'
+	| 'k'
+	| 'l'
+	| 'm'
+	| 'n'
+	| 'o'
+	| 'p'
+	| 'q'
+	| 'r'
+	| 's'
+	| 't'
+	| 'u'
+	| 'v'
+	| 'w'
+	| 'x'
+	| 'y'
+	| 'z';
 type Key =
 	| Letter
 	| 'tab'
@@ -42,7 +40,8 @@ type Key =
 	| 'arrowup'
 	| 'arrowdown'
 	| 'arrowleft'
-	| 'arrowright';
+	| 'arrowright'
+	| `f${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}`;
 
 export type SingleModifierCombination = `${HotKeyModifier}+${Key}`;
 export type DoubleModifierCombination =
@@ -67,8 +66,6 @@ export const useHotKey = (opts: HotKeysOptions) => {
 	let offWindow: (() => void) | null;
 	let offRef: (() => void) | null;
 	const getCombination = (event: KeyboardEvent) => {
-		const isMac =
-			typeof window != 'undefined' && /Mac|iPod|iPhone|iPad/.test(window.navigator.platform);
 		const { ctrlKey, altKey, shiftKey, metaKey, key: KEY } = event;
 		const key = KEY.toLowerCase();
 		let combination = '';

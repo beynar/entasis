@@ -12,7 +12,7 @@
 	let complete = $state(false);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card
 		class="mx-auto w-full max-w-xl"
 		title="Welcome aboard, Alex"
@@ -20,7 +20,7 @@
 		><Stack gap="lg">
 			<Grid columns={{ minWidth: 170, max: 3 }} gap="md">
 				{#each ['Introduce yourself', 'Pick your focus', 'Set your pace'] as title, index (title)}<div
-						class="rounded-lg bg-surface-recessed p-md"
+						class="bg-surface-recessed p-md rounded-lg"
 					>
 						<Chip color={complete ? 'success' : 'neutral'}>{complete ? '✓' : index + 1}</Chip>
 						<p class="mt-md text-sm font-medium">{title}</p>

@@ -10,25 +10,25 @@
 	let added = $state('');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="grid gap-xl md:grid-cols-[1.3fr_1fr]">
-		<div class="grid gap-lg sm:grid-cols-2">
+	<div class="gap-xl grid md:grid-cols-[1.3fr_1fr]">
+		<div class="gap-lg grid sm:grid-cols-2">
 			<div class="sm:col-span-2">{@render productArt('shirt', color)}</div>
-			<div class="rounded-lg bg-surface-recessed p-xl">
-				<p class="text-xs uppercase tracking-widest text-neutral/50">The fabric</p>
+			<div class="bg-surface-recessed p-xl rounded-lg">
+				<p class="text-neutral/65 text-xs tracking-widest uppercase">The fabric</p>
 				<p class="mt-lg text-3xl font-light">100%<br />organic cotton</p>
 			</div>
-			<div class="rounded-lg bg-primary-muted p-xl">
-				<p class="text-xs uppercase tracking-widest text-primary">The fit</p>
+			<div class="bg-primary-muted p-xl rounded-lg">
+				<p class="text-primary-muted-readable text-xs tracking-widest uppercase">The fit</p>
 				<p class="mt-lg text-3xl font-light">Relaxed.<br />Not oversized.</p>
 			</div>
 		</div>
-		<div class="flex flex-col gap-xl">
+		<div class="gap-xl flex flex-col">
 			<Chip class="w-fit" variant="soft">Core collection</Chip><Heading size="h2"
 				>The everyday tee</Heading
 			>
@@ -37,14 +37,14 @@
 				A substantial cotton tee with a soft hand and a neckline that holds its shape. An everyday
 				essential, carefully considered.
 			</p>
-			<div class="flex flex-col gap-lg">
+			<div class="gap-lg flex flex-col">
 				<p class="text-sm font-medium">Color / {color}</p>
-				<div class="flex gap-md flex-wrap">
+				<div class="gap-md flex flex-wrap">
 					{#each ['Sand', 'Olive', 'Chalk'] as finish (finish)}<Button
 							size="small"
 							variant={color === finish ? 'soft' : 'outline'}
 							onclick={() => (color = finish)}
-							aria-pressed={color === finish}>{finish}</Button
+							pressed={color === finish}>{finish}</Button
 						>{/each}
 				</div>
 			</div>
@@ -53,9 +53,9 @@
 				bind:value={size}
 				items={['XS', 'S', 'M', 'L', 'XL'].map((value) => ({ value, label: value }))}
 			/>
-			<p class="text-xs text-neutral/55">True to size. Choose one size up for a looser fit.</p>
+			<p class="text-neutral/65 text-xs">True to size. Choose one size up for a looser fit.</p>
 			<Button fullWidth onclick={() => (added = `${color} / ${size}`)}>Add to bag</Button
-			>{#if added}<p role="status" class="text-sm text-success">
+			>{#if added}<p role="status" class="text-success text-sm">
 					{added} added to the sample bag.
 				</p>{/if}<Accordion
 				items={[

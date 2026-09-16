@@ -4,18 +4,18 @@
 	import { Button } from 'svelai/button';
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="grid overflow-hidden rounded-lg bg-primary-muted md:grid-cols-2">
-		<div class="flex flex-col gap-xl justify-center p-xl">
+	<div class="bg-primary-muted grid overflow-hidden rounded-lg md:grid-cols-2">
+		<div class="gap-xl p-xl flex flex-col justify-center">
 			<Chip class="w-fit" variant="soft">The home collection</Chip><Heading size="h2"
 				>A little more<br />room for good things.</Heading
 			>
-			<p class="max-w-md text-lg text-neutral/65">
+			<p class="text-neutral/65 max-w-md text-lg">
 				Thoughtful objects for the spaces where everyday life happens.
 			</p>
 			<Button href="/components" class="self-start">Explore homeware ↗</Button>

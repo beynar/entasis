@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import type { Attachment } from 'svelte/attachments';
 	import { untrack } from 'svelte';
 	import { on } from 'svelte/events';
@@ -39,6 +40,7 @@
 	const yearWindowRadius = 100;
 	const yearWindowSpan = yearWindowRadius * 2;
 	const classes = $derived(useCalendarInputTheme(theme));
+	const t = $derived(useI18n());
 	const months = $derived(
 		Array.from({ length: 12 }, (_, month) =>
 			createCalendarDate(2024, month, 1).toLocaleDateString(locale, { month: 'long' })
@@ -199,13 +201,13 @@
 <div
 	{id}
 	role="group"
-	aria-label="Choose month and year"
+	aria-label={t.chooseMonthAndYear}
 	class={classes.picker()}
 	{@attach escapeToDays}
 	{@attach focusSelectedMonth}
 >
 	<div class={classes.pickerColumn()}>
-		<span id={`${id}-month-label`} class={classes.pickerLabel()}>Month</span>
+		<span id={`${id}-month-label`} class={classes.pickerLabel()}>{t.monthLabel}</span>
 		<ScrollArea scrollOnEdges type="hover" class={classes.pickerScrollArea()}>
 			<div
 				role="listbox"
@@ -236,7 +238,7 @@
 	</div>
 
 	<div class={classes.pickerColumn()}>
-		<span id={`${id}-year-label`} class={classes.pickerLabel()}>Year</span>
+		<span id={`${id}-year-label`} class={classes.pickerLabel()}>{t.yearLabel}</span>
 		<ScrollArea scrollOnEdges type="hover" class={classes.pickerScrollArea()}>
 			<div
 				role="listbox"

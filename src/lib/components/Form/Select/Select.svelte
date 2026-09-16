@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { untrack } from 'svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
@@ -17,7 +18,8 @@
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
-		placeholder = 'Select an option',
+		placeholder,
+		i18n,
 		theme,
 		disabled,
 		name,
@@ -29,11 +31,13 @@
 		items,
 		separators = true,
 		triggerAttrs,
+		label,
 		...rest
 	}: SelectProps = $props();
 	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
+	const t = $derived(useI18n(i18n));
 
 	const field = createFieldState({
 		id,
@@ -129,7 +133,7 @@
 	<div
 		id={select.listboxId}
 		role="listbox"
-		aria-label="Options"
+		aria-label={t.options}
 		tabindex={-1}
 		class={classes.content({ size })}
 		onmousedown={(event) => {
@@ -176,6 +180,7 @@
 	{#snippet trigger()}
 		<Field
 			{field}
+			{label}
 			{size}
 			{density}
 			theme={{
@@ -202,6 +207,8 @@
 				aria-controls={select.isOpen ? select.listboxId : undefined}
 				aria-activedescendant={select.isOpen ? select.nav.activeDescendant : undefined}
 				aria-required={required || undefined}
+				aria-label={triggerAttrs?.['aria-label'] ??
+					(label ? undefined : (placeholder ?? t.selectOption))}
 				data-placeholder={select.selectedOption ? undefined : ''}
 				disabled={field.disabled}
 				class={classes.input({ size, disabled: field.disabled })}
@@ -224,7 +231,7 @@
 				}}
 			>
 				<span class={classes.value({ size, placeholder: !select.selectedOption })}>
-					{select.selectedOption?.label ?? placeholder}
+					{select.selectedOption?.label ?? placeholder ?? t.selectOption}
 				</span>
 				{@render caretDownIcon({ class: classes.triggerIcon({ size }) })}
 			</button>

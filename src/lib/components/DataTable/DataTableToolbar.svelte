@@ -11,6 +11,7 @@
 	import type { DataTableClasses } from './dataTable.theme.js';
 	import type { DataTableModel } from './dataTable.model.svelte.js';
 	import type { DataTableApi } from './dataTable.props.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		model,
@@ -23,6 +24,7 @@
 		revision: number;
 		tableApi: DataTableApi<TData>;
 	} = $props();
+	const t = $derived(useI18n());
 
 	let searchValue = $state(untrack(() => model.state.globalFilter));
 	let searchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -35,17 +37,19 @@
 		return null;
 	});
 	const selectedRows = $derived.by(() => {
-		model.state.rowSelection;
+		void model.state.rowSelection;
 		return model.selectedRows;
 	});
 	const payload = $derived.by(() => {
-		revision;
-		model.state.pagination;
-		model.state.sorting;
-		model.state.globalFilter;
-		model.state.columnFilters;
-		model.state.grouping;
-		model.state.expanded;
+		void [
+			revision,
+			model.state.pagination,
+			model.state.sorting,
+			model.state.globalFilter,
+			model.state.columnFilters,
+			model.state.grouping,
+			model.state.expanded
+		];
 		return {
 			state: tableApi.state,
 			selectedRows: [...tableApi.selectedRows],
@@ -56,16 +60,13 @@
 	});
 	const hasFilters = $derived(!!model.state.globalFilter || model.state.columnFilters.length > 0);
 	const hideableColumns = $derived.by(() => {
-		revision;
-		model.state.columnOrder;
-		model.state.columnVisibility;
-		model.publicColumns;
+		void [revision, model.state.columnOrder, model.state.columnVisibility, model.publicColumns];
 		return model.table
 			.getAllLeafColumns()
 			.filter((column) => !!model.getColumnConfig(column.id) && column.getCanHide());
 	});
 	const visibilityItems = $derived.by(() => {
-		model.state.columnVisibility;
+		void model.state.columnVisibility;
 		const visibleCount = hideableColumns.filter(
 			(column) => model.state.columnVisibility[column.id] !== false
 		).length;
@@ -98,7 +99,7 @@
 	);
 
 	$effect(() => {
-		revision;
+		void revision;
 		const globalFilter = model.state.globalFilter;
 		if (globalFilter === syncedGlobalFilter) return;
 		syncedGlobalFilter = globalFilter;
@@ -139,7 +140,7 @@
 				<TextInput
 					class={classes.search()}
 					size="small"
-					placeholder={searchConfig.placeholder ?? 'Search rows'}
+					placeholder={searchConfig.placeholder ?? t.dataTableSearchRows}
 					value={searchValue}
 					disabled={model.props.disabled}
 					onValueChange={(value) => updateSearch(value ?? '')}
@@ -161,7 +162,7 @@
 					disabled={model.props.disabled}
 					onclick={() => model.clearFilters()}
 				>
-					Clear filters
+					{t.dataTableClearFilters}
 				</Button>
 			{/if}
 
@@ -169,10 +170,10 @@
 				<PopupMenu
 					closeOnItemClick={false}
 					mobileSheet
-					menu={{ items: visibilityItems, density: 'small' }}
+					menu={{ items: visibilityItems, density: 'compact' }}
 					trigger={{
-						label: 'Choose visible columns',
-						content: 'Columns',
+						label: t.dataTableChooseColumns,
+						content: t.dataTableColumns,
 						prefix: columnsIcon,
 						variant: 'ghost',
 						color: 'neutral',

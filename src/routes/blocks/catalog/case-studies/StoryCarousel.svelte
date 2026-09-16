@@ -34,18 +34,20 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">In good company</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			In good company
+		</p>
 		<Heading size="h2" weight="bold">Built around their ambitions.</Heading>
 	</header>
 	<Carousel
 		items={stories}
-		layout={{ default: 1, md: 2, lg: 2, xl: 2 }}
+		layout={{ xs: 1, md: 2, lg: 2, xl: 2 }}
 		navigationButton={{ color: 'neutral' }}
-		dots={{ color: 'primary' }}
+		pagination={{ variant: 'dots', color: 'primary' }}
 		>{#snippet children({ item: story })}<article
-				class="flex h-full flex-col overflow-hidden rounded-lg bg-surface-recessed"
+				class="bg-surface-recessed flex h-full flex-col overflow-hidden rounded-lg"
 			>
 				<img
 					src={`https://images.unsplash.com/photo-${story.photo}?auto=format&fit=crop&w=900&q=80`}
@@ -53,16 +55,16 @@
 					loading="lazy"
 					class="aspect-video w-full object-cover"
 				/>
-				<div class="flex flex-col gap-xl p-xl flex-1">
-					<div class="flex gap-md justify-between">
+				<div class="gap-xl p-xl flex flex-1 flex-col">
+					<div class="gap-md flex justify-between">
 						<h3 class="text-2xl font-semibold">{story.company}</h3>
 						<Chip size="small" variant="soft">{story.category}</Chip>
 					</div>
 					<p class="text-xl">{story.title}</p>
-					<div class="flex gap-lg items-end justify-between">
+					<div class="gap-lg flex items-end justify-between">
 						<p>
 							<strong class="text-3xl">{story.metric}</strong><br /><span
-								class="text-sm text-neutral/55">{story.label}</span
+								class="text-neutral/65 text-sm">{story.label}</span
 							>
 						</p>
 						<Button href="/docs" variant="outline">Read case study ↗</Button>

@@ -1,4 +1,11 @@
 import type { Attachment } from 'svelte/attachments';
+import { useTheme } from '$lib/components/Theme/theme.state.svelte.js';
+import { easingBezierStrings, type Easing } from '$lib/transitions/easingFunctions.js';
+import {
+	resolveMotionTokens,
+	type MotionDurationToken,
+	type MotionEasingToken
+} from '$lib/utils/motion/index.js';
 
 type Size = {
 	width: number;
@@ -10,19 +17,15 @@ export type TransitionSizeOptions = {
 	isActive?: () => boolean;
 	/** CSS properties to animate when the element's intrinsic size changes. */
 	axis?: 'height' | 'width' | 'both';
-	/** Animation duration in milliseconds. */
-	duration?: number;
-	/** CSS easing used by the Web Animations API. */
-	easing?: string;
+	/** A Theme duration token (`fast`, `normal`, …), or an explicit value in ms. */
+	duration?: MotionDurationToken | number;
+	/** A Theme easing role (`standard`, `enter`, …), or an easing-function name. */
+	easing?: MotionEasingToken | Easing;
 	/** Optional custom event names that should trigger a re-measure. */
 	events?: string | string[];
 };
 
-const defaultOptions = {
-	axis: 'height',
-	duration: 220,
-	easing: 'ease-in-out'
-} satisfies Required<Pick<TransitionSizeOptions, 'axis' | 'duration' | 'easing'>>;
+const defaultAxis = 'height' satisfies TransitionSizeOptions['axis'];
 
 const readSize = (node: HTMLElement): Size => {
 	const rect = node.getBoundingClientRect();
@@ -54,19 +57,33 @@ const getKeyframes = (previous: Size, next: Size, axis: TransitionSizeOptions['a
 	return [from, to];
 };
 
-const prefersReducedMotion = () =>
-	typeof window !== 'undefined' &&
-	window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
-
 const getEventNames = (events: TransitionSizeOptions['events']) => {
 	if (!events) return [];
 	return Array.isArray(events) ? events : [events];
 };
 
 export const transitionSize = (options: TransitionSizeOptions = {}): Attachment<HTMLElement> => {
-	const axis = options.axis ?? defaultOptions.axis;
-	const duration = options.duration ?? defaultOptions.duration;
-	const easing = options.easing ?? defaultOptions.easing;
+	// `useTheme` reads context, so it has to run while the owning component initialises
+	// — the returned attachment runs later.
+	const theme = useTheme();
+	const axis = options.axis ?? defaultAxis;
+	// Tokens by default (`normal` / `standard`), so `<Theme motion>` retunes every size
+	// animation and a reduced-motion preference collapses it to 0.
+	const tokens = () => theme?.motion ?? resolveMotionTokens();
+	const duration = () => {
+		if (theme?.preferReducesMotion) return 0;
+		const value = options.duration;
+		if (typeof value === 'number') return value;
+		return tokens().duration[value ?? 'normal'];
+	};
+	const easing = () => {
+		const roles = tokens().easing;
+		const value = options.easing;
+		if (value === undefined) return easingBezierStrings[roles.standard];
+		return easingBezierStrings[
+			value in roles ? roles[value as MotionEasingToken] : (value as Easing)
+		];
+	};
 	const isActive = () => options.isActive?.() ?? true;
 	const eventNames = getEventNames(options.events);
 
@@ -102,15 +119,18 @@ export const transitionSize = (options: TransitionSizeOptions = {}): Attachment<
 
 			if (animation && !shouldInterrupt) return;
 
+			const currentDuration = duration();
 			const animationProgress = animation?.effect?.getComputedTiming().progress;
 			const remainingDuration =
-				typeof animationProgress === 'number' ? duration * (1 - animationProgress) : duration;
+				typeof animationProgress === 'number'
+					? currentDuration * (1 - animationProgress)
+					: currentDuration;
 			const previousVisualSize = animation ? readSize(node) : previousSize;
 			const previousTargetSize = previousSize;
 			cancelAnimation();
 
 			const nextSize = readSize(node);
-			if (!isActive() || prefersReducedMotion()) {
+			if (!isActive() || currentDuration <= 0) {
 				node.style.overflow = initialOverflow;
 				previousSize = nextSize;
 				return;
@@ -124,12 +144,12 @@ export const transitionSize = (options: TransitionSizeOptions = {}): Attachment<
 			animationId += 1;
 			const currentAnimationId = animationId;
 			const animationDuration = hasSizeChanged(previousTargetSize, nextSize, axis)
-				? duration
+				? currentDuration
 				: remainingDuration;
 			node.style.overflow = 'hidden';
 			animation = node.animate(getKeyframes(previousVisualSize, nextSize, axis), {
 				duration: animationDuration,
-				easing
+				easing: easing()
 			});
 			previousSize = nextSize;
 			animation.onfinish = () => restoreOverflow(currentAnimationId);

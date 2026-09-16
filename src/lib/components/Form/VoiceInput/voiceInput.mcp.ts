@@ -33,6 +33,7 @@ VoiceInput records microphone audio into a bindable Blob, renders live microphon
 ## Props
 
 - **value**: \`Blob | null\` (bindable, default: \`null\`) - Finalized microphone recording. Starting a successful new recording or using Clear removes the previous value.
+- **defaultValue**: \`Blob | null\` (default: \`null\`) - Initial recording used only when \`value\` is omitted.
 - **duration**: \`number\` (bindable, default: \`0\`) - Current or finalized duration in seconds.
 - **minDuration**: \`number\` (default: \`0\`) - Minimum accepted finalized duration in seconds. Shorter recordings surface a Field validation error.
 - **maxDuration**: \`number | undefined\` - Maximum duration in seconds. Recording stops automatically at this limit.
@@ -41,7 +42,7 @@ VoiceInput records microphone audio into a bindable Blob, renders live microphon
 - **size**: \`'small' | 'normal' | 'large'\` (default: \`'normal'\`) - Control height, waveform height, timer size, and action size.
 - **disabled**: \`boolean\` (default: \`false\`) - Prevents microphone, playback, seeking, and clear interactions.
 - **required**: \`boolean\` (default: \`false\`) - Requires a recorded Blob during Field/Form validation.
-- **ariaLabel**: \`string\` (default: \`'Start voice recording'\`) - Start-button accessible label and tooltip.
+- **startLabel**: \`string\` (default: \`'Start voice recording'\`) - Start-button accessible label and tooltip.
 - **stopLabel**: \`string\` (default: \`'Stop recording'\`) - Stop-button accessible label and tooltip.
 - **playLabel**: \`string\` (default: \`'Play recording'\`) - Playback-button label and tooltip while paused.
 - **pauseLabel**: \`string\` (default: \`'Pause recording'\`) - Playback-button label and tooltip while playing.

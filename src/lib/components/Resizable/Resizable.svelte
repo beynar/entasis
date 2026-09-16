@@ -2,6 +2,7 @@
 	import type { ResizableProps } from './resizable.props.js';
 	import { ResizableState } from './resizable.state.svelte.js';
 	import { useResizableTheme } from './resizable.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		id: customId,
@@ -12,7 +13,7 @@
 		storageKey,
 		orientation,
 		direction,
-		withHandle = false,
+		handle = false,
 		handleVariant = 'grip',
 		showLines = true,
 		variant = 'default',
@@ -30,10 +31,13 @@
 		getHandleAriaLabel,
 		...attachments
 	}: ResizableProps = $props();
+	const t = $derived(useI18n());
+
+	const gripDots = [0, 1, 2, 3, 4, 5];
 
 	const generatedId = $props.id();
 	const resolvedOrientation = $derived(orientation ?? direction ?? 'horizontal');
-	const resolvedHandleVariant = $derived(withHandle ? handleVariant : 'grip');
+	const resolvedHandleVariant = $derived(handle ? handleVariant : 'grip');
 	const classes = $derived(useResizableTheme(theme));
 	const resizable = new ResizableState({
 		get id() {
@@ -80,9 +84,9 @@
 
 	const getDefaultHandleAriaLabel = (index: number) => {
 		const payload = resizable.handleAriaLabelPayload(index);
-		if (payload.collapsedBefore) return `Expand panel ${index + 1}`;
-		if (payload.collapsedAfter) return `Expand panel ${index + 2}`;
-		return `Resize panels ${index + 1} and ${index + 2}`;
+		if (payload.collapsedBefore) return t.expandPanel(index + 1);
+		if (payload.collapsedAfter) return t.expandPanel(index + 2);
+		return t.resizePanels(index + 1, index + 2);
 	};
 </script>
 
@@ -122,25 +126,25 @@
 		</div>
 
 		{#if index < panels.length - 1}
-			{@const handle = resizable.handlePayload(index)}
+			{@const handleState = resizable.handlePayload(index)}
 			<!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
 			<div
 				role="separator"
-				tabindex={handle.disabled ? -1 : 0}
-				aria-orientation={handle.separatorOrientation}
-				aria-valuenow={handle.size}
-				aria-valuemin={handle.min}
-				aria-valuemax={handle.max}
+				tabindex={handleState.disabled ? -1 : 0}
+				aria-orientation={handleState.separatorOrientation}
+				aria-valuenow={handleState.size}
+				aria-valuemin={handleState.min}
+				aria-valuemax={handleState.max}
 				aria-controls={`${resizable.panelId(index)} ${resizable.panelId(index + 1)}`}
-				aria-disabled={handle.disabled}
+				aria-disabled={handleState.disabled}
 				aria-label={getHandleAriaLabel?.(resizable.handleAriaLabelPayload(index)) ??
 					getDefaultHandleAriaLabel(index)}
 				data-slot="resizable-handle"
-				data-dragging={handle.dragging ? 'true' : undefined}
-				data-disabled={handle.disabled ? 'true' : undefined}
+				data-dragging={handleState.dragging ? 'true' : undefined}
+				data-disabled={handleState.disabled ? 'true' : undefined}
 				data-lines={showLines ? 'true' : 'false'}
-				data-collapsed-before={handle.collapsedBefore ? 'true' : undefined}
-				data-collapsed-after={handle.collapsedAfter ? 'true' : undefined}
+				data-collapsed-before={handleState.collapsedBefore ? 'true' : undefined}
+				data-collapsed-after={handleState.collapsedAfter ? 'true' : undefined}
 				class={classes.handle({
 					orientation: resolvedOrientation,
 					variant,
@@ -156,7 +160,7 @@
 				}}
 				onkeydown={(event) => resizable.handleKeydown(event, index)}
 			>
-				{#if withHandle}
+				{#if handle}
 					<span
 						data-handle-variant={resolvedHandleVariant}
 						class={classes.grip({
@@ -166,7 +170,7 @@
 						aria-hidden="true"
 					>
 						{#if resolvedHandleVariant === 'grip'}
-							{#each Array(6) as _, dotIndex (dotIndex)}
+							{#each gripDots as dotIndex (dotIndex)}
 								<span class={classes.gripDot({ orientation: resolvedOrientation })}></span>
 							{/each}
 						{/if}

@@ -25,7 +25,7 @@ export type AIMessageActionState<TMessage extends AIThreadItem = AIThreadItem> =
 };
 
 export type AIMessageActionHandler<TMessage extends AIThreadItem = AIThreadItem> = (
-	state: AIMessageActionState<TMessage>
+	payload: AIMessageActionState<TMessage>
 ) => void | Promise<void>;
 
 export type AIMessageActionSnippet<TMessage extends AIThreadItem = AIThreadItem> = Slot<

@@ -63,8 +63,8 @@
 			y={position.y}
 			marks={groupedMarks}
 			tooltip
-			ariaLabel="Quarterly revenue grouped by product"
-			initialDimensions={{ width: 520, height: 360 }}
+			label="Quarterly revenue grouped by product"
+			aspectRatio={520 / 360}
 			class="w-full"
 		/>
 	</section>
@@ -77,8 +77,8 @@
 			y={position.y}
 			marks={stackedMarks}
 			tooltip
-			ariaLabel="Quarterly revenue stacked by product"
-			initialDimensions={{ width: 520, height: 360 }}
+			label="Quarterly revenue stacked by product"
+			aspectRatio={520 / 360}
 			class="w-full"
 		/>
 	</section>

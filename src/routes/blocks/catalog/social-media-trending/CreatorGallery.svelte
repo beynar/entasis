@@ -38,20 +38,21 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<div class="grid gap-xl md:grid-cols-[15rem_1fr]">
-		<aside class="flex flex-col gap-xl md:sticky md:top-xl md:self-start">
-			<Avatar size="large" user={{ name: 'Maya Chen' }} /><Heading size="h3"
-				>Maya’s fieldnotes</Heading
-			><Chip class="w-fit" variant="soft">Featured creator</Chip>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<div class="gap-xl grid md:grid-cols-[15rem_1fr]">
+		<aside class="gap-xl md:top-xl flex flex-col md:sticky md:self-start">
+			<Avatar size="large" name="Maya Chen" /><Heading size="h3">Maya’s fieldnotes</Heading><Chip
+				class="w-fit"
+				variant="soft">Featured creator</Chip
+			>
 			<p class="text-neutral/65">
 				A photographer collecting quiet moments, changing light, and reasons to take the long way
 				home.
 			</p>
-			<p class="text-sm text-neutral/50">12 collections · Paris, France</p>
+			<p class="text-neutral/65 text-sm">12 collections · Paris, France</p>
 			<Button href="/docs" variant="outline">Explore the stories ↗</Button>
 		</aside>
-		<div class="grid gap-lg sm:grid-cols-2">
+		<div class="gap-lg grid sm:grid-cols-2">
 			{#each photos.slice(0, 4) as photo (photo.title)}<ImageZoom
 					><img
 						src={photo.src}

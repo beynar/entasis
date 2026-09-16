@@ -69,7 +69,7 @@
 			<div class="flex flex-col items-center gap-4">
 				<Globe bind:scrollTo={goTo} class="size-[320px]" />
 				<div class="flex flex-wrap justify-center gap-2">
-					{#each cities as city}
+					{#each cities as city, index (index)}
 						<Button
 							size="small"
 							variant="outline"

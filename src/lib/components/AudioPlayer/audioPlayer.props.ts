@@ -62,7 +62,7 @@ export type AudioPlayerProps = WithAttachments<{
 	artist?: string;
 	/** Optional artwork URL displayed beside the controls. */
 	artwork?: string | false;
-	/** Explicit accessible label; falls back to title. */
+	/** Accessible label applied as aria-label; falls back to title. */
 	label?: string;
 	/** Native audio preload behavior. */
 	preload?: AudioPlayerPreload;
@@ -135,19 +135,19 @@ export type AudioPlayerProps = WithAttachments<{
 	/** Replaces the default waveform or track progress surface. */
 	seek?: Snippet<[AudioPlayerState]>;
 	/** Called when the media starts playback. */
-	onPlay?: (snapshot: AudioPlayerSnapshot) => void;
+	onPlay?: (payload: AudioPlayerSnapshot) => void;
 	/** Called when the media pauses. */
-	onPause?: (snapshot: AudioPlayerSnapshot) => void;
+	onPause?: (payload: AudioPlayerSnapshot) => void;
 	/** Called when playback ends. */
-	onEnded?: (snapshot: AudioPlayerSnapshot) => void;
+	onEnded?: (payload: AudioPlayerSnapshot) => void;
 	/** Called when currentTime changes. */
-	onTimeUpdate?: (snapshot: AudioPlayerSnapshot) => void;
+	onTimeUpdate?: (payload: AudioPlayerSnapshot) => void;
 	/** Called when duration changes. */
-	onDurationChange?: (snapshot: AudioPlayerSnapshot) => void;
+	onDurationChange?: (payload: AudioPlayerSnapshot) => void;
 	/** Called when volume or muted state changes. */
-	onVolumeChange?: (snapshot: AudioPlayerSnapshot) => void;
+	onVolumeChange?: (payload: AudioPlayerSnapshot) => void;
 	/** Called when loop changes through the component API. */
-	onLoopChange?: (snapshot: AudioPlayerSnapshot) => void;
+	onLoopChange?: (payload: AudioPlayerSnapshot) => void;
 	/** Called when native media, waveform generation, or custom interaction errors occur. */
 	onError?: (payload: AudioPlayerErrorPayload) => void;
 	/** Per-instance theme overrides. */

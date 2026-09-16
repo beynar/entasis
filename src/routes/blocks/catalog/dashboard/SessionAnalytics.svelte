@@ -26,10 +26,10 @@
 	);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<header class="flex flex-wrap items-center justify-between gap-lg">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<header class="gap-lg flex flex-wrap items-center justify-between">
 		<div>
-			<p class="text-sm text-neutral/60">Product intelligence</p>
+			<p class="text-neutral/70 text-sm">Product intelligence</p>
 			<h2 class="mt-sm text-3xl font-semibold">Every session tells a story.</h2>
 		</div>
 		<Stack orientation="horizontal" gap="sm">
@@ -46,7 +46,7 @@
 			value="4m 32s"
 		/><Stat label="p95 latency" value="142 ms" />
 	</Grid>
-	<div class="grid gap-lg lg:grid-cols-3">
+	<div class="gap-lg grid lg:grid-cols-3">
 		<Card title="Session activity" description="Sample hourly sessions" class="lg:col-span-2"
 			><Chart
 				x={{ scale: { type: 'point' } }}
@@ -64,14 +64,15 @@
 						fillOpacity: 0.12
 					}
 				]}
-				ariaLabel="Sessions by hour"
+				label="Sessions by hour"
 			/></Card
 		><Card title="Latency distribution"
 			><Stack gap="lg">
-				<Meter label="Under 100 ms" value={{ value: 72, color: 'success' }} /><Meter
+				<Meter label="Under 100 ms" value={72} color="success" /><Meter
 					label="100–200 ms"
-					value={{ value: 21, color: 'primary' }}
-				/><Meter label="Over 200 ms" value={{ value: 7, color: 'warning' }} />
+					value={21}
+					color="primary"
+				/><Meter label="Over 200 ms" value={7} color="warning" />
 			</Stack></Card
 		>
 	</div>

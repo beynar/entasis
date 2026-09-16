@@ -1,8 +1,11 @@
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
+// The Form lays itself out against its OWN width, not the viewport: the root is an inline-size
+// container and every breakpoint inside the form (group columns, the action row) is a container
+// query, so a form in a 400px drawer stacks even on a 27" screen.
 const defaultForm = cva({
-	base: `grid gap-y-xl gap-x-md grid-cols-2 [&>*:not(.col-span-1)]:col-span-2`,
+	base: `@container grid gap-y-xl gap-x-md grid-cols-2 [&>*:not(.col-span-1)]:col-span-2`,
 	variants: {
 		variant: {
 			plain: '',
@@ -14,9 +17,9 @@ const defaultForm = cva({
 			horizontal: 'grid-cols-1 [&>*]:!col-span-1'
 		},
 		density: {
-			small: `gap-lg`,
+			compact: `gap-lg`,
 			normal: `gap-xl`,
-			large: `gap-layout-md`
+			comfortable: `gap-layout-md`
 		}
 	},
 	defaultVariants: {
@@ -25,9 +28,9 @@ const defaultForm = cva({
 		density: 'normal'
 	},
 	compoundVariants: [
-		{ variant: 'card', density: 'small', class: 'px-lg' },
+		{ variant: 'card', density: 'compact', class: 'px-lg' },
 		{ variant: 'card', density: 'normal', class: 'px-xl' },
-		{ variant: 'card', density: 'large', class: 'px-layout-md' }
+		{ variant: 'card', density: 'comfortable', class: 'px-layout-md' }
 	]
 });
 
@@ -35,14 +38,14 @@ const defaultFormHeader = cva({
 	base: 'flex flex-col',
 	variants: {
 		variant: {
-			plain: 'px-0',
-			sectioned: 'px-0',
+			plain: '',
+			sectioned: 'border-b border-neutral-muted',
 			card: ''
 		},
 		density: {
-			small: '',
-			normal: '',
-			large: ''
+			compact: 'gap-micro',
+			normal: 'gap-xs',
+			comfortable: 'gap-sm'
 		}
 	},
 	defaultVariants: {
@@ -50,9 +53,12 @@ const defaultFormHeader = cva({
 		density: 'normal'
 	},
 	compoundVariants: [
-		{ variant: 'card', density: 'small', class: '-mx-lg' },
+		{ variant: 'sectioned', density: 'compact', class: 'pb-lg' },
+		{ variant: 'sectioned', density: 'normal', class: 'pb-xl' },
+		{ variant: 'sectioned', density: 'comfortable', class: 'pb-layout-md' },
+		{ variant: 'card', density: 'compact', class: '-mx-lg' },
 		{ variant: 'card', density: 'normal', class: '-mx-xl' },
-		{ variant: 'card', density: 'large', class: '-mx-layout-md' }
+		{ variant: 'card', density: 'comfortable', class: '-mx-layout-md' }
 	]
 });
 
@@ -80,8 +86,8 @@ const defaultFormDescription = cva({
 	base: '',
 	variants: {
 		variant: {
-			plain: 'text-neutral/60',
-			sectioned: 'text-neutral/60',
+			plain: 'text-neutral/70',
+			sectioned: 'text-neutral/70',
 			card: ''
 		},
 		size: {
@@ -100,9 +106,9 @@ const defaultFormGroup = cva({
 	base: 'm-0 min-w-0 border-0 bg-transparent p-0',
 	variants: {
 		density: {
-			small: '',
+			compact: '',
 			normal: '',
-			large: ''
+			comfortable: ''
 		}
 	}
 });
@@ -119,7 +125,7 @@ const defaultFormGroupLabel = cva({
 });
 
 const defaultFormGroupDescription = cva({
-	base: 'mt-xs text-neutral/60',
+	base: 'mt-xs text-neutral/70',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -136,16 +142,19 @@ const defaultFormGroupFields = cva({
 			vertical: '',
 			horizontal: ''
 		},
+		// Column counts are container queries against the Form root: a field column needs roughly
+		// 20rem to hold a labelled control, so 2 columns wait for `@2xl` (42rem), 3 for `@4xl`
+		// (56rem) and 4 for `@6xl` (72rem), stepping through 2 columns on the way up.
 		columns: {
-			1: 'md:grid-cols-1',
-			2: 'md:grid-cols-2',
-			3: 'md:grid-cols-3',
-			4: 'md:grid-cols-4'
+			1: 'grid-cols-1',
+			2: '@2xl:grid-cols-2',
+			3: '@2xl:grid-cols-2 @4xl:grid-cols-3',
+			4: '@2xl:grid-cols-2 @6xl:grid-cols-4'
 		},
 		density: {
-			small: 'mt-md gap-xs',
+			compact: 'mt-md gap-xs',
 			normal: 'mt-lg gap-md',
-			large: 'mt-xl gap-lg'
+			comfortable: 'mt-xl gap-lg'
 		}
 	},
 	defaultVariants: {
@@ -163,9 +172,9 @@ const defaultFormItem = cva({
 			card: ''
 		},
 		density: {
-			small: '',
+			compact: '',
 			normal: '',
-			large: ''
+			comfortable: ''
 		}
 	},
 	defaultVariants: {
@@ -173,12 +182,12 @@ const defaultFormItem = cva({
 		density: 'normal'
 	},
 	compoundVariants: [
-		{ variant: 'sectioned', density: 'small', class: 'pt-lg' },
+		{ variant: 'sectioned', density: 'compact', class: 'pt-lg' },
 		{ variant: 'sectioned', density: 'normal', class: 'pt-xl' },
-		{ variant: 'sectioned', density: 'large', class: 'pt-layout-md' },
-		{ variant: 'card', density: 'small', class: '-mx-lg px-lg pt-lg' },
+		{ variant: 'sectioned', density: 'comfortable', class: 'pt-layout-md' },
+		{ variant: 'card', density: 'compact', class: '-mx-lg px-lg pt-lg' },
 		{ variant: 'card', density: 'normal', class: '-mx-xl px-xl pt-xl' },
-		{ variant: 'card', density: 'large', class: '-mx-layout-md px-layout-md pt-layout-md' }
+		{ variant: 'card', density: 'comfortable', class: '-mx-layout-md px-layout-md pt-layout-md' }
 	]
 });
 
@@ -190,9 +199,9 @@ const defaultFormActions = cva({
 			end: 'justify-end'
 		},
 		density: {
-			small: 'gap-xs',
+			compact: 'gap-xs',
 			normal: 'gap-md',
-			large: 'gap-lg'
+			comfortable: 'gap-lg'
 		}
 	},
 	defaultVariants: {
@@ -212,14 +221,14 @@ const defaultFormFooter = cva({
 	base: 'grid',
 	variants: {
 		variant: {
-			plain: 'px-0',
-			sectioned: 'px-0',
+			plain: '',
+			sectioned: 'border-t border-neutral-muted',
 			card: ''
 		},
 		density: {
-			small: '',
+			compact: '',
 			normal: '',
-			large: ''
+			comfortable: ''
 		}
 	},
 	defaultVariants: {
@@ -227,9 +236,12 @@ const defaultFormFooter = cva({
 		density: 'normal'
 	},
 	compoundVariants: [
-		{ variant: 'card', density: 'small', class: '-mx-lg' },
+		{ variant: 'sectioned', density: 'compact', class: 'pt-lg' },
+		{ variant: 'sectioned', density: 'normal', class: 'pt-xl' },
+		{ variant: 'sectioned', density: 'comfortable', class: 'pt-layout-md' },
+		{ variant: 'card', density: 'compact', class: '-mx-lg' },
 		{ variant: 'card', density: 'normal', class: '-mx-xl' },
-		{ variant: 'card', density: 'large', class: '-mx-layout-md' }
+		{ variant: 'card', density: 'comfortable', class: '-mx-layout-md' }
 	]
 });
 

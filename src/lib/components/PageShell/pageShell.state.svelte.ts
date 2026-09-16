@@ -21,71 +21,76 @@ export class PageShellState {
 	readonly api: PageShellApi;
 
 	constructor(private options: PageShellStateOptions) {
-		const shell = this;
+		// Arrow accessors keep the instance in scope for the `api` getters below, whose own
+		// `this` is the api object rather than the shell.
+		const current = () => this.current;
+		const isContentScrolled = () => this.options.isContentScrolled ?? false;
+		const hasHeader = () => this.hasHeader;
+		const hasFooter = () => this.hasFooter;
 
 		this.api = {
 			get title() {
-				return shell.current.title;
+				return current().title;
 			},
 			get subtitle() {
-				return shell.current.subtitle;
+				return current().subtitle;
 			},
 			get header() {
-				return shell.current.header;
+				return current().header;
 			},
 			get headerActions() {
-				return shell.current.headerActions;
+				return current().headerActions;
 			},
 			get footer() {
-				return shell.current.footer;
+				return current().footer;
 			},
 			get footerActions() {
-				return shell.current.footerActions;
+				return current().footerActions;
 			},
 			get eyebrow() {
-				return shell.current.eyebrow;
+				return current().eyebrow;
 			},
 			get breadcrumbs() {
-				return shell.current.breadcrumbs;
+				return current().breadcrumbs;
 			},
 			get breadcrumbsMaxItems() {
-				return shell.current.breadcrumbsMaxItems;
+				return current().breadcrumbsMaxItems;
 			},
 			get back() {
-				return shell.current.back;
+				return current().back;
 			},
 			get contentPadding() {
-				return shell.current.contentPadding;
+				return current().contentPadding;
 			},
 			get contentWidth() {
-				return shell.current.contentWidth;
+				return current().contentWidth;
 			},
 			get actionOverflow() {
-				return shell.current.actionOverflow;
+				return current().actionOverflow;
 			},
 			get mobileActionCount() {
-				return shell.current.mobileActionCount;
+				return current().mobileActionCount;
 			},
 			get isContentScrolled() {
-				return shell.options.isContentScrolled ?? false;
+				return isContentScrolled();
 			},
 			get hasHeader() {
-				return shell.hasHeader;
+				return hasHeader();
 			},
 			get hasFooter() {
-				return shell.hasFooter;
+				return hasFooter();
 			},
-			set: shell.set,
-			setEyebrow: shell.setEyebrow,
-			setBreadcrumbs: shell.setBreadcrumbs,
-			setBack: shell.setBack,
-			setTitle: shell.setTitle,
-			setSubtitle: shell.setSubtitle,
-			setHeader: shell.setHeader,
-			setHeaderActions: shell.setHeaderActions,
-			setFooter: shell.setFooter,
-			setFooterActions: shell.setFooterActions,
-			reset: shell.reset
+			set: this.set,
+			setEyebrow: this.setEyebrow,
+			setBreadcrumbs: this.setBreadcrumbs,
+			setBack: this.setBack,
+			setTitle: this.setTitle,
+			setSubtitle: this.setSubtitle,
+			setHeader: this.setHeader,
+			setHeaderActions: this.setHeaderActions,
+			setFooter: this.setFooter,
+			setFooterActions: this.setFooterActions,
+			reset: this.reset
 		};
 
 		setContext(PAGE_SHELL_CONTEXT, this);

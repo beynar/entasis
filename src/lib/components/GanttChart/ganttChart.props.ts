@@ -135,10 +135,10 @@ export type GanttInteractionOptions<TDependencyFields extends object = Record<ne
 		dependencyCreation?:
 			| false
 			| Readonly<{
-					create: (request: GanttDependencyCreationRequest) => GanttDependency<TDependencyFields>;
+					create: (payload: GanttDependencyCreationRequest) => GanttDependency<TDependencyFields>;
 			  }>;
 		/** Clipboard capability; `getId` is required for paste. */
-		clipboard?: false | Readonly<{ getId?: (request: GanttPasteIdRequest) => string }>;
+		clipboard?: false | Readonly<{ getId?: (payload: GanttPasteIdRequest) => string }>;
 		/** Immutable undo/redo history; defaults to 50 entries. */
 		history?: false | Readonly<{ limit?: number }>;
 	}>;
@@ -149,29 +149,29 @@ export type GanttMutationPolicy<
 	TAssignmentFields extends object = Record<never, never>
 > = Readonly<{
 	task?: Readonly<{
-		validate?: (proposal: GanttTaskProposal<TTaskFields>) => boolean;
-		resolve?: (proposal: GanttTaskProposal<TTaskFields>) => GanttTaskUpdateResult<TTaskFields>;
+		validate?: (payload: GanttTaskProposal<TTaskFields>) => boolean;
+		resolve?: (payload: GanttTaskProposal<TTaskFields>) => GanttTaskUpdateResult<TTaskFields>;
 		/** Called after the task collection commits with its guarded transaction. */
-		onTasksChange?: (change: GanttTasksChange<TTaskFields>) => void;
+		onTasksChange?: (payload: GanttTasksChange<TTaskFields>) => void;
 	}>;
 	dependency?: Readonly<{
-		validate?: (proposal: GanttDependencyProposal<TDependencyFields>) => boolean;
+		validate?: (payload: GanttDependencyProposal<TDependencyFields>) => boolean;
 		resolve?: (
-			proposal: GanttDependencyProposal<TDependencyFields>
+			payload: GanttDependencyProposal<TDependencyFields>
 		) => GanttDependencyUpdateResult<TDependencyFields>;
 		/** Called after the dependency collection commits with its guarded transaction. */
-		onDependenciesChange?: (change: GanttDependenciesChange<TDependencyFields>) => void;
+		onDependenciesChange?: (payload: GanttDependenciesChange<TDependencyFields>) => void;
 	}>;
 	assignment?: Readonly<{
-		validate?: (proposal: GanttAssignmentProposal<TAssignmentFields>) => boolean;
+		validate?: (payload: GanttAssignmentProposal<TAssignmentFields>) => boolean;
 		resolve?: (
-			proposal: GanttAssignmentProposal<TAssignmentFields>
+			payload: GanttAssignmentProposal<TAssignmentFields>
 		) => GanttAssignmentUpdateResult<TAssignmentFields>;
 		/** Called after the assignment collection commits with its guarded transaction. */
-		onAssignmentsChange?: (change: GanttAssignmentsChange<TAssignmentFields>) => void;
+		onAssignmentsChange?: (payload: GanttAssignmentsChange<TAssignmentFields>) => void;
 	}>;
 	range?: Readonly<{
-		validate?: (proposal: GanttRangeProposal) => boolean;
+		validate?: (payload: GanttRangeProposal) => boolean;
 	}>;
 }>;
 
@@ -424,17 +424,19 @@ export type GanttEventHandlers<
 	TTaskFields extends object = Record<never, never>,
 	TDependencyFields extends object = Record<never, never>
 > = Readonly<{
-	onSelectionChange?: (selection: GanttSelection) => void;
+	/** Reports the new selection model after a chart-driven selection change. */
+	onSelectionChange?: (payload: GanttSelection) => void;
 	onExpansionChange?: (expandedTaskIds: string[]) => void;
 	onZoomChange?: (zoom: GanttZoomLevel) => void;
-	onVisibleRangeChange?: (info: GanttVisibleRangeInfo) => void;
+	onVisibleRangeChange?: (payload: GanttVisibleRangeInfo) => void;
 	onTaskClick?: (payload: GanttTaskClickPayload<TTaskFields>) => void;
 	onTaskDoubleClick?: (payload: GanttTaskClickPayload<TTaskFields>) => void;
 	onDependencyClick?: (
 		payload: GanttDependencyClickPayload<TTaskFields, TDependencyFields>
 	) => void;
-	onEmptyRangeSelect?: (proposal: GanttRangeProposal) => void;
-	onInteractionBlocked?: (info: GanttInteractionBlockedInfo) => void;
+	/** Reports the range a user picked on an empty row, as a proposal for a new task. */
+	onSelect?: (payload: GanttRangeProposal) => void;
+	onInteractionBlocked?: (payload: GanttInteractionBlockedInfo) => void;
 	onScheduleViolations?: (payload: GanttScheduleViolationsPayload) => void;
 }>;
 
@@ -477,8 +479,10 @@ type GanttOwnProps<
 	calendars?: GanttCalendar[];
 	/** Bindable ordered unique expanded summary IDs. Defaults to summary definitions with `expanded` omitted, initially expanded. */
 	expandedTaskIds?: string[];
-	/** Bindable task, dependency, tree-cell, or empty selection. */
+	/** Bindable task, dependency, tree-cell, or empty selection. Defaults to `defaultSelection`. */
 	selection?: GanttSelection;
+	/** Initial selection when `selection` is omitted. Defaults to the empty selection. */
+	defaultSelection?: GanttSelection;
 	/** Bindable active built-in or custom zoom level. Defaults to `week`. */
 	zoom?: GanttZoomLevel;
 	/** Required IANA display time zone or `UTC`. */

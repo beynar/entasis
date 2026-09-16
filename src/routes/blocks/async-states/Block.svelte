@@ -33,14 +33,14 @@
 			<Stack orientation="horizontal" align="center" justify="between" gap="lg" wrap="wrap">
 				<Stack gap="xs">
 					<h2 class="text-neutral text-lg font-semibold">Projects</h2>
-					<p class="text-neutral/60 text-sm">Operational states for a remote project list.</p>
+					<p class="text-neutral/70 text-sm">Operational states for a remote project list.</p>
 				</Stack>
 				<SegmentedControl
 					items={stateOptions}
 					bind:value={viewState}
 					size="small"
 					variant="pill"
-					ariaLabel="Preview project list state"
+					label="Preview project list state"
 				/>
 			</Stack>
 		{/snippet}
@@ -103,7 +103,7 @@
 						description="The server stopped responding before the request completed. Your existing projects are safe."
 					/>
 					<Stack orientation="horizontal" align="center" justify="between" gap="md" wrap="wrap">
-						<p class="text-neutral/60 text-sm">Error code: GATEWAY_TIMEOUT</p>
+						<p class="text-neutral/70 text-sm">Error code: GATEWAY_TIMEOUT</p>
 						<Button variant="outline" color="danger" prefix={arrowClockwiseIcon} onclick={retry}>
 							Try again
 						</Button>

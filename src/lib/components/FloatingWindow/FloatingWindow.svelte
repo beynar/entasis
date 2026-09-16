@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
-	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { crossfade, scale } from 'svelte/transition';
+	import { easingFunctions } from '$lib/transitions/easingFunctions.js';
 	import Button from '../Button/Button.svelte';
 	import { minusIcon } from '../Icons/minus.js';
 	import { squareIcon } from '../Icons/square.js';
@@ -13,7 +14,8 @@
 		FloatingWindowResizeDirection
 	} from './floatingWindow.props.js';
 	import { FloatingWindowState } from './floatingWindow.state.svelte.js';
-	import { useFloatingWindowTheme } from './floatingWindow.theme.js';
+	import { useFloatingWindowMotion, useFloatingWindowTheme } from './floatingWindow.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		id: customId,
@@ -54,16 +56,28 @@
 	const generatedId = $props.id();
 	const id = $derived(customId || generatedId);
 	const classes = $derived(useFloatingWindowTheme(theme));
+	const t = $derived(useI18n());
+	// Motion preset from `floatingWindowTheme.motion`, through the override ladder
+	// (registry → `setFloatingWindowTheme` → instance `theme.motion`). `crossfade` is
+	// built once, so the preset is read at init like the hardcoded timings it replaces.
+	const resolveMotion = useFloatingWindowMotion();
+	const { flight, enter, exit } = untrack(() => ({
+		flight: resolveMotion({ phase: 'flight' }, { motion: theme?.motion }),
+		enter: resolveMotion({ phase: 'enter' }, { motion: theme?.motion }),
+		exit: resolveMotion({ phase: 'exit' }, { motion: theme?.motion })
+	}));
 	const [send, receive] = crossfade({
-		duration: 280,
-		easing: cubicOut,
-		fallback: (node, _params, intro) =>
-			scale(node, {
-				duration: intro ? 210 : 140,
-				easing: intro ? cubicOut : cubicIn,
-				start: 0.97,
-				opacity: 0
-			})
+		duration: flight.in.duration ?? 0,
+		easing: easingFunctions[flight.in.easing ?? 'cubicOut'],
+		fallback: (node, _params, intro) => {
+			const side = intro ? enter.in : exit.out;
+			return scale(node, {
+				duration: side.duration ?? 0,
+				easing: easingFunctions[side.easing ?? 'cubicOut'],
+				start: side.scale ?? 0.97,
+				opacity: side.opacity ?? 0
+			});
+		}
 	});
 	const windowState = new FloatingWindowState({
 		get id() {
@@ -243,7 +257,7 @@
 						variant="ghost"
 						color="neutral"
 						squared
-						label="Minimize window"
+						label={t.minimizeWindow}
 						class={classes.control()}
 						onclick={() => windowState.minimize()}
 					>
@@ -257,7 +271,7 @@
 						variant="ghost"
 						color="neutral"
 						squared
-						label="Close window"
+						label={t.closeWindow}
 						class={classes.control()}
 						onclick={() => windowState.close()}
 					>
@@ -267,7 +281,7 @@
 			</div>
 		</header>
 
-		<ScrollArea class={classes.scrollArea()} ariaLabel="Window content">
+		<ScrollArea class={classes.scrollArea()} label={t.windowContent}>
 			<Slot render={children} payload={windowState.payload} class={classes.content()} />
 		</ScrollArea>
 
@@ -280,7 +294,7 @@
 					data-direction={direction}
 					role={isEdge(direction) ? 'separator' : undefined}
 					tabindex={isEdge(direction) ? 0 : -1}
-					aria-label={isEdge(direction) ? `Resize window ${direction} edge` : undefined}
+					aria-label={isEdge(direction) ? t.resizeWindowEdge(direction) : undefined}
 					aria-orientation={isEdge(direction) ? edgeOrientation(direction) : undefined}
 					aria-valuenow={isEdge(direction) ? edgeValue(direction) : undefined}
 					aria-valuemin={isEdge(direction) ? edgeMinimum(direction) : undefined}
@@ -305,7 +319,7 @@
 		onoutroend={handleOutroEnd}
 		bind:this={ref}
 		role="group"
-		aria-label="Minimized window"
+		aria-label={t.minimizedWindow}
 		data-slot="floating-window-dock-item"
 		data-placement={dockPlacement}
 		data-dragging={windowState.isDragging ? 'true' : undefined}
@@ -329,7 +343,7 @@
 				orientation: windowState.dockOrientation,
 				dragging: windowState.isDragging
 			})}
-			label="Restore window"
+			label={t.restoreWindow}
 			onclick={() => windowState.restoreFromDock()}
 		>
 			<span class={classes.dockTitleText({ side: windowState.dockSide })}>
@@ -346,7 +360,7 @@
 				variant="ghost"
 				color="neutral"
 				squared
-				label="Restore window"
+				label={t.restoreWindow}
 				class={classes.control()}
 				onclick={() => windowState.restore()}
 			>
@@ -359,7 +373,7 @@
 					variant="ghost"
 					color="neutral"
 					squared
-					label="Close window"
+					label={t.closeWindow}
 					class={classes.control()}
 					onclick={() => windowState.close()}
 				>

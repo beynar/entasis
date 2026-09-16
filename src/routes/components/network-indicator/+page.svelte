@@ -9,10 +9,10 @@
 	import NetworkIndicatorTrailExamples from './NetworkIndicatorTrailExamples.svelte';
 	import type { Easing } from '$lib/transitions/easingFunctions.js';
 
-	const easingExamples: { label: string; easing: Easing; delay: number }[] = [
-		{ label: 'Cubic', easing: 'cubicInOut', delay: 300 },
-		{ label: 'Expo', easing: 'expoOut', delay: 450 },
-		{ label: 'Back', easing: 'backOut', delay: 500 }
+	const easingExamples: { label: string; easing: Easing; duration: number }[] = [
+		{ label: 'Cubic', easing: 'cubicInOut', duration: 300 },
+		{ label: 'Expo', easing: 'expoOut', duration: 450 },
+		{ label: 'Back', easing: 'backOut', duration: 500 }
 	];
 	const controls = createComponentControls([
 		{
@@ -40,9 +40,9 @@
 			showValue: true
 		},
 		{
-			name: 'delay',
+			name: 'duration',
 			type: 'slider',
-			label: 'Delay',
+			label: 'Duration',
 			value: 300,
 			min: 150,
 			max: 700,
@@ -99,7 +99,7 @@ ${'</' + 'script>'}
 			variant="${controls.value.variant}"
 			color="${controls.value.color}"
 			height={${controls.value.height}}
-			delay={${controls.value.delay}}
+			theme={{ motion: { duration: ${controls.value.duration} } }}
 			class="!absolute"
 		/>
 		<Button onclick={previewRequest} loading={loading}>
@@ -115,13 +115,13 @@ ${'</' + 'script>'}
 				variant={controls.value.variant}
 				color={controls.value.color}
 				height={controls.value.height}
-				delay={controls.value.delay}
+				theme={{ motion: { duration: controls.value.duration } }}
 				class="!absolute !z-10"
 			/>
 			<Button onclick={previewNetworkRequest} loading={isPreviewLoading}>
 				{isPreviewLoading ? 'Syncing' : 'Preview async work'}
 			</Button>
-			<p class="text-neutral/60 text-sm">The local indicator runs for 1.4 seconds.</p>
+			<p class="text-neutral/70 text-sm">The local indicator runs for 1.4 seconds.</p>
 		</div>
 	</ComponentCard>
 
@@ -159,11 +159,11 @@ ${'</' + 'script>'}
 		</ComponentCard>
 
 		<ComponentCard
-			description="Trail variant renders one randomly sized moving segment at a time. Use trailDuration for speed and trailGap for the pause between passes."
+			description="Trail variant renders one randomly sized moving segment at a time. The motion slot duration sets the pass speed and trailGap the pause between passes."
 			class="!min-h-[220px]"
-			code={`<NetworkIndicator loading variant="trail" color="primary" trailDuration={650} trailGap={0} />
-<NetworkIndicator loading variant="trail" color="success" height={5} trailDuration={450} trailGap={120} />
-<NetworkIndicator loading variant="trail-bounce" color="info" trailDuration={700} trailGap={80} />`}
+			code={`<NetworkIndicator loading variant="trail" color="primary" theme={{ motion: { duration: 650 } }} trailGap={0} />
+<NetworkIndicator loading variant="trail" color="success" height={5} theme={{ motion: { duration: 450 } }} trailGap={120} />
+<NetworkIndicator loading variant="trail-bounce" color="info" theme={{ motion: { duration: 700 } }} trailGap={80} />`}
 		>
 			<NetworkIndicatorTrailExamples />
 		</ComponentCard>
@@ -196,7 +196,7 @@ ${'</' + 'script>'}
 <NetworkIndicator loading color="warning" />`}
 		>
 			<div class="grid w-full max-w-xl gap-4">
-				{#each colors as color}
+				{#each colors as color, index (index)}
 					<NetworkIndicatorPreview label={color} class="h-10">
 						<NetworkIndicator loading {color} height={4} class="!absolute !z-10" />
 					</NetworkIndicatorPreview>
@@ -212,7 +212,7 @@ ${'</' + 'script>'}
 <NetworkIndicator loading height={6} color="info" />`}
 		>
 			<div class="grid w-full max-w-xl gap-4">
-				{#each [2, 4, 6] as height}
+				{#each [2, 4, 6] as height, index (index)}
 					<NetworkIndicatorPreview label={`${height}px`}>
 						<NetworkIndicator
 							loading
@@ -226,21 +226,20 @@ ${'</' + 'script>'}
 		</ComponentCard>
 
 		<ComponentCard
-			description="Delay controls each animation segment duration; easing changes the perceived momentum."
+			description="The motion slot duration sets each animation segment; its easing changes the perceived momentum."
 			class="!min-h-[240px]"
-			code={`<NetworkIndicator loading delay={300} easing="cubicInOut" />
-<NetworkIndicator loading delay={450} easing="expoOut" />
-<NetworkIndicator loading delay={500} easing="backOut" />`}
+			code={`<NetworkIndicator loading theme={{ motion: { duration: 300, easing: 'cubicInOut' } }} />
+<NetworkIndicator loading theme={{ motion: { duration: 450, easing: 'expoOut' } }} />
+<NetworkIndicator loading theme={{ motion: { duration: 500, easing: 'backOut' } }} />`}
 		>
 			<div class="grid w-full max-w-xl gap-4">
-				{#each easingExamples as example}
+				{#each easingExamples as example, index (index)}
 					<NetworkIndicatorPreview label={`${example.label}: ${example.easing}`}>
 						<NetworkIndicator
 							loading
 							color="secondary"
 							height={4}
-							delay={example.delay}
-							easing={example.easing}
+							theme={{ motion: { duration: example.duration, easing: example.easing } }}
 							class="!absolute !z-10"
 						/>
 					</NetworkIndicatorPreview>
@@ -251,7 +250,7 @@ ${'</' + 'script>'}
 		<ComponentCard
 			description="Provide a label when the default Loading announcement is not specific enough."
 			class="!min-h-[220px]"
-			code={`<NetworkIndicator loading label="Uploading files" color="info" />`}
+			code="<NetworkIndicator loading label=&quot;Uploading files&quot; color=&quot;info&quot; />"
 		>
 			<div class="w-full max-w-xl">
 				<NetworkIndicatorPreview label="Accessible label: Uploading files" class="h-14">

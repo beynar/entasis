@@ -1,5 +1,6 @@
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
+import { motion, useComponentMotion } from '$lib/utils/motion/index.js';
 
 export const defaultDialog = cva({
 	base: 'fixed inset-0',
@@ -43,7 +44,7 @@ export const defaultDialogBackdrop = cva({
 });
 
 export const defaultDialogContent = cva({
-	base: 'z-10 relative px-xl py-md raised-xl h-fit bg-surface-floating text-neutral rounded-md flex flex-col z-50 will-change-transform transition-transform duration-200 ease-out',
+	base: 'z-10 relative px-xl py-md raised-xl h-fit bg-surface-floating text-neutral rounded-xl flex flex-col z-50 will-change-transform transition-transform duration-normal ease-standard',
 	variants: {
 		size: {
 			small: 'max-w-md w-full',
@@ -137,7 +138,7 @@ export const defaultDialogTitle = cva({
 });
 
 export const defaultDialogDescription = cva({
-	base: 'text-sm text-neutral/60',
+	base: 'text-sm text-neutral/70',
 	variants: {
 		size: {
 			small: '',
@@ -147,7 +148,32 @@ export const defaultDialogDescription = cva({
 	}
 });
 
+// Motion preset, keyed by the resolved `type`: modal/fullScreen/alert scale in place,
+// drawers fly in from their edge. `duration` / `easing` stay tokens so a `<Theme motion>`
+// retune and a reduced-motion preference reach every dialog.
+export const defaultDialogMotion = motion({
+	base: {
+		in: { x: 0, y: 0, scale: 0.98, opacity: 0 },
+		out: { x: 0, y: 0, scale: 0.98, opacity: 0 }
+	},
+	variants: {
+		type: {
+			modal: {},
+			fullScreen: {},
+			drawerRight: { in: { x: '100%' }, out: { x: '100%' } },
+			drawerLeft: { in: { x: '-100%' }, out: { x: '-100%' } },
+			drawerBottom: { in: { y: '100%' }, out: { y: '100%' } },
+			drawerTop: { in: { y: '-100%' }, out: { y: '-100%' } },
+			alert: { in: { y: -100 }, out: { y: -100 } }
+		}
+	},
+	defaultVariants: {
+		type: 'modal'
+	}
+});
+
 export const dialogTheme = {
+	motion: defaultDialogMotion,
 	root: defaultDialog,
 	align: defaultDialogAlign,
 	backdrop: defaultDialogBackdrop,
@@ -164,3 +190,4 @@ export type DialogTheme = typeof dialogTheme;
 export type DialogThemeProps = InferComponentTheme<DialogTheme>;
 export const setDialogTheme = setComponentTheme<DialogTheme>('dialog');
 export const useDialogTheme = useComponentTheme<DialogTheme>('dialog', dialogTheme);
+export const useDialogMotion = () => useComponentMotion('dialog', defaultDialogMotion);

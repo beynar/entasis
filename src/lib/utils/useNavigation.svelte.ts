@@ -3,6 +3,9 @@ import { useKeyDown } from './useKeyDown.svelte.js';
 import { on } from 'svelte/events';
 import { onDestroy, untrack } from 'svelte';
 import { usePointerDown } from './usePointerDown.svelte.js';
+import { useDirection } from './useDirection.svelte.js';
+import { createTypeahead } from './typeahead.js';
+import { createId } from './id.js';
 
 type NavigationOptions = {
 	enabled?: () => boolean;
@@ -19,6 +22,16 @@ type NavigationOptions = {
 	 * roving tabindex or DOM focus.
 	 */
 	virtualFocus?: boolean;
+	/**
+	 * Swap ArrowLeft/ArrowRight in right-to-left contexts (horizontal orientation only).
+	 * Default `true`; direction comes from the i18n context, then the container's computed style.
+	 */
+	rtl?: boolean;
+	/**
+	 * Type-to-focus: printable keys move focus to the next item whose text starts with the
+	 * typed buffer. `true` reads `data-typeahead` then the item's text content.
+	 */
+	typeahead?: boolean | { getText: (item: HTMLElement) => string };
 };
 
 export const useNavigation = (opts: NavigationOptions) => {
@@ -39,7 +52,22 @@ export const useNavigation = (opts: NavigationOptions) => {
 		}
 	});
 	// Generate ID if not provided
-	const baseId = opts.id ?? `nav-${Math.random().toString(36).slice(2, 11)}`;
+	const baseId = opts.id ?? createId('nav');
+
+	const getDirection = useDirection(() => containerRef);
+	const typeahead = opts.typeahead
+		? createTypeahead<HTMLElement>({
+				getItems: () => items,
+				getText: (item) =>
+					typeof opts.typeahead === 'object'
+						? opts.typeahead.getText(item)
+						: (item.dataset.typeahead ?? item.textContent ?? ''),
+				getCurrentIndex: () => focusedIndex ?? -1,
+				onMatch: (index) => {
+					if (!isItemDisabled(items[index])) moveFocusTo(index);
+				}
+			})
+		: null;
 
 	// Get current orientation
 	const getOrientation = () => {
@@ -296,7 +324,16 @@ export const useNavigation = (opts: NavigationOptions) => {
 			if (!opts.preventKeyboardDefault && event.key !== 'Escape') {
 				event.preventDefault();
 			}
-			switch (event.key) {
+			// In RTL the physical arrows are mirrored: ArrowRight goes to the previous item.
+			const mirrored =
+				(opts.rtl ?? true) && orientation === 'horizontal' && getDirection() === 'rtl';
+			const key =
+				mirrored && event.key === 'ArrowLeft'
+					? 'ArrowRight'
+					: mirrored && event.key === 'ArrowRight'
+						? 'ArrowLeft'
+						: event.key;
+			switch (key) {
 				case 'ArrowLeft':
 					if (orientation === 'horizontal') {
 						const currentIdx = focusedIndex ?? findFirstIndex();
@@ -386,6 +423,12 @@ export const useNavigation = (opts: NavigationOptions) => {
 
 				// Apply keydown reference
 				const keyDownCleanup = keyDown.reference?.(node);
+				const typeaheadCleanup = typeahead
+					? on(node, 'keydown', (event) => {
+							if (!isEnabled() || event.defaultPrevented) return;
+							if (typeahead.handleKey(event)) event.preventDefault();
+						})
+					: null;
 
 				// Handle focus event - set focus to first item when container receives focus
 				const handleFocus = () => {
@@ -442,6 +485,7 @@ export const useNavigation = (opts: NavigationOptions) => {
 				return () => {
 					cleanUp();
 					keyDownCleanup?.();
+					typeaheadCleanup?.();
 					focusCleanup();
 					blurCleanup();
 					containerEnterCleanup();

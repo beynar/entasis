@@ -67,7 +67,7 @@ export type DataTableApi<TData> = {
 };
 ```
 
-Expose it through a bindable `dataTable` prop:
+Expose it through the bindable `api` prop:
 
 ```svelte
 <script lang="ts">
@@ -76,11 +76,11 @@ Expose it through a bindable `dataTable` prop:
 
 <TextInput
 	value={dataTable?.state.globalFilter ?? ''}
-	onChange={(value) => dataTable?.setGlobalFilter(value ?? '')}
+	onValueChange={(value) => dataTable?.setGlobalFilter(value ?? '')}
 />
 
 <DataTable
-	bind:dataTable
+	bind:api={dataTable}
 	{items}
 	{columns}
 	getRowId={(person) => person.id}
@@ -88,9 +88,9 @@ Expose it through a bindable `dataTable` prop:
 />
 
 <Pagination
-	page={dataTable?.state.pagination.page ?? 1}
+	value={dataTable?.state.pagination.page ?? 1}
 	totalPages={dataTable?.totalPages ?? 1}
-	onPageChange={(page) => dataTable?.setPage(page)}
+	onValueChange={(page) => dataTable?.setPage(page)}
 />
 ```
 
@@ -221,7 +221,7 @@ Gate: every advertised processing feature has a representable input/output contr
 ### Documentation
 
 - Add a controlled-state example using exported `createDataTableState`.
-- Add an external search and external pagination example using `bind:dataTable` and `showControls: false`.
+- Add an external search and external pagination example using `bind:api` and `showControls: false`.
 - Add complete Svelte 5 examples for custom cells, headers, filters, editors, and toolbar snippets.
 - Replace the race-prone manual request example with an abortable or sequence-guarded request that handles errors and cleanup.
 - Explain the difference between observing `state`, invoking `DataTableApi`, and handling `onStateChange`.

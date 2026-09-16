@@ -33,28 +33,30 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<div class="grid gap-xl md:grid-cols-[1fr_2fr]">
-		<div class="md:sticky md:top-xl md:self-start">
-			<header class="flex flex-col gap-lg">
-				<p class="text-xs font-semibold uppercase tracking-widest text-primary">The toolkit</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<div class="gap-xl grid md:grid-cols-[1fr_2fr]">
+		<div class="md:top-xl md:sticky md:self-start">
+			<header class="gap-lg flex flex-col">
+				<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+					The toolkit
+				</p>
 				<Heading size="h2" weight="bold">The right tool for the idea.</Heading>
-				<p class="max-w-2xl text-neutral/65">
+				<p class="text-neutral/65 max-w-2xl">
 					A few familiar tools I use to turn a good question into something people can use.
 				</p>
 			</header>
 		</div>
 		<div>
 			{#each tools as tool (tool.name)}<div
-					class="grid grid-cols-[auto_1fr_auto] items-center gap-xl border-t border-neutral/15 py-xl"
+					class="gap-xl border-neutral/15 py-xl grid grid-cols-[auto_1fr_auto] items-center border-t"
 				>
 					<span
-						class="grid size-12 place-items-center rounded-lg bg-primary-muted text-sm font-semibold text-primary"
+						class="bg-primary-muted text-primary-muted-readable grid size-12 place-items-center rounded-lg text-sm font-semibold"
 						>{tool.mark}</span
 					>
 					<div>
 						<h3 class="text-lg font-semibold">{tool.name}</h3>
-						<p class="mt-sm text-sm text-neutral/55">{tool.kind}</p>
+						<p class="mt-sm text-neutral/65 text-sm">{tool.kind}</p>
 					</div>
 					<Chip variant="outline" color="neutral" size="small">{tool.years}</Chip>
 				</div>{/each}

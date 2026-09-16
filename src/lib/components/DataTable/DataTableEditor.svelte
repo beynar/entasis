@@ -1,5 +1,4 @@
 <script lang="ts" generics="TData">
-	import type { Row } from '@tanstack/table-core';
 	import { tick } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import { on } from 'svelte/events';
@@ -11,6 +10,8 @@
 	import Slot from '../Slot/Slot.svelte';
 	import type { DataTableClasses } from './dataTable.theme.js';
 	import type { DataTableModel } from './dataTable.model.svelte.js';
+	import type { DataTableRowInstance } from './dataTable.table.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		row,
@@ -19,12 +20,13 @@
 		classes,
 		density
 	}: {
-		row: Row<TData>;
+		row: DataTableRowInstance<TData>;
 		columnId: string;
 		model: DataTableModel<TData>;
 		classes: DataTableClasses;
-		density: 'small' | 'normal' | 'large';
+		density: 'compact' | 'normal' | 'comfortable';
 	} = $props();
+	const t = $derived(useI18n());
 
 	const config = $derived(model.getColumnConfig(columnId));
 	const editor = $derived(config?.editor);
@@ -122,7 +124,8 @@
 
 	const fieldTheme = $derived({
 		input: { base: classes.editorInput() },
-		inputContainer: { base: classes.editorInputContainer({ density }) }
+		inputContainer: { base: classes.editorInputContainer({ density }) },
+		label: { base: classes.editorFieldLabel() }
 	});
 </script>
 
@@ -162,6 +165,7 @@
 				size="normal"
 				class={classes.editorField()}
 				theme={fieldTheme}
+				label={t.dataTableEditColumn(typeof config?.header === 'string' ? config.header : columnId)}
 				items={[...editor.options]}
 				disabled={payload.pending}
 				value={payload.draft == null ? null : String(payload.draft)}
@@ -177,14 +181,17 @@
 				disabled={payload.pending}
 				value={payload.draft instanceof Date ? payload.draft : null}
 				onValueChange={payload.setDraft}
-				onCalendarSelect={commitCalendarDate}
+				onSelect={commitCalendarDate}
 			/>
 		{:else if editor.type === 'switch'}
 			<Switch
 				size="small"
 				class={classes.editorField()}
-				theme={{ inputContainer: { base: classes.editorSwitchContainer() } }}
-				ariaLabel={`Edit ${columnId}`}
+				theme={{
+					inputContainer: { base: classes.editorSwitchContainer() },
+					label: { base: classes.editorFieldLabel() }
+				}}
+				label={t.dataTableEditColumn(columnId)}
 				disabled={payload.pending}
 				value={Boolean(payload.draft)}
 				onValueChange={payload.setDraft}

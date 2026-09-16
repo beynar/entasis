@@ -7,7 +7,8 @@ export const useToggleMenuOverflow = () => {
 	let moreElement: HTMLElement | null = null;
 	let resizeObserver: ResizeObserver | null = null;
 	let frame: number | null = null;
-	const unitElements = new Map<number, HTMLElement>();
+	/** Unit elements by their index in the rail; holes appear as elements unmount. */
+	const unitElements: Array<HTMLElement | undefined> = [];
 
 	let visibleCount = $state(Number.POSITIVE_INFINITY);
 	let hasOverflow = $state(false);
@@ -21,9 +22,7 @@ export const useToggleMenuOverflow = () => {
 		frame = null;
 		if (!rootElement || !railElement || !moreElement) return;
 
-		const units = [...unitElements.entries()]
-			.sort(([leftIndex], [rightIndex]) => leftIndex - rightIndex)
-			.map(([, element]) => element);
+		const units = unitElements.filter((element): element is HTMLElement => element !== undefined);
 		const rootStyle = getComputedStyle(rootElement);
 		const railStyle = getComputedStyle(railElement);
 		const contentWidth =
@@ -78,7 +77,7 @@ export const useToggleMenuOverflow = () => {
 			observe(node);
 			if (railElement) observe(railElement);
 			if (moreElement) observe(moreElement);
-			unitElements.forEach(observe);
+			for (const element of unitElements) if (element) observe(element);
 			scheduleMeasure();
 
 			return () => {
@@ -116,13 +115,13 @@ export const useToggleMenuOverflow = () => {
 	function unitReference(index: number): Attachment<HTMLElement> {
 		return (node) =>
 			untrack(() => {
-				unitElements.set(index, node);
+				unitElements[index] = node;
 				observe(node);
 				scheduleMeasure();
 
 				return () => {
 					unobserve(node);
-					if (unitElements.get(index) === node) unitElements.delete(index);
+					if (unitElements[index] === node) unitElements[index] = undefined;
 					scheduleMeasure();
 				};
 			});

@@ -75,13 +75,13 @@
 </script>
 
 <section
-	class="bg-surface-recessed flex min-h-96 w-full items-center justify-center rounded-lg p-lg sm:p-xl"
+	class="bg-surface-recessed p-lg sm:p-xl flex min-h-96 w-full items-center justify-center rounded-lg"
 >
 	<div
 		class="border-neutral-muted bg-surface w-full max-w-3xl overflow-hidden rounded-xl border shadow-lg"
 	>
-		<header class="border-neutral-muted flex items-center justify-between gap-md border-b p-md">
-			<div class="flex min-w-0 items-center gap-md">
+		<header class="border-neutral-muted gap-md p-md flex items-center justify-between border-b">
+			<div class="gap-md flex min-w-0 items-center">
 				<span
 					class="bg-primary text-primary-contrast flex size-10 shrink-0 items-center justify-center rounded-lg"
 				>
@@ -89,7 +89,7 @@
 				</span>
 				<div class="min-w-0">
 					<p class="text-neutral truncate font-semibold">Northstar</p>
-					<p class="text-neutral/60 truncate text-sm">Product workspace</p>
+					<p class="text-neutral/70 truncate text-sm">Product workspace</p>
 				</div>
 			</div>
 			<Button variant="ghost" size="small" squared label="Workspace settings">
@@ -97,13 +97,13 @@
 			</Button>
 		</header>
 
-		<main class="flex flex-col gap-xl p-lg sm:p-xl">
-			<div class="flex max-w-xl flex-col gap-sm">
+		<main class="gap-xl p-lg sm:p-xl flex flex-col">
+			<div class="gap-sm flex max-w-xl flex-col">
 				<p class="text-primary-readable text-sm font-medium">Quick actions</p>
 				<h2 class="text-neutral text-2xl font-semibold tracking-tight">
 					Move through your workspace without leaving the keyboard.
 				</h2>
-				<p class="text-neutral/60 text-sm leading-relaxed">
+				<p class="text-neutral/70 text-sm leading-relaxed">
 					Search pages, create work, and open settings from one command palette.
 				</p>
 			</div>
@@ -126,30 +126,30 @@
 				{/snippet}
 
 				{#snippet footer()}
-					<div class="text-neutral/60 flex flex-wrap items-center gap-md text-sm">
-						<span class="flex items-center gap-sm"><Kbd keys={['↑', '↓']} /> Navigate</span>
-						<span class="flex items-center gap-sm"><Kbd>Enter</Kbd> Select</span>
-						<span class="flex items-center gap-sm"><Kbd>Esc</Kbd> Close</span>
+					<div class="text-neutral/70 gap-md flex flex-wrap items-center text-sm">
+						<span class="gap-sm flex items-center"><Kbd keys={['↑', '↓']} /> Navigate</span>
+						<span class="gap-sm flex items-center"><Kbd>Enter</Kbd> Select</span>
+						<span class="gap-sm flex items-center"><Kbd>Esc</Kbd> Close</span>
 					</div>
 				{/snippet}
 			</Command>
 
 			<div
-				class="border-neutral-muted bg-surface-raised flex flex-col gap-md rounded-lg border p-md sm:flex-row sm:items-center sm:justify-between"
+				class="border-neutral-muted bg-surface-raised gap-md p-md flex flex-col rounded-lg border sm:flex-row sm:items-center sm:justify-between"
 				aria-live="polite"
 			>
-				<div class="flex items-center gap-md">
+				<div class="gap-md flex items-center">
 					<span
-						class="bg-primary-muted text-primary-readable flex size-10 shrink-0 items-center justify-center rounded-lg"
+						class="bg-primary-muted text-primary-muted-readable flex size-10 shrink-0 items-center justify-center rounded-lg"
 					>
 						{@render commandIcon({ size: 20 })}
 					</span>
 					<div>
 						<p class="text-neutral text-sm font-medium">Last activity</p>
-						<p class="text-neutral/60 text-sm">{lastAction}</p>
+						<p class="text-neutral/70 text-sm">{lastAction}</p>
 					</div>
 				</div>
-				<p class="text-neutral/60 text-sm">
+				<p class="text-neutral/70 text-sm">
 					{paletteOpen ? 'Palette is open' : 'Press ⌘K anytime'}
 				</p>
 			</div>

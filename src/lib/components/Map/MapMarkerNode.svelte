@@ -13,6 +13,7 @@
 		MapMarkerTooltipContentArg
 	} from './map-types.js';
 	import type { MapLibreMap, MapLibreMarker, MapLibreMarkerConstructor } from './maplibre-types.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type Props<TData = unknown> = {
 		map: MapLibreMap;
@@ -31,6 +32,7 @@
 	};
 
 	let { map, Marker, marker, content, popup, tooltip, onMarkerClick }: Props<TData> = $props();
+	const t = $derived(useI18n());
 
 	let popupOpen = $state(false);
 	let markerColor = $derived(marker.color ?? 'var(--color-neutral)');
@@ -49,9 +51,7 @@
 	let isInteractive = $derived(hasPopup || !!onMarkerClick);
 	let isFocusable = $derived(isInteractive || hasTooltip);
 	let triggerLabel = $derived(
-		plainLabel
-			? `${isInteractive ? 'Open' : 'Map'} marker ${plainLabel}`
-			: `${isInteractive ? 'Open' : 'Map'} marker ${marker.id}`
+		isInteractive ? t.openMarker(plainLabel || marker.id) : t.mapMarker(plainLabel || marker.id)
 	);
 	const noopAttachment: Attachment<HTMLElement> = () => {};
 

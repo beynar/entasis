@@ -43,13 +43,9 @@
 	}: Props = $props();
 
 	let command: { commandState: CommandState<string> } | undefined = $state();
-	let popoverOpen = $state(false);
+	let popoverOpen = $derived(open && anchor !== null);
 
 	const classes = $derived(useRichTextInputTheme(theme));
-
-	$effect(() => {
-		popoverOpen = open && anchor !== null;
-	});
 
 	export function moveHighlight(delta: number) {
 		command?.commandState.move(delta);
@@ -117,20 +113,18 @@
 	class={classes.floatingPanel({ size, width: 'suggestions', class: className })}
 	onAfterClose={handlePopoverClose}
 >
-	{#snippet children()}
-		<Command
-			bind:this={command}
-			{size}
-			items={visibleItems}
-			value={query}
-			{title}
-			empty={emptyState}
-			shouldFilter={false}
-			showInput={false}
-			closeOnSelect={false}
-			footer={showStatusFooter ? statusFooter : undefined}
-			{onSelect}
-			{onHighlightChange}
-		/>
-	{/snippet}
+	<Command
+		bind:this={command}
+		{size}
+		items={visibleItems}
+		search={query}
+		{title}
+		empty={emptyState}
+		shouldFilter={false}
+		showInput={false}
+		closeOnSelect={false}
+		footer={showStatusFooter ? statusFooter : undefined}
+		{onSelect}
+		{onHighlightChange}
+	/>
 </Popover>

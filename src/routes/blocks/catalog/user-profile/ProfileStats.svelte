@@ -9,30 +9,30 @@
 	let contact = $state(false);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card class="mx-auto w-full max-w-xl"
-		><div class="grid justify-items-center gap-lg text-center">
-			<Avatar user={{ name: 'Alex Morgan' }} size="large" />
+		><div class="gap-lg grid justify-items-center text-center">
+			<Avatar name="Alex Morgan" size="large" />
 			<div>
 				<h2 class="text-2xl font-semibold">Alex Morgan</h2>
-				<p class="mt-sm text-sm text-neutral/60">Product designer · Paris, France</p>
+				<p class="mt-sm text-neutral/70 text-sm">Product designer · Paris, France</p>
 			</div>
-			<p class="max-w-sm text-sm leading-relaxed text-neutral/65">
+			<p class="text-neutral/65 max-w-sm text-sm leading-relaxed">
 				I make complex things feel simple. Currently helping thoughtful teams find their next great
 				idea.
 			</p>
-			<div class="grid w-full grid-cols-3 gap-sm rounded-lg bg-surface-recessed p-lg">
+			<div class="gap-sm bg-surface-recessed p-lg grid w-full grid-cols-3 rounded-lg">
 				<div>
 					<strong class="text-xl">24</strong>
-					<p class="text-xs text-neutral/60">Projects</p>
+					<p class="text-neutral/70 text-xs">Projects</p>
 				</div>
 				<div>
 					<strong class="text-xl">{following ? '1,249' : '1,248'}</strong>
-					<p class="text-xs text-neutral/60">Followers</p>
+					<p class="text-neutral/70 text-xs">Followers</p>
 				</div>
 				<div>
 					<strong class="text-xl">186</strong>
-					<p class="text-xs text-neutral/60">Following</p>
+					<p class="text-neutral/70 text-xs">Following</p>
 				</div>
 			</div>
 			<Stack orientation="horizontal" wrap="wrap" gap="md">

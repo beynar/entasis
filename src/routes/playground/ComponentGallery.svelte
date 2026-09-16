@@ -29,10 +29,10 @@
 	];
 </script>
 
-<div class="grid gap-layout-md">
-	<div class="grid gap-lg">
+<div class="gap-layout-md grid">
+	<div class="gap-lg grid">
 		<h2 class="text-xl font-semibold">Dashboard components</h2>
-		<div class="grid gap-lg sm:grid-cols-3">
+		<div class="gap-lg grid sm:grid-cols-3">
 			<Stat label="Revenue" value="$45.2k" trend="+12.4%" trendDirection="up" />
 			<Stat label="Active users" value="8,492" trend="+8.1%" trendDirection="up" />
 			<Stat
@@ -45,10 +45,10 @@
 		</div>
 	</div>
 
-	<div class="grid gap-xl lg:grid-cols-2">
-		<div class="grid content-start gap-lg">
+	<div class="gap-xl grid lg:grid-cols-2">
+		<div class="gap-lg grid content-start">
 			<h2 class="text-xl font-semibold">Status</h2>
-			<div class="grid gap-lg">
+			<div class="gap-lg grid">
 				<Alert
 					variant="soft"
 					color="success"
@@ -64,17 +64,17 @@
 			</div>
 		</div>
 
-		<div class="grid content-start gap-lg">
+		<div class="gap-lg grid content-start">
 			<h2 class="text-xl font-semibold">Details</h2>
-			<div class="border-neutral-muted rounded-lg border bg-surface p-xl">
+			<div class="border-neutral-muted bg-surface p-xl rounded-lg border">
 				<Accordion items={accordionItems} />
 			</div>
 		</div>
 	</div>
 
-	<div class="grid gap-lg">
+	<div class="gap-lg grid">
 		<h2 class="text-xl font-semibold">Recent activity</h2>
-		<div class="border-neutral-muted overflow-hidden rounded-lg border bg-surface">
+		<div class="border-neutral-muted bg-surface overflow-hidden rounded-lg border">
 			<Table
 				header={{ member: 'Member', event: 'Event', time: 'Time' }}
 				items={activityRows}

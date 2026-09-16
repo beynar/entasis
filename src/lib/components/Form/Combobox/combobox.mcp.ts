@@ -65,7 +65,7 @@ A searchable dropdown component that supports both static arrays and async optio
 - **required**: \`boolean\` (default: \`false\`)
 - **disabled**: \`boolean\`
 - **size**: \`'small' | 'normal' | 'large'\` (default: \`'normal'\`)
-- **density**: \`'small' | 'normal' | 'large'\` (default: \`'normal'\`) - Spacing density forwarded to the dropdown option rows (paddings, gaps, min-height)
+- **density**: \`'compact' | 'normal' | 'comfortable'\` (default: \`'normal'\`) - Spacing density forwarded to the dropdown option rows (paddings, gaps, min-height)
 - **name**: \`string\`
 - **errors**: \`string[] | boolean\` (bindable)
 - **focused**: \`boolean\` (bindable)
@@ -91,7 +91,8 @@ A searchable dropdown component that supports both static arrays and async optio
 ### Theme Props
 
 - **theme**: \`ComboboxThemeProps\`
-  - Customize styling for: input, inputContainer, loading, error, noOptions, option, optionLabel, optionDescription
+  - Customize styling for: input, inputContainer, loading, error, noOptions
+  - Option rows are \`MenuOption\` components: style them globally with \`setMenuOptionTheme\` from \`svelai/menu-option\`
 
 ## Examples
 
@@ -145,12 +146,14 @@ A searchable dropdown component that supports both static arrays and async optio
 
 \`\`\`svelte
 <script lang="ts">
-	let value = $state('us');
-	const getValueOption = async (value: string) => {
+	import type { ComboboxOption } from 'svelai/combobox';
+	let value = $state<string | null>('us');
+	const getValueOption = async (value: string): Promise<ComboboxOption> => {
 		return { value, label: 'United States' };
 	};
-	const getOptions = async (searchValue?: string) => {
-		// Fetch options...
+	const getOptions = async (searchValue?: string): Promise<ComboboxOption[]> => {
+		const response = await fetch(\`/api/countries?q=\${searchValue ?? ''}\`);
+		return response.json();
 	};
 </script>
 
@@ -202,9 +205,8 @@ The theme object contains the following parts:
 - **loading**: Loading state indicator styles
 - **error**: Error message styles
 - **noOptions**: No options found message styles
-- **option**: Individual option item styles
-- **optionLabel**: Option label text styles
-- **optionDescription**: Option description text styles
+
+Option rows are rendered with the shared \`MenuOption\` component (parts: root, title, description, prefix, suffix, content) and are themed through \`setMenuOptionTheme\` from \`svelai/menu-option\`, not through the Combobox theme.
 
 ### Available Variants
 
@@ -229,17 +231,6 @@ The theme object contains the following parts:
 **noOptions**:
 - base: Base classes for no options message
 
-**option**:
-- base: Base classes for option items
-- Variants:
-  - highlighted: boolean - Highlighted/hovered option styling
-
-**optionLabel**:
-- base: Base classes for option label text
-
-**optionDescription**:
-- base: Base classes for option description text
-
 ### Usage Examples
 
 **Basic Theme Override**:
@@ -254,36 +245,38 @@ The theme object contains the following parts:
         normal: 'px-4 py-2'
       }
     },
-    option: {
-      base: 'state-layer px-4 py-2',
-      highlighted: {
-        true: ''
-      }
+    noOptions: {
+      base: 'italic'
     }
   }}
 />
 \`\`\`
 
-**Custom Option Styling**:
+**Custom Option Styling** (option rows use the shared MenuOption theme):
 \`\`\`svelte
-<Combobox
-  items={items}
-  bind:value={value}
-  theme={{
-    option: {
-      base: 'rounded-md transition-colors',
-      highlighted: {
-        true: 'bg-blue-500 text-white'
-      }
+<script lang="ts">
+  import { setMenuOptionTheme } from 'svelai/menu-option';
+
+  let value = $state<string | null>(null);
+  const items = [
+    { value: 'us', label: 'United States', description: 'North America' },
+    { value: 'uk', label: 'United Kingdom', description: 'Europe' }
+  ];
+
+  setMenuOptionTheme({
+    root: {
+      base: 'rounded-md transition-colors'
     },
-    optionLabel: {
+    title: {
       base: 'font-semibold'
     },
-    optionDescription: {
-      base: 'text-sm text-gray-600'
+    description: {
+      base: 'text-sm text-neutral/70'
     }
-  }}
-/>
+  });
+</script>
+
+<Combobox items={items} bind:value={value} />
 \`\`\`
 
 **Global Theme Setting**:
@@ -298,11 +291,8 @@ The theme object contains the following parts:
         normal: 'px-4 py-2'
       }
     },
-    option: {
-      base: 'px-4 py-2 rounded-md',
-      highlighted: {
-        true: 'bg-primary text-white'
-      }
+    loading: {
+      base: 'italic'
     }
   });
 </script>

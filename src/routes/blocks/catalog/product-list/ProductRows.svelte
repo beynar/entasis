@@ -31,18 +31,20 @@
 	let added = $state('');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="grid gap-xl md:grid-cols-[1fr_2fr]">
-		<aside class="flex flex-col gap-xl justify-center p-xl rounded-lg bg-primary-muted">
-			<header class="flex flex-col gap-lg">
-				<p class="text-xs font-semibold uppercase tracking-widest text-primary">A few favorites</p>
+	<div class="gap-xl grid md:grid-cols-[1fr_2fr]">
+		<aside class="gap-xl p-xl bg-primary-muted flex flex-col justify-center rounded-lg">
+			<header class="gap-lg flex flex-col">
+				<p class="text-primary-muted-readable text-xs font-semibold tracking-widest uppercase">
+					A few favorites
+				</p>
 				<Heading size="h2" weight="bold">Everyday,<br />made better.</Heading>
-				<p class="max-w-2xl text-neutral/65">
+				<p class="text-neutral/65 max-w-2xl">
 					Small, useful upgrades to the objects you reach for most.
 				</p>
 			</header>
@@ -50,19 +52,19 @@
 		</aside>
 		<div>
 			{#each products as product (product.id)}<article
-					class="grid grid-cols-[7rem_1fr_auto] items-center gap-xl border-b border-neutral/15 py-xl"
+					class="gap-xl border-neutral/15 py-xl grid grid-cols-[7rem_1fr_auto] items-center border-b"
 				>
 					<div>{@render productArt(product.shape, product.color)}</div>
-					<div class="flex flex-col gap-md">
-						<span class="text-xs uppercase tracking-widest text-neutral/45">{product.type}</span>
+					<div class="gap-md flex flex-col">
+						<span class="text-neutral/65 text-xs tracking-widest uppercase">{product.type}</span>
 						<h3 class="font-semibold">{product.name}</h3>
-						<p class="text-sm text-neutral/55">{product.color} / {money(product.price)}</p>
+						<p class="text-neutral/65 text-sm">{product.color} / {money(product.price)}</p>
 					</div>
 					<Button size="small" variant="outline" onclick={() => (added = product.name)}>Add</Button>
 				</article>{/each}
 		</div>
 	</div>
-	<p class="text-sm text-success" aria-live="polite">
+	<p class="text-success text-sm" aria-live="polite">
 		{added ? `${added} added to the sample bag.` : ''}
 	</p>
 </section>

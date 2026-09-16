@@ -17,6 +17,7 @@ A read-only star rating display with half/partial star support, a configurable s
 ### Core Props
 - **value**: \`number | null\` (default: \`0\`)
   - The displayed value. Fractions render as partially filled stars (0.5 = half star; any fraction works, e.g. an average score of 3.7).
+  - Read-only display data: Rating never writes it, so there is no \`defaultValue\` and no \`onValueChange\`. Use \`RatingInput\` for an editable rating.
 - **max**: \`number\` (default: \`5\`)
   - Number of stars rendered, which is also the maximum value.
 

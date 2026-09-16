@@ -1,11 +1,11 @@
 <script lang="ts" module>
 	const TREE_CELL_PADDING: Record<
-		'small' | 'normal' | 'large',
+		'compact' | 'normal' | 'comfortable',
 		Readonly<{ base: number; indent: number }>
 	> = {
-		small: { base: 4, indent: 10 },
+		compact: { base: 4, indent: 10 },
 		normal: { base: 6, indent: 12 },
-		large: { base: 8, indent: 14 }
+		comfortable: { base: 8, indent: 14 }
 	};
 
 	function focusEditor(element: HTMLInputElement): void {
@@ -167,7 +167,7 @@
 			<button
 				type="button"
 				data-dnd-handle
-				class="grid size-6 shrink-0 touch-none cursor-grab place-items-center rounded text-neutral/45 outline-none hover:bg-neutral-muted/50 focus-visible:ring-2 focus-visible:ring-color/60 active:cursor-grabbing"
+				class="text-neutral/45 hover:bg-neutral-muted/50 focus-visible:ring-focus/50 grid size-6 shrink-0 cursor-grab touch-none place-items-center rounded outline-none focus-visible:ring-2 active:cursor-grabbing"
 				aria-label={messages.ganttChartReorderAction}
 				tabindex="-1"
 				onclick={(event) => event.stopPropagation()}
@@ -196,7 +196,7 @@
 			<span
 				class={chart.classes.expander({
 					...chart.themeVariants,
-					class: 'invisible pointer-events-none'
+					class: 'pointer-events-none invisible'
 				})}
 				aria-hidden="true"
 			></span>
@@ -206,7 +206,7 @@
 	{#if isEditing}
 		<input
 			bind:value={editValue}
-			class="min-w-0 flex-1 rounded border border-color/45 bg-surface px-1 outline-none focus:ring-2 focus:ring-color/35"
+			class="border-color/45 bg-surface focus:ring-focus/50 min-w-0 flex-1 rounded border px-1 outline-none focus:ring-2"
 			class:h-5={chart.size === 'small'}
 			class:h-6={chart.size === 'normal'}
 			class:h-7={chart.size === 'large'}
@@ -223,7 +223,7 @@
 			<span
 				data-gantt-chart-part="resource-group-label"
 				data-resource-id={resourceGroup.id}
-				class="inline-flex max-w-28 shrink-0 items-center gap-1 rounded bg-surface-recessed px-1.5 py-0.5 font-medium text-neutral/65"
+				class="bg-surface-recessed text-neutral/65 inline-flex max-w-28 shrink-0 items-center gap-1 rounded px-1.5 py-0.5 font-medium"
 				title={resourceGroup.title}
 			>
 				<span
@@ -237,7 +237,7 @@
 		{#if column.id === 'title' && canOutdent}
 			<button
 				type="button"
-				class="grid size-6 shrink-0 place-items-center rounded text-neutral/55 outline-none hover:bg-neutral-muted/50 focus-visible:ring-2 focus-visible:ring-color/60"
+				class="text-neutral/55 hover:bg-neutral-muted/50 focus-visible:ring-focus/50 grid size-6 shrink-0 place-items-center rounded outline-none focus-visible:ring-2"
 				aria-label={messages.ganttChartOutdentAction}
 				tabindex="-1"
 				onclick={(event) => {
@@ -251,7 +251,7 @@
 		{#if column.id === 'title' && canIndent}
 			<button
 				type="button"
-				class="grid size-6 shrink-0 place-items-center rounded text-neutral/55 outline-none hover:bg-neutral-muted/50 focus-visible:ring-2 focus-visible:ring-color/60"
+				class="text-neutral/55 hover:bg-neutral-muted/50 focus-visible:ring-focus/50 grid size-6 shrink-0 place-items-center rounded outline-none focus-visible:ring-2"
 				aria-label={messages.ganttChartIndentAction}
 				tabindex="-1"
 				onclick={(event) => {

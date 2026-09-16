@@ -5,7 +5,7 @@
 	import { Stat } from 'svelai/stat';
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card
 		class="mx-auto w-full max-w-lg"
 		title="Recurring revenue"
@@ -25,11 +25,11 @@
 				]}
 				showLegend
 			/>{#each [{ name: 'Starter', amount: '$12,050', share: '25%' }, { name: 'Team', amount: '$26,510', share: '55%' }, { name: 'Enterprise', amount: '$9,640', share: '20%' }] as plan (plan)}<div
-					class="flex items-center justify-between border-b border-neutral-muted pb-md text-sm"
+					class="border-neutral-muted pb-md flex items-center justify-between border-b text-sm"
 				>
 					<span>{plan.name}</span>
 					<Stack orientation="horizontal" gap="lg">
-						<strong>{plan.amount}</strong><span class="text-neutral/60">{plan.share}</span>
+						<strong>{plan.amount}</strong><span class="text-neutral/70">{plan.share}</span>
 					</Stack>
 				</div>{/each}
 		</Stack></Card

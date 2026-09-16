@@ -7,4 +7,3 @@ export {
 	type AccordionTheme,
 	type AccordionThemeProps
 } from './accordion.theme.js';
-

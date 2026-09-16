@@ -9,7 +9,6 @@ import type {
 	AIAskUserQuestionAnswer
 } from '$lib/components/AIAskUserQuestion/aiAskUserQuestion.props.js';
 import type { AIComposerAttachment } from '$lib/components/AIComposer/aiComposer.props.js';
-import type { AIMcpAppHostConfig, AIMcpToolCall } from '$lib/components/AIMcpApp/aiMcpApp.props.js';
 import type { AIToolCall, AIToolProps, AIToolStatus } from '$lib/components/AITool/aiTool.props.js';
 import type {
 	AIMessageActionHandler,
@@ -187,7 +186,7 @@ export type AIThreadProps<TMessage extends AIThreadItem = AIThreadItem> = WithAt
 		/** Text announced through the internal polite live region. */
 		liveText?: string;
 		/** Whether an assistant response is currently streaming. */
-		isStreaming?: boolean;
+		streaming?: boolean;
 		/** Transcript row and edge spacing. @default 'normal' */
 		density?: AIThreadDensity;
 		/** Size forwarded to default AIMessage rows. @default 'normal' */
@@ -222,8 +221,6 @@ export type AIThreadProps<TMessage extends AIThreadItem = AIThreadItem> = WithAt
 		tocMaxPins?: number;
 		/** Theme overrides forwarded to the default AIThreadToc. */
 		tocTheme?: AIThreadTocThemeProps;
-		/** MCP Apps host used for application tool calls. */
-		mcpHost?: AIMcpAppHostConfig;
 		/** Direct ask-user-question request. `null` explicitly suppresses auto-detection. */
 		activeAskUserQuestion?: AIThreadAskUserQuestion<TMessage> | null;
 		/** Renders detected ask-user-question tools as an interactive question flow. */
@@ -233,7 +230,7 @@ export type AIThreadProps<TMessage extends AIThreadItem = AIThreadItem> = WithAt
 		/** Suggestions used as the default empty state. */
 		suggestions?: readonly string[];
 		/** Handles selection from the default empty-state suggestions. */
-		onSuggestionSelect?: (suggestion: string) => void;
+		onSelect?: (suggestion: string) => void;
 		/** Content rendered above the virtual transcript. */
 		header?: Slot;
 		/** Content rendered below the virtual transcript. */
@@ -282,11 +279,9 @@ export type AIThreadProps<TMessage extends AIThreadItem = AIThreadItem> = WithAt
 		markerIcon?: Slot<AIThreadRenderPayload<TMessage>>;
 		/** Custom content rendered by the default marker. */
 		markerContent?: Slot<AIThreadRenderPayload<TMessage>>;
-		/** Custom renderer for individual MCP App tool calls. */
-		app?: Slot<{ tool: AIMcpToolCall; message: TMessage; index: number }>;
 		/** Handles completion or dismissal of an ask-user-question request. */
 		onAskUserQuestionStateChange?: (
-			change: AIThreadAskUserQuestionStateChange<TMessage>
+			payload: AIThreadAskUserQuestionStateChange<TMessage>
 		) => void | Promise<void>;
 		/** Class applied to the thread root. */
 		class?: string;

@@ -15,11 +15,11 @@
 	]);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<header class="flex flex-wrap items-end justify-between gap-lg">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<header class="gap-lg flex flex-wrap items-end justify-between">
 		<div>
 			<h2 class="text-3xl font-semibold">The people behind the work.</h2>
-			<p class="mt-sm text-sm text-neutral/60">Manage roles in this local workspace preview.</p>
+			<p class="mt-sm text-neutral/70 text-sm">Manage roles in this local workspace preview.</p>
 		</div>
 		<Chip color="primary">{members.length} members</Chip>
 	</header>
@@ -63,5 +63,5 @@
 				/>{/snippet}</DataTable
 		></Card
 	>
-	<p class="text-xs text-neutral/60">The owner cannot be removed from this preview.</p>
+	<p class="text-neutral/70 text-xs">The owner cannot be removed from this preview.</p>
 </Stack>

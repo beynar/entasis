@@ -3,7 +3,7 @@
 	import DocPage from '../../DocPage.svelte';
 	import TagsInput from '$lib/components/Form/TagsInput/TagsInput.svelte';
 	import type { ComboboxOption } from '$lib/components/Form/Combobox/combobox.props.js';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	// Example data set
@@ -61,7 +61,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -120,7 +120,7 @@
 			<div class="w-full max-w-md">
 				<TagsInput placeholder="Add tags..." bind:value={value1} />
 				{#if value1?.length}
-					<p class="text-neutral/60 mt-2 text-xs">Tags: {value1.join(', ')}</p>
+					<p class="text-neutral/70 mt-2 text-xs">Tags: {value1.join(', ')}</p>
 				{/if}
 			</div>
 		</ComponentCard>
@@ -135,7 +135,7 @@
 					bind:value={value2}
 				/>
 				{#if value2?.length}
-					<p class="text-neutral/60 mt-2 text-xs">Tags: {value2.join(', ')}</p>
+					<p class="text-neutral/70 mt-2 text-xs">Tags: {value2.join(', ')}</p>
 				{/if}
 			</div>
 		</ComponentCard>
@@ -145,23 +145,23 @@
 			<div class="w-full max-w-md">
 				<TagsInput placeholder="Search async..." items={getAsyncOptions} bind:value={value3} />
 				{#if value3?.length}
-					<p class="text-neutral/60 mt-2 text-xs">Tags: {value3.join(', ')}</p>
+					<p class="text-neutral/70 mt-2 text-xs">Tags: {value3.join(', ')}</p>
 				{/if}
 			</div>
 		</ComponentCard>
 
-		<!-- Example 4: Items + allowCustom -->
+		<!-- Example 4: Items + customTags -->
 		<ComponentCard description="Restricted list, but also allows custom free-text tags">
 			<div class="w-full max-w-md">
 				<TagsInput
-					allowCustom
+					customTags
 					showAllOnFocus
 					placeholder="Pick or type your own..."
 					items={arrayOptions}
 					bind:value={value4}
 				/>
 				{#if value4?.length}
-					<p class="text-neutral/60 mt-2 text-xs">Tags: {value4.join(', ')}</p>
+					<p class="text-neutral/70 mt-2 text-xs">Tags: {value4.join(', ')}</p>
 				{/if}
 			</div>
 		</ComponentCard>
@@ -171,7 +171,7 @@
 			<div class="w-full max-w-md">
 				<TagsInput maxTags={3} placeholder="Up to 3 tags..." bind:value={value5} />
 				{#if value5?.length}
-					<p class="text-neutral/60 mt-2 text-xs">Tags: {value5.join(', ')}</p>
+					<p class="text-neutral/70 mt-2 text-xs">Tags: {value5.join(', ')}</p>
 				{/if}
 			</div>
 		</ComponentCard>

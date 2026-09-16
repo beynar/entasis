@@ -1,5 +1,5 @@
 export { default as Theme } from './Theme.svelte';
-export { ThemeState } from './theme.state.svelte.js';
+export { ThemeState, useDefaultColor } from './theme.state.svelte.js';
 export type { ThemeProps } from './theme.props.js';
 export {
 	defaultThemeSpacingScale,
@@ -15,3 +15,21 @@ export {
 	type TypeScaleRatio
 } from './theme.designTokens.js';
 export { themeTransitions, type ThemeTransition } from './themeTransition.js';
+export { focusRing, selectedSoft, selectedSolid } from './theme.recipes.js';
+export {
+	themePresetNames,
+	themePresets,
+	type ThemePreset,
+	type ThemePresetName,
+	type ThemePresetTokens
+} from './theme.presets.js';
+export {
+	breakpoints,
+	containerBreakpoints,
+	resolveContainerBreakpoint,
+	resolveResponsive,
+	responsiveContainerClasses,
+	responsiveVariables,
+	type ContainerBreakpoint
+} from './responsive.js';
+export type { Breakpoint, ResponsiveProps } from './theme.js';

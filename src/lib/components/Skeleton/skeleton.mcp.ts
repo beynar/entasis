@@ -110,7 +110,7 @@ The skeleton uses \`animate-pulse\` for the pulsing animation and supports color
 {#if loading}
 	<Skeleton class="h-64 w-full" />
 {:else}
-	<Content />
+	<p>{article.body}</p>
 {/if}
 \`\`\`
 
@@ -176,9 +176,9 @@ The theme object contains the following parts:
 <Skeleton 
   theme={{
     root: {
-      base: 'animate-pulse rounded-md bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200',
+      base: 'animate-pulse rounded-md bg-linear-to-r from-neutral/10 via-neutral/20 to-neutral/10',
       color: {
-        foreground: 'bg-gray-200'
+        neutral: 'bg-transparent'
       }
     }
   }}
@@ -194,7 +194,7 @@ The theme object contains the following parts:
     root: {
       base: 'animate-pulse rounded-md',
       color: {
-        foreground: 'bg-gray-200/50',
+        neutral: 'bg-neutral/15',
         primary: 'bg-primary/20'
       }
     }

@@ -18,7 +18,10 @@ export type MetadataListItem = {
 	key?: string;
 	/** Alias for key. */
 	title?: string;
-	/** Raw value; rendering depends on the resolved type. */
+	/**
+	 * Raw value; rendering depends on the resolved type. Read-only display data:
+	 * MetadataList never writes item values, so there is no `defaultValue` counterpart.
+	 */
 	value?: MetadataListValue;
 	/** Explicit rendering type; auto-detected from the value when omitted. */
 	type?: MetadataListItemType;
@@ -64,6 +67,8 @@ type MetadataListBaseProps = {
 	maxItems?: number;
 	/** Bindable open state of the "Show more" toggle. */
 	expanded?: boolean;
+	/** Initial open state of the "Show more" toggle when `expanded` is omitted. */
+	defaultExpanded?: boolean;
 	/** Per-instance i18n overrides merged over the global catalog. */
 	i18n?: Partial<Messages>;
 	/** Theme overrides for the metadata list parts. */

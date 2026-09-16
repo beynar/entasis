@@ -6,7 +6,7 @@
 </script>
 
 <section
-	class="relative isolate flex min-h-96 flex-col items-center justify-center gap-xl overflow-hidden bg-surface-recessed p-xl text-center"
+	class="gap-xl bg-surface-recessed p-xl relative isolate flex min-h-96 flex-col items-center justify-center overflow-hidden text-center"
 >
 	<div class="rings pointer-events-none absolute inset-0 -z-10" aria-hidden="true"></div>
 	<Chip variant="outline">A small beginning</Chip><Heading
@@ -15,7 +15,7 @@
 		weight="bold"
 		class="max-w-2xl">Make something worth coming back to.</Heading
 	>
-	<p class="max-w-lg text-neutral/70">
+	<p class="text-neutral/70 max-w-lg">
 		Thoughtful components for the moments that turn a useful product into a great experience.
 	</p>
 	<Button href="/blocks" size="large" suffix={arrowRightIcon}>Find your starting point</Button>

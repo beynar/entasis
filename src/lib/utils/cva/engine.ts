@@ -1,11 +1,12 @@
 /**
  * Class-variance engine vendored and trimmed from `cva`
- * (Copyright 2022 Joe Bell, Apache-2.0). The `clsx` + `tailwind-merge` steps
- * are collapsed into cnfast's single-pass, cached `cn`, and the original
- * `defineConfig`/hooks indirection is removed.
+ * (Copyright 2022 Joe Bell, Apache-2.0). The join + merge steps
+ * come from `./merge.js`, where the `cn` engine is extended with the library's
+ * own utility groups, and the original `defineConfig`/hooks indirection is
+ * removed.
  */
 
-import { cn } from 'cnfast';
+import { cn } from './merge.js';
 import type { ClassValue, CVA, CX, Compose } from './types.js';
 
 export const cx: CX = cn;

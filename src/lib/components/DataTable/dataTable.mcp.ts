@@ -42,15 +42,23 @@ Svelai-native; TanStack Table Core remains private. Use Table for static tabular
 \`\`\`
 
 \`items\`, \`columns\`, and \`getRowId\` are required. Without \`height\`, DataTable fills a
-parent with a definite height so the virtual viewport remains bounded.
+parent with a definite height so the virtual viewport remains bounded. Pass \`virtualize={false}\`
+instead to drop the table into normal document flow at its natural height:
+
+\`\`\`svelte
+<DataTable {items} {columns} {getRowId} virtualize={false} />
+\`\`\`
 
 ## Core props
 
 - **items**: \`readonly TData[]\`.
 - **columns**: \`readonly DataTableColumn<TData>[]\`.
 - **getRowId**: stable row identity used by selection, expansion, virtualization, and focus.
-- **height**: optional \`string | number\`; otherwise fills a definite-height parent.
-- **density**: \`small | normal | large\`, default \`normal\`.
+- **height**: optional \`string | number\`; otherwise fills a definite-height parent. Only read
+  while virtualizing.
+- **virtualize**: default true. False renders every row in normal flow, so the table needs no
+  height and no definite-height parent.
+- **density**: \`compact | normal | comfortable\`, default \`normal\`.
 - **interactionMode**: \`table | grid\`, default \`table\`.
 - **processingMode**: \`client | manual\`, default \`client\`.
 - **selectionMode**: \`none | single | multiple\`, default \`none\`.
@@ -61,7 +69,7 @@ parent with a definite height so the virtual viewport remains bounded.
 - **stickyHeader**, **overscan**, **estimatedRowHeight**, and **animateRows** control rendering.
 - **disabled** blocks sorting controls, selection paths, editing, and column manipulation.
 - **loading** and **error** drive table states and the NetworkIndicator.
-- **dataTable**: bindable narrow external-control facade.
+- **api**: bindable narrow external-control instance handle (\`DataTableApi<TData>\`).
 - **cell** and **header**: table-level renderer snippets with \`renderDefault\` delegates.
 - **class**, **theme**, **ref**, and Svelte attachments follow Svelai conventions.
 
@@ -116,14 +124,14 @@ columnVisibility, columnOrder, columnPinning, columnSizing, grouping, and expand
 DataTable updates replace slices immutably and call \`onStateChange(nextState)\`. Parent-originated
 mutations through \`bind:state\` are observed without calling that callback again.
 
-\`bind:dataTable\` exposes a stable \`DataTableApi<TData>\` with reactive state, totals, visible
+\`bind:api\` exposes a stable \`DataTableApi<TData>\` with reactive state, totals, visible
 rows, selected loaded rows, save status, and commands for global/column filters, selection clearing,
 page, and page size. Commands use the same guards and reset rules as built-in controls.
 
 \`\`\`svelte
 <DataTable
   bind:state
-  bind:dataTable
+  bind:api
   pagination={{ pageSize: 25, showControls: false }}
   {...props}
 />
@@ -167,8 +175,11 @@ column identity after data, pagination, filtering, grouping, and visibility chan
 complete column spans and keep recovery controls keyboard reachable. Logical row indices derive
 from the final grouped/expanded row model.
 
-Rows are always virtualized. Semantic table mode keeps all columns mounted; grid mode additionally
-virtualizes center columns while pinned columns stay mounted. Resize handles support pointer and
+Rows are virtualized by default; \`virtualize={false}\` renders all of them in normal flow at
+their natural height, keeping the same selection, keyboard navigation, and editing paths. Use it for
+small datasets that belong in document flow, not for large ones. Semantic table mode keeps all
+columns mounted; grid mode additionally virtualizes center columns while pinned columns stay
+mounted. Resize handles support pointer and
 keyboard resizing. Reorder handles support left/right keyboard movement and pointer movement within
 their current pin region. Logical inset positioning preserves RTL pinning.
 `;

@@ -1,5 +1,6 @@
 import { bind } from '$lib/utils/state.svelte.js';
 import { onDestroy, untrack } from 'svelte';
+import { SvelteURL } from 'svelte/reactivity';
 import {
 	resolveDocumentViewerAssets,
 	type DocumentViewerAssets,
@@ -127,7 +128,12 @@ const spreadsheetCapabilities: DocumentViewerCapabilities = {
 	sheetTabs: true
 };
 
-export class DocumentViewerState {
+// `bind(this, options)` installs the option properties on the instance; this type-only base
+// class is what declares them to TypeScript. (Merging an empty `interface` into the class
+// would be unsafe declaration merging: the interface promises members the class never defines.)
+const DocumentViewerOptionsBase = class {} as unknown as new () => DocumentViewerOptions;
+
+export class DocumentViewerState extends DocumentViewerOptionsBase {
 	model: DocumentViewerModel | null = $state.raw(null);
 	format: DocumentFormat | null = $state(null);
 	loading = $state(true);
@@ -221,14 +227,11 @@ export class DocumentViewerState {
 	}
 
 	constructor(options: DocumentViewerOptions) {
+		super();
 		bind(this, options);
 
 		$effect(() => {
-			this.src;
-			this.requestedFormat;
-			this.fileName;
-			this.password;
-			this.assets;
+			void [this.src, this.requestedFormat, this.fileName, this.password, this.assets];
 			untrack(() => void this.documentLoading.load());
 		});
 
@@ -365,7 +368,7 @@ export class DocumentViewerState {
 	clearSearch = this.documentSearch.clear;
 
 	renderThumbnail = async (canvas: HTMLCanvasElement, index: number, width: number) => {
-		this.surfaceRevision;
+		void this.surfaceRevision;
 		if (this.surface?.renderThumbnail) {
 			await this.surface.renderThumbnail(canvas, index, width);
 			return;
@@ -394,9 +397,9 @@ export class DocumentViewerState {
 			if (index !== undefined) this.goTo(index + 1);
 			return;
 		}
-		let url: URL;
+		let url: SvelteURL;
 		try {
-			url = new URL(target.url, window.location.href);
+			url = new SvelteURL(target.url, window.location.href);
 		} catch {
 			return;
 		}
@@ -417,7 +420,5 @@ export class DocumentViewerState {
 	download = this.documentOutput.download;
 	print = this.documentOutput.print;
 }
-
-export interface DocumentViewerState extends DocumentViewerOptions {}
 
 export { getOoxmlNaturalSize, renderOoxmlUnit };

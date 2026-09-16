@@ -26,12 +26,24 @@ export class DataTableFocus<TData> {
 		const nextRow = Math.max(0, Math.min(row, Math.max(0, rows.length - 1)));
 		const nextColumn = Math.max(0, Math.min(column, Math.max(0, columns.length - 1)));
 		this.hasFocusedCell = true;
-		this.focusedCell = {
+		const next = {
 			row: nextRow,
 			column: nextColumn,
 			rowId: rows[nextRow]?.id ?? null,
 			columnId: columns[nextColumn]?.id ?? null
 		};
+		// `reconcile()` runs from the effect that syncs table state and reads the current cell to
+		// do so; writing an identical cell back would re-trigger that effect forever (Svelte
+		// compares objects by identity), so only publish an actual move.
+		const current = this.focusedCell;
+		if (
+			current.row === next.row &&
+			current.column === next.column &&
+			current.rowId === next.rowId &&
+			current.columnId === next.columnId
+		)
+			return;
+		this.focusedCell = next;
 	}
 
 	reconcile() {

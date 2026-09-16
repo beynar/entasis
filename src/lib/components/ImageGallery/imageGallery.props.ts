@@ -60,8 +60,6 @@ export type ImageGalleryProps = WithAttachments<
 			disabled?: boolean;
 			/** Viewport margin, in pixels, kept around the zoomed gallery. */
 			zoomMargin?: number;
-			/** Zoom animation duration in milliseconds. */
-			transitionDuration?: number;
 			/** When true, clicking the backdrop closes the zoomed gallery. */
 			closeOnClickOutside?: boolean;
 			/** When true, pressing Escape closes the zoomed gallery. */

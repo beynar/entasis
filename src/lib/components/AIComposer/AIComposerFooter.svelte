@@ -149,7 +149,7 @@
 							minDuration={voiceInputMinDuration}
 							maxDuration={voiceInputMaxDuration}
 							color={voiceInputColor}
-							ariaLabel={voiceInputAriaLabel}
+							label={voiceInputAriaLabel}
 							stopLabel={voiceInputStopLabel}
 							disabled={disabled || isWorking}
 							onStop={processVoiceInput}

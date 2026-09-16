@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
+	import { SvelteMap } from 'svelte/reactivity';
 	import type { DocumentViewerState } from './documentViewer.state.svelte.js';
 
 	type Classes = {
@@ -10,7 +12,8 @@
 	};
 
 	let { viewer, classes }: { viewer: DocumentViewerState; classes: Classes } = $props();
-	const tabElements = new Map<number, HTMLButtonElement>();
+	const tabElements = new SvelteMap<number, HTMLButtonElement>();
+	const t = $derived(useI18n());
 
 	const trackTab =
 		(index: number): Attachment<HTMLButtonElement> =>
@@ -56,7 +59,7 @@
 <div
 	class={classes.sheetTabs()}
 	role="tablist"
-	aria-label="Workbook sheets"
+	aria-label={t.workbookSheets}
 	tabindex="-1"
 	onkeydown={onKeydown}
 >

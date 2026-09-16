@@ -79,6 +79,7 @@ during component initialization for automatic cleanup.
 	- **contentWidth**: 'full' | 'narrow' | 'normal' | 'wide' | 'prose' - Max-width preset for the content inner wrapper.
 	- **actionOverflow**: 'auto' | 'never' - Mobile overflow behavior for action arrays.
 	- **mobileActionCount**: 0 | 1 | 2 - Number of action-array buttons kept inline on mobile.
+	- **label**: string - Accessible name for the page's \`main\` landmark, applied as aria-label.
 	- **theme**: PageShellThemeProps - Per-instance theme overrides.
 
 ## API

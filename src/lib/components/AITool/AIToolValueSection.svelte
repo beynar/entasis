@@ -3,7 +3,7 @@
 	import { signOutIconBold } from '../Icons/signOut.js';
 	import ScrollArea from '../ScrollArea/ScrollArea.svelte';
 	import Slot from '../Slot/Slot.svelte';
-	import { tooltip } from '../Tooltip/tooltip.svelte.js';
+	import { tooltip } from '../Tooltip/tooltip.attachment.svelte.js';
 	import type { AIToolCall, AIToolSnippet } from './aiTool.props.js';
 	import type { AIToolThemeProps } from './aiTool.theme.js';
 	import { useAIToolTheme } from './aiTool.theme.js';
@@ -65,7 +65,7 @@
 	{#if snippet}
 		<Slot render={snippet} payload={{ tool, index }} />
 	{:else}
-		<ScrollArea type="hover" ariaLabel={`${label} details`} theme={scrollAreaTheme}>
+		<ScrollArea type="hover" label={`${label} details`} theme={scrollAreaTheme}>
 			<AIToolValueTree {value} {tone} {maxDepth} {maxEntries} {theme} />
 		</ScrollArea>
 	{/if}

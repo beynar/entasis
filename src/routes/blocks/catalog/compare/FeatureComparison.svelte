@@ -13,7 +13,7 @@
 	];
 </script>
 
-<section class="mx-auto flex max-w-5xl flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto flex max-w-5xl flex-col">
 	<div class="max-w-2xl">
 		<Chip class="mb-lg" variant="outline">A considered choice</Chip><Heading
 			as="h2"
@@ -24,7 +24,7 @@
 			Compare two example approaches to building your next interface.
 		</p>
 	</div>
-	<div class="overflow-x-auto rounded-lg border border-neutral-muted">
+	<div class="border-neutral-muted overflow-x-auto rounded-lg border">
 		<Table
 			header={{
 				feature: 'What matters',

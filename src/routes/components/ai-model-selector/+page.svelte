@@ -265,7 +265,7 @@ ${'</' + 'script>'}
 				bind:open
 				bind:query
 			/>
-			<div class="text-neutral/60 text-center text-xs">
+			<div class="text-neutral/70 text-center text-xs">
 				Selected: {value} · Search: {searchable ? 'shown' : 'hidden'} · Query: {query || 'none'}
 			</div>
 		</div>
@@ -284,7 +284,7 @@ ${'</' + 'script>'}
 					<AIConversation bind:selectedModel={conversationValue}>
 						<AIModelSelector {models} />
 					</AIConversation>
-					<div class="text-neutral/60 text-xs">Conversation value: {conversationValue}</div>
+					<div class="text-neutral/70 text-xs">Conversation value: {conversationValue}</div>
 				</div>
 			{:else if exampleControls.value.example === 'settings'}
 				<div class="grid justify-items-center gap-3">
@@ -294,7 +294,7 @@ ${'</' + 'script>'}
 						searchable={false}
 						bind:value={composedValue}
 					/>
-					<div class="text-neutral/60 text-xs">
+					<div class="text-neutral/70 text-xs">
 						Reasoning: {formatChoice(reasoningEffort)} · Speed: {formatChoice(responseSpeed)}
 					</div>
 				</div>
@@ -318,7 +318,7 @@ ${'</' + 'script>'}
 							<span class="block px-2 py-1 text-left">No model matches "{query}".</span>
 						{/snippet}
 					</AIModelSelector>
-					<div class="text-neutral/60 text-xs">
+					<div class="text-neutral/70 text-xs">
 						Query: {composedQuery || 'none'} · Selected: {composedValue ?? 'none'}
 					</div>
 				</div>
@@ -330,7 +330,7 @@ ${'</' + 'script>'}
 							<AIModelSelector {models} bind:value={explicitValue} placeholder={null} />
 						</div>
 					</AIConversation>
-					<div class="text-neutral/60 text-xs">Inherited model · Direct empty</div>
+					<div class="text-neutral/70 text-xs">Inherited model · Direct empty</div>
 				</div>
 			{:else}
 				<AIModelSelector models={labelModels} labels={selectorLabels} />

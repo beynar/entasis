@@ -12,7 +12,7 @@
 		theme,
 		size,
 		delay,
-		loadingState,
+		loading,
 		prefix,
 		suffix,
 		...attachments
@@ -27,22 +27,31 @@
 </script>
 
 <div data-size={size || 'normal'} class={classes.root({ size, className })} {...attachments}>
-	{#each visibleItems as user, index}
+	{#each visibleItems as item, index (index)}
 		{#if avatar}
 			{@render avatar({
-				user,
+				item,
 				index,
 				avatarProps: {
 					delay,
 					size,
-					loadingState,
+					loading,
 					prefix,
-					suffix,
-					theme
+					suffix
 				}
 			})}
 		{:else}
-			<Avatar {delay} {size} {loadingState} {prefix} {suffix} {theme} {user} />
+			<Avatar
+				{delay}
+				{size}
+				{loading}
+				{prefix}
+				{suffix}
+				{theme}
+				src={item.src}
+				alt={item.alt}
+				name={item.name}
+			/>
 		{/if}
 	{/each}
 	{#if remaining > 0}

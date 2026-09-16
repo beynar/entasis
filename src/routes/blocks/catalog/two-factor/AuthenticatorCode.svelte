@@ -10,7 +10,7 @@
 	let recovery = $state(false);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card
 		class="mx-auto w-full max-w-md"
 		title="One more step"
@@ -41,7 +41,7 @@
 				]}
 				onSubmit={() => (message = 'Demo code verified. No account session was created.')}
 			/>
-			<p class="text-xs text-neutral/60">Demo code: {recovery ? 'DEMO-2026' : '123456'}</p>
+			<p class="text-neutral/70 text-xs">Demo code: {recovery ? 'DEMO-2026' : '123456'}</p>
 			<Button
 				variant="link"
 				onclick={() => {

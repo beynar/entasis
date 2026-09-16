@@ -15,19 +15,19 @@
 
 <span data-slot="spinner-indicator" data-variant={variant} aria-hidden="true" class={className}>
 	{#if variant === 'grid'}
-		{#each gridDelays as delay}
+		{#each gridDelays as delay, index (index)}
 			<span style:--spinner-delay={`${delay}ms`}></span>
 		{/each}
 	{:else if variant === 'pulse'}
-		{#each pulseDelays as delay}
+		{#each pulseDelays as delay, index (index)}
 			<span style:--spinner-delay={`${delay}ms`}></span>
 		{/each}
 	{:else if variant === 'puff'}
-		{#each puffDelays as delay}
+		{#each puffDelays as delay, index (index)}
 			<span style:--spinner-delay={`${delay}ms`}></span>
 		{/each}
 	{:else if variant === 'lines' || variant === 'circles'}
-		{#each radialSegments as segment}
+		{#each radialSegments as segment, index (index)}
 			<span
 				style:--spinner-angle={segment.angle}
 				style:--spinner-delay={variant === 'lines' ? segment.lineDelay : segment.circleDelay}

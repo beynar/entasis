@@ -1,4 +1,5 @@
 <script lang="ts" generics="TData extends object">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { createVirtualizer } from '@tanstack/svelte-virtual';
 	import { get } from 'svelte/store';
 	import { untrack } from 'svelte';
@@ -31,7 +32,8 @@
 		getRowId,
 		height,
 		state: tableState = $bindable(),
-		dataTable = $bindable(),
+		// eslint-disable-next-line no-useless-assignment -- The parent observes this bindable output.
+		api = $bindable(),
 		initialState,
 		onStateChange,
 		interactionMode = 'table',
@@ -43,6 +45,7 @@
 		showColumnVisibilityControl = false,
 		density = 'normal',
 		stickyHeader = true,
+		virtualize = true,
 		overscan = 6,
 		estimatedRowHeight,
 		animateRows = false,
@@ -98,6 +101,7 @@
 				showColumnVisibilityControl,
 				density,
 				stickyHeader,
+				virtualize,
 				overscan,
 				estimatedRowHeight,
 				animateRows,
@@ -138,11 +142,12 @@
 	model.reconcileFocusedCell();
 
 	const classes = $derived(useDataTableTheme(theme));
-	const fillsParent = $derived(height === undefined);
+	const t = $derived(useI18n());
+	const fillsParent = $derived(virtualize && height === undefined);
 	const rowHeight = $derived.by(() => {
 		if (estimatedRowHeight !== undefined) return estimatedRowHeight;
-		if (density === 'small') return 32;
-		if (density === 'large') return 48;
+		if (density === 'compact') return 32;
+		if (density === 'comfortable') return 48;
 		return 40;
 	});
 	const viewportHeight = $derived(typeof height === 'number' ? `${height}px` : height);
@@ -151,14 +156,16 @@
 	const rowFlip = dataTableRowFlip(() => animateRows);
 
 	$effect.pre(() => {
-		items;
-		columns;
-		tableState;
-		processingMode;
-		rowCount;
-		selectionMode;
-		pagination;
-		rowActions;
+		void [
+			items,
+			columns,
+			tableState,
+			processingMode,
+			rowCount,
+			selectionMode,
+			pagination,
+			rowActions
+		];
 		model.reconcileProcessingMode();
 		model.reconcileColumns();
 		model.updateOptions();
@@ -167,28 +174,28 @@
 	});
 
 	const rows = $derived.by(() => {
-		modelRevision;
+		void modelRevision;
 		return model.pageRows;
 	});
 	const allColumns = $derived.by(() => {
-		modelRevision;
+		void modelRevision;
 		return [
-			...model.table.getLeftVisibleLeafColumns(),
+			...model.table.getStartVisibleLeafColumns(),
 			...model.table.getCenterVisibleLeafColumns(),
-			...model.table.getRightVisibleLeafColumns()
+			...model.table.getEndVisibleLeafColumns()
 		];
 	});
 	const leftColumns = $derived.by(() => {
-		modelRevision;
-		return model.table.getLeftVisibleLeafColumns();
+		void modelRevision;
+		return model.table.getStartVisibleLeafColumns();
 	});
 	const centerColumns = $derived.by(() => {
-		modelRevision;
+		void modelRevision;
 		return model.table.getCenterVisibleLeafColumns();
 	});
 	const rightColumns = $derived.by(() => {
-		modelRevision;
-		return model.table.getRightVisibleLeafColumns();
+		void modelRevision;
+		return model.table.getEndVisibleLeafColumns();
 	});
 	const gridTemplate = $derived(
 		[
@@ -219,6 +226,15 @@
 		const scrollElement = viewportRef;
 		const estimate = rowHeight;
 		const extra = overscan;
+		if (!virtualize) {
+			get(rowVirtualizerStore).setOptions({
+				count: 0,
+				getScrollElement: () => null,
+				estimateSize: () => estimate,
+				overscan: extra
+			});
+			return;
+		}
 		get(rowVirtualizerStore).setOptions({
 			count: currentRows.length,
 			getScrollElement: () => scrollElement,
@@ -262,6 +278,17 @@
 		)
 	);
 	const renderedRows = $derived.by(() => {
+		// Non-virtual mode maps rows 1:1: zero offsets keep both spacer rows out of the DOM and
+		// leave every row in normal grid flow at its natural height.
+		if (!virtualize)
+			return rows.map((row, index) => ({
+				index,
+				key: row.id,
+				start: 0,
+				end: 0,
+				size: 0,
+				lane: 0
+			}));
 		if (rowVirtualItems.length) return rowVirtualItems;
 		return Array.from({ length: fallbackRowCount }, (_, index) => ({
 			index,
@@ -272,7 +299,9 @@
 			lane: 0
 		}));
 	});
-	const totalRowsHeight = $derived($rowVirtualizerStore.getTotalSize() || rows.length * rowHeight);
+	const totalRowsHeight = $derived(
+		virtualize ? $rowVirtualizerStore.getTotalSize() || rows.length * rowHeight : 0
+	);
 	const topPadding = $derived(renderedRows[0]?.start ?? 0);
 	const bottomPadding = $derived(Math.max(0, totalRowsHeight - (renderedRows.at(-1)?.end ?? 0)));
 
@@ -295,11 +324,13 @@
 	});
 
 	const measureRow: Attachment<HTMLElement> = (element) => {
+		if (!virtualize) return;
 		get(rowVirtualizerStore).measureElement(element);
 	};
 	const measureDetailRow =
 		(rowIndex: number): Attachment<HTMLElement> =>
 		(element) => {
+			if (!virtualize) return;
 			const parent = element.parentElement;
 			const measure = () => {
 				const primaryRow = Array.from(parent?.children ?? []).find(
@@ -366,7 +397,7 @@
 		}
 		model.moveFocusedCell(nextRow, nextColumn);
 		const focused = model.focusedCell;
-		get(rowVirtualizerStore).scrollToIndex(focused.row, { align: 'auto' });
+		if (virtualize) get(rowVirtualizerStore).scrollToIndex(focused.row, { align: 'auto' });
 		const focusedColumn = allColumns[focused.column];
 		const centerIndex = focusedColumn
 			? centerColumns.findIndex((column) => column.id === focusedColumn.id)
@@ -378,13 +409,11 @@
 	};
 
 	const totalItems = $derived.by(() => {
-		modelRevision;
-		tableState!.globalFilter;
-		tableState!.columnFilters;
+		void [modelRevision, tableState!.globalFilter, tableState!.columnFilters];
 		return processingMode === 'manual' ? (rowCount ?? 0) : model.filteredRows.length;
 	});
 	const expandedDetailCount = $derived.by(() => {
-		tableState!.expanded;
+		void tableState!.expanded;
 		if (!expandedContent) return 0;
 		return rows.filter((row) => tableState!.expanded[row.id] && !row.getIsGrouped()).length;
 	});
@@ -436,7 +465,8 @@
 		setPage: (page) => model.setPage(page),
 		setPageSize: (size) => model.setPageSize(size)
 	};
-	dataTable = tableApi;
+	// eslint-disable-next-line no-useless-assignment -- Assignment publishes the table api to bind:api.
+	api = tableApi;
 	const statePayload = $derived<DataTableToolbarPayload<TData>>({
 		state: tableApi.state,
 		selectedRows: [...tableApi.selectedRows],
@@ -457,11 +487,11 @@
 			loading={isBusy}
 			color="primary"
 			height={2}
-			delay={120}
-			label={isSaving ? 'Saving table changes' : 'Loading table data'}
+			theme={{ motion: { duration: 120 } }}
+			label={isSaving ? t.dataTableSaving : t.dataTableLoading}
 			class={classes.savingIndicator()}
 		/>
-		<ScrollArea bind:viewportRef class={classes.scrollArea()} type="auto" ariaLabel="Data table">
+		<ScrollArea bind:viewportRef class={classes.scrollArea()} type="auto" label={t.dataTableLabel}>
 			<table
 				{@attach dataTableGridNavigation({
 					enabled: interactionMode === 'grid',
@@ -506,10 +536,10 @@
 										{:else}
 											<Empty
 												size="small"
-												title="Could not load data"
+												title={t.dataTableErrorTitle}
 												description={error instanceof Error
 													? error.message
-													: 'The data could not be loaded.'}
+													: t.dataTableErrorDescription}
 											/>
 										{/if}
 									{:else if hasActiveFilters}
@@ -518,10 +548,10 @@
 										{:else}
 											<Empty
 												size="small"
-												title="No matching rows"
-												description="Adjust or clear the active filters."
+												title={t.dataTableNoMatchesTitle}
+												description={t.dataTableNoMatchesDescription}
 												actions={[
-													{ content: 'Clear filters', onclick: () => model.clearFilters() }
+													{ content: t.dataTableClearFilters, onclick: () => model.clearFilters() }
 												]}
 											/>
 										{/if}
@@ -530,8 +560,8 @@
 									{:else}
 										<Empty
 											size="small"
-											title="No data"
-											description="There are no rows to display."
+											title={t.dataTableEmptyTitle}
+											description={t.dataTableEmptyDescription}
 										/>
 									{/if}
 								</div>
@@ -551,8 +581,8 @@
 									{#if loadingContent}
 										<Slot render={loadingContent} payload={statePayload} />
 									{:else}
-										<div class={classes.skeletonList()} aria-label="Loading rows">
-											{#each Array(6) as _}
+										<div class={classes.skeletonList()} aria-label={t.dataTableLoadingRows}>
+											{#each [...Array(6).keys()] as skeletonIndex (skeletonIndex)}
 												<Skeleton class={classes.skeletonBar()} />
 											{/each}
 										</div>
@@ -604,9 +634,10 @@
 		<div class={classes.footer()}>
 			<div class={classes.toolbarGroup()}>
 				<span class={classes.summary()}>{pageStart}–{pageEnd} of {totalItems}</span>
-				<span class={classes.summary()}>Rows per page</span>
+				<span class={classes.summary()}>{t.dataTableRowsPerPage}</span>
 				<Select
 					size="small"
+					label={t.dataTableRowsPerPage}
 					items={(paginationConfig.pageSizes ?? [25, 50, 100]).map((value) => ({
 						value: String(value),
 						label: String(value)
@@ -618,12 +649,12 @@
 			</div>
 			<Pagination
 				{totalPages}
-				page={Math.min(tableState!.pagination.page, totalPages)}
+				value={Math.min(tableState!.pagination.page, totalPages)}
 				variant="pages"
 				controlVariant="ghost"
 				size="small"
 				{disabled}
-				onPageChange={(page) => model.setPage(page)}
+				onValueChange={(page) => model.setPage(page)}
 			/>
 		</div>
 	{/if}

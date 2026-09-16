@@ -1,9 +1,10 @@
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
+import { motion, useComponentMotion } from '$lib/utils/motion/index.js';
 
 // The default (classic) variant is the nova/shadcn look: flat rows separated by
 // a muted border, a plain trigger whose title underlines on hover, a small muted
-// chevron, quiet content. `card` wraps the list in a raised surface, `outlined`
+// chevron, quiet content. `card` wraps the list in a raised surface, `outline`
 // in a muted border; `splitted` breaks the list into one surface per item.
 // `size` scales typography (title/description/content text, icon) only;
 // `density` owns paddings and gaps.
@@ -16,14 +17,14 @@ const defaultAccordion = cva({
 			large: ''
 		},
 		density: {
-			small: '',
+			compact: '',
 			normal: '',
-			large: ''
+			comfortable: ''
 		},
 		variant: {
 			classic: '',
 			card: '',
-			outlined: ''
+			outline: ''
 		},
 		splitted: {
 			true: 'flex flex-col',
@@ -32,12 +33,12 @@ const defaultAccordion = cva({
 	},
 	compoundVariants: [
 		// One container surface holding all rows (same surface as the Card component).
-		{ variant: 'card', splitted: false, class: 'raised rounded-md bg-surface-raised' },
-		{ variant: 'outlined', splitted: false, class: 'rounded-md border border-neutral-muted' },
+		{ variant: 'card', splitted: false, class: 'raised rounded-lg bg-surface-raised' },
+		{ variant: 'outline', splitted: false, class: 'rounded-lg border border-neutral-muted' },
 		// Gap between the per-item surfaces.
-		{ splitted: true, density: 'small', class: 'gap-md' },
+		{ splitted: true, density: 'compact', class: 'gap-md' },
 		{ splitted: true, density: 'normal', class: 'gap-lg' },
-		{ splitted: true, density: 'large', class: 'gap-xl' }
+		{ splitted: true, density: 'comfortable', class: 'gap-xl' }
 	],
 	defaultVariants: {
 		size: 'normal',
@@ -56,14 +57,14 @@ const defaultAccordionItem = cva({
 			large: ''
 		},
 		density: {
-			small: '',
+			compact: '',
 			normal: '',
-			large: ''
+			comfortable: ''
 		},
 		variant: {
 			classic: '',
 			card: '',
-			outlined: ''
+			outline: ''
 		},
 		splitted: {
 			true: '',
@@ -79,8 +80,8 @@ const defaultAccordionItem = cva({
 		{ splitted: false, class: 'border-b border-neutral-muted last:border-b-0' },
 		// One surface per item.
 		{ variant: 'classic', splitted: true, class: 'border-b border-neutral-muted' },
-		{ variant: 'card', splitted: true, class: 'raised rounded-md bg-surface-raised' },
-		{ variant: 'outlined', splitted: true, class: 'rounded-md border border-neutral-muted' }
+		{ variant: 'card', splitted: true, class: 'raised rounded-lg bg-surface-raised' },
+		{ variant: 'outline', splitted: true, class: 'rounded-lg border border-neutral-muted' }
 	],
 	defaultVariants: {
 		size: 'normal',
@@ -94,7 +95,7 @@ const defaultAccordionItem = cva({
 const defaultAccordionTrigger = cva({
 	// items-start + the icon wrapper's slight downward nudge keep the chevron
 	// aligned to the first title line when titles wrap or a description exists.
-	base: 'group/accordion-trigger cursor-pointer w-full flex items-start justify-between gap-xl text-left transition-all outline-none rounded-sm focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-50',
+	base: 'group/accordion-trigger cursor-pointer w-full flex items-start justify-between gap-xl text-left transition-[color,background-color,box-shadow,opacity] outline-none rounded-sm focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50',
 	variants: {
 		size: {
 			small: '',
@@ -102,15 +103,15 @@ const defaultAccordionTrigger = cva({
 			large: ''
 		},
 		density: {
-			small: 'py-md',
+			compact: 'py-md',
 			normal: 'py-md',
-			large: 'py-lg'
+			comfortable: 'py-lg'
 		},
 		variant: {
 			classic: '',
 			// Contained surfaces inset their rows (variant chrome, not density).
 			card: 'px-xl',
-			outlined: 'px-xl'
+			outline: 'px-xl'
 		}
 	},
 	defaultVariants: {
@@ -129,9 +130,9 @@ const defaultAccordionHeader = cva({
 			large: ''
 		},
 		density: {
-			small: 'gap-0',
+			compact: 'gap-0',
 			normal: 'gap-micro',
-			large: 'gap-xs'
+			comfortable: 'gap-xs'
 		}
 	},
 	defaultVariants: {
@@ -152,7 +153,7 @@ const defaultAccordionTitle = cva({
 });
 
 const defaultAccordionDescription = cva({
-	base: 'text-neutral/60',
+	base: 'text-neutral/70',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -165,7 +166,7 @@ const defaultAccordionDescription = cva({
 // Layout (shrink/nudge) and open-state rotation live on the span wrapper in the
 // component — this part only styles the glyph itself.
 const defaultAccordionIcon = cva({
-	base: 'text-neutral/60 block',
+	base: 'text-neutral/70 block',
 	variants: {
 		size: {
 			small: 'size-3.5',
@@ -195,14 +196,14 @@ const defaultAccordionContent = cva({
 			large: 'text-base'
 		},
 		density: {
-			small: 'pb-md',
+			compact: 'pb-md',
 			normal: 'pb-md',
-			large: 'pb-lg'
+			comfortable: 'pb-lg'
 		},
 		variant: {
 			classic: '',
 			card: 'px-xl',
-			outlined: 'px-xl'
+			outline: 'px-xl'
 		}
 	},
 	defaultVariants: {
@@ -212,7 +213,27 @@ const defaultAccordionContent = cva({
 	}
 });
 
+// Expanded content slides open along the `axis` the panel grows on — `y` for the
+// default vertical list — fading slightly as it collapses. `duration` / `easing`
+// stay tokens so `<Theme motion>` and a reduced-motion preference reach every item.
+export const defaultAccordionMotion = motion({
+	base: {
+		in: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0.2 },
+		out: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0.2 }
+	},
+	variants: {
+		axis: {
+			y: {},
+			x: { in: { axis: 'x' }, out: { axis: 'x' } }
+		}
+	},
+	defaultVariants: {
+		axis: 'y'
+	}
+});
+
 export const accordionTheme = {
+	motion: defaultAccordionMotion,
 	root: defaultAccordion,
 	item: defaultAccordionItem,
 	header: defaultAccordionHeader,
@@ -228,3 +249,4 @@ export type AccordionTheme = typeof accordionTheme;
 export type AccordionThemeProps = InferComponentTheme<AccordionTheme>;
 export const setAccordionTheme = setComponentTheme<AccordionTheme>('accordion');
 export const useAccordionTheme = useComponentTheme<AccordionTheme>('accordion', accordionTheme);
+export const useAccordionMotion = () => useComponentMotion('accordion', defaultAccordionMotion);

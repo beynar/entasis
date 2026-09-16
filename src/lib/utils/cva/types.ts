@@ -1,23 +1,16 @@
 /**
  * Type definitions vendored from `cva` (Copyright 2022 Joe Bell, Apache-2.0)
- * and `clsx`. The clsx class types are copied manually because re-importing them
- * (or cnfast's equivalents) triggers the TS2742 "cannot be named" error when
- * this package is built with `declaration: true`.
+ * and `clsx`. The clsx class types are copied manually because re-importing
+ * them (or tailwind-merge's equivalents) triggers the TS2742 "cannot be named"
+ * error when this package is built with `declaration: true`.
  */
 
 /* clsx
   ---------------------------------- */
 
 export type ClassValue =
-	| ClassArray
-	| ClassDictionary
-	| string
-	| number
-	| bigint
-	| null
-	| boolean
-	| undefined;
-export type ClassDictionary = Record<string, any>;
+	ClassArray | ClassDictionary | string | number | bigint | null | boolean | undefined;
+export type ClassDictionary = Record<string, unknown>;
 export type ClassArray = ClassValue[];
 
 /* Utils
@@ -25,11 +18,13 @@ export type ClassArray = ClassValue[];
 
 type OmitUndefined<T> = T extends undefined ? never : T;
 type StringToBoolean<T> = T extends 'true' | 'false' ? boolean : T;
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void
+type UnionToIntersection<U> = (U extends unknown ? (k: U) => void : never) extends (
+	k: infer I
+) => void
 	? I
 	: never;
 
-export type VariantProps<Component extends (...args: any) => any> = Omit<
+export type VariantProps<Component extends (...args: never[]) => unknown> = Omit<
 	OmitUndefined<Parameters<Component>[0]>,
 	'class' | 'className'
 >;
@@ -79,7 +74,7 @@ export type CVAClassProp =
 	  };
 
 export interface CVA {
-	<_ extends "cva's generic parameters are restricted to internal use only.", V>(
+	<V>(
 		config: V extends CVAVariantShape
 			? CVAConfigBase & {
 					variants?: V;

@@ -26,6 +26,9 @@ const getI18nContext = () => getContext<I18nInput | undefined>(I18N_KEY);
 const getI18nDirectionContext = () =>
 	getContext<(() => I18nDirection) | undefined>(I18N_DIRECTION_KEY);
 
+/** The direction getter installed by `setI18nDirection`, if any. Call during component init. */
+export const getI18nDirection = () => getI18nDirectionContext();
+
 /**
  * Resolve the active messages for a component. Merge order (lowest to highest priority):
  * English defaults -> global context (setI18n) -> per-instance `local` override.

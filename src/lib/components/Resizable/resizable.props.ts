@@ -139,7 +139,7 @@ export type ResizableProps = WithAttachments<{
 	/**
 	 * Show a visible grip inside each handle.
 	 */
-	withHandle?: boolean;
+	handle?: boolean;
 	/**
 	 * Visual style for the optional handle affordance.
 	 */

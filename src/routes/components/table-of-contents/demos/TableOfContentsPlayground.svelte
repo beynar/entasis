@@ -24,9 +24,9 @@
 		{ value: 'info', label: 'Info' }
 	] as const;
 	const densityItems = [
-		{ value: 'small', label: 'Small' },
+		{ value: 'compact', label: 'Compact' },
 		{ value: 'normal', label: 'Normal' },
-		{ value: 'large', label: 'Large' }
+		{ value: 'comfortable', label: 'Comfortable' }
 	] as const satisfies ReadonlyArray<{
 		value: Exclude<TableOfContentsDensity, number>;
 		label: string;
@@ -94,7 +94,7 @@
 					items={markerItems}
 					bind:value={markerSetting}
 					size="small"
-					ariaLabel="Marker visibility"
+					label="Marker visibility"
 				/>
 			</div>
 			<Switch size="small" label="Connectors" bind:value={showConnectors} />
@@ -127,7 +127,7 @@
 					items={sizeItems}
 					bind:value={size}
 					size="small"
-					ariaLabel="Navigation size"
+					label="Navigation size"
 				/>
 			</div>
 			<div class="grid gap-2">
@@ -136,7 +136,7 @@
 					items={densityItems}
 					bind:value={density}
 					size="small"
-					ariaLabel="Row density"
+					label="Row density"
 				/>
 			</div>
 			<div class="grid gap-2">
@@ -145,7 +145,7 @@
 					items={levelItems}
 					bind:value={levelPreset}
 					size="small"
-					ariaLabel="Heading levels"
+					label="Heading levels"
 				/>
 			</div>
 			<div class="grid gap-2">
@@ -154,7 +154,7 @@
 					items={colorItems}
 					bind:value={color}
 					size="small"
-					ariaLabel="Highlight color"
+					label="Highlight color"
 				/>
 			</div>
 		</div>

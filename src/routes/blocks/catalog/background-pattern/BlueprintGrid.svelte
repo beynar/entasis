@@ -7,26 +7,27 @@
 </script>
 
 <section
-	class="blueprint relative isolate grid min-h-96 items-center gap-xl overflow-hidden p-xl md:grid-cols-2"
+	class="blueprint gap-xl p-xl relative isolate grid min-h-96 items-center overflow-hidden md:grid-cols-2"
 >
-	<div class="relative flex flex-col gap-lg">
-		<span class="text-sm uppercase tracking-widest text-primary">Built with intention</span><Heading
-			as="h2"
-			size="h1"
-			weight="bold">Every idea needs a foundation.</Heading
-		><Button href="/docs" variant="outline" class="self-start">Read the foundations</Button>
+	<div class="gap-lg relative flex flex-col">
+		<span class="text-primary-readable text-sm tracking-widest uppercase">Built with intention</span
+		><Heading as="h2" size="h1" weight="bold">Every idea needs a foundation.</Heading><Button
+			href="/docs"
+			variant="outline"
+			class="self-start">Read the foundations</Button
+		>
 	</div>
 	<Card
 		class="relative md:rotate-3"
 		title="Your next product"
 		description="One thoughtful decision at a time."
-		><div class="flex flex-col gap-lg">
-			<div class="flex items-center gap-md">
-				<Chip color="success">Ready</Chip><span class="text-sm text-neutral/60"
+		><div class="gap-lg flex flex-col">
+			<div class="gap-md flex items-center">
+				<Chip color="success">Ready</Chip><span class="text-neutral/70 text-sm"
 					>Design system connected</span
 				>
 			</div>
-			<Meter label="Foundation complete" value={{ value: 76, color: 'primary' }} />
+			<Meter label="Foundation complete" value={76} color="primary" />
 			<div class="flex justify-between text-sm">
 				<span>24 components</span><span>One shared language</span>
 			</div>

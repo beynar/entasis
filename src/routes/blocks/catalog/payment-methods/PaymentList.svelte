@@ -12,14 +12,16 @@
 	const selected = $derived(methods.find((method) => method.id === editing));
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Your account</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Your account
+		</p>
 		<Heading size="h2" weight="bold">Payment methods.</Heading>
-		<p class="max-w-2xl text-neutral/65">Manage the display details of your saved sample cards.</p>
+		<p class="text-neutral/65 max-w-2xl">Manage the display details of your saved sample cards.</p>
 	</header>
-	<div class="flex flex-col gap-xl">
-		{#each methods as method (method.id)}<article class="rounded-lg border border-neutral/15 p-xl">
+	<div class="gap-xl flex flex-col">
+		{#each methods as method (method.id)}<article class="border-neutral/15 p-xl rounded-lg border">
 				{#if editing === method.id}{#key editing}<Form
 							inputs={{
 								name: {
@@ -48,21 +50,21 @@
 								{ children: 'Save changes', onAction: (form) => form.submit() },
 								{ children: 'Cancel', variant: 'ghost', onAction: () => (editing = null) }
 							]}
-						/>{/key}{:else}<div class="flex gap-xl items-center justify-between flex-wrap">
-						<div class="flex gap-xl items-center">
+						/>{/key}{:else}<div class="gap-xl flex flex-wrap items-center justify-between">
+						<div class="gap-xl flex items-center">
 							<span
-								class="grid h-12 w-20 place-items-center rounded-lg bg-surface-recessed text-sm font-semibold"
+								class="bg-surface-recessed grid h-12 w-20 place-items-center rounded-lg text-sm font-semibold"
 								>{method.brand}</span
 							>
 							<div>
-								<div class="flex gap-md items-center flex-wrap">
+								<div class="gap-md flex flex-wrap items-center">
 									<h3 class="font-semibold">{method.name} ···· {method.last4}</h3>
 									{#if preferred === method.id}<Chip size="small" variant="soft">Default</Chip>{/if}
 								</div>
-								<p class="mt-md text-sm text-neutral/55">Expires {method.expiry}</p>
+								<p class="mt-md text-neutral/65 text-sm">Expires {method.expiry}</p>
 							</div>
 						</div>
-						<div class="flex gap-md">
+						<div class="gap-md flex">
 							<Button variant="outline" size="small" onclick={() => (editing = method.id)}
 								>Edit details</Button
 							><Button

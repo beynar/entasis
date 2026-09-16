@@ -7,7 +7,7 @@ export const overviewCode = [
 	'  ]);',
 	'  let dependencies = $state<GanttDependency[]>([]);',
 	"  let size = $state<'small' | 'normal' | 'large'>('normal');",
-	"  let density = $state<'small' | 'normal' | 'large'>('normal');",
+	"  let density = $state<'compact' | 'normal' | 'comfortable'>('normal');",
 	'  let height = $state(544);',
 	"  let demoState = $state<'ready' | 'loading' | 'disabled'>('ready');",
 	'  let showGrid = $state(true);',
@@ -67,7 +67,7 @@ export const interactionsCode = [
 	'    clipboard: { getId: createPasteId }',
 	'  }}',
 	'  mutations={{ task: { onTasksChange: persistTasks } }}',
-	'  events={{ onEmptyRangeSelect: openCreateDialog }}',
+	'  events={{ onSelect: openCreateDialog }}',
 	'  class="h-[36rem]"',
 	'/>'
 ].join('\n');
@@ -156,7 +156,7 @@ export const largeDataCode = [
 	'<GanttChart',
 	'  {tasks}',
 	'  timeZone="UTC"',
-	'  density="small"',
+	'  density="compact"',
 	'  class="h-[34rem]"',
 	'/>'
 ].join('\n');

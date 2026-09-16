@@ -13,7 +13,12 @@ export type ToggleButtonProps = WithAttachments<
 			/** Native button type. Defaults to `button` so toggles never submit a form accidentally. */
 			type?: HTMLButtonAttributes['type'];
 			/** Accessible name, required when the button has no visible text. */
-			ariaLabel?: string;
+			label?: string;
+			/**
+			 * `'radio'` exposes the pressed state as `aria-checked` (inside a single-select
+			 * group); the default is a toggle button with `aria-pressed`.
+			 */
+			role?: 'radio';
 			/** Theme color token applied to the button styling. */
 			color?: Colors;
 			/** Visual style variant of the toggle button. */

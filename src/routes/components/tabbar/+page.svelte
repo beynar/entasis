@@ -28,20 +28,20 @@
 			name: 'color',
 			type: 'segmented',
 			label: 'Color',
-			value: 'primary',
+			value: 'neutral',
 			options: colors
 		}
 	]);
 
-	let simpleActiveTab = $state(0);
-	let iconActiveTab = $state(0);
-	let disabledActiveTab = $state(0);
-	let pillActiveTab = $state(2);
-	let pillColorTab = $state(1);
-	let pillVerticalActiveTab = $state(0);
-	let variableActiveTab = $state(0);
-	let scrollableActiveTab = $state(0);
-	let overflowActiveTab = $state(0);
+	let simpleActiveTab = $state('Home');
+	let iconActiveTab = $state('Home');
+	let disabledActiveTab = $state('Enabled');
+	let pillActiveTab = $state('Reports');
+	let pillColorTab = $state('Analytics');
+	let pillVerticalActiveTab = $state('Overview');
+	let variableActiveTab = $state('All');
+	let scrollableActiveTab = $state('Overview');
+	let overflowActiveTab = $state('Home');
 
 	// Overflow pattern: the last tab opens a popover menu with additional views.
 	const overflowTabs = [
@@ -87,8 +87,8 @@
 		{ label: 'Reports', href: '#reports' }
 	];
 
-	function handleTabChange(index: number) {
-		console.log('Tab changed to:', index);
+	function handleTabChange(value: string) {
+		console.log('Tab changed to:', value);
 	}
 </script>
 
@@ -111,7 +111,7 @@
 	size="${controls.value.size}"
 	variant="${controls.value.variant}"
 	color="${controls.value.color}"
-	onValueChange={(index) => console.log('Tab changed to:', index)}
+	onValueChange={(value) => console.log('Tab changed to:', value)}
 />`}
 	>
 		<div class="flex flex-col items-center">

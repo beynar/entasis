@@ -33,8 +33,8 @@ Use \`format\` with \`dd\`, \`mm\`, \`yy\`, and \`yyyy\` segments. Supported val
 - \`calendarView\`: \`'single' | 'double'\`.
 - \`mobileSheet\`: renders the DateSelector as a bottom sheet below 768px.
 - \`closeOnSelect\`: closes after choosing a date; defaults to \`false\`.
-- \`onCalendarSelect\`: called only when a date is chosen from the selector or its presets;
-  \`onValueChange\` continues to report both typed and selected valid dates.
+- \`onSelect\`: the pick event -- fires only when a date is chosen from the selector or its
+  presets; \`onValueChange\` is the value state change and reports both typed and picked dates.
 
 \`\`\`svelte
 <DateInput
@@ -48,7 +48,7 @@ Use \`format\` with \`dd\`, \`mm\`, \`yy\`, and \`yyyy\` segments. Supported val
 />
 \`\`\`
 
-The input opens its selector on focus or from the full-height field action button. It stays open after selection unless \`closeOnSelect\` is enabled. Calendar days support arrow, Home/End, and PageUp/PageDown navigation.
+The selector never opens on focus, so tabbing through the field does not pop it. Open it with ArrowDown while the input has focus, or from the full-height calendar button (which carries \`aria-haspopup="dialog"\`, \`aria-expanded\`, and \`aria-controls\`). It stays open after selection unless \`closeOnSelect\` is enabled. Calendar days support arrow, Home/End, and PageUp/PageDown navigation.
 
 ## State contract
 

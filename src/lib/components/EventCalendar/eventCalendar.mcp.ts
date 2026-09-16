@@ -51,7 +51,7 @@ The component never changes 'view' because its container becomes narrow. Previou
 - 'dir': 'ltr' | 'rtl'; defaults to ambient direction
 - 'weekStartsOn': 0..6; otherwise locale-derived
 - 'validRange': half-open Date range
-- 'onRangeChange(info)': receives view, anchor date, time zone, current/render/active/fetch ranges, and exact visibleDays
+- 'onRangeChange(payload)': receives view, anchor date, time zone, current/render/active/fetch ranges, and exact visibleDays
 
 'fetchRange' is the clipped active rendering/interaction envelope. The consumer must return overlapping non-recurring definitions, recurring sources that expand into the range, moved exception definitions selected by current or reconstructed original occurrence overlap, and every returned exception's source. EventCalendar performs no requests, caching, retries, or error substitution.
 
@@ -94,8 +94,8 @@ A recurring external source can move inside its original timed or all-day domain
 
 - 'interactions': partial policy. Drag, resize, slot selection, keyboard controls, two-click range selection, and clipboard default on. interactions.createActivation controls drag-create and defaults to distancePx 5, touchDelayMs 300, touchTolerancePx 8.
 - 'allowOverlap': boolean or predicate = true.
-- 'validateItemUpdate(proposal)': synchronous live item validation.
-- 'resolveItemUpdate(proposal)': accept, reject with false, or adjust placement/resource. Adjustments are fully revalidated.
+- 'validateItemUpdate(payload)': synchronous live item validation.
+- 'resolveItemUpdate(payload)': accept, reject with false, or adjust placement/resource. Adjustments are fully revalidated.
 - 'validateSlotSelection(slot)': synchronous slot validation.
 - Validation order is structural/editability/range, business hours, overlap, then custom policy.
 
@@ -103,7 +103,9 @@ A recurring external source can move inside its original timed or all-day domain
 
 'interactions.clipboard=true' enables internal occurrence copy/paste through the API and Mod+C/Mod+V. Paste creates a standalone item, targets a selected compatible slot when present, and never mutates the copied recurrence series. 'historyLimit=50' bounds immutable undo entries; 0 disables history. Mod+Z undoes, Mod+Shift+Z and Mod+Y redo. History refuses stale controlled collections instead of overwriting consumer state.
 
-Item callbacks are 'onItemClick({ occurrence, event })', 'onItemDoubleClick({ occurrence, event })', 'onMoreClick({ day, occurrences, event })', and 'onInteractionBlocked'. Slot callbacks are 'onSlotClick({ slot, event })' and 'onSlotSelect({ slot, info })'; info.source is 'drag-create', 'keyboard', or 'single-pointer'. Bound-state callbacks are 'onViewChange', 'onDateChange', 'onDayCountChange', and 'onSelectionChange'.
+Item callbacks are 'onItemClick({ occurrence, event })', 'onItemDoubleClick({ occurrence, event })', 'onMoreClick({ day, occurrences, event })', and 'onInteractionBlocked'. Slot callbacks are 'onSlotClick({ slot, event })' and 'onSelect({ slot, info })'; info.source is 'drag-create', 'keyboard', or 'single-pointer'. Bound-state callbacks are 'onViewChange', 'onDateChange', 'onDayCountChange', and 'onSelectionChange'.
+
+Selection-callback naming: 'onSelect({ slot, info })' is the pick event -- the user picked this slot -- and 'onSelectionChange(payload)' is the state change of the selection model, completed by the bindable 'selection' prop and its 'defaultSelection' initial value. Those two names are the only selection callbacks on the component.
 
 ## Recurrence
 
@@ -132,7 +134,7 @@ Snippets replace content inside component-owned semantic and interactive wrapper
 
 Render 'defaultContent' or the ready-made header snippets when wrapping the built-ins. Snippet content cannot remove item focusability, labels, selection state, drag/resize wiring, disclosures, or live announcements.
 
-EventCalendar does not own create/edit dialogs. Compose 'onSlotClick'/'onSlotSelect'/'onItemClick' with Svelai Dialog, Form, DateInput, TimeInput, Select, and Switch, then publish a fresh 'items' array.
+EventCalendar does not own create/edit dialogs. Compose 'onSlotClick'/'onSelect'/'onItemClick' with Svelai Dialog, Form, DateInput, TimeInput, Select, and Switch, then publish a fresh 'items' array.
 
 ## Imperative API
 

@@ -1,5 +1,12 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
-import type { ChartMark, ChartProps, ChartSeriesMark, ChartTooltipField } from './chart.props.js';
+import type {
+	ChartBarMark,
+	ChartMark,
+	ChartPalette,
+	ChartProps,
+	ChartSeriesMark,
+	ChartTooltipField
+} from './chart.props.js';
 
 type ChartConfiguration<TRow extends object> = Pick<
 	ChartProps<TRow>,
@@ -88,6 +95,84 @@ const compactPolar = {
 	]
 } satisfies ChartConfiguration<Revenue>;
 
+type Status = {
+	month: string;
+	completed: number;
+	inProgress: number;
+	pending: number;
+	owner: string;
+};
+
+const wideStack = {
+	type: 'bar',
+	variant: 'stack',
+	x: 'month',
+	y: ['completed', 'inProgress', 'pending'],
+	gap: 4
+} satisfies ChartBarMark<Status>;
+
+const invalidWideField = {
+	type: 'bar',
+	variant: 'stack',
+	x: 'month',
+	// @ts-expect-error Wide value fields must be numeric.
+	y: ['completed', 'owner']
+} satisfies ChartBarMark<Status>;
+
+const invalidWideSimpleBar = {
+	type: 'bar',
+	x: 'month',
+	// @ts-expect-error Only a stacked bar melts wide value fields.
+	y: ['completed', 'pending']
+} satisfies ChartBarMark<Status>;
+
+const invalidWideSeriesChannel = {
+	type: 'bar',
+	variant: 'stack',
+	x: 'month',
+	// @ts-expect-error Wide fields own the series key, so `series` leaves the wide mark.
+	y: ['completed', 'pending'],
+	series: 'owner'
+} satisfies ChartBarMark<Status>;
+
+const keyedPalette = {
+	completed: 'success',
+	inProgress: 'primary',
+	pending: 'surface-raised'
+} satisfies ChartPalette;
+
+const pinnedTooltip = {
+	defaultValue: 'February',
+	onValueChange: (value) => {
+		expectTypeOf(value).toEqualTypeOf<string | number | null>();
+	}
+} satisfies ChartProps<Status>['tooltip'];
+
+const sizedChart = {
+	data: [] as readonly Status[],
+	marks: [wideStack],
+	label: 'Task status',
+	height: 320,
+	palette: keyedPalette,
+	legend: { format: (key) => String(key) }
+} satisfies ChartProps<Status>;
+
+const invalidSizedChart = {
+	data: [] as readonly Status[],
+	marks: [wideStack],
+	label: 'Task status',
+	// @ts-expect-error initialDimensions is no longer a sizing input.
+	initialDimensions: { width: 800, height: 400 }
+} satisfies ChartProps<Status>;
+
+void wideStack;
+void invalidWideField;
+void invalidWideSimpleBar;
+void invalidWideSeriesChannel;
+void keyedPalette;
+void pinnedTooltip;
+void sizedChart;
+void invalidSizedChart;
 void invalidTooltipField;
 void invalidNullableKey;
 void invalidCategoricalNice;

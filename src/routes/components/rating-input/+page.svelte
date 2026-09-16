@@ -3,7 +3,7 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import RatingInput from '$lib/components/Form/RatingInput/RatingInput.svelte';
 	import Form from '$lib/components/Form/Form/Form.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let rating = $state<number | null>(3);
@@ -20,7 +20,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -41,7 +41,7 @@
 		'Configurable star count via max',
 		'Optional half-star precision',
 		'RTL fills from the right',
-		'Slider role with keyboard support'
+		{ label: 'Slider role with keyboard support', test: 'a11y:rating.slider-keyboard' }
 	]}
 >
 	<ComponentCard
@@ -79,13 +79,13 @@
 
 		<ComponentCard description="Half steps (LTR)">
 			<div class="w-full max-w-md">
-				<RatingInput label="Rating" allowHalf value={2.5} />
+				<RatingInput label="Rating" halfSteps value={2.5} />
 			</div>
 		</ComponentCard>
 
 		<ComponentCard description="Half steps (RTL) — fills from the right">
 			<div class="w-full max-w-md">
-				<RatingInput label="Rating" allowHalf dir="rtl" value={2.5} />
+				<RatingInput label="Rating" halfSteps dir="rtl" value={2.5} />
 			</div>
 		</ComponentCard>
 
@@ -113,7 +113,7 @@
 
 		<ComponentCard description="Read-only display">
 			<div class="w-full max-w-md">
-				<RatingInput label="Rating" readonly allowHalf value={4.5} />
+				<RatingInput label="Rating" readonly halfSteps value={4.5} />
 			</div>
 		</ComponentCard>
 

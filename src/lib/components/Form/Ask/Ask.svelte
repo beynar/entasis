@@ -25,16 +25,12 @@
 		failure?: unknown;
 		hasFailure: boolean;
 		settled: boolean;
-		returnFocusPath: HTMLElement[];
 		cancelButton: HTMLElement | null;
 		confirmButton: HTMLElement | null;
 	};
 
 	let { type }: AskProps = $props();
 	let asks = $state<AskViewState[]>([]);
-
-	const focusableControl =
-		'input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [href], [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
 
 	function resolveButton(button: AskButton): ResolvedAskButton {
 		if (typeof button === 'string') {
@@ -46,20 +42,12 @@
 	}
 
 	function enqueueAsk(request: AskRequest): void {
-		const returnFocusTo =
-			document.activeElement instanceof HTMLElement ? document.activeElement : null;
-		const parentAsk = getTopOpenAsk();
-		const returnFocusPath = [
-			...(returnFocusTo ? [returnFocusTo] : []),
-			...(parentAsk?.returnFocusPath ?? [])
-		].filter((target, index, targets) => targets.indexOf(target) === index);
 		const viewState: AskViewState = {
 			...request,
 			open: false,
 			value: { ...request.options.value },
 			hasFailure: false,
 			settled: false,
-			returnFocusPath,
 			cancelButton: null,
 			confirmButton: null
 		};
@@ -72,26 +60,6 @@
 		await tick();
 		const activeAsk = asks.find((candidate) => candidate.id === askState.id);
 		if (activeAsk && !activeAsk.settled) activeAsk.open = true;
-	}
-
-	function focusFirstControl(askState: AskViewState): void {
-		for (const field of askState.form?.fields.values() ?? []) {
-			const fieldNode = field.node?.matches(focusableControl)
-				? field.node
-				: field.rootNode?.querySelector<HTMLElement>(focusableControl);
-			if (!fieldNode) continue;
-			fieldNode.focus();
-			return;
-		}
-
-		(askState.cancelButton ?? askState.confirmButton)?.focus();
-	}
-
-	function getTopOpenAsk(): AskViewState | undefined {
-		for (let index = asks.length - 1; index >= 0; index -= 1) {
-			const askState = asks[index];
-			if (askState.open && !askState.settled) return askState;
-		}
 	}
 
 	function cancelAsk(askState: AskViewState): void {
@@ -136,21 +104,6 @@
 		askState.open = false;
 	}
 
-	async function restoreFocusAfterClose(returnFocusPath: HTMLElement[]): Promise<void> {
-		await tick();
-		const remainingAsk = getTopOpenAsk();
-		if (remainingAsk) {
-			focusFirstControl(remainingAsk);
-			return;
-		}
-
-		for (const returnFocusTo of returnFocusPath) {
-			if (!returnFocusTo.isConnected) continue;
-			returnFocusTo.focus();
-			return;
-		}
-	}
-
 	function finishClose(askState: AskViewState): void {
 		if (askState.settled) return;
 		askState.settled = true;
@@ -162,7 +115,6 @@
 		}
 
 		asks = asks.filter((candidate) => candidate.id !== askState.id);
-		void restoreFocusAfterClose(askState.returnFocusPath);
 	}
 
 	onMount(() => {
@@ -200,9 +152,6 @@
 			header: { base: '-mx-4 px-4' },
 			footer: { base: 'border-neutral-muted -mx-4 mt-2 border-t px-4 pt-3' }
 		}}
-		onAfterOpen={(dialog) => {
-			if (dialog.isTop) focusFirstControl(askState);
-		}}
 		onAfterClose={() => finishClose(askState)}
 	>
 		<Form
@@ -219,35 +168,40 @@
 		/>
 
 		{#snippet footer()}
-			<div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
-				<Button
-					color="neutral"
-					{...cancelButton.props}
-					type="button"
-					size={cancelButton.size ?? askState.options.size}
-					disabled={!askState.open ||
-						!askState.form ||
-						askState.form.loading ||
-						cancelButton.disabled}
-					bind:ref={askState.cancelButton}
-					onclick={() => cancelAsk(askState)}
-				>
-					{cancelButton.text}
-				</Button>
-				<Button
-					{...confirmButton.props}
-					type="button"
-					size={confirmButton.size ?? askState.options.size}
-					loading={askState.form?.loading ?? false}
-					disabled={!askState.open ||
-						!askState.form ||
-						askState.form.loading ||
-						confirmButton.disabled}
-					bind:ref={askState.confirmButton}
-					onclick={() => void submitAsk(askState)}
-				>
-					{confirmButton.text}
-				</Button>
+			<!-- The button row lays itself out against the dialog footer's own width, not the
+			     viewport: the wrapper is the inline-size container and `@sm` (24rem) is the width
+			     at which a Cancel + Confirm pair sits side by side without either button wrapping. -->
+			<div class="@container w-full">
+				<div class="flex flex-col gap-2 @sm:flex-row @sm:justify-end">
+					<Button
+						color="neutral"
+						{...cancelButton.props}
+						type="button"
+						size={cancelButton.size ?? askState.options.size}
+						disabled={!askState.open ||
+							!askState.form ||
+							askState.form.loading ||
+							cancelButton.disabled}
+						bind:ref={askState.cancelButton}
+						onclick={() => cancelAsk(askState)}
+					>
+						{cancelButton.text}
+					</Button>
+					<Button
+						{...confirmButton.props}
+						type="button"
+						size={confirmButton.size ?? askState.options.size}
+						loading={askState.form?.loading ?? false}
+						disabled={!askState.open ||
+							!askState.form ||
+							askState.form.loading ||
+							confirmButton.disabled}
+						bind:ref={askState.confirmButton}
+						onclick={() => void submitAsk(askState)}
+					>
+						{confirmButton.text}
+					</Button>
+				</div>
 			</div>
 		{/snippet}
 	</Dialog>

@@ -25,7 +25,7 @@ Default status is represented by the semantic left indicator: a spinner for acti
 
 Default input and output sections use compact sign-in and sign-out icons. Their configured labels remain available to assistive technology and on hover.
 
-Use \`toggleIcon="none"\` for the default minimal trigger, \`chevron\` for a rotating disclosure icon, or \`math\` for plus/minus expansion controls. The choice applies to both group and child triggers.
+Use \`toggleIcon="none"\` for the default minimal trigger, \`chevron\` for a rotating disclosure icon, or \`plus-minus\` for plus/minus expansion controls. The choice applies to both group and child triggers.
 
 The default \`ghost\` variant renders an unframed tool call. Use \`card\` for an elevated surface, \`outline\` for a transparent bounded surface, or \`soft\` for a subtle status-aware tint. Group triggers keep intrinsic width independently from their expanded call content, while each child call receives the same variant around its complete row and panel.
 `;

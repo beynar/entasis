@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts" generics="Item">
-	/* eslint-disable no-useless-assignment -- bindableStepper is an output binding. */
+	/* eslint-disable no-useless-assignment -- bindableApi is an output binding. */
 	import { onMount, tick, untrack } from 'svelte';
 	import BeforeHydratation from '../Utils/BeforeHydratation.svelte';
 	import { type StepperProps } from './stepper.props.js';
@@ -14,19 +14,18 @@
 		items = [],
 		defaultValue = 0,
 		value = $bindable(),
-		stepper: bindableStepper = $bindable<StepperStateClass<Item>>(),
+		api: bindableApi = $bindable<StepperStateClass<Item>>(),
 		class: className,
 		children,
 		onValueChange,
-		keyFramesOptions = {
-			duration: 300,
-			easing: 'ease-in-out',
-			fill: 'both'
-		},
+		transition,
+		theme,
 		mode = 'classic',
 		panelRole = 'tabpanel',
 		panelAriaLabelledby,
-		panelAriaLabel
+		panelAriaLabel,
+		panelId,
+		mount = 'eager'
 	}: StepperProps<Item> = $props();
 	const valueState = createBindableValue(
 		() => value,
@@ -51,15 +50,18 @@
 		get onValueChange() {
 			return onValueChange;
 		},
-		get keyFramesOptions() {
-			return keyFramesOptions;
+		get transition() {
+			return transition;
+		},
+		get motion() {
+			return theme?.motion;
 		}
 	});
 
-	bindableStepper = stepper;
-	const classes = $derived(useStepperTheme());
+	bindableApi = stepper;
+	const classes = $derived(useStepperTheme(theme));
 	const stepCount = $derived(Math.max(items.length, 1));
-	const trackWidth = $derived(`${stepCount * 100}%`);
+	const trackWidth = $derived(stepper.expanded ? `${stepCount * 100}%` : '100%');
 	const activeHeight = $derived(stepper.activeHeight);
 
 	onMount(() => {
@@ -72,10 +74,32 @@
 		untrack(() => stepper.syncActiveStep(targetStep));
 	});
 
+	// `once` keeps a panel after its first activation, so the steps that have been reached are
+	// recorded here rather than inferred from the current value. `eager` — the default, because a
+	// wizard's earlier steps stay live — mounts everything up front, and `lazy` only ever keeps
+	// the active panel alive. Tabs asks for `lazy` instead: its panels are whole screens.
+	const activated = $state<Record<number, boolean>>({});
+	$effect(() => {
+		activated[valueState.value] = true;
+	});
+	// `hidden` is `display:none`: a panel dropped on the same tick as the value change cannot slide
+	// out, cannot fade out, and reports `clientHeight` 0 while the root is still animating to the
+	// new height. The panel the track currently shows (`visualStep`) therefore stays rendered —
+	// inert and `aria-hidden`, so it is out of the accessibility tree — until the slide settles and
+	// `visualStep` catches up with `value`. Keyed on `visualStep` alone, not on `isAnimating`: the
+	// value changes one flush before the slide starts, and gating on the animation flag hid the
+	// outgoing panel for that frame, which collapsed the track and reset its fade.
+	const isLeaving = (index: number) => index === stepper.visualStep;
+	const isMounted = (index: number, isActiveStep: boolean) =>
+		mount === 'eager' ||
+		isActiveStep ||
+		(mount === 'once' && activated[index] === true) ||
+		isLeaving(index);
+
 	const getPanelAriaLabelledby = (item: Item, index: number) => {
 		if (panelAriaLabelledby === false) return undefined;
 		if (typeof panelAriaLabelledby === 'function') {
-			return panelAriaLabelledby({ stepper, item, index });
+			return panelAriaLabelledby({ api: stepper, item, index });
 		}
 		if (typeof panelAriaLabelledby === 'string') return panelAriaLabelledby;
 		if (panelRole === 'tabpanel') return `stepper-${index}`;
@@ -84,7 +108,7 @@
 
 	const getPanelAriaLabel = (item: Item, index: number) => {
 		if (typeof panelAriaLabel === 'function') {
-			return panelAriaLabel({ stepper, item, index });
+			return panelAriaLabel({ api: stepper, item, index });
 		}
 		return panelAriaLabel;
 	};
@@ -112,10 +136,11 @@ container.style.height = firstSlide.clientHeight + 'px';
 		className
 	})}
 	id="stepper-{id}"
+	data-animating={stepper.isAnimating}
 	style:will-change="height"
 	style:height={activeHeight == null ? undefined : `${activeHeight}px`}
-	style:transition-duration={`${keyFramesOptions.duration}ms`}
-	style:transition-timing-function={keyFramesOptions.easing}
+	style:transition-duration={`${stepper.timing.duration}ms`}
+	style:transition-timing-function={stepper.timing.easing}
 >
 	<div
 		bind:this={stepper.stepContainer}
@@ -123,13 +148,14 @@ container.style.height = firstSlide.clientHeight + 'px';
 			mode
 		})}
 		style:width={trackWidth}
-		style:grid-template-columns="repeat({stepCount}, minmax(0, 1fr))"
+		style:grid-template-columns="repeat({stepper.expanded ? stepCount : 1}, minmax(0, 1fr))"
 	>
 		{#each items as item, index (index)}
 			{@const isActiveStep = stepper.value === index}
 			{@const ariaLabelledby = getPanelAriaLabelledby(item, index)}
-			{@const ariaLabel = getPanelAriaLabel(item, index)}
+			{@const label = getPanelAriaLabel(item, index)}
 			{@const panelTabindex = panelRole === 'tabpanel' ? (isActiveStep ? 0 : -1) : undefined}
+			{@const mounted = isMounted(index, isActiveStep)}
 			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 			<div
 				bind:clientHeight={
@@ -138,21 +164,26 @@ container.style.height = firstSlide.clientHeight + 'px';
 						stepper.setStepHeight(index, value || 0);
 					}
 				}
+				id={panelId?.(index)}
 				data-step-active={isActiveStep ? 'true' : undefined}
 				data-step={index}
 				tabindex={panelTabindex}
+				hidden={!isActiveStep && !isLeaving(index)}
 				inert={!isActiveStep}
 				role={panelRole ?? undefined}
-				aria-label={ariaLabel}
+				aria-label={label}
 				aria-labelledby={ariaLabelledby}
 				aria-hidden={!isActiveStep ? 'true' : undefined}
-				style:transition-duration={`${keyFramesOptions.duration}ms`}
-				style:transition-timing-function={keyFramesOptions.easing}
+				style:transition-duration={`${stepper.timing.duration}ms`}
+				style:transition-timing-function={stepper.timing.easing}
+				style:grid-column={stepper.expanded ? index + 1 : 1}
 				class={classes.step({
 					mode
 				})}
 			>
-				{@render children?.({ stepper, item, index })}
+				{#if mounted}
+					{@render children?.({ api: stepper, item, index })}
+				{/if}
 			</div>
 		{/each}
 	</div>

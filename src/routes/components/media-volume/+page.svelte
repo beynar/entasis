@@ -32,7 +32,7 @@
 			name: 'color',
 			type: 'segmented',
 			label: 'Color',
-			value: 'primary',
+			value: 'neutral',
 			options: colors
 		},
 		{
@@ -74,7 +74,7 @@
 	{volume}
 	{muted}
 	orientation="vertical"
-	popoverClass="border-white/10 bg-black/90 text-white"
+	popover={{ class: 'border-white/10 bg-black/90 text-white' }}
 	panelClass="w-auto flex-col gap-2 px-0 py-1"
 	sliderTheme={darkSliderTheme}
 	onVolumeChange={setVolume}
@@ -88,8 +88,8 @@
 			label={context.label}
 			prefix={context.icon}
 			onclick={context.activate}
-			aria-haspopup={context.ariaHaspopup}
-			aria-expanded={context.ariaExpanded}
+			haspopup={context.haspopup}
+			expanded={context.expanded}
 			{@attach context.reference}
 		/>
 	{/snippet}
@@ -112,7 +112,7 @@
 			base: 'w-auto flex-col items-center gap-2'
 		},
 		track: {
-			base: 'h-36 text-primary focus-visible:ring-white/60 focus-visible:ring-offset-0'
+			base: 'h-36 text-primary-readable focus-visible:ring-white/60 focus-visible:ring-offset-0'
 		},
 		trackBackground: {
 			base: 'bg-white/25'
@@ -219,7 +219,9 @@
 					muted={playerVolume.muted}
 					orientation="vertical"
 					color="primary"
-					popoverClass="border-white/10 bg-black/90 p-1.5 text-white shadow-xl backdrop-blur"
+					popover={{
+						class: 'border-white/10 bg-black/90 p-1.5 text-white shadow-xl backdrop-blur'
+					}}
 					panelClass="w-auto flex-col justify-center gap-1.5 px-0 py-0.5"
 					sliderTheme={darkSliderTheme}
 					onVolumeChange={(nextVolume) => setVolume(playerVolume, nextVolume)}
@@ -234,8 +236,8 @@
 							label={context.label}
 							prefix={context.icon}
 							data-active={context.active ? 'true' : undefined}
-							aria-haspopup={context.ariaHaspopup}
-							aria-expanded={context.ariaExpanded}
+							haspopup={context.haspopup}
+							expanded={context.expanded}
 							onclick={context.activate}
 							class="border border-white/10 bg-white/5 text-white hover:bg-white/10"
 							{@attach context.reference}
@@ -251,7 +253,7 @@
 							label={context.label}
 							prefix={context.icon}
 							data-active={context.active ? 'true' : undefined}
-							aria-pressed={context.pressed}
+							pressed={context.pressed}
 							onclick={context.activate}
 							class="border border-white/10 bg-white/5 text-white hover:bg-white/10"
 						/>

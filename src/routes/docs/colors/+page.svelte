@@ -1,4 +1,18 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
+	import {
+		runtimeThemePresetNames,
+		runtimeThemePresets
+	} from '../../runtimeThemePlayground.svelte.js';
+
+	const elevationSteps = [
+		{ level: 1, className: 'raised-1', role: 'Resting cards' },
+		{ level: 2, className: 'raised-2', role: 'Hovered cards' },
+		{ level: 3, className: 'raised-3', role: 'Popovers' },
+		{ level: 4, className: 'raised-4', role: 'Dialogs' },
+		{ level: 5, className: 'raised-5', role: 'Dragged items' }
+	] as const;
+
 	const semanticFamilies = [
 		{
 			name: 'primary',
@@ -127,12 +141,12 @@
 </script>
 
 {#snippet token(text: string)}
-	<code class="font-mono text-[0.85em] text-neutral">{text}</code>
+	<code class="text-neutral font-mono text-[0.85em]">{text}</code>
 {/snippet}
 
 {#snippet interactionPreview(label: string, opacity?: 'hover' | 'pressed')}
 	<div
-		class="relative isolate overflow-hidden rounded-lg bg-surface-floating px-4 py-2 text-sm font-medium text-neutral"
+		class="bg-surface-floating text-neutral relative isolate overflow-hidden rounded-lg px-4 py-2 text-sm font-medium"
 	>
 		{#if opacity}
 			<span
@@ -145,10 +159,10 @@
 	</div>
 {/snippet}
 
-<article class="mx-auto flex max-w-4xl flex-col gap-14 pb-24 text-neutral">
+<article class="text-neutral mx-auto flex max-w-4xl flex-col gap-14 pb-24">
 	<header class="flex max-w-3xl flex-col gap-3">
 		<h1 class="text-3xl font-semibold">Color system</h1>
-		<p class="text-balance text-neutral">
+		<p class="text-neutral text-balance">
 			Choose meaning, resting surface, and interaction independently. This separation keeps
 			components coherent across light and dark themes.
 		</p>
@@ -179,7 +193,7 @@
 				A family name communicates meaning. Its suffix communicates a tonal treatment—not component
 				state and not elevation.
 			</p>
-			<p class="text-sm text-neutral">
+			<p class="text-neutral text-sm">
 				Use {@render token('{color}-contrast')} on solid fills and {@render token(
 					'{color}-muted-readable'
 				)} on muted fills. Use {@render token('{color}-readable')} when the semantic color itself is text
@@ -190,15 +204,15 @@
 			{#each semanticFamilies as family (family.name)}
 				<div class="flex flex-col gap-3">
 					<div class="max-w-3xl">
-						<p class="font-medium text-neutral">{family.name}</p>
-						<p class="mt-1 text-sm leading-relaxed text-neutral">{family.role}</p>
+						<p class="text-neutral font-medium">{family.name}</p>
+						<p class="text-neutral mt-1 text-sm leading-relaxed">{family.role}</p>
 					</div>
 					<div class="grid grid-cols-3 gap-3 sm:grid-cols-6">
 						{#each family.colors as [name, background] (name)}
 							<div class="min-w-0">
 								<div class={`h-12 rounded-md ${background}`}></div>
 								<code
-									class="mt-2 block truncate text-center text-[0.65rem] text-neutral"
+									class="text-neutral mt-2 block truncate text-center text-[0.65rem]"
 									title={name}>{name.replace(`${family.name}-`, '')}</code
 								>
 							</div>
@@ -225,7 +239,7 @@
 				Surface tokens describe resting layers. Their generated lightness changes by color scheme so
 				the hierarchy remains visible in both modes.
 			</p>
-			<p class="text-sm text-neutral">
+			<p class="text-neutral text-sm">
 				{@render token('surface-recessed')} is an inset role. The elevation ladder is {@render token(
 					'surface-canvas'
 				)} → {@render token('surface')} → {@render token('surface-raised')} → {@render token(
@@ -238,8 +252,8 @@
 			{#each surfaceTokens as surface (surface.name)}
 				<div class="grid items-center gap-3 sm:grid-cols-[8rem_11rem_1fr]">
 					<div class={`h-12 rounded-md ${surface.background}`}></div>
-					<code class="text-xs font-medium text-neutral">{surface.name}</code>
-					<p class="text-sm leading-relaxed text-neutral">{surface.role}</p>
+					<code class="text-neutral text-xs font-medium">{surface.name}</code>
+					<p class="text-neutral text-sm leading-relaxed">{surface.role}</p>
 				</div>
 			{/each}
 		</div>
@@ -247,7 +261,7 @@
 
 	<section class="flex flex-col gap-5">
 		<h2 class="text-lg font-semibold">Interaction states</h2>
-		<p class="max-w-3xl text-sm text-neutral">
+		<p class="text-neutral max-w-3xl text-sm">
 			{@render token('state-layer')} overlays the element's current text color at theme-configured opacity
 			without replacing its resting fill.
 		</p>
@@ -256,7 +270,7 @@
 			{@render interactionPreview('Hover', 'hover')}
 			{@render interactionPreview('Pressed', 'pressed')}
 		</div>
-		<ul class="flex max-w-3xl list-disc flex-col gap-2 pl-5 text-sm leading-relaxed text-neutral">
+		<ul class="text-neutral flex max-w-3xl list-disc flex-col gap-2 pl-5 text-sm leading-relaxed">
 			<li>Hover runs only on hover-capable pointers; press is stronger and wins.</li>
 			<li>Virtual focus uses the same layer as hover.</li>
 			<li>Disabled elements suppress the layer automatically.</li>
@@ -264,9 +278,66 @@
 		</ul>
 	</section>
 
+	<section class="flex flex-col gap-6">
+		<h2 class="text-lg font-semibold">Elevation</h2>
+		<div class="flex max-w-3xl flex-col gap-3">
+			<p class="text-neutral">
+				Surfaces describe which layer an element rests on; {@render token('raised-{level}')} describes
+				how far it lifts off that layer. The five levels share one shadow ramp, tuned by the theme's
+				{@render token('elevation')} token—<code class="text-neutral">flat</code> removes the
+				shadows,
+				<code class="text-neutral">high</code> deepens them.
+			</p>
+			<p class="text-neutral text-sm">
+				In dark mode the ramp also adds a light tint, because shadows alone read as flat on a dark
+				canvas. Toggle the color scheme to compare.
+			</p>
+			<p class="text-neutral text-sm">
+				{@render token('raised-{level}')} also draws a hairline border, which is what a card, a popover
+				or a panel wants. Borderless things that float — switch thumbs, tab indicators, drag previews,
+				tooltips — take {@render token('lift-{level}')} instead: the same shadow off the same ramp, no
+				border. Both accept the level numbers above and the t-shirt aliases ({@render token('sm')} … {@render token(
+					'2xl'
+				)}).
+			</p>
+		</div>
+		<div class="bg-surface-canvas grid grid-cols-5 gap-3 rounded-lg p-5 sm:gap-5 sm:p-8">
+			{#each elevationSteps as step (step.level)}
+				<div class="flex min-w-0 flex-col gap-2">
+					<div class="{step.className} bg-surface-raised h-14 rounded-lg sm:h-20"></div>
+					<code class="text-neutral block truncate text-center text-[0.65rem]" title={step.role}
+						>{step.className}</code
+					>
+				</div>
+			{/each}
+		</div>
+	</section>
+
+	<section class="flex flex-col gap-6">
+		<h2 class="text-lg font-semibold">Presets</h2>
+		<p class="text-neutral max-w-3xl">
+			Spacing, radius, type scale, and elevation travel together. The
+			<a class="text-primary-readable underline" href={resolve('/playground')}>playground</a>
+			applies these presets to a live component gallery, then prints the matching
+			{@render token('designTokens')} block to copy.
+		</p>
+		<dl class="flex flex-col gap-3 text-sm sm:grid sm:grid-cols-[10rem_1fr] sm:gap-x-4 sm:gap-y-3">
+			{#each runtimeThemePresetNames as presetName (presetName)}
+				{@const preset = runtimeThemePresets[presetName]}
+				<dt class="text-neutral font-medium">{preset.label}</dt>
+				<dd class="text-neutral">
+					{preset.description}
+					<span class="text-neutral/70">
+						{preset.typeScale} type, {preset.elevation} elevation.
+					</span>
+				</dd>
+			{/each}
+		</dl>
+	</section>
+
 	<section class="flex max-w-3xl flex-col gap-2">
 		<h2 class="text-lg font-semibold">Fast rule for humans and AI</h2>
-		<p class="text-sm leading-relaxed text-neutral">
+		<p class="text-neutral text-sm leading-relaxed">
 			Never infer interaction from {@render token('-dark')} or {@render token('-light')}. First
 			choose a semantic family, then a resting surface, and finally {@render token('state-layer')} for
 			transient interaction. Use rings for focus and explicit muted or solid fills for persistent state.

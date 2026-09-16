@@ -880,7 +880,7 @@ export class GanttChartInteractions<
 				});
 				return false;
 			}
-			this.#chart.eventHandlers?.onEmptyRangeSelect?.(gesture.resolution.proposal);
+			this.#chart.eventHandlers?.onSelect?.(gesture.resolution.proposal);
 			return true;
 		} finally {
 			this.cancel();

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Streamdown, type StreamdownToken } from 'svelte-streamdown';
 	import type { Snippet } from 'svelte';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import Card from '../Card/Card.svelte';
 	import Code from '../Code/Code.svelte';
 	import { Grid, GridSpan } from '../Grid/index.js';
@@ -30,11 +31,14 @@
 
 	const classes = $derived(useMarkdownTheme(theme));
 	const streamdownTheme = $derived(buildStreamdownTheme(size));
+	const t = $derived(useI18n());
 
 	// The `token` carried by the code/mermaid override snippets is a marked
 	// `Tokens.Code`; we only need its raw source and language string here.
 	type CodePayload = { token: { text: string; lang?: string } };
 	type MdxToken = Extract<StreamdownToken, { type: 'mdx' }>;
+	type ListItemToken = Extract<StreamdownToken, { type: 'list_item' }>;
+	type ListItemPayload = { token: ListItemToken; children: Snippet };
 	type MdxAttribute = string | number | boolean | null | undefined;
 	type MdxPayload = {
 		token: MdxToken;
@@ -101,6 +105,27 @@
 					class={markdownCodeSizes[size]}
 				/>
 			{/if}
+		{/snippet}
+		<!-- Task-list items own their checkbox, so the default `li` is replaced to name it:
+		     the input is disabled and has no text of its own, and an unnamed checkbox is a
+		     WCAG label failure. Everything else about the row matches Streamdown's default. -->
+		{#snippet li(payload: ListItemPayload)}
+			<li
+				class={streamdownTheme?.li?.base}
+				style:list-style-type={payload.token.task ? 'none' : undefined}
+				{...payload.token.value && !payload.token.task ? { value: payload.token.value } : {}}
+			>
+				{#if payload.token.task}
+					<input
+						disabled
+						type="checkbox"
+						checked={payload.token.checked}
+						class={streamdownTheme?.li?.checkbox}
+						aria-label={payload.token.checked ? t.taskComplete : t.taskIncomplete}
+					/>
+				{/if}
+				{@render payload.children()}
+			</li>
 		{/snippet}
 	</Streamdown>
 </div>

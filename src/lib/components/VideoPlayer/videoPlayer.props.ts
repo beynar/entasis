@@ -98,7 +98,7 @@ export type VideoPlayerProps = WithAttachments<{
 	poster?: string;
 	/** Accessible title for the player region and native video. */
 	title?: string;
-	/** Explicit accessible label; falls back to title. */
+	/** Accessible label applied as aria-label; falls back to title. */
 	label?: string;
 	/** Native video preload behavior. */
 	preload?: VideoPlayerPreload;
@@ -179,27 +179,27 @@ export type VideoPlayerProps = WithAttachments<{
 	/** Empty-source overlay content. */
 	empty?: Slot<VideoPlayerOverlayPayload>;
 	/** Called when the media starts playback. */
-	onPlay?: (snapshot: VideoPlayerSnapshot) => void;
+	onPlay?: (payload: VideoPlayerSnapshot) => void;
 	/** Called when the media pauses. */
-	onPause?: (snapshot: VideoPlayerSnapshot) => void;
+	onPause?: (payload: VideoPlayerSnapshot) => void;
 	/** Called when playback ends. */
-	onEnded?: (snapshot: VideoPlayerSnapshot) => void;
+	onEnded?: (payload: VideoPlayerSnapshot) => void;
 	/** Called when currentTime changes. */
-	onTimeUpdate?: (snapshot: VideoPlayerSnapshot) => void;
+	onTimeUpdate?: (payload: VideoPlayerSnapshot) => void;
 	/** Called when duration changes. */
-	onDurationChange?: (snapshot: VideoPlayerSnapshot) => void;
+	onDurationChange?: (payload: VideoPlayerSnapshot) => void;
 	/** Called when volume or muted state changes. */
-	onVolumeChange?: (snapshot: VideoPlayerSnapshot) => void;
+	onVolumeChange?: (payload: VideoPlayerSnapshot) => void;
 	/** Called when playbackRate changes. */
-	onRateChange?: (snapshot: VideoPlayerSnapshot) => void;
+	onRateChange?: (payload: VideoPlayerSnapshot) => void;
 	/** Called when loop changes through the component API. */
-	onLoopChange?: (snapshot: VideoPlayerSnapshot) => void;
+	onLoopChange?: (payload: VideoPlayerSnapshot) => void;
 	/** Called when fullscreen state changes. */
-	onFullscreenChange?: (snapshot: VideoPlayerSnapshot) => void;
+	onFullscreenChange?: (payload: VideoPlayerSnapshot) => void;
 	/** Called when Picture-in-Picture state changes. */
-	onPictureInPictureChange?: (snapshot: VideoPlayerSnapshot) => void;
+	onPictureInPictureChange?: (payload: VideoPlayerSnapshot) => void;
 	/** Called when captions/subtitles are toggled. */
-	onCaptionsChange?: (snapshot: VideoPlayerSnapshot) => void;
+	onCaptionsChange?: (payload: VideoPlayerSnapshot) => void;
 	/** Called when native media or custom interaction errors occur. */
 	onError?: (payload: VideoPlayerErrorPayload) => void;
 	/** Per-instance theme overrides. */

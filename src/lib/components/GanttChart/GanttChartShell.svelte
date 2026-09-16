@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	const HEADER_HEIGHT = { small: 40, normal: 48, large: 56 } as const;
+	const HEADER_HEIGHT = { compact: 40, normal: 48, comfortable: 56 } as const;
 
 	function validateGridMetrics(gridWidth: number, rowHeight: number): void {
 		if (
@@ -295,7 +295,7 @@
 		<ScrollArea
 			bind:viewportRef
 			class="h-full"
-			ariaLabel={chart.messages.ganttChartScrollableContent}
+			label={chart.messages.ganttChartScrollableContent}
 			type="hover"
 		>
 			{@render splitContent()}

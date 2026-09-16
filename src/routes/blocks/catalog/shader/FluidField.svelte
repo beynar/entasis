@@ -186,8 +186,8 @@ void main() {
 	});
 </script>
 
-<section class="flex flex-col gap-lg p-lg md:p-xl">
-	<div class="flex flex-wrap items-end justify-between gap-lg">
+<section class="gap-lg p-lg md:p-xl flex flex-col">
+	<div class="gap-lg flex flex-wrap items-end justify-between">
 		<div>
 			<Chip variant="outline">Motion study · 01</Chip><Heading
 				as="h2"
@@ -202,16 +202,16 @@ void main() {
 			onclick={() => (running = !running)}>{running ? 'Pause motion' : 'Resume motion'}</Button
 		>
 	</div>
-	<div class="relative overflow-hidden rounded-2xl border border-neutral-muted">
+	<div class="border-neutral-muted relative overflow-hidden rounded-2xl border">
 		<canvas
 			bind:this={canvas}
-			class="block h-80 w-full bg-surface text-primary md:h-96"
+			class="bg-surface text-primary-readable block h-80 w-full md:h-96"
 			aria-label="Animated flowing field using the current theme colors"
-		></canvas><span bind:this={secondaryColor} class="hidden text-secondary" aria-hidden="true"
+		></canvas><span bind:this={secondaryColor} class="text-secondary hidden" aria-hidden="true"
 		></span>
 	</div>
 	<Card variant="outline"
-		><div class="grid gap-xl md:grid-cols-3">
+		><div class="gap-xl grid md:grid-cols-3">
 			<Slider
 				label="Flow speed"
 				value={speed}
@@ -233,7 +233,7 @@ void main() {
 					if (typeof value === 'number') detail = value;
 				}}
 			/>
-			<p class="self-center text-sm text-neutral/60" role="status">
+			<p class="text-neutral/70 self-center text-sm" role="status">
 				{failure ||
 					(reducedMotion
 						? 'Motion is paused by your system preference.'

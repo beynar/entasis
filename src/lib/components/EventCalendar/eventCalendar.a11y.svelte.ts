@@ -1,5 +1,10 @@
 /* eslint-disable svelte/prefer-svelte-reactivity -- DOM registries and immutable configuration snapshots are not reactive state. */
 import { tick } from 'svelte';
+import { useLiveAnnouncer, type LiveAnnouncer } from '$lib/utils/useLiveAnnouncer.svelte.js';
+import {
+	createRovingRestoreVersion,
+	useRovingRegistry
+} from '$lib/utils/useRovingRegistry.svelte.js';
 import {
 	addCivilMonths,
 	getCachedDateTimeFormatter,
@@ -55,12 +60,26 @@ export class EventCalendarA11y<
 	TItemFields extends object = Record<never, never>,
 	TResourceFields extends object = Record<never, never>
 > {
-	announcement = $state('');
 	focusedDay = $state<EventCalendarDateOnly | null>(null);
 	mutationOccurrenceKey = $state<string | null>(null);
 	mutationOperation = $state<EventCalendarItemOperation | null>(null);
 	readonly liveRegionId: string;
-	private dayElements = new Map<EventCalendarDateOnly, HTMLElement>();
+	private readonly announcer: LiveAnnouncer;
+	/** Day and time-grid restores share a domain: the newest one wins the tab stop. */
+	private readonly focusVersion = createRovingRestoreVersion();
+	private readonly occurrenceFocusVersion = createRovingRestoreVersion();
+	private readonly dayRegistry = useRovingRegistry<EventCalendarDateOnly>({
+		version: this.focusVersion,
+		releaseWhen: 'focused',
+		onRelease: (day) => {
+			this.pendingDay = day;
+		},
+		restoreTarget: () => (this.pendingDay ? this.resolveEnabledDay(this.pendingDay) : null),
+		onRestore: (day) => {
+			this.focusedDay = day;
+			this.pendingDay = null;
+		}
+	});
 	private days: readonly EventCalendarDateOnly[] = [];
 	private enabledDays = $state.raw<ReadonlySet<EventCalendarDateOnly>>(new Set());
 	private columnCount = 1;
@@ -68,17 +87,39 @@ export class EventCalendarA11y<
 	private direction: 'ltr' | 'rtl' = 'ltr';
 	private onPage: (direction: -1 | 1, targetDay: EventCalendarDateOnly) => boolean = () => false;
 	private pendingDay: EventCalendarDateOnly | null = null;
-	private timeElements = new Map<string, HTMLElement>();
+	private readonly timeRegistry = useRovingRegistry<string>({
+		version: this.focusVersion,
+		releaseWhen: 'focused',
+		onRelease: (targetKey) => {
+			const target = this.timeTargetByKey.get(targetKey);
+			if (target) this.pendingTimeTarget = target;
+		},
+		restoreTarget: (targetKey) => (this.focusedTimeTarget === targetKey ? targetKey : null),
+		onRestore: () => {
+			this.pendingTimeTarget = null;
+		}
+	});
 	private timeTargets: readonly EventCalendarTimeTarget[] = [];
 	private timeTargetByKey = new Map<string, EventCalendarTimeTarget>();
 	private focusedTimeTarget = $state<string | null>(null);
 	private focusedTimeAnchor: EventCalendarTimeTarget | null = null;
 	private pendingTimeTarget: Pick<EventCalendarTimeTarget, 'column' | 'row' | 'kind'> | null = null;
 	private onTimePage: (direction: -1 | 1) => boolean = () => false;
-	private restoreVersion = 0;
-	private occurrenceRestoreVersion = 0;
 	private lifecycleVersion = 0;
-	private occurrenceElements = new Map<string, Set<HTMLElement>>();
+	/** An occurrence renders one control per segment, and the first of them takes the focus. */
+	private readonly occurrenceRegistry = useRovingRegistry<string>({
+		version: this.occurrenceFocusVersion,
+		multiple: true,
+		onRelease: (occurrenceKey) => {
+			if (this.focusedOccurrenceKey === occurrenceKey) this.pendingOccurrenceKey = occurrenceKey;
+		},
+		restoreTarget: (occurrenceKey) =>
+			this.pendingOccurrenceKey === occurrenceKey ? occurrenceKey : null,
+		onRestore: (occurrenceKey) => {
+			this.focusedOccurrenceKey = occurrenceKey;
+			this.pendingOccurrenceKey = null;
+		}
+	});
 	private focusedOccurrenceKey: string | null = null;
 	private pendingOccurrenceKey: string | null = null;
 	private activeView: EventCalendarView | null = null;
@@ -86,25 +127,26 @@ export class EventCalendarA11y<
 	private announcedResourceTarget = '';
 
 	constructor(private readonly calendar: EventCalendarState<TItemFields, TResourceFields>) {
-		this.liveRegionId = `${calendar.instanceId}-status`;
+		this.announcer = useLiveAnnouncer(calendar.instanceId, 'status');
+		this.liveRegionId = this.announcer.regionId;
 		$effect(() => this.syncResourceTargetAnnouncement());
 	}
 
 	configureView(view: EventCalendarView): void {
 		if (this.activeView === view) return;
 		this.activeView = view;
-		this.restoreVersion += 1;
-		this.occurrenceRestoreVersion += 1;
-		this.dayElements.clear();
+		this.focusVersion.bump();
+		this.occurrenceFocusVersion.bump();
+		this.dayRegistry.clear();
 		this.days = [];
 		this.enabledDays = new Set();
 		this.pendingDay = null;
-		this.timeElements.clear();
+		this.timeRegistry.clear();
 		this.timeTargets = [];
 		this.timeTargetByKey.clear();
 		this.focusedTimeTarget = null;
 		this.pendingTimeTarget = null;
-		this.occurrenceElements.clear();
+		this.occurrenceRegistry.clear();
 		this.pendingOccurrenceKey = this.focusedOccurrenceKey;
 	}
 
@@ -220,15 +262,11 @@ export class EventCalendarA11y<
 	}
 
 	registerOccurrenceControl(occurrenceKey: string, node: HTMLElement): () => void {
-		const elements = this.occurrenceElements.get(occurrenceKey) ?? new Set<HTMLElement>();
-		elements.add(node);
-		this.occurrenceElements.set(occurrenceKey, elements);
-		if (this.pendingOccurrenceKey === occurrenceKey) this.scheduleOccurrenceRestore(occurrenceKey);
-		return () => {
-			elements.delete(node);
-			if (elements.size === 0) this.occurrenceElements.delete(occurrenceKey);
-			if (this.focusedOccurrenceKey === occurrenceKey) this.pendingOccurrenceKey = occurrenceKey;
-		};
+		const release = this.occurrenceRegistry.register(occurrenceKey, node);
+		if (this.pendingOccurrenceKey === occurrenceKey) {
+			this.occurrenceRegistry.schedule(occurrenceKey);
+		}
+		return release;
 	}
 
 	handleOccurrenceFocus(occurrenceKey: string, day: EventCalendarDateOnly): void {
@@ -240,7 +278,7 @@ export class EventCalendarA11y<
 	restoreOccurrenceFocus(occurrenceKey = this.focusedOccurrenceKey): void {
 		if (!occurrenceKey) return;
 		this.pendingOccurrenceKey = occurrenceKey;
-		this.scheduleOccurrenceRestore(occurrenceKey);
+		this.occurrenceRegistry.schedule(occurrenceKey);
 	}
 
 	finishItemMutation(): void {
@@ -276,7 +314,7 @@ export class EventCalendarA11y<
 		if (nextDay) this.focusedDay = nextDay;
 		if (this.pendingDay) {
 			this.pendingDay = nextDay;
-			this.scheduleRestore();
+			this.dayRegistry.schedule();
 		}
 	}
 
@@ -294,7 +332,7 @@ export class EventCalendarA11y<
 		}
 		nextTarget ??= this.timeTargets[0];
 		this.focusedTimeTarget = nextTarget?.key ?? null;
-		if (this.pendingTimeTarget && nextTarget) this.scheduleTimeRestore(nextTarget.key);
+		if (this.pendingTimeTarget && nextTarget) this.timeRegistry.schedule(nextTarget.key);
 	}
 
 	configureAgenda(configuration: AgendaConfiguration): void {
@@ -305,17 +343,11 @@ export class EventCalendarA11y<
 	}
 
 	registerTimeTarget(targetKey: string, node: HTMLElement): () => void {
-		this.timeElements.set(targetKey, node);
+		const release = this.timeRegistry.register(targetKey, node);
 		if (this.focusedTimeTarget === targetKey && this.pendingTimeTarget) {
-			this.scheduleTimeRestore(targetKey);
+			this.timeRegistry.schedule(targetKey);
 		}
-		return () => {
-			if (typeof document !== 'undefined' && document.activeElement === node) {
-				const target = this.timeTargetByKey.get(targetKey);
-				if (target) this.pendingTimeTarget = target;
-			}
-			if (this.timeElements.get(targetKey) === node) this.timeElements.delete(targetKey);
-		};
+		return release;
 	}
 
 	getTimeTargetTabIndex(targetKey: string): 0 | -1 {
@@ -339,7 +371,7 @@ export class EventCalendarA11y<
 		if (event.key === 'Escape' && !this.calendar.interaction.isKeyboardSlotActive) {
 			event.preventDefault();
 			this.calendar.interaction.clearFocusedSelection();
-			this.timeElements.get(targetKey)?.blur();
+			this.timeRegistry.get(targetKey)?.blur();
 			return true;
 		}
 		if (this.calendar.interaction.isKeyboardSlotActive && event.key === 'Enter') {
@@ -388,14 +420,9 @@ export class EventCalendarA11y<
 	}
 
 	registerDay(day: EventCalendarDateOnly, node: HTMLElement): () => void {
-		this.dayElements.set(day, node);
-		if (this.pendingDay === day) this.scheduleRestore();
-		return () => {
-			if (typeof document !== 'undefined' && document.activeElement === node) {
-				this.pendingDay = day;
-			}
-			if (this.dayElements.get(day) === node) this.dayElements.delete(day);
-		};
+		const release = this.dayRegistry.register(day, node);
+		if (this.pendingDay === day) this.dayRegistry.schedule();
+		return release;
 	}
 
 	getDayTabIndex(day: EventCalendarDateOnly): 0 | -1 {
@@ -418,7 +445,7 @@ export class EventCalendarA11y<
 		if (event.key === 'Escape' && !this.calendar.interaction.isKeyboardSlotActive) {
 			event.preventDefault();
 			this.calendar.interaction.clearFocusedSelection();
-			this.dayElements.get(day)?.blur();
+			this.dayRegistry.get(day)?.blur();
 			return true;
 		}
 		if (this.calendar.interaction.isKeyboardSlotActive && event.key === 'Enter') {
@@ -462,7 +489,7 @@ export class EventCalendarA11y<
 				return true;
 			}
 			if (!this.onPage(direction, this.pendingDay)) this.pendingDay = null;
-			this.scheduleRestore();
+			this.dayRegistry.schedule();
 			event.preventDefault();
 			return true;
 		} else {
@@ -490,13 +517,12 @@ export class EventCalendarA11y<
 		return true;
 	}
 
+	get announcement(): string {
+		return this.announcer.message;
+	}
+
 	announce(message: string): void {
-		const version = this.lifecycleVersion;
-		this.announcement = '';
-		queueMicrotask(() => {
-			if (version !== this.lifecycleVersion) return;
-			this.announcement = message;
-		});
+		this.announcer.announce(message);
 	}
 
 	remapOccurrenceKeys(remap: (key: string) => string): void {
@@ -515,9 +541,9 @@ export class EventCalendarA11y<
 		if (!previousKey) return;
 		const nextKey = remap(previousKey);
 		if (nextKey === previousKey) return;
-		const version = ++this.restoreVersion;
+		const version = this.focusVersion.bump();
 		queueMicrotask(() => {
-			if (version !== this.restoreVersion) return;
+			if (!this.focusVersion.isCurrent(version)) return;
 			for (const candidate of root.querySelectorAll<HTMLElement>('[data-occurrence-key]')) {
 				if (candidate.dataset.occurrenceKey !== nextKey) continue;
 				(candidate.querySelector<HTMLElement>('button') ?? candidate).focus();
@@ -611,20 +637,21 @@ export class EventCalendarA11y<
 	}
 
 	destroy(): void {
+		this.announcer.reset();
 		this.lifecycleVersion += 1;
-		this.restoreVersion += 1;
-		this.occurrenceRestoreVersion += 1;
-		this.dayElements.clear();
+		this.focusVersion.bump();
+		this.occurrenceFocusVersion.bump();
+		this.dayRegistry.clear();
 		this.days = [];
 		this.enabledDays = new Set();
 		this.pendingDay = null;
-		this.timeElements.clear();
+		this.timeRegistry.clear();
 		this.timeTargets = [];
 		this.timeTargetByKey.clear();
 		this.focusedTimeTarget = null;
 		this.focusedTimeAnchor = null;
 		this.pendingTimeTarget = null;
-		this.occurrenceElements.clear();
+		this.occurrenceRegistry.clear();
 		this.focusedOccurrenceKey = null;
 		this.pendingOccurrenceKey = null;
 		this.activeView = null;
@@ -700,22 +727,9 @@ export class EventCalendarA11y<
 	}
 
 	private clearOccurrenceFocus(): void {
-		this.occurrenceRestoreVersion += 1;
+		this.occurrenceFocusVersion.bump();
 		this.focusedOccurrenceKey = null;
 		this.pendingOccurrenceKey = null;
-	}
-
-	private scheduleOccurrenceRestore(occurrenceKey: string): void {
-		const version = ++this.occurrenceRestoreVersion;
-		queueMicrotask(() => {
-			if (version !== this.occurrenceRestoreVersion || this.pendingOccurrenceKey !== occurrenceKey)
-				return;
-			const element = this.occurrenceElements.get(occurrenceKey)?.values().next().value;
-			if (!element) return;
-			this.focusedOccurrenceKey = occurrenceKey;
-			this.pendingOccurrenceKey = null;
-			element.focus();
-		});
 	}
 
 	private restoreNearestCalendarFocus(
@@ -733,7 +747,7 @@ export class EventCalendarA11y<
 			}
 		}
 
-		const availableTargets = this.timeTargets.filter((target) => this.timeElements.has(target.key));
+		const availableTargets = this.timeTargets.filter((target) => this.timeRegistry.has(target.key));
 		const target = timeAnchor
 			? availableTargets.reduce<EventCalendarTimeTarget | undefined>((closest, candidate) => {
 					if (!closest) return candidate;
@@ -762,7 +776,7 @@ export class EventCalendarA11y<
 
 	private resolveAvailableDay(day: EventCalendarDateOnly | null): EventCalendarDateOnly | null {
 		const availableDays = this.days.filter(
-			(candidate) => this.enabledDays.has(candidate) && this.dayElements.has(candidate)
+			(candidate) => this.enabledDays.has(candidate) && this.dayRegistry.has(candidate)
 		);
 		if (availableDays.length === 0) return null;
 		if (!day) return availableDays[0];
@@ -784,11 +798,11 @@ export class EventCalendarA11y<
 	}
 
 	private focusTimeTarget(target: EventCalendarTimeTarget): void {
-		const element = this.timeElements.get(target.key);
+		const element = this.timeRegistry.get(target.key);
 		this.focusedTimeTarget = target.key;
 		if (!element) {
 			this.pendingTimeTarget = target;
-			this.scheduleTimeRestore(target.key);
+			this.timeRegistry.schedule(target.key);
 			return;
 		}
 		this.pendingTimeTarget = null;
@@ -852,22 +866,11 @@ export class EventCalendarA11y<
 			})[0];
 	}
 
-	private scheduleTimeRestore(targetKey: string): void {
-		const version = ++this.restoreVersion;
-		queueMicrotask(() => {
-			if (version !== this.restoreVersion || this.focusedTimeTarget !== targetKey) return;
-			const element = this.timeElements.get(targetKey);
-			if (!element) return;
-			this.pendingTimeTarget = null;
-			element.focus();
-		});
-	}
-
 	private focusDay(day: EventCalendarDateOnly): void {
-		const element = this.dayElements.get(day);
+		const element = this.dayRegistry.get(day);
 		if (!element) {
 			this.pendingDay = day;
-			this.scheduleRestore();
+			this.dayRegistry.schedule();
 			return;
 		}
 		this.focusedDay = day;
@@ -918,20 +921,6 @@ export class EventCalendarA11y<
 			const closestDistance = Math.abs(compareDays(closest, day));
 			const candidateDistance = Math.abs(compareDays(candidate, day));
 			return candidateDistance < closestDistance ? candidate : closest;
-		});
-	}
-
-	private scheduleRestore(): void {
-		const version = ++this.restoreVersion;
-		queueMicrotask(() => {
-			if (version !== this.restoreVersion || !this.pendingDay) return;
-			const day = this.resolveEnabledDay(this.pendingDay);
-			if (!day) return;
-			const element = this.dayElements.get(day);
-			if (!element) return;
-			this.focusedDay = day;
-			this.pendingDay = null;
-			element.focus();
 		});
 	}
 }

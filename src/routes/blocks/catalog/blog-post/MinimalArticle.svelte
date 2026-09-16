@@ -18,30 +18,30 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<article class="flex flex-col gap-xl mx-auto max-w-2xl">
-		<header class="flex flex-col gap-xl items-center text-center">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<article class="gap-xl mx-auto flex max-w-2xl flex-col">
+		<header class="gap-xl flex flex-col items-center text-center">
 			<Chip size="small" variant="outline" color="neutral">Essay № 24</Chip><Heading
 				size="h2"
 				weight="normal">A little more attention.<br />A little less noise.</Heading
 			>
-			<p class="text-lg text-neutral/60">
+			<p class="text-neutral/70 text-lg">
 				Some thoughts on finding a sustainable pace for creative work.
 			</p>
-			<Avatar user={{ name: 'Alex Morgan' }} />
-			<p class="text-xs text-neutral/50">Alex Morgan · 5 minute read</p>
+			<Avatar name="Alex Morgan" />
+			<p class="text-neutral/65 text-xs">Alex Morgan · 5 minute read</p>
 		</header>
 		<p
-			class="text-lg leading-relaxed first-letter:float-left first-letter:mr-sm first-letter:text-6xl"
+			class="first-letter:mr-sm text-lg leading-relaxed first-letter:float-left first-letter:text-6xl"
 		>
 			The quality of our work often follows the quality of our attention. When every moment is
 			filled, we lose the chance to notice the small details that make an idea worth pursuing.
 		</p>
-		{#each sections as section (section.title)}<section class="flex flex-col gap-lg">
+		{#each sections as section (section.title)}<section class="gap-lg flex flex-col">
 				<Heading size="h4">{section.title}</Heading>
-				<p class="leading-relaxed text-neutral/70">{section.body}</p>
+				<p class="text-neutral/70 leading-relaxed">{section.body}</p>
 			</section>{/each}
-		<p class="border-t border-neutral/15 pt-xl text-center text-sm text-neutral/50">
+		<p class="border-neutral/15 pt-xl text-neutral/65 border-t text-center text-sm">
 			Thank you for reading. Make room for a good thought today.
 		</p>
 	</article>

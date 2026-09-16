@@ -12,26 +12,28 @@
 	let visible = $state(true);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Purchase activity</p>
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Purchase activity
+		</p>
 		<Heading size="h2" weight="bold">A small moment of reassurance.</Heading>
-		<p class="max-w-2xl text-neutral/65">Preview a purchase notification using sample activity.</p>
+		<p class="text-neutral/65 max-w-2xl">Preview a purchase notification using sample activity.</p>
 	</header>
 	{#if visible}<div class="max-w-lg">
 			<Card
-				><div class="grid grid-cols-[6rem_1fr_auto] items-center gap-lg">
+				><div class="gap-lg grid grid-cols-[6rem_1fr_auto] items-center">
 					<div>{@render productArt(activity[index].shape, activity[index].color)}</div>
-					<div class="flex flex-col gap-sm">
+					<div class="gap-sm flex flex-col">
 						<Chip size="small" variant="soft" color="neutral" class="w-fit">Sample purchase</Chip>
 						<p class="text-sm"><strong>{activity[index].name}</strong> in {activity[index].city}</p>
-						<p class="text-sm text-neutral/60">Chose {activity[index].product}</p>
-						<p class="text-xs text-neutral/40">2 minutes ago</p>
+						<p class="text-neutral/70 text-sm">Chose {activity[index].product}</p>
+						<p class="text-neutral/65 text-xs">2 minutes ago</p>
 					</div>
 					<Button
 						size="small"
@@ -42,7 +44,7 @@
 				</div></Card
 			>
 		</div>{/if}
-	<div class="flex gap-lg">
+	<div class="gap-lg flex">
 		<Button
 			variant="outline"
 			size="small"

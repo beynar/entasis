@@ -14,7 +14,7 @@
 
 	let {
 		ref = $bindable(),
-		conversation = $bindable<AIConversationState<TMessage>>(),
+		api = $bindable<AIConversationState<TMessage>>(),
 		status = $bindable<AIConversationStatus>('idle'),
 		error = $bindable<unknown>(),
 		messages = $bindable<TMessage[]>([]),
@@ -27,7 +27,7 @@
 		suggestions = $bindable<string[]>([]),
 		contextUsage = $bindable(),
 		selectedModel = $bindable<string>(),
-		isStreaming = $bindable(false),
+		streaming = $bindable(false),
 		activeAskUserQuestion = $bindable<AIThreadAskUserQuestion<TMessage> | null>(null),
 		labels,
 		models,
@@ -59,8 +59,7 @@
 		mentions,
 		references,
 		skills,
-		mcpHost,
-		onSuggestionSelect,
+		onSelect,
 		onFilesRejected,
 		onFileReject,
 		onAttachmentAdd,
@@ -110,7 +109,6 @@
 		message,
 		tool,
 		marker,
-		app,
 		suggestionsRegion,
 		toc,
 		composer,
@@ -122,7 +120,7 @@
 </script>
 
 <AIConversation
-	bind:conversation
+	bind:api
 	bind:status
 	bind:error
 	bind:messages
@@ -134,7 +132,7 @@
 	bind:suggestions
 	bind:contextUsage
 	bind:selectedModel
-	bind:isStreaming
+	bind:streaming
 	bind:activeAskUserQuestion
 	{labels}
 	{onStatusChange}
@@ -161,11 +159,11 @@
 	{onActiveAskUserQuestionChange}
 	{onAskUserQuestionStateChange}
 >
-	{#if conversation}
+	{#if api}
 		<AIChatSurface
 			bind:ref
 			bind:queue
-			{conversation}
+			conversation={api}
 			{models}
 			{modelGroups}
 			{maxTokens}
@@ -195,8 +193,7 @@
 			{mentions}
 			{references}
 			{skills}
-			{mcpHost}
-			{onSuggestionSelect}
+			{onSelect}
 			{onFilesRejected}
 			{onFileReject}
 			{onAttachmentAdd}
@@ -223,7 +220,6 @@
 			{message}
 			{tool}
 			{marker}
-			{app}
 			{suggestionsRegion}
 			{toc}
 			{composer}

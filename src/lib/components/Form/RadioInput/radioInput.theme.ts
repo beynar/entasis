@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultRadioInput = cva({
-	base: 'grid gap-lg',
+	base: '',
 	variants: {
 		mode: {
 			card: '',
@@ -12,16 +12,16 @@ const defaultRadioInput = cva({
 });
 
 const defaultRadioInputItem = cva({
-	base: 'relative grid w-full cursor-pointer items-start gap-xs rounded-md text-left transition-all outline-none focus-visible:ring-2 focus-visible:ring-color/50',
+	base: 'relative grid w-full cursor-pointer items-start gap-xs rounded-md text-left transition-[color,background-color,box-shadow,opacity] outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
 	variants: {
 		mode: {
 			card: 'raised bg-surface-raised py-md pl-layout-lg',
 			normal: 'py-xs pl-layout-xl'
 		},
 		size: {
-			small: 'min-h-8',
-			normal: 'min-h-10',
-			large: 'min-h-11'
+			small: 'min-h-row-sm',
+			normal: 'min-h-row-md',
+			large: 'min-h-row-lg'
 		},
 		checked: {
 			true: '',
@@ -39,7 +39,7 @@ const defaultRadioInputItem = cva({
 		{
 			mode: 'card',
 			checked: true,
-			class: 'ring-2 ring-color bg-color-muted text-color-muted-readable'
+			class: 'ring-2 ring-selected bg-selected-muted text-selected-muted-readable'
 		}
 	]
 });
@@ -75,7 +75,7 @@ const defaultRadioInputItemTrack = cva({
 			normal: 'top-1'
 		},
 		disabled: {
-			true: 'opacity-50',
+			true: '',
 			false: ''
 		}
 	},
@@ -99,10 +99,10 @@ const defaultRadioInputItemTrack = cva({
 });
 
 const defaultRadioInputItemThumb = cva({
-	base: 'origin-center radio bg-neutral rounded-full transition-all content-[""] absolute left-2 scale-[40%] opacity-0',
+	base: 'origin-center radio rounded-full transition-[background-color,opacity,scale] content-[""] absolute left-2 scale-[40%] opacity-0',
 	variants: {
 		checked: {
-			true: 'bg-color scale-[60%] opacity-100',
+			true: 'bg-selected scale-[60%] opacity-100',
 			false: ''
 		},
 		size: {
@@ -115,7 +115,7 @@ const defaultRadioInputItemThumb = cva({
 			normal: 'top-1'
 		},
 		disabled: {
-			true: 'opacity-50',
+			true: '',
 			false: ''
 		}
 	},
@@ -143,7 +143,7 @@ const defaultRadioInputItemIcon = cva({
 });
 
 const defaultRadioInputItemDescription = cva({
-	base: 'text-xs text-neutral/60',
+	base: 'text-xs text-neutral/70',
 	variants: {
 		mode: {
 			card: '',
@@ -158,7 +158,7 @@ const defaultRadioInputItemDescription = cva({
 		{
 			mode: 'card',
 			checked: true,
-			class: 'text-color-muted-readable/70'
+			class: 'text-selected-muted-readable'
 		}
 	]
 });
@@ -171,7 +171,7 @@ const defaultRadioInputContainer = cva({
 			normal: ''
 		},
 		disabled: {
-			true: 'opacity-50',
+			true: '',
 			false: ''
 		}
 	}

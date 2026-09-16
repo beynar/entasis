@@ -34,19 +34,21 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Tools of the trade</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Tools of the trade
+		</p>
 		<Heading size="h2" weight="bold">A practical creative toolkit.</Heading>
 	</header>
-	<div class="grid gap-xl sm:grid-cols-2">
+	<div class="gap-xl grid sm:grid-cols-2">
 		{#each tools as tool (tool.name)}<Card
-				><div class="flex gap-xl items-start">
+				><div class="gap-xl flex items-start">
 					<span
-						class="grid size-14 shrink-0 place-items-center rounded-lg bg-surface-recessed text-xl font-semibold"
+						class="bg-surface-recessed grid size-14 shrink-0 place-items-center rounded-lg text-xl font-semibold"
 						>{tool.mark}</span
 					>
-					<div class="flex flex-col gap-lg">
+					<div class="gap-lg flex flex-col">
 						<h3 class="text-xl font-semibold">{tool.name}</h3>
 						<p class="text-neutral/65">{tool.usage}</p>
 						<Chip size="small" variant="soft" class="w-fit">{tool.kind}</Chip>

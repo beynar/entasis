@@ -78,16 +78,16 @@
 </script>
 
 <section
-	class="bg-surface-recessed flex min-h-96 w-full items-center justify-center rounded-lg p-lg sm:p-xl"
+	class="bg-surface-recessed p-lg sm:p-xl flex min-h-96 w-full items-center justify-center rounded-lg"
 >
 	<Card
 		variant="outline"
-		density="large"
+		density="comfortable"
 		class="w-full max-w-2xl shadow-lg"
 		title="Upload your project brief"
 		description="Add one PDF or image. Files are encrypted while they are transferred."
 	>
-		<div class="flex flex-col gap-lg">
+		<div class="gap-lg flex flex-col">
 			{#if rejectionMessage}
 				<Alert
 					color="danger"
@@ -100,7 +100,7 @@
 			{/if}
 
 			{#if status === 'ready'}
-				<div class="flex flex-col gap-md">
+				<div class="gap-md flex flex-col">
 					<FileInput
 						label="Project file"
 						description="PDF, PNG, or JPG · 10 MB maximum"
@@ -113,8 +113,8 @@
 						placeholder="Drop your file here or click to browse"
 					/>
 
-					<div class="flex flex-col-reverse gap-sm sm:flex-row sm:items-center sm:justify-between">
-						<p class="text-neutral/60 text-sm">
+					<div class="gap-sm flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between">
+						<p class="text-neutral/70 text-sm">
 							{selectedFile ? 'Ready to upload securely.' : 'Your file stays private.'}
 						</p>
 						<Button color="primary" disabled={!selectedFile} onclick={startUpload}>
@@ -124,42 +124,38 @@
 					</div>
 				</div>
 			{:else if status === 'uploading' && selectedFile}
-				<div class="flex flex-col gap-lg" aria-live="polite">
+				<div class="gap-lg flex flex-col" aria-live="polite">
 					<div
-						class="border-neutral-muted bg-surface flex items-center gap-md rounded-lg border p-md"
+						class="border-neutral-muted bg-surface gap-md p-md flex items-center rounded-lg border"
 					>
 						<span
-							class="bg-primary-muted text-primary-readable flex size-10 shrink-0 items-center justify-center rounded-lg"
+							class="bg-primary-muted text-primary-muted-readable flex size-10 shrink-0 items-center justify-center rounded-lg"
 						>
 							{@render fileIcon({ size: 20 })}
 						</span>
 						<div class="min-w-0 flex-1">
 							<p class="text-neutral truncate text-sm font-medium">{selectedFile.name}</p>
-							<p class="text-neutral/60 text-sm">{formatFileSize(selectedFile.size)}</p>
+							<p class="text-neutral/70 text-sm">{formatFileSize(selectedFile.size)}</p>
 						</div>
 						<span class="text-neutral text-sm font-semibold">{progress}%</span>
 					</div>
 
-					<Meter
-						value={{ value: progress, color: 'primary', label: 'Upload progress' }}
-						max={100}
-						showIndicatorAs="percentage"
-					/>
+					<Meter value={progress} color="primary" max={100} showIndicatorAs="percentage" />
 
 					<div class="flex justify-end">
 						<Button variant="ghost" onclick={resetUpload}>Cancel upload</Button>
 					</div>
 				</div>
 			{:else if selectedFile}
-				<div class="flex flex-col items-center gap-lg text-center" aria-live="polite">
+				<div class="gap-lg flex flex-col items-center text-center" aria-live="polite">
 					<span
-						class="bg-success-muted text-success-readable flex size-12 items-center justify-center rounded-full"
+						class="bg-success-muted text-success-muted-readable flex size-12 items-center justify-center rounded-full"
 					>
 						{@render checkCircleIcon({ size: 28 })}
 					</span>
-					<div class="flex flex-col gap-sm">
+					<div class="gap-sm flex flex-col">
 						<h3 class="text-neutral text-xl font-semibold">Upload complete</h3>
-						<p class="text-neutral/60 text-sm">
+						<p class="text-neutral/70 text-sm">
 							{selectedFile.name} is ready for your workspace.
 						</p>
 					</div>

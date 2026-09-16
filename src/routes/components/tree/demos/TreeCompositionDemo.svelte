@@ -104,7 +104,7 @@
 	>
 		{#snippet header()}
 			<div
-				class="border-neutral-muted bg-neutral-muted text-neutral/60 flex items-center justify-between border-b px-3 py-2 text-xs"
+				class="border-neutral-muted bg-neutral-muted text-neutral/70 flex items-center justify-between border-b px-3 py-2 text-xs"
 			>
 				<span>Workspace</span>
 				<span>{workspaceTreePaths.length} paths</span>

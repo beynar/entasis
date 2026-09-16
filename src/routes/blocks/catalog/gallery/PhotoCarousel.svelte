@@ -36,30 +36,32 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Out of office</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Out of office
+		</p>
 		<Heading size="h2" weight="bold">Follow the light.</Heading>
-		<p class="max-w-2xl text-neutral/65">
+		<p class="text-neutral/65 max-w-2xl">
 			A visual field notebook. Move through the collection at your own pace.
 		</p>
 	</header>
 	<Carousel
 		items={photos}
-		layout={{ default: 1 }}
+		layout={1}
 		navigationButton={{ color: 'neutral' }}
-		dots={{ color: 'primary' }}
-		>{#snippet children({ item: photo, index })}<figure class="flex flex-col gap-xl">
+		pagination={{ variant: 'dots', color: 'primary' }}
+		>{#snippet children({ item: photo, index })}<figure class="gap-xl flex flex-col">
 				<img
 					src={photo.src}
 					alt={photo.title}
 					loading="lazy"
 					class="aspect-video w-full rounded-lg object-cover"
 				/>
-				<figcaption class="flex items-center justify-between gap-lg">
+				<figcaption class="gap-lg flex items-center justify-between">
 					<div>
 						<h3 class="text-xl font-medium">{photo.title}</h3>
-						<p class="mt-sm text-sm text-neutral/55">{photo.category} / Field collection</p>
+						<p class="mt-sm text-neutral/65 text-sm">{photo.category} / Field collection</p>
 					</div>
 					<Chip variant="outline" color="neutral">{index + 1} / {photos.length}</Chip>
 				</figcaption>

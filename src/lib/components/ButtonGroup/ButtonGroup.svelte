@@ -18,7 +18,7 @@
 </script>
 
 <div class={classes.root({ className })} {...attachments}>
-	{#each items as button}
+	{#each items as button, index (index)}
 		<Button {size} {color} {variant} {disabled} {...button} />
 	{/each}
 </div>

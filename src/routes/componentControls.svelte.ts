@@ -10,7 +10,6 @@ export type ComponentControlOption<Value extends string = string> =
 	| {
 			value: Value;
 			label: string;
-			ariaLabel?: string;
 			disabled?: boolean;
 	  };
 
@@ -31,7 +30,7 @@ export type ComponentSegmentedControlDefinition<
 	size?: Sizes;
 	color?: Colors;
 	variant?: SegmentedControlVariant;
-	ariaLabel?: string;
+	label?: string;
 	class?: string;
 };
 

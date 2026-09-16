@@ -58,12 +58,12 @@
 
 <div class="grid w-full max-w-6xl gap-10 p-2 lg:grid-cols-2 lg:gap-16">
 	<section>
-		<p class="mb-5 text-sm font-medium text-neutral/60">Minimal release history</p>
-		<Timeline items={releases} density="large" aria-label="Release history">
+		<p class="text-neutral/70 mb-5 text-sm font-medium">Minimal release history</p>
+		<Timeline items={releases} density="comfortable" aria-label="Release history">
 			{#snippet marker({ index, defaultMarker })}
 				{#if index < 2}
 					<span
-						class="relative z-10 size-5 rounded-full border-2 border-neutral/65 bg-surface shadow-[0_0_0_3px_var(--color-surface)]"
+						class="border-neutral/65 bg-surface relative z-10 size-5 rounded-full border-2 shadow-[0_0_0_3px_var(--color-surface)]"
 					></span>
 				{:else}
 					{@render defaultMarker()}
@@ -73,12 +73,12 @@
 	</section>
 
 	<section>
-		<p class="mb-5 text-sm font-medium text-neutral/60">Compact roadmap</p>
-		<Timeline items={roadmap} size="small" density="small" aria-label="Product roadmap">
+		<p class="text-neutral/70 mb-5 text-sm font-medium">Compact roadmap</p>
+		<Timeline items={roadmap} size="small" density="compact" aria-label="Product roadmap">
 			{#snippet marker({ color })}
 				<span
 					data-color={color}
-					class="relative z-10 mt-1 size-2.5 rounded-full bg-color shadow-[0_0_0_4px_var(--color-surface)]"
+					class="bg-color relative z-10 mt-1 size-2.5 rounded-full shadow-[0_0_0_4px_var(--color-surface)]"
 				></span>
 			{/snippet}
 		</Timeline>

@@ -224,9 +224,9 @@
 				active={isPickerOpen}
 				size={rest.size}
 				label={`${t.choose} ${t.color}`}
-				aria-haspopup="dialog"
-				aria-expanded={isPickerOpen}
-				aria-controls={isPickerOpen ? `${id}-color-picker` : undefined}
+				haspopup="dialog"
+				expanded={isPickerOpen}
+				controls={isPickerOpen ? `${id}-color-picker` : undefined}
 				disabled={field.disabled}
 				prefix={swatch}
 				onclick={() => {

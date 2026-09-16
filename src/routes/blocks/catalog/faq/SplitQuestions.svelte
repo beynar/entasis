@@ -34,8 +34,8 @@
 	];
 </script>
 
-<section class="mx-auto grid max-w-6xl gap-xl p-lg md:grid-cols-3 md:p-xl">
-	<div class="flex flex-col items-start gap-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl md:grid-cols-3">
+	<div class="gap-xl flex flex-col items-start">
 		<Chip variant="soft">Good questions welcome</Chip><Heading as="h2" size="h2" weight="bold"
 			>A little clarity goes a long way.</Heading
 		>
@@ -50,5 +50,5 @@
 			></Card
 		>
 	</div>
-	<Accordion class="md:col-span-2" variant="outlined" splitted items={questions} icon="chevron" />
+	<Accordion class="md:col-span-2" variant="outline" splitted items={questions} icon="chevron" />
 </section>

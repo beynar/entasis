@@ -2,7 +2,7 @@
 	import Theme from './Theme/Theme.svelte';
 	import Accordion from './Accordion/Accordion.svelte';
 	import AITool from './AITool/AITool.svelte';
-	import Suggestions from './AISuggestion/Suggestions.svelte';
+	import AISuggestions from './AISuggestion/AISuggestions.svelte';
 	import Sidebar from './Sidebar/Sidebar.svelte';
 	import Tabs from './Tabs/Tabs.svelte';
 	import ToggleButton from './ToggleButton/ToggleButton.svelte';
@@ -13,7 +13,7 @@
 		onValueChange,
 		onOpenChange,
 		onDisplayStateChange,
-		onSuggestionSelect,
+		onSelect,
 		defaultOpen = false
 	}: {
 		scenario:
@@ -25,23 +25,25 @@
 			| 'ai-tool-single'
 			| 'ai-tool-group'
 			| 'ai-suggestions';
-		onValueChange?: (value: boolean | number | string | string[]) => void;
+		onValueChange?: (
+			value: boolean | number | string | string[] | { value: string; item: string; index: number }
+		) => void;
 		onOpenChange?: SidebarProps['onOpenChange'];
 		onDisplayStateChange?: SidebarProps['onDisplayStateChange'];
-		onSuggestionSelect?: (value: string) => void;
+		onSelect?: (value: string) => void;
 		defaultOpen?: boolean;
 	} = $props();
 
 	let checked = $state(false);
-	let toggleProps = $state({ ariaLabel: 'Spread toggle', defaultValue: true, class: '' });
-	let tab = $state(0);
+	let toggleProps = $state({ label: 'Spread toggle', defaultValue: true, class: '' });
+	let tab = $state('Overview');
 	let expanded = $state(['first']);
 	let displayState = $state<SidebarProps['displayState']>();
 </script>
 
 <Theme>
 	{#if scenario === 'toggle'}
-		<ToggleButton ariaLabel="Bound toggle" bind:value={checked} {onValueChange} />
+		<ToggleButton label="Bound toggle" bind:value={checked} {onValueChange} />
 		<button onclick={() => (checked = false)}>External reset</button>
 		<output>{String(checked)}</output>
 	{:else if scenario === 'toggle-spread'}
@@ -53,11 +55,11 @@
 			}}
 		/>
 	{:else if scenario === 'tabs'}
-		<button onclick={() => (tab = 1)}>External tab change</button>
+		<button onclick={() => (tab = 'Settings')}>External tab change</button>
 		<Tabs items={['Overview', 'Settings']} bind:value={tab} {onValueChange}>
-			{#snippet children({ stepper, item })}
+			{#snippet children({ api, item })}
 				<p>{item} panel</p>
-				<button onclick={() => stepper.goTo(0)}>Go to first panel</button>
+				<button onclick={() => api.goTo(0)}>Go to first panel</button>
 			{/snippet}
 		</Tabs>
 		<output>{tab}</output>
@@ -85,11 +87,11 @@
 			{onValueChange}
 		/>
 	{:else if scenario === 'ai-suggestions'}
-		<Suggestions
+		<AISuggestions
 			suggestions={['Summarize', 'Explain']}
 			defaultValue="Summarize"
 			{onValueChange}
-			{onSuggestionSelect}
+			{onSelect}
 		/>
 	{:else}
 		<button onclick={() => (displayState = 'hidden')}>External sidebar change</button>

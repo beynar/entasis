@@ -3,11 +3,10 @@
 	import { Accordion } from 'melt/builders';
 	import { SvelteSet } from 'svelte/reactivity';
 	import type { AccordionProps } from './accordion.props.js';
-	import { useAccordionTheme } from './accordion.theme.js';
+	import { useAccordionMotion, useAccordionTheme } from './accordion.theme.js';
 	import Slot from '../Slot/Slot.svelte';
 	import type { Slot as SlotContent } from '../Slot/slot.js';
-	import { slide, type SlideTransitionParams } from '$lib/transitions/transition.js';
-	import { useTheme } from '../Theme/theme.state.svelte.js';
+	import { slide } from '$lib/transitions/transition.js';
 	import { caretDownIcon } from '../Icons/caretDown.js';
 	import { plusIcon } from '../Icons/plus.js';
 	import { minusIcon } from '../Icons/minus.js';
@@ -22,7 +21,7 @@
 		contentKey,
 		descriptionKey,
 		oneAtATime = true,
-		onToggle: ot,
+		onItemOpenChange: ot,
 		onValueChange,
 		icon = 'chevron',
 		variant = 'classic',
@@ -34,8 +33,9 @@
 		title,
 		description,
 		content,
-		transitions,
+		transition,
 		accessible = true,
+		headingLevel = 3,
 		...attachments
 	}: AccordionProps<Item> = $props();
 	const valueState = createBindableValue(
@@ -50,8 +50,10 @@
 	const classes = $derived(useAccordionTheme(theme));
 	const currentValue = $derived(valueState.value);
 
-	const themeState = useTheme();
-	const split = $derived(themeState.splitTransition<SlideTransitionParams>(transitions));
+	// Motion preset from `accordionTheme.motion`, through the override ladder
+	// (registry → `setAccordionTheme` → instance `theme.motion` → `transition` prop).
+	const resolveMotion = useAccordionMotion();
+	const split = $derived(resolveMotion(undefined, { motion: theme?.motion, transition }));
 	// slide is a factory: it captures the theme context at init because Svelte
 	// runs transition functions outside component initialisation.
 	const slideTransition = slide();
@@ -122,11 +124,11 @@
 </script>
 
 {#snippet renderIcon(isOpen: boolean)}
-	{#if icon && icon === 'chevron'}
+	{#if icon === 'chevron'}
 		{@render caretDownIcon({ class: classes.icon({ size }) })}
-	{:else if icon && icon === 'math'}
+	{:else if icon === 'plus-minus'}
 		{@render (isOpen ? minusIcon : plusIcon)({ class: classes.icon({ size }) })}
-	{:else if icon}
+	{:else if icon !== 'none'}
 		<Slot class={classes.icon({ size })} render={icon} />
 	{/if}
 {/snippet}
@@ -152,7 +154,11 @@
 			})}
 		>
 			<button {...accordionControl.trigger} class={classes.trigger({ size, density, variant })}>
-				<div {...accordionControl.heading} class={classes.header({ size, density })}>
+				<div
+					{...accordionControl.heading}
+					aria-level={headingLevel}
+					class={classes.header({ size, density })}
+				>
 					<Slot
 						render={title || resolve(accordionItem, titleKey || 'title')}
 						class={classes.title({ size })}
@@ -164,7 +170,7 @@
 						payload={{ item: accordionItem }}
 					/>
 				</div>
-				{#if icon}
+				{#if icon !== 'none'}
 					<span
 						data-slot="accordion-icon-wrapper"
 						aria-hidden="true"

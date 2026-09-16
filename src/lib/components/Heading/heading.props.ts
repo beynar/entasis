@@ -1,4 +1,6 @@
+import type { Snippet } from 'svelte';
 import type { WithAttachments } from '$lib/types/props.js';
+import type { HeadingThemeProps } from './heading.theme.js';
 
 export type HeadingProps = WithAttachments<{
 	/**
@@ -8,7 +10,7 @@ export type HeadingProps = WithAttachments<{
 	/**
 	 * Snippet rendered as the heading text content.
 	 */
-	children?: any;
+	children?: Snippet;
 	/**
 	 * Visual size level (h1–h6); sets `data-level` and the default semantic element.
 	 */
@@ -41,4 +43,8 @@ export type HeadingProps = WithAttachments<{
 	 * When true, applies the muted variant for secondary heading emphasis.
 	 */
 	muted?: boolean;
+	/**
+	 * Per-instance theme overrides merged over the resolved Heading theme.
+	 */
+	theme?: HeadingThemeProps;
 }>;

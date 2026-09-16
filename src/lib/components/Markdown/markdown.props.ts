@@ -1,9 +1,10 @@
+import type { Sizes } from '$lib/types/theme.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { StreamdownProps } from 'svelte-streamdown';
 import type { MarkdownThemeProps } from './markdown.theme.js';
 
 /** Type/spacing scale for the rendered markdown. */
-export type MarkdownSize = 'small' | 'normal' | 'large';
+export type MarkdownSize = Sizes;
 
 export type MarkdownProps = WithAttachments<
 	Omit<

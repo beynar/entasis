@@ -43,15 +43,15 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 			Fieldnotes / Issue 08
 		</p>
 		<Heading size="h2" weight="bold">A fresh perspective.</Heading>
 	</header>
-	<div class="grid gap-xl lg:grid-cols-[1.6fr_1fr]">
-		<article class="flex flex-col gap-lg">
+	<div class="gap-xl grid lg:grid-cols-[1.6fr_1fr]">
+		<article class="gap-lg flex flex-col">
 			<img
 				src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&amp;fit=crop&amp;w=1100&amp;q=80"
 				alt="Desert light"
@@ -65,14 +65,14 @@
 			</p>
 			<Button href="/docs" variant="link" class="self-start">Read the story ↗</Button>
 		</article>
-		<aside class="flex flex-col gap-xl">
-			<h3 class="text-sm font-semibold uppercase tracking-widest">Popular this month</h3>
+		<aside class="gap-xl flex flex-col">
+			<h3 class="text-sm font-semibold tracking-widest uppercase">Popular this month</h3>
 			{#each posts.slice(1) as post, i (post.title)}<article
-					class="grid grid-cols-[auto_1fr] gap-lg"
+					class="gap-lg grid grid-cols-[auto_1fr]"
 				>
-					<span class="text-3xl font-light text-neutral/30">0{i + 1}</span>
-					<div class="flex flex-col gap-sm">
-						<p class="text-xs text-neutral/60">{post.category} · {post.time}</p>
+					<span class="text-neutral/65 text-3xl font-light">0{i + 1}</span>
+					<div class="gap-sm flex flex-col">
+						<p class="text-neutral/70 text-xs">{post.category} · {post.time}</p>
 						<a href="/docs" class="text-lg font-medium">{post.title}</a>
 					</div>
 				</article>

@@ -45,7 +45,7 @@
 	});
 </script>
 
-<div class="h-window min-h-[420px] w-full overflow-hidden bg-neutral-muted">
+<div class="h-window bg-neutral-muted min-h-[420px] w-full overflow-hidden">
 	<AppShell
 		{sidebar}
 		variant="inset"
@@ -54,15 +54,13 @@
 		contentPadding="normal"
 		contentWidth="wide"
 	>
-		{#snippet children()}
-			<div class="grid min-h-full place-items-center p-4">
-				<div class="grid w-full max-w-3xl gap-3">
-					<Skeleton color="primary" class="h-3 w-11/12 rounded-full" />
-					<Skeleton class="h-3 w-8/12 rounded-full" />
-					<Skeleton class="h-3 w-full rounded-full" />
-					<Skeleton color="primary" class="h-3 w-7/12 rounded-full" />
-				</div>
+		<div class="grid min-h-full place-items-center p-4">
+			<div class="grid w-full max-w-3xl gap-3">
+				<Skeleton color="primary" class="h-3 w-11/12 rounded-full" />
+				<Skeleton class="h-3 w-8/12 rounded-full" />
+				<Skeleton class="h-3 w-full rounded-full" />
+				<Skeleton color="primary" class="h-3 w-7/12 rounded-full" />
 			</div>
-		{/snippet}
+		</div>
 	</AppShell>
 </div>

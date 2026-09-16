@@ -3,7 +3,7 @@
 	import DocPage from '../../DocPage.svelte';
 	import Combobox from '$lib/components/Form/Combobox/Combobox.svelte';
 	import type { ComboboxOption } from '$lib/components/Form/Combobox/combobox.props.js';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	// Example data sets
@@ -99,7 +99,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -117,9 +117,9 @@
 	subtitle="A text input with a filterable dropdown of options."
 	component="Combobox"
 	features={[
-		'role=combobox with aria-autocomplete=list',
+		{ label: 'role=combobox with aria-autocomplete=list', test: 'a11y:combobox.aria' },
 		'Debounced search, async or static',
-		'Arrow keys, Enter, Escape navigation',
+		{ label: 'Arrow keys, Enter, Escape navigation', test: 'a11y:combobox.keyboard' },
 		'Bindable value & searchValue',
 		'Loading, error & empty states'
 	]}
@@ -230,7 +230,7 @@
 			<div class="w-full max-w-md">
 				<Combobox placeholder="Search async..." items={getAsyncOptions} bind:value={value2} />
 				{#if value2}
-					<p class="text-neutral/60 mt-2 text-xs">Selected: {value2}</p>
+					<p class="text-neutral/70 mt-2 text-xs">Selected: {value2}</p>
 				{/if}
 			</div>
 		</ComponentCard>
@@ -240,7 +240,7 @@
 			<div class="w-full max-w-md">
 				<Combobox placeholder="Search languages..." items={getSyncOptions} bind:value={value3} />
 				{#if value3}
-					<p class="text-neutral/60 mt-2 text-xs">Selected: {value3}</p>
+					<p class="text-neutral/70 mt-2 text-xs">Selected: {value3}</p>
 				{/if}
 			</div>
 		</ComponentCard>
@@ -254,7 +254,7 @@
 					bind:value={value4}
 				/>
 				{#if value4}
-					<p class="text-neutral/60 mt-2 text-xs">Selected: {value4}</p>
+					<p class="text-neutral/70 mt-2 text-xs">Selected: {value4}</p>
 				{/if}
 			</div>
 		</ComponentCard>
@@ -269,7 +269,7 @@
 					bind:value={value5}
 				/>
 				{#if value5}
-					<p class="text-neutral/60 mt-2 text-xs">Selected: {value5}</p>
+					<p class="text-neutral/70 mt-2 text-xs">Selected: {value5}</p>
 				{/if}
 			</div>
 		</ComponentCard>
@@ -284,7 +284,7 @@
 					bind:value={value6}
 				/>
 				{#if value6}
-					<p class="text-neutral/60 mt-2 text-xs">Selected: {value6}</p>
+					<p class="text-neutral/70 mt-2 text-xs">Selected: {value6}</p>
 				{/if}
 			</div>
 		</ComponentCard>

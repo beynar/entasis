@@ -1,5 +1,5 @@
 export const basicDataTableCode = `<script lang="ts">
-  import { DataTable, type DataTableColumn } from 'svelai/data-table';
+  import { DataTable, type DataTableCellPayload, type DataTableColumn } from 'svelai/data-table';
 
   type Person = {
     id: string;
@@ -7,6 +7,12 @@ export const basicDataTableCode = `<script lang="ts">
     department: string;
     salary: number;
   };
+
+  const currency = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0
+  });
 
   const columns: DataTableColumn<Person>[] = [
     {
@@ -31,10 +37,15 @@ export const basicDataTableCode = `<script lang="ts">
       header: 'Salary',
       sortable: true,
       filter: { type: 'number', min: 0 },
+      cell: salaryCell,
       align: 'end'
     }
   ];
 </script>
+
+{#snippet salaryCell(payload: DataTableCellPayload<Person>)}
+  {currency.format(Number(payload.value))}
+{/snippet}
 
 <div class="h-[440px]">
   <DataTable
@@ -101,7 +112,7 @@ export const editingDataTableCode = `<script lang="ts">
   )}
   getRowId={(person) => person.id}
   height={420}
-  density="large"
+  density="comfortable"
   interactionMode="grid"
   selectionMode="multiple"
   pagination={{ pageSize: 10, pageSizes: [10, 18] }}
@@ -273,8 +284,8 @@ export const externalControlsDataTableCode = `<script lang="ts">
 {#if dataTable}
   <Pagination
     totalPages={dataTable.totalPages}
-    page={dataTable.state.pagination.page}
-    onPageChange={dataTable.setPage}
+    value={dataTable.state.pagination.page}
+    onValueChange={dataTable.setPage}
   />
 {/if}
 
@@ -283,7 +294,7 @@ export const externalControlsDataTableCode = `<script lang="ts">
   {columns}
   getRowId={(row) => row.id}
   bind:state
-  bind:dataTable
+  bind:api={dataTable}
   pagination={{ pageSize: 10, showControls: false }}
 />`;
 
@@ -293,10 +304,19 @@ export const gridDataTableCode = `<DataTable
   getRowId={(person) => person.id}
   height={520}
   interactionMode="grid"
-  density="small"
+  density="compact"
   pagination={false}
   overscan={8}
   initialState={{
     columnPinning: { left: ['name'], right: ['status'] }
   }}
+/>`;
+
+export const inFlowDataTableCode = `<DataTable
+  {items}
+  {columns}
+  getRowId={(person) => person.id}
+  virtualize={false}
+  pagination={false}
+  search={false}
 />`;

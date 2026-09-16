@@ -209,6 +209,7 @@ Use \`type: 'slider'\` for scalar values and \`type: 'slider-range'\` for submit
 - Thumb values expose \`aria-valuemin\`, \`aria-valuemax\`, \`aria-valuenow\`, \`aria-valuetext\`, and \`aria-orientation\`
 - Multi-thumb \`aria-valuemin\`/\`aria-valuemax\` reflect each thumb's current movement bounds, including minimum thumb spacing
 - Keyboard support: Arrow keys move by one step, Shift+Arrow and PageUp/PageDown move by ten steps, Home/End jump to bounds
+- ArrowLeft / ArrowRight follow the writing direction: in RTL, ArrowLeft increases and ArrowRight decreases (vertical sliders are unaffected)
 - Multi-thumb sliders enforce ordering and optional minimum thumb spacing
 - Disabled state blocks pointer, keyboard, and selected-range dragging
 

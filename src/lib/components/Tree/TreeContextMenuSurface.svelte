@@ -44,10 +44,7 @@
 
 <div
 	data-file-tree-context-menu-root="true"
-	class={cx(
-		'z-50 min-w-44 rounded-lg border border-neutral-muted bg-surface-floating text-neutral shadow-lg',
-		className
-	)}
+	class={cx('bg-surface-floating text-neutral raised-4 z-50 min-w-44 rounded-lg', className)}
 	style={menuStyle}
 >
 	<Menu {items} focusOnMount="container" {@attach closeAfterAction} />

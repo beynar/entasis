@@ -25,24 +25,24 @@
 	];
 </script>
 
-<section class="mx-auto flex max-w-6xl flex-col gap-xl p-lg md:p-xl">
-	<div class="flex flex-wrap items-end justify-between gap-lg">
+<section class="gap-xl p-lg md:p-xl mx-auto flex max-w-6xl flex-col">
+	<div class="gap-lg flex flex-wrap items-end justify-between">
 		<Heading as="h2" size="h1" weight="bold">Good ideas.<br />Useful execution.</Heading>
-		<p class="max-w-sm text-neutral/70">
+		<p class="text-neutral/70 max-w-sm">
 			We connect the strategy, the experience, and the system that helps it grow.
 		</p>
 	</div>
 	{#each services as service, index (service.title)}<div
-			class="grid items-start gap-xl border-t border-neutral-muted py-xl md:grid-cols-3"
+			class="gap-xl border-neutral-muted py-xl grid items-start border-t md:grid-cols-3"
 		>
-			<div class="flex items-start gap-lg">
-				<span class="text-sm text-neutral/40">0{index + 1}</span><Heading as="h3" size="h3"
+			<div class="gap-lg flex items-start">
+				<span class="text-neutral/65 text-sm">0{index + 1}</span><Heading as="h3" size="h3"
 					>{service.title}</Heading
 				>
 			</div>
 			<p class="text-neutral/70">{service.description}</p>
-			<div class="flex flex-col items-start gap-lg">
-				<div class="flex flex-wrap gap-sm">
+			<div class="gap-lg flex flex-col items-start">
+				<div class="gap-sm flex flex-wrap">
 					{#each service.tags as tag (tag)}<Chip size="small" variant="outline">{tag}</Chip>{/each}
 				</div>
 				<Button href={service.href} variant="link" suffix={arrowUpRightIcon}>Explore</Button>

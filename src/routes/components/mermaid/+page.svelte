@@ -98,7 +98,6 @@
 	features={[
 		'Mermaid loaded from cdnjs at runtime',
 		'Pan, zoom, fit and fullscreen controls',
-		'role=img with aria-label on SVG',
 		'Design-token theming for light and dark',
 		'errorForgiving holds last valid frame'
 	]}
@@ -188,7 +187,7 @@
 						Stream
 					</Button>
 					<pre
-						class="border-neutral-muted bg-surface text-neutral/60 min-h-16 flex-1 overflow-auto rounded border px-3 py-2 font-mono text-xs">{streamed ||
+						class="border-neutral-muted bg-surface text-neutral/70 min-h-16 flex-1 overflow-auto rounded border px-3 py-2 font-mono text-xs">{streamed ||
 							' '}</pre>
 				</div>
 				<Mermaid chart={streamed} errorForgiving />

@@ -7,4 +7,3 @@ export {
 	type SeparatorTheme,
 	type SeparatorThemeProps
 } from './separator.theme.js';
-

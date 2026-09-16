@@ -144,10 +144,10 @@ dc:; /* Targets direct children (& > *) */
 
 ```html
 <div class="bg-background min-h-screen">
-	<div class="bg-background-light p-6 rounded-lg raised-md border border-background-muted">
+	<div class="bg-background-light raised-md border-background-muted rounded-lg border p-6">
 		<!-- Use foreground colors for text hierarchy on background surfaces -->
-		<h1 class="text-foreground font-bold text-2xl">Main Heading</h1>
-		<h2 class="text-foreground-dark font-semibold text-lg">Subheading</h2>
+		<h1 class="text-foreground text-2xl font-bold">Main Heading</h1>
+		<h2 class="text-foreground-dark text-lg font-semibold">Subheading</h2>
 		<p class="text-foreground-muted">Body text with reduced contrast</p>
 		<small class="text-foreground-lighter">Secondary information</small>
 	</div>
@@ -318,8 +318,8 @@ Custom Styled
 - All event handlers respect disabled state
 - Icon sizing is automatically adjusted based on button size
 
-
 # Svelte MCP Server
+
 You are able to use the Svelte MCP server, where you have access to comprehensive Svelte 5 and SvelteKit documentation. Here's how to use the available tools effectively:
 
 ## Available MCP Tools of the svelte-mcp-server:

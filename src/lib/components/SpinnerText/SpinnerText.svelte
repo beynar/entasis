@@ -6,8 +6,9 @@
 	import { resolveSpinnerVariant } from '../Spinner/resolveSpinnerVariant.js';
 	import { useTheme } from '../Theme/theme.state.svelte.js';
 	import type { SpinnerTextProps } from './spinnerText.props.js';
-	import { useSpinnerTextTheme } from './spinnerText.theme.js';
+	import { useSpinnerTextMotion, useSpinnerTextTheme } from './spinnerText.theme.js';
 	import { revealText, verticalText } from './spinnerText.transition.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		ref = $bindable(),
@@ -19,12 +20,13 @@
 		showSpinner = true,
 		spinnerVariant,
 		spinner,
-		label = 'Loading',
+		label,
 		size = 'normal',
 		color = 'neutral',
 		theme,
 		...attachments
 	}: SpinnerTextProps = $props();
+	const t = $derived(useI18n());
 
 	let activeIndex = $state(0);
 	const themeState = useTheme();
@@ -35,8 +37,12 @@
 	);
 	const spinnerPayload = $derived({ color, size, variant: resolvedSpinnerVariant });
 	const classes = $derived(useSpinnerTextTheme(theme));
-	const verticalTransition = verticalText();
-	const revealTransition = revealText();
+	// Swap timing from `spinnerTextTheme.motion`, keyed by the transition mode, through
+	// the override ladder (registry → `setSpinnerTextTheme` → instance `theme.motion`).
+	const resolveMotion = useSpinnerTextMotion();
+	const textMotion = $derived(resolveMotion({ mode: transitionMode }, { motion: theme?.motion }));
+	const verticalTransition = verticalText(() => textMotion.in);
+	const revealTransition = revealText(() => textMotion.in);
 
 	const cycleTexts: Attachment<HTMLElement> = (node) =>
 		untrack(() => {
@@ -76,7 +82,7 @@
 	role="status"
 	aria-live="polite"
 	aria-atomic="true"
-	aria-label={activeText ? undefined : label}
+	aria-label={activeText ? undefined : (label ?? t.loading)}
 	class={classes.root({ size, color, className })}
 	{@attach cycleTexts}
 	{...attachments}

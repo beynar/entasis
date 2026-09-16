@@ -6,6 +6,7 @@
 	import Spinner from '../Spinner/Spinner.svelte';
 	import type { AIFilePreviewProps, AIFilePreviewSource } from './aiFilePreview.props.js';
 	import { useAIFilePreviewTheme } from './aiFilePreview.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		ref = $bindable<HTMLDivElement | null>(null),
@@ -20,6 +21,7 @@
 		theme,
 		...attachments
 	}: AIFilePreviewProps = $props();
+	const t = $derived(useI18n());
 
 	let generatedPreviewUrl = $state<string>();
 	const fileName = $derived(name ?? file.name);
@@ -93,7 +95,7 @@
 			squared
 			size="small"
 			variant="ghost"
-			label={`Retry ${fileName}`}
+			label={t.retry(fileName)}
 			onclick={onRetry}
 		>
 			{@render arrowClockwiseIcon({ size: 14 })}
@@ -105,7 +107,7 @@
 			squared
 			size="small"
 			variant="ghost"
-			label={`Remove ${fileName}`}
+			label={t.remove(fileName)}
 			onclick={onRemove}
 		>
 			{@render xIcon({ size: 14 })}

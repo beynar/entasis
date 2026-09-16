@@ -52,10 +52,7 @@ export type ChartRollingAnalysis = ChartAnalysisLineStyle & {
 };
 
 export type ChartSeriesAnalysis =
-	| ChartReferenceAnalysis
-	| ChartRegressionAnalysis
-	| ChartRollingAnalysis;
+	ChartReferenceAnalysis | ChartRegressionAnalysis | ChartRollingAnalysis;
 
 export type ChartScatterAnalysis = ChartReferenceAnalysis | ChartRegressionAnalysis;
 export type ChartBarAnalysis = ChartReferenceAnalysis;
-

@@ -58,8 +58,6 @@ export type ImageZoomProps = WithAttachments<
 			decoding?: ImageDecoding;
 			/** Viewport margin, in pixels, kept around the zoomed image. */
 			zoomMargin?: number;
-			/** Zoom animation duration in milliseconds. */
-			transitionDuration?: number;
 			/** When true, clicking the backdrop closes the zoomed layer. */
 			closeOnClickOutside?: boolean;
 			/** When true, pressing Escape closes the zoomed layer. */

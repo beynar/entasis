@@ -4,9 +4,9 @@
 	import { arrowRightIcon } from 'svelai/icons/arrowRight';
 </script>
 
-<div class="flex min-h-48 items-center justify-center p-lg">
+<div class="p-lg flex min-h-48 items-center justify-center">
 	<div
-		class="flex flex-wrap items-center justify-center gap-lg rounded-full border border-neutral-muted bg-surface-raised p-md"
+		class="gap-lg border-neutral-muted bg-surface-raised p-md flex flex-wrap items-center justify-center rounded-full border"
 	>
 		<AvatarGroup
 			size="small"

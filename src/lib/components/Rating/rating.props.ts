@@ -17,7 +17,13 @@ export type RatingStarPayload = {
 
 export type RatingProps = WithAttachments<
 	Omit<HTMLAttributes<HTMLDivElement>, 'onclick' | 'onpointermove'> & {
-		/** The displayed value; fractions render as partially filled stars. */
+		/**
+		 * The displayed rating; fractions render as partially filled stars. Read-only
+		 * display data: Rating never writes it, so it takes no `defaultValue` and is not
+		 * bindable. Use `RatingInput` for an editable rating.
+		 *
+		 * @readonly-value Rating renders a score; RatingInput is the editable control.
+		 */
 		value?: number | null;
 		/** Number of stars rendered, which is also the maximum value. */
 		max?: number;

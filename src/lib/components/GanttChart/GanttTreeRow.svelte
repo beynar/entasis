@@ -74,7 +74,7 @@
 	data-gantt-reorder-parent={isDropParent || undefined}
 	class={chart.classes.row({
 		...chart.themeVariants,
-		class: isSelected ? 'bg-color/6' : undefined
+		class: isSelected ? 'bg-selected/6' : undefined
 	})}
 	style:top={`${start}px`}
 	role="row"

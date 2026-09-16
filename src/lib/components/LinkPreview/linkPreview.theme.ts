@@ -2,7 +2,7 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultLinkPreviewTrigger = cva({
-	base: 'text-primary-readable inline-flex max-w-full items-center rounded-sm underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45',
+	base: 'text-primary-readable inline-flex max-w-full items-center rounded-sm underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
 	variants: {
 		disabled: {
 			true: 'pointer-events-none opacity-55',
@@ -83,14 +83,14 @@ const defaultLinkPreviewFavicon = cva({
 });
 
 const defaultLinkPreviewSite = cva({
-	base: 'text-neutral/60 min-w-0 truncate text-xs font-medium'
+	base: 'text-neutral/70 min-w-0 truncate text-xs font-medium'
 });
 
 const defaultLinkPreviewTitle = cva({
 	base: 'text-neutral line-clamp-2 font-semibold leading-snug',
 	variants: {
 		size: {
-			small: 'text-sm',
+			small: 'text-xs',
 			normal: 'text-sm',
 			large: 'text-base'
 		}
@@ -101,11 +101,11 @@ const defaultLinkPreviewTitle = cva({
 });
 
 const defaultLinkPreviewDescription = cva({
-	base: 'text-neutral/60 line-clamp-3 leading-relaxed',
+	base: 'text-neutral/70 line-clamp-3 leading-relaxed',
 	variants: {
 		size: {
 			small: 'text-xs',
-			normal: 'text-sm',
+			normal: 'text-xs',
 			large: 'text-sm'
 		}
 	},
@@ -115,7 +115,7 @@ const defaultLinkPreviewDescription = cva({
 });
 
 const defaultLinkPreviewUrl = cva({
-	base: 'text-neutral/45 truncate font-mono text-xs'
+	base: 'text-neutral/70 truncate font-mono text-xs'
 });
 
 const defaultLinkPreviewLoading = cva({
@@ -123,7 +123,7 @@ const defaultLinkPreviewLoading = cva({
 });
 
 const defaultLinkPreviewError = cva({
-	base: 'border-danger/20 bg-danger-muted/20 text-danger-muted-readable rounded-md border p-lg'
+	base: 'border-danger/20 bg-danger-muted/20 text-danger-muted-readable rounded-lg border p-lg'
 });
 
 export const linkPreviewTheme = {

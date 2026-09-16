@@ -6,7 +6,7 @@ import {
 } from '$lib/utils/cva/index.js';
 
 const defaultRoot = cva({
-	base: 'inline-grid max-w-full min-w-0 align-top text-neutral transition-all',
+	base: 'inline-grid max-w-full min-w-0 align-top text-neutral transition-[color,background-color,box-shadow]',
 	variants: {
 		scope: {
 			single: '',
@@ -30,14 +30,14 @@ const defaultRoot = cva({
 		{
 			scope: 'single',
 			variant: 'card',
-			class: 'rounded-md bg-surface-raised ring-1 ring-neutral/10 shadow-xs'
+			class: 'rounded-lg bg-surface-raised ring-1 ring-neutral-muted lift-1'
 		},
-		{ scope: 'single', variant: 'outline', class: 'rounded-md ring-1 ring-neutral/15' },
-		{ scope: 'single', variant: 'soft', tone: 'active', class: 'rounded-md bg-info/5' },
-		{ scope: 'single', variant: 'soft', tone: 'success', class: 'rounded-md bg-success/5' },
-		{ scope: 'single', variant: 'soft', tone: 'error', class: 'rounded-md bg-danger/5' },
-		{ scope: 'single', variant: 'soft', tone: 'cancelled', class: 'rounded-md bg-neutral/5' },
-		{ scope: 'single', variant: 'soft', tone: 'default', class: 'rounded-md bg-neutral/5' }
+		{ scope: 'single', variant: 'outline', class: 'rounded-lg ring-1 ring-neutral-muted' },
+		{ scope: 'single', variant: 'soft', tone: 'active', class: 'rounded-lg bg-info/5' },
+		{ scope: 'single', variant: 'soft', tone: 'success', class: 'rounded-lg bg-success/5' },
+		{ scope: 'single', variant: 'soft', tone: 'error', class: 'rounded-lg bg-danger/5' },
+		{ scope: 'single', variant: 'soft', tone: 'cancelled', class: 'rounded-lg bg-neutral/5' },
+		{ scope: 'single', variant: 'soft', tone: 'default', class: 'rounded-lg bg-neutral/5' }
 	],
 	defaultVariants: { scope: 'single', variant: 'ghost', tone: 'default' }
 });
@@ -71,12 +71,12 @@ const defaultAccordionItem = cva({
 			scope: 'calls',
 			variant: 'card',
 			class:
-				'mb-md rounded-sm border-b-0 bg-surface-raised ring-1 ring-neutral/10 shadow-xs last:mb-0'
+				'mb-md rounded-sm border-b-0 bg-surface-raised ring-1 ring-neutral-muted lift-1 last:mb-0'
 		},
 		{
 			scope: 'calls',
 			variant: 'outline',
-			class: 'mb-md rounded-sm border-b-0 ring-1 ring-neutral/15 last:mb-0'
+			class: 'mb-md rounded-sm border-b-0 ring-1 ring-neutral-muted last:mb-0'
 		},
 		{
 			scope: 'calls',
@@ -89,7 +89,7 @@ const defaultAccordionItem = cva({
 });
 const defaultAccordionHeader = cva({ base: 'min-w-0 flex-1' });
 const defaultAccordionTrigger = cva({
-	base: 'state-layer relative min-h-8 max-w-full items-center gap-md rounded-sm text-left text-xs text-neutral/65 hover:text-neutral',
+	base: 'state-layer relative min-h-row-sm max-w-full items-center gap-md rounded-sm text-left text-xs text-neutral/70 hover:text-neutral',
 	variants: {
 		scope: {
 			single: 'px-md py-sm',
@@ -112,7 +112,7 @@ const defaultAccordionTrigger = cva({
 		toggleIcon: {
 			none: '',
 			chevron: 'pr-layout-md',
-			math: 'pr-layout-md'
+			'plus-minus': 'pr-layout-md'
 		}
 	},
 	compoundVariants: [
@@ -120,9 +120,9 @@ const defaultAccordionTrigger = cva({
 		{
 			scope: 'group',
 			variant: 'card',
-			class: 'bg-surface-raised ring-1 ring-neutral/10 shadow-xs'
+			class: 'bg-surface-raised ring-1 ring-neutral-muted lift-1'
 		},
-		{ scope: 'group', variant: 'outline', class: 'ring-1 ring-neutral/15' },
+		{ scope: 'group', variant: 'outline', class: 'ring-1 ring-neutral-muted' },
 		{ scope: 'group', variant: 'soft', tone: 'active', class: 'bg-info/5' },
 		{ scope: 'group', variant: 'soft', tone: 'success', class: 'bg-success/5' },
 		{ scope: 'group', variant: 'soft', tone: 'error', class: 'bg-danger/5' },
@@ -134,7 +134,7 @@ const defaultAccordionTrigger = cva({
 const defaultAccordionTitle = cva({
 	base: 'min-w-0 w-full no-underline group-hover/accordion-trigger:no-underline'
 });
-const defaultAccordionIcon = cva({ base: 'size-2.5 text-neutral/50' });
+const defaultAccordionIcon = cva({ base: 'size-2.5 text-neutral/45' });
 const defaultAccordionIconWrapper = cva({
 	base: 'pointer-events-none absolute top-1/2 right-2 flex size-2.5 -translate-y-1/2 items-center justify-center'
 });
@@ -169,7 +169,7 @@ const defaultIndicator = cva({
 			success: 'border-success/30 bg-success/10 text-success-muted-readable',
 			error: 'border-danger/30 bg-danger/10 text-danger-muted-readable',
 			cancelled: 'border-neutral/20 bg-neutral-muted text-neutral-muted-readable',
-			default: 'border-neutral-muted bg-surface-raised text-neutral/55'
+			default: 'border-neutral-muted bg-surface-raised text-neutral/70'
 		}
 	}
 });
@@ -182,12 +182,12 @@ const defaultGroupIcon = cva({
 			success: 'border-success/30 bg-success/10 text-success-muted-readable',
 			error: 'border-danger/30 bg-danger/10 text-danger-muted-readable',
 			cancelled: 'border-neutral/20 bg-neutral-muted text-neutral-muted-readable',
-			default: 'border-neutral-muted bg-surface-raised text-neutral/55'
+			default: 'border-neutral-muted bg-surface-raised text-neutral/70'
 		}
 	},
 	defaultVariants: { tone: 'default' }
 });
-const defaultName = cva({ base: 'min-w-0 flex-1 truncate font-medium text-neutral/85' });
+const defaultName = cva({ base: 'min-w-0 flex-1 truncate font-medium text-neutral' });
 const defaultStatus = cva({ base: 'shrink-0' });
 const defaultContent = cva({ base: 'grid min-w-0 gap-md pb-xs' });
 const defaultGroupContent = cva({
@@ -216,10 +216,10 @@ const defaultLabel = cva({
 	variants: {
 		kind: {
 			icon: 'absolute top-2 right-2 z-10',
-			text: 'text-[0.625rem] font-medium tracking-wide uppercase'
+			text: 'text-xs font-medium tracking-wide uppercase'
 		},
 		tone: {
-			default: 'text-neutral/60',
+			default: 'text-neutral/70',
 			error: 'text-danger-readable'
 		}
 	},
@@ -247,12 +247,12 @@ const defaultScrollThumb = cva({
 		}
 	}
 });
-const defaultEmpty = cva({ base: 'py-xs text-xs text-neutral/55' });
+const defaultEmpty = cva({ base: 'py-xs text-xs text-neutral/70' });
 const defaultTree = cva({ base: 'grid min-w-full gap-xs p-md text-xs' });
 const defaultTreeNode = cva({ base: 'min-w-0' });
 const defaultTreeBranch = cva({ base: 'flex min-w-0 items-baseline gap-md' });
-const defaultTreeKey = cva({ base: 'min-w-0 truncate text-neutral/60' });
-const defaultTreeSummary = cva({ base: 'shrink-0 text-[0.625rem] text-neutral/40' });
+const defaultTreeKey = cva({ base: 'min-w-0 truncate text-neutral/70' });
+const defaultTreeSummary = cva({ base: 'shrink-0 text-xs text-neutral/70' });
 const defaultTreeChildren = cva({
 	base: 'mt-xs ml-xs grid gap-xs border-l border-neutral-muted pl-lg'
 });
@@ -260,15 +260,15 @@ const defaultTreeLeaf = cva({
 	base: 'grid w-max min-w-full grid-cols-[minmax(4rem,8rem)_max-content] items-baseline gap-lg'
 });
 const defaultTreeValue = cva({
-	base: 'whitespace-pre font-mono text-[0.6875rem] leading-relaxed',
+	base: 'whitespace-pre font-mono text-xs leading-relaxed',
 	variants: {
 		kind: {
 			string: 'text-neutral',
 			number: 'text-neutral tabular-nums',
 			boolean: 'text-primary-readable',
-			null: 'text-neutral/50 italic',
-			undefined: 'text-neutral/50 italic',
-			empty: 'text-neutral/50 italic',
+			null: 'text-neutral/70 italic',
+			undefined: 'text-neutral/70 italic',
+			empty: 'text-neutral/70 italic',
 			unknown: 'text-neutral'
 		},
 		tone: {

@@ -8,7 +8,8 @@ const INDENT = '  ';
 /**
  * A ready-to-use `set<Component>Theme({..})` override snippet for a component.
  * `default` ships the current default classes; `empty` yields a blank scaffold to
- * fill in. Boolean variants are omitted — `setComponentTheme` types them as booleans,
+ * fill in. The reserved `motion` slot is omitted (it takes a transition spec, not
+ * classes), and so are boolean variants — `setComponentTheme` types them as booleans,
  * so they take no string class map.
  */
 export function buildThemeSnippet(component: string, mode: ThemeSnippetMode): string {
@@ -19,8 +20,10 @@ export function buildThemeSnippet(component: string, mode: ThemeSnippetMode): st
 	const importPath = structure.importPath ?? 'svelai';
 	const parts = structure.parts.filter(
 		(part: ThemePart) =>
-			part.base !== undefined ||
-			part.variants?.some((variant: ThemeVariant) => !isBooleanVariant(variant))
+			// The `motion` slot takes a transition spec, not class strings.
+			part.kind !== 'motion' &&
+			(part.base !== undefined ||
+				part.variants?.some((variant: ThemeVariant) => !isBooleanVariant(variant)))
 	);
 
 	const body = parts.map((part: ThemePart) => renderPart(part, mode)).join(',\n');

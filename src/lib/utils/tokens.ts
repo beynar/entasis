@@ -1,5 +1,7 @@
 export const sizes = ['small', 'normal', 'large'] as const;
 
+export const densities = ['compact', 'normal', 'comfortable'] as const;
+
 export const colors = [
 	'primary',
 	'secondary',

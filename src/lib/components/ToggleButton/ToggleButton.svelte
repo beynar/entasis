@@ -3,12 +3,14 @@
 	import type { ToggleButtonProps } from './toggleButton.props.js';
 	import { useToggleButtonTheme } from './toggleButton.theme.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
+	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 	let {
 		onValueChange = null,
 		class: className,
-		ariaLabel,
+		label,
+		role,
 		type = 'button',
-		color = 'neutral',
+		color,
 		prefix,
 		suffix,
 		children,
@@ -34,18 +36,21 @@
 	);
 
 	const classes = $derived(useToggleButtonTheme(theme));
+	const resolvedColor = $derived(useDefaultColor(color));
 </script>
 
 <button
 	{type}
 	bind:this={ref}
-	data-color={color}
+	data-color={resolvedColor}
 	data-checked={valueState.value}
-	aria-label={ariaLabel}
-	aria-pressed={valueState.value}
+	aria-label={label}
+	{role}
+	aria-pressed={role === 'radio' ? undefined : valueState.value}
+	aria-checked={role === 'radio' ? valueState.value : undefined}
 	{disabled}
 	class={classes.root({
-		color,
+		color: resolvedColor,
 		checked: valueState.value,
 		squared: isSquared,
 		variant,

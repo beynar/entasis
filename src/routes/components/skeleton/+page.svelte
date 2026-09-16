@@ -114,7 +114,7 @@
 			class="!min-h-fit"
 		>
 			<div class="space-y-4">
-				{#each { length: 3 } as _}
+				{#each { length: 3 }, index (index)}
 					<Skeleton class="h-20 w-full" />
 				{/each}
 			</div>

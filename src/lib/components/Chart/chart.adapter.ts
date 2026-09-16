@@ -10,6 +10,7 @@ import {
 	type ChartControl,
 	type DomChartDefinition,
 	type ChartHostOptions,
+	type ChartSpec,
 	type StaticChartDefinition
 } from '@tanstack/charts';
 import { compileAnnotations } from './chart.annotation.js';
@@ -19,7 +20,9 @@ import {
 	compileChartTheme,
 	compileColor,
 	compileKeyChannel,
-	compileOptionalColor
+	compileKeyedPaletteScale,
+	compileOptionalColor,
+	isKeyedPalette
 } from './chart.channels.js';
 import {
 	compileAreaGradients,
@@ -33,7 +36,12 @@ import {
 import { compileDistribution, isEmpiricalDistributionMark } from './chart.distribution.js';
 import { unsupportedDiscriminant } from './chart.errors.js';
 import { compileHexbinColorOptions } from './chart.hexbin.js';
-import { compileChartLegend, withLegendSeries } from './chart.legend.js';
+import {
+	compileChartLegend,
+	withLegendSeries,
+	withSeriesLabel,
+	type ChartLegendSurface
+} from './chart.legend.js';
 import {
 	compileMatrixColorOptions,
 	compileMatrixMark,
@@ -55,14 +63,16 @@ import type {
 	ChartRelationMark,
 	ChartScatterMark,
 	ChartValue,
+	ChartPalette,
 	ChartProps
 } from './chart.props.js';
+import type { Messages } from '$lib/i18n/en.js';
 import {
 	compileChartTooltip,
 	resolveChartTooltipGroupBy,
 	type ChartTooltipSpecialization
 } from './chart.tooltip.js';
-import { validateInitialDimensions, validateMarkId } from './chart.validation.js';
+import { resolveChartSize, validateMarkId } from './chart.validation.js';
 
 type ChartPlotConfiguration<TRow extends object> = Pick<
 	ChartProps<TRow>,
@@ -70,7 +80,10 @@ type ChartPlotConfiguration<TRow extends object> = Pick<
 > & {
 	viewportDomain?: readonly ChartValue[];
 	legendValue?: readonly ChartKey[];
-	onLegendValueChange?: (value: readonly ChartKey[]) => void;
+	/** Receives the resolved categorical series the Svelte legend draws, or `undefined`. */
+	onLegendSurface?: (surface: ChartLegendSurface | undefined) => void;
+	/** Active i18n catalog, used for the built-in tooltip row labels. */
+	messages?: Messages;
 };
 
 type CreateChartOptionsInput<TRow extends object> = Pick<
@@ -86,9 +99,10 @@ type CreateChartOptionsInput<TRow extends object> = Pick<
 	| 'palette'
 	| 'legend'
 	| 'tooltip'
-	| 'ariaLabel'
+	| 'label'
 	| 'ariaDescription'
-	| 'initialDimensions'
+	| 'height'
+	| 'aspectRatio'
 > & {
 	idPrefix: string;
 	tooltipClassName?: string;
@@ -96,7 +110,27 @@ type CreateChartOptionsInput<TRow extends object> = Pick<
 	controls?: readonly ChartControl[];
 	viewportDomain?: readonly ChartValue[];
 	legendValue?: readonly ChartKey[];
-	onLegendValueChange?: (value: readonly ChartKey[]) => void;
+	/** Receives the resolved categorical series the Svelte legend draws, or `undefined`. */
+	onLegendSurface?: (surface: ChartLegendSurface | undefined) => void;
+	/** Active i18n catalog, used for the built-in tooltip row labels. */
+	messages?: Messages;
+};
+
+/**
+ * A facet cell, like a composed view, may only carry chart *spec* options: since
+ * @tanstack/charts 0.18 the host options (`focusRing`, `focus`, `keyboard`, `pointer`,
+ * `svgAnimation`, `controls`, `tooltip`, …) must live on the outer definition only.
+ * Typing the compiled plot as a spec keeps `focusRing` out of its keys, which is what the
+ * `facet({ chart })` type guard checks. See
+ * node_modules/@tanstack/charts/docs/reference/marks/text-frame-and-facet.md (`facet`).
+ */
+type CompiledChartSpec<TRow extends object> = ChartSpec & { readonly __datum?: TRow };
+
+type CompiledChartPlot<TRow extends object> = {
+	readonly spec: CompiledChartSpec<TRow>;
+	/** Same array as `spec.marks`, kept narrowly typed for facet domain inference. */
+	readonly marks: readonly CompiledMark[];
+	readonly tooltip: ReturnType<typeof compileChartTooltip<TRow>>;
 };
 
 type CompileMarkInput<TRow extends object> = {
@@ -123,18 +157,20 @@ export function createChartOptions<TRow extends object>({
 	palette,
 	legend,
 	tooltip,
-	ariaLabel,
+	label,
 	ariaDescription,
 	idPrefix,
-	initialDimensions,
+	height,
+	aspectRatio,
 	tooltipClassName,
 	animation,
 	controls,
 	viewportDomain,
 	legendValue,
-	onLegendValueChange
+	onLegendSurface,
+	messages
 }: CreateChartOptionsInput<TRow>): ChartHostOptions<TRow> {
-	validateInitialDimensions(initialDimensions);
+	const size = resolveChartSize(height, aspectRatio);
 	const definition = compileChartDefinition(
 		data,
 		{
@@ -150,7 +186,8 @@ export function createChartOptions<TRow extends object>({
 			viewportDomain,
 			legend,
 			legendValue,
-			onLegendValueChange
+			onLegendSurface,
+			messages
 		},
 		tooltipClassName,
 		animation,
@@ -159,11 +196,12 @@ export function createChartOptions<TRow extends object>({
 
 	return {
 		definition,
-		ariaLabel,
+		ariaLabel: label,
 		ariaDescription,
 		idPrefix,
-		initialWidth: initialDimensions?.width,
-		aspectRatio: initialDimensions ? initialDimensions.width / initialDimensions.height : undefined
+		initialWidth: size?.width,
+		height: size?.height,
+		aspectRatio: size?.aspectRatio
 	};
 }
 
@@ -194,18 +232,25 @@ function compileChartDefinition<TRow extends object>(
 	const relationIndex = configuration.marks.indexOf(relationMark);
 	const relationPath = `marks[${relationIndex}]`;
 	validateRelationPlot(configuration, relationIndex);
-	if (configuration.palette !== undefined && configuration.palette.length === 0) {
-		throw new TypeError('[Chart] palette must contain at least one color.');
-	}
-	const chartTooltip = compileChartTooltip(configuration.tooltip, tooltipClassName, undefined, {
-		type: 'relation'
-	});
+	validatePalette(configuration.palette, 'palette');
+	const chartTooltip = compileChartTooltip(
+		configuration.tooltip,
+		tooltipClassName,
+		undefined,
+		{ type: 'relation' },
+		configuration.messages
+	);
 	return compileRelationChart({
 		data,
 		mark: relationMark,
 		path: relationPath,
 		palette: configuration.palette,
-		legend: compileChartLegend(configuration.legend, undefined, undefined, false),
+		legend: compileChartLegend(
+			configuration.legend,
+			undefined,
+			false,
+			configuration.onLegendSurface
+		),
 		tooltip: chartTooltip.input
 	});
 }
@@ -219,6 +264,26 @@ function compileChartPlot<TRow extends object>(
 	animation?: false | ChartAnimationOptions,
 	controls?: readonly ChartControl[]
 ): StaticChartDefinition<TRow, ChartValue, ChartValue, 'dom'> {
+	const plot = compileChartSpec(data, configuration, tooltipClassName, path, fallbackSeries);
+	// Host options belong to the outer definition only; facet cells compile the spec alone.
+	return defineChart(plot.spec, {
+		svgAnimation: animation,
+		focusRing: false,
+		keyboard: false,
+		pointer: false,
+		focus: plot.tooltip.focus,
+		controls,
+		tooltip: plot.tooltip.input
+	});
+}
+
+function compileChartSpec<TRow extends object>(
+	data: readonly TRow[],
+	configuration: ChartPlotConfiguration<TRow>,
+	tooltipClassName?: string,
+	path = '',
+	fallbackSeries?: ChartChannel<TRow, ChartKey>
+): CompiledChartPlot<TRow> {
 	const marksPath = appendPath(path, 'marks');
 	const palettePath = appendPath(path, 'palette');
 	const xPath = appendPath(path, 'x');
@@ -226,9 +291,7 @@ function compileChartPlot<TRow extends object>(
 	if (!Array.isArray(configuration.marks) || configuration.marks.length === 0) {
 		throw new TypeError(`[Chart] ${marksPath} must contain at least one mark.`);
 	}
-	if (configuration.palette !== undefined && configuration.palette.length === 0) {
-		throw new TypeError(`[Chart] ${palettePath} must contain at least one color.`);
-	}
+	validatePalette(configuration.palette, palettePath);
 
 	const distributionMark = configuration.marks.find(
 		(mark): mark is ChartDistributionMark<TRow> => mark.type === 'distribution'
@@ -240,6 +303,8 @@ function compileChartPlot<TRow extends object>(
 		(mark): mark is Extract<ChartScatterMark<TRow>, { variant: 'hexbin' }> =>
 			mark.type === 'scatter' && mark.variant === 'hexbin'
 	);
+	const seriesLabelFormat =
+		typeof configuration.legend === 'object' ? configuration.legend.format : undefined;
 	const interactiveLegend =
 		typeof configuration.legend === 'object' &&
 		configuration.legend.interactive === true &&
@@ -251,7 +316,8 @@ function compileChartPlot<TRow extends object>(
 		configuration.tooltip,
 		tooltipClassName,
 		hexbinMark ? undefined : resolveChartTooltipGroupBy(configuration),
-		resolveTooltipSpecialization(distributionMark, proportionMark, hexbinMark)
+		resolveTooltipSpecialization(distributionMark, proportionMark, hexbinMark),
+		configuration.messages
 	);
 	const areaGradients = configuration.marks.some((mark) => mark.type === 'series' && mark.area)
 		? compileAreaGradients(configuration.palette, path)
@@ -321,7 +387,9 @@ function compileChartPlot<TRow extends object>(
 			path: markPath,
 			fallbackSeries
 		});
-		const layers = [...annotations.under, ...compiledMarks, ...analysisMarks, ...annotations.over];
+		let layers = [...annotations.under, ...compiledMarks, ...analysisMarks, ...annotations.over];
+		if (seriesLabelFormat)
+			layers = layers.map((layer) => withSeriesLabel(layer, seriesLabelFormat));
 		marks.push(...(interactiveLegend ? layers.map(withLegendSeries) : layers));
 	});
 
@@ -332,7 +400,7 @@ function compileChartPlot<TRow extends object>(
 		throw new TypeError(`[Chart] ${yPath} is required by ${requiredYPath}.`);
 	}
 
-	const definition: StaticChartDefinition<TRow, ChartValue, ChartValue, 'dom'> = {
+	const spec: CompiledChartSpec<TRow> = {
 		marks,
 		scales: {
 			x:
@@ -346,6 +414,9 @@ function compileChartPlot<TRow extends object>(
 		margin: configuration.margin,
 		gradients: areaGradients?.definitions,
 		color: {
+			...(isKeyedPalette(configuration.palette)
+				? { resolver: compileKeyedPaletteScale(configuration.palette) }
+				: undefined),
 			...(matrixColor ??
 				(hexbinMark && configuration.marks.length === 1
 					? compileHexbinColorOptions(hexbinMark)
@@ -353,22 +424,22 @@ function compileChartPlot<TRow extends object>(
 			legend: compileChartLegend(
 				configuration.legend,
 				configuration.legendValue,
-				configuration.onLegendValueChange,
-				interactiveLegend
+				interactiveLegend,
+				configuration.onLegendSurface
 			)
 		},
 		theme: compileChartTheme(configuration.palette)
 	};
 
-	return defineChart(definition, {
-		svgAnimation: animation,
-		focusRing: false,
-		keyboard: false,
-		pointer: false,
-		focus: chartTooltip.focus,
-		controls,
-		tooltip: chartTooltip.input
-	});
+	return { spec, marks, tooltip: chartTooltip };
+}
+
+function validatePalette(palette: ChartPalette | undefined, path: string): void {
+	if (palette === undefined) return;
+	const entries = Array.isArray(palette) ? palette : Object.keys(palette);
+	if (entries.length === 0) {
+		throw new TypeError(`[Chart] ${path} must contain at least one color.`);
+	}
 }
 
 function supportsSeriesVisibility<TRow extends object>(marks: readonly ChartMark<TRow>[]): boolean {
@@ -399,9 +470,10 @@ function compileTooltipFocusBand<TRow extends object>(
 					return undefined;
 			}
 		})
-		.find((candidate) => candidate !== undefined);
+		// A wide value channel is a list of fields, never the categorical focus axis.
+		.find((candidate) => candidate !== undefined && !Array.isArray(candidate));
 	if (!channel) return undefined;
-	const accessor = compileChannel(channel);
+	const accessor = compileChannel(channel as ChartChannel<TRow, ChartValue>);
 	const rowsByValue = new Map<string, TRow>();
 	data.forEach((row, index) => {
 		const value = accessor(row, { index, data });
@@ -506,13 +578,8 @@ function compileMark<TRow extends object>({
 					id: mark.id,
 					by: compileKeyChannel(mark.by),
 					chart: (facetData, { key: facetKey }) =>
-						compileChartPlot(
-							facetData,
-							nestedConfiguration,
-							tooltipClassName,
-							path,
-							() => facetKey
-						),
+						compileChartSpec(facetData, nestedConfiguration, tooltipClassName, path, () => facetKey)
+							.spec,
 					columns: mark.columns,
 					minWidth: mark.minWidth,
 					gap: mark.gap,
@@ -542,11 +609,11 @@ function shareFacetPositionDomains<TRow extends object>(
 	path: string
 ): ChartPlotConfiguration<TRow> {
 	if (axes === 'cell') return configuration;
-	const definition = compileChartPlot(data, configuration, tooltipClassName, path);
+	const { marks } = compileChartSpec(data, configuration, tooltipClassName, path);
 	return {
 		...configuration,
-		x: inferFacetPositionDomain(definition.marks, 'x', configuration.x),
-		y: inferFacetPositionDomain(definition.marks, 'y', configuration.y)
+		x: inferFacetPositionDomain(marks, 'x', configuration.x),
+		y: inferFacetPositionDomain(marks, 'y', configuration.y)
 	};
 }
 

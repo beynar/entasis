@@ -174,16 +174,23 @@ function isInheritedHtmlAttribute(symbol: MorphSymbol): boolean {
  */
 function classify(name: string, propType: Type, bindables: Set<string>): PropCategory {
 	if (isSlotType(propType)) return 'slot';
-	if (hasCallableMember(propType)) return 'event';
+	if (isCallbackType(propType)) return 'event';
 	if (bindables.has(name)) return 'binding';
 	return 'prop';
 }
 
-function hasCallableMember(propType: Type): boolean {
-	const members = propType.isUnion() ? propType.getUnionTypes() : [propType];
-	return members.some(
-		(member) => !member.isNull() && !member.isUndefined() && member.getCallSignatures().length > 0
+/**
+ * A prop is a callback only when EVERY non-nullish member of its type is callable. A union that
+ * also accepts data is an input the caller configures, not a callback the component invokes to
+ * notify you: `items` that also takes a loader is still the item list, and `content` that
+ * also takes a snippet is still content. Accepting one callable member was enough to bucket all
+ * of those under "Callbacks", i.e. under a heading saying the component calls them.
+ */
+function isCallbackType(propType: Type): boolean {
+	const members = (propType.isUnion() ? propType.getUnionTypes() : [propType]).filter(
+		(member) => !member.isNull() && !member.isUndefined()
 	);
+	return members.length > 0 && members.every((member) => member.getCallSignatures().length > 0);
 }
 
 function isOptional(symbol: MorphSymbol, propType: Type): boolean {

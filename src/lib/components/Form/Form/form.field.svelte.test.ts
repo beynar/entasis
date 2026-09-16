@@ -104,12 +104,12 @@ describe('Form field entries', () => {
 				onFieldValueChange,
 				onValueChange,
 				size: 'large',
-				density: 'small'
+				density: 'compact'
 			}
 		});
 		const control = screen.getByTestId('custom-field-control');
 		expect(control).toHaveAttribute('data-size', 'large');
-		expect(control).toHaveAttribute('data-density', 'small');
+		expect(control).toHaveAttribute('data-density', 'compact');
 		expect(onFieldValueChange).not.toHaveBeenCalled();
 		await fireEvent.click(screen.getByRole('button', { name: 'Set twice' }));
 		expect(onFieldValueChange.mock.calls).toEqual([['First'], ['Second']]);

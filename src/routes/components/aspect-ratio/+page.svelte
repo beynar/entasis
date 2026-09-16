@@ -62,15 +62,13 @@
 </AspectRatio>`}
 	>
 		<AspectRatio ratio={controls.value.ratio}>
-			{#snippet children()}
-				<div
-					class="from-primary to-secondary flex h-full w-full items-center justify-center bg-gradient-to-br"
+			<div
+				class="from-primary to-secondary flex h-full w-full items-center justify-center bg-gradient-to-br"
+			>
+				<span class="text-primary-contrast text-2xl font-bold"
+					>{controls.value.ratio.replace('x', ':')} Aspect Ratio</span
 				>
-					<span class="text-primary-contrast text-2xl font-bold"
-						>{controls.value.ratio.replace('x', ':')} Aspect Ratio</span
-					>
-				</div>
-			{/snippet}
+			</div>
 		</AspectRatio>
 	</ComponentCard>
 
@@ -91,19 +89,17 @@
 						<div class="flex h-52 items-center justify-center">
 							<div style:width={item.previewWidth}>
 								<AspectRatio ratio={item.ratio} class="rounded-md">
-									{#snippet children()}
-										<div
-											class="border-neutral-muted bg-surface-floating flex h-full w-full items-center justify-center border"
-										>
-											<span class="text-neutral text-sm font-semibold">
-												{item.ratio.replace('x', ':')}
-											</span>
-										</div>
-									{/snippet}
+									<div
+										class="border-neutral-muted bg-surface-floating flex h-full w-full items-center justify-center border"
+									>
+										<span class="text-neutral text-sm font-semibold">
+											{item.ratio.replace('x', ':')}
+										</span>
+									</div>
 								</AspectRatio>
 							</div>
 						</div>
-						<p class="text-neutral/60 text-center text-xs">{item.label}</p>
+						<p class="text-neutral/70 text-center text-xs">{item.label}</p>
 					</div>
 				{/each}
 			</div>

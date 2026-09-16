@@ -2,6 +2,7 @@ import type { WithSlot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { LayoutRootAttributes } from '../Layout/layoutAttributes.js';
 import type { LayoutSpacing } from '../Layout/layoutSpacing.js';
+import type { ResponsiveProps } from '../Theme/theme.js';
 import type { GridThemeProps } from './grid.theme.js';
 
 export type GridAlignment = 'start' | 'center' | 'end' | 'stretch';
@@ -24,14 +25,18 @@ export type GridProps = WithAttachments<
 			ref?: HTMLDivElement | null;
 			/** Additional classes merged onto the root grid element. */
 			class?: string;
-			/** Fixed column count or responsive minimum-width configuration. */
-			columns?: GridColumns;
-			/** Spacing between rows and columns. */
-			gap?: LayoutSpacing;
-			/** Row spacing, overriding `gap` on that axis. */
-			rowGap?: LayoutSpacing;
-			/** Column spacing, overriding `gap` on that axis. */
-			columnGap?: LayoutSpacing;
+			/**
+			 * Fixed column count or intrinsic minimum-width configuration, per container
+			 * breakpoint: a value, or `{ sm: 2, lg: 4 }` (nearest defined key at or below the
+			 * grid's own width wins).
+			 */
+			columns?: ResponsiveProps<GridColumns>;
+			/** Spacing between rows and columns, per container breakpoint. */
+			gap?: ResponsiveProps<LayoutSpacing>;
+			/** Row spacing, overriding `gap` on that axis at the breakpoints it defines. */
+			rowGap?: ResponsiveProps<LayoutSpacing>;
+			/** Column spacing, overriding `gap` on that axis at the breakpoints it defines. */
+			columnGap?: ResponsiveProps<LayoutSpacing>;
 			/** Height of implicit rows in pixels, useful with `GridSpan rows`. */
 			rowHeight?: number;
 			/** Vertical alignment of items inside their grid areas. */

@@ -4,7 +4,7 @@ export type TreeRendererHooks = {
 	onDispose?: () => void;
 	onFocusChange?: (focusedPath: string | null) => void;
 	onMutation?: (event: FileTreeMutationEvent) => void;
-	onReady?: (fileTree: FileTree) => void;
+	onReady?: (payload: FileTree) => void;
 	setFileTree?: (fileTree: FileTree | undefined) => void;
 };
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { TagsInputProps } from './tagsInput.props.js';
@@ -30,12 +31,13 @@
 		density = 'normal',
 		placeholder = '',
 		items,
-		allowCustom = false,
+		customTags = false,
 		maxTags,
 		showAllOnFocus = false,
 		getValueOption,
-		loadingText = 'Loading...',
-		noOptionsText = 'No options found',
+		loadingText,
+		noOptionsText,
+		i18n,
 		theme,
 		disabled,
 		name,
@@ -50,6 +52,7 @@
 	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
+	const t = $derived(useI18n(i18n));
 	const listboxId = `${id}-listbox`;
 	const optionId = (value: string) => `${id}-option-${value.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
 
@@ -138,7 +141,7 @@
 				} catch (error) {
 					return {
 						options: [] as ComboboxOption[],
-						error: error instanceof Error ? error.message : 'Failed to load options'
+						error: error instanceof Error ? error.message : t.failedToLoadOptions
 					};
 				} finally {
 					loading = false;
@@ -249,9 +252,9 @@
 				return;
 			}
 
-			// Enter adds free text in free mode (no items) or when allowCustom is enabled,
+			// Enter adds free text in free mode (no items) or when customTags is enabled,
 			// unless it maps to a highlighted dropdown option (handled by nav below).
-			const canAddCustom = !hasItems || allowCustom;
+			const canAddCustom = !hasItems || customTags;
 			const hasDropdown = isOpen && availableOptions.length > 0;
 
 			if (event.key === 'Enter') {
@@ -306,7 +309,7 @@
 					{#snippet suffix()}
 						<button
 							type="button"
-							aria-label={`Remove ${labelFor(tag)}`}
+							aria-label={t.remove(labelFor(tag))}
 							onclick={() => removeTag(tag)}
 							onmousedown={(e) => {
 								e.stopPropagation();
@@ -328,21 +331,21 @@
 		<div
 			id={listboxId}
 			role="listbox"
-			aria-label="Options"
+			aria-label={t.options}
 			class="flex max-h-[200px] flex-col gap-1"
 		>
 			{#if loading}
 				<div class={classes.loading({ size })} role="status" aria-live="polite">
-					{loadingText}
+					{loadingText ?? t.loadingEllipsis}
 				</div>
 			{:else if optionsAsync.error}
 				<div class={classes.error({ size })} role="alert" aria-live="assertive">
 					{optionsAsync.error}
 				</div>
 			{:else if availableOptions.length === 0 && searchValue}
-				<div class={classes.noOptions({ size })} role="status">{noOptionsText}</div>
+				<div class={classes.noOptions({ size })} role="status">{noOptionsText ?? t.noOptions}</div>
 			{:else if availableOptions.length === 0 && !searchValue && showAllOnFocus}
-				<div class={classes.noOptions({ size })} role="status">{noOptionsText}</div>
+				<div class={classes.noOptions({ size })} role="status">{noOptionsText ?? t.noOptions}</div>
 			{:else if availableOptions.length > 0}
 				<ScrollArea scrollOnEdges type="auto" class="flex max-h-[200px] flex-col gap-1">
 					{#each availableOptions as option (option.value)}

@@ -6,6 +6,7 @@
 	import DataTableEditingDemo from './DataTableEditingDemo.svelte';
 	import DataTableExternalControlsDemo from './DataTableExternalControlsDemo.svelte';
 	import DataTableGroupingDemo from './DataTableGroupingDemo.svelte';
+	import DataTableInFlowDemo from './DataTableInFlowDemo.svelte';
 	import DataTableLargeDemo from './DataTableLargeDemo.svelte';
 	import DataTableManualDemo from './DataTableManualDemo.svelte';
 	import DataTableRenderingDemo from './DataTableRenderingDemo.svelte';
@@ -15,6 +16,7 @@
 		externalControlsDataTableCode,
 		gridDataTableCode,
 		groupingDataTableCode,
+		inFlowDataTableCode,
 		manualDataTableCode,
 		renderingDataTableCode
 	} from './codeSnippets.js';
@@ -25,7 +27,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: ['small', 'normal', 'large']
+			options: ['compact', 'normal', 'comfortable']
 		},
 		{
 			name: 'selectionMode',
@@ -45,20 +47,21 @@
 	component="DataTable"
 	features={[
 		'Client and manual processing contracts',
-		'Rows always virtualized',
+		'Virtualized rows, or in-flow with virtualize={false}',
 		'Sorting, filters, grouping, and aggregation',
 		'Selection, expansion, and async editing',
 		'Column ordering, sizing, visibility, and pinning',
-		'Semantic table or keyboard grid interaction'
+		'Semantic table or interactive grid mode'
 	]}
 >
 	<section class="grid gap-3">
 		<h2 class="text-neutral text-xl font-semibold">Table or DataTable?</h2>
-		<p class="text-neutral/60 max-w-3xl text-sm leading-6">
+		<p class="text-neutral/70 max-w-3xl text-sm leading-6">
 			Use <code>Table</code> for static tabular content. Use <code>DataTable</code> when rows need
 			stable identity, processing state, virtualization, or interactive columns. DataTable requires
 			<code>getRowId</code> and fills a parent with a definite height by default; pass
-			<code>height</code> when the scroll viewport needs an explicit size.
+			<code>height</code> when the scroll viewport needs an explicit size, or
+			<code>{'virtualize={false}'}</code> to drop the table into normal document flow.
 		</p>
 	</section>
 
@@ -121,6 +124,17 @@
 		>
 			<div class="w-full">
 				<DataTableGroupingDemo />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title={'In-flow table (virtualize={false})'}
+			description="Row virtualization off: every row renders in normal document flow at its natural height, so the table needs no explicit height and no definite-height parent. Selection, keyboard navigation, and editing behave exactly as they do while virtualized."
+			code={inFlowDataTableCode}
+			class="min-h-0 items-stretch p-3 md:p-5"
+		>
+			<div class="w-full">
+				<DataTableInFlowDemo />
 			</div>
 		</ComponentCard>
 

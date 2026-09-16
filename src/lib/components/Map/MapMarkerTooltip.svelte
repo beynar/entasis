@@ -1,7 +1,8 @@
 <script lang="ts" generics="TData = unknown">
 	import type { Snippet } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
-	import { tooltip as tooltipAttachment } from '../Tooltip/tooltip.svelte.js';
+	import MapHtmlText from './MapHtmlText.svelte';
+	import { tooltip as tooltipAttachment } from '../Tooltip/tooltip.attachment.svelte.js';
 	import type { MapMarkerSnippetArg, MapMarkerTooltipContentArg } from './map-types.js';
 
 	type Props<TData = unknown> = {
@@ -24,12 +25,12 @@
 {#snippet tooltipContent()}
 	{#if content === true}
 		{#if args.marker.label}
-			{@html args.marker.label}
+			<MapHtmlText value={args.marker.label} />
 		{:else}
 			{args.marker.id}
 		{/if}
 	{:else if typeof content === 'string'}
-		{@html content}
+		<MapHtmlText value={content} />
 	{:else}
 		{@render content(tooltipArg)}
 	{/if}

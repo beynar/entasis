@@ -1,126 +1,90 @@
 <script lang="ts">
-	import Component from './Component.svelte';
-	import { Button, setButtonTheme } from '$lib/components/Button/index.js';
-	import { tooltip } from '$lib/components/Tooltip/tooltip.svelte.js';
+	import { Button } from '$lib/components/Button/index.js';
+	import { Heading } from '$lib/components/Heading/index.js';
+	import { Code } from '$lib/components/Code/index.js';
+	import { blockCount, blockCategories } from './blocks/catalog.js';
+	import { componentInventory } from '$lib/generated/componentContract.js';
 
-	// setButtonTheme({
-	// 	button: {
-	// 		base: 'rounded-full'
-	// 	}
-	// });
+	const componentCount = componentInventory.filter(
+		(entry) =>
+			entry.visibility === 'public' &&
+			(entry.capabilities as readonly string[]).includes('component')
+	).length;
+
+	const install = `pnpm add svelai`;
+	const setup = `@import 'tailwindcss';
+@source '../node_modules/svelai/dist';
+@plugin 'svelai/tailwind-plugin/theme' {
+	name: light;
+	default: true;
+	colorscheme: light;
+	surface: #fafafa;
+	neutral: #18181b;
+	primary: #5f62ef;
+}`;
+
+	const pillars = [
+		{
+			title: 'Configuration over markup',
+			text: 'One component, one props contract, snippets for composition. No Root/Trigger/Content trees to assemble.'
+		},
+		{
+			title: 'Laws, not conventions',
+			text: 'Value and disclosure state, selection events, focus and dismissal are enforced by tests and contract tooling on every build.'
+		},
+		{
+			title: 'Themed from tokens',
+			text: 'OKLCH-generated palettes, elevation, radius, type and motion scales. Retune globally, per subtree, or per instance.'
+		},
+		{
+			title: 'Accessible by default',
+			text: 'Focus scopes, layered dismissal, roving tabindex, type-ahead, RTL and reduced motion come with every overlay and control.'
+		}
+	];
 </script>
 
-<button data-color="danger" class="border"> eaz </button>
+<svelte:head>
+	<title>svelai · Svelte 5 design system</title>
+	<meta
+		name="description"
+		content="A configuration-over-markup component library for SvelteKit and Tailwind 4, with a token engine, enforced API laws and accessible overlays."
+	/>
+</svelte:head>
 
-<div class="bg-primary/20 m-10 size-20 shadow"></div>
-
-<div class="bg-secondary/20 raised-xl m-10 size-20"></div>
-
-<p class="text-neutral/60">hello</p>
-
-{#snippet Test({ text }: { text: string })}
-	<button class="bg-primary text-color-light p-2">{text}</button>
-{/snippet}
-
-<div class="bg-primary/20 size-20 rounded p-1" {@attach tooltip({ content: 'hello' })}>hello</div>
-
-<!--  -->
-<Button color="secondary">Hello</Button>
-<Button color="secondary">Hello</Button>
-
-<div class="size-10 border">e</div>
-<div class="border-danger bg-primary-dark size-10 border">e</div>
-<!-- <Button color="danger">Hello</Button>
-<Button color="success">Hello</Button>
-<Button color="warning">Hello</Button>
-<Button color="info">Hello</Button>
-
-<Button color="primary" variant="soft">Hello</Button>
-<Button color="secondary" variant="soft">Hello</Button>
-<Button color="danger" variant="soft">Hello</Button>
-<Button color="success" variant="soft">Hello</Button>
-<Button color="warning" variant="soft">Hello</Button>
-<Button color="info" variant="soft">Hello</Button>
-
-<Chip color="primary">Hello</Chip>
-<Chip color="secondary">Hello</Chip>
-<Chip color="danger">Hello</Chip>
-<Chip color="success">Hello</Chip>
-<Chip color="warning">Hello</Chip>
-<Chip color="info">Hello</Chip>
-<Chip color="neutral">Hello</Chip>
-<Chip color="neutral">Helloeaz</Chip>
-<br />
-<Chip color="primary" variant="outline">Hello</Chip>
-<Chip color="secondary" variant="outline">Hello</Chip>
-<Chip color="danger" variant="outline">Hello</Chip>
-<Chip color="success" variant="outline">Hello</Chip>
-<Chip color="warning" variant="outline">Hello</Chip>
-<Chip color="info" variant="outline">Hello</Chip>
-<Chip color="neutral" variant="outline">Hello</Chip>
-<Chip color="neutral" variant="outline">Helloeaz</Chip>
-<br />
-<Chip color="primary" variant="soft">Hello</Chip>
-<Chip color="secondary" variant="soft">Hello</Chip>
-<Chip color="danger" variant="soft">Hello</Chip>
-<Chip color="success" variant="soft">Hello</Chip>
-<Chip color="warning" variant="soft">Hello</Chip>
-<Chip color="info" variant="soft">Hello</Chip>
-<Chip color="neutral" variant="soft">Hello</Chip>
-<Chip color="neutral" variant="soft">Helloeaz</Chip>
-
-<div class="flex">
-	<div class="flex">
-		<div class="bg-primary/20 m-10 size-20 shadow">
-			<Chip color="primary">1</Chip>
+<div class="gap-layout-xl px-lg py-layout-lg mx-auto flex max-w-5xl flex-col">
+	<section class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-medium tracking-wide uppercase">svelai</p>
+		<Heading size="h1" class="max-w-3xl text-balance">
+			Configured components for SvelteKit, with the engine of a design system.
+		</Heading>
+		<p class="text-neutral/70 max-w-2xl text-lg text-pretty">
+			{componentCount} components, {blockCount} blocks across {blockCategories.length} categories, a Tailwind
+			4 token engine, and accessibility laws that are tested rather than promised.
+		</p>
+		<div class="gap-sm flex flex-wrap">
+			<Button href="/components" color="primary">Browse components</Button>
+			<Button href="/blocks" variant="outline">Explore blocks</Button>
+			<Button href="/docs/colors" variant="ghost">Read the docs</Button>
 		</div>
-		<div class="bg-primary/20 m-10 size-20 shadow">
-			<Chip color="primary" size="large">1</Chip>
+	</section>
+
+	<section class="gap-lg grid md:grid-cols-2">
+		<div class="gap-sm flex flex-col">
+			<Heading size="h4" as="h2">Install</Heading>
+			<Code code={install} language="bash" />
 		</div>
-		<div class="bg-primary/20 m-10 size-20 shadow">
-			<Chip color="primary" size="small">1</Chip>
+		<div class="gap-sm flex flex-col">
+			<Heading size="h4" as="h2">Tailwind setup</Heading>
+			<Code code={setup} language="css" />
 		</div>
-	</div>
-	<div class="flex">
-		<div class="bg-primary/20 m-10 size-20 shadow">
-			<Chip color="primary" position="topLeft">1</Chip>
-		</div>
-		<div class="bg-primary/20 m-10 size-20 shadow">
-			<Chip color="primary" size="large" position="topRight">1</Chip>
-		</div>
-		<div class="bg-primary/20 m-10 size-20 shadow">
-			<Chip color="primary" size="small" position="topRight">1</Chip>
-		</div>
-	</div>
-	<div class="flex">
-		<div class="bg-primary/20 m-10 size-20 shadow">
-			<Chip color="primary" position="bottomLeft">1</Chip>
-		</div>
-		<div class="bg-primary/20 m-10 size-20 shadow">
-			<Chip color="primary" size="large" position="bottomRight">1</Chip>
-		</div>
-		<div class="bg-primary/20 m-10 size-20 shadow">
-			<Chip color="danger" size="small" position="bottomRight">1</Chip>
-		</div>
-	</div>
+	</section>
+
+	<section class="gap-md grid sm:grid-cols-2">
+		{#each pillars as pillar (pillar.title)}
+			<article class="raised-1 bg-surface gap-xs p-lg flex flex-col rounded-lg">
+				<h3 class="font-medium">{pillar.title}</h3>
+				<p class="text-neutral/70 text-sm">{pillar.text}</p>
+			</article>
+		{/each}
+	</section>
 </div>
-
-<div class="bg-primary/20 m-10 size-20 shadow">
-	<Chip
-		theme={{
-			root: {
-				position: {
-					bottomRight: 'bottom-4 right-4'
-				}
-			}
-		}}
-		color="danger"
-		size="small"
-		position="bottomRight"
-		>1
-		<Chip color="primary" size="small" position="bottomRight"
-			>1
-			<Chip color="success" size="small" position="bottomRight">1</Chip>
-		</Chip>
-	</Chip>
-</div> -->

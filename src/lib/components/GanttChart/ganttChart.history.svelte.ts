@@ -1,3 +1,4 @@
+import { useUndoStack, type UndoStack } from '$lib/utils/useUndoStack.svelte.js';
 import { GanttChartError } from './ganttChart.error.js';
 import {
 	cloneGanttAssignment,
@@ -62,8 +63,13 @@ export class GanttChartHistory<
 	TResourceFields extends object,
 	TAssignmentFields extends object
 > {
-	#past = $state.raw<HistoryEntry<TTaskFields, TDependencyFields, TAssignmentFields>[]>([]);
-	#future = $state.raw<HistoryEntry<TTaskFields, TDependencyFields, TAssignmentFields>[]>([]);
+	/** The signatures let the stack drop a past that the controlled model no longer continues. */
+	#stack: UndoStack<HistoryEntry<TTaskFields, TDependencyFields, TAssignmentFields>> = useUndoStack(
+		{
+			limit: () => this.getLimit(),
+			signatureOf: (entry) => ({ before: entry.beforeSignature, after: entry.afterSignature })
+		}
+	);
 
 	constructor(
 		private readonly chart: GanttChartState<
@@ -88,28 +94,25 @@ export class GanttChartHistory<
 		const beforeSignature = getModelSignature(commit.before);
 		const afterSignature = getModelSignature(commit.after);
 		if (beforeSignature === afterSignature) return undefined;
-		const previousEntry = this.#past.at(-1);
-		if (previousEntry && previousEntry.afterSignature !== beforeSignature) this.#past = [];
 		const entry: HistoryEntry<TTaskFields, TDependencyFields, TAssignmentFields> = {
 			...commit,
 			beforeSignature,
 			afterSignature,
 			contextSignature: this.getContextSignature()
 		};
-		this.#past = [...this.#past, entry].slice(-limit);
-		this.#future = [];
+		this.#stack.push(entry);
 		return () => this.forget(entry);
 	}
 
 	canUndo(): boolean {
 		if (!this.chart.interactions.history || this.getLimit() === 0) return false;
-		const entry = this.#past.at(-1);
+		const entry = this.#stack.peekPast();
 		return Boolean(entry && this.isCurrent(entry, entry.afterSignature));
 	}
 
 	canRedo(): boolean {
 		if (!this.chart.interactions.history || this.getLimit() === 0) return false;
-		const entry = this.#future.at(-1);
+		const entry = this.#stack.peekFuture();
 		return Boolean(entry && this.isCurrent(entry, entry.beforeSignature));
 	}
 
@@ -127,8 +130,7 @@ export class GanttChartHistory<
 		if (this.chart.loading) {
 			throw new GanttChartError('invalid-operation', 'GanttChart is loading.');
 		}
-		const source = direction === 'undo' ? this.#past : this.#future;
-		const entry = source.at(-1);
+		const entry = direction === 'undo' ? this.#stack.peekPast() : this.#stack.peekFuture();
 		if (!entry) return false;
 		const expectedSignature = direction === 'undo' ? entry.afterSignature : entry.beforeSignature;
 		if (!this.isCurrent(entry, expectedSignature)) {
@@ -139,13 +141,8 @@ export class GanttChartHistory<
 		}
 		const target = direction === 'undo' ? entry.before : entry.after;
 		if (!this.restore(target, entry, direction)) return false;
-		if (direction === 'undo') {
-			this.#past = this.#past.slice(0, -1);
-			this.#future = [...this.#future, entry];
-		} else {
-			this.#future = this.#future.slice(0, -1);
-			this.#past = [...this.#past, entry];
-		}
+		if (direction === 'undo') this.#stack.undo();
+		else this.#stack.redo();
 		return true;
 	}
 
@@ -192,13 +189,11 @@ export class GanttChartHistory<
 		});
 	}
 
+	/** A rejected commit drops its entry; anything recorded on top of it can no longer be replayed. */
 	private forget(entry: HistoryEntry<TTaskFields, TDependencyFields, TAssignmentFields>): void {
-		if (this.#past.at(-1) === entry) {
-			this.#past = this.#past.slice(0, -1);
-		} else {
-			this.#past = [];
-		}
-		this.#future = [];
+		if (this.#stack.peekPast() === entry) this.#stack.remove(entry);
+		else this.#stack.clearPast();
+		this.#stack.clearFuture();
 	}
 }
 

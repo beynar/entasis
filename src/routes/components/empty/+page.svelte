@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import DocPage from '../../DocPage.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { createComponentControls } from '../../componentControls.svelte.js';
@@ -94,7 +95,7 @@
 					</div>
 				{/snippet}
 				{#snippet note()}
-					Need help? <a href="/components/empty">Contact support</a>
+					Need help? <a href={resolve('/components/empty')}>Contact support</a>
 				{/snippet}
 			</Empty>
 		</ComponentCard>
@@ -105,7 +106,7 @@
 				description="Try adjusting your search filters or check the spelling of your query."
 			>
 				{#snippet media()}
-					{@render magnifyingGlassIcon({ class: 'text-neutral/60 size-10' })}
+					{@render magnifyingGlassIcon({ class: 'text-neutral/70 size-10' })}
 				{/snippet}
 				{#snippet content()}
 					<Button size="small" variant="ghost">Clear filters</Button>
@@ -203,15 +204,15 @@
 				{/snippet}
 				{#snippet footer()}
 					<a
-						class="text-neutral/60 hover:text-primary text-xs underline underline-offset-4"
-						href="/docs"
+						class="text-neutral/70 hover:text-primary-readable text-xs underline underline-offset-4"
+						href={resolve('/docs')}
 					>
 						Learn more about deployments
 					</a>
 				{/snippet}
 			</Empty>
 			<Empty bordered>
-				<div class="text-neutral/60 flex flex-col items-center gap-2 text-sm">
+				<div class="text-neutral/70 flex flex-col items-center gap-2 text-sm">
 					{@render magnifyingGlassIcon({ class: 'size-8' })}
 					<p>Fully custom composition via <code class="text-neutral">children</code>.</p>
 				</div>

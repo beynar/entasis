@@ -3,11 +3,7 @@ import type { MapShapeFeatureCollection } from './map-shapes.js';
 
 export type MapLibreLngLat = [number, number];
 export type MapLibreBounds = [number, number, number, number];
-export type MapLibreControlPosition =
-	| 'top-left'
-	| 'top-right'
-	| 'bottom-left'
-	| 'bottom-right';
+export type MapLibreControlPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 
 export type MapLibreErrorEvent = {
 	error?: unknown;
@@ -40,9 +36,7 @@ export type MapLibreFeatureCollection = {
 };
 
 export type MapLibreGeoJSONData =
-	| MapMarkerFeatureCollection
-	| MapShapeFeatureCollection
-	| MapLibreFeatureCollection;
+	MapMarkerFeatureCollection | MapShapeFeatureCollection | MapLibreFeatureCollection;
 
 export type MapLibrePlainGeoJSONSource = {
 	type: 'geojson';
@@ -198,9 +192,7 @@ export type MapLibreMarker = {
 	remove(): void;
 };
 
-export type MapLibreMarkerConstructor = new (
-	options: MapLibreMarkerOptions
-) => MapLibreMarker;
+export type MapLibreMarkerConstructor = new (options: MapLibreMarkerOptions) => MapLibreMarker;
 
 export type MapLibreLibrary = {
 	Map: new (options: MapLibreMapOptions) => MapLibreMap;

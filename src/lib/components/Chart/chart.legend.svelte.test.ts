@@ -19,7 +19,7 @@ const props: ChartProps<Row> = {
 	y: { scale: { type: 'linear' } },
 	viewport: { transition: false },
 	tooltip: true,
-	ariaLabel: 'Interactive legend'
+	label: 'Interactive legend'
 };
 
 describe('Chart legend visibility state', () => {
@@ -31,7 +31,7 @@ describe('Chart legend visibility state', () => {
 				legend: { interactive: true, defaultValue: ['First', 'Second'], onValueChange }
 			}
 		});
-		const first = await waitFor(() => getByRole('button', { name: 'Toggle First series' }));
+		const first = await waitFor(() => getByRole('button', { name: 'First' }));
 		const brush = container.querySelector('[data-chart-brush]');
 		expect(first).toHaveAttribute('aria-pressed', 'true');
 		await fireEvent.click(first);
@@ -45,10 +45,7 @@ describe('Chart legend visibility state', () => {
 			legend: { interactive: true, defaultValue: ['First'], onValueChange }
 		});
 		expect(first).toHaveAttribute('aria-pressed', 'false');
-		expect(getByRole('button', { name: 'Toggle Second series' })).toHaveAttribute(
-			'aria-pressed',
-			'true'
-		);
+		expect(getByRole('button', { name: 'Second' })).toHaveAttribute('aria-pressed', 'true');
 		expect(onValueChange).toHaveBeenCalledTimes(1);
 		await fireEvent.click(first);
 		await waitFor(() => expect(first).toHaveAttribute('aria-pressed', 'true'));
@@ -60,17 +57,14 @@ describe('Chart legend visibility state', () => {
 		const { getByRole, rerender } = render(TypedChart, {
 			props: { ...props, legend: { interactive: true, value: ['First'], onValueChange } }
 		});
-		const second = await waitFor(() => getByRole('button', { name: 'Toggle Second series' }));
+		const second = await waitFor(() => getByRole('button', { name: 'Second' }));
 		expect(second).toHaveAttribute('aria-pressed', 'false');
 		await fireEvent.click(second);
 		expect(onValueChange).toHaveBeenCalledExactlyOnceWith(['First', 'Second']);
 		expect(second).toHaveAttribute('aria-pressed', 'false');
 		await rerender({ ...props, legend: { interactive: true, value: ['Second'], onValueChange } });
 		await waitFor(() => expect(second).toHaveAttribute('aria-pressed', 'true'));
-		expect(getByRole('button', { name: 'Toggle First series' })).toHaveAttribute(
-			'aria-pressed',
-			'false'
-		);
+		expect(getByRole('button', { name: 'First' })).toHaveAttribute('aria-pressed', 'false');
 		expect(onValueChange).toHaveBeenCalledTimes(1);
 	});
 });

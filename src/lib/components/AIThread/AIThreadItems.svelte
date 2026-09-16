@@ -1,12 +1,11 @@
 <script lang="ts" generics="TMessage extends AIThreadItem = AIThreadItem">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import type { VirtualItem } from '@tanstack/svelte-virtual';
 	import type { Attachment } from 'svelte/attachments';
-	import Alert from '../Alert/Alert.svelte';
 	import { getAIConversation } from '../AIConversation/aiConversation.state.svelte.js';
 	import Empty from '../Empty/Empty.svelte';
 	import AIMessage from '../AIMessage/AIMessage.svelte';
-	import AIMcpApp from '../AIMcpApp/AIMcpApp.svelte';
-	import AISuggestions from '../AISuggestion/Suggestions.svelte';
+	import AISuggestions from '../AISuggestion/AISuggestions.svelte';
 	import Slot from '../Slot/Slot.svelte';
 	import AITool from '../AITool/AITool.svelte';
 	import AIThreadMarker from './AIThreadMarker.svelte';
@@ -22,7 +21,7 @@
 	type Props<TMessage extends AIThreadItem> = Pick<
 		AIThreadProps<TMessage>,
 		| 'suggestions'
-		| 'onSuggestionSelect'
+		| 'onSelect'
 		| 'density'
 		| 'messageSize'
 		| 'messageVariant'
@@ -47,8 +46,6 @@
 		| 'marker'
 		| 'markerIcon'
 		| 'markerContent'
-		| 'app'
-		| 'mcpHost'
 		| 'theme'
 	> & {
 		renderItems: readonly AIThreadRenderItem<TMessage>[];
@@ -63,7 +60,7 @@
 		totalSize,
 		measureItem,
 		suggestions = [],
-		onSuggestionSelect,
+		onSelect,
 		density = 'normal',
 		messageSize = 'normal',
 		messageVariant = 'bubble',
@@ -88,13 +85,12 @@
 		marker: markerSlot,
 		markerIcon,
 		markerContent,
-		app: appSlot,
-		mcpHost,
 		theme
 	}: Props<TMessage> = $props();
 
 	const conversation = getAIConversation<TMessage>();
 	const classes = $derived(useAIThreadTheme(theme));
+	const t = $derived(useI18n());
 	const resolvedMessageActionsVisibility = $derived(messageActionsVisibility ?? 'always');
 
 	function messageRole(message: TMessage): AIThreadRole {
@@ -121,11 +117,10 @@
 		}
 		return item.message.name;
 	}
-
 </script>
 
 {#snippet suggestionContent()}
-	<AISuggestions {suggestions} {onSuggestionSelect} class="mx-auto max-w-full" />
+	<AISuggestions {suggestions} {onSelect} class="mx-auto max-w-full" />
 {/snippet}
 
 {#if renderItems.length === 0}
@@ -134,8 +129,8 @@
 	{:else}
 		<Empty
 			class="min-h-48"
-			title="Start a conversation"
-			description="Messages will appear here."
+			title={t.aiThreadEmptyTitle}
+			description={t.aiThreadEmptyDescription}
 			content={suggestions.length > 0 ? suggestionContent : undefined}
 		/>
 	{/if}
@@ -205,19 +200,6 @@
 								status={toolStatus}
 							/>
 						{/if}
-					{:else if appSlot}
-						<Slot
-							render={appSlot}
-							payload={{
-								tool: item.tool,
-								message: item.message,
-								index: item.messageIndex
-							}}
-						/>
-					{:else if mcpHost}
-						<AIMcpApp tool={item.tool} host={mcpHost} />
-					{:else}
-						<Alert color="danger" variant="soft" description="MCP App host is not configured." />
 					{/if}
 				</div>
 			{/if}

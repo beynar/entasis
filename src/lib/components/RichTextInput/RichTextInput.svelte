@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Field from '../Form/Field/Field.svelte';
 	import { createFieldState } from '../Form/Field/field.state.svelte.js';
@@ -11,6 +12,7 @@
 	import RichTextInputChrome from './RichTextInputChrome.svelte';
 	import { RichTextInputState } from './richTextInput.state.svelte.js';
 	import { useRichTextInputTheme } from './richTextInput.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		id: idProp,
@@ -36,7 +38,7 @@
 		maxHeight = false,
 		formats = AI_COMPOSER_DEFAULT_RICH_TEXT_FORMATS,
 		disabled = false,
-		placeholder = 'Ask anything...',
+		placeholder,
 		size = 'normal',
 		toolbarClass,
 		class: className,
@@ -54,6 +56,7 @@
 		fieldAttrs,
 		...attachments
 	}: Props = $props();
+	const t = $derived(useI18n());
 	const valueState = createBindableValue(
 		() => value,
 		(nextValue) => (value = nextValue),
@@ -168,8 +171,11 @@
 	}
 
 	$effect(() => {
-		ref = state.rootElement;
-		field.node = state.rootElement;
+		const rootElement = state.rootElement;
+		// `ref` is write-only from here: read it untracked so the guard cannot make this
+		// effect depend on the parent's binding.
+		if (untrack(() => ref) !== rootElement) ref = rootElement;
+		field.node = rootElement;
 	});
 	$effect(() => state.syncEditable());
 	$effect(() => state.syncValue());
@@ -191,7 +197,7 @@
 		{formats}
 		{toolbarClass}
 		disabled={field.disabled ?? false}
-		{placeholder}
+		placeholder={placeholder ?? t.aiComposerPlaceholder}
 		{standalone}
 		{maxHeight}
 		isEmpty={state.isEmpty}

@@ -21,10 +21,10 @@
 	]);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<header class="flex flex-wrap items-end justify-between gap-lg">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<header class="gap-lg flex flex-wrap items-end justify-between">
 		<div>
-			<p class="text-sm text-neutral/60">Good morning, Alex</p>
+			<p class="text-neutral/70 text-sm">Good morning, Alex</p>
 			<h2 class="mt-sm text-3xl font-semibold">Business is moving.</h2>
 		</div>
 		<Select
@@ -47,7 +47,7 @@
 			value="$84"
 		/><Stat label="Retention" value="94.2%" />
 	</Grid>
-	<div class="grid gap-lg lg:grid-cols-3">
+	<div class="gap-lg grid lg:grid-cols-3">
 		<Card title="Revenue overview" description="USD thousands · sample data" class="lg:col-span-2"
 			><Chart
 				x={{ scale: { type: 'band', padding: 0.2 } }}
@@ -55,14 +55,14 @@
 				class="h-64"
 				data={period === 'June' ? revenue : revenue.slice(0, 5)}
 				marks={[{ type: 'bar', x: 'month', y: 'value', fill: 'primary', radius: 4 }]}
-				ariaLabel="Revenue per month"
+				label="Revenue per month"
 			/></Card
 		><Card title="Quarterly goal" description="A good pace for a strong finish"
-			><div class="grid place-items-center gap-lg py-lg">
+			><div class="gap-lg py-lg grid place-items-center">
 				<ProgressCircle value={82} diameter={144} label="82% of revenue goal" /><strong
 					class="text-3xl">82%</strong
 				>
-				<p class="text-sm text-neutral/60">$18,000 until your target</p>
+				<p class="text-neutral/70 text-sm">$18,000 until your target</p>
 			</div></Card
 		>
 	</div>

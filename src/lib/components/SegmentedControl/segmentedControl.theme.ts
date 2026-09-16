@@ -26,7 +26,7 @@ const defaultSegmentedControl = cva({
 });
 
 const defaultSegment = cva({
-	base: "relative z-10 inline-flex cursor-pointer select-none items-center justify-center whitespace-nowrap font-medium text-neutral/70 outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-color/45 hover:text-neutral before:absolute before:inset-y-1 before:content-[''] first-of-type:before:-left-1 last:before:-right-1",
+	base: "relative z-10 inline-flex cursor-pointer select-none items-center justify-center whitespace-nowrap font-medium text-neutral/70 outline-none transition-colors duration-normal focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus/50 hover:text-neutral before:absolute before:inset-y-1 before:content-[''] first-of-type:before:-left-1 last:before:-right-1",
 	variants: {
 		size: {
 			small:
@@ -68,26 +68,26 @@ const defaultSegment = cva({
 	compoundVariants: [
 		{
 			selected: true,
-			class: 'text-color-contrast hover:text-color-contrast'
+			class: 'text-selected-contrast hover:text-selected-contrast'
 		}
 	]
 });
 
 const defaultIndicator = cva({
-	base: 'pointer-events-none absolute top-0 left-0 shadow-sm will-change-transform data-[ready=true]:transition-[transform,width,height] data-[ready=true]:duration-300 data-[ready=true]:ease-[cubic-bezier(0.4,0,0.2,1)]',
+	base: 'pointer-events-none absolute top-0 left-0 lift-1 will-change-transform data-[ready=true]:transition-[transform,width,height] data-[ready=true]:duration-slow data-[ready=true]:ease-standard',
 	variants: {
 		variant: {
 			normal: 'rounded-md',
 			pill: 'rounded-full'
 		},
 		color: {
-			primary: 'bg-color',
-			secondary: 'bg-color',
-			neutral: 'bg-color',
-			danger: 'bg-color',
-			success: 'bg-color',
-			warning: 'bg-color',
-			info: 'bg-color'
+			primary: 'bg-selected',
+			secondary: 'bg-selected',
+			neutral: 'bg-selected',
+			danger: 'bg-selected',
+			success: 'bg-selected',
+			warning: 'bg-selected',
+			info: 'bg-selected'
 		}
 	},
 	defaultVariants: {
@@ -97,20 +97,20 @@ const defaultIndicator = cva({
 });
 
 const defaultStaticIndicator = cva({
-	base: 'pointer-events-none absolute inset-0 -z-10 shadow-sm',
+	base: 'pointer-events-none absolute inset-0 -z-10 lift-1',
 	variants: {
 		variant: {
 			normal: 'rounded-md',
 			pill: 'rounded-full'
 		},
 		color: {
-			primary: 'bg-color',
-			secondary: 'bg-color',
-			neutral: 'bg-color',
-			danger: 'bg-color',
-			success: 'bg-color',
-			warning: 'bg-color',
-			info: 'bg-color'
+			primary: 'bg-selected',
+			secondary: 'bg-selected',
+			neutral: 'bg-selected',
+			danger: 'bg-selected',
+			success: 'bg-selected',
+			warning: 'bg-selected',
+			info: 'bg-selected'
 		}
 	},
 	defaultVariants: {

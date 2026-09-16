@@ -84,7 +84,7 @@
 	</div>
 	<Tree
 		id="docs-tree-policies"
-		bind:fileTree
+		bind:api={fileTree}
 		paths={workspaceTreePaths}
 		height={340}
 		initialExpansion="open"

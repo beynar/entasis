@@ -34,27 +34,27 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 			The work, in their words
 		</p>
 		<Heading size="h2" weight="bold">Better experiences. Measurable results.</Heading>
 	</header>
 	{#each stories.slice(0, 2) as story (story.company)}<div
-			class="grid gap-xl md:grid-cols-[1fr_2fr]"
+			class="gap-xl grid md:grid-cols-[1fr_2fr]"
 		>
-			<div class="flex flex-col gap-md">
-				<strong class="text-5xl font-light text-primary">{story.metric}</strong><span
-					class="text-neutral/60">{story.label}</span
+			<div class="gap-md flex flex-col">
+				<strong class="text-primary-readable text-5xl font-light">{story.metric}</strong><span
+					class="text-neutral/70">{story.label}</span
 				>
 				<h3 class="mt-lg text-xl font-semibold">{story.company}</h3>
 			</div>
-			<div class="flex flex-col gap-xl">
+			<div class="gap-xl flex flex-col">
 				<blockquote class="text-2xl leading-relaxed">“{story.quote}”</blockquote>
-				<div class="flex gap-lg items-center justify-between flex-wrap">
-					<div class="flex gap-md items-center">
-						<Avatar user={{ name: story.company + ' team' }} /><span class="text-sm text-neutral/60"
+				<div class="gap-lg flex flex-wrap items-center justify-between">
+					<div class="gap-md flex items-center">
+						<Avatar name={story.company + ' team'} /><span class="text-neutral/70 text-sm"
 							>The {story.company} product team</span
 						>
 					</div>

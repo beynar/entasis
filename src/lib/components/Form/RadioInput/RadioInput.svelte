@@ -105,7 +105,6 @@
 		<button
 			type="button"
 			role="radio"
-			data-color="primary"
 			aria-checked={checked}
 			disabled={optionDisabled}
 			aria-label={option.label}

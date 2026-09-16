@@ -4,17 +4,17 @@
 	import { Heading } from 'svelai/heading';
 </script>
 
-<section class="hero-grid flex flex-col items-center gap-xl overflow-hidden p-xl text-center">
+<section class="hero-grid gap-xl p-xl flex flex-col items-center overflow-hidden text-center">
 	<Chip variant="outline">Designed for the way you think</Chip><Heading
 		as="h2"
 		size="h1"
 		weight="bold"
 		class="max-w-3xl">Good tools make ambitious ideas possible.</Heading
 	>
-	<p class="max-w-xl text-lg text-neutral/70">
+	<p class="text-neutral/70 max-w-xl text-lg">
 		Build a clear, expressive interface from components that were made to belong together.
 	</p>
-	<div class="flex flex-wrap justify-center gap-md">
+	<div class="gap-md flex flex-wrap justify-center">
 		<Button href="/components" size="large">Explore the library</Button><Button
 			href="/blocks"
 			size="large"
@@ -22,13 +22,13 @@
 		>
 	</div>
 	<div
-		class="mt-xl flex w-full max-w-5xl flex-col gap-xl rounded-2xl border border-neutral-muted bg-surface p-xl"
+		class="mt-xl gap-xl border-neutral-muted bg-surface p-xl flex w-full max-w-5xl flex-col rounded-2xl border"
 	>
-		<p class="text-xs uppercase tracking-widest text-neutral/50">
+		<p class="text-neutral/65 text-xs tracking-widest uppercase">
 			A toolkit for every kind of team
 		</p>
 		<div
-			class="flex flex-wrap items-center justify-center gap-xl text-xl font-semibold text-neutral/50"
+			class="gap-xl text-neutral/65 flex flex-wrap items-center justify-center text-xl font-semibold"
 		>
 			<span>Layers</span><span class="font-serif italic">Quotient</span><span>✳ Capsule</span><span
 				class="tracking-tight">Sisyphus</span

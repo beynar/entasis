@@ -32,7 +32,7 @@
 			type: 'segmented',
 			label: 'Toggle',
 			value: 'none',
-			options: ['none', 'chevron', 'math']
+			options: ['none', 'chevron', 'plus-minus']
 		},
 		{
 			name: 'expansionMode',
@@ -107,7 +107,7 @@
 
   let status = $state<'running' | 'success' | 'error'>('running');
   let variant = $state<'card' | 'ghost' | 'outline' | 'soft'>('ghost');
-  let toggleIcon = $state<'none' | 'chevron' | 'math'>('none');
+  let toggleIcon = $state<'none' | 'chevron' | 'plus-minus'>('none');
   let openTools = $state<string[]>(['search']);
   let multiple = $state(true);
   const toolCalls = $derived<AIToolCall[]>([
@@ -176,7 +176,7 @@ ${'</' + 'script>'}
 <AITool tool={analysisTool}>
   {#snippet output({ tool })}
     <div class="flex items-center justify-between gap-4 p-3 text-sm">
-      <span class="text-neutral/60">Release score</span>
+      <span class="text-neutral/70">Release score</span>
       <strong>{String((tool.output as { score?: number }).score ?? 'n/a')}</strong>
     </div>
   {/snippet}
@@ -185,7 +185,7 @@ ${'</' + 'script>'}
 			<AITool tool={analysisTool} class="w-full max-w-2xl">
 				{#snippet output({ tool })}
 					<div class="flex items-center justify-between gap-4 p-3 text-sm">
-						<span class="text-neutral/60">Release score</span>
+						<span class="text-neutral/70">Release score</span>
 						<strong>{String((tool.output as { score?: number }).score ?? 'n/a')}</strong>
 					</div>
 				{/snippet}

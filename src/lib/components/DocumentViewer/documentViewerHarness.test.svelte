@@ -7,7 +7,5 @@
 </script>
 
 <Theme>
-	{#snippet children()}
-		<DocumentViewer {...props} />
-	{/snippet}
+	<DocumentViewer {...props} />
 </Theme>

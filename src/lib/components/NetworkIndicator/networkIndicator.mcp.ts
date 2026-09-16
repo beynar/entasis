@@ -32,16 +32,11 @@ NetworkIndicator is a fixed top loading bar for SvelteKit navigation and explici
   - \`bar\` progressively grows one indicator. \`trail\` renders one randomly sized moving segment at a time. \`trail-bounce\` sends that random trail fully off one edge, then returns from the opposite edge.
 - **trailGap**: number = 0
   - Pause between trail passes in milliseconds. Only applies to \`variant="trail"\`.
-- **trailDuration**: number = 650
-  - Duration of one trail pass in milliseconds. Only applies to \`variant="trail"\`. Lower values make the trail move faster.
 - **color**: 'primary' | 'secondary' | 'neutral' | 'danger' | 'success' | 'warning' | 'info' = 'neutral'
   - Applies the semantic color token to the bar.
 - **height**: number = 3
   - Height in pixels. Keep most navigation indicators between 2 and 6.
-- **delay**: number = 300
-  - Duration of each indeterminate animation segment in milliseconds.
-- **easing**: Easing = 'cubicInOut'
-  - Any easing key from the Svelai transition easing map, such as 'linear', 'quadOut', 'cubicInOut', 'expoOut', 'backOut', or 'bounceOut'.
+- Animation duration and easing come from the \`motion\` theme slot — \`theme={{ motion: { duration: 450, easing: 'expoOut' } }}\` — not from props; see Motion below.
 - **label**: string = 'Loading'
   - Accessible label for the indeterminate \`role="progressbar"\`.
 - **ref**: HTMLDivElement | null
@@ -112,9 +107,9 @@ Prefer \`showNetworkIndicator()\` and \`hideNetworkIndicator()\` for async work.
 ### Trail Variant
 
 \`\`\`svelte
-<NetworkIndicator loading variant="trail" color="primary" trailDuration={650} trailGap={0} />
-<NetworkIndicator loading variant="trail" color="success" height={5} trailDuration={450} trailGap={120} />
-<NetworkIndicator loading variant="trail-bounce" color="info" trailDuration={700} trailGap={80} />
+<NetworkIndicator loading variant="trail" color="primary" theme={{ motion: { duration: 650 } }} trailGap={0} />
+<NetworkIndicator loading variant="trail" color="success" height={5} theme={{ motion: { duration: 450 } }} trailGap={120} />
+<NetworkIndicator loading variant="trail-bounce" color="info" theme={{ motion: { duration: 700 } }} trailGap={80} />
 \`\`\`
 
 ### Height Variations
@@ -128,9 +123,9 @@ Prefer \`showNetworkIndicator()\` and \`hideNetworkIndicator()\` for async work.
 ### Motion Variations
 
 \`\`\`svelte
-<NetworkIndicator loading delay={300} easing="cubicInOut" />
-<NetworkIndicator loading delay={450} easing="expoOut" />
-<NetworkIndicator loading delay={500} easing="backOut" />
+<NetworkIndicator loading theme={{ motion: { duration: 300, easing: 'cubicInOut' } }} />
+<NetworkIndicator loading theme={{ motion: { duration: 450, easing: 'expoOut' } }} />
+<NetworkIndicator loading theme={{ motion: { duration: 500, easing: 'backOut' } }} />
 \`\`\`
 
 ### Theme Override
@@ -142,7 +137,7 @@ Prefer \`showNetworkIndicator()\` and \`hideNetworkIndicator()\` for async work.
 	height={5}
 	theme={{
 		root: {
-			base: 'ui-network-indicator fixed top-0 left-0 w-full z-[9999] origin-left rounded-none shadow-lg'
+			base: 'ui-network-indicator fixed top-0 left-0 w-full z-[9999] origin-left rounded-none lift-4'
 		}
 	}}
 />
@@ -165,4 +160,12 @@ The default root base includes \`ui-network-indicator\`; keep that class if over
 ## Accessibility
 
 The visible bar renders \`role="progressbar"\` without a value because progress is indeterminate. Use a specific \`label\` when the loading context matters, such as "Uploading files" or "Saving changes". If screen readers need richer lifecycle announcements, pair the indicator with app-level live region text.
+
+## Motion
+
+- **motion** theme slot, keyed by \`variant\`: one growth step of the \`bar\` loop (\`slow\`), or
+  one pass of the \`trail\` / \`trail-bounce\` variants (the \`slower\` token, 500ms). Only \`duration\` / \`easing\` are read.
+- Ladder: \`<Theme components={{ networkIndicator: { motion } }}>\` →
+  \`setNetworkIndicatorTheme({ motion })\` → \`theme={{ motion: { duration, easing } }}\`.
+- A resolved duration of 0 (reduced motion) holds the indicator still instead of looping.
 `;

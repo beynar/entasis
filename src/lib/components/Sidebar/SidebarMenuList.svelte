@@ -1,7 +1,8 @@
 <script lang="ts">
+	import type { DisclosureIndicator } from '$lib/types/theme.js';
 	import type {
+		SidebarActiveVariant,
 		SidebarApi,
-		SidebarCollapseIcon,
 		SidebarDensity,
 		SidebarMenuEntry,
 		SidebarSize,
@@ -16,14 +17,16 @@
 		collapseIcon,
 		tooltips,
 		size,
+		activeVariant,
 		density,
 		theme
 	}: {
 		items: SidebarMenuEntry[];
 		api: SidebarApi;
-		collapseIcon: SidebarCollapseIcon;
+		collapseIcon: DisclosureIndicator;
 		tooltips: SidebarTooltipMode;
 		size: SidebarSize;
+		activeVariant: SidebarActiveVariant;
 		density: SidebarDensity;
 		theme?: SidebarThemeProps;
 	} = $props();
@@ -33,6 +36,15 @@
 
 <ul data-slot="sidebar-menu" data-sidebar="menu" class={classes.menu({ density })}>
 	{#each items as item, index (item.label + index)}
-		<SidebarMenuItem {item} {api} {collapseIcon} {tooltips} {size} {density} {theme} />
+		<SidebarMenuItem
+			{item}
+			{api}
+			{collapseIcon}
+			{tooltips}
+			{size}
+			{activeVariant}
+			{density}
+			{theme}
+		/>
 	{/each}
 </ul>

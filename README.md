@@ -1,374 +1,289 @@
-# SvelAI Design System
+# svelai
 
-A comprehensive Svelte component library with a powerful Tailwind CSS theming system.
+Svelte 5 component library for SvelteKit, styled through a Tailwind CSS v4 plugin. One theme declaration in your CSS generates the palette; components consume it through semantic utilities (`bg-primary`, `text-neutral-contrast`, `bg-surface-raised`) and can be restyled per subtree or per instance without forking them.
 
-## Installation
+- 130+ components, each on its own import path (`svelai/button`, `svelai/dialog`, ...)
+- Light and dark palettes generated from a handful of seed colors
+- Runtime design tokens (spacing, radius, type scale) through the `<Theme>` component
+- 1500+ icons as Svelte snippets (`svelai/icons/<name>`)
+
+## Install
 
 ```bash
-npm install svelai
-# or
 pnpm add svelai
-# or
-yarn add svelai
 ```
 
-## Tailwind CSS Configuration
+Peer dependencies: `svelte ^5`, `@sveltejs/kit ^2`, `tailwindcss ^4` (via `@tailwindcss/vite`). There is no `tailwind.config.js`; all configuration lives in your CSS.
 
-SvelAI uses the modern Tailwind CSS configuration format with `@plugin` directives in your CSS files.
+## Tailwind setup
 
-### 1. Base Plugin Setup
-
-In your `tailwind.config.js`:
-
-```js
-export default {
-	content: ['./src/**/*.{html,js,svelte,ts}', './node_modules/svelai/**/*.{html,js,svelte,ts}']
-};
-```
-
-### 2. Plugin Configuration
-
-In your `app.css` (or main CSS file):
+Replace the contents of `src/app.css`. The `@source` line lets Tailwind see the utility classes used inside the packaged components (Tailwind skips `node_modules` by default). The theme marked `default: true` also installs the shared engine (utilities, variants, spinner, `raised-*`), so no second plugin is needed.
 
 ```css
 @import 'tailwindcss';
+@source '../node_modules/svelai/dist';
 
-/* Source SvelAI components */
-@source "../node_modules/svelai/**/*";
-
-/* Base plugin for utilities */
-@plugin "svelai/tailwind" {
-	raised-with-border: true;
-}
-
-/* Theme configuration */
-@plugin "svelai/tailwind-theme" {
-	name: 'light';
+@plugin 'svelai/tailwind-plugin/theme' {
+	name: light;
 	default: true;
-	colorscheme: 'light';
-	radius: normal;
-	spacing: large;
-	/* Custom colors */
-	primary: '#6366f1';
-	secondary: '#6366f1';
-	/* ... other theme options */
+	colorscheme: light;
+	surface: #fafafa;
+	neutral: #18181b;
+	primary: #5f62ef;
+	secondary: #e4e4e7;
+	danger: #dc2626;
+	success: #15803d;
+	warning: #f59e0b;
+	info: #2563eb;
+}
+
+@plugin 'svelai/tailwind-plugin/theme' {
+	name: dark;
+	colorscheme: dark;
+	surface: #09090b;
+	surface-floating: #27272a;
+	neutral: #fafafa;
+	primary: #5f62ef;
+	secondary: #27272a;
+	danger: #dc2626;
+	success: #15803d;
+	warning: #f59e0b;
+	info: #2563eb;
+	state-hover-opacity: 0.16;
+	state-pressed-opacity: 0.32;
 }
 ```
 
-## Plugin Overview
+Each named theme is scoped to `html[data-theme="<name>"]` (and `.<name>`); the default theme also applies to bare `html`. If you manage colors yourself and only want the engine, use `@plugin 'svelai/tailwind-plugin';` on its own instead of a default theme (never both).
 
-SvelAI provides two distinct Tailwind plugins that work together to create a comprehensive design system:
+## Layout setup
 
-### `@plugin "svelai/tailwind"`
+Wrap your app once in `<Theme>` and mount a single `<Toaster />`. `<Theme>` sets `data-theme` on `<html>` (light, dark, or system), injects runtime design tokens, and hosts the dialog backdrop and tooltip layer.
 
-**Purpose**: Core utilities and base functionality
-**What it provides**:
+```svelte nocheck
+<script lang="ts">
+	import '../app.css';
+	import { Theme } from 'svelai/theme';
+	import { Toaster } from 'svelai/toast';
 
-- Custom color utilities (`text-color-*`, `bg-color-*`, `border-color-*`)
-- Raised element utilities (`raised-*`)
-- Window-based sizing utilities (`h-window`, `w-window`)
-- Data attribute styling for theme switching
-- Color opacity modifiers
-- Base CSS variables and utility classes
+	let { children } = $props();
+</script>
 
-**Configuration options**:
-
-- Layout and interaction behavior
-- Global styling preferences
-- Utility customization
-
-### `@plugin "svelai/tailwind-theme"`
-
-**Purpose**: Theme definition and color palette generation
-**What it provides**:
-
-- CSS custom properties for all semantic colors
-- Automatic color variant generation (light, dark, muted, etc.)
-- Color scheme management
-- Theme-specific styling
-- Typography scale configuration
-- Spacing and radius definitions
-
-**Configuration options**:
-
-- Complete theme definition including colors, spacing, typography
-- Multiple theme support
-- Color scheme settings
-
-## Complete Configuration Reference
-
-### Base Plugin Tokens (`@plugin "svelai/tailwind"`)
-
-| Token                | Type      | Default | Description                                  |
-| -------------------- | --------- | ------- | -------------------------------------------- |
-| `raised-with-border` | `boolean` | `false` | Add borders to raised elements in light mode |
-
-### Theme Plugin Tokens (`@plugin "svelai/tailwind-theme"`)
-
-#### Core Theme Settings
-
-| Token         | Type                | Default     | Description                             |
-| ------------- | ------------------- | ----------- | --------------------------------------- |
-| `name`        | `string`            | `undefined` | Unique identifier for the theme         |
-| `default`     | `boolean`           | `false`     | Whether this is the default theme       |
-| `colorscheme` | `'light' \| 'dark'` | `'light'`   | Base color scheme for the theme         |
-| `prefersdark` | `boolean`           | `false`     | Apply theme when user prefers dark mode |
-
-#### Semantic Colors
-
-| Token       | Type     | Default (Light) | Default (Dark) | Description                   |
-| ----------- | -------- | --------------- | -------------- | ----------------------------- |
-| `primary`   | `string` | `#6366f1`       | `#6366f1`      | Primary brand color           |
-| `secondary` | `string` | `#6366f1`       | `#6366f1`      | Secondary brand color         |
-| `danger`    | `string` | `#ff0000`       | `#ff0000`      | Error and destructive actions |
-| `success`   | `string` | `#0070f3`       | `#0070f3`      | Success states                |
-| `warning`   | `string` | `#f5a623`       | `#f5a623`      | Warning states                |
-| `info`      | `string` | `#50e3c2`       | `#50e3c2`      | Informational content         |
-| `background` | `string` | `#fafafa`       | `#242524`      | Page and surface backgrounds  |
-| `foreground` | `string` | `#242524`       | `#fafafa`      | Default text color            |
-
-#### Color Variants (for each semantic color)
-
-| Token Pattern     | Type     | Description                                   | Example           |
-| ----------------- | -------- | --------------------------------------------- | ----------------- |
-| `{color}-light`   | `string` | 15% lighter than base color                   | `primary-light`   |
-| `{color}-lighter` | `string` | 25% lighter than base color                   | `primary-lighter` |
-| `{color}-dark`    | `string` | 15% darker than base color                    | `primary-dark`    |
-| `{color}-muted`   | `string` | 95% mixed with background color                  | `primary-muted`   |
-| `{color}-contrast`      | `string` | Accessible foreground color (auto-calculated) | `primary-contrast`      |
-
-#### Layout & Spacing
-
-| Token                         | Type                                                                         | Default     | Description                         |
-| ----------------------------- | ---------------------------------------------------------------------------- | ----------- | ----------------------------------- |
-| `radius`                      | `'normal' \| 'small' \| 'large' \| 'subtile' \| 'none' \| 'round' \| number` | `'normal'`  | Border radius for components        |
-| `spacing`                     | `'normal' \| 'small' \| 'large' \| number`                                   | `'normal'`  | Multiplier over native spacing scale |
-| `radius-inert-elements`       | `number`                                                                     | `undefined` | Radius for non-interactive elements |
-| `radius-interactive-elements` | `number`                                                                     | `undefined` | Radius for interactive elements     |
-| `border-width`                | `number`                                                                     | `undefined` | Default border width in pixels      |
-| `raised-with-border`          | `boolean`                                                                    | `false`     | Add borders to raised elements      |
-
-#### Color Adjustments
-
-| Token        | Type     | Default     | Description                                |
-| ------------ | -------- | ----------- | ------------------------------------------ |
-| `luminance`  | `number` | `undefined` | Global luminance adjustment (-100 to 100)  |
-| `saturation` | `number` | `undefined` | Global saturation adjustment (-100 to 100) |
-
-#### Typography (Future Support)
-
-| Token   | Type        | Default     | Description                          |
-| ------- | ----------- | ----------- | ------------------------------------ |
-| `scale` | `TypeScale` | `undefined` | Fluid typography scale configuration |
-
-### Value Types Reference
-
-#### Radius Values
-
-The `radius` knob is a multiplier applied to the native Tailwind radius scale
-(`rounded-sm` … `rounded-4xl` and bare `rounded`), so a single value rounds the
-whole UI proportionally. `'normal'` keeps Tailwind's native defaults.
-
-- `'none'` → 0× (sharp corners)
-- `'subtile'` → 0.5×
-- `'small'` → 0.75×
-- `'normal'` → 1× (native defaults)
-- `'large'` → 1.5×
-- `'round'` → 2.5×
-- `number` → custom multiplier (e.g. `1.25`)
-
-#### Spacing Values
-
-The `spacing` knob is a multiplier applied to the native Tailwind spacing scale
-(`p-*`, `gap-*`, `m-*`, `size-*`, `w-*`, `h-*` …), so a single value tightens or
-loosens the whole UI proportionally. `'normal'` keeps Tailwind's native defaults.
-It is emitted per theme, so light and dark can breathe differently.
-
-- `'small'` → 0.8× (denser)
-- `'normal'` → 1× (native defaults)
-- `'large'` → 1.2× (roomier)
-- `number` → custom multiplier (e.g. `1.1`)
-
-#### Color Values
-
-- Hex colors: `#6366f1`, `#ff0000`
-- Tailwind color names: `blue`, `red`, `emerald` (uses -500 shade)
-- CSS color functions: `rgb(99, 102, 241)`, `hsl(239, 84%, 67%)`
-
-#### Type Scale Values (Future)
-
-- `'minorSecond'` (1.067)
-- `'majorSecond'` (1.125)
-- `'minorThird'` (1.2)
-- `'majorThird'` (1.25)
-- `'perfectFourth'` (1.32)
-- `'augmentedFourth'` (1.414)
-- `'perfectFifth'` (1.5)
-- `'goldenRatio'` (1.618)
-
-## Configuration Examples
-
-### Custom Color Variants
-
-You can override specific color variants:
-
-```css
-@plugin "svelai/tailwind-theme" {
-	primary: '#6366f1';
-	primary-light: '#8b8cf8';
-	primary-lighter: '#a5a6fa';
-	primary-dark: '#4f46e5';
-	primary-muted: '#f1f1ff';
-	primary-contrast: '#ffffff';
-}
+<Theme>
+	{@render children()}
+	<Toaster />
+</Theme>
 ```
 
-### Using Tailwind Colors
+## First components
 
-You can reference any Tailwind color by name:
+Every component lives on its own subpath; there is no root `svelai` export.
 
-```css
-@plugin "svelai/tailwind-theme" {
-	primary: blue; /* Uses blue-500 as base */
-	secondary: emerald;
-	danger: red;
-}
+```svelte
+<script lang="ts">
+	import { Button } from 'svelai/button';
+	import { Dialog } from 'svelai/dialog';
+	import { toast } from 'svelai/toast';
+	import { plusIcon } from 'svelai/icons/plus';
+
+	let open = $state(false);
+</script>
+
+<Button color="primary" prefix={plusIcon} onclick={() => toast.success({ title: 'Saved' })}>
+	Save
+</Button>
+
+<Button variant="outline" onclick={() => (open = true)}>Open dialog</Button>
+
+<Dialog bind:open title="Confirm" description="This cannot be undone." closable>
+	<p>Dialog body.</p>
+	{#snippet footer()}
+		<Button color="danger" onclick={() => (open = false)}>Delete</Button>
+	{/snippet}
+</Dialog>
 ```
 
-**Available Tailwind colors**: `slate`, `gray`, `zinc`, `neutral`, `stone`, `red`, `orange`, `amber`, `yellow`, `lime`, `green`, `emerald`, `teal`, `cyan`, `sky`, `blue`, `indigo`, `violet`, `purple`, `fuchsia`, `pink`, `rose`, `black`
+Shared props across interactive components: `color` (`primary | secondary | neutral | danger | success | warning | info`), `variant` (`solid | outline | soft | ghost | link`), `size` (`small | normal | large`), `class`, `theme`, `ref`. Slot-style props (`prefix`, `suffix`, `title`, `footer`, ...) accept a string or a snippet.
 
-## Usage in Components
+### Prop conventions
 
-### CSS Classes
+The same words mean the same thing on every component, and `node tooling/check-public-api-contract.mjs` enforces it:
 
-SvelAI extends Tailwind with semantic color utilities:
+- **State comes in threes.** A bindable `value` always ships with `defaultValue` and `onValueChange`; a bindable `open` always ships with `defaultOpen` and `onOpenChange`. `bind:` one, or drive it with the pair. The one-way exceptions (Rating, Meter, ProgressCircle, QRCode display a value they never edit) are marked `@readonly-value` in their props file.
+- **Callbacks name the change, not the gesture.** `onValueChange`, `onOpenChange`, `onWidthChange` — never `onChange`, `onClick`, `onToggle`, or a past tense like `onWidthChanged` — and each takes one payload object.
+- **`api` is the instance handle.** A component that hands back a state object exposes it as a bindable `api`: `bind:api` on Tabs, Stepper, DataTable, Tree, AIChat, AIConversation.
+- **`label` is the one prop that names a component.** It is painted where the component has a visible label (every Field input, Select, Checkbox, Switch, Slider, Rating, Meter, Stat) and spoken where it has none (Button, ToggleButton, SegmentedControl, Pagination, Chart, ScrollArea, AudioPlayer, VideoPlayer, QRCode). There is no `ariaLabel` prop anywhere; where a component hides its visible label — Checkbox `mode="control"` — the string `label` becomes the control's `aria-label` instead.
+- **Sizes are `small | normal | large`** (the exported `Sizes` type), everywhere. `xs`/`sm`/`md`/`lg`/`xl` are Tailwind breakpoint and spacing words, not component sizes.
+- **Literal unions are kebab-case**: `position="top-right"`, `variant="outline"`, `icon="plus-minus"`. Disclosure controls share one `DisclosureIndicator` union — `'chevron' | 'plus-minus' | 'none'`.
 
-```html
-<!-- Background colors -->
-<div class="bg-color-primary">Primary background</div>
-<div class="bg-color-primary-light">Light primary background</div>
-<div class="bg-color-background-muted">Muted background</div>
+## Theming
 
-<!-- Text colors -->
-<p class="text-color-contrast">High contrast text</p>
-<p class="text-color-primary-contrast">Primary foreground</p>
+### Plugin tokens
 
-<!-- Borders -->
-<div class="border-color-primary">Primary border</div>
+Options accepted by each `@plugin 'svelai/tailwind-plugin/theme'` block:
 
-<!-- With opacity modifiers -->
-<div class="bg-color-primary/50">50% opacity primary</div>
-<div class="text-color-danger/75">75% opacity danger text</div>
+| Option                  | Type              | Description                                                                   |
+| ----------------------- | ----------------- | ----------------------------------------------------------------------------- |
+| `name`                  | string            | Theme name; scopes variables to `html[data-theme="<name>"]` and `.<name>`     |
+| `default`               | boolean           | Applies to bare `html` and installs the shared engine (exactly one per build) |
+| `colorscheme`           | `light` \| `dark` | Drives mode-aware defaults for the generated palette                          |
+| `prefersDark`           | boolean           | Also emits the palette under `@media (prefers-color-scheme: dark)`            |
+| `luminance`             | number            | Lightness adjustment applied to every seed color                              |
+| `saturation`            | number            | Saturation adjustment applied to every seed color                             |
+| `state-hover-opacity`   | number            | `.state-layer` hover opacity (default 0.05 light / 0.16 dark)                 |
+| `state-pressed-opacity` | number            | `.state-layer` pressed opacity (default 0.10 light / 0.32 dark)               |
+| `spinner`               | object            | Custom `.ui-spinner` keyframes and style                                      |
+
+Color seeds. Each role accepts a hex value or a Tailwind color name (`indigo`, `emerald`, uses the 500 shade):
+
+| Key                                                                                | Generates                                                                                                  |
+| ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `primary`, `secondary`, `neutral`, `danger`, `success`, `warning`, `info`          | `--color-<role>` plus `-light`, `-lighter`, `-dark`, `-muted`, `-contrast`, `-readable`, `-muted-readable` |
+| `<role>-light`, `<role>-lighter`, `<role>-dark`, `<role>-muted`, `<role>-contrast` | Explicit override for one generated variant                                                                |
+| `surface`                                                                          | Page background; seeds the elevation ladder                                                                |
+| `surface-recessed`, `surface-canvas`, `surface-raised`, `surface-floating`         | Explicit override for one elevation step (derived from `surface` when omitted)                             |
+
+These become ordinary Tailwind color utilities: `bg-primary`, `text-primary-contrast`, `border-neutral-muted`, `text-danger-readable`, `bg-surface-raised`. Inside an element with `data-color="<role>"` the role-relative utilities `bg-color`, `text-color-contrast`, `bg-color-muted` resolve to that role; this is how components implement their `color` prop.
+
+The engine also provides `raised-*` (shadow plus theme-aware border, same values as `shadow-*`), `h-window` / `w-window` (viewport size tracked by `<Theme>`), the `state-layer` component class, and the `dark:`, `checked:`, `highlight:`, `child:` variants.
+
+### Runtime design tokens
+
+Spacing, radius, type scale, raised borders, and the default component color are not plugin options. They are set per theme name through `<Theme designTokens>` and compiled to CSS variables on `html[data-theme="<name>"]`:
+
+```svelte
+<script lang="ts">
+	import { Theme, type ThemeDesignTokenMap } from 'svelai/theme';
+
+	let { children } = $props();
+
+	const designTokens = {
+		light: { spacing: 'normal', radius: 'normal', typeScale: 'default', raisedWithBorder: true },
+		dark: { spacing: 'normal', radius: 'normal', typeScale: 'default', raisedWithBorder: false }
+	} satisfies ThemeDesignTokenMap<readonly ['light', 'dark']>;
+</script>
+
+<Theme {designTokens}>
+	{@render children()}
+</Theme>
 ```
 
-### Raised Elements
+| Token              | Values                                                                                       |
+| ------------------ | -------------------------------------------------------------------------------------------- |
+| `spacing`          | `small` (0.8x) \| `normal` \| `large` (1.2x) \| number multiplier                            |
+| `spacingScale`     | Partial `{ xs, sm, md, lg, xl }` multipliers behind `gap-md`, `p-lg`, ...                    |
+| `radius`           | `none` \| `subtile` \| `small` \| `normal` \| `large` \| `round` \| number                   |
+| `typeScale`        | `compact` \| `default` \| `comfortable` \| `large` \| `{ baseMinPx, baseMaxPx, scale, ... }` |
+| `raisedWithBorder` | boolean; adds a 1px border to `raised-*` surfaces                                            |
+| `defaultColor`     | Role used by components that omit `color` (default `neutral`)                                |
 
-Special utility for elevated surfaces:
+Switching themes at runtime: the `children` snippet receives the `ThemeState`.
 
-```html
-<!-- Standard shadow with light theme borders -->
-<div class="raised-lg">Elevated card</div>
+```svelte
+<script lang="ts">
+	import { Theme } from 'svelai/theme';
+	import { Button } from 'svelai/button';
 
-<!-- No shadow -->
-<div class="raised-none">Flat element</div>
+	let { children: page } = $props();
+</script>
 
-<!-- Custom shadows -->
-<div class="raised-[0_4px_12px_rgba(0,0,0,0.1)]">Custom shadow</div>
+<Theme transition="radial-top-right">
+	{#snippet children(theme)}
+		<Button onclick={() => (theme.theme = theme.resolvedTheme === 'dark' ? 'light' : 'dark')}>
+			Toggle dark mode
+		</Button>
+		{@render page()}
+	{/snippet}
+</Theme>
 ```
 
-### Window Utilities
+### Component overrides
 
-Dynamic viewport-based sizing:
+Every component exposes its class recipe as named slots (Button: `root`, `prefix`, `suffix`). An override object carries an optional `base` string and one string per variant value; classes are merged on top of the defaults, or replace them when `override: true`.
 
-```html
-<div class="h-window">Full window height</div>
-<div class="w-window">Full window width</div>
+Set it once for a subtree with `set<Component>Theme` (it uses Svelte context, so call it during component initialisation, typically a layout):
+
+```svelte
+<script lang="ts">
+	import { setButtonTheme } from 'svelai/button';
+
+	let { children } = $props();
+
+	setButtonTheme({
+		root: {
+			base: 'rounded-full tracking-wide',
+			color: { primary: 'shadow-md shadow-primary/30' }
+		}
+	});
+</script>
+
+{@render children()}
 ```
 
-## Multiple Themes
+Or per instance through the `theme` prop:
 
-You can define multiple themes and switch between them in your `app.css`:
+```svelte
+<script lang="ts">
+	import { Button } from 'svelai/button';
+</script>
 
-```css
-/* Light theme (default) */
-@plugin "svelai/tailwind-theme" {
-	name: 'light';
-	default: true;
-	colorscheme: 'light';
-	primary: '#6366f1';
-}
-
-/* Dark theme */
-@plugin "svelai/tailwind-theme" {
-	name: 'dark';
-	colorscheme: 'dark';
-	primary: '#8b5cf6';
-	background: '#1a1a1a';
-}
-
-/* Custom theme */
-@plugin "svelai/tailwind-theme" {
-	name: 'brand';
-	primary: '#ff6b35';
-	secondary: '#004e92';
-}
+<Button theme={{ root: { base: 'uppercase' } }}>Uppercase</Button>
+<Button
+	theme={{
+		override: true,
+		root: { base: 'inline-flex h-10 px-4 bg-primary text-primary-contrast' }
+	}}
+>
+	From scratch
+</Button>
 ```
 
-Switch themes programmatically:
+Resolution order: default recipe, then `set<Component>Theme` context, then the `theme` prop, then `class`.
 
-```js
-// Set theme on html element
-document.documentElement.setAttribute('data-theme', 'dark');
+### Motion
+
+Motion is a token scale too: five duration steps (`instant`, `fast`, `normal`, `slow`, `slower`) and four easing roles (`standard`, `enter`, `exit`, `emphasized`), exposed as the `--duration-*` / `--ease-*` variables behind the `duration-normal` and `ease-emphasized` utilities. `<Theme motion>` retunes the scale app-wide and every component transition resolves against it; `<Theme components>` sets per-component defaults — class slots and the reserved `motion` slot alike — without a wrapper component per component. `reduceMotion` (or the OS `prefers-reduced-motion` setting) collapses every duration to 0, after every override.
+
+```svelte
+<script lang="ts">
+	import { Theme } from 'svelai/theme';
+
+	let { children } = $props();
+</script>
+
+<Theme
+	motion={{ duration: { normal: 150 }, easing: { standard: 'quintOut' } }}
+	components={{
+		dialog: { motion: { duration: 'slow', easing: 'emphasized' } },
+		button: { root: { base: 'tracking-wide' } }
+	}}
+>
+	{@render children()}
+</Theme>
 ```
 
-## Complete Example
+## Icons
 
-**tailwind.config.js:**
+Icons are Phosphor-style snippets, one file per icon, exported in six weights: `<name>Icon` (regular), `<name>IconBold`, `<name>IconDuotone`, `<name>IconFill`, `<name>IconLight`, `<name>IconThin`. Render them directly or pass them to any slot-style prop.
 
-```js
-export default {
-	content: ['./src/**/*.{html,js,svelte,ts}', './node_modules/svelai/**/*.{html,js,svelte,ts}']
-};
+```svelte
+<script lang="ts">
+	import { arrowRightIcon, arrowRightIconBold } from 'svelai/icons/arrowRight';
+	import { Button } from 'svelai/button';
+</script>
+
+<span class="text-primary">{@render arrowRightIcon({ size: 20 })}</span>
+<Button suffix={arrowRightIconBold}>Next</Button>
 ```
 
-**app.css:**
+Snippet props: `size` (px number or CSS length, default `1lh`), `color` (a role name or any CSS color, default `currentColor`), `mirrored`, `class`.
 
-```css
-@import 'tailwindcss';
+## Docs and agent skills
 
-/* Source SvelAI components */
-@source "../node_modules/svelai/**/*";
+- `pnpm dev` runs the documentation site with a page per component under `/components/<name>`.
+- `.claude/skills/svelai/` (mirrored in `.agents/skills/svelai/`) holds the coding-agent skill: import conventions, per-component references, theming notes.
+- Each component folder ships a `*.mcp.ts` description used by the MCP integration.
 
-/* Base plugin for utilities */
-@plugin "svelai/tailwind" {
-	raised-with-border: true;
-}
+## License
 
-/* Light theme */
-@plugin "svelai/tailwind-theme" {
-	name: 'light';
-	default: true;
-	colorscheme: 'light';
-	primary: blue;
-	secondary: emerald;
-	danger: red;
-	success: green;
-	radius: normal;
-	spacing: large;
-	raised-with-border: true;
-}
-
-/* Dark theme */
-@plugin "svelai/tailwind-theme" {
-	name: 'dark';
-	colorscheme: 'dark';
-	prefersdark: true;
-	primary: '#8b5cf6';
-	background: '#1a1a1a';
-	foreground: '#ffffff';
-	radius: large;
-	spacing: normal;
-}
-```
-
-This configuration provides a complete theming system with semantic colors, consistent spacing, and automatic dark mode support.
+MIT

@@ -10,9 +10,7 @@ The Collapsible component provides a way to show and hide content with a toggle 
 	{#snippet trigger()}
 		Click to expand
 	{/snippet}
-	{#snippet content()}
-		This content will be shown when expanded.
-	{/snippet}
+	This content will be shown when expanded.
 </Collapsible>
 \`\`\`
 
@@ -41,18 +39,19 @@ The Collapsible component provides a way to show and hide content with a toggle 
   - normal: Standard padding (py-3 px-4) and text-base
   - large: Increased padding (py-4 px-6) and text-lg
 
+- **icon**: 'chevron' | 'plus-minus' | 'none' | Snippet (default: 'chevron')
+  - Disclosure indicator rendered in the trigger.
+  - chevron: rotating chevron; plus-minus: plus/minus glyph; none: no indicator.
+  - Pass a snippet (it receives \`{ open }\`) for a custom icon.
+
 ### Content Props (Slots)
 - **trigger**: Snippet - Content rendered in the toggle button
   - Required for the component to function
   - Typically contains text, icons, or both
 
-- **content**: Snippet - Content shown when expanded
-  - Rendered inside a container with slide transition
-  - If not provided, falls back to \`children\` slot
-
-- **children**: Snippet - Default content slot
-  - Used as fallback if \`content\` slot is not provided
-  - Rendered inside the content container
+- **children**: Snippet<{ open: boolean }> - Content shown when expanded
+  - Rendered inside the content container with a slide transition
+  - Receives the current \`open\` state as a payload
 
 ### Advanced Props
 - **theme**: CollapsibleThemeProps - Theme configuration overrides
@@ -62,14 +61,17 @@ The Collapsible component provides a way to show and hide content with a toggle 
 
 ### Example 1 - Uncontrolled
 \`\`\`svelte
-<Collapsible defaultOpen={false}>
+<script lang="ts">
+	import { Collapsible } from 'svelai/collapsible';
+	import { caretDownIcon } from 'svelai/icons/caretDown';
+</script>
+
+<Collapsible defaultOpen={false} icon="none">
 	{#snippet trigger()}
 		<span>Toggle Content</span>
-		<Icon name="chevron-down" />
+		{@render caretDownIcon()}
 	{/snippet}
-	{#snippet content()}
-		<p>This content can be toggled.</p>
-	{/snippet}
+	<p>This content can be toggled.</p>
 </Collapsible>
 \`\`\`
 
@@ -83,20 +85,18 @@ The Collapsible component provides a way to show and hide content with a toggle 
 	{#snippet trigger()}
 		Toggle (Currently: {open ? 'Open' : 'Closed'})
 	{/snippet}
-	{#snippet content()}
-		<p>Controlled content</p>
-	{/snippet}
+	<p>Controlled content</p>
 </Collapsible>
 \`\`\`
 
-### Example 3 - With Children Slot
+### Example 3 - Explicit Children Snippet
 \`\`\`svelte
 <Collapsible>
 	{#snippet trigger()}
 		Show Details
 	{/snippet}
-	{#snippet children()}
-		<p>This uses the children slot instead of content.</p>
+	{#snippet children({ open })}
+		<p>This panel is {open ? 'open' : 'closed'}.</p>
 		<ul>
 			<li>Item 1</li>
 			<li>Item 2</li>
@@ -111,9 +111,7 @@ The Collapsible component provides a way to show and hide content with a toggle 
 	{#snippet trigger()}
 		Disabled Collapsible
 	{/snippet}
-	{#snippet content()}
-		This content cannot be toggled.
-	{/snippet}
+	This content cannot be toggled.
 </Collapsible>
 \`\`\`
 
@@ -123,18 +121,14 @@ The Collapsible component provides a way to show and hide content with a toggle 
 	{#snippet trigger()}
 		Small Collapsible
 	{/snippet}
-	{#snippet content()}
-		Small content
-	{/snippet}
+	Small content
 </Collapsible>
 
 <Collapsible size="large">
 	{#snippet trigger()}
 		Large Collapsible
 	{/snippet}
-	{#snippet content()}
-		Large content
-	{/snippet}
+	Large content
 </Collapsible>
 \`\`\`
 
@@ -164,7 +158,6 @@ The component renders:
 
 - The component uses Svelte's built-in \`slide\` transition with a 200ms duration.
 - When \`open\` prop is provided, the component is controlled. Otherwise, it manages its own state.
-- The \`content\` slot takes precedence over \`children\` slot if both are provided.
 - Content is completely removed from DOM when closed (not just hidden) for better performance.
 
 ## Theme Customization
@@ -222,9 +215,7 @@ The theme object contains the following parts:
   {#snippet trigger()}
     Toggle
   {/snippet}
-  {#snippet content()}
-    Content
-  {/snippet}
+  Content
 </Collapsible>
 \`\`\`
 
@@ -251,9 +242,7 @@ The theme object contains the following parts:
   {#snippet trigger()}
     Custom Trigger
   {/snippet}
-  {#snippet content()}
-    Content
-  {/snippet}
+  Content
 </Collapsible>
 \`\`\`
 
@@ -280,4 +269,11 @@ The theme object contains the following parts:
   });
 </script>
 \`\`\`
+
+## Motion
+
+- **motion** theme slot, keyed by \`variant\`: \`default\` slides the content open on the y axis,
+  \`peek\` animates its clip height on \`slow\` / \`enter\`.
+- Ladder: \`<Theme components={{ collapsible: { motion } }}>\` → \`setCollapsibleTheme({ motion })\`
+  → \`theme.motion\` → the \`transition\` prop. Reduced motion collapses it to 0.
 `;

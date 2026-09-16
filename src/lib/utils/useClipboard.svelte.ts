@@ -34,7 +34,7 @@ export const useClipboard = (opts: ClipboardOptions = {}) => {
 		textarea.style.opacity = '0';
 		document.body.appendChild(textarea);
 		textarea.select();
-		let ok = false;
+		let ok: boolean;
 		try {
 			ok = document.execCommand('copy');
 		} catch {

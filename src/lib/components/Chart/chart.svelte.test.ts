@@ -82,30 +82,56 @@ afterEach(() => {
 });
 
 describe('Chart in the browser', () => {
-	test('mounts a client-only chart with the TanStack default height', async () => {
+	test('mounts a client-only chart with the default root height class', async () => {
 		const { container } = render(RevenueChart, {
-			props: { data, ...definition, ariaLabel: 'Monthly revenue' }
+			props: { data, ...definition, label: 'Monthly revenue' }
 		});
 
 		await waitFor(() => expect(container.querySelector('svg')).toBeInTheDocument());
 
 		const root = container.querySelector('[data-slot="chart"]');
 		const svg = container.querySelector('svg');
-		expect(root).toHaveStyle({ height: '320px' });
+		expect(root).toHaveClass('h-80');
+		expect(root?.getAttribute('style')).not.toContain('height');
 		expect(svg).toHaveAttribute('aria-label', 'Monthly revenue');
 		expect(svg).toHaveAttribute('viewBox', '0 0 640 320');
 	});
 
+	test('lets a consumer height class replace the default one', async () => {
+		const { container } = render(RevenueChart, {
+			props: { data, ...definition, label: 'Monthly revenue', class: 'h-64' }
+		});
+
+		await waitFor(() => expect(container.querySelector('svg')).toBeInTheDocument());
+
+		const root = container.querySelector('[data-slot="chart"]');
+		expect(root).toHaveClass('h-64');
+		expect(root).not.toHaveClass('h-80');
+	});
+
+	test('sizes the root and the plot from height', async () => {
+		const { container } = render(RevenueChart, {
+			props: { data, ...definition, label: 'Monthly revenue', height: 240 }
+		});
+
+		await waitFor(() => expect(container.querySelector('svg')).toBeInTheDocument());
+
+		const root = container.querySelector('[data-slot="chart"]');
+		expect(root).toHaveStyle({ height: '240px' });
+		// The container is unmeasured here, so the SSR prerender width owns the layout.
+		expect(container.querySelector('svg')).toHaveAttribute('viewBox', '0 0 800 240');
+	});
+
 	test('updates accessible content after props are replaced', async () => {
 		const { container, rerender } = render(RevenueChart, {
-			props: { data, ...definition, ariaLabel: 'Monthly revenue' }
+			props: { data, ...definition, label: 'Monthly revenue' }
 		});
 
 		await waitFor(() => expect(container.querySelector('svg')).toBeInTheDocument());
 		await rerender({
 			data: [...data, { month: 'March', actual: 24 }],
 			...definition,
-			ariaLabel: 'Quarterly revenue',
+			label: 'Quarterly revenue',
 			ariaDescription: 'Three monthly values'
 		});
 
@@ -123,7 +149,7 @@ describe('Chart in the browser', () => {
 		await rerender({
 			data,
 			...pointDefinition,
-			ariaLabel: 'Monthly points'
+			label: 'Monthly points'
 		});
 
 		await waitFor(() => {
@@ -134,7 +160,7 @@ describe('Chart in the browser', () => {
 
 	test('does not activate point focus through keyboard or clicks', async () => {
 		const { container } = render(RevenueChart, {
-			props: { data, ...definition, ariaLabel: 'Monthly revenue' }
+			props: { data, ...definition, label: 'Monthly revenue' }
 		});
 
 		const svg = await waitFor(() => {
@@ -153,7 +179,7 @@ describe('Chart in the browser', () => {
 
 	test('opens the native tooltip from pointer input', async () => {
 		const { container } = render(RevenueChart, {
-			props: { data, ...definition, ariaLabel: 'Monthly revenue' }
+			props: { data, ...definition, label: 'Monthly revenue' }
 		});
 		const svg = await waitFor(() => {
 			const renderedSvg = container.querySelector('svg');
@@ -170,7 +196,7 @@ describe('Chart in the browser', () => {
 	test('uses the native TanStack brush for viewport zoom', async () => {
 		const brushData = [...data, { month: 'March', actual: 15 }];
 		const { container } = render(RevenueChart, {
-			props: { data: brushData, ...definition, viewport: true, ariaLabel: 'Monthly revenue' }
+			props: { data: brushData, ...definition, viewport: true, label: 'Monthly revenue' }
 		});
 
 		const brush = await waitFor(() => {
@@ -195,89 +221,98 @@ describe('Chart in the browser', () => {
 		);
 	});
 
-	test('supports repeated continuous brush zoom, hover, cancellation, and reset', async () => {
-		vi.spyOn(SVGSVGElement.prototype, 'getBoundingClientRect').mockReturnValue(
-			new DOMRect(0, 0, 640, 320)
-		);
-		const observations = [
-			{ month: 'January', actual: 12 },
-			{ month: 'February', actual: 15 },
-			{ month: 'March', actual: 18 }
-		];
-		const { container } = render(RevenueChart, {
-			props: {
-				data: observations,
-				x: { scale: { type: 'linear', domain: [0, 30] } },
-				y: { scale: { type: 'linear', domain: [0, 30] } },
-				marks: [{ type: 'scatter', x: 'actual', y: 'actual' }],
-				viewport: { transition: false },
-				tooltip: true,
-				ariaLabel: 'Continuous observations'
-			}
-		});
-		const brush = await waitFor(() => {
-			const renderedBrush = container.querySelector<SVGSVGElement>('[data-chart-brush]');
-			expect(renderedBrush).toBeInTheDocument();
-			return renderedBrush as SVGSVGElement;
-		});
-		const overlay = () => container.querySelector<SVGRectElement>('[data-chart-brush] .overlay')!;
-		expect(brush).toContainElement(overlay());
-		const firstPoint = () => container.querySelector<SVGCircleElement>('.ts-chart__dot circle')!;
-		const initialX = Number(firstPoint().getAttribute('cx'));
-		const mouse = async (
-			target: Element | Window,
-			type: string,
-			fraction: number,
-			buttons: number
-		) => {
-			const left = Number(overlay().getAttribute('x'));
-			const width = Number(overlay().getAttribute('width'));
-			const y = Number(overlay().getAttribute('y')) + 100;
-			const event = new MouseEvent(type, {
-				clientX: left + width * fraction,
-				clientY: y,
-				buttons,
-				button: 0,
-				bubbles: true
+	// Drives real pointer gestures through WAAPI-free brush animations; under a loaded CI box the
+	// frame timing occasionally drifts past an assertion, so allow a retry.
+	test(
+		'supports repeated continuous brush zoom, hover, cancellation, and reset',
+		{ retry: 2, timeout: 15000 },
+		async () => {
+			vi.spyOn(SVGSVGElement.prototype, 'getBoundingClientRect').mockReturnValue(
+				new DOMRect(0, 0, 640, 320)
+			);
+			const observations = [
+				{ month: 'January', actual: 12 },
+				{ month: 'February', actual: 15 },
+				{ month: 'March', actual: 18 }
+			];
+			const { container } = render(RevenueChart, {
+				props: {
+					data: observations,
+					x: { scale: { type: 'linear', domain: [0, 30] } },
+					y: { scale: { type: 'linear', domain: [0, 30] } },
+					marks: [{ type: 'scatter', x: 'actual', y: 'actual' }],
+					viewport: { transition: false },
+					tooltip: true,
+					label: 'Continuous observations'
+				}
 			});
-			// jsdom rejects Vitest's Window proxy in the MouseEvent constructor.
-			Object.defineProperty(event, 'view', { value: window });
-			await fireEvent(target, event);
-		};
-		const drag = async (start: number, end: number) => {
-			await mouse(overlay(), 'mousedown', start, 1);
-			await mouse(window, 'mousemove', end, 1);
-			await mouse(window, 'mouseup', end, 0);
-		};
-		await drag(0.2, 0.8);
-		await waitFor(() =>
-			expect(container.querySelector('[data-chart-viewport-reset]')).toBeInTheDocument()
-		);
-		const zoomedX = Number(firstPoint().getAttribute('cx'));
-		expect(zoomedX).toBeLessThan(initialX);
-		expect(container.querySelector('[data-chart-brush]')).toBe(brush);
-		await drag(0.2, 0.8);
-		await waitFor(() => expect(Number(firstPoint().getAttribute('cx'))).toBeLessThan(zoomedX));
+			const brush = await waitFor(() => {
+				const renderedBrush = container.querySelector<SVGSVGElement>('[data-chart-brush]');
+				expect(renderedBrush).toBeInTheDocument();
+				return renderedBrush as SVGSVGElement;
+			});
+			const overlay = () => container.querySelector<SVGRectElement>('[data-chart-brush] .overlay')!;
+			expect(brush).toContainElement(overlay());
+			const firstPoint = () => container.querySelector<SVGCircleElement>('.ts-chart__dot circle')!;
+			const initialX = Number(firstPoint().getAttribute('cx'));
+			const mouse = async (
+				target: Element | Window,
+				type: string,
+				fraction: number,
+				buttons: number
+			) => {
+				const left = Number(overlay().getAttribute('x'));
+				const width = Number(overlay().getAttribute('width'));
+				const y = Number(overlay().getAttribute('y')) + 100;
+				const event = new MouseEvent(type, {
+					clientX: left + width * fraction,
+					clientY: y,
+					buttons,
+					button: 0,
+					bubbles: true
+				});
+				// jsdom rejects Vitest's Window proxy in the MouseEvent constructor.
+				Object.defineProperty(event, 'view', { value: window });
+				await fireEvent(target, event);
+			};
+			const drag = async (start: number, end: number) => {
+				await mouse(overlay(), 'mousedown', start, 1);
+				await mouse(window, 'mousemove', end, 1);
+				await mouse(window, 'mouseup', end, 0);
+			};
+			await drag(0.2, 0.8);
+			await waitFor(
+				() => expect(container.querySelector('[data-chart-viewport-reset]')).toBeInTheDocument(),
+				{ timeout: 5000 }
+			);
+			const zoomedX = Number(firstPoint().getAttribute('cx'));
+			expect(zoomedX).toBeLessThan(initialX);
+			expect(container.querySelector('[data-chart-brush]')).toBe(brush);
+			await drag(0.2, 0.8);
+			await waitFor(() => expect(Number(firstPoint().getAttribute('cx'))).toBeLessThan(zoomedX), {
+				timeout: 5000
+			});
 
-		await fireEvent.pointerMove(overlay(), {
-			clientX: Number(firstPoint().getAttribute('cx')),
-			clientY: Number(firstPoint().getAttribute('cy'))
-		});
-		await waitFor(() =>
-			expect(container.querySelector('.ts-chart-tooltip')).toHaveTextContent('12')
-		);
-		await fireEvent.pointerDown(overlay());
-		await mouse(overlay(), 'mousedown', 0.3, 1);
-		await mouse(window, 'mousemove', 0.7, 1);
-		await fireEvent.keyDown(document, { key: 'Escape' });
-		await fireEvent.click(container.querySelector('[data-chart-viewport-reset]')!);
-		await waitFor(() => expect(Number(firstPoint().getAttribute('cx'))).toBeCloseTo(initialX, 1));
-		expect(container.querySelector('[data-chart-viewport-reset]')).not.toBeInTheDocument();
-	});
+			await fireEvent.pointerMove(overlay(), {
+				clientX: Number(firstPoint().getAttribute('cx')),
+				clientY: Number(firstPoint().getAttribute('cy'))
+			});
+			await waitFor(() =>
+				expect(container.querySelector('.ts-chart-tooltip')).toHaveTextContent('12')
+			);
+			await fireEvent.pointerDown(overlay());
+			await mouse(overlay(), 'mousedown', 0.3, 1);
+			await mouse(window, 'mousemove', 0.7, 1);
+			await fireEvent.keyDown(document, { key: 'Escape' });
+			await fireEvent.click(container.querySelector('[data-chart-viewport-reset]')!);
+			await waitFor(() => expect(Number(firstPoint().getAttribute('cx'))).toBeCloseTo(initialX, 1));
+			expect(container.querySelector('[data-chart-viewport-reset]')).not.toBeInTheDocument();
+		}
+	);
 
 	test('groups series at the hovered x value in a chart-contained tooltip', async () => {
 		const { container } = render(GroupedRevenueChart, {
-			props: { data: groupedData, ...groupedDefinition, ariaLabel: 'Revenue by product' }
+			props: { data: groupedData, ...groupedDefinition, label: 'Revenue by product' }
 		});
 		const svg = await waitFor(() => {
 			const renderedSvg = container.querySelector('svg');
@@ -303,7 +338,7 @@ describe('Chart in the browser', () => {
 
 	test('shows one axis indicator and one uniform state for the focused point group', async () => {
 		const { container } = render(GroupedRevenueChart, {
-			props: { data: groupedData, ...groupedDefinition, ariaLabel: 'Revenue by product' }
+			props: { data: groupedData, ...groupedDefinition, label: 'Revenue by product' }
 		});
 		const svg = await waitFor(() => {
 			const renderedSvg = container.querySelector('svg');
@@ -364,7 +399,7 @@ describe('Chart in the browser', () => {
 			}
 		} satisfies ChartConfiguration<Revenue>;
 		const { container } = render(RevenueChart, {
-			props: { data, ...customTooltip, ariaLabel: 'Monthly revenue' }
+			props: { data, ...customTooltip, label: 'Monthly revenue' }
 		});
 		const svg = await waitFor(() => {
 			const renderedSvg = container.querySelector('svg');
@@ -389,11 +424,18 @@ describe('Chart in the browser', () => {
 			props: {
 				data,
 				...definition,
-				ariaLabel: 'Monthly revenue',
-				initialDimensions: { width: 800, height: 400 }
+				label: 'Monthly revenue',
+				aspectRatio: 2
 			}
 		});
 		const host = container.querySelector('[data-chart-host]') as HTMLElement;
+		// @tanstack/charts >= 0.18 sizes the scene from the container's *content* box:
+		// "Padding and borders stay outside the scene" (docs/reference/dom-host.md, Responsive
+		// sizing). The plot host carries neither in a browser, but jsdom resolves the initial
+		// `border-width: medium` to 16px even with `border-style: none`, so the phantom border is
+		// removed here to make the mocked border box and content box agree.
+		host.style.border = '0px solid transparent';
+		host.style.padding = '0px';
 		vi.spyOn(host, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 400, 200));
 
 		controlledResizeCallback?.([], {} as ResizeObserver);
@@ -405,13 +447,39 @@ describe('Chart in the browser', () => {
 		expect(controlledResizeDisconnect).toHaveBeenCalled();
 	});
 
+	test('sizes the scene from the host content box', async () => {
+		// Companion to the test above: padding on the plot host is excluded from the scene
+		// (docs/reference/dom-host.md, Responsive sizing).
+		window.ResizeObserver = ControlledResizeObserver as typeof ResizeObserver;
+
+		const { container, unmount } = render(RevenueChart, {
+			props: {
+				data,
+				...definition,
+				label: 'Monthly revenue',
+				aspectRatio: 2
+			}
+		});
+		const host = container.querySelector('[data-chart-host]') as HTMLElement;
+		host.style.border = '0px solid transparent';
+		host.style.padding = '10px';
+		vi.spyOn(host, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 400, 200));
+
+		controlledResizeCallback?.([], {} as ResizeObserver);
+
+		await waitFor(() =>
+			expect(container.querySelector('svg')).toHaveAttribute('viewBox', '0 0 380 190')
+		);
+		unmount();
+	});
+
 	test('adopts the prerendered SVG when the vanilla controller mounts', () => {
 		const options = createChartOptions({
 			data,
 			...definition,
-			ariaLabel: 'Monthly revenue',
+			label: 'Monthly revenue',
 			idPrefix: 'chart-adoption-test',
-			initialDimensions: { width: 800, height: 400 }
+			aspectRatio: 2
 		});
 		const adapter = createChartAdapter(options);
 		const host = document.createElement('div');
@@ -424,9 +492,102 @@ describe('Chart in the browser', () => {
 		adapter.destroy();
 	});
 
+	test('pins a tooltip from tooltip.defaultValue and restores it after hover', async () => {
+		const { container } = render(RevenueChart, {
+			props: {
+				data,
+				...definition,
+				tooltip: { defaultValue: 'February' },
+				label: 'Monthly revenue'
+			}
+		});
+		const svg = await waitFor(() => {
+			const renderedSvg = container.querySelector('svg');
+			expect(renderedSvg).toBeInTheDocument();
+			return renderedSvg as SVGElement;
+		});
+		vi.spyOn(svg, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 640, 320));
+
+		await waitFor(() =>
+			expect(document.querySelector('.ts-chart-tooltip')).toHaveTextContent('February')
+		);
+
+		const first = container.querySelector('.ts-chart__dot circle') as SVGCircleElement;
+		await fireEvent.pointerMove(svg, {
+			clientX: Number(first.getAttribute('cx')),
+			clientY: Number(first.getAttribute('cy'))
+		});
+		await waitFor(() =>
+			expect(document.querySelector('.ts-chart-tooltip')).toHaveTextContent('January')
+		);
+
+		await fireEvent.pointerLeave(container.querySelector('[data-chart-host]') as HTMLElement);
+		await waitFor(() =>
+			expect(document.querySelector('.ts-chart-tooltip')).toHaveTextContent('February')
+		);
+	});
+
+	test('pins the clicked datum and reports it through onValueChange', async () => {
+		const onValueChange = vi.fn();
+		const { container } = render(RevenueChart, {
+			props: { data, ...definition, tooltip: { onValueChange }, label: 'Monthly revenue' }
+		});
+		const svg = await waitFor(() => {
+			const renderedSvg = container.querySelector('svg');
+			expect(renderedSvg).toBeInTheDocument();
+			return renderedSvg as SVGElement;
+		});
+		vi.spyOn(svg, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 640, 320));
+
+		const first = container.querySelector('.ts-chart__dot circle') as SVGCircleElement;
+		const coordinates = {
+			clientX: Number(first.getAttribute('cx')),
+			clientY: Number(first.getAttribute('cy'))
+		};
+		await fireEvent.click(svg, coordinates);
+
+		expect(onValueChange).toHaveBeenCalledWith('January');
+		await fireEvent.pointerLeave(container.querySelector('[data-chart-host]') as HTMLElement);
+		await waitFor(() =>
+			expect(document.querySelector('.ts-chart-tooltip')).toHaveTextContent('January')
+		);
+
+		await fireEvent.click(svg, coordinates);
+		expect(onValueChange).toHaveBeenLastCalledWith(null);
+	});
+
+	test('prints the formatted series key in the grouped tooltip', async () => {
+		const { container } = render(GroupedRevenueChart, {
+			props: {
+				data: groupedData,
+				...groupedDefinition,
+				legend: { format: (key) => `#${String(key)}` },
+				label: 'Revenue by product'
+			}
+		});
+		const svg = await waitFor(() => {
+			const renderedSvg = container.querySelector('svg');
+			expect(renderedSvg).toBeInTheDocument();
+			return renderedSvg as SVGElement;
+		});
+		vi.spyOn(svg, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 640, 320));
+		const point = container.querySelector('.ts-chart__dot circle') as SVGCircleElement;
+		await fireEvent.pointerMove(svg, {
+			clientX: Number(point.getAttribute('cx')),
+			clientY: Number(point.getAttribute('cy'))
+		});
+
+		await waitFor(() =>
+			expect(document.querySelector('.ts-chart-tooltip')).toHaveAttribute(
+				'aria-label',
+				'Month: January\n#Platform: 12\n#Services: 8'
+			)
+		);
+	});
+
 	test('removes chart DOM during cleanup', async () => {
 		const { container, unmount } = render(RevenueChart, {
-			props: { data, ...definition, ariaLabel: 'Monthly revenue' }
+			props: { data, ...definition, label: 'Monthly revenue' }
 		});
 
 		await waitFor(() => expect(container.querySelector('svg')).toBeInTheDocument());

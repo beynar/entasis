@@ -35,36 +35,38 @@
 	let added = $state('');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Find your fit</p>
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Find your fit
+		</p>
 		<Heading size="h2" weight="bold">Two good options. Different kinds of light.</Heading>
 	</header>
-	<div class="grid gap-xl sm:grid-cols-2">
+	<div class="gap-xl grid sm:grid-cols-2">
 		{#each lamps as lamp (lamp.name)}<Card
-				><div class="flex flex-col gap-xl">
+				><div class="gap-xl flex flex-col">
 					{@render productArt('lamp', lamp.color)}
-					<div class="flex gap-lg justify-between">
+					<div class="gap-lg flex justify-between">
 						<h3 class="text-xl font-semibold">{lamp.name}</h3>
 						<Chip variant="soft" size="small">{lamp.label}</Chip>
 					</div>
 					<p class="text-neutral/65">{lamp.description}</p>
-					<dl class="flex flex-col gap-lg text-sm">
+					<dl class="gap-lg flex flex-col text-sm">
 						<div class="flex justify-between">
-							<dt class="text-neutral/55">Height</dt>
+							<dt class="text-neutral/65">Height</dt>
 							<dd>{lamp.height}</dd>
 						</div>
 						<div class="flex justify-between">
-							<dt class="text-neutral/55">Light levels</dt>
+							<dt class="text-neutral/65">Light levels</dt>
 							<dd>{lamp.levels}</dd>
 						</div>
 						<div class="flex justify-between">
-							<dt class="text-neutral/55">Power</dt>
+							<dt class="text-neutral/65">Power</dt>
 							<dd>{lamp.power}</dd>
 						</div>
 					</dl>
@@ -74,7 +76,7 @@
 				</div></Card
 			>{/each}
 	</div>
-	<p class="text-sm text-success" aria-live="polite">
+	<p class="text-success text-sm" aria-live="polite">
 		{added ? `${added} added to the sample bag.` : ''}
 	</p>
 </section>

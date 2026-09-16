@@ -15,10 +15,12 @@ test('renders and hydrates every Chart documentation example', async ({ page }) 
 
 	await page.goto('/components/chart');
 	await expect(page.locator('[data-slot="chart"]')).toHaveCount(1);
-	await expect(page.getByRole('combobox', { name: 'Chart type' })).toHaveText('Line');
-	await expect(page.getByRole('img', { name: 'Quarterly revenue line chart' })).toBeVisible();
+	await expect(
+		page.getByRole('radiogroup', { name: 'Type' }).getByRole('radio', { checked: true })
+	).toHaveText('Series');
+	await expect(page.getByRole('img', { name: 'Quarterly revenue series chart' })).toBeVisible();
 
-	const usageChart = page.getByRole('img', { name: 'Quarterly revenue line chart' });
+	const usageChart = page.getByRole('img', { name: 'Quarterly revenue series chart' });
 	await usageChart.focus();
 	await usageChart.press('ArrowRight');
 	await expect(usageChart.locator('..').getByRole('status')).toBeVisible();
@@ -29,12 +31,14 @@ test('renders and hydrates every Chart documentation example', async ({ page }) 
 	});
 	expect(ratio).toBeCloseTo(960 / 480, 4);
 
-	await page.getByRole('combobox', { name: 'Chart type' }).click();
-	await page.getByRole('option', { name: 'Map', exact: true }).click();
-	await expect(page.getByRole('img', { name: 'Regional map chart' })).toBeVisible();
+	await page
+		.getByRole('radiogroup', { name: 'Type' })
+		.getByRole('radio', { name: 'Polar' })
+		.click();
+	await expect(page.getByRole('img', { name: 'Quarterly revenue polar chart' })).toBeVisible();
 
 	await page.getByRole('tab', { name: 'Examples' }).click();
-	await expect(page.locator('[data-slot="chart"]')).toHaveCount(5);
+	await expect(page.locator('[data-slot="chart"]')).toHaveCount(6);
 	await expect(
 		page.getByRole('img', { name: 'Monthly actual and forecast revenue' })
 	).toBeVisible();
@@ -44,6 +48,14 @@ test('renders and hydrates every Chart documentation example', async ({ page }) 
 	await expect(
 		page.getByRole('img', { name: 'Quarterly revenue stacked by product' })
 	).toBeVisible();
+	const wideStack = page.getByRole('img', {
+		name: 'Task status over the last six months'
+	});
+	await expect(wideStack).toBeVisible();
+	// The wide stack melts three numeric fields into three named, formatted series.
+	await expect(page.getByRole('button', { name: 'In progress' })).toBeVisible();
+	// `tooltip.value` keeps March pinned without any pointer input.
+	await expect(wideStack.locator('..').locator('.ts-chart-tooltip')).toContainText('In progress');
 	await expect(page.getByRole('img', { name: 'Product capability profile' })).toBeVisible();
 	await expect(page.getByRole('img', { name: 'API response time' })).toBeVisible();
 

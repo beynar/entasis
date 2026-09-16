@@ -9,10 +9,11 @@
 		resolveAIConversationLabels,
 		type AIConversationStatus
 	} from './aiConversation.state.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		// eslint-disable-next-line no-useless-assignment -- The parent observes this bindable output.
-		conversation = $bindable<AIConversationState<TMessage>>(),
+		api = $bindable<AIConversationState<TMessage>>(),
 		status = $bindable<AIConversationStatus>('idle'),
 		error = $bindable<unknown>(),
 		messages = $bindable<TMessage[]>([]),
@@ -24,7 +25,7 @@
 		suggestions = $bindable<string[]>([]),
 		contextUsage = $bindable<AIContextUsage>(),
 		selectedModel = $bindable<string>(),
-		isStreaming = $bindable(false),
+		streaming = $bindable(false),
 		activeAskUserQuestion = $bindable<AIThreadAskUserQuestion<TMessage> | null>(null),
 		labels,
 		onStatusChange,
@@ -52,6 +53,7 @@
 		onAskUserQuestionStateChange,
 		children
 	}: AIConversationProps<TMessage> = $props();
+	const t = $derived(useI18n());
 
 	const state = untrack(
 		() =>
@@ -122,11 +124,11 @@
 				set selectedModel(value) {
 					selectedModel = value;
 				},
-				get isStreaming() {
-					return isStreaming;
+				get streaming() {
+					return streaming;
 				},
-				set isStreaming(value) {
-					isStreaming = value;
+				set streaming(value) {
+					streaming = value;
 				},
 				get activeAskUserQuestion() {
 					return activeAskUserQuestion;
@@ -135,7 +137,7 @@
 					activeAskUserQuestion = value;
 				},
 				get labels() {
-					return resolveAIConversationLabels(labels);
+					return resolveAIConversationLabels(labels, t);
 				},
 				get onStatusChange() {
 					return onStatusChange;
@@ -208,8 +210,8 @@
 				}
 			})
 	);
-	// eslint-disable-next-line no-useless-assignment -- Assignment publishes the provider state to bind:conversation.
-	conversation = state;
+	// eslint-disable-next-line no-useless-assignment -- Assignment publishes the provider state to bind:api.
+	api = state;
 </script>
 
 {@render children?.()}

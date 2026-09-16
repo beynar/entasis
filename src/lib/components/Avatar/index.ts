@@ -1,6 +1,6 @@
 export { default as Avatar } from './Avatar.svelte';
 export { default as AvatarGroup } from './AvatarGroup.svelte';
-export type { AvatarProps } from './avatar.props.js';
+export type { AvatarItem, AvatarProps } from './avatar.props.js';
 export type { AvatarGroupProps } from './avatarGroup.props.js';
 export {
 	avatarTheme,

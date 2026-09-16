@@ -51,7 +51,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: ['small', 'normal', 'large']
+			options: ['compact', 'normal', 'comfortable']
 		},
 		{ name: 'showDateTime', type: 'switch', label: 'Date & time', value: true },
 		{ name: 'showConnectors', type: 'switch', label: 'Connectors', value: true },

@@ -32,41 +32,43 @@
 		}
 	];
 	let query = $state('');
-	let category = $state(0);
+	let category = $state('All resources');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Resource library</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Resource library
+		</p>
 		<Heading size="h2" weight="bold">Useful things for thoughtful teams.</Heading>
-		<p class="max-w-2xl text-neutral/65">
+		<p class="text-neutral/65 max-w-2xl">
 			Guides, articles, and practical checklists to keep your work moving.
 		</p>
 	</header>
-	<div class="grid gap-xl md:grid-cols-[14rem_1fr]">
-		<aside class="flex flex-col gap-xl">
+	<div class="gap-xl grid md:grid-cols-[14rem_1fr]">
+		<aside class="gap-xl flex flex-col">
 			<TextInput label="Search resources" placeholder="Find a topic" bind:value={query} /><Tabbar
 				orientation="vertical"
 				items={['All resources', 'Guide', 'Article', 'Checklist']}
 				bind:value={category}
 			/>
 		</aside>
-		<div class="grid gap-xl sm:grid-cols-2">
-			{#each resources.filter((resource) => (category === 0 || resource.type === ['', 'Guide', 'Article', 'Checklist'][category]) && resource.title
+		<div class="gap-xl grid sm:grid-cols-2">
+			{#each resources.filter((resource) => (category === 'All resources' || resource.type === category) && resource.title
 						.toLowerCase()
 						.includes((query ?? '').toLowerCase())) as resource (resource.title)}<Card
 					title={resource.title}
 					description={resource.description}
-					><div class="flex flex-col gap-xl">
+					><div class="gap-xl flex flex-col">
 						<Chip variant="soft" class="w-fit" size="small">{resource.type}</Chip>
-						<div class="flex gap-md items-center justify-between">
-							<span class="text-sm text-neutral/50">{resource.duration}</span><Button
+						<div class="gap-md flex items-center justify-between">
+							<span class="text-neutral/65 text-sm">{resource.duration}</span><Button
 								href="/docs"
 								variant="link">Read ↗</Button
 							>
 						</div>
 					</div></Card
-				>{:else}<p class="p-xl text-neutral/60">No resources match this search.</p>{/each}
+				>{:else}<p class="p-xl text-neutral/70">No resources match this search.</p>{/each}
 		</div>
 	</div>
 </section>

@@ -1,4 +1,5 @@
 import type { Placement } from '@floating-ui/dom';
+import type { Messages } from '$lib/i18n/en.js';
 import type { PopoverProps } from '$lib/components/Popover/popover.props.js';
 import type { InferComponentTheme } from '$lib/utils/cva/index.js';
 import type { InputProps } from '../Field/field.js';
@@ -74,6 +75,8 @@ export type DateSelectorProps<Mode extends DateSelectorMode = 'date'> = {
 	theme?: DateSelectorThemeProps;
 	/** Per-instance Calendar theme overrides. */
 	calendarTheme?: CalendarThemeProps;
+	/** Per-instance i18n overrides merged over the global catalog. */
+	i18n?: Partial<Messages>;
 };
 
 /** Selection modes representable as form field values ('multiple' has no field type). */

@@ -9,6 +9,7 @@
 	import { fso } from '$lib/transitions/transition.js';
 	import { portal } from '$lib/attachments/portal.js';
 	import { transitionSize } from '$lib/attachments/transitionSize.js';
+	import type { Attachment } from 'svelte/attachments';
 
 	let {
 		id: customId,
@@ -25,7 +26,7 @@
 		open = $bindable(),
 		openOnHover = false,
 		openOnClick = true,
-		hoverDelay = 100,
+		delay = 100,
 		closeOnEscape = true,
 		closeOnClickOutside = true,
 		closeOnMouseLeave = false,
@@ -33,11 +34,15 @@
 		directedTransition = true,
 		lockScroll = true,
 		fitTrigger = false,
+		inline = false,
 		mobileSheet = false,
 		mobileSheetSizeTransition = true,
+		focusOnOpen = false,
+		haspopup = 'dialog',
 		class: className,
 		trigger,
-		theme
+		theme,
+		...attachments
 	}: PopoverProps = $props();
 	const openState = createBindableValue(
 		() => open,
@@ -85,6 +90,9 @@
 		get mobileSheet() {
 			return mobileSheet;
 		},
+		get inline() {
+			return inline;
+		},
 		get closeOnEscape() {
 			return closeOnEscape;
 		},
@@ -103,21 +111,39 @@
 		get openOnHover() {
 			return openOnHover;
 		},
-		get hoverDelay() {
-			return hoverDelay;
+		get delay() {
+			return delay;
 		},
 		get openOnClick() {
 			return openOnClick;
+		},
+		get focusOnOpen() {
+			return focusOnOpen;
+		},
+		get haspopup() {
+			return haspopup;
+		},
+		get motion() {
+			return theme?.motion;
 		}
 	});
+
+	// `fitTrigger` panels grow past the trigger only up to the size cap, and a trigger wider than
+	// the cap keeps its own width (min-width would otherwise beat the class max-width silently).
+	const FIT_TRIGGER_CAP = { small: '16rem', normal: '20rem', large: '24rem' } as const;
 
 	const classes = $derived(usePopoverTheme(theme));
 
 	const in_out = fso();
 
+	// An inline panel needs no reference element: it renders where the component sits.
 	const visible = $derived(
-		popover.isOpen && (popover.isMobileSheet || popover.referenceElement || popover.externalRef)
+		popover.isOpen &&
+			(inline || popover.isMobileSheet || popover.referenceElement || popover.externalRef)
 	);
+
+	// Floating panels portal to the body layer; inline ones stay in normal document flow.
+	const maybePortal: Attachment<HTMLElement> = $derived(inline ? () => {} : portal());
 
 	const mobileSheetDialogTheme = $derived(
 		getPopoverDialogTheme(
@@ -131,6 +157,26 @@
 </script>
 
 {#snippet emptyCloseButton()}{/snippet}
+
+<!-- Trigger first: an inline panel then follows it in the document flow. Floating and
+     mobile-sheet panels portal out, so source order does not reach them. -->
+{#if trigger}
+	{#if typeof trigger === 'function'}
+		{@render trigger?.(popover)}
+	{:else if typeof trigger !== 'boolean'}
+		<Button
+			{...trigger}
+			{...popover.triggerProps}
+			onclick={(event) => {
+				trigger.onclick?.(event);
+				if (openOnClick) popover.toggle();
+			}}
+			{@attach popover.reference}
+		>
+			{trigger.content}
+		</Button>
+	{/if}
+{/if}
 
 {#if popover.isMobileSheet}
 	<Dialog
@@ -157,20 +203,22 @@
 			onAfterClose?.(popover);
 		}}
 	>
-		<div {@attach transitionSize({ isActive: () => mobileSheetSizeTransition })}>
+		<div {@attach transitionSize({ isActive: () => mobileSheetSizeTransition })} {...attachments}>
 			{@render children?.(popover)}
 		</div>
 	</Dialog>
 {:else if visible}
 	<dialog
-		{@attach portal()}
+		{@attach maybePortal}
 		{@attach popover.dialog}
 		open={true}
 		id={popover.id}
 		class={classes.root({ mode: popover.computedMode })}
-		style="visibility: hidden"
+		style:visibility={inline ? undefined : 'hidden'}
+		style:z-index={inline ? undefined : popover.layer.zIndex}
+		{...attachments}
 	>
-		<!-- The panel is a child of the portaled wrapper, so it is never re-parented mid-transition
+		<!-- The panel is a child of the wrapper, so it is never re-parented mid-transition
 		     (which would break the intro). It carries the visuals, transform-origin, and animation. -->
 		<div
 			{@attach popover.panel}
@@ -180,8 +228,11 @@
 				className
 			})}
 			style:transform-origin={popover.transformOrigin}
-			style:width={popover.triggerWidth != null ? `${popover.triggerWidth}px` : undefined}
-			style:max-width={popover.triggerWidth != null ? `${popover.triggerWidth}px` : undefined}
+			style:min-width={popover.triggerWidth != null ? `${popover.triggerWidth}px` : undefined}
+			style:width={popover.triggerWidth != null ? 'max-content' : undefined}
+			style:max-width={popover.triggerWidth != null
+				? `max(${FIT_TRIGGER_CAP[popover.computedSize]}, ${popover.triggerWidth}px)`
+				: undefined}
 			in:in_out={popover.computedTransition.in}
 			out:in_out={popover.computedTransition.out}
 			onintroend={() => {
@@ -191,25 +242,12 @@
 			onoutrostart={() => {
 				popover.hasTransitioned = false;
 			}}
-			onoutroend={() => onAfterClose?.(popover)}
+			onoutroend={() => {
+				popover.focusScope.restore();
+				onAfterClose?.(popover);
+			}}
 		>
 			{@render children?.(popover)}
 		</div>
 	</dialog>
-{/if}
-{#if trigger}
-	{#if typeof trigger === 'function'}
-		{@render trigger?.(popover)}
-	{:else if typeof trigger !== 'boolean'}
-		<Button
-			{...trigger}
-			onclick={(event) => {
-				trigger.onclick?.(event);
-				if (openOnClick) popover.toggle();
-			}}
-			{@attach popover.reference}
-		>
-			{trigger.content}
-		</Button>
-	{/if}
 {/if}

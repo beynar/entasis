@@ -19,6 +19,7 @@
 	);
 </script>
 
+<!-- eslint-disable svelte/no-at-html-tags -- this component exists to inject caller-supplied <script>/<style> text into <head> before hydration; raw HTML is its entire contract -->
 <svelte:head>
 	{@html /*html*/ `<s${'cript'} id="${id}">
 	${

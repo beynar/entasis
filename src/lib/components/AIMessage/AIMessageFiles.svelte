@@ -4,6 +4,7 @@
 	import ScrollArea from '../ScrollArea/ScrollArea.svelte';
 	import type { AIFileSource } from '../AIThread/aiThread.props.js';
 	import type { AIMessageSize } from './aiMessage.props.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	const MESSAGE_FILE_THEMES = {
 		small: {
@@ -58,6 +59,7 @@
 		size?: AIMessageSize;
 		class?: string;
 	} = $props();
+	const t = $derived(useI18n());
 
 	function isNativeFile(file: AIFileSource): file is File {
 		return typeof File !== 'undefined' && file instanceof File;
@@ -91,7 +93,7 @@
 		data-size={size}
 		class="max-w-full min-w-0 {alignmentClass} {className ?? ''}"
 	>
-		<ScrollArea scrollFade ariaLabel="Message files" class="w-full max-w-full">
+		<ScrollArea scrollFade label={t.messageFiles} class="w-full max-w-full">
 			<div
 				data-slot="ai-message-file-list"
 				role="list"

@@ -23,7 +23,7 @@ const defaultViewport = cva({
 	base: 'absolute left-1/2 min-h-2 w-1 -translate-x-1/2 rounded-full'
 });
 const defaultPin = cva({
-	base: 'group absolute left-0 flex h-[5px] w-full -translate-y-1/2 cursor-default items-center rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+	base: 'group absolute left-0 flex h-[5px] w-full -translate-y-1/2 cursor-default items-center rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-focus/50 focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
 	variants: {
 		side: {
 			left: 'justify-start',
@@ -37,7 +37,7 @@ const defaultPin = cva({
 	defaultVariants: { side: 'left', active: false }
 });
 const defaultPinIndicator = cva({
-	base: 'h-0.5 w-3 rounded-full bg-neutral [opacity:var(--ai-thread-toc-opacity)] [transform:scaleX(var(--ai-thread-toc-scale))] motion-safe:transition-[opacity,transform] motion-safe:duration-100 motion-safe:ease-out',
+	base: 'h-0.5 w-3 rounded-full bg-neutral [opacity:var(--ai-thread-toc-opacity)] [transform:scaleX(var(--ai-thread-toc-scale))] motion-safe:transition-[opacity,transform] motion-safe:duration-fast motion-safe:ease-standard',
 	variants: {
 		side: {
 			left: 'origin-left',
@@ -61,13 +61,13 @@ const defaultPreview = cva({
 });
 const defaultPreviewHeader = cva({ base: 'flex min-w-0 items-start gap-md' });
 const defaultPreviewIcon = cva({
-	base: 'mt-micro flex size-6 shrink-0 items-center justify-center rounded-sm border border-neutral-muted bg-surface text-neutral/60'
+	base: 'mt-micro flex size-6 shrink-0 items-center justify-center rounded-sm border border-neutral-muted bg-surface text-neutral/70'
 });
 const defaultPreviewTitle = cva({ base: 'truncate text-sm font-medium leading-tight' });
 const defaultPreviewExcerpt = cva({
-	base: 'line-clamp-4 text-xs leading-relaxed text-neutral/65'
+	base: 'line-clamp-4 text-xs leading-relaxed text-neutral/70'
 });
-const defaultPreviewMetadata = cva({ base: 'truncate text-xs text-neutral/55' });
+const defaultPreviewMetadata = cva({ base: 'truncate text-xs text-neutral/70' });
 const defaultPreviewFiles = cva({
 	base: 'flex min-w-0 flex-wrap items-center gap-x-lg gap-y-xs pt-micro'
 });

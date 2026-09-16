@@ -39,7 +39,7 @@ type FormVisibility = boolean | ((value: FormValueRecord) => boolean);
 
 type FormButtonAction<State> = ButtonProps & {
 	/** Called with the live form state when the action is activated. */
-	onAction?: (form: State) => MaybePromise<unknown>;
+	onAction?: (payload: State) => MaybePromise<unknown>;
 };
 
 export type FormAction<I extends FormInputs = FormInputs> = FormButtonAction<FormState<I>>;
@@ -160,7 +160,18 @@ type BaseFormRenderableInput = {
 	class?: string;
 };
 
-type ErasedFormInputState = Pick<FormState, keyof FormState>;
+/**
+ * The non-generic form state an `action` or `custom` entry declares. An inline `inputs`
+ * literal is contextually typed by `FormActionInput`/`FormCustomInput` *before* `I` is
+ * inferred, so a handler written there gets this type — and then has to satisfy the
+ * `FormInputState<I>` shape `FormInputsWithState<I>` maps it onto. Parameterising on `any`
+ * (instead of the `FormInputs` default, whose value map erases to `Record<string, undefined>`)
+ * is what keeps the two mutually assignable, so `onAction: (form) => form.validate()` written
+ * straight inside `inputs` type-checks.
+ */
+// Only `any` keeps the contextually-typed handler and `FormInputState<I>` mutually assignable.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ErasedFormInputState = FormInputState<any>;
 type ErasedFormInputAction = FormButtonAction<ErasedFormInputState>;
 
 export type FormActionInput = BaseFormRenderableInput & {
@@ -209,7 +220,7 @@ export type FormGroup<I extends FormGroupInputs = FormGroupInputs> = {
 	description?: Slot;
 	/** Fields and non-value entries grouped visually; field values retain top-level keys. */
 	inputs: I;
-	/** Number of equal-width group columns in vertical form layouts from the desktop breakpoint. */
+	/** Number of equal-width group columns in vertical form layouts, from 42rem of form width. */
 	columns?: FormGroupColumns;
 	/** Controls the whole group's visibility using the complete private value cache. */
 	visible?: FormVisibility;

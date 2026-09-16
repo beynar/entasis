@@ -5,9 +5,9 @@
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 	import type { Density } from '$lib/types/theme.js';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 
-	const accordionVariants = ['classic', 'card', 'outlined'] as const;
+	const accordionVariants = ['classic', 'card', 'outline'] as const;
 	const controls = createComponentControls([
 		{
 			name: 'size',
@@ -21,7 +21,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'variant',
@@ -35,9 +35,9 @@
 	]);
 
 	const densitySegments = [
-		{ value: 'small', label: 'Small' },
+		{ value: 'compact', label: 'Compact' },
 		{ value: 'normal', label: 'Normal' },
-		{ value: 'large', label: 'Large' }
+		{ value: 'comfortable', label: 'Comfortable' }
 	] as const satisfies ReadonlyArray<{ value: Density; label: string }>;
 	let accordionDensity = $state<Density>('normal');
 
@@ -162,7 +162,7 @@
 
 		<ComponentCard
 			title="Density"
-			description="density scales the paddings and gaps — small for dense lists, large for roomy surfaces. Combine freely with size."
+			description="density scales the paddings and gaps — compact for dense lists, comfortable for roomy surfaces. Combine freely with size."
 			code={`<SegmentedControl items={densities} bind:value={density} />
 <Accordion {density} {items} />`}
 		>
@@ -171,44 +171,44 @@
 					items={densitySegments}
 					bind:value={accordionDensity}
 					size="small"
-					ariaLabel="Accordion density"
+					label="Accordion density"
 				/>
 				<Accordion density={accordionDensity} items={faqItems} />
 			</div>
 		</ComponentCard>
 
 		<ComponentCard
-			title="Math icon"
+			title="Plus/minus icon"
 			description="A plus/minus icon instead of the rotating chevron."
 		>
 			<div class="w-full max-w-md">
-				<Accordion icon="math" items={faqItems} />
+				<Accordion icon="plus-minus" items={faqItems} />
 			</div>
 		</ComponentCard>
 
 		<ComponentCard
 			title="Variants"
-			description="classic is the flat default; card wraps the rows in a raised surface; outlined in a muted border."
+			description="classic is the flat default; card wraps the rows in a raised surface; outline in a muted border."
 			code={`<Accordion {items} />
 <Accordion variant="card" {items} />
-<Accordion variant="outlined" {items} />`}
+<Accordion variant="outline" {items} />`}
 		>
 			<div class="grid w-full gap-8 lg:grid-cols-3">
 				<Accordion items={faqItems.slice(0, 2)} />
 				<Accordion variant="card" items={faqItems.slice(0, 2)} />
-				<Accordion variant="outlined" items={faqItems.slice(0, 2)} />
+				<Accordion variant="outline" items={faqItems.slice(0, 2)} />
 			</div>
 		</ComponentCard>
 
 		<ComponentCard
 			title="Splitted"
-			description="splitted breaks the list into one surface per item, with a gap — combined here with the card and outlined variants."
+			description="splitted breaks the list into one surface per item, with a gap — combined here with the card and outline variants."
 			code={`<Accordion variant="card" splitted {items} />
-<Accordion variant="outlined" splitted {items} />`}
+<Accordion variant="outline" splitted {items} />`}
 		>
 			<div class="grid w-full gap-8 lg:grid-cols-2">
 				<Accordion variant="card" splitted items={faqItems.slice(0, 2)} />
-				<Accordion variant="outlined" splitted items={faqItems.slice(0, 2)} />
+				<Accordion variant="outline" splitted items={faqItems.slice(0, 2)} />
 			</div>
 		</ComponentCard>
 

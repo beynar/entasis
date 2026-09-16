@@ -53,15 +53,17 @@
 	}
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="flex gap-xl items-end justify-between flex-wrap">
-		<header class="flex flex-col gap-lg">
-			<p class="text-xs font-semibold uppercase tracking-widest text-primary">Your wishlist</p>
+	<div class="gap-xl flex flex-wrap items-end justify-between">
+		<header class="gap-lg flex flex-col">
+			<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+				Your wishlist
+			</p>
 			<Heading size="h2" weight="bold">Keep the good ideas close.</Heading>
 		</header>
 		<Button variant="outline" onclick={copyList}>{copied ? 'List copied' : 'Copy wishlist'}</Button>
@@ -76,14 +78,14 @@
 		]}
 		class="max-w-xs"
 	/>{#each sorted as product (product.id)}<article
-			class="grid items-center gap-xl border-t border-neutral/15 py-xl sm:grid-cols-[6rem_1fr_auto]"
+			class="gap-xl border-neutral/15 py-xl grid items-center border-t sm:grid-cols-[6rem_1fr_auto]"
 		>
 			<div>{@render productArt(product.shape, product.color)}</div>
 			<div>
 				<h3 class="font-semibold">{product.name}</h3>
-				<p class="mt-md text-sm text-neutral/55">{product.color} · {money(product.price)}</p>
+				<p class="mt-md text-neutral/65 text-sm">{product.color} · {money(product.price)}</p>
 			</div>
-			<div class="flex gap-md flex-wrap">
+			<div class="gap-md flex flex-wrap">
 				<Button
 					variant="outline"
 					size="small"
@@ -102,10 +104,10 @@
 			title="Your list is empty"
 			actions={[{ content: 'Restore favorites', onclick: () => (saved = [...products]) }]}
 		/>{/each}
-	<p class="text-sm text-success" aria-live="polite">
+	<p class="text-success text-sm" aria-live="polite">
 		{bag ? `${bag} items moved to sample bag.` : ''}
 	</p>
-	{#if copyError}<p role="alert" class="text-sm text-danger">{copyError}</p>{/if}
+	{#if copyError}<p role="alert" class="text-danger text-sm">{copyError}</p>{/if}
 </section>
 
 <style>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import ScrollArea from '../../ScrollArea/ScrollArea.svelte';
 	import type { Sizes } from '$lib/types/theme.js';
 	import type { TimeInputThemeProps } from './timeInput.theme.js';
@@ -30,11 +31,12 @@
 	}: TimeInputPickerProps = $props();
 
 	const classes = $derived(useTimeInputTheme(theme));
+	const t = $derived(useI18n());
 </script>
 
-<div {id} role="group" aria-label="Time picker" class={classes.picker()}>
+<div {id} role="group" aria-label={t.timePicker} class={classes.picker()}>
 	<div class={classes.pickerColumn()}>
-		<div class={classes.pickerLabel({ size })}>Hour</div>
+		<div class={classes.pickerLabel({ size })}>{t.hour}</div>
 		<ScrollArea scrollOnEdges type="auto" class={classes.pickerScrollArea()}>
 			{#each hourOptions as hour (hour.value)}
 				<button
@@ -50,7 +52,7 @@
 	</div>
 
 	<div class={classes.pickerColumn()}>
-		<div class={classes.pickerLabel({ size })}>Minute</div>
+		<div class={classes.pickerLabel({ size })}>{t.minute}</div>
 		<ScrollArea scrollOnEdges type="auto" class={classes.pickerScrollArea()}>
 			{#each minuteOptions as minute (minute.value)}
 				<button

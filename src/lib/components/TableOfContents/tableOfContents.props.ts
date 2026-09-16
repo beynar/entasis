@@ -58,7 +58,7 @@ export type TableOfContentsProps = WithAttachments<{
 	/** Semantic color token used by highlighted titles, rail segments, and markers. */
 	color?: Colors;
 	/** Accessible label for the navigation landmark. */
-	ariaLabel?: string;
+	label?: string;
 	/** CSS classes applied to the root navigation element. */
 	class?: string;
 	/** Theme overrides for the table-of-contents parts. */

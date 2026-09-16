@@ -45,7 +45,7 @@ Prefer the narrowest public API:
 2. Use \`preparedInput\` for large trees, server-rendered trees, or pre-sorted data.
 3. Use promoted props such as \`search\`, \`gitStatus\`, \`icons\`, \`renaming\`,
    \`dragAndDrop\`, \`density\`, and \`searchTopInset\` before using raw \`options\`.
-4. Use \`bind:fileTree\` only when you need imperative behavior such as custom search,
+4. Use \`bind:api\` only when you need imperative behavior such as custom search,
    focus, mutation, or scroll control.
 5. Passing \`onRename\` enables inline rename with the default policy unless
    \`renaming={false}\`. Passing \`onDropComplete\` enables drag-and-drop with the
@@ -76,7 +76,7 @@ Never pass both \`paths\` and \`preparedInput\`. Virtualized trees need a bounde
 </script>
 
 <input value={query} oninput={(event) => setQuery(event.currentTarget.value)} />
-<Tree bind:fileTree paths={paths} height={360} search initialSearchQuery={query} />
+<Tree bind:api paths={paths} height={360} search initialSearchQuery={query} />
 \`\`\`
 
 ### Git Status
@@ -120,7 +120,7 @@ Never pass both \`paths\` and \`preparedInput\`. Virtualized trees need a bounde
 - **paths**: readonly string[] - Canonical file and directory paths.
 - **preparedInput**: FileTreePreparedInput - Pre-shaped input from @pierre/trees.
 - **options**: TreeOptions - Lower-level FileTree options.
-- **fileTree**: FileTree - Bindable instance for imperative calls.
+- **api**: FileTree - Bindable instance handle for imperative calls.
 
 ### Rendering
 - **height**: number | string - Bounded wrapper height. Virtualized trees need one.
@@ -137,7 +137,7 @@ Never pass both \`paths\` and \`preparedInput\`. Virtualized trees need a bounde
 - **flattenEmptyDirectories**: boolean - Collapse single-child directory chains.
 - **presorted**: boolean - Treat input paths as already sorted.
 - **sort**: 'default' | FileTreeSortComparator - Sort policy.
-- **density**: 'small' | 'normal' | 'large' - Semantic row density. Lower-level numeric tuning belongs in options.density.
+- **density**: 'compact' | 'normal' | 'comfortable' - Semantic row density. Lower-level numeric tuning belongs in options.density.
 - **itemHeight**: number - Virtualized row height.
 - **overscan**: number - Extra rows above and below the viewport.
 - **initialVisibleRowCount**: number - SSR and virtualization first-pass row count.
@@ -164,10 +164,13 @@ Never pass both \`paths\` and \`preparedInput\`. Virtualized trees need a bounde
   and Pierre context-menu positioning.
 
 ### Events
-- **onReady**: (fileTree: FileTree) => void - After render or hydration.
+- **onReady**: (payload: FileTree) => void - After render or hydration.
 - **onFocusChange**: (path: string | null) => void - Focused row changed.
 - **onMutation**: (event: FileTreeMutationEvent) => void - Add/remove/move/reset event.
-- **onSelectionChange**: (paths: readonly string[]) => void - Selection changed.
+- **onSelectionChange**: (paths: readonly string[]) => void - Selection changed. Its payload is the
+  whole selected-path set, so it belongs to the \`onSelectionChange\` state family rather than the
+  \`onSelect\` pick event. @pierre/trees owns the selection and exposes no setter, so
+  \`initialSelectedPaths\` is the only default and there is no controlled \`selection\` prop.
 - **onSearchChange**: (value: string | null) => void - Search changed.
 - **onRename**: FileTreeRenamingConfig['onRename'] - Rename completed.
 - **onRenameError**: FileTreeRenamingConfig['onError'] - Rename failed.

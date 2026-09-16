@@ -6,14 +6,16 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 ## Basic Usage
 
 \`\`\`svelte
-<Meter value={{ value: 75, label: 'Progress' }} />
+<Meter value={75} label="Progress" />
 \`\`\`
 
 ## Props
 
 ### Core Props
-- **value**: Meter<T> | Array<Meter<T>> (required) - Single value or array of values to display
-  - Each meter object: { value: number, label?: string, color?: Colors, position?: 'top' | 'bottom', data?: T }
+- **value**: number | MeterStep<T> | Array<MeterStep<T>> (required) - A plain number, one segment, or a stacked set of segments
+  - A number renders a single segment coloured by \`color\`; its legend label defaults to the number itself
+  - Each segment object: { value: number, label?: string, color?: Colors, icon?: Snippet, position?: 'top' | 'bottom', data?: T }
+- **color**: Colors (default: 'primary') - Color used for a numeric value and as the fallback for segments with no color of their own
 
 - **min**: number (default: 0) - Minimum value
 - **max**: number (default: 100) - Maximum value
@@ -31,7 +33,7 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 - **description**: Snippet - Description text
 - **helper**: Snippet - Helper text
 - **header**: Snippet - Custom header
-- **indicator**: Snippet<Meter & { percentage: number, min: number, max: number }> - Custom indicator rendering
+- **indicator**: string | Snippet - Custom indicator content (no payload); combine with \`showIndicatorAs\` for the built-in value/percentage text
 
 ### Animation Props
 - **stiffness**: number - Spring animation stiffness
@@ -64,18 +66,18 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 
 ### Simple Progress Bar
 \`\`\`svelte
-<Meter value={{ value: 65 }} />
+<Meter value={65} />
 \`\`\`
 
 ### Basic Meter
 \`\`\`svelte
-<Meter value={{ value: 60, label: 'Completion' }} />
+<Meter value={60} label="Completion" />
 \`\`\`
 
 ### With Label and Description
 \`\`\`svelte
 <Meter 
-	value={{ value: 75 }}
+	value={75}
 >
 	{#snippet label()}
 		<span>Progress</span>
@@ -88,9 +90,9 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 
 ### Different Colors
 \`\`\`svelte
-<Meter value={{ value: 30, color: 'danger', label: 'Low' }} />
-<Meter value={{ value: 60, color: 'warning', label: 'Medium' }} />
-<Meter value={{ value: 90, color: 'success', label: 'High' }} />
+<Meter value={30} color="danger" label="Low" />
+<Meter value={60} color="warning" label="Medium" />
+<Meter value={90} color="success" label="High" />
 \`\`\`
 
 ### Multiple Values (Stacked)
@@ -107,7 +109,7 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 ### With Steps
 \`\`\`svelte
 <Meter 
-	value={{ value: 65 }}
+	value={65}
 	steps={[
 		{ start: 0, end: 25, label: 'Low', color: 'danger' },
 		{ start: 25, end: 75, label: 'Medium', color: 'warning' },
@@ -119,16 +121,16 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 ### Show as Percentage
 \`\`\`svelte
 <Meter 
-	value={{ value: 45 }}
+	value={45}
 	showIndicatorAs="percentage"
 />
 \`\`\`
 
 ### Different Sizes
 \`\`\`svelte
-<Meter size="small" value={{ value: 50 }} />
-<Meter size="normal" value={{ value: 50 }} />
-<Meter size="large" value={{ value: 50 }} />
+<Meter size="small" value={50} />
+<Meter size="normal" value={50} />
+<Meter size="large" value={50} />
 \`\`\`
 
 ### Custom Range
@@ -136,7 +138,8 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 <Meter 
 	min={0}
 	max={1000}
-	value={{ value: 350, label: 'Score' }}
+	value={350}
+	label="Score"
 />
 \`\`\`
 
@@ -180,7 +183,8 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 </script>
 
 <Meter 
-	value={{ value: progress, color: 'success' }}
+	value={progress}
+	color="success"
 >
 	{#snippet label()}
 		Task Progress
@@ -193,11 +197,10 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 
 ### With Custom Indicator
 \`\`\`svelte
-<Meter value={{ value: 75 }}>
-	{#snippet indicator({ value, percentage, min, max })}
-		<div class="custom-indicator">
-			{value}/{max} ({percentage.toFixed(1)}%)
-		</div>
+<!-- indicator is a payload-less slot; use showIndicatorAs for the built-in value/percentage text -->
+<Meter value={75}>
+	{#snippet indicator()}
+		<div class="custom-indicator">75 / 100</div>
 	{/snippet}
 </Meter>
 \`\`\`
@@ -205,7 +208,8 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 ### Skill Level Meter
 \`\`\`svelte
 <Meter 
-	value={{ value: 85, color: 'info' }}
+	value={85}
+	color="info"
 	steps={[
 		{ start: 0, end: 30, label: 'Beginner', color: 'danger', position: 'bottom' },
 		{ start: 30, end: 70, label: 'Intermediate', color: 'warning', position: 'bottom' },
@@ -232,7 +236,7 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 - Steps provide visual milestones and labels
 - Indicator position can be top or bottom
 - Progress bar fills from left to right
-- Colors can be set per value or inherited
+- The root \`color\` prop colors the whole meter; a segment's own \`color\` overrides it
 
 ## Theme Customization
 
@@ -336,7 +340,7 @@ The theme object contains the following parts:
 **Basic Theme Override**:
 \`\`\`svelte
 <Meter 
-  value={{ value: 75 }}
+  value={75}
   theme={{
     root: {
       base: 'flex flex-col',
@@ -357,7 +361,7 @@ The theme object contains the following parts:
 **Custom Progress Bar**:
 \`\`\`svelte
 <Meter 
-  value={{ value: 60 }}
+  value={60}
   theme={{
     progress: {
       base: 'bg-gradient-to-r from-primary to-secondary',

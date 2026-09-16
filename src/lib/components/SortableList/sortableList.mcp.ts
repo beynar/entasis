@@ -54,10 +54,10 @@ Items need a stable, unique \`id\` property (primitive items are matched by valu
 ### Event Props
 - **onReorder**: \`({ items, from, to, item }: SortableListReorderPayload<T>) => void\`
   - Fired once when a drag ends and the order actually changed, with the reordered array and the move details. A cancelled drag or a no-op drop does not fire this.
-- **onReceive**: \`(detail: { item: T; index: number; from: { list: string; index: number } }) => void\` - A row arrived from another list of the group (\`items\` already updated). \`from.index\` is the row's index in the source list at drag start — enough to persist the full move.
-- **onRemove**: \`(detail: { item: T; index: number; to: { list: string } }) => void\` - One of this list's rows left for another list of the group (\`items\` already updated); \`index\` is its index here at the moment of drop.
-- **onDragStart**: \`(detail: { item: T; index: number }) => void\` - A drag of one of this list's rows started.
-- **onDragEnd**: \`(detail: { item: T; dropped: boolean }) => void\` - The drag ended (drop or cancel), after state updates; \`dropped\` is true when it landed on an accepting list.
+- **onReceive**: \`(payload: { item: T; index: number; from: { list: string; index: number } }) => void\` - A row arrived from another list of the group (\`items\` already updated). \`from.index\` is the row's index in the source list at drag start — enough to persist the full move.
+- **onRemove**: \`(payload: { item: T; index: number; to: { list: string } }) => void\` - One of this list's rows left for another list of the group (\`items\` already updated); \`index\` is its index here at the moment of drop.
+- **onDragStart**: \`(payload: { item: T; index: number }) => void\` - A drag of one of this list's rows started.
+- **onDragEnd**: \`(payload: { item: T; dropped: boolean }) => void\` - The drag ended (drop or cancel), after state updates; \`dropped\` is true when it landed on an accepting list.
 
 ### Localization
 - **i18n**: \`Partial<Messages>\` - Per-instance i18n overrides merged over the global catalog. Supplies the default handle's aria-label (\`dragToReorder\`).
@@ -71,7 +71,7 @@ Items need a stable, unique \`id\` property (primitive items are matched by valu
 	{#snippet item({ item, isDragging })}
 		<div class="flex flex-col">
 			<span class="font-medium">{item.title}</span>
-			<span class="text-neutral/60 text-sm">{item.description}</span>
+			<span class="text-neutral/70 text-sm">{item.description}</span>
 		</div>
 	{/snippet}
 </SortableList>
@@ -83,9 +83,13 @@ Items need a stable, unique \`id\` property (primitive items are matched by valu
   - Customizes what renders inside the grip handle. The component owns the handle wrapper (with the \`data-dnd-handle\` marker, aria-label and grab cursor); the snippet only fills its contents.
 
 \`\`\`svelte
+<script lang="ts">
+	import { dotsSixVerticalIcon } from 'svelai/icons/dotsSixVertical';
+</script>
+
 <SortableList bind:items>
 	{#snippet handle()}
-		<MyGripIcon />
+		{@render dotsSixVerticalIcon()}
 	{/snippet}
 </SortableList>
 \`\`\`

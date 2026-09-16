@@ -8,16 +8,16 @@
 	let added = $state('');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<header class="flex gap-xl justify-between flex-wrap">
+	<header class="gap-xl flex flex-wrap justify-between">
 		<div>
-			<div class="flex flex-col gap-lg">
-				<p class="text-xs font-semibold uppercase tracking-widest text-primary">
+			<div class="gap-lg flex flex-col">
+				<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
 					Objects for everyday
 				</p>
 				<Heading size="h2" weight="bold">The everyday vessel.</Heading>
@@ -25,39 +25,39 @@
 		</div>
 		<Chip variant="outline" color="neutral" class="h-fit">Collection № 04</Chip>
 	</header>
-	<div class="grid gap-xl lg:grid-cols-[1fr_1.6fr_1fr]">
-		<div class="flex flex-col gap-xl justify-center">
+	<div class="gap-xl grid lg:grid-cols-[1fr_1.6fr_1fr]">
+		<div class="gap-xl flex flex-col justify-center">
 			<p class="text-xl leading-relaxed">Useful on its own.<br />Beautiful in company.</p>
-			<p class="text-neutral/60">
+			<p class="text-neutral/70">
 				A small stoneware vessel for flowers, kitchen tools, or nothing at all. Each one is finished
 				by hand.
 			</p>
-			<dl class="flex flex-col gap-lg text-sm">
+			<dl class="gap-lg flex flex-col text-sm">
 				<div>
-					<dt class="text-neutral/45">Material</dt>
+					<dt class="text-neutral/65">Material</dt>
 					<dd>Glazed stoneware</dd>
 				</div>
 				<div>
-					<dt class="text-neutral/45">Dimensions</dt>
+					<dt class="text-neutral/65">Dimensions</dt>
 					<dd>H 18 × Ø 12 cm</dd>
 				</div>
 			</dl>
 		</div>
 		<div class="flex items-center">{@render productArt('vase', finish)}</div>
-		<div class="flex flex-col gap-xl justify-center">
+		<div class="gap-xl flex flex-col justify-center">
 			<p class="text-3xl">$38</p>
 			<Rating value={4.9} size="small" />
 			<p class="text-sm">Finish: {finish}</p>
-			<div class="flex flex-col gap-md">
+			<div class="gap-md flex flex-col">
 				{#each ['Clay', 'Sand', 'Chalk'] as color (color)}<Button
 						fullWidth
 						variant={finish === color ? 'soft' : 'outline'}
 						onclick={() => (finish = color)}
-						aria-pressed={finish === color}>{color}</Button
+						pressed={finish === color}>{color}</Button
 					>{/each}
 			</div>
 			<Button fullWidth onclick={() => (added = finish)}>Add to bag →</Button>
-			<p class="text-xs text-neutral/55" aria-live="polite">
+			<p class="text-neutral/65 text-xs" aria-live="polite">
 				{added ? `${added} added to the sample bag.` : 'Made in small batches. Packed with care.'}
 			</p>
 		</div>

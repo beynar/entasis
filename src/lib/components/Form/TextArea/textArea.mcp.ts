@@ -1,7 +1,7 @@
 export const textAreaDescription = `
 # TextArea Component
 
-The TextArea component provides a multi-line text input field with optional auto-resize, character counting, and validation.
+The TextArea component provides a multi-line text input field with a configurable row count, a maximum length, and validation.
 
 ## Basic Usage
 
@@ -23,9 +23,11 @@ Extends all Field component props plus:
 - **rows**: number (default: 3) - Number of visible text rows
 
 ### Behavior Props
-- **resize**: 'none' | 'vertical' | 'horizontal' | 'both' (default: 'vertical')
-- **autoResize**: boolean (default: false) - Automatically adjust height to content
 - **maxLength**: number - Maximum character count
+- **textareaAttrs**: native attributes applied to the underlying textarea
+- **onPressEnter**: (payload) => void - Called when Enter is pressed without Shift
+
+The textarea is not resizable by default (\`resize-none\`); enable a resize handle through the \`input\` theme slot, e.g. \`theme={{ input: { base: 'resize-y' } }}\`.
 
 ### Field Props (inherited)
 - **label**: string | Snippet - Field label
@@ -87,16 +89,6 @@ Extends all Field component props plus:
 />
 \`\`\`
 
-### Auto-resize
-\`\`\`svelte
-<TextArea 
-	label="Notes"
-	bind:value={notes}
-	autoResize
-	placeholder="Type as much as you need..."
-/>
-\`\`\`
-
 ### Required Field
 \`\`\`svelte
 <TextArea 
@@ -116,12 +108,12 @@ Extends all Field component props plus:
 />
 \`\`\`
 
-### No Resize
+### Vertical Resize Handle
 \`\`\`svelte
 <TextArea 
-	label="Fixed Size"
+	label="Notes"
 	bind:value={content}
-	resize="none"
+	theme={{ input: { base: 'resize-y' } }}
 	rows={6}
 />
 \`\`\`
@@ -184,7 +176,7 @@ Extends all Field component props plus:
 	bind:value={css}
 	rows={10}
 	class="font-mono"
-	resize="both"
+	theme={{ input: { base: 'resize' } }}
 	placeholder={'.button { ... }'}
 />
 \`\`\`
@@ -251,9 +243,8 @@ TextArea automatically validates:
 ## Notes
 
 - Supports multi-line text input
-- Can auto-resize to fit content
 - Character counting for length limits
-- Resize handle can be controlled
+- Resize handle can be enabled through the input theme slot
 - Works in forms with validation
 - Maintains scroll position during typing
 
@@ -305,13 +296,18 @@ The theme object contains the following parts:
 \`\`\`
 
 **Focus State Customization**:
+
+To recolor every focus ring in the app at once, set \`designTokens.focusColor\` on \`Theme\`
+instead of overriding per component. \`ring-focus\` is the focus state role and falls back to the
+current role, so it never hard-pins a color.
+
 \`\`\`svelte
 <TextArea 
   label="Custom TextArea"
   bind:value={value}
   theme={{
     inputContainer: {
-      base: 'focus-within:ring-2 focus-within:ring-primary focus-within:border-primary'
+      base: 'focus-within:ring-2 focus-within:ring-focus/50 focus-within:border-focus'
     }
   }}
 />

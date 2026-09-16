@@ -31,7 +31,7 @@
 	} satisfies FormInputs;
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card
 		class="mx-auto w-full max-w-md"
 		title="Create your account"
@@ -51,7 +51,7 @@
 					title="Demo result"
 					description={message}
 				/>{/if}
-			<p class="text-center text-xs text-neutral/60">Local preview · No payment details required</p>
+			<p class="text-neutral/70 text-center text-xs">Local preview · No payment details required</p>
 		</Stack></Card
 	>
 </Stack>

@@ -4,7 +4,7 @@ import { type InferComponentTheme, cva } from '$lib/utils/cva/index.js';
 // The color text input showing / accepting the value in the selected format (hex / rgb / hsl).
 // Negative word-spacing halves the mono font's full-width spaces after rgb()/hsl() commas.
 const defaultInput = cva({
-	base: 'outline-none flex-1 w-full min-w-0 h-full bg-transparent resize-none placeholder:text-neutral/60 autofill:text-neutral appearance-none font-mono text-sm leading-normal [word-spacing:-0.5ch]',
+	base: 'outline-none flex-1 w-full min-w-0 h-full bg-transparent resize-none placeholder:text-neutral/70 autofill:text-neutral appearance-none font-mono text-sm leading-normal [word-spacing:-0.5ch]',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -23,7 +23,7 @@ const defaultInput = cva({
 
 // The bordered field container wrapping the swatch and text input (mirrors the shared field frame).
 const defaultInputContainer = cva({
-	base: 'flex w-full items-center border border-neutral-muted bg-surface-raised px-lg text-neutral ring-0 transition-all rounded-md outline-none focus-within:ring-2 focus-within:ring-primary/50',
+	base: 'flex w-full items-center border border-neutral-muted bg-surface-raised px-lg text-neutral ring-0 transition-[color,background-color,border-color,box-shadow] rounded-md outline-none focus-within:ring-2 focus-within:ring-focus/50',
 	variants: {
 		size: {
 			small: 'h-control-sm text-xs',

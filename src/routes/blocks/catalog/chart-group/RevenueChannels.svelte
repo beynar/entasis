@@ -17,12 +17,12 @@
 	];
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<header>
-		<p class="text-sm text-primary-readable">Growth analytics</p>
+		<p class="text-primary-readable text-sm">Growth analytics</p>
 		<h2 class="mt-sm text-3xl font-semibold">The shape of a good month.</h2>
 	</header>
-	<div class="grid gap-lg lg:grid-cols-3">
+	<div class="gap-lg grid lg:grid-cols-3">
 		<Card
 			title="Revenue trend"
 			description="First half of 2026 · USD thousands"
@@ -34,9 +34,9 @@
 					class="h-64"
 					data={revenue}
 					marks={[{ type: 'bar', x: 'month', y: 'value', fill: 'primary', radius: 4 }]}
-					ariaLabel="Monthly revenue from January to June"
+					label="Monthly revenue from January to June"
 				/>
-				<div class="grid grid-cols-1 gap-lg sm:grid-cols-2">
+				<div class="gap-lg grid grid-cols-1 sm:grid-cols-2">
 					<Stat label="Revenue" value="$188k" variant="ghost" /><Stat
 						label="Monthly growth"
 						value="14.3%"
@@ -57,9 +57,9 @@
 							value: 'value'
 						}
 					]}
-					ariaLabel="Acquisition channel shares"
+					label="Acquisition channel shares"
 				/>
-				<p class="text-sm text-neutral/60">Organic traffic leads at 48%.</p></Stack
+				<p class="text-neutral/70 text-sm">Organic traffic leads at 48%.</p></Stack
 			></Card
 		>
 	</div>

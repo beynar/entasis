@@ -17,15 +17,16 @@ import {
 	type ChartMarkState,
 	type ChartValue as TanStackValue,
 	type SceneNode,
+	type SceneRect,
 	type VisualChannel
 } from '@tanstack/charts';
 import {
 	compileChannel,
-	compileColor,
 	compileColorVisual,
+	compileKeyChannel,
 	compileMarkChannels,
 	compileNumberOrChannel,
-	DEFAULT_CHART_PALETTE
+	compilePaletteColors
 } from './chart.channels.js';
 import { unsupportedDiscriminant } from './chart.errors.js';
 import { compileHexbinScatterMark } from './chart.hexbin.js';
@@ -36,6 +37,7 @@ import type {
 	ChartColor,
 	ChartKey,
 	ChartLineOptions,
+	ChartPalette,
 	ChartPointOptions,
 	ChartPositionDefinition,
 	ChartRequiredChannel,
@@ -47,6 +49,14 @@ import type {
 	ChartValue,
 	ChartVisual
 } from './chart.props.js';
+import {
+	isWideChannel,
+	meltWideRows,
+	wideKey,
+	wideSeries,
+	wideValue,
+	type ChartWideRow
+} from './chart.wide.js';
 import { compileChartCurve, compileChartSizeChannel } from './chart.scale.js';
 
 export type CompiledMark = TanStackMark<unknown, TanStackValue, TanStackValue>;
@@ -87,6 +97,11 @@ export function compileSeriesMark<TRow extends object>(
 	fallbackSeries?: ChartChannel<TRow, ChartKey>,
 	focusAxis?: 'x' | 'y'
 ): CompiledMarkResult {
+	const vertical = mark.direction === undefined || mark.direction === 'vertical';
+	const valueChannel = vertical ? mark.y : mark.x;
+	if (isWideChannel(valueChannel)) {
+		return compileWideAreaSeries(data, mark, path, vertical, valueChannel, gradients, focusAxis);
+	}
 	const line = resolveSeriesLine(mark);
 	if (!mark.area && !line && !mark.points) {
 		throw new TypeError(`[Chart] ${path} must enable line, area, or points.`);
@@ -113,6 +128,41 @@ export function compileSeriesMark<TRow extends object>(
 		requiresX: compiled.requiresX,
 		requiresY: compiled.requiresY
 	};
+}
+
+function compileWideAreaSeries<TRow extends object>(
+	data: readonly TRow[],
+	mark: ChartSeriesMark<TRow>,
+	path: string,
+	vertical: boolean,
+	fields: readonly string[],
+	gradients: AreaGradients | undefined,
+	focusAxis?: 'x' | 'y'
+): CompiledMarkResult {
+	const axis = vertical ? 'y' : 'x';
+	validateWideMark(mark, path, axis);
+	if (!mark.area || mark.layout === undefined) {
+		throw new TypeError(
+			`[Chart] ${path}.${axis} accepts a list of fields only on an area stack; set ${path}.area and ${path}.layout.`
+		);
+	}
+	const rows = meltWideRows(data, fields, `${path}.${axis}`);
+	const melted = {
+		...mark,
+		[axis]: wideValue<TRow>,
+		series: wideSeries<TRow>,
+		colorBy: wideSeries<TRow>,
+		key: wideKey(mark.key)
+	} as unknown as ChartSeriesMark<ChartWideRow<TRow>>;
+	return compileAreaSeries(
+		rows,
+		melted,
+		path,
+		gradients,
+		resolveSeriesLine(melted),
+		undefined,
+		focusAxis
+	);
 }
 
 function compileSeriesInterval<TRow extends object>(
@@ -171,8 +221,8 @@ function compileLineSeries<TRow extends object>(
 	const lineMark = line
 		? lineY(data, {
 				...compileMarkChannels(mark, fallbackSeries),
-				x: compileChannel(mark.x),
-				y: compileChannel(mark.y),
+				x: compileChannel(mark.x as ChartChannel<TRow, ChartValue>),
+				y: compileChannel(mark.y as ChartChannel<TRow, number>),
 				stroke: compileColorVisual(line.stroke ?? mark.stroke),
 				strokeOpacity: line.strokeOpacity ?? mark.strokeOpacity,
 				strokeWidth: line.strokeWidth ?? mark.strokeWidth,
@@ -184,7 +234,7 @@ function compileLineSeries<TRow extends object>(
 	const points = mark.points
 		? compileCartesianPoints(
 				data,
-				mark,
+				mark as CartesianPointMark<TRow>,
 				mark.points,
 				`${path}:points`,
 				fallbackSeries,
@@ -204,16 +254,19 @@ function compileLineSeries<TRow extends object>(
 	};
 }
 
+/** A mark whose positions are known to be single channels, never wide value fields. */
+type CartesianPointMark<TRow> = {
+	id?: string;
+	key?: ChartRequiredChannel<TRow, ChartKey>;
+	series?: ChartChannel<TRow, ChartKey>;
+	colorBy?: ChartChannel<TRow, ChartKey>;
+	x: ChartChannel<TRow, ChartValue> | ChartChannel<TRow, number>;
+	y: ChartChannel<TRow, ChartValue> | ChartChannel<TRow, number>;
+};
+
 function compileCartesianPoints<TRow extends object>(
 	data: readonly TRow[],
-	mark: {
-		id?: string;
-		key?: ChartRequiredChannel<TRow, ChartKey>;
-		series?: ChartChannel<TRow, ChartKey>;
-		colorBy?: ChartChannel<TRow, ChartKey>;
-		x: ChartChannel<TRow, ChartValue> | ChartChannel<TRow, number>;
-		y: ChartChannel<TRow, ChartValue> | ChartChannel<TRow, number>;
-	},
+	mark: CartesianPointMark<TRow>,
 	input: true | ChartPointOptions<TRow>,
 	id: string,
 	fallbackSeries?: ChartChannel<TRow, ChartKey>,
@@ -370,10 +423,10 @@ function validateScatterSizeScale<TRow extends object>(
 }
 
 export function compileAreaGradients(
-	palette: readonly ChartColor[] | undefined,
+	palette: ChartPalette | undefined,
 	path: string
 ): AreaGradients {
-	const colors = palette?.map(compileColor) ?? DEFAULT_CHART_PALETTE;
+	const colors = compilePaletteColors(palette);
 	const prefix = `${path || 'root'}-area`.replaceAll(/[^a-zA-Z0-9_-]/g, '-');
 	const vertical = new Map<string, string>();
 	const horizontal = new Map<string, string>();
@@ -432,8 +485,8 @@ function compileAreaSeries<TRow extends object>(
 	if (mark.direction === undefined || mark.direction === 'vertical') {
 		const compiled = areaY(data, {
 			...style,
-			x: compileChannel(mark.x),
-			y: compileChannel(mark.y),
+			x: compileChannel(mark.x as ChartChannel<TRow, ChartValue>),
+			y: compileChannel(mark.y as ChartChannel<TRow, number>),
 			y1: compileNumberOrChannel(mark.baseline),
 			layout: compileStackLayout(mark.layout, `${path}.layout`),
 			curve: lineCurve
@@ -448,7 +501,7 @@ function compileAreaSeries<TRow extends object>(
 			? alignAreaPoints(
 					compileCartesianPoints(
 						data,
-						mark,
+						mark as CartesianPointMark<TRow>,
 						mark.points,
 						`${path}:points`,
 						fallbackSeries,
@@ -470,9 +523,9 @@ function compileAreaSeries<TRow extends object>(
 	if (mark.direction === 'horizontal') {
 		const compiled = areaX(data, {
 			...style,
-			x: compileChannel(mark.x),
+			x: compileChannel(mark.x as ChartChannel<TRow, number>),
 			x1: compileNumberOrChannel(mark.baseline),
-			y: compileChannel(mark.y),
+			y: compileChannel(mark.y as ChartChannel<TRow, ChartValue>),
 			layout: compileStackLayout(mark.layout, `${path}.layout`),
 			curve: curveFactory ? d3AreaXCurve(curveFactory) : undefined
 		});
@@ -486,7 +539,7 @@ function compileAreaSeries<TRow extends object>(
 			? alignAreaPoints(
 					compileCartesianPoints(
 						data,
-						mark,
+						mark as CartesianPointMark<TRow>,
 						mark.points,
 						`${path}:points`,
 						fallbackSeries,
@@ -514,6 +567,11 @@ export function compileBarMark<TRow extends object>(
 	path: string,
 	fallbackSeries?: ChartChannel<TRow, ChartKey>
 ): CompiledMarkResult {
+	const vertical = mark.direction === undefined || mark.direction === 'vertical';
+	const valueChannel = vertical ? mark.y : mark.x;
+	if (isWideChannel(valueChannel)) {
+		return compileWideBarMark(data, mark, path, vertical, valueChannel);
+	}
 	if (mark.variant && mark.series === undefined && mark.colorBy === undefined) {
 		throw new TypeError(
 			`[Chart] ${path}.variant "${mark.variant}" requires ${path}.series or ${path}.colorBy.`
@@ -527,14 +585,19 @@ export function compileBarMark<TRow extends object>(
 		radius: mark.radius
 	};
 
-	if (mark.direction === undefined || mark.direction === 'vertical') {
-		const compiled = barY(data, {
-			...style,
-			x: compileChannel(mark.x),
-			y: compileChannel(mark.y),
-			y1: compileNumberOrChannel(mark.baseline),
-			layout: compileBarVariant(mark, `${path}.variant`)
-		});
+	if (vertical) {
+		const compiled = withStackGap(
+			barY(data, {
+				...style,
+				x: compileChannel(mark.x as ChartChannel<TRow, ChartValue>),
+				y: compileChannel(mark.y as ChartChannel<TRow, number>),
+				y1: compileNumberOrChannel(mark.baseline),
+				layout: compileBarVariant(mark, `${path}.variant`)
+			}),
+			mark,
+			'vertical',
+			path
+		);
 		return {
 			mark: compiled,
 			annotationMarks: [compiled],
@@ -544,13 +607,18 @@ export function compileBarMark<TRow extends object>(
 	}
 
 	if (mark.direction === 'horizontal') {
-		const compiled = barX(data, {
-			...style,
-			x: compileChannel(mark.x),
-			x1: compileNumberOrChannel(mark.baseline),
-			y: compileChannel(mark.y),
-			layout: compileBarVariant(mark, `${path}.variant`)
-		});
+		const compiled = withStackGap(
+			barX(data, {
+				...style,
+				x: compileChannel(mark.x as ChartChannel<TRow, number>),
+				x1: compileNumberOrChannel(mark.baseline),
+				y: compileChannel(mark.y as ChartChannel<TRow, ChartValue>),
+				layout: compileBarVariant(mark, `${path}.variant`)
+			}),
+			mark,
+			'horizontal',
+			path
+		);
 		return {
 			mark: compiled,
 			annotationMarks: [compiled],
@@ -560,6 +628,143 @@ export function compileBarMark<TRow extends object>(
 	}
 
 	return unsupportedDiscriminant(mark, `${path}.direction`);
+}
+
+function compileWideBarMark<TRow extends object>(
+	data: readonly TRow[],
+	mark: ChartBarMark<TRow>,
+	path: string,
+	vertical: boolean,
+	fields: readonly string[]
+): CompiledMarkResult {
+	const axis = vertical ? 'y' : 'x';
+	validateWideMark(mark, path, axis);
+	const rows = meltWideRows(data, fields, `${path}.${axis}`);
+	const style = {
+		id: mark.id,
+		key: compileKeyChannel(wideKey(mark.key)),
+		z: wideSeries<TRow>,
+		color: wideSeries<TRow>,
+		fill: compileColorVisual<ChartWideRow<TRow>>(mark.fill),
+		fillOpacity: mark.fillOpacity,
+		inset: mark.inset,
+		radius: mark.radius
+	};
+	const layout = compileBarVariant(mark, `${path}.variant`);
+	const compiled = withStackGap(
+		vertical
+			? barY(rows, {
+					...style,
+					x: compileChannel(mark.x as ChartChannel<ChartWideRow<TRow>, ChartValue>),
+					y: wideValue<TRow>,
+					layout
+				})
+			: barX(rows, {
+					...style,
+					x: wideValue<TRow>,
+					y: compileChannel(mark.y as ChartChannel<ChartWideRow<TRow>, ChartValue>),
+					layout
+				}),
+		mark,
+		vertical ? 'vertical' : 'horizontal',
+		path
+	);
+	return { mark: compiled, annotationMarks: [compiled], requiresX: true, requiresY: true };
+}
+
+export function validateWideMark(
+	mark: { variant?: string; annotations?: readonly unknown[]; analysis?: readonly unknown[] },
+	path: string,
+	axis: 'x' | 'y'
+): void {
+	if (mark.annotations !== undefined) {
+		throw new TypeError(
+			`[Chart] ${path}.annotations cannot be combined with a wide ${path}.${axis} because the melted rows own their own keys.`
+		);
+	}
+	if (mark.analysis !== undefined) {
+		throw new TypeError(
+			`[Chart] ${path}.analysis cannot be combined with a wide ${path}.${axis} because the displayed values are transformed by the stack layout.`
+		);
+	}
+}
+
+/**
+ * Segment gap for a stacked bar. TanStack bars expose `inset` (both categorical edges) and
+ * `maxThickness`, but nothing between the segments of one stack, and the stack layout owns
+ * the value positions, so the gap is taken out of the painted rectangles after layout:
+ * every segment that has a neighbour before it on the value axis is shortened on that side.
+ * Points, semantic values, and stack totals are untouched, so the tooltip still reads the
+ * real values and hit testing still resolves through each bar's `x` affinity.
+ */
+function withStackGap<TRow>(
+	mark: CompiledMark,
+	source: ChartBarMark<TRow>,
+	direction: 'vertical' | 'horizontal',
+	path: string
+): CompiledMark {
+	const gap = source.variant === 'stack' ? source.gap : undefined;
+	if (gap === undefined) return mark;
+	if (!Number.isFinite(gap) || gap < 0) {
+		throw new TypeError(`[Chart] ${path}.gap must be a finite number of pixels of 0 or more.`);
+	}
+	if (gap === 0) return mark;
+	return {
+		...mark,
+		initialize(context) {
+			const initialized = mark.initialize(context);
+			return {
+				...initialized,
+				render(renderContext) {
+					const rendered = initialized.render(renderContext);
+					return { ...rendered, nodes: applyStackGap(rendered.nodes, gap, direction) };
+				}
+			};
+		}
+	};
+}
+
+function applyStackGap(
+	nodes: readonly SceneNode[],
+	gap: number,
+	direction: 'vertical' | 'horizontal'
+): readonly SceneNode[] {
+	const rects: SceneRect[] = [];
+	const collect = (children: readonly SceneNode[]) => {
+		for (const node of children) {
+			if (node.kind === 'group') collect(node.children);
+			else if (node.kind === 'rect') rects.push(node);
+		}
+	};
+	collect(nodes);
+	// A segment is shortened only on the edge it shares with the previous segment of the same
+	// stack, so the segment sitting on the baseline keeps its full extent and the stack total
+	// still reaches the same end.
+	const shrunk = new Map<SceneNode, SceneNode>();
+	for (const rect of rects) {
+		const shares = rects.some((other) => {
+			if (other === rect) return false;
+			if (direction === 'vertical') {
+				if (Math.abs(other.x - rect.x) > 0.5) return false;
+				return Math.abs(other.y - (rect.y + rect.height)) < 0.5;
+			}
+			if (Math.abs(other.y - rect.y) > 0.5) return false;
+			return Math.abs(other.x + other.width - rect.x) < 0.5;
+		});
+		if (!shares) continue;
+		shrunk.set(
+			rect,
+			direction === 'vertical'
+				? { ...rect, height: Math.max(0, rect.height - gap) }
+				: { ...rect, x: rect.x + gap, width: Math.max(0, rect.width - gap) }
+		);
+	}
+	if (shrunk.size === 0) return nodes;
+	const map = (children: readonly SceneNode[]): readonly SceneNode[] =>
+		children.map((node) =>
+			node.kind === 'group' ? { ...node, children: map(node.children) } : (shrunk.get(node) ?? node)
+		);
+	return map(nodes);
 }
 
 function resolveSeriesLine<TRow>(mark: ChartSeriesMark<TRow>): ChartLineOptions<TRow> | undefined {

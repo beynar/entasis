@@ -1,23 +1,21 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import { microphoneIcon } from '$lib/components/Icons/microphone.js';
 	import { pauseIcon } from '$lib/components/Icons/pause.js';
 	import { playIcon } from '$lib/components/Icons/play.js';
 	import { stopIconFill } from '$lib/components/Icons/stop.js';
 	import { xIcon } from '$lib/components/Icons/x.js';
-	import { tooltip } from '$lib/components/Tooltip/tooltip.svelte.js';
+	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
 	import Field from '../Field/Field.svelte';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import VoiceInputContent from './VoiceInputContent.svelte';
 	import type { VoiceInputProps } from './voiceInput.props.js';
 	import { VoiceInputState } from './voiceInput.state.svelte.js';
-	import {
-		formatVoiceInputDuration,
-		formatVoiceInputDurationRequirement,
-		normalizeVoiceInputDuration
-	} from './voiceInput.time.js';
+	import { formatVoiceInputDuration, normalizeVoiceInputDuration } from './voiceInput.time.js';
 	import { useVoiceInputTheme } from './voiceInput.theme.js';
+	import { useDefaultColor } from '../../Theme/theme.state.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
 
 	let {
 		defaultValue = null,
@@ -36,31 +34,42 @@
 		onStop,
 		onError,
 		visible,
-		color = 'primary',
+		color,
 		size = 'normal',
 		variant = 'default',
-		ariaLabel = 'Start voice recording',
-		stopLabel = 'Stop recording',
-		playLabel = 'Play recording',
-		pauseLabel = 'Pause recording',
-		seekLabel = 'Seek recording',
-		clearLabel = 'Clear recording',
+		startLabel,
+		stopLabel,
+		playLabel,
+		pauseLabel,
+		seekLabel,
+		clearLabel,
 		fieldAttrs,
 		theme,
 		...rest
 	}: VoiceInputProps = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	const valueState = createBindableValue<Blob | null>(
+		() => value,
+		(next) => {
+			value = next;
+		},
+		() => defaultValue
+	);
 
 	const id = $props.id();
+	const t = $derived(useI18n());
+	const resolvedColor = $derived(useDefaultColor(color));
+	const resolvedStopLabel = $derived(stopLabel ?? t.voiceInputStop);
+	const resolvedSeekLabel = $derived(seekLabel ?? t.voiceInputSeek);
+	const resolvedClearLabel = $derived(clearLabel ?? t.voiceInputClear);
 	const normalizedMinDuration = $derived(normalizeVoiceInputDuration(minDuration) ?? 0);
 	const normalizedMaxDuration = $derived(normalizeVoiceInputDuration(maxDuration));
 	const field = createFieldState({
 		id,
 		get value() {
-			return value;
+			return valueState.value;
 		},
 		set value(nextValue) {
-			value = nextValue;
+			valueState.value = nextValue;
 		},
 		get errors() {
 			return errors;
@@ -91,12 +100,10 @@
 		},
 		onValidate: (currentValue) => {
 			if (duration < normalizedMinDuration) {
-				return [`Record at least ${formatVoiceInputDurationRequirement(normalizedMinDuration)}.`];
+				return [t.voiceInputMinDuration(normalizedMinDuration)];
 			}
 			if (normalizedMaxDuration !== null && duration > normalizedMaxDuration) {
-				return [
-					`Record no longer than ${formatVoiceInputDurationRequirement(normalizedMaxDuration)}.`
-				];
+				return [t.voiceInputMaxDuration(normalizedMaxDuration)];
 			}
 			return onValidate?.(currentValue) || false;
 		},
@@ -132,7 +139,8 @@
 			field.validate(result.blob);
 			onStop?.(result);
 		},
-		onError: (error) => onError?.(error)
+		onError: (error) => onError?.(error),
+		getMessages: () => t
 	});
 
 	const classes = $derived(useVoiceInputTheme(theme));
@@ -164,20 +172,22 @@
 	});
 	const buttonLabel = $derived(
 		recorder.status === 'requesting'
-			? 'Waiting for microphone access'
+			? t.voiceInputWaitingForMicrophone
 			: recorder.isRecording || recorder.isStopping
-				? stopLabel
-				: ariaLabel
+				? resolvedStopLabel
+				: (startLabel ?? t.voiceInputStart)
 	);
-	const playbackButtonLabel = $derived(recorder.isPlaying ? pauseLabel : playLabel);
+	const playbackButtonLabel = $derived(
+		recorder.isPlaying ? (pauseLabel ?? t.voiceInputPause) : (playLabel ?? t.voiceInputPlay)
+	);
 	const statusMessage = $derived.by(() => {
 		if (recorder.errorMessage) return recorder.errorMessage;
-		if (recorder.status === 'requesting') return 'Waiting for microphone permission.';
-		if (recorder.isRecording) return 'Recording in progress.';
-		if (recorder.isStopping) return 'Finishing recording.';
-		if (recorder.isPlaying) return 'Playing recording.';
-		if (field.value) return `Recording ready, ${formatVoiceInputDuration(duration)}.`;
-		return 'Ready to record.';
+		if (recorder.status === 'requesting') return t.voiceInputStatusRequesting;
+		if (recorder.isRecording) return t.voiceInputStatusRecording;
+		if (recorder.isStopping) return t.voiceInputStatusFinishing;
+		if (recorder.isPlaying) return t.voiceInputStatusPlaying;
+		if (field.value) return t.voiceInputStatusReady(formatVoiceInputDuration(duration));
+		return t.voiceInputStatusIdle;
 	});
 
 	function clearRecording() {
@@ -199,7 +209,7 @@
 	theme={fieldTheme}
 	fieldAttrs={{
 		...fieldAttrs,
-		'data-color': color,
+		'data-color': resolvedColor,
 		'data-state': recorder.status,
 		'data-variant': variant,
 		'data-expanded': isExpanded
@@ -210,7 +220,7 @@
 		<FieldActionButton
 			id={`${id}-playback`}
 			{size}
-			color={recorder.isPlaying ? color : 'neutral'}
+			color={recorder.isPlaying ? resolvedColor : 'neutral'}
 			label={playbackButtonLabel}
 			disabled={field.disabled}
 			edge={variant === 'compact' ? 'none' : 'start'}
@@ -233,7 +243,7 @@
 		{hasPlayback}
 		disabled={!!field.disabled}
 		{duration}
-		{seekLabel}
+		seekLabel={resolvedSeekLabel}
 		{recorder}
 		{classes}
 		{theme}
@@ -244,7 +254,7 @@
 			id={`${id}-clear`}
 			{size}
 			color="danger"
-			label={clearLabel}
+			label={resolvedClearLabel}
 			disabled={field.disabled}
 			edge="none"
 			class={classes.clearAction({
@@ -254,13 +264,13 @@
 			})}
 			prefix={xIcon}
 			onclick={clearRecording}
-			{@attach tooltip({ content: clearLabel, position: 'top', size: 'small' })}
+			{@attach tooltip({ content: resolvedClearLabel, position: 'top', size: 'small' })}
 		/>
 	{/if}
 	<FieldActionButton
 		{id}
 		{size}
-		color={recorder.isRecording ? color : 'neutral'}
+		color={recorder.isRecording ? resolvedColor : 'neutral'}
 		label={buttonLabel}
 		disabled={field.disabled || recorder.isBusy}
 		edge={isExpanded ? 'end' : 'none'}

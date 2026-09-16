@@ -23,7 +23,7 @@
 				{@render today()}
 				{@render next()}
 			</div>
-			<div class="rounded-full bg-primary/10 px-3 py-1 text-primary">
+			<div class="bg-primary/10 text-primary-readable rounded-full px-3 py-1">
 				{@render title()}
 			</div>
 			{@render viewSwitcher()}
@@ -35,7 +35,7 @@
 			{#if occurrence.item.owner === 'Iris'}
 				<div
 					data-event-calendar-demo-custom-item
-					class="flex min-w-0 items-center gap-1 rounded bg-primary/10 px-1 text-primary"
+					class="bg-primary/10 text-primary-readable flex min-w-0 items-center gap-1 rounded px-1"
 				>
 					{@render markerContent()}
 					{@render titleContent()}

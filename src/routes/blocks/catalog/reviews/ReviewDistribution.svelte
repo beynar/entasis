@@ -46,37 +46,39 @@
 	let filter = $state(0);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Customer reviews</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+			Customer reviews
+		</p>
 		<Heading size="h2" weight="bold">A little outside perspective.</Heading>
 	</header>
-	<div class="grid gap-xl md:grid-cols-[15rem_1fr]">
-		<aside class="flex flex-col gap-xl">
+	<div class="gap-xl grid md:grid-cols-[15rem_1fr]">
+		<aside class="gap-xl flex flex-col">
 			<p class="text-5xl font-semibold">
-				4.8<span class="text-lg font-normal text-neutral/45"> / 5</span>
+				4.8<span class="text-neutral/65 text-lg font-normal"> / 5</span>
 			</p>
 			<Rating value={4.8} />
-			<p class="text-sm text-neutral/50">128 sample reviews</p>
+			<p class="text-neutral/65 text-sm">128 sample reviews</p>
 			{#each distribution as row (row.stars)}<Button
 					variant={filter === row.stars ? 'soft' : 'ghost'}
 					color="neutral"
 					class="w-full justify-between"
 					onclick={() => (filter = filter === row.stars ? 0 : row.stars)}
 					><span>{row.stars} ★</span><span class="flex-1"
-						><Meter value={{ value: row.count, color: 'primary' }} max={128} /></span
+						><Meter value={row.count} color="primary" max={128} /></span
 					><span class="text-xs">{row.count}</span></Button
 				>{/each}<Button variant="link" size="small" onclick={() => (filter = 0)}
 				>Show all ratings</Button
 			>
 		</aside>
-		<div class="flex flex-col gap-xl">
+		<div class="gap-xl flex flex-col">
 			{#each reviews.filter((review) => filter === 0 || review.rating === filter) as review (review.id)}<article
-					class="flex flex-col gap-lg p-xl rounded-lg border border-neutral/15"
+					class="gap-lg p-xl border-neutral/15 flex flex-col rounded-lg border"
 				>
-					<div class="flex gap-lg items-center justify-between">
-						<div class="flex gap-md items-center">
-							<Avatar size="small" user={{ name: review.name }} /><span class="font-medium"
+					<div class="gap-lg flex items-center justify-between">
+						<div class="gap-md flex items-center">
+							<Avatar size="small" name={review.name} /><span class="font-medium"
 								>{review.name}</span
 							>
 						</div>
@@ -84,7 +86,7 @@
 					</div>
 					<h3 class="font-semibold">{review.title}</h3>
 					<p class="text-neutral/65">{review.body}</p>
-				</article>{:else}<p class="rounded-lg bg-surface-recessed p-xl text-neutral/60">
+				</article>{:else}<p class="bg-surface-recessed p-xl text-neutral/70 rounded-lg">
 					There are no {filter}-star reviews in this sample.
 				</p>{/each}
 		</div>

@@ -6,14 +6,14 @@
 		value,
 		indeterminate = false,
 		disabled = false,
-		ariaLabel,
+		label,
 		onValueChange,
 		classes
 	}: {
 		value: boolean;
 		indeterminate?: boolean;
 		disabled?: boolean;
-		ariaLabel: string;
+		label: string;
 		onValueChange: (checked: boolean) => void;
 		classes: DataTableClasses;
 	} = $props();
@@ -29,7 +29,7 @@
 
 <Checkbox
 	mode="control"
-	{ariaLabel}
+	{label}
 	{value}
 	{indeterminate}
 	{disabled}

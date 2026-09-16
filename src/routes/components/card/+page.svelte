@@ -1,14 +1,15 @@
 <script lang="ts">
 	import DocPage from '../../DocPage.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
-	import { Card } from '$lib/components/Card/index.js';
+	import { Card, type CardElevation } from '$lib/components/Card/index.js';
 	import Button from '$lib/components/Button/Button.svelte';
-	import { colors, sizes } from '$lib/utils/tokens.js';
+	import { colors, densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import { Form } from '$lib/components/Form/Form/index.js';
 	import CardPlayground from './demos/CardPlayground.svelte';
 
 	const cardVariants = ['solid', 'outline', 'soft', 'ghost'] as const;
+	const cardElevations = ['1', '2', '3', '4', '5'] as const;
 	const controls = createComponentControls([
 		{
 			name: 'size',
@@ -22,7 +23,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'variant',
@@ -37,8 +38,16 @@
 			label: 'Color',
 			value: 'neutral',
 			options: colors
+		},
+		{
+			name: 'elevation',
+			type: 'segmented',
+			label: 'Elevation',
+			value: '1',
+			options: cardElevations
 		}
 	]);
+	const elevation = $derived(Number(controls.value.elevation) as CardElevation);
 </script>
 
 <DocPage
@@ -55,7 +64,7 @@
 >
 	<ComponentCard
 		{controls}
-		code={`<Card size="${controls.value.size}" density="${controls.value.density}" variant="${controls.value.variant}" color="${controls.value.color}">
+		code={`<Card size="${controls.value.size}" density="${controls.value.density}" variant="${controls.value.variant}" color="${controls.value.color}" elevation={${elevation}}>
 	{#snippet title()}
 		Card Title
 	{/snippet}
@@ -73,6 +82,7 @@
 			density={controls.value.density}
 			variant={controls.value.variant}
 			color={controls.value.color}
+			{elevation}
 		>
 			{#snippet title()}
 				Card Title
@@ -80,9 +90,7 @@
 			{#snippet description()}
 				This is a description of the card content.
 			{/snippet}
-			{#snippet children()}
-				<p>Card content goes here.</p>
-			{/snippet}
+			<p>Card content goes here.</p>
 		</Card>
 	</ComponentCard>
 
@@ -148,9 +156,7 @@
 						{#snippet description()}
 							Manage your preferences
 						{/snippet}
-						{#snippet children()}
-							<p>Same paddings, scaled type.</p>
-						{/snippet}
+						<p>Same paddings, scaled type.</p>
 					</Card>
 				{/each}
 			</div>
@@ -158,13 +164,13 @@
 
 		<ComponentCard
 			title="Density"
-			description="density scales the paddings and gaps — small for dense dashboards, large for roomy detail surfaces. Combine freely with size."
-			code={`<Card density="small" ... />
+			description="density scales the paddings and gaps — compact for dense dashboards, comfortable for roomy detail surfaces. Combine freely with size."
+			code={`<Card density="compact" ... />
 <Card density="normal" ... />
-<Card density="large" ... />`}
+<Card density="comfortable" ... />`}
 		>
 			<div class="grid w-full gap-6 lg:grid-cols-3">
-				{#each ['small', 'normal', 'large'] as const as d (d)}
+				{#each ['compact', 'normal', 'comfortable'] as const as d (d)}
 					<Card density={d}>
 						{#snippet title()}
 							Settings ({d})
@@ -172,9 +178,7 @@
 						{#snippet description()}
 							Manage your preferences
 						{/snippet}
-						{#snippet children()}
-							<p>Same type, scaled spacing.</p>
-						{/snippet}
+						<p>Same type, scaled spacing.</p>
 					</Card>
 				{/each}
 			</div>
@@ -204,13 +208,11 @@
 		>
 			<div class="grid w-full gap-4 sm:grid-cols-2 lg:grid-cols-4">
 				{#each colors as color (color)}
-					<Card {color} density="small">
+					<Card {color} density="compact">
 						{#snippet title()}
 							{color}
 						{/snippet}
-						{#snippet children()}
-							<p>Solid {color} surface.</p>
-						{/snippet}
+						<p>Solid {color} surface.</p>
 					</Card>
 				{/each}
 			</div>
@@ -235,9 +237,7 @@
 				{#snippet description()}
 					Choose how you want to be notified
 				{/snippet}
-				{#snippet children()}
-					<p>Email and push notifications are enabled.</p>
-				{/snippet}
+				<p>Email and push notifications are enabled.</p>
 			</Card>
 		</ComponentCard>
 
@@ -252,12 +252,10 @@
 				{#snippet description()}
 					Your plan renews on August 1st
 				{/snippet}
-				{#snippet children()}
-					<p>Pro plan · $29/month · 3 seats</p>
-				{/snippet}
+				<p>Pro plan · $29/month · 3 seats</p>
 				{#snippet footer()}
 					<div class="flex w-full items-center justify-between">
-						<span class="text-neutral/60 text-sm">Next invoice: $87</span>
+						<span class="text-neutral/70 text-sm">Next invoice: $87</span>
 						<Button size="small">Manage plan</Button>
 					</div>
 				{/snippet}
@@ -276,9 +274,7 @@
 					{#snippet description()}
 						Everything new in version 0.2
 					{/snippet}
-					{#snippet children()}
-						<p>Opens in a new tab.</p>
-					{/snippet}
+					<p>Opens in a new tab.</p>
 				</Card>
 				<Card onclick={() => console.log('Card clicked')}>
 					{#snippet title()}
@@ -287,9 +283,7 @@
 					{#snippet description()}
 						The whole surface is clickable
 					{/snippet}
-					{#snippet children()}
-						<p>Logs a message on click.</p>
-					{/snippet}
+					<p>Logs a message on click.</p>
 				</Card>
 			</div>
 		</ComponentCard>

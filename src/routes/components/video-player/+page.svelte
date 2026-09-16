@@ -164,7 +164,7 @@ ${'</' + 'script>'}
 					bind:currentTime
 					controls={['play', 'seek', 'time', 'volume', 'settings', 'fullscreen']}
 				/>
-				<p class="text-neutral/60 text-sm">
+				<p class="text-neutral/70 text-sm">
 					{paused ? 'Paused' : 'Playing'} at {currentTime.toFixed(1)}s
 				</p>
 			</div>

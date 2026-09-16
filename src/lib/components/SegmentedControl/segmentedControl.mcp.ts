@@ -33,7 +33,7 @@ A compact single-selection input for switching between a small set of mutually e
 - **color**: semantic color — controls the selected pill and focus ring; defaults to \`'neutral'\`.
 - **variant**: \`'normal' | 'pill'\` — controls corner radius; defaults to the moderately rounded \`'normal'\` shape.
 - **disabled**: \`boolean\` — disables the full control.
-- **ariaLabel**: \`string\` — accessible radiogroup name; defaults to \`'Segmented control'\`.
+- **label**: \`string\` — accessible name for the radiogroup; defaults to the catalog's "Segmented control".
 - **class**: additional root classes.
 - **theme**: component theme overrides.
 
@@ -44,12 +44,11 @@ type SegmentedControlItem<Value extends string = string> = {
   value: Value;
   label?: string | Snippet;
   icon?: string | Snippet;
-  ariaLabel?: string;
   disabled?: boolean;
 };
 \`\`\`
 
-The default renderer displays \`icon\`, then \`label\`. An item with only an icon remains icon-only; use \`ariaLabel\` when its value is not a suitable accessible name. If neither is provided, the value is displayed.
+The default renderer displays \`icon\`, then \`label\`. \`label\` is also the segment's accessible name: a string is painted and spoken, a snippet names the segment through its own content, and an icon-only segment (no \`label\`) falls back to its \`value\`.
 
 ## Custom item renderer
 

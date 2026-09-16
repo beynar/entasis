@@ -84,15 +84,15 @@ const semanticCases = [
 function renderDefinition<TRow extends object>(
 	data: readonly TRow[],
 	definition: ChartConfiguration<TRow>,
-	ariaLabel: string
+	label: string
 ): string {
 	const TypedChart = Chart as Component<ChartProps<TRow>>;
 	return render(TypedChart, {
 		props: {
 			data,
 			...definition,
-			ariaLabel,
-			initialDimensions: { width: 640, height: 360 }
+			label,
+			aspectRatio: 640 / 360
 		}
 	}).body;
 }
@@ -154,5 +154,120 @@ describe('Chart mark rendering', () => {
 		expect(body).toContain('data-ts-key="selected-band"');
 		expect(body).toContain('width="20"');
 		expect(body).toContain('Selected point');
+	});
+});
+
+type WideRow = {
+	month: string;
+	completed: number;
+	inProgress: number;
+	pending: number;
+};
+
+const wideRows: readonly WideRow[] = [
+	{ month: 'January', completed: 12, inProgress: 8, pending: 4 },
+	{ month: 'February', completed: 10, inProgress: 9, pending: 6 },
+	{ month: 'March', completed: 14, inProgress: 5, pending: 3 }
+];
+
+const wideStack = {
+	x: { scale: { type: 'band' } },
+	y: { scale: { type: 'linear' } },
+	marks: [
+		{
+			type: 'bar',
+			variant: 'stack',
+			x: 'month',
+			y: ['completed', 'inProgress', 'pending']
+		}
+	]
+} satisfies ChartConfiguration<WideRow>;
+
+function renderWide(
+	definition: ChartConfiguration<WideRow>,
+	extra: Partial<ChartProps<WideRow>> = {}
+): string {
+	const TypedChart = Chart as Component<ChartProps<WideRow>>;
+	return render(TypedChart, {
+		props: {
+			data: wideRows,
+			...definition,
+			...extra,
+			label: 'Task status',
+			height: 320
+		} as ChartProps<WideRow>
+	}).body;
+}
+
+/** Painted segment heights, without the full-height plot background rectangle. */
+function barHeights(body: string): number[] {
+	return [...body.matchAll(/<rect[^>]*\sheight="([\d.]+)"/g)]
+		.map((match) => Number(match[1]))
+		.filter((height) => height < 320);
+}
+
+describe('Chart wide value fields', () => {
+	test('melts a list of fields into one stacked series per field', () => {
+		const body = renderWide(wideStack);
+		// three months × three melted series
+		expect(barHeights(body)).toHaveLength(9);
+		expect(body).toContain('aria-label="Task status"');
+	});
+
+	test('names series colors by key through a record palette', () => {
+		const body = renderWide(wideStack, {
+			palette: { completed: 'success', pending: 'danger' }
+		});
+		expect(body).toContain('var(--color-success)');
+		expect(body).toContain('var(--color-danger)');
+		// `inProgress` has no entry and falls back to the first default palette color.
+		expect(body).toContain('var(--color-primary)');
+	});
+
+	test('resolves the surface family like the semantic roles', () => {
+		const body = renderWide(wideStack, { palette: { completed: 'surface-raised' } });
+		expect(body).toContain('var(--color-surface-raised)');
+	});
+
+	test('formats legend entries without renaming the series key', () => {
+		const body = renderWide(wideStack, {
+			legend: { format: (key) => (key === 'inProgress' ? 'In progress' : String(key)) }
+		});
+		expect(body).toContain('In progress');
+		expect(body).not.toContain('>inProgress<');
+	});
+
+	test('takes the stack gap out of every segment that follows another', () => {
+		const flush = barHeights(renderWide(wideStack));
+		const spaced = barHeights(
+			renderWide({
+				...wideStack,
+				marks: [{ ...wideStack.marks[0], gap: 4 }]
+			} as ChartConfiguration<WideRow>)
+		);
+		expect(spaced).toHaveLength(flush.length);
+		const removed = flush.reduce((total, value, index) => total + value - spaced[index], 0);
+		// Six of the nine segments sit on another segment; each gives back four pixels.
+		expect(Math.round(removed)).toBe(24);
+	});
+
+	test('rejects analysis on a wide stack', () => {
+		expect(() =>
+			renderWide({
+				...wideStack,
+				marks: [{ ...wideStack.marks[0], analysis: [{ type: 'reference', statistic: 'mean' }] }]
+			} as ChartConfiguration<WideRow>)
+		).toThrow(
+			'[Chart] marks[0].analysis cannot be combined with a wide marks[0].y because the displayed values are transformed by the stack layout.'
+		);
+	});
+
+	test('rejects a repeated field', () => {
+		expect(() =>
+			renderWide({
+				...wideStack,
+				marks: [{ type: 'bar', variant: 'stack', x: 'month', y: ['completed', 'completed'] }]
+			} as ChartConfiguration<WideRow>)
+		).toThrow('[Chart] marks[0].y lists the field "completed" twice.');
 	});
 });

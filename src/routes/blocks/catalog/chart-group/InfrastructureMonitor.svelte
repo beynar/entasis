@@ -17,10 +17,10 @@
 	);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<header class="flex flex-wrap items-center justify-between gap-lg">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<header class="gap-lg flex flex-wrap items-center justify-between">
 		<div>
-			<p class="text-sm text-neutral/60">Infrastructure / Overview</p>
+			<p class="text-neutral/70 text-sm">Infrastructure / Overview</p>
 			<h2 class="mt-sm text-3xl font-semibold">Systems at a glance</h2>
 		</div>
 		<Select
@@ -56,7 +56,7 @@
 						fillOpacity: 0.12
 					}
 				]}
-				ariaLabel="Requests per minute"
+				label="Requests per minute"
 			/></Card
 		><Card title="Response time" description="p95 latency in milliseconds"
 			><Chart
@@ -65,7 +65,7 @@
 				class="h-64"
 				data={samples}
 				marks={[{ type: 'series', x: 'minute', y: 'latency', stroke: 'warning', points: true }]}
-				ariaLabel="Response latency per minute"
+				label="Response latency per minute"
 			/></Card
 		>
 	</Grid>

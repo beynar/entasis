@@ -175,7 +175,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: ['small', 'normal', 'large']
+			options: ['compact', 'normal', 'comfortable']
 		},
 		{ name: 'showHeader', type: 'switch', label: 'Header', value: true },
 		{ name: 'showActions', type: 'switch', label: 'Actions', value: true }
@@ -226,7 +226,7 @@
 				},
 				confirm: 'Save profile',
 				cancel: 'Cancel',
-				density: 'small'
+				density: 'compact'
 			});
 		} catch (error) {
 			askError = error instanceof Error ? error.message : String(error);
@@ -237,7 +237,7 @@
 {#snippet valueSummary(form: FormInputState)}
 	<div class="text-neutral grid gap-1 text-sm">
 		<span class="font-medium">Custom form content</span>
-		<span class="text-neutral/60">{Object.keys(form.value).length} visible value keys</span>
+		<span class="text-neutral/70">{Object.keys(form.value).length} visible value keys</span>
 	</div>
 {/snippet}
 
@@ -251,7 +251,7 @@
 		'Conditional fields preserve hidden values',
 		'Visual groups preserve flat inferred values',
 		'Action and custom entries stay out of form values',
-		'Accessible errors with first-invalid focus',
+		{ label: 'Accessible errors with first-invalid focus', test: 'a11y:form.first-invalid-focus' },
 		'Programmatic submission through FormState',
 		'Managed Enter navigation and submission',
 		'Programmatic Dialog forms through Ask',

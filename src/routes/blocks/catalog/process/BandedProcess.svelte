@@ -24,21 +24,21 @@
 	];
 </script>
 
-<section class="flex flex-col p-lg md:p-xl">
+<section class="p-lg md:p-xl flex flex-col">
 	<div class="pb-xl">
 		<Heading as="h2" size="h2" weight="bold"
 			>From a useful question to a thoughtful product.</Heading
 		>
 	</div>
 	{#each steps as step, index (step.title)}<div
-			class={'grid gap-xl p-xl md:grid-cols-3 ' +
+			class={'gap-xl p-xl grid md:grid-cols-3 ' +
 				['bg-primary-muted', 'bg-secondary-muted', 'bg-surface-recessed'][index]}
 		>
-			<div class="flex items-start gap-lg">
+			<div class="gap-lg flex items-start">
 				<span class="text-sm">0{index + 1}</span><Heading as="h3" size="h3">{step.title}</Heading>
 			</div>
 			<p class="text-neutral/70">{step.description}</p>
-			<Card variant="ghost" density="small" title="What you leave with"
+			<Card variant="ghost" density="compact" title="What you leave with"
 				><p class="font-medium">{step.outcome}</p></Card
 			>
 		</div>{/each}<Button href="/docs" class="mt-xl self-start" variant="outline"

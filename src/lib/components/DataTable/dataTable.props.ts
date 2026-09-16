@@ -265,16 +265,16 @@ type DataTableBaseProps<TData> = {
 	columns: readonly DataTableColumn<TData>[];
 	/** Returns a stable row identifier that persists across sorting and pagination. */
 	getRowId: (row: TData, index: number, parent?: TData) => string;
-	/** Scroll viewport height. Defaults to filling a parent with a definite height. */
+	/** Scroll viewport height while virtualizing. Defaults to filling a parent with a definite height. */
 	height?: string | number;
 	/** Bindable table state, including filters, sorting, pagination, and selection. */
 	state?: DataTableState;
-	/** Narrow bindable facade for composing search, filters, and pagination outside the table. */
-	dataTable?: DataTableApi<TData>;
+	/** Narrow bindable instance handle for composing search, filters, and pagination outside the table. */
+	api?: DataTableApi<TData>;
 	/** Initial values for uncontrolled table state slices. */
 	initialState?: Partial<DataTableState>;
 	/** Called after a table interaction changes the public table state. */
-	onStateChange?: (state: DataTableState) => void;
+	onStateChange?: (payload: DataTableState) => void;
 	/** Keyboard interaction model for the table or editable grid. */
 	interactionMode?: DataTableInteractionMode;
 	/** Whether users may select no rows, one row, or multiple rows. */
@@ -289,6 +289,8 @@ type DataTableBaseProps<TData> = {
 	density?: Density;
 	/** Keep the column header visible while the body scrolls. */
 	stickyHeader?: boolean;
+	/** Virtualizes rows inside a bounded viewport. False renders every row in normal document flow. */
+	virtualize?: boolean;
 	/** Additional virtual rows rendered outside the visible viewport. */
 	overscan?: number;
 	/** Estimated row height in pixels before measurement. */
@@ -304,7 +306,7 @@ type DataTableBaseProps<TData> = {
 	/** Whether a particular row may be selected. */
 	isRowSelectable?: (row: TData) => boolean;
 	/** Persists an edited cell; rejection leaves the edit error visible. */
-	onCellCommit?: (commit: DataTableCellCommit<TData>) => void | Promise<void>;
+	onCellCommit?: (payload: DataTableCellCommit<TData>) => void | Promise<void>;
 	/** Additional classes on the table root. */
 	class?: string;
 	/** Bindable reference to the table root element. */

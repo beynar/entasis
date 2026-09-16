@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { DocumentViewerState } from './documentViewer.state.svelte.js';
 	import { renderOoxmlUnit, type OoxmlModel, type OoxmlTextRun } from './ooxmlAdapter.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type Classes = {
 		ooxmlPage: () => string;
@@ -29,6 +30,7 @@
 		horizontal?: boolean;
 		classes: Classes;
 	} = $props();
+	const t = $derived(useI18n());
 
 	let page = $state<HTMLDivElement | null>(null);
 	let canvas = $state<HTMLCanvasElement | null>(null);
@@ -72,9 +74,7 @@
 	});
 
 	$effect(() => {
-		viewer.query;
-		viewer.activeMatch;
-		viewer.page;
+		void [viewer.query, viewer.activeMatch, viewer.page];
 		highlightText();
 	});
 
@@ -141,7 +141,7 @@
 	style:width="{width}px"
 	style:height="{height}px"
 	data-document-unit={index + 1}
-	aria-label="{viewer.unit === 'slide' ? 'Slide' : 'Page'} {index + 1}"
+	aria-label={viewer.unit === 'slide' ? t.slideIndex(index + 1) : t.pageIndex(index + 1)}
 >
 	<canvas bind:this={canvas} class={classes.ooxmlCanvas()} aria-hidden="true"></canvas>
 	<div bind:this={textLayer} class={classes.ooxmlTextLayer()}></div>

@@ -3,14 +3,16 @@
 	import {
 		DataTable,
 		type DataTableCellCommit,
+		type DataTableCellPayload,
 		type DataTableColumn,
 		type DataTableEditorPayload,
 		type DataTableRowPayload,
 		type DataTableToolbarPayload
 	} from '$lib/components/DataTable/index.js';
 	import { Select } from '$lib/components/Form/Select/index.js';
+	import { checkIcon } from '$lib/components/Icons/check.js';
 	import { trashIcon } from '$lib/components/Icons/trash.js';
-	import { createPeople, type Person } from './exampleData.js';
+	import { createPeople, formatJoinedAt, formatSalary, type Person } from './exampleData.js';
 
 	let people = $state(createPeople(18));
 	const roleOptions = ['Analyst', 'Designer', 'Director', 'Engineer', 'Manager'].map((role) => ({
@@ -40,6 +42,7 @@
 			align: 'end',
 			sortable: true,
 			editor: { type: 'number', min: 0, step: 1000 },
+			cell: salaryCell,
 			width: 130
 		},
 		{
@@ -47,6 +50,7 @@
 			accessor: 'joinedAt',
 			header: 'Joined',
 			editor: { type: 'date' },
+			cell: joinedCell,
 			width: 150
 		},
 		{
@@ -55,6 +59,7 @@
 			header: 'Verified',
 			align: 'center',
 			editor: { type: 'switch' },
+			cell: verifiedCell,
 			width: 120
 		}
 	];
@@ -87,8 +92,26 @@
 	};
 </script>
 
+{#snippet salaryCell(payload: DataTableCellPayload<Person>)}
+	{formatSalary(payload.value)}
+{/snippet}
+
+{#snippet joinedCell(payload: DataTableCellPayload<Person>)}
+	{formatJoinedAt(payload.value)}
+{/snippet}
+
+{#snippet verifiedCell(payload: DataTableCellPayload<Person>)}
+	{#if payload.value}
+		<span class="text-success inline-flex" role="img" aria-label="Verified">
+			{@render checkIcon()}
+		</span>
+	{:else}
+		<span class="text-neutral/65" role="img" aria-label="Unverified">—</span>
+	{/if}
+{/snippet}
+
 {#snippet bulkActions(payload: DataTableToolbarPayload<Person>)}
-	<span class="text-neutral/60 text-sm">{payload.selectedRows.length} selected</span>
+	<span class="text-neutral/70 text-sm">{payload.selectedRows.length} selected</span>
 	<Button size="small" variant="ghost" color="danger" onclick={payload.clearSelection}>Clear</Button
 	>
 {/snippet}
@@ -130,7 +153,7 @@
 	)}
 	getRowId={(person) => person.id}
 	height={420}
-	density="large"
+	density="comfortable"
 	interactionMode="grid"
 	selectionMode="multiple"
 	pagination={{ pageSize: 10, pageSizes: [10, 18] }}

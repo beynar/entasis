@@ -2,14 +2,23 @@
 	import PopupMenu from '$lib/components/PopupMenu/PopupMenu.svelte';
 	import { caretDownIcon } from '$lib/components/Icons/caretDown.js';
 	import { caretUpDownIcon } from '$lib/components/Icons/caretUpDown.js';
-	import type { SidebarDensity, SidebarMenuButtonItem, SidebarSize } from './sidebar.props.js';
+	import type {
+		SidebarApi,
+		SidebarDensity,
+		SidebarMenuActionDescriptor,
+		SidebarMenuButtonItem,
+		SidebarSize
+	} from './sidebar.props.js';
 	import { getSidebarMenuPosition } from './sidebar-position.js';
+	import SidebarAction from './SidebarAction.svelte';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import { useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 
 	type Props = SidebarMenuButtonItem & {
+		/** Sidebar API handed to `onclick` and to a trailing action descriptor. */
+		api?: SidebarApi;
 		/** Uses the mobile menu placement when true. */
-		isMobile?: boolean;
+		mobile?: boolean;
 		/** Default alignment when the item does not provide menuAlign. */
 		defaultAlign?: 'start' | 'center' | 'end';
 		/** Typography, icon, and row geometry scale. */
@@ -38,7 +47,8 @@
 		openStyle,
 		class: className,
 		mediaClass,
-		isMobile = false,
+		api,
+		mobile = false,
 		defaultAlign = 'start',
 		size = 'normal',
 		density = 'normal',
@@ -51,10 +61,17 @@
 	const classes = $derived(useSidebarTheme(theme));
 	const compact = $derived(variant === 'compact');
 	const brand = $derived(variant === 'brand');
+	// A descriptor is an object that is neither a snippet nor a string: it becomes a real control
+	// beside the row, because a button cannot be nested inside a button.
+	const trailingAction = $derived<SidebarMenuActionDescriptor | undefined>(
+		trailing && typeof trailing === 'object' ? (trailing as SidebarMenuActionDescriptor) : undefined
+	);
+	const trailingActionSize = $derived(trailingAction?.size ?? size);
 	const resolvedTrailing = $derived(
-		trailing === false
+		trailing === false || trailingAction
 			? undefined
-			: (trailing ?? (menu ? (compact ? caretDownIcon : caretUpDownIcon) : undefined))
+			: ((trailing as Exclude<typeof trailing, false | SidebarMenuActionDescriptor>) ??
+					(menu ? (compact ? caretDownIcon : caretUpDownIcon) : undefined))
 	);
 	const resolvedOpenStyle = $derived(openStyle ?? (avatar ? 'muted' : 'accent'));
 	const openClass = $derived(
@@ -76,6 +93,7 @@
 			size: compact ? 'default' : 'lg',
 			className: [
 				compact && 'w-fit group-data-[collapsible=icon]:w-full',
+				trailingAction && 'min-w-0 flex-1 group-data-[collapsible=icon]:flex-none',
 				collapsedMediaPadding,
 				openClass,
 				className
@@ -86,7 +104,7 @@
 		getSidebarMenuPosition(
 			menuSide ?? (compact || brand ? 'bottom' : undefined),
 			menuAlign ?? defaultAlign,
-			isMobile
+			mobile
 		)
 	);
 
@@ -164,7 +182,7 @@
 	<div class="flex items-center gap-2 px-2 py-1 text-left">
 		{@render media()}
 		<div class="grid min-w-0 flex-1 leading-tight">
-			<span class="truncate font-medium text-neutral">{title}</span>
+			<span class="text-neutral truncate font-medium">{title}</span>
 			{#if subtitle}
 				<span class={classes.menuSecondary({ componentSize: size })}>{subtitle}</span>
 			{/if}
@@ -172,52 +190,75 @@
 	</div>
 {/snippet}
 
-{#if menu}
-	<PopupMenu
-		menu={{
-			items: menu,
-			header: menuShowLabel ? identityRow : undefined,
-			theme: menuIconClass ? { option: { prefix: { base: menuIconClass } } } : undefined
-		}}
-		position={menuPosition}
-		class={menuClass ?? 'min-w-56 rounded-lg'}
-		fitTrigger={!compact}
-	>
-		{#snippet trigger(popover)}
-			<button
-				type="button"
-				data-slot="sidebar-menu-button"
-				data-size={compact ? 'default' : 'lg'}
-				class={buttonClass}
-				aria-expanded={popover.isOpen}
-				aria-haspopup="menu"
-				aria-controls={popover.isOpen ? popover.id : undefined}
-				{@attach popover.reference}
-				onclick={() => popover.toggle()}
-			>
-				{@render buttonInner()}
-			</button>
-		{/snippet}
-	</PopupMenu>
-{:else if href}
-	<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs; library links cannot depend on SvelteKit routing. -->
-	<a
-		{href}
-		data-slot="sidebar-menu-button"
-		data-size={compact ? 'default' : 'lg'}
-		class={buttonClass}
-	>
-		{@render buttonInner()}
-	</a>
-	<!-- eslint-enable svelte/no-navigation-without-resolve -->
+{#snippet control()}
+	{#if menu}
+		<PopupMenu
+			menu={{
+				items: menu,
+				header: menuShowLabel ? identityRow : undefined,
+				theme: menuIconClass ? { option: { prefix: { base: menuIconClass } } } : undefined
+			}}
+			position={menuPosition}
+			class={menuClass ?? 'min-w-56 rounded-lg'}
+			fitTrigger={!compact}
+		>
+			{#snippet trigger(popover)}
+				<button
+					type="button"
+					data-slot="sidebar-menu-button"
+					data-size={compact ? 'default' : 'lg'}
+					class={buttonClass}
+					aria-expanded={popover.isOpen}
+					aria-haspopup="menu"
+					aria-controls={popover.isOpen ? popover.id : undefined}
+					{@attach popover.reference}
+					onclick={() => popover.toggle()}
+				>
+					{@render buttonInner()}
+				</button>
+			{/snippet}
+		</PopupMenu>
+	{:else if href}
+		<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs; library links cannot depend on SvelteKit routing. -->
+		<a
+			{href}
+			data-slot="sidebar-menu-button"
+			data-size={compact ? 'default' : 'lg'}
+			class={buttonClass}
+		>
+			{@render buttonInner()}
+		</a>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
+	{:else}
+		<button
+			type="button"
+			onclick={(event) => onclick?.(event, api as SidebarApi)}
+			data-slot="sidebar-menu-button"
+			data-size={compact ? 'default' : 'lg'}
+			class={buttonClass}
+		>
+			{@render buttonInner()}
+		</button>
+	{/if}
+{/snippet}
+
+{#if trailingAction}
+	<div data-slot="sidebar-menu-button-row" class={classes.buttonRow()}>
+		{@render control()}
+		<div
+			class={classes.actionSlot({
+				componentSize: trailingActionSize,
+				className: 'group-data-[collapsible=icon]:hidden'
+			})}
+		>
+			<SidebarAction
+				action={trailingAction}
+				api={api as SidebarApi}
+				size={trailingActionSize}
+				{theme}
+			/>
+		</div>
+	</div>
 {:else}
-	<button
-		type="button"
-		{onclick}
-		data-slot="sidebar-menu-button"
-		data-size={compact ? 'default' : 'lg'}
-		class={buttonClass}
-	>
-		{@render buttonInner()}
-	</button>
+	{@render control()}
 {/if}

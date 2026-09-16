@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { AppShell, type AppShellSidebarProps } from '$lib/components/AppShell/index.js';
 	import type {
+		SidebarVariant,
 		SidebarDensity,
 		SidebarDisplayState,
 		SidebarGroup,
-		SidebarSize,
-		SidebarVariant
+		SidebarSize
 	} from '$lib/components/Sidebar/index.js';
 	import { chartBarIcon } from '$lib/components/Icons/chartBar.js';
 	import { commandIcon } from '$lib/components/Icons/command.js';
@@ -55,8 +55,8 @@
 		resizable: {
 			minWidth: '12rem',
 			maxWidth: '24rem',
-			onWidthChange: (nextWidth) => {
-				sidebarWidth = nextWidth;
+			onWidthChange: ({ width }) => {
+				sidebarWidth = width;
 			}
 		},
 		headerButton: {
@@ -82,7 +82,7 @@
 		{#snippet headerActions({ sidebar })}
 			<button
 				type="button"
-				class="state-layer border-neutral-muted inline-flex size-8 items-center justify-center rounded-md border text-neutral"
+				class="state-layer border-neutral-muted text-neutral inline-flex size-8 items-center justify-center rounded-md border"
 				aria-label="Toggle sidebar"
 				onclick={sidebar.toggle}
 			>
@@ -92,18 +92,16 @@
 
 		{#snippet footer()}
 			<span>Sidebar is {open ? 'expanded' : 'collapsed'}</span>
-			<span class="font-medium text-primary">Responsive drawer included</span>
+			<span class="text-primary-readable font-medium">Responsive drawer included</span>
 		{/snippet}
 
-		{#snippet children()}
-			<div class="grid gap-4 p-4 md:grid-cols-3">
-				{#each ['Pipeline', 'Revenue', 'Support'] as metric}
-					<section class="rounded-lg border border-neutral-muted bg-surface-raised p-4">
-						<p class="text-sm font-medium text-neutral">{metric}</p>
-						<p class="mt-2 text-2xl font-semibold text-primary">Healthy</p>
-					</section>
-				{/each}
-			</div>
-		{/snippet}
+		<div class="grid gap-4 p-4 md:grid-cols-3">
+			{#each ['Pipeline', 'Revenue', 'Support'] as metric, index (index)}
+				<section class="border-neutral-muted bg-surface-raised rounded-lg border p-4">
+					<p class="text-neutral text-sm font-medium">{metric}</p>
+					<p class="text-primary-readable mt-2 text-2xl font-semibold">Healthy</p>
+				</section>
+			{/each}
+		</div>
 	</AppShell>
 </div>

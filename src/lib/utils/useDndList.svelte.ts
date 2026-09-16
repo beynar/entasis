@@ -62,14 +62,14 @@ export type UseDndListOptions<T> = {
 	 */
 	accepts?: (source: DndSource) => boolean;
 	/** An accepted external item was dropped here at `index` — insert it. */
-	onReceive?: (detail: { item: unknown; index: number; from: DndSource }) => void;
+	onReceive?: (payload: { item: unknown; index: number; from: DndSource }) => void;
 	/**
 	 * One of THIS list's items was dropped into another accepting list —
 	 * remove it. `index` is resolved at drop time. Note: the source list must
 	 * stay mounted for the duration of drags it originates, otherwise the
 	 * destination receives but nobody removes.
 	 */
-	onRemove?: (detail: { item: T; index: number; to: { listId: string } }) => void;
+	onRemove?: (payload: { item: T; index: number; to: { listId: string } }) => void;
 	/** Orientation; drives the closest-edge math and the indicator. Pass a
 	 * function to make it reactive. @default 'vertical' */
 	axis?: DndAxis | (() => DndAxis);
@@ -95,13 +95,13 @@ export type UseDndListOptions<T> = {
 	 * `handle`. Return false to keep the row in place. */
 	canDrag?: (item: T) => boolean;
 	/** A drag of one of THIS list's items started. */
-	onDragStart?: (detail: { item: T; index: number }) => void;
+	onDragStart?: (payload: { item: T; index: number }) => void;
 	/**
 	 * The drag of one of THIS list's items ended (drop or cancel), after any
 	 * state callbacks ran. `dropped` is true when it landed on an accepting
 	 * list — including no-op drops back onto its own position.
 	 */
-	onDragEnd?: (detail: { item: T; dropped: boolean }) => void;
+	onDragEnd?: (payload: { item: T; dropped: boolean }) => void;
 	/**
 	 * Draw the shared drop-indicator line while a drag hovers this list.
 	 * Set false for live-preview UIs that render the prospective order from

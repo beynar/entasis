@@ -9,10 +9,10 @@
 	import { Meter } from 'svelai/meter';
 	import { Stat } from 'svelai/stat';
 	import { Tabbar } from 'svelai/tabbar';
-	let active = $state(0);
+	let active = $state('Overview');
 </script>
 
-<section class="flex flex-col items-center gap-xl overflow-hidden p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl flex flex-col items-center overflow-hidden">
 	<Chip variant="outline">One place for the work that matters</Chip><Heading
 		as="h2"
 		size="h1"
@@ -20,10 +20,10 @@
 		align="center"
 		class="max-w-3xl">A little more clarity.<br />A lot more possibility.</Heading
 	>
-	<p class="max-w-xl text-center text-lg text-neutral/70">
+	<p class="text-neutral/70 max-w-xl text-center text-lg">
 		Bring your projects, people, and progress into one thoughtful workspace.
 	</p>
-	<div class="flex flex-wrap justify-center gap-md">
+	<div class="gap-md flex flex-wrap justify-center">
 		<Button href="/components" size="large">Start building</Button><Button
 			href="/docs"
 			size="large"
@@ -32,15 +32,16 @@
 	</div>
 	<Card class="w-full max-w-5xl" variant="outline"
 		><Stack gap="xl"
-			><div class="flex flex-wrap items-center justify-between gap-lg">
+			><div class="gap-lg flex flex-wrap items-center justify-between">
 				<strong>Northstar workspace</strong><AvatarGroup
 					size="small"
 					items={[{ name: 'Maya Chen' }, { name: 'Theo Park' }, { name: 'Nora Ellis' }]}
 				/>
 			</div>
-			<Tabbar items={['Overview', 'Projects', 'Team']} bind:value={active} />{#if active === 0}<div
-					class="grid gap-md sm:grid-cols-3"
-				>
+			<Tabbar
+				items={['Overview', 'Projects', 'Team']}
+				bind:value={active}
+			/>{#if active === 'Overview'}<div class="gap-md grid sm:grid-cols-3">
 					<Stat label="Active projects" value="12" /><Stat
 						label="Completed this week"
 						value="28"
@@ -48,22 +49,23 @@
 				</div>
 				<Meter
 					label="Quarterly goals"
-					value={{ value: 72, color: 'primary' }}
-				/>{:else if active === 1}<div class="grid gap-md sm:grid-cols-3">
+					value={72}
+					color="primary"
+				/>{:else if active === 'Projects'}<div class="gap-md grid sm:grid-cols-3">
 					{#each ['Website refresh', 'Customer portal', 'Design system'] as project, index (project)}<Card
 							variant="soft"
 							title={project}
 							><Stack gap="xl"
 								><Chip class="self-start" size="small" color={index === 1 ? 'success' : 'primary'}
 									>{index === 1 ? 'In review' : 'In progress'}</Chip
-								><Meter value={{ value: [60, 90, 45][index], color: 'primary' }} /></Stack
+								><Meter value={[60, 90, 45][index]} color="primary" /></Stack
 							></Card
 						>{/each}
-				</div>{:else}<div class="grid gap-lg sm:grid-cols-3">
+				</div>{:else}<div class="gap-lg grid sm:grid-cols-3">
 					{#each ['Maya Chen', 'Theo Park', 'Nora Ellis'] as name (name)}<div
-							class="flex items-center gap-md rounded-lg bg-surface-recessed p-lg"
+							class="gap-md bg-surface-recessed p-lg flex items-center rounded-lg"
 						>
-							<Avatar user={{ name }} /><strong class="text-sm">{name}</strong>
+							<Avatar {name} /><strong class="text-sm">{name}</strong>
 						</div>{/each}
 				</div>{/if}</Stack
 		></Card

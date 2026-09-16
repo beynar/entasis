@@ -312,7 +312,7 @@
 	aria-label={chart.messages.ganttChartTimeline}
 >
 	<div
-		class="sticky top-0 z-30 h-[var(--gantt-header-height)] overflow-x-clip bg-surface-raised/95 backdrop-blur"
+		class="bg-surface-raised/95 sticky top-0 z-30 h-[var(--gantt-header-height)] overflow-x-clip backdrop-blur"
 		dir={chart.direction}
 	>
 		<div
@@ -342,7 +342,7 @@
 		<ScrollArea
 			bind:viewportRef={horizontalViewport}
 			class="h-full min-w-0"
-			ariaLabel={chart.messages.ganttChartTimeline}
+			label={chart.messages.ganttChartTimeline}
 			type="hover"
 			onscroll={handleScroll}
 		>

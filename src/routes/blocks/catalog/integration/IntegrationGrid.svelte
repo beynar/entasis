@@ -51,7 +51,7 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl flex flex-col">
 	<div class="max-w-2xl">
 		<Chip variant="outline">Connected by design</Chip><Heading
 			as="h2"
@@ -63,17 +63,17 @@
 			Explore how different parts of a workspace can fit together.
 		</p>
 	</div>
-	<div class="grid gap-lg sm:grid-cols-2 lg:grid-cols-3">
+	<div class="gap-lg grid sm:grid-cols-2 lg:grid-cols-3">
 		{#each integrations as integration (integration.name)}<Card variant="outline"
 				><Stack gap="lg"
-					><div class="flex items-center justify-between gap-lg">
-						<span class="text-primary">{@render integration.icon({ size: 30 })}</span><Chip
+					><div class="gap-lg flex items-center justify-between">
+						<span class="text-primary-readable">{@render integration.icon({ size: 30 })}</span><Chip
 							size="small"
 							variant="outline">{integration.category}</Chip
 						>
 					</div>
 					<Heading as="h3" size="h4">{integration.name}</Heading>
-					<p class="text-sm text-neutral/70">{integration.description}</p>
+					<p class="text-neutral/70 text-sm">{integration.description}</p>
 					<Button variant="link" class="self-start" onclick={() => (selected = integration.name)}
 						>View connection</Button
 					></Stack

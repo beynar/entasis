@@ -7,7 +7,7 @@
 		defaultValue: 'Initial',
 		onValueChange(value) {
 			onValueChange(value);
-			controlProps = { ...controlProps, density: 'large' };
+			controlProps = { ...controlProps, density: 'comfortable' };
 		}
 	});
 </script>

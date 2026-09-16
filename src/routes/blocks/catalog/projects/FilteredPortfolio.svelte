@@ -32,26 +32,26 @@
 			photo: '1507525428034-b723cf961d3e'
 		}
 	];
-	let filter = $state(0);
+	let filter = $state('All work');
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<header class="flex flex-col gap-lg">
-		<p class="text-xs font-semibold uppercase tracking-widest text-primary">Portfolio</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<header class="gap-lg flex flex-col">
+		<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">Portfolio</p>
 		<Heading size="h2" weight="bold">Different challenges. A considered approach.</Heading>
 	</header>
 	<Tabbar items={['All work', 'Architecture', 'Photography', 'Identity']} bind:value={filter} />
-	<div class="grid gap-xl sm:grid-cols-2 lg:grid-cols-3">
-		{#each projects.filter((project) => filter === 0 || project.category === ['', 'Architecture', 'Photography', 'Identity'][filter]) as project (project.title)}<a
+	<div class="gap-xl grid sm:grid-cols-2 lg:grid-cols-3">
+		{#each projects.filter((project) => filter === 'All work' || project.category === filter) as project (project.title)}<a
 				href="/docs"
-				class="flex flex-col gap-lg"
+				class="gap-lg flex flex-col"
 				><img
 					src={`https://images.unsplash.com/photo-${project.photo}?auto=format&fit=crop&w=800&q=80`}
 					alt={project.title}
 					loading="lazy"
 					class="aspect-[3/4] w-full rounded-lg object-cover"
 				/>
-				<div class="flex gap-lg items-center justify-between">
+				<div class="gap-lg flex items-center justify-between">
 					<h3 class="text-lg font-semibold">{project.title}</h3>
 					<span aria-hidden="true">↗</span>
 				</div>

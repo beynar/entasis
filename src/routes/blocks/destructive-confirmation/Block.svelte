@@ -56,11 +56,11 @@
 
 			<Stack gap="md">
 				<h2 class="text-neutral text-base font-semibold">Deleting Northstar will remove</h2>
-				<Stack as="ul" gap="sm" class="text-neutral/70 list-disc pl-xl text-sm">
+				<ul class="text-neutral/70 gap-sm pl-xl flex list-disc flex-col text-sm">
 					<li>24 active projects and their complete history</li>
 					<li>18.4 GB of files, exports, and attachments</li>
 					<li>Access for all 12 workspace members</li>
-				</Stack>
+				</ul>
 			</Stack>
 
 			<Checkbox
@@ -81,7 +81,7 @@
 				/>
 			{:else}
 				<Stack orientation="horizontal" align="center" justify="between" gap="md" wrap="wrap">
-					<p class="text-neutral/60 text-sm" aria-live="polite">
+					<p class="text-neutral/70 text-sm" aria-live="polite">
 						{outcome === 'cancelled'
 							? 'Deletion cancelled. No changes were made.'
 							: 'No changes are made until you confirm.'}

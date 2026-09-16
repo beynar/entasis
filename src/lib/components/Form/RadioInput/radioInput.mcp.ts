@@ -30,7 +30,7 @@ Extends all Field component props plus:
 - **items**: Array<{ value: string, label: string, description?: string, disabled?: boolean }> (required)
 
 ### Layout Props
-- **orientation**: 'vertical' | 'horizontal' (default: 'vertical')
+- **mode**: 'normal' | 'card' (default: 'normal') - Visual layout style of the options
 
 ### Field Props (inherited)
 - **label**: string | Snippet - Field label
@@ -42,7 +42,7 @@ Extends all Field component props plus:
 
 ### Styling Props
 - **class**: string - Additional CSS classes
-- **theme**: ComponentTheme - Custom theme overrides
+- **theme**: RadioInputThemeProps & FieldThemeProps - Custom theme overrides
 
 ## Structure
 
@@ -50,7 +50,7 @@ Extends all Field component props plus:
 <Field>
 	<Label />
 	<Description />
-	<RadioGroup orientation="...">
+	<RadioGroup mode="...">
 		<Radio>
 			<RadioIndicator />
 			<RadioLabel />
@@ -106,7 +106,7 @@ Extends all Field component props plus:
 <RadioInput 
 	label="Gender"
 	bind:value={gender}
-	orientation="horizontal"
+	theme={{ inputContainer: { base: 'grid-cols-3' } }}
 	items={[
 		{ value: 'male', label: 'Male' },
 		{ value: 'female', label: 'Female' },
@@ -197,7 +197,6 @@ Extends all Field component props plus:
 <RadioInput 
 	label="T-Shirt Size"
 	bind:value={size}
-	orientation="horizontal"
 	required
 	items={[
 		{ value: 'xs', label: 'XS' },
@@ -389,8 +388,12 @@ The theme object contains the following parts:
   bind:value={value}
   items={items}
   theme={{
+    // The option grid lays itself out against its OWN width, not the viewport: declare the
+    // container on the root and query it on the grid, so the columns follow the field's host
+    // (a sidebar, a split pane, a dialog) instead of the device.
+    root: { base: '@container' },
     radiosInputContainer: {
-      base: 'grid-cols-1 md:grid-cols-3 gap-4'
+      base: 'grid-cols-1 @md:grid-cols-3 gap-lg'
     },
     radiosInputItem: {
       mode: {
@@ -414,7 +417,7 @@ The theme object contains the following parts:
         true: 'ring-2 ring-primary bg-primary/10'
       },
       mode: {
-        card: 'rounded-xl shadow-md hover:shadow-lg'
+        card: 'rounded-xl raised-3 hover:raised-4'
       }
     },
     radiosInputItemThumb: {
@@ -432,10 +435,11 @@ The theme object contains the following parts:
   import { setRadioInputTheme } from 'svelai/radio-input';
   
   setRadioInputTheme({
+    root: { base: '@container' },
     radiosInputContainer: {
-      base: 'gap-4',
+      base: 'gap-lg',
       mode: {
-        card: 'grid-cols-1 md:grid-cols-2'
+        card: 'grid-cols-1 @2xl:grid-cols-2'
       }
     },
     radiosInputItem: {

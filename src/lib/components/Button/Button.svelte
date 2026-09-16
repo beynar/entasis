@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { spinnerOverlay } from '$lib/attachments/spinnerOverlay.svelte.js';
 	import Slot from '../Slot/Slot.svelte';
-	import type { ButtonPrimitiveProps } from './button.props.js';
+	import type { ButtonInternalProps } from './button.props.js';
 	import { useButtonTheme } from './button.theme.js';
+	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 
 	let {
 		as,
@@ -13,7 +14,7 @@
 		href,
 		squared,
 		class: className,
-		color = 'primary',
+		color,
 		prefix,
 		suffix,
 		children,
@@ -30,16 +31,16 @@
 		download,
 		label,
 		role,
-		'aria-haspopup': ariaHaspopup,
-		'aria-expanded': ariaExpanded,
-		'aria-controls': ariaControls,
-		'aria-selected': ariaSelected,
-		'aria-pressed': ariaPressed,
+		haspopup,
+		expanded,
+		controls,
+		selected,
+		pressed,
 		'data-active': dataActive,
 		'data-highlighted': dataHighlighted,
 		'data-slot': dataSlot,
 		...attachments
-	}: ButtonPrimitiveProps = $props();
+	}: ButtonInternalProps = $props();
 
 	const isSquared = $derived(
 		squared ?? !!((!children && prefix && !suffix) || (!children && !prefix && suffix))
@@ -47,8 +48,9 @@
 	const isAnchor = $derived(!!(as || href));
 
 	const classes = $derived(useButtonTheme(theme));
+	const resolvedColor = $derived(useDefaultColor(color));
 
-	const handleClick: NonNullable<ButtonPrimitiveProps['onclick']> = (event) => {
+	const handleClick: NonNullable<ButtonInternalProps['onclick']> = (event) => {
 		if (disabled) {
 			event.preventDefault();
 			event.stopPropagation();
@@ -58,11 +60,11 @@
 		onclick?.(event);
 	};
 
-	const handlePointerEnter: NonNullable<ButtonPrimitiveProps['onpointerenter']> = (event) => {
+	const handlePointerEnter: NonNullable<ButtonInternalProps['onpointerenter']> = (event) => {
 		if (!disabled) onpointerenter?.(event);
 	};
 
-	const handlePointerLeave: NonNullable<ButtonPrimitiveProps['onpointerleave']> = (event) => {
+	const handlePointerLeave: NonNullable<ButtonInternalProps['onpointerleave']> = (event) => {
 		if (!disabled) onpointerleave?.(event);
 	};
 </script>
@@ -70,11 +72,11 @@
 <svelte:element
 	this={isAnchor ? 'a' : 'button'}
 	aria-label={label}
-	aria-haspopup={ariaHaspopup}
-	aria-expanded={ariaExpanded}
-	aria-controls={ariaControls}
-	aria-selected={ariaSelected}
-	aria-pressed={ariaPressed}
+	aria-haspopup={haspopup}
+	aria-expanded={expanded}
+	aria-controls={controls}
+	aria-selected={selected}
+	aria-pressed={pressed}
 	aria-disabled={isAnchor && disabled ? true : undefined}
 	role={role ?? (isAnchor ? 'link' : 'button')}
 	href={isAnchor && !disabled ? href : undefined}
@@ -87,10 +89,10 @@
 	data-active={dataActive}
 	data-highlighted={dataHighlighted}
 	data-slot={dataSlot}
-	data-color={color}
+	data-color={resolvedColor}
 	disabled={!isAnchor && disabled ? true : undefined}
 	class={classes.root({
-		color,
+		color: resolvedColor,
 		squared: isSquared,
 		variant,
 		size,

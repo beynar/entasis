@@ -10,7 +10,7 @@ import { scaleLinear } from 'd3-scale';
 import { compileChartTheme } from './chart.channels.js';
 import type { CompiledMark } from './chart.cartesian.js';
 import { unsupportedDiscriminant } from './chart.errors.js';
-import type { ChartColor, ChartRelationMark } from './chart.props.js';
+import type { ChartPalette, ChartRelationMark } from './chart.props.js';
 import { compileRelationData } from './chart.relation.data.js';
 import { compileNetworkRelation } from './chart.relation.network.js';
 import { compileSankeyRelation } from './chart.relation.sankey.js';
@@ -20,7 +20,7 @@ type CompileRelationChartInput<TRow extends object> = {
 	data: readonly TRow[];
 	mark: ChartRelationMark<TRow>;
 	path: string;
-	palette?: readonly ChartColor[];
+	palette?: ChartPalette;
 	legend?: ChartColorLegend;
 	tooltip: false | ChartTooltipInput<TRow, ChartValue, ChartValue, 'dom'>;
 };

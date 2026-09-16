@@ -20,12 +20,12 @@
 	}
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<div class="grid gap-xl md:grid-cols-3">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<div class="gap-xl grid md:grid-cols-3">
 		<div>
 			<Chip color="warning">Account security</Chip>
 			<h2 class="mt-lg text-3xl font-semibold">Your backup plan.</h2>
-			<p class="mt-md text-sm text-neutral/65">
+			<p class="mt-md text-neutral/65 text-sm">
 				Store recovery codes somewhere private. Each production code can only be used once.
 			</p>
 		</div>
@@ -34,7 +34,7 @@
 			title="Recovery codes"
 			description="These are nonfunctional sample codes for this preview."
 			><Stack gap="lg">
-				<div class="grid grid-cols-2 gap-md rounded-lg bg-surface-recessed p-lg font-mono text-sm">
+				<div class="gap-md bg-surface-recessed p-lg grid grid-cols-2 rounded-lg font-mono text-sm">
 					{#each codes as code (code)}<span>{visible ? code : '••••–••••'}</span>{/each}
 				</div>
 				<Stack orientation="horizontal" wrap="wrap" gap="md">
@@ -43,7 +43,7 @@
 					><Button onclick={downloadCodes}>Download sample codes</Button>
 				</Stack>
 				<Checkbox bind:value={stored} label="I understand these are sample codes" />
-				<p class="text-xs text-neutral/60" aria-live="polite">
+				<p class="text-neutral/70 text-xs" aria-live="polite">
 					{stored
 						? 'Preview checklist complete.'
 						: 'Keep real recovery codes away from shared devices.'}

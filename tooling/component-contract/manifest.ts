@@ -149,10 +149,7 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 		related: ['ai-composer', 'ai-chat']
 	}),
 	component('ai-tool', 'components/AITool', 'AI', 'Tool', {
-		related: ['ai-message', 'ai-mcp-app']
-	}),
-	component('ai-mcp-app', 'components/AIMcpApp', 'AI', 'MCP App', {
-		related: ['ai-tool', 'ai-chat']
+		related: ['ai-message']
 	}),
 	component('ai-file-preview', 'components/AIFilePreview', 'AI', 'File preview', {
 		docs: false,
@@ -539,6 +536,20 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 		visibility: 'public'
 	},
 	{
+		// Internal for now: the motion engine ships with the library and is consumed by
+		// component themes. Promote to `public` (with an MCP description and a docs route)
+		// when the component migration lands.
+		id: 'motion',
+		subpath: './motion',
+		sourceIndex: 'src/lib/utils/motion/index.ts',
+		exports: packageConditions('src/lib/utils/motion/index.ts', false),
+		docs: [],
+		mcp: null,
+		capabilities: ['motion', 'transition', 'utility'],
+		relatedComponents: ['theme'],
+		visibility: 'internal'
+	},
+	{
 		id: 'scheduling',
 		subpath: './scheduling',
 		sourceIndex: 'src/lib/utils/scheduling/index.ts',
@@ -580,17 +591,6 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 		capabilities: ['attachment', 'feedback'],
 		relatedComponents: ['spinner'],
 		visibility: 'public'
-	},
-	{
-		id: 'ai-mcp-app-sandbox',
-		subpath: './ai-mcp-app/sandbox',
-		sourceIndex: 'src/lib/components/AIMcpApp/sandbox/index.ts',
-		exports: packageConditions('src/lib/components/AIMcpApp/sandbox/index.ts', false),
-		docs: [],
-		mcp: null,
-		capabilities: ['ai', 'sandbox', 'utility'],
-		relatedComponents: ['ai-mcp-app'],
-		visibility: 'internal'
 	}
 ];
 
@@ -610,15 +610,17 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'AIConversationMessageUpdatePayload',
 		'AIConversationProps',
 		'AIConversationQueuedMessagePayload',
-		'AIConversationRetryDetail',
+		'AIConversationRetryOptions',
 		'AIConversationRetryPayload',
 		'AIConversationState',
 		'AIConversationStateEvents',
 		'AIConversationStateOptions',
 		'AIConversationStatus',
 		'AIConversationStatusChangePayload',
-		'AIConversationSubmitDetail',
+		'AIConversationSubmitOptions',
 		'AIConversationSubmitPayload',
+		'AIConversationTheme',
+		'AIConversationThemeProps',
 		'AIConversationToolTarget',
 		'AIConversationToolUpdate',
 		'AIConversationToolUpdateChange',
@@ -626,9 +628,12 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'AIConversationValueChangePayload',
 		'AI_CONVERSATION_CONTEXT_KEY',
 		'DEFAULT_AI_CONVERSATION_LABELS',
+		'aiConversationTheme',
 		'getAIConversation',
 		'resolveAIConversationLabels',
-		'useAIConversation'
+		'setAIConversationTheme',
+		'useAIConversation',
+		'useAIConversationTheme'
 	],
 	'ai-ask-user-question': [
 		'AIAskAnswer',
@@ -643,7 +648,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'AIAskUserQuestionQuestion',
 		'AIAskUserQuestionQuestionState',
 		'AIAskUserQuestionState',
-		'AIAskUserQuestionSubmitDetail',
+		'AIAskUserQuestionSubmitPayload',
 		'AIAskUserQuestionTextQuestion',
 		'AIAskUserQuestionTheme',
 		'AIAskUserQuestionThemeProps',
@@ -680,7 +685,6 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	'ai-chat': [
 		'AIChat',
-		'AIChatAppPayload',
 		'AIChatProps',
 		'AIChatSkeleton',
 		'AIChatSkeletonProps',
@@ -852,9 +856,9 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'AIComposerSearchResult',
 		'AIComposerSkillItem',
 		'AIComposerSkillSearch',
-		'AIComposerSubmitDetail',
 		'AIComposerSubmitEvent',
 		'AIComposerSubmitMeta',
+		'AIComposerSubmitPayload',
 		'AIComposerSubmitShortcut',
 		'AIComposerSubmitState',
 		'AIComposerSubmitToken',
@@ -872,24 +876,24 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'useAIComposerTheme'
 	],
 	'ai-reasoning': [
+		'AIReasoning',
 		'AIReasoningLabels',
+		'AIReasoningProps',
 		'AIReasoningState',
 		'AIReasoningTheme',
 		'AIReasoningThemeProps',
-		'Reasoning',
-		'ReasoningProps',
 		'aiReasoningTheme',
 		'setAIReasoningTheme',
 		'useAIReasoningTheme'
 	],
 	'ai-suggestion': [
+		'AISuggestion',
+		'AISuggestionProps',
+		'AISuggestionRenderPayload',
 		'AISuggestionTheme',
 		'AISuggestionThemeProps',
-		'Suggestion',
-		'SuggestionProps',
-		'SuggestionRenderPayload',
-		'Suggestions',
-		'SuggestionsProps',
+		'AISuggestions',
+		'AISuggestionsProps',
 		'aiSuggestionTheme',
 		'setAISuggestionTheme',
 		'useAISuggestionTheme'
@@ -909,40 +913,6 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'aiToolTheme',
 		'setAIToolTheme',
 		'useAIToolTheme'
-	],
-	'ai-mcp-app': [
-		'AIMcpApp',
-		'AIMcpAppContentModalities',
-		'AIMcpAppDisplayModeParams',
-		'AIMcpAppDisplayModeResult',
-		'AIMcpAppDownloadFileParams',
-		'AIMcpAppDownloadFileResult',
-		'AIMcpAppHostConfig',
-		'AIMcpAppHostContext',
-		'AIMcpAppMessageParams',
-		'AIMcpAppMessageResult',
-		'AIMcpAppModelContextParams',
-		'AIMcpAppOpenLinkParams',
-		'AIMcpAppOpenLinkResult',
-		'AIMcpAppPermission',
-		'AIMcpAppPermissionPolicy',
-		'AIMcpAppProps',
-		'AIMcpAppRequest',
-		'AIMcpAppRequestExtra',
-		'AIMcpAppResource',
-		'AIMcpAppResourceCsp',
-		'AIMcpAppResourcePermissions',
-		'AIMcpAppState',
-		'AIMcpAppStatus',
-		'AIMcpAppTheme',
-		'AIMcpAppThemeProps',
-		'AIMcpAppToolCallParams',
-		'AIMcpAppToolCallResult',
-		'AIMcpAppToolPolicy',
-		'AIMcpToolCall',
-		'aiMcpAppTheme',
-		'setAIMcpAppTheme',
-		'useAIMcpAppTheme'
 	],
 	'ai-file-preview': [
 		'AIFilePreview',
@@ -969,6 +939,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'CardProps',
 		'CardTheme',
 		'CardThemeProps',
+		'CardElevation',
 		'CardVariant',
 		'cardTheme',
 		'setCardTheme',
@@ -981,6 +952,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'GridProps',
 		'GridRepeat',
 		'GridSpan',
+		'GridSpanColumns',
 		'GridSpanProps',
 		'GridSpanTheme',
 		'GridSpanThemeProps',
@@ -995,7 +967,15 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'useGridSpanTheme',
 		'useGridTheme'
 	],
-	heading: ['Heading', 'HeadingProps'],
+	heading: [
+		'Heading',
+		'HeadingProps',
+		'HeadingTheme',
+		'HeadingThemeProps',
+		'headingTheme',
+		'setHeadingTheme',
+		'useHeadingTheme'
+	],
 	resizable: [
 		'Resizable',
 		'ResizableChangeMeta',
@@ -1101,14 +1081,18 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	sidebar: [
 		'Sidebar',
+		'SidebarActiveVariant',
+		'SidebarActivityBar',
+		'SidebarActivityBarItem',
+		'SidebarActivityBarSelectPayload',
 		'SidebarApi',
-		'SidebarCollapseIcon',
 		'SidebarCollapsible',
 		'SidebarDensity',
 		'SidebarDisplayState',
 		'SidebarFrame',
 		'SidebarGroup',
 		'SidebarIcon',
+		'SidebarIconVariant',
 		'SidebarMenuActionDescriptor',
 		'SidebarMenuAlign',
 		'SidebarMenuButton',
@@ -1132,7 +1116,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'SidebarTooltipMode',
 		'SidebarTreeNode',
 		'SidebarVariant',
-		'SidebarWidthChangedPayload',
+		'SidebarWidthChangePayload',
 		'setSidebarTheme',
 		'sidebarDescription',
 		'sidebarTheme',
@@ -1186,6 +1170,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'ToggleButtonGroupProps',
 		'ToggleButtonGroupTheme',
 		'ToggleButtonGroupThemeProps',
+		'ToggleButtonGroupType',
 		'ToggleButtonGroupValue',
 		'setToggleButtonGroupTheme',
 		'toggleButtonGroupTheme',
@@ -1195,6 +1180,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'ToggleMenu',
 		'ToggleMenuCustomItem',
 		'ToggleMenuCustomPayload',
+		'ToggleMenuGroupButton',
 		'ToggleMenuGroupButtons',
 		'ToggleMenuGroupItem',
 		'ToggleMenuItem',
@@ -1627,6 +1613,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'AvatarGroupProps',
 		'AvatarGroupTheme',
 		'AvatarGroupThemeProps',
+		'AvatarItem',
 		'AvatarProps',
 		'AvatarTheme',
 		'AvatarThemeProps',
@@ -1662,7 +1649,6 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'ChartFacetMark',
 		'ChartFillStyle',
 		'ChartFrameDefinition',
-		'ChartInitialDimensions',
 		'ChartKey',
 		'ChartLabelAnnotation',
 		'ChartLegend',
@@ -1678,6 +1664,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'ChartMatrixVariant',
 		'ChartNetworkRelationMark',
 		'ChartNumericScaleDefinition',
+		'ChartPalette',
 		'ChartPointOptions',
 		'ChartPointScale',
 		'ChartPointShape',
@@ -1713,6 +1700,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'ChartSqrtScale',
 		'ChartStackLayout',
 		'ChartStrokeStyle',
+		'ChartSurfaceColor',
 		'ChartSymlogScale',
 		'ChartTheme',
 		'ChartThemeProps',
@@ -1723,6 +1711,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'ChartTreeRelationMark',
 		'ChartUtcScale',
 		'ChartValue',
+		'ChartValueFields',
 		'ChartViewport',
 		'ChartViewportDefinition',
 		'ChartViewportTransition',
@@ -1924,8 +1913,12 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'Kanban',
 		'KanbanCard',
 		'KanbanCardMove',
+		'KanbanCardPayload',
+		'KanbanColumnContentPayload',
 		'KanbanColumnData',
 		'KanbanColumnMove',
+		'KanbanColumnPayload',
+		'KanbanEmptyPayload',
 		'KanbanProps',
 		'KanbanTheme',
 		'KanbanThemeProps',
@@ -1981,12 +1974,14 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	stat: [
 		'Stat',
 		'StatIndicatorVariant',
+		'StatPart',
 		'StatProps',
 		'StatTheme',
 		'StatThemeProps',
 		'StatTrendDirection',
 		'StatVariant',
 		'setStatTheme',
+		'statDefaultOrder',
 		'statTheme',
 		'useStatTheme'
 	],
@@ -2113,7 +2108,19 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'setAlertTheme',
 		'useAlertTheme'
 	],
-	confirmation: ['Confirmation', 'ConfirmationProps', 'confirmation'],
+	confirmation: [
+		'Confirmation',
+		'ConfirmationHost',
+		'ConfirmationOutcome',
+		'ConfirmationPayload',
+		'ConfirmationProps',
+		'ConfirmationTheme',
+		'ConfirmationThemeProps',
+		'confirmation',
+		'confirmationTheme',
+		'setConfirmationTheme',
+		'useConfirmationTheme'
+	],
 	empty: [
 		'Empty',
 		'EmptyAction',
@@ -2249,7 +2256,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'PaginationControlVariant',
 		'PaginationGap',
 		'PaginationItem',
-		'PaginationItemAriaLabel',
+		'PaginationItemLabel',
 		'PaginationPageItemPayload',
 		'PaginationProps',
 		'PaginationState',
@@ -2263,6 +2270,8 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	stepper: [
 		'Stepper',
+		'StepperApi',
+		'StepperMount',
 		'StepperPanelAriaLabel',
 		'StepperPanelAriaLabelledby',
 		'StepperProps',
@@ -2305,6 +2314,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	tabs: [
 		'Tabs',
+		'TabsApi',
 		'TabsPlacement',
 		'TabsProps',
 		'TabsRenderPayload',
@@ -2314,7 +2324,15 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'tabsTheme',
 		'useTabsTheme'
 	],
-	'context-menu': ['ContextMenu', 'ContextMenuProps'],
+	'context-menu': [
+		'ContextMenu',
+		'ContextMenuProps',
+		'ContextMenuTheme',
+		'ContextMenuThemeProps',
+		'contextMenuTheme',
+		'setContextMenuTheme',
+		'useContextMenuTheme'
+	],
 	menu: [
 		'Menu',
 		'MenuItem',
@@ -2345,7 +2363,16 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'setMenuOptionTheme',
 		'useMenuOptionTheme'
 	],
-	'popup-menu': ['MenuItem', 'PopupMenu', 'PopupMenuProps'],
+	'popup-menu': [
+		'MenuItem',
+		'PopupMenu',
+		'PopupMenuProps',
+		'PopupMenuTheme',
+		'PopupMenuThemeProps',
+		'popupMenuTheme',
+		'setPopupMenuTheme',
+		'usePopupMenuTheme'
+	],
 	dialog: [
 		'Dialog',
 		'DialogProps',
@@ -2388,7 +2415,6 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	'link-preview': [
 		'LinkPreview',
-		'LinkPreviewCardVariant',
 		'LinkPreviewFetch',
 		'LinkPreviewHoverCardPayload',
 		'LinkPreviewMetadata',
@@ -2399,8 +2425,6 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'LinkPreviewStatus',
 		'LinkPreviewTheme',
 		'LinkPreviewThemeProps',
-		'LinkPreviewTransition',
-		'LinkPreviewTransitionParams',
 		'linkPreviewTheme',
 		'setLinkPreviewTheme',
 		'useLinkPreviewTheme'
@@ -2430,9 +2454,12 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	tooltip: [
 		'Tooltip',
+		'TooltipHost',
+		'TooltipOptions',
 		'TooltipProps',
 		'TooltipTheme',
 		'TooltipThemeProps',
+		'TooltipTrigger',
 		'setTooltipTheme',
 		'tooltip',
 		'tooltipTheme',
@@ -2716,9 +2743,15 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	slot: ['Slot', 'SlotContent', 'slotDescription'],
 	theme: [
+		'Breakpoint',
+		'ContainerBreakpoint',
+		'ResponsiveProps',
 		'Theme',
 		'ThemeDesignTokenMap',
 		'ThemeDesignTokens',
+		'ThemePreset',
+		'ThemePresetName',
+		'ThemePresetTokens',
 		'ThemeProps',
 		'ThemeRadius',
 		'ThemeSpacing',
@@ -2729,9 +2762,21 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'TypeScaleOptions',
 		'TypeScalePreset',
 		'TypeScaleRatio',
+		'breakpoints',
+		'containerBreakpoints',
 		'defaultThemeSpacingScale',
+		'focusRing',
+		'resolveContainerBreakpoint',
+		'resolveResponsive',
+		'responsiveContainerClasses',
+		'responsiveVariables',
+		'selectedSoft',
+		'selectedSolid',
+		'themePresetNames',
+		'themePresets',
 		'themeTransitions',
-		'typeScalePresets'
+		'typeScalePresets',
+		'useDefaultColor'
 	],
 	i18n: [
 		'I18n',
@@ -2751,15 +2796,13 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'ColorPath',
 		'Colors',
 		'Density',
-		'DesignSystem',
+		'DisclosureIndicator',
 		'Easing',
 		'FontSize',
 		'Sizes',
 		'Styles',
-		'Theme',
 		'ThemeFunction',
 		'ThemePaths',
-		'Themes',
 		'deepMerge'
 	],
 	cva: [
@@ -2774,6 +2817,28 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'cx',
 		'setComponentTheme',
 		'useComponentTheme'
+	],
+	motion: [
+		'AnyMotionResolver',
+		'ComponentMotion',
+		'ComponentMotionOverrides',
+		'DeepPartial',
+		'MotionConfig',
+		'MotionDurationToken',
+		'MotionEasingToken',
+		'MotionOverride',
+		'MotionResolveOptions',
+		'MotionResolver',
+		'MotionSpec',
+		'MotionTheme',
+		'MotionTokens',
+		'MotionVariantSchema',
+		'MotionVariantShape',
+		'ResolvedMotion',
+		'defaultMotionTokens',
+		'motion',
+		'resolveMotionTokens',
+		'useComponentMotion'
 	],
 	scheduling: [
 		'SchedulingInterval',
@@ -2806,8 +2871,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'setSpinnerOverlayTheme',
 		'spinnerOverlay',
 		'useSpinnerOverlayTheme'
-	],
-	'ai-mcp-app-sandbox': ['CreateAIMcpSandboxResponseOptions', 'createAIMcpSandboxResponse']
+	]
 };
 
 export const componentContract: ComponentContractEntry[] = entries.map((entry) => ({

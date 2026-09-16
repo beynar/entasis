@@ -6,14 +6,14 @@
 	let message = $state('');
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<div class="grid gap-xl md:grid-cols-3">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<div class="gap-xl grid md:grid-cols-3">
 		<aside>
-			<p class="text-sm text-primary-readable">Companies / New</p>
+			<p class="text-primary-readable text-sm">Companies / New</p>
 			<h2 class="mt-md text-3xl font-semibold">Know who you work with.</h2>
-			<p class="mt-md text-sm text-neutral/60">Keep the company and its main contact together.</p>
+			<p class="mt-md text-neutral/70 text-sm">Keep the company and its main contact together.</p>
 		</aside>
-		<div class="grid gap-lg md:col-span-2">
+		<div class="gap-lg grid md:col-span-2">
 			<Form
 				variant="sectioned"
 				inputs={{

@@ -57,11 +57,11 @@
 		}
 	]}
 	footerButton={{ title: 'Alex Morgan', subtitle: 'Workspace admin', avatar: { fallback: 'AM' } }}
-	>{#snippet children(sidebar)}<Stack as="main" gap="lg" class="min-w-0 p-md sm:p-xl">
+	>{#snippet children(sidebar)}<Stack as="main" gap="lg" class="p-md sm:p-xl min-w-0">
 			<Button class="w-fit" variant="outline" prefix={sidebarIcon} onclick={sidebar.toggle}
 				>Navigation</Button
 			>
-			<p class="text-sm text-neutral/60">{workspace}</p>
+			<p class="text-neutral/70 text-sm">{workspace}</p>
 			<h2 class="text-3xl font-semibold">{page}</h2>
 			<Card
 				title={`${page} in ${workspace}`}
@@ -70,8 +70,8 @@
 					<Stat
 						label="Open projects"
 						value={workspace === 'Personal' ? '3' : '12'}
-						variant="soft"
-					/><Stat label="Members" value={workspace === 'Personal' ? '1' : '8'} variant="soft" />
+						variant="outline"
+					/><Stat label="Members" value={workspace === 'Personal' ? '1' : '8'} variant="outline" />
 				</Grid></Card
 			>
 		</Stack>{/snippet}</Sidebar

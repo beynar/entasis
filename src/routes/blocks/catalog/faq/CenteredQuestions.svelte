@@ -36,7 +36,7 @@
 	];
 </script>
 
-<section class="mx-auto flex max-w-3xl flex-col gap-xl p-lg md:p-xl">
+<section class="gap-xl p-lg md:p-xl mx-auto flex max-w-3xl flex-col">
 	<div class="text-center">
 		<Chip variant="outline">A few useful answers</Chip><Heading
 			as="h2"
@@ -46,11 +46,11 @@
 		>
 		<p class="mt-lg text-neutral/70">The questions that help you find your footing.</p>
 	</div>
-	<Accordion items={questions} defaultValue={['start']} icon="math" />
-	<p class="text-center text-sm text-neutral/60">
+	<Accordion items={questions} defaultValue={['start']} icon="plus-minus" />
+	<p class="text-neutral/70 text-center text-sm">
 		Looking for more detail? <a
 			href="/docs"
-			class="font-medium text-primary underline underline-offset-4">Read the guides.</a
+			class="text-primary-readable font-medium underline underline-offset-4">Read the guides.</a
 		>
 	</p>
 </section>

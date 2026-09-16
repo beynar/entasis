@@ -34,26 +34,28 @@
 
 	let open = $state(false);
 	let query = $state('');
-	let category = $state(0);
+	let category = $state('All');
 	let added = $state('');
 	const matches = $derived(
 		products.filter(
 			(product) =>
-				(category === 0 || product.type === ['', 'Lighting', 'Objects', 'Carry'][category]) &&
+				(category === 'All' || product.type === category) &&
 				(product.name + ' ' + product.type).toLowerCase().includes((query ?? '').toLowerCase())
 		)
 	);
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
 	{#snippet productArt(shape: string, color: string)}
 		<div class="product-art" data-shape={shape} data-color={color} aria-hidden="true">
 			<div class="object"></div>
 		</div>
 	{/snippet}
-	<div class="flex gap-xl items-center justify-between flex-wrap">
-		<header class="flex flex-col gap-lg">
-			<p class="text-xs font-semibold uppercase tracking-widest text-primary">Field objects</p>
+	<div class="gap-xl flex flex-wrap items-center justify-between">
+		<header class="gap-lg flex flex-col">
+			<p class="text-primary-readable text-xs font-semibold tracking-widest uppercase">
+				Field objects
+			</p>
 			<Heading size="h2" weight="bold">Discover your next everyday favorite.</Heading>
 		</header>
 		<Button onclick={() => (open = true)} variant="outline">Search store →</Button>
@@ -63,21 +65,21 @@
 		bind:open
 		title="Search the collection"
 		description="Useful things, easy to find."
-		><div class="flex flex-col gap-xl">
+		><div class="gap-xl flex flex-col">
 			<TextInput
 				label="Product name or category"
 				placeholder="Search products"
 				bind:value={query}
 			/><Tabbar items={['All', 'Lighting', 'Objects', 'Carry']} bind:value={category} />
-			<p class="text-sm text-neutral/55">{matches.length} results</p>
-			<div class="flex flex-col gap-lg">
+			<p class="text-neutral/65 text-sm">{matches.length} results</p>
+			<div class="gap-lg flex flex-col">
 				{#each matches as product (product.id)}<div
-						class="grid grid-cols-[5rem_1fr_auto] items-center gap-lg rounded-lg bg-surface-recessed p-lg"
+						class="gap-lg bg-surface-recessed p-lg grid grid-cols-[5rem_1fr_auto] items-center rounded-lg"
 					>
 						<div>{@render productArt(product.shape, product.color)}</div>
 						<div>
 							<h3 class="text-sm font-semibold">{product.name}</h3>
-							<p class="mt-sm text-xs text-neutral/55">{product.type} · {money(product.price)}</p>
+							<p class="mt-sm text-neutral/65 text-xs">{product.type} · {money(product.price)}</p>
 						</div>
 						<Button variant="ghost" size="small" onclick={() => (added = product.name)}>Add</Button>
 					</div>{:else}<Empty
@@ -85,7 +87,7 @@
 						description="Try lamp, vessel, tote, or cup."
 					/>{/each}
 			</div>
-			<p class="text-sm text-success" aria-live="polite">
+			<p class="text-success text-sm" aria-live="polite">
 				{added ? `${added} added to sample bag.` : ''}
 			</p>
 		</div></Dialog

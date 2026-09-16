@@ -8,7 +8,7 @@
 	let message = $state('');
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card
 		class="mx-auto w-full max-w-md"
 		title="Check your inbox"
@@ -29,7 +29,7 @@
 				]}
 				onSubmit={() => (message = 'Demo email verification complete. No account was updated.')}
 			/>
-			<p class="text-sm text-neutral/60">Preview code: <strong>123456</strong></p>
+			<p class="text-neutral/70 text-sm">Preview code: <strong>123456</strong></p>
 			<Button
 				variant="ghost"
 				onclick={() => (message = 'Resend preview requested. No email was sent.')}

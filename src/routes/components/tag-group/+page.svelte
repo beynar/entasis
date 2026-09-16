@@ -8,7 +8,7 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 
 	const categoryItems = [
 		{ value: 'news', label: 'News' },
@@ -41,7 +41,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -94,7 +94,7 @@
 				bind:value={category}
 				items={categoryItems}
 			/>
-			<p class="text-neutral/60 mt-4 text-sm">Selected: {category || 'none'}</p>
+			<p class="text-neutral/70 mt-4 text-sm">Selected: {category || 'none'}</p>
 		</div>
 	</ComponentCard>
 
@@ -115,7 +115,7 @@
 />`}
 		>
 			<div
-				class="bg-neutral text-neutral-contrast flex min-h-48 w-full items-center justify-center rounded border border-neutral/15 p-8"
+				class="bg-neutral text-neutral-contrast border-neutral/15 flex min-h-48 w-full items-center justify-center rounded border p-8"
 			>
 				<TagGroup
 					fieldAttrs={{ 'aria-label': 'Featured category' }}
@@ -140,7 +140,7 @@
 		>
 			<div class="w-full max-w-md">
 				<TagGroup multiple label="Interests" bind:value={interests} items={categoryItems} />
-				<p class="text-neutral/60 mt-4 text-sm">
+				<p class="text-neutral/70 mt-4 text-sm">
 					Selected: {interests.join(', ') || 'none'}
 				</p>
 			</div>

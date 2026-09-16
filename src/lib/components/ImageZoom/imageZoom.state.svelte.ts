@@ -1,6 +1,7 @@
 import { untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
-import { bind } from '$lib/utils/state.svelte.js';
+import { createBindableStateClass } from '$lib/utils/state.svelte.js';
+import type { Messages } from '$lib/i18n/en.js';
 import { ImageZoomLightbox } from './imageZoom.lightbox.js';
 import type { ImageZoomPayload, ImageZoomProps } from './imageZoom.props.js';
 
@@ -16,7 +17,6 @@ type ImageZoomStateOptions = MakeRequired<
 		| 'zoomHeight'
 		| 'disabled'
 		| 'zoomMargin'
-		| 'transitionDuration'
 		| 'closeOnClickOutside'
 		| 'closeOnEscape'
 		| 'closeOnScroll'
@@ -30,7 +30,6 @@ type ImageZoomStateOptions = MakeRequired<
 	>,
 	| 'disabled'
 	| 'zoomMargin'
-	| 'transitionDuration'
 	| 'closeOnClickOutside'
 	| 'closeOnEscape'
 	| 'closeOnScroll'
@@ -40,6 +39,10 @@ type ImageZoomStateOptions = MakeRequired<
 	| 'licenseKey'
 > & {
 	isOpen: boolean;
+	/** Zoom animation duration in ms, resolved from the `motion` theme slot. */
+	transitionDuration: number;
+	/** Active i18n catalog, used for the lightbox chrome strings. */
+	messages: Messages;
 };
 
 type ImageZoomAttachmentConfig = Pick<
@@ -61,9 +64,7 @@ type ImageZoomAttachmentConfig = Pick<
 	| 'licenseKey'
 >;
 
-export interface ImageZoomState extends ImageZoomStateOptions {}
-
-export class ImageZoomState {
+export class ImageZoomState extends createBindableStateClass<ImageZoomStateOptions>() {
 	private inferredSrc = $state('');
 	private inferredAlt = $state('');
 	private lightbox = new ImageZoomLightbox(this);
@@ -99,7 +100,7 @@ export class ImageZoomState {
 	});
 
 	constructor(options: ImageZoomStateOptions) {
-		bind(this, options);
+		super(options);
 
 		$effect(() => {
 			const isOpen = this.isOpen;

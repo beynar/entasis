@@ -15,10 +15,10 @@
 	let total = $derived(visible.reduce((sum, month) => sum + month.value, 0));
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card class="mx-auto w-full max-w-2xl" title="Revenue" description="A steady start to the year."
 		><Stack gap="lg">
-			<div class="flex flex-wrap items-center justify-between gap-md">
+			<div class="gap-md flex flex-wrap items-center justify-between">
 				<span class="text-4xl font-semibold tabular-nums">${total}k</span><Select
 					class="w-40"
 					label="Period"
@@ -46,12 +46,12 @@
 						curve: 'monotone-x'
 					}
 				]}
-				ariaLabel="Monthly revenue in thousands of dollars"
+				label="Monthly revenue in thousands of dollars"
 			/>
 			<div
-				class="flex flex-wrap items-center justify-between gap-md border-t border-neutral-muted pt-lg"
+				class="gap-md border-neutral-muted pt-lg flex flex-wrap items-center justify-between border-t"
 			>
-				<Chip color="success">+18.4% growth</Chip><span class="text-xs text-neutral/60"
+				<Chip color="success">+18.4% growth</Chip><span class="text-neutral/70 text-xs"
 					>Illustrative revenue · USD</span
 				>
 			</div>

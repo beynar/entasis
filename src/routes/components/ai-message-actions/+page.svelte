@@ -91,7 +91,7 @@ ${'</' + 'script>'}
 					lastAction = 'Retry requested';
 				}}
 			/>
-			<div class="text-sm text-neutral/60">{lastAction}</div>
+			<div class="text-neutral/70 text-sm">{lastAction}</div>
 		</div>
 	</ComponentCard>
 
@@ -160,7 +160,7 @@ ${'</' + 'script>'}
 				>
 					<AIMessageActions message={providerMessage} messageIndex={0} visibility="always" />
 				</AIConversation>
-				<div class="text-sm text-neutral/60">{providerAction}</div>
+				<div class="text-neutral/70 text-sm">{providerAction}</div>
 			</div>
 		</ComponentCard>
 	{/snippet}

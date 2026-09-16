@@ -73,7 +73,7 @@
 					<div role="listitem" class="min-w-0">
 						<AIFilePreview
 							file={previewFile.file}
-							class="min-w-0 max-w-36 gap-1.5 border-0 bg-transparent p-0"
+							class="max-w-36 min-w-0 gap-1.5 border-0 bg-transparent p-0"
 							theme={aiThreadTocPreviewFileTheme}
 						/>
 					</div>

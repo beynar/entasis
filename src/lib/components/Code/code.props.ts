@@ -4,7 +4,7 @@ import type { CodeThemeProps } from './code.theme.js';
 
 /** Payload passed to the `header` slot, letting a custom header drive the copy button. */
 export type CodeHeaderPayload = {
-	/** Resolved Shiki grammar id (e.g. `typescript`). */
+	/** Resolved language id (e.g. `ts`, `svelte`; `plaintext` when unknown). */
 	language: string;
 	/** Header label — `title` when set, otherwise the language's display name. */
 	label: string;
@@ -22,7 +22,7 @@ export type CodeProps = WithSlot<
 		 */
 		code: string;
 		/**
-		 * Shiki grammar id used for highlighting — e.g. `typescript`, `svelte`,
+		 * Language id or alias used for highlighting — e.g. `ts`, `svelte`,
 		 * `css`, `bash`. Aliases are resolved; unknown ids fall back to plain text.
 		 * Defaults to `'text'`.
 		 */

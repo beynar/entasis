@@ -1,7 +1,7 @@
 export const aiChatDescription = `
 # AIChat
 
-Assembled AI conversation surface built from AIConversation, AIThread, AIComposer, AIContext, AIModelSelector, AIAskUserQuestion, and optional MCP App rendering. It owns no transport.
+Assembled AI conversation surface built from AIConversation, AIThread, AIComposer, AIContext, AIModelSelector, and AIAskUserQuestion. It owns no transport.
 
 ## Import
 
@@ -15,18 +15,18 @@ Assembled AI conversation surface built from AIConversation, AIThread, AICompose
 
 \`\`\`svelte
 <AIChat
-  bind:conversation
+  bind:api
   bind:messages
   bind:selectedModel
   {models}
   {contextUsage}
   {suggestions}
-  onSubmit={({ message, meta }, state) => sendMessage(message, meta, state)}
-  onStop={(state) => stopGeneration(state)}
+  onSubmit={({ message, meta, conversation }) => sendMessage(message, meta, conversation)}
+  onStop={(payload) => stopGeneration(payload)}
 />
 \`\`\`
 
-AIChat exposes every AIConversation bindable and event: \`conversation\`, \`status\`, \`error\`, \`messages\`, \`queuedMessage\`, \`currentInput\`, \`files\`, \`attachments\`, \`liveText\`, \`suggestions\`, \`contextUsage\`, \`selectedModel\`, \`isStreaming\`, \`activeAskUserQuestion\`, \`labels\`, and all conversation mutation/lifecycle callbacks. \`queue\` is the bindable ordered AIComposer queue.
+AIChat exposes every AIConversation bindable and event: \`api\` (the conversation instance handle), \`status\`, \`error\`, \`messages\`, \`queuedMessage\`, \`currentInput\`, \`files\`, \`attachments\`, \`liveText\`, \`suggestions\`, \`contextUsage\`, \`selectedModel\`, \`streaming\`, \`activeAskUserQuestion\`, \`labels\`, and all conversation mutation/lifecycle callbacks. \`queue\` is the bindable ordered AIComposer queue.
 
 ## Regions
 
@@ -37,7 +37,7 @@ Product-level snippets receive the central \`AIConversationState\` instance dire
 - \`errorRegion\` replaces the default error alert.
 - \`context\` and \`modelSelector\` replace their individual composer controls; \`controls\` replaces both together.
 - \`empty\` replaces the transcript empty state; \`suggestionsRegion\` replaces suggestions inside that empty state.
-- \`message\`, \`tool\`, \`marker\`, and \`app\` customize transcript renderers with their row payloads.
+- \`message\`, \`tool\`, and \`marker\` customize transcript renderers with their row payloads.
   Message payloads include the thread-resolved \`actionsVisibility\` value so custom AIMessage
   composition does not make intermediate actions permanently visible.
 - \`toc\` receives the complete \`AIThreadTocState\`.
@@ -69,8 +69,6 @@ Use \`messageActions\`, \`messageActionsVisibility\` (\`hover\`, \`always\`, or 
 Intermediate assistant segments that continue through tools into another assistant segment omit the
 action region; actions attach to the terminal assistant response for the turn.
 
-Set \`mcpHost\` to render MCP App tool calls through AIMcpApp.
-
 ## Context and model controls
 
 \`models\` and \`modelGroups\` populate the default selector. \`maxTokens\` defaults to 128000. \`showContext\` and \`showModelSelector\` default to true; the model selector renders only when at least one model exists. Custom \`context\` and \`modelSelector\` snippets render regardless of those visibility flags. \`controls\` has precedence over both individual regions.
@@ -90,7 +88,7 @@ Conversation \`onSubmit\`, \`onStop\`, and \`onFilesChange\` remain central stat
 
 An active \`activeAskUserQuestion\` replaces both a custom or default composer. The complete request is rendered with every question, initial values, title, requester, context, navigation labels, submit label, and discard label. Answers are retained by request key, and completion or dismissal resolves the captured request through \`AIConversationState.resolveAskUserQuestion\`.
 
-Prompt \`suggestions\` render only inside an empty transcript. An explicit \`empty\` region has precedence. An explicit \`onSuggestionSelect\` callback has precedence over the default behavior; without it, selection updates \`currentInput\` and focuses the default composer.
+Prompt \`suggestions\` render only inside an empty transcript. An explicit \`empty\` region has precedence. An explicit \`onSelect\` callback -- the pick event for a suggestion -- has precedence over the default behavior; without it, picking a suggestion updates \`currentInput\` and focuses the default composer.
 
 ## Skeleton
 

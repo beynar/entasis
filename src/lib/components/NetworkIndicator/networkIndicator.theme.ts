@@ -1,5 +1,6 @@
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
+import { motion, useComponentMotion } from '$lib/utils/motion/index.js';
 
 const defaultNetworkIndicator = cva({
 	base: 'ui-network-indicator fixed top-0 left-0 w-full z-[9999] origin-left rounded-lg',
@@ -33,7 +34,7 @@ const defaultNetworkIndicator = cva({
 });
 
 const defaultNetworkIndicatorSegment = cva({
-	base: 'absolute top-0 h-full rounded-full opacity-90 shadow-sm will-change-transform',
+	base: 'absolute top-0 h-full rounded-full opacity-90 lift-1 will-change-transform',
 	variants: {
 		color: {
 			primary: 'bg-primary shadow-primary',
@@ -50,7 +51,33 @@ const defaultNetworkIndicatorSegment = cva({
 	}
 });
 
+// Pacing for the indeterminate bar, keyed by `variant`: one growth step of the `bar`
+// loop, or one pass of the `trail`. Only `duration` / `easing` are read (the bar is
+// driven by the Web Animations API). Reduced motion resolves the duration to 0, which
+// holds the indicator still instead of looping.
+export const defaultNetworkIndicatorMotion = motion({
+	base: {
+		in: {},
+		out: {},
+		duration: 'slow',
+		easing: 'standard'
+	},
+	variants: {
+		variant: {
+			bar: {},
+			// A trail pass is the slowest step on the scale, not a literal: a `<Theme motion>`
+			// retune has to move it the way it moves the `bar` loop.
+			trail: { duration: 'slower' },
+			'trail-bounce': { duration: 'slower' }
+		}
+	},
+	defaultVariants: {
+		variant: 'bar'
+	}
+});
+
 export const networkIndicatorTheme = {
+	motion: defaultNetworkIndicatorMotion,
 	root: defaultNetworkIndicator,
 	segment: defaultNetworkIndicatorSegment
 };
@@ -63,3 +90,5 @@ export const useNetworkIndicatorTheme = useComponentTheme<NetworkIndicatorTheme>
 	'networkIndicator',
 	networkIndicatorTheme
 );
+export const useNetworkIndicatorMotion = () =>
+	useComponentMotion('networkIndicator', defaultNetworkIndicatorMotion);

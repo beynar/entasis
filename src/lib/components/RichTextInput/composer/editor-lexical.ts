@@ -4,12 +4,7 @@ import { ListItemNode, ListNode, registerList } from '@lexical/list';
 import { registerMarkdownShortcuts } from '@lexical/markdown';
 import { HeadingNode, QuoteNode, registerRichText } from '@lexical/rich-text';
 import { mergeRegister } from '@lexical/utils';
-import {
-	COMMAND_PRIORITY_LOW,
-	SELECTION_CHANGE_COMMAND,
-	createEditor,
-	type LexicalEditor
-} from 'lexical';
+import { COMMAND_PRIORITY_LOW, SELECTION_CHANGE_COMMAND, createEditor } from 'lexical';
 import type { RichTextInputFormat, RichTextInputSubmitShortcut } from '../richTextInput.props.js';
 import { getAIComposerMarkdownTransformers } from './markdown.js';
 import { AIComposerTokenNode } from './token-node.js';

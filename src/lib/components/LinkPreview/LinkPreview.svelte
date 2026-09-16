@@ -9,6 +9,7 @@
 		DEFAULT_LINK_PREVIEW_METADATA_ENDPOINT
 	} from './linkPreview.state.svelte.js';
 	import { useLinkPreviewTheme } from './linkPreview.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		id: customId,
@@ -25,8 +26,8 @@
 		fallbackTitle,
 		imageAlt,
 		showUrl = true,
-		loadingLabel = 'Loading link preview',
-		errorLabel = 'Preview unavailable',
+		loadingLabel,
+		errorLabel,
 		position = 'top',
 		offset = 8,
 		delay = 150,
@@ -40,10 +41,8 @@
 		size = 'normal',
 		disabled = false,
 		class: className,
-		cardClass,
-		popoverClass,
-		cardColor = 'neutral',
-		cardVariant = 'solid',
+		card,
+		popover,
 		showBorders = false,
 		onOpenChange,
 		onAfterOpen,
@@ -52,10 +51,9 @@
 		onError,
 		theme,
 		hoverCardTheme,
-		cardTheme,
-		popoverTheme,
 		...attachments
 	}: LinkPreviewProps = $props();
+	const t = $derived(useI18n());
 	const openState = createBindableValue(
 		() => open,
 		(next) => {
@@ -175,14 +173,11 @@
 	{transition}
 	{size}
 	{disabled}
-	{popoverClass}
-	{cardColor}
-	{cardVariant}
+	{popover}
+	card={{ color: card?.color ?? 'neutral', variant: card?.variant ?? 'solid', theme: card?.theme }}
 	{showBorders}
-	class={classes.card({ size, className: cardClass })}
+	class={classes.card({ size, className: card?.class })}
 	theme={hoverCardTheme}
-	{cardTheme}
-	{popoverTheme}
 	onOpenChange={handleOpenChange}
 	onAfterOpen={handleAfterOpen}
 	onAfterClose={handleAfterClose}
@@ -206,64 +201,66 @@
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	{/snippet}
 
-	{#snippet content()}
-		<div class={classes.content({ size })} data-status={previewState.status}>
-			{#if previewState.status === 'loaded' && previewState.metadata}
-				{#if previewImage}
-					<div class={classes.media({ size })}>
-						<img
-							src={previewImage}
-							alt={imageAlt ?? `${previewTitle} preview`}
-							class={classes.image()}
-							loading="lazy"
-							onerror={() => (failedImageUrl = previewImage)}
-						/>
-					</div>
-				{/if}
-
-				<div class={classes.body({ size })}>
-					<div class={classes.header()}>
-						{#if previewFavicon}
-							<img
-								src={previewFavicon}
-								alt=""
-								class={classes.favicon()}
-								loading="lazy"
-								onerror={() => (failedFaviconUrl = previewFavicon)}
-							/>
-						{/if}
-						<span class={classes.site()}>{previewSite}</span>
-					</div>
-
-					<p class={classes.title({ size })}>{previewTitle}</p>
-
-					{#if previewDescription}
-						<p class={classes.description({ size })}>{previewDescription}</p>
-					{/if}
-
-					{#if showUrl}
-						<p class={classes.url()}>{previewUrlLabel}</p>
-					{/if}
-				</div>
-			{:else if previewState.status === 'error'}
-				<div class={classes.error()} role="status">
-					<p class={classes.title({ size })}>{errorLabel}</p>
-					{#if previewState.error}
-						<p class={classes.description({ size })}>{previewState.error}</p>
-					{/if}
-					<p class={classes.url()}>{previewHost}</p>
-				</div>
-			{:else}
-				<div class={classes.loading()} role="status" aria-label={loadingLabel}>
-					<Skeleton class={classes.media({ size })} />
-					<div class={classes.body({ size })}>
-						<Skeleton class="h-3 w-24 rounded-full" />
-						<Skeleton class="h-4 w-11/12 rounded-full" />
-						<Skeleton class="h-4 w-8/12 rounded-full" />
-						<Skeleton class="h-3 w-6/12 rounded-full" />
-					</div>
+	<div class={classes.content({ size })} data-status={previewState.status}>
+		{#if previewState.status === 'loaded' && previewState.metadata}
+			{#if previewImage}
+				<div class={classes.media({ size })}>
+					<img
+						src={previewImage}
+						alt={imageAlt ?? `${previewTitle} preview`}
+						class={classes.image()}
+						loading="lazy"
+						onerror={() => (failedImageUrl = previewImage)}
+					/>
 				</div>
 			{/if}
-		</div>
-	{/snippet}
+
+			<div class={classes.body({ size })}>
+				<div class={classes.header()}>
+					{#if previewFavicon}
+						<img
+							src={previewFavicon}
+							alt=""
+							class={classes.favicon()}
+							loading="lazy"
+							onerror={() => (failedFaviconUrl = previewFavicon)}
+						/>
+					{/if}
+					<span class={classes.site()}>{previewSite}</span>
+				</div>
+
+				<p class={classes.title({ size })}>{previewTitle}</p>
+
+				{#if previewDescription}
+					<p class={classes.description({ size })}>{previewDescription}</p>
+				{/if}
+
+				{#if showUrl}
+					<p class={classes.url()}>{previewUrlLabel}</p>
+				{/if}
+			</div>
+		{:else if previewState.status === 'error'}
+			<div class={classes.error()} role="status">
+				<p class={classes.title({ size })}>{errorLabel ?? t.linkPreviewUnavailable}</p>
+				{#if previewState.error}
+					<p class={classes.description({ size })}>{previewState.error}</p>
+				{/if}
+				<p class={classes.url()}>{previewHost}</p>
+			</div>
+		{:else}
+			<div
+				class={classes.loading()}
+				role="status"
+				aria-label={loadingLabel ?? t.linkPreviewLoading}
+			>
+				<Skeleton class={classes.media({ size })} />
+				<div class={classes.body({ size })}>
+					<Skeleton class="h-3 w-24 rounded-full" />
+					<Skeleton class="h-4 w-11/12 rounded-full" />
+					<Skeleton class="h-4 w-8/12 rounded-full" />
+					<Skeleton class="h-3 w-6/12 rounded-full" />
+				</div>
+			</div>
+		{/if}
+	</div>
 </HoverCard>

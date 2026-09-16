@@ -19,8 +19,8 @@
 			name: 'color',
 			type: 'segmented',
 			label: 'Color',
-			value: 'primary',
-			options: ['primary', 'success', 'danger']
+			value: 'neutral',
+			options: ['neutral', 'primary', 'success', 'danger']
 		},
 		{
 			name: 'days',
@@ -83,14 +83,14 @@
 			description="Bind value and read the picked date"
 			code={`<script>
 	let selected = $state<Date | null>(new Date());
-<\/script>
+</scr${'ipt'}>
 
 <MiniCalendar bind:value={selected} />
 <p>Selected: {selected?.toLocaleDateString()}</p>`}
 		>
 			<div class="flex flex-col items-center gap-3">
 				<MiniCalendar bind:value={selected} />
-				<p class="text-neutral/60 text-sm">Selected: {readout}</p>
+				<p class="text-neutral/70 text-sm">Selected: {readout}</p>
 			</div>
 		</ComponentCard>
 

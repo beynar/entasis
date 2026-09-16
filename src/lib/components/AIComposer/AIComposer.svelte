@@ -36,6 +36,7 @@
 	import { AIComposerSubmitMetadata } from './aiComposerSubmit.js';
 	import { AIComposerSubmitController } from './aiComposerSubmitController.svelte.js';
 	import { useAIComposerTheme } from './aiComposer.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		ref = $bindable<HTMLFormElement | null>(null),
@@ -74,8 +75,8 @@
 		submitLabel,
 		stopLabel,
 		attachLabel,
-		dropLabel = 'Drop files to attach',
-		dropInvalidLabel = 'These files cannot be attached',
+		dropLabel,
+		dropInvalidLabel,
 		onSubmit,
 		onStop,
 		onFilesRejected,
@@ -92,9 +93,9 @@
 		onQueuedMessageEditCancel,
 		onQueuedMessageReorder,
 		onSteer,
-		onCommandSelect,
-		onMentionSelect,
-		onSkillSelect,
+		onCommandInsert,
+		onMentionInsert,
+		onSkillInsert,
 		onCommandSearch,
 		onMentionSearch,
 		onSkillSearch,
@@ -123,6 +124,7 @@
 	);
 
 	const conversation = getAIConversation<AIThreadItem>();
+	const t = $derived(useI18n());
 	let editorHandle = $state<RichTextInputHandle>();
 	let editorValue = $state('');
 	let tokens = $state<RichTextInputToken[]>([]);
@@ -140,7 +142,7 @@
 	);
 	const resolvedQueue = $derived<AIComposerQueuedMessage[]>(queue ?? []);
 	const resolvedBusy = $derived(
-		busy ?? (conversation ? conversation.isStreaming || conversation.status === 'stopping' : false)
+		busy ?? (conversation ? conversation.streaming || conversation.status === 'stopping' : false)
 	);
 	const resolvedAccept = $derived(Array.from(accept ?? []));
 	const resolvedMaxFiles = $derived(Math.max(0, maxFiles ?? Number.POSITIVE_INFINITY));
@@ -152,26 +154,27 @@
 			mentions,
 			references,
 			skills,
-			onCommandSelect,
-			onMentionSelect,
-			onSkillSelect,
+			onCommandInsert,
+			onMentionInsert,
+			onSkillInsert,
 			onCommandSearch,
 			onMentionSearch,
 			onSkillSearch,
-			onItemSelect: ({ item, kind }) => submitMetadata.remember(item, kind)
+			onItemInsert: ({ item, kind }) => submitMetadata.remember(item, kind),
+			messages: t
 		})
 	);
 	const resolvedPlaceholder = $derived(
-		placeholder ?? conversation?.labels.composer.placeholder ?? 'Ask anything...'
+		placeholder ?? conversation?.labels.composer.placeholder ?? t.aiComposerPlaceholder
 	);
 	const resolvedSubmitLabel = $derived(
-		submitLabel ?? conversation?.labels.composer.submitLabel ?? 'Send message'
+		submitLabel ?? conversation?.labels.composer.submitLabel ?? t.aiComposerSend
 	);
 	const resolvedStopLabel = $derived(
-		stopLabel ?? conversation?.labels.composer.stopLabel ?? 'Stop response'
+		stopLabel ?? conversation?.labels.composer.stopLabel ?? t.aiComposerStop
 	);
 	const resolvedAttachLabel = $derived(
-		attachLabel ?? conversation?.labels.composer.attachLabel ?? 'Attach files'
+		attachLabel ?? conversation?.labels.composer.attachLabel ?? t.aiComposerAttach
 	);
 	const fileController: AIComposerFileController = new AIComposerFileController(() => ({
 		disabled,
@@ -416,7 +419,9 @@
 					{@render uploadSimpleIcon({ size: 18 })}
 				</span>
 				<span>
-					{fileDropzoneController.state === 'invalid' ? dropInvalidLabel : dropLabel}
+					{fileDropzoneController.state === 'invalid'
+						? (dropInvalidLabel ?? t.aiComposerDropInvalid)
+						: (dropLabel ?? t.aiComposerDrop)}
 				</span>
 			{/if}
 		</div>
@@ -484,9 +489,9 @@
 		{voiceInputMinDuration}
 		{voiceInputMaxDuration}
 		voiceInputColor={voiceInputColor ?? 'primary'}
-		voiceInputAriaLabel={voiceInputAriaLabel ?? 'Start voice recording'}
-		voiceInputStopLabel={voiceInputStopLabel ?? 'Stop recording'}
-		voiceInputProcessingLabel={voiceInputProcessingLabel ?? 'Processing voice input'}
+		voiceInputAriaLabel={voiceInputAriaLabel ?? t.voiceInputStart}
+		voiceInputStopLabel={voiceInputStopLabel ?? t.voiceInputStop}
+		voiceInputProcessingLabel={voiceInputProcessingLabel ?? t.voiceInputProcessing}
 		{onVoiceInput}
 		{fileDropzone}
 		attachDisabled={disabled || isWorking || displayFiles.length >= resolvedMaxFiles}

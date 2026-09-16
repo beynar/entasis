@@ -18,19 +18,19 @@
 	];
 </script>
 
-<section class="flex flex-col gap-xl p-xl mx-auto w-full max-w-6xl text-neutral">
-	<article class="flex flex-col gap-xl">
-		<header class="grid gap-xl md:grid-cols-2">
-			<div class="flex flex-col gap-xl justify-center">
-				<p class="text-xs uppercase tracking-widest text-primary">Culture / 8 minute read</p>
+<section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">
+	<article class="gap-xl flex flex-col">
+		<header class="gap-xl grid md:grid-cols-2">
+			<div class="gap-xl flex flex-col justify-center">
+				<p class="text-primary-readable text-xs tracking-widest uppercase">
+					Culture / 8 minute read
+				</p>
 				<Heading size="h2" weight="bold">The world is a better brief.</Heading>
-				<p class="text-lg text-neutral/65">
+				<p class="text-neutral/65 text-lg">
 					On leaving the desk, following your curiosity, and finding ideas in unexpected places.
 				</p>
-				<div class="flex gap-md items-center">
-					<Avatar user={{ name: 'Sam Rivera' }} /><span class="text-sm"
-						>Sam Rivera · June 12, 2026</span
-					>
+				<div class="gap-md flex items-center">
+					<Avatar name="Sam Rivera" /><span class="text-sm">Sam Rivera · June 12, 2026</span>
 				</div>
 			</div>
 			<img
@@ -41,14 +41,14 @@
 			/>
 		</header>
 		<Separator />
-		<div class="grid gap-xl md:grid-cols-[1fr_2fr]">
-			<blockquote class="text-2xl font-light leading-relaxed text-primary">
+		<div class="gap-xl grid md:grid-cols-[1fr_2fr]">
+			<blockquote class="text-primary-readable text-2xl leading-relaxed font-light">
 				“Attention is the first material we work with.”
 			</blockquote>
-			<div class="flex flex-col gap-xl">
-				{#each sections as section (section.title)}<section class="flex flex-col gap-lg">
+			<div class="gap-xl flex flex-col">
+				{#each sections as section (section.title)}<section class="gap-lg flex flex-col">
 						<Heading size="h4">{section.title}</Heading>
-						<p class="leading-relaxed text-neutral/70">{section.body}</p>
+						<p class="text-neutral/70 leading-relaxed">{section.body}</p>
 					</section>{/each}
 			</div>
 		</div>

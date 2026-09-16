@@ -16,10 +16,10 @@
 	]);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<header>
 		<h2 class="text-3xl font-semibold">The right update, in the right place.</h2>
-		<p class="mt-sm text-sm text-neutral/60">Decide how each kind of activity reaches you.</p>
+		<p class="mt-sm text-neutral/70 text-sm">Decide how each kind of activity reaches you.</p>
 	</header>
 	<Card
 		><DataTable
@@ -33,11 +33,11 @@
 			pagination={false}
 			caption="Notification channels"
 			>{#snippet cell(payload)}{#if payload.columnId === 'email'}<Switch
-						ariaLabel={`Email: ${payload.row.event}`}
+						label={`Email: ${payload.row.event}`}
 						value={payload.row.email}
 						onValueChange={(value) => (payload.row.email = Boolean(value))}
 					/>{:else if payload.columnId === 'inApp'}<Switch
-						ariaLabel={`In-app: ${payload.row.event}`}
+						label={`In-app: ${payload.row.event}`}
 						value={payload.row.inApp}
 						onValueChange={(value) => (payload.row.inApp = Boolean(value))}
 					/>{:else}<span class="whitespace-normal">{payload.row.event}</span
@@ -46,7 +46,7 @@
 	><Card title="Quiet hours" description="Protect time for focused work."
 		><Stack gap="lg">
 			<Switch label="Pause notifications outside working hours" bind:value={quiet} />{#if quiet}<div
-					class="rounded-lg bg-primary-muted p-md text-sm"
+					class="bg-primary-muted p-md rounded-lg text-sm"
 				>
 					Quiet hours: 18:00–09:00, Monday to Friday. This is a local preference preview.
 				</div>{/if}
@@ -56,7 +56,7 @@
 		<Button onclick={() => (message = 'Channel preferences saved in this local preview.')}
 			>Save preferences</Button
 		>
-		<p class="self-center text-xs text-neutral/60">
+		<p class="text-neutral/70 self-center text-xs">
 			{preferences.reduce(
 				(total, preference) => total + Number(preference.email) + Number(preference.inApp),
 				0

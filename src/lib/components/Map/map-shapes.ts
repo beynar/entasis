@@ -80,7 +80,10 @@ export function normalizeMapShapes(
 				continue;
 			}
 
-			normalizedShapes.set(id, normalizeMapShape(shape, id, index, options.defaultColor ?? DEFAULT_COLOR));
+			normalizedShapes.set(
+				id,
+				normalizeMapShape(shape, id, index, options.defaultColor ?? DEFAULT_COLOR)
+			);
 		} catch (error) {
 			if (!options.reportError) {
 				throw error;
@@ -160,7 +163,12 @@ function normalizeMapShape(
 	});
 }
 
-function getPolygonFill(shape: Exclude<MapShape, { type: 'polyline' }>, color: string, id: string, index: number): string {
+function getPolygonFill(
+	shape: Exclude<MapShape, { type: 'polyline' }>,
+	color: string,
+	id: string,
+	index: number
+): string {
 	if (shape.type !== 'polygon' && shape.type !== 'rectangle') {
 		return color;
 	}
@@ -168,7 +176,12 @@ function getPolygonFill(shape: Exclude<MapShape, { type: 'polyline' }>, color: s
 	return validateOptionalString(shape.fill, 'fill', id, index) ?? color;
 }
 
-function getPolygonStroke(shape: Exclude<MapShape, { type: 'polyline' }>, color: string, id: string, index: number): string {
+function getPolygonStroke(
+	shape: Exclude<MapShape, { type: 'polyline' }>,
+	color: string,
+	id: string,
+	index: number
+): string {
 	if (shape.type !== 'polygon' && shape.type !== 'rectangle') {
 		return color;
 	}

@@ -11,7 +11,7 @@ type IconProps = {
 const attributesToString = (attributes: SVGAttributes<SVGSVGElement>) => {
 	let result = '';
 	for (const key in attributes) {
-		if (attributes.hasOwnProperty(key)) {
+		if (Object.prototype.hasOwnProperty.call(attributes, key)) {
 			const value = attributes[key as keyof SVGAttributes<SVGSVGElement>];
 			const isObject = typeof value === 'object';
 			if (!isObject && value !== undefined) {
@@ -48,7 +48,10 @@ const useSetup = (node: Element, args: (() => IconProps) | undefined) => {
 	// rotate-180) must come OFF the node when the prop drops them.
 	let prevClasses: string[] = [];
 	$effect(() => {
-		const { size = '1lh', mirrored, color, class: className = '', ...attributes } = args?.() || {};
+		const { size, mirrored, color, class: className = '', ...attributes } = args?.() || {};
+		// `size` is rendered into the markup by `render`; the setup pass only reconciles
+		// attributes, so it is destructured here purely to keep it out of `attributes`.
+		void size;
 		for (const key in attributes) {
 			const value = attributes[key as keyof typeof attributes];
 			if (value !== undefined) {
@@ -64,7 +67,7 @@ const useSetup = (node: Element, args: (() => IconProps) | undefined) => {
 		} else {
 			node.setAttribute('fill', 'currentColor');
 		}
-		mirrored && node.setAttribute('transform', mirrored ? 'scale(-1, 1)' : '');
+		if (mirrored) node.setAttribute('transform', 'scale(-1, 1)');
 		if (typeof className === 'string') {
 			const classList = className.split(' ').filter(Boolean);
 			for (const cls of prevClasses) {
@@ -79,7 +82,7 @@ const useSetup = (node: Element, args: (() => IconProps) | undefined) => {
 };
 export const icon = (...paths: string[]) => {
 	const render = (propsAccessor: () => IconProps) => {
-		const { size, mirrored, color, class: className = '', ...rest } = propsAccessor?.();
+		const { size, mirrored, color, class: className = '', ...rest } = propsAccessor();
 
 		const icon = `<svg class="${className} aspect-square" 
 		${attributesToString(rest)} ${mirrored ? 'transform="scale(-1, 1)"' : ''}

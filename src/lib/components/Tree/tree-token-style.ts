@@ -7,8 +7,8 @@ const treeTokenDeclarations = [
 	['--trees-search-fg-override', 'var(--color-neutral)'],
 	['--trees-search-bg-override', 'var(--color-surface-raised)'],
 	['--trees-border-color-override', 'var(--color-neutral-muted)'],
-	['--trees-selected-fg-override', 'var(--color-neutral)'],
-	['--trees-selected-bg-override', 'color-mix(in oklab, var(--color-primary) 18%, transparent)'],
+	['--trees-selected-fg-override', 'var(--color-muted-readable)'],
+	['--trees-selected-bg-override', 'var(--color-muted)'],
 	[
 		'--trees-selected-border-color-override',
 		'color-mix(in oklab, var(--color-primary) 55%, var(--color-neutral-muted))'

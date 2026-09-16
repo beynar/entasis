@@ -52,7 +52,7 @@
 			name: 'color',
 			type: 'segmented',
 			label: 'Color',
-			value: 'primary',
+			value: 'neutral',
 			options: colors
 		},
 		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
@@ -65,7 +65,7 @@
 {#snippet customControlsSlot(player: AudioPlayerState)}
 	<div
 		data-slot="audio-player-controls"
-		class="flex min-w-0 flex-[1_1_100%] items-center justify-between gap-2 md:flex-[0_1_auto]"
+		class="flex min-w-0 flex-[1_1_100%] items-center justify-between gap-2 @lg:flex-[0_1_auto]"
 	>
 		<Button
 			squared
@@ -75,7 +75,7 @@
 			disabled={player.disabled}
 			onclick={() => player.runInteraction(() => player.togglePlay())}
 		/>
-		<span class="text-neutral/60 shrink-0 text-xs tabular-nums">
+		<span class="text-neutral/70 shrink-0 text-xs tabular-nums">
 			{formatTime(player.currentTime)} / {formatTime(player.duration)}
 		</span>
 	</div>
@@ -170,7 +170,7 @@
 		</ComponentCard>
 
 		<ComponentCard
-			description="Inline layout places controls beside the track when there is room."
+			description="Inline layout places controls beside the track when there is room. The player measures its own width, not the viewport, so a narrow column stacks the transport even on a wide screen."
 			class="!min-h-fit !items-stretch !justify-start"
 			code={trackCode}
 		>
@@ -216,7 +216,7 @@
 					controls={transportControls}
 					waveform={controlledWaveform}
 				/>
-				<p class="text-neutral/60 text-sm">
+				<p class="text-neutral/70 text-sm">
 					{paused ? 'Paused' : 'Playing'} at {currentTime.toFixed(1)}s
 				</p>
 			</div>

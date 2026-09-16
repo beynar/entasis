@@ -18,7 +18,7 @@ export type {
 	AIComposerSearchResult,
 	AIComposerSkillItem,
 	AIComposerSkillSearch,
-	AIComposerSubmitDetail,
+	AIComposerSubmitPayload,
 	AIComposerSubmitEvent,
 	AIComposerSubmitMeta,
 	AIComposerSubmitShortcut,

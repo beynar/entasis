@@ -20,9 +20,9 @@
 	const compactViewItems = [viewItems[0], viewItems[1]] as const;
 
 	const layoutItems = [
-		{ value: 'columns', icon: columnsIcon, ariaLabel: 'Columns' },
-		{ value: 'rows', icon: rowsIcon, ariaLabel: 'Rows' },
-		{ value: 'table', icon: tableIcon, ariaLabel: 'Table' }
+		{ value: 'columns', icon: columnsIcon, label: 'Columns' },
+		{ value: 'rows', icon: rowsIcon, label: 'Rows' },
+		{ value: 'table', icon: tableIcon, label: 'Table' }
 	] as const;
 
 	const densityItems = [
@@ -103,7 +103,7 @@
 		<div class="flex w-full max-w-xl items-center justify-between gap-6">
 			<div class="min-w-0">
 				<p class="text-neutral text-sm font-medium">Project view</p>
-				<p class="text-neutral/60 truncate text-xs">Current mode: {view}</p>
+				<p class="text-neutral/70 truncate text-xs">Current mode: {view}</p>
 			</div>
 			<SegmentedControl
 				items={viewItems}
@@ -112,7 +112,7 @@
 				variant={controls.value.variant}
 				color={controls.value.color}
 				disabled={controls.value.disabled}
-				ariaLabel="Project view"
+				label="Project view"
 			/>
 		</div>
 	</ComponentCard>
@@ -125,31 +125,26 @@
 <SegmentedControl {items} bind:value variant="pill" />`}
 		>
 			<div class="flex flex-wrap items-center justify-center gap-5">
-				<SegmentedControl items={viewItems} bind:value={variantView} ariaLabel="Normal view" />
+				<SegmentedControl items={viewItems} bind:value={variantView} label="Normal view" />
 				<SegmentedControl
 					items={viewItems}
 					bind:value={variantView}
 					variant="pill"
-					ariaLabel="Pill view"
+					label="Pill view"
 				/>
 			</div>
 		</ComponentCard>
 
 		<ComponentCard
 			title="Sizes"
-			description="Small, normal, and large use the same density scale as the rest of the library."
+			description="Small, normal, and large use the same size scale as the rest of the library."
 			code={`{#each ['small', 'normal', 'large'] as size}
 	<SegmentedControl {items} {size} bind:value />
 {/each}`}
 		>
 			<div class="flex flex-col items-center gap-5">
 				{#each sizes as size (size)}
-					<SegmentedControl
-						items={viewItems}
-						bind:value={sizeView}
-						{size}
-						ariaLabel={`${size} view`}
-					/>
+					<SegmentedControl items={viewItems} bind:value={sizeView} {size} label={`${size} view`} />
 				{/each}
 			</div>
 		</ComponentCard>
@@ -165,7 +160,7 @@
 						items={compactViewItems}
 						bind:value={colorView}
 						{color}
-						ariaLabel={`${color} view`}
+						label={`${color} view`}
 					/>
 				{/each}
 			</div>
@@ -173,15 +168,15 @@
 
 		<ComponentCard
 			title="Icon only"
-			description="Omit labels for a compact control and provide ariaLabel on each item."
+			description="Omit labels for a compact control and provide label on each item."
 			code={`const items = [
-	{ value: 'columns', icon: columnsIcon, ariaLabel: 'Columns' },
-	{ value: 'rows', icon: rowsIcon, ariaLabel: 'Rows' }
+	{ value: 'columns', icon: columnsIcon, label: 'Columns' },
+	{ value: 'rows', icon: rowsIcon, label: 'Rows' }
 ];
 
-<SegmentedControl {items} bind:value ariaLabel="Layout" />`}
+<SegmentedControl {items} bind:value label="Layout" />`}
 		>
-			<SegmentedControl items={layoutItems} bind:value={layout} ariaLabel="Layout" />
+			<SegmentedControl items={layoutItems} bind:value={layout} label="Layout" />
 		</ComponentCard>
 
 		<ComponentCard
@@ -199,9 +194,9 @@
 					items={densityItems}
 					bind:value={density}
 					item={densityRenderer}
-					ariaLabel="Row density"
+					label="Row density"
 				/>
-				<p class="text-neutral/60 text-xs">Selected density: {density}</p>
+				<p class="text-neutral/70 text-xs">Selected density: {density}</p>
 			</div>
 		</ComponentCard>
 
@@ -217,9 +212,9 @@
 						{ value: 'table', label: 'Table', icon: tableIcon }
 					]}
 					bind:value={disabledView}
-					ariaLabel="View with disabled list"
+					label="View with disabled list"
 				/>
-				<SegmentedControl items={viewItems} value="grid" disabled ariaLabel="Disabled view" />
+				<SegmentedControl items={viewItems} value="grid" disabled label="Disabled view" />
 			</div>
 		</ComponentCard>
 	{/snippet}

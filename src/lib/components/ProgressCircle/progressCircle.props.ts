@@ -15,7 +15,11 @@ type ProgressCircleBaseProps = {
 	size?: ProgressCircleSize;
 	/** Explicit circle diameter in pixels, overriding the semantic size. */
 	diameter?: number;
-	/** Progress value from 0 to 100. */
+	/**
+	 * Progress value from 0 to 100.
+	 *
+	 * @readonly-value ProgressCircle draws reported progress it never edits.
+	 */
 	value?: number;
 	/** Accessible label used when the progress circle is not decorative. */
 	label?: string;

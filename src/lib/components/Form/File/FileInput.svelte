@@ -9,6 +9,7 @@
 	import { useFileInputTheme } from './fileInput.theme.js';
 	import { slide } from 'svelte/transition';
 	import Slot from '../../Slot/Slot.svelte';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		defaultValue = null,
@@ -26,7 +27,7 @@
 		fileListClass,
 		file,
 		fileClass,
-		placeholder = 'Click or drag files here',
+		placeholder,
 		placeholderClass,
 		required = false,
 		theme,
@@ -39,6 +40,8 @@
 	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
+	const t = $derived(useI18n());
+	const resolvedPlaceholder = $derived(placeholder ?? t.fileDropzone);
 
 	const field = createFieldState({
 		id,
@@ -164,8 +167,8 @@
 				<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
 				<polyline points="14 2 14 8 20 8" />
 			</svg>
-			{#if placeholder}
-				<span class="mt-2">{placeholder}</span>
+			{#if resolvedPlaceholder}
+				<span class="mt-2">{resolvedPlaceholder}</span>
 			{/if}
 		</div>
 	{:else}
@@ -185,7 +188,7 @@
 							{/if}
 							<div class="min-w-0 flex-1">
 								<div class="truncate">{fil.name}</div>
-								<div class="text-neutral/60 text-xs">{size}</div>
+								<div class="text-neutral/70 text-xs">{size}</div>
 							</div>
 							<Button variant="ghost" size="small" squared onclick={() => dropzone.removeFile(fil)}>
 								{#snippet prefix()}
@@ -227,8 +230,8 @@
 							</svg>
 						{/snippet}
 						{Number.isFinite(maxFiles)
-							? `Add more files (${dropzone.files.length}/${maxFiles})`
-							: 'Add more files'}
+							? t.addMoreFiles(dropzone.files.length, maxFiles)
+							: t.addMoreFilesUnbounded}
 					</Button>
 				{/if}
 			</Slot>

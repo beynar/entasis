@@ -1,8 +1,15 @@
-import type { ChannelAccessor, ChartTheme, VisualChannel } from '@tanstack/charts';
+import type {
+	ChannelAccessor,
+	ChartColorScale,
+	ChartTheme,
+	ResolvedColorScale,
+	VisualChannel
+} from '@tanstack/charts';
 import type {
 	ChartChannel,
 	ChartColor,
 	ChartKey,
+	ChartPalette,
 	ChartRequiredChannel,
 	ChartValue,
 	ChartVisual
@@ -16,14 +23,19 @@ type CompilableRequiredChartChannel<TRow, TValue> =
 
 export type CompiledChartChannel<TRow, TValue> = ChannelAccessor<TRow, TValue | null | undefined>;
 
-const SEMANTIC_COLORS = new Set([
+const CHART_COLOR_TOKENS = new Set([
 	'primary',
 	'secondary',
 	'danger',
 	'success',
 	'warning',
 	'info',
-	'neutral'
+	'neutral',
+	'surface',
+	'surface-recessed',
+	'surface-canvas',
+	'surface-raised',
+	'surface-floating'
 ]);
 
 export const DEFAULT_CHART_PALETTE = [
@@ -36,14 +48,88 @@ export const DEFAULT_CHART_PALETTE = [
 	'var(--color-neutral)'
 ] as const;
 
-export function compileChartTheme(palette: readonly ChartColor[] | undefined): ChartTheme {
+export function isKeyedPalette(
+	palette: ChartPalette | undefined
+): palette is Readonly<Record<string, ChartColor>> {
+	return palette !== undefined && !Array.isArray(palette);
+}
+
+/**
+ * Every color a palette can paint, in the order series discovery consumes them. A keyed
+ * palette still needs an ordered list for the theme and for the area gradient definitions,
+ * so its own colors come first and the default palette backs the unkeyed series.
+ */
+export function compilePaletteColors(palette: ChartPalette | undefined): readonly string[] {
+	if (palette === undefined) return DEFAULT_CHART_PALETTE;
+	if (Array.isArray(palette)) return palette.map(compileColor);
+	const keyed = Object.values(palette as Record<string, ChartColor>).map(compileColor);
+	return [...new Set([...keyed, ...DEFAULT_CHART_PALETTE])];
+}
+
+export function compileChartTheme(palette: ChartPalette | undefined): ChartTheme {
 	return {
 		foreground: 'var(--color-neutral)',
 		muted: 'var(--color-neutral)',
 		grid: 'var(--color-neutral)',
 		background: 'var(--color-surface)',
-		palette: palette?.map(compileColor) ?? DEFAULT_CHART_PALETTE
+		// A keyed palette resolves per series through its own color scale; the theme palette
+		// stays the ordered fallback used by series the record does not name.
+		palette: isKeyedPalette(palette) ? DEFAULT_CHART_PALETTE : compilePaletteColors(palette)
 	};
+}
+
+/**
+ * Categorical color scale for a record palette. It reproduces the native ordinal
+ * resolution (domain in series-discovery order) but assigns a named color by key first
+ * and only then draws the next unused default color, so a series without an entry keeps
+ * the ordered fallback.
+ */
+export function compileKeyedPaletteScale(
+	palette: Readonly<Record<string, ChartColor>>
+): ChartColorScale {
+	return {
+		id: 'svelai-chart-keyed-palette',
+		resolve: ({ values, domain: configuredDomain, range: configuredRange, theme }) => {
+			const fallback = configuredRange?.length ? configuredRange : theme.palette;
+			const domain = uniqueChartKeys(configuredDomain ?? values);
+			const colorByKey = new Map<string, string>();
+			let fallbackIndex = 0;
+			const range = domain.map((key) => {
+				const named = Reflect.get(palette, String(key)) as ChartColor | undefined;
+				const color =
+					named === undefined
+						? (fallback[fallbackIndex++ % Math.max(fallback.length, 1)] ?? 'currentColor')
+						: compileColor(named);
+				colorByKey.set(chartKeyIdentity(key), color);
+				return color;
+			});
+			const resolved: ResolvedColorScale = {
+				type: 'ordinal',
+				kind: 'categorical',
+				domain,
+				range,
+				map: (value) => {
+					if (value === null || value === undefined) return range[0] ?? 'currentColor';
+					const known = colorByKey.get(chartKeyIdentity(value));
+					if (known !== undefined) return known;
+					const color = fallback[fallbackIndex++ % Math.max(fallback.length, 1)] ?? 'currentColor';
+					colorByKey.set(chartKeyIdentity(value), color);
+					return color;
+				}
+			};
+			return resolved;
+		}
+	};
+}
+
+function uniqueChartKeys(values: readonly unknown[]): readonly ChartKey[] {
+	const unique = new Map<string, ChartKey>();
+	for (const value of values) {
+		if (typeof value !== 'string' && typeof value !== 'number') continue;
+		const identity = chartKeyIdentity(value);
+		if (!unique.has(identity)) unique.set(identity, value);
+	}
+	return [...unique.values()];
 }
 
 export function compileMarkChannels<TRow extends object>(
@@ -78,14 +164,6 @@ export function compileOptionalChannel<TRow extends object, TValue>(
 	channel: CompilableChartChannel<TRow, TValue> | undefined
 ): CompiledChartChannel<TRow, TValue> | undefined {
 	return channel === undefined ? undefined : compileChannel(channel);
-}
-
-function compileValueOrChannel<TRow extends object, TValue>(
-	value: TValue | CompilableChartChannel<TRow, TValue> | undefined,
-	isConstant: (candidate: TValue | CompilableChartChannel<TRow, TValue>) => candidate is TValue
-): TValue | ReturnType<typeof compileChannel<TRow, TValue>> | undefined {
-	if (value === undefined || isConstant(value)) return value;
-	return compileChannel(value);
 }
 
 export function compileNumberOrChannel<TRow extends object>(
@@ -129,7 +207,7 @@ export function compileOptionalColor(color: ChartColor | undefined): string | un
 }
 
 export function compileColor(color: ChartColor): string {
-	return SEMANTIC_COLORS.has(color) ? `var(--color-${color})` : color;
+	return CHART_COLOR_TOKENS.has(color) ? `var(--color-${color})` : color;
 }
 
 export function chartKeyIdentity(value: ChartKey): string {

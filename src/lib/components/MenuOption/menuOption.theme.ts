@@ -10,12 +10,12 @@ const defaultMenuOption = cva({
 		size: {
 			small: 'text-xs',
 			normal: 'text-sm',
-			large: 'text-base'
+			large: 'text-sm'
 		},
 		density: {
-			small: 'px-sm py-xs gap-sm min-h-6',
-			normal: 'px-md py-sm gap-md min-h-7',
-			large: 'px-lg py-md gap-md min-h-9'
+			compact: 'px-sm py-xs gap-sm min-h-6',
+			normal: 'px-md py-sm gap-md min-h-row-sm',
+			comfortable: 'px-lg py-md gap-md min-h-row-md'
 		},
 		color: {
 			primary: 'text-primary-readable',
@@ -35,30 +35,15 @@ const defaultMenuOption = cva({
 			true: '',
 			false: ''
 		},
-		// Persistent highlight in the item's own color — e.g. a submenu trigger while its submenu is
-		// open. Unlike `highlighted`, it tracks the `color` variant via the compoundVariants below.
+		// Persistent highlight — e.g. a submenu trigger while its submenu is open. Unlike
+		// `highlighted` (transient, owned by the state layer) this is a selection, so it paints the
+		// `selected` STATE ROLE. `bg-selected-muted` falls back to the row's own `--color` (set from
+		// `data-color`), so an info option still highlights info until a Theme pins `selectedColor`.
 		active: {
-			true: '',
+			true: 'bg-selected-muted text-selected-muted-readable',
 			false: ''
 		}
 	},
-	compoundVariants: [
-		{ active: true, color: 'primary', class: 'bg-primary-muted text-primary-muted-readable' },
-		{
-			active: true,
-			color: 'secondary',
-			class: 'bg-secondary-muted text-secondary-muted-readable'
-		},
-		{
-			active: true,
-			color: 'neutral',
-			class: 'bg-neutral-muted text-neutral-muted-readable'
-		},
-		{ active: true, color: 'danger', class: 'bg-danger-muted text-danger-muted-readable' },
-		{ active: true, color: 'success', class: 'bg-success-muted text-success-muted-readable' },
-		{ active: true, color: 'warning', class: 'bg-warning-muted text-warning-muted-readable' },
-		{ active: true, color: 'info', class: 'bg-info-muted text-info-muted-readable' }
-	],
 	defaultVariants: {
 		size: 'normal',
 		density: 'normal',
@@ -74,7 +59,7 @@ const defaultMenuOptionTitle = cva({
 		size: {
 			small: 'text-xs',
 			normal: 'text-sm',
-			large: 'text-base'
+			large: 'text-sm'
 		}
 	},
 	defaultVariants: {
@@ -86,9 +71,9 @@ const defaultMenuOptionDescription = cva({
 	base: 'text-neutral/70  leading-none',
 	variants: {
 		size: {
-			small: 'text-[0.625rem]',
+			small: 'text-xs',
 			normal: 'text-xs',
-			large: 'text-sm'
+			large: 'text-xs'
 		}
 	},
 	defaultVariants: {
@@ -102,9 +87,9 @@ const defaultMenuOptionPrefix = cva({
 	base: 'flex shrink-0 items-center justify-center',
 	variants: {
 		size: {
-			small: 'size-3.5 [&_svg]:size-3.5',
-			normal: 'size-4 [&_svg]:size-4',
-			large: 'size-5 [&_svg]:size-5'
+			small: 'size-3.5 [&_svg]:size-icon-sm',
+			normal: 'size-4 [&_svg]:size-icon-md',
+			large: 'size-5 [&_svg]:size-icon-lg'
 		},
 		align: {
 			start: 'mb-auto',
@@ -122,9 +107,9 @@ const defaultMenuOptionSuffix = cva({
 	base: 'ml-auto flex shrink-0 items-center',
 	variants: {
 		size: {
-			small: '[&_svg]:size-3',
-			normal: '[&_svg]:size-4',
-			large: '[&_svg]:size-5'
+			small: '[&_svg]:size-icon-xs',
+			normal: '[&_svg]:size-icon-md',
+			large: '[&_svg]:size-icon-lg'
 		}
 	},
 	defaultVariants: {
@@ -137,9 +122,9 @@ const defaultMenuOptionContent = cva({
 	variants: {
 		// Spacing between title and description follows density, not size.
 		density: {
-			small: 'gap-0',
+			compact: 'gap-0',
 			normal: 'gap-micro',
-			large: 'gap-xs'
+			comfortable: 'gap-xs'
 		}
 	},
 	defaultVariants: {

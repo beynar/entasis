@@ -15,7 +15,7 @@
 		ToggleMenuRadioGroupItem
 	} from '../ToggleMenu/index.js';
 	import type { ToggleMenuThemeProps } from '../ToggleMenu/toggleMenu.theme.js';
-	import { tooltip } from '../Tooltip/tooltip.svelte.js';
+	import { tooltip } from '../Tooltip/tooltip.attachment.svelte.js';
 	import {
 		getRichTextInputBlockControls,
 		getRichTextInputInlineControls,
@@ -32,6 +32,7 @@
 		AIComposerSelectionFormats,
 		AIComposerSelectionListType
 	} from './composer/selection-formatting.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type Props = {
 		size: Sizes;
@@ -78,16 +79,17 @@
 		onSelectionFocusReturn,
 		class: className
 	}: Props = $props();
+	const t = $derived(useI18n());
 
 	let isEditingLink = $state(false);
 	let selectionMenu = $state<{ focusFirst: () => void } | null>(null);
-	let menuItems = $state<ToggleMenuItem[]>([]);
+	let menuItems = $derived<ToggleMenuItem[]>(buildMenuItems());
 
 	const classes = $derived(useRichTextInputTheme(theme));
 	const hasActiveLink = $derived(linkUrl.trim().length > 0);
 	const blockControls = $derived.by(() =>
 		hasAny(['heading1', 'heading2', 'heading3', 'quote'])
-			? getRichTextInputBlockControls({ hasFormat, blockType, onBlock })
+			? getRichTextInputBlockControls({ hasFormat, blockType, onBlock, messages: t })
 			: []
 	);
 	const inlineControls = $derived.by(() =>
@@ -96,11 +98,12 @@
 			formats,
 			hasActiveLink,
 			onFormat,
-			onLink: beginLinkEdit
+			onLink: beginLinkEdit,
+			messages: t
 		})
 	);
 	const listControls = $derived.by(() =>
-		getRichTextInputListControls({ hasFormat, listType, onList })
+		getRichTextInputListControls({ hasFormat, listType, onList, messages: t })
 	);
 	const menuTheme = $derived({
 		override: true,
@@ -121,10 +124,6 @@
 		node.addEventListener('keydown', onKeyDown);
 		return () => node.removeEventListener('keydown', onKeyDown);
 	};
-
-	$effect(() => {
-		menuItems = buildMenuItems();
-	});
 
 	function hasFormat(format: RichTextInputFormat) {
 		return availableFormats.includes(format);
@@ -166,9 +165,9 @@
 
 	function buildMenuItems() {
 		const items: ToggleMenuItem[] = [];
-		pushRadioGroup(items, 'Block style', blockControls, blockType);
-		pushGroup(items, 'Inline formatting', inlineControls);
-		pushGroup(items, 'Lists', listControls);
+		pushRadioGroup(items, t.richTextBlockStyle, blockControls, blockType);
+		pushGroup(items, t.richTextInlineFormatting, inlineControls);
+		pushGroup(items, t.richTextLists, listControls);
 
 		if (showDismiss) {
 			items.push({
@@ -183,25 +182,21 @@
 
 	function pushGroup(
 		items: ToggleMenuItem[],
-		ariaLabel: string,
+		label: string,
 		controls: RichTextInputToolbarButtonConfig[]
 	) {
 		if (controls.length === 0) return;
-		const buttons: ToggleMenuGroupButtons = {};
-		const value: Record<string, boolean> = {};
-
-		for (const control of controls) {
-			buttons[control.id] = {
-				prefix: control.icon,
-				ariaLabel: control.shortcut ? `${control.label} (${control.shortcut})` : control.label,
-				onValueChange: control.onSelect
-			};
-			value[control.id] = control.active;
-		}
+		const buttons: ToggleMenuGroupButtons = controls.map((control) => ({
+			value: control.id,
+			prefix: control.icon,
+			label: control.shortcut ? `${control.label} (${control.shortcut})` : control.label,
+			onValueChange: control.onSelect
+		}));
+		const value = controls.filter((control) => control.active).map((control) => control.id);
 
 		items.push({
 			type: 'group',
-			ariaLabel,
+			label,
 			items: buttons,
 			value,
 			joined: false
@@ -210,23 +205,20 @@
 
 	function pushRadioGroup(
 		items: ToggleMenuItem[],
-		ariaLabel: string,
+		label: string,
 		controls: RichTextInputToolbarButtonConfig[],
 		value: string
 	) {
 		if (controls.length === 0) return;
-		const buttons: ToggleMenuRadioGroupButtons = {};
-
-		for (const control of controls) {
-			buttons[control.id] = {
-				prefix: control.icon,
-				ariaLabel: control.label
-			};
-		}
+		const buttons: ToggleMenuRadioGroupButtons = controls.map((control) => ({
+			value: control.id,
+			prefix: control.icon,
+			label: control.label
+		}));
 
 		items.push({
 			type: 'radio-group',
-			ariaLabel,
+			label,
 			items: buttons,
 			value: controls.some((control) => control.id === value) ? value : undefined,
 			onValueChange: (nextValue) =>
@@ -239,7 +231,7 @@
 		return [
 			{
 				type: 'option',
-				title: 'Dismiss formatting toolbar',
+				title: t.richTextDismissToolbar,
 				prefix: xIcon,
 				onclick: dismiss
 			}
@@ -250,7 +242,7 @@
 {#snippet dismissControl({ reference, size, color, variant, disabled }: ToggleMenuCustomPayload)}
 	<Button
 		type="button"
-		label="Dismiss formatting toolbar"
+		label={t.richTextDismissToolbar}
 		prefix={xIcon}
 		color={color ?? 'neutral'}
 		variant={variant ?? 'ghost'}
@@ -259,7 +251,7 @@
 		squared
 		onclick={dismiss}
 		{@attach reference}
-		{@attach tooltip({ content: 'Dismiss formatting toolbar', delay: 350 })}
+		{@attach tooltip({ content: t.richTextDismissToolbar, delay: 350 })}
 	/>
 {/snippet}
 
@@ -281,8 +273,8 @@
 		bind:this={selectionMenu}
 		target={selectionTarget}
 		enabled={selectionEnabled}
-		bind:value={menuItems}
-		ariaLabel="Rich text formatting"
+		bind:items={menuItems}
+		label={t.richTextFormatting}
 		{size}
 		color="neutral"
 		variant="ghost"
@@ -290,7 +282,7 @@
 		position="top"
 		offset={8}
 		directedTransition={false}
-		popoverClass={selectionPopoverClass}
+		popover={{ class: selectionPopoverClass }}
 		onAfterClose={() => onSelectionClose?.()}
 		children={isEditingLink ? linkEditor : undefined}
 		{@attach restoreSelectionFocusOnEscape}
@@ -299,8 +291,8 @@
 	{@render linkEditor()}
 {:else}
 	<ToggleMenu
-		bind:value={menuItems}
-		ariaLabel="Rich text formatting"
+		bind:items={menuItems}
+		label={t.richTextFormatting}
 		{size}
 		color="neutral"
 		variant="ghost"

@@ -1,4 +1,3 @@
-import { watch } from 'runed';
 import { on } from 'svelte/events';
 
 export const useKeyDown = (opts: {

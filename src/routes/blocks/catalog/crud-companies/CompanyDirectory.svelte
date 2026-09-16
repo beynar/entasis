@@ -34,11 +34,11 @@
 	]);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
-	<header class="flex flex-wrap items-center justify-between gap-lg">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
+	<header class="gap-lg flex flex-wrap items-center justify-between">
 		<div>
 			<h2 class="text-3xl font-semibold">Your company network</h2>
-			<p class="mt-sm text-sm text-neutral/60">
+			<p class="mt-sm text-neutral/70 text-sm">
 				{companies.length} organizations in this local workspace
 			</p>
 		</div>

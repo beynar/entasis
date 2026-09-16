@@ -31,10 +31,10 @@ export type TreeProps = WithAttachments<
 			class?: string;
 			/** Classes applied to the inner `file-tree-container` host. */
 			hostClass?: string;
-			/** Current Pierre Trees instance. Bind with `bind:fileTree` for imperative calls. */
-			fileTree?: FileTree;
+			/** Current Pierre Trees instance. Bind with `bind:api` for imperative calls. */
+			api?: FileTree;
 			/** Fires after the current Pierre Trees instance renders or hydrates. */
-			onReady?: (fileTree: FileTree) => void;
+			onReady?: (payload: FileTree) => void;
 			/** Fires when the focused path changes. */
 			onFocusChange?: (focusedPath: string | null) => void;
 			/** Fires for public path mutation events emitted by Pierre Trees. */
@@ -59,7 +59,7 @@ export type TreePropValues = TreeEventProps &
 	TreeSnippetProps & {
 		onFocusChange?: (focusedPath: string | null) => void;
 		onMutation?: (event: FileTreeMutationEvent) => void;
-		onReady?: (fileTree: FileTree) => void;
+		onReady?: (payload: FileTree) => void;
 		onDispose: () => void;
 		setFileTree: (fileTree: FileTree | undefined) => void;
 	};

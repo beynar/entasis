@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import type { ResolvedPathname } from '$app/types';
+	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import Button from '$lib/components/Button/Button.svelte';
 	import Code from '$lib/components/Code/Code.svelte';
 	import { themeTransitions, type ThemeTransition } from '$lib/components/Theme/themeTransition.js';
@@ -51,9 +54,11 @@
 	);
 
 	async function previewTransition(transition: ThemeTransition) {
-		const searchParams = new URLSearchParams(page.url.searchParams);
+		const searchParams = new SvelteURLSearchParams(page.url.searchParams);
 		searchParams.set('transition', transition);
-		await goto(`${page.url.pathname}?${searchParams}`, {
+		// `resolve()` only accepts a route id, so the query is appended to what it returns.
+		const target = `${resolve('/docs/theme-transitions')}?${searchParams}` as ResolvedPathname;
+		await goto(target, {
 			keepFocus: true,
 			noScroll: true,
 			replaceState: true
@@ -63,7 +68,7 @@
 	}
 </script>
 
-<article class="mx-auto flex w-full max-w-4xl flex-col gap-14 pb-24 text-neutral">
+<article class="text-neutral mx-auto flex w-full max-w-4xl flex-col gap-14 pb-24">
 	<header class="flex max-w-3xl flex-col gap-3">
 		<h1 class="text-3xl font-semibold">Theme transitions</h1>
 		<p class="text-balance">

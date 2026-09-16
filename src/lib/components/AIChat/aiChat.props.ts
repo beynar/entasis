@@ -6,13 +6,13 @@ import type {
 	AIComposerQueuedMessage
 } from '../AIComposer/aiComposer.props.js';
 import type { AIContextUsage } from '../AIContext/aiContext.props.js';
+import type { AIConversationApi } from '../AIConversation/aiConversation.props.js';
 import type {
 	AIConversationLabelOverrides,
 	AIConversationState,
 	AIConversationStateEvents,
 	AIConversationStatus
 } from '../AIConversation/aiConversation.state.svelte.js';
-import type { AIMcpAppHostConfig } from '../AIMcpApp/aiMcpApp.props.js';
 import type {
 	AIMessageActionHandler,
 	AIMessageActionState,
@@ -42,12 +42,6 @@ export type AIChatState<TMessage extends AIThreadItem = AIThreadItem> =
 
 export type AIChatToolPayload<TMessage extends AIThreadItem = AIThreadItem> = {
 	tools: readonly AIToolCall[];
-	message: TMessage;
-	index: number;
-};
-
-export type AIChatAppPayload<TMessage extends AIThreadItem = AIThreadItem> = {
-	tool: AIToolCall;
 	message: TMessage;
 	index: number;
 };
@@ -85,8 +79,8 @@ type AIChatRootAttributes = Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'c
 type AIChatBaseProps<TMessage extends AIThreadItem> = AIChatComposerBehaviorProps & {
 	/** Bindable reference to the assembled chat root. */
 	ref?: HTMLDivElement | null;
-	/** Bindable conversation state created by the assembled provider. */
-	conversation?: AIConversationState<TMessage>;
+	/** Bindable instance handle: the conversation state created by the assembled provider. */
+	api?: AIConversationApi<TMessage>;
 	/** Bindable lifecycle status derived and updated by conversation mutations. */
 	status?: AIConversationStatus;
 	/** Failure displayed by the default error region. */
@@ -112,7 +106,7 @@ type AIChatBaseProps<TMessage extends AIThreadItem> = AIChatComposerBehaviorProp
 	/** Selected model identifier. */
 	selectedModel?: string;
 	/** Whether the assistant response is currently streaming. */
-	isStreaming?: boolean;
+	streaming?: boolean;
 	/** Active ask-user-question tool request rendered in place of the composer. */
 	activeAskUserQuestion?: AIThreadAskUserQuestion<TMessage> | null;
 	/** Conversation-aware label overrides. */
@@ -153,10 +147,8 @@ type AIChatBaseProps<TMessage extends AIThreadItem> = AIChatComposerBehaviorProp
 	onMessageEdit?: AIMessageActionHandler<TMessage>;
 	/** Handles message retry actions. */
 	onMessageRetry?: AIMessageActionHandler<TMessage>;
-	/** MCP Apps host used for application tool calls in the transcript. */
-	mcpHost?: AIMcpAppHostConfig;
 	/** Called instead of the default input update when an empty-state suggestion is selected. */
-	onSuggestionSelect?: (suggestion: string) => void;
+	onSelect?: (suggestion: string) => void;
 	/** Replaces the complete default surface while retaining the conversation provider. */
 	children?: Slot<AIChatState<TMessage>>;
 	/** Optional content above the default transcript. */
@@ -183,8 +175,6 @@ type AIChatBaseProps<TMessage extends AIThreadItem> = AIChatComposerBehaviorProp
 	tool?: Slot<AIChatToolPayload<TMessage>>;
 	/** Custom renderer for transcript markers. */
 	marker?: Slot<AIThreadRenderPayload<TMessage>>;
-	/** Custom renderer for MCP App tool calls. */
-	app?: Slot<AIChatAppPayload<TMessage>>;
 	/** Replaces default suggestions inside the empty transcript state. */
 	suggestionsRegion?: Slot<AIChatState<TMessage>>;
 	/** Replaces the user-turn table of contents. */

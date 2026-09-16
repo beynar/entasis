@@ -1,6 +1,8 @@
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
+// `--marquee-animation-*` is INTERNAL: the `pauseOnHover` and `reverse` variants use it to
+// reach the track's animation. Consumers use the props, not the properties.
 const defaultMarquee = cva({
 	base: 'group flex overflow-hidden relative',
 	variants: {

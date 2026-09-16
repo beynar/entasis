@@ -4,6 +4,7 @@
 	import { Dialog } from '$lib/components/Dialog/index.js';
 	import type { SidebarDensity, SidebarSide, SidebarSize } from './sidebar.props.js';
 	import { useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
+	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 
 	let {
 		open,
@@ -30,6 +31,7 @@
 	} = $props();
 
 	const classes = $derived(useSidebarTheme(theme));
+	const resolvedColor = $derived(useDefaultColor());
 	const dialogType = $derived(side === 'right' ? 'drawerRight' : 'drawerLeft');
 </script>
 
@@ -48,6 +50,7 @@
 	<div
 		data-slot="sidebar"
 		data-sidebar="sidebar"
+		data-color={resolvedColor}
 		data-mobile="true"
 		data-side={side}
 		data-size={size}

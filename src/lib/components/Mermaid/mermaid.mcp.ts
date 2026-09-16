@@ -20,6 +20,7 @@ Renders a [Mermaid](https://mermaid.js.org/) diagram (flowchart, sequence, gantt
 ### Interaction Props
 - **controls**: boolean | { fit?, zoomIn?, zoomOut?, expand?, download? } (default: true) - The floating controls to show. \`true\` shows all, \`false\` hides the bar, an object toggles individual controls.
 - **mouseWheelZoom**: boolean (default: true) - Enable mouse-wheel zoom over the diagram (activated after a short hover so page scroll isn't hijacked). Pan-drag and the zoom buttons work regardless.
+- **touchPan**: boolean (default: false) - Capture single-finger touch as a pan. Off inline so the diagram never traps page scroll; the fullscreen dialog turns it on. Pinch-zoom always works.
 - **errorForgiving**: boolean (default: false) - Swallow transient parse/render errors and keep the last valid diagram on screen instead of showing the error overlay. For token-streaming (LLM output), where the source is incomplete/invalid between chunks. Errors are still reported via \`onError\`.
 
 ### Event Props
@@ -35,7 +36,7 @@ Renders a [Mermaid](https://mermaid.js.org/) diagram (flowchart, sequence, gantt
 - **Pan**: drag the diagram.
 - **Zoom**: the +/− buttons, mouse-wheel (after a short hover), pinch, or double-click.
 - **Fit**: the fit-to-view button re-centers and scales the diagram to the viewport.
-- **Fullscreen**: the expand button promotes the diagram to a fixed fullscreen overlay (Escape exits).
+- **Fullscreen**: the expand button opens the same diagram in a \`fullScreen\` Dialog (focus trap, Escape and the close button exit, single-finger touch pans inside it).
 - **Download**: serializes the rendered diagram to a standalone .svg file.
 
 ## Brand theming

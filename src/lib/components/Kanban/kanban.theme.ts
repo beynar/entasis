@@ -9,7 +9,7 @@ const defaultKanban = cva({
 });
 
 const defaultKanbanColumn = cva({
-	base: 'bg-surface-raised ring-neutral/10 flex max-h-full w-72 shrink-0 flex-col rounded-lg ring-1'
+	base: 'bg-surface-raised ring-neutral-muted flex max-h-full w-72 shrink-0 flex-col rounded-lg ring-1'
 });
 
 const defaultKanbanColumnHeader = cva({
@@ -20,9 +20,9 @@ const defaultKanbanColumnHeader = cva({
 			false: ''
 		},
 		density: {
-			small: 'px-md py-md',
+			compact: 'px-md py-md',
 			normal: 'px-lg py-md',
-			large: 'px-xl py-lg'
+			comfortable: 'px-xl py-lg'
 		}
 	},
 	defaultVariants: {
@@ -40,18 +40,18 @@ const defaultKanbanColumnTitle = cva({
 });
 
 const defaultKanbanCount = cva({
-	base: 'text-neutral/60 bg-neutral-muted rounded-full px-sm py-micro text-xs tabular-nums'
+	base: 'text-neutral/70 bg-neutral-muted rounded-full px-sm py-micro text-xs tabular-nums'
 });
 
 const defaultKanbanList = cva({
 	// data-dnd-over comes from useDndList when an accepted drag hovers the list.
 	// pt keeps the first card's ring/shadow clear of the scroll container edge.
-	base: 'flex min-h-12 flex-1 flex-col overflow-y-auto scrollbar-none rounded-b-lg transition-colors data-[dnd-over=true]:bg-primary/5',
+	base: 'flex min-h-row-lg flex-1 flex-col overflow-y-auto scrollbar-none rounded-b-lg transition-colors data-[dnd-over=true]:bg-primary/5',
 	variants: {
 		density: {
-			small: 'gap-xs p-sm pt-xs',
+			compact: 'gap-xs p-sm pt-xs',
 			normal: 'gap-sm p-md pt-xs',
-			large: 'gap-md p-md pt-sm'
+			comfortable: 'gap-md p-md pt-sm'
 		}
 	},
 	defaultVariants: {
@@ -60,12 +60,12 @@ const defaultKanbanList = cva({
 });
 
 const defaultKanbanCard = cva({
-	base: 'bg-surface-floating ring-neutral/10 rounded-md text-sm shadow-xs ring-1 select-none',
+	base: 'bg-surface-floating ring-neutral-muted rounded-md text-sm lift-1 ring-1 select-none',
 	variants: {
 		density: {
-			small: 'px-md py-sm',
+			compact: 'px-md py-sm',
 			normal: 'px-lg py-md',
-			large: 'px-xl py-lg'
+			comfortable: 'px-xl py-lg'
 		},
 		handle: {
 			// With a grip handle the card body is not the drag activator.
@@ -84,11 +84,11 @@ const defaultKanbanCardTitle = cva({
 });
 
 const defaultKanbanCardDescription = cva({
-	base: 'text-neutral/60 mt-micro text-xs leading-normal'
+	base: 'text-neutral/70 mt-micro text-xs leading-normal'
 });
 
 const defaultKanbanEmpty = cva({
-	base: 'text-neutral/60 px-md py-xl text-center text-xs'
+	base: 'text-neutral/70 px-md py-xl text-center text-xs'
 });
 
 // Rendered below the card list (columnFooter snippet / the `footer` param of
@@ -97,9 +97,9 @@ const defaultKanbanFooter = cva({
 	base: '',
 	variants: {
 		density: {
-			small: 'p-sm pt-xs',
+			compact: 'p-sm pt-xs',
 			normal: 'p-md pt-xs',
-			large: 'p-md pt-sm'
+			comfortable: 'p-md pt-sm'
 		}
 	},
 	defaultVariants: {
@@ -138,7 +138,7 @@ const defaultKanbanColumnWrapper = cva({
 
 // The grip rendered by the DEFAULT card when cardHandle is on.
 const defaultKanbanCardHandle = cva({
-	base: 'text-neutral/60 hover:text-neutral mt-micro inline-flex shrink-0 cursor-grab items-center justify-center'
+	base: 'text-neutral/70 hover:text-neutral mt-micro inline-flex shrink-0 cursor-grab items-center justify-center'
 });
 
 export const kanbanTheme = {

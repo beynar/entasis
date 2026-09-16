@@ -22,7 +22,7 @@
 	} satisfies FormInputs;
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card
 		class="mx-auto w-full max-w-2xl"
 		title="Build your team"
@@ -44,7 +44,7 @@
 				{#each recipients as recipient (recipient)}<Chip
 						onclick={() => (recipients = recipients.filter((email) => email !== recipient))}
 						>{recipient} ×</Chip
-					>{:else}<p class="text-sm text-neutral/60">No recipients added yet.</p>{/each}
+					>{:else}<p class="text-neutral/70 text-sm">No recipients added yet.</p>{/each}
 			</Stack>
 			<Select
 				label="Everyone joins as"
@@ -64,7 +64,7 @@
 					title="Demo result"
 					description={message}
 				/>{/if}
-			<p class="text-xs text-neutral/60">Select an email chip to remove it.</p>
+			<p class="text-neutral/70 text-xs">Select an email chip to remove it.</p>
 		</Stack></Card
 	>
 </Stack>

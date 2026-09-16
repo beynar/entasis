@@ -10,7 +10,7 @@
 	let resends = $state(0);
 </script>
 
-<Stack as="section" gap="lg" class="mx-auto w-full max-w-5xl p-md text-neutral sm:p-xl">
+<Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">
 	<Card
 		class="mx-auto w-full max-w-md"
 		title="A little less to remember"
@@ -21,7 +21,7 @@
 					title="Email link preview"
 					description={`A link would be sent to ${address}. No email was sent.`}
 				/><Button variant="outline" onclick={() => (resends += 1)}>Preview another link</Button>
-				<p class="text-xs text-neutral/60" aria-live="polite">{resends} resend previews</p>
+				<p class="text-neutral/70 text-xs" aria-live="polite">{resends} resend previews</p>
 				<Button variant="ghost" onclick={() => (address = '')}>Change email</Button>{:else}<Form
 					inputs={{
 						email: {
@@ -36,7 +36,7 @@
 					]}
 					onSubmit={({ email }) => (address = email)}
 				/>{/if}<Separator />
-			<p class="text-center text-xs text-neutral/60">One link. One use. Your next workday.</p>
+			<p class="text-neutral/70 text-center text-xs">One link. One use. Your next workday.</p>
 		</Stack></Card
 	>
 </Stack>

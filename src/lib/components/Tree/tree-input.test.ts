@@ -5,9 +5,9 @@ import { createTreeOptions } from './tree-input.js';
 describe('Tree public adapter contract', () => {
 	test('maps semantic density and keeps raw options available at the adapter boundary', () => {
 		for (const [density, preset] of [
-			['small', 'compact'],
+			['compact', 'compact'],
 			['normal', 'default'],
-			['large', 'relaxed']
+			['comfortable', 'relaxed']
 		] as const) {
 			expect(createTreeOptions({ paths: [] }, { density: 0.5 }, { density }).density).toBe(preset);
 		}

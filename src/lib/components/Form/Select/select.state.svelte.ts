@@ -56,7 +56,8 @@ export class SelectState {
 	nav = useListNavigation({
 		values: () => this.flatOptions.filter((option) => !option.disabled).map((o) => o.value),
 		optionId: (value) => this.optionId(value),
-		onSelect: (value) => this.selectValue(value)
+		onSelect: (value) => this.selectValue(value),
+		typeahead: (value) => this.flatOptions.find((option) => option.value === value)?.label ?? value
 	});
 
 	constructor(options: SelectStateOptions) {

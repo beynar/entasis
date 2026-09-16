@@ -15,7 +15,7 @@ type LinkPreviewStateOptions = {
 	getMetadataEndpoint: () => LinkPreviewMetadataEndpoint | undefined;
 	getShouldLoad: () => boolean;
 	getDisabled: () => boolean;
-	onLoad?: (metadata: LinkPreviewMetadata) => void;
+	onLoad?: (payload: LinkPreviewMetadata) => void;
 	onError?: (error: Error) => void;
 };
 

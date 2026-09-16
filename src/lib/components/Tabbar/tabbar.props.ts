@@ -18,6 +18,11 @@ export type TabItem =
 	| string
 	| {
 			/**
+			 * Stable identifier used as the tab's `value`. Defaults to the string label, or the
+			 * item's index when the label is a snippet.
+			 */
+			value?: string;
+			/**
 			 * The label of the tab. Can be a string or a Snippet for custom rendering.
 			 */
 			label: string | Snippet;
@@ -56,13 +61,21 @@ export type TabItem =
 			 * Called with the selected entry index when a menu entry is picked
 			 * (only used when menu is provided).
 			 */
-			onMenuSelect?: (menuIndex: number) => void;
+			onSelect?: (menuIndex: number) => void;
 	  };
 
+// The tablist owns its own ARIA: `role`, `aria-orientation` (from `orientation`), and the
+// accessible name (from `label`). Callers describe meaning; the component writes the attributes.
 type TabbarRootAttributes = Omit<
 	HTMLAttributes<HTMLDivElement>,
-	'children' | 'class' | 'role' | 'aria-orientation'
+	'children' | 'class' | 'role' | 'id' | `aria-${string}`
 >;
+
+/** The value a tab item resolves to: `value`, else a string label, else its index. */
+export const getTabValue = (item: TabItem, index: number): string =>
+	typeof item === 'string'
+		? item
+		: (item.value ?? (typeof item.label === 'string' ? item.label : String(index)));
 
 export type TabbarProps = WithAttachments<
 	TabbarRootAttributes & {
@@ -73,17 +86,29 @@ export type TabbarProps = WithAttachments<
 		 */
 		items: TabItem[];
 		/**
-		 * The index of the currently active tab. This is bindable.
-		 * @default 0
+		 * The `value` of the active tab (a string label resolves to itself). Bindable.
+		 * @default the first tab's value
 		 */
-		value?: number;
-		/** Initial active tab index when `value` is omitted. */
-		defaultValue?: number;
+		value?: string;
+		/** Initial active tab value when `value` is omitted. */
+		defaultValue?: string;
 		/**
 		 * Callback function called when the active tab changes.
-		 * Receives the new tab index as an argument.
+		 * Receives the new tab's value.
 		 */
-		onValueChange?: (value: number) => void;
+		onValueChange?: (value: string) => void;
+		/** DOM id prefix for tab elements (`{id}-tab-{index}`); `aria-controls` targets `{id}-panel-{index}`. */
+		id?: string;
+		/**
+		 * Accessible name for the tab list, so a page with more than one set of tabs tells them
+		 * apart in a screen reader's list of controls. Applied as `aria-label`.
+		 */
+		label?: string;
+		/**
+		 * When true, each tab gets `aria-controls` pointing at `{id}-panel-{index}`.
+		 * Set by `Tabs`, which renders the matching panels.
+		 */
+		controlsPanels?: boolean;
 		/**
 		 * The size of the tabs.
 		 * @default 'normal'

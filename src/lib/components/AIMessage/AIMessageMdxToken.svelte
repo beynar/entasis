@@ -31,7 +31,7 @@
 	data-slot="ai-message-mdx-token"
 	data-ai-token={tagName.toLowerCase()}
 	title={detail}
-	class="mx-0.5 inline-flex max-w-full items-center gap-1 rounded-sm border border-current/20 bg-current/10 px-1 py-0 text-[0.78em] leading-[1.35] font-medium text-current align-[0.05em]"
+	class="mx-0.5 inline-flex max-w-full items-center gap-1 rounded-sm border border-current/20 bg-current/10 px-1 py-0 align-[0.05em] text-[0.78em] leading-[1.35] font-medium text-current"
 >
 	<span class="inline-flex size-[1em] shrink-0 items-center justify-center" aria-hidden="true">
 		{#if tagName === 'Command'}

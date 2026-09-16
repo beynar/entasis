@@ -255,28 +255,32 @@ The component renders as a fieldset with the following DOM structure:
 
 ### Complex Options with Rich Labels
 \`\`\`svelte
-<script>
+<script lang="ts">
 	import { Chip } from 'svelai/chip';
-	
-	let plans = $state([]);
+
+	let plans = $state<string[]>([]);
 </script>
 
-<CheckboxesInput 
+{#snippet storageLabel()}
+	Extra Storage <Chip color="primary">+$5/mo</Chip>
+{/snippet}
+
+{#snippet usersLabel()}
+	Team Members <Chip color="success">+$10/mo</Chip>
+{/snippet}
+
+<CheckboxesInput
 	label="Select add-ons"
 	mode="card"
 	items={[
-		{ 
+		{
 			value: 'storage',
-			label: (props) => {
-				return \`Extra Storage <Chip color="primary">+$5/mo</Chip>\`;
-			},
+			label: storageLabel,
 			description: '100GB additional cloud storage'
 		},
-		{ 
+		{
 			value: 'users',
-			label: (props) => {
-				return \`Team Members <Chip color="success">+$10/mo</Chip>\`;
-			},
+			label: usersLabel,
 			description: 'Add up to 10 team members'
 		}
 	]}
@@ -383,8 +387,12 @@ The theme object contains the following parts:
   bind:value={selected}
   items={items}
   theme={{
+    // The option grid lays itself out against its OWN width, not the viewport: declare the
+    // container on the root and query it on the grid, so the columns follow the field's host
+    // (a sidebar, a split pane, a dialog) instead of the device.
+    root: { base: '@container' },
     checkboxesInputContainer: {
-      base: 'grid-cols-1 md:grid-cols-3 gap-4'
+      base: 'grid-cols-1 @md:grid-cols-3 gap-lg'
     },
     checkboxesInputItem: {
       mode: {
@@ -408,7 +416,7 @@ The theme object contains the following parts:
         true: 'ring-2 ring-primary bg-primary/10'
       },
       mode: {
-        card: 'rounded-xl shadow-md hover:shadow-lg'
+        card: 'rounded-xl raised-3 hover:raised-4'
       }
     },
     checkboxesInputItemThumb: {
@@ -426,10 +434,11 @@ The theme object contains the following parts:
   import { setCheckboxesInputTheme } from 'svelai/checkboxes-input';
   
   setCheckboxesInputTheme({
+    root: { base: '@container' },
     checkboxesInputContainer: {
-      base: 'gap-4',
+      base: 'gap-lg',
       mode: {
-        card: 'grid-cols-1 md:grid-cols-2'
+        card: 'grid-cols-1 @2xl:grid-cols-2'
       }
     },
     checkboxesInputItem: {

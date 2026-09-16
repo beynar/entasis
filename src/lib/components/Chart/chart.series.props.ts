@@ -1,8 +1,5 @@
 import type { ChartDataMarkProps } from './chart.annotation.props.js';
-import type {
-	ChartBarAnalysis,
-	ChartSeriesAnalysis
-} from './chart.analysis.props.js';
+import type { ChartBarAnalysis, ChartSeriesAnalysis } from './chart.analysis.props.js';
 import type {
 	ChartChannel,
 	ChartColor,
@@ -10,6 +7,7 @@ import type {
 	ChartKey,
 	ChartRequiredChannel,
 	ChartValue,
+	ChartValueFields,
 	ChartVisual
 } from './chart.core.js';
 
@@ -81,6 +79,31 @@ type ChartHorizontalSeries<TRow> = {
 	layout?: ChartStackLayout;
 };
 
+/** Wide area stack: one stacked series per listed numeric field, keyed by the field name. */
+type ChartWideVerticalSeries<TRow> = {
+	direction?: 'vertical';
+	x: ChartChannel<TRow, ChartValue>;
+	y: ChartValueFields<TRow>;
+	area: true;
+	layout: ChartStackLayout;
+	series?: never;
+	colorBy?: never;
+	interval?: never;
+	baseline?: never;
+};
+
+type ChartWideHorizontalSeries<TRow> = {
+	direction: 'horizontal';
+	x: ChartValueFields<TRow>;
+	y: ChartChannel<TRow, ChartValue>;
+	area: true;
+	layout: ChartStackLayout;
+	series?: never;
+	colorBy?: never;
+	interval?: never;
+	baseline?: never;
+};
+
 type ChartSeriesSurface<TRow> =
 	| {
 			area?: false;
@@ -96,10 +119,13 @@ type ChartSeriesSurface<TRow> =
 	  };
 
 export type ChartSeriesMark<TRow> = ChartDataMarkProps<TRow> &
-	ChartSeriesChannels<TRow> &
 	ChartFillStyle<TRow> &
 	ChartStrokeStyle<TRow> &
-	(ChartVerticalSeries<TRow> | ChartHorizontalSeries<TRow>) & {
+	(
+		| ((ChartVerticalSeries<TRow> | ChartHorizontalSeries<TRow>) & ChartSeriesChannels<TRow>)
+		| ChartWideVerticalSeries<TRow>
+		| ChartWideHorizontalSeries<TRow>
+	) & {
 		type: 'series';
 		line?: boolean | ChartLineOptions<TRow>;
 		points?: boolean | ChartPointOptions<TRow>;
@@ -119,40 +145,64 @@ type ChartBarCoordinates<TRow> =
 			x: ChartChannel<TRow, number>;
 	  };
 
+/** Wide stack: one stacked series per listed numeric field, keyed by the field name. */
+type ChartWideBarCoordinates<TRow> =
+	| {
+			direction?: 'vertical';
+			x: ChartChannel<TRow, ChartValue>;
+			y: ChartValueFields<TRow>;
+			series?: never;
+			colorBy?: never;
+	  }
+	| {
+			direction: 'horizontal';
+			y: ChartChannel<TRow, ChartValue>;
+			x: ChartValueFields<TRow>;
+			series?: never;
+			colorBy?: never;
+	  };
+
 type ChartBarBase<TRow> = ChartDataMarkProps<TRow> &
-	ChartFillStyle<TRow> &
-	ChartBarCoordinates<TRow> & {
+	ChartFillStyle<TRow> & {
 		type: 'bar';
 		inset?: number;
 		radius?: number;
 		analysis?: readonly [ChartBarAnalysis, ...ChartBarAnalysis[]];
 	};
 
-type ChartSimpleBar<TRow> = ChartSeriesChannels<TRow> & {
-	variant?: undefined;
-	baseline?: number | ChartChannel<TRow, number>;
-	padding?: never;
-	order?: never;
-	offset?: never;
-	reverse?: never;
-};
+type ChartSimpleBar<TRow> = ChartBarCoordinates<TRow> &
+	ChartSeriesChannels<TRow> & {
+		variant?: undefined;
+		baseline?: number | ChartChannel<TRow, number>;
+		padding?: never;
+		order?: never;
+		offset?: never;
+		reverse?: never;
+		gap?: never;
+	};
 
-type ChartGroupedBar<TRow> = ChartGroupedChannels<TRow> & {
-	variant: 'group';
-	baseline?: never;
-	padding?: number;
-	order?: never;
-	offset?: never;
-	reverse?: never;
-};
+type ChartGroupedBar<TRow> = ChartBarCoordinates<TRow> &
+	ChartGroupedChannels<TRow> & {
+		variant: 'group';
+		baseline?: never;
+		padding?: number;
+		order?: never;
+		offset?: never;
+		reverse?: never;
+		gap?: never;
+	};
 
-type ChartStackedBar<TRow> = ChartGroupedChannels<TRow> & {
+type ChartStackedBar<TRow> = (
+	(ChartBarCoordinates<TRow> & ChartGroupedChannels<TRow>) | ChartWideBarCoordinates<TRow>
+) & {
 	variant: 'stack';
 	baseline?: never;
 	padding?: never;
 	order?: 'input' | 'ascending' | 'descending' | readonly ChartKey[];
 	offset?: 'diverging' | 'normalize' | 'center' | 'wiggle';
 	reverse?: boolean;
+	/** Pixels of surface left between consecutive segments of one stack. */
+	gap?: number;
 };
 
 export type ChartBarMark<TRow> = ChartBarBase<TRow> &

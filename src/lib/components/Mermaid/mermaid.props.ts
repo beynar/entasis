@@ -18,7 +18,7 @@ export type MermaidControls =
 			zoomIn?: boolean;
 			/** Zoom-out control. */
 			zoomOut?: boolean;
-			/** Fullscreen expand/collapse control. */
+			/** Open-in-fullscreen-dialog control. */
 			expand?: boolean;
 			/** Download-as-SVG control. */
 			download?: boolean;
@@ -52,6 +52,12 @@ export type MermaidProps = WithAttachments<{
 	 */
 	mouseWheelZoom?: boolean;
 	/**
+	 * Capture single-finger touch as a pan. Off by default so an inline diagram never
+	 * traps the page scroll; the fullscreen dialog turns it on. Pinch-zoom always works.
+	 * @default false
+	 */
+	touchPan?: boolean;
+	/**
 	 * Forgive transient render/parse errors: instead of showing the error overlay,
 	 * keep the last successfully-rendered diagram on screen (falling back to blank
 	 * only until the first valid render). Intended for token-streaming, where the
@@ -68,7 +74,7 @@ export type MermaidProps = WithAttachments<{
 	/**
 	 * Called after each successful render, with the diagram state.
 	 */
-	onRender?: (state: MermaidState) => void;
+	onRender?: (payload: MermaidState) => void;
 	/**
 	 * Called when loading mermaid, parsing, or rendering fails.
 	 */

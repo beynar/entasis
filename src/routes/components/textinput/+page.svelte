@@ -3,7 +3,7 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import Form from '$lib/components/Form/Form/Form.svelte';
 	import TextInput from '$lib/components/Form/TextInput/TextInput.svelte';
-	import { sizes } from '$lib/utils/tokens.js';
+	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let email = $state('');
@@ -20,7 +20,7 @@
 			type: 'segmented',
 			label: 'Density',
 			value: 'normal',
-			options: sizes
+			options: densities
 		},
 		{
 			name: 'labelPosition',
@@ -39,7 +39,7 @@
 	component="TextInput"
 	features={[
 		'Label linked via htmlFor/id',
-		'Bindable value, errors & focus',
+		'Bindable value, errors & focused state',
 		'Custom onValidate hook',
 		'Helper text & error display'
 	]}
