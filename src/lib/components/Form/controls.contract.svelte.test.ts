@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { fireEvent, screen, waitFor } from '@testing-library/svelte';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import TextInput from './TextInput/TextInput.svelte';
 import TextArea from './TextArea/TextArea.svelte';
@@ -10,6 +10,7 @@ import RetainedTextInput from './TextInput/RetainedTextInput.test.svelte';
 import Form from './Form/Form.svelte';
 import MultiStepForm from './MultiStepForm/MultiStepForm.svelte';
 import Slider from './Slider/Slider.svelte';
+import { renderInTheme } from '../Theme/renderInTheme.test-helper.js';
 
 const scrollTo = Element.prototype.scrollTo;
 beforeAll(() => {
@@ -25,12 +26,10 @@ describe('form control contracts', () => {
 		const onfocus = vi.fn();
 		const onblur = vi.fn();
 		const onValueChange = vi.fn();
-		render(TextInput, {
-			props: {
-				inputAttrs: { 'aria-label': 'Answer', autocomplete: 'email', oninput, onfocus, onblur },
-				fieldAttrs: { 'data-testid': 'wrapper', title: 'Field wrapper' },
-				onValueChange
-			}
+		renderInTheme(TextInput, {
+			inputAttrs: { 'aria-label': 'Answer', autocomplete: 'email', oninput, onfocus, onblur },
+			fieldAttrs: { 'data-testid': 'wrapper', title: 'Field wrapper' },
+			onValueChange
 		});
 
 		const input = screen.getByRole('textbox', { name: 'Answer' }) as HTMLInputElement;
@@ -56,7 +55,7 @@ describe('form control contracts', () => {
 
 	test('uses defaults once and does not echo parent value changes', async () => {
 		const onValueChange = vi.fn();
-		const { rerender } = render(TextArea, { props: { defaultValue: 'Initial', onValueChange } });
+		const { rerender } = renderInTheme(TextArea, { defaultValue: 'Initial', onValueChange });
 		const textarea = screen.getByRole('textbox');
 		expect(textarea).toHaveValue('Initial');
 		await rerender({ defaultValue: 'Ignored' });
@@ -70,7 +69,7 @@ describe('form control contracts', () => {
 
 	test('retains edits when the change callback replaces the spread props', async () => {
 		const onValueChange = vi.fn();
-		render(RetainedTextInput, { props: { onValueChange } });
+		renderInTheme(RetainedTextInput, { onValueChange });
 		const input = screen.getByRole('textbox');
 		await fireEvent.input(input, { target: { value: 'Retained' } });
 		expect(input).toHaveValue('Retained');
@@ -79,7 +78,7 @@ describe('form control contracts', () => {
 
 	test('range Slider ignores a clamped no-op and publishes one keyboard edit', async () => {
 		const onValueChange = vi.fn();
-		render(Slider, { props: { mode: 'range', defaultValue: [0, 100], onValueChange } });
+		renderInTheme(Slider, { mode: 'range', defaultValue: [0, 100], onValueChange });
 		const [minimum] = screen.getAllByRole('slider');
 		await fireEvent.keyDown(minimum, { key: 'Home' });
 		expect(onValueChange).not.toHaveBeenCalled();
@@ -91,7 +90,7 @@ describe('form control contracts', () => {
 	test('preserves textarea keyboard events and permits native cancellation', async () => {
 		const onPressEnter = vi.fn();
 		const onkeydown = vi.fn((event: KeyboardEvent) => event.preventDefault());
-		render(TextArea, { props: { onPressEnter, textareaAttrs: { onkeydown } } });
+		renderInTheme(TextArea, { onPressEnter, textareaAttrs: { onkeydown } });
 		const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
 		await fireEvent(screen.getByRole('textbox'), event);
 		expect(onkeydown).toHaveBeenCalledOnce();
@@ -101,13 +100,11 @@ describe('form control contracts', () => {
 
 	test('keeps Select native trigger attributes and keyboard events on the button', async () => {
 		const onkeydown = vi.fn((event: KeyboardEvent) => event.preventDefault());
-		render(PopoverControls, {
-			props: {
-				select: {
-					triggerAttrs: { 'aria-label': 'Country', title: 'Choose country', onkeydown },
-					fieldAttrs: { 'data-testid': 'select-wrapper' },
-					items: [{ value: 'us', label: 'United States' }]
-				}
+		renderInTheme(PopoverControls, {
+			select: {
+				triggerAttrs: { 'aria-label': 'Country', title: 'Choose country', onkeydown },
+				fieldAttrs: { 'data-testid': 'select-wrapper' },
+				items: [{ value: 'us', label: 'United States' }]
 			}
 		});
 		const trigger = screen.getByRole('combobox', { name: 'Country' });
@@ -126,8 +123,9 @@ describe('form control contracts', () => {
 
 	test('updates controlled key/value rows and publishes only user edits', async () => {
 		const onValueChange = vi.fn();
-		const { rerender } = render(KeyValueInput, {
-			props: { value: [{ key: 'Old key', value: 'Old value' }], onValueChange }
+		const { rerender } = renderInTheme(KeyValueInput, {
+			value: [{ key: 'Old key', value: 'Old value' }],
+			onValueChange
 		});
 		await rerender({ value: [{ key: 'New key', value: 'New value' }] });
 		await waitFor(() => expect(screen.getByDisplayValue('New key')).toBeInTheDocument());
@@ -137,7 +135,7 @@ describe('form control contracts', () => {
 	});
 
 	test('standalone Field owns validation and updates accessible error state', async () => {
-		render(StandaloneField);
+		renderInTheme(StandaloneField);
 		const input = screen.getByRole('textbox', { name: 'Standalone name' });
 		await fireEvent.click(screen.getByRole('button', { name: 'Validate' }));
 		const alert = await screen.findByRole('alert');
@@ -151,14 +149,12 @@ describe('form control contracts', () => {
 	test('publishes Form actions with the form state and preserves native cancellation', async () => {
 		const onAction = vi.fn();
 		const onclick = vi.fn((event: MouseEvent) => event.preventDefault());
-		render(Form, {
-			props: {
-				inputs: {},
-				actions: [
-					{ children: 'Cancel action', onclick, onAction },
-					{ children: 'Accept action', onAction }
-				]
-			}
+		renderInTheme(Form, {
+			inputs: {},
+			actions: [
+				{ children: 'Cancel action', onclick, onAction },
+				{ children: 'Accept action', onAction }
+			]
 		});
 		const event = new MouseEvent('click', { bubbles: true, cancelable: true });
 		await fireEvent(screen.getByRole('button', { name: 'Cancel action' }), event);
@@ -174,18 +170,16 @@ describe('form control contracts', () => {
 	test('MultiStepForm emits one step payload and can block advancement', async () => {
 		const onSubmitStep = vi.fn(() => false);
 		const onValueChange = vi.fn();
-		render(MultiStepForm, {
-			props: {
-				items: [
-					{
-						title: 'Name',
-						inputs: { name: { type: 'text', required: true, defaultValue: 'Ada' } }
-					},
-					{ title: 'Email', inputs: { email: { type: 'email' } } }
-				],
-				onSubmitStep,
-				onValueChange
-			}
+		renderInTheme(MultiStepForm, {
+			items: [
+				{
+					title: 'Name',
+					inputs: { name: { type: 'text', required: true, defaultValue: 'Ada' } }
+				},
+				{ title: 'Email', inputs: { email: { type: 'email' } } }
+			],
+			onSubmitStep,
+			onValueChange
 		});
 		await fireEvent.input(screen.getByDisplayValue('Ada'), { target: { value: 'Grace' } });
 		expect(onValueChange).toHaveBeenCalledOnce();
@@ -206,16 +200,14 @@ describe('form control contracts', () => {
 		const onValueChange = vi.fn();
 		const onOpenChange = vi.fn();
 		const date = new Date(2026, 1, 4);
-		render(PopoverControls, {
-			props: {
-				dateSelector: {
-					defaultValue: date,
-					defaultOpen: true,
-					closeOnSelect: true,
-					presets: [{ label: 'Selected date', value: date }],
-					onValueChange,
-					onOpenChange
-				}
+		renderInTheme(PopoverControls, {
+			dateSelector: {
+				defaultValue: date,
+				defaultOpen: true,
+				closeOnSelect: true,
+				presets: [{ label: 'Selected date', value: date }],
+				onValueChange,
+				onOpenChange
 			}
 		});
 		expect(onOpenChange).not.toHaveBeenCalled();

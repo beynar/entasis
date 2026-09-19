@@ -2,7 +2,7 @@ export { default as Markdown } from './Markdown.svelte';
 export * from './markdown.props.js';
 export {
 	markdownTheme,
-	buildStreamdownTheme,
+	buildMarkdownStreamdownTheme,
 	markdownCodeSizes,
 	markdownMermaidSizes,
 	setMarkdownTheme,

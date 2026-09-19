@@ -123,14 +123,16 @@ const defaultColorVariables = (defaultColor: Colors) => ({
 
 // The four STATE ROLES. None of these variables exists until a theme pins one, and every use
 // site falls back to the current role — `ring-focus` to `--color`, `bg-selected-muted` to
-// `--color-muted`, the state layer to `currentColor` — so an unpinned theme renders exactly as
+// `--color` at `--state-selected-opacity`, the state layer to `currentColor` — so an unpinned theme renders exactly as
 // before and `[data-color]` keeps re-pointing the states along with `--color`.
 const focusColorVariables = (role: Colors) => ({ '--color-focus': `var(--color-${role})` });
-// `selected` is the one state role that paints a surface, so it emits the whole kit: the fill,
-// its muted tint, and the three inks tuned for them.
+// `selected` is the one state role that paints a surface, so it emits the whole kit: the fill
+// and the three inks tuned for it. There is no `--color-selected-muted`: the soft fill is
+// `bg-selected-muted`, which composites `--color-selected` at `--state-selected-opacity` so the
+// same selection reads on `surface`, `surface-raised` and `surface-floating` alike. Pinning an
+// opaque tint here would put the pinned theme straight back on the surface it was mixed over.
 const selectedColorVariables = (role: Colors) => ({
 	'--color-selected': `var(--color-${role})`,
-	'--color-selected-muted': `var(--color-${role}-muted)`,
 	'--color-selected-contrast': `var(--color-${role}-contrast)`,
 	'--color-selected-muted-readable': `var(--color-${role}-muted-readable)`,
 	'--color-selected-readable': `var(--color-${role}-readable)`

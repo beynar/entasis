@@ -169,6 +169,7 @@ Three layers: the Tailwind theme plugin (palette + engine utilities), the `<Them
 	info: #2563eb;
 	state-hover-opacity: 0.16;
 	state-pressed-opacity: 0.32;
+	state-selected-opacity: 0.1;
 }
 ```
 
@@ -197,11 +198,14 @@ Opaque surfaces use `surface-recessed` for inset wells and grouped-control track
 <button class="state-layer bg-primary text-primary-contrast">Save</button>
 ```
 
-`state-hover-opacity` and `state-pressed-opacity` can be overridden per theme block. Their light-theme defaults are 0.05 and 0.10; their dark-theme defaults are 0.16 and 0.32.
+`state-hover-opacity`, `state-pressed-opacity` and `state-selected-opacity` can be overridden per theme block. Their light-theme defaults are 0.05, 0.10 and 0.07; their dark-theme defaults are 0.16, 0.32 and 0.10. `state-selected-opacity` is the alpha `bg-selected-muted` composites the selected role at, which is why a selected row reads the same on `surface`, `surface-raised` and `surface-floating`.
 
 ## Design Tokens
 
-Geometry tokens are runtime values passed to `<Theme designTokens={...}>`, keyed by theme name (they are not plugin options):
+Geometry tokens are runtime values passed to `<Theme designTokens={...}>`, keyed by theme name.
+`radius`, `spacing`, `typeScale`, `elevation` and `motion` are _also_ build-time plugin options on
+the `default: true` block; the runtime value wins for the theme that declares it, because it lands
+on the more specific `html[data-theme="<name>"]`. The rest are runtime-only:
 
 | Token              | Values                                                                                       | Default     |
 | ------------------ | -------------------------------------------------------------------------------------------- | ----------- |
@@ -209,6 +213,8 @@ Geometry tokens are runtime values passed to `<Theme designTokens={...}>`, keyed
 | `spacing`          | `small` \| `normal` \| `large` \| number                                                     | `normal`    |
 | `spacingScale`     | `{ xs?, sm?, md?, lg?, xl? }` multipliers of `--spacing`                                     | 1/1.5/2/3/4 |
 | `typeScale`        | `compact` \| `default` \| `comfortable` \| `large` \| `{ baseMinPx, baseMaxPx, scale, ... }` | unset       |
+| `elevation`        | `flat` \| `normal` \| `high`                                                                 | `normal`    |
+| `motion`           | `{ duration?, easing? }` -- the five duration steps and four easing roles                    | unset       |
 | `raisedWithBorder` | boolean                                                                                      | unset       |
 | `defaultColor`     | `primary` \| `secondary` \| `danger` \| `success` \| `warning` \| `info` \| `neutral`        | `neutral`   |
 | `focusColor`       | any color role -- pins every focus ring                                                      | unset       |

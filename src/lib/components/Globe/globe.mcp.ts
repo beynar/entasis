@@ -4,6 +4,12 @@ export const globeDescription = `
 An interactive, auto-rotating WebGL globe (powered by cobe). Draggable, theme-aware, and animated
 in via a fade. Colors accept theme tokens and recolor automatically when the app theme changes.
 
+## Requires
+
+Globe renders through cobe (WebGL). It is an optional peer dependency of svelai, so install it alongside svelai:
+
+\`pnpm add cobe\`
+
 ## Basic Usage
 
 \`\`\`svelte
@@ -72,7 +78,7 @@ accessible label on a wrapping element or nearby text; keyboard users cannot rot
 
 ## Notes
 
-- Requires the \`cobe\` package (WebGL). Renders nothing meaningful without WebGL support.
+- Renders nothing meaningful without WebGL support.
 - Colors resolve at runtime from CSS variables, so theme tokens recolor the globe on theme toggle.
 - The render loop runs while mounted and stops (and disposes the WebGL context) on unmount.
 `;

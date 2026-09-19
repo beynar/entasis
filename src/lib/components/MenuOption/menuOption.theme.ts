@@ -4,8 +4,14 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 // `size` scales typography/icons only; `density` owns paddings, gaps and
 // min-heights ('small' matches the old small spacing, 'large' the old
 // large spacing — defaults render exactly as before the split).
+// A row is always flush against the padding box of whatever hosts it — a popover panel, a Command
+// palette, a Select listbox — so it keeps the `md` control step but never more than the host's
+// corner allows: `rounded-md-concentric` = `min(md, radius-parent - padding)`, computed from what
+// that host publishes to it (`min(8px, 12 - 8)` = 4px inside a `rounded-lg p-md` panel). Outside
+// any rounded container the parent radius is infinite, so the row is exactly `md` and reads as the
+// control it is.
 const defaultMenuOption = cva({
-	base: 'state-layer rounded-md cursor-pointer items-center inline-flex relative w-full text-left outline-none',
+	base: 'state-layer rounded-md-concentric cursor-pointer items-center inline-flex relative w-full text-left outline-none',
 	variants: {
 		size: {
 			small: 'text-xs',

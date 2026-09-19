@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { EventCalendar } from '$lib/components/EventCalendar/index.js';
+	import { EventCalendar } from 'svelai/event-calendar';
 	import type { Density } from '$lib/types/theme.js';
 	import {
 		EVENT_CALENDAR_DEMO_TIME_ZONE,

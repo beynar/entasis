@@ -1,11 +1,12 @@
 import '@testing-library/jest-dom/vitest';
 import { createChartAdapter } from '@tanstack/charts/adapter';
-import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { fireEvent, waitFor } from '@testing-library/svelte';
 import type { Component } from 'svelte';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import Chart from './Chart.svelte';
 import { createChartOptions } from './chart.adapter.js';
 import type { ChartProps } from './chart.props.js';
+import { renderInTheme } from '../Theme/renderInTheme.test-helper.js';
 
 type ChartConfiguration<TRow extends object> = Pick<
 	ChartProps<TRow>,
@@ -83,8 +84,10 @@ afterEach(() => {
 
 describe('Chart in the browser', () => {
 	test('mounts a client-only chart with the default root height class', async () => {
-		const { container } = render(RevenueChart, {
-			props: { data, ...definition, label: 'Monthly revenue' }
+		const { container } = renderInTheme(RevenueChart, {
+			data,
+			...definition,
+			label: 'Monthly revenue'
 		});
 
 		await waitFor(() => expect(container.querySelector('svg')).toBeInTheDocument());
@@ -98,8 +101,11 @@ describe('Chart in the browser', () => {
 	});
 
 	test('lets a consumer height class replace the default one', async () => {
-		const { container } = render(RevenueChart, {
-			props: { data, ...definition, label: 'Monthly revenue', class: 'h-64' }
+		const { container } = renderInTheme(RevenueChart, {
+			data,
+			...definition,
+			label: 'Monthly revenue',
+			class: 'h-64'
 		});
 
 		await waitFor(() => expect(container.querySelector('svg')).toBeInTheDocument());
@@ -110,8 +116,11 @@ describe('Chart in the browser', () => {
 	});
 
 	test('sizes the root and the plot from height', async () => {
-		const { container } = render(RevenueChart, {
-			props: { data, ...definition, label: 'Monthly revenue', height: 240 }
+		const { container } = renderInTheme(RevenueChart, {
+			data,
+			...definition,
+			label: 'Monthly revenue',
+			height: 240
 		});
 
 		await waitFor(() => expect(container.querySelector('svg')).toBeInTheDocument());
@@ -123,8 +132,10 @@ describe('Chart in the browser', () => {
 	});
 
 	test('updates accessible content after props are replaced', async () => {
-		const { container, rerender } = render(RevenueChart, {
-			props: { data, ...definition, label: 'Monthly revenue' }
+		const { container, rerender } = renderInTheme(RevenueChart, {
+			data,
+			...definition,
+			label: 'Monthly revenue'
 		});
 
 		await waitFor(() => expect(container.querySelector('svg')).toBeInTheDocument());
@@ -159,8 +170,10 @@ describe('Chart in the browser', () => {
 	});
 
 	test('does not activate point focus through keyboard or clicks', async () => {
-		const { container } = render(RevenueChart, {
-			props: { data, ...definition, label: 'Monthly revenue' }
+		const { container } = renderInTheme(RevenueChart, {
+			data,
+			...definition,
+			label: 'Monthly revenue'
 		});
 
 		const svg = await waitFor(() => {
@@ -178,8 +191,10 @@ describe('Chart in the browser', () => {
 	});
 
 	test('opens the native tooltip from pointer input', async () => {
-		const { container } = render(RevenueChart, {
-			props: { data, ...definition, label: 'Monthly revenue' }
+		const { container } = renderInTheme(RevenueChart, {
+			data,
+			...definition,
+			label: 'Monthly revenue'
 		});
 		const svg = await waitFor(() => {
 			const renderedSvg = container.querySelector('svg');
@@ -195,8 +210,11 @@ describe('Chart in the browser', () => {
 
 	test('uses the native TanStack brush for viewport zoom', async () => {
 		const brushData = [...data, { month: 'March', actual: 15 }];
-		const { container } = render(RevenueChart, {
-			props: { data: brushData, ...definition, viewport: true, label: 'Monthly revenue' }
+		const { container } = renderInTheme(RevenueChart, {
+			data: brushData,
+			...definition,
+			viewport: true,
+			label: 'Monthly revenue'
 		});
 
 		const brush = await waitFor(() => {
@@ -235,16 +253,14 @@ describe('Chart in the browser', () => {
 				{ month: 'February', actual: 15 },
 				{ month: 'March', actual: 18 }
 			];
-			const { container } = render(RevenueChart, {
-				props: {
-					data: observations,
-					x: { scale: { type: 'linear', domain: [0, 30] } },
-					y: { scale: { type: 'linear', domain: [0, 30] } },
-					marks: [{ type: 'scatter', x: 'actual', y: 'actual' }],
-					viewport: { transition: false },
-					tooltip: true,
-					label: 'Continuous observations'
-				}
+			const { container } = renderInTheme(RevenueChart, {
+				data: observations,
+				x: { scale: { type: 'linear', domain: [0, 30] } },
+				y: { scale: { type: 'linear', domain: [0, 30] } },
+				marks: [{ type: 'scatter', x: 'actual', y: 'actual' }],
+				viewport: { transition: false },
+				tooltip: true,
+				label: 'Continuous observations'
 			});
 			const brush = await waitFor(() => {
 				const renderedBrush = container.querySelector<SVGSVGElement>('[data-chart-brush]');
@@ -311,8 +327,10 @@ describe('Chart in the browser', () => {
 	);
 
 	test('groups series at the hovered x value in a chart-contained tooltip', async () => {
-		const { container } = render(GroupedRevenueChart, {
-			props: { data: groupedData, ...groupedDefinition, label: 'Revenue by product' }
+		const { container } = renderInTheme(GroupedRevenueChart, {
+			data: groupedData,
+			...groupedDefinition,
+			label: 'Revenue by product'
 		});
 		const svg = await waitFor(() => {
 			const renderedSvg = container.querySelector('svg');
@@ -337,8 +355,10 @@ describe('Chart in the browser', () => {
 	});
 
 	test('shows one axis indicator and one uniform state for the focused point group', async () => {
-		const { container } = render(GroupedRevenueChart, {
-			props: { data: groupedData, ...groupedDefinition, label: 'Revenue by product' }
+		const { container } = renderInTheme(GroupedRevenueChart, {
+			data: groupedData,
+			...groupedDefinition,
+			label: 'Revenue by product'
 		});
 		const svg = await waitFor(() => {
 			const renderedSvg = container.querySelector('svg');
@@ -398,8 +418,10 @@ describe('Chart in the browser', () => {
 				placement: 'top'
 			}
 		} satisfies ChartConfiguration<Revenue>;
-		const { container } = render(RevenueChart, {
-			props: { data, ...customTooltip, label: 'Monthly revenue' }
+		const { container } = renderInTheme(RevenueChart, {
+			data,
+			...customTooltip,
+			label: 'Monthly revenue'
 		});
 		const svg = await waitFor(() => {
 			const renderedSvg = container.querySelector('svg');
@@ -420,13 +442,11 @@ describe('Chart in the browser', () => {
 	test('preserves the SSR aspect ratio when the host resizes', async () => {
 		window.ResizeObserver = ControlledResizeObserver as typeof ResizeObserver;
 
-		const { container, unmount } = render(RevenueChart, {
-			props: {
-				data,
-				...definition,
-				label: 'Monthly revenue',
-				aspectRatio: 2
-			}
+		const { container, unmount } = renderInTheme(RevenueChart, {
+			data,
+			...definition,
+			label: 'Monthly revenue',
+			aspectRatio: 2
 		});
 		const host = container.querySelector('[data-chart-host]') as HTMLElement;
 		// @tanstack/charts >= 0.18 sizes the scene from the container's *content* box:
@@ -452,13 +472,11 @@ describe('Chart in the browser', () => {
 		// (docs/reference/dom-host.md, Responsive sizing).
 		window.ResizeObserver = ControlledResizeObserver as typeof ResizeObserver;
 
-		const { container, unmount } = render(RevenueChart, {
-			props: {
-				data,
-				...definition,
-				label: 'Monthly revenue',
-				aspectRatio: 2
-			}
+		const { container, unmount } = renderInTheme(RevenueChart, {
+			data,
+			...definition,
+			label: 'Monthly revenue',
+			aspectRatio: 2
 		});
 		const host = container.querySelector('[data-chart-host]') as HTMLElement;
 		host.style.border = '0px solid transparent';
@@ -493,13 +511,11 @@ describe('Chart in the browser', () => {
 	});
 
 	test('pins a tooltip from tooltip.defaultValue and restores it after hover', async () => {
-		const { container } = render(RevenueChart, {
-			props: {
-				data,
-				...definition,
-				tooltip: { defaultValue: 'February' },
-				label: 'Monthly revenue'
-			}
+		const { container } = renderInTheme(RevenueChart, {
+			data,
+			...definition,
+			tooltip: { defaultValue: 'February' },
+			label: 'Monthly revenue'
 		});
 		const svg = await waitFor(() => {
 			const renderedSvg = container.querySelector('svg');
@@ -529,8 +545,11 @@ describe('Chart in the browser', () => {
 
 	test('pins the clicked datum and reports it through onValueChange', async () => {
 		const onValueChange = vi.fn();
-		const { container } = render(RevenueChart, {
-			props: { data, ...definition, tooltip: { onValueChange }, label: 'Monthly revenue' }
+		const { container } = renderInTheme(RevenueChart, {
+			data,
+			...definition,
+			tooltip: { onValueChange },
+			label: 'Monthly revenue'
 		});
 		const svg = await waitFor(() => {
 			const renderedSvg = container.querySelector('svg');
@@ -557,13 +576,11 @@ describe('Chart in the browser', () => {
 	});
 
 	test('prints the formatted series key in the grouped tooltip', async () => {
-		const { container } = render(GroupedRevenueChart, {
-			props: {
-				data: groupedData,
-				...groupedDefinition,
-				legend: { format: (key) => `#${String(key)}` },
-				label: 'Revenue by product'
-			}
+		const { container } = renderInTheme(GroupedRevenueChart, {
+			data: groupedData,
+			...groupedDefinition,
+			legend: { format: (key) => `#${String(key)}` },
+			label: 'Revenue by product'
 		});
 		const svg = await waitFor(() => {
 			const renderedSvg = container.querySelector('svg');
@@ -586,8 +603,10 @@ describe('Chart in the browser', () => {
 	});
 
 	test('removes chart DOM during cleanup', async () => {
-		const { container, unmount } = render(RevenueChart, {
-			props: { data, ...definition, label: 'Monthly revenue' }
+		const { container, unmount } = renderInTheme(RevenueChart, {
+			data,
+			...definition,
+			label: 'Monthly revenue'
 		});
 
 		await waitFor(() => expect(container.querySelector('svg')).toBeInTheDocument());

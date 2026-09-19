@@ -62,6 +62,7 @@
 	title="AI Chat"
 	subtitle="An opinionated conversation surface assembled from the AI provider, transcript, composer, suggestions, and controls."
 	component="AIChat"
+	requires="pnpm add lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils"
 	relatedComponents={['AIChatSkeleton']}
 	features={[
 		'Central conversation-state payloads',

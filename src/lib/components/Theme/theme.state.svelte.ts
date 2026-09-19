@@ -254,7 +254,15 @@ export class ThemeState extends createBindableStateClass<ThemeOptions>() {
 }
 
 export const useTheme = () => {
-	return getContext('sveltaiTheme') as ThemeState;
+	const theme = getContext('sveltaiTheme') as ThemeState | undefined;
+	// A missing provider used to surface as `undefined is not an object` from whichever call site
+	// dereferenced it first; name the cause instead, at the point where it is known.
+	if (!theme) {
+		throw new Error(
+			'svelai: <Theme> was not found above this component. Wrap your app in <Theme> from "svelai/theme".'
+		);
+	}
+	return theme;
 };
 
 /** Resolve a control color against Theme `defaultColor`. Call inside `$derived`. */

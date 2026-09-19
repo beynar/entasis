@@ -52,6 +52,16 @@ const defaultTabbar = cva({
 			class: 'shadow-[inset_-1px_0_0_0_var(--color-neutral-muted)]'
 		},
 		// A vertical pill track shouldn't be a stadium — soften to a large radius.
+		//
+		// This is the one place in the library where an inner radius deliberately exceeds its
+		// outer one, so it is recorded here rather than left to be rediscovered: the track is
+		// `rounded-lg` with the `pill` variant's `p-xs`, and the tabs inside it stay
+		// `rounded-full`. Rule 9 would put them at `rounded-md-concentric` — `min(md 8px, 12 - 4)`
+		// = 8px at the default preset — and a tab that much squarer than the track it sits in is
+		// not what a pill track is for. The stadium tab is the point; the softened track only
+		// keeps a tall vertical stack from reading as a capsule. The track publishes its radius
+		// and its padding either way, since both halves are automatic now; reading them stays the
+		// child's choice, so the exception costs nothing to declare and nothing to keep in sync.
 		{ variant: 'pill', orientation: 'vertical', class: 'rounded-lg' }
 	],
 	defaultVariants: {

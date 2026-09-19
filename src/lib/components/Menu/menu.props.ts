@@ -1,5 +1,5 @@
 import type { Snippet } from 'svelte';
-import type { Density } from '$lib/types/theme.js';
+import type { Colors, Density, Sizes } from '$lib/types/theme.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { ButtonProps } from '../Button/button.props.js';
 import type { MenuOptionProps } from '../MenuOption/menuOption.props.js';
@@ -71,6 +71,17 @@ export type MenuProps = WithAttachments<{
 	 * @default 'normal'
 	 */
 	density?: Density;
+	/**
+	 * Type/icon scale of every MenuOption row. A per-item `size` wins over the
+	 * menu-level one. Items of type 'button' render a Button and are unaffected.
+	 * @default 'normal'
+	 */
+	size?: Sizes;
+	/**
+	 * Role every MenuOption row follows unless the item names its own `color`.
+	 * Left undefined, each row keeps the MenuOption default.
+	 */
+	color?: Colors;
 	/**
 	 * Custom theme overrides for the menu container and child components.
 	 */

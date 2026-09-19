@@ -23,6 +23,7 @@ jobs:
       - run: npm run check:semantic-theme-tokens
       - run: npm run check:template-purity
       - run: npm run check:public-api-contract
+      - run: npm run check:readme-tokens
       - run: npm run test:contracts
       - run: npm run check
       - run: npm run test:unit -- --run

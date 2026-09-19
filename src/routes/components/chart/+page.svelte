@@ -286,6 +286,8 @@
 	title="Chart"
 	subtitle="Typed top-level props for cartesian, polar, relation, and faceted charts without exposing the rendering library."
 	component="Chart"
+	requires={`pnpm add @tanstack/charts d3-array d3-force d3-hierarchy d3-sankey d3-scale d3-shape
+pnpm add -D @types/d3-shape`}
 	features={[
 		'One shared typed dataset with ordered, layered marks',
 		'Summary and empirical distributions through one variant prop',

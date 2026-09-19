@@ -18,7 +18,8 @@ export type MenuBarMenu = Omit<MenuProps, 'focusOnMount'> & {
 export type MenuBarProps = WithAttachments<{
 	/** Top-level menus rendered from left to right. */
 	menus: MenuBarMenu[];
-	/** Size applied to every top-level trigger. */
+	/** Size applied to every top-level trigger and to the menu each one drops. A per-menu
+	 * `size` wins over it. */
 	size?: Sizes;
 	/** Text direction used by horizontal arrow-key navigation. */
 	dir?: 'ltr' | 'rtl';

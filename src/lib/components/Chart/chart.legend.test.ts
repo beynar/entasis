@@ -1,10 +1,10 @@
 import { createChartRuntime, type SceneNode } from '@tanstack/charts';
-import { render } from 'svelte/server';
 import type { Component } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import Chart from './Chart.svelte';
 import { createChartOptions } from './chart.adapter.js';
 import type { ChartLegendDefinition, ChartMark, ChartProps, ChartValue } from './chart.props.js';
+import { renderInThemeServer } from '../Theme/renderInThemeServer.test-helper.js';
 
 type Row = { x: number; y: number; group: string };
 const rows: readonly Row[] = [
@@ -93,16 +93,14 @@ describe('Chart legend ownership between the engine and the library', () => {
 
 	test('server-renders the interactive legend as pressed toggle buttons', () => {
 		const TypedChart = Chart as Component<ChartProps<Row>>;
-		const html = render(TypedChart, {
-			props: {
-				data: rows,
-				marks: [{ type: 'series', x: 'x', y: 'y', series: 'group', points: true }],
-				x: { scale: { type: 'linear' } },
-				y: { scale: { type: 'linear' } },
-				legend: { interactive: true, format: (key) => `Series ${key}` },
-				label: 'Server legend',
-				aspectRatio: 640 / 360
-			}
+		const html = renderInThemeServer(TypedChart, {
+			data: rows,
+			marks: [{ type: 'series', x: 'x', y: 'y', series: 'group', points: true }],
+			x: { scale: { type: 'linear' } },
+			y: { scale: { type: 'linear' } },
+			legend: { interactive: true, format: (key) => `Series ${key}` },
+			label: 'Server legend',
+			aspectRatio: 640 / 360
 		}).body;
 		expect(html).toContain('aria-label="Series visibility"');
 		expect(html).toContain('Series First');
@@ -120,16 +118,14 @@ describe('Chart legend ownership between the engine and the library', () => {
 
 	test('server-renders a static legend as plain items, not buttons', () => {
 		const TypedChart = Chart as Component<ChartProps<Row>>;
-		const html = render(TypedChart, {
-			props: {
-				data: rows,
-				marks: [{ type: 'series', x: 'x', y: 'y', series: 'group' }],
-				x: { scale: { type: 'linear' } },
-				y: { scale: { type: 'linear' } },
-				legend: true,
-				label: 'Static legend',
-				aspectRatio: 640 / 360
-			}
+		const html = renderInThemeServer(TypedChart, {
+			data: rows,
+			marks: [{ type: 'series', x: 'x', y: 'y', series: 'group' }],
+			x: { scale: { type: 'linear' } },
+			y: { scale: { type: 'linear' } },
+			legend: true,
+			label: 'Static legend',
+			aspectRatio: 640 / 360
 		}).body;
 		expect(html).toContain('aria-label="Chart legend"');
 		expect(html).toContain('data-chart-legend-swatch');

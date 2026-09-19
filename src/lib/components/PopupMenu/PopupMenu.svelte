@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { providePopupMenuPanelSize } from './popupMenu.context.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Popover from '../Popover/Popover.svelte';
 	import Menu from '../Menu/Menu.svelte';
@@ -19,9 +20,12 @@
 		mobileSheetSizeTransition,
 		class: className,
 		theme,
+		size = 'small',
 		...popoverProps
 	}: PopupMenuProps = $props();
 	const classes = $derived(usePopupMenuTheme(theme));
+	// Submenus rendered by the Menu below open in a panel of this same size.
+	providePopupMenuPanelSize(() => size);
 	const openState = createBindableValue(
 		() => open,
 		(next) => {
@@ -73,7 +77,7 @@
 	open={openState.value}
 	onOpenChange={setOpen}
 	haspopup="menu"
-	size="small"
+	{size}
 	{closeOnEscape}
 	{mobileSheet}
 	mobileSheetSizeTransition={resolvedMobileSheetSizeTransition}

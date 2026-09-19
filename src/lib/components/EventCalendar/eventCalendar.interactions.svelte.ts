@@ -15,8 +15,6 @@ import {
 	civilDayDifference,
 	getZonedDay,
 	isSupportedDateDomainError,
-	resolveZonedMinutesOnDay,
-	snapInstant,
 	startOfZonedDay
 } from './eventCalendar.date.js';
 import { EventCalendarError } from './eventCalendar.error.js';
@@ -31,13 +29,18 @@ import {
 	type EventCalendarInteractionResolution
 } from './eventCalendar.interactionResolution.js';
 import {
-	replaceEventCalendarPlacement,
-	replaceEventCalendarSchedule
-} from './eventCalendar.records.js';
-import {
-	replaceEventCalendarResourceAssignment,
-	setEventCalendarResourceIds
-} from './eventCalendar.resources.js';
+	applyEventCalendarAssistedStep,
+	deriveEventCalendarItemProposal,
+	eventCalendarSlotFromDropTarget,
+	eventCalendarSlotFromTarget,
+	getEventCalendarAssistedResourceTarget,
+	getProposalOperation,
+	getResolutionProposal,
+	hasSameEventCalendarLiveProposal,
+	hasSameEventCalendarPlacement,
+	isSameEndpoint,
+	type EventCalendarDraftContext
+} from './eventCalendar.drafts.js';
 import type {
 	EventCalendarModelBoundary,
 	EventCalendarState
@@ -186,7 +189,6 @@ export type EventCalendarAllDayInsertion = Readonly<{
 const SOURCE_MARK = 'svelai-event-calendar';
 const EDGE_SCROLL_DISTANCE = 56;
 const EDGE_SCROLL_MAX_PX = 18;
-const MINUTE_MS = 60_000;
 
 export class EventCalendarInteractionsController<
 	TItemFields extends object,
@@ -203,6 +205,7 @@ export class EventCalendarInteractionsController<
 	private suppressedClickKey: string | null = null;
 	private isSlotClickSuppressed = false;
 	private targetElements = new Map<string, HTMLElement>();
+	private targetsByKey = new Map<string, EventCalendarDropTarget>();
 	private itemDragFrame: number | null = null;
 	private lastPublishedProposalKey: string | null = null;
 	private pendingItemDrag: {
@@ -226,6 +229,27 @@ export class EventCalendarInteractionsController<
 	get instanceId(): string {
 		return this.calendar.instanceId;
 	}
+
+	private get draftContext(): EventCalendarDraftContext<TItemFields> {
+		const calendar = this.calendar;
+		return {
+			timeZone: calendar.timeZone,
+			snapDuration: calendar.snapDuration,
+			defaultTimedItemDuration: calendar.defaultTimedItemDuration,
+			defaultAllDayItemDuration: calendar.defaultAllDayItemDuration,
+			maintainDurationOnAllDayChange: calendar.interactions.maintainDurationOnAllDayChange,
+			resolveItemLeafIds: (item) => calendar.resourceModel.resolveItemLeafIds(item),
+			resolveLeafId: (resourceId) => calendar.resourceModel.resolveLeafId(resourceId),
+			resourceColumns: calendar.resourceModel.columns,
+			getOccurrencePlacementItem: (occurrence) =>
+				calendar.mutations.getOccurrencePlacementItem(occurrence),
+			getConversionDurationTimeZone: (occurrence) =>
+				calendar.mutations.getConversionDurationTimeZone(occurrence)
+		};
+	}
+
+	private readonly getTargetRect = (key: string): DOMRect | null =>
+		this.targetElements.get(key)?.getBoundingClientRect() ?? null;
 
 	get proposal(): EventCalendarProposedUpdate<TItemFields> | null {
 		return this.gesture && this.gesture.kind !== 'slot-create'
@@ -337,7 +361,7 @@ export class EventCalendarInteractionsController<
 		}
 		this.resetSinglePointerSlot();
 		if (this.gesture) this.cancel();
-		const anchor = this.slotFromDropTarget(target);
+		const anchor = eventCalendarSlotFromDropTarget(target);
 		const reason = this.calendar.mutations.validateSlot(anchor);
 		if (reason) {
 			this.reportBlocked({ reason, source: 'keyboard', slot: anchor });
@@ -367,7 +391,7 @@ export class EventCalendarInteractionsController<
 		) {
 			return false;
 		}
-		const point = this.slotFromDropTarget(target);
+		const point = eventCalendarSlotFromDropTarget(target);
 		if (point.resourceId !== active.anchor.resourceId) {
 			this.cancel();
 			return true;
@@ -463,7 +487,7 @@ export class EventCalendarInteractionsController<
 		this.syncFocusedSelection({
 			kind: 'slot',
 			itemKey: null,
-			slot: this.slotFromDropTarget(target)
+			slot: eventCalendarSlotFromDropTarget(target)
 		});
 	}
 
@@ -568,7 +592,8 @@ export class EventCalendarInteractionsController<
 			this.calendar.mutations.getOccurrencePlacementItem(active.occurrence);
 		const resourceTarget =
 			active.kind === 'move' && step.resourceDirection
-				? this.getAssistedResourceTarget(
+				? getEventCalendarAssistedResourceTarget(
+						this.draftContext,
 						currentItem,
 						active.sourceResourceId,
 						step.resourceDirection
@@ -576,7 +601,13 @@ export class EventCalendarInteractionsController<
 				: null;
 		let item: EventCalendarItem<TItemFields>;
 		try {
-			item = this.applyAssistedStep(currentItem, active.kind, step, active.sourceResourceId);
+			item = applyEventCalendarAssistedStep(
+				this.draftContext,
+				currentItem,
+				active.kind,
+				step,
+				active.sourceResourceId
+			);
 		} catch (error) {
 			if (!isSupportedDateDomainError(error)) throw error;
 			const next: EventCalendarItemGesture<TItemFields> = {
@@ -617,7 +648,13 @@ export class EventCalendarInteractionsController<
 			active.source !== 'single-pointer'
 		)
 			return false;
-		const proposal = this.deriveItemProposal(active, target, 0, Number.NaN);
+		const proposal = deriveEventCalendarItemProposal(
+			this.draftContext,
+			active,
+			target,
+			Number.NaN,
+			this.getTargetRect
+		);
 		const reason = proposal ? this.validateAssistedProposal(active, proposal) : 'invalid-target';
 		const next: EventCalendarItemGesture<TItemFields> = {
 			...active,
@@ -857,6 +894,7 @@ export class EventCalendarInteractionsController<
 		return (element) =>
 			untrack(() => {
 				this.targetElements.set(target.key, element);
+				this.targetsByKey.set(target.key, target);
 				const cleanup = dropTargetForElements({
 					element,
 					canDrop: ({ source }) =>
@@ -873,6 +911,7 @@ export class EventCalendarInteractionsController<
 					cleanup();
 					if (this.targetElements.get(target.key) === element)
 						this.targetElements.delete(target.key);
+					if (this.targetsByKey.get(target.key) === target) this.targetsByKey.delete(target.key);
 				};
 			});
 	}
@@ -906,11 +945,13 @@ export class EventCalendarInteractionsController<
 		return (element) =>
 			untrack(() => {
 				this.targetElements.set(target.key, element);
+				this.targetsByKey.set(target.key, target);
 				const cleanup = pointerDrag(element);
 				return () => {
 					cleanup?.();
 					if (this.targetElements.get(target.key) === element)
 						this.targetElements.delete(target.key);
+					if (this.targetsByKey.get(target.key) === target) this.targetsByKey.delete(target.key);
 				};
 			});
 	}
@@ -1104,9 +1145,18 @@ export class EventCalendarInteractionsController<
 			if (active.source !== 'external-drop') this.publishProposal(next);
 			return;
 		}
-		const proposal = this.deriveItemProposal(active, target, pointerX, pointerY);
+		const proposal = deriveEventCalendarItemProposal(
+			this.draftContext,
+			active,
+			target,
+			pointerY,
+			this.getTargetRect
+		);
 		const operation = proposal ? getProposalOperation(proposal, active.kind) : active.kind;
-		if (proposal && this.hasSameLiveProposal(active, proposal, operation)) {
+		if (
+			proposal &&
+			hasSameEventCalendarLiveProposal(this.draftContext, active, proposal, operation)
+		) {
 			this.gesture = { ...active, pointerX, pointerY, targetKey: target.key };
 			return;
 		}
@@ -1127,285 +1177,14 @@ export class EventCalendarInteractionsController<
 		this.publishProposal(this.gesture);
 	}
 
-	private hasSameLiveProposal(
-		active: EventCalendarItemGesture<TItemFields>,
-		proposal: EventCalendarProposedUpdate<TItemFields>,
-		operation: EventCalendarItemOperation
-	): boolean {
-		const current = getResolutionProposal(active.resolution);
-		if (!current || active.kind !== operation || current.source !== proposal.source) return false;
-		const currentItem = current.item;
-		const nextItem = proposal.item;
-		return (
-			currentItem.id === nextItem.id &&
-			(currentItem.allDay === true) === (nextItem.allDay === true) &&
-			isSameEndpoint(currentItem.start, nextItem.start) &&
-			isSameEndpoint(currentItem.end, nextItem.end) &&
-			areStringArraysEqual(
-				this.calendar.resourceModel.resolveItemLeafIds(currentItem),
-				this.calendar.resourceModel.resolveItemLeafIds(nextItem)
-			)
-		);
-	}
-
-	private deriveItemProposal(
-		gesture: EventCalendarItemGesture<TItemFields>,
-		target: EventCalendarDropTarget,
-		pointerX: number,
-		pointerY: number
-	): EventCalendarProposedUpdate<TItemFields> | null {
-		const { occurrence } = gesture;
-		const initialKind = gesture.initialKind;
-		const sourceItem = occurrence.item;
-		const sourceResourceIds = this.calendar.resourceModel.resolveItemLeafIds(sourceItem);
-		if (
-			initialKind !== 'move' &&
-			target.view === 'resource' &&
-			(target.resourceId === undefined
-				? sourceResourceIds.length !== 0
-				: !sourceResourceIds.includes(target.resourceId))
-		) {
-			return null;
-		}
-		const placementItem = this.calendar.mutations.getOccurrencePlacementItem(occurrence);
-		if (
-			gesture.source === 'external-drop' &&
-			sourceItem.recurrence !== undefined &&
-			target.allDay !== occurrence.allDay
-		) {
-			return null;
-		}
-		const isTimedMonthResize =
-			initialKind !== 'move' && target.allDay && target.view === 'month' && !occurrence.allDay;
-		if (initialKind !== 'move' && target.allDay !== occurrence.allDay && !isTimedMonthResize) {
-			return null;
-		}
-		let operation = initialKind;
-		let item: EventCalendarItem<TItemFields>;
-		try {
-			if (initialKind === 'move') {
-				item =
-					target.allDay && target.view === 'month' && !occurrence.allDay
-						? this.moveTimedToMonthDay(placementItem, occurrence, target.day)
-						: target.allDay
-							? this.moveToAllDay(placementItem, occurrence, target.day, gesture.grabOffsetDays)
-							: this.moveToTimed(placementItem, occurrence, target, pointerY, gesture.grabOffsetMs);
-			} else if (isTimedMonthResize) {
-				const sourceEndpoint = initialKind === 'resize-start' ? occurrence.start : occurrence.end;
-				let endpoint = resolveZonedMinutesOnDay(
-					target.day,
-					getWallMinutes(sourceEndpoint, this.calendar.timeZone),
-					this.calendar.timeZone
-				);
-				let resize = this.resizeTimedAcrossEdge(placementItem, initialKind, endpoint);
-				if (resize.operation !== initialKind) {
-					const oppositeEndpoint =
-						resize.operation === 'resize-start' ? occurrence.start : occurrence.end;
-					endpoint = resolveZonedMinutesOnDay(
-						target.day,
-						getWallMinutes(oppositeEndpoint, this.calendar.timeZone),
-						this.calendar.timeZone
-					);
-					resize = this.resizeTimedAcrossEdge(placementItem, initialKind, endpoint);
-				}
-				operation = resize.operation;
-				item = resize.item;
-			} else if (target.allDay) {
-				const resize = this.resizeAllDayAcrossEdge(placementItem, initialKind, target.day);
-				operation = resize.operation;
-				item = resize.item;
-			} else {
-				const endpoint = this.getTimedTargetInstant(target, pointerY);
-				const resize = this.resizeTimedAcrossEdge(placementItem, initialKind, endpoint);
-				operation = resize.operation;
-				item = resize.item;
-			}
-		} catch (error) {
-			if (isSupportedDateDomainError(error)) return null;
-			throw error;
-		}
-		if (gesture.source === 'external-drop' && target.allDay === occurrence.allDay) {
-			item = replaceEventCalendarPlacement(placementItem, {
-				allDay: item.allDay === true,
-				start: item.start,
-				end: item.end
-			});
-		}
-		if (initialKind === 'move') {
-			item =
-				gesture.source === 'external-drop' && target.view === 'resource'
-					? setEventCalendarResourceIds(item, target.resourceId ? [target.resourceId] : [])
-					: applyTargetResource(item, target, gesture.sourceResourceId);
-		}
-		return {
-			kind: operation,
-			source:
-				gesture.source === 'external-drop'
-					? gesture.source
-					: gesture.inputMode === 'pointer'
-						? this.operationSource(operation)
-						: gesture.source,
-			occurrence,
-			previousItem: sourceItem,
-			item
-		};
-	}
-
-	private moveTimedToMonthDay(
-		item: EventCalendarItem<TItemFields>,
-		occurrence: EventCalendarOccurrence<TItemFields>,
-		day: EventCalendarDateOnly
-	): EventCalendarItem<TItemFields> {
-		const start = resolveZonedMinutesOnDay(
-			day,
-			getWallMinutes(occurrence.start, this.calendar.timeZone),
-			this.calendar.timeZone
-		);
-		return replaceEventCalendarSchedule(item, {
-			allDay: false,
-			start,
-			end: new Date(start.getTime() + occurrence.end.getTime() - occurrence.start.getTime())
-		});
-	}
-
-	private moveToAllDay(
-		item: EventCalendarItem<TItemFields>,
-		occurrence: EventCalendarOccurrence<TItemFields>,
-		targetDay: EventCalendarDateOnly,
-		grabOffsetDays: number
-	): EventCalendarItem<TItemFields> {
-		const start = addCivilDays(targetDay, -grabOffsetDays);
-		const durationDays =
-			occurrence.allDay && this.calendar.interactions.maintainDurationOnAllDayChange
-				? Math.max(
-						1,
-						civilDayDifference(
-							getZonedDay(occurrence.start, this.calendar.timeZone),
-							getZonedDay(occurrence.end, this.calendar.timeZone)
-						)
-					)
-				: occurrence.allDay
-					? Math.max(
-							1,
-							civilDayDifference(
-								item.start as EventCalendarDateOnly,
-								item.end as EventCalendarDateOnly
-							)
-						)
-					: this.calendar.interactions.maintainDurationOnAllDayChange
-						? touchedCivilDayCount(
-								occurrence,
-								this.calendar.mutations.getConversionDurationTimeZone(occurrence)
-							)
-						: this.calendar.defaultAllDayItemDuration;
-		return replaceEventCalendarSchedule(item, {
-			allDay: true,
-			start,
-			end: addCivilDays(start, durationDays)
-		});
-	}
-
-	private moveToTimed(
-		item: EventCalendarItem<TItemFields>,
-		occurrence: EventCalendarOccurrence<TItemFields>,
-		target: Extract<EventCalendarDropTarget, { allDay: false }>,
-		pointerY: number,
-		grabOffsetMs: number
-	): EventCalendarItem<TItemFields> {
-		const pointer = this.getTimedTargetInstant(target, pointerY);
-		const start = snapInstant(
-			new Date(pointer.getTime() - grabOffsetMs),
-			this.calendar.timeZone,
-			this.calendar.snapDuration
-		);
-		let durationMs: number;
-		if (!occurrence.allDay) durationMs = occurrence.end.getTime() - occurrence.start.getTime();
-		else if (!this.calendar.interactions.maintainDurationOnAllDayChange) {
-			durationMs = this.calendar.defaultTimedItemDuration * MINUTE_MS;
-		} else {
-			const conversionTimeZone = this.calendar.mutations.getConversionDurationTimeZone(occurrence);
-			const days = Math.max(
-				1,
-				civilDayDifference(item.start as EventCalendarDateOnly, item.end as EventCalendarDateOnly)
-			);
-			const endDay = addCivilDays(getZonedDay(start, conversionTimeZone), days);
-			const parts = getWallMinutes(start, conversionTimeZone);
-			durationMs =
-				resolveZonedMinutesOnDay(endDay, parts, conversionTimeZone).getTime() - start.getTime();
-		}
-		return replaceEventCalendarSchedule(item, {
-			allDay: false,
-			start,
-			end: new Date(start.getTime() + durationMs)
-		});
-	}
-
-	private resizeAllDayAcrossEdge(
-		item: EventCalendarItem<TItemFields>,
-		initialKind: Exclude<EventCalendarItemOperation, 'move'>,
-		targetDay: EventCalendarDateOnly
-	): {
-		operation: Exclude<EventCalendarItemOperation, 'move'>;
-		item: EventCalendarItem<TItemFields>;
-	} {
-		if (item.allDay !== true) return { operation: initialKind, item };
-		const crossingBoundary = initialKind === 'resize-start' ? item.end : item.start;
-		const operation = targetDay < crossingBoundary ? 'resize-start' : 'resize-end';
-		const start = operation === 'resize-start' ? targetDay : item.start;
-		const end = operation === 'resize-end' ? addCivilDays(targetDay, 1) : item.end;
-		return {
-			operation,
-			item: replaceEventCalendarSchedule(item, { allDay: true, start, end })
-		};
-	}
-
-	private resizeTimedAcrossEdge(
-		item: EventCalendarItem<TItemFields>,
-		initialKind: Exclude<EventCalendarItemOperation, 'move'>,
-		endpoint: Date
-	): {
-		operation: Exclude<EventCalendarItemOperation, 'move'>;
-		item: EventCalendarItem<TItemFields>;
-	} {
-		if (item.allDay === true) return { operation: initialKind, item };
-		const crossingBoundary = initialKind === 'resize-start' ? item.end : item.start;
-		const endpointTime = endpoint.getTime();
-		const crossingTime = crossingBoundary.getTime();
-		const operation =
-			endpointTime < crossingTime
-				? 'resize-start'
-				: endpointTime > crossingTime
-					? 'resize-end'
-					: initialKind;
-		return {
-			operation,
-			item: replaceEventCalendarSchedule(item, {
-				allDay: false,
-				start: operation === 'resize-start' ? endpoint : item.start,
-				end: operation === 'resize-end' ? endpoint : item.end
-			})
-		};
-	}
-
-	private getTimedTargetInstant(
-		target: Extract<EventCalendarDropTarget, { allDay: false }>,
-		pointerY: number
-	): Date {
-		if (!Number.isFinite(pointerY)) return new Date(target.start);
-		const element = this.targetElements.get(target.key);
-		const rect = element?.getBoundingClientRect();
-		const ratio = rect
-			? Math.min(1, Math.max(0, (pointerY - rect.top) / Math.max(1, rect.height)))
-			: 0;
-		const instant = new Date(
-			target.start.getTime() + (target.end.getTime() - target.start.getTime()) * ratio
-		);
-		return snapInstant(instant, this.calendar.timeZone, this.calendar.snapDuration);
-	}
-
 	private beginSlotGesture(target: EventCalendarDropTarget, payload: PointerDragPayload): boolean {
 		this.resetSinglePointerSlot();
-		const anchor = this.slotFromTarget(target, payload.y);
+		const anchor = eventCalendarSlotFromTarget(
+			this.draftContext,
+			target,
+			payload.y,
+			this.getTargetRect(target.key)
+		);
 		const reason = this.calendar.mutations.validateSlot(anchor);
 		this.gesture = {
 			kind: 'slot-create',
@@ -1459,7 +1238,12 @@ export class EventCalendarInteractionsController<
 			};
 			return;
 		}
-		const point = this.slotFromTarget(target, pointerY);
+		const point = eventCalendarSlotFromTarget(
+			this.draftContext,
+			target,
+			pointerY,
+			this.getTargetRect(target.key)
+		);
 		const slot = mergeSlots(active.anchor, point);
 		if (areSlotsEqual(getResolutionProposal(active.resolution) ?? active.anchor, slot)) {
 			this.gesture = { ...active, pointerX, pointerY, targetKey: target.key };
@@ -1502,53 +1286,6 @@ export class EventCalendarInteractionsController<
 		this.calendar.eventHandlers.onSelect?.({ slot, info: { source: 'drag-create' } });
 	}
 
-	private slotFromDropTarget(target: EventCalendarDropTarget): EventCalendarSlot {
-		return target.allDay
-			? {
-					view: target.view,
-					allDay: true,
-					start: target.day,
-					end: addCivilDays(target.day, 1),
-					resourceId: target.resourceId
-				}
-			: {
-					view: target.view,
-					allDay: false,
-					start: new Date(target.start),
-					end: new Date(target.end),
-					resourceId: target.resourceId
-				};
-	}
-
-	private slotFromTarget(target: EventCalendarDropTarget, pointerY: number): EventCalendarSlot {
-		if (target.allDay) {
-			return {
-				view: target.view,
-				allDay: true,
-				start: target.day,
-				end: addCivilDays(target.day, 1),
-				resourceId: target.resourceId
-			};
-		}
-		const minimumDuration = this.calendar.snapDuration * MINUTE_MS;
-		const start = new Date(
-			Math.max(
-				target.start.getTime(),
-				Math.min(
-					this.getTimedTargetInstant(target, pointerY).getTime(),
-					target.end.getTime() - minimumDuration
-				)
-			)
-		);
-		return {
-			view: target.view,
-			allDay: false,
-			start,
-			end: new Date(start.getTime() + minimumDuration),
-			resourceId: target.resourceId
-		};
-	}
-
 	private createExternalOccurrence(
 		item: EventCalendarItem<TItemFields>
 	): EventCalendarOccurrence<TItemFields> {
@@ -1570,23 +1307,9 @@ export class EventCalendarInteractionsController<
 		proposal: EventCalendarProposedUpdate<TItemFields>
 	): InvalidReason | null {
 		const baseline = this.calendar.mutations.getOccurrencePlacementItem(gesture.occurrence);
-		if (this.hasSamePlacement(baseline, proposal.item)) return 'invalid-target';
+		if (hasSameEventCalendarPlacement(this.draftContext, baseline, proposal.item))
+			return 'invalid-target';
 		return this.calendar.mutations.validateProposal(proposal);
-	}
-
-	private hasSamePlacement(
-		baseline: EventCalendarItem<TItemFields>,
-		candidate: EventCalendarItem<TItemFields>
-	): boolean {
-		return (
-			(baseline.allDay === true) === (candidate.allDay === true) &&
-			isSameEndpoint(baseline.start, candidate.start) &&
-			isSameEndpoint(baseline.end, candidate.end) &&
-			areStringArraysEqual(
-				this.calendar.resourceModel.resolveItemLeafIds(baseline),
-				this.calendar.resourceModel.resolveItemLeafIds(candidate)
-			)
-		);
 	}
 
 	private canBeginItemGesture(
@@ -1611,77 +1334,6 @@ export class EventCalendarInteractionsController<
 			return false;
 		if (operation === 'move') return this.calendar.interactions.drag && item.draggable !== false;
 		return this.calendar.interactions.resize && item.resizable !== false;
-	}
-
-	private applyAssistedStep(
-		item: EventCalendarItem<TItemFields>,
-		operation: EventCalendarItemOperation,
-		step: EventCalendarAssistedStep,
-		sourceResourceId?: string
-	): EventCalendarItem<TItemFields> {
-		let next = item;
-		const dayDelta = step.dayDelta ?? 0;
-		const minuteDelta = step.minuteDelta ?? 0;
-		const shouldShiftStart = operation !== 'resize-end';
-		const shouldShiftEnd = operation !== 'resize-start';
-		if (next.allDay === true) {
-			next = replaceEventCalendarPlacement(next, {
-				allDay: true,
-				start: shouldShiftStart ? addCivilDays(next.start, dayDelta) : next.start,
-				end: shouldShiftEnd ? addCivilDays(next.end, dayDelta) : next.end
-			});
-		} else {
-			if (operation === 'move') {
-				const duration = next.end.getTime() - next.start.getTime();
-				const start = this.shiftTimedEndpoint(next.start, dayDelta, minuteDelta);
-				next = replaceEventCalendarPlacement(next, {
-					allDay: false,
-					start,
-					end: new Date(start.getTime() + duration)
-				});
-			} else {
-				next = replaceEventCalendarPlacement(next, {
-					allDay: false,
-					start: shouldShiftStart
-						? this.shiftTimedEndpoint(next.start, dayDelta, minuteDelta)
-						: next.start,
-					end: shouldShiftEnd ? this.shiftTimedEndpoint(next.end, dayDelta, minuteDelta) : next.end
-				});
-			}
-		}
-		if (operation !== 'move' || !step.resourceDirection) return next;
-		const columns = this.calendar.resourceModel.columns;
-		const currentId =
-			this.calendar.resourceModel.resolveLeafId(sourceResourceId) ??
-			this.calendar.resourceModel.resolveItemLeafIds(next)[0];
-		const currentIndex = columns.findIndex((column) => column.resourceId === currentId);
-		const target = columns[currentIndex + step.resourceDirection];
-		if (!target) return next;
-		return replaceEventCalendarResourceAssignment(next, currentId, target.resourceId);
-	}
-
-	private getAssistedResourceTarget(
-		item: EventCalendarItem<TItemFields>,
-		sourceResourceId: string | undefined,
-		direction: -1 | 1
-	): { resourceId: string | undefined } | null {
-		const columns = this.calendar.resourceModel.columns;
-		const currentId =
-			this.calendar.resourceModel.resolveLeafId(sourceResourceId) ??
-			this.calendar.resourceModel.resolveItemLeafIds(item)[0];
-		const currentIndex = columns.findIndex((column) => column.resourceId === currentId);
-		const target = columns[currentIndex + direction];
-		return target ? { resourceId: target.resourceId } : null;
-	}
-
-	private shiftTimedEndpoint(endpoint: Date, dayDelta: number, minuteDelta: number): Date {
-		const shifted = new Date(endpoint.getTime() + minuteDelta * MINUTE_MS);
-		if (dayDelta === 0) return shifted;
-		return resolveZonedMinutesOnDay(
-			addCivilDays(getZonedDay(shifted, this.calendar.timeZone), dayDelta),
-			getWallMinutes(shifted, this.calendar.timeZone),
-			this.calendar.timeZone
-		);
 	}
 
 	private publishProposal(gesture: EventCalendarItemGesture<TItemFields>): void {
@@ -1914,18 +1566,14 @@ export class EventCalendarInteractionsController<
 	}
 
 	private readElementTarget(element: HTMLElement): EventCalendarDropTarget | null {
-		const encoded = element.dataset.eventCalendarTarget;
-		if (!encoded) return null;
-		try {
-			return deserializeTarget(JSON.parse(encoded));
-		} catch {
-			return null;
-		}
+		const key = element.dataset.eventCalendarTargetKey;
+		return key ? (this.targetsByKey.get(key) ?? null) : null;
 	}
 
 	private getTargetAt(x: number, y: number): EventCalendarDropTarget | null {
 		for (const hit of document.elementsFromPoint(x, y)) {
-			if (!(hit instanceof HTMLElement) || !hit.matches('[data-event-calendar-target]')) continue;
+			if (!(hit instanceof HTMLElement) || !hit.matches('[data-event-calendar-target-key]'))
+				continue;
 			const element = hit;
 			if (element.dataset.calendarInstanceId !== this.instanceId) continue;
 			const rect = element.getBoundingClientRect();
@@ -2044,13 +1692,6 @@ export class EventCalendarInteractionsController<
 	}
 }
 
-export function serializeEventCalendarTarget(target: EventCalendarDropTarget): string {
-	return JSON.stringify({
-		...target,
-		...(target.allDay ? {} : { start: target.start.toISOString(), end: target.end.toISOString() })
-	});
-}
-
 function readPositiveNumber(value: unknown, fallback: number): number {
 	return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : fallback;
 }
@@ -2093,12 +1734,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-function getResolutionProposal<TProposal>(
-	resolution: EventCalendarInteractionResolution<TProposal>
-): TProposal | null {
-	return resolution.state === 'pending' ? null : resolution.proposal;
-}
-
 function isEventCalendarView(value: unknown): value is EventCalendarView {
 	return (
 		value === 'month' ||
@@ -2116,36 +1751,8 @@ function toValidTargetInstant(value: unknown): Date | null {
 	return instant && Number.isFinite(instant.getTime()) ? instant : null;
 }
 
-function isSameEndpoint(
-	left: Date | EventCalendarDateOnly,
-	right: Date | EventCalendarDateOnly
-): boolean {
-	if (left instanceof Date && right instanceof Date) return left.getTime() === right.getTime();
-	return left === right;
-}
-
 function getEndpointKey(endpoint: Date | EventCalendarDateOnly): string {
 	return endpoint instanceof Date ? `instant:${endpoint.getTime()}` : `day:${endpoint}`;
-}
-
-function areStringArraysEqual(left: readonly string[], right: readonly string[]): boolean {
-	return left.length === right.length && left.every((value, index) => value === right[index]);
-}
-
-function getProposalOperation<TItemFields extends object>(
-	proposal: EventCalendarProposedUpdate<TItemFields>,
-	fallback: EventCalendarItemOperation
-): EventCalendarItemOperation {
-	return proposal.kind === 'update' ? fallback : proposal.kind;
-}
-
-function applyTargetResource<TItemFields extends object>(
-	item: EventCalendarItem<TItemFields>,
-	target: EventCalendarDropTarget,
-	sourceResourceId?: string
-): EventCalendarItem<TItemFields> {
-	if (target.view !== 'resource') return item;
-	return replaceEventCalendarResourceAssignment(item, sourceResourceId, target.resourceId);
 }
 
 function mergeSlots(anchor: EventCalendarSlot, point: EventCalendarSlot): EventCalendarSlot {
@@ -2188,13 +1795,6 @@ function areSlotsEqual(left: EventCalendarSlot, right: EventCalendarSlot): boole
 	);
 }
 
-function touchedCivilDayCount<TItemFields extends object>(
-	occurrence: EventCalendarOccurrence<TItemFields>,
-	timeZone: string
-): number {
-	return touchedInstantDayCount(occurrence.start, occurrence.end, timeZone);
-}
-
 function touchedInstantDayCount(start: Date, end: Date, timeZone: string): number {
 	const startDay = getZonedDay(start, timeZone);
 	const inclusiveEndDay = getZonedDay(
@@ -2202,18 +1802,6 @@ function touchedInstantDayCount(start: Date, end: Date, timeZone: string): numbe
 		timeZone
 	);
 	return Math.max(1, civilDayDifference(startDay, inclusiveEndDay) + 1);
-}
-
-function getWallMinutes(instant: Date, timeZone: string): number {
-	const parts = new Intl.DateTimeFormat('en-US', {
-		timeZone,
-		hour: 'numeric',
-		minute: 'numeric',
-		hourCycle: 'h23'
-	}).formatToParts(instant);
-	const hour = Number(parts.find((part) => part.type === 'hour')?.value ?? 0);
-	const minute = Number(parts.find((part) => part.type === 'minute')?.value ?? 0);
-	return hour * 60 + minute;
 }
 
 function edgeScrollDelta(distance: number): number {

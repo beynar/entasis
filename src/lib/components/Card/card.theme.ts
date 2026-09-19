@@ -5,6 +5,14 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 // shadow), medium-weight title, muted description. `size` scales typography
 // only; `density` owns paddings and gaps ('comfortable' matches vega's default
 // 6-scale, 'normal' its sm 4-scale).
+//
+// Nesting needs no declaration here: the `rounded-lg py-*` root publishes its radius and vertical
+// gap to the header/content/footer wrappers, and each wrapper's own `px-*` publishes the
+// horizontal one to what it holds, so anything flush inside a part computes the right corner from
+// `rounded-<step>-concentric`. Nothing the Card ships reads it — a Card-shaped child, a Stat
+// inside one, is `rounded-lg` like the Card itself and so reads as equal rather than concentric
+// (12/12 at the default radius preset, 30/30 at `round`). That is deliberate: it floats in the
+// padding instead of sitting flush against it.
 const defaultCard = cva({
 	base: 'group/card text-neutral flex flex-col rounded-lg tabular-nums transition-[color,background-color,box-shadow,translate,opacity]',
 	variants: {

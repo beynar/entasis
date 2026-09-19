@@ -1,5 +1,5 @@
 import type { HandleServerError } from '@sveltejs/kit';
-import { mcpHandler, resource, tool, prompt } from 'svelte-mcp/mcp';
+import { mcpHandler, tool } from 'svelte-mcp/mcp';
 
 import * as z from 'zod/v4';
 import { sequence } from '@sveltejs/kit/hooks';
@@ -46,7 +46,7 @@ export const handle = sequence(async ({ event, resolve }) => {
 	return resolve(event);
 }, handler.handle);
 
-export const handleError: HandleServerError = async ({ error, event, status, message }) => {
+export const handleError: HandleServerError = async ({ error, status }) => {
 	if (status !== 404) {
 		console.log(error);
 	} else {

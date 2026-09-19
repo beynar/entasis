@@ -225,8 +225,11 @@ const defaultLabel = cva({
 	},
 	defaultVariants: { kind: 'text' }
 });
+// A full-width block flush inside `section`'s padding box, so its own `sm` step is capped by what
+// that padding leaves: `rounded-sm p-md` → `min(4px, 4 - 8)` → 0, a square corner, rather than a
+// repeat of the section's own radius.
 const defaultScrollArea = cva({
-	base: 'flex max-h-48 min-w-0 flex-col rounded-sm',
+	base: 'flex max-h-48 min-w-0 flex-col rounded-sm-concentric',
 	variants: {
 		tone: {
 			default: 'bg-surface-raised/60',

@@ -127,6 +127,7 @@ function createOccurrenceMutation<TItemFields extends object>(
 	}
 	const item = createExceptionItem(
 		seriesItem,
+		previousException,
 		options.proposal.item,
 		exceptionId,
 		occurrence.originalStart
@@ -158,11 +159,14 @@ function createExceptionId<TItemFields extends object>(
 
 function createExceptionItem<TItemFields extends object>(
 	seriesItem: EventCalendarItem<TItemFields>,
+	previousException: EventCalendarItem<TItemFields> | null,
 	targetItem: EventCalendarItem<TItemFields>,
 	id: string,
 	originalStart: RecurrenceValue
 ): EventCalendarItem<TItemFields> {
-	const item = { ...seriesItem } as Record<string, unknown>;
+	// An edit to an existing exception keeps that exception's own custom fields; a new
+	// exception still inherits the series source.
+	const item = { ...(previousException ?? seriesItem) } as Record<string, unknown>;
 	delete item.recurrence;
 	delete item.recurrenceTimeZone;
 	delete item.recurringItemId;

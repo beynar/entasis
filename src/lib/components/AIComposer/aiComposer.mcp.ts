@@ -3,6 +3,12 @@ export const aiComposerDescription = `
 
 AIComposer is a Markdown prompt composer built on the existing \`RichTextInput\`, \`VoiceInput\`, file-acceptance helpers, \`SortableList\`, \`ScrollArea\`, and \`AIFilePreview\`. It adds AI command, mention, reference, and skill tokens; optional voice capture; raw or managed files; queue editing; steering; submit/stop state; and optional \`AIConversation\` integration without owning transport.
 
+## Requires
+
+AIComposer embeds RichTextInput, which is built on Lexical. Those packages are optional peer dependencies of svelai, so install them alongside it:
+
+\`pnpm add lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils\`
+
 ## Import
 
 \`\`\`svelte

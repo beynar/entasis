@@ -1,8 +1,8 @@
-import { render } from 'svelte/server';
 import type { Component } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import Chart from './Chart.svelte';
 import type { ChartProps } from './chart.props.js';
+import { renderInThemeServer } from '../Theme/renderInThemeServer.test-helper.js';
 
 type Revenue = {
 	month: Date;
@@ -25,13 +25,11 @@ const RevenueChart = Chart as Component<ChartProps<Revenue>>;
 
 describe('Chart SSR', () => {
 	test('prerenders an accessible SVG at the requested aspect ratio', () => {
-		const output = render(RevenueChart, {
-			props: {
-				data,
-				...chart,
-				label: 'Monthly revenue',
-				aspectRatio: 2
-			}
+		const output = renderInThemeServer(RevenueChart, {
+			data,
+			...chart,
+			label: 'Monthly revenue',
+			aspectRatio: 2
 		});
 
 		expect(output.body).toContain('data-slot="chart"');
@@ -42,8 +40,11 @@ describe('Chart SSR', () => {
 	});
 
 	test('prerenders and sizes the root from height alone', () => {
-		const output = render(RevenueChart, {
-			props: { data, ...chart, label: 'Monthly revenue', height: 320 }
+		const output = renderInThemeServer(RevenueChart, {
+			data,
+			...chart,
+			label: 'Monthly revenue',
+			height: 320
 		});
 
 		expect(output.body).toContain('viewBox="0 0 800 320"');
@@ -53,8 +54,12 @@ describe('Chart SSR', () => {
 	test('rejects height combined with aspectRatio', () => {
 		let thrown: unknown;
 		try {
-			const output = render(RevenueChart, {
-				props: { data, ...chart, label: 'Monthly revenue', height: 320, aspectRatio: 2 }
+			const output = renderInThemeServer(RevenueChart, {
+				data,
+				...chart,
+				label: 'Monthly revenue',
+				height: 320,
+				aspectRatio: 2
 			});
 			void output.body;
 		} catch (error) {
@@ -68,9 +73,7 @@ describe('Chart SSR', () => {
 	});
 
 	test('renders only a stable host when no size is declared', () => {
-		const output = render(RevenueChart, {
-			props: { data, ...chart, label: 'Monthly revenue' }
-		});
+		const output = renderInThemeServer(RevenueChart, { data, ...chart, label: 'Monthly revenue' });
 
 		expect(output.body).toContain('data-slot="chart"');
 		expect(output.body).toContain('data-chart-host');
@@ -78,13 +81,11 @@ describe('Chart SSR', () => {
 	});
 
 	test('keeps empty datasets valid', () => {
-		const output = render(RevenueChart, {
-			props: {
-				data: [],
-				...chart,
-				label: 'Empty revenue',
-				aspectRatio: 2
-			}
+		const output = renderInThemeServer(RevenueChart, {
+			data: [],
+			...chart,
+			label: 'Empty revenue',
+			aspectRatio: 2
 		});
 
 		expect(output.body).toContain('<svg');
@@ -94,8 +95,11 @@ describe('Chart SSR', () => {
 	test('rejects a non-positive height', () => {
 		let thrown: unknown;
 		try {
-			const output = render(RevenueChart, {
-				props: { data, ...chart, label: 'Monthly revenue', height: 0 }
+			const output = renderInThemeServer(RevenueChart, {
+				data,
+				...chart,
+				label: 'Monthly revenue',
+				height: 0
 			});
 			void output.body;
 		} catch (error) {

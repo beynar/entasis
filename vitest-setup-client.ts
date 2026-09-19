@@ -63,8 +63,10 @@ Object.defineProperty(Element.prototype, 'getClientRects', {
 	}
 });
 
-// jsdom does not implement programmatic scrolling.
-for (const name of ['scrollTo', 'scrollBy'] as const) {
+// jsdom does not implement programmatic scrolling. `scrollIntoView` is on the list because
+// roving focus (useNavigation) calls it on every move, so any test that opens a menu or a
+// listbox would otherwise fail on an unhandled rejection rather than on its own assertion.
+for (const name of ['scrollTo', 'scrollBy', 'scrollIntoView'] as const) {
 	if (!(name in Element.prototype)) {
 		Object.defineProperty(Element.prototype, name, { writable: true, value: () => {} });
 	}

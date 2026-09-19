@@ -13,7 +13,21 @@ Svelte 5 component library for SvelteKit, styled through a Tailwind CSS v4 plugi
 pnpm add svelai
 ```
 
-Peer dependencies: `svelte ^5`, `@sveltejs/kit ^2`, `tailwindcss ^4` (via `@tailwindcss/vite`). There is no `tailwind.config.js`; all configuration lives in your CSS.
+Peer dependencies: `svelte ^5`, `@sveltejs/kit ^2` and `tailwindcss ^4` (via `@tailwindcss/vite`). There is no `tailwind.config.js`; all configuration lives in your CSS. The library reads SvelteKit's `$app/environment` and, in `NetworkIndicator`, the `navigating` store, so it runs inside a SvelteKit app.
+
+### Optional peers
+
+svelai installs 21 runtime dependencies. Four rendering libraries stay out of them, declared as optional peer dependencies so they never land in a bundle that does not use them. Install a row only if you import one of the components on it; every other component works with svelai alone.
+
+| Component                                                      | Install                                                                                                                                                                  |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Chart`                                                        | `pnpm add @tanstack/charts d3-array d3-force d3-hierarchy d3-sankey d3-scale d3-shape` (TypeScript: `pnpm add -D @types/d3-shape`, for the D3 `CurveFactory` on `curve`) |
+| `RichTextInput`, and the `AIComposer` / `AIChat` that embed it | `pnpm add lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils`                                   |
+| `Globe`                                                        | `pnpm add cobe`                                                                                                                                                          |
+
+A missing peer fails the build, not the browser — but Vite substitutes a stub module rather than reporting an unresolved import, so the message names the export before it names the package. Importing `Chart` without the row above fails with a wall of `[MISSING_EXPORT] "bandX" is not exported by "__vite-optional-peer-dep:@tanstack/charts:svelai"`. The package to install and `svelai` are both in that virtual module id.
+
+Row highlighting (`@tanstack/highlight`) and row virtualization (`@tanstack/svelte-virtual`) stay runtime dependencies: `Markdown` renders `Code`, and `AIChat` / `AIConversation` render `AIThread`, so an optional peer there would make the library's most-used components fail to build out of the box — and `svelte-streamdown` already depends on `@tanstack/highlight`, so moving it would remove nothing from the install.
 
 ## Tailwind setup
 
@@ -120,19 +134,34 @@ The same words mean the same thing on every component, and `node tooling/check-p
 
 ### Plugin tokens
 
-Options accepted by each `@plugin 'svelai/tailwind-plugin/theme'` block:
+Options accepted by each `@plugin 'svelai/tailwind-plugin/theme'` block (the `ThemeOptions` type in `src/lib/tailwind/theme.ts`). These are read at build time and baked into the stylesheet:
 
-| Option                  | Type              | Description                                                                   |
-| ----------------------- | ----------------- | ----------------------------------------------------------------------------- |
-| `name`                  | string            | Theme name; scopes variables to `html[data-theme="<name>"]` and `.<name>`     |
-| `default`               | boolean           | Applies to bare `html` and installs the shared engine (exactly one per build) |
-| `colorscheme`           | `light` \| `dark` | Drives mode-aware defaults for the generated palette                          |
-| `prefersDark`           | boolean           | Also emits the palette under `@media (prefers-color-scheme: dark)`            |
-| `luminance`             | number            | Lightness adjustment applied to every seed color                              |
-| `saturation`            | number            | Saturation adjustment applied to every seed color                             |
-| `state-hover-opacity`   | number            | `.state-layer` hover opacity (default 0.05 light / 0.16 dark)                 |
-| `state-pressed-opacity` | number            | `.state-layer` pressed opacity (default 0.10 light / 0.32 dark)               |
-| `spinner`               | object            | Custom `.ui-spinner` keyframes and style                                      |
+| Option                   | Type                                                                                     | Default              | Description                                                                   |
+| ------------------------ | ---------------------------------------------------------------------------------------- | -------------------- | ----------------------------------------------------------------------------- |
+| `name`                   | string                                                                                   | —                    | Theme name; scopes variables to `html[data-theme="<name>"]` and `.<name>`     |
+| `default`                | boolean                                                                                  | `false`              | Applies to bare `html` and installs the shared engine (exactly one per build) |
+| `colorscheme`            | `light` \| `dark`                                                                        | `light`              | Drives mode-aware defaults for the generated palette                          |
+| `prefersDark`            | boolean                                                                                  | `false`              | Also emits the palette under `@media (prefers-color-scheme: dark)`            |
+| `luminance`              | number                                                                                   | `0`                  | Lightness adjustment applied to every seed color                              |
+| `saturation`             | number                                                                                   | `0`                  | Saturation adjustment applied to every seed color                             |
+| `state-hover-opacity`    | number                                                                                   | `0.05` / `0.16` dark | `.state-layer` hover opacity                                                  |
+| `state-pressed-opacity`  | number                                                                                   | `0.10` / `0.32` dark | `.state-layer` pressed opacity                                                |
+| `state-selected-opacity` | number                                                                                   | `0.07` / `0.10` dark | Alpha of the `bg-selected*` tint (persistent selection), not the state layer  |
+| `spinner`                | `spinDynamicThin` \| `spinDynamicThick` \| `spinLargeThreeQuarter` \| `spinlargeQuarter` | `spinDynamicThin`    | Which `.ui-spinner` keyframes and style the engine emits                      |
+
+`ThemeOptions` also intersects `EngineOptions` (`src/lib/tailwind/scales.ts`). The engine is installed once, by the block carrying `default: true`, and `applyGlobalEngine` reads these five keys only from that block — they are ignored on every other theme block:
+
+| Option      | Type                                                                       | Default                      | Description                                                                   |
+| ----------- | -------------------------------------------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------- |
+| `spacing`   | `small` (0.8x) \| `normal` \| `large` (1.2x) \| number                     | unset (Tailwind's `0.25rem`) | Factor on the base spacing unit; writes `--spacing` and the geometry family   |
+| `radius`    | `none` \| `subtile` \| `small` \| `normal` \| `large` \| `round` \| number | `normal`                     | Factor on the whole radius ramp; writes `--radius` and `--radius-xs` … `-4xl` |
+| `typeScale` | `compact` \| `default` \| `comfortable` \| `large` \| `TypeScaleOptions`   | `default`                    | Fluid type ramp; writes every `--text-*` step as a `clamp()`                  |
+| `elevation` | `flat` \| `normal` \| `high`                                               | `normal`                     | Strength of the shadow ramp behind `raised-*` / `lift-*`                      |
+| `motion`    | `DeepPartial<{ duration, easing }>`                                        | library scale                | Duration steps and easing roles; writes `--duration-*` and `--ease-*`         |
+
+`motion` is object-valued, so it is only expressible when the plugin is configured from JavaScript; a CSS `@plugin` block carries flat values and can set the other four.
+
+**Build time versus runtime.** These five keys are the same tokens `<Theme designTokens>` compiles at runtime, and both emit the same CSS variables. The plugin writes them on `html`; `<Theme designTokens>` writes them on `html[data-theme="<name>"]`, which is more specific, so **a runtime token always wins for that theme** and every key a theme omits keeps the build-time value. Use the plugin for the app-wide baseline (it applies before hydration, with no flash) and `designTokens` for anything that differs per theme or changes at runtime.
 
 Color seeds. Each role accepts a hex value or a Tailwind color name (`indigo`, `emerald`, uses the 500 shade):
 
@@ -149,7 +178,7 @@ The engine also provides `raised-*` (shadow plus theme-aware border, same values
 
 ### Runtime design tokens
 
-Spacing, radius, type scale, raised borders, and the default component color are not plugin options. They are set per theme name through `<Theme designTokens>` and compiled to CSS variables on `html[data-theme="<name>"]`:
+The same scales the engine bakes in, plus the state roles and the default component color, are set per theme name through `<Theme designTokens>` and compiled to CSS variables on `html[data-theme="<name>"]`, overriding the build-time values for that theme:
 
 ```svelte
 <script lang="ts">
@@ -168,14 +197,22 @@ Spacing, radius, type scale, raised borders, and the default component color are
 </Theme>
 ```
 
-| Token              | Values                                                                                       |
-| ------------------ | -------------------------------------------------------------------------------------------- |
-| `spacing`          | `small` (0.8x) \| `normal` \| `large` (1.2x) \| number multiplier                            |
-| `spacingScale`     | Partial `{ xs, sm, md, lg, xl }` multipliers behind `gap-md`, `p-lg`, ...                    |
-| `radius`           | `none` \| `subtile` \| `small` \| `normal` \| `large` \| `round` \| number                   |
-| `typeScale`        | `compact` \| `default` \| `comfortable` \| `large` \| `{ baseMinPx, baseMaxPx, scale, ... }` |
-| `raisedWithBorder` | boolean; adds a 1px border to `raised-*` surfaces                                            |
-| `defaultColor`     | Role used by components that omit `color` (default `neutral`)                                |
+Every key of `ThemeDesignTokens` (`src/lib/components/Theme/theme.designTokens.ts`), with the value the compiler falls back to when the key is omitted. The four state roles emit nothing at all when unset, so each use site keeps following the control's own role:
+
+| Token              | Type                                                                                  | Default                                     | Description                                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `spacing`          | `small` (0.8x) \| `normal` \| `large` (1.2x) \| number                                | `normal`                                    | Factor on the 0.25rem base unit, so spaces, control heights, rows and icons scale together; writes `--spacing`           |
+| `spacingScale`     | `Partial<Record<'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl', number>>`                       | `{ xs: 1, sm: 1.5, md: 2, lg: 3, xl: 4 }`   | Multiplier per named step, applied to `--spacing`; must stay strictly increasing; writes `--space-xs` … `--space-xl`     |
+| `radius`           | `none` \| `subtile` \| `small` \| `normal` \| `large` \| `round` \| number            | `normal`                                    | Factor on the whole radius ramp; writes `--radius` and `--radius-xs` … `--radius-4xl`                                    |
+| `typeScale`        | `compact` \| `default` \| `comfortable` \| `large` \| `TypeScaleOptions`              | `default`                                   | Fluid type ramp: base size at the narrow and wide viewport plus the ratio between steps; writes every `--text-*`         |
+| `elevation`        | `flat` \| `normal` \| `high`                                                          | `normal`                                    | Strength of the shadow ramp `raised-*` and `lift-*` read; `flat` removes shadows; writes `--elevation-*`                 |
+| `motion`           | `DeepPartial<{ duration, easing }>`                                                   | library scale                               | The five duration steps in ms and the four easing roles; writes `--duration-*` and `--ease-*`                            |
+| `raisedWithBorder` | boolean                                                                               | `true`                                      | Whether `raised-*` draws its hairline border alongside the shadow; writes `--raised-border`                              |
+| `defaultColor`     | `primary` \| `secondary` \| `danger` \| `success` \| `warning` \| `info` \| `neutral` | `neutral`                                   | Semantic role chrome inherits when a control omits `color`; repoints `--color` and its companions                        |
+| `focusColor`       | one of the seven roles                                                                | unset — each ring follows `--color`         | State role for the focus ring: every `ring-focus` rings in this role; writes `--color-focus`                             |
+| `selectedColor`    | one of the seven roles                                                                | unset — each selection follows `--color`    | State role for a persistent highlight (sidebar row, menu option, selected row); writes the whole `--color-selected*` kit |
+| `hoverColor`       | one of the seven roles                                                                | unset — the layer tints with `currentColor` | State role for the transient hover tint `state-layer` paints; writes `--color-hover`                                     |
+| `pressedColor`     | one of the seven roles                                                                | unset — falls back to `hoverColor`          | State role for the transient pressed tint; writes `--color-pressed`                                                      |
 
 Switching themes at runtime: the `children` snippet receives the `ThemeState`.
 

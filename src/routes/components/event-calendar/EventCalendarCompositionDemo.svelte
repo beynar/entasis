@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { EventCalendar } from '$lib/components/EventCalendar/index.js';
+	import { EventCalendar } from 'svelai/event-calendar';
 	import { createDemoItems } from './eventCalendarDemoData.js';
 
 	let items = $state(createDemoItems());

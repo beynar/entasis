@@ -5,11 +5,15 @@
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import { startOfZonedDay } from './eventCalendar.date.js';
 	import { EventCalendarError } from './eventCalendar.error.js';
+
 	import type { EventCalendarResourceHeaderPayload } from './eventCalendar.props.js';
 	import type { EventCalendarResourceModel } from './eventCalendar.resources.js';
 	import type { EventCalendarState } from './eventCalendar.state.svelte.js';
+	import {
+		eventCalendarAllDayCellTarget,
+		type EventCalendarAllDayDropTarget
+	} from './eventCalendar.targets.js';
 	import type { EventCalendarTimeGridDayGeometry } from './eventCalendar.timeGrid.js';
-	import type { EventCalendarDateOnly } from './eventCalendar.types.js';
 
 	let {
 		calendar,
@@ -26,7 +30,7 @@
 		longDayFormatter: Intl.DateTimeFormat;
 		registerTimeTarget: (targetKey: string) => (node: HTMLElement) => () => void;
 		handleTargetKeydown: (event: KeyboardEvent, targetKey: string, activate?: boolean) => void;
-		handleAllDayClick: (day: EventCalendarDateOnly, event: MouseEvent, resourceId?: string) => void;
+		handleAllDayClick: (target: EventCalendarAllDayDropTarget, event: MouseEvent) => void;
 	} = $props();
 
 	const a11y = $derived(calendar.a11y);
@@ -77,7 +81,8 @@
 			style:grid-column={`${cell.columnStart + 2} / span ${cell.columnSpan}`}
 			style:grid-row={`${cell.depth + 1} / span ${cell.rowSpan}`}
 			onfocus={() => a11y.handleTimeTargetFocus(targetKey)}
-			onclick={(event) => handleAllDayClick(geometry.day, event, geometry.resourceId)}
+			onclick={(event) =>
+				handleAllDayClick(eventCalendarAllDayCellTarget('resource', geometry), event)}
 			onkeydown={(event) => handleTargetKeydown(event, targetKey, true)}
 			{@attach disabled ? null : registerTimeTarget(targetKey)}
 		>

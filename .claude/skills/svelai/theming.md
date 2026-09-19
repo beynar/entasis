@@ -53,14 +53,17 @@ on its own instead of a default theme (never both: the engine must run exactly o
 
 ## Theme Plugin Config
 
-Full example with all keys:
+Full example with all keys. Option names are case-sensitive and the plugin throws on a key it does
+not know, so the `prettier-ignore` below is load-bearing: Prettier lowercases property names inside
+a `css` fence, which silently turns `prefersDark` into a dead `prefersdark`.
 
+<!-- prettier-ignore -->
 ```css
 @plugin 'svelai/tailwind-plugin/theme' {
 	name: custom; /* string - used for the data-theme attribute */
 	default: true; /* boolean - default theme, also boots the engine */
 	colorscheme: light; /* 'light' | 'dark' - drives generated defaults */
-	prefersdark: false; /* boolean - also apply under prefers-color-scheme: dark */
+	prefersDark: false; /* boolean - also apply under prefers-color-scheme: dark */
 
 	luminance: 5; /* number - brightness adjustment applied to every accent */
 	saturation: 10; /* number - saturation adjustment applied to every accent */
@@ -80,12 +83,35 @@ Full example with all keys:
 
 	state-hover-opacity: 0.05;
 	state-pressed-opacity: 0.1;
+	state-selected-opacity: 0.07;
+
+	spinner: spinDynamicThin; /* 'spinDynamicThin' | 'spinDynamicThick'
+	                             | 'spinLargeThreeQuarter' | 'spinlargeQuarter' */
+
+	/* Engine options — read only from the block with `default: true`. */
+	spacing: normal; /* 'small' | 'normal' | 'large' | number */
+	radius: normal; /* 'none' | 'subtile' | 'small' | 'normal' | 'large' | 'round' | number */
+	typeScale: default; /* 'compact' | 'default' | 'comfortable' | 'large' | TypeScaleOptions */
+	elevation: normal; /* 'flat' | 'normal' | 'high' */
 }
 ```
 
-Other accepted keys: `spinner` (default spinner animation) and every `{color}-{variant}` /
-`surface-{grade}` override listed below. There are no radius, spacing, typography or border options
-on the plugin; those are runtime [design tokens](#design-tokens).
+Those keys are the `ThemeOptions` type (`src/lib/tailwind/theme.ts`), which is
+`Partial<{ name, default, luminance, saturation, colorscheme, state-hover-opacity,
+state-pressed-opacity, state-selected-opacity, prefersDark, spinner }>` intersected with `EngineOptions`
+(`src/lib/tailwind/scales.ts`: `radius`, `spacing`, `typeScale`, `elevation`, `motion`) and the
+colour seeds of `ColorTheme` — every `{color}-{variant}` / `surface-{grade}` override listed below.
+
+`applyGlobalEngine` reads the five engine options only from the block carrying `default: true`;
+they are ignored on every other theme block. `motion` is object-valued, so it is only expressible
+when the plugin is configured from JavaScript — a CSS `@plugin` block carries flat values.
+
+Radius, spacing, typography, elevation and motion therefore exist on **both** sides. The plugin
+writes them on `html` at build time; `<Theme designTokens>` writes the same variables on
+`html[data-theme="<name>"]`, which is more specific, so a runtime token always wins for that theme
+and every key a theme omits keeps the build-time value. Use the plugin for the app-wide baseline
+(it applies before hydration, with no flash) and [design tokens](#design-tokens) for what differs
+per theme or changes at runtime.
 
 ## Color Tokens
 
@@ -152,11 +178,13 @@ pinned on the theme the layer is `currentColor`, exactly as before. Focus remain
 (`ring-focus/50`); persistent selected, checked and open states use the selected state role.
 
 Defaults: light `0.05` / `0.10`, dark `0.16` / `0.32`. Override per theme block with
-`state-hover-opacity` / `state-pressed-opacity`.
+`state-hover-opacity` / `state-pressed-opacity`. The persistent selection has its own alpha,
+`state-selected-opacity` (light `0.07`, dark `0.10`), because `bg-selected-muted` composites a
+translucent tint of the role rather than painting an opaque colour — see rule 6.
 
 ## Theme Class Rules
 
-Eight axes drifted across the library's theme files until each got one value. These are the rules
+Nine axes drifted across the library's theme files until each got one value. These are the rules
 every `*.theme.ts` follows — `tooling/check-semantic-theme-tokens.mjs` enforces them, and an app
 writing its own overrides gets a consistent kit by following them too.
 
@@ -212,7 +240,12 @@ import { selectedSoft, selectedSolid } from 'svelai/theme';
 Persistent selection — a selected table row, an active sidebar row, an active menu option, a
 tabbar or segmented-control indicator, a pressed toggle, a checked switch / checkbox / radio, the
 current page in a pager — paints from the `bg-selected*` family. Each token falls back to its
-current-role twin (`bg-selected-muted` is `var(--color-selected-muted, var(--color-muted))`), so
+current-role twin — `bg-selected-muted` is
+`color-mix(in oklab, var(--color-selected, var(--color)) calc(var(--state-selected-opacity) * 100%), transparent)`,
+a **translucent tint of the role, not an opaque colour**, so the same selection reads identically
+on `surface`, on a card's `surface-raised` and inside a popover's `surface-floating` (an opaque
+tint can only be mixed over one surface, and in dark mode it went invisible on the other two).
+The alpha is `--state-selected-opacity`: 0.07 light, 0.10 dark, tunable per theme block. So
 with nothing pinned the fill is still the current role and follows `data-color` and `defaultColor`;
 `designTokens.selectedColor` pins all of it to one colour at once. A selection may not name a
 fixed role (`bg-primary-muted`, `bg-neutral-muted`) and may not ride the current role directly
@@ -310,6 +343,67 @@ device decision takes it from JS rather than CSS — `DataTable`'s column header
 `Confirmation`'s footer both read `useTheme().isMobile`, the same `< 768px` value the Popover used
 to pick sheet-versus-floating, instead of each hard-coding its own `matchMedia`.
 
+**9. A flush child rounds with `rounded-<step>-concentric`; the container publishes on its own.**
+Two concentric rounded boxes read as concentric only when the inner radius is no larger than the
+outer one minus the gap between them, and that gap is the container's padding. Guessing it by eye
+is what produced the drift — a `rounded-lg p-xs` panel whose rows were `rounded-md`, a
+`rounded-xl p-sm` card whose header was `rounded-lg`. Both halves of that formula are already on
+the container as utilities, so the utilities publish them to its children and the cascade does the
+arithmetic: **nothing is declared; a child sitting flush against the padding box keeps its own
+design step and writes `rounded-<step>-concentric` to cap it at what the corner allows.**
+
+```ts
+// rounded-lg publishes --radius-parent to its children, p-xs publishes --pad-parent-x/-y
+const panel = cva({ base: 'bg-surface-raised rounded-lg p-xs' });
+const row = cva({ base: 'state-layer rounded-md-concentric px-md min-h-row-sm w-full' });
+```
+
+Every `rounded-<step>` also emits `.rounded-<step> > * { --radius-parent: var(--radius-<step>) }`
+beside core's own `border-radius` rule; `rounded-full` publishes infinity (a pill's flush children
+stay pills) and `rounded-none` publishes `0px`; an arbitrary value (`rounded-[3px]`) and the side
+and corner forms publish nothing, because there is no step to pass on.
+`p-<step>` publishes `--pad-parent-x` and `--pad-parent-y`, `px-*` and `py-*` publish one axis
+each, and one-sided padding publishes nothing — `pt-*` is not the uniform gap a concentric corner
+is derived from. `rounded-<step>-concentric` (plus `rounded-t-<step>-concentric` and
+`rounded-b-<step>-concentric` for a flush header or footer; the step is one of
+`xs sm md lg xl 2xl 3xl 4xl`) is
+`min(var(--radius-<step>), calc(var(--radius-parent, calc(infinity * 1px)) - max(var(--pad-parent-x, 0px), var(--pad-parent-y, 0px))))`.
+It is a **cap, not a subtraction**: the child keeps its own step on the design ramp and only gives
+ground when the container's corner cannot hold it. A child rounder than parent minus padding cuts
+across the parent's corner, which is the ugly case worth preventing; a child less round than that
+merely reads as an ordinary control, which is fine. Both halves are the theme's own `--radius-*`
+and `--space-*`, so `designTokens.radius` and `designTokens.spacing` keep the two boxes concentric
+at every preset. The parent fallback is **infinite**, so a row placed outside any rounded container
+is exactly its own step; and a tight box needs no floor: CSS clamps a negative radius to 0, which
+is the square corner the geometry asks for — a `rounded-sm-concentric` box inside `rounded-sm p-md`
+is `min(4px, 4 - 8)` → 0. At the default theme a menu row inside a `rounded-lg p-md` panel is
+`min(8px, 12 - 8)` = 4px.
+
+Both variables inherit, because the flush child is rarely a direct child: a menu's rows sit in a
+`role="menu"` group inside the padded panel, so an unrounded, unpadded wrapper in between is
+transparent. What must not cross a rounded boundary is the padding — a `Button` inside a padded
+`Card` is a new box, and its children owe nothing to the `Card`'s padding — so every
+`rounded-<step>` also resets `--pad-parent-x/-y` to `0px` for its children, at zero specificity
+(`:where(.rounded-lg) > *`) so the same box's own `.p-md > *` publish wins whichever order the two
+are emitted in. The nearer padded wrapper wins outright rather than accumulating, which makes
+exactly one level exact — every nesting in the library. Two known
+limits, both accepted: a concentric box cannot publish its own _computed_ radius (the child rule
+would read the value it sets, which is the cycle), so it publishes its **nominal** step like every
+other `rounded-<step>` — its own children are therefore bounded by that step and can be slightly
+over-rounded at two levels, rather than reading nothing at all; and the corner subtracts the larger
+of the two axes instead of being elliptical.
+
+The child half stays opt-in because CSS cannot tell a flush child from a floating one. A menu row
+fills its panel's padding box and has to follow the container's shape; an avatar, a `Button`, a
+`Chip` inside a `TagsInput` float inside the padding and have to keep their own. Clamping every
+rounded child automatically would square the avatars and shrink the chips, so the container side is
+fully automatic and the child is the one that says it is flush.
+
+One more thing the sweep reaches, because it did not used to: a theme is an object literal **or a
+factory that returns one**. An exported `*Theme` arrow function is read as well now — reading only
+object literals is how `buildMarkdownStreamdownTheme` shipped a raw `shadow`, an off-scale `/80`
+muted step and a numeric `space-y-2`.
+
 ## Design Tokens
 
 Geometry tokens are runtime values compiled by `<Theme designTokens={...}>` onto each theme
@@ -406,12 +500,12 @@ Four more roles, each a `Colors` and each optional, pin what a _state_ looks lik
 kit — independently of the colour of the control the state happens to land on. They are
 Theme-level only: no component takes a per-instance override.
 
-| Token           | Pins                                                            | CSS variable(s)                                                                                                                           |
-| --------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `focusColor`    | every focus ring                                                | `--color-focus`                                                                                                                           |
-| `selectedColor` | every persistent selection (rows, options, indicators, checked) | `--color-selected`, `--color-selected-muted`, `--color-selected-contrast`, `--color-selected-readable`, `--color-selected-muted-readable` |
-| `hoverColor`    | the transient hover layer                                       | `--color-hover`                                                                                                                           |
-| `pressedColor`  | the transient pressed layer (falls back to `hoverColor`)        | `--color-pressed`                                                                                                                         |
+| Token           | Pins                                                            | CSS variable(s)                                                                                                 |
+| --------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `focusColor`    | every focus ring                                                | `--color-focus`                                                                                                 |
+| `selectedColor` | every persistent selection (rows, options, indicators, checked) | `--color-selected`, `--color-selected-contrast`, `--color-selected-readable`, `--color-selected-muted-readable` |
+| `hoverColor`    | the transient hover layer                                       | `--color-hover`                                                                                                 |
+| `pressedColor`  | the transient pressed layer (falls back to `hoverColor`)        | `--color-pressed`                                                                                               |
 
 ```svelte
 <Theme
@@ -428,7 +522,10 @@ None of these variables is declared at `:root`. **Every use site falls back to t
 current-role variable**, so a theme that pins none of the four renders exactly as it did:
 
 - `ring-focus` → `var(--color-focus, var(--color))`
-- `bg-selected-muted` → `var(--color-selected-muted, var(--color-muted))`
+- `bg-selected-muted` →
+  `color-mix(in oklab, var(--color-selected, var(--color)) calc(var(--state-selected-opacity) * 100%), transparent)`
+  — a tint of the role, so there is no `--color-selected-muted` to pin; `selectedColor` moves the
+  fill through `--color-selected` and the ink through `--color-selected-muted-readable`
 - the `state-layer`'s `::before` → `var(--color-hover, currentColor)`, and on `:active`
   `var(--color-pressed, var(--color-hover, currentColor))`
 

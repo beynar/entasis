@@ -48,6 +48,12 @@ The Menu component is a flexible container that renders an array of menu items i
 
 - **density**: 'compact' | 'normal' | 'comfortable' (default: 'normal') - Spacing density: controls the gap between rows and is forwarded to every MenuOption row (option, submenu trigger, back control); a per-item \`density\` wins. Items of type 'button' render a Button, which has no density axis and is unaffected.
 
+- **size**: 'small' | 'normal' | 'large' (default: 'normal') - Type/icon scale of every MenuOption row; a per-item \`size\` wins. Items of type 'button' are unaffected.
+
+- **color**: Colors - Role every MenuOption row follows unless the item names its own \`color\`. Left undefined, each row keeps the MenuOption default.
+
+All three axes (\`density\`, \`size\`, \`color\`) are inherited by submenus: a submenu is the same menu one level down and opens on the axes its parent was given.
+
 - **header**: Snippet - Optional header content rendered at the top of the menu
 
 - **footer**: Snippet - Optional footer content rendered at the bottom of the menu

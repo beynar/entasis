@@ -274,6 +274,12 @@
 			name: '--state-hover-opacity / --state-pressed-opacity',
 			detail: '0.05 / 0.1 light, 0.16 / 0.32 dark',
 			meaning: 'How strong the state layer paints. Generated with the palette, per colour scheme.'
+		},
+		{
+			name: '--state-selected-opacity',
+			detail: '0.07 light, 0.10 dark',
+			meaning:
+				'How strong bg-selected-muted tints. The fill is a translucent tint of --color-selected, not an opaque colour, so a selected row reads the same on surface, surface-raised and surface-floating.'
 		}
 	];
 
@@ -342,6 +348,18 @@
 			detail: 'an alias of --radius-md',
 			meaning: 'The control radius, so a bare rounded reads as a control.'
 		},
+		{
+			name: '--radius-parent',
+			detail: 'var(--radius-<step>) on the children of a rounded-<step>',
+			meaning:
+				'Engine-internal, never declared by hand: every rounded-<step> publishes its own radius to its children, and it inherits, so an unrounded wrapper in between is transparent. rounded-<step>-concentric reads it, falling back to an infinite radius outside any rounded container — where the child is then exactly its own step.'
+		},
+		{
+			name: '--pad-parent-x / -y',
+			detail: 'var(--space-<step>) on the children of a p / px / py',
+			meaning:
+				'Engine-internal, the other half of the cap rounded-<step>-concentric computes. It inherits like the radius, but every rounded-<step> resets it to 0px for its children, so padding never crosses a rounded boundary and a rounded box with no padding of its own passes nothing through.'
+		},
 		...(Object.entries(radiusSteps) as Array<[string, number]>).map(([step, rem]) => ({
 			name: `--radius-${step}`,
 			detail: `${rem}rem × the radius factor`,
@@ -355,6 +373,19 @@
 							: 'A distinct step on the ramp.'
 		}))
 	];
+
+	const nestedRadiusSnippet = `<!-- Nothing to declare: rounded-lg publishes --radius-parent to its children
+     and p-xs publishes --pad-parent-x/-y, both halves of the cap. -->
+<div class="bg-surface-raised rounded-lg p-xs">
+  <!-- Flush against the padding box: keeps the md step, capped at what the corner allows. -->
+  <button class="rounded-md-concentric px-md h-row-sm w-full">Concentric at every preset</button>
+</div>
+
+<!-- rounded-md-concentric: min(var(--radius-md),
+                                calc(var(--radius-parent, calc(infinity * 1px))
+                                     - max(var(--pad-parent-x, 0px), var(--pad-parent-y, 0px))))
+     Outside any rounded container the parent radius is infinite, so the button is exactly md.
+     No floor: CSS clamps a negative radius to 0, the square corner such a box really has. -->`;
 
 	const typeRows: Row[] = [
 		{
@@ -689,6 +720,39 @@
 				}
 			}))}
 		/>
+
+		<h4 class="mt-4 text-sm font-semibold">Concentric radius</h4>
+		<p class="text-neutral/70 mt-1 max-w-3xl text-sm leading-relaxed">
+			Two concentric rounded boxes look concentric only when the inner radius is no larger than the
+			outer one minus the gap between them, and that gap is the container's padding. Both halves are
+			already on the container as utilities, so they publish themselves:
+			<code>rounded-&lt;step&gt;</code> hands <code>--radius-parent</code> to its children,
+			<code>p</code> / <code>px</code> / <code>py</code> hand over <code>--pad-parent-x/-y</code>,
+			and every child flush against the padding box writes
+			<code>rounded-&lt;step&gt;-concentric</code> (also
+			<code>rounded-t-&lt;step&gt;-concentric</code> and
+			<code>rounded-b-&lt;step&gt;-concentric</code>) to keep its own step capped at that
+			difference. Nothing is declared and nothing is eyeballed. Both halves ride the
+			<code>radius</code> and <code>spacing</code> design tokens, so a theme that rounds or squares
+			the library can never let the child cut across the container's corner;
+			<code>rounded-&lt;step&gt;-concentric</code> with no rounded container above it is exactly its step,
+			and one whose cap would fall below zero is simply square.
+		</p>
+		<div class="bg-surface-raised raised-1 gap-md p-lg mt-4 grid rounded-lg sm:grid-cols-3">
+			{#each [['sm', 'rounded-lg p-xs'], ['md', 'rounded-xl p-md'], ['lg', 'rounded-2xl p-lg']] as [label, container] (label)}
+				<div class="gap-xs grid">
+					<span class="text-neutral/70 font-mono text-xs">{container}</span>
+					<div class="bg-surface-floating {container}">
+						<div
+							class="bg-primary-muted text-primary-muted-readable px-md py-sm rounded-md-concentric text-xs"
+						>
+							rounded-md-concentric
+						</div>
+					</div>
+				</div>
+			{/each}
+		</div>
+		<Code language="svelte" code={nestedRadiusSnippet} />
 
 		<h3 class="mt-4 text-base font-semibold">Type</h3>
 		<Table

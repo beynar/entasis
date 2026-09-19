@@ -1,9 +1,10 @@
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { fireEvent, waitFor } from '@testing-library/svelte';
 import type { Component } from 'svelte';
 import { describe, expect, test, vi } from 'vitest';
 import Chart from './Chart.svelte';
 import type { ChartProps } from './chart.props.js';
+import { renderInTheme } from '../Theme/renderInTheme.test-helper.js';
 
 type Row = { x: number; y: number; group: string };
 const TypedChart = Chart as Component<ChartProps<Row>>;
@@ -25,11 +26,9 @@ const props: ChartProps<Row> = {
 describe('Chart legend visibility state', () => {
 	test('keeps uncontrolled changes through prop spreads and changed defaults', async () => {
 		const onValueChange = vi.fn();
-		const { container, getByRole, rerender } = render(TypedChart, {
-			props: {
-				...props,
-				legend: { interactive: true, defaultValue: ['First', 'Second'], onValueChange }
-			}
+		const { container, getByRole, rerender } = renderInTheme(TypedChart, {
+			...props,
+			legend: { interactive: true, defaultValue: ['First', 'Second'], onValueChange }
 		});
 		const first = await waitFor(() => getByRole('button', { name: 'First' }));
 		const brush = container.querySelector('[data-chart-brush]');
@@ -54,8 +53,9 @@ describe('Chart legend visibility state', () => {
 
 	test('proposes controlled changes and applies parent updates silently', async () => {
 		const onValueChange = vi.fn();
-		const { getByRole, rerender } = render(TypedChart, {
-			props: { ...props, legend: { interactive: true, value: ['First'], onValueChange } }
+		const { getByRole, rerender } = renderInTheme(TypedChart, {
+			...props,
+			legend: { interactive: true, value: ['First'], onValueChange }
 		});
 		const second = await waitFor(() => getByRole('button', { name: 'Second' }));
 		expect(second).toHaveAttribute('aria-pressed', 'false');

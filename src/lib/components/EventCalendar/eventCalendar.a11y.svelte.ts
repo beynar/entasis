@@ -12,6 +12,7 @@ import {
 	parseDateOnly
 } from './eventCalendar.date.js';
 import type { EventCalendarItemIndex } from './eventCalendar.items.js';
+import { eventCalendarMonthDayTarget } from './eventCalendar.targets.js';
 import type { EventCalendarState } from './eventCalendar.state.svelte.js';
 import type {
 	EventCalendarDateOnly,
@@ -454,14 +455,7 @@ export class EventCalendarA11y<
 		}
 		if (event.key === ' ') {
 			event.preventDefault();
-			return (
-				this.calendar.interaction.beginKeyboardSlot({
-					key: `month:${day}`,
-					view: 'month',
-					allDay: true,
-					day
-				}) ?? false
-			);
+			return this.calendar.interaction.beginKeyboardSlot(eventCalendarMonthDayTarget(day));
 		}
 
 		let target: EventCalendarDateOnly | null;
@@ -500,19 +494,9 @@ export class EventCalendarA11y<
 		event.preventDefault();
 		this.focusDay(target);
 		if (this.calendar.interaction.isKeyboardSlotActive) {
-			this.calendar.interaction.updateKeyboardSlot({
-				key: `month:${target}`,
-				view: 'month',
-				allDay: true,
-				day: target
-			});
+			this.calendar.interaction.updateKeyboardSlot(eventCalendarMonthDayTarget(target));
 		} else {
-			this.calendar.interaction.syncFocusedSlotSelection({
-				key: `month:${target}`,
-				view: 'month',
-				allDay: true,
-				day: target
-			});
+			this.calendar.interaction.syncFocusedSlotSelection(eventCalendarMonthDayTarget(target));
 		}
 		return true;
 	}

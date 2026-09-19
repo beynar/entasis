@@ -32,10 +32,17 @@ const gapUtilities = {
 	'gap-y': (value: string) => ({ 'row-gap': value })
 };
 
+// `p`, `px` and `py` also publish their gap to their children as `--pad-parent-x/-y`, the
+// padding half of the cap `rounded-<step>-concentric` computes (see `radius.ts`).
+// One-sided padding (`pt-*`, `ps-*`) is not the uniform gap a concentric corner is derived
+// from, so it publishes nothing.
 const paddingUtilities = {
-	p: (value: string) => ({ padding: value }),
-	px: (value: string) => ({ 'padding-inline': value }),
-	py: (value: string) => ({ 'padding-block': value }),
+	p: (value: string) => ({
+		padding: value,
+		'& > *': { '--pad-parent-x': value, '--pad-parent-y': value }
+	}),
+	px: (value: string) => ({ 'padding-inline': value, '& > *': { '--pad-parent-x': value } }),
+	py: (value: string) => ({ 'padding-block': value, '& > *': { '--pad-parent-y': value } }),
 	pt: (value: string) => ({ 'padding-top': value }),
 	pr: (value: string) => ({ 'padding-right': value }),
 	pb: (value: string) => ({ 'padding-bottom': value }),

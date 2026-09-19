@@ -85,7 +85,7 @@
 
 	const classes = $derived(useSidebarTheme(theme));
 	const resolvedColor = $derived(useDefaultColor());
-	const layerStack = useTheme()?.layers;
+	const layerStack = useTheme().layers;
 	const showEdgeTrigger = $derived(edgeReveal && displayState === 'hidden');
 	const hasRail = $derived(rail !== false);
 	const railAppearance = $derived(rail === 'thumb' ? 'thumb' : 'line');

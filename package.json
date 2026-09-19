@@ -12,8 +12,9 @@
 		"check:semantic-theme-tokens": "node tooling/check-semantic-theme-tokens.mjs",
 		"check:template-purity": "node tooling/check-template-purity.mjs",
 		"check:public-api-contract": "node tooling/check-public-api-contract.mjs",
+		"check:readme-tokens": "node tooling/check-readme-tokens.mjs",
 		"check:package-consumer": "node tooling/check-package-consumer.mjs",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && npm run check:readme-tokens",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
@@ -31,14 +32,31 @@
 	"files": [
 		"dist",
 		"!dist/**/*.test.*",
-		"!dist/**/*.spec.*"
+		"!dist/**/*.spec.*",
+		"!dist/**/*.test-helper.*"
 	],
 	"sideEffects": [
 		"**/*.css"
 	],
 	"type": "module",
 	"peerDependencies": {
+		"@lexical/history": "^0.50.0",
+		"@lexical/link": "^0.50.0",
+		"@lexical/list": "^0.50.0",
+		"@lexical/markdown": "^0.50.0",
+		"@lexical/rich-text": "^0.50.0",
+		"@lexical/selection": "^0.50.0",
+		"@lexical/utils": "^0.50.0",
 		"@sveltejs/kit": "^2.43.5",
+		"@tanstack/charts": "^0.18.0",
+		"cobe": "^2.0.1",
+		"d3-array": "^3.2.4",
+		"d3-force": "^3.0.0",
+		"d3-hierarchy": "^3.1.2",
+		"d3-sankey": "^0.12.3",
+		"d3-scale": "^4.0.2",
+		"d3-shape": "^3.2.0",
+		"lexical": "^0.50.0",
 		"svelte": "^5.0.0",
 		"tailwindcss": "^4.0.0"
 	},
@@ -46,6 +64,13 @@
 		"@axe-core/playwright": "^4.13.0",
 		"@eslint/compat": "^2.1.1",
 		"@eslint/js": "^10.0.1",
+		"@lexical/history": "^0.50.0",
+		"@lexical/link": "^0.50.0",
+		"@lexical/list": "^0.50.0",
+		"@lexical/markdown": "^0.50.0",
+		"@lexical/rich-text": "^0.50.0",
+		"@lexical/selection": "^0.50.0",
+		"@lexical/utils": "^0.50.0",
 		"@playwright/test": "^1.63.0",
 		"@svelte-plugin/font": "^0.0.6",
 		"@sveltejs/adapter-auto": "^7.0.1",
@@ -54,6 +79,7 @@
 		"@sveltejs/package": "^2.5.8",
 		"@sveltejs/vite-plugin-svelte": "^7.3.0",
 		"@tailwindcss/vite": "^4.3.3",
+		"@tanstack/charts": "0.18.0",
 		"@testing-library/jest-dom": "^7.0.1",
 		"@testing-library/svelte": "^5.4.2",
 		"@types/d3-array": "3.2.2",
@@ -62,11 +88,19 @@
 		"@types/d3-sankey": "0.12.5",
 		"@types/d3-scale": "4.0.9",
 		"@types/d3-shape": "3.2.0",
+		"cobe": "^2.0.1",
+		"d3-array": "3.2.4",
+		"d3-force": "3.0.0",
+		"d3-hierarchy": "3.1.2",
+		"d3-sankey": "0.12.3",
+		"d3-scale": "4.0.2",
+		"d3-shape": "3.2.0",
 		"eslint": "^10.10.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.23.0",
 		"globals": "^17.12.0",
 		"jsdom": "^30.0.1",
+		"lexical": "^0.50.0",
 		"prettier": "^3.9.6",
 		"prettier-plugin-svelte": "^4.1.1",
 		"prettier-plugin-tailwindcss": "^0.8.1",
@@ -102,33 +136,17 @@
 		"@blossom-carousel/core": "^1.1.8",
 		"@date-fns/tz": "^1.5.0",
 		"@floating-ui/dom": "^1.8.0",
-		"@lexical/history": "^0.50.0",
-		"@lexical/link": "^0.50.0",
-		"@lexical/list": "^0.50.0",
-		"@lexical/markdown": "^0.50.0",
-		"@lexical/rich-text": "^0.50.0",
-		"@lexical/selection": "^0.50.0",
-		"@lexical/utils": "^0.50.0",
 		"@maskito/core": "^5.4.0",
 		"@maskito/kit": "^5.4.0",
 		"@pierre/diffs": "^1.4.2",
 		"@pierre/trees": "1.0.0-beta.6",
-		"@tanstack/charts": "0.18.0",
 		"@tanstack/highlight": "0.1.0",
 		"@tanstack/svelte-virtual": "3.13.38",
 		"@tanstack/table-core": "9.2.4",
 		"cn": "0.3.0",
-		"cobe": "^2.0.1",
 		"colorizr": "^5.1.1",
-		"d3-array": "3.2.4",
-		"d3-force": "3.0.0",
-		"d3-hierarchy": "3.1.2",
-		"d3-sankey": "0.12.3",
-		"d3-scale": "4.0.2",
-		"d3-shape": "3.2.0",
 		"esm-env": "^1.2.2",
 		"file-selector": "^5.0.1",
-		"lexical": "^0.50.0",
 		"lightgallery": "^2.9.0",
 		"melt": "^0.44.0",
 		"runed": "^0.37.1",
@@ -1233,6 +1251,54 @@
 		}
 	},
 	"peerDependenciesMeta": {
+		"@lexical/history": {
+			"optional": true
+		},
+		"@lexical/link": {
+			"optional": true
+		},
+		"@lexical/list": {
+			"optional": true
+		},
+		"@lexical/markdown": {
+			"optional": true
+		},
+		"@lexical/rich-text": {
+			"optional": true
+		},
+		"@lexical/selection": {
+			"optional": true
+		},
+		"@lexical/utils": {
+			"optional": true
+		},
+		"@tanstack/charts": {
+			"optional": true
+		},
+		"cobe": {
+			"optional": true
+		},
+		"d3-array": {
+			"optional": true
+		},
+		"d3-force": {
+			"optional": true
+		},
+		"d3-hierarchy": {
+			"optional": true
+		},
+		"d3-sankey": {
+			"optional": true
+		},
+		"d3-scale": {
+			"optional": true
+		},
+		"d3-shape": {
+			"optional": true
+		},
+		"lexical": {
+			"optional": true
+		},
 		"tailwindcss": {
 			"optional": true
 		}

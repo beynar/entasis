@@ -22,9 +22,16 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
   `--grid-*`, `--timeline-*`, `--gantt-*`, `--event-calendar-*`, `--spinner-size`) is an
   implementation detail with no stability guarantee.
 
-- Docs: a "Consistency rules" page (`/docs/consistency`) states the eight harmonised axes (focus
-  ring, elevation, sizes, muted text, hover, selected, type ramp, container queries) with live
-  components for each, the tokens behind them, and the checker that keeps them from drifting. The
+- Docs: a "Consistency rules" page (`/docs/consistency`) states the nine harmonised axes (focus
+  ring, elevation, sizes, muted text, hover, selected, type ramp, container queries, concentric
+  radius) with live components for each, the tokens behind them, and the checker that keeps the
+  eight written ones from drifting (the concentric radius is computed, so it has nothing to
+  police). The concentric-radius demo renders the same markup twice, once at the page's radius
+  preset and once at `round` (compiled by `compileThemeDesignTokens` and moved off `html` onto the
+  box), because a hand-written child radius keeps cutting across the container's corner as the
+  preset moves: inside a `rounded-lg p-xs` panel a `rounded-md-concentric` row is
+  `min(8px, 12 − 4)` = 8px at `normal` and `min(20px, 30 − 4)` = 20px at `round`, while a
+  hand-written `rounded-lg` row is 12px and then 30px against corners that allow 8px and 26px. The
   two "Pinning the role" demos wear the literal output of `compileThemeDesignTokens` — the function
   `<Theme designTokens>` compiles with — so the page cannot claim a behaviour the compiler does not
   have.
@@ -166,9 +173,42 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
   one focus ring for new code. `selectedSoft` and `selectedSolid` now read
   `'bg-selected-muted text-selected-muted-readable'` and `'bg-selected text-selected-contrast'`, so
   everything already importing them moved to the selected state role on its own.
+- Concentric radius, computed by the cascade instead of declared. A flush child takes
+  `rounded-<step>-concentric` (also `rounded-t-<step>-concentric` / `rounded-b-<step>-concentric`,
+  `<step>` one of `xs sm md lg xl 2xl 3xl 4xl`) and gets
+  `min(var(--radius-<step>), calc(var(--radius-parent, calc(infinity * 1px)) - max(var(--pad-parent-x, 0px), var(--pad-parent-y, 0px))))`
+  — a cap, not a subtraction: the child keeps its own step on the radius ramp and only gives ground
+  when the container's corner cannot hold it, because a child rounder than that cuts across the
+  corner while a child less round merely reads as an ordinary control. Outside any rounded
+  container the parent radius is infinite, so the child is exactly its step. A concentric box also
+  publishes its nominal step to its own children like every other `rounded-<step>`, so two-level
+  nesting is bounded by the step instead of reading nothing at all.
+  The container declares nothing, because every `rounded-<step>` now also emits
+  `.rounded-<step> > * { --radius-parent: var(--radius-<step>) }` and `p` / `px` / `py` publish
+  `--pad-parent-x/-y` to their children (`rounded-full` publishes infinity and `rounded-none`
+  `0px`; one-sided padding, arbitrary radii and the side and corner forms publish nothing). Both variables inherit, so an
+  unrounded, unpadded wrapper in between is transparent, and every `rounded-<step>` resets
+  `--pad-parent-*` to `0px` for its children — at zero specificity, so the box's own `p-*` publish
+  still wins — so padding never crosses a rounded boundary and never accumulates: one level of
+  nesting is exact, which is every nesting in the library. Both halves ride
+  `designTokens.radius` and `designTokens.spacing`, so the child can never cut the container's
+  corner at any preset, and a box tighter than its own padding squares off because CSS clamps a
+  negative radius to 0. The child half stays opt-in because CSS cannot tell a flush child (a menu row) from a
+  floating one (an avatar, a `Button`, a `Chip` in a `TagsInput`), which clamping every rounded
+  child would square or shrink.
 
 ### Changed
 
+- **Breaking: `buildStreamdownTheme` is now `buildMarkdownStreamdownTheme`** (`svelai/markdown`).
+  The old name did not carry its owner, which is what kept it outside
+  `tooling/check-semantic-theme-tokens.mjs` when the sweep learned to read theme factories. Same
+  signature, same return value.
+- Markdown prose follows the theme-class rules the rest of the library follows, now that the sweep
+  reaches it: a link no longer dims to `text-primary-readable/80` on hover (it is underlined at
+  `underline-offset-4` and keeps its colour, as `RichTextInput`'s prose links do), the description
+  list spaces on the scale (`space-y-md`, the same 8px), and the inline-citation popover takes
+  `raised-3` from the elevation engine instead of a raw `shadow` beside a hand-drawn border — so it
+  matches the real Popover panel and follows `designTokens.elevation`.
 - **Breaking: `ResponsiveProps<T>` is record-only.** The third form,
   `(breakpoint: Breakpoint) => T`, is gone: the type is now `T | Partial<Record<Breakpoint, T>>`.
   A record is declarative and inspectable, and the five steps it produces cannot disagree the way a
@@ -638,7 +678,7 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
   `duration-*`/`ease-*` and the semantic spacing scale. A test in `merge.test.ts` fails when the
   Tailwind plugin gains a utility family the merge config does not know.
 - Dependencies: removed `add`, `pnpm`, `bits-ui`, `embla-carousel*`, `libphonenumber-js`,
-  `type-fest`, `color2k`, `cnfast`; `zod`, `svelte-mcp` and `@sveltejs/kit` are dev-only.
+  `type-fest`, `color2k`, `cnfast`; `zod` and `svelte-mcp` are dev-only.
 - Sidebar and DataTable column resizing drag through the shared `createPointerDrag` helper
   instead of hand-rolled window listeners, so both capture the pointer and always release it.
 - DocumentViewer: the legacy and OOXML surfaces share one `createDocumentSurfaceViewport` helper
@@ -755,12 +795,89 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
   position.
 - `RichTextInput` toolbar items, link-form draft and suggestion popover state moved to writable
   `$derived`, removing three synchronising effects (one render pass fewer per change).
+- **Breaking: sixteen runtime dependencies are now optional peer dependencies.** `lexical` and the
+  seven `@lexical/*` packages (`RichTextInput`, and the `AIComposer` / `AIChat` that embed it),
+  `@tanstack/charts` with `d3-array`, `d3-force`, `d3-hierarchy`, `d3-sankey`, `d3-scale` and
+  `d3-shape` (`Chart`), and `cobe` (`Globe`). Each is declared
+  optional at a caret range, so an app that never imports those three components installs nothing
+  extra; an app that does installs the row printed in the README, on the component's docs page and
+  in its MCP description. A production-only install of svelai's `dependencies` goes from 38 direct /
+  178 total packages to 21 direct / 149 total. `@tanstack/highlight` and `@tanstack/svelte-virtual`
+  stay runtime dependencies on purpose: `Markdown` renders `Code` and `AIChat` / `AIConversation`
+  render `AIThread`, so making them optional would break the library's most-used components out of
+  the box, and `svelte-streamdown` depends on `@tanstack/highlight` anyway.
+- **Breaking: the theme plugin throws on an option it does not know**, naming the closest known key
+  (`unknown option "prefersdark" (did you mean "prefersDark"?)`) instead of ignoring it. Keys are
+  case-sensitive, and a mis-cased one used to be dropped in silence. The skill doc's full-options
+  example carries a `<!-- prettier-ignore -->`, because Prettier lowercases property names inside a
+  `css` fence and had quietly turned its `prefersDark` and `typeScale` into dead keys.
+- **Breaking: `useTheme()` throws when no `<Theme>` is above the component** —
+  `svelai: <Theme> was not found above this component.` — instead of returning `undefined` and
+  failing later at whichever call site dereferenced it first. Every component requires a `<Theme>`
+  ancestor.
+- Component docs pages and MCP descriptions for `Chart`, `Globe`, `RichTextInput`, `DataTable`,
+  `AIComposer` and `AIChat` carry a "Requires" section with the exact install command. The README
+  and the getting-started page also describe what a missing peer looks like: Vite substitutes a stub
+  module, so the build fails with `[MISSING_EXPORT] … "__vite-optional-peer-dep:<package>:svelai"`
+  rather than one unresolved-import error.
+- The README documents all twelve `<Theme designTokens>` keys, the full `ThemeOptions` plugin table
+  including the five build-time `EngineOptions` scales, and which of build time or runtime wins; it
+  and the getting-started page gained the optional-peers table. The svelai agent skill no longer claims there are no radius, spacing or typography
+  options on the plugin.
+- `*.test-helper.*` files are excluded from the published package alongside `*.test.*` / `*.spec.*`.
+- New `check:readme-tokens` (wired into `npm run check` and the contracts workflow) fails when a
+  `ThemeDesignTokens`, `ThemeOptions` or `EngineOptions` key has no row in the README tables.
+- The soft selected fill is now a translucent tint instead of an opaque colour.
+  `bg-selected-muted` composites `var(--color-selected, var(--color))` at the new
+  `--state-selected-opacity` (0.07 light, 0.10 dark, settable per theme block as
+  `state-selected-opacity`), so a selected row, menu option, tag or pressed toggle reads
+  identically on `surface`, `surface-raised` and `surface-floating`. In dark mode the fill used
+  to be darker than the floating panel it sat on — an open submenu's trigger was invisible.
+  `bg-selected` and the non-state `bg-color-muted` family are unchanged.
+- **Breaking: `designTokens.selectedColor` no longer emits `--color-selected-muted`.** The soft
+  fill is derived from `--color-selected`, so an app overriding `--color-selected-muted` by hand
+  should drop it; the fill and ink still follow `selectedColor` through `--color-selected` and
+  `--color-selected-muted-readable`.
+- A submenu opens in a panel of the same size as the `PopupMenu` that hosts it (PopupMenu
+  publishes its panel `size` through context and the nested PopupMenu reads it), so the parent
+  menu and its submenus share one panel padding and one concentric radius.
+- Menu forwards `size`, `density` and `color` to its submenus. A `size="small"` menu no longer
+  opens a normal-sized submenu beside itself, and `MenuBar`'s `size` now reaches the menu each
+  trigger drops. `Menu` gained `size` and `color` props and reflects all three axes on its root
+  as `data-size` / `data-density` / `data-color`.
+- Menu, select and combobox rows, and segmented-control segments, now cap their corner against the
+  container instead of repeating a fixed one. `MenuOption` takes `rounded-md-concentric`: it keeps
+  the `md` control step, capped by the radius and padding the `Popover` panel publishes at each of
+  its three sizes, so a row can never cut across the panel's corner at any radius preset — inside
+  a `rounded-lg p-md` panel it is `min(8px, 12 − 8)` = 4px. A `SegmentedControl` segment and its
+  sliding indicator used to carry the track's own `rounded-md` outright, so the segment's corner
+  cut across the track's; both now take `rounded-md-concentric` (8px track, `p-xs` →
+  `min(8px, 8 − 4)` = 4px segment). `Markdown`'s citation item takes `rounded-sm-concentric`
+  inside the `rounded-lg p-md` popover (`min(4px, 12 − 8)` = 4px); `AITool`'s section scroll area
+  and `DocumentViewer`'s page thumbnail sit in boxes whose padding exceeds their radius
+  (`rounded-sm p-md` → `min(4px, 4 − 8)`, `rounded-sm p-sm` → `min(4px, 4 − 6)`), so both clamp to
+  0 and render square, which is the concentric answer. Nothing changes at the default radius preset
+  except the segmented control.
 
 ### Removed
 
+- The declared half of the concentric radius: the 30 `nest-radius-{sm|md|lg|xl|2xl}-{micro|xs|sm|md|lg|xl}`
+  utilities, the `--radius-nested` property they published, the merge group that resolved them, and
+  the `tooling/check-semantic-theme-tokens.mjs` rule that required a padded rounded container to
+  carry one (with its `nestedRadiusExceptions` map). The container side is now emitted by
+  `rounded-<step>` and `p` / `px` / `py` themselves, so there is nothing to declare, nothing to
+  keep in sync with the radius and padding beside it, and no pair for a checker to police. Nothing
+  shipped with the declared form, so there is no migration.
+- The stepless child utility `rounded-nested` (with `rounded-t-nested` / `rounded-b-nested`), which
+  took the container's radius minus its padding outright and fell back to `--radius-md` outside
+  one. `rounded-<step>-concentric` replaces it and there is no alias, because the child should stay
+  on the radius ramp rather than be pulled off it by whatever container it lands in. It was never
+  published, so it is simply gone and there is no migration.
 - `TagGroupThemeProps['item']` no longer has a `selected` variant; the selected fill is `Chip`'s
   `selected` prop.
 - `Dialog/Test.svelte`, an unused scratch harness nothing imported.
+- `AGENT.md`, which documented a library called "uy" with a `background` / `foreground` palette the
+  engine does not emit. Nothing in the repository referenced it.
 
 ### Fixed
 
@@ -855,6 +972,38 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
   changed.
 - `NetworkIndicator` binds `ref` straight to the root element instead of mirroring it from an
   internal reference in an effect, so it is populated a tick earlier.
+- The package-consumer check resolved every bare import through the repository's own
+  `node_modules`, because its fixture was created inside the repository — it could not fail the way
+  a consumer's install fails. The fixture now lives outside the repository with only what a consumer
+  installs, and, since `skipLibCheck` hides unresolved imports inside `dist/**/*.d.ts`, the check
+  additionally reads every emitted module and asserts each bare specifier is declared in
+  `dependencies` or `peerDependencies`.
+- `tooling/check-semantic-theme-tokens.mjs` rejected the engine's child radius as an unsupported
+  utility. It now accepts `rounded-<step>-concentric`, `rounded-t-<step>-concentric` and
+  `rounded-b-<step>-concentric` — and only those, so a per-corner spelling or a missing step stays
+  a caught typo rather than a class that compiles to nothing.
+- `tooling/check-semantic-theme-tokens.mjs` read a theme only when it was an object literal, so
+  every class string inside an exported `*Theme` **factory** was invisible to it. The sweep now
+  reaches an exported arrow-function theme as well — which caught, in one file, a raw `shadow`, an
+  off-scale `text-primary-readable/80` and a numeric `space-y-2`, none of which any rule had ever
+  seen.
+- README's plugin-option table was missing `state-selected-opacity`, so `npm run check:readme-tokens`
+  — wired into `npm run check` and the contracts workflow — was red.
+- Toast's duration progress bar hard-coded `rounded-b-lg` while the toast is `rounded-md` at
+  `size="small"` and `rounded-none` as a banner, so its clipped corners disagreed with the toast in
+  two of six configurations. The bar now takes the root's own radius per size, and squares off with
+  the banner. It is the root's radius and not `rounded-b-<step>-concentric`: the bar is pinned to
+  the border box, not inside the padding box, so there is no gap to subtract, while the concentric
+  form would cap against the root's `px-*`/`py-*` anyway.
+- `MenuBar` spread its own `size` before each menu's props, so a `MenuBarMenu` written or spread
+  with an explicit `size: undefined` overwrote it and the dropped menu fell back to
+  `MenuFloating`'s own `normal` default instead of inheriting the bar. The per-menu size is now
+  read as `menu.size ?? size`, which is what "a per-menu size wins" was meant to say.
+- The comment justifying `--state-selected-opacity`'s defaults gave a wrong worked example for dark
+  mode: the engine re-lightens the surface seed to oklab L 0.18, so the base is `#111113`, not the
+  authored `#09090b`, and the tint lands on `#28282a` — 11/255 from the `#1f1f1f` it claimed to
+  reproduce within ~2/255. Both composites are now measured and stated, along with the fact that the
+  light default does reproduce the tint it replaces and the dark one deliberately does not.
 
 ## 0.3.0
 

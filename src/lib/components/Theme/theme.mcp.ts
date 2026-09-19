@@ -63,12 +63,14 @@ Changing the controlled object updates already-rendered Tailwind utilities witho
 - \`focusColor\`, \`selectedColor\`, \`hoverColor\`, \`pressedColor\`: the four \`Colors\` **state
   roles**. They pin, for the whole theme, what a focus ring, a persistent selection and the
   transient hover/pressed layer look like, independently of the role of the control the state
-  lands on. They compile \`--color-focus\`, \`--color-selected\` (plus its \`-muted\`,
-  \`-contrast\`, \`-readable\` and \`-muted-readable\` companions), \`--color-hover\` and
-  \`--color-pressed\` onto the theme selector. None is declared at \`:root\`: every use site
+  lands on. They compile \`--color-focus\`, \`--color-selected\` (plus its \`-contrast\`,
+  \`-readable\` and \`-muted-readable\` companions), \`--color-hover\` and
+  \`--color-pressed\` onto the theme selector. There is no \`--color-selected-muted\`: the soft
+  fill is a translucent tint of \`--color-selected\` at \`--state-selected-opacity\`, so it reads
+  on any surface. None is declared at \`:root\`: every use site
   falls back to the matching current role (\`ring-focus\` is
-  \`var(--color-focus, var(--color))\`, \`bg-selected-muted\` is
-  \`var(--color-selected-muted, var(--color-muted))\`, the state layer is
+  \`var(--color-focus, var(--color))\`, \`bg-selected-muted\` tints
+  \`var(--color-selected, var(--color))\`, the state layer is
   \`var(--color-hover, currentColor)\` and on \`:active\`
   \`var(--color-pressed, var(--color-hover, currentColor))\`), so leaving them unset changes
   nothing and \`data-color\` keeps moving the states with \`--color\`. Theme-level only: there is

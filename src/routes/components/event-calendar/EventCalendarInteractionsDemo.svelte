@@ -7,7 +7,7 @@
 		type EventCalendarItem,
 		type EventCalendarItemsChangePayload,
 		type EventCalendarSlotSelectPayload
-	} from '$lib/components/EventCalendar/index.js';
+	} from 'svelai/event-calendar';
 	import {
 		EVENT_CALENDAR_DEMO_TIME_ZONE,
 		createDemoItems,

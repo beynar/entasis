@@ -268,7 +268,7 @@
 		</button>
 	{/if}
 	{#if toast.opts.progress && toast.timer}
-		<div class={classes.progress()}>
+		<div class={classes.progress({ size: toast.opts.size, banner: isBanner })}>
 			<div class="bg-color h-full" style:width="{progressPercent}%"></div>
 		</div>
 	{/if}

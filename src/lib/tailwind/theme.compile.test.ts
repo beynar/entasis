@@ -115,6 +115,7 @@ describe('theme plugin CSS', () => {
 		const css = await compileThemeCss([
 			'bg-selected',
 			'bg-selected-muted',
+			'bg-color-muted',
 			'text-selected-muted-readable',
 			'text-selected-contrast',
 			'border-selected',
@@ -123,9 +124,22 @@ describe('theme plugin CSS', () => {
 		expect(css).toMatch(
 			/\.bg-selected \{\s*background-color: var\(--color-selected, var\(--color\)\)/
 		);
-		expect(css).toMatch(
-			/\.bg-selected-muted \{\s*background-color: var\(--color-selected-muted, var\(--color-muted\)\)/
+		// The soft fill is the one member of the family that is NOT a plain variable: it
+		// composites the role at `--state-selected-opacity` so the same selection reads on a
+		// raised or floating surface instead of being an opaque tint of the base one. Tailwind
+		// wraps every `color-mix()` in an `@supports` guard, so the declaration is read out of
+		// the rule rather than matched straight after the selector.
+		const rule = (name: string) => css.slice(css.indexOf(`.${name} {`)).split('\n}')[0];
+		expect(rule('bg-selected-muted')).toMatch(
+			/background-color: color-mix\(in oklab, var\(--color-selected, var\(--color\)\) calc\(var\(--state-selected-opacity\) \* 100%\), transparent\);/
 		);
+		// `bg-color-muted`, the non-state family, keeps the opaque tint: it is a surface colour,
+		// not a state on top of one.
+		expect(css).toMatch(/\.bg-color-muted \{\s*background-color: var\(--color-muted\)/);
+		// Both schemes declare the alpha, and dark runs higher — a dark surface needs more ink
+		// to shift the same perceived amount.
+		expect(css).toMatch(/--state-selected-opacity: 0\.07;/);
+		expect(css).toMatch(/--state-selected-opacity: 0\.1;/);
 		expect(css).toMatch(
 			/\.text-selected-muted-readable \{\s*color: var\(--color-selected-muted-readable, var\(--color-muted-readable\)\)/
 		);
@@ -151,6 +165,73 @@ describe('theme plugin CSS', () => {
 			/background-color: var\(--color-pressed, var\(--color-hover, currentColor\)\)/
 		);
 		expect(css).not.toMatch(/--color-hover:|--color-pressed:/);
+	});
+
+	// NESTED RADIUS is computed by the cascade: `rounded-<step>` and `p|px|py-<step>` publish
+	// their value to their children, `rounded-<step>-concentric` reads its own step capped at
+	// parent radius minus parent padding. Compiling both halves proves the variables one side
+	// emits are the ones the other consumes.
+	it('publishes radius and padding to children and reads them back in rounded-<step>-concentric', async () => {
+		const css = await compileThemeCss([
+			'rounded-lg',
+			'rounded-2xl',
+			'p-md',
+			'px-sm',
+			'py-xs',
+			'rounded-md-concentric',
+			'rounded-t-lg-concentric',
+			'rounded-b-sm-concentric'
+		]);
+		// Zero specificity on the publish so the same box's `p-md > *` beats the reset in any order.
+		expect(css).toMatch(
+			/:where\(\.rounded-lg\) > \* \{\s*--radius-parent: var\(--radius-lg\);\s*--pad-parent-x: 0px;\s*--pad-parent-y: 0px;/
+		);
+		expect(css).toMatch(/:where\(\.rounded-2xl\) > \* \{\s*--radius-parent: var\(--radius-2xl\);/);
+		expect(css).toMatch(
+			/\.p-md \{\s*padding: var\(--space-md\);\s*& > \* \{\s*--pad-parent-x: var\(--space-md\);\s*--pad-parent-y: var\(--space-md\);/
+		);
+		expect(css).toMatch(
+			/\.px-sm \{\s*padding-inline: var\(--space-sm\);\s*& > \* \{\s*--pad-parent-x: var\(--space-sm\);/
+		);
+		expect(css).toMatch(
+			/\.py-xs \{\s*padding-block: var\(--space-xs\);\s*& > \* \{\s*--pad-parent-y: var\(--space-xs\);/
+		);
+		const formula = (step: string) =>
+			`min\\(var\\(--radius-${step}\\), calc\\(var\\(--radius-parent, calc\\(infinity \\* 1px\\)\\) - max\\(var\\(--pad-parent-x, 0px\\), var\\(--pad-parent-y, 0px\\)\\)\\)\\)`;
+		expect(css).toMatch(
+			new RegExp(`\\.rounded-md-concentric \\{\\s*border-radius: ${formula('md')};`)
+		);
+		expect(css).toMatch(
+			new RegExp(
+				`\\.rounded-t-lg-concentric \\{\\s*border-top-left-radius: ${formula('lg')};\\s*border-top-right-radius: ${formula('lg')};`
+			)
+		);
+		expect(css).toMatch(
+			new RegExp(
+				`\\.rounded-b-sm-concentric \\{\\s*border-bottom-left-radius: ${formula('sm')};\\s*border-bottom-right-radius: ${formula('sm')};`
+			)
+		);
+		// A concentric box cannot publish its computed radius, so it publishes its nominal step
+		// and closes the padding boundary for its own children, like any rounded box.
+		expect(css).toMatch(
+			/\.rounded-md-concentric \{[^}]*:where\(&\) > \* \{\s*--radius-parent: var\(--radius-md\);\s*--pad-parent-x: 0px;\s*--pad-parent-y: 0px;/
+		);
+		expect(css).not.toMatch(/@property --pad-parent/);
+		// The bare child half is not a class: the step is part of the name.
+		expect(await compileThemeCss(['rounded-concentric', 'rounded-nested'])).not.toMatch(
+			/concentric|nested/
+		);
+		// A pill or square container is a rounded boundary too: its flush children stay pills
+		// or squares instead of inheriting some grandparent's corner.
+		const ends = await compileThemeCss(['rounded-full', 'rounded-none']);
+		expect(ends).toMatch(
+			/:where\(\.rounded-full\) > \* \{\s*--radius-parent: calc\(infinity \* 1px\);\s*--pad-parent-x: 0px;/
+		);
+		expect(ends).toMatch(/:where\(\.rounded-none\) > \* \{\s*--radius-parent: 0px;/);
+		// An arbitrary radius has no step to publish; one-sided padding is not a uniform gap.
+		const stray = await compileThemeCss(['rounded-[3px]', 'pt-md']);
+		expect(stray).not.toMatch(/--radius-parent/);
+		expect(stray).not.toMatch(/--pad-parent-[xy]:/);
 	});
 
 	it('re-declares the geometry tokens next to a scoped --spacing', async () => {

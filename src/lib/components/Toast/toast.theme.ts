@@ -99,11 +99,27 @@ const defaultToastActions = cva({
 	base: 'flex shrink-0 items-center gap-xs'
 });
 
-// Duration progress bar, pinned to the toast's bottom edge. `overflow-hidden` +
-// `rounded-b-lg` clip the inner bar to the toast's corner radius (the root itself
-// can't be clipped — the close icon sits outside it).
+// Duration progress bar, pinned to the toast's bottom edge. `overflow-hidden` clips the inner
+// bar to the toast's corner radius (the root itself can't be clipped — the close icon sits
+// outside it), so the bottom radius has to be the ROOT's own radius at that size, not a nested
+// one: the bar is pinned to the border box, not inside the padding box, so there is no gap to
+// subtract, while `rounded-b-<step>-concentric` would cap against the root's `px-*`/`py-*` anyway
+// and round the bar tighter than the toast it is clipping to.
 const defaultToastProgress = cva({
-	base: 'pointer-events-none absolute inset-x-0 bottom-0 h-1 overflow-hidden rounded-b-lg bg-neutral/15'
+	base: 'pointer-events-none absolute inset-x-0 bottom-0 h-1 overflow-hidden bg-neutral/15',
+	variants: {
+		size: {
+			small: 'rounded-b-md',
+			normal: 'rounded-b-lg',
+			large: 'rounded-b-lg'
+		},
+		// A banner is flush to the screen edge and square, so its progress bar is too.
+		banner: {
+			true: 'rounded-none',
+			false: ''
+		}
+	},
+	defaultVariants: { size: 'normal', banner: false }
 });
 
 const defaultToastSuffix = cva({

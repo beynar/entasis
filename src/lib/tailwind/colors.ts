@@ -424,6 +424,7 @@ type ColorThemeOption = {
 	colorscheme?: 'dark' | 'light';
 	'state-hover-opacity'?: number;
 	'state-pressed-opacity'?: number;
+	'state-selected-opacity'?: number;
 } & ColorTheme;
 
 export const generateBaseColors = (theme: ColorThemeOption) => {
@@ -590,7 +591,21 @@ export const generateColorPalette = (opts: ColorThemeOption) => {
 		...paletteToCssVariables(colorsPalette),
 		...surfaceToCssVariables(surfacePalette),
 		'--state-hover-opacity': String(opts['state-hover-opacity'] ?? (isDark ? 0.16 : 0.05)),
-		'--state-pressed-opacity': String(opts['state-pressed-opacity'] ?? (isDark ? 0.32 : 0.1))
+		'--state-pressed-opacity': String(opts['state-pressed-opacity'] ?? (isDark ? 0.32 : 0.1)),
+		// The SELECTED fill is a translucent tint of the role, not an opaque colour mixed over
+		// the base surface, so it reads the same on `surface`, `surface-raised` and
+		// `surface-floating` instead of going invisible (dark mode) on the lighter two.
+		// Measured over the base surface the engine actually paints — the seed re-lightened to
+		// `surfaceLightness.DEFAULT` (oklab L 0.985 / 0.18), so #fafafa in light but #111113 in
+		// dark, NOT the authored #09090b — against the opaque `-muted` tint this used to paint:
+		//   light  #fafafa + 7%  #18181b -> #eaeaea vs #ebebec   (2/255 apart; dL 0.048 vs 0.045)
+		//   dark   #111113 + 10% #fafafa -> #28282a vs #1f1f1f  (11/255 apart; dL 0.099 vs 0.061)
+		// So light reproduces the tint it replaces and dark deliberately does not. ~0.06 is the
+		// dark alpha that would match to within 2/255, and it inherits that tint's weakness with
+		// it: 0.06 puts only 14/255 between a selected row and the surface behind it. 0.10 is the
+		// weight at which the selection reads on a dark surface. Retune from the perceptual step
+		// (dL from the surface), not from the hex match.
+		'--state-selected-opacity': String(opts['state-selected-opacity'] ?? (isDark ? 0.1 : 0.07))
 	};
 
 	return {

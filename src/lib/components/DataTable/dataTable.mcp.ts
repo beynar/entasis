@@ -2,7 +2,12 @@ export const dataTableDescription = `
 # DataTable
 
 DataTable is the typed, interactive, virtualized table for application data. Its public API is
-Svelai-native; TanStack Table Core remains private. Use Table for static tabular content.
+Svelai-native; TanStack Table Core remains private, but it must be installed as an optional peer
+dependency. Use Table for static tabular content.
+
+## Requires
+
+DataTable builds its row model with TanStack Table Core, which ships with svelai.
 
 ## Basic usage
 

@@ -1,8 +1,9 @@
 import '@testing-library/jest-dom/vitest';
-import { render, screen } from '@testing-library/svelte';
+import { screen } from '@testing-library/svelte';
 import { describe, expect, test } from 'vitest';
 import TabsMountHarness from './TabsMountHarness.test.svelte';
 import type { StepperMount } from '../Stepper/stepper.props.js';
+import { renderInTheme } from '../Theme/renderInTheme.test-helper.js';
 
 const items = ['Overview', 'Timeline', 'Files'];
 
@@ -13,7 +14,7 @@ const mountedLabels = () =>
 		.filter(Boolean);
 
 const renderTabs = (mount?: StepperMount) =>
-	render(TabsMountHarness, { props: { items, value: 'Overview', mount } });
+	renderInTheme(TabsMountHarness, { items, value: 'Overview', mount });
 
 describe('Tabs panel mounting', () => {
 	test('creates only the active panel by default', () => {

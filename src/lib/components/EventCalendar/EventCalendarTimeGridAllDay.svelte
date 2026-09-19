@@ -27,10 +27,11 @@
 	} from './eventCalendar.color.js';
 	import { startOfZonedDay } from './eventCalendar.date.js';
 	import type { EventCalendarAllDayRowInsertion } from './eventCalendar.allDayInsertion.js';
+	import type { EventCalendarAllDayDropTarget } from './eventCalendar.targets.js';
 	import type { EventCalendarLaneLayout } from './eventCalendar.layout.js';
-	import { serializeEventCalendarTarget } from './eventCalendar.interactions.svelte.js';
 	import type { EventCalendarAllDayPayload } from './eventCalendar.props.js';
 	import type { EventCalendarState } from './eventCalendar.state.svelte.js';
+
 	import type { EventCalendarTimeGridDayGeometry } from './eventCalendar.timeGrid.js';
 	import type { EventCalendarDateOnly, EventCalendarSegment } from './eventCalendar.types.js';
 
@@ -70,7 +71,7 @@
 		selectionKey: string | null;
 		registerTimeTarget: (targetKey: string) => (node: HTMLElement) => () => void;
 		handleTargetKeydown: (event: KeyboardEvent, targetKey: string, activate?: boolean) => void;
-		handleAllDayClick: (day: EventCalendarDateOnly, event: MouseEvent, resourceId?: string) => void;
+		handleAllDayClick: (target: EventCalendarAllDayDropTarget, event: MouseEvent) => void;
 		handleItemActivate: (segment: EventCalendarSegment<TItemFields>, event: MouseEvent) => void;
 	} = $props();
 
@@ -99,13 +100,7 @@
 			calendar.selection.slot.allDay &&
 			calendar.selection.slot.start === geometry.day &&
 			calendar.selection.slot.resourceId === geometry.resourceId}
-		{@const dropTarget = {
-			key: `${view}:all-day:${geometry.key}`,
-			view,
-			allDay: true as const,
-			day: geometry.day,
-			resourceId: geometry.resourceId
-		}}
+		{@const dropTarget = geometry.allDayDropTarget}
 		<div
 			role="group"
 			aria-label={columnLabels.get(geometry.key)}
@@ -122,7 +117,6 @@
 			})}
 			style:height={allDayHeight}
 			style:min-width={view === 'resource' ? 'var(--event-calendar-resource-min-width)' : undefined}
-			data-event-calendar-target={serializeEventCalendarTarget(dropTarget)}
 			data-calendar-instance-id={calendar.interaction.instanceId}
 			data-event-calendar-target-key={dropTarget.key}
 			{@attach disabled ? null : calendar.interaction.dropTarget(dropTarget)}
@@ -140,7 +134,7 @@
 				data-drop-disabled={disabled || undefined}
 				class="absolute inset-0 z-0 bg-transparent outline-none"
 				onfocus={() => a11y.handleTimeTargetFocus(targetKey)}
-				onclick={(event) => handleAllDayClick(geometry.day, event, geometry.resourceId)}
+				onclick={(event) => handleAllDayClick(dropTarget, event)}
 				onkeydown={(event) => handleTargetKeydown(event, targetKey, true)}
 				{@attach disabled ? null : registerTimeTarget(targetKey)}
 				{@attach disabled ? null : calendar.interaction.slotDrag(dropTarget)}

@@ -9,6 +9,7 @@
 	import { caretRightIcon } from '../Icons/caretRight.js';
 	import MenuOption from '../MenuOption/MenuOption.svelte';
 	import PopupMenu from '../PopupMenu/PopupMenu.svelte';
+	import { usePopupMenuPanelSize } from '../PopupMenu/popupMenu.context.js';
 	import { usePopoverContext } from '../Popover/popover.state.svelte.js';
 	import type { PopoverState } from '../Popover/popover.state.svelte.js';
 	import Separator from '../Separator/Separator.svelte';
@@ -22,11 +23,15 @@
 		class: className = '',
 		theme,
 		density = 'normal',
+		size = 'normal',
+		color,
 		header,
 		footer,
 		focusOnMount,
 		...attachments
 	}: MenuProps = $props();
+	// The panel size of the PopupMenu this menu sits in, so a submenu opens in the same panel.
+	const panelSize = usePopupMenuPanelSize();
 
 	const id = $props.id();
 	const parentPopover = usePopoverContext();
@@ -124,6 +129,9 @@
 <div
 	class={classes.root({ density, className })}
 	role="menu"
+	data-size={size}
+	data-density={density}
+	data-color={color}
 	{...attachments}
 	{@attach navigation.containerReference}
 >
@@ -133,6 +141,8 @@
 			title={t.back}
 			prefix={arrowLeftIcon}
 			{density}
+			{size}
+			color={color ?? 'neutral'}
 			theme={theme?.option}
 			attrs={{ 'data-menu-keep-open': 'true' }}
 			onclick={() => {
@@ -163,6 +173,8 @@
 			<MenuOption
 				role={optionProps.selected !== undefined ? 'menuitemradio' : 'menuitem'}
 				{density}
+				{size}
+				{...color ? { color } : {}}
 				{...optionProps}
 				theme={theme?.option}
 				onpointerenter={(event) => {
@@ -194,6 +206,7 @@
 			} = submenuItem}
 			<!-- eslint-enable @typescript-eslint/no-unused-vars -->
 			<PopupMenu
+				size={panelSize?.() ?? 'small'}
 				position={submenuPosition}
 				openOnHover={openOnHover && !item.disabled && !isInMobileSheet}
 				{openOnClick}
@@ -208,7 +221,12 @@
 					items: menu,
 					focusOnMount: true,
 					submenuMode: 'popover',
+					// A submenu is the same menu one level down, so every axis the parent was
+					// given rides along: without this a `size="small"` menu opened a
+					// normal-sized submenu beside itself.
 					density,
+					size,
+					...(color ? { color } : {}),
 					theme
 				}}
 			>
@@ -216,6 +234,8 @@
 					<MenuOption
 						role="menuitem"
 						{density}
+						{size}
+						{...color ? { color } : {}}
 						{...itemProps}
 						suffix={suffix ?? caretRightIcon}
 						theme={theme?.submenu}

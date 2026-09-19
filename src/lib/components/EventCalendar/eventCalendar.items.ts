@@ -34,9 +34,6 @@ export type EventCalendarDayBucket<TItemFields extends object> = {
 
 export type EventCalendarItemIndex<TItemFields extends object> = {
 	occurrences: readonly EventCalendarOccurrence<TItemFields>[];
-	foreground: readonly EventCalendarOccurrence<TItemFields>[];
-	background: readonly EventCalendarOccurrence<TItemFields>[];
-	segments: readonly EventCalendarSegment<TItemFields>[];
 	segmentsByDay: ReadonlyMap<EventCalendarDateOnly, EventCalendarDayBucket<TItemFields>>;
 	occurrencesByKey: ReadonlyMap<string, EventCalendarOccurrence<TItemFields>>;
 	getOccurrence(key: string): EventCalendarOccurrence<TItemFields> | null;
@@ -48,44 +45,26 @@ export type CreateEventCalendarItemIndexOptions<TItemFields extends object> = {
 	items: readonly EventCalendarItem<TItemFields>[];
 	range: EventCalendarRange;
 	displayTimeZone: string;
-	visibleDays?: readonly EventCalendarDateOnly[];
 	expandRecurrence?: EventCalendarRecurrenceExpander<TItemFields>;
 };
 
-type RuntimeRecurrenceIdentity = {
-	recurrence?: unknown;
-	recurrenceTimeZone?: unknown;
-	recurringItemId?: unknown;
-	originalStart?: unknown;
-};
-
-type OccurrenceSchedule = {
-	key: string;
-	itemId: string;
-	start: number;
-	end: number;
-	allDay: boolean;
-	isRecurring: boolean;
+export type EventCalendarAdmittedException<TItemFields extends object> = {
+	/** The exception item carrying the overridden placement. */
+	item: EventCalendarItem<TItemFields>;
+	/** The resolved recurring source the exception targets. */
+	source: EventCalendarItem<TItemFields>;
+	/** The validated origin representation matching the source's temporal kind. */
 	originalStart: Date | EventCalendarDateOnly;
-	display: 'auto' | 'background';
-	priority: number;
-};
-
-type SegmentSchedule = {
-	key: string;
+	/** The 'instant:<ms>' | 'day:<d>' encoding used for origin comparison. */
+	canonicalOrigin: string;
+	/** createRecurringOccurrenceKey(source.id, originalStart). */
 	occurrenceKey: string;
-	day: EventCalendarDateOnly;
-	start: number;
-	end: number;
-	isStart: boolean;
-	isEnd: boolean;
-	continuesBefore: boolean;
-	continuesAfter: boolean;
 };
 
-type EventCalendarScheduleProjection = {
-	occurrences: readonly OccurrenceSchedule[];
-	segments: readonly SegmentSchedule[];
+export type EventCalendarAdmittedItems<TItemFields extends object> = {
+	items: readonly EventCalendarItem<TItemFields>[];
+	itemsById: ReadonlyMap<string, EventCalendarItem<TItemFields>>;
+	exceptions: readonly EventCalendarAdmittedException<TItemFields>[];
 };
 
 /**
@@ -96,8 +75,140 @@ export function createEventCalendarItemIndex<TItemFields extends object>(
 	options: CreateEventCalendarItemIndexOptions<TItemFields>
 ): EventCalendarItemIndex<TItemFields> {
 	validateIndexOptions(options);
-	const itemsById = validateItems(options.items, options.expandRecurrence !== undefined);
-	return hydrateIndex(buildSchedule(options, itemsById), itemsById, options.visibleDays);
+	return projectEventCalendarOccurrences(
+		admitEventCalendarItems(options.items, {
+			hasCustomExpander: options.expandRecurrence !== undefined
+		}),
+		{
+			range: options.range,
+			displayTimeZone: options.displayTimeZone,
+			expandRecurrence: options.expandRecurrence
+		}
+	);
+}
+
+/**
+ * Validates the collection and resolves exception links. Admission never expands recurrence and
+ * never touches a range or zone: the per-item field/placement pass covers every item before the
+ * identity pass runs, so errors interleave exactly as they did in the monolithic validator.
+ */
+export function admitEventCalendarItems<TItemFields extends object>(
+	items: readonly EventCalendarItem<TItemFields>[],
+	options: { hasCustomExpander: boolean }
+): EventCalendarAdmittedItems<TItemFields> {
+	if (!Array.isArray(items)) {
+		throw new EventCalendarError('invalid-item', 'items must be an array.');
+	}
+	const itemsById = new Map<string, EventCalendarItem<TItemFields>>();
+	for (const item of items) {
+		if (!item || typeof item !== 'object') {
+			throw new EventCalendarError('invalid-item', 'Every item must be an object.');
+		}
+		if (typeof item.id !== 'string' || item.id.length === 0) {
+			throw new EventCalendarError('invalid-item', 'Every item must have a non-empty string id.');
+		}
+		if (itemsById.has(item.id)) {
+			throw new EventCalendarError('duplicate-item-id', `Duplicate item id: ${item.id}.`, {
+				id: item.id
+			});
+		}
+		if (typeof item.title !== 'string') {
+			throw new EventCalendarError('invalid-item', `Item ${item.id} must have a string title.`, {
+				id: item.id
+			});
+		}
+		validateItemDisplayFields(item);
+		validateItemPlacement(item);
+		itemsById.set(item.id, item);
+	}
+	return {
+		items,
+		itemsById,
+		exceptions: admitExceptionIdentities(items, itemsById, options.hasCustomExpander)
+	};
+}
+
+/**
+ * Projects admitted items into the range-windowed occurrence index. Phase order is fixed:
+ * exception origins are verified against per-exception expansions first, recurring sources expand
+ * over the range skipping verified origins, plain definitions are range-checked, then exceptions
+ * whose current span intersects the range overlay their suppressed originals.
+ */
+export function projectEventCalendarOccurrences<TItemFields extends object>(
+	admitted: EventCalendarAdmittedItems<TItemFields>,
+	options: {
+		range: EventCalendarRange;
+		displayTimeZone: string;
+		expandRecurrence?: EventCalendarRecurrenceExpander<TItemFields>;
+	}
+): EventCalendarItemIndex<TItemFields> {
+	const exceptionOrigins = validateExceptionOrigins(admitted, options);
+	const occurrences: EventCalendarOccurrence<TItemFields>[] = [];
+
+	for (const item of admitted.items) {
+		if (item.recurringItemId !== undefined) continue;
+		if (item.recurrence !== undefined) {
+			for (const expanded of expandEventCalendarRecurrence({
+				item,
+				range: options.range,
+				displayTimeZone: options.displayTimeZone,
+				expandRecurrence: options.expandRecurrence
+			})) {
+				const key = createRecurringOccurrenceKey(item.id, expanded.originalStart);
+				if (exceptionOrigins.has(key)) continue;
+				occurrences.push(createExpandedOccurrence(item, expanded, key, options.displayTimeZone));
+			}
+			continue;
+		}
+		const occurrence = createDefinitionOccurrence(item, options.displayTimeZone);
+		if (occurrenceIntersects(occurrence.start.getTime(), occurrence.end.getTime(), options.range)) {
+			occurrences.push(occurrence);
+		}
+	}
+
+	for (const exception of admitted.exceptions) {
+		const current = createDefinitionOccurrence(exception.item, options.displayTimeZone);
+		if (!occurrenceIntersects(current.start.getTime(), current.end.getTime(), options.range)) {
+			continue;
+		}
+		occurrences.push({
+			...current,
+			key: exception.occurrenceKey,
+			isRecurring: true,
+			originalStart: cloneOrigin(exception.originalStart)
+		});
+	}
+
+	occurrences.sort(compareEventCalendarOccurrences);
+	assertOccurrenceKeysUnique(occurrences);
+	const segmentsByDay = createSegmentsByDay(occurrences, options.displayTimeZone, options.range);
+	const occurrencesByKey = new Map(occurrences.map((occurrence) => [occurrence.key, occurrence]));
+	return {
+		occurrences,
+		segmentsByDay,
+		occurrencesByKey,
+		getOccurrence: (key) => occurrencesByKey.get(key) ?? null,
+		getOccurrences: (range) => {
+			if (!range) return occurrences;
+			assertValidRange(range, 'occurrence query range');
+			return occurrences.filter((occurrence) =>
+				occurrenceIntersects(occurrence.start.getTime(), occurrence.end.getTime(), range)
+			);
+		},
+		getOccurrencesForDay: (day) => {
+			assertDateOnly(day, 'day');
+			const bucket = segmentsByDay.get(day);
+			if (!bucket) return [];
+			const dayOccurrences: EventCalendarOccurrence<TItemFields>[] = [];
+			const keys = new Set<string>();
+			for (const segment of bucket.all) {
+				if (keys.has(segment.occurrence.key)) continue;
+				keys.add(segment.occurrence.key);
+				dayOccurrences.push(segment.occurrence);
+			}
+			return dayOccurrences;
+		}
+	};
 }
 
 export function createRecurringOccurrenceKey(
@@ -167,49 +278,6 @@ function validateIndexOptions<TItemFields extends object>(
 	}
 	assertValidRange(options.range, 'item index range');
 	assertValidTimeZone(options.displayTimeZone);
-	if (options.visibleDays) {
-		if (!Array.isArray(options.visibleDays)) {
-			throw new EventCalendarError('invalid-prop', 'visibleDays must be an array.');
-		}
-		const days = new Set<string>();
-		for (const day of options.visibleDays) {
-			assertDateOnly(day, 'visibleDays');
-			if (days.has(day)) {
-				throw new EventCalendarError('invalid-prop', `visibleDays contains duplicate ${day}.`);
-			}
-			days.add(day);
-		}
-	}
-}
-
-function validateItems<TItemFields extends object>(
-	items: readonly EventCalendarItem<TItemFields>[],
-	hasCustomExpander: boolean
-): ReadonlyMap<string, EventCalendarItem<TItemFields>> {
-	const itemsById = new Map<string, EventCalendarItem<TItemFields>>();
-	for (const item of items) {
-		if (!item || typeof item !== 'object') {
-			throw new EventCalendarError('invalid-item', 'Every item must be an object.');
-		}
-		if (typeof item.id !== 'string' || item.id.length === 0) {
-			throw new EventCalendarError('invalid-item', 'Every item must have a non-empty string id.');
-		}
-		if (itemsById.has(item.id)) {
-			throw new EventCalendarError('duplicate-item-id', `Duplicate item id: ${item.id}.`, {
-				id: item.id
-			});
-		}
-		if (typeof item.title !== 'string') {
-			throw new EventCalendarError('invalid-item', `Item ${item.id} must have a string title.`, {
-				id: item.id
-			});
-		}
-		validateItemDisplayFields(item);
-		validateItemPlacement(item);
-		itemsById.set(item.id, item);
-	}
-	validateItemIdentities(items, itemsById, hasCustomExpander);
-	return itemsById;
 }
 
 function validateItemDisplayFields<TItemFields extends object>(
@@ -313,18 +381,19 @@ function validateItemPlacement<TItemFields extends object>(
 	}
 }
 
-function validateItemIdentities<TItemFields extends object>(
+function admitExceptionIdentities<TItemFields extends object>(
 	items: readonly EventCalendarItem<TItemFields>[],
 	itemsById: ReadonlyMap<string, EventCalendarItem<TItemFields>>,
 	hasCustomExpander: boolean
-): void {
+): EventCalendarAdmittedException<TItemFields>[] {
 	const exceptionOrigins = new Set<string>();
+	const exceptions: EventCalendarAdmittedException<TItemFields>[] = [];
 	for (const item of items) {
 		const identity = item as unknown as RuntimeRecurrenceIdentity;
 		const hasExceptionField =
 			identity.recurringItemId !== undefined || identity.originalStart !== undefined;
 		if (hasExceptionField) {
-			validateExceptionIdentity(item, itemsById, exceptionOrigins);
+			exceptions.push(admitExceptionIdentity(item, itemsById, exceptionOrigins));
 			continue;
 		}
 		if (identity.recurrence !== undefined) {
@@ -349,13 +418,14 @@ function validateItemIdentities<TItemFields extends object>(
 			);
 		}
 	}
+	return exceptions;
 }
 
-function validateExceptionIdentity<TItemFields extends object>(
+function admitExceptionIdentity<TItemFields extends object>(
 	item: EventCalendarItem<TItemFields>,
 	itemsById: ReadonlyMap<string, EventCalendarItem<TItemFields>>,
 	exceptionOrigins: Set<string>
-): void {
+): EventCalendarAdmittedException<TItemFields> {
 	const identity = item as unknown as RuntimeRecurrenceIdentity;
 	if (
 		typeof identity.recurringItemId !== 'string' ||
@@ -403,15 +473,23 @@ function validateExceptionIdentity<TItemFields extends object>(
 	) {
 		throwOriginRepresentationError(item.id, source.id);
 	}
-	const key = createRecurringOccurrenceKey(source.id, item.originalStart);
-	if (exceptionOrigins.has(key)) {
+	const originalStart = item.originalStart as Date | EventCalendarDateOnly;
+	const occurrenceKey = createRecurringOccurrenceKey(source.id, originalStart);
+	if (exceptionOrigins.has(occurrenceKey)) {
 		throw new EventCalendarError(
 			'invalid-recurrence',
 			`Multiple exceptions target the same origin in series ${source.id}.`,
-			{ recurringItemId: source.id, originalStart: canonicalOrigin(item.originalStart) }
+			{ recurringItemId: source.id, originalStart: canonicalOrigin(originalStart) }
 		);
 	}
-	exceptionOrigins.add(key);
+	exceptionOrigins.add(occurrenceKey);
+	return {
+		item,
+		source,
+		originalStart,
+		canonicalOrigin: canonicalOrigin(originalStart),
+		occurrenceKey
+	};
 }
 
 function throwOriginRepresentationError(itemId: string, sourceId: string): never {
@@ -422,77 +500,18 @@ function throwOriginRepresentationError(itemId: string, sourceId: string): never
 	);
 }
 
-function buildSchedule<TItemFields extends object>(
-	options: CreateEventCalendarItemIndexOptions<TItemFields>,
-	itemsById: ReadonlyMap<string, EventCalendarItem<TItemFields>>
-): EventCalendarScheduleProjection {
-	const exceptionOrigins = validateExceptionOrigins(options, itemsById);
-	const occurrences: OccurrenceSchedule[] = [];
-
-	for (const item of options.items) {
-		if (item.recurringItemId !== undefined) continue;
-		if (item.recurrence !== undefined) {
-			for (const expanded of expandEventCalendarRecurrence({
-				item,
-				range: options.range,
-				displayTimeZone: options.displayTimeZone,
-				expandRecurrence: options.expandRecurrence
-			})) {
-				const key = createRecurringOccurrenceKey(item.id, expanded.originalStart);
-				if (exceptionOrigins.has(key)) continue;
-				occurrences.push(
-					createOccurrenceSchedule(item, expanded, key, true, options.displayTimeZone)
-				);
-			}
-			continue;
-		}
-		const occurrence = createDefinitionOccurrence(item, options.displayTimeZone);
-		if (occurrenceIntersects(occurrence.start, occurrence.end, options.range)) {
-			occurrences.push(occurrence);
-		}
-	}
-
-	for (const item of options.items) {
-		if (item.recurringItemId === undefined || item.originalStart === undefined) continue;
-		const source = itemsById.get(item.recurringItemId) as EventCalendarItem<TItemFields>;
-		const reconstructed = reconstructSourceOccurrence(
-			source,
-			item.originalStart,
-			options.displayTimeZone
-		);
-		const current = createDefinitionOccurrence(item, options.displayTimeZone);
-		const isRelevant =
-			occurrenceIntersects(current.start, current.end, options.range) ||
-			occurrenceIntersects(reconstructed.start, reconstructed.end, options.range);
-		if (!isRelevant || !occurrenceIntersects(current.start, current.end, options.range)) continue;
-		occurrences.push({
-			...current,
-			key: createRecurringOccurrenceKey(source.id, item.originalStart),
-			isRecurring: true,
-			originalStart: cloneOrigin(item.originalStart)
-		});
-	}
-
-	occurrences.sort(compareOccurrenceSchedules);
-	assertOccurrenceScheduleKeysUnique(occurrences);
-	const segments = createSegmentSchedules(
-		occurrences,
-		options.displayTimeZone,
-		options.range,
-		null
-	);
-	return { occurrences, segments };
-}
-
 function validateExceptionOrigins<TItemFields extends object>(
-	options: CreateEventCalendarItemIndexOptions<TItemFields>,
-	itemsById: ReadonlyMap<string, EventCalendarItem<TItemFields>>
+	admitted: EventCalendarAdmittedItems<TItemFields>,
+	options: {
+		range: EventCalendarRange;
+		displayTimeZone: string;
+		expandRecurrence?: EventCalendarRecurrenceExpander<TItemFields>;
+	}
 ): ReadonlySet<string> {
 	const origins = new Set<string>();
-	for (const exception of options.items) {
-		if (exception.recurringItemId === undefined || exception.originalStart === undefined) continue;
-		const source = itemsById.get(exception.recurringItemId) as EventCalendarItem<TItemFields>;
-		let reconstructed: OccurrenceSchedule;
+	for (const exception of admitted.exceptions) {
+		const source = exception.source;
+		let reconstructed: { start: number; end: number };
 		try {
 			reconstructed = reconstructSourceOccurrence(
 				source,
@@ -503,9 +522,9 @@ function validateExceptionOrigins<TItemFields extends object>(
 			if (!(error instanceof EventCalendarError)) throw error;
 			throw new EventCalendarError(
 				'invalid-recurrence',
-				`Exception item ${exception.id} has an origin outside its source recurrence domain.`,
+				`Exception item ${exception.item.id} has an origin outside its source recurrence domain.`,
 				{
-					id: exception.id,
+					id: exception.item.id,
 					recurringItemId: source.id,
 					causeCode: error.code,
 					cause: error.message
@@ -519,27 +538,39 @@ function validateExceptionOrigins<TItemFields extends object>(
 			displayTimeZone: options.displayTimeZone,
 			expandRecurrence: options.expandRecurrence
 		});
-		const origin = canonicalOrigin(exception.originalStart);
-		if (!expanded.some((occurrence) => canonicalOrigin(occurrence.originalStart) === origin)) {
+		if (
+			!expanded.some(
+				(occurrence) => canonicalOrigin(occurrence.originalStart) === exception.canonicalOrigin
+			)
+		) {
 			throw new EventCalendarError(
 				'invalid-recurrence',
-				`Exception item ${exception.id} targets an origin absent from series ${source.id}.`,
-				{ id: exception.id, recurringItemId: source.id, originalStart: origin }
+				`Exception item ${exception.item.id} targets an origin absent from series ${source.id}.`,
+				{
+					id: exception.item.id,
+					recurringItemId: source.id,
+					originalStart: exception.canonicalOrigin
+				}
 			);
 		}
-		origins.add(createRecurringOccurrenceKey(source.id, exception.originalStart));
+		origins.add(exception.occurrenceKey);
 	}
 	return origins;
 }
 
-function getOriginVerificationRange(occurrence: OccurrenceSchedule): EventCalendarRange {
+function getOriginVerificationRange(occurrence: {
+	start: number;
+	end: number;
+}): EventCalendarRange {
 	if (occurrence.start === occurrence.end) {
 		return { start: new Date(occurrence.start), end: new Date(occurrence.start + 1) };
 	}
 	return { start: new Date(occurrence.start), end: new Date(occurrence.end) };
 }
 
-function assertOccurrenceScheduleKeysUnique(occurrences: readonly OccurrenceSchedule[]): void {
+function assertOccurrenceKeysUnique<TItemFields extends object>(
+	occurrences: readonly EventCalendarOccurrence<TItemFields>[]
+): void {
 	const keys = new Set<string>();
 	for (const occurrence of occurrences) {
 		if (keys.has(occurrence.key)) {
@@ -553,233 +584,79 @@ function assertOccurrenceScheduleKeysUnique(occurrences: readonly OccurrenceSche
 	}
 }
 
+/** Reconstructs the suppressed original span of an occurrence from its source definition. */
 function reconstructSourceOccurrence<TItemFields extends object>(
 	source: EventCalendarItem<TItemFields>,
 	originalStart: Date | EventCalendarDateOnly,
 	displayTimeZone: string
-): OccurrenceSchedule {
+): { start: number; end: number } {
 	if (source.allDay === true) {
 		const duration = civilDayDifference(source.start, source.end);
 		const start = originalStart as EventCalendarDateOnly;
 		const end = addCivilDays(start, duration);
-		return createOccurrenceSchedule(
-			source,
-			{ allDay: true, start, end, originalStart: start },
-			createRecurringOccurrenceKey(source.id, start),
-			true,
-			displayTimeZone
-		);
+		return {
+			start: startOfZonedDay(start, displayTimeZone).getTime(),
+			end: startOfZonedDay(end, displayTimeZone).getTime()
+		};
 	}
 	const start = originalStart as Date;
-	return createOccurrenceSchedule(
-		source,
-		{
-			allDay: false,
-			start,
-			end: new Date(start.getTime() + source.end.getTime() - source.start.getTime()),
-			originalStart: start
-		},
-		createRecurringOccurrenceKey(source.id, start),
-		true,
-		displayTimeZone
-	);
+	return {
+		start: start.getTime(),
+		end: start.getTime() + source.end.getTime() - source.start.getTime()
+	};
 }
 
 function createDefinitionOccurrence<TItemFields extends object>(
 	item: EventCalendarItem<TItemFields>,
 	displayTimeZone: string
-): OccurrenceSchedule {
+): EventCalendarOccurrence<TItemFields> {
 	if (item.allDay === true) {
 		return {
 			key: item.id,
-			itemId: item.id,
-			start: startOfZonedDay(item.start, displayTimeZone).getTime(),
-			end: startOfZonedDay(item.end, displayTimeZone).getTime(),
+			item,
+			start: startOfZonedDay(item.start, displayTimeZone),
+			end: startOfZonedDay(item.end, displayTimeZone),
 			allDay: true,
 			isRecurring: item.recurringItemId !== undefined,
-			originalStart: cloneOrigin(item.originalStart ?? item.start),
-			display: item.display ?? 'auto',
-			priority: item.priority ?? 0
+			originalStart: cloneOrigin(item.originalStart ?? item.start)
 		};
 	}
 	return {
 		key: item.id,
-		itemId: item.id,
-		start: item.start.getTime(),
-		end: item.end.getTime(),
+		item,
+		start: new Date(item.start.getTime()),
+		end: new Date(item.end.getTime()),
 		allDay: false,
 		isRecurring: item.recurringItemId !== undefined,
-		originalStart: cloneOrigin(item.originalStart ?? item.start),
-		display: item.display ?? 'auto',
-		priority: item.priority ?? 0
+		originalStart: cloneOrigin(item.originalStart ?? item.start)
 	};
 }
 
-function createOccurrenceSchedule<TItemFields extends object>(
+function createExpandedOccurrence<TItemFields extends object>(
 	item: EventCalendarItem<TItemFields>,
 	expanded: EventCalendarExpandedOccurrence,
 	key: string,
-	isRecurring: boolean,
 	displayTimeZone: string
-): OccurrenceSchedule {
+): EventCalendarOccurrence<TItemFields> {
 	return {
 		key,
-		itemId: item.id,
-		start: expanded.allDay
-			? startOfZonedDay(expanded.start, displayTimeZone).getTime()
-			: expanded.start.getTime(),
-		end: expanded.allDay
-			? startOfZonedDay(expanded.end, displayTimeZone).getTime()
-			: expanded.end.getTime(),
-		allDay: expanded.allDay,
-		isRecurring,
-		originalStart: cloneOrigin(expanded.originalStart),
-		display: item.display ?? 'auto',
-		priority: item.priority ?? 0
-	};
-}
-
-function createSegmentSchedules(
-	occurrences: readonly OccurrenceSchedule[],
-	displayTimeZone: string,
-	range: EventCalendarRange,
-	visibleDays: ReadonlySet<EventCalendarDateOnly> | null
-): readonly SegmentSchedule[] {
-	const segments: SegmentSchedule[] = [];
-	for (const occurrence of occurrences) {
-		const projectedStart = Math.max(occurrence.start, range.start.getTime());
-		const projectedEnd = Math.min(occurrence.end, range.end.getTime());
-		const startDay = getZonedDay(new Date(projectedStart), displayTimeZone);
-		const finalDay = getFinalOccurrenceDay(
-			{ ...occurrence, start: projectedStart, end: projectedEnd },
-			displayTimeZone
-		);
-		let segmentIndex = 0;
-		for (let day = startDay; day <= finalDay; day = addCivilDays(day, 1)) {
-			const dayStart = startOfZonedDay(day, displayTimeZone).getTime();
-			const dayEnd = startOfZonedDay(addCivilDays(day, 1), displayTimeZone).getTime();
-			const start = Math.max(occurrence.start, dayStart);
-			const end = Math.min(occurrence.end, dayEnd);
-			if (visibleDays === null || visibleDays.has(day)) {
-				segments.push({
-					key: createEventCalendarSegmentKey(occurrence.key, day, segmentIndex),
-					occurrenceKey: occurrence.key,
-					day,
-					start,
-					end,
-					isStart: occurrence.start >= dayStart,
-					isEnd: occurrence.end <= dayEnd,
-					continuesBefore: occurrence.start < dayStart,
-					continuesAfter: occurrence.end > dayEnd
-				});
-			}
-			segmentIndex += 1;
-		}
-	}
-	return segments;
-}
-
-function getFinalOccurrenceDay(
-	occurrence: OccurrenceSchedule,
-	displayTimeZone: string
-): EventCalendarDateOnly {
-	if (occurrence.start === occurrence.end) {
-		return getZonedDay(new Date(occurrence.start), displayTimeZone);
-	}
-	return getZonedDay(new Date(occurrence.end - 1), displayTimeZone);
-}
-
-function hydrateIndex<TItemFields extends object>(
-	schedule: EventCalendarScheduleProjection,
-	itemsById: ReadonlyMap<string, EventCalendarItem<TItemFields>>,
-	visibleDays: readonly EventCalendarDateOnly[] | undefined
-): EventCalendarItemIndex<TItemFields> {
-	const occurrences = schedule.occurrences.map((occurrence) =>
-		hydrateOccurrence(occurrence, itemsById)
-	);
-	const occurrencesByKey = new Map(occurrences.map((occurrence) => [occurrence.key, occurrence]));
-	const semanticSegments = schedule.segments.map((segment) => {
-		const occurrence = occurrencesByKey.get(segment.occurrenceKey);
-		if (!occurrence) {
-			throw new EventCalendarError('invalid-item', 'A segment references a missing occurrence.', {
-				occurrenceKey: segment.occurrenceKey
-			});
-		}
-		return {
-			key: segment.key,
-			occurrence,
-			day: segment.day,
-			start: new Date(segment.start),
-			end: new Date(segment.end),
-			isStart: segment.isStart,
-			isEnd: segment.isEnd,
-			continuesBefore: segment.continuesBefore,
-			continuesAfter: segment.continuesAfter
-		};
-	});
-	const visibleDaySet = visibleDays ? new Set(visibleDays) : null;
-	const segments = visibleDaySet
-		? semanticSegments.filter((segment) => visibleDaySet.has(segment.day))
-		: semanticSegments;
-	const segmentsByDay = bucketSegments(segments);
-	const semanticSegmentsByDay = bucketSegments(semanticSegments);
-	const foreground = occurrences.filter((occurrence) => occurrence.item.display !== 'background');
-	const background = occurrences.filter((occurrence) => occurrence.item.display === 'background');
-	return {
-		occurrences,
-		foreground,
-		background,
-		segments,
-		segmentsByDay,
-		occurrencesByKey,
-		getOccurrence: (key) => occurrencesByKey.get(key) ?? null,
-		getOccurrences: (range) => {
-			if (!range) return occurrences;
-			assertValidRange(range, 'occurrence query range');
-			return occurrences.filter((occurrence) =>
-				occurrenceIntersects(occurrence.start.getTime(), occurrence.end.getTime(), range)
-			);
-		},
-		getOccurrencesForDay: (day) => {
-			assertDateOnly(day, 'day');
-			const bucket = semanticSegmentsByDay.get(day);
-			if (!bucket) return [];
-			const dayOccurrences: EventCalendarOccurrence<TItemFields>[] = [];
-			const keys = new Set<string>();
-			for (const segment of bucket.all) {
-				if (keys.has(segment.occurrence.key)) continue;
-				keys.add(segment.occurrence.key);
-				dayOccurrences.push(segment.occurrence);
-			}
-			return dayOccurrences;
-		}
-	};
-}
-
-function hydrateOccurrence<TItemFields extends object>(
-	schedule: OccurrenceSchedule,
-	itemsById: ReadonlyMap<string, EventCalendarItem<TItemFields>>
-): EventCalendarOccurrence<TItemFields> {
-	const item = itemsById.get(schedule.itemId);
-	if (!item) {
-		throw new EventCalendarError(
-			'invalid-item',
-			`Occurrence references missing item ${schedule.itemId}.`
-		);
-	}
-	return {
-		key: schedule.key,
 		item,
-		start: new Date(schedule.start),
-		end: new Date(schedule.end),
-		allDay: schedule.allDay,
-		isRecurring: schedule.isRecurring,
-		originalStart: cloneOrigin(schedule.originalStart)
+		start: expanded.allDay
+			? startOfZonedDay(expanded.start, displayTimeZone)
+			: new Date(expanded.start.getTime()),
+		end: expanded.allDay
+			? startOfZonedDay(expanded.end, displayTimeZone)
+			: new Date(expanded.end.getTime()),
+		allDay: expanded.allDay,
+		isRecurring: true,
+		originalStart: cloneOrigin(expanded.originalStart)
 	};
 }
 
-function bucketSegments<TItemFields extends object>(
-	segments: readonly EventCalendarSegment<TItemFields>[]
+function createSegmentsByDay<TItemFields extends object>(
+	occurrences: readonly EventCalendarOccurrence<TItemFields>[],
+	displayTimeZone: string,
+	range: EventCalendarRange
 ): ReadonlyMap<EventCalendarDateOnly, EventCalendarDayBucket<TItemFields>> {
 	type MutableBucket = {
 		all: EventCalendarSegment<TItemFields>[];
@@ -789,17 +666,45 @@ function bucketSegments<TItemFields extends object>(
 		timed: EventCalendarSegment<TItemFields>[];
 	};
 	const buckets = new Map<EventCalendarDateOnly, MutableBucket>();
-	for (const segment of segments) {
-		let bucket = buckets.get(segment.day);
-		if (!bucket) {
-			bucket = { all: [], foreground: [], background: [], allDay: [], timed: [] };
-			buckets.set(segment.day, bucket);
+	for (const occurrence of occurrences) {
+		const occurrenceStart = occurrence.start.getTime();
+		const occurrenceEnd = occurrence.end.getTime();
+		const projectedStart = Math.max(occurrenceStart, range.start.getTime());
+		const projectedEnd = Math.min(occurrenceEnd, range.end.getTime());
+		const startDay = getZonedDay(new Date(projectedStart), displayTimeZone);
+		const finalDay =
+			projectedStart === projectedEnd
+				? getZonedDay(new Date(projectedStart), displayTimeZone)
+				: getZonedDay(new Date(projectedEnd - 1), displayTimeZone);
+		let segmentIndex = 0;
+		for (let day = startDay; day <= finalDay; day = addCivilDays(day, 1)) {
+			const dayStart = startOfZonedDay(day, displayTimeZone).getTime();
+			const dayEnd = startOfZonedDay(addCivilDays(day, 1), displayTimeZone).getTime();
+			const start = Math.max(occurrenceStart, dayStart);
+			const end = Math.min(occurrenceEnd, dayEnd);
+			const segment: EventCalendarSegment<TItemFields> = {
+				key: createEventCalendarSegmentKey(occurrence.key, day, segmentIndex),
+				occurrence,
+				day,
+				start: new Date(start),
+				end: new Date(end),
+				isStart: occurrenceStart >= dayStart,
+				isEnd: occurrenceEnd <= dayEnd,
+				continuesBefore: occurrenceStart < dayStart,
+				continuesAfter: occurrenceEnd > dayEnd
+			};
+			segmentIndex += 1;
+			let bucket = buckets.get(day);
+			if (!bucket) {
+				bucket = { all: [], foreground: [], background: [], allDay: [], timed: [] };
+				buckets.set(day, bucket);
+			}
+			bucket.all.push(segment);
+			if (occurrence.item.display === 'background') bucket.background.push(segment);
+			else bucket.foreground.push(segment);
+			if (occurrence.allDay) bucket.allDay.push(segment);
+			else bucket.timed.push(segment);
 		}
-		bucket.all.push(segment);
-		if (segment.occurrence.item.display === 'background') bucket.background.push(segment);
-		else bucket.foreground.push(segment);
-		if (segment.occurrence.allDay) bucket.allDay.push(segment);
-		else bucket.timed.push(segment);
 	}
 	return buckets;
 }
@@ -807,19 +712,6 @@ function bucketSegments<TItemFields extends object>(
 function occurrenceIntersects(start: number, end: number, range: EventCalendarRange): boolean {
 	if (start === end) return start >= range.start.getTime() && start < range.end.getTime();
 	return start < range.end.getTime() && range.start.getTime() < end;
-}
-
-function compareOccurrenceSchedules(left: OccurrenceSchedule, right: OccurrenceSchedule): number {
-	return compareEventCalendarScheduleValues(
-		left.start,
-		left.end,
-		left.priority,
-		left.key,
-		right.start,
-		right.end,
-		right.priority,
-		right.key
-	);
 }
 
 export function compareEventCalendarScheduleValues(
@@ -903,3 +795,10 @@ function civilSerial(day: EventCalendarDateOnly): number {
 		dayOfYear
 	);
 }
+
+type RuntimeRecurrenceIdentity = {
+	recurrence?: unknown;
+	recurrenceTimeZone?: unknown;
+	recurringItemId?: unknown;
+	originalStart?: unknown;
+};

@@ -31,9 +31,11 @@ import {
 } from './eventCalendar.interactions.svelte.js';
 import { EventCalendarMutations } from './eventCalendar.mutations.svelte.js';
 import {
+	admitEventCalendarItems,
 	createEventCalendarItemIndex,
 	createRecurringOccurrenceKey,
 	decodeRecurringOccurrenceKey,
+	projectEventCalendarOccurrences,
 	type EventCalendarItemIndex
 } from './eventCalendar.items.js';
 import type {
@@ -248,20 +250,57 @@ export class EventCalendarState<
 		items: this.items,
 		resources: this.resources
 	}));
-	readonly model: EventCalendarModel<TItemFields, TResourceFields> = $derived.by(() => {
-		const dateProfile = this.createProfile(this.view, this.date, this.dayCount);
-		return {
-			dateProfile,
-			resourceModel: createEventCalendarResourceModel(this.resources),
-			itemIndex: createEventCalendarItemIndex({
-				items: this.items,
-				range: dateProfile.activeRange,
-				displayTimeZone: this.timeZone,
-				visibleDays: dateProfile.visibleDays,
-				expandRecurrence: this.expandRecurrence
-			})
-		};
+	readonly resourceModel: EventCalendarResourceModel<TResourceFields> = $derived(
+		createEventCalendarResourceModel(this.resources)
+	);
+	/**
+	 * Validate the requested profile before resource admission. Reconciliation is kept in this
+	 * preflight so hidden-day and valid-range anchors retain the staged schedule behavior.
+	 */
+	private readonly profileAdmission = $derived.by(() => {
+		const view = this.view;
+		const date = this.reconcileDateFor(this.date, view);
+		return this.createProfile(view, date, this.dayCount);
 	});
+	/**
+	 * The admitted schedule: the view and anchor the calendar is allowed to project, reconciled
+	 * against enabled views, hidden weekdays, and validRange before any profile is built.
+	 */
+	private readonly schedule = $derived.by(() => {
+		const profile = this.profileAdmission;
+		const enabledViews = getEnabledViews(
+			this.views,
+			this.resourceModel.structure.leaves.length > 0
+		);
+		const view = enabledViews.includes(this.view) ? this.view : enabledViews[0];
+		const date = view === profile.view ? profile.date : this.reconcileDateFor(this.date, view);
+		return { view, date };
+	});
+	readonly dateProfile: EventCalendarDateProfile = $derived.by(() => {
+		const profile = this.profileAdmission;
+		const schedule = this.schedule;
+		if (schedule.view === profile.view && schedule.date.getTime() === profile.date.getTime()) {
+			return profile;
+		}
+		return this.createProfile(schedule.view, schedule.date, this.dayCount);
+	});
+	private readonly admittedItems = $derived(
+		admitEventCalendarItems(this.items, {
+			hasCustomExpander: this.expandRecurrence !== undefined
+		})
+	);
+	readonly itemIndex: EventCalendarItemIndex<TItemFields> = $derived(
+		projectEventCalendarOccurrences(this.admittedItems, {
+			range: this.dateProfile.activeRange,
+			displayTimeZone: this.timeZone,
+			expandRecurrence: this.expandRecurrence
+		})
+	);
+	readonly model: EventCalendarModel<TItemFields, TResourceFields> = $derived.by(() => ({
+		dateProfile: this.dateProfile,
+		resourceModel: this.resourceModel,
+		itemIndex: this.itemIndex
+	}));
 	readonly snapshot: EventCalendarSnapshot<TItemFields, TResourceFields> = $derived.by(() => ({
 		items: this.items,
 		resources: this.resources,
@@ -281,18 +320,6 @@ export class EventCalendarState<
 
 	get enabledViews(): readonly EventCalendarView[] {
 		return getEnabledViews(this.views, this.resourceModel.structure.leaves.length > 0);
-	}
-
-	get resourceModel(): EventCalendarResourceModel<TResourceFields> {
-		return this.model.resourceModel;
-	}
-
-	get dateProfile(): EventCalendarDateProfile {
-		return this.model.dateProfile;
-	}
-
-	get itemIndex(): EventCalendarItemIndex<TItemFields> {
-		return this.model.itemIndex;
 	}
 
 	isModelBoundaryCurrent(boundary: EventCalendarModelBoundary<TItemFields>): boolean {
@@ -406,7 +433,6 @@ export class EventCalendarState<
 			items,
 			range: profile.activeRange,
 			displayTimeZone: this.timeZone,
-			visibleDays: profile.visibleDays,
 			expandRecurrence: this.expandRecurrence
 		}).occurrences;
 	}
@@ -584,14 +610,6 @@ export class EventCalendarState<
 		if (didDateChange) this.eventHandlers.onDateChange?.(new Date(nextDate));
 	}
 
-	setDayCount(dayCount: number): void {
-		assertPositiveInteger(dayCount, 'dayCount');
-		if (this.dayCount === dayCount) return;
-		this.createProfile(this.view, this.date, dayCount);
-		this.dayCount = dayCount;
-		this.eventHandlers.onDayCountChange?.(dayCount);
-	}
-
 	select(selection: EventCalendarSelection): void {
 		if (this.disabled) return;
 		validateSelection(selection);
@@ -739,14 +757,12 @@ export class EventCalendarState<
 
 	private synchronize(
 		notify: boolean,
+		// Passed pre-evaluated so configuration and selection errors surface before reconcile
+		// touches the schedule; the sync effect tracks its dependencies through this argument.
 		projection: EventCalendarModel<TItemFields, TResourceFields>
 	): void {
-		const enabledViews = getEnabledViews(
-			this.views,
-			projection.resourceModel.structure.leaves.length > 0
-		);
-		const nextView = enabledViews.includes(this.view) ? this.view : enabledViews[0];
-		const nextDate = this.reconcileDateFor(this.date, nextView);
+		void projection;
+		const { view: nextView, date: nextDate } = this.schedule;
 		this.createProfile(nextView, nextDate, this.dayCount);
 		const didViewChange = nextView !== this.view;
 		const didDateChange = nextDate.getTime() !== this.date.getTime();

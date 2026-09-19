@@ -23,27 +23,6 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.8.0
         version: 1.8.0
-      '@lexical/history':
-        specifier: ^0.50.0
-        version: 0.50.0(typescript@6.0.3)
-      '@lexical/link':
-        specifier: ^0.50.0
-        version: 0.50.0(typescript@6.0.3)
-      '@lexical/list':
-        specifier: ^0.50.0
-        version: 0.50.0(typescript@6.0.3)
-      '@lexical/markdown':
-        specifier: ^0.50.0
-        version: 0.50.0(typescript@6.0.3)
-      '@lexical/rich-text':
-        specifier: ^0.50.0
-        version: 0.50.0(typescript@6.0.3)
-      '@lexical/selection':
-        specifier: ^0.50.0
-        version: 0.50.0(typescript@6.0.3)
-      '@lexical/utils':
-        specifier: ^0.50.0
-        version: 0.50.0(typescript@6.0.3)
       '@maskito/core':
         specifier: ^5.4.0
         version: 5.4.0
@@ -56,9 +35,6 @@ importers:
       '@pierre/trees':
         specifier: 1.0.0-beta.6
         version: 1.0.0-beta.6(@pierre/theme@2.0.0)(@shikijs/themes@4.4.3)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(shiki@4.4.3)
-      '@tanstack/charts':
-        specifier: 0.18.0
-        version: 0.18.0(preact@11.0.0-beta.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(svelte@5.57.0(@typescript-eslint/types@8.70.0))
       '@tanstack/highlight':
         specifier: 0.1.0
         version: 0.1.0
@@ -71,39 +47,15 @@ importers:
       cn:
         specifier: 0.3.0
         version: 0.3.0
-      cobe:
-        specifier: ^2.0.1
-        version: 2.0.1
       colorizr:
         specifier: ^5.1.1
         version: 5.1.1
-      d3-array:
-        specifier: 3.2.4
-        version: 3.2.4
-      d3-force:
-        specifier: 3.0.0
-        version: 3.0.0
-      d3-hierarchy:
-        specifier: 3.1.2
-        version: 3.1.2
-      d3-sankey:
-        specifier: 0.12.3
-        version: 0.12.3
-      d3-scale:
-        specifier: 4.0.2
-        version: 4.0.2
-      d3-shape:
-        specifier: 3.2.0
-        version: 3.2.0
       esm-env:
         specifier: ^1.2.2
         version: 1.2.2
       file-selector:
         specifier: ^5.0.1
         version: 5.0.1
-      lexical:
-        specifier: ^0.50.0
-        version: 0.50.0(typescript@6.0.3)
       lightgallery:
         specifier: ^2.9.0
         version: 2.9.0
@@ -132,6 +84,27 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))
+      '@lexical/history':
+        specifier: ^0.50.0
+        version: 0.50.0(typescript@6.0.3)
+      '@lexical/link':
+        specifier: ^0.50.0
+        version: 0.50.0(typescript@6.0.3)
+      '@lexical/list':
+        specifier: ^0.50.0
+        version: 0.50.0(typescript@6.0.3)
+      '@lexical/markdown':
+        specifier: ^0.50.0
+        version: 0.50.0(typescript@6.0.3)
+      '@lexical/rich-text':
+        specifier: ^0.50.0
+        version: 0.50.0(typescript@6.0.3)
+      '@lexical/selection':
+        specifier: ^0.50.0
+        version: 0.50.0(typescript@6.0.3)
+      '@lexical/utils':
+        specifier: ^0.50.0
+        version: 0.50.0(typescript@6.0.3)
       '@playwright/test':
         specifier: ^1.63.0
         version: 1.63.0
@@ -156,6 +129,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.3.0(esbuild@0.28.1)(jiti@2.7.0))
+      '@tanstack/charts':
+        specifier: 0.18.0
+        version: 0.18.0(preact@11.0.0-beta.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(svelte@5.57.0(@typescript-eslint/types@8.70.0))
       '@testing-library/jest-dom':
         specifier: ^7.0.1
         version: 7.0.1(@testing-library/dom@10.4.1)(vitest@5.0.0(jsdom@30.0.1)(vite@8.3.0(esbuild@0.28.1)(jiti@2.7.0)))
@@ -180,6 +156,27 @@ importers:
       '@types/d3-shape':
         specifier: 3.2.0
         version: 3.2.0
+      cobe:
+        specifier: ^2.0.1
+        version: 2.0.1
+      d3-array:
+        specifier: 3.2.4
+        version: 3.2.4
+      d3-force:
+        specifier: 3.0.0
+        version: 3.0.0
+      d3-hierarchy:
+        specifier: 3.1.2
+        version: 3.1.2
+      d3-sankey:
+        specifier: 0.12.3
+        version: 0.12.3
+      d3-scale:
+        specifier: 4.0.2
+        version: 4.0.2
+      d3-shape:
+        specifier: 3.2.0
+        version: 3.2.0
       eslint:
         specifier: ^10.10.0
         version: 10.10.0(jiti@2.7.0)(supports-color@10.2.2)
@@ -195,6 +192,9 @@ importers:
       jsdom:
         specifier: ^30.0.1
         version: 30.0.1
+      lexical:
+        specifier: ^0.50.0
+        version: 0.50.0(typescript@6.0.3)
       prettier:
         specifier: ^3.9.6
         version: 3.9.6

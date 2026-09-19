@@ -1,0 +1,773 @@
+- generic [ref=e6]:
+  - generic [ref=e7]:
+    - generic [ref=e9]:
+      - button "Svelai Components" [ref=e11]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: Svelai
+          - generic [ref=e17]: Components
+      - navigation "Sidebar navigation" [ref=e18]:
+        - generic [ref=e19]:
+          - generic [ref=e20]: Getting Started
+          - list [ref=e22]:
+            - listitem [ref=e23]:
+              - link "Theme & setup" [ref=e25] [cursor=pointer]:
+                - /url: /docs
+            - listitem [ref=e27]:
+              - link "Conventions" [ref=e29] [cursor=pointer]:
+                - /url: /docs/conventions
+            - listitem [ref=e31]:
+              - link "Color system" [ref=e33] [cursor=pointer]:
+                - /url: /docs/colors
+            - listitem [ref=e35]:
+              - link "Tokens" [ref=e37] [cursor=pointer]:
+                - /url: /docs/tokens
+            - listitem [ref=e39]:
+              - link "Motion" [ref=e41] [cursor=pointer]:
+                - /url: /docs/motion
+            - listitem [ref=e43]:
+              - link "Consistency rules" [ref=e45] [cursor=pointer]:
+                - /url: /docs/consistency
+            - listitem [ref=e47]:
+              - link "Theme transitions" [ref=e49] [cursor=pointer]:
+                - /url: /docs/theme-transitions
+            - listitem [ref=e51]:
+              - link "Internationalization" [ref=e53] [cursor=pointer]:
+                - /url: /docs/i18n
+            - listitem [ref=e55]:
+              - link "Stress test" [ref=e57] [cursor=pointer]:
+                - /url: /stress
+        - generic [ref=e59]:
+          - generic [ref=e60]: AI
+          - list [ref=e62]:
+            - listitem [ref=e63]:
+              - link "Conversation" [ref=e65] [cursor=pointer]:
+                - /url: /components/ai-conversation
+            - listitem [ref=e67]:
+              - link "Ask user question" [ref=e69] [cursor=pointer]:
+                - /url: /components/ai-ask-user-question
+            - listitem [ref=e71]:
+              - link "Chat" [ref=e73] [cursor=pointer]:
+                - /url: /components/ai-chat
+            - listitem [ref=e75]:
+              - link "Context" [ref=e77] [cursor=pointer]:
+                - /url: /components/ai-context
+            - listitem [ref=e79]:
+              - link "Thread" [ref=e81] [cursor=pointer]:
+                - /url: /components/ai-thread
+            - listitem [ref=e83]:
+              - link "Thread TOC" [ref=e85] [cursor=pointer]:
+                - /url: /components/ai-thread-toc
+            - listitem [ref=e87]:
+              - link "Message" [ref=e89] [cursor=pointer]:
+                - /url: /components/ai-message
+            - listitem [ref=e91]:
+              - link "Message actions" [ref=e93] [cursor=pointer]:
+                - /url: /components/ai-message-actions
+            - listitem [ref=e95]:
+              - link "Marker" [ref=e97] [cursor=pointer]:
+                - /url: /components/ai-marker
+            - listitem [ref=e99]:
+              - link "Model selector" [ref=e101] [cursor=pointer]:
+                - /url: /components/ai-model-selector
+            - listitem [ref=e103]:
+              - link "Composer" [ref=e105] [cursor=pointer]:
+                - /url: /components/ai-composer
+            - listitem [ref=e107]:
+              - link "Reasoning" [ref=e109] [cursor=pointer]:
+                - /url: /components/ai-reasoning
+            - listitem [ref=e111]:
+              - link "Suggestion" [ref=e113] [cursor=pointer]:
+                - /url: /components/ai-suggestion
+            - listitem [ref=e115]:
+              - link "Tool" [ref=e117] [cursor=pointer]:
+                - /url: /components/ai-tool
+        - generic [ref=e119]:
+          - generic [ref=e120]: Layout
+          - list [ref=e122]:
+            - listitem [ref=e123]:
+              - link "Aspect ratio" [ref=e125] [cursor=pointer]:
+                - /url: /components/aspect-ratio
+            - listitem [ref=e127]:
+              - link "Card" [ref=e129] [cursor=pointer]:
+                - /url: /components/card
+            - listitem [ref=e131]:
+              - link "Grid" [ref=e133] [cursor=pointer]:
+                - /url: /components/grid
+            - listitem [ref=e135]:
+              - link "Grid span" [ref=e137] [cursor=pointer]:
+                - /url: /components/grid-span
+            - listitem [ref=e139]:
+              - link "Heading" [ref=e141] [cursor=pointer]:
+                - /url: /components/heading
+            - listitem [ref=e143]:
+              - link "Resizable" [ref=e145] [cursor=pointer]:
+                - /url: /components/resizable
+            - listitem [ref=e147]:
+              - link "Scroll area" [ref=e149] [cursor=pointer]:
+                - /url: /components/scroll-area
+            - listitem [ref=e151]:
+              - link "Separator" [ref=e153] [cursor=pointer]:
+                - /url: /components/separator
+            - listitem [ref=e155]:
+              - link "Stack" [ref=e157] [cursor=pointer]:
+                - /url: /components/stack
+        - generic [ref=e159]:
+          - generic [ref=e160]: Shells
+          - list [ref=e162]:
+            - listitem [ref=e163]:
+              - link "App shell" [ref=e165] [cursor=pointer]:
+                - /url: /components/app-shell
+            - listitem [ref=e167]:
+              - link "Page shell" [ref=e169] [cursor=pointer]:
+                - /url: /components/page-shell
+            - listitem [ref=e171]:
+              - link "Sidebar" [ref=e173] [cursor=pointer]:
+                - /url: /components/sidebar
+        - generic [ref=e175]:
+          - generic [ref=e176]: Actions
+          - list [ref=e178]:
+            - listitem [ref=e179]:
+              - link "Button" [ref=e181] [cursor=pointer]:
+                - /url: /components/button
+            - listitem [ref=e183]:
+              - link "Button group" [ref=e185] [cursor=pointer]:
+                - /url: /components/button-group
+            - listitem [ref=e187]:
+              - link "Segmented control" [ref=e189] [cursor=pointer]:
+                - /url: /components/segmented-control
+            - listitem [ref=e191]:
+              - link "Toggle button" [ref=e193] [cursor=pointer]:
+                - /url: /components/toggle-button
+            - listitem [ref=e195]:
+              - link "Toggle group" [ref=e197] [cursor=pointer]:
+                - /url: /components/toggle-button-group
+            - listitem [ref=e199]:
+              - link "Toggle menu" [ref=e201] [cursor=pointer]:
+                - /url: /components/toggle-menu
+            - listitem [ref=e203]:
+              - link "Selection menu" [ref=e205] [cursor=pointer]:
+                - /url: /components/selection-menu
+        - generic [ref=e207]:
+          - generic [ref=e208]: Forms
+          - list [ref=e210]:
+            - listitem [ref=e211]:
+              - link "Calendar" [ref=e213] [cursor=pointer]:
+                - /url: /components/calendar
+            - listitem [ref=e215]:
+              - link "Checkbox" [ref=e217] [cursor=pointer]:
+                - /url: /components/checkbox
+            - listitem [ref=e219]:
+              - link "Checkboxes" [ref=e221] [cursor=pointer]:
+                - /url: /components/checkboxes
+            - listitem [ref=e223]:
+              - link "Color input" [ref=e225] [cursor=pointer]:
+                - /url: /components/color-input
+            - listitem [ref=e227]:
+              - link "Color picker" [ref=e229] [cursor=pointer]:
+                - /url: /components/color-picker
+            - listitem [ref=e231]:
+              - link "Combobox" [ref=e233] [cursor=pointer]:
+                - /url: /components/combobox
+            - listitem [ref=e235]:
+              - link "Date input" [ref=e237] [cursor=pointer]:
+                - /url: /components/date-input
+            - listitem [ref=e239]:
+              - link "Date selector" [ref=e241] [cursor=pointer]:
+                - /url: /components/date-selector
+            - listitem [ref=e243]:
+              - link "File" [ref=e245] [cursor=pointer]:
+                - /url: /components/file
+            - listitem [ref=e247]:
+              - link "Form" [ref=e249] [cursor=pointer]:
+                - /url: /components/form
+            - listitem [ref=e251]:
+              - link "Key value input" [ref=e253] [cursor=pointer]:
+                - /url: /components/key-value-input
+            - listitem [ref=e255]:
+              - link "Multi-step form" [ref=e257] [cursor=pointer]:
+                - /url: /components/multi-step-form
+            - listitem [ref=e259]:
+              - link "Number input" [ref=e261] [cursor=pointer]:
+                - /url: /components/number-input
+            - listitem [ref=e263]:
+              - link "Password" [ref=e265] [cursor=pointer]:
+                - /url: /components/password
+            - listitem [ref=e267]:
+              - link "Phone" [ref=e269] [cursor=pointer]:
+                - /url: /components/phone
+            - listitem [ref=e271]:
+              - link "Pin input" [ref=e273] [cursor=pointer]:
+                - /url: /components/pin-input
+            - listitem [ref=e275]:
+              - link "Radios" [ref=e277] [cursor=pointer]:
+                - /url: /components/radios
+            - listitem [ref=e279]:
+              - link "Rating input" [ref=e281] [cursor=pointer]:
+                - /url: /components/rating-input
+            - listitem [ref=e283]:
+              - link "Rich text input" [ref=e285] [cursor=pointer]:
+                - /url: /components/rich-text-input
+            - listitem [ref=e287]:
+              - link "Select" [ref=e289] [cursor=pointer]:
+                - /url: /components/select
+            - listitem [ref=e291]:
+              - link "Slider" [ref=e293] [cursor=pointer]:
+                - /url: /components/slider
+            - listitem [ref=e295]:
+              - link "Switch" [ref=e297] [cursor=pointer]:
+                - /url: /components/switch
+            - listitem [ref=e299]:
+              - link "Tag group" [ref=e301] [cursor=pointer]:
+                - /url: /components/tag-group
+            - listitem [ref=e303]:
+              - link "Tags input" [ref=e305] [cursor=pointer]:
+                - /url: /components/tags-input
+            - listitem [ref=e307]:
+              - link "Text input" [ref=e309] [cursor=pointer]:
+                - /url: /components/textinput
+            - listitem [ref=e311]:
+              - link "Textarea" [ref=e313] [cursor=pointer]:
+                - /url: /components/textarea
+            - listitem [ref=e315]:
+              - link "Time input" [ref=e317] [cursor=pointer]:
+                - /url: /components/time-input
+            - listitem [ref=e319]:
+              - link "Voice input" [ref=e321] [cursor=pointer]:
+                - /url: /components/voice-input
+        - generic [ref=e323]:
+          - generic [ref=e324]: Data display
+          - list [ref=e326]:
+            - listitem [ref=e327]:
+              - link "Avatar" [ref=e329] [cursor=pointer]:
+                - /url: /components/avatar
+            - listitem [ref=e331]:
+              - link "Avatar group" [ref=e333] [cursor=pointer]:
+                - /url: /components/avatar-group
+            - listitem [ref=e335]:
+              - link "Chart" [ref=e337] [cursor=pointer]:
+                - /url: /components/chart
+            - listitem [ref=e339]:
+              - link "Chip" [ref=e341] [cursor=pointer]:
+                - /url: /components/chip
+            - listitem [ref=e343]:
+              - link "Event calendar" [ref=e345] [cursor=pointer]:
+                - /url: /components/event-calendar
+            - listitem [ref=e347]:
+              - link "Gantt chart" [ref=e349] [cursor=pointer]:
+                - /url: /components/gantt-chart
+            - listitem [ref=e351]:
+              - link "Kanban" [ref=e353] [cursor=pointer]:
+                - /url: /components/kanban
+            - listitem [ref=e355]:
+              - link "Kbd" [ref=e357] [cursor=pointer]:
+                - /url: /components/kbd
+            - listitem [ref=e359]:
+              - link "Metadata list" [ref=e361] [cursor=pointer]:
+                - /url: /components/metadata-list
+            - listitem [ref=e363]:
+              - link "Mini calendar" [ref=e365] [cursor=pointer]:
+                - /url: /components/mini-calendar
+            - listitem [ref=e367]:
+              - link "Rating" [ref=e369] [cursor=pointer]:
+                - /url: /components/rating
+            - listitem [ref=e371]:
+              - link "Sortable list" [ref=e373] [cursor=pointer]:
+                - /url: /components/sortable-list
+            - listitem [ref=e375]:
+              - link "Stat" [ref=e377] [cursor=pointer]:
+                - /url: /components/stat
+            - listitem [ref=e379]:
+              - link "Table" [ref=e381] [cursor=pointer]:
+                - /url: /components/table
+            - listitem [ref=e383]:
+              - link "Data table" [ref=e385] [cursor=pointer]:
+                - /url: /components/data-table
+            - listitem [ref=e387]:
+              - link "Timeline" [ref=e389] [cursor=pointer]:
+                - /url: /components/timeline
+            - listitem [ref=e391]:
+              - link "Tree" [ref=e393] [cursor=pointer]:
+                - /url: /components/tree
+        - generic [ref=e395]:
+          - generic [ref=e396]: Feedback
+          - list [ref=e398]:
+            - listitem [ref=e399]:
+              - link "Alert" [ref=e401] [cursor=pointer]:
+                - /url: /components/alert
+            - listitem [ref=e403]:
+              - link "Confirmation" [ref=e405] [cursor=pointer]:
+                - /url: /components/confirmation
+            - listitem [ref=e407]:
+              - link "Empty" [ref=e409] [cursor=pointer]:
+                - /url: /components/empty
+            - listitem [ref=e411]:
+              - link "Meter" [ref=e413] [cursor=pointer]:
+                - /url: /components/meter
+            - listitem [ref=e415]:
+              - link "Network indicator" [ref=e417] [cursor=pointer]:
+                - /url: /components/network-indicator
+            - listitem [ref=e419]:
+              - link "Progress circle" [ref=e421] [cursor=pointer]:
+                - /url: /components/progress-circle
+            - listitem [ref=e423]:
+              - link "Skeleton" [ref=e425] [cursor=pointer]:
+                - /url: /components/skeleton
+            - listitem [ref=e427]:
+              - link "Spinner" [ref=e429] [cursor=pointer]:
+                - /url: /components/spinner
+            - listitem [ref=e431]:
+              - link "Spinner text" [ref=e433] [cursor=pointer]:
+                - /url: /components/spinner-text
+            - listitem [ref=e435]:
+              - link "Toast" [ref=e437] [cursor=pointer]:
+                - /url: /components/toast
+        - generic [ref=e439]:
+          - generic [ref=e440]: Disclosure
+          - list [ref=e442]:
+            - listitem [ref=e443]:
+              - link "Accordion" [ref=e445] [cursor=pointer]:
+                - /url: /components/accordion
+            - listitem [ref=e447]:
+              - link "Collapsible" [ref=e449] [cursor=pointer]:
+                - /url: /components/collapsible
+        - generic [ref=e451]:
+          - generic [ref=e452]: Navigation
+          - list [ref=e454]:
+            - listitem [ref=e455]:
+              - link "Breadcrumbs" [ref=e457] [cursor=pointer]:
+                - /url: /components/breadcrumbs
+            - listitem [ref=e459]:
+              - link "Command" [ref=e461] [cursor=pointer]:
+                - /url: /components/command
+            - listitem [ref=e463]:
+              - link "Pagination" [ref=e465] [cursor=pointer]:
+                - /url: /components/pagination
+            - listitem [ref=e467]:
+              - link "Stepper" [ref=e469] [cursor=pointer]:
+                - /url: /components/stepper
+            - listitem [ref=e471]:
+              - link "Tabbar" [ref=e473] [cursor=pointer]:
+                - /url: /components/tabbar
+            - listitem [ref=e475]:
+              - link "Table of contents" [ref=e477] [cursor=pointer]:
+                - /url: /components/table-of-contents
+            - listitem [ref=e479]:
+              - link "Tabs" [ref=e481] [cursor=pointer]:
+                - /url: /components/tabs
+        - generic [ref=e483]:
+          - generic [ref=e484]: Menus
+          - list [ref=e486]:
+            - listitem [ref=e487]:
+              - link "Context menu" [ref=e489] [cursor=pointer]:
+                - /url: /components/context-menu
+            - listitem [ref=e491]:
+              - link "Menu" [ref=e493] [cursor=pointer]:
+                - /url: /components/menu
+            - listitem [ref=e495]:
+              - link "Menu bar" [ref=e497] [cursor=pointer]:
+                - /url: /components/menu-bar
+            - listitem [ref=e499]:
+              - link "Menu option" [ref=e501] [cursor=pointer]:
+                - /url: /components/menu-option
+            - listitem [ref=e503]:
+              - link "Popup menu" [ref=e505] [cursor=pointer]:
+                - /url: /components/popup-menu
+        - generic [ref=e507]:
+          - generic [ref=e508]: Overlays
+          - list [ref=e510]:
+            - listitem [ref=e511]:
+              - link "Dialog" [ref=e513] [cursor=pointer]:
+                - /url: /components/dialog
+            - listitem [ref=e515]:
+              - link "Floating window" [ref=e517] [cursor=pointer]:
+                - /url: /components/floating-window
+            - listitem [ref=e519]:
+              - link "Hover card" [ref=e521] [cursor=pointer]:
+                - /url: /components/hover-card
+            - listitem [ref=e523]:
+              - link "Link preview" [ref=e525] [cursor=pointer]:
+                - /url: /components/link-preview
+            - listitem [ref=e527]:
+              - link "Overlay" [ref=e529] [cursor=pointer]:
+                - /url: /components/overlay
+            - listitem [ref=e531]:
+              - link "Popover" [ref=e533] [cursor=pointer]:
+                - /url: /components/popover
+            - listitem [ref=e535]:
+              - link "Tooltip" [ref=e537] [cursor=pointer]:
+                - /url: /components/tooltip
+        - generic [ref=e539]:
+          - generic [ref=e540]: Media
+          - list [ref=e542]:
+            - listitem [ref=e543]:
+              - link "Audio player" [ref=e545] [cursor=pointer]:
+                - /url: /components/audio-player
+            - listitem [ref=e547]:
+              - link "Carousel" [ref=e549] [cursor=pointer]:
+                - /url: /components/carousel
+            - listitem [ref=e551]:
+              - link "Image gallery" [ref=e553] [cursor=pointer]:
+                - /url: /components/image-gallery
+            - listitem [ref=e555]:
+              - link "Image zoom" [ref=e557] [cursor=pointer]:
+                - /url: /components/image-zoom
+            - listitem [ref=e559]:
+              - link "Media volume" [ref=e561] [cursor=pointer]:
+                - /url: /components/media-volume
+            - listitem [ref=e563]:
+              - link "Document viewer" [ref=e565] [cursor=pointer]:
+                - /url: /components/document-viewer
+            - listitem [ref=e567]:
+              - link "Video player" [ref=e569] [cursor=pointer]:
+                - /url: /components/video-player
+        - generic [ref=e571]:
+          - generic [ref=e572]: Content & graphics
+          - list [ref=e574]:
+            - listitem [ref=e575]:
+              - link "Code" [ref=e577] [cursor=pointer]:
+                - /url: /components/code
+            - listitem [ref=e579]:
+              - link "Diff" [ref=e581] [cursor=pointer]:
+                - /url: /components/diff
+            - listitem [ref=e583]:
+              - link "Globe" [ref=e585] [cursor=pointer]:
+                - /url: /components/globe
+            - listitem [ref=e587]:
+              - link "Map" [ref=e589] [cursor=pointer]:
+                - /url: /components/map
+            - listitem [ref=e591]:
+              - link "Markdown" [ref=e593] [cursor=pointer]:
+                - /url: /components/markdown
+            - listitem [ref=e595]:
+              - link "Marquee" [ref=e597] [cursor=pointer]:
+                - /url: /components/marquee
+            - listitem [ref=e599]:
+              - link "Mermaid" [ref=e601] [cursor=pointer]:
+                - /url: /components/mermaid
+            - listitem [ref=e603]:
+              - link "QR code" [ref=e605] [cursor=pointer]:
+                - /url: /components/qr-code
+        - generic [ref=e607]:
+          - generic [ref=e608]: Utilities
+          - list [ref=e610]:
+            - listitem [ref=e611]:
+              - link "Hitbox" [ref=e613] [cursor=pointer]:
+                - /url: /utilities/hitbox
+            - listitem [ref=e615]:
+              - link "Dnd list" [ref=e617] [cursor=pointer]:
+                - /url: /utilities/dnd
+            - listitem [ref=e619]:
+              - link "Raised" [ref=e621] [cursor=pointer]:
+                - /url: /utilities/raised
+            - listitem [ref=e623]:
+              - link "Scroll fade" [ref=e625] [cursor=pointer]:
+                - /url: /utilities/scroll-fade
+            - listitem [ref=e627]:
+              - link "Shimmer" [ref=e629] [cursor=pointer]:
+                - /url: /utilities/shimmer
+      - button "Search pages" [ref=e633] [cursor=pointer]:
+        - generic [aria-hidden] [ref=e638]: ⌘K
+    - separator "Resize Sidebar; Toggle Sidebar" [ref=e639]
+  - main [ref=e640]:
+    - generic [ref=e641]:
+      - generic [ref=e643]:
+        - navigation "Primary" [ref=e645]:
+          - link "Docs" [ref=e646] [cursor=pointer]:
+            - /url: ./docs
+          - link "Components" [ref=e647] [cursor=pointer]:
+            - /url: ./components
+          - link "Blocks" [ref=e648] [cursor=pointer]:
+            - /url: ./blocks
+          - link "Templates" [ref=e649] [cursor=pointer]:
+            - /url: ./templates
+          - link "Playground" [ref=e650] [cursor=pointer]:
+            - /url: ./playground
+          - link "Colors" [ref=e651] [cursor=pointer]:
+            - /url: ./colors
+        - button "Dark" [ref=e652] [cursor=pointer]
+      - main [ref=e654]:
+        - generic [ref=e656]:
+          - generic [ref=e657]:
+            - generic [ref=e658]: "Drag into the calendar:"
+            - generic [ref=e659]: External block
+          - region "Event calendar" [ref=e660]:
+            - generic [ref=e661]:
+              - generic [ref=e662]:
+                - generic [ref=e663]:
+                  - button "Previous period" [ref=e664] [cursor=pointer]
+                  - button "Next period" [ref=e668] [cursor=pointer]
+                - button "Today" [ref=e672] [cursor=pointer]
+              - status "Showing Jul 13 – 19, 2026" [ref=e673]: Jul 13 – 19, 2026
+              - radiogroup "Calendar view" [ref=e676]:
+                - radio "Week" [checked] [ref=e677] [cursor=pointer]
+                - radio "Month" [ref=e678] [cursor=pointer]
+            - generic [ref=e679]: Week view selected
+            - group "Jul 13 – 19, 2026" [ref=e683]:
+              - 'group "Week: Jul 13 – 19, 2026" [ref=e685]':
+                - generic [ref=e686]:
+                  - generic [ref=e687]:
+                    - button "Monday, July 13, 2026" [ref=e689]: Mon, Jul 13
+                    - button "Tuesday, July 14, 2026" [ref=e690]: Tue, Jul 14
+                    - button "Wednesday, July 15, 2026" [ref=e691]: Wed, Jul 15
+                    - button "Thursday, July 16, 2026" [ref=e692]: Thu, Jul 16
+                    - button "Friday, July 17, 2026" [ref=e693]: Fri, Jul 17
+                    - button "Saturday, July 18, 2026" [ref=e694]: Sat, Jul 18
+                    - button "Sunday, July 19, 2026" [ref=e695]: Sun, Jul 19
+                  - generic [ref=e696]:
+                    - generic [ref=e697]: All day
+                    - group "Monday, July 13, 2026" [ref=e698]:
+                      - button "All day, Monday, July 13, 2026" [ref=e699]
+                    - group "Tuesday, July 14, 2026" [ref=e700]:
+                      - button "All day, Tuesday, July 14, 2026" [ref=e701]
+                    - group "Wednesday, July 15, 2026" [ref=e702]:
+                      - button "All day, Wednesday, July 15, 2026" [ref=e703]
+                    - group "Thursday, July 16, 2026" [ref=e704]:
+                      - button "All day, Thursday, July 16, 2026" [ref=e705]
+                    - group "Friday, July 17, 2026" [ref=e706]:
+                      - button "All day, Friday, July 17, 2026" [ref=e707]
+                      - button "Offsite day, Jul 17" [ref=e711]:
+                        - generic [ref=e712]: Offsite day
+                    - group "Saturday, July 18, 2026" [ref=e715]:
+                      - button "All day, Saturday, July 18, 2026" [ref=e716]
+                    - group "Sunday, July 19, 2026" [ref=e717]:
+                      - button "All day, Sunday, July 19, 2026" [ref=e718]
+                - generic [ref=e719]:
+                  - generic [ref=e720]:
+                    - time [ref=e721]: 6:00 AM
+                    - time [ref=e722]: 7:00 AM
+                    - time [ref=e723]: 8:00 AM
+                    - time [ref=e724]: 9:00 AM
+                    - time [ref=e725]: 10:00 AM
+                    - time [ref=e726]: 11:00 AM
+                    - time [ref=e727]: 12:00 PM
+                    - time [ref=e728]: 1:00 PM
+                    - time [ref=e729]: 2:00 PM
+                    - time [ref=e730]: 3:00 PM
+                    - time [ref=e731]: 4:00 PM
+                    - time [ref=e732]: 5:00 PM
+                  - group "Monday, July 13, 2026" [ref=e733]:
+                    - button "Monday, July 13, 2026, 6:00 AM GMT+0" [ref=e734]
+                    - button "Monday, July 13, 2026, 6:30 AM GMT+0" [ref=e735]
+                    - button "Monday, July 13, 2026, 7:00 AM GMT+0" [ref=e736]
+                    - button "Monday, July 13, 2026, 7:30 AM GMT+0" [ref=e737]
+                    - button "Monday, July 13, 2026, 8:00 AM GMT+0" [ref=e738]
+                    - button "Monday, July 13, 2026, 8:30 AM GMT+0" [ref=e739]
+                    - button "Monday, July 13, 2026, 9:00 AM GMT+0" [ref=e740]
+                    - button "Monday, July 13, 2026, 9:30 AM GMT+0" [ref=e741]
+                    - button "Monday, July 13, 2026, 10:00 AM GMT+0" [ref=e742]
+                    - button "Monday, July 13, 2026, 10:30 AM GMT+0" [ref=e743]
+                    - button "Monday, July 13, 2026, 11:00 AM GMT+0" [ref=e744]
+                    - button "Monday, July 13, 2026, 11:30 AM GMT+0" [ref=e745]
+                    - button "Monday, July 13, 2026, 12:00 PM GMT+0" [ref=e746]
+                    - button "Monday, July 13, 2026, 12:30 PM GMT+0" [ref=e747]
+                    - button "Monday, July 13, 2026, 1:00 PM GMT+0" [ref=e748]
+                    - button "Monday, July 13, 2026, 1:30 PM GMT+0" [ref=e749]
+                    - button "Monday, July 13, 2026, 2:00 PM GMT+0" [ref=e750]
+                    - button "Monday, July 13, 2026, 2:30 PM GMT+0" [ref=e751]
+                    - button "Monday, July 13, 2026, 3:00 PM GMT+0" [ref=e752]
+                    - button "Monday, July 13, 2026, 3:30 PM GMT+0" [ref=e753]
+                    - button "Monday, July 13, 2026, 4:00 PM GMT+0" [ref=e754]
+                    - button "Monday, July 13, 2026, 4:30 PM GMT+0" [ref=e755]
+                    - button "Monday, July 13, 2026, 5:00 PM GMT+0" [ref=e756]
+                    - button "Monday, July 13, 2026, 5:30 PM GMT+0" [ref=e757]
+                    - button "Daily sync, Jul 13, 7:00 – 7:30 AM, recurring" [ref=e761]:
+                      - generic [ref=e762]: Daily sync
+                    - button "Move me, Jul 13, 9:00 – 10:00 AM" [ref=e771]:
+                      - generic [ref=e772]:
+                        - generic [ref=e773]: Move me
+                        - generic [ref=e774]: 9:00 – 10:00 AM
+                  - group "Tuesday, July 14, 2026" [ref=e776]:
+                    - button "Tuesday, July 14, 2026, 6:00 AM GMT+0" [ref=e777]
+                    - button "Tuesday, July 14, 2026, 6:30 AM GMT+0" [ref=e778]
+                    - button "Tuesday, July 14, 2026, 7:00 AM GMT+0" [ref=e779]
+                    - button "Tuesday, July 14, 2026, 7:30 AM GMT+0" [ref=e780]
+                    - button "Tuesday, July 14, 2026, 8:00 AM GMT+0" [ref=e781]
+                    - button "Tuesday, July 14, 2026, 8:30 AM GMT+0" [ref=e782]
+                    - button "Tuesday, July 14, 2026, 9:00 AM GMT+0" [ref=e783]
+                    - button "Tuesday, July 14, 2026, 9:30 AM GMT+0" [ref=e784]
+                    - button "Tuesday, July 14, 2026, 10:00 AM GMT+0" [ref=e785]
+                    - button "Tuesday, July 14, 2026, 10:30 AM GMT+0" [ref=e786]
+                    - button "Tuesday, July 14, 2026, 11:00 AM GMT+0" [ref=e787]
+                    - button "Tuesday, July 14, 2026, 11:30 AM GMT+0" [ref=e788]
+                    - button "Tuesday, July 14, 2026, 12:00 PM GMT+0" [ref=e789]
+                    - button "Tuesday, July 14, 2026, 12:30 PM GMT+0" [ref=e790]
+                    - button "Tuesday, July 14, 2026, 1:00 PM GMT+0" [ref=e791]
+                    - button "Tuesday, July 14, 2026, 1:30 PM GMT+0" [ref=e792]
+                    - button "Tuesday, July 14, 2026, 2:00 PM GMT+0" [ref=e793]
+                    - button "Tuesday, July 14, 2026, 2:30 PM GMT+0" [ref=e794]
+                    - button "Tuesday, July 14, 2026, 3:00 PM GMT+0" [ref=e795]
+                    - button "Tuesday, July 14, 2026, 3:30 PM GMT+0" [ref=e796]
+                    - button "Tuesday, July 14, 2026, 4:00 PM GMT+0" [ref=e797]
+                    - button "Tuesday, July 14, 2026, 4:30 PM GMT+0" [ref=e798]
+                    - button "Tuesday, July 14, 2026, 5:00 PM GMT+0" [ref=e799]
+                    - button "Tuesday, July 14, 2026, 5:30 PM GMT+0" [ref=e800]
+                    - button "Daily sync, Jul 14, 7:00 – 7:30 AM, recurring" [ref=e804]:
+                      - generic [ref=e805]: Daily sync
+                    - button "Resize me, Jul 14, 9:00 – 10:00 AM" [ref=e814]:
+                      - generic [ref=e815]:
+                        - generic [ref=e816]: Resize me
+                        - generic [ref=e817]: 9:00 – 10:00 AM
+                  - group "Wednesday, July 15, 2026" [ref=e819]:
+                    - button "Wednesday, July 15, 2026, 6:00 AM GMT+0" [ref=e820]
+                    - button "Wednesday, July 15, 2026, 6:30 AM GMT+0" [ref=e821]
+                    - button "Wednesday, July 15, 2026, 7:00 AM GMT+0" [ref=e822]
+                    - button "Wednesday, July 15, 2026, 7:30 AM GMT+0" [ref=e823]
+                    - button "Wednesday, July 15, 2026, 8:00 AM GMT+0" [ref=e824]
+                    - button "Wednesday, July 15, 2026, 8:30 AM GMT+0" [ref=e825]
+                    - button "Wednesday, July 15, 2026, 9:00 AM GMT+0" [ref=e826]
+                    - button "Wednesday, July 15, 2026, 9:30 AM GMT+0" [ref=e827]
+                    - button "Wednesday, July 15, 2026, 10:00 AM GMT+0" [ref=e828]
+                    - button "Wednesday, July 15, 2026, 10:30 AM GMT+0" [ref=e829]
+                    - button "Wednesday, July 15, 2026, 11:00 AM GMT+0" [ref=e830]
+                    - button "Wednesday, July 15, 2026, 11:30 AM GMT+0" [ref=e831]
+                    - button "Wednesday, July 15, 2026, 12:00 PM GMT+0" [ref=e832]
+                    - button "Wednesday, July 15, 2026, 12:30 PM GMT+0" [ref=e833]
+                    - button "Wednesday, July 15, 2026, 1:00 PM GMT+0" [ref=e834]
+                    - button "Wednesday, July 15, 2026, 1:30 PM GMT+0" [ref=e835]
+                    - button "Wednesday, July 15, 2026, 2:00 PM GMT+0" [ref=e836]
+                    - button "Wednesday, July 15, 2026, 2:30 PM GMT+0" [ref=e837]
+                    - button "Wednesday, July 15, 2026, 3:00 PM GMT+0" [ref=e838]
+                    - button "Wednesday, July 15, 2026, 3:30 PM GMT+0" [ref=e839]
+                    - button "Wednesday, July 15, 2026, 4:00 PM GMT+0" [ref=e840]
+                    - button "Wednesday, July 15, 2026, 4:30 PM GMT+0" [ref=e841]
+                    - button "Wednesday, July 15, 2026, 5:00 PM GMT+0" [ref=e842]
+                    - button "Wednesday, July 15, 2026, 5:30 PM GMT+0" [ref=e843]
+                    - button "Daily sync, Jul 15, 7:00 – 7:30 AM, recurring" [ref=e847]:
+                      - generic [ref=e848]: Daily sync
+                    - button "Keyboard move me, Jul 15, 11:00 AM – 12:00 PM" [ref=e857]:
+                      - generic [ref=e858]:
+                        - generic [ref=e859]: Keyboard move me
+                        - generic [ref=e860]: 11:00 AM – 12:00 PM
+                  - group "Thursday, July 16, 2026" [ref=e862]:
+                    - button "Thursday, July 16, 2026, 6:00 AM GMT+0" [ref=e863]
+                    - button "Thursday, July 16, 2026, 6:30 AM GMT+0" [ref=e864]
+                    - button "Thursday, July 16, 2026, 7:00 AM GMT+0" [ref=e865]
+                    - button "Thursday, July 16, 2026, 7:30 AM GMT+0" [ref=e866]
+                    - button "Thursday, July 16, 2026, 8:00 AM GMT+0" [ref=e867]
+                    - button "Thursday, July 16, 2026, 8:30 AM GMT+0" [ref=e868]
+                    - button "Thursday, July 16, 2026, 9:00 AM GMT+0" [ref=e869]
+                    - button "Thursday, July 16, 2026, 9:30 AM GMT+0" [ref=e870]
+                    - button "Thursday, July 16, 2026, 10:00 AM GMT+0" [ref=e871]
+                    - button "Thursday, July 16, 2026, 10:30 AM GMT+0" [ref=e872]
+                    - button "Thursday, July 16, 2026, 11:00 AM GMT+0" [ref=e873]
+                    - button "Thursday, July 16, 2026, 11:30 AM GMT+0" [ref=e874]
+                    - button "Thursday, July 16, 2026, 12:00 PM GMT+0" [ref=e875]
+                    - button "Thursday, July 16, 2026, 12:30 PM GMT+0" [ref=e876]
+                    - button "Thursday, July 16, 2026, 1:00 PM GMT+0" [ref=e877]
+                    - button "Thursday, July 16, 2026, 1:30 PM GMT+0" [ref=e878]
+                    - button "Thursday, July 16, 2026, 2:00 PM GMT+0" [ref=e879]
+                    - button "Thursday, July 16, 2026, 2:30 PM GMT+0" [ref=e880]
+                    - button "Thursday, July 16, 2026, 3:00 PM GMT+0" [ref=e881]
+                    - button "Thursday, July 16, 2026, 3:30 PM GMT+0" [ref=e882]
+                    - button "Thursday, July 16, 2026, 4:00 PM GMT+0" [ref=e883]
+                    - button "Thursday, July 16, 2026, 4:30 PM GMT+0" [ref=e884]
+                    - button "Thursday, July 16, 2026, 5:00 PM GMT+0" [ref=e885]
+                    - button "Thursday, July 16, 2026, 5:30 PM GMT+0" [ref=e886]
+                    - button "Daily sync, Jul 16, 7:00 – 7:30 AM, recurring" [ref=e890]:
+                      - generic [ref=e891]: Daily sync
+                    - button "Review me, Jul 16, 9:00 – 10:00 AM" [ref=e900]:
+                      - generic [ref=e901]:
+                        - generic [ref=e902]: Review me
+                        - generic [ref=e903]: 9:00 – 10:00 AM
+                  - group "Friday, July 17, 2026" [ref=e905]:
+                    - button "Friday, July 17, 2026, 6:00 AM GMT+0" [ref=e906]
+                    - button "Friday, July 17, 2026, 6:30 AM GMT+0" [ref=e907]
+                    - button "Friday, July 17, 2026, 7:00 AM GMT+0" [ref=e908]
+                    - button "Friday, July 17, 2026, 7:30 AM GMT+0" [ref=e909]
+                    - button "Friday, July 17, 2026, 8:00 AM GMT+0" [ref=e910]
+                    - button "Friday, July 17, 2026, 8:30 AM GMT+0" [ref=e911]
+                    - button "Friday, July 17, 2026, 9:00 AM GMT+0" [ref=e912]
+                    - button "Friday, July 17, 2026, 9:30 AM GMT+0" [ref=e913]
+                    - button "Friday, July 17, 2026, 10:00 AM GMT+0" [ref=e914]
+                    - button "Friday, July 17, 2026, 10:30 AM GMT+0" [ref=e915]
+                    - button "Friday, July 17, 2026, 11:00 AM GMT+0" [ref=e916]
+                    - button "Friday, July 17, 2026, 11:30 AM GMT+0" [ref=e917]
+                    - button "Friday, July 17, 2026, 12:00 PM GMT+0" [ref=e918]
+                    - button "Friday, July 17, 2026, 12:30 PM GMT+0" [ref=e919]
+                    - button "Friday, July 17, 2026, 1:00 PM GMT+0" [ref=e920]
+                    - button "Friday, July 17, 2026, 1:30 PM GMT+0" [ref=e921]
+                    - button "Friday, July 17, 2026, 2:00 PM GMT+0" [ref=e922]
+                    - button "Friday, July 17, 2026, 2:30 PM GMT+0" [ref=e923]
+                    - button "Friday, July 17, 2026, 3:00 PM GMT+0" [ref=e924]
+                    - button "Friday, July 17, 2026, 3:30 PM GMT+0" [ref=e925]
+                    - button "Friday, July 17, 2026, 4:00 PM GMT+0" [ref=e926]
+                    - button "Friday, July 17, 2026, 4:30 PM GMT+0" [ref=e927]
+                    - button "Friday, July 17, 2026, 5:00 PM GMT+0" [ref=e928]
+                    - button "Friday, July 17, 2026, 5:30 PM GMT+0" [ref=e929]
+                    - button "Daily sync, Jul 17, 7:00 – 7:30 AM, recurring" [ref=e933]:
+                      - generic [ref=e934]: Daily sync
+                  - group "Saturday, July 18, 2026" [ref=e940]:
+                    - button "Saturday, July 18, 2026, 6:00 AM GMT+0" [ref=e941]
+                    - button "Saturday, July 18, 2026, 6:30 AM GMT+0" [ref=e942]
+                    - button "Saturday, July 18, 2026, 7:00 AM GMT+0" [ref=e943]
+                    - button "Saturday, July 18, 2026, 7:30 AM GMT+0" [ref=e944]
+                    - button "Saturday, July 18, 2026, 8:00 AM GMT+0" [ref=e945]
+                    - button "Saturday, July 18, 2026, 8:30 AM GMT+0" [ref=e946]
+                    - button "Saturday, July 18, 2026, 9:00 AM GMT+0" [ref=e947]
+                    - button "Saturday, July 18, 2026, 9:30 AM GMT+0" [ref=e948]
+                    - button "Saturday, July 18, 2026, 10:00 AM GMT+0" [ref=e949]
+                    - button "Saturday, July 18, 2026, 10:30 AM GMT+0" [ref=e950]
+                    - button "Saturday, July 18, 2026, 11:00 AM GMT+0" [ref=e951]
+                    - button "Saturday, July 18, 2026, 11:30 AM GMT+0" [ref=e952]
+                    - button "Saturday, July 18, 2026, 12:00 PM GMT+0" [ref=e953]
+                    - button "Saturday, July 18, 2026, 12:30 PM GMT+0" [ref=e954]
+                    - button "Saturday, July 18, 2026, 1:00 PM GMT+0" [ref=e955]
+                    - button "Saturday, July 18, 2026, 1:30 PM GMT+0" [ref=e956]
+                    - button "Saturday, July 18, 2026, 2:00 PM GMT+0" [ref=e957]
+                    - button "Saturday, July 18, 2026, 2:30 PM GMT+0" [ref=e958]
+                    - button "Saturday, July 18, 2026, 3:00 PM GMT+0" [ref=e959]
+                    - button "Saturday, July 18, 2026, 3:30 PM GMT+0" [ref=e960]
+                    - button "Saturday, July 18, 2026, 4:00 PM GMT+0" [ref=e961]
+                    - button "Saturday, July 18, 2026, 4:30 PM GMT+0" [ref=e962]
+                    - button "Saturday, July 18, 2026, 5:00 PM GMT+0" [ref=e963]
+                    - button "Saturday, July 18, 2026, 5:30 PM GMT+0" [ref=e964]
+                    - button "Daily sync, Jul 18, 7:00 – 7:30 AM, recurring" [ref=e968]:
+                      - generic [ref=e969]: Daily sync
+                  - group "Sunday, July 19, 2026" [ref=e975]:
+                    - button "Sunday, July 19, 2026, 6:00 AM GMT+0" [ref=e976]
+                    - button "Sunday, July 19, 2026, 6:30 AM GMT+0" [ref=e977]
+                    - button "Sunday, July 19, 2026, 7:00 AM GMT+0" [ref=e978]
+                    - button "Sunday, July 19, 2026, 7:30 AM GMT+0" [ref=e979]
+                    - button "Sunday, July 19, 2026, 8:00 AM GMT+0" [ref=e980]
+                    - button "Sunday, July 19, 2026, 8:30 AM GMT+0" [ref=e981]
+                    - button "Sunday, July 19, 2026, 9:00 AM GMT+0" [ref=e982]
+                    - button "Sunday, July 19, 2026, 9:30 AM GMT+0" [ref=e983]
+                    - button "Sunday, July 19, 2026, 10:00 AM GMT+0" [ref=e984]
+                    - button "Sunday, July 19, 2026, 10:30 AM GMT+0" [ref=e985]
+                    - button "Sunday, July 19, 2026, 11:00 AM GMT+0" [ref=e986]
+                    - button "Sunday, July 19, 2026, 11:30 AM GMT+0" [ref=e987]
+                    - button "Sunday, July 19, 2026, 12:00 PM GMT+0" [ref=e988]
+                    - button "Sunday, July 19, 2026, 12:30 PM GMT+0" [ref=e989]
+                    - button "Sunday, July 19, 2026, 1:00 PM GMT+0" [ref=e990]
+                    - button "Sunday, July 19, 2026, 1:30 PM GMT+0" [ref=e991]
+                    - button "Sunday, July 19, 2026, 2:00 PM GMT+0" [ref=e992]
+                    - button "Sunday, July 19, 2026, 2:30 PM GMT+0" [ref=e993]
+                    - button "Sunday, July 19, 2026, 3:00 PM GMT+0" [ref=e994]
+                    - button "Sunday, July 19, 2026, 3:30 PM GMT+0" [ref=e995]
+                    - button "Sunday, July 19, 2026, 4:00 PM GMT+0" [ref=e996]
+                    - button "Sunday, July 19, 2026, 4:30 PM GMT+0" [ref=e997]
+                    - button "Sunday, July 19, 2026, 5:00 PM GMT+0" [ref=e998]
+                    - button "Sunday, July 19, 2026, 5:30 PM GMT+0" [ref=e999]
+                    - button "Daily sync, Jul 19, 7:00 – 7:30 AM, recurring" [ref=e1003]:
+                      - generic [ref=e1004]: Daily sync
+            - status [ref=e1010]
+            - generic [ref=e1011]: Press M to move, S to resize the start, or E to resize the end. Use arrows to adjust, Enter to commit, and Escape to cancel.
+          - generic [ref=e1013]:
+            - generic [ref=e1014]: none
+            - generic [ref=e1015]: none
+            - generic [ref=e1016]: none
+      - generic [ref=e1020]:
+        - generic [ref=e1021]:
+          - generic [ref=e1022]: Variant
+          - group "Sidebar variant" [ref=e1023]:
+            - button "admin" [ref=e1024] [cursor=pointer]
+            - button "floating" [ref=e1025] [cursor=pointer]
+            - button "inset" [ref=e1026] [cursor=pointer]
+            - button "split" [ref=e1027] [cursor=pointer]
+        - generic [ref=e1028]:
+          - generic [ref=e1029]: State
+          - group "Sidebar state" [ref=e1030]:
+            - button "expanded" [ref=e1031] [cursor=pointer]
+            - button "icon" [ref=e1032] [cursor=pointer]
+            - button "hidden" [ref=e1033] [cursor=pointer]
+        - button "Open the theme playground" [ref=e1035] [cursor=pointer]: "Theme: Balanced"

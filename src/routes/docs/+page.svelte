@@ -53,6 +53,53 @@
 			type: 'number',
 			def: '0.10 light / 0.32 dark',
 			desc: 'Opacity of the current-color layer used for the pressed state.'
+		},
+		{
+			name: 'state-selected-opacity',
+			type: 'number',
+			def: '0.07 light / 0.10 dark',
+			desc: 'Opacity of the role tint bg-selected-muted composites, so a selection reads the same on any surface.'
+		},
+		{
+			name: 'spinner',
+			type: "'spinDynamicThin' | 'spinDynamicThick' | 'spinLargeThreeQuarter' | 'spinlargeQuarter'",
+			def: "'spinDynamicThin'",
+			desc: 'Which .ui-spinner keyframes and style the engine emits.'
+		}
+	];
+
+	// `ThemeOptions` intersects `EngineOptions`, and `applyGlobalEngine` reads these five keys only
+	// from the block that carries `default: true` — they are ignored on every other theme block.
+	const engineOptions: Option[] = [
+		{
+			name: 'spacing',
+			type: "'small' | 'normal' | 'large' | number",
+			def: "unset (Tailwind's 0.25rem)",
+			desc: 'Factor on the base spacing unit; writes --spacing and the geometry family under it.'
+		},
+		{
+			name: 'radius',
+			type: "'none' | 'subtile' | 'small' | 'normal' | 'large' | 'round' | number",
+			def: "'normal'",
+			desc: 'Factor on the whole radius ramp; writes --radius and --radius-xs … --radius-4xl.'
+		},
+		{
+			name: 'typeScale',
+			type: "'compact' | 'default' | 'comfortable' | 'large' | TypeScaleOptions",
+			def: "'default'",
+			desc: 'Fluid type ramp; writes every --text-* step as a clamp().'
+		},
+		{
+			name: 'elevation',
+			type: "'flat' | 'normal' | 'high'",
+			def: "'normal'",
+			desc: 'Strength of the shadow ramp raised-* and lift-* read; flat removes shadows.'
+		},
+		{
+			name: 'motion',
+			type: 'DeepPartial<{ duration, easing }>',
+			def: 'library scale',
+			desc: 'Duration steps and easing roles; writes --duration-* and --ease-*. Object-valued, so only expressible from a JavaScript plugin config.'
 		}
 	];
 
@@ -68,7 +115,8 @@
 
 	const variants = ['DEFAULT', 'light', 'lighter', 'dark', 'muted', 'contrast'] as const;
 
-	const installCode = `pnpm add tailwindcss @tailwindcss/vite`;
+	const installCode = `pnpm add svelai
+pnpm add tailwindcss @tailwindcss/vite`;
 
 	const cssSetupCode = `@import 'tailwindcss';
 
@@ -107,6 +155,7 @@
 	/* optional interaction calibration */
 	state-hover-opacity: 0.05;
 	state-pressed-opacity: 0.10;
+	state-selected-opacity: 0.07;
 
 	/* optional per-variant overrides */
 	primary-contrast: #fafafa;
@@ -177,8 +226,30 @@
 
 	<Separator class="my-2" children="Installation" />
 
-	<p class="text-neutral/70">Install Tailwind and its Vite plugin.</p>
+	<p class="text-neutral/70">Install the package, then Tailwind and its Vite plugin.</p>
 	<Code language="bash" code={installCode} />
+
+	<p class="text-neutral/70">
+		svelai runs inside a SvelteKit app ({@render ic('@sveltejs/kit')} is a peer). Three rendering libraries
+		stay optional peers — install a line only if you import one of the components on it:
+		{@render ic('Chart')} needs
+		{@render ic('@tanstack/charts d3-array d3-force d3-hierarchy d3-sankey d3-scale d3-shape')},
+		{@render ic('RichTextInput')} — and the {@render ic('AIComposer')} / {@render ic('AIChat')} that render
+		it — needs
+		{@render ic(
+			'lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils'
+		)}, and {@render ic('Globe')} needs {@render ic('cobe')}. Every other component works with
+		svelai alone.
+	</p>
+
+	<p class="text-neutral/70">
+		A missing peer fails the build, not the browser. Vite substitutes a stub module instead of
+		reporting an unresolved import, so the errors name the missing exports first: importing
+		{@render ic('Chart')} without its line fails with a wall of
+		{@render ic('[MISSING_EXPORT] "bandX" is not exported by')}
+		{@render ic('"__vite-optional-peer-dep:@tanstack/charts:svelai"')}. The package to install is in
+		that virtual module id.
+	</p>
 
 	<p class="text-neutral/70">
 		Then wire up the theme in your {@render ic('src/app.css')}. Declare the {@render ic(
@@ -190,14 +261,39 @@
 	</p>
 	<Code language="css" code={cssSetupCode} />
 
-	<Separator class="my-2" children="Build-time color options" />
+	<Separator class="my-2" children="Build-time plugin options" />
 
 	<p class="text-neutral/70">
-		Every key below is passed inside the {@render ic("@plugin 'svelai/tailwind-plugin/theme'")} block.
+		Every key below is passed inside the {@render ic("@plugin 'svelai/tailwind-plugin/theme'")} block,
+		and together they are the {@render ic('ThemeOptions')} type. They are read at build time and baked
+		into the stylesheet.
 	</p>
 
 	<div class="border-neutral-muted overflow-hidden rounded-xl border">
 		{#each themeOptions as option, i (option.name)}
+			<div
+				class="grid grid-cols-[1fr_1.4fr] gap-4 p-3 {i % 2 === 0
+					? 'bg-surface'
+					: 'bg-surface-canvas'}"
+			>
+				<div class="grid content-start gap-1">
+					<code class="text-primary-readable text-sm font-medium">{option.name}</code>
+					<code class="text-neutral/70 text-xs">{option.type}</code>
+					<span class="text-neutral/70 text-xs">default: {option.def}</span>
+				</div>
+				<p class="text-neutral/70 text-sm">{option.desc}</p>
+			</div>
+		{/each}
+	</div>
+
+	<p class="text-neutral/70">
+		{@render ic('ThemeOptions')} also intersects {@render ic('EngineOptions')}. The engine is
+		installed once, by the block carrying {@render ic('default: true')}, and these five keys are
+		read only from that block — they are ignored on every other theme block.
+	</p>
+
+	<div class="border-neutral-muted overflow-hidden rounded-xl border">
+		{#each engineOptions as option, i (option.name)}
 			<div
 				class="grid grid-cols-[1fr_1.4fr] gap-4 p-3 {i % 2 === 0
 					? 'bg-surface'
@@ -231,9 +327,19 @@
 	</p>
 	<Code language="svelte" code={runtimeThemeCode} />
 	<p class="text-neutral/70">
-		This replaces the former {@render ic('spacing')}, {@render ic('radius')}, {@render ic('scale')}
-		and {@render ic('raised-with-border')} plugin options. Component density variants remain local choices;
-		their spacing utilities inherit the active runtime spacing scale.
+		{@render ic('spacing')}, {@render ic('radius')}, {@render ic('typeScale')}, {@render ic(
+			'elevation'
+		)}
+		and {@render ic('motion')} exist on both sides. The plugin writes them on {@render ic('html')} at
+		build time; {@render ic('designTokens')} writes them on {@render ic(
+			'html[data-theme="<name>"]'
+		)}, which is more specific — so a runtime token always wins for that theme, and every key a
+		theme omits keeps the build-time value. Use the plugin for the app-wide baseline and {@render ic(
+			'designTokens'
+		)} for what differs per theme or changes at runtime. See the
+		<a class="text-primary-readable underline" href={resolve('/docs/tokens')}>design tokens</a> page for
+		every key. Component density variants remain local choices; their spacing utilities inherit the active
+		runtime spacing scale.
 	</p>
 
 	<Separator class="my-2" children="Color tokens" />

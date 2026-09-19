@@ -21,12 +21,15 @@ describe('state role design tokens', () => {
 		expect(compile({ selectedColor: 'primary' })).toBe(
 			'html[data-theme="light"]{' +
 				'--color-selected:var(--color-primary);' +
-				'--color-selected-muted:var(--color-primary-muted);' +
 				'--color-selected-contrast:var(--color-primary-contrast);' +
 				'--color-selected-muted-readable:var(--color-primary-muted-readable);' +
 				'--color-selected-readable:var(--color-primary-readable);' +
 				'}'
 		);
+		// The soft fill has no variable of its own: `bg-selected-muted` composites
+		// `--color-selected` at `--state-selected-opacity`, so a pinned role tints whatever
+		// surface the selection lands on instead of an opaque tint of the base surface.
+		expect(compile({ selectedColor: 'primary' })).not.toContain('--color-selected-muted:');
 	});
 
 	it('emits the transient pair one variable each', () => {

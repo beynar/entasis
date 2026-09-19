@@ -2,7 +2,7 @@ import type {
 	EventCalendarItem,
 	EventCalendarProposedUpdate,
 	EventCalendarResource
-} from '$lib/components/EventCalendar/index.js';
+} from 'svelai/event-calendar';
 
 export type MeetingFields = {
 	owner: string;

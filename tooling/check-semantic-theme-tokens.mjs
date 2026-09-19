@@ -708,8 +708,15 @@ function checkClasses(source, filename) {
 					`${relative}: arbitrary spacing needs a documented geometry exception: ${token}`
 				);
 		}
+		// The utility that reads `--radius-parent` / `--pad-parent-*`. Only the three forms the
+		// engine emits are utilities — `rounded-<step>-concentric`, `rounded-t-…`, `rounded-b-…`
+		// — so a per-corner spelling stays a typo the checker catches rather than a class that
+		// silently does nothing. Concentricity itself is the cascade's job now: the container's
+		// own `rounded-*` and `p-*` publish the radius and the gap, so there is no declaration
+		// left to enforce.
 		if (
 			utility.startsWith('rounded') &&
+			!/^rounded(?:-[tb])?-(?:xs|sm|md|lg|xl|2xl|3xl|4xl)-concentric$/.test(utility) &&
 			!/^rounded(?:-(?:[trblse]|tl|tr|br|bl|ss|se|ee|es))?-(?:none|full|xs|sm|md|lg|xl|2xl|3xl|4xl|\[inherit\]|\[var\(--[^\]]+\])$/.test(
 				utility
 			)
@@ -802,10 +809,17 @@ async function inspectSource(filename, source) {
 			for (const declaration of statement.declarationList.declarations) {
 				if (!ts.isIdentifier(declaration.name) || !declaration.initializer) continue;
 				bindings.set(declaration.name.text, declaration.initializer);
+				// A theme is an object literal OR a factory that returns one. Reading only the
+				// object literal left every class string inside an exported arrow-function
+				// factory unswept — `buildMarkdownStreamdownTheme` shipped a raw `shadow`, an
+				// off-scale `/80` muted step and a numeric `space-y-2` behind that hole, none of
+				// which any rule ever saw.
 				if (
 					isExported(statement) &&
 					/Theme$/.test(declaration.name.text) &&
-					ts.isObjectLiteralExpression(unwrap(declaration.initializer))
+					(ts.isObjectLiteralExpression(unwrap(declaration.initializer)) ||
+						ts.isArrowFunction(declaration.initializer) ||
+						ts.isFunctionExpression(declaration.initializer))
 				)
 					exportedThemes.push(declaration);
 			}

@@ -1,10 +1,93 @@
-// Compiles every block against the packaged `dist` the way a real consumer would.
+// Compiles every block against the packaged `dist` the way a real consumer would, and
+// checks that every bare module `dist` imports is one that consumer's install provides.
 // Documentation code fences are checked separately by `check-doc-fences.mjs`.
-import { cp, mkdir } from 'node:fs/promises';
+import { cp, mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import ts from 'typescript';
 import { createConsumerFixture, listFiles, repositoryRoot } from './consumer-fixture.mjs';
 
 const blockRoot = path.join(repositoryRoot, 'src/routes/blocks');
+const manifest = JSON.parse(await readFile(path.join(repositoryRoot, 'package.json'), 'utf8'));
+
+// `skipLibCheck` hides unresolved imports inside `dist/**/*.d.ts`, so svelte-check alone
+// cannot prove the package resolves. Read the emitted modules instead: every bare specifier
+// must be declared as a dependency or a peer dependency, which is exactly what the fixture
+// links. This is what catches a framework import (`$app/*`) or a runtime dependency that
+// was moved to an optional peer without its components documenting the install.
+// `ts.preProcessFile` sees real imports only, so the import examples inside the docs
+// constants (`*.mcp.js`, the icon guide) are not mistaken for dependencies.
+const scriptRe = /<script[^>]*>([\s\S]*?)<\/script>/g;
+// SvelteKit's virtual modules are provided by the `@sveltejs/kit` peer.
+const packageOf = (specifier) =>
+	specifier.startsWith('$app/') || specifier.startsWith('$env/') || specifier === '$service-worker'
+		? '@sveltejs/kit'
+		: specifier.startsWith('@')
+			? specifier.split('/').slice(0, 2).join('/')
+			: specifier.split('/')[0];
+const importsOf = (source) =>
+	ts.preProcessFile(source, true, true).importedFiles.map((entry) => entry.fileName);
+
+const declared = new Set([
+	...Object.keys(manifest.dependencies ?? {}),
+	...Object.keys(manifest.peerDependencies ?? {}),
+	// The package may reference its own entrypoints, and `svelte/*` is the framework itself.
+	'svelai',
+	'svelte'
+]);
+const optionalPeers = new Set(
+	Object.entries(manifest.peerDependenciesMeta ?? {})
+		.filter(([, meta]) => meta?.optional)
+		.map(([name]) => name)
+);
+// Whatever `files` excludes never reaches a consumer, so it is not consumer surface.
+const unpublished = (manifest.files ?? [])
+	.filter((entry) => entry.startsWith('!'))
+	.map(
+		(entry) =>
+			new RegExp(
+				`^${entry
+					.slice(1)
+					.replace(/[.+^${}()|[\]\\]/g, '\\$&')
+					.replace(/\*\*\/|\*/g, (wildcard) => (wildcard === '*' ? '[^/]*' : '(?:.*/)?'))}$`
+			)
+	);
+const distFiles = await listFiles(path.join(repositoryRoot, 'dist'), (file) => {
+	if (!/\.(js|svelte|d\.ts)$/.test(file)) return false;
+	const published = path.relative(repositoryRoot, file).split(path.sep).join('/');
+	return !unpublished.some((pattern) => pattern.test(published));
+});
+const undeclared = new Map();
+const optionalUse = new Map();
+for (const file of distFiles) {
+	const source = await readFile(file, 'utf8');
+	const specifiers = file.endsWith('.svelte')
+		? [...source.matchAll(scriptRe)].flatMap((match) => importsOf(match[1]))
+		: importsOf(source);
+	for (const specifier of specifiers) {
+		if (specifier.startsWith('.') || specifier.startsWith('/') || specifier.startsWith('node:')) {
+			continue;
+		}
+		const name = packageOf(specifier);
+		const relative = path.relative(repositoryRoot, file);
+		if (!declared.has(name)) {
+			if (!undeclared.has(name)) undeclared.set(name, `${specifier} in ${relative}`);
+		} else if (optionalPeers.has(name)) {
+			if (!optionalUse.has(name)) optionalUse.set(name, new Set());
+			optionalUse.get(name).add(path.dirname(relative).split(path.sep).join('/'));
+		}
+	}
+}
+if (undeclared.size) {
+	throw new Error(
+		`The packaged dist imports modules a consumer does not install:\n- ${[...undeclared.values()].join('\n- ')}`
+	);
+}
+const optionalOwners = [...optionalUse]
+	.map(([name, owners]) => `${name} (${[...owners].sort().join(', ')})`)
+	.sort();
+console.log(
+	`Packaged imports are all declared (${distFiles.length} modules). Optional peers: ${optionalOwners.join('; ')}.`
+);
 
 const blockFiles = await listFiles(
 	blockRoot,

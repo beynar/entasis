@@ -514,6 +514,81 @@ test('theme inventory pins the type ramp a size variant walks', async () => {
 	});
 });
 
+// `rounded-<step>-concentric` is a radius utility like any other, so the radius allowlist has to know it —
+// and only the three forms the engine emits exist, because a per-corner spelling would compile to
+// nothing and round nothing. Concentricity itself is no longer a rule: the container's own
+// `rounded-*` and `p-*` publish `--radius-parent` / `--pad-parent-*` to the subtree, so the
+// checker has no pair left to pair up.
+test('theme inventory accepts the rounded-<step>-concentric family and rejects a per-corner spelling', async () => {
+	await fixture(async ({ directory, write }) => {
+		const tool = 'tooling/check-semantic-theme-tokens.mjs';
+		await write('src/lib/components/Widget/Widget.svelte', '<div>Widget</div>');
+
+		for (const accepted of [
+			'rounded-md-concentric p-xs bg-surface',
+			'rounded-t-md-concentric',
+			'rounded-b-md-concentric',
+			'rounded-lg p-xs'
+		]) {
+			await write('src/lib/components/Widget/widget.theme.ts', themeSource(accepted));
+			await runCheck(directory, tool);
+		}
+
+		await write(
+			'src/lib/components/Widget/widget.theme.ts',
+			themeSource('rounded-tl-md-concentric')
+		);
+		assert.match(
+			await runCheck(directory, tool, 1),
+			/widget\.theme\.ts: unsupported radius utility rounded-tl-md-concentric/
+		);
+	});
+});
+
+// A theme is an object literal OR a factory that returns one. Reading only the object literal
+// left every class string inside an exported `*Theme` arrow function unswept —
+// `buildMarkdownStreamdownTheme` shipped a raw `shadow`, an off-scale `/80` muted step and a
+// numeric `space-y-2` behind exactly that hole, and no rule ever saw them. So the sweep has to
+// reach a factory, and it has to reach the class strings a factory interpolates.
+test('theme inventory sweeps a theme factory, not just a theme object', async () => {
+	await fixture(async ({ directory, write }) => {
+		const tool = 'tooling/check-semantic-theme-tokens.mjs';
+		await write('src/lib/components/Widget/Widget.svelte', '<div>Widget</div>');
+		const factory = (classes) =>
+			`const SIZES = { normal: { text: 'text-sm' } };
+			 export const buildWidgetTheme = (size) => {
+				const s = SIZES[size];
+				return { root: { base: \`${classes} \${s.text}\` } };
+			 };`;
+
+		await write('src/lib/components/Widget/widget.theme.ts', factory('rounded-lg p-xs'));
+		await runCheck(directory, tool);
+
+		// Every rule reaches in here, not a chosen one: the factory body is ordinary theme source.
+		for (const [classes, diagnostic] of [
+			['h-9', /numeric height h-9 — controls use h-control-\*, rows use h-row-\*/],
+			['text-neutral/80', /muted text text-neutral\/80 — secondary text is text-<role>\/70/],
+			['space-y-2', /numeric spacing utility space-y-2/],
+			['rounded-lg shadow-lg', /raw shadow shadow-lg — elevation comes from raised-N/]
+		]) {
+			await write('src/lib/components/Widget/widget.theme.ts', factory(classes));
+			assert.match(await runCheck(directory, tool, 1), diagnostic);
+		}
+
+		// The factory is still a theme export, so it still has to name its owner — which is what
+		// keeps `buildStreamdownTheme`-shaped names from re-opening the hole by drifting out of
+		// the sweep's sight.
+		await write(
+			'src/lib/components/Widget/widget.theme.ts',
+			factory('rounded-lg p-xs').replace(/buildWidgetTheme/g, 'buildGadgetTheme')
+		);
+		assert.match(
+			await runCheck(directory, tool, 1),
+			/widget\.theme\.ts: theme export buildGadgetTheme does not name its owner/
+		);
+	});
+});
+
 // Elevation is the one surface rule that also reaches component markup and the `.mcp.ts`
 // snippets: a `class="shadow-lg"` in a template, or a snippet teaching `hover:shadow-lg`, puts
 // the raw value back in front of the reader exactly as loudly as a theme file would.

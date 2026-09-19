@@ -5,7 +5,7 @@ import type { MarkdownSize } from './markdown.props.js';
 import type { Sizes } from '$lib/types/theme.js';
 
 // The root wrapper part. Owns the overall type/spacing scale for the rendered
-// markdown; the size variant is echoed into `buildStreamdownTheme` so every
+// markdown; the size variant is echoed into `buildMarkdownStreamdownTheme` so every
 // child element scales in sync.
 const defaultMarkdownRoot = cva({
 	base: 'w-full min-w-0',
@@ -126,12 +126,12 @@ const SIZES: Record<MarkdownSize, SizeScale> = {
  * `<Streamdown theme={...}>`; it deep-merges over the built-in `tailwind` base
  * theme, so any key omitted here still falls back safely.
  */
-export const buildStreamdownTheme = (size: MarkdownSize): StreamdownProps['theme'] => {
+export const buildMarkdownStreamdownTheme = (size: MarkdownSize): StreamdownProps['theme'] => {
 	const s = SIZES[size];
 
 	return {
 		link: {
-			base: 'text-primary-readable wrap-anywhere font-medium underline hover:text-primary-readable/80',
+			base: 'text-primary-readable wrap-anywhere font-medium underline underline-offset-4',
 			blocked: 'text-neutral/70'
 		},
 		h1: {
@@ -253,7 +253,7 @@ export const buildStreamdownTheme = (size: MarkdownSize): StreamdownProps['theme
 			base: `state-layer text-neutral/70 ${s.smallText} rounded-full bg-neutral-muted cursor-pointer border border-neutral-muted tabular-nums min-w-5 min-h-5 outline-none focus:ring-1 focus:ring-focus/50`
 		},
 		descriptionList: {
-			base: `${s.blockMargin} space-y-2`
+			base: `${s.blockMargin} space-y-md`
 		},
 		descriptionTerm: {
 			base: 'font-semibold text-neutral border-l-2 border-neutral-muted pl-xl'
@@ -273,7 +273,10 @@ export const buildStreamdownTheme = (size: MarkdownSize): StreamdownProps['theme
 			},
 			list: {
 				base: 'grid gap-md',
-				item: 'state-layer grid gap-xs rounded-sm p-md',
+				// Flush inside the citation popover's `p-md`, so the row keeps its `sm` step but is
+				// capped by the popover's `rounded-lg`: `min(4px, 12 - 8)` = 4px, instead of
+				// hard-coding a radius beside it.
+				item: 'state-layer grid gap-xs rounded-sm-concentric p-md',
 				title: 'line-clamp-1 font-semibold text-sm',
 				url: 'flex items-center gap-md text-xs text-neutral/70',
 				favicon: 'h-3 w-3 rounded-sm'
@@ -282,8 +285,10 @@ export const buildStreamdownTheme = (size: MarkdownSize): StreamdownProps['theme
 		components: {
 			button:
 				'state-layer disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer p-xs text-neutral/70 transition-[color,background-color,opacity] hover:text-neutral rounded-sm flex items-center justify-center w-6 h-6',
+			// Same recipe as the real Popover panel at `size="normal"`: the elevation engine draws
+			// the shadow and the hairline together, so this one does not paint its own border.
 			popover:
-				'min-w-[250px] max-w-md fixed z-[1000] max-h-md overflow-y-auto rounded-lg bg-surface-floating border border-neutral-muted p-md shadow'
+				'min-w-[250px] max-w-md fixed z-[1000] max-h-md overflow-y-auto rounded-lg bg-surface-floating raised-3 p-md'
 		}
 	};
 };

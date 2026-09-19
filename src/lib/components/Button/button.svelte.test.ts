@@ -1,12 +1,13 @@
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen } from '@testing-library/svelte';
+import { fireEvent, screen } from '@testing-library/svelte';
 import { describe, expect, test, vi } from 'vitest';
 import Button from './Button.svelte';
+import { renderInTheme } from '../Theme/renderInTheme.test-helper.js';
 
 describe('Button behavior', () => {
 	test('keeps enabled buttons natively interactive', async () => {
 		const onclick = vi.fn();
-		render(Button, { props: { children: 'Save', onclick } });
+		renderInTheme(Button, { children: 'Save', onclick });
 
 		const button = screen.getByRole('button', { name: 'Save' });
 		expect(button).not.toBeDisabled();
@@ -20,7 +21,7 @@ describe('Button behavior', () => {
 
 	test('uses native disabled button behavior', async () => {
 		const onclick = vi.fn();
-		render(Button, { props: { children: 'Save', disabled: true, onclick } });
+		renderInTheme(Button, { children: 'Save', disabled: true, onclick });
 
 		const button = screen.getByRole('button', { name: 'Save' });
 		expect(button).toBeDisabled();
@@ -32,9 +33,7 @@ describe('Button behavior', () => {
 
 	test('keeps enabled anchors as native links', () => {
 		const onclick = vi.fn();
-		render(Button, {
-			props: { children: 'Continue', href: '#destination', onclick }
-		});
+		renderInTheme(Button, { children: 'Continue', href: '#destination', onclick });
 
 		const anchor = screen.getByRole('link', { name: 'Continue' });
 		expect(anchor).toHaveAttribute('href', '#destination');
@@ -48,9 +47,7 @@ describe('Button behavior', () => {
 
 	test('blocks disabled anchor pointer and keyboard activation', async () => {
 		const onclick = vi.fn();
-		render(Button, {
-			props: { children: 'Continue', href: '#destination', disabled: true, onclick }
-		});
+		renderInTheme(Button, { children: 'Continue', href: '#destination', disabled: true, onclick });
 
 		const anchor = screen.getByRole('link', { name: 'Continue' });
 		expect(anchor).not.toHaveAttribute('href');
@@ -68,9 +65,7 @@ describe('Button behavior', () => {
 	test('passes native pointer events to pointer handlers', async () => {
 		const onpointerenter = vi.fn();
 		const onpointerleave = vi.fn();
-		render(Button, {
-			props: { children: 'Hover', onpointerenter, onpointerleave }
-		});
+		renderInTheme(Button, { children: 'Hover', onpointerenter, onpointerleave });
 
 		const button = screen.getByRole('button', { name: 'Hover' });
 		const enter = new PointerEvent('pointerenter');

@@ -68,8 +68,13 @@ const thumbnail = cva({
 	base: 'state-layer flex w-full flex-col items-center gap-xs rounded-sm border border-transparent p-sm text-xs text-neutral/70 outline-none focus-visible:ring-2 focus-visible:ring-focus/50'
 });
 const thumbnailActive = cva({ base: `border-selected ${selectedSoft}` });
+// The white page sits flush inside the thumbnail button's `p-sm`, so `rounded-sm-concentric` caps
+// its own `sm` step at what the button's `rounded-sm` and `p-sm` leave: `min(4px, 4 - 6)` → 0, a
+// square corner, which is what a box tighter than its container's padding actually has. Its own
+// `p-xs` is not subtracted twice — a padding utility publishes onto its children, never onto
+// itself — and nothing it renders inside is rounded anyway.
 const thumbnailPreview = cva({
-	base: 'relative flex w-full items-start justify-center overflow-hidden rounded-sm bg-white p-xs text-left text-[5px] leading-tight text-black lift-1'
+	base: 'relative flex w-full items-start justify-center overflow-hidden rounded-sm-concentric bg-white p-xs text-left text-[5px] leading-tight text-black lift-1'
 });
 const thumbnailCanvas = cva({ base: 'block h-auto max-h-full max-w-full bg-white' });
 const surface = cva({ base: 'relative min-h-0 min-w-0 flex-1' });

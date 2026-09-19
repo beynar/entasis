@@ -1,19 +1,26 @@
-import { parse } from 'svelte/compiler';
+import { parse, type AST } from 'svelte/compiler';
 import { Node, type ObjectLiteralExpression, type Project, type SourceFile } from 'ts-morph';
 import type { ComponentStructure, StructureNode, ThemePart, ThemeVariant } from './types.js';
 
 /*
- * Svelte's compiler AST types are verbose and version-unstable, so template
- * nodes are traversed as `any`. Every access is guarded and the shapes are
- * documented inline; this is the pragmatic boundary for AST walking.
+ * ESTree types are reached through `AST` rather than imported from `estree`:
+ * `@types/estree` is a transitive dependency of svelte, not a direct one here.
  */
+/** Any template or ESTree node (`AST.SvelteNode` spans both). */
+type EstreeNode = AST.SvelteNode;
+/** A template node as it appears in a fragment's `nodes`. */
+type TemplateNode = AST.Fragment['nodes'][number];
+/** An embedded expression, e.g. the test of an `{#if}`. */
+type Expr = AST.IfBlock['test'];
+type SimpleCall = Extract<Expr, { type: 'CallExpression' }>;
+type ObjectPattern = Extract<AST.SnippetBlock['parameters'][number], { type: 'ObjectPattern' }>;
 
 type Ctx = {
 	source: string;
 	/** Identifier holding the theme (`const classes = $derived(useXTheme(..))`). */
 	classesId: string;
 	/** Local `{#snippet name}` bodies, inlined where `{@render name()}` appears. */
-	snippets: Map<string, any>;
+	snippets: Map<string, AST.Fragment>;
 	/** Snippet names currently being inlined, to stop recursive expansion. */
 	visited: Set<string>;
 	/** Literal prop defaults from `$props()` destructuring, e.g. `icon` -> `math`. */
@@ -53,7 +60,7 @@ export function extractComponentStructure(
 	componentName: string,
 	parts: ThemePart[]
 ): ComponentStructure {
-	const root: any = parse(source, { modern: true });
+	const root = parse(source, { modern: true });
 	const ctx: Ctx = {
 		source,
 		classesId: findClassesIdentifier(root.instance) ?? 'classes',
@@ -429,13 +436,13 @@ function literalString(node: Node | undefined): string | undefined {
 
 // --- template walking ---------------------------------------------------
 
-function walkFragment(fragment: any, ctx: Ctx): RawNode[] {
+function walkFragment(fragment: AST.Fragment | null | undefined, ctx: Ctx): RawNode[] {
 	const out: RawNode[] = [];
 	for (const node of fragment?.nodes ?? []) out.push(...walkNode(node, ctx));
 	return out;
 }
 
-function walkNode(node: any, ctx: Ctx): RawNode[] {
+function walkNode(node: TemplateNode, ctx: Ctx): RawNode[] {
 	switch (node.type) {
 		case 'RegularElement':
 		case 'SvelteElement': {
@@ -445,7 +452,7 @@ function walkNode(node: any, ctx: Ctx): RawNode[] {
 		case 'Component':
 		case 'SvelteComponent':
 		case 'SvelteSelf': {
-			const name = node.name ?? 'svelte:self';
+			const name = node.name;
 			if (name === 'Slot') return [buildSlotNode(node, ctx)];
 			return [element('component', name, node, ctx)];
 		}
@@ -468,9 +475,9 @@ function walkNode(node: any, ctx: Ctx): RawNode[] {
 }
 
 /** Flatten an `{#if}/{:else if}/{:else}` chain into an ordered list of branches. */
-function flattenIf(node: any, ctx: Ctx): Branch[] {
+function flattenIf(node: AST.IfBlock, ctx: Ctx): Branch[] {
 	const branches: Branch[] = [];
-	let current = node;
+	let current: AST.IfBlock | null = node;
 	while (current) {
 		branches.push({
 			test: raw(ctx, current.test),
@@ -479,12 +486,11 @@ function flattenIf(node: any, ctx: Ctx): Branch[] {
 			}),
 			nodes: walkFragment(current.consequent, ctx)
 		});
-		const alternate = current.alternate;
-		if (!alternate?.nodes?.length) break;
-		const elseif =
-			alternate.nodes.length === 1 && alternate.nodes[0].type === 'IfBlock'
-				? alternate.nodes[0]
-				: null;
+		const alternate: AST.Fragment | null = current.alternate;
+		if (!alternate?.nodes.length) break;
+		const first: TemplateNode = alternate.nodes[0];
+		const elseif: AST.IfBlock | null =
+			alternate.nodes.length === 1 && first.type === 'IfBlock' ? first : null;
 		if (elseif?.elseif) {
 			current = elseif;
 		} else {
@@ -496,7 +502,7 @@ function flattenIf(node: any, ctx: Ctx): Branch[] {
 }
 
 /** A `{@render x()}`: inline a local snippet transparently, mark `children`/icon snippets. */
-function walkRenderTag(node: any, ctx: Ctx): RawNode[] {
+function walkRenderTag(node: AST.RenderTag, ctx: Ctx): RawNode[] {
 	const call = node.expression;
 	// `call` may be a ChainExpression (`children?.(…)`); leadingIdentifier unwraps it.
 	const name = leadingIdentifier(call);
@@ -513,11 +519,11 @@ function walkRenderTag(node: any, ctx: Ctx): RawNode[] {
 	}
 	// A non-local snippet (e.g. a built-in icon) can still apply a theme part via a
 	// class argument: `{@render caretDownIcon({ class: classes.icon(...) })}`.
-	const themePart = call ? findClassesMember(call, ctx.classesId) : undefined;
+	const themePart = findClassesMember(call, ctx.classesId);
 	return [{ kind: 'snippet-ref', tag: name ?? raw(ctx, call), ...(themePart && { themePart }) }];
 }
 
-function buildSlotNode(node: any, ctx: Ctx): RawNode {
+function buildSlotNode(node: AST.ElementLike, ctx: Ctx): RawNode {
 	const renderAttr = getAttr(node, 'render');
 	const renderExpr = attrExpression(renderAttr);
 	const payloadAttr = getAttr(node, 'payload');
@@ -543,11 +549,11 @@ function buildSlotNode(node: any, ctx: Ctx): RawNode {
 // --- attributes ---------------------------------------------------------
 
 /** The theme part applied via `class={classes.<part>()}` on a node, if any. */
-function themePartOf(node: any, ctx: Ctx): string | undefined {
-	const classAttr = node.attributes?.find((a: any) => a.type === 'Attribute' && a.name === 'class');
+function themePartOf(node: AST.ElementLike, ctx: Ctx): string | undefined {
+	const classAttr = getAttr(node, 'class');
 	if (!classAttr) return undefined;
 	for (const value of normAttrValue(classAttr.value)) {
-		if (value?.type !== 'ExpressionTag') continue;
+		if (value.type !== 'ExpressionTag') continue;
 		const part = findClassesMember(value.expression, ctx.classesId);
 		if (part) return part;
 	}
@@ -555,15 +561,15 @@ function themePartOf(node: any, ctx: Ctx): string | undefined {
 }
 
 /** First `classes.<part>` member access in an ESTree expression. */
-function findClassesMember(expr: any, classesId: string): string | undefined {
+function findClassesMember(expr: unknown, classesId: string): string | undefined {
 	let found: string | undefined;
 	walkEstree(expr, (n) => {
 		if (
 			!found &&
 			n.type === 'MemberExpression' &&
-			n.object?.type === 'Identifier' &&
+			n.object.type === 'Identifier' &&
 			n.object.name === classesId &&
-			n.property?.type === 'Identifier'
+			n.property.type === 'Identifier'
 		) {
 			found = n.property.name;
 		}
@@ -571,67 +577,58 @@ function findClassesMember(expr: any, classesId: string): string | undefined {
 	return found;
 }
 
-function getAttr(node: any, name: string): any {
-	return node.attributes?.find((a: any) => a.type === 'Attribute' && a.name === name);
+function getAttr(node: AST.ElementLike, name: string): AST.Attribute | undefined {
+	return node.attributes.find((a): a is AST.Attribute => a.type === 'Attribute' && a.name === name);
 }
 
-function attrExpression(attr: any): any {
+function attrExpression(attr: AST.Attribute | undefined): Expr | undefined {
 	if (!attr) return undefined;
-	return normAttrValue(attr.value).find((v) => v?.type === 'ExpressionTag')?.expression;
+	return normAttrValue(attr.value).find((v) => v.type === 'ExpressionTag')?.expression;
 }
 
 /** Raw source of an attribute's expression, e.g. `title || resolve(item, key)`. */
-function attrRaw(attr: any, ctx: Ctx): string {
+function attrRaw(attr: AST.Attribute, ctx: Ctx): string {
 	const expr = attrExpression(attr);
 	if (expr) return raw(ctx, expr);
-	const text = normAttrValue(attr.value).find((v) => v?.type === 'Text');
+	const text = normAttrValue(attr.value).find((v) => v.type === 'Text');
 	return text?.data ?? '';
 }
 
 /** A string literal attribute (`as="span"`) as its value, else the raw expression. */
-function attrLiteralOrRaw(attr: any, ctx: Ctx): string {
-	const text = normAttrValue(attr.value).find((v) => v?.type === 'Text');
+function attrLiteralOrRaw(attr: AST.Attribute, ctx: Ctx): string {
+	const text = normAttrValue(attr.value).find((v) => v.type === 'Text');
 	return text ? text.data : attrRaw(attr, ctx);
 }
 
-function normAttrValue(value: any): any[] {
+function normAttrValue(value: AST.Attribute['value']): Array<AST.Text | AST.ExpressionTag> {
 	if (value === true) return [];
 	return Array.isArray(value) ? value : [value];
 }
 
 // --- helpers ------------------------------------------------------------
 
-function findClassesIdentifier(instance: any): string | undefined {
-	for (const stmt of instance?.content?.body ?? []) {
+function findClassesIdentifier(instance: AST.Script | null): string | undefined {
+	for (const stmt of instance?.content.body ?? []) {
 		if (stmt.type !== 'VariableDeclaration') continue;
 		for (const decl of stmt.declarations) {
-			if (decl.id?.type === 'Identifier' && callsThemeHook(decl.init)) return decl.id.name;
+			if (decl.id.type === 'Identifier' && callsThemeHook(decl.init)) return decl.id.name;
 		}
 	}
 	return undefined;
 }
 
 /** Literal defaults from `let { icon = 'math', ... } = $props()` -> `{ icon: 'math' }`. */
-function readPropDefaults(instance: any): Map<string, string> {
+function readPropDefaults(instance: AST.Script | null): Map<string, string> {
 	const defaults = new Map<string, string>();
-	for (const stmt of instance?.content?.body ?? []) {
-		if (stmt.type !== 'VariableDeclaration') continue;
-		for (const decl of stmt.declarations) {
-			const init = decl.init;
-			const isProps =
-				init?.type === 'CallExpression' &&
-				init.callee?.type === 'Identifier' &&
-				init.callee.name === '$props';
-			if (!isProps || decl.id?.type !== 'ObjectPattern') continue;
-			for (const prop of decl.id.properties) {
-				const value = prop.type === 'Property' ? prop.value : undefined;
-				if (
-					value?.type === 'AssignmentPattern' &&
-					value.left?.type === 'Identifier' &&
-					value.right?.type === 'Literal'
-				) {
-					defaults.set(value.left.name, String(value.right.value));
-				}
+	for (const pattern of propsPatterns(instance)) {
+		for (const prop of pattern.properties) {
+			const value = prop.type === 'Property' ? prop.value : undefined;
+			if (
+				value?.type === 'AssignmentPattern' &&
+				value.left.type === 'Identifier' &&
+				value.right.type === 'Literal'
+			) {
+				defaults.set(value.left.name, String(value.right.value));
 			}
 		}
 	}
@@ -639,35 +636,43 @@ function readPropDefaults(instance: any): Map<string, string> {
 }
 
 /** All prop identifiers destructured from `$props()` (`{ children, trigger, ... }`). */
-function readPropNames(instance: any): Set<string> {
+function readPropNames(instance: AST.Script | null): Set<string> {
 	const names = new Set<string>();
-	for (const stmt of instance?.content?.body ?? []) {
-		if (stmt.type !== 'VariableDeclaration') continue;
-		for (const decl of stmt.declarations) {
-			const init = decl.init;
-			const isProps =
-				init?.type === 'CallExpression' &&
-				init.callee?.type === 'Identifier' &&
-				init.callee.name === '$props';
-			if (!isProps || decl.id?.type !== 'ObjectPattern') continue;
-			for (const prop of decl.id.properties) {
-				if (prop.type === 'Property') {
-					const value = prop.value;
-					if (value?.type === 'Identifier') names.add(value.name);
-					else if (value?.type === 'AssignmentPattern' && value.left?.type === 'Identifier')
-						names.add(value.left.name);
-				}
+	for (const pattern of propsPatterns(instance)) {
+		for (const prop of pattern.properties) {
+			if (prop.type === 'Property') {
+				const value = prop.value;
+				if (value.type === 'Identifier') names.add(value.name);
+				else if (value.type === 'AssignmentPattern' && value.left.type === 'Identifier')
+					names.add(value.left.name);
 			}
 		}
 	}
 	return names;
 }
 
+/** The `{ ... }` destructuring patterns of every `let {..} = $props()` in the instance script. */
+function propsPatterns(instance: AST.Script | null): ObjectPattern[] {
+	const patterns: ObjectPattern[] = [];
+	for (const stmt of instance?.content.body ?? []) {
+		if (stmt.type !== 'VariableDeclaration') continue;
+		for (const decl of stmt.declarations) {
+			const init = decl.init;
+			const isProps =
+				init?.type === 'CallExpression' &&
+				init.callee.type === 'Identifier' &&
+				init.callee.name === '$props';
+			if (isProps && decl.id.type === 'ObjectPattern') patterns.push(decl.id);
+		}
+	}
+	return patterns;
+}
+
 /**
  * The literal a branch tests for when it matches a prop's default value, i.e. the
  * branch rendered "by default". `icon === 'math'` with `icon = 'math'` -> `math`.
  */
-function defaultBranchValue(test: any, defaults: Map<string, string>): string | undefined {
+function defaultBranchValue(test: unknown, defaults: Map<string, string>): string | undefined {
 	let found: string | undefined;
 	walkEstree(test, (node) => {
 		if (
@@ -682,32 +687,36 @@ function defaultBranchValue(test: any, defaults: Map<string, string>): string | 
 	return found;
 }
 
-function comparedLiteral(a: any, b: any): { name: string; value: string } | null {
-	if (a?.type === 'Identifier' && b?.type === 'Literal')
+function comparedLiteral(a: EstreeNode, b: EstreeNode): { name: string; value: string } | null {
+	if (a.type === 'Identifier' && b.type === 'Literal')
 		return { name: a.name, value: String(b.value) };
 	return null;
 }
 
 /** True for `useXTheme(..)` or `$derived(useXTheme(..))`. */
-function callsThemeHook(init: any): boolean {
-	let call = init;
-	if (call?.type === 'CallExpression' && call.callee?.name === '$derived')
-		call = call.arguments?.[0];
-	const name = call?.type === 'CallExpression' ? call.callee?.name : undefined;
+function callsThemeHook(init: EstreeNode | null | undefined): boolean {
+	let call: EstreeNode | null | undefined = init;
+	if (call?.type === 'CallExpression' && calleeName(call) === '$derived') call = call.arguments[0];
+	const name = call?.type === 'CallExpression' ? calleeName(call) : undefined;
 	return !!name && (/^use[A-Z]\w*Theme$/.test(name) || name === 'useComponentTheme');
 }
 
-function collectSnippets(fragment: any): Map<string, any> {
-	const map = new Map<string, any>();
+/** The callee name of a plain `foo(..)` call, else undefined (member/computed callees). */
+function calleeName(call: SimpleCall): string | undefined {
+	return call.callee.type === 'Identifier' ? call.callee.name : undefined;
+}
+
+function collectSnippets(fragment: AST.Fragment): Map<string, AST.Fragment> {
+	const map = new Map<string, AST.Fragment>();
 	walkAll(fragment, (node) => {
-		if (node.type === 'SnippetBlock' && node.expression?.name)
+		if (node.type === 'SnippetBlock' && node.expression.name)
 			map.set(node.expression.name, node.body);
 	});
 	return map;
 }
 
 /** Leftmost identifier name of an expression (`title` from `title || resolve()`). */
-function leadingIdentifier(expr: any): string | undefined {
+function leadingIdentifier(expr: EstreeNode | null | undefined): string | undefined {
 	if (!expr) return undefined;
 	switch (expr.type) {
 		case 'Identifier':
@@ -734,26 +743,39 @@ function collectUsedParts(nodes: StructureNode[], used: Set<string>): void {
 	}
 }
 
-function raw(ctx: Ctx, node: any): string {
-	if (typeof node?.start !== 'number' || typeof node?.end !== 'number') return '';
-	return ctx.source.slice(node.start, node.end);
+/** Source text of a node. Svelte adds `start`/`end` to ESTree nodes; the types don't declare them. */
+function raw(ctx: Ctx, node: EstreeNode | AST.SvelteNode | null | undefined): string {
+	const span = node as { start?: number; end?: number } | null | undefined;
+	if (typeof span?.start !== 'number' || typeof span.end !== 'number') return '';
+	return ctx.source.slice(span.start, span.end);
 }
+
+/** Keys under which a template node can hold a sub-fragment, across element/block kinds. */
+const FRAGMENT_KEYS = [
+	'fragment',
+	'body',
+	'fallback',
+	'consequent',
+	'alternate',
+	'pending',
+	'then',
+	'catch'
+] as const;
 
 /** Sub-fragments a template node can hold, across element/block kinds. */
-function childFragments(node: any): any[] {
-	return [
-		node.fragment,
-		node.body,
-		node.fallback,
-		node.consequent,
-		node.alternate,
-		node.pending,
-		node.then,
-		node.catch
-	].filter((frag) => frag?.nodes);
+function childFragments(node: AST.SvelteNode): AST.Fragment[] {
+	const record = node as unknown as Record<string, unknown>;
+	return FRAGMENT_KEYS.map((key) => record[key]).filter(isFragment);
 }
 
-function walkAll(fragment: any, visit: (node: any) => void): void {
+function isFragment(value: unknown): value is AST.Fragment {
+	return !!value && typeof value === 'object' && Array.isArray((value as AST.Fragment).nodes);
+}
+
+function walkAll(
+	fragment: AST.Fragment | null | undefined,
+	visit: (node: TemplateNode) => void
+): void {
 	for (const node of fragment?.nodes ?? []) {
 		visit(node);
 		for (const frag of childFragments(node)) walkAll(frag, visit);
@@ -761,27 +783,34 @@ function walkAll(fragment: any, visit: (node: any) => void): void {
 }
 
 /** Depth-first walk of an ESTree expression's child nodes. */
-function walkEstree(node: any, visit: (node: any) => void): void {
-	if (!node || typeof node.type !== 'string') return;
-	visit(node);
-	for (const key of Object.keys(node)) {
+function walkEstree(node: unknown, visit: (node: EstreeNode) => void): void {
+	if (!node || typeof node !== 'object') return;
+	const record = node as Record<string, unknown>;
+	if (typeof record.type !== 'string') return;
+	visit(node as EstreeNode);
+	for (const key of Object.keys(record)) {
 		if (key === 'start' || key === 'end' || key === 'loc' || key === 'range') continue;
-		const value = node[key];
+		const value = record[key];
 		if (Array.isArray(value)) value.forEach((child) => walkEstree(child, visit));
 		else if (value && typeof value === 'object') walkEstree(value, visit);
 	}
 }
 
-function element(kind: 'element' | 'component', tag: string, node: any, ctx: Ctx): RawNode {
+function element(
+	kind: 'element' | 'component',
+	tag: string,
+	node: AST.ElementLike,
+	ctx: Ctx
+): RawNode {
 	const themePart = themePartOf(node, ctx);
 	// `{#snippet name}` blocks nested in a child component are that component's slot
 	// content authored here (e.g. `<Popover>{#snippet children}…`). walkNode skips
 	// SnippetBlocks (they're definitions), so expand their bodies inline as children.
 	const slotBodies =
 		kind === 'component'
-			? (node.fragment?.nodes ?? [])
-					.filter((child: any) => child.type === 'SnippetBlock')
-					.flatMap((block: any) => walkFragment(block.body, ctx))
+			? node.fragment.nodes
+					.filter((child) => child.type === 'SnippetBlock')
+					.flatMap((block) => walkFragment(block.body, ctx))
 			: [];
 	return {
 		kind,
@@ -793,24 +822,17 @@ function element(kind: 'element' | 'component', tag: string, node: any, ctx: Ctx
 }
 
 /** Visually-hidden elements (`class="sr-only"`, `aria-hidden`) aren't part of the visual surface. */
-function isHidden(node: any): boolean {
+function isHidden(node: AST.ElementLike): boolean {
 	const classAttr = getAttr(node, 'class');
 	if (classAttr) {
 		for (const value of normAttrValue(classAttr.value)) {
-			if (
-				value?.type === 'Text' &&
-				String(value.data ?? '')
-					.split(/\s+/)
-					.includes('sr-only')
-			)
-				return true;
+			if (value.type === 'Text' && value.data.split(/\s+/).includes('sr-only')) return true;
 		}
 	}
 	const ariaHidden = getAttr(node, 'aria-hidden');
 	if (ariaHidden) {
 		const values = normAttrValue(ariaHidden.value);
-		if (values.some((v) => v?.type === 'Text' && String(v.data ?? '').trim() === 'true'))
-			return true;
+		if (values.some((v) => v.type === 'Text' && v.data.trim() === 'true')) return true;
 	}
 	return false;
 }

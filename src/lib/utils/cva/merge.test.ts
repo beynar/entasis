@@ -125,6 +125,20 @@ describe('cx conflict resolution', () => {
 			expect(cx('text-color-muted-readable', 'text-neutral')).toBe('text-neutral');
 			expect(cx('ring-primary/50', 'ring-color/50')).toBe('ring-color/50');
 			expect(cx('border-s-primary', 'border-s-color')).toBe('border-s-color');
+			// The `selected` state role is a background colour like any other, so an override
+			// written after it still wins.
+			expect(cx('bg-primary', 'bg-selected-muted')).toBe('bg-selected-muted');
+			expect(cx('bg-selected-muted', 'bg-primary')).toBe('bg-primary');
+		});
+
+		it('resolves rounded-<step>-concentric against the core corner groups', () => {
+			// `rounded-md-concentric` is a radius: an override after it wins, and it overrides one
+			// before it.
+			expect(cx('rounded-lg', 'rounded-md-concentric')).toBe('rounded-md-concentric');
+			expect(cx('rounded-md-concentric', 'rounded-lg')).toBe('rounded-lg');
+			expect(cx('rounded-sm-concentric', 'rounded-md-concentric')).toBe('rounded-md-concentric');
+			expect(cx('rounded-t-lg', 'rounded-t-md-concentric')).toBe('rounded-t-md-concentric');
+			expect(cx('rounded-b-md-concentric', 'rounded-b-sm')).toBe('rounded-b-sm');
 		});
 	});
 
@@ -222,6 +236,10 @@ describe('plugin utility coverage', () => {
 		}
 		// Resolved by tailwind-merge's own groups: colour roles are `<util>-<colour>` values.
 		const coreCovered = new Set([
+			// The `selected` STATE ROLE family is spelled `bg-selected`/`bg-selected-muted`, which the
+			// core `bg` colour group already resolves — `bg-primary bg-selected-muted` collapses to
+			// the last one, which is the whole point of listing it here rather than shadowing it.
+			'bg-selected',
 			'text-color',
 			'bg-color',
 			'ring-color',
@@ -271,9 +289,15 @@ describe('plugin utility coverage', () => {
 			'state-layer',
 			'ui-spinner'
 		]);
-		// Edge forms (`scroll-fade-t`, `-s`, ...) belong to the family they suffix.
+		// Edge forms (`scroll-fade-t`, `-s`, ...) belong to the family they suffix — including the
+		// ones where the edge sits in the middle of the name (`rounded-t-md-concentric` is the top-corner
+		// form of `rounded-md-concentric`, because Tailwind's corner utilities name the edge first).
 		const normalised = new Set(
-			[...families].map((family) => family.replace(/-(?:t|b|s|e|l|r)$/, ''))
+			[...families].map((family) =>
+				family
+					.replace(/-(?:t|b|s|e|l|r)$/, '')
+					.replace(/^rounded-(?:t|b|s|e|l|r|tl|tr|br|bl|ss|se|ee|es)-/, 'rounded-')
+			)
 		);
 		const uncovered = [...normalised].filter(
 			(family) =>

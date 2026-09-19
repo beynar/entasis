@@ -35,8 +35,8 @@
 		getWeekNumber,
 		startOfZonedDay
 	} from './eventCalendar.date.js';
+	import { eventCalendarMonthDayTarget } from './eventCalendar.targets.js';
 	import type { EventCalendarLaneLayout } from './eventCalendar.layout.js';
-	import { serializeEventCalendarTarget } from './eventCalendar.interactions.svelte.js';
 	import type { EventCalendarMonthCellPayload } from './eventCalendar.props.js';
 	import type { EventCalendarState } from './eventCalendar.state.svelte.js';
 	import type { EventCalendarDateOnly, EventCalendarSegment } from './eventCalendar.types.js';
@@ -147,8 +147,7 @@
 	}
 
 	function handleDayClick(day: EventCalendarDateOnly, event: MouseEvent): void {
-		if (a11y.activateMutationTarget({ key: `month:${day}`, view: 'month', allDay: true, day }))
-			return;
+		if (a11y.activateMutationTarget(eventCalendarMonthDayTarget(day))) return;
 		if (calendar.interaction.shouldSuppressSlotClick()) return;
 		if (!enabledDays.has(day)) return;
 		(event.currentTarget as HTMLElement).focus();
@@ -228,12 +227,7 @@
 			overflowCount: hiddenSegments.length,
 			defaultContent: defaultMonthCell
 		} satisfies EventCalendarMonthCellPayload<TItemFields>}
-		{@const dropTarget = {
-			key: `month:${day}`,
-			view: 'month' as const,
-			allDay: true as const,
-			day
-		}}
+		{@const dropTarget = eventCalendarMonthDayTarget(day)}
 		<div
 			role="gridcell"
 			aria-label={isRenderedDay ? getDayLabel(day) : undefined}
@@ -250,9 +244,6 @@
 			data-drop-view={isRenderedDay ? 'month' : undefined}
 			data-drop-all-day={isRenderedDay ? 'true' : undefined}
 			data-drop-disabled={isDisabled || undefined}
-			data-event-calendar-target={isRenderedDay
-				? serializeEventCalendarTarget(dropTarget)
-				: undefined}
 			data-calendar-instance-id={calendar.interaction.instanceId}
 			data-event-calendar-target-key={dropTarget.key}
 			class={classes.monthCell({

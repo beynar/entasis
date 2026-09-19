@@ -1,14 +1,18 @@
 # EventCalendar performance envelope
 
-The calendar renders only the active view. Occurrences are keyed, date profiles and
-formatters are cached by their owning inputs, and the exact item-index cache retains the
-eight most recently used profiles for each immutable item collection. The shared schedule
-cache retains 32 entries. Pointer movement is sampled through `requestAnimationFrame`; it
-does not rebuild the item index per frame.
+The calendar renders only the active view. Occurrences are keyed, and projections are
+staged: item admission re-runs only when the item collection or admission-relevant options
+change, the occurrence index re-projects only when admitted items or the visible range
+change, and the date profile and resource model derive independently. View switches reuse
+admitted items without re-validation. Lane and timed-segment packers are memoized by their
+schedule keys, and formatters are cached by locale and time zone. Pointer movement is
+sampled through `requestAnimationFrame`; it does not rebuild the item index per frame.
 
 ## Measured data point
 
-This is a practical measurement, not a supported maximum or a cross-device benchmark.
+This is a practical measurement, not a supported maximum or a cross-device benchmark. It
+predates the September 2026 projection-pipeline redesign; re-run the same method before
+quoting current numbers.
 
 - Date: 2026-07-27
 - Browser: Chrome 146, headed

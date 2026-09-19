@@ -1,9 +1,10 @@
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { fireEvent, screen, waitFor } from '@testing-library/svelte';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import AIAskUserQuestion from './AIAskUserQuestion.svelte';
 import AIAskUserQuestionBinding from './AIAskUserQuestionBinding.test.svelte';
 import type { AIAskQuestion } from './aiAskUserQuestion.props.js';
+import { renderInTheme } from '../Theme/renderInTheme.test-helper.js';
 
 const scrollTo = Element.prototype.scrollTo;
 beforeAll(() => {
@@ -16,12 +17,10 @@ afterAll(() => {
 describe('AIAskUserQuestion state contract', () => {
 	test('uses the initial default once and retains later user answers', async () => {
 		const onValueChange = vi.fn();
-		const { rerender } = render(AIAskUserQuestion, {
-			props: {
-				questions: [{ id: 'name', title: 'Name' }],
-				defaultValue: { name: 'Initial' },
-				onValueChange
-			}
+		const { rerender } = renderInTheme(AIAskUserQuestion, {
+			questions: [{ id: 'name', title: 'Name' }],
+			defaultValue: { name: 'Initial' },
+			onValueChange
 		});
 		const input = screen.getByRole('textbox');
 		expect(input).toHaveValue('Initial');
@@ -37,7 +36,7 @@ describe('AIAskUserQuestion state contract', () => {
 
 	test('binds answers and does not echo parent replacements', async () => {
 		const onValueChange = vi.fn();
-		render(AIAskUserQuestionBinding, { props: { onValueChange } });
+		renderInTheme(AIAskUserQuestionBinding, { onValueChange });
 		await fireEvent.click(screen.getByRole('button', { name: 'Replace answers' }));
 		const input = screen.getByRole('textbox');
 		expect(input).toHaveValue('Parent replacement');
@@ -50,23 +49,21 @@ describe('AIAskUserQuestion state contract', () => {
 	test('ignores repeated answers and disables choices and submission', async () => {
 		const onValueChange = vi.fn();
 		const onSubmit = vi.fn();
-		const { rerender } = render(AIAskUserQuestion, {
-			props: {
-				questions: [
-					{
-						id: 'tone',
-						title: 'Tone',
-						type: 'single',
-						options: [
-							{ id: 'brief', label: 'Brief' },
-							{ id: 'detailed', label: 'Detailed' }
-						]
-					}
-				],
-				defaultValue: { tone: 'brief' },
-				onValueChange,
-				onSubmit
-			}
+		const { rerender } = renderInTheme(AIAskUserQuestion, {
+			questions: [
+				{
+					id: 'tone',
+					title: 'Tone',
+					type: 'single',
+					options: [
+						{ id: 'brief', label: 'Brief' },
+						{ id: 'detailed', label: 'Detailed' }
+					]
+				}
+			],
+			defaultValue: { tone: 'brief' },
+			onValueChange,
+			onSubmit
 		});
 		await fireEvent.click(screen.getByRole('radio', { name: 'Brief' }));
 		expect(onValueChange).not.toHaveBeenCalled();
@@ -84,7 +81,7 @@ describe('AIAskUserQuestion state contract', () => {
 	test('validates required answers and preserves the typed submit payload', async () => {
 		const question: AIAskQuestion = { id: 'notes', title: 'Notes' };
 		const onSubmit = vi.fn();
-		render(AIAskUserQuestion, { props: { questions: [question], onSubmit } });
+		renderInTheme(AIAskUserQuestion, { questions: [question], onSubmit });
 		await fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
 		expect(onSubmit).not.toHaveBeenCalled();
 		expect(await screen.findByRole('alert')).toHaveTextContent('Answer required.');

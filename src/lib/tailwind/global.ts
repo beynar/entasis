@@ -134,7 +134,7 @@ export const applyGlobalEngine = (api: PluginAPI, options?: GlobalEngineOptions)
 	// `type: 'color'` is deliberately left off: it makes Tailwind pre-mix the opacity modifier
 	// into the value before the handler sees it, which would bury the fallback chain inside the
 	// `color-mix()` instead of wrapping it. The suffix is read back out of `value` the way
-	// `parseUtility` does, so `ring-focus/50` and `bg-selected-muted/40` both stay well-formed.
+	// `parseUtility` does, so `ring-focus/50` and `text-selected-contrast/40` both stay well-formed.
 	const STATE_SUFFIX = /(-muted-readable|-muted|-contrast|-readable)/;
 	const stateUtility =
 		(attribute: string, role: 'focus' | 'selected') =>
@@ -156,8 +156,26 @@ export const applyGlobalEngine = (api: PluginAPI, options?: GlobalEngineOptions)
 		},
 		stateOptions
 	);
+	// The SELECTED fill is the one state colour that has to survive being moved between surfaces:
+	// a menu row is painted on `surface`, on `surface-raised` inside a card and on
+	// `surface-floating` inside a popover. `--color-<role>-muted` is an *opaque* tint mixed over
+	// the BASE surface, so on the lighter two it reads as a dark patch in dark mode — the
+	// submenu trigger under an open submenu was invisible. So `bg-selected-muted` composites
+	// instead: a translucent tint of the role at `--state-selected-opacity`, which lands on
+	// whatever is behind it. `bg-color-muted` (the non-state family) keeps the opaque tint —
+	// only the state family composites.
+	const selectedTint = `color-mix(in oklab, var(--color-selected, var(--color)) calc(var(--state-selected-opacity) * 100%), transparent)`;
 	matchUtilities(
-		{ 'bg-selected': stateUtility('background-color', 'selected') },
+		{
+			'bg-selected': (value: string, { modifier }: { modifier: string | null }) => {
+				const color = value === '-muted' ? selectedTint : `var(--color-selected, var(--color))`;
+				return {
+					'background-color': modifier
+						? `color-mix(in oklab, ${color} ${modifier}%, transparent)`
+						: color
+				};
+			}
+		},
 		{ ...stateOptions, values: { DEFAULT: '', muted: '-muted' } }
 	);
 	matchUtilities(

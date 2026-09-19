@@ -1,8 +1,5 @@
 <script lang="ts">
-	import {
-		EventCalendar,
-		type EventCalendarResource
-	} from '$lib/components/EventCalendar/index.js';
+	import { EventCalendar, type EventCalendarResource } from 'svelai/event-calendar';
 	import {
 		createDemoItems,
 		createDemoResources,

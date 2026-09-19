@@ -47,6 +47,9 @@ Each semantic color supports explicit \`-light\`, \`-lighter\`, \`-dark\`, \`-mu
 
 \`state-hover-opacity\` and \`state-pressed-opacity\` calibrate the CSS variables consumed by
 \`.state-layer\`. They default to 0.05/0.10 in light mode and 0.16/0.32 in dark mode.
+\`state-selected-opacity\` (0.07 light, 0.10 dark) is the alpha \`bg-selected-muted\` composites the
+selected role at: the soft selection fill is a translucent tint, not an opaque colour, so it reads
+the same on \`surface\`, \`surface-raised\` and \`surface-floating\`.
 
 ## Runtime boundary
 

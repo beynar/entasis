@@ -174,17 +174,6 @@ export function assertRenderableDateOnly(
 	);
 }
 
-export function isDateOnly(value: unknown): value is EventCalendarDateOnly {
-	if (typeof value !== 'string') return false;
-	try {
-		parseDateOnly(value);
-		return true;
-	} catch (error) {
-		if (error instanceof EventCalendarError) return false;
-		throw error;
-	}
-}
-
 export function isEventCalendarOffDay(
 	day: EventCalendarDateOnly,
 	offDays: boolean | EventCalendarOffDaysConfig,

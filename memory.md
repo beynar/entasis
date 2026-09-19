@@ -1,5 +1,14 @@
 # Albert procedural memory
 
+- For a simplification review, derive a replacement model from required behavior before treating
+  existing owners as fixed. Compare local cleanup with structural redesign, trace concrete
+  cross-cutting scenarios through each, and budget the complete replacement, including new
+  adapters. Do not infer a ceiling on LOC reduction from cleanup opportunities alone.
+- Before promising behavior parity in a redesign plan, trace each public hook through its
+  callers, not just its helper contract. Separate reusable pure work from observable callback
+  execution, error translation, generation checks, and DOM-dependent observations. Verify
+  proposed invariants against source and explicit trace witnesses; label stronger guarantees
+  as corrections or hypotheses rather than existing behavior.
 - For a dependency migration, compare the installed package with the published release, not
   unreleased website examples. Replace both the gesture layer and its semantic state contract;
   test repeated interactions, cancellation, reset, and hover across the integration boundary.

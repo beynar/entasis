@@ -3,6 +3,12 @@ export const aiChatDescription = `
 
 Assembled AI conversation surface built from AIConversation, AIThread, AIComposer, AIContext, AIModelSelector, and AIAskUserQuestion. It owns no transport.
 
+## Requires
+
+AIChat renders AIComposer, which is built on Lexical. Those packages are optional peer dependencies of svelai, so install them alongside it:
+
+\`pnpm add lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils\`
+
 ## Import
 
 \`\`\`svelte

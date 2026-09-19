@@ -22,7 +22,11 @@ const defaultPopoverContainer = cva({
 	}
 });
 
-// The visible, animated panel.
+// The visible, animated panel. The radius lives on the base and the padding on `size`, and both
+// publish to the panel's children, so everything a popover hosts that sits flush against the
+// padding box — menu rows, select options, a Command palette's items — takes
+// `rounded-<step>-concentric` and stays concentric with the panel at every size and every radius
+// preset.
 const defaultPopover = cva({
 	base: 'raised-3 bg-surface-floating text-neutral isolate h-fit w-fit rounded-lg text-sm',
 	variants: {

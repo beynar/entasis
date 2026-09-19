@@ -55,7 +55,7 @@
 			id: 'selected',
 			title: 'Selected',
 			value: 'selectedSoft · selectedSolid',
-			rule: 'Two recipes exported from svelai/theme, both on the selected state role. Soft (bg-selected-muted text-selected-muted-readable) for rows, options, tags and pressed toggles; solid (bg-selected text-selected-contrast) for a current-page pill. Each token falls back to the current role, so designTokens.selectedColor pins every selection at once.'
+			rule: 'Two recipes exported from svelai/theme, both on the selected state role. Soft (bg-selected-muted text-selected-muted-readable) for rows, options, tags and pressed toggles; solid (bg-selected text-selected-contrast) for a current-page pill. The soft fill is a translucent tint of the role at --state-selected-opacity, so it reads the same on surface, surface-raised and surface-floating. Each token falls back to the current role, so designTokens.selectedColor pins every selection at once.'
 		},
 		{
 			id: 'type',
@@ -68,6 +68,12 @@
 			title: 'Container queries',
 			value: '@container · @lg: · @max-3xl:',
 			rule: 'A component that fills its host lays itself out against its own width, never the window. The root carries @container and the parts query it, so the same field, table or player reflows identically in a page, a split pane and a 360px drawer. A layout a consumer sets per breakpoint is expressed as ResponsiveProps<T> against one shared container table. Viewport variants survive only in app chrome, whose host is the viewport, and in overlays that size to their content.'
+		},
+		{
+			id: 'nested-radius',
+			title: 'Concentric radius',
+			value: 'rounded-<step>-concentric',
+			rule: 'A child flush against the padding box of its container writes rounded-<step>-concentric: it keeps its own step on the radius ramp, capped at the outer radius minus that padding. Nothing is declared: every rounded-<step> publishes its radius to its children and p/px/py publish their gap, so the cascade computes the cap from the same --radius-* and --space-* the theme scales. The child can never cut across the container corner at any radius or spacing preset, instead of being correct at the one the author happened to be looking at.'
 		}
 	] as const;
 
@@ -155,7 +161,8 @@ const trigger = cva({ base: focusRing });
 // a whole app has to name the colour its focus rings paint.
 <Theme designTokens={{ light: { focusColor: 'primary' }, dark: { focusColor: 'primary' } }} />`;
 
-	const selectedRoleSnippet = `// bg-selected-muted  → var(--color-selected-muted, var(--color-muted))
+	const selectedRoleSnippet = `// bg-selected-muted  → color-mix(in oklab, var(--color-selected, var(--color))
+//                              calc(var(--state-selected-opacity) * 100%), transparent)
 // text-selected-muted-readable → var(--color-selected-muted-readable, var(--color-muted-readable))
 // bg-selected        → var(--color-selected, var(--color))
 // text-selected-contrast → var(--color-selected-contrast, var(--color-contrast))
@@ -173,6 +180,29 @@ const trigger = cva({ base: focusRing });
 		designTokens: { light: { focusColor: 'primary', selectedColor: 'primary' } },
 		attribute: 'data-theme'
 	}).replace(/^[^{]*\{|\}$/g, '');
+
+	// The concentric-radius demo below renders the SAME markup twice: once at the page's radius
+	// preset and once at `round`. The second box wears what `<Theme designTokens={{ radius: 'round' }}>`
+	// would emit, compiled by the real compiler and moved off `html` onto the box, so the rest of
+	// the page keeps its own radius. That is the whole point of the rule — a hand-written child
+	// radius keeps cutting across the container's corner as the preset moves, while a capped one
+	// cannot — so the demo has to be able to move the preset.
+	const roundRadius = compileThemeDesignTokens({
+		designTokens: { light: { radius: 'round' } },
+		attribute: 'data-theme'
+	}).replace(/^[^{]*\{|\}$/g, '');
+
+	const nestedRadiusSnippet = `// Nothing is declared: the container's own utilities publish to its children.
+const panel = cva({ base: 'bg-surface-raised rounded-lg p-xs' });
+const row = cva({ base: 'state-layer rounded-md-concentric px-md min-h-row-sm w-full' });
+
+// rounded-lg → .rounded-lg > * { --radius-parent: var(--radius-lg) }
+// p-xs       → .p-xs > *      { --pad-parent-x: var(--space-xs); --pad-parent-y: … }
+// rounded-md-concentric = min(var(--radius-md), var(--radius-parent) - max(x, y)):
+//
+// normal preset: min( 8px, 12 - 4 =  8px) =  8px  — a hand-written rounded-lg row would be 12px,
+//                                                   cutting across the panel's own 12px corner
+// round  preset: min(20px, 30 - 4 = 26px) = 20px  — the same guess is now 30px, still cutting`;
 
 	const elevationSnippet = `<!-- A card owns its hairline, so it is raised. -->
 <div class="bg-surface-raised rounded-lg p-lg raised-2">…</div>
@@ -268,10 +298,12 @@ const fieldHeader = cva({
 	<header class="flex max-w-3xl flex-col gap-3">
 		<h1 class="text-3xl font-semibold">Consistency rules</h1>
 		<p class="text-balance">
-			Eight axes used to drift one component at a time: focus rings, elevation, sizes, muted text,
-			hover, selection, the type ramp and responsive layout each had a dominant value and a long
-			tail written per file. Each axis now has one rule, one token, and a checker that rejects
-			anything else. This page states the rules and shows them on live components.
+			Nine axes used to drift one component at a time: focus rings, elevation, sizes, muted text,
+			hover, selection, the type ramp, responsive layout and concentric radius each had a dominant
+			value and a long tail written per file. Each axis now has one rule and one token, backed by a
+			checker that rejects anything else — or, for the concentric radius, by a cap the utilities
+			compute so it cannot be written wrong. This page states the rules and shows them on live
+			components.
 		</p>
 	</header>
 
@@ -510,10 +542,24 @@ const fieldHeader = cva({
 				<code>text-selected-muted-readable</code>. Rows, menu options, tags and pressed toggles use
 				it. The one solid exception is a current-page pill —
 				<code>bg-selected text-selected-contrast</code> — which needs to stand out from its
-				siblings. Each of those tokens falls back to the matching current-role tint (<code
-					>var(--color-selected-muted, var(--color-muted))</code
+				siblings. The soft fill is not a colour, it is a <em>tint</em>: the role composited at
+				<code>--state-selected-opacity</code> (0.07 light, 0.10 dark), so the same selected row
+				reads the same whether it sits on <code>surface</code>, on a card's
+				<code>surface-raised</code> or inside a popover's <code>surface-floating</code>. An opaque
+				tint can only be mixed over one surface, and on the other two it goes flat — in dark mode it
+				went invisible. The inks still fall back to the matching current-role token (<code
+					>var(--color-selected-muted-readable, var(--color-muted-readable))</code
 				>), so an app that pins nothing looks unchanged.
 			</p>
+		</div>
+		<div class="gap-md grid sm:grid-cols-3">
+			{#each [['surface', 'bg-surface'], ['surface-raised', 'bg-surface-raised'], ['surface-floating', 'bg-surface-floating']] as [label, surface] (label)}
+				<div class="{surface} raised-1 gap-md p-lg grid rounded-lg">
+					<span class="text-neutral/70 font-mono text-xs">{label}</span>
+					<MenuOption as="button" title="Selected option" active />
+					<MenuOption as="button" title="Resting option" />
+				</div>
+			{/each}
 		</div>
 		<div class="gap-lg grid sm:grid-cols-2">
 			<div class="bg-surface-raised raised-1 gap-md p-lg grid rounded-lg">
@@ -697,14 +743,109 @@ const fieldHeader = cva({
 		<Code language="typescript" code={containerSnippet} />
 	</section>
 
+	<section id="nested-radius" class="flex flex-col gap-5">
+		<div class="max-w-3xl">
+			<h2 class="text-lg font-semibold">9. Concentric radius</h2>
+			<p class="mt-1 text-sm leading-relaxed">
+				Two concentric rounded boxes read as concentric only when the inner radius is no larger than
+				the outer one minus the gap between them — and that gap is the container's padding. Guessing
+				it by eye is what produced the drift: a <code>rounded-lg p-xs</code> panel whose rows were
+				<code>rounded-md</code> — right at the preset it was written at and adrift at the next — and
+				a <code>rounded-xl p-sm</code> card whose header was <code>rounded-lg</code>, 12px against a
+				corner that allows 10px. Both halves of the formula are already on the container as
+				utilities, so the utilities publish them to its children and the cascade does the
+				arithmetic: nothing is declared, and every child flush against the padding box takes
+				<code>rounded-&lt;step&gt;-concentric</code> — its own step on the ramp, capped at what the corner
+				allows.
+			</p>
+		</div>
+		<!-- Both columns are the same markup; the right one wears the compiled `radius: 'round'` token.
+		     The counter-example is a row that repeats the PANEL's radius, which is the drift this rule
+		     was written against: inside `rounded-lg p-xs` a hand-written `rounded-lg` row is 12px
+		     against a corner that allows 8px, and 30px against one that allows 26px — it cuts across
+		     the panel at both presets, while the concentric row (min of its own `md` step and what the
+		     corner allows: 8px, then 20px) never does. -->
+		<div class="gap-lg grid sm:grid-cols-2">
+			{#each [['radius: normal — panel 12px, corner allows 8px', ''], ['radius: round — panel 30px, corner allows 26px', roundRadius]] as [caption, style] (caption)}
+				<div class="gap-md grid" {style}>
+					<span class="text-neutral/70 font-mono text-xs">{caption}</span>
+					<div class="bg-surface-raised raised-1 p-xs gap-xs grid rounded-lg">
+						<span class="text-neutral/70 px-md py-micro font-mono text-xs">
+							rounded-md-concentric — capped by the container
+						</span>
+						{#each ['Overview', 'Activity'] as row (row)}
+							<span
+								class="bg-primary-muted text-primary-muted-readable px-md min-h-row-sm rounded-md-concentric flex items-center text-xs"
+							>
+								{row}
+							</span>
+						{/each}
+					</div>
+					<div class="bg-surface-raised raised-1 p-xs gap-xs grid rounded-lg">
+						<span class="text-neutral/70 px-md py-micro font-mono text-xs">
+							rounded-lg — guessed once, cuts the corner
+						</span>
+						{#each ['Overview', 'Activity'] as row (row)}
+							<span
+								class="bg-neutral-muted text-neutral px-md min-h-row-sm flex items-center rounded-lg text-xs"
+							>
+								{row}
+							</span>
+						{/each}
+					</div>
+				</div>
+			{/each}
+		</div>
+		<p class="text-neutral/70 max-w-3xl text-sm leading-relaxed">
+			Every <code>rounded-&lt;step&gt;</code> emits
+			<code
+				>.rounded-&lt;step&gt; &gt; * &lbrace; --radius-parent: var(--radius-&lt;step&gt;) &rbrace;</code
+			>
+			beside its own <code>border-radius</code>, and <code>p-&lt;step&gt;</code> publishes
+			<code>--pad-parent-x</code> and <code>--pad-parent-y</code> (<code>px-*</code> and
+			<code>py-*</code> one axis each). <code>rounded-full</code> publishes infinity, so a pill's
+			flush children stay pills, and <code>rounded-none</code> publishes zero. An arbitrary value, a
+			side or corner form and a one-sided <code>pt-*</code> publish nothing: there is no step to
+			pass on, and one-sided padding is not the uniform gap a concentric corner comes from.
+			<code>rounded-&lt;step&gt;-concentric</code>
+			(with
+			<code>rounded-t-&lt;step&gt;-concentric</code> and
+			<code>rounded-b-&lt;step&gt;-concentric</code> for a flush header or footer) is
+			<code>min(--radius-&lt;step&gt;, --radius-parent − max(--pad-parent-x, --pad-parent-y))</code>
+			— a cap, not a subtraction, so the child keeps its own step on the ramp and only gives ground when
+			the corner cannot hold it. A child rounder than that cuts across the container's corner; a child
+			less round merely reads as an ordinary control. The parent fallback is infinite, so a row placed
+			outside any rounded container is exactly its step. No floor is needed: CSS clamps a negative radius
+			to 0, which is the square corner a box tighter than its own padding actually has.
+		</p>
+		<p class="text-neutral/70 max-w-3xl text-sm leading-relaxed">
+			Both variables inherit, so an unrounded, unpadded wrapper between the panel and the row is
+			transparent — a menu's rows sit in a <code>role="menu"</code> group inside the padded panel.
+			What must not cross a rounded boundary is the padding, so every
+			<code>rounded-&lt;step&gt;</code> also resets <code>--pad-parent-x/-y</code> to
+			<code>0px</code> for its children, at zero specificity so the same box's own
+			<code>p-*</code> publish still wins. The nearer padded wrapper wins outright rather than
+			accumulating, which makes one level exact, which is every nesting in the library — at two
+			levels a concentric container cannot publish its own computed radius without the child rule
+			reading what it sets, so it publishes its nominal step like any other
+			<code>rounded-&lt;step&gt;</code>
+			and its children are bounded by that step rather than by nothing at all; and the corner subtracts
+			the larger of the two axes rather than being elliptical. The child half stays opt-in because CSS
+			cannot tell a flush child from a floating one: a menu row fills the padding box and must follow
+			the container, while an avatar or a Chip floats inside it and must keep its own shape.
+		</p>
+		<Code language="typescript" code={nestedRadiusSnippet} />
+	</section>
+
 	<section class="flex flex-col gap-5">
 		<div class="max-w-3xl">
 			<h2 class="text-lg font-semibold">How it stays this way</h2>
 			<p class="mt-1 text-sm leading-relaxed">
 				<code>tooling/check-semantic-theme-tokens.mjs</code> sweeps every theme file and the component
-				markup, and fails the build on any class outside these rules. Each rule has a test proving it
-				fires. Genuine geometry (a slider thumb, a drag handle) lives in a justified exceptions map, and
-				an exception nobody uses any more is itself an error.
+				markup, and fails the build on any class outside these rules. Each rule it enforces has a test
+				proving it fires — the concentric radius is the one axis it does not have to police, since the
+				cap is computed rather than written. Genuine geometry (a slider thumb, a drag handle) lives in
+				a justified exceptions map, and an exception nobody uses any more is itself an error.
 			</p>
 		</div>
 		<Code language="bash" code={checkerSnippet} />

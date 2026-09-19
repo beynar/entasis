@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Attachment } from 'svelte/attachments';
-	import type { Density } from '$lib/types/theme.js';
+	import type { Colors, Density, Sizes } from '$lib/types/theme.js';
 	import MenuOption from '../MenuOption/MenuOption.svelte';
 	import { arrowLeftIcon } from '../Icons/arrowLeft.js';
 	import type { MenuItem } from './menu.props.js';
@@ -13,6 +13,8 @@
 		label,
 		theme,
 		density,
+		size = 'normal',
+		color,
 		onBack,
 		itemReference,
 		backReference
@@ -21,12 +23,16 @@
 		label: string;
 		theme?: MenuThemeProps;
 		density?: Density;
+		size?: Sizes;
+		color?: Colors;
 		onBack: () => void;
 		itemReference: Attachment<HTMLElement>;
 		backReference: Attachment<HTMLElement>;
 	} = $props();
 
-	const size = $derived(opener?.size ?? 'normal');
+	// The opener's own axes win; otherwise the header follows the menu it belongs to.
+	const resolvedSize = $derived(opener?.size ?? size);
+	const resolvedColor = $derived(opener?.color ?? color);
 	const resolvedDensity = $derived(opener?.density ?? density ?? 'normal');
 	const openerTheme = $derived(theme?.submenu ?? theme?.option);
 </script>
@@ -34,8 +40,8 @@
 <MenuOption
 	role="menuitem"
 	prefix={arrowLeftIcon}
-	color={opener?.color}
-	{size}
+	color={resolvedColor}
+	size={resolvedSize}
 	density={resolvedDensity}
 	title={opener?.title ?? label}
 	description={opener?.description}

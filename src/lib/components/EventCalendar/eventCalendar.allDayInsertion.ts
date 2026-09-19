@@ -1,4 +1,4 @@
-import { compareScheduleValues } from '$lib/scheduling/scheduleOrder.js';
+import { packSchedulingLanes } from '$lib/utils/scheduling/intervalLayout.js';
 import { civilDayDifference } from './eventCalendar.date.js';
 import type { EventCalendarAllDayInsertion } from './eventCalendar.interactions.svelte.js';
 import { packEventCalendarLanes, type EventCalendarLaneLayout } from './eventCalendar.layout.js';
@@ -63,66 +63,34 @@ function createEventCalendarAllDayInsertionLayout<TItemFields extends object>(
 	layout: EventCalendarLaneLayout<TItemFields>,
 	insertion: Omit<EventCalendarAllDayRowInsertion, 'lane'>
 ): { layout: EventCalendarLaneLayout<TItemFields>; insertion: EventCalendarAllDayRowInsertion } {
-	const schedules = [
+	const packed = packSchedulingLanes([
 		...layout.placements.map((placement) => ({
 			key: placement.key,
-			isInsertion: false,
 			startIndex: placement.startIndex,
 			endIndex: placement.endIndex,
-			sortStart: placement.occurrence.start.getTime(),
-			sortEnd: placement.occurrence.end.getTime(),
+			start: placement.occurrence.start.getTime(),
+			end: placement.occurrence.end.getTime(),
 			priority: placement.occurrence.item.priority ?? 0
 		})),
-		{ key: insertion.occurrenceKey, isInsertion: true, ...insertion }
-	].sort(compareAllDaySchedules);
-	const laneEnds: number[] = [];
-	const placementLanes: Record<string, number> = {};
-	let insertionLane = 0;
-	for (const schedule of schedules) {
-		let lane = laneEnds.findIndex((endIndex) => endIndex <= schedule.startIndex);
-		if (lane < 0) {
-			lane = laneEnds.length;
-			laneEnds.push(schedule.endIndex);
-		} else {
-			laneEnds[lane] = schedule.endIndex;
+		{
+			key: insertion.occurrenceKey,
+			startIndex: insertion.startIndex,
+			endIndex: insertion.endIndex,
+			start: insertion.sortStart,
+			end: insertion.sortEnd,
+			priority: insertion.priority
 		}
-		if (schedule.isInsertion) insertionLane = lane;
-		else placementLanes[schedule.key] = lane;
-	}
+	]);
+	const lanes = new Map(packed.placements.map((placement) => [placement.key, placement.lane]));
 	return {
 		layout: {
 			...layout,
 			placements: layout.placements.map((placement) => ({
 				...placement,
-				lane: placementLanes[placement.key]
+				lane: lanes.get(placement.key) ?? 0
 			})),
-			laneCount: laneEnds.length
+			laneCount: packed.laneCount
 		},
-		insertion: { ...insertion, lane: insertionLane }
+		insertion: { ...insertion, lane: lanes.get(insertion.occurrenceKey) ?? 0 }
 	};
-}
-
-type AllDaySchedule = {
-	key: string;
-	isInsertion: boolean;
-	startIndex: number;
-	endIndex: number;
-	sortStart: number;
-	sortEnd: number;
-	priority: number;
-};
-
-function compareAllDaySchedules(left: AllDaySchedule, right: AllDaySchedule): number {
-	if (left.startIndex !== right.startIndex) return left.startIndex - right.startIndex;
-	if (left.endIndex !== right.endIndex) return right.endIndex - left.endIndex;
-	return compareScheduleValues(
-		left.sortStart,
-		left.sortEnd,
-		left.priority,
-		left.key,
-		right.sortStart,
-		right.sortEnd,
-		right.priority,
-		right.key
-	);
 }

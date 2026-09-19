@@ -1,20 +1,30 @@
-// Shared "package consumer" fixture: a throwaway SvelteKit-less project under
-// `.package-consumer/` whose `node_modules/svelai` is the freshly packaged `dist`.
-// Checks write source files into it and run svelte-check so imports resolve exactly
-// the way they do for a real consumer of the published package.
+// Shared "package consumer" fixture: a throwaway SvelteKit-less project whose
+// `node_modules/svelai` is the freshly packaged `dist`. Checks write source files into it
+// and run svelte-check so imports resolve exactly the way they do for a real consumer.
+//
+// The fixture lives outside the repository and gets an explicit `node_modules`: only
+// svelai's own `dependencies`, its peers — including the OPTIONAL peers (Chart's TanStack
+// Charts + D3, RichTextInput's Lexical, Globe's cobe) a consumer of those components
+// installs — and the two toolchain packages the fixture's own config imports. Nothing
+// resolves by walking up into the repository's `node_modules`, so a missing peer fails
+// here instead of passing by accident.
 import { execFile } from 'node:child_process';
-import { cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 
 const exec = promisify(execFile);
 export const repositoryRoot = path.resolve(import.meta.dirname, '..');
-// Unique per process so parallel checks (CI matrix, several agents) never share a fixture.
-export const fixtureRoot = path.join(
-	repositoryRoot,
-	`.package-consumer-${process.pid.toString(36)}`
-);
-export const packageRoot = path.join(fixtureRoot, 'node_modules/svelai');
+const manifest = JSON.parse(await readFile(path.join(repositoryRoot, 'package.json'), 'utf8'));
+// What a consumer who uses every component has installed, plus what the fixture's own
+// `svelte.config.js` and svelte-check need. `svelai` itself is the packaged `dist`.
+export const fixtureDependencies = [
+	...Object.keys(manifest.dependencies ?? {}),
+	...Object.keys(manifest.peerDependencies ?? {}),
+	'typescript',
+	'@sveltejs/vite-plugin-svelte'
+].sort();
 
 export const listFiles = async (directory, predicate) => {
 	const files = [];
@@ -27,11 +37,39 @@ export const listFiles = async (directory, predicate) => {
 };
 
 export async function createConsumerFixture() {
-	await rm(fixtureRoot, { recursive: true, force: true });
+	// Unique per process so parallel checks (CI matrix, several agents) never share a fixture.
+	const fixtureRoot = await mkdtemp(path.join(tmpdir(), 'svelai-package-consumer-'));
+	const packageRoot = path.join(fixtureRoot, 'node_modules/svelai');
 	await mkdir(path.join(fixtureRoot, 'src'), { recursive: true });
 	await mkdir(packageRoot, { recursive: true });
 	await cp(path.join(repositoryRoot, 'dist'), path.join(packageRoot, 'dist'), { recursive: true });
 	await cp(path.join(repositoryRoot, 'package.json'), path.join(packageRoot, 'package.json'));
+	for (const dependency of fixtureDependencies) {
+		const source = path.join(repositoryRoot, 'node_modules', dependency);
+		try {
+			await readFile(path.join(source, 'package.json'));
+		} catch {
+			throw new Error(`The consumer fixture needs ${dependency} installed in the repository.`);
+		}
+		const link = path.join(fixtureRoot, 'node_modules', dependency);
+		await mkdir(path.dirname(link), { recursive: true });
+		await symlink(source, link, 'dir');
+	}
+	await writeFile(
+		path.join(fixtureRoot, 'package.json'),
+		JSON.stringify(
+			{
+				name: 'svelai-package-consumer',
+				private: true,
+				type: 'module',
+				dependencies: Object.fromEntries(
+					['svelai', ...fixtureDependencies].map((name) => [name, '*'])
+				)
+			},
+			null,
+			2
+		)
+	);
 	await writeFile(
 		path.join(fixtureRoot, 'tsconfig.json'),
 		JSON.stringify(
@@ -77,7 +115,7 @@ export async function createConsumerFixture() {
 				path.join(fixtureRoot, 'tsconfig.json'),
 				JSON.stringify({ ...tsconfig, include }, null, 2)
 			);
-			let stdout = '';
+			let stdout;
 			try {
 				({ stdout } = await exec(
 					path.join(repositoryRoot, 'node_modules/.bin/svelte-check'),

@@ -16,6 +16,8 @@
  *     earlier edge forms; edge forms combine; `static` is a modifier)
  *   - `shimmer*` (`shimmer` / `shimmer-none` exclude each other; `once` and
  *     `reverse` are modifiers; `shimmer-color|duration|spread|angle-*` are scales)
+ *   - `rounded-<step>-concentric` / `rounded-t|b-<step>-concentric` (join the core corner groups), the container side
+ *     needing nothing here — a `rounded-<step>` publishes its radius to its children by itself
  *   - `duration-*` / `ease-*` motion tokens
  *   - the semantic spacing scale (`p-md`, `gap-layout-lg`, ...) registered on
  *     the `spacing` theme scale so it conflicts with Tailwind's numeric one.
@@ -30,6 +32,8 @@
 
 import { createCn, validators } from 'cn/config';
 import type { ClassValue } from './types.js';
+
+const isConcentric = (value: string) => /^(?:xs|sm|md|lg|xl|2xl|3xl|4xl)-concentric$/.test(value);
 
 /** Semantic spacing values usable wherever Tailwind accepts a spacing value. */
 const SEMANTIC_SPACING = [
@@ -78,7 +82,12 @@ const merge = createCn({
 			'shimmer-color': [{ 'shimmer-color': [validators.isAny] }],
 			'shimmer-duration': [{ 'shimmer-duration': [validators.isAny] }],
 			'shimmer-spread': [{ 'shimmer-spread': [validators.isAny] }],
-			'shimmer-angle': [{ 'shimmer-angle': [validators.isAny] }]
+			'shimmer-angle': [{ 'shimmer-angle': [validators.isAny] }],
+			// `rounded-md-concentric` is a radius like any other, so it joins the core corner groups
+			// and last-wins against `rounded-lg`.
+			rounded: [{ rounded: [isConcentric] }],
+			'rounded-t': [{ 'rounded-t': [isConcentric] }],
+			'rounded-b': [{ 'rounded-b': [isConcentric] }]
 		},
 		conflictingClassGroups: {
 			// `raised-*`, `lift-*` and `shadow-*` all own the `--tw-shadow` slot.

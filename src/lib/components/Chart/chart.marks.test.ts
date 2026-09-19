@@ -1,8 +1,8 @@
-import { render } from 'svelte/server';
 import type { Component } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import Chart from './Chart.svelte';
 import type { ChartProps } from './chart.props.js';
+import { renderInThemeServer } from '../Theme/renderInThemeServer.test-helper.js';
 
 type ChartConfiguration<TRow extends object> = Pick<
 	ChartProps<TRow>,
@@ -87,13 +87,11 @@ function renderDefinition<TRow extends object>(
 	label: string
 ): string {
 	const TypedChart = Chart as Component<ChartProps<TRow>>;
-	return render(TypedChart, {
-		props: {
-			data,
-			...definition,
-			label,
-			aspectRatio: 640 / 360
-		}
+	return renderInThemeServer(TypedChart, {
+		data,
+		...definition,
+		label,
+		aspectRatio: 640 / 360
 	}).body;
 }
 
@@ -188,15 +186,13 @@ function renderWide(
 	extra: Partial<ChartProps<WideRow>> = {}
 ): string {
 	const TypedChart = Chart as Component<ChartProps<WideRow>>;
-	return render(TypedChart, {
-		props: {
-			data: wideRows,
-			...definition,
-			...extra,
-			label: 'Task status',
-			height: 320
-		} as ChartProps<WideRow>
-	}).body;
+	return renderInThemeServer(TypedChart, {
+		data: wideRows,
+		...definition,
+		...extra,
+		label: 'Task status',
+		height: 320
+	} as ChartProps<WideRow>).body;
 }
 
 /** Painted segment heights, without the full-height plot background rectangle. */

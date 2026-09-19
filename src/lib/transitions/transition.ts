@@ -2,27 +2,23 @@ import type { TransitionConfig } from 'svelte/transition';
 import { easingFunctions, type Easing } from './easingFunctions.js';
 import { useTheme } from '$lib/components/Theme/theme.state.svelte.js';
 import type { ThemeState } from '$lib/components/Theme/theme.state.svelte.js';
-import { resolveMotionTokens } from '$lib/tailwind/scales.js';
-
-const fallbackTokens = resolveMotionTokens();
 
 const split_css_unit = (value: string | number): [number, string] => {
 	const split = typeof value === 'string' && value.match(/^\s*(-?[\d.]+)([^\s]*)\s*$/);
 	return (split ? [parseFloat(split[1]), split[2] || 'px'] : [value, 'px']) as [number, string];
 };
 // Both fall back to the Theme's motion tokens: the `standard` easing role and the
-// `normal` duration step. `useTheme()` is typed as always present but returns
-// undefined outside a `<Theme>` (a bare component in a test, say), so the library
-// scale stands in.
-const resolveEasing = (easing: Easing | undefined, theme: ThemeState | undefined) => {
-	return easingFunctions[easing || theme?.motion.easing.standard || fallbackTokens.easing.standard];
+// `normal` duration step. `useTheme()` throws when no `<Theme>` is above the component,
+// so the tokens are always there to read.
+const resolveEasing = (easing: Easing | undefined, theme: ThemeState) => {
+	return easingFunctions[easing || theme.motion.easing.standard];
 };
 
-const resolveDuration = (duration: number | undefined, theme: ThemeState | undefined) => {
-	if (theme?.preferReducesMotion) {
+const resolveDuration = (duration: number | undefined, theme: ThemeState) => {
+	if (theme.preferReducesMotion) {
 		return 0;
 	}
-	return duration ?? theme?.motion.duration.normal ?? fallbackTokens.duration.normal;
+	return duration ?? theme.motion.duration.normal;
 };
 
 export type BaseTransitionParams = {

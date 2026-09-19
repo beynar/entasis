@@ -29,6 +29,7 @@
 			prefix={magnifyingGlassIcon}
 			label={collapsed ? 'Search pages' : undefined}
 			color="neutral"
+			variant="ghost"
 			squared={collapsed}
 			fullWidth={!collapsed}
 			class={collapsed ? 'mx-auto' : 'justify-start'}

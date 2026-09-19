@@ -2678,7 +2678,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'MarkdownSize',
 		'MarkdownTheme',
 		'MarkdownThemeProps',
-		'buildStreamdownTheme',
+		'buildMarkdownStreamdownTheme',
 		'markdownCodeSizes',
 		'markdownDescription',
 		'markdownMermaidSizes',

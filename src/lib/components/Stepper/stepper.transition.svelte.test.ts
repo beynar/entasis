@@ -1,8 +1,9 @@
 import '@testing-library/jest-dom/vitest';
-import { render } from '@testing-library/svelte';
+
 import { tick } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import StepperTransitionHarness from './StepperTransitionHarness.test.svelte';
+import { renderInTheme } from '../Theme/renderInTheme.test-helper.js';
 
 const items = ['One', 'Two', 'Three'];
 
@@ -39,7 +40,7 @@ const settle = async () => {
 
 describe('Stepper panel visibility across a step change', () => {
 	test('hides every inactive panel at rest', async () => {
-		render(StepperTransitionHarness, { props: { items, value: 0 } });
+		renderInTheme(StepperTransitionHarness, { items, value: 0 });
 		await settle();
 
 		expect(visiblePanels()).toHaveLength(1);
@@ -47,7 +48,7 @@ describe('Stepper panel visibility across a step change', () => {
 	});
 
 	test('keeps the panel the track slides away from rendered until the slide settles', async () => {
-		const { rerender } = render(StepperTransitionHarness, { props: { items, value: 0 } });
+		const { rerender } = renderInTheme(StepperTransitionHarness, { items, value: 0 });
 		await settle();
 
 		await rerender({ items, value: 1 });
@@ -64,8 +65,10 @@ describe('Stepper panel visibility across a step change', () => {
 	});
 
 	test('lazy keeps the outgoing panel mounted for the slide, then drops it', async () => {
-		const { rerender } = render(StepperTransitionHarness, {
-			props: { items, value: 0, mount: 'lazy' }
+		const { rerender } = renderInTheme(StepperTransitionHarness, {
+			items,
+			value: 0,
+			mount: 'lazy'
 		});
 		await settle();
 

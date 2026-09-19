@@ -1,8 +1,8 @@
-import { render } from 'svelte/server';
 import type { Component } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import Chart from './Chart.svelte';
 import type { ChartProps } from './chart.props.js';
+import { renderInThemeServer } from '../Theme/renderInThemeServer.test-helper.js';
 
 type ChartConfiguration<TRow extends object> = Pick<
 	ChartProps<TRow>,
@@ -20,13 +20,11 @@ const RowChart = Chart as Component<ChartProps<Row>>;
 
 function compileInvalidDefinition(definition: unknown): unknown {
 	try {
-		const output = render(RowChart, {
-			props: {
-				data: rows,
-				...(definition as ChartConfiguration<Row>),
-				label: 'Invalid chart',
-				aspectRatio: 640 / 360
-			}
+		const output = renderInThemeServer(RowChart, {
+			data: rows,
+			...(definition as ChartConfiguration<Row>),
+			label: 'Invalid chart',
+			aspectRatio: 640 / 360
 		});
 		void output.body;
 	} catch (error) {

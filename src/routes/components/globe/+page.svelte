@@ -41,6 +41,7 @@
 	title="Globe"
 	subtitle="An interactive, theme-aware WebGL globe."
 	component="Globe"
+	requires="pnpm add cobe"
 	features={[
 		'Auto-rotating and draggable',
 		'Theme-token or RGB colors',

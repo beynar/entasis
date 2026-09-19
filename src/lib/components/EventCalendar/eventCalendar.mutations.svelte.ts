@@ -64,6 +64,41 @@ type EventCalendarCollectionMutation<TItemFields extends object> = {
 	onRevert?: () => void;
 };
 
+/**
+ * One validated commit attempt: the proposal that identifies it, the candidate collection to
+ * publish, and family-specific commit state (a recurrence mutation, or none for placements).
+ */
+type EventCalendarPreparedBatch<TItemFields extends object, TMutation> = {
+	proposal: EventCalendarProposedUpdate<TItemFields>;
+	candidateItems: EventCalendarItem<TItemFields>[];
+	mutation: TMutation;
+};
+
+/**
+ * The per-family policy the shared commit orchestration drives. `reprepare` returns null only
+ * after reporting the failure itself (a stale proposal target); structural and semantic
+ * failures of an adjusted batch throw 'invalid-adjustment'.
+ */
+type EventCalendarCommitPolicy<TItemFields extends object, TMutation> = {
+	prepare(): EventCalendarPreparedBatch<TItemFields, TMutation> | null;
+	validate(batch: EventCalendarPreparedBatch<TItemFields, TMutation>): InvalidReason | null;
+	/** Rebuild the normal candidate after the resolver; recurring edits keep their baseline phases. */
+	revalidateAfterResolver?: (
+		batch: EventCalendarPreparedBatch<TItemFields, TMutation>,
+		validatePolicy: boolean
+	) => EventCalendarPreparedBatch<TItemFields, TMutation> | null;
+	reprepare(
+		batch: EventCalendarPreparedBatch<TItemFields, TMutation>,
+		adjustedItem: EventCalendarItem<TItemFields>
+	): EventCalendarPreparedBatch<TItemFields, TMutation> | null;
+	publish(
+		batch: EventCalendarPreparedBatch<TItemFields, TMutation>
+	): Pick<
+		EventCalendarCollectionMutation<TItemFields>,
+		'createChange' | 'keyRemap' | 'clearMissingRecurringSeriesId'
+	>;
+};
+
 const MINUTE_MS = 60_000;
 
 /** Owns validation, immutable controlled writes, history, clipboard, and guarded revert. */
@@ -286,69 +321,138 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 				boundary
 			);
 		}
+		return this.commitPreparedBatch(
+			initialProposal,
+			boundary,
+			this.placementPolicy(initialProposal, boundary)
+		);
+	}
+
+	/**
+	 * The single commit orchestration: prepare a validated candidate, offer it to the resolve
+	 * callback, revalidate the normal candidate after every resolver result, reprepare adjusted
+	 * candidates, then hand the batch to the publication owner.
+	 */
+	private commitPreparedBatch<TMutation>(
+		initialProposal: EventCalendarProposedUpdate<TItemFields>,
+		boundary: EventCalendarModelBoundary<TItemFields>,
+		policy: EventCalendarCommitPolicy<TItemFields, TMutation>
+	): boolean {
 		if (!this.assertBoundary(boundary, initialProposal)) return false;
-		const initialCandidate = this.getCandidateItems(initialProposal, boundary.items);
-		if (!initialCandidate) return this.rejectStaleProposal(initialProposal);
-		this.calendar.validateCandidateItems(initialCandidate);
-		const initialReason = this.validateProposal(initialProposal);
-		if (initialReason) return this.rejectProposal(initialProposal, initialReason);
+		let batch = policy.prepare();
+		if (!batch) return this.rejectStaleProposal(initialProposal);
+		this.calendar.validateCandidateItems(batch.candidateItems);
+		const initialReason = policy.validate(batch);
+		if (initialReason) return this.rejectProposal(batch.proposal, initialReason);
 
 		const onItemUpdate = this.calendar.onItemUpdate;
-		const updateResult = onItemUpdate?.(initialProposal);
-		if (!this.assertBoundary(boundary, initialProposal)) return false;
-		if (updateResult === false) return this.rejectProposal(initialProposal, 'custom-policy');
+		const updateResult = onItemUpdate?.(batch.proposal);
+		if (!this.assertBoundary(boundary, batch.proposal)) return false;
+		if (updateResult === false) return this.rejectProposal(batch.proposal, 'custom-policy');
 		const adjustment = updateResult && typeof updateResult === 'object' ? updateResult : null;
-		const proposal = adjustment
-			? { ...initialProposal, item: this.applyAdjustment(initialProposal.item, adjustment) }
-			: initialProposal;
-		const candidate = this.getCandidateItems(proposal, boundary.items);
-		if (!candidate) return this.rejectStaleProposal(proposal);
-		try {
-			this.calendar.validateCandidateItems(candidate);
-		} catch (error) {
-			if (!adjustment) throw error;
-			throw this.invalidAdjustmentError(error, proposal.item.id);
+		if (adjustment) {
+			const adjustedItem = this.applyAdjustment(batch.proposal.item, adjustment);
+			const adjustedBatch = policy.reprepare(batch, adjustedItem);
+			if (!adjustedBatch) return false;
+			batch = adjustedBatch;
+		} else if (policy.revalidateAfterResolver) {
+			const revalidatedBatch = policy.revalidateAfterResolver(
+				batch,
+				onItemUpdate !== undefined
+			);
+			if (!revalidatedBatch) return false;
+			batch = revalidatedBatch;
 		}
-		const finalReason = onItemUpdate ? this.validateProposal(proposal) : null;
-		if (finalReason) {
-			if (adjustment) {
-				throw new EventCalendarError(
-					'invalid-adjustment',
-					'resolveItemUpdate returned an invalid adjustment.',
-					{ reason: finalReason, id: proposal.item.id }
-				);
-			}
-			return this.rejectProposal(proposal, finalReason);
-		}
-		if (!this.assertBoundary(boundary, proposal)) return false;
-		const kind =
-			proposal.kind === 'move' ? 'move' : proposal.kind.startsWith('resize') ? 'resize' : 'update';
+		if (!this.assertBoundary(boundary, batch.proposal)) return false;
 		return Boolean(
 			this.commitCollection({
 				boundary,
-				items: candidate,
-				source: proposal.source,
+				items: batch.candidateItems,
+				source: initialProposal.source,
+				...policy.publish(batch)
+			})
+		);
+	}
+
+	private placementPolicy(
+		initialProposal: EventCalendarProposedUpdate<TItemFields>,
+		boundary: EventCalendarModelBoundary<TItemFields>
+	): EventCalendarCommitPolicy<TItemFields, undefined> {
+		return {
+			prepare: () => {
+				const candidateItems = this.getCandidateItems(initialProposal, boundary.items);
+				return candidateItems
+					? { proposal: initialProposal, candidateItems, mutation: undefined }
+					: null;
+			},
+			validate: (batch) => this.validateProposal(batch.proposal),
+			revalidateAfterResolver: (batch, validatePolicy) => {
+				const candidateItems = this.getCandidateItems(batch.proposal, boundary.items);
+				if (!candidateItems) {
+					this.rejectStaleProposal(batch.proposal);
+					return null;
+				}
+				this.calendar.validateCandidateItems(candidateItems);
+				if (validatePolicy) {
+					const reason = this.validateProposal(batch.proposal);
+					if (reason) {
+						this.rejectProposal(batch.proposal, reason);
+						return null;
+					}
+				}
+				return { proposal: batch.proposal, candidateItems, mutation: undefined };
+			},
+			reprepare: (batch, adjustedItem) => {
+				const proposal = { ...batch.proposal, item: adjustedItem };
+				const candidateItems = this.getCandidateItems(proposal, boundary.items);
+				if (!candidateItems) {
+					this.rejectStaleProposal(proposal);
+					return null;
+				}
+				try {
+					this.calendar.validateCandidateItems(candidateItems);
+				} catch (error) {
+					throw this.invalidAdjustmentError(error, proposal.item.id);
+				}
+				const reason = this.validateProposal(proposal);
+				if (reason) {
+					throw new EventCalendarError(
+						'invalid-adjustment',
+						'resolveItemUpdate returned an invalid adjustment.',
+						{ reason, id: proposal.item.id }
+					);
+				}
+				return { proposal, candidateItems, mutation: undefined };
+			},
+			publish: (batch) => ({
 				createChange: (revert, publishedItems) => {
 					const committedItem =
-						publishedItems.find((item) => item.id === proposal.item.id) ?? proposal.item;
-					return proposal.source === 'external-drop' || proposal.source === 'clipboard'
-						? { kind: 'add', source: proposal.source, item: committedItem, revert }
+						publishedItems.find((item) => item.id === batch.proposal.item.id) ??
+						batch.proposal.item;
+					const kind =
+						batch.proposal.kind === 'move'
+							? 'move'
+							: batch.proposal.kind.startsWith('resize')
+								? 'resize'
+								: 'update';
+					return batch.proposal.source === 'external-drop' || batch.proposal.source === 'clipboard'
+						? { kind: 'add', source: batch.proposal.source, item: committedItem, revert }
 						: {
 								kind,
-								source: proposal.source,
+								source: batch.proposal.source,
 								item: committedItem,
-								previousItem: proposal.previousItem,
+								previousItem: batch.proposal.previousItem,
 								revert
 							};
 				},
 				clearMissingRecurringSeriesId:
-					proposal.source === 'external-drop' ||
-					proposal.source === 'clipboard' ||
-					proposal.previousItem.recurrence === undefined
+					batch.proposal.source === 'external-drop' ||
+					batch.proposal.source === 'clipboard' ||
+					batch.proposal.previousItem.recurrence === undefined
 						? undefined
-						: proposal.previousItem.id
+						: batch.proposal.previousItem.id
 			})
-		);
+		};
 	}
 
 	getOccurrencePlacementItem(
@@ -397,92 +501,95 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 		boundary: EventCalendarModelBoundary<TItemFields>
 	): boolean {
 		if (scope === 'disabled') return this.rejectProposal(initialProposal, 'disabled');
-		if (!this.assertBoundary(boundary, initialProposal)) return false;
-		const mutationOptions = this.getRecurrenceMutationOptions(
+		return this.commitPreparedBatch(
 			initialProposal,
-			scope,
-			boundary.items
+			boundary,
+			this.recurrencePolicy(
+				this.getRecurrenceMutationOptions(initialProposal, scope, boundary.items)
+			)
 		);
-		let mutation = createEventCalendarRecurrenceMutation(mutationOptions);
-		this.calendar.validateCandidateItems(mutation.committedItems);
-		let reason = this.validateRecurrenceMutation(mutation);
-		if (reason) return this.rejectProposal(mutation.proposal, reason);
+	}
 
-		const updateResult = this.calendar.onItemUpdate?.(mutation.proposal);
-		if (!this.assertBoundary(boundary, mutation.proposal)) return false;
-		if (updateResult === false) return this.rejectProposal(mutation.proposal, 'custom-policy');
-		const adjustment = updateResult && typeof updateResult === 'object' ? updateResult : null;
-		if (adjustment) {
-			const adjustedItem = this.applyAdjustment(mutation.proposal.item, adjustment);
-			try {
-				mutation =
-					mutation.scope === 'series'
-						? regenerateEventCalendarSeriesMutation(
-								mutationOptions,
-								adjustedItem,
-								mutation.operation
-							)
-						: createEventCalendarRecurrenceMutation({
-								...mutationOptions,
-								exceptionId: mutation.exceptionId,
-								proposal: { ...mutation.proposal, item: adjustedItem }
-							});
-				this.calendar.validateCandidateItems(mutation.committedItems);
-				reason = this.validateRecurrenceMutation(mutation);
-			} catch (error) {
-				throw this.invalidAdjustmentError(error, adjustedItem.id);
-			}
-			if (reason) {
-				throw new EventCalendarError(
-					'invalid-adjustment',
-					'resolveItemUpdate returned an invalid recurring adjustment.',
-					{ reason, id: adjustedItem.id }
-				);
-			}
-		}
-		if (!this.assertBoundary(boundary, mutation.proposal)) return false;
-		return Boolean(
-			this.commitCollection({
-				boundary,
-				items: mutation.committedItems,
-				source: initialProposal.source,
-				createChange: (revert) =>
-					mutation.scope === 'series'
-						? {
-								kind: 'recurrence-series-update',
-								source: initialProposal.source,
-								operation: mutation.operation,
-								seriesItem: mutation.seriesItem,
-								previousSeriesItem: mutation.previousSeriesItem,
-								exceptionItems: mutation.exceptionItems,
-								previousExceptionItems: mutation.previousExceptionItems,
-								revert
-							}
-						: mutation.previousItem
+	private recurrencePolicy(
+		mutationOptions: CreateRecurrenceMutationOptions<TItemFields>
+	): EventCalendarCommitPolicy<TItemFields, EventCalendarRecurrenceMutation<TItemFields>> {
+		const toBatch = (mutation: EventCalendarRecurrenceMutation<TItemFields>) => ({
+			proposal: mutation.proposal,
+			candidateItems: mutation.committedItems,
+			mutation
+		});
+		return {
+			prepare: () => toBatch(createEventCalendarRecurrenceMutation(mutationOptions)),
+			validate: (batch) => this.validateRecurrenceMutation(batch.mutation),
+			reprepare: (batch, adjustedItem) => {
+				try {
+					const mutation =
+						batch.mutation.scope === 'series'
+							? regenerateEventCalendarSeriesMutation(
+									mutationOptions,
+									adjustedItem,
+									batch.mutation.operation
+								)
+							: createEventCalendarRecurrenceMutation({
+									...mutationOptions,
+									exceptionId: batch.mutation.exceptionId,
+									proposal: { ...batch.mutation.proposal, item: adjustedItem }
+								});
+					this.calendar.validateCandidateItems(mutation.committedItems);
+					const reason = this.validateRecurrenceMutation(mutation);
+					if (reason) {
+						throw new EventCalendarError(
+							'invalid-adjustment',
+							'resolveItemUpdate returned an invalid recurring adjustment.',
+							{ reason, id: adjustedItem.id }
+						);
+					}
+					return toBatch(mutation);
+				} catch (error) {
+					throw this.invalidAdjustmentError(error, adjustedItem.id);
+				}
+			},
+			publish: (batch) => {
+				const mutation = batch.mutation;
+				return {
+					createChange: (revert) =>
+						mutation.scope === 'series'
 							? {
-									kind: 'recurrence-exception-update',
-									source: initialProposal.source,
+									kind: 'recurrence-series-update',
+									source: mutationOptions.proposal.source,
+									operation: mutation.operation,
 									seriesItem: mutation.seriesItem,
-									item: mutation.item,
-									previousItem: mutation.previousItem,
+									previousSeriesItem: mutation.previousSeriesItem,
+									exceptionItems: mutation.exceptionItems,
+									previousExceptionItems: mutation.previousExceptionItems,
 									revert
 								}
-							: {
-									kind: 'recurrence-exception-add',
-									source: initialProposal.source,
-									seriesItem: mutation.seriesItem,
-									item: mutation.item,
-									revert
-								},
-				keyRemap:
-					mutation.scope === 'series'
-						? {
-								forward: mutation.remapOccurrenceKey,
-								backward: mutation.restoreOccurrenceKey
-							}
-						: undefined
-			})
-		);
+							: mutation.previousItem
+								? {
+										kind: 'recurrence-exception-update',
+										source: mutationOptions.proposal.source,
+										seriesItem: mutation.seriesItem,
+										item: mutation.item,
+										previousItem: mutation.previousItem,
+										revert
+									}
+								: {
+										kind: 'recurrence-exception-add',
+										source: mutationOptions.proposal.source,
+										seriesItem: mutation.seriesItem,
+										item: mutation.item,
+										revert
+									},
+					keyRemap:
+						mutation.scope === 'series'
+							? {
+									forward: mutation.remapOccurrenceKey,
+									backward: mutation.restoreOccurrenceKey
+								}
+							: undefined
+				};
+			}
+		};
 	}
 
 	private getRecurrenceMutationOptions(
@@ -592,6 +699,11 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 		}
 		const committedItems = [...mutation.items];
 		this.calendar.validateCandidateItems(committedItems);
+		// Validation runs consumer expansion code; a reentrant write must not be overwritten.
+		if (!this.calendar.isModelBoundaryCurrent(mutation.boundary)) {
+			this.reportBlocked({ reason: 'stale', source: mutation.source });
+			return null;
+		}
 		this.calendar.items = committedItems;
 		const committedBoundary = this.calendar.modelBoundary;
 		const publishedItems = committedBoundary.items;

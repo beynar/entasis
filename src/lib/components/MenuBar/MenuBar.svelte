@@ -46,7 +46,15 @@
 			offset={4}
 			lockScroll={false}
 			{closeOnItemClick}
-			menu={menuBar.getMenuProps(menu, index)}
+			menu={{
+				...menuBar.getMenuProps(menu, index),
+				// Last, and read off `menu` explicitly: `getMenuProps` builds from `{ ...menu }`,
+				// so a MenuBarMenu written or spread with `size: undefined` still carries that as
+				// an own key. Spreading the bar's `size` first would let that undefined win, and
+				// MenuFloating's `size = 'normal'` default would replace the bar's size instead
+				// of the menu inheriting it.
+				size: menu.size ?? size
+			}}
 			onAfterClose={() => menuBar.handleMenuClose(index)}
 		>
 			{#snippet trigger(popover)}

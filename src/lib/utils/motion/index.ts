@@ -14,7 +14,6 @@
 
 import { useTheme } from '$lib/components/Theme/theme.state.svelte.js';
 import type { ResponsiveProps } from '$lib/components/Theme/theme.js';
-import { resolveResponsive } from '$lib/components/Theme/responsive.js';
 import { resolveMotionTokens, type DeepPartial, type MotionTokens } from '$lib/tailwind/scales.js';
 import type { Easing } from '$lib/transitions/easingFunctions.js';
 import type { FSOParams, FSOProps } from '$lib/transitions/transition.js';
@@ -189,25 +188,17 @@ export const useComponentMotion = <V extends MotionVariantShape>(
 	component: string,
 	defaultMotion: MotionResolver<V>
 ): ComponentMotion<V> => {
-	const theme = useTheme() as
-		| (MotionTheme & {
-				componentThemes?: Record<string, { motion?: DeepPartial<MotionSpec> } | undefined>;
-				resolveResponsiveProps: <T>(props?: ResponsiveProps<T>, defaultValue?: T) => T;
-		  })
-		| undefined;
+	const theme = useTheme() as MotionTheme & {
+		componentThemes?: Record<string, { motion?: DeepPartial<MotionSpec> } | undefined>;
+		resolveResponsiveProps: <T>(props?: ResponsiveProps<T>, defaultValue?: T) => T;
+	};
 	const context = getContext<{ motion?: DeepPartial<MotionSpec> } | undefined>(`${component}Theme`);
 	return (props, overrides) => {
 		const transition = overrides?.transition;
 		return defaultMotion(props, {
 			theme,
-			overrides: [theme?.componentThemes?.[component]?.motion, context?.motion, overrides?.motion],
-			// Outside a `<Theme>` there is no viewport breakpoint to read, so a responsive transition
-			// resolves against `md` — the same breakpoint `ThemeState` reports during SSR.
-			transition:
-				transition === undefined
-					? undefined
-					: (theme?.resolveResponsiveProps(transition) ??
-						resolveResponsive<FSOProps | undefined>(transition, 'md', undefined))
+			overrides: [theme.componentThemes?.[component]?.motion, context?.motion, overrides?.motion],
+			transition: transition === undefined ? undefined : theme.resolveResponsiveProps(transition)
 		});
 	};
 };

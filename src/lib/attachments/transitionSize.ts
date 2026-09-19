@@ -1,11 +1,7 @@
 import type { Attachment } from 'svelte/attachments';
 import { useTheme } from '$lib/components/Theme/theme.state.svelte.js';
 import { easingBezierStrings, type Easing } from '$lib/transitions/easingFunctions.js';
-import {
-	resolveMotionTokens,
-	type MotionDurationToken,
-	type MotionEasingToken
-} from '$lib/utils/motion/index.js';
+import type { MotionDurationToken, MotionEasingToken } from '$lib/utils/motion/index.js';
 
 type Size = {
 	width: number;
@@ -69,9 +65,9 @@ export const transitionSize = (options: TransitionSizeOptions = {}): Attachment<
 	const axis = options.axis ?? defaultAxis;
 	// Tokens by default (`normal` / `standard`), so `<Theme motion>` retunes every size
 	// animation and a reduced-motion preference collapses it to 0.
-	const tokens = () => theme?.motion ?? resolveMotionTokens();
+	const tokens = () => theme.motion;
 	const duration = () => {
-		if (theme?.preferReducesMotion) return 0;
+		if (theme.preferReducesMotion) return 0;
 		const value = options.duration;
 		if (typeof value === 'number') return value;
 		return tokens().duration[value ?? 'normal'];

@@ -66,10 +66,10 @@
 
 <DocPage
 	title="Network indicator"
-	subtitle="A fixed top loading bar for SvelteKit navigations and explicit async work."
+	subtitle="A fixed top loading bar for router navigations and explicit async work."
 	component="NetworkIndicator"
 	features={[
-		'Automatic SvelteKit navigation state',
+		'Router-agnostic navigating prop',
 		'Explicit show/hide helper API',
 		'Indeterminate progressbar semantics',
 		'Bar and trail animation variants',

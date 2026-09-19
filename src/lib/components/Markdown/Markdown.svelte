@@ -10,7 +10,7 @@
 	import { Stack } from '../Stack/index.js';
 	import type { MarkdownProps } from './markdown.props.js';
 	import {
-		buildStreamdownTheme,
+		buildMarkdownStreamdownTheme,
 		markdownCodeSizes,
 		markdownMermaidSizes,
 		useMarkdownTheme
@@ -30,7 +30,7 @@
 	}: MarkdownProps = $props();
 
 	const classes = $derived(useMarkdownTheme(theme));
-	const streamdownTheme = $derived(buildStreamdownTheme(size));
+	const streamdownTheme = $derived(buildMarkdownStreamdownTheme(size));
 	const t = $derived(useI18n());
 
 	// The `token` carried by the code/mermaid override snippets is a marked

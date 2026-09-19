@@ -9,6 +9,12 @@ const defaultSegmentedControl = cva({
 			normal: 'gap-xs',
 			large: 'gap-sm'
 		},
+		// The track is the padded rounded container: `p-xs` on the base, the radius here. Segments
+		// and both indicators sit flush against that padding box, so they take
+		// `rounded-md-concentric` rather than a hand-written `rounded-md` — same `md` step, but
+		// capped at `min(8px, 8 - 4)` = 4px inside the track. A segment used to carry the track's
+		// own radius outright, so its corner cut across the track's instead of nesting inside it.
+		// A `pill` track is a stadium holding stadiums, which is already concentric at any size.
 		variant: {
 			normal: 'rounded-md',
 			pill: 'rounded-full'
@@ -37,7 +43,7 @@ const defaultSegment = cva({
 				'h-control-lg gap-md px-xl text-sm before:-right-[3px] before:-left-[3px] [&>svg]:size-icon-lg'
 		},
 		variant: {
-			normal: 'rounded-md',
+			normal: 'rounded-md-concentric',
 			pill: 'rounded-full'
 		},
 		color: {
@@ -77,7 +83,7 @@ const defaultIndicator = cva({
 	base: 'pointer-events-none absolute top-0 left-0 lift-1 will-change-transform data-[ready=true]:transition-[transform,width,height] data-[ready=true]:duration-slow data-[ready=true]:ease-standard',
 	variants: {
 		variant: {
-			normal: 'rounded-md',
+			normal: 'rounded-md-concentric',
 			pill: 'rounded-full'
 		},
 		color: {
@@ -96,12 +102,15 @@ const defaultIndicator = cva({
 	}
 });
 
+// Coextensive with the segment (`inset-0`), so it wears the segment's corner, whatever that
+// computed to — it is not a box nested inside the segment's padding, so `rounded-md-concentric`
+// here would cap against the segment's own `px-*` and square it off.
 const defaultStaticIndicator = cva({
-	base: 'pointer-events-none absolute inset-0 -z-10 lift-1',
+	base: 'pointer-events-none absolute inset-0 -z-10 lift-1 rounded-[inherit]',
 	variants: {
 		variant: {
-			normal: 'rounded-md',
-			pill: 'rounded-full'
+			normal: '',
+			pill: ''
 		},
 		color: {
 			primary: 'bg-selected',

@@ -173,6 +173,7 @@
 	title="Rich Text Input"
 	subtitle="Markdown editor with inline formatting, trigger suggestions, and token insertion."
 	component="RichTextInput"
+	requires="pnpm add lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils"
 	features={[
 		'Bindable markdown value',
 		'Slash, mention, and skill trigger suggestions',

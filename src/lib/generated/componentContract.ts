@@ -4038,7 +4038,7 @@ export const componentInventory = [
 			'MarkdownSize',
 			'MarkdownTheme',
 			'MarkdownThemeProps',
-			'buildStreamdownTheme',
+			'buildMarkdownStreamdownTheme',
 			'markdownCodeSizes',
 			'markdownDescription',
 			'markdownMermaidSizes',

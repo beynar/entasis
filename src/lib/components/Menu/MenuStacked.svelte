@@ -36,6 +36,8 @@
 		class: className = '',
 		theme,
 		density = 'normal',
+		size = 'normal',
+		color,
 		header,
 		footer,
 		focusOnMount,
@@ -150,6 +152,9 @@
 <div
 	class={classes.root({ density, className })}
 	role="menu"
+	data-size={size}
+	data-density={density}
+	data-color={color}
 	{...attachments}
 	{@attach navigation.containerReference}
 >
@@ -176,6 +181,8 @@
 							opener={panelEntry?.item ?? null}
 							label={getBackControlLabel(panelEntry)}
 							{density}
+							{size}
+							{color}
 							{theme}
 							onBack={() => {
 								void closeSubmenu();
@@ -202,6 +209,8 @@
 							<MenuOption
 								role={optionProps.selected !== undefined ? 'menuitemradio' : 'menuitem'}
 								{density}
+								{size}
+								{...color ? { color } : {}}
 								{...optionProps}
 								theme={theme?.option}
 								{@attach attachItemReference(isActivePanel)}
@@ -230,6 +239,8 @@
 							<MenuOption
 								role="menuitem"
 								{density}
+								{size}
+								{...color ? { color } : {}}
 								{...itemProps}
 								suffix={suffix ?? caretRightIcon}
 								theme={theme?.submenu}

@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import Tabbar from '$lib/components/Tabbar/Tabbar.svelte';
 	import { componentInventory } from '$lib/generated/componentContract.js';
+	import { Code } from '$lib/components/Code/index.js';
 	import PropsTable from './PropsTable.svelte';
 	import StructureSchema from './StructureSchema.svelte';
 	import ThemeSchema from './ThemeSchema.svelte';
@@ -12,6 +13,7 @@
 		title,
 		subtitle,
 		component,
+		requires,
 		relatedComponents = [],
 		features,
 		children,
@@ -19,6 +21,8 @@
 	}: {
 		title: string;
 		subtitle?: string;
+		/** Optional peer dependencies this component needs, as the exact install command. */
+		requires?: string;
 		/** Component key for the props table + structure schema (e.g. "Button"). */
 		component?: string;
 		/** Secondary public components documented on the same package page. */
@@ -60,6 +64,19 @@
 			<p class="text-neutral/70 mt-2 text-base">{subtitle}</p>
 		{/if}
 	</header>
+
+	{#if requires}
+		<section
+			class="border-neutral-muted bg-surface mb-8 rounded-md border p-4"
+			aria-label="Requires"
+		>
+			<h2 class="text-neutral text-sm font-semibold">Requires</h2>
+			<p class="text-neutral/70 mt-1 mb-3 text-sm">
+				This component needs optional peer dependencies. Install them alongside <code>svelai</code>:
+			</p>
+			<Code code={requires} language="bash" />
+		</section>
+	{/if}
 
 	{#if features && features.length}
 		<ul class="mb-8 flex flex-wrap gap-2">

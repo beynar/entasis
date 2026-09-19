@@ -3,6 +3,12 @@ export const richTextInputDescription = `
 
 RichTextInput is a markdown rich text editor for AI-style composition. It supports inline and block formatting, trigger-based suggestions, token insertion, and a bindable markdown value.
 
+## Requires
+
+RichTextInput is built on Lexical. Those packages are optional peer dependencies of svelai, so install them alongside it:
+
+\`pnpm add lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils\`
+
 ## Basic Usage
 
 \`\`\`svelte
