@@ -1,4 +1,0 @@
-[ 2008618ms] TypeError: $$props.onIndent is not a function
-    at HTMLButtonElement.click_3 (http://127.0.0.1:5173/src/lib/components/GanttChart/GanttTreeCell.svelte:323:15)
-    at HTMLDivElement.handle_event_propagation (http://127.0.0.1:5173/node_modules/.vite/deps/events-CZ2HeGLj.js?v=849ed3b4:154:103)
-[ 2262693ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:5173/gantt-phase5-verify:0

@@ -1,9 +1,0 @@
-[   15106ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://127.0.0.1:5173/node_modules/.vite/deps/svelte_events.js?v=4650c9e8:0
-[   15107ms] [WARNING] The next HMR update will cause the page to reload @ http://127.0.0.1:5173/@vite/client:524
-[   15107ms] [ERROR] TypeError: Failed to fetch dynamically imported module: http://127.0.0.1:5173/.svelte-kit/generated/client/nodes/0.js @ http://127.0.0.1:5173/@vite/client:524
-[   15120ms] Failed to fetch dynamically imported module: http://127.0.0.1:5173/.svelte-kit/generated/client/nodes/0.js
-[   15717ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://127.0.0.1:5173/node_modules/.vite/deps/svelte_store.js?v=e0d6d8cf:0
-[   15717ms] Failed to fetch dynamically imported module: http://127.0.0.1:5173/node_modules/.pnpm/@sveltejs+kit@2.69.0_@sveltejs+vite-plugin-svelte@7.1.2_svelte@5.56.4_@typescript-eslin_3b900de0ca8023e74fffd71694985938/node_modules/@sveltejs/kit/src/runtime/client/entry.js
-[   15729ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://127.0.0.1:5173/node_modules/.vite/deps/runtime-BtUhiphS.js?v=e0d6d8cf:0
-[   15730ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://127.0.0.1:5173/node_modules/.vite/deps/client-DWUfyJmE.js?v=e0d6d8cf:0
-[   15730ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://127.0.0.1:5173/node_modules/.vite/deps/legacy-client-CgONOgKw.js?v=e0d6d8cf:0

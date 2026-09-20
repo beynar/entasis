@@ -1,6 +1,0 @@
-import { r as enable_legacy_mode_flag } from "/node_modules/.vite/deps/flags-Cdo780EX.js?v=1b1d2797";
-//#region node_modules/.pnpm/svelte@5.56.4_@typescript-eslint+types@8.62.1/node_modules/svelte/src/internal/flags/legacy.js
-enable_legacy_mode_flag();
-//#endregion
-
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3ZlbHRlX2ludGVybmFsX2ZsYWdzX2xlZ2FjeS5qcyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIuLi8uLi8ucG5wbS9zdmVsdGVANS41Ni40X0B0eXBlc2NyaXB0LWVzbGludCt0eXBlc0A4LjYyLjEvbm9kZV9tb2R1bGVzL3N2ZWx0ZS9zcmMvaW50ZXJuYWwvZmxhZ3MvbGVnYWN5LmpzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IGVuYWJsZV9sZWdhY3lfbW9kZV9mbGFnIH0gZnJvbSAnLi9pbmRleC5qcyc7XG5cbmVuYWJsZV9sZWdhY3lfbW9kZV9mbGFnKCk7XG4iXSwieF9nb29nbGVfaWdub3JlTGlzdCI6WzBdLCJtYXBwaW5ncyI6Ijs7QUFFQSx3QkFBd0IifQ==

@@ -1,2 +1,0 @@
-[    4294ms] [WARNING] You have already registered autoScrolling on the same element {existing: Object, proposed: Object} @ http://127.0.0.1:5173/@vite/client:524
-[  379999ms] [WARNING] You have already registered autoScrolling on the same element {existing: Object, proposed: Object} @ http://127.0.0.1:5173/@vite/client:524

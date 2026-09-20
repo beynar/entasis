@@ -1,8 +1,0 @@
-[    4736ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://127.0.0.1:5176/node_modules/.vite/deps/@lexical_list.js?v=bf5cd62a:0
-[    4737ms] [WARNING] The next HMR update will cause the page to reload @ http://127.0.0.1:5176/@vite/client:524
-[    4737ms] [ERROR] TypeError: Failed to fetch dynamically imported module: http://127.0.0.1:5176/.svelte-kit/generated/client/nodes/29.js @ http://127.0.0.1:5176/@vite/client:524
-[    4737ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://127.0.0.1:5176/node_modules/.vite/deps/@lexical_link.js?v=2306f4da:0
-[    4737ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://127.0.0.1:5176/node_modules/.vite/deps/@lexical_rich-text.js?v=293b69c9:0
-[    4737ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://127.0.0.1:5176/node_modules/.vite/deps/@lexical_selection.js?v=d4559856:0
-[    4738ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://127.0.0.1:5176/node_modules/.vite/deps/@lexical_utils.js?v=62a18079:0
-[    4738ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://127.0.0.1:5176/node_modules/.vite/deps/lexical.js?v=b0fdfe6d:0

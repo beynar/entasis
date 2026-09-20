@@ -1,8 +1,0 @@
-[  369818ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:4177/components/ai-thread:0
-[  369849ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:4177/favicon.ico:0
-[  370237ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:4177/components/ai-thread:0
-[  370261ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:4177/favicon.ico:0
-[  395490ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:4177/components/ai-thread:0
-[  395538ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:4177/favicon.ico:0
-[  700799ms] [LOG] [vite] server connection lost. Polling for restart... @ http://127.0.0.1:4177/@vite/client:992
-[55600544ms] [LOG] [vite] server connection lost. Polling for restart... @ http://127.0.0.1:4177/@vite/client:992

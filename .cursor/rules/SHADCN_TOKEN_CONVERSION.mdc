@@ -11,7 +11,7 @@ alwaysApply: false
 <p class="text-muted-foreground">Secondary text</p>
 ```
 
-**Svelai:**
+**Entasis:**
 ```html
 <p class="text-contrast-muted">Secondary text</p>
 ```
@@ -25,7 +25,7 @@ alwaysApply: false
 </button>
 ```
 
-**Svelai:**
+**Entasis:**
 ```html
 <button class="bg-primary text-primary-fg">
   Click me
@@ -41,7 +41,7 @@ alwaysApply: false
 </div>
 ```
 
-**Svelai:**
+**Entasis:**
 ```html
 <div class="bg-surface text-contrast border border-surface-muted rounded-normal">
   Card content
@@ -55,7 +55,7 @@ alwaysApply: false
 <input class="bg-input border border-input focus:ring-ring rounded-md" />
 ```
 
-**Svelai:**
+**Entasis:**
 ```html
 <input class="bg-surface-light border border-surface-muted focus:ring-primary rounded-normal" />
 ```
@@ -69,7 +69,7 @@ alwaysApply: false
 </button>
 ```
 
-**Svelai:**
+**Entasis:**
 ```html
 <button class="bg-danger text-danger-fg">
   Delete
@@ -85,7 +85,7 @@ alwaysApply: false
 </section>
 ```
 
-**Svelai:**
+**Entasis:**
 ```html
 <section class="bg-surface-muted text-contrast-muted">
   Muted section
@@ -101,7 +101,7 @@ alwaysApply: false
 </button>
 ```
 
-**Svelai:**
+**Entasis:**
 ```html
 <button class="bg-secondary text-secondary-fg hover:bg-secondary-dark">
   Accent button
@@ -117,7 +117,7 @@ alwaysApply: false
 </div>
 ```
 
-**Svelai:**
+**Entasis:**
 ```html
 <!-- Semantic muted background pairs perfectly with semantic text -->
 <div class="bg-danger-muted text-danger">
@@ -132,9 +132,9 @@ alwaysApply: false
 
 ---
 
-## Available Variants in Svelai
+## Available Variants in Entasis
 
-Each color in Svelai can have the following variants:
+Each color in Entasis can have the following variants:
 
 | Variant | ClassName Example | Description |
 |---------|-------------------|-------------|
@@ -147,7 +147,7 @@ Each color in Svelai can have the following variants:
 
 ### Variant Mapping from shadcn
 
-| shadcn Concept | Svelai Variant | Example |
+| shadcn Concept | Entasis Variant | Example |
 |----------------|----------------|---------|
 | Base color | `DEFAULT` | `bg-primary` |
 | Lighter color | `light` or `lighter` | `bg-primary-light` |
@@ -201,11 +201,11 @@ Each color in Svelai can have the following variants:
    - `primary-light` can replace a lighter `primary`
    - `surface-muted` can replace a general `muted`
 
-3. **Additional semantic colors**: Svelai offers `success`, `warning`, and `info` that don't exist directly in shadcn. Use them to enrich your palette.
+3. **Additional semantic colors**: Entasis offers `success`, `warning`, and `info` that don't exist directly in shadcn. Use them to enrich your palette.
 
-4. **Border radius**: Radius values in Svelai are defined via theme (`normal`, `small`, `large`, etc.). Adapt shadcn's `rounded-*` values according to your configuration.
+4. **Border radius**: Radius values in Entasis are defined via theme (`normal`, `small`, `large`, etc.). Adapt shadcn's `rounded-*` values according to your configuration.
 
-5. **Dark mode**: Svelai tokens automatically adapt to dark mode via the theme system. No separate `.dark` classes needed.
+5. **Dark mode**: Entasis tokens automatically adapt to dark mode via the theme system. No separate `.dark` classes needed.
 
 ---
 
@@ -213,7 +213,7 @@ Each color in Svelai can have the following variants:
 
 ### Button Patterns
 
-| Pattern | shadcn/ui | Svelai |
+| Pattern | shadcn/ui | Entasis |
 |---------|-----------|--------|
 | Primary button | `bg-primary text-primary-foreground` | `bg-primary text-primary-fg` |
 | Secondary button | `bg-secondary text-secondary-foreground` | `bg-secondary text-secondary-fg` |
@@ -223,14 +223,14 @@ Each color in Svelai can have the following variants:
 
 ### Card Patterns
 
-| Pattern | shadcn/ui | Svelai |
+| Pattern | shadcn/ui | Entasis |
 |---------|-----------|--------|
 | Basic card | `bg-card text-card-foreground border border-border` | `bg-surface text-contrast border border-surface-muted` |
 | Elevated card | `bg-card shadow-lg` | `bg-surface-light shadow-lg` |
 
 ### Input Patterns
 
-| Pattern | shadcn/ui | Svelai |
+| Pattern | shadcn/ui | Entasis |
 |---------|-----------|--------|
 | Basic input | `bg-input border border-input` | `bg-surface-light border border-surface-muted` |
 | Focused input | `bg-input border border-input focus:ring-ring` | `bg-surface-light border border-surface-muted focus:ring-primary` |

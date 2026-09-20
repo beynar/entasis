@@ -1,2 +1,0 @@
-[   13487ms] ReferenceError: Cannot access 'updated_listener' before initialization
-    at http://127.0.0.1:5173/node_modules/.pnpm/@sveltejs+kit@2.69.0_@sveltejs+vite-plugin-svelte@7.1.2_svelte@5.56.4_@typescript-eslin_3b900de0ca8023e74fffd71694985938/node_modules/@sveltejs/kit/src/runtime/client/state.svelte.js?v=9f145c50:134:2

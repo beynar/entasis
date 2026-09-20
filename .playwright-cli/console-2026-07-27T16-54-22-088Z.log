@@ -1,3 +1,0 @@
-[   27722ms] [WARNING] %c[svelte] state_proxy_equality_mismatch
-%cReactive `$state(...)` proxies and the values they proxy have different identities. Because of this, comparisons with `===` will produce unexpected results
-https://svelte.dev/e/state_proxy_equality_mismatch font-weight: bold font-weight: normal @ http://127.0.0.1:5173/@vite/client:524

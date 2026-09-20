@@ -1,6 +1,0 @@
-import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/lib/components/ScrollArea/ScrollArea.svelte?svelte&type=style&lang.css");import { updateStyle as __vite__updateStyle, removeStyle as __vite__removeStyle } from "/@vite/client"
-const __vite__id = "/Users/arnaud/code/ai2/src/lib/components/ScrollArea/ScrollArea.svelte?svelte&type=style&lang.css"
-const __vite__css = "\n\t/* Hide native scrollbars cross-browser; custom thumbs overlay the real scroll container.\n\t   Firefox/standard + old Edge are also set inline in viewportAttachment as a backstop. */\n\t[data-scroll-area-viewport].svelte-15q13al {\n\t\tscrollbar-width: none; /* Firefox + standard */\n\t\t-ms-overflow-style: none; /* old Edge/IE */\n\t}\n\n\t[data-scroll-area-viewport].svelte-15q13al::-webkit-scrollbar {\n\t\tdisplay: none; /* Chrome/Safari */\n\t}\n\n\t[data-scroll-area-viewport].svelte-15q13al::-webkit-scrollbar-track {\n\t\tdisplay: none;\n\t}\n .svelte-15q13al{}"
-__vite__updateStyle(__vite__id, __vite__css)
-import.meta.hot.accept()
-import.meta.hot.prune(() => __vite__removeStyle(__vite__id))

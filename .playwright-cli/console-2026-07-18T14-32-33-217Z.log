@@ -1,8 +1,0 @@
-[   14951ms] [LOG] [vite] server connection lost. Polling for restart... @ http://127.0.0.1:5173/@vite/client:992
-[   14952ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:5173/src/lib/utils/useResizeObserver.svelte.ts:0
-[   14952ms] [ERROR] Failed to load resource: net::ERR_SOCKET_NOT_CONNECTED @ http://127.0.0.1:5173/src/lib/utils/useBoundingClientRect.svelte.ts:0
-[   14952ms] [ERROR] Failed to load resource: net::ERR_SOCKET_NOT_CONNECTED @ http://127.0.0.1:5173/src/lib/components/ScrollArea/ScrollArea.svelte?svelte&type=style&lang.css:0
-[   14952ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://127.0.0.1:5173/src/lib/utils/useDrag.svelte.ts:0
-[   14952ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://127.0.0.1:5173/src/lib/components/ScrollArea/scrollArea.theme.ts:0
-[   14953ms] [WARNING] The next HMR update will cause the page to reload @ http://127.0.0.1:5173/@vite/client:524
-[   14953ms] [ERROR] TypeError: Failed to fetch dynamically imported module: http://127.0.0.1:5173/.svelte-kit/generated/client/nodes/49.js?t=1784384919841 @ http://127.0.0.1:5173/@vite/client:524

@@ -1,7 +1,0 @@
-[    1794ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://localhost:5180/node_modules/.vite/deps/flags-Cdo780EX.js?v=31d1f1fe:0
-[    1796ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://localhost:5180/node_modules/.vite/deps/warnings-CSOrDnC3.js?v=31d1f1fe:0
-[    1798ms] Failed to fetch dynamically imported module: http://localhost:5180/node_modules/.pnpm/@sveltejs+kit@2.69.0_@sveltejs+vite-plugin-svelte@7.1.2_svelte@5.56.4_@typescript-eslin_3b900de0ca8023e74fffd71694985938/node_modules/@sveltejs/kit/src/runtime/client/entry.js
-[    1798ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://localhost:5180/node_modules/.vite/deps/events-B1iXIEW_.js?v=31d1f1fe:0
-[    1804ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://localhost:5180/node_modules/.vite/deps/svelte_n_clsx.js?v=31d1f1fe:0
-[  284725ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:5180/@vite/client:992
-[ 8029198ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:5180/@vite/client:992

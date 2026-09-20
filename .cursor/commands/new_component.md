@@ -1,6 +1,6 @@
-# Component Creation Guide for svelai
+# Component Creation Guide for entasis
 
-This document describes the complete methodology for creating a new component in the svelai design system, a component library for SvelteKit based on a configuration-over-markup approach.
+This document describes the complete methodology for creating a new component in the entasis design system, a component library for SvelteKit based on a configuration-over-markup approach.
 
 ## 📁 File Structure
 
@@ -1162,4 +1162,4 @@ const state = new ComponentState({
 
 ---
 
-This guide constitutes the complete reference for creating consistent and maintainable components in the svelai system. Follow it step by step to ensure code quality and consistency.
+This guide constitutes the complete reference for creating consistent and maintainable components in the entasis system. Follow it step by step to ensure code quality and consistency.

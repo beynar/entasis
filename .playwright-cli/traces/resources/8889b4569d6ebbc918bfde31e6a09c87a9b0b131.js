@@ -1,6 +1,0 @@
-import { n as enable_async_mode_flag } from "/node_modules/.vite/deps/flags-Cdo780EX.js?v=1b1d2797";
-//#region node_modules/.pnpm/svelte@5.56.4_@typescript-eslint+types@8.62.1/node_modules/svelte/src/internal/flags/async.js
-enable_async_mode_flag();
-//#endregion
-
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3ZlbHRlX2ludGVybmFsX2ZsYWdzX2FzeW5jLmpzIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi4uLy4uLy5wbnBtL3N2ZWx0ZUA1LjU2LjRfQHR5cGVzY3JpcHQtZXNsaW50K3R5cGVzQDguNjIuMS9ub2RlX21vZHVsZXMvc3ZlbHRlL3NyYy9pbnRlcm5hbC9mbGFncy9hc3luYy5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBlbmFibGVfYXN5bmNfbW9kZV9mbGFnIH0gZnJvbSAnLi9pbmRleC5qcyc7XG5cbmVuYWJsZV9hc3luY19tb2RlX2ZsYWcoKTtcbiJdLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF0sIm1hcHBpbmdzIjoiOztBQUVBLHVCQUF1QiJ9

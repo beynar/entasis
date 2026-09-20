@@ -1,6 +1,0 @@
-[ 3404627ms] [LOG] [vite] server connection lost. Polling for restart... @ http://127.0.0.1:5173/@vite/client:992
-[70859750ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:5173/.svelte-kit/generated/client/nodes/133.js?t=1785774411325:0
-[70859765ms] [WARNING] The next HMR update will cause the page to reload @ http://127.0.0.1:5173/@vite/client:524
-[70859772ms] [ERROR] TypeError: Failed to fetch dynamically imported module: http://127.0.0.1:5173/.svelte-kit/generated/client/nodes/133.js?t=1785774411325 @ http://127.0.0.1:5173/@vite/client:524
-[70859776ms] [WARNING] Preloading data for /docs failed with the following error: Internal Error
-If this error is transient, you can ignore it. Otherwise, consider disabling preloading for this route. This route was preloaded due to a data-sveltekit-preload-data attribute. See https://svelte.dev/docs/kit/link-options for more info @ http://127.0.0.1:5173/@vite/client:524

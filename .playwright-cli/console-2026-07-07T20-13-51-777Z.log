@@ -1,4 +1,0 @@
-[    1135ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep) @ http://127.0.0.1:5173/node_modules/.vite/deps/svelte_events.js?v=68950e4c:0
-[    1136ms] [WARNING] The next HMR update will cause the page to reload @ http://127.0.0.1:5173/@vite/client:524
-[    1136ms] [ERROR] TypeError: Failed to fetch dynamically imported module: http://127.0.0.1:5173/.svelte-kit/generated/client/nodes/0.js @ http://127.0.0.1:5173/@vite/client:524
-[    1152ms] Failed to fetch dynamically imported module: http://127.0.0.1:5173/.svelte-kit/generated/client/nodes/0.js
