@@ -6,6 +6,7 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.4.0 — 2026-09-20
 This is a breaking release. Renamed APIs have no forwarding aliases.
 
 ### Renamed
