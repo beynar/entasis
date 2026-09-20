@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('renders and hydrates every Chart documentation example', async ({ page }) => {
-	const serverResponse = await page.request.get('http://localhost:4173/components/chart');
+	const serverResponse = await page.request.get('http://127.0.0.1:4173/components/chart');
 	expect(serverResponse.ok()).toBe(true);
 	const serverHtml = await serverResponse.text();
 	expect(serverHtml.match(/<svg[^>]*class="ts-chart"/g)).toHaveLength(1);
