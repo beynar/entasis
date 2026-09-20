@@ -7,7 +7,7 @@ Masked native text entry composed with Field and DateSelector. The bindable valu
 
 \`\`\`svelte
 <script lang="ts">
-  import { DateInput } from 'svelai/date-input';
+  import { DateInput } from 'entasis/date-input';
 </script>
 \`\`\`
 

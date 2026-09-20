@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Marquee } from 'svelai/marquee';
-	import { calendarIcon } from 'svelai/icons/calendar';
-	import { chartBarIcon } from 'svelai/icons/chartBar';
-	import { chatCircleIcon } from 'svelai/icons/chatCircle';
-	import { cloudIcon } from 'svelai/icons/cloud';
-	import { fileTextIcon } from 'svelai/icons/fileText';
-	import { gitBranchIcon } from 'svelai/icons/gitBranch';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Marquee } from 'entasis/marquee';
+	import { calendarIcon } from 'entasis/icons/calendar';
+	import { chartBarIcon } from 'entasis/icons/chartBar';
+	import { chatCircleIcon } from 'entasis/icons/chatCircle';
+	import { cloudIcon } from 'entasis/icons/cloud';
+	import { fileTextIcon } from 'entasis/icons/fileText';
+	import { gitBranchIcon } from 'entasis/icons/gitBranch';
 	const integrations = [
 		{ name: 'Calendar', icon: calendarIcon },
 		{ name: 'Documents', icon: fileTextIcon },

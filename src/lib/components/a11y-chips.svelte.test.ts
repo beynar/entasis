@@ -12,7 +12,7 @@ beforeAll(() => {
 	Element.prototype.scrollIntoView = vi.fn();
 	// The global animate stub never reports completion, so a closing overlay with a real
 	// transition would stay in the DOM forever. Finish every animation on the next tick instead.
-	Element.prototype.animate = function svelaiFiniteAnimate() {
+	Element.prototype.animate = function entasisFiniteAnimate() {
 		const animation = {
 			onfinish: null as null | (() => void),
 			oncancel: null,
@@ -339,7 +339,7 @@ describe('hover card', () => {
 		law('a11y:hover-card.focus-opens', 'opens the card when the trigger receives focus'),
 		async () => {
 			mount('hover-card');
-			const trigger = screen.getByRole('button', { name: '@svelai' });
+			const trigger = screen.getByRole('button', { name: '@entasis' });
 			await fireEvent.focusIn(trigger);
 			await waitFor(() => expect(screen.getByText('Hover card body')).toBeInTheDocument());
 		}

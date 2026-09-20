@@ -60,7 +60,7 @@ The ToggleButton component is a two-state button that can be toggled on and off,
 ### With Icon
 \`\`\`svelte
 <script lang="ts">
-	import { textBIcon } from 'svelai/icons/textB';
+	import { textBIcon } from 'entasis/icons/textB';
 
 	let isBold = $state(false);
 </script>
@@ -89,9 +89,9 @@ The ToggleButton component is a two-state button that can be toggled on and off,
 ### Toolbar Buttons
 \`\`\`svelte
 <script lang="ts">
-	import { textBIcon } from 'svelai/icons/textB';
-	import { textItalicIcon } from 'svelai/icons/textItalic';
-	import { textUnderlineIcon } from 'svelai/icons/textUnderline';
+	import { textBIcon } from 'entasis/icons/textB';
+	import { textItalicIcon } from 'entasis/icons/textItalic';
+	import { textUnderlineIcon } from 'entasis/icons/textUnderline';
 
 	let format = $state({ bold: false, italic: false, underline: false });
 </script>
@@ -210,7 +210,7 @@ The theme object contains the following parts:
 **Custom Checked State**:
 \`\`\`svelte
 <script lang="ts">
-  import { checkIcon } from 'svelai/icons/check';
+  import { checkIcon } from 'entasis/icons/check';
 </script>
 
 <ToggleButton 
@@ -243,7 +243,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setToggleButtonTheme } from 'svelai/toggle-button';
+  import { setToggleButtonTheme } from 'entasis/toggle-button';
   
   setToggleButtonTheme({
     root: {

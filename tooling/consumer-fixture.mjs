@@ -1,9 +1,9 @@
 // Shared "package consumer" fixture: a throwaway SvelteKit-less project whose
-// `node_modules/svelai` is the freshly packaged `dist`. Checks write source files into it
+// `node_modules/entasis` is the freshly packaged `dist`. Checks write source files into it
 // and run svelte-check so imports resolve exactly the way they do for a real consumer.
 //
 // The fixture lives outside the repository and gets an explicit `node_modules`: only
-// svelai's own `dependencies`, its peers — including the OPTIONAL peers (Chart's TanStack
+// entasis's own `dependencies`, its peers — including the OPTIONAL peers (Chart's TanStack
 // Charts + D3, RichTextInput's Lexical, Globe's cobe) a consumer of those components
 // installs — and the two toolchain packages the fixture's own config imports. Nothing
 // resolves by walking up into the repository's `node_modules`, so a missing peer fails
@@ -18,7 +18,7 @@ const exec = promisify(execFile);
 export const repositoryRoot = path.resolve(import.meta.dirname, '..');
 const manifest = JSON.parse(await readFile(path.join(repositoryRoot, 'package.json'), 'utf8'));
 // What a consumer who uses every component has installed, plus what the fixture's own
-// `svelte.config.js` and svelte-check need. `svelai` itself is the packaged `dist`.
+// `svelte.config.js` and svelte-check need. `entasis` itself is the packaged `dist`.
 export const fixtureDependencies = [
 	...Object.keys(manifest.dependencies ?? {}),
 	...Object.keys(manifest.peerDependencies ?? {}),
@@ -38,8 +38,8 @@ export const listFiles = async (directory, predicate) => {
 
 export async function createConsumerFixture() {
 	// Unique per process so parallel checks (CI matrix, several agents) never share a fixture.
-	const fixtureRoot = await mkdtemp(path.join(tmpdir(), 'svelai-package-consumer-'));
-	const packageRoot = path.join(fixtureRoot, 'node_modules/svelai');
+	const fixtureRoot = await mkdtemp(path.join(tmpdir(), 'entasis-package-consumer-'));
+	const packageRoot = path.join(fixtureRoot, 'node_modules/entasis');
 	await mkdir(path.join(fixtureRoot, 'src'), { recursive: true });
 	await mkdir(packageRoot, { recursive: true });
 	await cp(path.join(repositoryRoot, 'dist'), path.join(packageRoot, 'dist'), { recursive: true });
@@ -59,11 +59,11 @@ export async function createConsumerFixture() {
 		path.join(fixtureRoot, 'package.json'),
 		JSON.stringify(
 			{
-				name: 'svelai-package-consumer',
+				name: 'entasis-package-consumer',
 				private: true,
 				type: 'module',
 				dependencies: Object.fromEntries(
-					['svelai', ...fixtureDependencies].map((name) => [name, '*'])
+					['entasis', ...fixtureDependencies].map((name) => [name, '*'])
 				)
 			},
 			null,

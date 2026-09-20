@@ -1,7 +1,7 @@
 export const spinnerDescription = `
 # Spinner Component
 
-The Spinner component is a standalone indeterminate loading indicator. It inherits \`spinnerVariant\` from Theme and allows a per-instance override. The \`default\` variant uses the global \`.ui-spinner\` engine from the Svelai Tailwind plugin.
+The Spinner component is a standalone indeterminate loading indicator. It inherits \`spinnerVariant\` from Theme and allows a per-instance override. The \`default\` variant uses the global \`.ui-spinner\` engine from the Entasis Tailwind plugin.
 
 ## Basic Usage
 
@@ -97,7 +97,7 @@ The theme object contains three parts:
 
 \`\`\`svelte
 <script>
-	import { setSpinnerTheme } from 'svelai/spinner';
+	import { setSpinnerTheme } from 'entasis/spinner';
 
 	setSpinnerTheme({
 		indicator: {

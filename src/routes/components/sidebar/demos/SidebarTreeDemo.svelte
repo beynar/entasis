@@ -64,7 +64,7 @@
 		headerButton={{
 			icon: commandIcon,
 			title: 'Repository',
-			subtitle: 'svelai'
+			subtitle: 'entasis'
 		}}
 	>
 		<div class="bg-surface grid h-full min-w-0 place-items-center p-8">

@@ -86,7 +86,7 @@
 	component="AIThreadToc"
 	relatedComponents={['AIThread', 'ScrollArea', 'HoverCard']}
 	features={[
-		'Standalone svelai/ai-thread-toc package export',
+		'Standalone entasis/ai-thread-toc package export',
 		'Controlled state from AIThread or another transcript owner',
 		'80% container-height bound with scrollbar-free ScrollArea',
 		'Side-aware pin magnification and shared HoverCard preview',
@@ -101,7 +101,7 @@
   import {
     AIThreadToc,
     type AIThreadTocState
-  } from 'svelai/ai-thread-toc';
+  } from 'entasis/ai-thread-toc';
 
   let state: AIThreadTocState;
 ${'</' + 'script>'}

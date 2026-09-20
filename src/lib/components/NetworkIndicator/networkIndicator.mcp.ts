@@ -7,7 +7,7 @@ NetworkIndicator is a fixed top loading bar for SvelteKit navigation and explici
 
 \`\`\`svelte
 <script lang="ts">
-	import { NetworkIndicator } from 'svelai/network-indicator';
+	import { NetworkIndicator } from 'entasis/network-indicator';
 </script>
 \`\`\`
 
@@ -16,7 +16,7 @@ NetworkIndicator is a fixed top loading bar for SvelteKit navigation and explici
 \`\`\`svelte
 <!-- +layout.svelte -->
 <script lang="ts">
-	import { NetworkIndicator } from 'svelai/network-indicator';
+	import { NetworkIndicator } from 'entasis/network-indicator';
 </script>
 
 <NetworkIndicator />
@@ -53,7 +53,7 @@ import {
 	hideNetworkIndicator,
 	showNetworkIndicator,
 	toggleNetworkIndicator
-} from 'svelai/network-indicator';
+} from 'entasis/network-indicator';
 \`\`\`
 
 Prefer \`showNetworkIndicator()\` and \`hideNetworkIndicator()\` for async work. \`toggleNetworkIndicator()\` is available for simple demos or manual toggles, but it is easier to desynchronize in request lifecycles.
@@ -64,7 +64,7 @@ Prefer \`showNetworkIndicator()\` and \`hideNetworkIndicator()\` for async work.
 
 \`\`\`svelte
 <script lang="ts">
-	import { NetworkIndicator } from 'svelai/network-indicator';
+	import { NetworkIndicator } from 'entasis/network-indicator';
 
 	let loading = $state(false);
 </script>
@@ -76,11 +76,11 @@ Prefer \`showNetworkIndicator()\` and \`hideNetworkIndicator()\` for async work.
 
 \`\`\`svelte
 <script lang="ts">
-	import { Button } from 'svelai/button';
+	import { Button } from 'entasis/button';
 	import {
 		hideNetworkIndicator,
 		showNetworkIndicator
-	} from 'svelai/network-indicator';
+	} from 'entasis/network-indicator';
 
 	async function save() {
 		showNetworkIndicator();

@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Command, type CommandGroup } from 'svelai/command';
-	import { Kbd } from 'svelai/kbd';
-	import { commandIcon } from 'svelai/icons/command';
-	import { envelopeSimpleIcon } from 'svelai/icons/envelopeSimple';
-	import { folderSimpleIcon } from 'svelai/icons/folderSimple';
-	import { gearIcon } from 'svelai/icons/gear';
-	import { houseIcon } from 'svelai/icons/house';
-	import { magnifyingGlassIcon } from 'svelai/icons/magnifyingGlass';
-	import { moonIcon } from 'svelai/icons/moon';
-	import { plusIcon } from 'svelai/icons/plus';
-	import { questionIcon } from 'svelai/icons/question';
-	import { userIcon } from 'svelai/icons/user';
+	import { Button } from 'entasis/button';
+	import { Command, type CommandGroup } from 'entasis/command';
+	import { Kbd } from 'entasis/kbd';
+	import { commandIcon } from 'entasis/icons/command';
+	import { envelopeSimpleIcon } from 'entasis/icons/envelopeSimple';
+	import { folderSimpleIcon } from 'entasis/icons/folderSimple';
+	import { gearIcon } from 'entasis/icons/gear';
+	import { houseIcon } from 'entasis/icons/house';
+	import { magnifyingGlassIcon } from 'entasis/icons/magnifyingGlass';
+	import { moonIcon } from 'entasis/icons/moon';
+	import { plusIcon } from 'entasis/icons/plus';
+	import { questionIcon } from 'entasis/icons/question';
+	import { userIcon } from 'entasis/icons/user';
 
 	type Action = 'home' | 'projects' | 'inbox' | 'new-project' | 'profile' | 'appearance' | 'help';
 

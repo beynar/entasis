@@ -1,4 +1,4 @@
-# Svelai Layout and Navigation Components
+# Entasis Layout and Navigation Components
 
 ## Table of Contents
 
@@ -25,7 +25,7 @@
 
 ## Tabs
 
-`import { Tabs } from 'svelai/tabs'`
+`import { Tabs } from 'entasis/tabs'`
 
 Combines Tabbar + Stepper for a complete tabbed interface with animated content panels.
 
@@ -44,7 +44,7 @@ Combines Tabbar + Stepper for a complete tabbed interface with animated content 
 
 ```svelte
 <script>
-	import { Tabs } from 'svelai/tabs';
+	import { Tabs } from 'entasis/tabs';
 
 	let activeTab = $state('Home');
 </script>
@@ -66,7 +66,7 @@ Combines Tabbar + Stepper for a complete tabbed interface with animated content 
 
 ## Tabbar
 
-`import { Tabbar } from 'svelai/tabbar'`
+`import { Tabbar } from 'entasis/tabbar'`
 
 Standalone tab navigation bar with active indicator.
 
@@ -87,7 +87,7 @@ When `href` is provided, tab renders as `<a>`. Roving tabindex + full keyboard n
 
 ```svelte
 <script>
-	import { Tabbar } from 'svelai/tabbar';
+	import { Tabbar } from 'entasis/tabbar';
 
 	let activeTab = $state('Tab 1');
 </script>
@@ -101,7 +101,7 @@ When `href` is provided, tab renders as `<a>`. Roving tabindex + full keyboard n
 
 ## Stepper
 
-`import { Stepper } from 'svelai/stepper'`
+`import { Stepper } from 'entasis/stepper'`
 
 Animated multi-step content container with smooth height transitions.
 
@@ -120,8 +120,8 @@ Animated multi-step content container with smooth height transitions.
 
 ```svelte
 <script>
-	import { Stepper } from 'svelai/stepper';
-	import { Button } from 'svelai/button';
+	import { Stepper } from 'entasis/stepper';
+	import { Button } from 'entasis/button';
 </script>
 
 <Stepper items={['Step 1', 'Step 2']}>
@@ -142,7 +142,7 @@ Animated multi-step content container with smooth height transitions.
 
 ## Breadcrumbs
 
-`import { Breadcrumbs } from 'svelai/breadcrumbs'`
+`import { Breadcrumbs } from 'entasis/breadcrumbs'`
 
 Hierarchical navigation path. Semantic `<nav><ol><li>` structure.
 
@@ -159,7 +159,7 @@ Items with `menu` render as PopupMenu. Items can be strings or config objects.
 
 ```svelte
 <script>
-	import { Breadcrumbs } from 'svelai/breadcrumbs';
+	import { Breadcrumbs } from 'entasis/breadcrumbs';
 </script>
 
 <Breadcrumbs
@@ -182,7 +182,7 @@ single unconditional `gap-sm` at every width; there is no responsive gap to over
 
 ## Accordion
 
-`import { Accordion } from 'svelai/accordion'`
+`import { Accordion } from 'entasis/accordion'`
 
 Collapsible content sections with single/multiple expand modes.
 
@@ -203,7 +203,7 @@ Collapsible content sections with single/multiple expand modes.
 
 ```svelte
 <script>
-	import { Accordion } from 'svelai/accordion';
+	import { Accordion } from 'entasis/accordion';
 </script>
 
 <Accordion
@@ -221,7 +221,7 @@ Collapsible content sections with single/multiple expand modes.
 
 ## Collapsible
 
-`import { Collapsible } from 'svelai/collapsible'`
+`import { Collapsible } from 'entasis/collapsible'`
 
 Single toggle show/hide with slide transition.
 
@@ -241,7 +241,7 @@ Uses Svelte slide transition (200ms). Content removed from DOM when closed.
 
 ```svelte
 <script>
-	import { Collapsible } from 'svelai/collapsible';
+	import { Collapsible } from 'entasis/collapsible';
 
 	let isOpen = $state(false);
 </script>
@@ -258,7 +258,7 @@ Uses Svelte slide transition (200ms). Content removed from DOM when closed.
 
 ## Separator
 
-`import { Separator } from 'svelai/separator'`
+`import { Separator } from 'entasis/separator'`
 
 Visual divider with optional label.
 
@@ -273,7 +273,7 @@ Visual divider with optional label.
 
 ```svelte
 <script>
-	import { Separator } from 'svelai/separator';
+	import { Separator } from 'entasis/separator';
 </script>
 
 <Separator color="primary" thickness={2}>
@@ -287,7 +287,7 @@ Visual divider with optional label.
 
 ## Menu
 
-`import { Menu } from 'svelai/menu'`
+`import { Menu } from 'entasis/menu'`
 
 Renders an array of items: buttons, options, separators, and submenus.
 
@@ -305,8 +305,8 @@ Renders an array of items: buttons, options, separators, and submenus.
 
 ```svelte
 <script>
-	import { Menu } from 'svelai/menu';
-	import { userIcon } from 'svelai/icons/user';
+	import { Menu } from 'entasis/menu';
+	import { userIcon } from 'entasis/icons/user';
 </script>
 
 <Menu
@@ -332,7 +332,7 @@ Renders an array of items: buttons, options, separators, and submenus.
 
 ## PopupMenu
 
-`import { PopupMenu } from 'svelai/popup-menu'`
+`import { PopupMenu } from 'entasis/popup-menu'`
 
 Popover + Menu combo. Inherits all Popover props.
 
@@ -345,8 +345,8 @@ Popover + Menu combo. Inherits all Popover props.
 
 ```svelte
 <script lang="ts">
-	import { PopupMenu } from 'svelai/popup-menu';
-	import type { MenuItem } from 'svelai/menu';
+	import { PopupMenu } from 'entasis/popup-menu';
+	import type { MenuItem } from 'entasis/menu';
 
 	const menuItems: MenuItem[] = [
 		{ type: 'option', title: 'Edit' },
@@ -365,7 +365,7 @@ Popover + Menu combo. Inherits all Popover props.
 
 ## MenuOption
 
-`import { MenuOption } from 'svelai/menu-option'`
+`import { MenuOption } from 'entasis/menu-option'`
 
 Individual menu item with title/description layout.
 
@@ -383,8 +383,8 @@ Individual menu item with title/description layout.
 
 ```svelte
 <script>
-	import { MenuOption } from 'svelai/menu-option';
-	import { gearIcon } from 'svelai/icons/gear';
+	import { MenuOption } from 'entasis/menu-option';
+	import { gearIcon } from 'entasis/icons/gear';
 </script>
 
 <MenuOption href="/settings" color="primary">
@@ -400,7 +400,7 @@ Individual menu item with title/description layout.
 
 ## Carousel
 
-`import { Carousel } from 'svelai/carousel'`
+`import { Carousel } from 'entasis/carousel'`
 
 Scrollable item collection with drag/touch support and a chrome footer row under the slides.
 
@@ -431,7 +431,7 @@ recessed track whose fill is the fraction of the scrollable range already scroll
 
 ```svelte
 <script>
-	import { Carousel } from 'svelai/carousel';
+	import { Carousel } from 'entasis/carousel';
 
 	const items = [{ content: 'One' }, { content: 'Two' }, { content: 'Three' }];
 </script>
@@ -457,7 +457,7 @@ two slides from 42rem up, and a record that starts at `md` leaves the narrow ban
 default. See [Responsive props](theming.md#responsive-props) for the full rules.
 
 **Breakpoints are container queries on the carousel itself**, not viewport media queries, and the
-widths are the shared container breakpoint table exported from `svelai/theme` — the same table Grid
+widths are the shared container breakpoint table exported from `entasis/theme` — the same table Grid
 and Stack use: `sm` from 36rem (576px), `md` from 42rem (672px), `lg` from 56rem (896px), `xl` from
 72rem (1152px) of carousel width, with `xs` below that. A 360px carousel in a sidebar of a wide page
 is `xs`; the same carousel run full-bleed is `xl`. The slide width, gap and peek are resolved on the
@@ -471,7 +471,7 @@ the carousel measures zero and sticks at `xs`.
 
 ## ScrollArea
 
-`import { ScrollArea } from 'svelai/scroll-area'`
+`import { ScrollArea } from 'entasis/scroll-area'`
 
 Custom scrollbar container.
 
@@ -486,7 +486,7 @@ Scrolls in both directions; size the container (`class="h-64"`) to constrain it.
 
 ```svelte
 <script>
-	import { ScrollArea } from 'svelai/scroll-area';
+	import { ScrollArea } from 'entasis/scroll-area';
 </script>
 
 <ScrollArea class="h-64" type="hover" scrollFade>
@@ -500,7 +500,7 @@ Scrolls in both directions; size the container (`class="h-64"`) to constrain it.
 
 ## AspectRatio
 
-`import { AspectRatio } from 'svelai/aspect-ratio'`
+`import { AspectRatio } from 'entasis/aspect-ratio'`
 
 Maintains aspect ratio for content (images, videos, etc.).
 
@@ -511,7 +511,7 @@ Maintains aspect ratio for content (images, videos, etc.).
 
 ```svelte
 <script>
-	import { AspectRatio } from 'svelai/aspect-ratio';
+	import { AspectRatio } from 'entasis/aspect-ratio';
 </script>
 
 <AspectRatio ratio="16x9">
@@ -527,7 +527,7 @@ Maintains aspect ratio for content (images, videos, etc.).
 
 ## Marquee
 
-`import { Marquee } from 'svelai/marquee'`
+`import { Marquee } from 'entasis/marquee'`
 
 Infinite scrolling animation. Content auto-duplicated for seamless loop.
 
@@ -546,7 +546,7 @@ Vertical marquees need a container with defined height.
 
 ```svelte
 <script>
-	import { Marquee } from 'svelai/marquee';
+	import { Marquee } from 'entasis/marquee';
 
 	const items = [{ text: 'Alpha' }, { text: 'Beta' }, { text: 'Gamma' }];
 </script>
@@ -564,7 +564,7 @@ Vertical marquees need a container with defined height.
 
 ## Sidebar
 
-`import { Sidebar } from 'svelai/sidebar'`
+`import { Sidebar } from 'entasis/sidebar'`
 
 Application navigation panel. Owns its own display state, resizing, the mobile drawer, and the
 page column beside it. Compose it through `AppShell` for full application layouts.
@@ -635,12 +635,12 @@ badge renders a bare dot and a Snippet badge is decorative, so put their meaning
 
 ```svelte
 <script lang="ts">
-	import { Sidebar, type SidebarActivityBar, type SidebarGroup } from 'svelai/sidebar';
-	import { bellIcon } from 'svelai/icons/bell';
-	import { filesIcon } from 'svelai/icons/files';
-	import { gearIcon } from 'svelai/icons/gear';
-	import { houseIcon } from 'svelai/icons/house';
-	import { userIcon } from 'svelai/icons/user';
+	import { Sidebar, type SidebarActivityBar, type SidebarGroup } from 'entasis/sidebar';
+	import { bellIcon } from 'entasis/icons/bell';
+	import { filesIcon } from 'entasis/icons/files';
+	import { gearIcon } from 'entasis/icons/gear';
+	import { houseIcon } from 'entasis/icons/house';
+	import { userIcon } from 'entasis/icons/user';
 
 	let section = $state('files');
 
@@ -684,7 +684,7 @@ badge renders a bare dot and a Snippet badge is decorative, so put their meaning
 
 ## AppShell
 
-`import { AppShell } from 'svelai/app-shell'`
+`import { AppShell } from 'entasis/app-shell'`
 
 Composes `Sidebar` with `PageShell` and forwards one shared surface treatment to both. Use it when
 routes share the same application navigation and page chrome; reach for `Sidebar` alone only when
@@ -716,7 +716,7 @@ AppShell renders one `data-slot="app-shell-frame"` element between its root and 
 
 ## Stack
 
-`import { Stack } from 'svelai/stack'`
+`import { Stack } from 'entasis/stack'`
 
 Flex row or column with token spacing, sized by its host. Every layout axis is responsive to the
 **stack's own width** (see [Responsive props](theming.md#responsive-props) and the container
@@ -737,8 +737,8 @@ one page with no JavaScript and no measurement.
 
 ```svelte
 <script lang="ts">
-	import { Card } from 'svelai/card';
-	import { Stack } from 'svelai/stack';
+	import { Card } from 'entasis/card';
+	import { Stack } from 'entasis/stack';
 </script>
 
 <Stack orientation={{ md: 'horizontal' }} gap={{ xs: 'sm', md: 'lg' }} align="center">
@@ -766,7 +766,7 @@ flex line:
 
 ```svelte
 <script>
-	import { Stack } from 'svelai/stack';
+	import { Stack } from 'entasis/stack';
 </script>
 
 <ul class="gap-sm flex flex-col">
@@ -787,7 +787,7 @@ are custom properties now.
 
 ## Grid and GridSpan
 
-`import { Grid, GridSpan } from 'svelai/grid'`
+`import { Grid, GridSpan } from 'entasis/grid'`
 
 Responsive grid without hand-written `grid-cols-*` / `col-span-*` classes, laid out against the
 **grid's own width**.
@@ -811,8 +811,8 @@ as a two-thirds chart beside a one-third panel:
 
 ```svelte
 <script lang="ts">
-	import { Card } from 'svelai/card';
-	import { Grid, GridSpan } from 'svelai/grid';
+	import { Card } from 'entasis/card';
+	import { Grid, GridSpan } from 'entasis/grid';
 </script>
 
 <Grid columns={{ minWidth: 320, max: 3 }} gap="lg">
@@ -829,8 +829,8 @@ Or step the track count by hand, per breakpoint of the grid's own width:
 
 ```svelte
 <script lang="ts">
-	import { Card } from 'svelai/card';
-	import { Grid, GridSpan } from 'svelai/grid';
+	import { Card } from 'entasis/card';
+	import { Grid, GridSpan } from 'entasis/grid';
 </script>
 
 <Grid columns={{ xs: 1, sm: 2, lg: 4 }} gap={{ xs: 'sm', lg: 'lg' }}>

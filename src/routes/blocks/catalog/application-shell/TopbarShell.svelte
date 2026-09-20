@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Grid } from 'svelai/grid';
-	import { Stack } from 'svelai/stack';
-	import { Avatar } from 'svelai/avatar';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { TextInput } from 'svelai/text-input';
-	import { Timeline } from 'svelai/timeline';
+	import { Grid } from 'entasis/grid';
+	import { Stack } from 'entasis/stack';
+	import { Avatar } from 'entasis/avatar';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { TextInput } from 'entasis/text-input';
+	import { Timeline } from 'entasis/timeline';
 
 	let active = $state('Projects');
 	let query = $state<string | null>('');

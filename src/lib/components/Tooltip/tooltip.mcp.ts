@@ -12,7 +12,7 @@ Both are rendered by the single tooltip surface that \`<Theme>\` mounts (\`Toolt
 
 \`\`\`svelte
 <script lang="ts">
-	import { Tooltip } from 'svelai/tooltip';
+	import { Tooltip } from 'entasis/tooltip';
 </script>
 
 <Tooltip content="Click to submit" trigger={{ content: 'Submit', variant: 'outline' }} />
@@ -49,7 +49,7 @@ Every prop except \`trigger\`, \`open\`, \`defaultOpen\` and \`onOpenChange\` is
 ### Button Trigger
 \`\`\`svelte
 <script lang="ts">
-	import { Tooltip } from 'svelai/tooltip';
+	import { Tooltip } from 'entasis/tooltip';
 </script>
 
 <Tooltip
@@ -62,7 +62,7 @@ Every prop except \`trigger\`, \`open\`, \`defaultOpen\` and \`onOpenChange\` is
 \`\`\`svelte
 <script lang="ts">
 	import type { Attachment } from 'svelte/attachments';
-	import { Tooltip } from 'svelai/tooltip';
+	import { Tooltip } from 'entasis/tooltip';
 </script>
 
 {#snippet helpTrigger(attach: Attachment<HTMLElement>)}
@@ -75,7 +75,7 @@ Every prop except \`trigger\`, \`open\`, \`defaultOpen\` and \`onOpenChange\` is
 ### Forced Open
 \`\`\`svelte
 <script lang="ts">
-	import { Tooltip } from 'svelai/tooltip';
+	import { Tooltip } from 'entasis/tooltip';
 </script>
 
 <!-- Useful for docs, screenshots and visual tests -->
@@ -85,7 +85,7 @@ Every prop except \`trigger\`, \`open\`, \`defaultOpen\` and \`onOpenChange\` is
 ### Different Positions
 \`\`\`svelte
 <script lang="ts">
-	import { Tooltip } from 'svelai/tooltip';
+	import { Tooltip } from 'entasis/tooltip';
 </script>
 
 <Tooltip content="Top tooltip" position="top" trigger={{ content: 'Top' }} />
@@ -97,7 +97,7 @@ Every prop except \`trigger\`, \`open\`, \`defaultOpen\` and \`onOpenChange\` is
 ### Different Colors
 \`\`\`svelte
 <script lang="ts">
-	import { Tooltip } from 'svelai/tooltip';
+	import { Tooltip } from 'entasis/tooltip';
 </script>
 
 <Tooltip content="Success!" color="success" trigger={{ content: 'Success' }} />
@@ -108,7 +108,7 @@ Every prop except \`trigger\`, \`open\`, \`defaultOpen\` and \`onOpenChange\` is
 ### Custom Delay
 \`\`\`svelte
 <script lang="ts">
-	import { Tooltip } from 'svelai/tooltip';
+	import { Tooltip } from 'entasis/tooltip';
 </script>
 
 <Tooltip content="Quick tooltip" delay={100} trigger={{ content: 'Quick (100ms)' }} />
@@ -118,7 +118,7 @@ Every prop except \`trigger\`, \`open\`, \`defaultOpen\` and \`onOpenChange\` is
 ### Different Sizes and Variants
 \`\`\`svelte
 <script lang="ts">
-	import { Tooltip } from 'svelai/tooltip';
+	import { Tooltip } from 'entasis/tooltip';
 </script>
 
 <Tooltip content="Small tooltip" size="small" trigger={{ content: 'Small' }} />
@@ -130,7 +130,7 @@ Every prop except \`trigger\`, \`open\`, \`defaultOpen\` and \`onOpenChange\` is
 ### With Snippet Content
 \`\`\`svelte
 <script lang="ts">
-	import { Tooltip } from 'svelai/tooltip';
+	import { Tooltip } from 'entasis/tooltip';
 </script>
 
 {#snippet richContent()}
@@ -146,7 +146,7 @@ Every prop except \`trigger\`, \`open\`, \`defaultOpen\` and \`onOpenChange\` is
 ### With Callbacks
 \`\`\`svelte
 <script lang="ts">
-	import { Tooltip } from 'svelai/tooltip';
+	import { Tooltip } from 'entasis/tooltip';
 </script>
 
 <Tooltip
@@ -164,7 +164,7 @@ disabled wrappers — or inside another component's internals.
 
 \`\`\`svelte
 <script lang="ts">
-	import { tooltip } from 'svelai/tooltip';
+	import { tooltip } from 'entasis/tooltip';
 </script>
 
 <button {@attach tooltip({ content: 'Click to submit' })}> Submit </button>
@@ -212,7 +212,7 @@ The theme object contains the following parts:
 ### Theme Type Definition
 
 \`\`\`typescript
-import type { TooltipThemeProps } from 'svelai/tooltip';
+import type { TooltipThemeProps } from 'entasis/tooltip';
 
 // Example theme customization
 const customTheme: TooltipThemeProps = {
@@ -254,7 +254,7 @@ const customTheme: TooltipThemeProps = {
 **Basic Theme Override**:
 \`\`\`svelte
 <script lang="ts">
-	import { Tooltip } from 'svelai/tooltip';
+	import { Tooltip } from 'entasis/tooltip';
 </script>
 
 <Tooltip
@@ -267,7 +267,7 @@ const customTheme: TooltipThemeProps = {
 **Color Customization**:
 \`\`\`svelte
 <script lang="ts">
-	import { tooltip } from 'svelai/tooltip';
+	import { tooltip } from 'entasis/tooltip';
 </script>
 
 <button
@@ -284,7 +284,7 @@ const customTheme: TooltipThemeProps = {
 **Global Theme Setting**:
 \`\`\`svelte
 <script lang="ts">
-	import { setTooltipTheme } from 'svelai/tooltip';
+	import { setTooltipTheme } from 'entasis/tooltip';
 
 	setTooltipTheme({
 		root: {

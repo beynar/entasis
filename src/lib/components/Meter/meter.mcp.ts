@@ -388,7 +388,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setMeterTheme } from 'svelai/meter';
+  import { setMeterTheme } from 'entasis/meter';
   
   setMeterTheme({
     root: {

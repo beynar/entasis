@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Grid } from 'svelai/grid';
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { TextInput } from 'svelai/text-input';
+	import { Grid } from 'entasis/grid';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { TextInput } from 'entasis/text-input';
 
 	let query = $state<string | null>('');
 	let tools = $state([

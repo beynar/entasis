@@ -7,7 +7,7 @@
 
 	const sizes = ['small', 'normal', 'large'] as const;
 	const colors = ['primary', 'secondary', 'danger', 'success', 'neutral'] as const;
-	const value = 'https://svelai.dev';
+	const value = 'https://entasis.dev';
 
 	const controls = createComponentControls([
 		{
@@ -63,7 +63,7 @@
 		{controls}
 		description="Default QR code for a URL."
 		code={`<QRCode
-	value="https://svelai.dev"
+	value="https://entasis.dev"
 	size="${controls.value.size}"
 	color="${controls.value.color}"
 	dataModulesSettings={{ style: '${controls.value.moduleStyle}' }}

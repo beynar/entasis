@@ -5,8 +5,8 @@ Transcript marker with default, separator, and bottom-border variants.
 
 \`\`\`svelte
 <script>
-  import { AIMarker } from 'svelai/ai-marker';
-  import { fileTextIcon } from 'svelai/icons/fileText';
+  import { AIMarker } from 'entasis/ai-marker';
+  import { fileTextIcon } from 'entasis/icons/fileText';
 </script>
 
 {#snippet icon()}{@render fileTextIcon({ size: 16 })}{/snippet}

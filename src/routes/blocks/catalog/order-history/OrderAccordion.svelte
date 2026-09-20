@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Accordion } from 'svelai/accordion';
-	import { TextInput } from 'svelai/text-input';
-	import { Chip } from 'svelai/chip';
-	import { Button } from 'svelai/button';
-	import { Dialog } from 'svelai/dialog';
+	import { Heading } from 'entasis/heading';
+	import { Accordion } from 'entasis/accordion';
+	import { TextInput } from 'entasis/text-input';
+	import { Chip } from 'entasis/chip';
+	import { Button } from 'entasis/button';
+	import { Dialog } from 'entasis/dialog';
 	const money = (amount: number) =>
 		new Intl.NumberFormat('en-US', {
 			style: 'currency',

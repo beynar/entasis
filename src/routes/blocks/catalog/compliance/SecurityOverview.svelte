@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	import { shieldCheckIcon } from 'svelai/icons/shieldCheck';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
+	import { shieldCheckIcon } from 'entasis/icons/shieldCheck';
 </script>
 
 <section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl items-center md:grid-cols-2">
@@ -22,7 +22,7 @@
 			>Explore the documentation</Button
 		>
 		<p class="text-neutral/65 text-xs">
-			Illustrative statuses; these are not certifications of Svelai.
+			Illustrative statuses; these are not certifications of Entasis.
 		</p>
 	</div>
 	<div class="gap-lg flex flex-col">

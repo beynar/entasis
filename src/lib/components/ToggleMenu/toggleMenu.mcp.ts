@@ -7,12 +7,12 @@ ToggleMenu renders standalone toggles, independent toggle groups, exclusive radi
 
 \`\`\`svelte
 <script lang="ts">
-	import { ToggleMenu, type ToggleMenuItem } from 'svelai/toggle-menu';
-	import type { MenuItem } from 'svelai/menu';
-	import { eyeIcon } from 'svelai/icons/eye';
-	import { textBIcon } from 'svelai/icons/textB';
-	import { textItalicIcon } from 'svelai/icons/textItalic';
-	import { paletteIcon } from 'svelai/icons/palette';
+	import { ToggleMenu, type ToggleMenuItem } from 'entasis/toggle-menu';
+	import type { MenuItem } from 'entasis/menu';
+	import { eyeIcon } from 'entasis/icons/eye';
+	import { textBIcon } from 'entasis/icons/textB';
+	import { textItalicIcon } from 'entasis/icons/textItalic';
+	import { paletteIcon } from 'entasis/icons/palette';
 
 	const getTextColorOptions = (): MenuItem[] => [
 		{ type: 'option', title: 'Red', color: 'danger' },

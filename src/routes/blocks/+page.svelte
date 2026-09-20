@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import { Empty } from 'svelai/empty';
-	import { TextInput } from 'svelai/text-input';
-	import { magnifyingGlassIcon } from 'svelai/icons/magnifyingGlass';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import { Empty } from 'entasis/empty';
+	import { TextInput } from 'entasis/text-input';
+	import { magnifyingGlassIcon } from 'entasis/icons/magnifyingGlass';
 	import BlockCategoryCard from './BlockCategoryCard.svelte';
 	import { blockCategories, blockCount, blockGroups } from './catalog.js';
 	import { workflowBlocks } from './blocks.js';
@@ -47,17 +47,17 @@
 </script>
 
 <svelte:head>
-	<title>Blocks · svelai</title>
+	<title>Blocks · entasis</title>
 	<meta
 		name="description"
-		content="A library of complete interfaces composed with Svelai. Browse marketing, application, commerce, and content blocks with live previews and copyable Svelte source."
+		content="A library of complete interfaces composed with Entasis. Browse marketing, application, commerce, and content blocks with live previews and copyable Svelte source."
 	/>
 </svelte:head>
 
 <article class="gap-xl mx-auto flex w-full max-w-7xl flex-col">
 	<header class="gap-xl border-neutral-muted py-xl flex flex-col border-b">
 		<div class="gap-sm text-neutral/70 flex flex-wrap items-center text-xs font-medium">
-			<span class="bg-primary size-1.5 rounded-full"></span><span>THE SVELAI BLOCK LIBRARY</span>
+			<span class="bg-primary size-1.5 rounded-full"></span><span>THE ENTASIS BLOCK LIBRARY</span>
 		</div>
 		<div class="gap-xl flex flex-wrap items-end justify-between">
 			<div class="gap-lg flex max-w-2xl flex-col">

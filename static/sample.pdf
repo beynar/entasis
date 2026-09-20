@@ -17,7 +17,7 @@ stream
 BT
 /F1 28 Tf
 72 760 Td
-(svelai DocumentViewer) Tj
+(entasis DocumentViewer) Tj
 /F1 13 Tf
 0 -34 Td
 (Page 1 of 3 - a sample document rendered with pdf.js.) Tj
@@ -26,12 +26,12 @@ BT
 0 -22 Td
 (You can select this text, and search the whole document.) Tj
 0 -22 Td
-(Visit svelai.dev for the component library documentation.) Tj
+(Visit entasis.dev for the component library documentation.) Tj
 ET
 endstream
 endobj
 6 0 obj
-<< /Type /Annot /Subtype /Link /Rect [72 656 260 674] /Border [0 0 0] /A << /Type /Action /S /URI /URI (https://svelai.dev) >> >>
+<< /Type /Annot /Subtype /Link /Rect [72 656 260 674] /Border [0 0 0] /A << /Type /Action /S /URI /URI (https://entasis.dev) >> >>
 endobj
 7 0 obj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 8 0 R >>
@@ -73,7 +73,7 @@ BT
 0 -22 Td
 (Pinch to zoom works on touch devices.) Tj
 0 -22 Td
-(Thank you for reading this svelai document.) Tj
+(Thank you for reading this entasis document.) Tj
 ET
 endstream
 endobj

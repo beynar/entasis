@@ -3,7 +3,7 @@ The confirmation function displays a modal dialog that asks the user to confirm 
 
 **Usage:**
 \`\`\`typescript
-import { confirmation } from 'svelai/confirmation';
+import { confirmation } from 'entasis/confirmation';
 
 const { confirmed, result } = await confirmation({
   title: 'Delete Item',

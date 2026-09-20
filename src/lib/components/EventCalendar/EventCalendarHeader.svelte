@@ -38,17 +38,11 @@
 
 	let pickerYear = $state(1970);
 	let pickerMonth = $state(0);
-	const snapshot = $derived(calendar.snapshot);
 	const messages = $derived(calendar.messages);
-	const direction = $derived(calendar.direction);
-	const showDatePicker = $derived(calendar.showDatePicker);
 	const density = $derived(calendar.density);
 	const disabled = $derived(calendar.disabled);
-	const stickyHeader = $derived(calendar.stickyHeader);
-	const scrollMode = $derived(calendar.scrollMode);
 	const classes = $derived(calendar.classes);
-	const header = $derived(calendar.renderers.header || undefined);
-	const actions = $derived(calendar.renderers.actions);
+	const chrome = $derived({ density, view: calendar.view, disabled });
 
 	$effect.pre(() => {
 		const anchorDay = parseDateOnly(getZonedDay(calendar.date, calendar.timeZone));
@@ -67,8 +61,8 @@
 		getDateJumpDisabledDates(pickerYear, pickerMonth, hiddenWeekdays)
 	);
 	const pickerToday = $derived(getDateJumpToday(calendar.todayInstant, calendar.timeZone));
-	const previousIcon = $derived(direction === 'rtl' ? caretRightIcon : caretLeftIcon);
-	const nextIcon = $derived(direction === 'rtl' ? caretLeftIcon : caretRightIcon);
+	const previousIcon = $derived(calendar.direction === 'rtl' ? caretRightIcon : caretLeftIcon);
+	const nextIcon = $derived(calendar.direction === 'rtl' ? caretLeftIcon : caretRightIcon);
 	const viewLabels = $derived<Record<EventCalendarView, string>>({
 		month: messages.eventCalendarMonthView,
 		week: messages.eventCalendarWeekView,
@@ -105,24 +99,21 @@
 		label: messages.eventCalendarNext,
 		onclick: () => calendar.next()
 	});
-	const currentViewLabel = $derived(viewLabels[calendar.view]);
 </script>
 
 <div
 	data-event-calendar-part="header"
-	class={classes.header({
-		density,
-		view: calendar.view,
-		disabled,
+	class={calendar.classes.header({
+		...chrome,
 		class:
-			stickyHeader && scrollMode === 'page'
+			calendar.stickyHeader && calendar.scrollMode === 'page'
 				? 'sticky top-[var(--event-calendar-sticky-offset)] z-40'
 				: undefined
 	})}
 >
-	{#if header}
+	{#if calendar.renderers.header}
 		{@const headerPayload = {
-			...snapshot,
+			...calendar.snapshot,
 			previous: previousPart,
 			today: todayPart,
 			next: nextPart,
@@ -131,12 +122,9 @@
 			datePicker: datePickerPart,
 			actions: actionsPart
 		} satisfies EventCalendarHeaderPayload<TItemFields, TResourceFields>}
-		<Slot render={header} payload={headerPayload} />
+		<Slot render={calendar.renderers.header} payload={headerPayload} />
 	{:else}
-		<div
-			data-event-calendar-part="navigation"
-			class={classes.navigation({ density, view: calendar.view, disabled })}
-		>
+		<div data-event-calendar-part="navigation" class={classes.navigation(chrome)}>
 			<ButtonGroup
 				items={[previousButton, nextButton]}
 				size="small"
@@ -154,11 +142,11 @@
 </div>
 
 <span class="sr-only" aria-live="polite">
-	{messages.eventCalendarViewAnnouncement(currentViewLabel)}
+	{messages.eventCalendarViewAnnouncement(viewLabels[calendar.view])}
 </span>
 
 {#snippet previousPart()}
-	<Button {...previousButton} squared size="small" variant="ghost" color="neutral" {disabled} />
+	{@render navigationButton(previousButton)}
 {/snippet}
 
 {#snippet todayPart()}
@@ -168,14 +156,18 @@
 {/snippet}
 
 {#snippet nextPart()}
-	<Button {...nextButton} squared size="small" variant="ghost" color="neutral" {disabled} />
+	{@render navigationButton(nextButton)}
+{/snippet}
+
+{#snippet navigationButton(button: typeof previousButton)}
+	<Button {...button} squared size="small" variant="ghost" color="neutral" {disabled} />
 {/snippet}
 
 {#snippet titlePart()}
 	<div
 		role="status"
 		data-event-calendar-part="title"
-		class={classes.title({ density, view: calendar.view, disabled })}
+		class={classes.title(chrome)}
 		aria-live="polite"
 		aria-label={messages.eventCalendarRangeAnnouncement(profile.title)}
 	>
@@ -184,10 +176,7 @@
 {/snippet}
 
 {#snippet viewSwitcherPart()}
-	<div
-		data-event-calendar-part="view-switcher"
-		class={classes.viewSwitcher({ density, view: calendar.view, disabled })}
-	>
+	<div data-event-calendar-part="view-switcher" class={classes.viewSwitcher(chrome)}>
 		<div class="hidden @[40rem]:block">
 			<SegmentedControl
 				items={viewItems}
@@ -212,7 +201,7 @@
 						onclick={() => popover.toggle()}
 						{@attach popover.reference}
 					>
-						{currentViewLabel}
+						{viewLabels[calendar.view]}
 					</Button>
 				{/snippet}
 			</PopupMenu>
@@ -221,7 +210,7 @@
 {/snippet}
 
 {#snippet datePickerPart()}
-	{#if showDatePicker}
+	{#if calendar.showDatePicker}
 		<Popover position="bottom-start">
 			{#snippet trigger(popover)}
 				<Button
@@ -270,12 +259,9 @@
 {/snippet}
 
 {#snippet actionsPart()}
-	{#if actions}
-		<div
-			data-event-calendar-part="actions"
-			class={classes.actions({ density, view: calendar.view, disabled })}
-		>
-			<Slot render={actions} payload={snapshot} />
+	{#if calendar.renderers.actions}
+		<div data-event-calendar-part="actions" class={classes.actions(chrome)}>
+			<Slot render={calendar.renderers.actions} payload={calendar.snapshot} />
 		</div>
 	{/if}
 {/snippet}

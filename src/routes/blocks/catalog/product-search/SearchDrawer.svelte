@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Dialog } from 'svelai/dialog';
-	import { Button } from 'svelai/button';
-	import { TextInput } from 'svelai/text-input';
-	import { Empty } from 'svelai/empty';
-	import { Tabbar } from 'svelai/tabbar';
+	import { Heading } from 'entasis/heading';
+	import { Dialog } from 'entasis/dialog';
+	import { Button } from 'entasis/button';
+	import { TextInput } from 'entasis/text-input';
+	import { Empty } from 'entasis/empty';
+	import { Tabbar } from 'entasis/tabbar';
 	const products = [
 		{
 			id: 'arc',

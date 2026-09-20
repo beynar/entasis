@@ -136,7 +136,7 @@
 		<ComponentCard
 			description="The tooltip attachment stays available for elements you already render."
 			code={`<script>
-	import { tooltip } from 'svelai/tooltip';
+	import { tooltip } from 'entasis/tooltip';
 </scr${'ipt'}>
 
 <Button variant="outline" {@attach tooltip({ content: 'Top tooltip', position: 'top' })}>

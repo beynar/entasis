@@ -6,7 +6,7 @@ Role-aware chat message with Markdown, inline AI tokens, files, and copy/edit/re
 ## Content and precedence
 
 \`message\` supplies role, name, content, and files. Direct \`from\`, \`name\`, \`content\`, and
-\`files\` props take precedence. \`messageIndex\` is canonical and \`index\` is its Svelai alias.
+\`files\` props take precedence. \`messageIndex\` is canonical and \`index\` is its Entasis alias.
 
 \`markdown\` defaults to true. \`streamdown\` forwards shared Markdown options and wins over the
 \`markdownProps\` alias. Raw HTML is always disabled. HTTPS images and HTTPS, email, and telephone
@@ -21,7 +21,7 @@ and scales typography, content padding, file previews, and the default action co
 
 \`\`\`svelte
 <script>
-  import { AIMessage } from 'svelai/ai-message';
+  import { AIMessage } from 'entasis/ai-message';
 </script>
 
 <AIMessage

@@ -10,11 +10,11 @@ const components = componentMcpRegistry;
 const handler = mcpHandler({
 	tools: {
 		components: tool(`
-			svelai  is a component library for sveltekit. It provides a set of components that can be used to build web applications with a focus on configuration over markup.
+			entasis  is a component library for sveltekit. It provides a set of components that can be used to build web applications with a focus on configuration over markup.
 			Use this tool to get the documentation for a specific component.
 			You will have to know that most of the components should be imported like this: 
-			import { ComponentName } from 'svelai/component-name' 
-			(using kebab-case for the package name, e.g., svelai/dialog and using PascalCase for the component name, e.g., Dialog)
+			import { ComponentName } from 'entasis/component-name' 
+			(using kebab-case for the package name, e.g., entasis/dialog and using PascalCase for the component name, e.g., Dialog)
 			
 			When available in props 
 			- most of the components are using the following color props : primary, secondary, success, warning, danger, info, background, foreground.
@@ -38,7 +38,7 @@ const handler = mcpHandler({
 				return { documentation: component };
 			})
 	},
-	name: 'svelai-mcp',
+	name: 'entasis-mcp',
 	version: '1.0.0'
 });
 

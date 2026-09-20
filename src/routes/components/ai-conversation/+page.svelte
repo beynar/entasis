@@ -112,9 +112,9 @@
 		description="Children read the nearest conversation automatically. The buttons mutate the same bindable state exposed to the parent."
 		class="!min-h-0 p-4"
 		code={`<script lang="ts">
-  import { AIConversation } from 'svelai/ai-conversation';
-  import { AIThread } from 'svelai/ai-thread';
-  import { AIComposer } from 'svelai/ai-composer';
+  import { AIConversation } from 'entasis/ai-conversation';
+  import { AIThread } from 'entasis/ai-thread';
+  import { AIComposer } from 'entasis/ai-composer';
 ${'</' + 'script>'}
 
 <AIConversation bind:api={conversation} bind:messages onSubmit={sendMessage}>

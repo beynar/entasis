@@ -369,9 +369,9 @@ type EventCalendarOwnProps<
 		theme?: EventCalendarThemeProps;
 		/** Required IANA display time zone or `UTC`. */
 		timeZone: string;
-		/** BCP-47 formatting locale. Defaults to the active Svelai catalog locale. */
+		/** BCP-47 formatting locale. Defaults to the active Entasis catalog locale. */
 		locale?: string;
-		/** Per-instance Svelai message overrides. Defaults to none. */
+		/** Per-instance Entasis message overrides. Defaults to none. */
 		i18n?: Partial<Messages>;
 		/** Explicit reading direction; otherwise inherits the ambient direction. */
 		dir?: 'ltr' | 'rtl';

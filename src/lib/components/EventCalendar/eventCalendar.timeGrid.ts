@@ -9,6 +9,7 @@ import {
 	getZonedParts,
 	isEventCalendarOffDay,
 	resolveZonedMinutesOnDay,
+	startOfZonedDay,
 	type EventCalendarDateProfile
 } from './eventCalendar.date.js';
 import { EventCalendarError } from './eventCalendar.error.js';
@@ -24,13 +25,13 @@ import {
 	filterEventCalendarBucketByResource,
 	type EventCalendarResourceModel
 } from './eventCalendar.resources.js';
+import type { EventCalendarAdmittedBusinessHours } from './eventCalendar.businessHours.js';
 import {
 	eventCalendarAllDayCellTarget,
 	eventCalendarTimedColumnTarget,
 	eventCalendarTimedSlotTarget
 } from './eventCalendar.targets.js';
 import type {
-	EventCalendarBusinessHours,
 	EventCalendarDateOnly,
 	EventCalendarOffDaysConfig,
 	EventCalendarSegment,
@@ -44,6 +45,12 @@ import type {
 export const EVENT_CALENDAR_MINUTE_MS = 60_000;
 
 export type EventCalendarTimeGridView = 'week' | 'day' | 'days' | 'resource';
+
+export const getEventCalendarTimeGridItemTargetKey = (
+	kind: 'all-day' | 'timed',
+	columnKey: string,
+	itemKey: string
+): string => `time-item:${kind}:${columnKey}:${itemKey}`;
 
 export type EventCalendarTimeSlot = {
 	key: string;
@@ -63,6 +70,8 @@ export type EventCalendarTimeGridDayGeometry<TItemFields extends object> = {
 	key: string;
 	day: EventCalendarDateOnly;
 	column: number;
+	columnLabel?: string;
+	offDay: boolean;
 	resourceId?: string;
 	timedColumnTarget: EventCalendarTimedDropTarget;
 	allDayDropTarget: EventCalendarAllDayDropTarget;
@@ -73,6 +82,8 @@ export type EventCalendarTimeGridDayGeometry<TItemFields extends object> = {
 	intervalInstants: readonly Date[];
 	businessWindows: readonly EventCalendarBusinessWindow[];
 	backgroundSegments: readonly EventCalendarSegment<TItemFields>[];
+	allDaySegments: readonly EventCalendarSegment<TItemFields>[];
+	allDayBackgroundSegments: readonly EventCalendarSegment<TItemFields>[];
 	timedPlacements: readonly EventCalendarTimedPlacement<TItemFields>[];
 };
 
@@ -81,6 +92,8 @@ type CreateTimeGridDayGeometryOptions<TItemFields extends object> = {
 	view: EventCalendarTimeGridView;
 	day: EventCalendarDateOnly;
 	column: number;
+	columnLabel?: string;
+	offDay?: boolean;
 	resourceId?: string;
 	timeZone: string;
 	dayStartMinutes: number;
@@ -88,19 +101,20 @@ type CreateTimeGridDayGeometryOptions<TItemFields extends object> = {
 	interval: number;
 	slotDuration: number;
 	snapDuration: number;
-	businessHours: readonly EventCalendarBusinessHours[];
+	businessHours: readonly EventCalendarAdmittedBusinessHours[];
 	bucket?: EventCalendarDayBucket<TItemFields>;
 };
 
-export function getEventCalendarElapsedMinutes(start: Date, instant: Date): number {
-	return (instant.getTime() - start.getTime()) / EVENT_CALENDAR_MINUTE_MS;
-}
+export const getEventCalendarElapsedMinutes = (start: Date, instant: Date): number =>
+	(instant.getTime() - start.getTime()) / EVENT_CALENDAR_MINUTE_MS;
 
 export function createEventCalendarTimeGridDayGeometry<TItemFields extends object>({
 	columnKey,
 	view,
 	day,
 	column,
+	columnLabel,
+	offDay = false,
 	resourceId,
 	timeZone,
 	dayStartMinutes,
@@ -112,6 +126,7 @@ export function createEventCalendarTimeGridDayGeometry<TItemFields extends objec
 	bucket
 }: CreateTimeGridDayGeometryOptions<TItemFields>): EventCalendarTimeGridDayGeometry<TItemFields> {
 	const key = columnKey ?? day;
+	const resource = resourceId === undefined ? {} : { resourceId };
 	const windowStart = resolveZonedMinutesOnDay(day, dayStartMinutes, timeZone);
 	const windowEnd = resolveZonedMinutesOnDay(day, dayEndMinutes, timeZone);
 	const slots = enumerateInstantSlots(
@@ -143,22 +158,30 @@ export function createEventCalendarTimeGridDayGeometry<TItemFields extends objec
 	const backgroundSegments = timedSegments.filter(
 		(segment) => segment.occurrence.item.display === 'background'
 	);
+	const allDaySegments = (bucket?.allDay ?? []).filter(
+		(segment) => segment.occurrence.item.display !== 'background'
+	);
+	const allDayBackgroundSegments = (bucket?.allDay ?? []).filter(
+		(segment) => segment.occurrence.item.display === 'background'
+	);
 
 	return {
 		key,
 		day,
 		column,
-		...(resourceId === undefined ? {} : { resourceId }),
+		columnLabel,
+		offDay,
+		...resource,
 		timedColumnTarget: eventCalendarTimedColumnTarget(view, {
 			key,
 			windowStart,
 			windowEnd,
-			...(resourceId === undefined ? {} : { resourceId })
+			...resource
 		}),
 		allDayDropTarget: eventCalendarAllDayCellTarget(view, {
 			key,
 			day,
-			...(resourceId === undefined ? {} : { resourceId })
+			...resource
 		}),
 		windowStart,
 		windowEnd,
@@ -171,33 +194,26 @@ export function createEventCalendarTimeGridDayGeometry<TItemFields extends objec
 			dayEndMinutes,
 			interval
 		),
-		businessWindows: getBusinessEntries(businessHours, getCivilWeekday(day))
+		businessWindows: businessHours
+			.filter((entry) => entry.daysOfWeek.includes(getCivilWeekday(day)))
 			.map((entry): EventCalendarBusinessWindow | null => {
-				const start = resolveZonedMinutesOnDay(day, parseBusinessMinutes(entry.start), timeZone);
-				const end = resolveZonedMinutesOnDay(day, parseBusinessMinutes(entry.end), timeZone);
+				const start = resolveZonedMinutesOnDay(day, entry.startMinutes, timeZone);
+				const end = resolveZonedMinutesOnDay(day, entry.endMinutes, timeZone);
 				const clippedStart = new Date(Math.max(start.getTime(), windowStart.getTime()));
 				const clippedEnd = new Date(Math.min(end.getTime(), windowEnd.getTime()));
 				if (clippedStart >= clippedEnd) return null;
-				return { key: `${day}:${entry.start}-${entry.end}`, start: clippedStart, end: clippedEnd };
+				return {
+					key: `${day}:${entry.startMinutes}-${entry.endMinutes}`,
+					start: clippedStart,
+					end: clippedEnd
+				};
 			})
 			.filter((entry): entry is EventCalendarBusinessWindow => entry !== null),
 		backgroundSegments,
+		allDaySegments,
+		allDayBackgroundSegments,
 		timedPlacements: packEventCalendarTimedSegments(foregroundSegments, snapDuration).placements
 	};
-}
-
-function parseBusinessMinutes(value: string): number {
-	const [hour, minute] = value.split(':').map(Number);
-	return hour * 60 + minute;
-}
-
-function getBusinessEntries(
-	businessHours: readonly EventCalendarBusinessHours[],
-	weekday: EventCalendarWeekday
-): readonly EventCalendarBusinessHours[] {
-	return businessHours.filter(
-		(entry) => entry.daysOfWeek === undefined || entry.daysOfWeek.includes(weekday)
-	);
 }
 
 function clipTimedSegment<TItemFields extends object>(
@@ -221,28 +237,16 @@ function clipTimedSegment<TItemFields extends object>(
 	};
 }
 
-export type EventCalendarTimeGridColumn = {
-	key: string;
-	day: EventCalendarDateOnly;
-	column: number;
-	resourceId?: string;
-};
+type EventCalendarTimeGridColumn = Pick<
+	EventCalendarTimeGridDayGeometry<Record<never, never>>,
+	'key' | 'day' | 'column' | 'resourceId'
+>;
 
 export type EventCalendarTimeGridSurface<TItemFields extends object> = Readonly<{
 	visibleDays: readonly EventCalendarDateOnly[];
-	offDaysByDay: ReadonlyMap<EventCalendarDateOnly, boolean>;
-	columns: readonly EventCalendarTimeGridColumn[];
 	dayGeometries: readonly EventCalendarTimeGridDayGeometry<TItemFields>[];
 	maximumMinuteCount: number;
 	allDaySegments: readonly EventCalendarSegment<TItemFields>[];
-	allDayBackgroundSegmentsByColumn: ReadonlyMap<
-		string,
-		readonly EventCalendarSegment<TItemFields>[]
-	>;
-	columnBuckets: readonly {
-		column: EventCalendarTimeGridColumn;
-		bucket: EventCalendarDayBucket<TItemFields> | undefined;
-	}[];
 }>;
 
 export type EventCalendarTimeGridSurfaceOptions<TResourceFields extends object> = Readonly<{
@@ -253,9 +257,11 @@ export type EventCalendarTimeGridSurfaceOptions<TResourceFields extends object> 
 	interval: number;
 	slotDuration: number;
 	snapDuration: number;
-	businessHours: readonly EventCalendarBusinessHours[];
+	businessHours: readonly EventCalendarAdmittedBusinessHours[];
 	offDays: boolean | EventCalendarOffDaysConfig;
 	weekendDays: readonly EventCalendarWeekday[];
+	longDayFormatter: Intl.DateTimeFormat;
+	unassignedResourceLabel: string;
 	resourceModel?: EventCalendarResourceModel<TResourceFields>;
 }>;
 
@@ -268,80 +274,62 @@ export function createEventCalendarTimeGridSurface<
 	options: EventCalendarTimeGridSurfaceOptions<TResourceFields>
 ): EventCalendarTimeGridSurface<TItemFields> {
 	const visibleDays = profile.visibleDays;
-	const offDaysByDay = new Map(
-		visibleDays.map((day) => [
+	let columns: EventCalendarTimeGridColumn[];
+	if (options.view === 'resource') {
+		const day = visibleDays[0];
+		const model = options.resourceModel;
+		if (!day || !model) {
+			throw new EventCalendarError(
+				'invalid-resource',
+				'Resource view requires one visible day and a normalized resource model.'
+			);
+		}
+		columns = model.columns.map(({ key, resourceId }, column) => ({
+			key,
 			day,
-			isEventCalendarOffDay(day, options.offDays, options.weekendDays)
-		])
-	);
-	const columns: EventCalendarTimeGridColumn[] =
-		options.view !== 'resource'
-			? visibleDays.map((day, column) => ({ key: day, day, column }))
-			: (() => {
-					const day = visibleDays[0];
-					if (!day || !options.resourceModel) {
-						throw new EventCalendarError(
-							'invalid-resource',
-							'Resource view requires one visible day and a normalized resource model.'
-						);
-					}
-					return options.resourceModel.columns.map((resourceColumn, column) => ({
-						key: resourceColumn.key,
-						day,
-						column,
-						...(resourceColumn.resourceId === undefined
-							? {}
-							: { resourceId: resourceColumn.resourceId })
-					}));
-				})();
-	const columnBuckets = columns.map((column) => ({
-		column,
-		bucket:
+			column,
+			resourceId
+		}));
+	} else {
+		columns = visibleDays.map((day, column) => ({ key: day, day, column }));
+	}
+	const dayGeometries = columns.map((column) => {
+		const bucket =
 			options.view === 'resource' && options.resourceModel
 				? filterEventCalendarBucketByResource(
 						itemIndex.segmentsByDay.get(column.day),
 						options.resourceModel,
 						column.resourceId
 					)
-				: itemIndex.segmentsByDay.get(column.day)
-	}));
-	const dayGeometries = columnBuckets.map(
-		({ column, bucket }): EventCalendarTimeGridDayGeometry<TItemFields> =>
-			createEventCalendarTimeGridDayGeometry({
-				columnKey: column.key,
-				view: options.view,
-				day: column.day,
-				column: column.column,
-				...(column.resourceId === undefined ? {} : { resourceId: column.resourceId }),
-				timeZone: options.timeZone,
-				dayStartMinutes: options.dayStartMinutes,
-				dayEndMinutes: options.dayEndMinutes,
-				interval: options.interval,
-				slotDuration: options.slotDuration,
-				snapDuration: options.snapDuration,
-				businessHours: options.businessHours,
-				bucket
-			})
-	);
+				: itemIndex.segmentsByDay.get(column.day);
+		const dayLabel = options.longDayFormatter.format(startOfZonedDay(column.day, options.timeZone));
+		const columnLabel =
+			options.view === 'resource'
+				? `${options.resourceModel?.resolveLeaf(column.resourceId)?.title ?? options.unassignedResourceLabel}, ${dayLabel}`
+				: dayLabel;
+		return createEventCalendarTimeGridDayGeometry({
+			columnKey: column.key,
+			view: options.view,
+			day: column.day,
+			column: column.column,
+			columnLabel,
+			offDay: isEventCalendarOffDay(column.day, options.offDays, options.weekendDays),
+			...(column.resourceId === undefined ? {} : { resourceId: column.resourceId }),
+			timeZone: options.timeZone,
+			dayStartMinutes: options.dayStartMinutes,
+			dayEndMinutes: options.dayEndMinutes,
+			interval: options.interval,
+			slotDuration: options.slotDuration,
+			snapDuration: options.snapDuration,
+			businessHours: options.businessHours,
+			bucket
+		});
+	});
 	return {
 		visibleDays,
-		offDaysByDay,
-		columns,
-		columnBuckets,
 		dayGeometries,
 		maximumMinuteCount: Math.max(...dayGeometries.map((geometry) => geometry.minuteCount), 0),
-		allDaySegments: columnBuckets.flatMap(
-			({ bucket }) =>
-				(bucket?.allDay ?? []).filter(
-					(segment) => segment.occurrence.item.display !== 'background'
-				) as readonly EventCalendarSegment<TItemFields>[]
-		),
-		allDayBackgroundSegmentsByColumn: new Map(
-			columnBuckets.map(({ column, bucket }) => [
-				column.key,
-				(bucket?.allDay ?? []).filter((segment) => segment.occurrence.item.display === 'background')
-			])
-		)
+		allDaySegments: dayGeometries.flatMap(({ allDaySegments }) => allDaySegments)
 	};
 }
 
@@ -364,9 +352,9 @@ export function createEventCalendarTimeGridLabels<TItemFields extends object>(
 	const labelProfiles = dayGeometries.map((geometry) => {
 		const wallLabels = geometry.intervalInstants.map((instant) => timeFormatter.format(instant));
 		const counts = new Map<string, number>();
-		for (const label of wallLabels) counts.set(label, (counts.get(label) ?? 0) + 1);
+		wallLabels.forEach((label) => counts.set(label, (counts.get(label) ?? 0) + 1));
 		return {
-			geometry,
+			key: geometry.key,
 			signature: `${geometry.minuteCount}:${geometry.intervalInstants
 				.map((instant) => {
 					const parts = getZonedParts(instant, timeZone);
@@ -388,18 +376,20 @@ export function createEventCalendarTimeGridLabels<TItemFields extends object>(
 	}
 	const gutterProfile = labelProfiles.reduce<(typeof labelProfiles)[number] | undefined>(
 		(selected, profile) =>
-			!selected ||
-			(signatureCounts.get(profile.signature) ?? 0) > (signatureCounts.get(selected.signature) ?? 0)
+			(signatureCounts.get(profile.signature) ?? 0) >
+			(signatureCounts.get(selected?.signature ?? '') ?? 0)
 				? profile
 				: selected,
 		undefined
 	);
-	const localLabelsByColumn = new Map<string, readonly EventCalendarTimeLabel[]>();
-	for (const profile of labelProfiles) {
-		if (profile.signature === gutterProfile?.signature) continue;
-		localLabelsByColumn.set(profile.geometry.key, profile.labels);
-	}
-	return { gutterLabels: gutterProfile?.labels ?? [], localLabelsByColumn };
+	return {
+		gutterLabels: gutterProfile?.labels ?? [],
+		localLabelsByColumn: new Map(
+			labelProfiles
+				.filter((profile) => profile.signature !== gutterProfile?.signature)
+				.map((profile) => [profile.key, profile.labels])
+		)
+	};
 }
 
 export function createEventCalendarTimeGridAllDayPreview<TItemFields extends object>(
@@ -418,16 +408,13 @@ export function createEventCalendarTimeGridAllDayPreview<TItemFields extends obj
 			insertion
 		);
 	}
-	const placements = surface.columnBuckets.flatMap(({ column, bucket }) => {
-		const segments = (bucket?.allDay ?? []).filter(
-			(segment) => segment.occurrence.item.display !== 'background'
-		);
-		return packEventCalendarLanes(segments, [column.day]).placements.map((placement) => ({
+	const placements = surface.dayGeometries.flatMap((geometry) =>
+		packEventCalendarLanes(geometry.allDaySegments, [geometry.day]).placements.map((placement) => ({
 			...placement,
-			startIndex: column.column,
-			endIndex: column.column + 1
-		}));
-	});
+			startIndex: geometry.column,
+			endIndex: geometry.column + 1
+		}))
+	);
 	return {
 		layout: {
 			placements,
@@ -441,7 +428,6 @@ export function createEventCalendarTimeGridAllDayPreview<TItemFields extends obj
 
 export function createEventCalendarTimeTargets<TItemFields extends object>(
 	surface: EventCalendarTimeGridSurface<TItemFields>,
-	view: EventCalendarTimeGridView,
 	allDayLayout: EventCalendarLaneLayout<TItemFields>,
 	slotDuration: number,
 	disabled: boolean
@@ -449,51 +435,28 @@ export function createEventCalendarTimeTargets<TItemFields extends object>(
 	if (disabled) return [];
 	const targets: EventCalendarTimeTarget[] = [];
 	for (const geometry of surface.dayGeometries) {
-		let verticalOrder = 0;
-		const pushTarget = (target: Omit<EventCalendarTimeTarget, 'verticalOrder'>): void => {
-			targets.push({ ...target, verticalOrder });
-			verticalOrder += 1;
-		};
-		pushTarget({
-			key: `day-header:${geometry.key}`,
-			day: geometry.day,
-			column: geometry.column,
-			row: 0,
-			kind: 'day-header'
-		});
-		pushTarget({
-			key: `all-day:${geometry.key}`,
-			day: geometry.day,
-			column: geometry.column,
-			row: 1,
-			kind: 'all-day',
-			dropTarget: geometry.allDayDropTarget
-		});
-		for (const placement of allDayLayout.placements
+		const position = { day: geometry.day, column: geometry.column };
+		const allDayItems = allDayLayout.placements
 			.filter((candidate) => candidate.startIndex === geometry.column)
-			.sort((left, right) => left.lane - right.lane || left.key.localeCompare(right.key))) {
-			pushTarget({
-				key: `all-day-item:${placement.key}`,
-				day: geometry.day,
-				column: geometry.column,
+			.sort((left, right) => left.lane - right.lane || left.key.localeCompare(right.key))
+			.map((placement) => ({
+				key: getEventCalendarTimeGridItemTargetKey('all-day', geometry.key, placement.key),
+				...position,
 				row: 1,
-				kind: 'item',
+				kind: 'item' as const,
 				itemKey: placement.occurrence.key
-			});
-		}
-		const timedTargets: Omit<EventCalendarTimeTarget, 'verticalOrder'>[] = [
+			}));
+		const timedTargets = [
 			...geometry.slots.map((slot) => ({
+				...position,
 				key: slot.key,
-				day: geometry.day,
-				column: geometry.column,
 				row: slot.row,
 				kind: 'time-slot' as const,
 				dropTarget: slot.dropTarget
 			})),
 			...geometry.timedPlacements.map((placement) => ({
-				key: `time-item:${placement.segment.key}`,
-				day: geometry.day,
-				column: geometry.column,
+				...position,
+				key: getEventCalendarTimeGridItemTargetKey('timed', geometry.key, placement.segment.key),
 				row:
 					2 +
 					getEventCalendarElapsedMinutes(geometry.windowStart, placement.visualStart) /
@@ -506,9 +469,19 @@ export function createEventCalendarTimeTargets<TItemFields extends object>(
 			if (left.kind !== right.kind) return left.kind === 'time-slot' ? -1 : 1;
 			return left.key.localeCompare(right.key);
 		});
-		for (const target of timedTargets) {
-			pushTarget(target);
-		}
+		const columnTargets: Omit<EventCalendarTimeTarget, 'verticalOrder'>[] = [
+			{ key: `day-header:${geometry.key}`, ...position, row: 0, kind: 'day-header' },
+			{
+				key: `all-day:${geometry.key}`,
+				...position,
+				row: 1,
+				kind: 'all-day',
+				dropTarget: geometry.allDayDropTarget
+			},
+			...allDayItems,
+			...timedTargets
+		];
+		targets.push(...columnTargets.map((target, verticalOrder) => ({ ...target, verticalOrder })));
 	}
 	return targets;
 }

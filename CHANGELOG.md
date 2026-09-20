@@ -1,12 +1,22 @@
 # Changelog
 
-All notable changes to svelai are recorded here. The format follows Keep a Changelog; releases
+All notable changes to entasis are recorded here. The format follows Keep a Changelog; releases
 are cut with `npm run release <patch|minor|major>` (see `tooling/release.mjs`), which moves the
 Unreleased section under the new version.
 
 ## Unreleased
 
 This is a breaking release. Renamed APIs have no forwarding aliases.
+
+### Renamed
+
+- The package is now `entasis` (npm `entasis`, imports `entasis/<subpath>`, the Tailwind plugin
+  `entasis/tailwind-plugin/theme`, the `<Theme>` from `entasis/theme`). Every `svelai` spelling
+  went with it: the `data-entasis-*` attributes, the `entasis:*` context keys, the `entasis-mcp`
+  server, the Cloudflare worker and the `entasis` skill folder. Entasis is the slight swelling
+  given to a column so that it reads as straight, which is what this library does to colour,
+  spacing and radius: things are bent so they look right. `svelai` 0.1.x stays on npm as is; there
+  is no forwarding package.
 
 ### Added
 
@@ -128,7 +138,7 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
 - `Button` takes `pressed`, `selected`, `expanded` and `haspopup`; `PageShell` and `Tabbar` take
   `label`, and `Tabs` forwards `label` to its tab list. These are the semantic replacements for the
   ARIA attributes those components no longer accept as props.
-- `svelai/theme` exports the shared container breakpoint table and its resolvers:
+- `entasis/theme` exports the shared container breakpoint table and its resolvers:
   `containerBreakpoints`, `breakpoints`, `resolveResponsive`, `resolveContainerBreakpoint`,
   `responsiveVariables` and `responsiveContainerClasses`, plus the `Breakpoint`,
   `ContainerBreakpoint` and `ResponsiveProps` types. `responsiveVariables` flattens a responsive
@@ -142,7 +152,7 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
   one. `TagGroup` uses it instead of reaching the recipe through its own `item` theme part.
 - `Stepper` and `Tabs` take `mount: 'eager' | 'lazy' | 'once'`. A `lazy` panel is created the first
   time it is activated and destroyed once the slide away from it finishes, `once` keeps it
-  afterwards, `eager` creates every panel up front. `Tabs` defaults to `lazy`, `Stepper` to `eager`. `svelai/stepper` exports the
+  afterwards, `eager` creates every panel up front. `Tabs` defaults to `lazy`, `Stepper` to `eager`. `entasis/stepper` exports the
   `StepperMount` type.
 - `TabsProps['tabbar']` forwards `variant` and `scrollFade`, so Tabbar's `underline` / `pill` looks
   and its scroll fade are reachable from `Tabs`.
@@ -169,7 +179,7 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
   `text-selected-muted-readable`, `border-selected`, `ring-selected`. The set is deliberately
   exactly what the library uses — there is no `outline-focus`, `text-focus`,
   `text-selected-readable`, `fill-selected` or `stroke-selected`.
-- `focusRing` recipe (`svelai/theme`) — `'focus-visible:ring-2 focus-visible:ring-focus/50'`, the
+- `focusRing` recipe (`entasis/theme`) — `'focus-visible:ring-2 focus-visible:ring-focus/50'`, the
   one focus ring for new code. `selectedSoft` and `selectedSolid` now read
   `'bg-selected-muted text-selected-muted-readable'` and `'bg-selected text-selected-contrast'`, so
   everything already importing them moved to the selected state role on its own.
@@ -199,7 +209,7 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
 
 ### Changed
 
-- **Breaking: `buildStreamdownTheme` is now `buildMarkdownStreamdownTheme`** (`svelai/markdown`).
+- **Breaking: `buildStreamdownTheme` is now `buildMarkdownStreamdownTheme`** (`entasis/markdown`).
   The old name did not carry its owner, which is what kept it outside
   `tooling/check-semantic-theme-tokens.mjs` when the sweep learned to read theme factories. Same
   signature, same return value.
@@ -321,7 +331,7 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
   the one for the active width — so the first paint and the server render are already correct, with
   no measurement and no JavaScript.
 - **One container breakpoint table** — `xs` base, `sm` 36rem, `md` 42rem, `lg` 56rem, `xl` 72rem —
-  is exported from `svelai/theme` and shared by Grid, Stack and Carousel, so `sm` means the same box
+  is exported from `entasis/theme` and shared by Grid, Stack and Carousel, so `sm` means the same box
   width in all three. Each step is the width at which one more ~17–18rem content column fits, gaps
   included; they are the four widths Carousel already shipped, so nothing moves visually. These
   breakpoints measure the component's own width, not the viewport's: `md` on a Grid in a sidebar is
@@ -338,7 +348,7 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
   also where the `gap` / `rowGap` / `columnGap` theme variants went, the gap now being a custom
   property. The root is a query container, so it fills its host's inline size (it no longer shrinks
   to fit as a flex item) and is a containing block for `position: fixed` descendants.
-  `GridSpanColumns` (`number | 'full'`) is exported from `svelai/grid`.
+  `GridSpanColumns` (`number | 'full'`) is exported from `entasis/grid`.
 - **Stack** — **Breaking.** `orientation`, `gap`, `align`, `justify` and `wrap` resolve against the
   stack's own width (`orientation={{ md: 'horizontal' }}`), so a stack in a sidebar and the same
   stack full-bleed reflow differently on one page. Stack renders a container root plus a layout
@@ -557,10 +567,10 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
   Vitest 5, jsdom 30, Lexical 0.50, file-selector 5, `@pierre/diffs` 1.4, Playwright 1.63,
   ESLint 10.10, Prettier 3.9.6). One stays pinned on purpose: TypeScript 6 (svelte-check and
   typescript-eslint do not run on the TypeScript 7 Go compiler yet). `svelte-streamdown` 4
-  drops Shiki for `@tanstack/highlight`, the same engine svelai's Code already uses, so Markdown
+  drops Shiki for `@tanstack/highlight`, the same engine entasis's Code already uses, so Markdown
   no longer carries a second highlighter or a loading skeleton for code fences (the removed
   `code.skeleton` theme key went with it).
-- Removed the `AIMcpApp` component, the `svelai/ai-mcp-app` and `svelai/ai-mcp-app/sandbox`
+- Removed the `AIMcpApp` component, the `entasis/ai-mcp-app` and `entasis/ai-mcp-app/sandbox`
   subpath exports, and with them the `@modelcontextprotocol/sdk` and `@modelcontextprotocol/ext-apps`
   dependencies. `AIThread` and `AIChat` no longer accept `mcpHost` or the `app` renderer snippet, and
   MCP App tool calls render as ordinary grouped tool rows.
@@ -595,7 +605,7 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
   or 60) and every focus ring is `ring-2` at 50% of its role colour (was five opacities);
   `check:semantic-theme-tokens` now fails on any other value.
 - The eleven design-token presets from the docs playground ship as `themePresets` from
-  `svelai/theme` (`themePresets.glass.tokens` drops straight into `<Theme designTokens>`).
+  `entasis/theme` (`themePresets.glass.tokens` drops straight into `<Theme designTokens>`).
 - Code highlights with TanStack Highlight instead of Shiki: synchronous, no WebAssembly, every
   shipped language bundled by default (aliases still resolve, unknown ids render as plain text),
   tokens as `th-*` classes mapped to the same `--code-token-*` palette. Diff keeps its Shiki-based
@@ -604,7 +614,7 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
 - `Density` no longer shares the `Sizes` vocabulary: every `density` prop, theme variant and
   `data-density` value is now `'compact' | 'normal' | 'comfortable'`, so a density value can never
   type-check against a size prop. A `densities` token list ships alongside `sizes` in
-  `svelai/utils/tokens`.
+  `entasis/utils/tokens`.
 - The toggle family speaks one dialect: `ToggleButtonGroup` takes `items` as an array of
   `{ value, ...ToggleButton props }` and its `value`/`defaultValue`/`onValueChange` are a `string[]`
   of pressed values (`type="multiple"`) or one `string` (`type="single"`); `ToggleMenu` (and
@@ -801,7 +811,7 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
   `d3-shape` (`Chart`), and `cobe` (`Globe`). Each is declared
   optional at a caret range, so an app that never imports those three components installs nothing
   extra; an app that does installs the row printed in the README, on the component's docs page and
-  in its MCP description. A production-only install of svelai's `dependencies` goes from 38 direct /
+  in its MCP description. A production-only install of entasis's `dependencies` goes from 38 direct /
   178 total packages to 21 direct / 149 total. `@tanstack/highlight` and `@tanstack/svelte-virtual`
   stay runtime dependencies on purpose: `Markdown` renders `Code` and `AIChat` / `AIConversation`
   render `AIThread`, so making them optional would break the library's most-used components out of
@@ -812,17 +822,17 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
   example carries a `<!-- prettier-ignore -->`, because Prettier lowercases property names inside a
   `css` fence and had quietly turned its `prefersDark` and `typeScale` into dead keys.
 - **Breaking: `useTheme()` throws when no `<Theme>` is above the component** —
-  `svelai: <Theme> was not found above this component.` — instead of returning `undefined` and
+  `entasis: <Theme> was not found above this component.` — instead of returning `undefined` and
   failing later at whichever call site dereferenced it first. Every component requires a `<Theme>`
   ancestor.
 - Component docs pages and MCP descriptions for `Chart`, `Globe`, `RichTextInput`, `DataTable`,
   `AIComposer` and `AIChat` carry a "Requires" section with the exact install command. The README
   and the getting-started page also describe what a missing peer looks like: Vite substitutes a stub
-  module, so the build fails with `[MISSING_EXPORT] … "__vite-optional-peer-dep:<package>:svelai"`
+  module, so the build fails with `[MISSING_EXPORT] … "__vite-optional-peer-dep:<package>:entasis"`
   rather than one unresolved-import error.
 - The README documents all twelve `<Theme designTokens>` keys, the full `ThemeOptions` plugin table
   including the five build-time `EngineOptions` scales, and which of build time or runtime wins; it
-  and the getting-started page gained the optional-peers table. The svelai agent skill no longer claims there are no radius, spacing or typography
+  and the getting-started page gained the optional-peers table. The entasis agent skill no longer claims there are no radius, spacing or typography
   options on the plugin.
 - `*.test-helper.*` files are excluded from the published package alongside `*.test.*` / `*.spec.*`.
 - New `check:readme-tokens` (wired into `npm run check` and the contracts workflow) fails when a

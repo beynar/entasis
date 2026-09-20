@@ -7,7 +7,7 @@ Date-based calendar primitives for single, range, and multiple selection. Calend
 
 \`\`\`svelte
 <script lang="ts">
-  import { CalendarPrimitive, CalendarInput } from 'svelai/calendar';
+  import { CalendarPrimitive, CalendarInput } from 'entasis/calendar';
 </script>
 \`\`\`
 

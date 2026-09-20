@@ -58,37 +58,12 @@
 	const density = $derived(calendar.density);
 	const classes = $derived(calendar.classes);
 	const disabled = $derived(calendar.disabled);
-	const offDays = $derived(calendar.offDays);
 	const scrollMode = $derived(calendar.scrollMode);
-	const nowIndicator = $derived(calendar.renderers.nowIndicator !== false);
-	const dayHeader = $derived(calendar.renderers.dayHeader);
-	const timeGutter = $derived(calendar.renderers.timeGutter);
 	const resourceModel = $derived(view === 'resource' ? calendar.resourceModel : undefined);
-	const onItemClick = $derived(calendar.eventHandlers.onItemClick);
-	const onSlotClick = $derived(calendar.eventHandlers.onSlotClick);
 	const profile = $derived(calendar.dateProfile);
-	const surface = $derived(
-		createEventCalendarTimeGridSurface(profile, calendar.itemIndex, {
-			view,
-			timeZone: calendar.timeZone,
-			dayStartMinutes: calendar.dayStartHour * 60,
-			dayEndMinutes: calendar.dayEndHour * 60,
-			interval: calendar.interval,
-			slotDuration: calendar.slotDuration,
-			snapDuration: calendar.snapDuration,
-			businessHours: calendar.businessHours,
-			offDays,
-			weekendDays: calendar.weekendDays,
-			...(resourceModel === undefined ? {} : { resourceModel })
-		})
-	);
-	const visibleDays = $derived(surface.visibleDays);
-	const offDaysByDay = $derived(surface.offDaysByDay);
 	const todayDay = $derived(
 		calendar.todayInstant ? getZonedDay(calendar.todayInstant, calendar.timeZone) : null
 	);
-	const dayStartMinutes = $derived(calendar.dayStartHour * 60);
-	const dayEndMinutes = $derived(calendar.dayEndHour * 60);
 	const selectionKey = $derived(
 		calendar.selection.kind === 'item' ? calendar.selection.itemKey : null
 	);
@@ -107,6 +82,23 @@
 			day: 'numeric'
 		})
 	);
+	const surface = $derived(
+		createEventCalendarTimeGridSurface(profile, calendar.itemIndex, {
+			view,
+			timeZone: calendar.timeZone,
+			dayStartMinutes: calendar.dayStartHour * 60,
+			dayEndMinutes: calendar.dayEndHour * 60,
+			interval: calendar.interval,
+			slotDuration: calendar.slotDuration,
+			snapDuration: calendar.snapDuration,
+			businessHours: calendar.businessHours,
+			offDays: calendar.offDays,
+			weekendDays: calendar.weekendDays,
+			longDayFormatter,
+			unassignedResourceLabel: messages.eventCalendarUnassignedResource,
+			...(resourceModel === undefined ? {} : { resourceModel })
+		})
+	);
 	const timeFormatter = $derived(
 		getCachedDateTimeFormatter(calendar.locale, calendar.timeZone, {
 			hour: 'numeric',
@@ -120,9 +112,7 @@
 			timeZoneName: 'shortOffset'
 		})
 	);
-	const columns = $derived(surface.columns);
 	const dayGeometries = $derived(surface.dayGeometries);
-	const maximumMinuteCount = $derived(surface.maximumMinuteCount);
 	const timeLabels = $derived(
 		createEventCalendarTimeGridLabels(
 			dayGeometries,
@@ -131,10 +121,6 @@
 			calendar.timeZone
 		)
 	);
-	const gutterLabels = $derived(timeLabels.gutterLabels);
-	const localTimeLabelsByKey = $derived(timeLabels.localLabelsByColumn);
-	const allDaySegments = $derived(surface.allDaySegments);
-	const allDayBackgroundSegments = $derived(surface.allDayBackgroundSegmentsByColumn);
 	const allDayInsertion = $derived(
 		view === 'resource' ? null : calendar.interaction.getAllDayInsertion()
 	);
@@ -146,21 +132,21 @@
 		`calc(${Math.max(1, allDayLayout.laneCount)} * var(--event-calendar-item-min-height) + 0.5rem)`
 	);
 	const gridTemplateColumns = $derived(
-		`var(--event-calendar-time-gutter-width) repeat(${columns.length}, minmax(var(--event-calendar-${view === 'resource' ? 'resource' : 'day'}-min-width), 1fr))`
+		`var(--event-calendar-time-gutter-width) repeat(${dayGeometries.length}, minmax(var(--event-calendar-${view === 'resource' ? 'resource' : 'day'}-min-width), 1fr))`
 	);
 	const gridMinimumWidth = $derived(
-		`calc(var(--event-calendar-time-gutter-width) + ${columns.length} * var(--event-calendar-${view === 'resource' ? 'resource' : 'day'}-min-width))`
+		`calc(var(--event-calendar-time-gutter-width) + ${dayGeometries.length} * var(--event-calendar-${view === 'resource' ? 'resource' : 'day'}-min-width))`
 	);
 	const timeTargets = $derived(
-		createEventCalendarTimeTargets(surface, view, allDayLayout, calendar.slotDuration, disabled)
+		createEventCalendarTimeTargets(surface, allDayLayout, calendar.slotDuration, disabled)
 	);
 	const allDayPayload = $derived<EventCalendarAllDayPayload<TItemFields>>({
-		visibleDays,
-		segments: allDaySegments,
+		visibleDays: surface.visibleDays,
+		segments: surface.allDaySegments,
 		defaultContent: defaultAllDay
 	});
 	const nowPayload = $derived<EventCalendarNowIndicatorPayload | null>(
-		nowIndicator && calendar.nowInstant
+		calendar.renderers.nowIndicator !== false && calendar.nowInstant
 			? { now: calendar.nowInstant, defaultContent: defaultNowIndicator }
 			: null
 	);
@@ -170,18 +156,6 @@
 		if (view === 'days') return messages.eventCalendarDaysView;
 		return messages.eventCalendarResourceView;
 	});
-	const columnLabels = $derived(
-		new Map(
-			dayGeometries.map((geometry) => {
-				const dayLabel = longDayFormatter.format(startOfZonedDay(geometry.day, calendar.timeZone));
-				if (view !== 'resource' || !resourceModel) return [geometry.key, dayLabel] as const;
-				const resourceLabel =
-					resourceModel.resolveLeaf(geometry.resourceId)?.title ??
-					messages.eventCalendarUnassignedResource;
-				return [geometry.key, `${resourceLabel}, ${dayLabel}`] as const;
-			})
-		)
-	);
 
 	$effect(() => {
 		a11y.configureTimeGrid({
@@ -294,19 +268,43 @@
 		(event.currentTarget as HTMLElement).click();
 	}
 
-	function handleAllDayClick(target: EventCalendarAllDayDropTarget, event: MouseEvent): void {
+	function handleSlotClick(
+		target: EventCalendarAllDayDropTarget | EventCalendarTimedDropTarget,
+		event: MouseEvent
+	): void {
 		if (a11y.activateMutationTarget(target)) return;
 		if (calendar.interaction.shouldSuppressSlotClick()) return;
 		if (disabled) return;
 		(event.currentTarget as HTMLElement).focus();
+		const resource = target.resource?.id === undefined ? {} : { resourceId: target.resource.id };
+		if (target.kind === 'all-day') {
+			const slot = {
+				view,
+				allDay: true as const,
+				start: target.day,
+				end: addCivilDays(target.day, 1),
+				...resource
+			};
+			calendar.eventHandlers.onSlotClick?.({ slot, event });
+			if (event.defaultPrevented) {
+				calendar.interaction.resetSinglePointerSlot();
+				return;
+			}
+			if (calendar.interaction.selectSinglePointerSlot(slot)) return;
+			calendar.select({ kind: 'slot', itemKey: null, slot });
+			return;
+		}
 		const slot = {
 			view,
-			allDay: true as const,
-			start: target.day,
-			end: addCivilDays(target.day, 1),
-			...(target.resourceId === undefined ? {} : { resourceId: target.resourceId })
+			allDay: false as const,
+			start: new Date(target.start),
+			end: new Date(target.end),
+			...resource
 		};
-		onSlotClick?.({ slot, event });
+		calendar.eventHandlers.onSlotClick?.({
+			slot: { ...slot, start: new Date(slot.start), end: new Date(slot.end) },
+			event
+		});
 		if (event.defaultPrevented) {
 			calendar.interaction.resetSinglePointerSlot();
 			return;
@@ -315,37 +313,9 @@
 		calendar.select({ kind: 'slot', itemKey: null, slot });
 	}
 
-	function handleTimedSlotClick(target: EventCalendarTimedDropTarget, event: MouseEvent): void {
-		if (a11y.activateMutationTarget(target)) return;
-		if (calendar.interaction.shouldSuppressSlotClick()) return;
-		if (disabled) return;
-		(event.currentTarget as HTMLElement).focus();
-		const selectionSlot = {
-			view,
-			allDay: false as const,
-			start: new Date(target.start),
-			end: new Date(target.end),
-			...(target.resourceId === undefined ? {} : { resourceId: target.resourceId })
-		};
-		onSlotClick?.({
-			slot: {
-				...selectionSlot,
-				start: new Date(selectionSlot.start),
-				end: new Date(selectionSlot.end)
-			},
-			event
-		});
-		if (event.defaultPrevented) {
-			calendar.interaction.resetSinglePointerSlot();
-			return;
-		}
-		if (calendar.interaction.selectSinglePointerSlot(selectionSlot)) return;
-		calendar.select({ kind: 'slot', itemKey: null, slot: selectionSlot });
-	}
-
 	function handleItemActivate(segment: EventCalendarSegment<TItemFields>, event: MouseEvent): void {
 		calendar.interaction.resetSinglePointerSlot();
-		onItemClick?.({ occurrence: segment.occurrence, event });
+		calendar.eventHandlers.onItemClick?.({ occurrence: segment.occurrence, event });
 		if (event.defaultPrevented) return;
 		calendar.select({ kind: 'item', itemKey: segment.occurrence.key, slot: null });
 	}
@@ -359,8 +329,8 @@
 		data-event-calendar-part="time-grid"
 		data-view={view}
 		data-time-zone={calendar.timeZone}
-		data-day-start-minutes={dayStartMinutes}
-		data-day-end-minutes={dayEndMinutes}
+		data-day-start-minutes={calendar.dayStartHour * 60}
+		data-day-end-minutes={calendar.dayEndHour * 60}
 		data-interval={calendar.interval}
 		data-slot-duration={calendar.slotDuration}
 		data-snap-duration={calendar.snapDuration}
@@ -391,15 +361,13 @@
 						{calendar}
 						{resourceModel}
 						{dayGeometries}
-						{longDayFormatter}
 						{registerTimeTarget}
 						{handleTargetKeydown}
-						{handleAllDayClick}
+						handleAllDayClick={handleSlotClick}
 					/>
 				{:else}
 					{#each dayGeometries as geometry (geometry.key)}
 						{@const dayInstant = startOfZonedDay(geometry.day, calendar.timeZone)}
-						{@const isOff = offDaysByDay.get(geometry.day) ?? false}
 						{@const defaultLabel = dayFormatter.format(dayInstant)}
 						{@const targetKey = `day-header:${geometry.key}`}
 						{@const headerPayload = {
@@ -417,20 +385,23 @@
 							data-event-calendar-part="day-header"
 							data-day={geometry.day}
 							data-today={geometry.day === todayDay || undefined}
-							data-off-day={isOff || undefined}
+							data-off-day={geometry.offDay || undefined}
 							class={classes.dayHeader({
 								density,
 								view,
 								today: geometry.day === todayDay,
-								offDay: isOff,
+								offDay: geometry.offDay,
 								disabled
 							})}
 							onfocus={() => a11y.handleTimeTargetFocus(targetKey)}
-							onclick={(event) => handleAllDayClick(geometry.allDayDropTarget, event)}
+							onclick={(event) => handleSlotClick(geometry.allDayDropTarget, event)}
 							onkeydown={(event) => handleTargetKeydown(event, targetKey, true)}
 							{@attach disabled ? null : registerTimeTarget(targetKey)}
 						>
-							<Slot render={dayHeader ?? defaultDayHeader} payload={headerPayload} />
+							<Slot
+								render={calendar.renderers.dayHeader ?? defaultDayHeader}
+								payload={headerPayload}
+							/>
 						</button>
 
 						{#snippet defaultDayHeader()}
@@ -444,20 +415,17 @@
 				{view}
 				{calendar}
 				{dayGeometries}
-				{allDayBackgroundSegments}
 				{allDayLayout}
 				insertion={allDayPreview.insertion}
 				draggingOccurrenceKey={allDayPreview.draggingOccurrenceKey}
 				{allDayHeight}
 				{gridTemplateColumns}
 				{allDayPayload}
-				{offDaysByDay}
 				{longDayFormatter}
-				{columnLabels}
 				{selectionKey}
 				{registerTimeTarget}
 				{handleTargetKeydown}
-				{handleAllDayClick}
+				handleAllDayClick={handleSlotClick}
 				{handleItemActivate}
 			/>
 		</div>
@@ -466,10 +434,10 @@
 			bind:this={timeBody}
 			class="relative grid"
 			style:grid-template-columns={gridTemplateColumns}
-			style:height={`calc(${maximumMinuteCount / calendar.interval} * var(--event-calendar-slot-height))`}
+			style:height={`calc(${surface.maximumMinuteCount / calendar.interval} * var(--event-calendar-slot-height))`}
 		>
 			<div data-event-calendar-part="time-gutter" class={classes.timeGutter({ density, view })}>
-				{#each gutterLabels as gutterLabel (gutterLabel.instant.getTime())}
+				{#each timeLabels.gutterLabels as gutterLabel (gutterLabel.instant.getTime())}
 					{@const gutterPayload = {
 						...gutterLabel,
 						defaultContent: defaultTimeGutter
@@ -480,7 +448,10 @@
 						class={classes.timeLabel({ density, view })}
 						style:height="var(--event-calendar-slot-height)"
 					>
-						<Slot render={timeGutter ?? gutterPayload.defaultContent} payload={gutterPayload} />
+						<Slot
+							render={calendar.renderers.timeGutter ?? gutterPayload.defaultContent}
+							payload={gutterPayload}
+						/>
 					</time>
 
 					{#snippet defaultTimeGutter()}
@@ -494,16 +465,14 @@
 					{view}
 					{calendar}
 					{geometry}
-					columnLabel={columnLabels.get(geometry.key) ?? geometry.day}
-					isOffDay={offDaysByDay.get(geometry.day) ?? false}
 					{selectionKey}
 					{longDayFormatter}
 					{accessibleTimeFormatter}
-					localTimeLabels={localTimeLabelsByKey.get(geometry.key)}
+					localTimeLabels={timeLabels.localLabelsByColumn.get(geometry.key)}
 					{nowPayload}
 					{registerTimeTarget}
 					{handleTargetKeydown}
-					{handleTimedSlotClick}
+					handleTimedSlotClick={handleSlotClick}
 					{handleItemActivate}
 				/>
 			{/each}

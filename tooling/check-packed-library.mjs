@@ -6,7 +6,7 @@ import { promisify } from 'node:util';
 import { listSources, loadManifest, repositoryRoot } from './component-contract/source.mjs';
 
 const exec = promisify(execFile);
-const fixtureRoot = await mkdtemp(path.join(tmpdir(), 'svelai-consumer-'));
+const fixtureRoot = await mkdtemp(path.join(tmpdir(), 'entasis-consumer-'));
 
 async function run(command, args, cwd = fixtureRoot) {
 	try {
@@ -25,7 +25,7 @@ try {
 		repositoryRoot
 	);
 	const [packed] = JSON.parse(stdout);
-	const dependencies = { svelai: `file:${path.join(fixtureRoot, packed.filename)}` };
+	const dependencies = { entasis: `file:${path.join(fixtureRoot, packed.filename)}` };
 	for (const dependency of [
 		'svelte',
 		'typescript',
@@ -39,7 +39,7 @@ try {
 	}
 	await writeFile(
 		path.join(fixtureRoot, 'package.json'),
-		JSON.stringify({ name: 'svelai-consumer-check', private: true, type: 'module', dependencies })
+		JSON.stringify({ name: 'entasis-consumer-check', private: true, type: 'module', dependencies })
 	);
 	await run('npm', [
 		'install',
@@ -49,7 +49,7 @@ try {
 		'--package-lock=false'
 	]);
 
-	const packageRoot = path.join(fixtureRoot, 'node_modules/svelai');
+	const packageRoot = path.join(fixtureRoot, 'node_modules/entasis');
 	const manifest = await loadManifest();
 	const metadata = JSON.parse(await readFile(path.join(packageRoot, 'package.json'), 'utf8'));
 	if (metadata.license !== 'MIT')
@@ -76,7 +76,7 @@ try {
 		if (!entry.subpath.includes('*')) {
 			for (const target of targets) await access(path.join(packageRoot, target));
 			if (Array.isArray(entry.exportedSymbols) && entry.exportedSymbols.length) {
-				importSymbols(`svelai${entry.subpath.slice(1)}`, entry.exportedSymbols);
+				importSymbols(`entasis${entry.subpath.slice(1)}`, entry.exportedSymbols);
 			}
 			continue;
 		}
@@ -96,7 +96,7 @@ try {
 			const symbols =
 				entry.exportedSymbols.modules[name] ??
 				entry.exportedSymbols.pattern.map((symbol) => symbol.replaceAll('{name}', name));
-			importSymbols(`svelai${entry.subpath.slice(1).replace('*', name)}`, symbols);
+			importSymbols(`entasis${entry.subpath.slice(1).replace('*', name)}`, symbols);
 		}
 	}
 
@@ -136,7 +136,7 @@ try {
 	await run(process.execPath, [
 		'--input-type=module',
 		'-e',
-		"import plugin from 'svelai/tailwind-plugin'; if (typeof plugin !== 'function') throw new Error('The Tailwind entrypoint must export its plugin.');"
+		"import plugin from 'entasis/tailwind-plugin'; if (typeof plugin !== 'function') throw new Error('The Tailwind entrypoint must export its plugin.');"
 	]);
 	console.log(
 		`Packed library passed: ${entrypointCount} entrypoints and ${symbolIndex} symbols, installed from ${packed.filename}.`

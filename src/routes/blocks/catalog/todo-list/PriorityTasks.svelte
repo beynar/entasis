@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Grid } from 'svelai/grid';
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Checkbox } from 'svelai/checkbox';
-	import { Chip } from 'svelai/chip';
-	import { Form } from 'svelai/form';
+	import { Grid } from 'entasis/grid';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Checkbox } from 'entasis/checkbox';
+	import { Chip } from 'entasis/chip';
+	import { Form } from 'entasis/form';
 
 	let filter = $state('All');
 	let adding = $state(false);

@@ -1,7 +1,7 @@
 export const mermaidDescription = `
 # Mermaid Component
 
-Renders a [Mermaid](https://mermaid.js.org/) diagram (flowchart, sequence, gantt, pie, class, state, ER, etc.) from a code string, with pan, zoom, fullscreen and download controls. The diagram is themed with our design tokens so it adapts to light and dark automatically. Ported from svelte-streamdown's Mermaid element, rebuilt on the svelai state/theme system.
+Renders a [Mermaid](https://mermaid.js.org/) diagram (flowchart, sequence, gantt, pie, class, state, ER, etc.) from a code string, with pan, zoom, fullscreen and download controls. The diagram is themed with our design tokens so it adapts to light and dark automatically. Ported from svelte-streamdown's Mermaid element, rebuilt on the entasis state/theme system.
 
 ## Basic Usage
 

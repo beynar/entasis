@@ -1,5 +1,5 @@
 <script lang="ts">
-	import structureMap from 'virtual:svelai-structure';
+	import structureMap from 'virtual:entasis-structure';
 	import type { ThemePart } from '../../tooling/structure-docs/types.js';
 	import CustomizeTheme from './CustomizeTheme.svelte';
 

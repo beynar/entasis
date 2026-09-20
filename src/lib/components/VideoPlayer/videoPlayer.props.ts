@@ -108,9 +108,9 @@ export type VideoPlayerProps = WithAttachments<{
 	playsInline?: boolean;
 	/** Starts playback automatically when allowed by the browser. */
 	autoplay?: boolean;
-	/** Renders browser-native controls instead of or alongside the custom Svelai controls. */
+	/** Renders browser-native controls instead of or alongside the custom Entasis controls. */
 	nativeControls?: boolean;
-	/** Custom Svelai controls to render. */
+	/** Custom Entasis controls to render. */
 	controls?: VideoPlayerControl[];
 	/** Playback rates exposed in settings/rate controls. */
 	playbackRates?: number[];

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Checkbox } from 'svelai/checkbox';
-	import { Chip } from 'svelai/chip';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Checkbox } from 'entasis/checkbox';
+	import { Chip } from 'entasis/chip';
 
 	let visible = $state(false);
 	let stored = $state(false);

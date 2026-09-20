@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { AvatarGroup } from 'svelai/avatar';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Separator } from 'svelai/separator';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	import { checkCircleIcon } from 'svelai/icons/checkCircle';
-	import { circleIcon } from 'svelai/icons/circle';
+	import { Stack } from 'entasis/stack';
+	import { AvatarGroup } from 'entasis/avatar';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Separator } from 'entasis/separator';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
+	import { checkCircleIcon } from 'entasis/icons/checkCircle';
+	import { circleIcon } from 'entasis/icons/circle';
 </script>
 
 <section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl items-center md:grid-cols-2">

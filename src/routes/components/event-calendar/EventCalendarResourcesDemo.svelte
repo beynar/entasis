@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { EventCalendar, type EventCalendarResource } from 'svelai/event-calendar';
+	import { EventCalendar, type EventCalendarResource } from 'entasis/event-calendar';
 	import {
 		createDemoItems,
 		createDemoResources,

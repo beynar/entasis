@@ -1,5 +1,4 @@
-// Characterisation of the EventCalendarMutations commit phase ahead of merging its two commit
-// paths (commitProposal and commitRecurrenceProposal). Each test pins CURRENT observable
+// Characterisation of the unified EventCalendarMutations commit phase. Each test pins observable
 // behaviour — validation order, blocked reasons, adjustment handling, guarded revert, selection
 // remapping, and the emitted change payloads — exactly as the code behaves today. The state class
 // is instantiated directly with the getter/setter bindings EventCalendar.svelte hands it (the same

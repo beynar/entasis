@@ -53,7 +53,7 @@
 		description="Resize the viewport or use a narrow screen to see the shared scroll-fade utility indicate hidden suggestions."
 		class="!min-h-[240px] px-4"
 		code={`<script lang="ts">
-  import { AISuggestions } from 'svelai/ai-suggestion';
+  import { AISuggestions } from 'entasis/ai-suggestion';
 ${'</' + 'script>'}
 
 <AISuggestions suggestions={items} bind:value />`}

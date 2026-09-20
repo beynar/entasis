@@ -39,8 +39,8 @@ The Button component is a flexible and customizable button element that supports
 Describe the meaning; the Button writes the ARIA. Never pass an aria-* attribute to a Button.
 - **pressed**: boolean - Toggle state of a button that stays on or off (a bold button in a toolbar, a "show password" eye). Rendered as aria-pressed
 - **selected**: boolean - Chosen state of a button acting as one option among several (a tab, a listbox option). Rendered as aria-selected
-- **expanded**: boolean - Whether the surface this button opens is showing. Rendered as aria-expanded. A svelai surface (Popover, PopupMenu, Select, Combobox) sets this on its own trigger, so pass it only for a surface you open yourself
-- **haspopup**: 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid' | true - What the surface this button opens contains. Rendered as aria-haspopup, and likewise set by a svelai surface on its own trigger
+- **expanded**: boolean - Whether the surface this button opens is showing. Rendered as aria-expanded. A entasis surface (Popover, PopupMenu, Select, Combobox) sets this on its own trigger, so pass it only for a surface you open yourself
+- **haspopup**: 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid' | true - What the surface this button opens contains. Rendered as aria-haspopup, and likewise set by a entasis surface on its own trigger
 
 ### Link Props
 - **href**: string - Makes button render as anchor tag
@@ -161,7 +161,7 @@ The theme object contains the following parts:
 ### Theme Type Definition
 
 \`\`\`typescript
-import type { ButtonThemeProps } from 'svelai/button';
+import type { ButtonThemeProps } from 'entasis/button';
 
 // Example theme customization
 const customTheme: ButtonThemeProps = {
@@ -251,7 +251,7 @@ const customTheme: ButtonThemeProps = {
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setButtonTheme } from 'svelai/button';
+  import { setButtonTheme } from 'entasis/button';
   
   setButtonTheme({
     root: {

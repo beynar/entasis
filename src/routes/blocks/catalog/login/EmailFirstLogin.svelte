@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Alert } from 'svelai/alert';
-	import { Button } from 'svelai/button';
-	import { Form } from 'svelai/form';
-	import { Separator } from 'svelai/separator';
+	import { Stack } from 'entasis/stack';
+	import { Alert } from 'entasis/alert';
+	import { Button } from 'entasis/button';
+	import { Form } from 'entasis/form';
+	import { Separator } from 'entasis/separator';
 
 	let message = $state('');
 	let showEmail = $state(false);

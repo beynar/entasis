@@ -6,7 +6,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Accept Invite',
 		group: 'Application',
 		description:
-			'Accept Invite patterns composed from Svelai controls, display, and layout primitives.',
+			'Accept Invite patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'accept-invite-workspace-invitation',
@@ -33,7 +33,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Application Shell',
 		group: 'Application',
 		description:
-			'Application Shell patterns composed from Svelai controls, display, and layout primitives.',
+			'Application Shell patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'application-shell-workspace-shell',
@@ -69,12 +69,12 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Chart Card',
 		group: 'Application',
 		description:
-			'Chart Card patterns composed from Svelai controls, display, and layout primitives.',
+			'Chart Card patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'chart-card-area-trend',
 				title: 'Revenue over time',
-				description: 'An interactive time-window card using the native Svelai area chart.',
+				description: 'An interactive time-window card using the native Entasis area chart.',
 				file: 'chart-card/AreaTrend.svelte',
 				reference: 'https://www.shadcnblocks.com/block/chart-card2',
 				components: ['Card', 'Chart', 'Chip', 'Select', 'Stack']
@@ -103,7 +103,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Chart Group',
 		group: 'Application',
 		description:
-			'Chart Group patterns composed from Svelai controls, display, and layout primitives.',
+			'Chart Group patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'chart-group-revenue-channels',
@@ -148,7 +148,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'CRUD Companies',
 		group: 'Application',
 		description:
-			'Crud Companies patterns composed from Svelai controls, display, and layout primitives.',
+			'Crud Companies patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'crud-companies-company-form',
@@ -175,7 +175,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Dashboard',
 		group: 'Application',
 		description:
-			'Dashboard patterns composed from Svelai controls, display, and layout primitives.',
+			'Dashboard patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'dashboard-revenue-dashboard',
@@ -211,7 +211,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Data Table',
 		group: 'Application',
 		description:
-			'Data Table patterns composed from Svelai controls, display, and layout primitives.',
+			'Data Table patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'data-table-searchable-contacts',
@@ -254,7 +254,7 @@ export const applicationCategories: BlockCategory[] = [
 		slug: 'feedback',
 		title: 'Feedback',
 		group: 'Application',
-		description: 'Feedback patterns composed from Svelai controls, display, and layout primitives.',
+		description: 'Feedback patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'feedback-rating-feedback',
@@ -281,7 +281,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Field Mapping',
 		group: 'Application',
 		description:
-			'Field Mapping patterns composed from Svelai controls, display, and layout primitives.',
+			'Field Mapping patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'field-mapping-csv-mapping',
@@ -308,7 +308,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Forgot Password',
 		group: 'Application',
 		description:
-			'Forgot Password patterns composed from Svelai controls, display, and layout primitives.',
+			'Forgot Password patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'forgot-password-recovery-card',
@@ -334,7 +334,7 @@ export const applicationCategories: BlockCategory[] = [
 		slug: 'help',
 		title: 'Help',
 		group: 'Application',
-		description: 'Help patterns composed from Svelai controls, display, and layout primitives.',
+		description: 'Help patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'help-faq-support',
@@ -361,7 +361,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Help Center',
 		group: 'Application',
 		description:
-			'Help Center patterns composed from Svelai controls, display, and layout primitives.',
+			'Help Center patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'help-center-category-help',
@@ -387,7 +387,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Invite User',
 		group: 'Application',
 		description:
-			'Invite User patterns composed from Svelai controls, display, and layout primitives.',
+			'Invite User patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'invite-user-member-invites',
@@ -414,7 +414,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Leaderboard',
 		group: 'Application',
 		description:
-			'Leaderboard patterns composed from Svelai controls, display, and layout primitives.',
+			'Leaderboard patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'leaderboard-team-progress',
@@ -440,7 +440,7 @@ export const applicationCategories: BlockCategory[] = [
 		slug: 'list',
 		title: 'List',
 		group: 'Application',
-		description: 'List patterns composed from Svelai controls, display, and layout primitives.',
+		description: 'List patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'list-resource-list',
@@ -466,7 +466,7 @@ export const applicationCategories: BlockCategory[] = [
 		slug: 'login',
 		title: 'Login',
 		group: 'Application',
-		description: 'Login patterns composed from Svelai controls, display, and layout primitives.',
+		description: 'Login patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'login-centered-login',
@@ -492,7 +492,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Magic Link',
 		group: 'Application',
 		description:
-			'Magic Link patterns composed from Svelai controls, display, and layout primitives.',
+			'Magic Link patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'magic-link-magic-link-card',
@@ -517,7 +517,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Onboarding',
 		group: 'Application',
 		description:
-			'Onboarding patterns composed from Svelai controls, display, and layout primitives.',
+			'Onboarding patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'onboarding-workspace-onboarding',
@@ -543,7 +543,7 @@ export const applicationCategories: BlockCategory[] = [
 		slug: 'passkey',
 		title: 'Passkey',
 		group: 'Application',
-		description: 'Passkey patterns composed from Svelai controls, display, and layout primitives.',
+		description: 'Passkey patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'passkey-passkey-card',
@@ -569,7 +569,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Reset Password',
 		group: 'Application',
 		description:
-			'Reset Password patterns composed from Svelai controls, display, and layout primitives.',
+			'Reset Password patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'reset-password-reset-card',
@@ -594,7 +594,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Settings Integrations',
 		group: 'Application',
 		description:
-			'Settings Integrations patterns composed from Svelai controls, display, and layout primitives.',
+			'Settings Integrations patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'settings-integrations-integration-grid',
@@ -629,7 +629,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Settings Members',
 		group: 'Application',
 		description:
-			'Settings Members patterns composed from Svelai controls, display, and layout primitives.',
+			'Settings Members patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'settings-members-member-directory',
@@ -666,7 +666,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Settings Notifications',
 		group: 'Application',
 		description:
-			'Settings Notifications patterns composed from Svelai controls, display, and layout primitives.',
+			'Settings Notifications patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'settings-notifications-notification-groups',
@@ -692,7 +692,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Settings Profile',
 		group: 'Application',
 		description:
-			'Settings Profile patterns composed from Svelai controls, display, and layout primitives.',
+			'Settings Profile patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'settings-profile-profile-editor',
@@ -718,7 +718,7 @@ export const applicationCategories: BlockCategory[] = [
 		slug: 'sidebar',
 		title: 'Sidebar',
 		group: 'Application',
-		description: 'Sidebar patterns composed from Svelai controls, display, and layout primitives.',
+		description: 'Sidebar patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'sidebar-workspace-sidebar',
@@ -752,7 +752,7 @@ export const applicationCategories: BlockCategory[] = [
 		slug: 'signup',
 		title: 'Signup',
 		group: 'Application',
-		description: 'Signup patterns composed from Svelai controls, display, and layout primitives.',
+		description: 'Signup patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'signup-create-account',
@@ -787,7 +787,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Stats Card',
 		group: 'Application',
 		description:
-			'Stats Card patterns composed from Svelai controls, display, and layout primitives.',
+			'Stats Card patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'stats-card-trend-metric',
@@ -820,7 +820,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Todo List',
 		group: 'Application',
 		description:
-			'Todo List patterns composed from Svelai controls, display, and layout primitives.',
+			'Todo List patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'todo-list-task-capture',
@@ -856,7 +856,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Two Factor',
 		group: 'Application',
 		description:
-			'Two Factor patterns composed from Svelai controls, display, and layout primitives.',
+			'Two Factor patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'two-factor-authenticator-code',
@@ -883,7 +883,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'User Profile',
 		group: 'Application',
 		description:
-			'User Profile patterns composed from Svelai controls, display, and layout primitives.',
+			'User Profile patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'user-profile-profile-stats',
@@ -919,7 +919,7 @@ export const applicationCategories: BlockCategory[] = [
 		title: 'Verify Email',
 		group: 'Application',
 		description:
-			'Verify Email patterns composed from Svelai controls, display, and layout primitives.',
+			'Verify Email patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'verify-email-email-code',

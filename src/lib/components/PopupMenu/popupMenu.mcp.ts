@@ -7,11 +7,11 @@ The PopupMenu component is a wrapper around Popover that renders a Menu inside. 
 
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
-	import { PopupMenu } from 'svelai/popup-menu';
-	import { userIcon } from 'svelai/icons/user';
-	import { gearIcon } from 'svelai/icons/gear';
-	import { signOutIcon } from 'svelai/icons/signOut';
+	import type { MenuItem } from 'entasis/menu';
+	import { PopupMenu } from 'entasis/popup-menu';
+	import { userIcon } from 'entasis/icons/user';
+	import { gearIcon } from 'entasis/icons/gear';
+	import { signOutIcon } from 'entasis/icons/signOut';
 	
 	const menuItems = [
 		{ type: 'option', prefix: userIcon, title: 'Profile' },
@@ -116,7 +116,7 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 ### Basic Dropdown Menu
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 	const items = [
 		{ type: 'option', title: 'New File' },
 		{ type: 'option', title: 'Open...' },
@@ -136,11 +136,11 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 ### User Profile Menu
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
-	import { userIcon } from 'svelai/icons/user';
-	import { gearIcon } from 'svelai/icons/gear';
-	import { questionIcon } from 'svelai/icons/question';
-	import { signOutIcon } from 'svelai/icons/signOut';
+	import type { MenuItem } from 'entasis/menu';
+	import { userIcon } from 'entasis/icons/user';
+	import { gearIcon } from 'entasis/icons/gear';
+	import { questionIcon } from 'entasis/icons/question';
+	import { signOutIcon } from 'entasis/icons/signOut';
 	
 	const items = [
 		{ type: 'option', prefix: userIcon, title: 'Profile', href: '/profile' },
@@ -161,10 +161,10 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 ### Context Menu (Right Click)
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
-	import { trashIcon } from 'svelai/icons/trash';
-	import { copyIcon } from 'svelai/icons/copy';
-	import { shareIcon } from 'svelai/icons/share';
+	import type { MenuItem } from 'entasis/menu';
+	import { trashIcon } from 'entasis/icons/trash';
+	import { copyIcon } from 'entasis/icons/copy';
+	import { shareIcon } from 'entasis/icons/share';
 	
 	let open = $state(false);
 	let contextMenuRef = $state<HTMLElement | null>(null);
@@ -200,7 +200,7 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 ### With Custom Trigger Snippet
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 	let open = $state(false);
 
 	const items = [
@@ -221,7 +221,7 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 ### Hover Menu
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 	const items = [
 		{ type: 'option', title: 'Quick Action 1' },
 		{ type: 'option', title: 'Quick Action 2' }
@@ -241,7 +241,7 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 ### Actions Menu with Buttons
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 	const items = [
 		{ type: 'button', children: 'Save Draft', variant: 'ghost', fullWidth: true },
 		{ type: 'button', children: 'Publish', variant: 'solid', color: 'primary', fullWidth: true },
@@ -260,7 +260,7 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 ### External Control with Bindable State
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 	let menuOpen = $state(false);
 	
 	const items = [
@@ -285,7 +285,7 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 ### Positioned Menu
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 	const items = [
 		{ type: 'option', title: 'Top Start' },
 		{ type: 'option', title: 'Example' }
@@ -302,7 +302,7 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 ### With Custom Theme
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 	const items = [
 		{ type: 'option', title: 'Themed Option 1' },
 		{ type: 'option', title: 'Themed Option 2' }
@@ -325,7 +325,7 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 ### Keep Menu Open for Multiple Interactions
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 	let selections = $state<string[]>([]);
 	
 	const items = [
@@ -359,7 +359,7 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 ### Nested Submenus
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 
 	const items = [
 		{ type: 'option', title: 'New File' },

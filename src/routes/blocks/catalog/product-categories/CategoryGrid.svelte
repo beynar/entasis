@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Card } from 'svelai/card';
+	import { Heading } from 'entasis/heading';
+	import { Card } from 'entasis/card';
 
 	const categories = [
 		{ title: 'Lighting', description: 'A warmer kind of light', shape: 'lamp', color: 'Sand' },

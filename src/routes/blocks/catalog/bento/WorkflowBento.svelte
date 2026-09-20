@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { AvatarGroup } from 'svelai/avatar';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Meter } from 'svelai/meter';
-	import { Stat } from 'svelai/stat';
+	import { Stack } from 'entasis/stack';
+	import { AvatarGroup } from 'entasis/avatar';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Meter } from 'entasis/meter';
+	import { Stat } from 'entasis/stat';
 </script>
 
 <section class="gap-xl p-lg md:p-xl flex flex-col">

@@ -1,5 +1,5 @@
 <!--
-	Timeline tab body — everything visible here is drawn by svelai `GanttChart`.
+	Timeline tab body — everything visible here is drawn by entasis `GanttChart`.
 
 	The chart owns: the day scale, the today indicator, weekend shading, row geometry, horizontal
 	scrolling, bar placement, drag/resize/progress editing, the hover tooltip and the zoom control.
@@ -9,8 +9,8 @@
 	- `render.taskLabel` — emptied, because the title now lives inside the bar.
 -->
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
 	import {
 		GanttChart,
 		type GanttHeaderPayload,
@@ -18,12 +18,12 @@
 		type GanttTaskPayload,
 		type GanttTasksChange,
 		type GanttZoomLevel
-	} from 'svelai/gantt-chart';
-	import { caretLeftIcon } from 'svelai/icons/caretLeft';
-	import { caretRightIcon } from 'svelai/icons/caretRight';
-	import { funnelIcon } from 'svelai/icons/funnel';
-	import { Meter } from 'svelai/meter';
-	import { Stack } from 'svelai/stack';
+	} from 'entasis/gantt-chart';
+	import { caretLeftIcon } from 'entasis/icons/caretLeft';
+	import { caretRightIcon } from 'entasis/icons/caretRight';
+	import { funnelIcon } from 'entasis/icons/funnel';
+	import { Meter } from 'entasis/meter';
+	import { Stack } from 'entasis/stack';
 	import { progressColor, timelineDate, timelineTasks } from './data.js';
 
 	/** `tasksLeft` rides along on the task record so the bar snippet can read it back. */

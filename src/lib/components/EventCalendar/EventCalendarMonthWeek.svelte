@@ -36,57 +36,31 @@
 		startOfZonedDay
 	} from './eventCalendar.date.js';
 	import { eventCalendarMonthDayTarget } from './eventCalendar.targets.js';
-	import type { EventCalendarLaneLayout } from './eventCalendar.layout.js';
+	import type {
+		EventCalendarMonthSurface,
+		EventCalendarMonthWeekLayout
+	} from './eventCalendar.month.js';
 	import type { EventCalendarMonthCellPayload } from './eventCalendar.props.js';
 	import type { EventCalendarState } from './eventCalendar.state.svelte.js';
 	import type { EventCalendarDateOnly, EventCalendarSegment } from './eventCalendar.types.js';
 
 	let {
 		calendar,
-		days,
-		layout,
-		visibleLaneCount,
-		insertion,
-		draggingOccurrenceKey,
-		leadingEmptyCells,
-		trailingEmptyCells,
-		weekIndex,
+		surface,
+		week,
 		gridTemplateColumns,
-		visibleDaySet,
-		enabledDays,
-		currentStartDay,
-		currentEndDay,
 		todayDay
 	}: {
 		calendar: EventCalendarState<TItemFields, TResourceFields>;
-		days: readonly EventCalendarDateOnly[];
-		layout: EventCalendarLaneLayout<TItemFields>;
-		visibleLaneCount: number;
-		insertion: { startIndex: number; endIndex: number; lane: number } | null;
-		draggingOccurrenceKey: string | null;
-		leadingEmptyCells: number;
-		trailingEmptyCells: number;
-		weekIndex: number;
+		surface: EventCalendarMonthSurface;
+		week: EventCalendarMonthWeekLayout<TItemFields>;
 		gridTemplateColumns: string;
-		visibleDaySet: ReadonlySet<EventCalendarDateOnly>;
-		enabledDays: ReadonlySet<EventCalendarDateOnly>;
-		currentStartDay: EventCalendarDateOnly;
-		currentEndDay: EventCalendarDateOnly;
 		todayDay: EventCalendarDateOnly | null;
 	} = $props();
 
 	const a11y = $derived(calendar.a11y);
-	const messages = $derived(calendar.messages);
-	const showWeekNumbers = $derived(calendar.showWeekNumbers);
 	const density = $derived(calendar.density);
 	const classes = $derived(calendar.classes);
-	const disabled = $derived(calendar.disabled);
-	const offDays = $derived(calendar.offDays);
-	const monthCell = $derived(calendar.renderers.monthCell);
-	const onItemClick = $derived(calendar.eventHandlers.onItemClick);
-	const onItemDoubleClick = $derived(calendar.eventHandlers.onItemDoubleClick);
-	const onSlotClick = $derived(calendar.eventHandlers.onSlotClick);
-	const itemIndex = $derived(calendar.itemIndex);
 	const selectionKey = $derived(
 		calendar.selection.kind === 'item' ? calendar.selection.itemKey : null
 	);
@@ -102,39 +76,24 @@
 		getCachedDateTimeFormatter(calendar.locale, calendar.timeZone, { day: 'numeric' })
 	);
 
-	function isOffDay(day: EventCalendarDateOnly): boolean {
-		return isEventCalendarOffDay(day, offDays, calendar.weekendDays);
-	}
-
-	function getDayLabel(day: EventCalendarDateOnly): string {
-		return fullDayFormatter.format(startOfZonedDay(day, calendar.timeZone));
-	}
-
-	function getDaySegments(
-		day: EventCalendarDateOnly
-	): readonly EventCalendarSegment<TItemFields>[] {
-		return itemIndex.segmentsByDay.get(day)?.all ?? [];
-	}
-
 	function getHiddenSegments(
 		day: EventCalendarDateOnly,
 		gridDayIndex: number
 	): readonly EventCalendarSegment<TItemFields>[] {
-		return layout.placements
+		return week.layout.placements
 			.filter(
-				(placement) =>
-					(placement.lane >= visibleLaneCount ||
-						calendar.interaction.isDraggingFromOverflow(placement.occurrence.key)) &&
-					placement.startIndex <= gridDayIndex &&
-					placement.endIndex > gridDayIndex
+				({ lane, occurrence, startIndex, endIndex }) =>
+					(lane >= week.visibleLaneCount ||
+						calendar.interaction.isDraggingFromOverflow(occurrence.key)) &&
+					startIndex + week.leadingEmptyCells <= gridDayIndex &&
+					endIndex + week.leadingEmptyCells > gridDayIndex
 			)
-			.map((placement) => placement.segments.find((segment) => segment.day === day))
-			.filter((segment): segment is EventCalendarSegment<TItemFields> => segment !== undefined);
+			.flatMap(({ segments }) => segments.filter((segment) => segment.day === day));
 	}
 
 	function handleItemActivate(segment: EventCalendarSegment<TItemFields>, event: MouseEvent): void {
 		calendar.interaction.resetSinglePointerSlot();
-		onItemClick?.({ occurrence: segment.occurrence, event });
+		calendar.eventHandlers.onItemClick?.({ occurrence: segment.occurrence, event });
 		if (event.defaultPrevented) return;
 		calendar.select({ kind: 'item', itemKey: segment.occurrence.key, slot: null });
 	}
@@ -143,13 +102,13 @@
 		segment: EventCalendarSegment<TItemFields>,
 		event: MouseEvent
 	): void {
-		onItemDoubleClick?.({ occurrence: segment.occurrence, event });
+		calendar.eventHandlers.onItemDoubleClick?.({ occurrence: segment.occurrence, event });
 	}
 
 	function handleDayClick(day: EventCalendarDateOnly, event: MouseEvent): void {
 		if (a11y.activateMutationTarget(eventCalendarMonthDayTarget(day))) return;
 		if (calendar.interaction.shouldSuppressSlotClick()) return;
-		if (!enabledDays.has(day)) return;
+		if (!surface.enabledDays.has(day)) return;
 		(event.currentTarget as HTMLElement).focus();
 		const slot = {
 			view: 'month' as const,
@@ -157,66 +116,55 @@
 			start: day,
 			end: addCivilDays(day, 1)
 		};
-		onSlotClick?.({ slot, event });
-		if (event.defaultPrevented) {
-			calendar.interaction.resetSinglePointerSlot();
-			return;
-		}
+		calendar.eventHandlers.onSlotClick?.({ slot, event });
+		if (event.defaultPrevented) return calendar.interaction.resetSinglePointerSlot();
 		if (calendar.interaction.selectSinglePointerSlot(slot)) return;
 		calendar.select({ kind: 'slot', itemKey: null, slot });
 	}
-
-	function registerDay(day: EventCalendarDateOnly) {
-		return (node: HTMLElement) => untrack(() => a11y.registerDay(day, node));
-	}
 </script>
+
+{#snippet placeholderCell()}
+	<div
+		role="gridcell"
+		aria-disabled="true"
+		data-event-calendar-part="month-cell"
+		data-domain-placeholder
+		class={classes.monthCell({ density, view: 'month', disabled: true, outside: true })}
+	></div>
+{/snippet}
 
 <div
 	role="row"
 	data-event-calendar-part="week-row"
-	class={classes.weekRow({ density, view: 'month', disabled })}
+	class={classes.weekRow({ density, view: 'month', disabled: calendar.disabled })}
 	style:grid-template-columns={gridTemplateColumns}
 >
-	{#if showWeekNumbers}
-		{@const week = getWeekNumber(days[0], calendar.weekStartsOn)}
+	{#if calendar.showWeekNumbers}
+		{@const weekNumber = getWeekNumber(week.days[0], calendar.weekStartsOn)}
 		<div
 			role="rowheader"
-			aria-label={messages.eventCalendarWeekNumber(week)}
+			aria-label={calendar.messages.eventCalendarWeekNumber(weekNumber)}
 			data-event-calendar-part="week-number"
 			class={classes.weekNumber({ density, view: 'month' })}
 		>
-			{week}
+			{weekNumber}
 		</div>
 	{/if}
 
-	{#each Array.from({ length: leadingEmptyCells }, (_, index) => index) as placeholderIndex (placeholderIndex)}
-		<div
-			role="gridcell"
-			aria-disabled="true"
-			data-event-calendar-part="month-cell"
-			data-domain-placeholder
-			class={classes.monthCell({
-				density,
-				view: 'month',
-				disabled: true,
-				outside: true
-			})}
-		></div>
+	{#each Array.from({ length: week.leadingEmptyCells }, (_, index) => index) as placeholderIndex (placeholderIndex)}
+		{@render placeholderCell()}
 	{/each}
 
-	{#each days as day, dayIndex (day)}
-		{@const gridDayIndex = dayIndex + leadingEmptyCells}
-		{@const isRenderedDay = visibleDaySet.has(day)}
-		{@const isOutside = day < currentStartDay || day >= currentEndDay}
+	{#each week.days as day, dayIndex (day)}
+		{@const gridDayIndex = dayIndex + week.leadingEmptyCells}
+		{@const isRenderedDay = surface.visibleDaySet.has(day)}
+		{@const isOutside = day < surface.currentStartDay || day >= surface.currentEndDay}
 		{@const isToday = todayDay === day}
-		{@const isOff = isOffDay(day)}
-		{@const isDisabled = disabled || !enabledDays.has(day)}
-		{@const segments = isRenderedDay ? getDaySegments(day) : []}
+		{@const isOff = isEventCalendarOffDay(day, calendar.offDays, calendar.weekendDays)}
+		{@const isDisabled = !surface.enabledDays.has(day)}
+		{@const segments = isRenderedDay ? (calendar.itemIndex.segmentsByDay.get(day)?.all ?? []) : []}
 		{@const hiddenSegments = isRenderedDay ? getHiddenSegments(day, gridDayIndex) : []}
-		{@const isSlotSelected =
-			calendar.selection.kind === 'slot' &&
-			calendar.selection.slot.allDay &&
-			calendar.selection.slot.start === day}
+		{@const dayLabel = fullDayFormatter.format(startOfZonedDay(day, calendar.timeZone))}
 		{@const cellPayload = {
 			day,
 			segments,
@@ -230,9 +178,11 @@
 		{@const dropTarget = eventCalendarMonthDayTarget(day)}
 		<div
 			role="gridcell"
-			aria-label={isRenderedDay ? getDayLabel(day) : undefined}
+			aria-label={isRenderedDay ? dayLabel : undefined}
 			aria-disabled={isDisabled}
-			aria-selected={isSlotSelected}
+			aria-selected={calendar.selection.kind === 'slot' &&
+				calendar.selection.slot.allDay &&
+				calendar.selection.slot.start === day}
 			tabindex={isRenderedDay ? a11y.getDayTabIndex(day) : -1}
 			data-event-calendar-part="month-cell"
 			data-day={day}
@@ -264,9 +214,10 @@
 				event.preventDefault();
 				(event.currentTarget as HTMLElement).click();
 			}}
-			{@attach isRenderedDay ? registerDay(day) : null}
+			{@attach isRenderedDay
+				? (node: HTMLElement) => untrack(() => a11y.registerDay(day, node))
+				: null}
 			{@attach isRenderedDay && !isDisabled ? calendar.interaction.dropTarget(dropTarget) : null}
-			{@attach isRenderedDay && !isDisabled ? calendar.interaction.slotDrag(dropTarget) : null}
 		>
 			{#if isRenderedDay}
 				{#if calendar.interaction.isSlotDraftTarget(dropTarget)}
@@ -281,7 +232,7 @@
 						})}
 					></div>
 				{/if}
-				<Slot render={monthCell ?? defaultMonthCell} payload={cellPayload} />
+				<Slot render={calendar.renderers.monthCell ?? defaultMonthCell} payload={cellPayload} />
 
 				{#each segments.filter((segment) => segment.occurrence.item.display === 'background') as segment (segment.key)}
 					<div
@@ -293,7 +244,7 @@
 					></div>
 				{/each}
 
-				{#if calendar.interaction.isValid === true && insertion?.startIndex === gridDayIndex && insertion.lane < visibleLaneCount}
+				{#if calendar.interaction.isValid === true && week.insertion && week.insertion.startIndex + week.leadingEmptyCells === gridDayIndex && week.insertion.lane < week.visibleLaneCount}
 					{@const proposal = calendar.interaction.proposal}
 					{#if proposal}
 						{@const indicatorColor = isEventCalendarSemanticColor(proposal.item.color)
@@ -306,8 +257,8 @@
 						<div
 							aria-hidden="true"
 							class="inset-inline-start-0 duration-fast pointer-events-none absolute z-20 h-[var(--event-calendar-item-min-height)] px-1 transition-[top] motion-reduce:transition-none"
-							style:top={`calc(1.75rem + ${insertion.lane} * var(--event-calendar-item-min-height))`}
-							style:width={getMonthBarWidth(insertion.startIndex, insertion.endIndex)}
+							style:top={`calc(1.75rem + ${week.insertion.lane} * var(--event-calendar-item-min-height))`}
+							style:width={getMonthBarWidth(week.insertion.startIndex, week.insertion.endIndex)}
 						>
 							<div
 								data-event-calendar-part="drop-indicator"
@@ -324,12 +275,12 @@
 					{/if}
 				{/if}
 
-				{#each layout.placements.filter((placement) => placement.startIndex === gridDayIndex && placement.lane < visibleLaneCount) as placement (`${weekIndex}:${placement.key}`)}
+				{#each week.layout.placements.filter((placement) => placement.startIndex + week.leadingEmptyCells === gridDayIndex && placement.lane < week.visibleLaneCount) as placement (placement.key)}
 					{@const segment = getPlacementSegment(placement.segments)}
 					<div
 						class="inset-inline-start-0 duration-fast pointer-events-auto absolute z-10 h-[var(--event-calendar-item-min-height)] px-1 transition-[top,opacity] motion-reduce:transition-none"
-						class:pointer-events-none={placement.occurrence.key === draggingOccurrenceKey}
-						class:opacity-0={placement.occurrence.key === draggingOccurrenceKey}
+						class:pointer-events-none={calendar.interaction.isDragging(placement.occurrence.key)}
+						class:opacity-0={calendar.interaction.isDragging(placement.occurrence.key)}
 						style:top={`calc(1.75rem + ${placement.lane} * var(--event-calendar-item-min-height))`}
 						style:width={getMonthBarWidth(placement.startIndex, placement.endIndex)}
 					>
@@ -352,7 +303,7 @@
 						<EventCalendarMonthOverflow
 							{calendar}
 							{day}
-							dayLabel={getDayLabel(day)}
+							{dayLabel}
 							{hiddenSegments}
 							{selectionKey}
 							onItemActivate={handleItemActivate}
@@ -373,18 +324,7 @@
 		{/snippet}
 	{/each}
 
-	{#each Array.from({ length: trailingEmptyCells }, (_, index) => index) as placeholderIndex (placeholderIndex)}
-		<div
-			role="gridcell"
-			aria-disabled="true"
-			data-event-calendar-part="month-cell"
-			data-domain-placeholder
-			class={classes.monthCell({
-				density,
-				view: 'month',
-				disabled: true,
-				outside: true
-			})}
-		></div>
+	{#each Array.from({ length: week.trailingEmptyCells }, (_, index) => index) as placeholderIndex (placeholderIndex)}
+		{@render placeholderCell()}
 	{/each}
 </div>

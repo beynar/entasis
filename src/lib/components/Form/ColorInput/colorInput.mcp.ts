@@ -9,7 +9,7 @@ string (\`#rrggbb\`, or \`#rrggbbaa\` when alpha < 1).
 
 \`\`\`svelte
 <script>
-	import { ColorInput } from 'svelai/color-input';
+	import { ColorInput } from 'entasis/color-input';
 	let color = $state('#6366f1');
 </script>
 

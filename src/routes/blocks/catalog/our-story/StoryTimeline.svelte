@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Timeline } from 'svelai/timeline';
+	import { Heading } from 'entasis/heading';
+	import { Timeline } from 'entasis/timeline';
 	const chapters = [
 		{
 			label: '2016',

@@ -13,8 +13,8 @@ drawer behavior.
 
 \`\`\`svelte
 <script lang="ts">
-	import { PageShell, type PageShellAction } from 'svelai/page-shell';
-	import { downloadSimpleIcon } from 'svelai/icons/downloadSimple';
+	import { PageShell, type PageShellAction } from 'entasis/page-shell';
+	import { downloadSimpleIcon } from 'entasis/icons/downloadSimple';
 
 	const headerActions = [
 		{
@@ -43,7 +43,7 @@ during component initialization for automatic cleanup.
 
 \`\`\`svelte
 <script lang="ts">
-	import { setPageShell } from 'svelai/page-shell';
+	import { setPageShell } from 'entasis/page-shell';
 
 	setPageShell({
 		title: 'Revenue',
@@ -94,8 +94,8 @@ during component initialization for automatic cleanup.
 
 \`\`\`svelte
 <script lang="ts">
-	import { PageShell, type PageShellAction } from 'svelai/page-shell';
-	import { arrowClockwiseIcon } from 'svelai/icons/arrowClockwise';
+	import { PageShell, type PageShellAction } from 'entasis/page-shell';
+	import { arrowClockwiseIcon } from 'entasis/icons/arrowClockwise';
 
 	const headerActions = [
 		{

@@ -1,7 +1,7 @@
 export const dateSelectorDescription = `
 # DateSelector
 
-Popover calendar composition for selecting one date, a range, or multiple dates. It uses SvelAI's Popover, CalendarPrimitive, Button, and transitionSize attachment.
+Popover calendar composition for selecting one date, a range, or multiple dates. It uses Entasis's Popover, CalendarPrimitive, Button, and transitionSize attachment.
 \`DateSelector\` is the raw popover primitive; \`DateSelectorInput\` wraps it in the standard field
 chrome (label, description, errors, form registration) and extends InputProps — field type 'date'
 for \`mode="date"\`, 'calendar-range' for \`mode="range"\` (\`mode="multiple"\` has no field type and
@@ -11,7 +11,7 @@ stays primitive-only).
 
 \`\`\`svelte
 <script lang="ts">
-  import { DateSelector, DateSelectorInput } from 'svelai/date-selector';
+  import { DateSelector, DateSelectorInput } from 'entasis/date-selector';
 </script>
 \`\`\`
 

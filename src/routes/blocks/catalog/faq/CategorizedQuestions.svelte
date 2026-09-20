@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Accordion } from 'svelai/accordion';
-	import { Button } from 'svelai/button';
-	import { Heading } from 'svelai/heading';
-	import { Tabbar } from 'svelai/tabbar';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
+	import { Accordion } from 'entasis/accordion';
+	import { Button } from 'entasis/button';
+	import { Heading } from 'entasis/heading';
+	import { Tabbar } from 'entasis/tabbar';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
 	const tabs = ['Getting started', 'Design', 'Development'];
 	let active = $state(tabs[0]);
 	const topics = [
@@ -45,7 +45,7 @@
 				id: 'f',
 				title: 'How do I copy a block?',
 				content:
-					'Open the source tab, copy the component, and bring it into a project with Svelai configured.'
+					'Open the source tab, copy the component, and bring it into a project with Entasis configured.'
 			}
 		]
 	];

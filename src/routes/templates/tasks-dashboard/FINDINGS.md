@@ -1,6 +1,6 @@
 # Tasks dashboard template: design-system stress-test findings
 
-The template at `/templates/tasks-dashboard` is built from svelai components, their props, the layout
+The template at `/templates/tasks-dashboard` is built from entasis components, their props, the layout
 primitives and one root token block, and nothing else (`tooling/check-template-purity.mjs` enforces it).
 Everywhere the library could not express the reference, the template uses the closest thing the
 library can do and the gap is recorded here. Each entry is a candidate change to the library.
@@ -190,9 +190,9 @@ Recorded 2026-09-14.
 
 ## Grid (1, resolved)
 
-- **Gap.** `GridSpan` is referenced in `grid.props.ts` but is not exported from the `svelai/grid` subpath, so the 2/3 + 1/3 chart row falls back to a raw `grid lg:grid-cols-3` + `lg:col-span-2`.
-  **Suggestion.** Export `GridSpan` from the `svelai/grid` entry point (and document it) so asymmetric dashboard rows stay in the layout primitives.
-  **Resolved.** `GridSpan` is exported from `svelai/grid` and carried by the contract manifest, and the chart row in `OverviewPanel.svelte` is now `<Grid columns={{ minWidth: 320, max: 3 }} gap="lg">` with a `<GridSpan columns={2}>` around the status chart — no raw grid classes left.
+- **Gap.** `GridSpan` is referenced in `grid.props.ts` but is not exported from the `entasis/grid` subpath, so the 2/3 + 1/3 chart row falls back to a raw `grid lg:grid-cols-3` + `lg:col-span-2`.
+  **Suggestion.** Export `GridSpan` from the `entasis/grid` entry point (and document it) so asymmetric dashboard rows stay in the layout primitives.
+  **Resolved.** `GridSpan` is exported from `entasis/grid` and carried by the contract manifest, and the chart row in `OverviewPanel.svelte` is now `<Grid columns={{ minWidth: 320, max: 3 }} gap="lg">` with a `<GridSpan columns={2}>` around the status chart — no raw grid classes left.
 
 ## SegmentedControl (1)
 
@@ -211,7 +211,7 @@ Recorded 2026-09-14.
 - **Gap.** The colour kit (`-light`, `-lighter`, `-dark`, `-muted`, `-contrast`, `-readable` companions) is
   derived at build time by the Tailwind plugin only. At runtime every consumer that wants a scoped palette
   (this template, the docs playground) re-implements the same `color-mix()` formulas, and they can drift.
-  **Suggestion.** Export a runtime `colorRoleVariables(role, seed)` from `svelai/theme` that emits the same
+  **Suggestion.** Export a runtime `colorRoleVariables(role, seed)` from `entasis/theme` that emits the same
   companions the plugin does, and let `designTokens` accept per-role colour seeds.
 
 ## Deviations in the template itself

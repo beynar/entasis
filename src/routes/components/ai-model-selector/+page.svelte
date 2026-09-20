@@ -14,7 +14,7 @@
 		{
 			id: 'swift',
 			label: 'Swift',
-			provider: 'Svelai',
+			provider: 'Entasis',
 			description: 'Fast everyday responses',
 			contextWindow: 128_000,
 			keywords: ['quick', 'chat']
@@ -22,16 +22,16 @@
 		{
 			id: 'deep',
 			label: 'Deep',
-			provider: 'Svelai',
+			provider: 'Entasis',
 			description: 'Long-form reasoning',
 			contextWindow: 256_000,
 			keywords: ['analysis', 'reasoning']
 		},
-		{ id: 'retired', label: 'Legacy', provider: 'Svelai', disabled: true }
+		{ id: 'retired', label: 'Legacy', provider: 'Entasis', disabled: true }
 	];
 	const groups = [
 		{
-			label: 'Svelai',
+			label: 'Entasis',
 			models: models.slice(0, 2),
 			groups: [
 				{
@@ -164,7 +164,7 @@
   import {
     AIModelSelector,
     type AIModelSelectorMenuItem
-  } from 'svelai/ai-model-selector';
+  } from 'entasis/ai-model-selector';
 
   let reasoning = $state('medium');
   const menuItems = $derived<AIModelSelectorMenuItem[]>([
@@ -249,7 +249,7 @@ ${'</' + 'script>'}
 		description="Select a model from flat or nested sources. Direct value props override the nearest conversation default."
 		class="!min-h-[240px]"
 		code={`<script lang="ts">
-  import { AIModelSelector } from 'svelai/ai-model-selector';
+  import { AIModelSelector } from 'entasis/ai-model-selector';
 ${'</' + 'script>'}
 
 

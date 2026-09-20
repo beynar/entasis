@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Button } from 'svelai/button';
-	import { Dialog } from 'svelai/dialog';
-	import { Rating } from 'svelai/rating';
-	import { Accordion } from 'svelai/accordion';
+	import { Heading } from 'entasis/heading';
+	import { Button } from 'entasis/button';
+	import { Dialog } from 'entasis/dialog';
+	import { Rating } from 'entasis/rating';
+	import { Accordion } from 'entasis/accordion';
 
 	let open = $state(false);
 	let added = $state(0);

@@ -1,4 +1,4 @@
-# Component Gap Analysis — svelte-pro vs svelai
+# Component Gap Analysis — svelte-pro vs entasis
 
 Comparison of `svelte-pro/src/lib/components` against `src/lib/components` (2026-07-02).
 AI elements (`svelte-pro/src/lib/ai-elements`) deliberately excluded.
@@ -42,7 +42,7 @@ AI elements (`svelte-pro/src/lib/ai-elements`) deliberately excluded.
 
 ## Near-equivalents (present under a different name — not gaps)
 
-| svelte-pro                                                                                                    | svelai                           |
+| svelte-pro                                                                                                    | entasis                           |
 | ------------------------------------------------------------------------------------------------------------- | -------------------------------- |
 | Progress                                                                                                      | Meter                            |
 | AlertDialog                                                                                                   | Confirmation                     |

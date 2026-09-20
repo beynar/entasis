@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Alert } from 'svelai/alert';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { fingerprintIcon } from 'svelai/icons/fingerprint';
+	import { Stack } from 'entasis/stack';
+	import { Alert } from 'entasis/alert';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { fingerprintIcon } from 'entasis/icons/fingerprint';
 	let message = $state('');
 	let fallback = $state(false);
 </script>

@@ -89,13 +89,13 @@ export function updateThemeWithTransition(
 	const root = document.documentElement;
 	const transitionId = ++activeTransitionId;
 	const animation = createThemeTransitionAnimation(transition);
-	root.dataset.svelaiThemeTransition = transition;
+	root.dataset.entasisThemeTransition = transition;
 
 	let viewTransition: ViewTransition;
 	try {
 		viewTransition = document.startViewTransition(update);
 	} catch {
-		root.removeAttribute('data-svelai-theme-transition');
+		root.removeAttribute('data-entasis-theme-transition');
 		void update();
 		return;
 	}
@@ -114,7 +114,7 @@ export function updateThemeWithTransition(
 	};
 	const skipAnimation = () => {
 		if (transitionId === activeTransitionId) {
-			root.removeAttribute('data-svelai-theme-transition');
+			root.removeAttribute('data-entasis-theme-transition');
 		}
 	};
 
@@ -122,7 +122,7 @@ export function updateThemeWithTransition(
 	void viewTransition.finished.finally(() => {
 		revealAnimation?.cancel();
 		if (transitionId === activeTransitionId) {
-			root.removeAttribute('data-svelai-theme-transition');
+			root.removeAttribute('data-entasis-theme-transition');
 		}
 	});
 }

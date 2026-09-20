@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Empty } from 'svelai/empty';
-	import { Stack } from 'svelai/stack';
-	import { Tabbar } from 'svelai/tabbar';
-	import { checkCircleIcon } from 'svelai/icons/checkCircle';
-	import { magnifyingGlassIcon } from 'svelai/icons/magnifyingGlass';
-	import { plusIcon } from 'svelai/icons/plus';
-	import { userIcon } from 'svelai/icons/user';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Empty } from 'entasis/empty';
+	import { Stack } from 'entasis/stack';
+	import { Tabbar } from 'entasis/tabbar';
+	import { checkCircleIcon } from 'entasis/icons/checkCircle';
+	import { magnifyingGlassIcon } from 'entasis/icons/magnifyingGlass';
+	import { plusIcon } from 'entasis/icons/plus';
+	import { userIcon } from 'entasis/icons/user';
 
 	const navigationItems = ['Home', 'Explore', 'Updates', 'Profile'];
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { FileTreeIcons } from '@pierre/trees';
-	import type { Density } from 'svelai/types';
+	import type { Density } from 'entasis/types';
 	import Button from '$lib/components/Button/Button.svelte';
 	import Tree from '$lib/components/Tree/Tree.svelte';
 	import { gitStatus, workspaceTreePaths } from '../tree-demo-data.js';

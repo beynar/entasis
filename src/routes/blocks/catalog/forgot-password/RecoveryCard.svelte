@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Form } from 'svelai/form';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Form } from 'entasis/form';
 
 	let submitted = $state(false);
 	let address = $state('');

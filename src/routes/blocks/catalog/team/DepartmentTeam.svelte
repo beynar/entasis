@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Avatar } from 'svelai/avatar';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
+	import { Stack } from 'entasis/stack';
+	import { Avatar } from 'entasis/avatar';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
 	const people = [
 		{ name: 'Maya Chen', role: 'Product designer', department: 'Design', city: 'Paris' },
 		{ name: 'Theo Park', role: 'Frontend engineer', department: 'Engineering', city: 'Copenhagen' },

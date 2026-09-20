@@ -216,7 +216,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setHeadingTheme } from 'svelai/heading';
+  import { setHeadingTheme } from 'entasis/heading';
   
   setHeadingTheme({
     root: {

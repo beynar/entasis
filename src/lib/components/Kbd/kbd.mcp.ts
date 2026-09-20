@@ -67,7 +67,7 @@ Key combo:
 ### With an Icon Snippet
 \`\`\`svelte
 <script>
-	import { commandIcon } from 'svelai/icons/command';
+	import { commandIcon } from 'entasis/icons/command';
 </script>
 
 {#snippet cmd()}
@@ -126,7 +126,7 @@ The theme object contains the following parts:
 ### Theme Type Definition
 
 \`\`\`typescript
-import type { KbdThemeProps } from 'svelai/kbd';
+import type { KbdThemeProps } from 'entasis/kbd';
 
 const customTheme: KbdThemeProps = {
 	root: {
@@ -177,7 +177,7 @@ const customTheme: KbdThemeProps = {
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-	import { setKbdTheme } from 'svelai/kbd';
+	import { setKbdTheme } from 'entasis/kbd';
 
 	setKbdTheme({
 		root: {

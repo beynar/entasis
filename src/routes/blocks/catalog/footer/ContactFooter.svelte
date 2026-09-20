@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Separator } from 'svelai/separator';
-	import { arrowUpRightIcon } from 'svelai/icons/arrowUpRight';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Separator } from 'entasis/separator';
+	import { arrowUpRightIcon } from 'entasis/icons/arrowUpRight';
 </script>
 
 <footer class="gap-xl bg-primary-muted p-lg md:p-xl flex flex-col">
@@ -30,6 +30,6 @@
 	<div class="gap-lg flex flex-wrap items-center justify-between">
 		<Heading as="h3" size="h4">Northstar®</Heading>
 		<p class="text-neutral/70 text-sm">Independent thinking. Shared direction.</p>
-		<p class="text-neutral/65 text-xs">An example brand, built with Svelai.</p>
+		<p class="text-neutral/65 text-xs">An example brand, built with Entasis.</p>
 	</div>
 </footer>

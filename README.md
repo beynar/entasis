@@ -1,23 +1,23 @@
-# svelai
+# entasis
 
 Svelte 5 component library for SvelteKit, styled through a Tailwind CSS v4 plugin. One theme declaration in your CSS generates the palette; components consume it through semantic utilities (`bg-primary`, `text-neutral-contrast`, `bg-surface-raised`) and can be restyled per subtree or per instance without forking them.
 
-- 130+ components, each on its own import path (`svelai/button`, `svelai/dialog`, ...)
+- 130+ components, each on its own import path (`entasis/button`, `entasis/dialog`, ...)
 - Light and dark palettes generated from a handful of seed colors
 - Runtime design tokens (spacing, radius, type scale) through the `<Theme>` component
-- 1500+ icons as Svelte snippets (`svelai/icons/<name>`)
+- 1500+ icons as Svelte snippets (`entasis/icons/<name>`)
 
 ## Install
 
 ```bash
-pnpm add svelai
+pnpm add entasis
 ```
 
 Peer dependencies: `svelte ^5`, `@sveltejs/kit ^2` and `tailwindcss ^4` (via `@tailwindcss/vite`). There is no `tailwind.config.js`; all configuration lives in your CSS. The library reads SvelteKit's `$app/environment` and, in `NetworkIndicator`, the `navigating` store, so it runs inside a SvelteKit app.
 
 ### Optional peers
 
-svelai installs 21 runtime dependencies. Four rendering libraries stay out of them, declared as optional peer dependencies so they never land in a bundle that does not use them. Install a row only if you import one of the components on it; every other component works with svelai alone.
+entasis installs 21 runtime dependencies. Four rendering libraries stay out of them, declared as optional peer dependencies so they never land in a bundle that does not use them. Install a row only if you import one of the components on it; every other component works with entasis alone.
 
 | Component                                                      | Install                                                                                                                                                                  |
 | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -25,7 +25,7 @@ svelai installs 21 runtime dependencies. Four rendering libraries stay out of th
 | `RichTextInput`, and the `AIComposer` / `AIChat` that embed it | `pnpm add lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils`                                   |
 | `Globe`                                                        | `pnpm add cobe`                                                                                                                                                          |
 
-A missing peer fails the build, not the browser — but Vite substitutes a stub module rather than reporting an unresolved import, so the message names the export before it names the package. Importing `Chart` without the row above fails with a wall of `[MISSING_EXPORT] "bandX" is not exported by "__vite-optional-peer-dep:@tanstack/charts:svelai"`. The package to install and `svelai` are both in that virtual module id.
+A missing peer fails the build, not the browser — but Vite substitutes a stub module rather than reporting an unresolved import, so the message names the export before it names the package. Importing `Chart` without the row above fails with a wall of `[MISSING_EXPORT] "bandX" is not exported by "__vite-optional-peer-dep:@tanstack/charts:entasis"`. The package to install and `entasis` are both in that virtual module id.
 
 Row highlighting (`@tanstack/highlight`) and row virtualization (`@tanstack/svelte-virtual`) stay runtime dependencies: `Markdown` renders `Code`, and `AIChat` / `AIConversation` render `AIThread`, so an optional peer there would make the library's most-used components fail to build out of the box — and `svelte-streamdown` already depends on `@tanstack/highlight`, so moving it would remove nothing from the install.
 
@@ -35,9 +35,9 @@ Replace the contents of `src/app.css`. The `@source` line lets Tailwind see the 
 
 ```css
 @import 'tailwindcss';
-@source '../node_modules/svelai/dist';
+@source '../node_modules/entasis/dist';
 
-@plugin 'svelai/tailwind-plugin/theme' {
+@plugin 'entasis/tailwind-plugin/theme' {
 	name: light;
 	default: true;
 	colorscheme: light;
@@ -51,7 +51,7 @@ Replace the contents of `src/app.css`. The `@source` line lets Tailwind see the 
 	info: #2563eb;
 }
 
-@plugin 'svelai/tailwind-plugin/theme' {
+@plugin 'entasis/tailwind-plugin/theme' {
 	name: dark;
 	colorscheme: dark;
 	surface: #09090b;
@@ -68,7 +68,7 @@ Replace the contents of `src/app.css`. The `@source` line lets Tailwind see the 
 }
 ```
 
-Each named theme is scoped to `html[data-theme="<name>"]` (and `.<name>`); the default theme also applies to bare `html`. If you manage colors yourself and only want the engine, use `@plugin 'svelai/tailwind-plugin';` on its own instead of a default theme (never both).
+Each named theme is scoped to `html[data-theme="<name>"]` (and `.<name>`); the default theme also applies to bare `html`. If you manage colors yourself and only want the engine, use `@plugin 'entasis/tailwind-plugin';` on its own instead of a default theme (never both).
 
 ## Layout setup
 
@@ -77,8 +77,8 @@ Wrap your app once in `<Theme>` and mount a single `<Toaster />`. `<Theme>` sets
 ```svelte nocheck
 <script lang="ts">
 	import '../app.css';
-	import { Theme } from 'svelai/theme';
-	import { Toaster } from 'svelai/toast';
+	import { Theme } from 'entasis/theme';
+	import { Toaster } from 'entasis/toast';
 
 	let { children } = $props();
 </script>
@@ -91,14 +91,14 @@ Wrap your app once in `<Theme>` and mount a single `<Toaster />`. `<Theme>` sets
 
 ## First components
 
-Every component lives on its own subpath; there is no root `svelai` export.
+Every component lives on its own subpath; there is no root `entasis` export.
 
 ```svelte
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Dialog } from 'svelai/dialog';
-	import { toast } from 'svelai/toast';
-	import { plusIcon } from 'svelai/icons/plus';
+	import { Button } from 'entasis/button';
+	import { Dialog } from 'entasis/dialog';
+	import { toast } from 'entasis/toast';
+	import { plusIcon } from 'entasis/icons/plus';
 
 	let open = $state(false);
 </script>
@@ -134,7 +134,7 @@ The same words mean the same thing on every component, and `node tooling/check-p
 
 ### Plugin tokens
 
-Options accepted by each `@plugin 'svelai/tailwind-plugin/theme'` block (the `ThemeOptions` type in `src/lib/tailwind/theme.ts`). These are read at build time and baked into the stylesheet:
+Options accepted by each `@plugin 'entasis/tailwind-plugin/theme'` block (the `ThemeOptions` type in `src/lib/tailwind/theme.ts`). These are read at build time and baked into the stylesheet:
 
 | Option                   | Type                                                                                     | Default              | Description                                                                   |
 | ------------------------ | ---------------------------------------------------------------------------------------- | -------------------- | ----------------------------------------------------------------------------- |
@@ -182,7 +182,7 @@ The same scales the engine bakes in, plus the state roles and the default compon
 
 ```svelte
 <script lang="ts">
-	import { Theme, type ThemeDesignTokenMap } from 'svelai/theme';
+	import { Theme, type ThemeDesignTokenMap } from 'entasis/theme';
 
 	let { children } = $props();
 
@@ -218,8 +218,8 @@ Switching themes at runtime: the `children` snippet receives the `ThemeState`.
 
 ```svelte
 <script lang="ts">
-	import { Theme } from 'svelai/theme';
-	import { Button } from 'svelai/button';
+	import { Theme } from 'entasis/theme';
+	import { Button } from 'entasis/button';
 
 	let { children: page } = $props();
 </script>
@@ -242,7 +242,7 @@ Set it once for a subtree with `set<Component>Theme` (it uses Svelte context, so
 
 ```svelte
 <script lang="ts">
-	import { setButtonTheme } from 'svelai/button';
+	import { setButtonTheme } from 'entasis/button';
 
 	let { children } = $props();
 
@@ -261,7 +261,7 @@ Or per instance through the `theme` prop:
 
 ```svelte
 <script lang="ts">
-	import { Button } from 'svelai/button';
+	import { Button } from 'entasis/button';
 </script>
 
 <Button theme={{ root: { base: 'uppercase' } }}>Uppercase</Button>
@@ -283,7 +283,7 @@ Motion is a token scale too: five duration steps (`instant`, `fast`, `normal`, `
 
 ```svelte
 <script lang="ts">
-	import { Theme } from 'svelai/theme';
+	import { Theme } from 'entasis/theme';
 
 	let { children } = $props();
 </script>
@@ -305,8 +305,8 @@ Icons are Phosphor-style snippets, one file per icon, exported in six weights: `
 
 ```svelte
 <script lang="ts">
-	import { arrowRightIcon, arrowRightIconBold } from 'svelai/icons/arrowRight';
-	import { Button } from 'svelai/button';
+	import { arrowRightIcon, arrowRightIconBold } from 'entasis/icons/arrowRight';
+	import { Button } from 'entasis/button';
 </script>
 
 <span class="text-primary">{@render arrowRightIcon({ size: 20 })}</span>
@@ -318,8 +318,24 @@ Snippet props: `size` (px number or CSS length, default `1lh`), `color` (a role 
 ## Docs and agent skills
 
 - `pnpm dev` runs the documentation site with a page per component under `/components/<name>`.
-- `.claude/skills/svelai/` (mirrored in `.agents/skills/svelai/`) holds the coding-agent skill: import conventions, per-component references, theming notes.
+- `.claude/skills/entasis/` (mirrored in `.agents/skills/entasis/`) holds the coding-agent skill: import conventions, per-component references, theming notes.
 - Each component folder ships a `*.mcp.ts` description used by the MCP integration.
+
+## Releasing
+
+A version leaves this repo one way: from a clean `master`, run
+
+```bash
+npm run release patch
+```
+
+(`minor`, `major` or an explicit `x.y.z` also work). The script runs the full `prepack` gate locally,
+moves the CHANGELOG's "Unreleased" section under the new version, bumps `package.json`, commits,
+tags `v<version>` and pushes. The tag triggers `.github/workflows/release.yml`, which re-runs
+type-checking, the unit and end-to-end suites and the gate on CI, then publishes to npm with
+provenance through trusted publishing, so no token is stored anywhere. Public contracts run on every
+push (`contracts.yml`); the docs app deploys to Cloudflare on every push to `master`
+(`deploy-docs.yml`, needs the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets).
 
 ## License
 

@@ -7,7 +7,7 @@ A vertical list whose items are reordered by drag and drop. Its default live pre
 
 \`\`\`svelte
 <script lang="ts">
-	import { SortableList } from 'svelai/sortable-list';
+	import { SortableList } from 'entasis/sortable-list';
 	let items = $state([
 		{ id: '1', label: 'Write the brief' },
 		{ id: '2', label: 'Design the mockups' },
@@ -84,7 +84,7 @@ Items need a stable, unique \`id\` property (primitive items are matched by valu
 
 \`\`\`svelte
 <script lang="ts">
-	import { dotsSixVerticalIcon } from 'svelai/icons/dotsSixVertical';
+	import { dotsSixVerticalIcon } from 'entasis/icons/dotsSixVertical';
 </script>
 
 <SortableList bind:items>

@@ -20,7 +20,7 @@ The Tabbar component is a flexible navigation component that displays a list of 
   - Array of tab items. Each item can be:
     - A simple string (e.g., "Home")
     - A TabItem object with: { value?, label, prefix?, suffix?, href?, disabled?, target?, rel? }
-  - Every tab resolves to a string value: its \`value\`, else its string label, else its index as a string (\`getTabValue(item, index)\` is exported from \`svelai/tabbar\`)
+  - Every tab resolves to a string value: its \`value\`, else its string label, else its index as a string (\`getTabValue(item, index)\` is exported from \`entasis/tabbar\`)
 
 - **value**: string (default: the first tab's value, bindable)
   - The value of the currently active tab (a string item is its own value)
@@ -136,9 +136,9 @@ The tabbar follows this DOM structure:
 ### Tabs with Icons
 \`\`\`svelte
 <script lang="ts">
-	import { houseIcon } from 'svelai/icons/house';
-	import { userIcon } from 'svelai/icons/user';
-	import { gearIcon } from 'svelai/icons/gear';
+	import { houseIcon } from 'entasis/icons/house';
+	import { userIcon } from 'entasis/icons/user';
+	import { gearIcon } from 'entasis/icons/gear';
 
 	let activeTab = $state('Home');
 
@@ -268,7 +268,7 @@ The tabbar follows this DOM structure:
 ### Complex Tabs with Badges
 \`\`\`svelte
 <script>
-	import { Chip } from 'svelai/chip';
+	import { Chip } from 'entasis/chip';
 	
 	let activeTab = $state('Inbox');
 </script>
@@ -451,7 +451,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setTabbarTheme } from 'svelai/tabbar';
+  import { setTabbarTheme } from 'entasis/tabbar';
   
   setTabbarTheme({
     root: {

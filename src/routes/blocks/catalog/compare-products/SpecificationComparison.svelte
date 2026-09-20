@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Button } from 'svelai/button';
-	import { Checkbox } from 'svelai/checkbox';
+	import { Heading } from 'entasis/heading';
+	import { Button } from 'entasis/button';
+	import { Checkbox } from 'entasis/checkbox';
 
 	const rows = [
 		['Height', '26 cm', '38 cm'],

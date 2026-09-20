@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Separator } from 'svelai/separator';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	import { checkIcon } from 'svelai/icons/check';
-	import { compassIcon } from 'svelai/icons/compass';
-	import { paletteIcon } from 'svelai/icons/palette';
-	import { puzzlePieceIcon } from 'svelai/icons/puzzlePiece';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Separator } from 'entasis/separator';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
+	import { checkIcon } from 'entasis/icons/check';
+	import { compassIcon } from 'entasis/icons/compass';
+	import { paletteIcon } from 'entasis/icons/palette';
+	import { puzzlePieceIcon } from 'entasis/icons/puzzlePiece';
 	const services = [
 		{
 			title: 'Product strategy',

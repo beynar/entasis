@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Avatar } from 'svelai/avatar';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Carousel } from 'svelai/carousel';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Separator } from 'svelai/separator';
+	import { Avatar } from 'entasis/avatar';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Carousel } from 'entasis/carousel';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Separator } from 'entasis/separator';
 	const people = [
 		{
 			name: 'Maya Chen',

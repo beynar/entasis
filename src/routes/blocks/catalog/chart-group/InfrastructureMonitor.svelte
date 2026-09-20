@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Grid } from 'svelai/grid';
-	import { Stack } from 'svelai/stack';
-	import { Alert } from 'svelai/alert';
-	import { Card } from 'svelai/card';
-	import { Chart } from 'svelai/chart';
-	import { Select } from 'svelai/select';
-	import { Stat } from 'svelai/stat';
+	import { Grid } from 'entasis/grid';
+	import { Stack } from 'entasis/stack';
+	import { Alert } from 'entasis/alert';
+	import { Card } from 'entasis/card';
+	import { Chart } from 'entasis/chart';
+	import { Select } from 'entasis/select';
+	import { Stat } from 'entasis/stat';
 
 	let region = $state<string | null>('Europe');
 	let samples = $derived(

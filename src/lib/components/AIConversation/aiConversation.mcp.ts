@@ -11,7 +11,7 @@ Scoped, transport-agnostic conversation state for AI surfaces. Descendant AIThre
     AIConversation,
     type AIConversationState,
     type AIConversationStatus
-  } from 'svelai/ai-conversation';
+  } from 'entasis/ai-conversation';
 </script>
 \`\`\`
 

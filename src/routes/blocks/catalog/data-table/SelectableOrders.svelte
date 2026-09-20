@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { DataTable } from 'svelai/data-table';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { DataTable } from 'entasis/data-table';
 
 	let orders = $state([
 		{ id: 'ORD-1048', customer: 'Maya Chen', amount: 128, status: 'Pending' },

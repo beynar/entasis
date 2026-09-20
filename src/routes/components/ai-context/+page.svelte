@@ -126,7 +126,7 @@
 		description="Change the token count to exercise default, warning, and danger states, then hover the trigger for the breakdown."
 		class="!min-h-[260px]"
 		code={`<script lang="ts">
-  import { AIContext } from 'svelai/ai-context';
+  import { AIContext } from 'entasis/ai-context';
 ${'</' + 'script>'}
 
 

@@ -181,7 +181,7 @@ The component renders as a fieldset with the following DOM structure:
 ### In a Form
 \`\`\`svelte
 <script>
-	import { Form } from 'svelai/form';
+	import { Form } from 'entasis/form';
 	
 	function handleSubmit(data) {
 		console.log('Selected interests:', data.interests);
@@ -256,7 +256,7 @@ The component renders as a fieldset with the following DOM structure:
 ### Complex Options with Rich Labels
 \`\`\`svelte
 <script lang="ts">
-	import { Chip } from 'svelai/chip';
+	import { Chip } from 'entasis/chip';
 
 	let plans = $state<string[]>([]);
 </script>
@@ -431,7 +431,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setCheckboxesInputTheme } from 'svelai/checkboxes-input';
+  import { setCheckboxesInputTheme } from 'entasis/checkboxes-input';
   
   setCheckboxesInputTheme({
     root: { base: '@container' },

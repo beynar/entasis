@@ -252,6 +252,62 @@ describe('EventCalendar DOM structure', () => {
 		expect(headers[2]).toHaveAttribute('data-unassigned');
 	});
 
+	test('resource projections keep one roving tab stop and navigate by column', async () => {
+		const sharedTimed: EventCalendarItem = {
+			id: 'shared-timed',
+			title: 'Shared timed',
+			start: new Date('2026-07-15T09:00:00.000Z'),
+			end: new Date('2026-07-15T10:00:00.000Z'),
+			resourceIds: ['r1', 'r2']
+		};
+		const sharedAllDay: EventCalendarItem = {
+			id: 'shared-all-day',
+			title: 'Shared all day',
+			allDay: true,
+			start: '2026-07-15',
+			end: '2026-07-16',
+			resourceIds: ['r1', 'r2']
+		};
+		const { container } = renderCalendar({
+			view: 'resource',
+			resources,
+			items: [sharedTimed, sharedAllDay],
+			timeGrid: { startHour: 8, endHour: 12, scrollToHour: 8 }
+		});
+		await flush();
+
+		const projections = parts('item', container).filter((node) =>
+			['shared-timed', 'shared-all-day'].includes(node.dataset.occurrenceKey ?? '')
+		);
+		const navigationKeys = projections
+			.map((node) => node.parentElement?.dataset.eventCalendarNavigationKey)
+			.filter((key): key is string => key !== undefined);
+		expect(navigationKeys).toHaveLength(4);
+		expect(new Set(navigationKeys).size).toBe(navigationKeys.length);
+
+		const timedControls = ['r1', 'r2'].map((resourceId) => {
+			const column = container.querySelector<HTMLElement>(
+				`[data-event-calendar-part="day-column"][data-resource-id="${resourceId}"]`
+			);
+			const control = column?.querySelector<HTMLElement>(
+				'[data-event-calendar-part="item"][data-occurrence-key="shared-timed"] button'
+			);
+			if (!control) throw new Error(`missing timed projection for ${resourceId}`);
+			return control;
+		});
+		timedControls[0].focus();
+		await flush();
+		expect(
+			projections
+				.map((node) => node.querySelector<HTMLElement>('button'))
+				.filter((node) => node?.tabIndex === 0)
+		).toHaveLength(1);
+
+		await fireEvent.keyDown(timedControls[0], { key: 'ArrowRight' });
+		await flush();
+		expect(document.activeElement).toBe(timedControls[1]);
+	});
+
 	test('agenda view renders a list grouped by day', () => {
 		const { container } = renderCalendar({
 			view: 'agenda',
@@ -776,6 +832,34 @@ describe('announcements', () => {
 		await flush();
 		expect(announcements.seen).toContain('Changes cancelled for Planning');
 		announcements.stop();
+	});
+
+	test('stale assisted cancellation stops intercepting arrow input and keeps focus', async () => {
+		const view = renderCalendar({
+			view: 'week',
+			items: [planning],
+			timeGrid: { startHour: 8, endHour: 12, scrollToHour: 8 }
+		});
+		const control = occurrenceControl('planning', view.container);
+		control.focus();
+		await fireEvent.keyDown(control, { key: 'm' });
+		await flush();
+		expect(part('root', view.container)).toHaveAttribute('data-interaction-kind', 'move');
+
+		await view.rerender({ items: [{ ...planning }] });
+		await flush();
+		const currentControl = occurrenceControl('planning', view.container);
+		expect(document.activeElement).toBe(currentControl);
+		const arrow = new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'ArrowRight'
+		});
+		currentControl.dispatchEvent(arrow);
+		await flush();
+
+		expect(part('root', view.container)).not.toHaveAttribute('data-interaction-kind');
+		expect(document.activeElement).not.toBe(currentControl);
 	});
 });
 

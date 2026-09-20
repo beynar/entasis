@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Card } from 'svelai/card';
-	import { Form } from 'svelai/form';
-	import { Heading } from 'svelai/heading';
-	import { envelopeSimpleIcon } from 'svelai/icons/envelopeSimple';
+	import { Card } from 'entasis/card';
+	import { Form } from 'entasis/form';
+	import { Heading } from 'entasis/heading';
+	import { envelopeSimpleIcon } from 'entasis/icons/envelopeSimple';
 	let email = $state('');
 </script>
 

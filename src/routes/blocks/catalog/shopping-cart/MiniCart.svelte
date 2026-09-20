@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Popover } from 'svelai/popover';
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import { Dialog } from 'svelai/dialog';
-	import { Empty } from 'svelai/empty';
+	import { Heading } from 'entasis/heading';
+	import { Popover } from 'entasis/popover';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import { Dialog } from 'entasis/dialog';
+	import { Empty } from 'entasis/empty';
 	const products = [
 		{
 			id: 'arc',

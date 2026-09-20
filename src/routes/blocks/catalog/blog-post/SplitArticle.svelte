@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Avatar } from 'svelai/avatar';
-	import { Separator } from 'svelai/separator';
+	import { Heading } from 'entasis/heading';
+	import { Avatar } from 'entasis/avatar';
+	import { Separator } from 'entasis/separator';
 	const sections = [
 		{
 			title: 'Start with less',

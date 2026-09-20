@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Separator } from 'svelai/separator';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	import { checkCircleIcon } from 'svelai/icons/checkCircle';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Separator } from 'entasis/separator';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
+	import { checkCircleIcon } from 'entasis/icons/checkCircle';
 </script>
 
 <section class="p-lg md:p-xl">

@@ -2,12 +2,12 @@ export const dataTableDescription = `
 # DataTable
 
 DataTable is the typed, interactive, virtualized table for application data. Its public API is
-Svelai-native; TanStack Table Core remains private, but it must be installed as an optional peer
+Entasis-native; TanStack Table Core remains private, but it must be installed as an optional peer
 dependency. Use Table for static tabular content.
 
 ## Requires
 
-DataTable builds its row model with TanStack Table Core, which ships with svelai.
+DataTable builds its row model with TanStack Table Core, which ships with entasis.
 
 ## Basic usage
 
@@ -16,7 +16,7 @@ DataTable builds its row model with TanStack Table Core, which ships with svelai
   import {
     createDataTableColumnHelper,
     DataTable
-  } from 'svelai/data-table';
+  } from 'entasis/data-table';
 
   type Person = { id: string; name: string; role: string; active: boolean };
   const column = createDataTableColumnHelper<Person>();
@@ -76,7 +76,7 @@ instead to drop the table into normal document flow at its natural height:
 - **loading** and **error** drive table states and the NetworkIndicator.
 - **api**: bindable narrow external-control instance handle (\`DataTableApi<TData>\`).
 - **cell** and **header**: table-level renderer snippets with \`renderDefault\` delegates.
-- **class**, **theme**, **ref**, and Svelte attachments follow Svelai conventions.
+- **class**, **theme**, **ref**, and Svelte attachments follow Entasis conventions.
 
 ## Column definitions
 

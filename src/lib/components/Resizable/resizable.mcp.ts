@@ -2,7 +2,7 @@ export const resizableDescription = `
 # Resizable
 
 Resizable creates adjustable split-pane layouts from a typed panel configuration. It follows the
-Svelai configuration-over-markup pattern while matching the important behavior from shadcn/ui's
+Entasis configuration-over-markup pattern while matching the important behavior from shadcn/ui's
 Resizable: accessible separators, keyboard resizing, horizontal and vertical groups, visible handle
 grips, and RTL-aware horizontal resizing.
 
@@ -10,7 +10,7 @@ grips, and RTL-aware horizontal resizing.
 
 \`\`\`svelte
 <script lang="ts">
-	import { Resizable } from 'svelai/resizable';
+	import { Resizable } from 'entasis/resizable';
 </script>
 \`\`\`
 
@@ -102,6 +102,6 @@ layouts are restored only when the current panel id order matches the stored pan
 ## Notes
 
 Unlike shadcn/ui's React implementation, this component does not expose compound
-\`ResizablePanelGroup\`, \`ResizablePanel\`, and \`ResizableHandle\` components. Svelai keeps the
+\`ResizablePanelGroup\`, \`ResizablePanel\`, and \`ResizableHandle\` components. Entasis keeps the
 configuration API from the svelte-pro source while adding bindable sizes and live layout callbacks.
 `;

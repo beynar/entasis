@@ -83,7 +83,7 @@
 		'Explicit IANA zones, working calendars, constraints, and dependency DAG validation',
 		'Critical-path, total/free slack, and resource workload analysis',
 		'Bindable tasks, dependencies, assignments, expansion, selection, and zoom',
-		'Svelai theme and snippet composition inside owned semantics',
+		'Entasis theme and snippet composition inside owned semantics',
 		'SSR-safe split shell with bounded row and time-axis windowing'
 	]}
 >
@@ -147,7 +147,7 @@
 
 		<ComponentCard
 			title="Owned behavior, custom content, application dialog"
-			description="Snippets replace presentation inside GanttChart-owned semantic wrappers. Double-click a task to open a Svelai Dialog with a Form input; the application validates and publishes a fresh controlled task array instead of delegating a hidden editor to the chart."
+			description="Snippets replace presentation inside GanttChart-owned semantic wrappers. Double-click a task to open a Entasis Dialog with a Form input; the application validates and publishes a fresh controlled task array instead of delegating a hidden editor to the chart."
 			code={customizationCode}
 			class="min-h-0 items-stretch p-3 md:p-5"
 		>

@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { arrowLeftIcon } from 'svelai/icons/arrowLeft';
+	import { Button } from 'entasis/button';
+	import { arrowLeftIcon } from 'entasis/icons/arrowLeft';
 	import BlockPreview from '../../BlockPreview.svelte';
 	import type { PageData } from './$types.js';
 	let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
-	<title>{data.block.title} · {data.category.title} blocks · svelai</title>
+	<title>{data.block.title} · {data.category.title} blocks · entasis</title>
 	<meta name="description" content={data.block.description} />
 </svelte:head>
 

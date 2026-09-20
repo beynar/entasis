@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Marquee } from 'svelai/marquee';
+	import { Heading } from 'entasis/heading';
+	import { Marquee } from 'entasis/marquee';
 </script>
 
 <section class="gap-xl bg-surface-recessed p-xl flex flex-col overflow-hidden">

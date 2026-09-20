@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Separator } from 'svelai/separator';
-	import { checkIcon } from 'svelai/icons/check';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Separator } from 'entasis/separator';
+	import { checkIcon } from 'entasis/icons/check';
 	const plans = [
 		{
 			name: 'Free',

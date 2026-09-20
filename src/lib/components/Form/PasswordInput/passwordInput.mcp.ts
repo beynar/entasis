@@ -92,7 +92,7 @@ Extends all TextInput component props:
 ### With Prefix Icon
 \`\`\`svelte
 <script lang="ts">
-	import { lockIcon } from 'svelai/icons/lock';
+	import { lockIcon } from 'entasis/icons/lock';
 
 	let password = $state('');
 </script>
@@ -382,7 +382,7 @@ current role, so it never hard-pins a color.
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setPasswordInputTheme } from 'svelai/password-input';
+  import { setPasswordInputTheme } from 'entasis/password-input';
   
   setPasswordInputTheme({
     inputContainer: {

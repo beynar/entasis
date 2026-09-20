@@ -2,7 +2,7 @@
 
 ## Goal
 
-Bring `DataTable` from a strong feature-complete beta to a release-ready Svelai primitive that:
+Bring `DataTable` from a strong feature-complete beta to a release-ready Entasis primitive that:
 
 - preserves data and interaction correctness across editing, filtering, pagination, grouping, and virtualization;
 - provides coherent table and ARIA-grid accessibility;
@@ -16,7 +16,7 @@ The component fits the project structurally and visually, but it is not ready to
 
 What is already strong:
 
-- Configuration-first typed columns and named snippets follow Svelai conventions.
+- Configuration-first typed columns and named snippets follow Entasis conventions.
 - TanStack Table remains private at the package boundary.
 - Stable row identity is required through `getRowId`.
 - Internal state transitions are immutable.
@@ -38,7 +38,7 @@ What prevents release:
 The current implementation was reviewed through four independent adversarial passes:
 
 1. Public API ergonomics and ease of adoption.
-2. Architecture and fit with Svelai conventions.
+2. Architecture and fit with Entasis conventions.
 3. Correctness, accessibility, virtualization, and editing behavior.
 4. External composition, especially search and pagination rendered around DataTable.
 

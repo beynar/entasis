@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Switch } from 'svelai/switch';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Switch } from 'entasis/switch';
 	let expanded = $state(false);
 	let analytics = $state(false);
 	let personalization = $state(false);

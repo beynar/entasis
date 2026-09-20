@@ -102,7 +102,7 @@
 	const formatSpeed = (value: number) => (value === 0 ? 'instant' : formatMultiplier(value));
 
 	const themeMotionSnippet = $derived(`<script lang="ts">
-	import { Theme } from 'svelai/theme';
+	import { Theme } from 'entasis/theme';
 
 	let { children } = $props();
 </scr${'ipt'}>
@@ -116,8 +116,8 @@
 	{@render children()}
 </Theme>`);
 
-	const motionSlotSnippet = `import { cva, type InferComponentTheme } from 'svelai/cva';
-import { motion, useComponentMotion } from 'svelai/motion';
+	const motionSlotSnippet = `import { cva, type InferComponentTheme } from 'entasis/cva';
+import { motion, useComponentMotion } from 'entasis/motion';
 
 export const defaultDialogMotion = motion({
 	base: {
@@ -140,8 +140,8 @@ export const dialogTheme = { motion: defaultDialogMotion, root: defaultDialog };
 export const useDialogMotion = () => useComponentMotion('dialog', defaultDialogMotion);`;
 
 	const ladderSnippet = $derived(`<script lang="ts">
-	import { Theme } from 'svelai/theme';
-	import { Dialog, setDialogTheme } from 'svelai/dialog';
+	import { Theme } from 'entasis/theme';
+	import { Dialog, setDialogTheme } from 'entasis/dialog';
 
 	// 2. every dialog in the app
 	// 3. every dialog under this component
@@ -157,7 +157,7 @@ export const useDialogMotion = () => useComponentMotion('dialog', defaultDialogM
 </Theme>`);
 
 	const reducedMotionSnippet = `<script lang="ts">
-	import { Theme } from 'svelai/theme';
+	import { Theme } from 'entasis/theme';
 
 	let { children } = $props();
 </scr${'ipt'}>

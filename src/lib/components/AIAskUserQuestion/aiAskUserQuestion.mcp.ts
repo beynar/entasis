@@ -13,7 +13,7 @@ AIAskUserQuestion renders a validated stepped answer flow for AI tools that need
     type AIAskUserQuestionQuestion,
     type AIAskUserQuestionSubmitPayload,
     type AIAskUserQuestionValues
-  } from 'svelai/ai-ask-user-question';
+  } from 'entasis/ai-ask-user-question';
 </script>
 \`\`\`
 

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Alert } from 'svelai/alert';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Form, type FormInputs } from 'svelai/form';
-	import { Select } from 'svelai/select';
+	import { Stack } from 'entasis/stack';
+	import { Alert } from 'entasis/alert';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Form, type FormInputs } from 'entasis/form';
+	import { Select } from 'entasis/select';
 
 	let message = $state('');
 	let recipients = $state<string[]>(['sam@example.com']);

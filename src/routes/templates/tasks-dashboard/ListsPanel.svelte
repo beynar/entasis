@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Card } from 'svelai/card';
-	import { Carousel } from 'svelai/carousel';
-	import { Chip } from 'svelai/chip';
-	import { Meter } from 'svelai/meter';
-	import { Stack } from 'svelai/stack';
+	import { Card } from 'entasis/card';
+	import { Carousel } from 'entasis/carousel';
+	import { Chip } from 'entasis/chip';
+	import { Meter } from 'entasis/meter';
+	import { Stack } from 'entasis/stack';
 	import { elevationVariables } from '$lib/tailwind/scales.js';
 	import { progressColor, taskLists } from './data.js';
 

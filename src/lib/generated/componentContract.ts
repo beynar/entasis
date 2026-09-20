@@ -2,7 +2,7 @@
 export const componentInventory = [
 	{
 		id: 'package-json',
-		subpath: 'svelai/package.json',
+		subpath: 'entasis/package.json',
 		sourceIndex: 'package.json',
 		exportedSymbols: [],
 		docs: [],
@@ -12,7 +12,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ai-conversation',
-		subpath: 'svelai/ai-conversation',
+		subpath: 'entasis/ai-conversation',
 		sourceIndex: 'src/lib/components/AIConversation/index.ts',
 		exportedSymbols: [
 			'AIConversation',
@@ -66,7 +66,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ai-ask-user-question',
-		subpath: 'svelai/ai-ask-user-question',
+		subpath: 'entasis/ai-ask-user-question',
 		sourceIndex: 'src/lib/components/AIAskUserQuestion/index.ts',
 		exportedSymbols: [
 			'AIAskAnswer',
@@ -130,7 +130,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ai-chat',
-		subpath: 'svelai/ai-chat',
+		subpath: 'entasis/ai-chat',
 		sourceIndex: 'src/lib/components/AIChat/index.ts',
 		exportedSymbols: [
 			'AIChat',
@@ -162,7 +162,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ai-context',
-		subpath: 'svelai/ai-context',
+		subpath: 'entasis/ai-context',
 		sourceIndex: 'src/lib/components/AIContext/index.ts',
 		exportedSymbols: [
 			'AIContext',
@@ -191,7 +191,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ai-thread',
-		subpath: 'svelai/ai-thread',
+		subpath: 'entasis/ai-thread',
 		sourceIndex: 'src/lib/components/AIThread/index.ts',
 		exportedSymbols: [
 			'AIFileSource',
@@ -255,7 +255,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ai-thread-toc',
-		subpath: 'svelai/ai-thread-toc',
+		subpath: 'entasis/ai-thread-toc',
 		sourceIndex: 'src/lib/components/AIThreadToc/index.ts',
 		exportedSymbols: [
 			'AIFileSource',
@@ -290,7 +290,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ai-message',
-		subpath: 'svelai/ai-message',
+		subpath: 'entasis/ai-message',
 		sourceIndex: 'src/lib/components/AIMessage/index.ts',
 		exportedSymbols: [
 			'AIMessage',
@@ -325,7 +325,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ai-message-actions',
-		subpath: 'svelai/ai-message-actions',
+		subpath: 'entasis/ai-message-actions',
 		sourceIndex: 'src/lib/components/AIMessageActions/index.ts',
 		exportedSymbols: [
 			'AIMessageActionHandler',
@@ -354,7 +354,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ai-marker',
-		subpath: 'svelai/ai-marker',
+		subpath: 'entasis/ai-marker',
 		sourceIndex: 'src/lib/components/AIMarker/index.ts',
 		exportedSymbols: [
 			'AIMarker',
@@ -380,7 +380,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ai-model-selector',
-		subpath: 'svelai/ai-model-selector',
+		subpath: 'entasis/ai-model-selector',
 		sourceIndex: 'src/lib/components/AIModelSelector/index.ts',
 		exportedSymbols: [
 			'AIModelSelector',
@@ -411,7 +411,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ai-composer',
-		subpath: 'svelai/ai-composer',
+		subpath: 'entasis/ai-composer',
 		sourceIndex: 'src/lib/components/AIComposer/index.ts',
 		exportedSymbols: [
 			'AIComposer',
@@ -466,7 +466,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ai-reasoning',
-		subpath: 'svelai/ai-reasoning',
+		subpath: 'entasis/ai-reasoning',
 		sourceIndex: 'src/lib/components/AIReasoning/index.ts',
 		exportedSymbols: [
 			'AIReasoning',
@@ -493,7 +493,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ai-suggestion',
-		subpath: 'svelai/ai-suggestion',
+		subpath: 'entasis/ai-suggestion',
 		sourceIndex: 'src/lib/components/AISuggestion/index.ts',
 		exportedSymbols: [
 			'AISuggestion',
@@ -521,7 +521,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ai-tool',
-		subpath: 'svelai/ai-tool',
+		subpath: 'entasis/ai-tool',
 		sourceIndex: 'src/lib/components/AITool/index.ts',
 		exportedSymbols: [
 			'AITool',
@@ -553,7 +553,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ai-file-preview',
-		subpath: 'svelai/ai-file-preview',
+		subpath: 'entasis/ai-file-preview',
 		sourceIndex: 'src/lib/components/AIFilePreview/index.ts',
 		exportedSymbols: [
 			'AIFilePreview',
@@ -572,7 +572,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'aspect-ratio',
-		subpath: 'svelai/aspect-ratio',
+		subpath: 'entasis/aspect-ratio',
 		sourceIndex: 'src/lib/components/AspectRatio/index.ts',
 		exportedSymbols: [
 			'AspectRatio',
@@ -598,7 +598,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'card',
-		subpath: 'svelai/card',
+		subpath: 'entasis/card',
 		sourceIndex: 'src/lib/components/Card/index.ts',
 		exportedSymbols: [
 			'Card',
@@ -625,7 +625,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'grid',
-		subpath: 'svelai/grid',
+		subpath: 'entasis/grid',
 		sourceIndex: 'src/lib/components/Grid/index.ts',
 		exportedSymbols: [
 			'Grid',
@@ -669,7 +669,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'heading',
-		subpath: 'svelai/heading',
+		subpath: 'entasis/heading',
 		sourceIndex: 'src/lib/components/Heading/index.ts',
 		exportedSymbols: [
 			'Heading',
@@ -694,7 +694,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'resizable',
-		subpath: 'svelai/resizable',
+		subpath: 'entasis/resizable',
 		sourceIndex: 'src/lib/components/Resizable/index.ts',
 		exportedSymbols: [
 			'Resizable',
@@ -733,7 +733,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'scroll-area',
-		subpath: 'svelai/scroll-area',
+		subpath: 'entasis/scroll-area',
 		sourceIndex: 'src/lib/components/ScrollArea/index.ts',
 		exportedSymbols: [
 			'ScrollArea',
@@ -758,7 +758,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'separator',
-		subpath: 'svelai/separator',
+		subpath: 'entasis/separator',
 		sourceIndex: 'src/lib/components/Separator/index.ts',
 		exportedSymbols: [
 			'Separator',
@@ -783,7 +783,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'stack',
-		subpath: 'svelai/stack',
+		subpath: 'entasis/stack',
 		sourceIndex: 'src/lib/components/Stack/index.ts',
 		exportedSymbols: [
 			'LayoutSpacing',
@@ -816,7 +816,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'app-shell',
-		subpath: 'svelai/app-shell',
+		subpath: 'entasis/app-shell',
 		sourceIndex: 'src/lib/components/AppShell/index.ts',
 		exportedSymbols: [
 			'AppShell',
@@ -849,7 +849,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'page-shell',
-		subpath: 'svelai/page-shell',
+		subpath: 'entasis/page-shell',
 		sourceIndex: 'src/lib/components/PageShell/index.ts',
 		exportedSymbols: [
 			'PageShell',
@@ -893,7 +893,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'sidebar',
-		subpath: 'svelai/sidebar',
+		subpath: 'entasis/sidebar',
 		sourceIndex: 'src/lib/components/Sidebar/index.ts',
 		exportedSymbols: [
 			'Sidebar',
@@ -952,7 +952,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'button',
-		subpath: 'svelai/button',
+		subpath: 'entasis/button',
 		sourceIndex: 'src/lib/components/Button/index.ts',
 		exportedSymbols: [
 			'Button',
@@ -979,7 +979,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'button-group',
-		subpath: 'svelai/button-group',
+		subpath: 'entasis/button-group',
 		sourceIndex: 'src/lib/components/ButtonGroup/index.ts',
 		exportedSymbols: [
 			'ButtonGroup',
@@ -1004,7 +1004,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'segmented-control',
-		subpath: 'svelai/segmented-control',
+		subpath: 'entasis/segmented-control',
 		sourceIndex: 'src/lib/components/SegmentedControl/index.ts',
 		exportedSymbols: [
 			'SegmentedControl',
@@ -1031,7 +1031,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'toggle-button',
-		subpath: 'svelai/toggle-button',
+		subpath: 'entasis/toggle-button',
 		sourceIndex: 'src/lib/components/ToggleButton/index.ts',
 		exportedSymbols: [
 			'ToggleButton',
@@ -1057,7 +1057,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'toggle-button-group',
-		subpath: 'svelai/toggle-button-group',
+		subpath: 'entasis/toggle-button-group',
 		sourceIndex: 'src/lib/components/ToggleButtonGroup/index.ts',
 		exportedSymbols: [
 			'ToggleButtonGroup',
@@ -1086,7 +1086,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'toggle-menu',
-		subpath: 'svelai/toggle-menu',
+		subpath: 'entasis/toggle-menu',
 		sourceIndex: 'src/lib/components/ToggleMenu/index.ts',
 		exportedSymbols: [
 			'ToggleMenu',
@@ -1122,7 +1122,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'selection-menu',
-		subpath: 'svelai/selection-menu',
+		subpath: 'entasis/selection-menu',
 		sourceIndex: 'src/lib/components/SelectionMenu/index.ts',
 		exportedSymbols: [
 			'SelectionMenu',
@@ -1150,7 +1150,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'ask',
-		subpath: 'svelai/ask',
+		subpath: 'entasis/ask',
 		sourceIndex: 'src/lib/components/Form/Ask/index.ts',
 		exportedSymbols: [
 			'Ask',
@@ -1168,7 +1168,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'field',
-		subpath: 'svelai/field',
+		subpath: 'entasis/field',
 		sourceIndex: 'src/lib/components/Form/Field/index.ts',
 		exportedSymbols: [
 			'BooleanInputType',
@@ -1218,7 +1218,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'calendar',
-		subpath: 'svelai/calendar',
+		subpath: 'entasis/calendar',
 		sourceIndex: 'src/lib/components/Form/Calendar/index.ts',
 		exportedSymbols: [
 			'BaseCalendarProps',
@@ -1250,7 +1250,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'checkbox',
-		subpath: 'svelai/checkbox',
+		subpath: 'entasis/checkbox',
 		sourceIndex: 'src/lib/components/Form/Checkbox/index.ts',
 		exportedSymbols: [
 			'Checkbox',
@@ -1275,7 +1275,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'checkboxes-input',
-		subpath: 'svelai/checkboxes-input',
+		subpath: 'entasis/checkboxes-input',
 		sourceIndex: 'src/lib/components/Form/CheckboxesInput/index.ts',
 		exportedSymbols: [
 			'CheckboxOption',
@@ -1301,7 +1301,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'color-input',
-		subpath: 'svelai/color-input',
+		subpath: 'entasis/color-input',
 		sourceIndex: 'src/lib/components/Form/ColorInput/index.ts',
 		exportedSymbols: [
 			'ColorFormat',
@@ -1327,7 +1327,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'color-picker',
-		subpath: 'svelai/color-picker',
+		subpath: 'entasis/color-picker',
 		sourceIndex: 'src/lib/components/Form/ColorPicker/index.ts',
 		exportedSymbols: [
 			'ColorFormat',
@@ -1355,7 +1355,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'combobox',
-		subpath: 'svelai/combobox',
+		subpath: 'entasis/combobox',
 		sourceIndex: 'src/lib/components/Form/Combobox/index.ts',
 		exportedSymbols: [
 			'Combobox',
@@ -1382,7 +1382,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'date-input',
-		subpath: 'svelai/date-input',
+		subpath: 'entasis/date-input',
 		sourceIndex: 'src/lib/components/Form/DateInput/index.ts',
 		exportedSymbols: [
 			'DateFormat',
@@ -1408,7 +1408,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'date-selector',
-		subpath: 'svelai/date-selector',
+		subpath: 'entasis/date-selector',
 		sourceIndex: 'src/lib/components/Form/DateSelector/index.ts',
 		exportedSymbols: [
 			'DateSelector',
@@ -1439,7 +1439,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'file-input',
-		subpath: 'svelai/file-input',
+		subpath: 'entasis/file-input',
 		sourceIndex: 'src/lib/components/Form/File/index.ts',
 		exportedSymbols: [
 			'FileInput',
@@ -1467,7 +1467,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'form',
-		subpath: 'svelai/form',
+		subpath: 'entasis/form',
 		sourceIndex: 'src/lib/components/Form/Form/index.ts',
 		exportedSymbols: [
 			'Ask',
@@ -1524,7 +1524,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'key-value-input',
-		subpath: 'svelai/key-value-input',
+		subpath: 'entasis/key-value-input',
 		sourceIndex: 'src/lib/components/Form/KeyValueInput/index.ts',
 		exportedSymbols: [
 			'KeyValueInput',
@@ -1549,7 +1549,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'multi-step-form',
-		subpath: 'svelai/multi-step-form',
+		subpath: 'entasis/multi-step-form',
 		sourceIndex: 'src/lib/components/Form/MultiStepForm/index.ts',
 		exportedSymbols: [
 			'FormStep',
@@ -1577,7 +1577,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'number-input',
-		subpath: 'svelai/number-input',
+		subpath: 'entasis/number-input',
 		sourceIndex: 'src/lib/components/Form/NumberInput/index.ts',
 		exportedSymbols: [
 			'NumberInput',
@@ -1602,7 +1602,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'password-input',
-		subpath: 'svelai/password-input',
+		subpath: 'entasis/password-input',
 		sourceIndex: 'src/lib/components/Form/PasswordInput/index.ts',
 		exportedSymbols: [
 			'PasswordInput',
@@ -1627,7 +1627,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'phone-input',
-		subpath: 'svelai/phone-input',
+		subpath: 'entasis/phone-input',
 		sourceIndex: 'src/lib/components/Form/PhoneInput/index.ts',
 		exportedSymbols: [
 			'PhoneInput',
@@ -1652,7 +1652,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'pin-input',
-		subpath: 'svelai/pin-input',
+		subpath: 'entasis/pin-input',
 		sourceIndex: 'src/lib/components/Form/PinInput/index.ts',
 		exportedSymbols: [
 			'PIN_INPUT_ALPHANUMERIC_PATTERN',
@@ -1682,7 +1682,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'radio-input',
-		subpath: 'svelai/radio-input',
+		subpath: 'entasis/radio-input',
 		sourceIndex: 'src/lib/components/Form/RadioInput/index.ts',
 		exportedSymbols: [
 			'RadioInput',
@@ -1708,7 +1708,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'rating-input',
-		subpath: 'svelai/rating-input',
+		subpath: 'entasis/rating-input',
 		sourceIndex: 'src/lib/components/Form/RatingInput/index.ts',
 		exportedSymbols: [
 			'RatingInput',
@@ -1733,7 +1733,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'rich-text-input',
-		subpath: 'svelai/rich-text-input',
+		subpath: 'entasis/rich-text-input',
 		sourceIndex: 'src/lib/components/RichTextInput/index.ts',
 		exportedSymbols: [
 			'RichTextInput',
@@ -1775,7 +1775,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'select',
-		subpath: 'svelai/select',
+		subpath: 'entasis/select',
 		sourceIndex: 'src/lib/components/Form/Select/index.ts',
 		exportedSymbols: [
 			'Select',
@@ -1805,7 +1805,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'slider',
-		subpath: 'svelai/slider',
+		subpath: 'entasis/slider',
 		sourceIndex: 'src/lib/components/Form/Slider/index.ts',
 		exportedSymbols: [
 			'Slider',
@@ -1841,7 +1841,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'switch',
-		subpath: 'svelai/switch',
+		subpath: 'entasis/switch',
 		sourceIndex: 'src/lib/components/Form/Switch/index.ts',
 		exportedSymbols: [
 			'Switch',
@@ -1866,7 +1866,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'tag-group',
-		subpath: 'svelai/tag-group',
+		subpath: 'entasis/tag-group',
 		sourceIndex: 'src/lib/components/Form/TagGroup/index.ts',
 		exportedSymbols: [
 			'TagGroup',
@@ -1893,7 +1893,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'tags-input',
-		subpath: 'svelai/tags-input',
+		subpath: 'entasis/tags-input',
 		sourceIndex: 'src/lib/components/Form/TagsInput/index.ts',
 		exportedSymbols: [
 			'TagsInput',
@@ -1918,7 +1918,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'text-input',
-		subpath: 'svelai/text-input',
+		subpath: 'entasis/text-input',
 		sourceIndex: 'src/lib/components/Form/TextInput/index.ts',
 		exportedSymbols: [
 			'TextInput',
@@ -1944,7 +1944,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'text-area',
-		subpath: 'svelai/text-area',
+		subpath: 'entasis/text-area',
 		sourceIndex: 'src/lib/components/Form/TextArea/index.ts',
 		exportedSymbols: [
 			'TextArea',
@@ -1970,7 +1970,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'time-input',
-		subpath: 'svelai/time-input',
+		subpath: 'entasis/time-input',
 		sourceIndex: 'src/lib/components/Form/TimeInput/index.ts',
 		exportedSymbols: [
 			'TimeInput',
@@ -1995,7 +1995,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'voice-input',
-		subpath: 'svelai/voice-input',
+		subpath: 'entasis/voice-input',
 		sourceIndex: 'src/lib/components/Form/VoiceInput/index.ts',
 		exportedSymbols: [
 			'VoiceInput',
@@ -2023,7 +2023,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'avatar',
-		subpath: 'svelai/avatar',
+		subpath: 'entasis/avatar',
 		sourceIndex: 'src/lib/components/Avatar/index.ts',
 		exportedSymbols: [
 			'Avatar',
@@ -2062,7 +2062,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'chart',
-		subpath: 'svelai/chart',
+		subpath: 'entasis/chart',
 		sourceIndex: 'src/lib/components/Chart/index.ts',
 		exportedSymbols: [
 			'Chart',
@@ -2176,7 +2176,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'chip',
-		subpath: 'svelai/chip',
+		subpath: 'entasis/chip',
 		sourceIndex: 'src/lib/components/Chip/index.ts',
 		exportedSymbols: [
 			'Chip',
@@ -2201,7 +2201,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'event-calendar',
-		subpath: 'svelai/event-calendar',
+		subpath: 'entasis/event-calendar',
 		sourceIndex: 'src/lib/components/EventCalendar/index.ts',
 		exportedSymbols: [
 			'EventCalendar',
@@ -2288,7 +2288,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'gantt-chart',
-		subpath: 'svelai/gantt-chart',
+		subpath: 'entasis/gantt-chart',
 		sourceIndex: 'src/lib/components/GanttChart/index.ts',
 		exportedSymbols: [
 			'GanttAssignment',
@@ -2411,7 +2411,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'kanban',
-		subpath: 'svelai/kanban',
+		subpath: 'entasis/kanban',
 		sourceIndex: 'src/lib/components/Kanban/index.ts',
 		exportedSymbols: [
 			'Kanban',
@@ -2444,7 +2444,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'kbd',
-		subpath: 'svelai/kbd',
+		subpath: 'entasis/kbd',
 		sourceIndex: 'src/lib/components/Kbd/index.ts',
 		exportedSymbols: [
 			'Kbd',
@@ -2469,7 +2469,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'metadata-list',
-		subpath: 'svelai/metadata-list',
+		subpath: 'entasis/metadata-list',
 		sourceIndex: 'src/lib/components/MetadataList/index.ts',
 		exportedSymbols: [
 			'MetadataList',
@@ -2498,7 +2498,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'mini-calendar',
-		subpath: 'svelai/mini-calendar',
+		subpath: 'entasis/mini-calendar',
 		sourceIndex: 'src/lib/components/MiniCalendar/index.ts',
 		exportedSymbols: [
 			'MiniCalendar',
@@ -2524,7 +2524,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'rating',
-		subpath: 'svelai/rating',
+		subpath: 'entasis/rating',
 		sourceIndex: 'src/lib/components/Rating/index.ts',
 		exportedSymbols: [
 			'Rating',
@@ -2550,7 +2550,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'sortable-list',
-		subpath: 'svelai/sortable-list',
+		subpath: 'entasis/sortable-list',
 		sourceIndex: 'src/lib/components/SortableList/index.ts',
 		exportedSymbols: [
 			'SortableList',
@@ -2577,7 +2577,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'stat',
-		subpath: 'svelai/stat',
+		subpath: 'entasis/stat',
 		sourceIndex: 'src/lib/components/Stat/index.ts',
 		exportedSymbols: [
 			'Stat',
@@ -2607,7 +2607,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'table',
-		subpath: 'svelai/table',
+		subpath: 'entasis/table',
 		sourceIndex: 'src/lib/components/Table/index.ts',
 		exportedSymbols: [
 			'Table',
@@ -2635,7 +2635,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'data-table',
-		subpath: 'svelai/data-table',
+		subpath: 'entasis/data-table',
 		sourceIndex: 'src/lib/components/DataTable/index.ts',
 		exportedSymbols: [
 			'DataTable',
@@ -2703,7 +2703,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'timeline',
-		subpath: 'svelai/timeline',
+		subpath: 'entasis/timeline',
 		sourceIndex: 'src/lib/components/Timeline/index.ts',
 		exportedSymbols: [
 			'Timeline',
@@ -2734,7 +2734,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'tree',
-		subpath: 'svelai/tree',
+		subpath: 'entasis/tree',
 		sourceIndex: 'src/lib/components/Tree/index.ts',
 		exportedSymbols: [
 			'FileTree',
@@ -2784,7 +2784,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'alert',
-		subpath: 'svelai/alert',
+		subpath: 'entasis/alert',
 		sourceIndex: 'src/lib/components/Alert/index.ts',
 		exportedSymbols: [
 			'Alert',
@@ -2810,7 +2810,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'confirmation',
-		subpath: 'svelai/confirmation',
+		subpath: 'entasis/confirmation',
 		sourceIndex: 'src/lib/components/Confirmation/index.ts',
 		exportedSymbols: [
 			'Confirmation',
@@ -2839,7 +2839,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'empty',
-		subpath: 'svelai/empty',
+		subpath: 'entasis/empty',
 		sourceIndex: 'src/lib/components/Empty/index.ts',
 		exportedSymbols: [
 			'Empty',
@@ -2867,7 +2867,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'meter',
-		subpath: 'svelai/meter',
+		subpath: 'entasis/meter',
 		sourceIndex: 'src/lib/components/Meter/index.ts',
 		exportedSymbols: [
 			'Meter',
@@ -2893,7 +2893,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'network-indicator',
-		subpath: 'svelai/network-indicator',
+		subpath: 'entasis/network-indicator',
 		sourceIndex: 'src/lib/components/NetworkIndicator/index.ts',
 		exportedSymbols: [
 			'NetworkIndicator',
@@ -2922,7 +2922,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'progress-circle',
-		subpath: 'svelai/progress-circle',
+		subpath: 'entasis/progress-circle',
 		sourceIndex: 'src/lib/components/ProgressCircle/index.ts',
 		exportedSymbols: [
 			'ProgressCircle',
@@ -2948,7 +2948,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'skeleton',
-		subpath: 'svelai/skeleton',
+		subpath: 'entasis/skeleton',
 		sourceIndex: 'src/lib/components/Skeleton/index.ts',
 		exportedSymbols: [
 			'Skeleton',
@@ -2973,7 +2973,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'spinner',
-		subpath: 'svelai/spinner',
+		subpath: 'entasis/spinner',
 		sourceIndex: 'src/lib/components/Spinner/index.ts',
 		exportedSymbols: [
 			'Spinner',
@@ -2999,7 +2999,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'spinner-text',
-		subpath: 'svelai/spinner-text',
+		subpath: 'entasis/spinner-text',
 		sourceIndex: 'src/lib/components/SpinnerText/index.ts',
 		exportedSymbols: [
 			'SpinnerText',
@@ -3026,7 +3026,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'toast',
-		subpath: 'svelai/toast',
+		subpath: 'entasis/toast',
 		sourceIndex: 'src/lib/components/Toast/index.ts',
 		exportedSymbols: [
 			'Toast',
@@ -3053,7 +3053,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'accordion',
-		subpath: 'svelai/accordion',
+		subpath: 'entasis/accordion',
 		sourceIndex: 'src/lib/components/Accordion/index.ts',
 		exportedSymbols: [
 			'Accordion',
@@ -3079,7 +3079,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'collapsible',
-		subpath: 'svelai/collapsible',
+		subpath: 'entasis/collapsible',
 		sourceIndex: 'src/lib/components/Collapsible/index.ts',
 		exportedSymbols: [
 			'Collapsible',
@@ -3104,7 +3104,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'breadcrumbs',
-		subpath: 'svelai/breadcrumbs',
+		subpath: 'entasis/breadcrumbs',
 		sourceIndex: 'src/lib/components/Breadcrumbs/index.ts',
 		exportedSymbols: [
 			'BreadcrumbItem',
@@ -3131,7 +3131,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'command',
-		subpath: 'svelai/command',
+		subpath: 'entasis/command',
 		sourceIndex: 'src/lib/components/Command/index.ts',
 		exportedSymbols: [
 			'Command',
@@ -3160,7 +3160,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'pagination',
-		subpath: 'svelai/pagination',
+		subpath: 'entasis/pagination',
 		sourceIndex: 'src/lib/components/Pagination/index.ts',
 		exportedSymbols: [
 			'Pagination',
@@ -3194,7 +3194,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'stepper',
-		subpath: 'svelai/stepper',
+		subpath: 'entasis/stepper',
 		sourceIndex: 'src/lib/components/Stepper/index.ts',
 		exportedSymbols: [
 			'Stepper',
@@ -3226,7 +3226,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'tabbar',
-		subpath: 'svelai/tabbar',
+		subpath: 'entasis/tabbar',
 		sourceIndex: 'src/lib/components/Tabbar/index.ts',
 		exportedSymbols: [
 			'TabAlignment',
@@ -3255,7 +3255,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'table-of-contents',
-		subpath: 'svelai/table-of-contents',
+		subpath: 'entasis/table-of-contents',
 		sourceIndex: 'src/lib/components/TableOfContents/index.ts',
 		exportedSymbols: [
 			'TableOfContents',
@@ -3286,7 +3286,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'tabs',
-		subpath: 'svelai/tabs',
+		subpath: 'entasis/tabs',
 		sourceIndex: 'src/lib/components/Tabs/index.ts',
 		exportedSymbols: [
 			'Tabs',
@@ -3314,7 +3314,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'context-menu',
-		subpath: 'svelai/context-menu',
+		subpath: 'entasis/context-menu',
 		sourceIndex: 'src/lib/components/ContextMenu/index.ts',
 		exportedSymbols: [
 			'ContextMenu',
@@ -3339,7 +3339,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'menu',
-		subpath: 'svelai/menu',
+		subpath: 'entasis/menu',
 		sourceIndex: 'src/lib/components/Menu/index.ts',
 		exportedSymbols: [
 			'Menu',
@@ -3366,7 +3366,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'menu-bar',
-		subpath: 'svelai/menu-bar',
+		subpath: 'entasis/menu-bar',
 		sourceIndex: 'src/lib/components/MenuBar/index.ts',
 		exportedSymbols: [
 			'MenuBar',
@@ -3392,7 +3392,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'menu-option',
-		subpath: 'svelai/menu-option',
+		subpath: 'entasis/menu-option',
 		sourceIndex: 'src/lib/components/MenuOption/index.ts',
 		exportedSymbols: [
 			'MenuOption',
@@ -3417,7 +3417,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'popup-menu',
-		subpath: 'svelai/popup-menu',
+		subpath: 'entasis/popup-menu',
 		sourceIndex: 'src/lib/components/PopupMenu/index.ts',
 		exportedSymbols: [
 			'MenuItem',
@@ -3443,7 +3443,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'dialog',
-		subpath: 'svelai/dialog',
+		subpath: 'entasis/dialog',
 		sourceIndex: 'src/lib/components/Dialog/index.ts',
 		exportedSymbols: [
 			'Dialog',
@@ -3469,7 +3469,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'floating-window',
-		subpath: 'svelai/floating-window',
+		subpath: 'entasis/floating-window',
 		sourceIndex: 'src/lib/components/FloatingWindow/index.ts',
 		exportedSymbols: [
 			'FloatingWindow',
@@ -3504,7 +3504,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'hover-card',
-		subpath: 'svelai/hover-card',
+		subpath: 'entasis/hover-card',
 		sourceIndex: 'src/lib/components/HoverCard/index.ts',
 		exportedSymbols: [
 			'HoverCard',
@@ -3531,7 +3531,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'link-preview',
-		subpath: 'svelai/link-preview',
+		subpath: 'entasis/link-preview',
 		sourceIndex: 'src/lib/components/LinkPreview/index.ts',
 		exportedSymbols: [
 			'LinkPreview',
@@ -3563,7 +3563,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'overlay',
-		subpath: 'svelai/overlay',
+		subpath: 'entasis/overlay',
 		sourceIndex: 'src/lib/components/Overlay/index.ts',
 		exportedSymbols: [
 			'Overlay',
@@ -3592,7 +3592,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'popover',
-		subpath: 'svelai/popover',
+		subpath: 'entasis/popover',
 		sourceIndex: 'src/lib/components/Popover/index.ts',
 		exportedSymbols: [
 			'Popover',
@@ -3618,7 +3618,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'tooltip',
-		subpath: 'svelai/tooltip',
+		subpath: 'entasis/tooltip',
 		sourceIndex: 'src/lib/components/Tooltip/index.ts',
 		exportedSymbols: [
 			'Tooltip',
@@ -3647,7 +3647,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'audio-player',
-		subpath: 'svelai/audio-player',
+		subpath: 'entasis/audio-player',
 		sourceIndex: 'src/lib/components/AudioPlayer/index.ts',
 		exportedSymbols: [
 			'AUDIO_PLAYER_DEFAULT_CONTROLS',
@@ -3687,7 +3687,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'carousel',
-		subpath: 'svelai/carousel',
+		subpath: 'entasis/carousel',
 		sourceIndex: 'src/lib/components/Carousel/index.ts',
 		exportedSymbols: [
 			'Carousel',
@@ -3714,7 +3714,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'image-gallery',
-		subpath: 'svelai/image-gallery',
+		subpath: 'entasis/image-gallery',
 		sourceIndex: 'src/lib/components/ImageGallery/index.ts',
 		exportedSymbols: [
 			'ImageGallery',
@@ -3743,7 +3743,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'image-zoom',
-		subpath: 'svelai/image-zoom',
+		subpath: 'entasis/image-zoom',
 		sourceIndex: 'src/lib/components/ImageZoom/index.ts',
 		exportedSymbols: [
 			'ImageZoom',
@@ -3772,7 +3772,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'media-volume',
-		subpath: 'svelai/media-volume',
+		subpath: 'entasis/media-volume',
 		sourceIndex: 'src/lib/components/MediaVolume/index.ts',
 		exportedSymbols: [
 			'MediaVolumeControl',
@@ -3806,7 +3806,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'document-viewer',
-		subpath: 'svelai/document-viewer',
+		subpath: 'entasis/document-viewer',
 		sourceIndex: 'src/lib/components/DocumentViewer/index.ts',
 		exportedSymbols: [
 			'DocumentFitMode',
@@ -3845,7 +3845,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'video-player',
-		subpath: 'svelai/video-player',
+		subpath: 'entasis/video-player',
 		sourceIndex: 'src/lib/components/VideoPlayer/index.ts',
 		exportedSymbols: [
 			'VIDEO_PLAYER_DEFAULT_CONTROLS',
@@ -3887,7 +3887,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'code',
-		subpath: 'svelai/code',
+		subpath: 'entasis/code',
 		sourceIndex: 'src/lib/components/Code/index.ts',
 		exportedSymbols: [
 			'Code',
@@ -3918,7 +3918,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'diff',
-		subpath: 'svelai/diff',
+		subpath: 'entasis/diff',
 		sourceIndex: 'src/lib/components/Diff/index.ts',
 		exportedSymbols: [
 			'Diff',
@@ -3955,7 +3955,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'globe',
-		subpath: 'svelai/globe',
+		subpath: 'entasis/globe',
 		sourceIndex: 'src/lib/components/Globe/index.ts',
 		exportedSymbols: [
 			'Globe',
@@ -3983,7 +3983,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'map',
-		subpath: 'svelai/map',
+		subpath: 'entasis/map',
 		sourceIndex: 'src/lib/components/Map/index.ts',
 		exportedSymbols: [
 			'Map',
@@ -4030,7 +4030,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'markdown',
-		subpath: 'svelai/markdown',
+		subpath: 'entasis/markdown',
 		sourceIndex: 'src/lib/components/Markdown/index.ts',
 		exportedSymbols: [
 			'Markdown',
@@ -4060,7 +4060,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'marquee',
-		subpath: 'svelai/marquee',
+		subpath: 'entasis/marquee',
 		sourceIndex: 'src/lib/components/Marquee/index.ts',
 		exportedSymbols: [
 			'Marquee',
@@ -4085,7 +4085,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'mermaid',
-		subpath: 'svelai/mermaid',
+		subpath: 'entasis/mermaid',
 		sourceIndex: 'src/lib/components/Mermaid/index.ts',
 		exportedSymbols: [
 			'Mermaid',
@@ -4115,7 +4115,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'qr-code',
-		subpath: 'svelai/qr-code',
+		subpath: 'entasis/qr-code',
 		sourceIndex: 'src/lib/components/QRCode/index.ts',
 		exportedSymbols: [
 			'BackgroundSettings',
@@ -4154,7 +4154,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'hitbox',
-		subpath: 'svelai/hitbox',
+		subpath: 'entasis/hitbox',
 		sourceIndex: 'src/lib/components/Hitbox/index.ts',
 		exportedSymbols: [
 			'Hitbox',
@@ -4179,7 +4179,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'slot',
-		subpath: 'svelai/slot',
+		subpath: 'entasis/slot',
 		sourceIndex: 'src/lib/components/Slot/index.ts',
 		exportedSymbols: ['Slot', 'SlotContent', 'slotDescription'],
 		docs: [],
@@ -4189,7 +4189,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'theme',
-		subpath: 'svelai/theme',
+		subpath: 'entasis/theme',
 		sourceIndex: 'src/lib/components/Theme/index.ts',
 		exportedSymbols: [
 			'Breakpoint',
@@ -4234,7 +4234,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'i18n',
-		subpath: 'svelai/i18n',
+		subpath: 'entasis/i18n',
 		sourceIndex: 'src/lib/i18n/index.ts',
 		exportedSymbols: [
 			'I18n',
@@ -4255,7 +4255,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'tailwind-plugin',
-		subpath: 'svelai/tailwind-plugin',
+		subpath: 'entasis/tailwind-plugin',
 		sourceIndex: 'src/lib/tailwind/index.ts',
 		exportedSymbols: ['default'],
 		docs: [],
@@ -4265,7 +4265,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'theme-tailwind-plugin',
-		subpath: 'svelai/tailwind-plugin/theme',
+		subpath: 'entasis/tailwind-plugin/theme',
 		sourceIndex: 'src/lib/tailwind/theme.ts',
 		exportedSymbols: ['ThemeOptions', 'default'],
 		docs: [],
@@ -4275,7 +4275,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'types',
-		subpath: 'svelai/types',
+		subpath: 'entasis/types',
 		sourceIndex: 'src/lib/types/index.ts',
 		exportedSymbols: [
 			'ColorKeys',
@@ -4298,7 +4298,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'cva',
-		subpath: 'svelai/cva',
+		subpath: 'entasis/cva',
 		sourceIndex: 'src/lib/utils/cva/index.ts',
 		exportedSymbols: [
 			'ClassArray',
@@ -4320,7 +4320,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'motion',
-		subpath: 'svelai/motion',
+		subpath: 'entasis/motion',
 		sourceIndex: 'src/lib/utils/motion/index.ts',
 		exportedSymbols: [
 			'AnyMotionResolver',
@@ -4351,7 +4351,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'scheduling',
-		subpath: 'svelai/scheduling',
+		subpath: 'entasis/scheduling',
 		sourceIndex: 'src/lib/utils/scheduling/index.ts',
 		exportedSymbols: [
 			'SchedulingInterval',
@@ -4370,7 +4370,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'icons',
-		subpath: 'svelai/icons/*',
+		subpath: 'entasis/icons/*',
 		sourceIndex: 'src/lib/components/Icons/*.ts',
 		exportedSymbols: {
 			pattern: [
@@ -4395,7 +4395,7 @@ export const componentInventory = [
 	},
 	{
 		id: 'spinner-overlay',
-		subpath: 'svelai/spinner-overlay',
+		subpath: 'entasis/spinner-overlay',
 		sourceIndex: 'src/lib/attachments/spinnerOverlay.svelte.ts',
 		exportedSymbols: [
 			'SpinnerOverlayOptions',

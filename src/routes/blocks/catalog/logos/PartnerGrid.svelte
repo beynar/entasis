@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
 </script>
 
 <section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl items-center md:grid-cols-3">

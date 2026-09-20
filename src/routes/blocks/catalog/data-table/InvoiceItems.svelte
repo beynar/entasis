@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { NumberInput } from 'svelai/number-input';
-	import { Separator } from 'svelai/separator';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { NumberInput } from 'entasis/number-input';
+	import { Separator } from 'entasis/separator';
 
 	let lines = $state([
 		{ name: 'Design discovery', rate: 120, unit: 'hour', quantity: 8 },

@@ -1,6 +1,6 @@
 export const overviewCode = [
 	'<script lang="ts">',
-	"  import { GanttChart, type GanttDependency, type GanttTask } from 'svelai/gantt-chart';",
+	"  import { GanttChart, type GanttDependency, type GanttTask } from 'entasis/gantt-chart';",
 	'  let tasks = $state<GanttTask[]>([',
 	"    { id: 'plan', title: 'Plan', type: 'summary' },",
 	"    { id: 'design', parentId: 'plan', title: 'Design', start, end, progress: 0.4 }",

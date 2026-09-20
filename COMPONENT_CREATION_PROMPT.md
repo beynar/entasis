@@ -1,6 +1,6 @@
-# Component Creation Guide for svelai
+# Component Creation Guide for entasis
 
-This document describes the complete methodology for creating a new component in the svelai design system, a component library for SvelteKit based on a configuration-over-markup approach.
+This document describes the complete methodology for creating a new component in the entasis design system, a component library for SvelteKit based on a configuration-over-markup approach.
 
 ## 📁 File Structure
 
@@ -117,7 +117,7 @@ export type ComponentProps = WithAttachments<
 
 ## 🧩 Public Composition Rule
 
-Svelai components compose through props and named slots rendered with `Slot.svelte`.
+Entasis components compose through props and named slots rendered with `Slot.svelte`.
 
 Do not copy source-library compound subcomponents into the public API. If the source component exposes parts like `StatLabel`, `StatValue`, `StatIndicator`, or `CardHeader`, translate those parts into:
 
@@ -125,7 +125,7 @@ Do not copy source-library compound subcomponents into the public API. If the so
 - named `Slot` props for rich content,
 - theme parts for styling those regions.
 
-Only create and export public child components when the existing Svelai component family already uses that pattern, or when the user explicitly asks for a public compound API.
+Only create and export public child components when the existing Entasis component family already uses that pattern, or when the user explicitly asks for a public compound API.
 
 ### Correct Slot Implementation
 
@@ -783,7 +783,7 @@ When porting from a source library, collapse visual child components into named 
 ```
 
 ```svelte
-<!-- Svelai API -->
+<!-- Entasis API -->
 <Stat label="Revenue" value="$45,231" />
 ```
 
@@ -1293,4 +1293,4 @@ const state = new ComponentState({
 
 ---
 
-This guide constitutes the complete reference for creating consistent and maintainable components in the svelai system. Follow it step by step to ensure code quality and consistency.
+This guide constitutes the complete reference for creating consistent and maintainable components in the entasis system. Follow it step by step to ensure code quality and consistency.

@@ -31,7 +31,7 @@ export type IntlTelInputLibrary = {
 };
 
 const INTL_TEL_INPUT_CDN_VERSION = '29.1.1';
-const INTL_TEL_INPUT_SCRIPT_ID = 'svelai-intl-tel-input-script';
+const INTL_TEL_INPUT_SCRIPT_ID = 'entasis-intl-tel-input-script';
 const INTL_TEL_INPUT_SCRIPT_URL = `https://cdn.jsdelivr.net/npm/intl-tel-input@${INTL_TEL_INPUT_CDN_VERSION}/dist/js/intlTelInputWithUtils.min.js`;
 
 type IntlTelInputWindow = Window & {

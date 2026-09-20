@@ -7,7 +7,7 @@
 		type EventCalendarItem,
 		type EventCalendarItemsChangePayload,
 		type EventCalendarSlotSelectPayload
-	} from 'svelai/event-calendar';
+	} from 'entasis/event-calendar';
 	import {
 		EVENT_CALENDAR_DEMO_TIME_ZONE,
 		createDemoItems,

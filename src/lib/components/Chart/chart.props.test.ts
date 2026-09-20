@@ -180,7 +180,7 @@ void invalidGroupedBar;
 void compactPolar;
 
 describe('Chart public type contract', () => {
-	it('accepts Svelai-native layered definitions', () => {
+	it('accepts Entasis-native layered definitions', () => {
 		expect(definition.marks.map((mark) => mark.type)).toEqual(['series', 'series']);
 	});
 

@@ -1,5 +1,5 @@
 {
-	"name": "svelai",
+	"name": "entasis",
 	"version": "0.3.0",
 	"license": "MIT",
 	"scripts": {
@@ -125,11 +125,6 @@
 		"design-system",
 		"accessibility"
 	],
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"esbuild"
-		]
-	},
 	"dependencies": {
 		"@atlaskit/pragmatic-drag-and-drop": "^3.1.0",
 		"@atlaskit/pragmatic-drag-and-drop-auto-scroll": "^3.2.0",

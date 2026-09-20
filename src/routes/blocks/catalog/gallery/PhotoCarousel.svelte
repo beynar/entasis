@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Carousel } from 'svelai/carousel';
-	import { Chip } from 'svelai/chip';
+	import { Heading } from 'entasis/heading';
+	import { Carousel } from 'entasis/carousel';
+	import { Chip } from 'entasis/chip';
 	const photos = [
 		{
 			title: 'Desert light',

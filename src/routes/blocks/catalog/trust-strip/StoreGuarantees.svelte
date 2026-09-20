@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { truckIcon } from 'svelai/icons/truck';
-	import { packageIcon } from 'svelai/icons/package';
-	import { shieldCheckIcon } from 'svelai/icons/shieldCheck';
-	import { leafIcon } from 'svelai/icons/leaf';
+	import { Heading } from 'entasis/heading';
+	import { truckIcon } from 'entasis/icons/truck';
+	import { packageIcon } from 'entasis/icons/package';
+	import { shieldCheckIcon } from 'entasis/icons/shieldCheck';
+	import { leafIcon } from 'entasis/icons/leaf';
 	const guarantees = [
 		{
 			title: 'Delivery, on us',

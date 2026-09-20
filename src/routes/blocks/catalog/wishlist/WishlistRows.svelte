@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Button } from 'svelai/button';
-	import { Select } from 'svelai/select';
-	import { Empty } from 'svelai/empty';
+	import { Heading } from 'entasis/heading';
+	import { Button } from 'entasis/button';
+	import { Select } from 'entasis/select';
+	import { Empty } from 'entasis/empty';
 	const products = [
 		{
 			id: 'arc',

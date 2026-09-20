@@ -1,18 +1,34 @@
-import type { EventCalendarDropTarget } from './eventCalendar.interactions.svelte.js';
+import type {
+	EventCalendarDropTarget,
+	EventCalendarTargetResource
+} from './eventCalendar.interactions.svelte.js';
 import type { EventCalendarDateOnly, EventCalendarView } from './eventCalendar.types.js';
 
-export type EventCalendarAllDayDropTarget = Extract<EventCalendarDropTarget, { allDay: true }>;
-export type EventCalendarTimedDropTarget = Extract<EventCalendarDropTarget, { allDay: false }>;
+export type EventCalendarDateTarget = Extract<EventCalendarDropTarget, { kind: 'date' }>;
+export type EventCalendarAllDayDropTarget = Extract<EventCalendarDropTarget, { kind: 'all-day' }>;
+export type EventCalendarTimedDropTarget = Extract<EventCalendarDropTarget, { kind: 'instant' }>;
+
+type ResolvedKind =
+	| { kind: 'date'; date: EventCalendarDateOnly }
+	| { kind: 'all-day'; day: EventCalendarDateOnly }
+	| { kind: 'instant'; instant: Date };
+
+export type EventCalendarResolvedTarget = ResolvedKind & {
+	resource?: EventCalendarTargetResource;
+};
+
+function resourceContext(view: EventCalendarView, resourceId?: string) {
+	return view === 'resource'
+		? { resource: { ...(resourceId === undefined ? {} : { id: resourceId }) } }
+		: {};
+}
 
 /** Single construction site for drop-target identities; keys stay stable across renderers. */
-export function eventCalendarMonthDayTarget(
-	day: EventCalendarDateOnly
-): EventCalendarAllDayDropTarget {
+export function eventCalendarMonthDayTarget(day: EventCalendarDateOnly): EventCalendarDateTarget {
 	return {
 		key: `month:${day}`,
-		view: 'month',
-		allDay: true,
-		day
+		kind: 'date',
+		date: day
 	};
 }
 
@@ -27,11 +43,10 @@ export function eventCalendarTimedColumnTarget(
 ): EventCalendarTimedDropTarget {
 	return {
 		key: `${view}:timed-column:${geometry.key}`,
-		view,
-		allDay: false,
+		kind: 'instant',
 		start: new Date(geometry.windowStart),
 		end: new Date(geometry.windowEnd),
-		...(geometry.resourceId === undefined ? {} : { resourceId: geometry.resourceId })
+		...resourceContext(view, geometry.resourceId)
 	};
 }
 
@@ -42,11 +57,10 @@ export function eventCalendarTimedSlotTarget(
 ): EventCalendarTimedDropTarget {
 	return {
 		key: `${view}:timed:${slot.key}`,
-		view,
-		allDay: false,
+		kind: 'instant',
 		start: new Date(slot.start),
 		end: new Date(slot.end),
-		...(resourceId === undefined ? {} : { resourceId })
+		...resourceContext(view, resourceId)
 	};
 }
 
@@ -56,9 +70,8 @@ export function eventCalendarAllDayCellTarget(
 ): EventCalendarAllDayDropTarget {
 	return {
 		key: `${view}:all-day:${geometry.key}`,
-		view,
-		allDay: true,
+		kind: 'all-day',
 		day: geometry.day,
-		...(geometry.resourceId === undefined ? {} : { resourceId: geometry.resourceId })
+		...resourceContext(view, geometry.resourceId)
 	};
 }

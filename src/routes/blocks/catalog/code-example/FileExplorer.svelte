@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Button } from 'svelai/button';
-	import { Code } from 'svelai/code';
+	import { Heading } from 'entasis/heading';
+	import { Button } from 'entasis/button';
+	import { Code } from 'entasis/code';
 	let selected = $state(0);
 	const files = [
 		{
 			name: 'Counter.svelte',
 			language: 'svelte',
 			note: 'The component owns the interactive state.',
-			code: "<script>\n  import { Button } from 'svelai/button';\n  let count = $state(0);\n\u003c/script>\n\n<Button onclick={() => count += 1}>\n  Count: {count}\n</Button>"
+			code: "<script>\n  import { Button } from 'entasis/button';\n  let count = $state(0);\n\u003c/script>\n\n<Button onclick={() => count += 1}>\n  Count: {count}\n</Button>"
 		},
 		{
 			name: 'counter.css',
@@ -20,7 +20,7 @@
 			name: 'README.md',
 			language: 'markdown',
 			note: 'Documentation explains how a component is intended to be used.',
-			code: '# Counter\n\nA local click counter composed with Svelai Button.\n\nClick to increment the displayed value.'
+			code: '# Counter\n\nA local click counter composed with Entasis Button.\n\nClick to increment the displayed value.'
 		}
 	];
 </script>

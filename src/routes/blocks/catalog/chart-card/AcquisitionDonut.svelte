@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Card } from 'svelai/card';
-	import { Chart } from 'svelai/chart';
+	import { Stack } from 'entasis/stack';
+	import { Card } from 'entasis/card';
+	import { Chart } from 'entasis/chart';
 
 	const channels = [
 		{ name: 'Organic', value: 48 },

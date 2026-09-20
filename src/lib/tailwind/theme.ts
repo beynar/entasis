@@ -60,7 +60,7 @@ const assertKnownOptions = (theme: ThemeOptions) => {
 	const suggest = (key: string) =>
 		[...themeOptionKeys].find((known) => known.toLowerCase() === key.toLowerCase());
 	throw new Error(
-		`svelai/tailwind-plugin/theme: unknown option${unknown.length > 1 ? 's' : ''} ${unknown
+		`entasis/tailwind-plugin/theme: unknown option${unknown.length > 1 ? 's' : ''} ${unknown
 			.map((key) => {
 				const hint = suggest(key);
 				return hint ? `"${key}" (did you mean "${hint}"?)` : `"${key}"`;

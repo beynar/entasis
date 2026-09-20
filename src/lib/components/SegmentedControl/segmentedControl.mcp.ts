@@ -7,9 +7,9 @@ A compact single-selection input for switching between a small set of mutually e
 
 \`\`\`svelte
 <script lang="ts">
-  import { SegmentedControl } from 'svelai/segmented-control';
-  import { gridFourIcon } from 'svelai/icons/gridFour';
-  import { listIcon } from 'svelai/icons/list';
+  import { SegmentedControl } from 'entasis/segmented-control';
+  import { gridFourIcon } from 'entasis/icons/gridFour';
+  import { listIcon } from 'entasis/icons/list';
 
   const items = [
     { value: 'grid', label: 'Grid', icon: gridFourIcon },

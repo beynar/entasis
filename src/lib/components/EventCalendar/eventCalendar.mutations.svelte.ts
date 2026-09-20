@@ -10,14 +10,15 @@ import {
 	startOfZonedDay
 } from './eventCalendar.date.js';
 import { EventCalendarError } from './eventCalendar.error.js';
+import type { EventCalendarAdmittedBusinessHours } from './eventCalendar.businessHours.js';
 import {
 	createEventCalendarRecurrenceMutation,
-	regenerateEventCalendarSeriesMutation,
 	type CreateRecurrenceMutationOptions,
 	type EventCalendarRecurrenceMutation
 } from './eventCalendar.recurrenceMutation.js';
 import {
 	cloneEventCalendarItem,
+	getEventCalendarOccurrencePlacementItem,
 	getEventCalendarOccurrenceSeriesId,
 	replaceEventCalendarPlacement
 } from './eventCalendar.records.js';
@@ -27,8 +28,8 @@ import type {
 	EventCalendarState
 } from './eventCalendar.state.svelte.js';
 import type {
-	EventCalendarBusinessHours,
 	EventCalendarChange,
+	EventCalendarDateOnly,
 	EventCalendarInteractionBlockedInfo,
 	EventCalendarItem,
 	EventCalendarMutationSource,
@@ -40,6 +41,13 @@ import type {
 } from './eventCalendar.types.js';
 
 type InvalidReason = EventCalendarInteractionBlockedInfo['reason'];
+type EventCalendarScheduleLike = {
+	allDay?: boolean;
+	start: Date | EventCalendarDateOnly;
+	end: Date | EventCalendarDateOnly;
+	resourceId?: string;
+	resourceIds?: string[];
+};
 
 type EventCalendarHistoryEntry<TItemFields extends object> = {
 	beforeItems: EventCalendarItem<TItemFields>[];
@@ -64,39 +72,14 @@ type EventCalendarCollectionMutation<TItemFields extends object> = {
 	onRevert?: () => void;
 };
 
-/**
- * One validated commit attempt: the proposal that identifies it, the candidate collection to
- * publish, and family-specific commit state (a recurrence mutation, or none for placements).
- */
-type EventCalendarPreparedBatch<TItemFields extends object, TMutation> = {
+/** The one prepared transaction shared by normal and recurring edits. */
+type EventCalendarPreparedBatch<TItemFields extends object> = {
 	proposal: EventCalendarProposedUpdate<TItemFields>;
 	candidateItems: EventCalendarItem<TItemFields>[];
-	mutation: TMutation;
-};
-
-/**
- * The per-family policy the shared commit orchestration drives. `reprepare` returns null only
- * after reporting the failure itself (a stale proposal target); structural and semantic
- * failures of an adjusted batch throw 'invalid-adjustment'.
- */
-type EventCalendarCommitPolicy<TItemFields extends object, TMutation> = {
-	prepare(): EventCalendarPreparedBatch<TItemFields, TMutation> | null;
-	validate(batch: EventCalendarPreparedBatch<TItemFields, TMutation>): InvalidReason | null;
-	/** Rebuild the normal candidate after the resolver; recurring edits keep their baseline phases. */
-	revalidateAfterResolver?: (
-		batch: EventCalendarPreparedBatch<TItemFields, TMutation>,
-		validatePolicy: boolean
-	) => EventCalendarPreparedBatch<TItemFields, TMutation> | null;
-	reprepare(
-		batch: EventCalendarPreparedBatch<TItemFields, TMutation>,
-		adjustedItem: EventCalendarItem<TItemFields>
-	): EventCalendarPreparedBatch<TItemFields, TMutation> | null;
-	publish(
-		batch: EventCalendarPreparedBatch<TItemFields, TMutation>
-	): Pick<
-		EventCalendarCollectionMutation<TItemFields>,
-		'createChange' | 'keyRemap' | 'clearMissingRecurringSeriesId'
-	>;
+	recurrence: {
+		mutation: EventCalendarRecurrenceMutation<TItemFields>;
+		options: CreateRecurrenceMutationOptions<TItemFields>;
+	} | null;
 };
 
 const MINUTE_MS = 60_000;
@@ -157,12 +140,7 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 			item
 		};
 		if (occurrence.isRecurring || occurrence.item.recurringItemId !== undefined) {
-			const scope = options?.scope ?? this.calendar.recurrenceEditScope;
-			if (scope === 'disabled') {
-				this.reportBlocked({ reason: 'disabled', source: 'api', proposal });
-				return;
-			}
-			this.commitRecurrenceProposal(proposal, scope, boundary);
+			this.commitProposal(proposal, boundary, options?.scope);
 			return;
 		}
 		this.commitProposal(proposal, boundary);
@@ -273,11 +251,8 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 		) {
 			return 'read-only';
 		}
-		if (!isValidPlacement(item, this.calendar.snapDuration)) return 'invalid-target';
-		if (!this.isInsideValidRange(item)) return 'valid-range';
-		if (this.calendar.constrainToBusinessHours && !this.isInsideBusinessHours(item)) {
-			return 'business-hours';
-		}
+		const placementReason = this.validatePlacement(item);
+		if (placementReason) return placementReason;
 		for (const conflict of this.findConflicts(item, proposal.occurrence?.key, ignoredSeriesId)) {
 			if (!this.allowsConflict({ kind: 'item', proposal, conflictingOccurrence: conflict })) {
 				return 'overlap';
@@ -292,11 +267,8 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 	validateSlot(slot: EventCalendarSlot): InvalidReason | null {
 		if (this.calendar.disabled || this.calendar.loading) return 'disabled';
 		if (this.calendar.resourceModel.isReadOnly(slot.resourceId)) return 'read-only';
-		if (!isValidSlot(slot, this.calendar.snapDuration)) return 'invalid-target';
-		if (!this.isSlotInsideValidRange(slot)) return 'valid-range';
-		if (this.calendar.constrainToBusinessHours && !this.isSlotInsideBusinessHours(slot)) {
-			return 'business-hours';
-		}
+		const placementReason = this.validatePlacement(slot);
+		if (placementReason) return placementReason;
 		for (const conflict of this.findSlotConflicts(slot)) {
 			if (!this.allowsConflict({ kind: 'slot', slot, conflictingOccurrence: conflict })) {
 				return 'overlap';
@@ -308,165 +280,233 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 
 	commitProposal(
 		initialProposal: EventCalendarProposedUpdate<TItemFields>,
-		boundary = this.calendar.modelBoundary
+		boundary = this.calendar.modelBoundary,
+		scopeOverride?: 'occurrence' | 'series'
 	): boolean {
 		if (
 			initialProposal.source !== 'external-drop' &&
 			(initialProposal.occurrence?.isRecurring ||
 				initialProposal.occurrence?.item.recurringItemId !== undefined)
 		) {
-			return this.commitRecurrenceProposal(
-				initialProposal,
-				this.calendar.recurrenceEditScope,
-				boundary
-			);
+			const scope = scopeOverride ?? this.calendar.recurrenceEditScope;
+			return scope === 'disabled'
+				? this.rejectProposal(initialProposal, 'disabled')
+				: this.commitPreparedBatch(initialProposal, boundary, scope);
 		}
-		return this.commitPreparedBatch(
-			initialProposal,
-			boundary,
-			this.placementPolicy(initialProposal, boundary)
-		);
+		return this.commitPreparedBatch(initialProposal, boundary);
 	}
 
-	/**
-	 * The single commit orchestration: prepare a validated candidate, offer it to the resolve
-	 * callback, revalidate the normal candidate after every resolver result, reprepare adjusted
-	 * candidates, then hand the batch to the publication owner.
-	 */
-	private commitPreparedBatch<TMutation>(
+	/** Prepare, resolve, validate, and publish one concrete transaction. */
+	private commitPreparedBatch(
 		initialProposal: EventCalendarProposedUpdate<TItemFields>,
 		boundary: EventCalendarModelBoundary<TItemFields>,
-		policy: EventCalendarCommitPolicy<TItemFields, TMutation>
+		scope?: 'occurrence' | 'series'
 	): boolean {
-		if (!this.assertBoundary(boundary, initialProposal)) return false;
-		let batch = policy.prepare();
+		if (!this.assertCurrent(boundary, initialProposal.source, initialProposal)) return false;
+		let batch = scope
+			? this.prepareRecurrenceBatch(
+					this.getRecurrenceMutationOptions(initialProposal, scope, boundary.items)
+				)
+			: this.preparePlacementBatch(initialProposal, boundary.items);
 		if (!batch) return this.rejectStaleProposal(initialProposal);
 		this.calendar.validateCandidateItems(batch.candidateItems);
-		const initialReason = policy.validate(batch);
+		const initialReason = batch.recurrence
+			? this.validateRecurrenceMutation(batch.recurrence.mutation)
+			: this.validateProposal(batch.proposal);
 		if (initialReason) return this.rejectProposal(batch.proposal, initialReason);
 
 		const onItemUpdate = this.calendar.onItemUpdate;
 		const updateResult = onItemUpdate?.(batch.proposal);
-		if (!this.assertBoundary(boundary, batch.proposal)) return false;
+		if (!this.assertCurrent(boundary, batch.proposal.source, batch.proposal)) return false;
 		if (updateResult === false) return this.rejectProposal(batch.proposal, 'custom-policy');
 		const adjustment = updateResult && typeof updateResult === 'object' ? updateResult : null;
 		if (adjustment) {
 			const adjustedItem = this.applyAdjustment(batch.proposal.item, adjustment);
-			const adjustedBatch = policy.reprepare(batch, adjustedItem);
+			const adjustedBatch = batch.recurrence
+				? this.prepareAdjustedRecurrenceBatch(batch.recurrence, adjustedItem)
+				: this.preparePlacementBatch(
+						{ ...batch.proposal, item: adjustedItem },
+						boundary.items,
+						'adjustment',
+						true
+					);
 			if (!adjustedBatch) return false;
 			batch = adjustedBatch;
-		} else if (policy.revalidateAfterResolver) {
-			const revalidatedBatch = policy.revalidateAfterResolver(
-				batch,
+		} else if (!batch.recurrence) {
+			const revalidatedBatch = this.preparePlacementBatch(
+				batch.proposal,
+				boundary.items,
+				'resolver',
 				onItemUpdate !== undefined
 			);
 			if (!revalidatedBatch) return false;
 			batch = revalidatedBatch;
 		}
-		if (!this.assertBoundary(boundary, batch.proposal)) return false;
+		if (!this.assertCurrent(boundary, batch.proposal.source, batch.proposal)) return false;
+		const recurrence = batch.recurrence?.mutation;
 		return Boolean(
 			this.commitCollection({
 				boundary,
 				items: batch.candidateItems,
 				source: initialProposal.source,
-				...policy.publish(batch)
-			})
-		);
-	}
-
-	private placementPolicy(
-		initialProposal: EventCalendarProposedUpdate<TItemFields>,
-		boundary: EventCalendarModelBoundary<TItemFields>
-	): EventCalendarCommitPolicy<TItemFields, undefined> {
-		return {
-			prepare: () => {
-				const candidateItems = this.getCandidateItems(initialProposal, boundary.items);
-				return candidateItems
-					? { proposal: initialProposal, candidateItems, mutation: undefined }
-					: null;
-			},
-			validate: (batch) => this.validateProposal(batch.proposal),
-			revalidateAfterResolver: (batch, validatePolicy) => {
-				const candidateItems = this.getCandidateItems(batch.proposal, boundary.items);
-				if (!candidateItems) {
-					this.rejectStaleProposal(batch.proposal);
-					return null;
-				}
-				this.calendar.validateCandidateItems(candidateItems);
-				if (validatePolicy) {
-					const reason = this.validateProposal(batch.proposal);
-					if (reason) {
-						this.rejectProposal(batch.proposal, reason);
-						return null;
-					}
-				}
-				return { proposal: batch.proposal, candidateItems, mutation: undefined };
-			},
-			reprepare: (batch, adjustedItem) => {
-				const proposal = { ...batch.proposal, item: adjustedItem };
-				const candidateItems = this.getCandidateItems(proposal, boundary.items);
-				if (!candidateItems) {
-					this.rejectStaleProposal(proposal);
-					return null;
-				}
-				try {
-					this.calendar.validateCandidateItems(candidateItems);
-				} catch (error) {
-					throw this.invalidAdjustmentError(error, proposal.item.id);
-				}
-				const reason = this.validateProposal(proposal);
-				if (reason) {
-					throw new EventCalendarError(
-						'invalid-adjustment',
-						'resolveItemUpdate returned an invalid adjustment.',
-						{ reason, id: proposal.item.id }
-					);
-				}
-				return { proposal, candidateItems, mutation: undefined };
-			},
-			publish: (batch) => ({
-				createChange: (revert, publishedItems) => {
-					const committedItem =
-						publishedItems.find((item) => item.id === batch.proposal.item.id) ??
-						batch.proposal.item;
-					const kind =
-						batch.proposal.kind === 'move'
-							? 'move'
-							: batch.proposal.kind.startsWith('resize')
-								? 'resize'
-								: 'update';
-					return batch.proposal.source === 'external-drop' || batch.proposal.source === 'clipboard'
-						? { kind: 'add', source: batch.proposal.source, item: committedItem, revert }
-						: {
-								kind,
-								source: batch.proposal.source,
-								item: committedItem,
-								previousItem: batch.proposal.previousItem,
-								revert
-							};
-				},
+				createChange: (revert, publishedItems) =>
+					this.createPreparedChange(batch, revert, publishedItems),
+				keyRemap:
+					recurrence?.scope === 'series'
+						? {
+								forward: recurrence.remapOccurrenceKey,
+								backward: recurrence.restoreOccurrenceKey
+							}
+						: undefined,
 				clearMissingRecurringSeriesId:
+					batch.recurrence ||
 					batch.proposal.source === 'external-drop' ||
 					batch.proposal.source === 'clipboard' ||
 					batch.proposal.previousItem.recurrence === undefined
 						? undefined
 						: batch.proposal.previousItem.id
 			})
-		};
+		);
+	}
+
+	private preparePlacementBatch(
+		proposal: EventCalendarProposedUpdate<TItemFields>,
+		items: EventCalendarItem<TItemFields>[],
+		phase?: 'resolver' | 'adjustment',
+		validatePolicy = false
+	): EventCalendarPreparedBatch<TItemFields> | null {
+		const candidateItems = this.getCandidateItems(proposal, items);
+		if (!candidateItems) {
+			if (phase) this.rejectStaleProposal(proposal);
+			return null;
+		}
+		const batch = { proposal, candidateItems, recurrence: null } as const;
+		if (!phase) return batch;
+		try {
+			this.calendar.validateCandidateItems(candidateItems);
+		} catch (error) {
+			if (phase === 'adjustment') {
+				throw this.invalidAdjustmentError(error, proposal.item.id);
+			}
+			throw error;
+		}
+		if (!validatePolicy) return batch;
+		const reason = this.validateProposal(proposal);
+		if (!reason) return batch;
+		if (phase === 'adjustment') {
+			throw new EventCalendarError(
+				'invalid-adjustment',
+				'resolveItemUpdate returned an invalid adjustment.',
+				{ reason, id: proposal.item.id }
+			);
+		}
+		this.rejectProposal(proposal, reason);
+		return null;
+	}
+
+	private prepareRecurrenceBatch(
+		options: CreateRecurrenceMutationOptions<TItemFields>,
+		adjustedId?: string
+	): EventCalendarPreparedBatch<TItemFields> {
+		try {
+			const mutation = createEventCalendarRecurrenceMutation(options);
+			if (adjustedId) {
+				this.calendar.validateCandidateItems(mutation.committedItems);
+				const reason = this.validateRecurrenceMutation(mutation);
+				if (reason) {
+					throw new EventCalendarError(
+						'invalid-adjustment',
+						'resolveItemUpdate returned an invalid recurring adjustment.',
+						{ reason, id: adjustedId }
+					);
+				}
+			}
+			return {
+				proposal: mutation.proposal,
+				candidateItems: mutation.committedItems,
+				recurrence: { mutation, options }
+			};
+		} catch (error) {
+			if (adjustedId) throw this.invalidAdjustmentError(error, adjustedId);
+			throw error;
+		}
+	}
+
+	private prepareAdjustedRecurrenceBatch(
+		recurrence: NonNullable<EventCalendarPreparedBatch<TItemFields>['recurrence']>,
+		adjustedItem: EventCalendarItem<TItemFields>
+	): EventCalendarPreparedBatch<TItemFields> {
+		const options =
+			recurrence.mutation.scope === 'series'
+				? {
+						...recurrence.options,
+						adjustedSeriesItem: adjustedItem,
+						operation: recurrence.mutation.operation
+					}
+				: {
+						...recurrence.options,
+						exceptionId: recurrence.mutation.exceptionId,
+						proposal: { ...recurrence.mutation.proposal, item: adjustedItem }
+					};
+		return this.prepareRecurrenceBatch(options, adjustedItem.id);
+	}
+
+	private createPreparedChange(
+		batch: EventCalendarPreparedBatch<TItemFields>,
+		revert: () => void,
+		publishedItems: EventCalendarItem<TItemFields>[]
+	): EventCalendarChange<TItemFields> {
+		const recurrence = batch.recurrence?.mutation;
+		if (recurrence) {
+			if (recurrence.scope === 'series') {
+				return {
+					kind: 'recurrence-series-update',
+					source: batch.proposal.source,
+					operation: recurrence.operation,
+					seriesItem: recurrence.seriesItem,
+					previousSeriesItem: recurrence.previousSeriesItem,
+					exceptionItems: recurrence.exceptionItems,
+					previousExceptionItems: recurrence.previousExceptionItems,
+					revert
+				};
+			}
+			const exception = {
+				source: batch.proposal.source,
+				seriesItem: recurrence.seriesItem,
+				item: recurrence.item,
+				revert
+			};
+			return recurrence.previousItem
+				? {
+						kind: 'recurrence-exception-update',
+						...exception,
+						previousItem: recurrence.previousItem
+					}
+				: {
+						kind: 'recurrence-exception-add',
+						...exception
+					};
+		}
+		const { proposal } = batch;
+		const committedItem =
+			publishedItems.find((item) => item.id === proposal.item.id) ?? proposal.item;
+		const kind =
+			proposal.kind === 'move' ? 'move' : proposal.kind.startsWith('resize') ? 'resize' : 'update';
+		return proposal.source === 'external-drop' || proposal.source === 'clipboard'
+			? { kind: 'add', source: proposal.source, item: committedItem, revert }
+			: {
+					kind,
+					source: proposal.source,
+					item: committedItem,
+					previousItem: proposal.previousItem,
+					revert
+				};
 	}
 
 	getOccurrencePlacementItem(
 		occurrence: EventCalendarOccurrence<TItemFields>
 	): EventCalendarItem<TItemFields> {
-		return replaceEventCalendarPlacement(occurrence.item, {
-			allDay: occurrence.allDay,
-			start: occurrence.allDay
-				? getZonedDay(occurrence.start, this.calendar.timeZone)
-				: new Date(occurrence.start),
-			end: occurrence.allDay
-				? getZonedDay(occurrence.end, this.calendar.timeZone)
-				: new Date(occurrence.end)
-		});
+		return getEventCalendarOccurrencePlacementItem(occurrence, this.calendar.timeZone);
 	}
 
 	getConversionDurationTimeZone(occurrence: EventCalendarOccurrence<TItemFields>): string {
@@ -493,103 +533,6 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 			);
 		}
 		return seriesItem.recurrenceTimeZone;
-	}
-
-	private commitRecurrenceProposal(
-		initialProposal: EventCalendarProposedUpdate<TItemFields>,
-		scope: 'occurrence' | 'series' | 'disabled',
-		boundary: EventCalendarModelBoundary<TItemFields>
-	): boolean {
-		if (scope === 'disabled') return this.rejectProposal(initialProposal, 'disabled');
-		return this.commitPreparedBatch(
-			initialProposal,
-			boundary,
-			this.recurrencePolicy(
-				this.getRecurrenceMutationOptions(initialProposal, scope, boundary.items)
-			)
-		);
-	}
-
-	private recurrencePolicy(
-		mutationOptions: CreateRecurrenceMutationOptions<TItemFields>
-	): EventCalendarCommitPolicy<TItemFields, EventCalendarRecurrenceMutation<TItemFields>> {
-		const toBatch = (mutation: EventCalendarRecurrenceMutation<TItemFields>) => ({
-			proposal: mutation.proposal,
-			candidateItems: mutation.committedItems,
-			mutation
-		});
-		return {
-			prepare: () => toBatch(createEventCalendarRecurrenceMutation(mutationOptions)),
-			validate: (batch) => this.validateRecurrenceMutation(batch.mutation),
-			reprepare: (batch, adjustedItem) => {
-				try {
-					const mutation =
-						batch.mutation.scope === 'series'
-							? regenerateEventCalendarSeriesMutation(
-									mutationOptions,
-									adjustedItem,
-									batch.mutation.operation
-								)
-							: createEventCalendarRecurrenceMutation({
-									...mutationOptions,
-									exceptionId: batch.mutation.exceptionId,
-									proposal: { ...batch.mutation.proposal, item: adjustedItem }
-								});
-					this.calendar.validateCandidateItems(mutation.committedItems);
-					const reason = this.validateRecurrenceMutation(mutation);
-					if (reason) {
-						throw new EventCalendarError(
-							'invalid-adjustment',
-							'resolveItemUpdate returned an invalid recurring adjustment.',
-							{ reason, id: adjustedItem.id }
-						);
-					}
-					return toBatch(mutation);
-				} catch (error) {
-					throw this.invalidAdjustmentError(error, adjustedItem.id);
-				}
-			},
-			publish: (batch) => {
-				const mutation = batch.mutation;
-				return {
-					createChange: (revert) =>
-						mutation.scope === 'series'
-							? {
-									kind: 'recurrence-series-update',
-									source: mutationOptions.proposal.source,
-									operation: mutation.operation,
-									seriesItem: mutation.seriesItem,
-									previousSeriesItem: mutation.previousSeriesItem,
-									exceptionItems: mutation.exceptionItems,
-									previousExceptionItems: mutation.previousExceptionItems,
-									revert
-								}
-							: mutation.previousItem
-								? {
-										kind: 'recurrence-exception-update',
-										source: mutationOptions.proposal.source,
-										seriesItem: mutation.seriesItem,
-										item: mutation.item,
-										previousItem: mutation.previousItem,
-										revert
-									}
-								: {
-										kind: 'recurrence-exception-add',
-										source: mutationOptions.proposal.source,
-										seriesItem: mutation.seriesItem,
-										item: mutation.item,
-										revert
-									},
-					keyRemap:
-						mutation.scope === 'series'
-							? {
-									forward: mutation.remapOccurrenceKey,
-									backward: mutation.restoreOccurrenceKey
-								}
-							: undefined
-				};
-			}
-		};
 	}
 
 	private getRecurrenceMutationOptions(
@@ -622,34 +565,36 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 		);
 		for (const occurrence of seriesOccurrences) {
 			const item = this.getOccurrencePlacementItem(occurrence);
-			if (!isValidPlacement(item, this.calendar.snapDuration)) return 'invalid-target';
-			if (!this.isInsideValidRange(item)) return 'valid-range';
-			if (this.calendar.constrainToBusinessHours && !this.isInsideBusinessHours(item)) {
-				return 'business-hours';
-			}
+			const placementReason = this.validatePlacement(item);
+			if (placementReason) return placementReason;
 			const proposal: EventCalendarProposedUpdate<TItemFields> = {
 				...mutation.proposal,
 				occurrence,
 				item
 			};
-			for (const conflict of occurrences) {
-				if (
-					conflict.key === occurrence.key ||
-					conflict.item.display === 'background' ||
-					!this.itemsShareResource(conflict.item, item) ||
-					!rangesIntersect(
-						{ start: occurrence.start, end: occurrence.end },
-						{ start: conflict.start, end: conflict.end }
-					)
-				) {
-					continue;
-				}
+			for (const conflict of this.findConflicts(
+				item,
+				occurrence.key,
+				undefined,
+				occurrences,
+				false,
+				false
+			)) {
 				if (!this.allowsConflict({ kind: 'item', proposal, conflictingOccurrence: conflict })) {
 					return 'overlap';
 				}
 			}
 		}
 		if (this.calendar.canUpdateItem?.(mutation.proposal) === false) return 'custom-policy';
+		return null;
+	}
+
+	private validatePlacement(item: EventCalendarScheduleLike): InvalidReason | null {
+		if (!isValidPlacement(item, this.calendar.snapDuration)) return 'invalid-target';
+		if (!this.isInsideValidRange(item)) return 'valid-range';
+		if (this.calendar.constrainToBusinessHours && !this.isInsideBusinessHours(item)) {
+			return 'business-hours';
+		}
 		return null;
 	}
 
@@ -681,29 +626,23 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 			start: adjustment.start ?? item.start,
 			end: adjustment.end ?? item.end
 		});
-		if (adjustment.resourceIds !== undefined) {
-			return setEventCalendarResourceIds(adjusted, adjustment.resourceIds ?? []);
-		}
-		if (adjustment.resourceId === null) return setEventCalendarResourceIds(adjusted, []);
-		return adjustment.resourceId === undefined
+		let resourceIds: readonly string[] | undefined;
+		if (adjustment.resourceIds !== undefined) resourceIds = adjustment.resourceIds ?? [];
+		else if (adjustment.resourceId === null) resourceIds = [];
+		else if (adjustment.resourceId !== undefined) resourceIds = [adjustment.resourceId];
+		return resourceIds === undefined
 			? adjusted
-			: setEventCalendarResourceIds(adjusted, [adjustment.resourceId]);
+			: setEventCalendarResourceIds(adjusted, resourceIds);
 	}
 
 	private commitCollection(
 		mutation: EventCalendarCollectionMutation<TItemFields>
 	): EventCalendarModelBoundary<TItemFields> | null {
-		if (!this.calendar.isModelBoundaryCurrent(mutation.boundary)) {
-			this.reportBlocked({ reason: 'stale', source: mutation.source });
-			return null;
-		}
+		if (!this.assertCurrent(mutation.boundary, mutation.source)) return null;
 		const committedItems = [...mutation.items];
 		this.calendar.validateCandidateItems(committedItems);
 		// Validation runs consumer expansion code; a reentrant write must not be overwritten.
-		if (!this.calendar.isModelBoundaryCurrent(mutation.boundary)) {
-			this.reportBlocked({ reason: 'stale', source: mutation.source });
-			return null;
-		}
+		if (!this.assertCurrent(mutation.boundary, mutation.source)) return null;
 		this.calendar.items = committedItems;
 		const committedBoundary = this.calendar.modelBoundary;
 		const publishedItems = committedBoundary.items;
@@ -742,13 +681,13 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 			}
 		);
 		const change = mutation.createChange(revert, publishedItems);
-		committedStatus = { source: change.source, item: getChangeStatusItem(change) };
+		committedStatus = {
+			source: change.source,
+			item: 'item' in change ? change.item : 'seriesItem' in change ? change.seriesItem : undefined
+		};
 		this.calendar.eventHandlers.onItemsChange?.({ items: publishedItems, change });
 		if (wasReverted) return null;
-		if (!this.calendar.isModelBoundaryCurrent(committedBoundary)) {
-			this.reportBlocked({ reason: 'stale', source: mutation.source });
-			return null;
-		}
+		if (!this.assertCurrent(committedBoundary, mutation.source)) return null;
 		if (mutation.recordHistory !== false) {
 			historyEntry = this.recordHistory(mutation.boundary.items, publishedItems, committedBoundary);
 		}
@@ -838,10 +777,9 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 	private synchronizeHistoryBoundary(
 		boundary: EventCalendarModelBoundary<TItemFields> = this.calendar.modelBoundary
 	): void {
-		const pastEntry = this.history.peekPast();
-		const futureEntry = this.history.peekFuture();
-		if (pastEntry) pastEntry.expectedBoundary = boundary;
-		if (futureEntry) futureEntry.expectedBoundary = boundary;
+		for (const entry of [this.history.peekPast(), this.history.peekFuture()]) {
+			if (entry) entry.expectedBoundary = boundary;
+		}
 	}
 
 	private createPastedItem(
@@ -856,20 +794,20 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 		}
 		const slot = selection.slot;
 		let placed: EventCalendarItem<TItemFields>;
-		if (source.allDay === true && slot.allDay) {
+		if (source.allDay === true) {
+			if (slot.allDay !== true) return next;
 			placed = replaceEventCalendarPlacement(next, {
 				allDay: true,
 				start: slot.start,
 				end: addCivilDays(slot.start, civilDayDifference(source.start, source.end))
 			});
-		} else if (source.allDay !== true && !slot.allDay) {
+		} else {
+			if (slot.allDay === true) return next;
 			placed = replaceEventCalendarPlacement(next, {
 				allDay: false,
 				start: slot.start,
 				end: new Date(slot.start.getTime() + source.end.getTime() - source.start.getTime())
 			});
-		} else {
-			return next;
 		}
 		if (slot.view !== 'resource') return placed;
 		return setEventCalendarResourceIds(placed, slot.resourceId ? [slot.resourceId] : []);
@@ -889,59 +827,46 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 		return id;
 	}
 
-	private isInsideValidRange(item: EventCalendarItem<TItemFields>): boolean {
+	private isInsideValidRange(schedule: EventCalendarScheduleLike): boolean {
 		if (!this.calendar.validRange) return true;
-		const range = itemRange(item, this.calendar.timeZone);
+		const range = scheduleRange(schedule, this.calendar.timeZone);
 		return (
 			range.start >= this.calendar.validRange.start && range.end <= this.calendar.validRange.end
 		);
 	}
 
-	private isSlotInsideValidRange(slot: EventCalendarSlot): boolean {
-		if (!this.calendar.validRange) return true;
-		const range = slotRange(slot, this.calendar.timeZone);
-		return (
-			range.start >= this.calendar.validRange.start && range.end <= this.calendar.validRange.end
-		);
-	}
-
-	private isInsideBusinessHours(item: EventCalendarItem<TItemFields>): boolean {
-		const range = itemRange(item, this.calendar.timeZone);
-		const resourceIds = this.calendar.resourceModel.resolveItemLeafIds(item);
+	private isInsideBusinessHours(schedule: EventCalendarScheduleLike): boolean {
+		const range = scheduleRange(schedule, this.calendar.timeZone);
+		const resourceIds = this.calendar.resourceModel.resolveItemLeafIds(schedule);
 		if (resourceIds.length === 0) {
-			return isRangeInsideBusinessHours(range, item.allDay === true, this.calendar);
+			return isRangeInsideBusinessHours(range, schedule.allDay === true, this.calendar);
 		}
 		return resourceIds.every((resourceId) =>
 			isRangeInsideBusinessHours(
 				range,
-				item.allDay === true,
+				schedule.allDay === true,
 				this.calendar,
 				this.calendar.resourceModel.getBusinessHours(resourceId) ?? this.calendar.businessHours
 			)
 		);
 	}
 
-	private isSlotInsideBusinessHours(slot: EventCalendarSlot): boolean {
-		return isRangeInsideBusinessHours(
-			slotRange(slot, this.calendar.timeZone),
-			slot.allDay,
-			this.calendar,
-			this.calendar.resourceModel.getBusinessHours(slot.resourceId) ?? this.calendar.businessHours
-		);
-	}
-
 	private findConflicts(
 		item: EventCalendarItem<TItemFields>,
 		ignoredOccurrenceKey?: string,
-		ignoredSeriesId?: string
+		ignoredSeriesId?: string,
+		occurrences: readonly EventCalendarOccurrence<TItemFields>[] = this.calendar.itemIndex
+			.occurrences,
+		excludeSameItem = true,
+		excludeSeries = true
 	) {
 		if (item.display === 'background') return [];
-		const range = itemRange(item, this.calendar.timeZone);
-		return this.calendar.itemIndex.occurrences.filter(
+		const range = scheduleRange(item, this.calendar.timeZone);
+		return occurrences.filter(
 			(occurrence) =>
 				occurrence.key !== ignoredOccurrenceKey &&
-				getEventCalendarOccurrenceSeriesId(occurrence) !== ignoredSeriesId &&
-				occurrence.item.id !== item.id &&
+				(!excludeSeries || getEventCalendarOccurrenceSeriesId(occurrence) !== ignoredSeriesId) &&
+				(!excludeSameItem || occurrence.item.id !== item.id) &&
 				occurrence.item.display !== 'background' &&
 				this.itemsShareResource(occurrence.item, item) &&
 				rangesIntersect(range, { start: occurrence.start, end: occurrence.end })
@@ -949,7 +874,7 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 	}
 
 	private findSlotConflicts(slot: EventCalendarSlot) {
-		const range = slotRange(slot, this.calendar.timeZone);
+		const range = scheduleRange(slot, this.calendar.timeZone);
 		return this.calendar.itemIndex.occurrences.filter(
 			(occurrence) =>
 				occurrence.item.display !== 'background' &&
@@ -981,12 +906,13 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 		return this.calendar.allowOverlap(info);
 	}
 
-	private assertBoundary(
+	private assertCurrent(
 		boundary: EventCalendarModelBoundary<TItemFields>,
-		proposal: EventCalendarProposedUpdate<TItemFields>
+		source: EventCalendarMutationSource,
+		proposal?: EventCalendarProposedUpdate<TItemFields>
 	): boolean {
 		if (this.calendar.isModelBoundaryCurrent(boundary)) return true;
-		this.reportBlocked({ reason: 'stale', source: proposal.source, proposal });
+		this.reportBlocked({ reason: 'stale', source, ...(proposal ? { proposal } : {}) });
 		return false;
 	}
 
@@ -1039,51 +965,33 @@ export class EventCalendarMutations<TItemFields extends object, TResourceFields 
 	}
 }
 
-function getChangeStatusItem<TItemFields extends object>(
-	change: EventCalendarChange<TItemFields>
-): EventCalendarItem<TItemFields> | undefined {
-	if ('item' in change) return change.item;
-	if ('seriesItem' in change) return change.seriesItem;
-	return undefined;
-}
-
-function isValidPlacement<TItemFields extends object>(
-	item: EventCalendarItem<TItemFields>,
-	minimumMinutes: number
-): boolean {
+function isValidPlacement(item: EventCalendarScheduleLike, minimumMinutes: number): boolean {
 	if (item.allDay === true) return item.start < item.end;
+	const start = item.start as Date;
+	const end = item.end as Date;
 	return (
-		Number.isFinite(item.start.getTime()) &&
-		item.end.getTime() - item.start.getTime() >= minimumMinutes * MINUTE_MS
+		Number.isFinite(start.getTime()) &&
+		end.getTime() - start.getTime() >= minimumMinutes * MINUTE_MS
 	);
 }
 
-function isValidSlot(slot: EventCalendarSlot, minimumMinutes: number): boolean {
-	return slot.allDay
-		? slot.start < slot.end
-		: slot.end.getTime() - slot.start.getTime() >= minimumMinutes * MINUTE_MS;
-}
-
-function itemRange<TItemFields extends object>(
-	item: EventCalendarItem<TItemFields>,
+function scheduleRange(
+	schedule: EventCalendarScheduleLike,
 	timeZone: string
 ): { start: Date; end: Date } {
-	return item.allDay === true
-		? { start: startOfZonedDay(item.start, timeZone), end: startOfZonedDay(item.end, timeZone) }
-		: { start: item.start, end: item.end };
-}
-
-function slotRange(slot: EventCalendarSlot, timeZone: string): { start: Date; end: Date } {
-	return slot.allDay
-		? { start: startOfZonedDay(slot.start, timeZone), end: startOfZonedDay(slot.end, timeZone) }
-		: { start: slot.start, end: slot.end };
+	return schedule.allDay === true
+		? {
+				start: startOfZonedDay(schedule.start as EventCalendarDateOnly, timeZone),
+				end: startOfZonedDay(schedule.end as EventCalendarDateOnly, timeZone)
+			}
+		: { start: schedule.start as Date, end: schedule.end as Date };
 }
 
 function isRangeInsideBusinessHours<TItemFields extends object, TResourceFields extends object>(
 	range: { start: Date; end: Date },
 	isAllDay: boolean,
 	calendar: EventCalendarState<TItemFields, TResourceFields>,
-	businessHours: readonly EventCalendarBusinessHours[] = calendar.businessHours
+	businessHours: readonly EventCalendarAdmittedBusinessHours[] = calendar.businessHours
 ): boolean {
 	if (businessHours.length === 0) return false;
 	const startDay = getZonedDay(range.start, calendar.timeZone);
@@ -1092,26 +1000,17 @@ function isRangeInsideBusinessHours<TItemFields extends object, TResourceFields 
 	if (!isAllDay && startDay !== endDay) return false;
 	if (!isAllDay) {
 		return businessHours.some((window) => {
-			if (window.daysOfWeek && !window.daysOfWeek.includes(getCivilWeekday(startDay))) return false;
-			const start = resolveZonedMinutesOnDay(startDay, parseClock(window.start), calendar.timeZone);
-			const end = resolveZonedMinutesOnDay(startDay, parseClock(window.end), calendar.timeZone);
+			if (!window.daysOfWeek.includes(getCivilWeekday(startDay))) return false;
+			const start = resolveZonedMinutesOnDay(startDay, window.startMinutes, calendar.timeZone);
+			const end = resolveZonedMinutesOnDay(startDay, window.endMinutes, calendar.timeZone);
 			return range.start >= start && range.end <= end;
 		});
 	}
 	for (let day = startDay; day <= endDay; day = addCivilDays(day, 1)) {
-		if (
-			!businessHours.some(
-				(window) => !window.daysOfWeek || window.daysOfWeek.includes(getCivilWeekday(day))
-			)
-		) {
+		if (!businessHours.some((window) => window.daysOfWeek.includes(getCivilWeekday(day)))) {
 			return false;
 		}
 		if (day === endDay) break;
 	}
 	return true;
-}
-
-function parseClock(value: string): number {
-	const [hours, minutes] = value.split(':').map(Number);
-	return hours * 60 + minutes;
 }

@@ -125,8 +125,8 @@ export type DndOver = {
 
 // Marks data as belonging to this utility. Symbol.for keeps the mark stable
 // across HMR module re-evaluations.
-const DND_MARK = Symbol.for('svelai-dnd');
-const DND_OWNER = Symbol.for('svelai-dnd-owner');
+const DND_MARK = Symbol.for('entasis-dnd');
+const DND_OWNER = Symbol.for('entasis-dnd-owner');
 
 type DragLifecycle = {
 	isCancelled: boolean;

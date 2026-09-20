@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Popover } from 'svelai/popover';
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
+	import { Heading } from 'entasis/heading';
+	import { Popover } from 'entasis/popover';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
 	const groups = [
 		{ title: 'Home', links: ['All homeware', 'Lighting', 'Vessels', 'Tableware'] },
 		{ title: 'Wear', links: ['Everyday tees', 'Layers', 'Accessories'] },

@@ -2,7 +2,7 @@ import type {
 	EventCalendarItem,
 	EventCalendarProposedUpdate,
 	EventCalendarResource
-} from 'svelai/event-calendar';
+} from 'entasis/event-calendar';
 
 export type MeetingFields = {
 	owner: string;

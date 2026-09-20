@@ -1,6 +1,6 @@
-# Svelai
+# Entasis
 
-Svelai is a component library that exposes concise semantic descriptions and owns their rendering details.
+Entasis is a component library that exposes concise semantic descriptions and owns their rendering details.
 
 ## Chart language
 

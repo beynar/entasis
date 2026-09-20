@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Avatar } from 'svelai/avatar';
-	import { Button } from 'svelai/button';
-	import { Separator } from 'svelai/separator';
+	import { Heading } from 'entasis/heading';
+	import { Avatar } from 'entasis/avatar';
+	import { Button } from 'entasis/button';
+	import { Separator } from 'entasis/separator';
 	const stories = [
 		{
 			company: 'Northstar',

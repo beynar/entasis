@@ -15,6 +15,7 @@
 	import { type EventCalendarTimedDropTarget } from './eventCalendar.targets.js';
 	import {
 		getEventCalendarElapsedMinutes,
+		getEventCalendarTimeGridItemTargetKey,
 		type EventCalendarTimeGridDayGeometry,
 		type EventCalendarTimeSlot
 	} from './eventCalendar.timeGrid.js';
@@ -26,8 +27,6 @@
 		view,
 		calendar,
 		geometry,
-		columnLabel,
-		isOffDay,
 		selectionKey,
 		longDayFormatter,
 		accessibleTimeFormatter,
@@ -41,8 +40,6 @@
 		view: 'week' | 'day' | 'days' | 'resource';
 		calendar: EventCalendarState<TItemFields, TResourceFields>;
 		geometry: EventCalendarTimeGridDayGeometry<TItemFields>;
-		columnLabel: string;
-		isOffDay: boolean;
 		selectionKey: string | null;
 		longDayFormatter: Intl.DateTimeFormat;
 		accessibleTimeFormatter: Intl.DateTimeFormat;
@@ -58,9 +55,11 @@
 	const density = $derived(calendar.density);
 	const classes = $derived(calendar.classes);
 	const disabled = $derived(calendar.disabled);
-	const timeGutter = $derived(calendar.renderers.timeGutter);
-	const nowIndicatorContent = $derived(calendar.renderers.nowIndicator || undefined);
-	const onItemDoubleClick = $derived(calendar.eventHandlers.onItemDoubleClick);
+	const nowIndicator = $derived(
+		calendar.renderers.nowIndicator === false ? undefined : calendar.renderers.nowIndicator
+	);
+	const timeOffset = (instant: Date): number =>
+		getEventCalendarElapsedMinutes(geometry.windowStart, instant) / calendar.interval;
 
 	function isTimedSlotSelected(slot: EventCalendarTimeSlot): boolean {
 		return (
@@ -74,21 +73,15 @@
 	function getTimedPlacementStyle(
 		placement: EventCalendarTimeGridDayGeometry<TItemFields>['timedPlacements'][number]
 	): string {
-		const top =
-			getEventCalendarElapsedMinutes(geometry.windowStart, placement.visualStart) /
-			calendar.interval;
+		const top = timeOffset(placement.visualStart);
 		const clippedVisualEnd = new Date(
 			Math.min(placement.visualEnd.getTime(), geometry.windowEnd.getTime())
 		);
-		const height = Math.max(
-			0.125,
-			getEventCalendarElapsedMinutes(placement.visualStart, clippedVisualEnd) / calendar.interval
-		);
+		const height = Math.max(0.125, timeOffset(clippedVisualEnd) - top);
 		const inset = placement.column / placement.columnCount;
 		const width = placement.span / placement.columnCount;
 		return `top:calc(${top} * var(--event-calendar-slot-height));height:calc(${height} * var(--event-calendar-slot-height));inset-inline-start:${inset * 100}%;width:${width * 100}%`;
 	}
-	const columnDropTarget = $derived(geometry.timedColumnTarget);
 	const timedSelection = $derived.by(() => {
 		const slot = calendar.interaction.slot;
 		if (
@@ -106,26 +99,26 @@
 		return {
 			start,
 			end,
-			top: getEventCalendarElapsedMinutes(geometry.windowStart, start) / calendar.interval,
-			height: Math.max(0.125, getEventCalendarElapsedMinutes(start, end) / calendar.interval)
+			top: timeOffset(start),
+			height: Math.max(0.125, timeOffset(end) - timeOffset(start))
 		};
 	});
 </script>
 
 <div
 	role="group"
-	aria-label={columnLabel}
+	aria-label={geometry.columnLabel ?? geometry.day}
 	data-event-calendar-part="day-column"
 	data-day={geometry.day}
 	data-resource-id={geometry.resourceId}
 	data-minute-count={geometry.minuteCount}
-	data-off-day={isOffDay || undefined}
-	class={classes.dayColumn({ density, view, offDay: isOffDay, disabled })}
+	data-off-day={geometry.offDay || undefined}
+	class={classes.dayColumn({ density, view, offDay: geometry.offDay, disabled })}
 	style:min-width={view === 'resource' ? 'var(--event-calendar-resource-min-width)' : undefined}
 	style:height={`calc(${geometry.minuteCount / calendar.interval} * var(--event-calendar-slot-height))`}
 	data-calendar-instance-id={calendar.interaction.instanceId}
-	data-event-calendar-target-key={columnDropTarget.key}
-	{@attach disabled ? null : calendar.interaction.dropTarget(columnDropTarget)}
+	data-event-calendar-target-key={geometry.timedColumnTarget.key}
+	{@attach disabled ? null : calendar.interaction.dropTarget(geometry.timedColumnTarget)}
 >
 	{#each localTimeLabels ?? [] as localTimeLabel (localTimeLabel.instant.getTime())}
 		{@const timeGutterPayload = {
@@ -142,10 +135,13 @@
 				class:
 					'inset-inline-start-0 bg-surface/90 pointer-events-none absolute z-[2] w-[var(--event-calendar-time-gutter-width)]'
 			})}
-			style:top={`calc(${getEventCalendarElapsedMinutes(geometry.windowStart, localTimeLabel.instant) / calendar.interval} * var(--event-calendar-slot-height))`}
+			style:top={`calc(${timeOffset(localTimeLabel.instant)} * var(--event-calendar-slot-height))`}
 			style:height="var(--event-calendar-slot-height)"
 		>
-			<Slot render={timeGutter ?? timeGutterPayload.defaultContent} payload={timeGutterPayload} />
+			<Slot
+				render={calendar.renderers.timeGutter ?? timeGutterPayload.defaultContent}
+				payload={timeGutterPayload}
+			/>
 		</time>
 
 		{#snippet defaultLocalTimeGutter()}
@@ -160,8 +156,8 @@
 			data-start={businessWindow.start.toISOString()}
 			data-end={businessWindow.end.toISOString()}
 			class="bg-color-muted/25 pointer-events-none absolute inset-x-0"
-			style:top={`calc(${getEventCalendarElapsedMinutes(geometry.windowStart, businessWindow.start) / calendar.interval} * var(--event-calendar-slot-height))`}
-			style:height={`calc(${getEventCalendarElapsedMinutes(businessWindow.start, businessWindow.end) / calendar.interval} * var(--event-calendar-slot-height))`}
+			style:top={`calc(${timeOffset(businessWindow.start)} * var(--event-calendar-slot-height))`}
+			style:height={`calc(${timeOffset(businessWindow.end) - timeOffset(businessWindow.start)} * var(--event-calendar-slot-height))`}
 		></div>
 	{/each}
 
@@ -172,8 +168,8 @@
 			data-occurrence-key={segment.occurrence.key}
 			class="pointer-events-none absolute inset-x-0 opacity-20"
 			style:background={getEventCalendarItemColor(segment.occurrence)}
-			style:top={`calc(${getEventCalendarElapsedMinutes(geometry.windowStart, segment.start) / calendar.interval} * var(--event-calendar-slot-height))`}
-			style:height={`calc(${Math.max(0.125, getEventCalendarElapsedMinutes(segment.start, segment.end) / calendar.interval)} * var(--event-calendar-slot-height))`}
+			style:top={`calc(${timeOffset(segment.start)} * var(--event-calendar-slot-height))`}
+			style:height={`calc(${Math.max(0.125, timeOffset(segment.end) - timeOffset(segment.start))} * var(--event-calendar-slot-height))`}
 		></div>
 	{/each}
 
@@ -204,13 +200,13 @@
 			})}
 			style:position="absolute"
 			style:inset-inline="0"
-			style:top={`calc(${getEventCalendarElapsedMinutes(geometry.windowStart, slot.start) / calendar.interval} * var(--event-calendar-slot-height))`}
-			style:height={`calc(${getEventCalendarElapsedMinutes(slot.start, slot.end) / calendar.interval} * var(--event-calendar-slot-height))`}
+			style:top={`calc(${timeOffset(slot.start)} * var(--event-calendar-slot-height))`}
+			style:height={`calc(${timeOffset(slot.end) - timeOffset(slot.start)} * var(--event-calendar-slot-height))`}
 			onfocus={() => a11y.handleTimeTargetFocus(slot.key)}
 			onclick={(event) => handleTimedSlotClick(dropTarget, event)}
 			onkeydown={(event) => handleTargetKeydown(event, slot.key, true)}
 			{@attach disabled ? null : registerTimeTarget(slot.key)}
-			{@attach disabled ? null : calendar.interaction.slotDrag(dropTarget)}
+			{@attach disabled ? null : calendar.interaction.registerTarget(dropTarget)}
 		></button>
 	{/each}
 
@@ -233,14 +229,18 @@
 			data-event-calendar-time-line
 			data-line-instant={instant.toISOString()}
 			class="border-neutral-muted/60 pointer-events-none absolute inset-x-0 z-[1] border-t"
-			style:top={`calc(${getEventCalendarElapsedMinutes(geometry.windowStart, instant) / calendar.interval} * var(--event-calendar-slot-height))`}
+			style:top={`calc(${timeOffset(instant)} * var(--event-calendar-slot-height))`}
 		></div>
 	{/each}
 
 	{#each geometry.timedPlacements as placement (placement.key)}
 		{@const segment = placement.segment}
-		{@const targetKey = `time-item:${segment.key}`}
-		<div class="absolute z-10 min-w-0 px-px" style={getTimedPlacementStyle(placement)}>
+		{@const targetKey = getEventCalendarTimeGridItemTargetKey('timed', geometry.key, segment.key)}
+		<div
+			class="absolute z-10 min-w-0 px-px"
+			data-event-calendar-navigation-key={targetKey}
+			style={getTimedPlacementStyle(placement)}
+		>
 			<EventCalendarItem
 				{calendar}
 				{segment}
@@ -255,7 +255,8 @@
 				onControlFocus={() => a11y.handleTimeTargetFocus(targetKey)}
 				onControlKeydown={(event) => handleTargetKeydown(event, targetKey)}
 				onActivate={(event) => handleItemActivate(segment, event)}
-				onDoubleClick={(event) => onItemDoubleClick?.({ occurrence: segment.occurrence, event })}
+				onDoubleClick={(event) =>
+					calendar.eventHandlers.onItemDoubleClick?.({ occurrence: segment.occurrence, event })}
 			/>
 		</div>
 	{/each}
@@ -267,9 +268,9 @@
 			data-event-calendar-part="now-indicator"
 			class={classes.nowIndicator({ density, view })}
 			style:inset-inline="0"
-			style:top={`calc(${getEventCalendarElapsedMinutes(geometry.windowStart, nowPayload.now) / calendar.interval} * var(--event-calendar-slot-height))`}
+			style:top={`calc(${timeOffset(nowPayload.now)} * var(--event-calendar-slot-height))`}
 		>
-			<Slot render={nowIndicatorContent ?? defaultNowIndicator} payload={nowPayload} />
+			<Slot render={nowIndicator ?? defaultNowIndicator} payload={nowPayload} />
 		</div>
 	{/if}
 </div>

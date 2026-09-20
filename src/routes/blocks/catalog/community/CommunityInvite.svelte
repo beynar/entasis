@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { AvatarGroup } from 'svelai/avatar';
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { bookOpenIcon } from 'svelai/icons/bookOpen';
-	import { puzzlePieceIcon } from 'svelai/icons/puzzlePiece';
-	import { usersThreeIcon } from 'svelai/icons/usersThree';
+	import { AvatarGroup } from 'entasis/avatar';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { bookOpenIcon } from 'entasis/icons/bookOpen';
+	import { puzzlePieceIcon } from 'entasis/icons/puzzlePiece';
+	import { usersThreeIcon } from 'entasis/icons/usersThree';
 </script>
 
 <section class="gap-xl p-xl mx-auto flex max-w-3xl flex-col items-center text-center">

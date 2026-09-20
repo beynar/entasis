@@ -27,13 +27,13 @@ export const LOCALE = 'en-GB';
 	];
 
 	const oldConfig = `{
-	"name": "svelai",
+	"name": "entasis",
 	"version": "1.0.0"
 }
 `;
 
 	const newConfig = `{
-	"name": "svelai",
+	"name": "entasis",
 	"version": "1.1.0",
 	"private": true
 }

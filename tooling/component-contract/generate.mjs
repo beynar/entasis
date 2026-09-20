@@ -148,7 +148,7 @@ async function assertManifest(entries) {
 		!grid.exportedSymbols.includes('GridSpan') ||
 		!grid.docs.some((doc) => doc.id === 'grid-span')
 	) {
-		errors.push('GridSpan must remain documented and exported from svelai/grid');
+		errors.push('GridSpan must remain documented and exported from entasis/grid');
 	}
 
 	const modeledIndexes = new Set(entries.map((entry) => entry.sourceIndex));
@@ -318,8 +318,8 @@ function metadataOutput(entries) {
 			entry.subpath === null
 				? null
 				: entry.subpath === './package.json'
-					? 'svelai/package.json'
-					: `svelai/${entry.subpath.slice(2)}`,
+					? 'entasis/package.json'
+					: `entasis/${entry.subpath.slice(2)}`,
 		sourceIndex: entry.sourceIndex,
 		exportedSymbols: entry.exportedSymbols,
 		docs: entry.docs,
@@ -355,10 +355,10 @@ function inventoryPageOutput() {
 </script>
 
 <svelte:head>
-\t<title>Component inventory · svelai</title>
+\t<title>Component inventory · entasis</title>
 \t<meta
 \t\tname="description"
-\t\tcontent="The generated inventory of svelai components, utilities, entrypoints, and documentation."
+\t\tcontent="The generated inventory of entasis components, utilities, entrypoints, and documentation."
 \t/>
 </svelte:head>
 
@@ -435,7 +435,7 @@ function skillInventory(entries) {
 				`### ${category}\n\n${records
 					.map(
 						({ entry, doc }) =>
-							`- \`${entry.subpath === './package.json' ? 'svelai/package.json' : `svelai/${entry.subpath.slice(2)}`}\` — ${doc.label} (${doc.route})`
+							`- \`${entry.subpath === './package.json' ? 'entasis/package.json' : `entasis/${entry.subpath.slice(2)}`}\` — ${doc.label} (${doc.route})`
 					)
 					.join('\n')}`
 		)
@@ -443,7 +443,7 @@ function skillInventory(entries) {
 	const moduleSection = modules
 		.map(
 			(entry) =>
-				`- \`${entry.subpath === './package.json' ? 'svelai/package.json' : `svelai/${entry.subpath.slice(2)}`}\` — ${entry.capabilities.join(', ')}`
+				`- \`${entry.subpath === './package.json' ? 'entasis/package.json' : `entasis/${entry.subpath.slice(2)}`}\` — ${entry.capabilities.join(', ')}`
 		)
 		.join('\n');
 
@@ -471,7 +471,7 @@ function updateSkillInventory(source, inventory) {
 
 	if (startIndex === -1 && endIndex === -1) return `${source.trimEnd()}\n\n${inventory}\n`;
 	if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
-		throw new Error('Malformed component contract inventory markers in svelai skill');
+		throw new Error('Malformed component contract inventory markers in entasis skill');
 	}
 	return `${source.slice(0, startIndex)}${inventory}${source.slice(endIndex + end.length)}`;
 }
@@ -520,7 +520,7 @@ await emit(
 				// Vite uses the first matching prefix, so nested exports must come first.
 				.sort((left, right) => right.subpath.split('/').length - left.subpath.split('/').length)
 				.map((entry) => [
-					`svelai/${entry.subpath.slice(2)}`,
+					`entasis/${entry.subpath.slice(2)}`,
 					`./${entry.sourceIndex.replace(/\*\.ts$/, '*')}`
 				])
 		),
@@ -530,11 +530,11 @@ await emit(
 );
 await emit('src/routes/components/+page.svelte', inventoryPageOutput());
 
-// `.claude/skills/svelai` is the canonical skill tree; `.agents/skills/svelai` is a
+// `.claude/skills/entasis` is the canonical skill tree; `.agents/skills/entasis` is a
 // generated mirror so both agent runtimes read identical docs.
 const inventory = skillInventory(entries);
-const canonicalSkillDir = '.claude/skills/svelai';
-const mirrorSkillDir = '.agents/skills/svelai';
+const canonicalSkillDir = '.claude/skills/entasis';
+const mirrorSkillDir = '.agents/skills/entasis';
 await emit(
 	`${canonicalSkillDir}/SKILL.md`,
 	updateSkillInventory(await read(`${canonicalSkillDir}/SKILL.md`), inventory)

@@ -478,7 +478,7 @@ const warnIfNothingMounts = () => {
 		if (!pendingWarningScheduled || !pendingToasts.length) return;
 		pendingWarningScheduled = false;
 		console.warn(
-			`svelai: ${pendingToasts.length} toast(s) are queued because no <Toaster /> is mounted. Add <Toaster /> to your root layout; they will appear as soon as one mounts.`
+			`entasis: ${pendingToasts.length} toast(s) are queued because no <Toaster /> is mounted. Add <Toaster /> to your root layout; they will appear as soon as one mounts.`
 		);
 	}, 0);
 };

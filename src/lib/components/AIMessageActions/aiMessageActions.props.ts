@@ -9,7 +9,7 @@ import type { AIMessageActionsThemeProps } from './aiMessageActions.theme.js';
 export type AIMessageActionState<TMessage extends AIThreadItem = AIThreadItem> = {
 	message?: TMessage;
 	messageIndex?: number;
-	/** Svelai alias for `messageIndex`. */
+	/** Entasis alias for `messageIndex`. */
 	index?: number;
 	role: AIThreadRole;
 	content: string;
@@ -47,7 +47,7 @@ export type AIMessageActionsProps<TMessage extends AIThreadItem = AIThreadItem> 
 		message?: TMessage;
 		/** Transcript index passed to edit, retry, and custom actions. */
 		messageIndex?: number;
-		/** Svelai alias for `messageIndex`. */
+		/** Entasis alias for `messageIndex`. */
 		index?: number;
 		/** Role used to derive default action availability and alignment. */
 		role?: AIThreadRole;
@@ -65,15 +65,15 @@ export type AIMessageActionsProps<TMessage extends AIThreadItem = AIThreadItem> 
 		editable?: boolean;
 		/** Enables the retry action when the message role is `assistant`. */
 		retryable?: boolean;
-		/** Svelai alias for `copyable`. */
+		/** Entasis alias for `copyable`. */
 		copy?: boolean;
-		/** Svelai alias for `editable`. */
+		/** Entasis alias for `editable`. */
 		edit?: boolean;
-		/** Svelai alias for `retryable`. */
+		/** Entasis alias for `retryable`. */
 		retry?: boolean;
 		/** Replaces the default actions with a stateful custom renderer, or disables all actions. */
 		actions?: Slot<AIMessageActionState<TMessage>> | false;
-		/** Svelai child-slot alias for `actions`. */
+		/** Entasis child-slot alias for `actions`. */
 		children?: Slot<AIMessageActionState<TMessage>>;
 		/** Called with complete action state after content is copied successfully. */
 		onCopy?: AIMessageActionHandler<TMessage>;

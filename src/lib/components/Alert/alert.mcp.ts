@@ -112,8 +112,8 @@ The grid layout:
 ### Alert with Icon
 \`\`\`svelte
 <script lang="ts">
-	import { Alert } from 'svelai/alert';
-	import { infoIcon } from 'svelai/icons/info';
+	import { Alert } from 'entasis/alert';
+	import { infoIcon } from 'entasis/icons/info';
 </script>
 
 <Alert color="info">
@@ -132,8 +132,8 @@ The grid layout:
 ### Success Alert
 \`\`\`svelte
 <script lang="ts">
-	import { Alert } from 'svelai/alert';
-	import { checkCircleIcon } from 'svelai/icons/checkCircle';
+	import { Alert } from 'entasis/alert';
+	import { checkCircleIcon } from 'entasis/icons/checkCircle';
 </script>
 
 <Alert color="success">
@@ -152,8 +152,8 @@ The grid layout:
 ### Warning Alert
 \`\`\`svelte
 <script lang="ts">
-	import { Alert } from 'svelai/alert';
-	import { warningIcon } from 'svelai/icons/warning';
+	import { Alert } from 'entasis/alert';
+	import { warningIcon } from 'entasis/icons/warning';
 </script>
 
 <Alert color="warning" variant="outline">
@@ -172,8 +172,8 @@ The grid layout:
 ### Danger Alert
 \`\`\`svelte
 <script lang="ts">
-	import { Alert } from 'svelai/alert';
-	import { warningCircleIcon } from 'svelai/icons/warningCircle';
+	import { Alert } from 'entasis/alert';
+	import { warningCircleIcon } from 'entasis/icons/warningCircle';
 </script>
 
 <Alert color="danger">
@@ -317,7 +317,7 @@ The theme object contains the following parts:
 ### Theme Type Definition
 
 \`\`\`typescript
-import type { AlertThemeProps } from 'svelai/alert';
+import type { AlertThemeProps } from 'entasis/alert';
 
 // Example theme customization
 const customTheme: AlertThemeProps = {
@@ -414,8 +414,8 @@ const customTheme: AlertThemeProps = {
 **Basic Theme Override**:
 \`\`\`svelte
 <script lang="ts">
-  import { Alert } from 'svelai/alert';
-  import { warningCircleIcon } from 'svelai/icons/warningCircle';
+  import { Alert } from 'entasis/alert';
+  import { warningCircleIcon } from 'entasis/icons/warningCircle';
 </script>
 
 <Alert 
@@ -469,7 +469,7 @@ const customTheme: AlertThemeProps = {
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setAlertTheme } from 'svelai/alert';
+  import { setAlertTheme } from 'entasis/alert';
   
   setAlertTheme({
     root: {

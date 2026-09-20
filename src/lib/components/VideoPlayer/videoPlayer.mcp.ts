@@ -1,13 +1,13 @@
 export const videoPlayerDescription = `
 # VideoPlayer Component
 
-VideoPlayer is a native HTML5 video player with Svelai chrome. It keeps the media engine dependency-free and composes controls from Button, Popover, PopupMenu/Menu, AspectRatio, and the shared Slider primitive.
+VideoPlayer is a native HTML5 video player with Entasis chrome. It keeps the media engine dependency-free and composes controls from Button, Popover, PopupMenu/Menu, AspectRatio, and the shared Slider primitive.
 
 ## Import
 
 \`\`\`svelte
 <script lang="ts">
-	import { VideoPlayer } from 'svelai/video-player';
+	import { VideoPlayer } from 'entasis/video-player';
 </script>
 \`\`\`
 

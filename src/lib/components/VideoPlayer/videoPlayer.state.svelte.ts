@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging -- Descriptor binding follows the established Svelai state-class pattern. */
+/* eslint-disable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging -- Descriptor binding follows the established Entasis state-class pattern. */
 import {
 	MediaPlayerState,
 	type MediaPlayerCallbacks,

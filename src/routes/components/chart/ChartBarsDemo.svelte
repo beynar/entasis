@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Chart } from 'svelai/chart';
+	import { Chart } from 'entasis/chart';
 
 	type QuarterlyRevenue = {
 		quarter: string;

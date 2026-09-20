@@ -1,14 +1,14 @@
 export const audioPlayerDescription = `
 # AudioPlayer Component
 
-AudioPlayer is a native HTML5 audio player with Svelai chrome. It can render a
+AudioPlayer is a native HTML5 audio player with Entasis chrome. It can render a
 waveform or track seek/progress surface and composes controls from Button, Tooltip,
 Popover, and the shared Slider primitive.
 
 ## Import
 
 \`\`\`ts
-import { AudioPlayer } from 'svelai/audio-player';
+import { AudioPlayer } from 'entasis/audio-player';
 \`\`\`
 
 ## Core Props

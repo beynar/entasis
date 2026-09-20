@@ -259,7 +259,7 @@ export const useTheme = () => {
 	// dereferenced it first; name the cause instead, at the point where it is known.
 	if (!theme) {
 		throw new Error(
-			'svelai: <Theme> was not found above this component. Wrap your app in <Theme> from "svelai/theme".'
+			'entasis: <Theme> was not found above this component. Wrap your app in <Theme> from "entasis/theme".'
 		);
 	}
 	return theme;

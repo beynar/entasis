@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Chip } from 'svelai/chip';
-	import { Card } from 'svelai/card';
+	import { Heading } from 'entasis/heading';
+	import { Chip } from 'entasis/chip';
+	import { Card } from 'entasis/card';
 	const releases = [
 		{
 			version: '2.4',

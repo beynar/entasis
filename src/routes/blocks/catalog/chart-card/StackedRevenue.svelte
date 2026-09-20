@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chart } from 'svelai/chart';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chart } from 'entasis/chart';
 
 	let quarter = $state('Q2');
 	const revenue = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].flatMap((month, index) => [

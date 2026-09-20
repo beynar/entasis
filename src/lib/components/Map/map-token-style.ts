@@ -144,7 +144,7 @@ function readMapStyleColors(root: HTMLElement): MapStyleColors {
 
 	try {
 		const tokens = readMapStyleTokens(probe);
-		// svelai's Theme writes `color-scheme: dark` on <html> for every dark theme —
+		// entasis's Theme writes `color-scheme: dark` on <html> for every dark theme —
 		// including custom-named ones (data-theme="midnight") — so read that first, and
 		// fall back to the `.dark` / data-theme="dark" defaults.
 		const root = document.documentElement;

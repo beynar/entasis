@@ -7,8 +7,8 @@ FloatingWindow renders a non-modal, portaled utility window that can be moved, r
 
 \`\`\`svelte
 <script lang="ts">
-  import { Button } from 'svelai/button';
-  import { FloatingWindow } from 'svelai/floating-window';
+  import { Button } from 'entasis/button';
+  import { FloatingWindow } from 'entasis/floating-window';
 
   let open = $state(false);
 </script>
@@ -55,7 +55,7 @@ Header dragging is the default because it preserves text selection and content i
 ## Accessibility
 
 - The expanded surface uses a non-modal \`dialog\` role and is labelled by its title.
-- Close, minimize, and restore controls are native Svelai buttons with accessible labels.
+- Close, minimize, and restore controls are native Entasis buttons with accessible labels.
 - Edge resize handles use \`separator\` semantics and support arrow-key resizing; hold Shift for a larger step.
 - Opening focuses the non-modal window, closing restores focus to its previous owner, and only the topmost expanded floating window handles Escape.
 - Alt+Arrow moves the focused window; hold Shift for a larger step.

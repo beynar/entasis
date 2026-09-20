@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Tabbar } from 'svelai/tabbar';
-	import { TextInput } from 'svelai/text-input';
-	import { Button } from 'svelai/button';
-	import { Dialog } from 'svelai/dialog';
+	import { Heading } from 'entasis/heading';
+	import { Tabbar } from 'entasis/tabbar';
+	import { TextInput } from 'entasis/text-input';
+	import { Button } from 'entasis/button';
+	import { Dialog } from 'entasis/dialog';
 	const jobs = [
 		{
 			title: 'Product designer',

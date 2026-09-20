@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { EventCalendar } from 'svelai/event-calendar';
+	import { EventCalendar } from 'entasis/event-calendar';
 	import { createDemoItems } from './eventCalendarDemoData.js';
 
 	let items = $state(createDemoItems());

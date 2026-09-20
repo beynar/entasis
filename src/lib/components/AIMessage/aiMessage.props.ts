@@ -38,7 +38,7 @@ export type AIMessageProps<TMessage extends AIThreadItem = AIThreadItem> = WithA
 		message?: TMessage;
 		/** Transcript index passed to action callbacks and custom renderers. */
 		messageIndex?: number;
-		/** Svelai alias for `messageIndex`. */
+		/** Entasis alias for `messageIndex`. */
 		index?: number;
 		/** Message role; overrides the source message role. */
 		from?: AIThreadRole;
@@ -56,7 +56,7 @@ export type AIMessageProps<TMessage extends AIThreadItem = AIThreadItem> = WithA
 		markdown?: boolean;
 		/** Props forwarded to Markdown except for its owned safety boundary. */
 		streamdown?: AIMessageMarkdownProps;
-		/** Svelai alias for `streamdown`. */
+		/** Entasis alias for `streamdown`. */
 		markdownProps?: AIMessageMarkdownProps;
 		/** Conversation used by default actions. Pass `null` to disable scoped conversation lookup. */
 		conversation?: AIConversationState<TMessage> | null;
@@ -64,7 +64,7 @@ export type AIMessageProps<TMessage extends AIThreadItem = AIThreadItem> = WithA
 		actions?: false | Slot<AIMessageActionState<TMessage>>;
 		/** Controls when the default or custom action region is visible. */
 		actionsVisibility?: AIMessageActionVisibility;
-		/** Svelai alias for `actionsVisibility`. */
+		/** Entasis alias for `actionsVisibility`. */
 		actionVisibility?: AIMessageActionVisibility;
 		/** Enables the copy action. */
 		copyable?: boolean;
@@ -72,11 +72,11 @@ export type AIMessageProps<TMessage extends AIThreadItem = AIThreadItem> = WithA
 		editable?: boolean;
 		/** Enables the retry action when the message role is `assistant`. */
 		retryable?: boolean;
-		/** Svelai alias for `copyable`. */
+		/** Entasis alias for `copyable`. */
 		copyAction?: boolean;
-		/** Svelai alias for `editable`. */
+		/** Entasis alias for `editable`. */
 		editAction?: boolean;
-		/** Svelai alias for `retryable`. */
+		/** Entasis alias for `retryable`. */
 		retryAction?: boolean;
 		/** Replaces the message body while retaining role layout and actions. */
 		children?: Slot<AIMessageRenderPayload<TMessage>>;

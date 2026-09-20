@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Dialog } from 'svelai/dialog';
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
+	import { Heading } from 'entasis/heading';
+	import { Dialog } from 'entasis/dialog';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
 
 	let open = $state(false);
 	let applied = $state('');

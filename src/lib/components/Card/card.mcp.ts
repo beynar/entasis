@@ -137,9 +137,9 @@ The Card component uses a flexible slot-based structure:
 ### Card with Action Button (Snippet)
 \`\`\`svelte
 <script lang="ts">
-	import { Card } from 'svelai/card';
-	import { Button } from 'svelai/button';
-	import { dotsThreeVerticalIcon } from 'svelai/icons/dotsThreeVertical';
+	import { Card } from 'entasis/card';
+	import { Button } from 'entasis/button';
+	import { dotsThreeVerticalIcon } from 'entasis/icons/dotsThreeVertical';
 </script>
 
 <Card>
@@ -351,7 +351,7 @@ The theme object contains the following parts:
 ### Theme Type Definition
 
 \`\`\`typescript
-import type { CardThemeProps } from 'svelai/card';
+import type { CardThemeProps } from 'entasis/card';
 
 // Example theme customization
 const customTheme: CardThemeProps = {
@@ -493,7 +493,7 @@ const customTheme: CardThemeProps = {
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setCardTheme } from 'svelai/card';
+  import { setCardTheme } from 'entasis/card';
   
   setCardTheme({
     root: {

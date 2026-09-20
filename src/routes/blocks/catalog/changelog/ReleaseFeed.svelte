@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Tabbar } from 'svelai/tabbar';
-	import { Chip } from 'svelai/chip';
-	import { Avatar } from 'svelai/avatar';
+	import { Heading } from 'entasis/heading';
+	import { Tabbar } from 'entasis/tabbar';
+	import { Chip } from 'entasis/chip';
+	import { Avatar } from 'entasis/avatar';
 	const releases = [
 		{
 			version: '2.4',

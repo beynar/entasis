@@ -49,13 +49,13 @@ export type ButtonPrimitiveProps = WithAttachments<
 			selected?: boolean;
 			/**
 			 * Whether the surface this button opens is currently showing. Rendered as
-			 * `aria-expanded`. A svelai surface (Popover, PopupMenu, Select, Combobox) sets this
+			 * `aria-expanded`. A entasis surface (Popover, PopupMenu, Select, Combobox) sets this
 			 * on its own trigger; pass it only for a surface you open yourself.
 			 */
 			expanded?: boolean;
 			/**
 			 * What the surface this button opens contains, when it is a trigger. Rendered as
-			 * `aria-haspopup`. A svelai surface sets this on its own trigger.
+			 * `aria-haspopup`. A entasis surface sets this on its own trigger.
 			 */
 			haspopup?: 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid' | true;
 			/**

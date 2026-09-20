@@ -28,7 +28,7 @@ export interface LayerOptions {
 	parent?: LayerHandle | null;
 }
 
-const LAYER_CONTEXT = Symbol('svelai:layer');
+const LAYER_CONTEXT = Symbol('entasis:layer');
 
 export class LayerHandle {
 	readonly kind: LayerKind;

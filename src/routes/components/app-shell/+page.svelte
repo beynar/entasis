@@ -44,13 +44,13 @@
 
 	function toPublicExampleCode(code: string): string {
 		return code
-			.replaceAll('$lib/components/AppShell/index.js', 'svelai/app-shell')
-			.replaceAll('$lib/components/Breadcrumbs/index.js', 'svelai/breadcrumbs')
-			.replaceAll('$lib/components/Button/Button.svelte', 'svelai/button')
-			.replaceAll('$lib/components/PageShell/index.js', 'svelai/page-shell')
-			.replaceAll('$lib/components/SegmentedControl/index.js', 'svelai/segmented-control')
-			.replaceAll('$lib/components/Sidebar/index.js', 'svelai/sidebar')
-			.replace(/\$lib\/components\/Icons\/([A-Za-z0-9]+)\.js/g, 'svelai/icons/$1');
+			.replaceAll('$lib/components/AppShell/index.js', 'entasis/app-shell')
+			.replaceAll('$lib/components/Breadcrumbs/index.js', 'entasis/breadcrumbs')
+			.replaceAll('$lib/components/Button/Button.svelte', 'entasis/button')
+			.replaceAll('$lib/components/PageShell/index.js', 'entasis/page-shell')
+			.replaceAll('$lib/components/SegmentedControl/index.js', 'entasis/segmented-control')
+			.replaceAll('$lib/components/Sidebar/index.js', 'entasis/sidebar')
+			.replace(/\$lib\/components\/Icons\/([A-Za-z0-9]+)\.js/g, 'entasis/icons/$1');
 	}
 </script>
 
@@ -73,13 +73,13 @@
 		description="Use AppShell when every route follows the same sidebar plus page-shell structure."
 		class="!min-h-fit !items-start !p-4"
 		code={`<script lang="ts">
-	import { AppShell, type AppShellSidebarProps } from 'svelai/app-shell';
-	import { chartBarIcon } from 'svelai/icons/chartBar';
-	import { commandIcon } from 'svelai/icons/command';
-	import { gearIcon } from 'svelai/icons/gear';
-	import { houseIcon } from 'svelai/icons/house';
-	import { sidebarIcon } from 'svelai/icons/sidebar';
-	import { trayIcon } from 'svelai/icons/tray';
+	import { AppShell, type AppShellSidebarProps } from 'entasis/app-shell';
+	import { chartBarIcon } from 'entasis/icons/chartBar';
+	import { commandIcon } from 'entasis/icons/command';
+	import { gearIcon } from 'entasis/icons/gear';
+	import { houseIcon } from 'entasis/icons/house';
+	import { sidebarIcon } from 'entasis/icons/sidebar';
+	import { trayIcon } from 'entasis/icons/tray';
 
 	let sidebarDisplayState = $state<'expanded' | 'collapsed' | 'hidden'>('expanded');
 	let sidebarWidth = $state('17rem');
@@ -198,11 +198,11 @@ ${'</' + 'script>'}
 		AppShell,
 		type AppShellActions,
 		type AppShellSidebarProps
-	} from 'svelai/app-shell';
-	import type { BreadcrumbItem } from 'svelai/breadcrumbs';
-	import { arrowClockwiseIcon } from 'svelai/icons/arrowClockwise';
-	import { downloadSimpleIcon } from 'svelai/icons/downloadSimple';
-	import { plusIcon } from 'svelai/icons/plus';
+	} from 'entasis/app-shell';
+	import type { BreadcrumbItem } from 'entasis/breadcrumbs';
+	import { arrowClockwiseIcon } from 'entasis/icons/arrowClockwise';
+	import { downloadSimpleIcon } from 'entasis/icons/downloadSimple';
+	import { plusIcon } from 'entasis/icons/plus';
 
 	const breadcrumbs: BreadcrumbItem[] = [
 		{ label: 'Workspace', href: '#workspace' },
@@ -240,7 +240,7 @@ ${'</' + 'script>'}
 			description="When child routes need their own chrome, they can call setPageShell because AppShell renders PageShell internally."
 			class="!min-h-[260px]"
 			code={`<script lang="ts">
-	import { setPageShell } from 'svelai/page-shell';
+	import { setPageShell } from 'entasis/page-shell';
 
 	setPageShell({
 		title: 'Customer detail',

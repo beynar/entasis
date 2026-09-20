@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Heading } from 'svelai/heading';
-	import { Meter } from 'svelai/meter';
-	import { Stat } from 'svelai/stat';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Heading } from 'entasis/heading';
+	import { Meter } from 'entasis/meter';
+	import { Stat } from 'entasis/stat';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
 </script>
 
 <section class="gap-xl p-lg md:p-xl flex flex-col">

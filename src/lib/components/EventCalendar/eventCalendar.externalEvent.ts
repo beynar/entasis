@@ -3,7 +3,7 @@ import { untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 import type { EventCalendarItem } from './eventCalendar.types.js';
 
-const EXTERNAL_EVENT_SOURCE_MARK = 'svelai-event-calendar-external-event';
+const EXTERNAL_EVENT_SOURCE_MARK = 'entasis-event-calendar-external-event';
 
 export type EventCalendarExternalDragSource<TItemFields extends object> = {
 	kind: 'external';

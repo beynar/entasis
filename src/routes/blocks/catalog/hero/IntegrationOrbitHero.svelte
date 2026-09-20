@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	import { calendarIcon } from 'svelai/icons/calendar';
-	import { chartBarIcon } from 'svelai/icons/chartBar';
-	import { chatCircleIcon } from 'svelai/icons/chatCircle';
-	import { lightningIcon } from 'svelai/icons/lightning';
-	import { paletteIcon } from 'svelai/icons/palette';
-	import { puzzlePieceIcon } from 'svelai/icons/puzzlePiece';
-	import { usersThreeIcon } from 'svelai/icons/usersThree';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
+	import { calendarIcon } from 'entasis/icons/calendar';
+	import { chartBarIcon } from 'entasis/icons/chartBar';
+	import { chatCircleIcon } from 'entasis/icons/chatCircle';
+	import { lightningIcon } from 'entasis/icons/lightning';
+	import { paletteIcon } from 'entasis/icons/palette';
+	import { puzzlePieceIcon } from 'entasis/icons/puzzlePiece';
+	import { usersThreeIcon } from 'entasis/icons/usersThree';
 	const icons = [
 		chatCircleIcon,
 		chartBarIcon,
@@ -44,7 +44,7 @@
 		<div class="border-primary/20 absolute size-1/2 rounded-full border"></div>
 		<Card color="primary" variant="soft" class="z-10"
 			><div class="gap-md flex flex-col items-center">
-				{@render puzzlePieceIcon({ size: 44 })}<strong>Svelai</strong>
+				{@render puzzlePieceIcon({ size: 44 })}<strong>Entasis</strong>
 			</div></Card
 		>{#each icons as icon, index (icon)}<div
 				class="border-neutral-muted bg-surface text-primary-readable absolute flex size-16 items-center justify-center rounded-2xl border shadow-sm"

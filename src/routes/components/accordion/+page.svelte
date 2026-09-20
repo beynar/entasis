@@ -82,7 +82,7 @@
 	const faqByKey = [
 		{
 			question: 'How do I install it?',
-			answer: 'Run your package manager against the svelai package and import the component.'
+			answer: 'Run your package manager against the entasis package and import the component.'
 		},
 		{
 			question: 'Can I self-host?',

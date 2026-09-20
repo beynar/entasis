@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Form } from 'svelai/form';
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import { Dialog } from 'svelai/dialog';
+	import { Heading } from 'entasis/heading';
+	import { Form } from 'entasis/form';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import { Dialog } from 'entasis/dialog';
 	const products = [
 		{
 			id: 'vessel',

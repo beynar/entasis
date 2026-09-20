@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Field, createFieldState, type FieldState } from 'svelai/field';
-	import { Form } from 'svelai/form';
-	import { Grid, GridSpan } from 'svelai/grid';
-	import { Slot } from 'svelai/slot';
-	import { TextInput } from 'svelai/text-input';
-	import { checkIcon } from 'svelai/icons/check';
+	import { Button } from 'entasis/button';
+	import { Field, createFieldState, type FieldState } from 'entasis/field';
+	import { Form } from 'entasis/form';
+	import { Grid, GridSpan } from 'entasis/grid';
+	import { Slot } from 'entasis/slot';
+	import { TextInput } from 'entasis/text-input';
+	import { checkIcon } from 'entasis/icons/check';
 
 	let name = $state<string | null>('');
 	const field = createFieldState({

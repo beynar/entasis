@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { downloadSimpleIcon } from 'svelai/icons/downloadSimple';
-	import { fileTextIcon } from 'svelai/icons/fileText';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { downloadSimpleIcon } from 'entasis/icons/downloadSimple';
+	import { fileTextIcon } from 'entasis/icons/fileText';
 	const downloadHref =
 		'data:text/plain;charset=utf-8,' +
 		encodeURIComponent(

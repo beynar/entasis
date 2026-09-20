@@ -92,7 +92,7 @@
 				{ type: 'option', title: 'Documentation', prefix: questionIcon },
 				{ type: 'option', title: 'Keyboard shortcuts' },
 				{ type: 'separator' },
-				{ type: 'option', title: 'About Svelai' }
+				{ type: 'option', title: 'About Entasis' }
 			]
 		}
 	];
@@ -127,7 +127,7 @@
 	];
 
 	const usageCode = $derived(`<script lang="ts">
-	import { MenuBar, type MenuBarMenu } from 'svelai/menu-bar';
+	import { MenuBar, type MenuBarMenu } from 'entasis/menu-bar';
 
 	const menus: MenuBarMenu[] = [
 		{

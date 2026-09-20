@@ -7,7 +7,7 @@ The Table component provides a flexible way to display tabular data with support
 
 \`\`\`svelte
 <script>
-	import { Table } from 'svelai/table';
+	import { Table } from 'entasis/table';
 	
 	// Header can use strings directly (simplified syntax)
 	const header = {
@@ -44,7 +44,7 @@ You can also use the full object syntax when you need additional properties:
 
 \`\`\`svelte
 <script>
-	import { Table } from 'svelai/table';
+	import { Table } from 'entasis/table';
 	
 	// Full object syntax for cells with classes or spans
 	const header = {
@@ -193,7 +193,7 @@ type TableRow = {
 
 \`\`\`svelte
 <script>
-	import { Table } from 'svelai/table';
+	import { Table } from 'entasis/table';
 	
 	// Simplified syntax with strings
 	const header = {
@@ -227,7 +227,7 @@ type TableRow = {
 
 \`\`\`svelte
 <script>
-	import { Table } from 'svelai/table';
+	import { Table } from 'entasis/table';
 </script>
 
 {#snippet customStatus()}
@@ -250,7 +250,7 @@ type TableRow = {
 
 \`\`\`svelte
 <script>
-	import { Table } from 'svelai/table';
+	import { Table } from 'entasis/table';
 	
 	const header = {
 		item: { content: 'Item' },
@@ -289,7 +289,7 @@ type TableRow = {
 
 \`\`\`svelte
 <script>
-	import { Table } from 'svelai/table';
+	import { Table } from 'entasis/table';
 </script>
 
 {#snippet customRow()}
@@ -310,9 +310,9 @@ type TableRow = {
 
 \`\`\`svelte
 <script>
-	import { Table } from 'svelai/table';
-	import { TextInput } from 'svelai/text-input';
-	import { Button } from 'svelai/button';
+	import { Table } from 'entasis/table';
+	import { TextInput } from 'entasis/text-input';
+	import { Button } from 'entasis/button';
 	
 	const header = {
 		name: { content: 'Name' },
@@ -352,7 +352,7 @@ type TableRow = {
 
 \`\`\`svelte
 <script>
-	import { Table } from 'svelai/table';
+	import { Table } from 'entasis/table';
 	
 	const header = {
 		month: { content: 'Month' },
@@ -380,7 +380,7 @@ type TableRow = {
 
 \`\`\`svelte
 <script>
-	import { Table } from 'svelai/table';
+	import { Table } from 'entasis/table';
 	
 	const header = {
 		status: { content: 'Status', class: 'w-24' },
@@ -411,7 +411,7 @@ type TableRow = {
 
 \`\`\`svelte
 <script>
-	import { Table } from 'svelai/table';
+	import { Table } from 'entasis/table';
 
 	const header = { name: 'Name', email: 'Email' };
 	const rows = [
@@ -433,7 +433,7 @@ type TableRow = {
 
 \`\`\`svelte
 <script lang="ts">
-	import { Table, type TableRow } from 'svelai/table';
+	import { Table, type TableRow } from 'entasis/table';
 
 	const header = {
 		name: { content: 'Name' },
@@ -590,7 +590,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setTableTheme } from 'svelai/table';
+  import { setTableTheme } from 'entasis/table';
   
   setTableTheme({
     table: {

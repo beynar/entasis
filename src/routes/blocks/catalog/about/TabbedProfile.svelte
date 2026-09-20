@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Stat } from 'svelai/stat';
-	import { Tabbar } from 'svelai/tabbar';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Stat } from 'entasis/stat';
+	import { Tabbar } from 'entasis/tabbar';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
 	const tabs = ['Our purpose', 'Our people', 'Our approach'];
 	let active = $state(tabs[0]);
 	const panels = [

@@ -44,7 +44,7 @@ const colorVariablePattern = /^var\(--color-(.+)\)$/;
 const colorMixSupport = '@supports (color: color-mix(in lab, red, red))';
 const opacityMixPrefix = 'color-mix(in oklab, ';
 const opacityMixSuffix = ', transparent)';
-const opacityModifierPrefix = '__svelai-shimmer-integer-';
+const opacityModifierPrefix = '__entasis-shimmer-integer-';
 const opacityModifierSuffix = '__';
 
 const encodeOpacityModifier = (value: string) =>

@@ -100,7 +100,7 @@
 		description="Change the second call status and whether nested calls may remain open together. Errors replace retained output, and circular values stay bounded."
 		class="!min-h-[340px] p-4"
 		code={`<script lang="ts">
-  import { AITool, type AIToolCall } from 'svelai/ai-tool';
+  import { AITool, type AIToolCall } from 'entasis/ai-tool';
 
   const circular: Record<string, unknown> = { name: 'launch-plan' };
   circular.self = circular;

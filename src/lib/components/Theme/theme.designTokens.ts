@@ -25,7 +25,7 @@ import {
 
 // The design scales live in `$lib/tailwind/scales` so the Tailwind plugin and this
 // runtime compiler emit identical variables; they are re-exported here because the
-// public `svelai/theme` entry point has always surfaced them from this module.
+// public `entasis/theme` entry point has always surfaced them from this module.
 export { defaultThemeSpacingScale, typeScalePresets };
 export type {
 	MotionTokens,

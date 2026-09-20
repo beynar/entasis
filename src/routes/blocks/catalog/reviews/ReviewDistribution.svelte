@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Meter } from 'svelai/meter';
-	import { Rating } from 'svelai/rating';
-	import { Button } from 'svelai/button';
-	import { Avatar } from 'svelai/avatar';
+	import { Heading } from 'entasis/heading';
+	import { Meter } from 'entasis/meter';
+	import { Rating } from 'entasis/rating';
+	import { Button } from 'entasis/button';
+	import { Avatar } from 'entasis/avatar';
 	const reviews = [
 		{
 			id: 1,

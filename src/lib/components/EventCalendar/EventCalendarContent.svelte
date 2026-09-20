@@ -44,10 +44,9 @@
 			(day) => (calendar.itemIndex.segmentsByDay.get(day)?.foreground.length ?? 0) > 0
 		);
 	});
-	const emptyMode = $derived(view === 'agenda' ? 'agenda-replacement' : 'grid-status');
 	const emptyPayload = $derived<EventCalendarEmptyPayload>({
 		...viewPayload,
-		mode: emptyMode,
+		mode: view === 'agenda' ? 'agenda-replacement' : 'grid-status',
 		defaultContent: defaultEmpty
 	});
 	const loadingPayload = $derived<EventCalendarLoadingPayload>({
@@ -70,26 +69,7 @@
 	})}
 >
 	{#if view === 'agenda' && hasProvableEmptyRange}
-		<div
-			role="status"
-			aria-live="polite"
-			aria-atomic="true"
-			data-event-calendar-part="empty"
-			data-empty-mode="agenda-replacement"
-			inert={calendar.loading ? true : undefined}
-			class={calendar.classes.empty({
-				density: calendar.density,
-				view,
-				disabled: calendar.disabled
-			})}
-		>
-			<Empty>
-				<Slot
-					render={calendar.renderers.empty ?? emptyPayload.defaultContent}
-					payload={emptyPayload}
-				/>
-			</Empty>
-		</div>
+		<Empty>{@render emptyState(emptyPayload)}</Empty>
 	{:else}
 		<div
 			data-event-calendar-part="viewport"
@@ -112,24 +92,7 @@
 			{/if}
 		</div>
 		{#if hasProvableEmptyRange}
-			<div
-				role="status"
-				aria-live="polite"
-				aria-atomic="true"
-				data-event-calendar-part="empty"
-				data-empty-mode="grid-status"
-				inert={calendar.loading ? true : undefined}
-				class={calendar.classes.empty({
-					density: calendar.density,
-					view,
-					disabled: calendar.disabled
-				})}
-			>
-				<Slot
-					render={calendar.renderers.empty ?? emptyPayload.defaultContent}
-					payload={emptyPayload}
-				/>
-			</div>
+			{@render emptyState(emptyPayload)}
 		{/if}
 	{/if}
 
@@ -145,6 +108,20 @@
 		</div>
 	{/if}
 </div>
+
+{#snippet emptyState(payload: EventCalendarEmptyPayload)}
+	<div
+		role="status"
+		aria-live="polite"
+		aria-atomic="true"
+		data-event-calendar-part="empty"
+		data-empty-mode={payload.mode}
+		inert={calendar.loading ? true : undefined}
+		class={calendar.classes.empty({ density: calendar.density, view, disabled: calendar.disabled })}
+	>
+		<Slot render={calendar.renderers.empty ?? payload.defaultContent} {payload} />
+	</div>
+{/snippet}
 
 {#snippet defaultEmpty()}
 	{calendar.messages.eventCalendarEmpty}

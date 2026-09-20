@@ -17,7 +17,7 @@ A quick tour of **bold**, _italic_, and a [link](https://example.com).
 ## What's new
 
 - Streaming-friendly rendering
-- Themed with svelai tokens
+- Themed with entasis tokens
 - Adapts to light and dark
 
 ### Checklist
@@ -29,7 +29,7 @@ A quick tour of **bold**, _italic_, and a [link](https://example.com).
 > Blockquotes keep their styling and spacing.
 
 > [!NOTE]
-> GitHub alerts map to svelai info/success/primary/warning/danger callouts.
+> GitHub alerts map to entasis info/success/primary/warning/danger callouts.
 
 | Feature   | Status  |
 | --------- | ------- |
@@ -43,7 +43,7 @@ Use \`Markdown\` inline like any other component.`;
 	const codeAndMermaid = [
 		'## Code and diagrams',
 		'',
-		'A TypeScript fence renders through svelai `Code` (with a copy button):',
+		'A TypeScript fence renders through entasis `Code` (with a copy button):',
 		'',
 		'```ts',
 		'function greet(name: string): string {',
@@ -53,7 +53,7 @@ Use \`Markdown\` inline like any other component.`;
 		'console.log(greet("world"));',
 		'```',
 		'',
-		'A `mermaid` fence renders through svelai `Mermaid` (pan, zoom, theme tokens):',
+		'A `mermaid` fence renders through entasis `Mermaid` (pan, zoom, theme tokens):',
 		'',
 		'```mermaid',
 		'graph TD',
@@ -153,20 +153,20 @@ Use \`Markdown\` inline like any other component.`;
 
 <DocPage
 	title="Markdown"
-	subtitle="Render Markdown as themed HTML, built for streaming LLM output. Wraps the svelte-streamdown renderer, restyled with svelai design tokens, with code fences going through svelai's Code component and mermaid fences through svelai's Mermaid. Incomplete/streaming markdown is handled gracefully, and three size scales tune it for chat, prose, or long-form documents."
+	subtitle="Render Markdown as themed HTML, built for streaming LLM output. Wraps the svelte-streamdown renderer, restyled with entasis design tokens, with code fences going through entasis's Code component and mermaid fences through entasis's Mermaid. Incomplete/streaming markdown is handled gracefully, and three size scales tune it for chat, prose, or long-form documents."
 	component="Markdown"
 	features={[
-		'Wraps svelte-streamdown, themed with svelai tokens',
+		'Wraps svelte-streamdown, themed with entasis tokens',
 		'Built-in Card, Stat, Stack, and Grid MDX components',
-		'Code fences render via svelai Code (copy button)',
-		'Mermaid fences render via svelai Mermaid (pan/zoom)',
+		'Code fences render via entasis Code (copy button)',
+		'Mermaid fences render via entasis Mermaid (pan/zoom)',
 		'Streaming-friendly: partial markdown never crashes',
 		'small / normal / large type and spacing scales'
 	]}
 >
 	<ComponentCard
 		{controls}
-		description="Headings, emphasis, links, lists, task lists, blockquotes, a GitHub alert, a table and inline code — all styled from svelai tokens."
+		description="Headings, emphasis, links, lists, task lists, blockquotes, a GitHub alert, a table and inline code — all styled from entasis tokens."
 		class="!min-h-fit !items-stretch !justify-start"
 		code={`<Markdown content={doc} size="${controls.value.size}" />`}
 	>
@@ -177,7 +177,7 @@ Use \`Markdown\` inline like any other component.`;
 
 	{#snippet examples()}
 		<ComponentCard
-			description="Headings, emphasis, links, lists, task lists, blockquotes, a GitHub alert, a table and inline code — all styled from svelai tokens."
+			description="Headings, emphasis, links, lists, task lists, blockquotes, a GitHub alert, a table and inline code — all styled from entasis tokens."
 			class="!min-h-fit !items-stretch !justify-start"
 		>
 			<div class="w-full max-w-3xl">
@@ -197,7 +197,7 @@ Use \`Markdown\` inline like any other component.`;
 		</ComponentCard>
 
 		<ComponentCard
-			description="Fenced code renders through svelai's Code component (syntax highlighting + copy button), and a mermaid fence renders through svelai's Mermaid (pan, zoom, and design-token theming)."
+			description="Fenced code renders through entasis's Code component (syntax highlighting + copy button), and a mermaid fence renders through entasis's Mermaid (pan, zoom, and design-token theming)."
 			class="!min-h-fit !items-stretch !justify-start"
 		>
 			<div class="w-full max-w-3xl">

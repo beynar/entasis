@@ -7,17 +7,17 @@ import type { Plugin } from 'vite';
 import { extractComponentStructure, readThemeParts, readThemeSetter } from './extract.js';
 import type { StructureMap } from './types.js';
 
-const VIRTUAL_ID = 'virtual:svelai-structure';
+const VIRTUAL_ID = 'virtual:entasis-structure';
 const RESOLVED_ID = '\0' + VIRTUAL_ID;
 const COMPONENTS_DIR = 'src/lib/components';
 
 /**
- * Internal Vite plugin: serves `virtual:svelai-structure`, a map of each
+ * Internal Vite plugin: serves `virtual:entasis-structure`, a map of each
  * themeable component's rendered markup tree (from its `.svelte`), annotated
  * with slot insertion points and theme parts (from its `*.theme.ts`). Keyed by
  * component name. Never packaged - dev/docs only.
  */
-export function svelaiStructureDocs(): Plugin {
+export function entasisStructureDocs(): Plugin {
 	let root = '';
 	let project: Project | null = null;
 	let cachedMap: StructureMap | null = null;
@@ -48,7 +48,7 @@ export function svelaiStructureDocs(): Plugin {
 					};
 				} catch (error) {
 					// Skip a single unparseable component (surface it) rather than fail the build.
-					console.warn(`[svelai-structure] skipped ${name}: ${(error as Error).message}`);
+					console.warn(`[entasis-structure] skipped ${name}: ${(error as Error).message}`);
 				}
 			}
 		}
@@ -57,7 +57,7 @@ export function svelaiStructureDocs(): Plugin {
 	}
 
 	return {
-		name: 'svelai-structure-docs',
+		name: 'entasis-structure-docs',
 		configResolved(config) {
 			root = config.root;
 		},
@@ -98,7 +98,7 @@ function affectsStructureDocs(root: string, filePath: string): boolean {
 
 /**
  * Map each component directory (relative to the components root, e.g. "Button",
- * "Form/Combobox") to its published import path (e.g. "svelai/button"), read from
+ * "Form/Combobox") to its published import path (e.g. "entasis/button"), read from
  * `package.json` `exports`. Lets the docs show a copy-pasteable, correct import.
  */
 function buildImportMap(root: string): Map<string, string> {

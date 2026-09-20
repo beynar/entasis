@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Chip } from 'svelai/chip';
-	import { Button } from 'svelai/button';
-	import { Select } from 'svelai/select';
-	import { Accordion } from 'svelai/accordion';
+	import { Heading } from 'entasis/heading';
+	import { Chip } from 'entasis/chip';
+	import { Button } from 'entasis/button';
+	import { Select } from 'entasis/select';
+	import { Accordion } from 'entasis/accordion';
 
 	let color = $state('Olive');
 	let size = $state('M');

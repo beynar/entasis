@@ -7,7 +7,7 @@ The Popover component displays floating content positioned relative to a trigger
 
 \`\`\`svelte
 <script>
-	import { Popover } from 'svelai/popover';
+	import { Popover } from 'entasis/popover';
 		
 </script>
 // By default Popover comes with a button that triggers them, no need to define a callback and a $state
@@ -60,7 +60,7 @@ The Popover component displays floating content positioned relative to a trigger
 
 \`\`\`svelte
 <script>
-	import { Popover } from 'svelai/popover';
+	import { Popover } from 'entasis/popover';
 </script>
 
 <Popover focusOnOpen="first" haspopup="listbox" trigger={{ content: 'Pick one' }}>
@@ -102,8 +102,8 @@ The Popover component displays floating content positioned relative to a trigger
 ### With a custom trigger snippet
 \`\`\`svelte
 <script>
-	import { Popover } from 'svelai/popover';
-	import { Button } from 'svelai/button';
+	import { Popover } from 'entasis/popover';
+	import { Button } from 'entasis/button';
 </script>
 
 <!-- {@attach popover.reference} anchors the panel to the element and keeps
@@ -120,7 +120,7 @@ The Popover component displays floating content positioned relative to a trigger
 ### With button props
 \`\`\`svelte
 <script>
-	import { Popover } from 'svelai/popover';
+	import { Popover } from 'entasis/popover';
 </script>
 
 <Popover 
@@ -138,7 +138,7 @@ The Popover component displays floating content positioned relative to a trigger
 
 \`\`\`svelte
 <script>
-	import { Popover } from 'svelai/popover';
+	import { Popover } from 'entasis/popover';
 </script>
 
 <!-- Top -->
@@ -166,8 +166,8 @@ The Popover component displays floating content positioned relative to a trigger
 
 \`\`\`svelte
 <script>
-	import { Popover } from 'svelai/popover';
-	import { Button } from 'svelai/button';
+	import { Popover } from 'entasis/popover';
+	import { Button } from 'entasis/button';
 </script>
 
 <Popover position="bottom-start" trigger={{ content: "Menu" }}>
@@ -183,7 +183,7 @@ The Popover component displays floating content positioned relative to a trigger
 
 \`\`\`svelte
 <script>
-	import { Popover } from 'svelai/popover';
+	import { Popover } from 'entasis/popover';
 </script>
 
 <Popover 
@@ -200,7 +200,7 @@ The Popover component displays floating content positioned relative to a trigger
 
 \`\`\`svelte
 <script>
-	import { Popover } from 'svelai/popover';
+	import { Popover } from 'entasis/popover';
 </script>
 
 <Popover 
@@ -216,7 +216,7 @@ The Popover component displays floating content positioned relative to a trigger
 
 \`\`\`svelte
 <script>
-	import { Popover } from 'svelai/popover';
+	import { Popover } from 'entasis/popover';
 </script>
 
 <Popover 
@@ -231,7 +231,7 @@ The Popover component displays floating content positioned relative to a trigger
 
 \`\`\`svelte
 <script>
-	import { Popover } from 'svelai/popover';
+	import { Popover } from 'entasis/popover';
 </script>
 
 <!-- Open in place, no portal: useful for docs, visual tests, or an always-visible panel -->
@@ -249,7 +249,7 @@ The Popover component displays floating content positioned relative to a trigger
 
 \`\`\`svelte
 <script>
-	import { Popover } from 'svelai/popover';
+	import { Popover } from 'entasis/popover';
 </script>
 
 <Popover
@@ -265,7 +265,7 @@ The Popover component displays floating content positioned relative to a trigger
 
 \`\`\`svelte
 <script>
-	import { Popover } from 'svelai/popover';
+	import { Popover } from 'entasis/popover';
 </script>
 
 <!-- Small -->
@@ -283,7 +283,7 @@ The Popover component displays floating content positioned relative to a trigger
 
 \`\`\`svelte
 <script>
-	import { Popover } from 'svelai/popover';
+	import { Popover } from 'entasis/popover';
 </script>
 
 <Popover 
@@ -299,7 +299,7 @@ The Popover component displays floating content positioned relative to a trigger
 
 \`\`\`svelte
 <script>
-	import { Popover } from 'svelai/popover';
+	import { Popover } from 'entasis/popover';
 </script>
 
 <Popover 
@@ -315,9 +315,9 @@ The Popover component displays floating content positioned relative to a trigger
 
 \`\`\`svelte
 <script lang="ts">
-	import { Popover } from 'svelai/popover';
-	import { Button } from 'svelai/button';
-	import { Avatar } from 'svelai/avatar';
+	import { Popover } from 'entasis/popover';
+	import { Button } from 'entasis/button';
+	import { Avatar } from 'entasis/avatar';
 
 	let avatarRef = $state<HTMLElement | null>(null);
 	let open = $state(false);
@@ -381,7 +381,7 @@ The theme object contains the following parts:
 ### Theme Type Definition
 
 \`\`\`typescript
-import type { PopoverThemeProps } from 'svelai/popover';
+import type { PopoverThemeProps } from 'entasis/popover';
 
 // Example theme customization
 const customTheme: PopoverThemeProps = {
@@ -443,7 +443,7 @@ const customTheme: PopoverThemeProps = {
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setPopoverTheme } from 'svelai/popover';
+  import { setPopoverTheme } from 'entasis/popover';
   
   setPopoverTheme({
     popover: {

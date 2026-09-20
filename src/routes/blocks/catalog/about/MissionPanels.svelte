@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Heading } from 'svelai/heading';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Heading } from 'entasis/heading';
 </script>
 
 <section class="gap-xl p-lg md:p-xl flex flex-col">

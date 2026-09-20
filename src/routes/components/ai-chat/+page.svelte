@@ -79,7 +79,7 @@
 		description="AIChat connects product-level controls to one conversation state while retaining regional replacement snippets."
 		class="!min-h-0 p-3 sm:p-6"
 		code={`<script lang="ts">
-  import { AIChat } from 'svelai/ai-chat';
+  import { AIChat } from 'entasis/ai-chat';
 ${'</' + 'script>'}
 
 <AIChat
@@ -123,7 +123,7 @@ ${'</' + 'script>'}
 			description="Every product-level region receives the same AIConversationState instance, including its mutation methods."
 			class="!min-h-0 p-3 sm:p-6"
 			code={`<script lang="ts">
-  import { AIChat } from 'svelai/ai-chat';
+  import { AIChat } from 'entasis/ai-chat';
 ${'</' + 'script>'}
 
 <AIChat {messages}>

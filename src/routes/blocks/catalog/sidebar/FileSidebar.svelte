@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Sidebar } from 'svelai/sidebar';
-	import { folderIcon } from 'svelai/icons/folder';
-	import { sidebarIcon } from 'svelai/icons/sidebar';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Sidebar } from 'entasis/sidebar';
+	import { folderIcon } from 'entasis/icons/folder';
+	import { sidebarIcon } from 'entasis/icons/sidebar';
 	let file = $state('README.md');
 	const descriptions: Record<string, string> = {
 		'README.md': 'Project setup and development notes.',

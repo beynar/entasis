@@ -1,8 +1,8 @@
 export const fieldDescription = `
 # Field
 
-Import Field, createFieldState, and the FieldState type from svelai/field. Field is the shared
-validation and accessibility owner used by Svelai form controls. It renders field structure
+Import Field, createFieldState, and the FieldState type from entasis/field. Field is the shared
+validation and accessibility owner used by Entasis form controls. It renders field structure
 around a custom control and does not create another form or validation system.
 
 ## Controller

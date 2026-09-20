@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Card } from 'svelai/card';
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import { Dialog } from 'svelai/dialog';
-	import { Select } from 'svelai/select';
+	import { Heading } from 'entasis/heading';
+	import { Card } from 'entasis/card';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import { Dialog } from 'entasis/dialog';
+	import { Select } from 'entasis/select';
 
 	let open = $state(false);
 	let color = $state('Clay');

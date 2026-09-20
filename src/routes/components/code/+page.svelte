@@ -56,7 +56,7 @@ export async function getUser(id: string): Promise<User> {
 }`;
 
 	const jsonCode = `{
-	"name": "svelai",
+	"name": "entasis",
 	"version": "1.0.0",
 	"private": true,
 	"scripts": {

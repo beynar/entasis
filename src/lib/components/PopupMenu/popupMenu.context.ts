@@ -5,7 +5,7 @@ import type { PopoverProps } from '../Popover/popover.props.js';
 // one level down — same size, so the same padding and the same concentric radius — which nothing
 // carries across on its own: the nested PopupMenu is rendered by the Menu, not by the consumer.
 // The parent PopupMenu publishes its panel size here and MenuFloating reads it back.
-const POPUP_MENU_PANEL_SIZE = Symbol('svelai:popup-menu-panel-size');
+const POPUP_MENU_PANEL_SIZE = Symbol('entasis:popup-menu-panel-size');
 
 export type PopupMenuPanelSize = NonNullable<PopoverProps['size']>;
 

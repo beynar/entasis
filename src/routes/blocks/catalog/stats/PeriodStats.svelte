@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { SegmentedControl } from 'svelai/segmented-control';
-	import { Stat } from 'svelai/stat';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { SegmentedControl } from 'entasis/segmented-control';
+	import { Stat } from 'entasis/stat';
 	let period = $state<'month' | 'quarter'>('month');
 </script>
 

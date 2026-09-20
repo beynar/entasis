@@ -135,7 +135,7 @@ The star rendering lives in the \`Rating\` display component, so the theme is sh
 
 \`\`\`svelte
 <script>
-	import { setRatingTheme } from 'svelai/rating-input'; // also exported from 'svelai/rating'
+	import { setRatingTheme } from 'entasis/rating-input'; // also exported from 'entasis/rating'
 
 	setRatingTheme({
 		starFill: {

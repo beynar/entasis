@@ -15,8 +15,8 @@ Sidebar and PageShell directly when the frame needs custom composition.
 
 \`\`\`svelte
 <script lang="ts">
-	import { AppShell, type AppShellSidebarProps } from 'svelai/app-shell';
-	import { houseIcon } from 'svelai/icons/house';
+	import { AppShell, type AppShellSidebarProps } from 'entasis/app-shell';
+	import { houseIcon } from 'entasis/icons/house';
 
 	const sidebar: AppShellSidebarProps = {
 		collapsible: 'icon',
@@ -43,7 +43,7 @@ AppShell renders PageShell internally, so child pages can use the PageShell cont
 
 \`\`\`svelte
 <script lang="ts">
-	import { setPageShell } from 'svelai/page-shell';
+	import { setPageShell } from 'entasis/page-shell';
 
 	setPageShell({
 		title: 'Insights',

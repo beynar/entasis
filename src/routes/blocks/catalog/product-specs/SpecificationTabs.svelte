@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Tabs } from 'svelai/tabs';
-	import { Card } from 'svelai/card';
+	import { Heading } from 'entasis/heading';
+	import { Tabs } from 'entasis/tabs';
+	import { Card } from 'entasis/card';
 	const specifications = [
 		{
 			title: 'Dimensions & weight',

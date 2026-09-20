@@ -13,7 +13,7 @@
 </script>
 
 <svelte:head>
-	<title>{title} block · svelai</title>
+	<title>{title} block · entasis</title>
 	<meta name="description" content={description} />
 </svelte:head>
 

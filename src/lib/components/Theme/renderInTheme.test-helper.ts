@@ -8,7 +8,7 @@ import ThemeProviderHarness from './ThemeProviderHarness.test.svelte';
 type AnyComponent = Component<any, any, any>;
 
 /**
- * Mount one component inside a `<Theme>`. Every svelai component reads the provider through
+ * Mount one component inside a `<Theme>`. Every entasis component reads the provider through
  * `useTheme()`, which throws when it is missing, so an isolated component test goes through here
  * rather than rendering a bare tree.
  */

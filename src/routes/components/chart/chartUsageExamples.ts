@@ -11,7 +11,7 @@ import type {
 	ChartSeriesAnalysis,
 	ChartProps,
 	ChartWeightedRelationLink
-} from 'svelai/chart';
+} from 'entasis/chart';
 import type {
 	BarAnalysisUsage,
 	DistributionAnalysisUsage,

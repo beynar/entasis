@@ -157,6 +157,6 @@ Stat renders a compact metric card. Every region — label, value (with an optio
 ## Notes
 
 - \`Stat\` is the only public component; compose through props and named snippets.
-- Trend colors use Svelai semantic tokens: success for up, danger for down, muted current color for neutral.
+- Trend colors use Entasis semantic tokens: success for up, danger for down, muted current color for neutral.
 - Use string props for compact markup and named snippets when a region needs icon or richer content.
 `;

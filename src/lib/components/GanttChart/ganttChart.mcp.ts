@@ -1,7 +1,7 @@
 export const ganttChartDescription = `
 # GanttChart
 
-GanttChart is Svelai's typed project-scheduling surface for Svelte 5. It combines one hierarchical, virtualized tree grid with a synchronized, horizontally windowed time pane. It is a controlled component: task, dependency, and assignment definitions remain application-owned, while resolved WBS, summary spans/progress, durations, slack, critical state, constraint violations, and workload are exposed separately.
+GanttChart is Entasis's typed project-scheduling surface for Svelte 5. It combines one hierarchical, virtualized tree grid with a synchronized, horizontally windowed time pane. It is a controlled component: task, dependency, and assignment definitions remain application-owned, while resolved WBS, summary spans/progress, durations, slack, critical state, constraint violations, and workload are exposed separately.
 
 ## Import
 
@@ -12,7 +12,7 @@ GanttChart is Svelai's typed project-scheduling surface for Svelte 5. It combine
 		type GanttDependency,
 		type GanttDependencyCreationRequest,
 		type GanttTask
-	} from 'svelai/gantt-chart';
+	} from 'entasis/gantt-chart';
 
 	let tasks = $state<GanttTask[]>([
 		{ id: 'plan', title: 'Plan', type: 'summary' },
@@ -48,7 +48,7 @@ GanttChart is Svelai's typed project-scheduling surface for Svelte 5. It combine
 />
 ~~~
 
-The required timeZone must be UTC or an explicit IANA zone. Contained scrolling needs a definite height. GanttChart never infers a browser or server zone. Locale and SSR reading direction come from ambient Svelai I18n; without that provider, client rendering reconciles the root's computed DOM direction after mount. i18n remains available for per-instance message overrides.
+The required timeZone must be UTC or an explicit IANA zone. Contained scrolling needs a definite height. GanttChart never infers a browser or server zone. Locale and SSR reading direction come from ambient Entasis I18n; without that provider, client rendering reconciles the root's computed DOM direction after mount. i18n remains available for per-instance message overrides.
 
 ## Domain and controlled state
 
@@ -73,7 +73,7 @@ Use timeline.display to toggle criticalPath, baselines, deadlines, constraints, 
 
 - Built-in zoom levels are hour, day, week, month, quarter, and year. timeline.scales is one ordered list of enabled built-in ids and typed custom scale definitions.
 - timeline owns today/weekend/holiday presentation and optional snapDuration. Move, resize, and range snapping otherwise follows the active scale: 1 minute at hour, 15 minutes at day, 1 hour at week, 4 hours at month, 1 day at quarter, and 3 days at year. The initial view anchors to scheduled project content; use the API for exceptional navigation.
-- schedule.validRange owns the half-open project boundary. layout owns rowHeight, contained/page scroll mode, and the optional tree grid. gridWidth remains bindable, while safe splitter bounds, virtualization overscan, and sticky behavior are internal. GanttChart always uses the Svelai scrollbar owner.
+- schedule.validRange owns the half-open project boundary. layout owns rowHeight, contained/page scroll mode, and the optional tree grid. gridWidth remains bindable, while safe splitter bounds, virtualization overscan, and sticky behavior are internal. GanttChart always uses the Entasis scrollbar owner.
 - size changes typography, header controls, and task geometry. density changes row heights, padding, gaps, and indentation. Both are independent of zoom and of each other. The default WBS, title, start, end, duration, progress, and resources columns live under layout.grid.columns and accept typed visibility, size, alignment, sort, filter, value, compare, and edit behavior. Custom editable columns provide applyEdit.
 - Tasks render leaf/summary/milestone shapes, progress and expected progress, segments, baseline, deadline, labels, continuations, tooltips, non-working shade, project/today lines, constraints, critical state, and SVG dependency connectors.
 - timeline.resourceView filters or groups rows by resource and sets the compact workload height. render.resourceAssignments and render.workloadCell receive typed custom fields and over-allocation state.
@@ -110,5 +110,5 @@ Bind the component instance as GanttChartApi. Real methods include:
 
 ## Application-owned editors and non-goals
 
-GanttChart does not own task creation/edit dialogs. Compose events.onTaskDoubleClick or events.onSelect with Svelai Dialog and Form controls, validate the definition, then publish a fresh controlled array or call the API. Network fetching, persistence, retries, collaboration, recurrence, automatic resource leveling, proprietary import/export, and deployment are outside this package.
+GanttChart does not own task creation/edit dialogs. Compose events.onTaskDoubleClick or events.onSelect with Entasis Dialog and Form controls, validate the definition, then publish a fresh controlled array or call the API. Network fetching, persistence, retries, collaboration, recurrence, automatic resource leveling, proprietary import/export, and deployment are outside this package.
 `;

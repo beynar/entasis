@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { DataTable } from 'svelai/data-table';
+	import { Stack } from 'entasis/stack';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { DataTable } from 'entasis/data-table';
 
 	const contacts = [
 		'Maya Chen',

@@ -432,7 +432,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setRadioInputTheme } from 'svelai/radio-input';
+  import { setRadioInputTheme } from 'entasis/radio-input';
   
   setRadioInputTheme({
     root: { base: '@container' },

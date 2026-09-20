@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Tabbar } from 'svelai/tabbar';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	import { calendarIcon } from 'svelai/icons/calendar';
-	import { chartBarIcon } from 'svelai/icons/chartBar';
-	import { chatCenteredTextIcon } from 'svelai/icons/chatCenteredText';
-	import { chatCircleIcon } from 'svelai/icons/chatCircle';
-	import { columnsIcon } from 'svelai/icons/columns';
-	import { fileTextIcon } from 'svelai/icons/fileText';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Tabbar } from 'entasis/tabbar';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
+	import { calendarIcon } from 'entasis/icons/calendar';
+	import { chartBarIcon } from 'entasis/icons/chartBar';
+	import { chatCenteredTextIcon } from 'entasis/icons/chatCenteredText';
+	import { chatCircleIcon } from 'entasis/icons/chatCircle';
+	import { columnsIcon } from 'entasis/icons/columns';
+	import { fileTextIcon } from 'entasis/icons/fileText';
 	let active = $state('All tools');
 	const integrations = [
 		{

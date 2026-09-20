@@ -6,13 +6,13 @@ Planning only. This document defines the contract and phased implementation; it 
 
 ## Goal
 
-Build a first-class Svelai `EventCalendar` that feels native to this library rather than like a React calendar port. The final component must support the ordinary scheduling surface expected from a complete event calendar: month, week, day, configurable N-day, agenda, and resource views; timed, all-day, multi-day, and recurring items; date navigation; overflow handling; drag-to-move, edge resize, and drag-to-create; touch, keyboard, and non-drag alternatives; named time zones; localization and RTL; responsive layouts; and consumer-owned persistence.
+Build a first-class Entasis `EventCalendar` that feels native to this library rather than like a React calendar port. The final component must support the ordinary scheduling surface expected from a complete event calendar: month, week, day, configurable N-day, agenda, and resource views; timed, all-day, multi-day, and recurring items; date navigation; overflow handling; drag-to-move, edge resize, and drag-to-create; touch, keyboard, and non-drag alternatives; named time zones; localization and RTL; responsive layouts; and consumer-owned persistence.
 
-The public API will be one high-level component imported from `svelai/event-calendar`. Internal view components remain private. Composition is provided through Svelte snippets, ready-made default-content snippets, theme parts, bindable state, callbacks, and a small imperative handle.
+The public API will be one high-level component imported from `entasis/event-calendar`. Internal view components remain private. Composition is provided through Svelte snippets, ready-made default-content snippets, theme parts, bindable state, callbacks, and a small imperative handle.
 
 ## Context
 
-- Svelai components use Svelte 5 runes, bindable props, callback props, `Slot`, attachments, CVA theme parts, package subpath exports, MCP documentation, and a documentation route. See `COMPONENT_CREATION_PROMPT.md` and `src/routes/docs/conventions/+page.svelte`.
+- Entasis components use Svelte 5 runes, bindable props, callback props, `Slot`, attachments, CVA theme parts, package subpath exports, MCP documentation, and a documentation route. See `COMPONENT_CREATION_PROMPT.md` and `src/routes/docs/conventions/+page.svelte`.
 - The existing `Form/Calendar` is a date-selection control. Its state and event type do not own scheduling concerns such as stable item identity, timed layout, all-day bars, recurrence, resource assignment, or mutations. `EventCalendar` therefore belongs in a new top-level `src/lib/components/EventCalendar/` module.
 - The repository already contains the right UI and interaction primitives: `Button`, `ButtonGroup`, `SegmentedControl`, `PopupMenu`, `Popover`, `CalendarPrimitive`, `ScrollArea`, `Tooltip`, `Empty`, `Spinner`, icons, `Slot`, `useResizeObserver`, `createPointerDrag`, and Pragmatic Drag and Drop with auto-scroll.
 - The worktree is already dirty, including files that the eventual integration must touch (`package.json`, `src/hooks.server.ts`, and `src/routes/appNavigation.ts`). Implementation must preserve all unrelated changes.
@@ -32,8 +32,8 @@ One public Svelte component owns an internal reactive state object. That state c
 
 ### Deliberate departures from ReUI and FullCalendar
 
-- The main collection is `items`, not `events`, because Svelai’s public convention names the top-level rendered collection `items` and carries domain meaning in `EventCalendarItem`.
-- There is no public provider/compound API (`EventCalendarNav`, `EventCalendarMonthView`, and so on). Svelai translates source compound parts into props, snippets, and theme parts.
+- The main collection is `items`, not `events`, because Entasis’s public convention names the top-level rendered collection `items` and carries domain meaning in `EventCalendarItem`.
+- There is no public provider/compound API (`EventCalendarNav`, `EventCalendarMonthView`, and so on). Entasis translates source compound parts into props, snippets, and theme parts.
 - There is no public plugin system or whole-view replacement prop. Built-in view adapters stay static and internal; named region snippets customize their content without replacing the date, layout, interaction, or accessibility owners. A custom-view contract waits for a real second consumer.
 - There is no React-style `defaultDate`/`date` or `defaultView`/`view` duplication. The explicit `date` and defaulted `view` are each single bindable sources with matching component-originated callbacks.
 - There is no built-in event loader or persistence layer. Consumers fetch from `onRangeChange`, pass `items` and `loading`, and persist from `onItemsChange`. This keeps network errors at the application boundary and prevents the component from silently converting failures into empty calendars.
@@ -53,8 +53,8 @@ One public Svelte component owns an internal reactive state object. That state c
 - Click, double-click, slot click, range selection, move, start/end resize, all-day/timed conversion, resource transfer, and drag-created ranges.
 - Live validation, overlap policy, valid-range/business-hour constraints, snap intervals, invalid-drop feedback, immutable commits, and `revert()`.
 - Mouse, touch long-press, keyboard move/resize mode, Escape cancellation, auto-scroll, reduced motion, and a single-pointer alternative to dragging.
-- Explicit IANA named time zones (including the browser’s resolved local zone), UTC, DST-safe civil-day math, BCP-47 locales, all shipped Svelai catalogs, and RTL.
-- Per-instance and global Svelai theming, semantic item colors, data-state attributes, CSS metric variables, and named snippets.
+- Explicit IANA named time zones (including the browser’s resolved local zone), UTC, DST-safe civil-day math, BCP-47 locales, all shipped Entasis catalogs, and RTL.
+- Per-instance and global Entasis theming, semantic item colors, data-state attributes, CSS metric variables, and named snippets.
 - SSR-safe rendering and package-safe ESM exports.
 
 ### Explicit non-goals
@@ -457,8 +457,8 @@ The concrete `EventCalendarProps<TItemFields, TResourceFields>` is one `WithAtta
 | Prop            | Type                                           | Default                      | Contract                                                                                      |
 | --------------- | ---------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------- |
 | `timeZone`      | `string`                                       | required                     | Explicit display-zone IANA name or `'UTC'`; prevents server/browser inference from diverging. |
-| `locale`        | `string`                                       | active Svelai catalog locale | BCP-47 locale for date/time formatting.                                                       |
-| `i18n`          | `Partial<Messages>`                            | none                         | Per-instance Svelai message overrides.                                                        |
+| `locale`        | `string`                                       | active Entasis catalog locale | BCP-47 locale for date/time formatting.                                                       |
+| `i18n`          | `Partial<Messages>`                            | none                         | Per-instance Entasis message overrides.                                                        |
 | `dir`           | `'ltr' \| 'rtl'`                               | ambient direction            | Mirrors navigation and horizontal interaction semantics.                                      |
 | `weekStartsOn`  | `EventCalendarWeekday`                         | locale-derived               | Explicit value wins over locale week information.                                             |
 | `validRange`    | `EventCalendarRange`                           | unbounded                    | Half-open navigation, selection, and mutation boundary.                                       |
@@ -898,7 +898,7 @@ Stable parts are grouped by real visual responsibility:
 - Items and interaction: `item`, `itemControl`, `itemContent`, `itemTitle`, `itemTime`, `overflow`, `overflowPopover`, `dragPreview`, `dropIndicator`, `slotSelection`, `resizeHandle`, `actionTrigger`.
 - Agenda and resources: `agenda`, `agendaDay`, `agendaItem`, `agendaDetails`, `resourceHeader`.
 
-Theme variants include `density`, `color`, `view`, selected/dragging/invalid/disabled states, today/outside/off-day states, item display type, and segment start/end/continuation states. The internal `color` variant resolves per-item semantic colors through the Svelai color map; items without a color use `neutral`, while calendar chrome uses the primary theme context. Arbitrary CSS item colors flow through `--event-calendar-item-color` without inventing Tailwind class names.
+Theme variants include `density`, `color`, `view`, selected/dragging/invalid/disabled states, today/outside/off-day states, item display type, and segment start/end/continuation states. The internal `color` variant resolves per-item semantic colors through the Entasis color map; items without a color use `neutral`, while calendar chrome uses the primary theme context. Arbitrary CSS item colors flow through `--event-calendar-item-color` without inventing Tailwind class names.
 
 Metric CSS variables keep layout tunable without turning every measurement into a prop:
 
@@ -1033,7 +1033,7 @@ Each phase is a coherent review boundary containing one or more atomic Conventio
 
 ### Phase 2 — Shell, default header, snippets, theme, and i18n
 
-**Outcome:** a recognizably Svelai calendar shell with working navigation and composition.
+**Outcome:** a recognizably Entasis calendar shell with working navigation and composition.
 
 - [ ] Add `EventCalendar.svelte`, `EventCalendarHeader.svelte`, and `EventCalendarContent.svelte`.
 - [ ] Reuse `Button`/`ButtonGroup` for Today and previous/next, `SegmentedControl` for wide view selection, `PopupMenu` for narrow view selection, and `Popover` + `CalendarPrimitive` for optional date jump.
@@ -1183,7 +1183,7 @@ Each phase is a coherent review boundary containing one or more atomic Conventio
 
 ### Phase 11 — Documentation, package surface, and release verification
 
-**Outcome:** the component is discoverable, importable, documented, and packaged like the rest of Svelai.
+**Outcome:** the component is discoverable, importable, documented, and packaged like the rest of Entasis.
 
 - [ ] Add `index.ts` exporting only `EventCalendar`, `EventCalendarError`, public props/domain/API/snippet types, and theme helpers.
 - [ ] Add `./event-calendar` to `package.json` exports and the legacy type-resolution map if it remains authoritative at implementation time.
@@ -1196,7 +1196,7 @@ Each phase is a coherent review boundary containing one or more atomic Conventio
 - [ ] Run the full static, lint, packaging, and browser verification matrix below; compare any failures with the Phase 0 baseline.
 - [ ] Run the seven-part repository self-review: form, failure handling, convention, scope, DRY, correctness, and architecture. Fix and repeat until clean.
 
-**Exit gate:** `import { EventCalendar } from 'svelai/event-calendar'` works from the packed artifact; docs and MCP surfaces agree with types; no internal child leaks; no new diagnostic, SSR, hydration, lint, or publint failures remain.
+**Exit gate:** `import { EventCalendar } from 'entasis/event-calendar'` works from the packed artifact; docs and MCP surfaces agree with types; no internal child leaks; no new diagnostic, SSR, hydration, lint, or publint failures remain.
 
 ## Verification matrix
 
@@ -1264,12 +1264,12 @@ No new automated test files are part of the authorized scope. The implementation
 
 ## Done when
 
-- `EventCalendar` imports from `svelai/event-calendar` with complete public declarations.
+- `EventCalendar` imports from `entasis/event-calendar` with complete public declarations.
 - The component implements every included view and item shape from the shared date/occurrence model.
 - Move, resize, drag-create, keyboard, touch, and non-drag alternatives share one validation/commit pipeline.
 - Named zones, DST, recurrence, all-day semantics, and exclusive ends are correct and documented.
-- All default visual regions are themed through the Svelai global/per-instance system and composable through named snippets.
-- Existing Svelai primitives are reused where they own the responsibility; `useDndList` and `Form/Calendar` are not stretched into false abstractions.
+- All default visual regions are themed through the Entasis global/per-instance system and composable through named snippets.
+- Existing Entasis primitives are reused where they own the responsibility; `useDndList` and `Form/Calendar` are not stretched into false abstractions.
 - Remote loading and persistence remain consumer-owned, with visible-range callbacks, loading state, immutable change callbacks, and explicit revert.
 - Docs, MCP, navigation, package exports, generated props/structure docs, SSR, hydration, lint, check, and publint integration are complete.
 - No unrelated dirty-worktree changes are reverted or overwritten.

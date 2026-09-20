@@ -71,10 +71,10 @@ The ButtonGroup component displays a collection of related buttons as a cohesive
 ### With Icons
 \`\`\`svelte
 <script lang="ts">
-	import { ButtonGroup } from 'svelai/button-group';
-	import { textAlignLeftIcon } from 'svelai/icons/textAlignLeft';
-	import { textAlignCenterIcon } from 'svelai/icons/textAlignCenter';
-	import { textAlignRightIcon } from 'svelai/icons/textAlignRight';
+	import { ButtonGroup } from 'entasis/button-group';
+	import { textAlignLeftIcon } from 'entasis/icons/textAlignLeft';
+	import { textAlignCenterIcon } from 'entasis/icons/textAlignCenter';
+	import { textAlignRightIcon } from 'entasis/icons/textAlignRight';
 </script>
 
 <ButtonGroup 
@@ -131,10 +131,10 @@ The ButtonGroup component displays a collection of related buttons as a cohesive
 ### Icon Only Buttons
 \`\`\`svelte
 <script lang="ts">
-	import { ButtonGroup } from 'svelai/button-group';
-	import { textBIcon } from 'svelai/icons/textB';
-	import { textItalicIcon } from 'svelai/icons/textItalic';
-	import { textUnderlineIcon } from 'svelai/icons/textUnderline';
+	import { ButtonGroup } from 'entasis/button-group';
+	import { textBIcon } from 'entasis/icons/textB';
+	import { textItalicIcon } from 'entasis/icons/textItalic';
+	import { textUnderlineIcon } from 'entasis/icons/textUnderline';
 </script>
 
 <ButtonGroup 
@@ -259,7 +259,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setButtonGroupTheme } from 'svelai/button-group';
+  import { setButtonGroupTheme } from 'entasis/button-group';
   
   setButtonGroupTheme({
     root: {

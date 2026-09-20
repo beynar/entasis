@@ -19,7 +19,7 @@
 		<div>
 			<h2 class="text-xl font-semibold">Component preview</h2>
 			<p class="text-neutral/70 text-sm">
-				Every sample uses ordinary Tailwind classes and existing svelai components.
+				Every sample uses ordinary Tailwind classes and existing entasis components.
 			</p>
 		</div>
 

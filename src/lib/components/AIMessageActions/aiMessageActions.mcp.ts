@@ -24,7 +24,7 @@ the default buttons render through the semantic error region.
 
 \`\`\`svelte
 <script>
-  import { AIMessageActions } from 'svelai/ai-message-actions';
+  import { AIMessageActions } from 'entasis/ai-message-actions';
 </script>
 
 {#snippet actions({ copied, copy })}

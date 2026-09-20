@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { keyIcon } from 'svelai/icons/key';
-	import { listChecksIcon } from 'svelai/icons/listChecks';
-	import { shieldCheckIcon } from 'svelai/icons/shieldCheck';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { keyIcon } from 'entasis/icons/key';
+	import { listChecksIcon } from 'entasis/icons/listChecks';
+	import { shieldCheckIcon } from 'entasis/icons/shieldCheck';
 	const practices = [
 		{
 			title: 'Access with intention',

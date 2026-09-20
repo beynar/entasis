@@ -54,7 +54,7 @@
 </script>
 
 <svelte:head>
-	<title>{title} · svelai</title>
+	<title>{title} · entasis</title>
 </svelte:head>
 
 <article class="mx-auto w-full max-w-6xl">
@@ -72,7 +72,7 @@
 		>
 			<h2 class="text-neutral text-sm font-semibold">Requires</h2>
 			<p class="text-neutral/70 mt-1 mb-3 text-sm">
-				This component needs optional peer dependencies. Install them alongside <code>svelai</code>:
+				This component needs optional peer dependencies. Install them alongside <code>entasis</code>:
 			</p>
 			<Code code={requires} language="bash" />
 		</section>

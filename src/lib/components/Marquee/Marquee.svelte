@@ -140,8 +140,8 @@
 	}
 
 	/* Theme mirrors the reduced-motion preference (OS setting or `reduceMotion` prop) onto <html>. */
-	:global(html[data-svelai-reduce-motion] .animate-marquee-left),
-	:global(html[data-svelai-reduce-motion] .animate-marquee-up) {
+	:global(html[data-entasis-reduce-motion] .animate-marquee-left),
+	:global(html[data-entasis-reduce-motion] .animate-marquee-up) {
 		animation: none;
 	}
 </style>

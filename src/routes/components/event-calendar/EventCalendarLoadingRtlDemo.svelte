@@ -4,7 +4,7 @@
 		EventCalendar,
 		type EventCalendarItem,
 		type EventCalendarRangeChangeInfo
-	} from 'svelai/event-calendar';
+	} from 'entasis/event-calendar';
 
 	let date = $state(new Date('2026-07-15T06:00:00.000Z'));
 	let loading = $state(false);

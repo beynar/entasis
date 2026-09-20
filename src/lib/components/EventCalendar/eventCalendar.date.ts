@@ -5,7 +5,6 @@ import {
 	formatCivilDate,
 	getCivilDateDifference,
 	getCivilDateWeekday,
-	getCivilDaysInMonth,
 	modulo,
 	parseCivilDate,
 	startOfCivilDateWeek,
@@ -190,38 +189,24 @@ export function isEventCalendarOffDay(
 }
 
 export function toDateOnly(parts: CivilDate): EventCalendarDateOnly {
-	if (
-		!Number.isInteger(parts.year) ||
-		!Number.isInteger(parts.month) ||
-		!Number.isInteger(parts.day) ||
-		parts.year < 1 ||
-		parts.year > 9999 ||
-		parts.month < 1 ||
-		parts.month > 12 ||
-		parts.day < 1 ||
-		parts.day > getCivilDaysInMonth(parts.year, parts.month)
-	) {
-		if (Number.isInteger(parts.year) && (parts.year < 1 || parts.year > 9999)) {
-			throwSupportedDateDomainError({ parts });
-		}
+	try {
+		return formatCivilDate(parts);
+	} catch (error) {
+		if (!(error instanceof CivilDateError)) throw error;
+		if (error.code === 'outside-supported-range') throwSupportedDateDomainError({ parts });
 		throw new EventCalendarError('invalid-prop', 'Civil parts must form a real Gregorian date.', {
 			...parts
 		});
 	}
-	const value = formatCivilDate(parts);
-	assertDateOnly(value);
-	return value;
 }
 
 export function getZonedParts(instant: Date, timeZone: string): Required<EventCalendarWallTime> {
-	assertValidInstant(instant);
-	assertValidTimeZone(timeZone);
+	assertZonedInstant(instant, timeZone);
 	return getInstantZonedParts(instant, timeZone);
 }
 
 export function getZonedDay(instant: Date, timeZone: string): EventCalendarDateOnly {
-	assertValidInstant(instant);
-	assertValidTimeZone(timeZone);
+	assertZonedInstant(instant, timeZone);
 	return getInstantZonedDay(instant, timeZone);
 }
 
@@ -299,7 +284,7 @@ export function enumerateInstantSlots(
 ): readonly Date[] {
 	assertMinuteOfDay(startMinutes, 'startMinutes', true);
 	assertMinuteOfDay(endMinutes, 'endMinutes', true);
-	assertPositiveInteger(intervalMinutes, 'intervalMinutes');
+	assertInteger(intervalMinutes, 'intervalMinutes', true);
 	if (startMinutes >= endMinutes) {
 		throw new EventCalendarError('invalid-prop', 'startMinutes must be before endMinutes.', {
 			startMinutes,
@@ -367,26 +352,7 @@ export function generateVisibleDays(
 		});
 	}
 	assertSomeWeekdayVisible(hiddenWeekdays);
-
-	const days: EventCalendarDateOnly[] = [];
-	let day = start;
-	let scanned = 0;
-	while (day < end) {
-		if (!hiddenWeekdays.has(getCivilWeekday(day))) days.push(day);
-		day = addCivilDays(day, 1);
-		scanned += 1;
-		if (scanned > MAX_VISIBLE_DAY_SCAN) {
-			throw new EventCalendarError(
-				'invalid-prop',
-				'Visible-day generation exceeded its safe bound.',
-				{
-					start,
-					end
-				}
-			);
-		}
-	}
-	return days;
+	return collectVisibleDays(start, hiddenWeekdays, (day) => day < end, { start, end });
 }
 
 export function generateVisibleDayCount(
@@ -395,7 +361,7 @@ export function generateVisibleDayCount(
 	hiddenWeekdays: ReadonlySet<EventCalendarWeekday>
 ): readonly EventCalendarDateOnly[] {
 	parseDateOnly(start, 'start');
-	assertPositiveInteger(count, 'count');
+	assertInteger(count, 'count', true);
 	assertSomeWeekdayVisible(hiddenWeekdays);
 	if (hiddenWeekdays.has(getCivilWeekday(start))) {
 		throw new EventCalendarError('invalid-prop', 'The first rendered day cannot be hidden.', {
@@ -403,21 +369,29 @@ export function generateVisibleDayCount(
 		});
 	}
 
+	return collectVisibleDays(start, hiddenWeekdays, (_day, days) => days.length < count, {
+		start,
+		count
+	});
+}
+
+function collectVisibleDays(
+	start: EventCalendarDateOnly,
+	hiddenWeekdays: ReadonlySet<EventCalendarWeekday>,
+	shouldContinue: (day: EventCalendarDateOnly, days: EventCalendarDateOnly[]) => boolean,
+	details: Readonly<Record<string, unknown>>
+): readonly EventCalendarDateOnly[] {
 	const days: EventCalendarDateOnly[] = [];
 	let day = start;
 	let scanned = 0;
-	while (days.length < count) {
+	while (shouldContinue(day, days)) {
 		if (!hiddenWeekdays.has(getCivilWeekday(day))) days.push(day);
 		day = addCivilDays(day, 1);
-		scanned += 1;
-		if (scanned > MAX_VISIBLE_DAY_SCAN) {
+		if (++scanned > MAX_VISIBLE_DAY_SCAN) {
 			throw new EventCalendarError(
 				'invalid-prop',
 				'Visible-day generation exceeded its safe bound.',
-				{
-					start,
-					count
-				}
+				details
 			);
 		}
 	}
@@ -449,7 +423,7 @@ export function snapInstant(
 	mode: EventCalendarSnapMode = 'round'
 ): Date {
 	assertValidInstant(instant);
-	assertPositiveInteger(durationMinutes, 'durationMinutes');
+	assertInteger(durationMinutes, 'durationMinutes', true);
 	assertValidTimeZone(timeZone);
 	return snapInstantWithinZonedDay(instant, timeZone, durationMinutes, mode);
 }
@@ -668,7 +642,7 @@ export function getMaximumDateProfileAnchor(options: {
 
 	const usesDayCount = options.view === 'days';
 	const count = usesDayCount ? options.dayCount : options.agendaDayCount;
-	assertPositiveInteger(count, usesDayCount ? 'dayCount' : 'agendaDayCount');
+	assertInteger(count, usesDayCount ? 'dayCount' : 'agendaDayCount', true);
 	let lastVisibleDay = MAX_EVENT_CALENDAR_DAY;
 	while (hiddenWeekdays.has(getCivilWeekday(lastVisibleDay))) {
 		lastVisibleDay = addCivilDays(lastVisibleDay, -1);
@@ -858,8 +832,8 @@ function assertDateProfileOptions(options: EventCalendarDateProfileOptions): str
 	assertValidTimeZone(options.timeZone);
 	const locale = normalizeLocale(options.locale);
 	assertWeekday(options.weekStartsOn, 'weekStartsOn');
-	assertPositiveInteger(options.dayCount, 'dayCount');
-	assertPositiveInteger(options.agendaDayCount, 'agendaDayCount');
+	assertInteger(options.dayCount, 'dayCount', true);
+	assertInteger(options.agendaDayCount, 'agendaDayCount', true);
 	if (options.validRange) assertValidRange(options.validRange, 'validRange');
 	const seen = new Set<EventCalendarWeekday>();
 	for (const weekday of options.weekendDays) {
@@ -921,7 +895,6 @@ function normalizeWallTime(wallTime: EventCalendarWallTime): Required<EventCalen
 	const second = wallTime.second ?? 0;
 	const millisecond = wallTime.millisecond ?? 0;
 	const day = toDateOnly(wallTime);
-	parseDateOnly(day);
 	for (const [name, value, maximum] of [
 		['hour', hour, 24],
 		['minute', minute, 59],
@@ -987,6 +960,11 @@ function cloneRange(range: EventCalendarRange): EventCalendarRange {
 	return { start: new Date(range.start), end: new Date(range.end) };
 }
 
+function assertZonedInstant(instant: Date, timeZone: string): void {
+	assertValidInstant(instant);
+	assertValidTimeZone(timeZone);
+}
+
 function assertSomeWeekdayVisible(hiddenWeekdays: ReadonlySet<EventCalendarWeekday>): void {
 	if (hiddenWeekdays.size < 7) return;
 	throw new EventCalendarError('invalid-prop', 'At least one weekday must remain visible.');
@@ -1004,20 +982,16 @@ function assertWeekday(value: number, name: string): asserts value is EventCalen
 	);
 }
 
-function assertPositiveInteger(value: number, name: string): void {
-	if (Number.isInteger(value) && value > 0) return;
-	throw new EventCalendarError('invalid-prop', `${name} must be a positive integer.`, {
-		prop: name,
-		value
-	});
-}
-
-function assertInteger(value: number, name: string): void {
-	if (Number.isInteger(value)) return;
-	throw new EventCalendarError('invalid-prop', `${name} must be an integer.`, {
-		prop: name,
-		value
-	});
+function assertInteger(value: number, name: string, positive = false): void {
+	if (Number.isInteger(value) && (!positive || value > 0)) return;
+	throw new EventCalendarError(
+		'invalid-prop',
+		`${name} must be ${positive ? 'a positive integer' : 'an integer'}.`,
+		{
+			prop: name,
+			value
+		}
+	);
 }
 
 function assertMinuteOfDay(value: number, name: string, allowEnd: boolean): void {

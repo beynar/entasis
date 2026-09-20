@@ -76,7 +76,7 @@
 		</ComponentCard>
 
 		<ComponentCard
-			description="Density, icons, and Git status are first-class props and inherit svelai tokens."
+			description="Density, icons, and Git status are first-class props and inherit entasis tokens."
 			class="!min-h-fit !items-stretch !justify-start"
 		>
 			<TreeIconsDensityDemo />

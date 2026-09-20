@@ -220,7 +220,7 @@ export class ImageGalleryLightbox {
 				infiniteZoom: true,
 				scale: 0.25,
 				enableZoomAfter: this.gallery.transitionDuration,
-				addClass: 'svelai-image-gallery',
+				addClass: 'entasis-image-gallery',
 				mobileSettings: {
 					controls: true,
 					showCloseIcon: true,

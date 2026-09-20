@@ -2,7 +2,7 @@
 
 ## Goal
 
-Ship a production-grade, first-class Svelai package at `svelai/gantt-chart` and a documentation page at `/components/gantt-chart`. GanttChart is a dedicated project-scheduling component. It is not an EventCalendar view, a generic timeline, or a wrapper around a third-party Gantt library.
+Ship a production-grade, first-class Entasis package at `entasis/gantt-chart` and a documentation page at `/components/gantt-chart`. GanttChart is a dedicated project-scheduling component. It is not an EventCalendar view, a generic timeline, or a wrapper around a third-party Gantt library.
 
 ## Repository facts frozen before implementation
 
@@ -11,7 +11,7 @@ Ship a production-grade, first-class Svelai package at `svelai/gantt-chart` and 
 - `package.json` already contains unrelated version, script, and DocumentViewer export edits. Gantt package-boundary edits must preserve them and cannot be included in an otherwise atomic commit without also staging their existing hunks.
 - Baseline `npm run check` fails with 3,049 errors and 33 warnings in 15 pre-existing files. No GanttChart files existed at baseline.
 - Baseline scoped EventCalendar ESLint passes. Baseline `npm run prepack` and Publint pass.
-- Installed interfaces were verified from local source: Svelte 5.56.4, Tailwind 4.3.2, Pragmatic Drag and Drop 2.0.1, auto-scroll 3.0.0, `@tanstack/svelte-virtual` 3.13.32, the Svelai Resizable panels/snippet interface, the actual two-axis ScrollArea interface, and the shared pointer-drag attachment.
+- Installed interfaces were verified from local source: Svelte 5.56.4, Tailwind 4.3.2, Pragmatic Drag and Drop 2.0.1, auto-scroll 3.0.0, `@tanstack/svelte-virtual` 3.13.32, the Entasis Resizable panels/snippet interface, the actual two-axis ScrollArea interface, and the shared pointer-drag attachment.
 
 ## Product boundary
 
@@ -28,12 +28,12 @@ The removed EventCalendar timeline view will not be restored. EventCalendar recu
 
 ## Public package surface
 
-The package exports `GanttChart`, `GanttChartError`, the theme API, MCP description, props, API, domain definitions, resolved nodes, proposal/change types, snippet payloads, and callback types from `svelai/gantt-chart`.
+The package exports `GanttChart`, `GanttChartError`, the theme API, MCP description, props, API, domain definitions, resolved nodes, proposal/change types, snippet payloads, and callback types from `entasis/gantt-chart`.
 
 Consumers import it as:
 
 ```ts
-import { GanttChart, type GanttTask, type GanttDependency } from 'svelai/gantt-chart';
+import { GanttChart, type GanttTask, type GanttDependency } from 'entasis/gantt-chart';
 ```
 
 The component name is `GanttChart`; the public theme key is `ganttChart`.
@@ -122,7 +122,7 @@ The frozen public surface keeps controlled state flat and groups configuration b
 - `events` owns selection, expansion, zoom, visible-range, activation, empty-range, blocked-interaction, and schedule-violation notifications.
 - `render` owns semantic Svelte 5 content customization. `render.header: false` removes the default header.
 
-The component infers initial timeline anchoring, zoom-specific snap duration, safe grid bounds, virtualization overscan, sticky behavior, reading direction, and task accent. Svelai I18n is the SSR direction owner; without it, the client reconciles the root's computed DOM direction after mount. It always uses Svelai ScrollArea; there is no native-scrollbar switch. `color`, `locale`, `dir`, `initialScrollDate`, `scrollbars`, `stickyHeader`, `minGridWidth`, `maxGridWidth`, `overscan`, and public touch thresholds do not exist.
+The component infers initial timeline anchoring, zoom-specific snap duration, safe grid bounds, virtualization overscan, sticky behavior, reading direction, and task accent. Entasis I18n is the SSR direction owner; without it, the client reconciles the root's computed DOM direction after mount. It always uses Entasis ScrollArea; there is no native-scrollbar switch. `color`, `locale`, `dir`, `initialScrollDate`, `scrollbars`, `stickyHeader`, `minGridWidth`, `maxGridWidth`, `overscan`, and public touch thresholds do not exist.
 
 A dependency-creation function remains required when dependency creation is enabled because a generic dependency can contain required consumer fields that GanttChart cannot fabricate. The function supplies the ID and custom fields; GanttChart preserves the gesture-owned endpoints and type, then runs the normal validation and mutation pipeline.
 
@@ -211,7 +211,7 @@ Shared scheduling primitives will be extracted only where both consumers have th
 
 EventCalendar public errors, types, names, and behavior remain unchanged while its private imports move to shared owners. A shared transaction/history abstraction will be introduced only if both components are migrated to identical stale/revert invariants; otherwise each component retains its own owner.
 
-Direct reuse includes pointerDrag, installed Pragmatic Drag and Drop and auto-scroll, TanStack Svelte Virtual, and existing Svelai primitives. No external Gantt dependency will be added.
+Direct reuse includes pointerDrag, installed Pragmatic Drag and Drop and auto-scroll, TanStack Svelte Virtual, and existing Entasis primitives. No external Gantt dependency will be added.
 
 ### EventCalendar source map
 
@@ -247,4 +247,4 @@ No phase begins until the preceding exit gate is demonstrably clean. Temporary p
 
 No recurrence; EventCalendar views; provider sync; fetching; persistence; retries; collaboration; comments; CRDTs; server scheduling; automatic resource leveling; portfolio optimization; proprietary/PDF/image/Excel/MS Project import/export; generic plugin system; Canvas-only rendering; built-in task editor dialog; deployment; or publication.
 
-The documentation composes creation/editing with existing Svelai Dialog and Form inputs. Print-friendly CSS is allowed. JSON/CSV snapshot helpers are not part of the frozen interface.
+The documentation composes creation/editing with existing Entasis Dialog and Form inputs. Print-friendly CSS is allowed. JSON/CSV snapshot helpers are not part of the frozen interface.

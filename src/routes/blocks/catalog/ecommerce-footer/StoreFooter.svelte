@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Select } from 'svelai/select';
-	import { Chip } from 'svelai/chip';
+	import { Button } from 'entasis/button';
+	import { Select } from 'entasis/select';
+	import { Chip } from 'entasis/chip';
 	const groups = [
 		{ title: 'Shop', links: ['New arrivals', 'Lighting', 'Objects', 'Everyday carry'] },
 		{ title: 'Help', links: ['Delivery & returns', 'Care guide', 'FAQs', 'Contact'] },

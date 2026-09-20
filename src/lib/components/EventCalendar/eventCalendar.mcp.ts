@@ -7,7 +7,7 @@ A typed scheduling calendar for Svelte 5. It renders month, week, day, configura
 
 ~~~svelte
 <script lang="ts">
-	import { EventCalendar, type EventCalendarItem } from 'svelai/event-calendar';
+	import { EventCalendar, type EventCalendarItem } from 'entasis/event-calendar';
 
 	let date = $state(new Date('2026-07-15T10:00:00.000Z'));
 	let items = $state<EventCalendarItem[]>([]);
@@ -24,7 +24,7 @@ A typed scheduling calendar for Svelte 5. It renders month, week, day, configura
 - All-day starts and exclusive ends are canonical YYYY-MM-DD strings. Valid civil dates span 0001-01-01 through 9999-12-31, but 9999-12-30 is the last selectable/renderable day because a rendered day needs an exclusive end. An all-day end may be 9999-12-31.
 - Items need stable unique ids. Invalid items, resources, views, zones, recurrence, and stale transactions throw EventCalendarError with a public EventCalendarErrorCode.
 - 'items' and 'resources' are immutable controlled collections: allocate a fresh outer array for every consumer update and replace changed definitions. EventCalendar never mutates consumer objects.
-- EventCalendarItem<TItemFields> includes optional 'description' and 'color' fields and preserves custom fields through props, snippets, callbacks, and API methods. Item colors accept Svelai semantic tokens or CSS colors; omitted item colors render as neutral. Custom fields cannot redeclare calendar-owned keys.
+- EventCalendarItem<TItemFields> includes optional 'description' and 'color' fields and preserves custom fields through props, snippets, callbacks, and API methods. Item colors accept Entasis semantic tokens or CSS colors; omitted item colors render as neutral. Custom fields cannot redeclare calendar-owned keys.
 - Foreground items can be timed, all-day, multi-day, or recurring. 'display: background' items are display-only and never interactive.
 - Assign one leaf with 'resourceId' or several leaves with an ordered unique 'resourceIds' array. The two fields are mutually exclusive.
 - Timed recurrence requires an explicit 'recurrenceTimeZone'. All-day recurrence remains floating civil dates.
@@ -46,7 +46,7 @@ The component never changes 'view' because its container becomes narrow. Previou
 ## Date, locale, and range props
 
 - 'timeZone': required IANA name or 'UTC'
-- 'locale': BCP-47 string; defaults to the active Svelai catalog locale
+- 'locale': BCP-47 string; defaults to the active Entasis catalog locale
 - 'i18n': per-instance Partial<Messages>
 - 'dir': 'ltr' | 'rtl'; defaults to ambient direction
 - 'weekStartsOn': 0..6; otherwise locale-derived
@@ -76,7 +76,7 @@ Move, resize-start, resize-end, API updates, and keyboard mode share one proposa
 
 ~~~svelte
 <script lang="ts">
-	import { externalEvent, type EventCalendarItem } from 'svelai/event-calendar';
+	import { externalEvent, type EventCalendarItem } from 'entasis/event-calendar';
 
 	let sequence = 0;
 	const createExternalItem = (): EventCalendarItem => ({
@@ -134,7 +134,7 @@ Snippets replace content inside component-owned semantic and interactive wrapper
 
 Render 'defaultContent' or the ready-made header snippets when wrapping the built-ins. Snippet content cannot remove item focusability, labels, selection state, drag/resize wiring, disclosures, or live announcements.
 
-EventCalendar does not own create/edit dialogs. Compose 'onSlotClick'/'onSelect'/'onItemClick' with Svelai Dialog, Form, DateInput, TimeInput, Select, and Switch, then publish a fresh 'items' array.
+EventCalendar does not own create/edit dialogs. Compose 'onSlotClick'/'onSelect'/'onItemClick' with Entasis Dialog, Form, DateInput, TimeInput, Select, and Switch, then publish a fresh 'items' array.
 
 ## Imperative API
 
@@ -151,7 +151,7 @@ Unknown IDs/keys and invalid operations throw EventCalendarError. API mutations 
 
 ## Theme and accessibility
 
-'density' defaults to 'normal'; 'theme' accepts EventCalendarThemeProps. Import 'eventCalendarTheme', 'setEventCalendarTheme', and 'useEventCalendarTheme' from 'svelai/event-calendar'. Stable parts cover chrome, month, time grid, items/interactions, agenda, and resources. CSS metrics include --event-calendar-slot-height, --event-calendar-time-gutter-width, --event-calendar-day-min-width, --event-calendar-resource-min-width, --event-calendar-item-min-height, and --event-calendar-sticky-offset.
+'density' defaults to 'normal'; 'theme' accepts EventCalendarThemeProps. Import 'eventCalendarTheme', 'setEventCalendarTheme', and 'useEventCalendarTheme' from 'entasis/event-calendar'. Stable parts cover chrome, month, time grid, items/interactions, agenda, and resources. CSS metrics include --event-calendar-slot-height, --event-calendar-time-gutter-width, --event-calendar-day-min-width, --event-calendar-resource-min-width, --event-calendar-item-min-height, and --event-calendar-sticky-offset.
 
 The active view exposes grids/groups/buttons/disclosures, roving focus, keyboard move/resize, Escape cancellation, two-click range selection, 24px interaction targets, polite announcements, reduced-motion behavior, narrow-container wrapping/scrolling, and RTL-aware physical movement. Keyboard mutation starts from a focused item, uses arrows to propose, Enter to commit, and Escape to cancel.
 `;

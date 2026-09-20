@@ -333,10 +333,10 @@
 
 	<Matrix caption="QRCode" varies="color, size">
 		{#each colors as color (color)}
-			<QRCode value="https://svelai.dev" {color} {size} label="QR {color}" />
+			<QRCode value="https://entasis.dev" {color} {size} label="QR {color}" />
 		{/each}
 		{#each sizes as qrSize (qrSize)}
-			<QRCode value="https://svelai.dev" color="neutral" size={qrSize} label="QR {qrSize}" />
+			<QRCode value="https://entasis.dev" color="neutral" size={qrSize} label="QR {qrSize}" />
 		{/each}
 	</Matrix>
 

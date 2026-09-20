@@ -5,7 +5,11 @@
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import { useResizeObserver } from '$lib/utils/useResizeObserver.svelte.js';
 	import EventCalendarMonthWeek from './EventCalendarMonthWeek.svelte';
-	import { getCachedDateTimeFormatter, startOfZonedDay } from './eventCalendar.date.js';
+	import {
+		getCachedDateTimeFormatter,
+		getZonedDay,
+		startOfZonedDay
+	} from './eventCalendar.date.js';
 	import {
 		createEventCalendarMonthSurface,
 		createEventCalendarMonthWeekLayout,
@@ -21,9 +25,6 @@
 	} = $props();
 
 	let monthHeight = $state(0);
-	const a11y = $derived(calendar.a11y);
-	const messages = $derived(calendar.messages);
-	const direction = $derived(calendar.direction);
 	const density = $derived(calendar.density);
 	const classes = $derived(calendar.classes);
 	const disabled = $derived(calendar.disabled);
@@ -38,25 +39,14 @@
 		}
 	});
 	const profile = $derived(calendar.dateProfile);
-	const surface = $derived(
-		createEventCalendarMonthSurface(profile, calendar.itemIndex, {
-			timeZone: calendar.timeZone,
-			showWeekends: calendar.showWeekends,
-			weekendDays: calendar.weekendDays,
-			weekStartsOn: calendar.weekStartsOn,
-			disabled,
-			todayInstant: calendar.todayInstant
-		})
+	const surface = $derived(createEventCalendarMonthSurface(profile, calendar));
+	const todayDay = $derived(
+		calendar.todayInstant ? getZonedDay(calendar.todayInstant, calendar.timeZone) : null
 	);
 	const renderDays = $derived(surface.renderDays);
 	const columnCount = $derived(surface.columnCount);
 	const weekdayHeaderDays = $derived(surface.weekdayHeaderDays);
 	const weekRows = $derived(surface.weeks);
-	const visibleDaySet = $derived(surface.visibleDaySet);
-	const currentStartDay = $derived(surface.currentStartDay);
-	const currentEndDay = $derived(surface.currentEndDay);
-	const todayDay = $derived(surface.todayDay);
-	const enabledDays = $derived(surface.enabledDays);
 	const weekdayFormatter = $derived(
 		getCachedDateTimeFormatter(calendar.locale, calendar.timeZone, { weekday: 'short' })
 	);
@@ -72,7 +62,13 @@
 	const allDayInsertion = $derived(calendar.interaction.getAllDayInsertion());
 	const weekLayouts = $derived(
 		weekRows.map((week) =>
-			createEventCalendarMonthWeekLayout(week, allDayInsertion, maxItemsPerCell, autoLaneSlots)
+			createEventCalendarMonthWeekLayout(
+				week,
+				calendar.itemIndex,
+				allDayInsertion,
+				maxItemsPerCell,
+				autoLaneSlots
+			)
 		)
 	);
 	const gridTemplateColumns = $derived(
@@ -85,12 +81,12 @@
 	);
 
 	$effect(() => {
-		a11y.configureMonth({
+		calendar.a11y.configureMonth({
 			days: renderDays,
-			enabledDays,
+			enabledDays: surface.enabledDays,
 			columnCount,
-			leadingEmptyCells: surface.firstDayColumn,
-			direction,
+			leadingEmptyCells: weekRows[0]?.leadingEmptyCells ?? 0,
+			direction: calendar.direction,
 			onPage: (pageDirection) => {
 				const previousDate = calendar.date.getTime();
 				if (pageDirection < 0) calendar.previous();
@@ -106,7 +102,7 @@
 	aria-readonly="true"
 	aria-rowcount={weekRows.length + 1}
 	aria-colcount={columnCount + (showWeekNumbers ? 1 : 0)}
-	aria-label={`${messages.eventCalendarMonthView}: ${profile.title}`}
+	aria-label={`${calendar.messages.eventCalendarMonthView}: ${profile.title}`}
 	data-event-calendar-part="month"
 	class={classes.month({ density, view: 'month', disabled })}
 	{@attach maxItemsPerCell === 'auto' ? monthResizeObserver.reference : null}
@@ -153,22 +149,12 @@
 		class={classes.monthGrid({ density, view: 'month', disabled })}
 		style:min-width={gridMinimumWidth}
 	>
-		{#each weekLayouts as weekLayout, weekIndex (`${weekLayout.days[0]}:${weekLayout.days.at(-1)}`)}
+		{#each weekLayouts as weekLayout (`${weekLayout.days[0]}:${weekLayout.days.at(-1)}`)}
 			<EventCalendarMonthWeek
 				{calendar}
-				days={weekLayout.days}
-				layout={weekLayout.layout}
-				visibleLaneCount={weekLayout.visibleLaneCount}
-				insertion={weekLayout.insertion}
-				draggingOccurrenceKey={weekLayout.draggingOccurrenceKey}
-				leadingEmptyCells={weekLayout.leadingEmptyCells}
-				trailingEmptyCells={weekLayout.trailingEmptyCells}
-				{weekIndex}
+				{surface}
+				week={weekLayout}
 				{gridTemplateColumns}
-				{visibleDaySet}
-				{enabledDays}
-				{currentStartDay}
-				{currentEndDay}
 				{todayDay}
 			/>
 		{/each}

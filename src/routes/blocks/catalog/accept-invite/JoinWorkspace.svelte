@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Grid } from 'svelai/grid';
-	import { Stack } from 'svelai/stack';
-	import { Alert } from 'svelai/alert';
-	import { Avatar } from 'svelai/avatar';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Form } from 'svelai/form';
+	import { Grid } from 'entasis/grid';
+	import { Stack } from 'entasis/stack';
+	import { Alert } from 'entasis/alert';
+	import { Avatar } from 'entasis/avatar';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Form } from 'entasis/form';
 
 	let message = $state('');
 </script>

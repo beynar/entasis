@@ -2,13 +2,13 @@
 
 ## Goal
 
-Expand the existing /blocks documentation surface into a searchable, visual library of Svelai compositions. Cover all 108 top-level categories inspected in Dia on 2026-09-07, with 278 selected blocks (2–5 per category). Preserve the ten existing application workflows.
+Expand the existing /blocks documentation surface into a searchable, visual library of Entasis compositions. Cover all 108 top-level categories inspected in Dia on 2026-09-07, with 278 selected blocks (2–5 per category). Preserve the ten existing application workflows.
 
 ## Selection and ownership
 
-Use five layouts for Hero, Feature, and Pricing; four for broad categories; three where layout or interaction diversity merits it; two for focused categories. Background Pattern and Shader receive two compositions each. These are independent Svelte adaptations of selected public visual references, using the public Svelai API and current theme.
+Use five layouts for Hero, Feature, and Pricing; four for broad categories; three where layout or interaction diversity merits it; two for focused categories. Background Pattern and Shader receive two compositions each. These are independent Svelte adaptations of selected public visual references, using the public Entasis API and current theme.
 
-The main agent owns the gallery, routing, preview and source controls, integration, and validation. Three subagents own disjoint catalog directories and metadata shards. Each selected block is a standalone .svelte file with public svelai imports. The catalog metadata records its individual reference and component dependencies.
+The main agent owns the gallery, routing, preview and source controls, integration, and validation. Three subagents own disjoint catalog directories and metadata shards. Each selected block is a standalone .svelte file with public entasis imports. The catalog metadata records its individual reference and component dependencies.
 
 | Category                                                                             | Group       | Blocks | Implementation owner |
 | ------------------------------------------------------------------------------------ | ----------- | -----: | -------------------- |
@@ -127,7 +127,7 @@ Every mapped category has its allocated distinct compositions, all preview and s
 
 ## Selected layouts
 
-Each link records the original visual reference and its standalone Svelai implementation. The compositions use library props and the active theme; custom classes are reserved for layout and media.
+Each link records the original visual reference and its standalone Entasis implementation. The compositions use library props and the active theme; custom classes are reserved for layout and media.
 
 | Category               | Selected layouts and implementation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

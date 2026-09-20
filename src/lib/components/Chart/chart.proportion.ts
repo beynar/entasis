@@ -17,8 +17,8 @@ type NormalizedProportionVariant =
 	| { type: 'waffle'; cells: number; columns: number; gap: number; radius: number };
 
 export type ProportionDatum = {
-	readonly __svelaiProportion: true;
-	readonly __svelaiSourceRows: readonly object[];
+	readonly __entasisProportion: true;
+	readonly __entasisSourceRows: readonly object[];
 	readonly identity: string;
 	readonly category: ChartKey;
 	readonly value: number;
@@ -63,7 +63,7 @@ export function compileProportion<TRow extends object>({
 
 export function isProportionDatum(value: unknown): value is ProportionDatum {
 	return (
-		typeof value === 'object' && value !== null && Reflect.get(value, '__svelaiProportion') === true
+		typeof value === 'object' && value !== null && Reflect.get(value, '__entasisProportion') === true
 	);
 }
 
@@ -144,8 +144,8 @@ function summarizeProportions<TRow extends object>(
 	const total = entries.reduce((sum, [, entry]) => sum + entry.value, 0);
 	if (total === 0) return [];
 	return entries.map(([identity, entry]) => ({
-		__svelaiProportion: true,
-		__svelaiSourceRows: entry.rows,
+		__entasisProportion: true,
+		__entasisSourceRows: entry.rows,
 		identity,
 		category: entry.category,
 		value: entry.value,

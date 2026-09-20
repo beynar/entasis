@@ -3,7 +3,6 @@
 	generics="TItemFields extends object = Record<never, never>, TResourceFields extends object = Record<never, never>"
 >
 	import Slot from '$lib/components/Slot/Slot.svelte';
-	import { startOfZonedDay } from './eventCalendar.date.js';
 	import { EventCalendarError } from './eventCalendar.error.js';
 
 	import type { EventCalendarResourceHeaderPayload } from './eventCalendar.props.js';
@@ -19,7 +18,6 @@
 		calendar,
 		resourceModel,
 		dayGeometries,
-		longDayFormatter,
 		registerTimeTarget,
 		handleTargetKeydown,
 		handleAllDayClick
@@ -27,7 +25,6 @@
 		calendar: EventCalendarState<TItemFields, TResourceFields>;
 		resourceModel: EventCalendarResourceModel<TResourceFields>;
 		dayGeometries: readonly EventCalendarTimeGridDayGeometry<TItemFields>[];
-		longDayFormatter: Intl.DateTimeFormat;
 		registerTimeTarget: (targetKey: string) => (node: HTMLElement) => () => void;
 		handleTargetKeydown: (event: KeyboardEvent, targetKey: string, activate?: boolean) => void;
 		handleAllDayClick: (target: EventCalendarAllDayDropTarget, event: MouseEvent) => void;
@@ -37,8 +34,6 @@
 	const density = $derived(calendar.density);
 	const classes = $derived(calendar.classes);
 	const disabled = $derived(calendar.disabled);
-	const resourceHeader = $derived(calendar.renderers.resourceHeader);
-	const unassignedResourceLabel = $derived(calendar.messages.eventCalendarUnassignedResource);
 
 	function getGeometry(column: number): EventCalendarTimeGridDayGeometry<TItemFields> {
 		const geometry = dayGeometries[column];
@@ -52,7 +47,7 @@
 </script>
 
 {#each resourceModel.headerCells as cell (cell.key)}
-	{@const defaultLabel = cell.resource?.title ?? unassignedResourceLabel}
+	{@const defaultLabel = cell.resource?.title ?? calendar.messages.eventCalendarUnassignedResource}
 	{@const payload = {
 		resource: cell.resource,
 		depth: cell.depth,
@@ -65,7 +60,7 @@
 		<button
 			type="button"
 			tabindex={disabled ? -1 : a11y.getTimeTargetTabIndex(targetKey)}
-			aria-label={`${defaultLabel}, ${longDayFormatter.format(startOfZonedDay(geometry.day, calendar.timeZone))}`}
+			aria-label={geometry.columnLabel ?? defaultLabel}
 			{disabled}
 			data-event-calendar-part="resource-header"
 			data-resource-id={cell.resourceId}
@@ -86,7 +81,7 @@
 			onkeydown={(event) => handleTargetKeydown(event, targetKey, true)}
 			{@attach disabled ? null : registerTimeTarget(targetKey)}
 		>
-			<Slot render={resourceHeader ?? defaultResourceHeader} {payload} />
+			<Slot render={calendar.renderers.resourceHeader ?? defaultResourceHeader} {payload} />
 		</button>
 	{:else}
 		<div
@@ -105,7 +100,7 @@
 			style:grid-column={`${cell.columnStart + 2} / span ${cell.columnSpan}`}
 			style:grid-row={`${cell.depth + 1} / span ${cell.rowSpan}`}
 		>
-			<Slot render={resourceHeader ?? defaultResourceHeader} {payload} />
+			<Slot render={calendar.renderers.resourceHeader ?? defaultResourceHeader} {payload} />
 		</div>
 	{/if}
 

@@ -1,6 +1,6 @@
-# Svelai project guide
+# Entasis project guide
 
-Svelai is one Svelte 5 package with public subpath exports. Components live under
+Entasis is one Svelte 5 package with public subpath exports. Components live under
 `src/lib/components`; the documentation application lives under `src/routes`.
 
 ## Public contract
@@ -12,8 +12,8 @@ exports, or generated skill inventories. Verify them with `npm run check:compone
 The same manifest generates the source aliases used by SvelteKit and Vite; keep those aliases
 out of hand-written configuration. Manifest symbols include non-component modules and icons.
 
-Public examples and Blocks import `svelai/<subpath>`, never source files. Icons are Svelte snippets
-imported from `svelai/icons/<name>`. The local documentation build resolves those public imports to
+Public examples and Blocks import `entasis/<subpath>`, never source files. Icons are Svelte snippets
+imported from `entasis/icons/<name>`. The local documentation build resolves those public imports to
 source; the package-consumer check resolves them through the built package.
 
 Component and utility Usage cards bind a `createComponentControls` menu on the first
@@ -69,7 +69,7 @@ commerce/content metadata shards describe standalone Svelte files and their visu
 render without required props and use public package imports so its source can be copied into a
 consumer project. The package-consumer check includes every catalog component.
 
-Use Svelai component defaults, semantic props, and Stack/Grid composition before custom classes
+Use Entasis component defaults, semantic props, and Stack/Grid composition before custom classes
 or theme overrides. Keep custom styling for necessary responsive structure and media. The goal is
 a polished interface with little consumer customization.
 
@@ -82,9 +82,30 @@ Isolated previews use `/previews/blocks/[category]/[block]`, giving responsive c
 viewport and keeping overlays inside their example. Thumbnails load as they enter the viewport.
 The ten original workflow routes remain separate from the category catalog.
 
+## EventCalendar architecture
+
+EventCalendar admits items and business-hour windows before projecting occurrences into the
+active date profile. Keep item admission, resource admission, and date-profile projection as
+independent reactive stages. Month, time-grid, and agenda modules own their render surfaces;
+components consume those surfaces instead of reconstructing scheduling meaning.
+
+Drop targets use the semantic `date`, `all-day`, and `instant` variants from
+`eventCalendar.targets.ts`. Draft derivation in `eventCalendar.drafts.ts` stays free of DOM
+geometry. The interaction controller owns one root slot-drag host and only maps DOM elements to
+semantic targets. Clone mutable `Date` values before exposing slot payloads to consumers, and
+include resource identity in navigation keys for projected multi-resource items.
+
+Mutations use one prepared batch and one publication boundary. Preserve the normal resolver's
+three observable custom-expansion/validation phases, and recheck the item/resource model boundary
+after final candidate validation. Accessibility derives active mutation state from the interaction
+controller; it must not mirror a second edit-state authority.
+
+Focused validation is `npm run test:unit -- --run --no-file-parallelism
+src/lib/components/EventCalendar` and `npm run test:e2e -- e2e/event-calendar.test.ts --workers=1`.
+
 ## Chart integration
 
-Chart keeps TanStack behind its public Svelai props. Its viewport state owns the accepted zoom
+Chart keeps TanStack behind its public Entasis props. Its viewport state owns the accepted zoom
 window; TanStack owns brush gestures, scale inversion, animation, and tooltip hit-testing.
 Continuous zoom sets the native axis `viewport` and the brush scale domain to the same window:
 the viewport excludes off-window points, while the scale drives native brush inversion.

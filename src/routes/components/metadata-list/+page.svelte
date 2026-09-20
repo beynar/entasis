@@ -145,9 +145,9 @@
 		<ComponentCard
 			description="An optional icon before each key label"
 			code={`<script>
-	import { userIcon } from 'svelai/icons/user';
-	import { calendarIcon } from 'svelai/icons/calendar';
-	import { tagIcon } from 'svelai/icons/tag';
+	import { userIcon } from 'entasis/icons/user';
+	import { calendarIcon } from 'entasis/icons/calendar';
+	import { tagIcon } from 'entasis/icons/tag';
 </scr${'ipt'}>
 
 <MetadataList

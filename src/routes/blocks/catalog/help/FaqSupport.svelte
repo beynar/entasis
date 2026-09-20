@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Accordion } from 'svelai/accordion';
-	import { Alert } from 'svelai/alert';
-	import { Card } from 'svelai/card';
-	import { Form } from 'svelai/form';
+	import { Stack } from 'entasis/stack';
+	import { Accordion } from 'entasis/accordion';
+	import { Alert } from 'entasis/alert';
+	import { Card } from 'entasis/card';
+	import { Form } from 'entasis/form';
 
 	const questions = [
 		{

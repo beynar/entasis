@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging, svelte/prefer-svelte-reactivity -- Descriptor binding follows the established Svelai state-class pattern; Dates, Sets, and ranges are immutable schedule snapshots. */
+/* eslint-disable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging, svelte/prefer-svelte-reactivity -- Descriptor binding follows the established Entasis state-class pattern; Dates, Sets, and ranges are immutable schedule snapshots. */
 import { assertScheduleInstant, assertScheduleRange } from '$lib/scheduling/scheduleRange.js';
 import type { Messages } from '$lib/i18n/en.js';
 import type { Density, Sizes } from '$lib/types/theme.js';

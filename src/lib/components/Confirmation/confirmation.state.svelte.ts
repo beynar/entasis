@@ -68,7 +68,7 @@ const warnIfNothingMounts = () => {
 		if (!pendingWarningScheduled || !pendingRequests.length) return;
 		pendingWarningScheduled = false;
 		console.warn(
-			`svelai: ${pendingRequests.length} confirmation(s) are queued because no <Confirmation /> is mounted. Add <Confirmation /> to your root layout; they will open as soon as one mounts.`
+			`entasis: ${pendingRequests.length} confirmation(s) are queued because no <Confirmation /> is mounted. Add <Confirmation /> to your root layout; they will open as soon as one mounts.`
 		);
 	}, 0);
 };

@@ -8,6 +8,18 @@ admitted items without re-validation. Lane and timed-segment packers are memoize
 schedule keys, and formatters are cached by locale and time zone. Pointer movement is
 sampled through `requestAnimationFrame`; it does not rebuild the item index per frame.
 
+## Current architecture checks
+
+Verified on 2026-09-20:
+
+- A browser test uses a counting custom recurrence expander, starts a slot drag, and sends 30
+  pointer steps. The expander count does not change during pointer movement.
+- A visibility/clock refresh during an active slot drag does not replace the structural surface or
+  cancel the gesture; the selection commits after the refresh.
+- The focused EventCalendar suite passes 185 unit tests and 9 browser tests.
+
+These checks prove dependency and gesture-lifetime invariants. They are not a timing benchmark.
+
 ## Measured data point
 
 This is a practical measurement, not a supported maximum or a cross-device benchmark. It

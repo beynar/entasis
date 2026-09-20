@@ -55,7 +55,7 @@
 			id: 'selected',
 			title: 'Selected',
 			value: 'selectedSoft · selectedSolid',
-			rule: 'Two recipes exported from svelai/theme, both on the selected state role. Soft (bg-selected-muted text-selected-muted-readable) for rows, options, tags and pressed toggles; solid (bg-selected text-selected-contrast) for a current-page pill. The soft fill is a translucent tint of the role at --state-selected-opacity, so it reads the same on surface, surface-raised and surface-floating. Each token falls back to the current role, so designTokens.selectedColor pins every selection at once.'
+			rule: 'Two recipes exported from entasis/theme, both on the selected state role. Soft (bg-selected-muted text-selected-muted-readable) for rows, options, tags and pressed toggles; solid (bg-selected text-selected-contrast) for a current-page pill. The soft fill is a translucent tint of the role at --state-selected-opacity, so it reads the same on surface, surface-raised and surface-floating. Each token falls back to the current role, so designTokens.selectedColor pins every selection at once.'
 		},
 		{
 			id: 'type',
@@ -152,7 +152,7 @@
 
 	// The two state-role snippets: one Theme token replaces what used to be a per-component
 	// decision, and the controls inside stay on whatever role they already carried.
-	const focusRoleSnippet = `import { focusRing } from 'svelai/theme';
+	const focusRoleSnippet = `import { focusRing } from 'entasis/theme';
 
 // The recipe every control emits: focus-visible:ring-2 focus-visible:ring-focus/50
 const trigger = cva({ base: focusRing });
@@ -227,7 +227,7 @@ const row = cva({ base: 'min-h-row-md [&>svg]:size-icon-sm' });`;
 	const hoverSnippet = `<!-- Add state-layer to any interactive surface: hover and press tint through currentColor. -->
 <button class="state-layer rounded-md px-lg h-control-md">Same feedback as every Button</button>`;
 
-	const selectedSnippet = `import { selectedSoft, selectedSolid } from 'svelai/theme';
+	const selectedSnippet = `import { selectedSoft, selectedSolid } from 'entasis/theme';
 // selectedSoft = 'bg-selected-muted text-selected-muted-readable'
 // selectedSolid = 'bg-selected text-selected-contrast'
 

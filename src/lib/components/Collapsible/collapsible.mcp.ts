@@ -62,8 +62,8 @@ The Collapsible component provides a way to show and hide content with a toggle 
 ### Example 1 - Uncontrolled
 \`\`\`svelte
 <script lang="ts">
-	import { Collapsible } from 'svelai/collapsible';
-	import { caretDownIcon } from 'svelai/icons/caretDown';
+	import { Collapsible } from 'entasis/collapsible';
+	import { caretDownIcon } from 'entasis/icons/caretDown';
 </script>
 
 <Collapsible defaultOpen={false} icon="none">
@@ -249,7 +249,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setCollapsibleTheme } from 'svelai/collapsible';
+  import { setCollapsibleTheme } from 'entasis/collapsible';
   
   setCollapsibleTheme({
     root: {

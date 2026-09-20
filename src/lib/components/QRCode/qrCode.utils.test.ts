@@ -14,7 +14,7 @@ import {
 	sanitizeDataModulesSettings
 } from './qrCode.utils.js';
 
-const modules = encodeQRCode('https://svelai.dev', 'M', 1).getModules();
+const modules = encodeQRCode('https://entasis.dev', 'M', 1).getModules();
 
 describe('qrCode.utils', () => {
 	it('encodes a square module matrix with finder patterns in the corners', () => {

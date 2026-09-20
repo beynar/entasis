@@ -49,9 +49,9 @@
 		description="Use PageShell when navigation is already owned by Sidebar and the page needs stable content chrome."
 		class="!min-h-fit !items-start !p-4"
 		code={`<script lang="ts">
-	import { PageShell, type PageShellAction } from 'svelai/page-shell';
-	import { arrowClockwiseIcon } from 'svelai/icons/arrowClockwise';
-	import { downloadSimpleIcon } from 'svelai/icons/downloadSimple';
+	import { PageShell, type PageShellAction } from 'entasis/page-shell';
+	import { arrowClockwiseIcon } from 'entasis/icons/arrowClockwise';
+	import { downloadSimpleIcon } from 'entasis/icons/downloadSimple';
 
 	const headerActions = [
 		{
@@ -102,10 +102,10 @@ ${'</' + 'script>'}
 			description="Default header chrome can combine a back button, collapsed breadcrumbs, title text, and action arrays."
 			class="!min-h-fit !items-start !p-4"
 			code={`<script lang="ts">
-	import { PageShell, type PageShellAction } from 'svelai/page-shell';
-	import type { BreadcrumbItem } from 'svelai/breadcrumbs';
-	import { arrowClockwiseIcon } from 'svelai/icons/arrowClockwise';
-	import { usersIcon } from 'svelai/icons/users';
+	import { PageShell, type PageShellAction } from 'entasis/page-shell';
+	import type { BreadcrumbItem } from 'entasis/breadcrumbs';
+	import { arrowClockwiseIcon } from 'entasis/icons/arrowClockwise';
+	import { usersIcon } from 'entasis/icons/users';
 
 	const breadcrumbs: BreadcrumbItem[] = [
 		{ label: 'Customers', href: '#customers' },
@@ -140,9 +140,9 @@ ${'</' + 'script>'}
 			description="Footer actions stay available without creating a nested scroll container."
 			class="!min-h-fit !items-start !p-4"
 			code={`<script lang="ts">
-	import { PageShell, type PageShellAction } from 'svelai/page-shell';
-	import { checkIcon } from 'svelai/icons/check';
-	import { xIcon } from 'svelai/icons/x';
+	import { PageShell, type PageShellAction } from 'entasis/page-shell';
+	import { checkIcon } from 'entasis/icons/check';
+	import { xIcon } from 'entasis/icons/x';
 
 	const footerActions = [
 		{ content: 'Cancel', variant: 'outline', prefix: xIcon },
@@ -174,11 +174,11 @@ ${'</' + 'script>'}
 			description="Action arrays collapse extra mobile actions into a PopupMenu; snippets are left untouched."
 			class="!min-h-fit !items-start !p-4"
 			code={`<script lang="ts">
-	import { PageShell, type PageShellAction } from 'svelai/page-shell';
-	import { arrowClockwiseIcon } from 'svelai/icons/arrowClockwise';
-	import { downloadSimpleIcon } from 'svelai/icons/downloadSimple';
-	import { funnelIcon } from 'svelai/icons/funnel';
-	import { plusIcon } from 'svelai/icons/plus';
+	import { PageShell, type PageShellAction } from 'entasis/page-shell';
+	import { arrowClockwiseIcon } from 'entasis/icons/arrowClockwise';
+	import { downloadSimpleIcon } from 'entasis/icons/downloadSimple';
+	import { funnelIcon } from 'entasis/icons/funnel';
+	import { plusIcon } from 'entasis/icons/plus';
 
 	const headerActions = [
 		{ label: 'Refresh', squared: true, variant: 'outline', prefix: arrowClockwiseIcon },
@@ -207,7 +207,7 @@ ${'</' + 'script>'}
 			class="!min-h-fit !items-start !p-4"
 			code={`<!-- +layout.svelte -->
 <script lang="ts">
-	import { PageShell } from 'svelai/page-shell';
+	import { PageShell } from 'entasis/page-shell';
 	import RevenuePage from './RevenuePage.svelte';
 ${'</' + 'script>'}
 
@@ -219,8 +219,8 @@ ${'</' + 'script>'}
 
 <!-- RevenuePage.svelte -->
 <script lang="ts">
-	import { setPageShell } from 'svelai/page-shell';
-	import { arrowClockwiseIcon } from 'svelai/icons/arrowClockwise';
+	import { setPageShell } from 'entasis/page-shell';
+	import { arrowClockwiseIcon } from 'entasis/icons/arrowClockwise';
 
 	setPageShell({
 		title: 'Revenue insights',

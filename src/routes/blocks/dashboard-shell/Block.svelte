@@ -1,23 +1,23 @@
 <script lang="ts">
-	import { AppShell, type AppShellSidebarProps } from 'svelai/app-shell';
-	import { Button } from 'svelai/button';
-	import { Stat } from 'svelai/stat';
-	import { Timeline, type TimelineItem } from 'svelai/timeline';
-	import { arrowClockwiseIcon } from 'svelai/icons/arrowClockwise';
-	import { bellIcon } from 'svelai/icons/bell';
-	import { chartBarIcon } from 'svelai/icons/chartBar';
-	import { checkCircleIcon } from 'svelai/icons/checkCircle';
-	import { commandIcon } from 'svelai/icons/command';
-	import { downloadSimpleIcon } from 'svelai/icons/downloadSimple';
-	import { gearIcon } from 'svelai/icons/gear';
-	import { houseIcon } from 'svelai/icons/house';
-	import { lightningIcon } from 'svelai/icons/lightning';
-	import { receiptIcon } from 'svelai/icons/receipt';
-	import { sidebarIcon } from 'svelai/icons/sidebar';
-	import { signOutIcon } from 'svelai/icons/signOut';
-	import { trendUpIcon } from 'svelai/icons/trendUp';
-	import { trayIcon } from 'svelai/icons/tray';
-	import { usersIcon } from 'svelai/icons/users';
+	import { AppShell, type AppShellSidebarProps } from 'entasis/app-shell';
+	import { Button } from 'entasis/button';
+	import { Stat } from 'entasis/stat';
+	import { Timeline, type TimelineItem } from 'entasis/timeline';
+	import { arrowClockwiseIcon } from 'entasis/icons/arrowClockwise';
+	import { bellIcon } from 'entasis/icons/bell';
+	import { chartBarIcon } from 'entasis/icons/chartBar';
+	import { checkCircleIcon } from 'entasis/icons/checkCircle';
+	import { commandIcon } from 'entasis/icons/command';
+	import { downloadSimpleIcon } from 'entasis/icons/downloadSimple';
+	import { gearIcon } from 'entasis/icons/gear';
+	import { houseIcon } from 'entasis/icons/house';
+	import { lightningIcon } from 'entasis/icons/lightning';
+	import { receiptIcon } from 'entasis/icons/receipt';
+	import { sidebarIcon } from 'entasis/icons/sidebar';
+	import { signOutIcon } from 'entasis/icons/signOut';
+	import { trendUpIcon } from 'entasis/icons/trendUp';
+	import { trayIcon } from 'entasis/icons/tray';
+	import { usersIcon } from 'entasis/icons/users';
 
 	const sidebar: AppShellSidebarProps = {
 		collapsible: 'icon',

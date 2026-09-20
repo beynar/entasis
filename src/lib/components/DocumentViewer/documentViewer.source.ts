@@ -115,7 +115,7 @@ export const inferDocumentFileName = (source: DocumentSource, explicitName?: str
 	if (source instanceof URL) return source.pathname.split('/').pop() || undefined;
 	if (typeof source === 'string') {
 		try {
-			return new URL(source, 'https://svelai.local').pathname.split('/').pop() || undefined;
+			return new URL(source, 'https://entasis.local').pathname.split('/').pop() || undefined;
 		} catch {
 			return undefined;
 		}

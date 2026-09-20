@@ -1,14 +1,14 @@
 export const themePluginDescription = `
 # Theme Tailwind plugin
 
-\`@plugin 'svelai/tailwind-plugin/theme'\` generates color variables for each named theme. The declaration
+\`@plugin 'entasis/tailwind-plugin/theme'\` generates color variables for each named theme. The declaration
 marked \`default: true\` also registers the shared utility vocabulary, variants, spinner styles,
 and keyframes.
 
 \`\`\`css
 @import 'tailwindcss';
 
-@plugin 'svelai/tailwind-plugin/theme' {
+@plugin 'entasis/tailwind-plugin/theme' {
 	name: light;
 	default: true;
 	colorscheme: light;
@@ -18,7 +18,7 @@ and keyframes.
 	neutral: #18181b;
 }
 
-@plugin 'svelai/tailwind-plugin/theme' {
+@plugin 'entasis/tailwind-plugin/theme' {
 	name: dark;
 	colorscheme: dark;
 	primary: #5f62ef;

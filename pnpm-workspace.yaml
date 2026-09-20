@@ -1,8 +1,10 @@
+# Build scripts pnpm 11 may run on install. Without an explicit answer pnpm refuses the install
+# (ERR_PNPM_IGNORED_BUILDS), which is what broke every CI run.
 allowBuilds:
-  '@swc/core': set this to true or false
-  esbuild: set this to true or false
-  sharp: set this to true or false
-  workerd: set this to true or false
+  '@swc/core': true
+  esbuild: true
+  sharp: true
+  workerd: true
 minimumReleaseAgeExclude:
   - '@tanstack/charts@0.3.1 || 0.6.4'
   - '@tanstack/highlight@0.1.0'

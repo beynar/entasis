@@ -6,7 +6,7 @@ in via a fade. Colors accept theme tokens and recolor automatically when the app
 
 ## Requires
 
-Globe renders through cobe (WebGL). It is an optional peer dependency of svelai, so install it alongside svelai:
+Globe renders through cobe (WebGL). It is an optional peer dependency of entasis, so install it alongside entasis:
 
 \`pnpm add cobe\`
 
@@ -14,7 +14,7 @@ Globe renders through cobe (WebGL). It is an optional peer dependency of svelai,
 
 \`\`\`svelte
 <script>
-  import { Globe } from 'svelai/globe';
+  import { Globe } from 'entasis/globe';
 </script>
 
 <Globe />

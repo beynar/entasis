@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Grid } from 'svelai/grid';
-	import { Stack } from 'svelai/stack';
-	import { Card } from 'svelai/card';
-	import { Select } from 'svelai/select';
-	import { Stat } from 'svelai/stat';
-	import { Table } from 'svelai/table';
+	import { Grid } from 'entasis/grid';
+	import { Stack } from 'entasis/stack';
+	import { Card } from 'entasis/card';
+	import { Select } from 'entasis/select';
+	import { Stat } from 'entasis/stat';
+	import { Table } from 'entasis/table';
 
 	let range = $state<string | null>('all');
 	const ledger = [

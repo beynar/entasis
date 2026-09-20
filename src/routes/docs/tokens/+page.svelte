@@ -131,7 +131,7 @@
 	];
 
 	const designTokensSnippet = `<script lang="ts">
-	import { Theme } from 'svelai/theme';
+	import { Theme } from 'entasis/theme';
 
 	let { children } = $props();
 </scr${'ipt'}>

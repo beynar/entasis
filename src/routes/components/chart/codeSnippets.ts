@@ -1,5 +1,5 @@
 export const usageCode = `<script lang="ts">
-  import { Chart } from 'svelai/chart';
+  import { Chart } from 'entasis/chart';
 
   type Revenue = {
     quarter: string;
@@ -55,7 +55,7 @@ export const usageCode = `<script lang="ts">
 />`;
 
 export const layeredCode = `<script lang="ts">
-  import { Chart } from 'svelai/chart';
+  import { Chart } from 'entasis/chart';
 
   type Revenue = {
     month: Date;
@@ -115,7 +115,7 @@ export const layeredCode = `<script lang="ts">
 />`;
 
 export const barsCode = `<script lang="ts">
-  import { Chart } from 'svelai/chart';
+  import { Chart } from 'entasis/chart';
 
   type Revenue = {
     quarter: string;
@@ -177,7 +177,7 @@ export const barsCode = `<script lang="ts">
 </div>`;
 
 export const polarCode = `<script lang="ts">
-  import { Chart } from 'svelai/chart';
+  import { Chart } from 'entasis/chart';
 
   type Capability = { name: string; score: number };
 
@@ -210,7 +210,7 @@ export const polarCode = `<script lang="ts">
 />`;
 
 export const clientOnlyCode = `<script lang="ts">
-  import { Chart } from 'svelai/chart';
+  import { Chart } from 'entasis/chart';
 
   type ResponseTime = { minute: number; milliseconds: number };
 
@@ -246,7 +246,7 @@ export const clientOnlyCode = `<script lang="ts">
 />`;
 
 export const wideStackCode = `<script lang="ts">
-  import { Chart, type ChartKey, type ChartProps } from 'svelai/chart';
+  import { Chart, type ChartKey, type ChartProps } from 'entasis/chart';
 
   type StatusRow = { month: string; completed: number; inProgress: number; pending: number };
 

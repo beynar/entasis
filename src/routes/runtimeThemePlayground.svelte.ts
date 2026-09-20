@@ -53,7 +53,7 @@ const presetPalettes: Record<ThemePresetName, RuntimeColorPaletteName> = {
 	terminal: 'emerald'
 };
 
-// The playground starts from the presets the library ships (`svelai/theme`), so the docs
+// The playground starts from the presets the library ships (`entasis/theme`), so the docs
 // can never drift from what an app gets.
 export const runtimeThemePresets = Object.fromEntries(
 	themePresetNames.map((name) => [
@@ -266,7 +266,7 @@ class RuntimeThemePlayground {
 }
 
 /** Cookie carrying the footer playground levers, so SSR paints the chosen tokens first. */
-export const PLAYGROUND_COOKIE = 'svelai-docs-playground';
+export const PLAYGROUND_COOKIE = 'entasis-docs-playground';
 
 export type RuntimeThemePlaygroundSnapshot = {
 	spacing: number;

@@ -6,7 +6,7 @@
 		type ChartPolarVariant,
 		type ChartRelationVariant,
 		type ChartScatterSizeScaleShortcut
-	} from 'svelai/chart';
+	} from 'entasis/chart';
 	import {
 		chartUsageMetadata,
 		isMetricChartUsageType,

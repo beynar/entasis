@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Avatar } from 'svelai/avatar';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Form } from 'svelai/form';
-	import { Heading } from 'svelai/heading';
+	import { Stack } from 'entasis/stack';
+	import { Avatar } from 'entasis/avatar';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Form } from 'entasis/form';
+	import { Heading } from 'entasis/heading';
 	let draft = $state('');
 </script>
 

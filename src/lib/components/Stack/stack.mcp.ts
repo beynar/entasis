@@ -9,7 +9,7 @@ alignment.
 
 \`\`\`svelte
 <script lang="ts">
-  import { Stack } from 'svelai/stack';
+  import { Stack } from 'entasis/stack';
 </script>
 \`\`\`
 

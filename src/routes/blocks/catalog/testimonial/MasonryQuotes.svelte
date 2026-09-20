@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Avatar } from 'svelai/avatar';
-	import { Card } from 'svelai/card';
-	import { Heading } from 'svelai/heading';
-	import { Rating } from 'svelai/rating';
-	import { Separator } from 'svelai/separator';
+	import { Stack } from 'entasis/stack';
+	import { Avatar } from 'entasis/avatar';
+	import { Card } from 'entasis/card';
+	import { Heading } from 'entasis/heading';
+	import { Rating } from 'entasis/rating';
+	import { Separator } from 'entasis/separator';
 	const quotes = [
 		{
 			name: 'Maya Chen',

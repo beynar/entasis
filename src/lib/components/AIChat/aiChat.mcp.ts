@@ -5,7 +5,7 @@ Assembled AI conversation surface built from AIConversation, AIThread, AICompose
 
 ## Requires
 
-AIChat renders AIComposer, which is built on Lexical. Those packages are optional peer dependencies of svelai, so install them alongside it:
+AIChat renders AIComposer, which is built on Lexical. Those packages are optional peer dependencies of entasis, so install them alongside it:
 
 \`pnpm add lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils\`
 
@@ -13,7 +13,7 @@ AIChat renders AIComposer, which is built on Lexical. Those packages are optiona
 
 \`\`\`svelte
 <script lang="ts">
-  import { AIChat, AIChatSkeleton, type AIChatProps } from 'svelai/ai-chat';
+  import { AIChat, AIChatSkeleton, type AIChatProps } from 'entasis/ai-chat';
 </script>
 \`\`\`
 

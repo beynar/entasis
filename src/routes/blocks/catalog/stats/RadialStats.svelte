@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { ProgressCircle } from 'svelai/progress-circle';
-	import { Stat } from 'svelai/stat';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { ProgressCircle } from 'entasis/progress-circle';
+	import { Stat } from 'entasis/stat';
 </script>
 
 <section class="gap-xl p-lg md:p-xl mx-auto flex max-w-5xl flex-col">

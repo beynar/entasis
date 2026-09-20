@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Alert } from 'svelai/alert';
-	import { Card } from 'svelai/card';
-	import { Checkbox } from 'svelai/checkbox';
-	import { Form } from 'svelai/form';
-	import type { FormInputs } from 'svelai/form';
+	import { Stack } from 'entasis/stack';
+	import { Alert } from 'entasis/alert';
+	import { Card } from 'entasis/card';
+	import { Checkbox } from 'entasis/checkbox';
+	import { Form } from 'entasis/form';
+	import type { FormInputs } from 'entasis/form';
 	let message = $state('');
 	let remember = $state(false);
 	const inputs = {

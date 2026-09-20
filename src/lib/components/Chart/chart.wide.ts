@@ -8,12 +8,12 @@ import type { ChartKey, ChartRequiredChannel } from './chart.props.js';
  * keep working unchanged.
  */
 
-const WIDE_SERIES_CHANNEL = '__svelaiSeries';
-const WIDE_VALUE_CHANNEL = '__svelaiValue';
+const WIDE_SERIES_CHANNEL = '__entasisSeries';
+const WIDE_VALUE_CHANNEL = '__entasisValue';
 
 export type ChartWideRow<TRow> = TRow & {
-	readonly __svelaiSeries: string;
-	readonly __svelaiValue: number | null;
+	readonly __entasisSeries: string;
+	readonly __entasisValue: number | null;
 };
 
 export function isWideChannel(channel: unknown): channel is readonly string[] {
@@ -58,12 +58,12 @@ export function meltWideRows<TRow extends object>(
 
 /** Series key of a melted row: the field name it was melted from. */
 export function wideSeries<TRow>(row: ChartWideRow<TRow>): string {
-	return row.__svelaiSeries;
+	return row.__entasisSeries;
 }
 
 /** Numeric value of a melted row, read from the field it was melted from. */
 export function wideValue<TRow>(row: ChartWideRow<TRow>): number | null {
-	return row.__svelaiValue;
+	return row.__entasisValue;
 }
 
 /**
@@ -75,7 +75,7 @@ export function wideKey<TRow extends object>(
 ): ChartRequiredChannel<ChartWideRow<TRow>, ChartKey> | undefined {
 	if (key === undefined) return undefined;
 	if (typeof key !== 'function') {
-		return (row) => `${String(Reflect.get(row, key))}•${row.__svelaiSeries}`;
+		return (row) => `${String(Reflect.get(row, key))}•${row.__entasisSeries}`;
 	}
-	return (row, index, rows) => `${String(key(row, index, rows))}•${row.__svelaiSeries}`;
+	return (row, index, rows) => `${String(key(row, index, rows))}•${row.__entasisSeries}`;
 }

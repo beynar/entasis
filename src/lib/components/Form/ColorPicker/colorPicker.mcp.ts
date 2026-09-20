@@ -11,7 +11,7 @@ chrome (label, description, errors, form registration) and extends InputProps wi
 
 \`\`\`svelte
 <script>
-	import { ColorPicker, ColorPickerInput } from 'svelai/color-picker';
+	import { ColorPicker, ColorPickerInput } from 'entasis/color-picker';
 	let color = $state('#6366f1');
 </script>
 

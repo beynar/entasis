@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Dialog } from 'svelai/dialog';
-	import { Button } from 'svelai/button';
-	import { Form } from 'svelai/form';
-	import { Chip } from 'svelai/chip';
+	import { Heading } from 'entasis/heading';
+	import { Dialog } from 'entasis/dialog';
+	import { Button } from 'entasis/button';
+	import { Form } from 'entasis/form';
+	import { Chip } from 'entasis/chip';
 	let open = $state(false);
 	let revealed = $state(false);
 </script>

@@ -115,7 +115,7 @@
 
 	const variants = ['DEFAULT', 'light', 'lighter', 'dark', 'muted', 'contrast'] as const;
 
-	const installCode = `pnpm add svelai
+	const installCode = `pnpm add entasis
 pnpm add tailwindcss @tailwindcss/vite`;
 
 	const cssSetupCode = `@import 'tailwindcss';
@@ -123,19 +123,19 @@ pnpm add tailwindcss @tailwindcss/vite`;
 /* Light theme — applied to <html> by default.
    The default theme also registers the utilities,
    variants and .ui-spinner component. */
-@plugin 'svelai/tailwind-plugin/theme' {
+@plugin 'entasis/tailwind-plugin/theme' {
 	name: light;
 	default: true;
 	colorscheme: light;
 }
 
 /* Dark theme — applied via html[data-theme="dark"] or .dark */
-@plugin 'svelai/tailwind-plugin/theme' {
+@plugin 'entasis/tailwind-plugin/theme' {
 	name: dark;
 	colorscheme: dark;
 }`;
 
-	const brandCode = `@plugin 'svelai/tailwind-plugin/theme' {
+	const brandCode = `@plugin 'entasis/tailwind-plugin/theme' {
 	name: light;
 	default: true;
 	colorscheme: light;
@@ -178,7 +178,7 @@ pnpm add tailwindcss @tailwindcss/vite`;
 </html>`;
 
 	const runtimeThemeCode = `<script lang="ts">
-	import { Theme, type ThemeDesignTokenMap } from 'svelai/theme';
+	import { Theme, type ThemeDesignTokenMap } from 'entasis/theme';
 
 	let spacing = $state<'small' | 'normal' | 'large'>('normal');
 	const designTokens = $derived({
@@ -230,7 +230,7 @@ pnpm add tailwindcss @tailwindcss/vite`;
 	<Code language="bash" code={installCode} />
 
 	<p class="text-neutral/70">
-		svelai runs inside a SvelteKit app ({@render ic('@sveltejs/kit')} is a peer). Three rendering libraries
+		entasis runs inside a SvelteKit app ({@render ic('@sveltejs/kit')} is a peer). Three rendering libraries
 		stay optional peers — install a line only if you import one of the components on it:
 		{@render ic('Chart')} needs
 		{@render ic('@tanstack/charts d3-array d3-force d3-hierarchy d3-sankey d3-scale d3-shape')},
@@ -239,7 +239,7 @@ pnpm add tailwindcss @tailwindcss/vite`;
 		{@render ic(
 			'lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils'
 		)}, and {@render ic('Globe')} needs {@render ic('cobe')}. Every other component works with
-		svelai alone.
+		entasis alone.
 	</p>
 
 	<p class="text-neutral/70">
@@ -247,13 +247,13 @@ pnpm add tailwindcss @tailwindcss/vite`;
 		reporting an unresolved import, so the errors name the missing exports first: importing
 		{@render ic('Chart')} without its line fails with a wall of
 		{@render ic('[MISSING_EXPORT] "bandX" is not exported by')}
-		{@render ic('"__vite-optional-peer-dep:@tanstack/charts:svelai"')}. The package to install is in
+		{@render ic('"__vite-optional-peer-dep:@tanstack/charts:entasis"')}. The package to install is in
 		that virtual module id.
 	</p>
 
 	<p class="text-neutral/70">
 		Then wire up the theme in your {@render ic('src/app.css')}. Declare the {@render ic(
-			"@plugin 'svelai/tailwind-plugin/theme'"
+			"@plugin 'entasis/tailwind-plugin/theme'"
 		)} block once per theme — each generates a scoped color palette. The block marked
 		{@render ic('default: true')} also registers the shared utilities, variants and {@render ic(
 			'.ui-spinner'
@@ -264,7 +264,7 @@ pnpm add tailwindcss @tailwindcss/vite`;
 	<Separator class="my-2" children="Build-time plugin options" />
 
 	<p class="text-neutral/70">
-		Every key below is passed inside the {@render ic("@plugin 'svelai/tailwind-plugin/theme'")} block,
+		Every key below is passed inside the {@render ic("@plugin 'entasis/tailwind-plugin/theme'")} block,
 		and together they are the {@render ic('ThemeOptions')} type. They are read at build time and baked
 		into the stylesheet.
 	</p>

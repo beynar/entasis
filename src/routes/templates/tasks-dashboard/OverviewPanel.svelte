@@ -2,13 +2,13 @@
 	// Overview tab of the Tasks dashboard template.
 	//
 	// This panel is a stress test of the library, not a screenshot copy: every region is built
-	// from a svelai component and its public props. Where a component cannot reach what the
+	// from a entasis component and its public props. Where a component cannot reach what the
 	// reference shows, the closest thing it CAN do is used and the gap is reported as a finding
 	// instead of being faked with CSS.
-	import { AvatarGroup } from 'svelai/avatar';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chart, type ChartProps } from 'svelai/chart';
+	import { AvatarGroup } from 'entasis/avatar';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chart, type ChartProps } from 'entasis/chart';
 	import {
 		GanttChart,
 		type GanttAssignment,
@@ -16,19 +16,19 @@
 		type GanttResourceAssignmentsPayload,
 		type GanttTask,
 		type GanttTaskPayload
-	} from 'svelai/gantt-chart';
-	import { Grid, GridSpan } from 'svelai/grid';
-	import { SegmentedControl } from 'svelai/segmented-control';
-	import { Stack } from 'svelai/stack';
-	import { Stat } from 'svelai/stat';
-	import { checkSquareIcon } from 'svelai/icons/checkSquare';
-	import { dotsThreeVerticalIcon } from 'svelai/icons/dotsThreeVertical';
-	import { hourglassIcon } from 'svelai/icons/hourglass';
-	import { lightningIcon } from 'svelai/icons/lightning';
-	import { listBulletsIcon } from 'svelai/icons/listBullets';
-	import { listChecksIcon } from 'svelai/icons/listChecks';
-	import { plusIcon } from 'svelai/icons/plus';
-	import { spinnerGapIcon } from 'svelai/icons/spinnerGap';
+	} from 'entasis/gantt-chart';
+	import { Grid, GridSpan } from 'entasis/grid';
+	import { SegmentedControl } from 'entasis/segmented-control';
+	import { Stack } from 'entasis/stack';
+	import { Stat } from 'entasis/stat';
+	import { checkSquareIcon } from 'entasis/icons/checkSquare';
+	import { dotsThreeVerticalIcon } from 'entasis/icons/dotsThreeVertical';
+	import { hourglassIcon } from 'entasis/icons/hourglass';
+	import { lightningIcon } from 'entasis/icons/lightning';
+	import { listBulletsIcon } from 'entasis/icons/listBullets';
+	import { listChecksIcon } from 'entasis/icons/listChecks';
+	import { plusIcon } from 'entasis/icons/plus';
+	import { spinnerGapIcon } from 'entasis/icons/spinnerGap';
 	import {
 		monthlyStatus,
 		myTasks,

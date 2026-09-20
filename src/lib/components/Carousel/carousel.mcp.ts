@@ -10,7 +10,7 @@ The chrome is a FOOTER ROW under the slides, never an overlay: pagination fills 
 ## Basic Usage
 
 <script lang="ts">
-	import { Carousel } from 'svelai/carousel';
+	import { Carousel } from 'entasis/carousel';
 
 	const items = [
 		{ title: 'Signal', description: 'Collect the first insight.' },
@@ -47,7 +47,7 @@ When pagination and navigationButton are both false no footer is rendered and th
 
 Those three props take the shared ResponsiveProps shape: a plain number used at every width (gaps={16}) or a record keyed by breakpoint (layout={{ xs: 1, md: 2 }}). In the record form xs is the base — there is no default key — and the nearest defined key at or below the active width wins, so { xs: 1, md: 2 } shows two slides from md up. A key you leave unset below the narrowest one falls back to the prop default.
 
-The xs / sm / md / lg / xl keys are the CAROUSEL's own width, not the viewport's: sm from 36rem, md from 42rem, lg from 56rem, xl from 72rem of carousel width, with xs below that. These are the shared container breakpoints exported from svelai/theme, so sm means the same box width in Carousel, Grid and Stack. A 360px carousel in a sidebar of a wide page is xs; the same carousel run full-bleed is xl. Give the carousel a width that fills its host (the default root is w-full) so it can measure itself.
+The xs / sm / md / lg / xl keys are the CAROUSEL's own width, not the viewport's: sm from 36rem, md from 42rem, lg from 56rem, xl from 72rem of carousel width, with xs below that. These are the shared container breakpoints exported from entasis/theme, so sm means the same box width in Carousel, Grid and Stack. A 360px carousel in a sidebar of a wide page is xs; the same carousel run full-bleed is xl. Give the carousel a width that fills its host (the default root is w-full) so it can measure itself.
 
 ## Render Payload
 

@@ -3,10 +3,16 @@ name: Release
 # Publishing is tag-driven: `npm run release <patch|minor|major>` (tooling/release.mjs) runs the
 # full prepack gate locally, moves CHANGELOG "Unreleased" under the new version, bumps package.json
 # and pushes a `v*` tag. This workflow re-runs the gate on CI and publishes with provenance.
+#
+# It publishes through npm trusted publishing (OIDC), so no NPM_TOKEN secret exists or is needed:
+# the npm CLI exchanges the job's GitHub id-token for a short-lived publish token. One-time setup
+# by the package owner on npmjs.com, under the entasis package → Settings → Trusted Publisher:
+#   Repository: beynar/ai2   Workflow filename: release.yml   Environment: (none)
+# Until that is configured the publish step fails with E404/E403 on the token exchange.
 on:
   push:
     tags:
-      - 'v*'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 permissions:
   contents: read
@@ -24,11 +30,15 @@ jobs:
           package-manager-cache: false
       - run: npm install --global pnpm@11
       - run: pnpm install --frozen-lockfile
+      # Trusted publishing needs npm >= 11.5.1; the bundled npm is upgraded to be safe.
+      - run: npm install --global npm@latest
       - run: pnpm exec playwright install --with-deps chromium
       - run: npm run check
       - run: npm run test:unit -- --run
       - run: npm run test:e2e
-      # prepack runs every contract, packed-library, consumer and doc-fence check before publint.
+      # The tag must be the version being published, or the package on npm and the git history
+      # disagree about what a version is.
+      - run: test "v$(node -p "require('./package.json').version")" = "${GITHUB_REF_NAME}"
+      # `npm publish` runs prepack: every contract, packed-library, consumer and doc-fence check,
+      # then svelte-package and publint.
       - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

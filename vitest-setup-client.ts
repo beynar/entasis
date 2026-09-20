@@ -58,7 +58,7 @@ if (!('animate' in Element.prototype)) {
 // "not rendered". Report one rect so tabbability checks behave like a real browser.
 Object.defineProperty(Element.prototype, 'getClientRects', {
 	writable: true,
-	value: function svelaiGetClientRects() {
+	value: function entasisGetClientRects() {
 		return [new DOMRect(0, 0, 1, 1)] as unknown as DOMRectList;
 	}
 });

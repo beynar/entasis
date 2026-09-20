@@ -1,4 +1,9 @@
-import { packSchedulingLanes, packSchedulingOverlaps } from '$lib/utils/scheduling/index.js';
+import {
+	packSchedulingLanes,
+	packSchedulingOverlaps,
+	type SchedulingLanePlacement,
+	type SchedulingOverlapPlacement
+} from '$lib/utils/scheduling/index.js';
 import { EventCalendarError } from './eventCalendar.error.js';
 import { assertDateOnly, assertValidInstant } from './eventCalendar.date.js';
 import type {
@@ -7,13 +12,9 @@ import type {
 	EventCalendarSegment
 } from './eventCalendar.types.js';
 
-export type EventCalendarLanePlacement<TItemFields extends object> = {
-	key: string;
+export type EventCalendarLanePlacement<TItemFields extends object> = SchedulingLanePlacement & {
 	occurrence: EventCalendarOccurrence<TItemFields>;
 	segments: readonly EventCalendarSegment<TItemFields>[];
-	startIndex: number;
-	endIndex: number;
-	lane: number;
 };
 
 export type EventCalendarLaneLayout<TItemFields extends object> = {
@@ -22,15 +23,13 @@ export type EventCalendarLaneLayout<TItemFields extends object> = {
 	layoutIdentity: object;
 };
 
-export type EventCalendarTimedPlacement<TItemFields extends object> = {
-	key: string;
+export type EventCalendarTimedPlacement<TItemFields extends object> = Omit<
+	SchedulingOverlapPlacement,
+	'visualStart' | 'visualEnd'
+> & {
 	segment: EventCalendarSegment<TItemFields>;
-	column: number;
-	columnCount: number;
-	span: number;
 	visualStart: Date;
 	visualEnd: Date;
-	isZeroDuration: boolean;
 };
 
 export type EventCalendarTimedLayout<TItemFields extends object> = {
@@ -39,23 +38,11 @@ export type EventCalendarTimedLayout<TItemFields extends object> = {
 	layoutIdentity: object;
 };
 
-type LaneSchedule = {
-	key: string;
+type LaneSchedule = SchedulingLanePlacement & {
 	segmentKeys: readonly string[];
-	startIndex: number;
-	endIndex: number;
-	lane: number;
 };
 
-type TimedSchedule = {
-	key: string;
-	column: number;
-	columnCount: number;
-	span: number;
-	visualStart: number;
-	visualEnd: number;
-	isZeroDuration: boolean;
-};
+type TimedSchedule = SchedulingOverlapPlacement;
 
 type CachedLaneLayout = {
 	identity: object;

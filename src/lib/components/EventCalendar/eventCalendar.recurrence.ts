@@ -5,6 +5,7 @@ import {
 	assertValidInstant,
 	assertValidRange,
 	assertValidTimeZone,
+	civilDayDifference,
 	getCivilWeekday,
 	getZonedDay,
 	getZonedParts,
@@ -29,6 +30,7 @@ import type {
 export const EVENT_CALENDAR_RECURRENCE_LIMIT = 1_000;
 
 type RecurrenceValue = Date | EventCalendarDateOnly;
+export type EventCalendarRecurrenceValue = RecurrenceValue;
 type RuntimeRecurrenceIdentity = {
 	id?: unknown;
 	recurrence?: unknown;
@@ -68,6 +70,7 @@ const WEEKDAY_INDEX: Readonly<Record<RecurrenceWeekday, EventCalendarWeekday>> =
 	SA: 6
 };
 const RECURRENCE_WEEKDAYS = new Set(Object.keys(WEEKDAY_INDEX));
+const RECURRENCE_FREQUENCIES = ['daily', 'weekly', 'monthly', 'yearly'] as const;
 const RAW_RRULE_PARTS = new Set([
 	'FREQ',
 	'INTERVAL',
@@ -79,6 +82,19 @@ const RAW_RRULE_PARTS = new Set([
 	'WKST'
 ]);
 const MAX_COMPLEX_COUNT_WORK = 250_000;
+
+/** Returns the collision-safe identity shared by recurrence, projection, and mutation paths. */
+export function canonicalEventCalendarRecurrenceOrigin(
+	value: EventCalendarRecurrenceValue
+): string {
+	return value instanceof Date ? `instant:${value.getTime()}` : `day:${value}`;
+}
+
+export function hasEventCalendarRecurrenceDateSelectors(
+	rule: Pick<EventCalendarRecurrenceRule, 'byWeekday' | 'byMonthDay' | 'byMonth'>
+): boolean {
+	return Boolean(rule.byWeekday?.length || rule.byMonthDay?.length || rule.byMonth?.length);
+}
 
 /** Expands one source series. Consumer expander failures intentionally propagate unchanged. */
 export function expandEventCalendarRecurrence<TItemFields extends object>(
@@ -97,7 +113,7 @@ export function expandEventCalendarRecurrence<TItemFields extends object>(
 	}
 
 	const rule = normalizeRule(recurrence, item.allDay === true, recurrenceTimeZone);
-	return expandBuiltIn(item, rule, range, displayTimeZone);
+	return expandBuiltIn(item, rule, range, displayTimeZone, recurrenceTimeZone);
 }
 
 export function validateEventCalendarRecurrence<TItemFields extends object>(
@@ -117,23 +133,21 @@ function assertRecurringSource<TItemFields extends object>(
 ): void {
 	const identity = item as unknown as RuntimeRecurrenceIdentity;
 	if (!item || typeof item !== 'object' || identity.recurrence === undefined) {
-		throw new EventCalendarError(
-			'invalid-recurrence',
-			'Recurrence expansion requires a recurring source item.',
-			{ id: item?.id }
-		);
+		throwInvalidRecurrence('Recurrence expansion requires a recurring source item.', {
+			id: item?.id
+		});
 	}
 	if (identity.recurringItemId !== undefined || identity.originalStart !== undefined) {
-		throw new EventCalendarError(
-			'invalid-recurrence',
+		throwInvalidRecurrence(
 			`Exception item ${String(identity.id)} cannot define a recurrence rule.`,
-			{ id: identity.id }
+			{
+				id: identity.id
+			}
 		);
 	}
 	if (item.allDay === true) {
 		if (identity.recurrenceTimeZone !== undefined) {
-			throw new EventCalendarError(
-				'invalid-recurrence',
+			throwInvalidRecurrence(
 				`All-day recurring item ${String(identity.id)} cannot define recurrenceTimeZone.`,
 				{ id: identity.id }
 			);
@@ -141,18 +155,18 @@ function assertRecurringSource<TItemFields extends object>(
 		return;
 	}
 	if (typeof identity.recurrenceTimeZone !== 'string') {
-		throw new EventCalendarError(
-			'invalid-recurrence',
+		throwInvalidRecurrence(
 			`Timed recurring item ${String(identity.id)} requires recurrenceTimeZone.`,
-			{ id: identity.id }
+			{
+				id: identity.id
+			}
 		);
 	}
 	try {
 		assertValidTimeZone(identity.recurrenceTimeZone);
 	} catch (error) {
 		if (!(error instanceof EventCalendarError)) throw error;
-		throw new EventCalendarError(
-			'invalid-recurrence',
+		throwInvalidRecurrence(
 			`Timed recurring item ${String(identity.id)} has an invalid recurrenceTimeZone.`,
 			{ id: identity.id, recurrenceTimeZone: identity.recurrenceTimeZone }
 		);
@@ -169,7 +183,7 @@ function normalizeRule(
 		throwInvalidRecurrence('The recurrence rule must be a structured rule or RRULE string.');
 	}
 	const freq = rule.freq;
-	if (!['daily', 'weekly', 'monthly', 'yearly'].includes(freq)) {
+	if (!RECURRENCE_FREQUENCIES.includes(freq)) {
 		throwInvalidRecurrence('The recurrence frequency is invalid.', { freq });
 	}
 	const interval = rule.interval ?? 1;
@@ -177,12 +191,12 @@ function normalizeRule(
 	const count = rule.count ?? null;
 	if (count !== null) {
 		assertPositiveInteger(count, 'count');
+		if (rule.until !== undefined) {
+			throwInvalidRecurrence('A recurrence rule cannot define both count and until.');
+		}
 	}
-	if (count !== null && rule.until !== undefined) {
-		throwInvalidRecurrence('A recurrence rule cannot define both count and until.');
-	}
-	const until = rule.until ?? null;
-	if (until !== null) assertRecurrenceValue(until, isAllDay, 'until');
+	const until =
+		rule.until === undefined ? null : normalizeRecurrenceValue(rule.until, isAllDay, 'until');
 	const byWeekday = normalizeWeekdays(rule.byWeekday ?? []);
 	const byMonthDay = normalizeIntegerList(rule.byMonthDay ?? [], 'byMonthDay', -31, 31, true);
 	const byMonth = normalizeIntegerList(rule.byMonth ?? [], 'byMonth', 1, 12, false);
@@ -232,14 +246,10 @@ function parseRawRule(
 	}
 	const rawFrequency = entries.get('FREQ');
 	if (!rawFrequency) throwInvalidRecurrence('RRULE requires FREQ.');
-	const frequencyByRaw = {
-		DAILY: 'daily',
-		WEEKLY: 'weekly',
-		MONTHLY: 'monthly',
-		YEARLY: 'yearly'
-	} as const;
-	const freq = frequencyByRaw[rawFrequency as keyof typeof frequencyByRaw];
-	if (!freq) throwUnsupportedRecurrence(`Unsupported RRULE frequency: ${rawFrequency}.`);
+	const freq = rawFrequency.toLowerCase() as NormalizedRule['freq'];
+	if (!RECURRENCE_FREQUENCIES.includes(freq)) {
+		throwUnsupportedRecurrence(`Unsupported RRULE frequency: ${rawFrequency}.`);
+	}
 	const interval = parseRawPositiveInteger(entries.get('INTERVAL') ?? '1', 'INTERVAL');
 	const countValue = entries.get('COUNT');
 	const count = countValue === undefined ? null : parseRawPositiveInteger(countValue, 'COUNT');
@@ -249,24 +259,8 @@ function parseRawRule(
 	}
 	const until = rawUntil ? parseRawUntil(rawUntil, isAllDay, recurrenceTimeZone) : null;
 	const byWeekday = entries.has('BYDAY') ? parseRawWeekdays(entries.get('BYDAY') as string) : [];
-	const byMonthDay = entries.has('BYMONTHDAY')
-		? normalizeIntegerList(
-				parseRawIntegerList(entries.get('BYMONTHDAY') as string, 'BYMONTHDAY'),
-				'BYMONTHDAY',
-				-31,
-				31,
-				true
-			)
-		: [];
-	const byMonth = entries.has('BYMONTH')
-		? normalizeIntegerList(
-				parseRawIntegerList(entries.get('BYMONTH') as string, 'BYMONTH'),
-				'BYMONTH',
-				1,
-				12,
-				false
-			)
-		: [];
+	const byMonthDay = parseRawIntegerSelectors(entries, 'BYMONTHDAY', -31, 31, true);
+	const byMonth = parseRawIntegerSelectors(entries, 'BYMONTH', 1, 12, false);
 	const weekStart = (entries.get('WKST') ?? 'MO') as RecurrenceWeekday;
 	assertWeekdayName(weekStart, 'WKST');
 	validateSelectorCombination(freq, byWeekday);
@@ -288,24 +282,38 @@ function expandBuiltIn<TItemFields extends object>(
 	item: EventCalendarItem<TItemFields>,
 	rule: NormalizedRule,
 	range: EventCalendarRange,
-	displayTimeZone: string
+	displayTimeZone: string,
+	recurrenceTimeZone: string | null
 ): readonly EventCalendarExpandedOccurrence[] {
 	const isAllDay = item.allDay === true;
-	const recurrenceTimeZone = isAllDay
-		? null
-		: ((item as unknown as RuntimeRecurrenceIdentity).recurrenceTimeZone as string);
 	const anchorDay = isAllDay ? item.start : getZonedDay(item.start, recurrenceTimeZone as string);
 	const duration = isAllDay
 		? civilDayDifference(item.start, item.end)
 		: item.end.getTime() - item.start.getTime();
-	const rangeStart = getSearchStartDay(item, range, displayTimeZone, recurrenceTimeZone, duration);
-	const rangeEnd = getSearchEndDay(range, displayTimeZone, recurrenceTimeZone);
+	let rangeStart: EventCalendarDateOnly;
+	try {
+		rangeStart = isAllDay
+			? addCivilDays(getZonedDay(range.start, displayTimeZone), -Math.max(0, duration - 1))
+			: getZonedDay(new Date(range.start.getTime() - duration), recurrenceTimeZone as string);
+	} catch (error) {
+		if (isSupportedDateDomainError(error)) rangeStart = MIN_EVENT_CALENDAR_DAY;
+		else throw error;
+	}
+	const rangeEnd = getZonedDay(
+		new Date(Math.max(range.start.getTime(), range.end.getTime() - 1)),
+		recurrenceTimeZone ?? displayTimeZone
+	);
 	const scanStart = rangeStart > anchorDay ? rangeStart : anchorDay;
 	const generated: EventCalendarExpandedOccurrence[] = [];
 	const origins = new Set<string>();
-	const exclusions = new Set(rule.exDates.map(canonicalRecurrenceValue));
+	const exclusions = new Set(rule.exDates.map(canonicalEventCalendarRecurrenceOrigin));
 	let generatedByRule =
 		rule.count === null ? 0 : countRuleOccurrencesBefore(scanStart, anchorDay, rule);
+	const appendOccurrence = (originalStart: RecurrenceValue): void => {
+		const occurrence = createExpandedOccurrence(item, originalStart, duration);
+		if (occurrence)
+			addExpandedOccurrence(generated, origins, exclusions, occurrence, range, displayTimeZone);
+	};
 
 	for (
 		let day = scanStart;
@@ -319,17 +327,11 @@ function expandBuiltIn<TItemFields extends object>(
 		if (rule.until && compareRecurrenceValues(originalStart, rule.until) > 0) break;
 		generatedByRule += 1;
 		if (rule.count !== null && generatedByRule > rule.count) break;
-		const occurrence = createExpandedOccurrence(item, originalStart, duration);
-		if (occurrence) {
-			addExpandedOccurrence(generated, origins, exclusions, occurrence, range, displayTimeZone);
-		}
+		appendOccurrence(originalStart);
 	}
 
 	for (const originalStart of rule.rDates) {
-		const occurrence = createExpandedOccurrence(item, originalStart, duration);
-		if (occurrence) {
-			addExpandedOccurrence(generated, origins, exclusions, occurrence, range, displayTimeZone);
-		}
+		appendOccurrence(originalStart);
 	}
 	generated.sort(compareExpandedOccurrences);
 	return generated;
@@ -363,26 +365,27 @@ function countDailyOccurrencesBefore(
 	if (rule.byMonth.length === 0 && rule.byMonthDay.length === 0) {
 		if (rule.byWeekday.length === 0) return Math.min(limit, candidateCount + 1);
 		const weekdaySelectors = new Set(rule.byWeekday.map((weekday) => WEEKDAY_INDEX[weekday.day]));
-		const cycleLength = 7 / greatestCommonDivisor(rule.interval, 7);
-		let matchesPerCycle = 0;
+		let dividend = Math.abs(rule.interval);
+		let divisor = 7;
+		while (divisor !== 0) {
+			const remainder = dividend % divisor;
+			dividend = divisor;
+			divisor = remainder;
+		}
+		const cycleLength = 7 / dividend;
 		const weekdayStep = rule.interval % 7;
-		for (let index = 1; index <= cycleLength; index += 1) {
-			const weekday = modulo(
-				getCivilWeekday(anchorDay) + index * weekdayStep,
-				7
-			) as EventCalendarWeekday;
-			if (weekdaySelectors.has(weekday)) matchesPerCycle += 1;
-		}
+		const anchorWeekday = getCivilWeekday(anchorDay);
+		const countMatches = (length: number): number => {
+			let count = 0;
+			for (let index = 1; index <= length; index += 1) {
+				const weekday = modulo(anchorWeekday + index * weekdayStep, 7) as EventCalendarWeekday;
+				if (weekdaySelectors.has(weekday)) count += 1;
+			}
+			return count;
+		};
 		const fullCycles = Math.floor(candidateCount / cycleLength);
-		let count = 1 + fullCycles * matchesPerCycle;
-		const remainder = candidateCount % cycleLength;
-		for (let index = 1; index <= remainder; index += 1) {
-			const weekday = modulo(
-				getCivilWeekday(anchorDay) + index * weekdayStep,
-				7
-			) as EventCalendarWeekday;
-			if (weekdaySelectors.has(weekday)) count += 1;
-		}
+		const count =
+			1 + fullCycles * countMatches(cycleLength) + countMatches(candidateCount % cycleLength);
 		return Math.min(limit, count);
 	}
 
@@ -404,37 +407,29 @@ function countWeeklyOccurrencesBefore(
 	limit: number
 ): number {
 	const weekStart = WEEKDAY_INDEX[rule.weekStart];
-	const anchorWeekStart = addCivilDays(
-		anchorDay,
-		-modulo(getCivilWeekday(anchorDay) - weekStart, 7)
-	);
+	const anchorWeekStart = getRecurrenceWeekStart(anchorDay, weekStart);
 	const weekdays =
 		rule.byWeekday.length === 0
 			? [getCivilWeekday(anchorDay)]
 			: rule.byWeekday.map((weekday) => WEEKDAY_INDEX[weekday.day]);
+	const weekStep =
+		rule.interval > Math.floor(Number.MAX_SAFE_INTEGER / 7)
+			? Number.POSITIVE_INFINITY
+			: rule.interval * 7;
+	const uniqueWeekdays = new Set(weekdays);
 	if (rule.byMonth.length === 0 && rule.byMonthDay.length === 0) {
-		const step =
-			rule.interval > Math.floor(Number.MAX_SAFE_INTEGER / 7)
-				? Number.POSITIVE_INFINITY
-				: rule.interval * 7;
-		const exclusiveSerial = civilSerial(exclusiveDay);
-		const anchorSerial = civilSerial(anchorDay);
-		const weekSerial = civilSerial(anchorWeekStart);
+		const anchorOffset = civilDayDifference(anchorWeekStart, anchorDay);
+		const exclusiveOffset = civilDayDifference(anchorWeekStart, exclusiveDay);
 		let count = 1;
-		for (const weekday of new Set(weekdays)) {
+		for (const weekday of uniqueWeekdays) {
 			const offset = modulo(weekday - weekStart, 7);
-			const base = weekSerial + offset;
-			const firstIndex = Math.max(0, Math.ceil((anchorSerial + 1 - base) / step));
-			const lastIndex = Math.floor((exclusiveSerial - 1 - base) / step);
+			const firstIndex = Math.max(0, Math.ceil((anchorOffset + 1 - offset) / weekStep));
+			const lastIndex = Math.floor((exclusiveOffset - 1 - offset) / weekStep);
 			if (lastIndex >= firstIndex) count += lastIndex - firstIndex + 1;
 		}
 		return Math.min(limit, count);
 	}
 
-	const weekStep =
-		rule.interval > Math.floor(Number.MAX_SAFE_INTEGER / 7)
-			? Number.POSITIVE_INFINITY
-			: rule.interval * 7;
 	const weekSpan = civilDayDifference(anchorWeekStart, exclusiveDay);
 	const weekCount =
 		weekSpan <= 0
@@ -448,7 +443,7 @@ function countWeeklyOccurrencesBefore(
 		work += 1;
 		if (work > MAX_COMPLEX_COUNT_WORK) throwInternalRecurrenceLimit(rule, work);
 		const currentWeek = addCivilDays(anchorWeekStart, weekIndex * rule.interval * 7);
-		for (const weekday of new Set(weekdays)) {
+		for (const weekday of uniqueWeekdays) {
 			const day = addCivilDays(currentWeek, modulo(weekday - weekStart, 7));
 			if (day <= anchorDay || day >= exclusiveDay) continue;
 			if (matchesRuleDay(day, anchorDay, rule)) count += 1;
@@ -475,7 +470,21 @@ function countPeriodOccurrencesBefore(
 	if (periodCount > MAX_COMPLEX_COUNT_WORK) throwInternalRecurrenceLimit(rule, periodCount);
 	let count = 1;
 	for (let period = 0; period < periodCount && count < limit; period += 1) {
-		const months = getRecurrencePeriodMonths(anchor, rule, period);
+		let months: readonly { year: number; month: number }[];
+		if (rule.freq === 'monthly') {
+			const monthIndex = anchor.year * 12 + anchor.month - 1 + period * rule.interval;
+			months = [{ year: Math.floor(monthIndex / 12), month: modulo(monthIndex, 12) + 1 }];
+		} else {
+			const year = anchor.year + period * rule.interval;
+			const hasDaySelector = rule.byMonthDay.length > 0 || rule.byWeekday.length > 0;
+			const selectedMonths =
+				rule.byMonth.length > 0
+					? [...rule.byMonth].sort((left, right) => left - right)
+					: hasDaySelector
+						? Array.from({ length: 12 }, (_, index) => index + 1)
+						: [anchor.month];
+			months = selectedMonths.map((month) => ({ year, month }));
+		}
 		for (const { year, month } of months) {
 			for (const dayOfMonth of getPeriodCandidateDays(year, month, anchor.day, rule)) {
 				const day = toDateOnly({ year, month, day: dayOfMonth });
@@ -510,8 +519,8 @@ function getPeriodCandidateDays(
 	}
 
 	const days = new Set<number>();
-	let firstWeekday: EventCalendarWeekday | null = null;
-	let lastWeekday: EventCalendarWeekday | null = null;
+	const firstWeekday = getCivilWeekday(toDateOnly({ year, month, day: 1 }));
+	const lastWeekday = getCivilWeekday(toDateOnly({ year, month, day: monthLength }));
 	for (const selector of rule.byWeekday) {
 		const targetWeekday = WEEKDAY_INDEX[selector.day];
 		if (rule.freq === 'yearly' && rule.byMonth.length === 0 && selector.ordinal !== null) {
@@ -520,13 +529,10 @@ function getPeriodCandidateDays(
 			continue;
 		}
 		if (selector.ordinal === null) {
-			firstWeekday ??= getCivilWeekday(toDateOnly({ year, month, day: 1 }));
 			const firstMatch = 1 + modulo(targetWeekday - firstWeekday, 7);
 			for (let day = firstMatch; day <= monthLength; day += 7) days.add(day);
 			continue;
 		}
-		firstWeekday ??= getCivilWeekday(toDateOnly({ year, month, day: 1 }));
-		lastWeekday ??= getCivilWeekday(toDateOnly({ year, month, day: monthLength }));
 		const day =
 			selector.ordinal > 0
 				? 1 + modulo(targetWeekday - firstWeekday, 7) + (selector.ordinal - 1) * 7
@@ -560,35 +566,11 @@ function getYearlyOrdinalWeekdayDate(
 	return { month, day: dayOfYear };
 }
 
-function getRecurrencePeriodMonths(
-	anchor: ReturnType<typeof parseDateOnly>,
-	rule: NormalizedRule,
-	period: number
-): readonly { year: number; month: number }[] {
-	if (rule.freq === 'monthly') {
-		const monthIndex = anchor.year * 12 + anchor.month - 1 + period * rule.interval;
-		return [{ year: Math.floor(monthIndex / 12), month: modulo(monthIndex, 12) + 1 }];
-	}
-	const year = anchor.year + period * rule.interval;
-	const hasDaySelector = rule.byMonthDay.length > 0 || rule.byWeekday.length > 0;
-	const months =
-		rule.byMonth.length > 0
-			? [...rule.byMonth].sort((left, right) => left - right)
-			: hasDaySelector
-				? Array.from({ length: 12 }, (_, index) => index + 1)
-				: [anchor.month];
-	return months.map((month) => ({ year, month }));
-}
-
-function greatestCommonDivisor(left: number, right: number): number {
-	let dividend = Math.abs(left);
-	let divisor = Math.abs(right);
-	while (divisor !== 0) {
-		const remainder = dividend % divisor;
-		dividend = divisor;
-		divisor = remainder;
-	}
-	return dividend;
+function getRecurrenceWeekStart(
+	day: EventCalendarDateOnly,
+	weekStart: EventCalendarWeekday
+): EventCalendarDateOnly {
+	return addCivilDays(day, -modulo(getCivilWeekday(day) - weekStart, 7));
 }
 
 function throwInternalRecurrenceLimit(rule: NormalizedRule, work: number): never {
@@ -599,39 +581,6 @@ function throwInternalRecurrenceLimit(rule: NormalizedRule, work: number): never
 	);
 }
 
-function getSearchStartDay<TItemFields extends object>(
-	item: EventCalendarItem<TItemFields>,
-	range: EventCalendarRange,
-	displayTimeZone: string,
-	recurrenceTimeZone: string | null,
-	duration: number
-): EventCalendarDateOnly {
-	if (item.allDay === true) {
-		try {
-			return addCivilDays(getZonedDay(range.start, displayTimeZone), -Math.max(0, duration - 1));
-		} catch (error) {
-			if (isSupportedDateDomainError(error)) return MIN_EVENT_CALENDAR_DAY;
-			throw error;
-		}
-	}
-	try {
-		return getZonedDay(new Date(range.start.getTime() - duration), recurrenceTimeZone as string);
-	} catch (error) {
-		if (isSupportedDateDomainError(error)) return MIN_EVENT_CALENDAR_DAY;
-		throw error;
-	}
-}
-
-function getSearchEndDay(
-	range: EventCalendarRange,
-	displayTimeZone: string,
-	recurrenceTimeZone: string | null
-): EventCalendarDateOnly {
-	const zone = recurrenceTimeZone ?? displayTimeZone;
-	const lastInstant = new Date(Math.max(range.start.getTime(), range.end.getTime() - 1));
-	return getZonedDay(lastInstant, zone);
-}
-
 function matchesRuleDay(
 	day: EventCalendarDateOnly,
 	anchorDay: EventCalendarDateOnly,
@@ -640,85 +589,57 @@ function matchesRuleDay(
 	const dayParts = parseDateOnly(day);
 	const anchorParts = parseDateOnly(anchorDay);
 	if (rule.byMonth.length > 0 && !rule.byMonth.includes(dayParts.month)) return false;
-	if (!matchesFrequencyPeriod(day, anchorDay, rule)) return false;
-	if (!matchesMonthDay(dayParts.year, dayParts.month, dayParts.day, rule.byMonthDay)) return false;
-	if (rule.freq === 'weekly' && rule.byWeekday.length === 0) {
-		if (getCivilWeekday(day) !== getCivilWeekday(anchorDay)) return false;
-	} else if (!matchesWeekday(day, rule.byWeekday, rule.freq, rule.byMonth.length > 0)) {
-		return false;
+	if (rule.freq === 'daily') {
+		if (modulo(civilDayDifference(anchorDay, day), rule.interval) !== 0) return false;
+	} else if (rule.freq === 'weekly') {
+		const weekStart = WEEKDAY_INDEX[rule.weekStart];
+		const dayWeekStart = getRecurrenceWeekStart(day, weekStart);
+		const anchorWeekStart = getRecurrenceWeekStart(anchorDay, weekStart);
+		if (modulo(civilDayDifference(anchorWeekStart, dayWeekStart) / 7, rule.interval) !== 0) {
+			return false;
+		}
+	} else if (rule.freq === 'monthly') {
+		const months = (dayParts.year - anchorParts.year) * 12 + dayParts.month - anchorParts.month;
+		if (months < 0 || modulo(months, rule.interval) !== 0) return false;
+	} else {
+		const years = dayParts.year - anchorParts.year;
+		if (years < 0 || modulo(years, rule.interval) !== 0) return false;
+	}
+	if (rule.byMonthDay.length > 0) {
+		const monthLength = daysInMonth(dayParts.year, dayParts.month);
+		if (
+			!rule.byMonthDay.some(
+				(selector) => (selector > 0 ? selector : monthLength + selector + 1) === dayParts.day
+			)
+		) {
+			return false;
+		}
+	}
+	if (rule.byWeekday.length === 0) {
+		if (rule.freq === 'weekly' && getCivilWeekday(day) !== getCivilWeekday(anchorDay)) return false;
+	} else {
+		const weekday = getCivilWeekday(day);
+		const matchesWeekday = rule.byWeekday.some((selector) => {
+			if (WEEKDAY_INDEX[selector.day] !== weekday) return false;
+			if (selector.ordinal === null) return true;
+			return rule.freq === 'monthly' || rule.byMonth.length > 0
+				? matchesWeekdayOrdinalInMonth(dayParts, selector.ordinal)
+				: matchesWeekdayOrdinalInYear(day, dayParts.year, selector.ordinal);
+		});
+		if (!matchesWeekday) return false;
 	}
 
 	const hasDaySelector = rule.byMonthDay.length > 0 || rule.byWeekday.length > 0;
-	if (rule.freq === 'monthly' && !hasDaySelector) return dayParts.day === anchorParts.day;
-	if (
-		rule.freq === 'yearly' &&
-		rule.byMonth.length === 0 &&
-		!hasDaySelector &&
-		dayParts.month !== anchorParts.month
-	) {
-		return false;
-	}
-	if (rule.freq === 'yearly' && !hasDaySelector) return dayParts.day === anchorParts.day;
-	return true;
-}
-
-function matchesFrequencyPeriod(
-	day: EventCalendarDateOnly,
-	anchorDay: EventCalendarDateOnly,
-	rule: NormalizedRule
-): boolean {
-	const dayParts = parseDateOnly(day);
-	const anchorParts = parseDateOnly(anchorDay);
-	if (rule.freq === 'daily') {
-		return modulo(civilDayDifference(anchorDay, day), rule.interval) === 0;
-	}
-	if (rule.freq === 'weekly') {
-		const weekStart = WEEKDAY_INDEX[rule.weekStart];
-		const dayWeekStart = addCivilDays(day, -modulo(getCivilWeekday(day) - weekStart, 7));
-		const anchorWeekStart = addCivilDays(
-			anchorDay,
-			-modulo(getCivilWeekday(anchorDay) - weekStart, 7)
-		);
-		return modulo(civilDayDifference(anchorWeekStart, dayWeekStart) / 7, rule.interval) === 0;
-	}
-	if (rule.freq === 'monthly') {
-		const months = (dayParts.year - anchorParts.year) * 12 + dayParts.month - anchorParts.month;
-		return months >= 0 && modulo(months, rule.interval) === 0;
-	}
-	const years = dayParts.year - anchorParts.year;
-	return years >= 0 && modulo(years, rule.interval) === 0;
-}
-
-function matchesMonthDay(
-	year: number,
-	month: number,
-	day: number,
-	selectors: readonly number[]
-): boolean {
-	if (selectors.length === 0) return true;
-	const monthLength = daysInMonth(year, month);
-	return selectors.some(
-		(selector) => (selector > 0 ? selector : monthLength + selector + 1) === day
-	);
-}
-
-function matchesWeekday(
-	day: EventCalendarDateOnly,
-	selectors: readonly NormalizedWeekday[],
-	frequency: NormalizedRule['freq'],
-	hasByMonth: boolean
-): boolean {
-	if (selectors.length === 0) return frequency !== 'weekly';
-	const weekday = getCivilWeekday(day);
-	return selectors.some((selector) => {
-		if (WEEKDAY_INDEX[selector.day] !== weekday) return false;
-		if (selector.ordinal === null) return true;
-		const parts = parseDateOnly(day);
-		if (frequency === 'monthly' || hasByMonth) {
-			return matchesWeekdayOrdinalInMonth(day, selector.ordinal);
+	if (!hasDaySelector) {
+		if (rule.freq === 'monthly') return dayParts.day === anchorParts.day;
+		if (rule.freq === 'yearly') {
+			return (
+				dayParts.day === anchorParts.day &&
+				(rule.byMonth.length > 0 || dayParts.month === anchorParts.month)
+			);
 		}
-		return matchesWeekdayOrdinalInYear(day, parts.year, selector.ordinal);
-	});
+	}
+	return true;
 }
 
 function createOriginalStart<TItemFields extends object>(
@@ -759,11 +680,12 @@ function createExpandedOccurrence<TItemFields extends object>(
 		return { allDay: true, start: originalStart, end, originalStart };
 	}
 	if (!(originalStart instanceof Date)) throwInvalidRecurrence('Timed origin must be an instant.');
+	const start = new Date(originalStart);
 	return {
 		allDay: false,
-		start: new Date(originalStart),
-		end: new Date(originalStart.getTime() + duration),
-		originalStart: new Date(originalStart)
+		start,
+		end: new Date(start.getTime() + duration),
+		originalStart: new Date(start)
 	};
 }
 
@@ -775,7 +697,7 @@ function addExpandedOccurrence(
 	range: EventCalendarRange,
 	displayTimeZone: string
 ): void {
-	const origin = canonicalRecurrenceValue(occurrence.originalStart);
+	const origin = canonicalEventCalendarRecurrenceOrigin(occurrence.originalStart);
 	if (origins.has(origin) || exclusions.has(origin)) return;
 	if (!expandedOccurrenceIntersects(occurrence, range, displayTimeZone)) return;
 	origins.add(origin);
@@ -809,12 +731,8 @@ function validateExpandedOccurrences<TItemFields extends object>(
 				index
 			});
 		}
-		if (occurrence.allDay) {
-			assertExpandedAllDay(item.id, occurrence, index);
-		} else {
-			assertExpandedTimed(item.id, occurrence, index);
-		}
-		if (!expandedOccurrenceIntersects(occurrence, range, displayTimeZone)) {
+		const validatedOccurrence = validateExpandedOccurrence(item.id, occurrence, index);
+		if (!expandedOccurrenceIntersects(validatedOccurrence, range, displayTimeZone)) {
 			throwInvalidRecurrence(
 				`Expanded occurrence ${index} for ${item.id} is outside the requested range.`,
 				{
@@ -823,75 +741,68 @@ function validateExpandedOccurrences<TItemFields extends object>(
 				}
 			);
 		}
-		const origin = canonicalRecurrenceValue(occurrence.originalStart);
+		const origin = canonicalEventCalendarRecurrenceOrigin(validatedOccurrence.originalStart);
 		if (origins.has(origin)) {
-			throwInvalidRecurrence(`The recurrence expander returned duplicate origin ${origin}.`, {
-				id: item.id,
-				origin
-			});
+			const diagnosticOrigin = formatRecurrenceOriginForError(validatedOccurrence.originalStart);
+			throwInvalidRecurrence(
+				`The recurrence expander returned duplicate origin ${diagnosticOrigin}.`,
+				{
+					id: item.id,
+					origin: diagnosticOrigin
+				}
+			);
 		}
 		origins.add(origin);
-		return cloneExpandedOccurrence(occurrence);
+		return validatedOccurrence;
 	});
 	validated.sort(compareExpandedOccurrences);
 	return validated;
 }
 
-function assertExpandedAllDay(
+function validateExpandedOccurrence(
 	itemId: string,
-	occurrence: Extract<EventCalendarExpandedOccurrence, { allDay: true }>,
+	occurrence: EventCalendarExpandedOccurrence,
 	index: number
-): void {
+): EventCalendarExpandedOccurrence {
+	const kind = occurrence.allDay ? 'all-day' : 'timed';
 	try {
-		assertRenderableDateOnly(occurrence.start, 'expanded.start');
-		assertDateOnly(occurrence.end, 'expanded.end');
-		assertRenderableDateOnly(occurrence.originalStart, 'expanded.originalStart');
+		if (occurrence.allDay) {
+			assertRenderableDateOnly(occurrence.start, 'expanded.start');
+			assertDateOnly(occurrence.end, 'expanded.end');
+			assertRenderableDateOnly(occurrence.originalStart, 'expanded.originalStart');
+		} else {
+			assertValidInstant(occurrence.start, 'expanded.start');
+			assertValidInstant(occurrence.end, 'expanded.end');
+			assertValidInstant(occurrence.originalStart, 'expanded.originalStart');
+		}
 	} catch (error) {
 		if (!(error instanceof EventCalendarError)) throw error;
-		throwInvalidRecurrence(`Expanded all-day occurrence ${index} for ${itemId} is invalid.`, {
+		throwInvalidRecurrence(`Expanded ${kind} occurrence ${index} for ${itemId} is invalid.`, {
 			id: itemId,
 			index
 		});
 	}
-	if (occurrence.end <= occurrence.start || occurrence.start !== occurrence.originalStart) {
+	const invalidRangeOrOrigin = occurrence.allDay
+		? occurrence.end <= occurrence.start || occurrence.start !== occurrence.originalStart
+		: occurrence.end.getTime() < occurrence.start.getTime() ||
+			occurrence.start.getTime() !== occurrence.originalStart.getTime();
+	if (invalidRangeOrOrigin) {
 		throwInvalidRecurrence(
-			`Expanded all-day occurrence ${index} for ${itemId} has an invalid range or origin.`,
+			`Expanded ${kind} occurrence ${index} for ${itemId} has an invalid range or origin.`,
 			{
 				id: itemId,
 				index
 			}
 		);
 	}
-}
-
-function assertExpandedTimed(
-	itemId: string,
-	occurrence: Extract<EventCalendarExpandedOccurrence, { allDay: false }>,
-	index: number
-): void {
-	try {
-		assertValidInstant(occurrence.start, 'expanded.start');
-		assertValidInstant(occurrence.end, 'expanded.end');
-		assertValidInstant(occurrence.originalStart, 'expanded.originalStart');
-	} catch (error) {
-		if (!(error instanceof EventCalendarError)) throw error;
-		throwInvalidRecurrence(`Expanded timed occurrence ${index} for ${itemId} is invalid.`, {
-			id: itemId,
-			index
-		});
-	}
-	if (
-		occurrence.end.getTime() < occurrence.start.getTime() ||
-		occurrence.start.getTime() !== occurrence.originalStart.getTime()
-	) {
-		throwInvalidRecurrence(
-			`Expanded timed occurrence ${index} for ${itemId} has an invalid range or origin.`,
-			{
-				id: itemId,
-				index
-			}
-		);
-	}
+	return occurrence.allDay
+		? { ...occurrence }
+		: {
+				allDay: false,
+				start: new Date(occurrence.start),
+				end: new Date(occurrence.end),
+				originalStart: new Date(occurrence.originalStart)
+			};
 }
 
 function expandedOccurrenceIntersects(
@@ -977,10 +888,7 @@ function parseRawWeekdays(value: string): readonly NormalizedWeekday[] {
 		}
 		return { day: match[2] as RecurrenceWeekday, ordinal };
 	});
-	assertUnique(
-		weekdays.map((weekday) => `${weekday.ordinal ?? ''}${weekday.day}`),
-		'BYDAY'
-	);
+	assertUniqueWeekdays(weekdays, 'BYDAY');
 	return weekdays;
 }
 
@@ -1000,10 +908,7 @@ function normalizeWeekdays(
 		}
 		return { day: value.day, ordinal: value.ordinal };
 	});
-	assertUnique(
-		weekdays.map((weekday) => `${weekday.ordinal ?? ''}${weekday.day}`),
-		'byWeekday'
-	);
+	assertUniqueWeekdays(weekdays, 'byWeekday');
 	return weekdays;
 }
 
@@ -1048,22 +953,26 @@ function normalizeDateList(
 ): readonly RecurrenceValue[] {
 	if (values === undefined) return [];
 	if (!Array.isArray(values)) throwInvalidRecurrence(`${name} must be an array.`);
-	for (const value of values) assertRecurrenceValue(value, isAllDay, name);
-	assertUnique(values.map(canonicalRecurrenceValue), name);
-	return values.map(cloneRecurrenceValue);
+	const normalized = values.map((value) => normalizeRecurrenceValue(value, isAllDay, name));
+	assertUnique(normalized.map(canonicalEventCalendarRecurrenceOrigin), name);
+	return normalized;
 }
 
-function assertRecurrenceValue(value: unknown, isAllDay: boolean, name: string): void {
+function normalizeRecurrenceValue(
+	value: unknown,
+	isAllDay: boolean,
+	name: string
+): RecurrenceValue {
 	if (isAllDay) {
 		try {
 			assertRenderableDateOnly(value, name);
-			return;
+			return value;
 		} catch (error) {
 			if (!(error instanceof EventCalendarError)) throw error;
 			throwInvalidRecurrence(`${name} must contain canonical date-only values.`);
 		}
 	}
-	if (value instanceof Date && Number.isFinite(value.getTime())) return;
+	if (value instanceof Date && Number.isFinite(value.getTime())) return new Date(value);
 	throwInvalidRecurrence(`${name} must contain valid Date instants.`);
 }
 
@@ -1074,11 +983,28 @@ function parseRawPositiveInteger(value: string, name: string): number {
 	return parsed;
 }
 
-function parseRawIntegerList(value: string, name: string): readonly number[] {
-	return value.split(',').map((entry) => {
-		if (!/^[+-]?\d+$/.test(entry)) throwInvalidRecurrence(`${name} contains an invalid integer.`);
-		return Number(entry);
-	});
+function parseRawIntegerSelectors(
+	entries: ReadonlyMap<string, string>,
+	name: string,
+	minimum: number,
+	maximum: number,
+	excludeZero: boolean
+): readonly number[] {
+	const value = entries.get(name);
+	return value === undefined
+		? []
+		: normalizeIntegerList(
+				value.split(',').map((entry) => {
+					if (!/^[+-]?\d+$/.test(entry)) {
+						throwInvalidRecurrence(`${name} contains an invalid integer.`);
+					}
+					return Number(entry);
+				}),
+				name,
+				minimum,
+				maximum,
+				excludeZero
+			);
 }
 
 function assertPositiveInteger(value: number, name: string): void {
@@ -1096,8 +1022,17 @@ function assertUnique(values: readonly (string | number)[], name: string): void 
 	throwInvalidRecurrence(`${name} cannot contain duplicate values.`);
 }
 
-function matchesWeekdayOrdinalInMonth(day: EventCalendarDateOnly, ordinal: number): boolean {
-	const parts = parseDateOnly(day);
+function assertUniqueWeekdays(values: readonly NormalizedWeekday[], name: string): void {
+	assertUnique(
+		values.map((weekday) => `${weekday.ordinal ?? ''}${weekday.day}`),
+		name
+	);
+}
+
+function matchesWeekdayOrdinalInMonth(
+	parts: ReturnType<typeof parseDateOnly>,
+	ordinal: number
+): boolean {
 	const positive = Math.floor((parts.day - 1) / 7) + 1;
 	const negative = -Math.floor((daysInMonth(parts.year, parts.month) - parts.day) / 7) - 1;
 	return ordinal === positive || ordinal === negative;
@@ -1116,30 +1051,6 @@ function matchesWeekdayOrdinalInYear(
 	return ordinal === positive || ordinal === negative;
 }
 
-function civilDayDifference(start: EventCalendarDateOnly, end: EventCalendarDateOnly): number {
-	return civilSerial(end) - civilSerial(start);
-}
-
-function civilSerial(day: EventCalendarDateOnly): number {
-	const { year, month, day: dayOfMonth } = parseDateOnly(day);
-	let adjustedYear = year;
-	let adjustedMonth = month;
-	if (adjustedMonth <= 2) {
-		adjustedYear -= 1;
-		adjustedMonth += 12;
-	}
-	const era = Math.floor(adjustedYear / 400);
-	const yearOfEra = adjustedYear - era * 400;
-	const dayOfYear = Math.floor((153 * (adjustedMonth - 3) + 2) / 5) + dayOfMonth - 1;
-	return (
-		era * 146097 +
-		yearOfEra * 365 +
-		Math.floor(yearOfEra / 4) -
-		Math.floor(yearOfEra / 100) +
-		dayOfYear
-	);
-}
-
 function daysInMonth(year: number, month: number): number {
 	if (month === 2) return isLeapYear(year) ? 29 : 28;
 	return [4, 6, 9, 11].includes(month) ? 30 : 31;
@@ -1149,12 +1060,8 @@ function isLeapYear(year: number): boolean {
 	return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
 }
 
-function canonicalRecurrenceValue(value: RecurrenceValue): string {
+function formatRecurrenceOriginForError(value: RecurrenceValue): string {
 	return value instanceof Date ? `i${value.getTime()}` : `d${value.length}:${value}`;
-}
-
-function cloneRecurrenceValue(value: RecurrenceValue): RecurrenceValue {
-	return value instanceof Date ? new Date(value) : value;
 }
 
 function compareRecurrenceValues(left: RecurrenceValue, right: RecurrenceValue): number {
@@ -1167,21 +1074,8 @@ function compareExpandedOccurrences(
 	left: EventCalendarExpandedOccurrence,
 	right: EventCalendarExpandedOccurrence
 ): number {
-	if (left.allDay && right.allDay) return compareStrings(left.start, right.start);
-	if (!left.allDay && !right.allDay) return left.start.getTime() - right.start.getTime();
-	return left.allDay ? -1 : 1;
-}
-
-function cloneExpandedOccurrence(
-	occurrence: EventCalendarExpandedOccurrence
-): EventCalendarExpandedOccurrence {
-	if (occurrence.allDay) return { ...occurrence };
-	return {
-		allDay: false,
-		start: new Date(occurrence.start),
-		end: new Date(occurrence.end),
-		originalStart: new Date(occurrence.originalStart)
-	};
+	if (left.allDay !== right.allDay) return left.allDay ? -1 : 1;
+	return compareRecurrenceValues(left.start, right.start);
 }
 
 function modulo(value: number, divisor: number): number {

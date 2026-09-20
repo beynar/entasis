@@ -323,7 +323,7 @@ current role, so it never hard-pins a color.
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setNumberInputTheme } from 'svelai/number-input';
+  import { setNumberInputTheme } from 'entasis/number-input';
   
   setNumberInputTheme({
     inputContainer: {

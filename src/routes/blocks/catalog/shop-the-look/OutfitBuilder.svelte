@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Button } from 'svelai/button';
-	import { Checkbox } from 'svelai/checkbox';
-	import { Select } from 'svelai/select';
+	import { Heading } from 'entasis/heading';
+	import { Button } from 'entasis/button';
+	import { Checkbox } from 'entasis/checkbox';
+	import { Select } from 'entasis/select';
 	const money = (amount: number) =>
 		new Intl.NumberFormat('en-US', {
 			style: 'currency',

@@ -212,7 +212,7 @@
 		description="A controlled editor layout with persisted sizes, visible handles, and accessible separator labels."
 		code={`<Resizable
 	bind:sizes={workspaceSizes}
-	storageKey="svelai-resizable-workspace-demo"
+	storageKey="entasis-resizable-workspace-demo"
 	orientation="${controls.value.orientation}"
 	variant="${controls.value.variant}"
 	class="h-80 rounded-lg border border-neutral-muted"
@@ -227,7 +227,7 @@
 		<div class="grid w-full gap-4">
 			<Resizable
 				bind:sizes={workspaceSizes}
-				storageKey="svelai-resizable-workspace-demo"
+				storageKey="entasis-resizable-workspace-demo"
 				orientation={controls.value.orientation}
 				variant={controls.value.variant}
 				class={controls.value.variant === 'splitted'
@@ -323,7 +323,7 @@
 				<Resizable
 					bind:sizes={collapsibleSizes}
 					bind:collapsedPanels={collapsedPanelIds}
-					storageKey="svelai-resizable-collapsible-demo"
+					storageKey="entasis-resizable-collapsible-demo"
 					class="border-neutral-muted bg-surface h-72 rounded-lg border"
 					handle
 					panels={[

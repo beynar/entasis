@@ -8,7 +8,7 @@ export type * from './map-types.js';
 export type { MapMarker } from './map-data.js';
 
 /**
- * Props for the `Map` component. Extends the base MapLibre props with svelai's
+ * Props for the `Map` component. Extends the base MapLibre props with entasis's
  * `size` viewport variant and the per-instance `theme` override.
  */
 export type MapProps<TData = unknown> = BaseMapProps<TData> & {

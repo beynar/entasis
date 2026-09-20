@@ -1,7 +1,7 @@
 export const formDescription = `
 # Form
 
-Form renders configured svelai fields inside a div, owns their state and validation, and submits programmatically. It provides managed Enter-key navigation and submission, but not native form events, browser constraint validation, or FormData behavior.
+Form renders configured entasis fields inside a div, owns their state and validation, and submits programmatically. It provides managed Enter-key navigation and submission, but not native form events, browser constraint validation, or FormData behavior.
 
 ## Basic usage
 
@@ -12,7 +12,7 @@ Form renders configured svelai fields inside a div, owns their state and validat
 		type FormState,
 		type InferFormValue,
 		type LiveFormValue
-	} from 'svelai/form';
+	} from 'entasis/form';
 
 	const inputs = {
 		identity: {
@@ -86,11 +86,11 @@ On an enabled, editable single-line input, Enter validates the current field. A 
 
 ## Programmatic Dialog forms
 
-Mount one Ask host near the application root, then call ask() from any client-side event. Both exports come from svelai/form:
+Mount one Ask host near the application root, then call ask() from any client-side event. Both exports come from entasis/form:
 
 \`\`\`svelte
 <script lang="ts">
-	import { Ask, ask } from 'svelai/form';
+	import { Ask, ask } from 'entasis/form';
 
 	const inputs = {
 		name: { type: 'text', label: 'Name', required: true },
@@ -166,7 +166,7 @@ The left position becomes a two-column label/control layout once the field is at
 A group renders a transparent semantic fieldset with a required legend label and an optional description. Its label and description use the same size scale as ordinary fields; grouping does not add another card or padded container:
 
 \`\`\`ts
-import type { InferFormValue } from 'svelai/form';
+import type { InferFormValue } from 'entasis/form';
 
 export const inputs = {
 	contact: {

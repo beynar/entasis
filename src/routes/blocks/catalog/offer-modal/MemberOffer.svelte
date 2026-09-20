@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Dialog } from 'svelai/dialog';
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import { Checkbox } from 'svelai/checkbox';
+	import { Heading } from 'entasis/heading';
+	import { Dialog } from 'entasis/dialog';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import { Checkbox } from 'entasis/checkbox';
 
 	let open = $state(false);
 	let interests = $state<string[]>(['New collections']);

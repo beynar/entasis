@@ -1,9 +1,9 @@
 ---
-name: building-with-svelai
-description: Builds UIs with the svelai component library for SvelteKit. Covers component usage, theming, Tailwind plugin configuration, form inputs, overlays, layout primitives, and theme customization. Use when the user asks to build UI with svelai components, customize themes, or work with svelai form inputs.
+name: building-with-entasis
+description: Builds UIs with the entasis component library for SvelteKit. Covers component usage, theming, Tailwind plugin configuration, form inputs, overlays, layout primitives, and theme customization. Use when the user asks to build UI with entasis components, customize themes, or work with entasis form inputs.
 ---
 
-# svelai Component Library
+# entasis Component Library
 
 A configuration-over-markup component library for SvelteKit. Components are styled via a global theme system backed by a Tailwind CSS plugin.
 
@@ -21,14 +21,14 @@ A configuration-over-markup component library for SvelteKit. Components are styl
 
 ## Import Convention
 
-All components use kebab-case package paths with PascalCase component names. There is no root `svelai` export; always import from the subpath.
+All components use kebab-case package paths with PascalCase component names. There is no root `entasis` export; always import from the subpath.
 
 ```svelte
 <script>
-	import { Button } from 'svelai/button';
-	import { TextInput } from 'svelai/text-input';
-	import { Dialog } from 'svelai/dialog';
-	import { Popover } from 'svelai/popover';
+	import { Button } from 'entasis/button';
+	import { TextInput } from 'entasis/text-input';
+	import { Dialog } from 'entasis/dialog';
+	import { Popover } from 'entasis/popover';
 </script>
 ```
 
@@ -91,7 +91,7 @@ fails the build when it does not.
 
 ## Accessibility
 
-Accessibility is the library's job. Never pass an `aria-*` attribute to a svelai component: describe
+Accessibility is the library's job. Never pass an `aria-*` attribute to a entasis component: describe
 the meaning and the component writes the attribute.
 
 | You pass                                             | The component renders                                                                                |
@@ -121,8 +121,8 @@ Most components accept `prefix` and `suffix` snippets for composable content:
 
 ```svelte
 <script>
-	import { Button } from 'svelai/button';
-	import { plusIcon } from 'svelai/icons/plus';
+	import { Button } from 'entasis/button';
+	import { plusIcon } from 'entasis/icons/plus';
 </script>
 
 <Button>
@@ -131,7 +131,7 @@ Most components accept `prefix` and `suffix` snippets for composable content:
 </Button>
 ```
 
-`Slot` utility (`import { Slot } from 'svelai/slot'`) renders strings, numbers, Snippets, or components uniformly: `<Slot render={dynamicContent} />`
+`Slot` utility (`import { Slot } from 'entasis/slot'`) renders strings, numbers, Snippets, or components uniformly: `<Slot render={dynamicContent} />`
 
 ## Theme System
 
@@ -140,9 +140,9 @@ Three layers: the Tailwind theme plugin (palette + engine utilities), the `<Them
 ```css
 /* app.css - one @plugin block per theme; the default one also bootstraps the engine */
 @import 'tailwindcss';
-@source '../node_modules/svelai/dist';
+@source '../node_modules/entasis/dist';
 
-@plugin 'svelai/tailwind-plugin/theme' {
+@plugin 'entasis/tailwind-plugin/theme' {
 	name: light;
 	default: true;
 	colorscheme: light;
@@ -155,7 +155,7 @@ Three layers: the Tailwind theme plugin (palette + engine utilities), the `<Them
 	warning: #f59e0b;
 	info: #2563eb;
 }
-@plugin 'svelai/tailwind-plugin/theme' {
+@plugin 'entasis/tailwind-plugin/theme' {
 	name: dark;
 	colorscheme: dark;
 	surface: #09090b;
@@ -176,7 +176,7 @@ Three layers: the Tailwind theme plugin (palette + engine utilities), the `<Them
 ```svelte
 <!-- +layout.svelte - wrap app once -->
 <script>
-	import { Theme } from 'svelai/theme';
+	import { Theme } from 'entasis/theme';
 
 	let { children } = $props();
 </script>
@@ -230,7 +230,7 @@ override. See `theming.md` "State colours".
 
 ```svelte
 <script lang="ts">
-	import { Theme, type ThemeDesignTokenMap } from 'svelai/theme';
+	import { Theme, type ThemeDesignTokenMap } from 'entasis/theme';
 
 	let { children } = $props();
 	const designTokens: ThemeDesignTokenMap = {
@@ -250,7 +250,7 @@ Every component has a theme object with slots (e.g., `root`, `prefix`, `suffix`)
 
 ```svelte
 <script>
-	import { Button } from 'svelai/button';
+	import { Button } from 'entasis/button';
 </script>
 
 <Button theme={{ root: { base: 'rounded-full shadow-lg' } }}>Custom</Button>
@@ -260,7 +260,7 @@ Every component has a theme object with slots (e.g., `root`, `prefix`, `suffix`)
 
 ```svelte
 <script>
-	import { setButtonTheme } from 'svelai/button';
+	import { setButtonTheme } from 'entasis/button';
 
 	setButtonTheme({
 		root: {
@@ -272,7 +272,7 @@ Every component has a theme object with slots (e.g., `root`, `prefix`, `suffix`)
 </script>
 ```
 
-Pattern: `import { set{Component}Theme } from 'svelai/{kebab-name}'`. Overrides are appended to the defaults; pass `override: true` to drop the defaults entirely.
+Pattern: `import { set{Component}Theme } from 'entasis/{kebab-name}'`. Overrides are appended to the defaults; pass `override: true` to drop the defaults entirely.
 
 ## Component References
 
@@ -294,8 +294,8 @@ Pattern: `import { set{Component}Theme } from 'svelai/{kebab-name}'`. Overrides 
 
 ```svelte
 <script>
-	import { Form } from 'svelai/form';
-	import { Button } from 'svelai/button';
+	import { Form } from 'entasis/form';
+	import { Button } from 'entasis/button';
 
 	const handleSubmit = async (value) => {
 		console.log(value);
@@ -318,7 +318,7 @@ Pattern: `import { set{Component}Theme } from 'svelai/{kebab-name}'`. Overrides 
 ### Confirmation dialog
 
 ```typescript
-import { confirmation } from 'svelai/confirmation';
+import { confirmation } from 'entasis/confirmation';
 
 declare function deleteItem(): Promise<void>;
 
@@ -336,7 +336,7 @@ const { confirmed, result } = await confirmation({
 ### Toast notifications
 
 ```typescript
-import { toast } from 'svelai/toast';
+import { toast } from 'entasis/toast';
 
 declare function upload(): Promise<void>;
 
@@ -358,186 +358,186 @@ This section is generated from `tooling/component-contract/manifest.ts`.
 
 ### AI
 
-- `svelai/ai-conversation` — Conversation (/components/ai-conversation)
-- `svelai/ai-ask-user-question` — Ask user question (/components/ai-ask-user-question)
-- `svelai/ai-chat` — Chat (/components/ai-chat)
-- `svelai/ai-context` — Context (/components/ai-context)
-- `svelai/ai-thread` — Thread (/components/ai-thread)
-- `svelai/ai-thread-toc` — Thread TOC (/components/ai-thread-toc)
-- `svelai/ai-message` — Message (/components/ai-message)
-- `svelai/ai-message-actions` — Message actions (/components/ai-message-actions)
-- `svelai/ai-marker` — Marker (/components/ai-marker)
-- `svelai/ai-model-selector` — Model selector (/components/ai-model-selector)
-- `svelai/ai-composer` — Composer (/components/ai-composer)
-- `svelai/ai-reasoning` — Reasoning (/components/ai-reasoning)
-- `svelai/ai-suggestion` — Suggestion (/components/ai-suggestion)
-- `svelai/ai-tool` — Tool (/components/ai-tool)
+- `entasis/ai-conversation` — Conversation (/components/ai-conversation)
+- `entasis/ai-ask-user-question` — Ask user question (/components/ai-ask-user-question)
+- `entasis/ai-chat` — Chat (/components/ai-chat)
+- `entasis/ai-context` — Context (/components/ai-context)
+- `entasis/ai-thread` — Thread (/components/ai-thread)
+- `entasis/ai-thread-toc` — Thread TOC (/components/ai-thread-toc)
+- `entasis/ai-message` — Message (/components/ai-message)
+- `entasis/ai-message-actions` — Message actions (/components/ai-message-actions)
+- `entasis/ai-marker` — Marker (/components/ai-marker)
+- `entasis/ai-model-selector` — Model selector (/components/ai-model-selector)
+- `entasis/ai-composer` — Composer (/components/ai-composer)
+- `entasis/ai-reasoning` — Reasoning (/components/ai-reasoning)
+- `entasis/ai-suggestion` — Suggestion (/components/ai-suggestion)
+- `entasis/ai-tool` — Tool (/components/ai-tool)
 
 ### Layout
 
-- `svelai/aspect-ratio` — Aspect ratio (/components/aspect-ratio)
-- `svelai/card` — Card (/components/card)
-- `svelai/grid` — Grid (/components/grid)
-- `svelai/grid` — Grid span (/components/grid-span)
-- `svelai/heading` — Heading (/components/heading)
-- `svelai/resizable` — Resizable (/components/resizable)
-- `svelai/scroll-area` — Scroll area (/components/scroll-area)
-- `svelai/separator` — Separator (/components/separator)
-- `svelai/stack` — Stack (/components/stack)
+- `entasis/aspect-ratio` — Aspect ratio (/components/aspect-ratio)
+- `entasis/card` — Card (/components/card)
+- `entasis/grid` — Grid (/components/grid)
+- `entasis/grid` — Grid span (/components/grid-span)
+- `entasis/heading` — Heading (/components/heading)
+- `entasis/resizable` — Resizable (/components/resizable)
+- `entasis/scroll-area` — Scroll area (/components/scroll-area)
+- `entasis/separator` — Separator (/components/separator)
+- `entasis/stack` — Stack (/components/stack)
 
 ### Shells
 
-- `svelai/app-shell` — App shell (/components/app-shell)
-- `svelai/page-shell` — Page shell (/components/page-shell)
-- `svelai/sidebar` — Sidebar (/components/sidebar)
+- `entasis/app-shell` — App shell (/components/app-shell)
+- `entasis/page-shell` — Page shell (/components/page-shell)
+- `entasis/sidebar` — Sidebar (/components/sidebar)
 
 ### Actions
 
-- `svelai/button` — Button (/components/button)
-- `svelai/button-group` — Button group (/components/button-group)
-- `svelai/segmented-control` — Segmented control (/components/segmented-control)
-- `svelai/toggle-button` — Toggle button (/components/toggle-button)
-- `svelai/toggle-button-group` — Toggle group (/components/toggle-button-group)
-- `svelai/toggle-menu` — Toggle menu (/components/toggle-menu)
-- `svelai/selection-menu` — Selection menu (/components/selection-menu)
+- `entasis/button` — Button (/components/button)
+- `entasis/button-group` — Button group (/components/button-group)
+- `entasis/segmented-control` — Segmented control (/components/segmented-control)
+- `entasis/toggle-button` — Toggle button (/components/toggle-button)
+- `entasis/toggle-button-group` — Toggle group (/components/toggle-button-group)
+- `entasis/toggle-menu` — Toggle menu (/components/toggle-menu)
+- `entasis/selection-menu` — Selection menu (/components/selection-menu)
 
 ### Forms
 
-- `svelai/calendar` — Calendar (/components/calendar)
-- `svelai/checkbox` — Checkbox (/components/checkbox)
-- `svelai/checkboxes-input` — Checkboxes (/components/checkboxes)
-- `svelai/color-input` — Color input (/components/color-input)
-- `svelai/color-picker` — Color picker (/components/color-picker)
-- `svelai/combobox` — Combobox (/components/combobox)
-- `svelai/date-input` — Date input (/components/date-input)
-- `svelai/date-selector` — Date selector (/components/date-selector)
-- `svelai/file-input` — File (/components/file)
-- `svelai/form` — Form (/components/form)
-- `svelai/key-value-input` — Key value input (/components/key-value-input)
-- `svelai/multi-step-form` — Multi-step form (/components/multi-step-form)
-- `svelai/number-input` — Number input (/components/number-input)
-- `svelai/password-input` — Password (/components/password)
-- `svelai/phone-input` — Phone (/components/phone)
-- `svelai/pin-input` — Pin input (/components/pin-input)
-- `svelai/radio-input` — Radios (/components/radios)
-- `svelai/rating-input` — Rating input (/components/rating-input)
-- `svelai/rich-text-input` — Rich text input (/components/rich-text-input)
-- `svelai/select` — Select (/components/select)
-- `svelai/slider` — Slider (/components/slider)
-- `svelai/switch` — Switch (/components/switch)
-- `svelai/tag-group` — Tag group (/components/tag-group)
-- `svelai/tags-input` — Tags input (/components/tags-input)
-- `svelai/text-input` — Text input (/components/textinput)
-- `svelai/text-area` — Textarea (/components/textarea)
-- `svelai/time-input` — Time input (/components/time-input)
-- `svelai/voice-input` — Voice input (/components/voice-input)
+- `entasis/calendar` — Calendar (/components/calendar)
+- `entasis/checkbox` — Checkbox (/components/checkbox)
+- `entasis/checkboxes-input` — Checkboxes (/components/checkboxes)
+- `entasis/color-input` — Color input (/components/color-input)
+- `entasis/color-picker` — Color picker (/components/color-picker)
+- `entasis/combobox` — Combobox (/components/combobox)
+- `entasis/date-input` — Date input (/components/date-input)
+- `entasis/date-selector` — Date selector (/components/date-selector)
+- `entasis/file-input` — File (/components/file)
+- `entasis/form` — Form (/components/form)
+- `entasis/key-value-input` — Key value input (/components/key-value-input)
+- `entasis/multi-step-form` — Multi-step form (/components/multi-step-form)
+- `entasis/number-input` — Number input (/components/number-input)
+- `entasis/password-input` — Password (/components/password)
+- `entasis/phone-input` — Phone (/components/phone)
+- `entasis/pin-input` — Pin input (/components/pin-input)
+- `entasis/radio-input` — Radios (/components/radios)
+- `entasis/rating-input` — Rating input (/components/rating-input)
+- `entasis/rich-text-input` — Rich text input (/components/rich-text-input)
+- `entasis/select` — Select (/components/select)
+- `entasis/slider` — Slider (/components/slider)
+- `entasis/switch` — Switch (/components/switch)
+- `entasis/tag-group` — Tag group (/components/tag-group)
+- `entasis/tags-input` — Tags input (/components/tags-input)
+- `entasis/text-input` — Text input (/components/textinput)
+- `entasis/text-area` — Textarea (/components/textarea)
+- `entasis/time-input` — Time input (/components/time-input)
+- `entasis/voice-input` — Voice input (/components/voice-input)
 
 ### Data display
 
-- `svelai/avatar` — Avatar (/components/avatar)
-- `svelai/avatar` — Avatar group (/components/avatar-group)
-- `svelai/chart` — Chart (/components/chart)
-- `svelai/chip` — Chip (/components/chip)
-- `svelai/event-calendar` — Event calendar (/components/event-calendar)
-- `svelai/gantt-chart` — Gantt chart (/components/gantt-chart)
-- `svelai/kanban` — Kanban (/components/kanban)
-- `svelai/kbd` — Kbd (/components/kbd)
-- `svelai/metadata-list` — Metadata list (/components/metadata-list)
-- `svelai/mini-calendar` — Mini calendar (/components/mini-calendar)
-- `svelai/rating` — Rating (/components/rating)
-- `svelai/sortable-list` — Sortable list (/components/sortable-list)
-- `svelai/stat` — Stat (/components/stat)
-- `svelai/table` — Table (/components/table)
-- `svelai/data-table` — Data table (/components/data-table)
-- `svelai/timeline` — Timeline (/components/timeline)
-- `svelai/tree` — Tree (/components/tree)
+- `entasis/avatar` — Avatar (/components/avatar)
+- `entasis/avatar` — Avatar group (/components/avatar-group)
+- `entasis/chart` — Chart (/components/chart)
+- `entasis/chip` — Chip (/components/chip)
+- `entasis/event-calendar` — Event calendar (/components/event-calendar)
+- `entasis/gantt-chart` — Gantt chart (/components/gantt-chart)
+- `entasis/kanban` — Kanban (/components/kanban)
+- `entasis/kbd` — Kbd (/components/kbd)
+- `entasis/metadata-list` — Metadata list (/components/metadata-list)
+- `entasis/mini-calendar` — Mini calendar (/components/mini-calendar)
+- `entasis/rating` — Rating (/components/rating)
+- `entasis/sortable-list` — Sortable list (/components/sortable-list)
+- `entasis/stat` — Stat (/components/stat)
+- `entasis/table` — Table (/components/table)
+- `entasis/data-table` — Data table (/components/data-table)
+- `entasis/timeline` — Timeline (/components/timeline)
+- `entasis/tree` — Tree (/components/tree)
 
 ### Feedback
 
-- `svelai/alert` — Alert (/components/alert)
-- `svelai/confirmation` — Confirmation (/components/confirmation)
-- `svelai/empty` — Empty (/components/empty)
-- `svelai/meter` — Meter (/components/meter)
-- `svelai/network-indicator` — Network indicator (/components/network-indicator)
-- `svelai/progress-circle` — Progress circle (/components/progress-circle)
-- `svelai/skeleton` — Skeleton (/components/skeleton)
-- `svelai/spinner` — Spinner (/components/spinner)
-- `svelai/spinner-text` — Spinner text (/components/spinner-text)
-- `svelai/toast` — Toast (/components/toast)
+- `entasis/alert` — Alert (/components/alert)
+- `entasis/confirmation` — Confirmation (/components/confirmation)
+- `entasis/empty` — Empty (/components/empty)
+- `entasis/meter` — Meter (/components/meter)
+- `entasis/network-indicator` — Network indicator (/components/network-indicator)
+- `entasis/progress-circle` — Progress circle (/components/progress-circle)
+- `entasis/skeleton` — Skeleton (/components/skeleton)
+- `entasis/spinner` — Spinner (/components/spinner)
+- `entasis/spinner-text` — Spinner text (/components/spinner-text)
+- `entasis/toast` — Toast (/components/toast)
 
 ### Disclosure
 
-- `svelai/accordion` — Accordion (/components/accordion)
-- `svelai/collapsible` — Collapsible (/components/collapsible)
+- `entasis/accordion` — Accordion (/components/accordion)
+- `entasis/collapsible` — Collapsible (/components/collapsible)
 
 ### Navigation
 
-- `svelai/breadcrumbs` — Breadcrumbs (/components/breadcrumbs)
-- `svelai/command` — Command (/components/command)
-- `svelai/pagination` — Pagination (/components/pagination)
-- `svelai/stepper` — Stepper (/components/stepper)
-- `svelai/tabbar` — Tabbar (/components/tabbar)
-- `svelai/table-of-contents` — Table of contents (/components/table-of-contents)
-- `svelai/tabs` — Tabs (/components/tabs)
+- `entasis/breadcrumbs` — Breadcrumbs (/components/breadcrumbs)
+- `entasis/command` — Command (/components/command)
+- `entasis/pagination` — Pagination (/components/pagination)
+- `entasis/stepper` — Stepper (/components/stepper)
+- `entasis/tabbar` — Tabbar (/components/tabbar)
+- `entasis/table-of-contents` — Table of contents (/components/table-of-contents)
+- `entasis/tabs` — Tabs (/components/tabs)
 
 ### Menus
 
-- `svelai/context-menu` — Context menu (/components/context-menu)
-- `svelai/menu` — Menu (/components/menu)
-- `svelai/menu-bar` — Menu bar (/components/menu-bar)
-- `svelai/menu-option` — Menu option (/components/menu-option)
-- `svelai/popup-menu` — Popup menu (/components/popup-menu)
+- `entasis/context-menu` — Context menu (/components/context-menu)
+- `entasis/menu` — Menu (/components/menu)
+- `entasis/menu-bar` — Menu bar (/components/menu-bar)
+- `entasis/menu-option` — Menu option (/components/menu-option)
+- `entasis/popup-menu` — Popup menu (/components/popup-menu)
 
 ### Overlays
 
-- `svelai/dialog` — Dialog (/components/dialog)
-- `svelai/floating-window` — Floating window (/components/floating-window)
-- `svelai/hover-card` — Hover card (/components/hover-card)
-- `svelai/link-preview` — Link preview (/components/link-preview)
-- `svelai/overlay` — Overlay (/components/overlay)
-- `svelai/popover` — Popover (/components/popover)
-- `svelai/tooltip` — Tooltip (/components/tooltip)
+- `entasis/dialog` — Dialog (/components/dialog)
+- `entasis/floating-window` — Floating window (/components/floating-window)
+- `entasis/hover-card` — Hover card (/components/hover-card)
+- `entasis/link-preview` — Link preview (/components/link-preview)
+- `entasis/overlay` — Overlay (/components/overlay)
+- `entasis/popover` — Popover (/components/popover)
+- `entasis/tooltip` — Tooltip (/components/tooltip)
 
 ### Media
 
-- `svelai/audio-player` — Audio player (/components/audio-player)
-- `svelai/carousel` — Carousel (/components/carousel)
-- `svelai/image-gallery` — Image gallery (/components/image-gallery)
-- `svelai/image-zoom` — Image zoom (/components/image-zoom)
-- `svelai/media-volume` — Media volume (/components/media-volume)
-- `svelai/document-viewer` — Document viewer (/components/document-viewer)
-- `svelai/video-player` — Video player (/components/video-player)
+- `entasis/audio-player` — Audio player (/components/audio-player)
+- `entasis/carousel` — Carousel (/components/carousel)
+- `entasis/image-gallery` — Image gallery (/components/image-gallery)
+- `entasis/image-zoom` — Image zoom (/components/image-zoom)
+- `entasis/media-volume` — Media volume (/components/media-volume)
+- `entasis/document-viewer` — Document viewer (/components/document-viewer)
+- `entasis/video-player` — Video player (/components/video-player)
 
 ### Content & graphics
 
-- `svelai/code` — Code (/components/code)
-- `svelai/diff` — Diff (/components/diff)
-- `svelai/globe` — Globe (/components/globe)
-- `svelai/map` — Map (/components/map)
-- `svelai/markdown` — Markdown (/components/markdown)
-- `svelai/marquee` — Marquee (/components/marquee)
-- `svelai/mermaid` — Mermaid (/components/mermaid)
-- `svelai/qr-code` — QR code (/components/qr-code)
+- `entasis/code` — Code (/components/code)
+- `entasis/diff` — Diff (/components/diff)
+- `entasis/globe` — Globe (/components/globe)
+- `entasis/map` — Map (/components/map)
+- `entasis/markdown` — Markdown (/components/markdown)
+- `entasis/marquee` — Marquee (/components/marquee)
+- `entasis/mermaid` — Mermaid (/components/mermaid)
+- `entasis/qr-code` — QR code (/components/qr-code)
 
 ### Utilities
 
-- `svelai/hitbox` — Hitbox (/utilities/hitbox)
+- `entasis/hitbox` — Hitbox (/utilities/hitbox)
 
 ### Utilities and entrypoints
 
-- `svelai/package.json` — package-metadata
-- `svelai/ai-file-preview` — svelte, component, ai
-- `svelai/ask` — svelte, component, forms
-- `svelai/field` — svelte, component, forms
-- `svelai/slot` — svelte, component, utilities
-- `svelai/theme` — svelte, component, configuration
-- `svelai/i18n` — svelte, localization
-- `svelai/tailwind-plugin` — tailwind, theme-configuration
-- `svelai/tailwind-plugin/theme` — tailwind, theme-configuration, color-palettes
-- `svelai/types` — typescript, utility
-- `svelai/cva` — styling, utility
-- `svelai/scheduling` — scheduling, utility
-- `svelai/icons/*` — icons, snippet, wildcard-export
-- `svelai/spinner-overlay` — attachment, feedback
+- `entasis/package.json` — package-metadata
+- `entasis/ai-file-preview` — svelte, component, ai
+- `entasis/ask` — svelte, component, forms
+- `entasis/field` — svelte, component, forms
+- `entasis/slot` — svelte, component, utilities
+- `entasis/theme` — svelte, component, configuration
+- `entasis/i18n` — svelte, localization
+- `entasis/tailwind-plugin` — tailwind, theme-configuration
+- `entasis/tailwind-plugin/theme` — tailwind, theme-configuration, color-palettes
+- `entasis/types` — typescript, utility
+- `entasis/cva` — styling, utility
+- `entasis/scheduling` — scheduling, utility
+- `entasis/icons/*` — icons, snippet, wildcard-export
+- `entasis/spinner-overlay` — attachment, feedback
 
 <!-- component-contract:inventory:end -->

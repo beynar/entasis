@@ -126,7 +126,7 @@
 		code={`<AudioPlayer
 	src="${sampleAudio}"
 	title="Field recording"
-	artist="Svelai archives"
+	artist="Entasis archives"
 	size="${controls.value.size}"
 	variant="${controls.value.variant}"
 	layout="${controls.value.layout}"
@@ -137,7 +137,7 @@
 		<AudioPlayer
 			src={sampleAudio}
 			title="Field recording"
-			artist="Svelai archives"
+			artist="Entasis archives"
 			size={controls.value.size}
 			variant={controls.value.variant}
 			layout={controls.value.layout}

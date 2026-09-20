@@ -104,9 +104,9 @@ The Chip component is a compact element for displaying tags, labels, categories,
 ### With Icons
 \`\`\`svelte
 <script lang="ts">
-	import { Chip } from 'svelai/chip';
-	import { tagIcon } from 'svelai/icons/tag';
-	import { xIcon } from 'svelai/icons/x';
+	import { Chip } from 'entasis/chip';
+	import { tagIcon } from 'entasis/icons/tag';
+	import { xIcon } from 'entasis/icons/x';
 </script>
 
 <Chip>
@@ -140,8 +140,8 @@ The Chip component is a compact element for displaying tags, labels, categories,
 ### Removable Chip
 \`\`\`svelte
 <script lang="ts">
-	import { Chip } from 'svelai/chip';
-	import { xIcon } from 'svelai/icons/x';
+	import { Chip } from 'entasis/chip';
+	import { xIcon } from 'entasis/icons/x';
 
 	let tags = $state(['React', 'Vue', 'Svelte']);
 
@@ -250,7 +250,7 @@ The theme object contains the following parts:
 ### Theme Type Definition
 
 \`\`\`typescript
-import type { ChipThemeProps } from 'svelai/chip';
+import type { ChipThemeProps } from 'entasis/chip';
 
 // Example theme customization
 const customTheme: ChipThemeProps = {
@@ -352,7 +352,7 @@ const customTheme: ChipThemeProps = {
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setChipTheme } from 'svelai/chip';
+  import { setChipTheme } from 'entasis/chip';
   
   setChipTheme({
     root: {

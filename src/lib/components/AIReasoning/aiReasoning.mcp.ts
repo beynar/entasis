@@ -1,13 +1,13 @@
 export const aiReasoningDescription = `
 # AIReasoning
 
-AIReasoning renders an AI reasoning trace in the Svelai Collapsible primitive. It opens when a stream starts, measures elapsed time in seconds, and closes shortly after the first streamed completion.
+AIReasoning renders an AI reasoning trace in the Entasis Collapsible primitive. It opens when a stream starts, measures elapsed time in seconds, and closes shortly after the first streamed completion.
 
 ## Import
 
 \`\`\`svelte
 <script lang="ts">
-	import { AIReasoning } from 'svelai/ai-reasoning';
+	import { AIReasoning } from 'entasis/ai-reasoning';
 </script>
 \`\`\`
 

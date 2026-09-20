@@ -7,12 +7,12 @@ HoverCard previews supplemental content when a trigger is hovered or focused. It
 
 \`\`\`svelte
 <script lang="ts">
-	import { HoverCard } from 'svelai/hover-card';
+	import { HoverCard } from 'entasis/hover-card';
 </script>
 
 <HoverCard
-	trigger={{ content: 'Hover @svelai', variant: 'link' }}
-	title="@svelai"
+	trigger={{ content: 'Hover @entasis', variant: 'link' }}
+	title="@entasis"
 	description="Composable Svelte UI components."
 >
 	<p>Preview content shown on hover or focus.</p>
@@ -25,7 +25,7 @@ HoverCard previews supplemental content when a trigger is hovered or focused. It
 - **id**: string - Stable id for the underlying popover root.
 - **open**: boolean - Bindable open state.
 - **defaultOpen**: boolean (default: false) - Initial state when open is not provided.
-- **trigger**: string | Snippet<[HoverCardPayload]> | ButtonProps - Trigger content. ButtonProps render a Svelai Button.
+- **trigger**: string | Snippet<[HoverCardPayload]> | ButtonProps - Trigger content. ButtonProps render a Entasis Button.
 - **children**: string | Snippet<[HoverCardPayload]> - Main card content.
 - **title**: string | Snippet<[HoverCardPayload]> - Card title slot.
 - **description**: string | Snippet<[HoverCardPayload]> - Card description slot.

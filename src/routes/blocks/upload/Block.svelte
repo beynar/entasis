@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { Alert } from 'svelai/alert';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { FileInput, type FileInputProps } from 'svelai/file-input';
-	import { Meter } from 'svelai/meter';
-	import { arrowCounterClockwiseIcon } from 'svelai/icons/arrowCounterClockwise';
-	import { checkCircleIcon } from 'svelai/icons/checkCircle';
-	import { fileIcon } from 'svelai/icons/file';
-	import { uploadSimpleIcon } from 'svelai/icons/uploadSimple';
+	import { Alert } from 'entasis/alert';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { FileInput, type FileInputProps } from 'entasis/file-input';
+	import { Meter } from 'entasis/meter';
+	import { arrowCounterClockwiseIcon } from 'entasis/icons/arrowCounterClockwise';
+	import { checkCircleIcon } from 'entasis/icons/checkCircle';
+	import { fileIcon } from 'entasis/icons/file';
+	import { uploadSimpleIcon } from 'entasis/icons/uploadSimple';
 
 	type UploadStatus = 'ready' | 'uploading' | 'success';
 

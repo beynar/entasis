@@ -121,7 +121,7 @@
 
 	/* Smooth the color transition when the theme flips, unless Theme has flagged
 	   reduced motion on <html> (OS setting or `reduceMotion` prop). */
-	:global(html:not([data-svelai-reduce-motion]) [data-slot='code'] .th-code span) {
+	:global(html:not([data-entasis-reduce-motion]) [data-slot='code'] .th-code span) {
 		transition: color 160ms ease;
 	}
 

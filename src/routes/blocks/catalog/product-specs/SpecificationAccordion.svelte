@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Accordion } from 'svelai/accordion';
-	import { Chip } from 'svelai/chip';
+	import { Heading } from 'entasis/heading';
+	import { Accordion } from 'entasis/accordion';
+	import { Chip } from 'entasis/chip';
 	const specifications = [
 		{
 			title: 'Dimensions & weight',

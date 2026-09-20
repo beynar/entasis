@@ -90,7 +90,7 @@ ${'</' + 'script>'}
 
 <DocPage
 	title="Video player"
-	subtitle="Native video playback with Svelai controls, settings, captions, fullscreen, Picture-in-Picture, and download."
+	subtitle="Native video playback with Entasis controls, settings, captions, fullscreen, Picture-in-Picture, and download."
 	component="VideoPlayer"
 	features={[
 		'Native video engine with source and track rendering',

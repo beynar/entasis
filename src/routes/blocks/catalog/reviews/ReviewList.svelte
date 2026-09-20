@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Rating } from 'svelai/rating';
-	import { Avatar } from 'svelai/avatar';
-	import { Chip } from 'svelai/chip';
+	import { Heading } from 'entasis/heading';
+	import { Rating } from 'entasis/rating';
+	import { Avatar } from 'entasis/avatar';
+	import { Chip } from 'entasis/chip';
 	const reviews = [
 		{
 			id: 1,

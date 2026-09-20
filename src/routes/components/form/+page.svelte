@@ -338,8 +338,8 @@ ${controls.value.showHeader ? '\ttitle="Profile"\n\tdescription="Update the prof
 	MultiStepForm,
 	type FormStep,
 	type MergedMultiStepFormInputs
-} from 'svelai/multi-step-form';
-import type { FormInputs, InferFormValue, LiveFormValue } from 'svelai/form';
+} from 'entasis/multi-step-form';
+import type { FormInputs, InferFormValue, LiveFormValue } from 'entasis/form';
 
 const accountInputs = {
 	name: { type: 'text', label: 'Name', required: true },
@@ -409,7 +409,7 @@ let submission = $state<InferFormValue<Inputs> | null>(null);
 		<ComponentCard
 			description="Mount one Ask host near the application root, then open a typed Form in a Dialog and await submission or cancellation. The host type sets the default Dialog presentation."
 			class="!items-start"
-			code={`import { Ask, ask } from 'svelai/form';
+			code={`import { Ask, ask } from 'entasis/form';
 
 const inputs = {
 	displayName: { type: 'text', label: 'Display name', required: true },

@@ -7,7 +7,7 @@ Expanded call/group IDs use bindable \`value\`, initial \`defaultValue\`, and \`
 
 \`\`\`svelte
 <script lang="ts">
-  import { AITool, type AIToolCall } from 'svelai/ai-tool';
+  import { AITool, type AIToolCall } from 'entasis/ai-tool';
 
   const tools: AIToolCall[] = [
     { id: 'search', name: 'search_docs', input: { query: 'Svelte' }, output: { count: 4 } },
@@ -19,7 +19,7 @@ Expanded call/group IDs use bindable \`value\`, initial \`defaultValue\`, and \`
 <AITool {tools} bind:value={open} multiple />
 \`\`\`
 
-Use \`icon\`, \`title\`, \`status\`, \`input\`, \`output\`, \`error\`, or \`content\` snippets with a \`{ tool, index }\` payload. Default value panels use the existing Svelai ScrollArea and are capped vertically while supporting both scroll axes.
+Use \`icon\`, \`title\`, \`status\`, \`input\`, \`output\`, \`error\`, or \`content\` snippets with a \`{ tool, index }\` payload. Default value panels use the existing Entasis ScrollArea and are capped vertically while supporting both scroll axes.
 
 Default status is represented by the semantic left indicator: a spinner for active calls and a dot for settled calls. Use the \`status\` snippet only when a visible custom status treatment is required.
 

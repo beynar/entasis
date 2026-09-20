@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Tabbar } from 'svelai/tabbar';
-	import { Table } from 'svelai/table';
+	import { Heading } from 'entasis/heading';
+	import { Tabbar } from 'entasis/tabbar';
+	import { Table } from 'entasis/table';
 	const tabs = ['Delivery', 'Collaboration'];
 	let active = $state(tabs[0]);
 	const rows = [

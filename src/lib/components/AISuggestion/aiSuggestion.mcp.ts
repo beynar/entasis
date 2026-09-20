@@ -10,7 +10,7 @@ Prompt suggestions rendered as a horizontal, scroll-faded button row.
 - Its \`suggestion\` snippet receives \`{ suggestion, selected, disabled, select }\` for composed item rendering.
 
 \`\`\`svelte
-<script>import { AISuggestions } from 'svelai/ai-suggestion';</script>
+<script>import { AISuggestions } from 'entasis/ai-suggestion';</script>
 <AISuggestions suggestions={['Summarize', 'Explain', 'Compare']} bind:value />
 \`\`\`
 

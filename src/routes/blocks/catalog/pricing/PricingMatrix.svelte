@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Heading } from 'svelai/heading';
-	import { Switch } from 'svelai/switch';
-	import { Table } from 'svelai/table';
+	import { Button } from 'entasis/button';
+	import { Heading } from 'entasis/heading';
+	import { Switch } from 'entasis/switch';
+	import { Table } from 'entasis/table';
 	let annual = $state(false);
 	const features = [
 		['Projects', 'Unlimited', 'Unlimited', 'Unlimited'],

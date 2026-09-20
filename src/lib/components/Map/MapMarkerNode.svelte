@@ -64,7 +64,7 @@
 		}
 
 		event.stopPropagation();
-		// svelai's Popover only auto-wires open-on-click for ButtonProps triggers, not
+		// entasis's Popover only auto-wires open-on-click for ButtonProps triggers, not
 		// snippet triggers, so we toggle the (bound) popup open state ourselves on click
 		// — mirroring the keyboard-activation path.
 		if (hasPopup) {

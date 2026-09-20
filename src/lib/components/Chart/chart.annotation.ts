@@ -196,7 +196,7 @@ function pointContainsTargetRow<TRow extends object>(
 ): boolean {
 	if (targetRows.includes(point.datum as TRow)) return true;
 	if (typeof point.datum !== 'object' || point.datum === null) return false;
-	const sourceRows = Reflect.get(point.datum, '__svelaiSourceRows');
+	const sourceRows = Reflect.get(point.datum, '__entasisSourceRows');
 	return Array.isArray(sourceRows) && targetRows.some((row) => sourceRows.includes(row));
 }
 

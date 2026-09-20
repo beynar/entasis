@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Heading } from 'svelai/heading';
-	import { checkCircleIcon } from 'svelai/icons/checkCircle';
-	import { minusCircleIcon } from 'svelai/icons/minusCircle';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Heading } from 'entasis/heading';
+	import { checkCircleIcon } from 'entasis/icons/checkCircle';
+	import { minusCircleIcon } from 'entasis/icons/minusCircle';
 </script>
 
 <section class="gap-xl p-lg md:p-xl flex flex-col">

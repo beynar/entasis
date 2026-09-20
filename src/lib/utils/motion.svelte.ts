@@ -7,7 +7,7 @@ export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
 /**
  * Attribute Theme toggles on `<html>` while motion should be reduced, so CSS-only
- * animations can key off it (`html[data-svelai-reduce-motion] ...`) and honour the
+ * animations can key off it (`html[data-entasis-reduce-motion] ...`) and honour the
  * Theme `reduceMotion` override, not just the OS setting. Declared in `$lib/tailwind/scales`
  * so the Tailwind motion engine can zero the `--duration-*` scale under the same attribute.
  */

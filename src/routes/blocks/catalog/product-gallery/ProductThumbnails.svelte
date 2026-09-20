@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
+	import { Heading } from 'entasis/heading';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
 
 	const finishes = ['Clay', 'Sand', 'Olive', 'Chalk'];
 	let selected = $state(0);

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { appleLogoIcon } from 'svelai/icons/appleLogo';
-	import { downloadSimpleIcon } from 'svelai/icons/downloadSimple';
-	import { terminalWindowIcon } from 'svelai/icons/terminalWindow';
-	import { windowsLogoIcon } from 'svelai/icons/windowsLogo';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { appleLogoIcon } from 'entasis/icons/appleLogo';
+	import { downloadSimpleIcon } from 'entasis/icons/downloadSimple';
+	import { terminalWindowIcon } from 'entasis/icons/terminalWindow';
+	import { windowsLogoIcon } from 'entasis/icons/windowsLogo';
 	const platforms = [
 		{
 			name: 'macOS',
@@ -14,7 +14,7 @@
 			icon: appleLogoIcon,
 			file: 'macos-setup.txt',
 			notes:
-				'SVELAI ON MACOS\n\nOpen your Svelte project in Terminal.\nInstall the library: npm install svelai\nFollow the project documentation for theme configuration.\n'
+				'ENTASIS ON MACOS\n\nOpen your Svelte project in Terminal.\nInstall the library: npm install entasis\nFollow the project documentation for theme configuration.\n'
 		},
 		{
 			name: 'Windows',
@@ -22,15 +22,15 @@
 			icon: windowsLogoIcon,
 			file: 'windows-setup.txt',
 			notes:
-				'SVELAI ON WINDOWS\n\nOpen your Svelte project in PowerShell.\nInstall the library: npm install svelai\nFollow the project documentation for theme configuration.\n'
+				'ENTASIS ON WINDOWS\n\nOpen your Svelte project in PowerShell.\nInstall the library: npm install entasis\nFollow the project documentation for theme configuration.\n'
 		},
 		{
 			name: 'Linux',
-			description: 'Bring Svelai into your preferred environment.',
+			description: 'Bring Entasis into your preferred environment.',
 			icon: terminalWindowIcon,
 			file: 'linux-setup.txt',
 			notes:
-				'SVELAI ON LINUX\n\nOpen your Svelte project in your shell.\nInstall the library: npm install svelai\nFollow the project documentation for theme configuration.\n'
+				'ENTASIS ON LINUX\n\nOpen your Svelte project in your shell.\nInstall the library: npm install entasis\nFollow the project documentation for theme configuration.\n'
 		}
 	];
 </script>

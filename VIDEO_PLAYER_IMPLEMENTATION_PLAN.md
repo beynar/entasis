@@ -2,7 +2,7 @@
 
 ## Goal
 
-Build a first-class Svelai `VideoPlayer` component that wraps native HTML5 video playback with a fully propsified control surface composed from existing Svelai primitives where they fit: `Button`, `SliderState`/slider track primitives, `Popover`, `PopupMenu`, `Menu`, `MenuOption`, `AspectRatio`, and theme CVA parts.
+Build a first-class Entasis `VideoPlayer` component that wraps native HTML5 video playback with a fully propsified control surface composed from existing Entasis primitives where they fit: `Button`, `SliderState`/slider track primitives, `Popover`, `PopupMenu`, `Menu`, `MenuOption`, `AspectRatio`, and theme CVA parts.
 
 ## Research Notes
 
@@ -10,11 +10,11 @@ Build a first-class Svelai `VideoPlayer` component that wraps native HTML5 video
 - Dice UI’s shadcn-adjacent `Media Player` is the closest complete reference. Its useful patterns are compound controls, data attributes for state, loading/error surfaces, controls visibility, seek/volume sliders, settings menu, playback speed, loop, captions, PiP, fullscreen, and download controls: <https://diceui.com/docs/components/base/media-player>.
 - Shadix UI’s `Video Player` is a simpler shadcn registry component focused on `src`, progress, volume, and fullscreen: <https://shadix-ui.vercel.app/docs/components/video-player>.
 - Creative Tim’s shadcn video examples stay close to native `<video>` and mostly demonstrate `controls`, `autoplay`, `loop`, and `muted`: <https://www.creative-tim.com/ui/docs/components/video>.
-- Limeplay-style players add Shaka/HLS/DASH/DRM engines. That is outside the first Svelai component; the initial component should stay dependency-free and expose slots/props for future engine integration: <https://allshadcn.com/tools/limeplay/>.
+- Limeplay-style players add Shaka/HLS/DASH/DRM engines. That is outside the first Entasis component; the initial component should stay dependency-free and expose slots/props for future engine integration: <https://allshadcn.com/tools/limeplay/>.
 
 ## Local Constraints
 
-- Svelai components expose `index.ts`, `*.props.ts`, `*.theme.ts`, optional `*.state.svelte.ts`, `*.mcp.ts`, and a docs route under `src/routes/components/<component>/+page.svelte`.
+- Entasis components expose `index.ts`, `*.props.ts`, `*.theme.ts`, optional `*.state.svelte.ts`, `*.mcp.ts`, and a docs route under `src/routes/components/<component>/+page.svelte`.
 - Theme parts use `cva`, `setComponentTheme`, `useComponentTheme`, and `InferComponentTheme`.
 - `Button`, `Popover`, `PopupMenu`, `Menu`, `MenuOption`, `AspectRatio`, and icon snippets are directly reusable.
 - `Slider` itself is currently a Form field. For media controls we should reuse the exported `SliderState` and internal track pattern, or build a small VideoPlayer slider subcomponent that uses the same state/theme conventions without introducing `Field` wrappers.

@@ -21,8 +21,8 @@ export type NormalizedDistributionVariant =
 	NormalizedSummaryDistributionVariant | NormalizedEmpiricalDistributionVariant;
 
 export type DistributionSummary = {
-	readonly __svelaiDistribution: true;
-	readonly __svelaiSourceRows: readonly object[];
+	readonly __entasisDistribution: true;
+	readonly __entasisSourceRows: readonly object[];
 	readonly identity: string;
 	readonly group: ChartKey;
 	readonly count: number;
@@ -101,7 +101,7 @@ export function isDistributionSummary(value: unknown): value is DistributionSumm
 	return (
 		typeof value === 'object' &&
 		value !== null &&
-		Reflect.get(value, '__svelaiDistribution') === true
+		Reflect.get(value, '__entasisDistribution') === true
 	);
 }
 
@@ -219,8 +219,8 @@ function summarizeDistribution<TRow extends object>(
 		}
 		const range = distributionRange(values, q1, q3, average, variant);
 		return {
-			__svelaiDistribution: true,
-			__svelaiSourceRows: entry.rows,
+			__entasisDistribution: true,
+			__entasisSourceRows: entry.rows,
 			identity,
 			group: entry.group,
 			count: values.length,

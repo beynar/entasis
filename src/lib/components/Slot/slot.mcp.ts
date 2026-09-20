@@ -73,7 +73,7 @@ The Slot type accepts:
 ### In Component Props
 \`\`\`svelte
 <script lang="ts">
-	import { Slot, type SlotContent } from 'svelai/slot';
+	import { Slot, type SlotContent } from 'entasis/slot';
 
 	let { title, description }: { title: SlotContent; description: SlotContent } = $props();
 </script>

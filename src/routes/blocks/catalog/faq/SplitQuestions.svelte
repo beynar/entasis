@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Accordion } from 'svelai/accordion';
-	import { AvatarGroup } from 'svelai/avatar';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
+	import { Stack } from 'entasis/stack';
+	import { Accordion } from 'entasis/accordion';
+	import { AvatarGroup } from 'entasis/avatar';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
 	const questions = [
 		{
 			id: 'scope',

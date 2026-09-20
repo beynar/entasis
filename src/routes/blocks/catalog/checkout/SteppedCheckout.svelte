@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Chip } from 'svelai/chip';
-	import { Button } from 'svelai/button';
-	import { Form } from 'svelai/form';
-	import { Meter } from 'svelai/meter';
-	import { Card } from 'svelai/card';
+	import { Heading } from 'entasis/heading';
+	import { Chip } from 'entasis/chip';
+	import { Button } from 'entasis/button';
+	import { Form } from 'entasis/form';
+	import { Meter } from 'entasis/meter';
+	import { Card } from 'entasis/card';
 
 	let step = $state(0);
 	let furthest = $state(0);

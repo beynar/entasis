@@ -9,7 +9,7 @@ LightGallery provides origin zoom, swipe navigation, thumbnails, pinch zoom, and
 
 \`\`\`svelte
 <script>
-	import { ImageGallery } from 'svelai/image-gallery';
+	import { ImageGallery } from 'entasis/image-gallery';
 </script>
 
 <ImageGallery>

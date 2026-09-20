@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Separator } from 'svelai/separator';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Separator } from 'entasis/separator';
 	const year = new Date().getFullYear();
 	const columns = [
 		{
@@ -38,7 +38,7 @@
 			<p class="text-neutral/70 max-w-xs text-sm">
 				Thoughtful tools for the people building what comes next.
 			</p>
-			<Chip size="small" variant="outline">Made with Svelai</Chip>
+			<Chip size="small" variant="outline">Made with Entasis</Chip>
 		</div>
 		{#each columns as column (column.title)}<nav
 				aria-label={column.title + ' footer links'}

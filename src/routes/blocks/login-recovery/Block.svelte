@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Heading } from 'svelai/heading';
-	import { PasswordInput } from 'svelai/password-input';
-	import { Stack } from 'svelai/stack';
-	import { TextInput } from 'svelai/text-input';
-	import { arrowLeftIcon } from 'svelai/icons/arrowLeft';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	import { checkCircleIcon } from 'svelai/icons/checkCircle';
-	import { envelopeIcon } from 'svelai/icons/envelope';
-	import { lockSimpleIcon } from 'svelai/icons/lockSimple';
-	import { shieldCheckIcon } from 'svelai/icons/shieldCheck';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Heading } from 'entasis/heading';
+	import { PasswordInput } from 'entasis/password-input';
+	import { Stack } from 'entasis/stack';
+	import { TextInput } from 'entasis/text-input';
+	import { arrowLeftIcon } from 'entasis/icons/arrowLeft';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
+	import { checkCircleIcon } from 'entasis/icons/checkCircle';
+	import { envelopeIcon } from 'entasis/icons/envelope';
+	import { lockSimpleIcon } from 'entasis/icons/lockSimple';
+	import { shieldCheckIcon } from 'entasis/icons/shieldCheck';
 
 	type View = 'login' | 'recovery' | 'sent';
 

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { lightningIcon } from 'svelai/icons/lightning';
-	import { puzzlePieceIcon } from 'svelai/icons/puzzlePiece';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { lightningIcon } from 'entasis/icons/lightning';
+	import { puzzlePieceIcon } from 'entasis/icons/puzzlePiece';
 </script>
 
 <section class="gap-lg p-lg md:p-xl grid md:grid-cols-2">

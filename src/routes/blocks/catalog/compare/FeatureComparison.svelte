@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Table } from 'svelai/table';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Table } from 'entasis/table';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
 	const features = [
 		['A common design language', 'Included', 'Define and maintain'],
 		['Accessible interaction patterns', 'Shared primitives', 'Build for each control'],

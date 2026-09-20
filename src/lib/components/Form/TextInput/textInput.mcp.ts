@@ -111,7 +111,7 @@ Extends all Field component props plus:
 ### With Prefix Icon
 \`\`\`svelte
 <script lang="ts">
-	import { magnifyingGlassIcon } from 'svelai/icons/magnifyingGlass';
+	import { magnifyingGlassIcon } from 'entasis/icons/magnifyingGlass';
 
 	let search = $state('');
 </script>
@@ -126,7 +126,7 @@ Extends all Field component props plus:
 ### With Suffix Button
 \`\`\`svelte
 <script lang="ts">
-	import { copyIcon } from 'svelai/icons/copy';
+	import { copyIcon } from 'entasis/icons/copy';
 
 	let apiKey = $state('');
 	const copyToClipboard = () => navigator.clipboard.writeText(apiKey);
@@ -144,7 +144,7 @@ Extends all Field component props plus:
 ### With Both Prefix and Suffix
 \`\`\`svelte
 <script lang="ts">
-	import { arrowSquareOutIcon } from 'svelai/icons/arrowSquareOut';
+	import { arrowSquareOutIcon } from 'entasis/icons/arrowSquareOut';
 
 	let url = $state('');
 </script>
@@ -187,8 +187,8 @@ Extends all Field component props plus:
 ### Login Form
 \`\`\`svelte
 <script lang="ts">
-	import { envelopeIcon } from 'svelai/icons/envelope';
-	import { lockIcon } from 'svelai/icons/lock';
+	import { envelopeIcon } from 'entasis/icons/envelope';
+	import { lockIcon } from 'entasis/icons/lock';
 
 	let email = $state('');
 	let password = $state('');
@@ -314,7 +314,7 @@ current role, so it never hard-pins a color.
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setTextInputTheme } from 'svelai/text-input';
+  import { setTextInputTheme } from 'entasis/text-input';
   
   setTextInputTheme({
     inputContainer: {

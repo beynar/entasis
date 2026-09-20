@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Avatar } from 'svelai/avatar';
-	import { Chip } from 'svelai/chip';
-	import { Rating } from 'svelai/rating';
+	import { Avatar } from 'entasis/avatar';
+	import { Chip } from 'entasis/chip';
+	import { Rating } from 'entasis/rating';
 </script>
 
 <section class="gap-xl p-xl mx-auto flex max-w-4xl flex-col items-center text-center">

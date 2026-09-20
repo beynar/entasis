@@ -274,22 +274,20 @@
 		}
 	});
 	const a11y = calendar.a11y;
-	const dragPreviewDateTimeFormatter = $derived(
-		getCachedDateTimeFormatter(calendar.locale, calendar.timeZone, {
+	const dragPreviewFormatters = $derived({
+		dateTime: getCachedDateTimeFormatter(calendar.locale, calendar.timeZone, {
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric',
 			hour: 'numeric',
 			minute: '2-digit'
-		})
-	);
-	const dragPreviewDateFormatter = $derived(
-		getCachedDateTimeFormatter(calendar.locale, calendar.timeZone, {
+		}),
+		date: getCachedDateTimeFormatter(calendar.locale, calendar.timeZone, {
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric'
 		})
-	);
+	});
 
 	export const next = calendar.next.bind(calendar);
 	export const previous = calendar.previous.bind(calendar);
@@ -420,6 +418,7 @@
 		disabled,
 		class: [scrollMode === 'page' ? 'overflow-visible' : 'overflow-hidden', className]
 	})}
+	{@attach calendar.interaction.slotDragHost()}
 	{@attach scrollMode === 'page' ? calendar.interaction.autoScroll('page') : null}
 >
 	{#if calendar.renderers.header !== false}
@@ -451,9 +450,6 @@
 				payload={previewPayload}
 			/>
 		</div>
-	{/if}
-	{#if calendar.interaction.proposal && calendar.interaction.gesture?.inputMode === 'pointer'}
-		{@const proposal = calendar.interaction.proposal}
 		{@const indicatorRect = calendar.interaction.getDropIndicatorRect()}
 		{@const eventColor =
 			calendar.interaction.gesture.kind !== 'slot-create'
@@ -505,14 +501,14 @@
 				data-event-calendar-part="drag-preview-date"
 				class="text-neutral/70 block text-[0.6875rem] leading-4 whitespace-nowrap tabular-nums"
 			>
-				{dragPreviewDateFormatter.formatRange(start, inclusiveEnd)}
+				{dragPreviewFormatters.date.formatRange(start, inclusiveEnd)}
 			</span>
 		{:else}
 			<span
 				data-event-calendar-part="drag-preview-time"
 				class="text-neutral/70 block text-[0.6875rem] leading-4 whitespace-nowrap tabular-nums"
 			>
-				{dragPreviewDateTimeFormatter.formatRange(proposal.item.start, proposal.item.end)}
+				{dragPreviewFormatters.dateTime.formatRange(proposal.item.start, proposal.item.end)}
 			</span>
 		{/if}
 	{/if}

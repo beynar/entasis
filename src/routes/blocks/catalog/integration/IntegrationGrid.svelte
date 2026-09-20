@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { calendarIcon } from 'svelai/icons/calendar';
-	import { chartBarIcon } from 'svelai/icons/chartBar';
-	import { chatCircleIcon } from 'svelai/icons/chatCircle';
-	import { cloudIcon } from 'svelai/icons/cloud';
-	import { fileTextIcon } from 'svelai/icons/fileText';
-	import { gitBranchIcon } from 'svelai/icons/gitBranch';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { calendarIcon } from 'entasis/icons/calendar';
+	import { chartBarIcon } from 'entasis/icons/chartBar';
+	import { chatCircleIcon } from 'entasis/icons/chatCircle';
+	import { cloudIcon } from 'entasis/icons/cloud';
+	import { fileTextIcon } from 'entasis/icons/fileText';
+	import { gitBranchIcon } from 'entasis/icons/gitBranch';
 	let selected = $state('');
 	const integrations = [
 		{

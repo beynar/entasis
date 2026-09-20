@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Card } from 'svelai/card';
-	import { Meter } from 'svelai/meter';
-	import { Stat } from 'svelai/stat';
+	import { Stack } from 'entasis/stack';
+	import { Card } from 'entasis/card';
+	import { Meter } from 'entasis/meter';
+	import { Stat } from 'entasis/stat';
 </script>
 
 <Stack as="section" gap="lg" class="p-md text-neutral sm:p-xl mx-auto w-full max-w-5xl">

@@ -9,63 +9,44 @@ import {
 	getCivilWeekday,
 	getHiddenWeekdays,
 	getZonedDay,
-	rangesIntersect,
 	startOfZonedDay,
-	type EventCalendarDateProfile
+	type EventCalendarDateProfile,
+	type EventCalendarDateProfileOptions
 } from './eventCalendar.date.js';
 import type { EventCalendarAllDayInsertion } from './eventCalendar.interactions.svelte.js';
 import type { EventCalendarItemIndex } from './eventCalendar.items.js';
 import type { EventCalendarLaneLayout } from './eventCalendar.layout.js';
-import type {
-	EventCalendarDateOnly,
-	EventCalendarSegment,
-	EventCalendarWeekday
-} from './eventCalendar.types.js';
+import type { EventCalendarDateOnly, EventCalendarWeekday } from './eventCalendar.types.js';
 
 const WEEKDAYS: readonly EventCalendarWeekday[] = [0, 1, 2, 3, 4, 5, 6];
 
-export type EventCalendarMonthRow = {
+type EventCalendarMonthRow = {
 	days: readonly EventCalendarDateOnly[];
 	leadingEmptyCells: number;
 	trailingEmptyCells: number;
 };
 
-export type EventCalendarMonthWeekSurface<TItemFields extends object> = EventCalendarMonthRow & {
-	foregroundSegments: readonly EventCalendarSegment<TItemFields>[];
-};
-
-export type EventCalendarMonthSurface<TItemFields extends object> = Readonly<{
-	hiddenWeekdays: ReadonlySet<EventCalendarWeekday>;
+export type EventCalendarMonthSurface = Readonly<{
 	renderDays: readonly EventCalendarDateOnly[];
 	columnCount: number;
 	weekdayHeaderDays: readonly EventCalendarDateOnly[];
-	firstDayColumn: number;
-	weeks: readonly EventCalendarMonthWeekSurface<TItemFields>[];
+	weeks: readonly EventCalendarMonthRow[];
 	visibleDaySet: ReadonlySet<EventCalendarDateOnly>;
 	currentStartDay: EventCalendarDateOnly;
 	currentEndDay: EventCalendarDateOnly;
-	todayDay: EventCalendarDateOnly | null;
 	enabledDays: ReadonlySet<EventCalendarDateOnly>;
 }>;
 
-export type EventCalendarMonthSurfaceOptions = Readonly<{
-	timeZone: string;
-	showWeekends: boolean;
-	weekendDays: readonly EventCalendarWeekday[];
-	weekStartsOn: EventCalendarWeekday;
-	disabled: boolean;
-	todayInstant: Date | null;
-}>;
+export type EventCalendarMonthSurfaceOptions = Pick<
+	EventCalendarDateProfileOptions,
+	'timeZone' | 'showWeekends' | 'weekendDays' | 'weekStartsOn'
+> & { disabled: boolean };
 
-export function createEventCalendarMonthSurface<TItemFields extends object>(
+export function createEventCalendarMonthSurface(
 	profile: EventCalendarDateProfile,
-	itemIndex: EventCalendarItemIndex<TItemFields>,
 	options: EventCalendarMonthSurfaceOptions
-): EventCalendarMonthSurface<TItemFields> {
-	const hiddenWeekdays = getHiddenWeekdays({
-		showWeekends: options.showWeekends,
-		weekendDays: options.weekendDays
-	});
+): EventCalendarMonthSurface {
+	const hiddenWeekdays = getHiddenWeekdays(options);
 	const renderDays = generateVisibleDays(
 		getZonedDay(profile.renderRange.start, options.timeZone),
 		getZonedDay(profile.renderRange.end, options.timeZone),
@@ -77,46 +58,31 @@ export function createEventCalendarMonthSurface<TItemFields extends object>(
 		options.weekStartsOn,
 		hiddenWeekdays
 	);
-	const firstRenderDay = renderDays[0];
-	const firstDayColumn = firstRenderDay
-		? Math.max(
-				0,
-				weekdayHeaderDays.findIndex(
-					(day) => getCivilWeekday(day) === getCivilWeekday(firstRenderDay)
-				)
-			)
-		: 0;
+	const firstDayColumn =
+		renderDays.length === 0
+			? 0
+			: weekdayHeaderDays.findIndex(
+					(day) => getCivilWeekday(day) === getCivilWeekday(renderDays[0])
+				);
 	const weekRows = buildMonthRows(renderDays, columnCount, firstDayColumn);
 	const visibleDaySet = new Set(profile.visibleDays);
 	const currentStartDay = getZonedDay(profile.currentRange.start, options.timeZone);
 	const currentEndDay = getZonedDay(profile.currentRange.end, options.timeZone);
-	const todayDay = options.todayInstant
-		? getZonedDay(options.todayInstant, options.timeZone)
-		: null;
-	const enabledDays = options.disabled
-		? new Set<EventCalendarDateOnly>()
-		: new Set(
-				renderDays.filter(
-					(day) =>
-						visibleDaySet.has(day) && !isDayOutsideActiveRange(day, profile, options.timeZone)
+	const enabledDays = new Set<EventCalendarDateOnly>(
+		options.disabled
+			? []
+			: renderDays.filter(
+					(day) => visibleDaySet.has(day) && isDayInActiveRange(day, profile, options.timeZone)
 				)
-			);
+	);
 	return {
-		hiddenWeekdays,
 		renderDays,
 		columnCount,
 		weekdayHeaderDays,
-		firstDayColumn,
-		weeks: weekRows.map((row) => ({
-			...row,
-			foregroundSegments: row.days.flatMap(
-				(day) => itemIndex.segmentsByDay.get(day)?.foreground ?? []
-			)
-		})),
+		weeks: weekRows,
 		visibleDaySet,
 		currentStartDay,
 		currentEndDay,
-		todayDay,
 		enabledDays
 	};
 }
@@ -134,22 +100,21 @@ export function getEventCalendarMonthAutoLaneSlots(
 	return Math.max(1, Math.floor((rowHeight - dayChrome) / itemHeight));
 }
 
-export type EventCalendarMonthWeekLayout<TItemFields extends object> =
-	EventCalendarMonthWeekSurface<TItemFields> & {
-		layout: EventCalendarLaneLayout<TItemFields>;
-		visibleLaneCount: number;
-		insertion: EventCalendarAllDayRowInsertion | null;
-		draggingOccurrenceKey: string | null;
-	};
+export type EventCalendarMonthWeekLayout<TItemFields extends object> = EventCalendarMonthRow & {
+	layout: EventCalendarLaneLayout<TItemFields>;
+	visibleLaneCount: number;
+	insertion: EventCalendarAllDayRowInsertion | null;
+};
 
 export function createEventCalendarMonthWeekLayout<TItemFields extends object>(
-	week: EventCalendarMonthWeekSurface<TItemFields>,
+	week: EventCalendarMonthRow,
+	itemIndex: EventCalendarItemIndex<TItemFields>,
 	insertion: EventCalendarAllDayInsertion | null,
 	maxItemsPerCell: number | 'auto',
 	autoLaneSlots: number
 ): EventCalendarMonthWeekLayout<TItemFields> {
 	const preview = createEventCalendarAllDayPreviewLayout(
-		week.foregroundSegments,
+		week.days.flatMap((day) => itemIndex.segmentsByDay.get(day)?.foreground ?? []),
 		week.days,
 		insertion
 	);
@@ -165,41 +130,21 @@ export function createEventCalendarMonthWeekLayout<TItemFields extends object>(
 				previewInsertion.lane,
 				...preview.layout.placements
 					.filter(
-						(placement) =>
-							placement.startIndex < previewInsertion.endIndex &&
-							previewInsertion.startIndex < placement.endIndex
+						({ startIndex, endIndex }) =>
+							startIndex < previewInsertion.endIndex && previewInsertion.startIndex < endIndex
 					)
-					.map((placement) => placement.lane)
+					.map(({ lane }) => lane)
 			) + 1
 		: 0;
 	const visibleLaneCount = Math.max(
 		baseVisibleLaneCount,
 		Math.min(baseVisibleLaneCount + 1, insertionLaneRequirement)
 	);
-	const layout =
-		week.leadingEmptyCells === 0
-			? preview.layout
-			: {
-					...preview.layout,
-					placements: preview.layout.placements.map((placement) => ({
-						...placement,
-						startIndex: placement.startIndex + week.leadingEmptyCells,
-						endIndex: placement.endIndex + week.leadingEmptyCells
-					}))
-				};
-	const shiftedInsertion = preview.insertion
-		? {
-				...preview.insertion,
-				startIndex: preview.insertion.startIndex + week.leadingEmptyCells,
-				endIndex: preview.insertion.endIndex + week.leadingEmptyCells
-			}
-		: null;
 	return {
 		...week,
-		layout,
+		layout: preview.layout,
 		visibleLaneCount,
-		insertion: shiftedInsertion,
-		draggingOccurrenceKey: preview.draggingOccurrenceKey
+		insertion: preview.insertion
 	};
 }
 
@@ -214,18 +159,16 @@ function buildMonthRows(
 	];
 	while (cells.length % columnCount !== 0) cells.push(null);
 
-	const rows: EventCalendarMonthRow[] = [];
-	for (let index = 0; index < cells.length; index += columnCount) {
-		const cellsInRow = cells.slice(index, index + columnCount);
+	return Array.from({ length: cells.length / columnCount }, (_, rowIndex) => {
+		const cellsInRow = cells.slice(rowIndex * columnCount, (rowIndex + 1) * columnCount);
 		const firstDayIndex = cellsInRow.findIndex((day) => day !== null);
 		const lastDayIndex = cellsInRow.findLastIndex((day) => day !== null);
-		rows.push({
+		return {
 			days: cellsInRow.filter((day): day is EventCalendarDateOnly => day !== null),
 			leadingEmptyCells: firstDayIndex < 0 ? columnCount : firstDayIndex,
 			trailingEmptyCells: lastDayIndex < 0 ? 0 : columnCount - lastDayIndex - 1
-		});
-	}
-	return rows;
+		};
+	});
 }
 
 function orderWeekdayHeaderDays(
@@ -235,23 +178,20 @@ function orderWeekdayHeaderDays(
 ): readonly EventCalendarDateOnly[] {
 	const daysByWeekday = new Map(days.map((day) => [getCivilWeekday(day), day]));
 	const weekStartIndex = WEEKDAYS.indexOf(weekStartsOn);
-	return Array.from(
-		{ length: 7 },
-		(_, offset) => WEEKDAYS[(weekStartIndex + offset) % WEEKDAYS.length]
-	)
+	return WEEKDAYS.slice(weekStartIndex)
+		.concat(WEEKDAYS.slice(0, weekStartIndex))
 		.filter((weekday) => !hiddenWeekdays.has(weekday))
 		.map((weekday) => daysByWeekday.get(weekday))
 		.filter((day): day is EventCalendarDateOnly => day !== undefined);
 }
 
-function isDayOutsideActiveRange(
+function isDayInActiveRange(
 	day: EventCalendarDateOnly,
 	profile: EventCalendarDateProfile,
 	timeZone: string
 ): boolean {
-	const dayRange = {
-		start: startOfZonedDay(day, timeZone),
-		end: startOfZonedDay(addCivilDays(day, 1), timeZone)
-	};
-	return !rangesIntersect(dayRange, profile.activeRange);
+	return (
+		startOfZonedDay(day, timeZone) < profile.activeRange.end &&
+		startOfZonedDay(addCivilDays(day, 1), timeZone) > profile.activeRange.start
+	);
 }

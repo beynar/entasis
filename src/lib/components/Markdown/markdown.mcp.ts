@@ -1,9 +1,9 @@
 export const markdownDescription = `
 # Markdown Component
 
-Renders Markdown as themed HTML, built for streaming LLM output. Wraps the user's own [svelte-streamdown](https://github.com/) renderer, restyled with svelai design tokens so it matches the rest of the app and adapts to light and dark automatically. Incomplete/streaming Markdown (an unterminated code fence, a half-written table) is handled gracefully — nothing crashes or flashes as chunks arrive.
+Renders Markdown as themed HTML, built for streaming LLM output. Wraps the user's own [svelte-streamdown](https://github.com/) renderer, restyled with entasis design tokens so it matches the rest of the app and adapts to light and dark automatically. Incomplete/streaming Markdown (an unterminated code fence, a half-written table) is handled gracefully — nothing crashes or flashes as chunks arrive.
 
-Fenced code blocks render through svelai's own Code component (syntax highlighting + copy button), and \\\`mermaid\\\` fences render through svelai's Mermaid component (pan/zoom, brand theming, and errorForgiving so a diagram being streamed in doesn't flash errors between chunks).
+Fenced code blocks render through entasis's own Code component (syntax highlighting + copy button), and \\\`mermaid\\\` fences render through entasis's Mermaid component (pan/zoom, brand theming, and errorForgiving so a diagram being streamed in doesn't flash errors between chunks).
 
 Card, Stat, Stack, Grid, and GridSpan are also available as built-in MDX components. They can be used directly inside the Markdown source without passing an MDX component map.
 
@@ -27,16 +27,16 @@ Card, Stat, Stack, Grid, and GridSpan are also available as built-in MDX compone
 ### Advanced Props
 - **class**: string - Additional CSS classes on the root wrapper.
 - **theme**: MarkdownThemeProps - Overrides for the root wrapper part (size variants live here).
-- **mdxComponents**: StreamdownProps['mdxComponents'] - Custom MDX components. Matching names override the built-in svelai components.
-- **...streamdown passthroughs**: every other svelte-streamdown prop is forwarded except the ones svelai controls (\\\`content\\\`, \\\`theme\\\`, \\\`baseTheme\\\`, \\\`mergeTheme\\\`, \\\`class\\\`, \\\`code\\\`, \\\`mermaid\\\`, \\\`children\\\`, \\\`streamdown\\\`, \\\`element\\\`). Use these for streamdown features such as controlling which block types are parsed, link/image handling, and other renderer options — see the svelte-streamdown docs.
+- **mdxComponents**: StreamdownProps['mdxComponents'] - Custom MDX components. Matching names override the built-in entasis components.
+- **...streamdown passthroughs**: every other svelte-streamdown prop is forwarded except the ones entasis controls (\\\`content\\\`, \\\`theme\\\`, \\\`baseTheme\\\`, \\\`mergeTheme\\\`, \\\`class\\\`, \\\`code\\\`, \\\`mermaid\\\`, \\\`children\\\`, \\\`streamdown\\\`, \\\`element\\\`). Use these for streamdown features such as controlling which block types are parsed, link/image handling, and other renderer options — see the svelte-streamdown docs.
 
 ## Rendering
 
-- **Block elements**: headings (h1–h6), paragraphs, lists (ordered, unordered, task lists), blockquotes, horizontal rules, tables, images and links are all styled from svelai tokens.
-- **GitHub alerts**: \\\`> [!NOTE]\\\`, \\\`> [!TIP]\\\`, \\\`> [!IMPORTANT]\\\`, \\\`> [!WARNING]\\\` and \\\`> [!CAUTION]\\\` render as colored callouts mapped to svelai info/success/primary/warning/danger muted pairings.
+- **Block elements**: headings (h1–h6), paragraphs, lists (ordered, unordered, task lists), blockquotes, horizontal rules, tables, images and links are all styled from entasis tokens.
+- **GitHub alerts**: \\\`> [!NOTE]\\\`, \\\`> [!TIP]\\\`, \\\`> [!IMPORTANT]\\\`, \\\`> [!WARNING]\\\` and \\\`> [!CAUTION]\\\` render as colored callouts mapped to entasis info/success/primary/warning/danger muted pairings.
 - **Inline code** (\\\`codespan\\\`): styled as a subtle chip; its text size scales with \\\`size\\\`.
-- **Code fences**: rendered by svelai's Code component — syntax highlighting and a copy button. The code block sizing follows \\\`size\\\`.
-- **Mermaid fences**: a fence tagged \\\`mermaid\\\` renders through svelai's Mermaid component with \\\`errorForgiving\\\` enabled, so a diagram that is still streaming in holds its last valid frame instead of flashing parse errors. Diagram size maps from the Markdown \\\`size\\\`.
+- **Code fences**: rendered by entasis's Code component — syntax highlighting and a copy button. The code block sizing follows \\\`size\\\`.
+- **Mermaid fences**: a fence tagged \\\`mermaid\\\` renders through entasis's Mermaid component with \\\`errorForgiving\\\` enabled, so a diagram that is still streaming in holds its last valid frame instead of flashing parse errors. Diagram size maps from the Markdown \\\`size\\\`.
 
 ## Built-in MDX components
 
@@ -62,7 +62,7 @@ MDX attributes support string, number, and boolean values. Imperative event hand
 
 ## Theming
 
-The full theme is derived from svelai design tokens (translated from the shadcn preset): borders use \\\`border-neutral-muted\\\`, muted surfaces use \\\`bg-neutral-muted\\\`, secondary text uses \\\`text-neutral/70\\\`, and so on. Because it is token-based, the rendered Markdown adapts to light and dark automatically and stays visually consistent with the rest of the app. Per-instance tweaks to the root wrapper go through the \\\`theme\\\` prop; deeper element overrides fall back safely to the built-in theme.
+The full theme is derived from entasis design tokens (translated from the shadcn preset): borders use \\\`border-neutral-muted\\\`, muted surfaces use \\\`bg-neutral-muted\\\`, secondary text uses \\\`text-neutral/70\\\`, and so on. Because it is token-based, the rendered Markdown adapts to light and dark automatically and stays visually consistent with the rest of the app. Per-instance tweaks to the root wrapper go through the \\\`theme\\\` prop; deeper element overrides fall back safely to the built-in theme.
 
 ## Examples
 
@@ -96,6 +96,6 @@ The full theme is derived from svelai design tokens (translated from the shadcn 
 ## Notes
 
 - Renders reactively: it is safe to bind \\\`content\\\` to a string that grows over time (token streaming). Partial Markdown between chunks won't throw.
-- The theme deep-merges over svelte-streamdown's built-in base theme, so any element svelai doesn't explicitly restyle still renders sensibly.
-- Code and Mermaid rendering delegate to svelai's own components rather than streamdown's, keeping copy/pan/zoom behavior consistent across the app.
+- The theme deep-merges over svelte-streamdown's built-in base theme, so any element entasis doesn't explicitly restyle still renders sensibly.
+- Code and Mermaid rendering delegate to entasis's own components rather than streamdown's, keeping copy/pan/zoom behavior consistent across the app.
 `;

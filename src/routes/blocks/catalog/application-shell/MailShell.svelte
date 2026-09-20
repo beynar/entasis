@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Alert } from 'svelai/alert';
-	import { Avatar } from 'svelai/avatar';
-	import { Button } from 'svelai/button';
-	import { Form } from 'svelai/form';
-	import { Separator } from 'svelai/separator';
-	import { TextInput } from 'svelai/text-input';
+	import { Stack } from 'entasis/stack';
+	import { Alert } from 'entasis/alert';
+	import { Avatar } from 'entasis/avatar';
+	import { Button } from 'entasis/button';
+	import { Form } from 'entasis/form';
+	import { Separator } from 'entasis/separator';
+	import { TextInput } from 'entasis/text-input';
 
 	let mailbox = $state('Inbox');
 	let query = $state<string | null>('');

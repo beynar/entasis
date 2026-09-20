@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import { Form } from 'svelai/form';
+	import { Heading } from 'entasis/heading';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import { Form } from 'entasis/form';
 	const initialAddresses = [
 		{
 			id: 'home',

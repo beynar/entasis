@@ -7,7 +7,7 @@ The Accordion component provides an interactive collapsible container for organi
 
 \`\`\`svelte
 <script>
-	import { Accordion } from 'svelai/accordion';
+	import { Accordion } from 'entasis/accordion';
 </script>
 
 <Accordion 
@@ -91,7 +91,7 @@ The Accordion component provides an interactive collapsible container for organi
 
 \`\`\`svelte
 <script>
-	import { Accordion } from 'svelai/accordion';
+	import { Accordion } from 'entasis/accordion';
 	
 	let items = [
 		{ title: 'What is Svelte?', content: 'Svelte is a radical new approach to building user interfaces.' },
@@ -106,7 +106,7 @@ The Accordion component provides an interactive collapsible container for organi
 
 \`\`\`svelte
 <script>
-	import { Accordion } from 'svelai/accordion';
+	import { Accordion } from 'entasis/accordion';
 	
 	let items = [
 		{ title: 'Section 1', content: 'Content 1' },
@@ -124,7 +124,7 @@ The Accordion component provides an interactive collapsible container for organi
 
 \`\`\`svelte
 <script>
-	import { Accordion } from 'svelai/accordion';
+	import { Accordion } from 'entasis/accordion';
 	
 	let items = [
 		{ 
@@ -142,7 +142,7 @@ The Accordion component provides an interactive collapsible container for organi
 
 \`\`\`svelte
 <script>
-	import { Accordion } from 'svelai/accordion';
+	import { Accordion } from 'entasis/accordion';
 	
 	let items = [
 		{ title: 'Item 1', content: 'Content 1' }
@@ -166,8 +166,8 @@ The Accordion component provides an interactive collapsible container for organi
 
 \`\`\`svelte
 <script>
-	import { Accordion } from 'svelai/accordion';
-	import { starIcon } from 'svelai/icons/star';
+	import { Accordion } from 'entasis/accordion';
+	import { starIcon } from 'entasis/icons/star';
 	
 	let items = [
 		{ title: 'Section 1', content: 'Content 1' }
@@ -192,7 +192,7 @@ The Accordion component provides an interactive collapsible container for organi
 
 \`\`\`svelte
 <script>
-	import { Accordion } from 'svelai/accordion';
+	import { Accordion } from 'entasis/accordion';
 	
 	let faqs = [
 		{ question: 'How to install?', answer: 'Run npm install...' }
@@ -210,7 +210,7 @@ The Accordion component provides an interactive collapsible container for organi
 
 \`\`\`svelte
 <script>
-	import { Accordion } from 'svelai/accordion';
+	import { Accordion } from 'entasis/accordion';
 	
 	let items = [
 		{ title: 'Section 1', content: 'Content 1' }
@@ -231,7 +231,7 @@ The Accordion component provides an interactive collapsible container for organi
 
 \`\`\`svelte
 <script>
-	import { Accordion } from 'svelai/accordion';
+	import { Accordion } from 'entasis/accordion';
 	
 	let items = [
 		{ title: 'Section 1', content: 'Content 1' }
@@ -369,7 +369,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setAccordionTheme } from 'svelai/accordion';
+  import { setAccordionTheme } from 'entasis/accordion';
 
   setAccordionTheme({
     trigger: {

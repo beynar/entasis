@@ -64,7 +64,7 @@
 		description="Inline AI tokens use Streamdown's extension API while the message boundary disables raw HTML, permits HTTPS images, and limits links to HTTPS, email, and telephone URLs."
 		class="!min-h-[320px] p-4"
 		code={`<script lang="ts">
-  import { AIMessage } from 'svelai/ai-message';
+  import { AIMessage } from 'entasis/ai-message';
 ${'</' + 'script>'}
 
 <AIMessage

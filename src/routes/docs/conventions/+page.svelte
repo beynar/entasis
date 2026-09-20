@@ -2,9 +2,9 @@
 	import Code from '$lib/components/Code/Code.svelte';
 	import Separator from '$lib/components/Separator/Separator.svelte';
 
-	const importCode = `import { Button } from 'svelai/button';
-import { TextInput } from 'svelai/text-input';
-import { Dialog } from 'svelai/dialog';`;
+	const importCode = `import { Button } from 'entasis/button';
+import { TextInput } from 'entasis/text-input';
+import { Dialog } from 'entasis/dialog';`;
 
 	const booleanCode = `<Dialog bind:open />
 <ToggleButton bind:value />
@@ -37,7 +37,7 @@ import { Dialog } from 'svelai/dialog';`;
 
 	const themeCode =
 		`<script>
-	import { Button, setButtonTheme } from 'svelai/button';
+	import { Button, setButtonTheme } from 'entasis/button';
 
 	setButtonTheme({
 		root: { base: 'rounded-full' },

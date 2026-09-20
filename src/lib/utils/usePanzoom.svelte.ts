@@ -7,7 +7,7 @@ import { SvelteSet } from 'svelte/reactivity';
  * listens on the node's parent (the "owner" viewport) for drag / wheel / pinch,
  * and exposes imperative zoom/fit controls.
  *
- * Ported from svelte-streamdown's panzoom utility and adapted to the svelai
+ * Ported from svelte-streamdown's panzoom utility and adapted to the entasis
  * conventions (attachment returns a cleanup, `untrack` around setup, options via
  * getters so reactive flags stay live).
  */

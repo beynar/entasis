@@ -29,10 +29,7 @@ type LocaleWithWeekInfo = Intl.Locale & {
 /** Maps a civil date to the picker owner's host-local-noon representation. */
 export function toDateJumpDate(day: EventCalendarDateOnly): Date {
 	const parts = parseDateOnly(day, 'datePicker.day');
-	const date = new Date(0);
-	date.setFullYear(parts.year, parts.month - 1, parts.day);
-	date.setHours(12, 0, 0, 0);
-	return date;
+	return createHostLocalNoon(parts.year, parts.month - 1, parts.day);
 }
 
 /** Maps a picker selection back to a canonical civil date without `Date.parse`. */

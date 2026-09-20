@@ -25,8 +25,8 @@
 	} = $props();
 
 	const models = [
-		{ id: 'fast', label: 'Swift', provider: 'Svelai', contextWindow: 128_000 },
-		{ id: 'deep', label: 'Deep', provider: 'Svelai', contextWindow: 256_000 }
+		{ id: 'fast', label: 'Swift', provider: 'Entasis', contextWindow: 128_000 },
+		{ id: 'deep', label: 'Deep', provider: 'Entasis', contextWindow: 256_000 }
 	];
 	const commands = {
 		items: [

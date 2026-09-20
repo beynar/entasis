@@ -7,7 +7,7 @@ VoiceInput records microphone audio into a bindable Blob, renders live microphon
 
 \`\`\`svelte
 <script lang="ts">
-	import { VoiceInput } from 'svelai/voice-input';
+	import { VoiceInput } from 'entasis/voice-input';
 </script>
 \`\`\`
 
@@ -15,7 +15,7 @@ VoiceInput records microphone audio into a bindable Blob, renders live microphon
 
 \`\`\`svelte
 <script lang="ts">
-	import { VoiceInput } from 'svelai/voice-input';
+	import { VoiceInput } from 'entasis/voice-input';
 
 	let recording = $state<Blob | null>(null);
 	let duration = $state(0);

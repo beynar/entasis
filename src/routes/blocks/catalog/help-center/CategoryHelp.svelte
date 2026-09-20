@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { Grid } from 'svelai/grid';
-	import { Stack } from 'svelai/stack';
-	import { Accordion } from 'svelai/accordion';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { houseIcon } from 'svelai/icons/house';
-	import { usersIcon } from 'svelai/icons/users';
-	import { folderIcon } from 'svelai/icons/folder';
+	import { Grid } from 'entasis/grid';
+	import { Stack } from 'entasis/stack';
+	import { Accordion } from 'entasis/accordion';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { houseIcon } from 'entasis/icons/house';
+	import { usersIcon } from 'entasis/icons/users';
+	import { folderIcon } from 'entasis/icons/folder';
 	const categories = [
 		{
 			title: 'Getting started',

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { arrowUpRightIcon } from 'svelai/icons/arrowUpRight';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { arrowUpRightIcon } from 'entasis/icons/arrowUpRight';
 	const services = [
 		{
 			title: 'Direction',

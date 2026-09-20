@@ -34,9 +34,9 @@
 
 {#snippet profileContent()}
 	<div class="flex items-start gap-3">
-		<Avatar name="Svelai" />
+		<Avatar name="Entasis" />
 		<div class="grid gap-1">
-			<p class="text-sm font-semibold">@svelai</p>
+			<p class="text-sm font-semibold">@entasis</p>
 			<p class="text-neutral/70 text-sm">
 				Configuration-first Svelte components with theme-aware primitives.
 			</p>
@@ -60,20 +60,20 @@
 		{controls}
 		description="A compact preview shown from a trigger on hover or focus."
 		code={`<HoverCard
-	trigger={{ content: '@svelai', variant: 'link' }}
+	trigger={{ content: '@entasis', variant: 'link' }}
 	size="${controls.value.size}"
 	density="${controls.value.density}"
-	title="@svelai"
+	title="@entasis"
 	description="Configuration-first Svelte components."
 >
 	<p>Theme-aware primitives for building application interfaces.</p>
 </HoverCard>`}
 	>
 		<HoverCard
-			trigger={{ content: '@svelai', variant: 'link' }}
+			trigger={{ content: '@entasis', variant: 'link' }}
 			size={controls.value.size}
 			density={controls.value.density}
-			title="@svelai"
+			title="@entasis"
 			description="Configuration-first Svelte components."
 		>
 			<p class="text-neutral/70 text-sm">
@@ -89,9 +89,9 @@
 			class="!min-h-fit"
 			code={`<HoverCard trigger={{ content: 'Preview profile', variant: 'outline' }}>
 	<div class="flex items-start gap-3">
-		<Avatar name="Svelai" />
+		<Avatar name="Entasis" />
 		<div>
-			<p>@svelai</p>
+			<p>@entasis</p>
 			<p>Configuration-first Svelte components.</p>
 		</div>
 	</div>

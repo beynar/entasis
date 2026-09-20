@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	import { xIcon } from 'svelai/icons/x';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
+	import { xIcon } from 'entasis/icons/x';
 	let visible = $state(true);
 </script>
 

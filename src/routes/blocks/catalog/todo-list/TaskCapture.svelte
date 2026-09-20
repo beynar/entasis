@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Checkbox } from 'svelai/checkbox';
-	import { Chip } from 'svelai/chip';
-	import { Form } from 'svelai/form';
-	import { Meter } from 'svelai/meter';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Checkbox } from 'entasis/checkbox';
+	import { Chip } from 'entasis/chip';
+	import { Form } from 'entasis/form';
+	import { Meter } from 'entasis/meter';
 
 	let nextId = 4;
 	let draft = $state<{ title?: string }>({});

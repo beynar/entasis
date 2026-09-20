@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Avatar } from 'svelai/avatar';
-	import { Card } from 'svelai/card';
-	import { Carousel } from 'svelai/carousel';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Rating } from 'svelai/rating';
+	import { Avatar } from 'entasis/avatar';
+	import { Card } from 'entasis/card';
+	import { Carousel } from 'entasis/carousel';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Rating } from 'entasis/rating';
 	const quotes = [
 		{
 			quote:

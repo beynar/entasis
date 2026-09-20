@@ -7,8 +7,8 @@ The Dialog component (also known as Modal) displays content in a layer above the
 
 \`\`\`svelte
 <script>
-	import { Dialog } from 'svelai/dialog';
-	import { Button } from 'svelai/button';
+	import { Dialog } from 'entasis/dialog';
+	import { Button } from 'entasis/button';
 		
 </script>
 // By default Dialog comes with a button that trigger them, no need to define a callback and a $state
@@ -95,8 +95,8 @@ The Dialog component (also known as Modal) displays content in a layer above the
 \`\`\`svelte
 
 <script>
-	import { Dialog } from 'svelai/dialog';
-	import { Button } from 'svelai/button';
+	import { Dialog } from 'entasis/dialog';
+	import { Button } from 'entasis/button';
 	
 	let open = $state(false);
 </script>
@@ -115,8 +115,8 @@ The Dialog component (also known as Modal) displays content in a layer above the
 \`\`\`svelte
 
 <script>
-	import { Dialog } from 'svelai/dialog';
-	import { Button } from 'svelai/button';
+	import { Dialog } from 'entasis/dialog';
+	import { Button } from 'entasis/button';
 	
 	let open = $state(false);
 </script>
@@ -137,7 +137,7 @@ size:"small"
 
 \`\`\`svelte
 <script>
-	import { Dialog } from 'svelai/dialog';
+	import { Dialog } from 'entasis/dialog';
 	
 </script>
 
@@ -153,7 +153,7 @@ size:"small"
 
 \`\`\`svelte
 <script>
-	import { Dialog } from 'svelai/dialog';
+	import { Dialog } from 'entasis/dialog';
 	
 	let open = $state(false);
 </script>
@@ -164,8 +164,8 @@ size:"small"
 
 \`\`\`svelte
 <script>
-	import { Dialog } from 'svelai/dialog';
-	import { Button } from 'svelai/button';
+	import { Dialog } from 'entasis/dialog';
+	import { Button } from 'entasis/button';
 	
 	let open = $state(false);
 	
@@ -195,7 +195,7 @@ size:"small"
 
 \`\`\`svelte
 <script>
-	import { Dialog } from 'svelai/dialog';
+	import { Dialog } from 'entasis/dialog';
 	
 	
 </script>
@@ -225,8 +225,8 @@ size:"small"
 
 \`\`\`svelte
 <script>
-	import { Dialog } from 'svelai/dialog';
-	import { warningIcon } from 'svelai/icons/warning';
+	import { Dialog } from 'entasis/dialog';
+	import { warningIcon } from 'entasis/icons/warning';
 </script>
 
 <Dialog bind:open>
@@ -246,7 +246,7 @@ size:"small"
 
 \`\`\`svelte
 <script>
-	import { Dialog } from 'svelai/dialog';
+	import { Dialog } from 'entasis/dialog';
 	
 	let open = $state(false);
 </script>
@@ -310,7 +310,7 @@ The theme object contains the following parts:
 ### Theme Type Definition
 
 \`\`\`typescript
-import type { DialogThemeProps } from 'svelai/dialog';
+import type { DialogThemeProps } from 'entasis/dialog';
 
 // Example theme customization
 const customTheme: DialogThemeProps = {
@@ -456,7 +456,7 @@ const customTheme: DialogThemeProps = {
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setDialogTheme } from 'svelai/dialog';
+  import { setDialogTheme } from 'entasis/dialog';
   
   setDialogTheme({
     root: {

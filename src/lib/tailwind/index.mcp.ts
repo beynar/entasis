@@ -1,7 +1,7 @@
 export const tailwindPluginDescription = `
 # Main Tailwind plugin
 
-\`@plugin 'svelai/tailwind-plugin'\`
+\`@plugin 'entasis/tailwind-plugin'\`
 
 This palette-agnostic plugin registers shared utilities, variants, keyframes, and spinner CSS.
 Use it when colors are defined separately instead of through the theme plugin.

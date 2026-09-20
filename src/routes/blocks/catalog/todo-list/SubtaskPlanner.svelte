@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Accordion } from 'svelai/accordion';
-	import { Checkbox } from 'svelai/checkbox';
-	import { Chip } from 'svelai/chip';
-	import { Form } from 'svelai/form';
-	import { Meter } from 'svelai/meter';
+	import { Stack } from 'entasis/stack';
+	import { Accordion } from 'entasis/accordion';
+	import { Checkbox } from 'entasis/checkbox';
+	import { Chip } from 'entasis/chip';
+	import { Form } from 'entasis/form';
+	import { Meter } from 'entasis/meter';
 
 	let projects = $state([
 		{

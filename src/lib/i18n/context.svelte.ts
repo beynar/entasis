@@ -1,8 +1,8 @@
 import { getContext, setContext } from 'svelte';
 import { en, type Messages } from './en.js';
 
-const I18N_KEY = 'svelaiI18n';
-const I18N_DIRECTION_KEY = 'svelaiI18nDirection';
+const I18N_KEY = 'entasisI18n';
+const I18N_DIRECTION_KEY = 'entasisI18nDirection';
 
 type I18nDirection = 'ltr' | 'rtl';
 

@@ -7,7 +7,7 @@ A searchable dropdown component that supports both static arrays and async optio
 
 \`\`\`svelte
 <script>
-	import { Combobox } from 'svelai/combobox';
+	import { Combobox } from 'entasis/combobox';
 	let value = $state(null);
 	const items = [
 		{ value: 'us', label: 'United States', description: 'North America' },
@@ -92,7 +92,7 @@ A searchable dropdown component that supports both static arrays and async optio
 
 - **theme**: \`ComboboxThemeProps\`
   - Customize styling for: input, inputContainer, loading, error, noOptions
-  - Option rows are \`MenuOption\` components: style them globally with \`setMenuOptionTheme\` from \`svelai/menu-option\`
+  - Option rows are \`MenuOption\` components: style them globally with \`setMenuOptionTheme\` from \`entasis/menu-option\`
 
 ## Examples
 
@@ -146,7 +146,7 @@ A searchable dropdown component that supports both static arrays and async optio
 
 \`\`\`svelte
 <script lang="ts">
-	import type { ComboboxOption } from 'svelai/combobox';
+	import type { ComboboxOption } from 'entasis/combobox';
 	let value = $state<string | null>('us');
 	const getValueOption = async (value: string): Promise<ComboboxOption> => {
 		return { value, label: 'United States' };
@@ -206,7 +206,7 @@ The theme object contains the following parts:
 - **error**: Error message styles
 - **noOptions**: No options found message styles
 
-Option rows are rendered with the shared \`MenuOption\` component (parts: root, title, description, prefix, suffix, content) and are themed through \`setMenuOptionTheme\` from \`svelai/menu-option\`, not through the Combobox theme.
+Option rows are rendered with the shared \`MenuOption\` component (parts: root, title, description, prefix, suffix, content) and are themed through \`setMenuOptionTheme\` from \`entasis/menu-option\`, not through the Combobox theme.
 
 ### Available Variants
 
@@ -255,7 +255,7 @@ Option rows are rendered with the shared \`MenuOption\` component (parts: root, 
 **Custom Option Styling** (option rows use the shared MenuOption theme):
 \`\`\`svelte
 <script lang="ts">
-  import { setMenuOptionTheme } from 'svelai/menu-option';
+  import { setMenuOptionTheme } from 'entasis/menu-option';
 
   let value = $state<string | null>(null);
   const items = [
@@ -282,7 +282,7 @@ Option rows are rendered with the shared \`MenuOption\` component (parts: root, 
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setComboboxTheme } from 'svelai/combobox';
+  import { setComboboxTheme } from 'entasis/combobox';
   
   setComboboxTheme({
     inputContainer: {

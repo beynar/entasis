@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Form } from 'svelai/form';
-	import { Heading } from 'svelai/heading';
+	import { Stack } from 'entasis/stack';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Form } from 'entasis/form';
+	import { Heading } from 'entasis/heading';
 	import { onMount } from 'svelte';
 	let email = $state('');
 	let now = $state(Date.now());

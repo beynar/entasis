@@ -11,10 +11,10 @@
 			(entry.capabilities as readonly string[]).includes('component')
 	).length;
 
-	const install = `pnpm add svelai`;
+	const install = `pnpm add entasis`;
 	const setup = `@import 'tailwindcss';
-@source '../node_modules/svelai/dist';
-@plugin 'svelai/tailwind-plugin/theme' {
+@source '../node_modules/entasis/dist';
+@plugin 'entasis/tailwind-plugin/theme' {
 	name: light;
 	default: true;
 	colorscheme: light;
@@ -44,7 +44,7 @@
 </script>
 
 <svelte:head>
-	<title>svelai · Svelte 5 design system</title>
+	<title>entasis · Svelte 5 design system</title>
 	<meta
 		name="description"
 		content="A configuration-over-markup component library for SvelteKit and Tailwind 4, with a token engine, enforced API laws and accessible overlays."
@@ -53,7 +53,7 @@
 
 <div class="gap-layout-xl px-lg py-layout-lg mx-auto flex max-w-5xl flex-col">
 	<section class="gap-lg flex flex-col">
-		<p class="text-primary-readable text-xs font-medium tracking-wide uppercase">svelai</p>
+		<p class="text-primary-readable text-xs font-medium tracking-wide uppercase">entasis</p>
 		<Heading size="h1" class="max-w-3xl text-balance">
 			Configured components for SvelteKit, with the engine of a design system.
 		</Heading>

@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { Alert } from 'svelai/alert';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Checkbox } from 'svelai/checkbox';
-	import { confirmation } from 'svelai/confirmation';
-	import { Stack } from 'svelai/stack';
-	import { checkCircleIcon } from 'svelai/icons/checkCircle';
-	import { trashIcon } from 'svelai/icons/trash';
-	import { warningCircleIcon } from 'svelai/icons/warningCircle';
+	import { Alert } from 'entasis/alert';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Checkbox } from 'entasis/checkbox';
+	import { confirmation } from 'entasis/confirmation';
+	import { Stack } from 'entasis/stack';
+	import { checkCircleIcon } from 'entasis/icons/checkCircle';
+	import { trashIcon } from 'entasis/icons/trash';
+	import { warningCircleIcon } from 'entasis/icons/warningCircle';
 
 	let acknowledged = $state(false);
 	let outcome = $state<'idle' | 'cancelled' | 'deleted'>('idle');

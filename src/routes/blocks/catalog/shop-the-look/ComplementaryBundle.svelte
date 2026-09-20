@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Button } from 'svelai/button';
-	import { Checkbox } from 'svelai/checkbox';
-	import { Chip } from 'svelai/chip';
+	import { Heading } from 'entasis/heading';
+	import { Button } from 'entasis/button';
+	import { Checkbox } from 'entasis/checkbox';
+	import { Chip } from 'entasis/chip';
 	const products = [
 		{
 			id: 'arc',

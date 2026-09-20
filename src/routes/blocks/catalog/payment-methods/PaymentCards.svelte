@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import { Dialog } from 'svelai/dialog';
-	import { Form } from 'svelai/form';
+	import { Heading } from 'entasis/heading';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import { Dialog } from 'entasis/dialog';
+	import { Form } from 'entasis/form';
 	let methods = $state([
 		{ id: 'visa', brand: 'Visa', last4: '4242', name: 'Personal card', expiry: '12/2028' },
 		{ id: 'mastercard', brand: 'Mastercard', last4: '8210', name: 'Studio card', expiry: '08/2027' }

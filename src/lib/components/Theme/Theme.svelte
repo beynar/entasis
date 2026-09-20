@@ -58,7 +58,7 @@
 			}
 			return currentThemes;
 		},
-		// svelte-themes spells these `enableSystem` / `enableColorScheme`; svelai's prop
+		// svelte-themes spells these `enableSystem` / `enableColorScheme`; entasis's prop
 		// vocabulary bans the `enable` prefix, so the mapping lives here.
 		get enableSystem() {
 			return systemTheme;
@@ -215,17 +215,17 @@
 <TooltipHost />
 
 <style>
-	:global(html[data-svelai-theme-transition]::view-transition-old(root)),
-	:global(html[data-svelai-theme-transition]::view-transition-new(root)) {
+	:global(html[data-entasis-theme-transition]::view-transition-old(root)),
+	:global(html[data-entasis-theme-transition]::view-transition-new(root)) {
 		animation: none;
 		mix-blend-mode: normal;
 	}
 
-	:global(html[data-svelai-theme-transition]::view-transition-old(root)) {
+	:global(html[data-entasis-theme-transition]::view-transition-old(root)) {
 		z-index: 0;
 	}
 
-	:global(html[data-svelai-theme-transition]::view-transition-new(root)) {
+	:global(html[data-entasis-theme-transition]::view-transition-new(root)) {
 		z-index: 1;
 	}
 </style>

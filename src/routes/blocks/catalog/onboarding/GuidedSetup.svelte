@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Grid } from 'svelai/grid';
-	import { Stack } from 'svelai/stack';
-	import { Alert } from 'svelai/alert';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Dialog } from 'svelai/dialog';
-	import { MultiStepForm } from 'svelai/multi-step-form';
+	import { Grid } from 'entasis/grid';
+	import { Stack } from 'entasis/stack';
+	import { Alert } from 'entasis/alert';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Dialog } from 'entasis/dialog';
+	import { MultiStepForm } from 'entasis/multi-step-form';
 
 	let open = $state(false);
 	let complete = $state(false);

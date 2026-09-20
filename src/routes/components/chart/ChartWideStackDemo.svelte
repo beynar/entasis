@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Chart, type ChartKey, type ChartProps } from 'svelai/chart';
+	import { Chart, type ChartKey, type ChartProps } from 'entasis/chart';
 
 	type StatusRow = {
 		month: string;

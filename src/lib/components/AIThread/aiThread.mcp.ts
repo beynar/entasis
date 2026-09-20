@@ -7,7 +7,7 @@ Virtualized AI transcript with stable message keys, initial end anchoring, pinne
 
 \`\`\`svelte
 <script lang="ts">
-  import { AIThread, type AIThreadItem } from 'svelai/ai-thread';
+  import { AIThread, type AIThreadItem } from 'entasis/ai-thread';
 
   let messages: AIThreadItem[] = $state([]);
   let announcement = $state('');
@@ -106,8 +106,8 @@ Pending ask-user-question tools are auto-detected. Inside AIConversation, AIThre
 
 \`\`\`svelte
 <script lang="ts">
-  import { AIThread } from 'svelai/ai-thread';
-  import { AIThreadToc } from 'svelai/ai-thread-toc';
+  import { AIThread } from 'entasis/ai-thread';
+  import { AIThreadToc } from 'entasis/ai-thread-toc';
 </script>
 
 <AIThread {messages} showToc>
@@ -117,9 +117,9 @@ Pending ask-user-question tools are auto-detected. Inside AIConversation, AIThre
 </AIThread>
 \`\`\`
 
-Import \`AIThreadToc\`, its controlled state types, and its dedicated theme from \`svelai/ai-thread-toc\`. AIThread composes that exact primitive for the default minimap.
+Import \`AIThreadToc\`, its controlled state types, and its dedicated theme from \`entasis/ai-thread-toc\`. AIThread composes that exact primitive for the default minimap.
 
 ## Exports
 
-The \`svelai/ai-thread\` entry exports \`AIThread\`, thread/message/part/question types, scroll behavior and button-position types, marker/tool/action types, and the AIThread theme helpers. It keeps an \`AIThreadToc\` re-export for composition compatibility; the dedicated primitive entry is \`svelai/ai-thread-toc\`.
+The \`entasis/ai-thread\` entry exports \`AIThread\`, thread/message/part/question types, scroll behavior and button-position types, marker/tool/action types, and the AIThread theme helpers. It keeps an \`AIThreadToc\` re-export for composition compatibility; the dedicated primitive entry is \`entasis/ai-thread-toc\`.
 `;

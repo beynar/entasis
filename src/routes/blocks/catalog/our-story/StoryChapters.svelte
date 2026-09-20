@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Tabs } from 'svelai/tabs';
-	import { Chip } from 'svelai/chip';
+	import { Heading } from 'entasis/heading';
+	import { Tabs } from 'entasis/tabs';
+	import { Chip } from 'entasis/chip';
 	const chapters = [
 		{
 			label: '2016',

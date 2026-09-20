@@ -1,11 +1,11 @@
 import { FlatHierarchyError, buildFlatHierarchy } from '$lib/scheduling/flatHierarchy.js';
+import {
+	admitEventCalendarResourceBusinessHours,
+	type EventCalendarAdmittedBusinessHours
+} from './eventCalendar.businessHours.js';
 import { EventCalendarError } from './eventCalendar.error.js';
 import type { EventCalendarDayBucket } from './eventCalendar.items.js';
-import type {
-	EventCalendarBusinessHours,
-	EventCalendarItem,
-	EventCalendarResource
-} from './eventCalendar.types.js';
+import type { EventCalendarItem, EventCalendarResource } from './eventCalendar.types.js';
 
 export type EventCalendarResourceStructureNode = Readonly<{
 	id: string;
@@ -51,14 +51,23 @@ export type EventCalendarResourceModel<TResourceFields extends object> = Readonl
 	resolveLeaf(resourceId?: string): EventCalendarResource<TResourceFields> | null;
 	resolveLeafId(resourceId?: string): string | undefined;
 	resolveItemLeafIds(item: Pick<EventCalendarItem<object>, 'resourceId' | 'resourceIds'>): string[];
-	getBusinessHours(resourceId?: string): readonly EventCalendarBusinessHours[] | null;
+	getBusinessHours(resourceId?: string): readonly EventCalendarAdmittedBusinessHours[] | null;
 	isReadOnly(resourceId?: string): boolean;
 }>;
+
+type EventCalendarAdmittedResource<TResourceFields extends object> = Readonly<{
+	resource: EventCalendarResource<TResourceFields>;
+	businessHours: readonly EventCalendarAdmittedBusinessHours[] | null;
+}>;
+type EventCalendarResourceAdmission<TResourceFields extends object> = ReadonlyMap<
+	string,
+	EventCalendarAdmittedResource<TResourceFields>
+>;
 
 export function createEventCalendarResourceModel<TResourceFields extends object>(
 	resources: readonly EventCalendarResource<TResourceFields>[]
 ): EventCalendarResourceModel<TResourceFields> {
-	const resourcesById = validateResourceDefinitions(resources);
+	const admittedResources = validateResourceDefinitions(resources);
 	const signature = JSON.stringify(
 		resources.map((resource) => [resource.id, resource.parentId ?? null])
 	);
@@ -67,7 +76,7 @@ export function createEventCalendarResourceModel<TResourceFields extends object>
 	const columns: EventCalendarResourceColumn<TResourceFields>[] = structure.leaves.map((leaf) => ({
 		key: `resource:${leaf.id}`,
 		resourceId: leaf.id,
-		resource: getRequiredResource(resourcesById, leaf.id),
+		resource: admittedResources.get(leaf.id)?.resource ?? null,
 		depth: leaf.depth,
 		isUnassigned: false
 	}));
@@ -82,7 +91,7 @@ export function createEventCalendarResourceModel<TResourceFields extends object>
 		(node) => ({
 			key: `resource-header:${node.id}`,
 			resourceId: node.id,
-			resource: getRequiredResource(resourcesById, node.id),
+			resource: admittedResources.get(node.id)?.resource ?? null,
 			depth: node.depth,
 			isLeaf: node.isLeaf,
 			isUnassigned: false,
@@ -108,7 +117,9 @@ export function createEventCalendarResourceModel<TResourceFields extends object>
 		headerCells,
 		leafIds,
 		resolveLeaf: (resourceId) =>
-			resourceId && leafIds.has(resourceId) ? (resourcesById.get(resourceId) ?? null) : null,
+			resourceId && leafIds.has(resourceId)
+				? (admittedResources.get(resourceId)?.resource ?? null)
+				: null,
 		resolveLeafId: (resourceId) => (resourceId && leafIds.has(resourceId) ? resourceId : undefined),
 		resolveItemLeafIds: (item) =>
 			getEventCalendarResourceIds(item).flatMap((resourceId) =>
@@ -116,10 +127,14 @@ export function createEventCalendarResourceModel<TResourceFields extends object>
 			),
 		getBusinessHours: (resourceId) =>
 			resourceId && leafIds.has(resourceId)
-				? (resourcesById.get(resourceId)?.businessHours ?? null)
+				? (admittedResources.get(resourceId)?.businessHours ?? null)
 				: null,
 		isReadOnly: (resourceId) =>
-			Boolean(resourceId && leafIds.has(resourceId) && resourcesById.get(resourceId)?.readOnly)
+			Boolean(
+				resourceId &&
+				leafIds.has(resourceId) &&
+				admittedResources.get(resourceId)?.resource.readOnly
+			)
 	};
 }
 
@@ -133,12 +148,14 @@ export function filterEventCalendarBucketByResource<TItemFields extends object>(
 		const resourceIds = model.resolveItemLeafIds(item);
 		return resourceId === undefined ? resourceIds.length === 0 : resourceIds.includes(resourceId);
 	};
+	const filter = (segments: readonly (typeof bucket.all)[number][]) =>
+		segments.filter((segment) => belongsToColumn(segment.occurrence.item));
 	return {
-		all: bucket.all.filter((segment) => belongsToColumn(segment.occurrence.item)),
-		foreground: bucket.foreground.filter((segment) => belongsToColumn(segment.occurrence.item)),
-		background: bucket.background.filter((segment) => belongsToColumn(segment.occurrence.item)),
-		allDay: bucket.allDay.filter((segment) => belongsToColumn(segment.occurrence.item)),
-		timed: bucket.timed.filter((segment) => belongsToColumn(segment.occurrence.item))
+		all: filter(bucket.all),
+		foreground: filter(bucket.foreground),
+		background: filter(bucket.background),
+		allDay: filter(bucket.allDay),
+		timed: filter(bucket.timed)
 	};
 }
 
@@ -176,11 +193,11 @@ export function replaceEventCalendarResourceAssignment<TItemFields extends objec
 
 function validateResourceDefinitions<TResourceFields extends object>(
 	resources: readonly EventCalendarResource<TResourceFields>[]
-): ReadonlyMap<string, EventCalendarResource<TResourceFields>> {
+): EventCalendarResourceAdmission<TResourceFields> {
 	if (!Array.isArray(resources)) {
 		throw new EventCalendarError('invalid-resource', 'resources must be an array.');
 	}
-	const resourcesById = new Map<string, EventCalendarResource<TResourceFields>>();
+	const admittedResources = new Map<string, EventCalendarAdmittedResource<TResourceFields>>();
 	for (const resource of resources) {
 		if (!resource || typeof resource !== 'object') {
 			throw new EventCalendarError('invalid-resource', 'Every resource must be an object.');
@@ -188,7 +205,7 @@ function validateResourceDefinitions<TResourceFields extends object>(
 		if (typeof resource.id !== 'string' || resource.id.length === 0) {
 			throw new EventCalendarError('invalid-resource', 'Every resource needs a non-empty id.');
 		}
-		if (resourcesById.has(resource.id)) {
+		if (admittedResources.has(resource.id)) {
 			throw new EventCalendarError('invalid-resource', `Duplicate resource id: ${resource.id}.`, {
 				id: resource.id
 			});
@@ -205,47 +222,23 @@ function validateResourceDefinitions<TResourceFields extends object>(
 				{ id: resource.id }
 			);
 		}
-		for (const window of resource.businessHours ?? []) {
-			if (
-				!window ||
-				typeof window !== 'object' ||
-				!isValidClock(window.start) ||
-				!isValidClock(window.end) ||
-				clockMinutes(window.start) >= clockMinutes(window.end) ||
-				(window.daysOfWeek !== undefined &&
-					(!Array.isArray(window.daysOfWeek) ||
-						new Set(window.daysOfWeek).size !== window.daysOfWeek.length ||
-						window.daysOfWeek.some((day: number) => !Number.isInteger(day) || day < 0 || day > 6)))
-			) {
-				throw new EventCalendarError(
-					'invalid-resource',
-					`Resource ${resource.id} has invalid businessHours.`,
-					{ id: resource.id }
-				);
-			}
-		}
-		resourcesById.set(resource.id, resource);
+		const businessHours = admitEventCalendarResourceBusinessHours(resource.businessHours, () =>
+			invalidResourceBusinessHours(resource.id)
+		);
+		admittedResources.set(resource.id, {
+			resource,
+			businessHours: businessHours ?? null
+		});
 	}
-	for (const resource of resources) {
-		if (resource.parentId === undefined) continue;
-		if (resource.parentId === resource.id || !resourcesById.has(resource.parentId)) {
-			throw new EventCalendarError(
-				'invalid-resource',
-				`Resource ${resource.id} has an invalid parent.`,
-				{ id: resource.id, parentId: resource.parentId }
-			);
-		}
-	}
-	return resourcesById;
+	return admittedResources;
 }
 
-function isValidClock(value: string): boolean {
-	return typeof value === 'string' && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
-}
-
-function clockMinutes(value: string): number {
-	const [hours, minutes] = value.split(':').map(Number);
-	return hours * 60 + minutes;
+function invalidResourceBusinessHours(resourceId: string): EventCalendarError {
+	return new EventCalendarError(
+		'invalid-resource',
+		`Resource ${resourceId} has invalid businessHours.`,
+		{ id: resourceId }
+	);
 }
 
 function buildResourceStructure<TResourceFields extends object>(
@@ -254,20 +247,19 @@ function buildResourceStructure<TResourceFields extends object>(
 ): EventCalendarResourceStructure {
 	try {
 		const hierarchy = buildFlatHierarchy(resources);
-		const nodes = hierarchy.nodes.map((node) => ({
-			id: node.id,
-			...(node.parentId === null ? {} : { parentId: node.parentId }),
-			depth: node.depth,
-			isLeaf: node.isLeaf,
-			leafStart: node.leafStart,
-			leafSpan: node.leafSpan
+		const nodes = hierarchy.nodes.map(({ id, parentId, depth, isLeaf, leafStart, leafSpan }) => ({
+			id,
+			...(parentId === null ? {} : { parentId }),
+			depth,
+			isLeaf,
+			leafStart,
+			leafSpan
 		}));
-		const nodesById = new Map(nodes.map((node) => [node.id, node]));
 		return {
 			signature,
 			nodes,
 			leaves: hierarchy.leaves.map((leaf) => {
-				const node = nodesById.get(leaf.id);
+				const node = nodes[leaf.preorderIndex];
 				if (node) return node;
 				throw new EventCalendarError('invalid-resource', 'Resource hierarchy is incomplete.');
 			}),
@@ -275,17 +267,18 @@ function buildResourceStructure<TResourceFields extends object>(
 		};
 	} catch (error) {
 		if (!(error instanceof FlatHierarchyError)) throw error;
-		throw new EventCalendarError('invalid-resource', 'Resource hierarchy contains a cycle.', {
-			...error.details
-		});
+		if (error.code !== 'cycle')
+			throw new EventCalendarError(
+				'invalid-resource',
+				`Resource ${error.details.id} has an invalid parent.`,
+				{
+					...error.details
+				}
+			);
+		throw new EventCalendarError(
+			'invalid-resource',
+			'Resource hierarchy contains a cycle.',
+			error.details
+		);
 	}
-}
-
-function getRequiredResource<TResourceFields extends object>(
-	resourcesById: ReadonlyMap<string, EventCalendarResource<TResourceFields>>,
-	id: string
-): EventCalendarResource<TResourceFields> {
-	const resource = resourcesById.get(id);
-	if (resource) return resource;
-	throw new EventCalendarError('invalid-resource', `Resource structure lost ${id}.`, { id });
 }

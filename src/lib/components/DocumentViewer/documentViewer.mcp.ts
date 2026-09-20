@@ -7,7 +7,7 @@ A client-only, read-only viewer for PDF, DOCX/DOC, XLSX/XLS, CSV, and PPTX/PPT. 
 
 \`\`\`svelte
 <script lang="ts">
-	import { DocumentViewer } from 'svelai/document-viewer';
+	import { DocumentViewer } from 'entasis/document-viewer';
 
 	let file: File | undefined = $state();
 </script>

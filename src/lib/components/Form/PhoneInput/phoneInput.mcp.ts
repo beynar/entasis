@@ -353,7 +353,7 @@ current role, so it never hard-pins a color.
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setPhoneInputTheme } from 'svelai/phone-input';
+  import { setPhoneInputTheme } from 'entasis/phone-input';
   
   setPhoneInputTheme({
     inputContainer: {

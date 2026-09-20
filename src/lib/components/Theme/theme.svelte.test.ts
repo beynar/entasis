@@ -45,7 +45,7 @@ describe('Theme designTokens state roles', () => {
 describe('useTheme without a provider', () => {
 	test('names the missing <Theme> instead of failing on an undefined context', () => {
 		expect(() => render(MissingThemeHarness)).toThrow(
-			'svelai: <Theme> was not found above this component. Wrap your app in <Theme> from "svelai/theme".'
+			'entasis: <Theme> was not found above this component. Wrap your app in <Theme> from "entasis/theme".'
 		);
 	});
 

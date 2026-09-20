@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Avatar } from 'svelai/avatar';
-	import { Chip } from 'svelai/chip';
-	import { Button } from 'svelai/button';
+	import { Heading } from 'entasis/heading';
+	import { Avatar } from 'entasis/avatar';
+	import { Chip } from 'entasis/chip';
+	import { Button } from 'entasis/button';
 	const sections = [
 		{
 			title: 'Start with less',

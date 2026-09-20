@@ -175,7 +175,7 @@ const settings: RawThemeSetting[] = [
 ];
 
 /** Theme name registered with the highlighter (referenced by `codeToHtml`). */
-export const CODE_SYNTAX_THEME_NAME = 'svelai-code-tokens';
+export const CODE_SYNTAX_THEME_NAME = 'entasis-code-tokens';
 
 let cachedTheme: ThemeRegistration | undefined;
 

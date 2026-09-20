@@ -8,7 +8,7 @@ describe('Overlay disclosure state', () => {
 		const onAfterOpen = vi.fn();
 		const props = { open: false, title: 'Animated overlay', onAfterOpen };
 		const { container, rerender } = render(Overlay, { props });
-		const overlay = container.querySelector('[data-svelai-overlay]');
+		const overlay = container.querySelector('[data-entasis-overlay]');
 		let finishAnimation: (() => void) | undefined;
 		const finished = new Promise<void>((resolve) => {
 			finishAnimation = resolve;
@@ -31,7 +31,7 @@ describe('Overlay disclosure state', () => {
 			}
 		});
 
-		expect(container.querySelector('[data-svelai-overlay]')).toHaveAttribute('data-open', 'false');
+		expect(container.querySelector('[data-entasis-overlay]')).toHaveAttribute('data-open', 'false');
 	});
 
 	test('keeps external state changes silent and reports settled lifecycle', async () => {

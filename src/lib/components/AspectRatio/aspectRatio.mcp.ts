@@ -209,7 +209,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setAspectRatioTheme } from 'svelai/aspect-ratio';
+  import { setAspectRatioTheme } from 'entasis/aspect-ratio';
   
   setAspectRatioTheme({
     root: {

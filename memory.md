@@ -66,3 +66,11 @@
   CDN at runtime (MapLibre, intl-tel-input) so they never enter the module graph. `state_referenced_locally` warnings
   are a separate compiler issue: wrap the capture in `$derived` or a getter, do not treat them
   as the crash cause.
+- For canonical admission work, keep the admitted value small and reuse the existing owner for
+  validation and error ordering. Centralize only the shared boundary parser; remove downstream
+  interpretations and reject freeze/copy or validator-framework ceremony unless the contract
+  requires it. Check the complete production LOC delta after integration.
+- For exact pointer-drag browser assertions, keep the sampled path away from auto-scroll edges or
+  control scrolling explicitly. Edge scrolling makes a fixed viewport coordinate represent a
+  different semantic target over time. Stress the focused case with repeated runs before pinning
+  an endpoint.

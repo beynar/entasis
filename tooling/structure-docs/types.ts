@@ -113,7 +113,7 @@ export type ComponentStructure = {
 	parts: ThemePart[];
 	/** The `set<Component>Theme` export name, e.g. "setAccordionTheme". */
 	setter?: string;
-	/** Package subpath the setter is imported from, e.g. "svelai/accordion". */
+	/** Package subpath the setter is imported from, e.g. "entasis/accordion". */
 	importPath?: string;
 };
 

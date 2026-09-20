@@ -7,7 +7,7 @@ import type { ButtonProps } from '../Button/button.props.js';
 export type CardElevation = 1 | 2 | 3 | 4 | 5;
 export type CardVariant = 'solid' | 'outline' | 'soft' | 'ghost';
 
-/** @deprecated Use the shared `Density` type from svelai types instead. */
+/** @deprecated Use the shared `Density` type from entasis types instead. */
 export type CardDensity = Density;
 
 export type CardActionSlot = Slot | Omit<ButtonProps, 'as'>;

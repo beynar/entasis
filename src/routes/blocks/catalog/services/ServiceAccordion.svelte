@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Accordion } from 'svelai/accordion';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { checkIcon } from 'svelai/icons/check';
+	import { Stack } from 'entasis/stack';
+	import { Accordion } from 'entasis/accordion';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { checkIcon } from 'entasis/icons/check';
 	const services = [
 		{
 			id: 'strategy',

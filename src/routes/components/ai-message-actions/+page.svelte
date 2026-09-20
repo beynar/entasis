@@ -64,7 +64,7 @@
 		description="Copy, edit, and retry report through explicit callbacks. The custom snippet receives the same action methods."
 		class="!min-h-[240px]"
 		code={`<script lang="ts">
-  import { AIMessageActions } from 'svelai/ai-message-actions';
+  import { AIMessageActions } from 'entasis/ai-message-actions';
 ${'</' + 'script>'}
 
 <AIMessageActions
@@ -113,7 +113,7 @@ ${'</' + 'script>'}
 
 		<ComponentCard
 			title="Child slot"
-			description="The Svelai children slot remains an equivalent composition surface."
+			description="The Entasis children slot remains an equivalent composition surface."
 			class="!min-h-[220px]"
 			code={`<AIMessageActions role="assistant" content="Answer" onRetry={regenerate}>
   {#snippet children({ canRetry, retry })}

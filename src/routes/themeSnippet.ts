@@ -1,4 +1,4 @@
-import structureMap from 'virtual:svelai-structure';
+import structureMap from 'virtual:entasis-structure';
 import type { ThemePart, ThemeVariant } from '../../tooling/structure-docs/types.js';
 
 export type ThemeSnippetMode = 'default' | 'empty';
@@ -17,7 +17,7 @@ export function buildThemeSnippet(component: string, mode: ThemeSnippetMode): st
 	if (!structure) return '';
 
 	const setter = structure.setter ?? `set${component}Theme`;
-	const importPath = structure.importPath ?? 'svelai';
+	const importPath = structure.importPath ?? 'entasis';
 	const parts = structure.parts.filter(
 		(part: ThemePart) =>
 			// The `motion` slot takes a transition spec, not class strings.

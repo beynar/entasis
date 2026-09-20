@@ -35,7 +35,7 @@ export type ThemeProps<T extends readonly string[] = readonly string[]> = Omit<
 	/** View transition used when ThemeState.theme changes. Omit for an instant change. */
 	transition?: ThemeTransition;
 	/**
-	 * Forces reduced motion on (`true`) or off (`false`) for every svelai animation.
+	 * Forces reduced motion on (`true`) or off (`false`) for every entasis animation.
 	 * Omit to follow the user's OS reduced-motion setting.
 	 */
 	reduceMotion?: boolean;

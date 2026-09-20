@@ -31,8 +31,8 @@
 	]);
 
 	const usageCode = $derived(`<script lang="ts">
-	import { ScrollArea } from 'svelai/scroll-area';
-	import { TableOfContents } from 'svelai/table-of-contents';
+	import { ScrollArea } from 'entasis/scroll-area';
+	import { TableOfContents } from 'entasis/table-of-contents';
 </scr${'ipt'}>
 
 <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
@@ -50,7 +50,7 @@
 </div>`);
 
 	const itemsCode = `<script lang="ts">
-	import { TableOfContents, type TableOfContentsItem } from 'svelai/table-of-contents';
+	import { TableOfContents, type TableOfContentsItem } from 'entasis/table-of-contents';
 
 	const items: TableOfContentsItem[] = [
 		{ id: 'foundations', level: 2, title: 'System foundations' },
@@ -68,10 +68,10 @@
 </article>`;
 
 	const playgroundCode = `<script lang="ts">
-	import { SegmentedControl } from 'svelai/segmented-control';
-	import { Slider } from 'svelai/slider';
-	import { Switch } from 'svelai/switch';
-	import { TableOfContents } from 'svelai/table-of-contents';
+	import { SegmentedControl } from 'entasis/segmented-control';
+	import { Slider } from 'entasis/slider';
+	import { Switch } from 'entasis/switch';
+	import { TableOfContents } from 'entasis/table-of-contents';
 
 	let showRail = $state(true);
 	let markerSetting = $state<'hidden' | 'active' | 'always'>('active');

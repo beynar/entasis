@@ -231,7 +231,7 @@
 		resizable: {
 			minWidth: '12rem',
 			maxWidth: '24rem',
-			storageKey: 'svelai-docs-sidebar-width',
+			storageKey: 'entasis-docs-sidebar-width',
 			onWidthChange: ({ width }) => {
 				sidebarWidth = width;
 			}
@@ -239,7 +239,7 @@
 		items: sidebarGroups,
 		headerButton: {
 			icon: commandIcon,
-			title: 'Svelai',
+			title: 'Entasis',
 			subtitle: page.url.pathname.startsWith('/blocks') ? 'Blocks' : 'Components'
 		},
 		footer: sidebarFooter

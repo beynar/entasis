@@ -46,7 +46,7 @@ ${scriptCode}
 	// The complete key set, generated from the live catalog so it is always current and
 	// reflects the selected locale. Copy it, translate the values, keep the keys.
 	const fullCode = $derived(
-		`import { setI18n } from 'svelai/i18n';\n\n// Full ${locale} key set (${Object.keys(t).length} keys)\nsetI18n({\n` +
+		`import { setI18n } from 'entasis/i18n';\n\n// Full ${locale} key set (${Object.keys(t).length} keys)\nsetI18n({\n` +
 			Object.entries(t)
 				.map(([k, v]) => `\t${k}: ${typeof v === 'function' ? String(v) : JSON.stringify(v)},`)
 				.join('\n') +

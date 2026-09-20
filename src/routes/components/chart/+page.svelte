@@ -305,7 +305,7 @@ pnpm add -D @types/d3-shape`}
 	<section class="grid gap-3">
 		<h2 class="text-neutral text-xl font-semibold">Direct props, no renderer imports</h2>
 		<p class="text-neutral/70 max-w-3xl text-sm leading-6">
-			Import <code>Chart</code> and its local types from <code>svelai/chart</code>. Every mark reads
+			Import <code>Chart</code> and its local types from <code>entasis/chart</code>. Every mark reads
 			from the same data array and renders in mark order. A semantic <code>series</code> mark
 			composes a default line with optional points and either an area or interval layer. Bars use
 			their own mark with grouped and stacked variants. A stacked bar uses

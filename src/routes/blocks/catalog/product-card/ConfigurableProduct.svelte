@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Button } from 'svelai/button';
-	import { Select } from 'svelai/select';
-	import { NumberInput } from 'svelai/number-input';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Button } from 'entasis/button';
+	import { Select } from 'entasis/select';
+	import { NumberInput } from 'entasis/number-input';
 	const money = (amount: number) =>
 		new Intl.NumberFormat('en-US', {
 			style: 'currency',

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import propsMap from 'virtual:svelai-props';
+	import propsMap from 'virtual:entasis-props';
 	import type { PropCategory, PropDoc } from '../../tooling/props-docs/types.js';
 	import Popover from '$lib/components/Popover/Popover.svelte';
 	import Code from '$lib/components/Code/Code.svelte';

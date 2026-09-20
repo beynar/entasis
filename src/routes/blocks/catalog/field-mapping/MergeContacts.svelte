@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Alert } from 'svelai/alert';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { RadioInput } from 'svelai/radio-input';
-	import { Table } from 'svelai/table';
+	import { Stack } from 'entasis/stack';
+	import { Alert } from 'entasis/alert';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { RadioInput } from 'entasis/radio-input';
+	import { Table } from 'entasis/table';
 
 	const fields = [
 		{ key: 'name', label: 'Full name' },

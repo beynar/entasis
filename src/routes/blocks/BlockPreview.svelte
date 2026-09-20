@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { Button } from 'svelai/button';
-	import { Code } from 'svelai/code';
-	import { SegmentedControl } from 'svelai/segmented-control';
-	import { arrowClockwiseIcon } from 'svelai/icons/arrowClockwise';
-	import { arrowUpRightIcon } from 'svelai/icons/arrowUpRight';
-	import { desktopIcon } from 'svelai/icons/desktop';
-	import { deviceMobileIcon } from 'svelai/icons/deviceMobile';
+	import { Button } from 'entasis/button';
+	import { Code } from 'entasis/code';
+	import { SegmentedControl } from 'entasis/segmented-control';
+	import { arrowClockwiseIcon } from 'entasis/icons/arrowClockwise';
+	import { arrowUpRightIcon } from 'entasis/icons/arrowUpRight';
+	import { desktopIcon } from 'entasis/icons/desktop';
+	import { deviceMobileIcon } from 'entasis/icons/deviceMobile';
 	import { useClipboard } from '$lib/utils/useClipboard.svelte.js';
 	import BlockFrame from './BlockFrame.svelte';
 	import type { BlockDefinition } from './catalog/types.js';

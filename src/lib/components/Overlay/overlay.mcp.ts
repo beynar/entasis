@@ -7,7 +7,7 @@ Overlay layers concise content and actions over bounded media or another visual 
 
 \`\`\`svelte
 <script>
-	import { Overlay } from 'svelai/overlay';
+	import { Overlay } from 'entasis/overlay';
 </script>
 
 <div class="aspect-video overflow-hidden rounded-lg">

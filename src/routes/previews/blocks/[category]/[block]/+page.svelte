@@ -9,7 +9,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.block.title} preview · svelai</title>
+	<title>{data.block.title} preview · entasis</title>
 	<meta name="robots" content="noindex" />
 </svelte:head>
 

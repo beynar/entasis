@@ -184,7 +184,7 @@ The Separator component is a visual divider that separates content in an interfa
 ### With Attachments
 \`\`\`svelte
 <script>
-	import { spinnerOverlay } from 'svelai/spinner-overlay';
+	import { spinnerOverlay } from 'entasis/spinner-overlay';
 	
 	let loading = $state(false);
 </script>
@@ -285,7 +285,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setSeparatorTheme } from 'svelai/separator';
+  import { setSeparatorTheme } from 'entasis/separator';
   
   setSeparatorTheme({
     root: {

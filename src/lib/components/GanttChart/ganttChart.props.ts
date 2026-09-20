@@ -487,7 +487,7 @@ type GanttOwnProps<
 	zoom?: GanttZoomLevel;
 	/** Required IANA display time zone or `UTC`. */
 	timeZone: string;
-	/** Per-instance Svelai message overrides. */
+	/** Per-instance Entasis message overrides. */
 	i18n?: Partial<Messages>;
 	/** Typography, controls, and task geometry scale. Defaults to `normal`. */
 	size?: Sizes;

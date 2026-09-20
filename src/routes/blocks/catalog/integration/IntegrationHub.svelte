@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { calendarIcon } from 'svelai/icons/calendar';
-	import { chartBarIcon } from 'svelai/icons/chartBar';
-	import { chatCircleIcon } from 'svelai/icons/chatCircle';
-	import { codeIcon } from 'svelai/icons/code';
-	import { folderIcon } from 'svelai/icons/folder';
-	import { puzzlePieceIcon } from 'svelai/icons/puzzlePiece';
-	import { usersThreeIcon } from 'svelai/icons/usersThree';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { calendarIcon } from 'entasis/icons/calendar';
+	import { chartBarIcon } from 'entasis/icons/chartBar';
+	import { chatCircleIcon } from 'entasis/icons/chatCircle';
+	import { codeIcon } from 'entasis/icons/code';
+	import { folderIcon } from 'entasis/icons/folder';
+	import { puzzlePieceIcon } from 'entasis/icons/puzzlePiece';
+	import { usersThreeIcon } from 'entasis/icons/usersThree';
 	let active = $state(0);
 	const tools = [
 		{

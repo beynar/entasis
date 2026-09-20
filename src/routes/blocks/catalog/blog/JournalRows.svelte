@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Chip } from 'svelai/chip';
-	import { Button } from 'svelai/button';
+	import { Heading } from 'entasis/heading';
+	import { Chip } from 'entasis/chip';
+	import { Button } from 'entasis/button';
 	const posts = [
 		{
 			title: 'Making room for the things that matter',

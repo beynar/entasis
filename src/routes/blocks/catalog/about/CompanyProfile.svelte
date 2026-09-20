@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { AvatarGroup } from 'svelai/avatar';
-	import { Button } from 'svelai/button';
-	import { Heading } from 'svelai/heading';
-	import { Separator } from 'svelai/separator';
-	import { Stat } from 'svelai/stat';
+	import { AvatarGroup } from 'entasis/avatar';
+	import { Button } from 'entasis/button';
+	import { Heading } from 'entasis/heading';
+	import { Separator } from 'entasis/separator';
+	import { Stat } from 'entasis/stat';
 </script>
 
 <section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl md:grid-cols-3">

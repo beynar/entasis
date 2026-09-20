@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { MenuOption } from 'svelai/menu-option';
-	import { Form, type FormInputs, type InferFormValue, type LiveFormValue } from 'svelai/form';
-	import { arrowLeftIcon } from 'svelai/icons/arrowLeft';
-	import { checkCircleIcon } from 'svelai/icons/checkCircle';
-	import { floppyDiskIcon } from 'svelai/icons/floppyDisk';
-	import { plusIcon } from 'svelai/icons/plus';
-	import { trashIcon } from 'svelai/icons/trash';
+	import { Button } from 'entasis/button';
+	import { MenuOption } from 'entasis/menu-option';
+	import { Form, type FormInputs, type InferFormValue, type LiveFormValue } from 'entasis/form';
+	import { arrowLeftIcon } from 'entasis/icons/arrowLeft';
+	import { checkCircleIcon } from 'entasis/icons/checkCircle';
+	import { floppyDiskIcon } from 'entasis/icons/floppyDisk';
+	import { plusIcon } from 'entasis/icons/plus';
+	import { trashIcon } from 'entasis/icons/trash';
 
 	interface RecordSummary {
 		id: string;

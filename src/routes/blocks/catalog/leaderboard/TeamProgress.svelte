@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Avatar } from 'svelai/avatar';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Meter } from 'svelai/meter';
-	import { Select } from 'svelai/select';
+	import { Stack } from 'entasis/stack';
+	import { Avatar } from 'entasis/avatar';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Meter } from 'entasis/meter';
+	import { Select } from 'entasis/select';
 
 	let period = $state<string | null>('week');
 	const members = [

@@ -37,7 +37,7 @@
 		description="A horizontal separator dividing related content."
 		code={`<div class="w-full max-w-xl">
 	<div class="space-y-1">
-		<h4 class="text-sm font-medium leading-none">Svelai</h4>
+		<h4 class="text-sm font-medium leading-none">Entasis</h4>
 		<p class="text-neutral/70 text-sm">The foundation for your design system.</p>
 	</div>
 	<Separator class="my-4" orientation="${controls.value.orientation}" decorative={${controls.value.decorative}} />
@@ -52,7 +52,7 @@
 				: 'w-full max-w-xl'}
 		>
 			<div class="space-y-1">
-				<h4 class="text-sm leading-none font-medium">Svelai</h4>
+				<h4 class="text-sm leading-none font-medium">Entasis</h4>
 				<p class="text-neutral/70 text-sm">The foundation for your design system.</p>
 			</div>
 			<Separator

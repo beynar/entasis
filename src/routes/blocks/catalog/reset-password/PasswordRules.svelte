@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Grid } from 'svelai/grid';
-	import { Stack } from 'svelai/stack';
-	import { Alert } from 'svelai/alert';
-	import { Card } from 'svelai/card';
-	import { Form } from 'svelai/form';
-	import type { FormInputs } from 'svelai/form';
+	import { Grid } from 'entasis/grid';
+	import { Stack } from 'entasis/stack';
+	import { Alert } from 'entasis/alert';
+	import { Card } from 'entasis/card';
+	import { Form } from 'entasis/form';
+	import type { FormInputs } from 'entasis/form';
 	let message = $state('');
 	let values = $state<{ password?: string; confirm?: string }>({});
 	const inputs = {

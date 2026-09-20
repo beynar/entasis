@@ -16,7 +16,7 @@ const sourceTools = [
 ];
 
 async function fixture(run) {
-	const directory = await mkdtemp(path.join(os.tmpdir(), 'svelai-contract-'));
+	const directory = await mkdtemp(path.join(os.tmpdir(), 'entasis-contract-'));
 	const write = async (filename, source) => {
 		const target = path.join(directory, filename);
 		await mkdir(path.dirname(target), { recursive: true });
@@ -36,7 +36,7 @@ async function fixture(run) {
 		await write(
 			'package.json',
 			JSON.stringify({
-				name: 'svelai',
+				name: 'entasis',
 				type: 'module',
 				scripts: { prepack: 'keep authored scripts' }
 			})
@@ -107,7 +107,7 @@ test('manifest generation preserves authored fields and rejects invalid public m
 			"import { componentNavigationSections } from './componentNavigation.generated.js';"
 		);
 		for (const skill of ['.agents', '.claude'])
-			await write(`${skill}/skills/svelai/SKILL.md`, '# Authored prose\n\nPreserve this text.\n');
+			await write(`${skill}/skills/entasis/SKILL.md`, '# Authored prose\n\nPreserve this text.\n');
 		await write('tooling/component-contract/manifest.ts', manifestSource([gridEntry]));
 		const tool = 'tooling/component-contract/generate.mjs';
 		await runCheck(directory, tool);
@@ -119,7 +119,7 @@ test('manifest generation preserves authored fields and rejects invalid public m
 			'dist/components/Grid/index.d.ts'
 		]);
 		assert.match(
-			await readFile(path.join(directory, '.agents/skills/svelai/SKILL.md'), 'utf8'),
+			await readFile(path.join(directory, '.agents/skills/entasis/SKILL.md'), 'utf8'),
 			/Preserve this text\./
 		);
 		await execute(process.execPath, [tool, '--check'], { cwd: directory });

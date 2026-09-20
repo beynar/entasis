@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { arrowUpRightIcon } from 'svelai/icons/arrowUpRight';
+	import { arrowUpRightIcon } from 'entasis/icons/arrowUpRight';
 	import BlockFrame from './BlockFrame.svelte';
 	import type { BlockCategory } from './catalog/types.js';
 

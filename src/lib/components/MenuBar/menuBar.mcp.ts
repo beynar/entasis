@@ -7,7 +7,7 @@ MenuBar composes several PopupMenu and Menu instances into one horizontal applic
 
 \`\`\`svelte
 <script lang="ts">
-	import { MenuBar, type MenuBarMenu } from 'svelai/menu-bar';
+	import { MenuBar, type MenuBarMenu } from 'entasis/menu-bar';
 
 	const menus: MenuBarMenu[] = [
 		{

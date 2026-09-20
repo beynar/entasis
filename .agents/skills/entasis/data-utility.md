@@ -14,7 +14,7 @@
 
 ## Table
 
-`import { Table } from 'svelai/table'`
+`import { Table } from 'entasis/table'`
 
 Data table with config-over-markup approach. Define structure via props, not markup.
 
@@ -50,7 +50,7 @@ Data table with config-over-markup approach. Define structure via props, not mar
 
 ```svelte
 <script>
-	import { Table } from 'svelai/table';
+	import { Table } from 'entasis/table';
 
 	const header = { name: 'Name', email: 'Email', role: 'Role' };
 	const rows = [
@@ -73,7 +73,7 @@ Data table with config-over-markup approach. Define structure via props, not mar
 
 ```svelte
 <script>
-	import { Table } from 'svelai/table';
+	import { Table } from 'entasis/table';
 
 	const header = { name: 'Name', actions: '' };
 </script>
@@ -95,7 +95,7 @@ Global: `setTableTheme({...})`
 
 ## DataTable
 
-`import { DataTable } from 'svelai/data-table'`
+`import { DataTable } from 'entasis/data-table'`
 
 The typed, interactive table for application data: sorting, typed filters, grouping, selection,
 async cell editing, column sizing/ordering/pinning, and client or manual processing. Reach for
@@ -114,7 +114,7 @@ editing behavior. Column virtualization in grid mode is unaffected.
 
 ```svelte
 <script lang="ts">
-	import { DataTable, type DataTableColumn } from 'svelai/data-table';
+	import { DataTable, type DataTableColumn } from 'entasis/data-table';
 
 	type Person = { id: string; name: string; role: string };
 
@@ -139,7 +139,7 @@ rather than from a CSS breakpoint.
 
 ## Chart
 
-`import { Chart, type ChartProps, type ChartKey } from 'svelai/chart'`
+`import { Chart, type ChartProps, type ChartKey } from 'entasis/chart'`
 
 Declarative plotting surface: `data` plus one or more `marks`. The full mark API lives in the Chart
 MCP doc; the props below are the ones a dashboard reaches for:
@@ -149,7 +149,7 @@ MCP doc; the props below are the ones a dashboard reaches for:
 | `height`      | `number`                                                        | 320     | Plot height in px. Sizes the live plot and the server-rendered SVG together                                                                                                                                                                                                                                                                                                                                                                                               |
 | `aspectRatio` | `number`                                                        | -       | Width / height instead of a fixed height. Passing both `height` and `aspectRatio` throws                                                                                                                                                                                                                                                                                                                                                                                  |
 | `palette`     | `readonly ChartColor[] \| Readonly<Record<string, ChartColor>>` | -       | Array is consumed in series-discovery order; the record names a color per series key                                                                                                                                                                                                                                                                                                                                                                                      |
-| `legend`      | `boolean \| ChartLegendDefinition`                              | -       | `format?: (key: ChartKey) => string` sets the display text for a series in the legend and tooltip. A categorical legend is a svelai control — `interactive: true` renders a `ToggleButtonGroup` of small ghost toggles (colour swatch + label, pressed = visible) in its own row above or below the plot; static renders the same swatch and label as plain items. Numeric scales stay a colour ramp inside the plot. Theme parts: `legend`, `legendItem`, `legendSwatch` |
+| `legend`      | `boolean \| ChartLegendDefinition`                              | -       | `format?: (key: ChartKey) => string` sets the display text for a series in the legend and tooltip. A categorical legend is a entasis control — `interactive: true` renders a `ToggleButtonGroup` of small ghost toggles (colour swatch + label, pressed = visible) in its own row above or below the plot; static renders the same swatch and label as plain items. Numeric scales stay a colour ramp inside the plot. Theme parts: `legend`, `legendItem`, `legendSwatch` |
 | `tooltip`     | `boolean \| ChartTooltipDefinition`                             | -       | `value` / `defaultValue` / `onValueChange` pin a row: it shows without hover, hover moves the tooltip, pointer leave restores the pin                                                                                                                                                                                                                                                                                                                                     |
 
 `ChartColor` accepts the seven semantic roles plus the surface family (`surface`,
@@ -164,7 +164,7 @@ baseline or the stack total.
 
 ```svelte
 <script lang="ts">
-	import { Chart, type ChartProps } from 'svelai/chart';
+	import { Chart, type ChartProps } from 'entasis/chart';
 
 	type StatusRow = { month: string; completed: number; inProgress: number; pending: number };
 
@@ -194,7 +194,7 @@ baseline or the stack total.
 
 ## SortableList
 
-`import { SortableList } from 'svelai/sortable-list'`
+`import { SortableList } from 'entasis/sortable-list'`
 
 Drag-and-drop reorderable list, animated by default (a placeholder holds the slot while displaced rows slide into place). Generic over the item type `T`; built on the pragmatic-drag-and-drop based `useDndList` primitive. Objects need a stable unique `id`; primitives are matched by value. Lists that share a `group` accept each other's rows.
 
@@ -227,7 +227,7 @@ Drag-and-drop reorderable list, animated by default (a placeholder holds the slo
 
 ```svelte
 <script lang="ts">
-	import { SortableList } from 'svelai/sortable-list';
+	import { SortableList } from 'entasis/sortable-list';
 
 	let items = $state([
 		{ id: '1', title: 'First', description: 'The first item' },
@@ -255,7 +255,7 @@ Global: `setSortableListTheme({...})`
 
 ## Card
 
-`import { Card } from 'svelai/card'`
+`import { Card } from 'entasis/card'`
 
 Flexible container with sections. Supports standard color/size/variant props.
 
@@ -285,8 +285,8 @@ Flexible container with sections. Supports standard color/size/variant props.
 
 ```svelte
 <script>
-	import { Card } from 'svelai/card';
-	import { Button } from 'svelai/button';
+	import { Card } from 'entasis/card';
+	import { Button } from 'entasis/button';
 </script>
 
 <Card variant="outline" color="primary" showBorders>
@@ -301,7 +301,7 @@ Flexible container with sections. Supports standard color/size/variant props.
 
 ```svelte
 <script>
-	import { Card } from 'svelai/card';
+	import { Card } from 'entasis/card';
 </script>
 
 <Card
@@ -328,7 +328,7 @@ Global: `setCardTheme({...})`
 
 ## Skeleton
 
-`import { Skeleton } from 'svelai/skeleton'`
+`import { Skeleton } from 'entasis/skeleton'`
 
 Loading placeholder with pulse animation. Shape/size controlled entirely via `class`.
 
@@ -343,7 +343,7 @@ Loading placeholder with pulse animation. Shape/size controlled entirely via `cl
 
 ```svelte
 <script>
-	import { Skeleton } from 'svelai/skeleton';
+	import { Skeleton } from 'entasis/skeleton';
 
 	let loading = $state(true);
 </script>
@@ -376,7 +376,7 @@ Global: `setSkeletonTheme({...})`
 
 ## Slot
 
-`import { Slot } from 'svelai/slot'`
+`import { Slot } from 'entasis/slot'`
 
 Utility component for rendering dynamic content types uniformly.
 
@@ -398,7 +398,7 @@ Utility component for rendering dynamic content types uniformly.
 
 ```svelte
 <script>
-	import { Slot } from 'svelai/slot';
+	import { Slot } from 'entasis/slot';
 
 	let isLoading = $state(false);
 </script>

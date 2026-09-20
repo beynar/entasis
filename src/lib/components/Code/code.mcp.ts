@@ -87,7 +87,7 @@ function → info, tag → danger, …) and re-tunes a few roles under the dark 
 ### Theme Type Definition
 
 \`\`\`typescript
-import type { CodeThemeProps } from 'svelai/code';
+import type { CodeThemeProps } from 'entasis/code';
 
 const customTheme: CodeThemeProps = {
   root: { base: 'rounded-xl raised-4' },

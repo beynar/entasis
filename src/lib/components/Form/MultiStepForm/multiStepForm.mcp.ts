@@ -11,8 +11,8 @@ MultiStepForm owns one Form per step, displays them through Stepper, validates v
 		MultiStepForm,
 		type FormStep,
 		type MergedMultiStepFormInputs
-	} from 'svelai/multi-step-form';
-	import type { FormInputs, InferFormValue, LiveFormValue } from 'svelai/form';
+	} from 'entasis/multi-step-form';
+	import type { FormInputs, InferFormValue, LiveFormValue } from 'entasis/form';
 
 	const accountInputs = {
 		name: { type: 'text', label: 'Name', required: true },

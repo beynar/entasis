@@ -155,12 +155,12 @@
 {/if}
 
 <style>
-	:global(.svelai-image-gallery .lg-outer) {
+	:global(.entasis-image-gallery .lg-outer) {
 		box-sizing: border-box;
 		padding-inline: var(--image-gallery-margin, 32px);
 	}
 
-	:global(.svelai-image-gallery .lg-content) {
+	:global(.entasis-image-gallery .lg-content) {
 		margin-inline: var(--image-gallery-margin, 32px);
 	}
 </style>

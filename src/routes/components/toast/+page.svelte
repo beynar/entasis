@@ -130,7 +130,7 @@
 		{controls}
 		description="Fire a toast from anywhere with the toast helper. Mount a single <Toaster /> once in your layout. Drag a toast toward its screen edge to dismiss it."
 		code={`<script>
-	import { Toaster, toast } from 'svelai/toast';
+	import { Toaster, toast } from 'entasis/toast';
 </scr${'ipt'}>
 
 <Toaster />

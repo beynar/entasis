@@ -490,7 +490,7 @@ Field theme parts (label, description, error, ...) are also accepted on the same
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setFileInputTheme } from 'svelai/file-input';
+  import { setFileInputTheme } from 'entasis/file-input';
 
   setFileInputTheme({
     inputContainer: {

@@ -7,7 +7,7 @@ Hitbox enlarges the pointer target of an existing interactive element without ch
 
 \`\`\`svelte
 <script>
-  import { Hitbox } from 'svelai/hitbox';
+  import { Hitbox } from 'entasis/hitbox';
 </script>
 
 <button type="button" aria-label="Select page" class="relative size-2 rounded-full bg-primary">

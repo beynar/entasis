@@ -6,7 +6,7 @@ export interface BlockDefinition {
 	description: string;
 	/** Source file relative to the catalog directory. */
 	file: string;
-	/** The inspected layout that this Svelai composition adapts. */
+	/** The inspected layout that this Entasis composition adapts. */
 	reference: string;
 	components: string[];
 }

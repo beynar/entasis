@@ -4,7 +4,6 @@ import type {
 	EventCalendarOccurrence,
 	EventCalendarSegment
 } from './eventCalendar.types.js';
-
 export type EventCalendarAgendaEntry<TItemFields extends object> = Readonly<{
 	occurrence: EventCalendarOccurrence<TItemFields>;
 	segment: EventCalendarSegment<TItemFields>;

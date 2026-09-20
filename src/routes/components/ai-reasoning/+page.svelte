@@ -13,7 +13,7 @@
 		duration: (seconds: number) => 'Completed in ' + seconds + 's'
 	};
 	const mainCode = `<script lang="ts">
-  import { AIReasoning } from 'svelai/ai-reasoning';
+  import { AIReasoning } from 'entasis/ai-reasoning';
 
   let streaming = $state(true);
   const thinkingMessages = ['Planning', 'Checking constraints', 'Preparing response'];

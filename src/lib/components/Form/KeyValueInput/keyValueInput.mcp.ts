@@ -7,7 +7,7 @@ An editable list of key/value string pairs. Each row renders a key text input, a
 
 \`\`\`svelte
 <script>
-	import { KeyValueInput } from 'svelai/key-value-input';
+	import { KeyValueInput } from 'entasis/key-value-input';
 	let value = $state(null);
 </script>
 
@@ -157,7 +157,7 @@ The KeyValueInput uses a theme object customizable via the \`theme\` prop or a g
 
 \`\`\`svelte
 <script>
-	import { setKeyValueInputTheme } from 'svelai/key-value-input';
+	import { setKeyValueInputTheme } from 'entasis/key-value-input';
 
 	setKeyValueInputTheme({
 		addButton: {

@@ -7,8 +7,8 @@ SelectionMenu renders ToggleMenu controls anchored to a non-collapsed document s
 
 \`\`\`svelte
 <script lang="ts">
-	import { SelectionMenu } from 'svelai/selection-menu';
-	import type { ToggleMenuItem } from 'svelai/toggle-menu';
+	import { SelectionMenu } from 'entasis/selection-menu';
+	import type { ToggleMenuItem } from 'entasis/toggle-menu';
 
 	let items = $state<ToggleMenuItem[]>([
 		{ type: 'toggle', label: 'Bold', prefix: boldIcon },

@@ -1,5 +1,5 @@
 export const basicDataTableCode = `<script lang="ts">
-  import { DataTable, type DataTableCellPayload, type DataTableColumn } from 'svelai/data-table';
+  import { DataTable, type DataTableCellPayload, type DataTableColumn } from 'entasis/data-table';
 
   type Person = {
     id: string;
@@ -63,8 +63,8 @@ export const editingDataTableCode = `<script lang="ts">
     type DataTableCellCommit,
     type DataTableColumn,
     type DataTableEditorPayload
-  } from 'svelai/data-table';
-  import { Select } from 'svelai/select';
+  } from 'entasis/data-table';
+  import { Select } from 'entasis/select';
 
   let items = $state<Person[]>(initialPeople);
 
@@ -120,7 +120,7 @@ export const editingDataTableCode = `<script lang="ts">
 />`;
 
 export const groupingDataTableCode = `<script lang="ts">
-  import { DataTable, type DataTableColumn } from 'svelai/data-table';
+  import { DataTable, type DataTableColumn } from 'entasis/data-table';
 
   const columns: DataTableColumn<Person>[] = [
     {
@@ -155,7 +155,7 @@ export const groupingDataTableCode = `<script lang="ts">
 />`;
 
 export const manualDataTableCode = `<script lang="ts">
-  import { createDataTableState, DataTable } from 'svelai/data-table';
+  import { createDataTableState, DataTable } from 'entasis/data-table';
 
   let state = $state(createDataTableState(columns));
   let items = $state<Person[]>([]);
@@ -202,15 +202,15 @@ export const manualDataTableCode = `<script lang="ts">
 />`;
 
 export const renderingDataTableCode = `<script lang="ts">
-  import { Chip } from 'svelai/chip';
+  import { Chip } from 'entasis/chip';
   import {
     createDataTableColumnHelper,
     DataTable,
     type DataTableCellRenderPayload,
     type DataTableFilterPayload,
     type DataTableHeaderRenderPayload
-  } from 'svelai/data-table';
-  import { Select } from 'svelai/select';
+  } from 'entasis/data-table';
+  import { Select } from 'entasis/select';
 
   const column = createDataTableColumnHelper<Person>();
   const columns = [
@@ -266,9 +266,9 @@ export const externalControlsDataTableCode = `<script lang="ts">
     createDataTableState,
     DataTable,
     type DataTableApi
-  } from 'svelai/data-table';
-  import { Pagination } from 'svelai/pagination';
-  import { TextInput } from 'svelai/text-input';
+  } from 'entasis/data-table';
+  import { Pagination } from 'entasis/pagination';
+  import { TextInput } from 'entasis/text-input';
 
   let state = $state(createDataTableState(columns, {
     pagination: { page: 1, pageSize: 10 }

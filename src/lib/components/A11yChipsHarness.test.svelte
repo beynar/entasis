@@ -200,9 +200,9 @@
 		/>
 	{:else if scenario === 'hover-card'}
 		<HoverCard
-			trigger={{ content: '@svelai' }}
+			trigger={{ content: '@entasis' }}
 			delay={0}
-			title="svelai"
+			title="entasis"
 			description="Hover card body"
 			transition={zero}
 		/>

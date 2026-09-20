@@ -87,7 +87,7 @@
 		description="The flow composes existing form primitives and returns answers keyed by question id."
 		class="!min-h-0 p-4"
 		code={`<script lang="ts">
-  import { AIAskUserQuestion } from 'svelai/ai-ask-user-question';
+  import { AIAskUserQuestion } from 'entasis/ai-ask-user-question';
 ${'</' + 'script>'}
 
 <AIAskUserQuestion

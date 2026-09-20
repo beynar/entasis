@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	import { arrowUpRightIcon } from 'svelai/icons/arrowUpRight';
-	import { bookOpenIcon } from 'svelai/icons/bookOpen';
-	import { paletteIcon } from 'svelai/icons/palette';
-	import { squaresFourIcon } from 'svelai/icons/squaresFour';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
+	import { arrowUpRightIcon } from 'entasis/icons/arrowUpRight';
+	import { bookOpenIcon } from 'entasis/icons/bookOpen';
+	import { paletteIcon } from 'entasis/icons/palette';
+	import { squaresFourIcon } from 'entasis/icons/squaresFour';
 </script>
 
 <section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl md:grid-cols-2">

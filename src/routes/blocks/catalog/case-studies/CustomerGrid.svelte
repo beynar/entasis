@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Button } from 'svelai/button';
+	import { Heading } from 'entasis/heading';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Button } from 'entasis/button';
 	const stories = [
 		{
 			company: 'Northstar',

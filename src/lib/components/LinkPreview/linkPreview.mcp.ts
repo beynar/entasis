@@ -7,7 +7,7 @@ LinkPreview renders an anchor trigger with a HoverCard preview that loads link m
 
 \`\`\`svelte
 <script>
-	import { LinkPreview } from 'svelai/link-preview';
+	import { LinkPreview } from 'entasis/link-preview';
 </script>
 \`\`\`
 
@@ -23,15 +23,15 @@ By default, LinkPreview requests \`/api/link-metadata?url=<href>\` when the card
 
 \`\`\`svelte
 <LinkPreview
-	href="https://svelai.dev"
+	href="https://entasis.dev"
 	metadata={{
-		title: 'Svelai',
+		title: 'Entasis',
 		description: 'Configuration-first Svelte components.',
-		siteName: 'Svelai',
+		siteName: 'Entasis',
 		favicon: '/favicon.png'
 	}}
 >
-	Svelai
+	Entasis
 </LinkPreview>
 \`\`\`
 

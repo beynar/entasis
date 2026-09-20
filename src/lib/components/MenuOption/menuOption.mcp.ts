@@ -93,8 +93,8 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 ### Menu Item with Prefix Icon
 \`\`\`svelte
 <script lang="ts">
-	import { MenuOption } from 'svelai/menu-option';
-	import { gearIcon } from 'svelai/icons/gear';
+	import { MenuOption } from 'entasis/menu-option';
+	import { gearIcon } from 'entasis/icons/gear';
 </script>
 
 <MenuOption>
@@ -110,8 +110,8 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 ### Menu Item with Suffix Icon
 \`\`\`svelte
 <script lang="ts">
-	import { MenuOption } from 'svelai/menu-option';
-	import { caretRightIcon } from 'svelai/icons/caretRight';
+	import { MenuOption } from 'entasis/menu-option';
+	import { caretRightIcon } from 'entasis/icons/caretRight';
 </script>
 
 <MenuOption>
@@ -127,9 +127,9 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 ### Menu Item with Both Icons
 \`\`\`svelte
 <script lang="ts">
-	import { MenuOption } from 'svelai/menu-option';
-	import { userIcon } from 'svelai/icons/user';
-	import { checkIcon } from 'svelai/icons/check';
+	import { MenuOption } from 'entasis/menu-option';
+	import { userIcon } from 'entasis/icons/user';
+	import { checkIcon } from 'entasis/icons/check';
 </script>
 
 <MenuOption>
@@ -232,8 +232,8 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 ### External Link
 \`\`\`svelte
 <script lang="ts">
-	import { MenuOption } from 'svelai/menu-option';
-	import { arrowSquareOutIcon } from 'svelai/icons/arrowSquareOut';
+	import { MenuOption } from 'entasis/menu-option';
+	import { arrowSquareOutIcon } from 'entasis/icons/arrowSquareOut';
 </script>
 
 <MenuOption 
@@ -268,11 +268,11 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 ### Menu with Multiple Options
 \`\`\`svelte
 <script lang="ts">
-	import { MenuOption } from 'svelai/menu-option';
-	import { gearIcon } from 'svelai/icons/gear';
-	import { userIcon } from 'svelai/icons/user';
-	import { signOutIcon } from 'svelai/icons/signOut';
-	import { questionIcon } from 'svelai/icons/question';
+	import { MenuOption } from 'entasis/menu-option';
+	import { gearIcon } from 'entasis/icons/gear';
+	import { userIcon } from 'entasis/icons/user';
+	import { signOutIcon } from 'entasis/icons/signOut';
+	import { questionIcon } from 'entasis/icons/question';
 </script>
 
 <div class="w-64 bg-surface rounded-xl border border-neutral-muted p-1">
@@ -319,8 +319,8 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 ### With Attachments
 \`\`\`svelte
 <script lang="ts">
-	import { MenuOption } from 'svelai/menu-option';
-	import { spinnerOverlay } from 'svelai/spinner-overlay';
+	import { MenuOption } from 'entasis/menu-option';
+	import { spinnerOverlay } from 'entasis/spinner-overlay';
 	
 	let loading = $state(false);
 	
@@ -472,7 +472,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setMenuOptionTheme } from 'svelai/menu-option';
+  import { setMenuOptionTheme } from 'entasis/menu-option';
   
   setMenuOptionTheme({
     root: {

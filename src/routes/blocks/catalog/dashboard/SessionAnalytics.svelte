@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Grid } from 'svelai/grid';
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chart } from 'svelai/chart';
-	import { Meter } from 'svelai/meter';
-	import { Stat } from 'svelai/stat';
-	import { Table } from 'svelai/table';
+	import { Grid } from 'entasis/grid';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chart } from 'entasis/chart';
+	import { Meter } from 'entasis/meter';
+	import { Stat } from 'entasis/stat';
+	import { Table } from 'entasis/table';
 
 	let filter = $state('All');
 	const sessions = [

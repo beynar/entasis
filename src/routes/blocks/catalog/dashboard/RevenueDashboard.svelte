@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Grid } from 'svelai/grid';
-	import { Stack } from 'svelai/stack';
-	import { Card } from 'svelai/card';
-	import { Chart } from 'svelai/chart';
-	import { ProgressCircle } from 'svelai/progress-circle';
-	import { Select } from 'svelai/select';
-	import { Stat } from 'svelai/stat';
-	import { Table } from 'svelai/table';
+	import { Grid } from 'entasis/grid';
+	import { Stack } from 'entasis/stack';
+	import { Card } from 'entasis/card';
+	import { Chart } from 'entasis/chart';
+	import { ProgressCircle } from 'entasis/progress-circle';
+	import { Select } from 'entasis/select';
+	import { Stat } from 'entasis/stat';
+	import { Table } from 'entasis/table';
 
 	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
 	const revenue = months.map((month, index) => ({

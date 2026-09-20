@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { ImageZoom } from 'svelai/image-zoom';
+	import { Heading } from 'entasis/heading';
+	import { ImageZoom } from 'entasis/image-zoom';
 	const photos = [
 		{
 			title: 'Desert light',

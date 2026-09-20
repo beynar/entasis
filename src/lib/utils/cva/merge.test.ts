@@ -8,7 +8,7 @@ import { cx } from './engine.js';
  * all: every one of them is a "last class wins" decision that a plain clsx
  * cannot make. The custom groups (raised-*, lift-*, h-control-*, h-row-*, size-icon-*,
  * duration-*, ease-*) and the semantic spacing scale (p-md, gap-layout-lg, ...)
- * are svelai utilities, so the engine must be configured to know about them.
+ * are entasis utilities, so the engine must be configured to know about them.
  */
 describe('cx conflict resolution', () => {
 	describe('tailwind core scales', () => {
@@ -33,7 +33,7 @@ describe('cx conflict resolution', () => {
 		});
 	});
 
-	describe('svelai semantic spacing scale', () => {
+	describe('entasis semantic spacing scale', () => {
 		it('resolves semantic against semantic', () => {
 			expect(cx('p-md', 'p-lg')).toBe('p-lg');
 		});
@@ -48,7 +48,7 @@ describe('cx conflict resolution', () => {
 		});
 	});
 
-	describe('svelai custom utility groups', () => {
+	describe('entasis custom utility groups', () => {
 		it('resolves raised-* elevation', () => {
 			expect(cx('raised-2', 'raised-4')).toBe('raised-4');
 			expect(cx('raised-md', 'raised-none')).toBe('raised-none');
@@ -93,7 +93,7 @@ describe('cx conflict resolution', () => {
 		});
 	});
 
-	describe('svelai plugin utilities the config must know about', () => {
+	describe('entasis plugin utilities the config must know about', () => {
 		it('resolves viewport sizes against the core h-* and w-* groups', () => {
 			expect(cx('h-full', 'h-window')).toBe('h-window');
 			expect(cx('h-window', 'h-full')).toBe('h-full');
@@ -142,7 +142,7 @@ describe('cx conflict resolution', () => {
 		});
 	});
 
-	describe('svelai utilities against the core groups they shadow', () => {
+	describe('entasis utilities against the core groups they shadow', () => {
 		it('resolves control heights against h-* and size-*', () => {
 			expect(cx('h-control-md', 'h-9')).toBe('h-9');
 			expect(cx('h-9', 'h-control-md')).toBe('h-control-md');

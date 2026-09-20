@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Accordion } from 'svelai/accordion';
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Separator } from 'svelai/separator';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
+	import { Accordion } from 'entasis/accordion';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Separator } from 'entasis/separator';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
 	const groups = [
 		{
 			id: 'build',

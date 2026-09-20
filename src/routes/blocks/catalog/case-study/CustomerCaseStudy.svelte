@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Heading } from 'svelai/heading';
-	import { Chip } from 'svelai/chip';
-	import { Card } from 'svelai/card';
-	import { Avatar } from 'svelai/avatar';
+	import { Stack } from 'entasis/stack';
+	import { Heading } from 'entasis/heading';
+	import { Chip } from 'entasis/chip';
+	import { Card } from 'entasis/card';
+	import { Avatar } from 'entasis/avatar';
 </script>
 
 <section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">

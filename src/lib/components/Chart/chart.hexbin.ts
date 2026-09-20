@@ -8,8 +8,8 @@ import type { ChartScatterMark } from './chart.props.js';
 type HexbinScatterMark<TRow> = Extract<ChartScatterMark<TRow>, { variant: 'hexbin' }>;
 
 export type ChartHexbinDatum<TRow extends object = object> = HexbinDatum<TRow> & {
-	readonly __svelaiHexbin: true;
-	readonly __svelaiSourceRows: readonly TRow[];
+	readonly __entasisHexbin: true;
+	readonly __entasisSourceRows: readonly TRow[];
 };
 
 export function compileHexbinScatterMark<TRow extends object>(
@@ -34,8 +34,8 @@ export function compileHexbinScatterMark<TRow extends object>(
 			: createMixedHexbinFill<TRow>(compileColor(mark.color ?? 'primary')),
 		outputs: {
 			count: { reduce: 'count' },
-			__svelaiHexbin: { reduce: () => true as const },
-			__svelaiSourceRows: {
+			__entasisHexbin: { reduce: () => true as const },
+			__entasisSourceRows: {
 				reduce: ({ data }: TransformReduceContext<TRow>) => data
 			}
 		}
@@ -70,6 +70,6 @@ function createMixedHexbinFill<TRow>(color: string): ChannelAccessor<HexbinDatum
 
 export function isHexbinDatum(value: unknown): value is ChartHexbinDatum {
 	return (
-		typeof value === 'object' && value !== null && Reflect.get(value, '__svelaiHexbin') === true
+		typeof value === 'object' && value !== null && Reflect.get(value, '__entasisHexbin') === true
 	);
 }

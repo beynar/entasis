@@ -1,4 +1,4 @@
-# Svelai Display Components Reference
+# Entasis Display Components Reference
 
 ## Table of Contents
 
@@ -22,7 +22,7 @@
 
 ## Button
 
-`import { Button } from 'svelai/button'`
+`import { Button } from 'entasis/button'`
 
 ### Unique Props
 
@@ -50,8 +50,8 @@ Defaults: `variant="solid"`, `size="normal"`, `color` = theme `defaultColor` (`n
 
 ```svelte
 <script>
-	import { Button } from 'svelai/button';
-	import { floppyDiskIcon } from 'svelai/icons/floppyDisk';
+	import { Button } from 'entasis/button';
+	import { floppyDiskIcon } from 'entasis/icons/floppyDisk';
 
 	let saving = $state(false);
 </script>
@@ -66,7 +66,7 @@ Defaults: `variant="solid"`, `size="normal"`, `color` = theme `defaultColor` (`n
 
 ## ButtonGroup
 
-`import { ButtonGroup } from 'svelai/button-group'`
+`import { ButtonGroup } from 'entasis/button-group'`
 
 ### Unique Props
 
@@ -84,7 +84,7 @@ Shared props (size, color, variant, disabled) apply to all buttons. Individual b
 
 ```svelte
 <script>
-	import { ButtonGroup } from 'svelai/button-group';
+	import { ButtonGroup } from 'entasis/button-group';
 
 	let selected = $state('day');
 </script>
@@ -111,7 +111,7 @@ Shared props (size, color, variant, disabled) apply to all buttons. Individual b
 
 ## Avatar
 
-`import { Avatar, AvatarGroup } from 'svelai/avatar'`
+`import { Avatar, AvatarGroup } from 'entasis/avatar'`
 
 ### Avatar Props
 
@@ -144,7 +144,7 @@ prefix = bottom-left badge, suffix = bottom-right badge (both are `Slot`s and ta
 
 ```svelte
 <script>
-	import { Avatar, AvatarGroup } from 'svelai/avatar';
+	import { Avatar, AvatarGroup } from 'entasis/avatar';
 
 	const teamMembers = [{ name: 'Jane Doe' }, { name: 'John Roe' }, { name: 'Ada Lovelace' }];
 </script>
@@ -162,7 +162,7 @@ prefix = bottom-left badge, suffix = bottom-right badge (both are `Slot`s and ta
 
 ## Chip
 
-`import { Chip } from 'svelai/chip'`
+`import { Chip } from 'entasis/chip'`
 
 Compact tag/label element. Renders as `<button>` (if onclick/onenter/onleave), `<a>` (if href), or `<div>`. There is no separate Badge component: the `position` prop turns a Chip into a corner badge.
 
@@ -191,10 +191,10 @@ Pair `selected` with `variant="soft"` for the chosen entry and `variant="outline
 
 ```svelte
 <script>
-	import { Chip } from 'svelai/chip';
-	import { Button } from 'svelai/button';
-	import { tagIcon } from 'svelai/icons/tag';
-	import { xIcon } from 'svelai/icons/x';
+	import { Chip } from 'entasis/chip';
+	import { Button } from 'entasis/button';
+	import { tagIcon } from 'entasis/icons/tag';
+	import { xIcon } from 'entasis/icons/x';
 </script>
 
 <Chip color="primary" variant="soft">
@@ -215,7 +215,7 @@ Pair `selected` with `variant="soft"` for the chosen entry and `variant="outline
 
 ## Heading
 
-`import { Heading } from 'svelai/heading'`
+`import { Heading } from 'entasis/heading'`
 
 ### Unique Props
 
@@ -240,7 +240,7 @@ No prefix/suffix slots. No color/variant props.
 
 ```svelte
 <script>
-	import { Heading } from 'svelai/heading';
+	import { Heading } from 'entasis/heading';
 </script>
 
 <Heading size="h1" as="h2" weight="bold" trim="both">Page Title</Heading>
@@ -251,7 +251,7 @@ No prefix/suffix slots. No color/variant props.
 
 ## Code
 
-`import { Code } from 'svelai/code'`
+`import { Code } from 'entasis/code'`
 
 ### Unique Props
 
@@ -276,7 +276,7 @@ Block only (no inline mode). No color/variant/size props. Slots `header`/`footer
 
 ```svelte
 <script>
-	import { Code } from 'svelai/code';
+	import { Code } from 'entasis/code';
 </script>
 
 <Code
@@ -285,14 +285,14 @@ Block only (no inline mode). No color/variant/size props. Slots `header`/`footer
 	code={'interface User { name: string; age: number; }'}
 />
 
-<Code language="bash" showHeader={false} code="pnpm add svelai" />
+<Code language="bash" showHeader={false} code="pnpm add entasis" />
 ```
 
 ---
 
 ## Meter
 
-`import { Meter } from 'svelai/meter'`
+`import { Meter } from 'entasis/meter'`
 
 Progress/measurement visualization with spring animations.
 
@@ -323,7 +323,7 @@ Slots: `label`, `description`, `helper`, `header`, `indicator` (payload-less; us
 
 ```svelte
 <script>
-	import { Meter } from 'svelai/meter';
+	import { Meter } from 'entasis/meter';
 </script>
 
 <Meter value={72} color="success" label="Uptime" />
@@ -345,7 +345,7 @@ Slots: `label`, `description`, `helper`, `header`, `indicator` (payload-less; us
 
 ## Stat
 
-`import { Stat, statDefaultOrder, type StatPart } from 'svelai/stat'`
+`import { Stat, statDefaultOrder, type StatPart } from 'entasis/stat'`
 
 Single metric surface: label, value, unit, decorative indicator, hairline, trend row, description,
 plus a top-right action button.
@@ -379,9 +379,9 @@ comes from `trendDirection`), `description`, `children`
 
 ```svelte
 <script lang="ts">
-	import { Stat } from 'svelai/stat';
-	import { lightningIcon } from 'svelai/icons/lightning';
-	import { dotsThreeVerticalIcon } from 'svelai/icons/dotsThreeVertical';
+	import { Stat } from 'entasis/stat';
+	import { lightningIcon } from 'entasis/icons/lightning';
+	import { dotsThreeVerticalIcon } from 'entasis/icons/dotsThreeVertical';
 </script>
 
 <Stat
@@ -406,7 +406,7 @@ comes from `trendDirection`), `description`, `children`
 
 ## MetadataList
 
-`import { MetadataList } from 'svelai/metadata-list'`
+`import { MetadataList } from 'entasis/metadata-list'`
 
 Read-only key/value list (Notion page-properties panel). Muted key label (optional icon) on the left, a typed value on the right. Value `type` is auto-detected from the value and formatted (numbers/dates via `Intl`).
 
@@ -433,7 +433,7 @@ Value types: `text`, `number`, `boolean`, `date`, `url`, `email`, `phone`, `chip
 
 ```svelte
 <script lang="ts">
-	import { MetadataList, type MetadataListItem } from 'svelai/metadata-list';
+	import { MetadataList, type MetadataListItem } from 'entasis/metadata-list';
 
 	const items: MetadataListItem[] = [
 		{ key: 'Name', value: 'Design System v2' },
@@ -463,7 +463,7 @@ Value types: `text`, `number`, `boolean`, `date`, `url`, `email`, `phone`, `chip
 
 ## Rating
 
-`import { Rating } from 'svelai/rating'`
+`import { Rating } from 'entasis/rating'`
 
 Read-only star rating display: half/partial fills, configurable star count, RTL. `RatingInput` (see form-inputs.md) builds on it -- they share the same theme.
 
@@ -489,8 +489,8 @@ Accessibility: the row is `role="img"` labelled "{value} of {max}" (localized); 
 
 ```svelte
 <script>
-	import { Rating } from 'svelai/rating';
-	import { heartIcon, heartIconFill } from 'svelai/icons/heart';
+	import { Rating } from 'entasis/rating';
+	import { heartIcon, heartIconFill } from 'entasis/icons/heart';
 </script>
 
 <Rating value={3.7} />
@@ -510,7 +510,7 @@ Accessibility: the row is `role="img"` labelled "{value} of {max}" (localized); 
 
 ## ToggleButton
 
-`import { ToggleButton } from 'svelai/toggle-button'`
+`import { ToggleButton } from 'entasis/toggle-button'`
 
 Two-state toggle button. Default variant: `outline`.
 
@@ -533,8 +533,8 @@ Variants: `outline`, `ghost` only.
 
 ```svelte
 <script>
-	import { ToggleButton } from 'svelai/toggle-button';
-	import { textBIcon } from 'svelai/icons/textB';
+	import { ToggleButton } from 'entasis/toggle-button';
+	import { textBIcon } from 'entasis/icons/textB';
 
 	let isBold = $state(false);
 </script>
@@ -549,7 +549,7 @@ Variants: `outline`, `ghost` only.
 
 ## ToggleButtonGroup
 
-`import { ToggleButtonGroup } from 'svelai/toggle-button-group'`
+`import { ToggleButtonGroup } from 'entasis/toggle-button-group'`
 
 ### Unique Props
 
@@ -573,9 +573,9 @@ Variants: `outline`, `ghost` only.
 
 ```svelte
 <script>
-	import { ToggleButtonGroup } from 'svelai/toggle-button-group';
-	import { textBIcon } from 'svelai/icons/textB';
-	import { textItalicIcon } from 'svelai/icons/textItalic';
+	import { ToggleButtonGroup } from 'entasis/toggle-button-group';
+	import { textBIcon } from 'entasis/icons/textB';
+	import { textItalicIcon } from 'entasis/icons/textItalic';
 
 	let formats = $state(['bold']);
 </script>
@@ -595,14 +595,14 @@ Variants: `outline`, `ghost` only.
 
 ## Icons
 
-`import { iconNameIcon } from 'svelai/icons/iconName'`
+`import { iconNameIcon } from 'entasis/icons/iconName'`
 
 1500+ icons, each with 6 variants: `regular`, `bold`, `duotone`, `fill`, `light`, `thin`.
 
 ### Import Pattern
 
 ```ts
-import { houseIcon, houseIconBold, houseIconFill } from 'svelai/icons/house';
+import { houseIcon, houseIconBold, houseIconFill } from 'entasis/icons/house';
 ```
 
 ### IconProps
@@ -618,7 +618,7 @@ import { houseIcon, houseIconBold, houseIconFill } from 'svelai/icons/house';
 
 ```svelte
 <script>
-	import { houseIcon } from 'svelai/icons/house';
+	import { houseIcon } from 'entasis/icons/house';
 </script>
 
 {@render houseIcon({ size: 24, color: 'primary' })}
@@ -628,8 +628,8 @@ import { houseIcon, houseIconBold, houseIconFill } from 'svelai/icons/house';
 
 ```svelte
 <script>
-	import { Button } from 'svelai/button';
-	import { eyeClosedIcon } from 'svelai/icons/eyeClosed';
+	import { Button } from 'entasis/button';
+	import { eyeClosedIcon } from 'entasis/icons/eyeClosed';
 </script>
 
 <Button prefix={eyeClosedIcon.withProps({ color: 'danger' })}>Click me</Button>
@@ -641,7 +641,7 @@ This avoids verbose `{#snippet prefix()}...{/snippet}` markup. Icons inherit tex
 
 ## QRCode
 
-`import { QRCode } from 'svelai/qr-code'`
+`import { QRCode } from 'entasis/qr-code'`
 
 Renders a QR code as an SVG. `size` maps to fixed dimensions (small: 96px, normal: 128px, large: 192px); `color` applies theme colors via `currentColor`.
 
@@ -673,8 +673,8 @@ Renders a QR code as an SVG. `size` maps to fixed dimensions (small: 96px, norma
 
 ```svelte
 <script>
-	import { QRCode } from 'svelai/qr-code';
-	import { Button } from 'svelai/button';
+	import { QRCode } from 'entasis/qr-code';
+	import { Button } from 'entasis/button';
 
 	let qr;
 </script>
@@ -692,7 +692,7 @@ Renders a QR code as an SVG. `size` maps to fixed dimensions (small: 96px, norma
 
 ## DocumentViewer
 
-`import { DocumentViewer } from 'svelai/document-viewer'`
+`import { DocumentViewer } from 'entasis/document-viewer'`
 
 Read-only PDF, Word, Excel, CSV, and PowerPoint viewer. Heavy parsing and rendering engines load from pinned CDN assets only for the active format; none are package dependencies. The toolbar adapts to format capabilities, paged formats use a thumbnail sidebar, and XLS/XLSX workbooks use a bottom sheet-tab rail.
 
@@ -729,7 +729,7 @@ Embed the viewer in any width of host — a split pane, a drawer, a dialog — a
 
 ```svelte
 <script>
-	import { DocumentViewer } from 'svelai/document-viewer';
+	import { DocumentViewer } from 'entasis/document-viewer';
 
 	let sheet = $state(1);
 </script>
@@ -747,4 +747,4 @@ Embed the viewer in any width of host — a split pane, a drawer, a dialog — a
 
 ## Global Theming Note
 
-Each component exposes `set[Component]Theme()` from its import path (e.g., `setButtonTheme` from `'svelai/button'`). The shape is `{ root: { base, color: {...}, variant: {...}, size: {...} }, prefix: {...} }` -- see [theming.md](theming.md#component-theme-overrides).
+Each component exposes `set[Component]Theme()` from its import path (e.g., `setButtonTheme` from `'entasis/button'`). The shape is `{ root: { base, color: {...}, variant: {...}, size: {...} }, prefix: {...} }` -- see [theming.md](theming.md#component-theme-overrides).

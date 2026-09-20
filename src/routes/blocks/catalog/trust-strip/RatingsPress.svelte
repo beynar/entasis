@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Rating } from 'svelai/rating';
-	import { Chip } from 'svelai/chip';
-	import { Separator } from 'svelai/separator';
+	import { Rating } from 'entasis/rating';
+	import { Chip } from 'entasis/chip';
+	import { Separator } from 'entasis/separator';
 </script>
 
 <section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">

@@ -15,11 +15,11 @@
 		}
 	]);
 
-	const svelaiMetadata = {
-		title: 'Svelai',
+	const entasisMetadata = {
+		title: 'Entasis',
 		description: 'Configuration-first Svelte components for application interfaces.',
-		siteName: 'Svelai',
-		url: 'https://svelai.dev',
+		siteName: 'Entasis',
+		url: 'https://entasis.dev',
 		favicon: '/favicon.png'
 	};
 </script>
@@ -50,18 +50,18 @@
 			description="Pass metadata when it is already available from your route data or CMS."
 			class="!min-h-fit"
 			code={`<LinkPreview
-	href="https://svelai.dev"
+	href="https://entasis.dev"
 	metadata={{
-		title: 'Svelai',
+		title: 'Entasis',
 		description: 'Configuration-first Svelte components.',
-		siteName: 'Svelai',
+		siteName: 'Entasis',
 		favicon: '/favicon.png'
 	}}
 >
-	Svelai
+	Entasis
 </LinkPreview>`}
 		>
-			<LinkPreview href="https://svelai.dev" metadata={svelaiMetadata}>Svelai</LinkPreview>
+			<LinkPreview href="https://entasis.dev" metadata={entasisMetadata}>Entasis</LinkPreview>
 		</ComponentCard>
 
 		<ComponentCard

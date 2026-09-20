@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Dialog } from 'svelai/dialog';
-	import { Form } from 'svelai/form';
-	import { Table } from 'svelai/table';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Dialog } from 'entasis/dialog';
+	import { Form } from 'entasis/form';
+	import { Table } from 'entasis/table';
 
 	let open = $state(false);
 	let members = $state([

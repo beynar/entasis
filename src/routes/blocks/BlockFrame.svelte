@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { Skeleton } from 'svelai/skeleton';
+	import { Skeleton } from 'entasis/skeleton';
 
 	interface Props {
 		category: string;

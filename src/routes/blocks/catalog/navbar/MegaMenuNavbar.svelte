@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Popover } from 'svelai/popover';
-	import { caretDownIcon } from 'svelai/icons/caretDown';
-	import { listChecksIcon } from 'svelai/icons/listChecks';
-	import { paletteIcon } from 'svelai/icons/palette';
-	import { puzzlePieceIcon } from 'svelai/icons/puzzlePiece';
-	import { squaresFourIcon } from 'svelai/icons/squaresFour';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Popover } from 'entasis/popover';
+	import { caretDownIcon } from 'entasis/icons/caretDown';
+	import { listChecksIcon } from 'entasis/icons/listChecks';
+	import { paletteIcon } from 'entasis/icons/palette';
+	import { puzzlePieceIcon } from 'entasis/icons/puzzlePiece';
+	import { squaresFourIcon } from 'entasis/icons/squaresFour';
 	const links = [
 		{
 			title: 'Components',

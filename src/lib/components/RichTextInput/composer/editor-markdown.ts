@@ -14,7 +14,7 @@ import { getAIComposerMarkdownTransformers } from './markdown.js';
 import type { AIComposerEditorChange } from './editor-change.js';
 import { AIComposerTokenNode } from './token-node.js';
 
-export const EXTERNAL_MARKDOWN_UPDATE = 'svelai:external-markdown';
+export const EXTERNAL_MARKDOWN_UPDATE = 'entasis:external-markdown';
 
 export function loadComposerMarkdown(
 	editor: LexicalEditor,

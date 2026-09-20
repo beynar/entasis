@@ -8,8 +8,8 @@ default, or inside a modal Dialog (⌘K style) with \`dialog\`.
 
 \`\`\`svelte
 <script>
-	import { Command } from 'svelai/command';
-	import { calendarIcon } from 'svelai/icons/calendar';
+	import { Command } from 'entasis/command';
+	import { calendarIcon } from 'entasis/icons/calendar';
 
 	const items = [
 		{

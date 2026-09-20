@@ -27,7 +27,7 @@ export const customSeekTheme = {
 export const basicCode = `<AudioPlayer
 	src="${sampleAudio}"
 	title="Field recording"
-	artist="Svelai archives"
+	artist="Entasis archives"
 />`;
 
 export const histogramCode = `<AudioPlayer

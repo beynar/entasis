@@ -8,7 +8,7 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 
 \`\`\`svelte
 <script lang="ts">
-	import { Sidebar, type SidebarGroup } from 'svelai/sidebar';
+	import { Sidebar, type SidebarGroup } from 'entasis/sidebar';
 </script>
 \`\`\`
 
@@ -16,9 +16,9 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 
 \`\`\`svelte
 <script lang="ts">
-	import { Sidebar, type SidebarGroup } from 'svelai/sidebar';
-	import { houseIcon } from 'svelai/icons/house';
-	import { gearIcon } from 'svelai/icons/gear';
+	import { Sidebar, type SidebarGroup } from 'entasis/sidebar';
+	import { houseIcon } from 'entasis/icons/house';
+	import { gearIcon } from 'entasis/icons/gear';
 
 	const items: SidebarGroup[] = [
 		{
@@ -44,8 +44,8 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 ## AI-Safe Usage Contract
 
 1. Use \`items\` for normal navigation. Use \`content\` only when data-driven rows cannot express the layout.
-2. Use local Svelai icon snippets such as \`houseIcon\`, not Lucide component constructors.
-3. Use \`MenuItem[]\` from \`svelai/menu\` for \`menu\` and action dropdowns.
+2. Use local Entasis icon snippets such as \`houseIcon\`, not Lucide component constructors.
+3. Use \`MenuItem[]\` from \`entasis/menu\` for \`menu\` and action dropdowns.
 4. Do not combine \`menu\` with \`href\` or \`onclick\` on the same row; use \`action\` for a trailing row menu.
 5. Keep \`children\`, \`header\`, \`content\`, \`footer\`, \`banner\`, and action snippets pure; they receive \`SidebarApi\`.
 6. Use \`collapsible="icon"\` for icon rail behavior, \`collapsible="offcanvas"\` for hidden desktop panels, and \`collapsible="none"\` for fixed sidebars. Icon collapse automatically falls back to offcanvas when any data-driven row lacks an icon.
@@ -69,7 +69,7 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 
 ### SidebarMenuEntry
 - **label**: string - Visible row label.
-- **icon**: SidebarIcon - Svelai icon snippet or string.
+- **icon**: SidebarIcon - Entasis icon snippet or string.
 - **iconColor**: Colors - Role tint for the leading icon, applied through \`data-color\`.
 - **iconVariant**: 'bare' | 'tile' - Leading icon treatment. \`tile\` paints a rounded square (\`bg-color-muted text-color-muted-readable\`) around the glyph, so per-project colour chips come from the role scale instead of hand-built markup.
 - **href**: string - Render as an anchor. Mutually exclusive with menu.
@@ -77,7 +77,7 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 - **isActive**: boolean - Adds active styling and \`aria-current="page"\`.
 - **disabled**: boolean - Disables button rows and marks anchor rows disabled.
 - **badge**: string | number - Trailing count/status, hidden in icon mode.
-- **tooltip**: string - Svelai Tooltip content in icon mode. Defaults to label.
+- **tooltip**: string - Entasis Tooltip content in icon mode. Defaults to label.
 - **items**: SidebarMenuSubEntry[] - Inline nested menu.
 - **collapsible**: boolean - Set false for an always-open submenu.
 - **defaultOpen**: boolean - Initial nested menu state.
@@ -184,7 +184,7 @@ Use for \`headerButton\`, \`footerButton\`, or direct \`<SidebarMenuButton />\` 
 
 ## Notes
 
-- Dropdown menus use Svelai \`PopupMenu\` and \`MenuItem[]\`.
-- The component uses semantic Svelai tokens. Do not add shadcn \`sidebar-*\` color tokens.
-- Snippet icons from \`svelai/icons/*\` are the preferred icon format.
+- Dropdown menus use Entasis \`PopupMenu\` and \`MenuItem[]\`.
+- The component uses semantic Entasis tokens. Do not add shadcn \`sidebar-*\` color tokens.
+- Snippet icons from \`entasis/icons/*\` are the preferred icon format.
 `;

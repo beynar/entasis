@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { Alert } from 'svelai/alert';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Empty } from 'svelai/empty';
-	import { SegmentedControl } from 'svelai/segmented-control';
-	import { Skeleton } from 'svelai/skeleton';
-	import { Stack } from 'svelai/stack';
-	import { arrowClockwiseIcon } from 'svelai/icons/arrowClockwise';
-	import { folderOpenIcon } from 'svelai/icons/folderOpen';
-	import { plusIcon } from 'svelai/icons/plus';
-	import { spinnerGapIcon } from 'svelai/icons/spinnerGap';
-	import { xCircleIcon } from 'svelai/icons/xCircle';
+	import { Alert } from 'entasis/alert';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Empty } from 'entasis/empty';
+	import { SegmentedControl } from 'entasis/segmented-control';
+	import { Skeleton } from 'entasis/skeleton';
+	import { Stack } from 'entasis/stack';
+	import { arrowClockwiseIcon } from 'entasis/icons/arrowClockwise';
+	import { folderOpenIcon } from 'entasis/icons/folderOpen';
+	import { plusIcon } from 'entasis/icons/plus';
+	import { spinnerGapIcon } from 'entasis/icons/spinnerGap';
+	import { xCircleIcon } from 'entasis/icons/xCircle';
 
 	const stateOptions = [
 		{ value: 'loading', label: 'Loading', icon: spinnerGapIcon },

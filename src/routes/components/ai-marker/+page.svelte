@@ -48,8 +48,8 @@
 		description="Choose the visual boundary that matches the transcript event without changing message semantics."
 		class="!min-h-[280px]"
 		code={`<script lang="ts">
-  import { AIMarker } from 'svelai/ai-marker';
-  import { fileTextIcon } from 'svelai/icons/fileText';
+  import { AIMarker } from 'entasis/ai-marker';
+  import { fileTextIcon } from 'entasis/icons/fileText';
 ${'</' + 'script>'}
 
 {#snippet markerIcon()}

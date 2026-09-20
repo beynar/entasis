@@ -101,8 +101,8 @@ The Avatar component displays a user's profile picture with fallback initials. I
 ### With Icon Badge (Suffix)
 \`\`\`svelte
 <script lang="ts">
-	import { Avatar } from 'svelai/avatar';
-	import { checkIcon } from 'svelai/icons/check';
+	import { Avatar } from 'entasis/avatar';
+	import { checkIcon } from 'entasis/icons/check';
 </script>
 
 <Avatar name="Jane Smith">
@@ -153,7 +153,7 @@ The Avatar component displays a user's profile picture with fallback initials. I
 ### Custom Avatar in Group
 \`\`\`svelte
 <script lang="ts">
-	import { Avatar, AvatarGroup } from 'svelai/avatar';
+	import { Avatar, AvatarGroup } from 'entasis/avatar';
 
 	let items = [{ name: 'John Doe' }, { name: 'Jane Smith' }];
 </script>
@@ -172,7 +172,7 @@ The Avatar component displays a user's profile picture with fallback initials. I
 ### Custom Remaining Count
 \`\`\`svelte
 <script lang="ts">
-	import { AvatarGroup } from 'svelai/avatar';
+	import { AvatarGroup } from 'entasis/avatar';
 
 	let items = [{ name: 'User 1' }, { name: 'User 2' }, { name: 'User 3' }, { name: 'User 4' }];
 </script>
@@ -234,7 +234,7 @@ The theme object contains the following parts:
 ### Theme Type Definition
 
 \`\`\`typescript
-import type { AvatarThemeProps } from 'svelai/avatar';
+import type { AvatarThemeProps } from 'entasis/avatar';
 
 // Example theme customization
 const customTheme: AvatarThemeProps = {
@@ -347,7 +347,7 @@ const customTheme: AvatarThemeProps = {
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setAvatarTheme } from 'svelai/avatar';
+  import { setAvatarTheme } from 'entasis/avatar';
   
   setAvatarTheme({
     root: {

@@ -1,4 +1,4 @@
-// Templates are stress tests of the design system: they may use svelai components, their props,
+// Templates are stress tests of the design system: they may use entasis components, their props,
 // the layout primitives and the theme tokens — nothing else. This check fails on every way a
 // template could fake a look instead of exercising the library.
 import { readdirSync, readFileSync, statSync } from 'node:fs';

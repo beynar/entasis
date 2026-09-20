@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { Form, type FormInputs, type InferFormValue, type LiveFormValue } from 'svelai/form';
-	import { arrowCounterClockwiseIcon } from 'svelai/icons/arrowCounterClockwise';
-	import { bellIcon } from 'svelai/icons/bell';
-	import { checkCircleIcon } from 'svelai/icons/checkCircle';
-	import { desktopIcon } from 'svelai/icons/desktop';
-	import { envelopeIcon } from 'svelai/icons/envelope';
-	import { floppyDiskIcon } from 'svelai/icons/floppyDisk';
-	import { moonIcon } from 'svelai/icons/moon';
-	import { shieldCheckIcon } from 'svelai/icons/shieldCheck';
-	import { sunIcon } from 'svelai/icons/sun';
+	import { Form, type FormInputs, type InferFormValue, type LiveFormValue } from 'entasis/form';
+	import { arrowCounterClockwiseIcon } from 'entasis/icons/arrowCounterClockwise';
+	import { bellIcon } from 'entasis/icons/bell';
+	import { checkCircleIcon } from 'entasis/icons/checkCircle';
+	import { desktopIcon } from 'entasis/icons/desktop';
+	import { envelopeIcon } from 'entasis/icons/envelope';
+	import { floppyDiskIcon } from 'entasis/icons/floppyDisk';
+	import { moonIcon } from 'entasis/icons/moon';
+	import { shieldCheckIcon } from 'entasis/icons/shieldCheck';
+	import { sunIcon } from 'entasis/icons/sun';
 
 	// Every notification row reserves the same icon column, so the toggles and
 	// labels stay aligned whether or not a row declares a prefix icon.

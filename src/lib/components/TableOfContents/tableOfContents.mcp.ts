@@ -7,7 +7,7 @@ TableOfContents discovers headings inside a content target or accepts an explici
 
 \`\`\`svelte
 <script lang="ts">
-  import { TableOfContents } from 'svelai/table-of-contents';
+  import { TableOfContents } from 'entasis/table-of-contents';
 </script>
 
 <aside>
@@ -62,7 +62,7 @@ A selector target renders a pre-hydration list, neutral rail, and connectors int
 
 \`\`\`svelte
 <script lang="ts">
-  import { TableOfContents, type TableOfContentsItem } from 'svelai/table-of-contents';
+  import { TableOfContents, type TableOfContentsItem } from 'entasis/table-of-contents';
 
   const items: TableOfContentsItem[] = [
     { id: 'overview', level: 2, title: 'Overview' },

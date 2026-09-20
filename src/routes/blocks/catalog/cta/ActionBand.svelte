@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Heading } from 'svelai/heading';
+	import { Button } from 'entasis/button';
+	import { Heading } from 'entasis/heading';
 </script>
 
 <section class="gap-xl bg-primary-muted p-xl flex flex-wrap items-center justify-between">

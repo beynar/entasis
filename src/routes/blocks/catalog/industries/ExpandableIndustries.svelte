@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Accordion } from 'svelai/accordion';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	import { codeIcon } from 'svelai/icons/code';
-	import { graduationCapIcon } from 'svelai/icons/graduationCap';
-	import { paletteIcon } from 'svelai/icons/palette';
+	import { Stack } from 'entasis/stack';
+	import { Accordion } from 'entasis/accordion';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
+	import { codeIcon } from 'entasis/icons/code';
+	import { graduationCapIcon } from 'entasis/icons/graduationCap';
+	import { paletteIcon } from 'entasis/icons/palette';
 	const industries = [
 		{
 			id: 'product',

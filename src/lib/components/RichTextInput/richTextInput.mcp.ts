@@ -5,7 +5,7 @@ RichTextInput is a markdown rich text editor for AI-style composition. It suppor
 
 ## Requires
 
-RichTextInput is built on Lexical. Those packages are optional peer dependencies of svelai, so install them alongside it:
+RichTextInput is built on Lexical. Those packages are optional peer dependencies of entasis, so install them alongside it:
 
 \`pnpm add lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils\`
 
@@ -13,7 +13,7 @@ RichTextInput is built on Lexical. Those packages are optional peer dependencies
 
 \`\`\`svelte
 <script lang="ts">
-	import { RichTextInput, type RichTextInputTriggers } from 'svelai/rich-text-input';
+	import { RichTextInput, type RichTextInputTriggers } from 'entasis/rich-text-input';
 
 	let value = $state('');
 

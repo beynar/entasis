@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Chip } from 'svelai/chip';
-	import { Button } from 'svelai/button';
-	import { NumberInput } from 'svelai/number-input';
-	import { Card } from 'svelai/card';
-	import { Empty } from 'svelai/empty';
-	import { Dialog } from 'svelai/dialog';
-	import { Meter } from 'svelai/meter';
+	import { Heading } from 'entasis/heading';
+	import { Chip } from 'entasis/chip';
+	import { Button } from 'entasis/button';
+	import { NumberInput } from 'entasis/number-input';
+	import { Card } from 'entasis/card';
+	import { Empty } from 'entasis/empty';
+	import { Dialog } from 'entasis/dialog';
+	import { Meter } from 'entasis/meter';
 	const products = [
 		{
 			id: 'arc',

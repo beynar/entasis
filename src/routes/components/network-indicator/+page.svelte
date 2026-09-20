@@ -82,8 +82,8 @@
 		description="Trigger the mounted page indicator from explicit async work."
 		class="!min-h-[260px]"
 		code={`<script lang="ts">
-	import { Button } from 'svelai/button';
-	import { NetworkIndicator } from 'svelai/network-indicator';
+	import { Button } from 'entasis/button';
+	import { NetworkIndicator } from 'entasis/network-indicator';
 
 	let loading = $state(false);
 
@@ -130,8 +130,8 @@ ${'</' + 'script>'}
 			description="Controlled loading state keeps the indicator local to a panel and still plays the finish-to-100 animation when loading ends."
 			class="!min-h-[240px]"
 			code={`<script lang="ts">
-	import { Button } from 'svelai/button';
-	import { NetworkIndicator } from 'svelai/network-indicator';
+	import { Button } from 'entasis/button';
+	import { NetworkIndicator } from 'entasis/network-indicator';
 
 	let loading = $state(false);
 

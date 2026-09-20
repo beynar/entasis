@@ -7,7 +7,7 @@ Render an ordered sequence of dated or descriptive events on a vertical or horiz
 
 \`\`\`svelte
 <script lang="ts">
-  import { Timeline, type TimelineItem } from 'svelai/timeline';
+  import { Timeline, type TimelineItem } from 'entasis/timeline';
 
   const items: TimelineItem[] = [
     {
@@ -42,8 +42,8 @@ The default configuration is a vertical timeline with all content on the logical
 - **variant**: \`'ghost' | 'card' | 'outline' | 'soft'\` (default: \`'ghost'\`) — global surface treatment for all entries.
 - **size**: \`'small' | 'normal' | 'large'\` (default: \`'normal'\`) — title and description typography, marker and icon scale, and loading Spinner scale.
 - **density**: \`'compact' | 'normal' | 'comfortable'\` (default: \`'normal'\`) — item gaps, surface padding, connector spacing, and horizontal item minimum width.
-- **color**: Svelai semantic color (default: \`'neutral'\`) — default marker and outline or soft surface accent.
-- **connectorColor**: Svelai semantic color (default: \`'neutral'\`) — default outgoing connector color.
+- **color**: Entasis semantic color (default: \`'neutral'\`) — default marker and outline or soft surface accent.
+- **connectorColor**: Entasis semantic color (default: \`'neutral'\`) — default outgoing connector color.
 - **showConnectors**: \`boolean\` (default: \`true\`) — shows connector segments between markers.
 - **scrollFade**: \`boolean\` (default: \`true\`) — applies the shared logical horizontal scroll fade only while a horizontal timeline actually overflows.
 - **i18n**: \`Partial<Messages>\` — per-instance translations merged over the global i18n catalog.
@@ -105,7 +105,7 @@ Application item types can extend \`TimelineItem\`. The extended type remains av
 
 \`\`\`svelte
 <script lang="ts">
-  import { Timeline, type TimelineItem } from 'svelai/timeline';
+  import { Timeline, type TimelineItem } from 'entasis/timeline';
 
   type Release = TimelineItem & {
     version: string;

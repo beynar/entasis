@@ -61,7 +61,7 @@
 
 <div
 	bind:this={ref}
-	data-svelai-overlay
+	data-entasis-overlay
 	data-open={isOpen}
 	data-show-on={showOn}
 	data-position={position}
@@ -107,40 +107,40 @@
 </div>
 
 <style>
-	:global(:where(*:has(> [data-svelai-overlay]:first-child))) {
+	:global(:where(*:has(> [data-entasis-overlay]:first-child))) {
 		position: relative;
 		isolation: isolate;
 	}
 
-	:global(:where(*:has(> [data-svelai-overlay]:first-child)):hover)
-		> [data-svelai-overlay][data-open='true'][data-show-on='hover'],
-	:global(:where(*:has(> [data-svelai-overlay]:first-child)):focus-within)
-		> [data-svelai-overlay][data-open='true'][data-show-on='hover'],
-	:global(:where(*:has(> [data-svelai-overlay]:first-child)):focus-within)
-		> [data-svelai-overlay][data-open='true'][data-show-on='focus'] {
+	:global(:where(*:has(> [data-entasis-overlay]:first-child)):hover)
+		> [data-entasis-overlay][data-open='true'][data-show-on='hover'],
+	:global(:where(*:has(> [data-entasis-overlay]:first-child)):focus-within)
+		> [data-entasis-overlay][data-open='true'][data-show-on='hover'],
+	:global(:where(*:has(> [data-entasis-overlay]:first-child)):focus-within)
+		> [data-entasis-overlay][data-open='true'][data-show-on='focus'] {
 		opacity: 1;
 	}
 
-	:global(:where(*:has(> [data-svelai-overlay]:first-child)):hover)
-		> [data-svelai-overlay][data-open='true'][data-show-on='hover']
+	:global(:where(*:has(> [data-entasis-overlay]:first-child)):hover)
+		> [data-entasis-overlay][data-open='true'][data-show-on='hover']
 		> [data-overlay-content],
-	:global(:where(*:has(> [data-svelai-overlay]:first-child)):focus-within)
-		> [data-svelai-overlay][data-open='true'][data-show-on='hover']
+	:global(:where(*:has(> [data-entasis-overlay]:first-child)):focus-within)
+		> [data-entasis-overlay][data-open='true'][data-show-on='hover']
 		> [data-overlay-content],
-	:global(:where(*:has(> [data-svelai-overlay]:first-child)):focus-within)
-		> [data-svelai-overlay][data-open='true'][data-show-on='focus']
+	:global(:where(*:has(> [data-entasis-overlay]:first-child)):focus-within)
+		> [data-entasis-overlay][data-open='true'][data-show-on='focus']
 		> [data-overlay-content] {
 		pointer-events: auto;
 		translate: 0;
 	}
 
 	@media (hover: none) {
-		:global([data-svelai-overlay][data-open='true'][data-show-on='hover']) {
+		:global([data-entasis-overlay][data-open='true'][data-show-on='hover']) {
 			opacity: 1;
 		}
 
 		:global(
-			[data-svelai-overlay][data-open='true'][data-show-on='hover'] > [data-overlay-content]
+			[data-entasis-overlay][data-open='true'][data-show-on='hover'] > [data-overlay-content]
 		) {
 			pointer-events: auto;
 			translate: 0;

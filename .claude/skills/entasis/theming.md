@@ -1,4 +1,4 @@
-# Svelai Theming Reference
+# Entasis Theming Reference
 
 ## Table of Contents
 
@@ -22,21 +22,21 @@
 
 ## Tailwind Plugin Setup
 
-Declare `svelai/tailwind-plugin/theme` once per theme. The theme marked `default: true` also
+Declare `entasis/tailwind-plugin/theme` once per theme. The theme marked `default: true` also
 registers the palette-agnostic engine (color utilities, variants, `.ui-spinner`, `.state-layer`,
 `raised-*`, `lift-*`, shimmer and scroll-fade utilities), so two blocks cover a light/dark app:
 
 ```css
 @import 'tailwindcss';
-@source '../node_modules/svelai/dist';
+@source '../node_modules/entasis/dist';
 
 /* Default theme also bootstraps utilities/variants/spinner */
-@plugin 'svelai/tailwind-plugin/theme' {
+@plugin 'entasis/tailwind-plugin/theme' {
 	name: light;
 	default: true;
 	colorscheme: light;
 }
-@plugin 'svelai/tailwind-plugin/theme' {
+@plugin 'entasis/tailwind-plugin/theme' {
 	name: dark;
 	colorscheme: dark;
 }
@@ -48,7 +48,7 @@ also emits them on bare `html`.
 The `@source` line lets Tailwind see the utility classes used inside the packaged components
 (Tailwind skips `node_modules` by default).
 
-If you manage colors yourself and only want the engine, use `@plugin 'svelai/tailwind-plugin';`
+If you manage colors yourself and only want the engine, use `@plugin 'entasis/tailwind-plugin';`
 on its own instead of a default theme (never both: the engine must run exactly once).
 
 ## Theme Plugin Config
@@ -59,7 +59,7 @@ a `css` fence, which silently turns `prefersDark` into a dead `prefersdark`.
 
 <!-- prettier-ignore -->
 ```css
-@plugin 'svelai/tailwind-plugin/theme' {
+@plugin 'entasis/tailwind-plugin/theme' {
 	name: custom; /* string - used for the data-theme attribute */
 	default: true; /* boolean - default theme, also boots the engine */
 	colorscheme: light; /* 'light' | 'dark' - drives generated defaults */
@@ -188,7 +188,7 @@ Nine axes drifted across the library's theme files until each got one value. The
 every `*.theme.ts` follows — `tooling/check-semantic-theme-tokens.mjs` enforces them, and an app
 writing its own overrides gets a consistent kit by following them too.
 
-**1. Focus ring — `ring-2 ring-focus/50`** (the `focusRing` recipe, exported from `svelai/theme`,
+**1. Focus ring — `ring-2 ring-focus/50`** (the `focusRing` recipe, exported from `entasis/theme`,
 is exactly `'focus-visible:ring-2 focus-visible:ring-focus/50'`). `ring-focus` is the **focus state
 role**: it resolves to `var(--color-focus, var(--color))`, so with nothing pinned the ring still
 takes the _current_ role — neutral chrome rings neutral, a colored control rings in its color,
@@ -228,10 +228,10 @@ handles, separators. `/45` does not meet AA, so it never carries running text. N
 already-colored element at `opacity-0 hover:opacity-100`, not a fill that appears.
 
 **6. Selected has one recipe per weight**, both on the **selected state role** and exported from
-`svelai/theme`:
+`entasis/theme`:
 
 ```ts
-import { selectedSoft, selectedSolid } from 'svelai/theme';
+import { selectedSoft, selectedSolid } from 'entasis/theme';
 
 // selectedSoft  === 'bg-selected-muted text-selected-muted-readable'  // rows, options, chips, tags
 // selectedSolid === 'bg-selected text-selected-contrast'              // the loudest one: a current-page pill
@@ -411,7 +411,7 @@ selector. The map is keyed by theme name, so light and dark can differ:
 
 ```svelte
 <script lang="ts">
-	import { Theme, type ThemeDesignTokenMap } from 'svelai/theme';
+	import { Theme, type ThemeDesignTokenMap } from 'entasis/theme';
 
 	let { children } = $props();
 	const designTokens: ThemeDesignTokenMap = {
@@ -429,7 +429,7 @@ playground offers. Start from one and override what you need:
 
 ```svelte
 <script lang="ts">
-	import { Theme, themePresets } from 'svelai/theme';
+	import { Theme, themePresets } from 'entasis/theme';
 
 	let { children } = $props();
 	const tokens = { ...themePresets.glass.tokens, raisedWithBorder: true };
@@ -567,7 +567,7 @@ per theme, layered over the prop — so the utilities and the Svelte transitions
 
 ```svelte
 <script lang="ts">
-	import { Theme } from 'svelai/theme';
+	import { Theme } from 'entasis/theme';
 
 	let { children } = $props();
 </script>
@@ -590,7 +590,7 @@ plus a `duration` / `easing` token (or an explicit ms value and easing name):
 
 ```svelte
 <script lang="ts">
-	import { Dialog } from 'svelai/dialog';
+	import { Dialog } from 'entasis/dialog';
 </script>
 
 <Dialog theme={{ motion: { duration: 'fast', easing: 'emphasized' } }} title="Quick">Body</Dialog>
@@ -601,7 +601,7 @@ resolver. This is the shape a component declares — keep `duration` / `easing` 
 `<Theme motion>` retune and reduced motion reach the component:
 
 ```ts
-import { motion, useComponentMotion } from 'svelai/motion';
+import { motion, useComponentMotion } from 'entasis/motion';
 
 const defaultDialogMotion = motion({
 	base: {
@@ -637,8 +637,8 @@ first:
 
 ```svelte
 <script lang="ts">
-	import { Theme } from 'svelai/theme';
-	import { Dialog, setDialogTheme } from 'svelai/dialog';
+	import { Theme } from 'entasis/theme';
+	import { Dialog, setDialogTheme } from 'entasis/dialog';
 
 	// Every dialog below this component.
 	setDialogTheme({ motion: { duration: 'slow', easing: 'emphasized' } });
@@ -654,12 +654,12 @@ first:
 
 `reduceMotion` on `<Theme>` forces the preference; omitted, the OS `prefers-reduced-motion` setting
 decides. When it resolves to true every duration is set to 0 _last_, after every override, and the
-preference is mirrored onto `<html>` as `data-svelai-reduce-motion`, which also collapses the
+preference is mirrored onto `<html>` as `data-entasis-reduce-motion`, which also collapses the
 `--duration-*` variables so `duration-*` CSS transitions and CSS-only animations honour it too.
 
 ```svelte
 <script lang="ts">
-	import { Theme } from 'svelai/theme';
+	import { Theme } from 'entasis/theme';
 
 	let { children } = $props();
 </script>
@@ -675,7 +675,7 @@ A prop typed `ResponsiveProps<T>` takes one of two forms:
 
 ```svelte
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
+	import { Stack } from 'entasis/stack';
 </script>
 
 <!-- a value: the same at every width -->
@@ -758,7 +758,7 @@ On the server there is no viewport to measure, so `currentBreakpoint` is `md`.
 
 ### The container breakpoint table
 
-One table, exported from `svelai/theme` and shared by Grid, Stack and Carousel, so `sm` means the
+One table, exported from `entasis/theme` and shared by Grid, Stack and Carousel, so `sm` means the
 same box width in all three:
 
 | Breakpoint | Container width   | Chosen because             |
@@ -777,7 +777,7 @@ there, gaps included.
 on the page.
 
 ```ts
-import { containerBreakpoints, resolveContainerBreakpoint, resolveResponsive } from 'svelai/theme';
+import { containerBreakpoints, resolveContainerBreakpoint, resolveResponsive } from 'entasis/theme';
 
 containerBreakpoints.lg; // '56rem'
 resolveContainerBreakpoint(900); // 'lg' -- the step a 900px-wide container sits at
@@ -803,7 +803,7 @@ contain, and each component's test asserts the two are still equal — editing a
 `containerBreakpoints` then fails those tests until the literals follow.
 
 ```ts
-import { responsiveContainerClasses } from 'svelai/theme';
+import { responsiveContainerClasses } from 'entasis/theme';
 
 // Hand-written in stack.theme.ts; stack.theme.test.ts asserts it still equals this.
 responsiveContainerClasses('stack-gap', 'gap', 'stack');
@@ -825,7 +825,7 @@ Wrap your app once in `+layout.svelte`. The `children` snippet receives the shar
 
 ```svelte
 <script>
-	import { Theme } from 'svelai/theme';
+	import { Theme } from 'entasis/theme';
 
 	let { children } = $props();
 </script>
@@ -850,15 +850,15 @@ Wrap your app once in `+layout.svelte`. The `children` snippet receives the shar
 - `designTokens`: `ThemeDesignTokenMap` (`Record<theme, ThemeDesignTokens>`) -- see [Design Tokens](#design-tokens)
 - `transition`: `ThemeTransition` -- view transition on theme change (`'radial-top-left'`, `'line-top'`, `'shutter-left'`, `'random-grid'`, ...; full list in `themeTransitions`)
 - `spinnerVariant`: `SpinnerVariant` -- global default for loading indicators
-- `reduceMotion`: boolean -- force reduced motion on/off for every svelai animation, overriding the OS `prefers-reduced-motion` setting (omit to follow the OS); also toggles `data-svelai-reduce-motion` on `html`
+- `reduceMotion`: boolean -- force reduced motion on/off for every entasis animation, overriding the OS `prefers-reduced-motion` setting (omit to follow the OS); also toggles `data-entasis-reduce-motion` on `html`
 
 The component also renders the shared tooltip, dialog backdrop and floating-window layer, so it
-must be the outermost svelai element.
+must be the outermost entasis element.
 
 ## ThemeState
 
 The instance passed to `<Theme>`'s `children` snippet. Also exported as a type from
-`svelai/theme` (`ThemeState`), together with `useDefaultColor(color?)` for custom controls.
+`entasis/theme` (`ThemeState`), together with `useDefaultColor(color?)` for custom controls.
 
 **Theme:** `theme` (get/set, `'light' | 'dark' | 'system' | ...`), `resolvedTheme`,
 `systemTheme`, `themes`
@@ -877,8 +877,8 @@ set) and persists under `storageKey`:
 
 ```svelte
 <script>
-	import { Theme } from 'svelai/theme';
-	import { Button } from 'svelai/button';
+	import { Theme } from 'entasis/theme';
+	import { Button } from 'entasis/button';
 
 	let { children: page } = $props();
 </script>
@@ -909,8 +909,8 @@ string and one map per variant keyed by variant value.
 
 ```svelte
 <script>
-	import { setButtonTheme } from 'svelai/button';
-	import { setDialogTheme } from 'svelai/dialog';
+	import { setButtonTheme } from 'entasis/button';
+	import { setDialogTheme } from 'entasis/dialog';
 
 	setButtonTheme({
 		root: {
@@ -929,7 +929,7 @@ string and one map per variant keyed by variant value.
 
 ```svelte
 <script>
-	import { Button } from 'svelai/button';
+	import { Button } from 'entasis/button';
 </script>
 
 <Button theme={{ root: { base: 'rounded-lg' } }} color="primary">Themed</Button>
@@ -940,7 +940,7 @@ Override classes are appended after the defaults (Tailwind conflicts resolve in 
 
 ```svelte
 <script>
-	import { Button } from 'svelai/button';
+	import { Button } from 'entasis/button';
 </script>
 
 <Button theme={{ override: true, root: { base: 'inline-flex rounded px-3 py-1' } }}>Bare</Button>
@@ -957,7 +957,7 @@ that component's `theme` prop, the `motion` slot included.
 
 ```svelte
 <script lang="ts">
-	import { Theme } from 'svelai/theme';
+	import { Theme } from 'entasis/theme';
 
 	let { children } = $props();
 </script>

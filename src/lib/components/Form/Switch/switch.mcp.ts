@@ -365,7 +365,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setSwitchTheme } from 'svelai/switch';
+  import { setSwitchTheme } from 'entasis/switch';
   
   setSwitchTheme({
     toggle: {

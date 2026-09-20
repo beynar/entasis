@@ -10,7 +10,7 @@
 		},
 		{
 			title: 'Mutations, validation, and dialogs',
-			body: 'Drag, keyboard mode, both resize edges, API updates, paste, and history share one immutable mutation boundary. Focus an empty slot and press Space, extend with arrows, then press Enter to create a keyboard range; pointer users can click its two endpoints. Structural/range checks run before resource hours, overlap, and custom policy. resolveItemUpdate may reject or adjust, and adjustments are revalidated. onItemsChange receives one guarded transaction. Mod+C/Mod+V copies a selected occurrence as a standalone item; Mod+Z and Mod+Shift+Z undo and redo up to historyLimit. Empty-slot creation ends at onSelect, whose source identifies drag-create, keyboard, or single-pointer input: compose a Svelai Dialog and Form, then add the validated domain item yourself.'
+			body: 'Drag, keyboard mode, both resize edges, API updates, paste, and history share one immutable mutation boundary. Focus an empty slot and press Space, extend with arrows, then press Enter to create a keyboard range; pointer users can click its two endpoints. Structural/range checks run before resource hours, overlap, and custom policy. resolveItemUpdate may reject or adjust, and adjustments are revalidated. onItemsChange receives one guarded transaction. Mod+C/Mod+V copies a selected occurrence as a standalone item; Mod+Z and Mod+Shift+Z undo and redo up to historyLimit. Empty-slot creation ends at onSelect, whose source identifies drag-create, keyboard, or single-pointer input: compose a Entasis Dialog and Form, then add the validated domain item yourself.'
 		},
 		{
 			title: 'Snippets and theme',

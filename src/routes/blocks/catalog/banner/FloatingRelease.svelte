@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	import { xIcon } from 'svelai/icons/x';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
+	import { xIcon } from 'entasis/icons/x';
 	let visible = $state(true);
 </script>
 

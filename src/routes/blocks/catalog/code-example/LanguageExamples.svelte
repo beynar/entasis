@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Tabs } from 'svelai/tabs';
-	import { Code } from 'svelai/code';
-	import { Chip } from 'svelai/chip';
+	import { Heading } from 'entasis/heading';
+	import { Tabs } from 'entasis/tabs';
+	import { Code } from 'entasis/code';
+	import { Chip } from 'entasis/chip';
 	const examples = [
 		{
 			label: 'TypeScript',

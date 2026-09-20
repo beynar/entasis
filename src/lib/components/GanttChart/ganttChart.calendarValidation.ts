@@ -8,7 +8,7 @@ import {
 } from './ganttChart.validationBoundary.js';
 import type { GanttCalendar, GanttWorkingInterval } from './ganttChart.types.js';
 
-const DEFAULT_CALENDAR_ID = '__svelai_gantt_default_project_calendar__';
+const DEFAULT_CALENDAR_ID = '__entasis_gantt_default_project_calendar__';
 
 export function validateGanttCalendars(
 	calendars: readonly GanttCalendar[]

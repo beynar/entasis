@@ -11,7 +11,7 @@ edge math come from the utility.
 
 \`\`\`svelte
 <script>
-	import { Kanban } from 'svelai/kanban';
+	import { Kanban } from 'entasis/kanban';
 
 	let columns = $state([
 		{ id: 'todo', title: 'Todo', cards: [{ id: 'a', title: 'Write specs' }] },
@@ -98,8 +98,8 @@ Every content slot is a \`Slot\`: pass a plain string for static text, or a snip
 ### Custom card
 \`\`\`svelte
 <script lang="ts">
-	import { Kanban, type KanbanCard, type KanbanColumnData } from 'svelai/kanban';
-	import { Chip } from 'svelai/chip';
+	import { Kanban, type KanbanCard, type KanbanColumnData } from 'entasis/kanban';
+	import { Chip } from 'entasis/chip';
 
 	// Extend KanbanCard with your own fields; the card snippet receives them typed.
 	type TaskCard = KanbanCard & { priority: 'high' | 'low' };

@@ -1,7 +1,7 @@
 export const aiModelSelectorDescription = `
 # AIModelSelector
 
-Model selection built on Svelai \`PopupMenu\` and \`Menu\`. It accepts flat \`models\`, recursive \`groups\`, disabled entries, provider labels, optional keyword search, context-window metadata, and supplemental standard Menu items.
+Model selection built on Entasis \`PopupMenu\` and \`Menu\`. It accepts flat \`models\`, recursive \`groups\`, disabled entries, provider labels, optional keyword search, context-window metadata, and supplemental standard Menu items.
 
 Bind \`value\`, \`open\`, and \`query\` for direct control. \`defaultValue\` and \`defaultOpen\` apply once when their live props are omitted; \`onValueChange\` receives \`{ value, model }\`, and \`onOpenChange\` reports component-owned disclosure changes. Set \`searchable={false}\` to remove the search header and ignore, without erasing, a bound query. When \`value\` is omitted or undefined inside \`AIConversation\`, selection reads and updates \`conversation.selectedModel\`. A direct string or \`null\` wins over provider state; \`null\` is the bindable controlled-empty value because Svelte substitutes prop fallbacks for \`undefined\`. \`placeholder\` follows the same omission rule before the compact \`labels\` object and conversation placeholder, with \`null\` suppressing visible placeholder text.
 

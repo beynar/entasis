@@ -16,6 +16,7 @@ import type {
 	EventCalendarInteractionBlockedInfo,
 	EventCalendarItem,
 	EventCalendarProposedUpdate,
+	EventCalendarResource,
 	EventCalendarSelection,
 	EventCalendarUpdateResult,
 	EventCalendarView
@@ -25,6 +26,7 @@ const ANCHOR = new Date('2026-07-15T10:00:00.000Z'); // a Wednesday
 
 type SetupOptions = {
 	items?: EventCalendarItem[];
+	resources?: EventCalendarResource[];
 	recurrenceOptions?: EventCalendarRecurrenceOptions;
 	disabled?: boolean;
 	loading?: boolean;
@@ -39,6 +41,7 @@ afterEach(() => {
 
 const setup = (options: SetupOptions = {}) => {
 	let items = $state<EventCalendarItem[]>(options.items ?? []);
+	let resources = $state<EventCalendarResource[]>(options.resources ?? []);
 	let view = $state<EventCalendarView>('month');
 	let date = $state(ANCHOR);
 	const selection = $state<EventCalendarSelection>(EMPTY_EVENT_CALENDAR_SELECTION);
@@ -51,6 +54,10 @@ const setup = (options: SetupOptions = {}) => {
 		},
 		replaceItems: (next: EventCalendarItem[]) => {
 			items = next;
+			flushSync();
+		},
+		replaceResources: (next: EventCalendarResource[]) => {
+			resources = next;
 			flushSync();
 		}
 	};
@@ -84,7 +91,9 @@ const setup = (options: SetupOptions = {}) => {
 					return selection;
 				},
 				set selection(_value: EventCalendarSelection) {},
-				resources: [],
+				get resources() {
+					return resources;
+				},
 				timeZone: 'UTC',
 				messages: en,
 				density: 'normal',
@@ -170,6 +179,54 @@ describe('D01 — reentrant model writes during final publication validation', (
 
 		// The expander's replacement must win; the aborted commit reports `stale`.
 		expect(h.items.map((item) => item.id)).toEqual(['externally-set']);
+		expect(h.blocked.some((info) => info.reason === 'stale')).toBe(true);
+	});
+
+	test('a resource replacement inside the custom expander aborts the commit as stale', () => {
+		const series: EventCalendarItem = {
+			id: 'series',
+			title: 'Daily',
+			start: new Date('2026-07-15T09:00:00.000Z'),
+			end: new Date('2026-07-15T10:00:00.000Z'),
+			recurrence: { freq: 'daily' },
+			recurrenceTimeZone: 'UTC'
+		};
+		const replacement: EventCalendarResource = {
+			id: 'replacement-room',
+			title: 'Replacement room'
+		};
+		let armed = false;
+		let replaceResources: ((next: EventCalendarResource[]) => void) | null = null;
+		const h = setup({
+			items: [series],
+			resources: [{ id: 'original-room', title: 'Original room' }],
+			recurrenceOptions: {
+				expand: ({ item }): readonly EventCalendarExpandedOccurrence[] => {
+					if (armed && replaceResources) {
+						armed = false;
+						replaceResources([replacement]);
+					}
+					const start = item.start as Date;
+					const end = item.end as Date;
+					return [{ allDay: false as const, originalStart: start, start, end }];
+				}
+			}
+		});
+		replaceResources = h.replaceResources;
+		armed = true;
+
+		h.calendar.addItem({
+			id: 'added',
+			title: 'Added',
+			start: new Date('2026-07-17T09:00:00.000Z'),
+			end: new Date('2026-07-17T10:00:00.000Z')
+		});
+		flushSync();
+
+		expect(h.items.map((item) => item.id)).toEqual(['series']);
+		expect(h.calendar.resourceModel.structure.leaves.map((resource) => resource.id)).toEqual([
+			'replacement-room'
+		]);
 		expect(h.blocked.some((info) => info.reason === 'stale')).toBe(true);
 	});
 });

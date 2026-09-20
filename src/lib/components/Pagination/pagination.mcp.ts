@@ -7,7 +7,7 @@ Pagination renders accessible page navigation for long lists, tables, and server
 
 \`\`\`svelte
 <script lang="ts">
-	import { Pagination } from 'svelai/pagination';
+	import { Pagination } from 'entasis/pagination';
 
 	let value = $state(1);
 </script>
@@ -179,7 +179,7 @@ Dot controls keep their compact visual marker while the shared \`Hitbox\` utilit
 ### Localized Aria Labels
 \`\`\`svelte
 <script lang="ts">
-	import type { PaginationItemLabel } from 'svelai/pagination';
+	import type { PaginationItemLabel } from 'entasis/pagination';
 
 	const getItemLabel = (item: PaginationItemLabel) => {
 		if (item.type === 'page') {
@@ -220,7 +220,7 @@ The theme object contains:
 
 \`\`\`svelte
 <script>
-	import { setPaginationTheme } from 'svelai/pagination';
+	import { setPaginationTheme } from 'entasis/pagination';
 
 	setPaginationTheme({
 		control: {

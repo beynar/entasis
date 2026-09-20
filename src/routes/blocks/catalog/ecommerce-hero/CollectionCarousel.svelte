@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Carousel } from 'svelai/carousel';
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
+	import { Heading } from 'entasis/heading';
+	import { Carousel } from 'entasis/carousel';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
 
 	const collections = [
 		{

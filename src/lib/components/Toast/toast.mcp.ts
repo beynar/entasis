@@ -4,7 +4,7 @@ The toast function displays non-blocking notification messages to the user. It p
 
 **Usage:**
 \`\`\`typescript
-import { toast } from 'svelai/toast';
+import { toast } from 'entasis/toast';
 
 // Basic toast with a color variant
 toast.success({
@@ -181,7 +181,7 @@ The theme object contains the following parts:
 
 **Basic Theme Override**:
 \`\`\`typescript
-import { toast } from 'svelai/toast';
+import { toast } from 'entasis/toast';
 
 toast.success({
   title: 'Success',
@@ -219,7 +219,7 @@ toast.danger({
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setToastTheme } from 'svelai/toast';
+  import { setToastTheme } from 'entasis/toast';
   
   setToastTheme({
     root: {

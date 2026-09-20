@@ -7,7 +7,7 @@ The Marquee component creates an infinite scrolling animation for displaying con
 
 \`\`\`svelte
 <script>
-	import { Marquee } from 'svelai/marquee';
+	import { Marquee } from 'entasis/marquee';
 	
 	const items = [
 		{ id: 1, text: 'Item 1' },
@@ -89,7 +89,7 @@ The Marquee component creates an infinite scrolling animation for displaying con
 
 \`\`\`svelte
 <script>
-	import { Marquee } from 'svelai/marquee';
+	import { Marquee } from 'entasis/marquee';
 	
 	const testimonials = [
 		{ author: 'John Doe', quote: 'Amazing product!' },
@@ -112,7 +112,7 @@ The Marquee component creates an infinite scrolling animation for displaying con
 
 \`\`\`svelte
 <script>
-	import { Marquee } from 'svelai/marquee';
+	import { Marquee } from 'entasis/marquee';
 	
 	const logos = [
 		{ name: 'Company 1', logo: '/logo1.png' },
@@ -345,7 +345,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setMarqueeTheme } from 'svelai/marquee';
+  import { setMarqueeTheme } from 'entasis/marquee';
   
   setMarqueeTheme({
     root: {

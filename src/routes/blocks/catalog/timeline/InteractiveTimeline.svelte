@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Button } from 'svelai/button';
-	import { Meter } from 'svelai/meter';
-	import { Chip } from 'svelai/chip';
+	import { Heading } from 'entasis/heading';
+	import { Button } from 'entasis/button';
+	import { Meter } from 'entasis/meter';
+	import { Chip } from 'entasis/chip';
 	const phases = [
 		{
 			title: 'Discover',

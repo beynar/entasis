@@ -8,6 +8,56 @@ import { createConsumerFixture, listFiles, repositoryRoot } from './consumer-fix
 
 const blockRoot = path.join(repositoryRoot, 'src/routes/blocks');
 const manifest = JSON.parse(await readFile(path.join(repositoryRoot, 'package.json'), 'utf8'));
+const eventCalendarWitness = `<script lang="ts">
+	import {
+		EventCalendar,
+		type EventCalendarApi,
+		type EventCalendarItem,
+		type EventCalendarResource
+	} from 'entasis/event-calendar';
+
+	type ItemFields = { owner: string };
+	type ResourceFields = { capacity: number };
+
+	let items = $state<EventCalendarItem<ItemFields>[]>([
+		{
+			id: 'planning',
+			title: 'Planning',
+			start: new Date('2026-09-19T09:00:00Z'),
+			end: new Date('2026-09-19T10:00:00Z'),
+			owner: 'Arnaud'
+		}
+	]);
+	let resources = $state<EventCalendarResource<ResourceFields>[]>([
+		{ id: 'room-a', title: 'Room A', capacity: 8 }
+	]);
+	let date = $state(new Date('2026-09-19T09:00:00Z'));
+	let calendar = $state<EventCalendarApi<ItemFields> | null>(null);
+	let owner = $state('');
+</script>
+
+<EventCalendar
+	bind:this={calendar}
+	bind:items
+	{resources}
+	bind:date
+	timeZone="UTC"
+	aria-label="Schedule"
+	data-owner={owner}
+	onkeydown={(event) => {
+		owner = event.currentTarget.dataset.owner ?? '';
+	}}
+>
+	{#snippet item({ occurrence })}
+		<span>{occurrence.item.owner}</span>
+	{/snippet}
+	{#snippet resourceHeader({ resource })}
+		<span>{resource?.capacity ?? 0}</span>
+	{/snippet}
+</EventCalendar>
+
+<p>{calendar?.getOccurrence('planning')?.item.owner}</p>
+`;
 
 // `skipLibCheck` hides unresolved imports inside `dist/**/*.d.ts`, so svelte-check alone
 // cannot prove the package resolves. Read the emitted modules instead: every bare specifier
@@ -31,7 +81,7 @@ const declared = new Set([
 	...Object.keys(manifest.dependencies ?? {}),
 	...Object.keys(manifest.peerDependencies ?? {}),
 	// The package may reference its own entrypoints, and `svelte/*` is the framework itself.
-	'svelai',
+	'entasis',
 	'svelte'
 ]);
 const optionalPeers = new Set(
@@ -99,6 +149,7 @@ if (blockFiles.length === 0) throw new Error('No package-consumer blocks found.'
 
 const fixture = await createConsumerFixture();
 try {
+	await fixture.write('src/EventCalendarConsumer.svelte', eventCalendarWitness);
 	const imports = [];
 	const components = [];
 	for (const [index, blockFile] of blockFiles.entries()) {
@@ -117,12 +168,14 @@ try {
 	const errors = (await fixture.svelteCheck()).filter((d) => d.type === 'ERROR');
 	if (errors.length) {
 		throw new Error(
-			`Package-consumer blocks failed:\n- ${errors
+			`Package-consumer fixture failed:\n- ${errors
 				.map((e) => `${e.file}:${e.line}:${e.column} ${e.message}`)
 				.join('\n- ')}`
 		);
 	}
-	console.log(`Package-consumer blocks passed (${blockFiles.length} blocks).`);
+	console.log(
+		`Package-consumer fixture passed (${blockFiles.length} blocks + EventCalendar witness).`
+	);
 } finally {
 	await fixture.dispose();
 }

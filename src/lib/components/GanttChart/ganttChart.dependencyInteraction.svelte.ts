@@ -33,8 +33,8 @@ import type {
 
 /* eslint-disable svelte/prefer-svelte-reactivity -- attachment and validation caches must not invalidate rendering */
 
-const DEPENDENCY_SOURCE_MARK = 'svelai-gantt-chart-dependency-source';
-const DEPENDENCY_TARGET_MARK = 'svelai-gantt-chart-dependency-target';
+const DEPENDENCY_SOURCE_MARK = 'entasis-gantt-chart-dependency-source';
+const DEPENDENCY_TARGET_MARK = 'entasis-gantt-chart-dependency-target';
 let nextDependencyInteractionId = 0;
 
 type Point = Readonly<{ x: number; y: number }>;

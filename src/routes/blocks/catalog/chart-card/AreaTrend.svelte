@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Card } from 'svelai/card';
-	import { Chart } from 'svelai/chart';
-	import { Chip } from 'svelai/chip';
-	import { Select } from 'svelai/select';
+	import { Stack } from 'entasis/stack';
+	import { Card } from 'entasis/card';
+	import { Chart } from 'entasis/chart';
+	import { Chip } from 'entasis/chip';
+	import { Select } from 'entasis/select';
 
 	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
 	const revenue = months.map((month, index) => ({

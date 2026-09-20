@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Meter } from 'svelai/meter';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Meter } from 'entasis/meter';
 	const steps = [
 		{
 			title: 'Agree on the outcome',

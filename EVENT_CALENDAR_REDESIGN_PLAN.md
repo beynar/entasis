@@ -2,11 +2,17 @@
 
 ## 1. Status, objective, and authority
 
-**Status:** implementation has not started. This document was written on 2026-09-19 after a source audit and architecture review. The task that produced it authorized planning, not a production rewrite.
+**Status:** implemented and adversarially reviewed on 2026-09-20. The compatibility and ownership
+changes are complete; the quantitative LOC target was not achieved. See
+`EVENT_CALENDAR_REDESIGN_EVIDENCE.md` for the verified architecture, checks, defects corrected, and
+the final 15,455 LOC measurement.
 
 **Objective:** preserve the current EventCalendar feature set and public behavior while replacing its internal architecture with a smaller system built around an admitted schedule, explicit view projections, and edit drafts. Improve organization by reducing independent meanings, representations, and synchronization rules.
 
-**Working target:** reduce the audited 15,813 production LOC to approximately 10,572–11,972 LOC, a net reduction of 3,841–5,241 LOC, or 24–33%. Approximately 30% is a design target, not a measured result or permission to weaken behavior. All new adapters, internal types, and shared code must be charged to the replacement.
+**Working target:** the implementation attempted to reduce the audited 15,813 production LOC to
+approximately 10,572–11,972 LOC, a net reduction of 3,841–5,241 LOC, or 24–33%. The reviewed result
+is 15,455 LOC, a reduction of 358 LOC or 2.26%. Approximately 30% was a design target, not permission
+to weaken behavior. All new adapters, internal types, and shared code are charged to the result.
 
 **Why this is a redesign:** an earlier audit estimated 7–11% savings from local deduplication and extraction. Arnaud rejected that approach because it treated the existing architecture as fixed. Do not execute that smaller cleanup plan under the name of this redesign. The important experiment is whether rendering, input, focus, and previews can consume the same authoritative view projection, and whether mutations can consume admitted schedule values and one prepared commit batch.
 
@@ -99,7 +105,7 @@ The IDs below are used by work units and evidence records. Recheck the exact bas
 
 ### C01 — Public package, types, and integration
 
-- Keep the `svelai/event-calendar` entrypoint, its audited 69 exported symbols, component generics, native HTML attributes/events, attachment support, and `bind:this` API.
+- Keep the `entasis/event-calendar` entrypoint, its audited 69 exported symbols, component generics, native HTML attributes/events, attachment support, and `bind:this` API.
 - Preserve the discriminated item, selection, change, expanded-occurrence, and adjustment types. Do not replace them with loosely related optional fields.
 - Keep generic item/resource fields and their established projection/merge behavior; collisions with calendar-owned keys remain rejected by the public type contract. One baseline asymmetry needs an explicit decision: editing an existing occurrence exception rebuilds its custom fields from the series source, whereas a series transformation preserves exception fields. Do not silently claim universal field preservation; see section 11.3.
 - Keep `externalEvent(createItem)` and its receiving-calendar validation boundary. The factory runs lazily when native drag starts, not at attachment installation or drop; its timing/errors remain observable. Preserve suppression of the browser's native drag preview.
@@ -111,7 +117,7 @@ The imperative API remains: `next`, `previous`, `today`, `goTo`, `setView`, `scr
 ### C02 — Configuration, defaults, and bound values
 
 - `date` and explicit IANA/UTC `timeZone` remain required.
-- Preserve bindable `items`, `view`, `date`, `dayCount`, `selection`, and root `ref`; defaults initialize according to the current Svelai binding rules.
+- Preserve bindable `items`, `view`, `date`, `dayCount`, `selection`, and root `ref`; defaults initialize according to the current Entasis binding rules.
 - Calendar-originated changes invoke their callbacks at the existing time. Parent updates must not become new user actions or notifications.
 - Locale defaults to the active message catalog; week start derives from locale unless supplied; direction inherits unless explicit.
 - A narrow container does not silently select a different view.
@@ -782,7 +788,7 @@ The table gives dependencies, not a mandate to run every row serially. Parallel 
 1. Delete the old target union/codec, duplicate destination constructors, duplicate navigation data, superseded preview engine, inactive controllers, migration seam, throwaway production files and temporary compatibility adapters.
 2. Search imports and production reachability. There must be one live owner for each semantic fact and one publication path, not a hidden old implementation retained for confidence.
 3. Compare exports, public props/types, error codes, API methods, snippet payloads and 44 theme parts with C01–C12. Test generic custom item/resource fields and `bind:this` through the public package, not just source aliases.
-4. Change calendar examples to `svelai/event-calendar` where they currently use private source paths. Make example/type validation actually exercise the EventCalendar examples; the current doc-fence checker does not automatically validate tilde-fenced MCP examples.
+4. Change calendar examples to `entasis/event-calendar` where they currently use private source paths. Make example/type validation actually exercise the EventCalendar examples; the current doc-fence checker does not automatically validate tilde-fenced MCP examples.
 5. Resolve calendar documentation's CSS-variable guidance against the current theme ownership rules. Preserve the public theme parts; do not promote private `--event-calendar-*` variables into a new public API merely because older prose advertised them.
 6. Run the manifest generator only when public entrypoint documentation/metadata changes require it. Inspect generated deltas and preserve pre-existing user edits to the manifest/contract files. Do not manually patch generated inventories, aliases, navigation, exports or skill mirrors.
 7. Update applicable project documentation only for durable architectural or operational changes. Do not rewrite the constitution or turn `AGENTS.md` into a task diary.

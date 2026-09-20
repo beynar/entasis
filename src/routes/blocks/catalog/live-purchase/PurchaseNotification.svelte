@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Card } from 'svelai/card';
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
+	import { Heading } from 'entasis/heading';
+	import { Card } from 'entasis/card';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
 
 	const activity = [
 		{ name: 'Maya', city: 'Copenhagen', product: 'the Arc lamp', shape: 'lamp', color: 'Sand' },

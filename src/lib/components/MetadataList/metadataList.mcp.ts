@@ -7,7 +7,7 @@ A read-only key/value metadata list, like Notion's page-properties panel. Each r
 
 \`\`\`svelte
 <script>
-	import { MetadataList } from 'svelai/metadata-list';
+	import { MetadataList } from 'entasis/metadata-list';
 </script>
 
 <MetadataList

@@ -298,7 +298,7 @@ function isDistributionEmpiricalDatum(value: unknown): value is DistributionEmpi
 	return (
 		typeof value === 'object' &&
 		value !== null &&
-		Reflect.get(value, '__svelaiDistributionEmpirical') === true
+		Reflect.get(value, '__entasisDistributionEmpirical') === true
 	);
 }
 

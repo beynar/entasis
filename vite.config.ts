@@ -3,8 +3,8 @@ import tailwindcss from '@tailwindcss/vite';
 import { svelteTesting } from '@testing-library/svelte/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
-import { svelaiPropsDocs } from './tooling/props-docs/plugin.js';
-import { svelaiStructureDocs } from './tooling/structure-docs/plugin.js';
+import { entasisPropsDocs } from './tooling/props-docs/plugin.js';
+import { entasisStructureDocs } from './tooling/structure-docs/plugin.js';
 
 export default defineConfig({
 	plugins: [
@@ -27,8 +27,8 @@ export default defineConfig({
 		}),
 		tailwindcss(),
 		sveltekit(),
-		svelaiPropsDocs(),
-		svelaiStructureDocs()
+		entasisPropsDocs(),
+		entasisStructureDocs()
 	],
 
 	test: {

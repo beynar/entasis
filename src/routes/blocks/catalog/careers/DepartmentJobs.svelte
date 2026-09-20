@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Chip } from 'svelai/chip';
-	import { Button } from 'svelai/button';
-	import { Dialog } from 'svelai/dialog';
+	import { Heading } from 'entasis/heading';
+	import { Chip } from 'entasis/chip';
+	import { Button } from 'entasis/button';
+	import { Dialog } from 'entasis/dialog';
 	const jobs = [
 		{
 			title: 'Product designer',

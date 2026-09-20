@@ -316,7 +316,7 @@ current role, so it never hard-pins a color.
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setTextAreaTheme } from 'svelai/text-area';
+  import { setTextAreaTheme } from 'entasis/text-area';
   
   setTextAreaTheme({
     inputContainer: {

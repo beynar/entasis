@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Card } from 'svelai/card';
-	import { Button } from 'svelai/button';
+	import { Card } from 'entasis/card';
+	import { Button } from 'entasis/button';
 
 	let color = $state('Clay');
 	let saved = $state(false);

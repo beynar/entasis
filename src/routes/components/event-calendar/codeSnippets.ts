@@ -1,6 +1,6 @@
 export const viewsCode = [
 	'<script lang="ts">',
-	"  import { EventCalendar, type EventCalendarItem } from 'svelai/event-calendar';",
+	"  import { EventCalendar, type EventCalendarItem } from 'entasis/event-calendar';",
 	"  let date = $state(new Date('2026-07-15T10:00:00.000Z'));",
 	'  let items = $state<EventCalendarItem[]>([]);',
 	'</script>',
@@ -14,7 +14,7 @@ export const viewsCode = [
 
 export const interactionCode = [
 	'<script lang="ts">',
-	"  import { EventCalendar, externalEvent, type EventCalendarItem } from 'svelai/event-calendar';",
+	"  import { EventCalendar, externalEvent, type EventCalendarItem } from 'entasis/event-calendar';",
 	'  let externalId = 0;',
 	'  const createExternalItem = (): EventCalendarItem => ({',
 	"    id: `external-${++externalId}`, title: 'Focus block',",

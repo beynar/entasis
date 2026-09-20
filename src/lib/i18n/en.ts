@@ -1,4 +1,4 @@
-// The svelai i18n message catalog (English source of truth).
+// The entasis i18n message catalog (English source of truth).
 //
 // Atomic words are composed in component markup via template literals, e.g.
 // `${t.previous} ${t.page}` -> "Previous page". Leading-position atoms are capitalized,

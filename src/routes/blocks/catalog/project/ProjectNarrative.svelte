@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Chip } from 'svelai/chip';
-	import { ImageZoom } from 'svelai/image-zoom';
+	import { Heading } from 'entasis/heading';
+	import { Chip } from 'entasis/chip';
+	import { ImageZoom } from 'entasis/image-zoom';
 </script>
 
 <section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">

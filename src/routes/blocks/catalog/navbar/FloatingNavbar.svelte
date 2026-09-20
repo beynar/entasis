@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Heading } from 'svelai/heading';
-	import { Popover } from 'svelai/popover';
-	import { bookOpenIcon } from 'svelai/icons/bookOpen';
-	import { caretDownIcon } from 'svelai/icons/caretDown';
-	import { listIcon } from 'svelai/icons/list';
-	import { paletteIcon } from 'svelai/icons/palette';
-	import { squaresFourIcon } from 'svelai/icons/squaresFour';
+	import { Button } from 'entasis/button';
+	import { Heading } from 'entasis/heading';
+	import { Popover } from 'entasis/popover';
+	import { bookOpenIcon } from 'entasis/icons/bookOpen';
+	import { caretDownIcon } from 'entasis/icons/caretDown';
+	import { listIcon } from 'entasis/icons/list';
+	import { paletteIcon } from 'entasis/icons/palette';
+	import { squaresFourIcon } from 'entasis/icons/squaresFour';
 </script>
 
 <section class="bg-primary-muted p-lg md:p-xl min-h-80">

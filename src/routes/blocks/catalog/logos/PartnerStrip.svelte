@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Chip } from 'svelai/chip';
+	import { Chip } from 'entasis/chip';
 </script>
 
 <section class="gap-xl p-xl flex flex-col text-center">

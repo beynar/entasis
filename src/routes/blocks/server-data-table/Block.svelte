@@ -6,16 +6,16 @@
 		type DataTableColumn,
 		type DataTableRowPayload,
 		type DataTableState
-	} from 'svelai/data-table';
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import type { MenuItem } from 'svelai/menu';
-	import { PopupMenu } from 'svelai/popup-menu';
-	import { SpinnerText } from 'svelai/spinner-text';
-	import { arrowClockwiseIcon } from 'svelai/icons/arrowClockwise';
-	import { dotsThreeIcon } from 'svelai/icons/dotsThree';
-	import { eyeIcon } from 'svelai/icons/eye';
-	import { pencilSimpleIcon } from 'svelai/icons/pencilSimple';
+	} from 'entasis/data-table';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import type { MenuItem } from 'entasis/menu';
+	import { PopupMenu } from 'entasis/popup-menu';
+	import { SpinnerText } from 'entasis/spinner-text';
+	import { arrowClockwiseIcon } from 'entasis/icons/arrowClockwise';
+	import { dotsThreeIcon } from 'entasis/icons/dotsThree';
+	import { eyeIcon } from 'entasis/icons/eye';
+	import { pencilSimpleIcon } from 'entasis/icons/pencilSimple';
 
 	interface Customer {
 		id: string;

@@ -94,7 +94,7 @@
 		description="Type /, @, or $ to insert tokens. The submit detail includes Markdown, model input, token ids, files, and attachment states."
 		class="!min-h-[360px] p-4"
 		code={`<script lang="ts">
-  import { AIComposer } from 'svelai/ai-composer';
+  import { AIComposer } from 'entasis/ai-composer';
 ${'</' + 'script>'}
 
 <AIComposer

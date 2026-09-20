@@ -9,6 +9,18 @@ import {
 } from './eventCalendar.date.js';
 import { EventCalendarError } from './eventCalendar.error.js';
 import {
+	canonicalEventCalendarRecurrenceOrigin,
+	hasEventCalendarRecurrenceDateSelectors
+} from './eventCalendar.recurrence.js';
+import type { EventCalendarRecurrenceValue } from './eventCalendar.recurrence.js';
+import {
+	cloneEventCalendarRecurrenceRule,
+	cloneEventCalendarScheduleValue,
+	getEventCalendarOccurrencePlacementItem,
+	replaceEventCalendarSchedule,
+	replaceEventCalendarPlacement
+} from './eventCalendar.records.js';
+import {
 	createRecurringOccurrenceKey,
 	decodeRecurringOccurrenceKey
 } from './eventCalendar.items.js';
@@ -21,7 +33,6 @@ import type {
 } from './eventCalendar.types.js';
 
 type SeriesOperation = 'move' | 'resize-start' | 'resize-end' | 'convert';
-type RecurrenceValue = Date | EventCalendarDateOnly;
 type ScheduleValue = Date | EventCalendarDateOnly;
 
 type SeriesTransform<TItemFields extends object> = {
@@ -62,6 +73,8 @@ export type CreateRecurrenceMutationOptions<TItemFields extends object> = {
 		occurrence: EventCalendarOccurrence<TItemFields>
 	) => string;
 	exceptionId?: string;
+	adjustedSeriesItem?: EventCalendarItem<TItemFields>;
+	operation?: SeriesOperation;
 };
 
 const MINUTE_MS = 60_000;
@@ -80,25 +93,15 @@ export function createEventCalendarRecurrenceMutation<TItemFields extends object
 	const seriesItem = getSeriesItem(options.items, occurrence);
 	if (options.scope === 'occurrence')
 		return createOccurrenceMutation(options, seriesItem, occurrence);
-	return { scope: 'series', ...createSeriesMutation(options, seriesItem, occurrence) };
-}
-
-export function regenerateEventCalendarSeriesMutation<TItemFields extends object>(
-	options: CreateRecurrenceMutationOptions<TItemFields>,
-	adjustedSeriesItem: EventCalendarItem<TItemFields>,
-	operation: SeriesOperation
-): Extract<EventCalendarRecurrenceMutation<TItemFields>, { scope: 'series' }> {
-	const occurrence = options.proposal.occurrence;
-	if (!occurrence) {
-		throw new EventCalendarError(
-			'invalid-recurrence',
-			'A recurring series adjustment requires its concrete occurrence.'
-		);
-	}
-	const seriesItem = getSeriesItem(options.items, occurrence);
 	return {
 		scope: 'series',
-		...createSeriesMutation(options, seriesItem, occurrence, adjustedSeriesItem, operation)
+		...createSeriesMutation(
+			options,
+			seriesItem,
+			occurrence,
+			options.adjustedSeriesItem,
+			options.operation
+		)
 	};
 }
 
@@ -112,7 +115,8 @@ function createOccurrenceMutation<TItemFields extends object>(
 	const exceptionId =
 		previousException?.id ??
 		options.exceptionId ??
-		createExceptionId(options, seriesItem, occurrence);
+		options.getOccurrenceExceptionId?.(seriesItem, occurrence) ??
+		`${seriesItem.id}--exception--${canonicalEventCalendarRecurrenceOrigin(occurrence.originalStart).replace(':', '-')}`;
 	if (exceptionId === seriesItem.id || exceptionId.length === 0) {
 		throw new EventCalendarError(
 			'invalid-recurrence',
@@ -146,39 +150,27 @@ function createOccurrenceMutation<TItemFields extends object>(
 	};
 }
 
-function createExceptionId<TItemFields extends object>(
-	options: CreateRecurrenceMutationOptions<TItemFields>,
-	seriesItem: EventCalendarItem<TItemFields>,
-	occurrence: EventCalendarOccurrence<TItemFields>
-): string {
-	return (
-		options.getOccurrenceExceptionId?.(seriesItem, occurrence) ??
-		`${seriesItem.id}--exception--${canonicalOrigin(occurrence.originalStart)}`
-	);
-}
-
 function createExceptionItem<TItemFields extends object>(
 	seriesItem: EventCalendarItem<TItemFields>,
 	previousException: EventCalendarItem<TItemFields> | null,
 	targetItem: EventCalendarItem<TItemFields>,
 	id: string,
-	originalStart: RecurrenceValue
+	originalStart: EventCalendarRecurrenceValue
 ): EventCalendarItem<TItemFields> {
 	// An edit to an existing exception keeps that exception's own custom fields; a new
 	// exception still inherits the series source.
-	const item = { ...(previousException ?? seriesItem) } as Record<string, unknown>;
-	delete item.recurrence;
-	delete item.recurrenceTimeZone;
-	delete item.recurringItemId;
-	delete item.originalStart;
+	const item = replaceEventCalendarSchedule(
+		previousException ?? seriesItem,
+		{
+			allDay: targetItem.allDay === true,
+			start: targetItem.start,
+			end: targetItem.end
+		},
+		targetItem
+	) as Record<string, unknown>;
 	item.id = id;
-	item.start = cloneScheduleValue(targetItem.start);
-	item.end = cloneScheduleValue(targetItem.end);
-	if (targetItem.allDay === true) item.allDay = true;
-	else delete item.allDay;
-	copyResourceAssignment(item, targetItem);
 	item.recurringItemId = seriesItem.id;
-	item.originalStart = cloneScheduleValue(originalStart);
+	item.originalStart = cloneEventCalendarScheduleValue(originalStart);
 	return item as EventCalendarItem<TItemFields>;
 }
 
@@ -193,7 +185,10 @@ function createSeriesMutation<TItemFields extends object>(
 		(item) => item.recurringItemId === previousSeriesItem.id
 	);
 	const targetItem = directSeriesTarget ?? options.proposal.item;
-	const interactedReference = occurrenceToPlacement(occurrence, options.displayTimeZone);
+	const interactedReference = getEventCalendarOccurrencePlacementItem(
+		occurrence,
+		options.displayTimeZone
+	);
 	const referenceItem = directSeriesTarget ? previousSeriesItem : interactedReference;
 	const operation =
 		forcedOperation ?? inferSeriesOperation(options.proposal, previousSeriesItem, referenceItem);
@@ -222,7 +217,7 @@ function createSeriesMutation<TItemFields extends object>(
 		(operation === 'move' || operation === 'resize-start') &&
 		transform.dayDelta !== 0 &&
 		typeof recurrence !== 'string' &&
-		hasDateSelector(recurrence)
+		hasEventCalendarRecurrenceDateSelectors(recurrence)
 	) {
 		throw new EventCalendarError(
 			'unsupported-recurrence',
@@ -236,7 +231,11 @@ function createSeriesMutation<TItemFields extends object>(
 		operation === 'convert' && (interactedReference.allDay === true) === transform.targetIsAllDay
 			? shiftTargetKindPlacement(interactedReference, transform)
 			: transformPlacement(interactedReference, transform, options);
-	const interactedItem = applyPlacement(interactedReference, interactedPlacement, targetItem);
+	const interactedItem = replaceEventCalendarPlacement(
+		interactedReference,
+		interactedPlacement,
+		targetItem
+	);
 	const exceptionItems = previousExceptionItems.map((exception) =>
 		transformException(exception, previousSeriesItem, transform, options)
 	);
@@ -285,9 +284,8 @@ function assertConvertedOriginsUnique<TItemFields extends object>(
 	operation: SeriesOperation
 ): void {
 	if (operation !== 'convert') return;
-	const originPairs: Array<readonly [RecurrenceValue, RecurrenceValue]> = [
-		[previousSeriesItem.start, seriesItem.start]
-	];
+	const originPairs: Array<readonly [EventCalendarRecurrenceValue, EventCalendarRecurrenceValue]> =
+		[[previousSeriesItem.start, seriesItem.start]];
 	const previousRule = previousSeriesItem.recurrence;
 	const nextRule = seriesItem.recurrence;
 	if (
@@ -301,9 +299,9 @@ function assertConvertedOriginsUnique<TItemFields extends object>(
 			[previousRule.rDates, nextRule.rDates]
 		] as const) {
 			if (!previousOrigins || !nextOrigins) continue;
-			for (let index = 0; index < previousOrigins.length; index += 1) {
-				originPairs.push([previousOrigins[index], nextOrigins[index]]);
-			}
+			originPairs.push(
+				...previousOrigins.map((origin, index) => [origin, nextOrigins[index]] as const)
+			);
 		}
 	}
 	for (let index = 0; index < previousExceptionItems.length; index += 1) {
@@ -314,32 +312,18 @@ function assertConvertedOriginsUnique<TItemFields extends object>(
 	}
 	const sourceByTarget = new Map<string, string>();
 	for (const [previousOrigin, nextOrigin] of originPairs) {
-		const source = canonicalOrigin(previousOrigin);
-		const target = canonicalOrigin(nextOrigin);
+		const source = canonicalEventCalendarRecurrenceOrigin(previousOrigin);
+		const target = canonicalEventCalendarRecurrenceOrigin(nextOrigin);
 		const existingSource = sourceByTarget.get(target);
 		if (existingSource && existingSource !== source) {
 			throw new EventCalendarError(
 				'invalid-recurrence',
 				'A series conversion cannot collapse distinct canonical recurrence origins.',
-				{ id: previousSeriesItem.id, target }
+				{ id: previousSeriesItem.id, target: target.replace(':', '-') }
 			);
 		}
 		sourceByTarget.set(target, source);
 	}
-}
-
-function applyPlacement<TItemFields extends object>(
-	item: EventCalendarItem<TItemFields>,
-	placement: { allDay: boolean; start: ScheduleValue; end: ScheduleValue },
-	resourceSource: EventCalendarItem<TItemFields>
-): EventCalendarItem<TItemFields> {
-	const next = { ...item } as Record<string, unknown>;
-	next.start = placement.start;
-	next.end = placement.end;
-	if (placement.allDay) next.allDay = true;
-	else delete next.allDay;
-	copyResourceAssignment(next, resourceSource);
-	return next as EventCalendarItem<TItemFields>;
 }
 
 type PlacementTransform = {
@@ -408,29 +392,17 @@ function transformSeriesSource<TItemFields extends object>(
 	transform: PlacementTransform,
 	options: CreateRecurrenceMutationOptions<TItemFields>
 ): EventCalendarItem<TItemFields> {
-	const next = { ...seriesItem } as Record<string, unknown>;
-	const placement = transformPlacement(seriesItem, transform, options);
-	next.start = placement.start;
-	next.end = placement.end;
-	if (placement.allDay) next.allDay = true;
-	else delete next.allDay;
-	copyResourceAssignment(next, targetItem);
+	const next = replaceEventCalendarPlacement(
+		seriesItem,
+		transformPlacement(seriesItem, transform, options),
+		targetItem
+	) as Record<string, unknown>;
 	if (seriesItem.recurrence && typeof seriesItem.recurrence !== 'string') {
 		next.recurrence = transformRule(seriesItem.recurrence, transform);
 	}
-	if (placement.allDay) delete next.recurrenceTimeZone;
+	if (next.allDay === true) delete next.recurrenceTimeZone;
 	else next.recurrenceTimeZone = transform.newTimeZone;
 	return next as EventCalendarItem<TItemFields>;
-}
-
-function copyResourceAssignment(
-	target: Record<string, unknown>,
-	source: { resourceId?: string; resourceIds?: readonly string[] }
-): void {
-	delete target.resourceId;
-	delete target.resourceIds;
-	if (source.resourceIds !== undefined) target.resourceIds = [...source.resourceIds];
-	else if (source.resourceId !== undefined) target.resourceId = source.resourceId;
 }
 
 function transformException<TItemFields extends object>(
@@ -439,20 +411,17 @@ function transformException<TItemFields extends object>(
 	transform: PlacementTransform,
 	options: CreateRecurrenceMutationOptions<TItemFields>
 ): EventCalendarItem<TItemFields> {
-	const next = { ...exception } as Record<string, unknown>;
 	const isAlreadyTargetKind = (exception.allDay === true) === transform.targetIsAllDay;
 	const placement =
 		transform.operation === 'convert' && isAlreadyTargetKind
 			? shiftTargetKindPlacement(exception, transform)
 			: transformPlacement(exception, transform, options);
-	next.start = placement.start;
-	next.end = placement.end;
-	if (placement.allDay) next.allDay = true;
-	else delete next.allDay;
+	const next = replaceEventCalendarSchedule(exception, placement) as Record<string, unknown>;
 	next.recurringItemId = seriesItem.id;
-	next.originalStart = transformOrigin(exception.originalStart as RecurrenceValue, transform);
-	delete next.recurrence;
-	delete next.recurrenceTimeZone;
+	next.originalStart = transformOrigin(
+		exception.originalStart as EventCalendarRecurrenceValue,
+		transform
+	);
 	return next as EventCalendarItem<TItemFields>;
 }
 
@@ -464,33 +433,25 @@ function transformPlacement<TItemFields extends object>(
 	if (transform.operation === 'convert') {
 		return convertPlacement(item, transform, options);
 	}
-	if (item.allDay === true) {
-		const start =
-			transform.operation === 'resize-end'
-				? item.start
-				: addCivilDays(item.start, transform.dayDelta);
-		const end =
-			transform.operation === 'resize-start'
-				? item.end
-				: addCivilDays(
-						item.end,
-						transform.operation === 'resize-end' ? transform.endDayDelta : transform.dayDelta
-					);
-		return { allDay: true, start, end };
-	}
-	const start =
-		transform.operation === 'resize-end'
+	const shift = (value: ScheduleValue, days: number, wallMilliseconds: number): ScheduleValue =>
+		item.allDay === true
+			? addCivilDays(value as EventCalendarDateOnly, days)
+			: shiftWallInstant(value as Date, wallMilliseconds, transform.oldTimeZone);
+	const preservesStart = transform.operation === 'resize-end';
+	const preservesEnd = transform.operation === 'resize-start';
+	return {
+		allDay: item.allDay === true,
+		start: preservesStart
 			? item.start
-			: shiftWallInstant(item.start, transform.wallDeltaMs, transform.oldTimeZone);
-	const end =
-		transform.operation === 'resize-start'
+			: shift(item.start, transform.dayDelta, transform.wallDeltaMs),
+		end: preservesEnd
 			? item.end
-			: shiftWallInstant(
+			: shift(
 					item.end,
-					transform.operation === 'resize-end' ? transform.endWallDeltaMs : transform.wallDeltaMs,
-					transform.oldTimeZone
-				);
-	return { allDay: false, start, end };
+					preservesStart ? transform.endDayDelta : transform.dayDelta,
+					preservesStart ? transform.endWallDeltaMs : transform.wallDeltaMs
+				)
+	};
 }
 
 function convertPlacement<TItemFields extends object>(
@@ -554,7 +515,7 @@ function transformRule(
 	rule: EventCalendarRecurrenceRule,
 	transform: PlacementTransform
 ): EventCalendarRecurrenceRule {
-	if (transform.operation === 'resize-end') return cloneRule(rule);
+	if (transform.operation === 'resize-end') return cloneEventCalendarRecurrenceRule(rule);
 	return {
 		...rule,
 		...(rule.until === undefined ? {} : { until: transformOrigin(rule.until, transform) }),
@@ -567,20 +528,11 @@ function transformRule(
 	};
 }
 
-function cloneRule(rule: EventCalendarRecurrenceRule): EventCalendarRecurrenceRule {
-	return {
-		...rule,
-		...(rule.byWeekday ? { byWeekday: [...rule.byWeekday] } : {}),
-		...(rule.byMonthDay ? { byMonthDay: [...rule.byMonthDay] } : {}),
-		...(rule.byMonth ? { byMonth: [...rule.byMonth] } : {}),
-		...(rule.until ? { until: cloneScheduleValue(rule.until) } : {}),
-		...(rule.exDates ? { exDates: rule.exDates.map(cloneScheduleValue) } : {}),
-		...(rule.rDates ? { rDates: rule.rDates.map(cloneScheduleValue) } : {})
-	};
-}
-
-function transformOrigin(origin: RecurrenceValue, transform: PlacementTransform): RecurrenceValue {
-	if (transform.operation === 'resize-end') return cloneScheduleValue(origin);
+function transformOrigin(
+	origin: EventCalendarRecurrenceValue,
+	transform: PlacementTransform
+): EventCalendarRecurrenceValue {
+	if (transform.operation === 'resize-end') return cloneEventCalendarScheduleValue(origin);
 	if (transform.operation === 'convert') {
 		if (transform.targetIsAllDay) {
 			return addCivilDays(getZonedDay(origin as Date, transform.oldTimeZone), transform.dayDelta);
@@ -654,23 +606,6 @@ function getSeriesItem<TItemFields extends object>(
 	return seriesItem;
 }
 
-function occurrenceToPlacement<TItemFields extends object>(
-	occurrence: EventCalendarOccurrence<TItemFields>,
-	displayTimeZone: string
-): EventCalendarItem<TItemFields> {
-	const placement = { ...occurrence.item } as Record<string, unknown>;
-	placement.start = new Date(occurrence.start);
-	placement.end = new Date(occurrence.end);
-	if (occurrence.allDay) {
-		placement.allDay = true;
-		placement.start = getZonedDay(occurrence.start, displayTimeZone);
-		placement.end = getZonedDay(occurrence.end, displayTimeZone);
-	} else {
-		delete placement.allDay;
-	}
-	return placement as EventCalendarItem<TItemFields>;
-}
-
 function getPlacementDelta(
 	previous: ScheduleValue,
 	next: ScheduleValue,
@@ -727,18 +662,6 @@ function touchedCivilDayCount(start: Date, end: Date, timeZone: string): number 
 	const startDay = getZonedDay(start, timeZone);
 	const inclusiveEnd = new Date(Math.max(start.getTime(), end.getTime() - 1));
 	return Math.max(1, civilDayDifference(startDay, getZonedDay(inclusiveEnd, timeZone)) + 1);
-}
-
-function hasDateSelector(rule: EventCalendarRecurrenceRule): boolean {
-	return Boolean(rule.byWeekday?.length || rule.byMonthDay?.length || rule.byMonth?.length);
-}
-
-function canonicalOrigin(origin: RecurrenceValue): string {
-	return origin instanceof Date ? `instant-${origin.getTime()}` : `day-${origin}`;
-}
-
-function cloneScheduleValue<T extends ScheduleValue>(value: T): T {
-	return (value instanceof Date ? new Date(value) : value) as T;
 }
 
 function scheduleValuesEqual(left: ScheduleValue, right: ScheduleValue): boolean {

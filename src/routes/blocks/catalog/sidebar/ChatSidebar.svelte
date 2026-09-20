@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Avatar } from 'svelai/avatar';
-	import { Button } from 'svelai/button';
-	import { Form } from 'svelai/form';
-	import { Sidebar } from 'svelai/sidebar';
-	import { usersIcon } from 'svelai/icons/users';
-	import { sidebarIcon } from 'svelai/icons/sidebar';
-	import { chatCircleIcon } from 'svelai/icons/chatCircle';
+	import { Avatar } from 'entasis/avatar';
+	import { Button } from 'entasis/button';
+	import { Form } from 'entasis/form';
+	import { Sidebar } from 'entasis/sidebar';
+	import { usersIcon } from 'entasis/icons/users';
+	import { sidebarIcon } from 'entasis/icons/sidebar';
+	import { chatCircleIcon } from 'entasis/icons/chatCircle';
 	const channels = ['general', 'design', 'engineering', 'random'];
 	let channel = $state('general');
 	let draft = $state<{ message?: string }>({});

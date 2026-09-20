@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Alert } from 'svelai/alert';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { DataTable } from 'svelai/data-table';
-	import { Switch } from 'svelai/switch';
+	import { Stack } from 'entasis/stack';
+	import { Alert } from 'entasis/alert';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { DataTable } from 'entasis/data-table';
+	import { Switch } from 'entasis/switch';
 
 	let message = $state('');
 	let quiet = $state(false);

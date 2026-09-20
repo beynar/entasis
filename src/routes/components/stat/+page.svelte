@@ -491,7 +491,7 @@
 		</ComponentCard>
 
 		<ComponentCard
-			description="Surface colors and variants use the same semantic token model as the rest of Svelai."
+			description="Surface colors and variants use the same semantic token model as the rest of Entasis."
 			class="!min-h-[420px]"
 			code={`{#each statVariants as variant}
 	{#each colors.slice(0, 4) as color}

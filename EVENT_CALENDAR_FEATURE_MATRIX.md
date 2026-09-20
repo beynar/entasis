@@ -2,13 +2,13 @@
 
 **Assessment date:** 2026-07-27
 
-**Svelai baseline:** repository implementation through `0517246c` plus the working-tree scheduler expansion assessed here
+**Entasis baseline:** repository implementation through `0517246c` plus the working-tree scheduler expansion assessed here
 
 **Compared products:** FullCalendar, React Big Calendar, Mobiscroll Event Calendar, Syncfusion Scheduler, and Bryntum Calendar
 
 ## Verdict
 
-Svelai EventCalendar is already a **feature-complete core event calendar**, not yet a **full enterprise scheduler suite**.
+Entasis EventCalendar is already a **feature-complete core event calendar**, not yet a **full enterprise scheduler suite**.
 
 It covers the difficult calendar foundation: month/week/day/N-day/agenda/resource-day views, timed and all-day layout, background and multi-day events, recurrence expansion and exception mutation, named time zones, DST-safe civil-day math, drag/resize/range selection, touch, keyboard editing, RTL, accessible semantics, immutable controlled state, guarded rollback, clipboard operations, bounded history, multi-resource assignment, resource-local constraints, and Svelte-native composition. The implemented contract is documented in the [component description](src/lib/components/EventCalendar/eventCalendar.mcp.ts) and [public props](src/lib/components/EventCalendar/eventCalendar.props.ts).
 
@@ -18,7 +18,7 @@ The material gaps are concentrated in three areas:
 2. Cross-calendar drag-and-drop.
 3. Product adjacencies: built-in editors, print/export, ICS/provider connectors, and capacity/workload tooling.
 
-That puts Svelai roughly at:
+That puts Entasis roughly at:
 
 - **Core scheduling:** strong parity with FullCalendar Standard and materially ahead of React Big Calendar in recurrence integrity, time-zone explicitness, keyboard mutation, and transaction safety.
 - **Resource scheduling:** strong first-class scheduler surface; enterprise suites remain broader in capacity planning, data adapters, and administrative tooling.
@@ -26,7 +26,7 @@ That puts Svelai roughly at:
 
 ## Method
 
-The matrix compares observable component capabilities, not marketing category names. A feature is counted only when it is present in the shipped Svelai implementation or documented by the vendor.
+The matrix compares observable component capabilities, not marketing category names. A feature is counted only when it is present in the shipped Entasis implementation or documented by the vendor.
 
 | Mark | Meaning                                                               |
 | ---- | --------------------------------------------------------------------- |
@@ -39,7 +39,7 @@ Vendor columns link to official documentation. Specialist claims use additional 
 
 ## 1. Views and rendering
 
-| Capability                                | Svelai                    | [FullCalendar][fc-docs]                        | [React Big Calendar][rbc-core] | [Mobiscroll][mb-overview]             | [Syncfusion][sf-views]                                     | [Bryntum][br-features]                          |
+| Capability                                | Entasis                    | [FullCalendar][fc-docs]                        | [React Big Calendar][rbc-core] | [Mobiscroll][mb-overview]             | [Syncfusion][sf-views]                                     | [Bryntum][br-features]                          |
 | ----------------------------------------- | ------------------------- | ---------------------------------------------- | ------------------------------ | ------------------------------------- | ---------------------------------------------------------- | ----------------------------------------------- |
 | Month grid                                | ✅                        | ✅                                             | ✅                             | ✅                                    | ✅                                                         | ✅                                              |
 | Week and day time grids                   | ✅                        | ✅                                             | ✅                             | ✅                                    | ✅                                                         | ✅                                              |
@@ -54,11 +54,11 @@ Vendor columns link to official documentation. Specialist claims use additional 
 
 ### Assessment
 
-Svelai's ordinary calendar and resource-scheduling view surface is mature. The remaining view gap is **planning scale**: year and multi-month rendering.
+Entasis's ordinary calendar and resource-scheduling view surface is mature. The remaining view gap is **planning scale**: year and multi-month rendering.
 
 ## 2. Interaction and mutation
 
-| Capability                                      | Svelai                                     | [FullCalendar][fc-dnd]                   | [React Big Calendar][rbc-dnd]                   | [Mobiscroll][mb-dnd]                                            | [Syncfusion][sf-events]        | [Bryntum][br-features]       |
+| Capability                                      | Entasis                                     | [FullCalendar][fc-dnd]                   | [React Big Calendar][rbc-dnd]                   | [Mobiscroll][mb-dnd]                                            | [Syncfusion][sf-events]        | [Bryntum][br-features]       |
 | ----------------------------------------------- | ------------------------------------------ | ---------------------------------------- | ----------------------------------------------- | --------------------------------------------------------------- | ------------------------------ | ---------------------------- |
 | Event drag-to-move                              | ✅                                         | ✅                                       | ⊕ drag-and-drop add-on                          | ✅                                                              | ✅                             | ✅                           |
 | Resize from start and end edges                 | ✅                                         | ✅                                       | ✅ add-on                                       | ✅                                                              | ✅                             | ✅                           |
@@ -76,11 +76,11 @@ Svelai's ordinary calendar and resource-scheduling view surface is mature. The r
 
 ### Assessment
 
-Svelai is unusually strong here. Its main interaction deficit is **ecosystem drag-and-drop**. Keyboard move/resize, a unified validation pipeline, immutable transactions, and stale-revert protection are differentiators rather than catch-up work.
+Entasis is unusually strong here. Its main interaction deficit is **ecosystem drag-and-drop**. Keyboard move/resize, a unified validation pipeline, immutable transactions, and stale-revert protection are differentiators rather than catch-up work.
 
 ## 3. Recurrence, dates, and time zones
 
-| Capability                                              | Svelai                                        | [FullCalendar][fc-rrule]                                | [React Big Calendar][rbc-core] | [Mobiscroll][mb-timezones]            | [Syncfusion][sf-recurrence]     | [Bryntum][br-core]              |
+| Capability                                              | Entasis                                        | [FullCalendar][fc-rrule]                                | [React Big Calendar][rbc-core] | [Mobiscroll][mb-timezones]            | [Syncfusion][sf-recurrence]     | [Bryntum][br-core]              |
 | ------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------- | ------------------------------ | ------------------------------------- | ------------------------------- | ------------------------------- |
 | Daily/weekly/monthly/yearly recurrence                  | ✅                                            | ⊕ built-in simple recurrence plus RRule plugin          | —                              | ✅                                    | ✅                              | ✅                              |
 | RRULE-style advanced rules                              | ✅ structured rules plus restricted raw RRULE | ⊕ RRule plugin                                          | —                              | ✅ rule strings/objects               | ✅ iCalendar recurrence rules   | ◐ product recurrence model      |
@@ -96,11 +96,11 @@ Svelai is unusually strong here. Its main interaction deficit is **ecosystem dra
 
 ### Assessment
 
-Recurrence and time-zone correctness are Svelai strengths. The missing feature is the **authoring UI**, not the recurrence engine. React Big Calendar has no comparable built-in recurrence model; FullCalendar delegates advanced rules to its RRule connector and leaves persistence semantics to the application.
+Recurrence and time-zone correctness are Entasis strengths. The missing feature is the **authoring UI**, not the recurrence engine. React Big Calendar has no comparable built-in recurrence model; FullCalendar delegates advanced rules to its RRule connector and leaves persistence semantics to the application.
 
 ## 4. Resources, data, and scale
 
-| Capability                              | Svelai                                         | [FullCalendar][fc-plugins]                                           | [React Big Calendar][rbc-core] | [Mobiscroll][mb-resources]               | [Syncfusion][sf-resources]                                                        | [Bryntum][br-product]                                             |
+| Capability                              | Entasis                                         | [FullCalendar][fc-plugins]                                           | [React Big Calendar][rbc-core] | [Mobiscroll][mb-resources]               | [Syncfusion][sf-resources]                                                        | [Bryntum][br-product]                                             |
 | --------------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------- | ------------------------------ | ---------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | Resource hierarchy/grouping             | ✅ parent/leaf tree                            | ⊕ Premium hierarchy/grouping                                         | — flat columns                 | ✅ grouping/resource controls            | ✅ multi-level hierarchy                                                          | ◐ resource view/grouping                                          |
 | Multiple resources on one event         | ✅ `resourceIds` with legacy single assignment | ⊕ Premium resource arrays                                            | —                              | ✅ resource arrays                       | ✅ multiple selection                                                             | ◐ documented resource assignment, exact multiplicity not verified |
@@ -113,11 +113,11 @@ Recurrence and time-zone correctness are Svelai strengths. The missing feature i
 
 ### Assessment
 
-Svelai owns coherent calendar resource scheduling through resource-day columns, multi-assignment, and resource-local availability. Horizontal planning, capacity engines, lazy remote loading, and bulk workforce operations remain outside EventCalendar.
+Entasis owns coherent calendar resource scheduling through resource-day columns, multi-assignment, and resource-local availability. Horizontal planning, capacity engines, lazy remote loading, and bulk workforce operations remain outside EventCalendar.
 
 ## 5. Accessibility, composition, and product features
 
-| Capability                                    | Svelai                                               | [FullCalendar][fc-a11y]                                      | [React Big Calendar][rbc-core]                    | [Mobiscroll][mb-templates]                                  | [Syncfusion][sf-overview]                                       | [Bryntum][br-core]                       |
+| Capability                                    | Entasis                                               | [FullCalendar][fc-a11y]                                      | [React Big Calendar][rbc-core]                    | [Mobiscroll][mb-templates]                                  | [Syncfusion][sf-overview]                                       | [Bryntum][br-core]                       |
 | --------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------- |
 | Event/cell/header/resource render composition | ✅ Svelte snippets inside owned semantics            | ✅ content/class/mount hooks                                 | ✅ component/getter overrides                     | ✅ templates                                                | ✅ templates                                                    | ✅ renderers/class overrides             |
 | Per-instance and global theme contract        | ✅ CVA theme parts/tokens                            | ✅ theme and render hooks                                    | ◐ CSS/SASS customization                          | ✅ themes/templates                                         | ✅ theme packages/templates                                     | ✅ SASS/CSS themes                       |
@@ -136,11 +136,11 @@ Svelai owns coherent calendar resource scheduling through resource-day columns, 
 
 ### Assessment
 
-Svelai's accessibility and composition architecture is competitive. The absent rows are mostly **application/product conveniences**. They should not all move into the calendar core.
+Entasis's accessibility and composition architecture is competitive. The absent rows are mostly **application/product conveniences**. They should not all move into the calendar core.
 
 ## Completeness by market
 
-| Target market                                            | Svelai readiness              | Reason                                                                                                      |
+| Target market                                            | Entasis readiness              | Reason                                                                                                      |
 | -------------------------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | Product calendar, meeting planner, booking UI            | **High**                      | Core views, recurrence, time zones, resource day, interactions, accessibility, and composition are present. |
 | Team calendar similar to Google Calendar basics          | **High with companion forms** | Needs an application-owned event/recurrence editor and persistence, which are deliberate boundaries.        |
@@ -184,7 +184,7 @@ Horizontal task/resource planning is intentionally not an EventCalendar view. A 
 
 ### Priority 3 — companion product surface
 
-8. **Svelai event and recurrence editor recipe/component**
+8. **Entasis event and recurrence editor recipe/component**
 
    Compose `Dialog`, `Form`, `DateInput`, `TimeInput`, `Select`, and recurrence controls. Keep domain persistence outside EventCalendar.
 
@@ -214,7 +214,7 @@ The strongest next path is application completeness. The resource scheduler foun
 
 ## Sources
 
-### Svelai
+### Entasis
 
 - [EventCalendar implementation contract](src/lib/components/EventCalendar/eventCalendar.mcp.ts)
 - [EventCalendar public props](src/lib/components/EventCalendar/eventCalendar.props.ts)

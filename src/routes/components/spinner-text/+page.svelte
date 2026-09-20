@@ -62,7 +62,7 @@
 		{controls}
 		description="Cycle through progress messages while keeping the longest message width reserved. The spinner follows Theme unless overridden."
 		code={`<script lang="ts">
-\timport { SpinnerText } from 'svelai/spinner-text';
+\timport { SpinnerText } from 'entasis/spinner-text';
 ${'</' + 'script>'}
 
 <SpinnerText
@@ -153,8 +153,8 @@ ${'</' + 'script>'}
 			title="Custom spinner"
 			description="Compose a Spinner variant through the snippet that receives the resolved size and color."
 			code={`<script lang="ts">
-\timport { SpinnerText } from 'svelai/spinner-text';
-\timport { Spinner } from 'svelai/spinner';
+\timport { SpinnerText } from 'entasis/spinner-text';
+\timport { Spinner } from 'entasis/spinner';
 ${'</' + 'script>'}
 
 <SpinnerText texts={['Generating preview', 'Polishing details']} color="success">

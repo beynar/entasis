@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Alert } from 'svelai/alert';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Form } from 'svelai/form';
-	import { RadioInput } from 'svelai/radio-input';
+	import { Stack } from 'entasis/stack';
+	import { Alert } from 'entasis/alert';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Form } from 'entasis/form';
+	import { RadioInput } from 'entasis/radio-input';
 
 	let message = $state('');
 	let plan = $state<string | null>('Starter');

@@ -3,14 +3,14 @@ export const aiThreadTocDescription = `
 
 Standalone, controlled user-turn navigation for AI transcripts. It renders a compact rail, visible-range marker, magnifying pins, and one shared HoverCard preview from an AIThreadTocState.
 
-Import it directly from **svelai/ai-thread-toc**. AIThread composes the same primitive for its default minimap and exposes measured state through its **toc** slot.
+Import it directly from **entasis/ai-thread-toc**. AIThread composes the same primitive for its default minimap and exposes measured state through its **toc** slot.
 
 ## Thread composition
 
 ~~~svelte
 <script lang="ts">
-  import { AIThread } from 'svelai/ai-thread';
-  import { AIThreadToc, type AIThreadTocState } from 'svelai/ai-thread-toc';
+  import { AIThread } from 'entasis/ai-thread';
+  import { AIThreadToc, type AIThreadTocState } from 'entasis/ai-thread-toc';
 </script>
 
 {#snippet toc(state: AIThreadTocState)}

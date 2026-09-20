@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Form } from 'svelai/form';
-	import { Heading } from 'svelai/heading';
-	import { Separator } from 'svelai/separator';
+	import { Form } from 'entasis/form';
+	import { Heading } from 'entasis/heading';
+	import { Separator } from 'entasis/separator';
 	let email = $state('');
 </script>
 

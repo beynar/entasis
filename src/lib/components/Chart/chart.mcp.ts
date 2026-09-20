@@ -1,11 +1,11 @@
 export const chartDescription = `
 # Chart Component
 
-Chart renders layered cartesian, polar, relation, or faceted marks from one typed data array. Consumers import only from \`svelai/chart\`; TanStack Charts and D3 stay private implementation details of the component, but they must be installed as optional peer dependencies.
+Chart renders layered cartesian, polar, relation, or faceted marks from one typed data array. Consumers import only from \`entasis/chart\`; TanStack Charts and D3 stay private implementation details of the component, but they must be installed as optional peer dependencies.
 
 ## Requires
 
-Chart renders through TanStack Charts and D3. Those packages are optional peer dependencies of svelai, so install them alongside it:
+Chart renders through TanStack Charts and D3. Those packages are optional peer dependencies of entasis, so install them alongside it:
 
 \`pnpm add @tanstack/charts d3-array d3-force d3-hierarchy d3-sankey d3-scale d3-shape\`
 
@@ -15,7 +15,7 @@ One public type (\`curve\`) is D3's \`CurveFactory\`, so TypeScript users add it
 
 \`\`\`svelte
 <script lang="ts">
-  import { Chart } from 'svelai/chart'
+  import { Chart } from 'entasis/chart'
 
   type Row = { month: Date; actual: number; forecast: number; low: number; high: number }
   const x = { scale: { type: 'utc' }, axis: { label: 'Month' } } as const

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Heading } from 'svelai/heading';
+	import { Button } from 'entasis/button';
+	import { Heading } from 'entasis/heading';
 	let choice = $state<string | null>(null);
 </script>
 

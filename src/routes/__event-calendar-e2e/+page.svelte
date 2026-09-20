@@ -8,10 +8,12 @@
 		EventCalendar,
 		externalEvent,
 		type EventCalendarInteractionBlockedInfo,
+		type EventCalendarExpandedOccurrence,
 		type EventCalendarItem,
 		type EventCalendarItemsChangePayload,
+		type EventCalendarRecurrenceExpander,
 		type EventCalendarSlotSelectPayload
-	} from 'svelai/event-calendar';
+	} from 'entasis/event-calendar';
 
 	const TIME_ZONE = 'UTC';
 
@@ -69,6 +71,32 @@
 	let lastSelect = $state('none');
 	let lastBlocked = $state('none');
 	let externalSequence = 0;
+	let recurrenceExpansionCount = 0;
+
+	const expandRecurrence: EventCalendarRecurrenceExpander = ({ item, range }) => {
+		recurrenceExpansionCount += 1;
+		if (typeof window !== 'undefined') {
+			(
+				window as Window & { __eventCalendarExpansionCount?: number }
+			).__eventCalendarExpansionCount = recurrenceExpansionCount;
+		}
+		if (item.allDay === true) return [];
+		const start = item.start;
+		const duration = item.end.getTime() - start.getTime();
+		const occurrences: EventCalendarExpandedOccurrence[] = [];
+		for (let day = 0; day < 7; day += 1) {
+			const occurrenceStart = new Date(start.getTime() + day * 86_400_000);
+			const occurrenceEnd = new Date(occurrenceStart.getTime() + duration);
+			if (occurrenceEnd <= range.start || occurrenceStart >= range.end) continue;
+			occurrences.push({
+				allDay: false,
+				originalStart: occurrenceStart,
+				start: occurrenceStart,
+				end: occurrenceEnd
+			});
+		}
+		return occurrences;
+	};
 
 	function serializeEndpoint(value: Date | string): string {
 		return value instanceof Date ? value.toISOString() : value;
@@ -133,6 +161,7 @@
 		weekStartsOn={1}
 		timeGrid={{ startHour: 6, endHour: 18, scrollToHour: 6 }}
 		month={{ maxItemsPerCell: 1 }}
+		recurrence={{ expand: expandRecurrence }}
 		onItemsChange={handleItemsChange}
 		onSelect={handleSelect}
 		onInteractionBlocked={handleBlocked}

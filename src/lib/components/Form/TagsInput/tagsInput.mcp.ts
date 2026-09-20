@@ -7,7 +7,7 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 
 \`\`\`svelte
 <script>
-	import { TagsInput } from 'svelai/tags-input';
+	import { TagsInput } from 'entasis/tags-input';
 	let value = $state(null);
 </script>
 
@@ -190,7 +190,7 @@ The TagsInput uses a theme object customizable via the \`theme\` prop or a globa
 
 \`\`\`svelte
 <script>
-	import { setTagsInputTheme } from 'svelai/tags-input';
+	import { setTagsInputTheme } from 'entasis/tags-input';
 
 	setTagsInputTheme({
 		inputContainer: {

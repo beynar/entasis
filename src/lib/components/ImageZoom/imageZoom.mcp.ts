@@ -9,7 +9,7 @@ high-resolution sources, slots, focus restoration, and configurable dismissal.
 
 \`\`\`svelte
 <script>
-	import { ImageZoom } from 'svelai/image-zoom';
+	import { ImageZoom } from 'entasis/image-zoom';
 </script>
 
 <ImageZoom

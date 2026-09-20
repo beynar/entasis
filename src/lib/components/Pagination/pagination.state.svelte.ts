@@ -33,7 +33,7 @@ export function warnMissingPageCountOnce() {
 	if (hasWarnedAboutMissingPageCount) return;
 	hasWarnedAboutMissingPageCount = true;
 	console.warn(
-		'svelai: <Pagination /> has no page count and renders nothing. Pass `totalPages`, or both `totalItems` and `pageSize`.'
+		'entasis: <Pagination /> has no page count and renders nothing. Pass `totalPages`, or both `totalItems` and `pageSize`.'
 	);
 }
 

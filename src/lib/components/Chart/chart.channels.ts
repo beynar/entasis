@@ -88,7 +88,7 @@ export function compileKeyedPaletteScale(
 	palette: Readonly<Record<string, ChartColor>>
 ): ChartColorScale {
 	return {
-		id: 'svelai-chart-keyed-palette',
+		id: 'entasis-chart-keyed-palette',
 		resolve: ({ values, domain: configuredDomain, range: configuredRange, theme }) => {
 			const fallback = configuredRange?.length ? configuredRange : theme.palette;
 			const domain = uniqueChartKeys(configuredDomain ?? values);

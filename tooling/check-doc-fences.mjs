@@ -18,7 +18,7 @@ import { createConsumerFixture, listFiles, repositoryRoot } from './consumer-fix
 const only = process.argv.slice(2);
 const documentationFiles = [
 	path.join(repositoryRoot, 'README.md'),
-	...(await listFiles(path.join(repositoryRoot, '.claude/skills/svelai'), (f) =>
+	...(await listFiles(path.join(repositoryRoot, '.claude/skills/entasis'), (f) =>
 		f.endsWith('.md')
 	)),
 	...(await listFiles(
@@ -37,7 +37,7 @@ for (const entry of await loadManifest()) {
 	if (!entry.subpath || entry.subpath.includes('*')) continue;
 	for (const symbol of entry.exportedSymbols ?? []) {
 		if (/^[A-Z]/.test(symbol) && !componentSubpaths.has(symbol)) {
-			componentSubpaths.set(symbol, `svelai${entry.subpath.slice(1)}`);
+			componentSubpaths.set(symbol, `entasis${entry.subpath.slice(1)}`);
 		}
 	}
 }
@@ -127,7 +127,7 @@ function declaredInScript(program) {
 
 /**
  * Makes a fence self-contained so it type-checks against the package: components used in the
- * markup but never imported get their real `svelai/<subpath>` import, and free identifiers get
+ * markup but never imported get their real `entasis/<subpath>` import, and free identifiers get
  * an `any` declaration. A fence with no `<script>` gets one; an existing script is extended.
  */
 function completeFence(code, file) {
@@ -147,7 +147,7 @@ function completeFence(code, file) {
 	}
 	if (unknown.length) {
 		throw new Error(
-			`unknown component(s) ${unknown.join(', ')} — not exported by any svelai subpath`
+			`unknown component(s) ${unknown.join(', ')} — not exported by any entasis subpath`
 		);
 	}
 	if (!ast.instance) {

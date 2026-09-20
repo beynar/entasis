@@ -188,7 +188,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setSkeletonTheme } from 'svelai/skeleton';
+  import { setSkeletonTheme } from 'entasis/skeleton';
   
   setSkeletonTheme({
     root: {

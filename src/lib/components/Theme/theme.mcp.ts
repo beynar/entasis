@@ -8,7 +8,7 @@ transitions. Wrap the application once and use the \`ThemeState\` received by th
 
 \`\`\`svelte
 <script lang="ts">
-	import { Theme, type ThemeDesignTokenMap } from 'svelai/theme';
+	import { Theme, type ThemeDesignTokenMap } from 'entasis/theme';
 
 	let spacing = $state<'small' | 'normal' | 'large'>('normal');
 	const designTokens = $derived({
@@ -113,7 +113,7 @@ Motion is a token scale like spacing and radius: five duration steps and four ea
 
 \`\`\`svelte
 <script lang="ts">
-	import { Theme } from 'svelai/theme';
+	import { Theme } from 'entasis/theme';
 
 	let { children } = $props();
 </script>
@@ -130,14 +130,14 @@ and Svelte transitions read one set of numbers. The \`motion\` prop rewrites tho
 \`ThemeState.motion\` resolves through the same two rungs, so the utilities and the presets never
 disagree. \`ThemeState.transition\` is a deprecated alias for its \`normal\` duration and \`standard\`
 easing. Reduced motion resolves every duration to 0 and collapses the \`--duration-*\` variables via
-the \`data-svelai-reduce-motion\` attribute on \`html\`.
+the \`data-entasis-reduce-motion\` attribute on \`html\`.
 
 Components keep their own transition in a reserved \`motion\` slot on their theme, so the \`theme\`
 prop covers motion as well as classes:
 
 \`\`\`svelte
 <script lang="ts">
-	import { Dialog } from 'svelai/dialog';
+	import { Dialog } from 'entasis/dialog';
 </script>
 
 <Dialog theme={{ motion: { duration: 'fast', easing: 'emphasized' } }} title="Quick">Body</Dialog>
@@ -153,7 +153,7 @@ below it, so a subtree that restyles one slot keeps the registry's others.
 
 \`\`\`svelte
 <script lang="ts">
-	import { Theme } from 'svelai/theme';
+	import { Theme } from 'entasis/theme';
 
 	let { children } = $props();
 </script>
@@ -170,14 +170,14 @@ below it, so a subtree that restyles one slot keeps the registry's others.
 
 ## Reduced motion
 
-\`reduceMotion\` forces reduced motion on (\`true\`) or off (\`false\`) for every svelai animation,
+\`reduceMotion\` forces reduced motion on (\`true\`) or off (\`false\`) for every entasis animation,
 overriding the OS \`prefers-reduced-motion\` setting; omit it to follow the OS. The live result is
 exposed as \`ThemeState.preferReducesMotion\` (reactive, so it updates when the OS setting changes)
-and mirrored as a \`data-svelai-reduce-motion\` attribute on \`html\` for CSS-only animations.
+and mirrored as a \`data-entasis-reduce-motion\` attribute on \`html\` for CSS-only animations.
 
 \`\`\`svelte
 <script>
-	import { Theme } from 'svelai/theme';
+	import { Theme } from 'entasis/theme';
 
 	let { children } = $props();
 </script>

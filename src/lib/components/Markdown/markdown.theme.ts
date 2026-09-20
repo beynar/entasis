@@ -29,9 +29,9 @@ export const setMarkdownTheme = setComponentTheme<MarkdownTheme>('markdown');
 export const useMarkdownTheme = useComponentTheme('markdown', markdownTheme);
 
 /**
- * Wrapper classes applied to the svelai `Code` block per size (margin + type
+ * Wrapper classes applied to the entasis `Code` block per size (margin + type
  * scale). The `Markdown` component overrides the streamdown `code` renderer with
- * a svelai `Code` snippet, so these drive the fenced-code-block spacing.
+ * a entasis `Code` snippet, so these drive the fenced-code-block spacing.
  */
 export const markdownCodeSizes: Record<MarkdownSize, string> = {
 	small: 'my-md text-xs',
@@ -40,8 +40,8 @@ export const markdownCodeSizes: Record<MarkdownSize, string> = {
 };
 
 /**
- * Maps the markdown size scale onto the svelai `Mermaid` component's own size
- * scale (used when the `mermaid` renderer is overridden with a svelai Mermaid).
+ * Maps the markdown size scale onto the entasis `Mermaid` component's own size
+ * scale (used when the `mermaid` renderer is overridden with a entasis Mermaid).
  */
 export const markdownMermaidSizes: Record<MarkdownSize, Sizes> = {
 	small: 'small',
@@ -121,7 +121,7 @@ const SIZES: Record<MarkdownSize, SizeScale> = {
 };
 
 /**
- * The full shadcn base theme from `svelte-streamdown`, translated to svelai
+ * The full shadcn base theme from `svelte-streamdown`, translated to entasis
  * semantic tokens and scaled to the given markdown `size`. Passed to
  * `<Streamdown theme={...}>`; it deep-merges over the built-in `tailwind` base
  * theme, so any key omitted here still falls back safely.

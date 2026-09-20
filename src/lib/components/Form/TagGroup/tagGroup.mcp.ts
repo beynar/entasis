@@ -7,7 +7,7 @@ TagGroup renders a finite set of selectable tags as chips. It is a form input fo
 
 \`\`\`svelte
 <script lang="ts">
-	import { TagGroup } from 'svelai/tag-group';
+	import { TagGroup } from 'entasis/tag-group';
 
 	let value = $state('news');
 </script>

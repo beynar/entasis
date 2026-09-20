@@ -11,8 +11,8 @@ import type { ChartKey } from './chart.props.js';
 import { withoutTooltipPoints } from './chart.mark.js';
 
 export type DistributionEmpiricalDatum = {
-	readonly __svelaiDistributionEmpirical: true;
-	readonly __svelaiSourceRows: readonly object[];
+	readonly __entasisDistributionEmpirical: true;
+	readonly __entasisSourceRows: readonly object[];
 	readonly identity: string;
 	readonly group: ChartKey;
 	readonly variant: NormalizedEmpiricalDistributionVariant['type'];
@@ -219,8 +219,8 @@ function empiricalDatum(
 		Partial<Pick<DistributionEmpiricalDatum, 'lower' | 'upper'>> = { count: summary.count }
 ): DistributionEmpiricalDatum {
 	return {
-		__svelaiDistributionEmpirical: true,
-		__svelaiSourceRows: summary.__svelaiSourceRows,
+		__entasisDistributionEmpirical: true,
+		__entasisSourceRows: summary.__entasisSourceRows,
 		identity: `${summary.identity}:${variant}:${index}`,
 		group: summary.group,
 		variant,

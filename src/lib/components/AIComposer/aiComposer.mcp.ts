@@ -5,7 +5,7 @@ AIComposer is a Markdown prompt composer built on the existing \`RichTextInput\`
 
 ## Requires
 
-AIComposer embeds RichTextInput, which is built on Lexical. Those packages are optional peer dependencies of svelai, so install them alongside it:
+AIComposer embeds RichTextInput, which is built on Lexical. Those packages are optional peer dependencies of entasis, so install them alongside it:
 
 \`pnpm add lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils\`
 
@@ -22,7 +22,7 @@ AIComposer embeds RichTextInput, which is built on Lexical. Those packages are o
     type AIComposerQueuedMessage,
     type AIComposerSkillItem,
     type AIComposerSubmitPayload
-  } from 'svelai/ai-composer';
+  } from 'entasis/ai-composer';
 </script>
 \`\`\`
 

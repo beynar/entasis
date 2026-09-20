@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Timeline } from 'svelai/timeline';
-	import { Avatar } from 'svelai/avatar';
+	import { Heading } from 'entasis/heading';
+	import { Timeline } from 'entasis/timeline';
+	import { Avatar } from 'entasis/avatar';
 	const roles = [
 		{
 			company: 'Forma',

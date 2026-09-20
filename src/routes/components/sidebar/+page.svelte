@@ -58,13 +58,13 @@
 
 	function toPublicExampleCode(code: string): string {
 		return code
-			.replaceAll('$lib/components/Button/index.js', 'svelai/button')
-			.replaceAll('$lib/components/AppShell/index.js', 'svelai/app-shell')
-			.replaceAll('$lib/components/Menu/index.js', 'svelai/menu')
-			.replaceAll('$lib/components/SegmentedControl/index.js', 'svelai/segmented-control')
-			.replaceAll('$lib/components/Sidebar/index.js', 'svelai/sidebar')
-			.replaceAll('$lib/components/Skeleton/index.js', 'svelai/skeleton')
-			.replace(/\$lib\/components\/Icons\/([A-Za-z0-9]+)\.js/g, 'svelai/icons/$1');
+			.replaceAll('$lib/components/Button/index.js', 'entasis/button')
+			.replaceAll('$lib/components/AppShell/index.js', 'entasis/app-shell')
+			.replaceAll('$lib/components/Menu/index.js', 'entasis/menu')
+			.replaceAll('$lib/components/SegmentedControl/index.js', 'entasis/segmented-control')
+			.replaceAll('$lib/components/Sidebar/index.js', 'entasis/sidebar')
+			.replaceAll('$lib/components/Skeleton/index.js', 'entasis/skeleton')
+			.replace(/\$lib\/components\/Icons\/([A-Za-z0-9]+)\.js/g, 'entasis/icons/$1');
 	}
 </script>
 

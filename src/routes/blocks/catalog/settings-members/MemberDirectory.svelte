@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { trashIcon } from 'svelai/icons/trash';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { DataTable } from 'svelai/data-table';
-	import { Select } from 'svelai/select';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { trashIcon } from 'entasis/icons/trash';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { DataTable } from 'entasis/data-table';
+	import { Select } from 'entasis/select';
 
 	let members = $state([
 		{ name: 'Alex Morgan', email: 'alex@example.com', role: 'Owner', joined: 'January 12' },

@@ -93,6 +93,29 @@ async function html5Drag(page: Page, source: Locator, target: Locator) {
 }
 
 test.describe('EventCalendar browser interactions', () => {
+	test('pointer movement does not re-expand the admitted recurrence collection', async ({
+		page
+	}) => {
+		await gotoHarness(page);
+		await page.waitForTimeout(50);
+		const readExpansionCount = () =>
+			page.evaluate(
+				() =>
+					(window as Window & { __eventCalendarExpansionCount?: number })
+						.__eventCalendarExpansionCount ?? 0
+			);
+		const before = await readExpansionCount();
+		const start = await topCenter(timedSlot(page, '2026-07-16', '2026-07-16T13:00:00.000Z'), 1);
+		const end = await topCenter(timedSlot(page, '2026-07-16', '2026-07-16T15:00:00.000Z'), 1);
+
+		await page.mouse.move(start.x, start.y);
+		await page.mouse.down();
+		await page.mouse.move(end.x, end.y, { steps: 30 });
+		await expect(calendarRoot(page)).toHaveAttribute('data-interaction-kind', 'slot-create');
+		expect(await readExpansionCount()).toBe(before);
+		await page.mouse.up();
+	});
+
 	test('HTML5 drag of a timed item commits a move change', async ({ page }) => {
 		await gotoHarness(page);
 		// Drag "Move me" from Monday 09:00 to the Wednesday 13:00 slot.
@@ -115,9 +138,10 @@ test.describe('EventCalendar browser interactions', () => {
 	test('pointer drag across timed slots fires onSelect with drag-create', async ({ page }) => {
 		await gotoHarness(page);
 		// Real pointer events: slot-create uses pointer capture + a 5px activation
-		// distance, so page.mouse is required (synthetic dispatch cannot capture).
-		const start = await topCenter(timedSlot(page, '2026-07-16', '2026-07-16T13:00:00.000Z'), 1);
-		const end = await topCenter(timedSlot(page, '2026-07-16', '2026-07-16T14:00:00.000Z'), 1);
+		// distance, so page.mouse is required (synthetic dispatch cannot capture). Keep
+		// the path away from the scroll edges so auto-scroll timing cannot change its time.
+		const start = await topCenter(timedSlot(page, '2026-07-16', '2026-07-16T11:00:00.000Z'), 1);
+		const end = await topCenter(timedSlot(page, '2026-07-16', '2026-07-16T12:00:00.000Z'), 1);
 		await page.mouse.move(start.x, start.y);
 		await page.mouse.down();
 		await page.mouse.move(end.x, end.y, { steps: 12 });
@@ -125,11 +149,10 @@ test.describe('EventCalendar browser interactions', () => {
 		await page.mouse.up();
 		await expect(lastSelect(page)).toContainText('"source":"drag-create"');
 		await expect(lastSelect(page)).toContainText('"allDay":false');
-		// Pointer sampling + snapping resolve deterministically to mid-slot
-		// instants for this drag geometry (13:15–14:30, verified against baseline).
-		await expect(lastSelect(page)).toContainText('"start":"2026-07-16T13:15:00.000Z"');
-		await expect(lastSelect(page)).toContainText('"end":"2026-07-16T14:30:00.000Z"');
-		// The gesture ended; lastSelect above is the commit witness. The 13:15
+		// Pointer sampling + snapping resolve deterministically to mid-slot instants.
+		await expect(lastSelect(page)).toContainText('"start":"2026-07-16T11:15:00.000Z"');
+		await expect(lastSelect(page)).toContainText('"end":"2026-07-16T12:15:00.000Z"');
+		// The gesture ended; lastSelect above is the commit witness. The 11:15
 		// anchor is off-grid, so no slot button is marked pressed.
 		await expect(calendarRoot(page)).not.toHaveAttribute('data-interaction-kind', 'slot-create');
 	});

@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Heading } from 'svelai/heading';
-	import { Separator } from 'svelai/separator';
-	import { arrowsOutIcon } from 'svelai/icons/arrowsOut';
-	import { checkCircleIcon } from 'svelai/icons/checkCircle';
-	import { cursorClickIcon } from 'svelai/icons/cursorClick';
-	import { paletteIcon } from 'svelai/icons/palette';
-	import { puzzlePieceIcon } from 'svelai/icons/puzzlePiece';
-	import { textAlignLeftIcon } from 'svelai/icons/textAlignLeft';
+	import { Button } from 'entasis/button';
+	import { Heading } from 'entasis/heading';
+	import { Separator } from 'entasis/separator';
+	import { arrowsOutIcon } from 'entasis/icons/arrowsOut';
+	import { checkCircleIcon } from 'entasis/icons/checkCircle';
+	import { cursorClickIcon } from 'entasis/icons/cursorClick';
+	import { paletteIcon } from 'entasis/icons/palette';
+	import { puzzlePieceIcon } from 'entasis/icons/puzzlePiece';
+	import { textAlignLeftIcon } from 'entasis/icons/textAlignLeft';
 	const features = [
 		{
 			title: 'A familiar rhythm',

@@ -7,9 +7,9 @@ The Menu component is a flexible container that renders an array of menu items i
 
 \`\`\`svelte
 <script lang="ts">
-	import { Menu, type MenuItem } from 'svelai/menu';
-	import { userIcon } from 'svelai/icons/user';
-	import { gearIcon } from 'svelai/icons/gear';
+	import { Menu, type MenuItem } from 'entasis/menu';
+	import { userIcon } from 'entasis/icons/user';
+	import { gearIcon } from 'entasis/icons/gear';
 	
 	const items = [
 		{ type: 'option', title: 'Profile', prefix: userIcon },
@@ -76,7 +76,7 @@ The Menu accepts a discriminated union of four item types:
 
 ### Button Item
 \`\`\`typescript
-import type { MenuItem } from 'svelai/menu';
+import type { MenuItem } from 'entasis/menu';
 
 const buttonItem = {
 	type: 'button',
@@ -88,7 +88,7 @@ const buttonItem = {
 
 ### MenuOption Item
 \`\`\`typescript
-import type { MenuItem } from 'svelai/menu';
+import type { MenuItem } from 'entasis/menu';
 
 const optionItem = {
 	type: 'option',
@@ -100,7 +100,7 @@ const optionItem = {
 
 ### Separator Item
 \`\`\`typescript
-import type { MenuItem } from 'svelai/menu';
+import type { MenuItem } from 'entasis/menu';
 
 const separatorItem = {
 	type: 'separator',
@@ -111,7 +111,7 @@ const separatorItem = {
 
 ### Submenu Item
 \`\`\`typescript
-import type { MenuItem } from 'svelai/menu';
+import type { MenuItem } from 'entasis/menu';
 
 const submenuItem = {
 	type: 'submenu',
@@ -145,9 +145,9 @@ The menu follows this DOM structure:
 ### Simple Menu
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
-	import { fileIcon } from 'svelai/icons/file';
-	import { folderIcon } from 'svelai/icons/folder';
+	import type { MenuItem } from 'entasis/menu';
+	import { fileIcon } from 'entasis/icons/file';
+	import { folderIcon } from 'entasis/icons/folder';
 
 	const items = [
 		{ type: 'option', title: 'New File', prefix: fileIcon },
@@ -163,7 +163,7 @@ The menu follows this DOM structure:
 ### Menu with Buttons
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 
 	const items = [
 		{ type: 'button', children: 'Save', variant: 'solid', color: 'primary' },
@@ -177,10 +177,10 @@ The menu follows this DOM structure:
 ### Menu with Descriptions
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
-	import { starIcon } from 'svelai/icons/star';
-	import { checkIcon } from 'svelai/icons/check';
-	import { buildingIcon } from 'svelai/icons/building';
+	import type { MenuItem } from 'entasis/menu';
+	import { starIcon } from 'entasis/icons/star';
+	import { checkIcon } from 'entasis/icons/check';
+	import { buildingIcon } from 'entasis/icons/building';
 
 	const items = [
 		{ 
@@ -205,7 +205,7 @@ The menu follows this DOM structure:
 ### Menu with Event Handlers
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 
 	function handleProfile() {
 		console.log('Profile clicked');
@@ -228,7 +228,7 @@ The menu follows this DOM structure:
 ### Custom Theme
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 
 	const customTheme = {
 		root: {
@@ -253,7 +253,7 @@ The menu follows this DOM structure:
 ### Menu with Links
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 
 	const items = [
 		{ type: 'option', title: 'Dashboard', href: '/dashboard' },
@@ -269,8 +269,8 @@ The menu follows this DOM structure:
 ### Menu with Submenus
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
-	import { gearIcon } from 'svelai/icons/gear';
+	import type { MenuItem } from 'entasis/menu';
+	import { gearIcon } from 'entasis/icons/gear';
 	
 	const items = [
 		{ type: 'option', title: 'Dashboard' },
@@ -301,7 +301,7 @@ The menu follows this DOM structure:
 ### Nested Submenus
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 
 	const items = [
 		{ type: 'option', title: 'New File' },
@@ -332,7 +332,7 @@ The menu follows this DOM structure:
 ### Submenu with Custom Trigger Behavior
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 
 	const items = [
 		{ type: 'option', title: 'Option 1' },
@@ -365,7 +365,7 @@ The menu follows this DOM structure:
 ### Menu with Header
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 
 	const items = [
 		{ type: 'option', title: 'Profile' },
@@ -388,7 +388,7 @@ The menu follows this DOM structure:
 ### Menu with Footer
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 
 	const items = [
 		{ type: 'option', title: 'Item 1' },
@@ -409,10 +409,10 @@ The menu follows this DOM structure:
 ### Menu with Header and Footer
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
-	import { userIcon } from 'svelai/icons/user';
-	import { gearIcon } from 'svelai/icons/gear';
-	import { signOutIcon } from 'svelai/icons/signOut';
+	import type { MenuItem } from 'entasis/menu';
+	import { userIcon } from 'entasis/icons/user';
+	import { gearIcon } from 'entasis/icons/gear';
+	import { signOutIcon } from 'entasis/icons/signOut';
 
 	const items = [
 		{ type: 'option', prefix: userIcon, title: 'Profile' },
@@ -449,7 +449,7 @@ The menu follows this DOM structure:
 ### Mixed Size Items
 \`\`\`svelte
 <script lang="ts">
-	import type { MenuItem } from 'svelai/menu';
+	import type { MenuItem } from 'entasis/menu';
 
 	const items = [
 		{ type: 'option', title: 'Small Option', size: 'small' },
@@ -531,10 +531,10 @@ The theme object contains the following parts:
 ### Theme Type Definition
 
 \`\`\`typescript
-import type { MenuThemeProps } from 'svelai/menu';
-import type { ButtonThemeProps } from 'svelai/button';
-import type { MenuOptionThemeProps } from 'svelai/menu-option';
-import type { SeparatorThemeProps } from 'svelai/separator';
+import type { MenuThemeProps } from 'entasis/menu';
+import type { ButtonThemeProps } from 'entasis/button';
+import type { MenuOptionThemeProps } from 'entasis/menu-option';
+import type { SeparatorThemeProps } from 'entasis/separator';
 
 // Example theme customization
 const customTheme: MenuThemeProps = {
@@ -640,8 +640,8 @@ const customTheme: MenuThemeProps = {
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setMenuTheme } from 'svelai/menu';
-  import { setMenuOptionTheme } from 'svelai/menu-option';
+  import { setMenuTheme } from 'entasis/menu';
+  import { setMenuOptionTheme } from 'entasis/menu-option';
   
   // The global menu theme covers the container parts (root, header, footer).
   // Option rows are themed globally through MenuOption's own setter.

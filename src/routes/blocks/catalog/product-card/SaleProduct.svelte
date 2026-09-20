@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Button } from 'svelai/button';
-	import { Rating } from 'svelai/rating';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Button } from 'entasis/button';
+	import { Rating } from 'entasis/rating';
 
 	let quantity = $state(0);
 </script>

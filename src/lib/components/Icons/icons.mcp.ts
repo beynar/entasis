@@ -10,7 +10,7 @@ acorn, addressBook, addressBookTabs, airplane, airplaneInFlight, airplaneLanding
 
 
 ## Usage 
-Import icons with the following pattern "import { iconNameIcon, iconName[Variant]Icon } from "svelai/icons/iconName"
+Import icons with the following pattern "import { iconNameIcon, iconName[Variant]Icon } from "entasis/icons/iconName"
 Then use them as svelte 5 snippets. 
 They can receive the following props : 
 \`\`\`ts
@@ -23,7 +23,7 @@ type IconProps = {
 
 \`\`\`svelte
 <script>  
-    import { houseIcon } from "svelai/icons/house";
+    import { houseIcon } from "entasis/icons/house";
 </script>
   {@render houseIcon({ size: 24, color: 'primary' })}
 \`\`\`
@@ -35,8 +35,8 @@ When passing icons to components that accept snippet props (like \`prefix\` or \
 **Using \`withProps\` (Recommended):**
 \`\`\`svelte
 <script>
-    import { eyeClosedIcon } from "svelai/icons/eyeClosed";
-    import { Button } from "svelai/button";
+    import { eyeClosedIcon } from "entasis/icons/eyeClosed";
+    import { Button } from "entasis/button";
 </script>
 
 <Button prefix={eyeClosedIcon.withProps({ color: "danger" })}>
@@ -47,8 +47,8 @@ When passing icons to components that accept snippet props (like \`prefix\` or \
 **Without \`withProps\` (Verbose):**
 \`\`\`svelte
 <script>
-    import { eyeClosedIcon } from "svelai/icons/eyeClosed";
-    import { Button } from "svelai/button";
+    import { eyeClosedIcon } from "entasis/icons/eyeClosed";
+    import { Button } from "entasis/button";
 </script>
 
 <Button>

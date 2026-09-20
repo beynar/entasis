@@ -7,8 +7,8 @@ The Empty component displays an empty state: a centered composition of media (ic
 
 \`\`\`svelte
 <script>
-	import { Empty } from 'svelai/empty';
-	import { folderIcon } from 'svelai/icons/folder';
+	import { Empty } from 'entasis/empty';
+	import { folderIcon } from 'entasis/icons/folder';
 </script>
 
 <Empty
@@ -167,7 +167,7 @@ The Empty component uses a theme object that can be customized using the \`theme
 **Global theme setting**:
 \`\`\`svelte
 <script>
-	import { setEmptyTheme } from 'svelai/empty';
+	import { setEmptyTheme } from 'entasis/empty';
 
 	setEmptyTheme({
 		title: { base: 'font-semibold' },

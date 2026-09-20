@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { TextInput } from 'svelai/text-input';
-	import { Tabbar } from 'svelai/tabbar';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Button } from 'svelai/button';
+	import { Heading } from 'entasis/heading';
+	import { TextInput } from 'entasis/text-input';
+	import { Tabbar } from 'entasis/tabbar';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Button } from 'entasis/button';
 	const resources = [
 		{
 			title: 'Design system foundations',

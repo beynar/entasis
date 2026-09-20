@@ -17,6 +17,7 @@ import type { EventCalendarState } from './eventCalendar.state.svelte.js';
 import type {
 	EventCalendarDateOnly,
 	EventCalendarItem,
+	EventCalendarMutationSource,
 	EventCalendarOccurrence,
 	EventCalendarView
 } from './eventCalendar.types.js';
@@ -62,8 +63,6 @@ export class EventCalendarA11y<
 	TResourceFields extends object = Record<never, never>
 > {
 	focusedDay = $state<EventCalendarDateOnly | null>(null);
-	mutationOccurrenceKey = $state<string | null>(null);
-	mutationOperation = $state<EventCalendarItemOperation | null>(null);
 	readonly liveRegionId: string;
 	private readonly announcer: LiveAnnouncer;
 	/** Day and time-grid restores share a domain: the newest one wins the tab stop. */
@@ -169,26 +168,22 @@ export class EventCalendarA11y<
 			!this.calendar.interaction.beginAssistedItem(occurrence, operation, source, sourceResourceId)
 		)
 			return false;
-		this.mutationOccurrenceKey = occurrence.key;
-		this.mutationOperation = operation;
 		this.focusedOccurrenceKey = occurrence.key;
 		return true;
 	}
 
 	cancelItemMutation(): boolean {
-		if (!this.mutationOccurrenceKey) return false;
-		const occurrenceKey = this.mutationOccurrenceKey;
+		const gesture = this.assistedItemGesture;
+		if (!gesture) return false;
 		this.calendar.interaction.cancel();
-		this.clearMutation();
-		this.restoreOccurrenceFocus(occurrenceKey);
+		this.restoreOccurrenceFocus(gesture.occurrence.key);
 		return true;
 	}
 
 	activateMutationTarget(target: EventCalendarDropTarget): boolean {
+		const occurrenceKey = this.assistedItemGesture?.occurrence.key;
 		if (!this.calendar.interaction.activateAssistedTarget(target)) return false;
 		if (!this.calendar.interaction.gesture) {
-			const occurrenceKey = this.mutationOccurrenceKey;
-			this.clearMutation();
 			if (occurrenceKey) this.restoreOccurrenceFocus(occurrenceKey);
 		}
 		return true;
@@ -202,7 +197,8 @@ export class EventCalendarA11y<
 		allowMove = true
 	): boolean {
 		if (event.altKey || event.ctrlKey || event.metaKey) return false;
-		if (!this.mutationOccurrenceKey) {
+		const gesture = this.assistedItemGesture;
+		if (!gesture) {
 			const operation = getMutationShortcut(event.key);
 			if (!allowMove && operation === 'move') return false;
 			if (!allowResize && operation !== 'move') return false;
@@ -214,7 +210,7 @@ export class EventCalendarA11y<
 			event.preventDefault();
 			return true;
 		}
-		if (this.mutationOccurrenceKey !== occurrence.key) return false;
+		if (gesture.occurrence.key !== occurrence.key) return false;
 		if (event.key === 'Escape') {
 			event.preventDefault();
 			this.cancelItemMutation();
@@ -222,10 +218,9 @@ export class EventCalendarA11y<
 		}
 		if (event.key === 'Enter') {
 			event.preventDefault();
-			const occurrenceKey = this.mutationOccurrenceKey;
+			const occurrenceKey = gesture.occurrence.key;
 			this.calendar.interaction.commitAssistedItem();
 			if (!this.calendar.interaction.gesture) {
-				this.clearMutation();
 				this.restoreOccurrenceFocus(occurrenceKey);
 			}
 			return true;
@@ -236,7 +231,7 @@ export class EventCalendarA11y<
 		const isAllDay = proposal ? proposal.item.allDay === true : occurrence.allDay;
 		if (
 			this.calendar.view === 'resource' &&
-			this.mutationOperation === 'move' &&
+			gesture.initialKind === 'move' &&
 			(event.key === 'ArrowLeft' || event.key === 'ArrowRight')
 		) {
 			this.calendar.interaction.stepAssistedItem({
@@ -282,9 +277,10 @@ export class EventCalendarA11y<
 		this.occurrenceRegistry.schedule(occurrenceKey);
 	}
 
-	finishItemMutation(): void {
-		const occurrenceKey = this.mutationOccurrenceKey;
-		this.clearMutation();
+	finishItemMutation(source: EventCalendarMutationSource | 'drag-create'): void {
+		const occurrenceKey =
+			this.assistedItemGesture?.occurrence.key ??
+			(source === 'keyboard' || source === 'single-pointer' ? this.focusedOccurrenceKey : null);
 		if (occurrenceKey) this.restoreOccurrenceFocus(occurrenceKey);
 	}
 
@@ -512,7 +508,6 @@ export class EventCalendarA11y<
 	remapOccurrenceKeys(remap: (key: string) => string): void {
 		if (this.focusedOccurrenceKey) this.focusedOccurrenceKey = remap(this.focusedOccurrenceKey);
 		if (this.pendingOccurrenceKey) this.pendingOccurrenceKey = remap(this.pendingOccurrenceKey);
-		if (this.mutationOccurrenceKey) this.mutationOccurrenceKey = remap(this.mutationOccurrenceKey);
 		if (typeof document === 'undefined') return;
 		const root = document
 			.getElementById(this.liveRegionId)
@@ -579,7 +574,7 @@ export class EventCalendarA11y<
 		}
 		const title = status.item?.title ?? messages.eventCalendarLabel;
 		if (status.type === 'commit') {
-			this.finishItemMutation();
+			this.finishItemMutation(status.source);
 			this.announce(messages.eventCalendarMutationCommitted(title));
 			return;
 		}
@@ -587,7 +582,7 @@ export class EventCalendarA11y<
 			this.announce(messages.eventCalendarMutationReverted(title));
 			return;
 		}
-		this.finishItemMutation();
+		this.finishItemMutation(status.source);
 		this.announce(messages.eventCalendarMutationCancelled(title));
 	}
 
@@ -641,7 +636,6 @@ export class EventCalendarA11y<
 		this.activeView = null;
 		this.previousFocusContext = '';
 		this.announcedResourceTarget = '';
-		this.clearMutation();
 	}
 
 	private syncResourceTargetAnnouncement(): void {
@@ -705,9 +699,11 @@ export class EventCalendarA11y<
 		);
 	}
 
-	private clearMutation(): void {
-		this.mutationOccurrenceKey = null;
-		this.mutationOperation = null;
+	private get assistedItemGesture() {
+		const gesture = this.calendar.interaction.gesture;
+		return gesture && gesture.kind !== 'slot-create' && gesture.inputMode === 'assisted'
+			? gesture
+			: null;
 	}
 
 	private clearOccurrenceFocus(): void {

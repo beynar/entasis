@@ -7,14 +7,14 @@ This component library includes **1513 icons** from Phosphor Icons, each availab
 ### Installation
 
 ```bash
-npm install svelai
+npm install entasis
 ```
 
 ### Basic Usage
 
 ```svelte
 <script>
-	import { homeIcon, settingsIconBold } from 'svelai/icons';
+	import { homeIcon, settingsIconBold } from 'entasis/icons';
 </script>
 
 <!-- Direct SVG rendering -->
@@ -36,7 +36,7 @@ npm install svelai
 Tree-shakeable imports for optimal bundle size:
 
 ```typescript
-import { homeIcon, homeIconBold, homeIconFill } from 'svelai/icons';
+import { homeIcon, homeIconBold, homeIconFill } from 'entasis/icons';
 ```
 
 ### Barrel Import (Not Recommended)
@@ -44,7 +44,7 @@ import { homeIcon, homeIconBold, homeIconFill } from 'svelai/icons';
 Only use for development/prototyping due to bundle size impact:
 
 ```typescript
-import * as Icons from 'svelai/icons';
+import * as Icons from 'entasis/icons';
 
 const HomeIcon = Icons.homeIcon;
 ```
@@ -79,7 +79,7 @@ import {
 	homeIconFill, // Filled
 	homeIconLight, // Light
 	homeIconThin // Thin
-} from 'svelai/icons';
+} from 'entasis/icons';
 ```
 
 ### Props Examples:
@@ -152,7 +152,7 @@ The icons cover these categories:
 
 ```svelte
 <script>
-	import { userIcon, settingsIcon } from 'svelai/icons';
+	import { userIcon, settingsIcon } from 'entasis/icons';
 </script>
 
 <div class="flex gap-4">
@@ -165,7 +165,7 @@ The icons cover these categories:
 
 ```svelte
 <script>
-	import { heartIconFill } from 'svelai/icons';
+	import { heartIconFill } from 'entasis/icons';
 </script>
 
 <div class="heart-icon">
@@ -190,7 +190,7 @@ The icons cover these categories:
 
 ```svelte
 <script>
-	import * as Icons from 'svelai/icons';
+	import * as Icons from 'entasis/icons';
 
 	let iconName = $state('home');
 	let variant = $state('');
@@ -221,8 +221,8 @@ The icons cover these categories:
 
 ```svelte
 <script>
-	import { Button } from 'svelai';
-	import { plusIcon } from 'svelai/icons';
+	import { Button } from 'entasis';
+	import { plusIcon } from 'entasis/icons';
 
 	let { onclick, icon = plusIcon, ...props } = $props();
 </script>

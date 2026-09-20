@@ -49,7 +49,7 @@ export function getOrderCode({
 
 	return [
 		'<script lang="ts">',
-		"  import { Timeline, type TimelineItem } from 'svelai/timeline';",
+		"  import { Timeline, type TimelineItem } from 'entasis/timeline';",
 		'',
 		'  type OrderEvent = TimelineItem & {',
 		"    time: string; status: 'complete' | 'current' | 'upcoming';",
@@ -133,7 +133,7 @@ export function getOrderCode({
 }
 
 export const milestonesCode = [
-	"import { Timeline, type TimelineItem } from 'svelai/timeline';",
+	"import { Timeline, type TimelineItem } from 'entasis/timeline';",
 	'',
 	'type Milestone = TimelineItem & {',
 	'  dateBadge?: string;',

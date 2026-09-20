@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Code } from 'svelai/code';
-	import { Heading } from 'svelai/heading';
-	import { Separator } from 'svelai/separator';
-	import { Tabbar } from 'svelai/tabbar';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	import { copyIcon } from 'svelai/icons/copy';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Code } from 'entasis/code';
+	import { Heading } from 'entasis/heading';
+	import { Separator } from 'entasis/separator';
+	import { Tabbar } from 'entasis/tabbar';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
+	import { copyIcon } from 'entasis/icons/copy';
 	const commands: Record<string, string> = {
-		npm: 'npm install svelai',
-		pnpm: 'pnpm add svelai',
-		bun: 'bun add svelai'
+		npm: 'npm install entasis',
+		pnpm: 'pnpm add entasis',
+		bun: 'bun add entasis'
 	};
 	let active = $state('npm');
 	let feedback = $state('');

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Accordion } from 'svelai/accordion';
-	import { Alert } from 'svelai/alert';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Dialog } from 'svelai/dialog';
-	import { Form } from 'svelai/form';
-	import { TextInput } from 'svelai/text-input';
+	import { Stack } from 'entasis/stack';
+	import { Accordion } from 'entasis/accordion';
+	import { Alert } from 'entasis/alert';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Dialog } from 'entasis/dialog';
+	import { Form } from 'entasis/form';
+	import { TextInput } from 'entasis/text-input';
 
 	const questions = [
 		{

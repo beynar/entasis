@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Chip } from 'svelai/chip';
-	import { Separator } from 'svelai/separator';
+	import { Heading } from 'entasis/heading';
+	import { Chip } from 'entasis/chip';
+	import { Separator } from 'entasis/separator';
 	const sections = [
 		{
 			title: 'Start with less',

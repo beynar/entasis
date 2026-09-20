@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Dialog } from 'svelai/dialog';
-	import { Switch } from 'svelai/switch';
-	import { TextInput } from 'svelai/text-input';
-	import { fileTextIcon } from 'svelai/icons/fileText';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Dialog } from 'entasis/dialog';
+	import { Switch } from 'entasis/switch';
+	import { TextInput } from 'entasis/text-input';
+	import { fileTextIcon } from 'entasis/icons/fileText';
 	let query = $state<string | null>('');
 	let savedOnly = $state(false);
 	let resources = $state([

@@ -10,7 +10,7 @@ events.
 
 \`\`\`svelte
 <script lang="ts">
-	import { Tree } from 'svelai/tree';
+	import { Tree } from 'entasis/tree';
 
 	const paths = [
 		'src/lib/components/Tree/Tree.svelte',
@@ -24,12 +24,12 @@ events.
 
 ## Large Trees
 
-Use \`prepareFileTreeInput\` from \`svelai/tree\` and pass \`preparedInput\` for large
+Use \`prepareFileTreeInput\` from \`entasis/tree\` and pass \`preparedInput\` for large
 or SSR-heavy trees. Keep the input preparation outside component render work.
 
 \`\`\`svelte
 <script lang="ts">
-	import { Tree, prepareFileTreeInput } from 'svelai/tree';
+	import { Tree, prepareFileTreeInput } from 'entasis/tree';
 
 	const preparedInput = prepareFileTreeInput(paths, { sort: 'default' });
 </script>
@@ -64,7 +64,7 @@ Never pass both \`paths\` and \`preparedInput\`. Virtualized trees need a bounde
 
 \`\`\`svelte
 <script lang="ts">
-	import { Tree, type FileTree } from 'svelai/tree';
+	import { Tree, type FileTree } from 'entasis/tree';
 
 	let fileTree: FileTree | undefined = $state();
 	let query = $state('');
@@ -83,7 +83,7 @@ Never pass both \`paths\` and \`preparedInput\`. Virtualized trees need a bounde
 
 \`\`\`svelte
 <script lang="ts">
-	import { Tree, type GitStatusEntry } from 'svelai/tree';
+	import { Tree, type GitStatusEntry } from 'entasis/tree';
 
 	const gitStatus: GitStatusEntry[] = [
 		{ path: 'src/lib/Tree.svelte', status: 'modified' }
@@ -97,7 +97,7 @@ Never pass both \`paths\` and \`preparedInput\`. Virtualized trees need a bounde
 
 \`\`\`svelte
 <script lang="ts">
-	import { Tree, TreeContextMenuSurface } from 'svelai/tree';
+	import { Tree, TreeContextMenuSurface } from 'entasis/tree';
 </script>
 
 <Tree
@@ -160,7 +160,7 @@ Never pass both \`paths\` and \`preparedInput\`. Virtualized trees need a bounde
 ### Snippets
 - **header**: Snippet - Custom header mounted into the tree composition header slot.
 - **contextMenu**: Snippet<[TreeContextMenuSnippetData]> - Custom row context menu.
-- **TreeContextMenuSurface**: exported helper component for standard svelai Menu styling
+- **TreeContextMenuSurface**: exported helper component for standard entasis Menu styling
   and Pierre context-menu positioning.
 
 ### Events
@@ -188,8 +188,8 @@ a role=alert error region.
 
 - Pass exactly one data source: \`paths\` or \`preparedInput\`.
 - Virtualized trees need a bounded height via \`height\` or an outer layout class.
-- The wrapper maps Pierre CSS variables to svelai \`--color-*\` tokens, so light and
+- The wrapper maps Pierre CSS variables to entasis \`--color-*\` tokens, so light and
 dark themes are inherited automatically.
-- Import common Pierre helpers and types from \`svelai/tree\` first. Reach for
+- Import common Pierre helpers and types from \`entasis/tree\` first. Reach for
 \`@pierre/trees\` directly only when this wrapper does not re-export a type or helper.
 `;

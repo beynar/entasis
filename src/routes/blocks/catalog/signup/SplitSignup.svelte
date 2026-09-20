@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Alert } from 'svelai/alert';
-	import { Card } from 'svelai/card';
-	import { Form } from 'svelai/form';
-	import { Meter } from 'svelai/meter';
+	import { Stack } from 'entasis/stack';
+	import { Alert } from 'entasis/alert';
+	import { Card } from 'entasis/card';
+	import { Form } from 'entasis/form';
+	import { Meter } from 'entasis/meter';
 
 	let message = $state('');
 </script>

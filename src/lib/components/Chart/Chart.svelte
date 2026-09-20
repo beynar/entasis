@@ -29,7 +29,7 @@
 	const t = $derived(useI18n());
 
 	const generatedId = $props.id();
-	const idPrefix = `svelai-chart-${generatedId.replaceAll(/[^a-zA-Z0-9_-]/g, '')}`;
+	const idPrefix = `entasis-chart-${generatedId.replaceAll(/[^a-zA-Z0-9_-]/g, '')}`;
 	const chart = new ChartState<TRow>({
 		get data() {
 			return data;

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Stat } from 'svelai/stat';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	import { chatCircleIcon } from 'svelai/icons/chatCircle';
-	import { fileTextIcon } from 'svelai/icons/fileText';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Stat } from 'entasis/stat';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
+	import { chatCircleIcon } from 'entasis/icons/chatCircle';
+	import { fileTextIcon } from 'entasis/icons/fileText';
 </script>
 
 <section class="gap-xl p-lg md:p-xl mx-auto grid max-w-6xl md:grid-cols-2">

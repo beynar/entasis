@@ -7,7 +7,7 @@ SpinnerText combines the existing Spinner with a stable-width sequence of loadin
 
 \`\`\`svelte
 <script lang="ts">
-	import { SpinnerText } from 'svelai/spinner-text';
+	import { SpinnerText } from 'entasis/spinner-text';
 </script>
 \`\`\`
 
@@ -26,7 +26,7 @@ SpinnerText combines the existing Spinner with a stable-width sequence of loadin
 - **texts**: \`readonly string[]\` (required) - Messages displayed in sequence. The first message is rendered during SSR.
 - **delay**: \`number\` (default: \`2200\`) - Milliseconds between message changes. Zero, negative, and non-finite values pause cycling.
 - **transition**: \`'vertical' | 'reveal'\` (default: \`'vertical'\`) - Moves the outgoing message down while the next enters from above, or replaces both through opposing left-to-right clip reveals.
-- **shimmer**: \`boolean\` (default: \`false\`) - Applies the Svelai shimmer utility to the active message.
+- **shimmer**: \`boolean\` (default: \`false\`) - Applies the Entasis shimmer utility to the active message.
 - **showSpinner**: \`boolean\` (default: \`true\`) - Shows or hides the leading Spinner.
 - **spinnerVariant**: \`'default' | 'grid' | 'pulse' | 'puff' | 'lines' | 'circles'\` (default: Theme \`spinnerVariant\`, then \`'default'\`) - Overrides the global spinner animation for this instance.
 - **spinner**: \`Snippet<[SpinnerTextSpinnerPayload]>\` - Replaces the default visual spinner. Receives the resolved \`color\`, \`size\`, and \`variant\`.
@@ -43,8 +43,8 @@ Standard Svelte attachments are spread onto the root status element.
 
 \`\`\`svelte
 <script lang="ts">
-	import { Spinner } from 'svelai/spinner';
-	import { SpinnerText } from 'svelai/spinner-text';
+	import { Spinner } from 'entasis/spinner';
+	import { SpinnerText } from 'entasis/spinner-text';
 </script>
 
 <SpinnerText texts={['Thinking', 'Composing']} color="primary">

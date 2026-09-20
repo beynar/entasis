@@ -68,7 +68,7 @@
 >
 	<ComponentCard
 		{controls}
-		code={`import { confirmation } from 'svelai/confirmation';
+		code={`import { confirmation } from 'entasis/confirmation';
 
 const { confirmed } = await confirmation({
 	title: 'Confirm action',
@@ -114,7 +114,7 @@ const { confirmed } = await confirmation({
 		<ComponentCard
 			description="Setup: mount <Confirmation /> once, near the root of your app. The confirmation() function talks to it via events, so you never render it at the call site."
 			code={`// +layout.svelte — import and render once, near the root:
-import { Confirmation } from 'svelai/confirmation';
+import { Confirmation } from 'entasis/confirmation';
 
 // ...then in the markup:
 // <slot />

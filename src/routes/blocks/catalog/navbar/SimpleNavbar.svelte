@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { listIcon } from 'svelai/icons/list';
+	import { Button } from 'entasis/button';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { listIcon } from 'entasis/icons/list';
 	let open = $state(false);
 </script>
 

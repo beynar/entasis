@@ -6,7 +6,11 @@ import { en } from '$lib/i18n/en.js';
 import { flushSync } from 'svelte';
 import { afterEach, describe, expect, test } from 'vitest';
 import { EventCalendarError } from './eventCalendar.error.js';
-import { admitEventCalendarItems } from './eventCalendar.items.js';
+import {
+	admitEventCalendarItems,
+	createEventCalendarItemIndex,
+	createRecurringOccurrenceKey
+} from './eventCalendar.items.js';
 import type {
 	EventCalendarMonthOptions,
 	EventCalendarTimeGridOptions,
@@ -277,7 +281,7 @@ describe('EventCalendar admission and validation boundaries', () => {
 		} catch (error) {
 			expect(error).toBeInstanceOf(EventCalendarError);
 			expect((error as EventCalendarError).code).toBe('invalid-prop');
-			expect((error as EventCalendarError).message).toBe(
+			expect((error as EventCalendarError).message).toContain(
 				'The month date profile exceeds the supported civil-date domain.'
 			);
 		}
@@ -376,6 +380,69 @@ describe('EventCalendar API queries', () => {
 		// The occurrence stores the exact item object the calendar received — reads through the
 		// bound $state array return the same proxy, so compare against that read, not `source`.
 		expect(h.calendar.getOccurrence('standup')?.item).toBe(h.calendar.items[0]);
+	});
+
+	test('keeps a zero-length timed occurrence and segment in the active projection', () => {
+		const h = setup({
+			view: 'day',
+			items: [timedItem('instant', '2026-07-15T09:00:00.000Z', '2026-07-15T09:00:00.000Z')]
+		});
+		const occurrence = h.calendar.getOccurrence('instant');
+		expect(occurrence?.start.getTime()).toBe(occurrence?.end.getTime());
+		const segment = h.calendar.itemIndex.segmentsByDay.get('2026-07-15')?.timed[0];
+		expect(segment?.start.getTime()).toBe(segment?.end.getTime());
+		expect(segment?.isStart).toBe(true);
+		expect(segment?.isEnd).toBe(true);
+	});
+
+	test('keeps duplicate custom recurrence origins owned by expander validation', () => {
+		const origin = new Date('2026-07-15T09:00:00.000Z');
+		expect(() =>
+			createEventCalendarItemIndex<Record<never, never>>({
+				items: [
+					{
+						id: 'series',
+						title: 'series',
+						start: origin,
+						end: new Date('2026-07-15T10:00:00.000Z'),
+						recurrence: 'RRULE:FREQ=DAILY',
+						recurrenceTimeZone: 'UTC'
+					}
+				],
+				range: {
+					start: new Date('2026-07-15T00:00:00.000Z'),
+					end: new Date('2026-07-16T00:00:00.000Z')
+				},
+				displayTimeZone: 'UTC',
+				expandRecurrence: ({ item }) => {
+					const occurrence = {
+						allDay: false as const,
+						start: new Date(item.start as Date),
+						end: new Date(item.end as Date),
+						originalStart: new Date(item.start as Date)
+					};
+					return [occurrence, { ...occurrence }];
+				}
+			})
+		).toThrowError(/duplicate origin/);
+	});
+
+	test('rejects singleton ids that collide with recurring occurrence keys', () => {
+		const origin = new Date('2026-07-15T09:00:00.000Z');
+		const recurringKey = createRecurringOccurrenceKey('series', origin);
+		expect(() =>
+			createEventCalendarItemIndex({
+				items: [
+					dailySeries('series', origin.toISOString(), '2026-07-15T10:00:00.000Z'),
+					timedItem(recurringKey, origin.toISOString(), '2026-07-15T10:00:00.000Z')
+				],
+				range: {
+					start: new Date('2026-07-15T00:00:00.000Z'),
+					end: new Date('2026-07-16T00:00:00.000Z')
+				},
+				displayTimeZone: 'UTC'
+			})
+		).toThrowError(`Occurrence key collides with another item or occurrence: ${recurringKey}.`);
 	});
 
 	test('getOccurrences without a range returns the active-range projection', () => {

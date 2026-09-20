@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging -- Descriptor binding follows the established Svelai state-class pattern. */
+/* eslint-disable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging -- Descriptor binding follows the established Entasis state-class pattern. */
 /* eslint-disable svelte/prefer-svelte-reactivity -- Dates are immutable snapshots; Maps and Sets are non-reactive local validation indexes. */
 import { untrack } from 'svelte';
 import type { Messages } from '$lib/i18n/en.js';
@@ -24,6 +24,11 @@ import {
 } from './eventCalendar.date.js';
 import { getLocaleWeekStartsOn } from './eventCalendar.dateJump.js';
 import { EventCalendarError } from './eventCalendar.error.js';
+import {
+	EVENT_CALENDAR_ALL_WEEKDAYS,
+	parseEventCalendarBusinessClock,
+	type EventCalendarAdmittedBusinessHours
+} from './eventCalendar.businessHours.js';
 import { EventCalendarA11y } from './eventCalendar.a11y.svelte.js';
 import {
 	EventCalendarInteractionsController,
@@ -55,8 +60,8 @@ import {
 } from './eventCalendar.resources.js';
 import type { EventCalendarTheme } from './eventCalendar.theme.js';
 import type {
-	EventCalendarBusinessHours,
 	EventCalendarApi,
+	EventCalendarBusinessHours,
 	EventCalendarCreateActivation,
 	EventCalendarDateOnly,
 	EventCalendarItem,
@@ -103,7 +108,7 @@ const DEFAULT_INTERACTIONS: EventCalendarInteractions = Object.freeze({
 	clipboard: true
 });
 
-const EMPTY_BUSINESS_HOURS: readonly never[] = Object.freeze([]);
+const EMPTY_BUSINESS_HOURS: readonly EventCalendarBusinessHours[] = Object.freeze([]);
 
 type EventCalendarRuntimeInteractions = EventCalendarInteractions & {
 	maintainDurationOnAllDayChange: boolean;
@@ -221,8 +226,8 @@ export class EventCalendarState<
 		this.allDayConversionOptions?.allDayDurationDays ?? 1
 	);
 	readonly offDays = $derived(this.availabilityOptions?.offDays ?? false);
-	readonly businessHours: readonly EventCalendarBusinessHours[] = $derived(
-		this.availabilityOptions?.businessHours ?? EMPTY_BUSINESS_HOURS
+	readonly businessHours: readonly EventCalendarAdmittedBusinessHours[] = $derived(
+		admitBusinessHours(this.availabilityOptions?.businessHours ?? EMPTY_BUSINESS_HOURS)
 	);
 	readonly constrainToBusinessHours = $derived(
 		this.availabilityOptions?.constrainMutations ?? false
@@ -246,43 +251,32 @@ export class EventCalendarState<
 		maintainDurationOnAllDayChange: this.allDayConversionOptions?.preserveDuration ?? false
 	});
 	readonly clipboard = $derived(this.interactions.clipboard);
-	readonly modelBoundary: EventCalendarModelBoundary<TItemFields> = $derived.by(() => ({
+	readonly modelBoundary: EventCalendarModelBoundary<TItemFields> = $derived({
 		items: this.items,
 		resources: this.resources
-	}));
+	});
 	readonly resourceModel: EventCalendarResourceModel<TResourceFields> = $derived(
 		createEventCalendarResourceModel(this.resources)
 	);
 	/**
-	 * Validate the requested profile before resource admission. Reconciliation is kept in this
-	 * preflight so hidden-day and valid-range anchors retain the staged schedule behavior.
+	 * Build the profile before resource admission. This preserves invalid-profile precedence while
+	 * keeping the reconciled schedule in one derived value.
 	 */
-	private readonly profileAdmission = $derived.by(() => {
-		const view = this.view;
-		const date = this.reconcileDateFor(this.date, view);
-		return this.createProfile(view, date, this.dayCount);
-	});
-	/**
-	 * The admitted schedule: the view and anchor the calendar is allowed to project, reconciled
-	 * against enabled views, hidden weekdays, and validRange before any profile is built.
-	 */
-	private readonly schedule = $derived.by(() => {
-		const profile = this.profileAdmission;
+	readonly dateProfile: EventCalendarDateProfile = $derived.by(() => {
+		const profile = this.createProfile(
+			this.view,
+			this.reconcileDateFor(this.date, this.view),
+			this.dayCount
+		);
 		const enabledViews = getEnabledViews(
 			this.views,
 			this.resourceModel.structure.leaves.length > 0
 		);
 		const view = enabledViews.includes(this.view) ? this.view : enabledViews[0];
-		const date = view === profile.view ? profile.date : this.reconcileDateFor(this.date, view);
-		return { view, date };
-	});
-	readonly dateProfile: EventCalendarDateProfile = $derived.by(() => {
-		const profile = this.profileAdmission;
-		const schedule = this.schedule;
-		if (schedule.view === profile.view && schedule.date.getTime() === profile.date.getTime()) {
+		if (view === profile.view) {
 			return profile;
 		}
-		return this.createProfile(schedule.view, schedule.date, this.dayCount);
+		return this.createProfile(view, this.reconcileDateFor(this.date, view), this.dayCount);
 	});
 	private readonly admittedItems = $derived(
 		admitEventCalendarItems(this.items, {
@@ -317,7 +311,6 @@ export class EventCalendarState<
 		validateSelection(this.selection);
 		return this.model;
 	});
-
 	get enabledViews(): readonly EventCalendarView[] {
 		return getEnabledViews(this.views, this.resourceModel.structure.leaves.length > 0);
 	}
@@ -484,11 +477,6 @@ export class EventCalendarState<
 		);
 	}
 
-	isSelectionInRecurringSeries(seriesId: string): boolean {
-		if (this.selection.kind !== 'item') return false;
-		return decodeRecurringOccurrenceKey(this.selection.itemKey)?.seriesId === seriesId;
-	}
-
 	addItem(item: EventCalendarItem<TItemFields>): void {
 		this.mutations.addItem(item);
 	}
@@ -640,16 +628,6 @@ export class EventCalendarState<
 		return { previousSelection, committedSelection: this.selection };
 	}
 
-	clearSelectionForCollection(): {
-		previousSelection: EventCalendarSelection;
-		committedSelection: EventCalendarSelection;
-	} | null {
-		if (this.selection.kind === null) return null;
-		const previousSelection = this.selection;
-		this.selection = EMPTY_EVENT_CALENDAR_SELECTION;
-		return { previousSelection, committedSelection: this.selection };
-	}
-
 	clearMissingRecurringSelection(
 		items: EventCalendarItem<TItemFields>[],
 		seriesId: string
@@ -659,12 +637,14 @@ export class EventCalendarState<
 	} | null {
 		if (
 			this.selection.kind !== 'item' ||
-			!this.isSelectionInRecurringSeries(seriesId) ||
+			decodeRecurringOccurrenceKey(this.selection.itemKey)?.seriesId !== seriesId ||
 			this.hasRecurringOccurrence(items, this.selection.itemKey, seriesId)
 		) {
 			return null;
 		}
-		return this.clearSelectionForCollection();
+		const previousSelection = this.selection;
+		this.selection = EMPTY_EVENT_CALENDAR_SELECTION;
+		return { previousSelection, committedSelection: this.selection };
 	}
 
 	restoreOccurrenceKeyRemap(
@@ -734,12 +714,7 @@ export class EventCalendarState<
 			start: startOfZonedDay(day, this.timeZone),
 			end: startOfZonedDay(endDay, this.timeZone)
 		};
-		return createEventCalendarItemIndex({
-			items: this.items,
-			range,
-			displayTimeZone: this.timeZone,
-			expandRecurrence: this.expandRecurrence
-		}).occurrences;
+		return this.getOccurrences(range);
 	}
 
 	private navigate(direction: -1 | 1): void {
@@ -757,13 +732,10 @@ export class EventCalendarState<
 
 	private synchronize(
 		notify: boolean,
-		// Passed pre-evaluated so configuration and selection errors surface before reconcile
-		// touches the schedule; the sync effect tracks its dependencies through this argument.
 		projection: EventCalendarModel<TItemFields, TResourceFields>
 	): void {
-		void projection;
-		const { view: nextView, date: nextDate } = this.schedule;
-		this.createProfile(nextView, nextDate, this.dayCount);
+		const nextView = projection.dateProfile.view;
+		const nextDate = projection.dateProfile.date;
 		const didViewChange = nextView !== this.view;
 		const didDateChange = nextDate.getTime() !== this.date.getTime();
 		const didSelectionChange =
@@ -859,7 +831,7 @@ function validateConfiguration<TItemFields extends object, TResourceFields exten
 		assertNonNegativeInteger(state.maxItemsPerCell, 'month.maxItemsPerCell');
 	}
 	validateCreateActivation(state.createActivation);
-	validateBusinessHours(state.businessHours);
+	void state.businessHours;
 	validateOffDays(state.offDays);
 	if (state.validRange) assertValidRange(state.validRange, 'validRange');
 	if (!state.showWeekends && state.weekendDays.length === 7) {
@@ -899,18 +871,16 @@ function getEnabledViews(
 }
 
 function validateSelection(selection: EventCalendarSelection): void {
-	if (!selection || typeof selection !== 'object') {
+	if (!selection || typeof selection !== 'object')
 		throw new EventCalendarError('invalid-prop', 'selection must be a discriminated selection.');
-	}
 	if (selection.kind === null && selection.itemKey === null && selection.slot === null) return;
 	if (
 		selection.kind === 'item' &&
 		typeof selection.itemKey === 'string' &&
 		selection.itemKey.length > 0 &&
 		selection.slot === null
-	) {
+	)
 		return;
-	}
 	if (selection.kind === 'slot' && selection.itemKey === null && selection.slot) {
 		validateSlot(selection.slot);
 		return;
@@ -923,19 +893,16 @@ function validateSlot(slot: EventCalendarSlot): void {
 	if (slot.allDay === true) {
 		assertDateOnly(slot.start, 'selection.slot.start');
 		assertDateOnly(slot.end, 'selection.slot.end');
-		if (slot.end <= slot.start) {
+		if (slot.end <= slot.start)
 			throw new EventCalendarError('invalid-prop', 'An all-day slot must have positive length.');
-		}
 		return;
 	}
-	if (slot.allDay !== false) {
+	if (slot.allDay !== false)
 		throw new EventCalendarError('invalid-prop', 'A slot requires a boolean allDay discriminator.');
-	}
 	assertValidInstant(slot.start, 'selection.slot.start');
 	assertValidInstant(slot.end, 'selection.slot.end');
-	if (slot.end.getTime() < slot.start.getTime()) {
+	if (slot.end.getTime() < slot.start.getTime())
 		throw new EventCalendarError('invalid-prop', 'A timed slot cannot end before it starts.');
-	}
 }
 
 function validateHourRange(dayStartHour: number, dayEndHour: number, scrollToHour: number): void {
@@ -944,21 +911,19 @@ function validateHourRange(dayStartHour: number, dayEndHour: number, scrollToHou
 		['timeGrid.endHour', dayEndHour],
 		['timeGrid.scrollToHour', scrollToHour]
 	] as const) {
-		if (!Number.isFinite(value) || !Number.isInteger(value * 60)) {
+		if (!Number.isFinite(value) || !Number.isInteger(value * 60))
 			throw new EventCalendarError('invalid-prop', `${name} must resolve to whole minutes.`, {
 				prop: name,
 				value
 			});
-		}
 	}
-	if (dayStartHour < 0 || dayStartHour >= dayEndHour || dayEndHour > 24) {
+	if (dayStartHour < 0 || dayStartHour >= dayEndHour || dayEndHour > 24)
 		throw new EventCalendarError(
 			'invalid-prop',
 			'timeGrid.startHour and timeGrid.endHour must form a non-empty interval within 0..24.',
 			{ dayStartHour, dayEndHour }
 		);
-	}
-	if (scrollToHour < dayStartHour || scrollToHour >= dayEndHour) {
+	if (scrollToHour < dayStartHour || scrollToHour >= dayEndHour)
 		throw new EventCalendarError(
 			'invalid-prop',
 			'timeGrid.scrollToHour must fall inside displayed hours.',
@@ -968,11 +933,10 @@ function validateHourRange(dayStartHour: number, dayEndHour: number, scrollToHou
 				dayEndHour
 			}
 		);
-	}
 }
 
 function validateCreateActivation(activation: EventCalendarCreateActivation): void {
-	if (!activation || typeof activation !== 'object' || Array.isArray(activation)) {
+	if (!activation || typeof activation !== 'object' || Array.isArray(activation))
 		throw new EventCalendarError(
 			'invalid-prop',
 			'interactions.createActivation must be a configuration object.',
@@ -980,7 +944,6 @@ function validateCreateActivation(activation: EventCalendarCreateActivation): vo
 				prop: 'interactions.createActivation'
 			}
 		);
-	}
 	for (const name of ['distancePx', 'touchDelayMs', 'touchTolerancePx'] as const) {
 		const value = activation[name];
 		if (Number.isFinite(value) && value > 0) continue;
@@ -995,32 +958,33 @@ function validateCreateActivation(activation: EventCalendarCreateActivation): vo
 	}
 }
 
-function validateBusinessHours(entries: readonly EventCalendarBusinessHours[]): void {
-	if (!Array.isArray(entries)) {
+function admitBusinessHours(
+	entries: readonly EventCalendarBusinessHours[]
+): readonly EventCalendarAdmittedBusinessHours[] {
+	if (!Array.isArray(entries))
 		throw new EventCalendarError('invalid-prop', 'availability.businessHours must be an array.');
-	}
 	const windows = new Set<string>();
-	for (const entry of entries) {
-		if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+	return entries.map((entry) => {
+		if (!entry || typeof entry !== 'object' || Array.isArray(entry))
 			throw new EventCalendarError(
 				'invalid-prop',
 				'Every availability.businessHours entry must be an object.',
-				{ prop: 'availability.businessHours' }
+				{
+					prop: 'availability.businessHours'
+				}
 			);
-		}
-		const days = entry.daysOfWeek ?? [0, 1, 2, 3, 4, 5, 6];
+		const days = entry.daysOfWeek ?? EVENT_CALENDAR_ALL_WEEKDAYS;
 		validateWeekdays(days, 'availability.businessHours.daysOfWeek');
-		const start = parseWallMinutes(entry.start, false, 'availability.businessHours.start');
-		const end = parseWallMinutes(entry.end, true, 'availability.businessHours.end');
-		if (start >= end) {
+		const startMinutes = admitBusinessClock(entry.start, false, 'availability.businessHours.start');
+		const endMinutes = admitBusinessClock(entry.end, true, 'availability.businessHours.end');
+		if (startMinutes >= endMinutes)
 			throw new EventCalendarError('invalid-prop', 'Business hours must be a same-day range.', {
 				start: entry.start,
 				end: entry.end
 			});
-		}
 		for (const day of days) {
 			const key = `${day}:${entry.start}-${entry.end}`;
-			if (windows.has(key)) {
+			if (windows.has(key))
 				throw new EventCalendarError(
 					'invalid-prop',
 					'availability.businessHours contains a duplicate window.',
@@ -1030,38 +994,51 @@ function validateBusinessHours(entries: readonly EventCalendarBusinessHours[]): 
 						end: entry.end
 					}
 				);
-			}
 			windows.add(key);
 		}
-	}
+		return { daysOfWeek: days, startMinutes, endMinutes };
+	});
+}
+
+function admitBusinessClock(value: unknown, allowEnd: boolean, name: string): number {
+	const parsed = parseEventCalendarBusinessClock(value, allowEnd);
+	if (parsed === 'format')
+		throw new EventCalendarError('invalid-prop', `${name} must use strict HH:mm form.`, {
+			prop: name,
+			value
+		});
+	if (parsed === 'range')
+		throw new EventCalendarError('invalid-prop', `${name} is outside its valid wall-time range.`, {
+			prop: name,
+			value
+		});
+	return parsed;
 }
 
 function validateOffDays(offDays: boolean | EventCalendarOffDaysConfig): void {
 	if (typeof offDays === 'boolean') return;
-	if (!offDays || typeof offDays !== 'object' || Array.isArray(offDays)) {
+	if (!offDays || typeof offDays !== 'object' || Array.isArray(offDays))
 		throw new EventCalendarError(
 			'invalid-prop',
 			'availability.offDays must be a boolean or configuration.'
 		);
-	}
-	if (offDays.weekdays !== undefined) {
+	if (offDays.weekdays !== undefined)
 		validateWeekdays(offDays.weekdays, 'availability.offDays.weekdays');
-	}
-	if (offDays.dates !== undefined && !Array.isArray(offDays.dates)) {
+	if (offDays.dates !== undefined && !Array.isArray(offDays.dates))
 		throw new EventCalendarError('invalid-prop', 'availability.offDays.dates must be an array.', {
 			prop: 'availability.offDays.dates'
 		});
-	}
-	if (offDays.isOffDay !== undefined && typeof offDays.isOffDay !== 'function') {
+	if (offDays.isOffDay !== undefined && typeof offDays.isOffDay !== 'function')
 		throw new EventCalendarError(
 			'invalid-prop',
 			'availability.offDays.isOffDay must be a function.',
-			{ prop: 'availability.offDays.isOffDay' }
+			{
+				prop: 'availability.offDays.isOffDay'
+			}
 		);
-	}
 	const dates = new Set<EventCalendarDateOnly>();
 	for (const date of offDays.dates ?? []) {
-		if (typeof date !== 'string') {
+		if (typeof date !== 'string')
 			throw new EventCalendarError(
 				'invalid-prop',
 				'availability.offDays.dates must contain date strings.',
@@ -1070,59 +1047,32 @@ function validateOffDays(offDays: boolean | EventCalendarOffDaysConfig): void {
 					date
 				}
 			);
-		}
 		parseDateOnly(date, 'availability.offDays.dates');
-		if (dates.has(date)) {
+		if (dates.has(date))
 			throw new EventCalendarError(
 				'invalid-prop',
 				'availability.offDays.dates must not contain duplicates.',
-				{ date }
+				{
+					date
+				}
 			);
-		}
 		dates.add(date);
 	}
 }
 
 function validateWeekdays(weekdays: readonly number[], name: string): void {
-	if (!Array.isArray(weekdays)) {
+	if (!Array.isArray(weekdays))
 		throw new EventCalendarError('invalid-prop', `${name} must be an array.`, { prop: name });
-	}
 	const seen = new Set<number>();
 	for (const weekday of weekdays) {
 		assertWeekday(weekday, name);
-		if (seen.has(weekday)) {
+		if (seen.has(weekday))
 			throw new EventCalendarError('invalid-prop', `${name} must not contain duplicates.`, {
 				prop: name,
 				weekday
 			});
-		}
 		seen.add(weekday);
 	}
-}
-
-function parseWallMinutes(value: unknown, allowEnd: boolean, name: string): number {
-	if (typeof value !== 'string') {
-		throw new EventCalendarError('invalid-prop', `${name} must use strict HH:mm form.`, {
-			prop: name,
-			value
-		});
-	}
-	const match = /^(\d{2}):(\d{2})$/.exec(value);
-	if (!match) {
-		throw new EventCalendarError('invalid-prop', `${name} must use strict HH:mm form.`, {
-			prop: name,
-			value
-		});
-	}
-	const hour = Number(match[1]);
-	const minute = Number(match[2]);
-	if (minute > 59 || hour > 24 || (hour === 24 && (!allowEnd || minute !== 0))) {
-		throw new EventCalendarError('invalid-prop', `${name} is outside its valid wall-time range.`, {
-			prop: name,
-			value
-		});
-	}
-	return hour * 60 + minute;
 }
 
 function assertView(value: EventCalendarView): void {
@@ -1161,8 +1111,11 @@ function selectionsEqual(left: EventCalendarSelection, right: EventCalendarSelec
 	if (left.kind === null && right.kind === null) return true;
 	if (left.kind === 'item' && right.kind === 'item') return left.itemKey === right.itemKey;
 	if (left.kind !== 'slot' || right.kind !== 'slot') return false;
-	if (left.slot.allDay !== right.slot.allDay) return false;
-	if (left.slot.view !== right.slot.view || left.slot.resourceId !== right.slot.resourceId)
+	if (
+		left.slot.allDay !== right.slot.allDay ||
+		left.slot.view !== right.slot.view ||
+		left.slot.resourceId !== right.slot.resourceId
+	)
 		return false;
 	if (left.slot.allDay && right.slot.allDay) {
 		return left.slot.start === right.slot.start && left.slot.end === right.slot.end;

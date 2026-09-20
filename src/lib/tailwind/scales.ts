@@ -401,7 +401,7 @@ export const resolveMotionTokens = (motion?: DeepPartial<MotionTokens>): MotionT
  * because both the Tailwind plugin (which zeroes the `--duration-*` scale under it) and
  * the runtime `Theme` need it; `$lib/utils/motion.svelte` re-exports it for components.
  */
-export const REDUCED_MOTION_ATTRIBUTE = 'data-svelai-reduce-motion';
+export const REDUCED_MOTION_ATTRIBUTE = 'data-entasis-reduce-motion';
 
 /**
  * Layers one partial motion scale over another, per token. Keeps the CSS variables and

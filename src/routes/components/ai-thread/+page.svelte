@@ -344,7 +344,7 @@
 		description="History exposes prepend, append, and stable message-key behavior. Live text is announced without becoming a transcript row; pending ask-user-question tool parts move into the standalone flow below the viewport."
 		class="!min-h-0 p-4"
 		code={`<script lang="ts">
-  import { AIThread } from 'svelai/ai-thread';
+  import { AIThread } from 'entasis/ai-thread';
 
   let threadRoot: HTMLDivElement;
 ${'</' + 'script>'}
@@ -423,8 +423,8 @@ ${'</' + 'script>'}
 			description="The custom TOC receives measured entries, the visible range, active turn, and navigation callbacks. Focus any pin to open its HoverCard preview; Escape closes it."
 			class="!min-h-0 p-4"
 			code={`<script lang="ts">
-  import { AIThread } from 'svelai/ai-thread';
-  import { AIThreadToc, type AIThreadTocState } from 'svelai/ai-thread-toc';
+  import { AIThread } from 'entasis/ai-thread';
+  import { AIThreadToc, type AIThreadTocState } from 'entasis/ai-thread-toc';
 ${'</' + 'script>'}
 
 {#snippet toc(state: AIThreadTocState)}

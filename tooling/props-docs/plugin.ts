@@ -5,15 +5,15 @@ import type { Plugin } from 'vite';
 import { extractComponentDocs } from './extract.js';
 import type { PropsMap } from './types.js';
 
-const VIRTUAL_ID = 'virtual:svelai-props';
+const VIRTUAL_ID = 'virtual:entasis-props';
 const RESOLVED_ID = '\0' + VIRTUAL_ID;
 
 /**
- * Internal Vite plugin: serves `virtual:svelai-props`, a map of every
+ * Internal Vite plugin: serves `virtual:entasis-props`, a map of every
  * component's resolved props (from their `*.props.ts`), keyed by component name.
  * Never packaged - it lives outside `src/` and is only wired into vite.config.
  */
-export function svelaiPropsDocs(): Plugin {
+export function entasisPropsDocs(): Plugin {
 	let root = '';
 	let project: Project | null = null;
 	let cachedMap: PropsMap | null = null;
@@ -48,7 +48,7 @@ export function svelaiPropsDocs(): Plugin {
 	}
 
 	return {
-		name: 'svelai-props-docs',
+		name: 'entasis-props-docs',
 		configResolved(config) {
 			root = config.root;
 		},

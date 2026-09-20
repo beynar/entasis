@@ -1,13 +1,13 @@
 export const mapDescription = `
 # Map Component
 
-An interactive vector map (pan, zoom, markers, clustering, shapes, geolocation) built on [MapLibre GL](https://maplibre.org/). MapLibre is loaded from a CDN at runtime and never bundled. The base map style is a tokenized Positron style whose colours are derived from your svelai design tokens, so the map adapts to light and dark automatically. Ported from svelte-pro's Map component.
+An interactive vector map (pan, zoom, markers, clustering, shapes, geolocation) built on [MapLibre GL](https://maplibre.org/). MapLibre is loaded from a CDN at runtime and never bundled. The base map style is a tokenized Positron style whose colours are derived from your entasis design tokens, so the map adapts to light and dark automatically. Ported from svelte-pro's Map component.
 
 ## Basic Usage
 
 \`\`\`svelte
 <script>
-  import { Map } from 'svelai/map';
+  import { Map } from 'entasis/map';
   const markers = [
     { id: 'paris', lng: 2.3522, lat: 48.8566, label: 'Paris' },
     { id: 'lyon', lng: 4.8357, lat: 45.7640, label: 'Lyon' }
@@ -63,7 +63,7 @@ An interactive vector map (pan, zoom, markers, clustering, shapes, geolocation) 
 
 ## Theming
 
-The base style is generated at runtime from the current svelai \`--color-*\` tokens and re-generated whenever they change (theme flip, palette swap, runtime token edits): \`primary\` tints land, buildings and water like a monochrome basemap, \`success\` paints parks and points of interest, \`danger\` draws boundaries and \`neutral\` carries roads and labels on \`surface\`. To fully override the cartography, pass \`styleUrl\` or \`styles\`.
+The base style is generated at runtime from the current entasis \`--color-*\` tokens and re-generated whenever they change (theme flip, palette swap, runtime token edits): \`primary\` tints land, buildings and water like a monochrome basemap, \`success\` paints parks and points of interest, \`danger\` draws boundaries and \`neutral\` carries roads and labels on \`surface\`. To fully override the cartography, pass \`styleUrl\` or \`styles\`.
 
 ## Accessibility
 

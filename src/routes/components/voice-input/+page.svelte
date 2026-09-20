@@ -41,7 +41,7 @@
 	]);
 
 	const usageCode = $derived(`<script lang="ts">
-	import { VoiceInput } from 'svelai/voice-input';
+	import { VoiceInput } from 'entasis/voice-input';
 
 	let recording = $state<Blob | null>(null);
 	let duration = $state(0);

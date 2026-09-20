@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { SegmentedControl } from 'svelai/segmented-control';
-	import { checkIcon } from 'svelai/icons/check';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { SegmentedControl } from 'entasis/segmented-control';
+	import { checkIcon } from 'entasis/icons/check';
 	let billing = $state<'monthly' | 'annual'>('monthly');
 </script>
 

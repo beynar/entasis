@@ -7,7 +7,7 @@ A navigation component that displays a hierarchical path of links, helping users
 
 \`\`\`svelte
 <script>
-  import { Breadcrumbs } from 'svelai/breadcrumbs';
+  import { Breadcrumbs } from 'entasis/breadcrumbs';
   
   const items = [
     { label: 'Home', href: '/' },
@@ -92,7 +92,7 @@ A navigation component that displays a hierarchical path of links, helping users
 
 \`\`\`svelte
 <script>
-  import { Breadcrumbs } from 'svelai/breadcrumbs';
+  import { Breadcrumbs } from 'entasis/breadcrumbs';
   
   const items = [
     { label: 'Home', href: '/' },
@@ -108,7 +108,7 @@ A navigation component that displays a hierarchical path of links, helping users
 
 \`\`\`svelte
 <script>
-  import { Breadcrumbs } from 'svelai/breadcrumbs';
+  import { Breadcrumbs } from 'entasis/breadcrumbs';
   
   const items = [
     { label: 'Products', href: '/products' },
@@ -125,10 +125,10 @@ A navigation component that displays a hierarchical path of links, helping users
 
 \`\`\`svelte
 <script lang="ts">
-  import { Breadcrumbs } from 'svelai/breadcrumbs';
-  import { houseIcon } from 'svelai/icons/house';
-  import { folderIcon } from 'svelai/icons/folder';
-  import { fileIcon } from 'svelai/icons/file';
+  import { Breadcrumbs } from 'entasis/breadcrumbs';
+  import { houseIcon } from 'entasis/icons/house';
+  import { folderIcon } from 'entasis/icons/folder';
+  import { fileIcon } from 'entasis/icons/file';
   
   const items = [
     { label: 'Home', href: '/', icon: houseIcon },
@@ -144,7 +144,7 @@ A navigation component that displays a hierarchical path of links, helping users
 
 \`\`\`svelte
 <script lang="ts">
-  import { Breadcrumbs, type BreadcrumbItem } from 'svelai/breadcrumbs';
+  import { Breadcrumbs, type BreadcrumbItem } from 'entasis/breadcrumbs';
   
   const items: BreadcrumbItem[] = [
     { label: 'Home', href: '/' },
@@ -167,7 +167,7 @@ A navigation component that displays a hierarchical path of links, helping users
 
 \`\`\`svelte
 <script>
-  import { Breadcrumbs } from 'svelai/breadcrumbs';
+  import { Breadcrumbs } from 'entasis/breadcrumbs';
   
   const items = [
     { label: 'Home', href: '/' },
@@ -187,7 +187,7 @@ A navigation component that displays a hierarchical path of links, helping users
 
 \`\`\`svelte
 <script>
-  import { Breadcrumbs } from 'svelai/breadcrumbs';
+  import { Breadcrumbs } from 'entasis/breadcrumbs';
   
   const items = [
     { label: 'Home', href: '/' },
@@ -207,7 +207,7 @@ A navigation component that displays a hierarchical path of links, helping users
 
 \`\`\`svelte
 <script>
-  import { Breadcrumbs } from 'svelai/breadcrumbs';
+  import { Breadcrumbs } from 'entasis/breadcrumbs';
 </script>
 
 <Breadcrumbs
@@ -223,7 +223,7 @@ A navigation component that displays a hierarchical path of links, helping users
 
 \`\`\`svelte
 <script>
-  import { Breadcrumbs } from 'svelai/breadcrumbs';
+  import { Breadcrumbs } from 'entasis/breadcrumbs';
 </script>
 
 {#snippet productsLabel()}
@@ -243,7 +243,7 @@ A navigation component that displays a hierarchical path of links, helping users
 
 \`\`\`svelte
 <script>
-  import { Breadcrumbs } from 'svelai/breadcrumbs';
+  import { Breadcrumbs } from 'entasis/breadcrumbs';
   
   const items = [
     { label: 'Home', href: '/' },
@@ -260,7 +260,7 @@ A navigation component that displays a hierarchical path of links, helping users
 
 \`\`\`svelte
 <script>
-  import { Breadcrumbs } from 'svelai/breadcrumbs';
+  import { Breadcrumbs } from 'entasis/breadcrumbs';
   
   const items = [
     { label: 'Home', href: '/' },
@@ -411,7 +411,7 @@ The theme object contains the following parts:
 **Global Theme Setting**:
 \`\`\`svelte
 <script>
-  import { setBreadcrumbsTheme } from 'svelai/breadcrumbs';
+  import { setBreadcrumbsTheme } from 'entasis/breadcrumbs';
   
   setBreadcrumbsTheme({
     root: {

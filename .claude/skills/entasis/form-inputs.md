@@ -1,9 +1,9 @@
-# Svelai Form Inputs Reference
+# Entasis Form Inputs Reference
 
 All form inputs extend the **Field** component, inheriting: `label`, `description`, `error`, `required`, `disabled`, `size` (`'small' | 'normal' | 'large'`), `density`, `prefix`, `suffix`, `class`, `theme`. Do not repeat these in each component usage.
 
-Import pattern: `import { ComponentName } from 'svelai/kebab-case-name'`
-Global theme setter: `import { setComponentNameTheme } from 'svelai/kebab-case-name'` (shape: `{ slot: { base, variantName: { value: classes } } }`, see theming.md)
+Import pattern: `import { ComponentName } from 'entasis/kebab-case-name'`
+Global theme setter: `import { setComponentNameTheme } from 'entasis/kebab-case-name'` (shape: `{ slot: { base, variantName: { value: classes } } }`, see theming.md)
 
 ---
 
@@ -36,7 +36,7 @@ Global theme setter: `import { setComponentNameTheme } from 'svelai/kebab-case-n
 
 ## TextInput
 
-`import { TextInput } from 'svelai/text-input'`
+`import { TextInput } from 'entasis/text-input'`
 
 **Unique props:** `type` (`'text' | 'email' | 'url'`, default `'text'`), `value: string` (bindable), `placeholder`
 
@@ -46,7 +46,7 @@ Auto-validates email/url formats. Supports `prefix` and `suffix` snippets.
 
 ```svelte
 <script>
-	import { TextInput } from 'svelai/text-input';
+	import { TextInput } from 'entasis/text-input';
 
 	let email = $state('');
 </script>
@@ -58,7 +58,7 @@ Auto-validates email/url formats. Supports `prefix` and `suffix` snippets.
 
 ## TextArea
 
-`import { TextArea } from 'svelai/text-area'`
+`import { TextArea } from 'entasis/text-area'`
 
 **Unique props:** `value: string` (bindable), `placeholder`, `rows: number` (default 3), `maxLength: number`, `textareaAttrs` (extra native `<textarea>` attributes), `onPressEnter: (payload) => void`
 
@@ -68,7 +68,7 @@ When `maxLength` is set, a character counter is auto-displayed.
 
 ```svelte
 <script>
-	import { TextArea } from 'svelai/text-area';
+	import { TextArea } from 'entasis/text-area';
 
 	let bio = $state('');
 </script>
@@ -80,7 +80,7 @@ When `maxLength` is set, a character counter is auto-displayed.
 
 ## NumberInput
 
-`import { NumberInput } from 'svelai/number-input'`
+`import { NumberInput } from 'entasis/number-input'`
 
 **Unique props:** `value: number` (bindable), `min`, `max`, `step` (default 1), `showControls: boolean` (default true), `placeholder`
 
@@ -90,7 +90,7 @@ Keyboard: ArrowUp/Down (step), PageUp/Down (step\*10). Supports `prefix`/`suffix
 
 ```svelte
 <script>
-	import { NumberInput } from 'svelai/number-input';
+	import { NumberInput } from 'entasis/number-input';
 
 	let price = $state(0);
 </script>
@@ -104,7 +104,7 @@ Keyboard: ArrowUp/Down (step), PageUp/Down (step\*10). Supports `prefix`/`suffix
 
 ## RatingInput
 
-`import { RatingInput } from 'svelai/rating-input'`
+`import { RatingInput } from 'entasis/rating-input'`
 
 **Unique props:** `value: number | null` (bindable, default `null`), `max: number` (default 5, the star count and maximum value), `halfSteps: boolean` (default false, snaps to 0.5 increments), `readonly: boolean` (default false), `clearable: boolean` (default true, click the current value to clear), `dir` (`'ltr' | 'rtl'`, inherits ambient direction when omitted), `color` (default `'warning'`, the gold star fill), `star` (snippet, custom icon -- see Rating in display.md)
 
@@ -114,7 +114,7 @@ Builds on the `Rating` display component (display.md) -- same star rendering and
 
 ```svelte
 <script>
-	import { RatingInput } from 'svelai/rating-input';
+	import { RatingInput } from 'entasis/rating-input';
 
 	let rating = $state(null);
 </script>
@@ -126,7 +126,7 @@ Builds on the `Rating` display component (display.md) -- same star rendering and
 
 ## PasswordInput
 
-`import { PasswordInput } from 'svelai/password-input'`
+`import { PasswordInput } from 'entasis/password-input'`
 
 **Unique props:** `value: string` (bindable), `placeholder`
 
@@ -136,8 +136,8 @@ Extends TextInput. Built-in visibility toggle (eye icon). Only `prefix` slot (su
 
 ```svelte
 <script>
-	import { PasswordInput } from 'svelai/password-input';
-	import { lockIcon } from 'svelai/icons/lock';
+	import { PasswordInput } from 'entasis/password-input';
+	import { lockIcon } from 'entasis/icons/lock';
 
 	let password = $state('');
 </script>
@@ -151,7 +151,7 @@ Extends TextInput. Built-in visibility toggle (eye icon). Only `prefix` slot (su
 
 ## PhoneInput
 
-`import { PhoneInput } from 'svelai/phone-input'`
+`import { PhoneInput } from 'entasis/phone-input'`
 
 **Unique props:** `value: string` (bindable), `country: string` (bindable ISO code, default `'fr'`), `strict: boolean`, `searchPlaceholder`, `placeholder`
 
@@ -161,7 +161,7 @@ Built-in country code selector with flags, auto-formatting per country. intl-tel
 
 ```svelte
 <script>
-	import { PhoneInput } from 'svelai/phone-input';
+	import { PhoneInput } from 'entasis/phone-input';
 
 	let phone = $state('');
 </script>
@@ -173,7 +173,7 @@ Built-in country code selector with flags, auto-formatting per country. intl-tel
 
 ## DateInput
 
-`import { DateInput } from 'svelai/date-input'`
+`import { DateInput } from 'entasis/date-input'`
 
 **Unique props:** `value: Date | null` (bindable), `type` (`'date' | 'datetime'`, default `'date'`), `minDate`, `maxDate: Date`, `disabledDates: (Date | [Date, Date])[]`, `placeholder`, `format` (`'dd/mm/yyyy' | 'mm/dd/yyyy' | 'yyyy/mm/dd' | 'mm/yyyy' | 'yyyy/mm' | 'mm/yy' | 'yyyy'`), `locale`, `separator`, `presets`, `calendarView` (`'single' | 'double'`), `closeOnSelect`, `mobileSheet`
 
@@ -183,7 +183,7 @@ Opens a calendar picker.
 
 ```svelte
 <script>
-	import { DateInput } from 'svelai/date-input';
+	import { DateInput } from 'entasis/date-input';
 
 	let date = $state(null);
 </script>
@@ -195,7 +195,7 @@ Opens a calendar picker.
 
 ## TimeInput
 
-`import { TimeInput } from 'svelai/time-input'`
+`import { TimeInput } from 'entasis/time-input'`
 
 **Unique props:** `value: number` (bindable, time as numeric value), `placeholder`, `as` (`'minuteSinceMidnight'` | `'secondSinceMidnight'` | `'millisecondSinceMidnight'`), `format` (MaskitoTimeParams mode), `maxValues`, `minValues`
 
@@ -203,7 +203,7 @@ Opens a calendar picker.
 
 ```svelte
 <script>
-	import { TimeInput } from 'svelai/time-input';
+	import { TimeInput } from 'entasis/time-input';
 
 	let time = $state(null);
 </script>
@@ -215,7 +215,7 @@ Opens a calendar picker.
 
 ## ColorInput
 
-`import { ColorInput } from 'svelai/color-input'`
+`import { ColorInput } from 'entasis/color-input'`
 
 **Unique props:** `value: string | null` (bindable, canonical hex `#rrggbb` / `#rrggbbaa`; accepts any parseable CSS color as typed input and normalizes to hex), `format` (`'hex' | 'rgb' | 'hsl'`, default `'hex'`, bindable -- the input's text representation; the value stays hex), `placeholder`, `i18n: Partial<Messages>` (also forwarded to the picker)
 
@@ -225,7 +225,7 @@ Shows a color swatch and text input inside the shared Field frame; the swatch (o
 
 ```svelte
 <script>
-	import { ColorInput } from 'svelai/color-input';
+	import { ColorInput } from 'entasis/color-input';
 
 	let color = $state('#5f62ef');
 </script>
@@ -238,7 +238,7 @@ Shows a color swatch and text input inside the shared Field frame; the swatch (o
 
 ## ColorPicker
 
-`import { ColorPicker } from 'svelai/color-picker'`
+`import { ColorPicker } from 'entasis/color-picker'`
 
 Standalone color picker panel (not Field-based) -- a saturation/brightness square, hue and alpha sliders, an eyedropper, and a format-aware text input. Used inside `ColorInput` or standalone.
 
@@ -256,7 +256,7 @@ The square and both sliders support click-to-jump and pointer drag; the area thu
 
 ```svelte
 <script>
-	import { ColorPicker } from 'svelai/color-picker';
+	import { ColorPicker } from 'entasis/color-picker';
 
 	let color = $state('#5f62ef');
 </script>
@@ -269,7 +269,7 @@ The square and both sliders support click-to-jump and pointer drag; the area thu
 
 ## Select
 
-`import { Select } from 'svelai/select'`
+`import { Select } from 'entasis/select'`
 
 **Unique props:** `value: string` (bindable), `items: Array<{ value: string, label: string, disabled? } | { label?, items: SelectOption[] }>` (flat options or labelled groups), `placeholder`, `separators: boolean`
 
@@ -279,7 +279,7 @@ Native HTML select. Supports `prefix`/`suffix` snippets.
 
 ```svelte
 <script>
-	import { Select } from 'svelai/select';
+	import { Select } from 'entasis/select';
 
 	let country = $state('');
 </script>
@@ -299,7 +299,7 @@ Native HTML select. Supports `prefix`/`suffix` snippets.
 
 ## Combobox
 
-`import { Combobox } from 'svelai/combobox'`
+`import { Combobox } from 'entasis/combobox'`
 
 Searchable dropdown with async support.
 
@@ -319,7 +319,7 @@ Option format: `{ value: string, label: string, description?: string }`. Debounc
 
 ```svelte
 <script lang="ts">
-	import { Combobox, type ComboboxOption } from 'svelai/combobox';
+	import { Combobox, type ComboboxOption } from 'entasis/combobox';
 
 	let val = $state<string | null>(null);
 	const search = async (q?: string): Promise<ComboboxOption[]> =>
@@ -333,7 +333,7 @@ Option format: `{ value: string, label: string, description?: string }`. Debounc
 
 ## TagsInput
 
-`import { TagsInput } from 'svelai/tags-input'`
+`import { TagsInput } from 'entasis/tags-input'`
 
 Multi-tag input: free text, or restricted to a searchable option list (like Combobox but multi-value). Tags render as animated `Chip`s.
 
@@ -354,7 +354,7 @@ Option format: `{ value: string, label: string, description?: string }` (reused 
 
 ```svelte
 <script>
-	import { TagsInput } from 'svelai/tags-input';
+	import { TagsInput } from 'entasis/tags-input';
 
 	let tags = $state(null);
 	const technologies = [
@@ -371,7 +371,7 @@ Option format: `{ value: string, label: string, description?: string }` (reused 
 
 ## KeyValueInput
 
-`import { KeyValueInput } from 'svelai/key-value-input'`
+`import { KeyValueInput } from 'entasis/key-value-input'`
 
 An editable list of key/value string pairs. Each row is `[key input] [value input] [remove x]`, with a full-width `Add` button below that appends an empty row. Rows animate on add/remove. No dropdown, async, or option list -- it is a plain pair editor.
 
@@ -392,7 +392,7 @@ Rows are keyed by a stable per-row id (not the key string), so empty or duplicat
 
 ```svelte
 <script>
-	import { KeyValueInput } from 'svelai/key-value-input';
+	import { KeyValueInput } from 'entasis/key-value-input';
 
 	let pairs = $state(null);
 </script>
@@ -405,7 +405,7 @@ Rows are keyed by a stable per-row id (not the key string), so empty or duplicat
 
 ## Switch
 
-`import { Switch } from 'svelai/switch'`
+`import { Switch } from 'entasis/switch'`
 
 **State props:** `value: boolean | null` (bindable), `defaultValue: boolean | null`, `onValueChange: (value) => void`; the inherited `label` is painted beside the toggle and is also its accessible name
 
@@ -415,7 +415,7 @@ Label rendered beside the toggle. Global setter: `setSwitchInputTheme`.
 
 ```svelte
 <script>
-	import { Switch } from 'svelai/switch';
+	import { Switch } from 'entasis/switch';
 
 	let enabled = $state(false);
 </script>
@@ -427,7 +427,7 @@ Label rendered beside the toggle. Global setter: `setSwitchInputTheme`.
 
 ## RadioInput
 
-`import { RadioInput } from 'svelai/radio-input'`
+`import { RadioInput } from 'entasis/radio-input'`
 
 **Unique props:**
 
@@ -445,7 +445,7 @@ field's host and not the device. Same pattern for `checkboxesInputContainer`. A 
 
 ```svelte
 <script>
-	import { RadioInput } from 'svelai/radio-input';
+	import { RadioInput } from 'entasis/radio-input';
 
 	let plan = $state('free');
 </script>
@@ -464,7 +464,7 @@ field's host and not the device. Same pattern for `checkboxesInputContainer`. A 
 
 ## CheckboxesInput
 
-`import { CheckboxesInput } from 'svelai/checkboxes-input'`
+`import { CheckboxesInput } from 'entasis/checkboxes-input'`
 
 **Unique props:**
 
@@ -479,7 +479,7 @@ Extra slots: `header`, `helper`, `footer`, `actions`, `errorsContainer`
 
 ```svelte
 <script>
-	import { CheckboxesInput } from 'svelai/checkboxes-input';
+	import { CheckboxesInput } from 'entasis/checkboxes-input';
 
 	let skills = $state([]);
 </script>
@@ -499,7 +499,7 @@ Extra slots: `header`, `helper`, `footer`, `actions`, `errorsContainer`
 
 ## FileInput
 
-`import { FileInput } from 'svelai/file-input'`
+`import { FileInput } from 'entasis/file-input'`
 
 **Unique props:**
 
@@ -514,7 +514,7 @@ Drag-and-drop supported; rejected files (type, size, duplicate, count) are repor
 
 ```svelte
 <script lang="ts">
-	import { FileInput } from 'svelai/file-input';
+	import { FileInput } from 'entasis/file-input';
 
 	let avatar = $state<File | null>(null);
 	let attachments = $state<File[] | null>(null);
@@ -528,7 +528,7 @@ Drag-and-drop supported; rejected files (type, size, duplicate, count) are repor
 
 ## Calendar
 
-`import { CalendarInput, CalendarPrimitive } from 'svelai/calendar'`
+`import { CalendarInput, CalendarPrimitive } from 'entasis/calendar'`
 
 `CalendarInput` is the Field-based calendar (label, errors, form integration); `CalendarPrimitive` is the bare grid used inside DateInput. Both share these props:
 
@@ -542,7 +542,7 @@ Drag-and-drop supported; rejected files (type, size, duplicate, count) are repor
 
 ```svelte
 <script lang="ts">
-	import { CalendarInput, CalendarPrimitive } from 'svelai/calendar';
+	import { CalendarInput, CalendarPrimitive } from 'entasis/calendar';
 
 	let range = $state<[Date | null, Date | null] | null>(null);
 	let day = $state<Date | null>(null);
@@ -556,7 +556,7 @@ Drag-and-drop supported; rejected files (type, size, duplicate, count) are repor
 
 ## MiniCalendar
 
-`import { MiniCalendar } from 'svelai/mini-calendar'`
+`import { MiniCalendar } from 'entasis/mini-calendar'`
 
 Compact horizontal strip of N consecutive days (not Field-based) with a prev/next chevron on each side that shifts the range by N days. Each cell stacks a short month label over the day number; the selected day gets an elevated fill and today is subtly highlighted.
 
@@ -573,7 +573,7 @@ Dates are handled at noon and compared by year/month/day (timezone-resistant). N
 
 ```svelte
 <script>
-	import { MiniCalendar } from 'svelai/mini-calendar';
+	import { MiniCalendar } from 'entasis/mini-calendar';
 
 	let date = $state(null);
 </script>
@@ -585,7 +585,7 @@ Dates are handled at noon and compared by year/month/day (timezone-resistant). N
 
 ## Form
 
-`import { Form } from 'svelai/form'`
+`import { Form } from 'entasis/form'`
 
 Declarative form from config. Manages state, validation, layout.
 
@@ -618,8 +618,8 @@ overrides.
 
 ```svelte
 <script>
-	import { Form } from 'svelai/form';
-	import { Button } from 'svelai/button';
+	import { Form } from 'entasis/form';
+	import { Button } from 'entasis/button';
 
 	const handleSubmit = async (value) => {
 		console.log(value);
@@ -643,7 +643,7 @@ overrides.
 
 ## MultiStepForm
 
-`import { MultiStepForm } from 'svelai/multi-step-form'`
+`import { MultiStepForm } from 'entasis/multi-step-form'`
 
 **Unique props:**
 
@@ -660,7 +660,7 @@ Uses Stepper for progress. Validates per step. Data persists across steps.
 
 ```svelte
 <script>
-	import { MultiStepForm } from 'svelai/multi-step-form';
+	import { MultiStepForm } from 'entasis/multi-step-form';
 
 	let data = $state({});
 	const handleSubmit = async (value) => {

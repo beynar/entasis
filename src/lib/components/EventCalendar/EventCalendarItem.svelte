@@ -61,9 +61,9 @@
 	const a11y = $derived(calendar.a11y);
 	const interaction = $derived(calendar.interaction);
 	const disabled = $derived(calendar.disabled);
-	const showItemTooltip = $derived(calendar.renderers.itemTooltip !== false);
-	const item = $derived(calendar.renderers.item);
-	const itemTooltip = $derived(calendar.renderers.itemTooltip || undefined);
+	const itemTooltip = $derived(
+		calendar.renderers.itemTooltip === false ? undefined : calendar.renderers.itemTooltip
+	);
 	const occurrence = $derived(segment.occurrence);
 	const semanticColor = $derived(
 		isEventCalendarSemanticColor(occurrence.item.color) ? occurrence.item.color : 'neutral'
@@ -204,29 +204,9 @@
 		: null}
 >
 	{#if canResize && interaction && segment.isStart}
-		<div
-			aria-hidden="true"
-			data-event-calendar-part="resize-handle"
-			data-edge="start"
-			class={classes.resizeHandle({
-				class: isHorizontalResize
-					? 'inset-y-0 start-0 grid w-1.5 cursor-ew-resize place-items-center'
-					: 'inset-x-0 top-0 grid h-1.5 -translate-y-1/2 cursor-ns-resize place-items-center'
-			})}
-			{@attach interaction.draggableItem(segment, 'resize-start', view, projectionResourceId)}
-		>
-			{#if resizeStart}
-				<Slot render={resizeStart} />
-			{:else}
-				<span
-					class={isHorizontalResize
-						? 'pointer-events-none h-3 w-0.5 rounded-full bg-current'
-						: 'pointer-events-none h-0.5 w-3 rounded-full bg-current'}
-				></span>
-			{/if}
-		</div>
+		{@render resizeHandle('start', resizeStart)}
 	{/if}
-	{#if showItemTooltip}
+	{#if calendar.renderers.itemTooltip !== false}
 		<HoverCard
 			bind:open={isHoverCardOpen}
 			position="top"
@@ -246,29 +226,40 @@
 		{@render itemControl()}
 	{/if}
 	{#if canResize && interaction && segment.isEnd}
-		<div
-			aria-hidden="true"
-			data-event-calendar-part="resize-handle"
-			data-edge="end"
-			class={classes.resizeHandle({
-				class: isHorizontalResize
-					? 'inset-y-0 end-0 grid w-1.5 cursor-ew-resize place-items-center'
-					: 'inset-x-0 bottom-0 grid h-1.5 translate-y-1/2 cursor-ns-resize place-items-center'
-			})}
-			{@attach interaction.draggableItem(segment, 'resize-end', view, projectionResourceId)}
-		>
-			{#if resizeEnd}
-				<Slot render={resizeEnd} />
-			{:else}
-				<span
-					class={isHorizontalResize
-						? 'pointer-events-none h-3 w-0.5 rounded-full bg-current'
-						: 'pointer-events-none h-0.5 w-3 rounded-full bg-current'}
-				></span>
-			{/if}
-		</div>
+		{@render resizeHandle('end', resizeEnd)}
 	{/if}
 </div>
+
+{#snippet resizeHandle(edge: 'start' | 'end', customContent?: Snippet)}
+	<div
+		aria-hidden="true"
+		data-event-calendar-part="resize-handle"
+		data-edge={edge}
+		class={classes.resizeHandle({
+			class: isHorizontalResize
+				? `inset-y-0 ${edge}-0 grid w-1.5 cursor-ew-resize place-items-center`
+				: edge === 'start'
+					? 'inset-x-0 top-0 grid h-1.5 -translate-y-1/2 cursor-ns-resize place-items-center'
+					: 'inset-x-0 bottom-0 grid h-1.5 translate-y-1/2 cursor-ns-resize place-items-center'
+		})}
+		{@attach interaction?.draggableItem(
+			segment,
+			edge === 'start' ? 'resize-start' : 'resize-end',
+			view,
+			projectionResourceId
+		)}
+	>
+		{#if customContent}
+			<Slot render={customContent} />
+		{:else}
+			<span
+				class={isHorizontalResize
+					? 'pointer-events-none h-3 w-0.5 rounded-full bg-current'
+					: 'pointer-events-none h-0.5 w-3 rounded-full bg-current'}
+			></span>
+		{/if}
+	</div>
+{/snippet}
 
 {#snippet hoverCardTrigger(hoverCard: HoverCardPayload)}
 	{@render itemControl(hoverCard)}
@@ -324,7 +315,7 @@
 		}}
 		{@attach registerItemControl}
 	>
-		<Slot render={item ?? defaultContent} payload={itemPayload} />
+		<Slot render={calendar.renderers.item ?? defaultContent} payload={itemPayload} />
 	</button>
 {/snippet}
 

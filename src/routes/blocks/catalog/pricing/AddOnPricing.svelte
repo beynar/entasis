@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { chartBarIcon } from 'svelai/icons/chartBar';
-	import { usersThreeIcon } from 'svelai/icons/usersThree';
+	import { Stack } from 'entasis/stack';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { chartBarIcon } from 'entasis/icons/chartBar';
+	import { usersThreeIcon } from 'entasis/icons/usersThree';
 </script>
 
 <section class="gap-xl p-lg md:p-xl flex flex-col">

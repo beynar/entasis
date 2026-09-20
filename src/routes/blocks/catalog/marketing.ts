@@ -5,7 +5,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'about',
 		title: 'About',
 		group: 'Marketing',
-		description: 'Standalone about compositions, built with Svelai.',
+		description: 'Standalone about compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'about-story-columns',
@@ -47,7 +47,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'background-pattern',
 		title: 'Background Pattern',
 		group: 'Marketing',
-		description: 'Standalone background pattern compositions, built with Svelai.',
+		description: 'Standalone background pattern compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'background-pattern-radial-atmosphere',
@@ -71,7 +71,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'banner',
 		title: 'Banner',
 		group: 'Marketing',
-		description: 'Standalone banner compositions, built with Svelai.',
+		description: 'Standalone banner compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'banner-announcement-bar',
@@ -105,7 +105,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'bento',
 		title: 'Bento',
 		group: 'Marketing',
-		description: 'Standalone bento compositions, built with Svelai.',
+		description: 'Standalone bento compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'bento-collaboration-bento',
@@ -149,7 +149,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'book-a-demo',
 		title: 'Book A Demo',
 		group: 'Marketing',
-		description: 'Standalone book a demo compositions, built with Svelai.',
+		description: 'Standalone book a demo compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'book-a-demo-benefits-demo',
@@ -175,7 +175,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'community',
 		title: 'Community',
 		group: 'Marketing',
-		description: 'Standalone community compositions, built with Svelai.',
+		description: 'Standalone community compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'community-community-invite',
@@ -201,7 +201,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'compare',
 		title: 'Compare',
 		group: 'Marketing',
-		description: 'Standalone compare compositions, built with Svelai.',
+		description: 'Standalone compare compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'compare-feature-comparison',
@@ -236,7 +236,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'compliance',
 		title: 'Compliance',
 		group: 'Marketing',
-		description: 'Standalone compliance compositions, built with Svelai.',
+		description: 'Standalone compliance compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'compliance-trust-pillars',
@@ -262,7 +262,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'contact',
 		title: 'Contact',
 		group: 'Marketing',
-		description: 'Standalone contact compositions, built with Svelai.',
+		description: 'Standalone contact compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'contact-centered-contact',
@@ -303,7 +303,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'cookie-banner',
 		title: 'Cookie Banner',
 		group: 'Marketing',
-		description: 'Standalone cookie banner compositions, built with Svelai.',
+		description: 'Standalone cookie banner compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'cookie-banner-cookie-bar',
@@ -336,7 +336,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'cta',
 		title: 'CTA',
 		group: 'Marketing',
-		description: 'Standalone cta compositions, built with Svelai.',
+		description: 'Standalone cta compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'cta-feature-checklist-cta',
@@ -379,7 +379,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'download',
 		title: 'Download',
 		group: 'Marketing',
-		description: 'Standalone download compositions, built with Svelai.',
+		description: 'Standalone download compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'download-download-guide',
@@ -413,7 +413,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'faq',
 		title: 'FAQ',
 		group: 'Marketing',
-		description: 'Standalone faq compositions, built with Svelai.',
+		description: 'Standalone faq compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'faq-centered-questions',
@@ -446,7 +446,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'feature',
 		title: 'Feature',
 		group: 'Marketing',
-		description: 'Standalone feature compositions, built with Svelai.',
+		description: 'Standalone feature compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'feature-numbered-workflow',
@@ -508,7 +508,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'footer',
 		title: 'Footer',
 		group: 'Marketing',
-		description: 'Standalone footer compositions, built with Svelai.',
+		description: 'Standalone footer compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'footer-classic-footer',
@@ -552,7 +552,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'hero',
 		title: 'Hero',
 		group: 'Marketing',
-		description: 'Standalone hero compositions, built with Svelai.',
+		description: 'Standalone hero compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'hero-dashboard-hero',
@@ -615,7 +615,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'industries',
 		title: 'Industries',
 		group: 'Marketing',
-		description: 'Standalone industries compositions, built with Svelai.',
+		description: 'Standalone industries compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'industries-industry-list',
@@ -641,7 +641,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'integration',
 		title: 'Integration',
 		group: 'Marketing',
-		description: 'Standalone integration compositions, built with Svelai.',
+		description: 'Standalone integration compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'integration-integration-grid',
@@ -683,7 +683,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'logos',
 		title: 'Logos',
 		group: 'Marketing',
-		description: 'Standalone logos compositions, built with Svelai.',
+		description: 'Standalone logos compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'logos-partner-strip',
@@ -716,7 +716,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'navbar',
 		title: 'Navbar',
 		group: 'Marketing',
-		description: 'Standalone navbar compositions, built with Svelai.',
+		description: 'Standalone navbar compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'navbar-simple-navbar',
@@ -749,7 +749,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'newsletter',
 		title: 'Newsletter',
 		group: 'Marketing',
-		description: 'Standalone newsletter compositions, built with Svelai.',
+		description: 'Standalone newsletter compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'newsletter-centered-newsletter',
@@ -773,7 +773,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'pricing',
 		title: 'Pricing',
 		group: 'Marketing',
-		description: 'Standalone pricing compositions, built with Svelai.',
+		description: 'Standalone pricing compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'pricing-four-tier-pricing',
@@ -824,7 +824,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'process',
 		title: 'Process',
 		group: 'Marketing',
-		description: 'Standalone process compositions, built with Svelai.',
+		description: 'Standalone process compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'process-sticky-process',
@@ -849,7 +849,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'rate-card',
 		title: 'Rate Card',
 		group: 'Marketing',
-		description: 'Standalone rate card compositions, built with Svelai.',
+		description: 'Standalone rate card compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'rate-card-monthly-studio-rate',
@@ -874,7 +874,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'service',
 		title: 'Service',
 		group: 'Marketing',
-		description: 'Standalone service compositions, built with Svelai.',
+		description: 'Standalone service compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'service-service-detail',
@@ -899,7 +899,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'services',
 		title: 'Services',
 		group: 'Marketing',
-		description: 'Standalone services compositions, built with Svelai.',
+		description: 'Standalone services compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'services-service-checklist-grid',
@@ -934,7 +934,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'shader',
 		title: 'Shader',
 		group: 'Marketing',
-		description: 'Standalone shader compositions, built with Svelai.',
+		description: 'Standalone shader compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'shader-fluid-field',
@@ -960,7 +960,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'stats',
 		title: 'Stats',
 		group: 'Marketing',
-		description: 'Standalone stats compositions, built with Svelai.',
+		description: 'Standalone stats compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'stats-three-column-stats',
@@ -994,7 +994,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'team',
 		title: 'Team',
 		group: 'Marketing',
-		description: 'Standalone team compositions, built with Svelai.',
+		description: 'Standalone team compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'team-centered-team',
@@ -1038,7 +1038,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'testimonial',
 		title: 'Testimonial',
 		group: 'Marketing',
-		description: 'Standalone testimonial compositions, built with Svelai.',
+		description: 'Standalone testimonial compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'testimonial-centered-quote',
@@ -1081,7 +1081,7 @@ export const marketingCategories: BlockCategory[] = [
 		slug: 'waitlist',
 		title: 'Waitlist',
 		group: 'Marketing',
-		description: 'Standalone waitlist compositions, built with Svelai.',
+		description: 'Standalone waitlist compositions, built with Entasis.',
 		blocks: [
 			{
 				id: 'waitlist-community-waitlist',

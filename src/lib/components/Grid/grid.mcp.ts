@@ -8,7 +8,7 @@ direct-child composition primitive for spanning columns and implicit rows.
 
 \`\`\`svelte
 <script lang="ts">
-  import { Grid, GridSpan } from 'svelai/grid';
+  import { Grid, GridSpan } from 'entasis/grid';
 </script>
 \`\`\`
 

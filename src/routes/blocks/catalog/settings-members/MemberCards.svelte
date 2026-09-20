@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { Grid } from 'svelai/grid';
-	import { Stack } from 'svelai/stack';
-	import { Avatar } from 'svelai/avatar';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Dialog } from 'svelai/dialog';
-	import { Select } from 'svelai/select';
-	import { Switch } from 'svelai/switch';
+	import { Grid } from 'entasis/grid';
+	import { Stack } from 'entasis/stack';
+	import { Avatar } from 'entasis/avatar';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Dialog } from 'entasis/dialog';
+	import { Select } from 'entasis/select';
+	import { Switch } from 'entasis/switch';
 
 	let filter = $state<string | null>('All');
 	let members = $state([

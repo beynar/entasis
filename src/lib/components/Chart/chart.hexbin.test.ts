@@ -68,7 +68,7 @@ describe('Chart native hexbin', () => {
 		expect(bins.map((bin) => bin.count).sort()).toEqual([1, 3]);
 		expect(bins.flatMap((bin) => bin.sourceIndexes).sort()).toEqual([0, 2, 3, 5]);
 		for (const bin of bins) {
-			expect(bin.__svelaiSourceRows).toEqual(bin.source);
+			expect(bin.__entasisSourceRows).toEqual(bin.source);
 			bin.sourceIndexes.forEach((sourceIndex, index) => {
 				expect(bin.source[index]).toBe(observations[sourceIndex]);
 			});

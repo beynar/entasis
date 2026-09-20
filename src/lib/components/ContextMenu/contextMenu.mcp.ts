@@ -8,9 +8,9 @@ floating-ui virtual element, so the menu appears exactly at the pointer (and fli
 
 \`\`\`svelte
 <script>
-	import { ContextMenu } from 'svelai/context-menu';
-	import { copyIcon } from 'svelai/icons/copy';
-	import { trashIcon } from 'svelai/icons/trash';
+	import { ContextMenu } from 'entasis/context-menu';
+	import { copyIcon } from 'entasis/icons/copy';
+	import { trashIcon } from 'entasis/icons/trash';
 </script>
 
 <ContextMenu

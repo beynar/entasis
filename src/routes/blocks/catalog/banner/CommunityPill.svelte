@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { AvatarGroup } from 'svelai/avatar';
-	import { Button } from 'svelai/button';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
+	import { AvatarGroup } from 'entasis/avatar';
+	import { Button } from 'entasis/button';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
 </script>
 
 <div class="p-lg flex min-h-48 items-center justify-center">

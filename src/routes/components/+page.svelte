@@ -7,10 +7,10 @@
 </script>
 
 <svelte:head>
-	<title>Component inventory · svelai</title>
+	<title>Component inventory · entasis</title>
 	<meta
 		name="description"
-		content="The generated inventory of svelai components, utilities, entrypoints, and documentation."
+		content="The generated inventory of entasis components, utilities, entrypoints, and documentation."
 	/>
 </svelte:head>
 

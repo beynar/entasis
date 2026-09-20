@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { Grid } from 'svelai/grid';
-	import { Stack } from 'svelai/stack';
-	import { AppShell } from 'svelai/app-shell';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Form } from 'svelai/form';
-	import { Meter } from 'svelai/meter';
-	import { Stat } from 'svelai/stat';
-	import { houseIcon } from 'svelai/icons/house';
-	import { usersIcon } from 'svelai/icons/users';
-	import { folderIcon } from 'svelai/icons/folder';
-	import { sidebarIcon } from 'svelai/icons/sidebar';
-	import { commandIcon } from 'svelai/icons/command';
+	import { Grid } from 'entasis/grid';
+	import { Stack } from 'entasis/stack';
+	import { AppShell } from 'entasis/app-shell';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Form } from 'entasis/form';
+	import { Meter } from 'entasis/meter';
+	import { Stat } from 'entasis/stat';
+	import { houseIcon } from 'entasis/icons/house';
+	import { usersIcon } from 'entasis/icons/users';
+	import { folderIcon } from 'entasis/icons/folder';
+	import { sidebarIcon } from 'entasis/icons/sidebar';
+	import { commandIcon } from 'entasis/icons/command';
 	let active = $state('Overview');
 	let adding = $state(false);
 	let projects = $state([

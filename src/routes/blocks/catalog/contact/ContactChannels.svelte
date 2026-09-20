@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
-	import { bookOpenIcon } from 'svelai/icons/bookOpen';
-	import { puzzlePieceIcon } from 'svelai/icons/puzzlePiece';
-	import { squaresFourIcon } from 'svelai/icons/squaresFour';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
+	import { bookOpenIcon } from 'entasis/icons/bookOpen';
+	import { puzzlePieceIcon } from 'entasis/icons/puzzlePiece';
+	import { squaresFourIcon } from 'entasis/icons/squaresFour';
 	const channels = [
 		{
 			title: 'Getting started',

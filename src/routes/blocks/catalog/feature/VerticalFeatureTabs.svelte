@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { Stack } from 'svelai/stack';
-	import { Avatar } from 'svelai/avatar';
-	import { Button } from 'svelai/button';
-	import { Card } from 'svelai/card';
-	import { Chip } from 'svelai/chip';
-	import { Heading } from 'svelai/heading';
-	import { Meter } from 'svelai/meter';
-	import { Stat } from 'svelai/stat';
-	import { Tabbar } from 'svelai/tabbar';
-	import { arrowRightIcon } from 'svelai/icons/arrowRight';
+	import { Stack } from 'entasis/stack';
+	import { Avatar } from 'entasis/avatar';
+	import { Button } from 'entasis/button';
+	import { Card } from 'entasis/card';
+	import { Chip } from 'entasis/chip';
+	import { Heading } from 'entasis/heading';
+	import { Meter } from 'entasis/meter';
+	import { Stat } from 'entasis/stat';
+	import { Tabbar } from 'entasis/tabbar';
+	import { arrowRightIcon } from 'entasis/icons/arrowRight';
 	const tabs = ['Plan the work', 'Follow progress', 'Bring people in'];
 	let active = $state(tabs[0]);
 	const activeIndex = $derived(Math.max(0, tabs.indexOf(active)));

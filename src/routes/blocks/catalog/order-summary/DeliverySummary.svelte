@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Heading } from 'svelai/heading';
-	import { Timeline } from 'svelai/timeline';
-	import { Chip } from 'svelai/chip';
-	import { Card } from 'svelai/card';
+	import { Heading } from 'entasis/heading';
+	import { Timeline } from 'entasis/timeline';
+	import { Chip } from 'entasis/chip';
+	import { Card } from 'entasis/card';
 </script>
 
 <section class="gap-xl p-xl text-neutral mx-auto flex w-full max-w-6xl flex-col">

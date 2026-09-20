@@ -1,4 +1,4 @@
-# Svelai Overlays & Feedback Reference
+# Entasis Overlays & Feedback Reference
 
 ## Table of Contents
 
@@ -26,7 +26,7 @@ the page `inert`; Popover is non-modal. See [Dialog](#dialog) and [Popover](#pop
 
 ## Dialog
 
-`import { Dialog } from 'svelai/dialog'`
+`import { Dialog } from 'entasis/dialog'`
 
 Modal/drawer overlay that blocks page interaction.
 
@@ -67,8 +67,8 @@ Modal/drawer overlay that blocks page interaction.
 
 ```svelte
 <script>
-	import { Dialog } from 'svelai/dialog';
-	import { Button } from 'svelai/button';
+	import { Dialog } from 'entasis/dialog';
+	import { Button } from 'entasis/button';
 
 	let open = $state(false);
 </script>
@@ -90,7 +90,7 @@ Modal/drawer overlay that blocks page interaction.
 
 ## Popover
 
-`import { Popover } from 'svelai/popover'`
+`import { Popover } from 'entasis/popover'`
 
 Floating content positioned relative to a trigger element.
 
@@ -144,7 +144,7 @@ wins over `mobileSheet`.
 
 ```svelte
 <script lang="ts">
-	import { Popover } from 'svelai/popover';
+	import { Popover } from 'entasis/popover';
 
 	let anchor = $state<HTMLButtonElement | null>(null);
 	let open = $state(false);
@@ -171,7 +171,7 @@ wins over `mobileSheet`.
 
 ## Tooltip
 
-`import { Tooltip, tooltip } from 'svelai/tooltip'`
+`import { Tooltip, tooltip } from 'entasis/tooltip'`
 
 Two forms over one shared surface: the `<Tooltip>` component (a `trigger` prop, like every other
 overlay) and the `tooltip()` attachment for elements you already render. Both are painted by the
@@ -208,7 +208,7 @@ the tooltip attachment to spread on its own element. Every prop except `trigger`
 ```svelte
 <script lang="ts">
 	import type { Attachment } from 'svelte/attachments';
-	import { Tooltip, tooltip } from 'svelai/tooltip';
+	import { Tooltip, tooltip } from 'entasis/tooltip';
 </script>
 
 <!-- Button trigger -->
@@ -241,14 +241,14 @@ visible.
 
 ## Toast
 
-`import { toast } from 'svelai/toast'`
+`import { toast } from 'entasis/toast'`
 
 Programmatic function (not a component). Call color methods directly.
 
 ### API
 
 ```typescript
-import { toast } from 'svelai/toast';
+import { toast } from 'entasis/toast';
 
 const t = toast.success({ title: 'Saved', description: 'Your changes are live.' });
 t.remove(); // dismiss programmatically
@@ -291,7 +291,7 @@ registry default.
 ### Example
 
 ```typescript
-import { toast } from 'svelai/toast';
+import { toast } from 'entasis/toast';
 
 declare function upload(): Promise<void>;
 
@@ -313,14 +313,14 @@ warning is logged only if no Toaster ever appears.
 
 ## Confirmation
 
-`import { confirmation } from 'svelai/confirmation'`
+`import { confirmation } from 'entasis/confirmation'`
 
 Async function returning a Promise. Blocks interaction until user responds. Mount `<Confirmation />` once (inside `<Theme>`) for the host dialog.
 
 ### API
 
 ```typescript
-import { confirmation } from 'svelai/confirmation';
+import { confirmation } from 'entasis/confirmation';
 
 declare function deleteItem(): Promise<void>;
 
@@ -364,7 +364,7 @@ Override globally with `<Theme components={{ confirmation: { footer: { base: '..
 
 ## Alert
 
-`import { Alert } from 'svelai/alert'`
+`import { Alert } from 'entasis/alert'`
 
 Static message banner. Uses CSS Grid layout adapting to icon presence.
 
@@ -392,8 +392,8 @@ Static message banner. Uses CSS Grid layout adapting to icon presence.
 
 ```svelte
 <script>
-	import { Alert } from 'svelai/alert';
-	import { warningCircleIcon } from 'svelai/icons/warningCircle';
+	import { Alert } from 'entasis/alert';
+	import { warningCircleIcon } from 'entasis/icons/warningCircle';
 </script>
 
 <Alert color="danger" variant="soft">
@@ -409,7 +409,7 @@ Static message banner. Uses CSS Grid layout adapting to icon presence.
 
 ## NetworkIndicator
 
-`import { NetworkIndicator, toggleNetworkIndicator } from 'svelai/network-indicator'`
+`import { NetworkIndicator, toggleNetworkIndicator } from 'entasis/network-indicator'`
 
 Top-of-page loading bar. Auto-shows during SvelteKit navigations.
 
@@ -426,7 +426,7 @@ Top-of-page loading bar. Auto-shows during SvelteKit navigations.
 ### Programmatic Control
 
 ```typescript
-import { toggleNetworkIndicator } from 'svelai/network-indicator';
+import { toggleNetworkIndicator } from 'entasis/network-indicator';
 
 toggleNetworkIndicator(); // show
 await fetch('/api/data');
@@ -442,7 +442,7 @@ toggleNetworkIndicator(); // hide
 ```svelte
 <!-- In +layout.svelte -->
 <script>
-	import { NetworkIndicator } from 'svelai/network-indicator';
+	import { NetworkIndicator } from 'entasis/network-indicator';
 
 	let { children } = $props();
 </script>
