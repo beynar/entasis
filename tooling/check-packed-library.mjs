@@ -24,7 +24,9 @@ try {
 		['pack', '--ignore-scripts', '--json', '--pack-destination', fixtureRoot],
 		repositoryRoot
 	);
-	const [packed] = JSON.parse(stdout);
+	// npm 11 prints `[record]`, npm 12 `{ "<name>": record }`; both carry the same record.
+	const parsed = JSON.parse(stdout);
+	const [packed] = Array.isArray(parsed) ? parsed : Object.values(parsed);
 	const dependencies = { entasis: `file:${path.join(fixtureRoot, packed.filename)}` };
 	for (const dependency of [
 		'svelte',

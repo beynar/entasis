@@ -222,9 +222,13 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 				this.isOpen &&
 				(Math.abs(this.dragOffset) > this.dragSize * 0.25 || velocity > 0.4);
 			// Closing keeps dragOffset so the out transition starts from the dragged position.
-			// Snap-back waits a frame so the re-enabled CSS transition animates the return.
+			// Snap-back waits a frame so the re-enabled CSS transition animates the return — and
+			// yields to a drag that started in the meantime, or it would zero that drag's offset.
 			if (shouldClose) this.close();
-			else requestAnimationFrame(() => (this.dragOffset = 0));
+			else
+				requestAnimationFrame(() => {
+					if (!this.dragging) this.dragOffset = 0;
+				});
 		};
 
 		const drag = createPointerDrag({

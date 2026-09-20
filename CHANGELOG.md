@@ -7,6 +7,7 @@ Unreleased section under the new version.
 ## Unreleased
 
 ## 0.4.0 — 2026-09-20
+
 This is a breaking release. Renamed APIs have no forwarding aliases.
 
 ### Renamed
@@ -891,6 +892,9 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
   engine does not emit. Nothing in the repository referenced it.
 
 ### Fixed
+
+- A drawer grabbed again within a frame of a release that did not dismiss it no longer has its drag
+  offset zeroed by the deferred snap-back, which made a fast second swipe fail to dismiss.
 
 - Responsive props fell back to the component default on any falsy value, not just a missing one,
   so `<Toast collapseHorizontalAxis={false} />` was silently `true` and `<Carousel gaps={0} />`
