@@ -1,6 +1,8 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "entasis",
+	// BEYNAR. Pinned so `wrangler deploy` needs no account prompt (the token sees 14 accounts).
+	"account_id": "6886250e2aff0047919a1ed731a55c64",
 	"main": ".svelte-kit/cloudflare/_worker.js",
 	"compatibility_date": "2025-01-01",
 	"assets": { "binding": "ASSETS", "directory": ".svelte-kit/cloudflare" },
