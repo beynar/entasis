@@ -25,9 +25,10 @@ jobs:
       - run: npm run check:public-api-contract
       - run: npm run check:readme-tokens
       - run: npm run test:contracts
+      # dist before check: `entasis/icons/*` is typed through dist (see release.yml).
+      - run: pnpm exec svelte-package
       - run: npm run check
       - run: npm run test:unit -- --run
-      - run: pnpm exec svelte-package
       - run: npm run check:packed-library
       - run: npm run check:package-consumer
       - run: npm run check:doc-fences

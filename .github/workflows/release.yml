@@ -33,6 +33,10 @@ jobs:
       # Trusted publishing needs npm >= 11.5.1; the bundled npm is upgraded to be safe.
       - run: npm install --global npm@latest
       - run: pnpm exec playwright install --with-deps chromium
+      # `entasis/icons/*` is the one subpath the generated alias map cannot type under NodeNext
+      # (kit emits an extensionless wildcard path), so its types come from dist like a consumer's
+      # would. Packaging before the check is what makes it pass locally too.
+      - run: pnpm exec svelte-package
       - run: npm run check
       - run: npm run test:unit -- --run
       - run: npm run test:e2e
