@@ -7,7 +7,7 @@ name: Release
 # It publishes through npm trusted publishing (OIDC), so no NPM_TOKEN secret exists or is needed:
 # the npm CLI exchanges the job's GitHub id-token for a short-lived publish token. One-time setup
 # by the package owner on npmjs.com, under the entasis package → Settings → Trusted Publisher:
-#   Repository: beynar/ai2   Workflow filename: release.yml   Environment: (none)
+#   Repository: beynar/entasis   Workflow filename: release.yml   Environment: (none)
 # Until that is configured the publish step fails with E404/E403 on the token exchange.
 on:
   push:

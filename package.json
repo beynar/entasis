@@ -1299,12 +1299,12 @@
 		}
 	},
 	"description": "Configuration-over-markup Svelte 5 component library and design-system engine for SvelteKit and Tailwind 4",
-	"homepage": "https://github.com/beynar/ai2#readme",
+	"homepage": "https://github.com/beynar/entasis#readme",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/beynar/ai2.git"
+		"url": "git+https://github.com/beynar/entasis.git"
 	},
 	"bugs": {
-		"url": "https://github.com/beynar/ai2/issues"
+		"url": "https://github.com/beynar/entasis/issues"
 	}
 }
