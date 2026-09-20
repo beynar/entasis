@@ -333,15 +333,39 @@ export class CarouselState extends CarouselOptionsBase {
 			// The root is the query container; the track bleeds past it (see `measure`). A carousel
 			// built without that root — the state's own unit tests — falls back to the track.
 			const host = container.closest<HTMLElement>('[data-carousel]') ?? container;
+			// The track bleeds past the root by the shadow allowance, and a box that extends past the
+			// viewport is horizontal page scroll on a phone. CSS cannot see the viewport edge from
+			// inside a box, so the room on each side is measured here and the bleed rule takes the
+			// smaller of the allowance and the room (see the `--carousel-room-*` reads in
+			// Carousel.svelte). Clipping the root instead would cut the shadows on every side.
+			const room = () => {
+				// Layout position, not `getBoundingClientRect`: the rect includes transforms, and a
+				// carousel mounted inside a tab panel that is still sliding in would measure its room
+				// mid-flight and keep that answer until the next resize. The offset chain ignores
+				// transforms and reports where the root rests.
+				let left = -window.scrollX;
+				for (let element: HTMLElement | null = host; element;) {
+					const parent = element.offsetParent as HTMLElement | null;
+					left += element.offsetLeft + (parent?.clientLeft ?? 0);
+					element = parent;
+				}
+				const right = document.documentElement.clientWidth - (left + host.offsetWidth);
+				host.style.setProperty('--carousel-room-left', `${Math.max(0, left)}px`);
+				host.style.setProperty('--carousel-room-right', `${Math.max(0, right)}px`);
+			};
 			const resizeObserver = new ResizeObserver(([entry]) => {
 				// Border box, not `contentRect`: the root takes no padding, and a track measured as the
 				// fallback takes `padding-inline: 50%` in repeat mode, which would otherwise report a
 				// content width far wider than the carousel.
 				this.measure(entry?.borderBoxSize?.[0]?.inlineSize ?? entry?.target.clientWidth ?? 0);
+				room();
 			});
 			resizeObserver.observe(host, { box: 'border-box' });
+			// A viewport resize can change the room without changing the root's own size.
+			const offWindowResize = on(window, 'resize', room);
 			const offScroll = on(container, 'scroll', this.onScroll);
 			this.measure(host.clientWidth);
+			room();
 			const offSlides = this.observeSlides(container);
 			this.measureScrollRange();
 			return () => {
@@ -349,6 +373,7 @@ export class CarouselState extends CarouselOptionsBase {
 					blossom?.destroy();
 				}
 				resizeObserver.disconnect();
+				offWindowResize();
 				offSlides();
 				offScroll();
 			};

@@ -893,6 +893,11 @@ This is a breaking release. Renamed APIs have no forwarding aliases.
 
 ### Fixed
 
+- The carousel's shadow bleed is capped, per side, at the room between the carousel and the
+  viewport edge, measured from the layout position so a carousel mounted inside a tab panel that is
+  still sliding in reads its resting room. A carousel flush with a phone screen's edge widened the
+  page by the bleed and made it pan sideways.
+
 - A drawer grabbed again within a frame of a release that did not dismiss it no longer has its drag
   offset zeroed by the deferred snap-back, which made a fast second swipe fail to dismiss.
 

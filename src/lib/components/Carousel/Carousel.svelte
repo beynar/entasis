@@ -273,9 +273,26 @@
 			 * two bleeds short of the arrows. Hence `inline-size: auto` here and no inline width in
 			 * the markup.
 			 */
-			margin-inline: calc(var(--carousel-bleed-x) * -1);
-			padding-inline: var(--carousel-bleed-x);
-			scroll-padding-inline: var(--carousel-bleed-x);
+			/*
+			 * Per side, and physical: the bleed is capped at the room between the root and the
+			 * viewport edge (`--carousel-room-*`, set by the state from a measurement), so a carousel
+			 * flush with a phone screen's edge never widens the page. Unmeasured — before hydration,
+			 * or in a test without the root — the room is unbounded and the full bleed applies.
+			 */
+			--carousel-bleed-left: min(
+				var(--carousel-bleed-x),
+				var(--carousel-room-left, calc(infinity * 1px))
+			);
+			--carousel-bleed-right: min(
+				var(--carousel-bleed-x),
+				var(--carousel-room-right, calc(infinity * 1px))
+			);
+			margin-left: calc(var(--carousel-bleed-left) * -1);
+			margin-right: calc(var(--carousel-bleed-right) * -1);
+			padding-left: var(--carousel-bleed-left);
+			padding-right: var(--carousel-bleed-right);
+			scroll-padding-left: var(--carousel-bleed-left);
+			scroll-padding-right: var(--carousel-bleed-right);
 			/* Net block padding stays `--space-xl` (room for the dots); the bleed hides in the margin. */
 			margin-block: calc(var(--space-xl) - var(--carousel-bleed-y));
 			padding-block: var(--carousel-bleed-y);

@@ -11,5 +11,8 @@ export default defineConfig({
 		reuseExistingServer: !process.env.CI
 	},
 
+	// `webServer.url` (unlike `port`) does not infer a baseURL, and four suites navigate relative.
+	use: { baseURL: 'http://127.0.0.1:4173' },
+
 	testDir: 'e2e'
 });
