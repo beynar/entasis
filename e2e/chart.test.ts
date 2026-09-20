@@ -21,9 +21,15 @@ test('renders and hydrates every Chart documentation example', async ({ page }) 
 	await expect(page.getByRole('img', { name: 'Quarterly revenue series chart' })).toBeVisible();
 
 	const usageChart = page.getByRole('img', { name: 'Quarterly revenue series chart' });
-	await usageChart.focus();
-	await usageChart.press('ArrowRight');
-	await expect(usageChart.locator('..').getByRole('status')).toBeVisible();
+	// Keyboard zoom lives on the brush handles (`role="slider"`), not on the svg, which is
+	// `tabindex="-1"`. The handles only exist once the engine has attached on the client, so
+	// waiting for one is also the hydration check this test is named for.
+	// The announcer is a sibling of the plot box, not of the svg, so scope to the chart root.
+	const chartBox = page.locator('[data-slot="chart"]').filter({ has: usageChart });
+	const rangeEnd = chartBox.getByRole('slider', { name: 'Zoom range end' });
+	await rangeEnd.focus();
+	await rangeEnd.press('ArrowLeft');
+	await expect(chartBox.getByRole('status')).toHaveText('Chart zoomed on the x axis.');
 
 	const ratio = await usageChart.evaluate((svg) => {
 		const [, , width, height] = (svg.getAttribute('viewBox') ?? '').split(' ').map(Number);
