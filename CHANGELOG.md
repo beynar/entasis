@@ -6,6 +6,7 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.4.1 — 2026-09-21
 ### Changed
 
 - `svelte-streamdown` 4.0.0 → 4.2.0 under `Markdown` and `AIMessage`. What a consumer sees: wide tables
