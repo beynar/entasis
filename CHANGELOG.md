@@ -6,6 +6,15 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Changed
+
+- `svelte-streamdown` 4.0.0 → 4.2.0 under `Markdown` and `AIMessage`. What a consumer sees: wide tables
+  gain a fullscreen toggle beside copy and download (`controls={{ table: { fullscreen: false } }}`
+  removes it), a half-typed HTML tag at the streaming tail no longer flashes as text, and a finished
+  block keeps an incomplete PascalCase tag instead of losing its tail. Opt-in and off by default:
+  `customTags`, `literalTagContent`, `normalizeHtmlIndentation` and code `lineNumbers`, all forwarded
+  through `Markdown`'s rest props.
+
 ## 0.4.0 — 2026-09-20
 
 This is a breaking release. Renamed APIs have no forwarding aliases.

@@ -66,8 +66,8 @@ importers:
         specifier: ^0.37.1
         version: 0.37.1(@sveltejs/kit@2.70.3(@sveltejs/vite-plugin-svelte@7.3.0(svelte@5.57.0(@typescript-eslint/types@8.70.0))(vite@8.3.0(esbuild@0.28.1)(jiti@2.7.0)))(svelte@5.57.0(@typescript-eslint/types@8.70.0))(typescript@6.0.3)(vite@8.3.0(esbuild@0.28.1)(jiti@2.7.0)))(svelte@5.57.0(@typescript-eslint/types@8.70.0))(zod@4.6.2)
       svelte-streamdown:
-        specifier: ^4.0.0
-        version: 4.0.0(svelte@5.57.0(@typescript-eslint/types@8.70.0))
+        specifier: ^4.2.0
+        version: 4.2.0(svelte@5.57.0(@typescript-eslint/types@8.70.0))
       svelte-themes:
         specifier: ^2.0.10
         version: 2.0.10(svelte@5.57.0(@typescript-eslint/types@8.70.0))
@@ -3237,8 +3237,8 @@ packages:
     peerDependencies:
       svelte: ^5.0.0
 
-  svelte-streamdown@4.0.0:
-    resolution: {integrity: sha512-9qgPRZ5PYgqI1dNlZINCDAPmMwVKwLGVvdGjkNiZX1zclsnQwW9V0rO7zHcSy4iNxiJGF3MjvpJNoghjGi+Pjg==}
+  svelte-streamdown@4.2.0:
+    resolution: {integrity: sha512-VEJxXxA162NLvxNoXmJHuzi6uY3NeWmV2fcRuy8MIYvhRM0/8proibAowti28inAXGBgFUwqSHFhnyXCB6tYVQ==}
     peerDependencies:
       svelte: ^5.0.0
 
@@ -6404,7 +6404,7 @@ snapshots:
       - typescript
       - wrangler
 
-  svelte-streamdown@4.0.0(svelte@5.57.0(@typescript-eslint/types@8.70.0)):
+  svelte-streamdown@4.2.0(svelte@5.57.0(@typescript-eslint/types@8.70.0)):
     dependencies:
       '@floating-ui/dom': 1.8.0
       '@tanstack/highlight': 0.1.0

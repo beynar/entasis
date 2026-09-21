@@ -145,7 +145,7 @@
 		"lightgallery": "^2.9.0",
 		"melt": "^0.44.0",
 		"runed": "^0.37.1",
-		"svelte-streamdown": "^4.0.0",
+		"svelte-streamdown": "^4.2.0",
 		"svelte-themes": "^2.0.10",
 		"valibot": "^1.5.0"
 	},
