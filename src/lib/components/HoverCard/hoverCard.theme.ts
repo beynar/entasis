@@ -19,13 +19,18 @@ const defaultHoverCardPopover = cva({
 	base: 'bg-transparent p-0 shadow-none ring-0'
 });
 
+// A hover card is a floating panel, so it wears the Popover's surface — `raised-3` on
+// `bg-surface-floating` — not an in-page Card's `lift-1` + ring: the Popover shell above has its
+// chrome stripped and the Card carries the panel look instead, which keeps the Card's title /
+// description / footer structure. Widths come from the shell's own size step, so a hover card
+// is exactly as wide as a Popover of the same size.
 const defaultHoverCardCard = cva({
-	base: 'w-max',
+	base: 'w-full raised-3 bg-surface-floating ring-0',
 	variants: {
 		size: {
-			small: 'max-w-[min(16rem,calc(100vw-2rem))]',
-			normal: 'max-w-[min(18rem,calc(100vw-2rem))]',
-			large: 'max-w-[min(24rem,calc(100vw-2rem))]'
+			small: null,
+			normal: null,
+			large: null
 		}
 	},
 	defaultVariants: {
