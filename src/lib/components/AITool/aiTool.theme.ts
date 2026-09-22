@@ -161,28 +161,30 @@ const defaultAccordionContent = cva({
 	defaultVariants: { variant: 'ghost' }
 });
 const defaultTitle = cva({ base: 'flex min-w-0 flex-1 items-center gap-md text-xs' });
+// Status is a bare mark, no badge: a spinner while the call runs, a dot once it has settled,
+// coloured by outcome. The box is the icon size so rows and the group title line up.
 const defaultIndicator = cva({
-	base: 'flex size-5 shrink-0 items-center justify-center rounded-full border',
+	base: 'flex size-icon-md shrink-0 items-center justify-center',
 	variants: {
 		tone: {
-			active: 'border-info/30 bg-info/10 text-info-muted-readable',
-			success: 'border-success/30 bg-success/10 text-success-muted-readable',
-			error: 'border-danger/30 bg-danger/10 text-danger-muted-readable',
-			cancelled: 'border-neutral/20 bg-neutral-muted text-neutral-muted-readable',
-			default: 'border-neutral-muted bg-surface-raised text-neutral/70'
+			active: 'text-info',
+			success: 'text-success',
+			error: 'text-danger',
+			cancelled: 'text-neutral/45',
+			default: 'text-neutral/45'
 		}
 	}
 });
 const defaultIndicatorDot = cva({ base: 'size-1.5 rounded-full bg-current' });
 const defaultGroupIcon = cva({
-	base: 'flex size-5 shrink-0 items-center justify-center rounded-full border',
+	base: 'flex size-icon-md shrink-0 items-center justify-center',
 	variants: {
 		tone: {
-			active: 'border-info/30 bg-info/10 text-info-muted-readable',
-			success: 'border-success/30 bg-success/10 text-success-muted-readable',
-			error: 'border-danger/30 bg-danger/10 text-danger-muted-readable',
-			cancelled: 'border-neutral/20 bg-neutral-muted text-neutral-muted-readable',
-			default: 'border-neutral-muted bg-surface-raised text-neutral/70'
+			active: 'text-info',
+			success: 'text-success',
+			error: 'text-danger',
+			cancelled: 'text-neutral/45',
+			default: 'text-neutral/45'
 		}
 	},
 	defaultVariants: { tone: 'default' }

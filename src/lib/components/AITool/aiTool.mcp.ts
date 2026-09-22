@@ -21,7 +21,7 @@ Expanded call/group IDs use bindable \`value\`, initial \`defaultValue\`, and \`
 
 Use \`icon\`, \`title\`, \`status\`, \`input\`, \`output\`, \`error\`, or \`content\` snippets with a \`{ tool, index }\` payload. Default value panels use the existing Entasis ScrollArea and are capped vertically while supporting both scroll axes.
 
-Default status is represented by the semantic left indicator: a spinner for active calls and a dot for settled calls. Use the \`status\` snippet only when a visible custom status treatment is required.
+Default status is a bare mark on the left, no badge: a spinner for active calls and a coloured dot for settled calls (info while running, success, danger, muted when cancelled). Use the \`status\` snippet only when a visible custom status treatment is required.
 
 Default input and output sections use compact sign-in and sign-out icons. Their configured labels remain available to assistive technology and on hover.
 
