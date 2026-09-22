@@ -6,7 +6,49 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Renamed
+
+- Sidebar theme variants now spell both of the component's size axes in the shared scale. The
+  Sidebar's own scale is `size` on every slot (it was `componentSize` on all but `groupContent`),
+  and a row's own scale is `itemSize: 'small' | 'normal' | 'large'` (it was `size` spelled
+  `default | sm | lg` on `menuButton`, `sm | md` on `subButton` and `default | compact` on `media`).
+  The brand and user menu button's `data-size` follows: `normal` / `large` instead of `default` / `lg`.
+  Theme overrides written against the old names resolve no class; there is no forwarding alias.
+
+### Added
+
+- `use{Component}Theme(theme, shared)`: a second argument binds one set of variant values to every
+  class slot, so a template calls `slots.root()` and `slots.prefix()` instead of threading the same
+  props into each call; a slot can still add its own (`slots.root({ className })`). Every slot now
+  sees every prop, so an override keyed on a variant a component used to pass only to its root
+  reaches the slot it names. The one-argument form is unchanged. `Button` is the first consumer.
+- `designTokens.drawerInset`: how far a drawer `Dialog` stands off the screen edge, a spacing step
+  or `'none'`, default `'layout-md'` (the distance drawers always had). At `'none'` the drawer is
+  edge to edge and its edge corners square off by themselves — `min(--radius-xl, --drawer-inset ×
+9999)` — while the corners facing the page keep their radius. The drawer types used to square the
+  wrong side (`rounded-l-none` on a right drawer) whatever the inset. A single dialog overrides the
+  theme with the same values through its `inset` prop; the docs playground's Design tokens panel
+  exposes the token next to the other geometry.
+
+### Changed
+
+- Dark themes: `neutral-muted`, the kit's edge colour, is now derived from `surface-floating`
+  instead of the base surface. It used to land at the same lightness as a floating panel and 0.04
+  above a raised one, so a Card's ring and a Popover's edge were invisible in dark mode; every
+  `ring-neutral-muted`, `border-neutral-muted` and `--raised-border` now clears the lightest
+  surface by 0.06. Light themes are unchanged.
+- `AITool` status is a bare mark instead of a ringed, tinted badge: a spinner while a call runs, a
+  small dot once it has settled, coloured by outcome, for the tool rows and the group title alike.
+- `HoverCard` and `LinkPreview` panels now wear the `Popover` surface — `raised-3` on
+  `bg-surface-floating` with its 1px edge — instead of an in-page Card's `lift-1` and ring on
+  `bg-surface-raised`, and take their width from the Popover size step (16 / 20 / 24rem) rather than
+  their own 16 / 18 / 24rem. Three floating panels opened from the same page used to show two
+  different surfaces.
+- The `<Theme>` context key is now `entasisTheme`; it was still spelled `sveltaiTheme` after the 0.4.0
+  rename. Only code that reached past `useTheme()` with a raw `getContext` call notices.
+
 ## 0.4.1 — 2026-09-21
+
 ### Changed
 
 - `svelte-streamdown` 4.0.0 → 4.2.0 under `Markdown` and `AIMessage`. What a consumer sees: wide tables
