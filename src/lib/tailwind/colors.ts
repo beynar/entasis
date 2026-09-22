@@ -563,7 +563,13 @@ export const generateColorPalette = (opts: ColorThemeOption) => {
 		const baseColor = opts.neutral
 			? adjustColor(color.DEFAULT)
 			: setPerceptualLightness(surface.DEFAULT, isDark ? 0.96 : 0.22);
-		const muted = color.muted || mutedOn(baseColor, baseSurface);
+		// `neutral-muted` is the kit's edge colour (rings, borders, `--raised-border`), so it must
+		// clear the lightest surface it can sit on. In light mode the surfaces climb toward white
+		// while the tint drops below the base, so the base is the right anchor. In dark mode both
+		// climb: a tint 0.06 above the base lands exactly on `surface-floating` (0.24) and 0.04
+		// above `surface-raised`, which is why a card's ring and a popover's edge vanished. Anchor
+		// it on the floating surface instead, so the step is measured from the top of the stack.
+		const muted = color.muted || mutedOn(baseColor, isDark ? surfacePalette.floating : baseSurface);
 		return {
 			DEFAULT: baseColor,
 			dark: color.dark || darken(baseColor, 2),
