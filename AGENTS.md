@@ -27,7 +27,8 @@ exempt until they get the same treatment.
 - Semantic color props use the shared `Colors` roles.
 - Component geometry uses `size: 'small' | 'normal' | 'large'`.
 - Control height uses `h-control-sm/md/lg` (28 / 32 / 36). Button, ToggleButton, Pagination, and form field containers share that scale and `rounded-md`. Chip, Switch, and Avatar stay `rounded-full` on their own scales. Default radius tokens are 4px (`sm`) and 8px (`md` and up); do not invent a larger surface radius.
-- Internal whitespace uses `density: 'small' | 'normal' | 'large'`.
+- Internal whitespace uses `density: 'compact' | 'normal' | 'comfortable'` — a vocabulary deliberately
+  distinct from `size` so a density value can never be mistaken for a size.
 - Editable state uses `value`, `defaultValue`, and `onValueChange`.
 - Disclosure state uses `open`, `defaultOpen`, and `onOpenChange`.
 - Post-transition lifecycle uses `onAfterOpen` and `onAfterClose`.
