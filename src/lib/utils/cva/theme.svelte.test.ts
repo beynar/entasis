@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { setContext } from 'svelte';
 import { render } from '@testing-library/svelte';
 import { cva } from './engine.js';
-import { setComponentTheme, useComponentTheme } from './theme.js';
+import { setComponentTheme, useComponentTheme, bindTheme } from './theme.js';
 import Harness from './CvaHarness.test.svelte';
 
 // Runs `fn` inside a live component so getContext/setContext work.
@@ -213,5 +213,49 @@ describe('useComponentTheme', () => {
 			result = use().button({ size: 'sm' });
 		});
 		expect(result).toBe('rounded text-sm ring-1');
+	});
+});
+
+describe('bindTheme', () => {
+	const makeSlots = () => ({
+		root: cva({
+			base: 'rounded px-4',
+			variants: { size: { sm: 'text-sm', lg: 'text-lg' }, tone: { loud: 'font-bold' } },
+			defaultVariants: { size: 'sm' }
+		}),
+		icon: cva({ base: 'shrink-0', variants: { size: { sm: 'size-4', lg: 'size-5' } } }),
+		motion: (() => ({})) as never
+	});
+
+	it('hands the shared props to every class slot', () => {
+		const slots = bindTheme(makeSlots(), { size: 'lg', tone: 'loud' });
+		expect(slots.root()).toBe('rounded px-4 text-lg font-bold');
+		// `icon` declares no `tone`; it takes `size` and ignores the rest, as cva always has.
+		expect(slots.icon()).toBe('shrink-0 size-5');
+	});
+
+	it('lets a slot override a shared prop and lands its class last', () => {
+		const slots = bindTheme(makeSlots(), { size: 'lg' });
+		expect(slots.root({ size: 'sm', className: 'px-8' })).toBe('rounded text-sm px-8');
+		expect(slots.icon({ class: 'size-6' })).toBe('shrink-0 size-6');
+	});
+
+	it('skips the reserved motion slot', () => {
+		const slots = bindTheme(makeSlots(), {});
+		expect('motion' in slots).toBe(false);
+		expect(Object.keys(slots)).toEqual(['root', 'icon']);
+	});
+
+	it('binds through the second resolver argument and reaches a themed slot', () => {
+		const defaultTheme = makeSlots();
+		let icon: string | undefined;
+		inComponent(() => {
+			// An override keyed on `size` for the icon: with per-slot calls it only applied when the
+			// component remembered to pass `size` to the icon; bound, every slot sees it.
+			setComponentTheme<typeof defaultTheme>('btnBind')({ icon: { size: { lg: 'ring-1' } } });
+			const slots = useComponentTheme('btnBind', defaultTheme)(undefined, { size: 'lg' });
+			icon = slots.icon();
+		});
+		expect(icon).toBe('shrink-0 size-5 ring-1');
 	});
 });

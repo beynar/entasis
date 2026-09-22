@@ -47,8 +47,19 @@
 	);
 	const isAnchor = $derived(!!(as || href));
 
-	const classes = $derived(useButtonTheme(theme));
 	const resolvedColor = $derived(useDefaultColor(color));
+	// One set of variant values for every slot; the template reads `slots.x()`.
+	const slots = $derived(
+		useButtonTheme(theme, {
+			color: resolvedColor,
+			squared: isSquared,
+			variant,
+			size,
+			loading,
+			disabled,
+			fullWidth
+		})
+	);
 
 	const handleClick: NonNullable<ButtonInternalProps['onclick']> = (event) => {
 		if (disabled) {
@@ -91,23 +102,14 @@
 	data-slot={dataSlot}
 	data-color={resolvedColor}
 	disabled={!isAnchor && disabled ? true : undefined}
-	class={classes.root({
-		color: resolvedColor,
-		squared: isSquared,
-		variant,
-		size,
-		loading,
-		disabled,
-		className,
-		fullWidth
-	})}
+	class={slots.root({ className })}
 	{@attach spinnerOverlay({ loading, size })}
 	onclick={disabled || onclick ? handleClick : undefined}
 	onpointerenter={onpointerenter ? handlePointerEnter : undefined}
 	onpointerleave={onpointerleave ? handlePointerLeave : undefined}
 	{...attachments}
 >
-	<Slot render={prefix} as="span" class={classes.prefix({ size })} />
+	<Slot render={prefix} as="span" class={slots.prefix()} />
 	<Slot render={children} />
-	<Slot render={suffix} as="span" class={classes.suffix({ size })} />
+	<Slot render={suffix} as="span" class={slots.suffix()} />
 </svelte:element>

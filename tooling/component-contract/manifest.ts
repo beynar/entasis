@@ -2806,11 +2806,13 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'deepMerge'
 	],
 	cva: [
+		'BoundTheme',
 		'ClassArray',
 		'ClassDictionary',
 		'ClassValue',
 		'ComponentVariant',
 		'InferComponentTheme',
+		'SharedThemeProps',
 		'VariantProps',
 		'compose',
 		'cva',

@@ -68,6 +68,14 @@ const registryTheme = (component: string) =>
 	getContext<{ componentThemes?: Record<string, ThemeSource> } | null | undefined>('entasisTheme')
 		?.componentThemes?.[component];
 
+/** The resolver `useComponentTheme` returns: the theme's class slots, optionally pre-bound. */
+export type UseComponentTheme<T extends ComponentTheme> = {
+	/** With shared variant values: every class slot already carrying them (`slots.root()`). */
+	(theme: InferComponentTheme<T> | undefined, shared: SharedThemeProps<T>): BoundTheme<T>;
+	/** The resolved theme, one class function per slot. Last, so `ReturnType` reads this one. */
+	(theme?: InferComponentTheme<T>): T;
+};
+
 /**
  * Resolves a component's class slots through the same ladder `useComponentMotion` walks,
  * lowest first: the component's own theme, the `<Theme components>` registry, a
@@ -77,8 +85,8 @@ const registryTheme = (component: string) =>
 export const useComponentTheme = <T extends ComponentTheme>(
 	component: string,
 	defaultTheme: T
-): ((theme?: InferComponentTheme<T>) => T) => {
-	return (rawTheme?: InferComponentTheme<T>) => {
+): UseComponentTheme<T> => {
+	const resolve = (rawTheme?: InferComponentTheme<T>): T => {
 		const ctx = getContext<ThemeSource>(`${component}Theme`);
 		const registry = registryTheme(component);
 		const { override: localOverride, ...local } = rawTheme ?? {};
@@ -113,6 +121,8 @@ export const useComponentTheme = <T extends ComponentTheme>(
 		}
 		return changed ? (theme as T) : defaultTheme;
 	};
+	return ((rawTheme?: InferComponentTheme<T>, shared?: SharedThemeProps<T>) =>
+		shared ? bindTheme(resolve(rawTheme), shared) : resolve(rawTheme)) as UseComponentTheme<T>;
 };
 
 /**
@@ -133,3 +143,46 @@ export type ComponentThemeOverride = {
 
 /** App-wide component theme defaults, keyed by the component's theme context name. */
 export type ComponentThemeRegistry = Record<string, ComponentThemeOverride>;
+
+type SlotFn = (props?: Record<string, unknown>) => string;
+type SlotProps<S> = S extends (props?: infer P) => string ? NonNullable<P> : never;
+type KeysOfUnion<U> = U extends unknown ? keyof U : never;
+type ValueIn<U, K> = U extends unknown ? (K extends keyof U ? U[K] : never) : never;
+// The class slots of a theme — `motion` resolves a transition, not a string, and drops out.
+type ClassSlots<T> = { [K in keyof T as T[K] extends (props?: never) => string ? K : never]: T[K] };
+type AnySlotProps<T> = SlotProps<ClassSlots<T>[keyof ClassSlots<T>]>;
+
+/** Every variant any class slot of the theme accepts, each valued as the union the slots take. */
+export type SharedThemeProps<T extends ComponentTheme> = {
+	[K in Exclude<KeysOfUnion<AnySlotProps<T>>, 'class' | 'className'>]?: ValueIn<AnySlotProps<T>, K>;
+};
+
+/** The theme's class slots, each already carrying the shared props. */
+export type BoundTheme<T extends ComponentTheme> = {
+	[K in keyof ClassSlots<T>]: (props?: SlotProps<ClassSlots<T>[K]>) => string;
+};
+
+/**
+ * The primitive behind a `use{Component}Theme(theme, shared)` resolver's second argument.
+ *
+ * Binds a component's variant values to every class slot at once, so a template reads
+ * `slots.root()` instead of threading the same props into each call. A slot can still add its
+ * own on top — `slots.panel({ placement: 'static' })`, `slots.root({ className })` — and a
+ * slot ignores any shared variant it does not declare, exactly as `cva` always has.
+ *
+ * Every slot now sees every prop, so a theme override keyed on a variant the component used
+ * to pass only to its root (`prefix: { color: { primary } }`) reaches the slot it names.
+ * Each slot still resolves and merges its own classes; what this removes is the threading.
+ */
+export const bindTheme = <T extends ComponentTheme>(
+	theme: T,
+	shared: SharedThemeProps<T>
+): BoundTheme<T> => {
+	const bound: Record<string, SlotFn> = {};
+	for (const slot in theme) {
+		if (slot === 'motion') continue;
+		const resolve = theme[slot] as SlotFn;
+		bound[slot] = (props) => resolve(props ? { ...shared, ...props } : shared);
+	}
+	return bound as BoundTheme<T>;
+};

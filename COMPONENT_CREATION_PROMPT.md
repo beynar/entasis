@@ -169,15 +169,16 @@ export type StatProps = WithAttachments<
 		...attachments
 	}: StatProps = $props();
 
-	const classes = $derived(useStatTheme(theme));
+	// One set of variant values for every slot; the template reads `slots.x()`.
+	const slots = $derived(useStatTheme(theme, { size }));
 </script>
 
-<div class={classes.root({ size, className })} {...attachments}>
-	<Slot render={label} class={classes.label({ size })} />
-	<Slot render={value} class={classes.value({ size })} />
-	<Slot render={indicator} class={classes.indicator({ size })} />
-	<Slot render={trend} class={classes.trend({ size })} />
-	<Slot render={description} class={classes.description({ size })} />
+<div class={slots.root({ className })} {...attachments}>
+	<Slot render={label} class={slots.label()} />
+	<Slot render={value} class={slots.value()} />
+	<Slot render={indicator} class={slots.indicator()} />
+	<Slot render={trend} class={slots.trend()} />
+	<Slot render={description} class={slots.description()} />
 	<Slot render={children} />
 </div>
 ```
@@ -233,9 +234,9 @@ For components without complex state logic:
 </script>
 
 <div class={classes.container({ color, size, disabled, className })} {...attachments}>
-	<Slot render={prefix} class={classes.prefix({ size })} />
+	<Slot render={prefix} class={slots.prefix()} />
 	<Slot render={children} />
-	<Slot render={suffix} class={classes.suffix({ size })} />
+	<Slot render={suffix} class={slots.suffix()} />
 </div>
 ```
 

@@ -4301,11 +4301,13 @@ export const componentInventory = [
 		subpath: 'entasis/cva',
 		sourceIndex: 'src/lib/utils/cva/index.ts',
 		exportedSymbols: [
+			'BoundTheme',
 			'ClassArray',
 			'ClassDictionary',
 			'ClassValue',
 			'ComponentVariant',
 			'InferComponentTheme',
+			'SharedThemeProps',
 			'VariantProps',
 			'compose',
 			'cva',
