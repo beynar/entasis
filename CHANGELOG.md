@@ -6,6 +6,7 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.5.0 — 2026-09-22
 ### Renamed
 
 - Sidebar theme variants now spell both of the component's size axes in the shared scale. The
