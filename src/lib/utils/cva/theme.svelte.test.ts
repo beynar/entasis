@@ -164,7 +164,7 @@ describe('useComponentTheme', () => {
 	// `motion` slot through the same three rungs.
 	const withRegistry = (component: string, entry: Record<string, unknown>, fn: () => void) =>
 		inComponent(() => {
-			setContext('sveltaiTheme', { componentThemes: { [component]: entry } });
+			setContext('entasisTheme', { componentThemes: { [component]: entry } });
 			fn();
 		});
 

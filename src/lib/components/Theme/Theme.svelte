@@ -89,7 +89,7 @@
 		}
 	});
 
-	const sveltaiTheme = new ThemeState(
+	const entasisTheme = new ThemeState(
 		{
 			get spinnerVariant() {
 				return spinnerVariant;
@@ -132,7 +132,7 @@
 	$effect(() => {
 		document.documentElement.toggleAttribute(
 			REDUCED_MOTION_ATTRIBUTE,
-			sveltaiTheme.preferReducesMotion
+			entasisTheme.preferReducesMotion
 		);
 		return () => document.documentElement.removeAttribute(REDUCED_MOTION_ATTRIBUTE);
 	});
@@ -203,13 +203,13 @@
 
 <div
 	{@attach portal()}
-	{@attach sveltaiTheme.floatingWindows.layer}
+	{@attach entasisTheme.floatingWindows.layer}
 	data-slot="floating-window-layer"
 	class="pointer-events-none fixed inset-0"
 	style:z-index={FLOATING_WINDOW_LAYER_Z_INDEX}
 ></div>
 
-{@render children(sveltaiTheme)}
+{@render children(entasisTheme)}
 
 <DialogBackdrop />
 <TooltipHost />

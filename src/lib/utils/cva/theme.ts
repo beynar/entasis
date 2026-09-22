@@ -65,7 +65,7 @@ type ThemeSource = (Record<string, SlotOverride> & { override?: boolean }) | nul
 // `<Theme components>` is the registry every subtree inherits. Read through the Theme
 // context key so this module stays free of Theme imports.
 const registryTheme = (component: string) =>
-	getContext<{ componentThemes?: Record<string, ThemeSource> } | null | undefined>('sveltaiTheme')
+	getContext<{ componentThemes?: Record<string, ThemeSource> } | null | undefined>('entasisTheme')
 		?.componentThemes?.[component];
 
 /**

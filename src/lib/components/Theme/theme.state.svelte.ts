@@ -146,7 +146,7 @@ export class ThemeState extends createBindableStateClass<ThemeOptions>() {
 	constructor(options: ThemeOptions, svelteTheme: SvelteTheme) {
 		super(options);
 		this.svelteTheme = svelteTheme;
-		setContext('sveltaiTheme', this);
+		setContext('entasisTheme', this);
 		onDestroy(registerActiveTheme(this));
 	}
 
@@ -254,7 +254,7 @@ export class ThemeState extends createBindableStateClass<ThemeOptions>() {
 }
 
 export const useTheme = () => {
-	const theme = getContext('sveltaiTheme') as ThemeState | undefined;
+	const theme = getContext('entasisTheme') as ThemeState | undefined;
 	// A missing provider used to surface as `undefined is not an object` from whichever call site
 	// dereferenced it first; name the cause instead, at the point where it is known.
 	if (!theme) {
@@ -267,5 +267,5 @@ export const useTheme = () => {
 
 /** Resolve a control color against Theme `defaultColor`. Call inside `$derived`. */
 export const useDefaultColor = (color?: Colors): Colors => {
-	return color ?? (getContext('sveltaiTheme') as ThemeState | undefined)?.defaultColor ?? 'neutral';
+	return color ?? (getContext('entasisTheme') as ThemeState | undefined)?.defaultColor ?? 'neutral';
 };
