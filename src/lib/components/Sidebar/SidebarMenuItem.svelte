@@ -54,9 +54,6 @@
 	const resolveMotion = useSidebarMotion();
 	const slideTransition = slide();
 	const collapseMotion = $derived(resolveMotion(undefined, { motion: theme?.motion }));
-	const menuSize = $derived(
-		item.size ? ({ small: 'sm', normal: 'default', large: 'lg' } as const)[item.size] : undefined
-	);
 	const t = $derived(useI18n());
 	const isOpen = $derived(open ?? item.defaultOpen ?? false);
 	// A hover peek renders the collapsed panel at full width, so icon-mode behaviour has to
@@ -108,7 +105,7 @@
 		<span
 			data-slot="sidebar-menu-icon"
 			data-color={item.iconColor}
-			class={classes.menuIcon({ variant: item.iconVariant ?? 'bare', componentSize: size })}
+			class={classes.menuIcon({ variant: item.iconVariant ?? 'bare', size })}
 		>
 			<SidebarIcon icon={item.icon} />
 		</span>
@@ -122,15 +119,12 @@
 	{#if collapseIcon === 'none'}
 		<!-- No disclosure indicator. -->
 	{:else if collapseIcon === 'plus-minus'}
-		<SidebarIcon
-			icon={isOpen ? minusIcon : plusIcon}
-			class={classes.menuTrailing({ componentSize: size })}
-		/>
+		<SidebarIcon icon={isOpen ? minusIcon : plusIcon} class={classes.menuTrailing({ size })} />
 	{:else}
 		<SidebarIcon
 			icon={caretRightIcon}
 			class={classes.menuTrailing({
-				componentSize: size,
+				size,
 				className: ['transition-transform', isOpen && 'rotate-90']
 			})}
 		/>
@@ -155,9 +149,9 @@
 			class={classes.menuButton({
 				variant: item.variant,
 				activeVariant,
-				componentSize: size,
+				size,
 				density,
-				size: menuSize,
+				itemSize: item.size,
 				className: item.class
 			})}
 			{@attach tooltipContent ? tooltip({ content: tooltipContent, position: 'right' }) : undefined}
@@ -180,9 +174,9 @@
 			class={classes.menuButton({
 				variant: item.variant,
 				activeVariant,
-				componentSize: size,
+				size,
 				density,
-				size: menuSize,
+				itemSize: item.size,
 				className: item.class
 			})}
 			{@attach tooltipContent ? tooltip({ content: tooltipContent, position: 'right' }) : undefined}
@@ -211,9 +205,9 @@
 				class={classes.menuButton({
 					variant: item.variant,
 					activeVariant,
-					componentSize: size,
+					size,
 					density,
-					size: menuSize,
+					itemSize: item.size,
 					className: ['aria-expanded:bg-neutral-muted', item.class]
 				})}
 				aria-expanded={popover.isOpen}
@@ -226,7 +220,7 @@
 				onclick={() => popover.toggle()}
 			>
 				{@render entryContent()}
-				<SidebarIcon icon={dotsThreeIcon} class={classes.menuTrailing({ componentSize: size })} />
+				<SidebarIcon icon={dotsThreeIcon} class={classes.menuTrailing({ size })} />
 			</button>
 		{/snippet}
 	</PopupMenu>
@@ -262,7 +256,7 @@
 					bind:this={submenuTriggerRef}
 					type="button"
 					class={classes.menuAction({
-						componentSize: size,
+						size,
 						density,
 						className: 'bg-neutral-muted right-auto left-1 data-[open=true]:rotate-90'
 					})}
@@ -287,9 +281,9 @@
 					class={classes.menuButton({
 						variant: item.variant,
 						activeVariant,
-						componentSize: size,
+						size,
 						density,
-						size: menuSize,
+						itemSize: item.size,
 						className: item.class
 					})}
 					aria-expanded={showSubmenu}
@@ -310,7 +304,7 @@
 			<div
 				data-slot="sidebar-menu-badge"
 				data-sidebar="menu-badge"
-				class={classes.badge({ componentSize: size, density })}
+				class={classes.badge({ size, density })}
 			>
 				{item.badge}
 			</div>
@@ -322,7 +316,7 @@
 				data-sidebar="menu-action"
 				inert={isIconCollapsed ? true : undefined}
 				aria-hidden={isIconCollapsed ? 'true' : undefined}
-				class={classes.menuAction({ componentSize: size, density })}
+				class={classes.menuAction({ size, density })}
 			>
 				<SidebarAction action={item.action} {api} {size} {theme} />
 			</div>

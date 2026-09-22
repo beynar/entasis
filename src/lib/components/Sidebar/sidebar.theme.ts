@@ -147,7 +147,7 @@ const defaultGroupLabel = cva({
 			true: 'state-layer hover:text-neutral focus-visible:ring-2 focus-visible:ring-focus/50',
 			false: null
 		},
-		componentSize: {
+		size: {
 			small:
 				'h-control-sm text-xs group-data-[collapsible=icon]:-mt-layout-md [&>svg]:size-icon-sm',
 			normal:
@@ -162,7 +162,7 @@ const defaultGroupLabel = cva({
 	},
 	defaultVariants: {
 		interactive: false,
-		componentSize: 'normal',
+		size: 'normal',
 		density: 'normal'
 	}
 });
@@ -172,7 +172,7 @@ const defaultGroupLabel = cva({
 const defaultGroupAction = cva({
 	base: 'absolute flex items-center gap-micro group-data-[collapsible=icon]:hidden',
 	variants: {
-		componentSize: {
+		size: {
 			// Centred on the label row's own height token, then pulled up by half its box, so the
 			// action stays on the label's midline whatever the spacing or control scale is.
 			small: 'top-[calc(var(--sidebar-group-padding)+var(--control-height-sm)/2)] -translate-y-1/2',
@@ -196,7 +196,7 @@ const defaultGroupAction = cva({
 		{ density: 'comfortable', hasToggle: true, class: 'right-12' }
 	],
 	defaultVariants: {
-		componentSize: 'normal',
+		size: 'normal',
 		density: 'normal',
 		hasToggle: false
 	}
@@ -224,7 +224,7 @@ const defaultMenuButton = cva({
 			default: '',
 			outline: 'border border-neutral-muted bg-surface'
 		},
-		componentSize: {
+		size: {
 			small: 'text-xs leading-4 [&_svg]:size-icon-sm',
 			normal: 'text-sm leading-5 [&_svg]:size-icon-md',
 			large: 'text-base leading-6 [&_svg]:size-icon-lg'
@@ -234,29 +234,30 @@ const defaultMenuButton = cva({
 			normal: 'gap-md px-md',
 			comfortable: 'gap-md px-md'
 		},
-		size: {
-			default: '',
-			sm: 'text-xs',
-			lg: ''
+		// itemSize is the row's own scale (a menu entry's `size`); `size` is the Sidebar's.
+		itemSize: {
+			small: 'text-xs',
+			normal: '',
+			large: ''
 		}
 	},
 	compoundVariants: [
-		{ componentSize: 'small', size: 'sm', class: 'h-control-sm' },
-		{ componentSize: 'small', size: 'default', class: 'h-control-md' },
-		{ componentSize: 'small', size: 'lg', class: 'h-row-lg' },
-		{ componentSize: 'normal', size: 'sm', class: 'h-control-md' },
-		{ componentSize: 'normal', size: 'default', class: 'h-control-lg' },
-		{ componentSize: 'normal', size: 'lg', class: 'h-14' },
-		{ componentSize: 'large', size: 'sm', class: 'h-control-lg' },
-		{ componentSize: 'large', size: 'default', class: 'h-row-md' },
-		{ componentSize: 'large', size: 'lg', class: 'h-16' }
+		{ size: 'small', itemSize: 'small', class: 'h-control-sm' },
+		{ size: 'small', itemSize: 'normal', class: 'h-control-md' },
+		{ size: 'small', itemSize: 'large', class: 'h-row-lg' },
+		{ size: 'normal', itemSize: 'small', class: 'h-control-md' },
+		{ size: 'normal', itemSize: 'normal', class: 'h-control-lg' },
+		{ size: 'normal', itemSize: 'large', class: 'h-14' },
+		{ size: 'large', itemSize: 'small', class: 'h-control-lg' },
+		{ size: 'large', itemSize: 'normal', class: 'h-row-md' },
+		{ size: 'large', itemSize: 'large', class: 'h-16' }
 	],
 	defaultVariants: {
 		activeVariant: 'soft',
 		variant: 'default',
-		componentSize: 'normal',
+		size: 'normal',
 		density: 'normal',
-		size: 'default'
+		itemSize: 'normal'
 	}
 });
 
@@ -267,28 +268,28 @@ const defaultMenuLabel = cva({
 const defaultMenuSecondary = cva({
 	base: 'truncate text-neutral/70',
 	variants: {
-		componentSize: {
+		size: {
 			small: 'text-xs',
 			normal: 'text-xs',
 			large: 'text-sm'
 		}
 	},
 	defaultVariants: {
-		componentSize: 'normal'
+		size: 'normal'
 	}
 });
 
 const defaultMenuTrailing = cva({
 	base: 'ml-auto shrink-0 opacity-100 transition-[opacity,transform] duration-normal ease-standard group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:translate-x-1 group-data-[collapsible=icon]:opacity-0',
 	variants: {
-		componentSize: {
+		size: {
 			small: '[&>svg]:size-icon-sm',
 			normal: '[&>svg]:size-icon-md',
 			large: '[&>svg]:size-icon-lg'
 		}
 	},
 	defaultVariants: {
-		componentSize: 'normal'
+		size: 'normal'
 	}
 });
 
@@ -324,7 +325,7 @@ const defaultSubButton = cva({
 	base: 'state-layer text-neutral/70 hover:text-neutral flex min-w-0 -translate-x-px items-center overflow-hidden rounded-sm outline-none transition-[background,color,height,padding] duration-normal ease-linear focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:shrink-0',
 	variants: {
 		activeVariant: activeVariants,
-		componentSize: {
+		size: {
 			small: 'h-6 text-xs leading-4 [&>svg]:size-icon-sm',
 			normal: 'h-control-sm text-sm leading-5 [&>svg]:size-icon-md',
 			large: 'h-control-md text-base leading-6 [&>svg]:size-icon-lg'
@@ -334,23 +335,24 @@ const defaultSubButton = cva({
 			normal: 'gap-md px-lg',
 			comfortable: 'gap-md px-lg'
 		},
-		size: {
-			sm: 'text-xs',
-			md: ''
+		itemSize: {
+			small: 'text-xs',
+			normal: '',
+			large: ''
 		}
 	},
 	defaultVariants: {
 		activeVariant: 'soft',
-		componentSize: 'normal',
+		size: 'normal',
 		density: 'normal',
-		size: 'md'
+		itemSize: 'normal'
 	}
 });
 
 const defaultMenuAction = cva({
 	base: 'state-layer text-neutral hover:text-neutral peer-hover/menu-button:text-neutral absolute top-1/2 flex aspect-square -translate-y-1/2 items-center justify-center rounded-sm p-0 opacity-100 outline-none transition group-data-[collapsible=icon]:hidden focus-visible:ring-2 focus-visible:ring-focus/50 md:opacity-0 group-focus-within/menu-row:opacity-100 group-hover/menu-row:opacity-100 has-[[aria-expanded=true]]:opacity-100 [&>svg]:shrink-0',
 	variants: {
-		componentSize: {
+		size: {
 			small: 'size-4.5 [&>svg]:size-icon-sm',
 			normal: 'size-5 [&>svg]:size-icon-md',
 			large: 'size-6 [&>svg]:size-icon-lg'
@@ -362,7 +364,7 @@ const defaultMenuAction = cva({
 		}
 	},
 	defaultVariants: {
-		componentSize: 'normal',
+		size: 'normal',
 		density: 'normal'
 	}
 });
@@ -372,14 +374,14 @@ const defaultMenuAction = cva({
 const defaultActionSlot = cva({
 	base: 'state-layer text-neutral hover:text-neutral flex aspect-square shrink-0 items-center justify-center rounded-sm p-0 outline-none transition focus-visible:ring-2 focus-visible:ring-focus/50 [&>svg]:shrink-0',
 	variants: {
-		componentSize: {
+		size: {
 			small: 'h-control-sm [&>svg]:size-icon-sm',
 			normal: 'h-control-md [&>svg]:size-icon-md',
 			large: 'h-control-lg [&>svg]:size-icon-lg'
 		}
 	},
 	defaultVariants: {
-		componentSize: 'normal'
+		size: 'normal'
 	}
 });
 
@@ -392,20 +394,20 @@ const defaultMenuIcon = cva({
 			bare: 'text-color',
 			tile: 'bg-color-muted text-color-muted-readable rounded-sm'
 		},
-		componentSize: {
+		size: {
 			small: '',
 			normal: '',
 			large: ''
 		}
 	},
 	compoundVariants: [
-		{ variant: 'tile', componentSize: 'small', class: 'size-icon-lg [&_svg]:size-icon-xs' },
-		{ variant: 'tile', componentSize: 'normal', class: 'size-icon-xl [&_svg]:size-icon-sm' },
-		{ variant: 'tile', componentSize: 'large', class: 'size-icon-xl [&_svg]:size-icon-md' }
+		{ variant: 'tile', size: 'small', class: 'size-icon-lg [&_svg]:size-icon-xs' },
+		{ variant: 'tile', size: 'normal', class: 'size-icon-xl [&_svg]:size-icon-sm' },
+		{ variant: 'tile', size: 'large', class: 'size-icon-xl [&_svg]:size-icon-md' }
 	],
 	defaultVariants: {
 		variant: 'bare',
-		componentSize: 'normal'
+		size: 'normal'
 	}
 });
 
@@ -418,21 +420,21 @@ const defaultButtonRow = cva({
 const defaultActionTrigger = cva({
 	base: 'flex size-full items-center justify-center rounded-sm bg-transparent outline-none [&>svg]:shrink-0',
 	variants: {
-		componentSize: {
+		size: {
 			small: '[&>svg]:size-icon-sm',
 			normal: '[&>svg]:size-icon-md',
 			large: '[&>svg]:size-icon-lg'
 		}
 	},
 	defaultVariants: {
-		componentSize: 'normal'
+		size: 'normal'
 	}
 });
 
 const defaultBadge = cva({
 	base: 'text-neutral/70 peer-hover/menu-button:text-neutral peer-data-active/menu-button:text-neutral pointer-events-none absolute top-1/2 flex -translate-y-1/2 items-center justify-center rounded-sm px-xs font-medium tabular-nums select-none group-data-[collapsible=icon]:hidden',
 	variants: {
-		componentSize: {
+		size: {
 			small: 'h-4 min-w-4 text-xs',
 			normal: 'h-5 min-w-5 text-sm',
 			large: 'h-6 min-w-6 text-sm'
@@ -444,7 +446,7 @@ const defaultBadge = cva({
 		}
 	},
 	defaultVariants: {
-		componentSize: 'normal',
+		size: 'normal',
 		density: 'normal'
 	}
 });
@@ -452,7 +454,7 @@ const defaultBadge = cva({
 const defaultSearchContainer = cva({
 	base: 'relative w-full opacity-100 transition-[height,margin,opacity] duration-normal ease-linear',
 	variants: {
-		componentSize: {
+		size: {
 			small: 'h-control-md',
 			normal: 'h-control-lg',
 			large: 'h-row-md'
@@ -463,7 +465,7 @@ const defaultSearchContainer = cva({
 		}
 	},
 	defaultVariants: {
-		componentSize: 'normal',
+		size: 'normal',
 		collapsed: false
 	}
 });
@@ -473,7 +475,7 @@ const defaultSearch = cva({
 	variants: {
 		// The left padding clears the absolutely positioned magnifier (its `left` offset plus its
 		// box plus a gap) so the placeholder never starts on top of the icon.
-		componentSize: {
+		size: {
 			small: 'h-control-md pl-layout-md text-xs',
 			normal: 'h-control-lg pl-layout-lg text-sm',
 			large: 'h-row-md pl-layout-xl text-base'
@@ -485,7 +487,7 @@ const defaultSearch = cva({
 		}
 	},
 	defaultVariants: {
-		componentSize: 'normal',
+		size: 'normal',
 		density: 'normal'
 	}
 });
@@ -493,7 +495,7 @@ const defaultSearch = cva({
 const defaultSearchIcon = cva({
 	base: 'pointer-events-none absolute top-1/2 flex -translate-y-1/2 items-center justify-center text-neutral/45 select-none [&_svg]:size-full',
 	variants: {
-		componentSize: {
+		size: {
 			small: 'size-3.5',
 			normal: 'size-4',
 			large: 'size-5'
@@ -505,7 +507,7 @@ const defaultSearchIcon = cva({
 		}
 	},
 	defaultVariants: {
-		componentSize: 'normal',
+		size: 'normal',
 		density: 'normal'
 	}
 });
@@ -729,41 +731,41 @@ const defaultMobilePanel = cva({
 const defaultMedia = cva({
 	base: 'bg-neutral text-neutral-contrast flex aspect-square shrink-0 items-center justify-center rounded-sm',
 	variants: {
-		size: {
-			default: '',
-			compact: 'text-xs'
+		itemSize: {
+			normal: 'text-xs',
+			large: ''
 		},
-		componentSize: {
+		size: {
 			small: '',
 			normal: '',
 			large: ''
 		}
 	},
 	compoundVariants: [
-		{ size: 'default', componentSize: 'small', class: 'size-7 [&_svg]:size-icon-sm' },
-		{ size: 'default', componentSize: 'normal', class: 'size-8 [&_svg]:size-icon-md' },
-		{ size: 'default', componentSize: 'large', class: 'size-9 [&_svg]:size-icon-lg' },
-		{ size: 'compact', componentSize: 'small', class: 'size-4 [&_svg]:size-icon-xs' },
-		{ size: 'compact', componentSize: 'normal', class: 'size-5 [&_svg]:size-icon-xs' },
-		{ size: 'compact', componentSize: 'large', class: 'size-6 [&_svg]:size-icon-sm' }
+		{ itemSize: 'large', size: 'small', class: 'size-7 [&_svg]:size-icon-sm' },
+		{ itemSize: 'large', size: 'normal', class: 'size-8 [&_svg]:size-icon-md' },
+		{ itemSize: 'large', size: 'large', class: 'size-9 [&_svg]:size-icon-lg' },
+		{ itemSize: 'normal', size: 'small', class: 'size-4 [&_svg]:size-icon-xs' },
+		{ itemSize: 'normal', size: 'normal', class: 'size-5 [&_svg]:size-icon-xs' },
+		{ itemSize: 'normal', size: 'large', class: 'size-6 [&_svg]:size-icon-sm' }
 	],
 	defaultVariants: {
-		size: 'default',
-		componentSize: 'normal'
+		itemSize: 'large',
+		size: 'normal'
 	}
 });
 
 const defaultAvatar = cva({
 	base: 'bg-neutral-muted text-neutral-muted-readable flex shrink-0 items-center justify-center overflow-hidden rounded-sm font-medium',
 	variants: {
-		componentSize: {
+		size: {
 			small: 'size-7 text-xs',
 			normal: 'size-8 text-sm',
 			large: 'size-9 text-sm'
 		}
 	},
 	defaultVariants: {
-		componentSize: 'normal'
+		size: 'normal'
 	}
 });
 
@@ -809,7 +811,7 @@ const defaultActivityBarList = cva({
 const defaultActivityBarItem = cva({
 	base: 'state-layer relative flex aspect-square shrink-0 items-center justify-center rounded-md outline-none transition-[background,color] duration-normal ease-linear focus-visible:ring-2 focus-visible:ring-focus/50 data-active:bg-selected-muted data-active:text-selected-muted-readable data-active:font-medium [&_svg]:shrink-0',
 	variants: {
-		componentSize: {
+		size: {
 			small: 'h-control-sm [&_svg]:size-icon-sm',
 			normal: 'h-control-md [&_svg]:size-icon-md',
 			large: 'h-control-lg [&_svg]:size-icon-lg'
@@ -829,7 +831,7 @@ const defaultActivityBarItem = cva({
 		}
 	},
 	defaultVariants: {
-		componentSize: 'normal',
+		size: 'normal',
 		density: 'normal',
 		active: false,
 		disabled: false
@@ -839,7 +841,7 @@ const defaultActivityBarItem = cva({
 const defaultActivityBarBadge = cva({
 	base: 'bg-color text-color-readable pointer-events-none absolute flex items-center justify-center rounded-full px-xs font-medium tabular-nums select-none',
 	variants: {
-		componentSize: {
+		size: {
 			small: 'top-0 end-0 h-3.5 min-w-3.5 text-xs',
 			normal: 'top-0 end-0 h-4 min-w-4 text-xs',
 			large: 'top-0 end-0 h-4.5 min-w-4.5 text-xs'
@@ -850,7 +852,7 @@ const defaultActivityBarBadge = cva({
 		}
 	},
 	defaultVariants: {
-		componentSize: 'normal',
+		size: 'normal',
 		dot: false
 	}
 });

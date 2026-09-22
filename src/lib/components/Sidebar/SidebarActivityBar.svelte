@@ -108,7 +108,7 @@
 				data-slot="sidebar-activity-bar-badge"
 				data-color={resolvedColor}
 				aria-hidden="true"
-				class={classes.activityBarBadge({ componentSize: size, dot: isDot(item.badge) })}
+				class={classes.activityBarBadge({ size, dot: isDot(item.badge) })}
 			>
 				{#if typeof item.badge === 'number'}
 					{item.badge}
@@ -134,7 +134,7 @@
 			aria-label={accessibleName(item)}
 			aria-disabled={item.disabled || undefined}
 			class={classes.activityBarItem({
-				componentSize: size,
+				size,
 				density,
 				active: !!item.isActive,
 				disabled: !!item.disabled
@@ -158,7 +158,7 @@
 			aria-label={accessibleName(item)}
 			disabled={item.disabled || undefined}
 			class={classes.activityBarItem({
-				componentSize: size,
+				size,
 				density,
 				active: !!item.isActive,
 				disabled: !!item.disabled

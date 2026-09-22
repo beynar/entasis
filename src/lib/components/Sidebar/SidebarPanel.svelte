@@ -109,7 +109,7 @@
 			<form
 				bind:this={searchRef}
 				data-slot="sidebar-search"
-				class={classes.searchContainer({ componentSize: size, collapsed })}
+				class={classes.searchContainer({ size, collapsed })}
 				inert={collapsed ? true : undefined}
 				aria-hidden={collapsed ? 'true' : undefined}
 				onsubmit={(event) => event.preventDefault()}
@@ -119,12 +119,9 @@
 					aria-label={search.label ?? t.search}
 					value={search.value}
 					oninput={search.oninput}
-					class={classes.search({ componentSize: size, density, className: search.class })}
+					class={classes.search({ size, density, className: search.class })}
 				/>
-				<SidebarIcon
-					icon={magnifyingGlassIcon}
-					class={classes.searchIcon({ componentSize: size, density })}
-				/>
+				<SidebarIcon icon={magnifyingGlassIcon} class={classes.searchIcon({ size, density })} />
 			</form>
 		{/if}
 		{#if headerMenu}

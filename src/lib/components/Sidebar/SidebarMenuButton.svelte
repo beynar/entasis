@@ -61,6 +61,8 @@
 	const classes = $derived(useSidebarTheme(theme));
 	const compact = $derived(variant === 'compact');
 	const brand = $derived(variant === 'brand');
+	// The brand row is the tall two-line row; `compact` drops it to a normal menu row.
+	const rowSize = $derived(compact ? 'normal' : 'large');
 	// A descriptor is an object that is neither a snippet nor a string: it becomes a real control
 	// beside the row, because a button cannot be nested inside a button.
 	const trailingAction = $derived<SidebarMenuActionDescriptor | undefined>(
@@ -88,9 +90,9 @@
 	);
 	const buttonClass = $derived(
 		classes.menuButton({
-			componentSize: size,
+			size,
 			density,
-			size: compact ? 'default' : 'lg',
+			itemSize: rowSize,
 			className: [
 				compact && 'w-fit group-data-[collapsible=icon]:w-full',
 				trailingAction && 'min-w-0 flex-1 group-data-[collapsible=icon]:flex-none',
@@ -119,7 +121,7 @@
 
 {#snippet media()}
 	{#if avatar}
-		<div class={classes.avatar({ componentSize: size, className: mediaClass })}>
+		<div class={classes.avatar({ size, className: mediaClass })}>
 			{#if avatar.src && !avatarImageFailed}
 				<img
 					src={avatar.src}
@@ -134,8 +136,8 @@
 	{:else if icon}
 		<div
 			class={classes.media({
-				size: compact ? 'compact' : 'default',
-				componentSize: size,
+				itemSize: rowSize,
+				size,
 				className: mediaClass
 			})}
 		>
@@ -151,14 +153,14 @@
 		<div class={classes.menuLabel({ className: 'flex flex-col gap-0.5 leading-none' })}>
 			<span class="truncate font-medium">{title}</span>
 			{#if subtitle}
-				<span class={classes.menuSecondary({ componentSize: size })}>{subtitle}</span>
+				<span class={classes.menuSecondary({ size })}>{subtitle}</span>
 			{/if}
 		</div>
 	{:else}
 		<div class={classes.menuLabel({ className: 'grid text-left leading-tight' })}>
 			<span class="truncate font-medium">{title}</span>
 			{#if subtitle}
-				<span class={classes.menuSecondary({ componentSize: size })}>{subtitle}</span>
+				<span class={classes.menuSecondary({ size })}>{subtitle}</span>
 			{/if}
 		</div>
 	{/if}
@@ -171,7 +173,7 @@
 		<SidebarIcon
 			icon={resolvedTrailing}
 			class={classes.menuTrailing({
-				componentSize: size,
+				size,
 				className: compact ? 'opacity-50' : undefined
 			})}
 		/>
@@ -184,7 +186,7 @@
 		<div class="grid min-w-0 flex-1 leading-tight">
 			<span class="text-neutral truncate font-medium">{title}</span>
 			{#if subtitle}
-				<span class={classes.menuSecondary({ componentSize: size })}>{subtitle}</span>
+				<span class={classes.menuSecondary({ size })}>{subtitle}</span>
 			{/if}
 		</div>
 	</div>
@@ -206,7 +208,7 @@
 				<button
 					type="button"
 					data-slot="sidebar-menu-button"
-					data-size={compact ? 'default' : 'lg'}
+					data-size={rowSize}
 					class={buttonClass}
 					aria-expanded={popover.isOpen}
 					aria-haspopup="menu"
@@ -220,12 +222,7 @@
 		</PopupMenu>
 	{:else if href}
 		<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs; library links cannot depend on SvelteKit routing. -->
-		<a
-			{href}
-			data-slot="sidebar-menu-button"
-			data-size={compact ? 'default' : 'lg'}
-			class={buttonClass}
-		>
+		<a {href} data-slot="sidebar-menu-button" data-size={rowSize} class={buttonClass}>
 			{@render buttonInner()}
 		</a>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
@@ -234,7 +231,7 @@
 			type="button"
 			onclick={(event) => onclick?.(event, api as SidebarApi)}
 			data-slot="sidebar-menu-button"
-			data-size={compact ? 'default' : 'lg'}
+			data-size={rowSize}
 			class={buttonClass}
 		>
 			{@render buttonInner()}
@@ -247,7 +244,7 @@
 		{@render control()}
 		<div
 			class={classes.actionSlot({
-				componentSize: trailingActionSize,
+				size: trailingActionSize,
 				className: 'group-data-[collapsible=icon]:hidden'
 			})}
 		>

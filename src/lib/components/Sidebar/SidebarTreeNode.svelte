@@ -62,8 +62,8 @@
 	const tooltipContent = $derived(showTooltip ? node.label : undefined);
 	const rowClass = $derived(
 		isSubNode
-			? classes.subButton({ componentSize: size, activeVariant, density })
-			: classes.menuButton({ componentSize: size, activeVariant, density })
+			? classes.subButton({ size, activeVariant, density })
+			: classes.menuButton({ size, activeVariant, density })
 	);
 	const rowSlot = $derived(isSubNode ? 'sidebar-menu-sub-button' : 'sidebar-menu-button');
 	const rowData = $derived(isSubNode ? 'menu-sub-button' : 'menu-button');

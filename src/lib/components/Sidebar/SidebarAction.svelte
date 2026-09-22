@@ -37,7 +37,7 @@
 		{#snippet trigger(popover)}
 			<button
 				type="button"
-				class={classes.actionTrigger({ componentSize: size })}
+				class={classes.actionTrigger({ size })}
 				aria-label={actionLabel}
 				aria-expanded={popover.isOpen}
 				aria-haspopup="menu"
@@ -53,7 +53,7 @@
 {:else}
 	<button
 		type="button"
-		class={classes.actionTrigger({ componentSize: size })}
+		class={classes.actionTrigger({ size })}
 		aria-label={actionLabel}
 		onclick={(event) => action.onclick?.(event, api)}
 	>

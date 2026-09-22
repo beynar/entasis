@@ -373,9 +373,7 @@ const TYPE_RAMPS = new Map([
 	['lg/xl/2xl', 'display secondary']
 ]);
 const TYPE_RAMP_STEPS = ['small', 'normal', 'large'];
-// Sidebar names its size axis `componentSize` (it already spends `size` on row density); the
-// ramp is the same axis whatever the variant is called.
-const TYPE_RAMP_VARIANTS = new Set(['size', 'componentSize']);
+const TYPE_RAMP_VARIANTS = new Set(['size']);
 // `text-sm/relaxed` is the same step with its leading pinned, so the pair is read as one size.
 const TEXT_SIZE = /^!?text-(xs|sm|base|lg|xl|[2-9]xl)(?:\/[\w.-]+)?$/;
 // A type size written as a length is off the ramp whatever it rounds to, so it is banned

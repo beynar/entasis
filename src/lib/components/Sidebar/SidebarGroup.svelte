@@ -135,7 +135,7 @@
 		<button
 			bind:this={labelRef}
 			type="button"
-			class={classes.groupLabel({ interactive: true, componentSize: size, density })}
+			class={classes.groupLabel({ interactive: true, size, density })}
 			disabled={isIconCollapsed || undefined}
 			inert={isIconCollapsed ? true : undefined}
 			aria-hidden={isIconCollapsed ? 'true' : undefined}
@@ -156,13 +156,13 @@
 				inert={isIconCollapsed ? true : undefined}
 				aria-hidden={isIconCollapsed ? 'true' : undefined}
 				class={classes.groupAction({
-					componentSize: size,
+					size,
 					density,
 					hasToggle: true
 				})}
 			>
 				{#each actions as action, index (index)}
-					<div class={classes.actionSlot({ componentSize: actionSize(action) })}>
+					<div class={classes.actionSlot({ size: actionSize(action) })}>
 						<SidebarAction {action} {api} size={actionSize(action)} {theme} />
 					</div>
 				{/each}
@@ -183,7 +183,7 @@
 				data-slot="sidebar-group-label"
 				data-sidebar="group-label"
 				aria-hidden={isIconCollapsed ? 'true' : undefined}
-				class={classes.groupLabel({ componentSize: size, density })}
+				class={classes.groupLabel({ size, density })}
 			>
 				{group.label}
 			</div>
@@ -195,10 +195,10 @@
 				data-sidebar="group-action"
 				inert={isIconCollapsed ? true : undefined}
 				aria-hidden={isIconCollapsed ? 'true' : undefined}
-				class={classes.groupAction({ componentSize: size, density, hasToggle: false })}
+				class={classes.groupAction({ size, density, hasToggle: false })}
 			>
 				{#each actions as action, index (index)}
-					<div class={classes.actionSlot({ componentSize: actionSize(action) })}>
+					<div class={classes.actionSlot({ size: actionSize(action) })}>
 						<SidebarAction {action} {api} size={actionSize(action)} {theme} />
 					</div>
 				{/each}

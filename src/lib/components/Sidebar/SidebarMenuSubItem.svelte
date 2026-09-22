@@ -23,8 +23,7 @@
 	} = $props();
 
 	const classes = $derived(useSidebarTheme(theme));
-	const componentSize = $derived(sub.size ?? size);
-	const textSize = $derived(sub.size === 'small' ? 'sm' : 'md');
+	const subSize = $derived(sub.size ?? size);
 
 	function handleClick(event: MouseEvent) {
 		if (sub.disabled) {
@@ -48,13 +47,13 @@
 			role={sub.disabled ? 'link' : undefined}
 			data-slot="sidebar-menu-sub-button"
 			data-sidebar="menu-sub-button"
-			data-size={componentSize}
+			data-size={subSize}
 			data-active={sub.isActive ? 'true' : undefined}
 			data-active-variant={activeVariant}
 			aria-current={sub.isActive ? 'page' : undefined}
 			aria-disabled={sub.disabled || undefined}
 			tabindex={sub.disabled ? -1 : undefined}
-			class={classes.subButton({ componentSize, activeVariant, density, size: textSize })}
+			class={classes.subButton({ size: subSize, itemSize: sub.size, activeVariant, density })}
 			onclick={handleClick}
 		>
 			<SidebarIcon icon={sub.icon} />
@@ -66,11 +65,11 @@
 			type="button"
 			data-slot="sidebar-menu-sub-button"
 			data-sidebar="menu-sub-button"
-			data-size={componentSize}
+			data-size={subSize}
 			data-active={sub.isActive ? 'true' : undefined}
 			data-active-variant={activeVariant}
 			disabled={sub.disabled || undefined}
-			class={classes.subButton({ componentSize, activeVariant, density, size: textSize })}
+			class={classes.subButton({ size: subSize, itemSize: sub.size, activeVariant, density })}
 			onclick={handleClick}
 		>
 			<SidebarIcon icon={sub.icon} />
