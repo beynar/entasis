@@ -1,4 +1,5 @@
 import type { Colors } from '$lib/types/theme.js';
+import { spacingValues, type SpacingStep } from '$lib/tailwind/spacing.js';
 import {
 	defaultThemeSpacingScale,
 	elevationVariables,
@@ -75,6 +76,13 @@ export type ThemeDesignTokens = {
 	hoverColor?: Colors;
 	/** State role — the transient pressed tint; falls back to `hoverColor` when omitted. */
 	pressedColor?: Colors;
+	/**
+	 * How far a drawer `Dialog` stands off the screen edge: a spacing step (`'md'`,
+	 * `'layout-sm'`, …) or `'none'` for edge to edge. Defaults to `'layout-md'`. At `'none'` the
+	 * drawer's edge corners square off and only the corners facing the page keep their radius.
+	 * Writes `--drawer-inset`.
+	 */
+	drawerInset?: SpacingStep | 'none';
 };
 
 export type ThemeDesignTokenMap<T extends readonly string[] = readonly string[]> = Partial<
@@ -184,8 +192,19 @@ const tokenVariables = (
 			}),
 	...(tokens.elevation === undefined
 		? {}
-		: elevationVariables(tokens.elevation, colorScheme === 'dark' ? 'dark' : 'light'))
+		: elevationVariables(tokens.elevation, colorScheme === 'dark' ? 'dark' : 'light')),
+	...(tokens.drawerInset === undefined
+		? {}
+		: { '--drawer-inset': drawerInsetValue(tokens.drawerInset) })
 });
+
+/** `--drawer-inset` for a step: the theme token and a Dialog's `inset` prop share it. */
+export const drawerInsetValue = (step: SpacingStep | 'none') => {
+	if (step === 'none') return '0px';
+	const value = spacingValues[step];
+	if (!value) throw new Error(`Unknown drawerInset "${step}".`);
+	return value;
+};
 
 const validateThemeName = (themeName: string) => {
 	if (!themeNamePattern.test(themeName)) {

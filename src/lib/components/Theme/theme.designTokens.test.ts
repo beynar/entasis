@@ -52,3 +52,16 @@ describe('state role design tokens', () => {
 		expect(() => compile({ defaultColor: 'accent' })).toThrow('Unknown defaultColor "accent".');
 	});
 });
+
+describe('drawerInset', () => {
+	it('emits a spacing step, or 0px for none, and rejects a step off the scale', () => {
+		expect(compile({ drawerInset: 'md' })).toBe(
+			'html[data-theme="light"]{--drawer-inset:var(--space-md);}'
+		);
+		expect(compile({ drawerInset: 'layout-sm' })).toBe(
+			'html[data-theme="light"]{--drawer-inset:var(--layout-space-sm);}'
+		);
+		expect(compile({ drawerInset: 'none' })).toBe('html[data-theme="light"]{--drawer-inset:0px;}');
+		expect(() => compile({ drawerInset: 'huge' })).toThrow('Unknown drawerInset "huge".');
+	});
+});

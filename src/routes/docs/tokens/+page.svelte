@@ -127,6 +127,13 @@
 			default: 'unset — falls back to hoverColor',
 			meaning:
 				'State role for the transient pressed tint. Writes --color-pressed, which falls back to --color-hover before currentColor.'
+		},
+		{
+			token: 'drawerInset',
+			type: "spacing step | 'none'",
+			default: "'layout-md'",
+			meaning:
+				'How far a drawer Dialog stands off the screen edge. none makes it edge to edge and squares the corners on that edge; the corners facing the page keep their radius. Writes --drawer-inset.'
 		}
 	];
 

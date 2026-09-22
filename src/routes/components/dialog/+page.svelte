@@ -31,7 +31,14 @@
 			value: 'normal',
 			options: sizes
 		},
-		{ name: 'responsive', type: 'switch', label: 'Responsive', value: true }
+		{ name: 'responsive', type: 'switch', label: 'Responsive', value: true },
+		{
+			name: 'inset',
+			type: 'segmented',
+			label: 'Drawer inset',
+			value: 'theme',
+			options: ['theme', 'none', 'sm', 'layout-md']
+		}
 	]);
 
 	const shortText =
@@ -69,7 +76,7 @@
 		code={`<Dialog
 	type="${controls.value.type}"
 	size="${controls.value.size}"
-	responsive={${controls.value.responsive}}
+	responsive={${controls.value.responsive}}${controls.value.inset === 'theme' ? '' : `\n\tinset="${controls.value.inset}"`}
 	title="Modal"
 	description="A centered modal dialog."
 	trigger={{ content: 'Open', color: 'primary' }}
@@ -81,6 +88,7 @@
 			type={controls.value.type}
 			size={controls.value.size}
 			responsive={controls.value.responsive}
+			inset={controls.value.inset === 'theme' ? undefined : controls.value.inset}
 			title="Modal"
 			description="A centered modal dialog."
 			trigger={{ content: 'Open', color: 'primary' }}

@@ -7,6 +7,7 @@ import type {
 	TypeScalePreset
 } from '$lib/components/Theme/theme.designTokens.js';
 import { defaultThemeSpacingScale } from '$lib/components/Theme/theme.designTokens.js';
+import { spacingValues, type SpacingStep } from '$lib/tailwind/spacing.js';
 import {
 	themePresetNames,
 	themePresets,
@@ -125,6 +126,8 @@ class RuntimeThemePlayground {
 	typeScale = $state<TypeScalePreset>('default');
 	elevation = $state<ThemeElevation>('normal');
 	raisedWithBorder = $state(true);
+	/** How far drawer dialogs stand off the screen edge; presets leave it at the library default. */
+	drawerInset = $state<SpacingStep | 'none'>('layout-md');
 	palette = $state<RuntimeColorPaletteName>('default');
 	/** Multiplier applied to every duration step, so the whole scale speeds up together. */
 	motionSpeed = $state(1);
@@ -140,6 +143,7 @@ class RuntimeThemePlayground {
 				preset.typeScale === this.typeScale &&
 				preset.elevation === this.elevation &&
 				preset.raisedWithBorder === this.raisedWithBorder &&
+				this.drawerInset === 'layout-md' &&
 				preset.palette === this.palette &&
 				this.hasDefaultMotion
 			);
@@ -201,7 +205,8 @@ class RuntimeThemePlayground {
 			typeScale: this.typeScale,
 			elevation: this.elevation,
 			motion: this.motion,
-			raisedWithBorder: this.raisedWithBorder
+			raisedWithBorder: this.raisedWithBorder,
+			drawerInset: this.drawerInset
 		} satisfies ThemeDesignTokens;
 
 		return {
@@ -218,6 +223,7 @@ class RuntimeThemePlayground {
 		this.typeScale = preset.typeScale;
 		this.elevation = preset.elevation;
 		this.raisedWithBorder = preset.raisedWithBorder;
+		this.drawerInset = 'layout-md';
 		this.palette = preset.palette;
 		this.motionSpeed = 1;
 		this.motionEasing = 'standard';
@@ -236,6 +242,7 @@ class RuntimeThemePlayground {
 			typeScale: this.typeScale,
 			elevation: this.elevation,
 			raisedWithBorder: this.raisedWithBorder,
+			drawerInset: this.drawerInset,
 			palette: this.palette,
 			motionSpeed: this.motionSpeed,
 			motionEasing: this.motionEasing
@@ -252,6 +259,11 @@ class RuntimeThemePlayground {
 		if (snapshot.elevation) this.elevation = snapshot.elevation;
 		if (typeof snapshot.raisedWithBorder === 'boolean')
 			this.raisedWithBorder = snapshot.raisedWithBorder;
+		if (
+			snapshot.drawerInset &&
+			(snapshot.drawerInset === 'none' || snapshot.drawerInset in spacingValues)
+		)
+			this.drawerInset = snapshot.drawerInset;
 		if (
 			snapshot.palette &&
 			(runtimeColorPaletteNames as readonly string[]).includes(snapshot.palette)
@@ -275,6 +287,7 @@ export type RuntimeThemePlaygroundSnapshot = {
 	typeScale: TypeScalePreset;
 	elevation: ThemeElevation;
 	raisedWithBorder: boolean;
+	drawerInset: SpacingStep | 'none';
 	palette: RuntimeColorPaletteName;
 	motionSpeed: number;
 	motionEasing: RuntimeMotionEasingPresetName;

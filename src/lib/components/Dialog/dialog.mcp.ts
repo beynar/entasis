@@ -60,6 +60,7 @@ The Dialog component (also known as Modal) displays content in a layer above the
 - **closable**: boolean (default: true) - Whether dialog can be closed
 - **swipeToDismiss**: boolean (default: true for drawer types) - Drag the drawer toward its edge to dismiss. Direction-aware (drawerRight drags right, drawerBottom drags down, etc.) and never hijacks inner scrolling; opt elements out with \`data-no-swipe\`
 - **thumb**: boolean (default: true) - Drag thumb bar shown on swipe-dismissable drawers (inner edge, orientation follows the drawer side, oversized hitbox); set false to hide. Themeable via the \`thumb\` theme part
+- **inset**: a spacing step or \`'none'\` — how far a drawer stands off the screen edge for this dialog. Defaults to the theme's \`designTokens.drawerInset\` (\`'layout-md'\`). At \`'none'\` the drawer is edge to edge, its edge corners square off and only the corners facing the page stay rounded
 - **swipeFrom**: 'panel' | 'handle' (default: 'panel') - Where a swipe can start: anywhere on the panel, or only the drag handles (thumb and header)
 
 ### Visual Props
@@ -340,7 +341,7 @@ const customTheme: DialogThemeProps = {
     },
     type: {
       fullScreen: 'h-full w-full max-w-full',
-      drawerRight: 'rounded-l-none h-full',
+      drawerRight: 'rounded-r-[var(--drawer-edge-radius)] h-full',
       modal: ''
     }
   },

@@ -20,10 +20,12 @@ export const defaultDialogAlign = cva({
 	variants: {
 		type: {
 			fullScreen: 'justify-center items-center',
-			drawerRight: 'justify-end',
-			drawerLeft: 'justify-start',
-			drawerBottom: 'justify-center items-end',
-			drawerTop: 'justify-center items-start',
+			// Drawers stand off the screen edge by `--drawer-inset` (the `drawerInset` design token),
+			// modals keep the fixed gutter.
+			drawerRight: 'justify-end p-(--drawer-inset)',
+			drawerLeft: 'justify-start p-(--drawer-inset)',
+			drawerBottom: 'justify-center items-end p-(--drawer-inset)',
+			drawerTop: 'justify-center items-start p-(--drawer-inset)',
 			modal: 'justify-center items-center',
 			alert: 'justify-center items-center'
 		},
@@ -53,10 +55,12 @@ export const defaultDialogContent = cva({
 		},
 		type: {
 			fullScreen: 'h-full w-full max-w-full origin-center',
-			drawerRight: 'rounded-l-none h-full origin-right',
-			drawerLeft: 'rounded-r-none h-full origin-left',
-			drawerBottom: 'rounded-b-none max-w-full origin-bottom',
-			drawerTop: 'rounded-t-none max-w-full origin-top',
+			// The side that meets the screen edge takes `--drawer-edge-radius` (see Dialog.svelte):
+			// the panel's own radius while the drawer is inset, square once `drawerInset` is `none`.
+			drawerRight: 'rounded-r-[var(--drawer-edge-radius)] h-full origin-right',
+			drawerLeft: 'rounded-l-[var(--drawer-edge-radius)] h-full origin-left',
+			drawerBottom: 'rounded-b-[var(--drawer-edge-radius)] max-w-full origin-bottom',
+			drawerTop: 'rounded-t-[var(--drawer-edge-radius)] max-w-full origin-top',
 			modal: 'origin-center',
 			alert: 'origin-center'
 		},

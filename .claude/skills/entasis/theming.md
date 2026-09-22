@@ -488,6 +488,24 @@ Ratios: `minorSecond` 1.067, `majorSecond` 1.125, `minorThird` 1.2, `majorThird`
 `true` gives `raised-*` elements a 1px `neutral-muted` border in addition to their shadow;
 `false` removes it. Dark themes always drop the raised shadow, so leave it `true` there.
 
+### `drawerInset`
+
+How far a drawer `Dialog` (`drawerRight` / `drawerLeft` / `drawerBottom` / `drawerTop`, and the
+responsive bottom sheet a modal collapses into) stands off the screen edge. A spacing step —
+`'micro'` … `'xl'`, `'layout-sm'` … `'layout-xl'` — or `'none'` for edge to edge. Defaults to
+`'layout-md'`. Writes `--drawer-inset`, which the drawer positioner reads as its padding, and the
+drawer's edge corners follow it on their own: `min(--radius-xl, --drawer-inset × 9999)` is the
+panel's radius while inset and 0 at `'none'`, so an edge-to-edge drawer keeps its radius only on
+the corners facing the page. Modals keep their fixed gutter.
+
+One drawer can differ from the theme through its `inset` prop, which takes the same values and
+moves the stand-off and the edge corners together:
+
+```svelte
+<Dialog type="drawerBottom" inset="none" />
+<Dialog type="drawerRight" inset="sm" />
+```
+
 ### `defaultColor`
 
 Kit chrome role when a control omits `color`. Defaults to `'neutral'`. Set `'primary'` to

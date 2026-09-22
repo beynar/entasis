@@ -25,6 +25,15 @@ const checker = program.getTypeChecker();
 const geometryExceptions = new Map([
 	['MiniCalendar/miniCalendar.theme.ts', new Map([['-m-0.5', 'Calendar cell border overlap']])],
 	[
+		'Dialog/dialog.theme.ts',
+		new Map([
+			[
+				'p-(--drawer-inset)',
+				'Drawer stand-off is the drawerInset design token (--drawer-inset), a step chosen per theme'
+			]
+		])
+	],
+	[
 		'AudioPlayer/audioPlayer.theme.ts',
 		new Map([
 			['gap-[3px]', 'Fixed waveform bar separation'],

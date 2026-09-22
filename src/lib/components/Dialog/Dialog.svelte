@@ -8,6 +8,7 @@
 	import Button from '../Button/Button.svelte';
 	import { fso } from '$lib/transitions/transition.js';
 	import { portal } from '$lib/attachments/portal.js';
+	import { drawerInsetValue } from '../Theme/theme.designTokens.js';
 
 	let {
 		id: customId,
@@ -28,6 +29,7 @@
 		swipeToDismiss,
 		swipeFrom,
 		thumb = true,
+		inset,
 		class: className,
 		header,
 		footer,
@@ -132,6 +134,7 @@
 		data-type={dialog.type}
 		data-size={size}
 		style:z-index={dialog.zIndex}
+		style:--drawer-inset={inset === undefined ? undefined : drawerInsetValue(inset)}
 	>
 		<div class={classes.align({ type: dialog.computedType, scroll: dialog.computedScroll })}>
 			<div
@@ -220,3 +223,16 @@
 		</Button>
 	{/if}
 {/if}
+
+<style>
+	/*
+	 * A drawer's edge corners round only while it stands off the screen edge: 9999× the inset
+	 * is 0 at `drawerInset: 'none'` and larger than any radius otherwise, so `min()` picks square
+	 * or the panel's radius with no variant. Declared here, on the panel, so a scoped <Theme>
+	 * that changes `--drawer-inset` is seen (a declaration on `html` would resolve the variable
+	 * there instead).
+	 */
+	[data-type^='drawer'] {
+		--drawer-edge-radius: min(var(--radius-xl), calc(var(--drawer-inset) * 9999));
+	}
+</style>

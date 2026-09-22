@@ -4,6 +4,7 @@
 	import Slider from '$lib/components/Form/Slider/Slider.svelte';
 	import { Switch } from '$lib/components/Form/Switch/index.js';
 	import SegmentedControl from '$lib/components/SegmentedControl/SegmentedControl.svelte';
+	import type { SpacingStep } from '$lib/tailwind/spacing.js';
 	import type {
 		ThemeElevation,
 		TypeScalePreset
@@ -31,6 +32,13 @@
 		{ value: 'normal', label: 'Normal' },
 		{ value: 'high', label: 'High' }
 	] as const satisfies ReadonlyArray<{ value: ThemeElevation; label: string }>;
+	const drawerInsetItems: ReadonlyArray<{ value: SpacingStep | 'none'; label: string }> = [
+		{ value: 'none', label: 'None' },
+		{ value: 'sm', label: 'sm' },
+		{ value: 'md', label: 'md' },
+		{ value: 'xl', label: 'xl' },
+		{ value: 'layout-md', label: 'layout-md' }
+	];
 	const motionEasingItems = runtimeMotionEasingPresetNames.map((name) => ({
 		value: name,
 		label: runtimeMotionEasingPresets[name].label
@@ -48,7 +56,8 @@ designTokens={{
     typeScale: '${playground.typeScale}',
     elevation: '${playground.elevation}',
     motion: ${JSON.stringify(playground.motion)},
-    raisedWithBorder: ${playground.raisedWithBorder}
+    raisedWithBorder: ${playground.raisedWithBorder},
+    drawerInset: '${playground.drawerInset}'
   },
   dark: {
     spacing: ${playground.spacing},
@@ -57,7 +66,8 @@ designTokens={{
     typeScale: '${playground.typeScale}',
     elevation: '${playground.elevation}',
     motion: ${JSON.stringify(playground.motion)},
-    raisedWithBorder: ${playground.raisedWithBorder}
+    raisedWithBorder: ${playground.raisedWithBorder},
+    drawerInset: '${playground.drawerInset}'
   }
 }}`);
 
@@ -144,6 +154,16 @@ designTokens={{
 			/>
 		</div>
 		<Switch label="Raised borders" bind:value={playground.raisedWithBorder} />
+		<div class="gap-md grid">
+			<span class="text-sm font-medium">Drawer inset</span>
+			<SegmentedControl
+				items={drawerInsetItems}
+				bind:value={playground.drawerInset}
+				size="small"
+				label="Drawer inset"
+				class="w-full"
+			/>
+		</div>
 	</div>
 
 	<div class="border-neutral-muted gap-layout-sm pt-layout-sm grid border-t">

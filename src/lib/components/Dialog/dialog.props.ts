@@ -1,3 +1,4 @@
+import type { SpacingStep } from '$lib/tailwind/spacing.js';
 import type { Snippet } from 'svelte';
 import type { WithSlot } from '../Slot/slot.js';
 import type { DialogState } from './dialog.state.svelte.js';
@@ -55,6 +56,10 @@ export type DialogProps = WithSlot<
 		/** Where a swipe can start: the whole panel (`panel`, default) or only the drag handles
 		 *  (`handle` — the thumb and the header). */
 		swipeFrom?: 'panel' | 'handle';
+		/** How far a drawer stands off the screen edge: a spacing step or `'none'` for edge to edge.
+		 *  Defaults to the theme's `designTokens.drawerInset` (`'layout-md'`). At `'none'` the edge
+		 *  corners square off and only the corners facing the page keep their radius. */
+		inset?: SpacingStep | 'none';
 		/** Additional CSS classes merged onto the portaled dialog root element. */
 		class?: string;
 		/** Per-instance theme overrides for dialog layout and styling class names. */

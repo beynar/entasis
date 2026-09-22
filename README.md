@@ -213,6 +213,7 @@ Every key of `ThemeDesignTokens` (`src/lib/components/Theme/theme.designTokens.t
 | `selectedColor`    | one of the seven roles                                                                | unset — each selection follows `--color`    | State role for a persistent highlight (sidebar row, menu option, selected row); writes the whole `--color-selected*` kit |
 | `hoverColor`       | one of the seven roles                                                                | unset — the layer tints with `currentColor` | State role for the transient hover tint `state-layer` paints; writes `--color-hover`                                     |
 | `pressedColor`     | one of the seven roles                                                                | unset — falls back to `hoverColor`          | State role for the transient pressed tint; writes `--color-pressed`                                                      |
+| `drawerInset`      | a spacing step (`micro`…`xl`, `layout-sm`…`layout-xl`) \| `none`                      | `layout-md`                                 | How far a drawer `Dialog` stands off the screen edge; at `none` its edge corners square off. Writes `--drawer-inset`     |
 
 Switching themes at runtime: the `children` snippet receives the `ThemeState`.
 

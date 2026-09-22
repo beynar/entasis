@@ -10,10 +10,13 @@ const spacingVariables = {
 	'--layout-space-sm': 'calc(var(--spacing) * 5)',
 	'--layout-space-md': 'calc(var(--spacing) * 6)',
 	'--layout-space-lg': 'calc(var(--spacing) * 8)',
-	'--layout-space-xl': 'calc(var(--spacing) * 12)'
+	'--layout-space-xl': 'calc(var(--spacing) * 12)',
+	// How far a drawer Dialog stands off the screen edge. A spacing step or `0px`, overridden by
+	// `designTokens.drawerInset`; the drawer's edge corners round only when this is not zero.
+	'--drawer-inset': 'var(--layout-space-md)'
 } as const;
 
-const spacingValues = {
+export const spacingValues = {
 	micro: 'var(--space-micro)',
 	xs: 'var(--space-xs)',
 	sm: 'var(--space-sm)',
@@ -25,6 +28,8 @@ const spacingValues = {
 	'layout-lg': 'var(--layout-space-lg)',
 	'layout-xl': 'var(--layout-space-xl)'
 };
+
+export type SpacingStep = keyof typeof spacingValues;
 
 const gapUtilities = {
 	gap: (value: string) => ({ gap: value }),
