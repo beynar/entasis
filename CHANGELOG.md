@@ -6,6 +6,7 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.6.0 — 2026-09-23
 ### Added
 
 - `state-layer-none`: switches the hover / pressed overlay off on one element. The tint is a
