@@ -13,6 +13,7 @@
 		widthMobile,
 		dir,
 		size,
+		iconSize,
 		density,
 		label,
 		theme,
@@ -24,6 +25,7 @@
 		widthMobile: string;
 		dir?: 'ltr' | 'rtl';
 		size: SidebarSize;
+		iconSize?: SidebarSize;
 		density: SidebarDensity;
 		label: string;
 		theme?: SidebarThemeProps;
@@ -57,7 +59,7 @@
 		data-density={density}
 		style:--sidebar-width-mobile={widthMobile}
 		{dir}
-		class={classes.mobilePanel({ side, size, density })}
+		class={classes.mobilePanel({ side, size, iconSize, density })}
 	>
 		{@render children()}
 	</div>

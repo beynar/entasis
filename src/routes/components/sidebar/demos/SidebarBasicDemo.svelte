@@ -29,11 +29,13 @@
 	let {
 		variant = 'inset',
 		size = 'normal',
+		iconSize,
 		density = 'normal',
 		activeVariant = 'soft'
 	}: {
 		variant?: SidebarVariant;
 		size?: SidebarSize;
+		iconSize?: SidebarSize;
 		density?: SidebarDensity;
 		activeVariant?: SidebarActiveVariant;
 	} = $props();
@@ -146,6 +148,7 @@
 		collapsible="icon"
 		{variant}
 		{size}
+		{iconSize}
 		{density}
 		frame="contained"
 		rail="thumb"

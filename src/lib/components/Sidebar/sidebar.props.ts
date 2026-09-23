@@ -362,6 +362,8 @@ type SidebarOwnProps = {
 	variant?: SidebarVariant;
 	/** Typography, icon, and item-height scale. */
 	size?: SidebarSize;
+	/** Icon and leading-media scale inside the panel, on its own. Defaults to `size`. */
+	iconSize?: SidebarSize;
 	/** How active rows are painted. Defaults to 'soft', the shared selected recipe. */
 	activeVariant?: SidebarActiveVariant;
 	/** Spacing density for section padding, gaps, and nested navigation. */

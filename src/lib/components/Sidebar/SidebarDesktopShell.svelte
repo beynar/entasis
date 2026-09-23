@@ -35,6 +35,7 @@
 		side,
 		frame,
 		size,
+		iconSize,
 		density,
 		rail,
 		edgeReveal,
@@ -60,6 +61,7 @@
 		side: SidebarSide;
 		frame: SidebarFrame;
 		size: SidebarSize;
+		iconSize?: SidebarSize;
 		density: SidebarDensity;
 		rail: SidebarRail;
 		edgeReveal: boolean;
@@ -308,6 +310,7 @@
 				variant,
 				placement: 'positioned',
 				size,
+				iconSize,
 				density,
 				className: getSidebarPanelPeekClass(variant)
 			})}

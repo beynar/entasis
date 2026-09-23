@@ -137,3 +137,22 @@ describe('sidebar header button', () => {
 		expect(received?.displayState).toBe('expanded');
 	});
 });
+
+// `iconSize` publishes the same variables `size` does, declared after it on the panel parts, so
+// the two never disagree: unset, the panel carries the `size` value; set, the merge keeps only it.
+describe('sidebar icon size', () => {
+	const iconVar = (value: string) =>
+		document.querySelector(`[class*="--sidebar-icon-size:${value}"]`);
+
+	test('follows size when unset', () => {
+		render(SidebarSurfaceHarness);
+		expect(iconVar('1rem')).not.toBeNull();
+		expect(iconVar('1.25rem')).toBeNull();
+	});
+
+	test('scales icons on its own when set', () => {
+		render(SidebarSurfaceHarness, { props: { iconSize: 'large' } });
+		expect(iconVar('1.25rem')).not.toBeNull();
+		expect(iconVar('1rem')).toBeNull();
+	});
+});

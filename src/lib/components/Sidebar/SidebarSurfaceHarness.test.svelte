@@ -6,14 +6,17 @@
 		SidebarGroup,
 		SidebarMenuButtonItem
 	} from './sidebar.props.js';
+	import type { SidebarSize } from './sidebar.props.js';
 
 	let {
 		activeVariant = 'soft',
+		iconSize,
 		headerButton,
 		items,
 		onCollapse
 	}: {
 		activeVariant?: SidebarActiveVariant;
+		iconSize?: SidebarSize;
 		headerButton?: SidebarMenuButtonItem;
 		items?: SidebarGroup[];
 		onCollapse?: () => void;
@@ -44,6 +47,7 @@
 	<Sidebar
 		items={items ?? defaultItems}
 		{activeVariant}
+		{iconSize}
 		{headerButton}
 		search={{ placeholder: 'Search', label: 'Search the workspace' }}
 		defaultOpen

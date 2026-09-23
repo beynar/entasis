@@ -594,6 +594,7 @@ Snippet<[SidebarApi]>`; pass an array to pin several affordances to one group he
 - `open` (bindable), `defaultOpen`, `displayState` (bindable): `'expanded' | 'collapsed' | 'hidden'`
 - `side`: `'left' | 'right'`, `variant`: `'admin' | 'floating' | 'inset' | 'split' | 'framed'` (`framed` is the admin geometry with a `surface-recessed` well, for a sidebar hosted inside a raised card), `frame`: `'viewport' | 'contained'`, `mode`: `'layout' | 'panel'`
 - `size`: `'small' | 'normal' | 'large'` (default: `'normal'`) -- scales type and item height
+- `iconSize`: `'small' | 'normal' | 'large'` (default: follows `size`) -- scales icons and leading media inside the panel on their own
 - `activeVariant`: `'soft' | 'outline' | 'solid'` (default: `'soft'`) -- how an active row paints: `soft` is the shared selected recipe (`selectedSoft`, `bg-selected-muted text-selected-muted-readable`), `solid` is `selectedSolid` (`bg-selected text-selected-contrast`), `outline` is a bordered surface card on the tinted well. Read it off each row's own `data-active-variant`; never restyle selection with a descendant selector.
 - `density`: `'compact' | 'normal' | 'comfortable'` (default: `'normal'`) -- scales padding and gaps
 - `width`, `widthIcon`, `widthMobile`: string; `resizable`: `boolean | SidebarResizableOptions`

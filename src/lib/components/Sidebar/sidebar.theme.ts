@@ -24,6 +24,8 @@ const activeVariants = {
 // The `--sidebar-*` properties are INTERNAL: one `size` step publishes the icon, media and
 // compact-media dimensions the rows read back, so every part scales together. A consumer
 // changes `size`, never one of these properties.
+// Icon and leading-media sizes. `size` sets them by default; `iconSize`, declared after it on the
+// panel parts, publishes the same variables and wins when a consumer sets it on its own.
 const sidebarSizeVariables = {
 	small:
 		'[--sidebar-icon-size:0.875rem] [--sidebar-media-size:1.75rem] [--sidebar-compact-media-size:1rem]',
@@ -80,6 +82,7 @@ const defaultPanel = cva({
 			positioned: 'w-full'
 		},
 		size: sidebarSizeVariables,
+		iconSize: sidebarSizeVariables,
 		density: sidebarDensityVariables
 	},
 	compoundVariants: [
@@ -719,6 +722,7 @@ const defaultMobilePanel = cva({
 			right: ''
 		},
 		size: sidebarSizeVariables,
+		iconSize: sidebarSizeVariables,
 		density: sidebarDensityVariables
 	},
 	defaultVariants: {

@@ -30,6 +30,7 @@
 		side = 'left',
 		variant = 'admin',
 		size = 'normal',
+		iconSize,
 		activeVariant = 'soft',
 		density = 'normal',
 		collapsible = 'offcanvas',
@@ -268,7 +269,10 @@
 		style:--sidebar-width={panelWidth}
 		style:--sidebar-width-icon={widthIcon}
 		style:--sidebar-width-mobile={widthMobile}
-		class={cx('group', classes.panel({ variant, placement: 'panel', size, density, className }))}
+		class={cx(
+			'group',
+			classes.panel({ variant, placement: 'panel', size, iconSize, density, className })
+		)}
 		{...attachments}
 	>
 		{@render panel()}
@@ -307,6 +311,7 @@
 					{widthMobile}
 					{dir}
 					{size}
+					{iconSize}
 					{density}
 					label={navLabel}
 					{theme}
@@ -333,7 +338,7 @@
 					data-sidebar="sidebar"
 					data-color={resolvedColor}
 					data-side={side}
-					class={classes.panel({ variant, placement: 'static', size, density })}
+					class={classes.panel({ variant, placement: 'static', size, iconSize, density })}
 				>
 					{@render panel()}
 				</div>
@@ -349,6 +354,7 @@
 					{side}
 					{frame}
 					{size}
+					{iconSize}
 					{density}
 					{rail}
 					{edgeReveal}

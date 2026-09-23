@@ -35,6 +35,13 @@
 			options: sizes
 		},
 		{
+			name: 'iconSize',
+			type: 'segmented',
+			label: 'Icon size',
+			value: 'normal',
+			options: sizes
+		},
+		{
 			name: 'density',
 			type: 'segmented',
 			label: 'Density',
@@ -121,6 +128,7 @@
 		code={`<Sidebar
 	variant="${controls.value.variant}"
 	size="${controls.value.size}"
+	iconSize="${controls.value.iconSize}"
 	density="${controls.value.density}"
 	activeVariant="${controls.value.activeVariant}"
 	collapsible="icon"
@@ -136,6 +144,7 @@
 		<SidebarBasicDemo
 			variant={controls.value.variant}
 			size={controls.value.size}
+			iconSize={controls.value.iconSize}
 			density={controls.value.density}
 			activeVariant={controls.value.activeVariant}
 		/>
