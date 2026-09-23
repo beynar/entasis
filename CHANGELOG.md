@@ -6,6 +6,18 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `state-layer-none`: switches the hover / pressed overlay off on one element. The tint is a
+  `::before`, so `hover:bg-*` on the element never reached it; the merge engine treats the pair as
+  one group, so the last one wins.
+- Sidebar `iconSize`: the icon and leading-media scale inside the panel on its own, defaulting to
+  `size`. The `panel` and `mobilePanel` theme parts gain the matching `iconSize` variant; the
+  existing `size` variant is untouched.
+- Theming docs: a "Switching a house utility off" table naming the switch for each utility that is
+  not a plain class. The merge test suite now proves every house class group either yields to its
+  Tailwind counterpart or carries a `none` value, so the table stays true when a token is added.
+
 ## 0.5.0 — 2026-09-22
 ### Renamed
 
