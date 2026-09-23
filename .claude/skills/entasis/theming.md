@@ -967,6 +967,25 @@ Override classes are appended after the defaults (Tailwind conflicts resolve in 
 Global setters use Svelte context, so call them in a layout or wrapper component; per-instance
 overrides layer on top of the global ones.
 
+### Switching a house utility off
+
+Most entasis utilities are ordinary classes with a Tailwind counterpart, and the merge engine
+resolves the conflict in favour of the class you add last: `h-9` beats `h-control-md`, `px-3` beats
+`px-md`, `rounded-lg` beats `rounded-md-concentric`, `size-6` beats `size-icon-md`, `bg-blue-500`
+beats `bg-color`. A few are not plain classes, and need the switch named here:
+
+| Utility                | What it really is                                                                                                         | To switch it off or replace it                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `state-layer`          | a `::before` overlay tinted from `--color-hover` at `--state-hover-opacity`; `hover:bg-*` on the element never reaches it | `state-layer-none`; or retune it in place, `[--state-hover-opacity:0.2]` or `[--color-hover:var(--color-primary)]` |
+| `raised-*`             | a shadow whose hairline edge is drawn inside the `box-shadow`, not a CSS border, so `border-0` changes nothing            | `raised-none`, or any `shadow-*` (same slot)                                                                       |
+| `lift-*`               | the borderless half of the same ramp                                                                                      | `lift-none`, or any `shadow-*`                                                                                     |
+| `shimmer`              | a loading sheen on its own animation; `animate-none` does not stop it                                                     | `shimmer-none`                                                                                                     |
+| `scroll-fade-*`        | a `mask-image` on a scroller, unrelated to `overflow-*`                                                                   | `scroll-fade-none`                                                                                                 |
+| `rounded-*-concentric` | a radius derived from the parent's; without one it falls back to its own step                                             | any `rounded-*` (same corner group)                                                                                |
+
+When a slot should be rebuilt rather than patched, `override: true` drops its default classes
+entirely (above).
+
 ## Component Theme Registry
 
 `<Theme components>` holds app-wide component theme defaults without one wrapper component per
