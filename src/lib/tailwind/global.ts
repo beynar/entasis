@@ -253,7 +253,10 @@ export const applyGlobalEngine = (api: PluginAPI, options?: GlobalEngineOptions)
 				'background-color': 'var(--color-pressed, var(--color-hover, currentColor))',
 				opacity: 'var(--state-pressed-opacity)'
 			}
-		}
+		},
+		// The off switch for one element: the tint lives on the ::before, so a `hover:bg-*` on the
+		// element itself can never reach it.
+		'.state-layer-none': { '&::before': { display: 'none' } }
 	});
 	addShimmerUtilities(api);
 	addScrollFadeUtilities(api);

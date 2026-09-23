@@ -16,6 +16,7 @@
  *     earlier edge forms; edge forms combine; `static` is a modifier)
  *   - `shimmer*` (`shimmer` / `shimmer-none` exclude each other; `once` and
  *     `reverse` are modifiers; `shimmer-color|duration|spread|angle-*` are scales)
+ *   - `state-layer` / `state-layer-none` exclude each other
  *   - `rounded-<step>-concentric` / `rounded-t|b-<step>-concentric` (join the core corner groups), the container side
  *     needing nothing here — a `rounded-<step>` publishes its radius to its children by itself
  *   - `duration-*` / `ease-*` motion tokens
@@ -30,7 +31,7 @@
  * falsy values, so no separate clsx pass is needed.
  */
 
-import { createCn, validators } from 'cn/config';
+import { createCn, validators, type CreateCnInput } from 'cn/config';
 import type { ClassValue } from './types.js';
 
 const isConcentric = (value: string) => /^(?:xs|sm|md|lg|xl|2xl|3xl|4xl)-concentric$/.test(value);
@@ -49,7 +50,7 @@ const SEMANTIC_SPACING = [
 	'layout-xl'
 ];
 
-const merge = createCn({
+export const mergeConfig = {
 	extend: {
 		theme: {
 			spacing: SEMANTIC_SPACING
@@ -79,6 +80,8 @@ const merge = createCn({
 			'scroll-fade-start': [{ 'scroll-fade': ['s', 'l'] }],
 			'scroll-fade-end': [{ 'scroll-fade': ['e', 'r'] }],
 			shimmer: ['shimmer', 'shimmer-none'],
+			// The overlay is a ::before, so only its own off switch can remove it.
+			'state-layer': ['state-layer', 'state-layer-none'],
 			'shimmer-color': [{ 'shimmer-color': [validators.isAny] }],
 			'shimmer-duration': [{ 'shimmer-duration': [validators.isAny] }],
 			'shimmer-spread': [{ 'shimmer-spread': [validators.isAny] }],
@@ -115,7 +118,8 @@ const merge = createCn({
 			'scroll-fade': ['scroll-fade-t', 'scroll-fade-b', 'scroll-fade-start', 'scroll-fade-end']
 		}
 	}
-});
+} satisfies CreateCnInput;
+const merge = createCn(mergeConfig);
 
 export const cn = (...inputs: ClassValue[]): string =>
 	merge(...(inputs as Parameters<typeof merge>));

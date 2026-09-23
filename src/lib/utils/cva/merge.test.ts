@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
+import { defaultConfig } from 'cn/config';
 import { cx } from './engine.js';
+import { mergeConfig } from './merge.js';
 
 /**
  * Conflict-resolution contract for the merge engine behind `cx`.
@@ -286,7 +288,6 @@ describe('plugin utility coverage', () => {
 			'space-y',
 			'duration',
 			'ease',
-			'state-layer',
 			'ui-spinner'
 		]);
 		// Edge forms (`scroll-fade-t`, `-s`, ...) belong to the family they suffix — including the
@@ -305,5 +306,62 @@ describe('plugin utility coverage', () => {
 				!new RegExp(`['"\`]${family}['"\`]|'${family}':|\\b${family}:`).test(mergeSource)
 		);
 		expect(uncovered).toEqual([]);
+	});
+});
+
+/**
+ * The guarantee the theming docs make in "Switching a house utility off": a consumer's plain
+ * Tailwind class beats the entasis utility it targets, whichever comes first, and a utility that
+ * is not a plain class (`state-layer`, `shimmer`, `scroll-fade-*`) carries its own `none`.
+ * Read off the registered config, so the rule holds for the next token added, not just today's.
+ */
+describe('house class groups stay overridable', () => {
+	const core = new Set(Object.keys(defaultConfig().classGroups));
+	const house: Record<string, unknown> = mergeConfig.extend.classGroups;
+	const conflicts: Record<string, readonly string[]> = mergeConfig.extend.conflictingClassGroups;
+	const hasOffSwitch = (group: string) => /"(?:none|0)"|-none"/.test(JSON.stringify(house[group]));
+	const switchable = Object.keys(house).filter(hasOffSwitch);
+
+	it('every registered group yields to a Tailwind group or has an off switch', () => {
+		const offenders = Object.keys(house).filter(
+			(group) =>
+				!core.has(group) &&
+				!(conflicts[group] ?? []).some((other) => core.has(other)) &&
+				!switchable.some((parent) => group === parent || group.startsWith(`${parent}-`))
+		);
+		expect(offenders).toEqual([]);
+	});
+
+	it('declares every conflict with a Tailwind group in both directions', () => {
+		const oneWay = Object.keys(house).flatMap((group) =>
+			(conflicts[group] ?? [])
+				.filter((other) => core.has(other) && !(conflicts[other] ?? []).includes(group))
+				.map((other) => `${group} -> ${other}`)
+		);
+		expect(oneWay).toEqual([]);
+	});
+
+	it.each([
+		['h-control-md', 'h-9'],
+		['h-9', 'h-control-md'],
+		['min-h-row-md', 'min-h-12'],
+		['px-md', 'px-3'],
+		['gap-micro', 'gap-2'],
+		['p-layout-lg', 'p-8'],
+		['rounded-md-concentric', 'rounded-lg'],
+		['size-icon-md', 'size-6'],
+		['[&_svg]:size-icon-md', '[&_svg]:size-6'],
+		['raised-2', 'shadow-none'],
+		['lift-1', 'shadow-xl'],
+		['duration-normal', 'duration-150'],
+		['ease-enter', 'ease-out'],
+		['bg-color', 'bg-blue-500'],
+		['text-color-contrast', 'text-white'],
+		['bg-surface-raised', 'bg-white'],
+		['border-neutral-muted', 'border-gray-200'],
+		['state-layer', 'state-layer-none'],
+		['state-layer-none', 'state-layer']
+	])('%s then %s keeps only the later one', (first, second) => {
+		expect(cx(first, second)).toBe(second);
 	});
 });

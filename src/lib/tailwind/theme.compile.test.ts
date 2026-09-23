@@ -242,4 +242,9 @@ describe('theme plugin CSS', () => {
 		expect(scoped['--icon-size-lg']).toBe('calc(var(--spacing) * 5)');
 		expect(scoped['--row-height-lg']).toBe('calc(var(--spacing) * 12)');
 	});
+
+	it('switches the state layer off on one element', async () => {
+		const css = await compileThemeCss(['state-layer', 'state-layer-none']);
+		expect(css).toMatch(/\.state-layer-none::before \{\s*display: none;/);
+	});
 });
