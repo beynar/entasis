@@ -6,6 +6,7 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.7.1 — 2026-09-24
 ### Changed
 
 - The Sidebar activity bar follows the variant's panel instead of always being a flush hairline
