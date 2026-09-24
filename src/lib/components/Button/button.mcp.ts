@@ -25,7 +25,7 @@ The Button component is a flexible and customizable button element that supports
   - Determines the color scheme of the button
 
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
-  - small: 24px height, smaller padding and text
+  - small: 28px height, smaller padding and text
   - normal: 32px height, standard padding
   - large: 36px height, larger padding and text
 
@@ -239,7 +239,7 @@ const customTheme: ButtonThemeProps = {
   theme={{
     root: {
       color: {
-        primary: 'state-layer bg-gradient-to-r from-blue-500 to-purple-500'
+        primary: 'state-layer bg-linear-to-r from-blue-500 to-purple-500'
       }
     }
   }}

@@ -452,6 +452,22 @@ A `number` is used as the multiplier directly.
 | `large`   | 1.5×        |
 | `round`   | 2.5×        |
 
+The steps `rounded-xs` … `rounded-4xl` are the same eight everywhere; `radius` multiplies them all
+(`none` 0, `subtile` 0.5, `small` 0.75, `normal` 1, `large` 1.5, `round` 2.5, or a number):
+
+| Step  | At `normal` | Typical use                      |
+| ----- | ----------- | -------------------------------- |
+| `xs`  | 2px         |                                  |
+| `sm`  | 4px         |                                  |
+| `md`  | 8px         | controls: buttons, inputs        |
+| `lg`  | 12px        | panels: cards, popovers, menus   |
+| `xl`  | 16px        | dialogs, drawers, large surfaces |
+| `2xl` | 20px        |                                  |
+| `3xl` | 24px        |                                  |
+| `4xl` | 32px        |                                  |
+
+`rounded-full` and `rounded-none` are outside the scale and never move.
+
 ### `spacing`
 
 Scales `--spacing` (the base of `p-*`, `gap-*`, `m-*`, `size-*` ...). A `number` is used as the
@@ -890,6 +906,10 @@ setting)
 
 ## Dark / Light Mode
 
+Every theme emits its variables on `html[data-theme="<name>"]` and on the class `.<name>`, so
+`class="dark"` on any element scopes the dark theme to that subtree — a dark sidebar panel in a light
+app is `panel: { base: 'dark bg-slate-900' }`, no per-part ink overrides.
+
 Switching writes `theme.theme`, which updates the `html` attribute (through `transition` when
 set) and persists under `storageKey`:
 
@@ -967,12 +987,87 @@ Override classes are appended after the defaults (Tailwind conflicts resolve in 
 Global setters use Svelte context, so call them in a layout or wrapper component; per-instance
 overrides layer on top of the global ones.
 
+### Matching the default's variant prefixes
+
+"Later wins" holds between classes that target the same thing. A default written under a Tailwind
+variant prefix — Sidebar's active row is `data-[active-variant=solid]:data-active:bg-selected`, its
+edge is `data-[side=left]:border-r` — is a different target from an unprefixed class: the merge
+keeps both, and the browser then picks the more specific selector, which is the default's. To
+replace such a class, repeat its prefixes; the generated `theme-parts/` files show them verbatim.
+
+```svelte
+<script>
+	import { Sidebar } from 'entasis/sidebar';
+</script>
+
+<!-- Wrong: coexists with the default and loses on specificity. -->
+<Sidebar
+	items={[]}
+	activeVariant="solid"
+	theme={{ menuButton: { base: 'data-active:bg-indigo-600' } }}
+/>
+
+<!-- Right: same prefix chain as the default it replaces. -->
+<Sidebar
+	items={[]}
+	activeVariant="solid"
+	theme={{
+		menuButton: {
+			activeVariant: {
+				solid:
+					'data-[active-variant=solid]:data-active:bg-indigo-600 data-[active-variant=solid]:data-active:text-white'
+			}
+		}
+	}}
+/>
+```
+
+The same applies to `hover:`, `dark:` and every other prefix: `hover:text-inherit` cancels a
+default `hover:text-neutral`, a bare `text-inherit` does not.
+
+### Scoping an override to one colour or variant
+
+A slot map is keyed by one variant at a time — `color: { primary: .. }` or `variant: { solid: .. }` —
+so an override cannot say "primary _and_ solid" on its own. Components publish the values they
+resolved as data attributes on their root, so a Tailwind attribute variant does the second half:
+
+```svelte
+<script>
+	import { Button } from 'entasis/button';
+</script>
+
+<!-- Only the primary solid button turns into a gradient; a danger solid one is untouched. -->
+<Button
+	color="primary"
+	theme={{
+		root: {
+			variant: {
+				solid:
+					'data-[color=primary]:bg-linear-to-r data-[color=primary]:from-indigo-500 data-[color=primary]:to-violet-500'
+			}
+		}
+	}}
+>
+	Save
+</Button>
+```
+
+`data-color` is on the root of Alert, AudioPlayer, Button, Card, Carousel, Chip, EventCalendar, Form,
+GanttChart, Kanban, Kbd, Menu, MenuOption, Meter, NetworkIndicator, Pagination, ProgressCircle,
+SegmentedControl, Separator, Sidebar, Skeleton, Spinner, SpinnerText, Stat, Tabbar,
+TableOfContents, Timeline, Toast, ToggleButton, ToggleButtonGroup, ToggleMenu and Tooltip.
+`data-variant` is on the root of Accordion, AIMarker, AIMessage, AITool, Alert, Card, Chip, Form,
+Pagination, Resizable, Sidebar, Spinner, Stat, Timeline and Tooltip. Every component forwards the
+`data-*` attributes you pass it, so a component outside these lists can be given its own hook.
+
 ### Switching a house utility off
 
 Most entasis utilities are ordinary classes with a Tailwind counterpart, and the merge engine
 resolves the conflict in favour of the class you add last: `h-9` beats `h-control-md`, `px-3` beats
 `px-md`, `rounded-lg` beats `rounded-md-concentric`, `size-6` beats `size-icon-md`, `bg-blue-500`
-beats `bg-color`. A few are not plain classes, and need the switch named here:
+beats `bg-color`. A few are not plain classes, and need the switch named here. Every one of them
+takes a Tailwind variant prefix like any other class — `data-[color=primary]:state-layer-none`,
+`hover:raised-none` — so a switch can be scoped the same way an override is.
 
 | Utility                | What it really is                                                                                                         | To switch it off or replace it                                                                                     |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
@@ -990,7 +1085,11 @@ entirely (above).
 
 `<Theme components>` holds app-wide component theme defaults without one wrapper component per
 component. It is keyed by theme name (`dialog`, `button`, ...); each entry takes the same slots as
-that component's `theme` prop, the `motion` slot included.
+that component's `theme` prop, the `motion` slot included. The key is the component's kebab-case
+name — `hover-card`, `ai-chat`, `data-table` — the same word as its import subpath
+(`entasis/hover-card`). Every key, and every part each one takes with its element, variants and
+default classes, is listed in the generated `theme-parts/` folder next to this file, one file per
+component (`theme-parts/sidebar.md`).
 
 ```svelte
 <script lang="ts">
