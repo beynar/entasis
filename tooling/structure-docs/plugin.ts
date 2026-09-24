@@ -4,7 +4,12 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 import { Project } from 'ts-morph';
 import type { Plugin } from 'vite';
-import { extractComponentStructure, readThemeParts, readThemeSetter } from './extract.js';
+import {
+	extractComponentStructure,
+	readThemeKey,
+	readThemeParts,
+	readThemeSetter
+} from './extract.js';
 import type { StructureMap } from './types.js';
 
 const VIRTUAL_ID = 'virtual:entasis-structure';
@@ -17,6 +22,69 @@ const COMPONENTS_DIR = 'src/lib/components';
  * with slot insertion points and theme parts (from its `*.theme.ts`). Keyed by
  * component name. Never packaged - dev/docs only.
  */
+/**
+ * Build the structure map for every themeable component under `root`: the docs site reads it
+ * through the Vite plugin below, the component-contract generator through this export.
+ */
+export function buildStructureMap(root: string, project: Project): StructureMap {
+	const componentsRoot = resolve(root, COMPONENTS_DIR);
+	const importMap = buildImportMap(root);
+	const map: StructureMap = {};
+	for (const themeFile of findThemeFiles(componentsRoot)) {
+		const svelteFiles = findMainSvelteFiles(themeFile);
+		// A component theme without a main .svelte of its own (CalendarInput, Password): no tree to
+		// draw, but its parts, key and setter still belong in the reference. Presets
+		// (`<consumer>.<role>.theme.ts`) are skipped: they restyle another component's parts.
+		if (svelteFiles.length === 0 && basename(themeFile).split('.').length === 3) {
+			const name = basename(themeFile)
+				.replace(/\.theme\.ts$/, '')
+				.replace(/^\w/, (first: string) => first.toUpperCase());
+			try {
+				const registryKey = readThemeKey(project, themeFile);
+				if (registryKey) {
+					const setter = readThemeSetter(project, themeFile);
+					const directory = relative(componentsRoot, dirname(themeFile));
+					const importPath = importMap.get(directory);
+					map[name] = {
+						name,
+						tree: [],
+						parts: readThemeParts(project, themeFile),
+						...(setter && { setter }),
+						registryKey,
+						...(importPath && { importPath }),
+						directory
+					};
+				}
+			} catch (error) {
+				console.warn(`[entasis-structure] skipped ${name}: ${(error as Error).message}`);
+			}
+			continue;
+		}
+		for (const svelteFile of svelteFiles) {
+			const name = basename(svelteFile).slice(0, -'.svelte'.length);
+			try {
+				const parts = readThemeParts(project, themeFile);
+				const source = readFileSync(svelteFile, 'utf8');
+				const setter = readThemeSetter(project, themeFile);
+				const registryKey = readThemeKey(project, themeFile);
+				const directory = relative(componentsRoot, dirname(svelteFile));
+				const importPath = importMap.get(directory);
+				map[name] = {
+					...extractComponentStructure(source, name, parts),
+					...(setter && { setter }),
+					...(registryKey && { registryKey }),
+					...(importPath && { importPath }),
+					directory
+				};
+			} catch (error) {
+				// Skip a single unparseable component (surface it) rather than fail the build.
+				console.warn(`[entasis-structure] skipped ${name}: ${(error as Error).message}`);
+			}
+		}
+	}
+	return map;
+}
+
 export function entasisStructureDocs(): Plugin {
 	let root = '';
 	let project: Project | null = null;
@@ -27,33 +95,7 @@ export function entasisStructureDocs(): Plugin {
 	}
 
 	function buildMap(): StructureMap {
-		if (cachedMap) return cachedMap;
-		const proj = getProject();
-		const componentsRoot = resolve(root, COMPONENTS_DIR);
-		const importMap = buildImportMap(root);
-		const map: StructureMap = {};
-
-		for (const themeFile of findThemeFiles(componentsRoot)) {
-			for (const svelteFile of findMainSvelteFiles(themeFile)) {
-				const name = basename(svelteFile).slice(0, -'.svelte'.length);
-				try {
-					const parts = readThemeParts(proj, themeFile);
-					const source = readFileSync(svelteFile, 'utf8');
-					const setter = readThemeSetter(proj, themeFile);
-					const importPath = importMap.get(relative(componentsRoot, dirname(svelteFile)));
-					map[name] = {
-						...extractComponentStructure(source, name, parts),
-						...(setter && { setter }),
-						...(importPath && { importPath })
-					};
-				} catch (error) {
-					// Skip a single unparseable component (surface it) rather than fail the build.
-					console.warn(`[entasis-structure] skipped ${name}: ${(error as Error).message}`);
-				}
-			}
-		}
-		cachedMap = map;
-		return map;
+		return (cachedMap ??= buildStructureMap(root, getProject()));
 	}
 
 	return {

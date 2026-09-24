@@ -244,6 +244,13 @@ override. See `theming.md` "State colours".
 
 ## Component Theme Customization
 
+Each component's parts — the element a part lands on, the variants it takes and their default,
+the exact classes each value adds — are listed in `theme-parts/<registry-key>.md` next to this file
+(generated, one file per component: `theme-parts/sidebar.md`, `theme-parts/button.md`).
+Two subsections of `theming.md` answer the questions that come up first: _Scoping an override to
+one colour or variant_ (the `data-color` / `data-variant` hooks) and _Switching a house utility off_
+(`state-layer-none`, `raised-none`, and what each engine utility really is).
+
 Every component has a theme object with slots (e.g., `root`, `prefix`, `suffix`). Each slot has `base` classes plus one map per variant (`color`, `variant`, `size`, ...) keyed directly by variant value.
 
 ### Per-instance override

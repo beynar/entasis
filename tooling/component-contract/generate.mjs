@@ -4,6 +4,7 @@ import process from 'node:process';
 import ts from 'typescript';
 import prettier from 'prettier';
 import { createSourceProgram, listSources, loadManifest, moduleExports } from './source.mjs';
+import { themePartsDir, themePartsOutputs } from './theme-parts.mjs';
 
 const root = path.resolve(import.meta.dirname, '../..');
 const isCheck = process.argv.includes('--check');
@@ -539,9 +540,35 @@ await emit(
 	`${canonicalSkillDir}/SKILL.md`,
 	updateSkillInventory(await read(`${canonicalSkillDir}/SKILL.md`), inventory)
 );
+// Theme-part reference: one generated file per component, mirrored like the rest of the skill.
+const themeParts = await themePartsOutputs();
+if (themeParts.problems.length > 0) {
+	console.error(
+		`Theme registry keys must be kebab-case:\n${themeParts.problems.map((p) => `- ${p}`).join('\n')}`
+	);
+	process.exit(1);
+}
+const keep = new Set(themeParts.files.map((file) => path.basename(file.relativePath)));
+for (const file of themeParts.files) await emit(file.relativePath, file.content);
+for (const dir of [themePartsDir, themePartsDir.replace(canonicalSkillDir, mirrorSkillDir)]) {
+	let existing = [];
+	try {
+		existing = await fs.readdir(path.join(root, dir));
+	} catch (error) {
+		if (error.code !== 'ENOENT') throw error;
+	}
+	for (const stale of existing.filter((file) => file.endsWith('.md') && !keep.has(file))) {
+		changedFiles.push(`${dir}/${stale}`);
+		if (!isCheck) await fs.rm(path.join(root, dir, stale));
+	}
+}
+
 for (const file of await fs.readdir(path.join(root, canonicalSkillDir))) {
 	if (!file.endsWith('.md')) continue;
 	await emit(`${mirrorSkillDir}/${file}`, await read(`${canonicalSkillDir}/${file}`));
+}
+for (const file of themeParts.files) {
+	await emit(file.relativePath.replace(canonicalSkillDir, mirrorSkillDir), file.content);
 }
 
 if (isCheck && changedFiles.length > 0) {

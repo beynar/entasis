@@ -1,6 +1,12 @@
 import { parse, type AST } from 'svelte/compiler';
 import { Node, type ObjectLiteralExpression, type Project, type SourceFile } from 'ts-morph';
-import type { ComponentStructure, StructureNode, ThemePart, ThemeVariant } from './types.js';
+import type {
+	ComponentStructure,
+	StructureNode,
+	ThemeCompoundVariant,
+	ThemePart,
+	ThemeVariant
+} from './types.js';
 
 /*
  * ESTree types are reached through `AST` rather than imported from `estree`:
@@ -303,6 +309,27 @@ export function readThemeSetter(project: Project, themeFilePath: string): string
 }
 
 /**
+ * The registry key: the string literal handed to `setComponentTheme(..)` in the theme file.
+ * It is what `<Theme components={{ <key>: .. }}>` is keyed by, so the docs list it verbatim.
+ */
+export function readThemeKey(project: Project, themeFilePath: string): string | undefined {
+	const sourceFile =
+		project.getSourceFile(themeFilePath) ?? project.addSourceFileAtPath(themeFilePath);
+	for (const decl of sourceFile.getVariableDeclarations()) {
+		const init = decl.getInitializer();
+		if (
+			init &&
+			Node.isCallExpression(init) &&
+			init.getExpression().getText() === 'setComponentTheme'
+		) {
+			const [key] = init.getArguments();
+			if (key && Node.isStringLiteral(key)) return key.getLiteralText();
+		}
+	}
+	return undefined;
+}
+
+/**
  * Map of local `const name = <factory>({..})` declarations to their config object
  * literal, for a theme factory (`cva` for class slots, `motion` for the reserved
  * `motion` slot).
@@ -329,11 +356,13 @@ function parseCvaConfig(config: ObjectLiteralExpression): Partial<ThemePart> {
 	const variants = variantsObj ? parseVariants(variantsObj) : [];
 	const defaultsObj = objectProp(config, 'defaultVariants');
 	const defaultVariants = defaultsObj ? parseDefaults(defaultsObj) : {};
+	const compoundVariants = parseCompounds(config);
 
 	return {
 		...(base && { base }),
 		...(variants.length && { variants }),
-		...(Object.keys(defaultVariants).length && { defaultVariants })
+		...(Object.keys(defaultVariants).length && { defaultVariants }),
+		...(compoundVariants.length && { compoundVariants })
 	};
 }
 
@@ -350,8 +379,8 @@ function parseMotionConfig(config: ObjectLiteralExpression): Partial<ThemePart> 
 
 	for (const prop of variantsObj?.getProperties() ?? []) {
 		if (!Node.isPropertyAssignment(prop)) continue;
-		const optionsObj = prop.getInitializer();
-		if (!optionsObj || !Node.isObjectLiteralExpression(optionsObj)) continue;
+		const optionsObj = resolveObjectLiteral(prop.getInitializer());
+		if (!optionsObj) continue;
 		const options = optionsObj
 			.getProperties()
 			.filter(Node.isPropertyAssignment)
@@ -385,8 +414,8 @@ function parseVariants(variantsObj: ObjectLiteralExpression): ThemeVariant[] {
 	const variants: ThemeVariant[] = [];
 	for (const prop of variantsObj.getProperties()) {
 		if (!Node.isPropertyAssignment(prop)) continue;
-		const optionsObj = prop.getInitializer();
-		if (!optionsObj || !Node.isObjectLiteralExpression(optionsObj)) continue;
+		const optionsObj = resolveObjectLiteral(prop.getInitializer());
+		if (!optionsObj) continue;
 
 		const options = optionsObj
 			.getProperties()
@@ -394,14 +423,41 @@ function parseVariants(variantsObj: ObjectLiteralExpression): ThemeVariant[] {
 			.map((option) => ({
 				value: option.getName(),
 				classes: literalString(option.getInitializer()) ?? ''
-			}))
-			.filter((option) => option.classes.length > 0);
+			}));
 		if (options.length) variants.push({ name: prop.getName(), options });
 	}
 	return variants;
 }
 
 /** `defaultVariants` as a `variant -> value` string map (`size: 'normal'`, `disabled: false`). */
+/** `compoundVariants`: each entry's variant conditions plus the classes it adds when all hold. */
+function parseCompounds(config: ObjectLiteralExpression): ThemeCompoundVariant[] {
+	const prop = config.getProperty('compoundVariants');
+	if (!prop || !Node.isPropertyAssignment(prop)) return [];
+	const list = prop.getInitializer();
+	if (!list || !Node.isArrayLiteralExpression(list)) return [];
+	const compounds: ThemeCompoundVariant[] = [];
+	for (const element of list.getElements()) {
+		if (!Node.isObjectLiteralExpression(element)) continue;
+		const when: Record<string, string> = {};
+		let classes = '';
+		for (const entry of element.getProperties()) {
+			if (!Node.isPropertyAssignment(entry)) continue;
+			const name = entry.getName();
+			const init = entry.getInitializer();
+			if (name === 'class' || name === 'className') classes = literalString(init) ?? '';
+			else if (init && Node.isArrayLiteralExpression(init))
+				when[name] = init
+					.getElements()
+					.map((value) => literalString(value) ?? value.getText())
+					.join(' | ');
+			else when[name] = literalString(init) ?? init?.getText() ?? '';
+		}
+		if (classes) compounds.push({ when, classes });
+	}
+	return compounds;
+}
+
 function parseDefaults(defaultsObj: ObjectLiteralExpression): Record<string, string> {
 	const defaults: Record<string, string> = {};
 	for (const prop of defaultsObj.getProperties()) {
@@ -423,8 +479,25 @@ function objectProp(
 ): ObjectLiteralExpression | undefined {
 	const prop = obj.getProperty(name);
 	if (!prop || !Node.isPropertyAssignment(prop)) return undefined;
-	const init = prop.getInitializer();
-	return init && Node.isObjectLiteralExpression(init) ? init : undefined;
+	return resolveObjectLiteral(prop.getInitializer());
+}
+
+/**
+ * The object literal behind a node: itself, or the `const` it names in the same file, with
+ * `as const` and parentheses unwrapped. Big themes share variant maps between parts
+ * (`activeVariant: activeVariants`), and the reference has to show them on every part.
+ */
+function resolveObjectLiteral(node: Node | undefined): ObjectLiteralExpression | undefined {
+	let current = node;
+	while (current && (Node.isAsExpression(current) || Node.isParenthesizedExpression(current)))
+		current = current.getExpression();
+	if (!current) return undefined;
+	if (Node.isObjectLiteralExpression(current)) return current;
+	if (Node.isIdentifier(current)) {
+		const declaration = current.getSourceFile().getVariableDeclaration(current.getText());
+		return declaration ? resolveObjectLiteral(declaration.getInitializer()) : undefined;
+	}
+	return undefined;
 }
 
 /** The string value of a string or no-substitution template literal, else undefined. */

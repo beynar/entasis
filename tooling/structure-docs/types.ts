@@ -71,6 +71,13 @@ export type ThemeVariantOption = {
 	classes: string;
 };
 
+/** One `compoundVariants` entry: the variant values that must all hold, and the classes it then adds. */
+export type ThemeCompoundVariant = {
+	/** Variant name -> required value; several accepted values are joined with ` | `. */
+	when: Record<string, string>;
+	classes: string;
+};
+
 /** A `cva` / `motion()` variant axis, e.g. `size` with its `small`/`normal`/`large` options. */
 export type ThemeVariant = {
 	name: string;
@@ -102,6 +109,8 @@ export type ThemePart = {
 	variants?: ThemeVariant[];
 	/** The `defaultVariants` map (variant name -> selected value). */
 	defaultVariants?: Record<string, string>;
+	/** The `compoundVariants` entries, absent when the part has none. */
+	compoundVariants?: ThemeCompoundVariant[];
 };
 
 export type ComponentStructure = {
@@ -113,8 +122,12 @@ export type ComponentStructure = {
 	parts: ThemePart[];
 	/** The `set<Component>Theme` export name, e.g. "setAccordionTheme". */
 	setter?: string;
+	/** The `<Theme components>` registry key, the string passed to `setComponentTheme(..)`, e.g. "accordion". */
+	registryKey?: string;
 	/** Package subpath the setter is imported from, e.g. "entasis/accordion". */
 	importPath?: string;
+	/** Component directory relative to `src/lib/components`, e.g. "Form/TextInput". */
+	directory?: string;
 };
 
 /** Keyed by component name (e.g. "Accordion"). */

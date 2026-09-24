@@ -11,6 +11,7 @@ const execute = promisify(execFile);
 const sourceTools = [
 	'tooling/component-contract/source.mjs',
 	'tooling/component-contract/generate.mjs',
+	'tooling/component-contract/theme-parts.mjs',
 	'tooling/check-public-api-contract.mjs',
 	'tooling/check-semantic-theme-tokens.mjs'
 ];
