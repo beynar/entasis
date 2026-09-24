@@ -6,6 +6,7 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.7.0 — 2026-09-24
 ### Renamed
 
 - Every `<Theme components>` registry key is kebab-case, the component's import-subpath name:
