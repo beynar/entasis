@@ -67,5 +67,5 @@ export const aiThreadTheme = {
 };
 export type AIThreadTheme = typeof aiThreadTheme;
 export type AIThreadThemeProps = InferComponentTheme<AIThreadTheme>;
-export const setAIThreadTheme = setComponentTheme<AIThreadTheme>('aiThread');
-export const useAIThreadTheme = useComponentTheme<AIThreadTheme>('aiThread', aiThreadTheme);
+export const setAIThreadTheme = setComponentTheme<AIThreadTheme>('ai-thread');
+export const useAIThreadTheme = useComponentTheme<AIThreadTheme>('ai-thread', aiThreadTheme);

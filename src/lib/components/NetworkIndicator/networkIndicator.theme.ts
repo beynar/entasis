@@ -85,10 +85,10 @@ export const networkIndicatorTheme = {
 export type NetworkIndicatorTheme = typeof networkIndicatorTheme;
 export type NetworkIndicatorThemeProps = InferComponentTheme<NetworkIndicatorTheme>;
 export const setNetworkIndicatorTheme =
-	setComponentTheme<NetworkIndicatorTheme>('networkIndicator');
+	setComponentTheme<NetworkIndicatorTheme>('network-indicator');
 export const useNetworkIndicatorTheme = useComponentTheme<NetworkIndicatorTheme>(
 	'networkIndicator',
 	networkIndicatorTheme
 );
 export const useNetworkIndicatorMotion = () =>
-	useComponentMotion('networkIndicator', defaultNetworkIndicatorMotion);
+	useComponentMotion('network-indicator', defaultNetworkIndicatorMotion);

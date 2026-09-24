@@ -165,7 +165,7 @@ The visible bar renders \`role="progressbar"\` without a value because progress 
 
 - **motion** theme slot, keyed by \`variant\`: one growth step of the \`bar\` loop (\`slow\`), or
   one pass of the \`trail\` / \`trail-bounce\` variants (the \`slower\` token, 500ms). Only \`duration\` / \`easing\` are read.
-- Ladder: \`<Theme components={{ networkIndicator: { motion } }}>\` →
+- Ladder: \`<Theme components={{ 'network-indicator': { motion } }}>\` →
   \`setNetworkIndicatorTheme({ motion })\` → \`theme={{ motion: { duration, easing } }}\`.
 - A resolved duration of 0 (reduced motion) holds the indicator still instead of looping.
 `;

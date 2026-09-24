@@ -96,5 +96,5 @@ export const keyValueInputTheme = {
 
 export type KeyValueInputTheme = typeof keyValueInputTheme;
 export type KeyValueInputThemeProps = InferComponentTheme<KeyValueInputTheme>;
-export const setKeyValueInputTheme = setComponentTheme<KeyValueInputTheme>('keyValueInput');
-export const useKeyValueInputTheme = useComponentTheme('keyValueInput', keyValueInputTheme);
+export const setKeyValueInputTheme = setComponentTheme<KeyValueInputTheme>('key-value-input');
+export const useKeyValueInputTheme = useComponentTheme('key-value-input', keyValueInputTheme);

@@ -392,6 +392,6 @@ export const ganttChartTheme = {
 
 export type GanttChartTheme = typeof ganttChartTheme;
 export type GanttChartThemeProps = InferComponentTheme<GanttChartTheme>;
-export const setGanttChartTheme = setComponentTheme<GanttChartTheme>('ganttChart');
-export const useGanttChartTheme = useComponentTheme<GanttChartTheme>('ganttChart', ganttChartTheme);
+export const setGanttChartTheme = setComponentTheme<GanttChartTheme>('gantt-chart');
+export const useGanttChartTheme = useComponentTheme<GanttChartTheme>('gantt-chart', ganttChartTheme);
 export type GanttChartClasses = ReturnType<typeof useGanttChartTheme>;

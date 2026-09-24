@@ -314,5 +314,5 @@ export const richTextInputTheme = {
 
 export type RichTextInputTheme = typeof richTextInputTheme;
 export type RichTextInputThemeProps = InferComponentTheme<RichTextInputTheme>;
-export const setRichTextInputTheme = setComponentTheme<RichTextInputTheme>('richTextInput');
-export const useRichTextInputTheme = useComponentTheme('richTextInput', richTextInputTheme);
+export const setRichTextInputTheme = setComponentTheme<RichTextInputTheme>('rich-text-input');
+export const useRichTextInputTheme = useComponentTheme('rich-text-input', richTextInputTheme);

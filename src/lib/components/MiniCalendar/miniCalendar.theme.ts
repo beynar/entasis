@@ -186,5 +186,5 @@ export const miniCalendarTheme = {
 
 export type MiniCalendarTheme = typeof miniCalendarTheme;
 export type MiniCalendarThemeProps = InferComponentTheme<MiniCalendarTheme>;
-export const setMiniCalendarTheme = setComponentTheme<MiniCalendarTheme>('miniCalendar');
-export const useMiniCalendarTheme = useComponentTheme('miniCalendar', miniCalendarTheme);
+export const setMiniCalendarTheme = setComponentTheme<MiniCalendarTheme>('mini-calendar');
+export const useMiniCalendarTheme = useComponentTheme('mini-calendar', miniCalendarTheme);

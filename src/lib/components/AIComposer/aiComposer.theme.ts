@@ -92,5 +92,5 @@ export const aiComposerTheme = {
 };
 export type AIComposerTheme = typeof aiComposerTheme;
 export type AIComposerThemeProps = InferComponentTheme<AIComposerTheme>;
-export const setAIComposerTheme = setComponentTheme<AIComposerTheme>('aiComposer');
-export const useAIComposerTheme = useComponentTheme<AIComposerTheme>('aiComposer', aiComposerTheme);
+export const setAIComposerTheme = setComponentTheme<AIComposerTheme>('ai-composer');
+export const useAIComposerTheme = useComponentTheme<AIComposerTheme>('ai-composer', aiComposerTheme);

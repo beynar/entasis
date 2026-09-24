@@ -44,5 +44,5 @@ export const numberInputTheme = {
 
 export type NumberInputTheme = typeof numberInputTheme;
 export type NumberInputThemeProps = InferComponentTheme<NumberInputTheme>;
-export const setNumberInputTheme = setComponentTheme<NumberInputTheme>('numberInput');
-export const useNumberInputTheme = useComponentTheme('numberInput', numberInputTheme);
+export const setNumberInputTheme = setComponentTheme<NumberInputTheme>('number-input');
+export const useNumberInputTheme = useComponentTheme('number-input', numberInputTheme);

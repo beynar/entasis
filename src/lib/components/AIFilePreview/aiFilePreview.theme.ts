@@ -29,7 +29,7 @@ export const aiFilePreviewTheme = {
 
 export type AIFilePreviewTheme = typeof aiFilePreviewTheme;
 export type AIFilePreviewThemeProps = InferComponentTheme<AIFilePreviewTheme>;
-export const setAIFilePreviewTheme = setComponentTheme<AIFilePreviewTheme>('aiFilePreview');
+export const setAIFilePreviewTheme = setComponentTheme<AIFilePreviewTheme>('ai-file-preview');
 export const useAIFilePreviewTheme = useComponentTheme<AIFilePreviewTheme>(
 	'aiFilePreview',
 	aiFilePreviewTheme

@@ -44,5 +44,5 @@ export const textInputTheme = {
 
 export type TextInputTheme = typeof textInputTheme;
 export type TextInputThemeProps = InferComponentTheme<TextInputTheme>;
-export const setTextInputTheme = setComponentTheme<TextInputTheme>('textInput');
-export const useTextInputTheme = useComponentTheme('textInput', textInputTheme);
+export const setTextInputTheme = setComponentTheme<TextInputTheme>('text-input');
+export const useTextInputTheme = useComponentTheme('text-input', textInputTheme);

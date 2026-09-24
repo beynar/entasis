@@ -38,5 +38,5 @@ export const gridSpanTheme = {
 
 export type GridSpanTheme = typeof gridSpanTheme;
 export type GridSpanThemeProps = InferComponentTheme<GridSpanTheme>;
-export const setGridSpanTheme = setComponentTheme<GridSpanTheme>('gridSpan');
-export const useGridSpanTheme = useComponentTheme<GridSpanTheme>('gridSpan', gridSpanTheme);
+export const setGridSpanTheme = setComponentTheme<GridSpanTheme>('grid-span');
+export const useGridSpanTheme = useComponentTheme<GridSpanTheme>('grid-span', gridSpanTheme);

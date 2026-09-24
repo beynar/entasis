@@ -453,5 +453,5 @@ toggleNetworkIndicator(); // hide
 
 **Note:** Place in root `+layout.svelte`. Uses Web Animations API. Fixed position at viewport top.
 Pacing comes from the `motion` theme slot (duration tokens), not a `delay` prop — retune it
-per app with `<Theme components={{ networkIndicator: { motion } }}>` or per instance with
+per app with `<Theme components={{ 'network-indicator': { motion } }}>` or per instance with
 `theme={{ motion }}`.

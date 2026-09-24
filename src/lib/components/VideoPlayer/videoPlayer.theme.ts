@@ -346,5 +346,5 @@ export const videoPlayerTheme = {
 
 export type VideoPlayerTheme = typeof videoPlayerTheme;
 export type VideoPlayerThemeProps = InferComponentTheme<VideoPlayerTheme>;
-export const setVideoPlayerTheme = setComponentTheme<VideoPlayerTheme>('videoPlayer');
-export const useVideoPlayerTheme = useComponentTheme('videoPlayer', videoPlayerTheme);
+export const setVideoPlayerTheme = setComponentTheme<VideoPlayerTheme>('video-player');
+export const useVideoPlayerTheme = useComponentTheme('video-player', videoPlayerTheme);

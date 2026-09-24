@@ -239,5 +239,5 @@ export const phoneInputTheme = {
 
 export type PhoneInputTheme = typeof phoneInputTheme;
 export type PhoneInputThemeProps = InferComponentTheme<PhoneInputTheme>;
-export const setPhoneInputTheme = setComponentTheme<PhoneInputTheme>('phoneInput');
-export const usePhoneInputTheme = useComponentTheme('phoneInput', phoneInputTheme);
+export const setPhoneInputTheme = setComponentTheme<PhoneInputTheme>('phone-input');
+export const usePhoneInputTheme = useComponentTheme('phone-input', phoneInputTheme);

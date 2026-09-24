@@ -21,7 +21,7 @@ export const toggleButtonGroupTheme = {
 export type ToggleButtonGroupTheme = typeof toggleButtonGroupTheme;
 export type ToggleButtonGroupThemeProps = InferComponentTheme<ToggleButtonGroupTheme>;
 export const setToggleButtonGroupTheme =
-	setComponentTheme<ToggleButtonGroupTheme>('toggleButtonGroup');
+	setComponentTheme<ToggleButtonGroupTheme>('toggle-button-group');
 export const useToggleButtonGroupTheme = useComponentTheme<ToggleButtonGroupTheme>(
 	'toggleButtonGroup',
 	toggleButtonGroupTheme

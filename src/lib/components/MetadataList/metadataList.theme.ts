@@ -206,5 +206,5 @@ export const metadataListTheme = {
 
 export type MetadataListTheme = typeof metadataListTheme;
 export type MetadataListThemeProps = InferComponentTheme<MetadataListTheme>;
-export const setMetadataListTheme = setComponentTheme<MetadataListTheme>('metadataList');
-export const useMetadataListTheme = useComponentTheme('metadataList', metadataListTheme);
+export const setMetadataListTheme = setComponentTheme<MetadataListTheme>('metadata-list');
+export const useMetadataListTheme = useComponentTheme('metadata-list', metadataListTheme);

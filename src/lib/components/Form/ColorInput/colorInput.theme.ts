@@ -71,5 +71,5 @@ export const colorInputTheme = {
 
 export type ColorInputTheme = typeof colorInputTheme;
 export type ColorInputThemeProps = InferComponentTheme<ColorInputTheme>;
-export const setColorInputTheme = setComponentTheme<ColorInputTheme>('colorInput');
-export const useColorInputTheme = useComponentTheme('colorInput', colorInputTheme);
+export const setColorInputTheme = setComponentTheme<ColorInputTheme>('color-input');
+export const useColorInputTheme = useComponentTheme('color-input', colorInputTheme);

@@ -36,5 +36,5 @@ export const menuBarTheme = {
 
 export type MenuBarTheme = typeof menuBarTheme;
 export type MenuBarThemeProps = InferComponentTheme<MenuBarTheme>;
-export const setMenuBarTheme = setComponentTheme<MenuBarTheme>('menuBar');
-export const useMenuBarTheme = useComponentTheme<MenuBarTheme>('menuBar', menuBarTheme);
+export const setMenuBarTheme = setComponentTheme<MenuBarTheme>('menu-bar');
+export const useMenuBarTheme = useComponentTheme<MenuBarTheme>('menu-bar', menuBarTheme);

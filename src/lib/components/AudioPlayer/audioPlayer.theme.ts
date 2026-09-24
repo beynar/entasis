@@ -398,5 +398,5 @@ export const audioPlayerTheme = {
 
 export type AudioPlayerTheme = typeof audioPlayerTheme;
 export type AudioPlayerThemeProps = InferComponentTheme<AudioPlayerTheme>;
-export const setAudioPlayerTheme = setComponentTheme<AudioPlayerTheme>('audioPlayer');
-export const useAudioPlayerTheme = useComponentTheme('audioPlayer', audioPlayerTheme);
+export const setAudioPlayerTheme = setComponentTheme<AudioPlayerTheme>('audio-player');
+export const useAudioPlayerTheme = useComponentTheme('audio-player', audioPlayerTheme);

@@ -114,10 +114,10 @@ export const spinnerTextTheme = {
 
 export type SpinnerTextTheme = typeof spinnerTextTheme;
 export type SpinnerTextThemeProps = InferComponentTheme<SpinnerTextTheme>;
-export const setSpinnerTextTheme = setComponentTheme<SpinnerTextTheme>('spinnerText');
+export const setSpinnerTextTheme = setComponentTheme<SpinnerTextTheme>('spinner-text');
 export const useSpinnerTextTheme = useComponentTheme<SpinnerTextTheme>(
 	'spinnerText',
 	spinnerTextTheme
 );
 export const useSpinnerTextMotion = () =>
-	useComponentMotion('spinnerText', defaultSpinnerTextMotion);
+	useComponentMotion('spinner-text', defaultSpinnerTextMotion);

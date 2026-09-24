@@ -138,5 +138,5 @@ export const aiMessageTheme = {
 };
 export type AIMessageTheme = typeof aiMessageTheme;
 export type AIMessageThemeProps = InferComponentTheme<AIMessageTheme>;
-export const setAIMessageTheme = setComponentTheme<AIMessageTheme>('aiMessage');
-export const useAIMessageTheme = useComponentTheme<AIMessageTheme>('aiMessage', aiMessageTheme);
+export const setAIMessageTheme = setComponentTheme<AIMessageTheme>('ai-message');
+export const useAIMessageTheme = useComponentTheme<AIMessageTheme>('ai-message', aiMessageTheme);

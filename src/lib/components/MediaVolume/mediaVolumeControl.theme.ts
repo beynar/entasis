@@ -54,7 +54,7 @@ export const mediaVolumeControlTheme = {
 export type MediaVolumeControlTheme = typeof mediaVolumeControlTheme;
 export type MediaVolumeControlThemeProps = InferComponentTheme<MediaVolumeControlTheme>;
 export const setMediaVolumeControlTheme =
-	setComponentTheme<MediaVolumeControlTheme>('mediaVolumeControl');
+	setComponentTheme<MediaVolumeControlTheme>('media-volume-control');
 export const useMediaVolumeControlTheme = useComponentTheme(
 	'mediaVolumeControl',
 	mediaVolumeControlTheme

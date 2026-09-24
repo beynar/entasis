@@ -321,5 +321,5 @@ export const aiToolTheme = {
 };
 export type AIToolTheme = typeof aiToolTheme;
 export type AIToolThemeProps = InferComponentTheme<AIToolTheme>;
-export const setAIToolTheme = setComponentTheme<AIToolTheme>('aiTool');
-export const useAIToolTheme = useComponentTheme<AIToolTheme>('aiTool', aiToolTheme);
+export const setAIToolTheme = setComponentTheme<AIToolTheme>('ai-tool');
+export const useAIToolTheme = useComponentTheme<AIToolTheme>('ai-tool', aiToolTheme);

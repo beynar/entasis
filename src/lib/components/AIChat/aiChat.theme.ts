@@ -36,5 +36,5 @@ export const aiChatTheme = {
 };
 export type AIChatTheme = typeof aiChatTheme;
 export type AIChatThemeProps = InferComponentTheme<AIChatTheme>;
-export const setAIChatTheme = setComponentTheme<AIChatTheme>('aiChat');
-export const useAIChatTheme = useComponentTheme<AIChatTheme>('aiChat', aiChatTheme);
+export const setAIChatTheme = setComponentTheme<AIChatTheme>('ai-chat');
+export const useAIChatTheme = useComponentTheme<AIChatTheme>('ai-chat', aiChatTheme);

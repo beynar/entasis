@@ -63,5 +63,5 @@ export const aiContextTheme = {
 };
 export type AIContextTheme = typeof aiContextTheme;
 export type AIContextThemeProps = InferComponentTheme<AIContextTheme>;
-export const setAIContextTheme = setComponentTheme<AIContextTheme>('aiContext');
-export const useAIContextTheme = useComponentTheme<AIContextTheme>('aiContext', aiContextTheme);
+export const setAIContextTheme = setComponentTheme<AIContextTheme>('ai-context');
+export const useAIContextTheme = useComponentTheme<AIContextTheme>('ai-context', aiContextTheme);

@@ -76,5 +76,5 @@ export const pinInputTheme = {
 
 export type PinInputTheme = typeof pinInputTheme;
 export type PinInputThemeProps = InferComponentTheme<PinInputTheme>;
-export const setPinInputTheme = setComponentTheme<PinInputTheme>('pinInput');
-export const usePinInputTheme = useComponentTheme('pinInput', pinInputTheme);
+export const setPinInputTheme = setComponentTheme<PinInputTheme>('pin-input');
+export const usePinInputTheme = useComponentTheme('pin-input', pinInputTheme);

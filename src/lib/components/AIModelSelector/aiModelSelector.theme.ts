@@ -42,7 +42,7 @@ export const aiModelSelectorTheme = {
 };
 export type AIModelSelectorTheme = typeof aiModelSelectorTheme;
 export type AIModelSelectorThemeProps = InferComponentTheme<AIModelSelectorTheme>;
-export const setAIModelSelectorTheme = setComponentTheme<AIModelSelectorTheme>('aiModelSelector');
+export const setAIModelSelectorTheme = setComponentTheme<AIModelSelectorTheme>('ai-model-selector');
 export const useAIModelSelectorTheme = useComponentTheme<AIModelSelectorTheme>(
 	'aiModelSelector',
 	aiModelSelectorTheme

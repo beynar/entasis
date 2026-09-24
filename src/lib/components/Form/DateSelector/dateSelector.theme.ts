@@ -51,7 +51,7 @@ export const dateSelectorTheme = {
 
 export type DateSelectorTheme = typeof dateSelectorTheme;
 export type DateSelectorThemeProps = InferComponentTheme<DateSelectorTheme>;
-export const setDateSelectorTheme = setComponentTheme<DateSelectorTheme>('dateSelector');
+export const setDateSelectorTheme = setComponentTheme<DateSelectorTheme>('date-selector');
 export const useDateSelectorTheme = useComponentTheme<DateSelectorTheme>(
 	'dateSelector',
 	dateSelectorTheme

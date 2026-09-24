@@ -24,7 +24,7 @@ export const aiReasoningTheme = {
 };
 export type AIReasoningTheme = typeof aiReasoningTheme;
 export type AIReasoningThemeProps = InferComponentTheme<AIReasoningTheme>;
-export const setAIReasoningTheme = setComponentTheme<AIReasoningTheme>('aiReasoning');
+export const setAIReasoningTheme = setComponentTheme<AIReasoningTheme>('ai-reasoning');
 export const useAIReasoningTheme = useComponentTheme<AIReasoningTheme>(
 	'aiReasoning',
 	aiReasoningTheme

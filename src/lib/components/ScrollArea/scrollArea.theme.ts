@@ -51,5 +51,5 @@ export const scrollAreaTheme = {
 
 export type ScrollAreaTheme = typeof scrollAreaTheme;
 export type ScrollAreaThemeProps = InferComponentTheme<ScrollAreaTheme>;
-export const setScrollAreaTheme = setComponentTheme<ScrollAreaTheme>('scrollArea');
-export const useScrollAreaTheme = useComponentTheme<ScrollAreaTheme>('scrollArea', scrollAreaTheme);
+export const setScrollAreaTheme = setComponentTheme<ScrollAreaTheme>('scroll-area');
+export const useScrollAreaTheme = useComponentTheme<ScrollAreaTheme>('scroll-area', scrollAreaTheme);

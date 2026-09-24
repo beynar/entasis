@@ -96,5 +96,5 @@ export type SortableListTheme = typeof sortableListTheme;
 export type SortableListThemeProps = InferComponentTheme<SortableListTheme>;
 /** The resolved per-part class builders returned by `useSortableListTheme`. */
 export type SortableListClasses = ReturnType<typeof useSortableListTheme>;
-export const setSortableListTheme = setComponentTheme<SortableListTheme>('sortableList');
-export const useSortableListTheme = useComponentTheme('sortableList', sortableListTheme);
+export const setSortableListTheme = setComponentTheme<SortableListTheme>('sortable-list');
+export const useSortableListTheme = useComponentTheme('sortable-list', sortableListTheme);

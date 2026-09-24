@@ -172,7 +172,7 @@ export const documentViewerScrollAreaTheme = {
 
 export type DocumentViewerTheme = typeof documentViewerTheme;
 export type DocumentViewerThemeProps = InferComponentTheme<DocumentViewerTheme>;
-export const setDocumentViewerTheme = setComponentTheme<DocumentViewerTheme>('documentViewer');
+export const setDocumentViewerTheme = setComponentTheme<DocumentViewerTheme>('document-viewer');
 export const useDocumentViewerTheme = useComponentTheme<DocumentViewerTheme>(
 	'documentViewer',
 	documentViewerTheme

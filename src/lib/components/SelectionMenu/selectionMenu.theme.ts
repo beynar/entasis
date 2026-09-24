@@ -16,7 +16,7 @@ export const selectionMenuTheme = {
 
 export type SelectionMenuTheme = typeof selectionMenuTheme;
 export type SelectionMenuThemeProps = InferComponentTheme<SelectionMenuTheme>;
-export const setSelectionMenuTheme = setComponentTheme<SelectionMenuTheme>('selectionMenu');
+export const setSelectionMenuTheme = setComponentTheme<SelectionMenuTheme>('selection-menu');
 export const useSelectionMenuTheme = useComponentTheme<SelectionMenuTheme>(
 	'selectionMenu',
 	selectionMenuTheme

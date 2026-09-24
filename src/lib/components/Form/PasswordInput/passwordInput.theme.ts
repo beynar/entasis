@@ -44,5 +44,5 @@ export const passwordInputTheme = {
 
 export type PasswordInputTheme = typeof passwordInputTheme;
 export type PasswordInputThemeProps = InferComponentTheme<PasswordInputTheme>;
-export const setPasswordInputTheme = setComponentTheme<PasswordInputTheme>('passwordInput');
-export const usePasswordInputTheme = useComponentTheme('passwordInput', passwordInputTheme);
+export const setPasswordInputTheme = setComponentTheme<PasswordInputTheme>('password-input');
+export const usePasswordInputTheme = useComponentTheme('password-input', passwordInputTheme);

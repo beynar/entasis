@@ -94,7 +94,7 @@ export const aiThreadTocTheme = {
 
 export type AIThreadTocTheme = typeof aiThreadTocTheme;
 export type AIThreadTocThemeProps = InferComponentTheme<AIThreadTocTheme>;
-export const setAIThreadTocTheme = setComponentTheme<AIThreadTocTheme>('aiThreadToc');
+export const setAIThreadTocTheme = setComponentTheme<AIThreadTocTheme>('ai-thread-toc');
 export const useAIThreadTocTheme = useComponentTheme<AIThreadTocTheme>(
 	'aiThreadToc',
 	aiThreadTocTheme

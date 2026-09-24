@@ -104,7 +104,7 @@ export const toggleButtonTheme = {
 
 export type ToggleButtonTheme = typeof toggleButtonTheme;
 export type ToggleButtonThemeProps = InferComponentTheme<ToggleButtonTheme>;
-export const setToggleButtonTheme = setComponentTheme<ToggleButtonTheme>('toggleButton');
+export const setToggleButtonTheme = setComponentTheme<ToggleButtonTheme>('toggle-button');
 export const useToggleButtonTheme = useComponentTheme<ToggleButtonTheme>(
 	'toggleButton',
 	toggleButtonTheme

@@ -14,7 +14,7 @@ export const buttonGroupTheme = {
 
 export type ButtonGroupTheme = typeof buttonGroupTheme;
 export type ButtonGroupThemeProps = InferComponentTheme<ButtonGroupTheme>;
-export const setButtonGroupTheme = setComponentTheme<ButtonGroupTheme>('buttonGroup');
+export const setButtonGroupTheme = setComponentTheme<ButtonGroupTheme>('button-group');
 export const useButtonGroupTheme = useComponentTheme<ButtonGroupTheme>(
 	'buttonGroup',
 	buttonGroupTheme

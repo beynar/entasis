@@ -149,5 +149,5 @@ export const menuOptionTheme = {
 
 export type MenuOptionTheme = typeof menuOptionTheme;
 export type MenuOptionThemeProps = InferComponentTheme<MenuOptionTheme>;
-export const setMenuOptionTheme = setComponentTheme<MenuOptionTheme>('menuOption');
-export const useMenuOptionTheme = useComponentTheme<MenuOptionTheme>('menuOption', menuOptionTheme);
+export const setMenuOptionTheme = setComponentTheme<MenuOptionTheme>('menu-option');
+export const useMenuOptionTheme = useComponentTheme<MenuOptionTheme>('menu-option', menuOptionTheme);

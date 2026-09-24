@@ -49,5 +49,5 @@ export const dateInputTheme = {
 
 export type DateInputTheme = typeof dateInputTheme;
 export type DateInputThemeProps = InferComponentTheme<DateInputTheme>;
-export const setDateInputTheme = setComponentTheme<DateInputTheme>('dateInput');
-export const useDateInputTheme = useComponentTheme('dateInput', dateInputTheme);
+export const setDateInputTheme = setComponentTheme<DateInputTheme>('date-input');
+export const useDateInputTheme = useComponentTheme('date-input', dateInputTheme);

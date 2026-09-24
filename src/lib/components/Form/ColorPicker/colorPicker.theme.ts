@@ -289,5 +289,5 @@ export const colorPickerTheme = {
 
 export type ColorPickerTheme = typeof colorPickerTheme;
 export type ColorPickerThemeProps = InferComponentTheme<ColorPickerTheme>;
-export const setColorPickerTheme = setComponentTheme<ColorPickerTheme>('colorPicker');
-export const useColorPickerTheme = useComponentTheme('colorPicker', colorPickerTheme);
+export const setColorPickerTheme = setComponentTheme<ColorPickerTheme>('color-picker');
+export const useColorPickerTheme = useComponentTheme('color-picker', colorPickerTheme);

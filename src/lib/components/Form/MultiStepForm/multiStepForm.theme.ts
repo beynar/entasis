@@ -56,7 +56,7 @@ export const multiStepFormTheme = {
 
 export type MultiStepFormTheme = typeof multiStepFormTheme;
 export type MultiStepFormThemeProps = InferComponentTheme<MultiStepFormTheme>;
-export const setMultiStepFormTheme = setComponentTheme<MultiStepFormTheme>('multiStepForm');
+export const setMultiStepFormTheme = setComponentTheme<MultiStepFormTheme>('multi-step-form');
 export const useMultiStepFormTheme = useComponentTheme<MultiStepFormTheme>(
 	'multiStepForm',
 	multiStepFormTheme

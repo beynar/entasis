@@ -76,5 +76,5 @@ export const fileInputTheme = {
 
 export type FileInputTheme = typeof fileInputTheme;
 export type FileInputThemeProps = InferComponentTheme<FileInputTheme>;
-export const setFileInputTheme = setComponentTheme<FileInputTheme>('fileInput');
-export const useFileInputTheme = useComponentTheme('fileInput', fileInputTheme);
+export const setFileInputTheme = setComponentTheme<FileInputTheme>('file-input');
+export const useFileInputTheme = useComponentTheme('file-input', fileInputTheme);

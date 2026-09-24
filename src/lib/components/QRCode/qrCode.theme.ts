@@ -31,5 +31,5 @@ export const qrCodeTheme = {
 
 export type QRCodeTheme = typeof qrCodeTheme;
 export type QRCodeThemeProps = InferComponentTheme<QRCodeTheme>;
-export const setQRCodeTheme = setComponentTheme<QRCodeTheme>('qrCode');
-export const useQRCodeTheme = useComponentTheme<QRCodeTheme>('qrCode', qrCodeTheme);
+export const setQRCodeTheme = setComponentTheme<QRCodeTheme>('qr-code');
+export const useQRCodeTheme = useComponentTheme<QRCodeTheme>('qr-code', qrCodeTheme);

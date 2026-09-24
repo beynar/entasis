@@ -100,5 +100,5 @@ export const timeInputTheme = {
 
 export type TimeInputTheme = typeof timeInputTheme;
 export type TimeInputThemeProps = InferComponentTheme<TimeInputTheme>;
-export const setTimeInputTheme = setComponentTheme<TimeInputTheme>('timeInput');
-export const useTimeInputTheme = useComponentTheme('timeInput', timeInputTheme);
+export const setTimeInputTheme = setComponentTheme<TimeInputTheme>('time-input');
+export const useTimeInputTheme = useComponentTheme('time-input', timeInputTheme);

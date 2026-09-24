@@ -47,7 +47,7 @@ export const aiMessageActionsTheme = {
 export type AIMessageActionsTheme = typeof aiMessageActionsTheme;
 export type AIMessageActionsThemeProps = InferComponentTheme<AIMessageActionsTheme>;
 export const setAIMessageActionsTheme =
-	setComponentTheme<AIMessageActionsTheme>('aiMessageActions');
+	setComponentTheme<AIMessageActionsTheme>('ai-message-actions');
 export const useAIMessageActionsTheme = useComponentTheme<AIMessageActionsTheme>(
 	'aiMessageActions',
 	aiMessageActionsTheme

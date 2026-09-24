@@ -260,7 +260,7 @@ export const eventCalendarTheme = {
 
 export type EventCalendarTheme = typeof eventCalendarTheme;
 export type EventCalendarThemeProps = InferComponentTheme<EventCalendarTheme>;
-export const setEventCalendarTheme = setComponentTheme<EventCalendarTheme>('eventCalendar');
+export const setEventCalendarTheme = setComponentTheme<EventCalendarTheme>('event-calendar');
 export const useEventCalendarTheme = useComponentTheme<EventCalendarTheme>(
 	'eventCalendar',
 	eventCalendarTheme

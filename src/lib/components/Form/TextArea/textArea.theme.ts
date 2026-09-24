@@ -44,5 +44,5 @@ export const textAreaTheme = {
 
 export type TextAreaTheme = typeof textAreaTheme;
 export type TextAreaThemeProps = InferComponentTheme<TextAreaTheme>;
-export const setTextAreaTheme = setComponentTheme<TextAreaTheme>('textArea');
-export const useTextAreaTheme = useComponentTheme('textArea', textAreaTheme);
+export const setTextAreaTheme = setComponentTheme<TextAreaTheme>('text-area');
+export const useTextAreaTheme = useComponentTheme('text-area', textAreaTheme);

@@ -74,7 +74,7 @@ export const aiAskUserQuestionTheme = {
 export type AIAskUserQuestionTheme = typeof aiAskUserQuestionTheme;
 export type AIAskUserQuestionThemeProps = InferComponentTheme<AIAskUserQuestionTheme>;
 export const setAIAskUserQuestionTheme =
-	setComponentTheme<AIAskUserQuestionTheme>('aiAskUserQuestion');
+	setComponentTheme<AIAskUserQuestionTheme>('ai-ask-user-question');
 export const useAIAskUserQuestionTheme = useComponentTheme<AIAskUserQuestionTheme>(
 	'aiAskUserQuestion',
 	aiAskUserQuestionTheme

@@ -97,5 +97,5 @@ export const tagsInputTheme = {
 
 export type TagsInputTheme = typeof tagsInputTheme;
 export type TagsInputThemeProps = InferComponentTheme<TagsInputTheme>;
-export const setTagsInputTheme = setComponentTheme<TagsInputTheme>('tagsInput');
-export const useTagsInputTheme = useComponentTheme('tagsInput', tagsInputTheme);
+export const setTagsInputTheme = setComponentTheme<TagsInputTheme>('tags-input');
+export const useTagsInputTheme = useComponentTheme('tags-input', tagsInputTheme);

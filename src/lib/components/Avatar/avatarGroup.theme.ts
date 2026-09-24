@@ -36,7 +36,7 @@ export const avatarGroupTheme = {
 
 export type AvatarGroupTheme = typeof avatarGroupTheme;
 export type AvatarGroupThemeProps = InferComponentTheme<AvatarGroupTheme>;
-export const setAvatarGroupTheme = setComponentTheme<AvatarGroupTheme>('avatarGroup');
+export const setAvatarGroupTheme = setComponentTheme<AvatarGroupTheme>('avatar-group');
 export const useAvatarGroupTheme = useComponentTheme<AvatarGroupTheme>(
 	'avatarGroup',
 	avatarGroupTheme

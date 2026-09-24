@@ -34,5 +34,5 @@ export const aiMarkerTheme = {
 };
 export type AIMarkerTheme = typeof aiMarkerTheme;
 export type AIMarkerThemeProps = InferComponentTheme<AIMarkerTheme>;
-export const setAIMarkerTheme = setComponentTheme<AIMarkerTheme>('aiMarker');
-export const useAIMarkerTheme = useComponentTheme<AIMarkerTheme>('aiMarker', aiMarkerTheme);
+export const setAIMarkerTheme = setComponentTheme<AIMarkerTheme>('ai-marker');
+export const useAIMarkerTheme = useComponentTheme<AIMarkerTheme>('ai-marker', aiMarkerTheme);

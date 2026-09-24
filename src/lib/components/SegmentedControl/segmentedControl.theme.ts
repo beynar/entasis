@@ -138,7 +138,7 @@ export const segmentedControlTheme = {
 export type SegmentedControlTheme = typeof segmentedControlTheme;
 export type SegmentedControlThemeProps = InferComponentTheme<SegmentedControlTheme>;
 export const setSegmentedControlTheme =
-	setComponentTheme<SegmentedControlTheme>('segmentedControl');
+	setComponentTheme<SegmentedControlTheme>('segmented-control');
 export const useSegmentedControlTheme = useComponentTheme<SegmentedControlTheme>(
 	'segmentedControl',
 	segmentedControlTheme
