@@ -6,7 +6,40 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Renamed
+
+- Every `<Theme components>` registry key is kebab-case, the component's import-subpath name:
+  `ai-chat`, `data-table`, `date-input`, `network-indicator`, `video-player`, and so on. 54 keys
+  were still camelCase (`aiChat`, `dateInput`, `networkIndicator`, …); the new name is the old one
+  with a hyphen before each capital, lowercased, and every key is listed in the skill's
+  `theme-parts/` folder. A registry entry under an old key resolves nothing; the `set*Theme`
+  setters and `theme` props are unaffected. The contract generator now refuses a key that is not
+  kebab-case.
+
+### Added
+
+- A generated theme-part reference in the entasis skill, `theme-parts/<registry-key>.md`, one file
+  per component: for each part, the element it lands on, its variants with the default marked, and
+  the exact classes each value adds. Built by `generate:component-contract` from the same extractor
+  the docs site's Theme tab uses, and checked for drift with the rest of the contract.
+- Theming docs: how to scope an override to one colour or variant through the `data-color` /
+  `data-variant` attributes component roots publish, and the radius step table.
+- Theming docs: an override only replaces a default written under a variant prefix when it repeats
+  the same prefixes; otherwise the two coexist and the browser keeps the default. Stated, with
+  Sidebar's active row as the example.
+- Sidebar restyle recipes in its MCP description — dark panel, active row in your colour, no hover
+  change, flat panel, row height, icon size — each rendered and asserted by a test so it cannot drift.
+
+### Fixed
+
+- Sidebar `iconSize` (0.6.0) only reached the collapsed-mode padding math: the row, sub-row,
+  trailing, group-label and action icons and the leading media were sized by tokens keyed on
+  `size`. They now read the `--sidebar-icon-size` / `--sidebar-media-size` variables the panel
+  publishes, so `iconSize` scales them as documented, and a `size-*` override on any of them still
+  wins.
+
 ## 0.6.0 — 2026-09-23
+
 ### Added
 
 - `state-layer-none`: switches the hover / pressed overlay off on one element. The tint is a
@@ -20,6 +53,7 @@ Unreleased section under the new version.
   Tailwind counterpart or carries a `none` value, so the table stays true when a token is added.
 
 ## 0.5.0 — 2026-09-22
+
 ### Renamed
 
 - Sidebar theme variants now spell both of the component's size axes in the shared scale. The
