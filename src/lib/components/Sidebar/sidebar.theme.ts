@@ -27,12 +27,14 @@ const activeVariants = {
 // Icon and leading-media sizes. `size` sets them by default; `iconSize`, declared after it on the
 // panel parts, publishes the same variables and wins when a consumer sets it on its own.
 const sidebarSizeVariables = {
+	// The same tokens the rest of the kit sizes icons and media by, so a `spacing` retune still
+	// reaches the sidebar; `iconSize` simply republishes them one step up or down.
 	small:
-		'[--sidebar-icon-size:0.875rem] [--sidebar-media-size:1.75rem] [--sidebar-compact-media-size:1rem]',
+		'[--sidebar-icon-size:var(--icon-size-sm)] [--sidebar-media-size:calc(var(--spacing)*7)] [--sidebar-compact-media-size:calc(var(--spacing)*4)]',
 	normal:
-		'[--sidebar-icon-size:1rem] [--sidebar-media-size:2rem] [--sidebar-compact-media-size:1.25rem]',
+		'[--sidebar-icon-size:var(--icon-size-md)] [--sidebar-media-size:calc(var(--spacing)*8)] [--sidebar-compact-media-size:calc(var(--spacing)*5)]',
 	large:
-		'[--sidebar-icon-size:1.25rem] [--sidebar-media-size:2.25rem] [--sidebar-compact-media-size:1.5rem]'
+		'[--sidebar-icon-size:var(--icon-size-lg)] [--sidebar-media-size:calc(var(--spacing)*9)] [--sidebar-compact-media-size:calc(var(--spacing)*6)]'
 };
 
 const sidebarDensityVariables = {
@@ -144,18 +146,16 @@ const defaultGroup = cva({
 });
 
 const defaultGroupLabel = cva({
-	base: 'text-neutral/70 flex shrink-0 items-center rounded-sm font-medium outline-none transition-[height,margin,padding,opacity] duration-normal ease-linear group-data-[collapsible=icon]:opacity-0 disabled:pointer-events-none [&>svg]:shrink-0',
+	base: 'text-neutral/70 flex shrink-0 items-center rounded-sm font-medium outline-none transition-[height,margin,padding,opacity] duration-normal ease-linear group-data-[collapsible=icon]:opacity-0 disabled:pointer-events-none [&>svg]:shrink-0 [&>svg]:size-[var(--sidebar-icon-size)]',
 	variants: {
 		interactive: {
 			true: 'state-layer hover:text-neutral focus-visible:ring-2 focus-visible:ring-focus/50',
 			false: null
 		},
 		size: {
-			small:
-				'h-control-sm text-xs group-data-[collapsible=icon]:-mt-layout-md [&>svg]:size-icon-sm',
-			normal:
-				'h-control-md text-sm group-data-[collapsible=icon]:-mt-layout-lg [&>svg]:size-icon-md',
-			large: 'h-control-lg text-sm group-data-[collapsible=icon]:-mt-layout-lg [&>svg]:size-icon-lg'
+			small: 'h-control-sm text-xs group-data-[collapsible=icon]:-mt-layout-md',
+			normal: 'h-control-md text-sm group-data-[collapsible=icon]:-mt-layout-lg',
+			large: 'h-control-lg text-sm group-data-[collapsible=icon]:-mt-layout-lg'
 		},
 		density: {
 			compact: 'px-md',
@@ -220,7 +220,7 @@ const defaultMenu = cva({
 });
 
 const defaultMenuButton = cva({
-	base: 'state-layer peer/menu-button group/menu-button flex w-full items-center overflow-hidden rounded-sm text-left outline-none transition-[background,color,width,height,padding,margin,border-radius] duration-normal ease-linear hover:text-neutral focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:font-medium group-has-data-[sidebar=menu-action]/menu-item:pr-layout-lg group-data-[collapsible=icon]:mx-[calc((var(--sidebar-width-icon)-var(--sidebar-icon-button-width))/2-var(--sidebar-group-padding))] group-data-[collapsible=icon]:w-[var(--sidebar-icon-button-width)] group-data-[collapsible=icon]:rounded-none group-data-[variant=admin]:group-data-[collapsible=icon]:rounded-sm group-data-[variant=framed]:group-data-[collapsible=icon]:rounded-sm group-data-[variant=inset]:group-data-[collapsible=icon]:rounded-sm group-data-[collapsible=icon]:![padding-inline:calc((var(--sidebar-icon-button-width)-var(--sidebar-icon-size))/2)] group-data-[collapsible=icon]:ring-inset [&_svg]:shrink-0',
+	base: 'state-layer peer/menu-button group/menu-button flex w-full items-center overflow-hidden rounded-sm text-left outline-none transition-[background,color,width,height,padding,margin,border-radius] duration-normal ease-linear hover:text-neutral focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:font-medium group-has-data-[sidebar=menu-action]/menu-item:pr-layout-lg group-data-[collapsible=icon]:mx-[calc((var(--sidebar-width-icon)-var(--sidebar-icon-button-width))/2-var(--sidebar-group-padding))] group-data-[collapsible=icon]:w-[var(--sidebar-icon-button-width)] group-data-[collapsible=icon]:rounded-none group-data-[variant=admin]:group-data-[collapsible=icon]:rounded-sm group-data-[variant=framed]:group-data-[collapsible=icon]:rounded-sm group-data-[variant=inset]:group-data-[collapsible=icon]:rounded-sm group-data-[collapsible=icon]:![padding-inline:calc((var(--sidebar-icon-button-width)-var(--sidebar-icon-size))/2)] group-data-[collapsible=icon]:ring-inset [&_svg]:shrink-0 [&_svg]:size-[var(--sidebar-icon-size)]',
 	variants: {
 		activeVariant: activeVariants,
 		variant: {
@@ -228,9 +228,9 @@ const defaultMenuButton = cva({
 			outline: 'border border-neutral-muted bg-surface'
 		},
 		size: {
-			small: 'text-xs leading-4 [&_svg]:size-icon-sm',
-			normal: 'text-sm leading-5 [&_svg]:size-icon-md',
-			large: 'text-base leading-6 [&_svg]:size-icon-lg'
+			small: 'text-xs leading-4',
+			normal: 'text-sm leading-5',
+			large: 'text-base leading-6'
 		},
 		density: {
 			compact: 'gap-sm px-sm',
@@ -283,12 +283,12 @@ const defaultMenuSecondary = cva({
 });
 
 const defaultMenuTrailing = cva({
-	base: 'ml-auto shrink-0 opacity-100 transition-[opacity,transform] duration-normal ease-standard group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:translate-x-1 group-data-[collapsible=icon]:opacity-0',
+	base: 'ml-auto shrink-0 opacity-100 transition-[opacity,transform] duration-normal ease-standard group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:translate-x-1 group-data-[collapsible=icon]:opacity-0 [&>svg]:size-[var(--sidebar-icon-size)]',
 	variants: {
 		size: {
-			small: '[&>svg]:size-icon-sm',
-			normal: '[&>svg]:size-icon-md',
-			large: '[&>svg]:size-icon-lg'
+			small: '',
+			normal: '',
+			large: ''
 		}
 	},
 	defaultVariants: {
@@ -325,13 +325,13 @@ const defaultTreeSubMenu = cva({
 });
 
 const defaultSubButton = cva({
-	base: 'state-layer text-neutral/70 hover:text-neutral flex min-w-0 -translate-x-px items-center overflow-hidden rounded-sm outline-none transition-[background,color,height,padding] duration-normal ease-linear focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:shrink-0',
+	base: 'state-layer text-neutral/70 hover:text-neutral flex min-w-0 -translate-x-px items-center overflow-hidden rounded-sm outline-none transition-[background,color,height,padding] duration-normal ease-linear focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:shrink-0 [&>svg]:size-[var(--sidebar-icon-size)]',
 	variants: {
 		activeVariant: activeVariants,
 		size: {
-			small: 'h-6 text-xs leading-4 [&>svg]:size-icon-sm',
-			normal: 'h-control-sm text-sm leading-5 [&>svg]:size-icon-md',
-			large: 'h-control-md text-base leading-6 [&>svg]:size-icon-lg'
+			small: 'h-6 text-xs leading-4',
+			normal: 'h-control-sm text-sm leading-5',
+			large: 'h-control-md text-base leading-6'
 		},
 		density: {
 			compact: 'gap-sm px-md',
@@ -353,12 +353,12 @@ const defaultSubButton = cva({
 });
 
 const defaultMenuAction = cva({
-	base: 'state-layer text-neutral hover:text-neutral peer-hover/menu-button:text-neutral absolute top-1/2 flex aspect-square -translate-y-1/2 items-center justify-center rounded-sm p-0 opacity-100 outline-none transition group-data-[collapsible=icon]:hidden focus-visible:ring-2 focus-visible:ring-focus/50 md:opacity-0 group-focus-within/menu-row:opacity-100 group-hover/menu-row:opacity-100 has-[[aria-expanded=true]]:opacity-100 [&>svg]:shrink-0',
+	base: 'state-layer text-neutral hover:text-neutral peer-hover/menu-button:text-neutral absolute top-1/2 flex aspect-square -translate-y-1/2 items-center justify-center rounded-sm p-0 opacity-100 outline-none transition group-data-[collapsible=icon]:hidden focus-visible:ring-2 focus-visible:ring-focus/50 md:opacity-0 group-focus-within/menu-row:opacity-100 group-hover/menu-row:opacity-100 has-[[aria-expanded=true]]:opacity-100 [&>svg]:shrink-0 [&>svg]:size-[var(--sidebar-icon-size)]',
 	variants: {
 		size: {
-			small: 'size-4.5 [&>svg]:size-icon-sm',
-			normal: 'size-5 [&>svg]:size-icon-md',
-			large: 'size-6 [&>svg]:size-icon-lg'
+			small: 'size-4.5',
+			normal: 'size-5',
+			large: 'size-6'
 		},
 		density: {
 			compact: 'right-0.5',
@@ -375,12 +375,12 @@ const defaultMenuAction = cva({
 // One icon-only ghost button box. `size` follows the descriptor, defaulting to the Sidebar size,
 // so a group's `+` lands at row scale instead of at the group label's scale.
 const defaultActionSlot = cva({
-	base: 'state-layer text-neutral hover:text-neutral flex aspect-square shrink-0 items-center justify-center rounded-sm p-0 outline-none transition focus-visible:ring-2 focus-visible:ring-focus/50 [&>svg]:shrink-0',
+	base: 'state-layer text-neutral hover:text-neutral flex aspect-square shrink-0 items-center justify-center rounded-sm p-0 outline-none transition focus-visible:ring-2 focus-visible:ring-focus/50 [&>svg]:shrink-0 [&>svg]:size-[var(--sidebar-icon-size)]',
 	variants: {
 		size: {
-			small: 'h-control-sm [&>svg]:size-icon-sm',
-			normal: 'h-control-md [&>svg]:size-icon-md',
-			large: 'h-control-lg [&>svg]:size-icon-lg'
+			small: 'h-control-sm',
+			normal: 'h-control-md',
+			large: 'h-control-lg'
 		}
 	},
 	defaultVariants: {
@@ -421,12 +421,12 @@ const defaultButtonRow = cva({
 });
 
 const defaultActionTrigger = cva({
-	base: 'flex size-full items-center justify-center rounded-sm bg-transparent outline-none [&>svg]:shrink-0',
+	base: 'flex size-full items-center justify-center rounded-sm bg-transparent outline-none [&>svg]:shrink-0 [&>svg]:size-[var(--sidebar-icon-size)]',
 	variants: {
 		size: {
-			small: '[&>svg]:size-icon-sm',
-			normal: '[&>svg]:size-icon-md',
-			large: '[&>svg]:size-icon-lg'
+			small: '',
+			normal: '',
+			large: ''
 		}
 	},
 	defaultVariants: {
@@ -736,8 +736,8 @@ const defaultMedia = cva({
 	base: 'bg-neutral text-neutral-contrast flex aspect-square shrink-0 items-center justify-center rounded-sm',
 	variants: {
 		itemSize: {
-			normal: 'text-xs',
-			large: ''
+			normal: 'text-xs size-[var(--sidebar-compact-media-size)]',
+			large: `size-[var(--sidebar-media-size)] [&_svg]:size-[var(--sidebar-icon-size)]`
 		},
 		size: {
 			small: '',
@@ -746,12 +746,9 @@ const defaultMedia = cva({
 		}
 	},
 	compoundVariants: [
-		{ itemSize: 'large', size: 'small', class: 'size-7 [&_svg]:size-icon-sm' },
-		{ itemSize: 'large', size: 'normal', class: 'size-8 [&_svg]:size-icon-md' },
-		{ itemSize: 'large', size: 'large', class: 'size-9 [&_svg]:size-icon-lg' },
-		{ itemSize: 'normal', size: 'small', class: 'size-4 [&_svg]:size-icon-xs' },
-		{ itemSize: 'normal', size: 'normal', class: 'size-5 [&_svg]:size-icon-xs' },
-		{ itemSize: 'normal', size: 'large', class: 'size-6 [&_svg]:size-icon-sm' }
+		{ itemSize: 'normal', size: 'small', class: '[&_svg]:size-icon-xs' },
+		{ itemSize: 'normal', size: 'normal', class: '[&_svg]:size-icon-xs' },
+		{ itemSize: 'normal', size: 'large', class: '[&_svg]:size-icon-sm' }
 	],
 	defaultVariants: {
 		itemSize: 'large',
@@ -760,12 +757,12 @@ const defaultMedia = cva({
 });
 
 const defaultAvatar = cva({
-	base: 'bg-neutral-muted text-neutral-muted-readable flex shrink-0 items-center justify-center overflow-hidden rounded-sm font-medium',
+	base: 'bg-neutral-muted text-neutral-muted-readable flex shrink-0 items-center justify-center overflow-hidden rounded-sm font-medium size-[var(--sidebar-media-size)]',
 	variants: {
 		size: {
-			small: 'size-7 text-xs',
-			normal: 'size-8 text-sm',
-			large: 'size-9 text-sm'
+			small: 'text-xs',
+			normal: 'text-sm',
+			large: 'text-sm'
 		}
 	},
 	defaultVariants: {

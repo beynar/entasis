@@ -146,13 +146,13 @@ describe('sidebar icon size', () => {
 
 	test('follows size when unset', () => {
 		render(SidebarSurfaceHarness);
-		expect(iconVar('1rem')).not.toBeNull();
-		expect(iconVar('1.25rem')).toBeNull();
+		expect(iconVar('var(--icon-size-md)')).not.toBeNull();
+		expect(iconVar('var(--icon-size-lg)')).toBeNull();
 	});
 
 	test('scales icons on its own when set', () => {
 		render(SidebarSurfaceHarness, { props: { iconSize: 'large' } });
-		expect(iconVar('1.25rem')).not.toBeNull();
-		expect(iconVar('1rem')).toBeNull();
+		expect(iconVar('var(--icon-size-lg)')).not.toBeNull();
+		expect(iconVar('var(--icon-size-md)')).toBeNull();
 	});
 });

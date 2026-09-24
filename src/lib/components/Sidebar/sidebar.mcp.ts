@@ -157,7 +157,7 @@ Use for \`headerButton\`, \`footerButton\`, or direct \`<SidebarMenuButton />\` 
 
 ### Styling
 - **class**: string - Classes applied to the Sidebar root.
-- **theme**: SidebarThemeProps - Semantic part overrides such as \`panel\`, \`header\`, \`nav\`, \`footer\`, menu, search, rail, and mobile drawer parts.
+- **theme**: SidebarThemeProps - Semantic part overrides such as \`panel\`, \`header\`, \`nav\`, \`footer\`, menu, search, rail, and mobile drawer parts. Every part, with the element it lands on, its variants and their default classes, is listed in the entasis skill's \`theme-parts/sidebar.md\`; the registry key is \`sidebar\`.
 
 ## Motion
 
@@ -165,6 +165,28 @@ Use for \`headerButton\`, \`footerButton\`, or direct \`<SidebarMenuButton />\` 
   tree branches. Takes \`in\` / \`out\` slide params plus a \`duration\` / \`easing\` motion token.
 - Ladder: \`<Theme components={{ sidebar: { motion } }}>\` → \`setSidebarTheme({ motion })\` →
   \`theme.motion\`. Reduced motion collapses it to 0.
+
+## Restyle recipes
+
+The five asks that come up first, as the override to copy. Each one is rendered and asserted by
+\`sidebar-recipes.svelte.test.ts\`, so it cannot drift from the component. One rule behind them: a
+default written under a variant prefix (\`data-[active-variant=solid]:data-active:bg-selected\`,
+\`data-[side=left]:border-r\`) is only replaced by an override carrying the same prefixes; an
+unprefixed class coexists with it and loses on specificity. \`theme-parts/sidebar.md\` shows every
+default verbatim, prefixes included.
+
+- **Dark panel.** \`dark\` scopes the dark theme's variables to the panel, so every neutral ink inside
+  flips with it (every theme also emits its variables on \`.<name>\`, so the class scopes the dark theme to one subtree); needs a theme named \`dark\`, which the documented setup declares.
+  \`theme={{ panel: { base: 'dark bg-slate-900' }, mobilePanel: { base: 'dark bg-slate-900' } }}\`
+- **Active row in your colour.** \`activeVariant="solid"\` plus the same prefix chain as the default:
+  \`theme={{ menuButton: { base: 'rounded-full', activeVariant: { solid: 'data-[active-variant=solid]:data-active:bg-indigo-600 data-[active-variant=solid]:data-active:text-white' } } }}\`
+- **No hover change.** The overlay is a \`::before\` and the default also brightens the ink on hover:
+  \`theme={{ menuButton: { base: 'state-layer-none hover:text-inherit' }, subButton: { base: 'state-layer-none hover:text-neutral/70' } }}\`
+- **Flat panel.** The edge is a prefixed \`border-r\` / \`border-l\` on the admin variant, the shadow a
+  \`raised-*\` on the floating ones:
+  \`theme={{ panel: { base: 'raised-none', variant: { admin: 'data-[side=left]:border-r-0 data-[side=right]:border-l-0' } } }}\`
+- **Row height.** A plain height beats the compound \`h-control-*\`: \`theme={{ menuButton: { base: 'h-11' } }}\`
+- **Bigger icons.** A prop, not a theme: \`iconSize="large"\`.
 
 ## Accessibility
 
