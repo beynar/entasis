@@ -54,7 +54,8 @@
 			label: 'Active',
 			value: 'soft',
 			options: activeVariants
-		}
+		},
+		{ name: 'activityBar', type: 'switch', label: 'Activity bar', value: false }
 	]);
 
 	const activityBarCode = toPublicExampleCode(rawActivityBarCode);
@@ -130,7 +131,7 @@
 	size="${controls.value.size}"
 	iconSize="${controls.value.iconSize}"
 	density="${controls.value.density}"
-	activeVariant="${controls.value.activeVariant}"
+	activeVariant="${controls.value.activeVariant}"${controls.value.activityBar ? '\n\tactivityBar={activityBar}' : ''}
 	collapsible="icon"
 	frame="contained"
 	rail="thumb"
@@ -147,6 +148,7 @@
 			iconSize={controls.value.iconSize}
 			density={controls.value.density}
 			activeVariant={controls.value.activeVariant}
+			activityBar={controls.value.activityBar}
 		/>
 	</ComponentCard>
 
@@ -176,7 +178,7 @@
 		</ComponentCard>
 
 		<ComponentCard
-			description="An activity bar pins an icon rail outside the panel, so it stays on screen in every display state. With expandOnHover the icon-collapsed panel peeks open over the page and collapses again once the pointer, focus, and any menu opened inside it are gone."
+			description="An activity bar pins an icon rail outside the panel, so it stays on screen in every display state. Pick a rail item and the panel switches to that section's menu: the rail reports the selection through onSelect, and the page derives items from it. With expandOnHover the icon-collapsed panel peeks open over the page and collapses again once the pointer, focus, and any menu opened inside it are gone."
 			class="!min-h-fit !items-start !p-4"
 			code={activityBarCode}
 		>

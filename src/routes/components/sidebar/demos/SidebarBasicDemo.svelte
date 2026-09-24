@@ -2,6 +2,7 @@
 	import {
 		Sidebar,
 		type SidebarActiveVariant,
+		type SidebarActivityBar,
 		type SidebarDensity,
 		type SidebarDisplayState,
 		type SidebarGroup,
@@ -31,14 +32,35 @@
 		size = 'normal',
 		iconSize,
 		density = 'normal',
-		activeVariant = 'soft'
+		activeVariant = 'soft',
+		activityBar: showActivityBar = false
 	}: {
 		variant?: SidebarVariant;
 		size?: SidebarSize;
 		iconSize?: SidebarSize;
 		density?: SidebarDensity;
 		activeVariant?: SidebarActiveVariant;
+		/** Docs toggle: pin an activity bar beside the panel, to check it against every variant. */
+		activityBar?: boolean;
 	} = $props();
+
+	// The rail only tracks its own selection here; the activity bar example shows it switching the
+	// panel's menu.
+	let app = $state('studio');
+	const rail: SidebarActivityBar = $derived({
+		label: 'Apps',
+		items: [
+			{ id: 'studio', label: 'Studio', icon: houseIcon, isActive: app === 'studio' },
+			{ id: 'inbox', label: 'Inbox', icon: trayIcon, badge: 3, isActive: app === 'inbox' },
+			{ id: 'launches', label: 'Launches', icon: rocketLaunchIcon, isActive: app === 'launches' }
+		],
+		footerItems: [
+			{ id: 'settings', label: 'Settings', icon: gearIcon, isActive: app === 'settings' }
+		],
+		onSelect: ({ item }) => {
+			if (item.id) app = item.id;
+		}
+	});
 
 	let displayState = $state<SidebarDisplayState>('expanded');
 	let width = $state('17rem');
@@ -158,6 +180,7 @@
 			maxWidth: '24rem'
 		}}
 		{activeVariant}
+		activityBar={showActivityBar ? rail : undefined}
 		headerButton={{
 			icon: commandIcon,
 			title: 'Acme Studio',

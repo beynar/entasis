@@ -53,7 +53,7 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 8. Set \`keyboardShortcut={false}\` when embedding Sidebar inside another shortcut-heavy surface.
 9. Sidebar owns navigation, resize mechanics, the lower application wall, and variant surface geometry. AppShell forwards its variant and composes PageShell inside that surface.
 10. Use \`size\` for typography, icon scale, and item height. Use \`density\` independently for section padding, gaps, and submenu spacing.
-11. Use \`activityBar\` for a persistent icon rail outside the panel (section switching, workspaces). Every item needs an \`icon\` and a \`label\`; the label is the accessible name and the tooltip. It is layout mode only: \`mode="panel"\` renders the navigation panel alone.
+11. Use \`activityBar\` for a persistent icon rail outside the panel (section switching, workspaces). Every item needs an \`icon\` and a \`label\`; the label is the accessible name and the tooltip. It is layout mode only: \`mode="panel"\` renders the navigation panel alone. The rail does not change the panel by itself: keep the selected rail item in state from \`onSelect\`, mark it \`isActive\`, and derive the Sidebar's \`items\` from it, so each rail item shows its own menu.
 12. Use \`expandOnHover\` only with \`collapsible="icon"\`. It is a temporary peek, not a toggle: the persisted collapsed state never changes, while the peeked panel renders with expanded semantics.
 
 ## Data Model
