@@ -6,7 +6,18 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Changed
+
+- The Sidebar activity bar follows the variant's panel instead of always being a flush hairline
+  column: a card of its own with the panel's radius, edge and gutter for `floating` and `split`, the
+  recessed well for `framed`, borderless on the canvas with the panel's vertical gutter for `inset`;
+  `admin` is unchanged. For `floating` and `split` the reserved column adds the outer gutter, and a
+  hidden panel is parked fully past the edge so it cannot show through that gutter.
+- Sidebar docs: the activity bar example switches the panel's menu with the rail, and the main
+  example has an Activity bar switch to see it against every variant.
+
 ## 0.7.0 — 2026-09-24
+
 ### Renamed
 
 - Every `<Theme components>` registry key is kebab-case, the component's import-subpath name:
