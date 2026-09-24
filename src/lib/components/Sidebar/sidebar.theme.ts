@@ -771,12 +771,24 @@ const defaultAvatar = cva({
 });
 
 const defaultActivityBar = cva({
-	base: 'flex shrink-0 bg-surface-canvas text-neutral',
+	base: 'flex shrink-0 text-neutral',
 	variants: {
 		orientation: {
-			vertical:
-				'h-full w-[var(--sidebar-width-activity)] flex-col border-neutral-muted data-[side=left]:border-r data-[side=right]:border-l',
-			horizontal: 'w-full flex-row items-center border-b border-neutral-muted'
+			vertical: 'h-full w-[var(--sidebar-width-activity)] flex-col',
+			horizontal: 'w-full flex-row items-center border-b border-neutral-muted bg-surface-canvas'
+		},
+		// Beside the panel the rail wears that variant's panel surface (see the compounds); the
+		// mobile drawer's horizontal bar keeps one look whatever the variant.
+		variant: {
+			admin: '',
+			floating: '',
+			inset: '',
+			split: '',
+			framed: ''
+		},
+		placement: {
+			positioned: '',
+			static: ''
 		},
 		density: {
 			compact: 'gap-xs p-xs',
@@ -784,8 +796,48 @@ const defaultActivityBar = cva({
 			comfortable: 'gap-sm p-sm'
 		}
 	},
+	compoundVariants: [
+		// A hairline column on the canvas, beside admin's canvas panel.
+		{
+			orientation: 'vertical',
+			variant: 'admin',
+			class:
+				'bg-surface-canvas border-neutral-muted data-[side=left]:border-r data-[side=right]:border-l'
+		},
+		// In the card's recessed well with framed's panel, not on the canvas outside the card.
+		{
+			orientation: 'vertical',
+			variant: 'framed',
+			class:
+				'bg-surface-recessed border-neutral-muted data-[side=left]:border-r data-[side=right]:border-l'
+		},
+		// Borderless on the canvas, like inset's panel.
+		{ orientation: 'vertical', variant: 'inset', class: 'bg-surface-canvas' },
+		// A card of its own, the same card as the panel.
+		{
+			orientation: 'vertical',
+			variant: ['floating', 'split'],
+			class: 'rounded-lg bg-surface raised-1'
+		},
+		// Without the desktop container's gutters (`collapsible="none"`), the margins the static
+		// panel takes.
+		{
+			orientation: 'vertical',
+			variant: ['floating', 'split'],
+			placement: 'static',
+			class: 'my-md data-[side=left]:ml-md data-[side=right]:mr-md'
+		},
+		{
+			orientation: 'vertical',
+			variant: 'inset',
+			placement: 'static',
+			class: 'my-md h-[calc(100%_-_1rem)]'
+		}
+	],
 	defaultVariants: {
 		orientation: 'vertical',
+		variant: 'admin',
+		placement: 'positioned',
 		density: 'normal'
 	}
 });

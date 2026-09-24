@@ -286,9 +286,17 @@
 		<div
 			data-slot="sidebar-activity-bar-container"
 			data-side={side}
-			class={getSidebarActivityBarContainerClass(side, frame)}
+			class={getSidebarActivityBarContainerClass(side, frame, variant)}
 		>
-			<SidebarActivityBar {activityBar} {side} {size} {density} label={activityBarLabel} {theme} />
+			<SidebarActivityBar
+				{activityBar}
+				{side}
+				{size}
+				{density}
+				{variant}
+				label={activityBarLabel}
+				{theme}
+			/>
 		</div>
 	{/if}
 	<!-- A hidden panel is parked off screen: `inert` keeps Tab out of it, so focus cannot land
@@ -379,8 +387,8 @@
 				className:
 					activityBar &&
 					(side === 'left'
-						? '!left-[var(--sidebar-width-activity,3rem)]'
-						: '!right-[var(--sidebar-width-activity,3rem)]')
+						? '!left-[var(--sidebar-activity-offset,3rem)]'
+						: '!right-[var(--sidebar-activity-offset,3rem)]')
 			})}
 			onpointerenter={() => {
 				if (!resize.isEdgeRevealSuppressed) edgeRevealed = true;

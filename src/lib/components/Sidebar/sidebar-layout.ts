@@ -41,10 +41,22 @@ export function getSidebarContainerClass(
 		'inset-y-0 z-10 hidden w-[var(--sidebar-width)] bg-transparent transition-[left,right,width] duration-normal ease-linear group-data-[width-prehydrating=true]/sidebar-wrapper:!transition-none group-data-[resizing=true]:!transition-none md:flex',
 		frame === 'viewport' ? 'fixed h-window' : 'absolute h-full',
 		// The offcanvas offset slides the panel away relative to itself: the activity bar keeps
-		// its own inset, so it never leaves the screen with the panel.
+		// its own inset, so it never leaves the screen with the panel. Floating and split park it
+		// fully past the edge instead: their rail stands in a gutter, and a panel parked under it
+		// would show through that gutter.
 		side === 'left'
-			? 'left-[var(--sidebar-activity-offset,0px)] group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-activity-offset,0px)-var(--sidebar-width))]'
-			: 'right-[var(--sidebar-activity-offset,0px)] group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-activity-offset,0px)-var(--sidebar-width))]',
+			? cx(
+					'left-[var(--sidebar-activity-offset,0px)]',
+					panelOwnsShadow
+						? 'group-data-[collapsible=offcanvas]:-left-[var(--sidebar-width)]'
+						: 'group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-activity-offset,0px)-var(--sidebar-width))]'
+				)
+			: cx(
+					'right-[var(--sidebar-activity-offset,0px)]',
+					panelOwnsShadow
+						? 'group-data-[collapsible=offcanvas]:-right-[var(--sidebar-width)]'
+						: 'group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-activity-offset,0px)-var(--sidebar-width))]'
+				),
 		getContainerGeometryClass(variant),
 		// Hover peek: full width over the page, lifted so it reads as a temporary drawer. The
 		// elevation itself belongs to the panel (see `getSidebarPanelPeekClass`), not to this
@@ -70,11 +82,22 @@ export function getSidebarPanelPeekClass(variant: SidebarVariant) {
 	return panelOwnsShadow ? undefined : 'group-data-[peek=true]:raised-3';
 }
 
-/** Fixed/absolute placement for the activity bar column, pinned outside the panel. */
-export function getSidebarActivityBarContainerClass(side: SidebarSide, frame: SidebarFrame) {
+/**
+ * Fixed/absolute placement for the activity bar column, pinned outside the panel. The column is
+ * the reserved offset, and it takes the panel container's gutters so the rail lines up with the
+ * panel beside it: none for admin and framed, a vertical one for inset, the outer and vertical
+ * ones for floating and split (the panel's own gutter spaces the pair).
+ */
+export function getSidebarActivityBarContainerClass(
+	side: SidebarSide,
+	frame: SidebarFrame,
+	variant: SidebarVariant
+) {
 	return cx(
-		'inset-y-0 z-30 hidden w-[var(--sidebar-width-activity,3rem)] md:flex',
+		'inset-y-0 z-30 hidden w-[var(--sidebar-activity-offset,3rem)] md:flex',
 		frame === 'viewport' ? 'fixed h-window' : 'absolute h-full',
-		side === 'left' ? 'left-0' : 'right-0'
+		side === 'left' ? 'left-0' : 'right-0',
+		variant === 'inset' && 'py-2',
+		(variant === 'floating' || variant === 'split') && (side === 'left' ? 'py-2 pl-2' : 'py-2 pr-2')
 	);
 }

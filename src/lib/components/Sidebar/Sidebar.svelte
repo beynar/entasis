@@ -89,8 +89,16 @@
 	// contents render expanded whenever the peek renders them at full width.
 	let hoverExpanded = $state(false);
 	const activityBarWidth = $derived(activityBar?.width ?? '3rem');
-	// `0px` (not `0`) so the `calc()` in the spacer/container classes stays valid without a unit.
-	const activityBarOffset = $derived(activityBar ? activityBarWidth : '0px');
+	// The column the rail reserves: the rail itself, plus the outer gutter when it floats as a card
+	// of its own (floating, split). `0px` (not `0`) so the `calc()` in the spacer/container classes
+	// stays valid without a unit.
+	const activityBarOffset = $derived(
+		!activityBar
+			? '0px'
+			: variant === 'floating' || variant === 'split'
+				? `calc(${activityBarWidth} + var(--spacing) * 2)`
+				: activityBarWidth
+	);
 	function setOpen(nextOpen: boolean) {
 		openState.value = nextOpen;
 	}
@@ -248,7 +256,16 @@
 {/snippet}
 {#snippet staticActivityBar()}
 	{#if activityBar}
-		<SidebarActivityBar {activityBar} {side} {size} {density} label={activityBarLabel} {theme} />
+		<SidebarActivityBar
+			{activityBar}
+			{side}
+			{size}
+			{density}
+			{variant}
+			placement="static"
+			label={activityBarLabel}
+			{theme}
+		/>
 	{/if}
 {/snippet}
 {#if mode === 'panel'}

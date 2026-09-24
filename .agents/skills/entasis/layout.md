@@ -627,7 +627,11 @@ The activity bar is an icon-only rail pinned to the outer edge of the sidebar, i
 (`mode="panel"` renders the navigation panel alone and ignores it). It stays on screen
 in every display state -- only the panel takes the offcanvas offset -- and the reserved layout
 column becomes the panel width plus the activity bar width (default `3rem`, set through
-`width`). On mobile it renders as a horizontal row at the top of the drawer. It is its own `<nav>`
+`width`). The rail wears the surface of the variant's panel: a hairline column on the canvas beside
+`admin`, a column in the card's recessed well for `framed`, borderless on the canvas with the same
+vertical gutter for `inset`, and a card of its own, with the panel's radius, edge and gutter, for
+`floating` and `split` (their reserved column adds that gutter). On mobile it renders as a
+horizontal row at the top of the drawer. It is its own `<nav>`
 landmark -- the body navigation carries its own name, so the two are distinguishable -- with a
 roving tabindex and ArrowUp/ArrowDown/Home/End navigation that loops and skips
 disabled items; Tab lands on the `isActive` item, and each square takes its accessible name and

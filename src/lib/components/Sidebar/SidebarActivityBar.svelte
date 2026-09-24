@@ -8,7 +8,8 @@
 		SidebarActivityBarItem,
 		SidebarDensity,
 		SidebarSide,
-		SidebarSize
+		SidebarSize,
+		SidebarVariant
 	} from './sidebar.props.js';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import { useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
@@ -19,6 +20,8 @@
 		side,
 		size,
 		density,
+		variant = 'admin',
+		placement = 'positioned',
 		orientation = 'vertical',
 		label,
 		class: className,
@@ -28,6 +31,10 @@
 		side: SidebarSide;
 		size: SidebarSize;
 		density: SidebarDensity;
+		/** The Sidebar variant whose panel surface the rail wears beside the panel. */
+		variant?: SidebarVariant;
+		/** `static` when there is no desktop container to hold its gutters (`collapsible="none"`). */
+		placement?: 'positioned' | 'static';
 		/** Vertical along the sidebar edge on desktop; horizontal at the top of the mobile drawer. */
 		orientation?: 'vertical' | 'horizontal';
 		/** Fallback accessible name when the activity bar sets no label. */
@@ -179,7 +186,7 @@
 	data-side={side}
 	data-orientation={orientation}
 	aria-label={activityBar.label ?? label}
-	class={classes.activityBar({ orientation, density, className })}
+	class={classes.activityBar({ orientation, variant, placement, density, className })}
 >
 	{#if activityBar.header}
 		<div
