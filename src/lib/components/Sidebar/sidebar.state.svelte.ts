@@ -15,7 +15,9 @@ type SidebarStateOptions = {
 	readonly side: SidebarSide;
 	readonly collapsible: SidebarCollapsible;
 	readonly peeking: boolean;
+	readonly view: string | undefined;
 	setDisplayState: (state: SidebarDisplayState) => void;
+	setView: (view: string) => void;
 };
 
 function isEditableTarget(target: EventTarget | null) {
@@ -61,7 +63,11 @@ function createSidebarApi(controller: SidebarStateController): SidebarApi {
 		toggle: () => controller.toggle(),
 		setOpen: (open) => controller.setOpen(open),
 		setDisplayState: (state) => controller.setDisplayState(state),
-		setOpenMobile: (open) => controller.setOpenMobile(open)
+		setOpenMobile: (open) => controller.setOpenMobile(open),
+		get view() {
+			return controller.view;
+		},
+		setView: (view) => controller.setView(view)
 	};
 }
 
@@ -113,6 +119,12 @@ export class SidebarStateController {
 	get isMobile(): boolean {
 		return this.mobileQuery.current;
 	}
+
+	get view(): string | undefined {
+		return this.options.view;
+	}
+
+	setView = (view: string) => this.options.setView(view);
 
 	get side(): SidebarSide {
 		return this.options.side;

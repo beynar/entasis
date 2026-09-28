@@ -16,8 +16,12 @@
 	import SidebarGroupComponent from './SidebarGroup.svelte';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import SidebarMenuButton from './SidebarMenuButton.svelte';
+	import SidebarMenuItem from './SidebarMenuItem.svelte';
 	import SidebarMenuList from './SidebarMenuList.svelte';
+	import SidebarViewStage from './SidebarViewStage.svelte';
+	import { arrowLeftIcon } from '$lib/components/Icons/arrowLeft.js';
 	import { useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
+	import { type SidebarSlotValues, type SidebarViewsState } from './sidebar.views.svelte.js';
 
 	let {
 		api,
@@ -36,6 +40,7 @@
 		activeVariant,
 		density,
 		label,
+		views,
 		theme
 	}: {
 		api: SidebarApi;
@@ -55,8 +60,26 @@
 		density: SidebarDensity;
 		/** Accessible name for the body navigation landmark. */
 		label: string;
+		/** Named views; when enabled, each region slides between them instead of rendering the props. */
+		views?: SidebarViewsState;
 		theme?: SidebarThemeProps;
 	} = $props();
+
+	const rootSource = $derived<SidebarSlotValues>({
+		items,
+		content,
+		headerButton,
+		search,
+		headerMenu,
+		header,
+		footerButton,
+		footerMenu,
+		footer
+	});
+	const hasHeader = (source: SidebarSlotValues) =>
+		!!(source.headerButton || source.search || source.headerMenu || source.header);
+	const hasFooter = (source: SidebarSlotValues) =>
+		!!(source.footerButton || source.footerMenu || source.footer);
 
 	const classes = $derived(useSidebarTheme(theme));
 	const t = $derived(useI18n());
@@ -85,66 +108,87 @@
 	});
 </script>
 
-{#if headerButton || search || headerMenu || header}
-	<div data-slot="sidebar-header" data-sidebar="header" class={classes.header({ density })}>
-		<!--
-			The `header` snippet renders first, so a custom workspace card sits above the built-in
-			search and menu instead of under them. Consumers never need an order override.
-		-->
-		{#if header}
-			{@render header(api)}
-		{/if}
-		{#if headerButton}
-			<SidebarMenuButton
-				{...headerButton}
-				{api}
-				mobile={api.isMobile}
-				defaultAlign="start"
-				{size}
-				{density}
-				{theme}
-			/>
-		{/if}
-		{#if search}
-			<form
-				bind:this={searchRef}
-				data-slot="sidebar-search"
-				class={classes.searchContainer({ size, collapsed })}
-				inert={collapsed ? true : undefined}
-				aria-hidden={collapsed ? 'true' : undefined}
-				onsubmit={(event) => event.preventDefault()}
-			>
-				<input
-					placeholder={search.placeholder}
-					aria-label={search.label ?? t.search}
-					value={search.value}
-					oninput={search.oninput}
-					class={classes.search({ size, density, className: search.class })}
-				/>
-				<SidebarIcon icon={magnifyingGlassIcon} class={classes.searchIcon({ size, density })} />
-			</form>
-		{/if}
-		{#if headerMenu}
-			<SidebarMenuList
-				items={headerMenu}
-				{api}
-				{collapseIcon}
-				{tooltips}
-				{size}
-				{activeVariant}
-				{density}
-				{theme}
-			/>
-		{/if}
-	</div>
-{/if}
+{#snippet headerButtonSlot(headerButton: SidebarMenuButtonItem)}
+	<SidebarMenuButton
+		{...headerButton}
+		{api}
+		mobile={api.isMobile}
+		defaultAlign="start"
+		{size}
+		{density}
+		{theme}
+	/>
+{/snippet}
 
-<!-- The activity bar is a second nav landmark, so this one needs its own name to tell them apart. -->
-<nav data-slot="sidebar-nav" data-sidebar="nav" aria-label={label} class={classes.nav({ density })}>
-	{#if content}
-		{@render content(api)}
-	{:else if items}
-		{#each items as group, index (group.label ?? `group-${index}`)}
+{#snippet searchSlot(searchBox: SidebarSearch)}
+	<form
+		bind:this={searchRef}
+		data-slot="sidebar-search"
+		class={classes.searchContainer({ size, collapsed })}
+		inert={collapsed ? true : undefined}
+		aria-hidden={collapsed ? 'true' : undefined}
+		onsubmit={(event) => event.preventDefault()}
+	>
+		<input
+			placeholder={searchBox.placeholder}
+			aria-label={searchBox.label ?? t.search}
+			value={searchBox.value}
+			oninput={searchBox.oninput}
+			class={classes.search({ size, density, className: searchBox.class })}
+		/>
+		<SidebarIcon icon={magnifyingGlassIcon} class={classes.searchIcon({ size, density })} />
+	</form>
+{/snippet}
+
+{#snippet menuSlot(items: SidebarMenuEntry[])}
+	<SidebarMenuList
+		{items}
+		{api}
+		{collapseIcon}
+		{tooltips}
+		{size}
+		{activeVariant}
+		{density}
+		{theme}
+	/>
+{/snippet}
+
+{#snippet footerButtonSlot(footerButton: SidebarMenuButtonItem)}
+	<SidebarMenuButton
+		{...footerButton}
+		{api}
+		mobile={api.isMobile}
+		defaultAlign="end"
+		{size}
+		{density}
+		{theme}
+	/>
+{/snippet}
+
+{#snippet headerRegion(source: SidebarSlotValues)}
+	<!--
+		The `header` snippet renders first, so a custom workspace card sits above the built-in
+		search and menu instead of under them. Consumers never need an order override.
+	-->
+	{#if source.header}
+		{@render source.header(api)}
+	{/if}
+	{#if source.headerButton}
+		{@render headerButtonSlot(source.headerButton)}
+	{/if}
+	{#if source.search}
+		{@render searchSlot(source.search)}
+	{/if}
+	{#if source.headerMenu}
+		{@render menuSlot(source.headerMenu)}
+	{/if}
+{/snippet}
+
+{#snippet bodyRegion(source: SidebarSlotValues)}
+	{#if source.content}
+		{@render source.content(api)}
+	{:else if source.items}
+		{#each source.items as group, index (group.label ?? `group-${index}`)}
 			{#if group.separator && index > 0}
 				<div
 					data-slot="sidebar-separator"
@@ -164,35 +208,102 @@
 			/>
 		{/each}
 	{/if}
-</nav>
+{/snippet}
 
-{#if footerButton || footerMenu || footer}
-	<div data-slot="sidebar-footer" data-sidebar="footer" class={classes.footer({ density })}>
-		{#if footerButton}
-			<SidebarMenuButton
-				{...footerButton}
-				{api}
-				mobile={api.isMobile}
-				defaultAlign="end"
-				{size}
-				{density}
+{#snippet footerRegion(source: SidebarSlotValues)}
+	{#if source.footerButton}
+		{@render footerButtonSlot(source.footerButton)}
+	{/if}
+	{#if source.footerMenu}
+		{@render menuSlot(source.footerMenu)}
+	{/if}
+	{#if source.footer}
+		{@render source.footer(api)}
+	{/if}
+{/snippet}
+
+{#if views?.enabled}
+	<!--
+		Views with the same header and footer share one panel layer, so only the menu inside slides;
+		a view that changes them slides the whole panel as one page.
+	-->
+	<SidebarViewStage
+		{views}
+		kind="panel"
+		layers={views.layers('panel')}
+		layerClass="flex min-h-0 flex-col"
+		{theme}
+	>
+		{#snippet children(panelLayer)}
+			{@const chrome = views.chrome(panelLayer.view)}
+			{#if hasHeader(chrome)}
+				<div data-slot="sidebar-header" data-sidebar="header" class={classes.header({ density })}>
+					{@render headerRegion(chrome)}
+				</div>
+			{/if}
+			<!-- The activity bar is a second nav landmark, so this one needs its own name to tell them apart. -->
+			<SidebarViewStage
+				{views}
+				kind="body"
+				layers={panelLayer.role
+					? [{ key: panelLayer.view, view: panelLayer.view }]
+					: views.layers('body')}
+				layerClass={classes.nav({ density })}
+				{label}
 				{theme}
-			/>
-		{/if}
-		{#if footerMenu}
-			<SidebarMenuList
-				items={footerMenu}
-				{api}
-				{collapseIcon}
-				{tooltips}
-				{size}
-				{activeVariant}
-				{density}
-				{theme}
-			/>
-		{/if}
-		{#if footer}
-			{@render footer(api)}
-		{/if}
-	</div>
+			>
+				{#snippet children(bodyLayer)}
+					{@const parent = views.parentOf(bodyLayer.view)}
+					{#if parent !== undefined}
+						{@const parentLabel = views.labelOf(parent)}
+						<!-- A nested view opens on a row back to its parent, named after it like a back button. -->
+						<div data-slot="sidebar-group" data-sidebar="group" class={classes.group({ density })}>
+							<ul data-slot="sidebar-menu" data-sidebar="menu" class={classes.menu({ density })}>
+								<SidebarMenuItem
+									item={{ label: parentLabel ?? t.back, icon: arrowLeftIcon, view: parent }}
+									back
+									ariaLabel={parentLabel ? `${t.back}, ${parentLabel}` : undefined}
+									{api}
+									{collapseIcon}
+									{tooltips}
+									{size}
+									{activeVariant}
+									{density}
+									{theme}
+								/>
+							</ul>
+						</div>
+					{/if}
+					{@render bodyRegion(views.body(bodyLayer.view))}
+				{/snippet}
+			</SidebarViewStage>
+			{#if hasFooter(chrome)}
+				<div data-slot="sidebar-footer" data-sidebar="footer" class={classes.footer({ density })}>
+					{@render footerRegion(chrome)}
+				</div>
+			{/if}
+		{/snippet}
+	</SidebarViewStage>
+{:else}
+	{#if hasHeader(rootSource)}
+		<div data-slot="sidebar-header" data-sidebar="header" class={classes.header({ density })}>
+			{@render headerRegion(rootSource)}
+		</div>
+	{/if}
+
+	<!-- The activity bar is a second nav landmark, so this one needs its own name to tell them apart. -->
+	<nav
+		data-slot="sidebar-nav"
+		data-sidebar="nav"
+		aria-label={label}
+		class={classes.nav({ density })}
+	>
+		{@render bodyRegion(rootSource)}
+	</nav>
+
+	{#if hasFooter(rootSource)}
+		<div data-slot="sidebar-footer" data-sidebar="footer" class={classes.footer({ density })}>
+			{@render footerRegion(rootSource)}
+		</div>
+	{/if}
 {/if}

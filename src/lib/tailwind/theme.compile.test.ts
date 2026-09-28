@@ -243,6 +243,22 @@ describe('theme plugin CSS', () => {
 		expect(scoped['--row-height-lg']).toBe('calc(var(--spacing) * 12)');
 	});
 
+	it('pads a flush bar clear of its container corner with px|py-<step>-concentric', async () => {
+		const css = await compileThemeCss(['px-md-concentric', 'py-sm-concentric']);
+		const clearance = (step: string) =>
+			`max\\(var\\(--space-${step}\\), min\\(calc\\(var\\(--radius-parent, 0px\\) / 2\\), calc\\(var\\(--space-${step}\\) \\* 3\\)\\)\\)`;
+		expect(css).toMatch(
+			new RegExp(
+				`\\.px-md-concentric \\{\\s*padding-inline: ${clearance('md')};\\s*& > \\* \\{\\s*--pad-parent-x: ${clearance('md')};`
+			)
+		);
+		expect(css).toMatch(
+			new RegExp(
+				`\\.py-sm-concentric \\{\\s*padding-block: ${clearance('sm')};\\s*& > \\* \\{\\s*--pad-parent-y: ${clearance('sm')};`
+			)
+		);
+	});
+
 	it('switches the state layer off on one element', async () => {
 		const css = await compileThemeCss(['state-layer', 'state-layer-none']);
 		expect(css).toMatch(/\.state-layer-none::before \{\s*display: none;/);

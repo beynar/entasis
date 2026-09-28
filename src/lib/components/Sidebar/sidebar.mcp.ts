@@ -53,8 +53,9 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 8. Set \`keyboardShortcut={false}\` when embedding Sidebar inside another shortcut-heavy surface.
 9. Sidebar owns navigation, resize mechanics, the lower application wall, and variant surface geometry. AppShell forwards its variant and composes PageShell inside that surface.
 10. Use \`size\` for typography, icon scale, and item height. Use \`density\` independently for section padding, gaps, and submenu spacing.
-11. Use \`activityBar\` for a persistent icon rail outside the panel (section switching, workspaces). Every item needs an \`icon\` and a \`label\`; the label is the accessible name and the tooltip. It is layout mode only: \`mode="panel"\` renders the navigation panel alone. The rail does not change the panel by itself: keep the selected rail item in state from \`onSelect\`, mark it \`isActive\`, and derive the Sidebar's \`items\` from it, so each rail item shows its own menu.
+11. Use \`activityBar\` for a persistent icon rail outside the panel (section switching, workspaces). Every item needs an \`icon\` and a \`label\`; the label is the accessible name and the tooltip. It is layout mode only: \`mode="panel"\` renders the navigation panel alone. The rail does not change the panel by itself: keep the selected rail item in state from \`onSelect\`, mark it \`isActive\`, and either derive the Sidebar's \`items\` from it or, for an animated switch, give each rail item a view in \`views\` and set \`view\` from it.
 12. Use \`expandOnHover\` only with \`collapsible="icon"\`. It is a temporary peek, not a toggle: the persisted collapsed state never changes, while the peeked panel renders with expanded semantics.
+13. Use \`views\` when the panel's contents change as the user moves through the app: sections switched from the activity bar or the route, and nested menus that open inside the panel. Key each view, set \`parent\` on nested ones, open them with a row's \`view\`, and drive \`view\` from state or the URL. Do not hand-animate \`items\` swaps.
 
 ## Data Model
 
@@ -82,7 +83,17 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 - **collapsible**: boolean - Set false for an always-open submenu.
 - **defaultOpen**: boolean - Initial nested menu state.
 - **menu**: MenuItem[] - Popup menu opened from the full row. Mutually exclusive with href/onclick.
+- **view**: string - Key of the \`views\` entry the row opens, sliding it in; the row shows a trailing chevron. Mutually exclusive with href, menu and items.
 - **action**: SidebarMenuActionDescriptor | Snippet<[SidebarApi]> - Hover/focus trailing action.
+
+### SidebarView
+One named panel content in \`views\`.
+- **label**: string - The view's name, shown on the back row of the views nested under it.
+- **parent**: string - Key of the view this one is nested under. A nested view opens with a back row to its parent (named "Back, <parent label>"), and on mobile a swipe toward the inline end goes back. A view without \`parent\` is a top-level section.
+- **items**: SidebarGroup[] / **content**: Snippet<[SidebarApi]> - The view's body.
+- **headerButton**, **search**, **headerMenu**, **header**, **footerButton**, **footerMenu**, **footer** - Header and footer props for this view. Each one left undefined comes from the parent view, then from the Sidebar's own prop; \`null\` removes an inherited one.
+
+Changing the view slides the two views side by side, like pages: a deeper view comes in from the inline end while the old one leaves to the start, a shallower one slides back the other way, and between views at the same depth (sections) the later one in \`views\` counts as forward. When both views get every header and footer prop from the same place, the header and footer stay still and only the menu slides; when a view changes any of them, the whole panel slides as one page. \`api.view\` reads the current view and \`api.setView(key)\` changes it from a snippet.
 
 ### SidebarActivityBar
 Icon rail pinned to the outer edge of the sidebar, visible in every display state.
@@ -122,6 +133,9 @@ Use for \`headerButton\`, \`footerButton\`, or direct \`<SidebarMenuButton />\` 
 - **defaultOpen**: boolean (default true) - Initial desktop state when \`open\` is omitted.
 - **onOpenChange**: (open: boolean) => void - Called once for a library-originated desktop state change. Repeated requests and parent prop updates stay silent.
 - **onDisplayStateChange**: (state: SidebarDisplayState) => void - Called once for a library-originated semantic display-state change.
+- **view**: string (bindable) - Key of the view on screen when \`views\` is set. Defaults to \`defaultView\`, then the first view.
+- **defaultView**: string - Initial view when \`view\` is omitted.
+- **onViewChange**: (view: string) => void - Called once for a library-originated view change: a view row, a back row, a swipe. Parent prop updates stay silent; with a route-driven \`view\`, navigate here.
 - **api.displayState**: 'expanded' | 'collapsed' | 'hidden' - Semantic desktop state; hidden means closed offcanvas. A hover peek does not change it.
 - **api.isPeeking**: boolean - True while a hover peek renders the collapsed panel at full width. Read it alongside \`displayState\` when a snippet hides content in icon mode.
 - **keyboardShortcut**: string | false (default 'b') - Ctrl/Cmd shortcut key.
@@ -149,6 +163,7 @@ Use for \`headerButton\`, \`footerButton\`, or direct \`<SidebarMenuButton />\` 
 
 ### Content
 - **items**: SidebarGroup[] - Data-driven body navigation.
+- **views**: Record<string, SidebarView> - Named panel contents, one on screen at a time, replacing \`items\` and \`content\`. See SidebarView.
 - **headerButton** / **footerButton**: SidebarMenuButtonItem - Sticky large rows.
 - **search**: SidebarSearch - Header search input; use its native \`oninput\` handler.
 - **headerMenu** / **footerMenu**: SidebarMenuEntry[] - Sticky quick menus.
@@ -165,6 +180,7 @@ Use for \`headerButton\`, \`footerButton\`, or direct \`<SidebarMenuButton />\` 
   tree branches. Takes \`in\` / \`out\` slide params plus a \`duration\` / \`easing\` motion token.
 - Ladder: \`<Theme components={{ sidebar: { motion } }}>\` → \`setSidebarTheme({ motion })\` →
   \`theme.motion\`. Reduced motion collapses it to 0.
+- The \`view\` variant (\`part: 'view'\`) is the pager between views: \`in.x\` / \`out.x\` is how far a view travels (default \`'100%'\`: the two views slide side by side like pages) while it fades between \`opacity\` (default 0) and 1, at the \`slow\` duration on the \`enter\` easing. The back swipe moves the same layers the view change would, with the same travel and opacity. Reduced motion makes the switch instant while a swipe still follows the finger.
 
 ## Restyle recipes
 
@@ -204,6 +220,7 @@ default verbatim, prefixes included.
 - Both peeks (edge reveal and \`expandOnHover\`) stay open while focus is inside the panel or while an overlay opened from inside it is open, including nested submenus. They release about 120ms after the pointer, focus, and every such overlay are gone.
 - The activity bar is its own \`<nav>\` landmark with a \`<ul>\` of items, a roving tabindex, and ArrowUp/ArrowDown/Home/End navigation that loops and skips disabled items. Tab lands on the \`isActive\` item. Each square takes its accessible name from \`label\`, with a string or number \`badge\` appended to it, and shows \`label\` as a tooltip on hover and focus.
 - A hidden offcanvas panel is \`inert\`, so Tab never lands in a panel parked off screen; a peek makes it interactive again.
+- Views: when focus sat in the view being replaced, it lands on the back row after going deeper and on the row that opened the view after coming back. A view change from outside the panel (a route) leaves focus where it is. The back swipe is a shortcut; the back row stays the accessible path.
 
 ## Notes
 

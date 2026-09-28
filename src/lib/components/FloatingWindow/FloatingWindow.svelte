@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
-	import { crossfade, scale } from 'svelte/transition';
+	import { crossfade, fade, scale } from 'svelte/transition';
 	import { easingFunctions } from '$lib/transitions/easingFunctions.js';
 	import Button from '../Button/Button.svelte';
 	import { minusIcon } from '../Icons/minus.js';
@@ -32,6 +32,7 @@
 		minimizable = true,
 		closable = true,
 		closeOnEscape = true,
+		backdrop = false,
 		position = $bindable(),
 		dimensions = $bindable({ width: 480, height: 320 }),
 		class: className,
@@ -115,6 +116,9 @@
 		},
 		get closeOnEscape() {
 			return closeOnEscape;
+		},
+		get backdrop() {
+			return backdrop;
 		},
 		get position() {
 			return position;
@@ -202,6 +206,26 @@
 	};
 </script>
 
+{#if backdrop && openState.value && !minimized && windowState.position}
+	<!-- Portaled into the window layer one index below the window; it fades on the window's own
+		 enter / exit timing, so minimizing lifts it while the window flies to the dock. -->
+	<div
+		{@attach windowState.theme.floatingWindows.portal}
+		data-slot="floating-window-backdrop"
+		aria-hidden="true"
+		class={classes.backdrop()}
+		style:z-index={windowState.backdropZIndex}
+		in:fade={{
+			duration: enter.in.duration ?? 0,
+			easing: easingFunctions[enter.in.easing ?? 'cubicOut']
+		}}
+		out:fade={{
+			duration: exit.out.duration ?? 0,
+			easing: easingFunctions[exit.out.easing ?? 'cubicOut']
+		}}
+	></div>
+{/if}
+
 {#if openState.value && !minimized && windowState.position}
 	<div
 		{@attach windowState.theme.floatingWindows.portal}
@@ -214,7 +238,7 @@
 		bind:this={ref}
 		{id}
 		role="dialog"
-		aria-modal="false"
+		aria-modal={backdrop ? 'true' : 'false'}
 		aria-labelledby={`${id}-title`}
 		aria-keyshortcuts={draggable
 			? 'Alt+ArrowUp Alt+ArrowRight Alt+ArrowDown Alt+ArrowLeft'

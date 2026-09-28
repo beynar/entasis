@@ -55,8 +55,8 @@ export const radiusSteps = {
 	xs: 0.125,
 	sm: 0.25,
 	md: 0.5, // controls (buttons, inputs) keep the radius they always had
-	lg: 0.75, // panels: cards, popovers, menus, alerts
-	xl: 1, // dialogs, drawers, large surfaces
+	lg: 0.75, // panels: cards, popovers, menus, alerts (factor capped, see radiusVariables)
+	xl: 1, // dialogs, drawers, large surfaces (factor capped)
 	'2xl': 1.25,
 	'3xl': 1.5,
 	'4xl': 2
@@ -162,10 +162,19 @@ export const spacingScaleVariables = (spacingScale: Partial<ThemeSpacingScale>) 
 	);
 };
 
+// Surface steps (`lg` and up: cards, popovers, dialogs, windows) follow the factor only up to
+// `large`. A round theme turns controls into pills; a panel rounder than ×1.5 stops reading as
+// a panel. Radix Themes draws the same line: its `full` radius pills controls, not panels.
+const SURFACE_RADIUS_STEPS = new Set(['lg', 'xl', '2xl', '3xl', '4xl']);
+
 export const radiusVariables = (radius: ThemeRadius) => {
 	const factor = presetFactor(radius, radiusFactors, 'radius');
+	const surfaceFactor = Math.min(factor, radiusFactors.large);
 	const variables = Object.fromEntries(
-		Object.entries(radiusSteps).map(([step, rem]) => [`--radius-${step}`, formatRem(rem * factor)])
+		Object.entries(radiusSteps).map(([step, rem]) => [
+			`--radius-${step}`,
+			formatRem(rem * (SURFACE_RADIUS_STEPS.has(step) ? surfaceFactor : factor))
+		])
 	);
 	return { '--radius': variables['--radius-md'], ...variables };
 };

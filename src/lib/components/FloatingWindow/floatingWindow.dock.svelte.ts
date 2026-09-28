@@ -9,6 +9,11 @@ const DOCK_ITEM_WIDTH = 176;
 const DOCK_ITEM_HEIGHT = 36;
 const DOCK_GAP = 8;
 const DOCK_INLINE_GAP = 8;
+const DOCK_DRAG_ACTIVATION = Object.freeze({
+	distancePx: 4,
+	touchDelayMs: 300,
+	touchTolerancePx: 8
+});
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
@@ -115,6 +120,10 @@ export class FloatingWindowDockState {
 
 	drag = createPointerDrag({
 		disabled: () => !this.windowState.draggable || !this.windowState.minimized,
+		// The item is the title button's container, not a handle: a press that never travels must
+		// keep the pointer on the button, or its click lands on the item and never restores.
+		capture: 'on-activate',
+		activation: () => DOCK_DRAG_ACTIVATION,
 		onStart: (payload) => this.startMove(payload),
 		onMove: (payload) => this.updateMove(payload),
 		onEnd: (payload) => this.endMove(payload)
@@ -139,8 +148,8 @@ export class FloatingWindowDockState {
 
 	private startMove(payload: PointerDragPayload) {
 		if (
-			payload.event.target instanceof Element &&
-			payload.event.target.closest('[data-floating-window-dock-actions]')
+			payload.startTarget instanceof Element &&
+			payload.startTarget.closest('[data-floating-window-dock-actions]')
 		) {
 			return false;
 		}

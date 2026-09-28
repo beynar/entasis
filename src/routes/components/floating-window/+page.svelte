@@ -37,7 +37,8 @@
 		{ name: 'draggable', type: 'switch', label: 'Draggable', value: true },
 		{ name: 'resizable', type: 'switch', label: 'Resizable', value: true },
 		{ name: 'minimizable', type: 'switch', label: 'Minimize', value: true },
-		{ name: 'closable', type: 'switch', label: 'Close', value: true }
+		{ name: 'closable', type: 'switch', label: 'Close', value: true },
+		{ name: 'backdrop', type: 'switch', label: 'Backdrop', value: false }
 	]);
 
 	let notesOpen = $state(false);
@@ -89,7 +90,8 @@
 	subtitle="Crossfading utility windows with viewport-safe dragging, resizing, and a compact minimized dock."
 	component="FloatingWindow"
 	features={[
-		'Non-modal portaled surface',
+		'Non-modal portaled surface by default',
+		{ label: 'Optional backdrop makes it modal', test: 'a11y:floating-window.backdrop' },
 		'Header or whole-window dragging',
 		'Pointer resizing from edges and corners',
 		'Viewport-safe geometry',
@@ -113,6 +115,7 @@
 	resizable={${controls.value.resizable}}
 	minimizable={${controls.value.minimizable}}
 	closable={${controls.value.closable}}
+	backdrop={${controls.value.backdrop}}
 >
 	<p>Review the release checklist before publishing.</p>
 </FloatingWindow>`}
@@ -135,6 +138,7 @@
 			resizable={controls.value.resizable}
 			minimizable={controls.value.minimizable}
 			closable={controls.value.closable}
+			backdrop={controls.value.backdrop}
 		>
 			<div class="grid gap-4">
 				<p class="text-neutral/70 text-sm">

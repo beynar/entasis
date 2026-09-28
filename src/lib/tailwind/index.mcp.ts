@@ -36,6 +36,10 @@ Use it when colors are defined separately instead of through the theme plugin.
   infinite, so the child is exactly its step; a negative difference clamps to 0, a square corner.
   Put it on a child that sits flush against the padding box; a floating child (an avatar, a
   Button, a Chip) keeps its own radius.
+  The padding half reads the other way: \`px|py-<step>-concentric\` is
+  \`max(space-<step>, min(radius-parent / 2, space-<step> * 3))\`, so a flush bar's content clears a
+  large container corner (a very round theme over a compact title bar) and stays the plain step
+  otherwise.
 
 Configure spacing, radius, typography scale, and raised borders at runtime through
 \`Theme.designTokens\`.

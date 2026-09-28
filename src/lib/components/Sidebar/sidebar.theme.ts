@@ -131,6 +131,30 @@ const defaultNav = cva({
 	}
 });
 
+// With `views`, the panel and the menu inside it are one-cell grids whose layers are the views
+// they show: one at rest, two while they slide past each other. The cell clips the slide.
+const defaultViewStage = cva({
+	base: 'grid min-h-0 flex-1 grid-cols-1 grid-rows-1 overflow-x-clip'
+});
+
+// `translate` / `opacity` carry the swipe: they follow the finger with no transition while
+// dragging, then ease to rest. The view-change motion animates `transform`, so the two never fight.
+const defaultViewLayer = cva({
+	base: 'col-start-1 row-start-1 min-w-0 transition-[translate,opacity] ease-enter data-[dragging=true]:transition-none',
+	variants: {
+		// A body layer is its own scroll container, and `touch-action` only counts up to the nearest
+		// one: set on the layer, it leaves vertical scrolling to the browser and horizontal moves to
+		// the back swipe.
+		swipe: {
+			true: 'touch-pan-y',
+			false: null
+		}
+	},
+	defaultVariants: {
+		swipe: false
+	}
+});
+
 const defaultGroup = cva({
 	base: 'relative flex w-full min-w-0 flex-col',
 	variants: {
@@ -957,6 +981,24 @@ export const defaultSidebarMotion = motion({
 		out: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0.2 },
 		duration: 'normal',
 		easing: 'standard'
+	},
+	variants: {
+		part: {
+			collapse: {},
+			// The pager between views: the arriving view comes from the inline end and the leaving
+			// one goes to the start, side by side, each travelling `x` while it fades between
+			// `opacity` and 1. `enter` easing moves on the first frame; an in-out curve would sit
+			// still for the first and last fifth and squeeze the whole swap into a blink.
+			view: {
+				in: { axis: 'x', x: '100%', opacity: 0 },
+				out: { axis: 'x', x: '100%', opacity: 0 },
+				duration: 'slow',
+				easing: 'enter'
+			}
+		}
+	},
+	defaultVariants: {
+		part: 'collapse'
 	}
 });
 
@@ -966,6 +1008,8 @@ export const sidebarTheme = {
 	panel: defaultPanel,
 	header: defaultStackSection,
 	nav: defaultNav,
+	viewStage: defaultViewStage,
+	viewLayer: defaultViewLayer,
 	footer: defaultStackSection,
 	group: defaultGroup,
 	groupLabel: defaultGroupLabel,

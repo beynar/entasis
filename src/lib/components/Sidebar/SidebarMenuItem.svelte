@@ -30,6 +30,8 @@
 		size,
 		activeVariant,
 		density,
+		back = false,
+		ariaLabel,
 		theme
 	}: {
 		item: SidebarMenuEntry;
@@ -39,6 +41,10 @@
 		size: SidebarSize;
 		activeVariant: SidebarActiveVariant;
 		density: SidebarDensity;
+		/** The row a nested view opens on, back to its parent: a leading back arrow, no chevron. */
+		back?: boolean;
+		/** Accessible name when the visible label alone does not say what the row does. */
+		ariaLabel?: string;
 		theme?: SidebarThemeProps;
 	} = $props();
 
@@ -62,7 +68,9 @@
 		api.displayState === 'collapsed' && !api.isMobile && !api.isPeeking
 	);
 	const showTooltip = $derived((tooltips === 'always' || isIconCollapsed) && !api.isMobile);
-	const tooltipContent = $derived(showTooltip ? (item.tooltip ?? item.label) : undefined);
+	const tooltipContent = $derived(
+		showTooltip ? (item.tooltip ?? ariaLabel ?? item.label) : undefined
+	);
 	const hasSubmenu = $derived(!!item.items?.length);
 	// A bare glyph stays bare: the wrapper only appears when the entry asks for a role tint or a
 	// tile, so an untinted row never inherits the ambient `data-color`.
@@ -97,6 +105,7 @@
 			return;
 		}
 		item.onclick?.(event);
+		if (item.view !== undefined && !event.defaultPrevented) api.setView(item.view);
 	}
 </script>
 
@@ -110,7 +119,7 @@
 			<SidebarIcon icon={item.icon} />
 		</span>
 	{:else}
-		<SidebarIcon icon={item.icon} />
+		<SidebarIcon icon={item.icon} class={back ? 'rtl:-scale-x-100' : undefined} />
 	{/if}
 	<span class={classes.menuLabel()}>{item.label}</span>
 {/snippet}
@@ -170,6 +179,8 @@
 			data-active={item.isActive ? 'true' : undefined}
 			data-active-variant={activeVariant}
 			aria-current={item.isActive ? 'page' : undefined}
+			aria-label={ariaLabel}
+			data-sidebar-view-target={item.view}
 			disabled={item.disabled || undefined}
 			class={classes.menuButton({
 				variant: item.variant,
@@ -183,6 +194,12 @@
 			onclick={handleClick}
 		>
 			{@render entryContent()}
+			{#if item.view !== undefined && !back}
+				<SidebarIcon
+					icon={caretRightIcon}
+					class={classes.menuTrailing({ size, className: 'rtl:-scale-x-100' })}
+				/>
+			{/if}
 		</button>
 	{/if}
 {/snippet}

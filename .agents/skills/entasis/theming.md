@@ -379,6 +379,17 @@ is the square corner the geometry asks for — a `rounded-sm-concentric` box ins
 is `min(4px, 4 - 8)` → 0. At the default theme a menu row inside a `rounded-lg p-md` panel is
 `min(8px, 12 - 8)` = 4px.
 
+The padding half reads the other way. `px-<step>-concentric` and `py-<step>-concentric` (the step is a
+spacing step, `micro` … `layout-xl`) pad a flush bar clear of its container's corner:
+`max(var(--space-<step>), min(calc(var(--radius-parent, 0px) / 2), calc(var(--space-<step>) * 3)))`
+— the step, or half the container's corner when that is larger, capped at three steps because a
+pill publishes an infinite radius. It is for very round themes over compact bars: at `radius: 2.25`
+a window's 24px corner sits over its 36px title bar, and `px-md-concentric` gives the title 12px
+instead of 8px. It only departs from the plain step when the
+corner is more than twice the step, so default themes are unchanged, and it publishes what it pads
+like `px` / `py`. Only a full `rounded-<step>` publishes a radius, so a box rounded on some sides
+writes `rounded-xl rounded-b-none` rather than `rounded-t-xl` when its children read the corner.
+
 Both variables inherit, because the flush child is rarely a direct child: a menu's rows sit in a
 `role="menu"` group inside the padded panel, so an unrounded, unpadded wrapper in between is
 transparent. What must not cross a rounded boundary is the padding — a `Button` inside a padded
@@ -467,6 +478,13 @@ The steps `rounded-xs` … `rounded-4xl` are the same eight everywhere; `radius`
 | `4xl` | 32px        |                                  |
 
 `rounded-full` and `rounded-none` are outside the scale and never move.
+
+The surface steps (`lg` and up) follow the multiplier only up to `large` (1.5×). A round theme
+turns controls into pills (`md` at `round` is 20px on a 32px button), but a panel rounder than
+1.5× stops reading as a panel, so at `round` or `radius: 2.25` cards and popovers stay at 18px
+and dialogs and windows at 24px. Radius tracks the size of what it rounds, not the theme alone:
+an element smaller than its step's usual owner caps its own corner, as the 36px floating-window
+dock tab does with `min(var(--radius-xl), calc(var(--spacing) * 3))`, a third of its height.
 
 ### `spacing`
 

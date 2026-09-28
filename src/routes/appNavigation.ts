@@ -1,6 +1,6 @@
 import { resolve } from '$app/paths';
 import type { ResolvedPathname, RouteId } from '$app/types';
-import type { SidebarGroup } from '$lib/components/Sidebar/index.js';
+import type { SidebarGroup, SidebarView } from '$lib/components/Sidebar/index.js';
 import { componentNavigationSections } from './componentNavigation.generated.js';
 import { blockCategories, blockGroups } from './blocks/catalog.js';
 import { workflowBlocks } from './blocks/blocks.js';
@@ -47,50 +47,115 @@ const additionalUtilityLinks: AppNavigationLink[] = [
 	{ href: '/utilities/shimmer', text: 'Shimmer' }
 ];
 
-const sidebarSections: Array<{ label: string; links: AppNavigationLink[] }> = [
-	{ label: 'Getting Started', links: gettingStartedLinks },
-	...componentNavigationSections.map((section) => ({
+const toolLinks: AppNavigationLink[] = [
+	{ href: '/playground', text: 'Playground' },
+	{ href: '/colors', text: 'Colors' }
+];
+
+const templateLinks: AppNavigationLink[] = [
+	{ href: '/templates', text: 'All templates' },
+	{ href: '/templates/tasks-dashboard', text: 'Tasks dashboard' }
+];
+
+const componentSections: Array<{ label: string; links: AppNavigationLink[] }> =
+	componentNavigationSections.map((section) => ({
 		label: section.label,
 		links:
 			section.label === 'Utilities'
 				? [...section.links, ...additionalUtilityLinks]
 				: [...section.links]
-	}))
+	}));
+
+const sidebarSections: Array<{ label: string; links: AppNavigationLink[] }> = [
+	{ label: 'Getting Started', links: gettingStartedLinks },
+	...componentSections
 ];
 
-export function getSidebarGroups(routeId: string | null | undefined): SidebarGroup[] {
-	if (routeId?.startsWith('/blocks')) {
-		return [
-			{ items: [{ label: 'All blocks', href: '/blocks', isActive: routeId === '/blocks' }] },
-			...blockGroups.map((group) => ({
-				label: group,
-				items: blockCategories
-					.filter((category) => category.group === group)
-					.map((category) => ({
-						label: category.title,
-						href: `/blocks/${category.slug}`,
-						badge: category.blocks.length,
-						isActive:
-							routeId === `/blocks/${category.slug}` ||
-							routeId.startsWith(`/blocks/${category.slug}/`)
-					}))
-			})),
-			{
-				label: 'Application workflows',
-				items: workflowBlocks.map((block) => ({
-					label: block.title,
-					href: `/blocks/${block.slug}`,
-					isActive: routeId === `/blocks/${block.slug}`
+const linkGroup = (
+	label: string,
+	links: AppNavigationLink[],
+	routeId: string | null | undefined
+): SidebarGroup => ({
+	label,
+	items: links.map((link) => ({
+		label: link.text,
+		href: link.href,
+		isActive: routeId === link.href
+	}))
+});
+
+function blockSidebarGroups(routeId: string): SidebarGroup[] {
+	return [
+		{ items: [{ label: 'All blocks', href: '/blocks', isActive: routeId === '/blocks' }] },
+		...blockGroups.map((group) => ({
+			label: group,
+			items: blockCategories
+				.filter((category) => category.group === group)
+				.map((category) => ({
+					label: category.title,
+					href: `/blocks/${category.slug}`,
+					badge: category.blocks.length,
+					isActive:
+						routeId === `/blocks/${category.slug}` ||
+						routeId.startsWith(`/blocks/${category.slug}/`)
 				}))
-			}
-		];
-	}
-	return sidebarSections.map((section) => ({
-		label: section.label,
-		items: section.links.map((link) => ({
-			label: link.text,
-			href: link.href,
-			isActive: routeId === link.href
-		}))
-	}));
+		})),
+		{
+			label: 'Application workflows',
+			items: workflowBlocks.map((block) => ({
+				label: block.title,
+				href: `/blocks/${block.slug}`,
+				isActive: routeId === `/blocks/${block.slug}`
+			}))
+		}
+	];
+}
+
+export type DocsSidebarView = 'docs' | 'components' | 'blocks' | 'templates';
+
+/**
+ * The sidebar view a route shows: one per header section. Playground and Colors are single pages
+ * with no list of their own, so they sit in the Docs view beside the theme topics they belong to.
+ */
+export function getSidebarView(routeId: string | null | undefined): DocsSidebarView {
+	if (routeId?.startsWith('/blocks')) return 'blocks';
+	if (routeId?.startsWith('/templates')) return 'templates';
+	if (
+		routeId?.startsWith('/docs') ||
+		routeId === '/playground' ||
+		routeId === '/colors' ||
+		routeId === '/stress'
+	)
+		return 'docs';
+	return 'components';
+}
+
+/**
+ * The docs sidebar's views, keyed in the header's order: a view later in the header slides in from
+ * the inline end, an earlier one slides back, so the sidebar moves the way the header does.
+ */
+export function getSidebarViews(
+	routeId: string | null | undefined
+): Record<DocsSidebarView, SidebarView> {
+	return {
+		docs: {
+			label: 'Docs',
+			items: [
+				linkGroup('Getting Started', gettingStartedLinks, routeId),
+				linkGroup('Tools', toolLinks, routeId)
+			]
+		},
+		components: {
+			label: 'Components',
+			items: componentSections.map((section) => linkGroup(section.label, section.links, routeId))
+		},
+		blocks: { label: 'Blocks', items: blockSidebarGroups(routeId ?? '') },
+		templates: { label: 'Templates', items: [linkGroup('Templates', templateLinks, routeId)] }
+	};
+}
+
+/** Every page the command palette searches: the blocks catalog on its own section, all docs otherwise. */
+export function getSidebarGroups(routeId: string | null | undefined): SidebarGroup[] {
+	if (routeId?.startsWith('/blocks')) return blockSidebarGroups(routeId);
+	return sidebarSections.map((section) => linkGroup(section.label, section.links, routeId));
 }

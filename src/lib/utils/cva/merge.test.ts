@@ -360,6 +360,9 @@ describe('house class groups stay overridable', () => {
 		['bg-surface-raised', 'bg-white'],
 		['border-neutral-muted', 'border-gray-200'],
 		['state-layer', 'state-layer-none'],
+		['px-md', 'px-md-concentric'],
+		['px-md-concentric', 'px-3'],
+		['py-sm-concentric', 'py-2'],
 		['state-layer-none', 'state-layer']
 	])('%s then %s keeps only the later one', (first, second) => {
 		expect(cx(first, second)).toBe(second);

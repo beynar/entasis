@@ -18,6 +18,7 @@
  *     `reverse` are modifiers; `shimmer-color|duration|spread|angle-*` are scales)
  *   - `state-layer` / `state-layer-none` exclude each other
  *   - `rounded-<step>-concentric` / `rounded-t|b-<step>-concentric` (join the core corner groups), the container side
+ *   - `px|py-<step>-concentric` (join the core `px` / `py` groups)
  *     needing nothing here — a `rounded-<step>` publishes its radius to its children by itself
  *   - `duration-*` / `ease-*` motion tokens
  *   - the semantic spacing scale (`p-md`, `gap-layout-lg`, ...) registered on
@@ -35,6 +36,8 @@ import { createCn, validators, type CreateCnInput } from 'cn/config';
 import type { ClassValue } from './types.js';
 
 const isConcentric = (value: string) => /^(?:xs|sm|md|lg|xl|2xl|3xl|4xl)-concentric$/.test(value);
+const isSpacingConcentric = (value: string) =>
+	/^(?:micro|xs|sm|md|lg|xl|layout-sm|layout-md|layout-lg|layout-xl)-concentric$/.test(value);
 
 /** Semantic spacing values usable wherever Tailwind accepts a spacing value. */
 const SEMANTIC_SPACING = [
@@ -90,7 +93,10 @@ export const mergeConfig = {
 			// and last-wins against `rounded-lg`.
 			rounded: [{ rounded: [isConcentric] }],
 			'rounded-t': [{ 'rounded-t': [isConcentric] }],
-			'rounded-b': [{ 'rounded-b': [isConcentric] }]
+			'rounded-b': [{ 'rounded-b': [isConcentric] }],
+			// `px-md-concentric` is a padding like any other, so it joins the core `px` / `py` groups.
+			px: [{ px: [isSpacingConcentric] }],
+			py: [{ py: [isSpacingConcentric] }]
 		},
 		conflictingClassGroups: {
 			// `raised-*`, `lift-*` and `shadow-*` all own the `--tw-shadow` slot.

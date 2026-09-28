@@ -18,6 +18,7 @@
 	import { SidebarResizeState } from './sidebar.resize.svelte.js';
 	import { SidebarStateController } from './sidebar.state.svelte.js';
 	import { useSidebarTheme } from './sidebar.theme.js';
+	import { SidebarViewsState } from './sidebar.views.svelte.js';
 	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 	let {
 		id: customId,
@@ -47,6 +48,10 @@
 		expandOnHover = false,
 		activityBar,
 		items,
+		views,
+		view = $bindable(),
+		defaultView,
+		onViewChange,
 		class: className,
 		collapseIcon = 'chevron',
 		tooltips = 'auto',
@@ -111,19 +116,26 @@
 	const navLabel = $derived(`${t.sidebar} ${t.navigation}`);
 	const classes = $derived(useSidebarTheme(theme));
 	const resolvedColor = $derived(useDefaultColor());
+	// Every view counts, not just the one on screen: icon collapse must not come and go as the
+	// view changes.
 	const canCollapseToIcon = $derived.by(() => {
-		if (content) return false;
+		const viewList = Object.values(views ?? {});
+		if (viewList.length ? viewList.some((entry) => entry.content) : content) return false;
 
-		const menuEntries = [
-			...(headerMenu ?? []),
-			...(items?.flatMap((group) => group.items ?? []) ?? []),
-			...(footerMenu ?? [])
-		];
+		const sources = [{ headerMenu, items, footerMenu, headerButton, footerButton }, ...viewList];
+		const menuEntries = sources.flatMap((source) => [
+			...(source.headerMenu ?? []),
+			...(source.items?.flatMap((group) => group.items ?? []) ?? []),
+			...(source.footerMenu ?? [])
+		]);
 
 		return (
 			menuEntries.every(hasIcon) &&
-			hasCollapsibleMedia(headerButton) &&
-			hasCollapsibleMedia(footerButton)
+			sources.every(
+				(source) =>
+					hasCollapsibleMedia(source.headerButton ?? undefined) &&
+					hasCollapsibleMedia(source.footerButton ?? undefined)
+			)
 		);
 	});
 	const resolvedCollapsible = $derived(
@@ -150,6 +162,32 @@
 			return onDisplayStateChange;
 		}
 	});
+	const panelViews = new SidebarViewsState({
+		get views() {
+			return views;
+		},
+		get view() {
+			return view;
+		},
+		get defaultView() {
+			return defaultView;
+		},
+		get onViewChange() {
+			return onViewChange;
+		},
+		get isMobile(): boolean {
+			return controller.isMobile;
+		},
+		get side() {
+			return side;
+		},
+		get root() {
+			return { headerButton, search, headerMenu, header, footerButton, footerMenu, footer };
+		},
+		setViewProp: (next) => {
+			view = next;
+		}
+	});
 	const controller = new SidebarStateController({
 		get mode() {
 			return mode;
@@ -169,7 +207,11 @@
 		get peeking() {
 			return hoverExpanded;
 		},
-		setDisplayState: displayStateBridge.setDisplayState
+		get view(): string | undefined {
+			return panelViews.current;
+		},
+		setDisplayState: displayStateBridge.setDisplayState,
+		setView: panelViews.setView
 	});
 	const resize = new SidebarResizeState({
 		get width() {
@@ -251,6 +293,7 @@
 		{activeVariant}
 		{density}
 		label={navLabel}
+		views={panelViews.enabled ? panelViews : undefined}
 		{theme}
 	/>
 {/snippet}

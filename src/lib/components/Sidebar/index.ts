@@ -33,6 +33,7 @@ export type {
 	SidebarTooltipMode,
 	SidebarTreeNode,
 	SidebarVariant,
+	SidebarView,
 	SidebarWidthChangePayload
 } from './sidebar.props.js';
 export {

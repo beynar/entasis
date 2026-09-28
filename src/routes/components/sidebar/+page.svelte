@@ -8,12 +8,14 @@
 	import SidebarPanelModeDemo from './demos/SidebarPanelModeDemo.svelte';
 	import SidebarTreeDemo from './demos/SidebarTreeDemo.svelte';
 	import SidebarVariantDemo from './demos/SidebarVariantDemo.svelte';
+	import SidebarViewsDemo from './demos/SidebarViewsDemo.svelte';
 	import ShellMentalModel from '../ShellMentalModel.svelte';
 	import rawActivityBarCode from './demos/SidebarActivityBarDemo.svelte?raw';
 	import rawIconCode from './demos/SidebarIconDemo.svelte?raw';
 	import rawPanelModeCode from './demos/SidebarPanelModeDemo.svelte?raw';
 	import rawTreeCode from './demos/SidebarTreeDemo.svelte?raw';
 	import rawVariantCode from './demos/SidebarVariantDemo.svelte?raw';
+	import rawViewsCode from './demos/SidebarViewsDemo.svelte?raw';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import { densities, sizes } from '$lib/utils/tokens.js';
 
@@ -63,6 +65,7 @@
 	const panelModeCode = toPublicExampleCode(rawPanelModeCode);
 	const treeCode = toPublicExampleCode(rawTreeCode);
 	const variantCode = toPublicExampleCode(rawVariantCode);
+	const viewsCode = toPublicExampleCode(rawViewsCode);
 
 	function toPublicExampleCode(code: string): string {
 		return code
@@ -183,6 +186,14 @@
 			code={activityBarCode}
 		>
 			<SidebarActivityBarDemo />
+		</ComponentCard>
+
+		<ComponentCard
+			description="Views give the panel named contents that slide into each other. A row with view opens a nested view, which starts with a back row to its parent; on mobile, swiping toward the inline end goes back too. Views without a parent are sections, switched here from the activity bar. Header and footer props a view sets replace the Sidebar's and pass down to its nested views: when two views share them, only the menu slides; when a view changes them, the whole panel slides as one page."
+			class="!min-h-fit !items-start !p-4"
+			code={viewsCode}
+		>
+			<SidebarViewsDemo />
 		</ComponentCard>
 
 		<ComponentCard

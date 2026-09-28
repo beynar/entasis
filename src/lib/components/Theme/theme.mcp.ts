@@ -54,6 +54,7 @@ Changing the controlled object updates already-rendered Tailwind utilities witho
 - \`spacingScale\`: partial overrides for the strictly increasing \`xs\`, \`sm\`, \`md\`, \`lg\`,
   and \`xl\` spacing multipliers. Defaults to 1/1.5/2/3/4.
 - \`radius\`: \`'none' | 'subtile' | 'small' | 'normal' | 'large' | 'round' | number\`.
+  Controls take the full multiplier; surface steps (\`lg\` and up) stop at \`large\` (1.5×).
 - \`typeScale\`: \`'compact' | 'default' | 'comfortable' | 'large' | TypeScaleOptions\`.
 - \`raisedWithBorder\`: toggles the border used by \`raised-*\` utilities.
 - \`defaultColor\`: \`Colors\` role kit chrome inherits when a control omits \`color\`.

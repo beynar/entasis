@@ -1,7 +1,7 @@
 export const floatingWindowDescription = `
 # FloatingWindow Component
 
-FloatingWindow renders a non-modal, portaled utility window that can be moved, resized, minimized into a configurable viewport-edge dock, restored, and closed. Multiple windows inside the same Theme provider coordinate their z-order and stack independently by dock placement. The Theme keeps floating windows below modal Dialog surfaces, so an open window remains mounted behind a dialog and returns unchanged when the dialog closes.
+FloatingWindow renders a portaled utility window, non-modal unless \`backdrop\` is set, that can be moved, resized, minimized into a configurable viewport-edge dock, restored, and closed. Multiple windows inside the same Theme provider coordinate their z-order and stack independently by dock placement. The Theme keeps floating windows below modal Dialog surfaces, so an open window remains mounted behind a dialog and returns unchanged when the dialog closes.
 
 ## Basic Usage
 
@@ -35,6 +35,7 @@ FloatingWindow renders a non-modal, portaled utility window that can be moved, r
 - **minimizable**: boolean (default: true) - Shows the minimize control.
 - **closable**: boolean (default: true) - Shows the close control.
 - **closeOnEscape**: boolean (default: true) - Closes the topmost expanded floating window when Escape is pressed.
+- **backdrop**: boolean (default: false) - Dims the page behind the expanded window and makes it modal like a Dialog: Tab stays inside, the rest of the page is inert, and page scroll is locked. Minimizing into the dock lifts all of it; restoring brings it back. Clicking the backdrop does nothing: close with the close control or Escape.
 - **position**: { x: number; y: number } - Bindable viewport-relative top-left position. The first render is centered when omitted.
 - **dimensions**: { width: number; height: number; min?: [width, height]; max?: [width, height] } (default: 480 x 320, minimum 280 x 160) - Bindable pixel dimensions and optional constraint tuples. Maximum dimensions remain additionally constrained to the viewport.
 - **class**: string - Additional classes on the visible window.
@@ -54,16 +55,17 @@ Header dragging is the default because it preserves text selection and content i
 
 ## Accessibility
 
-- The expanded surface uses a non-modal \`dialog\` role and is labelled by its title.
+- The expanded surface uses a \`dialog\` role labelled by its title: \`aria-modal="false"\`, or \`"true"\` with \`backdrop\`.
 - Close, minimize, and restore controls are native Entasis buttons with accessible labels.
 - Edge resize handles use \`separator\` semantics and support arrow-key resizing; hold Shift for a larger step.
-- Opening focuses the non-modal window, closing restores focus to its previous owner, and only the topmost expanded floating window handles Escape.
+- Opening focuses the window, closing restores focus to its previous owner, and only the topmost expanded floating window handles Escape.
 - Alt+Arrow moves the focused window; hold Shift for a larger step.
 - Corner handles are pointer-only because a diagonal separator has no valid ARIA orientation.
-- The component does not trap focus or hide page content because it is explicitly non-modal.
+- Without \`backdrop\` it does not trap focus or hide page content. With it, Tab and Shift+Tab stay inside the window, every sibling subtree up to \`<body>\` is \`inert\` (other windows and dock items included), and page scroll is locked, until the window closes or is minimized.
 
 ## Theme Parts
 
+- **backdrop**: Page dim behind a window opened with \`backdrop\`, one layer below the window.
 - **root**: Floating window surface and drag/resize states.
 - **header**: Default title bar and drag handle.
 - **title**: Header title.
@@ -82,6 +84,7 @@ Header dragging is the default because it preserves text selection and content i
 - **motion** theme slot, keyed by \`phase\`: \`flight\` times the crossfade between window and
   dock pill, \`enter\` / \`exit\` the scale fallback when there is no counterpart.
 - Only \`duration\` / \`easing\` (plus the fallback's \`scale\` / \`opacity\`) are read.
+- The backdrop fades on the \`enter\` / \`exit\` timings.
 - Ladder: \`<Theme components={{ 'floating-window': { motion } }}>\` →
   \`setFloatingWindowTheme({ motion })\` → \`theme.motion\`. Read once, at mount.
 `;

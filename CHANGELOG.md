@@ -6,7 +6,56 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `px-<step>-concentric` / `py-<step>-concentric`: padding that clears the container's corner, the
+  step or half the parent's `--radius-parent` when that is larger (capped at three steps). The
+  padding half of the concentric radius engine, for very round themes over compact bars; default
+  themes are unchanged.
+- `FloatingWindow` `backdrop`: dims the page behind the expanded window and makes it modal like a
+  `Dialog` (Tab stays inside, the rest of the page is inert, page scroll is locked). Minimizing into
+  the dock lifts it and restoring brings it back. The backdrop is a new `backdrop` theme part, the
+  same wash as Dialog's, fading on the window's `enter` / `exit` motion, and it always sits one layer
+  below its window: the shared window counter reserves that index, so no other window can land in
+  between.
+
+- `Sidebar` views: `views` holds named panel contents and `view` / `defaultView` / `onViewChange`
+  pick the one on screen. A row with `view` opens a view; a view with `parent` is nested and opens
+  on a back row named after its parent, and on mobile a swipe toward the inline end goes back.
+  Changing the view slides the two views side by side like pages (deeper comes in from the inline
+  end, shallower slides back, sections go by their order in `views`) on the Sidebar motion slot's
+  new `view` variant. Header and footer props a view leaves out come from its parent, then from
+  the Sidebar; views that share them keep a still header and footer and only the menu slides, and
+  a view that changes them slides the whole panel as one page. `api.view` and `api.setView` reach
+  it from snippets. New theme parts `viewStage` and `viewLayer`.
+
+### Changed
+
+- Radius: the surface steps (`rounded-lg` and up: cards, popovers, dialogs, windows) follow the
+  `radius` multiplier only up to `large` (1.5×). Controls still take the full multiplier, so a
+  round theme keeps pill buttons, but its panels no longer balloon: at `round` or `radius: 2.25`
+  `rounded-xl` is 24px instead of 40px / 36px. Themes at `large` or below are unchanged.
+
+### Fixed
+
+- `FloatingWindow`: with a very round theme the header title sat inside the window's corner. It now
+  uses concentric padding (12px at `radius: 2.25`, unchanged 8px at the default radius).
+- `FloatingWindow` dock: the minimized tab caps its corner at a third of its height (12px), so a
+  round theme no longer turns it into a pill; at the default radius it goes from 16px to 12px.
+  Hovering or pressing its title tints the whole tab, not just the title's box.
+- Pointer drags that capture on activation (`capture: 'on-activate'`: the Dialog drawer's
+  swipe-to-close, the FloatingWindow dock) no longer cancel on touch screens. The browser captures
+  a touch to the element under it, and when the drag took the capture over, that element's
+  `lostpointercapture` bubbled up and was read as the drag's own.
+- `FloatingWindow` dock: clicking the minimized tab's title restores the window. The dock captured
+  the pointer on press, so the click landed on the tab instead of the title; the drag now starts
+  after 4px of travel (or a 300ms touch hold).
+
+- `FileInput`: the placeholder, remove and add-more icons are Phosphor snippets like the rest of the
+  kit instead of inline Lucide SVGs.
+
 ## 0.7.1 — 2026-09-24
+
 ### Changed
 
 - The Sidebar activity bar follows the variant's panel instead of always being a flush hairline

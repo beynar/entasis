@@ -314,6 +314,32 @@ describe('floating window', () => {
 		await escape();
 		await waitFor(() => expect(screen.getByTestId('window-open')).toHaveTextContent('false'));
 	});
+
+	test(
+		law(
+			'a11y:floating-window.backdrop',
+			'is modal behind a backdrop, with the page inert, until it is minimized'
+		),
+		async () => {
+			mount('floating-window-backdrop');
+			const dialog = await screen.findByRole('dialog', { name: 'Notes' });
+			expect(dialog).toHaveAttribute('aria-modal', 'true');
+			const backdrop = document.querySelector<HTMLElement>(
+				'[data-slot="floating-window-backdrop"]'
+			);
+			expect(backdrop).toHaveAttribute('aria-hidden', 'true');
+			// The index just below the window, reserved for it: nothing can land in between.
+			expect(Number(backdrop!.style.zIndex)).toBe(Number(dialog.style.zIndex) - 1);
+			const page = screen.getByText('Page action');
+			await waitFor(() => expect(page.closest('[inert]')).not.toBeNull());
+
+			await fireEvent.click(screen.getByRole('button', { name: 'Minimize window' }));
+			await waitFor(() =>
+				expect(document.querySelector('[data-slot="floating-window-backdrop"]')).toBeNull()
+			);
+			expect(page.closest('[inert]')).toBeNull();
+		}
+	);
 });
 
 describe('form', () => {

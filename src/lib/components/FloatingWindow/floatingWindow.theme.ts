@@ -26,7 +26,7 @@ const defaultFloatingWindow = cva({
 });
 
 const defaultFloatingWindowHeader = cva({
-	base: 'border-neutral-muted flex h-9 shrink-0 items-center gap-sm border-b px-md select-none',
+	base: 'border-neutral-muted flex h-9 shrink-0 items-center gap-sm border-b px-md-concentric select-none',
 	variants: {
 		draggable: {
 			true: 'cursor-move touch-none',
@@ -77,17 +77,19 @@ const defaultFloatingWindowResizeHandle = cva({
 });
 
 const defaultFloatingWindowDockItem = cva({
-	base: 'bg-surface-floating text-neutral pointer-events-auto fixed flex touch-none items-center overflow-hidden lift-4 ring-1 ring-neutral-muted',
+	base: 'bg-surface-floating text-neutral pointer-events-auto fixed flex touch-none items-center overflow-hidden lift-4 ring-1 ring-neutral-muted [--dock-radius:min(var(--radius-xl),calc(var(--spacing)*3))]',
 	variants: {
 		orientation: {
 			horizontal: 'h-9 flex-row',
 			vertical: 'w-9 flex-col'
 		},
 		side: {
-			top: 'rounded-t-none rounded-b-xl',
-			right: 'rounded-r-none rounded-l-xl',
-			bottom: 'rounded-t-xl rounded-b-none',
-			left: 'rounded-r-xl rounded-l-none'
+			// The window's step, capped at a third of the 36px (`spacing × 9`) item: any rounder and a
+			// round theme turns the tab into a pill. At that cap `md` padding always clears the corner.
+			top: 'rounded-[var(--dock-radius)] rounded-t-none',
+			right: 'rounded-[var(--dock-radius)] rounded-r-none',
+			bottom: 'rounded-[var(--dock-radius)] rounded-b-none',
+			left: 'rounded-[var(--dock-radius)] rounded-l-none'
 		},
 		dragging: {
 			true: 'cursor-grabbing select-none',
@@ -101,8 +103,13 @@ const defaultFloatingWindowDockItem = cva({
 	}
 });
 
+// `!static`: the title is the pill's drag and restore surface, so its hover / press overlay (the
+// Button's `state-layer` ::before) anchors to the fixed dock item instead of the button and tints
+// the whole pill, clipped by its rounded overflow. The dock controls keep their own overlay.
+// `active:translate-none` drops the Button's press nudge: any `translate` but `none`, 0 included,
+// makes the title the anchor of its own overlay again and pulls the press tint back inside it.
 const defaultFloatingWindowDockTitle = cva({
-	base: '!min-w-0 !flex-1 !rounded-none !text-xs !font-medium',
+	base: '!static active:translate-none !min-w-0 !flex-1 !rounded-none !text-xs !font-medium',
 	variants: {
 		orientation: {
 			horizontal: '!h-full !w-auto !justify-start !px-md !text-left',
@@ -150,6 +157,12 @@ const defaultFloatingWindowDockActions = cva({
 // The window and its dock pill are two halves of one crossfade: `flight` times the
 // shared transform between them, `enter` / `exit` the scale fallback used when there
 // is no counterpart to fly to. Only `duration` / `easing` are read from each.
+// The page dim behind a window opened with `backdrop`: the same wash as Dialog's backdrop, so a
+// modal window and a modal dialog dim the page alike.
+const defaultFloatingWindowBackdrop = cva({
+	base: 'fixed inset-0 bg-neutral/40 backdrop-blur-xs'
+});
+
 export const defaultFloatingWindowMotion = motion({
 	base: {
 		in: { x: 0, y: 0, scale: 0.97, opacity: 0 },
@@ -169,6 +182,7 @@ export const defaultFloatingWindowMotion = motion({
 
 export const floatingWindowTheme = {
 	motion: defaultFloatingWindowMotion,
+	backdrop: defaultFloatingWindowBackdrop,
 	root: defaultFloatingWindow,
 	header: defaultFloatingWindowHeader,
 	title: defaultFloatingWindowTitle,

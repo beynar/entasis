@@ -49,6 +49,7 @@
 		| 'popover'
 		| 'calendar'
 		| 'floating-window'
+		| 'floating-window-backdrop'
 		| 'form'
 		| 'hover-card'
 		| 'menu'
@@ -98,6 +99,7 @@
 		{ type: 'toggle', children: 'Underline' }
 	]);
 	let windowOpen = $state(true);
+	let windowMinimized = $state(false);
 	let confirmed = $state<string>('pending');
 	let switchValue = $state(false);
 	let comboboxValue = $state<string | null>(null);
@@ -189,6 +191,11 @@
 			<p>Window body</p>
 		</FloatingWindow>
 		<output data-testid="window-open">{String(windowOpen)}</output>
+	{:else if scenario === 'floating-window-backdrop'}
+		<button type="button">Page action</button>
+		<FloatingWindow bind:open={windowOpen} bind:minimized={windowMinimized} backdrop title="Notes">
+			<p>Window body</p>
+		</FloatingWindow>
 	{:else if scenario === 'form'}
 		<Form
 			inputs={{

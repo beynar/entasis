@@ -56,6 +56,26 @@ const paddingUtilities = {
 	pe: (value: string) => ({ 'padding-inline-end': value })
 };
 
+// `px-<step>-concentric` / `py-<step>-concentric`: the padding half of NESTED RADIUS (see
+// `radius.ts`) read the other way. A flush bar's content sits in its container's corner, so its
+// padding is the step, or half the container's corner radius when that is larger. A very round
+// theme on a compact bar needs it: at `radius: 2.25` a 36px window corner sits over a 36px title
+// bar, and `px-md` (8px) puts the title's first glyphs inside the curve. Capped at three steps,
+// because a pill container publishes an infinite radius. It only departs from the plain step when
+// the corner is more than twice the step. It publishes what it pads, like `px` / `py`.
+const cornerClearance = (value: string) =>
+	`max(${value}, min(calc(var(--radius-parent, 0px) / 2), calc(${value} * 3)))`;
+const concentricPaddingValues = Object.fromEntries(
+	Object.entries(spacingValues).map(([step, value]) => [
+		`${step}-concentric`,
+		cornerClearance(value)
+	])
+);
+const concentricPaddingUtilities = {
+	px: (value: string) => ({ 'padding-inline': value, '& > *': { '--pad-parent-x': value } }),
+	py: (value: string) => ({ 'padding-block': value, '& > *': { '--pad-parent-y': value } })
+};
+
 const marginUtilities = {
 	m: (value: string) => ({ margin: value }),
 	mx: (value: string) => ({ 'margin-inline': value }),
@@ -79,6 +99,7 @@ export const applySpacingEngine = ({ addBase, matchUtilities }: PluginAPI) => {
 	addBase({ html: spacingVariables });
 	matchUtilities(gapUtilities, { values: spacingValues });
 	matchUtilities(paddingUtilities, { values: spacingValues });
+	matchUtilities(concentricPaddingUtilities, { values: concentricPaddingValues });
 	matchUtilities(marginUtilities, { values: spacingValues, supportsNegativeValues: true });
 	matchUtilities(insetUtilities, { values: spacingValues });
 };

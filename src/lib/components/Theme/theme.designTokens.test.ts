@@ -65,3 +65,16 @@ describe('drawerInset', () => {
 		expect(() => compile({ drawerInset: 'huge' })).toThrow('Unknown drawerInset "huge".');
 	});
 });
+
+describe('radius', () => {
+	it('lets controls follow a round factor while surface steps stop at large', () => {
+		const css = compile({ radius: 2.25 });
+		// `md` (controls) takes the full factor, so a round theme still pills its buttons.
+		expect(css).toContain('--radius-md:1.125rem;');
+		// `lg` and up stop at ×1.5: a panel rounder than that reads as a pill.
+		expect(css).toContain('--radius-lg:1.125rem;');
+		expect(css).toContain('--radius-xl:1.5rem;');
+		expect(compile({ radius: 'large' })).toContain('--radius-xl:1.5rem;');
+		expect(compile({ radius: 'small' })).toContain('--radius-xl:0.75rem;');
+	});
+});

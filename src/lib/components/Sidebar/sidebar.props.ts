@@ -85,6 +85,10 @@ export type SidebarApi = {
 	setDisplayState: (state: SidebarDisplayState) => void;
 	/** Set the mobile drawer open state. */
 	setOpenMobile: (open: boolean) => void;
+	/** The view on screen when `views` is set, undefined otherwise. */
+	readonly view: string | undefined;
+	/** Show another view. Its depth against the current one picks the slide direction. */
+	setView: (view: string) => void;
 };
 
 export type SidebarActivityBarItem = {
@@ -218,10 +222,15 @@ type SidebarMenuEntryBase = {
 };
 
 type SidebarMenuEntryNavigation = SidebarMenuEntryBase & {
-	/** Link href. Mutually exclusive with menu. */
+	/** Link href. Mutually exclusive with menu and view. */
 	href?: string;
 	/** Native click handler. Mutually exclusive with menu. */
 	onclick?: (event: MouseEvent) => void;
+	/**
+	 * Key of the `views` entry this row opens, sliding it in. Mutually exclusive with href, menu,
+	 * and items.
+	 */
+	view?: string;
 	/** Popup menu rows own the whole trigger, so they cannot also navigate. */
 	menu?: never;
 };
@@ -231,6 +240,7 @@ type SidebarMenuEntryMenu = SidebarMenuEntryBase & {
 	menu: MenuItem[];
 	href?: never;
 	onclick?: never;
+	view?: never;
 };
 
 export type SidebarMenuEntry = SidebarMenuEntryNavigation | SidebarMenuEntryMenu;
@@ -263,6 +273,39 @@ export type SidebarTreeNode = {
 	defaultOpen?: boolean;
 	/** Child nodes. */
 	children?: SidebarTreeNode[];
+};
+
+/**
+ * One panel content in `views`. Header and footer props left undefined come from the parent view,
+ * then from the Sidebar's props; `null` removes an inherited one.
+ */
+export type SidebarView = {
+	/** The view's name, shown on the back row of the views nested under it. */
+	label?: string;
+	/**
+	 * Key of the view this one is nested under. A nested view opens with a back row to it, and
+	 * on mobile a swipe toward the inline end goes back. A view without a parent is a top-level
+	 * section.
+	 */
+	parent?: string;
+	/** Groups rendered in the scrollable body. */
+	items?: SidebarGroup[];
+	/** Custom scrollable body. Overrides items. */
+	content?: Snippet<[SidebarApi]>;
+	/** Sticky top large menu row. */
+	headerButton?: SidebarMenuButtonItem | null;
+	/** Search box rendered in the header. */
+	search?: SidebarSearch | null;
+	/** Pinned menu rendered in the header. */
+	headerMenu?: SidebarMenuEntry[] | null;
+	/** Sticky top custom content. */
+	header?: Snippet<[SidebarApi]> | null;
+	/** Sticky bottom large menu row. */
+	footerButton?: SidebarMenuButtonItem | null;
+	/** Pinned menu rendered in the footer. */
+	footerMenu?: SidebarMenuEntry[] | null;
+	/** Sticky bottom custom content. */
+	footer?: Snippet<[SidebarApi]> | null;
 };
 
 export type SidebarGroup = {
@@ -396,6 +439,19 @@ type SidebarOwnProps = {
 	activityBar?: SidebarActivityBar;
 	/** Items rendered in the scrollable body. Each item is a labelled sidebar group. */
 	items?: SidebarGroup[];
+	/**
+	 * Named panel contents, one on screen at a time, replacing `items` and `content`. Changing
+	 * the view slides between them: deeper views push in, shallower ones slide back, sections at
+	 * the same depth crossfade. Header and footer props a view leaves out come from its parent,
+	 * then from the Sidebar's own props.
+	 */
+	views?: Record<string, SidebarView>;
+	/** Bindable key of the view on screen. Defaults to `defaultView`, then the first view. */
+	view?: string;
+	/** Initial view when `view` is omitted. */
+	defaultView?: string;
+	/** Fires once for each library-originated view change: a view row, a back row, a swipe. */
+	onViewChange?: (view: string) => void;
 	/** Classes applied to the outer wrapper. */
 	class?: string;
 	/** Indicator style for collapsible menu items. */

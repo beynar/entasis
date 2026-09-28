@@ -35,8 +35,13 @@ export class ThemeFloatingWindows {
 		};
 	};
 
-	activate(id: string, type: FloatingWindowSurface) {
-		this.zIndex += 1;
+	/**
+	 * Brings a surface to the top. `reserveBelow` also claims the index just under it, for a
+	 * window's backdrop: the counter never hands an index out twice, so no other surface can land
+	 * between a window and its backdrop.
+	 */
+	activate(id: string, type: FloatingWindowSurface, reserveBelow = false) {
+		this.zIndex += reserveBelow ? 2 : 1;
 		this.surfaces.set(id, { type, zIndex: this.zIndex });
 		return this.zIndex;
 	}

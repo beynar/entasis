@@ -85,6 +85,12 @@ export type FloatingWindowProps = WithAttachments<{
 	closable?: boolean;
 	/** Closes the topmost expanded floating window when Escape is pressed. */
 	closeOnEscape?: boolean;
+	/**
+	 * Dims the page behind the expanded window and makes the window modal, like a Dialog: Tab
+	 * stays inside, the rest of the page is inert, and page scroll is locked. Minimizing into the
+	 * dock lifts all of it; restoring brings it back.
+	 */
+	backdrop?: boolean;
 	/** Bindable viewport-relative top-left position in pixels. Defaults to centered. */
 	position?: FloatingWindowPosition;
 	/** Bindable width and height in pixels, with optional [width, height] constraint tuples. */

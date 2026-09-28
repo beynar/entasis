@@ -1116,6 +1116,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'SidebarTooltipMode',
 		'SidebarTreeNode',
 		'SidebarVariant',
+		'SidebarView',
 		'SidebarWidthChangePayload',
 		'setSidebarTheme',
 		'sidebarDescription',

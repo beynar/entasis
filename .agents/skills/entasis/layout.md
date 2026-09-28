@@ -588,6 +588,50 @@ Snippet<[SidebarApi]>`; pass an array to pin several affordances to one group he
 - Every handler on that path is `onclick(event, api)`: `headerButton.onclick`, `footerButton.onclick`
   and `SidebarMenuActionDescriptor.onclick` all receive the `SidebarApi` beside the event.
 
+**Props (views):**
+
+- `views`: `Record<string, SidebarView>` -- named panel contents, one on screen at a time, replacing `items` and `content`. `SidebarView`: `{ label?, parent?, items?, content?, headerButton?, search?, headerMenu?, header?, footerButton?, footerMenu?, footer? }`
+- `view` (bindable), `defaultView`: string; `onViewChange`: `(view: string) => void` -- fires for library-originated changes only (a view row, a back row, a swipe)
+- `SidebarMenuEntry.view`: string -- the row opens that view (trailing chevron) instead of navigating
+
+A view with `parent` is nested: it opens on a back row named after its parent ("Back, Settings"),
+and on mobile a swipe toward the inline end goes back. Views without `parent` are sections. A
+view change slides the two views side by side like pages -- deeper comes in from the inline end,
+shallower slides back, and between sections the later one in `views` is forward. A header or
+footer prop a view leaves undefined comes from its parent, then from the Sidebar (`null` removes
+one). When both views share every header and footer prop, only the menu slides; when a view
+changes one, the whole panel slides as one page. Drive `view` from an activity
+bar's `onSelect` for section switching, or derive it from the URL and navigate in `onViewChange`.
+
+```svelte
+<script lang="ts">
+	import { Sidebar, type SidebarView } from 'entasis/sidebar';
+	import { creditCardIcon } from 'entasis/icons/creditCard';
+	import { usersIcon } from 'entasis/icons/users';
+
+	let view = $state('settings');
+
+	const views: Record<string, SidebarView> = {
+		settings: {
+			label: 'Settings',
+			search: { placeholder: 'Search settings' },
+			items: [
+				{
+					items: [
+						{ label: 'Members', icon: usersIcon, view: 'members' },
+						{ label: 'Billing', icon: creditCardIcon, view: 'billing' }
+					]
+				}
+			]
+		},
+		members: { label: 'Members', parent: 'settings', items: [] },
+		billing: { label: 'Billing', parent: 'settings', items: [] }
+	};
+</script>
+
+<Sidebar {views} bind:view />
+```
+
 **Props (state and layout):**
 
 - `collapsible`: `'offcanvas' | 'icon' | 'none'` (default: `'offcanvas'`) -- icon mode needs an `icon` on every data-driven row, otherwise it resolves to offcanvas
@@ -684,7 +728,7 @@ badge renders a bare dot and a Snippet badge is decorative, so put their meaning
 `menuLabel`, `menuSecondary`, `menuTrailing`,
 `subMenu`, `treeSubMenu`, `subButton`, `menuAction`, `actionTrigger`, `badge`, `searchContainer`,
 `search`, `searchIcon`, `separator`, `rail`, `activityBar`, `activityBarList`, `activityBarItem`,
-`activityBarBadge`, `activityBarHeader`, `activityBarFooter`, `resizeHandle`, `edgeTrigger`,
+`activityBarBadge`, `activityBarHeader`, `activityBarFooter`, `viewStage`, `viewLayer`, `resizeHandle`, `edgeTrigger`,
 `overlay`, `mobilePanel`, `main`, `media`, `avatar`
 
 ## AppShell

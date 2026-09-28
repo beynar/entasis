@@ -5,6 +5,7 @@ import { createPointerDrag, type PointerDragPayload } from '$lib/utils/pointerDr
 import { withOptions } from '$lib/utils/state.svelte.js';
 import { useTheme } from '../Theme/theme.state.svelte.js';
 import { useFocusScope } from '$lib/utils/useFocusScope.svelte.js';
+import { useScrollLock } from '$lib/utils/useScrollLock.svelte.js';
 import type { FloatingWindowSurface } from '../Theme/theme.floatingWindows.js';
 import { FloatingWindowDockState } from './floatingWindow.dock.svelte.js';
 import { FLOATING_WINDOW_VIEWPORT_GAP, FloatingWindowGeometry } from './floatingWindow.geometry.js';
@@ -28,6 +29,7 @@ type FloatingWindowStateOptions = {
 	minimizable: boolean;
 	closable: boolean;
 	closeOnEscape: boolean;
+	backdrop: boolean;
 	position?: FloatingWindowPosition;
 	dimensions: FloatingWindowDimensions;
 	onOpenChange?: (open: boolean) => void;
@@ -72,17 +74,20 @@ export class FloatingWindowState extends withOptions<FloatingWindowStateOptions>
 
 	private geometry: FloatingWindowGeometry;
 	private docking: FloatingWindowDockState;
-	// Non-modal: focus lands on the window when it opens and returns to the opener on close.
+	// Focus lands on the window when it opens and returns to the opener on close. Non-modal by
+	// default; with a backdrop the window is modal like a Dialog: Tab stays inside and every
+	// sibling subtree up to <body> is inert.
 	private focusScope = useFocusScope({
 		isActive: () => this.open && !this.minimized,
-		trap: () => false,
+		trap: () => this.backdrop,
+		inertSiblings: () => this.backdrop,
 		initialFocus: () => 'container'
 	});
 	// Escape is dispatched by the shared layer stack to the topmost layer only.
 	private layer = this.theme.layers.register({
 		kind: 'floating-window',
 		isOpen: () => this.open && !this.minimized,
-		isModal: () => false,
+		isModal: () => this.backdrop,
 		dismissOnEscape: () =>
 			this.closeOnEscape && this.closable && this.theme.floatingWindows.isTopWindow(this.id),
 		onDismiss: () => this.close(),
@@ -96,6 +101,11 @@ export class FloatingWindowState extends withOptions<FloatingWindowStateOptions>
 
 	constructor(options: FloatingWindowStateOptions) {
 		super(options);
+		useScrollLock({ isActive: () => this.backdrop && this.open && !this.minimized });
+		// A backdrop switched on while the window is open needs the index below it reserved.
+		$effect(() => {
+			if (this.backdrop && this.open && !this.minimized) untrack(() => this.bringToFront());
+		});
 		this.geometry = new FloatingWindowGeometry(this);
 		this.docking = new FloatingWindowDockState(this);
 
@@ -216,7 +226,16 @@ export class FloatingWindowState extends withOptions<FloatingWindowStateOptions>
 	}
 
 	activateSurface(type: FloatingWindowSurface) {
-		this.zIndex = this.theme.floatingWindows.activate(this.id, type);
+		this.zIndex = this.theme.floatingWindows.activate(
+			this.id,
+			type,
+			type === 'window' && this.backdrop
+		);
+	}
+
+	/** The index reserved just below the window when it activated with a backdrop. */
+	get backdropZIndex() {
+		return this.zIndex - 1;
 	}
 
 	bringToFront() {

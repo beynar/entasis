@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import { afterNavigate, beforeNavigate } from '$app/navigation';
+	import { afterNavigate, beforeNavigate, onNavigate } from '$app/navigation';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { page } from '$app/state';
 	import {
@@ -32,6 +32,8 @@
 	import { tick } from 'svelte';
 	import {
 		getSidebarGroups,
+		getSidebarView,
+		getSidebarViews,
 		headerLinks,
 		resolveLink,
 		type AppNavigationLink
@@ -127,6 +129,14 @@
 	const pageScrollPositions = new SvelteMap<string, number>();
 
 	const sidebarGroups = $derived(getSidebarGroups(page.url.pathname));
+	// One view per header section, following the URL: switching section slides the list the way
+	// the header moves, while the shared header button and search footer stay still. The sidebar
+	// follows the navigation target from the click on (`pendingPath`), not the loaded page, so the
+	// slide runs while the next page loads instead of waiting behind it.
+	let pendingPath = $state<string | null>(null);
+	const sidebarPath = $derived(pendingPath ?? page.url.pathname);
+	const sidebarViews = $derived(getSidebarViews(sidebarPath));
+	const sidebarView = $derived(getSidebarView(sidebarPath));
 	const sidebarState = $derived<SidebarFooterState>(
 		sidebarDisplayState === 'collapsed' ? 'icon' : sidebarDisplayState
 	);
@@ -190,14 +200,32 @@
 		}
 	}
 
-	beforeNavigate(({ from }) => {
+	beforeNavigate(({ from, to, willUnload, complete }) => {
+		if (to?.route.id && !willUnload) {
+			pendingPath = to.url.pathname;
+			// A cancelled or failed navigation hands the sidebar back to the page on screen.
+			complete.catch(() => (pendingPath = null));
+		}
 		const scroller = getPageScroller();
 		if (!from || !scroller) return;
 
 		pageScrollPositions.set(getScrollKey(from.url), scroller.scrollTop);
 	});
 
+	// A heavy page (Blocks, Playground) renders in one long task. Svelte starts a transition a frame
+	// after it mounts, so hold the render two frames when the section changes: the slide is then
+	// running, and a started transform / opacity animation keeps going on the compositor while the
+	// page renders. The same hook SvelteKit documents for view transitions.
+	onNavigate(({ from, to }) => {
+		if (!from || !to || getSidebarView(from.url.pathname) === getSidebarView(to.url.pathname))
+			return;
+		return new Promise<void>((resolve) =>
+			requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+		);
+	});
+
 	afterNavigate(async ({ type, to }) => {
+		pendingPath = null;
 		if (!to) return;
 
 		await tick();
@@ -236,11 +264,14 @@
 				sidebarWidth = width;
 			}
 		},
-		items: sidebarGroups,
+		views: sidebarViews,
+		view: sidebarView,
+		// Shared by every view, so it stays still while the list slides: a subtitle that followed the
+		// section would swap its text outside the slide.
 		headerButton: {
 			icon: commandIcon,
 			title: 'Entasis',
-			subtitle: page.url.pathname.startsWith('/blocks') ? 'Blocks' : 'Components'
+			subtitle: 'Documentation'
 		},
 		footer: sidebarFooter
 	});

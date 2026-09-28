@@ -301,7 +301,12 @@ export const createPointerDrag = <Node extends HTMLElement = HTMLElement>(
 			const offPointerMove = on(node, 'pointermove', move);
 			const offPointerUp = on(node, 'pointerup', end);
 			const offPointerCancel = on(node, 'pointercancel', abort);
-			const offLostPointerCapture = on(node, 'lostpointercapture', abort);
+			// Only the node's own capture counts. A touch is implicitly captured by the element under
+			// it, so when an `on-activate` session takes the capture over, that descendant's
+			// `lostpointercapture` bubbles up here and must not abort the drag it just started.
+			const offLostPointerCapture = on(node, 'lostpointercapture', (event) => {
+				if (event.target === node) abort(event);
+			});
 			const offTouchMove =
 				options.preventTouchMove === false
 					? () => {}

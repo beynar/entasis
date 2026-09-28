@@ -932,6 +932,7 @@ export const componentInventory = [
 			'SidebarTooltipMode',
 			'SidebarTreeNode',
 			'SidebarVariant',
+			'SidebarView',
 			'SidebarWidthChangePayload',
 			'setSidebarTheme',
 			'sidebarDescription',
