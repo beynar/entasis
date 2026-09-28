@@ -9,6 +9,9 @@
 	import { useFileInputTheme } from './fileInput.theme.js';
 	import { slide } from 'svelte/transition';
 	import Slot from '../../Slot/Slot.svelte';
+	import { fileIcon } from '../../Icons/file.js';
+	import { plusIcon } from '../../Icons/plus.js';
+	import { xIcon } from '../../Icons/x.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
@@ -153,20 +156,7 @@
 	/>
 	{#if dropzone.files.length === 0}
 		<div transition:slide class={classes.placeholder({ class: placeholderClass, size: rest.size })}>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				width="40"
-				height="40"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			>
-				<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-				<polyline points="14 2 14 8 20 8" />
-			</svg>
+			{@render fileIcon({ size: 40 })}
 			{#if resolvedPlaceholder}
 				<span class="mt-2">{resolvedPlaceholder}</span>
 			{/if}
@@ -192,20 +182,7 @@
 							</div>
 							<Button variant="ghost" size="small" squared onclick={() => dropzone.removeFile(fil)}>
 								{#snippet prefix()}
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="16"
-										height="16"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-									>
-										<line x1="18" y1="6" x2="6" y2="18" />
-										<line x1="6" y1="6" x2="18" y2="18" />
-									</svg>
+									{@render xIcon({ size: 16 })}
 								{/snippet}
 							</Button>
 						</Slot>
@@ -214,20 +191,7 @@
 				{#if mode === 'multiple' && dropzone.files.length > 0 && dropzone.files.length < maxFiles}
 					<Button variant="soft" color="primary" fullWidth onclick={() => dropzone.open()}>
 						{#snippet prefix()}
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="16"
-								height="16"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							>
-								<line x1="12" y1="5" x2="12" y2="19" />
-								<line x1="5" y1="12" x2="19" y2="12" />
-							</svg>
+							{@render plusIcon({ size: 16 })}
 						{/snippet}
 						{Number.isFinite(maxFiles)
 							? t.addMoreFiles(dropzone.files.length, maxFiles)
