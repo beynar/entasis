@@ -6,6 +6,7 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.8.0 — 2026-09-28
 ### Added
 
 - `px-<step>-concentric` / `py-<step>-concentric`: padding that clears the container's corner, the
