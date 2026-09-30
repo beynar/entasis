@@ -10,21 +10,21 @@ const components = componentMcpRegistry;
 const handler = mcpHandler({
 	tools: {
 		components: tool(`
-			entasis  is a component library for sveltekit. It provides a set of components that can be used to build web applications with a focus on configuration over markup.
-			Use this tool to get the documentation for a specific component.
-			You will have to know that most of the components should be imported like this: 
-			import { ComponentName } from 'entasis/component-name' 
-			(using kebab-case for the package name, e.g., entasis/dialog and using PascalCase for the component name, e.g., Dialog)
-			
-			When available in props 
-			- most of the components are using the following color props : primary, secondary, success, warning, danger, info, background, foreground.
-			- most of the components are using the following size props : small, normal, large.
-			- most of the components are using the following variant props : solid, outline, soft, ghost, link.
-			- most of the component can receive prefix and suffix props to add icons or other content with a svelte 5 snippet.
-			- for composability, most component allow passing custom snippets to replace the default rendering if necessary.
+			entasis is a Svelte 5 component library for SvelteKit, built on configuration over markup.
+			Call this tool with a component name to get that component's documentation: import path,
+			props, data model, theme parts, motion and accessibility notes.
 
-			The theme is declared globally so you should'nt have to style the components manually.
-			If you have to use the theme props of the component to add classname manually on the part of the component you want to style.
+			Conventions most components share:
+			- Import from the kebab-case subpath with the PascalCase name: import { Dialog } from 'entasis/dialog'.
+			  Icons are snippets: import { houseIcon } from 'entasis/icons/house'.
+			- color: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info' | 'neutral'. Left out,
+			  a control takes the theme's default color (neutral unless the Theme sets defaultColor).
+			- size: 'small' | 'normal' | 'large'; density: 'compact' | 'normal' | 'comfortable' for inner spacing.
+			- variant on buttons and similar controls: 'solid' | 'outline' | 'soft' | 'ghost' | 'link'.
+			- Editable state is value / defaultValue / onValueChange; disclosure is open / defaultOpen / onOpenChange.
+			- prefix / suffix take a snippet (usually an icon), and most parts accept a snippet that replaces them.
+			- The app is wrapped once in <Theme> from 'entasis/theme', which sets color, radius, spacing and
+			  motion for everything. Restyle a part through the component's theme prop instead of ad-hoc classes.
 			`)
 			.input(
 				z.object({

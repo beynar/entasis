@@ -6,7 +6,15 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Changed
+
+- Docs: the Getting started page and the README show how to connect the docs site's MCP server
+  (`https://entasis.beynar.workers.dev/mcp`) to a project, and the MCP `components` tool
+  describes the real color roles (`neutral`, no `background` / `foreground`), `density`, and the
+  state prop conventions.
+
 ## 0.8.0 — 2026-09-28
+
 ### Added
 
 - `px-<step>-concentric` / `py-<step>-concentric`: padding that clears the container's corner, the
@@ -19,7 +27,6 @@ Unreleased section under the new version.
   same wash as Dialog's, fading on the window's `enter` / `exit` motion, and it always sits one layer
   below its window: the shared window counter reserves that index, so no other window can land in
   between.
-
 - `Sidebar` views: `views` holds named panel contents and `view` / `defaultView` / `onViewChange`
   pick the one on screen. A row with `view` opens a view; a view with `parent` is nested and opens
   on a back row named after its parent, and on mobile a swipe toward the inline end goes back.
@@ -31,6 +38,9 @@ Unreleased section under the new version.
   it from snippets. New theme parts `viewStage` and `viewLayer`.
 
 ### Changed
+
+- Docs: the site sidebar is built from views, one per header section (Docs, Components, Blocks,
+  Templates), and slides between them as you move through the header.
 
 - Radius: the surface steps (`rounded-lg` and up: cards, popovers, dialogs, windows) follow the
   `radius` multiplier only up to `large` (1.5×). Controls still take the full multiplier, so a
@@ -51,7 +61,6 @@ Unreleased section under the new version.
 - `FloatingWindow` dock: clicking the minimized tab's title restores the window. The dock captured
   the pointer on press, so the click landed on the tab instead of the title; the drag now starts
   after 4px of travel (or a 300ms touch hold).
-
 - `FileInput`: the placeholder, remove and add-more icons are Phosphor snippets like the rest of the
   kit instead of inline Lucide SVGs.
 

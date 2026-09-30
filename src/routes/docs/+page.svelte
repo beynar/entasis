@@ -118,6 +118,8 @@
 	const installCode = `pnpm add entasis
 pnpm add tailwindcss @tailwindcss/vite`;
 
+	const mcpCode = `claude mcp add --transport http --scope project entasis https://entasis.beynar.workers.dev/mcp`;
+
 	const cssSetupCode = `@import 'tailwindcss';
 
 /* Light theme — applied to <html> by default.
@@ -247,8 +249,8 @@ pnpm add tailwindcss @tailwindcss/vite`;
 		reporting an unresolved import, so the errors name the missing exports first: importing
 		{@render ic('Chart')} without its line fails with a wall of
 		{@render ic('[MISSING_EXPORT] "bandX" is not exported by')}
-		{@render ic('"__vite-optional-peer-dep:@tanstack/charts:entasis"')}. The package to install is in
-		that virtual module id.
+		{@render ic('"__vite-optional-peer-dep:@tanstack/charts:entasis"')}. The package to install is
+		in that virtual module id.
 	</p>
 
 	<p class="text-neutral/70">
@@ -399,4 +401,13 @@ pnpm add tailwindcss @tailwindcss/vite`;
 		the system setting automatically.
 	</p>
 	<Code language="html" code={themeToggleCode} />
+
+	<Separator class="my-2" children="Coding agents" />
+
+	<p class="text-neutral/70">
+		This site runs an MCP server at {@render ic('https://entasis.beynar.workers.dev/mcp')}. Its
+		{@render ic('components')} tool returns any component's documentation: import path, props, theme parts,
+		motion and accessibility notes. Add it to a project for Claude Code:
+	</p>
+	<Code language="bash" code={mcpCode} />
 </article>

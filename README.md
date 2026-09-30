@@ -320,7 +320,13 @@ Snippet props: `size` (px number or CSS length, default `1lh`), `color` (a role 
 
 - `pnpm dev` runs the documentation site with a page per component under `/components/<name>`.
 - `.claude/skills/entasis/` (mirrored in `.agents/skills/entasis/`) holds the coding-agent skill: import conventions, per-component references, theming notes.
-- Each component folder ships a `*.mcp.ts` description used by the MCP integration.
+- Each component folder ships a `*.mcp.ts` description, served by the MCP server the docs site runs at
+  `https://entasis.beynar.workers.dev/mcp` (one `components` tool that returns a component's documentation).
+  Add it to a project for Claude Code with:
+
+  ```bash
+  claude mcp add --transport http --scope project entasis https://entasis.beynar.workers.dev/mcp
+  ```
 
 ## Releasing
 
