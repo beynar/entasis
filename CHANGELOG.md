@@ -6,6 +6,7 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.9.3 — 2026-10-02
 ### Changed
 
 - `Sidebar` / `AppShell`: every gutter between the activity bar, the panel and the page, and
