@@ -92,7 +92,7 @@ const defaultPanel = cva({
 		{
 			variant: 'inset',
 			placement: 'static',
-			class: 'my-md h-[calc(100%_-_1rem)]'
+			class: 'my-md h-[calc(100%-var(--space-md)*2)]'
 		}
 	],
 	defaultVariants: {
@@ -558,9 +558,9 @@ const defaultRail = cva({
 	variants: {
 		variant: {
 			admin: 'inset-y-0',
-			floating: 'inset-y-2',
-			inset: 'inset-y-2',
-			split: 'inset-y-2',
+			floating: 'inset-y-[var(--space-md)]',
+			inset: 'inset-y-[var(--space-md)]',
+			split: 'inset-y-[var(--space-md)]',
 			framed: 'inset-y-0'
 		},
 		// A peek widens the panel without widening the reserved column, so the rail has to travel
@@ -579,21 +579,29 @@ const defaultRail = cva({
 	compoundVariants: [
 		{ variant: ['admin', 'framed', 'inset'], side: 'left', class: 'translate-x-1/2' },
 		{ variant: ['admin', 'framed', 'inset'], side: 'right', class: '-translate-x-1/2' },
-		{ variant: ['floating', 'split'], side: 'left', class: 'right-2 translate-x-1/2' },
-		{ variant: ['floating', 'split'], side: 'right', class: 'left-2 -translate-x-1/2' },
-		// Floating and split reserve an extra 1rem gutter while collapsed, so their peek travel
-		// is that much shorter.
+		{
+			variant: ['floating', 'split'],
+			side: 'left',
+			class: 'right-[var(--space-md)] translate-x-1/2'
+		},
+		{
+			variant: ['floating', 'split'],
+			side: 'right',
+			class: 'left-[var(--space-md)] -translate-x-1/2'
+		},
+		// Floating and split reserve two extra gutters (`--space-md` each side) while collapsed, so
+		// their peek travel is that much shorter.
 		{
 			variant: ['floating', 'split'],
 			side: 'left',
 			class:
-				'group-data-[peek=true]:translate-x-[calc(var(--sidebar-width)_-_var(--sidebar-width-icon)_-_1rem_+_50%)]'
+				'group-data-[peek=true]:translate-x-[calc(var(--sidebar-width)_-_var(--sidebar-width-icon)_-_var(--space-md)*2_+_50%)]'
 		},
 		{
 			variant: ['floating', 'split'],
 			side: 'right',
 			class:
-				'group-data-[peek=true]:translate-x-[calc(var(--sidebar-width-icon)_+_1rem_-_var(--sidebar-width)_-_50%)]'
+				'group-data-[peek=true]:translate-x-[calc(var(--sidebar-width-icon)_+_var(--space-md)*2_-_var(--sidebar-width)_-_50%)]'
 		}
 	],
 	defaultVariants: {
@@ -608,9 +616,9 @@ const defaultResizeHandle = cva({
 	variants: {
 		variant: {
 			admin: '',
-			floating: 'inset-y-2',
-			inset: 'inset-y-2',
-			split: 'inset-y-2',
+			floating: 'inset-y-[var(--space-md)]',
+			inset: 'inset-y-[var(--space-md)]',
+			split: 'inset-y-[var(--space-md)]',
 			framed: ''
 		},
 		side: {
@@ -639,19 +647,27 @@ const defaultResizeHandle = cva({
 	compoundVariants: [
 		{ variant: ['admin', 'framed', 'inset'], side: 'left', class: 'translate-x-1/2' },
 		{ variant: ['admin', 'framed', 'inset'], side: 'right', class: '-translate-x-1/2' },
-		{ variant: ['floating', 'split'], side: 'left', class: 'right-2 translate-x-1/2' },
-		{ variant: ['floating', 'split'], side: 'right', class: 'left-2 -translate-x-1/2' },
+		{
+			variant: ['floating', 'split'],
+			side: 'left',
+			class: 'right-[var(--space-md)] translate-x-1/2'
+		},
+		{
+			variant: ['floating', 'split'],
+			side: 'right',
+			class: 'left-[var(--space-md)] -translate-x-1/2'
+		},
 		{
 			variant: ['floating', 'split'],
 			side: 'left',
 			class:
-				'group-data-[peek=true]:translate-x-[calc(var(--sidebar-width)_-_var(--sidebar-width-icon)_-_1rem_+_50%)]'
+				'group-data-[peek=true]:translate-x-[calc(var(--sidebar-width)_-_var(--sidebar-width-icon)_-_var(--space-md)*2_+_50%)]'
 		},
 		{
 			variant: ['floating', 'split'],
 			side: 'right',
 			class:
-				'group-data-[peek=true]:translate-x-[calc(var(--sidebar-width-icon)_+_1rem_-_var(--sidebar-width)_-_50%)]'
+				'group-data-[peek=true]:translate-x-[calc(var(--sidebar-width-icon)_+_var(--space-md)*2_-_var(--sidebar-width)_-_50%)]'
 		}
 	],
 	defaultVariants: {
@@ -701,7 +717,7 @@ const defaultMain = cva({
 		{
 			variant: ['inset', 'split'],
 			flush: false,
-			class: 'md:[--page-shell-edge-inset:0.5rem]'
+			class: 'md:[--page-shell-edge-inset:var(--space-md)]'
 		},
 		{
 			variant: 'inset',
@@ -879,7 +895,7 @@ const defaultActivityBar = cva({
 			orientation: 'vertical',
 			variant: 'inset',
 			placement: 'static',
-			class: 'my-md h-[calc(100%_-_1rem)]'
+			class: 'my-md h-[calc(100%-var(--space-md)*2)]'
 		}
 	],
 	defaultVariants: {

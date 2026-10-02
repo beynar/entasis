@@ -101,7 +101,7 @@
 		!activityBar
 			? '0px'
 			: variant === 'floating' || variant === 'split'
-				? `calc(${activityBarWidth} + var(--spacing) * 2)`
+				? `calc(${activityBarWidth} + var(--space-md))`
 				: activityBarWidth
 	);
 	function setOpen(nextOpen: boolean) {

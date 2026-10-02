@@ -46,7 +46,7 @@ const defaultPage = cva({
 			admin:
 				'bg-surface [--page-shell-chrome:var(--color-surface-canvas)] [--page-shell-surface:var(--color-surface)]',
 			floating:
-				'bg-surface-canvas [--page-shell-chrome:var(--color-surface)] [--page-shell-surface:var(--color-surface-canvas)] [--page-shell-chrome-inline-gap:0.5rem] [--page-shell-chrome-block-gap:0.5rem] [--page-shell-header-top-radius:var(--radius-lg)] [--page-shell-header-bottom-radius:var(--radius-lg)] [--page-shell-footer-top-radius:var(--radius-lg)] [--page-shell-footer-bottom-radius:var(--radius-lg)] [--page-shell-chrome-border:var(--color-neutral-muted)] [--page-shell-chrome-shadow:var(--elevation-1)]',
+				'bg-surface-canvas [--page-shell-chrome:var(--color-surface)] [--page-shell-surface:var(--color-surface-canvas)] [--page-shell-chrome-inline-gap:var(--space-md)] [--page-shell-chrome-block-gap:var(--space-md)] [--page-shell-header-top-radius:var(--radius-lg)] [--page-shell-header-bottom-radius:var(--radius-lg)] [--page-shell-footer-top-radius:var(--radius-lg)] [--page-shell-footer-bottom-radius:var(--radius-lg)] [--page-shell-chrome-border:var(--color-neutral-muted)] [--page-shell-chrome-shadow:var(--elevation-1)]',
 			inset:
 				'bg-surface [--page-shell-chrome:var(--color-surface)] [--page-shell-surface:var(--color-surface)] transition-[border-color,box-shadow] md:raised-1 md:group-data-[page-flush=true]/sidebar-wrapper:border-transparent md:group-data-[page-flush=true]/sidebar-wrapper:shadow-none',
 			split:
@@ -70,13 +70,13 @@ const defaultPage = cva({
 			variant: 'floating',
 			side: 'left',
 			class:
-				'md:[--page-shell-chrome-left-gap:0px] md:group-data-[display-state=hidden]/sidebar-wrapper:[--page-shell-chrome-left-gap:0.5rem]'
+				'md:[--page-shell-chrome-left-gap:0px] md:group-data-[display-state=hidden]/sidebar-wrapper:[--page-shell-chrome-left-gap:var(--space-md)]'
 		},
 		{
 			variant: 'floating',
 			side: 'right',
 			class:
-				'md:[--page-shell-chrome-right-gap:0px] md:group-data-[display-state=hidden]/sidebar-wrapper:[--page-shell-chrome-right-gap:0.5rem]'
+				'md:[--page-shell-chrome-right-gap:0px] md:group-data-[display-state=hidden]/sidebar-wrapper:[--page-shell-chrome-right-gap:var(--space-md)]'
 		}
 	],
 	defaultVariants: {

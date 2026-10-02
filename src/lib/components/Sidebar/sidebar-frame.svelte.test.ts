@@ -25,7 +25,7 @@ describe('sidebar page frame', () => {
 			});
 			expect(wrapper()).not.toHaveAttribute('data-page-flush');
 			expect(main()).not.toHaveClass('md:p-0');
-			expect(main()).toHaveClass('md:py-md', 'md:[--page-shell-edge-inset:0.5rem]');
+			expect(main()).toHaveClass('md:py-md', 'md:[--page-shell-edge-inset:var(--space-md)]');
 		});
 	}
 

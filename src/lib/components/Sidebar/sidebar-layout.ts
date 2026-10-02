@@ -10,11 +10,11 @@ export function getSidebarGapClass(variant: SidebarVariant) {
 	return cx(
 		'relative w-[calc(var(--sidebar-width)+var(--sidebar-activity-offset,0px))] bg-transparent transition-[width] duration-normal ease-linear group-data-[width-prehydrating=true]/sidebar-wrapper:!transition-none group-data-[resizing=true]:!transition-none group-data-[collapsible=offcanvas]:w-[var(--sidebar-activity-offset,0px)]',
 		hasInlineInset
-			? 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+1rem+var(--sidebar-activity-offset,0px))]'
+			? 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+var(--space-md)*2+var(--sidebar-activity-offset,0px))]'
 			: 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+var(--sidebar-activity-offset,0px))]',
 		// A hover peek overlays the page, so the reserved column must stay at its icon width.
 		hasInlineInset
-			? 'group-data-[peek=true]:!w-[calc(var(--sidebar-width-icon)+1rem+var(--sidebar-activity-offset,0px))]'
+			? 'group-data-[peek=true]:!w-[calc(var(--sidebar-width-icon)+var(--space-md)*2+var(--sidebar-activity-offset,0px))]'
 			: 'group-data-[peek=true]:!w-[calc(var(--sidebar-width-icon)+var(--sidebar-activity-offset,0px))]'
 	);
 }
@@ -24,9 +24,9 @@ function getContainerGeometryClass(variant: SidebarVariant) {
 		return 'group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)]';
 	}
 	if (variant === 'inset') {
-		return 'py-2 group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)]';
+		return 'py-md group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)]';
 	}
-	return 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+1rem)]';
+	return 'p-md group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+var(--space-md)*2)]';
 }
 
 export function getSidebarContainerClass(
@@ -66,7 +66,7 @@ export function getSidebarContainerClass(
 		isEdgeRevealed && !panelOwnsShadow && 'shadow-xl',
 		// Inset keeps a vertical gutter so the resting column sits level with the page card. An
 		// edge reveal overlays the page instead, so the peek runs the full height like any other
-		// temporary drawer rather than floating 0.5rem short of the top and bottom edges.
+		// temporary drawer rather than floating a gutter short of the top and bottom edges.
 		isEdgeRevealed && variant === 'inset' && '!py-0',
 		side === 'left' && isEdgeRevealed && '!left-[var(--sidebar-activity-offset,0px)]',
 		side === 'right' && isEdgeRevealed && '!right-[var(--sidebar-activity-offset,0px)]'
@@ -97,7 +97,8 @@ export function getSidebarActivityBarContainerClass(
 		'inset-y-0 z-30 hidden w-[var(--sidebar-activity-offset,3rem)] md:flex',
 		frame === 'viewport' ? 'fixed h-window' : 'absolute h-full',
 		side === 'left' ? 'left-0' : 'right-0',
-		variant === 'inset' && 'py-2',
-		(variant === 'floating' || variant === 'split') && (side === 'left' ? 'py-2 pl-2' : 'py-2 pr-2')
+		variant === 'inset' && 'py-md',
+		(variant === 'floating' || variant === 'split') &&
+			(side === 'left' ? 'py-md pl-md' : 'py-md pr-md')
 	);
 }

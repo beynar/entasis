@@ -6,7 +6,18 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Changed
+
+- `Sidebar` / `AppShell`: every gutter between the activity bar, the panel and the page, and
+  between them and the frame edge, is the `--space-md` token, so it scales with the theme's
+  `spacing` and a custom `md` step. Some were `--spacing` × 2, some fixed `0.5rem` / `1rem`: at
+  any spacing but the default the page cards fell out of line with the panel, and an
+  icon-collapsed floating or split panel lost width. Default themes render the same.
+- Docs: `resizable`'s `minWidth` / `maxWidth` (defaults `12rem` / `32rem`) are documented with the
+  Sidebar prop.
+
 ## 0.9.2 — 2026-10-02
+
 ### Fixed
 
 - `Sidebar` with an activity bar: a hidden panel revealed from the screen edge closed as soon as

@@ -641,7 +641,7 @@ bar's `onSelect` for section switching, or derive it from the URL and navigate i
 - `iconSize`: `'small' | 'normal' | 'large'` (default: follows `size`) -- scales icons and leading media inside the panel on their own
 - `activeVariant`: `'soft' | 'outline' | 'solid'` (default: `'soft'`) -- how an active row paints: `soft` is the shared selected recipe (`selectedSoft`, `bg-selected-muted text-selected-muted-readable`), `solid` is `selectedSolid` (`bg-selected text-selected-contrast`), `outline` is a bordered surface card on the tinted well. Read it off each row's own `data-active-variant`; never restyle selection with a descendant selector.
 - `density`: `'compact' | 'normal' | 'comfortable'` (default: `'normal'`) -- scales padding and gaps
-- `width`, `widthIcon`, `widthMobile`: string; `resizable`: `boolean | SidebarResizableOptions`
+- `width`, `widthIcon`, `widthMobile`: string; `resizable`: `boolean | SidebarResizableOptions` -- `{ minWidth?, maxWidth?, collapseThreshold?, keyboardStep?, storageKey?, onWidthChange? }`; `minWidth` / `maxWidth` take a CSS length or px number (defaults `12rem` / `32rem`) and bound both drag and keyboard resizing
 - `rail`: `boolean | 'line' | 'thumb'`, `keyboardShortcut`: `string | false` (default: `'b'`)
 - `onWidthChange`: `({ width, isUserInteraction }) => void` -- reports every expanded-width change: continuously while the user resizes (`isUserInteraction: true`), and once when a stored width is restored (`isUserInteraction: false`)
 - `collapseIcon`: `DisclosureIndicator` -- `'chevron' | 'plus-minus' | 'none'`, the indicator on collapsible menu items
