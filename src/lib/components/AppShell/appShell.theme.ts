@@ -62,6 +62,23 @@ const defaultPage = cva({
 			right: ''
 		}
 	},
+	compoundVariants: [
+		// A floating panel column pads its page side, which already spaces the panel card from the
+		// page's header and footer cards: their own inset on that side would double the gap. A
+		// hidden panel leaves the rail (or the screen edge) beside the page, so the inset returns.
+		{
+			variant: 'floating',
+			side: 'left',
+			class:
+				'md:[--page-shell-chrome-left-gap:0px] md:group-data-[display-state=hidden]/sidebar-wrapper:[--page-shell-chrome-left-gap:0.5rem]'
+		},
+		{
+			variant: 'floating',
+			side: 'right',
+			class:
+				'md:[--page-shell-chrome-right-gap:0px] md:group-data-[display-state=hidden]/sidebar-wrapper:[--page-shell-chrome-right-gap:0.5rem]'
+		}
+	],
 	defaultVariants: {
 		variant: 'admin',
 		side: 'left'

@@ -6,7 +6,25 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Changed
+
+- `Code` highlights with `@tanstack/highlight` 1.0.0 (from 0.1.0). Same API and markup; the
+  JavaScript and TypeScript tokenizers now mark object-literal keys as properties and no longer
+  mistake a spread (`...rest`) for a property access.
+- `svelte-streamdown` 4.2.1, which moves to the same `@tanstack/highlight` 1.0.0, so an app ships
+  one copy of the highlighter instead of two.
+
+### Fixed
+
+- `AppShell`, `floating`: the gap between the sidebar panel and the page's header and footer cards
+  was 16px, twice the 8px between the activity bar and the panel and at the screen edge: the panel
+  column's gutter and the page's own inset stacked. The page drops its inset on the sidebar side
+  while the panel column is there, so every gap is 8px; a hidden panel brings it back. PageShell's
+  header and footer read `--page-shell-chrome-left-gap` / `--page-shell-chrome-right-gap`, each
+  falling back to `--page-shell-chrome-inline-gap`.
+
 ## 0.9.0 — 2026-10-02
+
 ### Added
 
 - `Popover` `positionPanel`: place the panel yourself, `({ panel, reference }) => { x, y,

@@ -6,7 +6,7 @@ const defaultShell = cva({
 });
 
 const defaultHeader = cva({
-	base: 'sticky top-[calc(var(--page-shell-edge-inset,0px)_+_var(--page-shell-chrome-block-gap,0px))] z-20 mx-[var(--page-shell-chrome-inline-gap,0px)] mt-[var(--page-shell-chrome-block-gap,0px)] mb-[var(--page-shell-chrome-block-gap,0px)] shrink-0 rounded-tl-[var(--page-shell-header-top-radius,inherit)] rounded-tr-[var(--page-shell-header-top-radius,inherit)] rounded-br-[var(--page-shell-header-bottom-radius,0px)] rounded-bl-[var(--page-shell-header-bottom-radius,0px)] border-b [border-bottom-color:var(--page-shell-chrome-divider,var(--color-neutral-muted))] bg-[var(--page-shell-chrome,var(--color-surface))] shadow-[var(--page-shell-chrome-shadow,none)] ring-1 ring-inset ring-[var(--page-shell-chrome-border,transparent)] backdrop-blur'
+	base: 'sticky top-[calc(var(--page-shell-edge-inset,0px)_+_var(--page-shell-chrome-block-gap,0px))] z-20 ml-[var(--page-shell-chrome-left-gap,var(--page-shell-chrome-inline-gap,0px))] mr-[var(--page-shell-chrome-right-gap,var(--page-shell-chrome-inline-gap,0px))] mt-[var(--page-shell-chrome-block-gap,0px)] mb-[var(--page-shell-chrome-block-gap,0px)] shrink-0 rounded-tl-[var(--page-shell-header-top-radius,inherit)] rounded-tr-[var(--page-shell-header-top-radius,inherit)] rounded-br-[var(--page-shell-header-bottom-radius,0px)] rounded-bl-[var(--page-shell-header-bottom-radius,0px)] border-b [border-bottom-color:var(--page-shell-chrome-divider,var(--color-neutral-muted))] bg-[var(--page-shell-chrome,var(--color-surface))] shadow-[var(--page-shell-chrome-shadow,none)] ring-1 ring-inset ring-[var(--page-shell-chrome-border,transparent)] backdrop-blur'
 });
 
 // The row wraps: the title keeps its natural width and the actions drop under it when they do not
@@ -77,7 +77,7 @@ const defaultContentInner = cva({
 });
 
 const defaultFooter = cva({
-	base: 'sticky bottom-[calc(var(--page-shell-edge-inset,0px)_+_var(--page-shell-chrome-block-gap,0px))] z-20 mx-[var(--page-shell-chrome-inline-gap,0px)] mt-[var(--page-shell-chrome-block-gap,0px)] mb-[var(--page-shell-chrome-block-gap,0px)] shrink-0 rounded-tl-[var(--page-shell-footer-top-radius,0px)] rounded-tr-[var(--page-shell-footer-top-radius,0px)] rounded-br-[var(--page-shell-footer-bottom-radius,inherit)] rounded-bl-[var(--page-shell-footer-bottom-radius,inherit)] border-t [border-top-color:var(--page-shell-chrome-divider,var(--color-neutral-muted))] bg-[var(--page-shell-chrome,var(--color-surface))] shadow-[var(--page-shell-chrome-shadow,none)] ring-1 ring-inset ring-[var(--page-shell-chrome-border,transparent)] backdrop-blur'
+	base: 'sticky bottom-[calc(var(--page-shell-edge-inset,0px)_+_var(--page-shell-chrome-block-gap,0px))] z-20 ml-[var(--page-shell-chrome-left-gap,var(--page-shell-chrome-inline-gap,0px))] mr-[var(--page-shell-chrome-right-gap,var(--page-shell-chrome-inline-gap,0px))] mt-[var(--page-shell-chrome-block-gap,0px)] mb-[var(--page-shell-chrome-block-gap,0px)] shrink-0 rounded-tl-[var(--page-shell-footer-top-radius,0px)] rounded-tr-[var(--page-shell-footer-top-radius,0px)] rounded-br-[var(--page-shell-footer-bottom-radius,inherit)] rounded-bl-[var(--page-shell-footer-bottom-radius,inherit)] border-t [border-top-color:var(--page-shell-chrome-divider,var(--color-neutral-muted))] bg-[var(--page-shell-chrome,var(--color-surface))] shadow-[var(--page-shell-chrome-shadow,none)] ring-1 ring-inset ring-[var(--page-shell-chrome-border,transparent)] backdrop-blur'
 });
 
 const defaultFooterInner = cva({

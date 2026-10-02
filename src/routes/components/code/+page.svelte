@@ -64,7 +64,7 @@ export async function getUser(id: string): Promise<User> {
 		"build": "vite build"
 	},
 	"dependencies": {
-		"@tanstack/highlight": "^0.1.0"
+		"@tanstack/highlight": "^1.0.0"
 	}
 }`;
 

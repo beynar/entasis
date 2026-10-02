@@ -10,3 +10,4 @@ minimumReleaseAgeExclude:
   - '@tanstack/highlight@0.1.0'
   - cn@0.3.0
   - svelte-streamdown@4.0.0
+  - svelte-streamdown@4.2.1

@@ -135,7 +135,7 @@
 		"@maskito/kit": "^5.4.0",
 		"@pierre/diffs": "^1.4.2",
 		"@pierre/trees": "1.0.0-beta.6",
-		"@tanstack/highlight": "0.1.0",
+		"@tanstack/highlight": "1.0.0",
 		"@tanstack/svelte-virtual": "3.13.38",
 		"@tanstack/table-core": "9.2.4",
 		"cn": "0.3.0",
@@ -145,7 +145,7 @@
 		"lightgallery": "^2.9.0",
 		"melt": "^0.44.0",
 		"runed": "^0.37.1",
-		"svelte-streamdown": "^4.2.0",
+		"svelte-streamdown": "^4.2.1",
 		"svelte-themes": "^2.0.10",
 		"valibot": "^1.5.0"
 	},

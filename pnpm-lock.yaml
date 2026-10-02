@@ -36,8 +36,8 @@ importers:
         specifier: 1.0.0-beta.6
         version: 1.0.0-beta.6(@pierre/theme@2.0.0)(@shikijs/themes@4.4.3)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(shiki@4.4.3)
       '@tanstack/highlight':
-        specifier: 0.1.0
-        version: 0.1.0
+        specifier: 1.0.0
+        version: 1.0.0
       '@tanstack/svelte-virtual':
         specifier: 3.13.38
         version: 3.13.38(svelte@5.57.0(@typescript-eslint/types@8.70.0))
@@ -66,8 +66,8 @@ importers:
         specifier: ^0.37.1
         version: 0.37.1(@sveltejs/kit@2.70.3(@sveltejs/vite-plugin-svelte@7.3.0(svelte@5.57.0(@typescript-eslint/types@8.70.0))(vite@8.3.0(esbuild@0.28.1)(jiti@2.7.0)))(svelte@5.57.0(@typescript-eslint/types@8.70.0))(typescript@6.0.3)(vite@8.3.0(esbuild@0.28.1)(jiti@2.7.0)))(svelte@5.57.0(@typescript-eslint/types@8.70.0))(zod@4.6.2)
       svelte-streamdown:
-        specifier: ^4.2.0
-        version: 4.2.0(svelte@5.57.0(@typescript-eslint/types@8.70.0))
+        specifier: ^4.2.1
+        version: 4.2.1(svelte@5.57.0(@typescript-eslint/types@8.70.0))
       svelte-themes:
         specifier: ^2.0.10
         version: 2.0.10(svelte@5.57.0(@typescript-eslint/types@8.70.0))
@@ -1507,8 +1507,8 @@ packages:
       vue:
         optional: true
 
-  '@tanstack/highlight@0.1.0':
-    resolution: {integrity: sha512-B/NdJETsgoQ7ludUbflIiYQk74bE6VSgP3kLR99P1OsRX1Gepr3EVg6oVLRZ+duKWs+P4lrhWC4vVJsrRSnV2g==}
+  '@tanstack/highlight@1.0.0':
+    resolution: {integrity: sha512-nrg2iZSQUZlDZGTPKh/CNlg6Orm3vFHIaIi/9DqPC1rUpfe/M6rD2iokrckWTc2Z5jYDz185BK76GUh9VIjQRw==}
     engines: {node: '>=18'}
 
   '@tanstack/store@0.11.1':
@@ -3237,8 +3237,8 @@ packages:
     peerDependencies:
       svelte: ^5.0.0
 
-  svelte-streamdown@4.2.0:
-    resolution: {integrity: sha512-VEJxXxA162NLvxNoXmJHuzi6uY3NeWmV2fcRuy8MIYvhRM0/8proibAowti28inAXGBgFUwqSHFhnyXCB6tYVQ==}
+  svelte-streamdown@4.2.1:
+    resolution: {integrity: sha512-Vt1fG9x1xCnKfkxHMuuBbVwigrpsunTAg5lQxd7JvMz7ILnotpWLzOddmuSxod+oYjBkq6bdXohan1V0Wnhxzg==}
     peerDependencies:
       svelte: ^5.0.0
 
@@ -4633,7 +4633,7 @@ snapshots:
       react-dom: 19.2.7(react@19.2.7)
       svelte: 5.57.0(@typescript-eslint/types@8.70.0)
 
-  '@tanstack/highlight@0.1.0': {}
+  '@tanstack/highlight@1.0.0': {}
 
   '@tanstack/store@0.11.1': {}
 
@@ -6404,10 +6404,10 @@ snapshots:
       - typescript
       - wrangler
 
-  svelte-streamdown@4.2.0(svelte@5.57.0(@typescript-eslint/types@8.70.0)):
+  svelte-streamdown@4.2.1(svelte@5.57.0(@typescript-eslint/types@8.70.0)):
     dependencies:
       '@floating-ui/dom': 1.8.0
-      '@tanstack/highlight': 0.1.0
+      '@tanstack/highlight': 1.0.0
       clsx: 2.1.1
       katex: 0.16.47
       marked: 18.0.12
