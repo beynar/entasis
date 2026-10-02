@@ -6,7 +6,16 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Fixed
+
+- `Sidebar` with an activity bar: a hidden panel revealed from the screen edge closed as soon as
+  the pointer moved onto the activity bar. The rail is part of the sidebar now: hovering it
+  opens the collapsed panel like the edge strip (or `expandOnHover` in icon mode), and hovering
+  or focusing it keeps the panel open, so switching sections from it never closes the panel.
+  Keyboard focus alone does not open it.
+
 ## 0.9.1 — 2026-10-02
+
 ### Changed
 
 - `Code` highlights with `@tanstack/highlight` 1.0.0 (from 0.1.0). Same API and markup; the

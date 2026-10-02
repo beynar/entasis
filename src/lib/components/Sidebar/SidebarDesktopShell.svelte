@@ -99,6 +99,7 @@
 	let panelRef: HTMLElement | null = $state(null);
 	let resizeHandleRef: HTMLElement | null = $state(null);
 	let edgeTriggerRef: HTMLButtonElement | null = $state(null);
+	let activityBarRef: HTMLElement | null = $state(null);
 
 	let focusInside = $state(false);
 	let pointerInside = $state(false);
@@ -182,6 +183,34 @@
 				pointerInside = isInside(event.relatedTarget);
 			})
 		]);
+		return () => offs.forEach((off) => off());
+	});
+
+	// The activity bar is part of the sidebar: hovering it opens the collapsed panel the way the
+	// edge strip (or `expandOnHover`) does, and a peek stays open while the pointer or focus is on
+	// the rail, so switching sections from it never closes the panel it is switching. Keyboard
+	// focus only keeps a peek: tabbing through the rail does not pop the panel out.
+	$effect(() => {
+		const rail = activityBarRef;
+		if (!rail) return;
+		const isInside = (target: EventTarget | null) =>
+			target instanceof Node && [rail, ...peekRegion].some((node) => node.contains(target));
+		const offs = [
+			on(rail, 'pointerenter', () => {
+				pointerInside = true;
+				if (showEdgeTrigger && !resize.isEdgeRevealSuppressed) edgeRevealed = true;
+				if (canHoverExpand) hoverExpanded = true;
+			}),
+			on(rail, 'pointerleave', (event) => {
+				pointerInside = isInside(event.relatedTarget);
+			}),
+			on(rail, 'focusin', () => {
+				if (isPeeking) focusInside = true;
+			}),
+			on(rail, 'focusout', (event) => {
+				focusInside = isInside(event.relatedTarget);
+			})
+		];
 		return () => offs.forEach((off) => off());
 	});
 
@@ -284,6 +313,8 @@
 		<!-- Pinned outside the panel and never offset by the collapse state, so the rail stays
 			 on screen while the panel slides away. -->
 		<div
+			bind:this={activityBarRef}
+			{@attach revealSafeArea.reference}
 			data-slot="sidebar-activity-bar-container"
 			data-side={side}
 			class={getSidebarActivityBarContainerClass(side, frame, variant)}
