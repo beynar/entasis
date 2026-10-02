@@ -6,6 +6,7 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.9.0 — 2026-10-02
 ### Added
 
 - `Popover` `positionPanel`: place the panel yourself, `({ panel, reference }) => { x, y,
