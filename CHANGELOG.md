@@ -6,6 +6,7 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.9.1 — 2026-10-02
 ### Changed
 
 - `Code` highlights with `@tanstack/highlight` 1.0.0 (from 0.1.0). Same API and markup; the
