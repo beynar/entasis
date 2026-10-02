@@ -6,6 +6,7 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.9.2 — 2026-10-02
 ### Fixed
 
 - `Sidebar` with an activity bar: a hidden panel revealed from the screen edge closed as soon as
