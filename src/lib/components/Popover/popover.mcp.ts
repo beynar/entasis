@@ -29,6 +29,7 @@ The Popover component displays floating content positioned relative to a trigger
   - Determines where popover appears relative to trigger
 - **offset**: number - Distance in pixels from the reference element
 - **fitTrigger**: boolean (default: false) - Whether popover should match the width of the trigger element
+- **positionPanel**: ({ panel, reference }) => { x: number; y: number; minWidth?: number } | null - Place the panel yourself instead of floating-ui: return its viewport coordinates (the panel is \`position: fixed\`) and optionally a \`minWidth\` in px that replaces \`fitTrigger\`'s, or \`null\` to fall back to \`position\`. Called when the panel mounts and whenever floating-ui would reposition it. Select uses it to open over its trigger
 - **mobileSheet**: boolean (default: false) - On mobile viewports (<768px), render as a bottom sheet instead of an anchored floating panel
 - **inline**: boolean (default: false) - Render the panel in normal document flow where the component sits instead of portaling to the viewport-fixed layer: no floating-ui positioning, no scroll lock, no outside-press dismissal (Escape still closes it). Same panel classes and motion, and the trigger still toggles it. Wins over \`mobileSheet\`
 - **mobileSheetSizeTransition**: boolean (default: true) - Whether mobile-sheet panels animate intrinsic size changes

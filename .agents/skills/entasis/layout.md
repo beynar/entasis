@@ -674,8 +674,11 @@ column becomes the panel width plus the activity bar width (default `3rem`, set 
 `width`). The rail wears the surface of the variant's panel: a hairline column on the canvas beside
 `admin`, a column in the card's recessed well for `framed`, borderless on the canvas with the same
 vertical gutter for `inset`, and a card of its own, with the panel's radius, edge and gutter, for
-`floating` and `split` (their reserved column adds that gutter). On mobile it renders as a
-horizontal row at the top of the drawer. It is its own `<nav>`
+`floating` and `split` (their reserved column adds that gutter). With `inset` and `split`, a
+hidden panel normally lets the page drop its frame and fill the edge; with an activity bar the
+rail is still beside the page, so the page keeps its framed form, and a `split` page takes the
+gutter the panel used to supply. Only a flush page sets `data-page-flush` on the wrapper and the
+`main` part's `flush` variant. On mobile it renders as a horizontal row at the top of the drawer. It is its own `<nav>`
 landmark -- the body navigation carries its own name, so the two are distinguishable -- with a
 roving tabindex and ArrowUp/ArrowDown/Home/End navigation that loops and skips
 disabled items; Tab lands on the `isActive` item, and each square takes its accessible name and

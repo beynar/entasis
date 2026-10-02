@@ -48,9 +48,9 @@ const defaultPage = cva({
 			floating:
 				'bg-surface-canvas [--page-shell-chrome:var(--color-surface)] [--page-shell-surface:var(--color-surface-canvas)] [--page-shell-chrome-inline-gap:0.5rem] [--page-shell-chrome-block-gap:0.5rem] [--page-shell-header-top-radius:var(--radius-lg)] [--page-shell-header-bottom-radius:var(--radius-lg)] [--page-shell-footer-top-radius:var(--radius-lg)] [--page-shell-footer-bottom-radius:var(--radius-lg)] [--page-shell-chrome-border:var(--color-neutral-muted)] [--page-shell-chrome-shadow:var(--elevation-1)]',
 			inset:
-				'bg-surface [--page-shell-chrome:var(--color-surface)] [--page-shell-surface:var(--color-surface)] transition-[border-color,box-shadow] md:raised-1 md:group-data-[display-state=hidden]/sidebar-wrapper:border-transparent md:group-data-[display-state=hidden]/sidebar-wrapper:shadow-none',
+				'bg-surface [--page-shell-chrome:var(--color-surface)] [--page-shell-surface:var(--color-surface)] transition-[border-color,box-shadow] md:raised-1 md:group-data-[page-flush=true]/sidebar-wrapper:border-transparent md:group-data-[page-flush=true]/sidebar-wrapper:shadow-none',
 			split:
-				'bg-surface [--page-shell-chrome:var(--color-surface)] [--page-shell-surface:var(--color-surface)] transition-[border-color,box-shadow] md:raised-1 md:group-data-[display-state=hidden]/sidebar-wrapper:border-transparent md:group-data-[display-state=hidden]/sidebar-wrapper:shadow-none',
+				'bg-surface [--page-shell-chrome:var(--color-surface)] [--page-shell-surface:var(--color-surface)] transition-[border-color,box-shadow] md:raised-1 md:group-data-[page-flush=true]/sidebar-wrapper:border-transparent md:group-data-[page-flush=true]/sidebar-wrapper:shadow-none',
 			// The frame already owns the radius, border and elevation, so the page inside it is flat,
 			// and its header chrome is the same surface as the content: the white column is one
 			// piece whose only corners are the frame's own.

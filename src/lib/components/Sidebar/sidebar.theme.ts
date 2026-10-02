@@ -688,12 +688,19 @@ const defaultMain = cva({
 		edgeRevealed: {
 			true: '',
 			false: ''
+		},
+		// Nothing of the sidebar is left beside the page: the panel is hidden and there is no
+		// activity bar. Only then does an inset or split page drop its frame and fill the edge; with
+		// an activity bar the rail stays on screen, so the page keeps its framed form.
+		flush: {
+			true: '',
+			false: ''
 		}
 	},
 	compoundVariants: [
 		{
 			variant: ['inset', 'split'],
-			displayState: ['expanded', 'collapsed'],
+			flush: false,
 			class: 'md:[--page-shell-edge-inset:0.5rem]'
 		},
 		{
@@ -718,15 +725,32 @@ const defaultMain = cva({
 		},
 		{
 			variant: ['inset', 'split'],
-			displayState: 'hidden',
+			flush: true,
 			class: 'md:p-0 md:rounded-none'
+		},
+		// A hidden split panel no longer separates the page from the activity bar's card: the page
+		// takes the gutter on that side itself, so the two cards stay apart.
+		{
+			variant: 'split',
+			displayState: 'hidden',
+			flush: false,
+			side: 'left',
+			class: 'md:pl-md'
+		},
+		{
+			variant: 'split',
+			displayState: 'hidden',
+			flush: false,
+			side: 'right',
+			class: 'md:pr-md'
 		}
 	],
 	defaultVariants: {
 		variant: 'admin',
 		side: 'left',
 		displayState: 'expanded',
-		edgeRevealed: false
+		edgeRevealed: false,
+		flush: false
 	}
 });
 

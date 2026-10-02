@@ -34,6 +34,7 @@
 		directedTransition = true,
 		lockScroll = true,
 		fitTrigger = false,
+		positionPanel,
 		inline = false,
 		mobileSheet = false,
 		mobileSheetSizeTransition = true,
@@ -86,6 +87,9 @@
 		},
 		get fitTrigger() {
 			return fitTrigger;
+		},
+		get positionPanel() {
+			return positionPanel;
 		},
 		get mobileSheet() {
 			return mobileSheet;

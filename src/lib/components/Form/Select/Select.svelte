@@ -30,6 +30,7 @@
 		visible,
 		items,
 		separators = true,
+		alignItemWithTrigger = true,
 		triggerAttrs,
 		label,
 		...rest
@@ -37,6 +38,9 @@
 	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
+	let valueEl = $state<HTMLElement | null>(null);
+	let listEl = $state<HTMLDivElement | null>(null);
+	let viewportEl = $state<HTMLDivElement | null>(null);
 	const t = $derived(useI18n(i18n));
 
 	const field = createFieldState({
@@ -105,6 +109,18 @@
 		},
 		set triggerEl(_) {
 			// field.node is owned by the bind:this below.
+		},
+		get alignItemWithTrigger() {
+			return alignItemWithTrigger;
+		},
+		get valueEl() {
+			return valueEl;
+		},
+		get listEl() {
+			return listEl;
+		},
+		get viewportEl() {
+			return viewportEl;
 		}
 	});
 
@@ -121,6 +137,7 @@
 	fitTrigger
 	position="bottom"
 	ref={field.node?.parentElement}
+	positionPanel={select.positionPanel}
 	size="small"
 	transition={{
 		in: { scale: 1, opacity: 0 },
@@ -143,7 +160,13 @@
 			event.preventDefault();
 		}}
 	>
-		<ScrollArea scrollOnEdges type="auto" class="flex max-h-[240px] flex-col">
+		<ScrollArea
+			bind:ref={listEl}
+			bind:viewportRef={viewportEl}
+			scrollOnEdges
+			type="auto"
+			class="flex max-h-[240px] flex-col"
+		>
 			{#each select.renderGroups as group, groupIndex (groupIndex)}
 				{#if separators && groupIndex > 0}
 					<div role="separator" class={classes.separator({ size })}></div>
@@ -230,7 +253,10 @@
 					triggerAttrs?.onblur?.(event);
 				}}
 			>
-				<span class={classes.value({ size, placeholder: !select.selectedOption })}>
+				<span
+					bind:this={valueEl}
+					class={classes.value({ size, placeholder: !select.selectedOption })}
+				>
 					{select.selectedOption?.label ?? placeholder ?? t.selectOption}
 				</span>
 				{@render caretDownIcon({ class: classes.triggerIcon({ size }) })}

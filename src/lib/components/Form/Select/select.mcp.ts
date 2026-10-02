@@ -1,8 +1,10 @@
 export const selectDescription = `
 # Select Component
 
-A custom (non-native) dropdown selection field: a combobox trigger opening a listbox popover,
-with full keyboard navigation, grouped options, and Field/Form integration.
+A custom (non-native) selection field: a combobox trigger opening a listbox popover, with full
+keyboard navigation, grouped options, and Field/Form integration. Like a native select (and
+Radix's item-aligned or Base UI's \`alignItemWithTrigger\` position), the listbox opens over the
+trigger with the selected option sitting on the value.
 
 ## Basic Usage
 
@@ -42,6 +44,7 @@ Extends all Field component props plus:
 - **items**: (SelectOption | SelectOptionGroup)[] - Flat \`{ value, label, disabled? }\` options and/or \`{ label, items }\` groups
 - **placeholder**: string (default: 'Select an option') - Trigger text when no selection
 - **separators**: boolean (default: true) - Render separators between consecutive groups
+- **alignItemWithTrigger**: boolean (default: true) - Open over the trigger with the selected option (the first enabled one when nothing is selected) on the trigger's middle and its text on the value text. A list taller than the viewport is capped 8px from the edges and pre-scrolled so the option stays on the trigger; a trigger too close to the bottom for four rows gives up the alignment and the panel rises into view. Wheel and touch scrolling outside the panel are blocked while it is open, so the trigger cannot move away from it. \`false\` opens a dropdown below the trigger instead, capped at ~240px
 
 ### Field Props (inherited)
 - **label**: string | Snippet - Field label, and the trigger's accessible name; without it the trigger falls back to the placeholder
@@ -88,7 +91,8 @@ rather than repeating the placeholder.
 
 - Selection re-focuses the trigger (matches native select behavior)
 - Clicking outside closes via trigger blur; option rows prevent mousedown so the click can land
-- The dropdown scrolls beyond ~240px (ScrollArea); the highlight scrolls into view on keyboard nav
+- The list scrolls (ScrollArea) beyond the viewport when item-aligned, beyond ~240px as a dropdown; the highlight scrolls into view on keyboard nav
+- The panel covers the trigger while open, so clicking outside (not the trigger) closes it, as with a native select
 
 ## State contract
 

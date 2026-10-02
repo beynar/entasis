@@ -241,6 +241,9 @@
 		mode === 'panel' && controller.displayState === 'collapsed' ? widthIcon : width
 	);
 	const withBanner = $derived(!!banner);
+	// The page fills the frame only when nothing of the sidebar stays beside it: the panel is
+	// hidden and no activity bar remains on screen.
+	const pageFlush = $derived(controller.displayState === 'hidden' && !activityBar);
 	const rootClass = $derived(
 		classes.root({
 			variant,
@@ -352,6 +355,7 @@
 		data-size={size}
 		data-density={density}
 		data-activity-bar={activityBar ? 'true' : undefined}
+		data-page-flush={pageFlush ? 'true' : undefined}
 		data-width-prehydrating={resize.isWidthInitializing ? 'true' : undefined}
 		style:--sidebar-width={resize.renderWidth}
 		style:--sidebar-width-icon={widthIcon}
@@ -442,7 +446,8 @@
 					variant,
 					side,
 					displayState: controller.displayState,
-					edgeRevealed
+					edgeRevealed,
+					flush: pageFlush
 				})}
 			>
 				{@render children?.(api)}

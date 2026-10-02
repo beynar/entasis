@@ -103,6 +103,7 @@ Floating content positioned relative to a trigger element.
 | `position`            | `Placement` (12 options)                                      | `'bottom'` |
 | `offset`              | `number`                                                      | -          |
 | `fitTrigger`          | `boolean`                                                     | `false`    |
+| `positionPanel`       | `({ panel, reference }) => { x, y, minWidth? } \| null`       | -          |
 | `inline`              | `boolean`                                                     | `false`    |
 | `openOnHover`         | `boolean`                                                     | `false`    |
 | `openOnClick`         | `boolean`                                                     | `true`     |

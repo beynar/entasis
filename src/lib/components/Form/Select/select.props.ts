@@ -51,6 +51,14 @@ export type SelectProps = InputProps<'select'> & {
 	density?: Density;
 	/** Render separators between consecutive groups. */
 	separators?: boolean;
+	/**
+	 * Open over the trigger with the selected option (or the first, when nothing is selected) on
+	 * the value, its text lined up with the value's, like a native select. A list taller than the
+	 * viewport is capped and pre-scrolled to keep the option there. `false` opens a dropdown below
+	 * the trigger instead.
+	 * @default true
+	 */
+	alignItemWithTrigger?: boolean;
 	/** Native attributes applied to the combobox trigger button. */
 	triggerAttrs?: SelectTriggerAttributes;
 	/** Per-instance i18n overrides merged over the global catalog. */

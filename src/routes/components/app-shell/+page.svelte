@@ -35,7 +35,15 @@
 			label: 'Density',
 			value: 'normal',
 			options: densities
-		}
+		},
+		{
+			name: 'collapsible',
+			type: 'segmented',
+			label: 'Collapse',
+			value: 'icon',
+			options: ['icon', 'offcanvas']
+		},
+		{ name: 'activityBar', type: 'switch', label: 'Activity bar', value: false }
 	]);
 
 	const doubleSidebarCode = toPublicExampleCode(rawDoubleSidebarCode);
@@ -92,7 +100,7 @@
 		},
 		size: '${controls.value.size}',
 		density: '${controls.value.density}',
-		collapsible: 'icon',
+		collapsible: '${controls.value.collapsible}',${controls.value.activityBar ? '\n\t\tactivityBar,' : ''}
 		rail: true,
 		width: sidebarWidth,
 		resizable: {
@@ -142,6 +150,8 @@ ${'</' + 'script>'}
 			variant={controls.value.variant}
 			size={controls.value.size}
 			density={controls.value.density}
+			collapsible={controls.value.collapsible}
+			activityBar={controls.value.activityBar}
 		/>
 	</ComponentCard>
 

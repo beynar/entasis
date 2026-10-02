@@ -41,8 +41,51 @@
 		}
 	];
 
+	const countries = [
+		'Argentina',
+		'Australia',
+		'Austria',
+		'Belgium',
+		'Brazil',
+		'Canada',
+		'Chile',
+		'China',
+		'Colombia',
+		'Denmark',
+		'Egypt',
+		'Finland',
+		'France',
+		'Germany',
+		'Greece',
+		'India',
+		'Indonesia',
+		'Ireland',
+		'Italy',
+		'Japan',
+		'Kenya',
+		'Mexico',
+		'Morocco',
+		'Netherlands',
+		'New Zealand',
+		'Nigeria',
+		'Norway',
+		'Peru',
+		'Poland',
+		'Portugal',
+		'South Korea',
+		'Spain',
+		'Sweden',
+		'Switzerland',
+		'Thailand',
+		'Turkey',
+		'United Kingdom',
+		'United States',
+		'Vietnam'
+	].map((label) => ({ value: label.toLowerCase().replaceAll(' ', '-'), label }));
+
 	let value = $state<string | null>(null);
 	let timezone = $state<string | null>(null);
+	let country = $state<string | null>('japan');
 	const controls = createComponentControls([
 		{
 			name: 'size',
@@ -65,7 +108,8 @@
 			value: 'top',
 			options: ['top', 'left']
 		},
-		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'alignItemWithTrigger', type: 'switch', label: 'Align item', value: true }
 	]);
 </script>
 
@@ -76,6 +120,7 @@
 	features={[
 		{ label: 'role=combobox + listbox ARIA pattern', test: 'a11y:select.aria' },
 		{ label: 'Arrow keys, Enter, Escape navigation', test: 'a11y:select.keyboard' },
+		'Opens over the trigger on the selected option',
 		'Grouped options with separators',
 		'Bindable value with field validation',
 		{ label: 'Virtual focus stays on trigger', test: 'a11y:select.virtual-focus' }
@@ -88,7 +133,7 @@
 	size="${controls.value.size}"
 	density="${controls.value.density}"
 	labelPosition="${controls.value.labelPosition}"
-	disabled={${controls.value.disabled}}
+	disabled={${controls.value.disabled}}${controls.value.alignItemWithTrigger ? '' : '\n\talignItemWithTrigger={false}'}
 	label="Role"
 	description="Controls what this member can see and do"
 	placeholder="Select a role"
@@ -107,6 +152,7 @@
 				density={controls.value.density}
 				labelPosition={controls.value.labelPosition}
 				disabled={controls.value.disabled}
+				alignItemWithTrigger={controls.value.alignItemWithTrigger}
 				label="Role"
 				description="Controls what this member can see and do"
 				placeholder="Select a role"
@@ -117,6 +163,20 @@
 	</ComponentCard>
 
 	{#snippet examples()}
+		<ComponentCard
+			description="Opens over the trigger with the selected option on the value, like a native select. A list taller than the viewport is capped and pre-scrolled so the option still lands on the trigger; scroll to reach the rest."
+			code={`<Select label="Country" placeholder="Select a country" items={countries} bind:value={country} />`}
+		>
+			<div class="w-full max-w-md">
+				<Select
+					label="Country"
+					placeholder="Select a country"
+					items={countries}
+					bind:value={country}
+				/>
+			</div>
+		</ComponentCard>
+
 		<ComponentCard
 			description="A single-choice select with a placeholder and a disabled option (Viewer)"
 		>

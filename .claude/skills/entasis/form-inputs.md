@@ -271,9 +271,13 @@ The square and both sliders support click-to-jump and pointer drag; the area thu
 
 `import { Select } from 'entasis/select'`
 
-**Unique props:** `value: string` (bindable), `items: Array<{ value: string, label: string, disabled? } | { label?, items: SelectOption[] }>` (flat options or labelled groups), `placeholder`, `separators: boolean`
+**Unique props:** `value: string` (bindable), `items: Array<{ value: string, label: string, disabled? } | { label?, items: SelectOption[] }>` (flat options or labelled groups), `placeholder`, `separators: boolean`, `alignItemWithTrigger: boolean` (default `true`)
 
-Native HTML select. Supports `prefix`/`suffix` snippets.
+A custom select-only combobox (not a native `<select>`) with keyboard navigation and type-ahead.
+Like a native select, it opens over the trigger with the selected option (or the first, when
+nothing is selected) on the value and its text lined up with the value's; a list taller than the
+viewport is capped and pre-scrolled to keep the option there, and page scrolling is blocked while
+it is open. `alignItemWithTrigger={false}` opens a dropdown below the trigger instead.
 
 **Theme parts:** `input`, `inputContainer` (variants: `size`, `disabled`)
 

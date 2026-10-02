@@ -43,6 +43,7 @@ interface PopoverOptions extends MakeRequired<
 		| 'inline'
 		| 'focusOnOpen'
 		| 'haspopup'
+		| 'positionPanel'
 	>,
 	| 'directedTransition'
 	| 'closeOnEscape'
@@ -218,6 +219,19 @@ export class PopoverState extends PopoverOptionsBase {
 		}
 		if (this.fitTrigger) {
 			this.triggerWidth = this.referenceElement!.getBoundingClientRect().width;
+		}
+
+		const custom = this.positionPanel?.({ panel: node, reference: this.referenceElement });
+		if (custom) {
+			if (custom.minWidth != null) this.triggerWidth = custom.minWidth;
+			Object.assign(node.style, {
+				position: 'fixed',
+				left: `${custom.x}px`,
+				top: `${custom.y}px`,
+				visibility: ''
+			});
+			this.safeArea.updateAreas();
+			return;
 		}
 
 		const { x, y, strategy, placement } = await computePosition(this.referenceElement!, node, {

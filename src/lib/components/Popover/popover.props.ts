@@ -34,6 +34,18 @@ export type PopoverProps = WithAttachments<{
 	ref?: HTMLElement | VirtualElement | null;
 	/** Preferred placement relative to the reference element; supports responsive values. */
 	position?: ResponsiveProps<Placement>;
+	/**
+	 * Places the panel yourself instead of floating-ui: return its viewport coordinates (the
+	 * panel is `position: fixed`) and optionally a `minWidth` in px that replaces `fitTrigger`'s,
+	 * or `null` to fall back to `position`. Called when the panel mounts and whenever floating-ui
+	 * would reposition it (scroll, resize, size changes), with the positioned panel wrapper and the
+	 * reference element in one payload. Select uses it to open over its trigger with the selected
+	 * option on the value.
+	 */
+	positionPanel?: (payload: {
+		panel: HTMLElement;
+		reference: HTMLElement | VirtualElement;
+	}) => { x: number; y: number; minWidth?: number } | null;
 	/** When true, clicking the trigger toggles the popover open and closed. */
 	openOnClick?: boolean;
 	/** When true, hovering the trigger opens the popover after `delay`. */

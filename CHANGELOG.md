@@ -6,7 +6,30 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `Popover` `positionPanel`: place the panel yourself, `({ panel, reference }) => { x, y,
+minWidth? } | null`, instead of floating-ui; `null` falls back to `position`.
+
 ### Changed
+
+- `Select` opens over its trigger with the selected option on the value, its text lined up with
+  the value's, like a native select (Radix's item-aligned position, Base UI's
+  `alignItemWithTrigger`), overhanging the trigger by the same margin on both sides. With nothing
+  selected the first option takes that place. A list taller
+  than the viewport is capped 8px from the edges and pre-scrolled so the option stays on the
+  trigger, and wheel and touch scrolling outside the panel are blocked while it is open. The new
+  `alignItemWithTrigger` prop (default `true`) set to `false` keeps the dropdown below the trigger.
+- Docs: the Select page has a long country list example and an Align item switch.
+
+### Fixed
+
+- `Sidebar` / `AppShell`, `inset` and `split` with an activity bar: hiding the panel no longer
+  makes the page drop its frame and grow to the full height. The rail is still beside the page,
+  so it keeps its padding, rounding, border and shadow, and a `split` page keeps a gutter from
+  the rail's card. The page fills the edge only when nothing of the sidebar is left beside it,
+  which the wrapper now reports as `data-page-flush` and the `main` part as a `flush` variant.
+- Docs: the AppShell example has Collapse and Activity bar controls to check this on every variant.
 
 - Docs: the Getting started page and the README show how to connect the docs site's MCP server
   (`https://entasis.beynar.workers.dev/mcp`) to a project, and the MCP `components` tool

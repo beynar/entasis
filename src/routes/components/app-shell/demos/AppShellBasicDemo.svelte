@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { AppShell, type AppShellSidebarProps } from '$lib/components/AppShell/index.js';
 	import type {
+		SidebarActivityBar,
+		SidebarCollapsible,
 		SidebarVariant,
 		SidebarDensity,
 		SidebarDisplayState,
@@ -17,12 +19,27 @@
 	let {
 		variant = 'inset',
 		size = 'normal',
-		density = 'normal'
+		density = 'normal',
+		collapsible = 'icon',
+		activityBar = false
 	}: {
 		variant?: SidebarVariant;
 		size?: SidebarSize;
 		density?: SidebarDensity;
+		collapsible?: SidebarCollapsible;
+		activityBar?: boolean;
 	} = $props();
+
+	// The rail stays on screen when the panel collapses, so an inset or split page keeps its frame.
+	const rail: SidebarActivityBar = {
+		label: 'Apps',
+		items: [
+			{ id: 'workspace', label: 'Workspace', icon: houseIcon, isActive: true },
+			{ id: 'inbox', label: 'Inbox', icon: trayIcon, badge: 8 },
+			{ id: 'analytics', label: 'Analytics', icon: chartBarIcon }
+		],
+		footerItems: [{ id: 'settings', label: 'Settings', icon: gearIcon }]
+	};
 
 	let sidebarDisplayState = $state<SidebarDisplayState>('expanded');
 	let sidebarWidth = $state('17rem');
@@ -48,7 +65,8 @@
 		items,
 		size,
 		density,
-		collapsible: 'icon',
+		collapsible,
+		activityBar: activityBar ? rail : undefined,
 		rail: true,
 		width: sidebarWidth,
 		widthIcon: '3.5rem',
