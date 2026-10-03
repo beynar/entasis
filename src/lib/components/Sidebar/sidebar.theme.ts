@@ -775,7 +775,7 @@ const defaultEdgeTrigger = cva({
 });
 
 const defaultOverlay = cva({
-	base: 'fixed inset-0 z-40 bg-neutral/35 md:hidden'
+	base: 'fixed inset-0 z-40 bg-black/40 md:hidden dark:bg-black/60'
 });
 
 const defaultMobilePanel = cva({

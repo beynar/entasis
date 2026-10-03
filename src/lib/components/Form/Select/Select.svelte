@@ -231,7 +231,9 @@
 				aria-activedescendant={select.isOpen ? select.nav.activeDescendant : undefined}
 				aria-required={required || undefined}
 				aria-label={triggerAttrs?.['aria-label'] ??
-					(label ? undefined : (placeholder ?? t.selectOption))}
+					(label || triggerAttrs?.['aria-labelledby']
+						? undefined
+						: (placeholder ?? t.selectOption))}
 				data-placeholder={select.selectedOption ? undefined : ''}
 				disabled={field.disabled}
 				class={classes.input({ size, disabled: field.disabled })}

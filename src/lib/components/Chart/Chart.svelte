@@ -140,7 +140,7 @@
 		children (and calls `replaceChildren` when it swaps renderers), so the button is a
 		sibling of the host inside this box, not a child of it.
 	-->
-	<div class={chart.plotClass}>
+	<div class={chart.plotClass} style={chart.plotStyle}>
 		<div {@attach chart.host} data-chart-host class="absolute inset-0">
 			<!-- Markup serialized by the chart engine itself from the typed mark specs, never user HTML. -->
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -->

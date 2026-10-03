@@ -119,9 +119,10 @@ const row = cva({
 	base: 'state-layer grid min-w-full border-b border-neutral-muted transition-colors last:border-b-0 data-[selected=true]:bg-selected-muted data-[selected=true]:text-selected-muted-readable',
 	variants: {
 		density: { compact: 'min-h-row-sm', normal: 'min-h-row-md', comfortable: 'min-h-row-lg' },
-		grouped: { true: 'bg-surface-raised font-medium', false: '' }
+		grouped: { true: 'bg-surface-raised font-medium', false: '' },
+		activatable: { true: 'cursor-pointer', false: '' }
 	},
-	defaultVariants: { density: 'normal', grouped: false }
+	defaultVariants: { density: 'normal', grouped: false, activatable: false }
 });
 const cell = cva({
 	base: 'relative flex min-w-0 items-center overflow-hidden border-neutral-muted outline-none',

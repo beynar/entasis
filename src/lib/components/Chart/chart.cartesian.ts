@@ -474,6 +474,7 @@ function compileAreaSeries<TRow extends object>(
 	const curve = line?.curve ?? mark.curve;
 	const curveFactory = curve ? compileChartCurve(curve, `${path}.curve`) : undefined;
 	const lineCurve = curveFactory ? d3Curve(curveFactory) : undefined;
+	const areaGradients = mark.areaFill === 'solid' ? undefined : gradients;
 	const style = {
 		...compileMarkChannels(mark, fallbackSeries),
 		fill: compileColorVisual(mark.fill),
@@ -491,7 +492,7 @@ function compileAreaSeries<TRow extends object>(
 			layout: compileStackLayout(mark.layout, `${path}.layout`),
 			curve: lineCurve
 		});
-		const area = applyAreaPresentation(compiled, 'vertical', gradients, {
+		const area = applyAreaPresentation(compiled, 'vertical', areaGradients, {
 			curve: lineCurve,
 			strokeOpacity: line?.strokeOpacity ?? mark.strokeOpacity,
 			strokeDasharray: line?.strokeDasharray ?? mark.strokeDasharray,
@@ -529,7 +530,7 @@ function compileAreaSeries<TRow extends object>(
 			layout: compileStackLayout(mark.layout, `${path}.layout`),
 			curve: curveFactory ? d3AreaXCurve(curveFactory) : undefined
 		});
-		const area = applyAreaPresentation(compiled, 'horizontal', gradients, {
+		const area = applyAreaPresentation(compiled, 'horizontal', areaGradients, {
 			curve: lineCurve,
 			strokeOpacity: line?.strokeOpacity ?? mark.strokeOpacity,
 			strokeDasharray: line?.strokeDasharray ?? mark.strokeDasharray,

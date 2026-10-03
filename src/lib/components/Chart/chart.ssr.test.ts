@@ -36,10 +36,15 @@ describe('Chart SSR', () => {
 		expect(output.body).toContain('<svg');
 		expect(output.body).toContain('aria-label="Monthly revenue"');
 		expect(output.body).toContain('viewBox="0 0 800 400"');
-		expect(output.body).toContain('aspect-ratio:2');
+		// The ratio sizes the plot box the SVG fills, so a legend row adds to the chart instead
+		// of squeezing a scene laid out at the full ratio.
+		expect(output.body).toMatch(
+			/data-slot="chart"[^>]*style="position:relative;width:100%;height:auto"/
+		);
+		expect(output.body).toContain('style="flex:none;aspect-ratio:2"');
 	});
 
-	test('prerenders and sizes the root from height alone', () => {
+	test('prerenders and sizes the plot from height alone', () => {
 		const output = renderInThemeServer(RevenueChart, {
 			data,
 			...chart,
@@ -48,7 +53,7 @@ describe('Chart SSR', () => {
 		});
 
 		expect(output.body).toContain('viewBox="0 0 800 320"');
-		expect(output.body).toContain('height:320px');
+		expect(output.body).toContain('style="flex:none;height:320px"');
 	});
 
 	test('rejects height combined with aspectRatio', () => {

@@ -104,7 +104,12 @@
 </script>
 
 {#snippet CLOSE_BUTTON()}
-	<Slot class={classes.closeButton({ size: dialog.computedSize })} render={closeButton}>
+	{#if closeButton}
+		<!-- The part positions a custom close button through this wrapper. -->
+		<Slot class={classes.closeButton({ size: dialog.computedSize })} render={closeButton} />
+	{:else}
+		<!-- The default button carries the part itself. Wrapped in the same classes, the empty
+		     wrapper drew a dot at the corner when hovered (padding, rounded, state layer). -->
 		<Button
 			squared
 			class={classes.closeButton({ size: dialog.computedSize })}
@@ -115,7 +120,7 @@
 		>
 			{@render xIcon({ size: 20 })}
 		</Button>
-	</Slot>
+	{/if}
 {/snippet}
 
 {#if dialog.isOpen}
@@ -212,15 +217,15 @@
 	{#if typeof trigger === 'function'}
 		{@render trigger?.(dialog)}
 	{:else}
+		{@const { content, children, onclick, ...buttonProps } = trigger}
 		<Button
-			{...trigger}
+			{...buttonProps}
 			onclick={(event) => {
-				trigger.onclick?.(event);
+				onclick?.(event);
 				dialog.open();
 			}}
-		>
-			{trigger.content}
-		</Button>
+			children={children ?? content}
+		/>
 	{/if}
 {/if}
 

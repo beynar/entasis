@@ -146,7 +146,7 @@ export const pt: Messages = {
 		startItem: string | number,
 		endItem: string | number,
 		totalItems: string | number
-	) => `${startItem}-${endItem} de ${totalItems}`,
+	) => `${startItem}–${endItem} de ${totalItems}`,
 	currentPage: (page: string | number) => `Página ${page}, página atual`,
 	goToPage: (page: string | number) => `Ir para a página ${page}`,
 	expandPanel: (index: string | number) => `Expandir painel ${index}`,

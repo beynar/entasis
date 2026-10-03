@@ -1,4 +1,5 @@
 import { bind } from '$lib/utils/state.svelte.js';
+import { Registry } from '$lib/utils/registry.svelte.js';
 import { getContext, hasContext, onMount, setContext, untrack } from 'svelte';
 import { useTheme } from '../Theme/theme.state.svelte.js';
 import type { PopoverProps } from './popover.props.js';
@@ -70,6 +71,11 @@ interface PopoverOptions extends MakeRequired<
 const PopoverOptionsBase = class {} as unknown as new () => PopoverOptions;
 // The one place the trigger's semantic state becomes ARIA, for triggers the library cannot
 // pass props to (a snippet trigger carrying `{@attach popover.reference}`).
+/** Elements that may carry popup ARIA state. */
+const POPUP_CONTROL =
+	'button, a[href], input, select, textarea, summary, [role="button"], [role="link"], [role="combobox"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="tab"], [role="option"], [role="treeitem"], [role="gridcell"], [role="switch"], [role="checkbox"]';
+/** Elements the browser already focuses and activates from the keyboard. */
+const NATIVE_CONTROL = 'button, a[href], input, select, textarea, summary';
 const TRIGGER_ARIA = {
 	haspopup: 'aria-haspopup',
 	expanded: 'aria-expanded',
@@ -88,7 +94,11 @@ export class PopoverState extends PopoverOptionsBase {
 	// Trigger-matched width (fitTrigger), applied to the panel.
 	triggerWidth = $state<number | null>(null);
 	parent = getContext<PopoverState | null>('popover');
-	children = $state<PopoverState[]>([]);
+	// Nested popovers join while they mount and leave when torn down; see `Registry`.
+	readonly #children = new Registry<PopoverState>();
+	get children(): readonly PopoverState[] {
+		return this.#children.items;
+	}
 	hasChildOpen = $derived(this.children.some((d) => d.isOpen));
 	hasTransitioned = $state(false);
 	theme = useTheme();
@@ -154,12 +164,7 @@ export class PopoverState extends PopoverOptionsBase {
 		delay: this.delay
 	});
 
-	addChild = (child: PopoverState) => () => {
-		this.children.push(child);
-		return () => {
-			this.children = this.children.filter((d) => d.id !== child.id);
-		};
-	};
+	addChild = (child: PopoverState) => () => this.#children.add(child);
 
 	constructor(options: PopoverOptions) {
 		super();
@@ -184,7 +189,11 @@ export class PopoverState extends PopoverOptionsBase {
 		this.setOpen(false);
 	};
 
+	/** Calls to `setOpen`, direct or through `open`, `close` and `toggle`, unchanged state included. */
+	#openRequests = 0;
+
 	setOpen = (nextOpen: boolean) => {
+		this.#openRequests += 1;
 		if (this.isOpen === nextOpen) return;
 		this.isOpen = nextOpen;
 		this.onOpenChange?.(nextOpen);
@@ -319,9 +328,7 @@ export class PopoverState extends PopoverOptionsBase {
 		// Keep the trigger's ARIA in sync whichever way it was rendered (snippet or Button).
 		// Only real controls carry aria-haspopup/aria-expanded; a wrapper div or a
 		// presentational span used as the anchor must not (axe: aria-allowed-attr).
-		const canCarryPopupState = node.matches(
-			'button, a[href], input, select, textarea, summary, [role="button"], [role="link"], [role="combobox"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="tab"], [role="option"], [role="treeitem"], [role="gridcell"], [role="switch"], [role="checkbox"]'
-		);
+		const canCarryPopupState = node.matches(POPUP_CONTROL);
 		$effect(() => {
 			if (!canCarryPopupState) return;
 			for (const [prop, value] of Object.entries(this.triggerProps)) {
@@ -344,6 +351,47 @@ export class PopoverState extends PopoverOptionsBase {
 				cleanups.forEach((cleanup) => cleanup?.());
 			};
 		});
+	};
+	/**
+	 * Makes any element a complete trigger: it anchors the panel (as \`reference\` does), toggles
+	 * it on click when \`openOnClick\` allows, and keeps \`aria-expanded\` and friends in sync.
+	 * An element that is not already a control also gets \`role="button"\`, \`tabindex="0"\` and
+	 * Enter/Space activation, so a card or an avatar opens the panel from the keyboard too.
+	 */
+	trigger = (node: HTMLElement) => {
+		const nativeControl = node.matches(NATIVE_CONTROL);
+		if (!node.matches(POPUP_CONTROL) && !node.hasAttribute('role')) {
+			node.setAttribute('role', 'button');
+		}
+		if (!nativeControl && !node.hasAttribute('tabindex')) node.tabIndex = 0;
+		// The element's own handler wins. One that still opens, closes or toggles the popover
+		// (`onclick={popover.toggle}` kept from before this attachment existed) has acted by the
+		// time the event finishes dispatching, so the default toggle waits until then and runs only
+		// if nothing asked for an open state meanwhile; toggling regardless would undo that call.
+		let pending: ReturnType<typeof setTimeout> | undefined;
+		const activate = () => {
+			if (!this.openOnClick) return;
+			const requests = this.#openRequests;
+			clearTimeout(pending);
+			pending = setTimeout(() => {
+				if (this.#openRequests === requests) this.toggle();
+			});
+		};
+		const onKeydown = (event: KeyboardEvent) => {
+			if (nativeControl || event.target !== node) return;
+			if (event.key !== 'Enter' && event.key !== ' ') return;
+			event.preventDefault();
+			activate();
+		};
+		node.addEventListener('click', activate);
+		node.addEventListener('keydown', onKeydown);
+		const offReference = this.reference(node);
+		return () => {
+			clearTimeout(pending);
+			node.removeEventListener('click', activate);
+			node.removeEventListener('keydown', onKeydown);
+			offReference?.();
+		};
 	};
 }
 

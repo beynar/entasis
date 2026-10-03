@@ -102,6 +102,19 @@ describe('Chart mark rendering', () => {
 		expect(body).toContain(`aria-label="${name} chart"`);
 	});
 
+	test.each([
+		['gradient', true],
+		['solid', false]
+	] as const)('paints a %s area fill', (areaFill, gradient) => {
+		const body = renderDefinition(
+			rows,
+			{ ...xy, marks: [{ type: 'series', area: true, areaFill, x: 'x', y: 'y' }] },
+			`${areaFill} area`
+		);
+		// Gradient definitions are emitted for every area chart; only the fill references one.
+		expect(/<path[^>]*fill="url\(#/.test(body)).toBe(gradient);
+	});
+
 	test.each(['radar', 'circular', 'radial-bar', 'rose'] as const)(
 		'renders the %s polar variant',
 		(variant) => {

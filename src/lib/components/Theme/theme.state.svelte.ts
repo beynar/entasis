@@ -253,6 +253,10 @@ export class ThemeState extends createBindableStateClass<ThemeOptions>() {
 	};
 }
 
+/**
+ * The nearest `<Theme>`'s state: color scheme, design tokens, breakpoints and the methods that
+ * change them. Call it during component initialisation, like any Svelte context read.
+ */
 export const useTheme = () => {
 	const theme = getContext('entasisTheme') as ThemeState | undefined;
 	// A missing provider used to surface as `undefined is not an object` from whichever call site

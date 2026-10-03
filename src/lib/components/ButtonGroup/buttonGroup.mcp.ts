@@ -18,14 +18,20 @@ The ButtonGroup component displays a collection of related buttons as a cohesive
 ## Props
 
 ### Core Props
-- **items**: Array<ButtonProps> (required) - Array of button configurations
+Pass either \`items\` or \`children\`.
+- **items**: Array<ButtonProps> - Array of button configurations
   - Each button can have all standard Button component props
+- **children**: Snippet - Buttons composed directly, for content an item object cannot describe
+  (a Tooltip or Popover trigger, a Button with a custom body). Each direct child is joined to its
+  neighbours; set size, color and variant on each Button, since the shared props below apply to
+  \`items\` only.
+- **label**: string - Accessible name of the group (the root has \`role="group"\`)
 
-### Shared Button Props
+### Shared Button Props (items)
 - **size**: 'small' | 'normal' | 'large' - Applied to all buttons in the group
 - **color**: 'primary' | 'secondary' | 'neutral' | 'danger' | 'success' | 'warning' | 'info' - Shared color for all buttons
 - **variant**: 'solid' | 'outline' | 'soft' | 'ghost' | 'link' - Shared variant for all buttons
-- **disabled**: boolean - Disables all buttons in the group
+- **disabled**: boolean - Disables all buttons in the group, even one whose item sets \`disabled: false\`
 
 ### Styling Props
 - **class**: string - Additional CSS classes for the group container
@@ -42,6 +48,20 @@ The ButtonGroup component displays a collection of related buttons as a cohesive
 \`\`\`
 
 ## Examples
+
+### Composed Children
+\`\`\`svelte
+<script lang="ts">
+	import { Button } from 'entasis/button';
+	import { ButtonGroup } from 'entasis/button-group';
+	import { Tooltip } from 'entasis/tooltip';
+</script>
+
+<ButtonGroup label="History">
+	<Button variant="outline">Undo</Button>
+	<Tooltip content="Redo the last change" trigger={{ content: 'Redo', variant: 'outline' }} />
+</ButtonGroup>
+\`\`\`
 
 ### Basic Button Group
 \`\`\`svelte

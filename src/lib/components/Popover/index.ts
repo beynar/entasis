@@ -7,4 +7,4 @@ export {
 	type PopoverTheme,
 	type PopoverThemeProps
 } from './popover.theme.js';
-export { usePopoverContext } from './popover.state.svelte.js';
+export { usePopoverContext, type PopoverState } from './popover.state.svelte.js';

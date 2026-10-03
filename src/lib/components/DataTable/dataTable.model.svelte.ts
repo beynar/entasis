@@ -516,11 +516,12 @@ export class DataTableModel<TData> {
 		}
 
 		if (this.props.rowActions) {
+			const width = this.props.rowActionsWidth ?? 36;
 			definitions.push({
 				id: DATA_TABLE_ACTIONS_COLUMN,
-				size: 36,
-				minSize: 36,
-				maxSize: 36,
+				size: width,
+				minSize: width,
+				maxSize: width,
 				enableHiding: false,
 				enablePinning: false,
 				enableResizing: false,

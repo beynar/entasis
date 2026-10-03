@@ -1,4 +1,5 @@
 import type { ChartControl, ChartScene, ChartValue as TanStackValue } from '@tanstack/charts';
+import { untrack } from 'svelte';
 import { brushX, type BrushRange, type BrushXChange } from '@tanstack/charts/interaction/brush';
 import { controlledSignal } from '@tanstack/charts/interaction/signal';
 import type { ChartValue } from './chart.core.js';
@@ -28,15 +29,34 @@ export class ChartViewportState<TRow extends object> {
 	readonly controls = $derived(this.createControls());
 	readonly status = $derived(this.isZoomed ? 'Chart zoomed on the x axis.' : '');
 
+	/** Whether the x scale brushes categories or a continuous range. */
+	readonly #xKind = $derived(
+		this.chart.x?.scale.type === 'band' || this.chart.x?.scale.type === 'point'
+			? 'categorical'
+			: 'continuous'
+	);
+
 	constructor(chart: ChartState<TRow>) {
 		this.#chart = chart;
 		$effect(() => {
 			if (this.configuration) return;
-			this.xDomain = undefined;
-			this.fullDomain = [];
-			this.range = undefined;
-			this.isBrushing = false;
+			this.clear();
 		});
+		// A zoom window kept across a switch between categorical and continuous x would hold
+		// bounds of the wrong kind; start over from the next scene's domain instead.
+		let kind = untrack(() => this.#xKind);
+		$effect(() => {
+			if (this.#xKind === kind) return;
+			kind = this.#xKind;
+			untrack(() => this.clear());
+		});
+	}
+
+	private clear() {
+		this.xDomain = undefined;
+		this.fullDomain = [];
+		this.range = undefined;
+		this.isBrushing = false;
 	}
 
 	syncScene(scene: ChartScene<TRow>) {
@@ -91,9 +111,9 @@ export class ChartViewportState<TRow extends object> {
 			];
 		}
 		const { start, end } = this.range;
-		if (typeof start === 'string' || typeof end === 'string') {
-			throw new TypeError('[Chart] A continuous brush requires number or Date bounds.');
-		}
+		// Category bounds left from before the x scale turned continuous: the reset above clears
+		// them, and the next scene publishes the continuous domain.
+		if (typeof start === 'string' || typeof end === 'string') return undefined;
 		return [
 			brushX({
 				...options,

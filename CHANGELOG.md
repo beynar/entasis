@@ -6,7 +6,78 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `entasis/color-palette`: `generateColorPalette`, the palette the theme plugin writes, computed
+  at runtime with its `ColorPaletteOptions` and `ColorPalette` types. It does not import Tailwind,
+  so runtime theming no longer means importing `dist/tailwind/colors.js` by path.
+- `entasis/theme` exports `useTheme`, the nearest `Theme`'s state, for components below it.
+- `Popover`: `popover.trigger` turns any element in a snippet trigger into a complete trigger. It
+  anchors the panel, toggles it on click, keeps the ARIA state in sync, and gives a non-control
+  `role="button"`, `tabindex="0"` and Enter/Space activation. The element's own handler wins: if
+  it opens, closes or toggles the popover during the click, the default toggle stands down, so a
+  kept `onclick={popover.toggle}` does not toggle twice. `PopoverState` is exported to type the
+  snippet's parameter.
+- `DataTable`: `onRowActivate` receives the row payload and the native event when a row is
+  clicked (outside its controls) or given Enter in grid mode; rows show a pointer while it is set.
+  `rowActionsWidth` sizes the row actions column, which was fixed at 36px and cut text buttons.
+- `Chart` series: `areaFill: 'solid'` paints an area with one flat fill instead of the gradient.
+- `ButtonGroup` takes `children` as well as `items`, so Tooltip and Popover triggers and custom
+  Buttons join the group, plus a `label` for its new `role="group"`.
+
+### Fixed
+
+- Overlays in apps using Svelte's async mode: after a route or tab change, a dialog could open
+  with no backdrop and ignore Escape, and popovers and menus could lose dismissal the same way. The
+  layer stack dropped every overlay registered while the previous page was torn down: that
+  teardown read the registry as it was before and wrote it back. The registry, dialog and popover
+  children and `PageShell` overrides now use one store that cannot lose entries that way.
+  `PageShell` overrides are also removed reliably on navigation: they were stored through a deep
+  proxy, so the identity check that removed them could miss.
+- `Dialog`: hovering the close button showed a dot at the panel's corner. The default button was
+  wrapped in an empty element with the same close-button classes, whose state layer painted it.
+  The object `trigger` also forwarded `content` to the DOM as an attribute; it renders `children`
+  (a string or a snippet) or `content` now, like Popover and Tooltip.
+- `Sidebar`: clicking an activity bar button while the collapsed panel was peeking kept the panel
+  open after the pointer left, because the click's focus pinned it (so did focus a navigation put
+  back on the clicked link). Only keyboard focus pins a peek now, as with `:focus-visible`; a
+  focused text field still does.
+- `DataTable` pagination footer: the range read "1–25 of 100" in every language; it uses the
+  catalog's `paginationSummary` now. "Rows per page" was printed twice, as text and as the size
+  select's field label; the text now names the select. A `pageSize` missing from `pageSizes` left
+  the select on its placeholder; the current size is always offered.
+- `paginationSummary` separates the range with an en dash in every locale.
+- `Popover` and `Tooltip` object triggers rendered only their `content` string; `children` (a
+  string or a snippet) now replaces it, as on Button.
+- `Tooltip` snippet triggers on an element the browser cannot focus (a span, an icon) never
+  showed from the keyboard; the element joins the tab order.
+- `ButtonGroup`: an item's `disabled: false` re-enabled it inside a disabled group.
+
+- `Chart`: every chart type fills its plot.
+  - `height` and `aspectRatio` size the plot, as documented, rather than the whole chart. A
+    legend row used to take its height out of the sized box, so the engine laid out a scene
+    taller than the plot and the browser shrank it to fit: a chart with a legend drew at about
+    93% scale, text included, with empty bands on both sides. A legend now adds to the chart's
+    height.
+  - Pie and donut drop the 16px inset and 92% radius meant for polar axis labels; a 2px inset
+    keeps the slice separator stroke inside.
+  - Polar charts size the circle to their angle labels instead of a fixed 24px or 16px inset
+    (with 92% of the radius for circular, radial bar and rose). A label at twelve o'clock gets
+    exactly its height, and band labels that fall short of the top get nothing. Side labels now
+    stay inside a plot taller than it is wide, where they used to be cut off.
+  - Waffle uses the whole plot instead of 86% of its shorter side.
+  - Tree, network and sankey replace margins guessed from the plot size (up to 120px a side)
+    with the room their labels need. The tree also drops d3's half-row gaps at the edges, and a
+    network's settled layout is scaled to the plot instead of clamped inside it.
+- `Chart`: switching one chart's x scale between categories and a continuous range, with
+  `viewport` on, threw "A continuous brush requires number or Date bounds". The zoom window now
+  restarts from the new domain.
+- `Dialog`, `FloatingWindow`, the `Popover` mobile sheet and the mobile `Sidebar` drawer: the page
+  dim was `neutral` at 40%, and `neutral` turns light in dark mode, so the backdrop brightened the
+  page instead of dimming it. It is black now: 40% in light mode, 60% in dark mode.
+
 ## 0.9.3 — 2026-10-02
+
 ### Changed
 
 - `Sidebar` / `AppShell`: every gutter between the activity bar, the panel and the page, and

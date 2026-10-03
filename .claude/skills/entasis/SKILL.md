@@ -541,6 +541,7 @@ This section is generated from `tooling/component-contract/manifest.ts`.
 - `entasis/i18n` — svelte, localization
 - `entasis/tailwind-plugin` — tailwind, theme-configuration
 - `entasis/tailwind-plugin/theme` — tailwind, theme-configuration, color-palettes
+- `entasis/color-palette` — theme-configuration, color-palettes
 - `entasis/types` — typescript, utility
 - `entasis/cva` — styling, utility
 - `entasis/scheduling` — scheduling, utility

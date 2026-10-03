@@ -76,8 +76,6 @@
 {#if typeof trigger === 'function'}
 	{@render trigger(attach)}
 {:else}
-	{@const { content: triggerContent, ...buttonProps } = trigger}
-	<Button {...buttonProps} {@attach attach}>
-		{triggerContent}
-	</Button>
+	{@const { content: triggerContent, children, ...buttonProps } = trigger}
+	<Button {...buttonProps} children={children ?? triggerContent} {@attach attach} />
 {/if}

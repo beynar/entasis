@@ -130,6 +130,12 @@ export type ChartSeriesMark<TRow> = ChartDataMarkProps<TRow> &
 		line?: boolean | ChartLineOptions<TRow>;
 		points?: boolean | ChartPointOptions<TRow>;
 		curve?: ChartCurve;
+		/**
+		 * How an area is painted: `gradient` shades the series colour along the value axis, `solid`
+		 * is one flat fill at `fillOpacity` (20% by default). Gradients apply to palette colours.
+		 * @default 'gradient'
+		 */
+		areaFill?: 'gradient' | 'solid';
 		analysis?: readonly [ChartSeriesAnalysis, ...ChartSeriesAnalysis[]];
 	};
 

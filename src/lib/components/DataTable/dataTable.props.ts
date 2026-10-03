@@ -174,6 +174,11 @@ export type DataTableRowPayload<TData> = {
 	toggleExpanded: () => void;
 };
 
+export type DataTableRowActivation<TData> = DataTableRowPayload<TData> & {
+	/** The click or Enter key press that activated the row, for modifier keys. */
+	event: MouseEvent | KeyboardEvent;
+};
+
 export type DataTableCellPayload<TData, TValue = unknown> = DataTableRowPayload<TData> & {
 	columnId: string;
 	value: TValue;
@@ -327,6 +332,19 @@ type DataTableBaseProps<TData> = {
 	bulkActions?: Slot<DataTableToolbarPayload<TData>>;
 	/** Actions rendered for an individual row. */
 	rowActions?: Slot<DataTableRowPayload<TData>>;
+	/**
+	 * Width of the row actions column, in pixels. The default fits one icon button; widen it for
+	 * text buttons or several actions.
+	 * @default 36
+	 */
+	rowActionsWidth?: number;
+	/**
+	 * Called when a row is activated: clicked anywhere that is not a control inside it, or, in
+	 * `grid` mode, given Enter on a cell with no editor or control. Rows show a pointer while
+	 * it is set. In `table` mode rows are not focusable, so keep a link or row action for
+	 * keyboard users.
+	 */
+	onRowActivate?: (payload: DataTableRowActivation<TData>) => void;
 	/** Additional content displayed below an expanded row. */
 	expandedContent?: Slot<DataTableRowPayload<TData>>;
 	/** Display the loading state while rows are being fetched. */

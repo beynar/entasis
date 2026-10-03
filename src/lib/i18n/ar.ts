@@ -145,7 +145,7 @@ export const ar: Messages = {
 		startItem: string | number,
 		endItem: string | number,
 		totalItems: string | number
-	) => `${startItem}-${endItem} من ${totalItems}`,
+	) => `${startItem}–${endItem} من ${totalItems}`,
 	currentPage: (page: string | number) => `صفحة ${page}، الصفحة الحالية`,
 	goToPage: (page: string | number) => `الانتقال إلى صفحة ${page}`,
 	expandPanel: (index: string | number) => `توسيع اللوحة ${index}`,

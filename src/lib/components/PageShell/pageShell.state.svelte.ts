@@ -1,4 +1,5 @@
 import { getContext, onDestroy, setContext } from 'svelte';
+import { Registry } from '$lib/utils/registry.svelte.js';
 import type {
 	PageShellApi,
 	PageShellActions,
@@ -16,7 +17,8 @@ type PageShellStateOptions = Readonly<PageShellConfig> & {
 };
 
 export class PageShellState {
-	private overrides = $state<PageShellConfig[]>([]);
+	// Pages join on mount and leave on navigation; see `Registry`.
+	readonly #overrides = new Registry<PageShellConfig>();
 
 	readonly api: PageShellApi;
 
@@ -114,7 +116,7 @@ export class PageShellState {
 				actionOverflow: this.options.actionOverflow,
 				mobileActionCount: this.options.mobileActionCount
 			},
-			...this.overrides
+			...this.#overrides.items
 		);
 	}
 
@@ -136,16 +138,7 @@ export class PageShellState {
 		return Boolean(current.footer || current.footerActions);
 	}
 
-	set = (config: PageShellConfig) => {
-		this.overrides = [...this.overrides, config];
-		let isActive = true;
-
-		return () => {
-			if (!isActive) return;
-			isActive = false;
-			this.overrides = this.overrides.filter((override) => override !== config);
-		};
-	};
+	set = (config: PageShellConfig) => this.#overrides.add(config);
 
 	setEyebrow = (eyebrow?: PageShellTextRegion) => this.set({ eyebrow });
 	setBreadcrumbs = (breadcrumbs?: PageShellBreadcrumbs) => this.set({ breadcrumbs });
@@ -158,7 +151,7 @@ export class PageShellState {
 	setFooterActions = (footerActions?: PageShellActions) => this.set({ footerActions });
 
 	reset = () => {
-		this.overrides = [];
+		this.#overrides.clear();
 	};
 }
 

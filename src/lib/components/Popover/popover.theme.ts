@@ -14,7 +14,7 @@ const defaultPopoverContainer = cva({
 			// fixed positioning, no floating-ui placement.
 			inline: 'static h-fit w-fit',
 			mobileSheet:
-				'inset-0 flex h-dvh w-dvw max-w-none items-end justify-center overflow-hidden bg-neutral/40 backdrop-blur-xs'
+				'inset-0 flex h-dvh w-dvw max-w-none items-end justify-center overflow-hidden bg-black/40 backdrop-blur-xs dark:bg-black/60'
 		}
 	},
 	defaultVariants: {

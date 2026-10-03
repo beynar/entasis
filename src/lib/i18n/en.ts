@@ -152,7 +152,7 @@ export const en = {
 		startItem: string | number,
 		endItem: string | number,
 		totalItems: string | number
-	) => `${startItem}-${endItem} of ${totalItems}`,
+	) => `${startItem}–${endItem} of ${totalItems}`,
 	currentPage: (page: string | number) => `Page ${page}, current page`,
 	goToPage: (page: string | number) => `Go to page ${page}`,
 	expandPanel: (index: string | number) => `Expand panel ${index}`,

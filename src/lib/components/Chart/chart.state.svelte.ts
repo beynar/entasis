@@ -67,14 +67,19 @@ export class ChartState<TRow extends object> extends BoundChartOptions<ChartStat
 	readonly rootClass = $derived(this.classes.root({ className: this.className }));
 	readonly plotClass = $derived(this.classes.plot());
 	readonly size = $derived(resolveChartSize(this.height, this.aspectRatio));
-	// `height` and `aspectRatio` own the box when they are set, so they win over the root
-	// class; with neither, the root class keeps its own height and the chart observes it.
+	// `height` and `aspectRatio` size the plot, the box the engine draws into, so they go on the
+	// plot box and the legend row adds to the chart's height. Sizing the root instead left the
+	// plot shorter than the scene the engine laid out, which then shrank to fit. With neither,
+	// the root class keeps its own height and the engine measures what the legend leaves.
 	readonly rootStyle = $derived(
+		this.size ? 'position:relative;width:100%;height:auto' : 'position:relative;width:100%'
+	);
+	readonly plotStyle = $derived(
 		this.size?.height !== undefined
-			? `position:relative;width:100%;height:${this.size.height}px`
+			? `flex:none;height:${this.size.height}px`
 			: this.size?.aspectRatio !== undefined
-				? `position:relative;width:100%;height:auto;aspect-ratio:${this.size.aspectRatio}`
-				: 'position:relative;width:100%'
+				? `flex:none;aspect-ratio:${this.size.aspectRatio}`
+				: undefined
 	);
 
 	readonly initialMarkup: string;

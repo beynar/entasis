@@ -514,6 +514,17 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 		visibility: 'public'
 	},
 	{
+		id: 'color-palette',
+		subpath: './color-palette',
+		sourceIndex: 'src/lib/tailwind/palette.ts',
+		exports: packageConditions('src/lib/tailwind/palette.ts', false),
+		docs: [],
+		mcp: { source: 'tailwind/palette.mcp.js', exportName: 'colorPaletteDescription' },
+		capabilities: ['theme-configuration', 'color-palettes'],
+		relatedComponents: ['theme', 'tailwind-plugin'],
+		visibility: 'public'
+	},
+	{
 		id: 'types',
 		subpath: './types',
 		sourceIndex: 'src/lib/types/index.ts',
@@ -596,6 +607,7 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 
 const exportedSymbols: Record<string, ExportedSymbols> = {
 	'theme-tailwind-plugin': ['ThemeOptions', 'default'],
+	'color-palette': ['ColorPalette', 'ColorPaletteOptions', 'ColorTheme', 'generateColorPalette'],
 	'package-json': [],
 	'ai-conversation': [
 		'AIConversation',
@@ -2030,6 +2042,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'DataTablePinning',
 		'DataTableProcessingMode',
 		'DataTableProps',
+		'DataTableRowActivation',
 		'DataTableRowPayload',
 		'DataTableSearchConfig',
 		'DataTableSelectEditor',
@@ -2446,6 +2459,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	popover: [
 		'Popover',
 		'PopoverProps',
+		'PopoverState',
 		'PopoverTheme',
 		'PopoverThemeProps',
 		'popoverTheme',
@@ -2777,7 +2791,8 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'themePresets',
 		'themeTransitions',
 		'typeScalePresets',
-		'useDefaultColor'
+		'useDefaultColor',
+		'useTheme'
 	],
 	i18n: [
 		'I18n',

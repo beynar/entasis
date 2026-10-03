@@ -101,6 +101,9 @@
 	let edgeTriggerRef: HTMLButtonElement | null = $state(null);
 	let activityBarRef: HTMLElement | null = $state(null);
 
+	const TEXT_ENTRY =
+		'input:not([type="button"],[type="checkbox"],[type="radio"],[type="range"],[type="submit"],[type="reset"]), textarea, select, [contenteditable]:not([contenteditable="false"])';
+
 	let focusInside = $state(false);
 	let pointerInside = $state(false);
 
@@ -161,6 +164,22 @@
 		focusInside = false;
 	});
 
+	// Only the keyboard's focus pins a peek. A click focuses the button it lands on, and focus the
+	// page moves after a click (a navigation putting it back on the clicked link) belongs to that
+	// click too: either way the panel stayed open after the pointer left the rail. So the input
+	// used last decides, as `:focus-visible` does: Tab, or Escape handing focus back from a menu,
+	// pins; a press does not. A text field pins either way, so typing never loses the panel.
+	let lastInput: 'pointer' | 'keyboard' = 'keyboard';
+	$effect(() => {
+		const offs = [
+			on(window, 'pointerdown', () => (lastInput = 'pointer'), { capture: true }),
+			on(window, 'keydown', () => (lastInput = 'keyboard'), { capture: true })
+		];
+		return () => offs.forEach((off) => off());
+	});
+	const pinsPeek = (target: EventTarget | null) =>
+		lastInput === 'keyboard' || (target instanceof Element && target.matches(TEXT_ENTRY));
+
 	$effect(() => {
 		const nodes = peekRegion;
 		if (!nodes.length) return;
@@ -168,9 +187,9 @@
 		const isInside = (target: EventTarget | null) =>
 			target instanceof Node && nodes.some((node) => node.contains(target));
 		const offs = nodes.flatMap((node) => [
-			on(node, 'focusin', () => {
-				focusInside = true;
-				if (canHoverExpand) hoverExpanded = true;
+			on(node, 'focusin', (event) => {
+				focusInside = pinsPeek(event.target);
+				if (focusInside && canHoverExpand) hoverExpanded = true;
 			}),
 			on(node, 'focusout', (event) => {
 				focusInside = isInside(event.relatedTarget);
@@ -189,7 +208,8 @@
 	// The activity bar is part of the sidebar: hovering it opens the collapsed panel the way the
 	// edge strip (or `expandOnHover`) does, and a peek stays open while the pointer or focus is on
 	// the rail, so switching sections from it never closes the panel it is switching. Keyboard
-	// focus only keeps a peek: tabbing through the rail does not pop the panel out.
+	// focus only keeps a peek: tabbing through the rail does not pop the panel out, and a click
+	// keeps it only until the pointer leaves.
 	$effect(() => {
 		const rail = activityBarRef;
 		if (!rail) return;
@@ -204,8 +224,8 @@
 			on(rail, 'pointerleave', (event) => {
 				pointerInside = isInside(event.relatedTarget);
 			}),
-			on(rail, 'focusin', () => {
-				if (isPeeking) focusInside = true;
+			on(rail, 'focusin', (event) => {
+				focusInside = isPeeking && pinsPeek(event.target);
 			}),
 			on(rail, 'focusout', (event) => {
 				focusInside = isInside(event.relatedTarget);

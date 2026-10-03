@@ -143,7 +143,7 @@ export const zh: Messages = {
 		startItem: string | number,
 		endItem: string | number,
 		totalItems: string | number
-	) => `${startItem}-${endItem}，共 ${totalItems}`,
+	) => `${startItem}–${endItem}，共 ${totalItems}`,
 	currentPage: (page: string | number) => `第 ${page} 页，当前页`,
 	goToPage: (page: string | number) => `前往第 ${page} 页`,
 	expandPanel: (index: string | number) => `展开面板 ${index}`,

@@ -168,17 +168,17 @@
 	{#if typeof trigger === 'function'}
 		{@render trigger?.(popover)}
 	{:else if typeof trigger !== 'boolean'}
+		{@const { content, children, onclick, ...buttonProps } = trigger}
 		<Button
-			{...trigger}
+			{...buttonProps}
 			{...popover.triggerProps}
 			onclick={(event) => {
-				trigger.onclick?.(event);
+				onclick?.(event);
 				if (openOnClick) popover.toggle();
 			}}
+			children={children ?? content}
 			{@attach popover.reference}
-		>
-			{trigger.content}
-		</Button>
+		/>
 	{/if}
 {/if}
 

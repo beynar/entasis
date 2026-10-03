@@ -1,9 +1,10 @@
 // Laws for `inline` popovers: the panel stays in normal document flow instead of portaling to
 // the viewport-fixed layer, so docs and visual-stress pages can show an open panel statically.
 import '@testing-library/jest-dom/vitest';
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { describe, expect, test, vi } from 'vitest';
 import PopoverInlineHarness from './PopoverInlineHarness.test.svelte';
+import PopoverTriggerHarness from './PopoverTriggerHarness.test.svelte';
 
 describe('popover inline', () => {
 	test('a11y:popover.inline-in-flow renders the panel inside the component parent, not portaled', async () => {
@@ -49,5 +50,48 @@ describe('popover positionPanel', () => {
 		await waitFor(() => expect(dialog.style.visibility).toBe(''));
 		expect(positionPanel).toHaveBeenCalled();
 		expect(dialog.style.left).not.toBe('12px');
+	});
+});
+
+describe('Popover triggers', () => {
+	test('popover.trigger makes any element a keyboard-reachable trigger', async () => {
+		render(PopoverTriggerHarness);
+		const profile = screen.getByTestId('profile');
+		expect(profile).toHaveAttribute('role', 'button');
+		expect(profile).toHaveAttribute('tabindex', '0');
+		expect(profile).toHaveAttribute('aria-expanded', 'false');
+
+		await fireEvent.click(profile);
+		await waitFor(() => expect(profile).toHaveAttribute('aria-expanded', 'true'));
+		expect(screen.getByText('Profile details')).toBeInTheDocument();
+
+		await fireEvent.keyDown(profile, { key: 'Enter' });
+		await waitFor(() => expect(profile).toHaveAttribute('aria-expanded', 'false'));
+		await fireEvent.keyDown(profile, { key: ' ' });
+		await waitFor(() => expect(profile).toHaveAttribute('aria-expanded', 'true'));
+	});
+
+	test("the element's own click handler wins over popover.trigger's default toggle", async () => {
+		render(PopoverTriggerHarness);
+		// Let the deferred default run before judging the state it would have flipped.
+		const settle = () => new Promise((resolve) => setTimeout(resolve, 10));
+
+		const legacy = screen.getByRole('button', { name: 'Legacy' });
+		await fireEvent.click(legacy);
+		await settle();
+		expect(legacy).toHaveAttribute('aria-expanded', 'true');
+
+		const opener = screen.getByRole('button', { name: 'Opener' });
+		await fireEvent.click(opener);
+		await settle();
+		await fireEvent.click(opener);
+		await settle();
+		expect(opener).toHaveAttribute('aria-expanded', 'true');
+	});
+
+	test('an object trigger renders children instead of plain text', () => {
+		render(PopoverTriggerHarness);
+		const button = screen.getByRole('button', { name: 'Rich body' });
+		expect(button.querySelector('strong')).toHaveTextContent('Rich');
 	});
 });

@@ -22,8 +22,10 @@ Both are rendered by the single tooltip surface that \`<Theme>\` mounts (\`Toolt
 
 - **content**: string | Snippet (required) - Tooltip body
 - **trigger**: Snippet<[Attachment<HTMLElement>]> | ButtonProps & { content?: string } (required) -
-  A snippet receives the tooltip attachment and spreads it on its own element; Button props render
-  a Button carrying it
+  A snippet receives the tooltip attachment and spreads it on its own element; an element the
+  browser cannot focus (a span, an icon) gets \`tabindex="0"\` so keyboard focus shows the tooltip.
+  Button props render a Button carrying it; \`children\` (a string or a snippet) replaces
+  \`content\` for a richer body
 - **open**: boolean (default: false) - Shows the tooltip without hover or focus; bindable
 - **defaultOpen**: boolean (default: false) - Initial open state when \`open\` is not provided
 - **onOpenChange**: (open: boolean) => void - Called whenever the tooltip becomes visible or hidden,

@@ -19,6 +19,7 @@ import {
 	type RelationSourceEdge,
 	type RelationSourceNode
 } from './chart.relation.data.js';
+import { axisFraction, estimateLabelWidth, fitAxis, LABEL_LINE_BOX } from './chart.fit.js';
 import { compileRelationPointMarks } from './chart.relation.marks.js';
 
 type ForceNode<TRow> = RelationSourceNode<TRow> & SimulationNodeDatum;
@@ -61,20 +62,55 @@ export function compileNetworkRelation<TRow extends object>(
 		.force('y', forceY<ForceNode<TRow>>(height / 2).strength(0.035))
 		.stop();
 	simulation.tick(300);
-	const padding = radius + compiled.labels.fontSize + 16;
-	const positionedNodes: RelationNodeDatum<TRow>[] = nodes.map((node) => {
-		const x = clamp(coordinate(node.x, node.id, 'x'), padding, Math.max(padding, width - padding));
-		const y = clamp(coordinate(node.y, node.id, 'y'), padding, Math.max(padding, height - padding));
-		return {
-			...node,
-			kind: 'relation-node',
-			x,
-			y,
-			labelX: x,
-			labelY: y - radius - 10,
-			labelAnchor: 'middle'
-		};
-	});
+	// The simulation settles a shape around the centre at whatever size its forces give it; fit
+	// that shape to the plot on each axis, leaving room for the labels drawn above the nodes.
+	const labels = compiled.labels;
+	const settled = nodes.map((node) => ({
+		node,
+		x: coordinate(node.x, node.id, 'x'),
+		y: coordinate(node.y, node.id, 'y'),
+		labelWidth: labels.enabled
+			? estimateLabelWidth(node.label, labels.fontSize, labels.fontWeight)
+			: 0
+	}));
+	const xs = settled.map((node) => node.x);
+	const ys = settled.map((node) => node.y);
+	const [xMin, xMax, yMin, yMax] = [
+		Math.min(...xs),
+		Math.max(...xs),
+		Math.min(...ys),
+		Math.max(...ys)
+	];
+	const xFit = fitAxis(
+		settled.map((node) => {
+			const extent = Math.max(radius, node.labelWidth / 2);
+			return { fraction: axisFraction(node.x, xMin, xMax), before: extent, after: extent };
+		}),
+		width
+	);
+	const yFit = fitAxis(
+		settled.map((node) => ({
+			fraction: axisFraction(node.y, yMin, yMax),
+			before: labels.enabled ? radius + 10 + labels.fontSize * LABEL_LINE_BOX.middle.above : radius,
+			after: radius
+		})),
+		height
+	);
+	const positionedNodes: RelationNodeDatum<TRow>[] = settled.map(
+		({ node, x: settledX, y: settledY }) => {
+			const x = xFit.start + axisFraction(settledX, xMin, xMax) * xFit.span;
+			const y = yFit.start + axisFraction(settledY, yMin, yMax) * yFit.span;
+			return {
+				...node,
+				kind: 'relation-node',
+				x,
+				y,
+				labelX: x,
+				labelY: y - radius - 10,
+				labelAnchor: 'middle'
+			};
+		}
+	);
 	const positionByIdentity = new Map(positionedNodes.map((node) => [node.identity, node] as const));
 	const positionedLinks: RelationLinkDatum[] = links.map((link) => {
 		const source = resolveForceNode(link.source, 'source');

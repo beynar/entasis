@@ -42,7 +42,7 @@ export const defaultDialogAlign = cva({
 });
 
 export const defaultDialogBackdrop = cva({
-	base: 'fixed inset-0 bg-neutral/40 backdrop-blur-xs'
+	base: 'fixed inset-0 bg-black/40 backdrop-blur-xs dark:bg-black/60'
 });
 
 export const defaultDialogContent = cva({

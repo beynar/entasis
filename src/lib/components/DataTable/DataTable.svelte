@@ -64,6 +64,8 @@
 		toolbarSuffix,
 		bulkActions,
 		rowActions,
+		rowActionsWidth,
+		onRowActivate,
 		expandedContent,
 		loading = false,
 		error,
@@ -120,6 +122,8 @@
 				toolbarSuffix,
 				bulkActions,
 				rowActions,
+				rowActionsWidth,
+				onRowActivate,
 				expandedContent,
 				loading,
 				error,
@@ -164,7 +168,8 @@
 			rowCount,
 			selectionMode,
 			pagination,
-			rowActions
+			rowActions,
+			rowActionsWidth
 		];
 		model.reconcileProcessingMode();
 		model.reconcileColumns();
@@ -439,6 +444,18 @@
 		if (pagination === false) return null;
 		return pagination;
 	});
+	// The current size is always offered, so a `pageSize` missing from `pageSizes` still shows in
+	// the select instead of leaving it on its placeholder.
+	const pageSizeItems = $derived.by(() => {
+		const sizes = paginationConfig?.pageSizes ?? [25, 50, 100];
+		const current = tableState!.pagination.pageSize;
+		const offered = sizes.includes(current)
+			? sizes
+			: [...sizes, current].sort((left, right) => left - right);
+		return offered.map((value) => ({ value: String(value), label: String(value) }));
+	});
+	const uid = $props.id();
+	const rowsPerPageId = `${uid}-rows-per-page`;
 	const tableApi: DataTableApi<TData> = {
 		get state() {
 			return model.state;
@@ -633,15 +650,15 @@
 	{#if paginationConfig && paginationConfig.showControls !== false}
 		<div class={classes.footer()}>
 			<div class={classes.toolbarGroup()}>
-				<span class={classes.summary()}>{pageStart}–{pageEnd} of {totalItems}</span>
-				<span class={classes.summary()}>{t.dataTableRowsPerPage}</span>
+				<span class={classes.summary()}>
+					{t.paginationSummary(pageStart, pageEnd, totalItems)}
+				</span>
+				<!-- The visible text names the select; a field label would print it a second time. -->
+				<span id={rowsPerPageId} class={classes.summary()}>{t.dataTableRowsPerPage}</span>
 				<Select
 					size="small"
-					label={t.dataTableRowsPerPage}
-					items={(paginationConfig.pageSizes ?? [25, 50, 100]).map((value) => ({
-						value: String(value),
-						label: String(value)
-					}))}
+					triggerAttrs={{ 'aria-labelledby': rowsPerPageId }}
+					items={pageSizeItems}
 					value={String(tableState!.pagination.pageSize)}
 					{disabled}
 					onValueChange={(value) => model.setPageSize(Number(value))}

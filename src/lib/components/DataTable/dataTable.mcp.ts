@@ -68,7 +68,8 @@ instead to drop the table into normal document flow at its natural height:
 - **processingMode**: \`client | manual\`, default \`client\`.
 - **selectionMode**: \`none | single | multiple\`, default \`none\`.
 - **pagination**: \`false | DataTablePaginationConfig\`. False disables pagination processing.
-  \`showControls: false\` keeps processing active while hiding the built-in footer.
+  \`showControls: false\` keeps processing active while hiding the built-in footer. The size select
+  always offers the current \`pageSize\`, even when \`pageSizes\` leaves it out.
 - **search**: false, true, or placeholder/debounce configuration.
 - **showColumnVisibilityControl**: default false.
 - **stickyHeader**, **overscan**, **estimatedRowHeight**, and **animateRows** control rendering.
@@ -171,6 +172,16 @@ Calendar selection synchronizes its draft before commit. Arrow keys remain owned
   **expandedContent**, **loadingContent**, **empty**, **noResults**, and **errorContent**.
 - Toolbar slots receive state, selected loaded rows, visible rows, clearFilters, and clearSelection.
 - Row slots receive row identity, selection/expansion state, depth, and guarded toggle actions.
+- The row actions column is 36px, one icon button; set \`rowActionsWidth\` (pixels) for text
+  buttons or several actions.
+
+## Row activation
+
+\`onRowActivate(payload)\` receives the row payload plus the native \`event\`, for modifier keys.
+It fires on a click anywhere in the row except on a control (link, button, input, label, focusable
+element), the selection or actions column, a group row, or a click that ends a text selection.
+In grid mode Enter activates a cell that has no editor and no control. Rows show a pointer while it
+is set. Table-mode rows are not focusable, so keep a link or row action for keyboard users.
 
 ## Accessibility and virtualization
 

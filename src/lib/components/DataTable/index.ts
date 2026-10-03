@@ -31,6 +31,7 @@ export type {
 	DataTablePinning,
 	DataTableProcessingMode,
 	DataTableProps,
+	DataTableRowActivation,
 	DataTableRowPayload,
 	DataTableSearchConfig,
 	DataTableSelectionMode,

@@ -132,6 +132,7 @@ export const componentAliases = {
 	'entasis/theme': './src/lib/components/Theme/index.ts',
 	'entasis/i18n': './src/lib/i18n/index.ts',
 	'entasis/tailwind-plugin': './src/lib/tailwind/index.ts',
+	'entasis/color-palette': './src/lib/tailwind/palette.ts',
 	'entasis/types': './src/lib/types/index.ts',
 	'entasis/cva': './src/lib/utils/cva/index.ts',
 	'entasis/motion': './src/lib/utils/motion/index.ts',

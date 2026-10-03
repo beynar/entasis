@@ -804,6 +804,10 @@
 			"types": "./dist/tailwind/theme.d.ts",
 			"default": "./dist/tailwind/theme.js"
 		},
+		"./color-palette": {
+			"types": "./dist/tailwind/palette.d.ts",
+			"default": "./dist/tailwind/palette.js"
+		},
 		"./types": {
 			"types": "./dist/types/index.d.ts",
 			"default": "./dist/types/index.js"
@@ -1224,6 +1228,9 @@
 			],
 			"tailwind-plugin/theme": [
 				"dist/tailwind/theme.d.ts"
+			],
+			"color-palette": [
+				"dist/tailwind/palette.d.ts"
 			],
 			"types": [
 				"dist/types/index.d.ts"

@@ -418,7 +418,8 @@ const defaultColorsDark = {
 	neutral: '#fafafa'
 } as const;
 
-type ColorThemeOption = {
+/** Inputs of {@link generateColorPalette}: the seed colours plus mode and tuning options. */
+export type ColorPaletteOptions = {
 	saturation?: number;
 	luminance?: number;
 	colorscheme?: 'dark' | 'light';
@@ -427,7 +428,7 @@ type ColorThemeOption = {
 	'state-selected-opacity'?: number;
 } & ColorTheme;
 
-export const generateBaseColors = (theme: ColorThemeOption) => {
+export const generateBaseColors = (theme: ColorPaletteOptions) => {
 	const defaultSurface = theme.colorscheme === 'dark' ? defaultSurfaceDark : defaultSurfaceLight;
 	const surface = {
 		DEFAULT: theme.surface || defaultSurface,
@@ -476,7 +477,13 @@ export const generateBaseColors = (theme: ColorThemeOption) => {
 	return { colors: baseColors, surface };
 };
 
-export const generateColorPalette = (opts: ColorThemeOption) => {
+/**
+ * The palette the theme plugin writes for one theme, computed at runtime: every semantic role with
+ * its generated variants, the surface ladder, and the state-layer opacities. `cssVariables` maps
+ * `--color-*` and `--state-*` custom properties to values, ready to set on an element to theme its
+ * subtree (a brand colour chosen at runtime, a preview of a palette).
+ */
+export const generateColorPalette = (opts: ColorPaletteOptions) => {
 	const { luminance, saturation, colorscheme } = opts;
 	const { colors, surface } = generateBaseColors(opts);
 	const isDark = colorscheme === 'dark';

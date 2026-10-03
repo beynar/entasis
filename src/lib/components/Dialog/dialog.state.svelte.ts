@@ -1,4 +1,5 @@
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
+import { Registry } from '$lib/utils/registry.svelte.js';
 import { createPointerDrag } from '$lib/utils/pointerDrag.js';
 // import { useTheme } from '$lib/utils/theme.svelte.js';
 import { getContext, onMount, setContext, untrack } from 'svelte';
@@ -38,7 +39,11 @@ interface DialogOptions extends MakeRequired<
 
 export class DialogState extends createBindableStateClass<DialogOptions>() {
 	parent = getContext<DialogState | null>('dialog');
-	children = $state<DialogState[]>([]);
+	// Nested dialogs join while they mount and leave when torn down; see `Registry`.
+	readonly #children = new Registry<DialogState>();
+	get children(): readonly DialogState[] {
+		return this.#children.items;
+	}
 	hasTransitioned = $state(false);
 	theme = useTheme();
 	// Registered in the shared layer stack, which owns Escape / outside-press dismissal,
@@ -116,12 +121,7 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 		inertSiblings: () => true
 	});
 
-	addChild = (child: DialogState) => () => {
-		this.children.push(child);
-		return () => {
-			this.children = this.children.filter((d) => d.id !== child.id);
-		};
-	};
+	addChild = (child: DialogState) => () => this.#children.add(child);
 
 	constructor(options: DialogOptions) {
 		super(options);

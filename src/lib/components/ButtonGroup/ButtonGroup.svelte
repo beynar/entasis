@@ -5,6 +5,8 @@
 
 	let {
 		items,
+		children,
+		label,
 		size,
 		color,
 		variant,
@@ -17,8 +19,12 @@
 	const classes = $derived(useButtonGroupTheme(theme));
 </script>
 
-<div class={classes.root({ className })} {...attachments}>
-	{#each items as button, index (index)}
-		<Button {size} {color} {variant} {disabled} {...button} />
-	{/each}
+<div role="group" aria-label={label} class={classes.root({ className })} {...attachments}>
+	{#if children}
+		{@render children()}
+	{:else}
+		{#each items ?? [] as button, index (index)}
+			<Button {size} {color} {variant} {...button} disabled={disabled || button.disabled} />
+		{/each}
+	{/if}
 </div>

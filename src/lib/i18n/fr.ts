@@ -145,7 +145,7 @@ export const fr: Messages = {
 		startItem: string | number,
 		endItem: string | number,
 		totalItems: string | number
-	) => `${startItem}-${endItem} sur ${totalItems}`,
+	) => `${startItem}–${endItem} sur ${totalItems}`,
 	currentPage: (page: string | number) => `Page ${page}, page actuelle`,
 	goToPage: (page: string | number) => `Aller à la page ${page}`,
 	expandPanel: (index: string | number) => `Développer le panneau ${index}`,

@@ -130,6 +130,7 @@ import { themeDescription } from '$lib/components/Theme/theme.mcp.js';
 import { i18nDescription } from '$lib/i18n/i18n.mcp.js';
 import { tailwindPluginDescription } from '$lib/tailwind/index.mcp.js';
 import { themePluginDescription } from '$lib/tailwind/theme.mcp.js';
+import { colorPaletteDescription } from '$lib/tailwind/palette.mcp.js';
 import { typesDescription } from '$lib/types/types.mcp.js';
 import { cvaDescription } from '$lib/utils/cva/cva.mcp.js';
 import { schedulingDescription } from '$lib/utils/scheduling/scheduling.mcp.js';
@@ -270,6 +271,7 @@ export const componentMcpRegistry = {
 	i18n: i18nDescription,
 	'tailwind-plugin': tailwindPluginDescription,
 	'theme-tailwind-plugin': themePluginDescription,
+	'color-palette': colorPaletteDescription,
 	types: typesDescription,
 	cva: cvaDescription,
 	scheduling: schedulingDescription,

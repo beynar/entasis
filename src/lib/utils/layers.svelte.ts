@@ -5,6 +5,7 @@
 import { on } from 'svelte/events';
 import { getContext, hasContext, setContext, untrack } from 'svelte';
 import { SvelteSet } from 'svelte/reactivity';
+import { Registry } from './registry.svelte.js';
 import { LAYER_Z_BASE, LAYER_Z_STEP } from '$lib/components/Theme/theme.layers.js';
 
 export type LayerKind = keyof typeof LAYER_Z_BASE;
@@ -94,16 +95,16 @@ export class LayerHandle {
 }
 
 export class LayerStack {
-	// Raw (non-proxied) and replaced immutably on every change: handles are class instances
-	// with their own signals, and pushing them through a deep `$state` proxy was observed to
-	// desync the proxy's length from its entries once layers unmount in bulk (entries read
-	// back as `undefined`), which broke every overlay opened afterwards.
-	#layers = $state.raw<LayerHandle[]>([]);
+	// A plain registry rather than reactive state read, filtered and written back: see
+	// `Registry`. A teardown in another async batch used to restore an old list and drop every
+	// layer registered meanwhile (after a docs tab switch, dialogs opened with no backdrop and
+	// ignored Escape).
+	readonly #layers = new Registry<LayerHandle>();
 	#seq = 0;
 
 	/** Open layers sorted bottom → top. */
 	open = $derived(
-		this.#layers.filter((layer) => layer.isOpen).sort((a, b) => a.openOrder - b.openOrder)
+		this.#layers.items.filter((layer) => layer.isOpen).sort((a, b) => a.openOrder - b.openOrder)
 	);
 	topModal = $derived([...this.open].reverse().find((layer) => layer.isModal));
 
@@ -132,7 +133,7 @@ export class LayerStack {
 	register(options: LayerOptions): LayerHandle {
 		const handle = new LayerHandle(this, options);
 		setContext(LAYER_CONTEXT, handle);
-		this.#layers = [...this.#layers, handle];
+		this.#layers.add(handle);
 		$effect(() => {
 			if (options.isOpen()) {
 				untrack(() => {
@@ -145,7 +146,7 @@ export class LayerStack {
 	}
 
 	remove(handle: LayerHandle) {
-		this.#layers = this.#layers.filter((layer) => layer !== handle);
+		this.#layers.delete(handle);
 	}
 
 	#onKeyDown = (event: KeyboardEvent) => {

@@ -20,6 +20,13 @@ import {
 	type RelationSourceEdge,
 	type RelationSourceNode
 } from './chart.relation.data.js';
+import {
+	axisFraction,
+	CHART_FIT_MARGIN,
+	estimateLabelWidth,
+	fitAxis,
+	LABEL_LINE_BOX
+} from './chart.fit.js';
 import { withoutTooltipPoints } from './chart.mark.js';
 
 type SankeySourceNode<TRow> = RelationSourceNode<TRow>;
@@ -37,33 +44,90 @@ export function compileSankeyRelation<TRow extends object>(
 	height: number
 ): readonly CompiledMark[] {
 	const relations = compileRelationEdges(data, compiled, mark, path);
-	const labelSpace = compiled.labels.enabled ? clamp(width * 0.12, 64, 112) : 24;
-	const top = clamp(height * 0.06, 20, 36);
-	const bottom = top;
+	const labels = compiled.labels;
 	const nodeWidth = mark.nodeWidth ?? clamp(width * 0.022, 10, 22);
 	const nodeGap = mark.nodeGap ?? clamp(height * 0.055, 10, 30);
-	const graph = sankey<SankeySourceNode<TRow>, SankeySourceLink<TRow>>()
-		.nodeId((node) => node.identity)
-		.nodeAlign(resolveAlignment(mark.align))
-		.nodeSort((left, right) => left.index - right.index)
-		.nodeWidth(nodeWidth)
-		.nodePadding(nodeGap)
-		.extent([
-			[labelSpace, top],
-			[Math.max(labelSpace + 1, width - labelSpace), Math.max(top + 1, height - bottom)]
-		])
-		.iterations(32)({
-		nodes: compiled.nodes.map((node) => ({ ...node })),
-		links: relations.map((relation) => ({
-			source: relation.source.identity,
-			target: relation.target.identity,
-			value: relation.value ?? 0,
-			relation
-		}))
-	});
+	const layout = (top: number, bottom: number) =>
+		sankey<SankeySourceNode<TRow>, SankeySourceLink<TRow>>()
+			.nodeId((node) => node.identity)
+			.nodeAlign(resolveAlignment(mark.align))
+			.nodeSort((left, right) => left.index - right.index)
+			.nodeWidth(nodeWidth)
+			.nodePadding(nodeGap)
+			.extent([
+				[0, top],
+				[width, Math.max(top + 1, height - bottom)]
+			])
+			.iterations(32)({
+			nodes: compiled.nodes.map((node) => ({ ...node })),
+			links: relations.map((relation) => ({
+				source: relation.source.identity,
+				target: relation.target.identity,
+				value: relation.value ?? 0,
+				relation
+			}))
+		});
+	let graph = layout(CHART_FIT_MARGIN, CHART_FIT_MARGIN);
+	// Labels are centred on their node, so only a node shorter than a line pushes its label past
+	// the plot edge. Lay out again with exactly that overhang reserved.
+	const overhang = labelOverhang(graph.nodes, labels, height);
+	if (overhang.top > 0.5 || overhang.bottom > 0.5) {
+		graph = layout(CHART_FIT_MARGIN + overhang.top, CHART_FIT_MARGIN + overhang.bottom);
+	}
+	fitColumns(graph.nodes, nodeWidth, labels, width);
 	const nodes = graph.nodes.map((node) => compileNode(node, width));
 	const links = graph.links.map(compileLink);
 	return compileSankeyMarks(nodes, links, mark, compiled.labels, path);
+}
+
+function labelOverhang<TRow extends object>(
+	nodes: SankeyNode<SankeySourceNode<TRow>, SankeySourceLink<TRow>>[],
+	labels: CompiledRelationData<TRow>['labels'],
+	height: number
+): { top: number; bottom: number } {
+	if (!labels.enabled) return { top: 0, bottom: 0 };
+	const above = labels.fontSize * LABEL_LINE_BOX.middle.above;
+	const below = labels.fontSize * LABEL_LINE_BOX.middle.below;
+	let top = 0;
+	let bottom = 0;
+	for (const node of nodes) {
+		const { y0, y1 } = resolveNodeBounds(node);
+		const middle = (y0 + y1) / 2;
+		top = Math.max(top, CHART_FIT_MARGIN - (middle - above));
+		bottom = Math.max(bottom, middle + below - (height - CHART_FIT_MARGIN));
+	}
+	return { top, bottom };
+}
+
+// Columns are placed evenly across the plot, which leaves the outer labels to overflow or, with
+// guessed margins, a gap. Re-place them so the widest outer labels reach the plot edges: a
+// source's label sits left of its node, every other label to the right.
+function fitColumns<TRow extends object>(
+	nodes: SankeyNode<SankeySourceNode<TRow>, SankeySourceLink<TRow>>[],
+	nodeWidth: number,
+	labels: CompiledRelationData<TRow>['labels'],
+	width: number
+): void {
+	const columns = nodes.map((node) => resolveNodeBounds(node).x0);
+	const first = Math.min(...columns);
+	const last = Math.max(...columns);
+	const placed = nodes.map((node, index) => {
+		const label = labels.enabled
+			? 7 + estimateLabelWidth(node.label, labels.fontSize, labels.fontWeight)
+			: 0;
+		const labelOnLeft = (node.targetLinks?.length ?? 0) === 0;
+		return {
+			node,
+			fraction: axisFraction(columns[index] ?? first, first, last),
+			before: labelOnLeft ? label : 0,
+			after: nodeWidth + (labelOnLeft ? 0 : label)
+		};
+	});
+	const fit = fitAxis(placed, width);
+	for (const { node, fraction } of placed) {
+		node.x0 = fit.start + fraction * fit.span;
+		node.x1 = node.x0 + nodeWidth;
+	}
 }
 
 function compileSankeyMarks<TRow extends object>(

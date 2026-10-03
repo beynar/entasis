@@ -1,11 +1,27 @@
 <script lang="ts">
 	import Theme from '../Theme/Theme.svelte';
 	import DataTable from './DataTable.svelte';
-	import type { DataTableColumn } from './dataTable.props.js';
+	import type {
+		DataTableColumn,
+		DataTablePaginationConfig,
+		DataTableRowActivation
+	} from './dataTable.props.js';
 
 	type Person = { id: string; name: string; role: string };
 
-	let { items, virtualize = false }: { items: Person[]; virtualize?: boolean } = $props();
+	let {
+		items,
+		virtualize = false,
+		pagination = false,
+		onRowActivate,
+		withRowActions = false
+	}: {
+		items: Person[];
+		virtualize?: boolean;
+		pagination?: false | DataTablePaginationConfig;
+		onRowActivate?: (payload: DataTableRowActivation<Person>) => void;
+		withRowActions?: boolean;
+	} = $props();
 
 	const columns: DataTableColumn<Person>[] = [
 		{ id: 'name', accessor: 'name', header: 'Name' },
@@ -19,7 +35,14 @@
 		{columns}
 		getRowId={(person) => person.id}
 		{virtualize}
-		pagination={false}
+		{pagination}
+		{onRowActivate}
+		rowActions={withRowActions ? rowAction : undefined}
+		rowActionsWidth={withRowActions ? 96 : undefined}
 		search={false}
 	/>
 </Theme>
+
+{#snippet rowAction()}
+	<button type="button">Open</button>
+{/snippet}

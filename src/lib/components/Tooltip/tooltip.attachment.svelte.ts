@@ -3,6 +3,9 @@ import { useHoverAction } from '$lib/utils/useHoverAction.svelte.js';
 import { on } from 'svelte/events';
 import type { TooltipOptions } from './tooltip.props.js';
 
+const FOCUSABLE =
+	'a[href], button, input, select, textarea, summary, [tabindex], [contenteditable]:not([contenteditable="false"])';
+
 export const tooltip = (props: TooltipOptions) => {
 	const theme = useTheme();
 	let refElement: HTMLElement | null = null;
@@ -40,6 +43,9 @@ export const tooltip = (props: TooltipOptions) => {
 
 	return (ref: HTMLElement) => {
 		refElement = ref;
+		// Keyboard users reach the tooltip by focusing its trigger, so an element the browser
+		// cannot focus (an icon, a badge, a truncated label) joins the tab order.
+		if (!ref.matches(FOCUSABLE)) ref.tabIndex = 0;
 		const off = hoverAction.reference?.(ref);
 		// Keyboard users get the tooltip on focus; screen readers get it via aria-describedby.
 		const offFocus = on(ref, 'focusin', () => show(ref));

@@ -63,7 +63,9 @@ export function compileProportion<TRow extends object>({
 
 export function isProportionDatum(value: unknown): value is ProportionDatum {
 	return (
-		typeof value === 'object' && value !== null && Reflect.get(value, '__entasisProportion') === true
+		typeof value === 'object' &&
+		value !== null &&
+		Reflect.get(value, '__entasisProportion') === true
 	);
 }
 
@@ -191,8 +193,11 @@ function compileArcs(
 			})
 		],
 		scales: { angle: null, radius: null },
-		inset: 16,
-		radiusRatio: 0.92
+		// A pie has no guides or outside labels to make room for (the legend lives outside the
+		// plot), so it fills the plot like any other mark. The inset only keeps the outer half of
+		// the slice separator stroke inside the plot.
+		inset: arcOptions.strokeWidth,
+		radiusRatio: 1
 	});
 	return [base];
 }
@@ -250,13 +255,17 @@ function waffleMark(
 				seriesFromColor: true,
 				render({ chart, color: resolveColor }) {
 					const rows = Math.ceil(variant.cells / variant.columns);
-					const side = Math.min(chart.width, chart.height) * 0.86;
-					const gap = Math.min(variant.gap, side / (Math.max(variant.columns, rows) * 2));
+					// Square cells as large as the plot allows: the grid fills the plot's width or its
+					// height, whichever runs out first, and centres on the other.
+					const gap = Math.min(
+						variant.gap,
+						Math.min(chart.width / variant.columns, chart.height / rows) / 2
+					);
 					const size = Math.max(
 						0,
 						Math.min(
-							(side - gap * (variant.columns - 1)) / variant.columns,
-							(side - gap * (rows - 1)) / rows
+							(chart.width - gap * (variant.columns - 1)) / variant.columns,
+							(chart.height - gap * (rows - 1)) / rows
 						)
 					);
 					const width = size * variant.columns + gap * (variant.columns - 1);

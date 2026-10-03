@@ -52,6 +52,7 @@ One public type (\`curve\`) is D3's \`CurveFactory\`, so TypeScript users add it
 - \`data\` is one immutable array shared by every mark.
 - \`marks\` is a required non-empty discriminated union; array order is paint order.
 - A \`series\` mark renders a line by default. Set \`area\`, \`points\`, or \`line\` with booleans or local option objects to compose its visible layers.
+- An area is filled with a gradient of the series colour along its value axis. \`areaFill: 'solid'\` paints one flat fill at \`fillOpacity\` (20% by default) instead.
 - A series \`interval\` adds a non-interactive band behind the same line. Its required \`lower\` and \`upper\` numeric channels represent explicit bounds such as confidence, prediction, credible, or min/max intervals. \`interval\` and \`area\` are mutually exclusive because both own the filled surface.
 - \`analysis\` is a non-empty list of derived statistical layers owned by a series, scatter, bar, or distribution mark. Reference analysis supports mean, median, quantile, and standard deviation. Series and scatter support linear regression with optional confidence or prediction intervals. Series also supports rolling mean and rolling median. Analysis can use the complete plot or each series independently and does not add tooltip points. Stacked layouts reject analysis because their displayed values differ from the source channels.
 - A \`scatter\` mark renders independent observations with the default \`points\` variant. A numeric \`size\` is a constant pixel radius. A \`size\` data channel uses \`sqrt\` by default; \`sizeScale\` accepts \`linear\`, \`sqrt\`, \`log\`, \`exp\`, or an object with \`type\`, \`domain\`, \`range\`, and an optional \`base\` for logarithmic or exponential scales. The \`hexbin\` variant accepts numeric \`x\` and \`y\` channels and aggregates dense observations into responsive pixel-space hexagons; \`radius\` controls the bin size.
@@ -79,7 +80,7 @@ One public type (\`curve\`) is D3's \`CurveFactory\`, so TypeScript users add it
 - A \`facet\` mark owns nested \`marks\` with the same public union and inherits the plot positions.
 - Proportion tooltips show the category value and its share. They do not accept custom \`tooltip.fields\` or grouped axes.
 - \`label\` is required and \`ariaDescription\` is optional.
-- Sizing has one input: \`height\` (pixels) or \`aspectRatio\`. Either one sizes the plot and the server-rendered SVG (laid out at 800px wide), and they cannot be combined. With neither, the root class owns the height (320px by default, replaced by a height class on \`class\`) and SSR emits a stable empty host whose SVG mounts only in the browser.
+- Sizing has one input: \`height\` (pixels) or \`aspectRatio\`. Either one sizes the plot and the server-rendered SVG (laid out at 800px wide), and they cannot be combined. A legend row sits outside the plot and adds to the chart's height. With neither, the root class owns the height (320px by default, replaced by a height class on \`class\`) and SSR emits a stable empty host whose SVG mounts only in the browser.
 - Replace \`data\`, \`marks\`, or another configuration prop to update a mounted chart. In-place mutation is not an update contract.
 - Configuration errors throw a prefixed \`TypeError\`; dependency and accessor errors propagate.
 

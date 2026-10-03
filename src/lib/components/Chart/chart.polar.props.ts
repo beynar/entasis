@@ -28,7 +28,12 @@ type ChartPolarBase<TRow> = ChartDataMarkProps<TRow> &
 		color?: ChartColor;
 		startAngle?: number;
 		endAngle?: number;
+		/**
+		 * Pixels between the outer circle and the plot edge. By default the circle is as large as
+		 * the plot allows with every angle label inside it.
+		 */
 		inset?: number;
+		/** Share of the radius left after `inset` that the outer circle uses. Defaults to `1`. */
 		radiusRatio?: number;
 	};
 

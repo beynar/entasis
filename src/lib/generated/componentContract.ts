@@ -2670,6 +2670,7 @@ export const componentInventory = [
 			'DataTablePinning',
 			'DataTableProcessingMode',
 			'DataTableProps',
+			'DataTableRowActivation',
 			'DataTableRowPayload',
 			'DataTableSearchConfig',
 			'DataTableSelectEditor',
@@ -3598,6 +3599,7 @@ export const componentInventory = [
 		exportedSymbols: [
 			'Popover',
 			'PopoverProps',
+			'PopoverState',
 			'PopoverTheme',
 			'PopoverThemeProps',
 			'popoverTheme',
@@ -4226,7 +4228,8 @@ export const componentInventory = [
 			'themePresets',
 			'themeTransitions',
 			'typeScalePresets',
-			'useDefaultColor'
+			'useDefaultColor',
+			'useTheme'
 		],
 		docs: [],
 		capabilities: ['svelte', 'component', 'configuration'],
@@ -4271,6 +4274,16 @@ export const componentInventory = [
 		exportedSymbols: ['ThemeOptions', 'default'],
 		docs: [],
 		capabilities: ['tailwind', 'theme-configuration', 'color-palettes'],
+		relatedComponents: ['theme', 'tailwind-plugin'],
+		visibility: 'public'
+	},
+	{
+		id: 'color-palette',
+		subpath: 'entasis/color-palette',
+		sourceIndex: 'src/lib/tailwind/palette.ts',
+		exportedSymbols: ['ColorPalette', 'ColorPaletteOptions', 'ColorTheme', 'generateColorPalette'],
+		docs: [],
+		capabilities: ['theme-configuration', 'color-palettes'],
 		relatedComponents: ['theme', 'tailwind-plugin'],
 		visibility: 'public'
 	},
@@ -4548,6 +4561,7 @@ export const relatedComponents = {
 	i18n: ['theme'],
 	'tailwind-plugin': ['theme'],
 	'theme-tailwind-plugin': ['theme', 'tailwind-plugin'],
+	'color-palette': ['theme', 'tailwind-plugin'],
 	types: [],
 	cva: ['theme'],
 	motion: ['theme'],

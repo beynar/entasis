@@ -115,7 +115,7 @@ describe('Chart in the browser', () => {
 		expect(root).not.toHaveClass('h-80');
 	});
 
-	test('sizes the root and the plot from height', async () => {
+	test('sizes the plot from height, leaving the root to grow with a legend', async () => {
 		const { container } = renderInTheme(RevenueChart, {
 			data,
 			...definition,
@@ -126,7 +126,9 @@ describe('Chart in the browser', () => {
 		await waitFor(() => expect(container.querySelector('svg')).toBeInTheDocument());
 
 		const root = container.querySelector('[data-slot="chart"]');
-		expect(root).toHaveStyle({ height: '240px' });
+		const plot = container.querySelector('[data-chart-host]')?.parentElement;
+		expect(plot).toHaveStyle({ height: '240px' });
+		expect(root).not.toHaveStyle({ height: '240px' });
 		// The container is unmeasured here, so the SSR prerender width owns the layout.
 		expect(container.querySelector('svg')).toHaveAttribute('viewBox', '0 0 800 240');
 	});
@@ -237,6 +239,51 @@ describe('Chart in the browser', () => {
 		await waitFor(() =>
 			expect(container.querySelector('[data-chart-viewport-reset]')).not.toBeInTheDocument()
 		);
+	});
+
+	test('restarts the viewport when the x scale turns from categories to a continuous range', async () => {
+		type Reading = { at: string | number; actual: number };
+		const ReadingChart = Chart as Component<ChartProps<Reading>>;
+		const marks = [{ type: 'series', x: 'at', y: 'actual' }] satisfies ChartProps<Reading>['marks'];
+		const { container, rerender } = renderInTheme(ReadingChart, {
+			data: [
+				{ at: 'January', actual: 12 },
+				{ at: 'February', actual: 18 },
+				{ at: 'March', actual: 15 }
+			],
+			x: { scale: { type: 'point' } },
+			y: { scale: { type: 'linear' } },
+			marks,
+			viewport: true,
+			label: 'Readings'
+		});
+		const endHandle = await waitFor(() => {
+			const handle = container.querySelector('[data-chart-brush-handle="end"]');
+			expect(handle).toBeInTheDocument();
+			return handle as SVGElement;
+		});
+		await fireEvent.keyDown(endHandle, { key: 'ArrowLeft' });
+		await waitFor(() =>
+			expect(container.querySelector('[data-chart-viewport-reset]')).toBeInTheDocument()
+		);
+
+		// The category window cannot apply to numbers: it is dropped rather than thrown on.
+		await rerender({
+			data: [
+				{ at: 1, actual: 12 },
+				{ at: 2, actual: 18 },
+				{ at: 3, actual: 15 }
+			],
+			x: { scale: { type: 'linear' } },
+			y: { scale: { type: 'linear' } },
+			marks,
+			viewport: true,
+			label: 'Readings'
+		});
+		await waitFor(() => {
+			expect(container.querySelector('[data-chart-viewport-reset]')).not.toBeInTheDocument();
+			expect(container.querySelector('[data-chart-brush="brush-x"]')).toBeInTheDocument();
+		});
 	});
 
 	// Drives real pointer gestures through WAAPI-free brush animations; under a loaded CI box the

@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { describe, expect, test, vi } from 'vitest';
 import TooltipComponentHarness from './TooltipComponentHarness.test.svelte';
 import TooltipLawHarness from './TooltipLawHarness.test.svelte';
+import TooltipTriggerHarness from './TooltipTriggerHarness.test.svelte';
 
 describe('Tooltip lifecycle', () => {
 	test('retains the close callback until the tooltip has finished closing', async () => {
@@ -49,5 +50,21 @@ describe('Tooltip component', () => {
 
 		await fireEvent.mouseLeave(trigger);
 		await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+	});
+});
+
+describe('Tooltip triggers', () => {
+	test('a snippet trigger the browser cannot focus joins the tab order and shows on focus', async () => {
+		render(TooltipTriggerHarness);
+		const hint = screen.getByTestId('hint');
+		expect(hint).toHaveAttribute('tabindex', '0');
+		await fireEvent.focusIn(hint);
+		await waitFor(() => expect(screen.getByRole('tooltip')).toHaveTextContent('An explanation'));
+	});
+
+	test('an object trigger renders children instead of plain text', () => {
+		render(TooltipTriggerHarness);
+		const button = screen.getByRole('button', { name: 'Rich trigger' });
+		expect(button.querySelector('em')).toHaveTextContent('Rich');
 	});
 });

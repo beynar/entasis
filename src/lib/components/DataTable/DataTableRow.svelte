@@ -151,21 +151,44 @@
 		const control = (event.currentTarget as HTMLElement).querySelector<HTMLElement>(
 			'button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
 		);
-		control?.focus();
+		if (control) control.focus();
+		else if (event.key === 'Enter' && activatesFrom(column.id)) activate(event);
 	};
 
-	const handleCellClick = (event: MouseEvent, rowIndex: number, columnIndex: number) => {
-		if (interactionMode !== 'grid') return;
-		model.moveFocusedCell(rowIndex, columnIndex);
-
+	const handleCellClick = (
+		event: MouseEvent,
+		rowIndex: number,
+		columnIndex: number,
+		columnId: string
+	) => {
 		const target = event.target;
 		const interactive =
 			target instanceof Element
-				? target.closest('button, input, select, textarea, [tabindex]:not([tabindex="-1"])')
+				? target.closest(
+						'a[href], button, input, select, textarea, label, [contenteditable], [tabindex]:not([tabindex="-1"])'
+					)
 				: null;
-		if (interactive && interactive !== event.currentTarget) return;
-		(event.currentTarget as HTMLElement).focus();
+		const onControl = !!interactive && interactive !== event.currentTarget;
+		if (interactionMode === 'grid') {
+			model.moveFocusedCell(rowIndex, columnIndex);
+			if (!onControl) (event.currentTarget as HTMLElement).focus();
+		}
+		// A click that ends a text selection is the reader copying a value, not opening the row.
+		const selecting = !(window.getSelection()?.isCollapsed ?? true);
+		if (!onControl && !selecting && activatesFrom(columnId)) activate(event);
 	};
+
+	// The selection and actions columns own their clicks; group rows expand rather than open.
+	const activatable = $derived(
+		!!model.props.onRowActivate && !model.props.disabled && !row.getIsGrouped()
+	);
+	const activatesFrom = (columnId: string) =>
+		activatable &&
+		columnId !== DATA_TABLE_SELECTION_COLUMN &&
+		columnId !== DATA_TABLE_ACTIONS_COLUMN &&
+		model.editing?.row.id !== row.id;
+	const activate = (event: MouseEvent | KeyboardEvent) =>
+		model.props.onRowActivate?.({ ...rowPayload, event });
 </script>
 
 <tr
@@ -177,7 +200,7 @@
 	data-row-id={row.id}
 	data-grid-row={rowIndex}
 	data-selected={rowSelected}
-	class={classes.row({ density, grouped: row.getIsGrouped() })}
+	class={classes.row({ density, grouped: row.getIsGrouped(), activatable })}
 	style:grid-template-columns={gridTemplate}
 	{@attach measureAttachment}
 >
@@ -225,7 +248,7 @@
 			onmousedown={(event) => {
 				if (event.detail > 1 && config?.editor) event.preventDefault();
 			}}
-			onclick={(event) => handleCellClick(event, rowIndex, allIndex)}
+			onclick={(event) => handleCellClick(event, rowIndex, allIndex, column.id)}
 			onkeydown={(event) => handleCellKeydown(event, column, allIndex)}
 			ondblclick={(event) => {
 				if (!config?.editor) return;

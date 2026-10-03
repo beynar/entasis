@@ -181,6 +181,20 @@ describe('sidebar peek', () => {
 		expect(isHoverExpanded()).toBe(false);
 	});
 
+	test('focus a click brings does not keep a hover-expanded panel once the pointer leaves', async () => {
+		render(SidebarPeekHarness, { props: { collapsible: 'icon', expandOnHover: true } });
+		useTimerControl();
+
+		await fireEvent.pointerEnter(container());
+		// A press, then the focus it moves to the row: the pointer's focus, not the keyboard's.
+		const inbox = screen.getByRole('link', { name: /Inbox/ });
+		await fireEvent.pointerDown(inbox);
+		await fireEvent.focusIn(inbox);
+		await fireEvent.pointerLeave(container());
+		await pastGrace();
+		expect(isHoverExpanded()).toBe(false);
+	});
+
 	test('expandOnHover renders the peeked panel with expanded semantics', async () => {
 		render(SidebarPeekHarness, { props: { collapsible: 'icon', expandOnHover: true } });
 		useTimerControl();

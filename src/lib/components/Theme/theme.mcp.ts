@@ -3,6 +3,9 @@ export const themeDescription = `
 
 \`Theme\` owns global theme selection, runtime design tokens, shared overlay state, and theme
 transitions. Wrap the application once and use the \`ThemeState\` received by the children snippet.
+Components below it read the same state with \`useTheme()\` from \`entasis/theme\`, called during
+component initialisation; it throws when no \`Theme\` is above. For a palette computed at runtime,
+see \`generateColorPalette\` in \`entasis/color-palette\`.
 
 ## Runtime design tokens
 

@@ -42,8 +42,13 @@ The Popover component displays floating content positioned relative to a trigger
 ### Slot Props
 - **children**: Snippet<[PopoverState]> - Popover content
 - **trigger**: Snippet<[PopoverState]> | (ButtonProps & { content?: string }) | false - Trigger element
-  - Pass a snippet function for custom trigger: \`{#snippet trigger(popover)}...</snippet>\`
-  - Pass button props object for default button: \`trigger={{ content: "Click Me", color: "primary" }}\`
+  - Pass a snippet function for custom trigger: \`{#snippet trigger(popover)}...</snippet>\`. Put
+    \`{@attach popover.trigger}\` on any element (a card, an avatar, a Button) and it opens the
+    panel on click and from the keyboard, with the ARIA state kept in sync. Type the parameter
+    with \`PopoverState\` from \`entasis/popover\`.
+  - Pass button props object for default button: \`trigger={{ content: "Click Me", color: "primary" }}\`.
+    \`children\` (a string or a snippet) replaces \`content\` for a richer body; \`prefix\` and
+    \`suffix\` work as on Button.
   - Pass \`false\` to disable trigger (use with external ref)
 
 ### Interaction Props
@@ -107,14 +112,35 @@ The Popover component displays floating content positioned relative to a trigger
 	import { Button } from 'entasis/button';
 </script>
 
-<!-- {@attach popover.reference} anchors the panel to the element and keeps
+<!-- {@attach popover.trigger} anchors the panel to the element, toggles it on click and keeps
      aria-haspopup / aria-expanded / aria-controls in sync on it -->
 <Popover>
 	{#snippet trigger(popover)}
-		<Button onclick={() => popover.toggle()} {@attach popover.reference}>Open</Button>
+		<Button {@attach popover.trigger}>Open</Button>
 	{/snippet}
 	
 	<p>This is a popover!</p>
+</Popover>
+\`\`\`
+
+Any element works. One that is not a control gets \`role="button"\`, \`tabindex="0"\` and Enter/Space
+activation:
+
+\`\`\`svelte
+<script lang="ts">
+	import { Popover, type PopoverState } from 'entasis/popover';
+	import { Avatar } from 'entasis/avatar';
+</script>
+
+<Popover>
+	{#snippet trigger(popover: PopoverState)}
+		<div class="flex items-center gap-sm" {@attach popover.trigger}>
+			<Avatar name="Ada Lovelace" />
+			<span>Ada Lovelace</span>
+		</div>
+	{/snippet}
+
+	<p>Profile details</p>
 </Popover>
 \`\`\`
 
@@ -349,11 +375,12 @@ The Popover component uses a \`PopoverState\` instance that is passed to all slo
 - **open()**: () => void - Method to open the popover
 - **close()**: () => void - Method to close the popover
 - **toggle()**: () => void - Method to toggle the popover
-- **reference**: attachment for a custom trigger element (\`{@attach popover.reference}\`); anchors the panel to it and keeps its \`aria-haspopup\`, \`aria-expanded\`, and \`aria-controls\` in sync
+- **trigger**: attachment that makes any element the trigger (\`{@attach popover.trigger}\`): \`reference\` plus a click toggle (when \`openOnClick\`), and on a non-control \`role="button"\`, \`tabindex="0"\` and Enter/Space activation. The element's own handler wins: when it calls \`open\`, \`close\`, \`toggle\` or \`setOpen\` during the click, the default toggle stands down, so a kept \`onclick={popover.toggle}\` does not toggle twice
+- **reference**: attachment for a custom trigger element (\`{@attach popover.reference}\`); anchors the panel to it and keeps its \`aria-haspopup\`, \`aria-expanded\`, and \`aria-controls\` in sync, leaving clicks and keyboard to the element
 
 ## Accessibility
 
-- The trigger carries \`aria-haspopup\` (from \`haspopup\`), \`aria-expanded\`, and \`aria-controls\` — automatically for the built-in Button and for a snippet trigger using \`{@attach popover.reference}\`
+- The trigger carries \`aria-haspopup\` (from \`haspopup\`), \`aria-expanded\`, and \`aria-controls\` — automatically for the built-in Button and for a snippet trigger using \`{@attach popover.trigger}\` or \`{@attach popover.reference}\`
 - \`focusOnOpen\` decides where focus lands on open; focus returns to the trigger on close, whether by Escape or an outside press
 - Non-modal: Tab is not contained and the page is not made inert (use Dialog for that)
 - Escape closes only the topmost open layer; an outside press dismisses every layer stacked above the one pressed. Popovers, menus, and dialogs share one layer stack

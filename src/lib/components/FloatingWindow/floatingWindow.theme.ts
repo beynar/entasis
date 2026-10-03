@@ -160,7 +160,7 @@ const defaultFloatingWindowDockActions = cva({
 // The page dim behind a window opened with `backdrop`: the same wash as Dialog's backdrop, so a
 // modal window and a modal dialog dim the page alike.
 const defaultFloatingWindowBackdrop = cva({
-	base: 'fixed inset-0 bg-neutral/40 backdrop-blur-xs'
+	base: 'fixed inset-0 bg-black/40 backdrop-blur-xs dark:bg-black/60'
 });
 
 export const defaultFloatingWindowMotion = motion({
