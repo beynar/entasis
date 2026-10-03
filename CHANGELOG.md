@@ -6,6 +6,7 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.10.0 — 2026-10-03
 ### Added
 
 - `entasis/color-palette`: `generateColorPalette`, the palette the theme plugin writes, computed
