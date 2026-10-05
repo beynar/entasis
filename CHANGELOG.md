@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.10.1 — 2026-10-05
+
 ### Fixed
 
 - `Select`: with the last options of a short list selected and the trigger near the top of the
