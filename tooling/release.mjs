@@ -36,13 +36,13 @@ const version = read('npm', ['version', bump, '--no-git-tag-version']).replace(/
 const today = new Date().toISOString().slice(0, 10);
 const changelogPath = path.join(root, 'CHANGELOG.md');
 const changelog = await readFile(changelogPath, 'utf8');
-if (!/^## Unreleased\s*$/m.test(changelog)) {
+if (!/^## Unreleased[ \t]*$/m.test(changelog)) {
 	console.error('CHANGELOG.md needs a "## Unreleased" section to release from.');
 	process.exit(1);
 }
 await writeFile(
 	changelogPath,
-	changelog.replace(/^## Unreleased\s*$/m, `## Unreleased\n\n## ${version} — ${today}`)
+	changelog.replace(/^## Unreleased[ \t]*$/m, `## Unreleased\n\n## ${version} — ${today}`)
 );
 
 run('git', ['add', 'package.json', 'CHANGELOG.md']);

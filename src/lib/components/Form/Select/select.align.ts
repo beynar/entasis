@@ -36,8 +36,9 @@ const clamp = (value: number, min: number, max: number) =>
  * Item-aligned placement, the native select's and Radix's: the panel covers the trigger with the
  * option's middle on the trigger's middle and its text on the value text. A panel that would cross
  * the top edge is pinned there and its list scrolled by the overflow, so the option stays on the
- * trigger; one that would cross the bottom edge is cut short and scrolls. Only when the trigger
- * sits so low that fewer than four rows would fit does the panel rise and give up the alignment.
+ * trigger; one that would cross the bottom edge is cut short and scrolls. When either leaves fewer
+ * than four rows, the panel gives up the alignment and grows to four: up from the bottom edge for a
+ * trigger sitting low, down from the top edge for a short list pinned there.
  */
 export function alignItemWithTrigger(m: SelectAlignMetrics): SelectAlignment {
 	const top = SELECT_ALIGN_MARGIN;
@@ -54,10 +55,16 @@ export function alignItemWithTrigger(m: SelectAlignMetrics): SelectAlignment {
 		y = top;
 	}
 	let height = Math.min(m.panel.height - scrollTop, bottom - y);
-	const minHeight = Math.min(m.panel.height, chromeAbove + chromeBelow + m.item.height * 4);
+	const fourRows = chromeAbove + chromeBelow + m.item.height * 4;
+	// A list less than a row taller than four rows (its own padding) opens whole: cutting it would
+	// scroll it a few pixels and show a scroll arrow for nothing.
+	const minHeight = m.panel.height - fourRows < m.item.height ? m.panel.height : fourRows;
 	if (height < minHeight) {
+		// Grow away from the edge that is not in the way. A panel cut by the bottom edge rises; one
+		// pinned at the top (the last options of a short list under a high trigger, where the pin's
+		// scroll leaves too few rows) grows down and scrolls back instead of dropping to the bottom.
 		height = minHeight;
-		y = Math.max(top, bottom - height);
+		y = Math.max(top, Math.min(y, bottom - height));
 	}
 	const listHeight = Math.max(0, height - chromeAbove - chromeBelow);
 	scrollTop = clamp(scrollTop, 0, m.list.height - listHeight);

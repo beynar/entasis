@@ -75,6 +75,37 @@ describe('alignItemWithTrigger', () => {
 		expect(itemMiddleOnScreen(m, placed)).toBeLessThan(triggerMiddle(m));
 	});
 
+	test('a short list pinned at the top grows down to four rows instead of dropping to the bottom', () => {
+		// The last of five options under a trigger near the top: aligning it would need the panel to
+		// start above the viewport, and the scroll that pinning takes leaves under two rows.
+		const m = metrics({ rows: 5, index: 4, triggerTop: 30 });
+		const placed = alignItemWithTrigger(m);
+		expect(placed.y).toBe(SELECT_ALIGN_MARGIN);
+		expect(placed.listHeight).toBe(4 * ROW);
+		// Scrolled as far as the list goes, which keeps the option as close to the trigger as it gets.
+		expect(placed.scrollTop).toBe(ROW);
+		const middle = itemMiddleOnScreen(m, placed);
+		expect(middle).toBeGreaterThan(placed.y);
+		expect(middle).toBeLessThan(placed.y + 4 + placed.listHeight);
+	});
+
+	test('a list only its own padding taller than four rows opens whole instead of scrolling a few px', () => {
+		// Four options in a list with 4px of padding, the last selected, the trigger near the top.
+		const padding = 4;
+		const m: SelectAlignMetrics = {
+			viewport: { width: 1000, height: 600 },
+			trigger: { top: 30, height: ROW },
+			valueTextStart: 116,
+			panel: { left: 0, right: 200, top: 0, width: 200, height: 4 + 4 * ROW + 2 * padding + 4 },
+			list: { top: 4, height: 4 * ROW + 2 * padding },
+			item: { top: 4 + padding + 3 * ROW, height: ROW, textStart: 12 },
+			rtl: false
+		};
+		const placed = alignItemWithTrigger(m);
+		expect(placed.listHeight).toBe(m.list.height);
+		expect(placed.scrollTop).toBe(0);
+	});
+
 	test('in RTL the text lines up on the right edges', () => {
 		const m = metrics({ rtl: true });
 		const placed = alignItemWithTrigger(m);

@@ -6,7 +6,16 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Fixed
+
+- `Select`: with the last options of a short list selected and the trigger near the top of the
+  viewport, the item-aligned panel opened at the bottom of the screen. Pinning it to the top edge
+  left fewer than four rows, and the fallback that makes room always grew the panel upward from
+  the bottom edge. A panel pinned at the top now grows down from there. A list less than a row
+  taller than four rows also opens whole instead of scrolling a few pixels.
+
 ## 0.10.0 — 2026-10-03
+
 ### Added
 
 - `entasis/color-palette`: `generateColorPalette`, the palette the theme plugin writes, computed
