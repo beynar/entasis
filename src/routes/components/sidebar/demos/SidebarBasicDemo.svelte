@@ -89,8 +89,18 @@
 					icon: folderIcon,
 					defaultOpen: true,
 					items: [
-						{ label: 'Web app', href: '#web-app', isActive: true },
-						{ label: 'Mobile app', href: '#mobile-app' },
+						{
+							label: 'Web app',
+							href: '#web-app',
+							isActive: true,
+							badge: 4,
+							action: { label: 'More options for Web app', menu: projectMenu }
+						},
+						{
+							label: 'Mobile app',
+							href: '#mobile-app',
+							action: { label: 'More options for Mobile app', menu: projectMenu }
+						},
 						{ label: 'Design system', href: '#design-system' }
 					],
 					action: { label: 'Project actions', icon: dotsThreeIcon, menu: projectMenu }

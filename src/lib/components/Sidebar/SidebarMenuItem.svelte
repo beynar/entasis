@@ -255,7 +255,15 @@
 		out:slideTransition={collapseMotion.out}
 	>
 		{#each item.items ?? [] as sub, index (sub.label + index)}
-			<SidebarMenuSubItem {sub} {size} {activeVariant} {density} {theme} />
+			<SidebarMenuSubItem
+				{sub}
+				{api}
+				{size}
+				{activeVariant}
+				{density}
+				iconCollapsed={isIconCollapsed}
+				{theme}
+			/>
 		{/each}
 	</ul>
 {/snippet}

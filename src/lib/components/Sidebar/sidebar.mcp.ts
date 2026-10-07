@@ -86,6 +86,67 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 - **view**: string - Key of the \`views\` entry the row opens, sliding it in; the row shows a trailing chevron. Mutually exclusive with href, menu and items.
 - **action**: SidebarMenuActionDescriptor | Snippet<[SidebarApi]> - Hover/focus trailing action.
 
+### SidebarMenuSubEntry
+A row of an inline submenu (\`items\` on a menu entry). It carries the same row features as a
+top-level entry, so nested navigation (pages filed in folders) keeps its menus, pins and tints
+without flattening the tree. Every field below \`size\` is optional, and a sub entry that sets none
+of them renders exactly as a plain one.
+- **label**: string - Visible row label.
+- **href** / **onclick** - Render as an anchor, or a button with a native click handler.
+- **icon**: SidebarIcon - Leading icon.
+- **isActive** / **disabled** / **size** - As on a top-level entry; \`size\` defaults to the Sidebar size.
+- **iconColor**: Colors - Role tint for the leading icon, applied through \`data-color\`.
+- **iconVariant**: 'bare' | 'tile' - \`tile\` paints the same tinted rounded square as a top-level row.
+- **badge**: string | number - Trailing count or status; the label truncates before it.
+- **tooltip**: string - Tooltip text. Submenus never show in icon-collapsed mode, so a sub row shows its tooltip whenever one is set (never on mobile).
+- **class**: string - Classes applied to the row button.
+- **action**: SidebarMenuActionDescriptor | Snippet<[SidebarApi]> - Trailing action pinned to the row's end (\`data-sidebar="menu-sub-action"\`), drawn by the \`subAction\` theme part: hidden until the row is hovered or focused from \`md\` up, kept visible while its menu is open, always visible below \`md\`. The label truncates before it.
+
+\`\`\`svelte
+<script lang="ts">
+	import { Sidebar, type SidebarGroup } from 'entasis/sidebar';
+	import { folderIcon } from 'entasis/icons/folder';
+	import { fileTextIcon } from 'entasis/icons/fileText';
+	import { pencilSimpleIcon } from 'entasis/icons/pencilSimple';
+	import { pushPinIcon } from 'entasis/icons/pushPin';
+	import { trashIcon } from 'entasis/icons/trash';
+
+	const items: SidebarGroup[] = [
+		{
+			label: 'Pages',
+			items: [
+				{
+					label: 'Planning',
+					icon: folderIcon,
+					defaultOpen: true,
+					items: [
+						{
+							label: 'Q3 roadmap',
+							href: '/pages/q3-roadmap',
+							icon: fileTextIcon,
+							iconColor: 'success',
+							iconVariant: 'tile',
+							badge: 2,
+							action: {
+								label: 'More options for Q3 roadmap',
+								menu: [
+									{ type: 'option', title: 'Rename', prefix: pencilSimpleIcon },
+									{ type: 'option', title: 'Pin', prefix: pushPinIcon },
+									{ type: 'option', title: 'Delete', prefix: trashIcon, color: 'danger' }
+								]
+							}
+						},
+						{ label: 'Retro notes', href: '/pages/retro-notes', icon: fileTextIcon }
+					]
+				}
+			]
+		}
+	];
+</script>
+
+<Sidebar {items} />
+\`\`\`
+
 ### SidebarView
 One named panel content in \`views\`.
 - **label**: string - The view's name, shown on the back row of the views nested under it.
@@ -213,6 +274,7 @@ default verbatim, prefixes included.
 - Mobile drawer includes a backdrop button labelled "Close Sidebar".
 - Icon-collapsed rows keep their labels mounted and visually fade them, preserving accessible names and stable icon geometry.
 - Search, group controls, actions, and nested rows become inert before collapse can remove or hide them; focus returns to the owning visible row.
+- A submenu row's \`action\` is a sibling of its link, so Tab reaches the action button right after the row; its trigger takes \`label\` as its accessible name, and Escape closes its menu and returns focus to the trigger. It is \`inert\` and \`aria-hidden\` whenever the Sidebar is collapsed to icons.
 - Nested groups, tree branches, and inline submenus use reversible height transitions for open, close, and sidebar-collapse changes.
 - Tree roots use menu-row styling and nested tree nodes use submenu-row styling. In desktop icon mode, root folders open a PopupMenu and descendants remain navigable through recursive Menu submenu popovers; root leaves retain direct navigation and tooltips.
 - When \`rail\` and \`resizable\` are both enabled, one edge control owns click-to-toggle, drag resize, and keyboard resize without overlapping hitboxes.

@@ -178,6 +178,24 @@ export type SidebarMenuSubEntry = {
 	disabled?: boolean;
 	/** Submenu row geometry scale. Defaults to the Sidebar size. */
 	size?: Sizes;
+	/** Role tint applied to the leading icon, through `data-color`. */
+	iconColor?: Colors;
+	/** Leading icon treatment. 'tile' paints a tinted rounded square around the glyph. */
+	iconVariant?: SidebarIconVariant;
+	/** Trailing badge. */
+	badge?: string | number;
+	/**
+	 * Tooltip text. Submenus never show in icon-collapsed mode, where the label is hidden, so a
+	 * submenu row shows its tooltip whenever one is set (never on mobile).
+	 */
+	tooltip?: string;
+	/** Classes applied to the row button. */
+	class?: string;
+	/**
+	 * Secondary action pinned to the row's end, like a top-level entry's: shown on hover or focus
+	 * from `md` up and while its menu is open, always on touch-sized screens.
+	 */
+	action?: Snippet<[SidebarApi]> | SidebarMenuActionDescriptor;
 };
 
 type SidebarMenuEntryBase = {

@@ -366,13 +366,20 @@ const defaultSubButton = cva({
 			small: 'text-xs',
 			normal: '',
 			large: ''
+		},
+		// Room at the row's end for a pinned action or badge, so the label truncates before it
+		// instead of running under it. Off adds nothing: a plain row keeps its exact classes.
+		reserveEnd: {
+			true: 'pr-layout-lg',
+			false: ''
 		}
 	},
 	defaultVariants: {
 		activeVariant: 'soft',
 		size: 'normal',
 		density: 'normal',
-		itemSize: 'normal'
+		itemSize: 'normal',
+		reserveEnd: false
 	}
 });
 
@@ -383,6 +390,29 @@ const defaultMenuAction = cva({
 			small: 'size-4.5',
 			normal: 'size-5',
 			large: 'size-6'
+		},
+		density: {
+			compact: 'right-0.5',
+			normal: 'right-1',
+			comfortable: 'right-1.5'
+		}
+	},
+	defaultVariants: {
+		size: 'normal',
+		density: 'normal'
+	}
+});
+
+// A submenu row's pinned action: the `menuAction` recipe keyed to the sub row's own
+// `group/menu-sub-item`, one step smaller to sit in the shorter row. Hidden until the row is
+// hovered or focused from `md` up, kept while its menu is open, always shown below `md`.
+const defaultSubAction = cva({
+	base: 'state-layer text-neutral hover:text-neutral absolute top-1/2 flex aspect-square -translate-y-1/2 items-center justify-center rounded-sm p-0 opacity-100 outline-none transition group-data-[collapsible=icon]:hidden focus-visible:ring-2 focus-visible:ring-focus/50 md:opacity-0 group-focus-within/menu-sub-item:opacity-100 group-hover/menu-sub-item:opacity-100 has-[[aria-expanded=true]]:opacity-100 [&>svg]:shrink-0 [&>svg]:size-[var(--sidebar-icon-size)]',
+	variants: {
+		size: {
+			small: 'size-4',
+			normal: 'size-4.5',
+			large: 'size-5'
 		},
 		density: {
 			compact: 'right-0.5',
@@ -425,16 +455,24 @@ const defaultMenuIcon = cva({
 			small: '',
 			normal: '',
 			large: ''
+		},
+		// Where the icon sits. A top-level row sizes every nested glyph itself; a submenu row only
+		// sizes its direct glyph, so a bare wrapped icon there carries the row's icon size.
+		placement: {
+			row: '',
+			sub: ''
 		}
 	},
 	compoundVariants: [
+		{ variant: 'bare', placement: 'sub', class: '[&_svg]:size-[var(--sidebar-icon-size)]' },
 		{ variant: 'tile', size: 'small', class: 'size-icon-lg [&_svg]:size-icon-xs' },
 		{ variant: 'tile', size: 'normal', class: 'size-icon-xl [&_svg]:size-icon-sm' },
 		{ variant: 'tile', size: 'large', class: 'size-icon-xl [&_svg]:size-icon-md' }
 	],
 	defaultVariants: {
 		variant: 'bare',
-		size: 'normal'
+		size: 'normal',
+		placement: 'row'
 	}
 });
 
@@ -1077,6 +1115,7 @@ export const sidebarTheme = {
 	treeSubMenu: defaultTreeSubMenu,
 	subButton: defaultSubButton,
 	menuAction: defaultMenuAction,
+	subAction: defaultSubAction,
 	actionSlot: defaultActionSlot,
 	actionTrigger: defaultActionTrigger,
 	menuIcon: defaultMenuIcon,
