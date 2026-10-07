@@ -31,7 +31,7 @@
 			The best workflow connects the tools, people, and context you trust.
 		</p>
 	</div>
-	<Marquee speed="slow" fade innerClass="gap-lg"
+	<Marquee speed="slow" fade class="[--gap:var(--space-lg)]"
 		><div class="gap-lg flex">
 			{#each integrations as integration (integration.name)}<div
 					class="gap-lg border-neutral-muted bg-surface p-xl flex min-w-48 items-center rounded-xl border"

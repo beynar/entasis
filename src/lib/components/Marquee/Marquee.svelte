@@ -33,11 +33,6 @@
 		return `${Math.max(0.1, speed)}s`;
 	});
 
-	const gap = $derived.by(() => {
-		if (size === 'small') return '0.5rem';
-		if (size === 'large') return '1.5rem';
-		return '1rem';
-	});
 	const configuredCopyCount = $derived.by(() => {
 		if (!Number.isFinite(numberOfCopies)) return 2;
 		return Math.min(MAX_COPY_COUNT, Math.max(2, Math.floor(numberOfCopies)));
@@ -80,7 +75,7 @@
 	data-reverse={reverse ? 'true' : undefined}
 	data-fade={fade ? 'true' : undefined}
 	class={classes.root({ direction, size, fade, class: className })}
-	style="--animation-duration: {animationDuration}; --gap: {gap};"
+	style="--animation-duration: {animationDuration};"
 	{@attach observeRoot}
 	{...attachments}
 >
@@ -143,5 +138,12 @@
 	:global(html[data-entasis-reduce-motion] .animate-marquee-left),
 	:global(html[data-entasis-reduce-motion] .animate-marquee-up) {
 		animation: none;
+	}
+
+	/* A still marquee starts at its first item, so only its trailing edge, where the row is cut,
+	   keeps the fade; a faded leading edge would half-hide the first item. */
+	:global(html[data-entasis-reduce-motion]) div[data-slot='marquee'][data-fade] {
+		--scroll-fade-s: 0px;
+		--scroll-fade-t: 0px;
 	}
 </style>

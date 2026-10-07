@@ -65,10 +65,13 @@ The Marquee component creates an infinite scrolling animation for displaying con
   - Uses a static scroll-fade mode because the marquee is clipped animation, not a native scroll container
 
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
-  - Controls spacing between duplicated content copies
-  - \`small\`: Compact spacing (gap-2)
-  - \`normal\`: Standard spacing (gap-4)
-  - \`large\`: Expanded spacing (gap-6)
+  - Sets the marquee's one spacing value, \`--gap\`, from the theme spacing scale
+  - \`small\`: \`--space-md\`
+  - \`normal\`: \`--space-xl\`
+  - \`large\`: \`--layout-space-md\`
+  - The copies, the items inside each copy and the loop step all use \`--gap\`, so the loop stays
+    seamless at every size and theme spacing. To respace a marquee, set \`--gap\` once on the root
+    (\`class="[--gap:var(--space-lg)]"\`); never redeclare it on the copies.
 
 ### Styling Props
 - **ref**: HTMLDivElement | null (bindable)
@@ -245,7 +248,7 @@ The Marquee component renders:
 
 - Uses CSS keyframe animations for smooth GPU-accelerated performance
 - Content is duplicated \`numberOfCopies\` times to create seamless infinite scroll
-- Animation translates each copy by -100% of its width/height plus gap
+- Animation translates each copy by -100% of its width/height plus \`--gap\`, the same value the copies are spaced with
 - Animation duration is controlled via CSS custom property \`--animation-duration\`
 - Pause on hover uses CSS \`animation-play-state\` for instant response
 - Reverse mode uses CSS \`direction: reverse\` for the animation
@@ -256,7 +259,7 @@ The Marquee component renders:
 - Consider providing alternative static content for screen readers
 - Ensure sufficient color foreground for text content
 - Pause on hover helps users interact with and read content
-- Animation is disabled when the user requests reduced motion
+- Animation is disabled when the user requests reduced motion; the still row then fades only its trailing edge
 
 ## Notes
 
@@ -307,7 +310,7 @@ The theme object contains the following parts:
         left: 'flex-row'
       },
       size: {
-        normal: 'gap-4'
+        normal: '[--gap:var(--space-lg)]'
       }
     }
   }}
@@ -329,9 +332,6 @@ The theme object contains the following parts:
       },
       pauseOnHover: {
         true: 'group-hover:[animation-play-state:paused]'
-      },
-      size: {
-        large: 'gap-6'
       }
     }
   }}
@@ -354,7 +354,7 @@ The theme object contains the following parts:
         left: 'flex-row'
       },
       size: {
-        normal: 'gap-4'
+        normal: '[--gap:var(--space-lg)]'
       }
     },
     inner: {
