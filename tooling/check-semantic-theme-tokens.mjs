@@ -58,7 +58,7 @@ const geometryExceptions = new Map([
 			['gap-[-0.25rem]', 'Avatar stack overlap'],
 			['ml-[0.3rem]', 'Leading compensation for avatar overlap'],
 			['[&>[data-avatar]]:ml-[-0.45rem]', 'Normal avatar stack overlap'],
-			['[&>[data-avatar]]:ml-[-0.4rem]', 'Small avatar stack overlap'],
+			['[&>[data-avatar]]:ml-[-0.3rem]', 'Small avatar stack overlap'],
 			['[&>[data-avatar]]:ml-[-0.5rem]', 'Large avatar stack overlap'],
 			['ml-[-0.75rem]', 'Overflow counter overlap']
 		])
