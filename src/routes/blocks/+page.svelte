@@ -89,6 +89,26 @@
 			><span>Your theme, throughout</span>
 		</div>
 	</header>
+	<section
+		aria-labelledby="generative-heading"
+		class="gap-lg border-neutral-muted bg-surface-canvas p-lg flex flex-wrap items-center justify-between rounded-lg border"
+	>
+		<div class="gap-xs flex max-w-2xl flex-col">
+			<h2 id="generative-heading" class="text-neutral text-base font-semibold tracking-tight">
+				Generative blocks
+			</h2>
+			<p class="text-neutral/70 text-sm">
+				Two section types per category, each a few levers bounded by rules. A seed picks a legal
+				variant; a canvas composes whole pages from them.
+			</p>
+		</div>
+		<div class="gap-sm flex flex-wrap">
+			<Button href={resolve('/blocks/generative')} variant="outline" color="neutral"
+				>Explore the levers</Button
+			>
+			<Button href={resolve('/blocks/generative/compose')}>Compose a page</Button>
+		</div>
+	</section>
 	<section aria-label="Browse block categories" class="gap-xl flex flex-col">
 		<div class="gap-lg flex flex-wrap items-center justify-between">
 			<div role="group" aria-label="Block groups" class="gap-sm flex flex-wrap">

@@ -4,6 +4,7 @@ import type { SidebarGroup, SidebarView } from '$lib/components/Sidebar/index.js
 import { componentNavigationSections } from './componentNavigation.generated.js';
 import { blockCategories, blockGroups } from './blocks/catalog.js';
 import { workflowBlocks } from './blocks/blocks.js';
+import { sectionTypes } from './blocks/generative/registry.js';
 
 /**
  * `resolve()` is typed one route id at a time, so a union of ids — navigation data, a
@@ -87,6 +88,24 @@ const linkGroup = (
 function blockSidebarGroups(routeId: string): SidebarGroup[] {
 	return [
 		{ items: [{ label: 'All blocks', href: '/blocks', isActive: routeId === '/blocks' }] },
+		{
+			label: 'Generative',
+			items: [
+				{
+					label: 'Generative blocks',
+					href: '/blocks/generative',
+					badge: sectionTypes.length,
+					isActive:
+						routeId === '/blocks/generative' ||
+						(routeId.startsWith('/blocks/generative/') && routeId !== '/blocks/generative/compose')
+				},
+				{
+					label: 'Page composer',
+					href: '/blocks/generative/compose',
+					isActive: routeId === '/blocks/generative/compose'
+				}
+			]
+		},
 		...blockGroups.map((group) => ({
 			label: group,
 			items: blockCategories
