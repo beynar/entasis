@@ -6,6 +6,29 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `Sidebar`: submenu entries (`SidebarMenuSubEntry`) carry the row features top-level entries
+  have. `action` pins a `SidebarMenuActionDescriptor` or snippet to the sub row's end
+  (`data-sidebar="menu-sub-action"`), with the top-level visibility rule: shown on row hover or
+  focus from `md` up, kept while its menu is open, always below `md`, and `inert` when the panel
+  is collapsed to icons. A new `subAction` theme part draws it. `iconColor`, `iconVariant`,
+  `badge`, `tooltip` and `class` work as on top-level entries. Every field is optional: a sub
+  entry without them renders exactly as before, so nested navigation keeps its menus, pins and
+  tints without flattening the tree.
+
+### Fixed
+
+- `Marquee`: at `small` and `large`, and at any theme spacing other than the default, the loop
+  jumped once per cycle. Each copy redeclared `--gap` as 1rem, so the loop stepped 16px while the
+  copies were drawn with the size's spacing token. `--gap` is now set once on the root from the
+  spacing scale and read by the copies, their items and the loop; respace a marquee with
+  `class="[--gap:…]"` on the root. Under reduced motion the still row fades only its trailing
+  edge, so the first item is no longer half hidden.
+- `AvatarGroup`: at `small`, each avatar covered the end of the previous one's two-letter
+  initials. Small stacks now overlap by the same fifth of an avatar as normal and large, and small
+  initials tighten their tracking.
+
 ## 0.10.1 — 2026-10-05
 
 ### Fixed
