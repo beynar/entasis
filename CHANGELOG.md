@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.10.2 — 2026-10-07
+
 ### Added
 
 - `Sidebar`: submenu entries (`SidebarMenuSubEntry`) carry the row features top-level entries
