@@ -6,6 +6,29 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Fixed
+
+- `Toast`: calling a `toast` creator with the `id` of a toast that is still on screen no longer
+  crashes the Toaster with a duplicate-key error. That toast updates in place and the same handle
+  is returned: the new options merge over the old ones (keys you leave out keep their value) and
+  its auto-dismiss timer restarts from the full `duration`. A toast re-added while it is still
+  animating out, or removed and re-added in the same tick, is replaced: it returns to its slot
+  without any swipe offset, enters again and fires its own `onAfterOpen`. A same-tick replacement
+  joins a microtask later, once the removal has reached the DOM. Toasts queued before a
+  `<Toaster />` mounts merge by id the same way.
+- `Toast`: calling a `toast` creator or a toast's `remove()` inside a `$effect` no longer
+  subscribes the effect to the Toaster. Showing a toast from an effect used to loop until Svelte
+  threw `effect_update_depth_exceeded`.
+- `Toast`: auto-dismiss timers now pause while the browser window is blurred or the tab is hidden,
+  and resume with the time they had left. Coming back to a background tab no longer dismisses
+  every pending toast at once. A toast shown while the window is inactive starts paused, and
+  changing a toast's duration while it is hovered no longer starts its countdown under the
+  pointer.
+- `Toast`: showing a new toast while the pointer is over the toast stack no longer freezes the
+  page. The new toast's timer starts paused, like the rest of the hovered stack. The underlying
+  safe-area fix also covers `Popover` and `Sidebar` references attached while their safe area is
+  active.
+
 ## 0.11.0 — 2026-10-10
 
 ### Added
