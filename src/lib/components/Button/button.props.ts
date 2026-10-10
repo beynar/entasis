@@ -69,9 +69,11 @@ export type ButtonPrimitiveProps = WithAttachments<
 			/**
 			 * When true, shows a spinner overlay and refuses activation while keeping the button
 			 * focusable: it renders `aria-busy="true"` and `aria-disabled="true"`, ignores pointer
-			 * events, and cancels clicks from the keyboard (Enter, Space) as well as the form
-			 * submission of a `type="submit"` button. Unlike `disabled`, it never sets the native
-			 * `disabled` attribute, so focus stays on the button while the work runs.
+			 * events, and cancels clicks from the keyboard (Enter, Space) before any other listener
+			 * sees them, including attachments such as `popover.trigger`, as well as the form
+			 * submission of a `type="submit"` button and the navigation of an anchor. Unlike
+			 * `disabled`, it never sets the native `disabled` attribute, so focus stays on the
+			 * button while the work runs.
 			 */
 			loading?: boolean;
 			/**

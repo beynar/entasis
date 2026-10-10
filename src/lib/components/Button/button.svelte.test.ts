@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, test, vi } from 'vitest';
 import Button from './Button.svelte';
 import ButtonInForm from './ButtonInForm.test.svelte';
+import ButtonPopoverTrigger from './ButtonPopoverTrigger.test.svelte';
 import type { ButtonPrimitiveProps } from './button.props.js';
 import { renderInTheme } from '../Theme/renderInTheme.test-helper.js';
 
@@ -189,6 +190,44 @@ describe('Button loading', () => {
 		const click = new MouseEvent('click', { bubbles: true, cancelable: true });
 		expect(anchor.dispatchEvent(click)).toBe(false);
 		expect(onclick).not.toHaveBeenCalled();
+	});
+
+	test('a loading popover trigger stays closed on Enter or Space', async () => {
+		// `{@attach popover.trigger}` listens for `click` on the button itself, ahead of Svelte's
+		// delegated handlers, so the refusal has to happen on the element first.
+		const settle = () => new Promise((resolve) => setTimeout(resolve, 10));
+		const { rerender } = render(ButtonPopoverTrigger, { props: { loading: true } });
+
+		const button = screen.getByRole('button', { name: 'Export' });
+		button.focus();
+		button.click();
+		await settle();
+		expect(button).toHaveAttribute('aria-expanded', 'false');
+		expect(screen.queryByText('Export options')).not.toBeInTheDocument();
+
+		await rerender({ loading: false });
+		button.click();
+		await settle();
+		expect(button).toHaveAttribute('aria-expanded', 'true');
+	});
+
+	test('a loading anchor portaled outside the app root is cancelled before a router on <html> sees the click', () => {
+		// SvelteKit's router listens on <html>. For content a portal moved to <body>, that listener
+		// runs before Svelte's delegated handlers, so it must already see a cancelled click.
+		renderInTheme(Button, { children: 'Continue', href: '/next', loading: true });
+		const anchor = screen.getByRole('link', { name: 'Continue' });
+		document.body.append(anchor);
+
+		const seenByRouter: boolean[] = [];
+		const router = (event: MouseEvent) => seenByRouter.push(event.defaultPrevented);
+		document.documentElement.addEventListener('click', router);
+		try {
+			const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+			expect(anchor.dispatchEvent(click)).toBe(false);
+			expect(seenByRouter).not.toContain(false);
+		} finally {
+			document.documentElement.removeEventListener('click', router);
+		}
 	});
 });
 

@@ -145,6 +145,7 @@
 				placeholder={editor.placeholder}
 				disabled={payload.pending}
 				value={payload.draft == null ? '' : String(payload.draft)}
+				inputAttrs={{ 'data-1p-ignore': true }}
 				onValueChange={(value) => payload.setDraft(value ?? '')}
 			/>
 		{:else if editor.type === 'number'}

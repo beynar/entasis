@@ -143,6 +143,7 @@
 					placeholder={searchConfig.placeholder ?? t.dataTableSearchRows}
 					value={searchValue}
 					disabled={model.props.disabled}
+					inputAttrs={{ 'data-1p-ignore': true }}
 					onValueChange={(value) => updateSearch(value ?? '')}
 				/>
 			{/if}

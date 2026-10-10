@@ -1,8 +1,12 @@
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
+import * as v from 'valibot';
 import PasswordInput from './Password.svelte';
 import PasswordForm from './PasswordForm.test.svelte';
+import CustomPasswordField from './CustomPasswordField.test.svelte';
+import { fieldSchemas } from '../Field/index.js';
+import type { FormState } from '../Form/form.state.svelte.js';
 import { renderInTheme } from '../../Theme/renderInTheme.test-helper.js';
 import { fr } from '$lib/i18n/fr.js';
 
@@ -162,5 +166,57 @@ describe('PasswordInput minimum length', () => {
 		expect(await screen.findByRole('alert')).toHaveTextContent(
 			'Le mot de passe doit contenir au moins 6 caractères'
 		);
+	});
+});
+
+describe('PasswordInput minimum and the shared password schema', () => {
+	test('reports the same validity from isValid as from validation', async () => {
+		let form: FormState | undefined;
+		render(PasswordForm, { props: { onSubmit: vi.fn(), onForm: (state) => (form = state) } });
+		await fireEvent.input(passwordInput(), { target: { value: 'abc' } });
+
+		const field = form?.fields.get('password');
+		expect(field?.isValid).toBe(false);
+		expect(field?.validate()[0]).toBe(true);
+
+		await fireEvent.input(passwordInput(), { target: { value: 'abcdef' } });
+		expect(field?.isValid).toBe(true);
+	});
+
+	test('a current-password field is valid with a short saved password', async () => {
+		let form: FormState | undefined;
+		render(PasswordForm, {
+			props: {
+				autocomplete: 'current-password',
+				onSubmit: vi.fn(),
+				onForm: (state) => (form = state)
+			}
+		});
+		await fireEvent.input(passwordInput(), { target: { value: 'abc' } });
+
+		expect(form?.fields.get('password')?.isValid).toBe(true);
+	});
+
+	test('the public fieldSchemas keep the 6-character minimum', () => {
+		expect(v.safeParse(fieldSchemas.required.password, 'abc').success).toBe(false);
+		expect(v.safeParse(fieldSchemas.required.password, 'abcdef').success).toBe(true);
+		expect(v.safeParse(fieldSchemas.optional.password, 'abc').success).toBe(false);
+		expect(v.safeParse(fieldSchemas.optional.password, '').success).toBe(true);
+	});
+
+	test('a custom password control keeps the 6-character minimum', async () => {
+		let form: FormState | undefined;
+		const onSubmit = vi.fn();
+		render(CustomPasswordField, { props: { onSubmit, onForm: (state) => (form = state) } });
+
+		await fireEvent.input(screen.getByLabelText('Secret'), { target: { value: 'a' } });
+		expect(form?.fields.get('secret')?.isValid).toBe(false);
+		await fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+		expect(await screen.findByRole('alert')).toBeInTheDocument();
+		expect(onSubmit).not.toHaveBeenCalled();
+
+		await fireEvent.input(screen.getByLabelText('Secret'), { target: { value: 'abcdef' } });
+		await fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+		await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ secret: 'abcdef' }));
 	});
 });

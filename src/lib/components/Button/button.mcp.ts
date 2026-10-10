@@ -33,7 +33,7 @@ The Button component is a flexible and customizable button element that supports
 - **fullWidth**: boolean (default: false) - Makes button take full width of container
 - **squared**: boolean - Makes button square (aspect-ratio 1:1), auto-determined if only prefix/suffix is provided
 - **disabled**: boolean (default: false) - Disables button interaction. A \`<button>\` gets the native \`disabled\` attribute and leaves the tab order; an anchor drops its href, leaves the tab order and renders \`aria-disabled="true"\`
-- **loading**: boolean (default: false) - Shows the Theme-configured loading spinner and refuses activation while staying focusable: renders \`aria-busy="true"\` and \`aria-disabled="true"\`, ignores pointer events, and cancels clicks from Enter or Space as well as the form submission of a \`type="submit"\` button. It never sets the native \`disabled\` attribute, so keyboard focus stays on the button while the work runs
+- **loading**: boolean (default: false) - Shows the Theme-configured loading spinner and refuses activation while staying focusable: renders \`aria-busy="true"\` and \`aria-disabled="true"\`, ignores pointer events, and cancels clicks from Enter or Space before any other listener sees them, including attachments such as \`popover.trigger\`, as well as the form submission of a \`type="submit"\` button and the navigation of an anchor. It never sets the native \`disabled\` attribute, so keyboard focus stays on the button while the work runs
 
 ### State Props
 Describe the meaning; the Button writes the ARIA. Never pass an aria-* attribute to a Button.

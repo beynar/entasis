@@ -42,9 +42,7 @@ export const schemas: {
 	required: {
 		// Text input types
 		text: nonEmptyString,
-		// The minimum length is PasswordInput's `minLength` (6 unless the field is a sign-in
-		// `current-password`); the shared schema only checks that a password is present.
-		password: nonEmptyString,
+		password: v.pipe(nonEmptyString, v.minLength(6)),
 		email: v.pipe(nonEmptyString, v.email()),
 		url: v.pipe(nonEmptyString, v.url()),
 		textarea: nonEmptyString,
@@ -102,7 +100,7 @@ export const schemas: {
 	optional: {
 		// Text input types
 		text: optional(emptyStringNull(v.string())),
-		password: optional(emptyStringNull(v.string())),
+		password: optional(emptyStringNull(v.pipe(v.string(), v.minLength(6)))),
 		email: optional(emptyStringNull(v.pipe(v.string(), v.email()))),
 		url: optional(emptyStringNull(v.pipe(v.string(), v.url()))),
 		textarea: optional(emptyStringNull(v.string())),

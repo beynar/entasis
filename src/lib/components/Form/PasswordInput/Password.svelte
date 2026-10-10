@@ -3,7 +3,9 @@
 	import { tick } from 'svelte';
 	import Field from '../Field/Field.svelte';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
+	import { check, pipe, safeParse } from 'valibot';
 	import { createFieldState } from '../Field/field.state.svelte.js';
+	import { schemas } from '../Field/schemas.js';
 	import type { PasswordInputProps } from './passwordInput.props.js';
 	import { usePasswordInputTheme } from './passwordInput.theme.js';
 	import { eyeClosedIcon } from '$lib/components/Icons/eyeClosed.js';
@@ -38,14 +40,6 @@
 	const resolvedMinLength = $derived(
 		minLength ?? (autocomplete === 'current-password' ? 0 : DEFAULT_MIN_LENGTH)
 	);
-	// FieldState runs this after its presence check, only for a value that is there. A short value
-	// reports the length rule alone, as the shared schema did before the rule moved here.
-	const validatePassword = (password: string) => {
-		if (typeof password === 'string' && password.length < resolvedMinLength) {
-			return t.passwordTooShort(resolvedMinLength);
-		}
-		return onValidate?.(password);
-	};
 
 	let showPassword = $state(false);
 	const id = $props.id();
@@ -86,12 +80,32 @@
 		set name(v: string | undefined) {
 			name = v;
 		},
-		onValidate: validatePassword,
+		get onValidate() {
+			return onValidate;
+		},
 		get visible() {
 			return visible;
 		},
 		type: 'password'
 	});
+
+	// The built-in `password` schema keeps its 6-character minimum for custom password controls and
+	// `fieldSchemas`. This field checks presence with the text rule and applies its own minimum, so
+	// `isValid`, `validate()` and Form submission agree. An empty value reports presence alone, and
+	// `onValidate` runs only once the length passes.
+	const passwordSchema = $derived(
+		pipe(
+			schemas[field.required ? 'required' : 'optional'].text,
+			check(
+				(password) =>
+					typeof password !== 'string' ||
+					password.length === 0 ||
+					password.length >= resolvedMinLength,
+				t.passwordTooShort(resolvedMinLength)
+			)
+		)
+	);
+	field.checkSchema = (password) => safeParse(passwordSchema, password);
 
 	const classes = $derived(usePasswordInputTheme(theme));
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Attachment } from 'svelte/attachments';
 	import { spinnerOverlay } from '$lib/attachments/spinnerOverlay.svelte.js';
 	import Slot from '../Slot/Slot.svelte';
 	import type { ButtonInternalProps } from './button.props.js';
@@ -64,16 +65,20 @@
 		})
 	);
 
-	const handleClick: NonNullable<ButtonInternalProps['onclick']> = (event) => {
-		// Enter and Space still dispatch `click` on a focusable button; cancelling it also stops
-		// a `type="submit"` button from submitting its form.
-		if (inactive) {
+	// Enter and Space still dispatch `click` on a focusable loading button. A capture listener on
+	// the element cancels that click before anything else sees it: listeners attached to the
+	// button itself (`{@attach popover.trigger}`), Svelte's delegated `onclick` handlers, and a
+	// router listening on <html>, which runs before them for content portaled outside the app
+	// root. Cancelling it also stops a submit button from submitting and an anchor from
+	// navigating. The listener is registered once and reads `inactive` on each click.
+	const refuseInactiveActivation: Attachment<HTMLElement> = (node) => {
+		const refuse = (event: MouseEvent) => {
+			if (!inactive) return;
 			event.preventDefault();
-			event.stopPropagation();
-			return;
-		}
-
-		onclick?.(event);
+			event.stopImmediatePropagation();
+		};
+		node.addEventListener('click', refuse, { capture: true });
+		return () => node.removeEventListener('click', refuse, { capture: true });
 	};
 
 	const handlePointerEnter: NonNullable<ButtonInternalProps['onpointerenter']> = (event) => {
@@ -109,8 +114,9 @@
 	data-color={resolvedColor}
 	disabled={nativeDisabled ? true : undefined}
 	class={slots.root({ className })}
+	{@attach refuseInactiveActivation}
 	{@attach spinnerOverlay({ loading, size })}
-	onclick={inactive || onclick ? handleClick : undefined}
+	{onclick}
 	onpointerenter={onpointerenter ? handlePointerEnter : undefined}
 	onpointerleave={onpointerleave ? handlePointerLeave : undefined}
 	{...attachments}
