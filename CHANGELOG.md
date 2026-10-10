@@ -13,6 +13,24 @@ Unreleased section under the new version.
   checkbox.
 - `Switch`: a required switch sets `aria-required` and shows the required marker on its inline
   label.
+- Tooling: browser-mode unit tests. `*.browser.test.ts` files run in real Chromium and WebKit
+  through Vitest browser mode and Playwright, as part of `npm run test:unit` and on their own with
+  `npm run test:browser`. The docs stylesheet is loaded, so focus order, tabbability and panel
+  placement are measured as in the app. CI now installs WebKit next to Chromium.
+- Tooling: the axe end-to-end sweep now also audits pages with a popup open: Select (including
+  grouped and scrolling lists), Combobox, TagsInput and PhoneInput (including their empty results),
+  a PopupMenu with its submenu, MenuBar and Dialog. Before, it only saw closed popups. Allowlist
+  entries can be narrowed to one failing child with `match`, and an entry for an open popup that no
+  longer suppresses anything fails the sweep, so it gets removed once its fix lands.
+- Tooling: `npm run bench` measures, in Chromium: opening a 1,000-option Select, a keystroke in a
+  1,000-option Combobox and Command, mounting a 500-item Menu and moving its highlight, mounting 300
+  closed Popovers and Selects, and mounting a 200-row DataTable with a closed row-actions menu on
+  every row. Each result is compared with a committed baseline, and `npm run bench:baseline`
+  re-records the baselines. The result tables and baseline rows also print outside an interactive
+  terminal.
+- Tooling: jsdom unit tests get stand-ins for `CloseWatcher`, `visualViewport` and per-element
+  layout rects, with controls in `src/lib/testing/jsdom.test-helper.ts`. The proposed overlay and
+  accessibility laws have executable entries, which are expected to fail until each law lands.
 
 ### Changed
 
@@ -126,6 +144,8 @@ Unreleased section under the new version.
 - `CheckboxesInput`, `RadioInput`: option ids were built from `name` and value, so two fields
   sharing a `name` duplicated them and values with spaces made them invalid. Each option button now
   gets `<field id>-option-<index>`, and its hidden input gets `<option id>-input`.
+- Tooling: every end-to-end suite now follows `E2E_PORT`; five of them dialled port 4173 regardless.
+  Two tests that pressed a control before hydration now wait for the page to settle.
 
 ## 0.11.0 — 2026-10-10
 
