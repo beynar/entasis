@@ -88,9 +88,11 @@
 		closeParentMenu();
 	};
 
+	// Returns whether there was a level to leave: on a root row ArrowLeft stays unhandled.
 	const goUp = () => {
-		if (!hasParentMenu) return;
+		if (!hasParentMenu) return false;
 		goBack();
+		return true;
 	};
 
 	const attachPrevious = (node: HTMLElement) => {

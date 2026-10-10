@@ -23,8 +23,10 @@ type NavigationOptions = {
 	 */
 	virtualFocus?: boolean;
 	/**
-	 * Swap ArrowLeft/ArrowRight in right-to-left contexts (horizontal orientation only).
-	 * Default `true`; direction comes from the i18n context, then the container's computed style.
+	 * Swap ArrowLeft/ArrowRight in right-to-left contexts: they move between items of a horizontal
+	 * list, and in a vertical list ArrowLeft opens a level (`onNext`) and ArrowRight leaves it
+	 * (`onPrevious`). Default `true`; direction comes from the i18n context, then the container's
+	 * computed style.
 	 */
 	rtl?: boolean;
 	/**
@@ -33,6 +35,12 @@ type NavigationOptions = {
 	 */
 	typeahead?: boolean | { getText: (item: HTMLElement) => string };
 };
+
+/**
+ * Set on an item node by consumers whose rows open (`onNext`) or leave (`onPrevious`) a level.
+ * Returning `false` means the row had no level to open or leave, so the key stays unhandled.
+ */
+type LevelHandlers = { onNext?: () => boolean | void; onPrevious?: () => boolean | void };
 
 export const useNavigation = (opts: NavigationOptions) => {
 	const itemsSet = new SvelteSet<HTMLElement>();
@@ -62,7 +70,11 @@ export const useNavigation = (opts: NavigationOptions) => {
 					typeof opts.typeahead === 'object'
 						? opts.typeahead.getText(item)
 						: (item.dataset.typeahead ?? item.textContent ?? ''),
-				getCurrentIndex: () => focusedIndex ?? -1,
+				// Search from the focused item, not from the one the pointer highlighted.
+				getCurrentIndex: () => {
+					const focused = itemIndexOf(document.activeElement);
+					return focused !== -1 ? focused : (focusedIndex ?? -1);
+				},
 				onMatch: (index) => {
 					if (!isItemDisabled(items[index])) moveFocusTo(index);
 				}
@@ -130,6 +142,12 @@ export const useNavigation = (opts: NavigationOptions) => {
 			(dataDisabled !== null && dataDisabled !== 'false')
 		);
 	};
+
+	// Index of the item that is or contains `node` (the container itself is no item), else -1.
+	const itemIndexOf = (node: unknown) =>
+		node instanceof Node && node !== containerRef
+			? items.findIndex((item) => item.contains(node))
+			: -1;
 
 	// Find next non-disabled index
 	const findNextIndex = (currentIndex: number, direction: 1 | -1): number => {
@@ -263,8 +281,6 @@ export const useNavigation = (opts: NavigationOptions) => {
 		updateAriaAttributes(index);
 	};
 
-	// Handle keyboard events
-
 	// Batch update ARIA attributes when items or focusedIndex change
 	$effect(() => {
 		if (items.length > 0) {
@@ -276,136 +292,140 @@ export const useNavigation = (opts: NavigationOptions) => {
 		isActive: () => true
 	});
 
-	// Use the existing useKeyDown hook - pass all possible keys, filter in handleKeyboard
-	const keyDown = useKeyDown({
-		isActive: () => {
-			if (!isEnabled()) return false;
-			if (isHovering && opts.enableHoverFocus) {
+	// In RTL the inline arrows are mirrored: in a horizontal list ArrowRight goes to the previous
+	// item; in a vertical one ArrowLeft opens a level (onNext) and ArrowRight leaves it (onPrevious).
+	const resolveKey = (key: string) => {
+		const mirrored = (opts.rtl ?? true) && getDirection() === 'rtl';
+		if (mirrored && key === 'ArrowLeft') return 'ArrowRight';
+		if (mirrored && key === 'ArrowRight') return 'ArrowLeft';
+		return key;
+	};
+
+	// Move or activate for one (already mirrored) key. Returns whether the key did anything.
+	const navigate = (key: string): boolean => {
+		const orientation = getOrientation();
+		switch (key) {
+			case 'ArrowLeft':
+			case 'ArrowRight': {
+				const step = key === 'ArrowRight' ? 1 : -1;
+				if (orientation === 'horizontal') {
+					const currentIdx = focusedIndex ?? findFirstIndex();
+					if (currentIdx === -1) return false;
+					moveFocusTo(findNextIndex(currentIdx, step));
+					return true;
+				}
+				// Cross axis of a vertical list: the item may open (onNext) or leave (onPrevious) a level.
+				if (focusedIndex === null || !items[focusedIndex]) return false;
+				const node = items[focusedIndex] as HTMLElement & LevelHandlers;
+				const handler = step === 1 ? node.onNext : node.onPrevious;
+				if (typeof handler !== 'function') return false;
+				return handler.call(node) !== false;
+			}
+			case 'ArrowUp':
+			case 'ArrowDown': {
+				if (orientation !== 'vertical') return false;
+				const step = key === 'ArrowDown' ? 1 : -1;
+				const currentIdx = focusedIndex ?? findFirstIndex();
+				if (currentIdx !== -1) {
+					moveFocusTo(findNextIndex(currentIdx, step));
+				} else {
+					moveFocusTo(step === 1 ? findFirstIndex() : findLastIndex());
+				}
 				return true;
 			}
-			return true;
-		},
-		preventDefault: opts.preventKeyboardDefault,
-		onWindow: () => {
-			// return false;
-			return isHovering && !isFocused && opts.enableHoverFocus ? true : false;
-		},
-		callback: (event: KeyboardEvent) => {
-			// Respect the enabled gate per-event: the element listener is attached once at mount and
-			// never re-checks isActive, so without this a disabled menu (e.g. a parent whose submenu
-			// is open) would still handle keys that bubble to it and double-navigate.
-			if (!isEnabled()) return;
-
-			// Hover-to-navigate must not hijack when focus already lives inside another menu/listbox
-			// (e.g. an open submenu portaled elsewhere): stealing focus here would yank the caret out
-			// of the submenu and navigate this container instead.
-			const active = document.activeElement;
-			if (
-				active &&
-				!containerRef?.contains(active) &&
-				active.closest('[role="menu"],[role="listbox"]')
-			) {
-				return;
+			case 'Home':
+			case 'End': {
+				const index = key === 'Home' ? findFirstIndex() : findLastIndex();
+				if (index === -1) return false;
+				moveFocusTo(index);
+				return true;
 			}
-
-			// If hovering but container not focused, focus it first on arrow key
-			if (
-				isHovering &&
-				opts.enableHoverFocus &&
-				containerRef &&
-				document.activeElement !== containerRef &&
-				!containerRef.contains(document.activeElement)
-			) {
-				containerRef.focus();
-			}
-
-			const orientation = getOrientation();
-
-			if (!opts.preventKeyboardDefault && event.key !== 'Escape') {
-				event.preventDefault();
-			}
-			// In RTL the physical arrows are mirrored: ArrowRight goes to the previous item.
-			const mirrored =
-				(opts.rtl ?? true) && orientation === 'horizontal' && getDirection() === 'rtl';
-			const key =
-				mirrored && event.key === 'ArrowLeft'
-					? 'ArrowRight'
-					: mirrored && event.key === 'ArrowRight'
-						? 'ArrowLeft'
-						: event.key;
-			switch (key) {
-				case 'ArrowLeft':
-					if (orientation === 'horizontal') {
-						const currentIdx = focusedIndex ?? findFirstIndex();
-						if (currentIdx !== -1) {
-							moveFocusTo(findNextIndex(currentIdx, -1));
-						}
-					} else if (focusedIndex !== null) {
-						const node = items[focusedIndex];
-						if ('onPrevious' in node && typeof node.onPrevious === 'function') {
-							node.onPrevious();
-						}
-					}
-					break;
-				case 'ArrowRight':
-					if (orientation === 'horizontal') {
-						const currentIdx = focusedIndex ?? findFirstIndex();
-						if (currentIdx !== -1) {
-							moveFocusTo(findNextIndex(currentIdx, 1));
-						}
-					} else if (focusedIndex !== null) {
-						const node = items[focusedIndex];
-						if ('onNext' in node && typeof node.onNext === 'function') {
-							node.onNext();
-						}
-					}
-					break;
-				case 'ArrowUp':
-					if (orientation === 'vertical') {
-						const currentIdx = focusedIndex ?? findFirstIndex();
-						if (currentIdx !== -1) {
-							moveFocusTo(findNextIndex(currentIdx, -1));
-						} else {
-							moveFocusTo(findLastIndex());
-						}
-					}
-					break;
-				case 'ArrowDown':
-					if (orientation === 'vertical') {
-						const currentIdx = focusedIndex ?? findFirstIndex();
-						if (currentIdx !== -1) {
-							moveFocusTo(findNextIndex(currentIdx, 1));
-						} else {
-							moveFocusTo(findFirstIndex());
-						}
-					}
-					break;
-				case 'Home': {
-					const firstIndex = findFirstIndex();
-					if (firstIndex !== -1) {
-						moveFocusTo(firstIndex);
-					}
-					break;
+			case 'Escape':
+				if (containerRef?.contains(document.activeElement)) {
+					clearFocus();
 				}
-				case 'End': {
-					const lastIndex = findLastIndex();
-					if (lastIndex !== -1) {
-						moveFocusTo(lastIndex);
-					}
-					break;
-				}
-				case 'Escape': {
-					if (containerRef?.contains(document.activeElement)) {
-						clearFocus();
-					}
-					break;
-				}
+				return true;
+			case 'Enter':
+			case ' ':
+				clickFocused();
+				return true;
+		}
+		return false;
+	};
 
-				case 'Enter':
-				case ' ':
-					clickFocused();
-					break;
-			}
+	// Keys act where keyboard focus is. Hover moves the highlight without moving DOM focus, so a
+	// key typed on a focused item starts from that item, not from the one under the pointer. A key
+	// typed on the container itself (a popup menu opened by pointer) keeps the highlighted item,
+	// which the container's aria-activedescendant names.
+	const syncToKeyTarget = (target: EventTarget | null) => {
+		const index = itemIndexOf(target);
+		if (index === -1 || index === focusedIndex) return;
+		focusSource = 'keyboard';
+		focusedIndex = index;
+		updateAriaAttributes(index);
+	};
+
+	// Keys typed while focus is inside the container.
+	const handleContainerKey = (event: KeyboardEvent) => {
+		// `preventKeyboardDefault: false` (menus) lets Escape reach the popup that closes on it;
+		// every other consumer keeps all of its keys.
+		if (opts.preventKeyboardDefault !== false) event.preventDefault();
+		// Respect the enabled gate per-event: the element listener is attached once at mount and
+		// never re-checks isActive, so without this a disabled menu (e.g. a parent whose submenu
+		// is open) would still handle keys that bubble to it and double-navigate.
+		if (!isEnabled()) return;
+		if (event.key !== 'Escape') event.preventDefault();
+		syncToKeyTarget(event.target);
+		navigate(resolveKey(event.key));
+	};
+
+	// Only these keys may pull focus into a container the pointer merely rests on.
+	const hoverEntryKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
+	// No element has focus: the key was typed on the page itself, not in a field or control.
+	const isPageLevel = (node: EventTarget | null) => {
+		const pageTargets: unknown[] = [
+			null,
+			window,
+			document,
+			document.body,
+			document.documentElement
+		];
+		return pageTargets.includes(node);
+	};
+
+	// Hover-to-navigate (`enableHoverFocus`): while the pointer rests on the container and nothing
+	// on the page has focus, arrows and Home/End move focus into it. A key typed anywhere else (a
+	// text field, a button, an open submenu or dialog) belongs to that element, and Enter/Space
+	// never activate an item that is only highlighted under the pointer.
+	const handleHoverKey = (event: KeyboardEvent) => {
+		if (!isEnabled() || event.defaultPrevented || !hoverEntryKeys.includes(event.key)) return;
+		if (!isPageLevel(document.activeElement) || !isPageLevel(event.target)) return;
+		const key = resolveKey(event.key);
+		if (focusedIndex !== null && focusedIndex >= 0) {
+			// An item is highlighted under the pointer: move from it like the focused path does.
+			if (navigate(key)) event.preventDefault();
+			return;
+		}
+		// Nothing highlighted: enter at the edge the key points to.
+		const vertical = getOrientation() === 'vertical';
+		const toStart = key === 'Home' || key === (vertical ? 'ArrowDown' : 'ArrowRight');
+		const toEnd = key === 'End' || key === (vertical ? 'ArrowUp' : 'ArrowLeft');
+		const index = toStart ? findFirstIndex() : toEnd ? findLastIndex() : -1;
+		if (index === -1) return;
+		event.preventDefault();
+		moveFocusTo(index);
+	};
+
+	// Alt/Ctrl/Meta + a navigation key is a browser or OS shortcut (Alt+← is Back), never a move.
+	// useKeyDown leaves those alone; preventDefault is decided per path above.
+	const keyDown = useKeyDown({
+		isActive: isEnabled,
+		preventDefault: false,
+		ignoreModifiers: true,
+		onWindow: () => isHovering && !isFocused && !!opts.enableHoverFocus,
+		callback: (event, source) => {
+			if (source === 'window') handleHoverKey(event);
+			else handleContainerKey(event);
 		},
 		keys: ['Escape', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'Enter', ' ']
 	});

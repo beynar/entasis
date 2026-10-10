@@ -78,6 +78,7 @@ Extra fields on item objects remain available to the snippet through generic inf
 - Arrow Left/Right moves and selects, wrapping at the ends.
 - Home/End selects the first/last enabled item.
 - Disabled items are skipped.
+- Arrow, Home and End keys pressed with Alt, Ctrl or Meta are left to the browser and never change the selection (Alt+ArrowLeft stays Back); Shift+Arrow still moves.
 
 Each item has an invisible, size-aware pointer target that extends beyond the visual track: 36px for small, 44px for normal, and 48px for large. Adjacent targets meet at the midpoint of the configured gap instead of overlapping.
 

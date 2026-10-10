@@ -4,6 +4,7 @@
 	import { untrack } from 'svelte';
 	import { on } from 'svelte/events';
 	import ScrollArea from '../../ScrollArea/ScrollArea.svelte';
+	import { hasShortcutModifier } from '$lib/utils/useKeyDown.svelte.js';
 	import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
 	import type { CalendarThemeProps } from './calendar.theme.js';
 	import { useCalendarInputTheme } from './calendar.theme.js';
@@ -177,6 +178,8 @@
 			onEscape();
 			return;
 		}
+		// Alt/Ctrl/Meta + an arrow is a browser shortcut, as it is inside each list.
+		if (hasShortcutModifier(event)) return;
 
 		const activeElement = document.activeElement;
 		if (!(activeElement instanceof HTMLElement)) return;

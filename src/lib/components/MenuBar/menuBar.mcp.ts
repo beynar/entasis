@@ -39,7 +39,8 @@ MenuBar composes several PopupMenu and Menu instances into one horizontal applic
 - Typing letters jumps to the next top-level trigger whose label starts with the typed text; the same type-ahead works inside each open menu.
 - Once a menu is open, hovering or focusing a sibling trigger switches the open menu immediately.
 - ArrowLeft and ArrowRight inside an open root menu switch to the adjacent top-level menu.
-- ArrowRight on a submenu trigger remains owned by Menu and opens that submenu.
+- ArrowRight on a submenu trigger remains owned by Menu and opens that submenu (ArrowLeft in RTL).
+- Arrow keys, Home and End pressed with Alt, Ctrl or Meta are left to the browser, on the bar and inside an open menu (Alt+ArrowLeft stays Back); Enter and Space still open the focused menu.
 - Escape and outside-click dismissal remain owned by Popover.
 - Selecting a leaf item closes the active menu by default.
 

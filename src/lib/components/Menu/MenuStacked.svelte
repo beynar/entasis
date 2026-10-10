@@ -140,12 +140,15 @@
 		return navigation.itemReference(node);
 	};
 
+	// Returns whether there was a level to leave: on a root row ArrowLeft stays unhandled.
+	const leaveSubmenu = () => {
+		if (path.length === 0) return false;
+		void closeSubmenu();
+		return true;
+	};
+
 	const attachPrevious = (node: HTMLElement) => {
-		Object.assign(node, {
-			onPrevious: () => {
-				void closeSubmenu();
-			}
-		});
+		Object.assign(node, { onPrevious: leaveSubmenu });
 	};
 </script>
 
@@ -260,9 +263,7 @@
 										onNext: () => {
 											void openSubmenu(depth, index, item);
 										},
-										onPrevious: () => {
-											void closeSubmenu();
-										}
+										onPrevious: leaveSubmenu
 									});
 								}}
 							/>
