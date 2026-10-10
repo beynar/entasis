@@ -54,7 +54,7 @@ Date-based calendar primitives for single, range, and multiple selection. Calend
 
 ## Keyboard
 
-The visible month title opens an in-place month and year chooser composed from two scroll areas. Each list uses roving focus with ArrowUp/ArrowDown and Home/End; Escape returns to the day grid.
+The visible month title opens an in-place month and year chooser composed from two scroll areas. Each list uses roving focus with ArrowUp/ArrowDown and Home/End, ArrowLeft/ArrowRight move between the month and year lists (mirrored in RTL), and Escape returns to the day grid. Arrow keys held with Alt, Ctrl or Meta are left to the browser.
 
 Day focus is roving. Arrow keys move by day or week, Home/End move to week boundaries, PageUp/PageDown move by month, and Shift+PageUp/PageDown move by year. Enter or Space uses the native day button activation.
 

@@ -2,9 +2,11 @@
 // another field (MN-2), and Alt/Ctrl/Meta + a navigation key is a browser shortcut, never a move
 // (CC-INFRA-2a).
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen, within } from '@testing-library/svelte';
-import { flushSync } from 'svelte';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
+import { flushSync, tick } from 'svelte';
 import { afterEach, describe, expect, test, vi } from 'vitest';
+import CalendarMonthYearPicker from '../components/Form/Calendar/CalendarMonthYearPicker.svelte';
+import { renderInTheme } from '../components/Theme/renderInTheme.test-helper.js';
 import NavigationKeysHarness from './NavigationKeysHarness.test.svelte';
 import { useKeyDown } from './useKeyDown.svelte.js';
 
@@ -29,6 +31,37 @@ const hover = async (menu: HTMLElement, row?: HTMLElement) => {
 	await fireEvent.pointerEnter(menu);
 	if (row) await fireEvent.pointerEnter(row);
 };
+
+/** Let a popup mount and run its `focusOnMount` (it focuses after a tick). */
+const settle = async () => {
+	await new Promise((resolve) => setTimeout(resolve, 20));
+	await tick();
+};
+
+/** Open the harness PopupMenu with a click; its panel then has focus (`focusOnMount: 'container'`). */
+const openPopup = async (items = menuItems()) => {
+	render(NavigationKeysHarness, { props: { scenario: 'popup', items } });
+	await fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+	const menu = await waitFor(() => screen.getByRole('menu'));
+	await settle();
+	return { menu, rows: within(menu).getAllByRole('menuitem') };
+};
+
+/** Open a MenuBar menu from the keyboard; focus lands on its first row. */
+const openMenuBarMenu = async (label: string) => {
+	render(NavigationKeysHarness, { props: { scenario: 'menubar' } });
+	const trigger = screen.getByRole('menuitem', { name: label });
+	trigger.focus();
+	await fireEvent.keyDown(trigger, { key: 'ArrowDown' });
+	await settle();
+	return document.activeElement as HTMLElement;
+};
+
+const expandedTriggers = () =>
+	screen
+		.getAllByRole('menuitem')
+		.filter((node) => node.getAttribute('aria-expanded') === 'true')
+		.map((node) => node.textContent?.trim());
 
 afterEach(() => {
 	(document.activeElement as HTMLElement | null)?.blur?.();
@@ -96,6 +129,28 @@ describe('hovered menu and keys typed elsewhere (MN-2)', () => {
 		expect(document.activeElement).toBe(rows[2]);
 	});
 
+	test('with nothing focused and no row under the pointer, Home and End enter at the first and last rows', async () => {
+		const { menu, rows } = mountMenu();
+		await hover(menu);
+		expect(await fireEvent.keyDown(document.body, { key: 'End' })).toBe(false);
+		expect(document.activeElement).toBe(rows[2]);
+
+		(document.activeElement as HTMLElement).blur();
+		await fireEvent.pointerLeave(menu);
+		await hover(menu);
+		expect(await fireEvent.keyDown(document.body, { key: 'Home' })).toBe(false);
+		expect(document.activeElement).toBe(rows[0]);
+	});
+
+	test('with nothing focused, ArrowLeft on a root row with no level to leave is not taken', async () => {
+		const { menu, rows } = mountMenu();
+		await hover(menu, rows[0]);
+
+		expect(await fireEvent.keyDown(document.body, { key: 'ArrowLeft' })).toBe(true);
+		expect(await fireEvent.keyDown(document.body, { key: 'ArrowRight' })).toBe(true);
+		expect(document.activeElement).toBe(document.body);
+	});
+
 	test('with nothing focused, Enter and Space never click the row under the pointer', async () => {
 		const onProfile = vi.fn();
 		const { menu, rows } = mountMenu(menuItems(onProfile));
@@ -129,6 +184,76 @@ describe('hovered menu and keys typed elsewhere (MN-2)', () => {
 
 		expect(await fireEvent.keyDown(rows[1], { key: 'Enter' })).toBe(false);
 		expect(onSettings).toHaveBeenCalledOnce();
+	});
+});
+
+describe('keys act on the focused row, not on the row under the pointer (MN-2)', () => {
+	test('Enter and Space activate the focused row while the pointer rests on another', async () => {
+		const onProfile = vi.fn();
+		const onSettings = vi.fn();
+		const { menu, rows } = mountMenu(menuItems(onProfile, onSettings));
+		rows[0].focus();
+		await hover(menu, rows[1]);
+		expect(rows[1]).toHaveAttribute('data-highlighted', 'true');
+
+		await fireEvent.keyDown(rows[0], { key: 'Enter' });
+		await fireEvent.keyDown(rows[0], { key: ' ' });
+		expect(onSettings).not.toHaveBeenCalled();
+		expect(onProfile).toHaveBeenCalledTimes(2);
+		expect(rows[0]).toHaveAttribute('data-highlighted', 'true');
+	});
+
+	test('arrows move on from the focused row while the pointer rests on another', async () => {
+		const { menu, rows } = mountMenu();
+		rows[0].focus();
+		await hover(menu, rows[2]);
+
+		await fireEvent.keyDown(rows[0], { key: 'ArrowDown' });
+		expect(document.activeElement).toBe(rows[1]);
+	});
+
+	test('type-ahead searches on from the focused row while the pointer rests on another', async () => {
+		const { menu, rows } = mountMenu([
+			{ type: 'option', title: 'Save' },
+			{ type: 'option', title: 'Share' },
+			{ type: 'option', title: 'Settings' }
+		]);
+		rows[0].focus();
+		await hover(menu, rows[2]);
+
+		await fireEvent.keyDown(rows[0], { key: 's' });
+		expect(document.activeElement).toBe(rows[1]);
+	});
+
+	test('Enter still activates the focused row after the pointer has left the menu', async () => {
+		const onProfile = vi.fn();
+		const { menu, rows } = mountMenu(menuItems(onProfile));
+		rows[0].focus();
+		await hover(menu, rows[1]);
+		await fireEvent.pointerLeave(menu);
+
+		await fireEvent.keyDown(rows[0], { key: 'Enter' });
+		expect(onProfile).toHaveBeenCalledOnce();
+	});
+
+	test('in a popup menu whose panel has focus, Enter activates the highlighted row', async () => {
+		const onSettings = vi.fn();
+		const { menu, rows } = await openPopup(menuItems(vi.fn(), onSettings));
+		expect(document.activeElement).toBe(menu);
+		await hover(menu, rows[1]);
+		expect(menu).toHaveAttribute('aria-activedescendant', rows[1].id);
+
+		await fireEvent.keyDown(menu, { key: 'Enter' });
+		expect(onSettings).toHaveBeenCalledOnce();
+	});
+
+	test('Escape on a focused row is left for the popup, which closes', async () => {
+		const { menu, rows } = await openPopup();
+		await fireEvent.keyDown(menu, { key: 'ArrowDown' });
+		expect(document.activeElement).toBe(rows[0]);
+
+		expect(await fireEvent.keyDown(rows[0], { key: 'Escape' })).toBe(false);
+		await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
 	});
 });
 
@@ -182,6 +307,61 @@ describe('modified navigation keys (CC-INFRA-2a)', () => {
 		await hover(menu, rows[0]);
 		expect(await fireEvent.keyDown(document.body, { key: 'ArrowDown', altKey: true })).toBe(true);
 		expect(document.activeElement).toBe(document.body);
+	});
+
+	test.each(['altKey', 'ctrlKey', 'metaKey'] as const)(
+		'inside an open MenuBar menu, %s + ArrowLeft and ArrowRight stay with the browser',
+		async (modifier) => {
+			const row = await openMenuBarMenu('Edit');
+			expect(row).toHaveTextContent('Undo');
+
+			for (const key of ['ArrowLeft', 'ArrowRight']) {
+				expect(await fireEvent.keyDown(row, { key, [modifier]: true })).toBe(true);
+				await settle();
+				expect(expandedTriggers()).toEqual(['Edit']);
+				expect(document.activeElement).toBe(row);
+			}
+		}
+	);
+
+	test('inside an open MenuBar menu, a plain ArrowLeft still switches to the previous menu', async () => {
+		const row = await openMenuBarMenu('Edit');
+		expect(await fireEvent.keyDown(row, { key: 'ArrowLeft' })).toBe(false);
+		await settle();
+		expect(expandedTriggers()).toEqual(['File']);
+	});
+
+	test('Alt + ArrowDown on a MenuBar trigger opens nothing and stays with the browser', async () => {
+		render(NavigationKeysHarness, { props: { scenario: 'menubar' } });
+		const file = screen.getByRole('menuitem', { name: 'File' });
+		file.focus();
+		expect(await fireEvent.keyDown(file, { key: 'ArrowDown', altKey: true })).toBe(true);
+		await settle();
+		expect(expandedTriggers()).toEqual([]);
+		expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+	});
+
+	test('the calendar month and year chooser leaves Ctrl + ArrowRight to the browser', async () => {
+		renderInTheme(CalendarMonthYearPicker, {
+			id: 'picker',
+			currentMonth: 4,
+			currentYear: 2026,
+			onSelect: vi.fn(),
+			onEscape: vi.fn()
+		});
+		// The chooser focuses the current month (May) on the next frame.
+		const month = await waitFor(() => {
+			const active = document.activeElement as HTMLElement;
+			expect(active.dataset.pickerColumn).toBe('month');
+			expect(active).toHaveTextContent('May');
+			return active;
+		});
+
+		expect(await fireEvent.keyDown(month, { key: 'ArrowRight', ctrlKey: true })).toBe(true);
+		expect(document.activeElement).toBe(month);
+
+		expect(await fireEvent.keyDown(month, { key: 'ArrowRight' })).toBe(false);
+		expect((document.activeElement as HTMLElement).dataset.pickerColumn).toBe('year');
 	});
 });
 

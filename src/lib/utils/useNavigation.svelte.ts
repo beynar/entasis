@@ -34,8 +34,11 @@ type NavigationOptions = {
 	typeahead?: boolean | { getText: (item: HTMLElement) => string };
 };
 
-/** Set on an item node by consumers whose rows open (`onNext`) or leave (`onPrevious`) a level. */
-type LevelHandlers = { onNext?: () => void; onPrevious?: () => void };
+/**
+ * Set on an item node by consumers whose rows open (`onNext`) or leave (`onPrevious`) a level.
+ * Returning `false` means the row had no level to open or leave, so the key stays unhandled.
+ */
+type LevelHandlers = { onNext?: () => boolean | void; onPrevious?: () => boolean | void };
 
 export const useNavigation = (opts: NavigationOptions) => {
 	const itemsSet = new SvelteSet<HTMLElement>();
@@ -65,7 +68,11 @@ export const useNavigation = (opts: NavigationOptions) => {
 					typeof opts.typeahead === 'object'
 						? opts.typeahead.getText(item)
 						: (item.dataset.typeahead ?? item.textContent ?? ''),
-				getCurrentIndex: () => focusedIndex ?? -1,
+				// Search from the focused item, not from the one the pointer highlighted.
+				getCurrentIndex: () => {
+					const focused = itemIndexOf(document.activeElement);
+					return focused !== -1 ? focused : (focusedIndex ?? -1);
+				},
 				onMatch: (index) => {
 					if (!isItemDisabled(items[index])) moveFocusTo(index);
 				}
@@ -133,6 +140,12 @@ export const useNavigation = (opts: NavigationOptions) => {
 			(dataDisabled !== null && dataDisabled !== 'false')
 		);
 	};
+
+	// Index of the item that is or contains `node` (the container itself is no item), else -1.
+	const itemIndexOf = (node: unknown) =>
+		node instanceof Node && node !== containerRef
+			? items.findIndex((item) => item.contains(node))
+			: -1;
 
 	// Find next non-disabled index
 	const findNextIndex = (currentIndex: number, direction: 1 | -1): number => {
@@ -304,8 +317,7 @@ export const useNavigation = (opts: NavigationOptions) => {
 				const node = items[focusedIndex] as HTMLElement & LevelHandlers;
 				const handler = step === 1 ? node.onNext : node.onPrevious;
 				if (typeof handler !== 'function') return false;
-				handler.call(node);
-				return true;
+				return handler.call(node) !== false;
 			}
 			case 'ArrowUp':
 			case 'ArrowDown': {
@@ -339,6 +351,18 @@ export const useNavigation = (opts: NavigationOptions) => {
 		return false;
 	};
 
+	// Keys act where keyboard focus is. Hover moves the highlight without moving DOM focus, so a
+	// key typed on a focused item starts from that item, not from the one under the pointer. A key
+	// typed on the container itself (a popup menu opened by pointer) keeps the highlighted item,
+	// which the container's aria-activedescendant names.
+	const syncToKeyTarget = (target: EventTarget | null) => {
+		const index = itemIndexOf(target);
+		if (index === -1 || index === focusedIndex) return;
+		focusSource = 'keyboard';
+		focusedIndex = index;
+		updateAriaAttributes(index);
+	};
+
 	// Keys typed while focus is inside the container.
 	const handleContainerKey = (event: KeyboardEvent) => {
 		// `preventKeyboardDefault: false` (menus) lets Escape reach the popup that closes on it;
@@ -349,6 +373,7 @@ export const useNavigation = (opts: NavigationOptions) => {
 		// is open) would still handle keys that bubble to it and double-navigate.
 		if (!isEnabled()) return;
 		if (event.key !== 'Escape') event.preventDefault();
+		syncToKeyTarget(event.target);
 		navigate(resolveKey(event.key));
 	};
 
