@@ -215,6 +215,72 @@ Use type: 'field' when Form must own a value but a custom control must render it
 
 The controller exposes value, disabled, required, validation state, accessible ids, controlAttrs, and the control attachment. The entry participates in bind:value, visibility, validation, submission, and InferFormValue through the same FieldState owner as built-in controls.
 
+## App-defined input types
+
+An app can add its own input types to every Form and ask() dialog, by name, so entries stay plain data that serializes (JSON from a server, a tool call, a database). Two steps, once per app.
+
+Type it: augment \`FormInputRegistry\` with the value the input holds and the props its entries take.
+
+\`\`\`ts
+// doc-fence: skip (imports a sibling component; tooling/component-contract/consumer-form-input.ts checks this exact setup against the package)
+import { registerFormInputs } from 'entasis/form';
+import MoneyInput from './MoneyInput.svelte';
+
+export type Money = { amount: number; currency: string };
+
+declare module 'entasis/form' {
+	interface FormInputRegistry {
+		money: { value: Money; props: { currencies?: string[] } };
+	}
+}
+
+registerFormInputs({
+	money: {
+		component: MoneyInput,
+		isEmpty: (value) => value?.amount === undefined,
+		validate: (value) => (value.amount < 0 ? 'Must not be negative' : null)
+	}
+});
+\`\`\`
+
+Register it: call registerFormInputs at the top level of a module the server and the browser both load before a form renders, such as one the root layout imports. Its keys are checked against the registry; built-in type names are refused, and registering a type again replaces it.
+
+The component renders the control alone. Form wraps it in Field (label, description, errors) and hands it the field it registered, typed from the registry, plus the entry's own props:
+
+\`\`\`svelte
+<!-- doc-fence: skip -->
+<!-- Needs the money registration above; tooling/component-contract/consumer-money-input.svelte is the checked copy. -->
+<script lang="ts">
+	import type { FormInputComponentProps } from 'entasis/form';
+
+	let { field, currencies = ['EUR'] }: FormInputComponentProps<'money'> = $props();
+	const currency = $derived(field.value?.currency ?? currencies[0] ?? 'EUR');
+</script>
+
+<input
+	type="number"
+	{...field.controlAttrs}
+	{@attach field.control}
+	value={field.value?.amount ?? ''}
+	oninput={(event) => field.setValue({ amount: Number(event.currentTarget.value), currency })}
+/>
+\`\`\`
+
+Entries then use the type like a built-in one, in Form inputs, groups, and ask():
+
+\`\`\`ts
+// doc-fence: skip (needs the money registration above)
+const result = await ask({
+	title: 'Set a price',
+	confirm: 'Save',
+	cancel: 'Cancel',
+	inputs: { price: { type: 'money', label: 'Price', required: true, currencies: ['EUR', 'USD'] } }
+});
+if (result.submitted) result.value.price; // Money
+\`\`\`
+
+Every Field entry option applies (label, description, required, disabled, size, density, visible, defaultValue, onValidate, onValueChange, slots); any other key goes to the component. required rejects what isEmpty reports empty (by default null, undefined, an empty string, or an empty array); validate runs for every entry of the type, before the entry's own onValidate. The value takes part in bind:value, visibility, validation, submission, and InferFormValue like a built-in input's. An entry whose type is neither built-in nor registered throws when the form reads it.
+
 ## Non-value entries
 
 Use type: 'action' to place a labelled row of buttons in the ordered inputs flow. It accepts optional label and description content plus the same Form-aware action objects as the top-level actions prop. Its label position follows the Form layout unless labelPosition overrides it. Form size is the default button size, action density follows the Form, and loading or disabled protection cannot be overridden while the Form is submitting.

@@ -603,6 +603,23 @@ Declarative form from config. Manages state, validation, layout.
 
 **Types:** `text`, `email`, `url`, `password`, `textarea`, `phone`, `rich-text`, `number`, `slider`, `slider-range`, `rating`, `voice`, `tag`, `tag-group`, `keyvalue`, `pin`, `date`, `datetime`, `time`, `switch`, `checkbox`, `select`, `radio`, `combobox`, `checkboxes`, `file`, `files`, `calendar`, `calendar-range`, `color`
 
+**App-defined types:** an app adds its own input types by name, so entries stay serializable
+(`{ type: 'money', label: 'Price' }` from JSON, a tool call, a database) in every Form and
+`ask()` dialog. Augment `FormInputRegistry` in `entasis/form` with each type's `value` and entry
+`props`, and call `registerFormInputs({ money: { component, isEmpty?, validate? } })` at the top
+level of a module the root layout imports. The component renders the control alone; Form wraps
+it in Field and passes `field` (typed from the registry) plus the entry's non-Field props. Type
+its props with `FormInputComponentProps<'money'>`. See the Form MCP doc for the full example.
+
+```ts
+// doc-fence: skip
+declare module 'entasis/form' {
+	interface FormInputRegistry {
+		money: { value: { amount: number; currency: string }; props: { currencies?: string[] } };
+	}
+}
+```
+
 **Layout:** 2-column grid. `class: 'col-span-1'` for single column.
 
 **Responsive layout is a container query on the form, not the viewport.** `layout="horizontal"`

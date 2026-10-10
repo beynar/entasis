@@ -108,6 +108,21 @@ try {
 		path.join(fixtureRoot, 'src/PublicContract.svelte'),
 		await readFile(path.join(repositoryRoot, 'tooling/component-contract/consumer.svelte'), 'utf8')
 	);
+	// An app-defined Form input: module augmentation of 'entasis/form' and its registration.
+	await writeFile(
+		path.join(fixtureRoot, 'src/form-input.ts'),
+		await readFile(
+			path.join(repositoryRoot, 'tooling/component-contract/consumer-form-input.ts'),
+			'utf8'
+		)
+	);
+	await writeFile(
+		path.join(fixtureRoot, 'src/MoneyInput.svelte'),
+		await readFile(
+			path.join(repositoryRoot, 'tooling/component-contract/consumer-money-input.svelte'),
+			'utf8'
+		)
+	);
 	await writeFile(
 		path.join(fixtureRoot, 'tsconfig.json'),
 		JSON.stringify({

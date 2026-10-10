@@ -11,8 +11,14 @@ const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
 export default ts.config(
 	includeIgnoreFile(gitignorePath),
 	{ ignores: ['svelte-pro/**', '.playwright-cli/**', '.playwright-mcp/**'] },
-	// This fixture is type-checked in its installed-tarball project, without source aliases.
-	{ ignores: ['tooling/component-contract/consumer.svelte'] },
+	// These fixtures are type-checked in their installed-tarball project, without source aliases.
+	{
+		ignores: [
+			'tooling/component-contract/consumer.svelte',
+			'tooling/component-contract/consumer-form-input.ts',
+			'tooling/component-contract/consumer-money-input.svelte'
+		]
+	},
 	js.configs.recommended,
 	...ts.configs.recommended,
 	...svelte.configs.recommended,

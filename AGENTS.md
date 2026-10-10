@@ -41,6 +41,9 @@ validation path.
 Value-bearing Form entries use `type: 'field'`, `fieldType`, and a `snippet` receiving `FieldState`.
 `type: 'custom'` remains display-only. Use `field.setValue` for accepted control edits; parent
 updates remain silent. Defaults initialize state once and must survive parent prop spreads.
+App-defined input types are named, serializable entries: apps type them by augmenting
+`FormInputRegistry` in `entasis/form` and supply the component with `registerFormInputs`. They
+render through the same FieldState path as `type: 'field'`, in Form and in `ask()`.
 
 ## Theme ownership
 

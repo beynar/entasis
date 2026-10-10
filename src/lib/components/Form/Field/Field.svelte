@@ -1,6 +1,6 @@
-<script lang="ts" generics="Type extends InputType">
+<script lang="ts" generics="Type extends FieldType">
 	import Slot from '$lib/components/Slot/Slot.svelte';
-	import type { InputType, FieldProps } from './field.js';
+	import type { FieldType, FieldProps } from './field.js';
 	import { useFieldTheme } from './field.theme.js';
 
 	let {

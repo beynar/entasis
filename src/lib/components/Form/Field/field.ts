@@ -4,6 +4,7 @@ import type { HTMLAttributes } from 'svelte/elements';
 import type { FieldState } from './field.state.svelte.js';
 import type { FieldThemeProps } from './field.theme.js';
 import type { Density, Sizes } from '$lib/types/theme.js';
+import type { FormInputRegistry } from '../Form/form.js';
 
 export type KeyValuePair = { key: string; value: string };
 
@@ -48,49 +49,63 @@ export type InputType =
 	| SingleOptionInputType
 	| CalendarInputType;
 
-export type FieldValue<T extends InputType> = T extends 'file'
-	? File
-	: T extends 'files'
-		? File[]
-		: T extends DateInputType
-			? Date
-			: T extends SliderRangeInputType
-				? number[]
-				: T extends NumberInputType
-					? number
-					: T extends RatingInputType
-						? number
-						: T extends VoiceInputType
-							? Blob
-							: T extends TimeInputType
-								? number
-								: T extends TextInputType
-									? string
-									: T extends RichTextInputType
-										? string
-										: T extends PinInputType
-											? string
-											: T extends BooleanInputType
-												? boolean
-												: T extends MultipleChoiceInputType
-													? string[]
-													: T extends TagInputType
-														? string[]
-														: T extends TagGroupInputType
-															? string | string[] | null
-															: T extends KeyValueInputType
-																? KeyValuePair[]
-																: T extends SingleOptionInputType
-																	? string
-																	: T extends 'calendar'
-																		? Date
-																		: T extends 'calendar-range'
-																			? [Date | null, Date | null]
-																			: T extends ColorInputType
-																				? string
-																				: never;
+/** Input types an app registered: the keys of its `FormInputRegistry` augmentation. */
+export type RegisteredInputType = Extract<keyof FormInputRegistry, string>;
 
-export type InputProps<T extends InputType> = WithSlot<
+/** Every type a field can carry: the built-in inputs and the ones an app registered. */
+export type FieldType = InputType | RegisteredInputType;
+
+type RegisteredInputValue<T extends RegisteredInputType> = FormInputRegistry[T] extends {
+	value: infer Value;
+}
+	? Value
+	: unknown;
+
+export type FieldValue<T extends FieldType> = T extends RegisteredInputType
+	? RegisteredInputValue<T>
+	: T extends 'file'
+		? File
+		: T extends 'files'
+			? File[]
+			: T extends DateInputType
+				? Date
+				: T extends SliderRangeInputType
+					? number[]
+					: T extends NumberInputType
+						? number
+						: T extends RatingInputType
+							? number
+							: T extends VoiceInputType
+								? Blob
+								: T extends TimeInputType
+									? number
+									: T extends TextInputType
+										? string
+										: T extends RichTextInputType
+											? string
+											: T extends PinInputType
+												? string
+												: T extends BooleanInputType
+													? boolean
+													: T extends MultipleChoiceInputType
+														? string[]
+														: T extends TagInputType
+															? string[]
+															: T extends TagGroupInputType
+																? string | string[] | null
+																: T extends KeyValueInputType
+																	? KeyValuePair[]
+																	: T extends SingleOptionInputType
+																		? string
+																		: T extends 'calendar'
+																			? Date
+																			: T extends 'calendar-range'
+																				? [Date | null, Date | null]
+																				: T extends ColorInputType
+																					? string
+																					: never;
+
+export type InputProps<T extends FieldType> = WithSlot<
 	{
 		/** Form field name, used as the key when the input is part of a Form. */
 		name?: string;
@@ -137,7 +152,7 @@ export type InputProps<T extends InputType> = WithSlot<
 	| 'errorsContainer'
 >;
 
-export type FieldProps<T extends InputType> = Omit<
+export type FieldProps<T extends FieldType> = Omit<
 	InputProps<T>,
 	| 'type'
 	| 'name'

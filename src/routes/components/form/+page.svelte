@@ -16,6 +16,8 @@
 		type MergedMultiStepFormInputs
 	} from '$lib/components/Form/MultiStepForm/index.js';
 	import ComponentCard from '../../ComponentCard.svelte';
+	// Registers the docs' app-defined `money` input type, as an app's root layout would.
+	import './demos/moneyInput.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 
@@ -212,6 +214,32 @@
 			onAction: (form) => form.submit()
 		}
 	];
+
+	// App-defined input types are plain data: this object could arrive as JSON.
+	const pricingInputs = {
+		price: {
+			type: 'money',
+			label: 'Price',
+			description: 'An app-defined input type, named like a built-in one.',
+			required: true
+		},
+		deposit: { type: 'money', label: 'Deposit', currencies: ['EUR'] }
+	} as const satisfies FormInputs;
+	let pricingValue = $state<LiveFormValue<typeof pricingInputs>>({});
+	let pricingSubmitted = $state<InferFormValue<typeof pricingInputs> | null>(null);
+	const askedPriceInputs = {
+		price: { type: 'money', label: 'Price', required: true }
+	} as const satisfies FormInputs;
+	let askedPrice = $state<AskResult<typeof askedPriceInputs> | null>(null);
+
+	async function askForPrice(): Promise<void> {
+		askedPrice = await ask({
+			title: 'Set a price',
+			inputs: askedPriceInputs,
+			confirm: 'Save price',
+			cancel: 'Cancel'
+		});
+	}
 
 	async function openProfileAsk(): Promise<void> {
 		askError = null;
@@ -437,6 +465,61 @@ async function editProfile() {
 				<pre
 					class="bg-surface-recessed text-neutral min-h-20 overflow-auto rounded-lg p-3 text-xs">{JSON.stringify(
 						askOutcome,
+						null,
+						2
+					)}</pre>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="Register an app-defined input type once, then name it in any Form or ask() entry. Entries stay plain data that serializes, and the value is typed from the registry."
+			class="!items-start"
+			code={`// inputs.ts, imported by the root layout
+import { registerFormInputs } from 'entasis/form';
+import MoneyInput from './MoneyInput.svelte';
+
+declare module 'entasis/form' {
+	interface FormInputRegistry {
+		money: { value: { amount: number; currency: string }; props: { currencies?: string[] } };
+	}
+}
+
+registerFormInputs({
+	money: {
+		component: MoneyInput,
+		isEmpty: (value) => value?.amount === undefined,
+		validate: (value) => (value.amount < 0 ? 'Enter an amount of zero or more.' : null)
+	}
+});
+
+// MoneyInput.svelte renders the control alone; Form wraps it in Field.
+// let { field, currencies }: FormInputComponentProps<'money'> = $props();
+
+// Anywhere, as plain data:
+<Form inputs={{ price: { type: 'money', label: 'Price', required: true } }} />
+const outcome = await ask({ title: 'Set a price', inputs: { price: { type: 'money', label: 'Price', required: true } }, confirm: 'Save price', cancel: 'Cancel' });
+`}
+		>
+			<div class="grid w-full max-w-xl gap-4">
+				<Form
+					inputs={pricingInputs}
+					bind:value={pricingValue}
+					onSubmit={(value) => {
+						pricingSubmitted = value;
+					}}
+				>
+					{#snippet children(form)}
+						<div class="flex flex-wrap gap-2">
+							<Button type="button" onclick={() => void form.submit()}>Submit</Button>
+							<Button type="button" variant="outline" onclick={() => void askForPrice()}>
+								Ask for a price
+							</Button>
+						</div>
+					{/snippet}
+				</Form>
+				<pre
+					class="bg-surface-recessed text-neutral min-h-20 overflow-auto rounded-lg p-3 text-xs">{JSON.stringify(
+						{ value: pricingValue, submitted: pricingSubmitted, asked: askedPrice },
 						null,
 						2
 					)}</pre>

@@ -1,7 +1,8 @@
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
-import type { FieldValue, InputType } from './field.js';
+import type { FieldType, FieldValue, InputType } from './field.js';
 import * as v from 'valibot';
 import { schemas } from './schemas.js';
+import { getFormInputDefinition, getRegisteredInputSchema } from '../Form/form.registry.js';
 import { getContext, onDestroy, untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 import type { FormState } from '../Form/form.state.svelte.js';
@@ -9,7 +10,7 @@ import type { Density, Sizes } from '$lib/types/theme.js';
 
 export type FieldValidationResult = string | string[] | boolean | null | undefined;
 
-type FieldStateStaticOptions<T extends InputType> = {
+type FieldStateStaticOptions<T extends FieldType> = {
 	type: T;
 	name?: string;
 	required?: boolean;
@@ -22,13 +23,13 @@ type FieldStateStaticOptions<T extends InputType> = {
 	id: string;
 };
 
-type FieldStateBindableOptions<T extends InputType> = {
+type FieldStateBindableOptions<T extends FieldType> = {
 	value?: FieldValue<T> | null;
 	errors: string[] | boolean;
 	focused: boolean;
 };
 
-export type FieldState<T extends InputType> = ReturnType<typeof createFieldState<T>>;
+export type FieldState<T extends FieldType> = ReturnType<typeof createFieldState<T>>;
 export type FieldControlAttributes = {
 	id: string;
 	name: string;
@@ -44,7 +45,7 @@ const normalizeErrors = (validation: FieldValidationResult): string[] => {
 	return Array.isArray(validation) ? validation : [validation];
 };
 
-export const createFieldState = <T extends InputType>(
+export const createFieldState = <T extends FieldType>(
 	options: FieldStateBindableOptions<T> & FieldStateStaticOptions<T>
 ) => {
 	let mounted = false;
@@ -159,8 +160,16 @@ export const createFieldState = <T extends InputType>(
 			localValue = options.value;
 		};
 
+		/** The registered definition behind an app-defined input type, if this field has one. */
+		get definition() {
+			return getFormInputDefinition(this.type);
+		}
+
 		checkSchema(value?: FieldValue<T> | null) {
-			const schema = schemas[this.required ? 'required' : 'optional'][this.type];
+			const definition = this.definition;
+			const schema = definition
+				? getRegisteredInputSchema(definition, Boolean(this.required))
+				: schemas[this.required ? 'required' : 'optional'][this.type as InputType];
 			return v.safeParse(schema, value);
 		}
 
@@ -178,10 +187,17 @@ export const createFieldState = <T extends InputType>(
 			}
 
 			// We should only call onValidate if the value is not null or undefined and not an empty string when the field is not required
-			const shouldCallOnValidate =
-				this.required || (value !== null && value !== undefined && value !== '');
-			if (this.onValidate && shouldCallOnValidate) {
-				this.errors = normalizeErrors(this.onValidate(value as FieldValue<T>));
+			const definition = this.definition;
+			const shouldCallOnValidate = definition
+				? !definition.isEmpty(value)
+				: this.required || (value !== null && value !== undefined && value !== '');
+			if (shouldCallOnValidate) {
+				// A registered type's own rule runs first; the entry's onValidate adds to it.
+				const errors = [
+					...normalizeErrors(definition?.validate?.(value)),
+					...normalizeErrors(this.onValidate?.(value as FieldValue<T>))
+				];
+				if (errors.length > 0) this.errors = errors;
 			}
 
 			return [this.hasError, parseResult.output] as const;

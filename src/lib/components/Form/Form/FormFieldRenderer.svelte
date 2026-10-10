@@ -2,13 +2,46 @@
 	import { untrack, type Snippet } from 'svelte';
 	import type { Density, Sizes } from '$lib/types/theme.js';
 	import Field from '../Field/Field.svelte';
-	import type { FieldLabelPosition, FieldValue, InputType } from '../Field/field.js';
+	import type { FieldLabelPosition, FieldType, FieldValue } from '../Field/field.js';
 	import {
 		createFieldState,
 		type FieldState,
 		type FieldValidationResult
 	} from '../Field/field.state.svelte.js';
-	import type { FormFieldEntry } from './form.js';
+	import type { FormFieldEntry, FormRegisteredInput } from './form.js';
+	import { getFormInputDefinition } from './form.registry.js';
+
+	// What the Field wrapper and the field controller consume from an entry; everything else on
+	// a registered entry belongs to its component.
+	const FIELD_ENTRY_KEYS = new Set([
+		'type',
+		'visible',
+		'class',
+		'name',
+		'required',
+		'disabled',
+		'size',
+		'density',
+		'labelPosition',
+		'onValidate',
+		'onValueChange',
+		'fieldAttrs',
+		'theme',
+		'value',
+		'defaultValue',
+		'errors',
+		'focused',
+		'header',
+		'label',
+		'actions',
+		'description',
+		'helper',
+		'footer',
+		'error',
+		'errorsContainer',
+		'prefix',
+		'suffix'
+	]);
 
 	let {
 		name,
@@ -19,7 +52,8 @@
 		itemClass
 	}: {
 		name: string;
-		input: FormFieldEntry;
+		/** A `type: 'field'` entry with its snippet, or an entry of an app-registered type. */
+		input: FormFieldEntry | FormRegisteredInput;
 		size: Sizes;
 		density: Density;
 		labelPosition?: FieldLabelPosition;
@@ -28,18 +62,18 @@
 
 	const id = $props.id();
 	const initialInput = untrack(() => input);
-	let value = $state<FieldValue<InputType> | null>(
+	let value = $state<FieldValue<FieldType> | null>(
 		(initialInput.value === undefined
 			? (initialInput.defaultValue ?? null)
-			: initialInput.value) as FieldValue<InputType> | null
+			: initialInput.value) as FieldValue<FieldType> | null
 	);
 	let errors = $state<string[] | boolean>(initialInput.errors ?? []);
 	let focused = $state(initialInput.focused ?? false);
 
-	const field = createFieldState<InputType>({
+	const field = createFieldState<FieldType>({
 		id,
 		get type() {
-			return input.fieldType;
+			return input.type === 'field' ? input.fieldType : input.type;
 		},
 		get name() {
 			return name;
@@ -76,10 +110,10 @@
 		},
 		get onValidate() {
 			return input.onValidate as
-				((value: FieldValue<InputType>) => FieldValidationResult) | undefined;
+				((value: FieldValue<FieldType>) => FieldValidationResult) | undefined;
 		},
 		get onValueChange() {
-			return input.onValueChange as ((value: FieldValue<InputType> | null) => void) | undefined;
+			return input.onValueChange as ((value: FieldValue<FieldType> | null) => void) | undefined;
 		},
 		visible: true
 	});
@@ -87,7 +121,15 @@
 	const resolvedSize = $derived(input.size ?? size);
 	const resolvedLabelPosition = $derived(input.labelPosition ?? labelPosition);
 	const className = $derived([input.class, itemClass].filter(Boolean).join(' ') || undefined);
-	const controlSnippet = $derived(input.snippet as Snippet<[field: FieldState<InputType>]>);
+	const controlSnippet = $derived(
+		input.type === 'field' ? (input.snippet as Snippet<[field: FieldState<FieldType>]>) : undefined
+	);
+	const Control = $derived(
+		input.type === 'field' ? undefined : getFormInputDefinition(input.type)?.component
+	);
+	const controlProps = $derived(
+		Object.fromEntries(Object.entries(input).filter(([key]) => !FIELD_ENTRY_KEYS.has(key)))
+	);
 </script>
 
 <Field
@@ -109,5 +151,9 @@
 	prefix={input.prefix}
 	suffix={input.suffix}
 >
-	{@render controlSnippet(field)}
+	{#if controlSnippet}
+		{@render controlSnippet(field)}
+	{:else if Control}
+		<Control {...controlProps} {field} />
+	{/if}
 </Field>

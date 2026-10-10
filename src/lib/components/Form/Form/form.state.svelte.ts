@@ -3,7 +3,7 @@ import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import type { FieldState } from '../Field/field.state.svelte.js';
-import type { FieldValue, InputType } from '../Field/field.js';
+import type { FieldType, FieldValue, InputType } from '../Field/field.js';
 import type {
 	FlatFormField,
 	FormGroup,
@@ -15,6 +15,7 @@ import type {
 	LiveFormValue
 } from './form.js';
 import { flattenFormInputs, getFormValueInputType } from './form.js';
+import { getFormInputDefinition } from './form.registry.js';
 import { isFieldVisible } from './visibility.js';
 
 type FormStateOptions<I extends FormInputs> = {
@@ -24,7 +25,7 @@ type FormStateOptions<I extends FormInputs> = {
 	onValueChange?: (value: LiveFormValue<I>) => void;
 };
 
-type RegisteredField = FieldState<InputType>;
+type RegisteredField = FieldState<FieldType>;
 
 type NavigableField = {
 	field: RegisteredField;
@@ -99,8 +100,8 @@ export class FormState<I extends FormInputs = FormInputs> {
 	loading = $state(false);
 	hasError = $state(false);
 	private valueCache = $state<FormValueRecord>({});
-	private configuredValues = new SvelteMap<string, FieldValue<InputType> | null | undefined>();
-	private defaultValues = new SvelteMap<string, FieldValue<InputType> | null | undefined>();
+	private configuredValues = new SvelteMap<string, FieldValue<FieldType> | null | undefined>();
+	private defaultValues = new SvelteMap<string, FieldValue<FieldType> | null | undefined>();
 	private publishedValue: LiveFormValue<I> | undefined;
 	private submitPromise: Promise<InferFormValue<I> | false> | null = null;
 
@@ -128,7 +129,7 @@ export class FormState<I extends FormInputs = FormInputs> {
 		});
 	}
 
-	registerField<T extends InputType>(field: FieldState<T>): () => void {
+	registerField<T extends FieldType>(field: FieldState<T>): () => void {
 		const existingField = this.fields.get(field.name);
 		if (existingField && existingField !== field) {
 			throw new Error(`Form field "${field.name}" is already registered.`);
@@ -158,7 +159,7 @@ export class FormState<I extends FormInputs = FormInputs> {
 		};
 	}
 
-	updateFieldValue<T extends InputType>(field: FieldState<T>, notify = false): void {
+	updateFieldValue<T extends FieldType>(field: FieldState<T>, notify = false): void {
 		if (this.fields.get(field.name) !== (field as RegisteredField)) return;
 		const previousValue = this.value;
 		this.setCachedValue(field.name, field.value);
@@ -225,7 +226,7 @@ export class FormState<I extends FormInputs = FormInputs> {
 				firstErroredField ??= field;
 				continue;
 			}
-			validatedValue[definition.name] = parsedValue as FieldValue<InputType> | null;
+			validatedValue[definition.name] = parsedValue as FieldValue<FieldType> | null;
 		}
 
 		this.hasError = firstErroredField !== null;
@@ -281,8 +282,10 @@ export class FormState<I extends FormInputs = FormInputs> {
 
 		for (const { name, input } of definitions) {
 			const inputType = getFormValueInputType(input);
-			if (!supportedInputTypes.has(inputType)) {
-				throw new Error(`Form field "${name}" uses unsupported input type "${String(inputType)}".`);
+			if (!supportedInputTypes.has(inputType as InputType) && !getFormInputDefinition(inputType)) {
+				throw new Error(
+					`Form field "${name}" uses unsupported input type "${String(inputType)}". Register app-defined types with registerFormInputs().`
+				);
 			}
 
 			if (!hasOwn(externalValue, name)) continue;
@@ -343,7 +346,7 @@ export class FormState<I extends FormInputs = FormInputs> {
 				else this.configuredValues.delete(name);
 			}
 
-			let nextValue: FieldValue<InputType> | null | undefined;
+			let nextValue: FieldValue<FieldType> | null | undefined;
 			let shouldApplyValue = false;
 			if (hasOwn(externalValue, name)) {
 				nextValue = externalRecord?.[name];
@@ -424,7 +427,7 @@ export class FormState<I extends FormInputs = FormInputs> {
 		return (!group || isFieldVisible(group, value)) && isFieldVisible(input, value);
 	}
 
-	private setCachedValue(name: string, value: FieldValue<InputType> | null | undefined): void {
+	private setCachedValue(name: string, value: FieldValue<FieldType> | null | undefined): void {
 		if (hasOwn(this.valueCache, name) && Object.is(this.valueCache[name], value)) return;
 		this.valueCache = { ...this.valueCache, [name]: value };
 	}

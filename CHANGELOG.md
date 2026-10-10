@@ -6,6 +6,17 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `Form` / `ask()`: app-defined input types. An app augments `FormInputRegistry` in
+  `entasis/form` with each type's value and entry props, and registers its component with
+  `registerFormInputs({ money: { component, isEmpty?, validate? } })`. Entries then name the type
+  like a built-in one, `{ type: 'money', label: 'Price', required: true }`, as plain data that
+  serializes, in every Form, group and ask() dialog. Form wraps the component in Field and hands
+  it the field it registered, typed from the registry (`FormInputComponentProps<'money'>`); the
+  value takes part in binding, visibility, validation, submission and `InferFormValue`, and
+  `required` uses the type's `isEmpty`.
+
 ## 0.10.2 — 2026-10-07
 
 ### Added

@@ -11,6 +11,7 @@
 	import type { FormProps } from './form.props.js';
 	import { useFormTheme } from './form.theme.js';
 	import { useForm } from './form.state.svelte.js';
+	import { isRegisteredFormInput } from './form.registry.js';
 	import { formCardSurfaceContextKey, type FormCardSurfaceContext } from './form.context.js';
 	let {
 		inputs,
@@ -118,7 +119,7 @@
 				className: [input.class, itemClass].filter(Boolean).join(' ')
 			})}
 		/>
-	{:else if input.type === 'field'}
+	{:else if input.type === 'field' || isRegisteredFormInput(input)}
 		<FormFieldRenderer {name} {input} {size} {density} {labelPosition} {itemClass} />
 	{:else}
 		<FormInputRenderer {name} {input} {size} {density} {labelPosition} {itemClass} />

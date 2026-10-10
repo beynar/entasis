@@ -1,5 +1,12 @@
-import type { FieldLabelPosition, FieldValue, InputProps, InputType } from '../Field/field.js';
-import type { FieldState } from '../Field/field.state.svelte.js';
+import type {
+	FieldLabelPosition,
+	FieldType,
+	FieldValue,
+	InputProps,
+	InputType,
+	RegisteredInputType
+} from '../Field/field.js';
+import type { FieldState, FieldValidationResult } from '../Field/field.state.svelte.js';
 import type { TextInputProps } from '../TextInput/textInput.props.js';
 import type { NumberInputProps } from '../NumberInput/numberInput.props.js';
 import type { RatingInputProps } from '../RatingInput/ratingInput.props.js';
@@ -28,12 +35,59 @@ import type { KeyValueInputProps } from '../KeyValueInput/keyValueInput.props.js
 import type { PinInputProps } from '../PinInput/pinInput.props.js';
 import type { Slot } from '$lib/components/Slot/slot.js';
 import type { ButtonProps } from '$lib/components/Button/index.js';
-import type { Snippet } from 'svelte';
+import type { Component, Snippet } from 'svelte';
 import type { FormState } from './form.state.svelte.js';
 
 export type MaybePromise<T> = T | Promise<T>;
 
-export type FormValueRecord = Record<string, FieldValue<InputType> | null | undefined>;
+/**
+ * Input types an app adds to Form, ask() and every other Form-driven surface. Empty in the
+ * library; an app augments it once per custom input, naming the value the input holds and the
+ * props its entries take:
+ *
+ * ```ts
+ * declare module 'entasis/form' {
+ *   interface FormInputRegistry {
+ *     money: { value: { amount: number; currency: string }; props: { currencies?: string[] } };
+ *   }
+ * }
+ * ```
+ *
+ * Entries then read `{ type: 'money', label: 'Price', currencies: ['EUR'] }`, plain data that
+ * serializes, and the form value infers `money`'s value. Pair each key with
+ * `registerFormInputs`, which supplies the component that renders it.
+ */
+// An interface, not a type alias, so apps can merge their inputs into it.
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface FormInputRegistry {}
+
+type RegisteredInputProps<T extends RegisteredInputType> = FormInputRegistry[T] extends {
+	props: infer Props;
+}
+	? Props
+	: Record<never, never>;
+
+/** Props of the component that renders a registered input: its entry props and its field. */
+export type FormInputComponentProps<T extends RegisteredInputType> = RegisteredInputProps<T> & {
+	/** The field Form registered for the entry: value, errors, and control attributes. */
+	field: FieldState<T>;
+};
+
+/** How a registered input renders and validates; see `registerFormInputs`. */
+export type FormInputDefinition<T extends RegisteredInputType = RegisteredInputType> = {
+	/**
+	 * Renders the control. Form wraps it in Field (label, description, errors), so it renders
+	 * the control alone: spread `field.controlAttrs`, attach `field.control`, and report edits
+	 * with `field.setValue`.
+	 */
+	component: Component<FormInputComponentProps<T>>;
+	/** What `required` rejects. Defaults to null, undefined, an empty string, and an empty array. */
+	isEmpty?: (value: FieldValue<T>) => boolean;
+	/** Validation every entry of this type gets, before the entry's own `onValidate`. */
+	validate?: (value: FieldValue<T>) => FieldValidationResult;
+};
+
+export type FormValueRecord = Record<string, FieldValue<FieldType> | null | undefined>;
 
 type FormVisibility = boolean | ((value: FormValueRecord) => boolean);
 
@@ -205,9 +259,19 @@ export type FormFieldEntry<T extends InputType = InputType> = T extends InputTyp
 			}
 	: never;
 
-export type FormValueInput = FormFieldInput | FormFieldEntry;
+/** An entry of a type the app registered through `FormInputRegistry` and `registerFormInputs`. */
+export type FormRegisteredInput<T extends RegisteredInputType = RegisteredInputType> =
+	T extends RegisteredInputType
+		? BaseFormRenderableInput &
+				Omit<InputProps<T>, 'class' | 'name' | 'visible'> &
+				RegisteredInputProps<T> & {
+					type: T;
+				}
+		: never;
+
+export type FormValueInput = FormFieldInput | FormFieldEntry | FormRegisteredInput;
 export type FormRenderableInput =
-	FormFieldInput | FormFieldEntry | FormActionInput | FormCustomInput;
+	FormFieldInput | FormFieldEntry | FormRegisteredInput | FormActionInput | FormCustomInput;
 
 export type FormGroupInputs = Record<string, FormRenderableInput>;
 export type FormGroupColumns = 1 | 2 | 3 | 4;
@@ -256,7 +320,11 @@ export type FormInputsWithState<I extends FormInputs> = string extends keyof I
 	: { [K in keyof I]: BindFormInputState<I[K], I> };
 
 type FormValueInputType<T extends FormValueInput> =
-	T extends FormFieldEntry<infer Input> ? Input : T extends FormFieldInput ? T['type'] : never;
+	T extends FormFieldEntry<infer Input>
+		? Input
+		: T extends FormFieldInput | FormRegisteredInput
+			? T['type']
+			: never;
 
 type InferInputValue<T extends FormValueInput> = T['required'] extends true
 	? NonNullable<FieldValue<FormValueInputType<T>>>
@@ -393,7 +461,7 @@ export function flattenFormInputs(inputs: FormInputs): FlatFormField[] {
 	return fields;
 }
 
-export const getFormValueInputType = (input: FormValueInput): InputType =>
+export const getFormValueInputType = (input: FormValueInput): FieldType =>
 	input.type === 'field' ? input.fieldType : input.type;
 
 export type FormSubmitHandler<T extends FormInputs> = (
