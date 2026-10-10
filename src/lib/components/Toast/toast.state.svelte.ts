@@ -197,7 +197,9 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 		onMount(() => {
 			window.toaster = this;
 			flushPendingToasts(this);
+			const stopWatchingWindow = this.watchWindowActivity();
 			return () => {
+				stopWatchingWindow();
 				// Don't leave a dangling reference if this Toaster unmounts (another
 				// mounted Toaster may have already replaced it).
 				if (window.toaster === this) window.toaster = undefined as unknown as Toaster;
@@ -206,33 +208,91 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 
 		// Track duration configuration changes
 		$effect(() => {
-			const timersAndDurations = this.toasts.map((toast) => {
-				return {
-					toast,
-					position: toast.opts.position,
-					duration: toast.opts.duration || 0,
-					// Timeout is the only path that fires onAutoDismiss (the deferred-commit hook).
-					callback: () => toast.remove('auto')
-				};
-			});
+			const durations = this.toasts.map((toast) => ({
+				toast,
+				duration: toast.opts.duration || 0
+			}));
 			untrack(() => {
-				timersAndDurations.forEach(({ toast, position, duration, callback }) => {
-					if (!toast.timer && duration > 0) {
-						toast.timer = new Timer(callback, duration);
-						if (this.hovering === position) {
-							toast.timer.pause();
-						}
-					} else if (duration !== toast.timer?.delay && duration > 0 && toast.timer) {
-						toast.timer.update(duration);
-					} else if (toast.timer && duration <= 0) {
-						// duration switched to false/0: the toast became persistent.
-						toast.timer.destroy();
-						toast.timer = undefined;
+				durations.forEach(({ toast, duration }) => {
+					// No timer reads as a delay of 0, so a new finite duration creates one.
+					if (duration !== (toast.timer?.delay ?? 0)) {
+						this.syncTimer(toast);
 					}
 				});
 			});
 		});
 	}
+
+	// Timers stop while the window is blurred or its tab hidden. Frames stop in a hidden tab
+	// while `performance.now()` keeps counting, so without this every pending toast would
+	// expire on the first frame after the user comes back.
+	private windowBlurred = false;
+	private documentHidden = false;
+
+	private get windowInactive() {
+		return this.windowBlurred || this.documentHidden;
+	}
+
+	/** Whether timers at `position` must stay paused: hovered, or the window is inactive. */
+	private shouldPause = (position: ToastPosition) =>
+		this.windowInactive || this.hovering === position;
+
+	private watchWindowActivity = () => {
+		this.documentHidden = document.visibilityState === 'hidden';
+		const update = (change: () => void) => {
+			const wasInactive = this.windowInactive;
+			change();
+			if (wasInactive === this.windowInactive) return;
+			this.toasts.forEach((toast) => {
+				if (this.shouldPause(toast.opts.position)) toast.timer?.pause();
+				else toast.timer?.resume();
+			});
+		};
+		// Blur and focus don't bubble, so these listeners only see the window's own events; the
+		// target check keeps element focus changes out all the same.
+		const onBlur = (event: FocusEvent) => {
+			if (event.target === event.currentTarget) update(() => (this.windowBlurred = true));
+		};
+		const onFocus = (event: FocusEvent) => {
+			if (event.target === event.currentTarget) update(() => (this.windowBlurred = false));
+		};
+		const onVisibilityChange = () =>
+			update(() => (this.documentHidden = document.visibilityState === 'hidden'));
+		window.addEventListener('blur', onBlur);
+		window.addEventListener('focus', onFocus);
+		document.addEventListener('visibilitychange', onVisibilityChange);
+		return () => {
+			window.removeEventListener('blur', onBlur);
+			window.removeEventListener('focus', onFocus);
+			document.removeEventListener('visibilitychange', onVisibilityChange);
+		};
+	};
+
+	/**
+	 * Matches a toast's timer to its duration. `restart` counts down the full duration again
+	 * even when it did not change. A new or restarted timer starts paused when the toast's
+	 * position is hovered or the window is inactive.
+	 */
+	private syncTimer = (toast: Toast, restart = false) => {
+		const duration = toast.opts.duration || 0;
+		if (duration <= 0) {
+			// duration switched to false/0: the toast became persistent.
+			toast.timer?.destroy();
+			toast.timer = undefined;
+			return;
+		}
+		const paused = this.shouldPause(toast.opts.position);
+		if (!toast.timer) {
+			// Timeout is the only path that fires onAutoDismiss (the deferred-commit hook).
+			toast.timer = new Timer(() => toast.remove('auto'), duration, { startPaused: paused });
+			return;
+		}
+		if (!restart && duration === toast.timer.delay) return;
+		toast.timer.update(duration);
+		// An upsert can move the toast to another position, whose hover state differs.
+		if (paused) toast.timer.pause();
+		else toast.timer.resume();
+	};
 
 	maybeCloseToaster = () => {
 		if (this.toasts.length === 0) {
@@ -259,12 +319,38 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 	addToast = (opts: Omit<ToastOptions, 'id'> & { id?: string }) =>
 		this.adoptToast(new Toast({ ...opts, id: opts.id || createId('toast') }));
 
+	// Removed toasts whose exit transition may still be playing, by id. The list keys its
+	// items by id, so a toast re-added with that id resumes the leaving item instead of
+	// mounting a new one; see `adoptToast`.
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- bookkeeping read imperatively, never rendered
+	private leaving = new Map<string, Toast>();
+
 	/**
 	 * Attaches a toast to this Toaster: resolves its options against the Toaster's
 	 * defaults and pushes it onto the stack. Used both for a freshly created toast and
 	 * for one parked in the pending queue while no Toaster was mounted.
+	 *
+	 * A toast whose id is already on screen is not added twice (the list is keyed by id):
+	 * its options are merged into the live toast, its timer restarts, and the live toast is
+	 * returned.
 	 */
 	adoptToast = (toast: Toast) => {
+		const live = this.toasts.find((candidate) => candidate.id === toast.id);
+		if (live) {
+			if (live !== toast) live.merge(toast.requested);
+			live.opts = this.resolveOptions(live.requested);
+			this.syncTimer(live, true);
+			return live;
+		}
+		// The same id is still animating out: Svelte resumes that item with this toast as its
+		// value and plays the entry transition again. The component keeps its element, whose
+		// one-shot `bind:this` and size bindings do not follow the new value.
+		const leaving = this.leaving.get(toast.id);
+		this.leaving.delete(toast.id);
+		if (leaving && leaving !== toast && leaving.element?.isConnected) {
+			toast.element = leaving.element;
+			toast.height = leaving.height;
+		}
 		toast.toaster = this;
 		toast.theme = this.theme;
 		toast.opts = this.resolveOptions(toast.requested);
@@ -274,10 +360,18 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 	};
 
 	removeToast = (toast: Toast) => {
-		this.toasts = this.toasts.filter((t) => t.id !== toast.id);
+		if (!this.toasts.includes(toast)) return;
+		this.toasts = this.toasts.filter((t) => t !== toast);
+		// Drop entries whose exit already finished so the map only holds leaving toasts.
+		for (const [id, leaving] of this.leaving) {
+			if (!leaving.element?.isConnected) this.leaving.delete(id);
+		}
+		this.leaving.set(toast.id, toast);
 	};
 
 	toggleTimers = (position: ToastPosition, mode: 'pause' | 'resume') => {
+		// Leaving the hovered stack must not restart timers in an inactive window.
+		if (mode === 'resume' && this.windowInactive) return;
 		this.toasts.forEach((toast) => {
 			if (toast.opts.position === position) {
 				toast.timer?.[mode]?.();
@@ -294,8 +388,11 @@ export class Toast {
 	// `<Toaster />` mounts parks the instance in `pendingToasts` first.
 	toaster = $state<Toaster | null>(null);
 	theme: ThemeState | null = null;
-	/** The caller's own options; a Toaster layers its defaults over them on adoption. */
-	readonly requested: ToastRequest;
+	/**
+	 * The caller's own options; a Toaster layers its defaults over them on adoption. A later
+	 * `toast()` call with the same id merges its options in (see `merge`).
+	 */
+	requested: ToastRequest;
 	element = $state<HTMLElement>();
 	height = $state(0);
 	loading = $state(false);
@@ -319,6 +416,18 @@ export class Toast {
 		// flip `toast.loading` later (e.g. resolve a pending action to a result).
 		this.loading = opts.loading ?? false;
 	}
+
+	/**
+	 * Merges the options of a later `toast()` call with this id over the ones this toast
+	 * was created with; keys the call leaves out keep their value. The owning Toaster
+	 * resolves its defaults over the result.
+	 */
+	merge = (request: ToastRequest) => {
+		this.requested = { ...this.requested, ...request, id: this.id };
+		// Provisional, like the constructor's: `adoptToast` resolves the Toaster defaults.
+		this.opts = { ...this.requested, position: this.requested.position ?? 'bottom-right' };
+		if ('loading' in request) this.loading = request.loading ?? false;
+	};
 
 	// `$derived.by` (not `$derived`): `toaster` is assigned on adoption, so the
 	// reference has to sit inside a function the initializer only stores. Only ever read
@@ -497,7 +606,14 @@ export const toast = new Proxy(
 					// On the server nothing ever mounts a Toaster, so the queue would only retain
 					// toasts for the lifetime of the process. The caller still gets its handle.
 					if (typeof window === 'undefined') return toast;
+					// A toast whose id is already shown is updated in place (see `adoptToast`).
 					if (window.toaster) return window.toaster.adoptToast(toast);
+					// Same for one still queued: the first Toaster adopts a single toast per id.
+					const queued = pendingToasts.find((candidate) => candidate.id === toast.id);
+					if (queued) {
+						queued.merge(toast.requested);
+						return queued;
+					}
 					pendingToasts.push(toast);
 					if (pendingToasts.length > pendingToastLimit) pendingToasts.shift();
 					if (DEV) warnIfNothingMounts();

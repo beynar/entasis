@@ -91,22 +91,23 @@
 	};
 
 	// A pending toast that resolves into a success toast after a delay — the common
-	// "optimistic action" pattern.
+	// "optimistic action" pattern. Calling toast again with the same id updates that toast
+	// in place, so pressing the button twice still shows a single toast.
 	const showLoadingToast = () => {
-		const t = toast.primary({
+		toast.primary({
+			id: 'save-changes',
 			title: 'Saving changes…',
 			loading: true,
 			duration: false
 		});
 		setTimeout(() => {
-			t.loading = false;
-			t.opts = {
-				...t.opts,
-				color: 'success',
+			toast.success({
+				id: 'save-changes',
 				title: 'Changes saved',
 				description: 'Your changes are now live.',
+				loading: false,
 				duration: 3000
-			};
+			});
 		}, 1600);
 	};
 </script>
@@ -122,7 +123,7 @@
 		'Eight color variants, plain or rich',
 		'Six corner and center positions',
 		'Swipe / drag toward the edge to dismiss',
-		'Stacked layout, hover pauses timers',
+		'Stacked layout, hover and background tabs pause timers',
 		'Loading spinner, progress bar & actions'
 	]}
 >
@@ -396,7 +397,7 @@ toast.warning({ title: 'You are offline.', position: 'banner-bottom' });`}
 
 		<ComponentCard
 			title="Progress bar"
-			description="Set progress to render a bar counting down the remaining duration. It pauses when you hover the toast, like the timer. Set it on a single toast or on the Toaster to default it everywhere."
+			description="Set progress to render a bar counting down the remaining duration. It pauses when you hover the toast, like the timer, and while the window is in the background. Set it on a single toast or on the Toaster to default it everywhere."
 			class="!min-h-fit"
 			code={`// per toast
 toast.info({ title: 'Auto-dismissing', duration: 6000, progress: true });
@@ -421,23 +422,23 @@ toast.info({ title: 'Auto-dismissing', duration: 6000, progress: true });
 
 		<ComponentCard
 			title="Loading &amp; updates"
-			description="Show a spinner for a pending action, then mutate the same toast in place once it resolves — no second toast needed."
+			description="Show a spinner for a pending action, then call toast again with the same id once it resolves. A toast whose id is already on screen updates in place: the new options merge over the old ones and its timer restarts."
 			class="!min-h-fit"
-			code={`const t = toast.primary({
+			code={`toast.primary({
+	id: 'save-changes',
 	title: 'Saving changes…',
 	loading: true,
 	duration: false
 });
 
-// later, when the action resolves:
-t.loading = false;
-t.opts = {
-	...t.opts,
-	color: 'success',
+// later, when the action resolves — same id, so the toast updates in place:
+toast.success({
+	id: 'save-changes',
 	title: 'Changes saved',
 	description: 'Your changes are now live.',
+	loading: false,
 	duration: 3000
-};`}
+});`}
 		>
 			<Button color="primary" onclick={showLoadingToast}>Save changes</Button>
 		</ComponentCard>
