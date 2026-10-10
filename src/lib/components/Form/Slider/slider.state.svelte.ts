@@ -46,6 +46,7 @@ type SliderDragState =
 
 type SliderStateOptions = {
 	value?: SliderValue | null;
+	mode?: 'single' | 'range';
 	min?: number;
 	max?: number;
 	step?: number;
@@ -127,10 +128,23 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 	);
 	values = $derived.by(() => this.getNormalizedValues());
 	isRange = $derived(this.values.length > 1);
-	fieldType = $derived<'slider' | 'slider-range'>(this.isRange ? 'slider-range' : 'slider');
-	fieldValue: SliderValue = $derived(
-		this.isRange ? this.values : (this.values[0] ?? this.minValue)
+	/** The value keeps an array shape (even with one thumb) when it arrived as one or is a range. */
+	isArrayValue = $derived(
+		Array.isArray(this.value) || this.mode === 'range' || this.thumbCount > 1
 	);
+	fieldType = $derived<'slider' | 'slider-range'>(this.isArrayValue ? 'slider-range' : 'slider');
+	fieldValue: SliderValue = $derived.by(() => {
+		if (!this.isArrayValue) return this.values[0] ?? this.minValue;
+		// Hand back the caller's own array while it already holds the normalized values. A fresh
+		// copy per read never settles against a Form bound to a $state value: the Form writes the
+		// copy back as a deep proxy, which is a new array again, and so on.
+		const value = this.value;
+		const isNormalized =
+			Array.isArray(value) &&
+			value.length === this.values.length &&
+			value.every((item, index) => item === this.values[index]);
+		return isNormalized ? value : this.values;
+	});
 	startPercentage = $derived(this.getPercentage(this.values[0] ?? this.minValue));
 	endPercentage = $derived(
 		this.getPercentage(this.values[this.values.length - 1] ?? this.minValue)
@@ -378,7 +392,7 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 			constrainedValues.every((value, index) => value === this.values[index])
 		)
 			return;
-		if (this.thumbCount === 1) {
+		if (!this.isArrayValue) {
 			this.value = constrainedValues[0] ?? this.minValue;
 			return;
 		}
@@ -499,7 +513,9 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 			return this.getValueFromPercentage((offset / size) * 100);
 		}
 
-		const offset = event.clientX - rect.left;
+		// The track mirrors in RTL (thumbs sit at inset-inline-start), so the minimum is the right edge.
+		const offset =
+			this.getDirection() === 'rtl' ? rect.right - event.clientX : event.clientX - rect.left;
 		return this.getValueFromPercentage((offset / size) * 100);
 	}
 

@@ -250,7 +250,7 @@ const defaultThumb = cva({
 	base: 'group absolute z-20 flex size-11 touch-none appearance-none items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none',
 	variants: {
 		orientation: {
-			horizontal: 'top-1/2 -translate-x-1/2 -translate-y-1/2',
+			horizontal: 'top-1/2 -translate-x-1/2 -translate-y-1/2 rtl:translate-x-1/2',
 			vertical: 'left-1/2 -translate-x-1/2 translate-y-1/2'
 		},
 		size: {
@@ -291,7 +291,7 @@ const defaultThumbHitbox = cva({
 	base: 'absolute z-30 block touch-none rounded-full bg-transparent',
 	variants: {
 		orientation: {
-			horizontal: 'top-1/2 -translate-x-1/2 -translate-y-1/2',
+			horizontal: 'top-1/2 -translate-x-1/2 -translate-y-1/2 rtl:translate-x-1/2',
 			vertical: 'left-1/2 -translate-x-1/2 translate-y-1/2'
 		},
 		size: {
@@ -413,19 +413,19 @@ const defaultValueLabels = cva({
 			orientation: 'horizontal',
 			variant: 'contained',
 			size: 'small',
-			class: 'pointer-events-none absolute top-0 right-3 z-30 h-8 flex-nowrap'
+			class: 'pointer-events-none absolute top-0 end-3 z-30 h-8 flex-nowrap'
 		},
 		{
 			orientation: 'horizontal',
 			variant: 'contained',
 			size: 'normal',
-			class: 'pointer-events-none absolute top-0 right-4 z-30 h-10 flex-nowrap'
+			class: 'pointer-events-none absolute top-0 end-4 z-30 h-10 flex-nowrap'
 		},
 		{
 			orientation: 'horizontal',
 			variant: 'contained',
 			size: 'large',
-			class: 'pointer-events-none absolute top-0 right-5 z-30 h-12 flex-nowrap'
+			class: 'pointer-events-none absolute top-0 end-5 z-30 h-12 flex-nowrap'
 		},
 		{
 			orientation: 'horizontal',
@@ -497,15 +497,15 @@ const defaultValueLabel = cva({
 });
 
 const defaultContainedLabel = cva({
-	base: 'text-neutral/70 pointer-events-none absolute top-0 left-0 z-30 flex max-w-[55%] min-w-0 items-center truncate font-medium',
+	base: 'text-neutral/70 pointer-events-none absolute top-0 start-0 z-30 flex max-w-[55%] min-w-0 items-center truncate font-medium',
 	variants: {
 		size: {
-			small: 'h-8 pl-lg text-xs',
-			normal: 'h-10 pl-xl text-sm',
-			large: 'h-12 pl-layout-sm text-base'
+			small: 'h-8 ps-lg text-xs',
+			normal: 'h-10 ps-xl text-sm',
+			large: 'h-12 ps-layout-sm text-base'
 		},
 		required: {
-			true: "after:text-danger-readable after:ml-xs after:content-['*']",
+			true: "after:text-danger-readable after:ms-xs after:content-['*']",
 			false: ''
 		},
 		hasError: {
@@ -537,7 +537,7 @@ const defaultContainedTick = cva({
 	base: 'bg-current/10 absolute rounded-full',
 	variants: {
 		orientation: {
-			horizontal: 'top-1/2 w-px -translate-x-1/2 -translate-y-1/2',
+			horizontal: 'top-1/2 w-px -translate-x-1/2 -translate-y-1/2 rtl:translate-x-1/2',
 			vertical: 'left-1/2 h-px -translate-x-1/2 translate-y-1/2'
 		},
 		size: {
@@ -565,7 +565,7 @@ const defaultMarks = cva({
 	variants: {
 		orientation: {
 			horizontal: 'mt-sm h-5 w-full',
-			vertical: 'absolute inset-y-0 left-full ml-lg w-16'
+			vertical: 'absolute inset-y-0 start-full ms-lg w-16'
 		},
 		size: {
 			small: 'text-xs',
@@ -583,8 +583,8 @@ const defaultMark = cva({
 	base: 'absolute flex text-center',
 	variants: {
 		orientation: {
-			horizontal: 'top-0 -translate-x-1/2 flex-col items-center gap-xs',
-			vertical: 'left-0 -translate-y-1/2 items-center gap-md'
+			horizontal: 'top-0 -translate-x-1/2 rtl:translate-x-1/2 flex-col items-center gap-xs',
+			vertical: 'start-0 -translate-y-1/2 items-center gap-md'
 		}
 	},
 	defaultVariants: {

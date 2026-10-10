@@ -8,7 +8,7 @@
 	import type { SliderProps } from './slider.props.js';
 	import { SliderState } from './slider.state.svelte.js';
 	import { useSliderTheme } from './slider.theme.js';
-	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { useI18n, useI18nDirection } from '$lib/i18n/context.svelte.js';
 	import { useDefaultColor } from '../../Theme/theme.state.svelte.js';
 
 	let {
@@ -47,6 +47,9 @@
 	if (value === undefined) value = untrack(() => defaultValue);
 
 	const t = $derived(useI18n(i18n));
+	// An i18n direction that the document does not carry still has to mirror the track, so the
+	// thumbs' logical positions agree with the arrow keys and the pointer reading.
+	const contextualDirection = $derived(useI18nDirection());
 	const resolvedColor = $derived(useDefaultColor(color));
 
 	const id = $props.id();
@@ -57,6 +60,9 @@
 		},
 		set value(v) {
 			field.setValue(v);
+		},
+		get mode() {
+			return mode;
 		},
 		get min() {
 			return min;
@@ -185,7 +191,10 @@
 	}}
 	{...rest}
 >
-	<div class={classes.root({ orientation: slider.orientationValue, size })}>
+	<div
+		class={classes.root({ orientation: slider.orientationValue, size })}
+		dir={contextualDirection}
+	>
 		{#each slider.values as hiddenValue, index (index)}
 			<input type="hidden" name={field.name} value={hiddenValue} disabled={slider.disabled} />
 		{/each}

@@ -28,7 +28,8 @@ const emptyArrayNull = <TSchema extends Schema>(schema: TSchema) =>
 
 const optional = <TSchema extends Schema>(schema: TSchema) =>
 	v.optional(v.nullable(schema, null), null);
-const sliderRangeValue = v.pipe(v.array(v.number()), v.minLength(2));
+// A one-thumb Slider keeps an array value when it was given one, so a range holds one or more values.
+const sliderRangeValue = v.pipe(v.array(v.number()), v.minLength(1));
 const tagGroupValue = v.union([nonEmptyString, nonEmptyArray(v.string())]);
 const keyValuePair = v.object({ key: v.string(), value: v.string() });
 const calendarRangeValue = v.strictTuple([v.nullable(v.date()), v.nullable(v.date())]);

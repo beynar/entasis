@@ -311,6 +311,7 @@ RadioInput automatically validates:
 - Focus management
 - Screen reader announcements
 - Disabled options communicated properly
+- Each option button gets an id unique to the instance (\`<field id>-option-<index>\`) and its hidden input \`<option id>-input\`, so two fields with the same \`name\` or values containing spaces never produce duplicate or invalid ids
 
 ## Notes
 

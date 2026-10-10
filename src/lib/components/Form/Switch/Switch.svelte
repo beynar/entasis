@@ -1,3 +1,9 @@
+<script lang="ts" module>
+	// One native validation pass fires `invalid` on every rejected control at once. Like the
+	// browser, only the first rejected switch of a form takes focus.
+	const reportingForms = new WeakSet<HTMLFormElement>();
+</script>
+
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import Field from '../Field/Field.svelte';
@@ -22,6 +28,7 @@
 		label,
 		labelPosition,
 		onValueChange,
+		inputValue = 'true',
 		...rest
 	}: SwitchProps = $props();
 	if (value === undefined) value = untrack(() => defaultValue);
@@ -66,8 +73,10 @@
 		set name(v: string | undefined) {
 			name = v;
 		},
-		get onValidate() {
-			return onValidate;
+		// Required means the switch must be on, as for Checkbox: an off switch is not an answer.
+		onValidate: (checked) => {
+			if (required && !checked) return true;
+			return onValidate?.(checked) || false;
 		},
 		get visible() {
 			return visible;
@@ -80,6 +89,20 @@
 	const onclick = () => {
 		if (disabled) return;
 		field.value = !field.value;
+	};
+
+	// The hidden input is never rendered, so the browser cannot point at it when a native form
+	// rejects a required switch that is off: keep that report on the visible switch instead.
+	const oninvalid = (event: Event & { currentTarget: HTMLInputElement }) => {
+		event.preventDefault();
+		field.validate();
+		const form = event.currentTarget.form;
+		if (form) {
+			if (reportingForms.has(form)) return;
+			reportingForms.add(form);
+			queueMicrotask(() => reportingForms.delete(form));
+		}
+		field.node?.focus();
 	};
 
 	const onKeydown = (e: KeyboardEvent) => {
@@ -111,9 +134,12 @@
 >
 	<input
 		onchange={onclick}
+		{oninvalid}
 		name={field.name}
 		id={'input-' + field.id}
-		{value}
+		value={inputValue}
+		checked={!!field.value}
+		required={field.required}
 		hidden
 		disabled={field.disabled}
 		type="checkbox"

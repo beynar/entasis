@@ -3,6 +3,7 @@
 	import DocPage from '../../DocPage.svelte';
 	import Form from '$lib/components/Form/Form/Form.svelte';
 	import { Slider } from '$lib/components/Form/Slider/index.js';
+	import I18n from '$lib/i18n/I18n.svelte';
 	import { sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
@@ -18,6 +19,10 @@
 	let comfortRange = $state<number[] | null>([18, 24]);
 	let distribution = $state<number[] | null>([20, 50, 80]);
 	let verticalValue = $state<number | null>(60);
+	let threshold = $state<number[] | null>([25]);
+	let brightness = $state<number | null>(30);
+	let rtlRange = $state<number[] | null>([20, 60]);
+	let rtlGlow = $state<number | null>(1.2);
 
 	const semanticColors = ['primary', 'secondary', 'success', 'warning', 'danger', 'info'] as const;
 	const sizeLabels = {
@@ -62,7 +67,9 @@
 		'Scalar or range values',
 		'Default, thick, and contained variants',
 		'Vertical orientation',
-		'Draggable selected range'
+		'Draggable selected range',
+		'One-element arrays stay arrays',
+		'Right-to-left track mirroring'
 	]}
 >
 	<ComponentCard
@@ -164,6 +171,64 @@
 					thumbLabels={['Minimum budget', 'Maximum budget']}
 				/>
 			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="An array value keeps its array shape, even with a single thumb"
+			code={`<Slider label="Threshold" bind:value={threshold} min={0} max={100} showValue />
+<!-- threshold = [25] stays an array: ArrowRight gives [26], not 26 -->`}
+		>
+			<div class="grid w-full max-w-md gap-2">
+				<Slider label="Threshold" bind:value={threshold} min={0} max={100} showValue />
+				<p class="text-neutral/70 text-xs" data-testid="slider-threshold-value">
+					Value: {JSON.stringify(threshold)}
+				</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Right-to-left"
+			description="In an RTL locale the horizontal track mirrors: the minimum sits at the right edge, ArrowLeft increases, and a press reads its value from the right."
+			code={`<I18n locale="ar">
+	<Slider label="السطوع" bind:value={brightness} showValue />
+	<Slider
+		mode="range"
+		label="نطاق السعر"
+		bind:value={range}
+		marks={[
+			{ value: 0, label: '0' },
+			{ value: 50, label: '50' },
+			{ value: 100, label: '100' }
+		]}
+	/>
+	<Slider variant="contained" label="التوهج" bind:value={glow} min={0} max={3} step={0.1} showValue />
+</I18n>`}
+		>
+			<I18n locale="ar" manageDocument={false}>
+				<div class="grid w-full max-w-md gap-6" data-testid="slider-rtl-demo">
+					<Slider label="السطوع" bind:value={brightness} showValue />
+					<Slider
+						mode="range"
+						label="نطاق السعر"
+						bind:value={rtlRange}
+						marks={[
+							{ value: 0, label: '0' },
+							{ value: 50, label: '50' },
+							{ value: 100, label: '100' }
+						]}
+					/>
+					<Slider
+						variant="contained"
+						label="التوهج"
+						bind:value={rtlGlow}
+						min={0}
+						max={3}
+						step={0.1}
+						showValue
+						formatValue={(value) => value.toFixed(1)}
+					/>
+				</div>
+			</I18n>
 		</ComponentCard>
 
 		<ComponentCard

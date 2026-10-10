@@ -26,7 +26,10 @@ export type SliderProps = Omit<
 	InputProps<'slider'>,
 	'value' | 'defaultValue' | 'onValueChange' | 'onValidate'
 > & {
-	/** The field's value, bindable with `bind:value`; arrays render multiple thumbs. */
+	/**
+	 * The field's value, bindable with `bind:value`. An array renders one thumb per entry and keeps
+	 * its array shape, even with a single entry: `[25]` becomes `[26]`, never `26`.
+	 */
 	value?: number | number[] | null;
 	/** Initial field value when `value` is omitted. */
 	defaultValue?: number | number[] | null;
@@ -64,7 +67,7 @@ export type SliderProps = Omit<
 	thumbLabels?: string[];
 	/** Per-instance i18n overrides, merged over the global catalog. */
 	i18n?: Partial<Messages>;
-	/** Called whenever the field value changes. */
+	/** Called whenever the field value changes, with the same scalar or array shape as `value`. */
 	onValueChange?: (value: number | number[] | null) => void;
 	/** Validates the current value, returning error messages (or false) when invalid. */
 	onValidate?: (value: number | number[]) => string[] | boolean;

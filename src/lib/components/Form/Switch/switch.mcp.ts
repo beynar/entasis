@@ -20,12 +20,13 @@ Extends all Field component props plus:
 ### Core Props
 - **value**: boolean | null (bindable) - Toggle state (bind with \`bind:value\`)
 - **defaultValue**: boolean | null (default: null) - Initial value when value is omitted
+- **inputValue**: string (default: 'true') - Value a native \`<form>\` submits under \`name\` while the switch is on; an off switch submits nothing
 
 ### Field Props (inherited)
 - **label**: string | Snippet - Field label
 - **description**: string | Snippet - Helper text
 - **error**: string - Error message
-- **required**: boolean - Mark as required
+- **required**: boolean - The switch must be on to be valid (like Checkbox)
 - **disabled**: boolean - Disable toggle
 - **size**: 'small' | 'normal' | 'large' - Switch size
 
@@ -75,12 +76,25 @@ Extends all Field component props plus:
 \`\`\`
 
 ### Required Switch
+A required switch is valid only while it is on, so it fits consent and terms acceptance.
 \`\`\`svelte
 <Switch 
 	label="I agree to the terms and conditions"
 	bind:value={agreedToTerms}
 	required
 />
+\`\`\`
+
+### Native Form Submission
+Inside a plain \`<form>\` (for example a SvelteKit form action), the switch submits its \`name\` with
+\`inputValue\` while it is on and nothing while it is off, like a native checkbox. A required switch
+that is off blocks the submit, focuses the switch and shows its error.
+\`\`\`svelte
+<form method="POST">
+	<Switch name="marketing" inputValue="yes" label="Marketing emails" />
+	<Switch name="terms" label="Accept the terms" required />
+	<button type="submit">Save</button>
+</form>
 \`\`\`
 
 ### Disabled Switch
@@ -262,7 +276,7 @@ Extends all Field component props plus:
 ## Validation
 
 Switch validates:
-- **required**: Must be checked (useful for terms acceptance)
+- **required**: Must be on (useful for terms acceptance); an off switch fails Form validation and native form submission
 
 ## Accessibility
 

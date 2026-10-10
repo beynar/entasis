@@ -24,7 +24,7 @@
 		if (slider.orientationValue === 'vertical') {
 			return `bottom: ${percentage}%;`;
 		}
-		return `left: ${percentage}%;`;
+		return `inset-inline-start: ${percentage}%;`;
 	};
 </script>
 
