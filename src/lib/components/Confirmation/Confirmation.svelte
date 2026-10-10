@@ -15,10 +15,12 @@
 	const classes = $derived(useConfirmationTheme(theme));
 	const themeState = useTheme();
 
-	// Requests this host still owes an answer. A plain set, not `$state`: the unmount teardown
+	// Requests the user has not answered yet. A plain set, not `$state`: the unmount teardown
 	// reads it, and a `$state` read in teardown can return the value from before the last change.
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- read in teardown, never rendered
 	const unanswered = new Set<(outcome: ConfirmationOutcome) => void>();
+	// Set by the unmount teardown; a plain flag for the same reason.
+	let unmounted = false;
 
 	// Mounted first, then opened on the next tick so the Dialog plays its enter transition.
 	onMount(() => {
@@ -46,9 +48,11 @@
 				})
 		});
 		return () => {
+			unmounted = true;
 			unregister();
 			// Nobody can answer these dialogs any more: settle them as declined so an
-			// `await confirmation()` never hangs on a host that left (a layout remount).
+			// `await confirmation()` never hangs on a host that left (a layout remount). A request
+			// whose `onConfirm` is running was answered, and settles when that finishes.
 			for (const settle of [...unanswered]) settle({ confirmed: false });
 		};
 	});
@@ -63,12 +67,20 @@
 			onclick?.(event);
 			let result: unknown;
 			if (continued && confirmation.onConfirm) {
+				// The user answered: while `onConfirm` runs, an unmount must not decline the request
+				// (the action may be what navigated away), so it settles with the action's outcome.
+				unanswered.delete(confirmation.settle);
 				// A throwing or rejected `onConfirm` ends the loading state and keeps the dialog
 				// open, so Cancel works again; the error still propagates like any handler error.
 				try {
 					const pending = confirmation.onConfirm();
 					if (pending instanceof Promise) confirmation.loading = true;
 					result = await pending;
+				} catch (error) {
+					// The question is open again, unless the host left and nobody can answer it.
+					if (unmounted) confirmation.settle({ confirmed: false });
+					else unanswered.add(confirmation.settle);
+					throw error;
 				} finally {
 					confirmation.loading = false;
 				}

@@ -50,7 +50,10 @@ export type PopoverProps = WithAttachments<{
 	openOnClick?: boolean;
 	/** When true, hovering the trigger opens the popover after `delay`, including one that started open. */
 	openOnHover?: boolean;
-	/** Delay in milliseconds before opening on hover when `openOnHover` is enabled. Default `100`. */
+	/**
+	 * Delay in milliseconds before opening on hover when `openOnHover` is enabled. Default `100`.
+	 * Leaving the trigger, or any other open or close meanwhile, cancels the pending open.
+	 */
 	delay?: number;
 	/** When true, enter and exit transitions slide from the placement direction. */
 	directedTransition?: boolean;

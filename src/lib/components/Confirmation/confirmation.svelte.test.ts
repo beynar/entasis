@@ -93,6 +93,81 @@ describe('Confirmation', () => {
 		await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
 	});
 
+	test('a synchronously throwing onConfirm keeps the dialog open with Cancel enabled', async () => {
+		render(ConfirmationHarness);
+		const failure = new Error('Invalid state');
+		const onConfirm = vi.fn(() => {
+			throw failure;
+		});
+		const pending = ask(onConfirm);
+		const settled = vi.fn();
+		void pending.then(settled);
+		await screen.findByRole('alertdialog');
+		const cancel = screen.getByRole('button', { name: 'Keep' });
+
+		const unhandled = vi.fn();
+		await withUnhandledRejections(unhandled, async () => {
+			await fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+			expect(onConfirm).toHaveBeenCalledOnce();
+			await waitFor(() => expect(unhandled).toHaveBeenCalledWith(failure, expect.anything()));
+		});
+
+		expect(cancel).not.toBeDisabled();
+		expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+		expect(settled).not.toHaveBeenCalled();
+
+		await fireEvent.click(cancel);
+		await expect(pending).resolves.toEqual({ confirmed: false, result: undefined });
+	});
+
+	test('unmounting the host while an accepted onConfirm runs still reports the confirmation', async () => {
+		const { unmount } = render(ConfirmationHarness);
+		let finishAction: (value: string) => void = () => {};
+		const pending = ask(
+			() =>
+				new Promise<string>((resolve) => {
+					finishAction = resolve;
+				})
+		);
+		const settled = vi.fn();
+		void pending.then(settled);
+		await screen.findByRole('alertdialog');
+		await fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+		await waitFor(() => expect(screen.getByRole('button', { name: 'Keep' })).toBeDisabled());
+
+		// The action navigates away, which unmounts the host before the action finishes.
+		unmount();
+		await Promise.resolve();
+		expect(settled).not.toHaveBeenCalled();
+
+		finishAction('deleted');
+		await expect(pending).resolves.toEqual({ confirmed: true, result: 'deleted' });
+	});
+
+	test('an accepted onConfirm that rejects after the host unmounted settles as declined', async () => {
+		const { unmount } = render(ConfirmationHarness);
+		const failure = new Error('Network down');
+		let rejectAction: (reason: unknown) => void = () => {};
+		const pending = ask(
+			() =>
+				new Promise((_, reject) => {
+					rejectAction = reject;
+				})
+		);
+		await screen.findByRole('alertdialog');
+		await fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+		await waitFor(() => expect(screen.getByRole('button', { name: 'Keep' })).toBeDisabled());
+		unmount();
+
+		const unhandled = vi.fn();
+		await withUnhandledRejections(unhandled, async () => {
+			rejectAction(failure);
+			// Nobody is left to retry or cancel, so the request ends as declined.
+			await expect(pending).resolves.toEqual({ confirmed: false, result: undefined });
+			await waitFor(() => expect(unhandled).toHaveBeenCalledWith(failure, expect.anything()));
+		});
+	});
+
 	test('unmounting the host settles its open requests as declined', async () => {
 		const { unmount } = render(ConfirmationHarness);
 		const pending = ask();

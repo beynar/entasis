@@ -224,6 +224,9 @@ export class PopoverState extends PopoverOptionsBase {
 	setOpen = (nextOpen: boolean) => {
 		this.#openRequests += 1;
 		if (this.isOpen === nextOpen) return;
+		// A hover open still waiting on its delay belongs to the state before this change: left
+		// pending, it would reopen a popover the user just closed by click or Escape.
+		this.hoverAction.cancel();
 		this.isOpen = nextOpen;
 		this.onOpenChange?.(nextOpen);
 	};
@@ -339,6 +342,7 @@ export class PopoverState extends PopoverOptionsBase {
 		if (!reference) {
 			return () => {
 				this.dialogElement = null;
+				queueMicrotask(this.#closeIfAnchorLost);
 			};
 		}
 		// Hide until place() resolves (async computePosition), preventing the top-left flash.
@@ -356,6 +360,12 @@ export class PopoverState extends PopoverOptionsBase {
 		return () => {
 			cleanup();
 			this.dialogElement = null;
+			// The panel also leaves when its `ref` anchor does (`bind:this` resets it to null),
+			// and without an outro that happens before the observers above can report the
+			// detached node: judge the anchor once the flush settles, so the popover closes
+			// instead of staying open and reappearing when the anchor returns. A no-op when the
+			// popover closed or was destroyed, or when another anchor took over.
+			queueMicrotask(this.#closeIfAnchorLost);
 		};
 	};
 	panel = (node: HTMLElement) => {

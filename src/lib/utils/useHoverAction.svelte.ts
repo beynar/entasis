@@ -3,7 +3,10 @@ import { on } from 'svelte/events';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
 type HoverActionHandlerOptions = {
-	/** Checked when the pointer enters (after the delay) and leaves, never when attaching. */
+	/**
+	 * Checked when the pointer enters (no delay starts while inactive), again once the delay
+	 * elapses, and when it leaves; never when attaching.
+	 */
 	isActive: () => boolean;
 	onMouseEnter?: () => void;
 	onMouseLeave?: () => void;
@@ -30,11 +33,20 @@ export const useHoverAction = (props: HoverActionHandlerOptions) => {
 		});
 	};
 
+	/** Drops every pending delayed enter, so none of them calls `onMouseEnter` any more. */
+	const cancel = () => {
+		timeouts.forEach((timeout) => clearTimeout(timeout));
+		timeouts.clear();
+	};
+
 	function onMouseEnter(this: HTMLElement) {
 		if (timeouts.get(this)) {
 			clearTimeout(timeouts.get(this));
 			timeouts.delete(this);
 		}
+		// An inactive owner (a popover that is already open) starts no delay: one left pending
+		// would act on a later state, such as reopening a popover the user just closed.
+		if (!props.isActive()) return;
 		const delay = readDelay();
 		if (delay) {
 			wait(this, delay).then(() => {
@@ -58,8 +70,7 @@ export const useHoverAction = (props: HoverActionHandlerOptions) => {
 	const destroy = () => {
 		offs.forEach((off) => off());
 		offs.clear();
-		timeouts.forEach((timeout) => clearTimeout(timeout));
-		timeouts.clear();
+		cancel();
 		isHovered = false;
 	};
 	onDestroy(destroy);
@@ -88,6 +99,11 @@ export const useHoverAction = (props: HoverActionHandlerOptions) => {
 			});
 		},
 		destroy,
+		/**
+		 * Cancels pending delayed enters. Owners call it when their state changes another way (a
+		 * click, Escape), so a hover that began before the change cannot undo it afterwards.
+		 */
+		cancel,
 		get isHovered() {
 			return isHovered;
 		}

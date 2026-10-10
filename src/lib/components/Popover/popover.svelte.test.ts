@@ -121,6 +121,42 @@ describe('Popover hover', () => {
 		expect(trigger).toHaveAttribute('aria-expanded', 'false');
 	});
 
+	test('without a delay prop the hover open waits the 100 ms default', async () => {
+		render(PopoverAnchorHarness, { props: { openOnHover: true } });
+		const trigger = screen.getByRole('button', { name: 'Anchor trigger' });
+		await fireEvent.mouseEnter(trigger);
+		await sleep(50);
+		expect(trigger).toHaveAttribute('aria-expanded', 'false');
+		await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'));
+	});
+
+	test('a click that closes the popover during a pending hover open keeps it closed', async () => {
+		render(PopoverAnchorHarness, { props: { openOnHover: true, delay: 100 } });
+		const trigger = screen.getByRole('button', { name: 'Anchor trigger' });
+		// The pointer arrives, then clicks open and closed again before the hover delay elapses.
+		await fireEvent.mouseEnter(trigger);
+		await fireEvent.click(trigger);
+		expect(trigger).toHaveAttribute('aria-expanded', 'true');
+		await fireEvent.click(trigger);
+		expect(trigger).toHaveAttribute('aria-expanded', 'false');
+		await sleep(180);
+		expect(trigger).toHaveAttribute('aria-expanded', 'false');
+	});
+
+	test('re-entering an open popover’s trigger and clicking it closed keeps it closed', async () => {
+		render(PopoverAnchorHarness, { props: { openOnHover: true, delay: 100 } });
+		const trigger = screen.getByRole('button', { name: 'Anchor trigger' });
+		await fireEvent.click(trigger);
+		expect(trigger).toHaveAttribute('aria-expanded', 'true');
+		// Into the panel and back onto the trigger, then a click to close.
+		await fireEvent.mouseLeave(trigger);
+		await fireEvent.mouseEnter(trigger);
+		await fireEvent.click(trigger);
+		expect(trigger).toHaveAttribute('aria-expanded', 'false');
+		await sleep(180);
+		expect(trigger).toHaveAttribute('aria-expanded', 'false');
+	});
+
 	test('a popover that starts open still opens on hover once closed', async () => {
 		render(PopoverAnchorHarness, { props: { openOnHover: true, delay: 20, defaultOpen: true } });
 		const trigger = screen.getByRole('button', { name: 'Anchor trigger' });
@@ -175,6 +211,56 @@ describe('Popover anchor lifetime', () => {
 		await rerender({ onOpenChange, showPopover: false });
 		await sleep(20);
 		expect(onOpenChange).not.toHaveBeenCalledWith(false);
+	});
+
+	test('unmounting the trigger closes a mobile sheet popover', async () => {
+		const onOpenChange = vi.fn();
+		const { rerender } = render(PopoverAnchorHarness, {
+			props: { onOpenChange, mobileSheet: true }
+		});
+		await fireEvent.click(screen.getByRole('button', { name: 'Anchor trigger' }));
+		await screen.findByRole('button', { name: 'Inside popover' });
+
+		await rerender({ onOpenChange, mobileSheet: true, showTrigger: false });
+		await waitFor(() => expect(onOpenChange).toHaveBeenLastCalledWith(false));
+		await waitFor(() =>
+			expect(screen.queryByRole('button', { name: 'Inside popover' })).toBeNull()
+		);
+		await sleep(20);
+		expect(onOpenChange.mock.calls.filter(([open]) => open === false)).toHaveLength(1);
+	});
+
+	test('unmounting the trigger closes an inline popover', async () => {
+		const onOpenChange = vi.fn();
+		const { rerender } = render(PopoverAnchorHarness, { props: { onOpenChange, inline: true } });
+		await fireEvent.click(screen.getByRole('button', { name: 'Anchor trigger' }));
+		await screen.findByRole('button', { name: 'Inside popover' });
+
+		await rerender({ onOpenChange, inline: true, showTrigger: false });
+		await waitFor(() => expect(onOpenChange).toHaveBeenLastCalledWith(false));
+		await waitFor(() =>
+			expect(screen.queryByRole('button', { name: 'Inside popover' })).toBeNull()
+		);
+		await sleep(20);
+		expect(onOpenChange.mock.calls.filter(([open]) => open === false)).toHaveLength(1);
+	});
+
+	test('a bind:this ref that unmounts closes the popover, which stays closed when it returns', async () => {
+		const onOpenChange = vi.fn();
+		const { rerender } = render(PopoverAnchorHarness, { props: { onOpenChange, boundRef: true } });
+		await screen.findByRole('button', { name: 'Inside bound popover' });
+
+		// Svelte resets the bound ref to null; with zero-duration transitions the panel leaves
+		// in the same flush, before any floating-ui observer could notice the detached anchor.
+		await rerender({ onOpenChange, boundRef: true, showAnchor: false });
+		await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+		expect(screen.queryByRole('button', { name: 'Inside bound popover' })).toBeNull();
+
+		await rerender({ onOpenChange, boundRef: true, showAnchor: true });
+		await screen.findByTestId('bound-anchor');
+		await sleep(20);
+		expect(screen.queryByRole('button', { name: 'Inside bound popover' })).toBeNull();
+		expect(onOpenChange.mock.calls.filter(([open]) => open === false)).toHaveLength(1);
 	});
 
 	test('a ref element that leaves the document closes the popover anchored to it', async () => {
