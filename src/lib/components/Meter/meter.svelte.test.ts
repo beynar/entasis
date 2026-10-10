@@ -85,6 +85,26 @@ describe('Meter accessibility', () => {
 		expect(meter).toHaveAccessibleDescription('65% complete');
 	});
 
+	test('keeps the label inside the meter presentational, as the NVDA workaround needs', () => {
+		const single = render(Meter, { props: { value: 65, label: 'Progress' } });
+		const label = within(single.container).getByText('Progress');
+		// NVDA ignores a name that comes from a label element inside the meter (nvda#16204).
+		expect(label).toHaveAttribute('role', 'presentation');
+		expect(within(single.container).getByRole('meter', { name: 'Progress' })).toContainElement(
+			label
+		);
+		single.unmount();
+
+		const stacked = render(Meter, {
+			props: { label: 'Storage usage', value: [{ value: 10 }, { value: 20 }] }
+		});
+		expect(within(stacked.container).getByText('Storage usage')).toHaveAttribute(
+			'role',
+			'presentation'
+		);
+		expect(within(stacked.container).getByRole('group', { name: 'Storage usage' })).toBeTruthy();
+	});
+
 	test('announces the indicator text, so the raw value is read in value mode', () => {
 		const { getByRole } = render(Meter, {
 			props: { value: 750, max: 1000, showIndicatorAs: 'value', label: 'Score' }

@@ -54,4 +54,20 @@ describe('PhoneInput country listbox', () => {
 		await waitFor(() => expect(listbox()).toHaveAttribute('hidden'));
 		expect(listbox().children).toHaveLength(0);
 	});
+
+	test('collapses the search combobox while the listbox is hidden', async () => {
+		renderPicker();
+		const input = screen.getByPlaceholderText('Search countries');
+		await waitFor(() => expect(input).toHaveAttribute('aria-expanded', 'true'));
+		expect(input).toHaveAttribute('aria-controls', 'picker-listbox');
+
+		await fireEvent.input(input, { target: { value: 'atlantis' } });
+		await waitFor(() => expect(listbox()).toHaveAttribute('hidden'));
+		expect(input).toHaveAttribute('aria-expanded', 'false');
+		expect(input).not.toHaveAttribute('aria-activedescendant');
+
+		await fireEvent.input(input, { target: { value: 'fra' } });
+		await waitFor(() => expect(listbox()).not.toHaveAttribute('hidden'));
+		expect(input).toHaveAttribute('aria-expanded', 'true');
+	});
 });

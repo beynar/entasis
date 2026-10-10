@@ -37,6 +37,34 @@ describe('ScrollArea accessibility tree', () => {
 		expect(screen.getByRole('group', { name: 'Scrollable content' })).toBe(viewport());
 	});
 
+	test('a focused viewport keeps its focus when its content stops overflowing', async () => {
+		let extent = 400;
+		Object.defineProperty(Element.prototype, 'scrollHeight', {
+			configurable: true,
+			get: () => extent
+		});
+		render(ScrollAreaHarness);
+		const region = viewport();
+		await waitFor(() => expect(region).toHaveAttribute('tabindex', '0'));
+		region.focus();
+		expect(document.activeElement).toBe(region);
+
+		// The content now fits (a resize, a zoom-out, filtered content). Dropping the tabindex of
+		// the focused element would send focus to <body> in a real browser, so it stays -1, and the
+		// viewport keeps the role and name it is focused with.
+		extent = 0;
+		region.querySelector('p')!.append(' (edited)');
+		await waitFor(() => expect(region).toHaveAttribute('tabindex', '-1'));
+		expect(document.activeElement).toBe(region);
+		expect(screen.getByRole('group', { name: 'Scrollable content' })).toBe(region);
+
+		// Once focus moves on, the idle viewport is a plain element again.
+		region.blur();
+		await waitFor(() => expect(region).not.toHaveAttribute('tabindex'));
+		expect(region).not.toHaveAttribute('role');
+		expect(region).not.toHaveAttribute('aria-label');
+	});
+
 	test('keeps an explicit label as a named group even when the content fits', () => {
 		render(ScrollAreaHarness, { props: { label: 'Release notes' } });
 

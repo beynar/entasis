@@ -70,6 +70,7 @@ The ScrollArea component provides a native scroll viewport with custom overlay s
 
 - A viewport whose content fits is a plain element: no role, no name, no tab stop.
 - While it overflows, the viewport is a \`group\` named by \`label\` (default 'Scrollable content') with \`tabindex="0"\`, so keyboard users can scroll it (WCAG SCR34).
+- A focused viewport whose content stops overflowing keeps its role, name and \`tabindex="-1"\` until it blurs, so focus never drops to the page.
 - \`viewportRole="presentation"\` (or \`none\`) keeps the viewport transparent even while it overflows; use it when a surrounding listbox or grid owns keyboard scrolling.
 - The custom scrollbars and the edge-scroll arrows are pointer-only and carry \`aria-hidden="true"\`.
 

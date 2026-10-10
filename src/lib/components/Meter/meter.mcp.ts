@@ -228,7 +228,7 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 - The meter is named by the rendered \`label\` (\`aria-labelledby\`). With a custom \`header\`, a string \`label\` names it through \`aria-label\`; without any label it falls back to a single segment's own \`label\`, then to the i18n \`meter\` text
 - \`helper\` and \`description\` describe the meter through \`aria-describedby\`
 - Several segments make the root a \`role="group"\` named by \`label\`, containing one \`role="meter"\` per segment named by the segment's \`label\` (or "Segment 1 of 3", i18n \`meterSegment\`)
-- Each meter contains a visually hidden presentational text node so NVDA reads its name
+- Each meter contains a visually hidden presentational text node, and the rendered label element is \`role="presentation"\`, so NVDA reads its name
 
 ## Notes
 

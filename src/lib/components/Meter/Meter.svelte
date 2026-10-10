@@ -150,7 +150,10 @@
 
 {#snippet headerSnippet()}
 	{#if label}
-		<div id={labelId} class={classes.label({ size })}>
+		<!-- role="presentation" completes the NVDA workaround (mui/base-ui#4200): NVDA skips a name
+		     that comes from a label inside the meter (nvaccess/nvda#16204). aria-labelledby still
+		     resolves through a presentational element. -->
+		<div id={labelId} role="presentation" class={classes.label({ size })}>
 			{#if typeof label === 'string'}{label}{:else}{@render label()}{/if}
 		</div>
 	{/if}

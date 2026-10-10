@@ -75,7 +75,6 @@
 		searchInput = input;
 		input.setAttribute('role', 'combobox');
 		input.setAttribute('aria-autocomplete', 'list');
-		input.setAttribute('aria-expanded', 'true');
 		input.setAttribute('aria-haspopup', 'listbox');
 		input.setAttribute('autocomplete', 'off');
 		input.setAttribute('autocorrect', 'off');
@@ -109,6 +108,8 @@
 		if (!searchInput) return;
 
 		searchInput.setAttribute('aria-controls', listboxId);
+		// The listbox is hidden while the search matches nothing, so the combobox is collapsed.
+		searchInput.setAttribute('aria-expanded', String(filteredCountries.length > 0));
 		if (nav.activeDescendant) {
 			searchInput.setAttribute('aria-activedescendant', nav.activeDescendant);
 		} else {

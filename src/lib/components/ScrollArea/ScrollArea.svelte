@@ -55,17 +55,21 @@
 	// `none`) stays transparent even while it overflows: the surrounding widget (a listbox with
 	// active-descendant navigation, say) owns keyboard scrolling, and a focusable or named node
 	// would cancel the presentational role.
+	//
+	// A viewport that holds focus keeps its role, name and a programmatic tab stop (-1) after its
+	// content stops overflowing (a resize, a zoom-out, filtered content): removing the tabindex of
+	// the focused element would make the browser drop focus to <body>. They go once it blurs.
+	let viewportFocused = $state(false);
+	const exposed = $derived(scrollArea.overflowing || viewportFocused);
 	const presentational = $derived(viewportRole === 'presentation' || viewportRole === 'none');
 	const resolvedViewportRole = $derived(
-		viewportRole ?? (label !== undefined || scrollArea.overflowing ? 'group' : undefined)
+		viewportRole ?? (label !== undefined || exposed ? 'group' : undefined)
 	);
 	const resolvedViewportLabel = $derived(
-		presentational
-			? undefined
-			: (label ?? (scrollArea.overflowing ? t.scrollableContent : undefined))
+		presentational ? undefined : (label ?? (exposed ? t.scrollableContent : undefined))
 	);
 	const resolvedViewportTabindex = $derived(
-		presentational || !scrollArea.overflowing ? undefined : 0
+		presentational ? undefined : scrollArea.overflowing ? 0 : viewportFocused ? -1 : undefined
 	);
 </script>
 
@@ -94,6 +98,8 @@
 		role={resolvedViewportRole}
 		aria-label={resolvedViewportLabel}
 		{onscroll}
+		onfocus={() => (viewportFocused = true)}
+		onblur={() => (viewportFocused = false)}
 		{@attach scrollArea.viewportAttachment}
 		style:position="relative"
 		style:overflow="scroll"
