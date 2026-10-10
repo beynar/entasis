@@ -3,7 +3,9 @@ import { expect, test } from '@playwright/test';
 import { blockCategories } from '../src/routes/blocks/catalog.js';
 import { workflowBlocks } from '../src/routes/blocks/blocks.js';
 
-test.use({ baseURL: process.env.BLOCKS_BASE_URL ?? 'http://127.0.0.1:4173' });
+// The preview origin comes from playwright.config.ts (E2E_PORT); BLOCKS_BASE_URL points the suite
+// at another server, such as a deployed docs site.
+if (process.env.BLOCKS_BASE_URL) test.use({ baseURL: process.env.BLOCKS_BASE_URL });
 
 test('browse, filter, and recover from an empty search', async ({ page }) => {
 	await page.goto('/blocks', { waitUntil: 'domcontentloaded' });

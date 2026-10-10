@@ -28,10 +28,11 @@ jobs:
       # dist before check: `entasis/icons/*` is typed through dist (see release.yml).
       - run: pnpm exec svelte-package
       - run: npm run check
+      # Browser-mode unit tests (*.browser.test.ts) run in Chromium and WebKit.
+      - run: pnpm exec playwright install --with-deps chromium webkit
       - run: npm run test:unit -- --run
       - run: npm run check:packed-library
       - run: npm run check:package-consumer
       - run: npm run check:doc-fences
       - run: pnpm exec publint
-      - run: pnpm exec playwright install --with-deps chromium
       - run: npm run test:e2e

@@ -8,5 +8,15 @@
 		"route": "^/components/diff",
 		"ruleId": "color-contrast",
 		"reason": "@pierre/diffs paints its own line-number and count colours inside the diffs-container shadow tree"
+	},
+	{
+		"route": "^/components/(combobox|tags-input) \\(listbox open\\)$",
+		"ruleId": "aria-required-children",
+		"reason": "The open listbox wraps its options in a ScrollArea viewport (role=group) next to role=scrollbar elements. Tracked as SC-1 / DF-16 / SC-INFRA-6: the viewport becomes the listbox (Combobox and TagsInput lane C6, ScrollArea lane C17). Remove this entry with that change."
+	},
+	{
+		"route": "^/components/dialog \\(dialog open\\)$",
+		"ruleId": "button-name",
+		"reason": "Dialog's default close button is an icon-only Button without an accessible name. Found by the open-popup sweep (E2E-1); the fix belongs to the Dialog lane (C1). Remove this entry with that change."
 	}
 ]

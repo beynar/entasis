@@ -7,3 +7,6 @@ yarn.lock
 /svelte-pro
 /.playwright-cli
 /.playwright-mcp
+
+# Written by `npm run bench:baseline` (Vitest benchmark results)
+/src/benchmarks/baselines
