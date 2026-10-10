@@ -2340,6 +2340,8 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'TabsRenderPayload',
 		'TabsTheme',
 		'TabsThemeProps',
+		'TabsValueChangePayload',
+		'TabsValueChangeReason',
 		'setTabsTheme',
 		'tabsTheme',
 		'useTabsTheme'

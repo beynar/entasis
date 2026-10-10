@@ -110,7 +110,7 @@ describe('shared disabled anchor owners', () => {
 		expect(onclick).not.toHaveBeenCalled();
 	});
 
-	test('keeps a disabled selected Tabbar anchor out of the tab order', async () => {
+	test('keeps a disabled Tabbar anchor out of the tab order, even when it was the default', async () => {
 		const onValueChange = vi.fn();
 		render(Tabbar, {
 			props: {
@@ -122,8 +122,11 @@ describe('shared disabled anchor owners', () => {
 		const anchor = screen.getByRole('tab', { name: 'Tab destination' });
 		if (!(anchor instanceof HTMLAnchorElement)) throw new Error('Expected a tab anchor.');
 		expectDisabledAnchor(anchor);
+		// A disabled default is never shown as selected: the enabled tab takes over on mount.
+		expect(anchor).toHaveAttribute('aria-selected', 'false');
+		expect(onValueChange).toHaveBeenCalledExactlyOnceWith('Enabled');
 		await fireEvent.keyDown(anchor, { key: 'Enter' });
-		expect(onValueChange).not.toHaveBeenCalled();
+		expect(onValueChange).toHaveBeenCalledOnce();
 		expect(screen.getByRole('tab', { name: 'Enabled' })).toHaveAttribute('tabindex', '0');
 	});
 });

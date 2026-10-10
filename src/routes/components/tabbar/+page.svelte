@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Tabbar from '$lib/components/Tabbar/Tabbar.svelte';
+	import { Button } from '$lib/components/Button/index.js';
 	import { userIcon } from '$lib/components/Icons/user.js';
 	import { houseIcon } from '$lib/components/Icons/house.js';
 	import { gearIcon } from '$lib/components/Icons/gear.js';
@@ -90,6 +91,13 @@
 	function handleTabChange(value: string) {
 		console.log('Tab changed to:', value);
 	}
+
+	// A disabled first tab is skipped by the default selection; removing the active tab moves the
+	// selection to its nearest enabled neighbour and reports the new value.
+	const fallbackSeed = [{ label: 'Drafts', disabled: true }, 'Inbox', 'Sent', 'Archive'];
+	let fallbackTabs = $state(fallbackSeed);
+	let fallbackActiveTab = $state<string>();
+	let fallbackReports = $state<string[]>([]);
 </script>
 
 <DocPage
@@ -154,6 +162,40 @@
 		<ComponentCard title="Disabled tabs" description="Individual tabs can be disabled.">
 			<div class="flex flex-col items-center">
 				<Tabbar class="w-fit" items={tabsWithDisabled} bind:value={disabledActiveTab} />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Selection fallback"
+			description="The Tabbar always marks an enabled tab as selected. The disabled first tab is skipped by the default selection, and removing the active tab selects its nearest enabled neighbour. The new value is written back to the binding and reported through onValueChange."
+			code={`<Tabbar {items} bind:value onValueChange={(value) => console.log(value)} />`}
+		>
+			<div class="flex flex-col items-center gap-3">
+				<Tabbar
+					class="w-fit"
+					items={fallbackTabs}
+					bind:value={fallbackActiveTab}
+					onValueChange={(value) => (fallbackReports = [...fallbackReports, value])}
+				/>
+				<div class="flex flex-wrap justify-center gap-2">
+					<Button
+						variant="outline"
+						size="small"
+						onclick={() =>
+							(fallbackTabs = fallbackTabs.filter(
+								(tab) => (typeof tab === 'string' ? tab : tab.label) !== fallbackActiveTab
+							))}
+					>
+						Remove active tab
+					</Button>
+					<Button variant="ghost" size="small" onclick={() => (fallbackTabs = fallbackSeed)}>
+						Reset tabs
+					</Button>
+				</div>
+				<p class="text-neutral/70 text-sm" data-testid="tabbar-fallback-status">
+					value: {fallbackActiveTab ?? 'none'} · onValueChange: {fallbackReports.join(', ') ||
+						'not called yet'}
+				</p>
 			</div>
 		</ComponentCard>
 

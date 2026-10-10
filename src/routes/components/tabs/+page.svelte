@@ -64,6 +64,39 @@
 	];
 	let lastChangedTab = $state('Personal Info');
 
+	// The first tab is disabled, so the default selection is the second one. Removing or
+	// disabling the active tab moves the selection to an enabled tab and reports why.
+	const fallbackSeed = [
+		{
+			value: 'drafts',
+			label: 'Drafts',
+			disabled: true,
+			title: 'Drafts',
+			description: 'Disabled, so it is never selected, not even by default.'
+		},
+		{
+			value: 'review',
+			label: 'In review',
+			title: 'In review',
+			description: 'Selected by default: the first enabled tab.'
+		},
+		{
+			value: 'approved',
+			label: 'Approved',
+			title: 'Approved',
+			description: 'Remove the active tab to move to its nearest neighbour.'
+		},
+		{
+			value: 'archived',
+			label: 'Archived',
+			title: 'Archived',
+			description: 'Disable the active tab to move to the first enabled tab.'
+		}
+	];
+	let fallbackTabs = $state(fallbackSeed);
+	let fallbackActiveTab = $state<string>();
+	let fallbackReason = $state('none yet');
+
 	const simpleTabs = [
 		{ label: 'Overview', title: 'Overview', description: 'Important information at a glance.' },
 		{ label: 'Details', title: 'Details', description: 'Supporting data and operational notes.' },
@@ -312,6 +345,62 @@
 					</section>
 				{/snippet}
 			</Tabs>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Selection fallback"
+			description="Tabs always show an enabled tab next to its own panel. A disabled first tab is skipped by the default selection. Removing the active tab selects its nearest enabled neighbour (reason missing); disabling it selects the first enabled tab (reason disabled). The new value is written back to the binding and reported through onValueChange."
+			code={`<Tabs
+	{items}
+	bind:value
+	onValueChange={({ value, reason }) => console.log(value, reason)}
+>
+	{#snippet children({ item })}
+		<!-- Panel content -->
+	{/snippet}
+</Tabs>`}
+		>
+			<div class="flex w-full flex-col gap-4">
+				<div class="flex flex-wrap gap-2">
+					<Button
+						variant="outline"
+						size="small"
+						onclick={() =>
+							(fallbackTabs = fallbackTabs.filter((tab) => tab.value !== fallbackActiveTab))}
+					>
+						Remove active tab
+					</Button>
+					<Button
+						variant="outline"
+						size="small"
+						onclick={() =>
+							(fallbackTabs = fallbackTabs.map((tab) =>
+								tab.value === fallbackActiveTab ? { ...tab, disabled: true } : tab
+							))}
+					>
+						Disable active tab
+					</Button>
+					<Button variant="ghost" size="small" onclick={() => (fallbackTabs = fallbackSeed)}>
+						Reset tabs
+					</Button>
+				</div>
+				<Tabs
+					class="w-full"
+					items={fallbackTabs}
+					bind:value={fallbackActiveTab}
+					onValueChange={({ reason }) => (fallbackReason = reason)}
+				>
+					{#snippet children({ item })}
+						<section class="space-y-2 p-6">
+							<h3 class="text-xl font-semibold">{item.title}</h3>
+							<p class="text-neutral/80">{item.description}</p>
+						</section>
+					{/snippet}
+				</Tabs>
+				<p class="text-neutral/70 text-sm" data-testid="tabs-fallback-status">
+					value: {fallbackActiveTab ?? 'none'} · last reason: {fallbackReason}
+				</p>
+			</div>
 		</ComponentCard>
 
 		<ComponentCard

@@ -20,16 +20,18 @@ The Tabbar component is a flexible navigation component that displays a list of 
   - Array of tab items. Each item can be:
     - A simple string (e.g., "Home")
     - A TabItem object with: { value?, label, prefix?, suffix?, href?, disabled?, target?, rel? }
-  - Every tab resolves to a string value: its \`value\`, else its string label, else its index as a string (\`getTabValue(item, index)\` is exported from \`entasis/tabbar\`)
+  - Every tab resolves to a string value: its \`value\`, else its string label, else its index as a string
 
-- **value**: string (default: the first tab's value, bindable)
+- **value**: string (default: the first enabled tab's value, bindable)
   - The value of the currently active tab (a string item is its own value)
   - Can be bound with \`bind:value\`
+  - A value naming a disabled or unknown tab is replaced by an enabled tab (see Selection fallback)
 - **defaultValue**: string - Initial active tab value when value is omitted
 
 - **onValueChange**: (value: string) => void
-  - Callback function called when the active tab changes
-  - Receives the new tab's value as an argument; not called when the current tab is re-selected
+  - Called once per change of the active tab with the new tab's value: a click, an arrow key, a menu entry, or an automatic fallback (see Selection fallback)
+  - Not called when the current tab is re-selected or when value is changed externally to another enabled tab
+  - \`Tabs\` reports the reason of each change (\`user\`, \`initial\`, \`disabled\`, \`missing\`) in its own payload
 
 ### Styling Props
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
@@ -71,6 +73,16 @@ The Tabbar component is a flexible navigation component that displays a list of 
 - **theme**: TabbarThemeProps - Custom theme overrides
 
 Native div attributes and attachments are forwarded to the root, minus the ARIA the tab list owns: \`role\`, \`aria-orientation\` (from \`orientation\`), and its accessible name (from \`label\`) are written by the component and cannot be overridden. Horizontal and vertical overflow use the shared \`scroll-fade-x\` and \`scroll-fade-y\` utilities by default; non-overflowing tab lists remain unmasked, including in no-support fallback browsers.
+
+## Selection fallback
+
+The Tabbar always marks one enabled tab as selected. When value names a disabled tab or no tab, it resolves one effective tab, renders it (also during SSR), writes its value back to value and calls onValueChange with it:
+
+- On mount, a value or defaultValue naming a disabled or unknown tab selects the first enabled tab. Omitting both selects the first enabled tab directly and reports nothing.
+- When the selected tab becomes disabled, the first enabled tab is selected.
+- When the selected tab is removed from items, or value is set to a value no tab has, the nearest enabled neighbour of the tab that was shown is selected (the tab that moved into its place first, then the one before it).
+
+When every tab is disabled, a value naming one of them stays selected. An unknown value then selects no tab: every tab has \`aria-selected="false"\`, the sliding indicator is \`hidden\` with \`data-ready="false"\` and no inline style, and nothing is written back. A disabled tab is never selected by a click, a key or a menu entry.
 
 ## TabItem Structure
 
