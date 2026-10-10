@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-test.use({ baseURL: process.env.BLOCKS_BASE_URL ?? 'http://127.0.0.1:4173' });
+// The preview origin comes from playwright.config.ts (E2E_PORT); BLOCKS_BASE_URL points the suite
+// at another server, such as a deployed docs site.
+if (process.env.BLOCKS_BASE_URL) test.use({ baseURL: process.env.BLOCKS_BASE_URL });
 
 for (const width of [390, 768, 1440]) {
 	test(`studio rate keeps visible space between content groups at ${width}px`, async ({ page }) => {
@@ -58,7 +60,8 @@ test('product overlays use the same semantic inset as layout spacing', async ({ 
 
 test('all mobile navigation destinations fit without horizontal scrolling', async ({ page }) => {
 	await page.setViewportSize({ width: 390, height: 1000 });
-	await page.goto('/blocks/mobile-navigation');
+	// A tab pressed before hydration does nothing; under a loaded runner that race lost the press.
+	await page.goto('/blocks/mobile-navigation', { waitUntil: 'networkidle' });
 	const navigation = page.getByRole('tablist', { name: 'Mobile navigation' });
 	await navigation.scrollIntoViewIfNeeded();
 	await expect(navigation.getByRole('tab')).toHaveCount(4);

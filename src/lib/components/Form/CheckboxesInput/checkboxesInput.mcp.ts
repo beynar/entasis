@@ -318,6 +318,7 @@ The component renders as a fieldset with the following DOM structure:
 - ARIA attributes for validation states
 - Error announcements for screen readers
 - Focus management within the group
+- Each option button gets an id unique to the instance (\`<field id>-option-<index>\`) and its hidden input \`<option id>-input\`, so two fields with the same \`name\` or values containing spaces never produce duplicate or invalid ids
 
 ## Theme Customization
 

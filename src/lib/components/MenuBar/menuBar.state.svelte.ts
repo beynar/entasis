@@ -1,6 +1,7 @@
 import { tick, untrack } from 'svelte';
 import { createAttachmentKey, type Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
+import { hasShortcutModifier } from '$lib/utils/useKeyDown.svelte.js';
 import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
 import type { MenuProps } from '../Menu/menu.props.js';
 import type { MenuBarMenu } from './menuBar.props.js';
@@ -121,6 +122,8 @@ export function useMenuBarState(
 						event.key === 'Enter' ||
 						event.key === ' ';
 					if (!opensMenu) return;
+					// Alt/Ctrl/Meta + an arrow is a browser shortcut; Enter and Space still activate.
+					if (event.key.startsWith('Arrow') && hasShortcutModifier(event)) return;
 					event.preventDefault();
 					event.stopPropagation();
 					if (event.key === 'Enter' || event.key === ' ') {
@@ -152,6 +155,8 @@ export function useMenuBarState(
 				'keydown',
 				(event) => {
 					if (event.key !== nextKey && event.key !== previousKey) return;
+					// Alt/Ctrl/Meta + an arrow is a browser shortcut (Alt+ArrowLeft is Back).
+					if (hasShortcutModifier(event)) return;
 
 					const target = event.target as HTMLElement & { onNext?: () => void };
 					if (event.key === nextKey && typeof target.onNext === 'function') return;

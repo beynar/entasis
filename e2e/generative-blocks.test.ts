@@ -1,7 +1,9 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
-test.use({ baseURL: process.env.BLOCKS_BASE_URL ?? 'http://127.0.0.1:4173' });
+// The preview origin comes from playwright.config.ts (E2E_PORT); BLOCKS_BASE_URL points the suite
+// at another server, such as a deployed docs site.
+if (process.env.BLOCKS_BASE_URL) test.use({ baseURL: process.env.BLOCKS_BASE_URL });
 
 const sections = (page: Page) => page.locator('[data-artboard] [data-section-type]');
 const order = (page: Page) =>

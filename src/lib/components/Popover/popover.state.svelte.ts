@@ -1,6 +1,6 @@
 import { bind } from '$lib/utils/state.svelte.js';
 import { Registry } from '$lib/utils/registry.svelte.js';
-import { getContext, hasContext, onMount, setContext, untrack } from 'svelte';
+import { getContext, hasContext, onDestroy, onMount, setContext, untrack } from 'svelte';
 import { useTheme } from '../Theme/theme.state.svelte.js';
 import type { PopoverProps } from './popover.props.js';
 import {
@@ -161,7 +161,9 @@ export class PopoverState extends PopoverOptionsBase {
 		onMouseEnter: () => {
 			this.open();
 		},
-		delay: this.delay
+		// A function, read on each enter: field initialisers run before `bind(this, options)`
+		// installs the options, so a plain `this.delay` here would be `undefined` (no delay).
+		delay: () => this.delay
 	});
 
 	addChild = (child: PopoverState) => () => this.#children.add(child);
@@ -171,6 +173,9 @@ export class PopoverState extends PopoverOptionsBase {
 		bind(this, options);
 		setContext('popover', this);
 		if (this.parent) onMount(this.parent.addChild(this));
+		onDestroy(() => {
+			this.#destroyed = true;
+		});
 
 		useScrollLock({
 			isActive: () =>
@@ -191,10 +196,37 @@ export class PopoverState extends PopoverOptionsBase {
 
 	/** Calls to `setOpen`, direct or through `open`, `close` and `toggle`, unchanged state included. */
 	#openRequests = 0;
+	/**
+	 * The element attached through `reference` (or `trigger`). A plain field, not `$state`: the
+	 * detach teardown compares against it, and a `$state` read in teardown can return the value
+	 * from before the change that triggered it.
+	 */
+	#triggerNode: HTMLElement | null = null;
+	#destroyed = false;
+
+	/** Whether the panel still has an anchor in the document: the trigger, else the `ref` prop. */
+	#hasAnchor = () => {
+		const anchor = this.#triggerNode ?? this.externalRef;
+		if (!anchor) return false;
+		// A floating-ui virtual element (a cursor point) has no DOM presence to lose.
+		return !(anchor instanceof Element) || anchor.isConnected;
+	};
+
+	/**
+	 * Closes an open popover whose anchor left the document, through `close()` so `onOpenChange`
+	 * reports it. Skipped while the component itself is being destroyed.
+	 */
+	#closeIfAnchorLost = () => {
+		if (this.#destroyed || !this.isOpen || this.#hasAnchor()) return;
+		this.close();
+	};
 
 	setOpen = (nextOpen: boolean) => {
 		this.#openRequests += 1;
 		if (this.isOpen === nextOpen) return;
+		// A hover open still waiting on its delay belongs to the state before this change: left
+		// pending, it would reopen a popover the user just closed by click or Escape.
+		this.hoverAction.cancel();
 		this.isOpen = nextOpen;
 		this.onOpenChange?.(nextOpen);
 	};
@@ -304,13 +336,36 @@ export class PopoverState extends PopoverOptionsBase {
 			};
 		}
 
+		const reference = this.referenceElement;
+		// The anchor can go while the panel's outro still runs (its trigger unmounted): the panel
+		// keeps its last place, since floating-ui cannot observe a missing reference.
+		if (!reference) {
+			return () => {
+				this.dialogElement = null;
+				queueMicrotask(this.#closeIfAnchorLost);
+			};
+		}
 		// Hide until place() resolves (async computePosition), preventing the top-left flash.
 		node.style.visibility = 'hidden';
 		void this.place(node, true);
-		const cleanup = autoUpdate(this.referenceElement!, node, () => this.place(node));
+		const cleanup = autoUpdate(reference, node, () => {
+			// The observers also fire when the reference leaves the document (a `ref` element
+			// removed without a teardown): close instead of placing against a detached node.
+			if (reference instanceof Element && !reference.isConnected) {
+				this.#closeIfAnchorLost();
+				return;
+			}
+			void this.place(node);
+		});
 		return () => {
 			cleanup();
 			this.dialogElement = null;
+			// The panel also leaves when its `ref` anchor does (`bind:this` resets it to null),
+			// and without an outro that happens before the observers above can report the
+			// detached node: judge the anchor once the flush settles, so the popover closes
+			// instead of staying open and reappearing when the anchor returns. A no-op when the
+			// popover closed or was destroyed, or when another anchor took over.
+			queueMicrotask(this.#closeIfAnchorLost);
 		};
 	};
 	panel = (node: HTMLElement) => {
@@ -338,6 +393,7 @@ export class PopoverState extends PopoverOptionsBase {
 			}
 		});
 		return untrack(() => {
+			this.#triggerNode = node;
 			this.triggerReference = node;
 
 			// Gather all cleanup callbacks
@@ -349,6 +405,14 @@ export class PopoverState extends PopoverOptionsBase {
 			// Return combined cleanup function
 			return () => {
 				cleanups.forEach((cleanup) => cleanup?.());
+				// A newer trigger already took over; this one leaving changes nothing.
+				if (this.#triggerNode !== node) return;
+				this.#triggerNode = null;
+				this.triggerReference = null;
+				// A trigger swapped for another (a re-rendered snippet, a responsive branch)
+				// attaches in the same flush, so judge once it has settled: only a trigger that is
+				// gone for good closes the popover instead of leaving it on a detached node.
+				queueMicrotask(this.#closeIfAnchorLost);
 			};
 		});
 	};

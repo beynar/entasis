@@ -39,7 +39,7 @@ The Slider component is a Field-based numeric control for scalar values, range t
 Extends all Field props plus:
 
 ### Core Props
-- **value**: number | number[] | null (bindable) - Current scalar or multi-thumb value
+- **value**: number | number[] | null (bindable) - Current scalar or multi-thumb value; an array keeps its array shape, even with one element (\`[25]\` stays \`[26]\` after ArrowRight, never \`26\`)
 - **mode**: 'single' | 'range' (default: 'single') - Range mode defaults to two thumbs
 - **variant**: 'default' | 'thick' | 'contained' (default: 'default') - Visual track style; \`thick\` renders a heavier track with an inset pill thumb, while \`contained\` places the label and optional value inside an input-like rail
 - **thumbs**: number - Number of thumbs when the value is missing or scalar
@@ -81,7 +81,7 @@ Extends all Field props plus:
 
 ## Form Integration
 
-Use \`type: 'slider'\` for scalar values and \`type: 'slider-range'\` for submitted number arrays.
+Use \`type: 'slider'\` for scalar values and \`type: 'slider-range'\` for submitted number arrays. A \`slider-range\` holds one or more values, so a one-thumb array value such as \`[25]\` is submitted as \`[25]\`.
 
 \`\`\`svelte
 <Form
@@ -210,6 +210,7 @@ Use \`type: 'slider'\` for scalar values and \`type: 'slider-range'\` for submit
 - Multi-thumb \`aria-valuemin\`/\`aria-valuemax\` reflect each thumb's current movement bounds, including minimum thumb spacing
 - Keyboard support: Arrow keys move by one step, Shift+Arrow and PageUp/PageDown move by ten steps, Home/End jump to bounds
 - ArrowLeft / ArrowRight follow the writing direction: in RTL, ArrowLeft increases and ArrowRight decreases (vertical sliders are unaffected)
+- In RTL a horizontal track mirrors to match: the minimum sits at the right edge, thumbs, the filled range, marks and contained ticks are placed from the inline start, and a pointer press reads its value from the right edge. An I18n direction that the document does not carry is applied to the whole slider field (label, description, errors and track) through a \`dir\` attribute on the field root, and it takes precedence over a \`dir\` in \`fieldAttrs\`, as it does for the arrow keys and pointer. The slider follows its nearest direction, so an ltr slider inside an rtl page stays ltr; set the direction with I18n or a \`dir\` attribute rather than CSS \`direction\` alone
 - Multi-thumb sliders enforce ordering and optional minimum thumb spacing
 - Disabled state blocks pointer, keyboard, and selected-range dragging
 

@@ -203,7 +203,7 @@ describe('confirmation', () => {
 		async () => {
 			mount('confirmation');
 			await fireEvent.click(screen.getByRole('button', { name: 'Ask' }));
-			const dialog = await screen.findByRole('dialog');
+			const dialog = await screen.findByRole('alertdialog');
 			await escape();
 			await pressOutside();
 			expect(dialog).toBeInTheDocument();

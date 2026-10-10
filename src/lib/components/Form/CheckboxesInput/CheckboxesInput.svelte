@@ -102,11 +102,14 @@
 	}}
 	{...rest}
 >
-	{#each items as option (option.value)}
+	<!-- Option ids come from field.id, unique per instance, and the index, always a valid id
+	     token: name + value collides across instances that share a name and breaks on spaces. -->
+	{#each items as option, index (option.value)}
 		{@const checked = field.value?.includes(option.value)}
-		{@const optionId = `${field.name}-${option.value}`}
+		{@const optionId = `${field.id}-option-${index}`}
 		{@const optionDisabled = Boolean(field.disabled || option.disabled)}
 		<button
+			id={optionId}
 			type="button"
 			role="checkbox"
 			aria-checked={checked}
@@ -135,7 +138,7 @@
 				type="checkbox"
 				{checked}
 				name={field.name}
-				id={optionId}
+				id={`${optionId}-input`}
 				value={option.value}
 				disabled={optionDisabled}
 			/>

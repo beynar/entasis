@@ -6,6 +6,32 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `Switch`: `inputValue` sets the value a native `<form>` submits under the switch's `name` while it
+  is on (default `'true'`). An off switch, or one without a `name`, submits nothing, like a native
+  checkbox.
+- `Switch`: a required switch sets `aria-required` and shows the required marker on its inline
+  label.
+- Tooling: browser-mode unit tests. `*.browser.test.ts` files run in real Chromium and WebKit
+  through Vitest browser mode and Playwright, as part of `npm run test:unit` and on their own with
+  `npm run test:browser`. The docs stylesheet is loaded, so focus order, tabbability and panel
+  placement are measured as in the app. CI now installs WebKit next to Chromium.
+- Tooling: the axe end-to-end sweep now also audits pages with a popup open: Select (including
+  grouped and scrolling lists), Combobox, TagsInput and PhoneInput (including their empty results),
+  a PopupMenu with its submenu, MenuBar and Dialog. Before, it only saw closed popups. Allowlist
+  entries can be narrowed to one failing child with `match`, and an entry for an open popup that no
+  longer suppresses anything fails the sweep, so it gets removed once its fix lands.
+- Tooling: `npm run bench` measures, in Chromium: opening a 1,000-option Select, a keystroke in a
+  1,000-option Combobox and Command, mounting a 500-item Menu and moving its highlight, mounting 300
+  closed Popovers and Selects, and mounting a 200-row DataTable with a closed row-actions menu on
+  every row. Each result is compared with a committed baseline, and `npm run bench:baseline`
+  re-records the baselines. The result tables and baseline rows also print outside an interactive
+  terminal.
+- Tooling: jsdom unit tests get stand-ins for `CloseWatcher`, `visualViewport` and per-element
+  layout rects, with controls in `src/lib/testing/jsdom.test-helper.ts`. The proposed overlay and
+  accessibility laws have executable entries, which are expected to fail until each law lands.
+
 ### Changed
 
 - `PopupMenu` / `ContextMenu` / `MenuBar`: radio and selected options inside floating submenus now
@@ -14,6 +40,14 @@ Unreleased section under the new version.
   or turn off the menu's `closeOnItemClick`.
 - `Menu`: in an inline `Menu`, choosing an item in a submenu flyout now closes the flyout and
   returns focus to the row that opened it. Before, the flyout stayed open.
+- `Dialog`: `type="alert"` renders `role="alertdialog"` and ignores outside presses by default. Set
+  `closeOnClickOutside` to let a backdrop press dismiss it; Escape still closes it. `confirmation()`
+  dialogs are announced as alert dialogs too.
+- `Switch`: a `required` switch must now be on, as `Checkbox` already required. An off required
+  switch fails Form validation and blocks every native form submit, including double clicks and
+  back-to-back `requestSubmit()` calls, where it used to be accepted. When it is the first invalid
+  control, the switch takes focus and shows its own error, with no browser validation bubble on top.
+  A silent `checkValidity()` moves no focus and shows no error.
 
 ### Fixed
 
@@ -50,6 +84,68 @@ Unreleased section under the new version.
   page. The new toast's timer starts paused, like the rest of the hovered stack. The underlying
   safe-area fix also covers `Popover` and `Sidebar` references attached while their safe area is
   active.
+- `Menu`: pointing at an inline menu no longer takes keys typed elsewhere. Space or Enter in
+  another field no longer clicks the hovered row, and arrow keys no longer pull focus out of a text
+  field. While nothing on the page has focus, the arrow keys and Home/End still move focus into the
+  hovered menu, and ArrowLeft on a top-level menu is no longer blocked, so the page can still
+  scroll horizontally.
+- `Menu`: Enter, Space, the arrow keys and type-ahead act on the row that has keyboard focus, even
+  when the pointer highlights another row. Before, Enter clicked the hovered row instead of the
+  focused one. A popup menu whose panel has focus still activates the highlighted row, which
+  `aria-activedescendant` names.
+- `Menu`: right-to-left menus mirror the submenu arrows: ArrowLeft opens a submenu and ArrowRight
+  closes it. In a right-to-left `MenuBar`, ArrowLeft on a submenu row now opens it; before, those
+  submenus could not be opened from the keyboard.
+- `SegmentedControl`, `Tabbar`, `ToggleButtonGroup`, `ToggleMenu`, `Breadcrumbs`, `Menu`, `MenuBar`
+  and the other roving-focus groups ignore Arrow, Home, End, Enter and Space pressed with Alt, Ctrl
+  or Meta. Browser shortcuts such as Alt+ArrowLeft (Back) work again, and `SegmentedControl` no
+  longer changes value on Alt+Arrow. Shift+Arrow still navigates. In `MenuBar`, modified arrows no
+  longer switch or open menus, inside an open menu or on the bar's triggers (Enter and Space on a
+  trigger still open its menu). In the `Calendar` month and year chooser, modified
+  ArrowLeft/ArrowRight no longer move between the month and year lists.
+- `Popover`: the hover `delay` now applies. Popovers with `openOnHover` used to open instantly and
+  ignore the 100 ms default. A popover that starts open (`defaultOpen`) now opens on hover again
+  after it closes. Closing a popover by click, tap or Escape while a hover open is still waiting on
+  `delay` no longer lets that hover reopen it, and a pointer that re-enters an already open trigger
+  starts no hover delay.
+- `Popover`: removing the trigger, or a `ref` element leaving the document (including a `bind:this`
+  `ref` that unmounts), closes an open popover and calls `onOpenChange(false)`, also under reduced
+  motion or zero-duration transitions. Before, the panel stayed open against a detached element. The
+  popover stays closed when the element returns. A trigger re-rendered as a new element keeps the
+  popover open, and unmounting the whole Popover reports nothing.
+- `Confirmation`: if `onConfirm` throws or rejects, the loading state ends and the dialog stays open
+  with Cancel enabled. Before, the user was trapped behind a disabled Cancel. The error still
+  propagates like any event handler error.
+- `Confirmation`: unmounting `<Confirmation />` resolves the requests it is still showing as
+  `{ confirmed: false }`. Before, `await confirmation()` hung forever after a layout remount. A
+  confirmed request whose `onConfirm` is still running when the host unmounts resolves with
+  `{ confirmed: true, result }` once the action finishes, or `{ confirmed: false }` if it fails.
+- `Dialog`: `data-type` on the root and the panel reports the resolved type. Modals collapsed into
+  mobile sheets and responsive `type` records now get their rounded edge corners from
+  `--drawer-edge-radius`.
+- `Switch`: inside a plain `<form>` (for example a SvelteKit form action) the switch was never
+  submitted, because its hidden checkbox had no `checked` state and its value was the stringified
+  boolean. It now submits `name=inputValue` while on and carries `required`.
+- `Switch`: an untouched required switch and one turned off report the same error instead of
+  validation-library text. `fieldSchemas.required.switch` now accepts `null`.
+- `Slider`: an array value keeps its array shape with a single thumb. `[25]` becomes `[26]` on
+  ArrowRight or a track press instead of `26`, a Form holds and submits `[25]`, and `slider-range`
+  entries accept one or more values.
+- `Slider`: a range or multi-thumb value in a `Form` bound with `bind:value` to `$state` no longer
+  loops with 'Maximum update depth exceeded'.
+- `Slider`: in right-to-left layouts the horizontal track now mirrors like the arrow keys. The
+  minimum sits at the right edge. Thumbs, the filled range, marks, contained ticks, and the
+  contained label and value are placed from the inline start, and pointer presses and drags read
+  their value from the right edge. Centring follows the slider's own direction, so an ltr slider
+  inside a right-to-left page (for example an English `I18n` region in an Arabic app) keeps its
+  thumbs, marks and ticks on their values. An `I18n` direction that the document does not carry (for
+  example `manageDocument={false}`) is applied to the whole slider field through its `dir`
+  attribute, so the label, description and errors mirror with the track.
+- `CheckboxesInput`, `RadioInput`: option ids were built from `name` and value, so two fields
+  sharing a `name` duplicated them and values with spaces made them invalid. Each option button now
+  gets `<field id>-option-<index>`, and its hidden input gets `<option id>-input`.
+- Tooling: every end-to-end suite now follows `E2E_PORT`; five of them dialled port 4173 regardless.
+  Two tests that pressed a control before hydration now wait for the page to settle.
 
 ## 0.11.0 — 2026-10-10
 

@@ -53,3 +53,75 @@ describe('Dialog layer registration', () => {
 		expect(dialog.querySelectorAll('.right-1.top-1')).toHaveLength(1);
 	});
 });
+
+const pressOutside = () => fireEvent.pointerDown(document.body);
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+describe('Dialog alert', () => {
+	test('a11y:dialog.alert-role an alert renders role=alertdialog with aria-modal, named by its title', async () => {
+		render(DialogLawHarness, { props: { type: 'alert' } });
+		await fireEvent.click(screen.getByRole('button', { name: 'Open law dialog' }));
+		const dialog = await screen.findByRole('alertdialog');
+		expect(dialog).toHaveAttribute('aria-modal', 'true');
+		expect(dialog).toHaveAccessibleName('Disclosure law');
+		expect(screen.queryByRole('dialog')).toBeNull();
+	});
+
+	test('a11y:dialog.alert-outside-press an alert ignores outside presses unless closeOnClickOutside is set', async () => {
+		// Located by aria-modal rather than role, so this checks dismissal on its own.
+		const modal = () => document.querySelector('[aria-modal="true"]');
+		const onAfterOpen = vi.fn();
+		const { unmount } = render(DialogLawHarness, { props: { type: 'alert', onAfterOpen } });
+		await fireEvent.click(screen.getByRole('button', { name: 'Open law dialog' }));
+		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
+		await pressOutside();
+		await sleep(20);
+		expect(modal()).toBeInTheDocument();
+		// Escape still answers an alert.
+		await fireEvent.keyDown(window, { key: 'Escape' });
+		await waitFor(() => expect(modal()).toBeNull());
+		unmount();
+
+		const opened = vi.fn();
+		render(DialogLawHarness, {
+			props: { type: 'alert', closeOnClickOutside: true, onAfterOpen: opened }
+		});
+		await fireEvent.click(screen.getByRole('button', { name: 'Open law dialog' }));
+		await waitFor(() => expect(opened).toHaveBeenCalledOnce());
+		await pressOutside();
+		await waitFor(() => expect(modal()).toBeNull());
+	});
+
+	test('a modal still closes on an outside press by default', async () => {
+		const onAfterOpen = vi.fn();
+		render(DialogLawHarness, { props: { onAfterOpen } });
+		await fireEvent.click(screen.getByRole('button', { name: 'Open law dialog' }));
+		await screen.findByRole('dialog');
+		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
+		await pressOutside();
+		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+	});
+});
+
+describe('Dialog data-type', () => {
+	// jsdom matches no `min-width` query, so the theme resolves the `xs` (mobile) breakpoint.
+	const typeAttributes = () => {
+		const root = screen.getByRole('dialog');
+		const panel = root.querySelector('[data-type]:not([role])');
+		return [root.getAttribute('data-type'), panel?.getAttribute('data-type')];
+	};
+
+	test('a responsive modal collapsed into a mobile sheet reports drawerBottom', async () => {
+		render(DialogLawHarness, { props: { responsive: true } });
+		await fireEvent.click(screen.getByRole('button', { name: 'Open law dialog' }));
+		await screen.findByRole('dialog');
+		expect(typeAttributes()).toEqual(['drawerBottom', 'drawerBottom']);
+	});
+
+	test('a responsive type record reports the type resolved for the viewport', async () => {
+		render(DialogLawHarness, { props: { type: { xs: 'drawerRight', md: 'modal' } } });
+		await fireEvent.click(screen.getByRole('button', { name: 'Open law dialog' }));
+		await screen.findByRole('dialog');
+		expect(typeAttributes()).toEqual(['drawerRight', 'drawerRight']);
+	});
+});

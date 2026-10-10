@@ -45,7 +45,8 @@ test('loads the PDF runtime without fetching another format engine', async ({ pa
 });
 
 test('the demo renders every supported document format', async ({ page }) => {
-	await page.goto('/components/document-viewer');
+	// The format Select ignores a press made before hydration.
+	await page.goto('/components/document-viewer', { waitUntil: 'networkidle' });
 	const format = page.getByRole('combobox', { name: 'Preview format' });
 
 	const selectFormat = async (label: string) => {

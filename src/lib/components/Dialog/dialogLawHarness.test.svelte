@@ -5,19 +5,33 @@
 
 	let {
 		defaultOpen = false,
+		type,
+		responsive = false,
+		closeOnClickOutside,
 		onOpenChange,
 		onAfterOpen,
 		onAfterClose
-	}: Pick<DialogProps, 'defaultOpen' | 'onOpenChange' | 'onAfterOpen' | 'onAfterClose'> = $props();
+	}: Pick<
+		DialogProps,
+		| 'defaultOpen'
+		| 'type'
+		| 'responsive'
+		| 'closeOnClickOutside'
+		| 'onOpenChange'
+		| 'onAfterOpen'
+		| 'onAfterClose'
+	> = $props();
 </script>
 
 <Theme>
 	<Dialog
 		{defaultOpen}
+		{type}
+		{responsive}
+		{closeOnClickOutside}
 		{onOpenChange}
 		{onAfterOpen}
 		{onAfterClose}
-		responsive={false}
 		transition={{ in: { duration: 0 }, out: { duration: 0 } }}
 		title="Disclosure law"
 	>
