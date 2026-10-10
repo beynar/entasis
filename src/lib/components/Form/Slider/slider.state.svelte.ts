@@ -46,6 +46,7 @@ type SliderDragState =
 
 type SliderStateOptions = {
 	value?: SliderValue | null;
+	mode?: 'single' | 'range';
 	min?: number;
 	max?: number;
 	step?: number;
@@ -86,6 +87,8 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Render-time attachment caches must not update reactive state.
 	private thumbHitboxAttachments = new Map<number, Attachment<HTMLElement>>();
 	private documentHitboxDragCleanup: (() => void) | null = null;
+	// Not reactive: `fieldValue` memoizes its array output here (see fieldValue).
+	private arrayFieldValue: number[] | null = null;
 	private trackDrag = createPointerDrag({
 		disabled: () => this.isDisabled(),
 		onStart: (payload) => this.startTrackPointerDrag(payload),
@@ -127,10 +130,27 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 	);
 	values = $derived.by(() => this.getNormalizedValues());
 	isRange = $derived(this.values.length > 1);
-	fieldType = $derived<'slider' | 'slider-range'>(this.isRange ? 'slider-range' : 'slider');
-	fieldValue: SliderValue = $derived(
-		this.isRange ? this.values : (this.values[0] ?? this.minValue)
+	/** The value keeps an array shape (even with one thumb) when it arrived as one or is a range. */
+	isArrayValue = $derived(
+		Array.isArray(this.value) || this.mode === 'range' || this.thumbCount > 1
 	);
+	fieldType = $derived<'slider' | 'slider-range'>(this.isArrayValue ? 'slider-range' : 'slider');
+	fieldValue: SliderValue = $derived.by(() => {
+		if (!this.isArrayValue) return this.values[0] ?? this.minValue;
+		// Reuse the last array handed out while it holds the same values: a Form bound to $state
+		// writes the value back as a new deep proxy, and a new array per pass would never settle.
+		// It stays plain data, never the proxied `value` prop, so callers can clone, post or keep it.
+		const values = this.values;
+		const previous = this.arrayFieldValue;
+		if (
+			previous?.length === values.length &&
+			previous.every((item, index) => item === values[index])
+		) {
+			return previous;
+		}
+		this.arrayFieldValue = [...values];
+		return this.arrayFieldValue;
+	});
 	startPercentage = $derived(this.getPercentage(this.values[0] ?? this.minValue));
 	endPercentage = $derived(
 		this.getPercentage(this.values[this.values.length - 1] ?? this.minValue)
@@ -378,7 +398,7 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 			constrainedValues.every((value, index) => value === this.values[index])
 		)
 			return;
-		if (this.thumbCount === 1) {
+		if (!this.isArrayValue) {
 			this.value = constrainedValues[0] ?? this.minValue;
 			return;
 		}
@@ -499,7 +519,9 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 			return this.getValueFromPercentage((offset / size) * 100);
 		}
 
-		const offset = event.clientX - rect.left;
+		// The track mirrors in RTL (thumbs sit at inset-inline-start), so the minimum is the right edge.
+		const offset =
+			this.getDirection() === 'rtl' ? rect.right - event.clientX : event.clientX - rect.left;
 		return this.getValueFromPercentage((offset / size) * 100);
 	}
 

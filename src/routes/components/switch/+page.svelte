@@ -3,10 +3,13 @@
 	import DocPage from '../../DocPage.svelte';
 	import { Switch } from '$lib/components/Form/Switch/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
+	import Button from '$lib/components/Button/Button.svelte';
 	import { sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let enabled = $state(false);
+	let nativeSubmission = $state<string | null>(null);
+	let termsSubmission = $state<string | null>(null);
 	const controls = createComponentControls([
 		{
 			name: 'size',
@@ -34,7 +37,8 @@
 		{ label: 'role=switch with aria-checked', test: 'a11y:switch.role' },
 		{ label: 'Enter & Space keyboard toggle', test: 'a11y:switch.keyboard-toggle' },
 		'bind:value, errors, and focused',
-		'Hidden checkbox for form submit'
+		'Native form submit sends inputValue only while on',
+		'Required means switched on'
 	]}
 >
 	<ComponentCard
@@ -92,21 +96,72 @@
 			</div>
 		</ComponentCard>
 
-		<ComponentCard description="Using type: 'switch' inside a Form">
-			<div class="w-full max-w-md">
+		<ComponentCard
+			description="Using type: 'switch' inside a Form. A required switch must be on to submit."
+			code={`<Form
+	inputs={{
+		newsletter: {
+			type: 'switch',
+			label: 'Subscribe to newsletter',
+			description: 'Receive updates and promotions'
+		},
+		terms: { type: 'switch', label: 'Accept the terms', required: true }
+	}}
+	onSubmit={(data) => save(data)}
+>
+	{#snippet children(form)}
+		<Button type="button" onclick={() => void form.submit()}>Submit</Button>
+	{/snippet}
+</Form>`}
+		>
+			<div class="grid w-full max-w-md gap-4">
 				<Form
 					inputs={{
 						newsletter: {
 							type: 'switch',
 							label: 'Subscribe to newsletter',
 							description: 'Receive updates and promotions'
-						}
+						},
+						terms: { type: 'switch', label: 'Accept the terms', required: true }
 					}}
 					onSubmit={(data) => {
-						console.log('Form submitted:', data);
+						termsSubmission = JSON.stringify(data);
 					}}
-				/>
+				>
+					{#snippet children(form)}
+						<Button type="button" onclick={() => void form.submit()}>Submit</Button>
+					{/snippet}
+				</Form>
+				<p class="text-neutral/70 text-xs" data-testid="switch-form-submission">
+					Submitted: {termsSubmission ?? 'nothing yet'}
+				</p>
 			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Native form"
+			description="Inside a plain <form>, an on switch submits its name with inputValue (default 'true'); an off switch submits nothing, and a required one blocks the submit."
+			code={`<form method="POST">
+	<Switch name="marketing" inputValue="yes" label="Marketing emails" />
+	<Switch name="terms" label="Accept the terms" required />
+	<Button type="submit">Save</Button>
+</form>`}
+		>
+			<form
+				class="grid w-full max-w-md gap-4"
+				data-testid="switch-native-form"
+				onsubmit={(event) => {
+					event.preventDefault();
+					nativeSubmission = JSON.stringify(Object.fromEntries(new FormData(event.currentTarget)));
+				}}
+			>
+				<Switch name="marketing" inputValue="yes" label="Marketing emails" />
+				<Switch name="terms" label="Accept the terms" required />
+				<Button type="submit">Save</Button>
+				<p class="text-neutral/70 text-xs" data-testid="switch-native-submission">
+					FormData: {nativeSubmission ?? 'nothing submitted yet'}
+				</p>
+			</form>
 		</ComponentCard>
 	{/snippet}
 </DocPage>

@@ -69,9 +69,10 @@
 
 	const thumbPositionStyle = $derived.by(() => {
 		const containedPosition = `clamp(${getThumbMinPosition()}, ${payload.percentage}%, ${getThumbMaxPosition()})`;
+		// inset-inline-start mirrors a horizontal track in RTL, matching the mirrored arrow keys.
 		return orientation === 'vertical'
 			? `bottom: ${containedPosition};`
-			: `left: ${containedPosition};`;
+			: `inset-inline-start: ${containedPosition};`;
 	});
 
 	const registerRef = (node: HTMLButtonElement) => {

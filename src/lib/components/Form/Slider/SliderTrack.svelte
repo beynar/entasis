@@ -82,7 +82,7 @@
 	const rangeStyle = $derived(
 		slider.orientationValue === 'vertical'
 			? `bottom: ${rangeStartPercentage}%; height: ${getRangeLength()};`
-			: `left: ${rangeStartPercentage}%; width: ${getRangeLength()};`
+			: `inset-inline-start: ${rangeStartPercentage}%; width: ${getRangeLength()};`
 	);
 </script>
 
@@ -113,7 +113,7 @@
 						class={classes.containedTick({ orientation: slider.orientationValue, size })}
 						style={slider.orientationValue === 'vertical'
 							? `bottom: ${percentage}%;`
-							: `left: ${percentage}%;`}
+							: `inset-inline-start: ${percentage}%;`}
 					></span>
 				{/each}
 			</div>

@@ -8,7 +8,7 @@
 	import type { SliderProps } from './slider.props.js';
 	import { SliderState } from './slider.state.svelte.js';
 	import { useSliderTheme } from './slider.theme.js';
-	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { useI18n, useI18nDirection } from '$lib/i18n/context.svelte.js';
 	import { useDefaultColor } from '../../Theme/theme.state.svelte.js';
 
 	let {
@@ -42,11 +42,17 @@
 		size = 'normal',
 		i18n,
 		label,
+		fieldAttrs,
 		...rest
 	}: SliderProps = $props();
 	if (value === undefined) value = untrack(() => defaultValue);
 
 	const t = $derived(useI18n(i18n));
+	// An i18n direction that the document does not carry still has to mirror the whole field, so
+	// the label lines up with the track and the thumbs' logical positions agree with the arrow
+	// keys and the pointer reading, which follow that direction too.
+	const contextualDirection = $derived(useI18nDirection());
+	const directionAttributes = $derived(contextualDirection ? { dir: contextualDirection } : {});
 	const resolvedColor = $derived(useDefaultColor(color));
 
 	const id = $props.id();
@@ -57,6 +63,9 @@
 		},
 		set value(v) {
 			field.setValue(v);
+		},
+		get mode() {
+			return mode;
 		},
 		get min() {
 			return min;
@@ -93,10 +102,14 @@
 		}
 	});
 
+	// The field reads the slider value only through `fieldValue`, which keeps one plain array while
+	// the numbers are unchanged: a Form that writes the value back as a new proxy is not a change.
+	const hasValue = $derived(value !== undefined);
+
 	const field = createFieldState<'slider' | 'slider-range'>({
 		id,
 		get value() {
-			return value === undefined ? undefined : slider.fieldValue;
+			return hasValue ? slider.fieldValue : undefined;
 		},
 		set value(v) {
 			value = v;
@@ -172,6 +185,7 @@
 	{field}
 	{size}
 	label={hasContainedLayout ? undefined : label}
+	fieldAttrs={{ ...fieldAttrs, ...directionAttributes }}
 	theme={{
 		...(theme || {}),
 		inputContainer: {
