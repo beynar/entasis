@@ -88,9 +88,37 @@ describe('Switch native form participation', () => {
 
 		// A blocked submit (or reportValidity) focuses the first invalid control, as here.
 		hiddenInput().focus();
-		expect(nativeSwitch()).toHaveFocus();
+		await waitFor(() => expect(nativeSwitch()).toHaveFocus());
 		await waitFor(() => expect(nativeSwitch()).toHaveAttribute('aria-invalid', 'true'));
 		expect(within(nativeForm()).getByRole('alert')).toBeInTheDocument();
+	});
+
+	test("the browser's own bubble has no message to show: the switch's error is the only one", async () => {
+		render(SwitchForms, { props: { nativeRequired: true } });
+		const input = hiddenInput();
+
+		input.focus();
+		// The browser reads its bubble message once it has focused the control it reports.
+		expect(input.validationMessage).toBe('');
+		expect(input.validity.valid).toBe(true);
+
+		// Once focus has moved to the switch, the constraint is back and still blocks the submit.
+		await waitFor(() => expect(nativeSwitch()).toHaveFocus());
+		await waitFor(() => expect(input).toBeRequired());
+		expect(input.validity.valueMissing).toBe(true);
+		expect(nativeForm().checkValidity()).toBe(false);
+		expect(within(nativeForm()).getByRole('alert')).toBeInTheDocument();
+	});
+
+	test('a second blocked submit is reported again', async () => {
+		const onNativeSubmit = vi.fn();
+		render(SwitchForms, { props: { onNativeSubmit, nativeRequired: true } });
+		const input = hiddenInput();
+
+		input.focus();
+		await waitFor(() => expect(input).toBeRequired());
+		await submitNative();
+		expect(onNativeSubmit).not.toHaveBeenCalled();
 	});
 
 	test('a silent checkValidity() moves no focus and shows no error', async () => {

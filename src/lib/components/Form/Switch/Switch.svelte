@@ -89,11 +89,19 @@
 	};
 
 	// A blocked native submit (or reportValidity) focuses the first invalid control. When that is
-	// this switch's hidden input, hand the report to the visible switch: focus it and show its
-	// error. A silent checkValidity() fires `invalid` without focusing, so it changes nothing here.
-	const onHiddenInputFocus = () => {
+	// this switch's hidden input, the report belongs to the visible switch: it shows its own error
+	// and takes focus, and the browser's bubble stays away. Chromium reads the bubble's message
+	// right after this focus and WebKit on its next turn, so the input drops its constraint until
+	// focus has moved (no message, no bubble). Firefox reads it earlier and hides its bubble when
+	// the input loses focus. A silent checkValidity() focuses nothing, so it changes nothing here.
+	const onHiddenInputFocus = (event: FocusEvent & { currentTarget: HTMLInputElement }) => {
+		const input = event.currentTarget;
 		field.validate();
-		field.node?.focus();
+		input.required = false;
+		setTimeout(() => {
+			if (input.ownerDocument.activeElement === input) field.node?.focus();
+			setTimeout(() => (input.required = Boolean(field.required)));
+		});
 	};
 
 	const onKeydown = (e: KeyboardEvent) => {

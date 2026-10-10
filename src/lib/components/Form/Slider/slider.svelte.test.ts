@@ -2,6 +2,7 @@ import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
+import Slider from './Slider.svelte';
 import SliderHarness from './SliderHarness.test.svelte';
 
 // jsdom implements no pointer capture, which every track press goes through.
@@ -143,11 +144,35 @@ describe('Slider right-to-left layout', () => {
 		expect(range?.getAttribute('style')).toContain('inset-inline-start: 20%');
 	});
 
-	test('mirrors the track for an i18n direction the document does not carry', () => {
-		render(SliderHarness, { props: { dir: 'rtl', defaultValue: 30 } });
-		const track = screen.getByRole('group');
-		expect(track.closest('[dir]')).toHaveAttribute('dir', 'rtl');
+	test('mirrors the whole field for an i18n direction the document does not carry', () => {
+		render(SliderHarness, {
+			props: { dir: 'rtl', defaultValue: 30, label: 'Brightness', description: 'Screen level' }
+		});
+		const root = screen.getByRole('group').closest('[dir]');
+		expect(root).toHaveAttribute('dir', 'rtl');
+		// The label and the description line up with the mirrored track.
+		expect(root).toContainElement(screen.getByText('Brightness'));
+		expect(root).toContainElement(screen.getByText('Screen level'));
 		expect(document.documentElement).not.toHaveAttribute('dir', 'rtl');
+	});
+
+	test('the i18n direction wins over a field attribute, as it does for keys and pointer', () => {
+		render(SliderHarness, {
+			props: {
+				dir: 'rtl',
+				defaultValue: 30,
+				label: 'Level',
+				fieldAttrs: { dir: 'ltr', title: 'x' }
+			}
+		});
+		const root = screen.getByText('Level').closest('[dir]');
+		expect(root).toHaveAttribute('dir', 'rtl');
+		expect(root).toHaveAttribute('title', 'x');
+	});
+
+	test('sets no direction without an i18n context', () => {
+		render(Slider, { props: { defaultValue: 30, label: 'Plain' } });
+		expect(screen.getByRole('group').closest('[dir]')).toBeNull();
 	});
 
 	test('ArrowLeft increases the value and moves the thumb toward the inline start', async () => {

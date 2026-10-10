@@ -42,14 +42,17 @@
 		size = 'normal',
 		i18n,
 		label,
+		fieldAttrs,
 		...rest
 	}: SliderProps = $props();
 	if (value === undefined) value = untrack(() => defaultValue);
 
 	const t = $derived(useI18n(i18n));
-	// An i18n direction that the document does not carry still has to mirror the track, so the
-	// thumbs' logical positions agree with the arrow keys and the pointer reading.
+	// An i18n direction that the document does not carry still has to mirror the whole field, so
+	// the label lines up with the track and the thumbs' logical positions agree with the arrow
+	// keys and the pointer reading, which follow that direction too.
 	const contextualDirection = $derived(useI18nDirection());
+	const directionAttributes = $derived(contextualDirection ? { dir: contextualDirection } : {});
 	const resolvedColor = $derived(useDefaultColor(color));
 
 	const id = $props.id();
@@ -182,6 +185,7 @@
 	{field}
 	{size}
 	label={hasContainedLayout ? undefined : label}
+	fieldAttrs={{ ...fieldAttrs, ...directionAttributes }}
 	theme={{
 		...(theme || {}),
 		inputContainer: {
@@ -195,10 +199,7 @@
 	}}
 	{...rest}
 >
-	<div
-		class={classes.root({ orientation: slider.orientationValue, size })}
-		dir={contextualDirection}
-	>
+	<div class={classes.root({ orientation: slider.orientationValue, size })}>
 		{#each slider.values as hiddenValue, index (index)}
 			<input type="hidden" name={field.name} value={hiddenValue} disabled={slider.disabled} />
 		{/each}
