@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
 	import Field from '../Field/Field.svelte';
 	import { useFieldTheme } from '../Field/field.theme.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
@@ -90,18 +91,23 @@
 
 	// A blocked native submit (or reportValidity) focuses the first invalid control. When that is
 	// this switch's hidden input, the report belongs to the visible switch: it shows its own error
-	// and takes focus, and the browser's bubble stays away. Chromium reads the bubble's message
-	// right after this focus and WebKit on its next turn, so the input drops its constraint until
-	// focus has moved (no message, no bubble). Firefox reads it earlier and hides its bubble when
-	// the input loses focus. A silent checkValidity() focuses nothing, so it changes nothing here.
+	// and takes focus. Firefox hides its bubble when the reported input loses focus, which only
+	// works once its focus has settled, so the hand-off waits a task. A silent checkValidity()
+	// focuses nothing, so it changes nothing here.
 	const onHiddenInputFocus = (event: FocusEvent & { currentTarget: HTMLInputElement }) => {
 		const input = event.currentTarget;
 		field.validate();
-		input.required = false;
 		setTimeout(() => {
 			if (input.ownerDocument.activeElement === input) field.node?.focus();
-			setTimeout(() => (input.required = Boolean(field.required)));
 		});
+	};
+
+	// While a required switch is off, its hidden input also carries a blank custom error. Chromium
+	// and WebKit trim the message before showing their bubble, so a blank one shows nothing over
+	// the switch's own error, and the constraint never lapses: every submit stays blocked, even
+	// ones sent back to back.
+	const blankNativeReport: Attachment<HTMLInputElement> = (input) => {
+		input.setCustomValidity(field.required && !field.value ? ' ' : '');
 	};
 
 	const onKeydown = (e: KeyboardEvent) => {
@@ -145,6 +151,7 @@
 		tabindex={-1}
 		aria-hidden="true"
 		class="sr-only"
+		{@attach blankNativeReport}
 	/>
 	<div
 		bind:this={field.node}

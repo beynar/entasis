@@ -98,27 +98,48 @@ describe('Switch native form participation', () => {
 		const input = hiddenInput();
 
 		input.focus();
-		// The browser reads its bubble message once it has focused the control it reports.
-		expect(input.validationMessage).toBe('');
-		expect(input.validity.valid).toBe(true);
-
-		// Once focus has moved to the switch, the constraint is back and still blocks the submit.
-		await waitFor(() => expect(nativeSwitch()).toHaveFocus());
-		await waitFor(() => expect(input).toBeRequired());
+		// Browsers trim the message before showing their bubble: a blank one shows nothing.
+		expect(input.validationMessage.trim()).toBe('');
+		// The constraint itself stays: the input is still invalid and still blocks the submit.
+		expect(input).toBeRequired();
 		expect(input.validity.valueMissing).toBe(true);
+		expect(input.validity.valid).toBe(false);
+
+		await waitFor(() => expect(nativeSwitch()).toHaveFocus());
 		expect(nativeForm().checkValidity()).toBe(false);
 		expect(within(nativeForm()).getByRole('alert')).toBeInTheDocument();
 	});
 
-	test('a second blocked submit is reported again', async () => {
+	test('submits sent back to back while the report moves to the switch stay blocked', async () => {
 		const onNativeSubmit = vi.fn();
 		render(SwitchForms, { props: { onNativeSubmit, nativeRequired: true } });
-		const input = hiddenInput();
 
-		input.focus();
-		await waitFor(() => expect(input).toBeRequired());
+		// The first blocked submit focuses the hidden input; the next ones follow in the same task.
+		hiddenInput().focus();
+		nativeForm().requestSubmit();
+		nativeForm().requestSubmit();
 		await submitNative();
 		expect(onNativeSubmit).not.toHaveBeenCalled();
+
+		await waitFor(() => expect(nativeSwitch()).toHaveFocus());
+		await submitNative();
+		expect(onNativeSubmit).not.toHaveBeenCalled();
+	});
+
+	test('the blank report clears with the constraint: an on or optional switch is valid', async () => {
+		const { rerender } = render(SwitchForms, { props: { nativeRequired: true } });
+		const input = hiddenInput();
+		expect(input.validity.customError).toBe(true);
+
+		await fireEvent.click(nativeSwitch());
+		expect(input.validity.valid).toBe(true);
+		expect(input.validationMessage).toBe('');
+
+		await fireEvent.click(nativeSwitch());
+		expect(input.validity.valid).toBe(false);
+		await rerender({ nativeRequired: false });
+		expect(input.validity.valid).toBe(true);
+		expect(input.validity.customError).toBe(false);
 	});
 
 	test('a silent checkValidity() moves no focus and shows no error', async () => {
