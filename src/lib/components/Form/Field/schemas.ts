@@ -80,7 +80,9 @@ export const schemas: {
 		time: v.number(),
 
 		// Boolean input types
-		switch: v.boolean(),
+		// An untouched switch is null and a turned-off one false: both are "off", and Switch's own
+		// rule (required means on) reports them with the same error.
+		switch: v.nullable(v.boolean()),
 		checkbox: v.boolean(),
 
 		// Single option input types

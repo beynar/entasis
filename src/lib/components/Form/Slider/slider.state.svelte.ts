@@ -87,6 +87,8 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Render-time attachment caches must not update reactive state.
 	private thumbHitboxAttachments = new Map<number, Attachment<HTMLElement>>();
 	private documentHitboxDragCleanup: (() => void) | null = null;
+	// Not reactive: `fieldValue` memoizes its array output here (see fieldValue).
+	private arrayFieldValue: number[] | null = null;
 	private trackDrag = createPointerDrag({
 		disabled: () => this.isDisabled(),
 		onStart: (payload) => this.startTrackPointerDrag(payload),
@@ -135,15 +137,19 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 	fieldType = $derived<'slider' | 'slider-range'>(this.isArrayValue ? 'slider-range' : 'slider');
 	fieldValue: SliderValue = $derived.by(() => {
 		if (!this.isArrayValue) return this.values[0] ?? this.minValue;
-		// Hand back the caller's own array while it already holds the normalized values. A fresh
-		// copy per read never settles against a Form bound to a $state value: the Form writes the
-		// copy back as a deep proxy, which is a new array again, and so on.
-		const value = this.value;
-		const isNormalized =
-			Array.isArray(value) &&
-			value.length === this.values.length &&
-			value.every((item, index) => item === this.values[index]);
-		return isNormalized ? value : this.values;
+		// Reuse the last array handed out while it holds the same values: a Form bound to $state
+		// writes the value back as a new deep proxy, and a new array per pass would never settle.
+		// It stays plain data, never the proxied `value` prop, so callers can clone, post or keep it.
+		const values = this.values;
+		const previous = this.arrayFieldValue;
+		if (
+			previous?.length === values.length &&
+			previous.every((item, index) => item === values[index])
+		) {
+			return previous;
+		}
+		this.arrayFieldValue = [...values];
+		return this.arrayFieldValue;
 	});
 	startPercentage = $derived(this.getPercentage(this.values[0] ?? this.minValue));
 	endPercentage = $derived(

@@ -12,24 +12,27 @@ afterAll(() => {
 });
 
 const nativeForm = () => screen.getByTestId('native-form') as HTMLFormElement;
-const nativeSwitch = () => within(nativeForm()).getByRole('switch');
-const submitNative = () => nativeForm().requestSubmit();
+const nativeSwitch = () => within(nativeForm()).getByRole('switch', { name: 'Alerts' });
+const hiddenInput = (name = 'alerts') =>
+	nativeForm().querySelector<HTMLInputElement>(`input[name="${name}"]`)!;
+const saveButton = () => within(nativeForm()).getByRole('button', { name: 'Save native' });
+const submitNative = () => fireEvent.click(saveButton());
 
 describe('Switch native form participation', () => {
 	test('submits its name with "true" only while it is on', async () => {
 		const onNativeSubmit = vi.fn();
 		render(SwitchForms, { props: { onNativeSubmit } });
 
-		submitNative();
+		await submitNative();
 		expect(onNativeSubmit).toHaveBeenCalledTimes(1);
 		expect(onNativeSubmit.mock.calls[0][0].has('alerts')).toBe(false);
 
 		await fireEvent.click(nativeSwitch());
-		submitNative();
+		await submitNative();
 		expect(onNativeSubmit.mock.calls[1][0].getAll('alerts')).toEqual(['true']);
 
 		await fireEvent.click(nativeSwitch());
-		submitNative();
+		await submitNative();
 		expect(onNativeSubmit.mock.calls[2][0].has('alerts')).toBe(false);
 	});
 
@@ -38,47 +41,87 @@ describe('Switch native form participation', () => {
 		render(SwitchForms, { props: { onNativeSubmit, inputValue: '1' } });
 
 		await fireEvent.click(nativeSwitch());
-		submitNative();
+		await submitNative();
 		expect(onNativeSubmit.mock.calls[0][0].get('alerts')).toBe('1');
 	});
 
-	test('a required switch that is off blocks native submission and reports on the switch', async () => {
+	test('a switch without a name submits nothing, like a checkbox without one', async () => {
+		const onNativeSubmit = vi.fn();
+		render(SwitchForms, { props: { onNativeSubmit, withUnnamed: true } });
+		const unnamed = within(nativeForm()).getByRole('switch', { name: 'Advanced options' });
+
+		await fireEvent.click(unnamed);
+		expect(unnamed).toHaveAttribute('aria-checked', 'true');
+		await submitNative();
+		expect([...onNativeSubmit.mock.calls[0][0].keys()]).toEqual([]);
+	});
+
+	test('a required switch that is off blocks native submission', async () => {
 		const onNativeSubmit = vi.fn();
 		render(SwitchForms, { props: { onNativeSubmit, nativeRequired: true } });
-		const hiddenInput = nativeForm().querySelector<HTMLInputElement>('input[name="alerts"]');
-		expect(hiddenInput).toBeRequired();
+		expect(hiddenInput()).toBeRequired();
 
-		submitNative();
+		await submitNative();
 		expect(onNativeSubmit).not.toHaveBeenCalled();
-		expect(nativeSwitch()).toHaveFocus();
-		await waitFor(() => expect(nativeSwitch()).toHaveAttribute('aria-invalid', 'true'));
-		expect(within(nativeForm()).getByRole('alert')).toBeInTheDocument();
 
 		await fireEvent.click(nativeSwitch());
-		submitNative();
+		await submitNative();
 		expect(onNativeSubmit).toHaveBeenCalledOnce();
 		expect(onNativeSubmit.mock.calls[0][0].get('alerts')).toBe('true');
 	});
-});
 
-test('several required switches that are off focus the first one, as the browser would', async () => {
-	render(SwitchForms, { props: { nativeRequired: true, secondRequired: true } });
-	const [alerts, updates] = within(nativeForm()).getAllByRole('switch');
+	test('the hidden input stays reportable: focusable, out of the tab order and the a11y tree', () => {
+		render(SwitchForms, { props: { nativeRequired: true } });
+		const input = hiddenInput();
 
-	submitNative();
-	expect(alerts).toHaveFocus();
-	await waitFor(() => expect(updates).toHaveAttribute('aria-invalid', 'true'));
-	expect(alerts).toHaveAttribute('aria-invalid', 'true');
+		expect(input).not.toHaveAttribute('hidden');
+		expect(input).toHaveAttribute('tabindex', '-1');
+		expect(input).toHaveAttribute('aria-hidden', 'true');
+		// The browser picks the first invalid control to report: the switch never cancels that.
+		const invalid = new Event('invalid', { cancelable: true });
+		input.dispatchEvent(invalid);
+		expect(invalid.defaultPrevented).toBe(false);
+	});
 
-	// The next validation pass is independent of the previous one.
-	await fireEvent.click(alerts);
-	submitNative();
-	expect(updates).toHaveFocus();
+	test('the browser report lands on the switch: it takes focus and shows its error', async () => {
+		render(SwitchForms, { props: { nativeRequired: true } });
+
+		// A blocked submit (or reportValidity) focuses the first invalid control, as here.
+		hiddenInput().focus();
+		expect(nativeSwitch()).toHaveFocus();
+		await waitFor(() => expect(nativeSwitch()).toHaveAttribute('aria-invalid', 'true'));
+		expect(within(nativeForm()).getByRole('alert')).toBeInTheDocument();
+	});
+
+	test('a silent checkValidity() moves no focus and shows no error', async () => {
+		render(SwitchForms, { props: { nativeRequired: true, secondRequired: true } });
+		saveButton().focus();
+
+		expect(nativeForm().checkValidity()).toBe(false);
+		expect(hiddenInput('updates').checkValidity()).toBe(false);
+		await Promise.resolve();
+		expect(saveButton()).toHaveFocus();
+		for (const control of within(nativeForm()).getAllByRole('switch')) {
+			expect(control).not.toHaveAttribute('aria-invalid');
+		}
+		expect(within(nativeForm()).queryByRole('alert')).toBeNull();
+	});
 });
 
 describe('Switch required validation', () => {
 	const formSwitch = () => screen.getByRole('switch', { name: 'Accept the terms' });
 	const submitForm = () => fireEvent.click(screen.getByRole('button', { name: 'Submit form' }));
+
+	test('a required switch is announced as required', () => {
+		render(SwitchForms, { props: { nativeRequired: true } });
+		expect(nativeSwitch()).toHaveAttribute('aria-required', 'true');
+		expect(formSwitch()).toHaveAttribute('aria-required', 'true');
+	});
+
+	test('a switch that is not required carries no aria-required', () => {
+		render(SwitchForms);
+		expect(nativeSwitch()).not.toHaveAttribute('aria-required');
+	});
 
 	test('a required switch that is off fails Form validation until it is turned on', async () => {
 		const onFormSubmit = vi.fn();
@@ -103,5 +146,25 @@ describe('Switch required validation', () => {
 		await submitForm();
 		expect(onFormSubmit).not.toHaveBeenCalled();
 		await waitFor(() => expect(formSwitch()).toHaveAttribute('aria-invalid', 'true'));
+	});
+
+	test('an untouched and a turned-off required switch report the same error', async () => {
+		const errorText = async () => {
+			await submitForm();
+			await waitFor(() => expect(formSwitch()).toHaveAttribute('aria-invalid', 'true'));
+			const errorId = formSwitch().closest('[id$="-field"]')!.querySelector('[role="alert"]')!;
+			return errorId.textContent?.trim();
+		};
+
+		const untouched = render(SwitchForms, { props: { formDefaultValue: null } });
+		const untouchedError = await errorText();
+		untouched.unmount();
+
+		render(SwitchForms, { props: { formDefaultValue: true } });
+		await fireEvent.click(formSwitch());
+		const turnedOffError = await errorText();
+
+		expect(untouchedError).toBe(turnedOffError);
+		expect(untouchedError).not.toMatch(/Expected boolean/);
 	});
 });

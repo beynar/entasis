@@ -246,11 +246,14 @@ const defaultRange = cva({
 	]
 });
 
+// Horizontal thumbs, hitboxes, contained ticks and marks sit at inset-inline-start, so in RTL their
+// centring translate flips. It flips on `:dir(rtl)`, the nearest `dir`, rather than on the `rtl:`
+// variant, which also matches inside an ltr slider placed in an rtl page.
 const defaultThumb = cva({
 	base: 'group absolute z-20 flex size-11 touch-none appearance-none items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none',
 	variants: {
 		orientation: {
-			horizontal: 'top-1/2 -translate-x-1/2 -translate-y-1/2 rtl:translate-x-1/2',
+			horizontal: 'top-1/2 -translate-x-1/2 -translate-y-1/2 [&:dir(rtl)]:translate-x-1/2',
 			vertical: 'left-1/2 -translate-x-1/2 translate-y-1/2'
 		},
 		size: {
@@ -291,7 +294,7 @@ const defaultThumbHitbox = cva({
 	base: 'absolute z-30 block touch-none rounded-full bg-transparent',
 	variants: {
 		orientation: {
-			horizontal: 'top-1/2 -translate-x-1/2 -translate-y-1/2 rtl:translate-x-1/2',
+			horizontal: 'top-1/2 -translate-x-1/2 -translate-y-1/2 [&:dir(rtl)]:translate-x-1/2',
 			vertical: 'left-1/2 -translate-x-1/2 translate-y-1/2'
 		},
 		size: {
@@ -537,7 +540,7 @@ const defaultContainedTick = cva({
 	base: 'bg-current/10 absolute rounded-full',
 	variants: {
 		orientation: {
-			horizontal: 'top-1/2 w-px -translate-x-1/2 -translate-y-1/2 rtl:translate-x-1/2',
+			horizontal: 'top-1/2 w-px -translate-x-1/2 -translate-y-1/2 [&:dir(rtl)]:translate-x-1/2',
 			vertical: 'left-1/2 h-px -translate-x-1/2 translate-y-1/2'
 		},
 		size: {
@@ -583,7 +586,8 @@ const defaultMark = cva({
 	base: 'absolute flex text-center',
 	variants: {
 		orientation: {
-			horizontal: 'top-0 -translate-x-1/2 rtl:translate-x-1/2 flex-col items-center gap-xs',
+			horizontal:
+				'top-0 -translate-x-1/2 [&:dir(rtl)]:translate-x-1/2 flex-col items-center gap-xs',
 			vertical: 'start-0 -translate-y-1/2 items-center gap-md'
 		}
 	},

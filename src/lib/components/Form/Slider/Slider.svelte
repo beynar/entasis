@@ -99,10 +99,14 @@
 		}
 	});
 
+	// The field reads the slider value only through `fieldValue`, which keeps one plain array while
+	// the numbers are unchanged: a Form that writes the value back as a new proxy is not a change.
+	const hasValue = $derived(value !== undefined);
+
 	const field = createFieldState<'slider' | 'slider-range'>({
 		id,
 		get value() {
-			return value === undefined ? undefined : slider.fieldValue;
+			return hasValue ? slider.fieldValue : undefined;
 		},
 		set value(v) {
 			value = v;

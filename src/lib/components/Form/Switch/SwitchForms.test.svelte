@@ -7,6 +7,7 @@
 		inputValue,
 		nativeRequired = false,
 		secondRequired = false,
+		withUnnamed = false,
 		formDefaultValue = false,
 		onNativeSubmit,
 		onFormSubmit
@@ -14,6 +15,8 @@
 		inputValue?: string;
 		nativeRequired?: boolean;
 		secondRequired?: boolean;
+		/** Adds a switch without a name to the native form. */
+		withUnnamed?: boolean;
 		formDefaultValue?: boolean | null;
 		onNativeSubmit?: (data: FormData) => void;
 		onFormSubmit?: (value: { terms: boolean }) => void;
@@ -31,6 +34,9 @@
 		<Switch name="alerts" label="Alerts" {inputValue} required={nativeRequired} />
 		{#if secondRequired}
 			<Switch name="updates" label="Updates" required />
+		{/if}
+		{#if withUnnamed}
+			<Switch label="Advanced options" />
 		{/if}
 		<button type="submit">Save native</button>
 	</form>

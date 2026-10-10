@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import SliderHarness from './SliderHarness.test.svelte';
 
@@ -37,6 +38,14 @@ const pressTrack = async (track: HTMLElement, clientX: number) => {
 	const init = { bubbles: true, cancelable: true, pointerId: 1, button: 0, clientX, clientY: 10 };
 	await fireEvent(track, new PointerEvent('pointerdown', init));
 	await fireEvent(track, new PointerEvent('pointerup', init));
+};
+const pointer = (type: string, clientX: number) =>
+	new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 1, button: 0, clientX });
+/** Presses `node`, moves the pointer to `toX`, and releases it there. */
+const drag = async (node: HTMLElement, fromX: number, toX: number) => {
+	await fireEvent(node, pointer('pointerdown', fromX));
+	await fireEvent(node, pointer('pointermove', toX));
+	await fireEvent(node, pointer('pointerup', toX));
 };
 const thumbPosition = (thumb: HTMLElement) => thumb.getAttribute('style') ?? '';
 
@@ -94,6 +103,34 @@ describe('Slider one-element array values', () => {
 	});
 });
 
+describe('Slider array payloads', () => {
+	test.each([
+		['unbound', { defaultValue: [20, 60] }],
+		['bound', { bound: [20, 60] }]
+	])('a range payload is plain data the app owns (%s)', async (_, props) => {
+		const onValueChange = vi.fn();
+		render(SliderHarness, { props: { ...props, onValueChange } });
+		const [start, end] = screen.getAllByRole('slider');
+
+		await fireEvent.keyDown(start, { key: 'ArrowRight' });
+		const payload = onValueChange.mock.calls[0][0] as number[];
+		expect(structuredClone(payload)).toEqual([21, 60]);
+
+		// Changing the payload never writes into the slider.
+		payload[1] = 90;
+		await tick();
+		expect(end).toHaveAttribute('aria-valuenow', '60');
+	});
+
+	test('a one-element payload is plain data', async () => {
+		const onValueChange = vi.fn();
+		render(SliderHarness, { props: { defaultValue: [25], onValueChange } });
+
+		await fireEvent.keyDown(screen.getByRole('slider'), { key: 'ArrowRight' });
+		expect(structuredClone(onValueChange.mock.calls[0][0])).toEqual([26]);
+	});
+});
+
 describe('Slider right-to-left layout', () => {
 	test('positions thumbs and the range from the inline start', () => {
 		render(SliderHarness, { props: { dir: 'rtl', mode: 'range', defaultValue: [20, 60] } });
@@ -133,6 +170,50 @@ describe('Slider right-to-left layout', () => {
 		expect(onValueChange).toHaveBeenLastCalledWith(75);
 		await pressTrack(track, TRACK_LEFT);
 		expect(onValueChange).toHaveBeenLastCalledWith(100);
+	});
+
+	test('places marks and contained ticks from the inline start', () => {
+		render(SliderHarness, {
+			props: {
+				dir: 'rtl',
+				variant: 'contained',
+				defaultValue: 30,
+				marks: [
+					{ value: 0, label: 'Low' },
+					{ value: 50, label: 'Mid' }
+				]
+			}
+		});
+		const mark = screen.getByText('Mid').parentElement;
+		expect(mark?.getAttribute('style')).toBe('inset-inline-start: 50%;');
+		const track = screen.getByRole('group');
+		const ticks = track.querySelectorAll<HTMLElement>('span[style*="inset-inline-start"]');
+		expect([...ticks].map((tick) => tick.getAttribute('style'))).toContain(
+			'inset-inline-start: 10%;'
+		);
+		expect(document.querySelector('[style*="left:"]')).toBeNull();
+	});
+
+	test('a thumb drag reads the pointer from the right edge', async () => {
+		const onValueChange = vi.fn();
+		render(SliderHarness, { props: { dir: 'rtl', defaultValue: 50, onValueChange } });
+		layOutTrack();
+
+		await drag(screen.getByRole('slider'), TRACK_LEFT + TRACK_WIDTH / 2, TRACK_LEFT + 50);
+		expect(onValueChange).toHaveBeenLastCalledWith(75);
+	});
+
+	test('dragging the selected range follows the mirrored track', async () => {
+		const onValueChange = vi.fn();
+		render(SliderHarness, {
+			props: { dir: 'rtl', mode: 'range', dragRange: true, defaultValue: [20, 60], onValueChange }
+		});
+		layOutTrack();
+		const range = document.querySelector<HTMLElement>('[role="presentation"]')!;
+
+		// 20px toward the physical left is 10% toward the maximum in RTL.
+		await drag(range, TRACK_LEFT + 120, TRACK_LEFT + 100);
+		expect(onValueChange).toHaveBeenLastCalledWith([30, 70]);
 	});
 
 	test('keeps reading the pointer from the left edge in LTR', async () => {

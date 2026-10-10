@@ -20,7 +20,7 @@ Extends all Field component props plus:
 ### Core Props
 - **value**: boolean | null (bindable) - Toggle state (bind with \`bind:value\`)
 - **defaultValue**: boolean | null (default: null) - Initial value when value is omitted
-- **inputValue**: string (default: 'true') - Value a native \`<form>\` submits under \`name\` while the switch is on; an off switch submits nothing
+- **inputValue**: string (default: 'true') - Value a native \`<form>\` submits under \`name\` while the switch is on; an off switch, or one without a \`name\`, submits nothing
 
 ### Field Props (inherited)
 - **label**: string | Snippet - Field label
@@ -87,8 +87,10 @@ A required switch is valid only while it is on, so it fits consent and terms acc
 
 ### Native Form Submission
 Inside a plain \`<form>\` (for example a SvelteKit form action), the switch submits its \`name\` with
-\`inputValue\` while it is on and nothing while it is off, like a native checkbox. A required switch
-that is off blocks the submit, focuses the switch and shows its error.
+\`inputValue\` while it is on and nothing while it is off, like a native checkbox. A switch without a
+\`name\` submits nothing. A required switch that is off blocks the submit; when it is the first invalid
+control, the browser's report lands on the switch, which takes focus and shows its error. A silent
+\`checkValidity()\` changes nothing.
 \`\`\`svelte
 <form method="POST">
 	<Switch name="marketing" inputValue="yes" label="Marketing emails" />
@@ -280,7 +282,7 @@ Switch validates:
 
 ## Accessibility
 
-- Proper ARIA roles and attributes
+- Proper ARIA roles and attributes; a required switch carries \`aria-required\` and a required marker on its label
 - Keyboard accessible (Space/Enter to toggle)
 - Focus states clearly visible
 - Label clickable to toggle

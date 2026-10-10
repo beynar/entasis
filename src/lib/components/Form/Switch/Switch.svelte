@@ -1,9 +1,3 @@
-<script lang="ts" module>
-	// One native validation pass fires `invalid` on every rejected control at once. Like the
-	// browser, only the first rejected switch of a form takes focus.
-	const reportingForms = new WeakSet<HTMLFormElement>();
-</script>
-
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import Field from '../Field/Field.svelte';
@@ -34,6 +28,9 @@
 	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
+	// Field falls back to a generated name so Form wiring stays unique. Only a name the app gave,
+	// directly or through Form, is submitted: an unnamed switch submits nothing, like a checkbox.
+	let generatedName: string | undefined;
 
 	const field = createFieldState({
 		id,
@@ -68,10 +65,10 @@
 			return required;
 		},
 		get name() {
-			return name;
+			return name || generatedName;
 		},
 		set name(v: string | undefined) {
-			name = v;
+			generatedName = v;
 		},
 		// Required means the switch must be on, as for Checkbox: an off switch is not an answer.
 		onValidate: (checked) => {
@@ -91,17 +88,11 @@
 		field.value = !field.value;
 	};
 
-	// The hidden input is never rendered, so the browser cannot point at it when a native form
-	// rejects a required switch that is off: keep that report on the visible switch instead.
-	const oninvalid = (event: Event & { currentTarget: HTMLInputElement }) => {
-		event.preventDefault();
+	// A blocked native submit (or reportValidity) focuses the first invalid control. When that is
+	// this switch's hidden input, hand the report to the visible switch: focus it and show its
+	// error. A silent checkValidity() fires `invalid` without focusing, so it changes nothing here.
+	const onHiddenInputFocus = () => {
 		field.validate();
-		const form = event.currentTarget.form;
-		if (form) {
-			if (reportingForms.has(form)) return;
-			reportingForms.add(form);
-			queueMicrotask(() => reportingForms.delete(form));
-		}
 		field.node?.focus();
 	};
 
@@ -132,17 +123,20 @@
 	}}
 	{...rest}
 >
+	<!-- Visually hidden rather than `hidden`, so the browser can still report it invalid. -->
 	<input
 		onchange={onclick}
-		{oninvalid}
-		name={field.name}
+		onfocus={onHiddenInputFocus}
+		name={name || undefined}
 		id={'input-' + field.id}
 		value={inputValue}
 		checked={!!field.value}
 		required={field.required}
-		hidden
 		disabled={field.disabled}
 		type="checkbox"
+		tabindex={-1}
+		aria-hidden="true"
+		class="sr-only"
 	/>
 	<div
 		bind:this={field.node}
@@ -150,6 +144,7 @@
 		data-checked={!!value}
 		aria-checked={!!value}
 		aria-labelledby={label ? field.labelId : undefined}
+		aria-required={field.required || undefined}
 		aria-disabled={field.disabled || undefined}
 		role="switch"
 		tabindex={field.disabled ? -1 : 0}
@@ -163,7 +158,12 @@
 	</div>
 	{#snippet suffix()}
 		{#if !labelPosition}
-			<Slot as="span" attrs={{ id: field.labelId }} render={label} class={fieldClasses.label()} />
+			<Slot
+				as="span"
+				attrs={{ id: field.labelId }}
+				render={label}
+				class={fieldClasses.label({ required: field.required })}
+			/>
 		{/if}
 	{/snippet}
 </Field>
