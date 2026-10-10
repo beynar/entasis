@@ -1,7 +1,7 @@
 import { ThemeState, useTheme } from '../Theme/theme.state.svelte.js';
 import { Timer } from '$lib/utils/timer.svelte.js';
 import { DEV } from 'esm-env';
-import { onMount, untrack } from 'svelte';
+import { onMount, tick, untrack } from 'svelte';
 import type { ResponsiveProps } from '../Theme/theme.js';
 import type { Slot } from '../Slot/slot.js';
 import type { FSOParams, FSOProps } from '$lib/transitions/transition.js';
@@ -324,6 +324,9 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 	// mounting a new one; see `adoptToast`.
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- bookkeeping read imperatively, never rendered
 	private leaving = new Map<string, Toast>();
+	// Toasts re-added over a leaving one, by id, waiting for that removal to reach the DOM.
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- bookkeeping read imperatively, never rendered
+	private arriving = new Map<string, Toast>();
 
 	/**
 	 * Attaches a toast to this Toaster: resolves its options against the Toaster's
@@ -332,42 +335,71 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 	 *
 	 * A toast whose id is already on screen is not added twice (the list is keyed by id):
 	 * its options are merged into the live toast, its timer restarts, and the live toast is
-	 * returned.
+	 * returned. A toast whose id is still animating out joins a microtask later, once that
+	 * removal has reached the DOM, and takes the leaving item over.
 	 */
-	adoptToast = (toast: Toast) => {
-		const live = this.toasts.find((candidate) => candidate.id === toast.id);
-		if (live) {
-			if (live !== toast) live.merge(toast.requested);
-			live.opts = this.resolveOptions(live.requested);
-			this.syncTimer(live, true);
-			return live;
-		}
-		// The same id is still animating out: Svelte resumes that item with this toast as its
-		// value and plays the entry transition again. The component keeps its element, whose
-		// one-shot `bind:this` and size bindings do not follow the new value.
+	adoptToast = (toast: Toast) =>
+		// `toast()` is often called from an effect. Reading the stack here would subscribe that
+		// effect to it, and the push below would then re-run it without end.
+		untrack(() => {
+			const live =
+				this.toasts.find((candidate) => candidate.id === toast.id) ?? this.arriving.get(toast.id);
+			if (live) {
+				if (live !== toast) live.merge(toast.requested);
+				live.opts = this.resolveOptions(live.requested);
+				// An arriving toast gets its timer when it joins the stack.
+				if (this.toasts.includes(live)) this.syncTimer(live, true);
+				return live;
+			}
+			toast.toaster = this;
+			toast.theme = this.theme;
+			toast.opts = this.resolveOptions(toast.requested);
+			const leaving = this.leaving.get(toast.id);
+			if (leaving && leaving !== toast && leaving.element?.isConnected) {
+				// The same id is animating out, or is about to: its removal may not have reached
+				// the DOM yet. Joined in the same tick, the toast would only swap the item's value
+				// in place, with no entry transition and no `onAfterOpen`. Joined once the removal
+				// has flushed, Svelte resumes the leaving item and plays the entry again.
+				this.arriving.set(toast.id, toast);
+				tick().then(() => {
+					// Dismissed before it joined.
+					if (this.arriving.get(toast.id) !== toast) return;
+					this.arriving.delete(toast.id);
+					this.joinStack(toast);
+				});
+				return toast;
+			}
+			this.joinStack(toast);
+			return toast;
+		});
+
+	private joinStack = (toast: Toast) => {
 		const leaving = this.leaving.get(toast.id);
 		this.leaving.delete(toast.id);
+		// Svelte resumes a leaving item with this toast as its value. The component keeps its
+		// element, whose one-shot `bind:this` and size bindings do not follow the new value.
 		if (leaving && leaving !== toast && leaving.element?.isConnected) {
 			toast.element = leaving.element;
 			toast.height = leaving.height;
 		}
-		toast.toaster = this;
-		toast.theme = this.theme;
-		toast.opts = this.resolveOptions(toast.requested);
 		this.toasts.push(toast);
 		this.isOpen = true;
-		return toast;
 	};
 
-	removeToast = (toast: Toast) => {
-		if (!this.toasts.includes(toast)) return;
-		this.toasts = this.toasts.filter((t) => t !== toast);
-		// Drop entries whose exit already finished so the map only holds leaving toasts.
-		for (const [id, leaving] of this.leaving) {
-			if (!leaving.element?.isConnected) this.leaving.delete(id);
-		}
-		this.leaving.set(toast.id, toast);
-	};
+	removeToast = (toast: Toast) =>
+		untrack(() => {
+			if (this.arriving.get(toast.id) === toast) {
+				this.arriving.delete(toast.id);
+				return;
+			}
+			if (!this.toasts.includes(toast)) return;
+			this.toasts = this.toasts.filter((t) => t !== toast);
+			// Drop entries whose exit already finished so the map only holds leaving toasts.
+			for (const [id, leaving] of this.leaving) {
+				if (!leaving.element?.isConnected) this.leaving.delete(id);
+			}
+			this.leaving.set(toast.id, toast);
+		});
 
 	toggleTimers = (position: ToastPosition, mode: 'pause' | 'resume') => {
 		// Leaving the hovered stack must not restart timers in an inactive window.
@@ -518,17 +550,20 @@ export class Toast {
 	remove = (reason: 'manual' | 'auto' = 'manual') => {
 		if (this.removed) return;
 		this.removed = true;
-		// A toast dismissed before any Toaster mounted is still parked in the pending queue.
-		// Leaving it there would have the first Toaster adopt an already-dismissed toast that
-		// nothing can dismiss again, since this method is idempotent.
-		dropPendingToast(this);
-		this.toaster?.removeToast(this);
-		this.timer?.destroy();
-		if (reason === 'auto') {
-			this.opts?.onAutoDismiss?.(this);
-		} else {
-			this.opts?.onDismiss?.(this);
-		}
+		// Like `toast()`, often called from an effect, which must not subscribe to this toast.
+		untrack(() => {
+			// A toast dismissed before any Toaster mounted is still parked in the pending queue.
+			// Leaving it there would have the first Toaster adopt an already-dismissed toast that
+			// nothing can dismiss again, since this method is idempotent.
+			dropPendingToast(this);
+			this.toaster?.removeToast(this);
+			this.timer?.destroy();
+			if (reason === 'auto') {
+				this.opts?.onAutoDismiss?.(this);
+			} else {
+				this.opts?.onDismiss?.(this);
+			}
+		});
 	};
 }
 

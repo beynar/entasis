@@ -97,6 +97,8 @@
 		toast.primary({
 			id: 'save-changes',
 			title: 'Saving changes…',
+			// Omitted keys keep their value: clear the one a previous success set.
+			description: undefined,
 			loading: true,
 			duration: false
 		});
@@ -422,11 +424,13 @@ toast.info({ title: 'Auto-dismissing', duration: 6000, progress: true });
 
 		<ComponentCard
 			title="Loading &amp; updates"
-			description="Show a spinner for a pending action, then call toast again with the same id once it resolves. A toast whose id is already on screen updates in place: the new options merge over the old ones and its timer restarts."
+			description="Show a spinner for a pending action, then call toast again with the same id once it resolves. A toast whose id is already on screen updates in place: the new options merge over the old ones, so keys you leave out keep their value, and its timer restarts."
 			class="!min-h-fit"
 			code={`toast.primary({
 	id: 'save-changes',
 	title: 'Saving changes…',
+	// Omitted keys keep their value: clear the one a previous success set.
+	description: undefined,
 	loading: true,
 	duration: false
 });

@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
-import { tick } from 'svelte';
+import { flushSync, tick } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import Harness from './ToasterHarness.test.svelte';
 import { toast, type Toaster } from './toast.state.svelte.js';
@@ -33,6 +33,21 @@ const setVisibility = (state: DocumentVisibilityState) => {
 
 const toaster = () => window.toaster as Toaster;
 const items = () => document.querySelectorAll('section[data-live-region] > li');
+
+// From the call on, transitions never finish, so a removed toast stays mid-exit.
+const holdAnimations = () =>
+	vi.spyOn(Element.prototype, 'animate').mockImplementation(
+		() =>
+			({
+				cancel() {},
+				finish() {},
+				play() {},
+				pause() {},
+				finished: new Promise(() => {}),
+				onfinish: null,
+				oncancel: null
+			}) as unknown as Animation
+	);
 
 beforeEach(() => {
 	now = 1000;
@@ -126,6 +141,8 @@ describe('toast upsert by id', () => {
 		// The exit transition is still playing: the item stays in the DOM.
 		expect(items()).toHaveLength(1);
 
+		// jsdom has no layout; stand in for the height the item measured.
+		first.height = 48;
 		const reopened = vi.fn();
 		const second = toast.success({ id: 'sync', title: 'Synced', onAfterOpen: reopened });
 		await tick();
@@ -136,27 +153,111 @@ describe('toast upsert by id', () => {
 		expect(screen.queryByText('Syncing')).not.toBeInTheDocument();
 		await waitFor(() => expect(reopened).toHaveBeenCalledWith(second));
 		expect(onDismiss).toHaveBeenCalledTimes(1);
-		// The replacement inherits the live element, so stacking reads its real height.
+		// The replacement inherits the live element and its size, so stacking reads its real height.
 		expect(second.element).toBe(items()[0]);
+		expect(second.height).toBe(48);
 		expect(toaster().toasts).toEqual([second]);
 
 		// The stale handle no longer controls the toast with that id.
+		toaster().removeToast(first);
 		first.remove();
 		await tick();
 		expect(toaster().toasts).toEqual([second]);
 	});
 
-	test('removing and re-adding an id in the same tick swaps the toast in place', async () => {
+	test('removing and re-adding an id in the same tick still opens the replacement', async () => {
 		render(Harness);
-		const first = toast.info({ id: 'swap', title: 'Before', duration: false });
-		await tick();
+		const firstOpen = vi.fn();
+		const first = toast.info({
+			id: 'swap',
+			title: 'Before',
+			duration: false,
+			onAfterOpen: firstOpen
+		});
+		await waitFor(() => expect(firstOpen).toHaveBeenCalledTimes(1));
+
 		first.remove();
-		const second = toast.success({ id: 'swap', title: 'After', duration: false });
+		const reopened = vi.fn();
+		const second = toast.success({
+			id: 'swap',
+			title: 'After',
+			duration: false,
+			onAfterOpen: reopened
+		});
+		// A further call before the replacement joins merges into it.
+		expect(toast.success({ id: 'swap', title: 'After all' })).toBe(second);
 		await tick();
+
 		expect(items()).toHaveLength(1);
-		expect(screen.getByText('After')).toBeInTheDocument();
+		expect(screen.getByText('After all')).toBeInTheDocument();
 		expect(second.element).toBe(items()[0]);
 		expect(toaster().toasts).toEqual([second]);
+		await waitFor(() => expect(reopened).toHaveBeenCalledWith(second));
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		expect(reopened).toHaveBeenCalledTimes(1);
+		expect(firstOpen).toHaveBeenCalledTimes(1);
+	});
+
+	test('a replacement dismissed before it joins the stack never shows', async () => {
+		render(Harness);
+		const first = toast.info({ id: 'gone', title: 'Before', duration: false });
+		await tick();
+		first.remove();
+		const onDismiss = vi.fn();
+		const second = toast.success({ id: 'gone', title: 'After', onDismiss });
+		second.remove();
+		await tick();
+		expect(toaster().toasts).toEqual([]);
+		expect(onDismiss).toHaveBeenCalledTimes(1);
+		expect(screen.queryByText('After')).not.toBeInTheDocument();
+	});
+
+	test('a toast swiped away and re-added mid-exit comes back to its slot', async () => {
+		render(Harness, { position: 'bottom-right' });
+		const opened = vi.fn();
+		toast.info({ id: 'swipe', title: 'Swipe me', duration: false, onAfterOpen: opened });
+		await waitFor(() => expect(opened).toHaveBeenCalled());
+		holdAnimations();
+
+		const li = items()[0] as HTMLElement;
+		await fireEvent.pointerDown(li, { clientX: 100, clientY: 100 });
+		await fireEvent.pointerMove(window, { clientX: 200, clientY: 100 });
+		await fireEvent.pointerUp(window, { clientX: 200, clientY: 100 });
+		expect(toaster().toasts).toEqual([]);
+		expect(li.style.translate).toBe('100px 0px');
+
+		const second = toast.success({ id: 'swipe', title: 'Again', duration: false });
+		await tick();
+		expect(toaster().toasts).toEqual([second]);
+		expect(items()[0]).toBe(li);
+		expect(li.style.translate).toBe('0px 0px');
+	});
+
+	test('toast() and remove() called from an effect do not subscribe it to the Toaster', async () => {
+		render(Harness);
+		let status = $state('Offline');
+		let runs = 0;
+		const stop = $effect.root(() => {
+			$effect(() => {
+				runs++;
+				const shown = toast.warning({ id: 'net', title: status, duration: false });
+				if (status === 'Online') {
+					shown.remove();
+					// No id: an effect re-run by its own call would add one toast per run.
+					toast.success({ title: 'Back online' });
+				}
+			});
+		});
+		flushSync();
+		expect(runs).toBe(1);
+		expect(toaster().toasts.map((t) => t.opts.title)).toEqual(['Offline']);
+
+		status = 'Online';
+		flushSync();
+		await tick();
+		expect(runs).toBe(2);
+		expect(toaster().toasts.map((t) => t.opts.title)).toEqual(['Back online']);
+		stop();
 	});
 
 	test('toasts queued before a Toaster mounts are merged by id', async () => {
@@ -271,12 +372,51 @@ describe('toast timers and window activity', () => {
 		expect(shown.timer?.remaining).toBe(2000);
 	});
 
+	test('an upsert that moves a toast off the hovered stack resumes its countdown', async () => {
+		render(Harness);
+		const onAutoDismiss = vi.fn();
+		const shown = toast.success({
+			id: 'move',
+			title: 'Here',
+			duration: 1000,
+			position: 'bottom-right',
+			onAutoDismiss
+		});
+		await tick();
+		await fireEvent.pointerEnter(items()[0]);
+		expect(shown.timer?.paused).toBe(true);
+
+		toast.success({ id: 'move', title: 'There', position: 'top-left' });
+		await tick();
+		expect(shown.timer?.paused).toBe(false);
+		run(1016);
+		expect(onAutoDismiss).toHaveBeenCalledTimes(1);
+	});
+
+	test('a toast added to the hovered stack starts paused', async () => {
+		render(Harness);
+		toast.success({ title: 'First', duration: 1000 });
+		await tick();
+		await fireEvent.pointerEnter(items()[0]);
+
+		const next = toast.info({ title: 'Second', duration: 1000 });
+		await tick();
+		expect(next.timer?.paused).toBe(true);
+		run(2000);
+		expect(next.timer?.remaining).toBe(1000);
+	});
+
 	test('the Toaster stops listening to the window when it unmounts', async () => {
-		const remove = vi.spyOn(window, 'removeEventListener');
 		const { unmount } = render(Harness);
+		const shown = toast.success({ title: 'Saved', duration: 1000 });
+		await tick();
+		const timer = shown.timer!;
 		unmount();
-		const removed = remove.mock.calls.map(([type]) => type);
-		expect(removed).toContain('blur');
-		expect(removed).toContain('focus');
+
+		// A leaked listener would still pause the toasts of the unmounted Toaster.
+		window.dispatchEvent(new FocusEvent('blur'));
+		expect(timer.paused).toBe(false);
+		setVisibility('hidden');
+		expect(timer.paused).toBe(false);
 	});
 });

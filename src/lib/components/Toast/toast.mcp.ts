@@ -92,7 +92,7 @@ function deleteItemWithUndo(item) {
 }
 \`\`\`
 
-**Updating by id:** a creator called with the \`id\` of a toast that is still on screen updates that toast in place and returns the same \`Toast\` handle. The new options merge over the previous ones (keys you leave out keep their value), the color follows the creator you call, and the auto-dismiss timer restarts from the full \`duration\`. A toast with that id that is still animating out is replaced by a new one that plays its entry transition and fires its own \`onAfterOpen\`. Toasts queued before a \`<Toaster />\` mounts merge by id the same way.
+**Updating by id:** a creator called with the \`id\` of a toast that is still on screen updates that toast in place and returns the same \`Toast\` handle. The new options merge over the previous ones (keys you leave out keep their value; pass \`undefined\` to clear one), the color follows the creator you call, and the auto-dismiss timer restarts from the full \`duration\`. A toast with that id that is still animating out, or that was removed earlier in the same tick, is replaced by a new \`Toast\`: it takes the leaving toast's place a microtask later, plays its entry transition from wherever the exit had reached, and fires its own \`onAfterOpen\`. The old handle no longer controls it. Toasts queued before a \`<Toaster />\` mounts merge by id the same way.
 
 \`\`\`ts
 toast.primary({ id: 'save', title: 'Saving…', loading: true, duration: false });

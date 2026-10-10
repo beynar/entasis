@@ -102,6 +102,14 @@
 	let dragStartX = 0;
 	let dragStartY = 0;
 
+	// A toast re-added with the id of one still animating out takes this item over. It must
+	// not inherit the swipe that dismissed its predecessor, or it rests off its slot.
+	$effect.pre(() => {
+		if (!toast) return;
+		dragOffset = 0;
+		dragging = false;
+	});
+
 	const drag = useDrag({
 		get isActive() {
 			return swipeEnabled;
