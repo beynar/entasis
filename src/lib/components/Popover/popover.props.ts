@@ -29,7 +29,7 @@ export type PopoverProps = WithAttachments<{
 	 * External positioning reference instead of the built-in trigger. An HTMLElement, or a
 	 * floating-ui virtual element — an object with `getBoundingClientRect()` returning a rect at a
 	 * point, e.g. `{ getBoundingClientRect: () => new DOMRect(x, y, 0, 0) }` to anchor a context
-	 * menu at the cursor.
+	 * menu at the cursor. An open popover closes when this element leaves the document.
 	 */
 	ref?: HTMLElement | VirtualElement | null;
 	/** Preferred placement relative to the reference element; supports responsive values. */
@@ -48,9 +48,9 @@ export type PopoverProps = WithAttachments<{
 	}) => { x: number; y: number; minWidth?: number } | null;
 	/** When true, clicking the trigger toggles the popover open and closed. */
 	openOnClick?: boolean;
-	/** When true, hovering the trigger opens the popover after `delay`. */
+	/** When true, hovering the trigger opens the popover after `delay`, including one that started open. */
 	openOnHover?: boolean;
-	/** Delay in milliseconds before opening on hover when `openOnHover` is enabled. */
+	/** Delay in milliseconds before opening on hover when `openOnHover` is enabled. Default `100`. */
 	delay?: number;
 	/** When true, enter and exit transitions slide from the placement direction. */
 	directedTransition?: boolean;
@@ -58,7 +58,11 @@ export type PopoverProps = WithAttachments<{
 	transition?: ResponsiveProps<FSOProps>;
 	/** Snippet for popover panel content; receives the popover state instance. */
 	children?: Snippet<[PopoverState]>;
-	/** Snippet, button props, or `false` to render, customize, or hide the trigger control. */
+	/**
+	 * Snippet, button props, or `false` to render, customize, or hide the trigger control. An
+	 * open popover closes when its trigger unmounts; a trigger re-rendered as a new element keeps
+	 * it open.
+	 */
 	trigger?: Snippet<[PopoverState]> | (ButtonProps & { content?: string }) | false;
 	/**
 	 * Where focus goes when the panel opens: `'first'` (autofocus target or first tabbable),

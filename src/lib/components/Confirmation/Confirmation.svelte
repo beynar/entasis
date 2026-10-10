@@ -15,11 +15,21 @@
 	const classes = $derived(useConfirmationTheme(theme));
 	const themeState = useTheme();
 
+	// Requests this host still owes an answer. A plain set, not `$state`: the unmount teardown
+	// reads it, and a `$state` read in teardown can return the value from before the last change.
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- read in teardown, never rendered
+	const unanswered = new Set<(outcome: ConfirmationOutcome) => void>();
+
 	// Mounted first, then opened on the next tick so the Dialog plays its enter transition.
-	onMount(() =>
-		registerConfirmationHost(themeState, {
+	onMount(() => {
+		const unregister = registerConfirmationHost(themeState, {
 			request: (detail) =>
-				new Promise<ConfirmationOutcome>((settle) => {
+				new Promise<ConfirmationOutcome>((resolve) => {
+					const settle = (outcome: ConfirmationOutcome) => {
+						unanswered.delete(settle);
+						resolve(outcome);
+					};
+					unanswered.add(settle);
 					const confirmationState = Object.assign({}, detail, {
 						isOpen: false,
 						loading: false,
@@ -34,8 +44,14 @@
 						});
 					});
 				})
-		})
-	);
+		});
+		return () => {
+			unregister();
+			// Nobody can answer these dialogs any more: settle them as declined so an
+			// `await confirmation()` never hangs on a host that left (a layout remount).
+			for (const settle of [...unanswered]) settle({ confirmed: false });
+		};
+	});
 
 	const actionConfirmation =
 		(
@@ -45,13 +61,18 @@
 		): NonNullable<ButtonProps['onclick']> =>
 		async (event) => {
 			onclick?.(event);
-			let result;
-			if (continued) {
-				const res = confirmation.onConfirm?.();
-				confirmation.loading = !!res && res instanceof Promise;
-				result = continued && res ? await res : undefined;
+			let result: unknown;
+			if (continued && confirmation.onConfirm) {
+				// A throwing or rejected `onConfirm` ends the loading state and keeps the dialog
+				// open, so Cancel works again; the error still propagates like any handler error.
+				try {
+					const pending = confirmation.onConfirm();
+					if (pending instanceof Promise) confirmation.loading = true;
+					result = await pending;
+				} finally {
+					confirmation.loading = false;
+				}
 			}
-			confirmation.loading = false;
 			confirmation.isOpen = false;
 			confirmation.settle({ confirmed: continued, result });
 		};

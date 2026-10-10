@@ -3,22 +3,29 @@ import { on } from 'svelte/events';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
 type HoverActionHandlerOptions = {
+	/** Checked when the pointer enters (after the delay) and leaves, never when attaching. */
 	isActive: () => boolean;
 	onMouseEnter?: () => void;
 	onMouseLeave?: () => void;
-	delay?: number;
+	/**
+	 * Milliseconds between the pointer entering and `onMouseEnter`. Read on every enter, so a
+	 * getter or a function follows a changing value; a function also lets a class field read
+	 * options its constructor has not bound yet.
+	 */
+	delay?: number | (() => number | undefined);
 };
 type Timeout = ReturnType<typeof setTimeout>;
 export const useHoverAction = (props: HoverActionHandlerOptions) => {
 	const timeouts = new SvelteMap<HTMLElement, Timeout>();
 	const offs = new SvelteSet<() => void>();
 	let isHovered = $state(false);
-	const wait = async (ref: HTMLElement) => {
+	const readDelay = () => (typeof props.delay === 'function' ? props.delay() : props.delay) ?? 0;
+	const wait = async (ref: HTMLElement, delay: number) => {
 		return new Promise((resolve) => {
 			const timeout = setTimeout(() => {
 				resolve(true);
 				timeouts.delete(ref);
-			}, props.delay);
+			}, delay);
 			timeouts.set(ref, timeout);
 		});
 	};
@@ -28,8 +35,9 @@ export const useHoverAction = (props: HoverActionHandlerOptions) => {
 			clearTimeout(timeouts.get(this));
 			timeouts.delete(this);
 		}
-		if (props.delay) {
-			wait(this).then(() => {
+		const delay = readDelay();
+		if (delay) {
+			wait(this, delay).then(() => {
 				if (props.isActive()) props.onMouseEnter?.();
 				isHovered = true;
 			});
@@ -57,8 +65,9 @@ export const useHoverAction = (props: HoverActionHandlerOptions) => {
 	onDestroy(destroy);
 
 	return {
+		// Always listens: `isActive` is checked when the pointer moves, so an element attached
+		// while the owner is inactive (a popover that starts open) still responds once it is active.
 		reference: (ref: HTMLElement) => {
-			if (!props.isActive()) return null;
 			return untrack(() => {
 				const offEnter = on(ref, 'mouseenter', onMouseEnter.bind(ref));
 				const offLeave = on(ref, 'mouseleave', onMouseLeave.bind(ref));

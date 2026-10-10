@@ -52,9 +52,9 @@ The Popover component displays floating content positioned relative to a trigger
   - Pass \`false\` to disable trigger (use with external ref)
 
 ### Interaction Props
-- **openOnHover**: boolean (default: false) - Open on mouse hover
+- **openOnHover**: boolean (default: false) - Open on mouse hover, after \`delay\`. Works whether the popover started closed or open (\`defaultOpen\`): once closed, hovering the trigger opens it again
 - **openOnClick**: boolean (default: true) - Open on click
-- **delay**: number (default: 100) - Delay in ms before opening on hover
+- **delay**: number (default: 100) - Delay in ms before opening on hover; leaving the trigger before it elapses cancels the open
 - **closeOnEscape**: boolean (default: true) - Close on Escape. Only the topmost open layer closes, so Escape inside a nested popover leaves its parent open
 - **closeOnClickOutside**: boolean (default: true) - Close on an outside press. A press dismisses this popover and every layer stacked above it, but never the layer that was pressed
 - **closeOnMouseLeave**: boolean (default: false) - Close when the pointer leaves the hover safe area. The safe area is the trigger, the panel, and a prediction cone toward the panel, so a diagonal move to the panel keeps it open.
@@ -389,6 +389,7 @@ The Popover component uses a \`PopoverState\` instance that is passed to all slo
 ## Notes
 
 - Popover is positioned using floating-ui, except with \`inline\`, where the document lays the panel out
+- Removing the trigger closes an open popover (reported through \`onOpenChange(false)\`), and so does a \`ref\` element leaving the document; a trigger re-rendered as a new element keeps it open and re-anchors it. Unmounting the whole Popover reports nothing
 - Automatically adjusts position to stay in viewport
 - Multiple popovers can be stacked
 - Scroll locking prevents background scroll (when enabled)

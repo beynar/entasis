@@ -1,0 +1,103 @@
+import '@testing-library/jest-dom/vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { describe, expect, test, vi } from 'vitest';
+import ConfirmationHarness from './ConfirmationHarness.test.svelte';
+import { confirmation } from './confirmation.state.svelte.js';
+
+type RejectionListener = (reason: unknown) => void;
+// Node's process, typed locally: the project ships no Node ambient types.
+const nodeProcess = (
+	globalThis as unknown as {
+		process: {
+			listeners(event: 'unhandledRejection'): RejectionListener[];
+			removeAllListeners(event: 'unhandledRejection'): void;
+			on(event: 'unhandledRejection', listener: RejectionListener): void;
+		};
+	}
+).process;
+
+/** Runs `body` while unhandled rejections go to `listener` instead of failing the run. */
+const withUnhandledRejections = async (listener: RejectionListener, body: () => Promise<void>) => {
+	const previous = nodeProcess.listeners('unhandledRejection');
+	nodeProcess.removeAllListeners('unhandledRejection');
+	nodeProcess.on('unhandledRejection', listener);
+	try {
+		await body();
+	} finally {
+		nodeProcess.removeAllListeners('unhandledRejection');
+		for (const restore of previous) nodeProcess.on('unhandledRejection', restore);
+	}
+};
+
+const ask = (onConfirm?: () => unknown) =>
+	confirmation({
+		title: 'Delete project',
+		description: 'This cannot be undone.',
+		confirm: 'Delete',
+		cancel: 'Keep',
+		onConfirm
+	});
+
+describe('Confirmation', () => {
+	test('a11y:confirmation.alertdialog renders an alertdialog named by its title', async () => {
+		render(ConfirmationHarness);
+		void ask();
+		const dialog = await screen.findByRole('alertdialog');
+		expect(dialog).toHaveAttribute('aria-modal', 'true');
+		expect(dialog).toHaveAccessibleName('Delete project');
+		expect(dialog).toHaveAccessibleDescription('This cannot be undone.');
+		await fireEvent.click(screen.getByRole('button', { name: 'Keep' }));
+	});
+
+	test('a rejected onConfirm ends loading and keeps the dialog open, so Cancel still answers', async () => {
+		render(ConfirmationHarness);
+		const failure = new Error('Network down');
+		let rejectAction: (reason: unknown) => void = () => {};
+		const onConfirm = vi.fn(
+			() =>
+				new Promise((_, reject) => {
+					rejectAction = reject;
+				})
+		);
+		const pending = ask(onConfirm);
+		const settled = vi.fn();
+		void pending.then(settled);
+		await screen.findByRole('alertdialog');
+		const cancel = screen.getByRole('button', { name: 'Keep' });
+
+		const unhandled = vi.fn();
+		await withUnhandledRejections(unhandled, async () => {
+			await fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+			expect(onConfirm).toHaveBeenCalledOnce();
+			await waitFor(() => expect(cancel).toBeDisabled());
+
+			rejectAction(failure);
+			// The error still surfaces like any event handler's.
+			await waitFor(() => expect(unhandled).toHaveBeenCalledWith(failure, expect.anything()));
+		});
+
+		await waitFor(() => expect(cancel).not.toBeDisabled());
+		expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+		expect(settled).not.toHaveBeenCalled();
+
+		await fireEvent.click(cancel);
+		await expect(pending).resolves.toEqual({ confirmed: false, result: undefined });
+	});
+
+	test('a resolved onConfirm closes the dialog and returns its result', async () => {
+		render(ConfirmationHarness);
+		const pending = ask(async () => 'deleted');
+		await screen.findByRole('alertdialog');
+		await fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+		await expect(pending).resolves.toEqual({ confirmed: true, result: 'deleted' });
+		await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
+	});
+
+	test('unmounting the host settles its open requests as declined', async () => {
+		const { unmount } = render(ConfirmationHarness);
+		const pending = ask();
+		await screen.findByRole('alertdialog');
+		unmount();
+		await expect(pending).resolves.toEqual({ confirmed: false, result: undefined });
+	});
+});

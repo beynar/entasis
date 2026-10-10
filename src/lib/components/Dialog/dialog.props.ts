@@ -16,7 +16,9 @@ export type DialogProps = WithSlot<
 		/** Stable DOM id for the portaled dialog root; falls back to a generated id when omitted. */
 		id?: string;
 		/** Presentation variant (modal, alert, fullScreen, or edge drawer); supports responsive
-		 *  values — pass a `{ xs: 'drawerBottom', md: 'modal' }` record for per-breakpoint control. */
+		 *  values — pass a `{ xs: 'drawerBottom', md: 'modal' }` record for per-breakpoint control.
+		 *  An `alert` renders `role="alertdialog"` and ignores outside presses by default. The
+		 *  resolved type is exposed as `data-type` on the root and the panel. */
 		type?: ResponsiveProps<DialogType>;
 		/** When the resolved type is `modal`, collapse it into a bottom-sheet drawer on mobile
 		 *  (viewport < 768px), inheriting swipe-to-dismiss and the drag thumb. Default `true`. */
@@ -43,7 +45,8 @@ export type DialogProps = WithSlot<
 		trigger?: Snippet<[DialogState]> | (ButtonProps & { content?: string });
 		/** When true, shows a close button and allows Escape to close the dialog. */
 		closable?: boolean;
-		/** When true, clicking outside the dialog panel closes the topmost open dialog. */
+		/** When true, clicking outside the dialog panel closes the topmost open dialog. Defaults to
+		 *  `true`, except for an `alert`, which ignores outside presses unless this is set. */
 		closeOnClickOutside?: boolean;
 		/** When true, pressing Escape closes the dialog when it is closable and topmost. */
 		closeOnEscape?: boolean;
