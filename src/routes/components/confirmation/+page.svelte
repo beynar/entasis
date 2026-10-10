@@ -63,6 +63,10 @@
 			label: 'Modal: cannot be dismissed by escape or click-outside',
 			test: 'a11y:confirmation.modal'
 		},
+		{
+			label: 'role=alertdialog named by its title',
+			test: 'a11y:confirmation.alertdialog'
+		},
 		'Rendered by a single <Confirmation /> mounted at the app root'
 	]}
 >
@@ -93,7 +97,7 @@ const { confirmed } = await confirmation({
 
 	{#snippet examples()}
 		<ComponentCard
-			description="Async onConfirm: the confirm button shows a loading state until the promise resolves, and its return value comes back as result."
+			description="Async onConfirm: the confirm button shows a loading state until the promise resolves, and its return value comes back as result. If it rejects, the loading state ends and the dialog stays open so the user can retry or cancel."
 			code={`const { confirmed, result } = await confirmation({
 	title: 'Publish changes',
 	description: 'Runs an async task.',

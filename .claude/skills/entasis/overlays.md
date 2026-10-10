@@ -32,16 +32,20 @@ Modal/drawer overlay that blocks page interaction.
 
 ### Unique Props
 
-| Prop                  | Type                                                                                                   | Default   |
-| --------------------- | ------------------------------------------------------------------------------------------------------ | --------- |
-| `type`                | `'modal' \| 'alert' \| 'fullScreen' \| 'drawerRight' \| 'drawerLeft' \| 'drawerBottom' \| 'drawerTop'` | `'modal'` |
-| `open`                | `boolean` (bindable)                                                                                   | `false`   |
-| `closable`            | `boolean`                                                                                              | `true`    |
-| `closeOnEscape`       | `boolean`                                                                                              | `true`    |
-| `closeOnClickOutside` | `boolean`                                                                                              | `true`    |
-| `transition`          | `TransitionConfig`                                                                                     | -         |
+| Prop                  | Type                                                                                                   | Default                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------ |
+| `type`                | `'modal' \| 'alert' \| 'fullScreen' \| 'drawerRight' \| 'drawerLeft' \| 'drawerBottom' \| 'drawerTop'` | `'modal'`                            |
+| `open`                | `boolean` (bindable)                                                                                   | `false`                              |
+| `closable`            | `boolean`                                                                                              | `true`                               |
+| `closeOnEscape`       | `boolean`                                                                                              | `true`                               |
+| `closeOnClickOutside` | `boolean`                                                                                              | `true` (`false` for `type: 'alert'`) |
+| `transition`          | `TransitionConfig`                                                                                     | -                                    |
 
 `type` accepts a responsive record such as `{ xs: 'drawerBottom', md: 'modal' }` (nearest defined key at or below the active breakpoint wins); a `modal` collapses into a bottom sheet on mobile by default, and drawers can be dragged toward their edge to dismiss. `aria-labelledby` / `aria-describedby` link `title` and `description`; focus is restored to the opener before `onAfterClose`.
+
+`type="alert"` is for an interruption that needs an answer: it renders `role="alertdialog"` and
+ignores outside presses unless `closeOnClickOutside` is set explicitly; Escape still closes it
+(turn that off with `closeOnEscape={false}`).
 
 ### Slots
 
@@ -117,6 +121,11 @@ Floating content positioned relative to a trigger element.
 | `directedTransition`  | `boolean`                                                     | `true`     |
 
 The trigger automatically gets `aria-haspopup` (from `haspopup`), `aria-expanded`, and `aria-controls`; a snippet trigger opts in with `{@attach popover.reference}`.
+
+`openOnHover` opens after `delay`; leaving the trigger first cancels it, and so does closing the
+popover another way (a click, Escape) while the delay runs. Removing the trigger, or the `ref`
+element, closes an open popover and reports `onOpenChange(false)`; a trigger re-rendered as a new
+element keeps it open.
 
 `inline` renders the panel in normal document flow where the component sits instead of portaling to
 the viewport-fixed layer: no floating-ui positioning, no scroll lock, no outside-press dismissal
@@ -348,11 +357,12 @@ const { confirmed, result } = await confirmation({
 | `cancel`      | `string \| { text, ...ButtonProps }` | yes      |
 | `onConfirm`   | `() => Promise<R>`                   | no       |
 
-**Note:** Cannot be dismissed via Escape or click-outside. Confirm button shows loading during `onConfirm` execution.
+**Note:** Cannot be dismissed via Escape or click-outside. Confirm button shows loading during `onConfirm` execution. If `onConfirm` throws or rejects, loading ends and the dialog stays open so the user can retry or cancel.
 
 `<Confirmation />` registers itself as the host on the surrounding `<Theme>`. A `confirmation()`
 call made before that host mounts is queued rather than thrown away, and resolves as soon as the
-host appears.
+host appears. When the host unmounts, requests the user has not answered resolve as
+`{ confirmed: false }`; a request whose `onConfirm` is already running resolves with its result.
 
 ### Theme Parts
 

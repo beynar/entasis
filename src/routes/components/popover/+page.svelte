@@ -42,6 +42,9 @@
 	});
 
 	let buttonRef = $state<HTMLButtonElement | null>(null);
+
+	let lifetimeTrigger = $state(true);
+	let lifetimeLog = $state('No change yet');
 </script>
 
 {#snippet wrapper(children: Snippet)}
@@ -286,6 +289,57 @@
 				{/snippet}
 				content
 			</Popover>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Trigger lifetime"
+			description="The trigger anchors the panel. Removing it closes an open popover and reports onOpenChange(false), so the panel never lingers against a detached element. Outside presses are off here, so the removal is what closes it."
+			code={`<script lang="ts">
+	let showTrigger = $state(true);
+${'</' + 'script>'}
+
+<Button onclick={() => (showTrigger = !showTrigger)}>Remove trigger</Button>
+
+<Popover closeOnClickOutside={false} onOpenChange={(open) => console.log(open)}>
+	{#snippet trigger(popover)}
+		{#if showTrigger}
+			<Button {@attach popover.reference} onclick={() => popover.toggle()}>Open</Button>
+		{/if}
+	{/snippet}
+
+	<div>Anchored to the trigger</div>
+</Popover>`}
+		>
+			<!-- Remove trigger comes first: when the row wraps on a phone it sits above the trigger,
+			     so the panel opening below the trigger never covers it. -->
+			<div class="flex w-full max-w-xl flex-wrap items-center justify-center gap-3">
+				<Button
+					variant="outline"
+					color="neutral"
+					onclick={() => (lifetimeTrigger = !lifetimeTrigger)}
+				>
+					{lifetimeTrigger ? 'Remove trigger' : 'Restore trigger'}
+				</Button>
+				<Popover
+					position="bottom"
+					closeOnClickOutside={false}
+					onOpenChange={(open) => (lifetimeLog = `onOpenChange(${open})`)}
+				>
+					{#snippet trigger(popover)}
+						{#if lifetimeTrigger}
+							<Button variant="soft" {@attach popover.reference} onclick={() => popover.toggle()}>
+								Open anchored panel
+							</Button>
+						{/if}
+					{/snippet}
+					<p class="text-neutral/70 max-w-xs text-sm">
+						Press Remove trigger: this panel closes with it.
+					</p>
+				</Popover>
+				<p class="text-neutral/70 w-full text-center text-sm" data-testid="trigger-lifetime-log">
+					{lifetimeLog}
+				</p>
+			</div>
 		</ComponentCard>
 	{/snippet}
 </DocPage>

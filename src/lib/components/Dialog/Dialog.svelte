@@ -24,7 +24,7 @@
 		transition,
 		children,
 		closeOnEscape = true,
-		closeOnClickOutside = true,
+		closeOnClickOutside,
 		closable = true,
 		swipeToDismiss,
 		swipeFrom,
@@ -127,7 +127,7 @@
 	<div
 		{@attach portal()}
 		id={dialog.id}
-		role="dialog"
+		role={dialog.role}
 		aria-modal="true"
 		aria-labelledby={title ? `${dialog.id}-label` : undefined}
 		aria-describedby={description ? `${dialog.id}-description` : undefined}
@@ -136,7 +136,7 @@
 			scroll: dialog.computedScroll,
 			className
 		})}
-		data-type={dialog.type}
+		data-type={dialog.computedType}
 		data-size={size}
 		style:z-index={dialog.zIndex}
 		style:--drawer-inset={inset === undefined ? undefined : drawerInsetValue(inset)}
@@ -144,7 +144,7 @@
 		<div class={classes.align({ type: dialog.computedType, scroll: dialog.computedScroll })}>
 			<div
 				{@attach dialog.contentAttachment}
-				data-type={dialog.type}
+				data-type={dialog.computedType}
 				style:transform={dialog.contentTransform}
 				style:transition={dialog.dragging ? 'none' : undefined}
 				in:in_out={dialog.computedTransition.in}

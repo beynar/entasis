@@ -29,7 +29,7 @@ The Dialog component (also known as Modal) displays content in a layer above the
   - drawerLeft: Drawer sliding in from the left
   - drawerBottom: Drawer sliding in from the bottom
   - drawerTop: Drawer sliding in from the top
-  - alert: Alert-style dialog
+  - alert: Alert dialog for an interruption that needs an answer: renders \`role="alertdialog"\` and ignores outside presses unless \`closeOnClickOutside\` is set (Escape still closes it)
   - modal: Standard modal dialog
   - Supports responsive values: pass a \`Partial<Record<Breakpoint, DialogType>>\` record such as \`{ xs: 'drawerBottom', md: 'modal' }\` to vary the type per breakpoint (breakpoint is one of 'xs' | 'sm' | 'md' | 'lg' | 'xl', tracked live from the viewport; the nearest defined key at or below the active one wins)
 - **responsive**: boolean (default: true) - When the resolved type is \`modal\`, collapse it into a \`drawerBottom\` bottom sheet on mobile (viewport < 768px). The sheet inherits swipe-to-dismiss and the drag thumb. Set false to keep a centered modal on every screen size
@@ -56,7 +56,7 @@ The Dialog component (also known as Modal) displays content in a layer above the
 
 ### Behavior Props
 - **closeOnEscape**: boolean (default: true) - Close when Escape key is pressed
-- **closeOnClickOutside**: boolean (default: true) - Close when clicking outside dialog
+- **closeOnClickOutside**: boolean (default: true, false for \`type="alert"\`) - Close when clicking outside dialog
 - **closable**: boolean (default: true) - Whether dialog can be closed
 - **swipeToDismiss**: boolean (default: true for drawer types) - Drag the drawer toward its edge to dismiss. Direction-aware (drawerRight drags right, drawerBottom drags down, etc.) and never hijacks inner scrolling; opt elements out with \`data-no-swipe\`
 - **thumb**: boolean (default: true) - Drag thumb bar shown on swipe-dismissable drawers (inner edge, orientation follows the drawer side, oversized hitbox); set false to hide. Themeable via the \`thumb\` theme part
@@ -267,7 +267,8 @@ size:"small"
 The Dialog component uses a \`DialogState\` instance that is passed to all slot snippets. This state object provides:
 
 - **id**: string - Dialog identifier
-- **type**: DialogType - Current dialog type
+- **type**: DialogType - The \`type\` prop as passed (possibly a responsive record)
+- **computedType**: DialogType - The type resolved for the current viewport, after the mobile sheet collapse
 - **size**: Size - Current dialog size
 - **open()**: () => void - Method to open the dialog
 - **close()**: () => void - Method to close the dialog
@@ -278,6 +279,8 @@ The Dialog component uses a \`DialogState\` instance that is passed to all slot 
 - Tab and Shift+Tab are contained inside the dialog, and the rest of the page is \`inert\` while a modal is open
 - Focus is restored to the opener after the close transition finishes, just before \`onAfterClose\`
 - \`aria-labelledby\` links the \`title\` and \`aria-describedby\` links the \`description\`
+- The root is \`role="dialog"\`, or \`role="alertdialog"\` for \`type="alert"\`, always with \`aria-modal="true"\`
+- The root and the panel carry \`data-type\` with the resolved type (a responsive record or a modal collapsed into a mobile sheet reports the type actually shown), which drawer edge rounding keys on
 - Escape closes only the topmost open layer and an outside press dismisses the layers above the one pressed; both honour \`closeOnEscape\` / \`closable\` / \`closeOnClickOutside\` through the shared layer stack
 - Body scroll is locked when dialog is open
 

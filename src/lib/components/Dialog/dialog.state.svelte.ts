@@ -29,7 +29,7 @@ interface DialogOptions extends MakeRequired<
 		| 'swipeFrom'
 		| 'responsive'
 	>,
-	'closeOnEscape' | 'closeOnClickOutside' | 'closable'
+	'closeOnEscape' | 'closable'
 > {
 	isOpen: boolean;
 	onOpenChange?: (open: boolean) => void;
@@ -53,7 +53,7 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 		isOpen: () => this.isOpen,
 		isModal: () => true,
 		dismissOnEscape: () => this.closeOnEscape && this.closable,
-		dismissOnOutside: () => this.closeOnClickOutside && this.hasTransitioned,
+		dismissOnOutside: () => this.computedCloseOnClickOutside && this.hasTransitioned,
 		onDismiss: () => this.close(),
 		state: this
 	});
@@ -81,6 +81,12 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 		return resolved;
 	});
 	computedScroll = $derived(this.theme.resolveResponsiveProps(this.scroll, 'inner'));
+	/** Whether the resolved type is `alert`: an interruption that needs an explicit answer. */
+	isAlert = $derived(this.computedType === 'alert');
+	/** `alertdialog` for an alert, so assistive technology announces it as one. */
+	role: 'dialog' | 'alertdialog' = $derived(this.isAlert ? 'alertdialog' : 'dialog');
+	/** `closeOnClickOutside` when set; otherwise an outside press dismisses anything but an alert. */
+	computedCloseOnClickOutside = $derived(this.closeOnClickOutside ?? !this.isAlert);
 
 	// Per-type preset from `dialogTheme.motion`, through the override ladder
 	// (registry → `setDialogTheme` → instance `theme.motion` → `transition` prop).

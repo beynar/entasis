@@ -67,6 +67,14 @@
 		{
 			label: 'role=dialog + aria-modal with labelled title',
 			test: 'a11y:dialog.aria-modal-labelled'
+		},
+		{
+			label: 'type="alert" renders role=alertdialog',
+			test: 'a11y:dialog.alert-role'
+		},
+		{
+			label: 'Alerts ignore outside presses; Escape still answers',
+			test: 'a11y:dialog.alert-outside-press'
 		}
 	]}
 >
@@ -99,7 +107,7 @@
 
 	{#snippet examples()}
 		<ComponentCard
-			description="Modal, alert and full-screen variants. All portal to the body over a single shared backdrop."
+			description="Modal, alert and full-screen variants. All portal to the body over a single shared backdrop. An alert is an alertdialog: an outside press leaves it open, Escape or a button answers it."
 		>
 			<Dialog
 				type="modal"
