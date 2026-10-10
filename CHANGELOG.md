@@ -6,8 +6,30 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Changed
+
+- `PopupMenu` / `ContextMenu` / `MenuBar`: radio and selected options inside floating submenus now
+  close the whole menu tree when chosen, like every other item. Before, they left every menu open.
+  To keep the menu open for multi-select, give the option `attrs: { 'data-menu-keep-open': 'true' }`
+  or turn off the menu's `closeOnItemClick`.
+- `Menu`: in an inline `Menu`, choosing an item in a submenu flyout now closes the flyout and
+  returns focus to the row that opened it. Before, the flyout stayed open.
+
 ### Fixed
 
+- `PopupMenu`: choosing an item inside a submenu closes every open submenu and the menu together,
+  and a floating menu returns focus straight to its trigger. Before, the whole menu tree stayed
+  open. Each level closes once, deepest first, so `onOpenChange(false)` fires once per level.
+  Submenus follow the menu's `closeOnItemClick`, and an item with `data-menu-keep-open="true"` (or
+  inside an element that has it) keeps every level open. A `PopupMenu` placed in another menu's
+  header, footer or trigger stays a menu of its own and keeps its own `closeOnItemClick`.
+  `ContextMenu`, `MenuBar` and `Tree`'s context-menu surface close the same way: a `MenuBar` menu
+  returns focus to its bar trigger, and a `ContextMenu` to the element that had focus before it
+  opened.
+- `ContextMenu`: `popup.position` now places the menu relative to the pointer, for example
+  `popup={{ position: 'top-end' }}` opens it above and before the cursor. The default is still
+  `'bottom-start'`, and a responsive record keeps that default below its first breakpoint. Before,
+  the component always forced `'bottom-start'` and ignored the documented option.
 - `Toast`: calling a `toast` creator with the `id` of a toast that is still on screen no longer
   crashes the Toaster with a duplicate-key error. That toast updates in place and the same handle
   is returned: the new options merge over the old ones (keys you leave out keep their value) and
