@@ -3,6 +3,7 @@
 	import { on } from 'svelte/events';
 	import Menu from '../Menu/Menu.svelte';
 	import type { MenuItem } from '../Menu/menu.props.js';
+	import { providePopupMenuRoot } from '../PopupMenu/popupMenu.context.js';
 	import type { TreeContextMenuSnippetData } from './TreeSnippetRenderer.js';
 	import { cx } from '$lib/utils/cva/index.js';
 
@@ -20,6 +21,10 @@
 	let { data, items, class: className }: Props = $props();
 
 	const menuStyle = $derived(createMenuStyle(data));
+
+	// The surface is the root of the menu tree: a press in a submenu flyout, which is portaled out
+	// of the surface and never reaches `closeAfterAction`, closes the whole context menu too.
+	providePopupMenuRoot({ closeOnItemClick: () => true, close: () => data.close() });
 
 	function createMenuStyle(menuData: TreeContextMenuSnippetData): string {
 		const rect = menuData.context.anchorRect;

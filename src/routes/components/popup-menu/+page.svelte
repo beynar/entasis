@@ -18,6 +18,7 @@
 	import { dotsThreeVerticalIcon } from '$lib/components/Icons/dotsThreeVertical.js';
 
 	let clickCount = $state(0);
+	let lastChosen = $state('nothing yet');
 	let externalMenuOpen = $state(false);
 	let contextMenuOpen = $state(false);
 	// A floating-ui virtual element: a zero-size rect at the cursor, so the menu anchors to the pointer.
@@ -174,6 +175,30 @@
 		{ type: 'option', title: 'Delete Account', color: 'danger', prefix: trashIcon }
 	];
 
+	// Two submenu levels: choosing an item at any depth closes the whole tree.
+	const nestedItems: MenuItem[] = [
+		{ type: 'option', title: 'Rename', onclick: () => (lastChosen = 'Rename') },
+		{
+			type: 'submenu',
+			title: 'Share',
+			menu: [
+				{ type: 'option', title: 'Copy link', onclick: () => (lastChosen = 'Copy link') },
+				{
+					type: 'submenu',
+					title: 'Export',
+					menu: [
+						{ type: 'option', title: 'PDF', onclick: () => (lastChosen = 'Export as PDF') },
+						{
+							type: 'option',
+							title: 'Markdown',
+							onclick: () => (lastChosen = 'Export as Markdown')
+						}
+					]
+				}
+			]
+		}
+	];
+
 	const debugSafeAreaItems: MenuItem[] = [
 		{ type: 'option', title: 'Option 1' },
 		{
@@ -216,7 +241,10 @@
 			test: 'a11y:popup-menu.trigger-aria'
 		},
 		'Mobile-sheet submenus stack automatically',
-		'Closes on item click by default',
+		{
+			label: 'Choosing an item at any depth closes the menu; floating menus refocus the trigger',
+			test: 'a11y:popup-menu.item-closes-tree'
+		},
 		'Context menu via external ref'
 	]}
 >
@@ -408,6 +436,45 @@
 					closeOnItemClick={false}
 					menu={{ items: interactiveItems }}
 				/>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="Choosing an item inside a submenu closes every open submenu and the menu together, and focus returns to the trigger."
+			code={`<PopupMenu
+	trigger={{ content: 'Document', variant: 'outline' }}
+	position="bottom-start"
+	menu={{
+		items: [
+			{ type: 'option', title: 'Rename' },
+			{
+				type: 'submenu',
+				title: 'Share',
+				menu: [
+					{ type: 'option', title: 'Copy link' },
+					{
+						type: 'submenu',
+						title: 'Export',
+						menu: [
+							{ type: 'option', title: 'PDF' },
+							{ type: 'option', title: 'Markdown' }
+						]
+					}
+				]
+			}
+		]
+	}}
+/>`}
+		>
+			<div class="flex items-center gap-4">
+				<PopupMenu
+					trigger={{ content: 'Document', variant: 'outline' }}
+					position="bottom-start"
+					menu={{ items: nestedItems }}
+				/>
+				<span class="text-neutral/70 text-sm">
+					Last chosen: <span class="text-neutral font-medium">{lastChosen}</span>
+				</span>
 			</div>
 		</ComponentCard>
 
