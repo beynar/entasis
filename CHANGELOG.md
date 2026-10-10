@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.11.0 — 2026-10-10
+
 ### Added
 
 - `Form` / `ask()`: app-defined input types. An app augments `FormInputRegistry` in
