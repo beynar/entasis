@@ -379,8 +379,13 @@ export const useSafeArea = (opts: {
 	});
 
 	const registerReference = (ref: HTMLElement, role: SafeAreaRole) => {
-		refs.set(ref, role);
-		if (isListening) addReference(ref);
+		// Runs inside the caller's attachment effect. While the area is listening,
+		// `addReference` reads and writes `observerOffs`; tracked, that would re-run the
+		// attachment, whose teardown deletes the entry again, without end.
+		untrack(() => {
+			refs.set(ref, role);
+			if (isListening) addReference(ref);
+		});
 		return () => {
 			refs.delete(ref);
 			observerOffs.get(ref)?.();

@@ -1,0 +1,422 @@
+import '@testing-library/jest-dom/vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { flushSync, tick } from 'svelte';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import Harness from './ToasterHarness.test.svelte';
+import { toast, type Toaster } from './toast.state.svelte.js';
+
+// A frame clock the test drives by hand: `run(ms)` advances `performance.now()` frame by frame,
+// `jump(ms)` advances it without any frame, like a hidden tab.
+let now = 0;
+let frames = new Map<number, FrameRequestCallback>();
+let nextFrame = 1;
+
+const frame = (ms = 16) => {
+	now += ms;
+	const callbacks = [...frames.values()];
+	frames.clear();
+	callbacks.forEach((callback) => callback(now));
+};
+const run = (ms: number) => {
+	for (let left = ms; left > 0; left -= 16) frame(Math.min(16, left));
+};
+const jump = (ms: number) => {
+	now += ms;
+};
+
+let visibility: DocumentVisibilityState = 'visible';
+const setVisibility = (state: DocumentVisibilityState) => {
+	visibility = state;
+	// The global Document augmentation narrows dispatchEvent to the custom toast events.
+	EventTarget.prototype.dispatchEvent.call(document, new Event('visibilitychange'));
+};
+
+const toaster = () => window.toaster as Toaster;
+const items = () => document.querySelectorAll('section[data-live-region] > li');
+
+// From the call on, transitions never finish, so a removed toast stays mid-exit.
+const holdAnimations = () =>
+	vi.spyOn(Element.prototype, 'animate').mockImplementation(
+		() =>
+			({
+				cancel() {},
+				finish() {},
+				play() {},
+				pause() {},
+				finished: new Promise(() => {}),
+				onfinish: null,
+				oncancel: null
+			}) as unknown as Animation
+	);
+
+beforeEach(() => {
+	now = 1000;
+	frames = new Map();
+	nextFrame = 1;
+	visibility = 'visible';
+	vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+		frames.set(nextFrame, callback);
+		return nextFrame++;
+	});
+	vi.stubGlobal('cancelAnimationFrame', (id: number) => frames.delete(id));
+	vi.spyOn(performance, 'now').mockImplementation(() => now);
+	Object.defineProperty(document, 'visibilityState', {
+		configurable: true,
+		get: () => visibility
+	});
+});
+
+afterEach(() => {
+	vi.unstubAllGlobals();
+	vi.restoreAllMocks();
+	Reflect.deleteProperty(document, 'visibilityState');
+});
+
+describe('toast upsert by id', () => {
+	test('showing the same id twice keeps one toast, merges options and restarts the timer', async () => {
+		render(Harness);
+		const onAutoDismiss = vi.fn();
+		const first = toast.success({
+			id: 'save',
+			title: 'First',
+			description: 'Kept description',
+			duration: 1000,
+			onAutoDismiss
+		});
+		await tick();
+		run(600);
+		expect(first.timer?.elapsed).toBe(600);
+
+		const second = toast.danger({ id: 'save', title: 'Second' });
+		await tick();
+
+		expect(second).toBe(first);
+		expect(items()).toHaveLength(1);
+		expect(screen.getByText('Second')).toBeInTheDocument();
+		expect(screen.getByText('Kept description')).toBeInTheDocument();
+		expect(items()[0]).toHaveAttribute('data-color', 'danger');
+		expect(first.timer?.remaining).toBe(1000);
+
+		// The first countdown would have ended 400 ms in; the restarted one runs the full second.
+		run(600);
+		expect(onAutoDismiss).not.toHaveBeenCalled();
+		run(416);
+		expect(onAutoDismiss).toHaveBeenCalledTimes(1);
+	});
+
+	test('an upsert can end a loading toast and give it a duration', async () => {
+		render(Harness);
+		const pending = toast.primary({
+			id: 'upload',
+			title: 'Uploading',
+			loading: true,
+			duration: false
+		});
+		await tick();
+		expect(pending.loading).toBe(true);
+		expect(pending.timer).toBeUndefined();
+
+		toast.success({ id: 'upload', title: 'Uploaded', loading: false, duration: 2000 });
+		await tick();
+		expect(pending.loading).toBe(false);
+		expect(pending.timer?.delay).toBe(2000);
+		expect(items()).toHaveLength(1);
+	});
+
+	test('a toast re-added while it animates out is replaced and opens again', async () => {
+		render(Harness);
+		const onDismiss = vi.fn();
+		const firstOpen = vi.fn();
+		const first = toast.info({
+			id: 'sync',
+			title: 'Syncing',
+			duration: false,
+			onDismiss,
+			onAfterOpen: firstOpen
+		});
+		await waitFor(() => expect(firstOpen).toHaveBeenCalledTimes(1));
+
+		first.remove();
+		await tick();
+		// The exit transition is still playing: the item stays in the DOM.
+		expect(items()).toHaveLength(1);
+
+		// jsdom has no layout; stand in for the height the item measured.
+		first.height = 48;
+		const reopened = vi.fn();
+		const second = toast.success({ id: 'sync', title: 'Synced', onAfterOpen: reopened });
+		await tick();
+
+		expect(second).not.toBe(first);
+		expect(items()).toHaveLength(1);
+		expect(screen.getByText('Synced')).toBeInTheDocument();
+		expect(screen.queryByText('Syncing')).not.toBeInTheDocument();
+		await waitFor(() => expect(reopened).toHaveBeenCalledWith(second));
+		expect(onDismiss).toHaveBeenCalledTimes(1);
+		// The replacement inherits the live element and its size, so stacking reads its real height.
+		expect(second.element).toBe(items()[0]);
+		expect(second.height).toBe(48);
+		expect(toaster().toasts).toEqual([second]);
+
+		// The stale handle no longer controls the toast with that id.
+		toaster().removeToast(first);
+		first.remove();
+		await tick();
+		expect(toaster().toasts).toEqual([second]);
+	});
+
+	test('removing and re-adding an id in the same tick still opens the replacement', async () => {
+		render(Harness);
+		const firstOpen = vi.fn();
+		const first = toast.info({
+			id: 'swap',
+			title: 'Before',
+			duration: false,
+			onAfterOpen: firstOpen
+		});
+		await waitFor(() => expect(firstOpen).toHaveBeenCalledTimes(1));
+
+		first.remove();
+		const reopened = vi.fn();
+		const second = toast.success({
+			id: 'swap',
+			title: 'After',
+			duration: false,
+			onAfterOpen: reopened
+		});
+		// A further call before the replacement joins merges into it.
+		expect(toast.success({ id: 'swap', title: 'After all' })).toBe(second);
+		await tick();
+
+		expect(items()).toHaveLength(1);
+		expect(screen.getByText('After all')).toBeInTheDocument();
+		expect(second.element).toBe(items()[0]);
+		expect(toaster().toasts).toEqual([second]);
+		await waitFor(() => expect(reopened).toHaveBeenCalledWith(second));
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		expect(reopened).toHaveBeenCalledTimes(1);
+		expect(firstOpen).toHaveBeenCalledTimes(1);
+	});
+
+	test('a replacement dismissed before it joins the stack never shows', async () => {
+		render(Harness);
+		const first = toast.info({ id: 'gone', title: 'Before', duration: false });
+		await tick();
+		first.remove();
+		const onDismiss = vi.fn();
+		const second = toast.success({ id: 'gone', title: 'After', onDismiss });
+		second.remove();
+		await tick();
+		expect(toaster().toasts).toEqual([]);
+		expect(onDismiss).toHaveBeenCalledTimes(1);
+		expect(screen.queryByText('After')).not.toBeInTheDocument();
+	});
+
+	test('a toast swiped away and re-added mid-exit comes back to its slot', async () => {
+		render(Harness, { position: 'bottom-right' });
+		const opened = vi.fn();
+		toast.info({ id: 'swipe', title: 'Swipe me', duration: false, onAfterOpen: opened });
+		await waitFor(() => expect(opened).toHaveBeenCalled());
+		holdAnimations();
+
+		const li = items()[0] as HTMLElement;
+		await fireEvent.pointerDown(li, { clientX: 100, clientY: 100 });
+		await fireEvent.pointerMove(window, { clientX: 200, clientY: 100 });
+		await fireEvent.pointerUp(window, { clientX: 200, clientY: 100 });
+		expect(toaster().toasts).toEqual([]);
+		expect(li.style.translate).toBe('100px 0px');
+
+		const second = toast.success({ id: 'swipe', title: 'Again', duration: false });
+		await tick();
+		expect(toaster().toasts).toEqual([second]);
+		expect(items()[0]).toBe(li);
+		expect(li.style.translate).toBe('0px 0px');
+	});
+
+	test('toast() and remove() called from an effect do not subscribe it to the Toaster', async () => {
+		render(Harness);
+		let status = $state('Offline');
+		let runs = 0;
+		const stop = $effect.root(() => {
+			$effect(() => {
+				runs++;
+				const shown = toast.warning({ id: 'net', title: status, duration: false });
+				if (status === 'Online') {
+					shown.remove();
+					// No id: an effect re-run by its own call would add one toast per run.
+					toast.success({ title: 'Back online' });
+				}
+			});
+		});
+		flushSync();
+		expect(runs).toBe(1);
+		expect(toaster().toasts.map((t) => t.opts.title)).toEqual(['Offline']);
+
+		status = 'Online';
+		flushSync();
+		await tick();
+		expect(runs).toBe(2);
+		expect(toaster().toasts.map((t) => t.opts.title)).toEqual(['Back online']);
+		stop();
+	});
+
+	test('toasts queued before a Toaster mounts are merged by id', async () => {
+		const queued = toast.warning({ id: 'early', title: 'Early', duration: false });
+		const again = toast.warning({ id: 'early', title: 'Earlier still' });
+		expect(again).toBe(queued);
+
+		render(Harness);
+		await waitFor(() => expect(queued.toaster).not.toBeNull());
+		expect(items()).toHaveLength(1);
+		expect(screen.getByText('Earlier still')).toBeInTheDocument();
+	});
+});
+
+describe('toast timers and window activity', () => {
+	test('window blur pauses timers and focus resumes them with the remaining time', async () => {
+		render(Harness);
+		const onAutoDismiss = vi.fn();
+		const shown = toast.success({ title: 'Saved', duration: 1000, onAutoDismiss });
+		await tick();
+		run(400);
+
+		window.dispatchEvent(new FocusEvent('blur'));
+		run(5000);
+		expect(onAutoDismiss).not.toHaveBeenCalled();
+		expect(shown.timer?.paused).toBe(true);
+
+		window.dispatchEvent(new FocusEvent('focus'));
+		run(560);
+		expect(onAutoDismiss).not.toHaveBeenCalled();
+		run(64);
+		expect(onAutoDismiss).toHaveBeenCalledTimes(1);
+	});
+
+	test('focus moving between elements does not pause timers', async () => {
+		render(Harness);
+		const shown = toast.success({ title: 'Saved', duration: 1000 });
+		await tick();
+		const button = document.createElement('button');
+		document.body.append(button);
+		button.focus();
+		button.blur();
+		expect(shown.timer?.paused).toBe(false);
+		button.remove();
+	});
+
+	test('a hidden tab keeps the remaining time instead of expiring every toast on return', async () => {
+		render(Harness);
+		const onAutoDismiss = vi.fn();
+		const shown = toast.success({ title: 'Saved', duration: 1000, onAutoDismiss });
+		await tick();
+		run(400);
+
+		setVisibility('hidden');
+		// Frames stop in a hidden tab while the clock keeps going.
+		jump(60_000);
+		setVisibility('visible');
+		frame();
+
+		expect(onAutoDismiss).not.toHaveBeenCalled();
+		expect(shown.timer?.elapsed).toBe(416);
+	});
+
+	test('a toast created while the tab is hidden starts paused', async () => {
+		render(Harness);
+		setVisibility('hidden');
+		const onAutoDismiss = vi.fn();
+		const shown = toast.info({ title: 'Background', duration: 1000, onAutoDismiss });
+		await tick();
+		expect(shown.timer?.paused).toBe(true);
+
+		jump(60_000);
+		setVisibility('visible');
+		frame();
+		expect(onAutoDismiss).not.toHaveBeenCalled();
+		expect(shown.timer?.remaining).toBe(984);
+	});
+
+	test('timers stay paused while either the hover or the inactive window holds them', async () => {
+		render(Harness);
+		const shown = toast.success({ title: 'Hovered', duration: 1000 });
+		await tick();
+		await fireEvent.pointerEnter(items()[0]);
+		expect(shown.timer?.paused).toBe(true);
+
+		// Returning to the window keeps the hovered stack paused.
+		window.dispatchEvent(new FocusEvent('blur'));
+		window.dispatchEvent(new FocusEvent('focus'));
+		expect(shown.timer?.paused).toBe(true);
+
+		// Leaving the stack while the window is inactive keeps it paused too.
+		window.dispatchEvent(new FocusEvent('blur'));
+		toaster().toggleTimers(shown.opts.position, 'resume');
+		toaster().hovering = null;
+		expect(shown.timer?.paused).toBe(true);
+
+		window.dispatchEvent(new FocusEvent('focus'));
+		expect(shown.timer?.paused).toBe(false);
+	});
+
+	test('an upsert under the pointer restarts the countdown without starting it', async () => {
+		render(Harness);
+		const shown = toast.success({ id: 'hovered', title: 'Hovered', duration: 1000 });
+		await tick();
+		run(300);
+		await fireEvent.pointerEnter(items()[0]);
+
+		toast.success({ id: 'hovered', title: 'Updated', duration: 2000 });
+		await tick();
+		run(3000);
+		expect(shown.timer?.paused).toBe(true);
+		expect(shown.timer?.remaining).toBe(2000);
+	});
+
+	test('an upsert that moves a toast off the hovered stack resumes its countdown', async () => {
+		render(Harness);
+		const onAutoDismiss = vi.fn();
+		const shown = toast.success({
+			id: 'move',
+			title: 'Here',
+			duration: 1000,
+			position: 'bottom-right',
+			onAutoDismiss
+		});
+		await tick();
+		await fireEvent.pointerEnter(items()[0]);
+		expect(shown.timer?.paused).toBe(true);
+
+		toast.success({ id: 'move', title: 'There', position: 'top-left' });
+		await tick();
+		expect(shown.timer?.paused).toBe(false);
+		run(1016);
+		expect(onAutoDismiss).toHaveBeenCalledTimes(1);
+	});
+
+	test('a toast added to the hovered stack starts paused', async () => {
+		render(Harness);
+		toast.success({ title: 'First', duration: 1000 });
+		await tick();
+		await fireEvent.pointerEnter(items()[0]);
+
+		const next = toast.info({ title: 'Second', duration: 1000 });
+		await tick();
+		expect(next.timer?.paused).toBe(true);
+		run(2000);
+		expect(next.timer?.remaining).toBe(1000);
+	});
+
+	test('the Toaster stops listening to the window when it unmounts', async () => {
+		const { unmount } = render(Harness);
+		const shown = toast.success({ title: 'Saved', duration: 1000 });
+		await tick();
+		const timer = shown.timer!;
+		unmount();
+
+		// A leaked listener would still pause the toasts of the unmounted Toaster.
+		window.dispatchEvent(new FocusEvent('blur'));
+		expect(timer.paused).toBe(false);
+		setVisibility('hidden');
+		expect(timer.paused).toBe(false);
+	});
+});

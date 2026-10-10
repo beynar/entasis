@@ -59,7 +59,7 @@ toast.warning({
 - \`dismissible\` (boolean, optional): If false, prevents user from dismissing. Default: inherited from Toaster
 - \`richColors\` (boolean, optional): If true, uses richer color variants. Default: inherited from Toaster
 - \`loading\` (boolean, optional): If true, shows a loading spinner using Theme's global \`spinnerVariant\`
-- \`progress\` (boolean, optional): If true, shows a bar counting down the remaining duration (pauses on hover). Only appears when the toast has a finite \`duration\`. Can also be set on \`<Toaster progress />\` as a default.
+- \`progress\` (boolean, optional): If true, shows a bar counting down the remaining duration (pauses on hover and while the window is inactive). Only appears when the toast has a finite \`duration\`. Can also be set on \`<Toaster progress />\` as a default.
 - \`swipeToDismiss\` (boolean, optional, default true): Drag the toast toward its anchored screen edge (down for bottom-*, up for top-*) past a threshold to dismiss it; dragging the other way rubber-bands. A manual dismiss fires \`onDismiss\`, not \`onAutoDismiss\`.
 - \`closeOnClick\` (boolean, optional, default false): Dismiss when the toast body is clicked. Off by default now that swipe-to-dismiss exists; the close icon and swipe are the primary dismiss affordances.
 - \`size\` (Sizes, optional): Size of the toast — scales padding, corner radius, type and icon. Options: \`'small'\`, \`'normal'\`, \`'large'\` (default \`'normal'\`). Can be defaulted for all toasts with \`<Toaster size="..." />\`.
@@ -71,7 +71,7 @@ toast.warning({
 - \`important\` (boolean, optional): Uses \`role="alert"\` + assertive announcements for screen readers
 - \`transition\` (FSOProps, optional): Enter/exit transition override for this toast
 - \`theme\` (ToastThemeProps, optional): Theme overrides for this toast alone, layered over the \`<Toaster theme>\` object (\`base\` classes are appended, so the per-toast ones win)
-- \`id\` (string, optional): Custom ID for the toast. Auto-generated if not provided
+- \`id\` (string, optional): Custom ID for the toast. Auto-generated if not provided. Calling a creator again with an id that is still on screen updates that toast instead of adding another (see Updating by id)
 - \`onAfterOpen\` (function, optional): Called once the toast finishes entering: \`(payload: Toast) => void\`
 - \`onDismiss\` (function, optional): Called on manual dismiss (close button, an action, or \`toast.remove()\`). Not called on timeout: \`(payload: Toast) => void\`
 - \`onAutoDismiss\` (function, optional): Called only when the toast times out after \`duration\`. Put deferred irreversible work here; it never runs if the toast is dismissed first: \`(payload: Toast) => void\`
@@ -92,6 +92,14 @@ function deleteItemWithUndo(item) {
 }
 \`\`\`
 
+**Updating by id:** a creator called with the \`id\` of a toast that is still on screen updates that toast in place and returns the same \`Toast\` handle. The new options merge over the previous ones (keys you leave out keep their value; pass \`undefined\` to clear one), the color follows the creator you call, and the auto-dismiss timer restarts from the full \`duration\`. A toast with that id that is still animating out, or that was removed earlier in the same tick, is replaced by a new \`Toast\`: it takes the leaving toast's place a microtask later, plays its entry transition from wherever the exit had reached, and fires its own \`onAfterOpen\`. The old handle no longer controls it. Toasts queued before a \`<Toaster />\` mounts merge by id the same way.
+
+\`\`\`ts
+toast.primary({ id: 'save', title: 'Saving…', loading: true, duration: false });
+// later — same id, so the toast updates in place:
+toast.success({ id: 'save', title: 'Saved', loading: false, duration: 3000 });
+\`\`\`
+
 **Mounting order:** \`toast()\` never throws when no \`<Toaster />\` is mounted yet — the toast is queued and shown by the first Toaster that mounts. In development, a single \`console.warn\` reports a queue that is still waiting a tick later. Dismissing a queued toast drops it from the queue, and a \`toast()\` call made during SSR is discarded instead of queued.
 
 **Returns:**
@@ -105,7 +113,7 @@ A \`Toast\` instance that you can use to programmatically control the root:
 - The toaster is a \`role="region"\` landmark named "Notifications" (not a \`<dialog>\`); pressing F6 anywhere moves focus into it. Each toast is \`role="status"\`, or \`role="alert"\` when \`important\`
 - Toasts stacked away behind the front one are \`inert\` (rather than \`aria-hidden\`), so they take no clicks or tab stops until they surface
 - Multiple toasts can be displayed simultaneously and will stack based on position
-- Toasts pause their auto-close timer when hovered
+- Toasts pause their auto-close timer when hovered, and while the browser window is blurred or its tab is hidden; they resume with the time they had left. A toast shown while the window is inactive starts paused
 - Toasts can be dismissed by clicking the close icon, clicking the toast (if \`closeOnClick\` is true), or automatically after the duration expires
 
 ## Theme Customization
