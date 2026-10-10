@@ -6,6 +6,14 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `Switch`: `inputValue` sets the value a native `<form>` submits under the switch's `name` while it
+  is on (default `'true'`). An off switch, or one without a `name`, submits nothing, like a native
+  checkbox.
+- `Switch`: a required switch sets `aria-required` and shows the required marker on its inline
+  label.
+
 ### Changed
 
 - `PopupMenu` / `ContextMenu` / `MenuBar`: radio and selected options inside floating submenus now
@@ -17,6 +25,11 @@ Unreleased section under the new version.
 - `Dialog`: `type="alert"` renders `role="alertdialog"` and ignores outside presses by default. Set
   `closeOnClickOutside` to let a backdrop press dismiss it; Escape still closes it. `confirmation()`
   dialogs are announced as alert dialogs too.
+- `Switch`: a `required` switch must now be on, as `Checkbox` already required. An off required
+  switch fails Form validation and blocks every native form submit, including double clicks and
+  back-to-back `requestSubmit()` calls, where it used to be accepted. When it is the first invalid
+  control, the switch takes focus and shows its own error, with no browser validation bubble on top.
+  A silent `checkValidity()` moves no focus and shows no error.
 
 ### Fixed
 
@@ -92,6 +105,27 @@ Unreleased section under the new version.
 - `Dialog`: `data-type` on the root and the panel reports the resolved type. Modals collapsed into
   mobile sheets and responsive `type` records now get their rounded edge corners from
   `--drawer-edge-radius`.
+- `Switch`: inside a plain `<form>` (for example a SvelteKit form action) the switch was never
+  submitted, because its hidden checkbox had no `checked` state and its value was the stringified
+  boolean. It now submits `name=inputValue` while on and carries `required`.
+- `Switch`: an untouched required switch and one turned off report the same error instead of
+  validation-library text. `fieldSchemas.required.switch` now accepts `null`.
+- `Slider`: an array value keeps its array shape with a single thumb. `[25]` becomes `[26]` on
+  ArrowRight or a track press instead of `26`, a Form holds and submits `[25]`, and `slider-range`
+  entries accept one or more values.
+- `Slider`: a range or multi-thumb value in a `Form` bound with `bind:value` to `$state` no longer
+  loops with 'Maximum update depth exceeded'.
+- `Slider`: in right-to-left layouts the horizontal track now mirrors like the arrow keys. The
+  minimum sits at the right edge. Thumbs, the filled range, marks, contained ticks, and the
+  contained label and value are placed from the inline start, and pointer presses and drags read
+  their value from the right edge. Centring follows the slider's own direction, so an ltr slider
+  inside a right-to-left page (for example an English `I18n` region in an Arabic app) keeps its
+  thumbs, marks and ticks on their values. An `I18n` direction that the document does not carry (for
+  example `manageDocument={false}`) is applied to the whole slider field through its `dir`
+  attribute, so the label, description and errors mirror with the track.
+- `CheckboxesInput`, `RadioInput`: option ids were built from `name` and value, so two fields
+  sharing a `name` duplicated them and values with spaces made them invalid. Each option button now
+  gets `<field id>-option-<index>`, and its hidden input gets `<option id>-input`.
 
 ## 0.11.0 — 2026-10-10
 
