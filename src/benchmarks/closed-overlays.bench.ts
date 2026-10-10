@@ -3,6 +3,7 @@ import { expect, test } from 'vitest';
 import { countAll, createFixture, measure } from './fixture.js';
 
 const COUNT = 300;
+const ROWS = 200;
 
 test('Popover: mount 300 closed popovers', async ({ bench }) => {
 	const fixture = createFixture('closed-popovers', COUNT);
@@ -32,6 +33,26 @@ test('Select: mount 300 closed selects', async ({ bench }) => {
 				const mounted = countAll('[role="combobox"]');
 				fixture.unmount();
 				expect(mounted).toBe(COUNT);
+			}
+		},
+		() => {
+			fixture.mount();
+		}
+	);
+});
+
+// The case CX-10 names first: a data grid with a row-actions menu on every row.
+test('DataTable: mount 200 rows with a closed row menu each', async ({ bench }) => {
+	const fixture = createFixture('datatable-row-menus', ROWS);
+	await measure(
+		bench,
+		{ name: 'datatable row menus mount (200 rows)', file: 'datatable-row-menus-mount-200' },
+		{
+			afterEach() {
+				// The header's column menu has a trigger too; count the row menus by their label.
+				const mounted = countAll('[aria-haspopup="menu"][aria-label^="Actions for"]');
+				fixture.unmount();
+				expect(mounted).toBe(ROWS);
 			}
 		},
 		() => {

@@ -66,29 +66,40 @@ test('a bottom-start popover sits below its trigger, start-aligned, and Escape r
 	expect(document.activeElement).toBe(trigger.element());
 });
 
-test('a modal dialog keeps Tab and Shift+Tab inside it', async () => {
+test('a modal dialog wraps Tab and Shift+Tab inside it', async () => {
 	await mount('dialog');
 	await userEvent.click(page.getByRole('button', { name: 'Open dialog' }));
 	const dialog = page.getByRole('dialog');
 	await expect.element(dialog).toBeVisible();
-	const first = page.getByLabelText('First field').element();
-	await expect.poll(() => document.activeElement).toBe(first);
-	for (let step = 0; step < 6; step += 1) {
+	await expect
+		.poll(() => document.activeElement)
+		.toBe(page.getByLabelText('First field').element());
+	// Both ends are checked from the dialog's real first and last tabbables (the icon-only close
+	// button comes first): without the trap, the browser moves focus out of the dialog at each end.
+	const tabbables = getTabbableElements(dialog.element() as HTMLElement);
+	const first = tabbables[0];
+	const last = tabbables.at(-1)!;
+	expect(tabbables.length).toBeGreaterThan(2);
+	last.focus();
+	await tab();
+	expect(document.activeElement).toBe(first);
+	await tab({ shift: true });
+	expect(document.activeElement).toBe(last);
+	for (let step = 0; step < tabbables.length + 1; step += 1) {
 		await tab();
 		expect(dialog.element().contains(document.activeElement)).toBe(true);
 	}
-	first.focus();
-	await tab({ shift: true });
-	expect(dialog.element().contains(document.activeElement)).toBe(true);
-	expect(document.activeElement).not.toBe(first);
 });
 
 test('menu items take focus from real arrow, Home and End keys', async () => {
 	await mount('menu');
-	const trigger = page.getByRole('button', { name: 'Actions' });
-	(trigger.element() as HTMLElement).focus();
-	await userEvent.keyboard('{Enter}');
-	await expect.element(page.getByRole('menu')).toBeVisible();
+	// A pointer open focuses the menu itself, so the first ArrowDown reaches the first item. A
+	// keyboard open should focus that item directly (C3 · MN-4b, pending in
+	// proposed-laws.browser.test.ts), so this test does not open the menu from the keyboard.
+	await userEvent.click(page.getByRole('button', { name: 'Actions' }));
+	const menu = page.getByRole('menu');
+	await expect.element(menu).toBeVisible();
+	await expect.poll(() => document.activeElement).toBe(menu.element());
 	const focused = () => document.activeElement?.textContent?.trim();
 	await userEvent.keyboard('{ArrowDown}');
 	await expect.poll(focused).toBe('Archive');
