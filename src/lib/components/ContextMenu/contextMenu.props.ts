@@ -51,7 +51,8 @@ export type ContextMenuProps = WithAttachments<{
 	theme?: ContextMenuThemeProps;
 	/**
 	 * Additional PopupMenu/Popover overrides (position, offset, closeOnEscape, closeOnItemClick,
-	 * ...). `position` places the menu relative to the pointer and defaults to `'bottom-start'`.
+	 * ...). `position` places the menu relative to the pointer and defaults to `'bottom-start'`;
+	 * a responsive record keeps that default below its first breakpoint.
 	 */
 	popup?: Omit<
 		PopupMenuProps,

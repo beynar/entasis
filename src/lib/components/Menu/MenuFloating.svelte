@@ -9,7 +9,7 @@
 	import { caretRightIcon } from '../Icons/caretRight.js';
 	import MenuOption from '../MenuOption/MenuOption.svelte';
 	import PopupMenu from '../PopupMenu/PopupMenu.svelte';
-	import { usePopupMenuPanelSize } from '../PopupMenu/popupMenu.context.js';
+	import { usePopupMenuPanelSize, usePopupMenuRoot } from '../PopupMenu/popupMenu.context.js';
 	import { usePopoverContext } from '../Popover/popover.state.svelte.js';
 	import type { PopoverState } from '../Popover/popover.state.svelte.js';
 	import Separator from '../Separator/Separator.svelte';
@@ -32,6 +32,8 @@
 	}: MenuProps = $props();
 	// The panel size of the PopupMenu this menu sits in, so a submenu opens in the same panel.
 	const panelSize = usePopupMenuPanelSize();
+	// The menu tree this menu belongs to, which its submenus join.
+	const menuTree = usePopupMenuRoot();
 
 	const id = $props.id();
 	const parentPopover = usePopoverContext();
@@ -205,10 +207,11 @@
 				...itemProps
 			} = submenuItem}
 			<!-- eslint-enable @typescript-eslint/no-unused-vars -->
-			<!-- Inside a PopupMenu the submenu joins that menu's tree: the root's closeOnItemClick
-			     applies, and choosing an item closes every level. In an inline Menu the submenu is
-			     the root of its own tree and closes on item press by default. -->
+			<!-- Inside a PopupMenu (or another tree host) the submenu joins that menu's tree: the
+			     root's closeOnItemClick applies, and choosing an item closes every level. In an
+			     inline Menu with no host the submenu roots its own tree and closes on item press. -->
 			<PopupMenu
+				submenuOf={menuTree}
 				size={panelSize?.() ?? 'small'}
 				position={submenuPosition}
 				openOnHover={openOnHover && !item.disabled && !isInMobileSheet}

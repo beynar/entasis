@@ -242,7 +242,7 @@
 		},
 		'Mobile-sheet submenus stack automatically',
 		{
-			label: 'Choosing an item at any depth closes the menu and refocuses the trigger',
+			label: 'Choosing an item at any depth closes the menu; floating menus refocus the trigger',
 			test: 'a11y:popup-menu.item-closes-tree'
 		},
 		'Context menu via external ref'

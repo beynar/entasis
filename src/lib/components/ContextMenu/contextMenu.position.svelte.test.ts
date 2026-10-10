@@ -57,4 +57,9 @@ describe('context menu position', () => {
 	test('a responsive popup.position resolves like any Popover position', async () => {
 		expect(await openAtPointer({ position: { xs: 'top-end' } })).toBe('top-end');
 	});
+
+	test('a responsive popup.position keeps the default below its first breakpoint', async () => {
+		// Popover's own fallback below the first key is `top`, which put the menu above the pointer.
+		expect(await openAtPointer({ position: { xl: 'right-start' } })).toBe('bottom-start');
+	});
 });

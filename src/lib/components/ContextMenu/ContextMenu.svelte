@@ -3,6 +3,7 @@
 	import { tick } from 'svelte';
 	import PopupMenu from '../PopupMenu/PopupMenu.svelte';
 	import type { ContextMenuProps } from './contextMenu.props.js';
+	import type { PopupMenuProps } from '../PopupMenu/popupMenu.props.js';
 	import { useContextMenuTheme } from './contextMenu.theme.js';
 
 	let {
@@ -32,6 +33,14 @@
 	// A floating-ui virtual element: a zero-size rect at the cursor, so the menu anchors to the
 	// pointer rather than the target element.
 	let reference = $state<{ getBoundingClientRect: () => DOMRect } | null>(null);
+
+	// Below and after the pointer unless `popup.position` says otherwise. A responsive record keeps
+	// that default below its first breakpoint, where Popover would otherwise fall back to `top`.
+	const position = $derived.by((): PopupMenuProps['position'] => {
+		const requested = popup?.position;
+		if (typeof requested !== 'object' || requested === null) return requested ?? 'bottom-start';
+		return { ...requested, xs: requested.xs ?? 'bottom-start' };
+	});
 
 	function setOpen(nextOpen: boolean) {
 		if (openState.value === nextOpen) return;
@@ -101,6 +110,6 @@
 	{onAfterOpen}
 	{onAfterClose}
 	ref={reference}
-	position={popup?.position ?? 'bottom-start'}
+	{position}
 	menu={{ items, ...menu }}
 />

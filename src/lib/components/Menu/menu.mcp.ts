@@ -505,7 +505,8 @@ Default submenu behavior:
 - Opens on hover (after 100ms delay)
 - Opens on click
 - Closes when the pointer leaves the submenu prediction cone and rectangle tolerance
-- Does not close when clicking items inside (allows multi-interaction)
+- Closes when an item inside is chosen. Inside a PopupMenu, ContextMenu or MenuBar the submenu belongs to that menu: choosing an item at any depth closes every level at once, following the menu's closeOnItemClick. In an inline Menu, choosing an item closes the submenu and focus returns to its row
+- An item (or an ancestor) with \`data-menu-keep-open="true"\` keeps every level open, for multi-select options: \`{ type: 'option', title: 'Bold', attrs: { 'data-menu-keep-open': 'true' } }\`
 
 ## Notes
 
