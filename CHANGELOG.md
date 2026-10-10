@@ -14,6 +14,9 @@ Unreleased section under the new version.
   or turn off the menu's `closeOnItemClick`.
 - `Menu`: in an inline `Menu`, choosing an item in a submenu flyout now closes the flyout and
   returns focus to the row that opened it. Before, the flyout stayed open.
+- `Dialog`: `type="alert"` renders `role="alertdialog"` and ignores outside presses by default. Set
+  `closeOnClickOutside` to let a backdrop press dismiss it; Escape still closes it. `confirmation()`
+  dialogs are announced as alert dialogs too.
 
 ### Fixed
 
@@ -69,6 +72,26 @@ Unreleased section under the new version.
   longer switch or open menus, inside an open menu or on the bar's triggers (Enter and Space on a
   trigger still open its menu). In the `Calendar` month and year chooser, modified
   ArrowLeft/ArrowRight no longer move between the month and year lists.
+- `Popover`: the hover `delay` now applies. Popovers with `openOnHover` used to open instantly and
+  ignore the 100 ms default. A popover that starts open (`defaultOpen`) now opens on hover again
+  after it closes. Closing a popover by click, tap or Escape while a hover open is still waiting on
+  `delay` no longer lets that hover reopen it, and a pointer that re-enters an already open trigger
+  starts no hover delay.
+- `Popover`: removing the trigger, or a `ref` element leaving the document (including a `bind:this`
+  `ref` that unmounts), closes an open popover and calls `onOpenChange(false)`, also under reduced
+  motion or zero-duration transitions. Before, the panel stayed open against a detached element. The
+  popover stays closed when the element returns. A trigger re-rendered as a new element keeps the
+  popover open, and unmounting the whole Popover reports nothing.
+- `Confirmation`: if `onConfirm` throws or rejects, the loading state ends and the dialog stays open
+  with Cancel enabled. Before, the user was trapped behind a disabled Cancel. The error still
+  propagates like any event handler error.
+- `Confirmation`: unmounting `<Confirmation />` resolves the requests it is still showing as
+  `{ confirmed: false }`. Before, `await confirmation()` hung forever after a layout remount. A
+  confirmed request whose `onConfirm` is still running when the host unmounts resolves with
+  `{ confirmed: true, result }` once the action finishes, or `{ confirmed: false }` if it fails.
+- `Dialog`: `data-type` on the root and the panel reports the resolved type. Modals collapsed into
+  mobile sheets and responsive `type` records now get their rounded edge corners from
+  `--drawer-edge-radius`.
 
 ## 0.11.0 — 2026-10-10
 
