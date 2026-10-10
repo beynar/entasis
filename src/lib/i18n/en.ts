@@ -581,7 +581,10 @@ export const en = {
 	aiContextCachedInput: 'Cached input',
 	aiContextUsed: 'Used',
 	aiContextUsage: (used: string | number, maximum: string | number, remaining: string | number) =>
-		`Context usage: ${used} of ${maximum} tokens used. ${remaining} tokens remaining.`
+		`Context usage: ${used} of ${maximum} tokens used. ${remaining} tokens remaining.`,
+	// Password input
+	passwordTooShort: (min: string | number) =>
+		`Password must be at least ${min} character${Number(min) === 1 ? '' : 's'}`
 };
 
 export type Messages = typeof en;

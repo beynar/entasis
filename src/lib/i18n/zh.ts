@@ -558,5 +558,7 @@ export const zh: Messages = {
 	aiContextCachedInput: '缓存输入',
 	aiContextUsed: '已使用',
 	aiContextUsage: (used: string | number, maximum: string | number, remaining: string | number) =>
-		`上下文使用情况：已使用 ${used} / ${maximum} 个 token。剩余 ${remaining} 个 token。`
+		`上下文使用情况：已使用 ${used} / ${maximum} 个 token。剩余 ${remaining} 个 token。`,
+	// 密码输入
+	passwordTooShort: (min: string | number) => `密码至少需要 ${min} 个字符`
 };

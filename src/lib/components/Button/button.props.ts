@@ -33,7 +33,7 @@ export type ButtonPrimitiveProps = WithAttachments<
 			 */
 			label?: string;
 			/**
-			 * ARIA role override. Defaults to `button` (or `link` when `href`/`as` is set).
+			 * ARIA role override. Defaults to `button` (or `link` when `href` is set).
 			 * Pass `menuitem` when the button is an item inside a `menu`.
 			 */
 			role?: string;
@@ -67,7 +67,11 @@ export type ButtonPrimitiveProps = WithAttachments<
 			 */
 			href?: string;
 			/**
-			 * When true, shows a spinner overlay and disables pointer events.
+			 * When true, shows a spinner overlay and refuses activation while keeping the button
+			 * focusable: it renders `aria-busy="true"` and `aria-disabled="true"`, ignores pointer
+			 * events, and cancels clicks from the keyboard (Enter, Space) as well as the form
+			 * submission of a `type="submit"` button. Unlike `disabled`, it never sets the native
+			 * `disabled` attribute, so focus stays on the button while the work runs.
 			 */
 			loading?: boolean;
 			/**
@@ -91,7 +95,9 @@ export type ButtonPrimitiveProps = WithAttachments<
 			 */
 			fullWidth?: boolean;
 			/**
-			 * When true, prevents interaction and applies disabled styles.
+			 * When true, prevents interaction and applies disabled styles. A `<button>` gets the
+			 * native `disabled` attribute and leaves the tab order; an anchor drops its `href`,
+			 * leaves the tab order and renders `aria-disabled="true"`.
 			 */
 			disabled?: boolean;
 			/**
@@ -106,10 +112,6 @@ export type ButtonPrimitiveProps = WithAttachments<
 			 * Link rel attribute when href is set.
 			 */
 			rel?: string;
-			/**
-			 * When set, renders the root element as an anchor instead of a button.
-			 */
-			as?: 'string';
 			/**
 			 * Theme overrides for button parts such as prefix and suffix.
 			 */
@@ -131,7 +133,7 @@ export type ButtonPrimitiveProps = WithAttachments<
 	>
 >;
 
-export type ButtonProps = Omit<ButtonPrimitiveProps, 'as'>;
+export type ButtonProps = ButtonPrimitiveProps;
 
 /**
  * Button props plus the id plumbing the library wires between a surface and its own trigger.

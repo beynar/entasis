@@ -577,5 +577,8 @@ export const es: Messages = {
 	aiContextCachedInput: 'Entrada en caché',
 	aiContextUsed: 'Usados',
 	aiContextUsage: (used: string | number, maximum: string | number, remaining: string | number) =>
-		`Uso del contexto: ${used} de ${maximum} tokens usados. ${remaining} tokens restantes.`
+		`Uso del contexto: ${used} de ${maximum} tokens usados. ${remaining} tokens restantes.`,
+	// Campo de contraseña
+	passwordTooShort: (min: string | number) =>
+		`La contraseña debe tener al menos ${min} ${Number(min) === 1 ? 'carácter' : 'caracteres'}`
 };

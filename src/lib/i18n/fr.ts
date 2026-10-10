@@ -584,5 +584,8 @@ export const fr: Messages = {
 	aiContextCachedInput: 'Entrée en cache',
 	aiContextUsed: 'Utilisés',
 	aiContextUsage: (used: string | number, maximum: string | number, remaining: string | number) =>
-		`Utilisation du contexte : ${used} jetons sur ${maximum} utilisés. ${remaining} jetons restants.`
+		`Utilisation du contexte : ${used} jetons sur ${maximum} utilisés. ${remaining} jetons restants.`,
+	// Champ mot de passe
+	passwordTooShort: (min: string | number) =>
+		`Le mot de passe doit contenir au moins ${min} caractère${Number(min) > 1 ? 's' : ''}`
 };

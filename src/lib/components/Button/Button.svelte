@@ -6,7 +6,6 @@
 	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 
 	let {
-		as,
 		loading = false,
 		onclick = null,
 		onpointerenter = null,
@@ -45,7 +44,11 @@
 	const isSquared = $derived(
 		squared ?? !!((!children && prefix && !suffix) || (!children && !prefix && suffix))
 	);
-	const isAnchor = $derived(!!(as || href));
+	const isAnchor = $derived(!!href);
+	// Only a disabled <button> uses the native attribute. A loading button stays focusable, so a
+	// keyboard user keeps their place, and refuses activation through `aria-disabled` instead.
+	const nativeDisabled = $derived(!isAnchor && disabled);
+	const inactive = $derived(disabled || loading);
 
 	const resolvedColor = $derived(useDefaultColor(color));
 	// One set of variant values for every slot; the template reads `slots.x()`.
@@ -62,7 +65,9 @@
 	);
 
 	const handleClick: NonNullable<ButtonInternalProps['onclick']> = (event) => {
-		if (disabled) {
+		// Enter and Space still dispatch `click` on a focusable button; cancelling it also stops
+		// a `type="submit"` button from submitting its form.
+		if (inactive) {
 			event.preventDefault();
 			event.stopPropagation();
 			return;
@@ -88,7 +93,8 @@
 	aria-controls={controls}
 	aria-selected={selected}
 	aria-pressed={pressed}
-	aria-disabled={isAnchor && disabled ? true : undefined}
+	aria-disabled={inactive && !nativeDisabled ? true : undefined}
+	aria-busy={loading ? true : undefined}
 	role={role ?? (isAnchor ? 'link' : 'button')}
 	href={isAnchor && !disabled ? href : undefined}
 	{rel}
@@ -101,10 +107,10 @@
 	data-highlighted={dataHighlighted}
 	data-slot={dataSlot}
 	data-color={resolvedColor}
-	disabled={!isAnchor && disabled ? true : undefined}
+	disabled={nativeDisabled ? true : undefined}
 	class={slots.root({ className })}
 	{@attach spinnerOverlay({ loading, size })}
-	onclick={disabled || onclick ? handleClick : undefined}
+	onclick={inactive || onclick ? handleClick : undefined}
 	onpointerenter={onpointerenter ? handlePointerEnter : undefined}
 	onpointerleave={onpointerleave ? handlePointerLeave : undefined}
 	{...attachments}

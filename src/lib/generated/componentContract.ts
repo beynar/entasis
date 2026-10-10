@@ -1613,6 +1613,8 @@ export const componentInventory = [
 		sourceIndex: 'src/lib/components/Form/PasswordInput/index.ts',
 		exportedSymbols: [
 			'PasswordInput',
+			'PasswordInputAttributes',
+			'PasswordInputAutocomplete',
 			'PasswordInputProps',
 			'PasswordInputTheme',
 			'PasswordInputThemeProps',

@@ -47,6 +47,10 @@
 	component="Button"
 	features={[
 		{ label: 'role=button or link with aria-label', test: 'a11y:button.role-and-label' },
+		{
+			label: 'Loading keeps focus, aria-busy, blocks activation',
+			test: 'a11y:button.loading-stays-focusable'
+		},
 		'Loading spinner overlay attachment',
 		'Bindable ref to root element',
 		'Renders as anchor when href set',
@@ -104,7 +108,9 @@
 			</div>
 		</ComponentCard>
 
-		<ComponentCard description="Loading buttons use the Spinner variant configured on Theme.">
+		<ComponentCard
+			description="Loading buttons use the Spinner variant configured on Theme. They keep keyboard focus and announce aria-busy, while clicks, Enter, Space and form submission are ignored until loading ends."
+		>
 			<Button {loading} onclick={triggerLoading}>Save changes</Button>
 		</ComponentCard>
 

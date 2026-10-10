@@ -267,7 +267,6 @@
 				onToggle={popover.toggle}
 			/>
 			<input
-				data-1p-ignore
 				{@attach usePhoneInput}
 				oninput={() => {
 					field.value = getValue();

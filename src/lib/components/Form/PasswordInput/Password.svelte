@@ -10,6 +10,8 @@
 	import { eyeIcon } from '$lib/components/Icons/eye.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 
+	const DEFAULT_MIN_LENGTH = 6;
+
 	let {
 		defaultValue = null,
 		value = $bindable(),
@@ -23,10 +25,27 @@
 		onValidate,
 		onValueChange,
 		visible,
+		autocomplete,
+		minLength,
+		inputAttrs,
 		...rest
 	}: PasswordInputProps = $props();
 	const t = $derived(useI18n());
 	if (value === undefined) value = untrack(() => defaultValue);
+
+	// A sign-in field must accept whatever password the account already has, so the default
+	// minimum is skipped for `current-password`. An explicit `minLength` always applies.
+	const resolvedMinLength = $derived(
+		minLength ?? (autocomplete === 'current-password' ? 0 : DEFAULT_MIN_LENGTH)
+	);
+	// FieldState runs this after its presence check, only for a value that is there. A short value
+	// reports the length rule alone, as the shared schema did before the rule moved here.
+	const validatePassword = (password: string) => {
+		if (typeof password === 'string' && password.length < resolvedMinLength) {
+			return t.passwordTooShort(resolvedMinLength);
+		}
+		return onValidate?.(password);
+	};
 
 	let showPassword = $state(false);
 	const id = $props.id();
@@ -67,9 +86,7 @@
 		set name(v: string | undefined) {
 			name = v;
 		},
-		get onValidate() {
-			return onValidate;
-		},
+		onValidate: validatePassword,
 		get visible() {
 			return visible;
 		},
@@ -111,10 +128,11 @@
 	{...rest}
 >
 	<input
-		data-1p-ignore
+		{...inputAttrs}
 		type={showPassword ? 'text' : 'password'}
 		{id}
 		name={field.name}
+		{autocomplete}
 		bind:value={field.value}
 		bind:this={field.node}
 		{placeholder}

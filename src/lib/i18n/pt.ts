@@ -577,5 +577,8 @@ export const pt: Messages = {
 	aiContextCachedInput: 'Entrada em cache',
 	aiContextUsed: 'Usados',
 	aiContextUsage: (used: string | number, maximum: string | number, remaining: string | number) =>
-		`Uso do contexto: ${used} de ${maximum} tokens usados. ${remaining} tokens restantes.`
+		`Uso do contexto: ${used} de ${maximum} tokens usados. ${remaining} tokens restantes.`,
+	// Campo de senha
+	passwordTooShort: (min: string | number) =>
+		`A senha deve ter pelo menos ${min} caractere${Number(min) > 1 ? 's' : ''}`
 };
