@@ -205,6 +205,9 @@
 				...itemProps
 			} = submenuItem}
 			<!-- eslint-enable @typescript-eslint/no-unused-vars -->
+			<!-- Inside a PopupMenu the submenu joins that menu's tree: the root's closeOnItemClick
+			     applies, and choosing an item closes every level. In an inline Menu the submenu is
+			     the root of its own tree and closes on item press by default. -->
 			<PopupMenu
 				size={panelSize?.() ?? 'small'}
 				position={submenuPosition}
@@ -214,7 +217,6 @@
 				{closeOnMouseLeave}
 				{debugSafeArea}
 				closeOnEscape={true}
-				closeOnItemClick={false}
 				mobileSheet={false}
 				class={popoverClass}
 				menu={{

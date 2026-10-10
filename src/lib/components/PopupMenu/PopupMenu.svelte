@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { providePopupMenuPanelSize } from './popupMenu.context.js';
+	import {
+		closeMenuTree,
+		providePopupMenuPanelSize,
+		providePopupMenuRoot,
+		usePopupMenuRoot,
+		type PopupMenuRoot
+	} from './popupMenu.context.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Popover from '../Popover/Popover.svelte';
 	import Menu from '../Menu/Menu.svelte';
@@ -53,23 +59,39 @@
 		onOpenChange?.(nextOpen);
 	};
 
-	const closeOnClick = (popover: PopoverState) => (node: HTMLElement) => {
-		if (closeOnItemClick) {
-			return on(node, 'click', (e) => {
-				const path = e.composedPath();
-				const buttonOrLink = path.find(
-					(node) => node instanceof HTMLButtonElement || node instanceof HTMLAnchorElement
-				);
-				const shouldKeepOpen = path.some(
-					(node) =>
-						node instanceof HTMLElement && node.getAttribute('data-menu-keep-open') === 'true'
-				);
-
-				if (buttonOrLink && !shouldKeepOpen) {
-					popover?.close();
-				}
-			});
+	// The popover this PopupMenu renders, known once its menu mounts.
+	let popoverState: PopoverState | null = null;
+	// A submenu is a PopupMenu nested in another one's menu: it joins the tree of the outermost
+	// PopupMenu, whose `closeOnItemClick` then decides for every level, and an item press anywhere
+	// closes the whole tree once. Only the outermost PopupMenu provides the tree.
+	const parentRoot = usePopupMenuRoot();
+	const root: PopupMenuRoot = parentRoot ?? {
+		closeOnItemClick: () => closeOnItemClick,
+		close: () => {
+			if (popoverState) closeMenuTree(popoverState);
+			else setOpen(false);
 		}
+	};
+	if (!parentRoot) providePopupMenuRoot(root);
+
+	const closeOnClick = (popover: PopoverState) => (node: HTMLElement) => {
+		popoverState = popover;
+		const off = on(node, 'click', (e) => {
+			if (!root.closeOnItemClick()) return;
+			const path = e.composedPath();
+			const buttonOrLink = path.find(
+				(node) => node instanceof HTMLButtonElement || node instanceof HTMLAnchorElement
+			);
+			const shouldKeepOpen = path.some(
+				(node) => node instanceof HTMLElement && node.getAttribute('data-menu-keep-open') === 'true'
+			);
+
+			if (buttonOrLink && !shouldKeepOpen) root.close();
+		});
+		return () => {
+			off();
+			if (popoverState === popover) popoverState = null;
+		};
 	};
 </script>
 

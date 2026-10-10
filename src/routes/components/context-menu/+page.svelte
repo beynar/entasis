@@ -52,9 +52,14 @@
 			prefix: shareIcon,
 			title: 'Share',
 			menu: [
-				{ type: 'option', title: 'Copy link' },
-				{ type: 'option', title: 'Email' },
-				{ type: 'option', title: 'Export as PDF', prefix: downloadIcon }
+				{ type: 'option', title: 'Copy link', onclick: () => (lastAction = 'Copy link') },
+				{ type: 'option', title: 'Email', onclick: () => (lastAction = 'Email') },
+				{
+					type: 'option',
+					title: 'Export as PDF',
+					prefix: downloadIcon,
+					onclick: () => (lastAction = 'Export as PDF')
+				}
 			]
 		},
 		{ type: 'separator' },
@@ -77,6 +82,10 @@
 	features={[
 		'Anchors at the pointer via a floating-ui virtual element',
 		'Reuses Menu — options, separators, submenus',
+		{
+			label: 'Choosing a submenu item closes every level and restores focus',
+			test: 'a11y:context-menu.item-closes-tree'
+		},
 		{ label: 'Full keyboard navigation and highlighting', test: 'a11y:menu.arrow-keys' },
 		'Flips near viewport edges, closes on outside click / Esc'
 	]}
@@ -107,9 +116,27 @@
 	</ComponentCard>
 
 	{#snippet examples()}
-		<ComponentCard description="Menu items with a nested submenu (Share).">
-			<ContextMenu items={submenuItems} class="w-full">
-				{@render target('Right-click for a menu with a submenu')}
+		<ComponentCard
+			description="Menu items with a nested submenu (Share). Choosing a Share item closes the submenu and the menu together."
+		>
+			<div class="w-full">
+				<ContextMenu items={submenuItems} class="w-full">
+					{@render target('Right-click for a menu with a submenu')}
+				</ContextMenu>
+				<p class="text-neutral/70 mt-3 text-center text-xs">
+					Last action: <span class="text-neutral font-medium">{lastAction}</span>
+				</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description={"Placed relative to the pointer with popup.position: here above and before it (popup={{ position: 'top-end' }})."}
+			code={`<ContextMenu items={items} popup={{ position: 'top-end' }}>
+	<div>Right-click — the menu opens above the pointer</div>
+</ContextMenu>`}
+		>
+			<ContextMenu items={basicItems} class="w-full" popup={{ position: 'top-end' }}>
+				{@render target('Right-click — the menu opens above the pointer')}
 			</ContextMenu>
 		</ComponentCard>
 

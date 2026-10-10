@@ -8,7 +8,10 @@ export type PopupMenuProps = Omit<PopoverProps, 'children' | 'theme'> & {
 	 */
 	menu: MenuProps;
 	/**
-	 * Whether to close the menu when a menu item is clicked.
+	 * Whether choosing a menu item (a button or link without `data-menu-keep-open="true"`)
+	 * closes the menu. Choosing an item inside a submenu closes every open submenu and the menu
+	 * together, and focus returns to the menu trigger. Submenus follow the outermost menu's
+	 * setting.
 	 * @default true
 	 */
 	closeOnItemClick?: boolean;

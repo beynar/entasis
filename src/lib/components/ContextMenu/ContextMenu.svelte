@@ -101,6 +101,6 @@
 	{onAfterOpen}
 	{onAfterClose}
 	ref={reference}
-	position="bottom-start"
+	position={popup?.position ?? 'bottom-start'}
 	menu={{ items, ...menu }}
 />

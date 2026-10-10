@@ -171,6 +171,10 @@
 			test: 'a11y:menu-bar.focus-switches-open-menu'
 		},
 		'Nested submenu navigation is preserved',
+		{
+			label: 'Choosing a submenu item closes the menu and refocuses its trigger',
+			test: 'a11y:menu-bar.item-closes-tree'
+		},
 		'RTL and disabled-menu support'
 	]}
 >

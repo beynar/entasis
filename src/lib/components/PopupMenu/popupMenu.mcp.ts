@@ -39,6 +39,8 @@ The PopupMenu component is a wrapper around Popover that renders a Menu inside. 
 
 - **closeOnItemClick**: boolean (default: true)
   - Whether to close the menu when a menu item (button or link) is clicked
+  - Choosing an item inside a submenu closes every open submenu and the menu together, once each, and focus returns to the menu trigger
+  - Submenus follow the outermost menu's setting; an item (or an ancestor) with data-menu-keep-open="true" never closes the menu
   - Set to false for menus that should stay open for multiple selections
 
 ### Popover Props (All Available)
@@ -384,6 +386,7 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 - Type-ahead: typing letters moves the highlight to the next matching item
 - Escape closes only the topmost open layer, so a submenu closes before its parent (configurable)
 - An outside press closes every layer above the one pressed (configurable)
+- Choosing an item at any depth closes the whole menu tree at once and returns focus to the trigger
 
 ## Notes
 

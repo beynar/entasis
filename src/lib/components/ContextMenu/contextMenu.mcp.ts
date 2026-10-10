@@ -41,7 +41,7 @@ floating-ui virtual element, so the menu appears exactly at the pointer (and fli
 
 ### Advanced Props
 - **menu**: Omit<MenuProps, 'items'> - Overrides forwarded to the underlying Menu (header, footer, theme).
-- **popup**: PopupMenu/Popover overrides (offset, closeOnEscape, ...). position and ref are managed internally.
+- **popup**: PopupMenu/Popover overrides (position, offset, closeOnEscape, closeOnItemClick, ...). position places the menu relative to the pointer and defaults to 'bottom-start'; ref is managed internally.
 - **class**: string - Class on the wrapper around the target content.
 
 ## Behavior
@@ -50,7 +50,7 @@ floating-ui virtual element, so the menu appears exactly at the pointer (and fli
 - Keyboard: Shift+F10 or the ContextMenu key, while focus is inside the target, opens the menu anchored to the focused element.
 - Touch: a 500 ms long-press opens the menu at the finger; moving or lifting the finger earlier cancels it.
 - A second right-click elsewhere re-mounts the menu at the new point.
-- Left-click outside, Escape, or selecting an item closes it.
+- Left-click outside, Escape, or selecting an item closes it. Selecting an item inside a submenu closes the submenu and the menu together, and focus returns to the element that had it before the menu opened.
 - Submenus, keyboard navigation, and highlighting are inherited from Menu.
 
 ## Accessibility

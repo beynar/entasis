@@ -340,7 +340,9 @@ Popover + Menu combo. Inherits all Popover props.
 
 - `menu`: `{ items: MenuItem[], class?, theme? }` (required)
 - `trigger`: `Snippet | ButtonProps | false`
-- `closeOnItemClick`: boolean (default: true)
+- `closeOnItemClick`: boolean (default: true). Choosing an item in a submenu closes every open
+  submenu and the menu at once, and focus returns to the trigger. Submenus follow this setting;
+  an item with `data-menu-keep-open="true"` never closes the menu.
 - `position`, `offset`, `open` (bindable), `openOnClick`, `openOnHover`, `delay`, `closeOnClickOutside`, `closeOnEscape`, `closeOnMouseLeave`
 
 ```svelte
