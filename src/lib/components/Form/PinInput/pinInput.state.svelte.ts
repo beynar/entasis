@@ -23,6 +23,14 @@ const KEYS_TO_IGNORE = new Set([
 	'Alt'
 ]);
 
+/** Folds the full-width ASCII forms that CJK input methods produce (`１２`) to ASCII (`12`). */
+const toHalfWidth = (text: string) =>
+	text.replace(/[\uFF01-\uFF5E]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0));
+
+/** Some Android keyboards report all typing as one long composition, so they commit on input. */
+const isAlwaysComposingKeyboard = (node: Element) =>
+	/android/i.test(node.ownerDocument.defaultView?.navigator.userAgent ?? '');
+
 export type PinInputPattern = string | RegExp;
 
 export type PinInputCell = {
@@ -44,6 +52,8 @@ type PinInputStateOptions = {
 };
 
 type SelectionDirection = 'forward' | 'backward' | 'none';
+/** The value and the selection the active IME composition replaces. */
+type Composition = { value: string; start: number; end: number };
 type PreviousSelection = [number | null, number | null, SelectionDirection];
 type NormalizedSelection = [number, number, SelectionDirection];
 
@@ -52,9 +62,14 @@ export class PinInputState {
 	isFocused = $state(false);
 	selectionStart = $state<number | null>(null);
 	selectionEnd = $state<number | null>(null);
+	/** The input text while an IME composition is in progress; the cells display it. */
+	composingValue = $state<string | null>(null);
 	inputAttachment: Attachment<HTMLInputElement>;
 	#previousValue: string;
 	#previousSelection: PreviousSelection = [null, null, 'none'];
+	#composition: Composition | null = null;
+	/** A complete pasted or autofilled value to report even when the previous code was complete. */
+	#pendingCompleteValue: string | null = null;
 
 	constructor(private options: PinInputStateOptions) {
 		this.#previousValue = this.value.slice(0, this.length);
@@ -76,6 +91,7 @@ export class PinInputState {
 						this.selectionStart = null;
 						this.selectionEnd = null;
 						this.#previousSelection = [null, null, 'none'];
+						this.endComposition();
 					}
 				};
 			});
@@ -102,7 +118,7 @@ export class PinInputState {
 	}
 
 	get cells() {
-		const value = this.value;
+		const value = this.composingValue ?? this.value;
 		const selectionStart = this.selectionStart ?? Math.min(value.length, this.length - 1);
 		const selectionEnd = this.selectionEnd ?? selectionStart;
 		const lowerSelection = Math.min(selectionStart, selectionEnd);
@@ -134,12 +150,22 @@ export class PinInputState {
 		if (this.options.disabled()) return;
 
 		event.preventDefault();
+		// Moving the caret would end the composition; the input method keeps it until it commits.
+		if (this.#composition) return;
 		this.input?.focus({ preventScroll: true });
 		this.selectCellFromPointer(event);
 	};
 
 	handleKeydown = (event: KeyboardEvent) => {
-		if (event.isComposing || event.ctrlKey || event.metaKey || KEYS_TO_IGNORE.has(event.key)) {
+		if (
+			this.#composition ||
+			event.isComposing ||
+			// 229 marks a keystroke the input method consumes; its text is checked on compositionend.
+			event.keyCode === 229 ||
+			event.ctrlKey ||
+			event.metaKey ||
+			KEYS_TO_IGNORE.has(event.key)
+		) {
 			return;
 		}
 
@@ -152,6 +178,13 @@ export class PinInputState {
 		const input = event.currentTarget;
 		if (!(input instanceof HTMLInputElement)) return;
 
+		// The input method owns the text until compositionend; intermediate text is only displayed.
+		if (this.#composition) {
+			this.composingValue = input.value;
+			this.normalizeSelection();
+			return;
+		}
+
 		const nextValue = input.value.slice(0, this.length);
 		if (!this.isValueAllowed(nextValue)) {
 			input.value = this.value;
@@ -160,6 +193,44 @@ export class PinInputState {
 		}
 
 		this.commitValue(nextValue, input.selectionStart ?? nextValue.length);
+		if (isReplacementInput(event)) this.requestComplete(nextValue);
+		this.normalizeSelection();
+	};
+
+	handleCompositionStart = () => {
+		const input = this.input;
+		if (!input || this.options.disabled() || isAlwaysComposingKeyboard(input)) return;
+
+		const value = this.value;
+		const start = Math.min(input.selectionStart ?? value.length, value.length);
+		const end = Math.min(Math.max(input.selectionEnd ?? start, start), value.length);
+		this.#composition = { value, start, end };
+		this.composingValue = input.value;
+	};
+
+	handleCompositionEnd = (event: CompositionEvent) => {
+		const composition = this.#composition;
+		const input = this.input;
+		if (!composition || !input) return;
+		this.endComposition();
+
+		const value = this.value;
+		const composedText = toHalfWidth(event.data || readComposedText(input.value, composition));
+		const caret = composition.start + composedText.length;
+		// Composed text overwrites the selected cell and the cells after it, as typing does.
+		const nextValue = (
+			value.slice(0, composition.start) +
+			composedText +
+			value.slice(Math.max(composition.end, caret))
+		).slice(0, this.length);
+
+		if (!composedText || value !== composition.value || !this.isValueAllowed(nextValue)) {
+			input.value = value;
+			this.setSelectionRange(composition.start, composition.end);
+			return;
+		}
+
+		this.commitValue(nextValue, caret);
 		this.normalizeSelection();
 	};
 
@@ -173,11 +244,14 @@ export class PinInputState {
 		const pastedText = transformer ? transformer(rawText) : rawText;
 		const selectionStart = input.selectionStart ?? this.value.length;
 		const selectionEnd = input.selectionEnd ?? selectionStart;
-		const nextValue = (
-			this.value.slice(0, selectionStart) +
-			pastedText +
-			this.value.slice(selectionEnd)
-		).slice(0, this.length);
+		// A paste that fills every cell is a whole new code, wherever the caret was.
+		const nextValue =
+			pastedText.length >= this.length
+				? pastedText.slice(0, this.length)
+				: (this.value.slice(0, selectionStart) + pastedText + this.value.slice(selectionEnd)).slice(
+						0,
+						this.length
+					);
 
 		if (!this.isValueAllowed(nextValue)) return;
 
@@ -187,9 +261,12 @@ export class PinInputState {
 				? Math.max(selectionEndAfterPaste - 1, 0)
 				: selectionEndAfterPaste;
 		this.commitValue(nextValue, selectionStartAfterPaste, selectionEndAfterPaste);
+		this.requestComplete(nextValue);
 	};
 
 	handleFocus = () => {
+		// A composition cannot outlive focus; drop one whose compositionend never arrived.
+		this.endComposition();
 		this.isFocused = true;
 		this.options.setFocused(true);
 
@@ -212,6 +289,13 @@ export class PinInputState {
 		if (input.ownerDocument.activeElement !== input) {
 			this.selectionStart = null;
 			this.selectionEnd = null;
+			return;
+		}
+
+		// Moving the native selection mid-composition would cancel it, so only mirror the caret.
+		if (this.#composition) {
+			this.selectionStart = this.clampSelection(input.selectionStart ?? 0);
+			this.selectionEnd = this.clampSelection(input.selectionEnd ?? this.selectionStart);
 			return;
 		}
 
@@ -340,6 +424,8 @@ export class PinInputState {
 	}
 
 	private syncInputValue(value: string) {
+		// A value set from outside mid-composition replaces the text the input method was composing.
+		if (this.#composition && this.#composition.value !== value) this.endComposition();
 		if (!this.input || this.input.value === value) return;
 		this.input.value = value;
 		if (this.isFocused) {
@@ -347,12 +433,32 @@ export class PinInputState {
 		}
 	}
 
+	private endComposition() {
+		this.#composition = null;
+		this.composingValue = null;
+	}
+
+	/**
+	 * Reports a committed complete paste or autofill even when the code was already complete. A
+	 * changed value is reported by the value effect after the update; an unchanged one right away.
+	 */
+	private requestComplete(value: string) {
+		if (value.length !== this.length || this.value !== value) return;
+		if (value === this.#previousValue) {
+			this.options.onComplete()?.(value);
+			return;
+		}
+		this.#pendingCompleteValue = value;
+	}
+
 	private notifyComplete(value: string) {
 		const previousValue = this.#previousValue;
+		const isRequested = this.#pendingCompleteValue === value;
+		this.#pendingCompleteValue = null;
 		if (
 			previousValue !== value &&
-			previousValue.length < this.length &&
-			value.length === this.length
+			value.length === this.length &&
+			(isRequested || previousValue.length < this.length)
 		) {
 			this.options.onComplete()?.(value);
 		}
@@ -372,3 +478,24 @@ export class PinInputState {
 		return regex.test(value);
 	}
 }
+
+/** Whether an input event replaced the whole text, as autofill does, rather than typed into it. */
+const isReplacementInput = (event: Event) => {
+	const inputType = (event as Partial<InputEvent>).inputType;
+	// Some browsers autofill with a plain `input` Event that carries no input type.
+	return inputType === undefined || inputType === 'insertReplacementText';
+};
+
+/** Recovers the composed text from the input when compositionend carries no data. */
+const readComposedText = (inputValue: string, { value, start, end }: Composition) => {
+	const prefix = value.slice(0, start);
+	const suffix = value.slice(end);
+	if (
+		inputValue.length < prefix.length + suffix.length ||
+		!inputValue.startsWith(prefix) ||
+		!inputValue.endsWith(suffix)
+	) {
+		return '';
+	}
+	return inputValue.slice(prefix.length, inputValue.length - suffix.length);
+};

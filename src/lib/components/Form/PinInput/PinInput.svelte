@@ -144,6 +144,8 @@
 			onpointerdown={state.handlePointerDown}
 			onkeydown={state.handleKeydown}
 			oninput={state.handleInput}
+			oncompositionstart={state.handleCompositionStart}
+			oncompositionend={state.handleCompositionEnd}
 			onpaste={state.handlePaste}
 			onfocus={state.handleFocus}
 			onblur={state.handleBlur}

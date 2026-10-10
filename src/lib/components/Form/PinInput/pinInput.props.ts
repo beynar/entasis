@@ -12,11 +12,18 @@ export type PinInputProps = Omit<InputProps<'pin'>, 'onValueChange'> & {
 	inputMode?: HTMLInputAttributes['inputmode'];
 	/** Autocomplete hint forwarded to the real input. */
 	autocomplete?: HTMLInputAttributes['autocomplete'];
-	/** Transforms pasted text before it is inserted. */
+	/**
+	 * Transforms pasted text before it is inserted. A result at least `length` characters long
+	 * replaces the whole code, wherever the caret is.
+	 */
 	pasteTransformer?: (text: string) => string;
 	/** Called when the value changes. */
 	onValueChange?: (value: string) => void;
-	/** Called once when the input reaches the configured length. */
+	/**
+	 * Called when the value becomes complete. A paste or autofill that leaves the code complete
+	 * calls it again, even when the code was already complete or unchanged; typing over one cell
+	 * of a complete code does not.
+	 */
 	onComplete?: (value: string) => void;
 	/** Whether displayed characters should be visually masked. */
 	mask?: boolean;

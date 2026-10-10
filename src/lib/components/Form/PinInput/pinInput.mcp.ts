@@ -31,9 +31,12 @@ PinInput is a one-time-code input built from one real text input plus visible ce
 - **pasteTransformer**: (text: string) => string
   - Cleans pasted text before insertion.
   - Use for values like "123-456" or "123 456".
+  - A cleaned paste at least \`length\` characters long replaces the whole value, wherever the caret is; a shorter one is inserted at the caret.
 
 - **onComplete**: (value: string) => void
-  - Called once when the value reaches the configured length.
+  - Called when the value becomes complete, whether typed, pasted, autofilled, composed, or set by the parent.
+  - A paste or autofill that leaves the code complete calls it again, even when the code was already complete or unchanged, so re-pasting a code retries verification.
+  - Typing over one cell of a complete code does not call it.
 
 - **onValueChange**: (value: string) => void
   - Called when the value changes.
@@ -104,11 +107,13 @@ PinInput extends the standard field props:
 - The visible cells are \`aria-hidden\`; assistive tech interacts with one text input.
 - The real input uses \`autocomplete="one-time-code"\` by default.
 - Keyboard navigation, deletion, selection, and paste operate through the native input.
+- Input method (IME) composition, such as Japanese or Chinese input, is left to the input method: the cells show the in-progress text, and the text is checked and committed once when the composition ends. Full-width digits and letters (\`１２３\`) are committed as ASCII (\`123\`).
 
 ## Notes
 
 - The pattern should accept partial values, not only the final full code. Use \`^\\\\d+$\`, not \`^\\\\d{6}$\`.
 - For pasted codes with spaces or hyphens, pass a \`pasteTransformer\`.
+- Composed text that the pattern rejects (for example hiragana in a digits-only field) is discarded, and the previous code and selection are restored.
 
 ## State contract
 

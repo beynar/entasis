@@ -12,11 +12,18 @@
 	let inviteCode = $state('');
 	let standaloneCode = $state('');
 	let formValue = $state('');
+	let pasteCode = $state('');
+	let completions = $state(0);
+	let lastCompleted = $state('');
 
 	const digitsOnly = (text: string) => text.replace(/\D/g, '');
 	const alphanumericOnly = (text: string) => text.replace(/[^a-zA-Z0-9]/g, '');
 	const setFormValue = (value: { otp: string | null }) => {
 		formValue = JSON.stringify(value);
+	};
+	const recordCompletion = (value: string) => {
+		completions += 1;
+		lastCompleted = value;
 	};
 	const controls = createComponentControls([
 		{
@@ -50,6 +57,8 @@
 	component="PinInput"
 	features={[
 		{ label: 'Native input owns focus and paste', test: 'a11y:pin-input.native-input' },
+		{ label: 'Full-length paste replaces the code', test: 'pin-input:full-paste' },
+		{ label: 'IME composition commits once', test: 'pin-input:ime-composition' },
 		'OTP autocomplete',
 		'Bindable string value',
 		'Form integration'
@@ -123,6 +132,36 @@
 					bind:value={inviteCode}
 					pasteTransformer={alphanumericOnly}
 					helper={`Value: ${inviteCode || 'empty'}`}
+				/>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Paste and completion"
+			description="A full-length paste replaces the code wherever the caret is. onComplete runs whenever the code becomes complete, and again for every paste or autofill that leaves it complete, so re-pasting a code retries verification. Japanese or Chinese input commits once when the composition ends, with full-width digits converted."
+			code={`<script lang="ts">
+	import { PinInput } from 'entasis/pin-input';
+
+	let code = $state('');
+	let completions = $state(0);
+${'</' + 'script>'}
+
+<PinInput
+	label="Sign-in code"
+	bind:value={code}
+	pasteTransformer={(text) => text.replace(/\\D/g, '')}
+	onComplete={() => (completions += 1)}
+	helper={\`Completed \${completions} times\`}
+/>`}
+			class="!min-h-fit"
+		>
+			<div class="w-full max-w-md">
+				<PinInput
+					label="Sign-in code"
+					bind:value={pasteCode}
+					pasteTransformer={digitsOnly}
+					onComplete={recordCompletion}
+					helper={`Completed ${completions} ${completions === 1 ? 'time' : 'times'}${lastCompleted ? ` · last code ${lastCompleted}` : ''}`}
 				/>
 			</div>
 		</ComponentCard>
