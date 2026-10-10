@@ -23,8 +23,10 @@ type NavigationOptions = {
 	 */
 	virtualFocus?: boolean;
 	/**
-	 * Swap ArrowLeft/ArrowRight in right-to-left contexts (horizontal orientation only).
-	 * Default `true`; direction comes from the i18n context, then the container's computed style.
+	 * Swap ArrowLeft/ArrowRight in right-to-left contexts: they move between items of a horizontal
+	 * list, and in a vertical list ArrowLeft opens a level (`onNext`) and ArrowRight leaves it
+	 * (`onPrevious`). Default `true`; direction comes from the i18n context, then the container's
+	 * computed style.
 	 */
 	rtl?: boolean;
 	/**
@@ -290,10 +292,10 @@ export const useNavigation = (opts: NavigationOptions) => {
 		isActive: () => true
 	});
 
-	// In RTL the physical arrows are mirrored: ArrowRight goes to the previous item.
+	// In RTL the inline arrows are mirrored: in a horizontal list ArrowRight goes to the previous
+	// item; in a vertical one ArrowLeft opens a level (onNext) and ArrowRight leaves it (onPrevious).
 	const resolveKey = (key: string) => {
-		const mirrored =
-			(opts.rtl ?? true) && getOrientation() === 'horizontal' && getDirection() === 'rtl';
+		const mirrored = (opts.rtl ?? true) && getDirection() === 'rtl';
 		if (mirrored && key === 'ArrowLeft') return 'ArrowRight';
 		if (mirrored && key === 'ArrowRight') return 'ArrowLeft';
 		return key;

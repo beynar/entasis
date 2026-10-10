@@ -365,6 +365,92 @@ describe('modified navigation keys (CC-INFRA-2a)', () => {
 	});
 });
 
+describe('submenu arrows follow the writing direction', () => {
+	const shareItems = () => [
+		{ type: 'option' as const, title: 'Profile' },
+		{
+			type: 'submenu' as const,
+			title: 'Share',
+			menu: [
+				{ type: 'option' as const, title: 'Email' },
+				{ type: 'option' as const, title: 'Link' }
+			]
+		}
+	];
+
+	/** Open the harness PopupMenu (as in the docs demo) and focus its submenu row. */
+	const focusShare = async (dir: 'ltr' | 'rtl') => {
+		render(NavigationKeysHarness, { props: { scenario: 'popup', items: shareItems(), dir } });
+		await fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+		await settle();
+		const share = screen.getByRole('menuitem', { name: 'Share' });
+		share.focus();
+		return share;
+	};
+
+	/** Wait for the submenu to take focus on its first row. */
+	const submenuFocused = () =>
+		waitFor(() => {
+			const email = screen.getByRole('menuitem', { name: 'Email' });
+			expect(document.activeElement).toBe(email);
+			return email;
+		});
+
+	test('in LTR, ArrowRight opens a submenu and ArrowLeft closes it', async () => {
+		const share = await focusShare('ltr');
+		await fireEvent.keyDown(share, { key: 'ArrowLeft' });
+		await settle();
+		expect(share).toHaveAttribute('aria-expanded', 'false');
+
+		await fireEvent.keyDown(share, { key: 'ArrowRight' });
+		const email = await submenuFocused();
+		expect(share).toHaveAttribute('aria-expanded', 'true');
+
+		await fireEvent.keyDown(email, { key: 'ArrowLeft' });
+		await waitFor(() => expect(document.activeElement).toBe(share));
+		expect(share).toHaveAttribute('aria-expanded', 'false');
+	});
+
+	test('in RTL, ArrowLeft opens a submenu and ArrowRight closes it', async () => {
+		const share = await focusShare('rtl');
+		await fireEvent.keyDown(share, { key: 'ArrowRight' });
+		await settle();
+		expect(share).toHaveAttribute('aria-expanded', 'false');
+		expect(screen.getAllByRole('menu')).toHaveLength(1);
+
+		await fireEvent.keyDown(share, { key: 'ArrowLeft' });
+		const email = await submenuFocused();
+		expect(share).toHaveAttribute('aria-expanded', 'true');
+
+		// The submenu's rows open no further level, so ArrowLeft stays where it is.
+		await fireEvent.keyDown(email, { key: 'ArrowLeft' });
+		await settle();
+		expect(document.activeElement).toBe(email);
+
+		await fireEvent.keyDown(email, { key: 'ArrowRight' });
+		await waitFor(() => expect(document.activeElement).toBe(share));
+		expect(share).toHaveAttribute('aria-expanded', 'false');
+	});
+
+	test('in an RTL MenuBar, ArrowLeft on a submenu row opens the submenu', async () => {
+		render(NavigationKeysHarness, { props: { scenario: 'menubar', dir: 'rtl' } });
+		const file = screen.getByRole('menuitem', { name: 'File' });
+		file.focus();
+		await fireEvent.keyDown(file, { key: 'ArrowDown' });
+		await settle();
+		const recent = screen.getByRole('menuitem', { name: 'Open recent' });
+		await fireEvent.keyDown(document.activeElement as HTMLElement, { key: 'ArrowDown' });
+		expect(document.activeElement).toBe(recent);
+
+		await fireEvent.keyDown(recent, { key: 'ArrowLeft' });
+		await waitFor(() =>
+			expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'notes.md' }))
+		);
+		expect(recent).toHaveAttribute('aria-expanded', 'true');
+		expect(file).toHaveAttribute('aria-expanded', 'true');
+	});
+});
+
 describe('useKeyDown', () => {
 	const setup = (options: { ignoreModifiers?: boolean; preventDefault?: boolean }) => {
 		const callback = vi.fn();
