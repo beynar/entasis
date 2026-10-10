@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen } from '@testing-library/svelte';
+import { createEvent, fireEvent, render, screen } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import PinInput from './PinInput.svelte';
@@ -40,10 +40,22 @@ const compose = (input: HTMLInputElement, value: string) => {
 	);
 };
 
-/** Fills the input the way browser and OS one-time-code autofill does: one whole-value input. */
-const autofill = (input: HTMLInputElement, value: string) => {
+/**
+ * Fills the input the way browser and OS one-time-code autofill does: one whole-value input,
+ * either a plain `input` Event or an `insertReplacementText` InputEvent (Firefox autocomplete).
+ */
+const autofill = (
+	input: HTMLInputElement,
+	value: string,
+	kind: 'event' | 'insertReplacementText' = 'event'
+) => {
 	input.value = value;
-	return fireEvent(input, new Event('input', { bubbles: true }));
+	return fireEvent(
+		input,
+		kind === 'event'
+			? new Event('input', { bubbles: true })
+			: new InputEvent('input', { bubbles: true, inputType: 'insertReplacementText' })
+	);
 };
 
 afterEach(() => {
@@ -156,17 +168,20 @@ describe('pin input paste', () => {
 		expect(onComplete).not.toHaveBeenCalled();
 	});
 
-	test('autofilling a new code over a complete code reports completion', async () => {
-		const { input, onComplete } = setup({ value: '111111' });
-		input.focus();
+	test.each(['event', 'insertReplacementText'] as const)(
+		'autofilling a new code over a complete code reports completion (%s)',
+		async (kind) => {
+			const { input, onComplete } = setup({ value: '111111' });
+			input.focus();
 
-		await autofill(input, '654321');
-		await tick();
+			await autofill(input, '654321', kind);
+			await tick();
 
-		expect(input).toHaveValue('654321');
-		expect(onComplete).toHaveBeenCalledTimes(1);
-		expect(onComplete).toHaveBeenLastCalledWith('654321');
-	});
+			expect(input).toHaveValue('654321');
+			expect(onComplete).toHaveBeenCalledTimes(1);
+			expect(onComplete).toHaveBeenLastCalledWith('654321');
+		}
+	);
 
 	test('typing the last cell reports completion once, and retyping a complete code does not', async () => {
 		const { input, onComplete } = setup();
@@ -269,6 +284,94 @@ describe('pin input IME composition', () => {
 
 		expect(input).toHaveValue('129456');
 		expect(onValueChange).toHaveBeenLastCalledWith('129456');
+	});
+
+	test('a multi-character composition overwrites the selected cell and the cells after it', async () => {
+		const { input, onValueChange } = setup({ value: '123456' });
+		input.focus();
+		input.setSelectionRange(2, 3);
+
+		await fireEvent.compositionStart(input, { data: '' });
+		await compose(input, '12９８456');
+		await fireEvent.compositionEnd(input, { data: '９８' });
+		await tick();
+
+		// Typing 9 then 8 over the selected cell gives the same code.
+		expect(input).toHaveValue('129856');
+		expect(onValueChange).toHaveBeenCalledTimes(1);
+		expect(onValueChange).toHaveBeenLastCalledWith('129856');
+	});
+
+	test('a field disabled mid-composition refuses the commit and keeps the input in sync', async () => {
+		const { input, rerender, cellText, onValueChange, onComplete } = setup({
+			value: '12',
+			length: 4
+		});
+		input.focus();
+
+		await fireEvent.compositionStart(input, { data: '' });
+		await compose(input, '12３４');
+		// Chromium commits the composition into the input it has just disabled.
+		await rerender({ disabled: true });
+		await fireEvent.compositionEnd(input, { data: '３４' });
+		await tick();
+
+		expect(input).toHaveValue('12');
+		expect(cellText()).toBe('12');
+		expect(onValueChange).not.toHaveBeenCalled();
+		expect(onComplete).not.toHaveBeenCalled();
+
+		await rerender({ disabled: false });
+		input.focus();
+		await type(input, '125');
+		await tick();
+		expect(input).toHaveValue('125');
+		expect(onValueChange).toHaveBeenLastCalledWith('125');
+	});
+
+	test('a refused composition over a selected cell restores that selection', async () => {
+		const { input, rerender, onValueChange } = setup({ value: '123456' });
+		input.focus();
+		input.setSelectionRange(2, 3);
+
+		await fireEvent.compositionStart(input, { data: '' });
+		await compose(input, '12９456');
+		await rerender({ disabled: true });
+		await fireEvent.compositionEnd(input, { data: '９' });
+		await tick();
+
+		expect(input).toHaveValue('123456');
+		expect([input.selectionStart, input.selectionEnd]).toEqual([2, 3]);
+		expect(onValueChange).not.toHaveBeenCalled();
+	});
+
+	test('an edit the disabled field refuses leaves the input showing the field value', async () => {
+		const { input, rerender, cellText, onValueChange } = setup({ value: '12', length: 4 });
+		await rerender({ disabled: true });
+
+		await type(input, '123');
+		await tick();
+
+		expect(input).toHaveValue('12');
+		expect(cellText()).toBe('12');
+		expect(onValueChange).not.toHaveBeenCalled();
+	});
+
+	test('a paste committed before compositionend wins over the composed text', async () => {
+		const { input, cellText, onValueChange } = setup({ value: '12' });
+		input.focus();
+
+		await fireEvent.compositionStart(input, { data: '' });
+		await compose(input, '12３');
+		// Both events arrive before the value effect runs, so compositionend sees a stale composition.
+		input.dispatchEvent(createEvent.paste(input, { clipboardData: { getData: () => '654321' } }));
+		input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '３' }));
+		await tick();
+
+		expect(input).toHaveValue('654321');
+		expect(cellText()).toBe('654321');
+		expect(onValueChange).toHaveBeenCalledTimes(1);
+		expect(onValueChange).toHaveBeenLastCalledWith('654321');
 	});
 
 	test('the selection is left to the input method while composing', async () => {
@@ -384,6 +487,17 @@ describe('pin input IME composition', () => {
 		const plain = new KeyboardEvent('keydown', { key: 'a', bubbles: true, cancelable: true });
 		input.dispatchEvent(plain);
 		expect(plain.defaultPrevented).toBe(true);
+	});
+
+	test('keystrokes during a composition are left to the input method', async () => {
+		const { input } = setup();
+		input.focus();
+		await fireEvent.compositionStart(input, { data: '' });
+
+		// Some keydowns inside a composition carry neither isComposing nor keyCode 229.
+		const event = new KeyboardEvent('keydown', { key: 'a', bubbles: true, cancelable: true });
+		input.dispatchEvent(event);
+		expect(event.defaultPrevented).toBe(false);
 	});
 
 	test('Android keyboards that always compose keep committing on input', async () => {

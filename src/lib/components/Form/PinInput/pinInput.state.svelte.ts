@@ -224,7 +224,14 @@ export class PinInputState {
 			value.slice(Math.max(composition.end, caret))
 		).slice(0, this.length);
 
-		if (!composedText || value !== composition.value || !this.isValueAllowed(nextValue)) {
+		if (
+			// A field disabled mid-composition refuses the commit, as it refuses any other edit.
+			this.options.disabled() ||
+			!composedText ||
+			// A paste, or a parent value whose effect has not run yet, replaced the composed text.
+			value !== composition.value ||
+			!this.isValueAllowed(nextValue)
+		) {
 			input.value = value;
 			this.setSelectionRange(composition.start, composition.end);
 			return;
@@ -328,8 +335,10 @@ export class PinInputState {
 
 	private commitValue(nextValue: string, selectionStart: number, selectionEnd = selectionStart) {
 		this.options.setValue(nextValue);
-		if (this.input && this.input.value !== nextValue) {
-			this.input.value = nextValue;
+		// The field can refuse the change (while disabled); the input shows the value it holds.
+		const acceptedValue = this.value;
+		if (this.input && this.input.value !== acceptedValue) {
+			this.input.value = acceptedValue;
 		}
 		this.setSelectionRange(selectionStart, selectionEnd);
 	}
