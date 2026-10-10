@@ -298,6 +298,8 @@
 	let showTrigger = $state(true);
 ${'</' + 'script>'}
 
+<Button onclick={() => (showTrigger = !showTrigger)}>Remove trigger</Button>
+
 <Popover closeOnClickOutside={false} onOpenChange={(open) => console.log(open)}>
 	{#snippet trigger(popover)}
 		{#if showTrigger}
@@ -306,11 +308,18 @@ ${'</' + 'script>'}
 	{/snippet}
 
 	<div>Anchored to the trigger</div>
-</Popover>
-
-<Button onclick={() => (showTrigger = !showTrigger)}>Remove trigger</Button>`}
+</Popover>`}
 		>
+			<!-- Remove trigger comes first: when the row wraps on a phone it sits above the trigger,
+			     so the panel opening below the trigger never covers it. -->
 			<div class="flex w-full max-w-xl flex-wrap items-center justify-center gap-3">
+				<Button
+					variant="outline"
+					color="neutral"
+					onclick={() => (lifetimeTrigger = !lifetimeTrigger)}
+				>
+					{lifetimeTrigger ? 'Remove trigger' : 'Restore trigger'}
+				</Button>
 				<Popover
 					position="bottom"
 					closeOnClickOutside={false}
@@ -327,13 +336,6 @@ ${'</' + 'script>'}
 						Press Remove trigger: this panel closes with it.
 					</p>
 				</Popover>
-				<Button
-					variant="outline"
-					color="neutral"
-					onclick={() => (lifetimeTrigger = !lifetimeTrigger)}
-				>
-					{lifetimeTrigger ? 'Remove trigger' : 'Restore trigger'}
-				</Button>
 				<p class="text-neutral/70 w-full text-center text-sm" data-testid="trigger-lifetime-log">
 					{lifetimeLog}
 				</p>
