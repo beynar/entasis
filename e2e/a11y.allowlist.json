@@ -8,5 +8,34 @@
 		"route": "^/components/diff",
 		"ruleId": "color-contrast",
 		"reason": "@pierre/diffs paints its own line-number and count colours inside the diffs-container shadow tree"
+	},
+	{
+		"route": "^/components/(select \\(long listbox open\\)|(combobox|tags-input) \\(listbox open\\))$",
+		"ruleId": "aria-required-children",
+		"match": "[role=scrollbar]",
+		"reason": "An overflowing list's ScrollArea renders its role=scrollbar inside the listbox. Owned by lane B7 (DF-16, scrollbars get aria-hidden; SC-1). Remove this entry with that change; the open-popup sweep fails while it suppresses nothing."
+	},
+	{
+		"route": "^/components/select \\(grouped listbox open\\)$",
+		"ruleId": "aria-required-children",
+		"match": "[role=separator]",
+		"reason": "Select renders role=separator between groups inside the listbox. Owned by lane B7 (SC-1, the separator becomes presentation). Remove this entry with that change."
+	},
+	{
+		"route": "^/components/phone \\(no countries found\\)$",
+		"ruleId": "aria-required-children",
+		"match": "Required ARIA children role not present",
+		"reason": "The country picker's empty message is a plain div and the listbox's only child. Owned by lane B7 (SC-1, the empty state moves outside the listbox as a status). Remove this entry with that change."
+	},
+	{
+		"route": "^/components/(combobox|tags-input) \\(no options found\\)$",
+		"ruleId": "aria-required-children",
+		"match": "[role=status]",
+		"reason": "The no-options role=status message renders inside the listbox. Owned by lane C6 (SC-16 / SC-INFRA-3: a persistent live region beside the input replaces it). Remove this entry with that change."
+	},
+	{
+		"route": "^/components/dialog \\(dialog open\\)$",
+		"ruleId": "button-name",
+		"reason": "Dialog's default close button is an icon-only Button without an accessible name. Found by the open-popup sweep (E2E-1); the fix belongs to the Dialog lane (C1). Remove this entry with that change."
 	}
 ]

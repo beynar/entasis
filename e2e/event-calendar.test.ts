@@ -4,8 +4,6 @@
 // overflow. Harness route: /__event-calendar-e2e (UTC, week of 2026-07-13).
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
-test.use({ baseURL: 'http://127.0.0.1:4173' });
-
 const ROUTE = '/__event-calendar-e2e';
 const ROOT = '[data-event-calendar-part="root"]';
 

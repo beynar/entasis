@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom/vitest';
-import { vi } from 'vitest';
+import { afterEach, vi } from 'vitest';
+import { installJsdomStubs, resetJsdomStubs } from './src/lib/testing/jsdom.test-helper.js';
 
 // required for svelte5 + jsdom as jsdom does not support matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -54,14 +55,11 @@ if (!('animate' in Element.prototype)) {
 	});
 }
 
-// jsdom has no layout: every element reports no client rects, which the focus helpers read as
-// "not rendered". Report one rect so tabbability checks behave like a real browser.
-Object.defineProperty(Element.prototype, 'getClientRects', {
-	writable: true,
-	value: function entasisGetClientRects() {
-		return [new DOMRect(0, 0, 1, 1)] as unknown as DOMRectList;
-	}
-});
+// CloseWatcher, visualViewport and per-element rects (every element reports one 1×1 client rect
+// unless a test mocks it, so tabbability checks behave like a real browser). Tests drive them
+// through the controls in src/lib/testing/jsdom.test-helper.ts; they reset after every test.
+installJsdomStubs();
+afterEach(() => resetJsdomStubs());
 
 // jsdom does not implement programmatic scrolling. `scrollIntoView` is on the list because
 // roving focus (useNavigation) calls it on every move, so any test that opens a menu or a
