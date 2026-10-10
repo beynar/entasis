@@ -50,6 +50,25 @@ Unreleased section under the new version.
   page. The new toast's timer starts paused, like the rest of the hovered stack. The underlying
   safe-area fix also covers `Popover` and `Sidebar` references attached while their safe area is
   active.
+- `Menu`: pointing at an inline menu no longer takes keys typed elsewhere. Space or Enter in
+  another field no longer clicks the hovered row, and arrow keys no longer pull focus out of a text
+  field. While nothing on the page has focus, the arrow keys and Home/End still move focus into the
+  hovered menu, and ArrowLeft on a top-level menu is no longer blocked, so the page can still
+  scroll horizontally.
+- `Menu`: Enter, Space, the arrow keys and type-ahead act on the row that has keyboard focus, even
+  when the pointer highlights another row. Before, Enter clicked the hovered row instead of the
+  focused one. A popup menu whose panel has focus still activates the highlighted row, which
+  `aria-activedescendant` names.
+- `Menu`: right-to-left menus mirror the submenu arrows: ArrowLeft opens a submenu and ArrowRight
+  closes it. In a right-to-left `MenuBar`, ArrowLeft on a submenu row now opens it; before, those
+  submenus could not be opened from the keyboard.
+- `SegmentedControl`, `Tabbar`, `ToggleButtonGroup`, `ToggleMenu`, `Breadcrumbs`, `Menu`, `MenuBar`
+  and the other roving-focus groups ignore Arrow, Home, End, Enter and Space pressed with Alt, Ctrl
+  or Meta. Browser shortcuts such as Alt+ArrowLeft (Back) work again, and `SegmentedControl` no
+  longer changes value on Alt+Arrow. Shift+Arrow still navigates. In `MenuBar`, modified arrows no
+  longer switch or open menus, inside an open menu or on the bar's triggers (Enter and Space on a
+  trigger still open its menu). In the `Calendar` month and year chooser, modified
+  ArrowLeft/ArrowRight no longer move between the month and year lists.
 
 ## 0.11.0 — 2026-10-10
 
