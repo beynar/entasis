@@ -478,6 +478,8 @@ The menu follows this DOM structure:
 - Option items render \`role="menuitem"\`; an option that passes \`selected\` (true or false) renders \`role="menuitemradio"\` with \`aria-checked\`, so a check-marked choice is announced as checked rather than as a plain command
 - ArrowUp / ArrowDown move the highlight, Home / End jump, Enter or Space activates, ArrowRight opens a submenu and ArrowLeft closes it (mirrored in RTL)
 - Type-ahead: typing letters moves the highlight to the next item whose label starts with the typed text
+- Hovering a row only highlights it. While nothing else on the page has focus, the arrow keys and Home / End move focus into the hovered menu; keys typed in a text field, button or another popup stay there, and Enter or Space never activate a row the pointer merely rests on
+- Arrow, Home, End, Enter and Space pressed with Alt, Ctrl or Meta are left to the browser (Alt+ArrowLeft stays Back); Shift does not count as a modifier
 - Supports keyboard navigation through child components
 - MenuOption and Button items handle interactive states
 
