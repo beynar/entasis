@@ -581,7 +581,10 @@ export const en = {
 	aiContextCachedInput: 'Cached input',
 	aiContextUsed: 'Used',
 	aiContextUsage: (used: string | number, maximum: string | number, remaining: string | number) =>
-		`Context usage: ${used} of ${maximum} tokens used. ${remaining} tokens remaining.`
+		`Context usage: ${used} of ${maximum} tokens used. ${remaining} tokens remaining.`,
+	// Meter
+	meter: 'Meter',
+	meterSegment: (index: string | number, count: string | number) => `Segment ${index} of ${count}`
 };
 
 export type Messages = typeof en;

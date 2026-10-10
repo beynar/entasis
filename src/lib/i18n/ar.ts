@@ -566,5 +566,8 @@ export const ar: Messages = {
 	aiContextCachedInput: 'الإدخال المخزّن مؤقتًا',
 	aiContextUsed: 'المستخدم',
 	aiContextUsage: (used: string | number, maximum: string | number, remaining: string | number) =>
-		`استخدام السياق: تم استخدام ${used} من ${maximum} رمزًا. ${remaining} رمزًا متبقيًا.`
+		`استخدام السياق: تم استخدام ${used} من ${maximum} رمزًا. ${remaining} رمزًا متبقيًا.`,
+	// مقياس
+	meter: 'مقياس',
+	meterSegment: (index: string | number, count: string | number) => `الجزء ${index} من ${count}`
 };

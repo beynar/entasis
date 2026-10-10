@@ -311,7 +311,9 @@ Progress/measurement visualization with spring animations.
 
 A numeric `value` renders one segment whose legend label defaults to the number itself.
 
-The metadata generics are unconstrained and default to `unknown` (`MeterProps<T = unknown, S = unknown>`, `MeterStep<T = unknown>`), so `data` takes any shape. `steps` and `min` are currently accepted but never rendered.
+The metadata generics are unconstrained and default to `unknown` (`MeterProps<T = unknown, S = unknown>`, `MeterStep<T = unknown>`), so `data` takes any shape. `steps` is currently accepted but never rendered, and `min` only sets `aria-valuemin` and the clamp (the bar still fills from 0).
+
+Accessibility: one segment makes the root `role="meter"` with `aria-valuemin`/`aria-valuemax`, the clamped `aria-valuenow`, and the indicator text as `aria-valuetext`; it is named by `label` and described by `helper`/`description`. Several segments make the root a `role="group"` named by `label`, with one `meter` per segment named by the segment's `label` (or "Segment 2 of 3"). Always pass `label`: an unlabelled meter falls back to the generic catalog name "Meter".
 
 Slots: `label`, `description`, `helper`, `header`, `indicator` (payload-less; use `showIndicatorAs` for the built-in value/percentage text)
 

@@ -5,7 +5,9 @@ import type { MeterThemeProps } from './meter.theme.js';
 
 export type MeterStep<T = unknown> = {
 	/**
-	 * Label shown for this segment in the legend when `showLegend` is enabled.
+	 * Label shown for this segment in the legend when `showLegend` is enabled. In a stacked meter
+	 * it is also the accessible name of the segment's `meter`; an unlabelled segment is announced
+	 * as "Segment 1 of 3" from the i18n catalog.
 	 */
 	label?: string;
 	/**
@@ -81,6 +83,11 @@ export type MeterProps<T = unknown, S = unknown> = WithSlot<
 			 * on the track. A number renders a single segment coloured by `color` whose
 			 * legend label defaults to the number itself.
 			 *
+			 * One segment makes the root a `role="meter"` named by `label`; several segments make
+			 * it a `role="group"` named by `label` with one `meter` per segment. Each meter reports
+			 * `aria-valuemin`, `aria-valuemax`, the value clamped to the scale as `aria-valuenow`,
+			 * and the indicator text as `aria-valuetext`.
+			 *
 			 * @readonly-value Meter draws a measurement it never edits.
 			 */
 			value: number | MeterStep<T> | MeterStep<T>[];
@@ -114,11 +121,14 @@ export type MeterProps<T = unknown, S = unknown> = WithSlot<
 			 */
 			precision?: number;
 			/**
-			 * Minimum value of the meter scale.
+			 * Minimum value of the meter scale, reported as `aria-valuemin`.
+			 * @default 0
 			 */
 			min?: number;
 			/**
-			 * Maximum value of the meter scale used for percentage calculations.
+			 * Maximum value of the meter scale used for percentage calculations, reported as
+			 * `aria-valuemax`.
+			 * @default 100
 			 */
 			max?: number;
 			/**

@@ -565,5 +565,8 @@ export const ja: Messages = {
 	aiContextCachedInput: 'キャッシュ済み入力',
 	aiContextUsed: '使用済み',
 	aiContextUsage: (used: string | number, maximum: string | number, remaining: string | number) =>
-		`コンテキスト使用量: ${maximum} トークン中 ${used} トークンを使用。残り ${remaining} トークン。`
+		`コンテキスト使用量: ${maximum} トークン中 ${used} トークンを使用。残り ${remaining} トークン。`,
+	// メーター
+	meter: 'メーター',
+	meterSegment: (index: string | number, count: string | number) => `セグメント ${index}/${count}`
 };

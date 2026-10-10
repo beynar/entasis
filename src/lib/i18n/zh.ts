@@ -558,5 +558,8 @@ export const zh: Messages = {
 	aiContextCachedInput: '缓存输入',
 	aiContextUsed: '已使用',
 	aiContextUsage: (used: string | number, maximum: string | number, remaining: string | number) =>
-		`上下文使用情况：已使用 ${used} / ${maximum} 个 token。剩余 ${remaining} 个 token。`
+		`上下文使用情况：已使用 ${used} / ${maximum} 个 token。剩余 ${remaining} 个 token。`,
+	// 计量器
+	meter: '计量器',
+	meterSegment: (index: string | number, count: string | number) => `第 ${index} 段，共 ${count} 段`
 };

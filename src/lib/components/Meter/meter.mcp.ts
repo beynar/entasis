@@ -29,9 +29,9 @@ The Meter component visualizes a measurement or progress along a known scale, wi
   - Each step: { start: number, end?: number, label: Slot, color: Colors, position?: 'top' | 'bottom', class?: string, labelClass?: string, data?: S }
 
 ### Content Slots
-- **label**: Snippet - Custom label
-- **description**: Snippet - Description text
-- **helper**: Snippet - Helper text
+- **label**: string | Snippet - Label rendered in the header; it names the meter (or the group of stacked meters)
+- **description**: string | Snippet - Description text; describes the meter
+- **helper**: string | Snippet - Helper text shown beside the label; describes the meter
 - **header**: Snippet - Custom header
 - **indicator**: string | Snippet - Custom indicator content (no payload); combine with \`showIndicatorAs\` for the built-in value/percentage text
 
@@ -224,10 +224,11 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 
 ## Accessibility
 
-- Uses semantic HTML meter/progress elements
-- Labels provide context for screen readers
-- ARIA attributes for current value and range
-- Visual indicators have text alternatives
+- A single value makes the root \`role="meter"\` with \`aria-valuemin\` (\`min\`), \`aria-valuemax\` (\`max\`), \`aria-valuenow\` (the value clamped to the scale) and \`aria-valuetext\` (the indicator text, e.g. "65%", or the raw value with \`showIndicatorAs="value"\`)
+- The meter is named by the rendered \`label\` (\`aria-labelledby\`). With a custom \`header\`, a string \`label\` names it through \`aria-label\`; without any label it falls back to a single segment's own \`label\`, then to the i18n \`meter\` text
+- \`helper\` and \`description\` describe the meter through \`aria-describedby\`
+- Several segments make the root a \`role="group"\` named by \`label\`, containing one \`role="meter"\` per segment named by the segment's \`label\` (or "Segment 1 of 3", i18n \`meterSegment\`)
+- Each meter contains a visually hidden presentational text node so NVDA reads its name
 
 ## Notes
 

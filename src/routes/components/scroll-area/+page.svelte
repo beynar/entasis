@@ -30,6 +30,10 @@
 		{
 			label: 'Keyboard-focusable region only when it overflows (WCAG SCR34)',
 			test: 'a11y:scroll-area.tabbable-on-overflow'
+		},
+		{
+			label: 'Unnamed until it overflows; scrollbars hidden from screen readers',
+			test: 'a11y:scroll-area.accessibility-tree'
 		}
 	]}
 >

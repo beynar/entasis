@@ -577,5 +577,8 @@ export const pt: Messages = {
 	aiContextCachedInput: 'Entrada em cache',
 	aiContextUsed: 'Usados',
 	aiContextUsage: (used: string | number, maximum: string | number, remaining: string | number) =>
-		`Uso do contexto: ${used} de ${maximum} tokens usados. ${remaining} tokens restantes.`
+		`Uso do contexto: ${used} de ${maximum} tokens usados. ${remaining} tokens restantes.`,
+	// Medidor
+	meter: 'Medidor',
+	meterSegment: (index: string | number, count: string | number) => `Segmento ${index} de ${count}`
 };

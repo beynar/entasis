@@ -145,7 +145,22 @@
 		type="auto"
 		class={classes.countryList({ class: theme?.countryList?.base })}
 	>
-		<div id={listboxId} role="listbox" aria-label={t.countries} class={classes.countryListbox()}>
+		<!-- The empty message lives OUTSIDE the listbox: a listbox may only own options and groups
+		     (aria-required-children). role="status" announces it politely when the search empties
+		     the list. -->
+		{#if filteredCountries.length === 0}
+			<div role="status" class={classes.countryEmpty({ size, class: theme?.countryEmpty?.base })}>
+				{t.noCountries}
+			</div>
+		{/if}
+		<!-- Kept mounted while empty (hidden) so the search input's aria-controls always resolves. -->
+		<div
+			id={listboxId}
+			role="listbox"
+			aria-label={t.countries}
+			hidden={filteredCountries.length === 0}
+			class={classes.countryListbox()}
+		>
 			{#each filteredCountries as country (country.iso2)}
 				{@const selected = country.iso2 === selectedCountry?.iso2}
 				{@const highlighted = nav.highlighted === country.iso2}
@@ -189,10 +204,6 @@
 						})}
 					{/if}
 				</Button>
-			{:else}
-				<div class={classes.countryEmpty({ size, class: theme?.countryEmpty?.base })}>
-					{t.noCountries}
-				</div>
 			{/each}
 		</div>
 	</ScrollArea>

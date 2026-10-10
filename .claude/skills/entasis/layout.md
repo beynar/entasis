@@ -483,9 +483,15 @@ Custom scrollbar container.
 - `type`: `'auto' | 'always' | 'scroll' | 'hover'` -- scrollbar visibility strategy
 - `scrollFade`: boolean -- fade the content edges while more content is scrollable
 - `scrollOnEdges`: boolean, `delay`: number, `label`: string
+- `viewportRole`: string -- role of the viewport (`rowgroup` inside a grid, `presentation` inside a listbox)
 - `ref` / `viewportRef`: HTMLDivElement (bindable), `onscroll`
 
 Scrolls in both directions; size the container (`class="h-64"`) to constrain it.
+
+The viewport is a plain element while its content fits. While it overflows it becomes a focusable
+`group` named by `label` (default "Scrollable content"); a passed `label` or `viewportRole` always
+applies. `viewportRole="presentation"` stays unnamed and out of the tab order even while it
+overflows. The scrollbars are `aria-hidden`.
 
 ```svelte
 <script>

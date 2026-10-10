@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom/vitest';
-import { render } from '@testing-library/svelte';
+import { render, within } from '@testing-library/svelte';
+import { createRawSnippet } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import Meter from './Meter.svelte';
 
@@ -66,5 +67,106 @@ describe('Meter value shapes', () => {
 		expect(bars[1]).toHaveAttribute('data-color', 'danger');
 		expect(bars[0]).toHaveAttribute('data-first', 'true');
 		expect(bars[1]).toHaveAttribute('data-last', 'true');
+	});
+});
+
+describe('Meter accessibility', () => {
+	test('a11y:meter.role exposes a single value as a labelled meter with its range and value text', () => {
+		const { getByRole, getByText } = render(Meter, {
+			props: { value: 65, label: 'Progress', helper: '65% complete' }
+		});
+
+		const meter = getByRole('meter', { name: 'Progress' });
+		expect(meter).toHaveAttribute('aria-valuemin', '0');
+		expect(meter).toHaveAttribute('aria-valuemax', '100');
+		expect(meter).toHaveAttribute('aria-valuenow', '65');
+		expect(meter).toHaveAttribute('aria-valuetext', '65%');
+		expect(meter).toHaveAttribute('aria-labelledby', getByText('Progress').id);
+		expect(meter).toHaveAccessibleDescription('65% complete');
+	});
+
+	test('announces the indicator text, so the raw value is read in value mode', () => {
+		const { getByRole } = render(Meter, {
+			props: { value: 750, max: 1000, showIndicatorAs: 'value', label: 'Score' }
+		});
+
+		const meter = getByRole('meter', { name: 'Score' });
+		expect(meter).toHaveAttribute('aria-valuemax', '1000');
+		expect(meter).toHaveAttribute('aria-valuetext', '750');
+	});
+
+	test('clamps aria-valuenow to the scale', () => {
+		const { getByRole, rerender } = render(Meter, { props: { value: 120, label: 'Load' } });
+		expect(getByRole('meter')).toHaveAttribute('aria-valuenow', '100');
+
+		rerender({ value: 10, min: 20, label: 'Load' });
+		expect(getByRole('meter')).toHaveAttribute('aria-valuemin', '20');
+		expect(getByRole('meter')).toHaveAttribute('aria-valuenow', '20');
+	});
+
+	test('includes the description in the accessible description', () => {
+		const { getByRole } = render(Meter, {
+			props: { value: 30, label: 'Score', description: 'Current score out of 100' }
+		});
+
+		expect(getByRole('meter', { name: 'Score' })).toHaveAccessibleDescription(
+			'Current score out of 100'
+		);
+	});
+
+	test('keeps a name when a custom header replaces the label', () => {
+		const header = createRawSnippet(() => ({ render: () => '<div>Storage · 45 GB</div>' }));
+		const { getByRole } = render(Meter, { props: { value: 45, label: 'Storage', header } });
+
+		expect(getByRole('meter', { name: 'Storage' })).not.toHaveAttribute('aria-labelledby');
+	});
+
+	test('falls back to the segment label, then to the catalog name', () => {
+		const { getByRole, unmount } = render(Meter, {
+			props: { value: { value: 30, label: 'Used' } }
+		});
+		expect(getByRole('meter', { name: 'Used' })).toBeInTheDocument();
+		unmount();
+
+		render(Meter, { props: { value: 60 } });
+		expect(getByRole('meter', { name: 'Meter' })).toBeInTheDocument();
+	});
+
+	test('a11y:meter.stacked exposes stacked segments as a labelled group of meters', () => {
+		const { getByRole } = render(Meter, {
+			props: {
+				label: 'Storage usage',
+				value: [{ value: 19, label: 'System' }, { value: 33 }, { value: 6, label: 'Apps' }]
+			}
+		});
+
+		const group = getByRole('group', { name: 'Storage usage' });
+		const meters = within(group).getAllByRole('meter');
+		expect(meters.map((meter) => meter.getAttribute('aria-label'))).toEqual([
+			'System',
+			'Segment 2 of 3',
+			'Apps'
+		]);
+		expect(meters[1]).toHaveAttribute('aria-valuenow', '33');
+		expect(meters[1]).toHaveAttribute('aria-valuetext', '33%');
+		expect(meters[1]).toHaveAttribute('aria-valuemin', '0');
+		expect(meters[1]).toHaveAttribute('aria-valuemax', '100');
+		expect(group).not.toHaveAttribute('aria-valuenow');
+	});
+
+	test('gives every meter text content so NVDA reads its name', () => {
+		const single = render(Meter, { props: { value: 40, label: 'Battery' } });
+		const meter = within(single.container).getByRole('meter');
+		expect(meter.querySelector('[role="presentation"].sr-only')).not.toBeNull();
+		single.unmount();
+
+		const stacked = render(Meter, {
+			props: { label: 'Mix', value: [{ value: 10 }, { value: 20 }] }
+		});
+		const segments = within(stacked.container).getAllByRole('meter');
+		expect(segments).toHaveLength(2);
+		for (const segment of segments) {
+			expect(segment.querySelector('[role="presentation"].sr-only')).not.toBeNull();
+		}
 	});
 });

@@ -3,6 +3,7 @@
 	import { useMeterTheme } from './meter.theme.js';
 	import Slot from '../Slot/Slot.svelte';
 	import { useSpringState } from '$lib/utils/spring.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { untrack } from 'svelte';
 
 	let {
@@ -17,6 +18,7 @@
 		damping = 1,
 		precision = 0.001,
 		soft = 0.1,
+		min = 0,
 		max = 100,
 		header,
 		label,
@@ -24,6 +26,12 @@
 		description,
 		theme
 	}: MeterProps<T, S> = $props();
+	const t = $derived(useI18n());
+
+	const id = $props.id();
+	const labelId = `${id}-label`;
+	const helperId = `${id}-helper`;
+	const descriptionId = `${id}-description`;
 
 	const spring = useSpringState({
 		get stiffness() {
@@ -45,15 +53,13 @@
 				: [value]
 	);
 
+	const percentOf = (stepValue: number) => (stepValue / max) * 100;
+
 	const createMeterSprings = (steps: MeterStep<T>[]) =>
-		steps.map((step) => {
-			const percentage = (step.value / max) * 100;
-			return {
-				percentage,
-				value: spring(step.value),
-				width: spring(percentage)
-			};
-		});
+		steps.map((step) => ({
+			value: spring(step.value),
+			width: spring(percentOf(step.value))
+		}));
 
 	let springs = $state(untrack(() => createMeterSprings(meterSteps)));
 
@@ -64,13 +70,37 @@
 			return;
 		}
 		for (const [index, step] of currentSteps.entries()) {
-			springs[index].percentage = (step.value / max) * 100;
 			springs[index].value.set(step.value || 0, { soft });
-			springs[index].width!.set((step.value / max) * 100, { soft });
+			springs[index].width!.set(percentOf(step.value), { soft });
 		}
 	});
 
 	const classes = $derived(useMeterTheme(theme));
+
+	// Accessibility. One segment makes the root a `meter`; several make it a `group` of meters,
+	// one per segment. The value text is the indicator text, so what is announced matches what is
+	// drawn, and aria-valuenow is clamped to the scale.
+	const stacked = $derived(meterSteps.length !== 1);
+	const labelRendered = $derived(!header && !!label);
+	const clampToScale = (stepValue: number) =>
+		Number.isFinite(stepValue) ? Math.min(max, Math.max(min, stepValue)) : min;
+	const valueText = (step: MeterStep<T>) =>
+		showIndicatorAs === 'value' ? step.value.toFixed(0) : `${percentOf(step.value).toFixed(0)}%`;
+	// A custom `header` replaces the rendered label, so a string label still names the meter
+	// directly. A single segment object can name it with its own label; the catalog name is the
+	// last resort so every meter is announced with a name.
+	const rootName = $derived.by(() => {
+		if (labelRendered) return undefined;
+		if (typeof label === 'string' && label) return label;
+		if (stacked) return undefined;
+		if (typeof value !== 'number' && meterSteps[0]?.label) return meterSteps[0].label;
+		return t.meter;
+	});
+	const describedBy = $derived(
+		[!header && helper ? helperId : undefined, description ? descriptionId : undefined]
+			.filter(Boolean)
+			.join(' ') || undefined
+	);
 
 	const labelsPositions = $derived(meterSteps.map((step) => step.position || 'top'));
 	const labelsPosition: 'top' | 'bottom' | 'both' | undefined = $derived(
@@ -88,15 +118,17 @@
 		data-first={index === 0}
 		data-last={index === springs.length - 1}
 		data-color={meter.color ?? color}
+		role={stacked ? 'meter' : undefined}
+		aria-label={stacked ? meter.label || t.meterSegment(index + 1, meterSteps.length) : undefined}
+		aria-valuemin={stacked ? min : undefined}
+		aria-valuemax={stacked ? max : undefined}
+		aria-valuenow={stacked ? clampToScale(meter.value) : undefined}
+		aria-valuetext={stacked ? valueText(meter) : undefined}
 		style:width="{spring.width.current}%"
 		class={classes.container({ first: index === 0, last: index === springs.length - 1 })}
 	>
 		{#snippet indicatorContent()}
-			{showIndicatorAs === 'value'
-				? meter.value.toFixed(0)
-				: showIndicatorAs === 'percentage'
-					? `${spring.percentage.toFixed(0)}%`
-					: ''}
+			{showIndicatorAs ? valueText(meter) : ''}
 		{/snippet}
 		<Slot
 			as="span"
@@ -109,14 +141,32 @@
 		/>
 
 		<div class={classes.progress({ size })}></div>
+		{#if stacked}
+			<!-- Forces NVDA to read the meter's name (mui/base-ui#4184). -->
+			<span role="presentation" class="sr-only">x</span>
+		{/if}
 	</div>
 {/snippet}
 
 {#snippet headerSnippet()}
-	<Slot class={classes.label({ size })} render={label} />
-	<Slot class={classes.helper({ size })} render={helper} />
+	{#if label}
+		<div id={labelId} class={classes.label({ size })}>
+			{#if typeof label === 'string'}{label}{:else}{@render label()}{/if}
+		</div>
+	{/if}
+	<Slot class={classes.helper({ size })} render={helper} attrs={{ id: helperId }} />
 {/snippet}
-<div class={classes.root({ size, className })}>
+<div
+	class={classes.root({ size, className })}
+	role={stacked ? 'group' : 'meter'}
+	aria-labelledby={labelRendered ? labelId : undefined}
+	aria-label={rootName}
+	aria-describedby={stacked ? undefined : describedBy}
+	aria-valuemin={stacked ? undefined : min}
+	aria-valuemax={stacked ? undefined : max}
+	aria-valuenow={stacked ? undefined : clampToScale(meterSteps[0].value)}
+	aria-valuetext={stacked ? undefined : valueText(meterSteps[0])}
+>
 	<Slot
 		class={classes.header({ size })}
 		renderIf={!!(header || label || helper)}
@@ -130,7 +180,7 @@
 	{#if showLegend}
 		<div class={classes.legend({ size })}>
 			{#each meterSteps as meterItem, i (i)}
-				{@const percentage = (meterItem.value / max) * 100}
+				{@const percentage = percentOf(meterItem.value)}
 				<div data-color={meterItem.color ?? color} class={classes.legendItem({ size })}>
 					{#if meterItem.icon}
 						<div class={classes.legendIcon({ size })}>
@@ -147,5 +197,9 @@
 			{/each}
 		</div>
 	{/if}
-	<Slot class={classes.description({ size })} render={description} />
+	<Slot class={classes.description({ size })} render={description} attrs={{ id: descriptionId }} />
+	{#if !stacked}
+		<!-- Forces NVDA to read the meter's name (mui/base-ui#4184). -->
+		<span role="presentation" class="sr-only">x</span>
+	{/if}
 </div>

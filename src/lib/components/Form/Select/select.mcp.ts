@@ -50,10 +50,10 @@ Extends all Field component props plus:
 - **label**: string | Snippet - Field label, and the trigger's accessible name; without it the trigger falls back to the placeholder
 - **description**: string | Snippet - Helper text
 - **required**: boolean - Mark as required
-- **disabled**: boolean - Disable the trigger
+- **disabled**: boolean - Disable the trigger; the hidden input is disabled too, so a native form post leaves the value out
 - **size**: 'small' | 'normal' | 'large' - Trigger and dropdown size
 - **density**: 'compact' | 'normal' | 'comfortable' (default: 'normal') - Spacing density forwarded to the dropdown option rows (paddings, gaps, min-height)
-- **name**: string - Form field name; also renders a hidden input for native form posts
+- **name**: string - Form field name; also renders a hidden input for native form posts (disabled while the Select is disabled)
 
 ### Bindable Props
 - **value**: string - Selected value
@@ -80,6 +80,11 @@ ARIA 1.2 select-only combobox pattern: the trigger is a \`role="combobox"\` butt
 \`aria-haspopup="listbox"\`, \`aria-expanded\`, and \`aria-controls\`; DOM focus stays on the
 trigger while \`aria-activedescendant\` tracks the highlighted \`role="option"\` (virtual focus).
 The selected option shows a check indicator and \`aria-selected\`.
+
+The listbox owns only \`role="group"\` and \`role="option"\` nodes. Group separators are
+\`role="presentation"\`, group labels are \`aria-hidden\` (each group is named through
+\`aria-label\`), and the scroll viewport inside the listbox is presentational: it takes no role,
+name or tab stop even when the list overflows, and its scrollbars are \`aria-hidden\`.
 
 The trigger always has an accessible name: \`label\` names it through the Field label (a string
 label as a \`<label for>\`, a snippet through \`aria-labelledby\`), and without one the trigger

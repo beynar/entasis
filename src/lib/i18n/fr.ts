@@ -584,5 +584,8 @@ export const fr: Messages = {
 	aiContextCachedInput: 'Entrée en cache',
 	aiContextUsed: 'Utilisés',
 	aiContextUsage: (used: string | number, maximum: string | number, remaining: string | number) =>
-		`Utilisation du contexte : ${used} jetons sur ${maximum} utilisés. ${remaining} jetons restants.`
+		`Utilisation du contexte : ${used} jetons sur ${maximum} utilisés. ${remaining} jetons restants.`,
+	// Jauge
+	meter: 'Jauge',
+	meterSegment: (index: string | number, count: string | number) => `Segment ${index} sur ${count}`
 };
