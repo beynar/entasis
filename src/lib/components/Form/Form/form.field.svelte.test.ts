@@ -32,20 +32,31 @@ describe('Form field entries', () => {
 		expect(screen.getByText('Display only')).toBeInTheDocument();
 	});
 
-	test('uses FieldState required validation and disabled state', async () => {
+	test('uses FieldState required validation with a catalog message', async () => {
+		const onSubmit = vi.fn();
+		render(FormFieldEntry, { props: { onSubmit } });
+
+		await fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+		expect(onSubmit).not.toHaveBeenCalled();
+		const error = await screen.findByRole('alert');
+		expect(error.id).toMatch(/-errors$/);
+		expect(error).toHaveTextContent('This field is required');
+		expect(error).not.toHaveAttribute('aria-live');
+		expect(screen.getByTestId('custom-field-control')).toHaveAttribute(
+			'aria-describedby',
+			error.id
+		);
+	});
+
+	test('a disabled required field skips validation and does not block submit (D3)', async () => {
 		const onSubmit = vi.fn();
 		render(FormFieldEntry, { props: { onSubmit, disabled: true } });
 
 		expect(screen.getByTestId('custom-field-control')).toBeDisabled();
 
 		await fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
-		expect(onSubmit).not.toHaveBeenCalled();
-		const error = await screen.findByRole('alert');
-		expect(error.id).toMatch(/-errors$/);
-		expect(screen.getByTestId('custom-field-control')).toHaveAttribute(
-			'aria-describedby',
-			error.id
-		);
+		await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
+		expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 	});
 
 	test('keeps textarea and Field wrapper attributes on their native owners', () => {

@@ -69,6 +69,16 @@ export type FormProps<I extends FormInputs> = WithSlot<
 		 * Buttons rendered after the form content. Each handler receives the live form state.
 		 */
 		actions?: FormAction<I>[];
+		/**
+		 * Disables every field, for example `disabled={form.loading}` while a submission runs.
+		 * Disabled fields skip validation.
+		 */
+		disabled?: boolean;
+		/**
+		 * Makes every field read-only: values stay focusable, validated and submitted, but users
+		 * cannot change them.
+		 */
+		readOnly?: boolean;
 	},
 	'header' | 'title' | 'description' | 'footer',
 	FormState<I>

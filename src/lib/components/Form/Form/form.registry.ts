@@ -3,6 +3,7 @@ import * as v from 'valibot';
 import type { RegisteredInputType } from '../Field/field.js';
 import type { FieldValidationResult } from '../Field/field.state.svelte.js';
 import { schemas } from '../Field/schemas.js';
+import { isEmptyValue } from '$lib/utils/values.js';
 import type { FormInputDefinition, FormRegisteredInput, FormRenderableInput } from './form.js';
 
 /** The definitions `registerFormInputs` takes: one per `FormInputRegistry` key, all optional. */
@@ -24,12 +25,6 @@ type ErasedDefinition = {
 // Form's own entry kinds; the built-in input types are rejected through the schema table.
 const ENTRY_KINDS = new Set(['field', 'custom', 'action', 'group']);
 const definitions = new Map<string, RegisteredFormInputDefinition>();
-
-const isEmptyValue = (value: unknown) =>
-	value === null ||
-	value === undefined ||
-	value === '' ||
-	(Array.isArray(value) && value.length === 0);
 
 /**
  * Registers the components behind the app's `FormInputRegistry` types, so entries such as

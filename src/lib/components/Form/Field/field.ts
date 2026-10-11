@@ -1,7 +1,8 @@
 import type { WithSlot } from '$lib/components/Slot/slot.js';
 import type { Snippet } from 'svelte';
-import type { HTMLAttributes } from 'svelte/elements';
+import type { HTMLAttributes, HTMLButtonAttributes } from 'svelte/elements';
 import type { FieldState } from './field.state.svelte.js';
+import type { FieldMessageOverrides } from './field.messages.js';
 import type { FieldThemeProps } from './field.theme.js';
 import type { Density, Sizes } from '$lib/types/theme.js';
 import type { FormInputRegistry } from '../Form/form.js';
@@ -28,6 +29,27 @@ export type CalendarInputType = 'calendar' | 'calendar-range';
 export type ColorInputType = 'color';
 export type FieldLabelPosition = 'top' | 'left';
 export type FieldAttributes = Omit<HTMLAttributes<HTMLElement>, 'class' | 'id'>;
+/**
+ * Native attributes a button-rooted control (Checkbox, Switch) accepts through `inputAttrs`, such
+ * as `aria-label`, `aria-describedby`, `title`, `data-*` and event handlers. The control keeps its
+ * identity, role, state and form attributes. An `aria-label` here names the control instead of the
+ * field label.
+ */
+export type FieldButtonAttributes = Omit<
+	HTMLButtonAttributes,
+	| 'class'
+	| 'disabled'
+	| 'form'
+	| 'id'
+	| 'name'
+	| 'role'
+	| 'type'
+	| 'value'
+	| 'aria-checked'
+	| 'aria-disabled'
+	| 'aria-readonly'
+	| 'aria-required'
+>;
 
 export type InputType =
 	| FileInputType
@@ -111,8 +133,17 @@ export type InputProps<T extends FieldType> = WithSlot<
 		name?: string;
 		/** Marks the field as required for validation and shows the required indicator. */
 		required?: boolean;
-		/** Disables the input, preventing interaction and focus. */
+		/**
+		 * Disables the input, preventing interaction and focus. A disabled Form, FormGroup or
+		 * fieldset Field around the input disables it too; disabled fields skip validation.
+		 */
 		disabled?: boolean;
+		/**
+		 * Shows the value without letting the user change it: the control stays focusable and is
+		 * announced as read-only, and the value still validates and submits. A read-only Form or
+		 * FormGroup around the input makes it read-only too.
+		 */
+		readOnly?: boolean;
 		/** Geometry and typography of the field control and label. */
 		size?: Sizes;
 		/** Internal spacing between field regions, labels, and adornments. */
@@ -123,6 +154,12 @@ export type InputProps<T extends FieldType> = WithSlot<
 		visible?: boolean;
 		/** Validates the value; messages or true mark it invalid, false/null/undefined accept it. */
 		onValidate?: (value: FieldValue<T>) => string | string[] | boolean | null | undefined;
+		/**
+		 * Replaces catalog validation messages for this field: a string, or a function for the
+		 * messages that receive a limit, as in `{ required: 'Enter your name' }` or
+		 * `{ tooShort: (min) => 'Use ' + min + ' characters or more' }`.
+		 */
+		messages?: FieldMessageOverrides;
 		/** Called whenever the field value changes. */
 		onValueChange?: (value: FieldValue<T> | null) => void;
 		/** Native attributes applied to the Field wrapper. */
@@ -137,7 +174,10 @@ export type InputProps<T extends FieldType> = WithSlot<
 		defaultValue?: FieldValue<T> | null;
 		/** Validation errors to display; `true` marks the field as errored without a message. */
 		errors?: string[] | boolean;
-		/** Whether the field currently holds focus, bindable with `bind:focused`. */
+		/**
+		 * Whether focus is inside the field, including popups it opened, bindable with
+		 * `bind:focused`.
+		 */
 		focused?: boolean;
 	},
 	| 'header'
@@ -158,6 +198,8 @@ export type FieldProps<T extends FieldType> = Omit<
 	| 'name'
 	| 'required'
 	| 'disabled'
+	| 'readOnly'
+	| 'messages'
 	| 'visible'
 	| 'onValidate'
 	| 'onValueChange'

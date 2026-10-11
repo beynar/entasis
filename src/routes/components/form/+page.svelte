@@ -20,6 +20,7 @@
 	import './demos/moneyInput.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
+	import { I18n, type LocaleCode } from '$lib/i18n/index.js';
 
 	const profileInputs = {
 		identity: {
@@ -192,6 +193,65 @@
 		}
 	]);
 
+	const fieldStateControls = createComponentControls([
+		{
+			name: 'locale',
+			type: 'segmented',
+			label: 'Locale',
+			value: 'en',
+			options: ['en', 'fr', 'ja', 'ar']
+		},
+		{ name: 'disabled', type: 'switch', label: 'Form disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Form read-only', value: false },
+		{ name: 'groupDisabled', type: 'switch', label: 'Group disabled', value: false },
+		{ name: 'groupReadOnly', type: 'switch', label: 'Group read-only', value: false }
+	]);
+	const fieldStateInputs = $derived({
+		account: {
+			type: 'group',
+			label: 'Account',
+			description: 'A disabled or read-only group affects only its own fields.',
+			disabled: fieldStateControls.value.groupDisabled,
+			readOnly: fieldStateControls.value.groupReadOnly,
+			inputs: {
+				nickname: {
+					type: 'text',
+					label: 'Nickname',
+					required: true,
+					messages: { required: 'Pick a nickname' },
+					class: 'col-span-1'
+				},
+				email: { type: 'email', label: 'Email', required: true, class: 'col-span-1' }
+			}
+		},
+		terms: { type: 'switch', label: 'Accept the terms', labelPosition: 'top', required: true },
+		score: {
+			type: 'rating',
+			label: 'Rating',
+			description: 'Read-only: focusable and announced, still submitted.',
+			defaultValue: 4,
+			readOnly: true
+		}
+	} satisfies FormInputs);
+	let fieldStateSubmission = $state<InferFormValue<typeof fieldStateInputs> | null>(null);
+	const describeFieldState = (form: FormInputState) =>
+		Object.fromEntries(
+			[...form.fields].map(([name, field]) => [
+				name,
+				[
+					field.focused && 'focused',
+					field.touched && 'touched',
+					field.dirty && 'dirty',
+					field.filled && 'filled',
+					field.hasError && 'invalid',
+					field.disabled && 'disabled',
+					field.readOnly && 'read-only'
+				]
+					.filter(Boolean)
+					.join(' ')
+			])
+		);
+
 	let profileValue = $state<LiveFormValue<typeof profileInputs>>({ name: 'Ada' });
 	let profileSubmission = $state<InferFormValue<typeof profileInputs> | null>(null);
 	let contactValue = $state<LiveFormValue<typeof contactInputs>>({});
@@ -279,6 +339,9 @@
 		'Conditional fields preserve hidden values',
 		'Visual groups preserve flat inferred values',
 		'Action and custom entries stay out of form values',
+		'Disabled and read-only forms and groups',
+		'Localized validation messages with per-entry overrides',
+		'Touched, dirty and filled field state',
 		{ label: 'Accessible errors with first-invalid focus', test: 'a11y:form.first-invalid-focus' },
 		'Programmatic submission through FormState',
 		'Managed Enter navigation and submission',
@@ -523,6 +586,76 @@ const outcome = await ask({ title: 'Set a price', inputs: { price: { type: 'mone
 						null,
 						2
 					)}</pre>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			controls={fieldStateControls}
+			description="Disable or lock a whole Form or one group. Validation messages come from the i18n catalog in the active locale, an entry can override them, and every field reports focused, touched, dirty and filled (also as data attributes on its root)."
+			class="!items-start"
+			code={`import { Form, type FormInputs } from 'entasis/form';
+import { I18n } from 'entasis/i18n';
+
+const inputs = {
+	account: {
+		type: 'group',
+		label: 'Account',
+		disabled: ${fieldStateControls.value.groupDisabled},
+		readOnly: ${fieldStateControls.value.groupReadOnly},
+		inputs: {
+			nickname: {
+				type: 'text',
+				label: 'Nickname',
+				required: true,
+				messages: { required: 'Pick a nickname' }
+			},
+			email: { type: 'email', label: 'Email', required: true }
+		}
+	},
+	terms: { type: 'switch', label: 'Accept the terms', labelPosition: 'top', required: true },
+	score: { type: 'rating', label: 'Rating', defaultValue: 4, readOnly: true }
+} satisfies FormInputs;
+
+<I18n locale="${fieldStateControls.value.locale}" manageDocument={false}>
+	<Form
+		{inputs}
+		disabled={${fieldStateControls.value.disabled}}
+		readOnly={${fieldStateControls.value.readOnly}}
+		onSubmit={(value) => save(value)}
+	/>
+</I18n>`}
+		>
+			<div class="grid w-full max-w-xl gap-4">
+				<I18n locale={fieldStateControls.value.locale as LocaleCode} manageDocument={false}>
+					<Form
+						inputs={fieldStateInputs}
+						disabled={fieldStateControls.value.disabled}
+						readOnly={fieldStateControls.value.readOnly}
+						onSubmit={(value) => {
+							fieldStateSubmission = value;
+						}}
+					>
+						{#snippet children(form)}
+							<div class="flex flex-wrap gap-2">
+								<Button type="button" onclick={() => void form.submit()}>Submit</Button>
+								<Button
+									type="button"
+									variant="outline"
+									onclick={() => form.fields.forEach((field) => field.reset())}
+								>
+									Reset
+								</Button>
+							</div>
+							<pre
+								data-testid="field-state"
+								class="bg-surface-recessed text-neutral overflow-auto rounded-lg p-3 text-xs">{JSON.stringify(
+									{ fields: describeFieldState(form), submitted: fieldStateSubmission },
+									null,
+									2
+								)}</pre>
+						{/snippet}
+					</Form>
+				</I18n>
 			</div>
 		</ComponentCard>
 

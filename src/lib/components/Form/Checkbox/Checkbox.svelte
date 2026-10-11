@@ -16,6 +16,8 @@
 		indeterminate = false,
 		theme,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		onValidate,
 		visible,
@@ -24,6 +26,7 @@
 		description,
 		labelPosition,
 		size = 'normal',
+		inputAttrs,
 		...rest
 	}: CheckboxProps = $props();
 	if (value === undefined) value = untrack(() => defaultValue);
@@ -58,6 +61,12 @@
 		},
 		set disabled(v: boolean | undefined) {
 			disabled = v;
+		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
 		},
 		get required() {
 			return required;
@@ -107,6 +116,7 @@
 	{...rest}
 >
 	<CheckboxLine
+		attrs={inputAttrs}
 		bind:ref={field.node}
 		id={field.id}
 		name={field.name}

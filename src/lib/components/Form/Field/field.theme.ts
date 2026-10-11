@@ -73,6 +73,11 @@ const defaultFieldLabel = cva({
 		required: {
 			true: 'relative before:content-["*"] before:text-danger-readable before:text-sm before:font-bold before:absolute before:-right-2 before:top-0',
 			false: ''
+		},
+		// A disabled field, directly or through its group, dims its text with its control.
+		disabled: {
+			true: 'opacity-50',
+			false: ''
 		}
 	}
 });
@@ -202,6 +207,10 @@ const defaultFieldDescription = cva({
 			small: 'text-xs',
 			normal: 'text-sm',
 			large: 'text-base'
+		},
+		disabled: {
+			true: 'opacity-50',
+			false: ''
 		}
 	}
 });
@@ -213,6 +222,10 @@ const defaultFieldHelper = cva({
 			small: 'text-xs',
 			normal: 'text-sm',
 			large: 'text-base'
+		},
+		disabled: {
+			true: 'opacity-50',
+			false: ''
 		}
 	}
 });

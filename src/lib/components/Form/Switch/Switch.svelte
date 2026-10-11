@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
+	import type { HTMLAttributes } from 'svelte/elements';
 	import Field from '../Field/Field.svelte';
 	import { useFieldTheme } from '../Field/field.theme.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
@@ -16,6 +17,8 @@
 		required = false,
 		theme,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		onValidate,
 		visible,
@@ -24,6 +27,7 @@
 		labelPosition,
 		onValueChange,
 		inputValue = 'true',
+		inputAttrs,
 		...rest
 	}: SwitchProps = $props();
 	if (value === undefined) value = untrack(() => defaultValue);
@@ -62,6 +66,12 @@
 		set disabled(v: boolean | undefined) {
 			disabled = v;
 		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
+		},
 		get required() {
 			return required;
 		},
@@ -85,7 +95,7 @@
 	const classes = $derived(useSwitchTheme(theme));
 	const fieldClasses = $derived(useFieldTheme(theme));
 	const onclick = () => {
-		if (disabled) return;
+		if (field.disabled) return;
 		field.value = !field.value;
 	};
 
@@ -110,8 +120,17 @@
 		input.setCustomValidity(field.required && !field.value ? ' ' : '');
 	};
 
+	// The switch is still a div (a native button is C10's CC-13), so the button attributes are
+	// spread as plain element attributes.
+	const controlAttrs = $derived(inputAttrs as HTMLAttributes<HTMLElement> | undefined);
+	// An aria-label from inputAttrs names the switch instead of its painted label.
+	const labelledBy = $derived(
+		inputAttrs?.['aria-labelledby'] ??
+			(label && !inputAttrs?.['aria-label'] ? field.labelId : undefined)
+	);
+
 	const onKeydown = (e: KeyboardEvent) => {
-		if (disabled) return;
+		if (field.disabled) return;
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
 			field.value = !field.value;
@@ -154,20 +173,33 @@
 		{@attach blankNativeReport}
 	/>
 	<div
+		{...controlAttrs}
 		bind:this={field.node}
 		id={field.id}
 		data-checked={!!value}
 		aria-checked={!!value}
-		aria-labelledby={label ? field.labelId : undefined}
+		aria-labelledby={labelledBy}
 		aria-required={field.required || undefined}
 		aria-disabled={field.disabled || undefined}
 		role="switch"
 		tabindex={field.disabled ? -1 : 0}
-		class={classes.toggle({ checked: !!value, size, disabled })}
-		{onclick}
-		onkeydown={onKeydown}
-		onfocus={() => (field.focused = true)}
-		onblur={() => (field.focused = false)}
+		class={classes.toggle({ checked: !!value, size, disabled: field.disabled })}
+		onclick={(event) => {
+			controlAttrs?.onclick?.(event);
+			if (!event.defaultPrevented) onclick();
+		}}
+		onkeydown={(event) => {
+			controlAttrs?.onkeydown?.(event);
+			if (!event.defaultPrevented) onKeydown(event);
+		}}
+		onfocus={(event) => {
+			controlAttrs?.onfocus?.(event);
+			field.focused = true;
+		}}
+		onblur={(event) => {
+			controlAttrs?.onblur?.(event);
+			field.focused = false;
+		}}
 	>
 		<span class={classes.thumb({ checked: !!value, size })} data-checked={!!value}></span>
 	</div>

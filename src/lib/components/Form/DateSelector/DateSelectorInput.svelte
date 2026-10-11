@@ -24,6 +24,8 @@
 		mode = 'date' as Mode,
 		required = false,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		onValidate,
 		onValueChange,
@@ -88,6 +90,12 @@
 		},
 		set disabled(v: boolean | undefined) {
 			disabled = v;
+		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
 		},
 		get required() {
 			return required;

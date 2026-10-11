@@ -363,4 +363,7 @@ export const voiceInputTheme = {
 export type VoiceInputTheme = typeof voiceInputTheme;
 export type VoiceInputThemeProps = InferComponentTheme<VoiceInputTheme>;
 export const setVoiceInputTheme = setComponentTheme<VoiceInputTheme>('voice-input');
-export const useVoiceInputTheme = useComponentTheme<VoiceInputTheme>('voice-input', voiceInputTheme);
+export const useVoiceInputTheme = useComponentTheme<VoiceInputTheme>(
+	'voice-input',
+	voiceInputTheme
+);

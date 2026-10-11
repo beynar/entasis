@@ -21,13 +21,15 @@ Extends all Field component props plus:
 - **value**: boolean | null (bindable) - Toggle state (bind with \`bind:value\`)
 - **defaultValue**: boolean | null (default: null) - Initial value when value is omitted
 - **inputValue**: string (default: 'true') - Value a native \`<form>\` submits under \`name\` while the switch is on; an off switch, or one without a \`name\`, submits nothing
+- **inputAttrs**: FieldButtonAttributes - Native attributes for the switch control, such as \`aria-label\`, \`title\`, \`data-*\` and event handlers. An \`aria-label\` names the switch instead of its label; a handler that calls \`preventDefault()\` cancels the toggle
 
 ### Field Props (inherited)
 - **label**: string | Snippet - Field label
 - **description**: string | Snippet - Helper text
 - **error**: string - Error message
-- **required**: boolean - The switch must be on to be valid (like Checkbox)
+- **required**: boolean - The switch must be on to be valid (like Checkbox); off, it shows the catalog message asking to turn it on (override with \`messages.required\`)
 - **disabled**: boolean - Disable toggle
+- **readOnly**: boolean - Keeps the switch focusable with \`aria-readonly\` while clicks and keys change nothing; the value still validates and submits
 - **size**: 'small' | 'normal' | 'large' - Switch size
 
 ### Event Props

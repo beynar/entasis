@@ -587,7 +587,22 @@ export const en = {
 		`Password must be at least ${min} character${Number(min) === 1 ? '' : 's'}`,
 	// Meter
 	meter: 'Meter',
-	meterSegment: (index: string | number, count: string | number) => `Segment ${index} of ${count}`
+	meterSegment: (index: string | number, count: string | number) => `Segment ${index} of ${count}`,
+	// Field validation
+	fieldRequired: 'This field is required',
+	fieldMustBeChecked: 'Check this box to continue',
+	fieldMustBeOn: 'Turn this on to continue',
+	fieldInvalid: 'Enter a valid value',
+	fieldInvalidEmail: 'Enter a valid email address',
+	fieldInvalidUrl: 'Enter a valid URL',
+	fieldTooShort: (min: string | number) =>
+		`Enter at least ${min} character${Number(min) === 1 ? '' : 's'}`,
+	fieldTooLong: (max: string | number) =>
+		`Enter no more than ${max} character${Number(max) === 1 ? '' : 's'}`,
+	fieldRangeUnderflow: (min: string | number) => `Enter a value of ${min} or more`,
+	fieldRangeOverflow: (max: string | number) => `Enter a value of ${max} or less`,
+	fieldIncomplete: (length: string | number) =>
+		`Enter all ${length} character${Number(length) === 1 ? '' : 's'}`
 };
 
 export type Messages = typeof en;

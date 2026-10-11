@@ -22,6 +22,8 @@
 		required = false,
 		theme,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		onValidate,
 		visible,
@@ -85,8 +87,9 @@
 		get orientation() {
 			return orientation;
 		},
+		// The field's effective state: its own, or a disabled Form or group around it.
 		get disabled() {
-			return disabled;
+			return field.disabled;
 		},
 		get dragRange() {
 			return dragRange;
@@ -132,6 +135,12 @@
 		},
 		set disabled(v: boolean | undefined) {
 			disabled = v;
+		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
 		},
 		get required() {
 			return required;

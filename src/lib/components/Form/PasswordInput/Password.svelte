@@ -3,9 +3,7 @@
 	import { tick } from 'svelte';
 	import Field from '../Field/Field.svelte';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
-	import { check, pipe, safeParse } from 'valibot';
 	import { createFieldState } from '../Field/field.state.svelte.js';
-	import { schemas } from '../Field/schemas.js';
 	import type { PasswordInputProps } from './passwordInput.props.js';
 	import { usePasswordInputTheme } from './passwordInput.theme.js';
 	import { eyeClosedIcon } from '$lib/components/Icons/eyeClosed.js';
@@ -23,6 +21,8 @@
 		placeholder = '',
 		theme,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		onValidate,
 		onValueChange,
@@ -71,6 +71,12 @@
 		set disabled(v: boolean | undefined) {
 			disabled = v;
 		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
+		},
 		get required() {
 			return required;
 		},
@@ -86,26 +92,15 @@
 		get visible() {
 			return visible;
 		},
+		// The field's own minimum replaces the built-in `password` schema's 6 characters (kept for
+		// custom password controls and `fieldSchemas`), so `isValid`, `validate()` and Form
+		// submission agree. An empty value reports presence alone, and `onValidate` runs only once
+		// the length passes.
+		get minLength() {
+			return resolvedMinLength;
+		},
 		type: 'password'
 	});
-
-	// The built-in `password` schema keeps its 6-character minimum for custom password controls and
-	// `fieldSchemas`. This field checks presence with the text rule and applies its own minimum, so
-	// `isValid`, `validate()` and Form submission agree. An empty value reports presence alone, and
-	// `onValidate` runs only once the length passes.
-	const passwordSchema = $derived(
-		pipe(
-			schemas[field.required ? 'required' : 'optional'].text,
-			check(
-				(password) =>
-					typeof password !== 'string' ||
-					password.length === 0 ||
-					password.length >= resolvedMinLength,
-				t.passwordTooShort(resolvedMinLength)
-			)
-		)
-	);
-	field.checkSchema = (password) => safeParse(passwordSchema, password);
 
 	const classes = $derived(usePasswordInputTheme(theme));
 

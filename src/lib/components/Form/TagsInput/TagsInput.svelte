@@ -40,6 +40,8 @@
 		i18n,
 		theme,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		onValidate,
 		onValueChange,
@@ -87,6 +89,12 @@
 		},
 		set disabled(v: boolean | undefined) {
 			disabled = v;
+		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
 		},
 		get required() {
 			return required;
@@ -403,7 +411,7 @@
 					{placeholder}
 					bind:this={field.node}
 					bind:focused={field.focused}
-					{disabled}
+					disabled={field.disabled}
 					role="combobox"
 					aria-expanded={isOpen}
 					aria-controls={isOpen ? listboxId : undefined}
@@ -449,7 +457,7 @@
 			{placeholder}
 			bind:this={field.node}
 			bind:focused={field.focused}
-			{disabled}
+			disabled={field.disabled}
 			autocomplete="off"
 			class={classes.input({ size, disabled: field.disabled })}
 			{@attach keyDownHook.reference}

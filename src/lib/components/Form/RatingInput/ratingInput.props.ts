@@ -9,7 +9,7 @@ export type RatingInputProps = InputProps<'rating'> & {
 	max?: number;
 	/** When true the value snaps to 0.5 increments (half stars). */
 	halfSteps?: boolean;
-	/** Displays the value without allowing interaction. */
+	/** @deprecated Use `readOnly`; `readonly` is kept as an alias until the next minor release. */
 	readonly?: boolean;
 	/** When true, clicking the current value clears it back to null. */
 	clearable?: boolean;

@@ -7,6 +7,7 @@
 	import type { CheckboxMode } from './checkboxesInput.props.js';
 	import type { useCheckboxesInputTheme } from './checkboxesInput.theme.js';
 	import type { Sizes } from '$lib/types/theme.js';
+	import type { FieldButtonAttributes } from '../Field/field.js';
 
 	type CheckboxLineClasses = ReturnType<typeof useCheckboxesInputTheme>;
 
@@ -25,7 +26,8 @@
 		ref = $bindable(null),
 		onCheckedChange,
 		onFocus,
-		onBlur
+		onBlur,
+		attrs
 	}: {
 		id: string;
 		name?: string;
@@ -42,6 +44,8 @@
 		onCheckedChange: (checked: boolean) => void;
 		onFocus?: () => void;
 		onBlur?: () => void;
+		/** Native attributes from the owner's `inputAttrs`; its handlers run before the built-in ones. */
+		attrs?: FieldButtonAttributes;
 	} = $props();
 
 	const toggle = () => {
@@ -61,17 +65,27 @@
 </script>
 
 <button
+	{...attrs}
 	bind:this={ref}
 	{id}
 	type="button"
 	role="checkbox"
-	aria-label={hiddenLabel}
+	aria-label={hiddenLabel ?? attrs?.['aria-label']}
 	aria-checked={indeterminate ? 'mixed' : checked}
 	{disabled}
 	data-state={indeterminate ? 'mixed' : checked ? 'checked' : 'unchecked'}
-	onclick={toggle}
-	onfocus={onFocus}
-	onblur={onBlur}
+	onclick={(event) => {
+		attrs?.onclick?.(event);
+		if (!event.defaultPrevented) toggle();
+	}}
+	onfocus={(event) => {
+		attrs?.onfocus?.(event);
+		onFocus?.();
+	}}
+	onblur={(event) => {
+		attrs?.onblur?.(event);
+		onBlur?.();
+	}}
 	class={classes.checkboxesInputItem({ mode, checked, disabled, size })}
 >
 	<input

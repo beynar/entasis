@@ -14,13 +14,15 @@
 		required = false,
 		theme,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		onValidate,
 		onValueChange,
 		visible,
 		max = 5,
 		halfSteps = false,
-		readonly = false,
+		readonly,
 		clearable = true,
 		dir,
 		color = 'warning',
@@ -59,6 +61,13 @@
 		},
 		set disabled(v: boolean | undefined) {
 			disabled = v;
+		},
+		// `readonly` is the deprecated spelling, still honoured for one minor.
+		get readOnly() {
+			return readOnly ?? readonly;
+		},
+		get messages() {
+			return messages;
 		},
 		get required() {
 			return required;
@@ -100,7 +109,7 @@
 	let previewValue = $state<number | null>(null);
 	const displayValue = $derived(previewValue ?? field.value ?? 0);
 	const step = $derived(halfSteps ? 0.5 : 1);
-	const interactive = $derived(!readonly && !field.disabled);
+	const interactive = $derived(!field.readOnly && !field.disabled);
 
 	// Resolve the effective reading direction: explicit prop, else the ambient direction.
 	const isRtl = () => {
@@ -193,14 +202,14 @@
 		onclick={handleClick}
 		{id}
 		role="slider"
-		tabindex={readonly || field.disabled ? -1 : 0}
+		tabindex={field.disabled ? -1 : 0}
 		aria-label={label ? undefined : resolvedLabel}
 		aria-valuemin={0}
 		aria-valuemax={max}
 		aria-valuenow={field.value ?? 0}
 		aria-valuetext={`${field.value ?? 0} ${t.of} ${max}`}
 		aria-orientation="horizontal"
-		aria-readonly={readonly || undefined}
+		aria-readonly={field.readOnly || undefined}
 		aria-disabled={field.disabled || undefined}
 		onkeydown={handleKeydown}
 		onpointerleave={handlePointerLeave}

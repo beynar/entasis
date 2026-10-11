@@ -7,6 +7,7 @@ export type {
 	FieldState,
 	FieldValidationResult
 } from './field.state.svelte.js';
+export type { FieldMessageOverrides, FieldMessages } from './field.messages.js';
 export {
 	fieldTheme,
 	setFieldTheme,
@@ -22,6 +23,7 @@ export {
 	type ColorInputType,
 	type DateInputType,
 	type FieldAttributes,
+	type FieldButtonAttributes,
 	type FieldLabelPosition,
 	type FieldProps,
 	type FieldValue,

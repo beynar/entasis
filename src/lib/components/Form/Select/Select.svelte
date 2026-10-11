@@ -22,6 +22,8 @@
 		i18n,
 		theme,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		size = 'normal',
 		density = 'normal',
@@ -71,6 +73,12 @@
 		},
 		set disabled(v: boolean | undefined) {
 			disabled = v;
+		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
 		},
 		get required() {
 			return required;

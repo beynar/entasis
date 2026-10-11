@@ -7,10 +7,11 @@
 //
 // Clauses that need real focus rings or input modality (law 5) live in
 // `proposed-laws.browser.test.ts`, and law 14 renders on the server in `proposed-laws.test.ts`.
-// Laws with no entry: 9 (disabled fields leave the Form value) because form.field.svelte.test.ts
-// asserts the opposite today and F6 rewrites it under D3; 11 (catalog messages) because its keys
-// and overrides are F6's FD-1 design and do not exist yet; 13 (narrow Api types) because it is a
-// compile-time property that svelte-check enforces once R2 narrows the types.
+// Laws with no entry: 9 (disabled fields leave the Form value) because F6 made disabled fields
+// skip validation (form.field.svelte.test.ts) and C8 owns leaving them out of the value; 11
+// (catalog messages) lives with F6's FD-1 tests in Form/Field/field.svelte.test.ts; 13 (narrow
+// Api types) because it is a compile-time property that svelte-check enforces once R2 narrows
+// the types.
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { describe, expect, test, vi } from 'vitest';
@@ -236,7 +237,7 @@ describe('law 7 · keyboard lists (F4a · CX-7)', () => {
 });
 
 describe('law 8 · read-only (F6 · RO-1, C5 · SC-4)', () => {
-	pending('a read-only RatingInput stays focusable, says so and refuses key changes', async () => {
+	test('a read-only RatingInput stays focusable, says so and refuses key changes', async () => {
 		mount('rating-read-only');
 		const rating = screen.getByRole('slider', { name: 'Score' });
 		expect(rating).toHaveAttribute('tabindex', '0');
@@ -246,7 +247,7 @@ describe('law 8 · read-only (F6 · RO-1, C5 · SC-4)', () => {
 		expect(rating).toHaveAttribute('aria-valuenow', '3');
 	});
 
-	pending('a read-only Select says so and still submits its value', async () => {
+	test('a read-only Select says so and still submits its value', async () => {
 		mount('select-read-only');
 		const select = screen.getByRole('combobox', { name: 'Plan' });
 		expect(select).toHaveAttribute('aria-readonly', 'true');

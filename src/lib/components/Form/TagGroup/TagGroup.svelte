@@ -23,6 +23,8 @@
 		theme,
 		chipTheme,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		label,
 		onValidate,
@@ -85,6 +87,12 @@
 		},
 		set disabled(nextDisabled: boolean | undefined) {
 			disabled = nextDisabled;
+		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
 		},
 		get required() {
 			return required;

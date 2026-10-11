@@ -590,5 +590,21 @@ export const fr: Messages = {
 		`Le mot de passe doit contenir au moins ${min} caractère${Number(min) > 1 ? 's' : ''}`,
 	// Jauge
 	meter: 'Jauge',
-	meterSegment: (index: string | number, count: string | number) => `Segment ${index} sur ${count}`
+	meterSegment: (index: string | number, count: string | number) => `Segment ${index} sur ${count}`,
+	// Validation des champs
+	fieldRequired: 'Ce champ est obligatoire',
+	fieldMustBeChecked: 'Cochez cette case pour continuer',
+	fieldMustBeOn: 'Activez cette option pour continuer',
+	fieldInvalid: 'Saisissez une valeur valide',
+	fieldInvalidEmail: 'Saisissez une adresse e-mail valide',
+	fieldInvalidUrl: 'Saisissez une URL valide',
+	fieldTooShort: (min: string | number) =>
+		`Saisissez au moins ${min} caractère${Number(min) > 1 ? 's' : ''}`,
+	fieldTooLong: (max: string | number) =>
+		`Saisissez au plus ${max} caractère${Number(max) > 1 ? 's' : ''}`,
+	fieldRangeUnderflow: (min: string | number) =>
+		`Saisissez une valeur supérieure ou égale à ${min}`,
+	fieldRangeOverflow: (max: string | number) => `Saisissez une valeur inférieure ou égale à ${max}`,
+	fieldIncomplete: (length: string | number) =>
+		`Saisissez ${Number(length) > 1 ? `les ${length} caractères` : 'le caractère'}`
 };
