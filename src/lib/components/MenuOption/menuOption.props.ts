@@ -74,6 +74,12 @@ export type MenuOptionProps = WithAttachments<
 			 */
 			disabled?: boolean;
 			/**
+			 * Text that menu type-ahead matches instead of the row's visible text, reflected to
+			 * `data-typeahead`. Use it when the title is a snippet or the row shows a prefix, shortcut or
+			 * description that should not count (`textValue: 'Copy'` for a row reading "⌘C Copy").
+			 */
+			textValue?: string;
+			/**
 			 * Extra attributes/handlers spread onto the row element (`id`, `data-value`, `tabindex`,
 			 * `onpointermove`, `onmousedown`, aria-*). Escape hatch for listbox wiring.
 			 */

@@ -9,6 +9,8 @@
 	import PopupMenu from './PopupMenu/PopupMenu.svelte';
 	import RatingInput from './Form/RatingInput/RatingInput.svelte';
 	import Select from './Form/Select/Select.svelte';
+	import SegmentedControl from './SegmentedControl/SegmentedControl.svelte';
+	import type { SegmentedControlItem } from './SegmentedControl/segmentedControl.props.js';
 	import { tooltip } from './Tooltip/tooltip.attachment.svelte.js';
 	import type { MenuItem } from './Menu/menu.props.js';
 
@@ -24,6 +26,7 @@
 		| 'removed-opener'
 		| 'menu'
 		| 'popup-menu'
+		| 'segmented'
 		| 'tooltip'
 		| 'rating-read-only'
 		| 'select-read-only'
@@ -42,7 +45,8 @@
 			{ type: 'option', title: 'Copy' },
 			{ type: 'option', title: 'Cut' },
 			{ type: 'option', title: 'Delete' }
-		]
+		],
+		segments = ['Archive', 'Copy', 'Cut', 'Delete'].map((label) => ({ value: label, label }))
 	}: {
 		scenario: Scenario;
 		onOpenChange?: OpenChange;
@@ -53,6 +57,8 @@
 		triggerDisabled?: boolean;
 		/** `menu`: the items, replaced through `rerender` to insert or remove some. */
 		menuItems?: MenuItem[];
+		/** `segmented`: a keyed list, replaced through `rerender` to insert or remove some. */
+		segments?: SegmentedControlItem[];
 	} = $props();
 
 	const zero = { in: { duration: 0 }, out: { duration: 0 } };
@@ -160,6 +166,8 @@
 		</Dialog>
 	{:else if scenario === 'menu'}
 		<Menu items={menuItems} />
+	{:else if scenario === 'segmented'}
+		<SegmentedControl label="Action" items={segments} defaultValue="Archive" />
 	{:else if scenario === 'popup-menu'}
 		<PopupMenu menu={{ items: menuItems }} transition={zero} trigger={{ content: 'Actions' }} />
 	{:else if scenario === 'tooltip'}

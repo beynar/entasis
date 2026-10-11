@@ -205,8 +205,8 @@ describe('law 6 · hover (F5 · MN-7, C14 · DF-6, F1 · MN-4)', () => {
 
 describe('law 7 · keyboard lists (F4a · CX-7)', () => {
 	// `mockNotRendered` gives the item no client rects, which is how `isTabbable` and a CSS-hidden
-	// element look to the focus helpers; the real-CSS variant belongs in a `*.browser.test.ts`.
-	pending('arrow keys skip an item that is not rendered', async () => {
+	// element look to the focus helpers; the real-CSS variant is in `useNavigation.browser.test.ts`.
+	test('arrow keys skip an item that is not rendered', async () => {
 		mount('menu');
 		const [archive, copy] = screen.getAllByRole('menuitem');
 		mockNotRendered(copy);
@@ -216,6 +216,43 @@ describe('law 7 · keyboard lists (F4a · CX-7)', () => {
 		await waitFor(() => expect(document.activeElement).toHaveTextContent('Cut'));
 	});
 
+	test('removing an item before the focused one keeps arrow keys on track', async () => {
+		const segments = ['Archive', 'Copy', 'Cut', 'Delete'].map((label) => ({ value: label, label }));
+		const { rerender } = mount('segmented', { segments });
+		const cut = screen.getByRole('radio', { name: 'Cut' });
+		await fireEvent.click(cut);
+		await waitFor(() => expect(document.activeElement).toBe(cut));
+		// Remove "Copy", which sits before the focused "Cut".
+		await rerender({ segments: segments.filter((_, index) => index !== 1) });
+		await settle();
+		expect(document.activeElement).toBe(cut);
+		// The single tab stop stays on the focused item, not on the item that slid into its index.
+		const tabStops = screen.getAllByRole('radio').filter((radio) => radio.tabIndex === 0);
+		expect(tabStops).toEqual([cut]);
+		await fireEvent.keyDown(cut, { key: 'ArrowRight' });
+		await waitFor(() => expect(document.activeElement).toHaveTextContent('Delete'));
+	});
+
+	test('a disabled menu item is never an arrow-key target', async () => {
+		mount('menu', {
+			menuItems: [
+				{ type: 'option', title: 'Archive' },
+				{ type: 'option', title: 'Copy', disabled: true },
+				{ type: 'option', title: 'Cut' }
+			]
+		});
+		const archive = screen.getByRole('menuitem', { name: 'Archive' });
+		archive.focus();
+		await fireEvent.keyDown(archive, { key: 'ArrowDown' });
+		await waitFor(() => expect(document.activeElement).toHaveTextContent('Cut'));
+	});
+});
+
+// Menu renders its rows keyed by position (`{#each items as item, index (index)}` in
+// MenuFloating), so after "Copy" is removed the focused row node shows "Delete": the focus jumps
+// to another item before any key is pressed. The tab stop itself follows the element (above); the
+// rows need keys that follow their item, which is Menu's change to make (C3).
+describe('law 7 · Menu rows keep their node through removals (C3 · CX-7)', () => {
 	pending('removing an item before the focused one keeps arrow keys on track', async () => {
 		const items = ['Archive', 'Copy', 'Cut', 'Delete'].map((title): MenuItem => ({
 			type: 'option',

@@ -90,6 +90,7 @@ ToggleMenu stays on one row. When complete logical units no longer fit, it moves
 - ArrowLeft and ArrowRight move between visible controls; Home and End move to the edges.
 - Arrow navigation through a radio group does not change its value. Space, Enter, or click selects the focused radio.
 - Disabled and overflowed controls are excluded from navigation.
+- A text field passed as a custom control keeps its editing keys: Home, End, Space and Enter stay in the field, and ArrowLeft / ArrowRight leave it only when the caret is already at the start or end of its text (mirrored in RTL).
 - Icon-only toggle and menu controls automatically use their \`label\` as tooltip content. Custom snippets own their tooltip and accessible label.
 - Use \`radio-group\` for exclusive choices inside ToggleMenu and SegmentedControl for standalone exclusive controls.
 `;
