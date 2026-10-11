@@ -35,6 +35,8 @@ Unreleased section under the new version.
   `inputAttrs` props, with the exported `PasswordInputAutocomplete` and `PasswordInputAttributes`
   types.
 - i18n: `passwordTooShort(min)` in all 8 locales.
+- i18n: `meter` and `meterSegment(index, count)` in all 8 locales. They name a `Meter` rendered
+  without a label and an unlabelled stacked segment ("Segment 2 of 3").
 
 ### Changed
 
@@ -69,6 +71,9 @@ Unreleased section under the new version.
 - `PinInput`: `onComplete` also runs for every paste or autofill that leaves the code complete,
   even when the code was already complete or unchanged, so pasting a code again retries
   verification. Typing over one cell of a complete code still does not call it.
+- `ScrollArea`: `viewportRole` no longer defaults to `'group'`. `viewportRole="presentation"` (or
+  `none`) keeps the viewport unnamed and out of the tab order even while it overflows, for scroll
+  areas inside a listbox.
 
 ### Removed
 
@@ -186,6 +191,26 @@ Unreleased section under the new version.
   previous code and selection. While a composition is in progress the hidden native input turns
   fully transparent, so the input method's underline or highlight is not drawn over the first cell.
   Theme authors can restyle this with the new `composing` variant of the `input` theme slot.
+- `ScrollArea`: a viewport whose content fits is no longer announced as a "Scrollable content" group
+  or kept focusable with `tabindex="-1"`. It takes the group role, its name and a tab stop only
+  while it overflows, or keeps the `label` and `viewportRole` you pass. A focused viewport whose
+  content stops overflowing keeps its role, name and `tabindex="-1"` until it loses focus, so
+  keyboard focus no longer drops to the page.
+- `ScrollArea`: the custom scrollbars and the edge-scroll arrows are hidden from assistive
+  technology (`aria-hidden="true"`) instead of exposing an unreachable `role="scrollbar"`.
+- `Select`: the listbox now owns only groups and options. Group separators are
+  `role="presentation"`, and the scroll viewport adds no group, tab stop or scrollbar inside it.
+- `Select`: a disabled Select no longer submits its value in native form posts; its hidden input is
+  disabled with the control.
+- `PhoneInput`: "No countries found" is announced as a polite `role="status"` outside the country
+  listbox instead of sitting inside it. The status stays mounted while countries match, so screen
+  readers announce the message when it appears. The country search reports `aria-expanded="false"`
+  while no country matches.
+- `Meter`: exposes `role="meter"` with `aria-valuemin`, `aria-valuemax`, a clamped `aria-valuenow`
+  and the indicator text as `aria-valuetext`. It is named by `label` and described by `helper` and
+  `description`. Stacked segments become a group named by `label` and described by `helper` and
+  `description`, with one meter per segment, named by the segment's `label`. The rendered label is
+  `role="presentation"`, which completes the NVDA naming workaround for labels inside a meter.
 
 ## 0.11.0 — 2026-10-10
 
