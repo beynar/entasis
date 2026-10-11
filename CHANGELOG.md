@@ -31,6 +31,10 @@ Unreleased section under the new version.
 - Tooling: jsdom unit tests get stand-ins for `CloseWatcher`, `visualViewport` and per-element
   layout rects, with controls in `src/lib/testing/jsdom.test-helper.ts`. The proposed overlay and
   accessibility laws have executable entries, which are expected to fail until each law lands.
+- `PasswordInput`: `autocomplete` (`'current-password' | 'new-password' | 'off'`), `minLength` and
+  `inputAttrs` props, with the exported `PasswordInputAutocomplete` and `PasswordInputAttributes`
+  types.
+- i18n: `passwordTooShort(min)` in all 8 locales.
 
 ### Changed
 
@@ -48,6 +52,25 @@ Unreleased section under the new version.
   back-to-back `requestSubmit()` calls, where it used to be accepted. When it is the first invalid
   control, the switch takes focus and shows its own error, with no browser validation bubble on top.
   A silent `checkValidity()` moves no focus and shows no error.
+- `Button`: a `loading` button stays focusable and renders `aria-busy="true"` and
+  `aria-disabled="true"` instead of only ignoring the pointer. Clicks, Enter, Space and the form
+  submission of a `type="submit"` button are cancelled until loading ends.
+- `Form`: actions are marked `loading` while the form submits instead of being natively disabled, so
+  the pressed action keeps keyboard focus rather than dropping it to the page body. An action's own
+  `disabled` still renders the native attribute.
+- `TextInput`, `PasswordInput` and `PhoneInput` no longer hard-code `data-1p-ignore`, so password
+  managers and browser autofill work on them. Pass `inputAttrs={{ 'data-1p-ignore': true }}` to opt
+  a `TextInput` or `PasswordInput` out. The library's own search, filter and cell-editor fields keep
+  it.
+- `PasswordInput`: the 6-character minimum is now the field's own `minLength` rule and is skipped
+  for `autocomplete="current-password"`. An empty required password reports one message instead of
+  two, and a too-short value shows the localized `passwordTooShort` message instead of the
+  validation library's text. `fieldSchemas.password` keeps its 6-character minimum.
+
+### Removed
+
+- `Button`: the undocumented `as` prop on `ButtonPrimitiveProps`, which could render an anchor
+  without `href`. Pass `href` to render a link.
 
 ### Fixed
 
@@ -146,6 +169,10 @@ Unreleased section under the new version.
   gets `<field id>-option-<index>`, and its hidden input gets `<option id>-input`.
 - Tooling: every end-to-end suite now follows `E2E_PORT`; five of them dialled port 4173 regardless.
   Two tests that pressed a control before hydration now wait for the page to settle.
+- `Button`: a `loading` button now cancels Enter and Space clicks on the element itself, before any
+  other listener runs. A loading button used as a `Popover` or menu trigger
+  (`{@attach popover.trigger}`) no longer opens its panel. A loading link inside portaled content
+  (`Popover`, `Dialog`, `Drawer`) no longer navigates through the SvelteKit router.
 
 ## 0.11.0 — 2026-10-10
 
