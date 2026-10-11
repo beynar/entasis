@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Attachment } from 'svelte/attachments';
 	import { spinnerOverlay } from '$lib/attachments/spinnerOverlay.svelte.js';
 	import Slot from '../Slot/Slot.svelte';
 	import type { ButtonInternalProps } from './button.props.js';
@@ -6,7 +7,6 @@
 	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 
 	let {
-		as,
 		loading = false,
 		onclick = null,
 		onpointerenter = null,
@@ -45,7 +45,11 @@
 	const isSquared = $derived(
 		squared ?? !!((!children && prefix && !suffix) || (!children && !prefix && suffix))
 	);
-	const isAnchor = $derived(!!(as || href));
+	const isAnchor = $derived(!!href);
+	// Only a disabled <button> uses the native attribute. A loading button stays focusable, so a
+	// keyboard user keeps their place, and refuses activation through `aria-disabled` instead.
+	const nativeDisabled = $derived(!isAnchor && disabled);
+	const inactive = $derived(disabled || loading);
 
 	const resolvedColor = $derived(useDefaultColor(color));
 	// One set of variant values for every slot; the template reads `slots.x()`.
@@ -61,14 +65,20 @@
 		})
 	);
 
-	const handleClick: NonNullable<ButtonInternalProps['onclick']> = (event) => {
-		if (disabled) {
+	// Enter and Space still dispatch `click` on a focusable loading button. A capture listener on
+	// the element cancels that click before anything else sees it: listeners attached to the
+	// button itself (`{@attach popover.trigger}`), Svelte's delegated `onclick` handlers, and a
+	// router listening on <html>, which runs before them for content portaled outside the app
+	// root. Cancelling it also stops a submit button from submitting and an anchor from
+	// navigating. The listener is registered once and reads `inactive` on each click.
+	const refuseInactiveActivation: Attachment<HTMLElement> = (node) => {
+		const refuse = (event: MouseEvent) => {
+			if (!inactive) return;
 			event.preventDefault();
-			event.stopPropagation();
-			return;
-		}
-
-		onclick?.(event);
+			event.stopImmediatePropagation();
+		};
+		node.addEventListener('click', refuse, { capture: true });
+		return () => node.removeEventListener('click', refuse, { capture: true });
 	};
 
 	const handlePointerEnter: NonNullable<ButtonInternalProps['onpointerenter']> = (event) => {
@@ -88,7 +98,8 @@
 	aria-controls={controls}
 	aria-selected={selected}
 	aria-pressed={pressed}
-	aria-disabled={isAnchor && disabled ? true : undefined}
+	aria-disabled={inactive && !nativeDisabled ? true : undefined}
+	aria-busy={loading ? true : undefined}
 	role={role ?? (isAnchor ? 'link' : 'button')}
 	href={isAnchor && !disabled ? href : undefined}
 	{rel}
@@ -101,10 +112,11 @@
 	data-highlighted={dataHighlighted}
 	data-slot={dataSlot}
 	data-color={resolvedColor}
-	disabled={!isAnchor && disabled ? true : undefined}
+	disabled={nativeDisabled ? true : undefined}
 	class={slots.root({ className })}
+	{@attach refuseInactiveActivation}
 	{@attach spinnerOverlay({ loading, size })}
-	onclick={disabled || onclick ? handleClick : undefined}
+	{onclick}
 	onpointerenter={onpointerenter ? handlePointerEnter : undefined}
 	onpointerleave={onpointerleave ? handlePointerLeave : undefined}
 	{...attachments}

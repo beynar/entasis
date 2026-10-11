@@ -30,7 +30,7 @@
 | -------------- | ----------------------------- | ------- | ----------------------------------------------- |
 | fullWidth      | boolean                       | false   | Takes full container width                      |
 | squared        | boolean                       | auto    | Auto-detected when only prefix/suffix provided  |
-| loading        | boolean                       | false   | Shows loading state, disables interaction       |
+| loading        | boolean                       | false   | Spinner; keeps focus, aria-busy, no activation  |
 | href           | string                        | -       | Renders as `<a>` instead of `<button>`          |
 | target         | string                        | -       | Link target (with href)                         |
 | rel            | string                        | -       | Link relationship (with href)                   |

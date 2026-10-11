@@ -284,6 +284,7 @@ PhoneInput validates:
 - Country code is included in value
 - Validation depends on country format
 - Works with form libraries and validation schemas
+- Password managers and browser autofill are not blocked on the number input
 
 ## Theme Customization
 

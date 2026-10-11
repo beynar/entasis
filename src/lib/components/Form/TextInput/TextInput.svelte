@@ -98,7 +98,6 @@
 		{...inputAttrs}
 		disabled={field.disabled}
 		required={field.required}
-		data-1p-ignore
 		{type}
 		{id}
 		name={field.name}

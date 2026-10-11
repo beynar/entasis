@@ -578,5 +578,8 @@ export const de: Messages = {
 	aiContextCachedInput: 'Zwischengespeicherte Eingabe',
 	aiContextUsed: 'Verwendet',
 	aiContextUsage: (used: string | number, maximum: string | number, remaining: string | number) =>
-		`Kontextnutzung: ${used} von ${maximum} Token verwendet. ${remaining} Token verbleibend.`
+		`Kontextnutzung: ${used} von ${maximum} Token verwendet. ${remaining} Token verbleibend.`,
+	// Passwortfeld
+	passwordTooShort: (min: string | number) =>
+		`Das Passwort muss mindestens ${min} Zeichen lang sein`
 };

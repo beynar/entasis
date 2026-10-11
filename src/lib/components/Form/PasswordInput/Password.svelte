@@ -3,12 +3,16 @@
 	import { tick } from 'svelte';
 	import Field from '../Field/Field.svelte';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
+	import { check, pipe, safeParse } from 'valibot';
 	import { createFieldState } from '../Field/field.state.svelte.js';
+	import { schemas } from '../Field/schemas.js';
 	import type { PasswordInputProps } from './passwordInput.props.js';
 	import { usePasswordInputTheme } from './passwordInput.theme.js';
 	import { eyeClosedIcon } from '$lib/components/Icons/eyeClosed.js';
 	import { eyeIcon } from '$lib/components/Icons/eye.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
+
+	const DEFAULT_MIN_LENGTH = 6;
 
 	let {
 		defaultValue = null,
@@ -23,10 +27,19 @@
 		onValidate,
 		onValueChange,
 		visible,
+		autocomplete,
+		minLength,
+		inputAttrs,
 		...rest
 	}: PasswordInputProps = $props();
 	const t = $derived(useI18n());
 	if (value === undefined) value = untrack(() => defaultValue);
+
+	// A sign-in field must accept whatever password the account already has, so the default
+	// minimum is skipped for `current-password`. An explicit `minLength` always applies.
+	const resolvedMinLength = $derived(
+		minLength ?? (autocomplete === 'current-password' ? 0 : DEFAULT_MIN_LENGTH)
+	);
 
 	let showPassword = $state(false);
 	const id = $props.id();
@@ -76,6 +89,24 @@
 		type: 'password'
 	});
 
+	// The built-in `password` schema keeps its 6-character minimum for custom password controls and
+	// `fieldSchemas`. This field checks presence with the text rule and applies its own minimum, so
+	// `isValid`, `validate()` and Form submission agree. An empty value reports presence alone, and
+	// `onValidate` runs only once the length passes.
+	const passwordSchema = $derived(
+		pipe(
+			schemas[field.required ? 'required' : 'optional'].text,
+			check(
+				(password) =>
+					typeof password !== 'string' ||
+					password.length === 0 ||
+					password.length >= resolvedMinLength,
+				t.passwordTooShort(resolvedMinLength)
+			)
+		)
+	);
+	field.checkSchema = (password) => safeParse(passwordSchema, password);
+
 	const classes = $derived(usePasswordInputTheme(theme));
 
 	const togglePasswordVisibility = async () => {
@@ -111,10 +142,11 @@
 	{...rest}
 >
 	<input
-		data-1p-ignore
+		{...inputAttrs}
 		type={showPassword ? 'text' : 'password'}
 		{id}
 		name={field.name}
+		{autocomplete}
 		bind:value={field.value}
 		bind:this={field.node}
 		{placeholder}

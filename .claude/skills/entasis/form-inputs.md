@@ -128,9 +128,9 @@ Builds on the `Rating` display component (display.md) -- same star rendering and
 
 `import { PasswordInput } from 'entasis/password-input'`
 
-**Unique props:** `value: string` (bindable), `placeholder`
+**Unique props:** `value: string` (bindable), `placeholder`, `autocomplete` (`'current-password' | 'new-password' | 'off'`), `minLength` (default 6, none for `current-password`), `inputAttrs`
 
-Extends TextInput. Built-in visibility toggle (eye icon). Only `prefix` slot (suffix is the toggle).
+Extends TextInput. Built-in visibility toggle (eye icon). Only `prefix` slot (suffix is the toggle). Password managers are not blocked: set `autocomplete="current-password"` on sign-in forms and `autocomplete="new-password"` on sign-up forms. A non-empty value shorter than `minLength` fails validation with the catalog's `passwordTooShort` message.
 
 **Theme parts:** `input`, `inputContainer` (same as TextInput)
 
@@ -142,7 +142,7 @@ Extends TextInput. Built-in visibility toggle (eye icon). Only `prefix` slot (su
 	let password = $state('');
 </script>
 
-<PasswordInput label="Password" bind:value={password} required>
+<PasswordInput label="Password" autocomplete="current-password" bind:value={password} required>
 	{#snippet prefix()}{@render lockIcon()}{/snippet}
 </PasswordInput>
 ```

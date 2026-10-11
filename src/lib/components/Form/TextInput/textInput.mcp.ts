@@ -17,6 +17,7 @@ Extends all Field component props plus:
 - **type**: 'text' | 'email' | 'url' (default: 'text')
 - **value**: string (bindable) - Input value
 - **placeholder**: string - Placeholder text
+- **inputAttrs**: native attributes for the underlying \`<input>\`, such as \`autocomplete\`, \`inputmode\`, \`aria-*\`, \`data-*\` and event handlers. \`id\`, \`name\`, \`type\`, \`value\`, \`placeholder\`, \`required\`, \`disabled\` and \`class\` stay owned by the component
 
 ### Field Props (inherited)
 - **label**: string | Snippet - Field label
@@ -199,6 +200,7 @@ Extends all Field component props plus:
 		type="email"
 		label="Email"
 		placeholder="your@email.com"
+		inputAttrs={{ autocomplete: 'username' }}
 		bind:value={email}
 		required
 	>
@@ -209,6 +211,7 @@ Extends all Field component props plus:
 	
 	<PasswordInput 
 		label="Password"
+		autocomplete="current-password"
 		bind:value={password}
 		required
 	>
@@ -245,6 +248,7 @@ Custom validation can be added through the Field component.
 - Input container handles focus states
 - Validation runs on blur and submit
 - Type determines browser validation behavior
+- Password managers and browser autofill are not blocked. To keep a manager away from a field, pass its opt-out attribute through \`inputAttrs\`, for example \`inputAttrs={{ 'data-1p-ignore': true }}\` for 1Password
 
 ## Theme Customization
 

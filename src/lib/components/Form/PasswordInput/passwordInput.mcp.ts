@@ -20,6 +20,9 @@ Extends all TextInput component props:
 ### Core Props
 - **value**: string (bindable) - Password value
 - **placeholder**: string - Placeholder text
+- **autocomplete**: 'current-password' | 'new-password' | 'off' - Rendered as the input's \`autocomplete\` so browsers and password managers know what the field holds. Use \`current-password\` on sign-in forms and \`new-password\` on sign-up and change-password forms. Omitted, the attribute is left off
+- **minLength**: number - Fewest characters a non-empty value accepts during validation. Defaults to 6, or to no minimum when \`autocomplete\` is \`current-password\`; an explicit value always applies and \`0\` drops the rule. The message comes from the i18n catalog (\`passwordTooShort\`)
+- **inputAttrs**: native attributes for the underlying \`<input>\` (\`aria-*\`, \`data-*\`, \`maxlength\`, event handlers). \`autocomplete\`, \`type\`, \`value\`, \`id\`, \`name\`, \`placeholder\`, \`required\`, \`disabled\` and \`class\` stay owned by the component
 
 ### Field Props (inherited)
 - **label**: string | Snippet - Field label
@@ -137,12 +140,14 @@ Extends all TextInput component props:
 	<TextInput 
 		type="email"
 		label="Email"
+		inputAttrs={{ autocomplete: 'username' }}
 		bind:value={email}
 		required
 	/>
 	
 	<PasswordInput 
 		label="Password"
+		autocomplete="current-password"
 		bind:value={password}
 		required
 	/>
@@ -193,12 +198,15 @@ Extends all TextInput component props:
 <form>
 	<PasswordInput 
 		label="Current Password"
+		autocomplete="current-password"
 		bind:value={currentPassword}
 		required
 	/>
 	
 	<PasswordInput 
 		label="New Password"
+		autocomplete="new-password"
+		minLength={8}
 		bind:value={newPassword}
 		description="Must be at least 8 characters"
 		required
@@ -206,6 +214,7 @@ Extends all TextInput component props:
 	
 	<PasswordInput 
 		label="Confirm Password"
+		autocomplete="new-password"
 		bind:value={confirmPassword}
 		error={passwordMismatch ? 'Passwords do not match' : ''}
 		required
@@ -287,8 +296,16 @@ The visibility toggle button:
 
 PasswordInput supports:
 - **required**: Non-empty password
-- Custom validation via error prop
+- **minLength**: at least 6 characters by default, none for \`autocomplete="current-password"\`; a short value reports only the length message
+- Custom validation via \`onValidate\`, which runs after the length rule passes
 - Pattern matching for complexity requirements
+
+## Password managers
+
+PasswordInput does not opt out of password managers. Set \`autocomplete\` so they offer a saved
+password (\`current-password\`) or suggest a new one (\`new-password\`). To keep a specific manager
+away from a field that is not a real credential, pass its opt-out attribute through \`inputAttrs\`,
+for example \`inputAttrs={{ 'data-1p-ignore': true }}\` for 1Password.
 
 ## Security Best Practices
 
@@ -296,7 +313,7 @@ PasswordInput supports:
 - Always use HTTPS in production
 - Consider password strength requirements
 - Don't limit password length unnecessarily
-- Support password managers (autocomplete="current-password" or "new-password")
+- Support password managers with the \`autocomplete\` prop (\`current-password\` or \`new-password\`)
 
 ## Accessibility
 

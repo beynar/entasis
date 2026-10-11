@@ -32,8 +32,8 @@ The Button component is a flexible and customizable button element that supports
 ### Layout Props
 - **fullWidth**: boolean (default: false) - Makes button take full width of container
 - **squared**: boolean - Makes button square (aspect-ratio 1:1), auto-determined if only prefix/suffix is provided
-- **disabled**: boolean (default: false) - Disables button interaction
-- **loading**: boolean (default: false) - Shows the Theme-configured loading spinner and disables interaction
+- **disabled**: boolean (default: false) - Disables button interaction. A \`<button>\` gets the native \`disabled\` attribute and leaves the tab order; an anchor drops its href, leaves the tab order and renders \`aria-disabled="true"\`
+- **loading**: boolean (default: false) - Shows the Theme-configured loading spinner and refuses activation while staying focusable: renders \`aria-busy="true"\` and \`aria-disabled="true"\`, ignores pointer events, and cancels clicks from Enter or Space before any other listener sees them, including attachments such as \`popover.trigger\`, as well as the form submission of a \`type="submit"\` button and the navigation of an anchor. It never sets the native \`disabled\` attribute, so keyboard focus stays on the button while the work runs
 
 ### State Props
 Describe the meaning; the Button writes the ARIA. Never pass an aria-* attribute to a Button.
@@ -138,13 +138,14 @@ The button follows this DOM structure:
 - Automatically sets appropriate ARIA roles (button/link)
 - Supports keyboard navigation
 - Disabled state prevents interaction
-- Loading state provides visual feedback
+- Loading state keeps focus on the button and announces it busy (\`aria-busy\`) and unavailable (\`aria-disabled\`); clicks, Enter, Space and form submission are cancelled until it ends
+- Prefer \`loading\` over \`disabled\` for a button whose own action is running: \`disabled\` removes the button from the tab order and drops focus to the page body
 
 ## Notes
 
 - When \`href\` is provided, renders as \`<a>\` tag, otherwise \`<button>\`
 - \`squared\` is automatically determined when only prefix or suffix is provided without children
-- All event handlers respect disabled state
+- All event handlers respect disabled state; \`onclick\` also stays silent while \`loading\`
 - Icon sizing is automatically adjusted based on button size
 
 ## Theme Customization

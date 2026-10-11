@@ -566,5 +566,7 @@ export const ar: Messages = {
 	aiContextCachedInput: 'الإدخال المخزّن مؤقتًا',
 	aiContextUsed: 'المستخدم',
 	aiContextUsage: (used: string | number, maximum: string | number, remaining: string | number) =>
-		`استخدام السياق: تم استخدام ${used} من ${maximum} رمزًا. ${remaining} رمزًا متبقيًا.`
+		`استخدام السياق: تم استخدام ${used} من ${maximum} رمزًا. ${remaining} رمزًا متبقيًا.`,
+	// حقل كلمة المرور
+	passwordTooShort: (min: string | number) => `يجب ألا يقل عدد أحرف كلمة المرور عن ${min}`
 };

@@ -1447,6 +1447,8 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	'password-input': [
 		'PasswordInput',
+		'PasswordInputAttributes',
+		'PasswordInputAutocomplete',
 		'PasswordInputProps',
 		'PasswordInputTheme',
 		'PasswordInputThemeProps',

@@ -121,6 +121,7 @@
 	<TextInput
 		{@attach attachSearchInput}
 		bind:value={searchQuery}
+		inputAttrs={{ 'data-1p-ignore': true }}
 		placeholder={searchPlaceholder}
 		{size}
 		class={classes.countrySearch({ class: theme?.countrySearch?.base })}

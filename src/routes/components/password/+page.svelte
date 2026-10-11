@@ -41,7 +41,8 @@
 		'Show/hide toggle on prefix',
 		'Bindable value, errors & focused',
 		'Field validation via onValidate',
-		'data-1p-ignore for autofill'
+		'Autocomplete hints for password managers',
+		'6-character minimum, skipped for sign-in'
 	]}
 >
 	<ComponentCard
@@ -83,6 +84,91 @@
 					label="New password"
 					placeholder="Choose a strong password"
 					helper="At least 8 characters"
+					autocomplete="new-password"
+				/>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Sign in"
+			description="autocomplete='current-password' lets password managers offer the saved password, and skips the 6-character minimum: a sign-in form must accept the password the account already has. While the sign-in runs, the action shows its spinner and keeps keyboard focus."
+			code={`<Form
+	inputs={{
+		email: {
+			type: 'email',
+			label: 'Email',
+			required: true,
+			inputAttrs: { autocomplete: 'username' }
+		},
+		password: {
+			type: 'password',
+			label: 'Password',
+			required: true,
+			autocomplete: 'current-password'
+		}
+	}}
+	actions={[{ children: 'Sign in', onAction: (form) => form.submit() }]}
+	onSubmit={signIn}
+/>`}
+		>
+			<div class="w-full max-w-md">
+				<Form
+					inputs={{
+						email: {
+							type: 'email',
+							label: 'Email',
+							required: true,
+							inputAttrs: { autocomplete: 'username' }
+						},
+						password: {
+							type: 'password',
+							label: 'Password',
+							required: true,
+							autocomplete: 'current-password'
+						}
+					}}
+					actions={[{ children: 'Sign in', onAction: (form) => form.submit() }]}
+					onSubmit={async (data) => {
+						// Stands in for the network round trip: the action shows its spinner and keeps focus.
+						await new Promise((resolve) => setTimeout(resolve, 1500));
+						console.log('Signed in:', data);
+					}}
+				/>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Sign up"
+			description="autocomplete='new-password' lets password managers suggest a strong password. minLength replaces the 6-character default; the message comes from the i18n catalog."
+			code={`<Form
+	inputs={{
+		password: {
+			type: 'password',
+			label: 'New password',
+			required: true,
+			autocomplete: 'new-password',
+			minLength: 8
+		}
+	}}
+	actions={[{ children: 'Create account', onAction: (form) => form.submit() }]}
+	onSubmit={signUp}
+/>`}
+		>
+			<div class="w-full max-w-md">
+				<Form
+					inputs={{
+						password: {
+							type: 'password',
+							label: 'New password',
+							required: true,
+							autocomplete: 'new-password',
+							minLength: 8
+						}
+					}}
+					actions={[{ children: 'Create account', onAction: (form) => form.submit() }]}
+					onSubmit={(data) => {
+						console.log('Account created:', data);
+					}}
 				/>
 			</div>
 		</ComponentCard>

@@ -294,6 +294,7 @@
 				placeholder={resolvedLabels.searchPlaceholder}
 				label={resolvedLabels.searchPlaceholder}
 				theme={{ label: { base: 'sr-only' } }}
+				inputAttrs={{ 'data-1p-ignore': true }}
 				onValueChange={(nextValue: string | null) => setQuery(nextValue ?? '')}
 			/>{/if}
 	</div>

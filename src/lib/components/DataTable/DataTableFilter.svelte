@@ -105,6 +105,7 @@
 				placeholder={config.filter.placeholder ?? t.filterValues}
 				value={typeof value === 'string' ? value : ''}
 				disabled={model.props.disabled}
+				inputAttrs={{ 'data-1p-ignore': true }}
 				onValueChange={(next) => model.setColumnFilter(column.id, next || undefined)}
 			/>
 		{:else if config.filter.type === 'number'}

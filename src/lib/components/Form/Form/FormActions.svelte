@@ -50,12 +50,14 @@
 </script>
 
 {#snippet buttons()}
+	<!-- A submitting form marks its actions `loading`, never natively `disabled`: the pressed
+	     button keeps keyboard focus instead of dropping it to the page body. -->
 	{#each actionStates as actionState, index (index)}
 		<Button
 			{...actionState.props}
 			size={actionState.size ?? size}
 			loading={form.loading || actionState.loading}
-			disabled={form.loading || actionState.disabled}
+			disabled={actionState.disabled}
 			onclick={(event) => {
 				actionState.onclick?.(event);
 				if (!event.defaultPrevented) return actionState.onAction?.(form);
