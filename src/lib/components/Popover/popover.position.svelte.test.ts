@@ -1,6 +1,7 @@
 // Floating placement in `popover.position.ts`, alone and through PopoverState. These tests pin the
 // middleware chain, when a placement runs, what it writes on the wrapper, the order of the
-// minimum-width writes, and the autoUpdate wiring. jsdom has no
+// minimum-width writes, the autoUpdate wiring, and what PopoverState does with each placement
+// (the directed-transition origin and the hover safe area). jsdom has no
 // layout, so floating-ui's `computePosition` and `autoUpdate` are replaced by controllable
 // mocks; real placement and flipping are covered in `popover.position.browser.test.ts`.
 import '@testing-library/jest-dom/vitest';
@@ -321,6 +322,82 @@ describe('Popover placement through the positioner', () => {
 			expect((lastOptions().middleware[0] as { options: number }).options).toBe(12)
 		);
 	});
+
+	test('a directed transition is opted out of with directedTransition={false}', async () => {
+		floating.resolvedPlacement = 'top-start';
+		render(PopoverPositionHarness, {
+			props: { position: 'bottom-start', directedTransition: false }
+		});
+		const dialog = await wrapper();
+		await waitFor(() => expect(dialog.style.visibility).toBe(''));
+		await settle();
+		expect(lastOptions().placement).toBe('bottom-start');
+		const panel = dialog.firstElementChild as HTMLElement;
+		expect(panel.style.transformOrigin).toBe('center center');
+	});
+
+	test('the transform origin is set as the panel opens and kept by later placements', async () => {
+		const { component } = render(PopoverPositionHarness, { props: { position: 'bottom-start' } });
+		const panel = (await wrapper()).firstElementChild as HTMLElement;
+		await waitFor(() => expect(panel.style.transformOrigin).toBe('left top'));
+		await settle();
+		const placements = computePosition.mock.calls.length;
+
+		// An observed change (scroll, resize) that flips the open panel.
+		floating.resolvedPlacement = 'right-end';
+		observedUpdate()();
+		await waitFor(() => expect(computePosition).toHaveBeenCalledTimes(placements + 1));
+		await settle();
+		expect(panel.style.transformOrigin).toBe('left top');
+
+		// A new preferred placement re-runs the mount placement of a panel that already opened.
+		floating.resolvedPlacement = null;
+		component.update({ position: 'top-end' });
+		await waitFor(() => expect(lastOptions().placement).toBe('top-end'));
+		await settle();
+		expect(panel.style.transformOrigin).toBe('left top');
+	});
+
+	// The safe area measures the trigger and the panel; a panel moved by its wrapper's
+	// coordinates changes neither element's own attributes or size, so its observers stay quiet
+	// and only the placement can measure it again.
+	test.each([
+		['floating-ui', undefined],
+		['positionPanel', () => ({ x: 400, y: 300 })]
+	] as const)(
+		'a panel re-placed by %s moves the hover safe area with it',
+		async (_placer, positionPanel) => {
+			const onOpenChange = vi.fn();
+			render(PopoverPositionHarness, {
+				props: { closeOnMouseLeave: true, positionPanel, onOpenChange }
+			});
+			const panel = (await wrapper()).firstElementChild as HTMLElement;
+			mockRect(screen.getByRole('button', { name: 'Open popover' }), {
+				x: 10,
+				y: 20,
+				width: 87.5,
+				height: 32
+			});
+			await settle();
+			const pointerAt = async (clientX: number, clientY: number) => {
+				document.body.dispatchEvent(
+					new PointerEvent('pointermove', { bubbles: true, clientX, clientY })
+				);
+				// Past the safe area's close delay.
+				await new Promise((resolve) => setTimeout(resolve, 200));
+			};
+
+			mockRect(panel, { x: 400, y: 300, width: 160, height: 120 });
+			observedUpdate()();
+			await settle();
+			await pointerAt(480, 360);
+			expect(onOpenChange).not.toHaveBeenCalled();
+
+			// The safe area is live: leaving it closes the popover.
+			await pointerAt(900, 700);
+			expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(false);
+		}
+	);
 
 	test('fitTrigger gives the panel the trigger width as its minimum', async () => {
 		render(PopoverPositionHarness, { props: { fitTrigger: true } });
