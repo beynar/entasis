@@ -170,15 +170,20 @@ describe('Popover hover', () => {
 });
 
 describe('Popover anchor lifetime', () => {
+	const unmountDetails = expect.objectContaining({ reason: 'trigger-unmount' });
+
 	test('unmounting the trigger closes the popover and reports it once', async () => {
 		const onOpenChange = vi.fn();
 		const { rerender } = render(PopoverAnchorHarness, { props: { onOpenChange } });
 		await fireEvent.click(screen.getByRole('button', { name: 'Anchor trigger' }));
 		await screen.findByRole('button', { name: 'Inside popover' });
-		expect(onOpenChange).toHaveBeenLastCalledWith(true);
+		expect(onOpenChange).toHaveBeenLastCalledWith(
+			true,
+			expect.objectContaining({ reason: 'trigger-press' })
+		);
 
 		await rerender({ onOpenChange, showTrigger: false });
-		await waitFor(() => expect(onOpenChange).toHaveBeenLastCalledWith(false));
+		await waitFor(() => expect(onOpenChange).toHaveBeenLastCalledWith(false, unmountDetails));
 		await waitFor(() =>
 			expect(screen.queryByRole('button', { name: 'Inside popover' })).toBeNull()
 		);
@@ -197,7 +202,7 @@ describe('Popover anchor lifetime', () => {
 		await sleep(20);
 		const second = screen.getByRole('button', { name: 'Anchor trigger' });
 		expect(second).not.toBe(first);
-		expect(onOpenChange).not.toHaveBeenCalledWith(false);
+		expect(onOpenChange).not.toHaveBeenCalledWith(false, expect.anything());
 		expect(screen.getByRole('button', { name: 'Inside popover' })).toBeInTheDocument();
 		await waitFor(() => expect(second).toHaveAttribute('aria-expanded', 'true'));
 	});
@@ -210,7 +215,7 @@ describe('Popover anchor lifetime', () => {
 
 		await rerender({ onOpenChange, showPopover: false });
 		await sleep(20);
-		expect(onOpenChange).not.toHaveBeenCalledWith(false);
+		expect(onOpenChange).not.toHaveBeenCalledWith(false, expect.anything());
 	});
 
 	test('unmounting the trigger closes a mobile sheet popover', async () => {
@@ -222,7 +227,7 @@ describe('Popover anchor lifetime', () => {
 		await screen.findByRole('button', { name: 'Inside popover' });
 
 		await rerender({ onOpenChange, mobileSheet: true, showTrigger: false });
-		await waitFor(() => expect(onOpenChange).toHaveBeenLastCalledWith(false));
+		await waitFor(() => expect(onOpenChange).toHaveBeenLastCalledWith(false, unmountDetails));
 		await waitFor(() =>
 			expect(screen.queryByRole('button', { name: 'Inside popover' })).toBeNull()
 		);
@@ -237,7 +242,7 @@ describe('Popover anchor lifetime', () => {
 		await screen.findByRole('button', { name: 'Inside popover' });
 
 		await rerender({ onOpenChange, inline: true, showTrigger: false });
-		await waitFor(() => expect(onOpenChange).toHaveBeenLastCalledWith(false));
+		await waitFor(() => expect(onOpenChange).toHaveBeenLastCalledWith(false, unmountDetails));
 		await waitFor(() =>
 			expect(screen.queryByRole('button', { name: 'Inside popover' })).toBeNull()
 		);
@@ -253,7 +258,7 @@ describe('Popover anchor lifetime', () => {
 		// Svelte resets the bound ref to null; with zero-duration transitions the panel leaves
 		// in the same flush, before any floating-ui observer could notice the detached anchor.
 		await rerender({ onOpenChange, boundRef: true, showAnchor: false });
-		await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+		await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false, unmountDetails));
 		expect(screen.queryByRole('button', { name: 'Inside bound popover' })).toBeNull();
 
 		await rerender({ onOpenChange, boundRef: true, showAnchor: true });
@@ -271,7 +276,7 @@ describe('Popover anchor lifetime', () => {
 		screen.getByTestId('anchor').remove();
 		// floating-ui's autoUpdate re-runs on resize; the reference is gone, so it closes.
 		window.dispatchEvent(new Event('resize'));
-		await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+		await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false, unmountDetails));
 		await waitFor(() =>
 			expect(screen.queryByRole('button', { name: 'Inside anchored popover' })).toBeNull()
 		);

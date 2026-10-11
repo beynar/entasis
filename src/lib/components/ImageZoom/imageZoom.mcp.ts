@@ -45,9 +45,9 @@ high-resolution sources, slots, focus restoration, and configurable dismissal.
 - **indicatorPosition**: "top-left" | "top-right" | "bottom-left" | "bottom-right" (default: "top-right") - Corner used for the thumbnail zoom indicator.
 - **class**: string - Additional root classes.
 - **theme**: ImageZoomThemeProps - Per-instance theme overrides.
-- **onOpenChange**: (open: boolean) => void - Fired once when the library requests a new open state.
-- **onAfterOpen**: (payload) => void - Fired after the open animation completes.
-- **onAfterClose**: (payload) => void - Fired after the close animation completes.
+- **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void - Fired before the zoom opens or closes, with \`details.reason\` (\`'trigger-press'\`, \`'escape-key'\`, \`'close-press'\` for a click on the zoomed image, \`'outside-press'\`, \`'imperative-action'\` for \`payload.open()\` / \`close()\` and a scroll dismissal), \`details.event\` and \`details.cancel()\`, which keeps the state as it is.
+- **onAfterOpen**: (payload) => void - Fired once per open, after the open animation completes.
+- **onAfterClose**: (payload) => void - Fired once per close, after the close animation completes.
 
 ## Slots
 

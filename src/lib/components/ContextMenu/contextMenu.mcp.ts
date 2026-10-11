@@ -35,7 +35,7 @@ floating-ui virtual element, so the menu appears exactly at the pointer (and fli
 ### Bindable Props
 - **open**: boolean - Open state of the context menu.
 - **defaultOpen**: boolean (default: false) - Initial state when open is not provided.
-- **onOpenChange**: (open: boolean) => void - Called once for each library-requested state change.
+- **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void - Called before each library-requested state change, with \`details.reason\` (\`'trigger-press'\` for the right-click, long-press or keyboard request, \`'item-press'\`, \`'escape-key'\`, \`'outside-press'\`), \`details.event\` and \`details.cancel()\`.
 - **onAfterOpen**: (payload) => void - Called after the open transition finishes.
 - **onAfterClose**: (payload) => void - Called after the close transition finishes.
 

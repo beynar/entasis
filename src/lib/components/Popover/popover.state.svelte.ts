@@ -1,13 +1,31 @@
 import { bind } from '$lib/utils/state.svelte.js';
 import { Registry } from '$lib/utils/registry.svelte.js';
 import { getContext, hasContext, onDestroy, onMount, setContext, untrack } from 'svelte';
+import { on } from 'svelte/events';
 import { useTheme } from '../Theme/theme.state.svelte.js';
-import type { PopoverProps } from './popover.props.js';
+import type { PopoverOpenReason, PopoverProps } from './popover.props.js';
 import type { Placement, VirtualElement } from '@floating-ui/dom';
 import { useScrollLock } from '$lib/utils/useScrollLock.svelte.js';
 import { useFocusScope } from '$lib/utils/useFocusScope.svelte.js';
 import { useSafeArea } from '$lib/utils/safeArea.svelte.js';
 import { useHoverAction } from '$lib/utils/useHoverAction.svelte.js';
+import { useOpenLifecycle, type OpenLifecycle } from '$lib/utils/openLifecycle.svelte.js';
+import {
+	getInteractionType,
+	isOpenChangeDetails,
+	requestOpenChange,
+	resolveOpenChangeDetails,
+	type OpenChangeDetails,
+	type OpenChangeInit,
+	type OpenChangeReason
+} from '$lib/utils/openChange.js';
+import {
+	focusedElement,
+	triggerActivation,
+	triggerFocusTarget,
+	writePopupAria,
+	type PopupTriggerProps
+} from '$lib/utils/trigger.js';
 import { usePopoverMotion, type PopoverThemeProps } from './popover.theme.js';
 import { createPanelPositioner, directedMotion, releasePanelPosition } from './popover.position.js';
 
@@ -20,6 +38,8 @@ interface PopoverOptions extends MakeRequired<
 		| 'position'
 		| 'transition'
 		| 'onOpenChange'
+		| 'onAfterOpen'
+		| 'onAfterClose'
 		| 'offset'
 		| 'directedTransition'
 		| 'closeOnEscape'
@@ -55,25 +75,47 @@ interface PopoverOptions extends MakeRequired<
 	motion?: PopoverThemeProps['motion'];
 }
 
+/** What `open`, `close`, `toggle` and `setOpen` accept: details, a partial, or the DOM event. */
+export type PopoverOpenChangeInput = OpenChangeDetails | OpenChangeInit | Event;
+
 // `bind(this, options)` installs the option properties on the instance; this type-only base
 // class is what declares them to TypeScript. (Merging an empty `interface` into the class
 // would be unsafe declaration merging: the interface promises members the class never defines.)
 const PopoverOptionsBase = class {} as unknown as new () => PopoverOptions;
-// The one place the trigger's semantic state becomes ARIA, for triggers the library cannot
-// pass props to (a snippet trigger carrying `{@attach popover.reference}`).
-/** Elements that may carry popup ARIA state. */
-const POPUP_CONTROL =
-	'button, a[href], input, select, textarea, summary, [role="button"], [role="link"], [role="combobox"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="tab"], [role="option"], [role="treeitem"], [role="gridcell"], [role="switch"], [role="checkbox"]';
-/** Elements the browser already focuses and activates from the keyboard. */
-const NATIVE_CONTROL = 'button, a[href], input, select, textarea, summary';
-const TRIGGER_ARIA = {
-	haspopup: 'aria-haspopup',
-	expanded: 'aria-expanded',
-	controls: 'aria-controls'
+
+/** The role a non-dialog popup's content element carries, by `haspopup`. */
+const POPUP_ROLE = {
+	menu: 'menu',
+	listbox: 'listbox',
+	tree: 'tree',
+	grid: 'grid'
 } as const;
 
+/** How the open state was reached, from the change that opened it. */
+const openReasonOf = (details: OpenChangeDetails): PopoverOpenReason => {
+	if (details.reason === 'trigger-hover') return 'hover';
+	const fromTrigger: OpenChangeReason[] = ['trigger-press', 'trigger-focus', 'list-navigation'];
+	if (fromTrigger.includes(details.reason)) {
+		return details.interaction === 'keyboard' ? 'keyboard' : 'press';
+	}
+	return 'programmatic';
+};
+
+/** A press on a trigger, remembered while its event dispatches. */
+type TriggerPress = { node: HTMLElement; event: Event; reason: OpenChangeReason };
+
 export class PopoverState extends PopoverOptionsBase {
-	triggerReference: HTMLElement | null = $state(null);
+	/** The trigger that opened the popover, while it is open; `null` for a programmatic open. */
+	activeTrigger = $state<HTMLElement | null>(null);
+	/** The most recently attached `reference` / `trigger` element. */
+	#latestTrigger = $state<HTMLElement | null>(null);
+	/** The id of the role owner inside a non-dialog popup (the `role="menu"` element). */
+	#popupOwnerId = $state<string | null>(null);
+	/**
+	 * The trigger the panel anchors to: the one that opened it, else the most recently attached
+	 * `reference` / `trigger` element.
+	 */
+	triggerReference: HTMLElement | null = $derived(this.activeTrigger ?? this.#latestTrigger);
 	referenceElement: HTMLElement | VirtualElement | null = $derived(
 		this.triggerReference || this.externalRef || null
 	);
@@ -83,6 +125,13 @@ export class PopoverState extends PopoverOptionsBase {
 	transformOrigin = $state('center center');
 	// Trigger-matched width (fitTrigger), applied to the panel.
 	triggerWidth = $state<number | null>(null);
+	/**
+	 * How the popover was opened: `hover`, `press` (pointer), `keyboard`, or `programmatic`
+	 * (`open()` from code, the `open` prop, `defaultOpen`). `null` once closed.
+	 */
+	openReason = $state<PopoverOpenReason | null>(null);
+	/** The details of the last change that was applied, kept until the next one. */
+	lastOpenChange = $state.raw<OpenChangeDetails | null>(null);
 	parent = getContext<PopoverState | null>('popover');
 	// Nested popovers join while they mount and leave when torn down; see `Registry`.
 	readonly #children = new Registry<PopoverState>();
@@ -90,8 +139,16 @@ export class PopoverState extends PopoverOptionsBase {
 		return this.#children.items;
 	}
 	hasChildOpen = $derived(this.children.some((d) => d.isOpen));
-	hasTransitioned = $state(false);
 	theme = useTheme();
+	/**
+	 * Open → entering → open → exiting → closed; completes even when no transition plays.
+	 * Created in the constructor: it reads the options as it starts, after `bind` installs them.
+	 */
+	lifecycle: OpenLifecycle;
+	/** @deprecated Read `lifecycle.status === 'open'`; kept for one minor. */
+	get hasTransitioned() {
+		return this.lifecycle.status === 'open';
+	}
 	// The mobile sheet delegates to a Dialog, which registers its own layer.
 	// An inline panel sits in the flow and is not dismissed by an outside press; Escape still
 	// reaches it while it is the top layer.
@@ -100,8 +157,8 @@ export class PopoverState extends PopoverOptionsBase {
 		isOpen: () => this.isOpen && !this.isMobileSheet,
 		isModal: () => false,
 		dismissOnEscape: () => this.closeOnEscape,
-		dismissOnOutside: () => !this.inline && this.closeOnClickOutside && this.hasTransitioned,
-		onDismiss: () => this.close(),
+		dismissOnOutside: () => !this.inline && this.closeOnClickOutside,
+		onDismiss: (request) => this.setOpen(false, request),
 		state: this
 	});
 	computedSize = $derived(this.theme.resolveResponsiveProps(this.size, 'normal'));
@@ -111,20 +168,30 @@ export class PopoverState extends PopoverOptionsBase {
 		this.inline ? 'inline' : this.isMobileSheet ? 'mobileSheet' : 'floating'
 	);
 	/**
+	 * Whether the panel holds dialog content. Menus, listboxes, trees and grids render a plain
+	 * wrapper instead of an unnamed `<dialog>`, and their trigger controls the role owner inside.
+	 */
+	isDialogPopup = $derived((this.haspopup ?? 'dialog') === 'dialog');
+	/** The id of the element `aria-controls` points at while open. */
+	controlsId = $derived(this.isDialogPopup ? this.id : (this.#popupOwnerId ?? this.id));
+	/**
 	 * Trigger state in the library's semantic vocabulary: spread on the built-in Button, and
 	 * written as the matching ARIA attributes by `reference` for a snippet trigger.
 	 */
-	triggerProps = $derived({
+	triggerProps: PopupTriggerProps = $derived({
 		haspopup: this.haspopup ?? 'dialog',
 		expanded: this.isOpen,
-		controls: this.isOpen && !this.isMobileSheet ? this.id : undefined
+		controls: this.isOpen && !this.isMobileSheet ? this.controlsId : undefined
 	});
-	// Non-modal: no Tab containment or `inert`; optional initial focus, always restores.
+	// Non-modal: no Tab containment or `inert`; optional initial focus. Focus goes back only when
+	// it was inside the panel: a popover that never had focus (a combobox list) leaves it alone,
+	// even when the control that kept it blurred on purpose.
 	focusScope = useFocusScope({
 		isActive: () => this.isOpen && !this.isMobileSheet && this.layer.isTop,
 		trap: () => false,
 		initialFocus: () => this.focusOnOpen ?? false,
-		returnTo: () => this.triggerReference
+		restoreFocus: () => this.#focusEntered,
+		returnTo: () => this.#returnTarget()
 	});
 	// Mode preset from `popoverTheme.motion`, through the override ladder
 	// (registry → `setPopoverTheme` → instance `theme.motion` → `transition` prop).
@@ -138,10 +205,16 @@ export class PopoverState extends PopoverOptionsBase {
 	computedPosition = $derived(this.theme.resolveResponsiveProps(this.position, 'top'));
 
 	// Hook instances
+	// The safe area tracks every open popover (menus ask it whether the pointer is on its way to
+	// an open submenu), but leaving it closes only a popover the pointer opened by hovering: one
+	// opened by a press, the keyboard or code stays until it is dismissed.
 	safeArea = useSafeArea({
 		isActive: () =>
 			this.isOpen && this.closeOnMouseLeave && this.children.filter((d) => d.isOpen).length === 0,
-		callback: () => this.close(),
+		callback: () => {
+			if (this.openReason !== 'hover') return;
+			this.setOpen(false, { reason: 'trigger-hover', interaction: 'mouse' });
+		},
 		offset: 15,
 		debug: () => this.debugSafeArea
 	});
@@ -149,7 +222,11 @@ export class PopoverState extends PopoverOptionsBase {
 	hoverAction = useHoverAction({
 		isActive: () => this.openOnHover && !this.isOpen,
 		onMouseEnter: () => {
-			this.open();
+			this.setOpen(true, {
+				reason: 'trigger-hover',
+				trigger: this.#hoveredTrigger ?? undefined,
+				interaction: 'mouse'
+			});
 		},
 		// A function, read on each enter: field initialisers run before `bind(this, options)`
 		// installs the options, so a plain `this.delay` here would be `undefined` (no delay).
@@ -161,64 +238,185 @@ export class PopoverState extends PopoverOptionsBase {
 	constructor(options: PopoverOptions) {
 		super();
 		bind(this, options);
+		this.lifecycle = useOpenLifecycle({
+			isOpen: () => this.isOpen,
+			external: () => this.isMobileSheet,
+			onAfterOpen: () => this.onAfterOpen?.(this),
+			onAfterClose: () => {
+				this.focusScope.restore();
+				this.onAfterClose?.(this);
+				this.openReason = null;
+				this.#setActiveTrigger(null);
+				this.#opener = null;
+			}
+		});
 		setContext('popover', this);
 		if (this.parent) onMount(this.parent.addChild(this));
 		onDestroy(() => {
 			this.#destroyed = true;
 		});
 
+		// A hover-opened popover is a preview the pointer can leave: the page keeps scrolling.
 		useScrollLock({
 			isActive: () =>
-				this.lockScroll && !this.inline && !this.isMobileSheet && !this.parent && this.isOpen
+				this.lockScroll &&
+				!this.inline &&
+				!this.isMobileSheet &&
+				!this.parent &&
+				this.isOpen &&
+				this.openReason !== 'hover'
+		});
+
+		// An open state that did not come through `setOpen` (the `open` prop, `defaultOpen`) is a
+		// programmatic open: focus returns to whatever had it when it opened.
+		$effect.pre(() => {
+			const open = this.isOpen;
+			untrack(() => {
+				const committed = this.#committed;
+				this.#committed = null;
+				if (committed === open || !open) return;
+				this.openReason = 'programmatic';
+				this.#opener = focusedElement();
+			});
 		});
 	}
 
-	toggle = () => {
-		this.setOpen(!this.isOpen);
+	/** Toggles the popover. A press on the trigger of a popover the pointer opened by hovering pins it open instead. */
+	toggle = (input?: PopoverOpenChangeInput) => {
+		const details = this.#details(input);
+		if (this.isOpen && details.reason === 'trigger-press') {
+			const anchor = this.triggerReference;
+			if (this.openReason === 'hover') {
+				// Hovered open, then pressed: the press keeps it open and makes it stay.
+				this.#openRequests += 1;
+				this.openReason = openReasonOf(details);
+				return;
+			}
+			if (details.trigger && anchor && details.trigger !== anchor && this.#triggers.has(details.trigger)) {
+				// Another trigger of the same popover: the panel moves to it and stays open.
+				this.#openRequests += 1;
+				this.#setActiveTrigger(details.trigger);
+				this.#opener = triggerFocusTarget(details.trigger, details.event);
+				return;
+			}
+		}
+		this.setOpen(!this.isOpen, details);
 	};
-	open = () => {
-		this.setOpen(true);
+	open = (input?: PopoverOpenChangeInput) => {
+		this.setOpen(true, input);
 	};
 
-	close = () => {
-		this.setOpen(false);
+	close = (input?: PopoverOpenChangeInput) => {
+		this.setOpen(false, input);
 	};
 
 	/** Calls to `setOpen`, direct or through `open`, `close` and `toggle`, unchanged state included. */
 	#openRequests = 0;
-	/**
-	 * The element attached through `reference` (or `trigger`). A plain field, not `$state`: the
-	 * detach teardown compares against it, and a `$state` read in teardown can return the value
-	 * from before the change that triggered it.
-	 */
-	#triggerNode: HTMLElement | null = null;
 	#destroyed = false;
+	/** The open state `setOpen` last wrote, until the effect that sees it has run. */
+	#committed: boolean | null = null;
+	/** Where focus returns when the popover closes; see `#returnTarget`. */
+	#opener: HTMLElement | null = null;
+	/** Whether focus has been inside the mounted panel. */
+	#focusEntered = false;
 
-	/** Whether the panel still has an anchor in the document: the trigger, else the `ref` prop. */
+	// Triggers: every element attached through `reference` (or `trigger`), with the order they
+	// attached in. Plain fields, not `$state`: detach teardowns compare against them, and a
+	// `$state` read in teardown can return the value from before the change that triggered it.
+	readonly #triggers = new Map<HTMLElement, number>();
+	#triggerSequence = 0;
+	/** Triggers attached during the current flush: a re-rendered trigger's replacement. */
+	readonly #recentTriggers = new Set<HTMLElement>();
+	#latestTriggerNode: HTMLElement | null = null;
+	#activeTriggerNode: HTMLElement | null = null;
+	#hoveredTrigger: HTMLElement | null = null;
+	/** The press dispatching right now on a trigger, so `toggle()` from its handler knows it. */
+	#press: TriggerPress | null = null;
+	/** The pointer type of the last press on a trigger, for clicks that do not carry one. */
+	#pointerType: string | null = null;
+
+	#setActiveTrigger(node: HTMLElement | null) {
+		this.#activeTriggerNode = node;
+		this.activeTrigger = node;
+	}
+
+	#setLatestTrigger(node: HTMLElement | null) {
+		this.#latestTriggerNode = node;
+		this.#latestTrigger = node;
+	}
+
+	/** Whether the panel still has an anchor in the document: a trigger, else the `ref` prop. */
 	#hasAnchor = () => {
-		const anchor = this.#triggerNode ?? this.externalRef;
+		const anchor = this.#activeTriggerNode ?? this.#latestTriggerNode ?? this.externalRef;
 		if (!anchor) return false;
 		// A floating-ui virtual element (a cursor point) has no DOM presence to lose.
 		return !(anchor instanceof Element) || anchor.isConnected;
 	};
 
 	/**
-	 * Closes an open popover whose anchor left the document, through `close()` so `onOpenChange`
-	 * reports it. Skipped while the component itself is being destroyed.
+	 * Closes an open popover whose anchor left the document, so `onOpenChange` reports it with
+	 * `reason: 'trigger-unmount'`. Skipped while the component itself is being destroyed.
 	 */
 	#closeIfAnchorLost = () => {
 		if (this.#destroyed || !this.isOpen || this.#hasAnchor()) return;
-		this.close();
+		this.setOpen(false, { reason: 'trigger-unmount' });
 	};
 
-	setOpen = (nextOpen: boolean) => {
+	/**
+	 * Focus goes back to the trigger that opened the popover (or the control pressed inside it),
+	 * and after a programmatic open to the element that had focus when it opened. `null` lets the
+	 * focus scope use the element focused when the panel mounted.
+	 */
+	#returnTarget = (): HTMLElement | null => {
+		if (this.#opener?.isConnected) return this.#opener;
+		if (this.openReason === 'programmatic' || this.openReason === null) return null;
+		const trigger = this.activeTrigger ?? this.triggerReference;
+		return trigger ? triggerFocusTarget(trigger) : null;
+	};
+
+	/** The details for a request, filled in from the trigger press it happens during. */
+	#details = (input?: PopoverOpenChangeInput): OpenChangeDetails => {
+		if (isOpenChangeDetails(input)) return input;
+		const event = input instanceof Event ? input : input?.event;
+		const press = this.#press && (!event || event === this.#press.event) ? this.#press : null;
+		const fallback: OpenChangeInit = press
+			? {
+					reason: press.reason,
+					event: press.event,
+					trigger: press.node,
+					interaction: getInteractionType(press.event, this.#pointerType)
+				}
+			: { interaction: getInteractionType(event, this.#pointerType) };
+		return resolveOpenChangeDetails(input, fallback);
+	};
+
+	/**
+	 * Requests an open-state change. `onOpenChange(nextOpen, details)` runs first; when it calls
+	 * `details.cancel()` nothing changes. Returns `false` when the change was cancelled.
+	 */
+	setOpen = (nextOpen: boolean, input?: PopoverOpenChangeInput): boolean => {
 		this.#openRequests += 1;
-		if (this.isOpen === nextOpen) return;
+		if (this.isOpen === nextOpen) return true;
+		const details = this.#details(input);
+		if (!requestOpenChange(this.onOpenChange, nextOpen, details)) return false;
 		// A hover open still waiting on its delay belongs to the state before this change: left
 		// pending, it would reopen a popover the user just closed by click or Escape.
 		this.hoverAction.cancel();
+		if (nextOpen) {
+			const trigger = details.trigger && this.#triggers.has(details.trigger) ? details.trigger : null;
+			this.#setActiveTrigger(trigger);
+			this.openReason = openReasonOf(details);
+			this.#opener =
+				this.openReason === 'programmatic'
+					? focusedElement()
+					: trigger
+						? triggerFocusTarget(trigger, details.event)
+						: null;
+		}
+		this.lastOpenChange = details;
+		this.#committed = nextOpen;
 		this.isOpen = nextOpen;
-		this.onOpenChange?.(nextOpen);
+		return true;
 	};
 
 	/** Starts the panel's motion from the side facing the reference, for the resolved placement. */
@@ -240,7 +438,7 @@ export class PopoverState extends PopoverOptionsBase {
 		reference: () => this.referenceElement,
 		// Inline panels and mobile sheets are laid out by the document, never by floating-ui.
 		floating: () => !this.inline && !this.isMobileSheet,
-		settled: () => this.hasTransitioned,
+		settled: () => this.lifecycle.status === 'open',
 		placement: () => this.computedPosition,
 		offset: () => this.offset,
 		fitTrigger: () => this.fitTrigger,
@@ -250,7 +448,7 @@ export class PopoverState extends PopoverOptionsBase {
 		},
 		onPlace: ({ panel, placement, mount }) => {
 			this.safeArea.updateAreas();
-			if (placement && mount && !this.hasTransitioned && this.directedTransition) {
+			if (placement && mount && this.lifecycle.status !== 'open' && this.directedTransition) {
 				this.applyDirectedTransition(panel, placement);
 			}
 		}
@@ -259,7 +457,8 @@ export class PopoverState extends PopoverOptionsBase {
 	/** Places the floating panel against its reference once; see `PanelPositioner.place`. */
 	place = (node: HTMLElement, mount = false) => this.#positioner.place(node, mount);
 
-	dialog = (node: HTMLDialogElement) => {
+	/** Attachment for the positioning wrapper (`<dialog>`, or a `<div>` for a non-dialog popup). */
+	dialog = (node: HTMLElement) => {
 		this.dialogElement = node;
 		if (this.inline) {
 			// No portal, no fixed placement: the wrapper stays where the component is rendered.
@@ -302,89 +501,192 @@ export class PopoverState extends PopoverOptionsBase {
 	panel = (node: HTMLElement) => {
 		return untrack(() => {
 			const cleanups: Array<(() => void) | null | void> = [];
+			this.#focusEntered = node.contains(node.ownerDocument.activeElement);
+			cleanups.push(
+				on(node, 'focusin', () => {
+					this.#focusEntered = true;
+				})
+			);
 			cleanups.push(this.layer.node(node));
 			cleanups.push(this.focusScope.attachment(node));
 			cleanups.push(this.safeArea.floatingReference?.(node));
+			if (!this.isDialogPopup) cleanups.push(this.#labelPopupOwner(node));
 			return () => {
 				cleanups.forEach((cleanup) => cleanup?.());
 			};
 		});
 	};
-	reference = (node: HTMLElement) => {
-		// Keep the trigger's ARIA in sync whichever way it was rendered (snippet or Button).
-		// Only real controls carry aria-haspopup/aria-expanded; a wrapper div or a
-		// presentational span used as the anchor must not (axe: aria-allowed-attr).
-		const canCarryPopupState = node.matches(POPUP_CONTROL);
-		$effect(() => {
-			if (!canCarryPopupState) return;
-			for (const [prop, value] of Object.entries(this.triggerProps)) {
-				const name = TRIGGER_ARIA[prop as keyof typeof TRIGGER_ARIA];
-				if (value === undefined) node.removeAttribute(name);
-				else node.setAttribute(name, String(value));
+
+	/**
+	 * A menu, listbox, tree or grid popup: its trigger's `aria-controls` points at the element
+	 * carrying that role (not the wrapper), and that element is labelled by the trigger unless it
+	 * has a name of its own. Ids it has to create are removed again when the panel goes.
+	 */
+	#labelPopupOwner = (panel: HTMLElement) => {
+		const haspopup = this.haspopup ?? 'dialog';
+		const role = haspopup === true ? 'menu' : POPUP_ROLE[haspopup as keyof typeof POPUP_ROLE];
+		const added: Array<[Element, string]> = [];
+		const set = (element: Element, name: string, value: string) => {
+			if (element.hasAttribute(name)) return;
+			element.setAttribute(name, value);
+			added.push([element, name]);
+		};
+		let owner: Element | null = null;
+		const resolve = () => {
+			const next = panel.querySelector(`[role="${role}"]`);
+			if (next === owner) return;
+			owner = next;
+			if (!owner) {
+				this.#popupOwnerId = null;
+				return;
 			}
+			set(owner, 'id', `${this.id}-${role}`);
+			this.#popupOwnerId = owner.id;
+			const trigger = this.triggerReference;
+			if (trigger && !owner.hasAttribute('aria-label')) {
+				set(trigger, 'id', `${this.id}-trigger`);
+				set(owner, 'aria-labelledby', trigger.id);
+			}
+		};
+		queueMicrotask(resolve);
+		const observer =
+			typeof MutationObserver === 'undefined' ? null : new MutationObserver(resolve);
+		observer?.observe(panel, { childList: true, subtree: true });
+		return () => {
+			observer?.disconnect();
+			for (const [element, name] of added.splice(0)) element.removeAttribute(name);
+			this.#popupOwnerId = null;
+		};
+	};
+
+	/** Remembers a press on a trigger until its event has dispatched. */
+	#notePress = (node: HTMLElement, event: Event, reason: OpenChangeReason) => {
+		const press = { node, event, reason };
+		this.#press = press;
+		setTimeout(() => {
+			if (this.#press === press) this.#press = null;
+		});
+	};
+
+	reference = (node: HTMLElement) => {
+		// Keep the trigger's ARIA in sync whichever way it was rendered (snippet or Button). With
+		// several triggers, only the one the panel is anchored to reads as expanded.
+		$effect(() => {
+			const anchored = this.triggerReference === node || this.triggerReference === null;
+			writePopupAria(node, {
+				...this.triggerProps,
+				expanded: this.triggerProps.expanded && anchored,
+				controls: anchored ? this.triggerProps.controls : undefined
+			});
 		});
 		return untrack(() => {
-			this.#triggerNode = node;
-			this.triggerReference = node;
+			this.#triggers.set(node, ++this.#triggerSequence);
+			this.#recentTriggers.add(node);
+			queueMicrotask(() => this.#recentTriggers.delete(node));
+			this.#setLatestTrigger(node);
 
 			// Gather all cleanup callbacks
 			const cleanups: Array<(() => void) | null | void> = [];
 			cleanups.push(this.layer.node(node));
 			cleanups.push(this.safeArea.anchorReference?.(node));
+			// Before the hover action's own listener, which may open at once (no delay).
+			cleanups.push(
+				on(node, 'mouseenter', () => {
+					this.#hoveredTrigger = node;
+				})
+			);
 			cleanups.push(this.hoverAction.reference?.(node));
+			// Capture phase: these run before the element's own (delegated) handlers, so a
+			// `popover.toggle()` called from `onclick` knows the press it belongs to.
+			cleanups.push(
+				on(
+					node,
+					'pointerdown',
+					(event) => {
+						this.#pointerType = event.pointerType;
+					},
+					{ capture: true }
+				)
+			);
+			const notePress = (event: Event) => this.#notePress(node, event, 'trigger-press');
+			const noteKey = (event: KeyboardEvent) => {
+				if (event.key === 'Enter' || event.key === ' ') this.#notePress(node, event, 'trigger-press');
+				else if (event.key === 'ArrowDown' || event.key === 'ArrowUp')
+					this.#notePress(node, event, 'list-navigation');
+			};
+			node.addEventListener('click', notePress, true);
+			node.addEventListener('keydown', noteKey, true);
+			cleanups.push(() => {
+				node.removeEventListener('click', notePress, true);
+				node.removeEventListener('keydown', noteKey, true);
+			});
 
 			// Return combined cleanup function
 			return () => {
 				cleanups.forEach((cleanup) => cleanup?.());
-				// A newer trigger already took over; this one leaving changes nothing.
-				if (this.#triggerNode !== node) return;
-				this.#triggerNode = null;
-				this.triggerReference = null;
-				// A trigger swapped for another (a re-rendered snippet, a responsive branch)
-				// attaches in the same flush, so judge once it has settled: only a trigger that is
-				// gone for good closes the popover instead of leaving it on a detached node.
-				queueMicrotask(this.#closeIfAnchorLost);
+				this.#triggers.delete(node);
+				this.#recentTriggers.delete(node);
+				if (this.#hoveredTrigger === node) this.#hoveredTrigger = null;
+				const wasActive = this.#activeTriggerNode === node;
+				const wasAnchor = wasActive || (!this.#activeTriggerNode && this.#latestTriggerNode === node);
+				if (wasActive) this.#setActiveTrigger(null);
+				if (this.#latestTriggerNode === node) this.#setLatestTrigger(this.#newestTrigger());
+				if (!wasAnchor) return;
+				// A trigger re-rendered as a new element (a re-rendered snippet, a responsive
+				// branch) attaches in the same flush: the panel moves to it. Only a trigger that
+				// is gone for good closes the popover instead of leaving it on a detached node.
+				const sequence = this.#triggerSequence;
+				const replacements = [...this.#recentTriggers];
+				queueMicrotask(() => {
+					if (this.#destroyed || !this.isOpen) return;
+					const successor = [...replacements, ...this.#triggersAfter(sequence)].find(
+						(candidate) => this.#triggers.has(candidate) && candidate.isConnected
+					);
+					if (successor) {
+						if (wasActive) this.#setActiveTrigger(successor);
+						return;
+					}
+					// The trigger that opened it is gone: another trigger does not inherit it.
+					if (wasActive && !this.externalRef) {
+						this.setOpen(false, { reason: 'trigger-unmount' });
+						return;
+					}
+					this.#closeIfAnchorLost();
+				});
 			};
 		});
 	};
+
+	#newestTrigger(): HTMLElement | null {
+		let newest: HTMLElement | null = null;
+		let newestSequence = -1;
+		for (const [node, sequence] of this.#triggers) {
+			if (sequence > newestSequence) [newest, newestSequence] = [node, sequence];
+		}
+		return newest;
+	}
+
+	#triggersAfter(sequence: number): HTMLElement[] {
+		return [...this.#triggers].filter(([, at]) => at > sequence).map(([node]) => node);
+	}
+
 	/**
 	 * Makes any element a complete trigger: it anchors the panel (as \`reference\` does), toggles
 	 * it on click when \`openOnClick\` allows, and keeps \`aria-expanded\` and friends in sync.
 	 * An element that is not already a control also gets \`role="button"\`, \`tabindex="0"\` and
 	 * Enter/Space activation, so a card or an avatar opens the panel from the keyboard too.
+	 * The element's own handler runs first: calling \`event.preventDefault()\` there, or opening,
+	 * closing or toggling the popover itself, stops the default toggle.
 	 */
 	trigger = (node: HTMLElement) => {
-		const nativeControl = node.matches(NATIVE_CONTROL);
-		if (!node.matches(POPUP_CONTROL) && !node.hasAttribute('role')) {
-			node.setAttribute('role', 'button');
-		}
-		if (!nativeControl && !node.hasAttribute('tabindex')) node.tabIndex = 0;
-		// The element's own handler wins. One that still opens, closes or toggles the popover
-		// (`onclick={popover.toggle}` kept from before this attachment existed) has acted by the
-		// time the event finishes dispatching, so the default toggle waits until then and runs only
-		// if nothing asked for an open state meanwhile; toggling regardless would undo that call.
-		let pending: ReturnType<typeof setTimeout> | undefined;
-		const activate = () => {
-			if (!this.openOnClick) return;
-			const requests = this.#openRequests;
-			clearTimeout(pending);
-			pending = setTimeout(() => {
-				if (this.#openRequests === requests) this.toggle();
-			});
-		};
-		const onKeydown = (event: KeyboardEvent) => {
-			if (nativeControl || event.target !== node) return;
-			if (event.key !== 'Enter' && event.key !== ' ') return;
-			event.preventDefault();
-			activate();
-		};
-		node.addEventListener('click', activate);
-		node.addEventListener('keydown', onKeydown);
+		const offActivation = triggerActivation(node, {
+			enabled: () => this.openOnClick,
+			requests: () => this.#openRequests,
+			activate: (event) => this.toggle({ reason: 'trigger-press', event, trigger: node })
+		});
 		const offReference = this.reference(node);
 		return () => {
-			clearTimeout(pending);
-			node.removeEventListener('click', activate);
-			node.removeEventListener('keydown', onKeydown);
+			offActivation();
 			offReference?.();
 		};
 	};

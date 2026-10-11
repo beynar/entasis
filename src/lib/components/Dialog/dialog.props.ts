@@ -7,6 +7,7 @@ import type { Sizes } from '$lib/types/theme.js';
 import type { ButtonProps } from '../Button/index.js';
 import type { FSOProps } from '$lib/transitions/transition.js';
 import type { DialogThemeProps } from './dialog.theme.js';
+import type { OpenChangeHandler } from '$lib/utils/openChange.js';
 
 export type DialogType =
 	'fullScreen' | 'drawerRight' | 'drawerLeft' | 'drawerBottom' | 'drawerTop' | 'alert' | 'modal';
@@ -27,11 +28,18 @@ export type DialogProps = WithSlot<
 		open?: boolean;
 		/** Initial open state when `open` is not provided. */
 		defaultOpen?: boolean;
-		/** Called once when the library requests an open-state change. */
-		onOpenChange?: (open: boolean) => void;
-		/** Called after the open transition finishes. */
+		/**
+		 * Called before the dialog opens or closes, with the requested state and the change
+		 * details: `reason` (`'trigger-press'`, `'escape-key'`, `'outside-press'`, `'close-press'`,
+		 * `'swipe'`, `'close-watcher'` for the Android Back gesture, `'imperative-action'`…), the
+		 * originating `event`, the `trigger` element, the `interaction` type and `cancel()`.
+		 * Calling `details.cancel()` keeps the dialog as it is (a cancelled swipe snaps back) and
+		 * leaves the event untouched. Inside the callback, `open` still holds the previous state.
+		 */
+		onOpenChange?: OpenChangeHandler;
+		/** Called once per open, after the open transition finishes (right away when none plays). */
 		onAfterOpen?: (payload: DialogState) => void;
-		/** Called after the close transition finishes. */
+		/** Called once per close, after the close transition finishes. */
 		onAfterClose?: (payload: DialogState) => void;
 		/** Content max-width for modal and alert types; supports responsive values. */
 		size?: ResponsiveProps<Sizes>;
@@ -41,14 +49,22 @@ export type DialogProps = WithSlot<
 		transition?: ResponsiveProps<FSOProps>;
 		/** Snippet for main dialog body content; receives the dialog state instance. */
 		children?: Snippet<[DialogState]>;
-		/** Snippet or button props that render the control used to open the dialog. */
+		/**
+		 * Snippet or button props that render the control used to open the dialog. The built-in
+		 * button carries `aria-haspopup="dialog"`, `aria-expanded` and `aria-controls`, and its
+		 * `onclick` runs first: calling `event.preventDefault()` there keeps the dialog closed. A
+		 * snippet trigger gets the same contract with `{@attach dialog.trigger}`; focus returns to
+		 * the trigger when the dialog closes.
+		 */
 		trigger?: Snippet<[DialogState]> | (ButtonProps & { content?: string });
 		/** When true, shows a close button and allows Escape to close the dialog. */
 		closable?: boolean;
-		/** When true, clicking outside the dialog panel closes the topmost open dialog. Defaults to
-		 *  `true`, except for an `alert`, which ignores outside presses unless this is set. */
+		/** When true, pressing outside the dialog panel closes the topmost open dialog. Defaults to
+		 *  `true`, except for an `alert`, which ignores outside presses unless this is set. A press
+		 *  that began before the dialog opened does not count. */
 		closeOnClickOutside?: boolean;
-		/** When true, pressing Escape closes the dialog when it is closable and topmost. */
+		/** When true, pressing Escape (and, on Android, the Back gesture) closes the dialog when it
+		 *  is closable and topmost. */
 		closeOnEscape?: boolean;
 		/** Drag the panel toward its edge to dismiss (drawer types only). Defaults to true for drawers.
 		 *  Direction-aware, and never hijacks inner scrolling — a scrollable region that can still

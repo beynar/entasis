@@ -1,6 +1,7 @@
 import { getContext, setContext } from 'svelte';
 import type { PopoverProps } from '../Popover/popover.props.js';
 import type { PopoverState } from '../Popover/popover.state.svelte.js';
+import type { OpenChangeInit } from '$lib/utils/openChange.js';
 
 // A submenu is a second PopupMenu nested inside the first. Its panel must be the same panel
 // one level down — same size, so the same padding and the same concentric radius — which nothing
@@ -27,8 +28,11 @@ const POPUP_MENU_ROOT = Symbol('entasis:popup-menu-root');
 export interface PopupMenuRoot {
 	/** The root's `closeOnItemClick`: whether an item press anywhere in the tree closes it. */
 	closeOnItemClick: () => boolean;
-	/** Closes every open level of the tree once, focus going back to where the root returns it. */
-	close: () => void;
+	/**
+	 * Closes every open level of the tree once, focus going back to where the root returns it.
+	 * `event` is the item press, reported to each level's `onOpenChange` as `reason: 'item-press'`.
+	 */
+	close: (event?: Event) => void;
 }
 
 /** Makes `root` the tree that the submenus of every Menu rendered below it join. */
@@ -44,8 +48,8 @@ const containsInTree = (popover: PopoverState, node: Node): boolean =>
 
 /**
  * Closes a menu tree: every open submenu, deepest first, then the root, each through its own
- * `close()` so each level reports its open change exactly once (the order an outside press
- * dismisses them in).
+ * `close(details)` so each level reports its open change exactly once (the order an outside press
+ * dismisses them in), with the reason in `details` (`item-press` for a chosen item).
  *
  * Focus left inside the tree goes straight to `returnTo`, the element the root hands focus back
  * to. No row of a closing panel keeps focus through the close transition, and every panel's focus
@@ -55,13 +59,14 @@ const containsInTree = (popover: PopoverState, node: Node): boolean =>
 export const closeMenuTree = (
 	root: PopoverState,
 	returnTo: HTMLElement | null,
-	rootMenu?: HTMLElement | null
+	rootMenu?: HTMLElement | null,
+	details?: OpenChangeInit
 ) => {
 	const active = document.activeElement;
 	const focusInTree = !!active && (!!rootMenu?.contains(active) || containsInTree(root, active));
 	const close = (popover: PopoverState) => {
 		for (const child of popover.children) close(child);
-		if (popover.isOpen) popover.close();
+		if (popover.isOpen) popover.close(details);
 	};
 	close(root);
 	if (focusInTree && returnTo?.isConnected) returnTo.focus({ preventScroll: true });

@@ -14,6 +14,7 @@
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { useDrag } from '$lib/utils/useDrag.svelte.js';
 	import { untrack } from 'svelte';
+	import { composeHandlers } from '$lib/utils/handlers.js';
 
 	let {
 		toast,
@@ -238,12 +239,12 @@
 					size="small"
 					variant="soft"
 					{...buttonProps}
-					onclick={(event) => {
-						onclick?.(event);
+					onclick={composeHandlers(onclick, () => {
 						// A manual dismiss fires onDismiss, never onAutoDismiss — so an Undo
-						// action here cancels the deferred commit just by closing early.
+						// action here cancels the deferred commit just by closing early. The
+						// action's own handler runs first; `event.preventDefault()` keeps the toast.
 						if (dismiss !== false) toast.remove();
-					}}
+					})}
 				>
 					{label}
 				</Button>

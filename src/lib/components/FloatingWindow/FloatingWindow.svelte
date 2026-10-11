@@ -16,6 +16,7 @@
 	import { FloatingWindowState } from './floatingWindow.state.svelte.js';
 	import { useFloatingWindowMotion, useFloatingWindowTheme } from './floatingWindow.theme.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { useOpenLifecycle } from '$lib/utils/openLifecycle.svelte.js';
 
 	let {
 		id: customId,
@@ -181,29 +182,16 @@
 			? (dimensions.max?.[1] ?? windowState.viewportHeight - 16)
 			: (dimensions.max?.[0] ?? windowState.viewportWidth - 16);
 
-	let observedOpen = openState.value;
-	let pendingAfterOpen = openState.value;
-	let pendingAfterClose = false;
-
-	$effect(() => {
-		const nextOpen = openState.value;
-		if (nextOpen === observedOpen) return;
-		observedOpen = nextOpen;
-		pendingAfterOpen = nextOpen;
-		pendingAfterClose = !nextOpen;
+	// One open and one close report each, whichever surface (window or dock item) animates; a
+	// window open at creation reports its open once mounted. Minimizing and restoring move between
+	// the two surfaces without reporting anything.
+	const lifecycle = useOpenLifecycle({
+		isOpen: () => openState.value,
+		onAfterOpen: () => onAfterOpen?.(windowState.payload),
+		onAfterClose: () => onAfterClose?.(windowState.payload)
 	});
-
-	const handleIntroEnd = () => {
-		if (!pendingAfterOpen) return;
-		pendingAfterOpen = false;
-		onAfterOpen?.(windowState.payload);
-	};
-
-	const handleOutroEnd = () => {
-		if (!pendingAfterClose) return;
-		pendingAfterClose = false;
-		onAfterClose?.(windowState.payload);
-	};
+	const sendTracked = lifecycle.transition(send);
+	const receiveTracked = lifecycle.transition(receive);
 </script>
 
 {#if backdrop && openState.value && !minimized && windowState.position}
@@ -231,10 +219,10 @@
 		{@attach windowState.theme.floatingWindows.portal}
 		{@attach windowState.root}
 		{@attach windowState.windowDrag}
-		in:receive={{ key: id }}
-		out:send={{ key: id }}
-		onintroend={handleIntroEnd}
-		onoutroend={handleOutroEnd}
+		in:receiveTracked={{ key: id }}
+		out:sendTracked={{ key: id }}
+		onintroend={lifecycle.introEnd}
+		onoutroend={lifecycle.outroEnd}
 		bind:this={ref}
 		{id}
 		role="dialog"
@@ -297,7 +285,7 @@
 						squared
 						label={t.closeWindow}
 						class={classes.control()}
-						onclick={() => windowState.close()}
+						onclick={(event) => windowState.close({ reason: 'close-press', event })}
 					>
 						{@render xIcon({ size: 16 })}
 					</Button>
@@ -337,10 +325,10 @@
 		{@attach windowState.theme.floatingWindows.portal}
 		{@attach windowState.dock}
 		{@attach windowState.dockDrag}
-		in:receive={{ key: id }}
-		out:send={{ key: id }}
-		onintroend={handleIntroEnd}
-		onoutroend={handleOutroEnd}
+		in:receiveTracked={{ key: id }}
+		out:sendTracked={{ key: id }}
+		onintroend={lifecycle.introEnd}
+		onoutroend={lifecycle.outroEnd}
 		bind:this={ref}
 		role="group"
 		aria-label={t.minimizedWindow}
@@ -399,7 +387,7 @@
 					squared
 					label={t.closeWindow}
 					class={classes.control()}
-					onclick={() => windowState.close()}
+					onclick={(event) => windowState.close({ reason: 'close-press', event })}
 				>
 					{@render xIcon({ size: 15 })}
 				</Button>

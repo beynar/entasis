@@ -3,6 +3,7 @@ import type { MenuItem, MenuProps } from '../Menu/menu.props.js';
 import type { PopupMenuProps } from '../PopupMenu/popupMenu.props.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { ContextMenuThemeProps } from './contextMenu.theme.js';
+import type { OpenChangeHandler } from '$lib/utils/openChange.js';
 
 export type ContextMenuProps = WithAttachments<{
 	/**
@@ -30,9 +31,12 @@ export type ContextMenuProps = WithAttachments<{
 	 */
 	defaultOpen?: boolean;
 	/**
-	 * Called once when the library requests an open-state change.
+	 * Called before the menu opens or closes, with the requested state and the change details
+	 * (`reason`, `event`, `interaction`, `cancel()`): `'trigger-press'` for the right-click,
+	 * long-press or keyboard request that opened it, `'item-press'`, `'escape-key'` or
+	 * `'outside-press'` when it closes. `details.cancel()` keeps the menu as it is.
 	 */
-	onOpenChange?: (open: boolean) => void;
+	onOpenChange?: OpenChangeHandler;
 	/**
 	 * Called after the open transition finishes.
 	 */

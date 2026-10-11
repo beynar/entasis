@@ -62,6 +62,9 @@ const openPopupMenu = async (props: Record<string, unknown> = {}) => {
 	return { trigger, onOpenChange };
 };
 
+/** The open states each `onOpenChange` call asked for, in order. */
+const openStates = (fn: { mock: { calls: unknown[][] } }) => fn.mock.calls.map(([open]) => open);
+
 describe('popup menu tree', () => {
 	test('a11y:popup-menu.item-closes-tree choosing a submenu item closes every level and returns focus to the trigger', async () => {
 		const onCopy = vi.fn();
@@ -75,7 +78,11 @@ describe('popup menu tree', () => {
 		expect(onCopy).toHaveBeenCalledTimes(1);
 		await waitFor(() => expect(menus()).toHaveLength(0));
 		expect(trigger).toHaveAttribute('aria-expanded', 'false');
-		expect(onOpenChange.mock.calls).toEqual([[true], [false]]);
+		expect(openStates(onOpenChange)).toEqual([true, false]);
+		expect(onOpenChange).toHaveBeenLastCalledWith(
+			false,
+			expect.objectContaining({ reason: 'item-press', event: expect.any(MouseEvent) })
+		);
 		expect(document.activeElement).toBe(trigger);
 	});
 
@@ -88,7 +95,7 @@ describe('popup menu tree', () => {
 		await fireEvent.click(within(exportPanel).getByRole('menuitem', { name: 'PDF' }));
 
 		await waitFor(() => expect(menus()).toHaveLength(0));
-		expect(onOpenChange.mock.calls).toEqual([[true], [false]]);
+		expect(openStates(onOpenChange)).toEqual([true, false]);
 		expect(document.activeElement).toBe(trigger);
 	});
 
@@ -117,7 +124,7 @@ describe('popup menu tree', () => {
 		await new Promise((resolve) => setTimeout(resolve, 20));
 
 		expect(menus()).toHaveLength(2);
-		expect(onOpenChange.mock.calls).toEqual([[true]]);
+		expect(openStates(onOpenChange)).toEqual([true]);
 	});
 
 	test("the root's closeOnItemClick={false} keeps submenus open too", async () => {
@@ -128,7 +135,7 @@ describe('popup menu tree', () => {
 		await new Promise((resolve) => setTimeout(resolve, 20));
 
 		expect(menus()).toHaveLength(2);
-		expect(onOpenChange.mock.calls).toEqual([[true]]);
+		expect(openStates(onOpenChange)).toEqual([true]);
 	});
 
 	test('a root item still closes the root and an open submenu with it', async () => {
@@ -139,7 +146,7 @@ describe('popup menu tree', () => {
 		await fireEvent.click(within(root).getByRole('menuitem', { name: 'New file' }));
 
 		await waitFor(() => expect(menus()).toHaveLength(0));
-		expect(onOpenChange.mock.calls).toEqual([[true], [false]]);
+		expect(openStates(onOpenChange)).toEqual([true, false]);
 		expect(document.activeElement).toBe(trigger);
 	});
 
@@ -173,7 +180,7 @@ describe('popup menu tree', () => {
 
 			expect(onCopy).toHaveBeenCalledTimes(1);
 			await waitFor(() => expect(menus()).toHaveLength(0));
-			expect(onOpenChange.mock.calls).toEqual([[true], [false]]);
+			expect(openStates(onOpenChange)).toEqual([true, false]);
 			expect(document.activeElement).toBe(trigger);
 		}
 	);
@@ -208,7 +215,7 @@ describe('context menu tree', () => {
 		await fireEvent.click(within(submenu).getByRole('menuitem', { name: 'Copy link' }));
 
 		await waitFor(() => expect(menus()).toHaveLength(0));
-		expect(onOpenChange.mock.calls).toEqual([[true], [false]]);
+		expect(openStates(onOpenChange)).toEqual([true, false]);
 		// No trigger: focus goes back to the element that had it when the menu opened.
 		expect(document.activeElement).toBe(target);
 	});
@@ -232,7 +239,7 @@ describe('context menu tree options', () => {
 		await settle();
 
 		expect(menus()).toHaveLength(2);
-		expect(onOpenChange.mock.calls).toEqual([[true]]);
+		expect(openStates(onOpenChange)).toEqual([true]);
 	});
 });
 
@@ -294,7 +301,7 @@ describe('menus nested without being submenus', () => {
 		expect(onInnerItem).toHaveBeenCalledTimes(1);
 		// The inner menu closes on its own default; the outer one, which keeps open, stays.
 		await waitFor(() => expect(menus()).toHaveLength(1));
-		expect(onInnerOpenChange.mock.calls).toEqual([[true], [false]]);
+		expect(openStates(onInnerOpenChange)).toEqual([true, false]);
 		expect(screen.getByRole('button', { name: 'Columns' })).toHaveAttribute(
 			'aria-expanded',
 			'true'
@@ -316,7 +323,7 @@ describe('menus nested without being submenus', () => {
 
 		expect(onInnerItem).toHaveBeenCalledTimes(1);
 		await waitFor(() => expect(menus()).toHaveLength(0));
-		expect(onInnerOpenChange.mock.calls).toEqual([[true], [false]]);
+		expect(openStates(onInnerOpenChange)).toEqual([true, false]);
 	});
 });
 

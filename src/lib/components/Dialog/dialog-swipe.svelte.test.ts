@@ -9,6 +9,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vit
 import Harness from './dialogSwipeHarness.test.svelte';
 import { DIALOG_Z_BASE } from './dialog.state.svelte.js';
 import type { DialogProps } from './dialog.props.js';
+import type { OpenChangeDetails } from '$lib/utils/openChange.js';
 
 // jsdom implements no pointer capture at all, so stand in for it and record the calls.
 const captured = new Set<number>();
@@ -165,7 +166,29 @@ describe('Dialog drawer swipe-to-dismiss', () => {
 		await firePointer(node, 'pointerdown', { pos: 0, t: 2000 });
 		await firePointer(node, 'pointermove', { pos: PANEL_SIZE * 0.25 + 1, t: 2900 });
 		await firePointer(node, 'pointerup', { pos: PANEL_SIZE * 0.25 + 1, t: 3800 });
-		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(false);
+		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(
+			false,
+			expect.objectContaining({ reason: 'swipe', event: expect.any(PointerEvent) })
+		);
+	});
+
+	test('a swipe close that onOpenChange cancels snaps back and keeps the drawer open', async () => {
+		const onOpenChange = vi.fn((open: boolean, details: OpenChangeDetails) => {
+			if (!open) details.cancel();
+		});
+		const node = setup({ onOpenChange });
+
+		await firePointer(node, 'pointerdown', { pos: 0, t: 0 });
+		await firePointer(node, 'pointermove', { pos: PANEL_SIZE * 0.5, t: 900 });
+		await firePointer(node, 'pointerup', { pos: PANEL_SIZE * 0.5, t: 1800 });
+		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(
+			false,
+			expect.objectContaining({ reason: 'swipe' })
+		);
+		await nextFrame();
+		expect(readout('offset')).toBe('0');
+		expect(transform()).toBe('');
+		expect(document.querySelector('[role="dialog"]')).toBeInTheDocument();
 	});
 
 	test('a flick dismisses on velocity alone, well short of the distance threshold', async () => {
@@ -176,7 +199,10 @@ describe('Dialog drawer swipe-to-dismiss', () => {
 		// 60px in 20ms = 3px/ms, far past the 0.4px/ms flick rule, but only 15% of the panel.
 		await firePointer(node, 'pointermove', { pos: 60, t: 20 });
 		await firePointer(node, 'pointerup', { pos: 60, t: 25 });
-		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(false);
+		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(
+			false,
+			expect.objectContaining({ reason: 'swipe', event: expect.any(PointerEvent) })
+		);
 	});
 
 	test('a flick that ends in a stationary hold is not a flick any more', async () => {
@@ -378,7 +404,10 @@ describe('Dialog drawer swipe-to-dismiss', () => {
 
 		await firePointer(node, 'pointermove', { pos: -PANEL_SIZE * 0.3, axis: 'x', t: 1500 });
 		await firePointer(node, 'pointerup', { pos: -PANEL_SIZE * 0.3, axis: 'x', t: 2400 });
-		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(false);
+		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(
+			false,
+			expect.objectContaining({ reason: 'swipe', event: expect.any(PointerEvent) })
+		);
 	});
 
 	test('swipe stays off when the drawer opts out of it', async () => {

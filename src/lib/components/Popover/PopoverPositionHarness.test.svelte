@@ -11,7 +11,10 @@
 		Pick<
 			PopoverProps,
 			'directedTransition' | 'closeOnMouseLeave' | 'positionPanel' | 'onOpenChange'
-		>;
+		> & {
+			/** Start closed and open when the pointer rests on the trigger, instead of open. */
+			openedByHover?: boolean;
+		};
 	let {
 		position = 'bottom-start',
 		offset,
@@ -19,7 +22,8 @@
 		directedTransition = true,
 		closeOnMouseLeave = false,
 		positionPanel,
-		onOpenChange
+		onOpenChange,
+		openedByHover = false
 	}: HarnessProps = $props();
 
 	let changed = $state<PlacementInputs>({});
@@ -30,7 +34,9 @@
 
 <Theme>
 	<Popover
-		open
+		open={openedByHover ? undefined : true}
+		openOnHover={openedByHover}
+		delay={0}
 		position={'position' in changed ? changed.position : position}
 		offset={'offset' in changed ? changed.offset : offset}
 		fitTrigger={'fitTrigger' in changed ? changed.fitTrigger : fitTrigger}

@@ -5,7 +5,7 @@
 // layout, so floating-ui's `computePosition` and `autoUpdate` are replaced by controllable
 // mocks; real placement and flipping are covered in `popover.position.browser.test.ts`.
 import '@testing-library/jest-dom/vitest';
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import type { Placement, VirtualElement } from '@floating-ui/dom';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { mockRect } from '$lib/testing/jsdom.test-helper.js';
@@ -360,7 +360,7 @@ describe('Popover placement through the positioner', () => {
 
 	// The safe area measures the trigger and the panel; a panel moved by its wrapper's
 	// coordinates changes neither element's own attributes or size, so its observers stay quiet
-	// and only the placement can measure it again.
+	// and only the placement can measure it again. It closes only a popover hovering opened.
 	test.each([
 		['floating-ui', undefined],
 		['positionPanel', () => ({ x: 400, y: 300 })]
@@ -369,8 +369,9 @@ describe('Popover placement through the positioner', () => {
 		async (_placer, positionPanel) => {
 			const onOpenChange = vi.fn();
 			render(PopoverPositionHarness, {
-				props: { closeOnMouseLeave: true, positionPanel, onOpenChange }
+				props: { closeOnMouseLeave: true, positionPanel, onOpenChange, openedByHover: true }
 			});
+			await fireEvent.mouseEnter(screen.getByRole('button', { name: 'Open popover' }));
 			const panel = (await wrapper()).firstElementChild as HTMLElement;
 			mockRect(screen.getByRole('button', { name: 'Open popover' }), {
 				x: 10,
@@ -391,11 +392,18 @@ describe('Popover placement through the positioner', () => {
 			observedUpdate()();
 			await settle();
 			await pointerAt(480, 360);
-			expect(onOpenChange).not.toHaveBeenCalled();
+			expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(
+				true,
+				expect.objectContaining({ reason: 'trigger-hover' })
+			);
 
 			// The safe area is live: leaving it closes the popover.
 			await pointerAt(900, 700);
-			expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(false);
+			expect(onOpenChange).toHaveBeenCalledTimes(2);
+			expect(onOpenChange).toHaveBeenLastCalledWith(
+				false,
+				expect.objectContaining({ reason: 'trigger-hover', interaction: 'mouse' })
+			);
 		}
 	);
 

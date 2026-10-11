@@ -4,6 +4,7 @@ import type { Sizes } from '$lib/types/theme.js';
 import type { Snippet } from 'svelte';
 import type { ButtonProps } from '../Button/index.js';
 import type { OverlayThemeProps } from './overlay.theme.js';
+import type { OpenChangeHandler } from '$lib/utils/openChange.js';
 
 export type OverlayPosition = 'fill' | 'top' | 'bottom';
 export type OverlayAlign = 'start' | 'center' | 'end';
@@ -29,11 +30,14 @@ export type OverlayProps = WithAttachments<
 			open?: boolean;
 			/** Initial open state when `open` is not provided. */
 			defaultOpen?: boolean;
-			/** Called once when the library requests an open-state change. */
-			onOpenChange?: (open: boolean) => void;
-			/** Called after the open transition finishes. */
+			/**
+			 * Reserved for the shared disclosure contract: Overlay has no control of its own that
+			 * opens or closes it, so it never calls this. The parent owns `open`.
+			 */
+			onOpenChange?: OpenChangeHandler;
+			/** Called once per open, after the reveal animation settles (an overlay open at creation included). */
 			onAfterOpen?: () => void;
-			/** Called after the close transition finishes. */
+			/** Called once per close, after the hide animation settles. */
 			onAfterClose?: () => void;
 			/** Renders the dark fill or directional gradient behind the content. */
 			scrim?: boolean;

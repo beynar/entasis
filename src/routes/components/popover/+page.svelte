@@ -10,6 +10,7 @@
 	import Button from '$lib/components/Button/Button.svelte';
 	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
 	import { sizes } from '$lib/utils/tokens.js';
+	import type { OpenChangeDetails } from '$lib/types/index.js';
 
 	const placements = ['top', 'bottom', 'left', 'right'] as const;
 	const controls = createComponentControls([
@@ -45,6 +46,15 @@
 
 	let lifetimeTrigger = $state(true);
 	let lifetimeLog = $state('No change yet');
+
+	let note = $state('');
+	let noteLog = $state('No change yet');
+	// Runs before the change: an outside press or Escape keeps a popover holding an unsaved note.
+	const keepNote = (open: boolean, details: OpenChangeDetails) => {
+		const dismissal = details.reason === 'outside-press' || details.reason === 'escape-key';
+		if (!open && dismissal && note) details.cancel();
+		noteLog = `onOpenChange(${open}, { reason: '${details.reason}' })${details.isCanceled ? ' · cancelled' : ''}`;
+	};
 </script>
 
 {#snippet wrapper(children: Snippet)}
@@ -293,14 +303,17 @@
 
 		<ComponentCard
 			title="Trigger lifetime"
-			description="The trigger anchors the panel. Removing it closes an open popover and reports onOpenChange(false), so the panel never lingers against a detached element. Outside presses are off here, so the removal is what closes it."
+			description="The trigger anchors the panel. Removing it closes an open popover and reports onOpenChange(false) with reason 'trigger-unmount', so the panel never lingers against a detached element. Outside presses are off here, so the removal is what closes it."
 			code={`<script lang="ts">
 	let showTrigger = $state(true);
 ${'</' + 'script>'}
 
 <Button onclick={() => (showTrigger = !showTrigger)}>Remove trigger</Button>
 
-<Popover closeOnClickOutside={false} onOpenChange={(open) => console.log(open)}>
+<Popover
+	closeOnClickOutside={false}
+	onOpenChange={(open, details) => console.log(open, details.reason)}
+>
 	{#snippet trigger(popover)}
 		{#if showTrigger}
 			<Button {@attach popover.reference} onclick={() => popover.toggle()}>Open</Button>
@@ -323,7 +336,8 @@ ${'</' + 'script>'}
 				<Popover
 					position="bottom"
 					closeOnClickOutside={false}
-					onOpenChange={(open) => (lifetimeLog = `onOpenChange(${open})`)}
+					onOpenChange={(open, details) =>
+						(lifetimeLog = `onOpenChange(${open}, { reason: '${details.reason}' })`)}
 				>
 					{#snippet trigger(popover)}
 						{#if lifetimeTrigger}
@@ -339,6 +353,95 @@ ${'</' + 'script>'}
 				<p class="text-neutral/70 w-full text-center text-sm" data-testid="trigger-lifetime-log">
 					{lifetimeLog}
 				</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Open-change details"
+			description="onOpenChange runs before the change with a reason, the event and cancel(). Type a note, then press outside or Escape: the popover stays open while the note has text. Discard empties it and closes."
+			code={`<script lang="ts">
+	import type { OpenChangeDetails } from 'entasis/types';
+
+	let note = $state('');
+	const keepNote = (open: boolean, details: OpenChangeDetails) => {
+		const dismissal = details.reason === 'outside-press' || details.reason === 'escape-key';
+		if (!open && dismissal && note) details.cancel();
+	};
+${'</' + 'script>'}
+
+<Popover trigger={{ content: 'Add a note' }} focusOnOpen="first" onOpenChange={keepNote}>
+	{#snippet children(popover)}
+		<TextArea label="Note" bind:value={note} />
+		<Button onclick={() => { note = ''; popover.close(); }}>Discard</Button>
+	{/snippet}
+</Popover>`}
+		>
+			<div class="flex w-full max-w-xl flex-col items-center gap-3">
+				<Popover
+					trigger={{ content: 'Add a note', variant: 'soft' }}
+					position="bottom"
+					focusOnOpen="first"
+					onOpenChange={keepNote}
+				>
+					{#snippet children(popover)}
+						<div class="flex flex-col gap-2">
+							<textarea
+								aria-label="Note"
+								class="border-neutral/20 min-h-20 rounded-md border p-2 text-sm"
+								bind:value={note}
+							></textarea>
+							<Button
+								size="small"
+								variant="soft"
+								onclick={() => {
+									note = '';
+									popover.close();
+								}}>Discard</Button
+							>
+						</div>
+					{/snippet}
+				</Popover>
+				<p class="text-neutral/70 text-center text-sm" data-testid="open-change-log">{noteLog}</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="How it opened"
+			description="openReason records how the popover opened. A hover-opened popover leaves page scroll unlocked and closes when the pointer leaves; pressing its trigger pins it open. With several triggers, the one pressed anchors the panel and gets focus back."
+			code={`<Popover openOnHover closeOnMouseLeave trigger={{ content: 'Hover or press' }}>
+	{#snippet children(popover)}Opened by {popover.openReason}{/snippet}
+</Popover>
+
+<Popover focusOnOpen="first">
+	{#snippet trigger(popover)}
+		<Button {@attach popover.trigger}>First</Button>
+		<Button {@attach popover.trigger}>Second</Button>
+	{/snippet}
+	{#snippet children(popover)}
+		<Button onclick={() => popover.close()}>Close</Button>
+	{/snippet}
+</Popover>`}
+		>
+			<div class="flex flex-wrap items-center justify-center gap-3">
+				<Popover
+					openOnHover
+					closeOnMouseLeave
+					position="bottom"
+					trigger={{ content: 'Hover or press', variant: 'soft' }}
+				>
+					{#snippet children(popover)}
+						<p class="text-sm" data-testid="open-reason">Opened by {popover.openReason}</p>
+					{/snippet}
+				</Popover>
+				<Popover position="bottom" focusOnOpen="first">
+					{#snippet trigger(popover)}
+						<Button variant="outline" color="neutral" {@attach popover.trigger}>First</Button>
+						<Button variant="outline" color="neutral" {@attach popover.trigger}>Second</Button>
+					{/snippet}
+					{#snippet children(popover)}
+						<Button size="small" variant="soft" onclick={() => popover.close()}>Close</Button>
+					{/snippet}
+				</Popover>
 			</div>
 		</ComponentCard>
 	{/snippet}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
-	import { tick, untrack } from 'svelte';
+	import { useOpenLifecycle } from '$lib/utils/openLifecycle.svelte.js';
 	import Button from '../Button/Button.svelte';
 	import Slot from '../Slot/Slot.svelte';
 	import type { OverlayProps } from './overlay.props.js';
@@ -38,25 +38,14 @@
 	const isOpen = $derived(openState.value);
 
 	const classes = $derived(useOverlayTheme(theme));
-	let observedOpen = untrack(() => isOpen);
-	let transitionSequence = 0;
-
-	$effect(() => {
-		const nextOpen = isOpen;
-		if (nextOpen === observedOpen) return;
-		observedOpen = nextOpen;
-		const sequence = ++transitionSequence;
-		void settleTransition(nextOpen, sequence);
+	// CSS transitions animate the overlay: each open and close reports once its animations
+	// settle, an overlay open at creation included.
+	useOpenLifecycle({
+		isOpen: () => isOpen,
+		animated: () => ref,
+		onAfterOpen: () => onAfterOpen?.(),
+		onAfterClose: () => onAfterClose?.()
 	});
-
-	async function settleTransition(nextOpen: boolean, sequence: number) {
-		await tick();
-		const animations = ref?.getAnimations?.({ subtree: true }) ?? [];
-		await Promise.allSettled(animations.map((animation) => animation.finished));
-		if (sequence !== transitionSequence || isOpen !== nextOpen) return;
-		if (nextOpen) onAfterOpen?.();
-		else onAfterClose?.();
-	}
 </script>
 
 <div

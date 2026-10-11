@@ -9,6 +9,7 @@
 	import { fso } from '$lib/transitions/transition.js';
 	import { portal } from '$lib/attachments/portal.js';
 	import { transitionSize } from '$lib/attachments/transitionSize.js';
+	import { composeHandlers } from '$lib/utils/handlers.js';
 	import type { Attachment } from 'svelte/attachments';
 
 	let {
@@ -66,6 +67,12 @@
 		},
 		get onOpenChange() {
 			return onOpenChange;
+		},
+		get onAfterOpen() {
+			return onAfterOpen;
+		},
+		get onAfterClose() {
+			return onAfterClose;
 		},
 		get size() {
 			return size;
@@ -138,7 +145,8 @@
 
 	const classes = $derived(usePopoverTheme(theme));
 
-	const in_out = fso();
+	// Wrapped so the lifecycle knows when the panel's transition plays (and when none does).
+	const panelTransition = popover.lifecycle.transition(fso());
 
 	// An inline panel needs no reference element: it renders where the component sits.
 	const visible = $derived(
@@ -162,6 +170,31 @@
 
 {#snippet emptyCloseButton()}{/snippet}
 
+<!-- The panel is a child of the wrapper, so it is never re-parented mid-transition (which would
+     break the intro). It carries the visuals, transform-origin, and animation. -->
+{#snippet floatingPanel()}
+	<div
+		{@attach popover.panel}
+		class={classes.popover({
+			size: popover.computedSize,
+			mode: popover.computedMode,
+			className
+		})}
+		style:transform-origin={popover.transformOrigin}
+		style:min-width={popover.triggerWidth != null ? `${popover.triggerWidth}px` : undefined}
+		style:width={popover.triggerWidth != null ? 'max-content' : undefined}
+		style:max-width={popover.triggerWidth != null
+			? `max(${FIT_TRIGGER_CAP[popover.computedSize]}, ${popover.triggerWidth}px)`
+			: undefined}
+		in:panelTransition={popover.computedTransition.in}
+		out:panelTransition={popover.computedTransition.out}
+		onintroend={popover.lifecycle.introEnd}
+		onoutroend={popover.lifecycle.outroEnd}
+	>
+		{@render children?.(popover)}
+	</div>
+{/snippet}
+
 <!-- Trigger first: an inline panel then follows it in the document flow. Floating and
      mobile-sheet panels portal out, so source order does not reach them. -->
 {#if trigger}
@@ -172,10 +205,9 @@
 		<Button
 			{...buttonProps}
 			{...popover.triggerProps}
-			onclick={(event) => {
-				onclick?.(event);
-				if (openOnClick) popover.toggle();
-			}}
+			onclick={composeHandlers(onclick, (event) => {
+				if (openOnClick) popover.toggle(event);
+			})}
 			children={children ?? content}
 			{@attach popover.reference}
 		/>
@@ -197,21 +229,19 @@
 		thumb={false}
 		closeButton={emptyCloseButton}
 		theme={mobileSheetDialogTheme}
-		onOpenChange={(nextOpen) => popover.setOpen(nextOpen)}
-		onAfterOpen={() => {
-			popover.hasTransitioned = true;
-			onAfterOpen?.(popover);
-		}}
-		onAfterClose={() => {
-			popover.hasTransitioned = false;
-			onAfterClose?.(popover);
-		}}
+		onOpenChange={(nextOpen, details) => popover.setOpen(nextOpen, details)}
+		onAfterOpen={popover.lifecycle.introEnd}
+		onAfterClose={popover.lifecycle.outroEnd}
 	>
 		<div {@attach transitionSize({ isActive: () => mobileSheetSizeTransition })} {...attachments}>
 			{@render children?.(popover)}
 		</div>
 	</Dialog>
-{:else if visible}
+{:else if visible && popover.isDialogPopup}
+	<!-- Dialog content sits in a <dialog>; a menu, listbox, tree or grid gets a plain wrapper
+	     (below), so assistive technology does not announce an unnamed dialog around it. Two
+	     branches of this one chain rather than a dynamic element: a nested block would stop the
+	     panel's local transitions from playing. -->
 	<dialog
 		{@attach maybePortal}
 		{@attach popover.dialog}
@@ -222,36 +252,18 @@
 		style:z-index={inline ? undefined : popover.layer.zIndex}
 		{...attachments}
 	>
-		<!-- The panel is a child of the wrapper, so it is never re-parented mid-transition
-		     (which would break the intro). It carries the visuals, transform-origin, and animation. -->
-		<div
-			{@attach popover.panel}
-			class={classes.popover({
-				size: popover.computedSize,
-				mode: popover.computedMode,
-				className
-			})}
-			style:transform-origin={popover.transformOrigin}
-			style:min-width={popover.triggerWidth != null ? `${popover.triggerWidth}px` : undefined}
-			style:width={popover.triggerWidth != null ? 'max-content' : undefined}
-			style:max-width={popover.triggerWidth != null
-				? `max(${FIT_TRIGGER_CAP[popover.computedSize]}, ${popover.triggerWidth}px)`
-				: undefined}
-			in:in_out={popover.computedTransition.in}
-			out:in_out={popover.computedTransition.out}
-			onintroend={() => {
-				popover.hasTransitioned = true;
-				onAfterOpen?.(popover);
-			}}
-			onoutrostart={() => {
-				popover.hasTransitioned = false;
-			}}
-			onoutroend={() => {
-				popover.focusScope.restore();
-				onAfterClose?.(popover);
-			}}
-		>
-			{@render children?.(popover)}
-		</div>
+		{@render floatingPanel()}
 	</dialog>
+{:else if visible}
+	<div
+		{@attach maybePortal}
+		{@attach popover.dialog}
+		id={popover.id}
+		class={classes.root({ mode: popover.computedMode })}
+		style:visibility={inline ? undefined : 'hidden'}
+		style:z-index={inline ? undefined : popover.layer.zIndex}
+		{...attachments}
+	>
+		{@render floatingPanel()}
+	</div>
 {/if}

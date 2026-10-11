@@ -16,6 +16,7 @@
 	import SidebarIcon from './SidebarIcon.svelte';
 	import SidebarTreeNodeComponent from './SidebarTreeNode.svelte';
 	import { slide } from '$lib/transitions/transition.js';
+	import { composeHandlers } from '$lib/utils/handlers.js';
 	import { useSidebarMotion, useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 
 	let {
@@ -93,10 +94,10 @@
 				...option,
 				type: 'option',
 				href: treeNode.href,
-				onclick: (event) => {
-					treeNode.onclick?.(event);
+				// The node's own handler runs first; `event.preventDefault()` keeps the flyout open.
+				onclick: composeHandlers(treeNode.onclick, () => {
 					popupOpen = false;
-				}
+				})
 			};
 		});
 	}

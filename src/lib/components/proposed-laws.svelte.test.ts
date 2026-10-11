@@ -30,7 +30,7 @@ const button = (name: string) => screen.getByRole('button', { name });
 const queryButton = (name: string) => screen.queryByRole('button', { name });
 
 describe('law 1 · open-change details (F1 · CX-1)', () => {
-	pending('onOpenChange receives the close reason and the originating event', async () => {
+	test('onOpenChange receives the close reason and the originating event', async () => {
 		const onOpenChange = vi.fn();
 		mount('dialog-trigger', { onOpenChange });
 		await fireEvent.click(button('Open dialog'));
@@ -42,7 +42,7 @@ describe('law 1 · open-change details (F1 · CX-1)', () => {
 		);
 	});
 
-	pending('an outside press reports the outside-press reason', async () => {
+	test('an outside press reports the outside-press reason', async () => {
 		const onOpenChange = vi.fn();
 		mount('popover', { onOpenChange });
 		await fireEvent.click(button('Open popover'));
@@ -55,7 +55,7 @@ describe('law 1 · open-change details (F1 · CX-1)', () => {
 		);
 	});
 
-	pending('cancelling the change keeps the overlay open', async () => {
+	test('cancelling the change keeps the overlay open', async () => {
 		mount('dialog-trigger', {
 			onOpenChange: (open, details) => {
 				if (!open) details?.cancel?.();
@@ -68,7 +68,7 @@ describe('law 1 · open-change details (F1 · CX-1)', () => {
 		expect(screen.getByRole('dialog')).toBeInTheDocument();
 	});
 
-	pending('a cancelled Escape leaves its keydown event untouched', async () => {
+	test('a cancelled Escape leaves its keydown event untouched', async () => {
 		mount('dialog-trigger', {
 			onOpenChange: (open, details) => {
 				if (!open) details?.cancel?.();
@@ -84,7 +84,7 @@ describe('law 1 · open-change details (F1 · CX-1)', () => {
 });
 
 describe('law 2 · lifecycle (F1 · CX-2)', () => {
-	pending(
+	test(
 		'a Dialog open at creation fires onAfterOpen once and dismisses on outside press',
 		async () => {
 			const onAfterOpen = vi.fn();
@@ -96,7 +96,7 @@ describe('law 2 · lifecycle (F1 · CX-2)', () => {
 		}
 	);
 
-	pending('an inline Popover open at creation fires onAfterOpen once', async () => {
+	test('an inline Popover open at creation fires onAfterOpen once', async () => {
 		const onAfterOpen = vi.fn();
 		mount('popover-inline-default-open', { onAfterOpen });
 		await screen.findByRole('button', { name: 'Inside inline popover' });
@@ -105,7 +105,7 @@ describe('law 2 · lifecycle (F1 · CX-2)', () => {
 });
 
 describe('law 3 · handler composition (F1 · CX-4)', () => {
-	pending('a consumer onclick that calls preventDefault cancels the built-in toggle', async () => {
+	test('a consumer onclick that calls preventDefault cancels the built-in toggle', async () => {
 		mount('popover-prevented-trigger');
 		await fireEvent.click(button('Guarded trigger'));
 		await settle();
@@ -114,7 +114,7 @@ describe('law 3 · handler composition (F1 · CX-4)', () => {
 });
 
 describe('law 4 · trigger contract (F1 · CX-4)', () => {
-	pending('the Dialog trigger exposes aria-haspopup, aria-expanded and aria-controls', async () => {
+	test('the Dialog trigger exposes aria-haspopup, aria-expanded and aria-controls', async () => {
 		mount('dialog-trigger');
 		const trigger = button('Open dialog');
 		expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
@@ -125,7 +125,7 @@ describe('law 4 · trigger contract (F1 · CX-4)', () => {
 		expect(trigger).toHaveAttribute('aria-controls', dialog.id);
 	});
 
-	pending('of two triggers, the one that opened the popover gets focus back', async () => {
+	test('of two triggers, the one that opened the popover gets focus back', async () => {
 		mount('popover-two-triggers');
 		const first = button('First trigger');
 		first.focus();
@@ -136,7 +136,7 @@ describe('law 4 · trigger contract (F1 · CX-4)', () => {
 		expect(document.activeElement).toBe(first);
 	});
 
-	pending('removing the trigger of an open popover closes it', async () => {
+	test('removing the trigger of an open popover closes it', async () => {
 		const onOpenChange = vi.fn();
 		const { rerender } = mount('popover-removable-trigger', { onOpenChange });
 		await fireEvent.click(button('Removable trigger'));
@@ -193,7 +193,7 @@ describe('law 6 · hover (F5 · MN-7, C14 · DF-6, F1 · MN-4)', () => {
 		expect(queryButton('Inside hover popover')).toBeNull();
 	});
 
-	pending('a hover-opened popover leaves page scroll unlocked', async () => {
+	test('a hover-opened popover leaves page scroll unlocked', async () => {
 		mount('popover-hover');
 		await fireEvent.mouseEnter(button('Hover trigger'));
 		await screen.findByRole('button', { name: 'Inside hover popover' });

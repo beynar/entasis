@@ -7,6 +7,14 @@ import type { FSOProps } from '$lib/transitions/transition.js';
 import { type Placement, type VirtualElement } from '@floating-ui/dom';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { PopoverThemeProps } from './popover.theme.js';
+import type { OpenChangeHandler } from '$lib/utils/openChange.js';
+
+/**
+ * How an open popover was opened: `hover` (the pointer rested on the trigger), `press` (a click
+ * or tap on the trigger), `keyboard` (Enter, Space or an arrow key on the trigger), or
+ * `programmatic` (`open()` from code, the `open` prop, `defaultOpen`).
+ */
+export type PopoverOpenReason = 'hover' | 'press' | 'keyboard' | 'programmatic';
 
 export type PopoverProps = WithAttachments<{
 	/** Stable DOM id for the popover dialog; falls back to a generated id when omitted. */
@@ -15,11 +23,18 @@ export type PopoverProps = WithAttachments<{
 	open?: boolean;
 	/** Initial open state when `open` is not provided. */
 	defaultOpen?: boolean;
-	/** Called once when the library requests an open-state change. */
-	onOpenChange?: (open: boolean) => void;
-	/** Called after the open transition finishes. */
+	/**
+	 * Called before the popover opens or closes, with the requested state and the change details:
+	 * `reason` (`'trigger-press'`, `'trigger-hover'`, `'outside-press'`, `'escape-key'`,
+	 * `'trigger-unmount'`, `'imperative-action'`…), the originating `event`, the `trigger`
+	 * element, the `interaction` type and `cancel()`. Calling `details.cancel()` keeps the popover
+	 * as it is and leaves the event untouched. Inside the callback, `open` still holds the
+	 * previous state.
+	 */
+	onOpenChange?: OpenChangeHandler;
+	/** Called once per open, after the open transition finishes (right away when none plays, e.g. `defaultOpen`). */
 	onAfterOpen?: (payload: PopoverState) => void;
-	/** Called after the close transition finishes. */
+	/** Called once per close, after the close transition finishes. */
 	onAfterClose?: (payload: PopoverState) => void;
 	/** Popover panel size variant; supports responsive values. */
 	size?: ResponsiveProps<Sizes>;
@@ -48,7 +63,10 @@ export type PopoverProps = WithAttachments<{
 	}) => { x: number; y: number; minWidth?: number } | null;
 	/** When true, clicking the trigger toggles the popover open and closed. */
 	openOnClick?: boolean;
-	/** When true, hovering the trigger opens the popover after `delay`, including one that started open. */
+	/**
+	 * When true, hovering the trigger opens the popover after `delay`, including one that started
+	 * open. A hover-opened popover does not lock page scroll; pressing its trigger pins it open.
+	 */
 	openOnHover?: boolean;
 	/**
 	 * Delay in milliseconds before opening on hover when `openOnHover` is enabled. Default `100`.
@@ -62,33 +80,39 @@ export type PopoverProps = WithAttachments<{
 	/** Snippet for popover panel content; receives the popover state instance. */
 	children?: Snippet<[PopoverState]>;
 	/**
-	 * Snippet, button props, or `false` to render, customize, or hide the trigger control. An
-	 * open popover closes when its trigger unmounts; a trigger re-rendered as a new element keeps
-	 * it open.
+	 * Snippet, button props, or `false` to render, customize, or hide the trigger control. The
+	 * trigger that opened the popover anchors it and gets focus back; an open popover closes when
+	 * that trigger unmounts (`reason: 'trigger-unmount'`), and a trigger re-rendered as a new
+	 * element keeps it open. The built-in button's `onclick` runs first: calling
+	 * `event.preventDefault()` there stops the toggle.
 	 */
 	trigger?: Snippet<[PopoverState]> | (ButtonProps & { content?: string }) | false;
 	/**
 	 * Where focus goes when the panel opens: `'first'` (autofocus target or first tabbable),
-	 * `'container'` (the panel itself), or `false` (stay on the trigger). Focus always returns
-	 * to the trigger when the popover closes.
+	 * `'container'` (the panel itself), or `false` (stay on the trigger). When the popover
+	 * closes, focus returns to the trigger that opened it, or after a programmatic open to the
+	 * element that had focus when it opened.
 	 * @default false
 	 */
 	focusOnOpen?: 'first' | 'container' | false;
 	/**
 	 * Value of `aria-haspopup` applied to the trigger, describing what the panel contains.
-	 * `aria-expanded` and `aria-controls` are managed automatically alongside it.
+	 * `aria-expanded` and `aria-controls` are managed automatically alongside it. A `'dialog'`
+	 * popup renders in a `<dialog>`; any other value renders a plain wrapper, points
+	 * `aria-controls` at the element inside with the matching role (`role="menu"` for `menu` and
+	 * `true`) and labels that element by the trigger unless it has an `aria-label`.
 	 * @default 'dialog'
 	 */
 	haspopup?: 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid' | true;
-	/** When true, clicking outside the popover closes it. */
+	/** When true, pressing outside the popover closes it. A press that began before it opened does not count, and on touch screens only a tap does (a finger that starts scrolling the page does not). */
 	closeOnClickOutside?: boolean;
 	/** When true, pressing Escape closes the topmost open popover. */
 	closeOnEscape?: boolean;
-	/** When true, moving the pointer outside the hover safe area closes the popover. The safe area is the trigger, the panel, and a prediction cone toward the panel, so a diagonal move to the panel keeps it open. */
+	/** When true, moving the pointer outside the hover safe area closes a popover that hovering opened. The safe area is the trigger, the panel, and a prediction cone toward the panel, so a diagonal move to the panel keeps it open. A popover opened by a press, the keyboard or code stays open. */
 	closeOnMouseLeave?: boolean;
 	/** When true, renders debug overlays for the hover safe-area rectangles (blue) and the prediction cone toward the panel (orange). */
 	debugSafeArea?: boolean;
-	/** When true, locks page scroll while a root-level popover is open. */
+	/** When true, locks page scroll while a root-level popover is open, unless hovering opened it. */
 	lockScroll?: boolean;
 	/** Additional CSS classes merged onto the popover dialog element. */
 	class?: string;

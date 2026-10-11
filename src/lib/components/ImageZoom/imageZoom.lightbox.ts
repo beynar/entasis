@@ -134,7 +134,8 @@ export class ImageZoomLightbox {
 				plugins: [lgMediumZoom],
 				licenseKey: this.zoom.licenseKey,
 				startAnimationDuration: transitionDuration,
-				escKey: this.zoom.closeOnEscape,
+				// Escape is handled here, so `onOpenChange` can be asked first (see attachEvents).
+				escKey: false,
 				hideScrollbar: this.zoom.lockScroll,
 				margin: Math.max(0, this.zoom.zoomMargin),
 				backgroundColor: this.zoom.backgroundColor,
@@ -162,6 +163,31 @@ export class ImageZoomLightbox {
 	}
 
 	private attachEvents(root: HTMLElement, imageElement: HTMLImageElement) {
+		// A press on the trigger asks `onOpenChange` before LightGallery's own listener on the
+		// trigger opens the zoom; a cancelled press never reaches it.
+		this.addEvent(
+			root,
+			'click',
+			(event) => {
+				const trigger = this.triggerElement;
+				if (!trigger || !(event.target instanceof Node) || !trigger.contains(event.target)) return;
+				if (this.instance?.lgOpened || this.zoom.disabled) return;
+				if (!this.zoom.requestOpenChange(true, { reason: 'trigger-press', event, trigger })) {
+					event.preventDefault();
+					event.stopPropagation();
+				}
+			},
+			{ capture: true }
+		);
+		this.addEvent(window, 'keydown', (event) => {
+			const key = event as KeyboardEvent;
+			if (key.key !== 'Escape' || key.defaultPrevented || !this.instance?.lgOpened) return;
+			if (!this.zoom.closeOnEscape) return;
+			// A cancelled Escape is left untouched for whatever handles it next.
+			if (!this.zoom.requestOpenChange(false, { reason: 'escape-key', event })) return;
+			key.preventDefault();
+			this.close();
+		});
 		this.addEvent(root, 'lgBeforeOpen', () => {
 			this.previousFocus =
 				document.activeElement instanceof HTMLElement
@@ -176,8 +202,8 @@ export class ImageZoomLightbox {
 			this.zoom.onAfterClose?.(this.zoom.payload);
 		});
 		this.addEvent(imageElement, 'load', this.handleImageLoad);
-		const handleScrollIntent = () => {
-			if (this.zoom.isOpen && this.zoom.closeOnScroll) this.close();
+		const handleScrollIntent = (event: Event) => {
+			if (this.zoom.isOpen && this.zoom.closeOnScroll) this.zoom.close(event);
 		};
 		const scrollOptions = { capture: true, passive: true } as const;
 		document.addEventListener('scroll', handleScrollIntent, scrollOptions);
@@ -190,12 +216,20 @@ export class ImageZoomLightbox {
 		});
 	}
 
+	// The medium-zoom layer closes on any click: on the zoomed image (`close-press`) or around it
+	// (`outside-press`, only with `closeOnClickOutside`). The click asks `onOpenChange` first; a
+	// cancelled one, like an outside click that may not close, stops before LightGallery sees it.
 	private attachOutsideClickPolicy(outer: HTMLElement) {
 		const handleClick = (event: Event) => {
-			if (this.zoom.closeOnClickOutside) return;
+			if (!this.instance?.lgOpened) return;
 			const target = event.target;
-			if (target instanceof Element && target.closest('.lg-object')) return;
-			event.stopImmediatePropagation();
+			const onImage = target instanceof Element && !!target.closest('.lg-object');
+			if (!onImage && !this.zoom.closeOnClickOutside) {
+				event.stopImmediatePropagation();
+				return;
+			}
+			const reason = onImage ? 'close-press' : 'outside-press';
+			if (!this.zoom.requestOpenChange(false, { reason, event })) event.stopImmediatePropagation();
 		};
 		this.addEvent(outer, 'click', handleClick, { capture: true });
 	}

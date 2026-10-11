@@ -2,7 +2,7 @@
 	import Button from '$lib/components/Button/Button.svelte';
 	import Dialog from '$lib/components/Dialog/Dialog.svelte';
 	import type { Sizes } from '$lib/types/theme.js';
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 	import Form from '../Form/Form.svelte';
 	import type { FormState } from '../Form/form.state.svelte.js';
 	import type { FormInputs, InferFormValue, LiveFormValue } from '../Form/form.js';
@@ -41,10 +41,12 @@
 		return { text, disabled, size, props };
 	}
 
+	// Each request mounts its Dialog open: the Dialog itself renders once mounted, so it still
+	// plays its enter transition and reports `onAfterOpen`.
 	function enqueueAsk(request: AskRequest): void {
 		const viewState: AskViewState = {
 			...request,
-			open: false,
+			open: true,
 			value: { ...request.options.value },
 			hasFailure: false,
 			settled: false,
@@ -53,13 +55,6 @@
 		};
 
 		asks.push(viewState);
-		void openAsk(viewState);
-	}
-
-	async function openAsk(askState: AskViewState): Promise<void> {
-		await tick();
-		const activeAsk = asks.find((candidate) => candidate.id === askState.id);
-		if (activeAsk && !activeAsk.settled) activeAsk.open = true;
 	}
 
 	function cancelAsk(askState: AskViewState): void {

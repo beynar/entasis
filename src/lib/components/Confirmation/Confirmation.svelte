@@ -7,7 +7,8 @@
 	import type { ConfirmationProps } from './confirmation.props.js';
 	import { useConfirmationTheme } from './confirmation.theme.js';
 	import { useTheme } from '../Theme/theme.state.svelte.js';
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
+	import { composeHandlers } from '$lib/utils/handlers.js';
 	let { theme }: ConfirmationProps = $props();
 
 	let confirmations = $state<ConfirmationState[]>([]);
@@ -22,7 +23,8 @@
 	// Set by the unmount teardown; a plain flag for the same reason.
 	let unmounted = false;
 
-	// Mounted first, then opened on the next tick so the Dialog plays its enter transition.
+	// Each request mounts its Dialog open: the Dialog itself renders once mounted, so it still
+	// plays its enter transition and reports `onAfterOpen`.
 	onMount(() => {
 		const unregister = registerConfirmationHost(themeState, {
 			request: (detail) =>
@@ -33,18 +35,11 @@
 					};
 					unanswered.add(settle);
 					const confirmationState = Object.assign({}, detail, {
-						isOpen: false,
+						isOpen: true,
 						loading: false,
 						settle
 					}) satisfies ConfirmationState;
 					confirmations.push(confirmationState);
-					tick().then(() => {
-						confirmations.forEach((a) => {
-							if (a.id === confirmationState.id) {
-								a.isOpen = true;
-							}
-						});
-					});
 				})
 		});
 		return () => {
@@ -57,14 +52,14 @@
 		};
 	});
 
-	const actionConfirmation =
-		(
-			confirmation: ConfirmationState,
-			continued: boolean,
-			onclick?: ButtonProps['onclick']
-		): NonNullable<ButtonProps['onclick']> =>
-		async (event) => {
-			onclick?.(event);
+	// The button's own `onclick` runs first; calling `event.preventDefault()` there keeps the
+	// question open.
+	const actionConfirmation = (
+		confirmation: ConfirmationState,
+		continued: boolean,
+		onclick?: ButtonProps['onclick']
+	): NonNullable<ButtonProps['onclick']> =>
+		composeHandlers(onclick, async () => {
 			let result: unknown;
 			if (continued && confirmation.onConfirm) {
 				// The user answered: while `onConfirm` runs, an unmount must not decline the request
@@ -87,7 +82,7 @@
 			}
 			confirmation.isOpen = false;
 			confirmation.settle({ confirmed: continued, result });
-		};
+		});
 	// A Dialog sizes to its content, so it takes the device decision from JS rather than CSS — and
 	// from the SAME value the Dialog itself used to pick sheet-versus-floating, instead of a second
 	// hand-written `(max-width: 768px)` that can drift out of step with it.
