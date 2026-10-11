@@ -116,7 +116,9 @@ export type CommandProps<Value extends string = string> = WithAttachments<
 			 */
 			shouldFilter?: boolean;
 			/**
-			 * Custom match predicate. Defaults to a case-insensitive substring match on `label` + `keywords` + `value`.
+			 * Custom match predicate. Defaults to a case- and accent-insensitive substring match on
+			 * `label` + `keywords` + `value`, compared with `Intl.Collator` in the active I18n locale,
+			 * so "eclair" finds "Éclair".
 			 */
 			filter?: (item: CommandItem<Value>, search: string) => boolean;
 			/**

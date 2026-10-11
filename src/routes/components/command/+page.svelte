@@ -69,7 +69,7 @@
 		'Arrow, Home, End, Enter navigation',
 		'Optional dialog mode with ⌘K shortcut',
 		'bind:open, bind:value, and bind:search',
-		'Keyword-aware fuzzy filtering'
+		'Keyword-aware, case- and accent-insensitive filtering'
 	]}
 >
 	<ComponentCard

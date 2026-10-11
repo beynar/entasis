@@ -1,3 +1,4 @@
+import { createItemMatcher } from '$lib/utils/match.js';
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
 import { useListNavigation } from '$lib/utils/useListNavigation.svelte.js';
 import { untrack } from 'svelte';
@@ -24,6 +25,8 @@ type CommandOptions<Value extends string = string> = Pick<
 	search: string;
 	/** Value of the selected command, or null when nothing has been selected. */
 	value: Value | null;
+	/** Locale the default filter compares text in: the active I18n locale. */
+	locale?: string;
 };
 
 // `bind()` copies the option accessors onto the instance; this typed base is what declares
@@ -116,10 +119,13 @@ export class CommandState<Value extends string = string> extends BoundCommandOpt
 
 	optionId = (value: string) => `${this.id}-opt-${value.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
 
-	defaultMatch = (item: CommandItem<Value>, query: string) => {
-		const haystack = `${item.label} ${item.keywords?.join(' ') ?? ''} ${item.value}`.toLowerCase();
-		return haystack.includes(query.toLowerCase());
-	};
+	/**
+	 * Case- and accent-insensitive substring match on `label`, `keywords` and `value`, compared in
+	 * the active locale.
+	 */
+	defaultMatch: (item: CommandItem<Value>, query: string) => boolean = $derived(
+		createItemMatcher({ locale: this.locale })
+	);
 
 	/** Set the highlight without scrolling — used by pointermove on rows. */
 	setHighlighted = (value: Value | undefined) => {
