@@ -107,7 +107,9 @@ export class StepperState<Item> extends createBindableStateClass<StepperStateBin
 	};
 
 	syncActiveStep(step: number) {
-		if (!this.canGoToStep(step) || this.targetStep === step) return;
+		// A value outside the items shows no step, not the one the track last rested on.
+		if (!this.canGoToStep(step)) return this.clearStep();
+		if (this.targetStep === step) return;
 		this.translateToStep(step);
 	}
 
@@ -163,9 +165,9 @@ export class StepperState<Item> extends createBindableStateClass<StepperStateBin
 
 	private translateToStep(step: number) {
 		const offset = this.offsets[step];
-		if (!this.stepContainer || offset == null || Number.isNaN(offset)) {
-			// Nothing can slide before the track is measured, so no panel is leaving: the shown
-			// step is the requested one, and `setOffsets` locks the transform once it can.
+		if (!this.stepContainer || offset == null || Number.isNaN(offset) || this.visualStep < 0) {
+			// Nothing can slide before the track is measured, or when no step is shown, so no panel
+			// is leaving: the shown step is the requested one, at rest.
 			this.targetStep = step;
 			this.visualStep = step;
 			return;
@@ -220,17 +222,34 @@ export class StepperState<Item> extends createBindableStateClass<StepperStateBin
 		const offset = this.offsets[step];
 		if (!this.stepContainer || offset == null || Number.isNaN(offset)) return;
 		this.destinationOffset = offset;
-		// At rest the track collapses to one viewport with the shown panel in column one, written
-		// to the DOM in the same frame the slide settles so the panel never moves twice.
-		this.stepContainer.style.transform = 'translateX(0px)';
-		this.stepContainer.style.width = '100%';
-		this.stepContainer.style.gridTemplateColumns = 'repeat(1, minmax(0, 1fr))';
-		this.getSteps().forEach((node) => {
-			node.style.gridColumn = '1';
-		});
+		this.collapseTrack();
 		this.targetStep = step;
 		this.visualStep = step;
+	}
+
+	// At rest the track collapses to one viewport with the shown panel in column one, written to
+	// the DOM in the same frame the slide settles so the panel never moves twice.
+	private collapseTrack() {
+		if (this.stepContainer) {
+			this.stepContainer.style.transform = 'translateX(0px)';
+			this.stepContainer.style.width = '100%';
+			this.stepContainer.style.gridTemplateColumns = 'repeat(1, minmax(0, 1fr))';
+			this.getSteps().forEach((node) => {
+				node.style.gridColumn = '1';
+			});
+		}
 		this.expanded = false;
+	}
+
+	// Every panel is hidden and the root drops the last height, so the next step appears in place
+	// instead of sliding in from a panel that is no longer shown.
+	private clearStep() {
+		if (this.visualStep < 0 && this.targetStep === undefined) return;
+		this.cancelAnimations();
+		this.collapseTrack();
+		this.targetStep = undefined;
+		this.visualStep = -1;
+		this.lastActiveHeight = undefined;
 	}
 
 	private cancelAnimations() {

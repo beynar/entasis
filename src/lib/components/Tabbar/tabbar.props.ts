@@ -87,14 +87,22 @@ export type TabbarProps = WithAttachments<
 		items: TabItem[];
 		/**
 		 * The `value` of the active tab (a string label resolves to itself). Bindable.
-		 * @default the first tab's value
+		 * A value you set is never rewritten: one naming a disabled tab shows that tab, and one
+		 * naming no tab selects nothing. When the selected tab is removed or disabled, an enabled
+		 * tab is selected instead, written back here and reported through `onValueChange`.
+		 * @default the first enabled tab's value
 		 */
 		value?: string;
-		/** Initial active tab value when `value` is omitted. */
+		/**
+		 * Initial active tab value when `value` is omitted. One that names a disabled or unknown
+		 * tab selects the first enabled tab on mount, reported through `onValueChange`.
+		 */
 		defaultValue?: string;
 		/**
-		 * Callback function called when the active tab changes.
-		 * Receives the new tab's value.
+		 * Called once per change of the active tab with its value: a click, an arrow key, a menu
+		 * entry, or the Tabbar moving the selection to an enabled tab by itself because
+		 * `defaultValue` named no enabled tab or the selected tab was removed or disabled. Not
+		 * called when the current tab is re-selected or when `value` is changed externally.
 		 */
 		onValueChange?: (value: string) => void;
 		/** DOM id prefix for tab elements (`{id}-tab-{index}`); `aria-controls` targets `{id}-panel-{index}`. */

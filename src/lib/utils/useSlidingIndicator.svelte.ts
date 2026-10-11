@@ -14,9 +14,17 @@ export const useSlidingIndicator = (options: SlidingIndicatorOptions) => {
 	let style = $state('');
 	let isHydrated = $state(false);
 	let isReady = $state(false);
+	let isVisible = $state(false);
+
+	const cancelFrames = () => {
+		if (firstFrame !== undefined) cancelAnimationFrame(firstFrame);
+		if (secondFrame !== undefined) cancelAnimationFrame(secondFrame);
+		firstFrame = undefined;
+		secondFrame = undefined;
+	};
 
 	const enableTransition = () => {
-		if (isReady || firstFrame !== undefined) return;
+		if (isReady || firstFrame !== undefined || secondFrame !== undefined) return;
 
 		firstFrame = requestAnimationFrame(() => {
 			firstFrame = undefined;
@@ -27,11 +35,23 @@ export const useSlidingIndicator = (options: SlidingIndicatorOptions) => {
 		});
 	};
 
+	// No active item: drop the last position instead of leaving the indicator on a tab that is
+	// no longer selected, and let the next placement snap into place before transitions resume.
+	const hideIndicator = () => {
+		style = '';
+		isVisible = false;
+		isReady = false;
+		cancelFrames();
+	};
+
 	const placeIndicator = (index = options.activeIndex()) => {
+		if (index < 0) return hideIndicator();
+		// An item that is not attached yet places the indicator from its own `itemReference`.
 		const element = itemElements[index];
 		if (!element) return;
 
 		style = options.getStyle(element);
+		isVisible = true;
 		isHydrated = true;
 		enableTransition();
 	};
@@ -65,8 +85,7 @@ export const useSlidingIndicator = (options: SlidingIndicatorOptions) => {
 			return () => {
 				resizeObserver?.disconnect();
 				resizeObserver = undefined;
-				if (firstFrame !== undefined) cancelAnimationFrame(firstFrame);
-				if (secondFrame !== undefined) cancelAnimationFrame(secondFrame);
+				cancelFrames();
 			};
 		});
 	};
@@ -82,6 +101,10 @@ export const useSlidingIndicator = (options: SlidingIndicatorOptions) => {
 		},
 		get isReady() {
 			return isReady;
+		},
+		/** True while the indicator sits on an active item; false when no item is active. */
+		get isVisible() {
+			return isVisible;
 		}
 	};
 };

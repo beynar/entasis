@@ -33,16 +33,26 @@ Use items for the tab collection and a single children snippet for the repeated 
 
 - items: required array of TabItem values. Each item is used by Tabbar and passed to children as item. A string item is its own value; an object item resolves to its \`value\`, else its string label, else its index as a string.
 - children: repeated panel renderer called with { api, item, index }.
-- value: bindable string value of the active tab (defaults to the first tab's value).
+- value: bindable string value of the active tab (defaults to the first enabled tab's value).
 - defaultValue: initial active tab value when value is omitted.
-- onValueChange: called once per change with { value, item, index }; not called when the current tab is re-selected or when value is changed externally.
+- onValueChange: called once per change with { value, item, index, reason } (\`TabsValueChangePayload\`). \`reason\` (\`TabsValueChangeReason\`) is \`user\` for a click, arrow key, menu entry or api navigation, and \`initial\`, \`disabled\` or \`missing\` for an automatic fallback (see Selection fallback). Not called when the current tab is re-selected or when value is changed externally.
 - placement: top, bottom, left, or right. Also drives the default tabbar orientation.
-- api: bindable TabsApi (a StepperState) for next(), previous(), and goTo(index).
+- api: bindable TabsApi (a StepperState) for next(), previous(), and goTo(index). next() and previous() step over disabled tabs, as the arrow keys do; goTo() a disabled tab does nothing.
 - transition: panel swap timing override (\`duration\` in ms, \`easing\`); responsive, and it beats the \`motion\` theme slot.
 - tabbar: props forwarded to the inner Tabbar as one object — \`{ size, orientation, color, alignment, fullWidth, variant, scrollFade, label, class, theme }\`. \`orientation\` overrides the placement-derived default.
 - mount: when a panel's content is created — \`lazy\` (default) on first activation and destroyed when the tab is left, \`once\` on first activation and kept, \`eager\` for every panel up front. Inactive panels are \`hidden\` and \`inert\` in every mode.
 - class: extra classes for the root.
 - theme: theme overrides for the Tabs wrapper.
+
+## Selection fallback
+
+The tab list and the panels always show the same tab. Tabs moves the selection by itself only when the change is its own; it then renders the new tab (also during SSR), writes its value back to value and calls onValueChange with the reason:
+
+- \`initial\`: on mount, defaultValue named a disabled or unknown tab; the first enabled tab is selected.
+- \`disabled\`: the selected tab became disabled; the first enabled tab is selected.
+- \`missing\`: the selected tab was removed from items; its nearest enabled neighbour is selected (the tab that moved into its place first, then the one before it).
+
+Omitting value and defaultValue selects the first enabled tab and reports nothing, including when items arrive after mount. A value the parent sets (on mount or later, by binding or by another control) is never rewritten: a value naming a disabled tab shows that tab, and a value naming no tab selects no tab and shows no panel until a tab with that value appears. When every tab is disabled, nothing can be selected instead, so a value naming one of them stays selected and an unknown value shows no panel.
 
 ## Composition Rules
 

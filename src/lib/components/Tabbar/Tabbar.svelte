@@ -5,11 +5,17 @@
 	import { caretUpIcon } from '../Icons/caretUp.js';
 	import { checkIcon } from '../Icons/check.js';
 	import { getTabValue, type TabbarProps } from './tabbar.props.js';
+	import {
+		getDefaultTabValue,
+		getTabValueOrigin,
+		isTabDisabled,
+		useTabSelection
+	} from './tabbar.selection.svelte.js';
 	import { useTabbarTheme } from './tabbar.theme.js';
 	import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
 	import { useOverflowObserver } from '$lib/utils/useOverflowObserver.svelte.js';
 	import { useSlidingIndicator } from '$lib/utils/useSlidingIndicator.svelte.js';
-	import type { Snippet } from 'svelte';
+	import { untrack, type Snippet } from 'svelte';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 
@@ -34,12 +40,13 @@
 		scrollFade = true,
 		...attachments
 	}: TabbarProps = $props();
+	const origin = untrack(() => getTabValueOrigin(value, defaultValue));
 	const valueState = createBindableValue(
 		() => value,
 		(next) => {
 			value = next;
 		},
-		() => defaultValue ?? (items[0] === undefined ? '' : getTabValue(items[0], 0))
+		() => defaultValue ?? getDefaultTabValue(items)
 	);
 
 	const generatedId = $props.id();
@@ -47,12 +54,25 @@
 	const classes = $derived(useTabbarTheme(theme));
 	const resolvedColor = $derived(useDefaultColor(color));
 	const tabValues = $derived(items.map(getTabValue));
-	/** Index of the active tab; -1 when `value` matches no tab. */
-	const selectedValue = $derived(tabValues.indexOf(valueState.value));
+	// Removing or disabling the selected tab moves the selection to an enabled one, written back
+	// and reported; a value the parent set that names no enabled tab is shown as it is.
+	const selection = useTabSelection({
+		items: () => items,
+		value: () => valueState.value,
+		origin,
+		onFallback: (next, { reason }) => {
+			valueState.value = next;
+			if (reason) onValueChange?.(next);
+		}
+	});
+	/** Index of the active tab; -1 when no tab is selected. */
+	const selectedIndex = $derived(selection.index);
 	const tabId = (index: number) => `${id}-tab-${index}`;
 	const panelId = (index: number) => (controlsPanels ? `${id}-panel-${index}` : undefined);
+	// Every path into a selection (click, focus-follows-selection, menu entry) lands here, so a
+	// disabled tab can never be selected even when a key reaches it while it holds DOM focus.
 	const select = (index: number) => {
-		if (selectedValue === index) return;
+		if (selectedIndex === index || isTabDisabled(items[index])) return;
 		const next = tabValues[index];
 		valueState.value = next;
 		onValueChange?.(next);
@@ -125,11 +145,11 @@
 		onChange: (index) => {
 			// Menu tabs activate manually (via entry selection), never by focus alone —
 			// arrowing onto the trigger must not slide the indicator to it.
-			if (index !== null && index !== selectedValue && !normalizedTabs[index]?.menu) {
+			if (index !== null && index !== selectedIndex && !normalizedTabs[index]?.menu) {
 				select(index);
 			}
 		},
-		defaultFocusedIndex: () => selectedValue
+		defaultFocusedIndex: () => (selectedIndex >= 0 ? selectedIndex : null)
 	});
 
 	function handleTabClick(event: MouseEvent, index: number, tab: NormalizedTab) {
@@ -145,7 +165,7 @@
 	}
 
 	const indicator = useSlidingIndicator({
-		activeIndex: () => selectedValue,
+		activeIndex: () => selectedIndex,
 		observe: () => [
 			items,
 			size,
@@ -211,11 +231,12 @@
 			style={indicator.style}
 			data-color={resolvedColor}
 			data-ready={indicator.isReady ? 'true' : 'false'}
+			hidden={!indicator.isVisible}
 			aria-hidden="true"
 		></div>
 	{/if}
 	{#each normalizedTabs as tab, index (index)}
-		{@const isActive = selectedValue === index}
+		{@const isActive = selectedIndex === index}
 		{@const isFocused = navigation.focusedIndex === index}
 		{@const elementType = tab.href ? 'a' : 'button'}
 

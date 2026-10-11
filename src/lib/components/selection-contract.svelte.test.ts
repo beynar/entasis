@@ -97,7 +97,8 @@ describe('selection contract', () => {
 		expect(onValueChange).toHaveBeenCalledExactlyOnceWith({
 			value: 'Settings',
 			item: 'Settings',
-			index: 1
+			index: 1,
+			reason: 'user'
 		});
 		expect(screen.getByRole('status')).toHaveTextContent('Settings');
 		await fireEvent.click(screen.getByRole('button', { name: 'Go to first panel' }));
@@ -105,7 +106,8 @@ describe('selection contract', () => {
 		expect(onValueChange).toHaveBeenLastCalledWith({
 			value: 'Overview',
 			item: 'Overview',
-			index: 0
+			index: 0,
+			reason: 'user'
 		});
 		await fireEvent.click(screen.getByRole('button', { name: 'External tab change' }));
 		expect(screen.getByRole('status')).toHaveTextContent('Settings');

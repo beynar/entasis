@@ -3306,6 +3306,8 @@ export const componentInventory = [
 			'TabsRenderPayload',
 			'TabsTheme',
 			'TabsThemeProps',
+			'TabsValueChangePayload',
+			'TabsValueChangeReason',
 			'setTabsTheme',
 			'tabsTheme',
 			'useTabsTheme'
