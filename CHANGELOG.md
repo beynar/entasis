@@ -88,6 +88,10 @@ Unreleased section under the new version.
   that load after mount select the first enabled tab without calling `onValueChange`.
 - `Tabs`: `api.next()` and `api.previous()` skip disabled tabs, as the arrow keys do. `api.goTo()`
   on a disabled tab does nothing.
+- `Command`: the default filter ignores accents as well as case ("eclair" finds "Éclair", "deplôy"
+  finds the `deploy` keyword) and compares text with `Intl.Collator` in the active I18n locale, so
+  each language keeps its own letters (in Spanish, "n" does not find "ñ"). A custom `filter` still
+  replaces it.
 
 ### Removed
 
@@ -235,6 +239,8 @@ Unreleased section under the new version.
   clicked, no longer selects that tab.
 - `Stepper`: when `value` moves outside its items, every panel is hidden and the last measured
   height is dropped. The next step then appears in place instead of sliding in.
+- `Command`: the default search now finds Arabic and Hebrew labels written with vowel marks
+  (tashkeel, shadda, niqqud) when the query is typed without them, and the other way round.
 
 ## 0.11.0 — 2026-10-10
 
