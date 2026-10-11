@@ -167,7 +167,7 @@
 
 		<ComponentCard
 			title="Selection fallback"
-			description="The Tabbar always marks an enabled tab as selected. The disabled first tab is skipped by the default selection, and removing the active tab selects its nearest enabled neighbour. The new value is written back to the binding and reported through onValueChange."
+			description="The disabled first tab is skipped by the default selection, and removing the active tab selects its nearest enabled neighbour; the new value is written back to the binding and reported through onValueChange. A value the parent or another control sets is never rewritten: one that names no tab selects no tab and hides the indicator."
 			code={`<Tabbar {items} bind:value onValueChange={(value) => console.log(value)} />`}
 		>
 			<div class="flex flex-col items-center gap-3">
@@ -188,7 +188,17 @@
 					>
 						Remove active tab
 					</Button>
-					<Button variant="ghost" size="small" onclick={() => (fallbackTabs = fallbackSeed)}>
+					<Button variant="outline" size="small" onclick={() => (fallbackActiveTab = 'Spam')}>
+						Pick Spam from elsewhere
+					</Button>
+					<Button
+						variant="ghost"
+						size="small"
+						onclick={() => {
+							fallbackTabs = fallbackSeed;
+							fallbackActiveTab = 'Inbox';
+						}}
+					>
 						Reset tabs
 					</Button>
 				</div>

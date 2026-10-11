@@ -5,12 +5,17 @@
 	import { caretUpIcon } from '../Icons/caretUp.js';
 	import { checkIcon } from '../Icons/check.js';
 	import { getTabValue, type TabbarProps } from './tabbar.props.js';
-	import { getDefaultTabValue, isTabDisabled, useTabSelection } from './tabbar.selection.svelte.js';
+	import {
+		getDefaultTabValue,
+		getTabValueOrigin,
+		isTabDisabled,
+		useTabSelection
+	} from './tabbar.selection.svelte.js';
 	import { useTabbarTheme } from './tabbar.theme.js';
 	import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
 	import { useOverflowObserver } from '$lib/utils/useOverflowObserver.svelte.js';
 	import { useSlidingIndicator } from '$lib/utils/useSlidingIndicator.svelte.js';
-	import type { Snippet } from 'svelte';
+	import { untrack, type Snippet } from 'svelte';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 
@@ -35,6 +40,7 @@
 		scrollFade = true,
 		...attachments
 	}: TabbarProps = $props();
+	const origin = untrack(() => getTabValueOrigin(value, defaultValue));
 	const valueState = createBindableValue(
 		() => value,
 		(next) => {
@@ -48,16 +54,18 @@
 	const classes = $derived(useTabbarTheme(theme));
 	const resolvedColor = $derived(useDefaultColor(color));
 	const tabValues = $derived(items.map(getTabValue));
-	// A value naming a disabled or unknown tab renders an enabled one and is written back.
+	// Removing or disabling the selected tab moves the selection to an enabled one, written back
+	// and reported; a value the parent set that names no enabled tab is shown as it is.
 	const selection = useTabSelection({
 		items: () => items,
 		value: () => valueState.value,
-		onFallback: (next) => {
+		origin,
+		onFallback: (next, { reason }) => {
 			valueState.value = next;
-			onValueChange?.(next);
+			if (reason) onValueChange?.(next);
 		}
 	});
-	/** Index of the active tab; -1 only when no tab can be selected. */
+	/** Index of the active tab; -1 when no tab is selected. */
 	const selectedIndex = $derived(selection.index);
 	const tabId = (index: number) => `${id}-tab-${index}`;
 	const panelId = (index: number) => (controlsPanels ? `${id}-panel-${index}` : undefined);

@@ -25,12 +25,12 @@ The Tabbar component is a flexible navigation component that displays a list of 
 - **value**: string (default: the first enabled tab's value, bindable)
   - The value of the currently active tab (a string item is its own value)
   - Can be bound with \`bind:value\`
-  - A value naming a disabled or unknown tab is replaced by an enabled tab (see Selection fallback)
+  - A value you set is never rewritten; see Selection fallback for what the Tabbar changes by itself
 - **defaultValue**: string - Initial active tab value when value is omitted
 
 - **onValueChange**: (value: string) => void
   - Called once per change of the active tab with the new tab's value: a click, an arrow key, a menu entry, or an automatic fallback (see Selection fallback)
-  - Not called when the current tab is re-selected or when value is changed externally to another enabled tab
+  - Not called when the current tab is re-selected or when value is changed externally
   - \`Tabs\` reports the reason of each change (\`user\`, \`initial\`, \`disabled\`, \`missing\`) in its own payload
 
 ### Styling Props
@@ -76,13 +76,13 @@ Native div attributes and attachments are forwarded to the root, minus the ARIA 
 
 ## Selection fallback
 
-The Tabbar always marks one enabled tab as selected. When value names a disabled tab or no tab, it resolves one effective tab, renders it (also during SSR), writes its value back to value and calls onValueChange with it:
+The Tabbar moves the selection by itself only when the change is its own; it then renders the new tab (also during SSR), writes its value back to value and calls onValueChange with it:
 
-- On mount, a value or defaultValue naming a disabled or unknown tab selects the first enabled tab. Omitting both selects the first enabled tab directly and reports nothing.
+- On mount, a defaultValue naming a disabled or unknown tab selects the first enabled tab.
 - When the selected tab becomes disabled, the first enabled tab is selected.
-- When the selected tab is removed from items, or value is set to a value no tab has, the nearest enabled neighbour of the tab that was shown is selected (the tab that moved into its place first, then the one before it).
+- When the selected tab is removed from items, its nearest enabled neighbour is selected (the tab that moved into its place first, then the one before it).
 
-When every tab is disabled, a value naming one of them stays selected. An unknown value then selects no tab: every tab has \`aria-selected="false"\`, the sliding indicator is \`hidden\` with \`data-ready="false"\` and no inline style, and nothing is written back. A disabled tab is never selected by a click, a key or a menu entry.
+Omitting value and defaultValue selects the first enabled tab and reports nothing, including when items arrive after mount. A value the parent sets (on mount or later, by binding or by another control such as an overflow picker or a second tab list) is never rewritten: a value naming a disabled tab shows that tab, and a value naming no tab selects no tab until a tab with that value appears. With no selected tab every tab has \`aria-selected="false"\` and the sliding indicator is \`hidden\` with \`data-ready="false"\` and no inline style; when a tab is selected again the indicator snaps into place before it animates. When every tab is disabled, a value naming one of them stays selected. A disabled tab is never selected by a click, a key or a menu entry.
 
 ## TabItem Structure
 

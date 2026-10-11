@@ -349,7 +349,7 @@
 
 		<ComponentCard
 			title="Selection fallback"
-			description="Tabs always show an enabled tab next to its own panel. A disabled first tab is skipped by the default selection. Removing the active tab selects its nearest enabled neighbour (reason missing); disabling it selects the first enabled tab (reason disabled). The new value is written back to the binding and reported through onValueChange."
+			description="The tab list and the panel always show the same tab. A disabled first tab is skipped by the default selection. Removing the active tab selects its nearest enabled neighbour (reason missing); disabling it selects the first enabled tab (reason disabled); the new value is written back to the binding and reported through onValueChange. A value the parent sets is never rewritten: one that names no tab selects no tab and shows no panel."
 			code={`<Tabs
 	{items}
 	bind:value
@@ -380,7 +380,17 @@
 					>
 						Disable active tab
 					</Button>
-					<Button variant="ghost" size="small" onclick={() => (fallbackTabs = fallbackSeed)}>
+					<Button variant="outline" size="small" onclick={() => (fallbackActiveTab = 'unknown')}>
+						Set unknown value
+					</Button>
+					<Button
+						variant="ghost"
+						size="small"
+						onclick={() => {
+							fallbackTabs = fallbackSeed;
+							fallbackActiveTab = 'review';
+						}}
+					>
 						Reset tabs
 					</Button>
 				</div>

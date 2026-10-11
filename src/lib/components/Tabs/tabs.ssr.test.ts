@@ -11,6 +11,14 @@ const selectedIds = (body: string) =>
 		.filter((tag) => tag.includes('aria-selected="true"'))
 		.map((tag) => tag.match(/\sid="([^"]+)"/)?.[1]);
 
+const renderTabs = (props: Record<string, unknown>) =>
+	render(ThemeProviderHarness, {
+		props: {
+			component: TabsFallbackHarness as unknown as Component<Record<string, unknown>>,
+			...props
+		}
+	});
+
 // The fallback must already be in the server markup: hydration only writes it back.
 describe('server-rendered fallback', () => {
 	test('Tabbar marks the first enabled tab, with its static indicator', () => {
@@ -23,13 +31,10 @@ describe('server-rendered fallback', () => {
 		expect(inbox.slice(0, inbox.indexOf('</button>'))).toContain('data-slot="tabbar-indicator"');
 	});
 
-	test('Tabs shows the panel of the tab it marks for an unknown value', () => {
-		const { body } = render(ThemeProviderHarness, {
-			props: {
-				component: TabsFallbackHarness as unknown as Component<Record<string, unknown>>,
-				items: [{ label: 'Overview', disabled: true }, 'Activity'],
-				initialValue: 'Gone'
-			}
+	test('Tabs shows the panel of the tab it marks for an unknown defaultValue', () => {
+		const { body } = renderTabs({
+			items: [{ label: 'Overview', disabled: true }, 'Activity'],
+			defaultValue: 'Gone'
 		});
 
 		const [selected] = selectedIds(body);
@@ -37,5 +42,14 @@ describe('server-rendered fallback', () => {
 		const activePanel = body.match(/<div[^>]*data-step-active="true"[^>]*>/)?.[0] ?? '';
 		expect(activePanel).toContain(`aria-labelledby="${selected}"`);
 		expect(activePanel).toContain('role="tabpanel"');
+	});
+
+	test('Tabs marks no tab and shows no panel for a bound value naming no tab', () => {
+		const { body } = renderTabs({ items: ['Overview', 'Activity'], initialValue: 'Gone' });
+
+		expect(selectedIds(body)).toEqual([]);
+		expect(body).not.toContain('data-step-active="true"');
+		expect(body).not.toContain('Panel 0');
+		expect(body).toContain('<output>Gone</output>');
 	});
 });

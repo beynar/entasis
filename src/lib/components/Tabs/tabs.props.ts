@@ -15,11 +15,10 @@ export type TabsApi<Item extends TabItem = TabItem> = StepperState<Item>;
 /**
  * Why the active tab changed.
  * - `user`: a click, an arrow key, a menu entry or the `api` handle picked the tab.
- * - `initial`: on mount, `value` / `defaultValue` named a disabled or unknown tab, so the first
- *   enabled tab was selected instead.
+ * - `initial`: on mount, `defaultValue` named a disabled or unknown tab, so the first enabled tab
+ *   was selected instead.
  * - `disabled`: the selected tab became disabled, so the first enabled tab was selected.
- * - `missing`: the selected tab was removed or `value` named no tab, so the enabled tab nearest
- *   to it was selected.
+ * - `missing`: the selected tab was removed, so the enabled tab nearest to it was selected.
  */
 export type TabsValueChangeReason = 'user' | 'initial' | 'disabled' | 'missing';
 
@@ -51,18 +50,21 @@ export type TabsProps<Item extends TabItem = TabItem> = WithAttachments<{
 	/**
 	 * The `value` of the active tab (a string item resolves to itself; objects use `value`,
 	 * else their string label, else their index). Bindable.
-	 * A value that names a disabled or unknown tab shows an enabled tab and its panel instead:
-	 * the first enabled tab, or the nearest enabled neighbour when the active tab is removed.
-	 * That value is written back here and reported through `onValueChange` with its `reason`.
+	 * A value you set is never rewritten: one naming a disabled tab shows that tab and its
+	 * panel, and one naming no tab selects no tab and shows no panel. When the selected tab is
+	 * removed or disabled, Tabs selects its nearest enabled neighbour or the first enabled tab,
+	 * writes it back here and reports it through `onValueChange` with its `reason`.
 	 * @default the first enabled tab's value
 	 */
 	value?: string;
-	/** Initial active tab value when `value` is omitted. */
+	/**
+	 * Initial active tab value when `value` is omitted. One that names a disabled or unknown
+	 * tab selects the first enabled tab on mount, reported with reason `initial`.
+	 */
 	defaultValue?: string;
 	/**
 	 * Called once per change of the active tab with `{ value, item, index, reason }`.
-	 * Not called when the current tab is re-selected or when `value` is changed externally to
-	 * another enabled tab.
+	 * Not called when the current tab is re-selected or when `value` is changed externally.
 	 */
 	onValueChange?: (payload: TabsValueChangePayload<Item>) => void;
 	/**
@@ -80,8 +82,8 @@ export type TabsProps<Item extends TabItem = TabItem> = WithAttachments<{
 	theme?: TabsThemeProps;
 	/**
 	 * Bindable instance handle for programmatic control.
-	 * Provides methods like next(), previous(), goTo(index). Navigating to a disabled tab does
-	 * nothing.
+	 * Provides methods like next(), previous(), goTo(index). `next` and `previous` step over
+	 * disabled tabs; `goTo` a disabled tab does nothing.
 	 */
 	api?: TabsApi<Item>;
 	/**

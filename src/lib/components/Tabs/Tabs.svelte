@@ -4,10 +4,12 @@
 	import { getTabValue, type TabItem } from '$lib/components/Tabbar/tabbar.props.js';
 	import {
 		getDefaultTabValue,
+		getTabValueOrigin,
 		isTabDisabled,
 		useTabSelection
 	} from '$lib/components/Tabbar/tabbar.selection.svelte.js';
 	import { StepperState } from '../Stepper/stepper.state.svelte.js';
+	import { untrack } from 'svelte';
 	import type { TabsProps, TabsValueChangeReason } from './tabs.props.js';
 	import { useTabsMotion, useTabsTheme } from './tabs.theme.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
@@ -27,6 +29,7 @@
 		children: panel,
 		...attachments
 	}: TabsProps<Item> = $props();
+	const origin = untrack(() => getTabValueOrigin(value, defaultValue));
 	const valueState = createBindableValue(
 		() => value,
 		(next) => {
@@ -40,14 +43,15 @@
 	const emitChange = (index: number, reason: TabsValueChangeReason) => {
 		onValueChange?.({ value: tabValues[index], item: items[index], index, reason });
 	};
-	// One effective selection drives both the tab list and the panels, so a disabled or unknown
-	// value can never show one tab as selected next to another tab's panel.
+	// One effective selection drives both the tab list and the panels, so they always show the
+	// same tab, or none when the value names no tab.
 	const selection = useTabSelection({
 		items: () => items,
 		value: () => valueState.value,
+		origin,
 		onFallback: (next, { index, reason }) => {
 			valueState.value = next;
-			emitChange(index, reason);
+			if (reason) emitChange(index, reason);
 		}
 	});
 	const activeIndex = $derived(selection.index);
@@ -66,8 +70,20 @@
 			emitChange(index, 'user');
 			return;
 		}
-		// `goTo` slides before it reports; slide back to the panel of the selected tab.
+		// `goTo` slides before it reports; slide back to the panel of the selected tab, or to no
+		// panel when no tab is selected.
 		api?.translate();
+	};
+	// `next` and `previous` step over disabled tabs, as the arrow keys do.
+	const stepToEnabledTab = (stepper: StepperState<Item>, direction: 1 | -1) => {
+		for (let index = activeIndex + direction; index in items; index += direction) {
+			if (isSelectable(index)) return stepper.goTo(index);
+		}
+	};
+	const bindApi = (stepper: StepperState<Item>) => {
+		stepper.next = () => stepToEnabledTab(stepper, 1);
+		stepper.previous = () => stepToEnabledTab(stepper, -1);
+		api = stepper;
 	};
 
 	const classes = $derived(useTabsTheme(theme));
@@ -105,7 +121,7 @@
 	/>
 	<Stepper
 		class={classes.content({ placement })}
-		bind:api
+		bind:api={() => api, bindApi}
 		{items}
 		bind:value={() => activeIndex, setActiveIndex}
 		onValueChange={({ value: index }) => handleStepChange(index)}
