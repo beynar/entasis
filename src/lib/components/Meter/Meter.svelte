@@ -78,7 +78,7 @@
 	const classes = $derived(useMeterTheme(theme));
 
 	// Accessibility. One segment makes the root a `meter`; several make it a `group` of meters,
-	// one per segment. The value text is the indicator text, so what is announced matches what is
+	// one per segment. Either root is described by the helper and description. The value text is the indicator text, so what is announced matches what is
 	// drawn, and aria-valuenow is clamped to the scale.
 	const stacked = $derived(meterSteps.length !== 1);
 	const labelRendered = $derived(!header && !!label);
@@ -164,7 +164,7 @@
 	role={stacked ? 'group' : 'meter'}
 	aria-labelledby={labelRendered ? labelId : undefined}
 	aria-label={rootName}
-	aria-describedby={stacked ? undefined : describedBy}
+	aria-describedby={describedBy}
 	aria-valuemin={stacked ? undefined : min}
 	aria-valuemax={stacked ? undefined : max}
 	aria-valuenow={stacked ? undefined : clampToScale(meterSteps[0].value)}

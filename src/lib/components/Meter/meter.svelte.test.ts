@@ -174,6 +174,21 @@ describe('Meter accessibility', () => {
 		expect(group).not.toHaveAttribute('aria-valuenow');
 	});
 
+	test('describes a stacked group by its helper and description, like a single meter', () => {
+		const { getByRole } = render(Meter, {
+			props: {
+				label: 'Storage usage',
+				helper: 'Total: 67%',
+				description: 'Across all volumes',
+				value: [{ value: 40 }, { value: 27 }]
+			}
+		});
+
+		expect(getByRole('group', { name: 'Storage usage' })).toHaveAccessibleDescription(
+			'Total: 67% Across all volumes'
+		);
+	});
+
 	test('gives every meter text content so NVDA reads its name', () => {
 		const single = render(Meter, { props: { value: 40, label: 'Battery' } });
 		const meter = within(single.container).getByRole('meter');
