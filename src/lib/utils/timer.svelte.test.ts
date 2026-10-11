@@ -1,5 +1,11 @@
+import { flushSync } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { Timer } from './timer.svelte.js';
+import {
+	holdWhileWindowInactive,
+	Timer,
+	watchWindowActivity,
+	WINDOW_INACTIVE_REASON
+} from './timer.svelte.js';
 
 // A frame clock the test drives by hand: `frame(ms)` advances `performance.now()` and runs the
 // frames requested so far, `jump(ms)` advances the clock without a frame (a hidden tab).
@@ -125,5 +131,196 @@ describe('Timer', () => {
 		finished.resume();
 		run(500);
 		expect(finishedCallback).toHaveBeenCalledTimes(1);
+	});
+
+	test('runs only while no reason holds it', () => {
+		const callback = vi.fn();
+		const timer = new Timer(callback, 1000);
+		run(400);
+		timer.hold('hover');
+		timer.hold('focus');
+		expect(timer.paused).toBe(true);
+		expect(timer.heldBy).toEqual(['hover', 'focus']);
+		jump(5000);
+		timer.release('hover');
+		run(2000);
+		// Focus still holds it: nothing elapsed while the pointer left.
+		expect(timer.paused).toBe(true);
+		expect(callback).not.toHaveBeenCalled();
+		expect(timer.elapsed).toBe(400);
+		timer.release('focus');
+		expect(timer.paused).toBe(false);
+		run(592);
+		expect(callback).not.toHaveBeenCalled();
+		run(16);
+		expect(callback).toHaveBeenCalledTimes(1);
+	});
+
+	test('holding twice with one reason needs one release; unknown releases change nothing', () => {
+		const callback = vi.fn();
+		const timer = new Timer(callback, 100);
+		timer.hold('swipe');
+		timer.hold('swipe');
+		timer.release('hover');
+		expect(timer.paused).toBe(true);
+		timer.release('swipe');
+		expect(timer.paused).toBe(false);
+		run(112);
+		expect(callback).toHaveBeenCalledTimes(1);
+	});
+
+	test('pause() and resume() are one reason among others', () => {
+		const callback = vi.fn();
+		const timer = new Timer(callback, 100);
+		timer.hold('window');
+		timer.pause();
+		timer.resume();
+		expect(timer.paused).toBe(true);
+		expect(timer.isHeldBy('window')).toBe(true);
+		expect(timer.isHeldBy('pause')).toBe(false);
+		run(500);
+		expect(callback).not.toHaveBeenCalled();
+		timer.release('window');
+		run(112);
+		expect(callback).toHaveBeenCalledTimes(1);
+	});
+
+	test('heldBy starts the timer held by those reasons', () => {
+		const callback = vi.fn();
+		const timer = new Timer(callback, 100, { heldBy: ['hover', 'window'], startPaused: true });
+		expect(frames.size).toBe(0);
+		expect(timer.heldBy).toEqual(['hover', 'window', 'pause']);
+		timer.release('hover');
+		timer.resume();
+		run(500);
+		expect(callback).not.toHaveBeenCalled();
+		timer.release('window');
+		run(112);
+		expect(callback).toHaveBeenCalledTimes(1);
+	});
+
+	test('heldBy given one reason holds with that reason', () => {
+		const callback = vi.fn();
+		const timer = new Timer(callback, 100, { heldBy: 'window' });
+		expect(timer.heldBy).toEqual(['window']);
+		timer.release('window');
+		expect(timer.paused).toBe(false);
+		run(112);
+		expect(callback).toHaveBeenCalledTimes(1);
+	});
+
+	test('heldBy and isHeldBy are reactive', () => {
+		const timer = new Timer(vi.fn(), 1000);
+		const reasons: (readonly string[])[] = [];
+		const focus: boolean[] = [];
+		const destroy = $effect.root(() => {
+			$effect(() => {
+				reasons.push(timer.heldBy);
+			});
+			$effect(() => {
+				focus.push(timer.isHeldBy('focus'));
+			});
+		});
+		flushSync();
+		timer.hold('hover');
+		flushSync();
+		timer.hold('focus');
+		flushSync();
+		timer.release('hover');
+		flushSync();
+		destroy();
+		expect(reasons).toEqual([[], ['hover'], ['hover', 'focus'], ['focus']]);
+		expect(focus[0]).toBe(false);
+		expect(focus.at(-1)).toBe(true);
+	});
+
+	test('a hold inside an effect does not subscribe that effect to other reasons', () => {
+		const timer = new Timer(vi.fn(), 1000);
+		let runs = 0;
+		const destroy = $effect.root(() => {
+			$effect(() => {
+				runs += 1;
+				timer.hold('hover');
+			});
+		});
+		flushSync();
+		timer.hold('focus');
+		timer.release('focus');
+		flushSync();
+		destroy();
+		expect(runs).toBe(1);
+	});
+
+	test('update() keeps every hold', () => {
+		const callback = vi.fn();
+		const timer = new Timer(callback, 100);
+		timer.hold('hover');
+		timer.update(200);
+		expect(timer.paused).toBe(true);
+		run(500);
+		expect(callback).not.toHaveBeenCalled();
+		timer.release('hover');
+		run(208);
+		expect(callback).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe('window activity', () => {
+	let visibility: DocumentVisibilityState = 'visible';
+	beforeEach(() => {
+		visibility = 'visible';
+		vi.spyOn(document, 'visibilityState', 'get').mockImplementation(() => visibility);
+	});
+
+	const setVisibility = (next: DocumentVisibilityState) => {
+		visibility = next;
+		// `Document` here carries the library's custom-event overloads; dispatch as a plain target.
+		EventTarget.prototype.dispatchEvent.call(document, new Event('visibilitychange'));
+	};
+
+	test('reports blur, hidden tabs and their end once each', () => {
+		const onChange = vi.fn();
+		const stop = watchWindowActivity(onChange);
+		window.dispatchEvent(new FocusEvent('blur'));
+		setVisibility('hidden');
+		setVisibility('visible');
+		expect(onChange.mock.calls).toEqual([[true]]);
+		window.dispatchEvent(new FocusEvent('focus'));
+		expect(onChange.mock.calls).toEqual([[true], [false]]);
+		// Focus moving between elements is not window activity.
+		const input = document.createElement('input');
+		document.body.append(input);
+		input.focus();
+		input.blur();
+		input.remove();
+		stop();
+		window.dispatchEvent(new FocusEvent('blur'));
+		expect(onChange).toHaveBeenCalledTimes(2);
+	});
+
+	test('a hidden document reports inactive at once', () => {
+		visibility = 'hidden';
+		const onChange = vi.fn();
+		const stop = watchWindowActivity(onChange);
+		expect(onChange.mock.calls).toEqual([[true]]);
+		stop();
+	});
+
+	test('holdWhileWindowInactive holds the timer for the inactive spell only', () => {
+		const callback = vi.fn();
+		const timer = new Timer(callback, 1000);
+		const stop = holdWhileWindowInactive(timer);
+		run(400);
+		setVisibility('hidden');
+		expect(timer.isHeldBy(WINDOW_INACTIVE_REASON)).toBe(true);
+		jump(60_000);
+		setVisibility('visible');
+		frame();
+		expect(callback).not.toHaveBeenCalled();
+		expect(timer.elapsed).toBe(416);
+		window.dispatchEvent(new FocusEvent('blur'));
+		expect(timer.paused).toBe(true);
+		stop();
+		expect(timer.paused).toBe(false);
 	});
 });

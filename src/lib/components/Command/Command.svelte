@@ -65,9 +65,13 @@
 	);
 
 	const id = $props.id();
+	const t = $derived(useI18n());
 
 	const command = new CommandState<Value>({
 		id,
+		get locale() {
+			return t.locale;
+		},
 		get items() {
 			return items;
 		},
@@ -123,7 +127,6 @@
 
 	const classes = $derived(useCommandTheme(theme));
 	const resolvedColor = $derived(useDefaultColor());
-	const t = $derived(useI18n());
 	const resolvedTitle = $derived(title ?? t.commandPalette);
 	const resolvedPlaceholder = $derived(placeholder ?? t.commandPlaceholder);
 	const resolvedEmpty = $derived(empty ?? t.noResults);

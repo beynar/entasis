@@ -79,8 +79,10 @@ default, or inside a modal Dialog (⌘K style) with \`dialog\`.
 - **placeholder**: string (default: 'Type a command or search...')
 - **showInput**: boolean (default: true) - Render the search input row.
 - **shouldFilter**: boolean (default: true) - Filter internally; set false to filter externally.
-- **filter**: (item, search) => boolean - Custom match predicate (defaults to case-insensitive
-  substring match on label + keywords + value).
+- **filter**: (item, search) => boolean - Custom match predicate (defaults to a case- and
+  accent-insensitive substring match on label + keywords + value, compared with
+  \`Intl.Collator\` in the active I18n locale, so "eclair" finds "Éclair"; in Spanish "n" does
+  not find "ñ", which is a letter of its own there).
 
 ### Event Props
 - **onSelect**: (value: string) => void - Activation callback: fires for every selected item (after the item's own onSelect), including a repeat selection of the already-selected command.
