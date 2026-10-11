@@ -262,7 +262,7 @@
 
 		<ComponentCard
 			title="Trigger and open-change details"
-			description="A snippet trigger with {@attach dialog.trigger} gets aria-haspopup, aria-expanded and aria-controls, and focus returns to it. onOpenChange runs before the change with a reason and cancel(): while Keep open is on, Escape and outside presses are cancelled and only the close button closes it."
+			description="A snippet trigger that attaches dialog.trigger gets aria-haspopup, aria-expanded and aria-controls, and focus returns to it. onOpenChange runs before the change with a reason and cancel(): while Keep open is on, Escape and outside presses are cancelled and only the close button closes it."
 			code={`<script lang="ts">
 	import type { OpenChangeDetails } from 'entasis/types';
 
