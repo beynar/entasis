@@ -256,6 +256,41 @@ describe('pin input IME composition', () => {
 		expect(onValueChange).toHaveBeenLastCalledWith('1234');
 	});
 
+	test('the real input hides while composing so the IME marker does not cover the cells', async () => {
+		const { input, rerender, cellText } = setup({ length: 4 });
+		input.focus();
+		await type(input, '12');
+		expect(input).not.toHaveClass('opacity-0');
+
+		await fireEvent.compositionStart(input, { data: '' });
+		await compose(input, '12３４');
+		// The input method draws its marker at the input's own text offset, over the first cell.
+		expect(input).toHaveClass('opacity-0');
+		expect(cellText()).toBe('12３４');
+
+		await fireEvent.compositionEnd(input, { data: '３４' });
+		await tick();
+		expect(input).toHaveValue('1234');
+		expect(input).not.toHaveClass('opacity-0');
+
+		// Every way a composition ends shows the input again: a cancel, a parent value, a refocus.
+		await fireEvent.compositionStart(input, { data: '' });
+		await fireEvent.compositionEnd(input, { data: '' });
+		await tick();
+		expect(input).not.toHaveClass('opacity-0');
+
+		await fireEvent.compositionStart(input, { data: '' });
+		await rerender({ value: '9' });
+		await tick();
+		expect(input).not.toHaveClass('opacity-0');
+
+		await fireEvent.compositionStart(input, { data: '' });
+		input.blur();
+		input.focus();
+		await tick();
+		expect(input).not.toHaveClass('opacity-0');
+	});
+
 	test('a composition that completes the code reports completion', async () => {
 		const { input, onComplete } = setup({ length: 4 });
 		input.focus();

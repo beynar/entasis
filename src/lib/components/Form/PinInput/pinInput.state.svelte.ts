@@ -111,6 +111,11 @@ export class PinInputState {
 		return this.options.value() ?? '';
 	}
 
+	/** Whether an IME composition the cells display is in progress. */
+	get isComposing() {
+		return this.composingValue !== null;
+	}
+
 	get length() {
 		const length = this.options.length();
 		if (!Number.isFinite(length)) return 6;

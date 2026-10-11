@@ -107,7 +107,7 @@ PinInput extends the standard field props:
 - The visible cells are \`aria-hidden\`; assistive tech interacts with one text input.
 - The real input uses \`autocomplete="one-time-code"\` by default.
 - Keyboard navigation, deletion, selection, and paste operate through the native input.
-- Input method (IME) composition, such as Japanese or Chinese input, is left to the input method: the cells show the in-progress text, and the text is checked and committed once when the composition ends. Full-width digits and letters (\`１２３\`) are committed as ASCII (\`123\`).
+- Input method (IME) composition, such as Japanese or Chinese input, is left to the input method: the cells show the in-progress text, and the text is checked and committed once when the composition ends. Full-width digits and letters (\`１２３\`) are committed as ASCII (\`123\`). While composing, the real input turns fully transparent (the \`input\` theme slot's \`composing\` variant, \`opacity-0\`), so the input method's underline or clause highlight does not cover the first cells.
 
 ## Notes
 

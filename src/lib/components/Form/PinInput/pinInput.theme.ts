@@ -30,7 +30,19 @@ const defaultRoot = cva({
 });
 
 const defaultInput = cva({
-	base: 'absolute inset-0 z-10 size-full appearance-none border-0 bg-transparent text-transparent caret-transparent outline-none selection:bg-transparent selection:text-transparent [font-size:16px] disabled:cursor-not-allowed'
+	base: 'absolute inset-0 z-10 size-full appearance-none border-0 bg-transparent text-transparent caret-transparent outline-none selection:bg-transparent selection:text-transparent [font-size:16px] disabled:cursor-not-allowed',
+	variants: {
+		// An input method paints its composition underline or clause highlight whatever the text
+		// color, so the input hides while composing and the cells show the text. It stays opaque
+		// otherwise: iOS offers long-press paste only on a visible input.
+		composing: {
+			true: 'opacity-0',
+			false: ''
+		}
+	},
+	defaultVariants: {
+		composing: false
+	}
 });
 
 const defaultCell = cva({
