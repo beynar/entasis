@@ -147,13 +147,17 @@
 		class={classes.countryList({ class: theme?.countryList?.base })}
 	>
 		<!-- The empty message lives OUTSIDE the listbox: a listbox may only own options and groups
-		     (aria-required-children). role="status" announces it politely when the search empties
-		     the list. -->
-		{#if filteredCountries.length === 0}
-			<div role="status" class={classes.countryEmpty({ size, class: theme?.countryEmpty?.base })}>
-				{t.noCountries}
-			</div>
-		{/if}
+		     (aria-required-children). The role="status" region stays mounted (empty and unstyled
+		     while countries match) because screen readers skip a live region that mounts already
+		     filled; filling it when the search empties the list announces it politely. -->
+		<div
+			role="status"
+			class={filteredCountries.length === 0
+				? classes.countryEmpty({ size, class: theme?.countryEmpty?.base })
+				: undefined}
+		>
+			{#if filteredCountries.length === 0}{t.noCountries}{/if}
+		</div>
 		<!-- Kept mounted while empty (hidden) so the search input's aria-controls always resolves. -->
 		<div
 			id={listboxId}

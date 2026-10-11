@@ -10,24 +10,6 @@
 		"reason": "@pierre/diffs paints its own line-number and count colours inside the diffs-container shadow tree"
 	},
 	{
-		"route": "^/components/(select \\(long listbox open\\)|(combobox|tags-input) \\(listbox open\\))$",
-		"ruleId": "aria-required-children",
-		"match": "[role=scrollbar]",
-		"reason": "An overflowing list's ScrollArea renders its role=scrollbar inside the listbox. Owned by lane B7 (DF-16, scrollbars get aria-hidden; SC-1). Remove this entry with that change; the open-popup sweep fails while it suppresses nothing."
-	},
-	{
-		"route": "^/components/select \\(grouped listbox open\\)$",
-		"ruleId": "aria-required-children",
-		"match": "[role=separator]",
-		"reason": "Select renders role=separator between groups inside the listbox. Owned by lane B7 (SC-1, the separator becomes presentation). Remove this entry with that change."
-	},
-	{
-		"route": "^/components/phone \\(no countries found\\)$",
-		"ruleId": "aria-required-children",
-		"match": "Required ARIA children role not present",
-		"reason": "The country picker's empty message is a plain div and the listbox's only child. Owned by lane B7 (SC-1, the empty state moves outside the listbox as a status). Remove this entry with that change."
-	},
-	{
 		"route": "^/components/(combobox|tags-input) \\(no options found\\)$",
 		"ruleId": "aria-required-children",
 		"match": "[role=status]",
@@ -37,5 +19,10 @@
 		"route": "^/components/dialog \\(dialog open\\)$",
 		"ruleId": "button-name",
 		"reason": "Dialog's default close button is an icon-only Button without an accessible name. Found by the open-popup sweep (E2E-1); the fix belongs to the Dialog lane (C1). Remove this entry with that change."
+	},
+	{
+		"route": "^/components/select \\(long listbox open\\)$",
+		"ruleId": "scrollable-region-focusable",
+		"reason": "The overflowing Select list scrolls in a presentational ScrollArea viewport inside the listbox, with no tab stop: the trigger's aria-activedescendant navigation scrolls the highlighted option into view. Owned by lane C5 (SC-1c, the listbox owns the scroll viewport). Remove this entry with that change."
 	}
 ]

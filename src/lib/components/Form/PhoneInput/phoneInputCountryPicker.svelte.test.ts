@@ -37,18 +37,22 @@ describe('PhoneInput country listbox', () => {
 		const children = Array.from(listbox().children);
 		expect(children).toHaveLength(2);
 		expect(children.every((child) => child.getAttribute('role') === 'option')).toBe(true);
-		expect(screen.queryByRole('status')).toBeNull();
+		expect(screen.getByRole('status')).toBeEmptyDOMElement();
 	});
 
 	test('announces an empty search through a status outside the listbox', async () => {
 		renderPicker();
+		// The live region exists, empty, before the search empties the list: screen readers skip a
+		// region that mounts already filled.
+		const status = screen.getByRole('status');
+		expect(status).toBeEmptyDOMElement();
 
 		await fireEvent.input(screen.getByPlaceholderText('Search countries'), {
 			target: { value: 'atlantis' }
 		});
 
-		const status = await screen.findByRole('status');
-		expect(status).toHaveTextContent('No countries found');
+		await waitFor(() => expect(status).toHaveTextContent('No countries found'));
+		expect(screen.getByRole('status')).toBe(status);
 		expect(listbox().contains(status)).toBe(false);
 		// The empty listbox stays mounted for the search input's aria-controls, but hidden.
 		await waitFor(() => expect(listbox()).toHaveAttribute('hidden'));

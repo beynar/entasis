@@ -272,7 +272,7 @@ PhoneInput validates:
 
 - Proper label association
 - Country selector is keyboard accessible: the search input is a \`role="combobox"\` that drives the country \`role="listbox"\` through \`aria-activedescendant\`
-- When the search matches no country, "No countries found" renders outside the listbox as a polite \`role="status"\`, the empty listbox is hidden and the search combobox reports \`aria-expanded="false"\`
+- When the search matches no country, "No countries found" fills a polite \`role="status"\` region that stays mounted outside the listbox (so it is announced), the empty listbox is hidden and the search combobox reports \`aria-expanded="false"\`
 - ARIA attributes for required state
 - Error messages announced
 - Focus management between country and number
