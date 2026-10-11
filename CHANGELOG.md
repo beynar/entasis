@@ -66,6 +66,9 @@ Unreleased section under the new version.
   for `autocomplete="current-password"`. An empty required password reports one message instead of
   two, and a too-short value shows the localized `passwordTooShort` message instead of the
   validation library's text. `fieldSchemas.password` keeps its 6-character minimum.
+- `PinInput`: `onComplete` also runs for every paste or autofill that leaves the code complete,
+  even when the code was already complete or unchanged, so pasting a code again retries
+  verification. Typing over one cell of a complete code still does not call it.
 
 ### Removed
 
@@ -173,6 +176,16 @@ Unreleased section under the new version.
   other listener runs. A loading button used as a `Popover` or menu trigger
   (`{@attach popover.trigger}`) no longer opens its panel. A loading link inside portaled content
   (`Popover`, `Dialog`, `Drawer`) no longer navigates through the SvelteKit router.
+- `PinInput`: pasting a full code after a partial entry, or onto a complete code, now replaces the
+  whole value instead of splicing the paste in at the caret. Typing 12 and then pasting 123456 used
+  to give 121234. The check runs after `pasteTransformer`, so a cleaned `123-456` also replaces the
+  code.
+- `PinInput`: Japanese and Chinese input methods now work. The field waits for the composition to
+  end before checking and committing the text, shows the in-progress text in the cells, and commits
+  full-width digits and letters (１２３) as ASCII. Rejected or cancelled compositions restore the
+  previous code and selection. While a composition is in progress the hidden native input turns
+  fully transparent, so the input method's underline or highlight is not drawn over the first cell.
+  Theme authors can restyle this with the new `composing` variant of the `input` theme slot.
 
 ## 0.11.0 — 2026-10-10
 
