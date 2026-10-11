@@ -137,13 +137,15 @@
 			{autocomplete}
 			disabled={field.disabled}
 			aria-label={label ? undefined : 'One-time code'}
-			class={classes.input()}
+			class={classes.input({ composing: state.isComposing })}
 			data-pin-input-input
 			data-pin-input-input-mss={state.selectionStart}
 			data-pin-input-input-mse={state.selectionEnd}
 			onpointerdown={state.handlePointerDown}
 			onkeydown={state.handleKeydown}
 			oninput={state.handleInput}
+			oncompositionstart={state.handleCompositionStart}
+			oncompositionend={state.handleCompositionEnd}
 			onpaste={state.handlePaste}
 			onfocus={state.handleFocus}
 			onblur={state.handleBlur}
