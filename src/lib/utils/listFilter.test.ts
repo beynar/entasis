@@ -31,6 +31,25 @@ describe('createListFilter', () => {
 		expect(en.contains('Isparta', 'isparta')).toBe(true);
 	});
 
+	test('combining marks the sensitivity ignores do not shift the compared text', () => {
+		const ar = createListFilter({ locale: 'ar' });
+		expect(ar.contains('مُحَمَّد', 'محمد')).toBe(true);
+		expect(ar.contains('النبي مُحَمَّد', 'محمد')).toBe(true);
+		expect(ar.contains('محمد', 'مُحَمَّد')).toBe(true);
+		expect(ar.startsWith('مُحَمَّد علي', 'محمد')).toBe(true);
+		expect(ar.startsWith('علي مُحَمَّد', 'محمد')).toBe(false);
+		expect(ar.contains('مُحَمَّد', 'احمد')).toBe(false);
+		expect(createListFilter({ locale: 'he' }).contains('שָׁלוֹם', 'שלום')).toBe(true);
+		// Marks that carry meaning at this sensitivity still count: Devanagari vowel signs.
+		const hi = createListFilter({ locale: 'hi' });
+		expect(hi.contains('कीमत', 'कि')).toBe(false);
+		expect(hi.contains('नकिता', 'कि')).toBe(true);
+		// And every mark counts once the sensitivity keeps accents.
+		expect(
+			createListFilter({ locale: 'ar', sensitivity: 'accent' }).contains('مُحَمَّد', 'محمد')
+		).toBe(false);
+	});
+
 	test('respects a stricter sensitivity', () => {
 		const accents = createListFilter({ locale: 'en', sensitivity: 'accent' });
 		expect(accents.contains('Éclair', 'eclair')).toBe(false);
@@ -81,6 +100,13 @@ describe('createListFilter', () => {
 		);
 		expect(results).toEqual(['item 0', 'item 1', 'item 2', 'item 3', 'item 4']);
 		expect(match).toHaveBeenCalledTimes(5);
+	});
+
+	test('an option given as undefined keeps the default and shares its filter', () => {
+		const forwarded = createListFilter({ locale: 'en-GB', sensitivity: undefined });
+		expect(forwarded.contains('Éclair', 'eclair')).toBe(true);
+		expect(createListFilter({ locale: 'en-GB' })).toBe(forwarded);
+		expect(createListFilter({ locale: 'en-GB' }).contains('Éclair', 'eclair')).toBe(true);
 	});
 
 	test('shares one filter per locale and options', () => {

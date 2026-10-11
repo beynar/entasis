@@ -41,15 +41,29 @@ test('a closed hiddenUntilFound panel takes no space and opens at once on a frag
 	expect(panel().getAttribute('hidden')).toBe('until-found');
 	expect(height()).toBe(0);
 
+	// What the first frame after the reveal shows, before any animation could have run.
+	const firstFrame = new Promise<{ height: number; animations: number; afterOpen: number }>(
+		(resolve) =>
+			panel().addEventListener(
+				'beforematch',
+				() =>
+					requestAnimationFrame(() =>
+						resolve({
+							height: height(),
+							animations: panel().getAnimations().length,
+							afterOpen: onAfterOpen.mock.calls.length
+						})
+					),
+				{ once: true }
+			)
+	);
 	// Navigating to an element inside the panel fires `beforematch`, like find-in-page does.
 	location.hash = '#disclosure-secret';
-	await expect.poll(() => onAfterOpen.mock.calls.length).toBe(1);
+	// Revealed without animation: the match is laid out at full height straight away.
+	expect(await firstFrame).toEqual({ height: FINDABLE_HEIGHT, animations: 0, afterOpen: 1 });
 	expect(onBeforeMatch).toHaveBeenCalledOnce();
 	expect(panel().hasAttribute('hidden')).toBe(false);
 	expect(panel().hasAttribute('data-open')).toBe(true);
-	// Revealed without animation: the match is laid out at full height straight away.
-	expect(height()).toBe(FINDABLE_HEIGHT);
-	expect(panel().getAnimations()).toHaveLength(0);
 });
 
 test('a refused find-in-page open hides the content again, still findable', async () => {
@@ -97,6 +111,67 @@ test('opening animates the height from 0 and reports once when the animation end
 	expect(panel().style.getPropertyValue('--disclosure-panel-height')).toBe('auto');
 	expect(panel().style.overflow).toBe('');
 	expect(panel().getAnimations()).toHaveLength(0);
+});
+
+test('a panel sized by --disclosure-panel-height animates to its content height', async () => {
+	const onAfterOpen = vi.fn();
+	await render(DisclosurePanelHarness, {
+		props: {
+			keepMounted: true,
+			panelStyle: 'margin: 0; height: var(--disclosure-panel-height)',
+			motion: { in: { duration: 300, easing: 'linear' } },
+			onAfterOpen
+		}
+	});
+	await toggle();
+	await nextFrame();
+	await nextFrame();
+	const midway = height();
+	expect(midway).toBeGreaterThan(0);
+	expect(midway).toBeLessThan(FINDABLE_HEIGHT);
+	await expect.poll(() => onAfterOpen.mock.calls.length).toBe(1);
+	expect(height()).toBe(FINDABLE_HEIGHT);
+});
+
+test('a delayed open stays collapsed through the delay', async () => {
+	const onAfterOpen = vi.fn();
+	await render(DisclosurePanelHarness, {
+		props: {
+			keepMounted: true,
+			panelStyle: PANEL_STYLE,
+			motion: { in: { duration: 200, delay: 400, easing: 'linear' } },
+			onAfterOpen
+		}
+	});
+	await toggle();
+	await nextFrame();
+	await nextFrame();
+	expect(panel().hasAttribute('data-entering')).toBe(true);
+	expect(height()).toBe(0);
+	await expect.poll(() => onAfterOpen.mock.calls.length).toBe(1);
+	expect(height()).toBe(NATURAL_HEIGHT);
+});
+
+test('a delayed close holds the height it reverses from through the delay', async () => {
+	await render(DisclosurePanelHarness, {
+		props: {
+			keepMounted: true,
+			panelStyle: PANEL_STYLE,
+			motion: {
+				in: { duration: 600, easing: 'linear' },
+				out: { duration: 200, delay: 400, easing: 'linear' }
+			}
+		}
+	});
+	await toggle();
+	await expect.poll(height).toBeGreaterThan(30);
+	await nextFrame();
+	const before = height();
+	toggleNow();
+	await nextFrame();
+	await nextFrame();
+	expect(panel().hasAttribute('data-exiting')).toBe(true);
+	expect(Math.abs(height() - before)).toBeLessThan(1);
 });
 
 test('a close during the open reverses from the current height and reports only the close', async () => {

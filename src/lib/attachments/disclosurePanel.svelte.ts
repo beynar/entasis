@@ -254,11 +254,13 @@ export class DisclosurePanel {
 		);
 		this.#restoreOverflow = overrideStyle(element, 'overflow', 'hidden');
 		const id = ++this.#animationId;
+		// `both`: the first keyframe holds through a delay, so the panel doesn't show at its final
+		// or CSS height first, and the last one holds until `#finish` settles the styles.
 		const animation = element.animate([from, to], {
 			duration: timing.duration,
 			delay: timing.delay,
 			easing: timing.easing,
-			fill: 'forwards'
+			fill: 'both'
 		});
 		this.#animation = animation;
 		animation.onfinish = () => {

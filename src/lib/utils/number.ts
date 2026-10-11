@@ -132,6 +132,13 @@ const PERCENT_TEST_RE = new RegExp(PERCENT_RE.source, 'u');
 const PERMILLE_TEST_RE = new RegExp(PERMILLE_RE.source, 'u');
 const SPACE_RE = /\p{Zs}/gu;
 const SPACE_CHAR_RE = /^\p{Zs}$/u;
+// Every space separator (`\p{Zs}`). The parser drops them all, so where a format renders a space
+// the user may type or paste any of them: plain, no-break, narrow no-break, thin, figure…
+const SPACE_SEPARATORS = [
+	...' \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000'
+];
+// Both apostrophes group digits in Swiss locales; the parser reads either one.
+const APOSTROPHES = ["'", '\u2019'];
 
 /** The symbols a locale and format use around the digits. */
 export type NumberSymbols = {
@@ -139,9 +146,12 @@ export type NumberSymbols = {
 	decimal: string;
 	/** Grouping separator, when the format groups digits. */
 	group?: string;
-	/** Currency symbol, code or name, for currency formats. */
-	currency?: string;
-	/** Unit labels (`km/h`, `°C`), for unit formats. */
+	/**
+	 * Currency symbol, code or name, for currency formats: one entry per plural form of a name
+	 * (`US dollar`, `US dollars`).
+	 */
+	currencies: string[];
+	/** Unit labels (`km/h`, `°C`), one entry per plural form (`day`, `days`), for unit formats. */
 	units: string[];
 	/** Exponent separator (`E`), for scientific and engineering notation. */
 	exponentSeparator?: string;
@@ -149,9 +159,35 @@ export type NumberSymbols = {
 	percentSign?: string;
 	/** Other literal text the format renders (spaces, parentheses). */
 	literals: string[];
+	/**
+	 * Whole texts the format renders without digits, with the value each spells out: Arabic and
+	 * Hebrew write one or two of a unit as the word alone (`يومان`, two days).
+	 */
+	spelledValues: ReadonlyMap<string, number>;
 };
 
 const SAMPLE_VALUE = -11111.1;
+// One value in each plural category of every CLDR locale (zero, one, two, few, many and other,
+// with and without fraction digits), so every plural form of a unit label or currency name is
+// read: `1 day` and `2 days`, `1 litre` and `1,5 litre`, Arabic's dual and plural forms.
+const PLURAL_SAMPLES = [0, 1, 2, 3, 5, 6, 7, 11, 21, 100, 1_000_000, 0.5, 1.5];
+
+const formatSamples = (
+	values: readonly number[],
+	locale?: NumberLocale,
+	options?: Intl.NumberFormatOptions
+) => {
+	const formatter = getNumberFormatter(locale, options);
+	return values.flatMap((value) => formatter.formatToParts(value));
+};
+
+const addOnce = (list: string[], value: string) => {
+	if (value !== '' && !list.includes(value)) list.push(value);
+};
+
+// How a whole text is compared with `spelledValues`: without bidi marks, with plain spaces.
+const spelledKey = (text: string) => stripBidiMarks(text).replace(SPACE_RE, ' ').trim();
+
 const symbolsCache = new Map<string, NumberSymbols>();
 
 /**
@@ -166,22 +202,35 @@ export const getNumberSymbols = (
 	const cached = symbolsCache.get(key);
 	if (cached) return cached;
 
+	const spelledValues = new Map<string, number>();
+	const formatter = getNumberFormatter(locale, options);
 	const parts = [
-		...getNumberFormatter(locale, options).formatToParts(SAMPLE_VALUE),
-		...getNumberFormatter(locale, { ...options, signDisplay: 'always' }).formatToParts(
-			-SAMPLE_VALUE
-		)
+		...[SAMPLE_VALUE, ...PLURAL_SAMPLES].flatMap((value) => {
+			const valueParts = formatter.formatToParts(value);
+			const text = spelledKey(valueParts.map((part) => part.value).join(''));
+			if (!valueParts.some((part) => part.type === 'integer') && !spelledValues.has(text)) {
+				spelledValues.set(text, value);
+			}
+			return valueParts;
+		}),
+		...formatSamples([-SAMPLE_VALUE], locale, { ...options, signDisplay: 'always' })
 	];
-	const symbols: NumberSymbols = { decimal: '.', units: [], literals: [] };
+	const symbols: NumberSymbols = {
+		decimal: '.',
+		currencies: [],
+		units: [],
+		literals: [],
+		spelledValues
+	};
 	for (const part of parts) {
+		// Parsed text loses its bidi marks first, so the decorations it is matched against do too.
+		const value = stripBidiMarks(part.value);
 		if (part.type === 'group') symbols.group = part.value;
-		else if (part.type === 'currency') symbols.currency = part.value;
-		else if (part.type === 'unit' && !symbols.units.includes(part.value))
-			symbols.units.push(part.value);
+		else if (part.type === 'currency') addOnce(symbols.currencies, value);
+		else if (part.type === 'unit') addOnce(symbols.units, value);
 		else if (part.type === 'exponentSeparator') symbols.exponentSeparator = part.value;
 		else if (part.type === 'percentSign') symbols.percentSign = part.value;
-		else if (part.type === 'literal' && !symbols.literals.includes(part.value))
-			symbols.literals.push(part.value);
+		else if (part.type === 'literal') addOnce(symbols.literals, value);
 	}
 	// Integer formats render no decimal separator, but the locale still has one to type.
 	for (const part of getNumberFormatter(locale).formatToParts(0.1)) {
@@ -211,8 +260,10 @@ const NUMBER_BODY_RE = /^(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/;
  *   typed with a plain space parses in `fr`.
  * - The locale's decimal separator, the full-width period and the Arabic decimal separator read as
  *   the decimal point. When several points remain, the last one is the decimal point.
- * - Currency symbols, unit labels and literals of the format are ignored; Unicode minus signs,
- *   a trailing minus (`5-`) and accounting parentheses (`(5)`) read as negative.
+ * - Currency symbols, unit labels (in every plural form) and literals of the format are ignored;
+ *   Unicode minus signs, a trailing minus (`5-`) and accounting parentheses (`(5)`) read as
+ *   negative. A plural form the format writes without digits (Arabic `يومان`, two days) reads as
+ *   the value it spells out.
  * - Percent text (a percent sign, or `style: 'percent'`) is divided by 100, per-mille by 1000.
  *
  * Without a `locale`, Arabic-script digits read with `ar` separators and Han digits with `zh`.
@@ -239,15 +290,16 @@ export const parseNumber = (
 		else if (HAN_DIGIT_RE.test(input)) computedLocale = 'zh';
 	}
 	const symbols = getNumberSymbols(computedLocale, options);
+	const spelled = symbols.spelledValues.get(spelledKey(input));
+	if (spelled !== undefined) return negative ? -spelled : spelled;
 
 	const hasPercent = PERCENT_TEST_RE.test(input);
 	const hasPermille = PERMILLE_TEST_RE.test(input);
 
 	// Decorations go first, so a currency symbol made of letters never reaches the number body.
-	if (symbols.currency) input = input.split(symbols.currency).join('');
-	for (const unit of [...symbols.units].sort((a, b) => b.length - a.length)) {
-		input = input.split(unit).join('');
-	}
+	// Longest first, so `US dollars` goes whole rather than leaving the `s` of `US dollar`.
+	const labels = [...symbols.currencies, ...symbols.units].sort((a, b) => b.length - a.length);
+	for (const label of labels) input = input.split(label).join('');
 	input = input.replace(PERCENT_RE, '').replace(PERMILLE_RE, '');
 	for (const literal of symbols.literals) {
 		if (/^[\p{Zs}()]*$/u.test(literal)) continue;
@@ -303,9 +355,11 @@ const allowedCache = new Map<string, ReadonlySet<string>>();
 
 /**
  * The non-digit characters number text in `locale` and `options` may contain, read per character
- * from `formatToParts`: separators, currency and unit characters, signs, percent and per-mille
- * variants, and a plain space when the locale groups with a space. Digits of every supported
- * numeral system are accepted separately by `isNumberText`.
+ * from `formatToParts` of positive, negative and plural sample values: separators, currency and
+ * unit characters in every plural form, signs, accounting parentheses, percent and per-mille
+ * variants, every space separator when the format renders a space, and both apostrophes when it
+ * groups with one. Digits of every supported numeral system are accepted separately by
+ * `isNumberText`.
  */
 export const getNumberCharacters = (
 	locale?: NumberLocale,
@@ -317,14 +371,18 @@ export const getNumberCharacters = (
 	if (cached) return cached;
 
 	const characters = new Set<string>(COMMON_SEPARATORS);
-	const parts = getNumberFormatter(locale, options).formatToParts(-SAMPLE_VALUE);
-	for (const part of parts) {
+	// The negative sample brings what only negative text renders, such as accounting parentheses.
+	const samples = [-SAMPLE_VALUE, ...PLURAL_SAMPLES, ...(allowNegative ? [SAMPLE_VALUE] : [])];
+	for (const part of formatSamples(samples, locale, options)) {
 		// Compact suffixes (`K`, `M`) cannot be parsed back, so they stay out.
 		if (['integer', 'fraction', 'exponentInteger', 'compact', 'minusSign'].includes(part.type)) {
 			continue;
 		}
-		for (const char of part.value) characters.add(char);
-		if (SPACE_CHAR_RE.test(part.value)) characters.add(' ');
+		for (const char of part.value) {
+			characters.add(char);
+			if (SPACE_CHAR_RE.test(char)) SPACE_SEPARATORS.forEach((space) => characters.add(space));
+			if (APOSTROPHES.includes(char)) APOSTROPHES.forEach((mark) => characters.add(mark));
+		}
 	}
 	characters.add(getNumberSymbols(locale, options).decimal);
 
@@ -400,16 +458,27 @@ export const cleanFloatingPoint = (value: number): number => {
  */
 export const roundToFormat = (value: number, options?: Intl.NumberFormatOptions): number => {
 	if (!Number.isFinite(value) || !hasRoundingOptions(options)) return value;
-	// Decorations that don't change the rounded number are neutralized so the text parses back.
+	// Decorations that don't change the rounded number are neutralized, and the rounded digits are
+	// read from the parts, so no unit label, currency name or sign style has to be parsed back.
 	const formatter = getNumberFormatter('en-US', {
 		...options,
 		signDisplay: 'auto',
 		currencySign: 'standard',
 		notation: options?.notation === 'compact' ? 'standard' : options?.notation,
+		numberingSystem: 'latn',
 		useGrouping: false
 	} as Intl.NumberFormatOptions);
-	const text = formatter.format(value);
-	const rounded = parseNumber(text, 'en-US', options);
-	if (rounded === null) return value;
-	return formatter.format(rounded) === text ? rounded : value;
+	let text = '';
+	for (const part of formatter.formatToParts(value)) {
+		if (part.type === 'integer' || part.type === 'fraction' || part.type === 'exponentInteger') {
+			text += part.value;
+		} else if (part.type === 'decimal') text += '.';
+		else if (part.type === 'minusSign' || part.type === 'exponentMinusSign') text += '-';
+		else if (part.type === 'exponentSeparator') text += 'e';
+	}
+	let rounded = Number(text);
+	if (options?.style === 'percent') rounded = shiftDecimal(rounded, -2);
+	if (text === '' || !Number.isFinite(rounded)) return value;
+	// `-0` would format as "-0".
+	return rounded === 0 ? 0 : rounded;
 };

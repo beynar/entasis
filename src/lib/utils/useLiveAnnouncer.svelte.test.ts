@@ -1,5 +1,7 @@
+import { render, screen } from '@testing-library/svelte';
 import { flushSync } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import LiveRegionsListHarness from './LiveRegionsListHarness.test.svelte';
 import { useLiveAnnouncer, useLiveRegions } from './useLiveAnnouncer.svelte.js';
 
 const flush = () => new Promise<void>((resolve) => queueMicrotask(() => resolve()));
@@ -143,6 +145,34 @@ describe('useLiveRegions', () => {
 		await vi.advanceTimersByTimeAsync(200);
 		flushSync();
 		expect(region(host, 'polite').textContent).toBe('');
+	});
+
+	it('keeps the regions when Svelte empties a host whose only child is a list', async () => {
+		const { component, rerender } = render(LiveRegionsListHarness, { items: ['a', 'b'] });
+		const host = screen.getByTestId('host');
+		expect(host.querySelectorAll('[data-live-region]')).toHaveLength(2);
+
+		component.announce('2 results');
+		await flush();
+		flushSync();
+		expect(region(host, 'polite').textContent).toBe('2 results');
+
+		await rerender({ items: [] });
+		await flush();
+		expect(host.querySelectorAll('li')).toHaveLength(0);
+		expect(host.querySelectorAll('[data-live-region]')).toHaveLength(2);
+		expect(region(host, 'polite').textContent).toBe('2 results');
+
+		component.announce('No results');
+		await flush();
+		flushSync();
+		expect(region(host, 'polite').isConnected).toBe(true);
+		expect(region(host, 'polite').textContent).toBe('No results');
+
+		// The list renders again ahead of the regions.
+		await rerender({ items: ['c'] });
+		expect(host.querySelectorAll('li')).toHaveLength(1);
+		expect(host.querySelectorAll('[data-live-region]')).toHaveLength(2);
 	});
 
 	it('removes the regions with the host', () => {

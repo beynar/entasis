@@ -128,7 +128,7 @@ describe('disclosurePanel', () => {
 		expect(panel()).toHaveAttribute('data-closed', '');
 		expect(panel()).toHaveAttribute('data-exiting', '');
 		expect(animations[0].keyframes).toEqual([NATURAL, COLLAPSED]);
-		expect(animations[0].options).toMatchObject({ duration: 100, fill: 'forwards' });
+		expect(animations[0].options).toMatchObject({ duration: 100, fill: 'both' });
 
 		animations[0].finish();
 		expect(onAfterClose).toHaveBeenCalledOnce();

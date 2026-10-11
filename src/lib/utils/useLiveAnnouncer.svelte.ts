@@ -105,7 +105,9 @@ const VISUALLY_HIDDEN: Record<string, string> = {
  * Attach `host` once to an element that is always rendered and stays in the accessibility tree
  * (no `hidden`, `display: none` or `visibility: hidden` ancestor). It inserts both regions empty
  * as soon as it mounts, so they exist before the first announcement, and holds messages until
- * the regions have settled. Removing the host removes the regions.
+ * the regions have settled. The host may render its own children: when Svelte empties it (a
+ * host whose only child is an `{#each}` is cleared at once when the list empties), the regions
+ * are put back with their text. Removing the host removes the regions.
  */
 export const useLiveRegions = (
 	baseId: string,
@@ -140,6 +142,16 @@ export const useLiveRegions = (
 			};
 			const politeRegion = createRegion(polite);
 			const assertiveRegion = createRegion(assertive);
+			// Svelte empties a host whose only child is an `{#each}` with `textContent = ''` once
+			// the list is empty, taking the regions along: put them back as soon as that happens.
+			const restore = () => {
+				for (const region of [politeRegion, assertiveRegion]) {
+					if (region.parentNode !== node) node.append(region);
+				}
+			};
+			const observer =
+				typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(restore);
+			observer?.observe(node, { childList: true });
 
 			let settled = $state(settleDelay <= 0);
 			const settleTimer =
@@ -147,12 +159,15 @@ export const useLiveRegions = (
 
 			$effect(() => {
 				politeRegion.textContent = settled ? polite.message : '';
+				restore();
 			});
 			$effect(() => {
 				assertiveRegion.textContent = settled ? assertive.message : '';
+				restore();
 			});
 
 			return () => {
+				observer?.disconnect();
 				clearTimeout(settleTimer);
 				cancelClear('polite');
 				cancelClear('assertive');

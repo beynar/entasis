@@ -1,12 +1,14 @@
+import { untrack } from 'svelte';
+
 export type TimerOptions = {
 	/** Creates the timer held by `pause()`: it counts nothing until `resume()`. @default false */
 	startPaused?: boolean;
 	/**
-	 * Reasons that hold the timer from the start, such as `'hover'` or `'window'` when the
-	 * pointer or an inactive window already pauses its owner. It counts nothing until each one is
-	 * released.
+	 * Reason, or reasons, that hold the timer from the start, such as `'hover'` or `'window'` when
+	 * the pointer or an inactive window already pauses its owner. It counts nothing until each one
+	 * is released.
 	 */
-	heldBy?: Iterable<string>;
+	heldBy?: string | Iterable<string>;
 };
 
 /** The reason `pause()` holds and `resume()` releases. */
@@ -28,8 +30,12 @@ export class Timer {
 	private startTime: number = 0;
 	private pausedTime: number = 0;
 	private callback: () => void;
-	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- read imperatively; `held` is the reactive mirror
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- read imperatively, so `hold()` in an effect doesn't subscribe it; `held` and `revision` are the reactive mirrors
 	private holds = new Set<string>();
+	// Bumped on every hold and release, so `heldBy` and `isHeldBy` are reactive.
+	private revision = $state(0);
+	// Bumps `revision` without reading it, so a `hold()` inside an effect doesn't subscribe it.
+	private touch = () => untrack(() => (this.revision += 1));
 	// Set once the callback ran or the timer was destroyed; only `update()` restarts it.
 	private stopped: boolean = false;
 	private held = $state(false);
@@ -48,7 +54,7 @@ export class Timer {
 		this.callback = callback;
 		this.delay = delay;
 		this.remaining = delay;
-		for (const reason of heldBy) this.holds.add(reason);
+		for (const reason of typeof heldBy === 'string' ? [heldBy] : heldBy) this.holds.add(reason);
 		if (startPaused) this.holds.add(PAUSE_REASON);
 		this.held = this.holds.size > 0;
 		if (delay > 0 && !this.held) {
@@ -61,13 +67,17 @@ export class Timer {
 		return this.held;
 	}
 
-	/** The reasons currently holding the countdown, in the order they were added. */
+	/** The reasons currently holding the countdown, in the order they were added. Reactive. */
 	get heldBy(): readonly string[] {
+		void this.revision;
 		return [...this.holds];
 	}
 
-	/** Whether `reason` currently holds the countdown. */
-	isHeldBy = (reason: string) => this.holds.has(reason);
+	/** Whether `reason` currently holds the countdown. Reactive. */
+	isHeldBy = (reason: string) => {
+		void this.revision;
+		return this.holds.has(reason);
+	};
 
 	start = () => {
 		this.cancelFrame();
@@ -82,6 +92,7 @@ export class Timer {
 	hold = (reason: string) => {
 		if (this.holds.has(reason)) return;
 		this.holds.add(reason);
+		this.touch();
 		if (this.holds.size > 1) return;
 		this.cancelFrame();
 		this.pausedTime = this.elapsed;
@@ -93,7 +104,9 @@ export class Timer {
 	 * had left. Releasing a reason that doesn't hold it changes nothing.
 	 */
 	release = (reason: string) => {
-		if (!this.holds.delete(reason) || this.holds.size > 0) return;
+		if (!this.holds.delete(reason)) return;
+		this.touch();
+		if (this.holds.size > 0) return;
 		this.held = false;
 		if (this.stopped || this.delay <= 0) return;
 		this.startTime = performance.now() - this.pausedTime;

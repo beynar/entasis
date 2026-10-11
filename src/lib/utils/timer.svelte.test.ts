@@ -1,3 +1,4 @@
+import { flushSync } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
 	holdWhileWindowInactive,
@@ -196,6 +197,58 @@ describe('Timer', () => {
 		timer.release('window');
 		run(112);
 		expect(callback).toHaveBeenCalledTimes(1);
+	});
+
+	test('heldBy given one reason holds with that reason', () => {
+		const callback = vi.fn();
+		const timer = new Timer(callback, 100, { heldBy: 'window' });
+		expect(timer.heldBy).toEqual(['window']);
+		timer.release('window');
+		expect(timer.paused).toBe(false);
+		run(112);
+		expect(callback).toHaveBeenCalledTimes(1);
+	});
+
+	test('heldBy and isHeldBy are reactive', () => {
+		const timer = new Timer(vi.fn(), 1000);
+		const reasons: (readonly string[])[] = [];
+		const focus: boolean[] = [];
+		const destroy = $effect.root(() => {
+			$effect(() => {
+				reasons.push(timer.heldBy);
+			});
+			$effect(() => {
+				focus.push(timer.isHeldBy('focus'));
+			});
+		});
+		flushSync();
+		timer.hold('hover');
+		flushSync();
+		timer.hold('focus');
+		flushSync();
+		timer.release('hover');
+		flushSync();
+		destroy();
+		expect(reasons).toEqual([[], ['hover'], ['hover', 'focus'], ['focus']]);
+		expect(focus[0]).toBe(false);
+		expect(focus.at(-1)).toBe(true);
+	});
+
+	test('a hold inside an effect does not subscribe that effect to other reasons', () => {
+		const timer = new Timer(vi.fn(), 1000);
+		let runs = 0;
+		const destroy = $effect.root(() => {
+			$effect(() => {
+				runs += 1;
+				timer.hold('hover');
+			});
+		});
+		flushSync();
+		timer.hold('focus');
+		timer.release('focus');
+		flushSync();
+		destroy();
+		expect(runs).toBe(1);
 	});
 
 	test('update() keeps every hold', () => {

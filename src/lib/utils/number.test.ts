@@ -52,7 +52,21 @@ describe('formatNumber', () => {
 
 	test('symbols keep the locale decimal for integer formats', () => {
 		expect(getNumberSymbols('de', { maximumFractionDigits: 0 }).decimal).toBe(',');
-		expect(getNumberSymbols('en-US', { style: 'currency', currency: 'EUR' }).currency).toBe('€');
+		expect(getNumberSymbols('en-US', { style: 'currency', currency: 'EUR' }).currencies).toEqual([
+			'€'
+		]);
+	});
+
+	test('symbols hold every plural form of unit labels and currency names', () => {
+		const days = getNumberSymbols('en', { style: 'unit', unit: 'day', unitDisplay: 'long' });
+		expect(days.units).toEqual(expect.arrayContaining(['day', 'days']));
+		const dollars = getNumberSymbols('en', {
+			style: 'currency',
+			currency: 'USD',
+			currencyDisplay: 'name',
+			maximumFractionDigits: 0
+		});
+		expect(dollars.currencies).toEqual(expect.arrayContaining(['US dollar', 'US dollars']));
 	});
 });
 
@@ -100,6 +114,31 @@ describe('parseNumber', () => {
 		expect(parseNumber('50 km/h', 'en-US', speed)).toBe(50);
 	});
 
+	test('reads back its own formatting in every plural form of a unit or currency name', () => {
+		const cases: [Intl.LocalesArgument, Intl.NumberFormatOptions, number[]][] = [
+			['en', { style: 'unit', unit: 'kilometer-per-hour', unitDisplay: 'long' }, [1, 1.5, 2]],
+			['en', { style: 'unit', unit: 'liter', unitDisplay: 'long' }, [1, 1.5, 12]],
+			['en', { style: 'unit', unit: 'day' }, [1, 5]],
+			['fr', { style: 'unit', unit: 'liter', unitDisplay: 'long' }, [1, 1.5, 2]],
+			['ru', { style: 'unit', unit: 'kilogram', unitDisplay: 'long' }, [1, 3, 5, 21]],
+			['ar', { style: 'unit', unit: 'day', unitDisplay: 'long' }, [1, 2, 5, 11, 100]],
+			[
+				'en',
+				{ style: 'currency', currency: 'USD', currencyDisplay: 'name', maximumFractionDigits: 0 },
+				[1, 2]
+			],
+			['fr', { style: 'currency', currency: 'USD', currencyDisplay: 'name' }, [1, 1.5, 2]],
+			['ar', { style: 'currency', currency: 'EGP', currencyDisplay: 'name' }, [1, 2, 5, 11]]
+		];
+		for (const [locale, options, values] of cases) {
+			for (const value of values) {
+				const text = formatNumber(value, locale, options);
+				expect(parseNumber(text, locale, options), `${String(locale)} ${text}`).toBe(value);
+				expect(isNumberText(text, locale, options), `${String(locale)} ${text}`).toBe(true);
+			}
+		}
+	});
+
 	test('divides percent and per-mille text', () => {
 		expect(parseNumber('12%', 'en-US')).toBe(0.12);
 		expect(parseNumber('12', 'en-US', { style: 'percent' })).toBe(0.12);
@@ -144,6 +183,12 @@ describe('allowed characters', () => {
 		expect(brl.has('$')).toBe(true);
 
 		expect(getNumberCharacters('en-US', undefined, { allowNegative: false }).has('-')).toBe(false);
+		// Every space separator where the locale groups with a space, both apostrophes in de-CH.
+		for (const space of [' ', '\u00a0', '\u2009', '\u202f']) expect(fr.has(space)).toBe(true);
+		expect(getNumberCharacters('en-US').has('\u00a0')).toBe(false);
+		const swiss = getNumberCharacters('de-CH');
+		expect(swiss.has("'")).toBe(true);
+		expect(swiss.has('\u2019')).toBe(true);
 		expect(getNumberCharacters('en-US').has('%')).toBe(false);
 		expect(getNumberCharacters('en-US', { style: 'percent' }).has('٪')).toBe(true);
 	});
@@ -153,6 +198,17 @@ describe('allowed characters', () => {
 		expect(isNumberText('\u200e١٢٣٫', 'ar')).toBe(true);
 		expect(isNumberText('12a', 'en-US')).toBe(false);
 		expect(isNumberText('-5', 'en-US', undefined, { allowNegative: false })).toBe(false);
+	});
+
+	test('isNumberText accepts every text the parser reads back from the formatter', () => {
+		const accounting = { style: 'currency', currency: 'USD', currencySign: 'accounting' } as const;
+		expect(formatNumber(-5, 'en-US', accounting)).toBe('($5.00)');
+		expect(isNumberText('($5.00)', 'en-US', accounting)).toBe(true);
+		expect(isNumberText('($5.00)', 'en-US', accounting, { allowNegative: false })).toBe(false);
+		// A no-break space as Excel or Word paste it, or Option+Space types it on macOS.
+		expect(isNumberText('1\u00a0234,5', 'fr')).toBe(true);
+		expect(isNumberText('1\u2019234.5', 'de-CH')).toBe(true);
+		expect(isNumberText("1'234.5", 'de-CH')).toBe(true);
 	});
 });
 
@@ -170,6 +226,30 @@ describe('commit rounding', () => {
 		expect(
 			roundToFormat(-1.005, { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 })
 		).toBe(-1.01);
+		expect(roundToFormat(12345, { notation: 'scientific', maximumFractionDigits: 2 })).toBe(12300);
+		expect(roundToFormat(-0.001, { maximumFractionDigits: 2 })).toBe(0);
+		expect(Object.is(roundToFormat(-0.001, { maximumFractionDigits: 2 }), 0)).toBe(true);
+	});
+
+	test('rounds unit and currency formats whatever plural form the label takes', () => {
+		const liters = {
+			style: 'unit',
+			unit: 'liter',
+			unitDisplay: 'long',
+			maximumFractionDigits: 2
+		} as const;
+		expect(roundToFormat(1.004, liters)).toBe(1);
+		expect(roundToFormat(2.004, liters)).toBe(2);
+		const dollars = {
+			style: 'currency',
+			currency: 'USD',
+			currencyDisplay: 'name',
+			maximumFractionDigits: 0
+		} as const;
+		expect(roundToFormat(0.96, dollars)).toBe(1);
+		expect(roundToFormat(12.5, { style: 'unit', unit: 'percent', maximumFractionDigits: 0 })).toBe(
+			13
+		);
 	});
 
 	test('cleans floating-point noise only', () => {
