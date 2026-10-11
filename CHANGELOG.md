@@ -37,6 +37,9 @@ Unreleased section under the new version.
 - i18n: `passwordTooShort(min)` in all 8 locales.
 - i18n: `meter` and `meterSegment(index, count)` in all 8 locales. They name a `Meter` rendered
   without a label and an unlabelled stacked segment ("Segment 2 of 3").
+- `Tabs`: the `onValueChange` payload gains `reason`: `user` for a click, key, menu entry or `api`
+  navigation, and `initial`, `disabled` or `missing` for an automatic fallback. The new
+  `TabsValueChangePayload` and `TabsValueChangeReason` types are exported from `entasis/tabs`.
 
 ### Changed
 
@@ -74,6 +77,17 @@ Unreleased section under the new version.
 - `ScrollArea`: `viewportRole` no longer defaults to `'group'`. `viewportRole="presentation"` (or
   `none`) keeps the viewport unnamed and out of the tab order even while it overflows, for scroll
   areas inside a listbox.
+- `Tabs` / `Tabbar`: the default selection is the first enabled tab, not the first tab. They move
+  the selection by themselves only for their own state. On mount, a `defaultValue` that names a
+  disabled or unknown tab selects the first enabled tab. A selected tab that becomes disabled hands
+  the selection to the first enabled tab, and removing the selected tab selects its nearest enabled
+  neighbour. The new tab is rendered on the server, written back to `bind:value` and reported
+  through `onValueChange`. A `value` set by the parent or by another control is never rewritten. If
+  it names a disabled tab, that tab is shown. If it names no tab, no tab is selected and `Tabs`
+  shows no panel until a tab with that value appears. With no `value` and no `defaultValue`, tabs
+  that load after mount select the first enabled tab without calling `onValueChange`.
+- `Tabs`: `api.next()` and `api.previous()` skip disabled tabs, as the arrow keys do. `api.goTo()`
+  on a disabled tab does nothing.
 
 ### Removed
 
@@ -211,6 +225,16 @@ Unreleased section under the new version.
   `description`. Stacked segments become a group named by `label` and described by `helper` and
   `description`, with one meter per segment, named by the segment's `label`. The rendered label is
   `role="presentation"`, which completes the NVDA naming workaround for labels inside a meter.
+- `Tabs`: no panel is shown next to a tab list with nothing selected. Before, it showed panel 0 for
+  an unknown value, or the last shown panel when the selected tab was removed and no enabled tab
+  remained.
+- `Tabbar`: the sliding indicator is hidden (`hidden`, `data-ready="false"`, no inline style) when
+  no tab is selected, instead of staying on the last selected tab. `SegmentedControl`'s indicator,
+  which uses the same helper, now snaps back into place before it animates again.
+- `Tabbar`: a key pressed while a disabled tab has focus, for example a disabled link tab that was
+  clicked, no longer selects that tab.
+- `Stepper`: when `value` moves outside its items, every panel is hidden and the last measured
+  height is dropped. The next step then appears in place instead of sliding in.
 
 ## 0.11.0 — 2026-10-10
 
