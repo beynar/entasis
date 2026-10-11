@@ -3,23 +3,13 @@ import { Registry } from '$lib/utils/registry.svelte.js';
 import { getContext, hasContext, onDestroy, onMount, setContext, untrack } from 'svelte';
 import { useTheme } from '../Theme/theme.state.svelte.js';
 import type { PopoverProps } from './popover.props.js';
-import {
-	computePosition,
-	autoUpdate,
-	hide,
-	offset,
-	shift,
-	flip,
-	type Placement,
-	type Alignment,
-	type Side,
-	type VirtualElement
-} from '@floating-ui/dom';
+import type { Placement, VirtualElement } from '@floating-ui/dom';
 import { useScrollLock } from '$lib/utils/useScrollLock.svelte.js';
 import { useFocusScope } from '$lib/utils/useFocusScope.svelte.js';
 import { useSafeArea } from '$lib/utils/safeArea.svelte.js';
 import { useHoverAction } from '$lib/utils/useHoverAction.svelte.js';
 import { usePopoverMotion, type PopoverThemeProps } from './popover.theme.js';
+import { createPanelPositioner, directedMotion, releasePanelPosition } from './popover.position.js';
 
 type MakeRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 interface PopoverOptions extends MakeRequired<
@@ -231,106 +221,57 @@ export class PopoverState extends PopoverOptionsBase {
 		this.onOpenChange?.(nextOpen);
 	};
 
+	/** Starts the panel's motion from the side facing the reference, for the resolved placement. */
 	applyDirectedTransition = (node: HTMLElement, placement: Placement) => {
-		const side = placement.split('-')[0] as Side;
-		const alignment = placement.split('-')[1] as Alignment;
-		const axis = side === 'top' || side === 'bottom' ? 'y' : 'x';
-		const value = side === 'top' || side === 'left' ? 10 : -10;
-		const transformOriginY = side === 'top' ? 'bottom' : side === 'bottom' ? 'top' : 'center';
-		const transformOriginX =
-			alignment === 'start' ? 'left' : alignment === 'end' ? 'right' : 'center';
-
-		this.transformOrigin = `${transformOriginX} ${transformOriginY}`;
+		const { transformOrigin, axis, distance } = directedMotion(placement);
+		this.transformOrigin = transformOrigin;
 		Object.assign(this.computedTransition.in, {
-			[axis]: value
+			[axis]: distance
 		});
 		Object.assign(this.computedTransition.out, {
-			[axis]: value
+			[axis]: distance
 		});
 	};
 
-	place = async (node: HTMLElement, mount = false) => {
-		// Inline panels are laid out by the document, never by floating-ui.
-		if (this.inline || this.isMobileSheet || !this.referenceElement) {
-			this.triggerWidth = null;
-			return;
-		}
-		if (!mount && !this.hasTransitioned) {
-			return;
-		}
-		if (this.fitTrigger) {
-			this.triggerWidth = this.referenceElement!.getBoundingClientRect().width;
-		}
-
-		const custom = this.positionPanel?.({ panel: node, reference: this.referenceElement });
-		if (custom) {
-			if (custom.minWidth != null) this.triggerWidth = custom.minWidth;
-			Object.assign(node.style, {
-				position: 'fixed',
-				left: `${custom.x}px`,
-				top: `${custom.y}px`,
-				visibility: ''
-			});
+	// floating-ui placement lives in `popover.position.ts`. Its inputs are read when a placement
+	// runs: the mount placement runs inside the `dialog` attachment, so a change to any of them
+	// re-places an open panel.
+	#positioner = createPanelPositioner({
+		reference: () => this.referenceElement,
+		// Inline panels and mobile sheets are laid out by the document, never by floating-ui.
+		floating: () => !this.inline && !this.isMobileSheet,
+		settled: () => this.hasTransitioned,
+		placement: () => this.computedPosition,
+		offset: () => this.offset,
+		fitTrigger: () => this.fitTrigger,
+		positionPanel: () => this.positionPanel,
+		setMinWidth: (width) => {
+			this.triggerWidth = width;
+		},
+		onPlace: ({ panel, placement, mount }) => {
 			this.safeArea.updateAreas();
-			return;
+			if (placement && mount && !this.hasTransitioned && this.directedTransition) {
+				this.applyDirectedTransition(panel, placement);
+			}
 		}
+	});
 
-		const { x, y, strategy, placement } = await computePosition(this.referenceElement!, node, {
-			strategy: 'fixed',
-			placement: this.computedPosition,
-
-			middleware: [
-				offset(this.offset ?? 4),
-				flip({
-					mainAxis: true,
-					crossAxis: true,
-					padding: 20
-				}),
-				shift({
-					mainAxis: true,
-					crossAxis: true,
-					padding: 20
-				}),
-				hide()
-			]
-		});
-
-		Object.assign(node.style, {
-			position: strategy,
-			left: `${x}px`,
-			top: `${y}px`,
-			// computePosition is async: unhide only once the first placement lands, so the
-			// panel never flashes at top-left (0,0) before floating-ui resolves.
-			visibility: ''
-		});
-		this.safeArea.updateAreas();
-		if (mount && !this.hasTransitioned && this.directedTransition) {
-			this.applyDirectedTransition(node, placement);
-		}
-	};
+	/** Places the floating panel against its reference once; see `PanelPositioner.place`. */
+	place = (node: HTMLElement, mount = false) => this.#positioner.place(node, mount);
 
 	dialog = (node: HTMLDialogElement) => {
 		this.dialogElement = node;
 		if (this.inline) {
 			// No portal, no fixed placement: the wrapper stays where the component is rendered.
 			this.triggerWidth = null;
-			Object.assign(node.style, {
-				position: '',
-				left: '',
-				top: '',
-				visibility: ''
-			});
+			releasePanelPosition(node, true);
 			return () => {
 				this.dialogElement = null;
 			};
 		}
 		if (this.isMobileSheet) {
 			this.triggerWidth = null;
-			Object.assign(node.style, {
-				position: '',
-				left: '',
-				top: ''
-			});
+			releasePanelPosition(node, false);
 			return () => {
 				this.dialogElement = null;
 			};
@@ -345,23 +286,13 @@ export class PopoverState extends PopoverOptionsBase {
 				queueMicrotask(this.#closeIfAnchorLost);
 			};
 		}
-		// Hide until place() resolves (async computePosition), preventing the top-left flash.
-		node.style.visibility = 'hidden';
-		void this.place(node, true);
-		const cleanup = autoUpdate(reference, node, () => {
-			// The observers also fire when the reference leaves the document (a `ref` element
-			// removed without a teardown): close instead of placing against a detached node.
-			if (reference instanceof Element && !reference.isConnected) {
-				this.#closeIfAnchorLost();
-				return;
-			}
-			void this.place(node);
-		});
+		// A reference that leaves the document closes the popover instead of being placed.
+		const cleanup = this.#positioner.track(node, reference, this.#closeIfAnchorLost);
 		return () => {
 			cleanup();
 			this.dialogElement = null;
 			// The panel also leaves when its `ref` anchor does (`bind:this` resets it to null),
-			// and without an outro that happens before the observers above can report the
+			// and without an outro that happens before the positioner's observers can report the
 			// detached node: judge the anchor once the flush settles, so the popover closes
 			// instead of staying open and reappearing when the anchor returns. A no-op when the
 			// popover closed or was destroyed, or when another anchor took over.
