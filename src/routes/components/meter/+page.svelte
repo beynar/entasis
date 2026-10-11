@@ -71,7 +71,9 @@
 		'Stacked values with optional legend',
 		'Colored threshold steps on track',
 		'Configurable min/max range',
-		'Percentage or raw value indicator'
+		'Percentage or raw value indicator',
+		{ label: 'role=meter with clamped value and value text', test: 'a11y:meter.role' },
+		{ label: 'Stacked segments as a labelled group of meters', test: 'a11y:meter.stacked' }
 	]}
 >
 	<ComponentCard

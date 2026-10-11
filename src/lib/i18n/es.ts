@@ -580,5 +580,8 @@ export const es: Messages = {
 		`Uso del contexto: ${used} de ${maximum} tokens usados. ${remaining} tokens restantes.`,
 	// Campo de contraseña
 	passwordTooShort: (min: string | number) =>
-		`La contraseña debe tener al menos ${min} ${Number(min) === 1 ? 'carácter' : 'caracteres'}`
+		`La contraseña debe tener al menos ${min} ${Number(min) === 1 ? 'carácter' : 'caracteres'}`,
+	// Medidor
+	meter: 'Medidor',
+	meterSegment: (index: string | number, count: string | number) => `Segmento ${index} de ${count}`
 };

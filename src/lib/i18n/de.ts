@@ -581,5 +581,8 @@ export const de: Messages = {
 		`Kontextnutzung: ${used} von ${maximum} Token verwendet. ${remaining} Token verbleibend.`,
 	// Passwortfeld
 	passwordTooShort: (min: string | number) =>
-		`Das Passwort muss mindestens ${min} Zeichen lang sein`
+		`Das Passwort muss mindestens ${min} Zeichen lang sein`,
+	// Messanzeige
+	meter: 'Messanzeige',
+	meterSegment: (index: string | number, count: string | number) => `Segment ${index} von ${count}`
 };

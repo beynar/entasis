@@ -584,7 +584,10 @@ export const en = {
 		`Context usage: ${used} of ${maximum} tokens used. ${remaining} tokens remaining.`,
 	// Password input
 	passwordTooShort: (min: string | number) =>
-		`Password must be at least ${min} character${Number(min) === 1 ? '' : 's'}`
+		`Password must be at least ${min} character${Number(min) === 1 ? '' : 's'}`,
+	// Meter
+	meter: 'Meter',
+	meterSegment: (index: string | number, count: string | number) => `Segment ${index} of ${count}`
 };
 
 export type Messages = typeof en;

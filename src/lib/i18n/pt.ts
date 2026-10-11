@@ -580,5 +580,8 @@ export const pt: Messages = {
 		`Uso do contexto: ${used} de ${maximum} tokens usados. ${remaining} tokens restantes.`,
 	// Campo de senha
 	passwordTooShort: (min: string | number) =>
-		`A senha deve ter pelo menos ${min} caractere${Number(min) > 1 ? 's' : ''}`
+		`A senha deve ter pelo menos ${min} caractere${Number(min) > 1 ? 's' : ''}`,
+	// Medidor
+	meter: 'Medidor',
+	meterSegment: (index: string | number, count: string | number) => `Segmento ${index} de ${count}`
 };

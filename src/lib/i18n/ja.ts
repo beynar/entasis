@@ -567,5 +567,8 @@ export const ja: Messages = {
 	aiContextUsage: (used: string | number, maximum: string | number, remaining: string | number) =>
 		`コンテキスト使用量: ${maximum} トークン中 ${used} トークンを使用。残り ${remaining} トークン。`,
 	// パスワード入力
-	passwordTooShort: (min: string | number) => `パスワードは${min}文字以上で入力してください`
+	passwordTooShort: (min: string | number) => `パスワードは${min}文字以上で入力してください`,
+	// メーター
+	meter: 'メーター',
+	meterSegment: (index: string | number, count: string | number) => `セグメント ${index}/${count}`
 };

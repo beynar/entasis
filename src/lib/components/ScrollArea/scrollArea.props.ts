@@ -14,13 +14,19 @@ export type ScrollAreaProps = WithAttachments<
 		ref?: HTMLDivElement | null;
 		/** Bindable reference to the native scrolling viewport. */
 		viewportRef?: HTMLDivElement | null;
-		/** Accessible label applied to the native scrolling viewport. */
+		/**
+		 * Accessible name of the native scrolling viewport. Passing it makes the viewport a named
+		 * `group` even when its content fits. Without it, the viewport is named "Scrollable content"
+		 * (from the i18n catalog) only while it overflows and is a keyboard tab stop.
+		 */
 		label?: string;
 		/**
-		 * Role of the native scrolling viewport. Override it when the scroll area sits inside a
-		 * structural role whose children are constrained — a grid or treegrid, say, where the
-		 * viewport has to read as `rowgroup` rather than an unrelated group.
-		 * @default 'group'
+		 * Role of the native scrolling viewport. Without it, the viewport is a plain element while
+		 * its content fits and a `group` while it overflows (or when `label` is passed). Override
+		 * it when the scroll area sits inside a structural role whose children are constrained: a
+		 * grid or treegrid, say, where the viewport has to read as `rowgroup`. Inside a listbox,
+		 * pass `presentation`: the viewport then never takes a name or a tab stop, even while it
+		 * overflows, because the listbox owns keyboard scrolling.
 		 */
 		viewportRole?: string;
 		/**

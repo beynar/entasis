@@ -587,5 +587,8 @@ export const fr: Messages = {
 		`Utilisation du contexte : ${used} jetons sur ${maximum} utilisés. ${remaining} jetons restants.`,
 	// Champ mot de passe
 	passwordTooShort: (min: string | number) =>
-		`Le mot de passe doit contenir au moins ${min} caractère${Number(min) > 1 ? 's' : ''}`
+		`Le mot de passe doit contenir au moins ${min} caractère${Number(min) > 1 ? 's' : ''}`,
+	// Jauge
+	meter: 'Jauge',
+	meterSegment: (index: string | number, count: string | number) => `Segment ${index} sur ${count}`
 };

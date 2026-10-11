@@ -160,16 +160,21 @@
 			event.preventDefault();
 		}}
 	>
+		<!-- A listbox may only own options and groups (aria-required-children). The scroll viewport
+		     is presentational: no role, name or tab stop even while it overflows, because the
+		     trigger's active-descendant navigation scrolls the highlighted option into view. -->
 		<ScrollArea
 			bind:ref={listEl}
 			bind:viewportRef={viewportEl}
+			viewportRole="presentation"
 			scrollOnEdges
 			type="auto"
 			class="flex max-h-[240px] flex-col"
 		>
 			{#each select.renderGroups as group, groupIndex (groupIndex)}
 				{#if separators && groupIndex > 0}
-					<div role="separator" class={classes.separator({ size })}></div>
+					<!-- Decorative divider between groups: the groups already convey the structure. -->
+					<div role="presentation" class={classes.separator({ size })}></div>
 				{/if}
 				<div role="group" aria-label={group.label} class={classes.group({ size })}>
 					{#if group.label}
@@ -268,5 +273,7 @@
 </Popover>
 
 {#if name}
-	<input type="hidden" {name} value={field.value ?? ''} />
+	<!-- Disabled with the control, so a disabled Select is left out of native form data, as a
+	     disabled <select> would be. -->
+	<input type="hidden" {name} value={field.value ?? ''} disabled={field.disabled} />
 {/if}

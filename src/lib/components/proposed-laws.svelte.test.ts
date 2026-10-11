@@ -256,7 +256,7 @@ describe('law 8 · read-only (F6 · RO-1, C5 · SC-4)', () => {
 });
 
 describe('law 10 · native forms (B7 · CX-13b)', () => {
-	pending('a disabled Select leaves its value out of the native form', () => {
+	test('a disabled Select leaves its value out of the native form', () => {
 		mount('select-disabled');
 		const form = screen.getByTestId('form') as HTMLFormElement;
 		expect(new FormData(form).has('plan')).toBe(false);

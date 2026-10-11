@@ -75,7 +75,6 @@
 		searchInput = input;
 		input.setAttribute('role', 'combobox');
 		input.setAttribute('aria-autocomplete', 'list');
-		input.setAttribute('aria-expanded', 'true');
 		input.setAttribute('aria-haspopup', 'listbox');
 		input.setAttribute('autocomplete', 'off');
 		input.setAttribute('autocorrect', 'off');
@@ -109,6 +108,8 @@
 		if (!searchInput) return;
 
 		searchInput.setAttribute('aria-controls', listboxId);
+		// The listbox is hidden while the search matches nothing, so the combobox is collapsed.
+		searchInput.setAttribute('aria-expanded', String(filteredCountries.length > 0));
 		if (nav.activeDescendant) {
 			searchInput.setAttribute('aria-activedescendant', nav.activeDescendant);
 		} else {
@@ -146,7 +147,26 @@
 		type="auto"
 		class={classes.countryList({ class: theme?.countryList?.base })}
 	>
-		<div id={listboxId} role="listbox" aria-label={t.countries} class={classes.countryListbox()}>
+		<!-- The empty message lives OUTSIDE the listbox: a listbox may only own options and groups
+		     (aria-required-children). The role="status" region stays mounted (empty and unstyled
+		     while countries match) because screen readers skip a live region that mounts already
+		     filled; filling it when the search empties the list announces it politely. -->
+		<div
+			role="status"
+			class={filteredCountries.length === 0
+				? classes.countryEmpty({ size, class: theme?.countryEmpty?.base })
+				: undefined}
+		>
+			{#if filteredCountries.length === 0}{t.noCountries}{/if}
+		</div>
+		<!-- Kept mounted while empty (hidden) so the search input's aria-controls always resolves. -->
+		<div
+			id={listboxId}
+			role="listbox"
+			aria-label={t.countries}
+			hidden={filteredCountries.length === 0}
+			class={classes.countryListbox()}
+		>
 			{#each filteredCountries as country (country.iso2)}
 				{@const selected = country.iso2 === selectedCountry?.iso2}
 				{@const highlighted = nav.highlighted === country.iso2}
@@ -190,10 +210,6 @@
 						})}
 					{/if}
 				</Button>
-			{:else}
-				<div class={classes.countryEmpty({ size, class: theme?.countryEmpty?.base })}>
-					{t.noCountries}
-				</div>
 			{/each}
 		</div>
 	</ScrollArea>

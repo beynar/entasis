@@ -122,6 +122,7 @@
 		{ label: 'Arrow keys, Enter, Escape navigation', test: 'a11y:select.keyboard' },
 		'Opens over the trigger on the selected option',
 		'Grouped options with separators',
+		{ label: 'Listbox owns only options and groups', test: 'a11y:select.listbox-children' },
 		'Bindable value with field validation',
 		{ label: 'Virtual focus stays on trigger', test: 'a11y:select.virtual-focus' }
 	]}

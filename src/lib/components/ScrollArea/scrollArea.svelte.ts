@@ -136,10 +136,11 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 	});
 	isDraggingX = $derived(this.dragX.isDragging);
 
-	// The viewport is the focusable scroll region — but only when it actually overflows, so an
-	// idle ScrollArea (e.g. a dropdown whose items fit) adds no phantom tab stop. Native
-	// `overflow: auto` then handles all keyboard scrolling (arrows, PageUp/Down, Home/End, Space).
-	viewportTabindex = $derived(this.scrollbarYEnabled || this.scrollbarXEnabled ? 0 : -1);
+	// The viewport is the focusable, named scroll region — but only when it actually overflows, so
+	// an idle ScrollArea (e.g. a dropdown whose items fit) adds no phantom tab stop and no group to
+	// the accessibility tree. Native `overflow: auto` then handles all keyboard scrolling (arrows,
+	// PageUp/Down, Home/End, Space).
+	overflowing = $derived(this.scrollbarYEnabled || this.scrollbarXEnabled);
 
 	// Warning : non reactive.
 	hoover = $derived(
@@ -221,7 +222,7 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 	// ---------------------------------------------------------------------------------------
 	// Overflow measurement
 	//
-	// `viewportTabindex` (WCAG SCR34) hangs off these numbers, so a stale measurement is an
+	// `overflowing` (the WCAG SCR34 tab stop) hangs off these numbers, so a stale measurement is an
 	// accessibility bug, not a cosmetic one. Three things can make the first ResizeObserver
 	// callback wrong: it can fire before the first layout has settled, the content can grow
 	// afterwards without changing the observed border-boxes (an image resolving, a streamed
@@ -258,7 +259,7 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 		) {
 			this.contentDimensions = { width: contentWidth, height: contentHeight };
 		}
-		// The scroll extent is what `viewportTabindex` and the scrollbars are derived from, and it
+		// The scroll extent is what `overflowing` and the scrollbars are derived from, and it
 		// can change while both observed border-boxes stay identical. Bump only when it moves.
 		const extentY = viewport.scrollHeight - viewportHeight;
 		const extentX = viewport.scrollWidth - viewportWidth;

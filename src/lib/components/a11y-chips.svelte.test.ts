@@ -553,8 +553,9 @@ describe('scroll area', () => {
 		),
 		async () => {
 			const { unmount } = mount('scroll-area');
-			const viewport = () => screen.getByText('Scrollable content').closest('[tabindex]')!;
-			expect(viewport()).toHaveAttribute('tabindex', '-1');
+			const viewport = () =>
+				screen.getByText('Scrollable content').closest('[data-scroll-area-viewport]')!;
+			expect(viewport()).not.toHaveAttribute('tabindex');
 			unmount();
 			// jsdom has no layout: report overflowing content for the second mount.
 			const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollHeight')!;
