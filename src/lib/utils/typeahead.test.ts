@@ -66,4 +66,18 @@ describe('createTypeahead', () => {
 		expect(current()).toBe(0); // fresh buffer "a", not "ba"
 		vi.useRealTimers();
 	});
+
+	it('reports isTyping while the buffer holds characters', () => {
+		vi.useFakeTimers();
+		const { typeahead } = setup(['Apple', 'Banana']);
+		expect(typeahead.isTyping).toBe(false);
+		typeahead.handleKey(key('b'));
+		expect(typeahead.isTyping).toBe(true);
+		vi.advanceTimersByTime(60);
+		expect(typeahead.isTyping).toBe(false);
+		typeahead.handleKey(key('a'));
+		typeahead.reset();
+		expect(typeahead.isTyping).toBe(false);
+		vi.useRealTimers();
+	});
 });

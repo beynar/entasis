@@ -68,5 +68,12 @@ export function createTypeahead<Item>(options: TypeaheadOptions<Item>) {
 		return true;
 	};
 
-	return { handleKey, reset };
+	return {
+		handleKey,
+		reset,
+		/** True while the buffer holds typed characters (until the timeout or a `reset`). */
+		get isTyping() {
+			return buffer !== '';
+		}
+	};
 }
