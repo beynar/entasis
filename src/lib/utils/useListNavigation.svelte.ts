@@ -207,6 +207,7 @@ export const useListNavigation = <Value extends string = string>(
 	// in-progress selection.
 	let previousQuery: string | undefined;
 	let previousOpen: boolean | undefined;
+	let previousCount = 0;
 	$effect(() => {
 		const values = opts.values();
 		const query = opts.query?.() ?? '';
@@ -215,17 +216,24 @@ export const useListNavigation = <Value extends string = string>(
 			const opened = open && previousOpen !== true;
 			const queryChanged = previousQuery !== undefined && query !== previousQuery;
 			const cleared = queryChanged && query === '';
+			// Options that load after the list opened (async sources) still get the anchor.
+			const arrived = previousCount === 0 && values.length > 0;
 			previousQuery = query;
 			previousOpen = open;
+			previousCount = values.length;
 			if (!open) return;
 
 			// A new query shows a new list: the first match belongs in view, however far the user
 			// had scrolled the previous one.
 			const typed = queryChanged && !cleared;
 			if (typed) {
+				// The old highlight may be gone from the list; any rendered option finds the scroller.
+				const probe = [highlighted, values[0]].find(
+					(value) => value !== undefined && optionId(value)
+				);
 				const element =
-					highlighted !== undefined && optionId(highlighted)
-						? document.getElementById(optionId(highlighted)!)
+					probe !== undefined && typeof document !== 'undefined'
+						? document.getElementById(optionId(probe)!)
 						: null;
 				const container = opts.scrollContainer?.() ?? (element ? nearestScroller(element) : null);
 				if (container) container.scrollTop = 0;
@@ -239,12 +247,13 @@ export const useListNavigation = <Value extends string = string>(
 			const stale = highlighted === undefined || !values.includes(highlighted);
 			// Typing starts the highlight over at the first match; without auto-highlight a
 			// surviving highlight stays (and is scrolled back into view below).
-			const next = typed || stale ? resting(values, query, false) : highlighted;
+			const next = typed || stale ? resting(values, query, arrived) : highlighted;
 			if (typed && next === undefined && !stale) {
 				scrollToHighlighted();
 			} else {
 				setHighlighted(next, { reason: 'list' });
-				if (typed) scrollToHighlighted();
+				if (arrived) scrollSoon();
+				else if (typed) scrollToHighlighted();
 			}
 		});
 	});

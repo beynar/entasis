@@ -41,3 +41,39 @@ describe('scrolling', () => {
 		expect(active.textContent?.trim()).toBe('Item 1');
 	});
 });
+
+describe('pointer', () => {
+	const move = (target: HTMLElement, x: number, y: number) =>
+		target.dispatchEvent(
+			new PointerEvent('pointermove', {
+				bubbles: true,
+				clientX: x,
+				clientY: y,
+				pointerType: 'mouse'
+			})
+		);
+
+	test('a pointermove at unchanged coordinates does not steal the keyboard highlight', async () => {
+		await render(ListNavigationHarness);
+		const options = () => Array.from(el('list').querySelectorAll<HTMLElement>('[role="option"]'));
+		const [first, second] = options();
+		const at = first.getBoundingClientRect();
+		move(first, at.left + 4, at.top + 4);
+		await settle();
+		expect(first.getAttribute('aria-selected')).toBe('true');
+
+		el('search').focus();
+		await userEvent.keyboard('{ArrowDown}');
+		await settle();
+		expect(second.getAttribute('aria-selected')).toBe('true');
+
+		move(first, at.left + 4, at.top + 4); // the engine replays the move after scrolling
+		await settle();
+		expect(second.getAttribute('aria-selected')).toBe('true');
+		expect(first.getAttribute('aria-selected')).toBe('false');
+
+		move(first, at.left + 5, at.top + 4); // a real move
+		await settle();
+		expect(first.getAttribute('aria-selected')).toBe('true');
+	});
+});

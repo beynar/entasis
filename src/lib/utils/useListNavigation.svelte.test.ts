@@ -30,7 +30,7 @@ const setup = (
 	});
 	cleanups.push(stop);
 	flushSync();
-	return { nav, state };
+	return { nav, state, stop };
 };
 
 const key = (name: string, extra: KeyboardEventInit = {}) => {
@@ -112,6 +112,27 @@ describe('useListNavigation highlight model', () => {
 		state.open = true;
 		state.query = 'b';
 		flushSync();
+		expect(nav.highlighted).toBe('a');
+	});
+
+	test('an anchor still wins when the values arrive after the list opened', () => {
+		const { nav, state } = setup([], { anchor: () => 'b', query: '' });
+		expect(nav.highlighted).toBeUndefined();
+		state.values = ['a', 'b', 'c'];
+		flushSync();
+		expect(nav.highlighted).toBe('b');
+	});
+
+	test('reanchor re-runs the anchor, else the auto-highlight rule', () => {
+		let anchor: string | undefined = 'c';
+		const { nav } = setup(['a', 'b', 'c'], { anchor: () => anchor });
+		nav.highlight('b');
+		nav.reanchor();
+		expect(nav.highlighted).toBe('c');
+		expect(nav.highlightDetails.reason).toBe('list');
+		anchor = undefined;
+		nav.highlight('b');
+		nav.reanchor();
 		expect(nav.highlighted).toBe('a');
 	});
 
@@ -215,6 +236,17 @@ describe('useListNavigation typeahead state', () => {
 		expect(nav.typeahead?.isTyping).toBe(true);
 		vi.advanceTimersByTime(1100);
 		expect(nav.typeahead?.isTyping).toBe(false);
+	});
+
+	test('destroying the root drops the buffer and the pending scroll timer', () => {
+		vi.useFakeTimers();
+		const { nav, stop } = setup(['apple', 'banana'], { typeahead: (v) => v });
+		nav.onKeydown(key('b'));
+		expect(nav.typeahead?.isTyping).toBe(true);
+		expect(vi.getTimerCount()).toBeGreaterThan(0);
+		stop();
+		expect(nav.typeahead?.isTyping).toBe(false);
+		expect(vi.getTimerCount()).toBe(0);
 	});
 
 	test('the typeahead is null without the option', () => {
@@ -348,6 +380,46 @@ describe('scrolling inside the list', () => {
 		flushSync();
 		expect(container.scrollTop).toBe(0);
 		expect(nav.highlighted).toBe('row-0');
+	});
+
+	test('the reset happens even when the old highlight is gone and nothing is highlighted', () => {
+		const { container } = list(20);
+		const { nav, state } = setup(values, {
+			optionId: (v) => v,
+			query: '',
+			autoHighlight: false,
+			scrollContainer: () => container
+		});
+		nav.highlight('row-18');
+		expect(container.scrollTop).toBeGreaterThan(0);
+		state.query = 'row-1';
+		state.values = ['row-1', 'row-10'];
+		flushSync();
+		expect(nav.highlighted).toBeUndefined();
+		expect(container.scrollTop).toBe(0);
+	});
+
+	test('the reset finds the scroller without scrollContainer, even with nothing highlighted', () => {
+		const { container } = list(20);
+		const { state } = setup(values, { optionId: (v) => v, query: '', autoHighlight: false });
+		container.scrollTop = 100;
+		state.query = 'row';
+		state.values = values.slice(0, 16);
+		flushSync();
+		expect(container.scrollTop).toBe(0);
+	});
+
+	test('scrollToHighlighted brings the current highlight back into view on demand', () => {
+		const { container } = list(20);
+		const { nav } = setup(values, {
+			optionId: (v) => v,
+			autoHighlight: false,
+			scrollContainer: () => container
+		});
+		nav.setHighlighted('row-15'); // hover-style: moves the highlight without scrolling
+		expect(container.scrollTop).toBe(0);
+		nav.scrollToHighlighted();
+		expect(container.scrollTop).toBe(220);
 	});
 
 	test('without auto-highlight a surviving highlight is kept and scrolled back into view', () => {
