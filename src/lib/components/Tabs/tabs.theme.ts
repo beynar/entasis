@@ -17,8 +17,10 @@ const defaultTabs = cva({
 	}
 });
 
+// `my-md` keeps panel content off the tab list. It is a margin, not padding: the Stepper positions
+// its panel track from the padding box, so padding on it would offset the panels.
 const defaultTabsContent = cva({
-	base: 'w-full  flex-full',
+	base: 'my-md w-full flex-full',
 	variants: {
 		placement: {
 			top: 'w-full',

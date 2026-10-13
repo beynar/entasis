@@ -32,9 +32,6 @@
 	import { AIThreadScrollController } from './threadScrollController.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 
-	type EndStateVirtualizer = {
-		isAtEnd: (threshold?: number) => boolean;
-	};
 	const DENSITY_PADDING: Record<AIThreadDensity, number> = {
 		compact: 8,
 		normal: 16,
@@ -142,6 +139,12 @@
 	let hasInitializedEnd = $state(false);
 	let isInitializingEnd = $state(false);
 	let isFollowingAppendedItem = $state(false);
+	// `isPinned` is the user's intent to follow the end, not a geometry reading: content that grows
+	// under the viewport (a tool block rendering, streaming text) must not unpin it. Only the user
+	// scrolling away does, and scrolling back to the end re-pins.
+	let isUserTouching = false;
+	let lastScrollTop = 0;
+	let stickFrame: number | undefined;
 	let errorMessage = $state<string>();
 	let questionStates = $state<Record<string, AIThreadAskUserQuestionState | undefined>>({});
 	let questionValuesByKey = $state<Record<string, AIAskAnswers | undefined>>({});
@@ -267,7 +270,7 @@
 	$effect(() => {
 		const currentViewport = viewport;
 		if (!currentViewport) return;
-		const sync = () => syncThreadPosition(get(virtualizerStore));
+		const sync = () => syncThreadPosition();
 		sync();
 		const observer = new ResizeObserver(sync);
 		observer.observe(currentViewport);
@@ -316,7 +319,7 @@
 			prependScrollTarget = undefined;
 			scrollController.settlePrependedItems(
 				target === 'start' ? scrollToStart : () => scrollToBottom('instant'),
-				() => syncThreadPosition(get(virtualizerStore))
+				() => syncThreadPosition()
 			);
 		}
 		previousRenderItemCount = count;
@@ -325,10 +328,12 @@
 			scrollController.scheduleSmoothAppendAdjustmentReset();
 			scrollController.watchAppendFollowEnd(isViewportAtEnd, () => {
 				isFollowingAppendedItem = false;
-				syncThreadPosition(get(virtualizerStore));
+				syncThreadPosition();
+				stickToEnd();
 			});
 		}
 		if (count === 0) {
+			isPinned = true;
 			hasInitializedEnd = false;
 			isInitializingEnd = false;
 			isFollowingAppendedItem = false;
@@ -340,11 +345,13 @@
 			hasInitializedEnd = true;
 			scheduleInitialEndSettlement();
 		}
-		syncThreadPosition(get(virtualizerStore));
+		syncThreadPosition();
+		if (!shouldSmoothAppendedItem) stickToEnd();
 	});
 
 	onDestroy(() => {
 		cancelInitialEndSettlement();
+		if (stickFrame !== undefined) cancelAnimationFrame(stickFrame);
 		questionPublisher.destroy();
 		scrollController.destroy();
 	});
@@ -396,11 +403,11 @@
 		return followOutput ? scrollBehavior : false;
 	}
 
-	function handleVirtualizerChange(instance: EndStateVirtualizer): void {
-		syncThreadPosition(instance);
+	function handleVirtualizerChange(): void {
+		syncThreadPosition();
 	}
 
-	function syncThreadPosition(instance: EndStateVirtualizer): void {
+	function syncThreadPosition(): void {
 		if (!viewport) return;
 		viewportHeight = viewport.clientHeight;
 		viewportScrollTop = viewport.scrollTop;
@@ -408,7 +415,26 @@
 			isPinned = true;
 			return;
 		}
-		isPinned = isViewportAtEnd() || instance.isAtEnd(Math.max(0, bottomThreshold));
+		// Reaching the end pins; leaving it does not unpin (see `handleScroll` and `handleWheel`). Only
+		// the DOM position counts: the virtualizer's own offset lags a scroll the user just made.
+		if (isViewportAtEnd()) isPinned = true;
+		stickToEnd();
+	}
+
+	// Closes any gap between the viewport and the end while pinned. Deferred a frame so the spacer
+	// has taken the virtualizer's new total size, and coalesced because size changes arrive in bursts.
+	function stickToEnd(): void {
+		if (stickFrame !== undefined || !followOutput) return;
+		stickFrame = requestAnimationFrame(() => {
+			stickFrame = undefined;
+			if (!viewport || !isPinned || isUserTouching || isInitializingEnd) return;
+			// A smooth follow or a smooth scroll-to-latest owns the viewport until it lands.
+			if (isFollowingAppendedItem || renderItems.length === 0) return;
+			const distanceFromEnd = viewport.scrollHeight - viewport.clientHeight - viewport.scrollTop;
+			if (distanceFromEnd <= 1) return;
+			get(virtualizerStore).scrollToEnd({ behavior: 'instant' });
+			syncThreadPosition();
+		});
 	}
 
 	function isViewportAtStart(): boolean {
@@ -422,33 +448,69 @@
 	}
 
 	function handleScroll(event: UIEvent & { currentTarget: EventTarget & HTMLDivElement }): void {
-		syncThreadPosition(get(virtualizerStore));
+		const scrollTop = event.currentTarget.scrollTop;
+		const movedUp = scrollTop < lastScrollTop - 1;
+		lastScrollTop = scrollTop;
+		// Growth moves the end away without moving the viewport, so only an upward move that lands
+		// away from the end counts as the user leaving it.
+		if (movedUp && !isInitializingEnd && (isUserTouching || !isViewportAtEnd())) {
+			isPinned = false;
+			isFollowingAppendedItem = false;
+		}
+		syncThreadPosition();
 		onscroll?.(event);
 	}
 
-	function handleWheel(): void {
+	function handleWheel(event: WheelEvent): void {
 		cancelInitialEndSettlement();
 		isInitializingEnd = false;
+		if (event.deltaY >= 0) return;
 		isFollowingAppendedItem = false;
 		isPinned = false;
+	}
+
+	function handleKeyDown(event: KeyboardEvent): void {
+		if (event.key === 'ArrowUp' || event.key === 'PageUp' || event.key === 'Home') {
+			isFollowingAppendedItem = false;
+			isPinned = false;
+		}
+	}
+
+	function handleTouchStart(): void {
+		isUserTouching = true;
+	}
+
+	function handleTouchEnd(): void {
+		isUserTouching = false;
+		if (isViewportAtEnd()) isPinned = true;
+		else stickToEnd();
 	}
 
 	function handleRootWheel(
 		event: WheelEvent & { currentTarget: EventTarget & HTMLDivElement }
 	): void {
-		handleWheel();
+		handleWheel(event);
 		onWheel?.(event);
 	}
 
 	function scrollToStart(): void {
 		get(virtualizerStore).scrollToOffset(0, { behavior: 'instant' });
-		syncThreadPosition(get(virtualizerStore));
+		syncThreadPosition();
 	}
 
 	function scrollToBottom(behavior: AIThreadScrollBehavior = scrollBehavior): void {
 		if (renderItems.length === 0) return;
+		isPinned = true;
+		if (behavior === 'smooth') {
+			isFollowingAppendedItem = true;
+			scrollController.watchAppendFollowEnd(isViewportAtEnd, () => {
+				isFollowingAppendedItem = false;
+				syncThreadPosition();
+				stickToEnd();
+			});
+		}
 		get(virtualizerStore).scrollToEnd({ behavior });
-		syncThreadPosition(get(virtualizerStore));
+		syncThreadPosition();
 	}
 
 	function scheduleInitialEndSettlement(): void {
@@ -461,7 +523,7 @@
 				get(virtualizerStore).scrollToEnd({ behavior: 'instant' });
 				initialEndFrame = undefined;
 				isInitializingEnd = false;
-				syncThreadPosition(get(virtualizerStore));
+				syncThreadPosition();
 			});
 		});
 	}
@@ -557,6 +619,10 @@
 			tabindex="0"
 			aria-label={viewportLabel ?? t.aiThreadTranscript}
 			onscroll={handleScroll}
+			onkeydown={handleKeyDown}
+			ontouchstart={handleTouchStart}
+			ontouchend={handleTouchEnd}
+			ontouchcancel={handleTouchEnd}
 		>
 			<AIThreadItems
 				{renderItems}

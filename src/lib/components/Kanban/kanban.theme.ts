@@ -4,12 +4,14 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 // Vega-quiet board: columns are soft elevated surfaces, cards one surface step
 // above, the drop indicator comes from useDndList. Column color accents render
 // as a small dot next to the title (driven by data-color on the column).
+// The board scrolls on x, which makes it clip on y too, so `p-xs` keeps the ring and elevation
+// shadow of the outermost columns inside the scroll container instead of cropping them.
 const defaultKanban = cva({
-	base: 'flex w-full items-start gap-xl overflow-x-auto scrollbar-none'
+	base: 'flex w-full items-start gap-xl overflow-x-auto p-xs scrollbar-none'
 });
 
 const defaultKanbanColumn = cva({
-	base: 'bg-surface-raised ring-neutral-muted flex max-h-full w-72 shrink-0 flex-col rounded-lg ring-1'
+	base: 'bg-surface-raised ring-neutral-muted flex max-h-full w-full flex-col rounded-lg ring-1'
 });
 
 const defaultKanbanColumnHeader = cva({
@@ -123,8 +125,10 @@ const defaultKanbanCardWrapper = cva({
 
 // Per-column wrapper (the dnd row of the board). `dragging` marks the dimmed
 // placeholder while a column is dragged.
+// Columns share the board's width between 15rem and 20rem, so a few columns fit inside narrow
+// containers such as a tab panel; more columns than fit scroll horizontally.
 const defaultKanbanColumnWrapper = cva({
-	base: 'shrink-0',
+	base: 'min-w-60 max-w-80 flex-1 basis-72',
 	variants: {
 		dragging: {
 			true: 'opacity-40',
