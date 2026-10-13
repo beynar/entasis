@@ -3,12 +3,14 @@
 // around the roving tab stop, and a toolbar text field typed into with real keys.
 import { describe, expect, test } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
+import type { Component } from 'svelte';
 import { render } from 'vitest-browser-svelte';
 import { nextFrame, tab } from '$lib/testing/browser.test-helper.js';
 import ThemeProviderHarness from '../components/Theme/ThemeProviderHarness.test.svelte';
 import TabbarFallbackHarness from '../components/Tabbar/TabbarFallbackHarness.test.svelte';
 import NavigationListHarness, { type HarnessItem } from './NavigationListHarness.test.svelte';
 
+const fallbackHarness = TabbarFallbackHarness as unknown as Component<Record<string, unknown>>;
 const items = (...labels: string[]): HarnessItem[] =>
 	labels.map((label) => ({ id: label.toLowerCase(), label }));
 const button = (name: string) =>
@@ -69,7 +71,7 @@ describe('removing the focused item', () => {
 
 	test('the focused, selected last tab: focus and the tab stop land on its replacement', async () => {
 		const screen = await render(ThemeProviderHarness, {
-			component: TabbarFallbackHarness,
+			component: fallbackHarness,
 			items: ['In review', 'Approved', 'Archived'],
 			initialValue: 'Archived'
 		});
@@ -78,7 +80,7 @@ describe('removing the focused item', () => {
 		expect(document.activeElement).toBe(archived.element());
 
 		await screen.rerender({
-			component: TabbarFallbackHarness,
+			component: fallbackHarness,
 			items: ['In review', 'Approved']
 		});
 		await settle();
