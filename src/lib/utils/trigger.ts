@@ -103,7 +103,8 @@ export function triggerActivation(node: HTMLElement, options: TriggerActivationO
 export function triggerFocusTarget(trigger: HTMLElement, event?: Event): HTMLElement | null {
 	if (trigger.matches(focusableSelector) && !trigger.matches(':disabled')) return trigger;
 	const active = trigger.ownerDocument.activeElement;
-	if (active instanceof HTMLElement && active !== trigger && trigger.contains(active)) return active;
+	if (active instanceof HTMLElement && active !== trigger && trigger.contains(active))
+		return active;
 	const target = event?.target;
 	if (target instanceof Element) {
 		const focusable = target.closest<HTMLElement>(focusableSelector);

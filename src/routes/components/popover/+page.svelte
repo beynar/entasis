@@ -388,8 +388,7 @@ ${'</' + 'script>'}
 							<textarea
 								aria-label="Note"
 								class="border-neutral/20 min-h-20 rounded-md border p-2 text-sm"
-								bind:value={note}
-							></textarea>
+								bind:value={note}></textarea>
 							<Button
 								size="small"
 								variant="soft"

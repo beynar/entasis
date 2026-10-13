@@ -11,7 +11,10 @@ import { LAYER_Z_BASE, LAYER_Z_STEP } from '$lib/components/Theme/theme.layers.j
 
 export type LayerKind = keyof typeof LAYER_Z_BASE;
 /** The open-change reasons the layer stack itself reports. */
-export type DismissReason = Extract<OpenChangeReason, 'escape-key' | 'outside-press' | 'close-watcher'>;
+export type DismissReason = Extract<
+	OpenChangeReason,
+	'escape-key' | 'outside-press' | 'close-watcher'
+>;
 
 /** A dismissal the stack asks a layer's owner to apply, in `onOpenChange` details terms. */
 export interface LayerDismissRequest extends OpenChangeInit {

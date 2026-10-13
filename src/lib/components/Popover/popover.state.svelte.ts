@@ -292,7 +292,12 @@ export class PopoverState extends PopoverOptionsBase {
 				this.openReason = openReasonOf(details);
 				return;
 			}
-			if (details.trigger && anchor && details.trigger !== anchor && this.#triggers.has(details.trigger)) {
+			if (
+				details.trigger &&
+				anchor &&
+				details.trigger !== anchor &&
+				this.#triggers.has(details.trigger)
+			) {
 				// Another trigger of the same popover: the panel moves to it and stays open.
 				this.#openRequests += 1;
 				this.#setActiveTrigger(details.trigger);
@@ -323,9 +328,11 @@ export class PopoverState extends PopoverOptionsBase {
 	// Triggers: every element attached through `reference` (or `trigger`), with the order they
 	// attached in. Plain fields, not `$state`: detach teardowns compare against them, and a
 	// `$state` read in teardown can return the value from before the change that triggered it.
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- teardown bookkeeping, never rendered
 	readonly #triggers = new Map<HTMLElement, number>();
 	#triggerSequence = 0;
 	/** Triggers attached during the current flush: a re-rendered trigger's replacement. */
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- teardown bookkeeping, never rendered
 	readonly #recentTriggers = new Set<HTMLElement>();
 	#latestTriggerNode: HTMLElement | null = null;
 	#activeTriggerNode: HTMLElement | null = null;
@@ -403,7 +410,8 @@ export class PopoverState extends PopoverOptionsBase {
 		// pending, it would reopen a popover the user just closed by click or Escape.
 		this.hoverAction.cancel();
 		if (nextOpen) {
-			const trigger = details.trigger && this.#triggers.has(details.trigger) ? details.trigger : null;
+			const trigger =
+				details.trigger && this.#triggers.has(details.trigger) ? details.trigger : null;
 			this.#setActiveTrigger(trigger);
 			this.openReason = openReasonOf(details);
 			this.#opener =
@@ -549,8 +557,7 @@ export class PopoverState extends PopoverOptionsBase {
 			}
 		};
 		queueMicrotask(resolve);
-		const observer =
-			typeof MutationObserver === 'undefined' ? null : new MutationObserver(resolve);
+		const observer = typeof MutationObserver === 'undefined' ? null : new MutationObserver(resolve);
 		observer?.observe(panel, { childList: true, subtree: true });
 		return () => {
 			observer?.disconnect();
@@ -610,7 +617,8 @@ export class PopoverState extends PopoverOptionsBase {
 			);
 			const notePress = (event: Event) => this.#notePress(node, event, 'trigger-press');
 			const noteKey = (event: KeyboardEvent) => {
-				if (event.key === 'Enter' || event.key === ' ') this.#notePress(node, event, 'trigger-press');
+				if (event.key === 'Enter' || event.key === ' ')
+					this.#notePress(node, event, 'trigger-press');
 				else if (event.key === 'ArrowDown' || event.key === 'ArrowUp')
 					this.#notePress(node, event, 'list-navigation');
 			};
@@ -628,7 +636,8 @@ export class PopoverState extends PopoverOptionsBase {
 				this.#recentTriggers.delete(node);
 				if (this.#hoveredTrigger === node) this.#hoveredTrigger = null;
 				const wasActive = this.#activeTriggerNode === node;
-				const wasAnchor = wasActive || (!this.#activeTriggerNode && this.#latestTriggerNode === node);
+				const wasAnchor =
+					wasActive || (!this.#activeTriggerNode && this.#latestTriggerNode === node);
 				if (wasActive) this.#setActiveTrigger(null);
 				if (this.#latestTriggerNode === node) this.#setLatestTrigger(this.#newestTrigger());
 				if (!wasAnchor) return;
