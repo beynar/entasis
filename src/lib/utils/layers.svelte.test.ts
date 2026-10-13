@@ -36,7 +36,12 @@ describe('Android Back through CloseWatcher (OV-11)', () => {
 		await waitFor(() => expect(queryDialog('Outer dialog')).toBeNull());
 		expect(onOpenChange).toHaveBeenLastCalledWith(
 			false,
-			expect.objectContaining({ reason: 'close-watcher', event: expect.any(Event) })
+			expect.objectContaining({
+				reason: 'close-watcher',
+				event: expect.any(Event),
+				// The Back gesture is user input, not code.
+				interaction: 'touch'
+			})
 		);
 		await waitFor(() => expect(closeWatchers.active).toHaveLength(0));
 	});

@@ -47,9 +47,13 @@ const containsInTree = (popover: PopoverState, node: Node): boolean =>
 	popover.children.some((child) => containsInTree(child, node));
 
 /**
- * Closes a menu tree: every open submenu, deepest first, then the root, each through its own
- * `close(details)` so each level reports its open change exactly once (the order an outside press
- * dismisses them in), with the reason in `details` (`item-press` for a chosen item).
+ * Closes a menu tree: the root first, through its own `close(details)`, then every open submenu
+ * below it, deepest first. Each level reports its open change exactly once, with the reason in
+ * `details` (`item-press` for a chosen item).
+ *
+ * The root asks first because it is the level the consumer's `onOpenChange` can cancel: when it
+ * does, the whole tree stays as it was, submenus and focus included. Submenus are still mounted
+ * while the root panel's outro runs, so they close right after it in the same task.
  *
  * Focus left inside the tree goes straight to `returnTo`, the element the root hands focus back
  * to. No row of a closing panel keeps focus through the close transition, and every panel's focus
@@ -64,10 +68,13 @@ export const closeMenuTree = (
 ) => {
 	const active = document.activeElement;
 	const focusInTree = !!active && (!!rootMenu?.contains(active) || containsInTree(root, active));
-	const close = (popover: PopoverState) => {
-		for (const child of popover.children) close(child);
-		if (popover.isOpen) popover.close(details);
+	if (root.isOpen && root.close(details) === false) return;
+	const closeBelow = (popover: PopoverState) => {
+		for (const child of popover.children) {
+			closeBelow(child);
+			if (child.isOpen) child.close(details);
+		}
 	};
-	close(root);
+	closeBelow(root);
 	if (focusInTree && returnTo?.isConnected) returnTo.focus({ preventScroll: true });
 };

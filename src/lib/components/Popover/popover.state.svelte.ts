@@ -183,14 +183,15 @@ export class PopoverState extends PopoverOptionsBase {
 		expanded: this.isOpen,
 		controls: this.isOpen && !this.isMobileSheet ? this.controlsId : undefined
 	});
-	// Non-modal: no Tab containment or `inert`; optional initial focus. Focus goes back only when
-	// it was inside the panel: a popover that never had focus (a combobox list) leaves it alone,
-	// even when the control that kept it blurred on purpose.
+	// Non-modal: no Tab containment or `inert`; optional initial focus. Focus goes back when it was
+	// inside the panel, or when a trigger opened the popover (Safari does not focus a button on
+	// click, so a press and Escape leave focus on <body>). A popover with neither, such as a
+	// combobox list, leaves focus alone, even when the control that kept it blurred on purpose.
 	focusScope = useFocusScope({
 		isActive: () => this.isOpen && !this.isMobileSheet && this.layer.isTop,
 		trap: () => false,
 		initialFocus: () => this.focusOnOpen ?? false,
-		restoreFocus: () => this.#focusEntered,
+		restoreFocus: () => this.#focusEntered || this.activeTrigger !== null,
 		returnTo: () => this.#returnTarget()
 	});
 	// Mode preset from `popoverTheme.motion`, through the override ladder
@@ -311,9 +312,8 @@ export class PopoverState extends PopoverOptionsBase {
 		this.setOpen(true, input);
 	};
 
-	close = (input?: PopoverOpenChangeInput) => {
-		this.setOpen(false, input);
-	};
+	/** Closes the popover. Returns `false` when `onOpenChange` cancelled the change. */
+	close = (input?: PopoverOpenChangeInput): boolean => this.setOpen(false, input);
 
 	/** Calls to `setOpen`, direct or through `open`, `close` and `toggle`, unchanged state included. */
 	#openRequests = 0;
@@ -403,7 +403,15 @@ export class PopoverState extends PopoverOptionsBase {
 	 */
 	setOpen = (nextOpen: boolean, input?: PopoverOpenChangeInput): boolean => {
 		this.#openRequests += 1;
-		if (this.isOpen === nextOpen) return true;
+		if (this.isOpen === nextOpen) {
+			// A press on the trigger of a popover the pointer opened by hovering pins it open, the
+			// same as `toggle()` does: a menu's submenu trigger opens its submenu with `open()`.
+			if (nextOpen && this.openReason === 'hover') {
+				const pressed = this.#details(input);
+				if (pressed.reason === 'trigger-press') this.openReason = openReasonOf(pressed);
+			}
+			return true;
+		}
 		const details = this.#details(input);
 		if (!requestOpenChange(this.onOpenChange, nextOpen, details)) return false;
 		// A hover open still waiting on its delay belongs to the state before this change: left

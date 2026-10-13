@@ -14,7 +14,10 @@ export type OpenChangeReason =
 	| 'outside-press'
 	/** The Escape key. */
 	| 'escape-key'
-	/** A platform close request such as the Android Back gesture (a `CloseWatcher`). */
+	/**
+	 * A platform close request such as the Android Back gesture (a `CloseWatcher`). Reported with
+	 * `interaction: 'touch'`: the event it fires carries no input modality of its own.
+	 */
 	| 'close-watcher'
 	/** A close button inside the overlay. */
 	| 'close-press'

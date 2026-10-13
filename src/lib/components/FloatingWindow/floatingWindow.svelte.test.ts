@@ -52,4 +52,23 @@ describe('FloatingWindow open-change details and lifecycle', () => {
 		expect(event.defaultPrevented).toBe(false);
 		expect(screen.getByRole('dialog')).toBeInTheDocument();
 	});
+
+	test('minimizing to the dock and restoring report no extra onAfterOpen or onAfterClose', async () => {
+		const onAfterOpen = vi.fn();
+		const onAfterClose = vi.fn();
+		const onOpenChange = vi.fn();
+		mount({ onAfterOpen, onAfterClose, onOpenChange });
+		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
+
+		await fireEvent.click(screen.getByRole('button', { name: /minimize/i }));
+		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+		await settle();
+		await fireEvent.click(screen.getAllByRole('button', { name: /restore/i })[0]);
+		await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+		await settle();
+
+		expect(onAfterOpen).toHaveBeenCalledOnce();
+		expect(onAfterClose).not.toHaveBeenCalled();
+		expect(onOpenChange).not.toHaveBeenCalled();
+	});
 });

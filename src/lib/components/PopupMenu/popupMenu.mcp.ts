@@ -95,7 +95,7 @@ The PopupMenu component is a wrapper around Popover that renders a Menu inside. 
 
 - **ref**: HTMLElement | null - External reference element (instead of trigger)
 
-- **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void - Called before component-owned state changes, with \`details.reason\` (\`'trigger-press'\`, \`'trigger-hover'\`, \`'item-press'\` when a chosen item closes the menu, \`'escape-key'\`, \`'outside-press'\`…), \`details.event\` and \`details.cancel()\`, which keeps the menu as it is
+- **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void - Called before component-owned state changes, with \`details.reason\` (\`'trigger-press'\`, \`'trigger-hover'\`, \`'item-press'\` when a chosen item closes the menu, \`'escape-key'\`, \`'outside-press'\`…), \`details.event\` and \`details.cancel()\`, which keeps the menu as it is (cancelling an \`'item-press'\` close also keeps its open submenus and focus where they were)
 
 - **onAfterOpen**: (popover: PopoverState) => void - Called after the popover opens
 

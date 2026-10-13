@@ -104,7 +104,8 @@ export class SelectState {
 		$effect(() => {
 			if (!this.isOpen || !this.alignItemWithTrigger) return;
 			const block = (event: Event) => {
-				const panel = document.getElementById(this.listboxId)?.closest('dialog');
+				// The listbox sits in the popover's panel, the only child of its positioning wrapper.
+				const panel = document.getElementById(this.listboxId)?.parentElement?.parentElement;
 				if (event.target instanceof Node && panel?.contains(event.target)) return;
 				event.preventDefault();
 			};

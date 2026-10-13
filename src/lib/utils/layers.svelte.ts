@@ -237,8 +237,13 @@ export class LayerStack {
 		const applied =
 			!refused &&
 			!!top?.options.dismissOnEscape?.() &&
-			top.options.onDismiss?.({ reason: 'close-watcher', event, cancelable: event.cancelable }) !==
-				false;
+			top.options.onDismiss?.({
+				reason: 'close-watcher',
+				event,
+				// The Back gesture is user input, though the event it fires carries no modality.
+				interaction: 'touch',
+				cancelable: event.cancelable
+			}) !== false;
 		// Keeps the watcher alive for the next request when nothing closed.
 		if (!applied && event.cancelable) event.preventDefault();
 	};

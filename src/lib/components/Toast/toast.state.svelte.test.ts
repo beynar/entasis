@@ -420,3 +420,31 @@ describe('toast timers and window activity', () => {
 		expect(timer.paused).toBe(false);
 	});
 });
+
+describe('toast action handlers (CX-4)', () => {
+	test("an action's onclick runs first, and preventDefault keeps the toast", async () => {
+		render(Harness);
+		const keep = vi.fn((event: MouseEvent) => event.preventDefault());
+		const leave = vi.fn();
+		toast.info({
+			title: 'Archived',
+			duration: false,
+			actions: [
+				{ content: 'Keep', onclick: keep },
+				{ content: 'Undo', onclick: leave }
+			]
+		});
+		await tick();
+
+		await fireEvent.click(screen.getByRole('button', { name: 'Keep' }));
+		await tick();
+		expect(keep).toHaveBeenCalledOnce();
+		expect(items()).toHaveLength(1);
+
+		// Without a preventDefault the action dismisses the toast, after its own handler ran.
+		await fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+		await tick();
+		expect(leave).toHaveBeenCalledOnce();
+		await waitFor(() => expect(items()).toHaveLength(0));
+	});
+});

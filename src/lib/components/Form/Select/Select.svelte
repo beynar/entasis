@@ -140,6 +140,7 @@
 {/snippet}
 
 <Popover
+	haspopup="listbox"
 	closeOnClickOutside={false}
 	closeOnEscape={false}
 	fitTrigger

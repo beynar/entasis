@@ -35,6 +35,24 @@ describe('how the popover was opened (MN-4)', () => {
 		await waitFor(() => expect(document.body.style.overflow).toBe('hidden'));
 	});
 
+	test('open() from the click handler of a hover-opened popup pins it too (a submenu trigger)', async () => {
+		const onOpenChange = vi.fn();
+		mount('hover-open-call', { onOpenChange });
+		await fireEvent.mouseEnter(button('Submenu trigger'));
+		await waitFor(() => expect(screen.getByTestId('reason')).toHaveTextContent('hover'));
+
+		await pointerClick(button('Submenu trigger'));
+		await settle();
+
+		expect(screen.getByTestId('reason')).toHaveTextContent('press');
+		expect(onOpenChange).toHaveBeenCalledOnce();
+		// Pinned, the pointer leaving no longer closes it.
+		await fireEvent.mouseLeave(button('Submenu trigger'));
+		await fireEvent.mouseMove(document.body, { clientX: 900, clientY: 900 });
+		await settle();
+		expect(screen.getByTestId('reason')).toBeInTheDocument();
+	});
+
 	test('a pointer press reports press, a keyboard activation keyboard', async () => {
 		mount('hover');
 		await pointerClick(button('Hover trigger'));
@@ -148,6 +166,46 @@ describe('trigger contract (CX-4)', () => {
 		await settle();
 		expect(screen.getByTestId('anchor')).toHaveTextContent('First');
 		expect(onOpenChange).toHaveBeenCalledOnce();
+	});
+});
+
+describe('cancelling an open change (CX-1)', () => {
+	test('a cancelled trigger press keeps the popover closed', async () => {
+		const onOpenChange = vi.fn((_open: boolean, details: { cancel(): void }) => details.cancel());
+		mount('two-triggers', { onOpenChange, secondPresent: false });
+		await pointerClick(button('First'));
+		await settle();
+
+		expect(onOpenChange).toHaveBeenCalledOnce();
+		expect(onOpenChange).toHaveBeenCalledWith(
+			true,
+			expect.objectContaining({ reason: 'trigger-press', trigger: button('First') })
+		);
+		expect(screen.queryByTestId('anchor')).toBeNull();
+		expect(button('First')).toHaveAttribute('aria-expanded', 'false');
+	});
+
+	test('a cancelled outside press keeps it open; the next one closes it', async () => {
+		const onOpenChange = vi.fn((open: boolean, details: { reason: string; cancel(): void }) => {
+			if (!open && onOpenChange.mock.calls.length === 2) details.cancel();
+		});
+		mount('two-triggers', { onOpenChange, secondPresent: false });
+		await pointerClick(button('First'));
+		await screen.findByTestId('anchor');
+
+		await fireEvent.pointerDown(screen.getByTestId('outside'));
+		await fireEvent.click(screen.getByTestId('outside'));
+		await settle();
+		expect(onOpenChange).toHaveBeenLastCalledWith(
+			false,
+			expect.objectContaining({ reason: 'outside-press' })
+		);
+		expect(screen.getByTestId('anchor')).toBeInTheDocument();
+
+		await fireEvent.pointerDown(screen.getByTestId('outside'));
+		await fireEvent.click(screen.getByTestId('outside'));
+		await waitFor(() => expect(screen.queryByTestId('anchor')).toBeNull());
+		expect(onOpenChange).toHaveBeenCalledTimes(3);
 	});
 });
 

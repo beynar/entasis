@@ -166,6 +166,22 @@ describe('Dialog trigger contract (CX-4)', () => {
 		expect(card).toHaveAttribute('aria-expanded', 'false');
 	});
 
+	test('cancelling the trigger press keeps the dialog closed and the trigger collapsed', async () => {
+		const onOpenChange = vi.fn((_open: boolean, details: { cancel(): void }) => details.cancel());
+		render(DialogTriggerHarness, { props: { scenario: 'snippet-trigger', onOpenChange } });
+		const card = screen.getByTestId('card');
+		await fireEvent.click(card);
+		await new Promise((resolve) => setTimeout(resolve, 20));
+
+		expect(onOpenChange).toHaveBeenCalledOnce();
+		expect(onOpenChange).toHaveBeenCalledWith(
+			true,
+			expect.objectContaining({ reason: 'trigger-press', trigger: card })
+		);
+		expect(screen.queryByRole('dialog')).toBeNull();
+		expect(card).toHaveAttribute('aria-expanded', 'false');
+	});
+
 	test("the built-in trigger's onclick runs first, and preventDefault keeps the dialog closed", async () => {
 		const onOpenChange = vi.fn();
 		render(DialogTriggerHarness, { props: { scenario: 'prevented-trigger', onOpenChange } });

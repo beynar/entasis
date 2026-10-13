@@ -94,7 +94,8 @@
 				...option,
 				type: 'option',
 				href: treeNode.href,
-				// The node's own handler runs first; `event.preventDefault()` keeps the flyout open.
+				// The node's own handler runs first; `event.preventDefault()` skips this explicit close. The
+				// flyout is a PopupMenu, which closes on any item press, so it closes either way.
 				onclick: composeHandlers(treeNode.onclick, () => {
 					popupOpen = false;
 				})

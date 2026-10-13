@@ -10,6 +10,7 @@
 
 	type Scenario =
 		| 'hover'
+		| 'hover-open-call'
 		| 'wrapper-trigger'
 		| 'programmatic'
 		| 'loading-trigger'
@@ -47,6 +48,18 @@
 			trigger={{ content: 'Hover trigger' }}
 			{onOpenChange}
 		>
+			{#snippet children(popover)}
+				<p data-testid="reason">{popover.openReason}</p>
+			{/snippet}
+		</Popover>
+	{:else if scenario === 'hover-open-call'}
+		<!-- A submenu trigger: its click calls open(), never toggle(). -->
+		<Popover openOnHover delay={0} closeOnMouseLeave transition={zero} {onOpenChange}>
+			{#snippet trigger(popover)}
+				<button type="button" onclick={() => popover.open()} {@attach popover.reference}
+					>Submenu trigger</button
+				>
+			{/snippet}
 			{#snippet children(popover)}
 				<p data-testid="reason">{popover.openReason}</p>
 			{/snippet}

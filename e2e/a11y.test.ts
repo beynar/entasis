@@ -110,11 +110,7 @@ test.describe('component pages', () => {
 // short and overflowing lists, grouped lists with separators, and the empty state of a search.
 /** Wait until the open popup's list overflows and its ScrollArea has laid out the scrollbar. */
 const scrollbarShown = (page: Page) =>
-	page
-		.locator('dialog[open]', { has: page.getByRole('listbox') })
-		.locator('[data-slot="scroll-area-scrollbar"]')
-		.first()
-		.waitFor();
+	page.getByRole('listbox').locator('[data-slot="scroll-area-scrollbar"]').first().waitFor();
 
 const openPopups: { route: string; open: string; show: (page: Page) => Promise<unknown> }[] = [
 	{

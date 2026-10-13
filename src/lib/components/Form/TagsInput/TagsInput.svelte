@@ -335,7 +335,14 @@
 {/snippet}
 
 {#if hasItems}
-	<Popover closeOnClickOutside={false} fitTrigger position="bottom" size="small" open={isOpen}>
+	<Popover
+		haspopup="listbox"
+		closeOnClickOutside={false}
+		fitTrigger
+		position="bottom"
+		size="small"
+		open={isOpen}
+	>
 		<div
 			id={listboxId}
 			role="listbox"
