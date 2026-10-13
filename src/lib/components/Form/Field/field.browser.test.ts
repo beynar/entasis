@@ -5,6 +5,7 @@ import { page, userEvent } from 'vitest/browser';
 import type { Component } from 'svelte';
 import { render } from 'vitest-browser-svelte';
 import ThemeProviderHarness from '../../Theme/ThemeProviderHarness.test.svelte';
+import RichTextInput from '../../RichTextInput/RichTextInput.svelte';
 import FieldHarness from './FieldHarness.test.svelte';
 import type { FieldState } from './field.state.svelte.js';
 import type { FieldType } from './field.js';
@@ -67,4 +68,39 @@ test('clicking a labelFor={false} label focuses the control', async () => {
 	await mountField({ labelFor: false, controlRole: 'combobox' });
 	await userEvent.click(page.getByText('Name'));
 	await expect.element(page.getByTestId('control')).toHaveFocus();
+});
+
+test('a press on the field description takes focus away, so focused clears and touched sets', async () => {
+	const { field } = await mountField({ description: 'Shown under the control' });
+	await userEvent.click(page.getByTestId('control'));
+	await expect.poll(() => field.focused).toBe(true);
+	await userEvent.click(page.getByText('Shown under the control'));
+	await expect.poll(() => field.focused).toBe(false);
+	expect(field.touched).toBe(true);
+	expect(document.activeElement).toBe(document.body);
+});
+
+test('a press on a button inside the field keeps the field focused', async () => {
+	const { field } = await mountField();
+	await userEvent.click(page.getByTestId('control'));
+	await expect.poll(() => field.focused).toBe(true);
+	await userEvent.click(page.getByRole('button', { name: 'Action' }));
+	expect(field.focused).toBe(true);
+	expect(field.touched).toBe(false);
+});
+
+test('a read-only RichTextInput shows what the user types as unchanged', async () => {
+	const view = await render(ThemeProviderHarness, {
+		props: {
+			component: RichTextInput as unknown as Component<Record<string, unknown>>,
+			readOnly: true,
+			defaultValue: 'Hello'
+		}
+	});
+	const editor = view.getByRole('textbox');
+	await expect.element(editor).toHaveAttribute('contenteditable', 'false');
+	await userEvent.click(editor);
+	await userEvent.keyboard('XYZ');
+	await expect.element(editor).toHaveTextContent('Hello');
+	expect(editor.element().textContent).toBe('Hello');
 });

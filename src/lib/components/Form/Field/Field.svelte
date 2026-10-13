@@ -82,6 +82,18 @@
 		if (value === null) element.removeAttribute(name);
 		else element.setAttribute(name, value);
 	};
+
+	// Sets an attribute and returns its undo. A control's own template can write the same
+	// attribute (aria-readonly on Rating, aria-required on Switch); once that template removes it,
+	// the undo must not bring back a value this effect captured earlier, so it only restores
+	// while the attribute still holds what was set here.
+	const claimAttribute = (element: Element, name: string, value: string) => {
+		const initial = element.getAttribute(name);
+		element.setAttribute(name, value);
+		return () => {
+			if (element.getAttribute(name) === value) restoreAttribute(element, name, initial);
+		};
+	};
 </script>
 
 <script lang="ts" generics="Type extends FieldType">
@@ -140,14 +152,11 @@
 		const control = field.node ?? field.rootNode;
 		if (!control) return;
 
-		const initialInvalid = control.getAttribute('aria-invalid');
 		const initialDescribedBy = control.getAttribute('aria-describedby');
 		const initialLabelledBy = control.getAttribute('aria-labelledby');
-		const initialRequired = control.getAttribute('aria-required');
-		const initialReadOnly = control.getAttribute('aria-readonly');
-		const initialNativeReadOnly = control.getAttribute('readonly');
+		const undo: (() => void)[] = [];
 
-		if (field.hasError) control.setAttribute('aria-invalid', 'true');
+		if (field.hasError) undo.push(claimAttribute(control, 'aria-invalid', 'true'));
 
 		// The app's own ids come first, then the description, the helper and the errors.
 		const fieldDescriptionIds = new Set([field.descriptionId, field.helperId, field.errorId]);
@@ -171,20 +180,19 @@
 		// Native controls carry `required` themselves; a role-based control announces it.
 		const role = roleOf(control);
 		if (field.required && !isNativeFormControl(control) && role && ARIA_REQUIRED_ROLES.has(role)) {
-			control.setAttribute('aria-required', 'true');
+			undo.push(claimAttribute(control, 'aria-required', 'true'));
 		}
 		if (field.readOnly) {
-			if (acceptsNativeReadOnly(control)) control.setAttribute('readonly', '');
-			else if (role && ARIA_READONLY_ROLES.has(role)) control.setAttribute('aria-readonly', 'true');
+			if (acceptsNativeReadOnly(control)) undo.push(claimAttribute(control, 'readonly', ''));
+			else if (role && ARIA_READONLY_ROLES.has(role)) {
+				undo.push(claimAttribute(control, 'aria-readonly', 'true'));
+			}
 		}
 
 		return () => {
-			restoreAttribute(control, 'aria-invalid', initialInvalid);
+			for (const restore of undo) restore();
 			restoreAttribute(control, 'aria-describedby', initialDescribedBy);
 			restoreAttribute(control, 'aria-labelledby', initialLabelledBy);
-			restoreAttribute(control, 'aria-required', initialRequired);
-			restoreAttribute(control, 'aria-readonly', initialReadOnly);
-			restoreAttribute(control, 'readonly', initialNativeReadOnly);
 		};
 	});
 

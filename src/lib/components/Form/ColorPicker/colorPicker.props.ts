@@ -20,6 +20,8 @@ export type ColorPickerProps = WithAttachments<{
 	size?: Sizes;
 	/** Disables every control and dims the panel. */
 	disabled?: boolean;
+	/** Refuses edits (drag, keys, typed text, eyedropper) while the controls stay focusable. */
+	readOnly?: boolean;
 	/** Fires on every committed change, including continuously while dragging. Receives the canonical hex. */
 	onValueChange?: (value: string) => void;
 	/** Extra classes merged onto the root panel. */

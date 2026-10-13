@@ -160,6 +160,7 @@
 			{calendarLabel}
 			id={selectorId}
 			disabled={field.disabled}
+			readOnly={field.readOnly}
 			theme={theme?.selector}
 			{calendarTheme}
 		/>

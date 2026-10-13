@@ -67,6 +67,7 @@ RichTextInput is built on Lexical. Those packages are optional peer dependencies
 - **label**, **description**, **helper**, **errors**, **required**, **onValidate** - Standard Field props.
 - **placeholder**: string (default: "Ask anything...") - Placeholder and textbox aria-label.
 - **disabled**: boolean (default: false) - Disables editing and suggestions.
+- **readOnly**: boolean (default: false) - The editor stays focusable and selectable but is not editable; the fixed toolbar is hidden and the value still submits.
 - **standalone**: boolean (default: false) - Renders only the rich text editor chrome without the Field wrapper or input surface.
 - **maxHeight**: number | string | false (default: false) - False lets the editor grow with content; a number/string caps the editor height.
 

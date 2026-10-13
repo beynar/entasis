@@ -206,6 +206,7 @@
 		{formats}
 		{toolbarClass}
 		disabled={field.disabled ?? false}
+		readOnly={field.readOnly}
 		placeholder={placeholder ?? t.aiComposerPlaceholder}
 		{standalone}
 		{maxHeight}

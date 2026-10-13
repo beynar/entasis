@@ -105,6 +105,7 @@
 			{size}
 			{i18n}
 			disabled={field.disabled}
+			readOnly={field.readOnly}
 			theme={theme?.picker}
 		/>
 	</div>

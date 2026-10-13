@@ -14,6 +14,7 @@
 		format = $bindable('hex'),
 		size = 'normal',
 		disabled = false,
+		readOnly = false,
 		onValueChange,
 		class: className,
 		theme,
@@ -44,6 +45,9 @@
 		get disabled() {
 			return disabled;
 		},
+		get readOnly() {
+			return readOnly;
+		},
 		onValueChange: (v) => onValueChange?.(v)
 	});
 
@@ -62,7 +66,7 @@
 	});
 
 	const openEyeDropper = async () => {
-		if (!eyeDropperSupported || disabled) return;
+		if (!eyeDropperSupported || disabled || readOnly) return;
 		try {
 			const EyeDropperCtor = (
 				window as unknown as {
@@ -134,6 +138,7 @@
 				picker.v * 100
 			)}% ${t.brightness}`}
 			aria-disabled={disabled || undefined}
+			aria-readonly={readOnly || undefined}
 			onkeydown={picker.onAreaKeydown}
 		></div>
 	</div>
@@ -143,7 +148,7 @@
 		<button
 			type="button"
 			class={classes.eyedropperButton({ size })}
-			disabled={disabled || !eyeDropperSupported}
+			disabled={disabled || readOnly || !eyeDropperSupported}
 			aria-label={t.pickColorFromScreen}
 			onclick={openEyeDropper}
 		>
@@ -162,6 +167,7 @@
 					aria-valuemax={360}
 					aria-valuenow={Math.round(picker.h)}
 					aria-disabled={disabled || undefined}
+					aria-readonly={readOnly || undefined}
 					onkeydown={picker.onHueKeydown}
 				></div>
 			</div>
@@ -181,6 +187,7 @@
 					aria-valuemax={100}
 					aria-valuenow={picker.alphaPercent}
 					aria-disabled={disabled || undefined}
+					aria-readonly={readOnly || undefined}
 					onkeydown={picker.onAlphaKeydown}
 				></div>
 			</div>
@@ -205,6 +212,7 @@
 			class={classes.input({ size })}
 			value={textValue}
 			{disabled}
+			readonly={readOnly}
 			spellcheck="false"
 			autocomplete="off"
 			autocapitalize="off"
@@ -226,6 +234,7 @@
 				class={classes.alphaInput({ size })}
 				value={picker.alphaPercent}
 				{disabled}
+				readonly={readOnly}
 				aria-label={`${t.alpha} ${t.percentage}`}
 				{@attach alphaMask}
 				onchange={onAlphaChange}

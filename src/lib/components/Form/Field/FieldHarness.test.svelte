@@ -41,7 +41,8 @@
 		groupDisabled = false,
 		groupReadOnly = false,
 		onSubmit,
-		onField
+		onField,
+		onLocale
 	}: {
 		scenario?: Scenario;
 		locale?: LocaleCode;
@@ -68,9 +69,13 @@
 		groupReadOnly?: boolean;
 		onSubmit?: (value: Record<string, unknown>) => void;
 		onField?: (field: FieldState<FieldType>) => void;
+		/** Receives a setter that switches the locale without touching the other props. */
+		onLocale?: (setLocale: (next: LocaleCode) => void) => void;
 	} = $props();
 
-	setI18n(() => locales[locale].messages);
+	let activeLocale = $state<LocaleCode | null>(null);
+	setI18n(() => locales[activeLocale ?? locale].messages);
+	untrack(() => onLocale)?.((next) => (activeLocale = next));
 
 	const field = createFieldState<FieldType>({
 		id: 'harness',

@@ -130,6 +130,7 @@
 			{locale}
 			label={typeof label === 'string' ? label : undefined}
 			disabled={field.disabled}
+			readOnly={field.readOnly}
 			{cell}
 			{buttons}
 			{header}

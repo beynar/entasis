@@ -2,7 +2,13 @@ import '@testing-library/jest-dom/vitest';
 import { fireEvent, screen, waitFor, within } from '@testing-library/svelte';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import { flushSync, tick } from 'svelte';
+import CalendarInput from '../Calendar/CalendarInput.svelte';
 import Checkbox from '../Checkbox/Checkbox.svelte';
+import CheckboxesInput from '../CheckboxesInput/CheckboxesInput.svelte';
+import ColorPickerInput from '../ColorPicker/ColorPickerInput.svelte';
+import DateSelectorInput from '../DateSelector/DateSelectorInput.svelte';
+import FileInput from '../File/FileInput.svelte';
+import RichTextInput from '../../RichTextInput/RichTextInput.svelte';
 import Form from '../Form/Form.svelte';
 import type { FormInputs } from '../Form/form.js';
 import { registerFormInputs } from '../Form/form.registry.js';
@@ -18,6 +24,7 @@ import { renderInTheme } from '../../Theme/renderInTheme.test-helper.js';
 import FieldHarness from './FieldHarness.test.svelte';
 import type { FieldState } from './field.state.svelte.js';
 import type { FieldType } from './field.js';
+import type { LocaleCode } from '$lib/i18n/locales.js';
 
 type HarnessProps = NonNullable<Parameters<typeof FieldHarness>[1]>;
 
@@ -481,7 +488,7 @@ describe('FD-8 · SC-19 · labels and containers focus the control', () => {
 	test('clicking a Select label focuses the trigger without opening it', async () => {
 		renderInTheme(Select, {
 			label: 'Plan',
-			options: [
+			items: [
 				{ value: 'free', label: 'Free' },
 				{ value: 'pro', label: 'Pro' }
 			]
@@ -507,5 +514,184 @@ describe('FD-8 · SC-19 · labels and containers focus the control', () => {
 		action.dispatchEvent(buttonPress);
 		expect(buttonPress.defaultPrevented).toBe(false);
 		expect(control).not.toHaveFocus();
+	});
+});
+
+describe('review fixes · read-only primitives refuse their own edits', () => {
+	test('a read-only CalendarInput keeps its selection and marks the grid read-only', async () => {
+		const onValueChange = vi.fn();
+		const { container } = renderInTheme(CalendarInput, {
+			type: 'calendar',
+			readOnly: true,
+			defaultValue: new Date(2026, 9, 5, 12),
+			onValueChange
+		});
+		const selected = () =>
+			[...container.querySelectorAll('[data-selected]')].map((cell) =>
+				cell.getAttribute('data-date')
+			);
+		expect(selected()).toEqual(['2026-10-05']);
+		expect(container.querySelector('[role="grid"]')).toHaveAttribute('aria-readonly', 'true');
+		await fireEvent.click(container.querySelector('[data-date="2026-10-20"]') as HTMLElement);
+		expect(selected()).toEqual(['2026-10-05']);
+		expect(onValueChange).not.toHaveBeenCalled();
+	});
+
+	test('an editable CalendarInput still selects', async () => {
+		const onValueChange = vi.fn();
+		const { container } = renderInTheme(CalendarInput, {
+			type: 'calendar',
+			defaultValue: new Date(2026, 9, 5, 12),
+			onValueChange
+		});
+		await fireEvent.click(container.querySelector('[data-date="2026-10-20"]') as HTMLElement);
+		expect(onValueChange).toHaveBeenCalledTimes(1);
+		expect(container.querySelector('[role="grid"]')).not.toHaveAttribute('aria-readonly');
+	});
+
+	test('a read-only DateSelectorInput opens but keeps its date', async () => {
+		const onValueChange = vi.fn();
+		renderInTheme(DateSelectorInput, {
+			readOnly: true,
+			defaultOpen: true,
+			defaultValue: new Date(2026, 9, 5, 12),
+			onValueChange
+		});
+		const cell = await waitFor(() => {
+			const node = document.querySelector('[data-date="2026-10-20"]');
+			expect(node).not.toBeNull();
+			return node as HTMLElement;
+		});
+		await fireEvent.click(cell);
+		expect(onValueChange).not.toHaveBeenCalled();
+		expect(document.querySelector('[data-selected]')?.getAttribute('data-date')).toBe('2026-10-05');
+	});
+
+	test('a read-only ColorPickerInput refuses typed colors and drags', async () => {
+		const onValueChange = vi.fn();
+		const { container } = renderInTheme(ColorPickerInput, {
+			readOnly: true,
+			defaultValue: '#ff0000',
+			onValueChange
+		});
+		const hex = container.querySelector(
+			'input[aria-label$="Value"], input[type="text"]'
+		) as HTMLInputElement;
+		expect(hex).toHaveAttribute('readonly');
+		expect(hex.value).toBe('#ff0000');
+		await fireEvent.focus(hex);
+		await fireEvent.input(hex, { target: { value: '#00ff00' } });
+		await fireEvent.keyDown(hex, { key: 'Enter' });
+		expect(onValueChange).not.toHaveBeenCalled();
+		expect(hex.value).toBe('#ff0000');
+		const area = container.querySelector('[role="slider"]') as HTMLElement;
+		expect(area).toHaveAttribute('aria-readonly', 'true');
+		await fireEvent.keyDown(area, { key: 'ArrowLeft' });
+		expect(onValueChange).not.toHaveBeenCalled();
+	});
+
+	test('a read-only RichTextInput is not content-editable', async () => {
+		renderInTheme(RichTextInput, { readOnly: true, defaultValue: 'Hello', toolbar: 'fixed' });
+		const editor = await screen.findByRole('textbox');
+		await waitFor(() => expect(editor).toHaveAttribute('contenteditable', 'false'));
+		expect(editor).toHaveAttribute('aria-readonly', 'true');
+		expect(editor).toHaveAttribute('tabindex', '0');
+		expect(document.querySelector('[data-slot="rich-text-input-toolbar"]')).toBeNull();
+	});
+
+	test('a read-only FileInput neither opens the chooser nor offers removal', async () => {
+		const file = new File(['x'], 'notes.txt', { type: 'text/plain' });
+		const { container } = renderInTheme(FileInput, {
+			readOnly: true,
+			clickable: true,
+			defaultValue: file
+		});
+		const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+		const click = vi.spyOn(input, 'click');
+		await fireEvent.click(container.querySelector('fieldset') as HTMLElement);
+		expect(click).not.toHaveBeenCalled();
+		const remove = container.querySelector('fieldset button') as HTMLButtonElement;
+		expect(remove).toBeDisabled();
+	});
+
+	test('a read-only CheckboxesInput announces every option as read-only', () => {
+		renderInTheme(CheckboxesInput, {
+			label: 'Toppings',
+			readOnly: true,
+			items: [
+				{ label: 'Cheese', value: 'cheese' },
+				{ label: 'Olives', value: 'olives' }
+			]
+		});
+		for (const box of screen.getAllByRole('checkbox')) {
+			expect(box).toHaveAttribute('aria-readonly', 'true');
+		}
+	});
+});
+
+describe('review fixes · attributes the control also writes', () => {
+	test('turning readOnly off clears aria-readonly on a Rating', async () => {
+		const view = renderInTheme(RatingInput, { label: 'Score', readOnly: true, defaultValue: 2 });
+		const rating = screen.getByRole('slider', { name: 'Score' });
+		expect(rating).toHaveAttribute('aria-readonly', 'true');
+		await view.rerender({ readOnly: false });
+		await tick();
+		expect(rating).not.toHaveAttribute('aria-readonly');
+		await view.rerender({ readOnly: true });
+		await tick();
+		expect(rating).toHaveAttribute('aria-readonly', 'true');
+	});
+
+	test('turning required off clears aria-required on a Switch', async () => {
+		const view = renderInTheme(Switch, { label: 'Alerts', labelPosition: 'top', required: true });
+		const control = screen.getByRole('switch', { name: 'Alerts' });
+		expect(control).toHaveAttribute('aria-required', 'true');
+		await view.rerender({ required: false });
+		await tick();
+		expect(control).not.toHaveAttribute('aria-required');
+	});
+});
+
+describe('review fixes · focused and locale', () => {
+	test('a control writing focused=false while focus is still in the field does not clear it', async () => {
+		const { field } = mountField({});
+		const control = screen.getByTestId('control');
+		control.focus();
+		await tick();
+		expect(field.focused).toBe(true);
+		// A control blur handler fires before focus lands on the next part of the field.
+		field.focused = false;
+		expect(field.focused).toBe(true);
+		screen.getByRole('button', { name: 'Action' }).focus();
+		await tick();
+		expect(field.focused).toBe(true);
+		screen.getByRole('button', { name: 'After' }).focus();
+		await tick();
+		expect(field.focused).toBe(false);
+		expect(field.touched).toBe(true);
+	});
+
+	test('a shown validation message is written again when the locale changes', async () => {
+		let setLocale!: (locale: LocaleCode) => void;
+		const { field } = mountField({
+			required: true,
+			onLocale: (next: (locale: LocaleCode) => void) => (setLocale = next)
+		});
+		field.validate();
+		expect(errorsOf(field)).toEqual(['This field is required']);
+		setLocale('fr');
+		await tick();
+		expect(errorsOf(field)).toEqual(['Ce champ est obligatoire']);
+	});
+
+	test('errors an app set are left alone when the locale changes', async () => {
+		let setLocale!: (locale: LocaleCode) => void;
+		const { field } = mountField({
+			errors: ['Taken already'],
+			onLocale: (next: (locale: LocaleCode) => void) => (setLocale = next)
+		});
+		setLocale('fr');
+		await tick();
+		expect(errorsOf(field)).toEqual(['Taken already']);
 	});
 });

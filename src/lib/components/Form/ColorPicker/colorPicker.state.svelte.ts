@@ -16,6 +16,7 @@ type ColorPickerStateOptions = {
 	value?: string;
 	format?: ColorFormat;
 	disabled?: boolean;
+	readOnly?: boolean;
 	onValueChange?: (value: string) => void;
 };
 
@@ -73,6 +74,7 @@ export class ColorPickerState extends createBindableStateClass<ColorPickerStateO
 	declare value?: string;
 	declare format?: ColorFormat;
 	declare disabled?: boolean;
+	declare readOnly?: boolean;
 	declare onValueChange?: (value: string) => void;
 
 	// HSVA is the source of truth for the UI so hue/saturation survive a black/white/desaturated color.
@@ -81,22 +83,27 @@ export class ColorPickerState extends createBindableStateClass<ColorPickerStateO
 	v = $state(1);
 	a = $state(1);
 
+	/** Disabled or read-only: no edit reaches the color. */
+	private get locked() {
+		return !!this.disabled || !!this.readOnly;
+	}
+
 	private mounted = false;
 	// The last hex this component emitted; external writes equal to it are skipped to avoid re-parsing.
 	private lastEmitted: string | undefined = undefined;
 
 	private areaDrag = createPointerDrag({
-		disabled: () => !!this.disabled,
+		disabled: () => this.locked,
 		onStart: (payload) => this.setSaturationValueFromPointer(payload),
 		onMove: (payload) => this.setSaturationValueFromPointer(payload)
 	});
 	private hueDrag = createPointerDrag({
-		disabled: () => !!this.disabled,
+		disabled: () => this.locked,
 		onStart: (payload) => this.setHueFromPointer(payload),
 		onMove: (payload) => this.setHueFromPointer(payload)
 	});
 	private alphaDrag = createPointerDrag({
-		disabled: () => !!this.disabled,
+		disabled: () => this.locked,
 		onStart: (payload) => this.setAlphaFromPointer(payload),
 		onMove: (payload) => this.setAlphaFromPointer(payload)
 	});
@@ -229,7 +236,7 @@ export class ColorPickerState extends createBindableStateClass<ColorPickerStateO
 	// reverts). Alpha-less input (the text input's solid form, the eyedropper's opaque hex) keeps
 	// the current alpha — alpha is owned by the % input and the alpha slider.
 	commitText = (input: string): boolean => {
-		if (this.disabled) return false;
+		if (this.locked) return false;
 		const parsed = this.parse(input);
 		if (!parsed) return false;
 		this.applyParsed(parsed, this.a);
@@ -238,13 +245,13 @@ export class ColorPickerState extends createBindableStateClass<ColorPickerStateO
 	};
 
 	setAlphaPercent = (percent: number) => {
-		if (this.disabled) return;
+		if (this.locked) return;
 		this.a = clamp01(percent / 100);
 		this.emit();
 	};
 
 	onAreaKeydown = (event: KeyboardEvent) => {
-		if (this.disabled) return;
+		if (this.locked) return;
 		const step = event.shiftKey ? 0.1 : 0.01;
 		let handled = true;
 		switch (event.key) {
@@ -276,7 +283,7 @@ export class ColorPickerState extends createBindableStateClass<ColorPickerStateO
 	};
 
 	onHueKeydown = (event: KeyboardEvent) => {
-		if (this.disabled) return;
+		if (this.locked) return;
 		const step = event.shiftKey ? 10 : 1;
 		let next = this.h;
 		let handled = true;
@@ -306,7 +313,7 @@ export class ColorPickerState extends createBindableStateClass<ColorPickerStateO
 	};
 
 	onAlphaKeydown = (event: KeyboardEvent) => {
-		if (this.disabled) return;
+		if (this.locked) return;
 		const step = event.shiftKey ? 0.1 : 0.01;
 		let next = this.a;
 		let handled = true;

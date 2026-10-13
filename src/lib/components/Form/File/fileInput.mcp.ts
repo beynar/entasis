@@ -37,6 +37,7 @@ Extends all Field component props plus:
 - **description**: string | Snippet - Helper text
 - **required**: boolean - Mark as required
 - **disabled**: boolean - Disable input
+- **readOnly**: boolean - Keep the files but refuse choosing, dropping and removing them; the value still submits
 - **size**: 'small' | 'normal' | 'large'
 
 ### Event Props

@@ -33,6 +33,8 @@ export type CalendarPrimitiveProps<
 	value?: CalendarValue<T>;
 	/** Initial selection when `value` is omitted. */
 	defaultValue?: CalendarValue<T>;
+	/** Keeps browsing months but refuses selecting a date. */
+	readOnly?: boolean;
 	/** Called whenever the calendar selection changes. */
 	onValueChange?: (value: CalendarValue<T>) => void;
 };

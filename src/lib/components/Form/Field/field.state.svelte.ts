@@ -102,6 +102,15 @@ const unique = (messages: string[]) => [...new Set(messages)];
 const containsNode = (container: Node, node: Node) =>
 	container === node || container.contains(node);
 
+// Parts of a field that take focus when pressed (WebKit leaves buttons unfocused): a press on one
+// keeps the field's focus parked. A press on anything else in the field (its description, say)
+// moves focus to the body, which leaves the field.
+const PRESSABLE =
+	'a[href], button, input, select, textarea, label, summary, [tabindex], [role="button"], [role="checkbox"], [role="switch"], [role="radio"], [role="slider"], [role="option"], [role="tab"], [role="menuitem"], [role="combobox"], [contenteditable]:not([contenteditable="false"])';
+
+const sameStrings = (a: unknown, b: readonly string[]) =>
+	Array.isArray(a) && a.length === b.length && a.every((entry, index) => entry === b[index]);
+
 export const createFieldState = <T extends FieldType>(
 	options: FieldStateBindableOptions<T> & FieldStateStaticOptions<T>
 ) => {
@@ -119,6 +128,8 @@ export const createFieldState = <T extends FieldType>(
 	// exported and cannot carry `#private` members.
 	let focusWithin = false;
 	let stopWatchingFocus: (() => void) | null = null;
+	// The errors the last catalog-driven validation produced, and the locale they were written in.
+	let validation: { errors: string[]; locale: string } | null = null;
 	let initialValue = $state<FieldValue<T> | null | undefined>(undefined);
 	let hasBaseline = $state(false);
 	let hasDescription = $state(false);
@@ -223,6 +234,9 @@ export const createFieldState = <T extends FieldType>(
 				focused: {
 					get: () => (hasFocusedGetter ? options.focused : localFocused),
 					set: (focused: boolean) => {
+						// While focus is inside the root, a control's own blur handler is stale: focus
+						// moved to another part of the field. The root tracking clears `focused`.
+						if (!focused && focusWithin) return;
 						options.focused = focused;
 						localFocused = options.focused;
 					}
@@ -280,6 +294,19 @@ export const createFieldState = <T extends FieldType>(
 							this.form.updateFieldValue(field);
 						}
 					}
+				});
+			});
+			// A shown validation message follows the active locale: errors the catalog wrote are
+			// written again when the locale changes.
+			$effect(() => {
+				const locale = resolveMessages().locale;
+				untrack(() => {
+					if (!validation || validation.locale === locale) return;
+					if (!this.hasError || !sameStrings(this.errors, validation.errors)) {
+						validation = null;
+						return;
+					}
+					this.validate(this.value);
 				});
 			});
 			// Focus is tracked on the field root, so every control reports it, including those with
@@ -373,7 +400,18 @@ export const createFieldState = <T extends FieldType>(
 			return this.checkSchema(value).success && lengthMessage(value) === null;
 		}
 
+		/** Validates a value, writes the errors, and remembers the locale they were written in. */
 		validate = (value = this.value) => {
+			const result = this.runValidation(value);
+			validation =
+				result[0] && Array.isArray(this.errors) && this.errors.length > 0
+					? { errors: [...this.errors], locale: resolveMessages().locale }
+					: null;
+			return result;
+		};
+
+		/** @internal The validation `validate` wraps. */
+		runValidation = (value: FieldValue<T> | null | undefined) => {
 			// Disabled fields are barred from validation, as in a native form; errors an app set
 			// on them stay visible.
 			if (this.disabled) return [false, value] as const;
@@ -461,6 +499,22 @@ export const createFieldState = <T extends FieldType>(
 		return false;
 	}
 
+	// A press inside a popup the field opened, or on a pressable part of the field, keeps focus
+	// parked; a press on its text or padding takes focus away.
+	function pressKeepsFocus(target: EventTarget | null): boolean {
+		const root = field.rootNode;
+		if (!root || !isWithin(target)) return false;
+		if (!root.contains(target)) return true;
+		const element = target instanceof Element ? target : target.parentElement;
+		const pressable = element?.closest(PRESSABLE);
+		return (
+			pressable !== null &&
+			pressable !== undefined &&
+			pressable !== root &&
+			root.contains(pressable)
+		);
+	}
+
 	function enterFocus(root: HTMLElement): void {
 		focusWithin = true;
 		if (!field.focused && !field.disabled) field.focused = true;
@@ -473,7 +527,7 @@ export const createFieldState = <T extends FieldType>(
 		let pressInside = false;
 		let parked = false;
 		const onPointerDown = (event: PointerEvent) => {
-			pressInside = isWithin(event.target);
+			pressInside = pressKeepsFocus(event.target);
 			if (parked && !pressInside) leaveFocus(true);
 		};
 		const onPointerUp = () => {

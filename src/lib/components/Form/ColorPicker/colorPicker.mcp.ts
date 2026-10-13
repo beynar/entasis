@@ -50,6 +50,7 @@ Accepts every field prop from InputProps ('color') — \`label\`, \`description\
 - **size**: \`'small' | 'normal' | 'large'\` (default: \`'normal'\`)
   - Scales the panel width, slider heights, thumb sizes and text sizes.
 - **disabled**: \`boolean\` (default: \`false\`) - Disables every control and dims the panel.
+- **readOnly**: \`boolean\` (default: \`false\`) - Keeps the controls focusable but refuses drags, keys, typed text and the eyedropper.
 
 ### Event Props
 - **onValueChange**: \`(value: string) => void\`

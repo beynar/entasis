@@ -121,6 +121,7 @@
 			type="button"
 			role="checkbox"
 			aria-checked={checked}
+			aria-readonly={field.readOnly || undefined}
 			disabled={optionDisabled}
 			onclick={() => {
 				if (optionDisabled) return;

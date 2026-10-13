@@ -31,6 +31,8 @@
 		formats: RichTextInputFormat[];
 		toolbarClass?: string;
 		disabled: boolean;
+		/** Focusable and selectable, but not editable; the formatting toolbar is hidden. */
+		readOnly?: boolean;
 		placeholder: string;
 		standalone?: boolean;
 		maxHeight?: RichTextInputMaxHeight;
@@ -66,6 +68,7 @@
 		formats,
 		toolbarClass,
 		disabled,
+		readOnly = false,
 		placeholder,
 		standalone = false,
 		maxHeight = false,
@@ -95,7 +98,7 @@
 	class={classes.root({ size, disabled, className })}
 	{...attachments}
 >
-	{#if showFixedToolbar}
+	{#if showFixedToolbar && !readOnly}
 		<div
 			data-slot="rich-text-input-toolbar"
 			class={classes.fixedToolbar({ size, standalone, class: toolbarClass })}
@@ -124,6 +127,7 @@
 		{size}
 		{theme}
 		{disabled}
+		{readOnly}
 		{placeholder}
 		{standalone}
 		{maxHeight}

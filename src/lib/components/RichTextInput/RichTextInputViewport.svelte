@@ -14,6 +14,7 @@
 		size: Sizes;
 		theme?: RichTextInputThemeProps;
 		disabled?: boolean;
+		readOnly?: boolean;
 		placeholder: string;
 		standalone?: boolean;
 		maxHeight?: RichTextInputMaxHeight;
@@ -30,6 +31,7 @@
 		size,
 		theme,
 		disabled = false,
+		readOnly = false,
 		placeholder,
 		standalone = false,
 		maxHeight = false,
@@ -185,7 +187,7 @@
 				{@attach editorAttachment}
 				data-slot="ai-composer-editor"
 				data-rich-text-input-editor="true"
-				contenteditable={disabled ? 'false' : 'true'}
+				contenteditable={disabled || readOnly ? 'false' : 'true'}
 				role="textbox"
 				aria-label={placeholder}
 				aria-multiline="true"

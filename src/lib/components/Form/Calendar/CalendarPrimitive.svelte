@@ -38,6 +38,7 @@
 		locale,
 		label,
 		disabled = false,
+		readOnly = false,
 		class: className,
 		cell: renderCell,
 		buttons,
@@ -131,6 +132,9 @@
 		},
 		get disabled() {
 			return disabled;
+		},
+		get readOnly() {
+			return readOnly;
 		},
 		get locale() {
 			return locale;
@@ -337,6 +341,7 @@
 {#snippet calendarPart(rows: typeof calendar.rows, month: Date)}
 	<div
 		role="grid"
+		aria-readonly={readOnly || undefined}
 		class={classes.grid()}
 		aria-label={month.toLocaleDateString(locale, { month: 'long', year: 'numeric' })}
 	>

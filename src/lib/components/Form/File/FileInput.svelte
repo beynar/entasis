@@ -110,7 +110,8 @@
 	};
 
 	const dropzone = new FileDropzone(() => ({
-		disabled: field.disabled,
+		// A read-only zone neither opens the chooser nor takes drops or removals.
+		disabled: field.disabled || field.readOnly,
 		types,
 		maxFiles,
 		clickable,
@@ -188,7 +189,13 @@
 								<div class="truncate">{fil.name}</div>
 								<div class="text-neutral/70 text-xs">{size}</div>
 							</div>
-							<Button variant="ghost" size="small" squared onclick={() => dropzone.removeFile(fil)}>
+							<Button
+								variant="ghost"
+								size="small"
+								squared
+								disabled={field.readOnly}
+								onclick={() => dropzone.removeFile(fil)}
+							>
 								{#snippet prefix()}
 									{@render xIcon({ size: 16 })}
 								{/snippet}
@@ -197,7 +204,13 @@
 					</div>
 				{/each}
 				{#if mode === 'multiple' && dropzone.files.length > 0 && dropzone.files.length < maxFiles}
-					<Button variant="soft" color="primary" fullWidth onclick={() => dropzone.open()}>
+					<Button
+						variant="soft"
+						color="primary"
+						fullWidth
+						disabled={field.readOnly}
+						onclick={() => dropzone.open()}
+					>
 						{#snippet prefix()}
 							{@render plusIcon({ size: 16 })}
 						{/snippet}
