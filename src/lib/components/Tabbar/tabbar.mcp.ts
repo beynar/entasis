@@ -319,7 +319,7 @@ The Tabbar component follows WAI-ARIA best practices for tablist patterns:
 - Sets \`aria-disabled="true"\` on disabled tabs
 - Sets \`aria-activedescendant\` on the container to reference the active tab
 - Implements roving tabindex pattern (active tab has \`tabindex="0"\`, others have \`tabindex="-1"\`). The tablist itself has \`tabindex="-1"\`, so Tab and Shift+Tab pass through the tab list in one step
-- The tab stop follows the focused tab when tabs are added, removed or reordered, and skips tabs hidden with CSS; removing the focused tab moves focus to the tab that takes its place
+- The tab stop stays on the focused tab element and skips tabs hidden with CSS, including ones hidden by a class, a style or a media query after mount; removing the focused tab moves focus to the tab that takes its place. Tabs are keyed by position, so inserting or reordering tabs before the focused one leaves focus and the tab stop at the same position
 
 ### Keyboard Navigation
 Full keyboard support following WAI-ARIA best practices:

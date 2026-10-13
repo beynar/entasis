@@ -15,6 +15,11 @@ const items = (...labels: string[]): HarnessItem[] =>
 	labels.map((label) => ({ id: label.toLowerCase(), label }));
 const button = (name: string) =>
 	page.getByRole('button', { name, exact: true }).element() as HTMLElement;
+/** Like `button`, but still finds an item hidden with CSS (which the accessibility tree drops). */
+const rawButton = (name: string) =>
+	Array.from(document.querySelectorAll<HTMLElement>('button')).find(
+		(node) => node.textContent === name
+	)!;
 const tabStops = (root: Element) => Array.from(root.querySelectorAll('[tabindex="0"]'));
 const settle = async () => {
 	await nextFrame();
@@ -47,6 +52,37 @@ describe('hidden items', () => {
 		button('Before').focus();
 		await tab();
 		expect(document.activeElement).toBe(button('Copy'));
+	});
+
+	test('a tab-stop item hidden by an inline style or a class hands the stop on, and takes it back', async () => {
+		await render(NavigationListHarness, { items: items('Archive', 'Copy', 'Cut') });
+		const list = page.getByTestId('list').element();
+		const sheet = document.createElement('style');
+		sheet.textContent = '.nav-gone { display: none; }';
+		document.head.append(sheet);
+		try {
+			await settle();
+			expect(tabStops(list)).toEqual([button('Archive')]);
+
+			rawButton('Archive').style.display = 'none';
+			await settle();
+			expect(tabStops(list)).toEqual([button('Copy')]);
+			button('Before').focus();
+			await tab();
+			expect(document.activeElement).toBe(button('Copy'));
+
+			rawButton('Archive').style.display = '';
+			rawButton('Copy').classList.add('nav-gone');
+			await settle();
+			expect(tabStops(list)).toEqual([button('Archive')]);
+
+			// Hiding is live too: the items that remain share the one stop.
+			rawButton('Archive').classList.add('nav-gone');
+			await settle();
+			expect(tabStops(list)).toEqual([button('Cut')]);
+		} finally {
+			sheet.remove();
+		}
 	});
 });
 

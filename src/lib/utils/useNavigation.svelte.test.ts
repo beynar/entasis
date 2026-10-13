@@ -10,6 +10,7 @@ import { mockNotRendered } from '$lib/testing/jsdom.test-helper.js';
 import { renderInTheme } from '../components/Theme/renderInTheme.test-helper.js';
 import TabbarFallbackHarness from '../components/Tabbar/TabbarFallbackHarness.test.svelte';
 import NavigationKeysHarness from './NavigationKeysHarness.test.svelte';
+import NavigationNestedHarness from './NavigationNestedHarness.test.svelte';
 import NavigationListHarness, { type HarnessItem } from './NavigationListHarness.test.svelte';
 import type { useNavigation } from './useNavigation.svelte.js';
 
@@ -618,5 +619,31 @@ describe('Tabs keep one tab stop (backlog: B9 review, W0 smoke)', () => {
 		expect(approved).toHaveAttribute('aria-selected', 'true');
 		expect(document.activeElement).toBe(approved);
 		expect(tabStops(screen.getByTestId('tabbar'))).toEqual([approved]);
+	});
+});
+
+describe('nested lists (CX-7)', () => {
+	test('a key typed in a nested list moves only that list, and the outer list leaves it alone', async () => {
+		render(NavigationNestedHarness);
+		await focus(item('Inner A'));
+
+		const arrow = await press('ArrowRight');
+		expect(arrow).toBe(false); // the inner list handled it and cancelled the default
+		expect(document.activeElement).toBe(item('Inner B'));
+		expect(tabStops(screen.getByRole('toolbar', { name: 'Outer' }))).toEqual([
+			item('Outer A'),
+			item('Inner B')
+		]);
+
+		// Type-ahead typed in the nested list does not reach the outer list's items either.
+		await press('O');
+		expect(document.activeElement).toBe(item('Inner B'));
+	});
+
+	test('the outer list still takes keys typed in its own items', async () => {
+		render(NavigationNestedHarness);
+		await focus(item('Outer A'));
+		await press('ArrowRight');
+		expect(document.activeElement).toBe(item('Outer B'));
 	});
 });

@@ -381,11 +381,34 @@ export const useNavigation = (opts: NavigationOptions) => {
 
 	let observer: MutationObserver | null = null;
 
+	// A class, style or media-query change can hide an item without touching any watched
+	// attribute. Hiding collapses its box, which a ResizeObserver reports; the tab stop then
+	// moves to an item that is still rendered. The first report of an item always counts, since an
+	// item hidden at mount reports nothing until it shows.
+	const renderedItems = new WeakMap<Element, boolean>();
+	let resizeObserver: ResizeObserver | null = null;
+	const watchRendered = (node: HTMLElement) => {
+		if (typeof ResizeObserver === 'undefined') return;
+		resizeObserver ??= new ResizeObserver((entries) => {
+			let changed = false;
+			for (const { target } of entries) {
+				if (!(target instanceof HTMLElement) || !positions.has(target)) continue;
+				const rendered = target.getClientRects().length > 0;
+				if (renderedItems.get(target) !== rendered) changed = true;
+				renderedItems.set(target, rendered);
+			}
+			if (changed) revision += 1;
+		});
+		resizeObserver.observe(node);
+	};
+
 	const cleanUp = () => {
 		registered.length = 0;
 		positions.clear();
 		observer?.disconnect();
 		observer = null;
+		resizeObserver?.disconnect();
+		resizeObserver = null;
 		typeahead?.reset();
 		restoreVersion.bump();
 		containerRef = null;
@@ -493,6 +516,7 @@ export const useNavigation = (opts: NavigationOptions) => {
 		// Ids are assigned once, at registration: aria-activedescendant names them.
 		if (!node.id) node.id = `${baseId}-item-${(sequence += 1)}`;
 		setAttribute(node, 'tabindex', '-1');
+		watchRendered(node);
 		revision += 1;
 	};
 
@@ -503,6 +527,8 @@ export const useNavigation = (opts: NavigationOptions) => {
 		if (index !== -1) registered.splice(index, 1);
 		positions.delete(node);
 		positionsStale = true;
+		resizeObserver?.unobserve(node);
+		renderedItems.delete(node);
 		if (appliedTabStop === node) appliedTabStop = null;
 		if (appliedHighlight === node) appliedHighlight = null;
 		if (lastFocusedItem === node) lastFocusedItem = null;
