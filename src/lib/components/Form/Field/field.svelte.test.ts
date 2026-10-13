@@ -9,6 +9,7 @@ import { registerFormInputs } from '../Form/form.registry.js';
 import MoneyInput from '../Form/MoneyInput.test.svelte';
 import RadioInput from '../RadioInput/RadioInput.svelte';
 import RatingInput from '../RatingInput/RatingInput.svelte';
+import Select from '../Select/Select.svelte';
 import Slider from '../Slider/Slider.svelte';
 import Switch from '../Switch/Switch.svelte';
 import TextArea from '../TextArea/TextArea.svelte';
@@ -475,6 +476,20 @@ describe('FD-8 · SC-19 · labels and containers focus the control', () => {
 		renderInTheme(RatingInput, { label: 'Score' });
 		await fireEvent.click(screen.getByText('Score'));
 		expect(screen.getByRole('slider', { name: 'Score' })).toHaveFocus();
+	});
+
+	test('clicking a Select label focuses the trigger without opening it', async () => {
+		renderInTheme(Select, {
+			label: 'Plan',
+			options: [
+				{ value: 'free', label: 'Free' },
+				{ value: 'pro', label: 'Pro' }
+			]
+		});
+		const trigger = screen.getByRole('combobox', { name: 'Plan' });
+		await fireEvent.click(screen.getByText('Plan'));
+		expect(trigger).toHaveFocus();
+		expect(trigger).toHaveAttribute('aria-expanded', 'false');
 	});
 
 	test('a press on the container padding focuses the text control; buttons keep theirs', async () => {

@@ -219,6 +219,7 @@
 			{label}
 			{size}
 			{density}
+			labelFor={false}
 			theme={{
 				...(theme || {}),
 				inputContainer: {

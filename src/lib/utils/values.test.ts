@@ -34,9 +34,9 @@ describe('valuesEqual', () => {
 		expect(valuesEqual(new Date(Number.NaN), new Date(Number.NaN))).toBe(true);
 		expect(valuesEqual(['a', 'b'], ['a', 'b'])).toBe(true);
 		expect(valuesEqual(['a', 'b'], ['b', 'a'])).toBe(false);
-		expect(
-			valuesEqual([{ key: 'env', value: 'prod' }], [{ key: 'env', value: 'prod' }])
-		).toBe(true);
+		expect(valuesEqual([{ key: 'env', value: 'prod' }], [{ key: 'env', value: 'prod' }])).toBe(
+			true
+		);
 		expect(valuesEqual({ amount: 1, currency: 'EUR' }, { amount: 1 })).toBe(false);
 		expect(valuesEqual([new Date(0), null], [new Date(0), null])).toBe(true);
 	});

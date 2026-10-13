@@ -2,7 +2,7 @@
 	import { untrack } from 'svelte';
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import Field from '../Field/Field.svelte';
-	import { createFieldState } from '../Field/field.state.svelte.js';
+	import { createFieldState, type FieldState } from '../Field/field.state.svelte.js';
 	import SliderTrack from './SliderTrack.svelte';
 	import SliderValueLabels from './SliderValueLabels.svelte';
 	import type { SliderProps } from './slider.props.js';
@@ -59,7 +59,7 @@
 
 	const id = $props.id();
 
-	const slider = new SliderState({
+	const slider: SliderState = new SliderState({
 		get value() {
 			return value;
 		},
@@ -88,7 +88,7 @@
 			return orientation;
 		},
 		// The field's effective state: its own, or a disabled Form or group around it.
-		get disabled() {
+		get disabled(): boolean {
 			return field.disabled;
 		},
 		get dragRange() {
@@ -109,7 +109,7 @@
 	// the numbers are unchanged: a Form that writes the value back as a new proxy is not a change.
 	const hasValue = $derived(value !== undefined);
 
-	const field = createFieldState<'slider' | 'slider-range'>({
+	const field: FieldState<'slider' | 'slider-range'> = createFieldState<'slider' | 'slider-range'>({
 		id,
 		get value() {
 			return hasValue ? slider.fieldValue : undefined;
