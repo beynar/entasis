@@ -1,3 +1,4 @@
+import { elementById } from '$lib/utils/id.js';
 import { withOptions } from '$lib/utils/state.svelte.js';
 import { onDestroy, tick, untrack } from 'svelte';
 import type {
@@ -261,7 +262,9 @@ export class TableOfContentsState extends withOptions<TableOfContentsStateOption
 		const targetHeadings = this.targetElement ? getHeadingElementsById(this.targetElement) : null;
 
 		for (const item of this.resolvedProvidedItems ?? []) {
-			const heading = targetHeadings ? targetHeadings.get(item.id) : getHeadingElementById(item.id);
+			const heading = targetHeadings
+				? targetHeadings.get(item.id)
+				: getHeadingElementById(this.rootElement, item.id);
 			if (heading) headingElements.set(item.id, heading);
 		}
 
@@ -489,9 +492,9 @@ function getHeadingElementsById(target: HTMLElement): Map<string, HTMLHeadingEle
 	return headings;
 }
 
-function getHeadingElementById(id: string): HTMLHeadingElement | null {
-	if (typeof document === 'undefined') return null;
-	const element = document.getElementById(id);
+function getHeadingElementById(from: HTMLElement | null, id: string): HTMLHeadingElement | null {
+	// Resolved in the tree the table of contents renders in, so a shadow root's headings are found.
+	const element = elementById(from, id);
 	if (!(element instanceof HTMLElement) || !/^H[1-6]$/.test(element.tagName)) return null;
 	return element as HTMLHeadingElement;
 }
@@ -503,7 +506,7 @@ function getHeadingId(
 ): string | null {
 	const explicitId = heading.id.trim();
 	if (explicitId) {
-		const owner = document.getElementById(explicitId);
+		const owner = elementById(heading, explicitId);
 		return !usedIds.has(explicitId) && (!owner || owner === heading) ? explicitId : null;
 	}
 
@@ -517,7 +520,7 @@ function getHeadingId(
 	let candidate = baseId;
 	let suffix = 2;
 
-	while (usedIds.has(candidate) || document.getElementById(candidate)) {
+	while (usedIds.has(candidate) || elementById(heading, candidate)) {
 		candidate = `${baseId}-${suffix}`;
 		suffix += 1;
 	}

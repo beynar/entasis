@@ -446,8 +446,8 @@ export const load = ({ locals }) => ({ nonce: locals.nonce });`;
 		A dialog or popover locks page scroll with a {@render ic('data-entasis-scroll-lock')} attribute on
 		{@render ic('<html>')} and one rule in the Tailwind plugin CSS. No inline style is written, so a lock
 		another library holds on the same element is neither overwritten nor released early. The hidden scrollbar's
-		room is kept with {@render ic('scrollbar-gutter: stable')} unless your page already reserves a gutter.
-		Two variables help your own layout:
+		room is kept with {@render ic('scrollbar-gutter: stable')} (or padding where the gutter does not hold)
+		unless your page already reserves a gutter. Two variables help your own layout:
 		{@render ic('--entasis-scrollbar-width')} (set on {@render ic('<html>')} while locked) and
 		{@render ic('--keyboard-inset')} (the height the on-screen keyboard covers, from the visual viewport).
 	</p>

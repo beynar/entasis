@@ -18,6 +18,12 @@ export const SCROLL_LOCK_ATTRIBUTE = 'data-entasis-scroll-lock';
  */
 export const SCROLL_LOCK_UNCOMPENSATED = 'uncompensated';
 /**
+ * Value of `data-entasis-scroll-lock` when `scrollbar-gutter: stable` did not keep the hidden
+ * scrollbar's room (the property is unsupported, or the scroller has a custom scrollbar): the
+ * plugin rule pads the scroller by the scrollbar's width instead.
+ */
+export const SCROLL_LOCK_PADDED = 'padding';
+/**
  * Custom property set on a locked scroller: the width in px of the scrollbar the lock hides,
  * `0px` with overlay scrollbars. Use it to keep `position: fixed` bars from jumping sideways.
  */
@@ -55,11 +61,18 @@ export const lockScroll = (scroller: HTMLElement = document.documentElement) => 
 		locks.set(scroller, { count: 1 });
 		// Measured before the attribute hides the scrollbar.
 		const width = measureScrollbarWidth(scroller);
+		const before = scroller.clientWidth;
 		scroller.style.setProperty(SCROLLBAR_WIDTH_VARIABLE, `${width}px`);
-		scroller.setAttribute(
-			SCROLL_LOCK_ATTRIBUTE,
-			width === 0 || reservesGutter(scroller) ? SCROLL_LOCK_UNCOMPENSATED : ''
-		);
+		if (width === 0 || reservesGutter(scroller)) {
+			scroller.setAttribute(SCROLL_LOCK_ATTRIBUTE, SCROLL_LOCK_UNCOMPENSATED);
+		} else {
+			scroller.setAttribute(SCROLL_LOCK_ATTRIBUTE, '');
+			// `scrollbar-gutter` is not honoured everywhere (older engines, custom scrollbars on the
+			// viewport). When the content still widened into the hidden scrollbar's room, pad it back.
+			if (scroller.clientWidth - before >= width / 2) {
+				scroller.setAttribute(SCROLL_LOCK_ATTRIBUTE, SCROLL_LOCK_PADDED);
+			}
+		}
 	}
 	let released = false;
 	return () => {

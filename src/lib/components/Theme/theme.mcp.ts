@@ -280,8 +280,8 @@ When several Themes are mounted, the most recently mounted one that sets \`porta
 A dialog or popover locks page scroll with a \`data-entasis-scroll-lock\` attribute on \`<html>\` and one
 rule in the Tailwind plugin CSS (\`overflow: hidden\`); nothing is written to inline styles, so a lock a
 third-party library holds on the same element is neither overwritten nor released early. While
-locked, the hidden scrollbar's room is kept with \`scrollbar-gutter: stable\` (padding where that is
-unsupported) unless the page already reserves a gutter, so there is no double gutter. Two variables
+locked, the hidden scrollbar's room is kept with \`scrollbar-gutter: stable\` (the lock measures the
+page and pads the scrollbar's width instead where the gutter does not hold) unless the page already reserves a gutter, so there is no double gutter. Two variables
 describe the viewport for your own layout:
 
 - \`--entasis-scrollbar-width\`: set on \`<html>\` while locked, the width in px of the scrollbar the

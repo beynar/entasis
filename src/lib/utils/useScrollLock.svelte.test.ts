@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
 	lockScroll,
 	SCROLL_LOCK_ATTRIBUTE,
+	SCROLL_LOCK_PADDED,
 	SCROLL_LOCK_UNCOMPENSATED,
 	SCROLLBAR_WIDTH_VARIABLE,
 	useScrollLock
@@ -103,6 +104,26 @@ describe('lockScroll', () => {
 		gutter('stable both-edges');
 		const release = lockScroll();
 		expect(root).toHaveAttribute(SCROLL_LOCK_ATTRIBUTE, SCROLL_LOCK_UNCOMPENSATED);
+		release();
+	});
+
+	test('pads the scrollbar width when the gutter did not hold and the content widened', () => {
+		const width = vi.spyOn(root, 'clientWidth', 'get');
+		vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(1024);
+		// 1009 with the scrollbar showing; the attribute hides it and nothing kept its room.
+		width.mockImplementation(() => (locked() ? 1024 : 1009));
+		const release = lockScroll();
+		expect(root).toHaveAttribute(SCROLL_LOCK_ATTRIBUTE, SCROLL_LOCK_PADDED);
+		expect(root.style.getPropertyValue(SCROLLBAR_WIDTH_VARIABLE)).toBe('15px');
+		release();
+		expect(locked()).toBe(false);
+	});
+
+	test('keeps the gutter rule when the content did not widen', () => {
+		vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(1024);
+		vi.spyOn(root, 'clientWidth', 'get').mockReturnValue(1009);
+		const release = lockScroll();
+		expect(root).toHaveAttribute(SCROLL_LOCK_ATTRIBUTE, '');
 		release();
 	});
 

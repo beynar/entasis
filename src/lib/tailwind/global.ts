@@ -200,21 +200,21 @@ export const applyGlobalEngine = (api: PluginAPI, options?: GlobalEngineOptions)
 	// SCROLL LOCK — dialogs and popovers lock the page by putting `data-entasis-scroll-lock` on
 	// `<html>`, never by writing inline styles, so a lock held by another library on the same
 	// element is neither restored over nor released early. The value is empty while the lock
-	// hides a classic scrollbar: `scrollbar-gutter: stable` then keeps its room (padding does the
-	// same where the property is unsupported) and `--entasis-scrollbar-width` carries its width
-	// for `position: fixed` bars. `uncompensated` marks a page that reserves the gutter itself or
-	// has no classic scrollbar, which would otherwise gain a gutter it never had.
+	// hides a classic scrollbar: `scrollbar-gutter: stable` then keeps its room and
+	// `--entasis-scrollbar-width` carries its width for `position: fixed` bars. `padding` is the
+	// same lock after the lock measured that the gutter did not hold (an unsupported property, or
+	// a viewport with a custom `::-webkit-scrollbar`): the scrollbar's width is padded instead.
+	// `uncompensated` marks a page that reserves the gutter itself or has no classic scrollbar,
+	// which would otherwise gain a gutter it never had.
 	const scrollLock = '[data-entasis-scroll-lock]';
-	const scrollLockCompensated = `${scrollLock}:not([data-entasis-scroll-lock='uncompensated'])`;
+	const scrollLockGutter = `${scrollLock}:not([data-entasis-scroll-lock='uncompensated']):not([data-entasis-scroll-lock='padding'])`;
 	addBase({
 		// `!important`: base-layer rules lose to a page's unlayered `html { overflow-y: scroll }`
 		// and to an outside library's inline `overflow`, and the lock has to hold against both.
 		[scrollLock]: { overflow: 'hidden !important' },
-		[scrollLockCompensated]: { 'scrollbar-gutter': 'stable !important' },
-		'@supports not (scrollbar-gutter: stable)': {
-			[scrollLockCompensated]: {
-				'padding-inline-end': 'var(--entasis-scrollbar-width, 0px)'
-			}
+		[scrollLockGutter]: { 'scrollbar-gutter': 'stable !important' },
+		[`${scrollLock}[data-entasis-scroll-lock='padding']`]: {
+			'padding-inline-end': 'var(--entasis-scrollbar-width, 0px)'
 		},
 		// The keyboard overlap from the visual viewport (see Theme); `0px` until a Theme measures it.
 		html: { '--keyboard-inset': '0px' }

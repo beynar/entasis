@@ -39,14 +39,15 @@ describe('scroll lock rules', () => {
 
 	it('keeps the scrollbar gutter while locked, unless the page already reserves it', async () => {
 		const source = await css();
-		const compensated = `[data-entasis-scroll-lock]:not([data-entasis-scroll-lock='uncompensated'])`;
-		expect(rule(source, compensated)).toMatch(/scrollbar-gutter:\s*stable\s*!important/);
-		// Padding by the published width is the fallback where the property is unsupported.
-		const fallback = source.match(
-			/@supports not \(scrollbar-gutter: stable\)\s*\{[\s\S]*?\n\s*\}\s*\n\s*\}/
+		const gutter = `[data-entasis-scroll-lock]:not([data-entasis-scroll-lock='uncompensated']):not([data-entasis-scroll-lock='padding'])`;
+		expect(rule(source, gutter)).toMatch(/scrollbar-gutter:\s*stable\s*!important/);
+	});
+
+	it('pads the scrollbar width where the lock measured that the gutter did not hold', async () => {
+		const padded = `[data-entasis-scroll-lock][data-entasis-scroll-lock='padding']`;
+		expect(rule(await css(), padded)).toMatch(
+			/padding-inline-end:\s*var\(--entasis-scrollbar-width, 0px\)/
 		);
-		expect(fallback?.[0]).toMatch(/padding-inline-end:\s*var\(--entasis-scrollbar-width, 0px\)/);
-		expect(fallback?.[0]).toContain(`[data-entasis-scroll-lock='uncompensated']`);
 	});
 
 	it('defaults --keyboard-inset to 0px on html', async () => {
