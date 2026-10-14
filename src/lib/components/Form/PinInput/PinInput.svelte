@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import Field from '../Field/Field.svelte';
-	import { createFieldState, type FieldValidationResult } from '../Field/field.state.svelte.js';
+	import { createFieldState, type FieldValidatorResult } from '../Field/field.state.svelte.js';
 	import PinInputCells from './PinInputCells.svelte';
 	import type { PinInputProps } from './pinInput.props.js';
 	import { PIN_INPUT_DIGITS_PATTERN, PinInputState } from './pinInput.state.svelte.js';
@@ -79,7 +79,7 @@
 		set name(v: string | undefined) {
 			name = v;
 		},
-		onValidate: (currentValue): FieldValidationResult => {
+		onValidate: (currentValue): FieldValidatorResult => {
 			if (required && typeof currentValue === 'string' && currentValue.length < resolvedLength()) {
 				return field.messages.incomplete(resolvedLength());
 			}

@@ -36,7 +36,10 @@
 		actions,
 		theme,
 		disabled = false,
-		readOnly = false
+		readOnly = false,
+		validationMode,
+		validationDebounce,
+		errors
 	}: FormProps<I> = $props();
 	// Every field below shares the form's disabled and read-only state.
 	provideFieldGroup({
@@ -70,6 +73,15 @@
 		},
 		get onValueChange() {
 			return onValueChange;
+		},
+		get validationMode() {
+			return validationMode;
+		},
+		get validationDebounce() {
+			return validationDebounce;
+		},
+		get errors() {
+			return errors;
 		}
 	});
 	if (form !== formState) form = formState;

@@ -159,6 +159,8 @@
 			density={askState.options.density}
 			variant={askState.options.variant}
 			layout={askState.options.layout}
+			validationMode={askState.options.validationMode}
+			validationDebounce={askState.options.validationDebounce}
 			theme={askState.options.theme}
 		/>
 
@@ -166,6 +168,8 @@
 			<!-- The button row lays itself out against the dialog footer's own width, not the
 			     viewport: the wrapper is the inline-size container and `@sm` (24rem) is the width
 			     at which a Cancel + Confirm pair sits side by side without either button wrapping. -->
+			<!-- Confirm marks itself `loading`, never natively `disabled`, while the form submits: the
+			     pressed button keeps keyboard focus, and Button still refuses activation. -->
 			<div class="@container w-full">
 				<div class="flex flex-col gap-2 @sm:flex-row @sm:justify-end">
 					<Button
@@ -187,10 +191,7 @@
 						type="button"
 						size={confirmButton.size ?? askState.options.size}
 						loading={askState.form?.loading ?? false}
-						disabled={!askState.open ||
-							!askState.form ||
-							askState.form.loading ||
-							confirmButton.disabled}
+						disabled={!askState.open || !askState.form || confirmButton.disabled}
 						bind:ref={askState.confirmButton}
 						onclick={() => void submitAsk(askState)}
 					>

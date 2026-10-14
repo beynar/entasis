@@ -123,10 +123,24 @@ export class MultiStepFormState<I extends MultiStepFormItems = FormStep[]> {
 		}
 	}
 
-	submit = (): Promise<MultiStepProgressValue<I> | false> => {
+	submit = (): Promise<MultiStepProgressValue<I> | false> => this.run();
+
+	/**
+	 * @internal A step's own Form, submitted from the keyboard, already validated its value: this
+	 * continues with it instead of validating the step, and its async validators, again.
+	 */
+	submitStep = (
+		index: number,
+		value: LiveFormValue<FormInputs>
+	): Promise<MultiStepProgressValue<I> | false> => this.run({ index, value });
+
+	private run(validated?: {
+		index: number;
+		value: LiveFormValue<FormInputs>;
+	}): Promise<MultiStepProgressValue<I> | false> {
 		if (this.submitPromise) return this.submitPromise;
 
-		const submission = this.submitCurrentStep();
+		const submission = this.submitCurrentStep(validated);
 		this.submitPromise = submission;
 		void submission.then(
 			() => {
@@ -137,15 +151,26 @@ export class MultiStepFormState<I extends MultiStepFormItems = FormStep[]> {
 			}
 		);
 		return submission;
-	};
+	}
 
-	private async submitCurrentStep(): Promise<MultiStepProgressValue<I> | false> {
+	private async submitCurrentStep(validated?: {
+		index: number;
+		value: LiveFormValue<FormInputs>;
+	}): Promise<MultiStepProgressValue<I> | false> {
 		try {
 			const activeStep = this.getActiveStep();
-			const validatedSteps = this.validateThrough(activeStep);
+			let validatedSteps = this.validateThrough(
+				activeStep,
+				validated?.index === activeStep ? validated.value : undefined
+			);
+			if (validatedSteps instanceof Promise) {
+				// Async validators are pending: the buttons show a spinner meanwhile.
+				this.loading = true;
+				validatedSteps = await validatedSteps;
+			}
 			if (validatedSteps === false) return false;
-
 			this.loading = true;
+
 			if (activeStep === this.steps.length - 1) {
 				const finalValue = validatedSteps.mergedValue as MultiStepSubmitValue<I>;
 				await this.options.onSubmitForm?.(finalValue);
@@ -178,34 +203,52 @@ export class MultiStepFormState<I extends MultiStepFormItems = FormStep[]> {
 		}
 	}
 
-	private validateThrough(activeStep: number): ValidatedSteps<I> | false {
+	// Validates steps 0..activeStep in order. Returns at once unless a step has async validators
+	// pending, so a plain form keeps validating synchronously.
+	private validateThrough(
+		activeStep: number,
+		activeValue?: LiveFormValue<FormInputs>
+	): ValidatedSteps<I> | false | Promise<ValidatedSteps<I> | false> {
 		const mergedValue: FormValueRecord = {};
 		let currentValue: InferFormValue<StepInputs<I>> | undefined;
 		let currentForm: FormState<StepInputs<I>> | undefined;
 
-		for (let index = 0; index <= activeStep; index += 1) {
+		const finish = (): ValidatedSteps<I> => {
+			if (!currentValue || !currentForm) {
+				throw new Error('MultiStepForm could not resolve the active form.');
+			}
+			return {
+				mergedValue: mergedValue as MultiStepProgressValue<I>,
+				currentValue,
+				currentForm
+			};
+		};
+
+		const validateStep = (
+			index: number
+		): ValidatedSteps<I> | false | Promise<ValidatedSteps<I> | false> => {
+			if (index > activeStep) return finish();
 			const form = this.getForm(index);
 			if (!form) throw new Error(`MultiStepForm step ${index + 1} is not registered.`);
 
-			const stepValue = form.validate();
-			if (stepValue === false) return false;
-			Object.assign(mergedValue, stepValue);
-			if (index === activeStep) {
-				// The form is registered and read through the same checked step index.
-				currentValue = stepValue as unknown as InferFormValue<StepInputs<I>>;
-				currentForm = form as unknown as FormState<StepInputs<I>>;
-			}
-		}
-
-		if (!currentValue || !currentForm) {
-			throw new Error('MultiStepForm could not resolve the active form.');
-		}
-
-		return {
-			mergedValue: mergedValue as MultiStepProgressValue<I>,
-			currentValue,
-			currentForm
+			const accept = (stepValue: unknown) => {
+				if (stepValue === false) return false as const;
+				Object.assign(mergedValue, stepValue);
+				if (index === activeStep) {
+					// The form is registered and read through the same checked step index.
+					currentValue = stepValue as InferFormValue<StepInputs<I>>;
+					currentForm = form as unknown as FormState<StepInputs<I>>;
+				}
+				return validateStep(index + 1);
+			};
+			const staged =
+				index === activeStep && activeValue !== undefined
+					? (activeValue as unknown)
+					: form.validateStaged();
+			return staged instanceof Promise ? staged.then(accept) : accept(staged);
 		};
+
+		return validateStep(0);
 	}
 
 	private reconcileSteps(steps: I, externalValue: MultiStepFormValue<I> | undefined): void {

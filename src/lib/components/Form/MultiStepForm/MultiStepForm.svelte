@@ -36,7 +36,9 @@
 		submitButtonProps = {},
 		defaultValue = {},
 		value = $bindable(),
-		onValueChange
+		onValueChange,
+		validationMode,
+		validationDebounce
 	}: MultiStepFormProps<I> = $props();
 	const valueState = createBindableValue(
 		() => value,
@@ -142,7 +144,7 @@
 					<FormCardSurfaceBoundary isOwned={isCard}>
 						<Form
 							inputs={item.inputs}
-							onSubmit={() => form.submit()}
+							onSubmit={(stepValue) => form.submitStep(index, stepValue)}
 							bind:form={() => form.getForm(index), (nextForm) => form.setForm(index, nextForm)}
 							bind:value={
 								() => form.getStepValue(index), (nextValue) => form.setStepValue(index, nextValue)
@@ -151,6 +153,8 @@
 							title={item.title}
 							description={item.description}
 							{variant}
+							{validationMode}
+							{validationDebounce}
 							theme={formTheme}
 						/>
 					</FormCardSurfaceBoundary>
@@ -160,10 +164,13 @@
 		{@render children?.(form)}
 	</div>
 	<Slot render={footer} payload={form} class={classes.multiStepFormFooter({ variant })}>
+		<!-- A submitting form marks its buttons `loading`, never natively `disabled`: the pressed
+		     button keeps keyboard focus instead of dropping it to the page body, and Button still
+		     refuses activation while loading. -->
 		<Button
 			{...previousButton.forwardedProps}
 			prefix={arrowLeftIcon}
-			disabled={form.activeStep === 0 || form.loading || previousButton.disabled}
+			disabled={form.activeStep === 0 || previousButton.disabled}
 			loading={form.loading || previousButton.loading}
 			onclick={goToPreviousStep}
 		>
@@ -172,7 +179,7 @@
 		<Button
 			{...activeButton.forwardedProps}
 			suffix={form.isLastStep ? arrowCircleUpIcon : arrowRightIcon}
-			disabled={form.loading || activeButton.disabled}
+			disabled={activeButton.disabled}
 			loading={form.loading || activeButton.loading}
 			onclick={submitCurrentStep}
 		>

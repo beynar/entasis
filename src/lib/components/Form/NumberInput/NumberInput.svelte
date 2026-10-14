@@ -4,7 +4,7 @@
 	import { plusIcon } from '../../Icons/plus.js';
 	import Field from '../Field/Field.svelte';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
-	import { createFieldState, type FieldValidationResult } from '../Field/field.state.svelte.js';
+	import { createFieldState, type FieldValidatorResult } from '../Field/field.state.svelte.js';
 	import type { NumberInputProps } from './numberInput.props.js';
 	import { useNumberInputTheme } from './numberInput.theme.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
@@ -78,7 +78,7 @@
 		set name(v: string | undefined) {
 			name = v;
 		},
-		onValidate: (val): FieldValidationResult => {
+		onValidate: (val): FieldValidatorResult => {
 			if (typeof val === 'number') {
 				if (min !== undefined && val < min) {
 					return field.messages.rangeUnderflow(min);

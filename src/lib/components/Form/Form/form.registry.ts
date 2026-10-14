@@ -1,7 +1,7 @@
 import type { Component } from 'svelte';
 import * as v from 'valibot';
 import type { RegisteredInputType } from '../Field/field.js';
-import type { FieldValidationResult } from '../Field/field.state.svelte.js';
+import type { FieldValidatorResult } from '../Field/field.state.svelte.js';
 import { schemas } from '../Field/schemas.js';
 import { isEmptyValue } from '$lib/utils/values.js';
 import type { FormInputDefinition, FormRegisteredInput, FormRenderableInput } from './form.js';
@@ -13,13 +13,13 @@ export type FormInputDefinitions = { [T in RegisteredInputType]?: FormInputDefin
 export type RegisteredFormInputDefinition = {
 	component: Component<Record<string, unknown>>;
 	isEmpty: (value: unknown) => boolean;
-	validate?: (value: unknown) => FieldValidationResult;
+	validate?: (value: unknown) => FieldValidatorResult;
 };
 
 type ErasedDefinition = {
 	component: unknown;
 	isEmpty?: (value: unknown) => boolean;
-	validate?: (value: unknown) => FieldValidationResult;
+	validate?: (value: unknown) => FieldValidatorResult;
 };
 
 // Form's own entry kinds; the built-in input types are rejected through the schema table.

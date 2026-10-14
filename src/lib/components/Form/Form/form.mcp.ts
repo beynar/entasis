@@ -65,7 +65,10 @@ Form renders configured entasis fields inside a div, owns their state and valida
 - **variant**: plain (default), sectioned, or card. All variants consume the shared Card typography. Plain remains transparent without separators. Sectioned stays transparent and adds edge-to-edge separators between the header, visible top-level fields or groups, and footer. Card adds the same separators inside the Card surface and inset; Card header/footer padding applies only to that variant. Separators do not appear between fields inside a group.
 - **layout**: vertical (default) or horizontal. Horizontal keeps one field per row and places labels to the left once each field is at least 32rem wide; fields remain stacked in narrower forms.
 - **actions**: optional array of Button props. Each action's onAction receives the live FormState, so a submit action calls form.submit(). Actions are disabled while the form is submitting; their own loading and disabled props are composed with that protection.
-- **disabled**: disables every field, for example disabled={form.loading} while a submission runs. Disabled fields skip validation. The root carries data-disabled.
+- **validationMode**: submit (default), blur, or change. When a field validates by itself besides a submit: submit waits for the first submit attempt and then re-validates each edited field, blur validates when focus leaves the field, change validates on every accepted change. A field that shows an error always re-validates as it is edited. A field's own validationMode takes precedence, and mounting never validates.
+- **validationDebounce**: milliseconds an edit waits before the validation it triggers, so an async onValidate is not called on every keystroke. Submit and blur validate at once. A field's own validationDebounce takes precedence.
+- **errors**: errors from outside the form, for example a SvelteKit ActionData, keyed by field name with one message or a list of them. They show under their fields, survive validation, do not block a submit (the server re-checks), and clear when that field's value next changes. Changing the prop replaces the errors; the first errored field in render order is revealed.
+- **disabled**: disables every field, for example disabled={form.loading} while a submission runs. Disabled fields skip validation and, as in a native form, are left out of the submitted value. The root carries data-disabled.
 - **readOnly**: makes every field read-only. Values stay focusable, validated and submitted, but users cannot change them. The root carries data-readonly.
 - **class**: additional classes on the root div.
 - **theme**: Form theme overrides for root, header, title, description, group, group label/description/fields, top-level items, custom entries, footer, and actions. Global Card typography and section-rhythm changes flow into all Form variants before Form-specific overrides are composed; Card surface changes apply only to the card variant.
@@ -77,10 +80,18 @@ Field wrapper attributes and native control attributes have separate owners. Use
 ## FormState
 
 - **value**: current visible partial value.
-- **loading**: true while the active submission handler is pending.
-- **hasError**: true after validation fails; reset after successful validation.
-- **validate()**: returns the validated visible payload, or false.
-- **submit()**: returns a promise of the validated visible payload, or false. Concurrent calls share the active promise.
+- **loading**: true while a submission is pending: async validators first, then the handler.
+- **hasError**: true after validation fails or errors are set from outside; reset after successful validation.
+- **dirty**: true when any field differs from its initial value (null, an empty string and an empty list count as equal).
+- **touched**: true once focus has entered and left any field.
+- **validating**: true while an async onValidate of any field is pending.
+- **submitCount**: how many times the form was validated to submit.
+- **validate(options?)**: validates every visible, enabled field synchronously and returns the validated visible payload, or false after revealing the first invalid field. Disabled fields are skipped and left out of the payload. Pass { reveal: false } to check quietly: no scrolling, no focus, and the call does not count as a submit attempt. It does not wait for async validators.
+- **validateAsync(options?)**: like validate, and waits for async validators; returns a promise.
+- **validateField(name)**: validates one field now and returns whether it is valid. It neither scrolls nor focuses. A name that is not a visible field returns false; a disabled field skips validation and returns true.
+- **submit()**: returns a promise of the validated visible payload, or false. It waits for pending async validators. Concurrent calls share the active promise.
+- **setErrors(errors)**: shows errors from outside the form under their fields, replacing those set before; setErrors({}) clears them. Call it from onSubmit with the server response. The first errored field in render order is revealed once the submission ends.
+- **reset(value?)**: restores every field to its initial value, or to value where it gives one, and makes that the new baseline. Errors, touched, dirty and the submit count clear, fields do not echo onValueChange, and the form's onValueChange runs once if the visible value changed. Conditional visibility is evaluated again.
 - **advanceFrom(field)**: moves on from a registered field as Enter does in a text field: the last navigable field submits, any other validates and focuses the next field when valid. Returns false when the field is hidden, disabled or not part of this form. Controls that own Enter themselves, such as checkboxes and radios, call it from their key handler and fall back to the native form otherwise.
 
 ## Enter-key behavior
@@ -121,7 +132,7 @@ Mount one Ask host near the application root, then call ask() from any client-si
 <Ask />
 \`\`\`
 
-AskOptions accepts inputs, value, onSubmit, class, size, density, variant, layout, and theme with the same contracts as Form. title is required for the Dialog's accessible name. confirm and cancel accept a string or Button presentation props plus text. Their click, loading, link, and native type behavior is owned by Ask. Set type on the mounted Ask host for its default Dialog type; a request's optional dialog object may override type and also accepts responsive, size, and scroll.
+AskOptions accepts inputs, value, onSubmit, class, size, density, variant, layout, theme, validationMode, and validationDebounce with the same contracts as Form. Disabled fields are left out of the result. title is required for the Dialog's accessible name. confirm and cancel accept a string or Button presentation props plus text. Their click, loading, link, and native type behavior is owned by Ask. Set type on the mounted Ask host for its default Dialog type; a request's optional dialog object may override type and also accepts responsive, size, and scroll.
 
 Validation failures keep the Dialog open and focus the first invalid field. A successful submission resolves with the validated visible payload. Cancel, the close button, and Escape resolve with submitted: false and the current partial visible value. Outside-click and swipe dismissal are disabled. While submission is active, all close paths and actions are protected. Rejected onSubmit promises reject ask() after the Dialog closes. Concurrent ask() calls render as independent stacked Dialogs. Calling ask() during SSR or without one mounted host rejects clearly.
 
@@ -342,7 +353,74 @@ onValidate may return:
 - a string for one error, shown verbatim;
 - a string array for multiple errors.
 
-Validation runs on submission. After a field has an error, it revalidates while edited. Failed submission scrolls to and focuses the first invalid control. Disabled fields, directly or through a disabled group or Form, skip validation; read-only fields still validate.
+Validation runs on submission. Failed submission scrolls to and focuses the first invalid control in render order. Disabled fields, directly or through a disabled group or Form, skip validation and are left out of the submitted value, as in a native form; entries that declare disabled become optional keys in InferFormValue. Read-only fields still validate and submit.
+
+### When fields validate
+
+validationMode on the Form, or on one entry, picks when a field validates by itself:
+
+\`\`\`ts
+import type { FormInputs } from 'entasis/form';
+
+export const inputs = {
+	username: { type: 'text', label: 'Username', required: true, validationMode: 'change' },
+	email: { type: 'email', label: 'Email', required: true }
+} satisfies FormInputs;
+// <Form {inputs} validationMode="blur" />: email validates when focus leaves it,
+// username validates on every change.
+\`\`\`
+
+submit (the default) validates on a submit attempt, and from then on re-validates each edited field. blur validates when focus leaves the field, including a popup the field opened. change validates on every accepted change, including values synced from a parent. Whatever the mode, a field that shows an error re-validates as it is edited, and a blur that settles the value (trimming, say) validates the settled value. validationDebounce delays the validation an edit triggers; submit and blur never wait.
+
+### Async validators
+
+onValidate may return a promise. While it is pending the field is neither valid nor invalid: no aria-invalid and no data-invalid, and its root carries data-validating. A result for an older value is dropped, a rejected promise marks the field invalid with the generic message, and unmounting cancels the work. submit() waits for pending validators before it calls onSubmit (loading is true meanwhile); validate() stays synchronous, so use validateAsync() to wait.
+
+\`\`\`ts
+import type { FormInputs } from 'entasis/form';
+
+declare function isTaken(username: string): Promise<boolean>;
+
+export const inputs = {
+	username: {
+		type: 'text',
+		label: 'Username',
+		required: true,
+		onValidate: async (username) => ((await isTaken(username)) ? 'That username is taken' : null)
+	}
+} satisfies FormInputs;
+\`\`\`
+
+### Server errors
+
+Pass the errors of a failed save as the errors prop or call form.setErrors(). They show under their fields, are not wiped by validation, do not block a re-submit, and clear on that field's next change:
+
+\`\`\`svelte
+<script lang="ts">
+	import { Form, type FormState, type FormInputs } from 'entasis/form';
+
+	const inputs = {
+		email: { type: 'email', label: 'Email', required: true }
+	} satisfies FormInputs;
+
+	let form = $state<FormState<typeof inputs>>();
+</script>
+
+<Form
+	{inputs}
+	bind:form
+	onSubmit={async (value) => {
+		const response = await fetch('/api/signup', { method: 'POST', body: JSON.stringify(value) });
+		if (!response.ok) form?.setErrors({ email: 'Already registered' });
+	}}
+/>
+\`\`\`
+
+### Dirty, touched and reset
+
+Every field reports touched, dirty and filled (data-touched, data-dirty and data-filled on its root); form.dirty and form.touched are true when any field is. form.reset() returns every field to its initial value and clears errors, touched and dirty; form.reset(value) restores the given values instead and makes them the new baseline.
+
+Errors fade and grow in; reduced motion and the Theme motion tokens apply (the field theme motion slot).
 
 ## Supported input types
 

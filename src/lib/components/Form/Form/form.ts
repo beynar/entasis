@@ -6,7 +6,7 @@ import type {
 	InputType,
 	RegisteredInputType
 } from '../Field/field.js';
-import type { FieldState, FieldValidationResult } from '../Field/field.state.svelte.js';
+import type { FieldState, FieldValidatorResult } from '../Field/field.state.svelte.js';
 import type { TextInputProps } from '../TextInput/textInput.props.js';
 import type { NumberInputProps } from '../NumberInput/numberInput.props.js';
 import type { RatingInputProps } from '../RatingInput/ratingInput.props.js';
@@ -87,7 +87,7 @@ export type FormInputDefinition<T extends RegisteredInputType = RegisteredInputT
 	 */
 	isEmpty?: (value: FieldValue<T>) => boolean;
 	/** Validation every entry of this type gets, before the entry's own `onValidate`. */
-	validate?: (value: FieldValue<T>) => FieldValidationResult;
+	validate?: (value: FieldValue<T>) => FieldValidatorResult;
 };
 
 export type FormValueRecord = Record<string, FieldValue<FieldType> | null | undefined>;
@@ -354,7 +354,18 @@ type HasConditionalVisibility<Input> = Input extends { visible: infer Visibility
 			: true
 	: false;
 
-type ConditionalGroupInputs<Group extends FormGroup, Inputs extends FormGroupInputs> =
+// A disabled field is left out of the submitted value, as in a native form, so an entry that
+// declares `disabled` (other than the literal `false`) may be missing from it.
+type HasDisabled<Input> = Input extends { disabled: infer Disabled }
+	? [Disabled] extends [false]
+		? false
+		: true
+	: false;
+
+type IsOptionalEntry<Input> =
+	HasConditionalVisibility<Input> extends true ? true : HasDisabled<Input>;
+
+type VisibleGroupInputs<Group extends FormGroup, Inputs extends FormGroupInputs> =
 	HasConditionalVisibility<Group> extends true
 		? {
 				[K in keyof Inputs]: Omit<Inputs[K], 'visible'> & {
@@ -362,6 +373,17 @@ type ConditionalGroupInputs<Group extends FormGroup, Inputs extends FormGroupInp
 				};
 			}
 		: Inputs;
+
+// Every field of a group that declares `disabled` may be missing from the submitted value.
+type ConditionalGroupInputs<Group extends FormGroup, Inputs extends FormGroupInputs> =
+	HasDisabled<Group> extends true
+		? {
+				[K in keyof VisibleGroupInputs<Group, Inputs>]: Omit<
+					VisibleGroupInputs<Group, Inputs>[K],
+					'disabled'
+				> & { disabled: boolean };
+			}
+		: VisibleGroupInputs<Group, Inputs>;
 
 type FlattenFormInputEntry<Key extends PropertyKey, Input extends FormInput> =
 	Input extends FormGroup<infer Inputs>
@@ -381,7 +403,7 @@ export type FlattenFormInputs<T extends FormInputs> = Simplify<
 type InferFlatFormValue<T> = {
 	[
 		K in keyof T as T[K] extends FormValueInput
-			? HasConditionalVisibility<T[K]> extends true
+			? IsOptionalEntry<T[K]> extends true
 				? never
 				: K
 			: never
@@ -389,7 +411,7 @@ type InferFlatFormValue<T> = {
 } & {
 	[
 		K in keyof T as T[K] extends FormValueInput
-			? HasConditionalVisibility<T[K]> extends true
+			? IsOptionalEntry<T[K]> extends true
 				? K
 				: never
 			: never
@@ -470,6 +492,15 @@ export function flattenFormInputs(inputs: FormInputs): FlatFormField[] {
 
 export const getFormValueInputType = (input: FormValueInput): FieldType =>
 	input.type === 'field' ? input.fieldType : input.type;
+
+/**
+ * Errors from outside the form, a server response say, keyed by field name. A value is one
+ * message or a list; `null` and `undefined` mean no error. Pass it as `Form`'s `errors` prop or
+ * to `form.setErrors`.
+ */
+export type FormErrors<I extends FormInputs = FormInputs> = {
+	[K in Extract<keyof LiveFormValue<I>, string>]?: string | string[] | null | undefined;
+};
 
 export type FormSubmitHandler<T extends FormInputs> = (
 	value: InferFormValue<T>

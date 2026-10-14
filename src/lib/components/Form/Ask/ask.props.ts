@@ -17,7 +17,17 @@ export type AskDialogOptions = Pick<DialogProps, 'type' | 'responsive' | 'size' 
 
 export type AskOptions<I extends FormInputs> = Pick<
 	FormProps<I>,
-	'inputs' | 'value' | 'onSubmit' | 'class' | 'size' | 'density' | 'variant' | 'layout' | 'theme'
+	| 'inputs'
+	| 'value'
+	| 'onSubmit'
+	| 'class'
+	| 'size'
+	| 'density'
+	| 'variant'
+	| 'layout'
+	| 'theme'
+	| 'validationMode'
+	| 'validationDebounce'
 > & {
 	/** Accessible title rendered in the Dialog header. */
 	title: Slot;

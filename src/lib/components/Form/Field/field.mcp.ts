@@ -10,11 +10,14 @@ around a custom control and does not create another form or validation system.
 createFieldState receives id, type, value, errors, and focused. Use getter/setter properties
 for values bound to component props; plain initial values also work for standalone controls.
 Optional name, required, disabled, readOnly, visible, size, density, messages, minLength,
-maxLength, onValidate, and onValueChange configure the same owner used by built-in controls.
+maxLength, onValidate, validationMode, validationDebounce, and onValueChange configure the same
+owner used by built-in controls.
 
 The controller exposes value, setValue(value), validate(), checkSchema(value), isValid,
-errors, errorMessages, hasError, focused, touched, dirty, filled, initialValue, reset(value?),
-focusControl(), disabled, readOnly, required, messages, size, and density.
+errors, errorMessages, hasError, hasValidationError, focused, touched, dirty, filled,
+initialValue, reset(value?), focusControl(), validating, validateAsync(), settle(),
+externalErrors, setExternalErrors(messages), clearExternalErrors(), disabled, readOnly,
+required, messages, size, and density.
 Use bind:value on field.value or call field.setValue for user edits. Accepted changes publish
 one onValueChange callback each. Unchanged values and parent state synchronization do not
 publish callbacks. Disabled and read-only controllers reject user edits.
@@ -68,6 +71,25 @@ resolved messages, for custom rules that report a range or length:
 </script>
 \`\`\`
 
+## Validation timing, async validators and external errors
+
+validationMode picks when the field validates by itself: submit (the default, from the Form)
+validates on a submit attempt and then re-validates each edit, blur when focus leaves the field,
+change on every accepted change. A field showing an error always re-validates as it is edited,
+and mounting never validates. validationDebounce (milliseconds) delays the validation an edit
+triggers. Both can be set on the Form, on an entry, or as Field props that controls forward.
+
+onValidate may return a promise. While it is pending the field is neither valid nor invalid
+(no aria-invalid, no data-invalid, data-validating on the root) and validating is true; a
+result for an older value is dropped, a rejection marks the field invalid with the generic
+message, and unmounting cancels it. validate() stays synchronous; validateAsync() and settle()
+wait for pending validators.
+
+setExternalErrors(messages) shows errors an app got from outside, such as a server response.
+errorMessages lists the validation errors first, then these. validate() leaves them alone and
+they do not count as hasValidationError, so they never block a submit; they clear on the
+field's next accepted value change, reset(), or clearExternalErrors().
+
 ## Interaction state
 
 Focus is tracked on the Field root, so every control reports it, including those with several
@@ -80,10 +102,13 @@ dirty is true while the value differs from initialValue, the first settled value
 empty string and an empty array count as equal, Dates compare by time, arrays and plain objects
 by content. filled is true while the field holds a value (a checked checkbox or switch; a
 registered type's isEmpty decides for app-defined types). reset(value?) restores the initial
-value, or a new one, as the untouched baseline without a value callback, and clears errors.
+value, or a new one, as the untouched baseline without a value callback, and clears errors and
+any pending validation.
 
 The Field root carries data-invalid, data-disabled, data-readonly, data-focused, data-filled,
-data-dirty, and data-touched as presence attributes for styling, next to data-label-position.
+data-dirty, data-touched, and data-validating as presence attributes for styling, next to
+data-label-position. A new error fades and grows in under the Theme's motion tokens; reduced
+motion plays nothing.
 
 ## Wrapper props
 

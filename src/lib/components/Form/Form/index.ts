@@ -3,6 +3,8 @@ export { Ask, ask } from '../Ask/index.js';
 export type { AskButton, AskDialogOptions, AskOptions, AskProps, AskResult } from '../Ask/index.js';
 export type { FormLayout, FormProps, FormVariant } from './form.props.js';
 export { FormState } from './form.state.svelte.js';
+export type { FormValidateOptions } from './form.state.svelte.js';
+export type { ValidationMode } from '../Field/field.state.svelte.js';
 export { registerFormInputs, type FormInputDefinitions } from './form.registry.js';
 export type { FieldLabelPosition } from '../Field/field.js';
 export {
@@ -29,6 +31,7 @@ export type {
 	FormGroup,
 	FormGroupColumns,
 	FormGroupInputs,
+	FormErrors,
 	FormInputsWithState,
 	FormInputs,
 	FormRenderableInput,

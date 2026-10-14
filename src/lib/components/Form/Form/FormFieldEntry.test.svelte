@@ -16,7 +16,7 @@
 		density = 'normal'
 	}: {
 		disabled?: boolean;
-		onSubmit: (value: { displayName: string }) => void;
+		onSubmit: (value: { displayName?: string }) => void;
 		onFieldValueChange?: (value: string | null) => void;
 		onValueChange?: (value: { displayName?: string }) => void;
 		onValidate?: (value: string) => string | null;

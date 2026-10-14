@@ -20,6 +20,16 @@ import {
 
 export type FieldValidationResult = string | string[] | boolean | null | undefined;
 
+/** What `onValidate` may return: a result now, or a promise of one. */
+export type FieldValidatorResult = FieldValidationResult | Promise<FieldValidationResult>;
+
+/**
+ * When a field validates on its own, besides a submit: `'submit'` waits for the first submit
+ * attempt (edited fields then re-validate on every change), `'blur'` validates when focus
+ * leaves the field, `'change'` validates on every accepted change.
+ */
+export type ValidationMode = 'submit' | 'blur' | 'change';
+
 type FieldStateStaticOptions<T extends FieldType> = {
 	type: T;
 	name?: string;
@@ -36,7 +46,11 @@ type FieldStateStaticOptions<T extends FieldType> = {
 	minLength?: number;
 	/** Maximum length of a text value; a longer value reports `tooLong`. */
 	maxLength?: number;
-	onValidate?: (value: FieldValue<T>) => FieldValidationResult;
+	onValidate?: (value: FieldValue<T>) => FieldValidatorResult;
+	/** Overrides the Form's `validationMode` for this field. */
+	validationMode?: ValidationMode;
+	/** Milliseconds a change waits before the validation it triggers runs; submits do not wait. */
+	validationDebounce?: number;
 	onValueChange?: (value: FieldValue<T> | null) => void;
 	id: string;
 };
@@ -99,6 +113,16 @@ const normalizeErrors = (validation: FieldValidationResult, invalid: string): st
 
 const unique = (messages: string[]) => [...new Set(messages)];
 
+const isThenable = (value: unknown): value is PromiseLike<unknown> =>
+	value !== null &&
+	(typeof value === 'object' || typeof value === 'function') &&
+	typeof (value as { then?: unknown }).then === 'function';
+
+const toMessages = (messages: string | string[] | null | undefined): string[] =>
+	(Array.isArray(messages) ? messages : messages ? [messages] : []).filter(
+		(message) => typeof message === 'string' && message !== ''
+	);
+
 const containsNode = (container: Node, node: Node) =>
 	container === node || container.contains(node);
 
@@ -132,6 +156,21 @@ export const createFieldState = <T extends FieldType>(
 	let validation: { errors: string[]; locale: string } | null = null;
 	let initialValue = $state<FieldValue<T> | null | undefined>(undefined);
 	let hasBaseline = $state(false);
+	// Errors an app set from outside (a server response); they clear on the next accepted change.
+	let externalErrors = $state<string[]>([]);
+	// True while an async validator is in flight; the field reads as neither valid nor invalid.
+	let validating = $state(false);
+	// Validation timing a Field component hands down from its props (controls forward them).
+	let fieldMode = $state<ValidationMode | undefined>(undefined);
+	let fieldDebounce = $state<number | undefined>(undefined);
+	// Each validation run takes a token; a result carrying an older token is dropped.
+	let asyncToken = 0;
+	let pending: Promise<void> | null = null;
+	let changeTimer: ReturnType<typeof setTimeout> | undefined;
+	let blurTimer: ReturnType<typeof setTimeout> | undefined;
+	let destroyed = false;
+	// The value a reset wrote: the change it causes is a restore, not an edit to validate.
+	let restored: { value: unknown } | null = null;
 	let hasDescription = $state(false);
 	let hasHelper = $state(false);
 
@@ -153,8 +192,13 @@ export const createFieldState = <T extends FieldType>(
 		descriptionId = `${options.id}-description`;
 		/** Id Field gives the rendered helper text, referenced from the control's `aria-describedby`. */
 		helperId = `${options.id}-helper`;
-		errorMessages = $derived.by(() => normalizeErrors(this.errors, this.messages.invalid));
+		/** Messages from validation (and from `errors`), without those an app set from outside. */
+		validationMessages = $derived.by(() => normalizeErrors(this.errors, this.messages.invalid));
+		/** Every message shown: validation errors first, then the ones set from outside. */
+		errorMessages = $derived.by(() => [...this.validationMessages, ...externalErrors]);
 		hasError = $derived(this.errorMessages.length > 0);
+		/** Validation failed. Unlike `hasError`, errors set from outside do not count. */
+		hasValidationError = $derived(this.validationMessages.length > 0);
 		/** True once focus has left the field after entering it (popups the field opened included). */
 		touched = $state(false);
 		/** The value differs from the initial one; empty values (`null`, `''`, `[]`) count as equal. */
@@ -203,6 +247,32 @@ export const createFieldState = <T extends FieldType>(
 				'aria-describedby': this.describedBy.length > 0 ? this.describedBy.join(' ') : undefined
 			};
 		}
+
+		/** True while an async `onValidate` is pending; the field is neither valid nor invalid then. */
+		get validating(): boolean {
+			return validating;
+		}
+
+		/** Errors an app set from outside; they clear on the field's next accepted change. */
+		get externalErrors(): string[] {
+			return externalErrors;
+		}
+
+		/** When this field validates by itself: its own mode, else its Field's, else the Form's. */
+		get activeValidationMode(): ValidationMode {
+			return options.validationMode ?? fieldMode ?? this.form?.validationMode ?? 'submit';
+		}
+
+		/** Milliseconds a change waits before the validation it triggers. */
+		get activeValidationDebounce(): number {
+			return options.validationDebounce ?? fieldDebounce ?? this.form?.validationDebounce ?? 0;
+		}
+
+		/** @internal Field forwards the validation timing its props declare. */
+		configureValidation = (timing: { mode?: ValidationMode; debounce?: number }) => {
+			fieldMode = timing.mode;
+			fieldDebounce = timing.debounce;
+		};
 
 		/** The value the field started with, the baseline for `dirty`; reset re-captures it. */
 		get initialValue(): FieldValue<T> | null | undefined {
@@ -287,8 +357,11 @@ export const createFieldState = <T extends FieldType>(
 						initialValue = newValue;
 						hasBaseline = true;
 					} else {
-						if (this.hasError) {
-							this.validate(newValue);
+						const wasRestored = restored !== null && Object.is(restored.value, newValue);
+						restored = null;
+						if (!wasRestored) {
+							this.clearExternalErrors();
+							validateAfterChange(newValue);
 						}
 						if (this.form) {
 							this.form.updateFieldValue(field);
@@ -335,7 +408,12 @@ export const createFieldState = <T extends FieldType>(
 					if (node) queueMicrotask(releaseStaleFocus);
 				};
 			});
-			onDestroy(() => stopWatchingFocus?.());
+			onDestroy(() => {
+				destroyed = true;
+				stopWatchingFocus?.();
+				cancelValidation();
+				clearTimeout(blurTimer);
+			});
 		}
 
 		/** Updates the control value and publishes one callback for an accepted change. */
@@ -345,6 +423,7 @@ export const createFieldState = <T extends FieldType>(
 			this.syncValue(nextValue);
 			const acceptedValue = this.value;
 			if (Object.is(previousValue, acceptedValue)) return;
+			this.clearExternalErrors();
 			this.form?.updateFieldValue(this, true);
 			this.onValueChange?.(acceptedValue ?? null);
 		};
@@ -360,11 +439,42 @@ export const createFieldState = <T extends FieldType>(
 		 * callback, no errors, not dirty, not touched.
 		 */
 		reset = (nextValue: FieldValue<T> | null | undefined = initialValue) => {
+			cancelValidation();
+			clearTimeout(blurTimer);
 			this.syncValue(nextValue);
+			restored = { value: this.value };
 			initialValue = this.value;
 			hasBaseline = true;
 			this.errors = [];
+			this.clearExternalErrors();
 			this.touched = false;
+		};
+
+		/**
+		 * Shows errors an app set from outside, a server response say, next to the validation
+		 * ones. They stay through validation and clear on the next accepted change of the value.
+		 */
+		setExternalErrors = (messages: string | string[] | null | undefined) => {
+			externalErrors = toMessages(messages);
+		};
+
+		/** Removes the errors an app set from outside. */
+		clearExternalErrors = () => {
+			if (externalErrors.length === 0) return;
+			externalErrors = [];
+			this.form?.forgetExternalErrors(this.name);
+		};
+
+		/** Resolves once no async validator is in flight. */
+		settle = async (): Promise<void> => {
+			while (pending) await pending;
+		};
+
+		/** Validates, and waits for async validators. Resolves to `[hasError, parsedValue]`. */
+		validateAsync = async (value = this.value) => {
+			const result = this.validate(value);
+			await this.settle();
+			return [this.hasValidationError, result[1]] as const;
 		};
 
 		/**
@@ -415,6 +525,7 @@ export const createFieldState = <T extends FieldType>(
 			// Disabled fields are barred from validation, as in a native form; errors an app set
 			// on them stay visible.
 			if (this.disabled) return [false, value] as const;
+			cancelValidation();
 			const messages = this.messages;
 			this.errors = [];
 
@@ -446,14 +557,22 @@ export const createFieldState = <T extends FieldType>(
 				: this.required || (value !== null && value !== undefined && value !== '');
 			if (shouldCallOnValidate) {
 				// A registered type's own rule runs first; the entry's onValidate adds to it.
-				const errors = [
-					...normalizeErrors(definition?.validate?.(value), messages.invalid),
-					...normalizeErrors(this.onValidate?.(value as FieldValue<T>), messages.invalid)
-				];
+				const results = [
+					definition?.validate?.(value),
+					this.onValidate?.(value as FieldValue<T>)
+				] as const;
+				if (results.some(isThenable)) {
+					// Neutral until the promises settle: no error shows, and submit waits.
+					startAsyncValidation(results);
+					return [false, parseResult.output] as const;
+				}
+				const errors = (results as readonly FieldValidationResult[]).flatMap((result) =>
+					normalizeErrors(result, messages.invalid)
+				);
 				if (errors.length > 0) this.errors = errors;
 			}
 
-			return [this.hasError, parseResult.output] as const;
+			return [this.hasValidationError, parseResult.output] as const;
 		};
 	}
 
@@ -462,6 +581,64 @@ export const createFieldState = <T extends FieldType>(
 	if (formContext) {
 		field.form = formContext;
 		onDestroy(formContext.registerField(field));
+	}
+
+	// Drops any pending async result and debounced change validation.
+	function cancelValidation(): void {
+		asyncToken += 1;
+		validating = false;
+		pending = null;
+		clearTimeout(changeTimer);
+		changeTimer = undefined;
+	}
+
+	function startAsyncValidation(results: readonly unknown[]): void {
+		const token = asyncToken;
+		validating = true;
+		// A rejected validator marks the field invalid with the generic message, so a failed
+		// network call never lets a submit through.
+		const settled = Promise.all(
+			results.map((result) =>
+				isThenable(result)
+					? Promise.resolve(result).then(
+							(resolved) => resolved as FieldValidationResult,
+							() => true as const
+						)
+					: result
+			)
+		).then((resolved) => {
+			if (token !== asyncToken || destroyed) return;
+			const invalid = field.messages.invalid;
+			const errors = resolved.flatMap((result) =>
+				normalizeErrors(result as FieldValidationResult, invalid)
+			);
+			validating = false;
+			pending = null;
+			if (errors.length > 0) field.errors = errors;
+		});
+		pending = settled;
+	}
+
+	// Runs the validation an edit asks for: always while errors show, and in 'change' mode or
+	// after a submit attempt for every edit. A debounce delays it; blur and submit never wait.
+	function validateAfterChange(value: FieldValue<T> | null | undefined): void {
+		const form = field.form;
+		const wanted =
+			field.hasValidationError ||
+			field.activeValidationMode === 'change' ||
+			(form !== undefined && form.submitCount > 0);
+		if (!wanted || field.disabled) return;
+		clearTimeout(changeTimer);
+		changeTimer = undefined;
+		const delay = field.activeValidationDebounce;
+		if (delay > 0) {
+			changeTimer = setTimeout(() => {
+				changeTimer = undefined;
+				if (!destroyed) field.validate(field.value);
+			}, delay);
+		} else {
+			field.validate(value);
+		}
 	}
 
 	function isEmpty(value: unknown): boolean {
@@ -562,7 +739,14 @@ export const createFieldState = <T extends FieldType>(
 		focusWithin = false;
 		stopWatchingFocus?.();
 		if (field.focused) field.focused = false;
-		if (touch) field.touched = true;
+		if (!touch) return;
+		field.touched = true;
+		if (field.activeValidationMode !== 'blur') return;
+		// A control may settle its value as it blurs (trimming): validate what it settled on.
+		clearTimeout(blurTimer);
+		blurTimer = setTimeout(() => {
+			if (!destroyed && !focusWithin && !field.disabled) field.validate(field.value);
+		});
 	}
 
 	// Runs a microtask after the control or the root left: focus that went with them is gone.

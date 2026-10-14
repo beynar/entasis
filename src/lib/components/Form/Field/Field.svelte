@@ -121,8 +121,10 @@
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import { presence } from '$lib/utils/stateAttributes.js';
 	import type { FieldType, FieldProps } from './field.js';
+	import { easingBezierStrings } from '$lib/transitions/easingFunctions.js';
+	import { prefersReducedMotion } from '$lib/utils/motion.svelte.js';
 	import { provideFieldGroup } from './field.state.svelte.js';
-	import { useFieldTheme } from './field.theme.js';
+	import { useFieldMotion, useFieldTheme } from './field.theme.js';
 	import { fieldNativeForm, setFieldFormAttribute } from './fieldNativeForm.svelte.js';
 
 	let {
@@ -147,8 +149,15 @@
 		labelFor = field.id,
 		fieldAttrs,
 		form,
+		validationMode,
+		validationDebounce,
 		...attachments
 	}: FieldProps<Type> = $props();
+
+	// Controls forward their `validationMode` and `validationDebounce` props here.
+	$effect.pre(() => {
+		field.configureValidation({ mode: validationMode, debounce: validationDebounce });
+	});
 
 	// Hidden inputs rendered inside the field read the `form` prop through its controller.
 	untrack(() => setFieldFormAttribute(field, () => form));
@@ -167,6 +176,24 @@
 	}
 
 	const classes = $derived(useFieldTheme(theme));
+	// Errors fade and grow in. The duration and easing come from the Theme's motion tokens, which
+	// are zero under reduced motion, so nothing animates then. Leaving is instant: a cleared error
+	// must not linger in the accessibility tree.
+	const resolveMotion = useFieldMotion();
+	const errorMotion = $derived(resolveMotion(theme?.motion));
+	const errorEnter: Attachment<HTMLElement> = (node) => {
+		const { duration, easing } = errorMotion.in;
+		if (!duration || prefersReducedMotion() || typeof node.animate !== 'function') return;
+		const height = node.offsetHeight;
+		const animation = node.animate(
+			[
+				{ opacity: 0, height: '0px', overflow: 'hidden' },
+				{ opacity: 1, height: `${height}px`, overflow: 'hidden' }
+			],
+			{ duration, easing: easingBezierStrings[easing ?? 'cubicOut'], fill: 'none' }
+		);
+		return () => animation.cancel();
+	};
 	const resolvedLabelPosition = $derived(
 		label || actions || header ? labelPosition : ('top' as const)
 	);
@@ -249,6 +276,7 @@
 	data-filled={presence(field.filled)}
 	data-dirty={presence(field.dirty)}
 	data-touched={presence(field.touched)}
+	data-validating={presence(field.validating)}
 	{...as === 'fieldset' ? { disabled: field.disabled || undefined } : {}}
 	class={classes.root({
 		className,
@@ -347,6 +375,7 @@
 			render={errorsContainer}
 			class={classes.errorsContainer({ size, labelPosition: resolvedLabelPosition })}
 			attrs={{ id: field.errorId, role: 'alert' }}
+			{@attach errorEnter}
 		>
 			{#each field.errorMessages as err, index (index)}
 				<Slot render={error} class={classes.error({ size })}>

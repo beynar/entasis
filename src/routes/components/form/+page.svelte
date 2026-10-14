@@ -6,6 +6,7 @@
 		type AskResult,
 		type FormInputAction,
 		type FormInputState,
+		type FormState,
 		type FormInputs,
 		type InferFormValue,
 		type LiveFormValue
@@ -238,7 +239,7 @@
 		}
 	} satisfies FormInputs);
 	let fieldStateSubmission = $state<InferFormValue<typeof fieldStateInputs> | null>(null);
-	const describeFieldState = (form: FormInputState) =>
+	const describeFieldState = (form: Pick<FormInputState, 'fields'>) =>
 		Object.fromEntries(
 			[...form.fields].map(([name, field]) => [
 				name,
@@ -255,6 +256,54 @@
 					.join(' ')
 			])
 		);
+
+	const validationControls = createComponentControls([
+		{
+			name: 'validationMode',
+			type: 'segmented',
+			label: 'Validation mode',
+			value: 'submit',
+			options: ['submit', 'blur', 'change']
+		},
+		{ name: 'debounce', type: 'switch', label: 'Debounce 400 ms', value: false }
+	]);
+	const takenUsernames = ['ada', 'admin', 'grace'];
+	const validationInputs = {
+		username: {
+			type: 'text',
+			label: 'Username',
+			description: 'Asynchronous check: "ada", "admin" and "grace" are taken.',
+			required: true,
+			// A stand-in for a server call; the field is neutral while it runs and submit waits.
+			onValidate: (name: string) =>
+				new Promise<string | null>((resolve) =>
+					setTimeout(
+						() =>
+							resolve(
+								takenUsernames.includes(name.toLowerCase()) ? 'That username is taken' : null
+							),
+						600
+					)
+				)
+		},
+		email: { type: 'email', label: 'Email', required: true },
+		code: {
+			type: 'text',
+			label: 'Invite code',
+			description: 'Disabled: skipped by validation and left out of the submitted value.',
+			defaultValue: 'BETA',
+			required: true,
+			disabled: true
+		}
+	} satisfies FormInputs;
+	let validationSubmitted = $state<InferFormValue<typeof validationInputs> | null>(null);
+	const describeValidation = (form: FormState<typeof validationInputs>) => ({
+		dirty: form.dirty,
+		touched: form.touched,
+		validating: form.validating,
+		submitCount: form.submitCount,
+		submitted: validationSubmitted
+	});
 
 	let profileValue = $state<LiveFormValue<typeof profileInputs>>({ name: 'Ada' });
 	let profileSubmission = $state<InferFormValue<typeof profileInputs> | null>(null);
@@ -346,7 +395,10 @@
 		'Action and custom entries stay out of form values',
 		'Disabled and read-only forms and groups',
 		'Localized validation messages with per-entry overrides',
-		'Touched, dirty and filled field state',
+		'Touched, dirty and filled field state, with form.reset()',
+		'Validation on submit, blur or change, with async validators',
+		'Server errors that clear on the next edit',
+		'Disabled fields left out of the submitted value',
 		{ label: 'Accessible errors with first-invalid focus', test: 'a11y:form.first-invalid-focus' },
 		'Programmatic submission through FormState',
 		'Managed Enter navigation and submission',
@@ -644,13 +696,7 @@ const inputs = {
 						{#snippet children(form)}
 							<div class="flex flex-wrap gap-2">
 								<Button type="button" onclick={() => void form.submit()}>Submit</Button>
-								<Button
-									type="button"
-									variant="outline"
-									onclick={() => form.fields.forEach((field) => field.reset())}
-								>
-									Reset
-								</Button>
+								<Button type="button" variant="outline" onclick={() => form.reset()}>Reset</Button>
 							</div>
 							<pre
 								data-testid="field-state"
@@ -662,6 +708,83 @@ const inputs = {
 						{/snippet}
 					</Form>
 				</I18n>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			controls={validationControls}
+			description="Fields validate on submit, on blur or on every change, and edited fields re-validate after a failed submit. A validator may return a promise: the field stays neutral while it runs and submit waits for it. Server errors show under their fields and clear on the next edit; reset restores the initial values and clears errors, touched and dirty."
+			class="!items-start"
+			code={`import { Form, type FormInputs } from 'entasis/form';
+
+const inputs = {
+	username: {
+		type: 'text',
+		label: 'Username',
+		required: true,
+		// May return a promise; stale results are dropped.
+		onValidate: async (name) => ((await isTaken(name)) ? 'That username is taken' : null)
+	},
+	email: { type: 'email', label: 'Email', required: true },
+	code: { type: 'text', label: 'Invite code', defaultValue: 'BETA', disabled: true }
+} satisfies FormInputs;
+
+let form = $state<FormState<typeof inputs>>();
+
+<Form
+	{inputs}
+	bind:form
+	validationMode="${validationControls.value.validationMode}"${validationControls.value.debounce ? '\n\tvalidationDebounce={400}' : ''}
+	onSubmit={async (value) => {
+		// value omits the disabled "code" field.
+		const response = await save(value);
+		if (response.errors) form.setErrors(response.errors); // { email: 'Already registered' }
+	}}
+/>
+// form.reset() restores the initial values; form.validateField('email') checks one field;
+// form.validate({ reveal: false }) checks without moving focus.`}
+		>
+			<div class="grid w-full max-w-xl gap-4">
+				<Form
+					inputs={validationInputs}
+					validationMode={validationControls.value.validationMode as 'submit' | 'blur' | 'change'}
+					validationDebounce={validationControls.value.debounce ? 400 : 0}
+					onSubmit={(value) => {
+						validationSubmitted = value;
+					}}
+				>
+					{#snippet children(form)}
+						<div class="flex flex-wrap gap-2">
+							<Button type="button" loading={form.loading} onclick={() => void form.submit()}>
+								Submit
+							</Button>
+							<Button
+								type="button"
+								variant="outline"
+								onclick={() => form.setErrors({ email: 'Already registered' })}
+							>
+								Simulate a server error
+							</Button>
+							<Button
+								type="button"
+								variant="outline"
+								onclick={() => {
+									validationSubmitted = null;
+									form.reset();
+								}}
+							>
+								Reset
+							</Button>
+						</div>
+						<pre
+							data-testid="validation-state"
+							class="bg-surface-recessed text-neutral overflow-auto rounded-lg p-3 text-xs">{JSON.stringify(
+								describeValidation(form),
+								null,
+								2
+							)}</pre>
+					{/snippet}
+				</Form>
 			</div>
 		</ComponentCard>
 

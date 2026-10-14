@@ -1,7 +1,7 @@
 import type { WithSlot } from '$lib/components/Slot/slot.js';
 import type { Snippet } from 'svelte';
 import type { HTMLAttributes, HTMLButtonAttributes } from 'svelte/elements';
-import type { FieldState } from './field.state.svelte.js';
+import type { FieldState, FieldValidatorResult, ValidationMode } from './field.state.svelte.js';
 import type { FieldMessageOverrides } from './field.messages.js';
 import type { FieldThemeProps } from './field.theme.js';
 import type { Density, Sizes } from '$lib/types/theme.js';
@@ -158,8 +158,25 @@ export type InputProps<T extends FieldType> = WithSlot<
 		labelPosition?: FieldLabelPosition;
 		/** Whether the field is rendered; when false the field is hidden from the form. */
 		visible?: boolean;
-		/** Validates the value; messages or true mark it invalid, false/null/undefined accept it. */
-		onValidate?: (value: FieldValue<T>) => string | string[] | boolean | null | undefined;
+		/**
+		 * Validates the value; messages or true mark it invalid, false/null/undefined accept it.
+		 * It may return a promise: the field reads as neither valid nor invalid while the promise
+		 * is pending, submit waits for it, and a result for an older value is dropped. A rejected
+		 * promise marks the field invalid with the generic message.
+		 */
+		onValidate?: (value: FieldValue<T>) => FieldValidatorResult;
+		/**
+		 * When the field validates by itself, overriding the Form's `validationMode`: `'submit'`
+		 * (the default) waits for the first submit attempt and then re-validates every edit,
+		 * `'blur'` validates when focus leaves the field, `'change'` validates on every change.
+		 * A field that shows an error always re-validates as it is edited.
+		 */
+		validationMode?: ValidationMode;
+		/**
+		 * Milliseconds an edit waits before the validation it triggers runs, so an async
+		 * `onValidate` is not called on every keystroke. Submit and blur validate at once.
+		 */
+		validationDebounce?: number;
 		/**
 		 * Replaces catalog validation messages for this field: a string, or a function for the
 		 * messages that receive a limit, as in `{ required: 'Enter your name' }` or
