@@ -49,6 +49,11 @@ export type ComboboxControllerOptions = {
 	loadingText: () => string | undefined;
 	noOptionsText: () => string | undefined;
 	query: Accessor<string>;
+	/**
+	 * Whether a non-empty query asks for results. Defaults to always; Autocomplete's query is its
+	 * persistent value rather than a search draft, so only an open list searches.
+	 */
+	searching?: () => boolean;
 	loading: Accessor<boolean>;
 	open: Accessor<boolean>;
 	onOpenChange: () => OpenChangeHandler | undefined;
@@ -196,7 +201,8 @@ export class ComboboxController {
 	}
 
 	get #wantsResults() {
-		return this.#options.query.get() !== '' || this.#showAll;
+		const searching = this.#options.searching?.() ?? true;
+		return (searching && this.#options.query.get() !== '') || this.#showAll;
 	}
 
 	#live: ComboboxView = $derived.by(() => {

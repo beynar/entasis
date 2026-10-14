@@ -155,6 +155,9 @@
 				field.setValue(next);
 			}
 		},
+		// The text is a value here, not a search draft: a prefilled or just chosen text does not
+		// ask the source anything until the list is open for it.
+		searching: () => openState.value,
 		loading: {
 			get: () => loading,
 			set: (next) => {
@@ -282,13 +285,13 @@
 	// -- Input events ---------------------------------------------------------------------
 
 	const oninput = (event: Event & { currentTarget: HTMLInputElement }) => {
+		inputAttrs?.oninput?.(event);
 		const inputType = event instanceof InputEvent ? event.inputType : '';
 		holdCompletion = inputType.startsWith('delete');
 		// What is in the input is now the typed text, previewed or not.
 		previewing = null;
 		field.setValue(event.currentTarget.value);
 		if (!field.readOnly) controller.onInput(event);
-		inputAttrs?.oninput?.(event);
 	};
 
 	const onkeydown = (event: KeyboardEvent & { currentTarget: HTMLInputElement }) => {
@@ -386,24 +389,24 @@
 				{oninput}
 				{onkeydown}
 				onfocus={(event) => {
-					controller.onFocus(event);
 					inputAttrs?.onfocus?.(event);
+					controller.onFocus(event);
 				}}
 				onpointerdown={(event) => {
-					controller.onPointerDown();
 					inputAttrs?.onpointerdown?.(event);
+					if (!event.defaultPrevented) controller.onPointerDown();
 				}}
 				onclick={(event) => {
-					controller.onClick(event);
 					inputAttrs?.onclick?.(event);
+					if (!event.defaultPrevented) controller.onClick(event);
 				}}
 				oncompositionstart={(event) => {
-					composing = true;
 					inputAttrs?.oncompositionstart?.(event);
+					composing = true;
 				}}
 				oncompositionend={(event) => {
-					composing = false;
 					inputAttrs?.oncompositionend?.(event);
+					composing = false;
 				}}
 			/>
 			<!-- Persistent, so it exists before the first announcement: result counts and status. -->

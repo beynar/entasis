@@ -4,8 +4,7 @@ import { createListFilter } from '$lib/utils/listFilter.js';
 import type {
 	ComboboxItems,
 	ComboboxItemsSource,
-	ComboboxOption,
-	ComboboxOptionGroup
+	ComboboxOption
 } from '../Combobox/combobox.props.js';
 import type {
 	AutocompleteItem,
@@ -21,11 +20,30 @@ const isGroup = (entry: AutocompleteItem | AutocompleteItemGroup): entry is Auto
 export const toOption = (item: AutocompleteItem): ComboboxOption =>
 	typeof item === 'string' ? { value: item, label: item } : item;
 
-/** Suggestions as options: strings become `{ value, label }`, everything else is passed through. */
-export const normalizeItems = (items: AutocompleteItems): ComboboxItems =>
-	items.map((entry): ComboboxOption | ComboboxOptionGroup =>
-		isGroup(entry) ? { ...entry, items: entry.items.map(toOption) } : toOption(entry)
-	);
+/**
+ * Suggestions as options: strings become `{ value, label }`, everything else is passed through.
+ * A value listed more than once (within or across groups) keeps its first entry, since rows and
+ * option ids are keyed by value; a group left empty by that is dropped.
+ */
+export const normalizeItems = (items: AutocompleteItems): ComboboxItems => {
+	const seen = new Set<string>();
+	const fresh = (option: ComboboxOption) => {
+		if (seen.has(option.value)) return false;
+		seen.add(option.value);
+		return true;
+	};
+	const result: ComboboxItems = [];
+	for (const entry of items) {
+		if (isGroup(entry)) {
+			const options = entry.items.map(toOption).filter(fresh);
+			if (options.length > 0 || entry.items.length === 0) result.push({ ...entry, items: options });
+		} else {
+			const option = toOption(entry);
+			if (fresh(option)) result.push(option);
+		}
+	}
+	return result;
+};
 
 /** The Combobox list's source for these suggestions; functions have their results normalized. */
 export const normalizeSource = (

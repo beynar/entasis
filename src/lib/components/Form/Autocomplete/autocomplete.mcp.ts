@@ -23,7 +23,7 @@ A text input with suggestions. The value is the text in the input, and the input
 ### Core Props
 
 - **items**: \`AutocompleteItemsSource\` (required)
-  - Suggestions: strings, \`{ value, label, description?, disabled?, data? }\` options, \`{ label?, items }\` groups of either (mixed freely), or a function \`(query: string, { signal }) => MaybePromise<AutocompleteItems>\`
+  - Suggestions: strings, \`{ value, label, description?, disabled?, data? }\` options, \`{ label?, items }\` groups of either (mixed freely), or a function \`(query: string, { signal }) => MaybePromise<AutocompleteItems>\`. A value listed more than once keeps its first entry. A function runs only while the list is open (typing opens it), never for a prefilled or just chosen text
   - A string suggestion is an option whose value and label are that text
   - For arrays: narrowed client-side with a case- and accent-insensitive match on the label, in the active I18n locale
   - For functions: called after a 100ms pause in typing with the text and \`{ signal }\`. The signal is aborted when a newer text replaces the request, and a response that is not the latest is ignored. Results are shown as returned (the function filters)
@@ -69,7 +69,7 @@ With \`mode="both"\` or \`"inline"\` the highlighted suggestion is previewed in 
 - **autocomplete**: browser autofill hint (default \`'off'\`: the component offers its own suggestions)
 - **loadingText** / **emptyText**: replace the "Loading..." and "No options found" messages
 - **item**: \`Snippet<[ComboboxOption]>\` custom row renderer; **separators**: \`boolean\` between groups
-- **inputAttrs**: native attributes for the input (\`inputmode\`, \`maxlength\`, event handlers); the component keeps id, name, value and ARIA state
+- **inputAttrs**: native attributes for the input (\`inputmode\`, \`maxlength\`, event handlers that run first, where \`preventDefault()\` cancels the built-in behaviour); the component keeps id, name, value and ARIA state
 - **onHighlightChange**: \`({ value, reason, event }) => void\`
 
 ## Examples

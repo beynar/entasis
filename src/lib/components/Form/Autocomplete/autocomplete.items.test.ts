@@ -4,15 +4,32 @@ import { completeInline, normalizeItems, normalizeSource } from './autocomplete.
 describe('normalizeItems', () => {
 	test('turns strings into options and keeps options, groups and their order', () => {
 		const option = { value: 'x', label: 'Ex', description: 'Letter', data: { n: 1 } };
+		const other = { value: 'y', label: 'Why' };
+		expect(normalizeItems(['Plain', option, { label: 'Group', items: ['Inside', other] }])).toEqual(
+			[
+				{ value: 'Plain', label: 'Plain' },
+				option,
+				{
+					label: 'Group',
+					items: [{ value: 'Inside', label: 'Inside' }, other]
+				}
+			]
+		);
+	});
+
+	test('a repeated value keeps its first entry, across groups too, and drops emptied groups', () => {
 		expect(
-			normalizeItems(['Plain', option, { label: 'Group', items: ['Inside', option] }])
+			normalizeItems([
+				'Paris',
+				'Paris',
+				{ label: 'Recent', items: ['Paris', 'Pau'] },
+				{ label: 'Again', items: ['Pau'] },
+				{ label: 'None', items: [] }
+			])
 		).toEqual([
-			{ value: 'Plain', label: 'Plain' },
-			option,
-			{
-				label: 'Group',
-				items: [{ value: 'Inside', label: 'Inside' }, option]
-			}
+			{ value: 'Paris', label: 'Paris' },
+			{ label: 'Recent', items: [{ value: 'Pau', label: 'Pau' }] },
+			{ label: 'None', items: [] }
 		]);
 	});
 

@@ -508,3 +508,215 @@ describe('Autocomplete async suggestions', () => {
 		expect(await screen.findByText('Nothing like that')).toBeInTheDocument();
 	});
 });
+
+describe('Autocomplete duplicate suggestions', () => {
+	test('a repeated suggestion is listed once, first entry winning', async () => {
+		mount({ items: ['Paris', 'Paris', 'Pau'] });
+		await typeText('p');
+		await waitFor(() => expect(optionLabels()).toEqual(['Paris', 'Pau']));
+	});
+
+	test('the same suggestion in two groups gets one row and one option id', async () => {
+		mount({
+			items: [
+				{ label: 'Recent', items: ['Paris'] },
+				{ label: 'Popular', items: ['Paris', 'Pau'] }
+			]
+		});
+		await typeText('p');
+		await waitFor(() => expect(optionLabels()).toEqual(['Paris', 'Pau']));
+		const ids = screen.getAllByRole('option').map((option) => option.id);
+		expect(new Set(ids).size).toBe(ids.length);
+		await key('ArrowDown');
+		await key('ArrowDown');
+		await waitFor(() => expect(active()).toHaveTextContent('Pau'));
+		expect(
+			screen.getAllByRole('option').filter((o) => o.getAttribute('data-highlighted') === 'true')
+		).toHaveLength(1);
+	});
+
+	test('async results with repeats render', async () => {
+		mount({ items: async () => ['Paris', 'Paris', 'Pau'] });
+		await typeText('p');
+		await waitFor(() => expect(optionLabels()).toEqual(['Paris', 'Pau']));
+	});
+});
+
+describe('Autocomplete asks the source only for an open list', () => {
+	test('a prefilled text and a chosen suggestion do not call the function', async () => {
+		const items = vi.fn(async (query: string) => (query.startsWith('ap') ? ['Apple'] : []));
+		mount({ items, defaultValue: 'Par' });
+		await new Promise((resolve) => setTimeout(resolve, 400));
+		expect(items).not.toHaveBeenCalled();
+		await typeText('ap');
+		await waitFor(() => expect(optionLabels()).toEqual(['Apple']));
+		expect(items.mock.calls.map(([query]) => query)).toEqual(['ap']);
+		await fireEvent.click(screen.getByRole('option', { name: /Apple/ }));
+		expect(value()).toBe('Apple');
+		await new Promise((resolve) => setTimeout(resolve, 400));
+		expect(items.mock.calls.map(([query]) => query)).toEqual(['ap']);
+	});
+
+	test('a parent write to the value does not call the function', async () => {
+		const items = vi.fn(async () => ['One']);
+		mount({ items, externalValue: 'Plum' });
+		await fireEvent.click(screen.getByRole('button', { name: 'External change' }));
+		await new Promise((resolve) => setTimeout(resolve, 400));
+		expect(input().value).toBe('Plum');
+		expect(items).not.toHaveBeenCalled();
+	});
+
+	test('openOnFocus is the way to call it with an empty text', async () => {
+		const items = vi.fn(async () => ['One']);
+		mount({ items, openOnFocus: true });
+		input().focus();
+		await waitFor(() => expect(items).toHaveBeenCalledExactlyOnceWith('', expect.anything()));
+	});
+
+	test('unmounting with a request pending aborts it', async () => {
+		let signal: AbortSignal | undefined;
+		const items = (_query: string, request: { signal: AbortSignal }) => {
+			signal = request.signal;
+			return new Promise<string[]>(() => {});
+		};
+		const { unmount } = mount({ items });
+		await typeText('a');
+		await waitFor(() => expect(signal).toBeDefined());
+		unmount();
+		expect(signal?.aborted).toBe(true);
+	});
+});
+
+describe('Autocomplete input attributes and handlers', () => {
+	test('a consumer handler runs before the built-in one for the same event', async () => {
+		const order: string[] = [];
+		mount({
+			openOnFocus: true,
+			inputAttrs: {
+				onfocus: () => order.push(`focus:${input().getAttribute('aria-expanded')}`)
+			}
+		});
+		input().focus();
+		await waitFor(() => expect(input()).toHaveAttribute('aria-expanded', 'true'));
+		expect(order).toEqual(['focus:false']);
+	});
+
+	test('onclick preventDefault stops the press from toggling the list', async () => {
+		mount({ inputAttrs: { onclick: (event: MouseEvent) => event.preventDefault() } });
+		input().focus();
+		await fireEvent.pointerDown(input());
+		await fireEvent.click(input());
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		expect(input()).toHaveAttribute('aria-expanded', 'false');
+	});
+
+	test('without a veto the same handlers still run the built-in behaviour', async () => {
+		const onclick = vi.fn();
+		mount({ inputAttrs: { onclick } });
+		input().focus();
+		await fireEvent.pointerDown(input());
+		await fireEvent.click(input());
+		expect(onclick).toHaveBeenCalledOnce();
+		await waitFor(() => expect(input()).toHaveAttribute('aria-expanded', 'true'));
+	});
+
+	test('native attributes reach the input', () => {
+		mount({ inputAttrs: { inputmode: 'search', maxlength: 12 } });
+		expect(input()).toHaveAttribute('inputmode', 'search');
+		expect(input()).toHaveAttribute('maxlength', '12');
+	});
+});
+
+describe('Autocomplete highlight, loop and rendering options', () => {
+	test("autoHighlight 'always' highlights the first suggestion with empty text", async () => {
+		mount({ autoHighlight: 'always', openOnFocus: true });
+		input().focus();
+		await waitFor(() => expect(active()).toHaveTextContent('Apple'));
+	});
+
+	test('onHighlightChange reports the suggestion and why it moved', async () => {
+		const onHighlightChange = vi.fn();
+		mount({ onHighlightChange });
+		await typeText('a');
+		await waitFor(() => expect(optionLabels()).toHaveLength(4));
+		await key('ArrowDown');
+		await waitFor(() =>
+			expect(onHighlightChange).toHaveBeenCalledWith(
+				expect.objectContaining({ value: 'Apple', reason: 'keyboard' })
+			)
+		);
+	});
+
+	test("loop 'input' lands on no highlight past the end, then wraps; false stops", async () => {
+		const { unmount } = mount({ loop: 'input', items: ['Apple', 'Apricot'] });
+		await typeText('ap');
+		await waitFor(() => expect(optionLabels()).toEqual(['Apple', 'Apricot']));
+		await key('ArrowDown');
+		await key('ArrowDown');
+		await waitFor(() => expect(active()).toHaveTextContent('Apricot'));
+		await key('ArrowDown');
+		await waitFor(() => expect(input().getAttribute('aria-activedescendant')).toBeFalsy());
+		expect(input().value).toBe('ap');
+		await key('ArrowDown');
+		await waitFor(() => expect(active()).toHaveTextContent('Apple'));
+		unmount();
+
+		mount({ loop: false, items: ['Apple', 'Apricot'] });
+		await typeText('ap');
+		await waitFor(() => expect(optionLabels()).toHaveLength(2));
+		await key('ArrowDown');
+		await key('ArrowDown');
+		await key('ArrowDown');
+		await waitFor(() => expect(active()).toHaveTextContent('Apricot'));
+	});
+
+	test('the item snippet renders every row', async () => {
+		mount({ customItem: true });
+		await typeText('ap');
+		await waitFor(() =>
+			expect(screen.getAllByTestId('custom-row').map((r) => r.textContent)).toEqual([
+				'APPLE',
+				'APRICOT'
+			])
+		);
+	});
+
+	test('onAfterOpen and onAfterClose each run once per open and close', async () => {
+		const onAfterOpen = vi.fn();
+		const onAfterClose = vi.fn();
+		mount({ onAfterOpen, onAfterClose });
+		await typeText('ap');
+		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
+		await key('Escape');
+		await waitFor(() => expect(onAfterClose).toHaveBeenCalledOnce());
+		expect(onAfterOpen).toHaveBeenCalledOnce();
+	});
+});
+
+describe('Autocomplete composition and direction', () => {
+	test('while an IME composes, inline completion leaves the input alone', async () => {
+		mount({ mode: 'both', autoHighlight: true });
+		input().focus();
+		await fireEvent.compositionStart(input());
+		await typeText('ap', 'insertCompositionText');
+		await waitFor(() => expect(optionLabels()).toEqual(['Apple', 'Apricot']));
+		expect(input().value).toBe('ap');
+		await fireEvent.compositionEnd(input());
+		await waitFor(() => expect(input().value).toBe('apple'));
+	});
+
+	test('works in a right-to-left document', async () => {
+		document.documentElement.dir = 'rtl';
+		try {
+			mount();
+			await typeText('ap');
+			await waitFor(() => expect(optionLabels()).toEqual(['Apple', 'Apricot']));
+			await key('ArrowDown');
+			await waitFor(() => expect(active()).toHaveTextContent('Apple'));
+			await key('Enter');
+			expect(value()).toBe('Apple');
+		} finally {
+			document.documentElement.removeAttribute('dir');
+		}
+	});
+});

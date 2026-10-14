@@ -87,7 +87,9 @@ export type AutocompleteProps = InputProps<'text'> & {
 	 * The suggestions: strings, `{ value, label, description?, disabled?, data? }` options, groups
 	 * of either, or a function returning them for the current text. The function receives
 	 * `(query, { signal })`: it is called after a 100ms pause in typing, the signal is aborted when
-	 * a newer text replaces the request, and a response that is not the latest is ignored.
+	 * a newer text replaces the request, and a response that is not the latest is ignored. The
+	 * function only runs while the list is open (typing opens it), never for a prefilled or just
+	 * chosen text. A value listed more than once keeps its first entry.
 	 */
 	items: AutocompleteItemsSource;
 	/**
@@ -170,7 +172,11 @@ export type AutocompleteProps = InputProps<'text'> & {
 	separators?: boolean;
 	/** Custom row renderer: receives the suggestion. Overrides the default title and description layout. */
 	item?: Snippet<[ComboboxOption]>;
-	/** Native attributes applied to the underlying input, such as `inputmode` or `maxlength`. */
+	/**
+	 * Native attributes applied to the underlying input, such as `inputmode` or `maxlength`. Event
+	 * handlers run before the built-in behaviour for the same event, and `preventDefault()` on a
+	 * cancelable one (`onkeydown`, `onclick`, `onpointerdown`) cancels it.
+	 */
 	inputAttrs?: AutocompleteInputAttributes;
 	/** Per-instance i18n overrides merged over the global catalog. */
 	i18n?: Partial<Messages>;
