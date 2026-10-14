@@ -100,6 +100,19 @@ describe('Collapsible hiddenUntilFound', () => {
 	});
 });
 
+describe('Collapsible disabled with hiddenUntilFound', () => {
+	test('is not findable and find-in-page never opens it', async () => {
+		const onOpenChange = vi.fn();
+		render(CollapsibleHarness, { hiddenUntilFound: true, disabled: true, onOpenChange });
+		const hidden = screen.getByText('Closed secret').closest('[hidden]')!;
+		expect(hidden).toHaveAttribute('hidden', '');
+		await fireEvent(hidden, new Event('beforematch', { bubbles: true }));
+		await settle();
+		expect(onOpenChange).not.toHaveBeenCalled();
+		expect(trigger()).toHaveAttribute('aria-expanded', 'false');
+	});
+});
+
 describe('Collapsible onOpenChange', () => {
 	test('runs before the state changes with the press reason, the event and the trigger', async () => {
 		let expandedInside: string | null = null;

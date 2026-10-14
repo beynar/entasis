@@ -95,7 +95,7 @@ describe('Accordion disabled', () => {
 
 	test('disabledKey reads another boolean property', () => {
 		render(AccordionHarness, {
-			disabledKey: 'locked' as never,
+			disabledKey: 'locked',
 			items: [
 				{ id: 'a', title: 'Free', content: 'A', locked: false },
 				{ id: 'b', title: 'Locked', content: 'B', locked: true }
@@ -221,6 +221,31 @@ describe('Accordion hiddenUntilFound and keepMounted', () => {
 			)
 		);
 		expect(trigger('Third')).toHaveAttribute('aria-expanded', 'false');
+	});
+
+	test('a disabled item is not findable and find-in-page never opens it', async () => {
+		const onItemOpenChange = vi.fn();
+		render(AccordionHarness, {
+			hiddenUntilFound: true,
+			onItemOpenChange,
+			items: [
+				{ id: 'a', title: 'Free', content: 'Free text' },
+				{ id: 'b', title: 'Locked', content: 'Locked text', disabled: true }
+			]
+		});
+		// The enabled panel waits for find-in-page; the disabled one is under plain hidden.
+		expect(screen.getByText('Free text').closest('[hidden]')).toHaveAttribute(
+			'hidden',
+			'until-found'
+		);
+		const locked = screen.getByText('Locked text').closest('[hidden]')!;
+		expect(locked).toHaveAttribute('hidden', '');
+		// Even a stray `beforematch` leaves it closed.
+		await fireEvent(locked, new Event('beforematch', { bubbles: true }));
+		await settle();
+		expect(onItemOpenChange).not.toHaveBeenCalled();
+		expect(trigger('Locked')).toHaveAttribute('aria-expanded', 'false');
+		expect(screen.getByText('Locked text').closest('[hidden]')).toHaveAttribute('hidden', '');
 	});
 
 	test('keepMounted keeps collapsed panels hidden but mounted', async () => {

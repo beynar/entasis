@@ -49,7 +49,8 @@ type CollapsibleBaseProps = {
 	 * Keeps the closed content in the DOM under `hidden="until-found"`, so the browser's
 	 * find-in-page, text fragments and `#id` links can reach it and open the collapsible
 	 * (reason `find-in-page`, no animation). Closed content is hidden from assistive technology
-	 * and from the tab order until then. A parent that refuses the change leaves it closed.
+	 * and from the tab order until then. A parent that refuses the change leaves it closed. A disabled
+	 * collapsible is not findable: its closed content stays under plain `hidden`.
 	 * Applies to the `default` variant; `peek` always keeps its content mounted.
 	 * @default false
 	 */

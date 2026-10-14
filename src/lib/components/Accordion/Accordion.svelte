@@ -187,11 +187,14 @@
 				id={panelId(index)}
 				labelledby={triggerId(index)}
 				open={expanded}
-				{hiddenUntilFound}
-				{keepMounted}
+				hiddenUntilFound={hiddenUntilFound && !itemDisabled}
+				keepMounted={keepMounted || (hiddenUntilFound && itemDisabled)}
 				{motion}
 				class={classes.content({ size, density, variant })}
-				onBeforeMatch={(event) => requestChange(index, true, { reason: 'find-in-page', event })}
+				onBeforeMatch={(event) => {
+					// A disabled item cannot be toggled, so find-in-page must not open it either.
+					if (!itemDisabled) requestChange(index, true, { reason: 'find-in-page', event });
+				}}
 				onAfterOpen={() => onItemAfterOpen?.({ item: itemsWithoutIds[index], index })}
 				onAfterClose={() => onItemAfterClose?.({ item: itemsWithoutIds[index], index })}
 			>

@@ -92,10 +92,14 @@
 	// completion callbacks come from the shared disclosure panel.
 	const panel = disclosurePanel({
 		open: () => isOpen,
-		hiddenUntilFound: () => hiddenUntilFound,
-		keepMounted: () => keepMounted,
+		// A disabled collapsible cannot be toggled, so it is not findable: its closed content stays
+		// under plain `hidden`.
+		hiddenUntilFound: () => hiddenUntilFound && !disabled,
+		keepMounted: () => keepMounted || (hiddenUntilFound && disabled),
 		motion: () => contentMotion,
-		onBeforeMatch: (event) => requestChange(true, { reason: 'find-in-page', event }),
+		onBeforeMatch: (event) => {
+			if (!disabled) requestChange(true, { reason: 'find-in-page', event });
+		},
 		// The peek variant renders no panel: it reports its own completion below.
 		onAfterOpen: () => variant !== 'peek' && onAfterOpen?.(),
 		onAfterClose: () => variant !== 'peek' && onAfterClose?.()

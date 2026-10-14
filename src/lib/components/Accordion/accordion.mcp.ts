@@ -59,7 +59,7 @@ The Accordion component provides an interactive collapsible container for organi
 
 ### Behavior Props
 - **oneAtATime**: boolean (default: true) - Whether only one item can be expanded at a time
-- **hiddenUntilFound**: boolean (default: false) - Keeps collapsed panels in the DOM under \`hidden="until-found"\`, so the browser's find-in-page, text fragments and \`#id\` links reach their content and open the item (reason \`find-in-page\`, no animation). Collapsed content stays out of the accessibility tree and the tab order until then.
+- **hiddenUntilFound**: boolean (default: false) - Keeps collapsed panels in the DOM under \`hidden="until-found"\`, so the browser's find-in-page, text fragments and \`#id\` links reach their content and open the item (reason \`find-in-page\`, no animation). Collapsed content stays out of the accessibility tree and the tab order until then. A disabled item is not findable: its collapsed panel stays under plain \`hidden\`.
 - **keepMounted**: boolean (default: false) - Keeps collapsed panels mounted under \`hidden\`, preserving their state (form values, scroll). Not findable by the browser.
 
 ### Visual Props

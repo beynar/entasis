@@ -39,6 +39,7 @@ The Collapsible component provides a way to show and hide content with a toggle 
 - **hiddenUntilFound**: boolean (default: false)
   - Keeps the closed content in the DOM under \`hidden="until-found"\`, so the browser's find-in-page, text fragments and \`#id\` links reach it and open the collapsible (reason \`find-in-page\`, no animation).
   - Closed content stays out of the accessibility tree and the tab order until then. Cancelling the open-change leaves it closed and findable.
+  - A disabled collapsible is not findable: its closed content stays under plain \`hidden\`.
   - Only the content is skipped while closed, so keep padding, gaps and margins on an element inside the panel (the \`content\` theme slot already is).
 
 - **keepMounted**: boolean (default: false)

@@ -196,8 +196,15 @@ Collapsible content sections with single/multiple expand modes.
 - `oneAtATime`: boolean (default: true)
 - `value`: `string[]` (bindable) -- expanded item ids, `defaultValue`, `onValueChange: (value: string[]) => void`
 - `icon`: `DisclosureIndicator | Slot` -- `'chevron' | 'plus-minus' | 'none'` (default: `'chevron'`)
-- `onItemOpenChange`: `({ item, index, open }) => void` -- one item's open state; `onValueChange` reports the whole set
-- `transitions`: SlideTransitionProps
+- `disabled`: boolean -- disables every item; `disabledKey`: key whose boolean disables one item (default `'disabled'`). A disabled trigger is natively disabled (skipped by Tab)
+- `headingLevel`: `1 | 2 | 3 | 4 | 5 | 6` (default: 3) -- each trigger button sits inside a heading of this level; each panel is a `region` labelled by its trigger
+- `hiddenUntilFound`: boolean -- collapsed panels stay in the DOM under `hidden="until-found"`, so find-in-page and `#id` links open the item (reason `find-in-page`, no animation). Disabled items are not findable
+- `keepMounted`: boolean -- collapsed panels stay mounted under `hidden`, keeping their state; not findable
+- `onItemOpenChange`: `({ item, index, open, details }) => void` -- runs before one item changes; `details.reason` (`'trigger-press'`, `'find-in-page'`), `details.event`, `details.cancel()` keeps the item as it was. `onValueChange` reports the whole set after the change
+- `onItemAfterOpen` / `onItemAfterClose`: `({ item, index }) => void` -- once per finished open or close, also when no animation runs
+- `transition`: motion override for the panel slide
+
+Keyboard: Tab moves between triggers; Enter and Space toggle. There is no arrow-key navigation, and collapsed content is never copied into screen-reader-only text.
 
 **Snippets:** `title`, `description`, `content`, `icon` (receives `{ isOpen }`)
 
@@ -231,13 +238,16 @@ Single toggle show/hide with slide transition.
 - `defaultOpen`: boolean (default: false, uncontrolled)
 - `size`: `'small' | 'normal' | 'large'` (default: `'normal'`)
 - `disabled`: boolean
-- `onOpenChange`: `(open: boolean) => void`
+- `onOpenChange`: `(open: boolean, details) => void` -- runs before the state changes; `details.reason` (`'trigger-press'`, `'find-in-page'`), `details.event`, `details.cancel()` keeps it as it was
+- `onAfterOpen` / `onAfterClose`: `() => void` -- once per finished open or close, also when no animation runs
+- `hiddenUntilFound`: boolean -- closed content stays in the DOM under `hidden="until-found"`, so find-in-page and `#id` links open it (reason `find-in-page`). A disabled collapsible is not findable
+- `keepMounted`: boolean -- closed content stays mounted under `hidden`, keeping its state; not findable
 - `icon`: `DisclosureIndicator | Slot` -- `'chevron' | 'plus-minus' | 'none'` (default: `'chevron'`)
-- `variant`: `'default' | 'peek'`, `peekHeight`: number | string -- peek keeps a preview of the content visible when closed
+- `variant`: `'default' | 'peek'`, `peekHeight`: number | string -- peek keeps a preview of the content visible when closed; controls below the preview are inert while closed
 
-**Snippets:** `trigger` (receives `{ open }`), `children` (the content, receives `{ open }`), `srOnlyContent`
+**Snippets:** `trigger` (receives `{ open }`), `children` (the content, receives `{ open }`)
 
-Uses Svelte slide transition (200ms). Content removed from DOM when closed.
+Slides open and closed (height animation, none under reduced motion). Closed content is removed from the DOM unless `hiddenUntilFound` or `keepMounted` is set; it is never copied into screen-reader-only text.
 
 ```svelte
 <script>

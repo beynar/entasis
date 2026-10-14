@@ -8,7 +8,7 @@ import type { AccordionThemeProps } from './accordion.theme.js';
 
 export type ConditionalKeys<Base, Condition> = NonNullable<
 	{
-		[Key in keyof Base]: Base[Key] extends Condition ? Key : never;
+		[Key in keyof Base]: NonNullable<Base[Key]> extends Condition ? Key : never;
 	}[keyof Base]
 >;
 
@@ -67,13 +67,15 @@ export type AccordionProps<Item extends Record<string, unknown>> = WithAttachmen
 			 * `disabled` property of each item. A disabled item's trigger has the native `disabled`
 			 * attribute, so it is skipped by Tab and announced as unavailable.
 			 */
-			disabledKey?: ConditionalKeys<Item, boolean>;
+			disabledKey?:
+				ConditionalKeys<Item, boolean> | (string extends keyof Item ? keyof Item & string : never);
 			/**
 			 * Keeps collapsed panels in the DOM under `hidden="until-found"`, so the browser's
 			 * find-in-page, text fragments and `#id` links can reach their content and open the item
 			 * (reason `find-in-page`, no animation). Collapsed content stays out of the accessibility
-			 * tree and the tab order until then. A parent that refuses the change leaves the item
-			 * closed.
+			 * tree and the tab order until then. A disabled item is not findable: its collapsed panel
+			 * stays under plain `hidden`, so the browser never opens it. A parent that refuses the
+			 * change leaves the item closed.
 			 * @default false
 			 */
 			hiddenUntilFound?: boolean;
