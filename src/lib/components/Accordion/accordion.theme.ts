@@ -121,6 +121,10 @@ const defaultAccordionTrigger = cva({
 	}
 });
 
+// The heading element (`h2`-`h6`) that wraps each trigger button. Headings render without browser
+// margins or type scale; the trigger owns the row's look.
+const defaultAccordionHeading = cva({ base: 'm-0 w-full text-[length:inherit] font-[inherit]' });
+
 const defaultAccordionHeader = cva({
 	base: 'flex-1 flex flex-col items-start',
 	variants: {
@@ -236,6 +240,7 @@ export const accordionTheme = {
 	motion: defaultAccordionMotion,
 	root: defaultAccordion,
 	item: defaultAccordionItem,
+	heading: defaultAccordionHeading,
 	header: defaultAccordionHeader,
 	trigger: defaultAccordionTrigger,
 	title: defaultAccordionTitle,

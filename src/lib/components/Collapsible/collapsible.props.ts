@@ -3,6 +3,7 @@ import type { ResponsiveProps } from '$lib/components/Theme/theme.js';
 import type { FSOProps } from '$lib/transitions/transition.js';
 import type { WithSlot, Slot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
+import type { OpenChangeHandler } from '$lib/utils/openChange.js';
 import type { CollapsibleThemeProps } from './collapsible.theme.js';
 
 type CollapsibleBaseProps = {
@@ -27,9 +28,39 @@ type CollapsibleBaseProps = {
 	 */
 	disabled?: boolean;
 	/**
-	 * Callback fired when the open state changes.
+	 * Called before the open state changes, whenever the user (a trigger press, or the browser's
+	 * find-in-page reaching hidden content) or an imperative call asks to open or close it.
+	 * `details.reason` says why, `details.event` carries the DOM event, and `details.cancel()`
+	 * keeps the collapsible as it was. Inside the callback `open` still holds the previous state.
+	 * Not called for initialization or for changes the parent assigns to `open`.
 	 */
-	onOpenChange?: ((open: boolean) => void) | null | undefined;
+	onOpenChange?: OpenChangeHandler | null | undefined;
+	/**
+	 * Called once each time an open finishes: after the slide, or at once when no animation runs
+	 * (reduced motion, a zero duration, find-in-page). Not called for the initial state.
+	 */
+	onAfterOpen?: () => void;
+	/**
+	 * Called once each time a close finishes: after the slide, at once when no animation runs, or
+	 * when the panel is removed mid-close. Not called for the initial state.
+	 */
+	onAfterClose?: () => void;
+	/**
+	 * Keeps the closed content in the DOM under `hidden="until-found"`, so the browser's
+	 * find-in-page, text fragments and `#id` links can reach it and open the collapsible
+	 * (reason `find-in-page`, no animation). Closed content is hidden from assistive technology
+	 * and from the tab order until then. A parent that refuses the change leaves it closed.
+	 * Applies to the `default` variant; `peek` always keeps its content mounted.
+	 * @default false
+	 */
+	hiddenUntilFound?: boolean;
+	/**
+	 * Keeps the closed content mounted under `hidden`, preserving its state (form values, scroll,
+	 * media). It is not findable by the browser; use `hiddenUntilFound` for that. Applies to the
+	 * `default` variant.
+	 * @default false
+	 */
+	keepMounted?: boolean;
 	/**
 	 * Size variant of the collapsible.
 	 */
@@ -45,13 +76,10 @@ type CollapsibleBaseProps = {
 	theme?: CollapsibleThemeProps;
 
 	/**
-	 * Whether the collapsible is accessible.
-	 */
-	accessible?: boolean;
-	/**
 	 * Visual variant. `default` toggles the content in and out with a slide.
 	 * `peek` keeps the content mounted, clips it to `peekHeight` and fades the
-	 * edge while closed, with the trigger floating as a pill over the fade.
+	 * edge while closed, with the trigger floating as a pill over the fade; links and controls
+	 * below the visible preview are inert until it opens.
 	 */
 	variant?: 'default' | 'peek';
 	/**
@@ -67,7 +95,7 @@ type CollapsibleBaseProps = {
 
 type CollapsibleSlotProps = WithSlot<
 	CollapsibleBaseProps,
-	'trigger' | 'children' | 'srOnlyContent',
+	'trigger' | 'children',
 	{ open: boolean }
 >;
 

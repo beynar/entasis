@@ -3,6 +3,7 @@ import type { Slot, WithSlot } from '../Slot/slot.js';
 import type { FSOProps } from '$lib/transitions/transition.js';
 import type { ResponsiveProps } from '$lib/components/Theme/theme.js';
 import type { WithAttachments } from '$lib/types/props.js';
+import type { OpenChangeDetails } from '$lib/utils/openChange.js';
 import type { AccordionThemeProps } from './accordion.theme.js';
 
 export type ConditionalKeys<Base, Condition> = NonNullable<
@@ -26,17 +27,62 @@ export type AccordionProps<Item extends Record<string, unknown>> = WithAttachmen
 			value?: string[];
 			/** Initially expanded item ids when `value` is omitted. */
 			defaultValue?: string[];
-			/** Called after the expanded item ids change. */
+			/** Called after the expanded item ids change, with the new ids. */
 			onValueChange?: (value: string[]) => void;
 			/**
-			 * Called after one item's open state changes. Receives the item, its index, and the
-			 * resulting open state; `onValueChange` reports the whole expanded set.
+			 * Called before one item opens or closes. Receives the item, its index, the requested open
+			 * state and the open-change `details`: `details.reason` says why (`trigger-press`, or
+			 * `find-in-page` for the browser's find), `details.event` carries the DOM event, and
+			 * `details.cancel()` keeps the item as it was (then `onValueChange` is not called).
+			 * `onValueChange` reports the whole expanded set once the change is applied.
 			 */
-			onItemOpenChange?: (payload: { item: Item; index: number; open: boolean }) => void;
+			onItemOpenChange?: (payload: {
+				item: Item;
+				index: number;
+				open: boolean;
+				details: OpenChangeDetails;
+			}) => void;
+			/**
+			 * Called once each time an item finishes opening: after its slide, or at once when no
+			 * animation runs (reduced motion, a zero duration, find-in-page). Not called for items open
+			 * at the start.
+			 */
+			onItemAfterOpen?: (payload: { item: Item; index: number }) => void;
+			/**
+			 * Called once each time an item finishes closing: after its slide, at once when no
+			 * animation runs, or when the panel is removed mid-close.
+			 */
+			onItemAfterClose?: (payload: { item: Item; index: number }) => void;
 			/**
 			 * Whether the accordion should only allow one item to be open at a time.
 			 */
 			oneAtATime?: boolean;
+			/**
+			 * Disables every item: the triggers get the native `disabled` attribute, leave the tab
+			 * order and cannot be toggled.
+			 */
+			disabled?: boolean;
+			/**
+			 * The key whose boolean marks one item as disabled. By default the accordion reads the
+			 * `disabled` property of each item. A disabled item's trigger has the native `disabled`
+			 * attribute, so it is skipped by Tab and announced as unavailable.
+			 */
+			disabledKey?: ConditionalKeys<Item, boolean>;
+			/**
+			 * Keeps collapsed panels in the DOM under `hidden="until-found"`, so the browser's
+			 * find-in-page, text fragments and `#id` links can reach their content and open the item
+			 * (reason `find-in-page`, no animation). Collapsed content stays out of the accessibility
+			 * tree and the tab order until then. A parent that refuses the change leaves the item
+			 * closed.
+			 * @default false
+			 */
+			hiddenUntilFound?: boolean;
+			/**
+			 * Keeps collapsed panels mounted under `hidden`, preserving their state (form values,
+			 * scroll, media). Not findable by the browser; use `hiddenUntilFound` for that.
+			 * @default false
+			 */
+			keepMounted?: boolean;
 			/**
 			 * The key to use to get the title from the item. By default, the accordion will use the 'title' property of the item.
 			 * Usefull if the title is a string but you can pass a slot to display a custom title.
@@ -75,7 +121,7 @@ export type AccordionProps<Item extends Record<string, unknown>> = WithAttachmen
 			 */
 			variant?: 'classic' | 'card' | 'outline';
 			/**
-			 * Heading level announced for each item title (`aria-level` on the item heading).
+			 * Level of the heading element (`h2` to `h6`) that wraps each trigger button.
 			 * @default 3
 			 */
 			headingLevel?: 2 | 3 | 4 | 5 | 6;
@@ -93,11 +139,6 @@ export type AccordionProps<Item extends Record<string, unknown>> = WithAttachmen
 			 * Theme overrides for the accordion root and item sub-parts (header, trigger, title, description, icon, content).
 			 */
 			theme?: AccordionThemeProps;
-			/**
-			 * Whether the accordion should be accessible when not expanded.
-			 * This is useful for screen readers to skip the content when not expanded.
-			 */
-			accessible?: boolean;
 		},
 		'title' | 'description' | 'content',
 		{

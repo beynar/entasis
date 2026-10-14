@@ -112,10 +112,13 @@ describe('collapsible', () => {
 			mount('collapsible');
 			const trigger = screen.getByRole('button', { name: /Show details/ });
 			expect(trigger).toHaveAttribute('aria-expanded', 'false');
-			const controls = trigger.getAttribute('aria-controls');
-			expect(controls).toBeTruthy();
+			// Closed content is not in the DOM, so there is nothing to control yet.
+			expect(trigger).not.toHaveAttribute('aria-controls');
+			expect(screen.queryByText('Hidden details')).toBeNull();
 			await fireEvent.click(trigger);
 			await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'));
+			const controls = trigger.getAttribute('aria-controls');
+			expect(controls).toBeTruthy();
 			expect(document.getElementById(controls!)).toHaveTextContent('Hidden details');
 		}
 	);

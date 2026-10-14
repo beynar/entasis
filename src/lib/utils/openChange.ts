@@ -33,6 +33,8 @@ export type OpenChangeReason =
 	| 'swipe'
 	/** The trigger it was anchored to left the document. */
 	| 'trigger-unmount'
+	/** The browser's find-in-page, a text fragment or a `#id` link reached content a disclosure hides. */
+	| 'find-in-page'
 	/** Code called `open()`, `close()`, `toggle()` or `setOpen()` with no user event behind it. */
 	| 'imperative-action';
 

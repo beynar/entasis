@@ -9,7 +9,7 @@ Colors names semantic palette roles. Sizes selects small, normal, or large compo
 
 Every overlay's \`onOpenChange(open, details)\` receives \`OpenChangeDetails\` as its second argument, and runs before the state changes:
 
-- \`reason\` (\`OpenChangeReason\`): \`'trigger-press'\`, \`'trigger-hover'\`, \`'trigger-focus'\`, \`'outside-press'\`, \`'escape-key'\`, \`'close-watcher'\` (the Android Back gesture), \`'close-press'\`, \`'item-press'\`, \`'list-navigation'\`, \`'input-change'\` (typing in a combobox input), \`'focus-out'\`, \`'swipe'\`, \`'trigger-unmount'\` or \`'imperative-action'\`.
+- \`reason\` (\`OpenChangeReason\`): \`'trigger-press'\`, \`'trigger-hover'\`, \`'trigger-focus'\`, \`'outside-press'\`, \`'escape-key'\`, \`'close-watcher'\` (the Android Back gesture), \`'close-press'\`, \`'item-press'\`, \`'list-navigation'\`, \`'input-change'\` (typing in a combobox input), \`'focus-out'\`, \`'swipe'\`, \`'trigger-unmount'\`, \`'find-in-page'\` (the browser's find-in-page opened a disclosure that hides its content until found) or \`'imperative-action'\`.
 - \`event\`: the DOM event behind the change, when there is one.
 - \`trigger\`: the trigger element involved, when a trigger caused it.
 - \`interaction\` (\`OpenChangeInteraction\`): \`'mouse'\`, \`'touch'\`, \`'pen'\`, \`'keyboard'\` or \`'programmatic'\`.

@@ -79,7 +79,10 @@ describe('state and event law', () => {
 
 		expect(button).toHaveAttribute('aria-expanded', 'false');
 		expect(onOpenChange).toHaveBeenCalledOnce();
-		expect(onOpenChange).toHaveBeenCalledWith(false);
+		expect(onOpenChange).toHaveBeenCalledWith(
+			false,
+			expect.objectContaining({ reason: 'trigger-press' })
+		);
 	});
 
 	test('Command uses search for its editable query', async () => {
