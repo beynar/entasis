@@ -62,3 +62,23 @@ describe('a link that wraps (OV-20b)', () => {
 		expect(lines()).toHaveLength(1);
 	});
 });
+
+describe('arrow', () => {
+	test('arrow draws a pointer on the card that reports its side', async () => {
+		mount({ link: { arrow: true } });
+		await userEvent.hover(link());
+		await expect.poll(() => document.querySelector('dialog[open]')).not.toBeNull();
+		const arrow = document.querySelector<HTMLElement>(
+			'dialog[open] [data-side][aria-hidden="true"]'
+		);
+		expect(arrow).not.toBeNull();
+		await expect.poll(() => arrow!.getAttribute('data-side')).toBe('bottom');
+	});
+
+	test('no arrow by default', async () => {
+		mount();
+		await userEvent.hover(link());
+		await expect.poll(() => document.querySelector('dialog[open]')).not.toBeNull();
+		expect(document.querySelector('dialog[open] [data-side][aria-hidden="true"]')).toBeNull();
+	});
+});

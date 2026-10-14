@@ -3,6 +3,7 @@
 	// ColorInput, MediaVolume), a modal popover and arrow placements, with controls around them.
 	import Theme from '../Theme/Theme.svelte';
 	import Popover from './Popover.svelte';
+	import Dialog from '../Dialog/Dialog.svelte';
 	import DateSelector from '../Form/DateSelector/DateSelector.svelte';
 	import ColorInput from '../Form/ColorInput/ColorInput.svelte';
 	import MediaVolumeControl from '../MediaVolume/MediaVolumeControl.svelte';
@@ -11,12 +12,20 @@
 	let {
 		scenario
 	}: {
-		scenario: 'date-selector' | 'color-input' | 'media-volume' | 'modal' | 'arrow' | 'arrow-edge';
+		scenario:
+			| 'date-selector'
+			| 'color-input'
+			| 'media-volume'
+			| 'modal'
+			| 'dialog'
+			| 'arrow'
+			| 'arrow-edge';
 	} = $props();
 
 	const zero = { in: { duration: 0 }, out: { duration: 0 } };
 	let volume = $state(0.5);
 	let muted = $state(false);
+	let editing = $state(false);
 </script>
 
 <Theme>
@@ -42,6 +51,14 @@
 				>Second</button
 			>
 		</Popover>
+	{:else if scenario === 'dialog'}
+		<!-- A button in the panel opens a modal Dialog that renders outside the panel. -->
+		<Popover transition={zero} trigger={{ content: 'Open' }}>
+			<button type="button" onclick={() => (editing = true)}>Edit</button>
+		</Popover>
+		<Dialog bind:open={editing} transition={zero} responsive={false} title="Edit item">
+			<button type="button">Save</button>
+		</Dialog>
 	{:else if scenario === 'arrow'}
 		<div style="padding: 120px 200px">
 			<Popover arrow position="bottom" offset={12} transition={zero} trigger={{ content: 'Open' }}>

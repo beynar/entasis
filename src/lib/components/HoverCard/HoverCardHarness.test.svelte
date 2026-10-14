@@ -9,7 +9,7 @@
 		card = {},
 		innerCard = {}
 	}: {
-		scenario: 'single' | 'nested' | 'sibling';
+		scenario: 'single' | 'nested' | 'sibling' | 'wrap';
 		card?: Partial<HoverCardProps>;
 		innerCard?: Partial<HoverCardProps>;
 	} = $props();
@@ -23,6 +23,25 @@
 		<HoverCard trigger="Card trigger" transition={zero} {...card}>
 			<p>Card body</p>
 		</HoverCard>
+	{:else if scenario === 'wrap'}
+		{#snippet wrapped()}
+			<a href="#wrapped">documentation about wrapping cards in paragraphs</a>
+		{/snippet}
+		<p style="width: 220px; font: 16px/24px sans-serif; margin: 160px 40px">
+			Read the
+			<HoverCard
+				trigger={wrapped}
+				delay={0}
+				closeDelay={0}
+				position="bottom"
+				offset={4}
+				transition={zero}
+				{...card}
+			>
+				<p>Card body</p>
+			</HoverCard>
+			and keep reading afterwards.
+		</p>
 	{:else if scenario === 'sibling'}
 		<HoverCard trigger="First card" transition={zero} {...card}>
 			<p>First body</p>

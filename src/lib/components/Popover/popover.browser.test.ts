@@ -135,6 +135,52 @@ describe('modal popover (OV-18b)', () => {
 		expect(document.activeElement).toBe(element('First'));
 		expect(insidePanel()).toBe(true);
 	});
+
+	test('the tooltip over a control in the panel is not made inert, focused or hovered', async () => {
+		mount('modal');
+		element('Before').focus();
+		await tab();
+		await userEvent.keyboard('{Enter}');
+		await expect.poll(panelOpen).toBe(true);
+		await tab();
+		await expect.poll(() => document.querySelector('[role="tooltip"]')).not.toBeNull();
+		await nextFrame();
+		expect(document.querySelector('[role="tooltip"]')!.closest('[inert]')).toBeNull();
+	});
+
+	test('the tooltip a hovered control in the panel shows is not made inert either', async () => {
+		mount('modal');
+		await userEvent.click(element('Open modal'));
+		await expect.poll(panelOpen).toBe(true);
+		await userEvent.hover(element('Second'));
+		await expect
+			.poll(() => document.querySelector('[role="tooltip"]'), { timeout: 4000 })
+			.not.toBeNull();
+		await nextFrame();
+		expect(document.querySelector('[role="tooltip"]')!.closest('[inert]')).toBeNull();
+	});
+});
+
+describe('a modal Dialog opened from the panel', () => {
+	test('the popover stays open underneath it, and focus returns to the control that opened it', async () => {
+		mount('dialog');
+		await userEvent.click(element('Open'));
+		await expect.poll(panelOpen).toBe(true);
+		await userEvent.click(element('Edit'));
+		await expect.poll(() => document.activeElement?.textContent?.trim()).toBe('Save');
+		// Focus left the panel for the Dialog: the popover waits, its control is still there.
+		await nextFrame();
+		await nextFrame();
+		expect(page.getByRole('button', { name: 'Edit', includeHidden: true }).elements().length).toBe(
+			1
+		);
+
+		await userEvent.keyboard('{Escape}');
+		await expect.poll(() => document.activeElement?.textContent?.trim()).toBe('Edit');
+		expect(page.getByRole('button', { name: 'Edit', includeHidden: true }).elements().length).toBe(
+			1
+		);
+	});
 });
 
 describe('arrow (POP-2)', () => {

@@ -152,6 +152,17 @@ describe('popover name (POP-1)', () => {
 		expect(document.querySelector('dialog')).toBeNull();
 	});
 
+	test('a menu popup follows label and labelledBy while it is open', async () => {
+		const { rerender } = mount({ scenario: 'menu', label: 'First name' });
+		await open('Open menu');
+		const menu = await screen.findByRole('menu', { name: 'First name' });
+		await rerender({ scenario: 'menu', label: 'Second name' });
+		await waitFor(() => expect(menu).toHaveAttribute('aria-label', 'Second name'));
+		await rerender({ scenario: 'menu', label: '' });
+		await waitFor(() => expect(menu).not.toHaveAttribute('aria-label'));
+		expect(menu).toHaveAttribute('aria-labelledby', button('Open menu').id);
+	});
+
 	test('a menu popup without label is still named by its trigger', async () => {
 		mount({ scenario: 'menu' });
 		await open('Open menu');

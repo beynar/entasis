@@ -11,10 +11,13 @@
 	let {
 		scenario,
 		popover = {},
+		label,
 		onOpenChange
 	}: {
 		scenario: 'plain' | 'menu' | 'nested' | 'rows' | 'sheet';
 		popover?: Partial<PopoverProps>;
+		/** A name that can change while the popover is open (rerender it). */
+		label?: string;
 		onOpenChange?: PopoverProps['onOpenChange'];
 	} = $props();
 
@@ -46,6 +49,7 @@
 		<Popover
 			transition={zero}
 			haspopup="menu"
+			{label}
 			trigger={{ content: 'Open menu' }}
 			{onOpenChange}
 			{...popover}

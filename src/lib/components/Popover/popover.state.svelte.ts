@@ -231,8 +231,12 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 		if (index < 0) return false;
 		return open.slice(index + 1).every((layer) => {
 			const state = layer.state;
+			// The shared tooltip surface is known by id, so it counts before its panel has mounted:
+			// the scope would otherwise release and re-apply `inert` around the tooltip itself.
 			return (
-				state instanceof PopoverState && !!state.panelElement?.querySelector('[role="tooltip"]')
+				state instanceof PopoverState &&
+				(`${state.id}-tooltip` === this.theme.tooltipId ||
+					!!state.panelElement?.querySelector('[role="tooltip"]'))
 			);
 		});
 	});
@@ -637,7 +641,21 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 		if (!target) return false;
 		const external = this.externalRef;
 		if (external instanceof Node && composedContains(external, target)) return true;
-		return this.theme.layers.open.some((layer) => {
+		const open = this.theme.layers.open;
+		// A modal layer opened above this popover (a Dialog or confirmation the panel's content
+		// opened, rendered elsewhere) holds focus while the popover waits underneath it.
+		const above = open.indexOf(this.layer);
+		if (
+			above >= 0 &&
+			open
+				.slice(above + 1)
+				.some(
+					(layer) =>
+						layer.isModal && [...layer.nodes].some((node) => composedContains(node, target))
+				)
+		)
+			return true;
+		return open.some((layer) => {
 			for (let current: LayerHandle | null = layer; current; current = current.parent) {
 				if (current !== this.layer) continue;
 				return [...layer.nodes].some((node) => composedContains(node, target));
@@ -866,15 +884,43 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 		const haspopup = this.haspopup ?? 'dialog';
 		const role = haspopup === true ? 'menu' : POPUP_ROLE[haspopup as keyof typeof POPUP_ROLE];
 		const added: Array<[Element, string]> = [];
+		const created = (element: Element, name: string) =>
+			added.some(([e, n]) => e === element && n === name);
+		// Never replaces an attribute the consumer wrote; one this code wrote may be rewritten.
 		const set = (element: Element, name: string, value: string) => {
-			if (element.hasAttribute(name)) return;
+			if (element.hasAttribute(name) && !created(element, name)) return;
+			if (!created(element, name)) added.push([element, name]);
 			element.setAttribute(name, value);
-			added.push([element, name]);
+		};
+		const unset = (element: Element, name: string) => {
+			if (!created(element, name)) return;
+			element.removeAttribute(name);
+			added.splice(
+				added.findIndex(([e, n]) => e === element && n === name),
+				1
+			);
 		};
 		let owner: Element | null = null;
+		// Named by the consumer: `label` / `labelledBy` win over the trigger. Read reactively, so a
+		// name that changes while the popover is open reaches the role owner.
+		const name = () => {
+			// Read before the owner check, so the effect tracks them while no owner exists yet.
+			const { label, labelledBy } = this;
+			if (!owner) return;
+			unset(owner, 'aria-label');
+			unset(owner, 'aria-labelledby');
+			if (labelledBy) set(owner, 'aria-labelledby', labelledBy);
+			if (label) set(owner, 'aria-label', label);
+			const trigger = this.triggerReference;
+			if (trigger && !owner.hasAttribute('aria-label') && !owner.hasAttribute('aria-labelledby')) {
+				set(trigger, 'id', `${this.id}-trigger`);
+				set(owner, 'aria-labelledby', trigger.id);
+			}
+		};
 		const resolve = () => {
 			const next = panel.querySelector(`[role="${role}"]`);
 			if (next === owner) return;
+			if (owner) for (const attribute of ['aria-label', 'aria-labelledby']) unset(owner, attribute);
 			owner = next;
 			if (!owner) {
 				this.#popupOwnerId = null;
@@ -882,15 +928,9 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 			}
 			set(owner, 'id', `${this.id}-${role}`);
 			this.#popupOwnerId = owner.id;
-			// Named by the consumer: `label` / `labelledBy` win over the trigger.
-			if (this.labelledBy) set(owner, 'aria-labelledby', this.labelledBy);
-			if (this.label) set(owner, 'aria-label', this.label);
-			const trigger = this.triggerReference;
-			if (trigger && !owner.hasAttribute('aria-label') && !owner.hasAttribute('aria-labelledby')) {
-				set(trigger, 'id', `${this.id}-trigger`);
-				set(owner, 'aria-labelledby', trigger.id);
-			}
+			name();
 		};
+		$effect(name);
 		queueMicrotask(resolve);
 		const observer = typeof MutationObserver === 'undefined' ? null : new MutationObserver(resolve);
 		observer?.observe(panel, { childList: true, subtree: true });
