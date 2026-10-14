@@ -75,6 +75,12 @@ export type ToastOptions = {
 	description?: Slot;
 	/** Semantic palette role. */
 	color: Colors;
+	/**
+	 * Without an `id`, a toast whose color, title and description match one still on screen
+	 * updates that toast (its timer restarts) instead of stacking a duplicate. Applies only to
+	 * plain-text title and description; pass `false` to always add a new toast. Default `true`.
+	 */
+	dedupe?: boolean;
 	/** Announces the toast with an assertive live region. */
 	important?: boolean;
 	/** Icon text displayed before the toast content. */
@@ -373,7 +379,7 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 	});
 
 	addToast = (opts: Omit<ToastOptions, 'id'> & { id?: string }) =>
-		this.adoptToast(new Toast({ ...opts, id: opts.id || createId('toast') }));
+		this.adoptToast(new Toast({ ...opts, id: toastId(opts) }));
 
 	// Removed toasts whose exit transition may still be playing, by id. The list keys its
 	// items by id, so a toast re-added with that id resumes the leaving item instead of
@@ -850,11 +856,31 @@ const warnIfNothingMounts = () => {
 	}, 0);
 };
 
+// The id a toast gets: the one the caller supplied, else one derived from what the toast says, so
+// the same message submitted twice is one toast. A snippet title or description cannot be compared,
+// so such a toast, one with no text at all, and one with `dedupe: false` are always new.
+const toastId = (opts: {
+	id?: string;
+	color?: Colors;
+	title?: Slot;
+	description?: Slot;
+	dedupe?: boolean;
+}) => {
+	if (opts.id) return opts.id;
+	const { title, description } = opts;
+	const comparable = (value: Slot | undefined) => value === undefined || typeof value === 'string';
+	const hasText = typeof title === 'string' || typeof description === 'string';
+	if (opts.dedupe === false || !hasText || !comparable(title) || !comparable(description)) {
+		return createId('toast');
+	}
+	return `dedupe:${opts.color ?? ''}:${title ?? ''}\u0000${description ?? ''}`;
+};
+
 const createToast = (color: Colors, payload: Parameters<ToastCreator[Colors]>[0]) => {
 	const toast = new Toast({
 		color,
 		...payload,
-		id: payload?.id || createId('toast')
+		id: toastId({ ...payload, color })
 	});
 	// On the server nothing ever mounts a Toaster, so the queue would only retain
 	// toasts for the lifetime of the process. The caller still gets its handle.

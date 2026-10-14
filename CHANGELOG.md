@@ -8,6 +8,10 @@ Unreleased section under the new version.
 
 ### Added
 
+- `Toast`: a toast with no `id` whose color, title and description match one still on screen updates
+  that toast and restarts its timer instead of stacking a duplicate, so a repeated submission shows
+  once. It compares plain-text titles and descriptions only. Pass `dedupe: false` to always add a
+  new toast; an explicit `id` still wins.
 - `Switch`: `inputValue` sets the value a native `<form>` submits under the switch's `name` while it
   is on (default `'true'`). An off switch, or one without a `name`, submits nothing, like a native
   checkbox.

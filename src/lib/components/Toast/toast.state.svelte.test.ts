@@ -273,6 +273,76 @@ describe('toast upsert by id', () => {
 	});
 });
 
+describe('toast dedupe by content', () => {
+	test('the same color, title and description is one toast and restarts the timer', async () => {
+		render(Harness);
+		const first = toast.success({
+			title: 'Saved',
+			description: 'All changes stored',
+			duration: 1000
+		});
+		await tick();
+		run(600);
+
+		const second = toast.success({
+			title: 'Saved',
+			description: 'All changes stored',
+			duration: 1000
+		});
+		await tick();
+
+		expect(second).toBe(first);
+		expect(items()).toHaveLength(1);
+		expect(first.timer?.remaining).toBe(1000);
+	});
+
+	test('a different color, title or description is a new toast', async () => {
+		render(Harness);
+		toast.success({ title: 'Saved', description: 'A', duration: false });
+		toast.danger({ title: 'Saved', description: 'A', duration: false });
+		toast.success({ title: 'Saved too', description: 'A', duration: false });
+		toast.success({ title: 'Saved', description: 'B', duration: false });
+		await tick();
+		expect(items()).toHaveLength(4);
+	});
+
+	test('an explicit id wins over the content', async () => {
+		render(Harness);
+		toast.info({ id: 'a', title: 'Same', duration: false });
+		toast.info({ id: 'b', title: 'Same', duration: false });
+		await tick();
+		expect(items()).toHaveLength(2);
+	});
+
+	test('dedupe: false always adds a toast', async () => {
+		render(Harness);
+		toast.info({ title: 'Again', dedupe: false, duration: false });
+		toast.info({ title: 'Again', dedupe: false, duration: false });
+		await tick();
+		expect(items()).toHaveLength(2);
+	});
+
+	test('a toast with no text, or a snippet title, is never merged', async () => {
+		render(Harness);
+		toast.info({ duration: false });
+		toast.info({ duration: false });
+		await tick();
+		expect(items()).toHaveLength(2);
+	});
+
+	test('the same message after the first was dismissed shows again', async () => {
+		render(Harness);
+		const first = toast.info({ title: 'Once', duration: false });
+		await tick();
+		first.remove();
+		await tick();
+		const again = toast.info({ title: 'Once', duration: false });
+		await tick();
+		expect(again).not.toBe(first);
+		expect(screen.getAllByText('Once')).toHaveLength(1);
+	});
+});
+
 describe('toast timers and window activity', () => {
 	test('window blur pauses timers and focus resumes them with the remaining time', async () => {
 		render(Harness);

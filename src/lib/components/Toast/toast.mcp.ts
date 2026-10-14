@@ -71,6 +71,7 @@ toast.warning({
 - \`important\` (boolean, optional): Announced through the assertive live region instead of the polite one, so screen readers interrupt for it
 - \`transition\` (FSOProps, optional): Enter/exit transition override for this toast
 - \`theme\` (ToastThemeProps, optional): Theme overrides for this toast alone, layered over the \`<Toaster theme>\` object (\`base\` classes are appended, so the per-toast ones win)
+- \`dedupe\` (boolean, optional, default true): Without an \`id\`, a toast whose color, title and description match one still on screen updates that toast (its countdown restarts) instead of stacking a duplicate, so a repeated submission shows once. It compares plain-text titles and descriptions only; a snippet, or a toast with no text, is always added. Pass \`false\` to opt out. An explicit \`id\` always wins
 - \`id\` (string, optional): Custom ID for the toast. Auto-generated if not provided. Calling a creator again with an id that is still on screen updates that toast instead of adding another (see Updating by id)
 - \`onAfterOpen\` (function, optional): Called once the toast finishes entering: \`(payload: Toast) => void\`
 - \`onDismiss\` (function, optional): Called on manual dismiss (close button, an action, or \`toast.remove()\`). Not called on timeout: \`(payload: Toast) => void\`
