@@ -8,7 +8,7 @@
 	import Chip from '../../Chip/Chip.svelte';
 	import Popover from '../../Popover/Popover.svelte';
 	import { xIcon } from '../../Icons/x.js';
-	import type { PopoverState } from '../../Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '../../Popover/popover.api.js';
 	import { useTagsInputTheme } from './tagsInput.theme.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
@@ -379,7 +379,7 @@
 	</div>
 {/snippet}
 
-{#snippet fieldView(popover: PopoverState | null)}
+{#snippet fieldView(popover: PopoverApi | null)}
 	<Field
 		{density}
 		{field}
@@ -451,7 +451,7 @@
 		onAfterClose={() => onAfterClose?.()}
 	>
 		<ComboboxPopup {controller} {classes} {size} {density} {separators} {item} {i18n} />
-		{#snippet trigger(popover: PopoverState)}
+		{#snippet trigger(popover: PopoverApi)}
 			{@render fieldView(popover)}
 		{/snippet}
 	</Popover>

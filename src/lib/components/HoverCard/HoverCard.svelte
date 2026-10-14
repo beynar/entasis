@@ -11,7 +11,8 @@
 	import type { HoverCardProps, HoverCardTrigger } from './hoverCard.props.js';
 	import { useHoverCardMotion, useHoverCardTheme } from './hoverCard.theme.js';
 	import { useTheme } from '../Theme/theme.state.svelte.js';
-	import type { PopoverState } from '../Popover/popover.state.svelte.js';
+	import { popoverInternals, type PopoverState } from '../Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '../Popover/popover.api.js';
 
 	let {
 		id: customId,
@@ -76,8 +77,9 @@
 	// The popover behind this card, for the cards opened from inside it (see `hasChildOpen`).
 	let cardPopover = $state.raw<PopoverState | null>(null);
 	const trackPopover =
-		(popover: PopoverState): Attachment =>
+		(api: PopoverApi): Attachment =>
 		() => {
+			const popover = popoverInternals(api);
 			cardPopover = popover;
 			return () => {
 				if (cardPopover === popover) cardPopover = null;

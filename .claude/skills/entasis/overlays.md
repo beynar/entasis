@@ -93,23 +93,27 @@ sheet; in a bottom sheet a focused text field makes room for the on-screen keybo
 
 ### Slots
 
-- `title`: string or `Snippet<[DialogState]>`
-- `description`: string or `Snippet<[DialogState]>`
-- `children`: `Snippet<[DialogState]>`
+- `title`: string or `Snippet`
+- `description`: string or `Snippet`
+- `children`: `Snippet<[DialogApi]>`
 - `header`, `footer`, `closeButton`: `Snippet`
-- `trigger`: `Snippet<[DialogState]>` or `ButtonProps & { content?: string }`; in a snippet,
+- `trigger`: `Snippet<[DialogApi]>` or `ButtonProps & { content?: string }`; in a snippet,
   `{@attach dialog.trigger}` gives any element `aria-haspopup`, `aria-expanded`, `aria-controls`
   and click / Enter / Space opening
 
 ### Events
 
-- `onOpenChange(open, details)`, `onAfterOpen(payload: DialogState)`, `onAfterClose(payload: DialogState)`
+- `onOpenChange(open, details)`, `onAfterOpen(payload: DialogApi)`, `onAfterClose(payload: DialogApi)`
 
-### DialogState (passed to snippets)
+### DialogApi (passed to snippets)
 
-- `isOpen`, `id`, `type`, `size`, `modal`, `open(details?)`, `close(details?)`,
-  `setOpen(open, details?)`, `setSnapPoint(point, details?)`, `currentSnapPoint`,
-  `trigger` and `reference` (attachments), `lifecycle.status`
+`import type { DialogApi } from 'entasis/dialog'`. A narrow handle; the state class behind it is
+internal.
+
+- `isOpen`, `id`, `status` (`'closed' | 'entering' | 'open' | 'exiting'`), `modal`, `computedType`,
+  `open(details?)`, `close(details?)`, `toggle(details?)`, `setOpen(open, details?)`,
+  `setSnapPoint(point, details?)`, `currentSnapPoint`, `triggerProps`, and `trigger` and
+  `reference` (attachments)
 
 ### Theme Parts
 
@@ -192,7 +196,7 @@ announced as a dialog, so name it. `modal` keeps Tab inside the panel, makes the
 with focus inside and adds a visually hidden Close button at the end of the panel for screen readers.
 `arrow` draws a pointer toward the trigger that stays on it when the panel shifts to fit. One Popover
 can serve many triggers: `{@attach popover.triggerFor(() => row)}` anchors it to the one pressed and
-`popover.payload` holds that trigger's data (type the snippet parameter `PopoverState<Row>`).
+`popover.payload` holds that trigger's data (type the snippet parameter `PopoverApi<Row>`).
 
 `inline` renders the panel in normal document flow where the component sits instead of portaling to
 the viewport-fixed layer: no floating-ui positioning, no scroll lock, no outside-press dismissal
@@ -202,19 +206,22 @@ wins over `mobileSheet`.
 
 ### Slots
 
-- `children`: `Snippet<[PopoverState]>`
-- `trigger`: `Snippet<[PopoverState]>` | `ButtonProps & { content?: string }` | `false`
+- `children`: `Snippet<[PopoverApi]>`
+- `trigger`: `Snippet<[PopoverApi]>` | `ButtonProps & { content?: string }` | `false`
 
 ### Events
 
-- `onOpenChange(open, details)`, `onAfterOpen(payload: PopoverState)`, `onAfterClose(payload: PopoverState)`
+- `onOpenChange(open, details)`, `onAfterOpen(payload: PopoverApi)`, `onAfterClose(payload: PopoverApi)`
 
-### PopoverState (passed to snippets)
+### PopoverApi (passed to snippets)
 
-- `isOpen`, `id`, `size`, `position`, `offset`, `open(details?)`, `close(details?)`,
-  `toggle(details?)`, `setOpen(open, details?)`, `payload`, `openReason` (`'hover' | 'press' | 'keyboard' |
-'programmatic'`), `activeTrigger`, `lifecycle.status`, `trigger`, `triggerFor(() => payload)` and
-  `reference` (attachments for a custom trigger)
+`import type { PopoverApi } from 'entasis/popover'`. A narrow handle; the state class behind it is
+internal. `PopoverState` is its deprecated alias (one minor). `usePopoverContext()` returns it too.
+
+- `isOpen`, `id`, `status` (`'closed' | 'entering' | 'open' | 'exiting'`), `open(details?)`,
+  `close(details?)`, `toggle(details?)`, `setOpen(open, details?)`, `payload`, `openReason`
+  (`'hover' | 'press' | 'keyboard' | 'programmatic'`), `activeTrigger`, `placement`, `triggerProps`,
+  `trigger`, `triggerFor(() => payload)` and `reference` (attachments for a custom trigger)
 
 ### Theme Parts
 

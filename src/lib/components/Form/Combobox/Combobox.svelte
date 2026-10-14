@@ -7,7 +7,7 @@
 	import Popover from '../../Popover/Popover.svelte';
 	import { xIcon } from '../../Icons/x.js';
 	import { magnifyingGlassIcon } from '../../Icons/magnifyingGlass.js';
-	import type { PopoverState } from '../../Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '../../Popover/popover.api.js';
 	import { useComboboxTheme } from './combobox.theme.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { flattenItems } from './combobox.items.js';
@@ -239,7 +239,7 @@
 		{i18n}
 		isSelected={(option) => field.value === option.value}
 	/>
-	{#snippet trigger(popover: PopoverState)}
+	{#snippet trigger(popover: PopoverApi)}
 		<Field
 			{density}
 			{field}

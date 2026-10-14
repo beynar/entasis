@@ -64,7 +64,7 @@ Each preset value must match the active mode. Presets follow the same \`closeOnS
 
 ## Custom trigger
 
-The \`trigger\` prop follows Popover's trigger contract. A trigger snippet receives \`PopoverState\`; attach \`popover.reference\` to the trigger element and call \`popover.toggle()\`.
+The \`trigger\` prop follows Popover's trigger contract. A trigger snippet receives \`PopoverApi\` (from \`entasis/popover\`); attach \`popover.reference\` to the trigger element and call \`popover.toggle()\`.
 
 ## Calendar configuration
 

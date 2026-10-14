@@ -308,7 +308,7 @@
 
 		<ComponentCard
 			title="Trigger and open-change details"
-			description="A snippet trigger that attaches dialog.trigger gets aria-haspopup, aria-expanded and aria-controls, and focus returns to it. onOpenChange runs before the change with a reason and cancel(): while Keep open is on, Escape and outside presses are cancelled and only the close button closes it."
+			description="Snippets receive a DialogApi (open, close, status, trigger…). A snippet trigger that attaches dialog.trigger gets aria-haspopup, aria-expanded and aria-controls, and focus returns to it. onOpenChange runs before the change with a reason and cancel(): while Keep open is on, Escape and outside presses are cancelled and only the close button closes it."
 			code={`<script lang="ts">
 	import type { OpenChangeDetails } from 'entasis/types';
 
@@ -321,6 +321,7 @@ ${'</' + 'script>'}
 <Dialog title="Guarded dialog" onOpenChange={guardClose}>
 	{#snippet trigger(dialog)}
 		<Button {@attach dialog.trigger}>Open guarded dialog</Button>
+		<span>Status: {dialog.status}</span>
 	{/snippet}
 	<Switch label="Keep open" bind:value={keepOpen} />
 </Dialog>`}
@@ -333,6 +334,9 @@ ${'</' + 'script>'}
 				>
 					{#snippet trigger(dialog)}
 						<Button color="primary" {@attach dialog.trigger}>Open guarded dialog</Button>
+						<span class="text-neutral/70 text-sm" data-testid="dialog-status">
+							Status: {dialog.status}
+						</span>
 					{/snippet}
 					<label class="flex items-center gap-2 text-sm">
 						<input type="checkbox" bind:checked={keepOpen} />

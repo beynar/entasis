@@ -2,6 +2,7 @@
 	import Theme from '../Theme/Theme.svelte';
 	import Dialog from './Dialog.svelte';
 	import type { DialogProps } from './dialog.props.js';
+	import { dialogInternals } from './dialog.state.svelte.js';
 
 	let {
 		type = 'drawerBottom',
@@ -50,9 +51,10 @@
 	>
 		{#snippet children(dialog)}
 			<!-- The drag state the panel transform and the backdrop opacity are derived from. -->
-			<span data-testid="dragging">{dialog.dragging}</span>
-			<span data-testid="progress">{dialog.dragProgress}</span>
-			<span data-testid="offset">{dialog.dragOffset}</span>
+			{@const drag = dialogInternals(dialog)}
+			<span data-testid="dragging">{drag.dragging}</span>
+			<span data-testid="progress">{drag.dragProgress}</span>
+			<span data-testid="offset">{drag.dragOffset}</span>
 			<span data-testid="snap">{dialog.currentSnapPoint}</span>
 			<button
 				type="button"

@@ -3,13 +3,13 @@
 	// directly to the element cannot act while the Button refuses activation.
 	import Theme from '../Theme/Theme.svelte';
 	import Popover from '../Popover/Popover.svelte';
-	import type { PopoverState } from '../Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '../Popover/popover.api.js';
 	import Button from './Button.svelte';
 
 	let { loading = false, disabled = false }: { loading?: boolean; disabled?: boolean } = $props();
 </script>
 
-{#snippet trigger(popover: PopoverState)}
+{#snippet trigger(popover: PopoverApi)}
 	<Button {loading} {disabled} {@attach popover.trigger}>Export</Button>
 {/snippet}
 

@@ -26,6 +26,7 @@ import {
 	type PopupTriggerProps
 } from '$lib/utils/trigger.js';
 import { useDialogMotion, type DialogThemeProps } from './dialog.theme.js';
+import type { DialogApi } from './dialog.api.js';
 
 export { DIALOG_Z_BASE, DIALOG_Z_STEP } from '../Theme/theme.layers.js';
 
@@ -53,14 +54,14 @@ interface DialogOptions extends MakeRequired<
 		| 'defaultSnapPoint'
 		| 'onSnapPointChange'
 	>,
-	'closeOnEscape' | 'closable' | 'modal'
+	'id' | 'closeOnEscape' | 'closable' | 'modal'
 > {
 	isOpen: boolean;
 	/** The resting snap point; `undefined` until one is chosen (the default point applies). */
 	snapPoint?: DialogSnapPoint;
 	onOpenChange?: OpenChangeHandler;
-	onAfterOpen?: (payload: DialogState) => void;
-	onAfterClose?: (payload: DialogState) => void;
+	onAfterOpen?: (payload: DialogApi) => void;
+	onAfterClose?: (payload: DialogApi) => void;
 	/** The instance `theme.motion` slot; the `transition` prop still wins over it. */
 	motion?: DialogThemeProps['motion'];
 }
@@ -68,7 +69,7 @@ interface DialogOptions extends MakeRequired<
 /** What `open`, `close`, `toggle` and `setOpen` accept: details, a partial, or the DOM event. */
 export type DialogOpenChangeInput = OpenChangeDetails | OpenChangeInit | Event;
 
-export class DialogState extends createBindableStateClass<DialogOptions>() {
+export class DialogState extends createBindableStateClass<DialogOptions>() implements DialogApi {
 	parent = getContext<DialogState | null>('dialog');
 	// Nested dialogs join while they mount and leave when torn down; see `Registry`.
 	readonly #children = new Registry<DialogState>();
@@ -92,7 +93,11 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 			this.#opener = null;
 		}
 	});
-	/** @deprecated Read `lifecycle.status === 'open'`; kept for one minor. */
+	/** Where the dialog is in its open/close lifecycle; see `DialogApi.status`. */
+	get status() {
+		return this.lifecycle.status;
+	}
+	/** @deprecated Read `status === 'open'`; kept for one minor. */
 	get hasTransitioned() {
 		return this.lifecycle.status === 'open';
 	}
@@ -744,3 +749,9 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 		};
 	};
 }
+
+/**
+ * The state behind the `DialogApi` a Dialog hands its snippets and callbacks. For library code
+ * and tests that read a dialog's internals; consumers get the narrow API.
+ */
+export const dialogInternals = (dialog: DialogApi): DialogState => dialog as DialogState;

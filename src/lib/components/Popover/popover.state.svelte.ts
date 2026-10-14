@@ -33,6 +33,7 @@ import {
 import { useDirection } from '$lib/utils/useDirection.svelte.js';
 import { placementAttributes, popupSideAttributes } from '$lib/utils/stateAttributes.js';
 import { usePopoverMotion, type PopoverThemeProps } from './popover.theme.js';
+import type { PopoverApi } from './popover.api.js';
 import {
 	applyDirectedOffset,
 	claimPopupSide,
@@ -84,6 +85,7 @@ interface PopoverOptions<Payload = unknown> extends MakeRequired<
 		| 'closeOnFocusOut'
 		| 'arrow'
 	>,
+	| 'id'
 	| 'directedTransition'
 	| 'closeOnEscape'
 	| 'lockScroll'
@@ -138,7 +140,10 @@ const TOUCH_LOCK_MARGIN = 20;
 /** A press on a trigger, remembered while its event dispatches. */
 type TriggerPress = { node: HTMLElement; event: Event; reason: OpenChangeReason };
 
-export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload> {
+export class PopoverState<Payload = unknown>
+	extends PopoverOptionsBase<Payload>
+	implements PopoverApi<Payload>
+{
 	/** The trigger that opened the popover, while it is open; `null` for a programmatic open. */
 	activeTrigger = $state<HTMLElement | null>(null);
 	/** The most recently attached `reference` / `trigger` element. */
@@ -204,7 +209,11 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 	 * Created in the constructor: it reads the options as it starts, after `bind` installs them.
 	 */
 	lifecycle: OpenLifecycle;
-	/** @deprecated Read `lifecycle.status === 'open'`; kept for one minor. */
+	/** Where the panel is in its open/close lifecycle; see `PopoverApi.status`. */
+	get status() {
+		return this.lifecycle.status;
+	}
+	/** @deprecated Read `status === 'open'`; kept for one minor. */
 	get hasTransitioned() {
 		return this.lifecycle.status === 'open';
 	}
@@ -1164,7 +1173,13 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 	};
 }
 
-// Use interface merging to add the properties
+/**
+ * The state behind the `PopoverApi` a Popover hands its snippets and callbacks. For library
+ * components that drive a popover's internals (menus, hover cards); consumers get the narrow API.
+ */
+export const popoverInternals = <Payload = unknown>(
+	popover: PopoverApi<Payload>
+): PopoverState<Payload> => popover as PopoverState<Payload>;
 
 export const usePopoverContext = () => {
 	const hasPopover = hasContext('popover');

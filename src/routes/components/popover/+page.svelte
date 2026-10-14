@@ -12,7 +12,7 @@
 	import { sizes } from '$lib/utils/tokens.js';
 	import type { OpenChangeDetails } from '$lib/types/index.js';
 	import type { PopoverPlacement } from '$lib/components/Popover/popover.props.js';
-	import type { PopoverState } from '$lib/components/Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '$lib/components/Popover/popover.api.js';
 
 	type Person = { id: number; name: string; role: string };
 	const people: Person[] = [
@@ -602,9 +602,9 @@ ${'</' + 'script>'}
 
 		<ComponentCard
 			title="How it opened"
-			description="openReason records how the popover opened. A hover-opened popover leaves page scroll unlocked and closes when the pointer leaves; pressing its trigger pins it open. With several triggers, the one pressed anchors the panel and gets focus back."
+			description="Every snippet receives a PopoverApi: openReason records how the popover opened and status where its panel is in the open/close lifecycle. A hover-opened popover leaves page scroll unlocked and closes when the pointer leaves; pressing its trigger pins it open. With several triggers, the one pressed anchors the panel and gets focus back."
 			code={`<Popover openOnHover closeOnMouseLeave trigger={{ content: 'Hover or press' }}>
-	{#snippet children(popover)}Opened by {popover.openReason}{/snippet}
+	{#snippet children(popover)}Opened by {popover.openReason} ({popover.status}){/snippet}
 </Popover>
 
 <Popover focusOnOpen="first">
@@ -625,7 +625,10 @@ ${'</' + 'script>'}
 					trigger={{ content: 'Hover or press', variant: 'soft' }}
 				>
 					{#snippet children(popover)}
-						<p class="text-sm" data-testid="open-reason">Opened by {popover.openReason}</p>
+						<p class="text-sm" data-testid="open-reason">
+							Opened by {popover.openReason} (<span data-testid="open-status">{popover.status}</span
+							>)
+						</p>
 					{/snippet}
 				</Popover>
 				<Popover position="bottom" focusOnOpen="first">
@@ -764,21 +767,29 @@ ${'</' + 'script>'}
 
 		<ComponentCard
 			title="One popup for many triggers"
-			description="A list of rows does not need a popover per row. Put {'{@attach popover.triggerFor(() => row)}'} on every row's trigger: one Popover moves to the one that was pressed, and popover.payload is that trigger's data, read live. Pressing another trigger while it is open moves the panel to it."
-			code={`<Popover>
-	{#snippet trigger(popover)}
+			description="A list of rows does not need a popover per row. Put {'{@attach popover.triggerFor(() => row)}'} on every row's trigger: one Popover moves to the one that was pressed, and popover.payload is that trigger's data, read live (type the snippet parameter PopoverApi<Person>). Pressing another trigger while it is open moves the panel to it."
+			code={`<script lang="ts">
+	import { Popover, type PopoverApi } from 'entasis/popover';
+	import { Button } from 'entasis/button';
+
+	type Person = { id: number; name: string; role: string };
+	let { people }: { people: Person[] } = $props();
+${'</' + 'script>'}
+
+<Popover>
+	{#snippet trigger(popover: PopoverApi<Person>)}
 		{#each people as person (person.id)}
 			<Button {@attach popover.triggerFor(() => person)}>{person.name}</Button>
 		{/each}
 	{/snippet}
-	{#snippet children(popover)}
+	{#snippet children(popover: PopoverApi<Person>)}
 		<strong>{popover.payload?.name}</strong>
 		<p>{popover.payload?.role}</p>
 	{/snippet}
 </Popover>`}
 		>
 			<Popover position="bottom" arrow offset={10}>
-				{#snippet trigger(popover: PopoverState<Person>)}
+				{#snippet trigger(popover: PopoverApi<Person>)}
 					<div class="flex flex-wrap items-center justify-center gap-3">
 						{#each people as person (person.id)}
 							<Button variant="soft" {@attach popover.triggerFor(() => person)}>
@@ -787,7 +798,7 @@ ${'</' + 'script>'}
 						{/each}
 					</div>
 				{/snippet}
-				{#snippet children(popover: PopoverState<Person>)}
+				{#snippet children(popover: PopoverApi<Person>)}
 					<div class="grid gap-1" data-testid="shared-popup">
 						<strong class="text-sm">{popover.payload?.name}</strong>
 						<span class="text-neutral/70 text-sm">{popover.payload?.role}</span>

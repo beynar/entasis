@@ -4,7 +4,7 @@
 	import DateSelectorInput from '$lib/components/Form/DateSelector/DateSelectorInput.svelte';
 	import type { DateSelectorPreset } from '$lib/components/Form/DateSelector/dateSelector.props.js';
 	import { calendarBlankIcon } from '$lib/components/Icons/calendarBlank.js';
-	import type { PopoverState } from '$lib/components/Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '$lib/components/Popover/popover.api.js';
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
@@ -128,7 +128,7 @@
 		>
 			<div class="flex flex-col items-center gap-3">
 				<DateSelector bind:value={selectedDate} presets={datePresets}>
-					{#snippet trigger(popover: PopoverState)}
+					{#snippet trigger(popover: PopoverApi)}
 						<Button suffix={calendarBlankIcon} onclick={popover.toggle} {@attach popover.reference}>
 							{formatDate(selectedDate)}
 						</Button>

@@ -3,7 +3,7 @@
 	import { checkIcon } from '../Icons/check.js';
 	import Button from '../Button/Button.svelte';
 	import type { MenuItem } from '../Menu/menu.props.js';
-	import type { PopoverState } from '../Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '../Popover/popover.api.js';
 	import PopupMenu from '../PopupMenu/PopupMenu.svelte';
 	import Slot from '../Slot/Slot.svelte';
 	import TextInput from '../Form/TextInput/TextInput.svelte';
@@ -300,7 +300,7 @@
 	</div>
 {/snippet}
 
-{#snippet selectorTrigger(popover: PopoverState)}
+{#snippet selectorTrigger(popover: PopoverApi)}
 	{#if children}
 		<button
 			type="button"

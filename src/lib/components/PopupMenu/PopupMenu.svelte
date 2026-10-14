@@ -14,7 +14,8 @@
 	import { untrack, type Snippet } from 'svelte';
 	import { createAttachmentKey } from 'svelte/attachments';
 	import { on } from 'svelte/events';
-	import type { PopoverState } from '../Popover/popover.state.svelte.js';
+	import { popoverInternals, type PopoverState } from '../Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '../Popover/popover.api.js';
 	import { hasSubmenuItems } from '../Menu/menuTree.js';
 	import { createOpenChangeDetails, type OpenChangeDetails } from '$lib/utils/openChange.js';
 	import { getTabbableElements } from '$lib/utils/focus.js';
@@ -213,8 +214,8 @@
 	// put the key handler on: the snippet's Popover is remembered as it renders, and a keydown
 	// that bubbles up from the element it anchors to is handled the same way.
 	let snippetPopover: PopoverState | null = null;
-	const rememberSnippetPopover = (popover: PopoverState) => {
-		snippetPopover = popover;
+	const rememberSnippetPopover = (popover: PopoverApi) => {
+		snippetPopover = popoverInternals(popover);
 		return popover;
 	};
 	const usesSnippetTrigger = $derived(typeof trigger === 'function');
@@ -235,9 +236,9 @@
 	);
 </script>
 
-{#snippet snippetTrigger(popover: PopoverState)}
+{#snippet snippetTrigger(popover: PopoverApi)}
 	{@const remembered = rememberSnippetPopover(popover)}
-	{@render (trigger as Snippet<[PopoverState]>)(remembered)}
+	{@render (trigger as Snippet<[PopoverApi]>)(remembered)}
 {/snippet}
 
 <Popover
@@ -254,7 +255,8 @@
 	{...popoverProps}
 >
 	{#snippet children(popover)}
-		{@const focusOnMount = untrack(() => initialFocus(popover))}
-		<Menu {...menu} {focusOnMount} {@attach attachTree(popover)} />
+		{@const internals = popoverInternals(popover)}
+		{@const focusOnMount = untrack(() => initialFocus(internals))}
+		<Menu {...menu} {focusOnMount} {@attach attachTree(internals)} />
 	{/snippet}
 </Popover>

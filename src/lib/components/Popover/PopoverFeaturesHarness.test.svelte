@@ -4,7 +4,7 @@
 	import Theme from '../Theme/Theme.svelte';
 	import Popover from './Popover.svelte';
 	import type { PopoverProps } from './popover.props.js';
-	import type { PopoverState } from './popover.state.svelte.js';
+	import type { PopoverApi } from './popover.api.js';
 
 	type Row = { id: number; name: string };
 
@@ -29,7 +29,7 @@
 	]);
 </script>
 
-{#snippet rowTrigger(row: Row, shared: PopoverState<Row>)}
+{#snippet rowTrigger(row: Row, shared: PopoverApi<Row>)}
 	<li>
 		<button type="button" {@attach shared.triggerFor(() => row)}>Open {row.name}</button>
 		<button type="button" onclick={() => (rows[row.id - 1] = { ...row, name: `${row.name}!` })}>
@@ -77,10 +77,10 @@
 		</Popover>
 	{:else}
 		<Popover transition={zero} {onOpenChange}>
-			{#snippet children(shared: PopoverState<Row>)}
+			{#snippet children(shared: PopoverApi<Row>)}
 				<p data-testid="payload">{shared.payload?.name ?? 'none'}</p>
 			{/snippet}
-			{#snippet trigger(shared: PopoverState<Row>)}
+			{#snippet trigger(shared: PopoverApi<Row>)}
 				<ul>
 					{#each rows as row (row.id)}
 						{@render rowTrigger(row, shared)}
