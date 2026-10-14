@@ -4,7 +4,7 @@
 import type { Attachment } from 'svelte/attachments';
 import type { OpenTransitionStatus } from '$lib/utils/stateAttributes.js';
 import type { PopupTriggerProps } from '$lib/utils/trigger.js';
-import type { PopoverOpenReason } from './popover.props.js';
+import type { PopoverOpenReason, PopoverProps } from './popover.props.js';
 import type { PopoverOpenChangeInput, PopoverPlacementState } from './popover.state.svelte.js';
 
 /**
@@ -75,4 +75,13 @@ export interface PopoverApi<Payload = unknown> {
 	readonly triggerFor: (payload: () => Payload) => Attachment<HTMLElement>;
 	/** @deprecated Read `status === 'open'`; kept for one minor. */
 	readonly hasTransitioned: boolean;
+	/** @deprecated Read the `size` prop you passed; kept for one minor. */
+	readonly size?: PopoverProps<Payload>['size'];
+	/**
+	 * @deprecated Read the `position` prop you passed, or `placement` for where the panel landed;
+	 * kept for one minor.
+	 */
+	readonly position?: PopoverProps<Payload>['position'];
+	/** @deprecated Read the `offset` prop you passed; kept for one minor. */
+	readonly offset?: PopoverProps<Payload>['offset'];
 }

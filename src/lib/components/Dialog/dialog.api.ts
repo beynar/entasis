@@ -4,7 +4,7 @@
 import type { Attachment } from 'svelte/attachments';
 import type { OpenTransitionStatus } from '$lib/utils/stateAttributes.js';
 import type { PopupTriggerProps } from '$lib/utils/trigger.js';
-import type { DialogSnapPoint, DialogType } from './dialog.props.js';
+import type { DialogProps, DialogSnapPoint, DialogType } from './dialog.props.js';
 import type { DialogOpenChangeInput } from './dialog.state.svelte.js';
 
 /**
@@ -59,4 +59,11 @@ export interface DialogApi {
 	readonly reference: Attachment<HTMLElement>;
 	/** @deprecated Read `status === 'open'`; kept for one minor. */
 	readonly hasTransitioned: boolean;
+	/**
+	 * @deprecated Read `computedType` for the type in effect, or the `type` prop you passed; kept
+	 * for one minor.
+	 */
+	readonly type?: DialogProps['type'];
+	/** @deprecated Read the `size` prop you passed; kept for one minor. */
+	readonly size?: DialogProps['size'];
 }

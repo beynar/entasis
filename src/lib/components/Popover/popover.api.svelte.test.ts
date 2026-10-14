@@ -60,7 +60,16 @@ describe('PopoverApi types (CX-9)', () => {
 			| 'reference'
 			| 'triggerFor'
 			| 'hasTransitioned'
+			| 'size'
+			| 'position'
+			| 'offset'
 		>();
+	});
+
+	test('the members the 0.11.0 PopoverState documented stay readable for one minor', () => {
+		expectTypeOf<PopoverApi<Row>['size']>().toEqualTypeOf<PopoverProps<Row>['size']>();
+		expectTypeOf<PopoverApi<Row>['position']>().toEqualTypeOf<PopoverProps<Row>['position']>();
+		expectTypeOf<PopoverApi<Row>['offset']>().toEqualTypeOf<PopoverProps<Row>['offset']>();
 	});
 
 	test('the public PopoverState is a deprecated alias of PopoverApi', () => {
@@ -84,6 +93,10 @@ describe('PopoverApi at runtime (CX-9)', () => {
 		expect(opened.status).toBe('open');
 		expect(opened.isOpen).toBe(true);
 		expect(opened.id).toEqual(expect.any(String));
+		// Deprecated 0.11.0 members still read the props.
+		expect(opened.size).toBe('large');
+		expect(opened.position).toBe('top');
+		expect(opened.offset).toBe(12);
 		expect(screen.getByTestId('trigger-status')).toHaveTextContent('open');
 		expect(screen.getByTestId('panel-status')).toHaveTextContent('open');
 		expect(screen.getByRole('button', { name: 'Details' })).toHaveAttribute(

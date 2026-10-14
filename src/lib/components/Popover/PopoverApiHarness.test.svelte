@@ -18,6 +18,9 @@
 	<Popover
 		transition={{ in: { duration: 0 }, out: { duration: 0 } }}
 		label="Details"
+		size="large"
+		position="top"
+		offset={12}
 		{onAfterOpen}
 		{onAfterClose}
 	>

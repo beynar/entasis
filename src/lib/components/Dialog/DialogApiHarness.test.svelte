@@ -17,6 +17,8 @@
 <Theme>
 	<Dialog
 		title="Settings"
+		type="modal"
+		size="large"
 		responsive={false}
 		transition={{ in: { duration: 0 }, out: { duration: 0 } }}
 		{onAfterOpen}

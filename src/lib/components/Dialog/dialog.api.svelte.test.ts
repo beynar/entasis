@@ -51,7 +51,14 @@ describe('DialogApi types (CX-9)', () => {
 			| 'trigger'
 			| 'reference'
 			| 'hasTransitioned'
+			| 'type'
+			| 'size'
 		>();
+	});
+
+	test('the members the 0.11.0 DialogState documented stay readable for one minor', () => {
+		expectTypeOf<DialogApi['type']>().toEqualTypeOf<DialogProps['type']>();
+		expectTypeOf<DialogApi['size']>().toEqualTypeOf<DialogProps['size']>();
 	});
 });
 
@@ -68,6 +75,9 @@ describe('DialogApi at runtime (CX-9)', () => {
 		expect(opened.status).toBe('open');
 		expect(opened.isOpen).toBe(true);
 		expect(opened.computedType).toBe('modal');
+		// Deprecated 0.11.0 members still read the props.
+		expect(opened.type).toBe('modal');
+		expect(opened.size).toBe('large');
 		expect(screen.getByTestId('trigger-status')).toHaveTextContent('open');
 		expect(screen.getByTestId('panel-status')).toHaveTextContent('open');
 
