@@ -452,7 +452,7 @@
 		{...inputAttrs}
 		type="text"
 		role="spinbutton"
-		inputmode={inputMode}
+		inputmode={inputAttrs?.inputmode ?? inputMode}
 		{id}
 		bind:this={field.node}
 		{@attach wheel}
@@ -481,6 +481,7 @@
 				variant="ghost"
 				color="neutral"
 				size={rest.size}
+				type="button"
 				squared
 				tabindex={-1}
 				controls={id}
@@ -496,6 +497,7 @@
 				variant="ghost"
 				color="neutral"
 				size={rest.size}
+				type="button"
 				squared
 				tabindex={-1}
 				controls={id}

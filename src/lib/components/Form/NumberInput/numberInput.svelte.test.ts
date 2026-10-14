@@ -522,3 +522,17 @@ describe('NumberInput stepper buttons', () => {
 		expect(screen.queryByRole('button')).toBeNull();
 	});
 });
+
+describe('NumberInput steppers inside a native form', () => {
+	test('the steppers are plain buttons, so they never become the form default button', async () => {
+		await setup();
+		for (const name of ['Decrease value', 'Increase value']) {
+			expect(screen.getByRole('button', { name })).toHaveAttribute('type', 'button');
+		}
+	});
+
+	test('inputAttrs.inputmode overrides the derived keyboard hint', async () => {
+		const { input } = await setup({ inputAttrs: { inputmode: 'tel' } });
+		expect(input).toHaveAttribute('inputmode', 'tel');
+	});
+});

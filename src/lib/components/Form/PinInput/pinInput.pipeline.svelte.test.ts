@@ -153,6 +153,24 @@ describe('one normalization pipeline', () => {
 		expect(onValueChange).not.toHaveBeenCalled();
 	});
 
+	test('a printable key the pattern refuses is reported through keydown', async () => {
+		const { input, onRejectInput } = setup();
+		input.focus();
+		expect(await fireEvent.keyDown(input, { key: 'a' })).toBe(false);
+		expect(onRejectInput).toHaveBeenLastCalledWith({ text: 'a', source: 'input' });
+		onRejectInput.mockClear();
+		// A separator is dropped by the pipeline, not refused.
+		expect(await fireEvent.keyDown(input, { key: '-' })).toBe(false);
+		expect(await fireEvent.keyDown(input, { key: ' ' })).toBe(false);
+		expect(await fireEvent.keyDown(input, { key: '4' })).toBe(true);
+		expect(onRejectInput).not.toHaveBeenCalled();
+	});
+
+	test('the native input leaves room for a formatted autofill before the pipeline strips it', () => {
+		const { input } = setup();
+		expect(Number(input.getAttribute('maxlength'))).toBeGreaterThan(7);
+	});
+
 	test('a separator the pattern accepts stays in the code', async () => {
 		const { input } = setup({ pattern: '^[a-z0-9-]+$', inputMode: 'text', length: 7 });
 		input.focus();

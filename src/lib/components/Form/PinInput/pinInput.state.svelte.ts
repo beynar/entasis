@@ -4,6 +4,13 @@ import { normalizeDigits, stripBidiMarks } from '$lib/utils/number.js';
 
 export const PIN_INPUT_DIGITS_PATTERN = '^\\d+$';
 export const PIN_INPUT_CHARS_PATTERN = '^[a-zA-Z]+$';
+/**
+ * Extra characters the native input accepts beyond the code length. Autofilled or inserted text
+ * such as `123-456` reaches the pipeline whole, so it can strip separators before clamping to
+ * `length`, instead of the browser truncating it first.
+ */
+export const PIN_INPUT_TEXT_MARGIN = 32;
+
 export const PIN_INPUT_ALPHANUMERIC_PATTERN = '^[a-zA-Z0-9]+$';
 
 const KEYS_TO_IGNORE = new Set([
@@ -233,7 +240,13 @@ export class PinInputState {
 		if (event.key.length === 1) {
 			// A key the pipeline drops (a separator, a space) never reaches the input.
 			const typed = this.normalizeText(event.key);
-			if (typed === '' || !this.isValueAllowed(typed)) event.preventDefault();
+			if (typed === '') {
+				event.preventDefault();
+			} else if (!this.isValueAllowed(typed)) {
+				event.preventDefault();
+				// The browser never raises an input event for a key that is refused here.
+				if (!this.isLocked) this.reject(event.key, 'input');
+			}
 		}
 	};
 

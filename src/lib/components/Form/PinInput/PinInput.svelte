@@ -5,7 +5,11 @@
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import PinInputCells from './PinInputCells.svelte';
 	import type { PinInputProps } from './pinInput.props.js';
-	import { PIN_INPUT_DIGITS_PATTERN, PinInputState } from './pinInput.state.svelte.js';
+	import {
+		PIN_INPUT_DIGITS_PATTERN,
+		PIN_INPUT_TEXT_MARGIN,
+		PinInputState
+	} from './pinInput.state.svelte.js';
 	import { usePinInputTheme } from './pinInput.theme.js';
 
 	let {
@@ -161,7 +165,7 @@
 			{id}
 			name={field.name}
 			value={state.value}
-			maxlength={state.length}
+			maxlength={state.length + PIN_INPUT_TEXT_MARGIN}
 			inputmode={inputMode}
 			{autocomplete}
 			disabled={field.disabled}

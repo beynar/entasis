@@ -1,6 +1,6 @@
 // NumberInput in real engines: the stepper buttons keep focus in the input and out of the tab
 // order, the arrow keys keep working after a click, and the wheel only steps when asked to.
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import type { Component } from 'svelte';
 import { render } from 'vitest-browser-svelte';
@@ -98,4 +98,16 @@ test('typing in a locale formats on blur', async () => {
 	await userEvent.keyboard('1234,5');
 	await userEvent.tab();
 	expect(valueOf().replace(/\s/g, ' ')).toBe('1 234,5');
+});
+
+test('Enter in the input submits the form without stepping, and a stepper click does not submit', async () => {
+	const onSubmit = vi.fn();
+	await mount({ value: 5, onSubmit });
+	await userEvent.click(inputOf());
+	await userEvent.keyboard('{Enter}');
+	expect(valueOf()).toBe('5');
+	expect(onSubmit).toHaveBeenCalledTimes(1);
+	await userEvent.click(page.getByRole('button', { name: 'Increase value' }));
+	expect(valueOf()).toBe('6');
+	expect(onSubmit).toHaveBeenCalledTimes(1);
 });
