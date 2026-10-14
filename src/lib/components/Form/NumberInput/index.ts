@@ -1,5 +1,10 @@
 export { default as NumberInput } from './NumberInput.svelte';
-export type { NumberInputProps } from './numberInput.props.js';
+export type {
+	NumberInputCommitDetail,
+	NumberInputCommitReason,
+	NumberInputInputAttributes,
+	NumberInputProps
+} from './numberInput.props.js';
 export {
 	numberInputTheme,
 	setNumberInputTheme,

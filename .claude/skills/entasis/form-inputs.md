@@ -82,9 +82,9 @@ When `maxLength` is set, a character counter is auto-displayed.
 
 `import { NumberInput } from 'entasis/number-input'`
 
-**Unique props:** `value: number` (bindable), `min`, `max`, `step` (default 1), `showControls: boolean` (default true), `placeholder`
+**Unique props:** `value: number | null` (bindable), `min`, `max`, `step` (default 1), `largeStep` (default 10 x step), `smallStep` (default step / 10), `snapOnStep`, `wheelStep` (opt in; the wheel never steps otherwise), `showControls: boolean` (default true), `format` (`Intl.NumberFormatOptions`: currency, percent, unit, fraction digits), `locale` (default: the i18n locale), `onValueCommit({ value, reason })`, `inputAttrs`, `placeholder`, `readOnly`
 
-Keyboard: ArrowUp/Down (step), PageUp/Down (step\*10). Supports `prefix`/`suffix` for units.
+A text input with `role="spinbutton"` that parses and formats by locale (`1 234,5` in `fr`, Arabic-Indic digits in any locale); `name` is posted by a hidden input as the plain number. Keyboard: ArrowUp/Down (step), Shift+Arrow and PageUp/Down (largeStep), Alt+Arrow (smallStep), Home/End (min/max). The +/- buttons repeat while held, keep focus in the input and are out of the tab order. Supports `prefix`/`suffix` for units.
 
 **Theme parts:** `input`, `inputContainer` (variants: `size`, `disabled`)
 

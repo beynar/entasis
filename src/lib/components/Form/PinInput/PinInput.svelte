@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState, type FieldValidatorResult } from '../Field/field.state.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import PinInputCells from './PinInputCells.svelte';
 	import type { PinInputProps } from './pinInput.props.js';
 	import { PIN_INPUT_DIGITS_PATTERN, PinInputState } from './pinInput.state.svelte.js';
@@ -18,6 +19,10 @@
 		inputMode = 'numeric',
 		autocomplete = 'one-time-code',
 		pasteTransformer,
+		normalizeValue,
+		onRejectInput,
+		submitOnComplete = false,
+		groups,
 		mask = false,
 		theme,
 		disabled,
@@ -32,6 +37,7 @@
 		description,
 		...rest
 	}: PinInputProps = $props();
+	const t = $derived(useI18n());
 	if (value === undefined) value = untrack(() => defaultValue);
 
 	const id = $props.id();
@@ -102,8 +108,18 @@
 		length: resolvedLength,
 		pattern: () => pattern,
 		pasteTransformer: () => pasteTransformer,
+		normalizeValue: () => normalizeValue,
+		onRejectInput: () => onRejectInput,
 		onComplete: () => onComplete,
-		disabled: () => field.disabled
+		// Inside a Form it validates first and keeps focus on an earlier invalid field; the code
+		// input never takes focus back. Outside one, the native form submits.
+		submit: () => () => {
+			if (field.form) void field.form.submit();
+			else (field.node as HTMLInputElement | null)?.form?.requestSubmit();
+		},
+		submitOnComplete: () => submitOnComplete,
+		disabled: () => field.disabled,
+		readOnly: () => field.readOnly
 	});
 
 	const classes = $derived(usePinInputTheme(theme));
@@ -126,10 +142,14 @@
 	}}
 	{...rest}
 >
+	<!-- Digits and codes read left to right in every document direction, so the cells and the
+	     native caret over the transparent input agree. -->
 	<div
+		dir="ltr"
 		data-slot="pin-input"
 		data-focused={state.isFocused}
 		data-disabled={field.disabled}
+		data-readonly={field.readOnly || undefined}
 		class={classes.root({ size: rest.size, disabled: field.disabled })}
 	>
 		<input
@@ -137,6 +157,7 @@
 			{@attach state.inputAttachment}
 			data-slot="pin-input-input"
 			type="text"
+			dir="ltr"
 			{id}
 			name={field.name}
 			value={state.value}
@@ -144,7 +165,7 @@
 			inputmode={inputMode}
 			{autocomplete}
 			disabled={field.disabled}
-			aria-label={label ? undefined : 'One-time code'}
+			aria-label={label ? undefined : t.oneTimeCode}
 			class={classes.input({ composing: state.isComposing })}
 			data-pin-input-input
 			data-pin-input-input-mss={state.selectionStart}
@@ -161,6 +182,6 @@
 			onkeyup={state.normalizeSelection}
 			onclick={state.normalizeSelection}
 		/>
-		<PinInputCells {state} {classes} size={rest.size} disabled={field.disabled} {mask} />
+		<PinInputCells {state} {classes} size={rest.size} disabled={field.disabled} {mask} {groups} />
 	</div>
 </Field>

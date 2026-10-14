@@ -1,5 +1,6 @@
 import { untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
+import { normalizeDigits, stripBidiMarks } from '$lib/utils/number.js';
 
 export const PIN_INPUT_DIGITS_PATTERN = '^\\d+$';
 export const PIN_INPUT_CHARS_PATTERN = '^[a-zA-Z]+$';
@@ -27,6 +28,14 @@ const KEYS_TO_IGNORE = new Set([
 const toHalfWidth = (text: string) =>
 	text.replace(/[\uFF01-\uFF5E]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0));
 
+/** Whitespace, which never belongs to a code. */
+const WHITESPACE_RE = /[\p{Z}\s]/u;
+/** Dashes, dots, slashes and the like that group a code for reading (`123-456`, `123.456`). */
+const SEPARATOR_RE = /[\p{Pd}\u2212._\u00b7\u2022/\\,:;|]/u;
+
+/** Where the root node of `node` is: the document, or the shadow root it lives in. */
+const rootOf = (node: Node) => node.getRootNode() as Document | ShadowRoot;
+
 /** Some Android keyboards report all typing as one long composition, so they commit on input. */
 const isAlwaysComposingKeyboard = (node: Element) =>
 	/android/i.test(node.ownerDocument.defaultView?.navigator.userAgent ?? '');
@@ -47,9 +56,18 @@ type PinInputStateOptions = {
 	length: () => number;
 	pattern: () => PinInputPattern | undefined;
 	pasteTransformer: () => ((text: string) => string) | undefined;
+	normalizeValue: () => ((text: string) => string) | undefined;
+	onRejectInput: () => ((detail: PinInputRejectDetail) => void) | undefined;
 	onComplete: () => ((value: string) => void) | undefined;
+	/** Submits the owning form; called when a typed, pasted or autofilled code completes. */
+	submit: () => (() => void) | undefined;
+	submitOnComplete: () => boolean | undefined;
 	disabled: () => boolean | undefined;
+	readOnly: () => boolean | undefined;
 };
+
+/** Text the pattern turned away, and where it came from. */
+export type PinInputRejectDetail = { text: string; source: 'paste' | 'input' };
 
 type SelectionDirection = 'forward' | 'backward' | 'none';
 /** The value and the selection the active IME composition replaces. */
@@ -70,6 +88,10 @@ export class PinInputState {
 	#composition: Composition | null = null;
 	/** A complete pasted or autofilled value to report even when the previous code was complete. */
 	#pendingCompleteValue: string | null = null;
+	/** The value the last user edit asked for; completing with it may submit the form. */
+	#userCommit: string | null = null;
+	/** What the controlled-value normalization last wrote, so it never re-normalizes its own output. */
+	#normalizedValue: string | null = null;
 
 	constructor(private options: PinInputStateOptions) {
 		this.#previousValue = this.value.slice(0, this.length);
@@ -79,13 +101,20 @@ export class PinInputState {
 				this.syncInputValue(this.value.slice(0, this.length));
 				this.normalizeSelection();
 
-				const document = node.ownerDocument;
-				document.addEventListener('selectionchange', this.normalizeSelection, { capture: true });
+				// `selectionchange` does not cross a shadow boundary, so the root node listens, and the
+				// document too for engines that report it there.
+				const root = rootOf(node);
+				const targets = root === node.ownerDocument ? [root] : [root, node.ownerDocument];
+				for (const target of targets) {
+					target.addEventListener('selectionchange', this.normalizeSelection, { capture: true });
+				}
 
 				return () => {
-					document.removeEventListener('selectionchange', this.normalizeSelection, {
-						capture: true
-					});
+					for (const target of targets) {
+						target.removeEventListener('selectionchange', this.normalizeSelection, {
+							capture: true
+						});
+					}
 					if (this.input === node) {
 						this.input = null;
 						this.selectionStart = null;
@@ -98,8 +127,12 @@ export class PinInputState {
 
 		$effect(() => {
 			const value = this.value;
-			const clippedValue = value.slice(0, this.length);
+			// A controlled value goes through the same pipeline as typed text, once: what the
+			// pipeline wrote is accepted as it is, so an unstable `normalizeValue` cannot loop.
+			const normalizedValue = value === this.#normalizedValue ? value : this.normalizeText(value);
+			const clippedValue = normalizedValue.slice(0, this.length);
 			if (value !== clippedValue) {
+				this.#normalizedValue = clippedValue;
 				this.options.setValue(clippedValue);
 			}
 			this.syncInputValue(clippedValue);
@@ -120,6 +153,24 @@ export class PinInputState {
 		const length = this.options.length();
 		if (!Number.isFinite(length)) return 6;
 		return Math.max(1, Math.floor(length));
+	}
+
+	/**
+	 * The one pipeline typed, pasted, autofilled, composed and controlled text goes through:
+	 * format controls and whitespace go, full-width and other numeral systems become ASCII,
+	 * grouping separators go where the pattern does not accept them, then `normalizeValue` runs.
+	 * The pattern and the length are applied by the caller.
+	 */
+	normalizeText(text: string) {
+		const folded = normalizeDigits(toHalfWidth(stripBidiMarks(text)));
+		const stripped = Array.from(folded)
+			.filter(
+				(char) =>
+					!WHITESPACE_RE.test(char) &&
+					!(SEPARATOR_RE.test(char) && this.options.pattern() && !this.isValueAllowed(char))
+			)
+			.join('');
+		return this.options.normalizeValue()?.(stripped) ?? stripped;
 	}
 
 	get cells() {
@@ -144,6 +195,11 @@ export class PinInputState {
 				hasFakeCaret: isActive && char === null
 			} satisfies PinInputCell;
 		});
+	}
+
+	/** Whether the field refuses edits: disabled, or read-only. */
+	get isLocked() {
+		return Boolean(this.options.disabled() || this.options.readOnly());
 	}
 
 	focus = () => {
@@ -174,8 +230,10 @@ export class PinInputState {
 			return;
 		}
 
-		if (event.key.length === 1 && !this.isValueAllowed(event.key)) {
-			event.preventDefault();
+		if (event.key.length === 1) {
+			// A key the pipeline drops (a separator, a space) never reaches the input.
+			const typed = this.normalizeText(event.key);
+			if (typed === '' || !this.isValueAllowed(typed)) event.preventDefault();
 		}
 	};
 
@@ -190,14 +248,19 @@ export class PinInputState {
 			return;
 		}
 
-		const nextValue = input.value.slice(0, this.length);
-		if (!this.isValueAllowed(nextValue)) {
+		const text = input.value;
+		const nextValue = this.normalizeText(text).slice(0, this.length);
+		if (this.isLocked || !this.isValueAllowed(nextValue)) {
+			if (!this.isLocked) this.reject(text, 'input');
 			input.value = this.value;
 			this.normalizeSelection();
 			return;
 		}
 
-		this.commitValue(nextValue, input.selectionStart ?? nextValue.length);
+		this.commitValue(
+			nextValue,
+			Math.min(input.selectionStart ?? nextValue.length, nextValue.length)
+		);
 		if (isReplacementInput(event)) this.requestComplete(nextValue);
 		this.normalizeSelection();
 	};
@@ -220,7 +283,9 @@ export class PinInputState {
 		this.endComposition();
 
 		const value = this.value;
-		const composedText = toHalfWidth(event.data || readComposedText(input.value, composition));
+		const composedText = this.normalizeText(
+			event.data || readComposedText(input.value, composition)
+		);
 		const caret = composition.start + composedText.length;
 		// Composed text overwrites the selected cell and the cells after it, as typing does.
 		const nextValue = (
@@ -230,8 +295,8 @@ export class PinInputState {
 		).slice(0, this.length);
 
 		if (
-			// A field disabled mid-composition refuses the commit, as it refuses any other edit.
-			this.options.disabled() ||
+			// A field disabled or locked mid-composition refuses the commit, as any other edit.
+			this.isLocked ||
 			!composedText ||
 			// A paste, or a parent value whose effect has not run yet, replaced the composed text.
 			value !== composition.value ||
@@ -251,9 +316,15 @@ export class PinInputState {
 		if (!input) return;
 
 		event.preventDefault();
+		if (this.isLocked) return;
 		const rawText = event.clipboardData?.getData('text/plain') ?? '';
 		const transformer = this.options.pasteTransformer();
-		const pastedText = transformer ? transformer(rawText) : rawText;
+		// The transformer is a paste-only first step; the shared pipeline follows it.
+		const pastedText = this.normalizeText(transformer ? transformer(rawText) : rawText);
+		if (pastedText === '') {
+			if (rawText !== '') this.reject(rawText, 'paste');
+			return;
+		}
 		const selectionStart = input.selectionStart ?? this.value.length;
 		const selectionEnd = input.selectionEnd ?? selectionStart;
 		// A paste that fills every cell is a whole new code, wherever the caret was.
@@ -265,7 +336,10 @@ export class PinInputState {
 						this.length
 					);
 
-		if (!this.isValueAllowed(nextValue)) return;
+		if (!this.isValueAllowed(nextValue)) {
+			this.reject(rawText, 'paste');
+			return;
+		}
 
 		const selectionEndAfterPaste = nextValue.length;
 		const selectionStartAfterPaste =
@@ -298,7 +372,8 @@ export class PinInputState {
 		const input = this.input;
 		if (!input) return;
 
-		if (input.ownerDocument.activeElement !== input) {
+		// Inside a shadow root the document's active element is the host, not the input.
+		if (rootOf(input).activeElement !== input) {
 			this.selectionStart = null;
 			this.selectionEnd = null;
 			return;
@@ -339,9 +414,11 @@ export class PinInputState {
 	};
 
 	private commitValue(nextValue: string, selectionStart: number, selectionEnd = selectionStart) {
+		this.#userCommit = nextValue;
 		this.options.setValue(nextValue);
 		// The field can refuse the change (while disabled); the input shows the value it holds.
 		const acceptedValue = this.value;
+		if (acceptedValue !== nextValue) this.#userCommit = null;
 		if (this.input && this.input.value !== acceptedValue) {
 			this.input.value = acceptedValue;
 		}
@@ -459,22 +536,34 @@ export class PinInputState {
 	private requestComplete(value: string) {
 		if (value.length !== this.length || this.value !== value) return;
 		if (value === this.#previousValue) {
-			this.options.onComplete()?.(value);
+			this.complete(value, true);
 			return;
 		}
 		this.#pendingCompleteValue = value;
 	}
 
+	private reject(text: string, source: PinInputRejectDetail['source']) {
+		this.options.onRejectInput()?.({ text, source });
+	}
+
+	/** Reports a complete code, and submits the form after one the user typed, pasted or filled. */
+	private complete(value: string, byUser: boolean) {
+		this.options.onComplete()?.(value);
+		if (byUser && this.options.submitOnComplete() && !this.isLocked) this.options.submit()?.();
+	}
+
 	private notifyComplete(value: string) {
 		const previousValue = this.#previousValue;
 		const isRequested = this.#pendingCompleteValue === value;
+		const byUser = this.#userCommit === value;
 		this.#pendingCompleteValue = null;
+		this.#userCommit = null;
 		if (
 			previousValue !== value &&
 			value.length === this.length &&
 			(isRequested || previousValue.length < this.length)
 		) {
-			this.options.onComplete()?.(value);
+			this.complete(value, byUser);
 		}
 		this.#previousValue = value;
 	}
