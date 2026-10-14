@@ -20,8 +20,6 @@
 	let completions = $state(0);
 	let lastCompleted = $state('');
 
-	const digitsOnly = (text: string) => text.replace(/\D/g, '');
-	const alphanumericOnly = (text: string) => text.replace(/[^a-zA-Z0-9]/g, '');
 	const setFormValue = (value: { otp: string | null }) => {
 		formValue = JSON.stringify(value);
 	};
@@ -105,12 +103,12 @@
 	<ComponentCard
 		description="Standalone input centered in its preview."
 		code={`<div class="flex min-h-40 w-full items-center justify-center">
-	<PinInput bind:value={code} pasteTransformer={digitsOnly} class="w-fit" />
+	<PinInput bind:value={code} class="w-fit" />
 </div>`}
 		class="!min-h-fit"
 	>
 		<div class="flex min-h-40 w-full items-center justify-center">
-			<PinInput bind:value={standaloneCode} pasteTransformer={digitsOnly} class="w-fit" />
+			<PinInput bind:value={standaloneCode} class="w-fit" />
 		</div>
 	</ComponentCard>
 
@@ -119,29 +117,28 @@
 			title="Sizes"
 			description="Small, normal, and large sizes."
 			code={`<div class="grid w-full max-w-xl gap-6">
-	<PinInput label="Small" size="small" value="123" pasteTransformer={digitsOnly} />
-	<PinInput label="Normal" size="normal" value="1234" pasteTransformer={digitsOnly} />
-	<PinInput label="Large" size="large" value="12345" pasteTransformer={digitsOnly} />
+	<PinInput label="Small" size="small" value="123" />
+	<PinInput label="Normal" size="normal" value="1234" />
+	<PinInput label="Large" size="large" value="12345" />
 </div>`}
 			class="!min-h-fit"
 		>
 			<div class="grid w-full max-w-xl gap-6">
-				<PinInput label="Small" size="small" value="123" pasteTransformer={digitsOnly} />
-				<PinInput label="Normal" size="normal" value="1234" pasteTransformer={digitsOnly} />
-				<PinInput label="Large" size="large" value="12345" pasteTransformer={digitsOnly} />
+				<PinInput label="Small" size="small" value="123" />
+				<PinInput label="Normal" size="normal" value="1234" />
+				<PinInput label="Large" size="large" value="12345" />
 			</div>
 		</ComponentCard>
 
 		<ComponentCard description="Masked and alphanumeric variants." class="!min-h-fit">
 			<div class="grid w-full max-w-xl gap-6">
-				<PinInput label="Masked code" bind:value={maskedCode} mask pasteTransformer={digitsOnly} />
+				<PinInput label="Masked code" bind:value={maskedCode} mask />
 				<PinInput
 					label="Invite code"
 					length={8}
 					inputMode="text"
 					pattern={PIN_INPUT_ALPHANUMERIC_PATTERN}
 					bind:value={inviteCode}
-					pasteTransformer={alphanumericOnly}
 					helper={`Value: ${inviteCode || 'empty'}`}
 				/>
 			</div>
@@ -160,7 +157,6 @@ ${'</' + 'script>'}
 <PinInput
 	label="Sign-in code"
 	bind:value={code}
-	pasteTransformer={(text) => text.replace(/\\D/g, '')}
 	onComplete={() => (completions += 1)}
 	helper={\`Completed \${completions} times\`}
 />`}
@@ -170,7 +166,6 @@ ${'</' + 'script>'}
 				<PinInput
 					label="Sign-in code"
 					bind:value={pasteCode}
-					pasteTransformer={digitsOnly}
 					onComplete={recordCompletion}
 					helper={`Completed ${completions} ${completions === 1 ? 'time' : 'times'}${lastCompleted ? ` · last code ${lastCompleted}` : ''}`}
 				/>
@@ -243,8 +238,7 @@ ${'</' + 'script>'}
 							type: 'pin',
 							label: 'Login code',
 							required: true,
-							length: 6,
-							pasteTransformer: digitsOnly
+							length: 6
 						}
 					}}
 					onSubmit={setFormValue}

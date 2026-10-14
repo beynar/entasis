@@ -81,7 +81,6 @@ PinInput extends the standard field props:
 	label="Security code"
 	length={6}
 	bind:value={code}
-	pasteTransformer={(text) => text.replace(/\\D/g, '')}
 />
 \`\`\`
 

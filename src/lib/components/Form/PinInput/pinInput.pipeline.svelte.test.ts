@@ -70,6 +70,19 @@ describe('one normalization pipeline', () => {
 		expect(onValueChange).toHaveBeenLastCalledWith('456789');
 	});
 
+	test('pin-input:normalize pasted full-width and Arabic-Indic digits complete the code without a transformer', async () => {
+		const { input, onComplete } = setup();
+		input.focus();
+		await paste(input, '１２３４５６');
+		await tick();
+		expect(input).toHaveValue('123456');
+		expect(onComplete).toHaveBeenCalledWith('123456');
+		await paste(input, '٤٥٦٧٨٩');
+		await tick();
+		expect(input).toHaveValue('456789');
+		expect(onComplete).toHaveBeenLastCalledWith('456789');
+	});
+
 	test('typed or autofilled text with separators is cleaned before it is checked', async () => {
 		const { input } = setup();
 		input.focus();
