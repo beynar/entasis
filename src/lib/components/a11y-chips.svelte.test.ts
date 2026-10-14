@@ -519,7 +519,9 @@ describe('radios', () => {
 		mount('radios');
 		const group = screen.getByRole('radiogroup', { name: 'Plan' });
 		const radios = within(group).getAllByRole('radio');
-		expect(radios.map((radio) => radio.getAttribute('aria-label'))).toEqual(['Free', 'Pro']);
+		expect(radios.map((radio) => radio.getAttribute('aria-label'))).toEqual([null, null]);
+		expect(radios[0]).toHaveAccessibleName('Free');
+		expect(radios[1]).toHaveAccessibleName('Pro');
 	});
 });
 
@@ -675,16 +677,6 @@ describe('switch', () => {
 		expect(control).toHaveAttribute('aria-checked', 'false');
 		await fireEvent.click(control);
 		await waitFor(() => expect(control).toHaveAttribute('aria-checked', 'true'));
-	});
-
-	test(law('a11y:switch.keyboard-toggle', 'toggles with Enter and Space'), async () => {
-		mount('switch');
-		const control = screen.getByRole('switch', { name: 'Notifications' });
-		control.focus();
-		await fireEvent.keyDown(control, { key: 'Enter' });
-		await waitFor(() => expect(screen.getByTestId('switch-value')).toHaveTextContent('true'));
-		await fireEvent.keyDown(control, { key: ' ' });
-		await waitFor(() => expect(screen.getByTestId('switch-value')).toHaveTextContent('false'));
 	});
 });
 

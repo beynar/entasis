@@ -3,6 +3,8 @@
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import CheckboxLine from '../CheckboxesInput/CheckboxLine.svelte';
+	import { continueFormFromChoice } from '../CheckboxesInput/choiceEnter.js';
+	import FieldHiddenInputs from '../Field/FieldHiddenInputs.svelte';
 	import { useCheckboxesInputTheme } from '../CheckboxesInput/checkboxesInput.theme.js';
 	import type { CheckboxProps } from './checkbox.props.js';
 
@@ -27,6 +29,7 @@
 		labelPosition,
 		size = 'normal',
 		inputAttrs,
+		inputValue = 'true',
 		...rest
 	}: CheckboxProps = $props();
 	if (value === undefined) value = untrack(() => defaultValue);
@@ -119,11 +122,10 @@
 		attrs={inputAttrs}
 		bind:ref={field.node}
 		id={field.id}
-		name={field.name}
-		inputValue="true"
 		checked={!!field.value}
 		{indeterminate}
 		disabled={field.disabled}
+		readOnly={field.readOnly}
 		{mode}
 		{size}
 		label={labelPosition ? undefined : label}
@@ -132,5 +134,8 @@
 		onCheckedChange={setChecked}
 		onFocus={() => (field.focused = true)}
 		onBlur={() => (field.focused = false)}
+		onEnter={(event) => continueFormFromChoice(event, field)}
 	/>
+	<!-- Beside the button, not inside it: a button may not contain interactive content. -->
+	<FieldHiddenInputs {field} checked={!!field.value} value={inputValue} />
 </Field>

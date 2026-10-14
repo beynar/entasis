@@ -63,6 +63,11 @@ type NavigationOptions = {
 	disabledItemsFocusable?: boolean;
 	/** `false` is the toolbar spelling of `disabledItemsFocusable: true`. Default `true`. */
 	skipDisabled?: boolean;
+	/**
+	 * Enter clicks the focused item, like Space. `false` leaves Enter to the item (a radio does
+	 * not select on Enter: it continues its form). Default `true`.
+	 */
+	enterActivates?: boolean;
 };
 
 /**
@@ -617,6 +622,7 @@ export const useNavigation = (opts: NavigationOptions) => {
 				return true;
 			case 'Enter':
 			case ' ':
+				if (key === 'Enter' && opts.enterActivates === false) return false;
 				clickFocused();
 				return true;
 		}

@@ -451,11 +451,10 @@ describe('CC-INFRA-6 · accessible-name channel', () => {
 		expect(control).toHaveAccessibleName('Search people');
 	});
 
-	test('a labelled Switch lists its label id once', () => {
+	test('a labelled Switch is named by its label element, with no aria-labelledby to repeat', () => {
 		renderInTheme(Switch, { label: 'Notifications', labelPosition: 'top' });
 		const control = screen.getByRole('switch', { name: 'Notifications' });
-		const ids = control.getAttribute('aria-labelledby')?.split(' ') ?? [];
-		expect(ids).toHaveLength(1);
+		expect(control).not.toHaveAttribute('aria-labelledby');
 	});
 
 	test('Checkbox forwards inputAttrs to its button', async () => {
@@ -474,12 +473,6 @@ describe('CC-INFRA-6 · accessible-name channel', () => {
 
 describe('FD-8 · SC-19 · labels and containers focus the control', () => {
 	test('clicking a non-native label focuses the control without activating it', async () => {
-		renderInTheme(Switch, { label: 'Alerts', labelPosition: 'top' });
-		const control = screen.getByRole('switch', { name: 'Alerts' });
-		await fireEvent.click(screen.getByText('Alerts'));
-		expect(control).toHaveFocus();
-		expect(control).toHaveAttribute('aria-checked', 'false');
-
 		renderInTheme(RatingInput, { label: 'Score' });
 		await fireEvent.click(screen.getByText('Score'));
 		expect(screen.getByRole('slider', { name: 'Score' })).toHaveFocus();

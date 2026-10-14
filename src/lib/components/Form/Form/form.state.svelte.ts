@@ -766,7 +766,13 @@ export class FormState<I extends FormInputs = FormInputs> {
 	}
 
 	private getFieldFocusTarget(field: RegisteredField): HTMLElement | null {
-		return field.node ?? field.rootNode?.querySelector<HTMLElement>(focusableControl) ?? null;
+		// A roving group (radios) has one Tab stop, the checked option, which is where focus belongs.
+		return (
+			field.node ??
+			field.rootNode?.querySelector<HTMLElement>('[role="radio"][tabindex="0"]:not([disabled])') ??
+			field.rootNode?.querySelector<HTMLElement>(focusableControl) ??
+			null
+		);
 	}
 
 	private isEnterNavigationEvent(event: KeyboardEvent): boolean {

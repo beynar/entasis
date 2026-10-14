@@ -16,6 +16,11 @@ const defaultSwitchToggle = cva({
 		disabled: {
 			true: 'cursor-not-allowed opacity-50',
 			false: ''
+		},
+		// Focusable and announced, but not changeable: no pointer cursor promising a toggle.
+		readOnly: {
+			true: 'cursor-default',
+			false: ''
 		}
 	},
 	defaultVariants: {
@@ -42,17 +47,17 @@ const defaultSwitchThumb = cva({
 		{
 			size: 'small',
 			checked: true,
-			class: 'translate-x-4'
+			class: 'translate-x-4 rtl:-translate-x-4'
 		},
 		{
 			size: 'normal',
 			checked: true,
-			class: 'translate-x-5'
+			class: 'translate-x-5 rtl:-translate-x-5'
 		},
 		{
 			size: 'large',
 			checked: true,
-			class: 'translate-x-5'
+			class: 'translate-x-5 rtl:-translate-x-5'
 		}
 	],
 	defaultVariants: {

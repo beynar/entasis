@@ -11,6 +11,12 @@ export type CheckboxProps = InputProps<'checkbox'> & {
 	/** Shows a mixed state without changing the boolean field value. */
 	indeterminate?: boolean;
 	/**
+	 * Value a native `<form>` submits with the checkbox's `name` while it is checked; an unchecked
+	 * checkbox, or one without a `name`, submits nothing, like a native checkbox. Defaults to
+	 * `'true'`.
+	 */
+	inputValue?: string;
+	/**
 	 * Native attributes for the checkbox control, such as `aria-label`, `title` or `data-*`. An
 	 * `aria-label` names the checkbox instead of its label.
 	 */

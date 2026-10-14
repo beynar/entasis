@@ -13,12 +13,12 @@ const defaultCheckboxesInput = cva({
 });
 
 const defaultCheckboxesInputItem = cva({
-	base: 'relative grid w-full cursor-pointer items-start gap-xs rounded-md pl-layout-xl text-left transition-[color,background-color,box-shadow,opacity] outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
+	base: 'relative grid w-full cursor-pointer items-start gap-xs rounded-md ps-layout-xl text-start transition-[color,background-color,box-shadow,opacity] outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
 	variants: {
 		mode: {
 			card: 'raised bg-surface-raised py-md',
 			normal: 'py-xs',
-			control: '!inline-grid !min-h-0 !grid-cols-1 !place-items-center !gap-0 !p-0 !pl-0'
+			control: '!inline-grid !min-h-0 !grid-cols-1 !place-items-center !gap-0 !p-0 !ps-0'
 		},
 		size: {
 			small: 'min-h-row-sm',
@@ -31,6 +31,11 @@ const defaultCheckboxesInputItem = cva({
 		},
 		disabled: {
 			true: 'cursor-not-allowed opacity-50',
+			false: ''
+		},
+		// Focusable and announced, but not changeable: no pointer cursor promising a toggle.
+		readOnly: {
+			true: 'cursor-default',
 			false: ''
 		}
 	},
@@ -76,7 +81,7 @@ const defaultCheckboxesInputItemLabel = cva({
 });
 
 const defaultCheckboxesInputItemTrack = cva({
-	base: 'origin-center content-[""] bg-surface-raised border border-neutral-muted rounded-sm absolute left-2',
+	base: 'origin-center content-[""] bg-surface-raised border border-neutral-muted rounded-sm absolute start-2',
 	variants: {
 		checked: {
 			true: '',
@@ -103,7 +108,7 @@ const defaultCheckboxesInputItemTrack = cva({
 const defaultCheckboxesInputItemThumb = cva({
 	// The check/minus icons paint with `currentColor`, so the thumb's text colour is the
 	// mark colour: `selected-contrast` against the `bg-selected` fill it gets when checked.
-	base: 'origin-center radio rounded-sm flex items-center justify-center transition-[background-color,opacity,scale] content-[""] absolute left-2 scale-[85%] opacity-0 p-xs text-selected-contrast',
+	base: 'origin-center radio rounded-sm flex items-center justify-center transition-[background-color,opacity,scale] content-[""] absolute start-2 scale-[85%] opacity-0 p-xs text-selected-contrast',
 	variants: {
 		checked: {
 			true: 'bg-selected scale-[100%] opacity-100',

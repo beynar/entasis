@@ -46,10 +46,14 @@
 	component="RadioInput"
 	features={[
 		'Fieldset groups mutually exclusive options',
-		{ label: 'aria-label on each option button', test: 'a11y:radios.option-labels' },
+		{ label: 'Each option is named by its text', test: 'a11y:radios.option-labels' },
+		{ label: 'One Tab stop, on the checked option', test: 'a11y:radios.single-tab-stop' },
+		{ label: 'Arrow keys move focus and select', test: 'a11y:radios.arrow-keys' },
+		{ label: 'aria-required and aria-readonly on the group', test: 'a11y:radios.group-aria' },
 		'Bindable single value selection',
 		'Normal and card display modes',
-		'Hidden native radio inputs'
+		'Read-only, still submitted',
+		'Hidden native radio input beside the options'
 	]}
 >
 	<ComponentCard
@@ -132,6 +136,22 @@
 					mode="normal"
 					name="large-radios"
 					size="large"
+					items={normalOptions}
+				/>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Read-only"
+			description="Focusable and announced as read-only, but unchangeable: arrow keys move focus without selecting. The value still submits."
+			code={`<RadioInput label="Plan" readOnly value="option2" items={normalOptions} />`}
+		>
+			<div class="w-full max-w-md">
+				<RadioInput
+					label="Plan"
+					readOnly
+					value="option2"
+					name="read-only-radios"
 					items={normalOptions}
 				/>
 			</div>
