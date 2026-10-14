@@ -167,6 +167,12 @@ type BaseFormFieldInput =
 			type: 'select';
 	  } & SelectProps)
 	| ({
+			type: 'select-multiple';
+	  } & Omit<SelectProps<true>, 'multiple' | 'value' | 'defaultValue'> & {
+				value?: string[] | null;
+				defaultValue?: string[] | null;
+			})
+	| ({
 			type: 'combobox';
 	  } & ComboboxProps)
 	| ({

@@ -119,4 +119,54 @@ describe('alignItemWithTrigger', () => {
 			1000 - SELECT_ALIGN_MARGIN - 200
 		);
 	});
+
+	test('a cap on the list shortens it and keeps the option on the trigger (SC-6)', () => {
+		const m = { ...metrics({ rows: 20, index: 10, triggerTop: 300 }), maxListHeight: 5 * ROW };
+		const placed = alignItemWithTrigger(m);
+		expect(placed.listHeight).toBe(5 * ROW);
+		expect(itemMiddleOnScreen(m, placed)).toBe(triggerMiddle(m));
+		// Without the cap the same list runs to the edge of the viewport.
+		expect(
+			alignItemWithTrigger(metrics({ rows: 20, index: 10, triggerTop: 300 })).listHeight
+		).toBeGreaterThan(5 * ROW);
+	});
+
+	test('a cap above the list changes nothing', () => {
+		const m = metrics();
+		expect(alignItemWithTrigger({ ...m, maxListHeight: 10_000 })).toEqual(alignItemWithTrigger(m));
+		expect(alignItemWithTrigger({ ...m, maxListHeight: Infinity })).toEqual(
+			alignItemWithTrigger(m)
+		);
+	});
+
+	test('a cap shorter than the distance to the option scrolls the list to it', () => {
+		// Option 15 of 20 under a cap of 4 rows: the window has to move down to reach it.
+		const m = { ...metrics({ rows: 20, index: 15, triggerTop: 300 }), maxListHeight: 4 * ROW };
+		const placed = alignItemWithTrigger(m);
+		expect(placed.listHeight).toBe(4 * ROW);
+		expect(itemMiddleOnScreen(m, placed)).toBe(triggerMiddle(m));
+		const middleInList = m.item.top - m.list.top + ROW / 2;
+		expect(middleInList - placed.scrollTop).toBeLessThanOrEqual(4 * ROW);
+		expect(middleInList - placed.scrollTop).toBeGreaterThanOrEqual(0);
+	});
+
+	test('fractional measurements from browser zoom come out in whole pixels (SC-6)', () => {
+		const zoom = 1.1;
+		const row = ROW * zoom;
+		const m: SelectAlignMetrics = {
+			viewport: { width: 1000.4, height: 600.4 },
+			trigger: { top: 300.3, height: row },
+			valueTextStart: 116.7,
+			panel: { left: 0.4, right: 200.4, top: 0.4, width: 200, height: 4.4 + 5 * row + 4.4 },
+			list: { top: 4.8, height: 5 * row },
+			item: { top: 4.8 + 2 * row, height: row, textStart: 12.3 },
+			rtl: false
+		};
+		const placed = alignItemWithTrigger(m);
+		for (const number of [placed.x, placed.y, placed.listHeight, placed.scrollTop]) {
+			expect(Number.isInteger(number)).toBe(true);
+		}
+		// The list never rounds below what it needs, so a list that fits shows no scroll bar.
+		expect(placed.listHeight).toBeGreaterThanOrEqual(m.list.height);
+	});
 });

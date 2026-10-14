@@ -105,6 +105,7 @@ const supportedInputTypes = new Set<InputType>([
 	'keyvalue',
 	'pin',
 	'select',
+	'select-multiple',
 	'radio',
 	'combobox',
 	'calendar',

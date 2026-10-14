@@ -84,7 +84,24 @@ describe('Select listbox structure', () => {
 		expect(listbox.querySelectorAll('[role="presentation"]').length).toBeGreaterThan(0);
 	});
 
-	test('adds no scroll group, tab stop or scrollbar to an overflowing list', async () => {
+	test('a11y:select.listbox-children bare options are listed straight under the listbox', async () => {
+		render(SelectHarness, {
+			props: {
+				label: 'Produce',
+				items: [
+					{ value: 'apple', label: 'Apple' },
+					{ value: 'banana', label: 'Banana' }
+				]
+			}
+		});
+		const listbox = await open();
+
+		// No unlabelled group wraps a flat list.
+		expect(ownedRoles(listbox)).toEqual(['option', 'option']);
+		expect(listbox.querySelector('[role="group"]')).toBeNull();
+	});
+
+	test('the listbox is the scroll viewport: no extra scroll group, tab stop or scrollbar', async () => {
 		Object.defineProperty(Element.prototype, 'scrollHeight', {
 			configurable: true,
 			get: () => 400
@@ -94,13 +111,18 @@ describe('Select listbox structure', () => {
 
 		// type="auto" renders the scrollbar once the overflow is measured.
 		await waitFor(() =>
-			expect(listbox.querySelector('[data-slot="scroll-area-scrollbar"]')).not.toBeNull()
+			expect(document.querySelector('[data-slot="scroll-area-scrollbar"]')).not.toBeNull()
 		);
+		expect(listbox).toHaveAttribute('data-scroll-area-viewport');
+		expect(listbox).toHaveAttribute('tabindex', '-1');
+		expect(listbox).toHaveAttribute('aria-label', 'Options');
 		expect(ownedRoles(listbox)).toEqual(['group', 'option', 'option', 'group', 'option', 'option']);
-		const viewport = listbox.querySelector('[data-scroll-area-viewport]')!;
-		expect(viewport).not.toHaveAttribute('tabindex');
-		expect(viewport).not.toHaveAttribute('aria-label');
+		expect(screen.queryByRole('group', { name: 'Scrollable content' })).toBeNull();
 		expect(screen.queryByRole('scrollbar')).toBeNull();
+		// The scrollbar is a pointer-only affordance, outside the listbox and hidden from the tree.
+		const scrollbar = document.querySelector('[data-slot="scroll-area-scrollbar"]')!;
+		expect(scrollbar).toHaveAttribute('aria-hidden', 'true');
+		expect(listbox.contains(scrollbar)).toBe(false);
 	});
 });
 

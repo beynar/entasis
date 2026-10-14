@@ -92,6 +92,7 @@ export const schemas: {
 
 		// Multiple choice input types
 		checkboxes: v.array(v.string()),
+		'select-multiple': v.array(v.string()),
 
 		// File input types
 		file: v.instance(File),
@@ -151,6 +152,7 @@ export const schemas: {
 
 		// Multiple choice input types
 		checkboxes: optional(emptyArrayNull(v.array(v.string()))),
+		'select-multiple': optional(emptyArrayNull(v.array(v.string()))),
 
 		// File input types
 		file: optional(v.instance(File)),

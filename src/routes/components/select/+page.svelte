@@ -3,6 +3,7 @@
 	import DocPage from '../../DocPage.svelte';
 	import { Select } from '$lib/components/Form/Select/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
+	import Button from '$lib/components/Button/Button.svelte';
 
 	import type { SelectItems } from '$lib/components/Form/Select/index.js';
 	import { densities, sizes } from '$lib/utils/tokens.js';
@@ -86,6 +87,26 @@
 	let value = $state<string | null>(null);
 	let timezone = $state<string | null>(null);
 	let country = $state<string | null>('japan');
+	let toppings = $state<string[]>(['basil']);
+	let clearableRole = $state<string | null>('editor');
+	let controlledOpen = $state(false);
+	let openLog = $state<string[]>([]);
+	let submitted = $state('');
+
+	const pizzaToppings = [
+		{ value: 'olives', label: 'Olives' },
+		{ value: 'basil', label: 'Basil' },
+		{ value: 'mushrooms', label: 'Mushrooms' },
+		{ value: 'ham', label: 'Ham' },
+		{ value: 'pineapple', label: 'Pineapple', disabled: true }
+	];
+
+	const phoneCountries = [
+		{ value: 'FR', label: 'France' },
+		{ value: 'DE', label: 'Germany' },
+		{ value: 'ES', label: 'Spain' },
+		{ value: 'US', label: 'United States' }
+	];
 	const controls = createComponentControls([
 		{
 			name: 'size',
@@ -124,7 +145,25 @@
 		'Grouped options with separators',
 		{ label: 'Listbox owns only options and groups', test: 'a11y:select.listbox-children' },
 		'Bindable value with field validation',
-		{ label: 'Virtual focus stays on trigger', test: 'a11y:select.virtual-focus' }
+		{ label: 'Virtual focus stays on trigger', test: 'a11y:select.virtual-focus' },
+		{
+			label: 'Type to pick, also on the closed trigger; Space continues a search',
+			test: 'a11y:select.typeahead'
+		},
+		{
+			label: 'Multiple selection that stays open, one hidden input per value',
+			test: 'a11y:select.multiple'
+		},
+		{ label: 'Read-only: browse the list, keep the value', test: 'a11y:select.read-only' },
+		{ label: 'Browser autofill and native required validation', test: 'a11y:select.autofill' },
+		{
+			label: 'Touch opens a dropdown; mouse and keyboard align over the trigger',
+			test: 'a11y:select.touch-dropdown'
+		},
+		{
+			label: 'Open state with onOpenChange reasons that can cancel',
+			test: 'a11y:select.open-change'
+		}
 	]}
 >
 	<ComponentCard
@@ -249,6 +288,150 @@
 			</div>
 		</ComponentCard>
 
+		<ComponentCard
+			description="Multiple selection: the list stays open while options are toggled, and the trigger lists two labels and counts the rest. Enter and Space toggle the highlighted option."
+			code={`<Select
+	multiple
+	label="Toppings"
+	items={toppingOptions}
+	bind:value={toppings}
+/>`}
+		>
+			<div class="w-full max-w-md">
+				<Select
+					multiple
+					label="Toppings"
+					placeholder="Pick toppings"
+					items={pizzaToppings}
+					clearable
+					bind:value={toppings}
+				/>
+				<p class="text-neutral/70 mt-2 text-xs">Selected: {JSON.stringify(toppings)}</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="formatValue writes the trigger text from the selected options (given in item order)"
+			code={`<Select
+	multiple
+	label="Toppings"
+	items={toppingOptions}
+	formatValue={(options) => options.length + ' toppings'}
+	defaultValue={['olives', 'ham']}
+/>`}
+		>
+			<div class="w-full max-w-md">
+				<Select
+					multiple
+					label="Toppings"
+					items={pizzaToppings}
+					formatValue={(options) => `${options.length} toppings`}
+					defaultValue={['olives', 'ham']}
+				/>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="Read-only: the list opens and can be browsed with the arrow keys, but nothing can be chosen. The value is still submitted by a native form."
+			code={`<Select label="Role" readOnly items={roles} defaultValue="editor" />`}
+		>
+			<div class="w-full max-w-md">
+				<Select label="Role" readOnly items={roles} defaultValue="editor" />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="Clearable: a button next to the trigger empties the selection and returns focus to the trigger"
+			code={`<Select label="Role" clearable items={roles} bind:value={role} />`}
+		>
+			<div class="w-full max-w-md">
+				<Select label="Role" clearable items={roles} bind:value={clearableRole} />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="A native form: required blocks the submit until a country is chosen, autocomplete lets the browser fill the country by its value or its name, and the value posts under name."
+			code={`<form onsubmit={submit}>
+	<Select
+		label="Ship to"
+		name="country"
+		autocomplete="country"
+		required
+		items={countries}
+	/>
+	<Button type="submit">Submit</Button>
+</form>`}
+		>
+			<form
+				class="grid w-full max-w-md gap-4"
+				onsubmit={(event) => {
+					event.preventDefault();
+					submitted = JSON.stringify(Object.fromEntries(new FormData(event.currentTarget)));
+				}}
+			>
+				<Select
+					label="Ship to"
+					name="country"
+					autocomplete="country"
+					required
+					placeholder="Select a country"
+					items={phoneCountries}
+				/>
+				<div class="flex items-center gap-3">
+					<Button type="submit">Submit</Button>
+					{#if submitted}
+						<output class="text-neutral/70 text-xs">{submitted}</output>
+					{/if}
+				</div>
+			</form>
+		</ComponentCard>
+
+		<ComponentCard
+			description="An id on the Select lets a label elsewhere on the page name it: clicking the label focuses the trigger without opening the list."
+			code={`<label for="plan-select">Plan</label>
+<Select id="plan-select" items={plans} />`}
+		>
+			<div class="grid w-full max-w-md gap-2">
+				<label for="plan-select" class="text-sm font-medium">Plan</label>
+				<Select id="plan-select" placeholder="Choose a plan" items={roles} />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="Open state: bind open to control the list, and onOpenChange to see why it changed (or cancel it) before it happens."
+			code={`<Select
+	label="Role"
+	items={roles}
+	bind:open
+	onOpenChange={(open, details) => log(open, details.reason)}
+/>`}
+		>
+			<div class="grid w-full max-w-md gap-3">
+				<Select
+					label="Role"
+					items={roles}
+					bind:open={controlledOpen}
+					onOpenChange={(next, details) => {
+						openLog = [
+							`${next ? 'open' : 'close'}: ${details.reason} (${details.interaction})`,
+							...openLog
+						].slice(0, 4);
+					}}
+				/>
+				<div class="flex items-center gap-3">
+					<Button size="small" onclick={() => (controlledOpen = !controlledOpen)}>
+						{controlledOpen ? 'Close' : 'Open'} from outside
+					</Button>
+					<span class="text-neutral/70 text-xs">open = {controlledOpen}</span>
+				</div>
+				<ul class="text-neutral/70 text-xs">
+					{#each openLog as entry, index (index)}
+						<li>{entry}</li>
+					{/each}
+				</ul>
+			</div>
+		</ComponentCard>
+
 		<ComponentCard description="Using type: 'select' inside a Form">
 			<div class="w-full max-w-md">
 				<Form
@@ -259,6 +442,25 @@
 							placeholder: 'Select a role',
 							required: true,
 							items: roles
+						}
+					}}
+					onSubmit={(data) => {
+						console.log('Form submitted:', data);
+					}}
+				/>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard description="Using type: 'select-multiple' inside a Form: the value is an array">
+			<div class="w-full max-w-md">
+				<Form
+					inputs={{
+						toppings: {
+							type: 'select-multiple',
+							label: 'Toppings',
+							placeholder: 'Pick toppings',
+							required: true,
+							items: pizzaToppings
 						}
 					}}
 					onSubmit={(data) => {

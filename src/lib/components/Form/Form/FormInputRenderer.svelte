@@ -77,6 +77,13 @@
 	<RichTextInput {...inputProps as FormInputProps<'rich-text'>} {name} />
 {:else if input.type === 'select'}
 	<Select {...inputProps as FormInputProps<'select'>} density={inheritedDensity} {name} />
+{:else if input.type === 'select-multiple'}
+	<Select
+		{...inputProps as FormInputProps<'select-multiple'>}
+		multiple
+		density={inheritedDensity}
+		{name}
+	/>
 {:else if input.type === 'combobox'}
 	<Combobox {...inputProps as FormInputProps<'combobox'>} density={inheritedDensity} {name} />
 {:else if input.type === 'radio'}

@@ -13,10 +13,5 @@
 		"route": "^/components/dialog \\(dialog open\\)$",
 		"ruleId": "button-name",
 		"reason": "Dialog's default close button is an icon-only Button without an accessible name. Found by the open-popup sweep (E2E-1); the fix belongs to the Dialog lane (C1). Remove this entry with that change."
-	},
-	{
-		"route": "^/components/select \\(long listbox open\\)$",
-		"ruleId": "scrollable-region-focusable",
-		"reason": "The overflowing Select list scrolls in a presentational ScrollArea viewport inside the listbox, with no tab stop: the trigger's aria-activedescendant navigation scrolls the highlighted option into view. Owned by lane C5 (SC-1c, the listbox owns the scroll viewport). Remove this entry with that change."
 	}
 ]
