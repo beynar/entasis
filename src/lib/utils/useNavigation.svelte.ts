@@ -364,20 +364,24 @@ export const useNavigation = (opts: NavigationOptions) => {
 		});
 	});
 
-	const focusedIndex = $derived.by(() => {
+	// Plain functions, not deriveds: a menu switch reads these from sync() while the previous
+	// menu's effects are being destroyed, and reading a derived owned by a destroyed effect warns
+	// (derived_inert) and may return a stale value. They still track `revision` and the focus
+	// state for any reactive caller.
+	const readFocusedIndex = () => {
 		void revision;
 		if (focusedItem) {
 			const index = indexOf(focusedItem);
 			return index === -1 ? null : index;
 		}
 		return containerHighlighted ? -1 : null;
-	});
+	};
 
-	const lastFocusedIndex = $derived.by(() => {
+	const readLastFocusedIndex = () => {
 		void revision;
 		const index = indexOf(lastFocusedItem);
 		return index === -1 ? null : index;
-	});
+	};
 
 	let observer: MutationObserver | null = null;
 
@@ -893,7 +897,7 @@ export const useNavigation = (opts: NavigationOptions) => {
 		},
 		// Expose focused index for external use
 		get focusedIndex() {
-			return focusedIndex;
+			return readFocusedIndex();
 		},
 		// Expose control methods
 		focusItem: (index: number) => {
@@ -931,7 +935,7 @@ export const useNavigation = (opts: NavigationOptions) => {
 			}
 		},
 		get lastFocusedIndex() {
-			return lastFocusedIndex;
+			return readLastFocusedIndex();
 		},
 		focusContainer: focusContainer
 	};
