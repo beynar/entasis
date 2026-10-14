@@ -236,6 +236,30 @@ describe('focus leaving (OV-14b)', () => {
 		expect(hidden('First')).not.toBeNull();
 	});
 
+	test('Tab past the last control keeps a closeOnFocusOut={false} popover open and closes the default one', async () => {
+		const stays = mount({
+			scenario: 'plain',
+			popover: { closeOnFocusOut: false, focusOnOpen: 'first' }
+		});
+		await open('Open popover');
+		await placed();
+		await waitFor(() => expect(document.querySelector('[aria-owns]')).not.toBeNull());
+		button('Second').focus();
+		await fireEvent.keyDown(button('Second'), { key: 'Tab' });
+		await waitFor(() => expect(document.activeElement).toBe(button('After')));
+		await sleep(40);
+		expect(hidden('First')).not.toBeNull();
+		stays.unmount();
+
+		mount({ scenario: 'plain', popover: { focusOnOpen: 'first' } });
+		await open('Open popover');
+		await placed();
+		await waitFor(() => expect(document.querySelector('[aria-owns]')).not.toBeNull());
+		button('Second').focus();
+		await fireEvent.keyDown(button('Second'), { key: 'Tab' });
+		await waitFor(() => expect(hidden('First')).toBeNull());
+	});
+
 	test('a popover that ignores outside presses ignores focus moving on too', async () => {
 		mount({ scenario: 'plain', popover: { closeOnClickOutside: false, focusOnOpen: 'first' } });
 		await open('Open popover');

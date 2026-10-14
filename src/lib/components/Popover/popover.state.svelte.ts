@@ -419,8 +419,12 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 				const parentPanel = this.parent?.panelElement;
 				return anchor && parentPanel && parentPanel.contains(anchor) ? parentPanel : undefined;
 			},
-			onLeave: (event) =>
-				void this.setOpen(false, { reason: 'focus-out', event, interaction: 'keyboard' })
+			// The bridge has already moved focus on; whether that closes the panel is the same
+			// `closeOnFocusOut` decision the focus listener below makes.
+			onLeave: (event) => {
+				if (!this.closesOnFocusOut) return;
+				void this.setOpen(false, { reason: 'focus-out', event, interaction: 'keyboard' });
+			}
 		});
 		// Focus that was inside the popover (or on its trigger) moving on closes it. A popover whose
 		// panel focus never entered is left to outside presses: Tab, a click or a screen reader's
