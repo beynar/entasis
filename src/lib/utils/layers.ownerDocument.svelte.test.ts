@@ -87,3 +87,31 @@ describe('layer listeners on the owner document', () => {
 		expect(onDismiss).not.toHaveBeenCalled();
 	});
 });
+
+describe('layers whose panel lives in a shadow root', () => {
+	test('a press inside the shadow panel keeps the layer, a press outside dismisses it', async () => {
+		const host = document.createElement('div');
+		document.body.append(host);
+		const shadow = host.attachShadow({ mode: 'open' });
+		const panel = document.createElement('div');
+		const inside = document.createElement('button');
+		panel.append(inside);
+		shadow.append(panel);
+		const outside = document.createElement('p');
+		document.body.append(outside);
+
+		const onDismiss = vi.fn();
+		render(LayersOwnerDocumentHarness, { props: { open: true, nodes: [panel], onDismiss } });
+		await tick();
+		await later();
+
+		// Composed, as a real pointer event is: the document hears it with the host as its target.
+		inside.dispatchEvent(new Event('pointerdown', { bubbles: true, composed: true }));
+		expect(onDismiss).not.toHaveBeenCalled();
+		outside.dispatchEvent(new Event('pointerdown', { bubbles: true, composed: true }));
+		expect(onDismiss).toHaveBeenCalledOnce();
+		expect(onDismiss).toHaveBeenCalledWith(expect.objectContaining({ reason: 'outside-press' }));
+		host.remove();
+		outside.remove();
+	});
+});

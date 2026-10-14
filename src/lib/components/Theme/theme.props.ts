@@ -55,13 +55,16 @@ export type ThemeProps<T extends readonly string[] = readonly string[]> = Omit<
 	 * Content-Security-Policy nonce. Applied to every `<script>` and `<style>` the Theme and the
 	 * components below it inject (the theme and viewport boot scripts, design-token CSS, and the
 	 * CDN loaders of PhoneInput, Map and Mermaid). Generate one per request in `hooks.server`,
-	 * pass it through `locals` and layout data, and give the same value to `kit.csp`.
+	 * pass it through `locals` and layout data, and send the Content-Security-Policy header with
+	 * that same nonce yourself (`kit.csp` generates its own and cannot take this one).
 	 */
 	nonce?: string;
 	/**
 	 * Where portaled panels (dialogs, popovers, menus, tooltips, the floating-window layer) are
 	 * mounted. Defaults to `document.body`, or to the shadow root when the Theme renders inside
-	 * one. Pass an element, or a function for a container that does not exist yet at render time.
+	 * one. Pass an element, or a function for a container that does not exist yet at render time:
+	 * a function over `$state` (`() => host`) moves the panels in when the container appears, a
+	 * function over a plain variable is read when each panel mounts.
 	 */
 	portalContainer?: HTMLElement | ShadowRoot | (() => HTMLElement | ShadowRoot | null | undefined);
 };

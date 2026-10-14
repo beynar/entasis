@@ -195,8 +195,12 @@ and mirrored as a \`data-entasis-reduce-motion\` attribute on \`html\` for CSS-o
 inject: the theme and viewport boot scripts, the design-token stylesheet, the \`transitionOnChange={false}\`
 style, and the CDN loaders of PhoneInput, Map and Mermaid (the document print frame and Mermaid's own
 svg \`<style>\` too). Drag-and-drop base styles are rules in the Tailwind plugin CSS, so nothing is
-injected for them. Generate one nonce per request in \`hooks.server.ts\`, give the same value to
-SvelteKit's \`kit.csp\` (for its own scripts) and to \`<Theme nonce>\`:
+injected for them. Generate one nonce per request in \`hooks.server.ts\`, send it through \`locals\` to
+\`<Theme nonce>\`, and send the Content-Security-Policy header yourself with that same nonce.
+SvelteKit's \`kit.csp\` cannot be used for this: it generates its own nonce per request, exposes it
+only as \`%sveltekit.nonce%\` in \`app.html\`, and has no option to take yours, so the header would
+carry one nonce while the Theme's tags carry another. Leave \`kit.csp\` unset and put the nonce on
+SvelteKit's own inline tags in \`transformPageChunk\`:
 
 \`\`\`ts
 // doc-fence: skip (needs nonce declared on the app's App.Locals)
@@ -204,8 +208,19 @@ SvelteKit's \`kit.csp\` (for its own scripts) and to \`<Theme nonce>\`:
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	event.locals.nonce = crypto.randomUUID();
-	return resolve(event);
+	const nonce = crypto.randomUUID();
+	event.locals.nonce = nonce;
+	const response = await resolve(event, {
+		// Adds the nonce to SvelteKit's inline <script> and <style> tags; tags that already carry one
+		// (the Theme's) are left alone.
+		transformPageChunk: ({ html }) =>
+			html.replace(/<(script|style)(?=[\\s>])(?![^>]*\\snonce=)/g, \`<$1 nonce="\${nonce}"\`)
+	});
+	response.headers.set(
+		'content-security-policy',
+		\`script-src 'self' 'nonce-\${nonce}'; style-src 'self' 'nonce-\${nonce}'; style-src-attr 'unsafe-inline'\`
+	);
+	return response;
 };
 \`\`\`
 
@@ -231,13 +246,16 @@ export const load: LayoutServerLoad = ({ locals }) => ({ nonce: locals.nonce });
 \`\`\`
 
 Server-rendered \`style\` attributes (\`style:\` directives) are not covered by a nonce: allow them with
-\`style-src-attr 'unsafe-inline'\`. \`ThemeState.nonce\` exposes the value to your own injected code.
+\`style-src-attr 'unsafe-inline'\` (as above). \`ThemeState.nonce\` exposes the value to your own injected code.
 
 ## Shadow DOM and portal containers
 
 Dialogs, popovers, menus, tooltips and the floating-window layer mount in \`document.body\`. Inside a
 shadow root they mount in that root so adopted styles keep applying. \`portalContainer\` overrides both:
 an element or shadow root, or a function returning one for a container that is not rendered yet.
+A function that reads \`$state\` (as below) moves the floating-window layer in as soon as the container
+appears; a function over a plain variable is read each time a panel mounts, so the layer, which mounts
+with the Theme, needs the container to exist by then.
 Outside presses and Escape are heard on the document a panel lives in, so a panel rendered into an
 iframe's document dismisses correctly.
 

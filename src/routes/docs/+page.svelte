@@ -216,8 +216,19 @@ pnpm add tailwindcss @tailwindcss/vite`;
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	event.locals.nonce = crypto.randomUUID();
-	return resolve(event);
+	const nonce = crypto.randomUUID();
+	event.locals.nonce = nonce;
+	const response = await resolve(event, {
+		// Adds the nonce to SvelteKit's inline <script> and <style> tags; tags that already carry
+		// one (the Theme's) are left alone.
+		transformPageChunk: ({ html }) =>
+			html.replace(/<(script|style)(?=[\\s>])(?![^>]*\\snonce=)/g, \`<$1 nonce="\${nonce}"\`)
+	});
+	response.headers.set(
+		'content-security-policy',
+		\`script-src 'self' 'nonce-\${nonce}'; style-src 'self' 'nonce-\${nonce}'; style-src-attr 'unsafe-inline'\`
+	);
+	return response;
 };
 
 // src/routes/+layout.server.ts
@@ -233,16 +244,6 @@ export const load = ({ locals }) => ({ nonce: locals.nonce });`;
 <Theme nonce={data.nonce}>
 	{@render children()}
 </Theme>`;
-
-	const cspConfigCode = `// svelte.config.js — SvelteKit adds the nonce to its own scripts and styles
-const config = {
-	kit: {
-		csp: {
-			mode: 'nonce',
-			directives: { 'script-src': ['self'], 'style-src': ['self'] }
-		}
-	}
-};`;
 
 	const portalCode = `<script lang="ts">
 	import { Theme } from 'entasis/theme';
@@ -412,12 +413,14 @@ const config = {
 		)}, {@render ic('Map')} and {@render ic('Mermaid')}. Drag-and-drop base styles are plain rules
 		in the Tailwind plugin CSS, so nothing is injected for them. Generate the nonce in {@render ic(
 			'hooks.server.ts'
-		)}, send it through {@render ic('locals')} and layout data, and give the same value to SvelteKit's
-		{@render ic('kit.csp')} for its own tags.
+		)}, send it through {@render ic('locals')} and layout data, and send the {@render ic(
+			'Content-Security-Policy'
+		)} header yourself with that same nonce. SvelteKit's {@render ic('kit.csp')} cannot take it: it generates
+		its own nonce per request and exposes it only as {@render ic('%sveltekit.nonce%')}, so leave it
+		unset and add the nonce to SvelteKit's own inline tags in {@render ic('transformPageChunk')}.
 	</p>
 	<Code language="ts" code={cspHooksCode} />
 	<Code language="svelte" code={cspLayoutCode} />
-	<Code language="js" code={cspConfigCode} />
 	<p class="text-neutral/70">
 		Server-rendered {@render ic('style:')} directives compile to {@render ic('style')} attributes, which
 		a nonce cannot cover: allow them with {@render ic("style-src-attr 'unsafe-inline'")}.
@@ -431,7 +434,9 @@ const config = {
 		shadow root they mount in that root, so adopted styles keep applying. {@render ic(
 			'portalContainer'
 		)} overrides both with an element or a function that finds one later. Escape and outside presses are
-		heard on the document a panel lives in, so a panel rendered into an iframe dismisses correctly.
+		heard on the document a panel lives in, so a panel rendered into an iframe dismisses correctly. A
+		container function that reads {@render ic('$state')} moves the floating-window layer in once the container
+		appears; one over a plain variable is read each time a panel mounts.
 	</p>
 	<Code language="svelte" code={portalCode} />
 

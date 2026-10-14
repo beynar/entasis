@@ -318,7 +318,7 @@ describe('option ids', () => {
 
 describe('scrolling inside the list', () => {
 	/** A scrolling container with `count` 20px rows in a 100px viewport; jsdom has no layout. */
-	const list = (count: number) => {
+	const list = (count: number, root: ParentNode = document.body) => {
 		const page = document.createElement('div');
 		const container = document.createElement('div');
 		container.style.overflowY = 'auto';
@@ -337,7 +337,7 @@ describe('scrolling inside the list', () => {
 			rows.push(row);
 		}
 		page.append(container);
-		document.body.append(page);
+		root.append(page);
 		return { page, container, rows };
 	};
 
@@ -354,6 +354,17 @@ describe('scrolling inside the list', () => {
 		nav.highlight('row-0');
 		expect(container.scrollTop).toBe(0);
 		expect(scrollIntoView).not.toHaveBeenCalled();
+	});
+
+	test('finds the options when the list renders inside a shadow root', () => {
+		const host = document.createElement('div');
+		document.body.append(host);
+		const { container } = list(20, host.attachShadow({ mode: 'open' }));
+		const { nav } = setup(values, { optionId: (v) => v, scrollContainer: () => container });
+
+		nav.highlight('row-10');
+		expect(container.scrollTop).toBe(120);
+		host.remove();
 	});
 
 	test('falls back to the nearest scrolling ancestor and leaves the page alone', () => {

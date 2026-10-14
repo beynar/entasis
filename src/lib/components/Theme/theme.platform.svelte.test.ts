@@ -8,6 +8,7 @@ import { getCspNonce } from '$lib/utils/cspNonce.js';
 import { portal } from '$lib/attachments/portal.js';
 import { compileThemeBlockingScript, compileViewportScript, disableAnimation } from './helper.js';
 import ThemePlatformHarness from './ThemePlatformHarness.test.svelte';
+import ThemePortalHostHarness from './ThemePortalHostHarness.test.svelte';
 import type { ThemeState } from './theme.state.svelte.js';
 
 const layer = (container: ParentNode) =>
@@ -86,6 +87,21 @@ describe('Theme nonce (CX-8)', () => {
 		}
 	});
 
+	test('turning transitionOnChange off later leaves no suppressing style behind', async () => {
+		const { rerender, unmount } = render(ThemePlatformHarness, {
+			props: { nonce: 'toggle', transitionOnChange: true }
+		});
+		flushSync();
+		await rerender({ nonce: 'toggle', transitionOnChange: false });
+		flushSync();
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		const leaked = Array.from(document.head.querySelectorAll('style')).filter((style) =>
+			style.textContent?.includes('transition:none')
+		);
+		expect(leaked).toHaveLength(0);
+		unmount();
+	});
+
 	test('non-component code reads the nonce of the mounted Theme', () => {
 		expect(getCspNonce()).toBeUndefined();
 		const { unmount } = render(ThemePlatformHarness, { props: { nonce: 'registry' } });
@@ -122,6 +138,15 @@ describe('portal container (CX-12)', () => {
 		expect(node.parentElement).toBe(container);
 		detach();
 		container.remove();
+	});
+
+	test('moves the layer into a container that appears after the Theme mounted', async () => {
+		const { getByTestId } = render(ThemePortalHostHarness);
+		flushSync();
+		await Promise.resolve();
+		const host = getByTestId('host');
+		expect(layer(host)).not.toBeNull();
+		expect(layer(host)?.parentElement).toBe(host);
 	});
 
 	test('a Theme inside a shadow root portals into that root', () => {

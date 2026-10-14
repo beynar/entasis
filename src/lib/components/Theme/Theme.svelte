@@ -97,8 +97,11 @@
 	let restoreTransitions: (() => void) | null = null;
 	$effect.pre(() => {
 		void theme.resolvedTheme;
-		if (transitionOnChange) return;
+		// `transitionOnChange` is read untracked: this effect must only re-run with a theme swap,
+		// because only the post effect below (which follows `resolvedTheme` alone) releases the
+		// style. Re-running on the prop would leave `*{transition:none!important}` in the head.
 		untrack(() => {
+			if (transitionOnChange) return;
 			restoreTransitions?.();
 			restoreTransitions = disableAnimation(nonce);
 		});

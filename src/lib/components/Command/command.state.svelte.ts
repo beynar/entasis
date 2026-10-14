@@ -4,6 +4,7 @@ import { useListNavigation } from '$lib/utils/useListNavigation.svelte.js';
 import { untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 import type { CommandGroup, CommandItem, CommandProps } from './command.props.js';
+import { elementById } from '$lib/utils/id.js';
 
 type CommandOptions<Value extends string = string> = Pick<
 	CommandProps<Value>,
@@ -152,7 +153,7 @@ export class CommandState<Value extends string = string> extends BoundCommandOpt
 	selectValue = (value: Value) => {
 		const item = this.navItems.find((it) => it.value === value);
 		if (!item) return;
-		if (item.href) document.getElementById(this.optionId(item.value))?.click();
+		if (item.href) elementById(this.triggerElement, this.optionId(item.value))?.click();
 		else this.select(item);
 	};
 
