@@ -287,7 +287,7 @@ Pattern: `import { set{Component}Theme } from 'entasis/{kebab-name}'`. Overrides
 
 **Display**: See [display.md](display.md) for Button, ButtonGroup, Avatar, Chip, Heading, Code, Meter, MetadataList, Rating, ToggleButton, ToggleButtonGroup, QRCode, DocumentViewer, Icons.
 
-**Form Inputs**: See [form-inputs.md](form-inputs.md) for TextInput, TextArea, NumberInput, RatingInput, PasswordInput, PhoneInput, DateInput, TimeInput, ColorInput, ColorPicker, Select, Combobox, TagsInput, KeyValueInput, Switch, RadioInput, CheckboxesInput, FileInput, Calendar, MiniCalendar, Form, MultiStepForm.
+**Form Inputs**: See [form-inputs.md](form-inputs.md) for TextInput, TextArea, NumberInput, RatingInput, PasswordInput, PhoneInput, DateInput, TimeInput, ColorInput, ColorPicker, Select, Combobox, Autocomplete, TagsInput, KeyValueInput, Switch, RadioInput, CheckboxesInput, FileInput, Calendar, MiniCalendar, Form, MultiStepForm.
 
 **Layout & Navigation**: See [layout.md](layout.md) for Tabs, Tabbar, Stepper, Breadcrumbs, NavigationMenu, Accordion, Collapsible, Separator, Menu, PopupMenu, MenuOption, Carousel, ScrollArea, AspectRatio, Marquee, Sidebar, AppShell, Grid/GridSpan — including `AppShell variant="framed"`, `Sidebar activeVariant`, and the `mount` axis on Tabs and Stepper.
 

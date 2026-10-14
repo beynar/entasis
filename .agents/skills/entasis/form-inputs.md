@@ -21,6 +21,7 @@ Global theme setter: `import { setComponentNameTheme } from 'entasis/kebab-case-
 - [ColorPicker](#colorpicker)
 - [Select](#select)
 - [Combobox](#combobox)
+- [Autocomplete](#autocomplete)
 - [TagsInput](#tagsinput)
 - [KeyValueInput](#keyvalueinput)
 - [Switch](#switch)
@@ -331,6 +332,39 @@ Option format: `{ value: string, label: string, description?: string }`. Debounc
 </script>
 
 <Combobox label="City" items={search} bind:value={val} />
+```
+
+---
+
+## Autocomplete
+
+`import { Autocomplete } from 'entasis/autocomplete'`
+
+Free text with suggestions. The value is the text in the input (submitted natively under `name`); a suggestion is a shortcut for typing. Use Combobox when people must pick from the list.
+
+**Unique props:**
+
+- `items`: strings, `ComboboxOption`s, `{ label?, items }` groups, or `(query, { signal }) => MaybePromise<items>` (required; async calls are debounced 100ms and aborted by newer text)
+- `value: string | null` (bindable), `defaultValue`, `onValueChange(value)`, `onSelect({ item, value, event })`
+- `mode`: `'list'` (filter, default) | `'both'` (filter + inline completion) | `'inline'` (no filter + inline completion) | `'none'` (no filter, text never previewed)
+- `autoHighlight`: `boolean | 'always'` (default `false`, so Enter keeps the typed text); use `true` with `mode="both"` to complete as you type
+- `openOnFocus`, `open` (bindable) / `defaultOpen` / `onOpenChange(open, details)`, `shouldFilter`, `filter`, `limit`, `loop`
+- `placeholder`, `emptyText`, `loadingText`, `autocomplete` (browser autofill hint, default `'off'`), `item` snippet, `inputAttrs`, `readOnly`
+
+Inline completion previews the highlighted suggestion in the input while `value` stays the typed text: Escape restores it, blur restores it, Enter chooses the suggestion, Tab or ArrowLeft/Right/Home/End accept it as typed text.
+
+**Theme parts:** `input`, `inputContainer`, `loading`, `error`, `noOptions`, `group`, `groupLabel`, `separator`
+
+```svelte
+<script lang="ts">
+	import { Autocomplete } from 'entasis/autocomplete';
+
+	let city = $state('');
+	const search = async (query: string, { signal }: { signal: AbortSignal }) =>
+		fetch(`/api/cities?q=${encodeURIComponent(query)}`, { signal }).then((r) => r.json());
+</script>
+
+<Autocomplete name="city" label="City" items={search} bind:value={city} />
 ```
 
 ---
