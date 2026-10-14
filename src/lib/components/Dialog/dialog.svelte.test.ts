@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { describe, expect, test, vi } from 'vitest';
 import DialogLawHarness from './dialogLawHarness.test.svelte';
 import DialogSwapHarness from './DialogSwapHarness.test.svelte';
@@ -488,6 +489,32 @@ describe('Dialog bottom sheet and the on-screen keyboard (OV-13)', () => {
 		// Moving focus to another field never lets the sheet drop in between.
 		screen.getByRole('button', { name: 'Close law dialog' }).focus();
 		await waitFor(() => expect(align().className).not.toContain('--keyboard-inset'));
+	});
+
+	test('moving focus from one field to the next never lets the sheet drop its keyboard room', async () => {
+		render(DialogLawHarness, { props: { type: 'drawerBottom' } });
+		await openLaw();
+		screen.getByLabelText('Draft').focus();
+		await waitFor(() => expect(align().className).toContain('--keyboard-inset'));
+
+		const dropped: boolean[] = [];
+		const watch = new MutationObserver(() =>
+			dropped.push(!align().className.includes('--keyboard-inset'))
+		);
+		watch.observe(align(), { attributes: true, attributeFilter: ['class'] });
+		try {
+			// Focus leaves the first field and lands on the next one a moment later, after the DOM has
+			// been flushed in between (the release waits a frame for exactly this).
+			screen.getByLabelText('Draft').blur();
+			await tick();
+			await tick();
+			screen.getByLabelText('Second draft').focus();
+			await sleep(80);
+			expect(align().className).toContain('--keyboard-inset');
+			expect(dropped).not.toContain(true);
+		} finally {
+			watch.disconnect();
+		}
 	});
 
 	test('it is a bottom sheet behaviour: other types keep their padding', async () => {

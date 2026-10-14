@@ -21,7 +21,7 @@ The Dialog component (also known as Modal) displays content in a layer above the
 
 ### Core Props
 - **open**: boolean (bindable) - Controls dialog visibility
-- **modal**: boolean (default: true) - A modal makes the page behind \`inert\`, locks page scroll, contains Tab, dims the page with the shared backdrop and dismisses on an outside press. \`modal={false}\` leaves the page interactive: no \`inert\`, no scroll lock, no backdrop, no Tab containment, and an outside press does not dismiss it unless \`closeOnClickOutside\` is set. Escape, the close button and swipes still close it. It renders no \`aria-modal\` (and \`data-modal="false"\`), always scrolls inside its card, and does not push dialogs beneath it back
+- **modal**: boolean (default: true) - A modal makes the page behind \`inert\`, locks page scroll, contains Tab, dims the page with the shared backdrop and dismisses on an outside press. \`modal={false}\` leaves the page interactive: no \`inert\`, no scroll lock, no backdrop, no Tab containment, and an outside press does not dismiss it unless \`closeOnClickOutside\` is set. Escape, the close button and swipes still close it (the Android Back gesture does not: it closes modal dialogs only). It renders no \`aria-modal\` (and \`data-modal="false"\`), always scrolls inside its card, and does not push dialogs beneath it back
 - **defaultOpen**: boolean (default: false) - Initial state when open is not provided
 - **id**: string - Unique identifier for the dialog
 - **type**: 'fullScreen' | 'drawerRight' | 'drawerLeft' | 'drawerBottom' | 'drawerTop' | 'alert' | 'modal' (default: 'modal')
@@ -56,7 +56,7 @@ The Dialog component (also known as Modal) displays content in a layer above the
 - **closeButton**: Snippet | false - Custom close button, or \`false\` to suppress the visible one. A closable dialog whose visible button is suppressed (\`false\`, or a snippet that renders nothing, as the Popover mobile sheet passes) still renders a visually hidden \`Close\` button at the end of the panel, out of the Tab order but in the accessibility tree, so screen reader users have a control that closes it. An \`alert\` never gets one: its own buttons answer it. The default close button is named \`Close\` (translated by the i18n catalog)
 
 ### Behavior Props
-- **closeOnEscape**: boolean (default: true) - Close when Escape key is pressed (and, on Android, on the Back gesture)
+- **closeOnEscape**: boolean (default: true) - Close when Escape key is pressed (and, for a modal dialog on Android, on the Back gesture)
 - **closeOnClickOutside**: boolean (default: true, false for \`type="alert"\` and for \`modal={false}\`) - Close when pressing outside dialog. A press that began before the dialog opened does not count
 - **closable**: boolean (default: true) - Whether dialog can be closed
 - **focusOnClose**: boolean | HTMLElement | ((details) => HTMLElement | boolean | void) (default: true) - Where focus goes when the dialog closes. \`true\` returns it to the control that opened the dialog, else to the most recent element still on the page; \`false\` leaves focus alone; an element receives it; a function gets the change details (\`reason\`, \`interaction\`…) and returns one of these, or nothing to restore as usual
@@ -67,7 +67,7 @@ The Dialog component (also known as Modal) displays content in a layer above the
 - **snapPoints**: (number | string)[] - Where a \`drawerBottom\` or \`drawerTop\` (or a modal collapsed into a mobile sheet) can rest. A number is a fraction of the available height (above 0, at most 1), a string a CSS length (\`'148px'\`, \`'20rem'\`, \`'40%'\`, \`'50vh'\`). The panel is as tall as the largest point and shows only the active one; a drag moves it between the points, a flick (0.4 px/ms or more) carries it to the next one in the direction it was thrown, and dragging below the lowest dismisses it when swipe-to-dismiss is on (otherwise the lowest is as far as it goes). The body scrolls only at the largest point; below it, a drag anywhere moves the panel. Ignored by the other types
 - **snapPoint**: number | string (bindable) - The point the drawer rests at, one of \`snapPoints\`
 - **defaultSnapPoint**: number | string - The point it opens at when \`snapPoint\` is not bound (default: the largest)
-- **onSnapPointChange**: (snapPoint, details: OpenChangeDetails) => void - Called before the resting point changes. \`details.reason\` is \`'swipe'\` or \`'imperative-action'\` (\`dialog.setSnapPoint\`); \`details.cancel()\` keeps the current point and a cancelled drag snaps back
+- **onSnapPointChange**: ({ snapPoint, details }: { snapPoint; details: OpenChangeDetails }) => void - Called before the resting point changes. \`details.reason\` is \`'swipe'\` or \`'imperative-action'\` (\`dialog.setSnapPoint\`); \`details.cancel()\` keeps the current point and a cancelled drag snaps back
 
 ### Visual Props
 - **transition**: TransitionConfig - Custom transition animation
@@ -213,7 +213,7 @@ The Dialog component (also known as Modal) displays content in a layer above the
 	title="Snap points"
 	snapPoints={[0.3, 0.6, 1]}
 	bind:snapPoint
-	onSnapPointChange={(point, details) => console.log(point, details.reason)}
+	onSnapPointChange={({ snapPoint, details }) => console.log(snapPoint, details.reason)}
 	trigger={{ content: 'Open sheet' }}
 >
 	{#snippet children(dialog)}
@@ -397,7 +397,7 @@ The Dialog component uses a \`DialogState\` instance that is passed to all slot 
 - When a dialog (a Confirmation, say) closes over another dialog, the one beneath keeps focus where it was and receives it back from the closing one; it does not move focus to its first field again
 - Tab moves focus inside the dialog itself instead of leaving it to the browser, so it wraps in Safari too, where Tab skips buttons by default
 - The trigger (built-in, or a snippet element with \`{@attach dialog.trigger}\`) carries \`aria-haspopup="dialog"\`, \`aria-expanded\` and \`aria-controls\` pointing at the open dialog
-- On Android, the Back gesture closes the topmost dialog through a \`CloseWatcher\` (\`reason: 'close-watcher'\`), under the same rules as Escape
+- On Android, the Back gesture closes the topmost modal dialog (not a \`modal={false}\` one) through a \`CloseWatcher\` (\`reason: 'close-watcher'\`), under the same rules as Escape
 - \`aria-labelledby\` links the \`title\` and \`aria-describedby\` links the \`description\`
 - The root is \`role="dialog"\`, or \`role="alertdialog"\` for \`type="alert"\`, always with \`aria-modal="true"\`
 - The root and the panel carry \`data-type\` with the resolved type (a responsive record or a modal collapsed into a mobile sheet reports the type actually shown), which drawer edge rounding keys on
@@ -419,7 +419,7 @@ Non-modal dialogs do not set them.
 
 ## On-screen keyboard
 
-In a \`drawerBottom\` (or a modal collapsed into a mobile sheet), while a text field inside the panel has focus the sheet's bottom padding grows by \`--keyboard-inset\` (the height the keyboard covers, published on \`<html>\` by the Theme), the panel shrinks to the room above the keyboard, and the field is centered once the visual viewport has stopped moving. Focus moving from one field to the next never lets the sheet drop in between. Browsers that resize the layout viewport for the keyboard report no inset; Chrome on Android needs \`interactive-widget=resizes-content\` in the viewport meta tag to do so.
+In a \`drawerBottom\` (or a modal collapsed into a mobile sheet), while a text field inside the panel has focus the sheet's bottom padding grows by \`--keyboard-inset\` (the height the keyboard covers, published on \`<html>\` by the Theme), the panel shrinks to the room above the keyboard, and the field is centered once the visual viewport has stopped moving. Focus moving from one field to the next never lets the sheet drop in between. Browsers that resize the layout viewport for the keyboard (Chrome on Android only with \`interactive-widget=resizes-content\` in the viewport meta tag) report no inset and need no help; by default Chrome on Android reports the inset and the sheet uses it, like iOS.
 
 ## Notes
 

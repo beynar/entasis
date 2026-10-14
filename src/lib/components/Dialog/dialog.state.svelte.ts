@@ -301,7 +301,7 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 		if (!target) return false;
 		if (target === this.activeSnap) return true;
 		const details = this.#details(input);
-		this.onSnapPointChange?.(target.point, details);
+		this.onSnapPointChange?.({ snapPoint: target.point, details });
 		if (details.isCanceled) return false;
 		this.snapPoint = target.point;
 		return true;
@@ -629,7 +629,10 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 					if (index < 0) shouldClose = true;
 					else snapTo = this.snapHeights[index].point;
 				} else {
-					shouldClose = Math.abs(this.dragOffset) > this.dragSize * 0.25 || velocity > 0.4;
+					// Without usable snap points the drag only dismisses where swiping to dismiss is on.
+					shouldClose =
+						this.swipeEnabled &&
+						(Math.abs(this.dragOffset) > this.dragSize * 0.25 || velocity > 0.4);
 				}
 			}
 			// Closing keeps dragOffset so the out transition starts from the dragged position.

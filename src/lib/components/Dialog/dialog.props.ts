@@ -91,11 +91,14 @@ export type DialogProps = WithSlot<
 		/** The snap point the drawer opens at when `snapPoint` is not bound. Defaults to the largest. */
 		defaultSnapPoint?: DialogSnapPoint;
 		/**
-		 * Called before the resting snap point changes, with the new point and the change details
-		 * (`reason` is `'swipe'` for a drag and `'imperative-action'` for `setSnapPoint`; `cancel()`
-		 * keeps the current point and a cancelled drag snaps back).
+		 * Called before the resting snap point changes, with `{ snapPoint, details }`: the new point
+		 * and the change details (`reason` is `'swipe'` for a drag and `'imperative-action'` for
+		 * `setSnapPoint`; `details.cancel()` keeps the current point and a cancelled drag snaps back).
 		 */
-		onSnapPointChange?: (snapPoint: DialogSnapPoint, details: OpenChangeDetails) => void;
+		onSnapPointChange?: (payload: {
+			snapPoint: DialogSnapPoint;
+			details: OpenChangeDetails;
+		}) => void;
 		/** Snippet for main dialog body content; receives the dialog state instance. */
 		children?: Snippet<[DialogState]>;
 		/**
@@ -112,8 +115,8 @@ export type DialogProps = WithSlot<
 		 *  `true`, except for an `alert`, which ignores outside presses unless this is set. A press
 		 *  that began before the dialog opened does not count. */
 		closeOnClickOutside?: boolean;
-		/** When true, pressing Escape (and, on Android, the Back gesture) closes the dialog when it
-		 *  is closable and topmost. */
+		/** When true, pressing Escape (and, for a modal dialog on Android, the Back gesture) closes
+		 *  the dialog when it is closable and topmost. */
 		closeOnEscape?: boolean;
 		/** Drag the panel toward its edge to dismiss (drawer types only). Defaults to true for drawers.
 		 *  Direction-aware, and never hijacks inner scrolling — a scrollable region that can still

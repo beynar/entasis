@@ -659,10 +659,10 @@ describe('Dialog snap points (DLG-5)', () => {
 
 		// 1 → 0.5 is 400px away; 300px is nearer to it than to staying.
 		await dragBy(node, 300);
-		expect(onSnapPointChange).toHaveBeenCalledExactlyOnceWith(
-			0.5,
-			expect.objectContaining({ reason: 'swipe', event: expect.any(PointerEvent) })
-		);
+		expect(onSnapPointChange).toHaveBeenCalledExactlyOnceWith({
+			snapPoint: 0.5,
+			details: expect.objectContaining({ reason: 'swipe', event: expect.any(PointerEvent) })
+		});
 		expect(readout('snap')).toBe('0.5');
 		await vi.waitFor(() => expect(readout('offset')).toBe(`${AVAILABLE * 0.5}`));
 		expect(onOpenChange).not.toHaveBeenCalled();
@@ -699,7 +699,10 @@ describe('Dialog snap points (DLG-5)', () => {
 		await firePointer(node, 'pointerdown', { pos: 0, t: 0 });
 		await firePointer(node, 'pointermove', { pos: 90, t: 20 });
 		await firePointer(node, 'pointerup', { pos: 90, t: 22 });
-		expect(onSnapPointChange).toHaveBeenCalledExactlyOnceWith(0.5, expect.anything());
+		expect(onSnapPointChange).toHaveBeenCalledExactlyOnceWith({
+			snapPoint: 0.5,
+			details: expect.anything()
+		});
 	});
 
 	test('dragging below the lowest point dismisses the drawer', async () => {
@@ -736,8 +739,8 @@ describe('Dialog snap points (DLG-5)', () => {
 	});
 
 	test('onSnapPointChange can cancel: the drawer snaps back and keeps its point', async () => {
-		const onSnapPointChange = vi.fn((_point: number | string, details: OpenChangeDetails) =>
-			details.cancel()
+		const onSnapPointChange = vi.fn(
+			({ details }: { snapPoint: number | string; details: OpenChangeDetails }) => details.cancel()
 		);
 		const node = snapSetup({ onSnapPointChange });
 		await dragBy(node, 300);
@@ -750,10 +753,10 @@ describe('Dialog snap points (DLG-5)', () => {
 		const onSnapPointChange = vi.fn();
 		snapSetup({ onSnapPointChange });
 		await fireEvent.click(screen.getByTestId('snap-first'));
-		expect(onSnapPointChange).toHaveBeenCalledExactlyOnceWith(
-			0.25,
-			expect.objectContaining({ reason: 'imperative-action' })
-		);
+		expect(onSnapPointChange).toHaveBeenCalledExactlyOnceWith({
+			snapPoint: 0.25,
+			details: expect.objectContaining({ reason: 'imperative-action' })
+		});
 		expect(readout('snap')).toBe('0.25');
 		await vi.waitFor(() => expect(readout('offset')).toBe(`${AVAILABLE * 0.75}`));
 	});
@@ -765,12 +768,34 @@ describe('Dialog snap points (DLG-5)', () => {
 		expect(readout('offset')).toBe(`${AVAILABLE * 0.9 - 400}`);
 	});
 
+	test('snap points that resolve to nothing never dismiss a drawer that opted out of swiping', async () => {
+		// Numbers above 1 are invalid and dropped, leaving no point to rest at.
+		const onOpenChange = vi.fn();
+		const node = snapSetup({ snapPoints: [2, 5], swipeToDismiss: false, onOpenChange });
+		await dragBy(node, 300);
+		expect(onOpenChange).not.toHaveBeenCalled();
+		expect(document.querySelector('[role="dialog"]')).toBeInTheDocument();
+	});
+
+	test('snap points that resolve to nothing still dismiss a drawer that swipes to dismiss', async () => {
+		const onOpenChange = vi.fn();
+		const node = snapSetup({ snapPoints: [2, 5], onOpenChange });
+		await dragBy(node, 300);
+		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(
+			false,
+			expect.objectContaining({ reason: 'swipe' })
+		);
+	});
+
 	test('top drawers snap the other way', async () => {
 		const onSnapPointChange = vi.fn();
 		const node = snapSetup({ type: 'drawerTop', onSnapPointChange });
 		// A top drawer is dismissed upward: dragging up 300px rests at the middle point.
 		await dragBy(node, -300);
-		expect(onSnapPointChange).toHaveBeenCalledExactlyOnceWith(0.5, expect.anything());
+		expect(onSnapPointChange).toHaveBeenCalledExactlyOnceWith({
+			snapPoint: 0.5,
+			details: expect.anything()
+		});
 		await vi.waitFor(() => expect(readout('offset')).toBe(`${-AVAILABLE * 0.5}`));
 	});
 

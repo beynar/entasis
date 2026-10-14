@@ -58,6 +58,7 @@
 		{#snippet children(dialog)}
 			<button type="button" onclick={dialog.close}>Close law dialog</button>
 			<input aria-label="Draft" />
+			<input aria-label="Second draft" />
 		{/snippet}
 	</Dialog>
 </Theme>

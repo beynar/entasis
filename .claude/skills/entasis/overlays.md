@@ -61,7 +61,7 @@ Modal/drawer overlay that blocks page interaction.
 | `closeButton`         | `Snippet \| false`                                                                                     | the default button                                       |
 | `snapPoints`          | `(number \| string)[]` (bottom and top drawers)                                                        | -                                                        |
 | `snapPoint`           | `number \| string` (bindable), `defaultSnapPoint` sets where it opens                                  | the largest point                                        |
-| `onSnapPointChange`   | `(snapPoint, details) => void`; `details.cancel()` keeps the current point                             | -                                                        |
+| `onSnapPointChange`   | `({ snapPoint, details }) => void`; `details.cancel()` keeps the current point                         | -                                                        |
 | `transition`          | `TransitionConfig`                                                                                     | -                                                        |
 
 `type` accepts a responsive record such as `{ xs: 'drawerBottom', md: 'modal' }` (nearest defined key at or below the active breakpoint wins); a `modal` collapses into a bottom sheet on mobile by default, and drawers can be dragged toward their edge to dismiss. `aria-labelledby` / `aria-describedby` link `title` and `description`; focus is restored to the opener before `onAfterClose`.
@@ -72,7 +72,7 @@ ignores outside presses unless `closeOnClickOutside` is set explicitly; Escape s
 
 `modal={false}` leaves the page usable: no `inert` page, scroll lock, backdrop or Tab containment,
 and outside presses do not dismiss it; Escape and the close button still do. Every way out (Escape,
-an outside press, the close button, a swipe, Android Back) goes through `onOpenChange` first, so
+an outside press, the close button, a swipe, Android Back for modal dialogs) goes through `onOpenChange` first, so
 `details.cancel()` can hold any of them back (ask before discarding a draft); a cancelled swipe
 snaps back. The close button is named `Close`; with `closeButton={false}` (or a snippet that renders
 nothing, as the Popover mobile sheet passes) a closable dialog keeps a visually hidden `Close`

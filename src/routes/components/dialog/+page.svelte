@@ -435,7 +435,7 @@ ${'</' + 'script>'}
 	title="Snap points"
 	snapPoints={[0.3, 0.6, 1]}
 	bind:snapPoint
-	onSnapPointChange={(point, details) => console.log(point, details.reason)}
+	onSnapPointChange={({ snapPoint, details }) => console.log(snapPoint, details.reason)}
 	trigger={{ content: 'Open sheet' }}
 >
 	{#snippet children(dialog)}
@@ -451,8 +451,8 @@ ${'</' + 'script>'}
 					description="Drag the handle, or use the buttons."
 					{snapPoints}
 					bind:snapPoint
-					onSnapPointChange={(point, details) =>
-						(snapLog = `onSnapPointChange(${point}, { reason: '${details.reason}' })`)}
+					onSnapPointChange={({ snapPoint, details }) =>
+						(snapLog = `onSnapPointChange({ snapPoint: ${snapPoint}, details: { reason: '${details.reason}' } })`)}
 					trigger={{ content: 'Open sheet', color: 'primary' }}
 				>
 					{#snippet children(dialog)}
@@ -508,7 +508,7 @@ html[data-dialog-open] .app-shell {
 
 		<ComponentCard
 			title="Fields above the keyboard"
-			description="In a bottom sheet (or a modal collapsed into one on mobile), the sheet makes room for the on-screen keyboard while a field inside has focus: its bottom padding grows by --keyboard-inset, and the field is centered once the keyboard has stopped moving. Chrome on Android resizes the layout instead; add interactive-widget=resizes-content to the viewport meta tag to opt in there."
+			description="In a bottom sheet (or a modal collapsed into one on mobile), the sheet makes room for the on-screen keyboard while a field inside has focus: its bottom padding grows by --keyboard-inset, and the field is centered once the keyboard has stopped moving. Browsers that resize the layout for the keyboard (Chrome on Android only with interactive-widget=resizes-content in the viewport meta tag) report no inset and need no help; by default Chrome on Android reports it like iOS."
 			code={`<Dialog type="drawerBottom" title="Reply" trigger={{ content: 'Reply' }}>
 	<TextInput label="Subject" />
 	<TextArea label="Message" />
