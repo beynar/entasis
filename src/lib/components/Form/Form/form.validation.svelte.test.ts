@@ -517,6 +517,53 @@ describe('FD-11 · async validators', () => {
 		expect(field.validating).toBe(false);
 	});
 
+	test('a form that disables itself while loading still honours a failing validator', async () => {
+		const onSubmit = vi.fn();
+		const pending = deferred<string | null>();
+		const { form } = mount(
+			{ b: { type: 'text', label: 'B', onValidate: () => pending.promise } },
+			{ onSubmit, actions, disableWhileLoading: true }
+		);
+		await type('B', 'ada');
+		const outcome = form().submit();
+		await tick();
+		expect(form().loading).toBe(true);
+		expect(box('B')).toBeDisabled();
+		pending.resolve('Taken');
+		await expect(outcome).resolves.toBe(false);
+		expect(onSubmit).not.toHaveBeenCalled();
+		await waitFor(() => expect(errorOf('B')).toBe('Taken'));
+		await waitFor(() => expect(box('B')).toHaveFocus());
+	});
+
+	test('a pending result is dropped when an edit starts no new validation', async () => {
+		const first = deferred<string | null>();
+		const { form } = mount(
+			{ b: { type: 'text', label: 'B', onValidate: () => first.promise } },
+			{ validationMode: 'blur' }
+		);
+		box('B').focus();
+		await type('B', 'ada');
+		box('B').blur();
+		await waitFor(() => expect(form().fields.get('b')!.validating).toBe(true));
+		await type('B', 'adam');
+		expect(form().fields.get('b')!.validating).toBe(false);
+		first.resolve('Taken');
+		await new Promise((resolve) => setTimeout(resolve, 10));
+		expect(errorOf('B')).toBeUndefined();
+		expect(box('B')).toHaveValue('adam');
+	});
+
+	test('validateField reads a field with a pending async validator as not valid yet', async () => {
+		const pending = deferred<string | null>();
+		const { form } = mount({
+			b: { type: 'text', label: 'B', onValidate: () => pending.promise }
+		});
+		await type('B', 'ada');
+		expect(form().validateField('b')).toBe(false);
+		pending.resolve(null);
+	});
+
 	test('validateAsync waits and returns the validated value', async () => {
 		const pending = deferred<string | null>();
 		const { form } = mount({

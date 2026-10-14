@@ -7,11 +7,16 @@
 	let {
 		onValidate,
 		onSubmitStep,
-		onSubmitForm
+		onSubmitForm,
+		validationMode,
+		roleDisabled = false
 	}: {
 		onValidate?: (value: string) => string | null | Promise<string | null>;
 		onSubmitStep?: () => void | boolean | Promise<void | boolean>;
-		onSubmitForm?: () => void | Promise<void>;
+		onSubmitForm?: (value: unknown) => void | Promise<void>;
+		validationMode?: 'submit' | 'blur' | 'change';
+		/** Adds a disabled, required field to the first step. */
+		roleDisabled?: boolean;
 	} = $props();
 </script>
 
@@ -21,11 +26,17 @@
 		items={[
 			{
 				title: 'Account',
-				inputs: { name: { type: 'text', label: 'Name', required: true, onValidate } }
+				inputs: {
+					name: { type: 'text', label: 'Name', required: true, onValidate },
+					...(roleDisabled
+						? { role: { type: 'text', label: 'Role', required: true, disabled: true } }
+						: {})
+				}
 			},
 			{ title: 'Contact', inputs: { email: { type: 'email', label: 'Email' } } }
 		]}
 		{onSubmitStep}
 		{onSubmitForm}
+		{validationMode}
 	/>
 </Theme>

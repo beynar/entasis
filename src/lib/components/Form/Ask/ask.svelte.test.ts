@@ -69,4 +69,21 @@ describe('ask()', () => {
 		expect(result).toEqual({ submitted: true, value: { email: 'ada@example.com' } });
 		expect(result.value).not.toHaveProperty('role');
 	});
+
+	test('validationMode reaches the fields', async () => {
+		render(AskHarness);
+		const outcome = ask({
+			title: 'Rename',
+			inputs: { name: { type: 'text', label: 'Name', required: true } },
+			validationMode: 'change',
+			confirm: 'Save',
+			cancel: 'Cancel'
+		});
+		const name = await screen.findByRole('textbox', { name: 'Name' });
+		await fireEvent.input(name, { target: { value: 'Ada' } });
+		await fireEvent.input(name, { target: { value: '' } });
+		await waitFor(() => expect(name).toHaveAttribute('aria-invalid', 'true'));
+		await fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+		await outcome;
+	});
 });

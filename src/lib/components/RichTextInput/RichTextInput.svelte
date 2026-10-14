@@ -24,6 +24,8 @@
 		required = false,
 		name,
 		onValidate,
+		validationMode,
+		validationDebounce,
 		visible,
 		triggers = {},
 		onSuggestionOpen,
@@ -102,6 +104,12 @@
 		},
 		get required() {
 			return required;
+		},
+		get validationMode() {
+			return validationMode;
+		},
+		get validationDebounce() {
+			return validationDebounce;
 		},
 		get name() {
 			return name;

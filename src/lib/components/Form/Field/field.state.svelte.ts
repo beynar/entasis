@@ -627,7 +627,11 @@ export const createFieldState = <T extends FieldType>(
 			field.hasValidationError ||
 			field.activeValidationMode === 'change' ||
 			(form !== undefined && form.submitCount > 0);
-		if (!wanted || field.disabled) return;
+		if (!wanted || field.disabled) {
+			// The value moved on and nothing validates it: a pending result belongs to the old value.
+			if (validating) cancelValidation();
+			return;
+		}
 		clearTimeout(changeTimer);
 		changeTimer = undefined;
 		const delay = field.activeValidationDebounce;

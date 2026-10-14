@@ -12,6 +12,7 @@
 		onForm,
 		customField = false,
 		reduceMotion,
+		disableWhileLoading = false,
 		value = $bindable({}),
 		...rest
 	}: {
@@ -20,6 +21,8 @@
 		/** Appends a `type: 'field'` entry named `custom`. */
 		customField?: boolean;
 		reduceMotion?: boolean;
+		/** Binds the Form's `disabled` to its own `loading`, as the docs recommend. */
+		disableWhileLoading?: boolean;
 		value?: LiveFormValue<FormInputs>;
 		[key: string]: unknown;
 	} = $props();
@@ -44,6 +47,7 @@
 			: inputs}
 		bind:form
 		bind:value
+		disabled={disableWhileLoading ? form?.loading : undefined}
 		{...rest}
 	/>
 	<output data-testid="value">{JSON.stringify(value)}</output>

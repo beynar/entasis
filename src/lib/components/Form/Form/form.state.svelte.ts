@@ -136,6 +136,7 @@ export class FormState<I extends FormInputs = FormInputs> {
 	// Server errors by field name, kept for fields that register after they were set.
 	private externalErrors = new SvelteMap<string, string[]>();
 	private revealAfterSubmit = false;
+	private revealFieldAfterSubmit: RegisteredField | null = null;
 	/** How many times the form was validated to submit; fields re-validate on edit after the first. */
 	submitCount = $state(0);
 
@@ -346,13 +347,15 @@ export class FormState<I extends FormInputs = FormInputs> {
 	/**
 	 * Validates one field now and returns whether it is valid. A field that is not a visible
 	 * field of this form reads as invalid; a disabled one skips validation and reads as valid.
+	 * A field whose async validator is still running reads as invalid: use `validateAsync` to wait.
 	 * It neither scrolls nor focuses, and does not count as a submit attempt.
 	 */
 	validateField = (name: string): boolean => {
 		const field = this.fields.get(name);
 		if (!field || !this.isInputVisible(name)) return false;
 		const [hasError] = field.validate();
-		return !hasError;
+		// A pending async validator has not accepted the value yet.
+		return !hasError && !field.validating;
 	};
 
 	submit = (): Promise<InferFormValue<I> | false> => {
@@ -376,6 +379,9 @@ export class FormState<I extends FormInputs = FormInputs> {
 			} finally {
 				this.loading = false;
 				this.submitPromise = null;
+				const invalid = this.revealFieldAfterSubmit;
+				this.revealFieldAfterSubmit = null;
+				if (invalid) void tick().then(() => this.revealField(invalid));
 			}
 		})();
 		return this.submitPromise;
@@ -494,14 +500,17 @@ export class FormState<I extends FormInputs = FormInputs> {
 
 	private fail(field: RegisteredField, reveal: boolean): false {
 		this.hasError = true;
-		if (reveal) this.revealField(field);
+		// A form that disables itself while submitting cannot focus yet: reveal once it is done.
+		if (reveal && this.loading && field.disabled) this.revealFieldAfterSubmit = field;
+		else if (reveal) this.revealField(field);
 		return false;
 	}
 
-	private firstInvalidField(): RegisteredField | null {
-		for (const definition of this.getActiveFieldDefinitions()) {
-			const field = this.fields.get(definition.name);
-			if (field && !field.disabled && field.hasValidationError) return field;
+	// The fields the pass validated, in render order: a form that disables itself while it
+	// submits must still honour what their validators decided.
+	private firstInvalidField(pass: ValidationPass): RegisteredField | null {
+		for (const [field] of pass.snapshot) {
+			if (field.hasValidationError) return field;
 		}
 		return null;
 	}
@@ -520,7 +529,7 @@ export class FormState<I extends FormInputs = FormInputs> {
 		}
 
 		return Promise.all(pass.validating.map((field) => field.settle())).then(() => {
-			const invalid = this.firstInvalidField();
+			const invalid = this.firstInvalidField(pass);
 			if (invalid) return this.fail(invalid, reveal);
 			// A field edited while the validators ran is validated again before the value is used.
 			const edited = pass.snapshot.some(([field, value]) => !Object.is(field.value, value));

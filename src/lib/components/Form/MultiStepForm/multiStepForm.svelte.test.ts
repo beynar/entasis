@@ -74,4 +74,26 @@ describe('MultiStepForm submission', () => {
 		await waitFor(() => expect(onSubmitStep).toHaveBeenCalledOnce());
 		expect(onValidate).toHaveBeenCalledOnce();
 	});
+
+	test('validationMode reaches the fields of every step', async () => {
+		render(MultiStepFormHarness, { props: { validationMode: 'change' } });
+		await fireEvent.input(name(), { target: { value: 'Ada' } });
+		await fireEvent.input(name(), { target: { value: '' } });
+		await waitFor(() => expect(name()).toHaveAttribute('aria-invalid', 'true'));
+	});
+
+	test('disabled fields are left out of the merged payload', async () => {
+		const onSubmitForm = vi.fn();
+		render(MultiStepFormHarness, { props: { roleDisabled: true, onSubmitForm } });
+		await fireEvent.input(name(), { target: { value: 'Ada' } });
+		await fireEvent.click(next());
+		await fireEvent.input(await screen.findByRole('textbox', { name: 'Email' }), {
+			target: { value: 'ada@example.com' }
+		});
+		await fireEvent.click(screen.getByRole('button', { name: /submit|finish|done/i }));
+		await waitFor(() => expect(onSubmitForm).toHaveBeenCalledOnce());
+		const value = onSubmitForm.mock.calls[0][0] as Record<string, unknown>;
+		expect(JSON.stringify(value)).toContain('Ada');
+		expect(JSON.stringify(value)).not.toContain('role');
+	});
 });
