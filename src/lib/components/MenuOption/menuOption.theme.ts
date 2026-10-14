@@ -141,7 +141,7 @@ const defaultMenuOptionContent = cva({
 const defaultMenuOptionIndicator = cva({
 	// The check of a checkbox or radio row stays mounted: unchecking fades and shrinks it instead
 	// of removing it, so the exit plays.
-	base: 'inline-flex shrink-0 items-center justify-center transition-[opacity,scale] duration-150 ease-out motion-reduce:transition-none',
+	base: 'inline-flex shrink-0 items-center justify-center transition-[opacity,scale] duration-fast ease-standard motion-reduce:transition-none',
 	variants: {
 		checked: {
 			true: 'opacity-100 scale-100',
