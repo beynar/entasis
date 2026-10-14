@@ -614,6 +614,57 @@ describe('FD-TEST · the first invalid field in render order', () => {
 	});
 });
 
+describe('FD-11 · async validators and the first invalid field', () => {
+	const pair = (pending: Promise<string | null>) =>
+		({
+			username: { type: 'text', label: 'Username', onValidate: () => pending },
+			email: { type: 'email', label: 'Email', required: true }
+		}) satisfies FormInputs;
+
+	test('a sync error after a pending async field waits for it, so the earlier field takes focus', async () => {
+		const pending = deferred<string | null>();
+		const onSubmit = vi.fn();
+		const { form } = mount(pair(pending.promise), { onSubmit, actions });
+		await type('Username', 'ada');
+		await type('Email', 'bad@');
+		await submit();
+		await tick();
+		expect(form().loading).toBe(true);
+		expect(box('Email')).not.toHaveFocus();
+		pending.resolve('Taken');
+		await waitFor(() => expect(errorOf('Username')).toBe('Taken'));
+		await waitFor(() => expect(box('Username')).toHaveFocus());
+		expect(form().loading).toBe(false);
+		expect(onSubmit).not.toHaveBeenCalled();
+	});
+
+	test('the sync error takes focus when the earlier async field turns out valid', async () => {
+		const pending = deferred<string | null>();
+		const { form } = mount(pair(pending.promise), { actions });
+		await type('Username', 'ada');
+		await type('Email', 'bad@');
+		await submit();
+		pending.resolve(null);
+		await waitFor(() => expect(box('Email')).toHaveFocus());
+		expect(form().loading).toBe(false);
+	});
+
+	test('a sync error before the pending field fails at once', async () => {
+		const pending = deferred<string | null>();
+		const inputs = {
+			email: { type: 'email', label: 'Email', required: true },
+			username: { type: 'text', label: 'Username', onValidate: () => pending.promise }
+		} satisfies FormInputs;
+		const { form } = mount(inputs, { actions });
+		await type('Username', 'ada');
+		await type('Email', 'bad@');
+		await submit();
+		await tick();
+		expect(box('Email')).toHaveFocus();
+		expect(form().loading).toBe(false);
+	});
+});
+
 describe('FD-9 · error transition', () => {
 	const keyframesOf = (spy: { mock: { calls: unknown[][] } }) =>
 		spy.mock.calls.map(([keyframes]) => keyframes as Keyframe[]);

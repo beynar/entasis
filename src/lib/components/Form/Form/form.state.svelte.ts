@@ -522,7 +522,18 @@ export class FormState<I extends FormInputs = FormInputs> {
 		attempt = 0
 	): InferFormValue<I> | false | Promise<InferFormValue<I> | false> {
 		const pass = this.collect();
-		if (pass.firstErrored) return this.fail(pass.firstErrored, reveal);
+		if (pass.firstErrored) {
+			// An async field that renders before the sync error may still turn out invalid: it
+			// leads, so focus waits for its result.
+			const order = pass.snapshot.map(([field]) => field);
+			const errorIndex = order.indexOf(pass.firstErrored);
+			const earlier = pass.validating.filter((field) => order.indexOf(field) < errorIndex);
+			if (earlier.length === 0) return this.fail(pass.firstErrored, reveal);
+			const firstErrored = pass.firstErrored;
+			return Promise.all(earlier.map((field) => field.settle())).then(() =>
+				this.fail(this.firstInvalidField(pass) ?? firstErrored, reveal)
+			);
+		}
 		if (pass.validating.length === 0) {
 			this.hasError = false;
 			return pass.value as InferFormValue<I>;
