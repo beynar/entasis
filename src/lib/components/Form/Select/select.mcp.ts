@@ -97,7 +97,7 @@ Extends all Field component props plus:
 ### Callbacks
 - **onValueChange**: (value) => void - Fires when the selection changes: the new string or \`null\`, or with \`multiple\` the new array (once per toggle)
 - **onValidate**: (value) => string[] | boolean - Custom validation
-- **onOpenChange**: (open, details) => void - Runs before the list opens or closes. \`details\` carries \`reason\` (\`'trigger-press'\`, \`'list-navigation'\` for an arrow-key open, \`'item-press'\`, \`'escape-key'\`, \`'focus-out'\`, \`'close-press'\`, \`'imperative-action'\`), the originating \`event\`, the \`trigger\`, the \`interaction\` (\`'mouse'\`, \`'touch'\`, \`'pen'\`, \`'keyboard'\`, \`'programmatic'\`) and \`cancel()\`, which keeps the list as it is. Setting \`open\` from outside is silent
+- **onOpenChange**: (open, details) => void - Runs before the list opens or closes. \`details\` carries \`reason\` (\`'trigger-press'\`, \`'list-navigation'\` for an arrow-key open, \`'item-press'\`, \`'escape-key'\`, \`'outside-press'\` (a press outside the list), \`'focus-out'\`, \`'close-press'\`, \`'imperative-action'\`), the originating \`event\`, the \`trigger\`, the \`interaction\` (\`'mouse'\`, \`'touch'\`, \`'pen'\`, \`'keyboard'\`, \`'programmatic'\`) and \`cancel()\`, which keeps the list as it is. Setting \`open\` from outside is silent
 - **onAfterOpen** / **onAfterClose**: () => void - Once per open and close, after the transition (right away when none plays)
 
 ### Advanced Props

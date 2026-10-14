@@ -258,7 +258,9 @@ Unreleased section under the new version.
   selects the option whose value matches, else whose label matches (ignoring case and accents),
   without opening the list. A `required` Select blocks a native form submit until it has a value.
 - `Select`: `open`, `defaultOpen`, `onOpenChange(open, details)` (with `reason`, `event`,
-  `interaction` and `cancel()`), `onAfterOpen` and `onAfterClose`.
+  `interaction` and `cancel()`), `onAfterOpen` and `onAfterClose`. A press outside the list reports
+  `reason: 'outside-press'` with the pointer's interaction (`mouse`, `touch` or `pen`); focus moving
+  away by keyboard stays `'focus-out'`.
 - `Select`: `clearable` adds a button that empties the selection and returns focus to the trigger,
   `id` sets the trigger's id so an external `<label for>` names it, and `items` accept readonly
   arrays (`as const` data). New `SelectValue` type.

@@ -93,6 +93,12 @@ export class SelectState {
 	#pointerType: string | null = null;
 	/** A click on a `<label for>` is on its way to the trigger as a second click. */
 	#labelClick = false;
+	/**
+	 * The last press outside the trigger and panel while the list is open. The blur it causes
+	 * arrives after the press, so it is reported as that press (`outside-press`, with the press's
+	 * pointer type) instead of a keyboard `focus-out`.
+	 */
+	#outsidePress: PointerEvent | null = null;
 	// Where this open session placed the panel. Measured once: later repositioning (the panel
 	// resizing, the list scrolling) must not re-scroll the list under the pointer. A new viewport
 	// size measures again.
@@ -237,6 +243,23 @@ export class SelectState {
 			return () => {
 				window.removeEventListener('wheel', block, listen);
 				window.removeEventListener('touchmove', block, listen);
+			};
+		});
+		// A press outside the list moves focus away from the trigger, which closes it: remember the
+		// press so that close can name it. A key press ends the claim (Tab is a keyboard blur).
+		$effect(() => {
+			if (!this.isOpen) return;
+			const press = (event: PointerEvent) => {
+				this.#outsidePress = this.contains(event.composedPath()[0] ?? event.target) ? null : event;
+			};
+			const clear = () => (this.#outsidePress = null);
+			const listen = { capture: true };
+			window.addEventListener('pointerdown', press, listen);
+			window.addEventListener('keydown', clear, listen);
+			return () => {
+				window.removeEventListener('pointerdown', press, listen);
+				window.removeEventListener('keydown', clear, listen);
+				this.#outsidePress = null;
 			};
 		});
 		// A list opened from outside (`open`, `defaultOpen`) never went through `setOpen`: it starts
@@ -489,14 +512,28 @@ export class SelectState {
 	/** Focus left the trigger: the list closes, unless focus moved into the panel (a screen reader's cursor). */
 	onTriggerBlur = (event: FocusEvent) => {
 		if (this.contains(event.relatedTarget)) return;
-		this.close({ reason: 'focus-out', event });
+		this.#closeFromFocusOut(event);
 	};
 
 	/** Focus left the panel: the list closes unless it went back to the trigger or stayed inside. */
 	onPanelFocusOut = (event: FocusEvent) => {
 		if (this.contains(event.relatedTarget)) return;
-		this.close({ reason: 'focus-out', event });
+		this.#closeFromFocusOut(event);
 	};
+
+	/** Closes because focus left: as an `outside-press` when a recent press outside caused it. */
+	#closeFromFocusOut(event: FocusEvent) {
+		const press = this.#outsidePress;
+		// A press is a recent cause only: a stale one (focus moved by code long after) is not.
+		if (press && event.timeStamp - press.timeStamp < 1000) {
+			const type = press.pointerType;
+			this.close({
+				reason: 'outside-press',
+				event: press,
+				interaction: type === 'touch' || type === 'pen' ? type : 'mouse'
+			});
+		} else this.close({ reason: 'focus-out', event });
+	}
 
 	/** Keys while focus rests in the panel (a screen reader moved it onto an option). */
 	onPanelKeydown = (event: KeyboardEvent) => {

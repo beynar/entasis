@@ -96,7 +96,7 @@ type SelectSharedProps = {
 	/**
 	 * Called before the list opens or closes, with the requested state and the change details:
 	 * `reason` (`'trigger-press'`, `'list-navigation'`, `'item-press'`, `'escape-key'`,
-	 * `'focus-out'`, `'close-press'`, `'imperative-action'`…), the originating `event`, the
+	 * `'outside-press'`, `'focus-out'`, `'close-press'`, `'imperative-action'`…), the originating `event`, the
 	 * `trigger` element, the `interaction` type and `cancel()`. Calling `details.cancel()` keeps
 	 * the list as it is. Inside the callback, `open` still holds the previous state.
 	 */
