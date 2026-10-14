@@ -56,6 +56,38 @@ describe('opening a menu from its trigger', () => {
 	});
 });
 
+describe('direction', () => {
+	test('a11y:menu-bar.rtl-runtime a page switched to rtl after the bar was used mirrors the arrows', async () => {
+		renderInTheme(MenuBar, {
+			menus: ['File', 'Edit', 'Help'].map((label) => ({
+				label,
+				items: [{ type: 'option' as const, title: `${label} item` }]
+			}))
+		});
+		const file = screen.getByRole('menuitem', { name: 'File' });
+		file.focus();
+		await fireEvent.keyDown(file, { key: 'ArrowDown' });
+		await waitFor(() => expect(menus()).toHaveLength(1));
+		await fireEvent.keyDown(document.activeElement!, { key: 'ArrowRight' });
+		await waitFor(() =>
+			expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'Edit item' }))
+		);
+
+		// jsdom does not inherit `direction`, so it is set on the bar itself.
+		const bar = screen.getByRole('menubar');
+		bar.style.direction = 'rtl';
+		try {
+			// In rtl ArrowLeft is "next": Edit gives way to Help, not back to File.
+			await fireEvent.keyDown(document.activeElement!, { key: 'ArrowLeft' });
+			await waitFor(() =>
+				expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'Help item' }))
+			);
+		} finally {
+			bar.style.direction = '';
+		}
+	});
+});
+
 describe('closing', () => {
 	test('a menu that closes does not take focus back from a control Tab reached', async () => {
 		mount();

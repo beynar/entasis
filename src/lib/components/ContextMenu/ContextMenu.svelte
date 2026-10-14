@@ -89,12 +89,17 @@
 
 	// The point the open menu is anchored to, so a second right-click near it closes the menu.
 	let anchorPoint: { x: number; y: number } | null = null;
+	// Whether the open in progress came from the keyboard. The PopupMenu receives `open` as a
+	// controlled prop, so it sees every open as one made from code and cannot read the key itself:
+	// a keyboard open asks for the first row, a pointer open leaves the menu container focused.
+	let keyboardOpen = $state(false);
 
 	async function openAt(x: number, y: number, event: Event) {
 		// Close first so a second request re-mounts the menu at the new point.
 		setOpen(false, createOpenChangeDetails({ reason: 'trigger-press', event }));
 		await tick();
 		anchorPoint = { x, y };
+		keyboardOpen = event instanceof KeyboardEvent;
 		reference = { getBoundingClientRect: () => new DOMRect(x, y, 0, 0) };
 		setOpen(true, createOpenChangeDetails({ reason: 'trigger-press', event }));
 	}
@@ -207,5 +212,5 @@
 	{position}
 	{collisionBoundary}
 	nativeMenu={false}
-	menu={{ items, ...menu }}
+	menu={{ items, focusOnMount: keyboardOpen ? true : undefined, ...menu }}
 />

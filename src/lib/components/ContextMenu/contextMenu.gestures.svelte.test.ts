@@ -161,6 +161,35 @@ describe('right-click', () => {
 	});
 });
 
+describe('keyboard open', () => {
+	test('a11y:context-menu.keyboard Shift+F10 opens the menu with the first row highlighted', async () => {
+		const { target } = mount({
+			items: [
+				{ type: 'option', title: 'Copy' },
+				{ type: 'option', title: 'Paste' }
+			]
+		});
+		target.focus();
+		await fireEvent.keyDown(target, { key: 'F10', shiftKey: true });
+		await waitFor(() => expect(screen.queryByRole('menu')).not.toBeNull());
+		await waitFor(() =>
+			expect(screen.getByRole('menuitem', { name: 'Copy' })).toHaveAttribute('data-highlighted')
+		);
+		expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'Copy' }));
+	});
+
+	test('the ContextMenu key does the same, and a right-click after it focuses the menu itself', async () => {
+		const { target } = mount();
+		await fireEvent.keyDown(target, { key: 'ContextMenu' });
+		await waitFor(() =>
+			expect(screen.getByRole('menuitem', { name: 'Copy' })).toHaveAttribute('data-highlighted')
+		);
+		await fireEvent.contextMenu(target, { clientX: 300, clientY: 300 });
+		await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('menu')));
+		expect(screen.getByRole('menuitem', { name: 'Copy' })).not.toHaveAttribute('data-highlighted');
+	});
+});
+
 describe('touch callout', () => {
 	test('the wrapper turns the iOS callout off while the menu is enabled', () => {
 		const { target } = mount();

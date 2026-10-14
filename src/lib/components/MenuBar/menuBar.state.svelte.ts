@@ -35,8 +35,10 @@ export function useMenuBarState(
 		const index = openStates.findIndex(Boolean);
 		return index === -1 ? null : index;
 	});
-	const nextKey = $derived(getDirection() === 'rtl' ? 'ArrowLeft' : 'ArrowRight');
-	const previousKey = $derived(getDirection() === 'rtl' ? 'ArrowRight' : 'ArrowLeft');
+	// Read when a key arrives, not derived: the direction comes from computed style, which has no
+	// reactive dependency, so a `dir` changed on the page after the bar was used would stay cached.
+	const nextKey = () => (getDirection() === 'rtl' ? 'ArrowLeft' : 'ArrowRight');
+	const previousKey = () => (getDirection() === 'rtl' ? 'ArrowRight' : 'ArrowLeft');
 
 	$effect(() => {
 		const menuCount = getMenus().length;
@@ -166,16 +168,17 @@ export function useMenuBarState(
 				node,
 				'keydown',
 				(event) => {
-					if (event.key !== nextKey && event.key !== previousKey) return;
+					const next = nextKey();
+					if (event.key !== next && event.key !== previousKey()) return;
 					// Alt/Ctrl/Meta + an arrow is a browser shortcut (Alt+ArrowLeft is Back).
 					if (hasShortcutModifier(event)) return;
 
 					const target = event.target as HTMLElement & { onNext?: () => void };
-					if (event.key === nextKey && typeof target.onNext === 'function') return;
+					if (event.key === next && typeof target.onNext === 'function') return;
 
 					event.preventDefault();
 					event.stopPropagation();
-					moveOpenMenu(index, event.key === nextKey ? 1 : -1);
+					moveOpenMenu(index, event.key === next ? 1 : -1);
 				},
 				{ capture: true }
 			);
