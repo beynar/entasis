@@ -3,6 +3,7 @@
 	import { Button } from '$lib/components/Button/index.js';
 	import { TextInput } from '$lib/components/Form/TextInput/index.js';
 	import { Chip } from '$lib/components/Chip/index.js';
+	import { Switch } from '$lib/components/Form/Switch/index.js';
 	import { userIcon } from '$lib/components/Icons/user.js';
 	import { houseIcon } from '$lib/components/Icons/house.js';
 	import { gearIcon } from '$lib/components/Icons/gear.js';
@@ -63,6 +64,15 @@
 		}
 	];
 	let lastChangedTab = $state('Personal Info');
+
+	// Manual activation: count how often each panel is built, to show that arrowing over a tab
+	// builds nothing until Enter or Space opens it.
+	const manualTabs = ['Inbox', 'Drafts', 'Sent', 'Spam'];
+	let manualBuilt = $state(0);
+	let manualActivateOnFocus = $state(false);
+	const countBuild = () => {
+		manualBuilt += 1;
+	};
 
 	// The first tab is disabled, so the default selection is the second one. Removing or
 	// disabling the active tab moves the selection to an enabled tab and reports why.
@@ -414,6 +424,54 @@
 		</ComponentCard>
 
 		<ComponentCard
+			title="Manual activation"
+			description="By default the arrow keys select the tab they move to. With tabbar.activateOnFocus set to false they only move focus, and Enter, Space or a click opens the tab. Each lazy panel is built when it opens, so arrowing across the list builds none of the panels it passes. Focus the tab list and press the arrow keys, then Enter."
+			code={`<Tabs {items} tabbar={{ activateOnFocus: false }}>
+	{#snippet children({ item })}
+		<!-- Panel content: built only when its tab opens -->
+	{/snippet}
+</Tabs>`}
+		>
+			<div class="flex w-full flex-col gap-4">
+				<Switch bind:value={manualActivateOnFocus} label="activateOnFocus" />
+				{#key manualActivateOnFocus}
+					<Tabs
+						class="w-full"
+						items={manualTabs}
+						tabbar={{ activateOnFocus: manualActivateOnFocus, variant: 'pill' }}
+					>
+						{#snippet children({ item })}
+							<section class="space-y-2 p-6" {@attach countBuild}>
+								<h3 class="text-xl font-semibold">{item}</h3>
+								<p class="text-neutral/80">This panel was built when its tab opened.</p>
+							</section>
+						{/snippet}
+					</Tabs>
+				{/key}
+				<p class="text-neutral/70 text-sm" data-testid="tabs-manual-status">
+					panels built: {manualBuilt}
+				</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Activation direction"
+			description="Tabs sets data-activation-direction on its root and on the active panel: left or right for a horizontal list (mirrored in right-to-left documents), up or down for a vertical one, and none before the first change. A programmatic change of value sets it too. Style direction-aware panel animations with it; this card prints the value with CSS."
+			code={`.my-tabs[data-activation-direction='right'] [role='tabpanel']:not([hidden]) {
+	/* the new tab is to the right of the previous one */
+}`}
+		>
+			<Tabs class="activation-demo w-full" items={simpleTabs} tabbar={{ variant: 'pill' }}>
+				{#snippet children({ item })}
+					<section class="space-y-2 p-6">
+						<h3 class="text-xl font-semibold">{item.title}</h3>
+						<p class="text-neutral/80">{item.description}</p>
+					</section>
+				{/snippet}
+			</Tabs>
+		</ComponentCard>
+
+		<ComponentCard
 			description="Customize tabbar size, color, and alignment without changing panel composition."
 		>
 			<Tabs
@@ -436,3 +494,11 @@
 		</ComponentCard>
 	{/snippet}
 </DocPage>
+
+<style>
+	:global(.activation-demo[data-activation-direction])::after {
+		content: 'data-activation-direction: ' attr(data-activation-direction);
+		font-size: 0.75rem;
+		opacity: 0.7;
+	}
+</style>

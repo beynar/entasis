@@ -28,6 +28,7 @@
 		label,
 		controlsPanels = false,
 		onValueChange,
+		activateOnFocus = true,
 		size = 'normal',
 		orientation = 'horizontal',
 		color,
@@ -62,7 +63,7 @@
 		origin,
 		onFallback: (next, { reason }) => {
 			valueState.value = next;
-			if (reason) onValueChange?.(next);
+			if (reason) onValueChange?.(next, { reason });
 		}
 	});
 	/** Index of the active tab; -1 when no tab is selected. */
@@ -75,7 +76,7 @@
 		if (selectedIndex === index || isTabDisabled(items[index])) return;
 		const next = tabValues[index];
 		valueState.value = next;
-		onValueChange?.(next);
+		onValueChange?.(next, { reason: 'user' });
 	};
 
 	type NormalizedTab = {
@@ -144,8 +145,14 @@
 		enableHoverFocus: false,
 		onChange: (index) => {
 			// Menu tabs activate manually (via entry selection), never by focus alone —
-			// arrowing onto the trigger must not slide the indicator to it.
-			if (index !== null && index !== selectedIndex && !normalizedTabs[index]?.menu) {
+			// arrowing onto the trigger must not slide the indicator to it. With
+			// `activateOnFocus={false}` no tab activates by focus: Enter, Space or a click does.
+			if (
+				activateOnFocus &&
+				index !== null &&
+				index !== selectedIndex &&
+				!normalizedTabs[index]?.menu
+			) {
 				select(index);
 			}
 		},

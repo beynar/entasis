@@ -98,6 +98,7 @@
 	let fallbackTabs = $state(fallbackSeed);
 	let fallbackActiveTab = $state<string>();
 	let fallbackReports = $state<string[]>([]);
+	let manualActiveTab = $state('Inbox');
 </script>
 
 <DocPage
@@ -137,7 +138,7 @@
 
 	{#snippet examples()}
 		<ComponentCard
-			description="Use Arrow keys (Left/Right for horizontal, Up/Down for vertical) to move focus; Home/End jump to first/last tab; Enter or Space activates the focused tab."
+			description="Use Arrow keys (Left/Right for horizontal, Up/Down for vertical) to move to a tab and select it; Home/End jump to the first/last tab."
 		>
 			<div class="flex flex-col items-center gap-3">
 				<Tabbar
@@ -147,6 +148,24 @@
 					onValueChange={handleTabChange}
 				/>
 				<p class="text-neutral/70 text-sm">Active tab: {simpleActiveTab}</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Manual activation"
+			description="With activateOnFocus set to false the arrow keys, Home and End only move focus; Enter, Space or a click selects the focused tab. Focus the first tab, press the arrow keys, and watch the selection stay put until you press Enter."
+			code={`<Tabbar items={['Inbox', 'Drafts', 'Sent']} activateOnFocus={false} bind:value />`}
+		>
+			<div class="flex flex-col items-center gap-3">
+				<Tabbar
+					class="w-fit"
+					items={['Inbox', 'Drafts', 'Sent']}
+					activateOnFocus={false}
+					bind:value={manualActiveTab}
+				/>
+				<p class="text-neutral/70 text-sm" data-testid="tabbar-manual-status">
+					Active tab: {manualActiveTab}
+				</p>
 			</div>
 		</ComponentCard>
 

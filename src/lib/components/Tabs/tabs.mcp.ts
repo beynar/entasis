@@ -39,7 +39,7 @@ Use items for the tab collection and a single children snippet for the repeated 
 - placement: top, bottom, left, or right. Also drives the default tabbar orientation.
 - api: bindable TabsApi (a StepperState) for next(), previous(), and goTo(index). next() and previous() step over disabled tabs, as the arrow keys do; goTo() a disabled tab does nothing.
 - transition: panel swap timing override (\`duration\` in ms, \`easing\`); responsive, and it beats the \`motion\` theme slot.
-- tabbar: props forwarded to the inner Tabbar as one object — \`{ size, orientation, color, alignment, fullWidth, variant, scrollFade, label, class, theme }\`. \`orientation\` overrides the placement-derived default.
+- tabbar: props forwarded to the inner Tabbar as one object — \`{ size, orientation, color, alignment, fullWidth, variant, scrollFade, label, activateOnFocus, class, theme }\`. \`orientation\` overrides the placement-derived default. \`activateOnFocus: false\` switches to manual activation (see below).
 - mount: when a panel's content is created — \`lazy\` (default) on first activation and destroyed when the tab is left, \`once\` on first activation and kept, \`eager\` for every panel up front. Inactive panels are \`hidden\` and \`inert\` in every mode.
 - class: extra classes for the root.
 - theme: theme overrides for the Tabs wrapper.
@@ -53,6 +53,14 @@ The tab list and the panels always show the same tab. Tabs moves the selection b
 - \`missing\`: the selected tab was removed from items; its nearest enabled neighbour is selected (the tab that moved into its place first, then the one before it).
 
 Omitting value and defaultValue selects the first enabled tab and reports nothing, including when items arrive after mount. A value the parent sets (on mount or later, by binding or by another control) is never rewritten: a value naming a disabled tab shows that tab, and a value naming no tab selects no tab and shows no panel until a tab with that value appears. When every tab is disabled, nothing can be selected instead, so a value naming one of them stays selected and an unknown value shows no panel.
+
+## Manual activation
+
+By default the arrow keys select the tab they move to. With \`tabbar={{ activateOnFocus: false }}\` they only move focus, and Enter, Space or a click opens the tab. Since \`mount\` defaults to \`lazy\`, selecting on focus builds and destroys a whole panel on every keypress; manual activation builds only the panel you open (APG recommends it when panels are costly).
+
+## Activation direction
+
+Tabs sets \`data-activation-direction\` on its root and on the active panel: where the active tab sits relative to the previously active one, along the tab list's axis. The value is \`left\` or \`right\` for a horizontal list (mirrored in a right-to-left document), \`up\` or \`down\` for a vertical one (\`placement\` left or right), and \`none\` until the selection first changes. A click, a key, \`api\` navigation and a change of the bound \`value\` all set it, in the same render as the new panel. Use it to style direction-aware panel animations, for example \`[data-activation-direction='right'] [role='tabpanel']:not([hidden])\`. It stays until the next change.
 
 ## Composition Rules
 

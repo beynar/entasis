@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Tabbar from './Tabbar.svelte';
-	import type { TabItem } from './tabbar.props.js';
+	import type { TabItem, TabbarValueChangeDetails } from './tabbar.props.js';
 
 	let {
 		items,
@@ -8,7 +8,8 @@
 		defaultValue,
 		externalValue,
 		mirrorItems,
-		onValueChange
+		onValueChange,
+		activateOnFocus
 	}: {
 		items: TabItem[];
 		initialValue?: string;
@@ -16,7 +17,8 @@
 		externalValue?: string;
 		/** Renders a second tab list bound to the same value, as a responsive layout would. */
 		mirrorItems?: TabItem[];
-		onValueChange?: (value: string) => void;
+		onValueChange?: (value: string, details: TabbarValueChangeDetails) => void;
+		activateOnFocus?: boolean;
 	} = $props();
 
 	// svelte-ignore state_referenced_locally
@@ -25,7 +27,7 @@
 
 <button onclick={() => (value = externalValue)}>Set external value</button>
 <div data-testid="tabbar">
-	<Tabbar {items} bind:value {defaultValue} {onValueChange} />
+	<Tabbar {items} bind:value {defaultValue} {onValueChange} {activateOnFocus} />
 </div>
 {#if mirrorItems}
 	<div data-testid="mirror">

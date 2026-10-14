@@ -13,6 +13,8 @@
 	import type { TabsProps, TabsValueChangeReason } from './tabs.props.js';
 	import { useTabsMotion, useTabsTheme } from './tabs.theme.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
+	import { useDirection } from '$lib/utils/useDirection.svelte.js';
+	import { useActivationDirection } from './tabs.direction.svelte.js';
 
 	let {
 		items,
@@ -98,15 +100,28 @@
 		tabbar?.orientation ??
 			(placement === 'left' || placement === 'right' ? 'vertical' : 'horizontal')
 	);
+	let root = $state<HTMLElement | null>(null);
+	const direction = useDirection(() => root);
+	const activationDirection = useActivationDirection({
+		index: () => activeIndex,
+		orientation: () => effectiveTabbarOrientation,
+		direction
+	});
 </script>
 
-<div class={classes.root({ placement, className })} {...attachments}>
+<div
+	bind:this={root}
+	class={classes.root({ placement, className })}
+	data-activation-direction={activationDirection.value}
+	{...attachments}
+>
 	<Tabbar
 		id={`${id}-tabs`}
 		controlsPanels
 		fullWidth={tabbar?.fullWidth}
 		label={tabbar?.label}
-		onValueChange={(next) => emitChange(tabValues.indexOf(next), 'user')}
+		onValueChange={(next, { reason }) => emitChange(tabValues.indexOf(next), reason)}
+		activateOnFocus={tabbar?.activateOnFocus}
 		{items}
 		bind:value={() => activeValue, (next) => (valueState.value = next)}
 		size={tabbar?.size}
@@ -130,6 +145,8 @@
 		panelAriaLabelledby={({ index }) => `${id}-tabs-tab-${index}`}
 		transition={panelTransition}
 		{mount}
+		panelActivationDirection={(index) =>
+			index === activeIndex ? activationDirection.value : undefined}
 	>
 		{#snippet children(payload)}
 			{@render panel?.(payload)}
