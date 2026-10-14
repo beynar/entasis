@@ -437,6 +437,16 @@ function ownerName(node) {
 	return [...names, propertyName(node)].join('.');
 }
 
+// onOpenChange(open, details) is the one callback with two arguments: the settled `open`
+// decision plus the shared OpenChangeDetails object (reason, event, interaction, cancel()).
+function isOpenChangeDetails(parameter, fallback) {
+	const type = checker.getTypeOfSymbolAtLocation(
+		parameter,
+		parameter.valueDeclaration ?? parameter.declarations?.[0] ?? fallback
+	);
+	return (type.aliasSymbol ?? type.symbol)?.name === 'OpenChangeDetails';
+}
+
 function checkProperty(node) {
 	const name = propertyName(node);
 	if (!name) return;
@@ -463,7 +473,11 @@ function checkProperty(node) {
 		if (type.flags & ts.TypeFlags.Any) report(node, `callback ${name} uses any`);
 		for (const signature of callbackSignatures(type)) {
 			const parameters = signature.getParameters();
-			if (parameters.length > 1)
+			const openChange =
+				name === 'onOpenChange' &&
+				parameters.length === 2 &&
+				isOpenChangeDetails(parameters[1], node);
+			if (parameters.length > 1 && !openChange)
 				report(
 					node,
 					`callback ${name} must use one payload object, found ${parameters.length} positional parameters`
@@ -577,7 +591,11 @@ function checkProps(declaration, label = declaration.name.text) {
 				checker.getTypeOfSymbolAtLocation(callback, declaration)
 			)) {
 				const parameters = signature.getParameters();
-				if (parameters.length !== 1)
+				const openChange =
+					contract[2] === 'onOpenChange' &&
+					parameters.length === 2 &&
+					isOpenChangeDetails(parameters[1], declaration);
+				if (parameters.length !== 1 && !openChange)
 					report(declaration, `${label}.${contract[2]} must receive its semantic state value`);
 				else {
 					const parameter = parameters[0];
