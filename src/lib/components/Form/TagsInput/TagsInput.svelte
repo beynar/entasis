@@ -221,8 +221,9 @@
 			(button) => tags.includes(button.dataset.tag ?? '')
 		);
 
-	// Remove the tag of a focused remove button and hand focus to its neighbour (the input after
-	// the last one), so the focused button leaving the DOM never drops focus to the body.
+	// Remove the tag of a focused remove button and hand focus to its neighbour (the next tag,
+	// else the previous one, else the input), so the focused button leaving the DOM never drops
+	// focus to the body.
 	const removeFocusedTag = (button: HTMLButtonElement) => {
 		const tag = button.dataset.tag;
 		if (tag === undefined) return;
@@ -245,8 +246,8 @@
 		focusableContainer: false
 	});
 
-	// Backspace and Delete remove the focused tag and hand focus to its neighbour (the input
-	// after the last one); the arrow past the last tag returns to the input.
+	// Backspace and Delete remove the focused tag and hand focus to its neighbour (the next
+	// tag, else the previous one, else the input); the arrow past the last tag returns to the input.
 	const toolbarKeys: Attachment<HTMLElement> = (node) =>
 		on(
 			node,

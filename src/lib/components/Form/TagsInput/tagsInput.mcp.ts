@@ -167,7 +167,7 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 - **Backspace** (input empty): Removes the last tag.
 - **ArrowLeft** (**ArrowRight** in right-to-left text) at the start of the text: Moves focus to the last tag.
 - **ArrowLeft / ArrowRight** on a tag: Move between tags (mirrored in right-to-left text); the arrow past the last tag returns to the input. **Home / End** jump to the first / last tag.
-- **Backspace / Delete** on a focused tag: Removes it and moves focus to its neighbour, or to the input after the last one. **Enter / Space** on its remove button removes it too.
+- **Backspace / Delete** on a focused tag: Removes it and moves focus to its neighbour (the next tag, else the previous one), or to the input when no tag remains. **Enter / Space** on its remove button removes it too.
 - **ArrowDown / ArrowUp**: Open a closed dropdown (restricted mode), then move the highlight (wraps around; see \`loop\`).
 - **Home / End** (dropdown open): Highlight the first / last option. Restricted mode only.
 - **Escape**: Closes the dropdown and keeps focus in the input; a second Escape clears the typed text (also in free mode).
