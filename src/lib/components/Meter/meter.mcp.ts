@@ -1,7 +1,7 @@
 export const meterDescription = `
 # Meter Component
 
-The Meter component visualizes a measurement or progress along a known scale, with support for multiple values, steps, labels, and animations.
+The Meter component visualizes a measurement or progress along a known scale, with support for stacked segments, labels, and animations.
 
 ## Basic Usage
 
@@ -17,16 +17,15 @@ The Meter component visualizes a measurement or progress along a known scale, wi
   - Each segment object: { value: number, label?: string, color?: Colors, icon?: Snippet, position?: 'top' | 'bottom', data?: T }
 - **color**: Colors (default: 'primary') - Color used for a numeric value and as the fallback for segments with no color of their own
 
-- **min**: number (default: 0) - Minimum value
-- **max**: number (default: 100) - Maximum value
+- **min**: number (default: 0) - Minimum value of the scale; a segment fills (value - min) / (max - min) of the track
+- **max**: number (default: 100) - Maximum value of the scale; values are clamped into [min, max], so a bar never passes the track
 - **size**: 'small' | 'normal' | 'large' - Visual size of the meter
 
 ### Display Props
 - **showIndicatorAs**: 'value' | 'percentage' - How to display the indicator label
-
-### Steps
-- **steps**: Array<Step<S>> - Predefined steps/milestones on the meter
-  - Each step: { start: number, end?: number, label: Slot, color: Colors, position?: 'top' | 'bottom', class?: string, labelClass?: string, data?: S }
+- **format**: Intl.NumberFormatOptions - Formats the clamped value in value mode (for example { style: 'unit', unit: 'megabyte' }); the percentage text is always the share of the scale
+- **getAriaValueText**: (payload: { value, formattedValue, min, max }) => string - Overrides aria-valuetext, which otherwise mirrors the indicator text
+- **locale**: Intl.LocalesArgument - Locale of the value and percentage text (default: the I18n locale, so French reads "50 %")
 
 ### Content Slots
 - **label**: string | Snippet - Label rendered in the header; it names the meter (or the group of stacked meters)
@@ -56,7 +55,6 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 	<Track>
 		<Progress />
 		<Indicator />
-		<Steps />
 	</Track>
 	<Helper />
 </Meter>
@@ -106,15 +104,15 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 />
 \`\`\`
 
-### With Steps
+### Formatted Value
 \`\`\`svelte
-<Meter 
-	value={65}
-	steps={[
-		{ start: 0, end: 25, label: 'Low', color: 'danger' },
-		{ start: 25, end: 75, label: 'Medium', color: 'warning' },
-		{ start: 75, end: 100, label: 'High', color: 'success' }
-	]}
+<Meter
+	value={1536}
+	max={4096}
+	showIndicatorAs="value"
+	format={{ style: 'unit', unit: 'megabyte', unitDisplay: 'short' }}
+	getAriaValueText={({ formattedValue, max }) => \`\${formattedValue} of \${max} megabytes used\`}
+	label="Memory"
 />
 \`\`\`
 
@@ -207,24 +205,12 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 
 ### Skill Level Meter
 \`\`\`svelte
-<Meter 
-	value={85}
-	color="info"
-	steps={[
-		{ start: 0, end: 30, label: 'Beginner', color: 'danger', position: 'bottom' },
-		{ start: 30, end: 70, label: 'Intermediate', color: 'warning', position: 'bottom' },
-		{ start: 70, end: 100, label: 'Expert', color: 'success', position: 'bottom' }
-	]}
->
-	{#snippet label()}
-		JavaScript Proficiency
-	{/snippet}
-</Meter>
+<Meter value={85} color="success" label="JavaScript Proficiency" />
 \`\`\`
 
 ## Accessibility
 
-- A single value makes the root \`role="meter"\` with \`aria-valuemin\` (\`min\`), \`aria-valuemax\` (\`max\`), \`aria-valuenow\` (the value clamped to the scale) and \`aria-valuetext\` (the indicator text, e.g. "65%", or the raw value with \`showIndicatorAs="value"\`)
+- A single value makes the root \`role="meter"\` with \`aria-valuemin\` (\`min\`), \`aria-valuemax\` (\`max\`), \`aria-valuenow\` (the value clamped to the scale) and \`aria-valuetext\` (the indicator text computed from the clamped value over the scale, e.g. "65%" or "50 %" in French, or the formatted raw value with \`showIndicatorAs="value"\`; \`getAriaValueText\` overrides it)
 - The meter is named by the rendered \`label\` (\`aria-labelledby\`). With a custom \`header\`, a string \`label\` names it through \`aria-label\`; without any label it falls back to a single segment's own \`label\`, then to the i18n \`meter\` text
 - \`helper\` and \`description\` describe the root (the meter, or the group of stacked meters) through \`aria-describedby\`
 - Several segments make the root a \`role="group"\` named by \`label\`, containing one \`role="meter"\` per segment named by the segment's \`label\` (or "Segment 1 of 3", i18n \`meterSegment\`)
@@ -234,7 +220,6 @@ The Meter component visualizes a measurement or progress along a known scale, wi
 
 - Values are animated with spring physics for smooth transitions
 - Multiple values stack horizontally
-- Steps provide visual milestones and labels
 - Indicator position can be top or bottom
 - Progress bar fills from left to right
 - The root \`color\` prop colors the whole meter; a segment's own \`color\` overrides it

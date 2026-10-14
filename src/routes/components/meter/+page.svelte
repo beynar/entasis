@@ -69,8 +69,8 @@
 	features={[
 		'Spring-animated fill via useSpringState',
 		'Stacked values with optional legend',
-		'Colored threshold steps on track',
-		'Configurable min/max range',
+		'Values clamped into a configurable min/max range',
+		'Locale-aware percentage and value text, with Intl format options',
 		'Percentage or raw value indicator',
 		{ label: 'role=meter with clamped value and value text', test: 'a11y:meter.role' },
 		{ label: 'Stacked segments as a labelled group of meters', test: 'a11y:meter.stacked' }
@@ -120,17 +120,12 @@
 			/>
 		</ComponentCard>
 
-		<ComponentCard description="Meter with colored threshold steps on the track.">
+		<ComponentCard description="Danger, warning and success colors chosen from the value.">
 			<Meter
 				value={value3}
 				label="Performance Level"
 				helper="Excellent!"
-				steps={[
-					{ label: 'Poor', start: 0, end: 25, color: 'danger' },
-					{ label: 'Fair', start: 25, end: 50, color: 'warning' },
-					{ label: 'Good', start: 50, end: 75, color: 'success' },
-					{ label: 'Excellent', start: 75, end: 100, color: 'info' }
-				]}
+				color={value3 < 40 ? 'danger' : value3 < 70 ? 'warning' : 'success'}
 			/>
 		</ComponentCard>
 
@@ -206,6 +201,37 @@
 			</div>
 		</ComponentCard>
 
+		<ComponentCard
+			description="A scale that starts above zero: 30 on a 20 to 40 scale fills half of the track."
+		>
+			<Meter value={30} min={20} max={40} label="Temperature" helper="Safe range 20 to 40" />
+		</ComponentCard>
+
+		<ComponentCard
+			description="Values past the scale are clamped: the fill stops at the track, aria-valuenow stays at max and the text reads 100%."
+		>
+			<Meter value={120} label="Over capacity" color="danger" />
+		</ComponentCard>
+
+		<ComponentCard
+			description="Value text formatted with Intl options and a custom announcement for screen readers."
+		>
+			<Meter
+				value={1536}
+				max={4096}
+				showIndicatorAs="value"
+				format={{ style: 'unit', unit: 'megabyte', unitDisplay: 'short' }}
+				getAriaValueText={({ formattedValue, max }) => `${formattedValue} of ${max} megabytes used`}
+				label="Memory"
+			/>
+		</ComponentCard>
+
+		<ComponentCard
+			description="The locale prop formats the percentage: French puts a space before the percent sign."
+		>
+			<Meter value={50} locale="fr" label="Progression" />
+		</ComponentCard>
+
 		<ComponentCard description="Custom scale from 0 to 1000.">
 			<Meter
 				value={750}
@@ -218,7 +244,7 @@
 		</ComponentCard>
 
 		<ComponentCard
-			description="Complete example with legend, steps, and multiple sizes."
+			description="Complete example with a legend and multiple sizes."
 			class="!items-start"
 		>
 			<div class="grid w-full gap-4">
@@ -232,11 +258,6 @@
 					label="System Resources"
 					helper="CPU & Memory Usage"
 					description="Combined usage should stay below 80% Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos."
-					steps={[
-						{ label: 'Safe', start: 0, end: 60, color: 'success', position: 'bottom' },
-						{ label: 'Caution', start: 60, end: 80, color: 'warning', position: 'bottom' },
-						{ label: 'Critical', start: 80, end: 100, color: 'danger', position: 'bottom' }
-					]}
 					stiffness={0.15}
 					soft={0.2}
 				/>
@@ -250,11 +271,6 @@
 					label="System Resources"
 					helper="CPU & Memory Usage"
 					description="Combined usage should stay below 80 Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.%"
-					steps={[
-						{ label: 'Safe', start: 0, end: 60, color: 'success', position: 'bottom' },
-						{ label: 'Caution', start: 60, end: 80, color: 'warning', position: 'bottom' },
-						{ label: 'Critical', start: 80, end: 100, color: 'danger', position: 'bottom' }
-					]}
 					stiffness={0.15}
 					soft={0.2}
 				/>
@@ -269,11 +285,6 @@
 					label="System Resources"
 					helper="CPU & Memory Usage"
 					description="Combined usage should stay below 80% Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos."
-					steps={[
-						{ label: 'Safe', start: 0, end: 60, color: 'success', position: 'bottom' },
-						{ label: 'Caution', start: 60, end: 80, color: 'warning', position: 'bottom' },
-						{ label: 'Critical', start: 80, end: 100, color: 'danger', position: 'bottom' }
-					]}
 					stiffness={0.15}
 					soft={0.2}
 				/>

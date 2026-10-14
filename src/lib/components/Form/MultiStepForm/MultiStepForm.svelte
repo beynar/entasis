@@ -129,7 +129,7 @@
 		class={classes.multiStepFormHeader({ variant })}
 	>
 		{#if showMeter}
-			<Meter value={[form.progress]} steps={form.meterSteps} />
+			<Meter value={[form.progress]} />
 		{/if}
 	</Slot>
 	<div class={classes.multiStepFormContent()}>

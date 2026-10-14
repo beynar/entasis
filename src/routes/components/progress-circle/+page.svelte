@@ -35,13 +35,16 @@
 
 <DocPage
 	title="Progress circle"
-	subtitle="Determinate circular progress indicator."
+	subtitle="Circular progress indicator, determinate or indeterminate."
 	component="ProgressCircle"
 	features={[
 		'Animated value changes',
+		'Indeterminate state with value={null}',
+		'Values clamped into a configurable min/max range',
 		'Visible track',
 		'size tokens or numeric pixel size',
-		'Semantic color tokens'
+		'Semantic color tokens',
+		{ label: 'Value text inside the progressbar for NVDA', test: 'a11y:progress-circle.nvda' }
 	]}
 >
 	<ComponentCard
@@ -69,6 +72,23 @@
 				{#each colors as color, index (index)}
 					<ProgressCircle value={65} {color} label={`${color} progress`} />
 				{/each}
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="Indeterminate: value={null} spins a quarter arc and announces no value."
+			class="!min-h-fit"
+		>
+			<ProgressCircle value={null} color="primary" label="Loading" />
+		</ComponentCard>
+
+		<ComponentCard
+			description="A custom range: 30 on a 20 to 40 range fills half of the circle. data-complete is set at the maximum."
+			class="!min-h-fit"
+		>
+			<div class="flex flex-wrap items-center justify-center gap-6">
+				<ProgressCircle value={30} min={20} max={40} label="Temperature" />
+				<ProgressCircle value={140} color="success" label="Clamped to the maximum" />
 			</div>
 		</ComponentCard>
 	{/snippet}
