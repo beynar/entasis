@@ -105,6 +105,10 @@ export function useMenuBarState(
 
 	function handleMenuClose(index: number) {
 		if (openStates.some(Boolean) || lastActiveIndex !== index) return;
+		// Focus that went somewhere on purpose (Tab to the next control, a click in a field) stays
+		// there; only focus the closed menu dropped on the page is given back to its trigger.
+		const active = document.activeElement;
+		if (active && active !== document.body && active !== triggerElements[index]) return;
 		triggerElements[index]?.focus();
 	}
 

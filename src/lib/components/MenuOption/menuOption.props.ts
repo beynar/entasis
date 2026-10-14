@@ -74,6 +74,12 @@ export type MenuOptionProps = WithAttachments<
 			 */
 			disabled?: boolean;
 			/**
+			 * Whether pressing the row closes the menu it sits in. `false` marks the row
+			 * `data-menu-keep-open="true"`, which a PopupMenu reads as "leave the menu open".
+			 * @default true
+			 */
+			closeOnClick?: boolean;
+			/**
 			 * Text that menu type-ahead matches instead of the row's visible text, reflected to
 			 * `data-typeahead`. Use it when the title is a snippet or the row shows a prefix, shortcut or
 			 * description that should not count (`textValue: 'Copy'` for a row reading "⌘C Copy").

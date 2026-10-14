@@ -138,16 +138,35 @@ const defaultMenuOptionContent = cva({
 	}
 });
 
+const defaultMenuOptionIndicator = cva({
+	// The check of a checkbox or radio row stays mounted: unchecking fades and shrinks it instead
+	// of removing it, so the exit plays.
+	base: 'inline-flex shrink-0 items-center justify-center transition-[opacity,scale] duration-150 ease-out motion-reduce:transition-none',
+	variants: {
+		checked: {
+			true: 'opacity-100 scale-100',
+			false: 'opacity-0 scale-50'
+		}
+	},
+	defaultVariants: {
+		checked: false
+	}
+});
+
 export const menuOptionTheme = {
 	root: defaultMenuOption,
 	title: defaultMenuOptionTitle,
 	description: defaultMenuOptionDescription,
 	prefix: defaultMenuOptionPrefix,
 	suffix: defaultMenuOptionSuffix,
-	content: defaultMenuOptionContent
+	content: defaultMenuOptionContent,
+	indicator: defaultMenuOptionIndicator
 };
 
 export type MenuOptionTheme = typeof menuOptionTheme;
 export type MenuOptionThemeProps = InferComponentTheme<MenuOptionTheme>;
 export const setMenuOptionTheme = setComponentTheme<MenuOptionTheme>('menu-option');
-export const useMenuOptionTheme = useComponentTheme<MenuOptionTheme>('menu-option', menuOptionTheme);
+export const useMenuOptionTheme = useComponentTheme<MenuOptionTheme>(
+	'menu-option',
+	menuOptionTheme
+);

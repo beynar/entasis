@@ -69,7 +69,8 @@
 			aria-checked={isChecked}
 			data-color={resolvedColor}
 			data-checked={isChecked}
-			disabled={isDisabled}
+			aria-disabled={isDisabled || undefined}
+			data-disabled={isDisabled || undefined}
 			class={buttonClasses.root({
 				color: resolvedColor,
 				checked: isChecked,
@@ -77,9 +78,13 @@
 				variant: resolvedVariant,
 				size: resolvedSize,
 				disabled: isDisabled,
+				focusable: true,
 				className: button.class
 			})}
-			onclick={() => onValueChange(button.value)}
+			onclick={() => {
+				// Disabled but focusable: it stays in the toolbar's arrow-key order and refuses a choice.
+				if (!isDisabled) onValueChange(button.value);
+			}}
 			{@attach overflowed ? undefined : buttonReference}
 			{@attach !button.children && button.label && !overflowed
 				? tooltip({ content: button.label, delay: 350 })
