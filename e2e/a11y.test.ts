@@ -273,6 +273,7 @@ test.describe('slider keyboard', () => {
 		page
 	}) => {
 		await page.goto('/components/slider', { waitUntil: 'networkidle' });
+		await page.getByRole('tab', { name: 'Examples' }).click();
 		const min = page.getByRole('slider', { name: 'Minimum budget' });
 		const max = page.getByRole('slider', { name: 'Maximum budget' });
 		await min.focus();

@@ -8,10 +8,5 @@
 		"route": "^/components/diff",
 		"ruleId": "color-contrast",
 		"reason": "@pierre/diffs paints its own line-number and count colours inside the diffs-container shadow tree"
-	},
-	{
-		"route": "^/components/dialog \\(dialog open\\)$",
-		"ruleId": "button-name",
-		"reason": "Dialog's default close button is an icon-only Button without an accessible name. Found by the open-popup sweep (E2E-1); the fix belongs to the Dialog lane (C1). Remove this entry with that change."
 	}
 ]
