@@ -38,7 +38,7 @@ const pointerClick = async (element: HTMLElement) => {
 const keyboardClick = (element: HTMLElement) => fireEvent.click(element, { detail: 0 });
 
 describe('initial focus follows how the menu opened', () => {
-	test('a keyboard click on the button highlights the first row', async () => {
+	test('a11y:popup-menu.initial-focus a keyboard click on the button highlights the first row', async () => {
 		mount();
 		trigger().focus();
 		await keyboardClick(trigger());
@@ -98,7 +98,7 @@ describe('Tab leaves the menu', () => {
 		await waitFor(() => expect(menus()[0].contains(document.activeElement)).toBe(true));
 	};
 
-	test('Tab closes the menu and hands focus to the trigger, so the browser moves on after it', async () => {
+	test('a11y:popup-menu.tab-leaves Tab closes the menu and hands focus to the trigger, so the browser moves on after it', async () => {
 		const onOpenChange = vi.fn();
 		mount({ onOpenChange });
 		await openWithKeyboard();
@@ -205,7 +205,7 @@ describe('submenus', () => {
 		return share;
 	};
 
-	test('pressing an open submenu trigger again with the keyboard closes the submenu', async () => {
+	test('a11y:popup-menu.submenu-toggle pressing an open submenu trigger again with the keyboard closes the submenu', async () => {
 		mount();
 		const share = await openShare();
 
@@ -317,5 +317,90 @@ describe('an inline menu', () => {
 		dashboard.dispatchEvent(event);
 		expect(document.activeElement).toBe(dashboard);
 		expect(menus()).toHaveLength(1);
+	});
+});
+
+describe('a submenu the pointer opened', () => {
+	const hoverMenu = () => {
+		render(PopupMenuFocusHarness, {
+			props: {
+				items: [
+					{ type: 'option', title: 'New file' },
+					{
+						type: 'submenu',
+						title: 'Share',
+						delay: 0,
+						menu: [
+							{ type: 'option', title: 'Email' },
+							{ type: 'option', title: 'Link' }
+						]
+					}
+				] satisfies MenuItem[]
+			}
+		});
+	};
+
+	test('opens without taking focus from where it was', async () => {
+		hoverMenu();
+		trigger().focus();
+		await keyboardClick(trigger());
+		await waitFor(() => expect(menus()).toHaveLength(1));
+		const search = screen.getByRole('textbox', { name: 'Search' });
+		search.focus();
+
+		await fireEvent.mouseEnter(screen.getByRole('menuitem', { name: 'Share' }));
+		await waitFor(() => expect(menus()).toHaveLength(2));
+		await settle();
+		expect(document.activeElement).toBe(search);
+	});
+
+	test('a mouse click on it pins it open, and Enter then closes it', async () => {
+		hoverMenu();
+		trigger().focus();
+		await keyboardClick(trigger());
+		await waitFor(() => expect(menus()).toHaveLength(1));
+		const share = screen.getByRole('menuitem', { name: 'Share' });
+
+		await fireEvent.mouseEnter(share);
+		await waitFor(() => expect(menus()).toHaveLength(2));
+		await pointerClick(share);
+		await settle();
+		expect(menus()).toHaveLength(2);
+
+		await keyboardClick(share);
+		await waitFor(() => expect(menus()).toHaveLength(1));
+	});
+});
+
+describe('VoiceOver (Apple platforms)', () => {
+	const openShare = async () => {
+		mount();
+		trigger().focus();
+		await keyboardClick(trigger());
+		await waitFor(() => expect(menus()).toHaveLength(1));
+		const share = screen.getByRole('menuitem', { name: 'Share' });
+		share.focus();
+		await fireEvent.keyDown(share, { key: 'ArrowRight' });
+		await waitFor(() => expect(menus()).toHaveLength(2));
+		return share;
+	};
+
+	test('an open submenu trigger drops aria-expanded, keeping aria-haspopup and aria-controls', async () => {
+		vi.spyOn(navigator, 'platform', 'get').mockReturnValue('MacIntel');
+		const share = await openShare();
+		expect(share).not.toHaveAttribute('aria-expanded');
+		expect(share).toHaveAttribute('aria-haspopup', 'menu');
+		expect(share).toHaveAttribute('aria-controls');
+
+		await fireEvent.keyDown(document.activeElement!, { key: 'ArrowLeft' });
+		await waitFor(() => expect(menus()).toHaveLength(1));
+		expect(share).toHaveAttribute('aria-expanded', 'false');
+	});
+
+	test('elsewhere the trigger keeps aria-expanded', async () => {
+		vi.spyOn(navigator, 'platform', 'get').mockReturnValue('Win32');
+		vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue('Mozilla/5.0 (Windows NT 10.0)');
+		const share = await openShare();
+		expect(share).toHaveAttribute('aria-expanded', 'true');
 	});
 });

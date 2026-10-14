@@ -82,7 +82,7 @@ describe('Tab and Shift+Tab', () => {
 		await expect.poll(() => menus().length).toBe(0);
 	});
 
-	test('Tab out of a MenuBar menu moves past the bar', async () => {
+	test('a11y:menu-bar.tab-leaves Tab out of a MenuBar menu moves past the bar', async () => {
 		mount('menubar');
 		const file = page.getByRole('menuitem', { name: 'File' }).element() as HTMLElement;
 		button('Before').focus();

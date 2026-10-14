@@ -239,8 +239,10 @@
 		const target = event.target;
 		if (!(target instanceof Element)) return;
 		// Focus inside a submenu belongs to that submenu, even in the moment before its panel has
-		// been moved out of this menu's subtree.
-		if (target.closest('[role="menu"]') !== list) return;
+		// been moved out of this menu's subtree. The header, footer and search field count as this
+		// menu's own.
+		const owner = target.closest('[role="menu"]');
+		if (owner && owner !== list) return;
 		// The menu itself taking focus (its mount focus, a press on its padding) names no row.
 		if (target === list) return;
 		for (const popover of Object.values(submenuPopovers)) {
@@ -310,9 +312,17 @@
 	const registerSubmenu = (node: HTMLElement, key: string, popover: PopoverState) => {
 		// VoiceOver announces the trigger's state again when focus lands in the submenu it opened;
 		// leaving `aria-expanded` off while the submenu is open avoids that.
-		$effect(() => {
-			if (apple && popover.isOpen) node.removeAttribute('aria-expanded');
-		});
+		// The popover writes the attribute from its own effect, so this watches the attribute and
+		// removes it after each write, whichever effect ran first.
+		let offExpanded: (() => void) | undefined;
+		if (apple && typeof MutationObserver !== 'undefined') {
+			const observer = new MutationObserver(() => {
+				if (popover.isOpen && node.hasAttribute('aria-expanded'))
+					node.removeAttribute('aria-expanded');
+			});
+			observer.observe(node, { attributes: true, attributeFilter: ['aria-expanded'] });
+			offExpanded = () => observer.disconnect();
+		}
 		submenuPopovers[key] = popover;
 		Object.assign(node, {
 			onNext: () => {
@@ -323,6 +333,7 @@
 			onPrevious: goUp
 		});
 		return () => {
+			offExpanded?.();
 			delete submenuPopovers[key];
 		};
 	};
@@ -336,9 +347,9 @@
 	<MenuMirroredIcon icon={arrowLeftIcon} />
 {/snippet}
 
-{#snippet rows(list: MenuItem[], scope: string)}
-	{@const keys = scope === '' ? rowKeys : menuItemKeys(list)}
-	{#each list as item, index (keys[index])}
+{#snippet rows(entries: MenuItem[], scope: string)}
+	{@const keys = scope === '' ? rowKeys : menuItemKeys(entries)}
+	{#each entries as item, index (keys[index])}
 		{@const path = `${scope}${index}`}
 		{#if item.type === 'button'}
 			{@const buttonProps = withoutMenuFields(item, ['type', 'key', 'value', 'closeOnClick'])}
@@ -516,6 +527,7 @@
 	data-size={size}
 	data-density={density}
 	data-color={color}
+	onfocusin={closeSubmenusOnFocus}
 	{...panelDir ? { dir: panelDir } : {}}
 	{...attachments}
 >
@@ -547,7 +559,6 @@
 		data-density={density}
 		data-color={color}
 		bind:this={list}
-		onfocusin={closeSubmenusOnFocus}
 		onmousedown={keepFocusInField}
 		{@attach navigation.containerReference}
 		{@attach trackHighlight || filterable ? watchList : undefined}

@@ -133,7 +133,10 @@ export type ToggleMenuProps = WithAttachments<{
 	color?: Colors;
 	/** Default visual variant inherited by every item. */
 	variant?: ToggleButtonVariant;
-	/** When true, disables every item in the menu. */
+	/**
+	 * When true, disables every item in the menu. Disabled items stay in the arrow-key order and
+	 * keep the toolbar's tab stop, announcing `aria-disabled` instead of leaving the tab order.
+	 */
 	disabled?: boolean;
 	/** Called once with the complete updated item list after any control state changes. */
 	onItemsChange?: (items: ToggleMenuItem[]) => void;

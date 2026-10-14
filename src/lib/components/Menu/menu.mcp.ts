@@ -1,7 +1,7 @@
 export const menuDescription = `
 # Menu Component
 
-The Menu component is a flexible container that renders an array of menu items including Buttons, MenuOptions, and Separators. It provides theme forwarding capabilities and manages vertical layout with configurable spacing.
+The Menu component is a flexible container that renders an array of menu items: Buttons, MenuOptions, Separators, submenus, checkbox items, radio groups and labelled groups. It provides theme forwarding capabilities and manages vertical layout with configurable spacing.
 
 ## Basic Usage
 
@@ -41,8 +41,9 @@ The Menu component is a flexible container that renders an array of menu items i
 ### Core Props
 - **items**: MenuItem[] (required)
   - Array of menu items to render
-  - Each item must have a \`type\` field: 'button', 'option', or 'separator'
+  - Each item must have a \`type\` field: 'button', 'option', 'separator', 'submenu', 'checkbox', 'radio-group' or 'group'
   - Items are spread with their respective component props
+  - Every item accepts a \`key\`. A row keeps its DOM node, and with it focus, the Tab stop and hover state, while rows before it are inserted, removed or reordered, as long as its key stays the same. Without a \`key\` the identity comes from the row's plain-text title or children, its \`href\` or its \`textValue\`, so a menu built from strings needs none; give rows whose title is a snippet, or whose text repeats, an explicit \`key\`
 
 - **class**: string - Additional CSS classes for the menu container
 
@@ -54,9 +55,19 @@ The Menu component is a flexible container that renders an array of menu items i
 
 All three axes (\`density\`, \`size\`, \`color\`) are inherited by submenus: a submenu is the same menu one level down and opens on the axes its parent was given.
 
-- **header**: Snippet - Optional header content rendered at the top of the menu
+- **header**: Snippet - Optional header content rendered at the top of the menu, outside the \`role="menu"\` element: a field or a link in it is not a menu item
 
-- **footer**: Snippet - Optional footer content rendered at the bottom of the menu
+- **footer**: Snippet - Optional footer content rendered at the bottom of the menu, outside the \`role="menu"\` element: links and buttons in it are not menu items. A PopupMenu still closes when a button or link in the footer is pressed
+
+- **focusOnMount**: boolean | 'container' | 'last' - Which part takes focus when the menu mounts: \`true\` the first row, \`'last'\` the last row, \`'container'\` the menu itself. A PopupMenu decides from how it opened when this is left out: a keyboard open (Enter, Space, ArrowDown, Shift+F10) highlights the first row, ArrowUp the last, a pointer open focuses the menu itself, and a hover open leaves focus where it is
+
+- **filter**: boolean | { placeholder?, label?, match? } (default: false) - Adds a search field above the rows. See Filterable menus
+
+- **search** / **defaultSearch** / **onSearchChange**: the text of the search field (bindable \`search\`, initial \`defaultSearch\`, \`onSearchChange(search)\` once per edit)
+
+- **onHighlightChange**: (value: string | undefined) => void - Called when the highlighted row changes (keyboard, pointer or filter), with that row's \`value\` (its \`textValue\`, or its text when that is a string); \`undefined\` when no row is highlighted
+
+- **empty**: Snippet - Shown in place of the rows when the search matches none of them (default: "No results found.")
 
 - **theme**: MenuThemeProps - Custom theme overrides
   - menu: Theme for the container (gap spacing, layout)
@@ -72,7 +83,7 @@ All three axes (\`density\`, \`size\`, \`color\`) are inherited by submenus: a s
 
 ## MenuItem Types
 
-The Menu accepts a discriminated union of four item types:
+The Menu accepts a discriminated union of seven item types:
 
 ### Button Item
 \`\`\`typescript
@@ -110,6 +121,17 @@ const copyItem = {
 } satisfies MenuItem;
 \`\`\`
 
+\`closeOnClick\` (default true) says whether pressing a button or option closes the PopupMenu it sits in; \`false\` marks the row \`data-menu-keep-open="true"\`:
+\`\`\`typescript
+import type { MenuItem } from 'entasis/menu';
+
+const zoomIn = {
+	type: 'option',
+	title: 'Zoom in',
+	closeOnClick: false
+} satisfies MenuItem;
+\`\`\`
+
 ### Separator Item
 \`\`\`typescript
 import type { MenuItem } from 'entasis/menu';
@@ -137,20 +159,74 @@ const submenuItem = {
 } satisfies MenuItem;
 \`\`\`
 
+### Checkbox Item
+A row with a checked state. It is a \`menuitemcheckbox\` with \`aria-checked\`, takes \`value\`, \`defaultValue\` and \`onValueChange\` like the other editable components, and keeps the menu open unless \`closeOnClick: true\`. The check indicator stays mounted and fades out when the row is unchecked. A consumer \`onclick\` runs first and \`preventDefault()\` there refuses the toggle.
+\`\`\`typescript
+import type { MenuItem } from 'entasis/menu';
+
+const wordWrap = {
+	type: 'checkbox',
+	title: 'Word wrap',
+	defaultValue: true,
+	onValueChange: (next) => console.log(next)
+} satisfies MenuItem;
+\`\`\`
+
+### Radio Group Item
+Radio rows that share one value, inside a \`role="group"\` named by \`label\`. Each radio is a \`menuitemradio\`. Choosing the checked radio changes nothing; \`onValueChange\` reports the chosen value once. The group keeps the menu open unless \`closeOnClick: true\` (a radio's own \`closeOnClick\` wins).
+\`\`\`typescript
+import type { MenuItem } from 'entasis/menu';
+
+const sortBy = {
+	type: 'radio-group',
+	label: 'Sort by',
+	defaultValue: 'name',
+	onValueChange: (value) => console.log(value),
+	items: [
+		{ value: 'name', title: 'Name' },
+		{ value: 'date', title: 'Date modified' }
+	]
+} satisfies MenuItem;
+\`\`\`
+
+An option that passes \`selected\` still renders a \`menuitemradio\` for single-choice lists that keep their value elsewhere.
+
+### Group Item
+Rows under a label, inside a \`role="group"\` that the label names. The visible label is hidden from the accessibility tree, so it is not read twice. Arrow keys and type-ahead cross group boundaries.
+\`\`\`typescript
+import type { MenuItem } from 'entasis/menu';
+
+const recent = {
+	type: 'group',
+	label: 'Recent',
+	items: [
+		{ type: 'option', title: 'notes.md' },
+		{ type: 'option', title: 'todo.md' }
+	]
+} satisfies MenuItem;
+\`\`\`
+
 ## Structure
 
 The menu follows this DOM structure:
 \`\`\`
 <Menu>
-	<div role="menu">
-		<!-- Items rendered based on type -->
-		<Button />
-		<MenuOption />
-		<Separator />
-		<!-- ... -->
+	<div>                       <!-- first element: class, data attributes -->
+		<!-- header snippet -->
+		<div role="menu">
+			<!-- Items rendered based on type -->
+			<Button />
+			<MenuOption />
+			<div role="group">...</div>
+			<Separator />
+			<!-- ... -->
+		</div>
+		<!-- footer snippet -->
 	</div>
 </Menu>
 \`\`\`
+
+With \`filter\` the search field sits between the header and the \`role="menu"\` element, and the empty message (a \`role="status"\` region) after it.
 
 ## Examples
 
@@ -458,6 +534,83 @@ The menu follows this DOM structure:
 </Menu>
 \`\`\`
 
+### Checkbox Items and Radio Groups
+\`\`\`svelte
+<script lang="ts">
+	import { Menu, type MenuItem } from 'entasis/menu';
+
+	let minimap = $state(true);
+	let sort = $state('name');
+
+	const items: MenuItem[] = $derived([
+		{
+			type: 'checkbox',
+			title: 'Minimap',
+			value: minimap,
+			onValueChange: (next) => (minimap = next)
+		},
+		{ type: 'checkbox', title: 'Word wrap', defaultValue: false },
+		{ type: 'separator' },
+		{
+			type: 'radio-group',
+			label: 'Sort by',
+			value: sort,
+			onValueChange: (next) => (sort = next),
+			items: [
+				{ value: 'name', title: 'Name' },
+				{ value: 'date', title: 'Date modified' },
+				{ value: 'size', title: 'Size' }
+			]
+		}
+	]);
+</script>
+
+<Menu {items} />
+\`\`\`
+
+### Filterable Menu
+A search field above the rows. Typing narrows them (case and accent insensitive, over the row's \`textValue\`, or its text, and its \`value\`); a group whose rows all drop out goes too, and separators are dropped while searching. Focus stays in the field: ArrowDown and ArrowUp highlight rows (wrapping), the first match is highlighted as you type, and Enter presses the highlighted row. ArrowRight at the end of the text opens a highlighted submenu, ArrowLeft at the start leaves a submenu. A row whose title is a snippet needs a \`textValue\` to be found.
+\`\`\`svelte
+<script lang="ts">
+	import { PopupMenu } from 'entasis/popup-menu';
+	import type { MenuItem } from 'entasis/menu';
+
+	const items: MenuItem[] = [
+		{ type: 'option', title: 'Open file' },
+		{ type: 'option', title: 'Open folder' },
+		{ type: 'option', title: 'Open recent' },
+		{ type: 'option', title: 'Save' },
+		{ type: 'option', title: 'Save as' }
+	];
+</script>
+
+<PopupMenu
+	trigger={{ content: 'Commands' }}
+	menu={{
+		items,
+		filter: { placeholder: 'Find a command' },
+		onSearchChange: (search) => console.log(search),
+		onHighlightChange: (value) => console.log(value)
+	}}
+/>
+\`\`\`
+
+A submenu takes its own \`filter\` (a "Move to..." picker); it opens on its search field:
+\`\`\`typescript
+import type { MenuItem } from 'entasis/menu';
+
+const moveTo = {
+	type: 'submenu',
+	title: 'Move to',
+	filter: { placeholder: 'Pick a folder' },
+	menu: [
+		{ type: 'option', title: 'Inbox' },
+		{ type: 'option', title: 'Archive' },
+		{ type: 'option', title: 'Projects' }
+	]
+} satisfies MenuItem;
+\`\`\`
+
 ### Mixed Size Items
 \`\`\`svelte
 <script lang="ts">
@@ -487,11 +640,13 @@ The menu follows this DOM structure:
 ## Accessibility
 
 - Automatically sets \`role="menu"\` on the container
-- Option items render \`role="menuitem"\`; an option that passes \`selected\` (true or false) renders \`role="menuitemradio"\` with \`aria-checked\`, so a check-marked choice is announced as checked rather than as a plain command
-- ArrowUp / ArrowDown move the highlight, Home / End jump, Enter or Space activates, ArrowRight opens a submenu and ArrowLeft closes it (mirrored in RTL)
+- Option items render \`role="menuitem"\`; checkbox items render \`menuitemcheckbox\` and radio items \`menuitemradio\`, each with \`aria-checked\`; an option that passes \`selected\` (true or false) renders \`role="menuitemradio"\` too, so a check-marked choice is announced as checked rather than as a plain command
+- Groups and radio groups render \`role="group"\` named (\`aria-labelledby\`) by their label, which is hidden from the accessibility tree. The header, footer and search field sit outside the \`role="menu"\` element
+- ArrowUp / ArrowDown move the highlight, Home / End jump, Enter or Space activates, ArrowRight opens a submenu and ArrowLeft closes it; both are mirrored in right-to-left text, in an inline Menu as in a PopupMenu. A panel opened from a right-to-left trigger carries \`dir="rtl"\` itself, because it is portaled out of the trigger's subtree
+- Tab inside a PopupMenu, ContextMenu or MenuBar menu closes every level and lets the browser carry on from the trigger, so focus lands on the control after it; Shift+Tab closes the menu and stays on the trigger. A field or link in the header or footer keeps Tab until the last one. Focus moving back to a row of the parent menu (a screen reader's cursor, a click) closes the submenus open beside it, so the arrow keys work there again
 - Type-ahead: typing letters moves the highlight to the next item whose label starts with the typed text. An option or submenu item's \`textValue\` replaces its visible text for matching (useful when the title is a snippet or the row shows a shortcut); disabled and hidden items are passed over for the next match, and the typed text starts over when focus leaves the menu
-- Disabled items and items hidden with CSS are skipped by the arrow keys, Home and End. The single Tab stop stays on the focused row element and follows the row that takes its place when the focused row is removed. Rows are keyed by position, so inserting or reordering rows before the focused one leaves focus and the Tab stop at the same position
-- Hovering a row highlights it without moving focus. While nothing on the page has focus, the arrow keys and Home / End move focus into the hovered menu; keys typed in a text field, a button or another popup stay there, and Enter or Space never activate the hovered row. A submenu row is the exception: it still opens its submenu after the hover \`delay\`, and that submenu moves focus to its first row
+- Disabled items and items hidden with CSS are skipped by the arrow keys, Home and End. The single Tab stop stays on the focused row element and follows the row that takes its place when the focused row is removed. Rows are keyed by identity (see \`key\`), so inserting, removing or reordering rows around the focused one leaves focus and the Tab stop on the same row
+- Hovering a row highlights it without moving focus. While nothing on the page has focus, the arrow keys and Home / End move focus into the hovered menu; keys typed in a text field, a button or another popup stay there, and Enter or Space never activate the hovered row. A submenu row is the exception: it still opens its submenu after the hover \`delay\`, but a submenu the pointer opened does not take focus, so typing in a field elsewhere carries on
 - Once focus is inside the menu, keys act on the focused row, not on the row under the pointer. When the menu panel itself has focus (a popup menu opened with the pointer), they act on the highlighted row that \`aria-activedescendant\` names, so Enter activates the row under the pointer
 - Arrow, Home, End, Enter and Space pressed with Alt, Ctrl or Meta are left to the browser (Alt+ArrowLeft stays Back), including in menus opened from a MenuBar; Shift does not count as a modifier
 - Supports keyboard navigation through child components
@@ -520,7 +675,9 @@ Submenu items automatically:
 
 Default submenu behavior:
 - Opens on hover (after 100ms delay)
-- Opens on click
+- Opens on click. A keyboard open (ArrowRight, Enter, Space) focuses the submenu's first row, a pointer click the submenu itself
+- A second press on an open submenu's row closes it when it came from the keyboard or assistive technology, or follows a click; a mouse click on a submenu the pointer opened keeps it open
+- On Apple platforms an open submenu's row omits \`aria-expanded\` (keeping \`aria-haspopup\` and \`aria-controls\`), because VoiceOver reads the trigger's state again when focus moves into the submenu
 - Closes when the pointer leaves the submenu prediction cone and rectangle tolerance
 - Closes when an item inside is chosen. Inside a PopupMenu, ContextMenu or MenuBar the submenu belongs to that menu: choosing an item at any depth closes every level at once, following the menu's closeOnItemClick. In an inline Menu, choosing an item closes the submenu and focus returns to its row
 - An item (or an ancestor) with \`data-menu-keep-open="true"\` keeps every level open, for multi-select options: \`{ type: 'option', title: 'Bold', attrs: { 'data-menu-keep-open': 'true' } }\`
@@ -541,6 +698,11 @@ The Menu component uses a theme object that can be customized using the \`theme\
 
 The theme object contains the following parts:
 - **root**: Main menu container styles
+- **list**: The \`role="menu"\` element (density gap)
+- **group** / **groupLabel**: A \`role="group"\` and its label
+- **search** / **searchIcon** / **searchInput**: The search field of a filterable menu
+- **empty**: The message shown when a search matches nothing
+- **header** / **footer**: The header and footer slots
 - **button**: Theme forwarded to Button items (optional)
 - **option**: Theme forwarded to MenuOption items (optional)
 - **separator**: Theme forwarded to Separator items (optional)

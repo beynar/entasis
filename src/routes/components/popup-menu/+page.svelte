@@ -245,6 +245,18 @@
 			label: 'Choosing an item at any depth closes the menu; floating menus refocus the trigger',
 			test: 'a11y:popup-menu.item-closes-tree'
 		},
+		{
+			label: 'A keyboard open highlights the first row, a pointer open focuses the menu',
+			test: 'a11y:popup-menu.initial-focus'
+		},
+		{
+			label: 'Tab closes the menu and moves on after the trigger',
+			test: 'a11y:popup-menu.tab-leaves'
+		},
+		{
+			label: 'Repeating a keyboard press on a submenu row closes it',
+			test: 'a11y:popup-menu.submenu-toggle'
+		},
 		'Context menu via external ref'
 	]}
 >
@@ -332,6 +344,84 @@
 					menu={{ items: profileItems }}
 				/>
 			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Settings menu"
+			description="Checkbox and radio rows keep the menu open, so several settings change in one visit. Escape, Tab or a click outside closes it."
+			code={`<PopupMenu
+	trigger={{ content: 'View', variant: 'outline' }}
+	menu={{
+		items: [
+			{ type: 'checkbox', title: 'Show hidden files', defaultValue: false },
+			{
+				type: 'radio-group',
+				label: 'Sort by',
+				defaultValue: 'name',
+				items: [
+					{ value: 'name', title: 'Name' },
+					{ value: 'date', title: 'Date modified' }
+				]
+			},
+			{ type: 'separator' },
+			{ type: 'option', title: 'Done' }
+		]
+	}}
+/>`}
+		>
+			<PopupMenu
+				trigger={{ content: 'View', variant: 'outline' }}
+				position="bottom-start"
+				menu={{
+					items: [
+						{ type: 'checkbox', title: 'Show hidden files', defaultValue: false },
+						{
+							type: 'radio-group',
+							label: 'Sort by',
+							defaultValue: 'name',
+							items: [
+								{ value: 'name', title: 'Name' },
+								{ value: 'date', title: 'Date modified' }
+							]
+						},
+						{ type: 'separator' },
+						{ type: 'option', title: 'Done' }
+					]
+				}}
+			/>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Command menu with a search field"
+			description="filter puts a search field above the rows and focuses it on open. Type to narrow the rows, ArrowDown to highlight, Enter to choose. The Move to submenu has a search field of its own."
+			code={`<PopupMenu
+	trigger={{ content: 'Commands', variant: 'outline' }}
+	menu={{ items, filter: { placeholder: 'Find a command' } }}
+/>`}
+		>
+			<PopupMenu
+				trigger={{ content: 'Commands', variant: 'outline' }}
+				position="bottom-start"
+				menu={{
+					filter: { placeholder: 'Find a command' },
+					items: [
+						{ type: 'option', title: 'Open file' },
+						{ type: 'option', title: 'Open folder' },
+						{ type: 'option', title: 'Save' },
+						{ type: 'option', title: 'Save as' },
+						{
+							type: 'submenu',
+							title: 'Move to',
+							filter: { placeholder: 'Pick a folder' },
+							menu: [
+								{ type: 'option', title: 'Inbox' },
+								{ type: 'option', title: 'Archive' },
+								{ type: 'option', title: 'Projects' }
+							]
+						}
+					]
+				}}
+			/>
 		</ComponentCard>
 
 		<ComponentCard description="Menu items rendered as full-width action buttons.">

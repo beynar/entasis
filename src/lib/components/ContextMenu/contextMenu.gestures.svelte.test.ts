@@ -30,7 +30,7 @@ describe('long press', () => {
 	beforeEach(() => vi.useFakeTimers({ shouldAdvanceTime: true }));
 	afterEach(() => vi.useRealTimers());
 
-	test('a finger that drifts a few pixels still opens the menu after 500 ms', async () => {
+	test('a11y:context-menu.long-press a finger that drifts a few pixels still opens the menu after 500 ms', async () => {
 		const { onOpenChange, target } = mount();
 		await fireEvent.pointerDown(target, touch(100, 100));
 		await fireEvent.pointerMove(target, touch(103, 104));
@@ -92,7 +92,7 @@ describe('long press', () => {
 });
 
 describe('right-click', () => {
-	test('a second right-click on the spot the menu is anchored to closes it', async () => {
+	test('a11y:context-menu.second-click a second right-click on the spot the menu is anchored to closes it', async () => {
 		const { onOpenChange, target } = mount();
 		await fireEvent.contextMenu(target, { clientX: 200, clientY: 150 });
 		await waitFor(() => expect(screen.queryByRole('menu')).not.toBeNull());

@@ -14,7 +14,7 @@ import { menuItemKeys } from './menuTree.js';
 const settle = () => new Promise((resolve) => setTimeout(resolve, 20));
 
 describe('menu checkbox items', () => {
-	test('a checkbox row is a menuitemcheckbox that toggles aria-checked once per press', async () => {
+	test('a11y:menu.checkable-items a checkbox row is a menuitemcheckbox that toggles aria-checked once per press', async () => {
 		const onValueChange = vi.fn();
 		renderInTheme(Menu, {
 			items: [{ type: 'checkbox', title: 'Word wrap', onValueChange }] satisfies MenuItem[]
@@ -277,7 +277,7 @@ describe('closeOnClick', () => {
 });
 
 describe('header and footer', () => {
-	test('header and footer sit outside the role="menu" element', () => {
+	test('a11y:menu.chrome-outside-role header and footer sit outside the role="menu" element', () => {
 		const header = createRawSnippet(() => ({
 			render: () => '<input aria-label="Filter" />'
 		}));
@@ -304,7 +304,7 @@ describe('row identity', () => {
 		expect(keys).toEqual(['option:Copy', 'option:Copy~1', 'k:p', 'option:@3', 'separator:@4']);
 	});
 
-	test('a row keeps its node when an item before it is removed', async () => {
+	test('a11y:menu.row-identity a row keeps its node when an item before it is removed', async () => {
 		const items = ['Archive', 'Copy', 'Cut', 'Delete'].map((title): MenuItem => ({
 			type: 'option',
 			title
@@ -329,5 +329,29 @@ describe('row identity', () => {
 		const cut = screen.getByRole('menuitem', { name: 'Cut' });
 		await rerender({ items: build(['Archive', 'Cut']) });
 		expect(screen.getByRole('menuitem', { name: 'Cut' })).toBe(cut);
+	});
+});
+
+describe('right-to-left icons', () => {
+	const mirrored = (row: Element) =>
+		row.querySelector('span.inline-flex[class*="rtl:-scale-x-100"]');
+
+	test('the submenu caret and the stacked back arrow flip with the reading direction', async () => {
+		renderInTheme(Menu, {
+			submenuMode: 'stack',
+			items: [
+				{
+					type: 'submenu',
+					title: 'More',
+					menu: [{ type: 'option', title: 'Inner' }]
+				}
+			] satisfies MenuItem[]
+		});
+		const more = screen.getByRole('menuitem', { name: 'More' });
+		expect(mirrored(more)).not.toBeNull();
+
+		await fireEvent.click(more);
+		const back = await screen.findByRole('menuitem', { name: /Back/ });
+		expect(mirrored(back)).not.toBeNull();
 	});
 });

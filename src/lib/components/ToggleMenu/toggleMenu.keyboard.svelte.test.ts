@@ -9,7 +9,7 @@ const tabStops = () =>
 	Array.from(screen.getByRole('toolbar').querySelectorAll<HTMLElement>('[tabindex="0"]'));
 
 describe('disabled items stay reachable', () => {
-	test('arrow keys land on a disabled toggle, which says so and ignores Space', async () => {
+	test('a11y:toggle-menu.disabled-reachable arrow keys land on a disabled toggle, which says so and ignores Space', async () => {
 		render(ToggleMenuHarness, { props: { itemDisabled: true } });
 		const bold = screen.getByRole('button', { name: 'Bold' });
 		const italic = screen.getByRole('button', { name: 'Italic' });

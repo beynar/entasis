@@ -150,7 +150,7 @@ describe('search state', () => {
 });
 
 describe('keyboard', () => {
-	test('ArrowDown highlights the first row, names it as the active descendant and keeps focus in the field', async () => {
+	test('a11y:menu.filter-focus ArrowDown highlights the first row, names it as the active descendant and keeps focus in the field', async () => {
 		renderInTheme(Menu, { items: items(), filter: true });
 		field().focus();
 		await key('ArrowDown');

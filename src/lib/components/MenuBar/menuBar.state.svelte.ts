@@ -26,6 +26,8 @@ export function useMenuBarState(
 
 	const openStates = $state(untrack(() => getMenus().map(() => false)));
 	let keyboardOpen = $state(false);
+	// ArrowUp on a trigger opens its menu on the last row, ArrowDown on the first.
+	let openOnLast = $state(false);
 	let openedByTrigger = $state(false);
 	let lastActiveIndex = $state<number | null>(null);
 	const triggerElements = $state<Array<HTMLElement | undefined>>([]);
@@ -58,13 +60,19 @@ export function useMenuBarState(
 		return -1;
 	}
 
-	function openMenu(index: number, source: 'keyboard' | 'pointer', isTriggerActivation = false) {
+	function openMenu(
+		index: number,
+		source: 'keyboard' | 'pointer',
+		isTriggerActivation = false,
+		onLast = false
+	) {
 		const menus = getMenus();
 		if (menus[index]?.disabled) return;
 		for (let menuIndex = 0; menuIndex < menus.length; menuIndex++) {
 			openStates[menuIndex] = menuIndex === index;
 		}
 		keyboardOpen = source === 'keyboard';
+		openOnLast = onLast;
 		openedByTrigger = isTriggerActivation;
 		lastActiveIndex = index;
 	}
@@ -140,7 +148,7 @@ export function useMenuBarState(
 						return;
 					}
 
-					openMenu(index, 'keyboard', true);
+					openMenu(index, 'keyboard', true, event.key === 'ArrowUp');
 				});
 
 				return () => {
@@ -182,7 +190,8 @@ export function useMenuBarState(
 		delete props.disabled;
 		return {
 			...props,
-			focusOnMount: keyboardOpen && activeIndex === index ? true : 'container',
+			focusOnMount:
+				keyboardOpen && activeIndex === index ? (openOnLast ? 'last' : true) : 'container',
 			[menuAttachmentKey]: attachMenuNavigation(index)
 		};
 	}

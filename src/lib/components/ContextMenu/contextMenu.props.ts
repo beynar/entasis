@@ -7,7 +7,8 @@ import type { OpenChangeHandler } from '$lib/utils/openChange.js';
 
 export type ContextMenuProps = WithAttachments<{
 	/**
-	 * The menu items shown on right-click (Button, MenuOption, Separator, or submenu).
+	 * The menu items shown on right-click (Button, MenuOption, Separator, submenu, checkbox, radio
+	 * group or group).
 	 */
 	items: MenuItem[];
 	/**
@@ -33,8 +34,9 @@ export type ContextMenuProps = WithAttachments<{
 	/**
 	 * Called before the menu opens or closes, with the requested state and the change details
 	 * (`reason`, `event`, `interaction`, `cancel()`): `'trigger-press'` for the right-click,
-	 * long-press or keyboard request that opened it, `'item-press'`, `'escape-key'` or
-	 * `'outside-press'` when it closes. `details.cancel()` keeps the menu as it is.
+	 * long-press or keyboard request that opened it (or a second right-click on its anchor that
+	 * closes it), `'item-press'`, `'escape-key'`, `'outside-press'` or `'focus-out'` (Tab) when it
+	 * closes. `details.cancel()` keeps the menu as it is.
 	 */
 	onOpenChange?: OpenChangeHandler;
 	/**

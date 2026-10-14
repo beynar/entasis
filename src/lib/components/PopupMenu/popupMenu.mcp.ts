@@ -32,7 +32,9 @@ The PopupMenu component is a wrapper around Popover that renders a Menu inside. 
 
 ### Menu Props
 - **menu**: MenuProps (required)
-  - items: MenuItem[] - Array of menu items (buttons, options, separators)
+  - items: MenuItem[] - Array of menu items (buttons, options, separators, submenus, checkbox items, radio groups, groups)
+  - filter / search / defaultSearch / onSearchChange / onHighlightChange / empty: a search field above the rows (see the Menu docs)
+  - focusOnMount: boolean | 'container' | 'last' - leave it out and the menu decides from how it opened (see Accessibility)
   - class: string - Custom class for the menu container
   - theme: MenuThemeProps - Theme overrides for menu and its items
   - submenuMode: 'auto' | 'popover' | 'stack' - defaults to auto; mobileSheet menus stack submenus automatically
@@ -360,6 +362,31 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 />
 \`\`\`
 
+### Checkbox Items and Radio Groups
+Checkbox and radio rows keep the menu open on their own, so a menu of settings needs no \`closeOnItemClick={false}\`:
+\`\`\`svelte
+<script lang="ts">
+	import type { MenuItem } from 'entasis/menu';
+
+	const items = [
+		{ type: 'checkbox', title: 'Show hidden files', defaultValue: false },
+		{
+			type: 'radio-group',
+			label: 'Sort by',
+			defaultValue: 'name',
+			items: [
+				{ value: 'name', title: 'Name' },
+				{ value: 'date', title: 'Date modified' }
+			]
+		},
+		{ type: 'separator' },
+		{ type: 'option', title: 'Done' }
+	] satisfies MenuItem[];
+</script>
+
+<PopupMenu trigger={{ content: 'View' }} menu={{ items }} />
+\`\`\`
+
 ### Nested Submenus
 \`\`\`svelte
 <script lang="ts">
@@ -384,7 +411,11 @@ The Menu inherits the Popover's dialog styling (background, border, shadow, etc.
 ## Accessibility
 
 - Inherits all Popover accessibility features: the trigger carries \`aria-haspopup="menu"\`, \`aria-expanded\`, and \`aria-controls\`, and focus returns to it on close
-- Menu items have appropriate roles (\`menuitem\`, or \`menuitemradio\` with \`aria-checked\` for options that set \`selected\`) and keyboard navigation
+- Menu items have appropriate roles (\`menuitem\`, \`menuitemcheckbox\` and \`menuitemradio\` with \`aria-checked\`, or \`menuitemradio\` for options that set \`selected\`) and keyboard navigation
+- Where focus goes when the menu opens depends on how it opened. Enter, Space or a screen reader's press on the button, and ArrowDown, put focus on the first row; ArrowUp on the last; a mouse or touch press focuses the menu itself with no row highlighted; hovering it open leaves focus where it was. ArrowDown and ArrowUp on the button open the menu (Alt, Ctrl and Meta with them are left to the browser); on an already open menu they move into it
+- Tab closes the whole menu tree and moves on to the control after the trigger, Shift+Tab closes it and stays on the trigger; \`onOpenChange\` reports \`reason: 'focus-out'\`. Focus left where Tab put it is not taken back when the close finishes. A field or link in the menu's header or footer keeps Tab until the last one
+- A submenu closes when focus returns to a row of the menu that opened it
+- The panel carries the reading direction of its trigger: in right-to-left text submenus open to the left, carets and back arrows mirror, and ArrowLeft opens a submenu while ArrowRight leaves it
 - Type-ahead: typing letters moves the highlight to the next matching item
 - Escape closes only the topmost open layer, so a submenu closes before its parent (configurable)
 - An outside press closes every layer above the one pressed (configurable)

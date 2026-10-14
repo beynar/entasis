@@ -87,7 +87,15 @@
 			test: 'a11y:context-menu.item-closes-tree'
 		},
 		{ label: 'Full keyboard navigation and highlighting', test: 'a11y:menu.arrow-keys' },
-		'Flips near viewport edges, closes on outside click / Esc'
+		'Flips near viewport edges, closes on outside click / Esc',
+		{
+			label: 'A long press tolerates a drifting finger and opens once',
+			test: 'a11y:context-menu.long-press'
+		},
+		{
+			label: 'A second right-click on the anchor closes the menu',
+			test: 'a11y:context-menu.second-click'
+		}
 	]}
 >
 	<ComponentCard
@@ -143,6 +151,23 @@
 		<ComponentCard description={'Flush at the cursor with no offset (popup={{ offset: 0 }}).'}>
 			<ContextMenu items={basicItems} class="w-full" popup={{ offset: 0 }}>
 				{@render target('Right-click — menu opens flush at the pointer')}
+			</ContextMenu>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Checkable rows"
+			description="Checkbox rows keep the menu open while they change. A second right-click on the spot the menu is anchored to closes it, and the browser's own menu never opens over the panel."
+		>
+			<ContextMenu
+				class="w-full"
+				items={[
+					{ type: 'checkbox', title: 'Show grid', defaultValue: true },
+					{ type: 'checkbox', title: 'Snap to guides', defaultValue: false },
+					{ type: 'separator' },
+					{ type: 'option', title: 'Reset view' }
+				]}
+			>
+				{@render target('Right-click for checkable rows')}
 			</ContextMenu>
 		</ComponentCard>
 

@@ -5,7 +5,9 @@ import type { PopupMenuThemeProps } from './popupMenu.theme.js';
 
 export type PopupMenuProps = Omit<PopoverProps, 'children' | 'theme'> & {
 	/**
-	 * Menu props including items array and theme.
+	 * Menu props including the items array, theme and the search field (`filter`). Left out,
+	 * `focusOnMount` follows how the menu opened: the first row (the last for ArrowUp) after a
+	 * keyboard open, the menu itself after a pointer open, nothing after a hover open.
 	 */
 	menu: MenuProps;
 	/**

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import ComponentCard from '../../ComponentCard.svelte';
 	import DocPage from '../../DocPage.svelte';
 	import { Menu, type MenuItem } from '$lib/components/Menu/index.js';
@@ -18,6 +19,10 @@
 	import { houseIcon } from '$lib/components/Icons/house.js';
 
 	let clickCount = $state(0);
+	let showMinimap = $state(true);
+	let sortBy = $state('name');
+	let search = $state('');
+	let highlighted = $state<string | undefined>();
 
 	const submenuModes = ['auto', 'popover', 'stack'] as const;
 	const controls = createComponentControls([
@@ -136,6 +141,77 @@
 		}
 	]);
 
+	// Checkbox items and a radio group: they keep the menu open and report each change once.
+	const checkableItems: MenuItem[] = $derived([
+		{
+			type: 'checkbox',
+			title: 'Show minimap',
+			value: showMinimap,
+			onValueChange: (next) => (showMinimap = next)
+		},
+		{ type: 'checkbox', title: 'Word wrap', defaultValue: true },
+		{ type: 'separator' },
+		{
+			type: 'radio-group',
+			label: 'Sort by',
+			value: sortBy,
+			onValueChange: (next) => (sortBy = next),
+			items: [
+				{ value: 'name', title: 'Name' },
+				{ value: 'date', title: 'Date modified' },
+				{ value: 'size', title: 'Size' }
+			]
+		}
+	]);
+
+	// Groups: a labelled role="group" per heading; the arrow keys cross the boundaries.
+	const groupedItems: MenuItem[] = [
+		{ type: 'option', prefix: houseIcon, title: 'Dashboard' },
+		{
+			type: 'group',
+			label: 'Recent',
+			items: [
+				{ type: 'option', title: 'notes.md' },
+				{ type: 'option', title: 'todo.md' }
+			]
+		},
+		{
+			type: 'group',
+			label: 'Pinned',
+			items: [
+				{ type: 'option', title: 'roadmap.md' },
+				{ type: 'option', title: 'budget.xlsx' }
+			]
+		}
+	];
+
+	// Filterable: a search field above the rows; a submenu takes a filter of its own.
+	const filterItems: MenuItem[] = [
+		{ type: 'option', prefix: houseIcon, title: 'Dashboard' },
+		{ type: 'option', prefix: userIcon, title: 'Profile' },
+		{ type: 'option', prefix: gearIcon, title: 'Settings' },
+		{ type: 'option', prefix: bellIcon, title: 'Notifications' },
+		{
+			type: 'group',
+			label: 'Account',
+			items: [
+				{ type: 'option', prefix: lockIcon, title: 'Privacy' },
+				{ type: 'option', prefix: signOutIcon, title: 'Log out', color: 'danger' }
+			]
+		},
+		{
+			type: 'submenu',
+			title: 'Move to',
+			filter: { placeholder: 'Pick a folder' },
+			menu: [
+				{ type: 'option', title: 'Inbox' },
+				{ type: 'option', title: 'Archive' },
+				{ type: 'option', title: 'Projects' },
+				{ type: 'option', title: 'Receipts' }
+			]
+		}
+	];
+
 	// Application menu
 	const appMenuItems: MenuItem[] = [
 		{
@@ -221,6 +297,22 @@
 		{ label: 'Arrow key navigation with loop', test: 'a11y:menu.arrow-keys' },
 		'Submenus as popovers or stacked views',
 		'Options, buttons, separators, submenus',
+		{
+			label: 'Checkbox items, radio groups and labelled groups',
+			test: 'a11y:menu.checkable-items'
+		},
+		{
+			label: 'Filterable, with focus staying in the search field',
+			test: 'a11y:menu.filter-focus'
+		},
+		{
+			label: 'Header and footer sit outside the menu role',
+			test: 'a11y:menu.chrome-outside-role'
+		},
+		{
+			label: 'Rows keep their node through insertions and removals',
+			test: 'a11y:menu.row-identity'
+		},
 		'Optional header and footer snippets'
 	]}
 >
@@ -323,6 +415,117 @@
 		<ComponentCard description="Menu items that update state on each click.">
 			<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
 				<Menu items={interactiveItems} />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Checkbox items and radio groups"
+			description="Checkbox and radio rows keep the menu open and report each change once. The check fades out when a row is unchecked. Minimap is controlled from the page; Word wrap and the sort order are uncontrolled or bound."
+			code={`<Menu
+	items={[
+		{ type: 'checkbox', title: 'Show minimap', value: showMinimap, onValueChange: (next) => (showMinimap = next) },
+		{ type: 'checkbox', title: 'Word wrap', defaultValue: true },
+		{ type: 'separator' },
+		{
+			type: 'radio-group',
+			label: 'Sort by',
+			value: sortBy,
+			onValueChange: (next) => (sortBy = next),
+			items: [
+				{ value: 'name', title: 'Name' },
+				{ value: 'date', title: 'Date modified' },
+				{ value: 'size', title: 'Size' }
+			]
+		}
+	]}
+/>`}
+		>
+			<div class="flex flex-col items-center gap-3">
+				<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
+					<Menu items={checkableItems} />
+				</div>
+				<p class="text-neutral/70 text-sm" data-testid="checkable-state">
+					Minimap {showMinimap ? 'on' : 'off'}, sorted by {sortBy}
+				</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Labelled groups"
+			description="A group is a role=group named by its label. The label is hidden from the accessibility tree so it is not read twice, and the arrow keys and type-ahead cross group boundaries."
+		>
+			<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
+				<Menu items={groupedItems} />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Filterable menu"
+			description="filter adds a search field. Focus stays in the field while ArrowDown and ArrowUp highlight rows; Enter presses the highlighted one. A submenu takes a filter of its own, and onHighlightChange reports the highlighted row."
+			code={`<Menu
+	items={items}
+	filter={{ placeholder: 'Find an action' }}
+	bind:search
+	onHighlightChange={(value) => (highlighted = value)}
+/>`}
+		>
+			<div class="flex flex-col items-center gap-3">
+				<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
+					<Menu
+						items={filterItems}
+						filter={{ placeholder: 'Find an action' }}
+						bind:search
+						onHighlightChange={(value) => (highlighted = value)}
+					/>
+				</div>
+				<p class="text-neutral/70 text-sm" data-testid="filter-state">
+					Search "{search}", highlighted {highlighted ?? 'nothing'}
+				</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Header and footer"
+			description="The header and footer slots sit outside the menu role, so a link or a field in them is not a menu item."
+		>
+			<div class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
+				<Menu items={basicItems}>
+					{#snippet header()}
+						<p class="text-neutral/70 px-md pt-xs pb-sm text-xs font-medium">
+							Signed in as ada@example.com
+						</p>
+					{/snippet}
+					{#snippet footer()}
+						<a
+							class="text-primary-readable px-md pt-sm block text-xs underline"
+							href={resolve('/components/menu')}
+						>
+							Help and shortcuts
+						</a>
+					{/snippet}
+				</Menu>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Right-to-left text"
+			description="In right-to-left text submenus open to the left, the caret mirrors, ArrowLeft opens a submenu and ArrowRight closes it. The submenu panel carries the direction of its row even though it is portaled out of it."
+		>
+			<div dir="rtl" class="bg-surface border-neutral-muted w-64 rounded-xl border p-2">
+				<Menu
+					items={[
+						{ type: 'option', prefix: houseIcon, title: 'Dashboard' },
+						{
+							type: 'submenu',
+							prefix: gearIcon,
+							title: 'Settings',
+							menu: [
+								{ type: 'option', title: 'General' },
+								{ type: 'option', title: 'Privacy' }
+							]
+						}
+					]}
+				/>
 			</div>
 		</ComponentCard>
 
