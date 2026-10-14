@@ -103,7 +103,12 @@
 		{
 			label: 'Inline mode renders the panel in normal document flow',
 			test: 'a11y:popover.inline-in-flow'
-		}
+		},
+		{
+			label: 'Hover never opens from a touch tap or a disabled trigger',
+			test: 'a11y:popover.hover-ignores-touch-and-disabled'
+		},
+		'Neighbouring hover popovers, hover cards and tooltips open without waiting'
 	]}
 >
 	<ComponentCard
@@ -412,6 +417,55 @@
 				{/snippet}
 				content
 			</Popover>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Hover popovers"
+			description="openOnHover opens after delay, from a mouse or pen only: a touch tap or a disabled trigger never hover-opens it. Once one is open, its neighbour opens at once. closeDelay is how long the pointer may wander outside the safe area before closeOnMouseLeave closes the panel."
+			code={`<Popover
+	openOnHover
+	closeOnMouseLeave
+	delay={300}
+	closeDelay={300}
+	trigger={{ content: 'Profile', variant: 'soft' }}
+>
+	<p>Hover the next trigger: it opens without waiting.</p>
+</Popover>
+
+<Popover openOnHover closeOnMouseLeave delay={300} closeDelay={300} trigger={{ content: 'Billing', variant: 'soft' }}>
+	<p>Opened without the delay.</p>
+</Popover>
+
+<Popover openOnHover delay={300} trigger={{ content: 'Disabled', disabled: true }}>
+	<p>Never shown on hover.</p>
+</Popover>`}
+		>
+			<div class="flex w-full max-w-xl flex-wrap items-center justify-center gap-3">
+				{#each ['Profile', 'Billing', 'Team'] as label (label)}
+					<Popover
+						openOnHover
+						closeOnMouseLeave
+						delay={300}
+						closeDelay={300}
+						position="bottom"
+						lockScroll={false}
+						trigger={{ content: label, variant: 'soft' }}
+					>
+						<p class="text-neutral/70 max-w-xs text-sm">
+							{label} details. Move to a neighbouring trigger: it opens without waiting.
+						</p>
+					</Popover>
+				{/each}
+				<Popover
+					openOnHover
+					delay={300}
+					position="bottom"
+					lockScroll={false}
+					trigger={{ content: 'Disabled', variant: 'soft', disabled: true }}
+				>
+					<p class="text-sm">Never shown on hover.</p>
+				</Popover>
+			</div>
 		</ComponentCard>
 
 		<ComponentCard

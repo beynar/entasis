@@ -11,6 +11,7 @@
 	import { transitionSize } from '$lib/attachments/transitionSize.js';
 	import { composeHandlers } from '$lib/utils/handlers.js';
 	import type { Attachment } from 'svelte/attachments';
+	import { SAFE_AREA_CLOSE_DELAY } from '$lib/utils/safeArea.svelte.js';
 
 	let {
 		id: customId,
@@ -28,6 +29,7 @@
 		openOnHover = false,
 		openOnClick = true,
 		delay = 100,
+		closeDelay = SAFE_AREA_CLOSE_DELAY,
 		closeOnEscape = true,
 		closeOnClickOutside = true,
 		closeOnMouseLeave = false,
@@ -136,6 +138,9 @@
 		},
 		get delay() {
 			return delay;
+		},
+		get closeDelay() {
+			return closeDelay;
 		},
 		get openOnClick() {
 			return openOnClick;

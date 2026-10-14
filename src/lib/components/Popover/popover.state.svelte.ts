@@ -62,6 +62,7 @@ interface PopoverOptions extends MakeRequired<
 		| 'closeOnClickOutside'
 		| 'openOnHover'
 		| 'delay'
+		| 'closeDelay'
 		| 'openOnClick'
 		| 'mobileSheet'
 		| 'inline'
@@ -261,7 +262,8 @@ export class PopoverState extends PopoverOptionsBase {
 			this.setOpen(false, { reason: 'trigger-hover', event, interaction: 'mouse' });
 		},
 		offset: 15,
-		debug: () => this.debugSafeArea
+		debug: () => this.debugSafeArea,
+		closeDelay: () => this.closeDelay
 	});
 
 	hoverAction = useHoverAction({
@@ -276,7 +278,12 @@ export class PopoverState extends PopoverOptionsBase {
 		},
 		// A function, read on each enter: field initialisers run before `bind(this, options)`
 		// installs the options, so a plain `this.delay` here would be `undefined` (no delay).
-		delay: () => this.delay
+		delay: () => this.delay,
+		// Root hover popovers share the warm-up with tooltips and hover cards. Submenus keep their
+		// delay: it is what lets the pointer cross sibling rows on the way to an open submenu.
+		group: () => (this.openOnHover && !this.parent ? this.theme.hoverIntent : null),
+		isOpen: () => this.isOpen,
+		contains: (node) => !!this.dialogElement?.contains(node)
 	});
 
 	addChild = (child: PopoverState) => () => this.#children.add(child);

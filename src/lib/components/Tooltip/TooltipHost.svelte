@@ -22,8 +22,15 @@
 	function handleOpenChange(open: boolean) {
 		if (open) return;
 		theme.tooltip = null;
-		theme.lastTooltipClosed = Date.now();
 	}
+
+	// However the shared surface closes (pointer, focus, Escape, unmount), the hover warm-up
+	// window starts: the next tooltip, hover card or hover popover opens at once. A tooltip held
+	// open (`open`, keyboard focus) does not warm the group while it shows.
+	$effect(() => {
+		if (!theme.tooltip) return;
+		return () => theme.hoverIntent.markClosed();
+	});
 	const color = $derived(currentTooltip?.color ?? 'neutral');
 	const size = $derived(currentTooltip?.size ?? 'normal');
 	const variant = $derived(currentTooltip?.variant ?? 'solid');

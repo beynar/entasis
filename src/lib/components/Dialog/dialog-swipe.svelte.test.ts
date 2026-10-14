@@ -1,7 +1,7 @@
 // Characterisation of the drawer swipe-to-dismiss gesture. The panel is the whole dialog
 // content, so the gesture is deliberately *not* captured on pointerdown: a press that never
 // becomes a drag has to leave clicks, text selection and focus inside the drawer alone. Only a
-// move past 4px along the dismiss axis promotes the press to a drag, captures the pointer and
+// move past 4px along the dismiss axis (and not mostly across it) promotes the press to a drag, captures the pointer and
 // starts moving the panel.
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/svelte';
@@ -61,6 +61,8 @@ const firePointer = async (node: Element, type: string, init: PointerInit = {}) 
 		cancelable: true,
 		pointerId,
 		button: 0,
+		// The primary button is held from the press until the release, as in a real drag.
+		buttons: type === 'pointerup' || type === 'pointercancel' ? 0 : 1,
 		pointerType,
 		clientX: axis === 'y' ? cross : pos,
 		clientY: axis === 'y' ? pos : cross
@@ -217,6 +219,21 @@ describe('Dialog drawer swipe-to-dismiss', () => {
 		expect(onOpenChange).not.toHaveBeenCalled();
 	});
 
+	test('a flick that ends with an almost stationary move still dismisses', async () => {
+		// Android Chrome sends one last move that barely changes the position right before release.
+		const onOpenChange = vi.fn();
+		const node = setup({ onOpenChange });
+
+		await firePointer(node, 'pointerdown', { pos: 0, t: 0 });
+		await firePointer(node, 'pointermove', { pos: 20, t: 8 });
+		await firePointer(node, 'pointermove', { pos: 40, t: 16 });
+		await firePointer(node, 'pointermove', { pos: 60, t: 24 });
+		await firePointer(node, 'pointermove', { pos: 60.5, t: 34 });
+		await firePointer(node, 'pointerup', { pos: 60.5, t: 35 });
+		expect(onOpenChange).toHaveBeenCalledOnce();
+		expect(onOpenChange.mock.calls[0][0]).toBe(false);
+	});
+
 	test('a short drag snaps the panel back on the next frame', async () => {
 		const onOpenChange = vi.fn();
 		const node = setup({ onOpenChange });
@@ -237,7 +254,7 @@ describe('Dialog drawer swipe-to-dismiss', () => {
 		expect(backdrop().style.opacity).toBe('');
 	});
 
-	test('a drag across the other axis is ignored, and does not spend the gesture', async () => {
+	test('a drag across the other axis is spent: a sideways drag never starts the drawer', async () => {
 		const node = setup();
 
 		await firePointer(node, 'pointerdown', { pos: 0, cross: 0, t: 0 });
@@ -245,10 +262,36 @@ describe('Dialog drawer swipe-to-dismiss', () => {
 		expect(readout('dragging')).toBe('false');
 		expect(setPointerCapture).not.toHaveBeenCalled();
 
-		// The press is still live: moving along the dismiss axis afterwards still drags.
+		// The press went across, so moving down the dismiss axis afterwards does not take it over.
 		await firePointer(node, 'pointermove', { pos: 40, cross: 120, t: 200 });
+		await firePointer(node, 'pointermove', { pos: 200, cross: 120, t: 300 });
+		expect(readout('dragging')).toBe('false');
+		expect(setPointerCapture).not.toHaveBeenCalled();
+		await firePointer(node, 'pointerup', { pos: 200, cross: 120, t: 400 });
+		expect(transform()).toBe('');
+	});
+
+	test('a horizontal drag with downward drift never drags a bottom drawer', async () => {
+		const onOpenChange = vi.fn();
+		const node = setup({ onOpenChange });
+
+		await firePointer(node, 'pointerdown', { pos: 0, cross: 0, t: 0 });
+		// A carousel swipe: well over the 4px the drawer used to need, but mostly sideways.
+		for (let i = 1; i <= 8; i += 1) {
+			await firePointer(node, 'pointermove', { pos: i * 3, cross: i * 20, t: i * 16 });
+		}
+		expect(readout('dragging')).toBe('false');
+		await firePointer(node, 'pointerup', { pos: 24, cross: 160, t: 140 });
+		expect(onOpenChange).not.toHaveBeenCalled();
+		expect(transform()).toBe('');
+	});
+
+	test('a drag along the dismiss axis with a little sideways drift still drags', async () => {
+		const node = setup();
+
+		await firePointer(node, 'pointerdown', { pos: 0, cross: 0, t: 0 });
+		await firePointer(node, 'pointermove', { pos: 12, cross: 5, t: 50 });
 		expect(readout('dragging')).toBe('true');
-		expect(readout('offset')).toBe('40');
 	});
 
 	test('a drag the wrong way down the axis spends the gesture for good', async () => {

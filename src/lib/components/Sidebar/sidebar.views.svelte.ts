@@ -3,6 +3,7 @@ import type { TransitionConfig } from 'svelte/transition';
 import { easingFunctions } from '$lib/transitions/easingFunctions.js';
 import type { ResolvedMotion } from '$lib/utils/motion/index.js';
 import { createPointerDrag } from '$lib/utils/pointerDrag.js';
+import { createVelocityTracker } from '$lib/utils/swipeVelocity.js';
 import { createBindableValue } from '$lib/utils/state.svelte.js';
 import type {
 	SidebarApi,
@@ -296,16 +297,15 @@ export class SidebarViewsState {
 		this.rtl = getComputedStyle(node).direction === 'rtl';
 		let candidate = false;
 		let sign = 1;
-		let lastX = 0;
-		let lastTime = 0;
-		let velocity = 0;
+		// Release speed over a short window, shared with drawers and toasts.
+		const tracker = createVelocityTracker();
 
-		const release = (cancelled: boolean, timeStamp: number) => {
+		const release = (cancelled: boolean, event: PointerEvent) => {
 			candidate = false;
 			const swipe = this.swipe;
 			if (swipe?.phase !== 'drag') return;
-			// A long stationary hold is not a flick: the last velocity sample may be stale.
-			if (timeStamp - lastTime > 100) velocity = 0;
+			tracker.add(event.clientX, event.timeStamp);
+			const velocity = tracker.velocity(event.timeStamp) * sign;
 			const commit =
 				!cancelled && (velocity > 0.4 || (swipe.offset > swipe.width * 0.35 && velocity > -0.2));
 			swipe.phase = commit ? 'commit' : 'cancel';
@@ -320,9 +320,8 @@ export class SidebarViewsState {
 				candidate = true;
 				this.rtl = getComputedStyle(node).direction === 'rtl';
 				sign = this.rtl ? -1 : 1;
-				lastX = event.clientX;
-				lastTime = event.timeStamp;
-				velocity = 0;
+				tracker.reset();
+				tracker.add(event.clientX, event.timeStamp);
 			},
 			// Horizontal toward the inline end, clearly more than vertical: anything else is a scroll.
 			shouldActivate: ({ deltaX, deltaY }) => {
@@ -342,15 +341,10 @@ export class SidebarViewsState {
 				const swipe = this.swipe;
 				if (swipe?.phase !== 'drag') return;
 				swipe.offset = clamp(deltaX * sign, 0, swipe.width);
-				const elapsed = event.timeStamp - lastTime;
-				if (elapsed >= 8) {
-					velocity = ((event.clientX - lastX) * sign) / elapsed;
-					lastX = event.clientX;
-					lastTime = event.timeStamp;
-				}
+				tracker.add(event.clientX, event.timeStamp);
 			},
-			onEnd: ({ event }) => release(false, event.timeStamp),
-			onCancel: ({ event }) => release(true, event.timeStamp)
+			onEnd: ({ event }) => release(false, event),
+			onCancel: ({ event }) => release(true, event)
 		})(node);
 	};
 }

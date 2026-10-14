@@ -1,6 +1,7 @@
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
 import { Registry } from '$lib/utils/registry.svelte.js';
 import { createPointerDrag } from '$lib/utils/pointerDrag.js';
+import { createVelocityTracker } from '$lib/utils/swipeVelocity.js';
 // import { useTheme } from '$lib/utils/theme.svelte.js';
 import { getContext, onMount, setContext, untrack } from 'svelte';
 import { useTheme } from '../Theme/theme.state.svelte.js';
@@ -313,9 +314,9 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 	private swipeAttachment = (node: HTMLElement) => {
 		let candidate = false;
 		let startPos = 0;
-		let lastPos = 0;
-		let lastTime = 0;
-		let velocity = 0;
+		// Release speed over a short window: a trailing stationary sample or a 120 Hz input
+		// keeps a flick a flick, and a pointer that rested before release has none left.
+		const tracker = createVelocityTracker();
 
 		const axisPos = (e: PointerEvent) => (this.swipeAxis === 'y' ? e.clientY : e.clientX);
 
@@ -353,8 +354,8 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 			candidate = false;
 			if (!this.dragging) return;
 			this.dragging = false;
-			// A long stationary hold is not a flick — the last velocity sample may be old.
-			if (event.timeStamp - lastTime > 100) velocity = 0;
+			tracker.add(axisPos(event), event.timeStamp);
+			const velocity = tracker.velocity(event.timeStamp) * this.swipeSign;
 			const shouldClose =
 				!cancelled &&
 				this.isOpen &&
@@ -377,11 +378,14 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 			// Touch panning is already governed by `touch-action` on the handles and by `ownsGesture`,
 			// which only promotes where nothing else can still scroll along the axis.
 			preventTouchMove: false,
+			// A press that travels mostly across the dismiss axis is spent before the drawer can take
+			// it, so a sideways drag (a carousel in the drawer) never starts dismissing it.
+			axis: () => this.swipeAxis,
 			onDown: ({ event }) => {
 				candidate = true;
-				startPos = lastPos = axisPos(event);
-				lastTime = event.timeStamp;
-				velocity = 0;
+				startPos = axisPos(event);
+				tracker.reset();
+				tracker.add(startPos, event.timeStamp);
 				this.dragSize = this.swipeAxis === 'y' ? node.offsetHeight : node.offsetWidth;
 			},
 			// The press becomes a drag once it has moved past 4px toward the dismissing edge.
@@ -408,13 +412,7 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 			onMove: ({ event }) => {
 				const pos = axisPos(event);
 				this.dragOffset = this.swipeSign * Math.max(0, (pos - startPos) * this.swipeSign); // clamp: can't drag past open
-				// Resample velocity on ~frame intervals so a single sub-frame move can't spike it.
-				const dt = event.timeStamp - lastTime;
-				if (dt >= 8) {
-					velocity = ((pos - lastPos) * this.swipeSign) / dt;
-					lastPos = pos;
-					lastTime = event.timeStamp;
-				}
+				tracker.add(pos, event.timeStamp);
 			},
 			onEnd: ({ event }) => endDrag(event, false),
 			onCancel: ({ event }) => endDrag(event, true)

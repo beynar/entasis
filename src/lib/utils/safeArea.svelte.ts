@@ -137,6 +137,9 @@ function drawAreaInDOM(points: Point[], style: DebugAreaStyle): SVGSVGElement {
 	return svg;
 }
 
+/** Default grace before a pointer outside the safe area closes it; see `closeDelay`. */
+export const SAFE_AREA_CLOSE_DELAY = 120;
+
 export const useSafeArea = (opts: {
 	isActive: () => boolean;
 	/** Runs when the pointer has left the safe area, with the pointer event that left it. */
@@ -144,6 +147,12 @@ export const useSafeArea = (opts: {
 	offset?: number;
 	debug?: SafeAreaDebugOption;
 	trackPosition?: boolean;
+	/**
+	 * Milliseconds the pointer may stay outside the safe area before `callback` runs. Read each
+	 * time the pointer leaves, so a function follows a changing value. Default
+	 * `SAFE_AREA_CLOSE_DELAY`.
+	 */
+	closeDelay?: number | (() => number | undefined);
 }) => {
 	const refs = new SvelteMap<HTMLElement, SafeAreaRole>();
 	const observerOffs = new SvelteMap<HTMLElement, () => void>();
@@ -156,10 +165,15 @@ export const useSafeArea = (opts: {
 	let isListening = false;
 	let closeTimer: ReturnType<typeof setTimeout> | null = null;
 
-	// ponytail: a short grace delay is a sampling safety net — pointermove fires
-	// on discrete points, so a fast flick can skip past the cone in one event; the
-	// delay lets it re-enter a safe region before the close actually fires.
-	const CLOSE_DELAY = 120;
+	// A short grace delay is also a sampling safety net: pointermove fires on discrete points, so
+	// a fast flick can skip past the cone in one event, and the delay lets it re-enter a safe
+	// region before the close actually fires.
+	const readCloseDelay = () =>
+		Math.max(
+			0,
+			(typeof opts.closeDelay === 'function' ? opts.closeDelay() : opts.closeDelay) ??
+				SAFE_AREA_CLOSE_DELAY
+		);
 
 	const { offset = 10 } = opts;
 	const getDebug = () => (typeof opts.debug === 'function' ? opts.debug() : !!opts.debug);
@@ -257,7 +271,7 @@ export const useSafeArea = (opts: {
 			closeTimer = null;
 			opts.callback?.(event);
 			destroy();
-		}, CLOSE_DELAY);
+		}, readCloseDelay());
 	};
 
 	const onPointerMove = (e: PointerEvent) => {

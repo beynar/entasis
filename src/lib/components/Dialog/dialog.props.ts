@@ -68,7 +68,9 @@ export type DialogProps = WithSlot<
 		closeOnEscape?: boolean;
 		/** Drag the panel toward its edge to dismiss (drawer types only). Defaults to true for drawers.
 		 *  Direction-aware, and never hijacks inner scrolling — a scrollable region that can still
-		 *  scroll along the drag axis keeps the gesture. Opt elements out with `data-no-swipe`. */
+		 *  scroll along the drag axis keeps the gesture, and so does a drag that travels more across
+		 *  the axis than along it. A flick dismisses on release speed alone. Opt elements out with
+		 *  `data-no-swipe`. */
 		swipeToDismiss?: boolean;
 		/** Show the drag thumb bar on swipe-dismissable drawers; set false to hide. Default true. */
 		thumb?: boolean;

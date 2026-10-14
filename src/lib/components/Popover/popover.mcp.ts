@@ -56,12 +56,13 @@ The Popover component displays floating content positioned relative to a trigger
   - Pass \`false\` to disable trigger (use with external ref)
 
 ### Interaction Props
-- **openOnHover**: boolean (default: false) - Open on mouse hover, after \`delay\`. Works whether the popover started closed or open (\`defaultOpen\`): once closed, hovering the trigger opens it again. A hover-opened popover does not lock page scroll, and pressing its trigger pins it open instead of closing it
+- **openOnHover**: boolean (default: false) - Open on mouse hover, after \`delay\`. Works whether the popover started closed or open (\`defaultOpen\`): once closed, hovering the trigger opens it again. A hover-opened popover does not lock page scroll, and pressing its trigger pins it open instead of closing it. Touch taps and disabled triggers (\`disabled\`, \`aria-disabled="true"\`, \`data-disabled\`) never hover-open it, a pending open needs the pointer still on the trigger when the delay ends, and a trigger that appears under a resting pointer (a menu reopened from the keyboard) waits for the pointer to move. Right after another hover popover, tooltip or hover card was open (within 400 ms), a root popover opens without the delay; submenus keep theirs
 - **openOnClick**: boolean (default: true) - Open on click
 - **delay**: number (default: 100) - Delay in ms before opening on hover; leaving the trigger before it elapses cancels the open, and so does any other open-state change meanwhile (a click that opens and closes it, Escape), so a pending hover never reopens a popover the user just closed
 - **closeOnEscape**: boolean (default: true) - Close on Escape. Only the topmost open layer closes, so Escape inside a nested popover leaves its parent open
 - **closeOnClickOutside**: boolean (default: true) - Close on an outside press. A press dismisses this popover and every layer stacked above it, but never the layer that was pressed. A press that began before the popover opened does not count, and on a touch screen only a tap does: a finger that starts scrolling the page leaves it open
 - **closeOnMouseLeave**: boolean (default: false) - Close a popover that hovering opened when the pointer leaves the hover safe area (\`reason: 'trigger-hover'\`). The safe area is the trigger, the panel, and a prediction cone toward the panel, so a diagonal move to the panel keeps it open. A popover opened by a press, the keyboard or code stays open.
+- **closeDelay**: number (default: 120) - Milliseconds the pointer may spend outside the hover safe area before \`closeOnMouseLeave\` closes the popover; a longer delay forgives a pointer that overshoots on its way to the panel
 - **debugSafeArea**: boolean (default: false) - Show hover safe-area overlays. Trigger/panel rectangles render in blue; the prediction cone toward the panel renders in orange.
 
 ### Focus & ARIA Props

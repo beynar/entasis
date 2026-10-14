@@ -187,6 +187,9 @@ interchangeable.
 
 - Shows on pointer hover and on keyboard focus (\`focusin\` / \`focusout\` on the trigger element), so
   attach it to focusable elements for keyboard users
+- A touch tap is not a hover: the compatibility mouse events a tap fires never show the tooltip
+- A trigger that appears under a resting pointer (a dialog closing over it, a list scrolled by the
+  wheel) shows its tooltip once the pointer moves, not on arrival
 - Dismissed on mouse leave or blur
 - Non-interactive (cannot be clicked)
 - Renders with \`role="tooltip"\` and sets \`aria-describedby\` on the trigger while visible (any previous value is restored on hide)
@@ -197,7 +200,9 @@ interchangeable.
 - Only one tooltip shows at a time; an \`open\` tooltip hands the surface over when another tooltip is
   hovered and reports that through \`onOpenChange\`
 - Automatically positions to stay in viewport using Floating UI
-- Uses smart delay: subsequent tooltips show instantly if within 400ms of previous
+- Uses smart delay: right after a tooltip, a hover card or a hover-opened popover was open
+  (within 400ms of it closing, or while a hover card or popover is still open), the next tooltip
+  shows instantly. A tooltip inside an open hover card keeps its delay.
 - Brief content only (use Popover for interactive content)
 - The surface is a singleton (\`TooltipHost\`) rendered by \`<Theme>\`
 - Does not lock scroll or trap focus

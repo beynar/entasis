@@ -129,6 +129,9 @@ export type PopoverProps = WithAttachments<{
 	/**
 	 * When true, hovering the trigger opens the popover after `delay`, including one that started
 	 * open. A hover-opened popover does not lock page scroll; pressing its trigger pins it open.
+	 * Touch taps and disabled triggers never hover-open it, and a trigger that appears under a
+	 * resting pointer waits for the pointer to move. Right after another hover popover, tooltip
+	 * or hover card was open, a root popover opens without the delay.
 	 */
 	openOnHover?: boolean;
 	/**
@@ -136,6 +139,12 @@ export type PopoverProps = WithAttachments<{
 	 * Leaving the trigger, or any other open or close meanwhile, cancels the pending open.
 	 */
 	delay?: number;
+	/**
+	 * Milliseconds the pointer may spend outside the hover safe area before `closeOnMouseLeave`
+	 * closes the popover. A longer delay forgives a pointer that overshoots on its way to the
+	 * panel. Default `120`.
+	 */
+	closeDelay?: number;
 	/** When true, enter and exit transitions slide from the placement direction. */
 	directedTransition?: boolean;
 	/** Fly/scale opacity transition overrides for open and close; supports responsive values. */

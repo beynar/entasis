@@ -220,9 +220,10 @@ describe('toast upsert by id', () => {
 		holdAnimations();
 
 		const li = items()[0] as HTMLElement;
+		// Once the press becomes a drag the toast captures the pointer, so its moves arrive there.
 		await fireEvent.pointerDown(li, { clientX: 100, clientY: 100 });
-		await fireEvent.pointerMove(window, { clientX: 200, clientY: 100 });
-		await fireEvent.pointerUp(window, { clientX: 200, clientY: 100 });
+		await fireEvent.pointerMove(li, { clientX: 200, clientY: 100 });
+		await fireEvent.pointerUp(li, { clientX: 200, clientY: 100 });
 		expect(toaster().toasts).toEqual([]);
 		expect(li.style.translate).toBe('100px 0px');
 

@@ -51,7 +51,9 @@
 		'{@attach tooltip()} primitive for any element',
 		'Chip-aligned solid, outline, and soft variants',
 		'Any-side placement via Floating UI',
-		'Single shared surface through theme state'
+		'Single shared surface through theme state',
+		'Warm-up shared with hover cards and hover popovers: the next opens at once',
+		'Never shown by a touch tap’s compatibility mouse events'
 	]}
 >
 	<ComponentCard

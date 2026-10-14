@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 
 	import Button from '../Button/Button.svelte';
 	import Card from '../Card/Card.svelte';
@@ -9,6 +9,7 @@
 	import type { ButtonProps } from '../Button/index.js';
 	import type { HoverCardProps, HoverCardTrigger } from './hoverCard.props.js';
 	import { useHoverCardMotion, useHoverCardTheme } from './hoverCard.theme.js';
+	import { useTheme } from '../Theme/theme.state.svelte.js';
 
 	let {
 		id: customId,
@@ -64,6 +65,18 @@
 
 	let openTimer: ReturnType<typeof setTimeout> | null = null;
 	let closeTimer: ReturnType<typeof setTimeout> | null = null;
+	const themeState = useTheme();
+	let triggerElement = $state<HTMLElement | null>(null);
+	let cardElement = $state<HTMLElement | null>(null);
+
+	// An open card keeps the hover warm-up going: moving on to a neighbouring card, tooltip or
+	// hover popover opens it at once. Triggers inside this card do not count as moving on.
+	$effect(() => {
+		if (!isOpen) return;
+		return untrack(() =>
+			themeState.hoverIntent.join({ contains: (node) => !!cardElement?.contains(node) })
+		);
+	});
 
 	const clearOpenTimer = () => {
 		if (openTimer) {
@@ -108,7 +121,19 @@
 	const scheduleOpen = () => {
 		clearCloseTimer();
 		if (disabled || isOpen || openTimer) return;
+		if (themeState.hoverIntent.isWarm(triggerElement)) {
+			openImmediately();
+			return;
+		}
 		openTimer = setTimeout(openImmediately, delay);
+	};
+
+	// Hover is a mouse or pen affair: a touch tap reaches the card through focus instead.
+	const handlePointerEnter = (event: PointerEvent) => {
+		if (event.pointerType !== 'touch') scheduleOpen();
+	};
+	const handlePointerLeave = (event: PointerEvent) => {
+		if (event.pointerType !== 'touch') scheduleClose();
 	};
 
 	const scheduleClose = () => {
@@ -173,8 +198,9 @@
 				aria-expanded={isOpen}
 				aria-controls={id}
 				{disabled}
-				onpointerenter={scheduleOpen}
-				onpointerleave={scheduleClose}
+				bind:this={triggerElement}
+				onpointerenter={handlePointerEnter}
+				onpointerleave={handlePointerLeave}
 				onfocusin={handleFocusIn}
 				onfocusout={scheduleClose}
 				onclick={handleClick}
@@ -188,8 +214,9 @@
 				class={classes.trigger({ disabled, className: triggerClass })}
 				data-state={isOpen ? 'open' : 'closed'}
 				role="presentation"
-				onpointerenter={scheduleOpen}
-				onpointerleave={scheduleClose}
+				bind:this={triggerElement}
+				onpointerenter={handlePointerEnter}
+				onpointerleave={handlePointerLeave}
 				onfocusin={handleFocusIn}
 				onfocusout={scheduleClose}
 				onclick={isButtonTrigger(triggerContent) ? undefined : handleClick}
@@ -224,8 +251,9 @@
 
 	<div
 		role="presentation"
+		bind:this={cardElement}
 		onpointerenter={openImmediately}
-		onpointerleave={scheduleClose}
+		onpointerleave={handlePointerLeave}
 		onfocusin={handleFocusIn}
 		onfocusout={scheduleClose}
 	>

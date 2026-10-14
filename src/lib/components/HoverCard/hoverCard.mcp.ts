@@ -34,7 +34,7 @@ HoverCard previews supplemental content when a trigger is hovered or focused. It
 ### Behavior Props
 - **position**: Placement (default: 'top') - Preferred placement relative to the trigger.
 - **offset**: number (default: 8) - Gap between trigger and card.
-- **delay**: number (default: 150) - Delay before opening on hover or focus.
+- **delay**: number (default: 150) - Delay before opening on hover or focus. Skipped right after another hover card, tooltip or hover-opened popover was open (within 400ms of it closing, or while one is still open), so moving between neighbouring cards does not wait at each one.
 - **closeDelay**: number (default: 100) - Delay before closing after pointer/focus leaves.
 - **openOnFocus**: boolean (default: true) - Opens when focus enters the trigger or card.
 - **openOnClick**: boolean (default: false) - Toggles on trigger click, useful for touch fallbacks.
@@ -83,7 +83,7 @@ HoverCard previews supplemental content when a trigger is hovered or focused. It
 
 ## Accessibility
 
-- Opens on pointer hover and keyboard focus by default.
+- Opens on pointer hover and keyboard focus by default. Hover means a mouse or a pen: a touch tap's pointer events never open or close the card, focus does.
 - Escape and outside click dismissal are delegated to Popover.
 - Button triggers receive aria-haspopup, aria-expanded, and aria-controls.
 - HoverCard is best for supplemental previews; primary content should remain reachable without hover.

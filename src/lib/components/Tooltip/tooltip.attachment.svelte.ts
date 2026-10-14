@@ -20,16 +20,15 @@ export const tooltip = (props: TooltipOptions) => {
 		onMouseLeave: () => {
 			if (theme.tooltip?.ref !== refElement) return;
 			theme.tooltip = null;
-			theme.lastTooltipClosed = Date.now();
 		},
 		get delay() {
-			const lastTooltipClosed = theme.lastTooltipClosed;
-			const now = Date.now();
-			if (lastTooltipClosed && now - lastTooltipClosed < (props.delay ?? 400)) {
-				return 0;
-			}
 			return props.delay ?? 400;
-		}
+		},
+		// Right after another tooltip, hover card or hover popover, the next tooltip shows at once.
+		// TooltipHost reports the shared surface's closes to the group.
+		group: () => theme.hoverIntent,
+		// A tooltip often explains why its trigger is disabled.
+		skipDisabled: false
 	});
 
 	const show = (ref: HTMLElement) => {
@@ -38,7 +37,6 @@ export const tooltip = (props: TooltipOptions) => {
 	const hide = (ref: HTMLElement) => {
 		if (theme.tooltip?.ref !== ref) return;
 		theme.tooltip = null;
-		theme.lastTooltipClosed = Date.now();
 	};
 
 	return (ref: HTMLElement) => {
@@ -65,10 +63,7 @@ export const tooltip = (props: TooltipOptions) => {
 			offFocus();
 			offBlur();
 			hoverAction.destroy();
-			if (theme.tooltip?.ref === ref) {
-				theme.tooltip = null;
-				theme.lastTooltipClosed = Date.now();
-			}
+			if (theme.tooltip?.ref === ref) theme.tooltip = null;
 			if (refElement === ref) refElement = null;
 		};
 	};
