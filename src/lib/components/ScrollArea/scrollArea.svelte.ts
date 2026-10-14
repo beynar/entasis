@@ -3,6 +3,7 @@ import { useBoundingClientRect } from '$lib/utils/useBoundingClientRect.svelte.j
 import { createPointerDrag } from '$lib/utils/pointerDrag.js';
 import { useHoverAction } from '$lib/utils/useHoverAction.svelte.js';
 import { useResizeObserver } from '$lib/utils/useResizeObserver.svelte.js';
+import { untrack } from 'svelte';
 import { on } from 'svelte/events';
 
 /**
@@ -12,10 +13,34 @@ import { on } from 'svelte/events';
  */
 const OVERFLOW_TOLERANCE = 1;
 
+/** Shortest a thumb gets, in px, whatever the content length or an overscroll asks for. */
+const MIN_THUMB_SIZE = 18;
+
+/** How long after the last scroll event the area still counts as scrolling, in ms. */
+const SCROLLING_IDLE_MS = 400;
+
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
+
+/** `-0` becomes `0`, so a normalised RTL offset compares equal to zero. */
+const unsigned = (value: number) => (value === 0 ? 0 : value);
+
+/** How far a scroll offset sits beyond its range (rubber banding): negative before, positive after. */
+const overscrollOf = (scroll: number, max: number) => scroll - clamp(scroll, 0, max);
+
 export interface ScrollAreaOptions {
 	delay: number;
 	type: 'auto' | 'always' | 'scroll' | 'hover';
 	scrollOnEdges: boolean;
+	/**
+	 * Px of content that may stay hidden past an edge before that edge counts as overflowing.
+	 * Defaults to 1.
+	 */
+	overflowEdgeThreshold?: number;
+	/**
+	 * Writing direction of the viewport. In `rtl` the horizontal offset runs from 0 down to a
+	 * negative number, so every horizontal read and write is mirrored. Defaults to `ltr`.
+	 */
+	direction?: () => 'ltr' | 'rtl';
 }
 
 export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
@@ -62,11 +87,66 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 
 	visible = $derived(this.scrollbarYEnabled);
 	visibleX = $derived(this.scrollbarXEnabled);
-	canScrollUp = $derived(this.maxScrollY > 0 && this.scrollY > 0);
-	canScrollDown = $derived(this.maxScrollY > 0 && this.scrollY < this.maxScrollY);
+
+	// Whether the viewport lays out right-to-left. In RTL the browser's `scrollLeft` runs from 0
+	// down to a negative number, so everything horizontal is read through `scrollX` (the distance
+	// travelled from the inline start, never negative inside the range) and written back mirrored.
+	rtl = $state(false);
+
+	// Thickness in px of each rendered scrollbar track (0 while it is not rendered). Where both
+	// bars show, each one stops short of the other so they do not overlap at the corner.
+	trackYThickness = $state(0);
+	trackXThickness = $state(0);
+
+	// The threshold for the overflow-edge hooks: hidden content past an edge counts once it is
+	// longer than this.
+	private edgeThreshold = $derived(Math.max(0, this.overflowEdgeThreshold ?? OVERFLOW_TOLERANCE));
+
+	// Scroll distance travelled from the start and left to travel to the end, per axis. These stay
+	// inside the scroll range (an overscroll does not leave content "hidden") and are 0 while the
+	// axis does not overflow.
+	overflowYStart = $derived(this.scrollbarYEnabled ? clamp(this.scrollY, 0, this.maxScrollY) : 0);
+	overflowYEnd = $derived(
+		this.scrollbarYEnabled ? clamp(this.maxScrollY - this.scrollY, 0, this.maxScrollY) : 0
+	);
+	overflowXStart = $derived(this.scrollbarXEnabled ? clamp(this.scrollX, 0, this.maxScrollX) : 0);
+	overflowXEnd = $derived(
+		this.scrollbarXEnabled ? clamp(this.maxScrollX - this.scrollX, 0, this.maxScrollX) : 0
+	);
+
+	// Whether content is hidden past each edge, beyond the threshold.
+	hasOverflowYStart = $derived(this.overflowYStart > this.edgeThreshold);
+	hasOverflowYEnd = $derived(this.overflowYEnd > this.edgeThreshold);
+	hasOverflowXStart = $derived(this.overflowXStart > this.edgeThreshold);
+	hasOverflowXEnd = $derived(this.overflowXEnd > this.edgeThreshold);
+
+	canScrollUp = $derived(this.hasOverflowYStart);
+	canScrollDown = $derived(this.hasOverflowYEnd);
+
 	thumbRect = useBoundingClientRect();
 	trackRect = useBoundingClientRect();
-	thumbYSize = $derived.by(() => {
+	trackRectX = useBoundingClientRect();
+
+	// Track lengths and thumb sizes read the live DOM, so they also depend on everything that
+	// moves those numbers: the observed boxes, the scroll extent (`measureVersion`) and the track
+	// boxes themselves (which also change when the other bar's corner inset appears). Without them
+	// the thumb keeps the size it had when the content last crossed the overflow threshold.
+	private trackYLength = $derived.by(() => {
+		void this.viewportDimensions;
+		void this.measureVersion;
+		void this.trackRect.current;
+		return this.scrollbarYElement?.clientHeight ?? 0;
+	});
+	private trackXLength = $derived.by(() => {
+		void this.viewportDimensions;
+		void this.measureVersion;
+		void this.trackRectX.current;
+		return this.scrollbarXElement?.clientWidth ?? 0;
+	});
+
+	/** Thumb length the content ratio asks for, before any overscroll shrinks it. */
+	thumbYBaseSize = $derived.by(() => {
+		void this.contentDimensions;
 		if (
 			!this.scrollbarYEnabled ||
 			!this.scrollbarYElement ||
@@ -75,10 +155,56 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 		) {
 			return 0;
 		}
-		const scrollbarYHeight = this.scrollbarYElement.clientHeight;
-		const thumbYRatio = this.viewportElement.clientHeight / this.viewportElement.scrollHeight;
-		return Math.max(thumbYRatio * scrollbarYHeight, 18);
+		const ratio = this.viewportElement.clientHeight / (this.viewportElement.scrollHeight || 1);
+		return Math.max(ratio * this.trackYLength, MIN_THUMB_SIZE);
 	});
+
+	thumbXBaseSize = $derived.by(() => {
+		void this.contentDimensions;
+		if (
+			!this.scrollbarXEnabled ||
+			!this.scrollbarXElement ||
+			!this.viewportElement ||
+			!this.contentElement
+		) {
+			return 0;
+		}
+		const ratio = this.viewportElement.clientWidth / (this.viewportElement.scrollWidth || 1);
+		return Math.max(ratio * this.trackXLength, MIN_THUMB_SIZE);
+	});
+
+	// WebKit lets the scroll offset leave its range while it rubber-bands. The thumb shrinks by
+	// that amount and stays pinned to the edge that is being pulled, instead of leaving its track.
+	overscrollY = $derived(overscrollOf(this.scrollY, this.maxScrollY));
+	overscrollX = $derived(overscrollOf(this.scrollX, this.maxScrollX));
+
+	thumbYSize = $derived(
+		this.thumbYBaseSize === 0
+			? 0
+			: Math.max(this.thumbYBaseSize - Math.abs(this.overscrollY), MIN_THUMB_SIZE)
+	);
+	thumbXSize = $derived(
+		this.thumbXBaseSize === 0
+			? 0
+			: Math.max(this.thumbXBaseSize - Math.abs(this.overscrollX), MIN_THUMB_SIZE)
+	);
+
+	// Scroll snapping would pull a dragged viewport to the nearest snap point under the thumb,
+	// which then jumps between them. It is switched off while a thumb is held.
+	private savedScrollSnapType: string | null = null;
+
+	private pauseScrollSnap() {
+		const viewport = this.viewportElement;
+		if (!viewport || this.savedScrollSnapType !== null) return;
+		this.savedScrollSnapType = viewport.style.scrollSnapType;
+		viewport.style.scrollSnapType = 'none';
+	}
+
+	private restoreScrollSnap() {
+		if (this.savedScrollSnapType === null) return;
+		if (this.viewportElement) this.viewportElement.style.scrollSnapType = this.savedScrollSnapType;
+		this.savedScrollSnapType = null;
+	}
 
 	isDraggingY = $state(false);
 	// The thumb is a handle: the shared pointer drag captures the pointer on press (primary
@@ -89,13 +215,14 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 			// Offset from the pointer to the thumb top, from a fresh rect
 			this.dragOffset = event.clientY - node.getBoundingClientRect().top;
 			this.isDraggingY = true;
+			this.pauseScrollSnap();
 		},
 		onMove: ({ y }) => {
 			if (!this.scrollbarYElement) return;
 
 			// Get fresh track rect at drag time
 			const trackRect = this.scrollbarYElement.getBoundingClientRect();
-			const maxThumbPos = Math.max(0, trackRect.height - this.thumbYSize);
+			const maxThumbPos = Math.max(0, trackRect.height - this.thumbYBaseSize);
 
 			// Calculate new thumb position relative to track
 			let newThumbTop = y - this.dragOffset - trackRect.top;
@@ -106,46 +233,39 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 		},
 		onEnd: () => {
 			this.isDraggingY = false;
+			this.restoreScrollSnap();
 		},
 		onCancel: () => {
 			this.isDraggingY = false;
+			this.restoreScrollSnap();
 		}
-	});
-
-	thumbXSize = $derived.by(() => {
-		if (
-			!this.scrollbarXEnabled ||
-			!this.scrollbarXElement ||
-			!this.viewportElement ||
-			!this.contentElement
-		) {
-			return 0;
-		}
-		const scrollbarXWidth = this.scrollbarXElement.clientWidth;
-		const thumbXRatio = this.viewportElement.clientWidth / this.viewportElement.scrollWidth;
-		return Math.max(thumbXRatio * scrollbarXWidth, 18);
 	});
 
 	isDraggingX = $state(false);
 	dragX = createPointerDrag({
 		onStart: ({ event, node }) => {
-			this.dragOffset = event.clientX - node.getBoundingClientRect().left;
+			// Offset from the pointer to the thumb's inline start edge.
+			const rect = node.getBoundingClientRect();
+			this.dragOffset = this.rtl ? rect.right - event.clientX : event.clientX - rect.left;
 			this.isDraggingX = true;
+			this.pauseScrollSnap();
 		},
 		onMove: ({ x }) => {
 			if (!this.scrollbarXElement) return;
 			const trackRect = this.scrollbarXElement.getBoundingClientRect();
-			const maxThumbPos = Math.max(0, trackRect.width - this.thumbXSize);
-			let newThumbLeft = x - this.dragOffset - trackRect.left;
-			newThumbLeft = Math.max(0, Math.min(newThumbLeft, maxThumbPos));
-			const scrollPercentage = maxThumbPos > 0 ? newThumbLeft / maxThumbPos : 0;
-			this.viewportElement!.scrollLeft = scrollPercentage * this.maxScrollX;
+			const maxThumbPos = Math.max(0, trackRect.width - this.thumbXBaseSize);
+			const pointer = this.rtl ? trackRect.right - x : x - trackRect.left;
+			const newThumbStart = Math.max(0, Math.min(pointer - this.dragOffset, maxThumbPos));
+			const scrollPercentage = maxThumbPos > 0 ? newThumbStart / maxThumbPos : 0;
+			this.writeScrollX(scrollPercentage * this.maxScrollX);
 		},
 		onEnd: () => {
 			this.isDraggingX = false;
+			this.restoreScrollSnap();
 		},
 		onCancel: () => {
 			this.isDraggingX = false;
+			this.restoreScrollSnap();
 		}
 	});
 
@@ -165,34 +285,67 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 
 	thumbYPosition = $derived.by(() => {
 		if (this.maxScrollY <= 0 || !this.scrollbarYElement) return 0;
-		const trackHeight = this.scrollbarYElement.clientHeight;
-		return (this.scrollY / this.maxScrollY) * (trackHeight - this.thumbYSize);
+		const overscroll = this.overscrollY;
+		if (overscroll < 0) return 0;
+		if (overscroll > 0) return this.trackYLength - this.thumbYSize;
+		return (this.scrollY / this.maxScrollY) * (this.trackYLength - this.thumbYSize);
 	});
 
+	/** Distance from the track's inline start to the thumb's inline start edge. */
 	thumbXPosition = $derived.by(() => {
 		if (this.maxScrollX <= 0 || !this.scrollbarXElement) return 0;
-		const trackWidth = this.scrollbarXElement.clientWidth;
-		return (this.scrollX / this.maxScrollX) * (trackWidth - this.thumbXSize);
+		const overscroll = this.overscrollX;
+		if (overscroll < 0) return 0;
+		if (overscroll > 0) return this.trackXLength - this.thumbXSize;
+		return (this.scrollX / this.maxScrollX) * (this.trackXLength - this.thumbXSize);
 	});
+
+	/** The horizontal thumb's `translateX` in px: mirrored in RTL, where the track fills from the right. */
+	thumbXTranslate = $derived(this.rtl ? -this.thumbXPosition : this.thumbXPosition);
 
 	// Wheel / touch / trackpad / momentum scrolling is fully NATIVE via the viewport's
 	// `overflow: auto` — no custom handlers needed. This class only reads the native scroll
 	// offset (handleScroll) to position the custom thumbs, and drives programmatic scroll for
 	// thumb-drag, track-click, keyboard, and edge auto-scroll.
 
-	isScrolling = $state<ReturnType<typeof setTimeout> | null>(null);
+	// True from the first scroll event until the viewport has been idle for a moment. The timer
+	// handle is a plain field: only the boolean is state, so a scroll session writes it twice
+	// instead of once per event.
+	isScrolling = $state(false);
+	private scrollingTimer: ReturnType<typeof setTimeout> | null = null;
+
+	private clearScrollingTimer() {
+		if (this.scrollingTimer === null) return;
+		clearTimeout(this.scrollingTimer);
+		this.scrollingTimer = null;
+	}
+
+	/** Horizontal scroll offset as distance from the inline start, whatever the direction. */
+	private readScrollX(viewport: HTMLElement) {
+		return unsigned(this.rtl ? -viewport.scrollLeft : viewport.scrollLeft);
+	}
+
+	/** Scrolls horizontally to a distance from the inline start. */
+	private writeScrollX(value: number) {
+		if (!this.viewportElement) return;
+		this.viewportElement.scrollLeft = this.rtl ? -value : value;
+	}
+
+	private readScrollOffsets() {
+		const viewport = this.viewportElement;
+		if (!viewport) return;
+		this.scrollY = viewport.scrollTop;
+		this.scrollX = this.readScrollX(viewport);
+	}
 
 	private handleScroll = () => {
-		if (this.isScrolling) {
-			clearTimeout(this.isScrolling);
-		}
-		this.isScrolling = setTimeout(() => {
-			this.isScrolling = null;
-		}, 400);
-		if (this.viewportElement) {
-			this.scrollY = this.viewportElement.scrollTop;
-			this.scrollX = this.viewportElement.scrollLeft;
-		}
+		if (!this.isScrolling) this.isScrolling = true;
+		this.clearScrollingTimer();
+		this.scrollingTimer = setTimeout(() => {
+			this.scrollingTimer = null;
+			this.isScrolling = false;
+		}, SCROLLING_IDLE_MS);
+		this.readScrollOffsets();
 	};
 
 	handleTrackClick = (event: MouseEvent) => {
@@ -208,10 +361,10 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 		const clickY = event.clientY - trackRect.top;
 
 		// Calculate the maximum thumb position (track height minus thumb height)
-		const maxThumbPos = Math.max(0, trackRect.height - this.thumbYSize);
+		const maxThumbPos = Math.max(0, trackRect.height - this.thumbYBaseSize);
 
 		// Center the thumb on the click position
-		const targetThumbPos = clickY - this.thumbYSize / 2;
+		const targetThumbPos = clickY - this.thumbYBaseSize / 2;
 		const clampedThumbPos = Math.max(0, Math.min(targetThumbPos, maxThumbPos));
 
 		// Convert thumb position to scroll position
@@ -224,12 +377,12 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 		if (event.composedPath().some((el) => el instanceof HTMLElement && el.dataset.thumb === ''))
 			return;
 		const trackRect = this.scrollbarXElement.getBoundingClientRect();
-		const clickX = event.clientX - trackRect.left;
-		const maxThumbPos = Math.max(0, trackRect.width - this.thumbXSize);
-		const targetThumbPos = clickX - this.thumbXSize / 2;
+		const clickX = this.rtl ? trackRect.right - event.clientX : event.clientX - trackRect.left;
+		const maxThumbPos = Math.max(0, trackRect.width - this.thumbXBaseSize);
+		const targetThumbPos = clickX - this.thumbXBaseSize / 2;
 		const clampedThumbPos = Math.max(0, Math.min(targetThumbPos, maxThumbPos));
 		const scrollPercentage = maxThumbPos > 0 ? clampedThumbPos / maxThumbPos : 0;
-		this.viewportElement.scrollLeft = scrollPercentage * this.maxScrollX;
+		this.writeScrollX(scrollPercentage * this.maxScrollX);
 	};
 
 	// ---------------------------------------------------------------------------------------
@@ -255,6 +408,11 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 	measure = () => {
 		const viewport = this.viewportElement;
 		if (!viewport) return;
+		// The direction decides how the horizontal offset reads (negative in RTL), so it is
+		// re-read with every measurement, and the offsets are published again when it flips.
+		const rtl = this.direction?.() === 'rtl';
+		if (rtl !== this.rtl) this.rtl = rtl;
+		this.readScrollOffsets();
 		const viewportWidth = viewport.clientWidth;
 		const viewportHeight = viewport.clientHeight;
 		if (
@@ -305,6 +463,11 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 
 	viewportAttachment = (element: HTMLElement) => {
 		this.viewportElement = element;
+		untrack(() => {
+			this.rtl = this.direction?.() === 'rtl';
+			// A restored or pre-set scroll position is not announced by a scroll event.
+			this.readScrollOffsets();
+		});
 		const offScroll = on(element, 'scroll', this.handleScroll);
 		// Hide the native scrollbars cross-browser (WebKit handled via the component <style>).
 		element.style.scrollbarWidth = 'none'; // Firefox + standard
@@ -327,6 +490,8 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 			offScroll();
 			offResize?.();
 			this.cancelScheduledMeasure();
+			this.clearScrollingTimer();
+			this.restoreScrollSnap();
 		};
 	};
 
@@ -373,29 +538,69 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 	};
 
 	// Forward a wheel over the (overlaid) custom scrollbar to the viewport, so wheeling on the
-	// thin bar scrolls the content just like wheeling on the viewport does.
+	// thin bar scrolls the content just like wheeling on the viewport does. The wheel is only
+	// consumed while the viewport can still move that way: at an edge it goes on to scroll the
+	// page behind, as it does over the viewport itself.
 	private forwardWheelToViewport = (event: WheelEvent) => {
-		if (!this.viewportElement) return;
-		this.viewportElement.scrollTop += event.deltaY;
-		this.viewportElement.scrollLeft += event.deltaX;
+		const viewport = this.viewportElement;
+		if (!viewport) return;
+		const canScrollY =
+			event.deltaY > 0
+				? viewport.scrollHeight - viewport.clientHeight - viewport.scrollTop >= OVERFLOW_TOLERANCE
+				: event.deltaY < 0 && viewport.scrollTop >= OVERFLOW_TOLERANCE;
+		// Along the inline axis: a positive delta scrolls towards the inline end.
+		const towardsEnd = (this.rtl ? -event.deltaX : event.deltaX) > 0;
+		const towardsStart = (this.rtl ? -event.deltaX : event.deltaX) < 0;
+		const scrollX = this.readScrollX(viewport);
+		const maxScrollX = viewport.scrollWidth - viewport.clientWidth;
+		const canScrollX =
+			(towardsEnd && maxScrollX - scrollX >= OVERFLOW_TOLERANCE) ||
+			(towardsStart && scrollX >= OVERFLOW_TOLERANCE);
+		if (!canScrollY && !canScrollX) return;
+		viewport.scrollTop += event.deltaY;
+		viewport.scrollLeft += event.deltaX;
 		event.preventDefault();
 	};
 
+	// A press on a scrollbar or its thumb must not pull focus away from the control that has it
+	// (a Combobox input whose list is being dragged, say): the default action of the press, which
+	// moves focus and starts a text selection, is cancelled. Touch is left alone, where it would
+	// only stop the scroll gesture.
+	private keepFocusOnPress = (event: MouseEvent) => {
+		if (event.button === 0) event.preventDefault();
+	};
+
 	trackAttachment = (element: HTMLElement) => {
+		this.trackYThickness = element.offsetWidth;
 		const offClick = on(element, 'click', this.handleTrackClick);
 		const offWheel = on(element, 'wheel', this.forwardWheelToViewport, { passive: false });
+		const offPointerDown = on(element, 'pointerdown', (event) => {
+			if (event.pointerType !== 'touch') this.keepFocusOnPress(event);
+		});
+		const offMouseDown = on(element, 'mousedown', this.keepFocusOnPress);
 		return () => {
 			offClick();
 			offWheel();
+			offPointerDown();
+			offMouseDown();
+			this.trackYThickness = 0;
 		};
 	};
 
 	trackAttachmentX = (element: HTMLElement) => {
+		this.trackXThickness = element.offsetHeight;
 		const offClick = on(element, 'click', this.handleTrackClickX);
 		const offWheel = on(element, 'wheel', this.forwardWheelToViewport, { passive: false });
+		const offPointerDown = on(element, 'pointerdown', (event) => {
+			if (event.pointerType !== 'touch') this.keepFocusOnPress(event);
+		});
+		const offMouseDown = on(element, 'mousedown', this.keepFocusOnPress);
 		return () => {
 			offClick();
 			offWheel();
+			offPointerDown();
+			offMouseDown();
+			this.trackXThickness = 0;
 		};
 	};
 

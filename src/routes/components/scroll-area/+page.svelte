@@ -6,6 +6,7 @@
 
 	const paragraphs = Array.from({ length: 12 }, (_, i) => i + 1);
 	const types = ['hover', 'always', 'scroll', 'auto'] as const;
+	const fruits = ['Apple', 'Banana', 'Cherry', 'Date', 'Elderberry', 'Fig', 'Grape', 'Honeydew'];
 	const controls = createComponentControls([
 		{
 			name: 'type',
@@ -27,6 +28,9 @@
 		'Vertical and horizontal thumbs with drag',
 		'hover, always, scroll, and auto visibility modes',
 		'Optional scroll fade via the shared utility',
+		'data-scrolling and overflow-edge attributes and CSS variables for styling',
+		'Right-to-left horizontal scrolling with logical scrollbar placement',
+		'Thumb drags keep focus where it is and pause scroll snapping',
 		{
 			label: 'Keyboard-focusable region only when it overflows (WCAG SCR34)',
 			test: 'a11y:scroll-area.tabbable-on-overflow'
@@ -87,6 +91,55 @@
 						</div>
 					{/each}
 				</div>
+			</ScrollArea>
+		</ComponentCard>
+
+		<ComponentCard
+			description="Overflow-edge hooks: the borders appear only while content is hidden past that edge (data-overflow-y-start, data-overflow-y-end), and data-scrolling marks the area while it scrolls."
+		>
+			<ScrollArea
+				type="always"
+				class="raised data-overflow-y-end:border-b-primary data-overflow-y-start:border-t-primary h-40 w-full max-w-md border-y-2 border-transparent transition-colors"
+			>
+				<div class="flex flex-col gap-3 p-4">
+					{#each paragraphs as p, index (index)}
+						<p class="text-neutral/80 text-sm">Paragraph {p}. Scroll to see the edges change.</p>
+					{/each}
+				</div>
+			</ScrollArea>
+		</ComponentCard>
+
+		<ComponentCard
+			description="Right-to-left: the offset runs negative, the horizontal thumb starts at the right, and the vertical bar sits at the left."
+		>
+			<div dir="rtl" class="w-full max-w-md">
+				<ScrollArea type="always" class="raised h-40 w-full">
+					<div class="flex gap-3 p-4" style:width="900px">
+						{#each paragraphs as p, index (index)}
+							<div
+								class="bg-neutral-muted text-neutral/80 grid h-60 w-32 shrink-0 place-items-center rounded text-sm"
+							>
+								{p}
+							</div>
+						{/each}
+					</div>
+				</ScrollArea>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="viewportAttrs lets a widget own the viewport: here the scrolling element is the listbox itself."
+		>
+			<ScrollArea
+				type="always"
+				class="raised h-32 w-full max-w-xs"
+				viewportAttrs={{ role: 'listbox', 'aria-label': 'Fruits', tabindex: 0 }}
+			>
+				{#each fruits as fruit, index (index)}
+					<div role="option" aria-selected="false" class="text-neutral/80 px-3 py-2 text-sm">
+						{fruit}
+					</div>
+				{/each}
 			</ScrollArea>
 		</ComponentCard>
 	{/snippet}
