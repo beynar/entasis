@@ -12,6 +12,9 @@
 		theme,
 		size,
 		delay,
+		revealDelay,
+		fallbackDelay,
+		image,
 		loading,
 		prefix,
 		suffix,
@@ -34,6 +37,9 @@
 				index,
 				avatarProps: {
 					delay,
+					revealDelay,
+					fallbackDelay,
+					image,
 					size,
 					loading,
 					prefix,
@@ -43,6 +49,9 @@
 		{:else}
 			<Avatar
 				{delay}
+				{revealDelay}
+				{fallbackDelay}
+				{image}
 				{size}
 				{loading}
 				{prefix}

@@ -2,7 +2,7 @@ import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultAvatar = cva({
-	base: 'relative items-center border border-neutral-muted text-neutral aspect-ratio-1 rounded-full',
+	base: 'group/avatar relative items-center border border-neutral-muted text-neutral aspect-ratio-1 rounded-full',
 	variants: {
 		size: {
 			normal: 'size-8',
@@ -16,7 +16,7 @@ const defaultAvatar = cva({
 });
 
 const defaultAvatarImage = cva({
-	base: 'rounded-full absolute top-0 left-0 z-0 object-cover w-full max-w-full h-full max-h-full',
+	base: 'rounded-full absolute top-0 left-0 z-0 object-cover w-full max-w-full h-full max-h-full opacity-0 transition-opacity duration-normal motion-reduce:transition-none group-data-[status=loaded]/avatar:opacity-100',
 	variants: {
 		size: {
 			normal: '',
@@ -60,7 +60,7 @@ const defaultAvatarSuffix = cva({
 // Small initials sit on the type scale's smallest step, so they tighten their tracking instead:
 // two bold capitals then fill the 24px circle in the same proportion the larger sizes do.
 const defaultAvatarInitials = cva({
-	base: 'absolute bg-surface-floating bottom-0 w-full h-full text-center left-0 rounded-full flex items-center justify-center uppercase font-bold text-sm',
+	base: 'absolute bg-surface-floating bottom-0 w-full h-full text-center left-0 rounded-full flex items-center justify-center uppercase font-bold text-sm transition-opacity duration-normal motion-reduce:transition-none group-data-[status=loaded]/avatar:opacity-0',
 	variants: {
 		size: {
 			normal: 'text-sm',
