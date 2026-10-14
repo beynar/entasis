@@ -249,7 +249,9 @@ describe('CC-7 · literal value types', () => {
 		type Props = RadioInputProps<RadioOption<Plan>>;
 		expectTypeOf<Props['value']>().toEqualTypeOf<Plan | null | undefined>();
 		expectTypeOf<Props['defaultValue']>().toEqualTypeOf<Plan | null | undefined>();
-		expectTypeOf<Props['onValueChange']>().toEqualTypeOf<((value: Plan) => void) | undefined>();
+		expectTypeOf<Props['onValueChange']>().toEqualTypeOf<
+			((value: Plan | null) => void) | undefined
+		>();
 		// Unchanged for options with plain string values.
 		expectTypeOf<RadioInputProps['value']>().toEqualTypeOf<string | null | undefined>();
 	});

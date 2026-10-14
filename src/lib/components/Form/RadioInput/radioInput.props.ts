@@ -33,8 +33,11 @@ export type RadioInputProps<
 	value?: Value | null;
 	/** Initial selected value when `value` is omitted. */
 	defaultValue?: Value | null;
-	/** Called when the user selects another option. */
-	onValueChange?: (value: Value) => void;
+	/**
+	 * Called when the value changes: with the selected option's value, or `null` when the group is
+	 * cleared (for example through `field.setValue(null)`).
+	 */
+	onValueChange?: (value: Value | null) => void;
 	/**
 	 * Theme overrides for the radio group's own slots plus the Field parts (label,
 	 * inputContainer, error, ...) the group is wrapped in.

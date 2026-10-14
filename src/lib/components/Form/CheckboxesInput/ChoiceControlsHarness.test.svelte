@@ -1,6 +1,7 @@
 <script lang="ts">
 	// Choice controls in a plain <form> (a SvelteKit form action), or inside an entasis Form.
 	import Theme from '../../Theme/Theme.svelte';
+	import Dialog from '../../Dialog/Dialog.svelte';
 	import Checkbox from '../Checkbox/Checkbox.svelte';
 	import Form from '../Form/Form.svelte';
 	import RadioInput from '../RadioInput/RadioInput.svelte';
@@ -21,7 +22,7 @@
 		onPlanChange,
 		onSwitchChange
 	}: {
-		scenario?: 'native' | 'entasis';
+		scenario?: 'native' | 'entasis' | 'dialog';
 		dir?: 'ltr' | 'rtl';
 		readOnly?: boolean;
 		radioDefault?: string | null;
@@ -31,7 +32,7 @@
 		onFormSubmit?: (value: Record<string, unknown>) => void;
 		onTermsChange?: (value: boolean | null) => void;
 		onTopicsChange?: (value: string[]) => void;
-		onPlanChange?: (value: string) => void;
+		onPlanChange?: (value: string | null) => void;
 		onSwitchChange?: (value: boolean | null) => void;
 	} = $props();
 
@@ -88,6 +89,16 @@
 				<button type="submit">Save</button>
 				<button type="button">After</button>
 			</form>
+		{:else if scenario === 'dialog'}
+			<Dialog
+				responsive={false}
+				type="drawerRight"
+				transition={{ in: { duration: 0 }, out: { duration: 0 } }}
+				title="Choose a plan"
+				trigger={{ content: 'Open plans' }}
+			>
+				<RadioInput label="Plan" items={plans} defaultValue={radioDefault} />
+			</Dialog>
 		{:else}
 			<Form
 				inputs={{

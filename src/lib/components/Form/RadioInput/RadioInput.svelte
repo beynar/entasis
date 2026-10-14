@@ -54,9 +54,7 @@
 		set focused(v: boolean) {
 			focused = v;
 		},
-		onValueChange: (v) => {
-			if (v !== null) onValueChange?.(v as Value);
-		},
+		onValueChange: (v) => onValueChange?.(v as Value | null),
 		get disabled() {
 			return disabled;
 		},
@@ -115,6 +113,9 @@
 		enableHoverFocus: false,
 		// Enter belongs to the form (see continueFormFromChoice); Space selects.
 		enterActivates: false,
+		// Escape must reach the Dialog, Popover or Ask the group sits in; the arrows, Home, End and
+		// Space are still cancelled by the navigation itself.
+		preventKeyboardDefault: false,
 		enabled: () => !field.disabled,
 		defaultFocusedIndex: () => (tabStopIndex >= 0 ? tabStopIndex : null),
 		// Selection follows the keyboard, but only a deliberate key move (an arrow, Home or End)

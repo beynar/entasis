@@ -26,7 +26,7 @@ The RadioInput component provides a group of radio buttons for single-selection 
 Extends all Field component props plus:
 
 ### Core Props
-- **value**: string | null (bindable) - Selected value. Typed from the options: with literal option values (for example \`value: 'free'\` and \`value: 'pro'\`) it is \`'free' | 'pro' | null\`, and \`onValueChange\` receives that union. A variable typed as plain \`string\` still binds
+- **value**: string | null (bindable) - Selected value. Typed from the options: with literal option values (for example \`value: 'free'\` and \`value: 'pro'\`) it is \`'free' | 'pro' | null\`, and \`onValueChange\` receives that union, or \`null\` when the group is cleared. A variable typed as plain \`string\` still binds
 - **items**: Array<{ value: string, label: string, description?: string, disabled?: boolean }> (required). A disabled option cannot be selected; when it is the selected one, a native \`<form>\` leaves it out of its submission (like a disabled native radio) while the field value, and so an entasis Form value, keeps it
 
 ### Layout Props

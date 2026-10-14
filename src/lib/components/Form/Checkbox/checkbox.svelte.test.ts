@@ -43,7 +43,7 @@ describe('CC-1 · Enter', () => {
 		expect(onNativeSubmit.mock.calls[0][0].has('terms')).toBe(false);
 	});
 
-	test('a modified or repeated Enter is left alone', () => {
+	test('a modified or repeated Enter never toggles and does not submit', () => {
 		const onNativeSubmit = vi.fn();
 		render(ChoiceControlsHarness, { props: { onNativeSubmit } });
 
@@ -55,7 +55,8 @@ describe('CC-1 · Enter', () => {
 				...init
 			});
 			terms().dispatchEvent(event);
-			expect(event.defaultPrevented).toBe(false);
+			// Cancelled so the native button click (and its auto-repeat) cannot toggle it.
+			expect(event.defaultPrevented).toBe(true);
 		}
 		expect(onNativeSubmit).not.toHaveBeenCalled();
 	});
@@ -123,6 +124,25 @@ describe('CC-3 · names and descriptions', () => {
 		const checkbox = screen.getByRole('checkbox', { name: 'Accept terms' });
 		expect(checkbox.getAttribute('aria-describedby')?.split(' ')).toContain('external-hint');
 		expect(checkbox.getAttribute('aria-describedby')?.split(' ')).toHaveLength(2);
+	});
+});
+
+describe('CC-3 · describedby survives a toggle', () => {
+	test('the helper and description ids Field wrote are still listed after a click', async () => {
+		renderInTheme(Checkbox, {
+			label: 'Updates',
+			labelPosition: 'top',
+			description: 'Product news',
+			helper: 'Once a month'
+		});
+		const checkbox = screen.getByRole('checkbox', { name: 'Updates' });
+		const before = checkbox.getAttribute('aria-describedby');
+		expect(before?.split(' ')).toHaveLength(2);
+
+		await fireEvent.click(checkbox);
+		await waitFor(() => expect(checkbox).toHaveAttribute('aria-checked', 'true'));
+
+		expect(checkbox.getAttribute('aria-describedby')).toBe(before);
 	});
 });
 

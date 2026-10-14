@@ -72,11 +72,15 @@
 		attrs?.['aria-labelledby'] ??
 			(label && !hiddenLabel && !attrs?.['aria-label'] ? labelId : undefined)
 	);
+	// Only spread when there is something to say. An `aria-describedby={undefined}` in the
+	// template would make Svelte own the attribute and remove what Field wrote for the helper,
+	// the description and the errors on the next attribute update (the first toggle).
 	const describedBy = $derived(
 		[attrs?.['aria-describedby'], description ? descriptionId : undefined]
 			.filter(Boolean)
 			.join(' ') || undefined
 	);
+	const describedByAttrs = $derived(describedBy ? { 'aria-describedby': describedBy } : {});
 </script>
 
 <button
@@ -87,7 +91,7 @@
 	role="checkbox"
 	aria-label={hiddenLabel ?? attrs?.['aria-label']}
 	aria-labelledby={labelledBy}
-	aria-describedby={describedBy}
+	{...describedByAttrs}
 	aria-controls={controls}
 	aria-checked={indeterminate ? 'mixed' : checked}
 	aria-readonly={readOnly || undefined}

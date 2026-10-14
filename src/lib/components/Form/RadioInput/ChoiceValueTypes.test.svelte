@@ -16,7 +16,7 @@
 	bind:value={plan}
 	items={[{ value: 'free' }, { value: 'pro' }]}
 	onValueChange={(value) => {
-		const narrowed: Plan = value;
+		const narrowed: Plan | null = value;
 		void narrowed;
 	}}
 />

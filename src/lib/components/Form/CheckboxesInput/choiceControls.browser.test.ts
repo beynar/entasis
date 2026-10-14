@@ -137,6 +137,72 @@ describe('radio group keyboard model (CC-9)', () => {
 	});
 });
 
+describe('Enter that is not a plain press (CC-1)', () => {
+	test('Shift+Enter and Ctrl+Enter do not select a radio', async () => {
+		const onPlanChange = vi.fn();
+		await render(ChoiceControlsHarness, { onPlanChange });
+		await settle();
+		radio('Free').focus();
+
+		await userEvent.keyboard('{Shift>}{Enter}{/Shift}');
+		await userEvent.keyboard('{Control>}{Enter}{/Control}');
+		// Cancelled, so the native button cannot click on it in any engine.
+		const shifted = new KeyboardEvent('keydown', {
+			key: 'Enter',
+			shiftKey: true,
+			bubbles: true,
+			cancelable: true
+		});
+		radio('Free').dispatchEvent(shifted);
+		expect(shifted.defaultPrevented).toBe(true);
+
+		expect(checked(radio('Free'))).toBe('false');
+		expect(checked(radio('Pro'))).toBe('true');
+		expect(onPlanChange).not.toHaveBeenCalled();
+	});
+
+	test('a held Enter does not flip a checkbox', async () => {
+		const onTermsChange = vi.fn();
+		const onNativeSubmit = vi.fn();
+		await render(ChoiceControlsHarness, { onTermsChange, onNativeSubmit });
+		await settle();
+		const terms = checkbox('Terms');
+		terms.focus();
+
+		// A held key: the first keydown, then auto-repeats. Each one is cancelled, so the native
+		// button never clicks on any of them.
+		const presses = [false, true, true, true].map((repeat) => {
+			const event = new KeyboardEvent('keydown', {
+				key: 'Enter',
+				repeat,
+				bubbles: true,
+				cancelable: true
+			});
+			terms.dispatchEvent(event);
+			return event.defaultPrevented;
+		});
+
+		expect(presses).toEqual([true, true, true, true]);
+		expect(checked(terms)).toBe('false');
+		expect(onTermsChange).not.toHaveBeenCalled();
+		expect(onNativeSubmit).toHaveBeenCalledOnce();
+	});
+});
+
+describe('radio group inside a Dialog (CC-9)', () => {
+	test('Escape on a focused option closes the Dialog', async () => {
+		await render(ChoiceControlsHarness, { scenario: 'dialog' });
+		await userEvent.click(page.getByRole('button', { name: 'Open plans' }));
+		await expect.element(page.getByRole('dialog', { name: 'Choose a plan' })).toBeVisible();
+		radio('Pro').focus();
+		expect(document.activeElement).toBe(radio('Pro'));
+
+		await userEvent.keyboard('{Escape}');
+
+		await expect.poll(() => document.querySelector('[role="dialog"]')).toBeNull();
+	});
+});
+
 describe('checkbox (CC-1)', () => {
 	test('Space toggles once; Enter submits the form without toggling', async () => {
 		const onTermsChange = vi.fn();

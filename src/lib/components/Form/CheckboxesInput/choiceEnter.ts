@@ -7,18 +7,18 @@ import type { FieldType } from '../Field/field.js';
 import type { FieldState } from '../Field/field.state.svelte.js';
 
 /**
- * Handles a plain Enter key press on a choice control's element: the toggle or selection is left
- * alone and the form moves on instead. Returns whether the key was handled, so a caller can skip
- * its own work. A key a handler already cancelled, a repeat, an IME composition and a press with
- * a modifier are not handled.
+ * Handles an Enter key press on a choice control's element. Enter never toggles or selects, so
+ * every Enter nobody cancelled is cancelled here (a button would click on it, and again on each
+ * auto-repeat). Only a plain press moves the form on; a repeat, an IME composition and a press
+ * with a modifier are swallowed without submitting. Returns whether the form was continued.
  */
 export const continueFormFromChoice = <T extends FieldType>(
 	event: KeyboardEvent & { currentTarget: EventTarget & Element },
 	field: FieldState<T>
 ): boolean => {
+	if (event.key !== 'Enter' || event.defaultPrevented) return false;
+	event.preventDefault();
 	if (
-		event.key !== 'Enter' ||
-		event.defaultPrevented ||
 		event.repeat ||
 		event.isComposing ||
 		event.shiftKey ||
@@ -28,7 +28,6 @@ export const continueFormFromChoice = <T extends FieldType>(
 	) {
 		return false;
 	}
-	event.preventDefault();
 	if (!field.form?.advanceFrom(field)) requestNativeSubmit(event.currentTarget);
 	return true;
 };
