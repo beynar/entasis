@@ -39,6 +39,16 @@ export type PointerDragOptions<Node extends HTMLElement = HTMLElement> = {
 	 *  promoted simply ends on pointerup, without `onStart`/`onEnd`. Takes the place of
 	 *  `activation`, which promotes on distance and a touch hold instead. */
 	shouldActivate?: (payload: PointerDragPayload<Node>) => boolean;
+	/** Direction attribution for a gesture along one axis, decided before any activation. Once
+	 *  the press has travelled `axisSlopPx` either way, a press that went further across the axis
+	 *  than along it is spent: it never activates (neither `shouldActivate` nor `activation` is
+	 *  consulted again) and ends on pointerup through `onCancel`, so a mostly sideways drag stays
+	 *  with whatever scrolls or swipes across. Until then, movement activates nothing (a touch
+	 *  hold under `activation` still can). Return `undefined` to skip attribution. Ignored by
+	 *  sessions that activate on press. */
+	axis?: () => 'x' | 'y' | undefined;
+	/** Travel in px after which `axis` attributes the press. Default 6. */
+	axisSlopPx?: number;
 	/** While the drag is active, `touchmove` is prevented so the page cannot pan under it.
 	 *  Default true; set false when the consumer governs touch panning itself (`touch-action`)
 	 *  and native scrolling around the gesture must keep working. */
@@ -70,9 +80,12 @@ type PointerDragSession<Node extends HTMLElement> = {
 	usesActivation: boolean;
 	activationTimer: number | null;
 	detachWindowEnd: (() => void) | null;
+	/** `axis` attribution: the press went along the axis (`attributed`) or across it (`spent`). */
+	attribution: 'pending' | 'attributed' | 'spent';
 };
 
 const DEFAULT_MOVE_TOLERANCE = 2;
+const DEFAULT_AXIS_SLOP = 6;
 
 export const createPointerDrag = <Node extends HTMLElement = HTMLElement>(
 	options: PointerDragOptions<Node>
@@ -128,7 +141,9 @@ export const createPointerDrag = <Node extends HTMLElement = HTMLElement>(
 	};
 
 	const releasePointer = (currentSession: PointerDragSession<Node>) => {
-		if (currentSession.node.hasPointerCapture(currentSession.pointerId)) {
+		// Optional: an `on-activate` session that never activated took no capture, and DOM
+		// implementations without pointer capture (jsdom) must still end the session.
+		if (currentSession.node.hasPointerCapture?.(currentSession.pointerId)) {
 			currentSession.node.releasePointerCapture(currentSession.pointerId);
 		}
 	};
@@ -219,7 +234,8 @@ export const createPointerDrag = <Node extends HTMLElement = HTMLElement>(
 					isActive: false,
 					usesActivation: false,
 					activationTimer: null,
-					detachWindowEnd: null
+					detachWindowEnd: null,
+					attribution: 'pending'
 				};
 				const deferCapture = options.capture === 'on-activate';
 				if (!deferCapture) node.setPointerCapture(event.pointerId);
@@ -253,11 +269,44 @@ export const createPointerDrag = <Node extends HTMLElement = HTMLElement>(
 				}, activation.touchDelayMs);
 			};
 
+			/** Whether a candidate may be promoted on this move, after `axis` attribution. */
+			const isAttributed = (
+				payload: PointerDragPayload<Node>,
+				currentSession: PointerDragSession<Node>
+			) => {
+				if (currentSession.attribution !== 'pending') {
+					return currentSession.attribution === 'attributed';
+				}
+				const axis = options.axis?.();
+				if (!axis) return true;
+				const along = Math.abs(axis === 'x' ? payload.deltaX : payload.deltaY);
+				const across = Math.abs(axis === 'x' ? payload.deltaY : payload.deltaX);
+				if (Math.max(along, across) < (options.axisSlopPx ?? DEFAULT_AXIS_SLOP)) return false;
+				if (across > along) {
+					// Spent: the session stays until the pointer lifts, so a second pointer cannot
+					// take over mid-press, but it no longer waits on a touch hold either.
+					currentSession.attribution = 'spent';
+					clearActivationTimer(currentSession);
+					return false;
+				}
+				currentSession.attribution = 'attributed';
+				return true;
+			};
+
 			const move = (event: PointerEvent) => {
 				if (!session || event.pointerId !== session.pointerId) return;
 
+				// The primary button came up where no pointerup reached us (outside the window, over
+				// an iframe, under devtools): a mouse moving without it held is no longer dragging.
+				// It ends where the button was last known to be held, not where this move landed.
+				if (event.pointerType === 'mouse' && (event.buttons & 1) === 0) {
+					end(session.lastEvent);
+					return;
+				}
+
 				const currentSession = session;
 				const payload = getPayload(event, currentSession);
+				if (!currentSession.isActive && !isAttributed(payload, currentSession)) return;
 				// A candidate the consumer promotes itself: nothing moves until it says so.
 				if (options.shouldActivate && !currentSession.isActive) {
 					if (!options.shouldActivate(payload)) return;

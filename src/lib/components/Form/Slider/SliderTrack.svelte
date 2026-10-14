@@ -20,6 +20,7 @@
 		groupLabel,
 		getThumbLabel,
 		onFirstThumbRef,
+		readOnly,
 		t
 	}: {
 		id: string;
@@ -32,6 +33,8 @@
 		groupLabel?: string;
 		getThumbLabel: (index: number) => string | undefined;
 		onFirstThumbRef?: (node: HTMLButtonElement | null) => void;
+		/** Edits are refused: every thumb exposes aria-readonly, not only the first one. */
+		readOnly?: boolean;
 		t: Messages;
 	} = $props();
 
@@ -139,6 +142,7 @@
 				describedBy={instructionsId}
 				orientation={slider.orientationValue}
 				disabled={slider.disabled}
+				{readOnly}
 				{variant}
 				{color}
 				{size}

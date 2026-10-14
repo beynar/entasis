@@ -42,3 +42,16 @@ export const useI18n = (local?: Partial<Messages>): Messages => {
 };
 
 export const useI18nDirection = (): I18nDirection | undefined => getI18nDirectionContext()?.();
+
+/**
+ * `useI18n` for code that resolves messages later, outside component initialisation (validation,
+ * event handlers). Call it during initialisation; the returned function reads the active messages
+ * whenever it runs, and stays reactive to a locale getter when read inside `$derived`.
+ */
+export const useI18nResolver = (): (() => Messages) => {
+	const ctx = getI18nContext();
+	return () => {
+		const global = typeof ctx === 'function' ? ctx() : ctx;
+		return global ? { ...en, ...global } : en;
+	};
+};

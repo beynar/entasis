@@ -1,6 +1,7 @@
 import type { Slot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { FloatingWindowThemeProps } from './floatingWindow.theme.js';
+import type { OpenChangeHandler } from '$lib/utils/openChange.js';
 
 export type FloatingWindowDragFrom = 'header' | 'window';
 
@@ -99,11 +100,15 @@ export type FloatingWindowProps = WithAttachments<{
 	class?: string;
 	/** Per-instance theme overrides. */
 	theme?: FloatingWindowThemeProps;
-	/** Called once when the library requests an open-state change. */
-	onOpenChange?: (open: boolean) => void;
-	/** Called after the open transition finishes. */
+	/**
+	 * Called before the window closes (the close button, Escape, `payload.close()`), with the
+	 * change details: `reason` (`'close-press'`, `'escape-key'`, `'imperative-action'`), the
+	 * originating `event` and `cancel()`, which keeps the window open.
+	 */
+	onOpenChange?: OpenChangeHandler;
+	/** Called once per open, after the open transition finishes (once mounted for a window open at creation). */
 	onAfterOpen?: (payload: FloatingWindowPayload) => void;
-	/** Called after the close transition finishes. */
+	/** Called once per close, after the close transition finishes. */
 	onAfterClose?: (payload: FloatingWindowPayload) => void;
 	/** Called after the minimize command updates state. */
 	onMinimize?: (payload: FloatingWindowPayload) => void;

@@ -583,5 +583,20 @@ export const pt: Messages = {
 		`A senha deve ter pelo menos ${min} caractere${Number(min) > 1 ? 's' : ''}`,
 	// Medidor
 	meter: 'Medidor',
-	meterSegment: (index: string | number, count: string | number) => `Segmento ${index} de ${count}`
+	meterSegment: (index: string | number, count: string | number) => `Segmento ${index} de ${count}`,
+	// Validação de campos
+	fieldRequired: 'Este campo é obrigatório',
+	fieldMustBeChecked: 'Marque esta caixa para continuar',
+	fieldMustBeOn: 'Ative esta opção para continuar',
+	fieldInvalid: 'Insira um valor válido',
+	fieldInvalidEmail: 'Insira um endereço de e-mail válido',
+	fieldInvalidUrl: 'Insira uma URL válida',
+	fieldTooShort: (min: string | number) =>
+		`Insira pelo menos ${min} caractere${Number(min) > 1 ? 's' : ''}`,
+	fieldTooLong: (max: string | number) =>
+		`Insira no máximo ${max} caractere${Number(max) > 1 ? 's' : ''}`,
+	fieldRangeUnderflow: (min: string | number) => `Insira um valor maior ou igual a ${min}`,
+	fieldRangeOverflow: (max: string | number) => `Insira um valor menor ou igual a ${max}`,
+	fieldIncomplete: (length: string | number) =>
+		`Insira ${Number(length) === 1 ? 'o caractere' : `os ${length} caracteres`}`
 };

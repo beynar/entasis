@@ -7,10 +7,11 @@
 //
 // Clauses that need real focus rings or input modality (law 5) live in
 // `proposed-laws.browser.test.ts`, and law 14 renders on the server in `proposed-laws.test.ts`.
-// Laws with no entry: 9 (disabled fields leave the Form value) because form.field.svelte.test.ts
-// asserts the opposite today and F6 rewrites it under D3; 11 (catalog messages) because its keys
-// and overrides are F6's FD-1 design and do not exist yet; 13 (narrow Api types) because it is a
-// compile-time property that svelte-check enforces once R2 narrows the types.
+// Laws with no entry: 9 (disabled fields leave the Form value) because F6 made disabled fields
+// skip validation (form.field.svelte.test.ts) and C8 owns leaving them out of the value; 11
+// (catalog messages) lives with F6's FD-1 tests in Form/Field/field.svelte.test.ts; 13 (narrow
+// Api types) because it is a compile-time property that svelte-check enforces once R2 narrows
+// the types.
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { describe, expect, test, vi } from 'vitest';
@@ -30,7 +31,7 @@ const button = (name: string) => screen.getByRole('button', { name });
 const queryButton = (name: string) => screen.queryByRole('button', { name });
 
 describe('law 1 · open-change details (F1 · CX-1)', () => {
-	pending('onOpenChange receives the close reason and the originating event', async () => {
+	test('onOpenChange receives the close reason and the originating event', async () => {
 		const onOpenChange = vi.fn();
 		mount('dialog-trigger', { onOpenChange });
 		await fireEvent.click(button('Open dialog'));
@@ -42,7 +43,7 @@ describe('law 1 · open-change details (F1 · CX-1)', () => {
 		);
 	});
 
-	pending('an outside press reports the outside-press reason', async () => {
+	test('an outside press reports the outside-press reason', async () => {
 		const onOpenChange = vi.fn();
 		mount('popover', { onOpenChange });
 		await fireEvent.click(button('Open popover'));
@@ -55,7 +56,7 @@ describe('law 1 · open-change details (F1 · CX-1)', () => {
 		);
 	});
 
-	pending('cancelling the change keeps the overlay open', async () => {
+	test('cancelling the change keeps the overlay open', async () => {
 		mount('dialog-trigger', {
 			onOpenChange: (open, details) => {
 				if (!open) details?.cancel?.();
@@ -68,7 +69,7 @@ describe('law 1 · open-change details (F1 · CX-1)', () => {
 		expect(screen.getByRole('dialog')).toBeInTheDocument();
 	});
 
-	pending('a cancelled Escape leaves its keydown event untouched', async () => {
+	test('a cancelled Escape leaves its keydown event untouched', async () => {
 		mount('dialog-trigger', {
 			onOpenChange: (open, details) => {
 				if (!open) details?.cancel?.();
@@ -84,19 +85,16 @@ describe('law 1 · open-change details (F1 · CX-1)', () => {
 });
 
 describe('law 2 · lifecycle (F1 · CX-2)', () => {
-	pending(
-		'a Dialog open at creation fires onAfterOpen once and dismisses on outside press',
-		async () => {
-			const onAfterOpen = vi.fn();
-			mount('dialog-default-open', { onAfterOpen });
-			await screen.findByRole('dialog');
-			await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
-			await pressOutside();
-			await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-		}
-	);
+	test('a Dialog open at creation fires onAfterOpen once and dismisses on outside press', async () => {
+		const onAfterOpen = vi.fn();
+		mount('dialog-default-open', { onAfterOpen });
+		await screen.findByRole('dialog');
+		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
+		await pressOutside();
+		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+	});
 
-	pending('an inline Popover open at creation fires onAfterOpen once', async () => {
+	test('an inline Popover open at creation fires onAfterOpen once', async () => {
 		const onAfterOpen = vi.fn();
 		mount('popover-inline-default-open', { onAfterOpen });
 		await screen.findByRole('button', { name: 'Inside inline popover' });
@@ -105,7 +103,7 @@ describe('law 2 · lifecycle (F1 · CX-2)', () => {
 });
 
 describe('law 3 · handler composition (F1 · CX-4)', () => {
-	pending('a consumer onclick that calls preventDefault cancels the built-in toggle', async () => {
+	test('a consumer onclick that calls preventDefault cancels the built-in toggle', async () => {
 		mount('popover-prevented-trigger');
 		await fireEvent.click(button('Guarded trigger'));
 		await settle();
@@ -114,7 +112,7 @@ describe('law 3 · handler composition (F1 · CX-4)', () => {
 });
 
 describe('law 4 · trigger contract (F1 · CX-4)', () => {
-	pending('the Dialog trigger exposes aria-haspopup, aria-expanded and aria-controls', async () => {
+	test('the Dialog trigger exposes aria-haspopup, aria-expanded and aria-controls', async () => {
 		mount('dialog-trigger');
 		const trigger = button('Open dialog');
 		expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
@@ -125,7 +123,7 @@ describe('law 4 · trigger contract (F1 · CX-4)', () => {
 		expect(trigger).toHaveAttribute('aria-controls', dialog.id);
 	});
 
-	pending('of two triggers, the one that opened the popover gets focus back', async () => {
+	test('of two triggers, the one that opened the popover gets focus back', async () => {
 		mount('popover-two-triggers');
 		const first = button('First trigger');
 		first.focus();
@@ -136,7 +134,7 @@ describe('law 4 · trigger contract (F1 · CX-4)', () => {
 		expect(document.activeElement).toBe(first);
 	});
 
-	pending('removing the trigger of an open popover closes it', async () => {
+	test('removing the trigger of an open popover closes it', async () => {
 		const onOpenChange = vi.fn();
 		const { rerender } = mount('popover-removable-trigger', { onOpenChange });
 		await fireEvent.click(button('Removable trigger'));
@@ -152,21 +150,18 @@ describe('law 4 · trigger contract (F1 · CX-4)', () => {
 });
 
 describe('law 5 · focus (F3 · CX-3)', () => {
-	pending(
-		'when the opener is gone, closing restores focus to the last element still in the page',
-		async () => {
-			mount('removed-opener');
-			const notes = screen.getByLabelText('Notes');
-			notes.focus();
-			const opener = button('Open and remove');
-			opener.focus();
-			await fireEvent.click(opener);
-			await screen.findByRole('dialog');
-			await escape();
-			await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-			await waitFor(() => expect(document.activeElement).toBe(notes));
-		}
-	);
+	test('when the opener is gone, closing restores focus to the last element still in the page', async () => {
+		mount('removed-opener');
+		const notes = screen.getByLabelText('Notes');
+		notes.focus();
+		const opener = button('Open and remove');
+		opener.focus();
+		await fireEvent.click(opener);
+		await screen.findByRole('dialog');
+		await escape();
+		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+		await waitFor(() => expect(document.activeElement).toBe(notes));
+	});
 });
 
 describe('law 6 · hover (F5 · MN-7, C14 · DF-6, F1 · MN-4)', () => {
@@ -179,33 +174,33 @@ describe('law 6 · hover (F5 · MN-7, C14 · DF-6, F1 · MN-4)', () => {
 		await fireEvent.mouseEnter(element);
 	};
 
-	pending('a touch tap does not open a tooltip', async () => {
+	test('a touch tap does not open a tooltip', async () => {
 		mount('tooltip');
 		await tap(button('Tooltip trigger'));
 		await settle();
 		expect(screen.queryByRole('tooltip')).toBeNull();
 	});
 
-	pending('hovering a disabled trigger does not open its popover', async () => {
+	test('hovering a disabled trigger does not open its popover', async () => {
 		mount('popover-hover', { triggerDisabled: true });
 		await fireEvent.mouseEnter(button('Hover trigger'));
 		await settle();
 		expect(queryButton('Inside hover popover')).toBeNull();
 	});
 
-	pending('a hover-opened popover leaves page scroll unlocked', async () => {
+	test('a hover-opened popover leaves page scroll unlocked', async () => {
 		mount('popover-hover');
 		await fireEvent.mouseEnter(button('Hover trigger'));
 		await screen.findByRole('button', { name: 'Inside hover popover' });
 		await settle();
-		expect(document.body.style.overflow).not.toBe('hidden');
+		expect(document.documentElement).not.toHaveAttribute('data-entasis-scroll-lock');
 	});
 });
 
 describe('law 7 · keyboard lists (F4a · CX-7)', () => {
 	// `mockNotRendered` gives the item no client rects, which is how `isTabbable` and a CSS-hidden
-	// element look to the focus helpers; the real-CSS variant belongs in a `*.browser.test.ts`.
-	pending('arrow keys skip an item that is not rendered', async () => {
+	// element look to the focus helpers; the real-CSS variant is in `useNavigation.browser.test.ts`.
+	test('arrow keys skip an item that is not rendered', async () => {
 		mount('menu');
 		const [archive, copy] = screen.getAllByRole('menuitem');
 		mockNotRendered(copy);
@@ -215,6 +210,43 @@ describe('law 7 · keyboard lists (F4a · CX-7)', () => {
 		await waitFor(() => expect(document.activeElement).toHaveTextContent('Cut'));
 	});
 
+	test('removing an item before the focused one keeps arrow keys on track', async () => {
+		const segments = ['Archive', 'Copy', 'Cut', 'Delete'].map((label) => ({ value: label, label }));
+		const { rerender } = mount('segmented', { segments });
+		const cut = screen.getByRole('radio', { name: 'Cut' });
+		await fireEvent.click(cut);
+		await waitFor(() => expect(document.activeElement).toBe(cut));
+		// Remove "Copy", which sits before the focused "Cut".
+		await rerender({ segments: segments.filter((_, index) => index !== 1) });
+		await settle();
+		expect(document.activeElement).toBe(cut);
+		// The single tab stop stays on the focused item, not on the item that slid into its index.
+		const tabStops = screen.getAllByRole('radio').filter((radio) => radio.tabIndex === 0);
+		expect(tabStops).toEqual([cut]);
+		await fireEvent.keyDown(cut, { key: 'ArrowRight' });
+		await waitFor(() => expect(document.activeElement).toHaveTextContent('Delete'));
+	});
+
+	test('a disabled menu item is never an arrow-key target', async () => {
+		mount('menu', {
+			menuItems: [
+				{ type: 'option', title: 'Archive' },
+				{ type: 'option', title: 'Copy', disabled: true },
+				{ type: 'option', title: 'Cut' }
+			]
+		});
+		const archive = screen.getByRole('menuitem', { name: 'Archive' });
+		archive.focus();
+		await fireEvent.keyDown(archive, { key: 'ArrowDown' });
+		await waitFor(() => expect(document.activeElement).toHaveTextContent('Cut'));
+	});
+});
+
+// Menu renders its rows keyed by position (`{#each items as item, index (index)}` in
+// MenuFloating), so after "Copy" is removed the focused row node shows "Delete": the focus jumps
+// to another item before any key is pressed. The tab stop itself follows the element (above); the
+// rows need keys that follow their item, which is Menu's change to make (C3).
+describe('law 7 · Menu rows keep their node through removals (C3 · CX-7)', () => {
 	pending('removing an item before the focused one keeps arrow keys on track', async () => {
 		const items = ['Archive', 'Copy', 'Cut', 'Delete'].map((title): MenuItem => ({
 			type: 'option',
@@ -236,7 +268,7 @@ describe('law 7 · keyboard lists (F4a · CX-7)', () => {
 });
 
 describe('law 8 · read-only (F6 · RO-1, C5 · SC-4)', () => {
-	pending('a read-only RatingInput stays focusable, says so and refuses key changes', async () => {
+	test('a read-only RatingInput stays focusable, says so and refuses key changes', async () => {
 		mount('rating-read-only');
 		const rating = screen.getByRole('slider', { name: 'Score' });
 		expect(rating).toHaveAttribute('tabindex', '0');
@@ -246,7 +278,7 @@ describe('law 8 · read-only (F6 · RO-1, C5 · SC-4)', () => {
 		expect(rating).toHaveAttribute('aria-valuenow', '3');
 	});
 
-	pending('a read-only Select says so and still submits its value', async () => {
+	test('a read-only Select says so and still submits its value', async () => {
 		mount('select-read-only');
 		const select = screen.getByRole('combobox', { name: 'Plan' });
 		expect(select).toHaveAttribute('aria-readonly', 'true');

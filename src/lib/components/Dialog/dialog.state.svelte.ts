@@ -1,11 +1,28 @@
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
 import { Registry } from '$lib/utils/registry.svelte.js';
 import { createPointerDrag } from '$lib/utils/pointerDrag.js';
+import { createVelocityTracker } from '$lib/utils/swipeVelocity.js';
 // import { useTheme } from '$lib/utils/theme.svelte.js';
 import { getContext, onMount, setContext, untrack } from 'svelte';
 import { useTheme } from '../Theme/theme.state.svelte.js';
 import type { DialogProps } from './dialog.props.js';
 import { useFocusScope } from '$lib/utils/useFocusScope.svelte.js';
+import { useOpenLifecycle } from '$lib/utils/openLifecycle.svelte.js';
+import {
+	getInteractionType,
+	isOpenChangeDetails,
+	requestOpenChange,
+	resolveOpenChangeDetails,
+	type OpenChangeDetails,
+	type OpenChangeHandler,
+	type OpenChangeInit
+} from '$lib/utils/openChange.js';
+import {
+	triggerActivation,
+	triggerFocusTarget,
+	writePopupAria,
+	type PopupTriggerProps
+} from '$lib/utils/trigger.js';
 import { useDialogMotion, type DialogThemeProps } from './dialog.theme.js';
 
 export { DIALOG_Z_BASE, DIALOG_Z_STEP } from '../Theme/theme.layers.js';
@@ -28,14 +45,20 @@ interface DialogOptions extends MakeRequired<
 		| 'swipeToDismiss'
 		| 'swipeFrom'
 		| 'responsive'
+		| 'focusOnClose'
 	>,
 	'closeOnEscape' | 'closable'
 > {
 	isOpen: boolean;
-	onOpenChange?: (open: boolean) => void;
+	onOpenChange?: OpenChangeHandler;
+	onAfterOpen?: (payload: DialogState) => void;
+	onAfterClose?: (payload: DialogState) => void;
 	/** The instance `theme.motion` slot; the `transition` prop still wins over it. */
 	motion?: DialogThemeProps['motion'];
 }
+
+/** What `open`, `close`, `toggle` and `setOpen` accept: details, a partial, or the DOM event. */
+export type DialogOpenChangeInput = OpenChangeDetails | OpenChangeInit | Event;
 
 export class DialogState extends createBindableStateClass<DialogOptions>() {
 	parent = getContext<DialogState | null>('dialog');
@@ -44,18 +67,50 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 	get children(): readonly DialogState[] {
 		return this.#children.items;
 	}
-	hasTransitioned = $state(false);
 	theme = useTheme();
-	// Registered in the shared layer stack, which owns Escape / outside-press dismissal,
-	// open ordering and z-index for every overlay kind.
+	// Svelte plays no intro for a block that is already true when it is created, so a Dialog
+	// created open renders once it has mounted: it animates in like any other open (and is not
+	// part of the server render, where it could only sit in the page flow).
+	#mounted = $state(false);
+	/** Whether the dialog is rendered: open, and mounted. */
+	isRendered = $derived(this.isOpen && this.#mounted);
+	// Open → entering → open → exiting → closed; completes even when no transition plays.
+	lifecycle = useOpenLifecycle({
+		isOpen: () => this.isRendered,
+		onAfterOpen: () => this.onAfterOpen?.(this),
+		onAfterClose: () => {
+			this.focusScope.restore();
+			this.onAfterClose?.(this);
+			this.#opener = null;
+		}
+	});
+	/** @deprecated Read `lifecycle.status === 'open'`; kept for one minor. */
+	get hasTransitioned() {
+		return this.lifecycle.status === 'open';
+	}
+	/** The details of the last change that was applied, kept until the next one. */
+	lastOpenChange = $state.raw<OpenChangeDetails | null>(null);
+	/** The open state `setOpen` last applied, to tell a change made from outside. */
+	#appliedOpen: boolean | undefined;
+	// Registered in the shared layer stack, which owns Escape / outside-press / close-request
+	// dismissal, open ordering and z-index for every overlay kind.
 	layer = this.theme.layers.register({
 		kind: 'dialog',
 		isOpen: () => this.isOpen,
 		isModal: () => true,
 		dismissOnEscape: () => this.closeOnEscape && this.closable,
-		dismissOnOutside: () => this.computedCloseOnClickOutside && this.hasTransitioned,
-		onDismiss: () => this.close(),
+		dismissOnOutside: () => this.computedCloseOnClickOutside,
+		onDismiss: (request) => this.setOpen(false, request),
 		state: this
+	});
+	/**
+	 * Trigger state in the library's semantic vocabulary: spread on the built-in Button, and
+	 * written as ARIA attributes by `reference` / `trigger` on a snippet trigger.
+	 */
+	triggerProps: PopupTriggerProps = $derived({
+		haspopup: 'dialog',
+		expanded: this.isOpen,
+		controls: this.isOpen ? this.id : undefined
 	});
 
 	/** How many open dialogs sit above this one. */
@@ -121,10 +176,14 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 		return `translate3d(${this.swipeAxis === 'x' ? this.dragOffset : 0}px, ${this.swipeAxis === 'y' ? this.dragOffset : 0}px, 0) scale(${this.stackScale})`;
 	});
 
-	// Initial focus, Tab containment, `inert` page behind, focus restore to the opener.
+	// Initial focus, Tab containment, `inert` page behind, focus restore to the opener: the
+	// trigger that opened it, else whatever had focus when it opened.
 	focusScope = useFocusScope({
 		isActive: () => this.isTop,
-		inertSiblings: () => true
+		inertSiblings: () => true,
+		returnTo: () => (this.#opener?.isConnected ? this.#opener : null),
+		focusOnClose: () => this.focusOnClose,
+		closeDetails: () => this.lastOpenChange
 	});
 
 	addChild = (child: DialogState) => () => this.#children.add(child);
@@ -132,25 +191,114 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 	constructor(options: DialogOptions) {
 		super(options);
 		setContext('dialog', this);
+		// Details describe the change `setOpen` made: an open state moved from outside (the bound
+		// `open` prop) leaves none, so a later close does not read the one that opened it.
+		$effect.pre(() => {
+			const open = this.isOpen;
+			untrack(() => {
+				if (this.#appliedOpen !== open) this.lastOpenChange = null;
+				this.#appliedOpen = open;
+			});
+		});
 		if (this.parent) onMount(this.parent.addChild(this));
+		onMount(() => {
+			this.#mounted = true;
+		});
 	}
 
-	toggle = () => {
-		this.setOpen(!this.isOpen);
+	/** Calls to `setOpen`, direct or through `open`, `close` and `toggle`, unchanged state included. */
+	#openRequests = 0;
+	/** The element focus returns to: the control of the trigger that opened the dialog. */
+	#opener: HTMLElement | null = null;
+	/** A press on a trigger, remembered while its event dispatches. */
+	#press: { node: HTMLElement; event: Event } | null = null;
+
+	toggle = (input?: DialogOpenChangeInput) => {
+		this.setOpen(!this.isOpen, input);
 	};
-	open = () => {
-		this.setOpen(true);
+	open = (input?: DialogOpenChangeInput) => {
+		this.setOpen(true, input);
 	};
 
-	close = () => {
-		this.setOpen(false);
+	close = (input?: DialogOpenChangeInput) => {
+		this.setOpen(false, input);
 	};
 
-	private setOpen(nextOpen: boolean) {
-		if (this.isOpen === nextOpen) return;
+	/** The details for a request, filled in from the trigger press it happens during. */
+	#details(input?: DialogOpenChangeInput): OpenChangeDetails {
+		if (isOpenChangeDetails(input)) return input;
+		const event = input instanceof Event ? input : input?.event;
+		const press = this.#press && (!event || event === this.#press.event) ? this.#press : null;
+		return resolveOpenChangeDetails(
+			input,
+			press
+				? { reason: 'trigger-press', event: press.event, trigger: press.node }
+				: { interaction: getInteractionType(event) }
+		);
+	}
+
+	/**
+	 * Requests an open-state change. `onOpenChange(nextOpen, details)` runs first; when it calls
+	 * `details.cancel()` nothing changes. Returns `false` when the change was cancelled.
+	 */
+	setOpen(nextOpen: boolean, input?: DialogOpenChangeInput): boolean {
+		this.#openRequests += 1;
+		if (this.isOpen === nextOpen) return true;
+		const details = this.#details(input);
+		if (!requestOpenChange(this.onOpenChange, nextOpen, details)) return false;
+		if (nextOpen) {
+			this.#opener = details.trigger ? triggerFocusTarget(details.trigger, details.event) : null;
+		}
+		this.lastOpenChange = details;
+		this.#appliedOpen = nextOpen;
 		this.isOpen = nextOpen;
-		this.onOpenChange?.(nextOpen);
+		return true;
 	}
+
+	/**
+	 * Attachment for a custom trigger element (`{@attach dialog.reference}`): keeps its
+	 * `aria-haspopup`, `aria-expanded` and `aria-controls` in sync and makes it the element focus
+	 * returns to, leaving clicks and keys to the element.
+	 */
+	reference = (node: HTMLElement) => {
+		$effect(() => {
+			writePopupAria(node, this.triggerProps);
+		});
+		return untrack(() => {
+			// Capture phase: runs before the element's own (delegated) handlers, so a
+			// `dialog.open()` called from `onclick` knows the press it belongs to.
+			const notePress = (event: Event) => {
+				const press = { node, event };
+				this.#press = press;
+				setTimeout(() => {
+					if (this.#press === press) this.#press = null;
+				});
+			};
+			node.addEventListener('click', notePress, true);
+			return () => {
+				node.removeEventListener('click', notePress, true);
+				if (this.#press?.node === node) this.#press = null;
+			};
+		});
+	};
+
+	/**
+	 * Makes any element the dialog's trigger (`{@attach dialog.trigger}`): `reference`, plus a
+	 * click that opens the dialog, and on an element that is not already a control
+	 * `role="button"`, `tabindex="0"` and Enter/Space activation. The element's own handler runs
+	 * first: calling `event.preventDefault()` there, or opening the dialog itself, stops it.
+	 */
+	trigger = (node: HTMLElement) => {
+		const offActivation = triggerActivation(node, {
+			requests: () => this.#openRequests,
+			activate: (event) => this.open({ reason: 'trigger-press', event, trigger: node })
+		});
+		const offReference = this.reference(node);
+		return () => {
+			offActivation();
+			offReference();
+		};
+	};
 
 	contentAttachment = (node: HTMLElement) => {
 		return untrack(() => {
@@ -181,9 +329,9 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 	private swipeAttachment = (node: HTMLElement) => {
 		let candidate = false;
 		let startPos = 0;
-		let lastPos = 0;
-		let lastTime = 0;
-		let velocity = 0;
+		// Release speed over a short window: a trailing stationary sample or a 120 Hz input
+		// keeps a flick a flick, and a pointer that rested before release has none left.
+		const tracker = createVelocityTracker();
 
 		const axisPos = (e: PointerEvent) => (this.swipeAxis === 'y' ? e.clientY : e.clientX);
 
@@ -221,8 +369,8 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 			candidate = false;
 			if (!this.dragging) return;
 			this.dragging = false;
-			// A long stationary hold is not a flick — the last velocity sample may be old.
-			if (event.timeStamp - lastTime > 100) velocity = 0;
+			tracker.add(axisPos(event), event.timeStamp);
+			const velocity = tracker.velocity(event.timeStamp) * this.swipeSign;
 			const shouldClose =
 				!cancelled &&
 				this.isOpen &&
@@ -230,11 +378,11 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 			// Closing keeps dragOffset so the out transition starts from the dragged position.
 			// Snap-back waits a frame so the re-enabled CSS transition animates the return — and
 			// yields to a drag that started in the meantime, or it would zero that drag's offset.
-			if (shouldClose) this.close();
-			else
-				requestAnimationFrame(() => {
-					if (!this.dragging) this.dragOffset = 0;
-				});
+			// A close that `onOpenChange` cancels snaps back the same way.
+			if (shouldClose && this.setOpen(false, { reason: 'swipe', event })) return;
+			requestAnimationFrame(() => {
+				if (!this.dragging) this.dragOffset = 0;
+			});
 		};
 
 		const drag = createPointerDrag({
@@ -245,11 +393,14 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 			// Touch panning is already governed by `touch-action` on the handles and by `ownsGesture`,
 			// which only promotes where nothing else can still scroll along the axis.
 			preventTouchMove: false,
+			// A press that travels mostly across the dismiss axis is spent before the drawer can take
+			// it, so a sideways drag (a carousel in the drawer) never starts dismissing it.
+			axis: () => this.swipeAxis,
 			onDown: ({ event }) => {
 				candidate = true;
-				startPos = lastPos = axisPos(event);
-				lastTime = event.timeStamp;
-				velocity = 0;
+				startPos = axisPos(event);
+				tracker.reset();
+				tracker.add(startPos, event.timeStamp);
 				this.dragSize = this.swipeAxis === 'y' ? node.offsetHeight : node.offsetWidth;
 			},
 			// The press becomes a drag once it has moved past 4px toward the dismissing edge.
@@ -276,13 +427,7 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 			onMove: ({ event }) => {
 				const pos = axisPos(event);
 				this.dragOffset = this.swipeSign * Math.max(0, (pos - startPos) * this.swipeSign); // clamp: can't drag past open
-				// Resample velocity on ~frame intervals so a single sub-frame move can't spike it.
-				const dt = event.timeStamp - lastTime;
-				if (dt >= 8) {
-					velocity = ((pos - lastPos) * this.swipeSign) / dt;
-					lastPos = pos;
-					lastTime = event.timeStamp;
-				}
+				tracker.add(pos, event.timeStamp);
 			},
 			onEnd: ({ event }) => endDrag(event, false),
 			onCancel: ({ event }) => endDrag(event, true)

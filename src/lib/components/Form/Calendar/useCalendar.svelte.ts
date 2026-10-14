@@ -54,6 +54,8 @@ export interface CalendarStateOptions<E extends Event, T extends CalendarType> {
 	view?: 'single' | 'double';
 	disabledDates?: (Date | [Date, Date])[];
 	disabled?: boolean;
+	/** Browsing stays possible; selecting a date is refused. */
+	readOnly?: boolean;
 	locale?: string;
 	onValueChange?: CalendarValueChangeHandler<T>;
 	value?: CalendarValue<T>;
@@ -127,6 +129,7 @@ export class CalendarState<E extends Event = Event, T extends CalendarType = 'ca
 	weekStartsOn: CalendarWeekday | undefined = undefined;
 	disabledDates: (Date | [Date, Date])[] = [];
 	disabled = false;
+	readOnly = false;
 	locale: string | undefined;
 
 	today = $state(createCalendarDate(1970, 0, 1));
@@ -391,6 +394,7 @@ export class CalendarState<E extends Event = Event, T extends CalendarType = 'ca
 	};
 
 	private commitValue(value: CalendarValue<T>) {
+		if (this.readOnly) return;
 		const currentValue = this.value;
 		if (Object.is(value, currentValue)) return;
 		if (

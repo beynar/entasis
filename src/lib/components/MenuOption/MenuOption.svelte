@@ -20,6 +20,7 @@
 		selected,
 		active = false,
 		disabled = false,
+		textValue,
 		title,
 		description,
 		children,
@@ -83,6 +84,7 @@
 	data-color={color}
 	data-size={size}
 	data-density={density}
+	data-typeahead={textValue}
 	onclick={disabled || onclick ? handleClick : undefined}
 	onpointerenter={disabled ? undefined : onpointerenter}
 	onpointerleave={disabled ? undefined : onpointerleave}

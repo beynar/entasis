@@ -67,7 +67,7 @@ The PopupMenu component is a wrapper around Popover that renders a Menu inside. 
 
 - **openOnClick**: boolean (default: true) - Open on trigger click
 
-- **openOnHover**: boolean (default: false) - Open on trigger hover
+- **openOnHover**: boolean (default: false) - Open on trigger hover. Touch taps and disabled triggers never hover-open it, and a submenu row that lands under a resting pointer (a menu reopened from the keyboard) opens only once the pointer moves
 
 - **delay**: number (default: 100) - Delay before opening on hover (ms)
 
@@ -76,6 +76,7 @@ The PopupMenu component is a wrapper around Popover that renders a Menu inside. 
 - **closeOnEscape**: boolean (default: true) - Close on Escape key
 
 - **closeOnMouseLeave**: boolean (default: false) - Close when the pointer leaves the hover safe area. The safe area is the trigger, the panel, and a prediction cone toward the submenu, so a diagonal move into the submenu keeps it open while sibling rows stay hoverable.
+- **closeDelay**: number (default: 120) - Milliseconds the pointer may spend outside the hover safe area before \`closeOnMouseLeave\` closes the menu
 
 - **debugSafeArea**: boolean (default: false) - Show hover safe-area overlays. Trigger/panel rectangles render in blue; the prediction cone toward the submenu renders in orange.
 
@@ -95,7 +96,7 @@ The PopupMenu component is a wrapper around Popover that renders a Menu inside. 
 
 - **ref**: HTMLElement | null - External reference element (instead of trigger)
 
-- **onOpenChange**: (open: boolean) => void - Called for component-owned state changes
+- **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void - Called before component-owned state changes, with \`details.reason\` (\`'trigger-press'\`, \`'trigger-hover'\`, \`'item-press'\` when a chosen item closes the menu, \`'escape-key'\`, \`'outside-press'\`…), \`details.event\` and \`details.cancel()\`, which keeps the menu as it is (cancelling an \`'item-press'\` close also keeps its open submenus and focus where they were)
 
 - **onAfterOpen**: (popover: PopoverState) => void - Called after the popover opens
 

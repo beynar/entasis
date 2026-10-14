@@ -6,6 +6,13 @@ import { withOptions } from '$lib/utils/state.svelte.js';
 import { useTheme } from '../Theme/theme.state.svelte.js';
 import { useFocusScope } from '$lib/utils/useFocusScope.svelte.js';
 import { useScrollLock } from '$lib/utils/useScrollLock.svelte.js';
+import {
+	requestOpenChange,
+	resolveOpenChangeDetails,
+	type OpenChangeDetails,
+	type OpenChangeHandler,
+	type OpenChangeInit
+} from '$lib/utils/openChange.js';
 import type { FloatingWindowSurface } from '../Theme/theme.floatingWindows.js';
 import { FloatingWindowDockState } from './floatingWindow.dock.svelte.js';
 import { FLOATING_WINDOW_VIEWPORT_GAP, FloatingWindowGeometry } from './floatingWindow.geometry.js';
@@ -32,7 +39,7 @@ type FloatingWindowStateOptions = {
 	backdrop: boolean;
 	position?: FloatingWindowPosition;
 	dimensions: FloatingWindowDimensions;
-	onOpenChange?: (open: boolean) => void;
+	onOpenChange?: OpenChangeHandler;
 	onMinimize?: (payload: FloatingWindowPayload) => void;
 	onRestore?: (payload: FloatingWindowPayload) => void;
 	onMove?: (payload: { position: FloatingWindowPosition; window: FloatingWindowPayload }) => void;
@@ -90,7 +97,7 @@ export class FloatingWindowState extends withOptions<FloatingWindowStateOptions>
 		isModal: () => this.backdrop,
 		dismissOnEscape: () =>
 			this.closeOnEscape && this.closable && this.theme.floatingWindows.isTopWindow(this.id),
-		onDismiss: () => this.close(),
+		onDismiss: (request) => this.close(request),
 		state: this
 	});
 	private moveStartPosition: FloatingWindowPosition = { x: 0, y: 0 };
@@ -242,10 +249,15 @@ export class FloatingWindowState extends withOptions<FloatingWindowStateOptions>
 		this.activateSurface(this.minimized ? 'dock' : 'window');
 	}
 
-	close() {
-		if (!this.closable) return;
+	/**
+	 * Closes the window, minimized or not, through `onOpenChange`; returns `false` when it stays
+	 * open (not closable, or the change was cancelled).
+	 */
+	close(input?: OpenChangeDetails | OpenChangeInit | Event): boolean {
+		if (!this.closable) return false;
+		if (!this.setOpen(false, input)) return false;
 		this.minimized = false;
-		this.setOpen(false);
+		return true;
 	}
 
 	minimize() {
@@ -385,9 +397,12 @@ export class FloatingWindowState extends withOptions<FloatingWindowStateOptions>
 		}
 	}
 
-	private setOpen(nextOpen: boolean) {
-		if (this.open === nextOpen) return;
+	/** `onOpenChange(nextOpen, details)` runs first; a cancelled change leaves the window as is. */
+	private setOpen(nextOpen: boolean, input?: OpenChangeDetails | OpenChangeInit | Event): boolean {
+		if (this.open === nextOpen) return true;
+		const details = resolveOpenChangeDetails(input);
+		if (!requestOpenChange(this.onOpenChange, nextOpen, details)) return false;
 		this.open = nextOpen;
-		this.onOpenChange?.(nextOpen);
+		return true;
 	}
 }

@@ -5,6 +5,7 @@ import { hasShortcutModifier } from '$lib/utils/useKeyDown.svelte.js';
 import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
 import type { MenuProps } from '../Menu/menu.props.js';
 import type { MenuBarMenu } from './menuBar.props.js';
+import { elementById } from '$lib/utils/id.js';
 
 /** Keys of a `MenuBarMenu` that drive the trigger button and must not reach the `<Menu />`. */
 type MenuBarTriggerKeys = 'label' | 'prefix' | 'suffix' | 'disabled';
@@ -70,8 +71,7 @@ export function useMenuBarState(
 
 	async function focusOpenMenu(index: number) {
 		await tick();
-		document
-			.getElementById(`${id}-menu-${index}`)
+		elementById(triggerElements[index], `${id}-menu-${index}`)
 			?.querySelector<HTMLElement>('[role="menu"]')
 			?.focus();
 	}

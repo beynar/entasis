@@ -113,7 +113,7 @@ ToggleButtonGroup renders an ordered list of ToggleButton items and exposes the 
 
 - \`type="multiple"\`: the root is \`role="group"\` named by \`label\`; each ToggleButton exposes its independent state through \`aria-pressed\`.
 - \`type="single"\`: the root is \`role="radiogroup"\`; buttons are \`role="radio"\` with \`aria-checked\`.
-- The group is a single tab stop (roving tabindex): Tab enters it, ArrowLeft / ArrowRight move between buttons (looping, mirrored in RTL), Home / End jump to the first / last, Space or Enter toggles the focused button.
+- The group is a single tab stop (roving tabindex; the group element itself has \`tabindex="-1"\` and is never a Tab stop): Tab enters it, ArrowLeft / ArrowRight move between buttons (looping, mirrored in RTL), Home / End jump to the first / last, Space or Enter toggles the focused button.
 - Prefer SegmentedControl for a visually segmented exclusive choice; use \`type="single"\` when you want toggle-button styling with exclusive semantics.
 
 ## Theme example

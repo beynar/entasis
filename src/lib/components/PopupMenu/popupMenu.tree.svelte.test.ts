@@ -62,6 +62,9 @@ const openPopupMenu = async (props: Record<string, unknown> = {}) => {
 	return { trigger, onOpenChange };
 };
 
+/** The open states each `onOpenChange` call asked for, in order. */
+const openStates = (fn: { mock: { calls: unknown[][] } }) => fn.mock.calls.map(([open]) => open);
+
 describe('popup menu tree', () => {
 	test('a11y:popup-menu.item-closes-tree choosing a submenu item closes every level and returns focus to the trigger', async () => {
 		const onCopy = vi.fn();
@@ -75,8 +78,28 @@ describe('popup menu tree', () => {
 		expect(onCopy).toHaveBeenCalledTimes(1);
 		await waitFor(() => expect(menus()).toHaveLength(0));
 		expect(trigger).toHaveAttribute('aria-expanded', 'false');
-		expect(onOpenChange.mock.calls).toEqual([[true], [false]]);
+		expect(openStates(onOpenChange)).toEqual([true, false]);
+		expect(onOpenChange).toHaveBeenLastCalledWith(
+			false,
+			expect.objectContaining({ reason: 'item-press', event: expect.any(MouseEvent) })
+		);
 		expect(document.activeElement).toBe(trigger);
+	});
+
+	test('a cancelled item-press close keeps every level open and focus inside the menu', async () => {
+		const onOpenChange = vi.fn((_open: boolean, details: { reason: string; cancel(): void }) => {
+			if (details.reason === 'item-press') details.cancel();
+		});
+		const { trigger } = await openPopupMenu({ onOpenChange });
+		const submenu = await openSubmenu('Share');
+
+		await fireEvent.click(within(submenu).getByRole('menuitem', { name: 'Copy link' }));
+		await settle();
+
+		expect(openStates(onOpenChange)).toEqual([true, false]);
+		expect(menus()).toHaveLength(2);
+		expect(trigger).toHaveAttribute('aria-expanded', 'true');
+		expect(submenu.contains(document.activeElement)).toBe(true);
 	});
 
 	test('an item two levels down closes all three panels at once', async () => {
@@ -88,7 +111,7 @@ describe('popup menu tree', () => {
 		await fireEvent.click(within(exportPanel).getByRole('menuitem', { name: 'PDF' }));
 
 		await waitFor(() => expect(menus()).toHaveLength(0));
-		expect(onOpenChange.mock.calls).toEqual([[true], [false]]);
+		expect(openStates(onOpenChange)).toEqual([true, false]);
 		expect(document.activeElement).toBe(trigger);
 	});
 
@@ -117,7 +140,7 @@ describe('popup menu tree', () => {
 		await new Promise((resolve) => setTimeout(resolve, 20));
 
 		expect(menus()).toHaveLength(2);
-		expect(onOpenChange.mock.calls).toEqual([[true]]);
+		expect(openStates(onOpenChange)).toEqual([true]);
 	});
 
 	test("the root's closeOnItemClick={false} keeps submenus open too", async () => {
@@ -128,7 +151,7 @@ describe('popup menu tree', () => {
 		await new Promise((resolve) => setTimeout(resolve, 20));
 
 		expect(menus()).toHaveLength(2);
-		expect(onOpenChange.mock.calls).toEqual([[true]]);
+		expect(openStates(onOpenChange)).toEqual([true]);
 	});
 
 	test('a root item still closes the root and an open submenu with it', async () => {
@@ -139,7 +162,7 @@ describe('popup menu tree', () => {
 		await fireEvent.click(within(root).getByRole('menuitem', { name: 'New file' }));
 
 		await waitFor(() => expect(menus()).toHaveLength(0));
-		expect(onOpenChange.mock.calls).toEqual([[true], [false]]);
+		expect(openStates(onOpenChange)).toEqual([true, false]);
 		expect(document.activeElement).toBe(trigger);
 	});
 
@@ -173,7 +196,7 @@ describe('popup menu tree', () => {
 
 			expect(onCopy).toHaveBeenCalledTimes(1);
 			await waitFor(() => expect(menus()).toHaveLength(0));
-			expect(onOpenChange.mock.calls).toEqual([[true], [false]]);
+			expect(openStates(onOpenChange)).toEqual([true, false]);
 			expect(document.activeElement).toBe(trigger);
 		}
 	);
@@ -208,7 +231,7 @@ describe('context menu tree', () => {
 		await fireEvent.click(within(submenu).getByRole('menuitem', { name: 'Copy link' }));
 
 		await waitFor(() => expect(menus()).toHaveLength(0));
-		expect(onOpenChange.mock.calls).toEqual([[true], [false]]);
+		expect(openStates(onOpenChange)).toEqual([true, false]);
 		// No trigger: focus goes back to the element that had it when the menu opened.
 		expect(document.activeElement).toBe(target);
 	});
@@ -232,7 +255,7 @@ describe('context menu tree options', () => {
 		await settle();
 
 		expect(menus()).toHaveLength(2);
-		expect(onOpenChange.mock.calls).toEqual([[true]]);
+		expect(openStates(onOpenChange)).toEqual([true]);
 	});
 });
 
@@ -294,7 +317,7 @@ describe('menus nested without being submenus', () => {
 		expect(onInnerItem).toHaveBeenCalledTimes(1);
 		// The inner menu closes on its own default; the outer one, which keeps open, stays.
 		await waitFor(() => expect(menus()).toHaveLength(1));
-		expect(onInnerOpenChange.mock.calls).toEqual([[true], [false]]);
+		expect(openStates(onInnerOpenChange)).toEqual([true, false]);
 		expect(screen.getByRole('button', { name: 'Columns' })).toHaveAttribute(
 			'aria-expanded',
 			'true'
@@ -316,7 +339,7 @@ describe('menus nested without being submenus', () => {
 
 		expect(onInnerItem).toHaveBeenCalledTimes(1);
 		await waitFor(() => expect(menus()).toHaveLength(0));
-		expect(onInnerOpenChange.mock.calls).toEqual([[true], [false]]);
+		expect(openStates(onInnerOpenChange)).toEqual([true, false]);
 	});
 });
 
@@ -351,7 +374,7 @@ describe('closeMenuTree', () => {
 		isOpen: boolean;
 		children: FakeLevel[];
 		dialogElement: HTMLElement | null;
-		close: () => void;
+		close: () => boolean;
 	};
 	const level = (name: string, closed: string[], children: FakeLevel[] = []): FakeLevel => {
 		const fake: FakeLevel = {
@@ -362,12 +385,13 @@ describe('closeMenuTree', () => {
 			close: vi.fn(() => {
 				closed.push(name);
 				fake.isOpen = false;
+				return true;
 			})
 		};
 		return fake;
 	};
 
-	test('closes every open level once, deepest first, and skips closed ones', () => {
+	test('asks the root first, then closes every open submenu once, deepest first, skipping closed ones', () => {
 		const closed: string[] = [];
 		const exportLevel = level('export', closed);
 		const shareLevel = level('share', closed, [exportLevel]);
@@ -377,8 +401,31 @@ describe('closeMenuTree', () => {
 
 		closeMenuTree(root as unknown as PopoverState, null);
 
-		expect(closed).toEqual(['export', 'share', 'root']);
+		expect(closed).toEqual(['root', 'export', 'share']);
 		expect(closedLevel.close).not.toHaveBeenCalled();
+	});
+
+	test('a root that cancels leaves every submenu and focus as they were', () => {
+		const panel = document.createElement('div');
+		const item = document.createElement('button');
+		const trigger = document.createElement('button');
+		panel.append(item);
+		document.body.append(panel, trigger);
+		const closed: string[] = [];
+		const submenu = level('submenu', closed);
+		submenu.dialogElement = panel;
+		const root = level('root', closed, [submenu]);
+		root.close = vi.fn(() => false);
+
+		item.focus();
+		closeMenuTree(root as unknown as PopoverState, trigger);
+
+		expect(root.close).toHaveBeenCalledTimes(1);
+		expect(closed).toEqual([]);
+		expect(submenu.isOpen).toBe(true);
+		expect(document.activeElement).toBe(item);
+		panel.remove();
+		trigger.remove();
 	});
 
 	test('moves focus to the return target only when focus was inside the tree', () => {

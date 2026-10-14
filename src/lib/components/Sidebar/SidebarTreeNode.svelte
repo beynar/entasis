@@ -16,6 +16,7 @@
 	import SidebarIcon from './SidebarIcon.svelte';
 	import SidebarTreeNodeComponent from './SidebarTreeNode.svelte';
 	import { slide } from '$lib/transitions/transition.js';
+	import { composeHandlers } from '$lib/utils/handlers.js';
 	import { useSidebarMotion, useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 
 	let {
@@ -93,10 +94,11 @@
 				...option,
 				type: 'option',
 				href: treeNode.href,
-				onclick: (event) => {
-					treeNode.onclick?.(event);
+				// The node's own handler runs first; `event.preventDefault()` skips this explicit close. The
+				// flyout is a PopupMenu, which closes on any item press, so it closes either way.
+				onclick: composeHandlers(treeNode.onclick, () => {
 					popupOpen = false;
-				}
+				})
 			};
 		});
 	}

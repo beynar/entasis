@@ -220,9 +220,10 @@ describe('toast upsert by id', () => {
 		holdAnimations();
 
 		const li = items()[0] as HTMLElement;
+		// Once the press becomes a drag the toast captures the pointer, so its moves arrive there.
 		await fireEvent.pointerDown(li, { clientX: 100, clientY: 100 });
-		await fireEvent.pointerMove(window, { clientX: 200, clientY: 100 });
-		await fireEvent.pointerUp(window, { clientX: 200, clientY: 100 });
+		await fireEvent.pointerMove(li, { clientX: 200, clientY: 100 });
+		await fireEvent.pointerUp(li, { clientX: 200, clientY: 100 });
 		expect(toaster().toasts).toEqual([]);
 		expect(li.style.translate).toBe('100px 0px');
 
@@ -418,5 +419,33 @@ describe('toast timers and window activity', () => {
 		expect(timer.paused).toBe(false);
 		setVisibility('hidden');
 		expect(timer.paused).toBe(false);
+	});
+});
+
+describe('toast action handlers (CX-4)', () => {
+	test("an action's onclick runs first, and preventDefault keeps the toast", async () => {
+		render(Harness);
+		const keep = vi.fn((event: MouseEvent) => event.preventDefault());
+		const leave = vi.fn();
+		toast.info({
+			title: 'Archived',
+			duration: false,
+			actions: [
+				{ content: 'Keep', onclick: keep },
+				{ content: 'Undo', onclick: leave }
+			]
+		});
+		await tick();
+
+		await fireEvent.click(screen.getByRole('button', { name: 'Keep' }));
+		await tick();
+		expect(keep).toHaveBeenCalledOnce();
+		expect(items()).toHaveLength(1);
+
+		// Without a preventDefault the action dismisses the toast, after its own handler ran.
+		await fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+		await tick();
+		expect(leave).toHaveBeenCalledOnce();
+		await waitFor(() => expect(items()).toHaveLength(0));
 	});
 });

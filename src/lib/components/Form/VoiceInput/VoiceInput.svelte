@@ -27,6 +27,8 @@
 		focused = $bindable(false),
 		required = false,
 		disabled = false,
+		readOnly,
+		messages,
 		name,
 		onValidate,
 		onValueChange,
@@ -91,6 +93,12 @@
 		},
 		set disabled(nextDisabled) {
 			disabled = nextDisabled ?? false;
+		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
 		},
 		get name() {
 			return name;
@@ -255,7 +263,7 @@
 			{size}
 			color="danger"
 			label={resolvedClearLabel}
-			disabled={field.disabled}
+			disabled={field.disabled || field.readOnly}
 			edge="none"
 			class={classes.clearAction({
 				size,
@@ -272,7 +280,7 @@
 		{size}
 		color={recorder.isRecording ? resolvedColor : 'neutral'}
 		label={buttonLabel}
-		disabled={field.disabled || recorder.isBusy}
+		disabled={field.disabled || field.readOnly || recorder.isBusy}
 		edge={isExpanded ? 'end' : 'none'}
 		class={classes.action({
 			size,

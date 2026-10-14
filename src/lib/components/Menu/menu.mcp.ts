@@ -98,6 +98,18 @@ const optionItem = {
 } satisfies MenuItem;
 \`\`\`
 
+\`textValue\` sets the text type-ahead matches when the visible text should not count, for
+example a row that starts with a keyboard shortcut:
+\`\`\`typescript
+import type { MenuItem } from 'entasis/menu';
+
+const copyItem = {
+	type: 'option',
+	title: '⌘C  Copy',
+	textValue: 'Copy'
+} satisfies MenuItem;
+\`\`\`
+
 ### Separator Item
 \`\`\`typescript
 import type { MenuItem } from 'entasis/menu';
@@ -477,7 +489,8 @@ The menu follows this DOM structure:
 - Automatically sets \`role="menu"\` on the container
 - Option items render \`role="menuitem"\`; an option that passes \`selected\` (true or false) renders \`role="menuitemradio"\` with \`aria-checked\`, so a check-marked choice is announced as checked rather than as a plain command
 - ArrowUp / ArrowDown move the highlight, Home / End jump, Enter or Space activates, ArrowRight opens a submenu and ArrowLeft closes it (mirrored in RTL)
-- Type-ahead: typing letters moves the highlight to the next item whose label starts with the typed text
+- Type-ahead: typing letters moves the highlight to the next item whose label starts with the typed text. An option or submenu item's \`textValue\` replaces its visible text for matching (useful when the title is a snippet or the row shows a shortcut); disabled and hidden items are passed over for the next match, and the typed text starts over when focus leaves the menu
+- Disabled items and items hidden with CSS are skipped by the arrow keys, Home and End. The single Tab stop stays on the focused row element and follows the row that takes its place when the focused row is removed. Rows are keyed by position, so inserting or reordering rows before the focused one leaves focus and the Tab stop at the same position
 - Hovering a row highlights it without moving focus. While nothing on the page has focus, the arrow keys and Home / End move focus into the hovered menu; keys typed in a text field, a button or another popup stay there, and Enter or Space never activate the hovered row. A submenu row is the exception: it still opens its submenu after the hover \`delay\`, and that submenu moves focus to its first row
 - Once focus is inside the menu, keys act on the focused row, not on the row under the pointer. When the menu panel itself has focus (a popup menu opened with the pointer), they act on the highlighted row that \`aria-activedescendant\` names, so Enter activates the row under the pointer
 - Arrow, Home, End, Enter and Space pressed with Alt, Ctrl or Meta are left to the browser (Alt+ArrowLeft stays Back), including in menus opened from a MenuBar; Shift does not count as a modifier
@@ -499,7 +512,8 @@ This allows for consistent styling across all menu items while maintaining flexi
 
 Submenu items automatically:
 - Add a caret-right icon as suffix (unless custom suffix provided)
-- Open submenus positioned to the right (right-start)
+- Open submenus beside their row on the reading direction's end side (\`inline-end-start\`: right in a left-to-right document, left in a right-to-left one); below \`md\` they drop below the row (\`bottom-start\`)
+- Fall back below their row when neither side of the menu has room (\`fallbackAxisSide: 'end'\`), instead of covering the menu
 - Support hover and click triggers (configurable)
 - Manage submenu state internally using PopupMenu
 - Support nested submenus (submenus within submenus)

@@ -51,6 +51,8 @@
 	features={[
 		{ label: 'Opens on hover and keyboard focus', test: 'a11y:hover-card.focus-opens' },
 		'Configurable open and close delays',
+		'Neighbouring cards, tooltips and hover popovers open without waiting',
+		'Opens from a mouse or pen hover, never from a touch tap’s pointer events',
 		'Positioned by Popover with flip-aware transitions',
 		'Card-powered title, description, content and footer',
 		'String, snippet, or ButtonProps trigger'

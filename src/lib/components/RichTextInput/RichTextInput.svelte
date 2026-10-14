@@ -38,6 +38,8 @@
 		maxHeight = false,
 		formats = AI_COMPOSER_DEFAULT_RICH_TEXT_FORMATS,
 		disabled = false,
+		readOnly,
+		messages,
 		placeholder,
 		size = 'normal',
 		toolbarClass,
@@ -91,6 +93,12 @@
 		},
 		set disabled(nextDisabled: boolean | undefined) {
 			disabled = nextDisabled ?? false;
+		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
 		},
 		get required() {
 			return required;
@@ -147,8 +155,9 @@
 		get formats() {
 			return formats;
 		},
+		// A read-only editor stops editing and suggestions too; only its chrome stays enabled.
 		get disabled() {
-			return field.disabled ?? false;
+			return field.disabled || field.readOnly;
 		}
 	});
 
@@ -197,6 +206,7 @@
 		{formats}
 		{toolbarClass}
 		disabled={field.disabled ?? false}
+		readOnly={field.readOnly}
 		placeholder={placeholder ?? t.aiComposerPlaceholder}
 		{standalone}
 		{maxHeight}

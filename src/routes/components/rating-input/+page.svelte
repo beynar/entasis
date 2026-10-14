@@ -113,7 +113,7 @@
 
 		<ComponentCard description="Read-only display">
 			<div class="w-full max-w-md">
-				<RatingInput label="Rating" readonly halfSteps value={4.5} />
+				<RatingInput label="Rating" readOnly halfSteps value={4.5} />
 			</div>
 		</ComponentCard>
 

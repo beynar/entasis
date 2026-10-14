@@ -39,6 +39,7 @@
 		maxDate,
 		disabledDates = [],
 		disabled = false,
+		readOnly = false,
 		calendarLabel,
 		i18n,
 		id,
@@ -130,7 +131,7 @@
 	}
 
 	function commitValue(nextValue: DateSelectorValue<Mode>, isSelectionComplete = true) {
-		if (disabled) return;
+		if (disabled || readOnly) return;
 		const normalizedValue = normalizeValue(nextValue);
 		if (!isValueSelected(normalizedValue)) {
 			valueState.value = normalizedValue;
@@ -203,7 +204,7 @@
 						variant={isValueSelected(preset.value) ? 'soft' : 'ghost'}
 						size="small"
 						fullWidth
-						{disabled}
+						disabled={disabled || readOnly}
 						class={classes.preset()}
 						onclick={() => commitValue(preset.value)}
 					>
@@ -224,6 +225,7 @@
 			{maxDate}
 			{disabledDates}
 			{disabled}
+			{readOnly}
 			label={calendarLabel ?? t.chooseDates}
 			theme={mergedCalendarTheme}
 			onValueChange={handleCalendarChange}

@@ -1,4 +1,5 @@
 import type { MapLibreLibrary } from './maplibre-types.js';
+import { applyCspNonce } from '$lib/utils/cspNonce.js';
 
 const MAPLIBRE_CDN_VERSION = '5.24.0';
 const MAPLIBRE_SCRIPT_ID = 'svelte-pro-maplibre-script';
@@ -38,7 +39,7 @@ function ensureMapLibreStyle(): void {
 		return;
 	}
 
-	const link = document.createElement('link');
+	const link = applyCspNonce(document.createElement('link'));
 	link.id = MAPLIBRE_STYLE_ID;
 	link.rel = 'stylesheet';
 	link.href = MAPLIBRE_STYLE_URL;
@@ -83,7 +84,7 @@ function createMapLibreScriptPromise(): Promise<MapLibreLibrary> {
 }
 
 function createMapLibreScript(): HTMLScriptElement {
-	const script = document.createElement('script');
+	const script = applyCspNonce(document.createElement('script'));
 	script.id = MAPLIBRE_SCRIPT_ID;
 	script.src = MAPLIBRE_SCRIPT_URL;
 	script.async = true;

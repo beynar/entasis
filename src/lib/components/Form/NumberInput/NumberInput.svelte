@@ -4,7 +4,7 @@
 	import { plusIcon } from '../../Icons/plus.js';
 	import Field from '../Field/Field.svelte';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
-	import { createFieldState } from '../Field/field.state.svelte.js';
+	import { createFieldState, type FieldValidationResult } from '../Field/field.state.svelte.js';
 	import type { NumberInputProps } from './numberInput.props.js';
 	import { useNumberInputTheme } from './numberInput.theme.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
@@ -18,6 +18,8 @@
 		placeholder = '',
 		theme,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		onValidate,
 		onValueChange,
@@ -61,6 +63,12 @@
 		set disabled(v: boolean | undefined) {
 			disabled = v;
 		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
+		},
 		get required() {
 			return required;
 		},
@@ -70,13 +78,13 @@
 		set name(v: string | undefined) {
 			name = v;
 		},
-		onValidate: (val) => {
+		onValidate: (val): FieldValidationResult => {
 			if (typeof val === 'number') {
 				if (min !== undefined && val < min) {
-					return true;
+					return field.messages.rangeUnderflow(min);
 				}
 				if (max !== undefined && val > max) {
-					return true;
+					return field.messages.rangeOverflow(max);
 				}
 			}
 			return onValidate?.(val) || false;
@@ -99,10 +107,14 @@
 		typeof field.value === 'number' && Number.isFinite(field.value) ? field.value : null
 	);
 	const canDecrement = $derived(
-		!field.disabled && (numericValue === null || min === undefined || numericValue > min)
+		!field.disabled &&
+			!field.readOnly &&
+			(numericValue === null || min === undefined || numericValue > min)
 	);
 	const canIncrement = $derived(
-		!field.disabled && (numericValue === null || max === undefined || numericValue < max)
+		!field.disabled &&
+			!field.readOnly &&
+			(numericValue === null || max === undefined || numericValue < max)
 	);
 
 	const countDecimalPlaces = (value: number) => {

@@ -41,9 +41,9 @@ FloatingWindow renders a portaled utility window, non-modal unless \`backdrop\` 
 - **class**: string - Additional classes on the visible window.
 - **theme**: FloatingWindowThemeProps - Per-instance theme overrides.
 - **ref**: HTMLDivElement - Bindable reference to the visible window or minimized dock item.
-- **onOpenChange**: (open: boolean) => void - Runs once for each library-requested state change.
-- **onAfterOpen**: (payload) => void - Runs after the open transition finishes.
-- **onAfterClose**: (payload) => void - Runs after the close transition finishes.
+- **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void - Runs before the window closes, with \`details.reason\` (\`'close-press'\`, \`'escape-key'\`, \`'imperative-action'\` for \`payload.close()\`), \`details.event\` and \`details.cancel()\`, which keeps it open.
+- **onAfterOpen**: (payload) => void - Runs once per open after the open transition finishes; a window open at creation reports it once mounted.
+- **onAfterClose**: (payload) => void - Runs once per close after the close transition finishes.
 - **onMinimize**: (payload) => void - Runs after minimize state updates.
 - **onRestore**: (payload) => void - Runs after restore state updates.
 - **onMove**: ({ position, window }) => void - Runs when a move commits.

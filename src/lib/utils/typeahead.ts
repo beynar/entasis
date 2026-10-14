@@ -7,24 +7,30 @@ export interface TypeaheadOptions<Item> {
 	getText: (item: Item) => string;
 	getCurrentIndex: () => number;
 	onMatch: (index: number, item: Item) => void;
+	/**
+	 * Items the search steps over, such as disabled or hidden ones: a match on one of them moves
+	 * on to the next match instead of ending the search.
+	 */
+	isItemDisabled?: (item: Item) => boolean;
 	/** Milliseconds of silence before the buffer resets. */
 	timeout?: number;
 }
 
-const isTextEntry = (target: EventTarget | null) =>
+const nonTextInputTypes = ['button', 'checkbox', 'radio', 'range', 'submit', 'reset', 'image'];
+
+/** A field the user types into: text inputs, textareas and contenteditable regions. */
+export const isTextEntry = (target: EventTarget | null): target is HTMLElement =>
 	typeof HTMLElement !== 'undefined' &&
 	target instanceof HTMLElement &&
 	(target.isContentEditable ||
 		target.tagName === 'TEXTAREA' ||
-		(target.tagName === 'INPUT' &&
-			!['button', 'checkbox', 'radio', 'range', 'submit', 'reset'].includes(
-				(target as HTMLInputElement).type
-			)));
+		(target.tagName === 'INPUT' && !nonTextInputTypes.includes((target as HTMLInputElement).type)));
 
 export function createTypeahead<Item>(options: TypeaheadOptions<Item>) {
 	let buffer = '';
 	let timer: ReturnType<typeof setTimeout> | null = null;
 
+	/** Empties the buffer and clears its timer; call it on focus-out and on destroy. */
 	const reset = () => {
 		buffer = '';
 		if (timer) clearTimeout(timer);
@@ -37,11 +43,12 @@ export function createTypeahead<Item>(options: TypeaheadOptions<Item>) {
 		if (isTextEntry(event.target)) return false;
 		if (event.key === ' ' && buffer === '') return false; // Space activates, it does not search
 
+		const items = options.getItems();
+		if (items.length === 0) return false;
+
 		if (timer) clearTimeout(timer);
 		timer = setTimeout(reset, options.timeout ?? 1000);
 
-		const items = options.getItems();
-		if (items.length === 0) return false;
 		buffer += event.key.toLowerCase();
 		const repeated = buffer.length > 1 && [...buffer].every((c) => c === buffer[0]);
 		const needle = repeated ? buffer[0] : buffer;
@@ -51,13 +58,22 @@ export function createTypeahead<Item>(options: TypeaheadOptions<Item>) {
 
 		for (let step = 0; step < items.length; step += 1) {
 			const index = (((start + step) % items.length) + items.length) % items.length;
-			if (options.getText(items[index]).trim().toLowerCase().startsWith(needle)) {
-				options.onMatch(index, items[index]);
+			const item = items[index];
+			if (options.isItemDisabled?.(item)) continue;
+			if (options.getText(item).trim().toLowerCase().startsWith(needle)) {
+				options.onMatch(index, item);
 				return true;
 			}
 		}
 		return true;
 	};
 
-	return { handleKey, reset };
+	return {
+		handleKey,
+		reset,
+		/** True while the buffer holds typed characters (until the timeout or a `reset`). */
+		get isTyping() {
+			return buffer !== '';
+		}
+	};
 }

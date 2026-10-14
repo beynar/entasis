@@ -148,7 +148,7 @@
 				style:height={scrollArea.thumbYSize + 'px'}
 				style:width="100%"
 				style:transform={`translateY(${scrollArea.thumbYPosition}px)`}
-				{@attach scrollArea.dragY.reference}
+				{@attach scrollArea.dragY}
 				{@attach scrollArea.thumbRect.reference}
 			></div>
 		</div>
@@ -175,7 +175,7 @@
 				style:width={scrollArea.thumbXSize + 'px'}
 				style:height="100%"
 				style:transform={`translateX(${scrollArea.thumbXPosition}px)`}
-				{@attach scrollArea.dragX.reference}
+				{@attach scrollArea.dragX}
 			></div>
 		</div>
 	{/if}

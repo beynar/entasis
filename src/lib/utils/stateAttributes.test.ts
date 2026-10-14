@@ -5,6 +5,7 @@ import {
 	openStateAttributes,
 	parsePlacement,
 	placementAttributes,
+	popupSideAttributes,
 	popupTriggerAttributes,
 	presence,
 	stateDataAttributes,
@@ -51,6 +52,25 @@ describe('state attributes', () => {
 		expect(placementAttributes(undefined)['data-side']).toBeUndefined();
 	});
 
+	test('a logical side is reported as such, and side none has no alignment', () => {
+		expect(placementAttributes({ side: 'inline-end', align: 'start' })).toEqual({
+			'data-side': 'inline-end',
+			'data-align': 'start',
+			'data-anchor-hidden': undefined
+		});
+		expect(placementAttributes({ side: 'none', align: 'center' })).toEqual({
+			'data-side': 'none',
+			'data-align': undefined,
+			'data-anchor-hidden': undefined
+		});
+	});
+
+	test('a trigger reports the side of its placed popup, and nothing while unplaced', () => {
+		expect(popupSideAttributes('inline-start')).toEqual({ 'data-popup-side': 'inline-start' });
+		expect(popupSideAttributes('none')).toEqual({ 'data-popup-side': 'none' });
+		expect(popupSideAttributes(null)).toEqual({ 'data-popup-side': undefined });
+	});
+
 	test('item state', () => {
 		expect(itemStateAttributes({ highlighted: true, selected: true })).toEqual({
 			'data-highlighted': '',
@@ -78,6 +98,7 @@ describe('state attributes', () => {
 			...Object.keys(transitionStatusAttributes('open')),
 			...Object.keys(placementAttributes('top')),
 			...Object.keys(popupTriggerAttributes(true)),
+			...Object.keys(popupSideAttributes('top')),
 			...Object.keys(itemStateAttributes({}))
 		];
 		expect(names.sort()).toEqual(Object.keys(stateDataAttributes).sort());

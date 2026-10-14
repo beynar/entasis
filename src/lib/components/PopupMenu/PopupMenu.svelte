@@ -14,6 +14,7 @@
 	import { on } from 'svelte/events';
 	import type { PopoverState } from '../Popover/popover.state.svelte.js';
 	import { hasSubmenuItems } from '../Menu/menuTree.js';
+	import { createOpenChangeDetails, type OpenChangeDetails } from '$lib/utils/openChange.js';
 
 	let {
 		menu,
@@ -54,10 +55,13 @@
 		usesStackedSubmenus ? false : mobileSheetSizeTransition
 	);
 
-	const setOpen = (nextOpen: boolean) => {
+	// The Popover's `onOpenChange`: the details (reason, event, `cancel()`) pass through, so a
+	// consumer that cancels keeps the menu as it is.
+	const setOpen = (nextOpen: boolean, details: OpenChangeDetails) => {
 		if (openState.value === nextOpen) return;
+		onOpenChange?.(nextOpen, details);
+		if (details.isCanceled) return;
 		openState.value = nextOpen;
-		onOpenChange?.(nextOpen);
 	};
 
 	// The popover this PopupMenu renders and its Menu element, known once the menu mounts.
@@ -73,10 +77,11 @@
 	const tree = untrack(() => submenuOf);
 	const root: PopupMenuRoot = tree ?? {
 		closeOnItemClick: () => closeOnItemClick,
-		close: () => {
+		close: (event) => {
+			const details = { reason: 'item-press', event } as const;
 			if (popoverState) {
-				closeMenuTree(popoverState, popoverState.triggerReference ?? opener, menuElement);
-			} else setOpen(false);
+				closeMenuTree(popoverState, popoverState.triggerReference ?? opener, menuElement, details);
+			} else setOpen(false, createOpenChangeDetails(details));
 		}
 	};
 	if (!tree) providePopupMenuRoot(root);
@@ -99,7 +104,7 @@
 				(node) => node instanceof HTMLElement && node.getAttribute('data-menu-keep-open') === 'true'
 			);
 
-			if (buttonOrLink && !shouldKeepOpen) root.close();
+			if (buttonOrLink && !shouldKeepOpen) root.close(e);
 		});
 		return () => {
 			off();

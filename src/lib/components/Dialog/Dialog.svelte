@@ -9,6 +9,7 @@
 	import { fso } from '$lib/transitions/transition.js';
 	import { portal } from '$lib/attachments/portal.js';
 	import { drawerInsetValue } from '../Theme/theme.designTokens.js';
+	import { composeHandlers } from '$lib/utils/handlers.js';
 
 	let {
 		id: customId,
@@ -26,6 +27,7 @@
 		closeOnEscape = true,
 		closeOnClickOutside,
 		closable = true,
+		focusOnClose,
 		swipeToDismiss,
 		swipeFrom,
 		thumb = true,
@@ -67,6 +69,12 @@
 		get onOpenChange() {
 			return onOpenChange;
 		},
+		get onAfterOpen() {
+			return onAfterOpen;
+		},
+		get onAfterClose() {
+			return onAfterClose;
+		},
 		get size() {
 			return size;
 		},
@@ -85,6 +93,9 @@
 		get closable() {
 			return closable;
 		},
+		get focusOnClose() {
+			return focusOnClose;
+		},
 		get swipeToDismiss() {
 			return swipeToDismiss;
 		},
@@ -100,7 +111,8 @@
 
 	const hasHeader = $derived(!!(title || description));
 
-	const in_out = fso();
+	// Wrapped so the lifecycle knows when the panel's transition plays (and when none does).
+	const panelTransition = dialog.lifecycle.transition(fso());
 </script>
 
 {#snippet CLOSE_BUTTON()}
@@ -116,14 +128,14 @@
 			size="small"
 			variant="ghost"
 			{@attach (node) => node.setAttribute('data-autofocus-skip', '')}
-			onclick={() => dialog.close()}
+			onclick={(event) => dialog.close({ reason: 'close-press', event })}
 		>
 			{@render xIcon({ size: 20 })}
 		</Button>
 	{/if}
 {/snippet}
 
-{#if dialog.isOpen}
+{#if dialog.isRendered}
 	<div
 		{@attach portal()}
 		id={dialog.id}
@@ -147,19 +159,10 @@
 				data-type={dialog.computedType}
 				style:transform={dialog.contentTransform}
 				style:transition={dialog.dragging ? 'none' : undefined}
-				in:in_out={dialog.computedTransition.in}
-				out:in_out={dialog.computedTransition.out}
-				onintroend={() => {
-					dialog.hasTransitioned = true;
-					onAfterOpen?.(dialog);
-				}}
-				onoutrostart={() => {
-					dialog.hasTransitioned = false;
-				}}
-				onoutroend={() => {
-					dialog.focusScope.restore();
-					onAfterClose?.(dialog);
-				}}
+				in:panelTransition={dialog.computedTransition.in}
+				out:panelTransition={dialog.computedTransition.out}
+				onintroend={dialog.lifecycle.introEnd}
+				onoutroend={dialog.lifecycle.outroEnd}
 				class={classes.content({
 					size: dialog.computedSize,
 					type: dialog.computedType,
@@ -220,11 +223,10 @@
 		{@const { content, children, onclick, ...buttonProps } = trigger}
 		<Button
 			{...buttonProps}
-			onclick={(event) => {
-				onclick?.(event);
-				dialog.open();
-			}}
+			{...dialog.triggerProps}
+			onclick={composeHandlers(onclick, (event) => dialog.open(event))}
 			children={children ?? content}
+			{@attach dialog.reference}
 		/>
 	{/if}
 {/if}

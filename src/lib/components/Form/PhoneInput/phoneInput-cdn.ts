@@ -1,3 +1,5 @@
+import { applyCspNonce } from '$lib/utils/cspNonce.js';
+
 export type PhoneCountry = {
 	iso2: string;
 	dialCode: string;
@@ -110,7 +112,7 @@ function createIntlTelInputScriptPromise(): Promise<IntlTelInputLibrary> {
 }
 
 function createIntlTelInputScript(): HTMLScriptElement {
-	const script = document.createElement('script');
+	const script = applyCspNonce(document.createElement('script'));
 	script.id = INTL_TEL_INPUT_SCRIPT_ID;
 	script.src = INTL_TEL_INPUT_SCRIPT_URL;
 	script.async = true;

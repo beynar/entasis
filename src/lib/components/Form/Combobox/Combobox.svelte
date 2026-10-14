@@ -35,6 +35,8 @@
 		i18n,
 		theme,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		onValidate,
 		onValueChange,
@@ -80,6 +82,12 @@
 		},
 		set disabled(v: boolean | undefined) {
 			disabled = v;
+		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
 		},
 		get required() {
 			return required;
@@ -247,12 +255,19 @@
 	const classes = $derived(useComboboxTheme(theme));
 </script>
 
-<Popover closeOnClickOutside={false} fitTrigger position="bottom" size="small" open={isOpen}>
+<Popover
+	haspopup="listbox"
+	closeOnClickOutside={false}
+	fitTrigger
+	position="bottom"
+	size="small"
+	open={isOpen}
+>
 	<div
 		id={listboxId}
 		role="listbox"
 		aria-label={t.options}
-		class="flex max-h-[200px] flex-col gap-1"
+		class="flex max-h-[min(200px,calc(var(--available-height,100dvh)_-_2*var(--space-xs)))] flex-col gap-1"
 	>
 		{#if loading}
 			<div class={classes.loading({ size })} role="status" aria-live="polite">
@@ -267,7 +282,11 @@
 		{:else if optionsAsync.options.length === 0 && !searchValue && showAllOnFocus}
 			<div class={classes.noOptions({ size })} role="status">{noOptionsText ?? t.noOptions}</div>
 		{:else if optionsAsync.options.length > 0}
-			<ScrollArea scrollOnEdges type="auto" class="flex max-h-[200px] flex-col gap-1">
+			<ScrollArea
+				scrollOnEdges
+				type="auto"
+				class="flex max-h-[min(200px,calc(var(--available-height,100dvh)_-_2*var(--space-xs)))] flex-col gap-1"
+			>
 				{#each optionsAsync.options as option (option.value)}
 					<MenuOption
 						as="button"
@@ -323,7 +342,7 @@
 				placeholder={selectedOption ? selectedOption.label : placeholder}
 				bind:this={field.node}
 				bind:focused={field.focused}
-				{disabled}
+				disabled={field.disabled}
 				role="combobox"
 				aria-expanded={isOpen}
 				aria-controls={isOpen ? listboxId : undefined}

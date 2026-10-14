@@ -2,7 +2,7 @@
 	import { untrack } from 'svelte';
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import Field from '../Field/Field.svelte';
-	import { createFieldState } from '../Field/field.state.svelte.js';
+	import { createFieldState, type FieldState } from '../Field/field.state.svelte.js';
 	import SliderTrack from './SliderTrack.svelte';
 	import SliderValueLabels from './SliderValueLabels.svelte';
 	import type { SliderProps } from './slider.props.js';
@@ -22,6 +22,8 @@
 		required = false,
 		theme,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		onValidate,
 		visible,
@@ -57,7 +59,7 @@
 
 	const id = $props.id();
 
-	const slider = new SliderState({
+	const slider: SliderState = new SliderState({
 		get value() {
 			return value;
 		},
@@ -85,8 +87,9 @@
 		get orientation() {
 			return orientation;
 		},
-		get disabled() {
-			return disabled;
+		// The field's effective state: its own, or a disabled Form or group around it.
+		get disabled(): boolean {
+			return field.disabled;
 		},
 		get dragRange() {
 			return dragRange;
@@ -106,7 +109,7 @@
 	// the numbers are unchanged: a Form that writes the value back as a new proxy is not a change.
 	const hasValue = $derived(value !== undefined);
 
-	const field = createFieldState<'slider' | 'slider-range'>({
+	const field: FieldState<'slider' | 'slider-range'> = createFieldState<'slider' | 'slider-range'>({
 		id,
 		get value() {
 			return hasValue ? slider.fieldValue : undefined;
@@ -132,6 +135,12 @@
 		},
 		set disabled(v: boolean | undefined) {
 			disabled = v;
+		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
 		},
 		get required() {
 			return required;
@@ -236,6 +245,7 @@
 				{marks}
 				{groupLabel}
 				{getThumbLabel}
+				readOnly={field.readOnly}
 				{t}
 			/>
 

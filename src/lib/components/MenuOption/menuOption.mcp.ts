@@ -47,6 +47,7 @@ MenuOption is also the shared row primitive for the listbox family (Command, Sel
 - **highlighted**: boolean - Keyboard-active state (virtual focus). Applies the highlight background and reflects to \`data-highlighted\`. Menus omit this and rely on \`useNavigation\` setting \`data-highlighted\` imperatively.
 - **selected**: boolean - Sets \`data-selected\` plus the role-appropriate state: \`aria-checked\` for checkable roles (\`menuitemradio\`, \`menuitemcheckbox\`, \`checkbox\`, \`radio\`, \`switch\`) and \`aria-selected\` for listbox \`option\` rows (pass a check icon via \`suffix\`).
 - **disabled**: boolean - Dims the row, sets \`aria-disabled\`, blocks pointer/click.
+- **textValue**: string - Text menu type-ahead matches instead of the row's visible text, reflected to \`data-typeahead\`. Set it when the title is a snippet or the row shows a shortcut, prefix or description that should not count (\`textValue: 'Copy'\` for a row reading "⌘C Copy").
 - **attrs**: Record<string, any> - Extra attributes/handlers spread onto the row (\`id\`, \`data-value\`, \`tabindex\`, \`onpointermove\`, \`onmousedown\`).
 
 ### Styling Props

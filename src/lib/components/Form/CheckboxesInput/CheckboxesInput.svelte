@@ -17,6 +17,8 @@
 		mode = 'normal',
 		theme,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		onValidate,
 		visible,
@@ -55,6 +57,12 @@
 		},
 		set disabled(v: boolean | undefined) {
 			disabled = v;
+		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
 		},
 		get required() {
 			return required;
@@ -113,6 +121,7 @@
 			type="button"
 			role="checkbox"
 			aria-checked={checked}
+			aria-readonly={field.readOnly || undefined}
 			disabled={optionDisabled}
 			onclick={() => {
 				if (optionDisabled) return;

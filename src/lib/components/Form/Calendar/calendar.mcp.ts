@@ -48,6 +48,7 @@ Date-based calendar primitives for single, range, and multiple selection. Calend
 - \`view\`: \`'single' | 'double'\`. Double view falls back to one month when the calendar container is narrower than 576px.
 - \`disabledDates\`: individual dates or inclusive \`[start, end]\` ranges.
 - \`minDate\` / \`maxDate\`: selection bounds.
+- \`readOnly\`: months can be browsed but no date can be selected; the grid reports aria-readonly.
 - \`events\`: values with \`start\` and \`end\`; matching events are exposed to the custom cell snippet.
 - \`cell\`: custom day renderer receiving the complete Calendar cell payload.
 - \`onViewChange\`: receives the first and last visible month after pointer, keyboard, or controlled-value navigation.

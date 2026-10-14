@@ -35,9 +35,7 @@ describe('law 5 · focus (F3 · CX-3, C14 · DF-6)', () => {
 		expect(trigger.matches(':focus-visible')).toBe(true);
 	});
 
-	// Today focus lands on <body>: the dialog calls focus() on its trigger while the trigger is
-	// still inside the subtree the modal made inert.
-	pending('closing a dialog with Escape returns a visible focus ring to its trigger', async () => {
+	test('closing a dialog with Escape returns a visible focus ring to its trigger', async () => {
 		mount('dialog-trigger');
 		await tabTo('Open dialog');
 		await userEvent.keyboard('{Enter}');

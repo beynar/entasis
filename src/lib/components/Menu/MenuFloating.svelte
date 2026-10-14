@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Placement } from '@floating-ui/dom';
 	import { onMount, tick, untrack } from 'svelte';
 	import { on } from 'svelte/events';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
@@ -12,6 +11,7 @@
 	import { usePopupMenuPanelSize, usePopupMenuRoot } from '../PopupMenu/popupMenu.context.js';
 	import { usePopoverContext } from '../Popover/popover.state.svelte.js';
 	import type { PopoverState } from '../Popover/popover.state.svelte.js';
+	import type { PopoverPlacement } from '../Popover/popover.props.js';
 	import Separator from '../Separator/Separator.svelte';
 	import Slot from '../Slot/Slot.svelte';
 	import type { ResponsiveProps } from '../Theme/theme.js';
@@ -43,10 +43,12 @@
 	const hasParentMenu = $derived(!!parentPopover?.parent);
 	const showBackControl = $derived(isInMobileSheet && hasParentMenu);
 	// Narrow viewports have no room beside the parent panel, so the submenu drops below it
-	// instead; `md` up it flies out to the side. The nearest-below cascade covers `sm` from `xs`.
-	const submenuPosition: ResponsiveProps<Placement> = {
+	// instead; `md` up it flies out on the reading direction's end side. The nearest-below cascade
+	// covers `sm` from `xs`. When neither side of the parent has room, the submenu falls back to
+	// the cross axis (`fallbackAxisSide`) and opens below its row instead of covering the menu.
+	const submenuPosition: ResponsiveProps<PopoverPlacement> = {
 		xs: 'bottom-start',
-		md: 'right-start'
+		md: 'inline-end-start'
 	};
 
 	let submenuPopovers = $state<Record<number, PopoverState>>({});
@@ -216,6 +218,7 @@
 				submenuOf={menuTree}
 				size={panelSize?.() ?? 'small'}
 				position={submenuPosition}
+				fallbackAxisSide="end"
 				openOnHover={openOnHover && !item.disabled && !isInMobileSheet}
 				{openOnClick}
 				{delay}

@@ -14,6 +14,7 @@
 		describedBy,
 		orientation,
 		disabled,
+		readOnly,
 		variant,
 		color,
 		size,
@@ -28,6 +29,7 @@
 		describedBy?: string;
 		orientation: SliderOrientation;
 		disabled?: boolean;
+		readOnly?: boolean;
 		variant: SliderVariant;
 		color: Colors;
 		size?: Sizes;
@@ -108,6 +110,7 @@
 	aria-valuemax={payload.thumbMax}
 	aria-valuenow={payload.value}
 	aria-valuetext={payload.formatted}
+	aria-readonly={readOnly || undefined}
 	{disabled}
 	class={classes.thumb({
 		orientation,

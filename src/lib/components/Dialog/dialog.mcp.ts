@@ -41,9 +41,9 @@ The Dialog component (also known as Modal) displays content in a layer above the
   - large: Larger dialog size
 
 ### Event Props
-- **onOpenChange**: (open: boolean) => void - Called once for each library-requested state change
-- **onAfterOpen**: (payload: DialogState) => void - Called after the open transition finishes
-- **onAfterClose**: (payload: DialogState) => void - Called after the close transition finishes
+- **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void - Called before each library-requested state change, with \`details.reason\` (\`'trigger-press'\`, \`'escape-key'\`, \`'outside-press'\`, \`'close-press'\`, \`'swipe'\`, \`'close-watcher'\` for the Android Back gesture, \`'imperative-action'\`…), \`details.event\`, \`details.trigger\`, \`details.interaction\` and \`details.cancel()\`. Cancelling keeps the dialog as it is (a cancelled swipe snaps back) and leaves the event untouched. Inside the callback \`open\` still holds the previous state. Types from \`entasis/types\`
+- **onAfterOpen**: (payload: DialogState) => void - Called once per open after the open transition finishes; a dialog created open (\`defaultOpen\`) renders once mounted, animates in and reports it too
+- **onAfterClose**: (payload: DialogState) => void - Called once per close after the close transition finishes
 
 ### Slot Props
 - **title**: string | Snippet<[DialogState]> - Dialog title
@@ -51,14 +51,15 @@ The Dialog component (also known as Modal) displays content in a layer above the
 - **children**: Snippet<[DialogState]> - Main dialog content
 - **header**: Snippet - Custom header content
 - **footer**: Snippet - Custom footer content
-- **trigger**: Snippet | (ButtonProps & { content?: string }) - Custom trigger button
+- **trigger**: Snippet | (ButtonProps & { content?: string }) - Custom trigger button. The built-in button carries \`aria-haspopup="dialog"\`, \`aria-expanded\` and \`aria-controls\`; its \`onclick\` runs first, and \`event.preventDefault()\` there keeps the dialog closed. In a snippet, \`{@attach dialog.trigger}\` gives any element the same contract
 - **closeButton**: Snippet - Custom close button
 
 ### Behavior Props
-- **closeOnEscape**: boolean (default: true) - Close when Escape key is pressed
-- **closeOnClickOutside**: boolean (default: true, false for \`type="alert"\`) - Close when clicking outside dialog
+- **closeOnEscape**: boolean (default: true) - Close when Escape key is pressed (and, on Android, on the Back gesture)
+- **closeOnClickOutside**: boolean (default: true, false for \`type="alert"\`) - Close when pressing outside dialog. A press that began before the dialog opened does not count
 - **closable**: boolean (default: true) - Whether dialog can be closed
-- **swipeToDismiss**: boolean (default: true for drawer types) - Drag the drawer toward its edge to dismiss. Direction-aware (drawerRight drags right, drawerBottom drags down, etc.) and never hijacks inner scrolling; opt elements out with \`data-no-swipe\`
+- **focusOnClose**: boolean | HTMLElement | ((details) => HTMLElement | boolean | void) (default: true) - Where focus goes when the dialog closes. \`true\` returns it to the control that opened the dialog, else to the most recent element still on the page; \`false\` leaves focus alone; an element receives it; a function gets the change details (\`reason\`, \`interaction\`…) and returns one of these, or nothing to restore as usual
+- **swipeToDismiss**: boolean (default: true for drawer types) - Drag the drawer toward its edge to dismiss. Direction-aware (drawerRight drags right, drawerBottom drags down, etc.) and never hijacks inner scrolling or a mostly sideways drag (a press that travels more across the dismiss axis than along it is spent); a quick flick dismisses even when the last move before release is nearly stationary; opt elements out with \`data-no-swipe\`
 - **thumb**: boolean (default: true) - Drag thumb bar shown on swipe-dismissable drawers (inner edge, orientation follows the drawer side, oversized hitbox); set false to hide. Themeable via the \`thumb\` theme part
 - **inset**: a spacing step or \`'none'\` — how far a drawer stands off the screen edge for this dialog. Defaults to the theme's \`designTokens.drawerInset\` (\`'layout-md'\`). At \`'none'\` the drawer is edge to edge, its edge corners square off and only the corners facing the page stay rounded
 - **swipeFrom**: 'panel' | 'handle' (default: 'panel') - Where a swipe can start: anywhere on the panel, or only the drag handles (thumb and header)
@@ -106,9 +107,50 @@ The Dialog component (also known as Modal) displays content in a layer above the
 <Dialog bind:open title="Welcome">
 	<p>This is a basic dialog.</p>
 	
+	<!-- {@attach dialog.trigger} opens the dialog on click (Enter/Space on a non-control) and
+	     keeps aria-haspopup / aria-expanded / aria-controls in sync; focus returns to it -->
 	{#snippet trigger(dialog)}
-		<Button onclick={() => dialog.open()}>Open</Button>
+		<Button {@attach dialog.trigger}>Open</Button>
 	{/snippet}
+</Dialog>
+\`\`\`
+
+### Choose where focus goes on close
+
+\`\`\`svelte
+<script lang="ts">
+	import { Dialog } from 'entasis/dialog';
+
+	let search = $state<HTMLInputElement | null>(null);
+</script>
+
+<input bind:this={search} aria-label="Search" />
+<!-- After a save, focus the search field instead of the button that opened the dialog. -->
+<Dialog
+	title="Rename"
+	trigger={{ content: 'Rename' }}
+	focusOnClose={(details) => (details?.reason === 'close-press' ? search : undefined)}
+>
+	<p>New name</p>
+</Dialog>
+\`\`\`
+
+### Cancel a close
+
+\`\`\`svelte
+<script lang="ts">
+	import { Dialog } from 'entasis/dialog';
+	import type { OpenChangeDetails } from 'entasis/types';
+
+	let draft = $state('');
+	// Runs before the change: with a draft, only the close button closes the dialog.
+	const keepDraft = (open: boolean, details: OpenChangeDetails) => {
+		if (!open && draft && details.reason !== 'close-press') details.cancel();
+	};
+</script>
+
+<Dialog title="New message" trigger={{ content: 'Write' }} onOpenChange={keepDraft}>
+	<textarea aria-label="Message" bind:value={draft}></textarea>
 </Dialog>
 \`\`\`
 
@@ -270,19 +312,26 @@ The Dialog component uses a \`DialogState\` instance that is passed to all slot 
 - **type**: DialogType - The \`type\` prop as passed (possibly a responsive record)
 - **computedType**: DialogType - The type resolved for the current viewport, after the mobile sheet collapse
 - **size**: Size - Current dialog size
-- **open()**: () => void - Method to open the dialog
-- **close()**: () => void - Method to close the dialog
+- **open(details?)**, **close(details?)**, **toggle(details?)** - Request a change through \`onOpenChange\`; each accepts the DOM event or partial details (\`{ reason, event }\`), and reports \`'imperative-action'\` unless a trigger press is dispatching
+- **setOpen(open, details?)**: boolean - The same request with an explicit state; returns \`false\` when \`onOpenChange\` cancelled it
+- **lifecycle.status**: 'closed' | 'entering' | 'open' | 'exiting' - Where the dialog is in its open/close lifecycle
+- **trigger**: attachment that makes any element the dialog's trigger (\`{@attach dialog.trigger}\`): \`reference\`, plus a click that opens the dialog and, on a non-control, \`role="button"\`, \`tabindex="0"\` and Enter/Space activation. The element's own handler runs first; \`event.preventDefault()\` there stops it
+- **reference**: attachment that keeps a custom trigger's \`aria-haspopup\`, \`aria-expanded\` and \`aria-controls\` in sync and makes it the element focus returns to, leaving clicks to the element
 
 ## Accessibility
 
 - Initial focus goes to an \`[autofocus]\` / \`[data-autofocus]\` element inside the dialog, else the first tabbable control (the close button is skipped), else the panel itself
 - Tab and Shift+Tab are contained inside the dialog, and the rest of the page is \`inert\` while a modal is open
-- Focus is restored to the opener after the close transition finishes, just before \`onAfterClose\`
+- Focus is restored to the opener after the close transition finishes, just before \`onAfterClose\`: the trigger that opened it, else the element focused when it opened. When that element is gone or disabled (a menu item that opened the dialog), focus goes to the last element that had it inside the dialog beneath this one, else to the most recent element still on the page. A close by Escape or from the keyboard returns focus with a visible focus ring, and in Safari a focused text field is blurred before it unmounts so the page does not jump. \`focusOnClose\` overrides all of this
+- When a dialog (a Confirmation, say) closes over another dialog, the one beneath keeps focus where it was and receives it back from the closing one; it does not move focus to its first field again
+- Tab moves focus inside the dialog itself instead of leaving it to the browser, so it wraps in Safari too, where Tab skips buttons by default
+- The trigger (built-in, or a snippet element with \`{@attach dialog.trigger}\`) carries \`aria-haspopup="dialog"\`, \`aria-expanded\` and \`aria-controls\` pointing at the open dialog
+- On Android, the Back gesture closes the topmost dialog through a \`CloseWatcher\` (\`reason: 'close-watcher'\`), under the same rules as Escape
 - \`aria-labelledby\` links the \`title\` and \`aria-describedby\` links the \`description\`
 - The root is \`role="dialog"\`, or \`role="alertdialog"\` for \`type="alert"\`, always with \`aria-modal="true"\`
 - The root and the panel carry \`data-type\` with the resolved type (a responsive record or a modal collapsed into a mobile sheet reports the type actually shown), which drawer edge rounding keys on
 - Escape closes only the topmost open layer and an outside press dismisses the layers above the one pressed; both honour \`closeOnEscape\` / \`closable\` / \`closeOnClickOutside\` through the shared layer stack
-- Body scroll is locked when dialog is open
+- Page scroll is locked while a dialog is open: \`data-entasis-scroll-lock\` on \`<html>\` (the Tailwind plugin turns it into \`overflow: hidden\`, so a lock another library holds is never overwritten) and \`--entasis-scrollbar-width\` with the hidden scrollbar's width, for \`position: fixed\` headers that must not jump. A page with \`scrollbar-gutter: stable\` gets no second gutter
 
 ## Notes
 

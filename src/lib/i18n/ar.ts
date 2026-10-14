@@ -571,5 +571,17 @@ export const ar: Messages = {
 	passwordTooShort: (min: string | number) => `يجب ألا يقل عدد أحرف كلمة المرور عن ${min}`,
 	// مقياس
 	meter: 'مقياس',
-	meterSegment: (index: string | number, count: string | number) => `الجزء ${index} من ${count}`
+	meterSegment: (index: string | number, count: string | number) => `الجزء ${index} من ${count}`,
+	// التحقق من الحقول
+	fieldRequired: 'هذا الحقل مطلوب',
+	fieldMustBeChecked: 'حدد هذا المربع للمتابعة',
+	fieldMustBeOn: 'فعّل هذا الخيار للمتابعة',
+	fieldInvalid: 'أدخل قيمة صالحة',
+	fieldInvalidEmail: 'أدخل عنوان بريد إلكتروني صالحًا',
+	fieldInvalidUrl: 'أدخل عنوان URL صالحًا',
+	fieldTooShort: (min: string | number) => `أدخل ${min} أحرف على الأقل`,
+	fieldTooLong: (max: string | number) => `أدخل ${max} أحرف كحد أقصى`,
+	fieldRangeUnderflow: (min: string | number) => `أدخل قيمة أكبر من ${min} أو تساويها`,
+	fieldRangeOverflow: (max: string | number) => `أدخل قيمة أصغر من ${max} أو تساويها`,
+	fieldIncomplete: (length: string | number) => `أدخل جميع الأحرف البالغ عددها ${length}`
 };

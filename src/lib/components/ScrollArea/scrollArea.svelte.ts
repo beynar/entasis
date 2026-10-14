@@ -1,6 +1,6 @@
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
 import { useBoundingClientRect } from '$lib/utils/useBoundingClientRect.svelte.js';
-import { useDrag } from '$lib/utils/useDrag.svelte.js';
+import { createPointerDrag } from '$lib/utils/pointerDrag.js';
 import { useHoverAction } from '$lib/utils/useHoverAction.svelte.js';
 import { useResizeObserver } from '$lib/utils/useResizeObserver.svelte.js';
 import { on } from 'svelte/events';
@@ -80,14 +80,17 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 		return Math.max(thumbYRatio * scrollbarYHeight, 18);
 	});
 
-	dragY = useDrag({
-		isActive: true,
-		onDragStart: ({ clientY, target }) => {
-			// Calculate offset from mouse to thumb top using fresh rects
-			const thumbRect = (target! as HTMLElement).getBoundingClientRect();
-			this.dragOffset = clientY - thumbRect.top;
+	isDraggingY = $state(false);
+	// The thumb is a handle: the shared pointer drag captures the pointer on press (primary
+	// button only), and a cancelled touch, a lost capture or a mouse released outside the window
+	// ends the drag instead of leaving it stuck.
+	dragY = createPointerDrag({
+		onStart: ({ event, node }) => {
+			// Offset from the pointer to the thumb top, from a fresh rect
+			this.dragOffset = event.clientY - node.getBoundingClientRect().top;
+			this.isDraggingY = true;
 		},
-		onDrag: ({ clientY }) => {
+		onMove: ({ y }) => {
 			if (!this.scrollbarYElement) return;
 
 			// Get fresh track rect at drag time
@@ -95,14 +98,19 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 			const maxThumbPos = Math.max(0, trackRect.height - this.thumbYSize);
 
 			// Calculate new thumb position relative to track
-			let newThumbTop = clientY - this.dragOffset - trackRect.top;
+			let newThumbTop = y - this.dragOffset - trackRect.top;
 			newThumbTop = Math.max(0, Math.min(newThumbTop, maxThumbPos));
 
 			const scrollPercentage = maxThumbPos > 0 ? newThumbTop / maxThumbPos : 0;
 			this.viewportElement!.scrollTop = scrollPercentage * this.maxScrollY;
+		},
+		onEnd: () => {
+			this.isDraggingY = false;
+		},
+		onCancel: () => {
+			this.isDraggingY = false;
 		}
 	});
-	isDraggingY = $derived(this.dragY.isDragging);
 
 	thumbXSize = $derived.by(() => {
 		if (
@@ -118,23 +126,28 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 		return Math.max(thumbXRatio * scrollbarXWidth, 18);
 	});
 
-	dragX = useDrag({
-		isActive: true,
-		onDragStart: ({ clientX, target }) => {
-			const thumbRect = (target! as HTMLElement).getBoundingClientRect();
-			this.dragOffset = clientX - thumbRect.left;
+	isDraggingX = $state(false);
+	dragX = createPointerDrag({
+		onStart: ({ event, node }) => {
+			this.dragOffset = event.clientX - node.getBoundingClientRect().left;
+			this.isDraggingX = true;
 		},
-		onDrag: ({ clientX }) => {
+		onMove: ({ x }) => {
 			if (!this.scrollbarXElement) return;
 			const trackRect = this.scrollbarXElement.getBoundingClientRect();
 			const maxThumbPos = Math.max(0, trackRect.width - this.thumbXSize);
-			let newThumbLeft = clientX - this.dragOffset - trackRect.left;
+			let newThumbLeft = x - this.dragOffset - trackRect.left;
 			newThumbLeft = Math.max(0, Math.min(newThumbLeft, maxThumbPos));
 			const scrollPercentage = maxThumbPos > 0 ? newThumbLeft / maxThumbPos : 0;
 			this.viewportElement!.scrollLeft = scrollPercentage * this.maxScrollX;
+		},
+		onEnd: () => {
+			this.isDraggingX = false;
+		},
+		onCancel: () => {
+			this.isDraggingX = false;
 		}
 	});
-	isDraggingX = $derived(this.dragX.isDragging);
 
 	// The viewport is the focusable, named scroll region — but only when it actually overflows, so
 	// an idle ScrollArea (e.g. a dropdown whose items fit) adds no phantom tab stop and no group to

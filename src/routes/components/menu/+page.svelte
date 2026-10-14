@@ -621,6 +621,32 @@
 			</div>
 		</ComponentCard>
 
+		<ComponentCard
+			title="Type-ahead text"
+			description="Focus a row and type a letter. Each row matches on its textValue, so the shortcut in front of the title does not count, and the disabled Duplicate row is passed over for Delete."
+			code={`<Menu
+	items={[
+		{ type: 'option', title: '⌘C  Copy', textValue: 'Copy' },
+		{ type: 'option', title: '⌘X  Cut', textValue: 'Cut' },
+		{ type: 'option', title: '⌘V  Paste', textValue: 'Paste' },
+		{ type: 'option', title: '⌘D  Duplicate', textValue: 'Duplicate', disabled: true },
+		{ type: 'option', title: '⌫  Delete', textValue: 'Delete' }
+	]}
+/>`}
+		>
+			<div class="bg-surface border-neutral-muted w-56 rounded-xl border p-2">
+				<Menu
+					items={[
+						{ type: 'option', title: '⌘C  Copy', textValue: 'Copy' },
+						{ type: 'option', title: '⌘X  Cut', textValue: 'Cut' },
+						{ type: 'option', title: '⌘V  Paste', textValue: 'Paste' },
+						{ type: 'option', title: '⌘D  Duplicate', textValue: 'Duplicate', disabled: true },
+						{ type: 'option', title: '⌫  Delete', textValue: 'Delete' }
+					]}
+				/>
+			</div>
+		</ComponentCard>
+
 		<ComponentCard description="Minimal three-item menu.">
 			<div class="bg-surface border-neutral-muted w-48 rounded-xl border p-2">
 				<Menu

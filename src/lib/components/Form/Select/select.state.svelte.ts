@@ -2,6 +2,7 @@ import { bind } from '$lib/utils/state.svelte.js';
 import { useListNavigation } from '$lib/utils/useListNavigation.svelte.js';
 import { alignItemWithTrigger, SELECT_ALIGN_MARGIN } from './select.align.js';
 import type { SelectItems, SelectOption, SelectOptionGroup } from './select.props.js';
+import { elementById } from '$lib/utils/id.js';
 
 /** Inline-start edge of an element's first text: what lines up between the value and an option. */
 const textStart = (element: Element, rtl: boolean) => {
@@ -104,8 +105,11 @@ export class SelectState {
 		$effect(() => {
 			if (!this.isOpen || !this.alignItemWithTrigger) return;
 			const block = (event: Event) => {
-				const panel = document.getElementById(this.listboxId)?.closest('dialog');
-				if (event.target instanceof Node && panel?.contains(event.target)) return;
+				// The listbox sits in the popover's panel, the only child of its positioning wrapper.
+				const panel = elementById(this.triggerEl, this.listboxId)?.parentElement?.parentElement;
+				// The composed path, not `event.target`: a window listener sees a shadow root's events
+				// retargeted to its host.
+				if (panel && event.composedPath().includes(panel)) return;
 				event.preventDefault();
 			};
 			const listen = { capture: true, passive: false };
@@ -135,7 +139,7 @@ export class SelectState {
 			this.selectedOption && !this.selectedOption.disabled
 				? this.selectedOption
 				: this.flatOptions.find((option) => !option.disabled);
-		const item = anchor && document.getElementById(this.optionId(anchor.value));
+		const item = anchor && elementById(reference, this.optionId(anchor.value));
 		if (!item) return null;
 
 		const width = window.innerWidth;
@@ -211,9 +215,9 @@ export class SelectState {
 			// rAF stalls in hidden tabs). An item-aligned panel has already scrolled its list.
 			setTimeout(() => {
 				if (this.#alignment) return;
-				document
-					.getElementById(this.optionId(selected.value))
-					?.scrollIntoView({ block: 'nearest' });
+				elementById(this.triggerEl, this.optionId(selected.value))?.scrollIntoView({
+					block: 'nearest'
+				});
 			}, 0);
 		} else {
 			this.nav.first();

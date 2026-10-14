@@ -66,9 +66,7 @@
 		const ref = element;
 		theme.tooltip = { ...options, ref };
 		return () => {
-			if (theme.tooltip?.ref !== ref) return;
-			theme.tooltip = null;
-			theme.lastTooltipClosed = Date.now();
+			if (theme.tooltip?.ref === ref) theme.tooltip = null;
 		};
 	});
 </script>

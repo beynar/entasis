@@ -22,6 +22,8 @@
 		i18n,
 		theme,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		size = 'normal',
 		density = 'normal',
@@ -71,6 +73,12 @@
 		},
 		set disabled(v: boolean | undefined) {
 			disabled = v;
+		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
 		},
 		get required() {
 			return required;
@@ -132,6 +140,7 @@
 {/snippet}
 
 <Popover
+	haspopup="listbox"
 	closeOnClickOutside={false}
 	closeOnEscape={false}
 	fitTrigger
@@ -169,7 +178,7 @@
 			viewportRole="presentation"
 			scrollOnEdges
 			type="auto"
-			class="flex max-h-[240px] flex-col"
+			class="flex max-h-[min(240px,calc(var(--available-height,100dvh)_-_2*var(--space-xs)))] flex-col"
 		>
 			{#each select.renderGroups as group, groupIndex (groupIndex)}
 				{#if separators && groupIndex > 0}
@@ -211,6 +220,7 @@
 			{label}
 			{size}
 			{density}
+			labelFor={false}
 			theme={{
 				...(theme || {}),
 				inputContainer: {

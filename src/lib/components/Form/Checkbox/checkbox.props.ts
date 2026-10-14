@@ -1,4 +1,4 @@
-import type { InputProps } from '../Field/field.js';
+import type { FieldButtonAttributes, InputProps } from '../Field/field.js';
 import type { CheckboxMode } from '../CheckboxesInput/checkboxesInput.props.js';
 import type { CheckboxesInputThemeProps } from '../CheckboxesInput/checkboxesInput.theme.js';
 
@@ -10,6 +10,11 @@ export type CheckboxProps = InputProps<'checkbox'> & {
 	mode?: CheckboxMode | 'control';
 	/** Shows a mixed state without changing the boolean field value. */
 	indeterminate?: boolean;
+	/**
+	 * Native attributes for the checkbox control, such as `aria-label`, `title` or `data-*`. An
+	 * `aria-label` names the checkbox instead of its label.
+	 */
+	inputAttrs?: FieldButtonAttributes;
 	/** Theme overrides for the checkbox row and field parts. */
 	theme?: CheckboxesInputThemeProps & InputProps<'checkbox'>['theme'];
 };

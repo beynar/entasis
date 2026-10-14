@@ -10,8 +10,10 @@
 	import Button from '$lib/components/Button/Button.svelte';
 	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
 	import { sizes } from '$lib/utils/tokens.js';
+	import type { OpenChangeDetails } from '$lib/types/index.js';
+	import type { PopoverPlacement } from '$lib/components/Popover/popover.props.js';
 
-	const placements = ['top', 'bottom', 'left', 'right'] as const;
+	const placements = ['top', 'bottom', 'left', 'right', 'inline-start', 'inline-end'] as const;
 	const controls = createComponentControls([
 		{
 			name: 'size',
@@ -29,6 +31,20 @@
 		}
 	]);
 
+	const panelText =
+		'Use popovers for compact actions, controls, and supporting context that should stay anchored to a trigger.';
+
+	const placementExamples = [
+		{ position: 'top', label: 'Top' },
+		{ position: 'right', label: 'Right' },
+		{ position: 'bottom', label: 'Bottom' },
+		{ position: 'left', label: 'Left' },
+		{ position: 'bottom-start', label: 'Bottom start' },
+		{ position: 'bottom-end', label: 'Bottom end' },
+		{ position: 'inline-start', label: 'Inline start' },
+		{ position: 'inline-end', label: 'Inline end' }
+	] satisfies Array<{ position: PopoverPlacement; label: string }>;
+
 	const text = `Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor`;
 
 	const wrapper2 = createRawSnippet<[Snippet]>(() => {
@@ -45,7 +61,23 @@
 
 	let lifetimeTrigger = $state(true);
 	let lifetimeLog = $state('No change yet');
+
+	let note = $state('');
+	let noteLog = $state('No change yet');
+	// Runs before the change: an outside press or Escape keeps a popover holding an unsaved note.
+	const keepNote = (open: boolean, details: OpenChangeDetails) => {
+		const dismissal = details.reason === 'outside-press' || details.reason === 'escape-key';
+		if (!open && dismissal && note) details.cancel();
+		noteLog = `onOpenChange(${open}, { reason: '${details.reason}' })${details.isCanceled ? ' · cancelled' : ''}`;
+	};
 </script>
+
+{#snippet panelContent(title: string, description = panelText)}
+	<div class="grid gap-2">
+		<h2 class="text-neutral text-base font-semibold">{title}</h2>
+		<p class="text-neutral/70 text-sm">{description}</p>
+	</div>
+{/snippet}
 
 {#snippet wrapper(children: Snippet)}
 	{@render children()}
@@ -71,7 +103,12 @@
 		{
 			label: 'Inline mode renders the panel in normal document flow',
 			test: 'a11y:popover.inline-in-flow'
-		}
+		},
+		{
+			label: 'Hover never opens from a touch tap or a disabled trigger',
+			test: 'a11y:popover.hover-ignores-touch-and-disabled'
+		},
+		'Neighbouring hover popovers, hover cards and tooltips open without waiting'
 	]}
 >
 	<ComponentCard
@@ -126,6 +163,97 @@
 					<p class="text-sm">The trigger still toggles an inline panel.</p>
 				</Popover>
 			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Placement"
+			description="Choose the preferred side or aligned edge. Floating UI flips the panel when there is not enough room. inline-start and inline-end follow the reading direction: inline-end opens on the right in English and on the left in Arabic."
+			class="!min-h-fit"
+			code={`<Popover position="top" trigger={{ content: 'Top', variant: 'soft' }}>
+	<div>Top placement</div>
+</Popover>
+
+<Popover position="bottom-end" trigger={{ content: 'Bottom end', variant: 'soft' }}>
+	<div>Bottom-end placement</div>
+</Popover>
+
+<Popover position="inline-end" trigger={{ content: 'Inline end', variant: 'soft' }}>
+	<div>Opens on the reading direction's end side</div>
+</Popover>`}
+		>
+			<div class="flex w-full max-w-3xl flex-wrap items-center justify-center gap-3">
+				{#each placementExamples as example (example.position)}
+					<Popover
+						position={example.position}
+						trigger={{
+							content: example.label,
+							variant: 'soft'
+						}}
+					>
+						{@render panelContent(`${example.label} placement`)}
+					</Popover>
+				{/each}
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Styling by side"
+			description="The panel reports the side it landed on, after any flip, as data-side, and its trigger reports it as data-popup-side. Square the corners where they meet, whichever way the panel opens."
+			class="!min-h-fit"
+			code={`<Popover
+	position="bottom-start"
+	offset={0}
+	class="data-[side=bottom]:rounded-t-none data-[side=top]:rounded-b-none"
+	trigger={{
+		content: 'Attached panel',
+		variant: 'soft',
+		class: 'data-[popup-side=bottom]:rounded-b-none data-[popup-side=top]:rounded-t-none'
+	}}
+>
+	<div>Attached to its trigger</div>
+</Popover>`}
+		>
+			<Popover
+				position="bottom-start"
+				offset={0}
+				class="data-[side=bottom]:rounded-t-none data-[side=top]:rounded-b-none"
+				trigger={{
+					content: 'Attached panel',
+					variant: 'soft',
+					class: 'data-[popup-side=bottom]:rounded-b-none data-[popup-side=top]:rounded-t-none'
+				}}
+			>
+				{@render panelContent('Attached to its trigger')}
+			</Popover>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Wrapped link"
+			description="A trigger that wraps across lines has a bounding box wider than either line. With anchorTo set to line, the panel anchors to the line the pointer was on when it opened and stays there while it is open."
+			class="!min-h-fit"
+			code={`<p class="w-56">
+	Read the
+	<Popover anchorTo="line" position="bottom-start">
+		{#snippet trigger(popover)}
+			<span class="underline" {@attach popover.trigger}>full release notes for this version</span>
+		{/snippet}
+		<div>Anchored to the line you pointed at</div>
+	</Popover>
+	before upgrading.
+</p>`}
+		>
+			<p class="w-56 text-sm leading-6" data-testid="wrapped-link-example">
+				Read the
+				<Popover anchorTo="line" position="bottom-start">
+					{#snippet trigger(popover)}
+						<span class="text-primary cursor-pointer underline" {@attach popover.trigger}
+							>full release notes for this version</span
+						>
+					{/snippet}
+					{@render panelContent('Anchored to the line you pointed at')}
+				</Popover>
+				before upgrading.
+			</p>
 		</ComponentCard>
 
 		<ComponentCard
@@ -292,15 +420,67 @@
 		</ComponentCard>
 
 		<ComponentCard
+			title="Hover popovers"
+			description="openOnHover opens after delay, from a mouse or pen only: a touch tap or a disabled trigger never hover-opens it. Once one is open, its neighbour opens at once. closeDelay is how long the pointer may wander outside the safe area before closeOnMouseLeave closes the panel."
+			code={`<Popover
+	openOnHover
+	closeOnMouseLeave
+	delay={300}
+	closeDelay={300}
+	trigger={{ content: 'Profile', variant: 'soft' }}
+>
+	<p>Hover the next trigger: it opens without waiting.</p>
+</Popover>
+
+<Popover openOnHover closeOnMouseLeave delay={300} closeDelay={300} trigger={{ content: 'Billing', variant: 'soft' }}>
+	<p>Opened without the delay.</p>
+</Popover>
+
+<Popover openOnHover delay={300} trigger={{ content: 'Disabled', disabled: true }}>
+	<p>Never shown on hover.</p>
+</Popover>`}
+		>
+			<div class="flex w-full max-w-xl flex-wrap items-center justify-center gap-3">
+				{#each ['Profile', 'Billing', 'Team'] as label (label)}
+					<Popover
+						openOnHover
+						closeOnMouseLeave
+						delay={300}
+						closeDelay={300}
+						position="bottom"
+						lockScroll={false}
+						trigger={{ content: label, variant: 'soft' }}
+					>
+						<p class="text-neutral/70 max-w-xs text-sm">
+							{label} details. Move to a neighbouring trigger: it opens without waiting.
+						</p>
+					</Popover>
+				{/each}
+				<Popover
+					openOnHover
+					delay={300}
+					position="bottom"
+					lockScroll={false}
+					trigger={{ content: 'Disabled', variant: 'soft', disabled: true }}
+				>
+					<p class="text-sm">Never shown on hover.</p>
+				</Popover>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
 			title="Trigger lifetime"
-			description="The trigger anchors the panel. Removing it closes an open popover and reports onOpenChange(false), so the panel never lingers against a detached element. Outside presses are off here, so the removal is what closes it."
+			description="The trigger anchors the panel. Removing it closes an open popover and reports onOpenChange(false) with reason 'trigger-unmount', so the panel never lingers against a detached element. Outside presses are off here, so the removal is what closes it."
 			code={`<script lang="ts">
 	let showTrigger = $state(true);
 ${'</' + 'script>'}
 
 <Button onclick={() => (showTrigger = !showTrigger)}>Remove trigger</Button>
 
-<Popover closeOnClickOutside={false} onOpenChange={(open) => console.log(open)}>
+<Popover
+	closeOnClickOutside={false}
+	onOpenChange={(open, details) => console.log(open, details.reason)}
+>
 	{#snippet trigger(popover)}
 		{#if showTrigger}
 			<Button {@attach popover.reference} onclick={() => popover.toggle()}>Open</Button>
@@ -323,7 +503,8 @@ ${'</' + 'script>'}
 				<Popover
 					position="bottom"
 					closeOnClickOutside={false}
-					onOpenChange={(open) => (lifetimeLog = `onOpenChange(${open})`)}
+					onOpenChange={(open, details) =>
+						(lifetimeLog = `onOpenChange(${open}, { reason: '${details.reason}' })`)}
 				>
 					{#snippet trigger(popover)}
 						{#if lifetimeTrigger}
@@ -339,6 +520,116 @@ ${'</' + 'script>'}
 				<p class="text-neutral/70 w-full text-center text-sm" data-testid="trigger-lifetime-log">
 					{lifetimeLog}
 				</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Open-change details"
+			description="onOpenChange runs before the change with a reason, the event and cancel(). Type a note, then press outside or Escape: the popover stays open while the note has text. Discard empties it and closes."
+			code={`<script lang="ts">
+	import type { OpenChangeDetails } from 'entasis/types';
+
+	let note = $state('');
+	const keepNote = (open: boolean, details: OpenChangeDetails) => {
+		const dismissal = details.reason === 'outside-press' || details.reason === 'escape-key';
+		if (!open && dismissal && note) details.cancel();
+	};
+${'</' + 'script>'}
+
+<Popover trigger={{ content: 'Add a note' }} focusOnOpen="first" onOpenChange={keepNote}>
+	{#snippet children(popover)}
+		<TextArea label="Note" bind:value={note} />
+		<Button onclick={() => { note = ''; popover.close(); }}>Discard</Button>
+	{/snippet}
+</Popover>`}
+		>
+			<div class="flex w-full max-w-xl flex-col items-center gap-3">
+				<Popover
+					trigger={{ content: 'Add a note', variant: 'soft' }}
+					position="bottom"
+					focusOnOpen="first"
+					onOpenChange={keepNote}
+				>
+					{#snippet children(popover)}
+						<div class="flex flex-col gap-2">
+							<textarea
+								aria-label="Note"
+								class="border-neutral/20 min-h-20 rounded-md border p-2 text-sm"
+								bind:value={note}></textarea>
+							<Button
+								size="small"
+								variant="soft"
+								onclick={() => {
+									note = '';
+									popover.close();
+								}}>Discard</Button
+							>
+						</div>
+					{/snippet}
+				</Popover>
+				<p class="text-neutral/70 text-center text-sm" data-testid="open-change-log">{noteLog}</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="How it opened"
+			description="openReason records how the popover opened. A hover-opened popover leaves page scroll unlocked and closes when the pointer leaves; pressing its trigger pins it open. With several triggers, the one pressed anchors the panel and gets focus back."
+			code={`<Popover openOnHover closeOnMouseLeave trigger={{ content: 'Hover or press' }}>
+	{#snippet children(popover)}Opened by {popover.openReason}{/snippet}
+</Popover>
+
+<Popover focusOnOpen="first">
+	{#snippet trigger(popover)}
+		<Button {@attach popover.trigger}>First</Button>
+		<Button {@attach popover.trigger}>Second</Button>
+	{/snippet}
+	{#snippet children(popover)}
+		<Button onclick={() => popover.close()}>Close</Button>
+	{/snippet}
+</Popover>`}
+		>
+			<div class="flex flex-wrap items-center justify-center gap-3">
+				<Popover
+					openOnHover
+					closeOnMouseLeave
+					position="bottom"
+					trigger={{ content: 'Hover or press', variant: 'soft' }}
+				>
+					{#snippet children(popover)}
+						<p class="text-sm" data-testid="open-reason">Opened by {popover.openReason}</p>
+					{/snippet}
+				</Popover>
+				<Popover position="bottom" focusOnOpen="first">
+					{#snippet trigger(popover)}
+						<Button variant="outline" color="neutral" {@attach popover.trigger}>First</Button>
+						<Button variant="outline" color="neutral" {@attach popover.trigger}>Second</Button>
+					{/snippet}
+					{#snippet children(popover)}
+						<Button size="small" variant="soft" onclick={() => popover.close()}>Close</Button>
+					{/snippet}
+				</Popover>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Tab order"
+			description="The panel is rendered at the end of the page, but Tab treats it as part of the trigger: Tab on the open trigger enters the panel, Tab past its last control continues with the next control and closes it, and Shift+Tab on its first control returns to the trigger. focusOnClose chooses where focus goes when it closes."
+			code={`<Button>Previous control</Button>
+<Popover trigger={{ content: 'Open filters' }}>
+	<label><input type="checkbox" /> In stock</label>
+	<label><input type="checkbox" /> On sale</label>
+</Popover>
+<Button>Next control</Button>`}
+		>
+			<div class="flex flex-wrap items-center justify-center gap-3">
+				<Button variant="outline" color="neutral">Previous control</Button>
+				<Popover trigger={{ content: 'Open filters', variant: 'soft' }} position="bottom">
+					<div class="flex flex-col gap-2 text-sm">
+						<label class="flex items-center gap-2"><input type="checkbox" /> In stock</label>
+						<label class="flex items-center gap-2"><input type="checkbox" /> On sale</label>
+					</div>
+				</Popover>
+				<Button variant="outline" color="neutral">Next control</Button>
 			</div>
 		</ComponentCard>
 	{/snippet}

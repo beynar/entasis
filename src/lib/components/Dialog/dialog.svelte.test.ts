@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { describe, expect, test, vi } from 'vitest';
 import DialogLawHarness from './dialogLawHarness.test.svelte';
 import DialogSwapHarness from './DialogSwapHarness.test.svelte';
+import DialogTriggerHarness from './DialogTriggerHarness.test.svelte';
 
 describe('Dialog disclosure state', () => {
 	test('reports each library-requested transition once', async () => {
@@ -18,13 +19,20 @@ describe('Dialog disclosure state', () => {
 		await fireEvent.click(openButton);
 
 		expect(onOpenChange).toHaveBeenCalledTimes(1);
-		expect(onOpenChange).toHaveBeenLastCalledWith(true);
+		// `onclick={dialog.open}` passes its click: no trigger is attached, so code opened it.
+		expect(onOpenChange).toHaveBeenLastCalledWith(
+			true,
+			expect.objectContaining({ reason: 'imperative-action', event: expect.any(MouseEvent) })
+		);
 		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
 
 		await fireEvent.click(screen.getByRole('button', { name: 'Close law dialog' }));
 
 		expect(onOpenChange).toHaveBeenCalledTimes(2);
-		expect(onOpenChange).toHaveBeenLastCalledWith(false);
+		expect(onOpenChange).toHaveBeenLastCalledWith(
+			false,
+			expect.objectContaining({ reason: 'imperative-action', event: expect.any(MouseEvent) })
+		);
 		await waitFor(() => expect(onAfterClose).toHaveBeenCalledOnce());
 	});
 });
@@ -123,5 +131,107 @@ describe('Dialog data-type', () => {
 		await fireEvent.click(screen.getByRole('button', { name: 'Open law dialog' }));
 		await screen.findByRole('dialog');
 		expect(typeAttributes()).toEqual(['drawerRight', 'drawerRight']);
+	});
+});
+
+describe('Dialog trigger contract (CX-4)', () => {
+	test('{@attach dialog.trigger} makes any element a keyboard-reachable trigger with popup ARIA', async () => {
+		const onOpenChange = vi.fn();
+		render(DialogTriggerHarness, { props: { scenario: 'snippet-trigger', onOpenChange } });
+		const card = screen.getByTestId('card');
+		expect(card).toHaveAttribute('role', 'button');
+		expect(card).toHaveAttribute('tabindex', '0');
+		expect(card).toHaveAttribute('aria-haspopup', 'dialog');
+		expect(card).toHaveAttribute('aria-expanded', 'false');
+		expect(card).not.toHaveAttribute('aria-controls');
+
+		card.focus();
+		await fireEvent.keyDown(card, { key: 'Enter' });
+		const dialog = await screen.findByRole('dialog', { name: 'Card details' });
+		await waitFor(() => expect(card).toHaveAttribute('aria-expanded', 'true'));
+		expect(card).toHaveAttribute('aria-controls', dialog.id);
+		expect(onOpenChange).toHaveBeenLastCalledWith(
+			true,
+			expect.objectContaining({ reason: 'trigger-press', trigger: card, interaction: 'keyboard' })
+		);
+
+		// The close button reports its own reason; focus goes back to the trigger.
+		await fireEvent.click(dialog.querySelector('button')!);
+		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+		expect(onOpenChange).toHaveBeenLastCalledWith(
+			false,
+			expect.objectContaining({ reason: 'close-press' })
+		);
+		expect(document.activeElement).toBe(card);
+		expect(card).toHaveAttribute('aria-expanded', 'false');
+	});
+
+	test.each(['escape', 'close-button'] as const)(
+		'focus returns to the trigger after an animated %s close, although the page behind was inert',
+		async (how) => {
+			// jsdom focuses inert elements; a browser refuses, which is what the restore must survive.
+			const focus = HTMLElement.prototype.focus;
+			const spy = vi.spyOn(HTMLElement.prototype, 'focus').mockImplementation(function (
+				this: HTMLElement,
+				...args
+			) {
+				if (this.closest('[inert]')) return;
+				return focus.apply(this, args);
+			});
+			try {
+				render(DialogTriggerHarness, { props: { scenario: 'animated-trigger' } });
+				const opener = screen.getByTestId('opener');
+				opener.focus();
+				await fireEvent.click(opener);
+				const dialog = await screen.findByRole('dialog', { name: 'Animated card' });
+				await waitFor(() => expect(opener.closest('[inert]')).not.toBeNull());
+
+				if (how === 'escape') await fireEvent.keyDown(window, { key: 'Escape' });
+				else await fireEvent.click(dialog.querySelector('button')!);
+				await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+				await waitFor(() => expect(document.activeElement).toBe(opener));
+				expect(opener.closest('[inert]')).toBeNull();
+			} finally {
+				spy.mockRestore();
+			}
+		}
+	);
+
+	test('cancelling the trigger press keeps the dialog closed and the trigger collapsed', async () => {
+		const onOpenChange = vi.fn((_open: boolean, details: { cancel(): void }) => details.cancel());
+		render(DialogTriggerHarness, { props: { scenario: 'snippet-trigger', onOpenChange } });
+		const card = screen.getByTestId('card');
+		await fireEvent.click(card);
+		await new Promise((resolve) => setTimeout(resolve, 20));
+
+		expect(onOpenChange).toHaveBeenCalledOnce();
+		expect(onOpenChange).toHaveBeenCalledWith(
+			true,
+			expect.objectContaining({ reason: 'trigger-press', trigger: card })
+		);
+		expect(screen.queryByRole('dialog')).toBeNull();
+		expect(card).toHaveAttribute('aria-expanded', 'false');
+	});
+
+	test("the built-in trigger's onclick runs first, and preventDefault keeps the dialog closed", async () => {
+		const onOpenChange = vi.fn();
+		render(DialogTriggerHarness, { props: { scenario: 'prevented-trigger', onOpenChange } });
+		await fireEvent.click(screen.getByRole('button', { name: 'Open guarded' }));
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		expect(onOpenChange).not.toHaveBeenCalled();
+		expect(screen.queryByRole('dialog')).toBeNull();
+	});
+});
+
+describe('Dialog lifecycle (CX-2)', () => {
+	test('a dialog created open renders once mounted, animates in and reports onAfterOpen once', async () => {
+		const onAfterOpen = vi.fn();
+		render(DialogTriggerHarness, { props: { scenario: 'default-open', onAfterOpen } });
+		await screen.findByRole('dialog', { name: 'Open at creation' });
+		// The intro plays: the open completes on its end, not right away.
+		expect(onAfterOpen).not.toHaveBeenCalled();
+		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
+		await new Promise((resolve) => setTimeout(resolve, 80));
+		expect(onAfterOpen).toHaveBeenCalledOnce();
 	});
 });

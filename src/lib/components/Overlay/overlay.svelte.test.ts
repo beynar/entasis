@@ -23,6 +23,17 @@ describe('Overlay disclosure state', () => {
 		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
 	});
 
+	test('an overlay open at creation reports onAfterOpen once, though no transition starts', async () => {
+		const onAfterOpen = vi.fn();
+		const onAfterClose = vi.fn();
+		render(Overlay, { props: { title: 'Open overlay', onAfterOpen, onAfterClose } });
+
+		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
+		await new Promise((resolve) => setTimeout(resolve, 30));
+		expect(onAfterOpen).toHaveBeenCalledOnce();
+		expect(onAfterClose).not.toHaveBeenCalled();
+	});
+
 	test('uses defaultOpen only as the initial uncontrolled state', () => {
 		const { container } = render(Overlay, {
 			props: {

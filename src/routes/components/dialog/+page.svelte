@@ -6,6 +6,9 @@
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 	import { sizes } from '$lib/utils/tokens.js';
+	import type { OpenChangeDetails } from '$lib/types/index.js';
+
+	let searchField = $state<HTMLInputElement | null>(null);
 
 	const dialogTypes = [
 		'modal',
@@ -50,6 +53,14 @@
 		Quisquam, quos.`;
 
 	const longText = Array.from({ length: 12 }, () => paragraph).join('\n\n');
+
+	let keepOpen = $state(true);
+	let dialogLog = $state('No change yet');
+	// Runs before the change: while "Keep open" is on, only the dialog's own button closes it.
+	const guardClose = (open: boolean, details: OpenChangeDetails) => {
+		if (!open && keepOpen && details.reason !== 'close-press') details.cancel();
+		dialogLog = `onOpenChange(${open}, { reason: '${details.reason}' })${details.isCanceled ? ' · cancelled' : ''}`;
+	};
 </script>
 
 <DocPage
@@ -249,6 +260,99 @@
 					</Dialog>
 				</Dialog>
 			</Dialog>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Trigger and open-change details"
+			description="A snippet trigger that attaches dialog.trigger gets aria-haspopup, aria-expanded and aria-controls, and focus returns to it. onOpenChange runs before the change with a reason and cancel(): while Keep open is on, Escape and outside presses are cancelled and only the close button closes it."
+			code={`<script lang="ts">
+	import type { OpenChangeDetails } from 'entasis/types';
+
+	let keepOpen = $state(true);
+	const guardClose = (open: boolean, details: OpenChangeDetails) => {
+		if (!open && keepOpen && details.reason !== 'close-press') details.cancel();
+	};
+${'</' + 'script>'}
+
+<Dialog title="Guarded dialog" onOpenChange={guardClose}>
+	{#snippet trigger(dialog)}
+		<Button {@attach dialog.trigger}>Open guarded dialog</Button>
+	{/snippet}
+	<Switch label="Keep open" bind:value={keepOpen} />
+</Dialog>`}
+		>
+			<div class="flex w-full max-w-xl flex-col items-center gap-3">
+				<Dialog
+					title="Guarded dialog"
+					description="Escape and outside presses ask first."
+					onOpenChange={guardClose}
+				>
+					{#snippet trigger(dialog)}
+						<Button color="primary" {@attach dialog.trigger}>Open guarded dialog</Button>
+					{/snippet}
+					<label class="flex items-center gap-2 text-sm">
+						<input type="checkbox" bind:checked={keepOpen} />
+						Keep open
+					</label>
+				</Dialog>
+				<p class="text-neutral/70 text-center text-sm" data-testid="dialog-open-change-log">
+					{dialogLog}
+				</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Where focus goes on close"
+			description="Focus returns to the button that opened the dialog, with a focus ring after Escape. Closing the confirmation inside it returns focus to Delete, not to the first field. With focusOnClose, the Save button sends focus to the search field instead; Escape still restores the trigger."
+			code={`<script lang="ts">
+	let search = $state<HTMLInputElement | null>(null);
+${'</' + 'script>'}
+
+<input bind:this={search} aria-label="Search" />
+<Dialog
+	title="Rename project"
+	trigger={{ content: 'Rename' }}
+	focusOnClose={(details) => (details?.reason === 'close-press' ? search : undefined)}
+>
+	<input aria-label="Name" />
+	<Button onclick={() => confirmation({ title: 'Delete project?', confirm: 'Delete', cancel: 'Keep' })}>
+		Delete
+	</Button>
+</Dialog>`}
+		>
+			<div class="flex w-full max-w-xl flex-wrap items-center justify-center gap-3">
+				<input
+					bind:this={searchField}
+					aria-label="Search"
+					placeholder="Search"
+					class="border-neutral/20 rounded-md border px-2 py-1 text-sm"
+				/>
+				<Dialog
+					title="Rename project"
+					trigger={{ content: 'Rename', color: 'primary' }}
+					size="small"
+					focusOnClose={(details) => (details?.reason === 'close-press' ? searchField : undefined)}
+				>
+					<div class="flex flex-col gap-3">
+						<input
+							aria-label="Name"
+							placeholder="Name"
+							class="border-neutral/20 rounded-md border px-2 py-1 text-sm"
+						/>
+						<Button
+							variant="soft"
+							color="danger"
+							onclick={() =>
+								confirmation({
+									title: 'Delete project?',
+									description: 'This cannot be undone.',
+									confirm: 'Delete',
+									cancel: 'Keep'
+								})}>Delete</Button
+						>
+					</div>
+				</Dialog>
+			</div>
 		</ComponentCard>
 
 		<ComponentCard

@@ -217,3 +217,25 @@ describe('Switch required validation', () => {
 		expect(untouchedError).not.toMatch(/Expected boolean/);
 	});
 });
+
+describe('Switch inline label', () => {
+	test('clicking the label text focuses the switch without toggling it', async () => {
+		render(SwitchForms);
+		const control = nativeSwitch();
+		expect(control).not.toHaveFocus();
+
+		await fireEvent.click(within(nativeForm()).getByText('Alerts'));
+
+		expect(control).toHaveFocus();
+		expect(control).toHaveAttribute('aria-checked', 'false');
+	});
+
+	test('a disabled switch ignores a label click', async () => {
+		render(SwitchForms, { props: { nativeDisabled: true } });
+
+		await fireEvent.click(within(nativeForm()).getByText('Alerts'));
+
+		expect(nativeSwitch()).not.toHaveFocus();
+		expect(nativeSwitch()).toHaveAttribute('aria-checked', 'false');
+	});
+});

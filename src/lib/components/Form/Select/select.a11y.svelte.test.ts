@@ -66,6 +66,14 @@ const open = async () => {
 };
 
 describe('Select listbox structure', () => {
+	test('a11y:select.popup-wrapper the listbox is not announced inside an unnamed dialog', async () => {
+		render(SelectHarness, { props: { label: 'Produce', items } });
+		const listbox = await open();
+
+		expect(listbox.closest('dialog')).toBeNull();
+		expect(screen.queryByRole('dialog')).toBeNull();
+	});
+
 	test('a11y:select.listbox-children owns only groups and options', async () => {
 		render(SelectHarness, { props: { label: 'Produce', items } });
 		const listbox = await open();

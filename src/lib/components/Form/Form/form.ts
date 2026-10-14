@@ -81,7 +81,10 @@ export type FormInputDefinition<T extends RegisteredInputType = RegisteredInputT
 	 * with `field.setValue`.
 	 */
 	component: Component<FormInputComponentProps<T>>;
-	/** What `required` rejects. Defaults to null, undefined, an empty string, and an empty array. */
+	/**
+	 * What `required` rejects and what reads as not filled. Defaults to null, undefined, an empty
+	 * string, and an array with no values.
+	 */
 	isEmpty?: (value: FieldValue<T>) => boolean;
 	/** Validation every entry of this type gets, before the entry's own `onValidate`. */
 	validate?: (value: FieldValue<T>) => FieldValidationResult;
@@ -290,6 +293,10 @@ export type FormGroup<I extends FormGroupInputs = FormGroupInputs> = {
 	visible?: FormVisibility;
 	/** Additional classes applied to the fieldset. */
 	class?: string;
+	/** Disables every field in the group, as a native disabled fieldset does. */
+	disabled?: boolean;
+	/** Makes every field in the group read-only. */
+	readOnly?: boolean;
 };
 
 export type FormInput = FormRenderableInput | FormGroup;

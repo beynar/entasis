@@ -27,3 +27,18 @@ export const createId = (prefix?: string): string => {
 			: `${Date.now().toString(36)}-${randomSegment()}`;
 	return prefix ? `${prefix}-${id}` : id;
 };
+
+/**
+ * Finds an element by id in the tree `from` lives in: the document, or the shadow root when it
+ * renders inside one (`document.getElementById` cannot see into a shadow tree). Falls back to the
+ * page's document, where a panel portaled out of a shadow root ends up. `from` is any node of
+ * that tree; without one the page's document is searched.
+ */
+export const elementById = (from: Node | null | undefined, id: string): HTMLElement | null => {
+	const root = from?.getRootNode?.();
+	if (root && 'getElementById' in root) {
+		const found = (root as Document | ShadowRoot).getElementById(id);
+		if (found) return found;
+	}
+	return typeof document === 'undefined' ? null : document.getElementById(id);
+};

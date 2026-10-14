@@ -41,7 +41,8 @@
 			value: 'top',
 			options: ['top', 'left']
 		},
-		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false }
 	]);
 </script>
 
@@ -65,6 +66,7 @@
 	density="${controls.value.density}"
 	labelPosition="${controls.value.labelPosition}"
 	disabled={${controls.value.disabled}}
+	readOnly={${controls.value.readOnly}}
 	label="Environment variables"
 	description="Passed to the container at deploy time"
 	bind:value={envVars}
@@ -76,6 +78,7 @@
 				density={controls.value.density}
 				labelPosition={controls.value.labelPosition}
 				disabled={controls.value.disabled}
+				readOnly={controls.value.readOnly}
 				label="Environment variables"
 				description="Passed to the container at deploy time"
 				bind:value={envVars}

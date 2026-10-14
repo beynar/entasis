@@ -13,12 +13,15 @@ import { on } from 'svelte/events';
 import type { FSOParams, FSOProps } from '$lib/transitions/transition.js';
 import type { Theme as SvelteTheme } from 'svelte-themes';
 import { LayerStack } from '$lib/utils/layers.svelte.js';
+import { HoverIntentGroup } from '$lib/utils/hoverIntent.js';
 import type { TooltipOptions } from '../Tooltip/tooltip.props.js';
 import type { ConfirmationHost } from '../Confirmation/confirmation.state.svelte.js';
 import { updateThemeWithTransition, type ThemeTransition } from './themeTransition.js';
 import { ThemeFloatingWindows } from './theme.floatingWindows.js';
 import type { Colors } from '$lib/types/theme.js';
 import { REDUCED_MOTION_QUERY, registerActiveTheme } from '$lib/utils/motion.svelte.js';
+import { registerCspNonce } from '$lib/utils/cspNonce.js';
+import { registerPortalContainer, type PortalContainerSource } from '$lib/attachments/portal.js';
 
 type Events = 'scroll' | 'pointerdown' | 'keydown' | 'keyup';
 type EventPayload = {
@@ -48,11 +51,26 @@ interface ThemeOptions {
 	readonly motionTokens?: DeepPartial<MotionTokens>;
 	/** The `<Theme components>` registry; read by `useComponentTheme`/`useComponentMotion`. */
 	readonly componentThemes?: ComponentThemeRegistry;
+	/** The `<Theme nonce>` value: the CSP nonce of every injected `<script>` and `<style>`. */
+	readonly nonce?: string;
+	/** The `<Theme portalContainer>` value: where portaled panels mount. */
+	readonly portalContainer?: PortalContainerSource;
 }
 
 export class ThemeState extends createBindableStateClass<ThemeOptions>() {
 	tooltip = $state<(TooltipOptions & { ref: HTMLElement }) | null>(null);
-	lastTooltipClosed = $state<number | null>(null);
+	/**
+	 * Hover warm-up shared by tooltips, hover cards and hover-opened popovers: right after one
+	 * of them was open, the next opens without its delay.
+	 */
+	readonly hoverIntent = new HoverIntentGroup();
+	/** @deprecated Read `hoverIntent.lastClosedAt`; the tooltip warm-up now lives there. */
+	get lastTooltipClosed(): number | null {
+		return this.hoverIntent.lastClosedAt;
+	}
+	set lastTooltipClosed(time: number | null) {
+		if (time !== null) this.hoverIntent.markClosed(time);
+	}
 	/** DOM id of the single tooltip surface, so triggers can point `aria-describedby` at it. */
 	tooltipId = $state<string | null>(null);
 	/**
@@ -148,6 +166,8 @@ export class ThemeState extends createBindableStateClass<ThemeOptions>() {
 		this.svelteTheme = svelteTheme;
 		setContext('entasisTheme', this);
 		onDestroy(registerActiveTheme(this));
+		onDestroy(registerCspNonce(() => this.nonce));
+		onDestroy(registerPortalContainer(() => this.portalContainer));
 	}
 
 	resolveTransitionProps = (props?: ResponsiveProps<FSOProps>, defaultTransition?: FSOProps) => {

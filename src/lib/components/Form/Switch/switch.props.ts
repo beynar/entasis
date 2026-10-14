@@ -1,4 +1,4 @@
-import type { InputProps } from '../Field/field.js';
+import type { FieldButtonAttributes, InputProps } from '../Field/field.js';
 import type { SwitchThemeProps } from './switch.theme.js';
 
 export type SwitchProps = InputProps<'switch'> & {
@@ -10,6 +10,11 @@ export type SwitchProps = InputProps<'switch'> & {
 	 * `'true'`.
 	 */
 	inputValue?: string;
+	/**
+	 * Native attributes for the switch control, such as `aria-label`, `title` or `data-*`. An
+	 * `aria-label` names the switch instead of its label.
+	 */
+	inputAttrs?: FieldButtonAttributes;
 	/** Theme overrides for the switch toggle, thumb, input container, and field parts. */
 	theme?: SwitchThemeProps & InputProps<'switch'>['theme'];
 };

@@ -35,13 +35,13 @@ floating-ui virtual element, so the menu appears exactly at the pointer (and fli
 ### Bindable Props
 - **open**: boolean - Open state of the context menu.
 - **defaultOpen**: boolean (default: false) - Initial state when open is not provided.
-- **onOpenChange**: (open: boolean) => void - Called once for each library-requested state change.
+- **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void - Called before each library-requested state change, with \`details.reason\` (\`'trigger-press'\` for the right-click, long-press or keyboard request, \`'item-press'\`, \`'escape-key'\`, \`'outside-press'\`), \`details.event\` and \`details.cancel()\`.
 - **onAfterOpen**: (payload) => void - Called after the open transition finishes.
 - **onAfterClose**: (payload) => void - Called after the close transition finishes.
 
 ### Advanced Props
 - **menu**: Omit<MenuProps, 'items'> - Overrides forwarded to the underlying Menu (header, footer, theme).
-- **popup**: PopupMenu/Popover overrides (position, offset, closeOnEscape, closeOnItemClick, ...). position places the menu relative to the pointer and defaults to 'bottom-start' (a responsive record keeps that default below its first breakpoint); ref is managed internally.
+- **popup**: PopupMenu/Popover overrides (position, offset, closeOnEscape, closeOnItemClick, ...). position places the menu relative to the pointer and defaults to 'bottom-start' (a responsive record keeps that default below its first breakpoint); collisionBoundary defaults to 'layoutViewport', so panning a pinch-zoomed page doesn't drag the menu along (submenus keep the visual viewport); ref is managed internally.
 - **class**: string - Class on the wrapper around the target content.
 
 ## Behavior

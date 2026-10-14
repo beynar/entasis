@@ -100,7 +100,9 @@
 			event.stopPropagation();
 			return;
 		}
+		// The item's own handler runs first; `event.preventDefault()` there skips the selection.
 		entry.item.onclick?.(event);
+		if (event.defaultPrevented) return;
 		activityBar.onSelect?.({ item: entry.item, index: entry.index });
 	}
 </script>

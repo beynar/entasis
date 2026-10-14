@@ -189,6 +189,109 @@ and mirrored as a \`data-entasis-reduce-motion\` attribute on \`html\` for CSS-o
 <Theme reduceMotion>{@render children()}</Theme>
 \`\`\`
 
+## Content Security Policy
+
+\`nonce\` is stamped on every \`<script>\` and \`<style>\` the Theme and the components below it
+inject: the theme and viewport boot scripts, the design-token stylesheet, the \`transitionOnChange={false}\`
+style, and the CDN loaders of PhoneInput, Map and Mermaid (the document print frame and Mermaid's own
+svg \`<style>\` too). Drag-and-drop base styles are rules in the Tailwind plugin CSS, so nothing is
+injected for them. Generate one nonce per request in \`hooks.server.ts\`, send it through \`locals\` to
+\`<Theme nonce>\`, and send the Content-Security-Policy header yourself with that same nonce.
+SvelteKit's \`kit.csp\` cannot be used for this: it generates its own nonce per request, exposes it
+only as \`%sveltekit.nonce%\` in \`app.html\`, and has no option to take yours, so the header would
+carry one nonce while the Theme's tags carry another. Leave \`kit.csp\` unset and put the nonce on
+SvelteKit's own inline tags in \`transformPageChunk\`:
+
+\`\`\`ts
+// doc-fence: skip (needs nonce declared on the app's App.Locals)
+// src/hooks.server.ts
+import type { Handle } from '@sveltejs/kit';
+
+export const handle: Handle = async ({ event, resolve }) => {
+	const nonce = crypto.randomUUID();
+	event.locals.nonce = nonce;
+	const response = await resolve(event, {
+		// Adds the nonce to SvelteKit's inline <script> and <style> tags; tags that already carry one
+		// (the Theme's) are left alone.
+		transformPageChunk: ({ html }) =>
+			html.replace(/<(script|style)(?=[\\s>])(?![^>]*\\snonce=)/g, \`<$1 nonce="\${nonce}"\`)
+	});
+	response.headers.set(
+		'content-security-policy',
+		\`script-src 'self' 'nonce-\${nonce}'; style-src 'self' 'nonce-\${nonce}'; style-src-attr 'unsafe-inline'\`
+	);
+	return response;
+};
+\`\`\`
+
+\`\`\`ts
+// doc-fence: skip (needs nonce declared on the app's App.Locals)
+// src/routes/+layout.server.ts
+import type { LayoutServerLoad } from './$types';
+
+export const load: LayoutServerLoad = ({ locals }) => ({ nonce: locals.nonce });
+\`\`\`
+
+\`\`\`svelte
+<!-- src/routes/+layout.svelte -->
+<script lang="ts">
+	import { Theme } from 'entasis/theme';
+
+	let { data, children } = $props();
+</script>
+
+<Theme nonce={data.nonce}>
+	{@render children()}
+</Theme>
+\`\`\`
+
+Server-rendered \`style\` attributes (\`style:\` directives) are not covered by a nonce: allow them with
+\`style-src-attr 'unsafe-inline'\` (as above). \`ThemeState.nonce\` exposes the value to your own injected code.
+
+## Shadow DOM and portal containers
+
+Dialogs, popovers, menus, tooltips and the floating-window layer mount in \`document.body\`. Inside a
+shadow root they mount in that root so adopted styles keep applying. \`portalContainer\` overrides both:
+an element or shadow root, or a function returning one for a container that is not rendered yet.
+A function that reads \`$state\` (as below) moves the floating-window layer in as soon as the container
+appears; a function over a plain variable is read each time a panel mounts, so the layer, which mounts
+with the Theme, needs the container to exist by then.
+Outside presses and Escape are heard on the document a panel lives in, so a panel rendered into an
+iframe's document dismisses correctly.
+
+\`\`\`svelte
+<script lang="ts">
+	import { Theme } from 'entasis/theme';
+
+	let { children } = $props();
+	let host = $state<HTMLElement>();
+</script>
+
+<div bind:this={host}></div>
+<Theme portalContainer={() => host}>
+	{@render children()}
+</Theme>
+\`\`\`
+
+When several Themes are mounted, the most recently mounted one that sets \`portalContainer\` wins.
+
+## Scroll lock and viewport variables
+
+A dialog or popover locks page scroll with a \`data-entasis-scroll-lock\` attribute on \`<html>\` and one
+rule in the Tailwind plugin CSS (\`overflow: hidden\`); nothing is written to inline styles, so a lock a
+third-party library holds on the same element is neither overwritten nor released early. While
+locked, the hidden scrollbar's room is kept with \`scrollbar-gutter: stable\` (the lock measures the
+page and pads the scrollbar's width instead where the gutter does not hold) unless the page already reserves a gutter, so there is no double gutter. Two variables
+describe the viewport for your own layout:
+
+- \`--entasis-scrollbar-width\`: set on \`<html>\` while locked, the width in px of the scrollbar the
+  lock hides (\`0px\` with overlay scrollbars). Add it to \`position: fixed\` bars:
+  \`padding-inline-end: var(--entasis-scrollbar-width, 0px)\`.
+- \`--keyboard-inset\`: the height in px the on-screen keyboard covers at the bottom of the layout
+  viewport, measured from the visual viewport (\`0px\` without a keyboard, while pinch-zoomed, and in
+  browsers that resize the layout viewport for the keyboard). Pin a bottom bar above the keyboard with
+  \`bottom: var(--keyboard-inset)\`.
+
 ## Build-time boundary
 
 The Tailwind plugin still generates color palettes and registers utility names, variants,

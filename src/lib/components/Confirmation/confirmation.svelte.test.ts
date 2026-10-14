@@ -49,6 +49,29 @@ describe('Confirmation', () => {
 		await fireEvent.click(screen.getByRole('button', { name: 'Keep' }));
 	});
 
+	test("a button's own onclick runs first, and preventDefault keeps the question open", async () => {
+		render(ConfirmationHarness);
+		const onConfirm = vi.fn();
+		const guard = vi.fn((event: MouseEvent) => event.preventDefault());
+		const answer = confirmation({
+			title: 'Delete project',
+			description: 'This cannot be undone.',
+			confirm: { text: 'Delete', onclick: guard },
+			cancel: 'Keep',
+			onConfirm
+		});
+		await screen.findByRole('alertdialog');
+
+		await fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		expect(guard).toHaveBeenCalledOnce();
+		expect(onConfirm).not.toHaveBeenCalled();
+		expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+
+		await fireEvent.click(screen.getByRole('button', { name: 'Keep' }));
+		await expect(answer).resolves.toEqual({ confirmed: false });
+	});
+
 	test('a rejected onConfirm ends loading and keeps the dialog open, so Cancel still answers', async () => {
 		render(ConfirmationHarness);
 		const failure = new Error('Network down');

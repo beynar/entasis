@@ -25,19 +25,23 @@ The Popover component displays floating content positioned relative to a trigger
 - **id**: string - Unique identifier
 
 ### Layout Props
-- **position**: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end' | 'left-start' | 'left-end' | 'right-start' | 'right-end' (default: 'bottom')
-  - Determines where popover appears relative to trigger
+- **position**: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end' | 'left-start' | 'left-end' | 'right-start' | 'right-end' | 'inline-start' | 'inline-end' | 'inline-start-start' | 'inline-start-end' | 'inline-end-start' | 'inline-end-end' (default: 'top'; responsive values allowed)
+  - Determines where popover appears relative to trigger. The panel flips to the opposite side when the preferred one has no room, and shifts back inside the viewport (20px from its edges)
+  - \`inline-start\` / \`inline-end\` are logical sides: left / right in a left-to-right document, right / left in a right-to-left one (the i18n direction context, else the trigger's computed \`direction\`). The \`start\` / \`end\` alignment of \`top\` and \`bottom\` already follows the reading direction
+- **collisionBoundary**: 'visualViewport' | 'layoutViewport' (default: 'visualViewport') - The viewport the panel is shifted back into. The visual viewport is the visible area: it shrinks under an on-screen keyboard and follows pinch-zoom. \`'layoutViewport'\` ignores pinch-zoom so panning a zoomed page doesn't drag the panel along; flipping and \`--available-*\` still use the visual viewport. ContextMenu uses \`'layoutViewport'\`
+- **fallbackAxisSide**: 'start' | 'end' | 'none' (default: 'none') - When the panel fits neither on its side nor the opposite one, also try the perpendicular sides: \`'end'\` tries bottom (or the inline end) first, \`'start'\` top (or the inline start). A panel placed beside its reference (left or right) tries only the side asked for, so it never jumps over the reference's own row and menu. Submenus use \`'end'\`, so a submenu with no room beside its menu opens below its row, sliding back into the viewport if that is still too tight
+- **anchorTo**: 'box' | 'line' (default: 'box') - What the panel anchors to when its trigger wraps across lines (a link in prose): the whole bounding box, or the line the pointer was on when the panel opened, kept while it stays open. A keyboard open takes the first line above the trigger and the last one below it
 - **offset**: number - Distance in pixels from the reference element
-- **fitTrigger**: boolean (default: false) - Whether popover should match the width of the trigger element
+- **fitTrigger**: boolean (default: false) - Whether popover should match the width of the trigger element (the trigger width snapped to the device pixel grid, also published as \`--anchor-width\`)
 - **positionPanel**: ({ panel, reference }) => { x: number; y: number; minWidth?: number } | null - Place the panel yourself instead of floating-ui: return its viewport coordinates (the panel is \`position: fixed\`) and optionally a \`minWidth\` in px that replaces \`fitTrigger\`'s, or \`null\` to fall back to \`position\`. Called when the panel mounts and whenever floating-ui would reposition it. Select uses it to open over its trigger
 - **mobileSheet**: boolean (default: false) - On mobile viewports (<768px), render as a bottom sheet instead of an anchored floating panel
 - **inline**: boolean (default: false) - Render the panel in normal document flow where the component sits instead of portaling to the viewport-fixed layer: no floating-ui positioning, no scroll lock, no outside-press dismissal (Escape still closes it). Same panel classes and motion, and the trigger still toggles it. Wins over \`mobileSheet\`
 - **mobileSheetSizeTransition**: boolean (default: true) - Whether mobile-sheet panels animate intrinsic size changes
 
 ### Event Props
-- **onOpenChange**: (open: boolean) => void - Called once for each library-requested state change
-- **onAfterOpen**: (payload: PopoverState) => void - Called after the open transition finishes
-- **onAfterClose**: (payload: PopoverState) => void - Called after the close transition finishes
+- **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void - Called before each library-requested state change, with \`details.reason\` (\`'trigger-press'\`, \`'trigger-hover'\`, \`'outside-press'\`, \`'escape-key'\`, \`'item-press'\`, \`'trigger-unmount'\`, \`'imperative-action'\`…), \`details.event\`, \`details.trigger\`, \`details.interaction\` and \`details.cancel()\`. Cancelling keeps the popover as it is and leaves the event untouched (a cancelled Escape is not \`defaultPrevented\`). Inside the callback \`open\` still holds the previous state. Types from \`entasis/types\`
+- **onAfterOpen**: (payload: PopoverState) => void - Called once per open after the open transition finishes, right away when none plays (\`defaultOpen\`, \`inline\`)
+- **onAfterClose**: (payload: PopoverState) => void - Called once per close after the close transition finishes
 
 ### Slot Props
 - **children**: Snippet<[PopoverState]> - Popover content
@@ -52,17 +56,19 @@ The Popover component displays floating content positioned relative to a trigger
   - Pass \`false\` to disable trigger (use with external ref)
 
 ### Interaction Props
-- **openOnHover**: boolean (default: false) - Open on mouse hover, after \`delay\`. Works whether the popover started closed or open (\`defaultOpen\`): once closed, hovering the trigger opens it again
+- **openOnHover**: boolean (default: false) - Open on mouse hover, after \`delay\`. Works whether the popover started closed or open (\`defaultOpen\`): once closed, hovering the trigger opens it again. A hover-opened popover does not lock page scroll, and pressing its trigger pins it open instead of closing it. Touch taps and disabled triggers (\`disabled\`, \`aria-disabled="true"\`, \`data-disabled\`) never hover-open it, a pending open needs the pointer still on the trigger when the delay ends, and a trigger that appears under a resting pointer (a menu reopened from the keyboard) waits for the pointer to move. Right after another hover popover, tooltip or hover card was open (within 400 ms), a root popover opens without the delay; submenus keep theirs
 - **openOnClick**: boolean (default: true) - Open on click
 - **delay**: number (default: 100) - Delay in ms before opening on hover; leaving the trigger before it elapses cancels the open, and so does any other open-state change meanwhile (a click that opens and closes it, Escape), so a pending hover never reopens a popover the user just closed
 - **closeOnEscape**: boolean (default: true) - Close on Escape. Only the topmost open layer closes, so Escape inside a nested popover leaves its parent open
-- **closeOnClickOutside**: boolean (default: true) - Close on an outside press. A press dismisses this popover and every layer stacked above it, but never the layer that was pressed
-- **closeOnMouseLeave**: boolean (default: false) - Close when the pointer leaves the hover safe area. The safe area is the trigger, the panel, and a prediction cone toward the panel, so a diagonal move to the panel keeps it open.
+- **closeOnClickOutside**: boolean (default: true) - Close on an outside press. A press dismisses this popover and every layer stacked above it, but never the layer that was pressed. A press that began before the popover opened does not count, and on a touch screen only a tap does: a finger that starts scrolling the page leaves it open
+- **closeOnMouseLeave**: boolean (default: false) - Close a popover that hovering opened when the pointer leaves the hover safe area (\`reason: 'trigger-hover'\`). The safe area is the trigger, the panel, and a prediction cone toward the panel, so a diagonal move to the panel keeps it open. A popover opened by a press, the keyboard or code stays open.
+- **closeDelay**: number (default: 120) - Milliseconds the pointer may spend outside the hover safe area before \`closeOnMouseLeave\` closes the popover; a longer delay forgives a pointer that overshoots on its way to the panel
 - **debugSafeArea**: boolean (default: false) - Show hover safe-area overlays. Trigger/panel rectangles render in blue; the prediction cone toward the panel renders in orange.
 
 ### Focus & ARIA Props
-- **focusOnOpen**: 'first' | 'container' | false (default: false) - Where focus goes when the panel opens: \`'first'\` moves it to an \`[autofocus]\` / \`[data-autofocus]\` target or the first tabbable control, \`'container'\` focuses the panel itself, \`false\` keeps it on the trigger. Focus always returns to the trigger when the popover closes (Escape or outside press)
-- **haspopup**: 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid' | true (default: 'dialog') - Value of \`aria-haspopup\` on the trigger, describing what the panel contains. \`aria-expanded\` and \`aria-controls\` are managed automatically alongside it, for the built-in Button trigger and for a snippet trigger using \`{@attach popover.reference}\`
+- **focusOnOpen**: 'first' | 'container' | false (default: false) - Where focus goes when the panel opens: \`'first'\` moves it to an \`[autofocus]\` / \`[data-autofocus]\` target or the first tabbable control, \`'container'\` focuses the panel itself, \`false\` keeps it on the trigger. When the popover closes with focus inside it, focus returns to the trigger that opened it (or the control pressed inside a wrapper trigger), and after a programmatic open to the element that had focus when it opened
+- **focusOnClose**: boolean | HTMLElement | ((details) => HTMLElement | boolean | void) (default: true) - Where focus goes when the popover closes with focus inside it or after a trigger opened it. \`true\` returns it to the trigger (a visible focus ring after Escape or another keyboard close), else to the most recent element still on the page; \`false\` leaves focus alone; an element receives it; a function gets the change details and returns one of these, or nothing to restore as usual. A close because focus moved on (\`'focus-out'\`) never moves it
+- **haspopup**: 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid' | true (default: 'dialog') - Value of \`aria-haspopup\` on the trigger, describing what the panel contains. \`aria-expanded\` and \`aria-controls\` are managed automatically alongside it, for the built-in Button trigger and for a snippet trigger using \`{@attach popover.reference}\`. A \`'dialog'\` popup renders in a \`<dialog>\`; any other value renders a plain \`<div>\` wrapper, points \`aria-controls\` at the element inside with the matching role (\`role="menu"\` for \`menu\` and \`true\`) and labels that element by the trigger (\`aria-labelledby\`) unless it has an \`aria-label\`
 
 \`\`\`svelte
 <script>
@@ -83,11 +89,44 @@ The Popover component displays floating content positioned relative to a trigger
 - **directedTransition**: boolean (default: true) - Transition direction follows position
 
 ### Behavior Props
-- **lockScroll**: boolean (default: true) - Lock body scroll when open
+- **lockScroll**: boolean (default: true) - Lock page scroll while a root-level popover is open, unless hovering opened it, or a finger did and the panel is more than 20px narrower than the viewport (a touch popover the page can still scroll under stays unlocked). The lock is the \`data-entasis-scroll-lock\` attribute on \`<html>\`; \`--entasis-scrollbar-width\` holds the hidden scrollbar's width for fixed bars
 
 ### Styling Props
 - **class**: string - Additional CSS classes
 - **theme**: ComponentTheme - Custom theme overrides
+
+## Styling hooks
+
+A floating panel is placed before it shows: it stays hidden until its first placement lands, and \`focusOnOpen\` waits for that placement too. Every placement (scroll, resize, a flip, the end of the opening transition, and the visual viewport settling after an on-screen keyboard) updates these hooks.
+
+**Data attributes**
+- \`data-side\` on the panel: the side of the trigger it sits on after flipping: \`top\`, \`right\`, \`bottom\`, \`left\`; \`inline-start\` / \`inline-end\` when a logical side was requested; \`none\` when \`positionPanel\` placed it
+- \`data-align\` on the panel: \`start\`, \`center\` or \`end\` (absent with \`data-side="none"\`)
+- \`data-anchor-hidden\` on the panel: present while the trigger is scrolled out of view; the panel is hidden meanwhile
+- \`data-popup-side\` on the trigger (or the \`ref\` element): the panel's \`data-side\` while it is placed, so a theme can flatten the corner the panel attaches to
+
+**CSS variables** (set on the positioned wrapper, inherited by the panel and its content)
+- \`--available-height\` / \`--available-width\`: the room between the trigger and the viewport edge on the panel's side, minus 20px. Cap a scrolling list with \`max-height: min(240px, var(--available-height))\` so it shrinks instead of covering its trigger
+- \`--anchor-width\` / \`--anchor-height\`: the trigger's size, snapped to the device pixel grid
+- \`--transform-origin\`: the panel corner facing the trigger, mirrored in right-to-left documents
+
+\`\`\`svelte
+<script>
+	import { Popover } from 'entasis/popover';
+</script>
+
+<!-- Square the corner that touches the trigger, whichever side the panel lands on -->
+<Popover
+	position="bottom-start"
+	class="data-[side=bottom]:rounded-t-none data-[side=top]:rounded-b-none"
+	trigger={{ content: 'Open' }}
+>
+	Attached panel
+</Popover>
+
+<!-- Opens on the reading direction's end side: right in English, left in Arabic -->
+<Popover position="inline-end" trigger={{ content: 'Details' }}>Details</Popover>
+\`\`\`
 
 ## Structure
 
@@ -338,6 +377,35 @@ activation:
 </Popover>
 \`\`\`
 
+### Keep it open with onOpenChange
+
+\`\`\`svelte
+<script lang="ts">
+	import { Popover } from 'entasis/popover';
+	import type { OpenChangeDetails } from 'entasis/types';
+
+	let note = $state('');
+	// Runs before the change: an outside press or Escape keeps a popover with an unsaved note.
+	const keepNote = (open: boolean, details: OpenChangeDetails) => {
+		const dismissal = details.reason === 'outside-press' || details.reason === 'escape-key';
+		if (!open && dismissal && note) details.cancel();
+	};
+</script>
+
+<Popover trigger={{ content: 'Add a note' }} focusOnOpen="first" onOpenChange={keepNote}>
+	{#snippet children(popover)}
+		<textarea aria-label="Note" bind:value={note}></textarea>
+		<button
+			type="button"
+			onclick={() => {
+				note = '';
+				popover.close();
+			}}>Discard</button
+		>
+	{/snippet}
+</Popover>
+\`\`\`
+
 ### User Card Popover with External Ref
 
 \`\`\`svelte
@@ -372,27 +440,34 @@ The Popover component uses a \`PopoverState\` instance that is passed to all slo
 - **size**: Size - Current popover size
 - **position**: Placement - Current popover position
 - **offset**: number - Current offset value
-- **open()**: () => void - Method to open the popover
-- **close()**: () => void - Method to close the popover
-- **toggle()**: () => void - Method to toggle the popover
-- **trigger**: attachment that makes any element the trigger (\`{@attach popover.trigger}\`): \`reference\` plus a click toggle (when \`openOnClick\`), and on a non-control \`role="button"\`, \`tabindex="0"\` and Enter/Space activation. The element's own handler wins: when it calls \`open\`, \`close\`, \`toggle\` or \`setOpen\` during the click, the default toggle stands down, so a kept \`onclick={popover.toggle}\` does not toggle twice
+- **placement**: { side, align, anchorHidden } | null - Where the floating panel was last placed (the values of \`data-side\`, \`data-align\` and \`data-anchor-hidden\`); \`null\` until it is placed and once it unmounts
+- **open(details?)**, **close(details?)**, **toggle(details?)** - Request a change through \`onOpenChange\`. Each accepts the DOM event (\`onclick={popover.toggle}\`) or partial details (\`{ reason, event, trigger }\`); called while a trigger press dispatches, the change reports \`reason: 'trigger-press'\` and that trigger, otherwise \`'imperative-action'\`. \`toggle\` on the trigger of a hover-opened popover pins it open; on another trigger of an open popover it moves the panel there
+- **setOpen(open, details?)**: boolean - The same request with an explicit state; returns \`false\` when \`onOpenChange\` cancelled it
+- **openReason**: 'hover' | 'press' | 'keyboard' | 'programmatic' | null - How the open popover was opened (\`programmatic\` covers \`open()\` from code, the \`open\` prop and \`defaultOpen\`)
+- **activeTrigger**: HTMLElement | null - The trigger that opened it: the panel anchors to it and focus returns to it
+- **lifecycle.status**: 'closed' | 'entering' | 'open' | 'exiting' - Where the panel is in its open/close lifecycle
+- **trigger**: attachment that makes any element the trigger (\`{@attach popover.trigger}\`): \`reference\` plus a click toggle (when \`openOnClick\`), and on a non-control \`role="button"\`, \`tabindex="0"\` and Enter/Space activation. The element's own handler runs first: when it calls \`event.preventDefault()\`, or \`open\`, \`close\`, \`toggle\` or \`setOpen\` during the click, the default toggle stands down, so a kept \`onclick={popover.toggle}\` does not toggle twice. Several elements may carry it: the one pressed opens the popover and anchors it
 - **reference**: attachment for a custom trigger element (\`{@attach popover.reference}\`); anchors the panel to it and keeps its \`aria-haspopup\`, \`aria-expanded\`, and \`aria-controls\` in sync, leaving clicks and keyboard to the element
 
 ## Accessibility
 
 - The trigger carries \`aria-haspopup\` (from \`haspopup\`), \`aria-expanded\`, and \`aria-controls\` — automatically for the built-in Button and for a snippet trigger using \`{@attach popover.trigger}\` or \`{@attach popover.reference}\`
-- \`focusOnOpen\` decides where focus lands on open; focus returns to the trigger on close, whether by Escape or an outside press
+- \`focusOnOpen\` decides where focus lands on open; when the popover closes with focus inside it, focus returns to the trigger that opened it (after a programmatic open, to the element that had focus then)
+- Menus, listboxes, trees and grids (\`haspopup\` other than \`'dialog'\`) render a plain wrapper instead of an unnamed \`<dialog>\`; the trigger's \`aria-controls\` points at the role owner, which is labelled by the trigger
 - Non-modal: Tab is not contained and the page is not made inert (use Dialog for that)
+- Tab order for a dialog popup that a trigger opened (not a hover-opened one, a \`ref\` popover, a menu, listbox, tree or grid): the panel is portaled to the end of the page, so Tab on the open trigger moves into the panel's first control, Tab past its last control continues with the control after the trigger and closes the popover (\`reason: 'focus-out'\`), and Shift+Tab on its first control returns to the trigger. When nothing follows the trigger, Tab is left to the browser, so it cannot loop. A visually hidden \`aria-owns\` element after the trigger makes screen readers read the panel straight after it
 - Escape closes only the topmost open layer; an outside press dismisses every layer stacked above the one pressed. Popovers, menus, and dialogs share one layer stack
 - Keyboard navigation support
 
 ## Notes
 
 - Popover is positioned using floating-ui, except with \`inline\`, where the document lays the panel out
-- Removing the trigger closes an open popover (reported through \`onOpenChange(false)\`), and so does a \`ref\` element leaving the document; a trigger re-rendered as a new element keeps it open and re-anchors it. Unmounting the whole Popover reports nothing
-- Automatically adjusts position to stay in viewport
+- Removing the trigger that opened it closes an open popover (reported through \`onOpenChange(false, details)\` with \`reason: 'trigger-unmount'\`), even when another trigger remains, and so does a \`ref\` element leaving the document; a trigger re-rendered as a new element keeps it open and re-anchors it. Unmounting the whole Popover reports nothing
+- \`onAfterOpen\` and \`onAfterClose\` fire exactly once per open and close, also when no transition plays (an \`inline\` or \`defaultOpen\` popover reports its open once mounted)
+- Automatically adjusts position to stay in viewport: flips, then shifts 20px inside the visual viewport, and places again once the visual viewport settles after an on-screen keyboard opens
+- Coordinates are rounded to the device pixel grid, and in right-to-left documents the panel stays beside its trigger with \`start\` alignment on the right
 - Multiple popovers can be stacked
-- Scroll locking prevents background scroll (when enabled)
+- Scroll locking prevents background scroll (when enabled), except for a popover hovering opened and a touch-opened popover narrower than the viewport
 - Transitions animate based on position direction
 
 ## Theme Customization

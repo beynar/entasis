@@ -1,6 +1,7 @@
 import type { Slot, WithSlot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { ImageZoomThemeProps } from './imageZoom.theme.js';
+import type { OpenChangeHandler } from '$lib/utils/openChange.js';
 
 export type ImageZoomPayload = {
 	/** Resolved thumbnail image source. */
@@ -80,11 +81,16 @@ export type ImageZoomProps = WithAttachments<
 			indicatorPosition?: ImageZoomIndicatorPosition;
 			/** Additional CSS classes merged onto the root element. */
 			class?: string;
-			/** Callback fired once when the library requests a new open state. */
-			onOpenChange?: (open: boolean) => void;
-			/** Callback fired after the open animation finishes. */
+			/**
+			 * Called before the zoomed layer opens or closes, with the change details: `reason`
+			 * (`'trigger-press'`, `'escape-key'`, `'close-press'` for a click on the zoomed image,
+			 * `'outside-press'`, `'imperative-action'` for `payload.open()`/`close()` and a scroll
+			 * dismissal), the originating `event` and `cancel()`, which keeps the state as it is.
+			 */
+			onOpenChange?: OpenChangeHandler;
+			/** Callback fired once per open, after the open animation finishes. */
 			onAfterOpen?: (payload: ImageZoomPayload) => void;
-			/** Callback fired after the close animation finishes. */
+			/** Callback fired once per close, after the close animation finishes. */
 			onAfterClose?: (payload: ImageZoomPayload) => void;
 			/** Per-instance theme overrides for image zoom parts. */
 			theme?: ImageZoomThemeProps;

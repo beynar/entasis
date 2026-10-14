@@ -13,6 +13,9 @@
 	import { useForm } from './form.state.svelte.js';
 	import { isRegisteredFormInput } from './form.registry.js';
 	import { formCardSurfaceContextKey, type FormCardSurfaceContext } from './form.context.js';
+	import FieldGroup from '../Field/FieldGroup.svelte';
+	import { provideFieldGroup } from '../Field/field.state.svelte.js';
+	import { presence } from '$lib/utils/stateAttributes.js';
 	let {
 		inputs,
 		onSubmit,
@@ -31,8 +34,19 @@
 		variant = 'plain',
 		layout = 'vertical',
 		actions,
-		theme
+		theme,
+		disabled = false,
+		readOnly = false
 	}: FormProps<I> = $props();
+	// Every field below shares the form's disabled and read-only state.
+	provideFieldGroup({
+		get disabled() {
+			return disabled;
+		},
+		get readOnly() {
+			return readOnly;
+		}
+	});
 	const valueState = createBindableValue(
 		() => value,
 		(nextValue) => {
@@ -133,6 +147,8 @@
 	data-variant={variant}
 	data-color={hasCardSurface ? 'neutral' : undefined}
 	data-layout={layout}
+	data-disabled={presence(disabled)}
+	data-readonly={presence(readOnly)}
 	class={cx(
 		hasCardSurface
 			? cardClasses.root({
@@ -167,6 +183,9 @@
 			variant !== 'plain' && index > 0 ? classes.formItem({ density, variant }) : undefined}
 		{#if input.type === 'group'}
 			<fieldset
+				disabled={input.disabled || undefined}
+				data-disabled={presence(input.disabled)}
+				data-readonly={presence(input.readOnly)}
 				class={classes.formGroup({
 					density,
 					className: [input.class, itemClass].filter(Boolean).join(' ')
@@ -174,19 +193,21 @@
 			>
 				<Slot as="legend" render={input.label} class={classes.formGroupLabel({ size })} />
 				<Slot as="p" render={input.description} class={classes.formGroupDescription({ size })} />
-				<div
-					class={classes.formGroupFields({
-						density,
-						layout,
-						columns: layout === 'horizontal' ? 1 : (input.columns ?? 2)
-					})}
-				>
-					{#each Object.entries<FormRenderableInput>(input.inputs) as [childName, childInput] (childName)}
-						{#if formState.isFieldVisible(childInput, input)}
-							{@render inputSnippet(childName, childInput)}
-						{/if}
-					{/each}
-				</div>
+				<FieldGroup disabled={input.disabled} readOnly={input.readOnly}>
+					<div
+						class={classes.formGroupFields({
+							density,
+							layout,
+							columns: layout === 'horizontal' ? 1 : (input.columns ?? 2)
+						})}
+					>
+						{#each Object.entries<FormRenderableInput>(input.inputs) as [childName, childInput] (childName)}
+							{#if formState.isFieldVisible(childInput, input)}
+								{@render inputSnippet(childName, childInput)}
+							{/if}
+						{/each}
+					</div>
+				</FieldGroup>
 			</fieldset>
 		{:else}
 			{@render inputSnippet(name, input, itemClass)}

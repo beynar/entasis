@@ -20,6 +20,9 @@
 		'name',
 		'required',
 		'disabled',
+		'form',
+		'readOnly',
+		'messages',
 		'size',
 		'density',
 		'labelPosition',
@@ -99,6 +102,12 @@
 		get disabled() {
 			return input.disabled;
 		},
+		get readOnly() {
+			return input.readOnly;
+		},
+		get messages() {
+			return input.messages;
+		},
 		get required() {
 			return input.required;
 		},
@@ -140,6 +149,7 @@
 	class={className}
 	theme={input.theme}
 	fieldAttrs={input.fieldAttrs}
+	form={input.form}
 	header={input.header}
 	label={input.label}
 	actions={input.actions}

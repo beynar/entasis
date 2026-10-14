@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import Field from '../Field/Field.svelte';
-	import { createFieldState } from '../Field/field.state.svelte.js';
+	import { createFieldState, type FieldValidationResult } from '../Field/field.state.svelte.js';
 	import PinInputCells from './PinInputCells.svelte';
 	import type { PinInputProps } from './pinInput.props.js';
 	import { PIN_INPUT_DIGITS_PATTERN, PinInputState } from './pinInput.state.svelte.js';
@@ -21,6 +21,8 @@
 		mask = false,
 		theme,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		onValidate,
 		onValueChange,
@@ -62,6 +64,12 @@
 		set disabled(v: boolean | undefined) {
 			disabled = v;
 		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
+		},
 		get required() {
 			return required;
 		},
@@ -71,9 +79,9 @@
 		set name(v: string | undefined) {
 			name = v;
 		},
-		onValidate: (currentValue) => {
+		onValidate: (currentValue): FieldValidationResult => {
 			if (required && typeof currentValue === 'string' && currentValue.length < resolvedLength()) {
-				return true;
+				return field.messages.incomplete(resolvedLength());
 			}
 			return onValidate?.(currentValue) || false;
 		},

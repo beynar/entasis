@@ -32,6 +32,8 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium webkit
       - run: npm run test:unit -- --run
       - run: npm run check:packed-library
+      # The same consumer with the oldest Svelte the peer range admits (`fromAction` needs 5.32).
+      - run: ENTASIS_CHECK_SVELTE_VERSION=5.32.0 npm run check:packed-library
       - run: npm run check:package-consumer
       - run: npm run check:doc-fences
       - run: pnpm exec publint

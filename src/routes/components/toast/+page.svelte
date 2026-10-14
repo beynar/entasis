@@ -124,14 +124,14 @@
 		'Imperative toast.color() helper API',
 		'Eight color variants, plain or rich',
 		'Six corner and center positions',
-		'Swipe / drag toward the edge to dismiss',
+		'Swipe, drag or flick toward the edge to dismiss',
 		'Stacked layout, hover and background tabs pause timers',
 		'Loading spinner, progress bar & actions'
 	]}
 >
 	<ComponentCard
 		{controls}
-		description="Fire a toast from anywhere with the toast helper. Mount a single <Toaster /> once in your layout. Drag a toast toward its screen edge to dismiss it."
+		description="Fire a toast from anywhere with the toast helper. Mount a single <Toaster /> once in your layout. Drag or flick a toast toward its screen edge to dismiss it."
 		code={`<script>
 	import { Toaster, toast } from 'entasis/toast';
 </scr${'ipt'}>

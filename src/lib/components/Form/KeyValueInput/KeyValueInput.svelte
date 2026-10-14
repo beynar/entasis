@@ -28,6 +28,8 @@
 		i18n,
 		theme,
 		disabled,
+		readOnly,
+		messages,
 		name,
 		onValidate,
 		onValueChange,
@@ -88,6 +90,12 @@
 		set disabled(v: boolean | undefined) {
 			disabled = v;
 		},
+		get readOnly() {
+			return readOnly;
+		},
+		get messages() {
+			return messages;
+		},
 		get required() {
 			return required;
 		},
@@ -126,10 +134,12 @@
 	});
 
 	const atMaxRows = $derived(maxRows !== undefined && rows.length >= maxRows);
+	// Rows keep their own text, so a read-only field locks them rather than refusing edits late.
+	const locked = $derived(field.disabled || field.readOnly);
 
 	// Append a fresh empty row. Never mutates the array in place.
 	const addRow = async () => {
-		if (disabled || atMaxRows) return;
+		if (locked || atMaxRows) return;
 
 		const row = { id: nextId(), key: '', value: '' };
 		rows = [...rows, row];
@@ -139,7 +149,7 @@
 
 	// Remove a row by id. Never mutates the array in place; early-returns when disabled.
 	const removeRow = (rowId: string) => {
-		if (disabled) return;
+		if (locked) return;
 		rows = rows.filter((row) => row.id !== rowId);
 	};
 
@@ -270,8 +280,9 @@
 					bind:value={row.key}
 					{@attach (node) => registerInput(row.id, 'key', node)}
 					placeholder={keyPlaceholder ?? t.keyLabel}
-					{disabled}
-					class={classes.input({ size, disabled })}
+					disabled={field.disabled}
+					readonly={field.readOnly}
+					class={classes.input({ size, disabled: field.disabled })}
 					onkeydown={(event) => handleKeydown(event, row, 'key')}
 				/>
 				<input
@@ -281,15 +292,16 @@
 					bind:value={row.value}
 					{@attach (node) => registerInput(row.id, 'value', node)}
 					placeholder={valuePlaceholder ?? t.valueLabel}
-					{disabled}
-					class={classes.input({ size, disabled })}
+					disabled={field.disabled}
+					readonly={field.readOnly}
+					class={classes.input({ size, disabled: field.disabled })}
 					onkeydown={(event) => handleKeydown(event, row, 'value')}
 				/>
 				<button
 					type="button"
 					aria-label={t.remove(row.key || t.keyLabel)}
-					{disabled}
-					class={classes.removeButton({ size, disabled })}
+					disabled={locked}
+					class={classes.removeButton({ size, disabled: locked })}
 					onclick={() => removeRow(row.id)}
 				>
 					{@render xIcon({ size: 16 })}
@@ -299,8 +311,8 @@
 	</ul>
 	<button
 		type="button"
-		disabled={disabled || atMaxRows}
-		class={classes.addButton({ size, disabled: disabled || atMaxRows })}
+		disabled={locked || atMaxRows}
+		class={classes.addButton({ size, disabled: locked || atMaxRows })}
 		onclick={() => void addRow()}
 	>
 		{@render plusIcon({ size: 16 })}

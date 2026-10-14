@@ -12,8 +12,9 @@
 	import { mergeToastTheme, useToastTheme, type ToastThemeProps } from './toast.theme.js';
 	import type { WithAttachments } from '$lib/types/props.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
-	import { useDrag } from '$lib/utils/useDrag.svelte.js';
-	import { untrack } from 'svelte';
+	import { createPointerDrag } from '$lib/utils/pointerDrag.js';
+	import { createVelocityTracker } from '$lib/utils/swipeVelocity.js';
+	import { composeHandlers } from '$lib/utils/handlers.js';
 
 	let {
 		toast,
@@ -79,9 +80,11 @@
 	// --- Swipe / drag to dismiss ------------------------------------------------
 	// The toast is dragged toward its anchored screen edge: left/right corners swipe
 	// horizontally, center positions swipe vertically. Dragging the other way meets
-	// resistance. Past the threshold it dismisses — the exit transition continues
-	// from the dragged position since the swipe matches the position's outro.
+	// resistance. Past the threshold, or released in a flick toward the edge, it dismisses —
+	// the exit transition continues from the dragged position since the swipe matches the
+	// position's outro.
 	const SWIPE_THRESHOLD = 45; // px past which a release dismisses
+	const FLICK_VELOCITY = 0.4; // px/ms toward the edge at which a shorter release dismisses
 	const isBanner = $derived(
 		toast.opts.position === 'banner-top' || toast.opts.position === 'banner-bottom'
 	);
@@ -99,8 +102,11 @@
 
 	let dragOffset = $state(0);
 	let dragging = $state(false);
-	let dragStartX = 0;
-	let dragStartY = 0;
+	// The click that ends a drag is not a press on the toast (`closeOnClick`). Set when a drag
+	// ends; the click consumes it, and the next press clears one that no click followed.
+	let suppressClick = false;
+	const tracker = createVelocityTracker();
+	const axisPos = (event: PointerEvent) => (swipe.axis === 'x' ? event.clientX : event.clientY);
 
 	// A toast re-added with the id of one still animating out takes this item over. It must
 	// not inherit the swipe that dismissed its predecessor, or it rests off its slot.
@@ -110,33 +116,55 @@
 		dragging = false;
 	});
 
-	const drag = useDrag({
-		get isActive() {
-			return swipeEnabled;
+	// Primary button only; a cancelled touch or a lost capture snaps the toast back. A mouse
+	// released outside the window ends the drag where the button was last held, so it dismisses
+	// or snaps back by the same rule as a normal release.
+	const dragAttachment = createPointerDrag({
+		disabled: () => !swipeEnabled,
+		// The toast holds buttons, not just a handle: the pointer is captured only once the press
+		// becomes a drag, so a press that never travels keeps its click.
+		capture: 'on-activate',
+		// A press that travels mostly across the swipe axis is spent: it never drags the toast.
+		axis: () => swipe.axis,
+		onDown: ({ event }) => {
+			suppressClick = false;
+			tracker.reset();
+			tracker.add(axisPos(event), event.timeStamp);
 		},
-		onDragStart: (e) => {
-			dragStartX = e.clientX;
-			dragStartY = e.clientY;
+		// Attributed to the swipe axis (either way along it): the drag starts.
+		shouldActivate: () => true,
+		onStart: ({ node }) => {
 			dragging = true;
+			// A mouse press that travelled before it became a drag may have begun selecting text.
+			const selection = window.getSelection();
+			if (selection && !selection.isCollapsed && node.contains(selection.anchorNode)) {
+				selection.removeAllRanges();
+			}
 		},
-		onDrag: (e) => {
-			let delta = swipe.axis === 'x' ? e.clientX - dragStartX : e.clientY - dragStartY;
+		onMove: ({ event, deltaX, deltaY }) => {
+			let delta = swipe.axis === 'x' ? deltaX : deltaY;
 			// Rubber-band when dragging away from the dismiss direction.
 			if (delta * swipe.dir < 0) delta /= 4;
 			dragOffset = delta;
+			tracker.add(axisPos(event), event.timeStamp);
 		},
-		onDragEnd: () => {
+		onEnd: ({ event }) => {
 			dragging = false;
-			if (dragOffset * swipe.dir > SWIPE_THRESHOLD) {
+			suppressClick = true;
+			tracker.add(axisPos(event), event.timeStamp);
+			const towardEdge = dragOffset * swipe.dir;
+			const flick = tracker.velocity(event.timeStamp) * swipe.dir > FLICK_VELOCITY;
+			if (towardEdge > SWIPE_THRESHOLD || (towardEdge > 0 && flick)) {
 				toast.remove();
 			} else {
 				dragOffset = 0; // snap back (animated by the CSS transition)
 			}
+		},
+		onCancel: () => {
+			dragging = false;
+			dragOffset = 0;
 		}
 	});
-
-	// Stable attachment; wires pointerdown on the toast when swipe is enabled.
-	const dragReference = (node: HTMLElement) => untrack(() => drag.reference?.(node));
 
 	// Fade the toast as it's dragged toward dismissal.
 	const dragOpacity = $derived(
@@ -149,7 +177,7 @@
 	bind:this={toast.element}
 	bind:clientHeight={toast.height}
 	{...attachments}
-	{@attach dragReference}
+	{@attach dragAttachment}
 	onpointerenter={onPointerEnter}
 	ontransitionend={(e) => {
 		if (e.propertyName === 'translate' && toast.hovered && index === 0) {
@@ -189,7 +217,12 @@
 		(swipe.axis === 'y' ? dragOffset : 0)}px"
 	style:transition={dragging ? 'none' : undefined}
 	style={toast.actualizedPosition[2]}
-	onclick={toast.opts.dismissible && toast.opts.closeOnClick ? () => toast.remove() : null}
+	onclick={toast.opts.dismissible && toast.opts.closeOnClick
+		? () => {
+				if (suppressClick) suppressClick = false;
+				else toast.remove();
+			}
+		: null}
 >
 	{#if icon || toast.loading}
 		<div
@@ -238,12 +271,12 @@
 					size="small"
 					variant="soft"
 					{...buttonProps}
-					onclick={(event) => {
-						onclick?.(event);
+					onclick={composeHandlers(onclick, () => {
 						// A manual dismiss fires onDismiss, never onAutoDismiss — so an Undo
-						// action here cancels the deferred commit just by closing early.
+						// action here cancels the deferred commit just by closing early. The
+						// action's own handler runs first; `event.preventDefault()` keeps the toast.
 						if (dismiss !== false) toast.remove();
-					}}
+					})}
 				>
 					{label}
 				</Button>

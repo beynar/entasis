@@ -570,5 +570,17 @@ export const ja: Messages = {
 	passwordTooShort: (min: string | number) => `パスワードは${min}文字以上で入力してください`,
 	// メーター
 	meter: 'メーター',
-	meterSegment: (index: string | number, count: string | number) => `セグメント ${index}/${count}`
+	meterSegment: (index: string | number, count: string | number) => `セグメント ${index}/${count}`,
+	// フィールドの検証
+	fieldRequired: 'この項目は必須です',
+	fieldMustBeChecked: '続行するにはこのチェックボックスをオンにしてください',
+	fieldMustBeOn: '続行するにはこの設定をオンにしてください',
+	fieldInvalid: '有効な値を入力してください',
+	fieldInvalidEmail: '有効なメールアドレスを入力してください',
+	fieldInvalidUrl: '有効なURLを入力してください',
+	fieldTooShort: (min: string | number) => `${min}文字以上で入力してください`,
+	fieldTooLong: (max: string | number) => `${max}文字以内で入力してください`,
+	fieldRangeUnderflow: (min: string | number) => `${min}以上の値を入力してください`,
+	fieldRangeOverflow: (max: string | number) => `${max}以下の値を入力してください`,
+	fieldIncomplete: (length: string | number) => `${length}文字すべてを入力してください`
 };

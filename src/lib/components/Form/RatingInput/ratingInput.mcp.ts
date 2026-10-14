@@ -21,7 +21,7 @@ Extends all Field component props plus:
 - **value**: number | null (bindable, default null) - Current rating; null (or 0) means "no rating"
 - **max**: number (default: 5) - Number of stars, which is also the maximum value
 - **halfSteps**: boolean (default: false) - When true the value snaps to 0.5 increments (half stars)
-- **readonly**: boolean (default: false) - Displays the value without allowing interaction (aria-readonly=true); still shows the stars
+- **readOnly**: boolean (default: false) - Shows the value without letting the user change it: the stars stay focusable with aria-readonly="true", pointer and keys change nothing, and the value still validates and submits. A read-only Form or FormGroup makes it read-only too. \`readonly\` is a deprecated alias kept for one minor
 - **clearable**: boolean (default: true) - When true, clicking the exact current value clears it back to null
 - **dir**: 'ltr' | 'rtl' - Reading direction override; inherits the ambient direction when omitted
 - **color**: Colors (default: 'warning') - Color of the filled stars (the classic gold/amber star)
@@ -65,7 +65,7 @@ Extends all Field component props plus:
 
 ### Readonly
 \`\`\`svelte
-<RatingInput label="Average" value={4.5} halfSteps readonly />
+<RatingInput label="Average" value={4.5} halfSteps readOnly />
 \`\`\`
 
 ### Disabled
@@ -91,7 +91,7 @@ Value semantics do NOT flip in RTL: Arrow Right always increases the numeric val
 
 ## Accessibility
 
-- The row container carries \`role="slider"\` and is the single focusable element (\`tabindex\` 0 when interactive, -1 when readonly/disabled)
+- The row container carries \`role="slider"\` and is the single focusable element (\`tabindex\` 0 when interactive or read-only, -1 when disabled)
 - ARIA: \`aria-valuemin={0}\`, \`aria-valuemax={max}\`, \`aria-valuenow\`, \`aria-valuetext\`, \`aria-orientation="horizontal"\`, \`aria-readonly\`, \`aria-disabled\`
 - Individual stars are \`aria-hidden\` and not focusable; the pointer selects a value and half-star hits are computed from the pointer position within each star
 - Clicking a star focuses the slider container (native focus fixup), so arrow keys work immediately after a pointer selection and \`focused\` becomes true — same as clicking a text input

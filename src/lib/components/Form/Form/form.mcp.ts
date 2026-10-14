@@ -1,7 +1,7 @@
 export const formDescription = `
 # Form
 
-Form renders configured entasis fields inside a div, owns their state and validation, and submits programmatically. It provides managed Enter-key navigation and submission, but not native form events, browser constraint validation, or FormData behavior.
+Form renders configured entasis fields inside a div, owns their state and validation, and submits programmatically. It provides managed Enter-key navigation and submission, but not native form events, browser constraint validation, or FormData behavior. For a plain <form> (a SvelteKit form action), use the controls directly: each submits its name and value through hidden inputs, follows the form's reset, and accepts a form prop when it sits outside the form.
 
 ## Basic usage
 
@@ -65,6 +65,8 @@ Form renders configured entasis fields inside a div, owns their state and valida
 - **variant**: plain (default), sectioned, or card. All variants consume the shared Card typography. Plain remains transparent without separators. Sectioned stays transparent and adds edge-to-edge separators between the header, visible top-level fields or groups, and footer. Card adds the same separators inside the Card surface and inset; Card header/footer padding applies only to that variant. Separators do not appear between fields inside a group.
 - **layout**: vertical (default) or horizontal. Horizontal keeps one field per row and places labels to the left once each field is at least 32rem wide; fields remain stacked in narrower forms.
 - **actions**: optional array of Button props. Each action's onAction receives the live FormState, so a submit action calls form.submit(). Actions are disabled while the form is submitting; their own loading and disabled props are composed with that protection.
+- **disabled**: disables every field, for example disabled={form.loading} while a submission runs. Disabled fields skip validation. The root carries data-disabled.
+- **readOnly**: makes every field read-only. Values stay focusable, validated and submitted, but users cannot change them. The root carries data-readonly.
 - **class**: additional classes on the root div.
 - **theme**: Form theme overrides for root, header, title, description, group, group label/description/fields, top-level items, custom entries, footer, and actions. Global Card typography and section-rhythm changes flow into all Form variants before Form-specific overrides are composed; Card surface changes apply only to the card variant.
 
@@ -79,10 +81,11 @@ Field wrapper attributes and native control attributes have separate owners. Use
 - **hasError**: true after validation fails; reset after successful validation.
 - **validate()**: returns the validated visible payload, or false.
 - **submit()**: returns a promise of the validated visible payload, or false. Concurrent calls share the active promise.
+- **advanceFrom(field)**: moves on from a registered field as Enter does in a text field: the last navigable field submits, any other validates and focuses the next field when valid. Returns false when the field is hidden, disabled or not part of this form. Controls that own Enter themselves, such as checkboxes and radios, call it from their key handler and fall back to the native form otherwise.
 
 ## Enter-key behavior
 
-On an enabled, editable single-line input, Enter validates the current field. A valid field moves focus to the next visible enabled field, while an invalid field remains focused and displays its errors. Enter on a valid final navigable field calls form.submit(). Multiline editors and controls that already own Enter, such as selects and combobox menus, keep their native component behavior. Modified, repeated, and IME-composition Enter events are ignored.
+On an enabled, editable single-line input, Enter validates the current field. A valid field moves focus to the next visible enabled field, while an invalid field remains focused and displays its errors. Enter on a valid final navigable field calls form.submit(). Multiline editors and controls that already own Enter, such as selects and combobox menus, keep their native component behavior. A control that owns Enter can continue the flow with form.advanceFrom(field). Modified, repeated, and IME-composition Enter events are ignored.
 
 ## Programmatic Dialog forms
 
@@ -185,6 +188,8 @@ type Value = InferFormValue<typeof inputs>;
 // { email: string; phone: string | null }
 \`\`\`
 
+Set disabled on a group to disable every field inside it, as a native disabled fieldset does (the fieldset renders disabled and data-disabled), or readOnly to make them read-only (data-readonly). A field is disabled or read-only when it, its group, or the Form is.
+
 The group key is visual only and never appears in value or submission output. Descendant field names remain top-level, so duplicate names across groups are rejected. Group visibility hides all descendants, preserves field values in the private cache, and makes inferred field keys optional. In a vertical form layout, set columns to 1, 2, 3, or 4 to control the equal-width grid; the count is a container query against the form width (2 columns from 42rem, 3 from 56rem, 4 from 72rem), and groups collapse to one column in narrower forms. Horizontal form layouts ignore columns and always render group entries in one column. A child class may span tracks when an entry needs more room. Groups may contain fields, action rows, and custom snippets; nested groups are intentionally unsupported.
 
 ## Custom value fields
@@ -279,7 +284,7 @@ const result = await ask({
 if (result.submitted) result.value.price; // Money
 \`\`\`
 
-Every Field entry option applies (label, description, required, disabled, size, density, visible, defaultValue, onValidate, onValueChange, slots); any other key goes to the component. required rejects what isEmpty reports empty (by default null, undefined, an empty string, or an empty array); validate runs for every entry of the type, before the entry's own onValidate. The value takes part in bind:value, visibility, validation, submission, and InferFormValue like a built-in input's. An entry whose type is neither built-in nor registered throws when the form reads it.
+Every Field entry option applies (label, description, required, disabled, readOnly, messages, size, density, visible, defaultValue, onValidate, onValueChange, slots); any other key goes to the component. required rejects what isEmpty reports empty (by default null, undefined, an empty string, or an array with no values) with the catalog required message, and isEmpty also decides whether the field reads as filled; validate runs for every entry of the type, before the entry's own onValidate. The value takes part in bind:value, visibility, validation, submission, and InferFormValue like a built-in input's. An entry whose type is neither built-in nor registered throws when the form reads it.
 
 ## Non-value entries
 
@@ -313,14 +318,31 @@ For this configuration, InferFormValue contains name only; status and controls a
 
 ## Validation
 
-Built-in validation uses the field schema and preserves its issue messages. onValidate may return:
+Built-in validation uses the field schema. Every message a user sees comes from the i18n catalog in the active locale, never from the validation library: an empty required field shows one required message (for a checkbox or switch, that it must be on), and email, URL, length, range and incomplete-code failures each have their own message. Override them per entry with messages:
+
+\`\`\`ts
+import type { FormInputs } from 'entasis/form';
+
+export const inputs = {
+	name: { type: 'text', label: 'Name', required: true, messages: { required: 'Enter your name' } },
+	code: {
+		type: 'pin',
+		label: 'Code',
+		length: 6,
+		required: true,
+		messages: { incomplete: (length) => 'Enter the ' + length + '-digit code' }
+	}
+} satisfies FormInputs;
+\`\`\`
+
+onValidate may return:
 
 - false, null, undefined, an empty string, or an empty array for valid input;
-- true for a generic error;
-- a string for one error;
+- true for the catalog's generic invalid message;
+- a string for one error, shown verbatim;
 - a string array for multiple errors.
 
-Validation runs on submission. After a field has an error, it revalidates while edited. Failed submission scrolls to and focuses the first invalid control.
+Validation runs on submission. After a field has an error, it revalidates while edited. Failed submission scrolls to and focuses the first invalid control. Disabled fields, directly or through a disabled group or Form, skip validation; read-only fields still validate.
 
 ## Supported input types
 

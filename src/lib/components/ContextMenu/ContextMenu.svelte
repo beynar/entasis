@@ -5,6 +5,7 @@
 	import type { ContextMenuProps } from './contextMenu.props.js';
 	import type { PopupMenuProps } from '../PopupMenu/popupMenu.props.js';
 	import { useContextMenuTheme } from './contextMenu.theme.js';
+	import { createOpenChangeDetails, type OpenChangeDetails } from '$lib/utils/openChange.js';
 
 	let {
 		items,
@@ -42,24 +43,30 @@
 		return { ...requested, xs: requested.xs ?? 'bottom-start' };
 	});
 
-	function setOpen(nextOpen: boolean) {
+	// Shifted back into the layout viewport, not the visual one, so the menu stays where it
+	// opened while a pinch-zoomed page pans. Submenus keep the default.
+	const collisionBoundary = $derived(popup?.collisionBoundary ?? 'layoutViewport');
+
+	// Also the PopupMenu's `onOpenChange`: its details (reason, event, `cancel()`) pass through.
+	function setOpen(nextOpen: boolean, details: OpenChangeDetails) {
 		if (openState.value === nextOpen) return;
+		onOpenChange?.(nextOpen, details);
+		if (details.isCanceled) return;
 		openState.value = nextOpen;
-		onOpenChange?.(nextOpen);
 	}
 
-	async function openAt(x: number, y: number) {
+	async function openAt(x: number, y: number, event: Event) {
 		// Close first so a second request re-mounts the menu at the new point.
-		setOpen(false);
+		setOpen(false, createOpenChangeDetails({ reason: 'trigger-press', event }));
 		await tick();
 		reference = { getBoundingClientRect: () => new DOMRect(x, y, 0, 0) };
-		setOpen(true);
+		setOpen(true, createOpenChangeDetails({ reason: 'trigger-press', event }));
 	}
 
 	function handleContextMenu(event: MouseEvent) {
 		if (disabled) return;
 		event.preventDefault();
-		void openAt(event.clientX, event.clientY);
+		void openAt(event.clientX, event.clientY, event);
 	}
 
 	// Shift+F10 and the ContextMenu key open the menu anchored to the focused element.
@@ -68,7 +75,7 @@
 		if (event.key !== 'ContextMenu' && !(event.key === 'F10' && event.shiftKey)) return;
 		event.preventDefault();
 		const rect = (event.target as HTMLElement).getBoundingClientRect();
-		void openAt(rect.left + rect.width / 2, rect.bottom);
+		void openAt(rect.left + rect.width / 2, rect.bottom, event);
 	}
 
 	// Touch has no right-click: a 500 ms press opens the menu at the finger.
@@ -83,7 +90,7 @@
 		const { clientX, clientY } = event;
 		pressTimer = setTimeout(() => {
 			pressTimer = null;
-			void openAt(clientX, clientY);
+			void openAt(clientX, clientY, event);
 		}, 500);
 	}
 </script>
@@ -111,5 +118,6 @@
 	{onAfterClose}
 	ref={reference}
 	{position}
+	{collisionBoundary}
 	menu={{ items, ...menu }}
 />

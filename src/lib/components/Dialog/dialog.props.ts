@@ -7,6 +7,8 @@ import type { Sizes } from '$lib/types/theme.js';
 import type { ButtonProps } from '../Button/index.js';
 import type { FSOProps } from '$lib/transitions/transition.js';
 import type { DialogThemeProps } from './dialog.theme.js';
+import type { OpenChangeHandler } from '$lib/utils/openChange.js';
+import type { FocusOnClose } from '$lib/utils/useFocusScope.svelte.js';
 
 export type DialogType =
 	'fullScreen' | 'drawerRight' | 'drawerLeft' | 'drawerBottom' | 'drawerTop' | 'alert' | 'modal';
@@ -27,11 +29,18 @@ export type DialogProps = WithSlot<
 		open?: boolean;
 		/** Initial open state when `open` is not provided. */
 		defaultOpen?: boolean;
-		/** Called once when the library requests an open-state change. */
-		onOpenChange?: (open: boolean) => void;
-		/** Called after the open transition finishes. */
+		/**
+		 * Called before the dialog opens or closes, with the requested state and the change
+		 * details: `reason` (`'trigger-press'`, `'escape-key'`, `'outside-press'`, `'close-press'`,
+		 * `'swipe'`, `'close-watcher'` for the Android Back gesture, `'imperative-action'`…), the
+		 * originating `event`, the `trigger` element, the `interaction` type and `cancel()`.
+		 * Calling `details.cancel()` keeps the dialog as it is (a cancelled swipe snaps back) and
+		 * leaves the event untouched. Inside the callback, `open` still holds the previous state.
+		 */
+		onOpenChange?: OpenChangeHandler;
+		/** Called once per open, after the open transition finishes (right away when none plays). */
 		onAfterOpen?: (payload: DialogState) => void;
-		/** Called after the close transition finishes. */
+		/** Called once per close, after the close transition finishes. */
 		onAfterClose?: (payload: DialogState) => void;
 		/** Content max-width for modal and alert types; supports responsive values. */
 		size?: ResponsiveProps<Sizes>;
@@ -39,20 +48,40 @@ export type DialogProps = WithSlot<
 		scroll?: ResponsiveProps<'inner' | 'outer'>;
 		/** Fly/scale opacity transition overrides for open and close; supports responsive values. */
 		transition?: ResponsiveProps<FSOProps>;
+		/**
+		 * Where focus goes when the dialog closes. By default it returns to the control that
+		 * opened the dialog (with a visible focus ring after Escape or another keyboard close);
+		 * when that control is gone or disabled, to the most recent element that is still on the
+		 * page. `false` leaves focus where it is, an element receives it, and a function is called
+		 * with the change details (`reason`, `interaction`…) and returns one of these, or nothing
+		 * to restore as usual.
+		 * @default true
+		 */
+		focusOnClose?: FocusOnClose;
 		/** Snippet for main dialog body content; receives the dialog state instance. */
 		children?: Snippet<[DialogState]>;
-		/** Snippet or button props that render the control used to open the dialog. */
+		/**
+		 * Snippet or button props that render the control used to open the dialog. The built-in
+		 * button carries `aria-haspopup="dialog"`, `aria-expanded` and `aria-controls`, and its
+		 * `onclick` runs first: calling `event.preventDefault()` there keeps the dialog closed. A
+		 * snippet trigger gets the same contract with `{@attach dialog.trigger}`; focus returns to
+		 * the trigger when the dialog closes.
+		 */
 		trigger?: Snippet<[DialogState]> | (ButtonProps & { content?: string });
 		/** When true, shows a close button and allows Escape to close the dialog. */
 		closable?: boolean;
-		/** When true, clicking outside the dialog panel closes the topmost open dialog. Defaults to
-		 *  `true`, except for an `alert`, which ignores outside presses unless this is set. */
+		/** When true, pressing outside the dialog panel closes the topmost open dialog. Defaults to
+		 *  `true`, except for an `alert`, which ignores outside presses unless this is set. A press
+		 *  that began before the dialog opened does not count. */
 		closeOnClickOutside?: boolean;
-		/** When true, pressing Escape closes the dialog when it is closable and topmost. */
+		/** When true, pressing Escape (and, on Android, the Back gesture) closes the dialog when it
+		 *  is closable and topmost. */
 		closeOnEscape?: boolean;
 		/** Drag the panel toward its edge to dismiss (drawer types only). Defaults to true for drawers.
 		 *  Direction-aware, and never hijacks inner scrolling — a scrollable region that can still
-		 *  scroll along the drag axis keeps the gesture. Opt elements out with `data-no-swipe`. */
+		 *  scroll along the drag axis keeps the gesture, and so does a drag that travels more across
+		 *  the axis than along it. A flick dismisses on release speed alone. Opt elements out with
+		 *  `data-no-swipe`. */
 		swipeToDismiss?: boolean;
 		/** Show the drag thumb bar on swipe-dismissable drawers; set false to hide. Default true. */
 		thumb?: boolean;

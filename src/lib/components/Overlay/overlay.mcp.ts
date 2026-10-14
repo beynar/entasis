@@ -27,9 +27,9 @@ Overlay layers concise content and actions over bounded media or another visual 
 - **showOn**: 'always' | 'hover' | 'focus' (default: 'always') - Reveal condition. Hover also reveals for focus-within so actions remain keyboard accessible.
 - **open**: boolean (default: true) - Enables or hides the overlay while preserving its reveal transition.
 - **defaultOpen**: boolean (default: true) - Initial state when open is not provided.
-- **onOpenChange**: (open: boolean) => void - Reserved for library-requested state changes.
-- **onAfterOpen**: () => void - Called after the open transition finishes.
-- **onAfterClose**: () => void - Called after the close transition finishes.
+- **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void - Reserved for the shared disclosure contract; Overlay has no control of its own that opens or closes it, so it never calls this.
+- **onAfterOpen**: () => void - Called once per open after the reveal animation settles, including for an overlay open at creation.
+- **onAfterClose**: () => void - Called once per close after the hide animation settles.
 - **scrim**: boolean (default: true) - Toggles the dark fill or directional gradient.
 - **size**: 'small' | 'normal' | 'large' (default: 'normal') - Scales padding, gaps, and typography.
 - **actions**: OverlayAction[] - Button props plus a content string, rendered as a wrapping action row.

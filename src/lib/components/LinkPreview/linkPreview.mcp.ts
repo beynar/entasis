@@ -69,7 +69,7 @@ By default, LinkPreview requests \`/api/link-metadata?url=<href>\` when the card
 - **errorLabel**: string - Heading shown when metadata loading fails.
 - **position**: Popover placement - Preferred card placement.
 - **offset**: number - Gap between trigger and card.
-- **delay**: number - Open delay in milliseconds.
+- **delay**: number - Open delay in milliseconds. Skipped right after another preview, hover card, tooltip or hover-opened popover was open, as for HoverCard.
 - **closeDelay**: number - Close delay in milliseconds.
 - **openOnFocus**: boolean - Open when focus enters trigger or card.
 - **openOnClick**: boolean - Toggle card on click before navigation.

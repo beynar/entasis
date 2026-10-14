@@ -181,8 +181,28 @@ export class FormState<I extends FormInputs = FormInputs> {
 		if (currentIndex === -1) return;
 
 		event.preventDefault();
-		const lastFieldIndex = navigableFields.length - 1;
-		if (currentIndex === lastFieldIndex) {
+		this.advance(navigableFields, currentIndex);
+	};
+
+	/**
+	 * Moves on from `field` as Enter does in a text field: the last navigable field submits the
+	 * form; any other field validates and, when valid, hands focus to the next field, or keeps it
+	 * while invalid. Controls that do not reach Form's Enter handling (checkboxes, radios) call it
+	 * from their own Enter key. Returns false when `field` is not a visible, enabled field of this
+	 * form, so the caller can fall back to the native behaviour.
+	 */
+	advanceFrom = <T extends FieldType>(field: FieldState<T>): boolean => {
+		const navigableFields = this.getNavigableFields();
+		const currentIndex = navigableFields.findIndex(
+			(entry) => entry.field === (field as RegisteredField)
+		);
+		if (currentIndex === -1) return false;
+		this.advance(navigableFields, currentIndex);
+		return true;
+	};
+
+	private advance(navigableFields: NavigableField[], currentIndex: number): void {
+		if (currentIndex === navigableFields.length - 1) {
 			void this.submit();
 			return;
 		}
@@ -195,7 +215,7 @@ export class FormState<I extends FormInputs = FormInputs> {
 		}
 
 		navigableFields[currentIndex + 1]?.focusTarget.focus();
-	};
+	}
 
 	isInputVisible(name: string): boolean {
 		return this.getActiveFieldDefinitions().some((field) => field.name === name);

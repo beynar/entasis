@@ -563,5 +563,18 @@ export const zh: Messages = {
 	passwordTooShort: (min: string | number) => `密码至少需要 ${min} 个字符`,
 	// 计量器
 	meter: '计量器',
-	meterSegment: (index: string | number, count: string | number) => `第 ${index} 段，共 ${count} 段`
+	meterSegment: (index: string | number, count: string | number) =>
+		`第 ${index} 段，共 ${count} 段`,
+	// 字段验证
+	fieldRequired: '此字段为必填项',
+	fieldMustBeChecked: '请勾选此框以继续',
+	fieldMustBeOn: '请开启此选项以继续',
+	fieldInvalid: '请输入有效的值',
+	fieldInvalidEmail: '请输入有效的电子邮件地址',
+	fieldInvalidUrl: '请输入有效的网址',
+	fieldTooShort: (min: string | number) => `请至少输入 ${min} 个字符`,
+	fieldTooLong: (max: string | number) => `最多只能输入 ${max} 个字符`,
+	fieldRangeUnderflow: (min: string | number) => `请输入大于或等于 ${min} 的值`,
+	fieldRangeOverflow: (max: string | number) => `请输入小于或等于 ${max} 的值`,
+	fieldIncomplete: (length: string | number) => `请输入全部 ${length} 个字符`
 };

@@ -584,5 +584,19 @@ export const de: Messages = {
 		`Das Passwort muss mindestens ${min} Zeichen lang sein`,
 	// Messanzeige
 	meter: 'Messanzeige',
-	meterSegment: (index: string | number, count: string | number) => `Segment ${index} von ${count}`
+	meterSegment: (index: string | number, count: string | number) => `Segment ${index} von ${count}`,
+	// Feldvalidierung
+	fieldRequired: 'Dieses Feld ist erforderlich',
+	fieldMustBeChecked: 'Aktivieren Sie dieses Kästchen, um fortzufahren',
+	fieldMustBeOn: 'Schalten Sie diese Option ein, um fortzufahren',
+	fieldInvalid: 'Geben Sie einen gültigen Wert ein',
+	fieldInvalidEmail: 'Geben Sie eine gültige E-Mail-Adresse ein',
+	fieldInvalidUrl: 'Geben Sie eine gültige URL ein',
+	fieldTooShort: (min: string | number) => `Geben Sie mindestens ${min} Zeichen ein`,
+	fieldTooLong: (max: string | number) => `Geben Sie höchstens ${max} Zeichen ein`,
+	fieldRangeUnderflow: (min: string | number) =>
+		`Geben Sie einen Wert größer oder gleich ${min} ein`,
+	fieldRangeOverflow: (max: string | number) =>
+		`Geben Sie einen Wert kleiner oder gleich ${max} ein`,
+	fieldIncomplete: (length: string | number) => `Geben Sie alle ${length} Zeichen ein`
 };

@@ -63,6 +63,8 @@ export type DateSelectorProps<Mode extends DateSelectorMode = 'date'> = {
 	disabledDates?: (Date | [Date, Date])[];
 	/** Disables calendar and default-trigger interaction. */
 	disabled?: boolean;
+	/** The calendar opens and browses, but choosing a date or preset is refused. */
+	readOnly?: boolean;
 	/** Accessible label for the calendar. */
 	calendarLabel?: string;
 	/** Stable id for the selector popover. */
