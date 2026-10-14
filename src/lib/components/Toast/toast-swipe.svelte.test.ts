@@ -102,6 +102,14 @@ describe('Toast swipe', () => {
 		expect(toaster().toasts).toHaveLength(1);
 	});
 
+	test('a mouse that lost its button past the threshold ends the drag as a release', async () => {
+		const li = await showToast();
+		await firePointer(li, 'pointerdown', { x: 100, t: 0 });
+		await firePointer(li, 'pointermove', { x: 170, t: 200 });
+		await firePointer(li, 'pointermove', { x: 300, t: 400, buttons: 0 });
+		expect(toaster().toasts).toEqual([]);
+	});
+
 	test('the click that ends a drag is not a press on a closeOnClick toast', async () => {
 		const li = await showToast({ closeOnClick: true });
 		await firePointer(li, 'pointerdown', { x: 100, t: 0 });

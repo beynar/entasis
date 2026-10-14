@@ -137,13 +137,36 @@ describe('usePressAndHold', () => {
 		await fireEvent.pointerLeave(button, { pointerType: 'mouse' });
 		vi.advanceTimersByTime(1000);
 		expect(await value()).toBe(1);
-		await fireEvent.pointerEnter(button, { pointerType: 'mouse' });
+		await fireEvent.pointerEnter(button, { pointerType: 'mouse', buttons: 1 });
 		expect(await value()).toBe(2);
 		vi.advanceTimersByTime(PRESS_AND_HOLD_DELAY + PRESS_AND_HOLD_INTERVAL);
 		expect(await value()).toBe(3);
 		await release();
 		await fireEvent.pointerEnter(button, { pointerType: 'mouse' });
 		expect(await value()).toBe(3);
+	});
+
+	test('coming back onto the button after a lost pointerup ends the press', async () => {
+		const { button, onStop } = await mount();
+		await press(button);
+		await fireEvent.pointerLeave(button, { pointerType: 'mouse' });
+		// The release landed where no pointerup reached the page: re-entering has no button held.
+		await fireEvent.pointerEnter(button, { pointerType: 'mouse', buttons: 0 });
+		vi.advanceTimersByTime(2000);
+		expect(await value()).toBe(1);
+		expect(onStop).toHaveBeenCalledOnce();
+	});
+
+	test('keyboard activation after a touch hold still steps', async () => {
+		const { button } = await mount();
+		await press(button, 'touch');
+		vi.advanceTimersByTime(50);
+		expect(await value()).toBe(1);
+		await release('touch');
+		await fireEvent.click(button, { detail: 1 });
+		expect(await value()).toBe(1);
+		await fireEvent.click(button, { detail: 0 });
+		expect(await value()).toBe(2);
 	});
 
 	test('stop() ends a running hold', async () => {

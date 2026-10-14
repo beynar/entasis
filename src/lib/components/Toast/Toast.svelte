@@ -116,8 +116,9 @@
 		dragging = false;
 	});
 
-	// Primary button only; a cancelled touch, a lost capture or a mouse released outside the
-	// window ends the drag and snaps the toast back.
+	// Primary button only; a cancelled touch or a lost capture snaps the toast back. A mouse
+	// released outside the window ends the drag where the button was last held, so it dismisses
+	// or snaps back by the same rule as a normal release.
 	const dragAttachment = createPointerDrag({
 		disabled: () => !swipeEnabled,
 		// The toast holds buttons, not just a handle: the pointer is captured only once the press

@@ -158,7 +158,14 @@ export const usePressAndHold = (options: PressAndHoldOptions) => {
 		if (pressed && !isTouch(event.pointerType)) stopRepeating();
 	};
 	const resume = (event: PointerEvent) => {
-		if (pressed && !isTouch(event.pointerType) && !isTouch(pointerType)) start(event);
+		if (!pressed || isTouch(event.pointerType) || isTouch(pointerType)) return;
+		// The button came up where no pointerup reached us (outside the window, over an iframe):
+		// coming back onto the button without it held ends the press instead of repeating it.
+		if ((event.buttons & 1) === 0) {
+			release();
+			return;
+		}
+		start(event);
 	};
 
 	$effect(() => {
@@ -199,8 +206,13 @@ export const usePressAndHold = (options: PressAndHoldOptions) => {
 	 */
 	const shouldSkipClick = (event: MouseEvent): boolean => {
 		if (event.defaultPrevented) return true;
-		if (isTouch(pointerType)) return ignoreClick;
-		return event.detail !== 0;
+		// Keyboard and assistive-tech activations always step, whatever pointer pressed last.
+		if (event.detail === 0) return false;
+		if (!isTouch(pointerType)) return true;
+		// The click a touch hold ends with is skipped once; a later one is a tap of its own.
+		const skip = ignoreClick;
+		ignoreClick = false;
+		return skip;
 	};
 
 	return { attachment, shouldSkipClick, stop };
