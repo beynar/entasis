@@ -1,4 +1,6 @@
 <script lang="ts" module>
+	import type { Attachment } from 'svelte/attachments';
+	import { on } from 'svelte/events';
 	// Roles that take aria-required / aria-readonly (ARIA 1.2, plus slider from 1.3, which axe
 	// accepts). Native inputs keep their own `required` and `readonly` attributes instead.
 	const ARIA_REQUIRED_ROLES = new Set([
@@ -94,12 +96,28 @@
 			if (element.getAttribute(name) === value) restoreAttribute(element, name, initial);
 		};
 	};
+
+	/**
+	 * Attachment for a label that is not a native <label> (labelFor={false}): clicking it focuses
+	 * the field's control without activating it, and leaves a text selection alone. A control that
+	 * renders its own label outside Field's label slot (Switch's inline label) attaches it too.
+	 */
+	export const focusFromLabel =
+		(field: { focusControl: () => boolean }): Attachment<HTMLElement> =>
+		(labelNode) =>
+			on(labelNode, 'click', (event) => {
+				if (event.defaultPrevented) return;
+				const target = event.target instanceof Element ? event.target : null;
+				const interactive = target?.closest(INTERACTIVE);
+				if (interactive && interactive !== labelNode && labelNode.contains(interactive)) return;
+				const selection = labelNode.ownerDocument.getSelection();
+				if (selection && !selection.isCollapsed && labelNode.contains(selection.anchorNode)) return;
+				field.focusControl();
+			});
 </script>
 
 <script lang="ts" generics="Type extends FieldType">
 	import { untrack } from 'svelte';
-	import type { Attachment } from 'svelte/attachments';
-	import { on } from 'svelte/events';
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import { presence } from '$lib/utils/stateAttributes.js';
 	import type { FieldType, FieldProps } from './field.js';
@@ -196,18 +214,7 @@
 		};
 	});
 
-	// A label that is not a native <label> (labelFor={false}) still focuses its control when
-	// clicked, without activating it, and leaves a text selection alone.
-	const focusFromLabel: Attachment<HTMLElement> = (labelNode) =>
-		on(labelNode, 'click', (event) => {
-			if (event.defaultPrevented) return;
-			const target = event.target instanceof Element ? event.target : null;
-			const interactive = target?.closest(INTERACTIVE);
-			if (interactive && interactive !== labelNode && labelNode.contains(interactive)) return;
-			const selection = labelNode.ownerDocument.getSelection();
-			if (selection && !selection.isCollapsed && labelNode.contains(selection.anchorNode)) return;
-			field.focusControl();
-		});
+	const labelClick: Attachment<HTMLElement> = (labelNode) => focusFromLabel(field)(labelNode);
 
 	// A press on the container around a text control (its padding, an icon, a chip) focuses the
 	// control instead of blurring it; buttons and other controls inside keep their own behaviour.
@@ -294,7 +301,7 @@
 						disabled: field.disabled
 					})}
 					render={label}
-					{@attach labelFor === false ? focusFromLabel : undefined}
+					{@attach labelFor === false ? labelClick : undefined}
 				/>
 				<Slot class={classes.actions({ density })} render={actions} />
 			</Slot>

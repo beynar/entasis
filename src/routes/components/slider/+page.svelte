@@ -54,7 +54,8 @@
 			value: 'horizontal',
 			options: ['horizontal', 'vertical']
 		},
-		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false }
 	]);
 </script>
 
@@ -80,6 +81,7 @@
 	variant="${controls.value.variant}"
 	orientation="${controls.value.orientation}"
 	disabled={${controls.value.disabled}}
+	readOnly={${controls.value.readOnly}}
 	label="Volume"
 	description="Set the default output level."
 	bind:value={volume}
@@ -95,6 +97,7 @@
 				variant={controls.value.variant}
 				orientation={controls.value.orientation}
 				disabled={controls.value.disabled}
+				readOnly={controls.value.readOnly}
 				label="Volume"
 				description="Set the default output level."
 				bind:value={volume}

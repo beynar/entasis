@@ -2,7 +2,7 @@
 	import { untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import Field from '../Field/Field.svelte';
+	import Field, { focusFromLabel } from '../Field/Field.svelte';
 	import { useFieldTheme } from '../Field/field.theme.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { SwitchProps } from './switch.props.js';
@@ -210,6 +210,7 @@
 				attrs={{ id: field.labelId }}
 				render={label}
 				class={fieldClasses.label({ required: field.required })}
+				{@attach focusFromLabel(field)}
 			/>
 		{/if}
 	{/snippet}

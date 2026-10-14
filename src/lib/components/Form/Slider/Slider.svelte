@@ -245,6 +245,7 @@
 				{marks}
 				{groupLabel}
 				{getThumbLabel}
+				readOnly={field.readOnly}
 				{t}
 			/>
 

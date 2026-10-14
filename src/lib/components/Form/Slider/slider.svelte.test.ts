@@ -249,3 +249,21 @@ describe('Slider right-to-left layout', () => {
 		expect(onValueChange).toHaveBeenLastCalledWith(25);
 	});
 });
+
+describe('Slider read-only', () => {
+	test('every thumb of a range exposes aria-readonly', () => {
+		render(SliderHarness, { props: { mode: 'range', defaultValue: [20, 60], readOnly: true } });
+
+		const thumbs = screen.getAllByRole('slider');
+		expect(thumbs).toHaveLength(2);
+		for (const thumb of thumbs) expect(thumb).toHaveAttribute('aria-readonly', 'true');
+	});
+
+	test('thumbs carry no aria-readonly while the slider is editable', () => {
+		render(SliderHarness, { props: { mode: 'range', defaultValue: [20, 60] } });
+
+		for (const thumb of screen.getAllByRole('slider')) {
+			expect(thumb).not.toHaveAttribute('aria-readonly');
+		}
+	});
+});

@@ -6,6 +6,7 @@
 	let {
 		inputValue,
 		nativeRequired = false,
+		nativeDisabled = false,
 		secondRequired = false,
 		withUnnamed = false,
 		formDefaultValue = false,
@@ -14,6 +15,7 @@
 	}: {
 		inputValue?: string;
 		nativeRequired?: boolean;
+		nativeDisabled?: boolean;
 		secondRequired?: boolean;
 		/** Adds a switch without a name to the native form. */
 		withUnnamed?: boolean;
@@ -31,7 +33,13 @@
 			onNativeSubmit?.(new FormData(event.currentTarget));
 		}}
 	>
-		<Switch name="alerts" label="Alerts" {inputValue} required={nativeRequired} />
+		<Switch
+			name="alerts"
+			label="Alerts"
+			{inputValue}
+			required={nativeRequired}
+			disabled={nativeDisabled}
+		/>
 		{#if secondRequired}
 			<Switch name="updates" label="Updates" required />
 		{/if}
