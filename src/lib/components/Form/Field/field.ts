@@ -144,6 +144,12 @@ export type InputProps<T extends FieldType> = WithSlot<
 		 * FormGroup around the input makes it read-only too.
 		 */
 		readOnly?: boolean;
+		/**
+		 * Id of the native `<form>` the field submits with when it is rendered outside that form,
+		 * like the HTML `form` attribute. The field's native controls and hidden inputs join that
+		 * form, and its reset returns the field to its initial value.
+		 */
+		form?: string;
 		/** Geometry and typography of the field control and label. */
 		size?: Sizes;
 		/** Internal spacing between field regions, labels, and adornments. */

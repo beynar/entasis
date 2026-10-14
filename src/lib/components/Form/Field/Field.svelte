@@ -123,6 +123,7 @@
 	import type { FieldType, FieldProps } from './field.js';
 	import { provideFieldGroup } from './field.state.svelte.js';
 	import { useFieldTheme } from './field.theme.js';
+	import { fieldNativeForm, setFieldFormAttribute } from './fieldNativeForm.svelte.js';
 
 	let {
 		class: className = '',
@@ -145,8 +146,12 @@
 		as = 'div',
 		labelFor = field.id,
 		fieldAttrs,
+		form,
 		...attachments
 	}: FieldProps<Type> = $props();
+
+	// Hidden inputs rendered inside the field read the `form` prop through its controller.
+	untrack(() => setFieldFormAttribute(field, () => form));
 
 	// A fieldset Field is a group, like a FormGroup: a field rendered inside it shares its
 	// disabled and read-only state.
@@ -255,6 +260,7 @@
 	{...fieldAttrs}
 	id="{field.id}-field"
 	{...attachments}
+	{@attach fieldNativeForm(field)}
 >
 	{#if label || actions || header}
 		{#if as === 'fieldset'}

@@ -1,7 +1,7 @@
 export const fieldDescription = `
 # Field
 
-Import Field, createFieldState, and the FieldState type from entasis/field. Field is the shared
+Import Field, FieldHiddenInputs, createFieldState, and the FieldState type from entasis/field. Field is the shared
 validation and accessibility owner used by Entasis form controls. It renders field structure
 around a custom control and does not create another form or validation system.
 
@@ -109,6 +109,52 @@ buttons and other controls inside keep their own behaviour.
 Required role-based controls (checkbox, switch, radiogroup, slider, combobox) receive
 aria-required from Field; native inputs keep their required attribute. Button-rooted controls
 (Checkbox, Switch) accept inputAttrs typed as FieldButtonAttributes.
+
+## Native forms
+
+Every Field control also works inside a plain <form>, such as a SvelteKit form action.
+
+- form: the id of the native form a field submits with when it is rendered outside that form,
+  like the HTML form attribute. Every input prop type accepts it; Field gives it to the field's
+  native controls and hidden inputs.
+- Reset: a native reset of the field's form (a type="reset" button or form.reset()) returns the
+  field to the value it mounted with, clears its errors, and publishes one onValueChange. A reset
+  that another listener cancels changes nothing. Disabled and read-only fields keep their value.
+
+FieldHiddenInputs renders the inputs a custom control submits through, beside the control and
+never inside a button. Pass the field, plus value (a string or number for one input, an array for
+one input per entry, null for none) or checked (one checkbox submitting value, default "on", only
+while checked). name, required, disabled and form default to the field's; a generated field name
+is never submitted. A required, empty field blocks the native submit: the browser's report moves
+to the field's control, which shows the field's own error instead of the browser bubble.
+autocomplete renders the single value as a text input the browser can autofill; the filled text
+is matched against options (by value, then label, then label ignoring case and accents) and
+committed with field.setValue, or handed to onAutofill. Read-only and disabled fields ignore
+autofill.
+
+\`\`\`svelte
+<script lang="ts">
+	import { Field, FieldHiddenInputs, createFieldState } from 'entasis/field';
+
+	const plans = ['free', 'pro'];
+	const field = createFieldState({
+		id: 'plan',
+		type: 'select',
+		name: 'plan',
+		value: 'free',
+		errors: [],
+		focused: false
+	});
+	const nextPlan = () => plans[(plans.indexOf(field.value ?? '') + 1) % plans.length];
+</script>
+
+<Field {field} label="Plan" labelFor={false}>
+	<button type="button" {@attach field.control} onclick={() => field.setValue(nextPlan())}>
+		{field.value}
+	</button>
+	<FieldHiddenInputs {field} value={field.value} />
+</Field>
+\`\`\`
 
 ## Form participation
 

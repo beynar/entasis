@@ -15,6 +15,10 @@
 		type FormStep,
 		type MergedMultiStepFormInputs
 	} from '$lib/components/Form/MultiStepForm/index.js';
+	import CheckboxesInput from '$lib/components/Form/CheckboxesInput/CheckboxesInput.svelte';
+	import Select from '$lib/components/Form/Select/Select.svelte';
+	import Switch from '$lib/components/Form/Switch/Switch.svelte';
+	import TextInput from '$lib/components/Form/TextInput/TextInput.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
 	// Registers the docs' app-defined `money` input type, as an app's root layout would.
 	import './demos/moneyInput.js';
@@ -287,6 +291,7 @@
 	} as const satisfies FormInputs;
 	let pricingValue = $state<LiveFormValue<typeof pricingInputs>>({});
 	let pricingSubmitted = $state<InferFormValue<typeof pricingInputs> | null>(null);
+	let nativeSubmission = $state<string | null>(null);
 	const askedPriceInputs = {
 		price: { type: 'money', label: 'Price', required: true }
 	} as const satisfies FormInputs;
@@ -345,6 +350,7 @@
 		{ label: 'Accessible errors with first-invalid focus', test: 'a11y:form.first-invalid-focus' },
 		'Programmatic submission through FormState',
 		'Managed Enter navigation and submission',
+		'Native <form> submission, reset and form attribute',
 		'Programmatic Dialog forms through Ask',
 		'Plain, sectioned, and card presentations share Card typography and section rhythm',
 		'Responsive vertical and horizontal field layouts',
@@ -691,6 +697,100 @@ const inputs = {
 						null,
 						2
 					)}</pre>
+			</div>
+		</ComponentCard>
+		<ComponentCard
+			title="Native forms"
+			description="Every control also works in a plain <form>, such as a SvelteKit form action: it submits its name and value, a required control blocks the submit and reports through its own error, Reset returns each control to its initial value, and the form prop joins a control placed outside the form."
+			class="!items-start"
+			code={`<form id="newsletter" method="POST">
+	<TextInput name="email" type="email" label="Email" defaultValue="ada@example.com" required />
+	<Select
+		name="frequency"
+		label="Frequency"
+		defaultValue="weekly"
+		items={[
+			{ value: 'daily', label: 'Daily' },
+			{ value: 'weekly', label: 'Weekly' }
+		]}
+	/>
+	<CheckboxesInput
+		name="topics"
+		label="Topics"
+		defaultValue={['product']}
+		items={[
+			{ value: 'product', label: 'Product news' },
+			{ value: 'events', label: 'Events' }
+		]}
+	/>
+	<Switch name="terms" label="Accept the terms" required />
+	<Button type="submit">Subscribe</Button>
+	<Button type="reset" variant="outline">Reset</Button>
+</form>
+
+<!-- Rendered elsewhere on the page, submitted and reset with the form above. -->
+<Switch form="newsletter" name="digest" inputValue="yes" label="Weekly digest" />`}
+		>
+			<div class="grid w-full max-w-xl gap-4">
+				<form
+					id="native-newsletter"
+					class="grid gap-4"
+					data-testid="native-form"
+					onsubmit={(event) => {
+						event.preventDefault();
+						const data = new FormData(event.currentTarget);
+						nativeSubmission = JSON.stringify(
+							[...data.keys()].reduce<Record<string, string | string[]>>((record, key) => {
+								const values = data.getAll(key).map(String);
+								record[key] = values.length > 1 ? values : values[0];
+								return record;
+							}, {})
+						);
+					}}
+				>
+					<TextInput
+						name="email"
+						type="email"
+						label="Email"
+						defaultValue="ada@example.com"
+						required
+					/>
+					<Select
+						name="frequency"
+						label="Frequency"
+						defaultValue="weekly"
+						items={[
+							{ value: 'daily', label: 'Daily' },
+							{ value: 'weekly', label: 'Weekly' }
+						]}
+					/>
+					<CheckboxesInput
+						name="topics"
+						label="Topics"
+						defaultValue={['product']}
+						items={[
+							{ value: 'product', label: 'Product news' },
+							{ value: 'events', label: 'Events' }
+						]}
+					/>
+					<Switch name="terms" label="Accept the terms" required />
+					<div class="flex flex-wrap gap-2">
+						<Button type="submit">Subscribe</Button>
+						<Button type="reset" variant="outline">Reset</Button>
+					</div>
+				</form>
+				<div class="border-neutral-muted rounded-lg border border-dashed p-3">
+					<Switch
+						form="native-newsletter"
+						name="digest"
+						inputValue="yes"
+						label="Weekly digest (outside the form)"
+					/>
+				</div>
+				<pre
+					class="bg-surface-recessed text-neutral overflow-auto rounded-lg p-3 text-xs"
+					data-testid="native-form-submission">FormData: {nativeSubmission ??
+						'nothing submitted yet'}</pre>
 			</div>
 		</ComponentCard>
 	{/snippet}

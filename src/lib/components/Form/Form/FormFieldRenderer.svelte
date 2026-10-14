@@ -20,6 +20,7 @@
 		'name',
 		'required',
 		'disabled',
+		'form',
 		'readOnly',
 		'messages',
 		'size',
@@ -148,6 +149,7 @@
 	class={className}
 	theme={input.theme}
 	fieldAttrs={input.fieldAttrs}
+	form={input.form}
 	header={input.header}
 	label={input.label}
 	actions={input.actions}

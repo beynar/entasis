@@ -1,5 +1,11 @@
 export { default as Field } from './Field.svelte';
 export { default as FieldActionButton } from './FieldActionButton.svelte';
+export { default as FieldHiddenInputs } from './FieldHiddenInputs.svelte';
+export type {
+	FieldHiddenInputOption,
+	FieldHiddenInputValue,
+	FieldHiddenInputsProps
+} from './fieldHiddenInputs.props.js';
 export { createFieldState } from './field.state.svelte.js';
 export { schemas as fieldSchemas } from './schemas.js';
 export type {

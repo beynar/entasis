@@ -1,7 +1,7 @@
 export const formDescription = `
 # Form
 
-Form renders configured entasis fields inside a div, owns their state and validation, and submits programmatically. It provides managed Enter-key navigation and submission, but not native form events, browser constraint validation, or FormData behavior.
+Form renders configured entasis fields inside a div, owns their state and validation, and submits programmatically. It provides managed Enter-key navigation and submission, but not native form events, browser constraint validation, or FormData behavior. For a plain <form> (a SvelteKit form action), use the controls directly: each submits its name and value through hidden inputs, follows the form's reset, and accepts a form prop when it sits outside the form.
 
 ## Basic usage
 
@@ -81,10 +81,11 @@ Field wrapper attributes and native control attributes have separate owners. Use
 - **hasError**: true after validation fails; reset after successful validation.
 - **validate()**: returns the validated visible payload, or false.
 - **submit()**: returns a promise of the validated visible payload, or false. Concurrent calls share the active promise.
+- **advanceFrom(field)**: moves on from a registered field as Enter does in a text field: the last navigable field submits, any other validates and focuses the next field when valid. Returns false when the field is hidden, disabled or not part of this form. Controls that own Enter themselves, such as checkboxes and radios, call it from their key handler and fall back to the native form otherwise.
 
 ## Enter-key behavior
 
-On an enabled, editable single-line input, Enter validates the current field. A valid field moves focus to the next visible enabled field, while an invalid field remains focused and displays its errors. Enter on a valid final navigable field calls form.submit(). Multiline editors and controls that already own Enter, such as selects and combobox menus, keep their native component behavior. Modified, repeated, and IME-composition Enter events are ignored.
+On an enabled, editable single-line input, Enter validates the current field. A valid field moves focus to the next visible enabled field, while an invalid field remains focused and displays its errors. Enter on a valid final navigable field calls form.submit(). Multiline editors and controls that already own Enter, such as selects and combobox menus, keep their native component behavior. A control that owns Enter can continue the flow with form.advanceFrom(field). Modified, repeated, and IME-composition Enter events are ignored.
 
 ## Programmatic Dialog forms
 
