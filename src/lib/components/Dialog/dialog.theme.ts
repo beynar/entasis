@@ -8,10 +8,17 @@ export const defaultDialog = cva({
 		scroll: {
 			inner: 'overflow-hidden',
 			outer: 'overflow-y-auto'
+		},
+		// A non-modal dialog leaves the page behind usable: the full-viewport root lets pointer
+		// events through, and only the panel takes them (see `content`).
+		modal: {
+			true: '',
+			false: 'pointer-events-none'
 		}
 	},
 	defaultVariants: {
-		scroll: 'inner'
+		scroll: 'inner',
+		modal: true
 	}
 });
 
@@ -34,10 +41,18 @@ export const defaultDialogAlign = cva({
 		scroll: {
 			inner: 'h-full',
 			outer: 'min-h-full'
+		},
+		// A bottom sheet with a focused text field makes room for the on-screen keyboard: the
+		// bottom padding grows by `--keyboard-inset` (published on `<html>` by the Theme), which
+		// is 0 where there is no overlapping keyboard.
+		keyboard: {
+			true: 'pb-[calc(var(--drawer-inset)+var(--keyboard-inset,0px))]',
+			false: ''
 		}
 	},
 	defaultVariants: {
-		scroll: 'inner'
+		scroll: 'inner',
+		keyboard: false
 	}
 });
 
@@ -70,10 +85,16 @@ export const defaultDialogContent = cva({
 		scroll: {
 			inner: 'max-h-full overflow-auto overscroll-none',
 			outer: ''
+		},
+		// The panel takes pointer events again inside a non-modal root that lets them through.
+		modal: {
+			true: '',
+			false: 'pointer-events-auto'
 		}
 	},
 	defaultVariants: {
-		scroll: 'inner'
+		scroll: 'inner',
+		modal: true
 	}
 });
 

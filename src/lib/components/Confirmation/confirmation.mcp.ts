@@ -39,7 +39,7 @@ A Promise that resolves to:
 **Notes:**
 - The dialog is a modal \`role="alertdialog"\` named by \`title\` and described by \`description\`, and prevents interaction with the rest of the page until the user responds
 - If \`onConfirm\` is provided, the confirm button shows a loading state while the function executes
-- The dialog cannot be closed by clicking outside or pressing Escape (user must click a button)
+- A press outside the dialog does nothing; Escape (and the Android Back gesture) answers it as Cancel: the promise resolves with \`{ confirmed: false }\` without running \`onConfirm\` or the Cancel button's \`onclick\`. While \`onConfirm\` is running, Escape is ignored like the buttons are. There is no close button, visible or hidden: the two answers are the only controls
 - Requests made before any \`<Confirmation />\` is mounted are queued and served by the first one that mounts
 - With several mounted, the most recently mounted one serves; when it unmounts the previous one takes over again
 - When a \`<Confirmation />\` unmounts, every request the user has not answered resolves as \`{ confirmed: false }\`, so an \`await confirmation()\` never hangs. A request whose \`onConfirm\` is already running (it may be what navigated away) still resolves with \`{ confirmed: true, result }\` when it finishes, or \`{ confirmed: false }\` if it fails

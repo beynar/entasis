@@ -7,6 +7,7 @@ import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import Harness from './dialogSwipeHarness.test.svelte';
+import StackHarness from './dialogStackSwipeHarness.test.svelte';
 import { DIALOG_Z_BASE } from './dialog.state.svelte.js';
 import type { DialogProps } from './dialog.props.js';
 import type { OpenChangeDetails } from '$lib/utils/openChange.js';
@@ -46,14 +47,17 @@ type PointerInit = {
 	axis?: 'x' | 'y';
 };
 
-/** Fires a pointer event positioned along the drawer's dismiss axis (vertical by default). */
+/**
+ * Fires a pointer event positioned along the drawer's dismiss axis (vertical by default). A
+ * finger by default: a mouse or pen drags a drawer only from its handles.
+ */
 const firePointer = async (node: Element, type: string, init: PointerInit = {}) => {
 	const {
 		pos = 0,
 		cross = 0,
 		t = 0,
 		pointerId = POINTER_ID,
-		pointerType = 'mouse',
+		pointerType = 'touch',
 		axis = 'y'
 	} = init;
 	const event = new PointerEvent(type, {
@@ -461,5 +465,318 @@ describe('Dialog drawer swipe-to-dismiss', () => {
 		expect(readout('dragging')).toBe('false');
 		expect(transform()).toBe('');
 		expect(setPointerCapture).not.toHaveBeenCalled();
+	});
+});
+
+describe('Dialog swipe: text selection and pointer type (OV-10)', () => {
+	test('a mouse drag on the body selects text instead of dismissing the drawer', async () => {
+		const onOpenChange = vi.fn();
+		const node = setup({ onOpenChange });
+
+		await firePointer(screen.getByTestId('body'), 'pointerdown', {
+			pos: 0,
+			t: 0,
+			pointerType: 'mouse'
+		});
+		await firePointer(node, 'pointermove', { pos: 200, t: 100, pointerType: 'mouse' });
+		expect(readout('dragging')).toBe('false');
+		expect(setPointerCapture).not.toHaveBeenCalled();
+		await firePointer(node, 'pointerup', { pos: 200, t: 200, pointerType: 'mouse' });
+		expect(onOpenChange).not.toHaveBeenCalled();
+	});
+
+	test('a pen drag on the body does not swipe either', async () => {
+		const node = setup();
+
+		await firePointer(screen.getByTestId('body'), 'pointerdown', {
+			pos: 0,
+			t: 0,
+			pointerType: 'pen'
+		});
+		await firePointer(node, 'pointermove', { pos: 200, t: 100, pointerType: 'pen' });
+		expect(readout('dragging')).toBe('false');
+	});
+
+	test('a mouse drag on the header and on the thumb still dismisses', async () => {
+		const onOpenChange = vi.fn();
+		const node = setup({ title: 'Drawer', onOpenChange });
+		const header = document.querySelector('header[data-drag-handle]');
+		if (!(header instanceof HTMLElement)) throw new Error('drawer header not rendered');
+
+		await firePointer(header, 'pointerdown', { pos: 0, t: 0, pointerType: 'mouse' });
+		await firePointer(node, 'pointermove', { pos: 40, t: 300, pointerType: 'mouse' });
+		expect(readout('dragging')).toBe('true');
+		await firePointer(node, 'pointermove', { pos: PANEL_SIZE * 0.5, t: 900, pointerType: 'mouse' });
+		await firePointer(node, 'pointerup', { pos: PANEL_SIZE * 0.5, t: 1500, pointerType: 'mouse' });
+		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(
+			false,
+			expect.objectContaining({ reason: 'swipe', interaction: 'mouse' })
+		);
+	});
+
+	test('a touch drag with an active text selection in the panel does not dismiss', async () => {
+		const onOpenChange = vi.fn();
+		const node = setup({ onOpenChange });
+		const body = screen.getByTestId('body');
+		window.getSelection()?.selectAllChildren(body);
+		expect(window.getSelection()?.isCollapsed).toBe(false);
+
+		await firePointer(body, 'pointerdown', { pos: 0, t: 0 });
+		await firePointer(node, 'pointermove', { pos: 200, t: 100 });
+		expect(readout('dragging')).toBe('false');
+		await firePointer(node, 'pointerup', { pos: 200, t: 200 });
+		expect(onOpenChange).not.toHaveBeenCalled();
+
+		// Once the selection is gone the same drag swipes.
+		window.getSelection()?.removeAllRanges();
+		await firePointer(body, 'pointerdown', { pos: 0, t: 300 });
+		await firePointer(node, 'pointermove', { pos: 200, t: 400 });
+		expect(readout('dragging')).toBe('true');
+	});
+});
+
+describe('Dialog swipe in right-to-left scrollers (CX-14)', () => {
+	const defineScroller = (scroller: HTMLElement, scrollLeft: number) => {
+		Object.defineProperty(scroller, 'scrollWidth', { configurable: true, value: 300 });
+		Object.defineProperty(scroller, 'clientWidth', { configurable: true, value: 100 });
+		Object.defineProperty(scroller, 'scrollLeft', { configurable: true, value: scrollLeft });
+	};
+
+	test('a right-to-left scroller that can still scroll back keeps a drag toward the right edge', async () => {
+		const node = setup({ type: 'drawerRight' });
+		const scroller = screen.getByTestId('x-scroller');
+		// At its start edge (the right end), scrollLeft is 0 and there is content to the left.
+		defineScroller(scroller, 0);
+
+		await firePointer(scroller, 'pointerdown', { pos: 0, axis: 'x', t: 0 });
+		await firePointer(node, 'pointermove', { pos: 80, axis: 'x', t: 100 });
+		expect(readout('dragging')).toBe('false');
+	});
+
+	test('scrolled to its far (left) end, nothing is left to scroll back and the drag dismisses', async () => {
+		const node = setup({ type: 'drawerRight' });
+		const scroller = screen.getByTestId('x-scroller');
+		defineScroller(scroller, -200);
+
+		await firePointer(scroller, 'pointerdown', { pos: 0, axis: 'x', t: 0 });
+		await firePointer(node, 'pointermove', { pos: 80, axis: 'x', t: 100 });
+		expect(readout('dragging')).toBe('true');
+	});
+});
+
+describe('Dialog stack follows a child swipe (OV-12)', () => {
+	test("the parent's scale and fade track the child's drag progress", async () => {
+		render(StackHarness);
+		await fireEvent.click(await screen.findByRole('button', { name: 'Open child' }));
+		const dialogs = await screen.findAllByRole('dialog');
+		expect(dialogs).toHaveLength(2);
+		const panelOf = (root: HTMLElement) => {
+			const node = root.firstElementChild?.firstElementChild;
+			if (!(node instanceof HTMLElement)) throw new Error('panel not rendered');
+			return node;
+		};
+		const parent = panelOf(dialogs[0]);
+		const child = panelOf(dialogs[1]);
+		for (const name of ['offsetHeight', 'offsetWidth'] as const) {
+			Object.defineProperty(child, name, { configurable: true, value: PANEL_SIZE });
+		}
+		const parentFade = () => parent.querySelector<HTMLElement>(':scope > div')!.style.opacity;
+		// Resting: one level down.
+		expect(parent.style.transform).toContain('scale(0.94)');
+		expect(parentFade()).toBe('0.65');
+
+		await firePointer(child, 'pointerdown', { pos: 0, t: 0 });
+		await firePointer(child, 'pointermove', { pos: PANEL_SIZE * 0.5, t: 600 });
+		expect(child.style.transform).toContain(`translate3d(0px, ${PANEL_SIZE * 0.5}px, 0)`);
+		// Half dismissed: halfway back to full size and opacity.
+		expect(parent.style.transform).toContain('scale(0.97)');
+		expect(Number(parentFade())).toBeCloseTo(0.825, 3);
+		// While the finger drives it, the parent follows without easing.
+		expect(parent.style.transition).toBe('none');
+
+		await firePointer(child, 'pointermove', { pos: 0, t: 1200 });
+		expect(parent.style.transform).toContain('scale(0.94)');
+	});
+});
+
+describe('Dialog snap points (DLG-5)', () => {
+	const AVAILABLE = 800;
+	const clientHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientHeight');
+	beforeAll(() => {
+		// jsdom has no layout: the positioner reports the room the snap points are measured against.
+		Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
+			configurable: true,
+			get: () => AVAILABLE
+		});
+	});
+	afterAll(() => {
+		if (clientHeight) Object.defineProperty(HTMLElement.prototype, 'clientHeight', clientHeight);
+		else Reflect.deleteProperty(HTMLElement.prototype, 'clientHeight');
+	});
+
+	const snapSetup = (props: Partial<DialogProps> = {}) => {
+		const node = setup({ snapPoints: [0.25, 0.5, 1], ...props });
+		return node;
+	};
+	/** Drags the panel by `distance` px along the axis and releases it after `ms`. */
+	const dragBy = async (node: Element, distance: number, ms = 900, from = 0) => {
+		await firePointer(node, 'pointerdown', { pos: from, t: 0 });
+		await firePointer(node, 'pointermove', { pos: from + distance, t: ms });
+		await firePointer(node, 'pointerup', { pos: from + distance, t: ms + 900 });
+		await nextFrame();
+	};
+
+	test('the panel is as tall as the largest point and opens there', async () => {
+		const node = snapSetup();
+		expect(node.style.height).toBe(`${AVAILABLE}px`);
+		expect(readout('snap')).toBe('1');
+		expect(readout('offset')).toBe('0');
+		expect(transform()).toBe('');
+	});
+
+	test('defaultSnapPoint opens the drawer lower, offset by the part of the panel that is hidden', async () => {
+		const node = snapSetup({ defaultSnapPoint: 0.5 });
+		expect(readout('snap')).toBe('0.5');
+		expect(readout('offset')).toBe(`${AVAILABLE * 0.5}`);
+		expect(transform()).toBe(`translate3d(0px, ${AVAILABLE * 0.5}px, 0) scale(1)`);
+		expect(node.style.height).toBe(`${AVAILABLE}px`);
+	});
+
+	test('the body scrolls only at the largest point', async () => {
+		const node = snapSetup({ defaultSnapPoint: 0.5 });
+		expect(node.style.overflowY).toBe('hidden');
+		expect(node.style.touchAction).toBe('none');
+		await dragBy(node, -AVAILABLE * 0.5);
+		expect(readout('snap')).toBe('1');
+		expect(node.style.overflowY).toBe('');
+		expect(node.style.touchAction).toBe('');
+	});
+
+	test('a drag past the middle rests at the next point and reports it', async () => {
+		const onSnapPointChange = vi.fn();
+		const onOpenChange = vi.fn();
+		const node = snapSetup({ onSnapPointChange, onOpenChange });
+
+		// 1 → 0.5 is 400px away; 300px is nearer to it than to staying.
+		await dragBy(node, 300);
+		expect(onSnapPointChange).toHaveBeenCalledExactlyOnceWith(
+			0.5,
+			expect.objectContaining({ reason: 'swipe', event: expect.any(PointerEvent) })
+		);
+		expect(readout('snap')).toBe('0.5');
+		await vi.waitFor(() => expect(readout('offset')).toBe(`${AVAILABLE * 0.5}`));
+		expect(onOpenChange).not.toHaveBeenCalled();
+		expect(document.querySelector('[role="dialog"]')).toBeInTheDocument();
+	});
+
+	test('a short drag returns to where it was without reporting a change', async () => {
+		const onSnapPointChange = vi.fn();
+		const node = snapSetup({ onSnapPointChange });
+		await dragBy(node, 100);
+		expect(onSnapPointChange).not.toHaveBeenCalled();
+		await vi.waitFor(() => expect(readout('offset')).toBe('0'));
+		expect(readout('snap')).toBe('1');
+	});
+
+	test('dragging up from a lower point opens it further', async () => {
+		const node = snapSetup({ defaultSnapPoint: 0.25 });
+		expect(readout('offset')).toBe(`${AVAILABLE * 0.75}`);
+		await dragBy(node, -300);
+		expect(readout('snap')).toBe('0.5');
+	});
+
+	test('at the largest point an upward drag is left to the body, which scrolls', async () => {
+		const node = snapSetup();
+		await firePointer(node, 'pointerdown', { pos: 400, t: 0 });
+		await firePointer(node, 'pointermove', { pos: 300, t: 100 });
+		expect(readout('dragging')).toBe('false');
+	});
+
+	test('a flick carries the drawer on to the next point', async () => {
+		const onSnapPointChange = vi.fn();
+		const node = snapSetup({ onSnapPointChange });
+		// 90px is well short of halfway, but at 4.5px/ms it is carried on to the middle point.
+		await firePointer(node, 'pointerdown', { pos: 0, t: 0 });
+		await firePointer(node, 'pointermove', { pos: 90, t: 20 });
+		await firePointer(node, 'pointerup', { pos: 90, t: 22 });
+		expect(onSnapPointChange).toHaveBeenCalledExactlyOnceWith(0.5, expect.anything());
+	});
+
+	test('dragging below the lowest point dismisses the drawer', async () => {
+		const onOpenChange = vi.fn();
+		const node = snapSetup({ defaultSnapPoint: 0.25, onOpenChange });
+		// The lowest point shows 200px of 800; 130px further down shows 70px, nearer to closed.
+		await dragBy(node, 130);
+		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(
+			false,
+			expect.objectContaining({ reason: 'swipe' })
+		);
+	});
+
+	test('with swipeToDismiss off the lowest point is as far as it goes', async () => {
+		const onOpenChange = vi.fn();
+		const node = snapSetup({ defaultSnapPoint: 0.25, swipeToDismiss: false, onOpenChange });
+		await dragBy(node, 200);
+		expect(onOpenChange).not.toHaveBeenCalled();
+		await vi.waitFor(() => expect(readout('offset')).toBe(`${AVAILABLE * 0.75}`));
+		expect(readout('snap')).toBe('0.25');
+	});
+
+	test('the backdrop fades only for the drag below the lowest point', async () => {
+		const node = snapSetup({ defaultSnapPoint: 0.25 });
+		await firePointer(node, 'pointerdown', { pos: 0, t: 0 });
+		await firePointer(node, 'pointermove', { pos: -200, t: 500 });
+		expect(readout('progress')).toBe('0');
+		await firePointer(node, 'pointermove', { pos: 0, t: 800 });
+		expect(readout('progress')).toBe('0');
+		// 100px below the lowest point's offset of 600, of the 200 left to go.
+		await firePointer(node, 'pointermove', { pos: 100, t: 1100 });
+		expect(readout('progress')).toBe('0.5');
+		expect(backdrop().style.opacity).toBe('0.5');
+	});
+
+	test('onSnapPointChange can cancel: the drawer snaps back and keeps its point', async () => {
+		const onSnapPointChange = vi.fn((_point: number | string, details: OpenChangeDetails) =>
+			details.cancel()
+		);
+		const node = snapSetup({ onSnapPointChange });
+		await dragBy(node, 300);
+		expect(onSnapPointChange).toHaveBeenCalledOnce();
+		expect(readout('snap')).toBe('1');
+		await vi.waitFor(() => expect(readout('offset')).toBe('0'));
+	});
+
+	test('setSnapPoint moves the drawer and reports an imperative change', async () => {
+		const onSnapPointChange = vi.fn();
+		snapSetup({ onSnapPointChange });
+		await fireEvent.click(screen.getByTestId('snap-first'));
+		expect(onSnapPointChange).toHaveBeenCalledExactlyOnceWith(
+			0.25,
+			expect.objectContaining({ reason: 'imperative-action' })
+		);
+		expect(readout('snap')).toBe('0.25');
+		await vi.waitFor(() => expect(readout('offset')).toBe(`${AVAILABLE * 0.75}`));
+	});
+
+	test('points written as lengths resolve against the room the drawer has', async () => {
+		const node = snapSetup({ snapPoints: ['200px', '25rem', 0.9], defaultSnapPoint: '25rem' });
+		expect(node.style.height).toBe(`${AVAILABLE * 0.9}px`);
+		expect(readout('snap')).toBe('25rem');
+		expect(readout('offset')).toBe(`${AVAILABLE * 0.9 - 400}`);
+	});
+
+	test('top drawers snap the other way', async () => {
+		const onSnapPointChange = vi.fn();
+		const node = snapSetup({ type: 'drawerTop', onSnapPointChange });
+		// A top drawer is dismissed upward: dragging up 300px rests at the middle point.
+		await dragBy(node, -300);
+		expect(onSnapPointChange).toHaveBeenCalledExactlyOnceWith(0.5, expect.anything());
+		await vi.waitFor(() => expect(readout('offset')).toBe(`${-AVAILABLE * 0.5}`));
+	});
+
+	test('other drawer types ignore snapPoints', async () => {
+		const node = snapSetup({ type: 'drawerRight' });
+		expect(node.style.height).toBe('');
+		expect(readout('offset')).toBe('0');
 	});
 });

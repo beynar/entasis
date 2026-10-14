@@ -199,12 +199,11 @@ describe('command', () => {
 
 describe('confirmation', () => {
 	test(
-		law('a11y:confirmation.modal', 'ignores Escape and outside presses until a choice is made'),
+		law('a11y:confirmation.modal', 'ignores outside presses until a choice is made'),
 		async () => {
 			mount('confirmation');
 			await fireEvent.click(screen.getByRole('button', { name: 'Ask' }));
 			const dialog = await screen.findByRole('alertdialog');
-			await escape();
 			await pressOutside();
 			expect(dialog).toBeInTheDocument();
 			expect(screen.getByTestId('confirmed')).toHaveTextContent('pending');

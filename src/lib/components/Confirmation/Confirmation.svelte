@@ -9,6 +9,7 @@
 	import { useTheme } from '../Theme/theme.state.svelte.js';
 	import { onMount } from 'svelte';
 	import { composeHandlers } from '$lib/utils/handlers.js';
+	import type { OpenChangeDetails } from '$lib/utils/openChange.js';
 	let { theme }: ConfirmationProps = $props();
 
 	let confirmations = $state<ConfirmationState[]>([]);
@@ -83,6 +84,18 @@
 			confirmation.isOpen = false;
 			confirmation.settle({ confirmed: continued, result });
 		});
+	// Escape (and the Android Back gesture) answers a question as Cancel, unless an action is
+	// running: then the dialog stays, like its buttons, until it finishes. Outside presses never
+	// answer it. The state it ends in is the one `confirmation.settle` reports.
+	const cancelOnEscape =
+		(confirmation: ConfirmationState) => (open: boolean, details: OpenChangeDetails) => {
+			if (open) return;
+			if (confirmation.loading) {
+				details.cancel();
+				return;
+			}
+			confirmation.settle({ confirmed: false });
+		};
 	// A Dialog sizes to its content, so it takes the device decision from JS rather than CSS — and
 	// from the SAME value the Dialog itself used to pick sheet-versus-floating, instead of a second
 	// hand-written `(max-width: 768px)` that can drift out of step with it.
@@ -96,9 +109,9 @@
 		onAfterClose={() => {
 			confirmations = confirmations.filter((a) => a.id !== confirmation.id);
 		}}
-		closable={false}
+		closeButton={false}
 		closeOnClickOutside={false}
-		closeOnEscape={false}
+		onOpenChange={cancelOnEscape(confirmation)}
 		bind:open={confirmation.isOpen}
 		title={confirmation.title}
 		description={confirmation.description}

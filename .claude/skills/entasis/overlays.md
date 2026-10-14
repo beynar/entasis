@@ -49,21 +49,44 @@ Modal/drawer overlay that blocks page interaction.
 
 ### Unique Props
 
-| Prop                  | Type                                                                                                   | Default                              |
-| --------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------ |
-| `type`                | `'modal' \| 'alert' \| 'fullScreen' \| 'drawerRight' \| 'drawerLeft' \| 'drawerBottom' \| 'drawerTop'` | `'modal'`                            |
-| `open`                | `boolean` (bindable)                                                                                   | `false`                              |
-| `closable`            | `boolean`                                                                                              | `true`                               |
-| `focusOnClose`        | `boolean \| HTMLElement \| ((details) => HTMLElement \| boolean \| void)`                              | `true`                               |
-| `closeOnEscape`       | `boolean`                                                                                              | `true`                               |
-| `closeOnClickOutside` | `boolean`                                                                                              | `true` (`false` for `type: 'alert'`) |
-| `transition`          | `TransitionConfig`                                                                                     | -                                    |
+| Prop                  | Type                                                                                                   | Default                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| `type`                | `'modal' \| 'alert' \| 'fullScreen' \| 'drawerRight' \| 'drawerLeft' \| 'drawerBottom' \| 'drawerTop'` | `'modal'`                                                |
+| `open`                | `boolean` (bindable)                                                                                   | `false`                                                  |
+| `closable`            | `boolean`                                                                                              | `true`                                                   |
+| `focusOnClose`        | `boolean \| HTMLElement \| ((details) => HTMLElement \| boolean \| void)`                              | `true`                                                   |
+| `closeOnEscape`       | `boolean`                                                                                              | `true`                                                   |
+| `closeOnClickOutside` | `boolean`                                                                                              | `true` (`false` for `type: 'alert'` and `modal={false}`) |
+| `modal`               | `boolean`                                                                                              | `true`                                                   |
+| `closeButton`         | `Snippet \| false`                                                                                     | the default button                                       |
+| `snapPoints`          | `(number \| string)[]` (bottom and top drawers)                                                        | -                                                        |
+| `snapPoint`           | `number \| string` (bindable), `defaultSnapPoint` sets where it opens                                  | the largest point                                        |
+| `onSnapPointChange`   | `(snapPoint, details) => void`; `details.cancel()` keeps the current point                             | -                                                        |
+| `transition`          | `TransitionConfig`                                                                                     | -                                                        |
 
 `type` accepts a responsive record such as `{ xs: 'drawerBottom', md: 'modal' }` (nearest defined key at or below the active breakpoint wins); a `modal` collapses into a bottom sheet on mobile by default, and drawers can be dragged toward their edge to dismiss. `aria-labelledby` / `aria-describedby` link `title` and `description`; focus is restored to the opener before `onAfterClose`.
 
 `type="alert"` is for an interruption that needs an answer: it renders `role="alertdialog"` and
 ignores outside presses unless `closeOnClickOutside` is set explicitly; Escape still closes it
 (turn that off with `closeOnEscape={false}`).
+
+`modal={false}` leaves the page usable: no `inert` page, scroll lock, backdrop or Tab containment,
+and outside presses do not dismiss it; Escape and the close button still do. Every way out (Escape,
+an outside press, the close button, a swipe, Android Back) goes through `onOpenChange` first, so
+`details.cancel()` can hold any of them back (ask before discarding a draft); a cancelled swipe
+snaps back. The close button is named `Close`; with `closeButton={false}` (or a snippet that renders
+nothing, as the Popover mobile sheet passes) a closable dialog keeps a visually hidden `Close`
+button for screen readers (never for an `alert`). A mouse or pen drags a drawer only from its
+thumb and header, a finger from anywhere unless text is selected, and a dialog above another keeps
+the one beneath moving with its swipe.
+
+`snapPoints` (fractions of the available height such as `[0.3, 0.6, 1]`, or CSS lengths like
+`'148px'`, `'20rem'`, `'40%'`, `'50vh'`) let a bottom or top drawer, or a modal collapsed into a
+mobile sheet, rest at several heights: drag it between them, a flick moves it to the next, dragging
+below the lowest dismisses it, and its body scrolls only at the largest. While a modal dialog is
+open `<html>` carries `data-dialog-open` and `--dialog-depth` so a page can scale back behind a
+sheet; in a bottom sheet a focused text field makes room for the on-screen keyboard
+(`--keyboard-inset`).
 
 ### Slots
 
@@ -81,7 +104,8 @@ ignores outside presses unless `closeOnClickOutside` is set explicitly; Escape s
 
 ### DialogState (passed to snippets)
 
-- `isOpen`, `id`, `type`, `size`, `open(details?)`, `close(details?)`, `setOpen(open, details?)`,
+- `isOpen`, `id`, `type`, `size`, `modal`, `open(details?)`, `close(details?)`,
+  `setOpen(open, details?)`, `setSnapPoint(point, details?)`, `currentSnapPoint`,
   `trigger` and `reference` (attachments), `lifecycle.status`
 
 ### Theme Parts
@@ -388,7 +412,7 @@ const { confirmed, result } = await confirmation({
 | `cancel`      | `string \| { text, ...ButtonProps }` | yes      |
 | `onConfirm`   | `() => Promise<R>`                   | no       |
 
-**Note:** Cannot be dismissed via Escape or click-outside. Confirm button shows loading during `onConfirm` execution. If `onConfirm` throws or rejects, loading ends and the dialog stays open so the user can retry or cancel.
+**Note:** A press outside does nothing; Escape answers it as Cancel (`{ confirmed: false }`) unless `onConfirm` is running. Confirm button shows loading during `onConfirm` execution. If `onConfirm` throws or rejects, loading ends and the dialog stays open so the user can retry or cancel.
 
 `<Confirmation />` registers itself as the host on the surrounding `<Theme>`. A `confirmation()`
 call made before that host mounts is queued rather than thrown away, and resolves as soon as the
