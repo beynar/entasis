@@ -16,6 +16,7 @@ import {
 	claimPopupSide,
 	createPanelPositioner,
 	directedMotion,
+	nearestLine,
 	panelMiddleware,
 	releasePanelPosition,
 	reportedSide,
@@ -72,6 +73,19 @@ const observedUpdate = () => autoUpdate.mock.calls.at(-1)![2];
 const middlewareNames = (options: PositionOptions) => options.middleware.map(({ name }) => name);
 const middlewareNamed = (options: PositionOptions, name: string) =>
 	options.middleware.find((middleware) => middleware.name === name)!;
+/** Two wrapped lines of an element: the top half across, then the bottom half's left half. */
+const wrapLines = (element: Element) => {
+	element.getClientRects = () => {
+		const box = element.getBoundingClientRect();
+		return [
+			new DOMRect(box.x, box.y, box.width, box.height / 2),
+			new DOMRect(box.x, box.y + box.height / 2, box.width / 2, box.height / 2)
+		] as unknown as DOMRectList;
+	};
+};
+/** The reference of the last placement: the line box a line-anchored placement chose. */
+const lastReferenceRect = () =>
+	(computePosition.mock.calls.at(-1)![0] as VirtualElement).getBoundingClientRect();
 const setDevicePixelRatio = (ratio: number) =>
 	Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: ratio });
 
@@ -163,19 +177,27 @@ describe('panel middleware', () => {
 		expect(middleware[1].options.fallbackAxisSideDirection).toBe('end');
 	});
 
-	test('anchoring to a line puts inline() first, with the frozen point or none', () => {
+	test('anchoring to a line without a point puts inline() first; with a point the line is chosen outside it', () => {
 		const atPoint = panelMiddleware({ line: { x: 40, y: 60 } }) as unknown as MiddlewareLike[];
-		expect(atPoint.map(({ name }) => name)).toEqual([
-			'inline',
-			'offset',
-			'flip',
-			'size',
-			'shift',
-			'hide'
-		]);
-		expect(atPoint[0].options).toEqual({ x: 40, y: 60 });
+		expect(atPoint.map(({ name }) => name)).toEqual(['offset', 'flip', 'size', 'shift', 'hide']);
 		const noPoint = panelMiddleware({ line: null }) as unknown as MiddlewareLike[];
 		expect(noPoint[0]).toMatchObject({ name: 'inline', options: {} });
+	});
+
+	test('nearestLine picks the line holding the point, else the closest, even when lines overlap', () => {
+		// The wrapped link of the docs: line 1 on the right, line 2 under it, overlapping in x.
+		const first = new DOMRect(719, 400, 139, 24);
+		const second = new DOMRect(656, 424, 78, 24);
+		expect(nearestLine([first, second], { x: 760, y: 410 })).toBe(first);
+		expect(nearestLine([first, second], { x: 700, y: 436 })).toBe(second);
+		// On the overlapping columns the vertical position decides.
+		expect(nearestLine([first, second], { x: 725, y: 405 })).toBe(first);
+		expect(nearestLine([first, second], { x: 725, y: 440 })).toBe(second);
+		// Outside every line: the closest one.
+		expect(nearestLine([first, second], { x: 300, y: 436 })).toBe(second);
+		expect(nearestLine([first, second], { x: 900, y: 380 })).toBe(first);
+		expect(nearestLine([new DOMRect(0, 0, 0, 0)], { x: 0, y: 0 })).toBeNull();
+		expect(nearestLine([], { x: 0, y: 0 })).toBeNull();
 	});
 
 	test('size writes the available space and the reference size snapped to device pixels', () => {
@@ -500,14 +522,25 @@ describe('panel positioner: place', () => {
 		expect(onPlace).toHaveBeenCalledWith(placed(panel, 'bottom-start'));
 	});
 
-	test('anchoring to a line passes the point, or none, to inline()', async () => {
+	test('anchoring to a line places against the line holding the point, or lets inline() pick', async () => {
 		let point: { x: number; y: number } | null = { x: 30, y: 44 };
-		const { panel, positioner } = setup({ anchorTo: () => 'line', anchorPoint: () => point });
+		const { reference, panel, positioner } = setup({
+			anchorTo: () => 'line',
+			anchorPoint: () => point
+		});
+		// Two lines that overlap horizontally, which inline() alone resolves to a single box.
+		reference.getClientRects = () =>
+			[new DOMRect(20, 30, 100, 20), new DOMRect(10, 50, 80, 20)] as unknown as DOMRectList;
 		await positioner.place(panel);
-		expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({ x: 30, y: 44 });
+		expect(middlewareNames(lastOptions())).not.toContain('inline');
+		expect(lastReferenceRect()).toMatchObject({ x: 20, y: 30 });
+		point = { x: 30, y: 60 };
+		await positioner.place(panel);
+		expect(lastReferenceRect()).toMatchObject({ x: 10, y: 50 });
 		point = null;
 		await positioner.place(panel);
 		expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({});
+		expect(computePosition.mock.calls.at(-1)![0]).toBe(reference);
 	});
 
 	test('a reference without client rects anchors to its box even with anchorTo line', async () => {
@@ -755,26 +788,28 @@ describe('Popover placement through the positioner', () => {
 		const { component } = render(PopoverPositionHarness, {
 			props: { open: false, anchorTo: 'line' }
 		});
+		mockRect(trigger(), { x: 10, y: 40, width: 300, height: 40 });
+		wrapLines(trigger());
 		await fireEvent.pointerEnter(trigger(), { clientX: 30, clientY: 44 });
 		await fireEvent.pointerMove(trigger(), { clientX: 32, clientY: 46 });
 		component.update({ open: true });
 		await wrapper();
-		expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({ x: 32, y: 46 });
+		expect(lastReferenceRect()).toMatchObject({ y: 40, width: 300 });
 
 		// Moving to the other line while open doesn't re-anchor.
 		await settle();
 		await fireEvent.pointerMove(trigger(), { clientX: 200, clientY: 64 });
 		observedUpdate()();
 		await waitFor(() => expect(computePosition.mock.calls.length).toBeGreaterThan(1));
-		expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({ x: 32, y: 46 });
+		expect(lastReferenceRect()).toMatchObject({ y: 40, width: 300 });
 
 		// Reopening does.
 		component.update({ open: false });
 		await waitFor(() => expect(screen.queryByText('Inside popover')).toBeNull());
-		await fireEvent.pointerMove(trigger(), { clientX: 200, clientY: 64 });
+		await fireEvent.pointerMove(trigger(), { clientX: 100, clientY: 64 });
 		component.update({ open: true });
 		await wrapper();
-		expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({ x: 200, y: 64 });
+		expect(lastReferenceRect()).toMatchObject({ y: 60, width: 150 });
 	});
 
 	test('anchorTo line keeps its line when the reference scrolls while the popover is open', async () => {
@@ -782,40 +817,43 @@ describe('Popover placement through the positioner', () => {
 			props: { open: false, anchorTo: 'line' }
 		});
 		mockRect(trigger(), { x: 100, y: 200, width: 120, height: 40 });
+		wrapLines(trigger());
 		await fireEvent.pointerMove(trigger(), { clientX: 130, clientY: 210 });
 		component.update({ open: true });
 		await wrapper();
-		expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({ x: 130, y: 210 });
+		expect(lastReferenceRect()).toMatchObject({ y: 200, width: 120 });
 
 		// The page scrolls by 30px: the point scrolls with the reference.
 		await settle();
 		mockRect(trigger(), { x: 100, y: 170, width: 120, height: 40 });
 		observedUpdate()();
-		await waitFor(() =>
-			expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({ x: 130, y: 180 })
-		);
+		await waitFor(() => expect(lastReferenceRect()).toMatchObject({ y: 170, width: 120 }));
 	});
 
 	test('anchorTo line keeps the point of a tap, whose pointer leaves before the click opens', async () => {
 		const { component } = render(PopoverPositionHarness, {
 			props: { open: false, anchorTo: 'line' }
 		});
+		mockRect(trigger(), { x: 10, y: 40, width: 300, height: 40 });
+		wrapLines(trigger());
 		await fireEvent.pointerDown(trigger(), { pointerType: 'touch', clientX: 30, clientY: 44 });
 		await fireEvent.pointerUp(trigger(), { pointerType: 'touch', clientX: 30, clientY: 44 });
 		await fireEvent.pointerLeave(trigger(), { pointerType: 'touch', clientX: 30, clientY: 44 });
 		component.update({ open: true });
 		await wrapper();
-		expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({ x: 30, y: 44 });
+		expect(lastReferenceRect()).toMatchObject({ y: 40, width: 300 });
 	});
 
 	test('anchorTo line forgets the point after the popover closes and on a keyboard open', async () => {
 		const { component } = render(PopoverPositionHarness, {
 			props: { open: false, anchorTo: 'line' }
 		});
+		mockRect(trigger(), { x: 10, y: 40, width: 300, height: 40 });
+		wrapLines(trigger());
 		await fireEvent.pointerMove(trigger(), { clientX: 30, clientY: 44 });
 		component.update({ open: true });
 		await wrapper();
-		expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({ x: 30, y: 44 });
+		expect(lastReferenceRect()).toMatchObject({ y: 40, width: 300 });
 
 		// The pointer never left (a hover open); the popover closes and opens again from the keyboard.
 		await settle();

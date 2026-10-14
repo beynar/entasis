@@ -243,6 +243,42 @@ test('anchorTo line places the panel against the wrapped line that holds the poi
 	expect(panel.getBoundingClientRect().left).toBeCloseTo(first.left, 0);
 });
 
+test('anchorTo line follows the pointer even when the wrapped lines overlap horizontally', async () => {
+	const paragraph = document.createElement('p');
+	Object.assign(paragraph.style, {
+		position: 'fixed',
+		top: '200px',
+		left: '100px',
+		width: '22ch',
+		margin: '0',
+		font: '16px/20px monospace'
+	});
+	const link = document.createElement('a');
+	link.href = '#';
+	// "xxxxx " leads, so line 1 of the link spans columns 6-21 and line 2 columns 0-12: they overlap.
+	link.textContent = 'aaaaaaaaaaaaaaa bbbbbbbbbbbb';
+	paragraph.append('xxxxx ', link);
+	document.body.append(paragraph);
+	const [first, last] = Array.from(link.getClientRects());
+	expect(last.top).toBeGreaterThan(first.top);
+	expect(last.right).toBeGreaterThan(first.left);
+
+	const panel = panelBox();
+	let point = { x: first.left + 4, y: first.top + first.height / 2 };
+	const { place } = positioner(link, 'bottom-start', {
+		anchorTo: () => 'line',
+		anchorPoint: () => point
+	});
+	await place(panel);
+	expect(panel.getBoundingClientRect().top).toBeCloseTo(first.bottom + 4, 0);
+	expect(panel.getBoundingClientRect().left).toBeCloseTo(first.left, 0);
+
+	point = { x: last.left + 4, y: last.top + last.height / 2 };
+	await place(panel);
+	expect(panel.getBoundingClientRect().top).toBeCloseTo(last.bottom + 4, 0);
+	expect(panel.getBoundingClientRect().left).toBeCloseTo(last.left, 0);
+});
+
 test('a list with no room for its full height shrinks to the room below its input instead of covering it', async () => {
 	await page.viewport(800, 320);
 	render(PopoverCapHarness, { props: { top: 140 } });

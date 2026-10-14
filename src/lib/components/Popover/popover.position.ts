@@ -16,6 +16,7 @@ import {
 	shift,
 	size,
 	type Alignment,
+	type ClientRectObject,
 	type Placement,
 	type Side,
 	type Strategy,
@@ -169,15 +170,51 @@ export interface PanelMiddlewareOptions {
 	/** The perpendicular sides `flip` falls back to when neither side of the axis fits. */
 	fallbackAxisSide?: PopoverFallbackAxisSide;
 	/**
-	 * Anchor to the line of a wrapped reference that holds this point (viewport coordinates);
-	 * `null` lets floating-ui pick the line from the side. Omitted anchors to the whole box.
+	 * Anchor to the line of a wrapped reference nearest this point (viewport coordinates);
+	 * `null` lets floating-ui's `inline()` pick the first or last line from the side. Omitted
+	 * anchors to the whole box.
 	 */
 	line?: { x: number; y: number } | null;
 }
 
+/** The line box of a wrapped reference nearest a point: the one holding it, else the closest. */
+export const nearestLine = <Rect extends ClientRectObject>(
+	rects: Iterable<Rect>,
+	point: { x: number; y: number }
+): Rect | null => {
+	let nearest: Rect | null = null;
+	let nearestDistance = Infinity;
+	for (const rect of rects) {
+		if (!rect.width && !rect.height) continue;
+		const dx = Math.max(rect.left - point.x, 0, point.x - rect.right);
+		const dy = Math.max(rect.top - point.y, 0, point.y - rect.bottom);
+		const distance = dx * dx + dy * dy;
+		if (distance < nearestDistance) {
+			nearest = rect;
+			nearestDistance = distance;
+		}
+	}
+	return nearest;
+};
+
+/**
+ * A reference standing for the line of `reference` nearest the point. floating-ui's own
+ * `inline()` honours a point only for two disjoint lines; a wrapped link usually has overlapping
+ * ones, so the line is chosen here and placed like any other box. The line is read at placement
+ * time, so a scroll or resize follows it.
+ */
+const lineReference = (
+	reference: PopoverReference,
+	point: { x: number; y: number }
+): VirtualElement => ({
+	contextElement: reference instanceof Element ? reference : reference.contextElement,
+	getBoundingClientRect: () =>
+		nearestLine(reference.getClientRects?.() ?? [], point) ?? reference.getBoundingClientRect()
+});
+
 /**
  * The floating-ui middleware every floating panel is placed with, in order: `inline` (only when
- * anchoring to a line), `offset`, `flip`, `size`, `shift` and `hide`. `size` writes the available
+ * anchoring to a line without a pointer point), `offset`, `flip`, `size`, `shift` and `hide`. `size` writes the available
  * space and the snapped reference size as CSS variables on the wrapper. It runs before `shift`,
  * so `--available-height` is the room on the panel's own side of the reference: a list capped by
  * it never has to slide over its trigger to fit.
@@ -188,7 +225,7 @@ export const panelMiddleware = ({
 	fallbackAxisSide = 'none',
 	line
 }: PanelMiddlewareOptions = {}) => [
-	...(line === undefined ? [] : [inline(line ?? {})]),
+	...(line === null ? [inline({})] : []),
 	offset(gap ?? DEFAULT_OFFSET),
 	flip({
 		mainAxis: true,
@@ -232,7 +269,7 @@ export const computePanelPosition = (
 	panel: HTMLElement,
 	{ placement, direction, ...middleware }: PanelPositionOptions
 ) =>
-	computePosition(reference, panel, {
+	computePosition(middleware.line ? lineReference(reference, middleware.line) : reference, panel, {
 		strategy: 'fixed',
 		placement,
 		middleware: panelMiddleware(middleware),
