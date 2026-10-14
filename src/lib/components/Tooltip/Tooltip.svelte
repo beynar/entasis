@@ -7,13 +7,7 @@
 	import type { TooltipProps } from './tooltip.props.js';
 	import { tooltip } from './tooltip.attachment.svelte.js';
 
-	let {
-		trigger,
-		open = $bindable(),
-		defaultOpen = false,
-		onOpenChange,
-		...options
-	}: TooltipProps = $props();
+	let { trigger, open = $bindable(), defaultOpen = false, ...options }: TooltipProps = $props();
 
 	const theme = useTheme();
 	const openState = createBindableValue(
@@ -47,7 +41,8 @@
 	const surfaceTaken = $derived(theme.tooltip !== null && theme.tooltip.ref !== element);
 
 	// Hover and focus move the surface without asking, so mirror what it shows back into the
-	// controlled state. Only real surface changes are reported, never the caller's own request.
+	// controlled state. `onOpenChange` already ran, before the surface changed hands, in the
+	// primitive that made the change; the caller's own `open` is never echoed back to it.
 	let shown = false;
 	$effect(() => {
 		const next = displayed;
@@ -56,7 +51,6 @@
 		untrack(() => {
 			if (openState.value === next) return;
 			openState.value = next;
-			onOpenChange?.(next);
 		});
 	});
 
