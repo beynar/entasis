@@ -647,3 +647,24 @@ describe('nested lists (CX-7)', () => {
 		expect(document.activeElement).toBe(item('Outer B'));
 	});
 });
+
+describe('reading after unmount', () => {
+	test('lastFocusedIndex and focusedIndex stay readable once the list is destroyed (no derived_inert)', async () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		try {
+			const { navigation, unmount } = mount({ items: items('One', 'Two', 'Three') });
+			await focus(item('Two'));
+			const nav = navigation();
+			expect(nav.lastFocusedIndex).toBe(1);
+			unmount();
+			await settle();
+			// A menu switch reads this from sync() while the previous menu's effects are destroyed.
+			void nav.lastFocusedIndex;
+			void nav.focusedIndex;
+			const inert = warn.mock.calls.filter((call) => String(call[0]).includes('derived_inert'));
+			expect(inert).toEqual([]);
+		} finally {
+			warn.mockRestore();
+		}
+	});
+});

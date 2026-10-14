@@ -298,6 +298,9 @@ Unreleased section under the new version.
 
 ### Fixed
 
+- `MenuBar`, `Menu`: switching menus with ArrowRight/ArrowLeft no longer logs a Svelte `derived_inert`
+  warning in development. Navigation reads its focused indexes without a derived that outlives the
+  menu being closed.
 - `PopupMenu`: choosing an item inside a submenu closes every open submenu and the menu together,
   and a floating menu returns focus straight to its trigger. Before, the whole menu tree stayed
   open. Each level closes once, deepest first, so `onOpenChange(false)` fires once per level.
