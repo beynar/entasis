@@ -351,6 +351,39 @@ describe('submenu filters', () => {
 		await waitFor(() => expect(screen.queryAllByRole('menu')).toHaveLength(1));
 		expect(document.activeElement).toBe(move);
 	});
+
+	test('ArrowLeft from a submenu of a filterable menu returns focus to the parent search field', async () => {
+		renderInTheme(PopupMenu, {
+			trigger: { content: 'Actions' },
+			menu: { items: tree(), filter: true },
+			transition: { in: { duration: 0 }, out: { duration: 0 } }
+		});
+		const trigger = screen.getByRole('button', { name: 'Actions' });
+		trigger.focus();
+		await fireEvent.click(trigger, { detail: 0 });
+		const root = await screen.findByRole('textbox', { name: 'Search' });
+		await waitFor(() => expect(document.activeElement).toBe(root));
+		(root as HTMLInputElement).value = 'mo';
+		await fireEvent.input(root);
+		await settle();
+		await fireEvent.keyDown(root, { key: 'ArrowRight' });
+		const search = await screen.findByPlaceholderText('Pick a folder');
+		await waitFor(() => expect(document.activeElement).toBe(search));
+
+		await fireEvent.keyDown(search, { key: 'ArrowLeft' });
+		await waitFor(() => expect(screen.queryAllByRole('menu')).toHaveLength(1));
+		expect(document.activeElement).toBe(root);
+	});
+
+	test('a menu opened without taking focus keeps focus out of its search field', async () => {
+		const before = document.createElement('button');
+		document.body.append(before);
+		before.focus();
+		renderInTheme(Menu, { items: items(), filter: true, focusOnMount: false });
+		await settle();
+		expect(document.activeElement).toBe(before);
+		before.remove();
+	});
 });
 
 describe('stacked menus (mobile sheet)', () => {

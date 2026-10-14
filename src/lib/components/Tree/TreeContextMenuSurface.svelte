@@ -36,12 +36,20 @@
 	}
 
 	function handleMenuClick(event: MouseEvent): void {
-		const interactiveElement = event
-			.composedPath()
-			.find((node) => node instanceof HTMLButtonElement || node instanceof HTMLAnchorElement);
+		const path = event.composedPath();
+		const interactiveElement = path.find(
+			(node) => node instanceof HTMLButtonElement || node instanceof HTMLAnchorElement
+		);
 
 		if (!(interactiveElement instanceof HTMLElement)) return;
 		if ((interactiveElement as NavigationElement).onNext != null) return;
+		// Checkable rows and rows with `closeOnClick: false` keep the menu open, as in a PopupMenu.
+		if (
+			path.some(
+				(node) => node instanceof HTMLElement && node.getAttribute('data-menu-keep-open') === 'true'
+			)
+		)
+			return;
 
 		data.close();
 	}

@@ -11,7 +11,7 @@
 	import Menu from '../Menu/Menu.svelte';
 	import type { PopupMenuInternalProps } from './popupMenu.props.js';
 	import { usePopupMenuTheme } from './popupMenu.theme.js';
-	import { untrack } from 'svelte';
+	import { untrack, type Snippet } from 'svelte';
 	import { createAttachmentKey } from 'svelte/attachments';
 	import { on } from 'svelte/events';
 	import type { PopoverState } from '../Popover/popover.state.svelte.js';
@@ -179,38 +179,66 @@
 	};
 
 	// The ArrowDown or ArrowUp that opened the menu from its button: the Popover sees that open as
-	// one made from code, so the key is kept here until the menu has taken focus.
+	// one made from code, so the key is kept here until the menu has taken focus. A menu closed any
+	// other way (code setting `open`, a cancelled change) must not leave it for the next open.
 	let arrowOpen: { event: KeyboardEvent } | null = null;
-	const arrowKey = createAttachmentKey();
-	const openFromArrow = (node: HTMLElement) =>
-		on(node, 'keydown', (event) => {
-			if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
-			if (event.defaultPrevented || hasShortcutModifier(event)) return;
-			if (node.matches(':disabled') || node.getAttribute('aria-disabled') === 'true') return;
-			event.preventDefault();
-			if (openState.value) {
-				// Already open: ArrowDown or ArrowUp moves into it, like Tab does.
-				menuElement?.querySelector<HTMLElement>('[role="menu"]')?.focus();
-				return;
-			}
-			arrowOpen = { event };
-			setOpen(
-				true,
-				createOpenChangeDetails({
-					reason: 'list-navigation',
-					event,
-					trigger: node,
-					interaction: 'keyboard'
-				})
-			);
+	$effect(() => {
+		if (!openState.value) arrowOpen = null;
+	});
+	const openFromArrow = (node: HTMLElement, event: KeyboardEvent) => {
+		if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+		if (event.defaultPrevented || hasShortcutModifier(event)) return;
+		if (node.matches(':disabled') || node.getAttribute('aria-disabled') === 'true') return;
+		event.preventDefault();
+		if (openState.value) {
+			// Already open: ArrowDown or ArrowUp moves into it, like Tab does.
+			menuElement?.querySelector<HTMLElement>('[role="menu"]')?.focus();
+			return;
+		}
+		const details = createOpenChangeDetails({
+			reason: 'list-navigation',
+			event,
+			trigger: node,
+			interaction: 'keyboard'
 		});
+		arrowOpen = { event };
+		setOpen(true, details);
+		if (details.isCanceled) arrowOpen = null;
+	};
+	const arrowKey = createAttachmentKey();
+	const openFromArrowKey = (node: HTMLElement) =>
+		on(node, 'keydown', (e) => openFromArrow(node, e));
+
+	// A trigger made with a snippet is the consumer's own element, so there is no attachment to
+	// put the key handler on: the snippet's Popover is remembered as it renders, and a keydown
+	// that bubbles up from the element it anchors to is handled the same way.
+	let snippetPopover: PopoverState | null = null;
+	const rememberSnippetPopover = (popover: PopoverState) => {
+		snippetPopover = popover;
+		return popover;
+	};
+	const usesSnippetTrigger = $derived(typeof trigger === 'function');
+	$effect(() => {
+		if (!usesSnippetTrigger) return;
+		return on(document, 'keydown', (event) => {
+			const target = event.target;
+			const anchor = snippetPopover?.triggerReference ?? snippetPopover?.referenceElement;
+			if (!(target instanceof HTMLElement) || !anchor || target !== anchor) return;
+			openFromArrow(target, event);
+		});
+	});
 
 	const resolvedTrigger = $derived(
 		trigger !== undefined && trigger !== false && typeof trigger === 'object'
-			? { ...trigger, [arrowKey]: openFromArrow }
+			? { ...trigger, [arrowKey]: openFromArrowKey }
 			: trigger
 	);
 </script>
+
+{#snippet snippetTrigger(popover: PopoverState)}
+	{@const remembered = rememberSnippetPopover(popover)}
+	{@render (trigger as Snippet<[PopoverState]>)(remembered)}
+{/snippet}
 
 <Popover
 	open={openState.value}
@@ -222,7 +250,7 @@
 	mobileSheetSizeTransition={resolvedMobileSheetSizeTransition}
 	class={panelClass}
 	{theme}
-	trigger={resolvedTrigger}
+	trigger={typeof resolvedTrigger === 'function' ? snippetTrigger : resolvedTrigger}
 	{...popoverProps}
 >
 	{#snippet children(popover)}

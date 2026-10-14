@@ -102,6 +102,32 @@ describe('right-click', () => {
 		expect(onOpenChange.mock.calls.map(([open]) => open)).toEqual([true, false]);
 	});
 
+	test('a11y:context-menu.second-click the press that dismisses the menu first does not reopen it', async () => {
+		const { onOpenChange, target } = mount();
+		await fireEvent.contextMenu(target, { clientX: 200, clientY: 150 });
+		await waitFor(() => expect(screen.queryByRole('menu')).not.toBeNull());
+
+		// A real browser sends pointerdown (an outside press, which closes the menu) before contextmenu.
+		const press = { pointerType: 'mouse', button: 2, clientX: 204, clientY: 153 };
+		await fireEvent.pointerDown(target, press);
+		expect(onOpenChange.mock.calls.at(-1)?.[1].reason).toBe('outside-press');
+		await fireEvent.contextMenu(target, press);
+		await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+		expect(onOpenChange.mock.calls.map(([open]) => open)).toEqual([true, false]);
+	});
+
+	test('a right-click elsewhere still moves the menu when the press closes it first', async () => {
+		const { onOpenChange, target } = mount();
+		await fireEvent.contextMenu(target, { clientX: 200, clientY: 150 });
+		await waitFor(() => expect(screen.queryByRole('menu')).not.toBeNull());
+
+		const press = { pointerType: 'mouse', button: 2, clientX: 400, clientY: 300 };
+		await fireEvent.pointerDown(target, press);
+		await fireEvent.contextMenu(target, press);
+		await waitFor(() => expect(screen.queryByRole('menu')).not.toBeNull());
+		expect(opens(onOpenChange)).toBe(2);
+	});
+
 	test('a right-click elsewhere moves the menu', async () => {
 		const { onOpenChange, target } = mount();
 		await fireEvent.contextMenu(target, { clientX: 200, clientY: 150 });

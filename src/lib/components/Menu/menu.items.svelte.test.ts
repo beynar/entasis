@@ -9,7 +9,7 @@ import PopupMenu from '../PopupMenu/PopupMenu.svelte';
 import { renderInTheme } from '../Theme/renderInTheme.test-helper.js';
 import Menu from './Menu.svelte';
 import type { MenuItem } from './menu.props.js';
-import { menuItemKeys } from './menuTree.js';
+import { createMenuKeys, menuItemKeys } from './menuTree.js';
 
 const settle = () => new Promise((resolve) => setTimeout(resolve, 20));
 
@@ -320,6 +320,33 @@ describe('row identity', () => {
 		await settle();
 		expect(screen.getByRole('menuitem', { name: 'Cut' })).toBe(cut);
 		expect(document.activeElement).toBe(cut);
+	});
+
+	test('a11y:menu.row-identity a row that changes its own text keeps its node and focus', async () => {
+		const build = (muted: boolean): MenuItem[] => [
+			{ type: 'option', title: muted ? 'Unmute' : 'Mute', closeOnClick: false },
+			{ type: 'option', title: 'Copy' }
+		];
+		const { rerender } = renderInTheme(Menu, { items: build(false) });
+		const mute = screen.getByRole('menuitem', { name: 'Mute' });
+		mute.focus();
+
+		await rerender({ items: build(true) });
+		await settle();
+		const unmute = screen.getByRole('menuitem', { name: 'Unmute' });
+		expect(unmute).toBe(mute);
+		expect(document.activeElement).toBe(unmute);
+	});
+
+	test('keys handed to a renamed row stay unique', () => {
+		const keys = createMenuKeys();
+		const row = (title: string): MenuItem => ({ type: 'option', title });
+		expect(keys([row('Mute'), row('Copy')])).toEqual(['option:Mute', 'option:Copy']);
+		// Mute is renamed: the new row takes its key, and a later row that is called Mute again is fresh.
+		expect(keys([row('Unmute'), row('Copy')])).toEqual(['option:Mute', 'option:Copy']);
+		const next = keys([row('Unmute'), row('Mute'), row('Copy')]);
+		expect(new Set(next).size).toBe(3);
+		expect(next[0]).toBe('option:Mute');
 	});
 
 	test('rows rebuilt as new objects still keep their node', async () => {

@@ -2,10 +2,12 @@
 	import { onMount, tick } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { useDirection } from '$lib/utils/useDirection.svelte.js';
 	import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
 	import Button from '../Button/Button.svelte';
 	import { caretRightIcon } from '../Icons/caretRight.js';
 	import MenuOption from '../MenuOption/MenuOption.svelte';
+	import { usePopoverContext } from '../Popover/popover.state.svelte.js';
 	import Separator from '../Separator/Separator.svelte';
 	import Slot from '../Slot/Slot.svelte';
 	import Stepper from '../Stepper/Stepper.svelte';
@@ -24,6 +26,7 @@
 	import type { MenuFilterOptions, MenuItem, MenuProps } from './menu.props.js';
 	import { useMenuTheme } from './menu.theme.js';
 	import {
+		createMenuKeys,
 		filterMenuItems,
 		getMenuMaxDepth,
 		hasMenuRows,
@@ -70,10 +73,26 @@
 	}: MenuProps = $props();
 
 	const id = $props.id();
+	const parentPopover = usePopoverContext();
 	const classes = $derived(useMenuTheme(theme));
 	const t = $derived(useI18n());
 	const maxDepth = $derived(getMenuMaxDepth(items));
 	const panels = $derived(Array.from({ length: maxDepth + 1 }, (_, depth) => depth));
+
+	// The sheet is portaled out of the trigger's subtree, so it does not inherit a `dir` set there:
+	// a menu opened from a right-to-left subtree carries that direction itself, which keeps the
+	// carets, the back arrow and the arrow keys reading the way the trigger does.
+	const anchorElement = () => {
+		const reference = parentPopover?.referenceElement;
+		return reference instanceof HTMLElement ? reference : null;
+	};
+	const getDirection = useDirection(anchorElement);
+	const panelDir = $derived.by(() => {
+		if (!parentPopover || typeof document === 'undefined') return undefined;
+		const direction = getDirection();
+		const inherited = getComputedStyle(document.body).direction === 'rtl' ? 'rtl' : 'ltr';
+		return direction === inherited ? undefined : direction;
+	});
 
 	let path = $state<MenuPathEntry[]>([]);
 	const activeStep = $derived(path.length);
@@ -127,6 +146,8 @@
 		void (async () => {
 			await tick();
 			if (activeFilter) {
+				// A hover open (`false`) leaves focus where it was, even when the field could take it.
+				if (focusOnMount === false) return;
 				searchField?.focus({ preventScroll: true });
 				if (focusOnMount === 'last') navigation.focusLast();
 				else if (focusOnMount === true) navigation.focusFirst();
@@ -265,7 +286,10 @@
 	const keepOpen = (closeOnClick: boolean | undefined) =>
 		closeOnClick === false ? { 'data-menu-keep-open': 'true' } : {};
 
-	const rootKeys = $derived(menuItemKeys(getPanelItems(0)));
+	// The root level's keys follow a row whose text changes; the levels below it are lists that
+	// come and go as the path changes, so they keep the plain keys.
+	const trackRootKeys = createMenuKeys();
+	const rootKeys = $derived(trackRootKeys(getPanelItems(0)));
 </script>
 
 {#snippet caret()}
@@ -403,6 +427,7 @@
 	data-size={size}
 	data-density={density}
 	data-color={color}
+	{...panelDir ? { dir: panelDir } : {}}
 	{...attachments}
 >
 	{#if activeStep === 0}

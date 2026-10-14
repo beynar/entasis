@@ -37,7 +37,7 @@
 	import type { MenuItem, MenuProps } from './menu.props.js';
 	import { isApplePlatform } from './menu.platform.js';
 	import { useMenuTheme } from './menu.theme.js';
-	import { hasMenuRows, menuItemKeys, menuItemValue } from './menuTree.js';
+	import { createMenuKeys, hasMenuRows, menuItemValue } from './menuTree.js';
 
 	let {
 		items,
@@ -147,7 +147,8 @@
 		void (async () => {
 			await tick();
 			if (filterable) {
-				// Focus goes to the search field; a keyboard open also highlights the row it points at.
+				// A hover open (`false`) leaves focus where it was, even when the field could take it.
+				if (focusOnMount === false) return;
 				searchField?.focus({ preventScroll: true });
 				if (focusOnMount === 'last') navigation.focusLast();
 				else if (focusOnMount === true) navigation.focusFirst();
@@ -197,7 +198,16 @@
 		if (!parentPopover) return;
 		const trigger = parentPopover.referenceElement;
 		parentPopover.close({ reason: 'list-navigation', interaction: 'keyboard' });
-		if (trigger instanceof HTMLElement) trigger.focus();
+		if (!(trigger instanceof HTMLElement)) return;
+		// A parent with a search field keeps focus in the field (its rows are only highlighted), so
+		// that is where focus returns; typing then goes on filtering the parent.
+		const parentList = trigger.closest('[role="menu"]');
+		const parentField = parentList?.id
+			? trigger.ownerDocument.querySelector<HTMLInputElement>(
+					`input[aria-controls="${CSS.escape(parentList.id)}"]`
+				)
+			: null;
+		(parentField ?? trigger).focus();
 	};
 
 	const goBack = () => {
@@ -306,7 +316,16 @@
 	const radioValueAttrs = (radio: { value: string }) =>
 		trackHighlight ? { [HIGHLIGHT_VALUE_ATTRIBUTE]: radio.value } : {};
 
-	const rowKeys = $derived(menuItemKeys(visibleItems));
+	// One key tracker per list of rows (the root, each group), so a row that changes its own text
+	// keeps its node.
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- plain memo of the previous render; nothing reads it reactively
+	const keyTrackers = new Map<string, ReturnType<typeof createMenuKeys>>();
+	const keysFor = (scope: string, entries: readonly MenuItem[]) => {
+		let track = keyTrackers.get(scope);
+		if (!track) keyTrackers.set(scope, (track = createMenuKeys()));
+		return track(entries);
+	};
+	const rowKeys = $derived(keysFor('', visibleItems));
 
 	/** Wires a submenu trigger row: its popover registration, ArrowRight and ArrowLeft. */
 	const registerSubmenu = (node: HTMLElement, key: string, popover: PopoverState) => {
@@ -348,7 +367,7 @@
 {/snippet}
 
 {#snippet rows(entries: MenuItem[], scope: string)}
-	{@const keys = scope === '' ? rowKeys : menuItemKeys(entries)}
+	{@const keys = scope === '' ? rowKeys : keysFor(scope, entries)}
 	{#each entries as item, index (keys[index])}
 		{@const path = `${scope}${index}`}
 		{#if item.type === 'button'}

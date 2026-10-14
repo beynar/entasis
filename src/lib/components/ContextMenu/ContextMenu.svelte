@@ -29,6 +29,8 @@
 	const LONG_PRESS_MS = 500;
 	const GESTURE_TOLERANCE = 8;
 	const TOUCH_GESTURE_MS = 700;
+	// How long after the press that closed the menu its `contextmenu` still counts as part of it.
+	const SECONDARY_PRESS_MS = 1000;
 	const openState = createBindableValue(
 		() => open,
 		(next) => {
@@ -58,7 +60,31 @@
 		if (openState.value === nextOpen) return;
 		onOpenChange?.(nextOpen, details);
 		if (details.isCanceled) return;
+		if (!nextOpen) noteSecondaryPress(details);
 		openState.value = nextOpen;
+	}
+
+	// A right-click on the open menu's anchor reaches the page as a `pointerdown` first, which the
+	// layer stack takes for an outside press and closes the menu with, before `contextmenu` fires.
+	// That close is remembered so the `contextmenu` that follows is read as the second right-click.
+	let secondaryDismissal: { x: number; y: number; at: number } | null = null;
+	function noteSecondaryPress({ reason, event }: OpenChangeDetails) {
+		secondaryDismissal = null;
+		if (reason !== 'outside-press' || !event) return;
+		const press = event as Partial<PointerEvent>;
+		if (press.pointerType === 'touch' || (press.button !== 2 && !press.ctrlKey)) return;
+		if (press.clientX === undefined || press.clientY === undefined) return;
+		secondaryDismissal = { x: press.clientX, y: press.clientY, at: event.timeStamp };
+	}
+	// Whether this `contextmenu` follows the press that just closed the menu at the same spot.
+	function followsDismissal(event: MouseEvent) {
+		const dismissal = secondaryDismissal;
+		secondaryDismissal = null;
+		return (
+			dismissal !== null &&
+			event.timeStamp - dismissal.at <= SECONDARY_PRESS_MS &&
+			Math.hypot(event.clientX - dismissal.x, event.clientY - dismissal.y) <= GESTURE_TOLERANCE
+		);
 	}
 
 	// The point the open menu is anchored to, so a second right-click near it closes the menu.
@@ -91,6 +117,8 @@
 			return;
 		}
 		// A second right-click on the spot the menu is anchored to dismisses it.
+		const dismissed = followsDismissal(event);
+		if (dismissed && sameSpot(event.clientX, event.clientY)) return;
 		if (openState.value && sameSpot(event.clientX, event.clientY)) {
 			setOpen(false, createOpenChangeDetails({ reason: 'trigger-press', event }));
 			return;

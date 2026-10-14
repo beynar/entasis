@@ -43,7 +43,7 @@ The Menu component is a flexible container that renders an array of menu items: 
   - Array of menu items to render
   - Each item must have a \`type\` field: 'button', 'option', 'separator', 'submenu', 'checkbox', 'radio-group' or 'group'
   - Items are spread with their respective component props
-  - Every item accepts a \`key\`. A row keeps its DOM node, and with it focus, the Tab stop and hover state, while rows before it are inserted, removed or reordered, as long as its key stays the same. Without a \`key\` the identity comes from the row's plain-text title or children, its \`href\` or its \`textValue\`, so a menu built from strings needs none; give rows whose title is a snippet, or whose text repeats, an explicit \`key\`
+  - Every item accepts a \`key\`. A row keeps its DOM node, and with it focus, the Tab stop and hover state, while rows before it are inserted, removed or reordered, as long as its key stays the same. Without a \`key\` the identity comes from the row's plain-text title or children, its \`href\` or its \`textValue\`, so a menu built from strings needs none. A row whose text changes when it is pressed (Mute becoming Unmute) keeps its node too, as it takes over the key of the row that disappeared in the same place. Give rows whose title is a snippet, or whose text repeats, an explicit \`key\`
 
 - **class**: string - Additional CSS classes for the menu container
 

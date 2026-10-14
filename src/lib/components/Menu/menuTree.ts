@@ -71,6 +71,49 @@ export const menuItemKeys = (items: readonly MenuItem[]): string[] => {
 };
 
 /**
+ * Row keys that survive a row's text changing. The keys come from `menuItemKeys`, but a row of
+ * the previous render that is gone (Mute becoming Unmute, Show becoming Hide) hands its key to
+ * a new row of the same type that has no previous row, in order. The row then keeps its DOM node,
+ * and with it focus, when it changes its own label as it is pressed. Call it with each render's
+ * rows, for one list; it remembers only the render before.
+ */
+export const createMenuKeys = () => {
+	let previous: { natural: string; key: string; type: string }[] = [];
+	return (items: readonly MenuItem[]): string[] => {
+		const natural = menuItemKeys(items);
+		const before = new Map(previous.map((entry) => [entry.natural, entry]));
+		const keys: (string | undefined)[] = natural.map((name) => before.get(name)?.key);
+		const present = new Set(natural);
+		const used = new Set(keys.filter((key): key is string => key !== undefined));
+		// Rows of the previous render that no row matches, waiting for a new row to take over.
+		const gone = previous.filter((entry) => !present.has(entry.natural));
+		natural.forEach((name, index) => {
+			if (keys[index] !== undefined) return;
+			const type = items[index].type;
+			const successor = gone.findIndex((entry) => entry.type === type && !used.has(entry.key));
+			if (successor === -1) return;
+			keys[index] = gone[successor].key;
+			used.add(gone.splice(successor, 1)[0].key);
+		});
+		const result = natural.map((name, index) => {
+			let key = keys[index] ?? name;
+			// A fresh row's own key can equal one a neighbour inherited: keep every key unique.
+			for (let count = 1; keys[index] === undefined && used.has(key); count += 1) {
+				key = `${name}~~${count}`;
+			}
+			used.add(key);
+			return key;
+		});
+		previous = result.map((key, index) => ({
+			natural: natural[index],
+			key,
+			type: items[index].type
+		}));
+		return result;
+	};
+};
+
+/**
  * The text a row is matched and announced on: `textValue`, else the row's own plain text, else the
  * text content of the rendered element (read lazily by the caller when this is empty).
  */

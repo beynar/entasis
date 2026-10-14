@@ -81,6 +81,48 @@ describe('initial focus follows how the menu opened', () => {
 		await waitFor(() => expect(document.activeElement).toBe(menus()[0]));
 	});
 
+	test('ArrowDown and ArrowUp open a menu whose trigger is a snippet', async () => {
+		mount({ snippetTrigger: true });
+		trigger().focus();
+		await fireEvent.keyDown(trigger(), { key: 'ArrowUp' });
+		await waitFor(() =>
+			expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'Quit' }))
+		);
+		expect(trigger()).toHaveAttribute('aria-expanded', 'true');
+	});
+
+	test('an ArrowDown open that code closes does not leak into the next pointer open', async () => {
+		mount();
+		trigger().focus();
+		await fireEvent.keyDown(trigger(), { key: 'ArrowDown' });
+		await waitFor(() =>
+			expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'New file' }))
+		);
+		await fireEvent.click(screen.getByRole('button', { name: 'Close from code' }));
+		await waitFor(() => expect(menus()).toHaveLength(0));
+
+		await pointerClick(trigger());
+		await waitFor(() => expect(menus()).toHaveLength(1));
+		await waitFor(() => expect(document.activeElement).toBe(menus()[0]));
+	});
+
+	test('a cancelled ArrowDown open does not leak into the next pointer open', async () => {
+		let cancel = true;
+		const onOpenChange = vi.fn((_open: boolean, details: { cancel(): void }) => {
+			if (cancel) details.cancel();
+		});
+		mount({ onOpenChange });
+		trigger().focus();
+		await fireEvent.keyDown(trigger(), { key: 'ArrowDown' });
+		await settle();
+		expect(menus()).toHaveLength(0);
+
+		cancel = false;
+		await pointerClick(trigger());
+		await waitFor(() => expect(menus()).toHaveLength(1));
+		await waitFor(() => expect(document.activeElement).toBe(menus()[0]));
+	});
+
 	test('ArrowDown or ArrowUp with a modifier is left to the browser', async () => {
 		mount();
 		trigger().focus();
@@ -402,5 +444,21 @@ describe('VoiceOver (Apple platforms)', () => {
 		vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue('Mozilla/5.0 (Windows NT 10.0)');
 		const share = await openShare();
 		expect(share).toHaveAttribute('aria-expanded', 'true');
+	});
+});
+
+describe('a stacked menu in right-to-left text', () => {
+	test('a11y:popup-menu.rtl-stack the panel carries the direction of its trigger, so the caret mirrors and ArrowLeft opens a level', async () => {
+		mount({ dir: 'rtl', menu: { submenuMode: 'stack' } });
+		await keyboardClick(trigger());
+		await waitFor(() => expect(menus()).toHaveLength(1));
+		expect(menus()[0].closest('[dir]')).toHaveAttribute('dir', 'rtl');
+
+		const share = screen.getByRole('menuitem', { name: 'Share' });
+		share.focus();
+		await fireEvent.keyDown(share, { key: 'ArrowLeft' });
+		await waitFor(() =>
+			expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'Email' }))
+		);
 	});
 });
