@@ -59,8 +59,8 @@ toast.warning({
 - \`dismissible\` (boolean, optional): If false, prevents user from dismissing. Default: inherited from Toaster
 - \`richColors\` (boolean, optional): If true, uses richer color variants. Default: inherited from Toaster
 - \`loading\` (boolean, optional): If true, shows a loading spinner using Theme's global \`spinnerVariant\`
-- \`progress\` (boolean, optional): If true, shows a bar counting down the remaining duration (pauses on hover and while the window is inactive). Only appears when the toast has a finite \`duration\`. Can also be set on \`<Toaster progress />\` as a default.
-- \`swipeToDismiss\` (boolean, optional, default true): Drag the toast toward its anchored screen edge (down for bottom-*, up for top-*) past a threshold, or flick it that way, to dismiss it; dragging the other way rubber-bands. Only the primary button drags, and only from the toast's surface: a press on an action button, the close button, a link or any \`[data-swipe-ignore]\` element never starts a drag. A press that travels mostly across the swipe axis never moves the toast, so the page keeps scrolling (a swipeable toast sets \`touch-action\` to \`pan-y\` when it swipes sideways and \`pan-x\` when it swipes vertically); the stack stays expanded and its timers paused while a toast is dragged; a cancelled touch snaps it back, and a mouse released outside the window ends the drag where the button was last held (it dismisses or snaps back by the same rule as a normal release); and the click that ends a drag is not a \`closeOnClick\` press. A manual dismiss fires \`onDismiss\`, not \`onAutoDismiss\`.
+- \`progress\` (boolean, optional): If true, shows a bar counting down the remaining duration (pauses on hover, keyboard focus, a press or swipe, and while the window is inactive). Only appears when the toast has a finite \`duration\`. Can also be set on \`<Toaster progress />\` as a default.
+- \`swipeToDismiss\` (boolean, optional, default true): Drag the toast toward its anchored screen edge (down for bottom-*, up for top-*) past a threshold, or flick it that way, to dismiss it; dragging the other way rubber-bands. Only the primary button drags, and only from the toast's surface: a press on an action button, the close button, a link or any \`[data-swipe-ignore]\` element never starts a drag. A press that travels mostly across the swipe axis never moves the toast, so the page keeps scrolling along that direction (a swipeable toast sets \`touch-action\` to \`pan-y\` when it swipes sideways and \`pan-x\` when it swipes vertically, so a touch drag along the swipe axis of a center or banner toast swipes it instead of scrolling the page); the stack stays expanded and its timers paused while a toast is dragged; a cancelled touch snaps it back, and a mouse released outside the window ends the drag where the button was last held (it dismisses or snaps back by the same rule as a normal release); and the click that ends a drag is not a \`closeOnClick\` press. A manual dismiss fires \`onDismiss\`, not \`onAutoDismiss\`.
 - \`closeOnClick\` (boolean, optional, default false): Dismiss when the toast body is clicked. Off by default now that swipe-to-dismiss exists; the close icon and swipe are the primary dismiss affordances.
 - \`size\` (Sizes, optional): Size of the toast — scales padding, corner radius, type and icon. Options: \`'small'\`, \`'normal'\`, \`'large'\` (default \`'normal'\`). Can be defaulted for all toasts with \`<Toaster size="..." />\`.
 - \`prefix\` (Slot | false, optional): Content before the text. \`false\` hides the default icon
@@ -68,7 +68,7 @@ toast.warning({
 - \`actions\` (ToastAction[], optional): Buttons rendered inside the toast. \`ToastAction\` is full Button props plus \`content\` (the label) and \`dismiss\` (default true — clicking dismisses the toast). Each button's \`onclick\` runs with the native MouseEvent, then the toast fires \`onDismiss\`.
 - \`closeIcon\` (Slot, optional): Custom close button component
 - \`icon\` (string, optional): Icon name to display before the toast text
-- \`important\` (boolean, optional): Uses \`role="alert"\` + assertive announcements for screen readers
+- \`important\` (boolean, optional): Announced through the assertive live region instead of the polite one, so screen readers interrupt for it
 - \`transition\` (FSOProps, optional): Enter/exit transition override for this toast
 - \`theme\` (ToastThemeProps, optional): Theme overrides for this toast alone, layered over the \`<Toaster theme>\` object (\`base\` classes are appended, so the per-toast ones win)
 - \`id\` (string, optional): Custom ID for the toast. Auto-generated if not provided. Calling a creator again with an id that is still on screen updates that toast instead of adding another (see Updating by id)
@@ -112,7 +112,7 @@ toast.success({ id: 'save', title: 'Saved', loading: false, duration: 3000 });
 const rows = await toast.promise(saveRows(), {
   loading: { title: 'Saving…', description: 'Hold on' },
   success: (count) => ({ title: \`Saved \${count} rows\` }),
-  error: (error) => ({ title: 'Save failed', description: error.message })
+  error: (error) => ({ title: 'Save failed', description: (error as Error).message })
 });
 
 toast.update('batch', (current) => ({ title: current.title + '!' }));

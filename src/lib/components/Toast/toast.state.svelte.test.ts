@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import { flushSync, tick } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import Harness from './ToasterHarness.test.svelte';
@@ -460,7 +460,7 @@ const focusVisible = (visible: boolean) =>
 	});
 
 describe('toast pause reasons (DF-2)', () => {
-	test('keyboard focus holds the stack and releases with the time that was left', async () => {
+	test('a11y:toast.timers-pause-on-focus keyboard focus holds the stack and releases with the time that was left', async () => {
 		render(Harness);
 		const onAutoDismiss = vi.fn();
 		const shown = toast.success({ title: 'Saved', duration: 1000, onAutoDismiss });
@@ -677,14 +677,14 @@ describe('toast.update, toast.dismiss and toast.promise (DF-3)', () => {
 		expect(shown.loading).toBe(true);
 		expect(shown.timer).toBeUndefined();
 		expect(shown.opts.color).toBe('primary');
-		expect(screen.getByText('Hold on')).toBeInTheDocument();
+		expect(within(items()[0]).getByText('Hold on')).toBeInTheDocument();
 
 		resolve(3);
 		await returned;
 		await tick();
 		expect(shown.loading).toBe(false);
 		expect(shown.opts.color).toBe('success');
-		expect(screen.getByText('Saved 3 rows')).toBeInTheDocument();
+		expect(within(items()[0]).getByText('Saved 3 rows')).toBeInTheDocument();
 		// The pending toast's description does not leak into the result.
 		expect(screen.queryByText('Hold on')).not.toBeInTheDocument();
 		expect(shown.timer?.delay).toBe(4000);

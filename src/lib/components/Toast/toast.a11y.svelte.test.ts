@@ -80,6 +80,23 @@ describe('Toaster region and announcements', () => {
 		expect(liveRegion('polite')).toBeInTheDocument();
 	});
 
+	test('toasts created in the same tick are all announced, in one message', async () => {
+		render(Harness);
+		await tick();
+		const seen: string[] = [];
+		const observer = new MutationObserver(() => {
+			const text = liveRegion('polite').textContent ?? '';
+			if (text) seen.push(text);
+		});
+		observer.observe(liveRegion('polite'), { childList: true, characterData: true, subtree: true });
+		toast.info({ title: 'Alpha', duration: false });
+		toast.info({ title: 'Beta', duration: false });
+		await waitFor(() => expect(liveRegion('polite')).toHaveTextContent('Alpha'));
+		expect(liveRegion('polite')).toHaveTextContent('Alpha. Beta');
+		observer.disconnect();
+		expect(seen.every((text) => text.includes('Alpha'))).toBe(true);
+	});
+
 	test('direction sets the text and layout direction of the region', async () => {
 		render(Harness, { direction: 'rtl' });
 		await tick();
@@ -90,6 +107,65 @@ describe('Toaster region and announcements', () => {
 		render(Harness);
 		await tick();
 		expect(region()).not.toHaveAttribute('dir');
+	});
+});
+
+describe('F6 and the region', () => {
+	test('F6 with no toast on screen leaves focus where it is', async () => {
+		const input = document.createElement('input');
+		document.body.append(input);
+		render(Harness);
+		await tick();
+		input.focus();
+		toaster().focusRegion();
+		expect(document.activeElement).toBe(input);
+		input.remove();
+	});
+
+	test('focus on the region holds the timers of every stack, and releases them when it leaves', async () => {
+		const outside = document.createElement('button');
+		document.body.append(outside);
+		render(Harness);
+		const shown = toast.info({ title: 'Timed', duration: 5000 });
+		await tick();
+		outside.focus();
+		toaster().focusRegion();
+		expect(document.activeElement).toBe(region());
+		expect(shown.timer?.heldBy).toEqual(['focus']);
+
+		outside.focus();
+		expect(shown.timer?.heldBy).toEqual([]);
+		outside.remove();
+	});
+
+	test('moving from the region to a toast keeps the hold', async () => {
+		render(Harness);
+		const shown = toast.info({ title: 'Timed', duration: 5000 });
+		await tick();
+		toaster().focusRegion();
+		expect(shown.timer?.heldBy).toEqual(['focus']);
+		items()[0].focus();
+		// A programmatic focus is not `:focus-visible` in jsdom; only the region's hold is gone.
+		expect(document.activeElement).toBe(items()[0]);
+	});
+
+	test('the element F6 left is forgotten once focus goes elsewhere on its own', async () => {
+		const a = document.createElement('button');
+		const b = document.createElement('button');
+		document.body.append(a, b);
+		render(Harness);
+		toast.info({ title: 'Only', duration: false });
+		await tick();
+		a.focus();
+		toaster().focusRegion();
+		b.focus();
+		items()[0].focus();
+		toaster().toasts[0].remove();
+		await tick();
+		await tick();
+		expect(document.activeElement).not.toBe(a);
+		a.remove();
+		b.remove();
 	});
 });
 

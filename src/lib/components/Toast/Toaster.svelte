@@ -127,6 +127,8 @@
 	data-open={toaster.isOpen ? '' : undefined}
 	class={classes.toaster()}
 	data-hovering={toaster.hovering}
+	onfocusin={toaster.onRegionFocusIn}
+	onfocusout={toaster.onRegionFocusOut}
 	{@attach toaster.liveRegions.host}
 >
 	{#each toaster.toasts as toast (toast.id)}

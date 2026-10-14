@@ -184,6 +184,8 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 	 * touch tap or a mouse click focuses a toast without pausing anything.
 	 */
 	focusedToast = $state<Toast | null>(null);
+	/** Focus rests on the notification region itself, where F6 puts it; every stack is held. */
+	regionFocused = $state(false);
 	polygon = $state<[number, number, number, number]>([0, 0, 0, 0]);
 	isOpen = $state(false);
 	theme = useTheme();
@@ -239,6 +241,8 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 			});
 			return () => {
 				stopWatchingWindow();
+				clearTimeout(this.announceTimer);
+				this.announceTimer = undefined;
 				// Don't leave a dangling reference if this Toaster unmounts (another
 				// mounted Toaster may have already replaced it).
 				if (window.toaster === this) window.toaster = undefined as unknown as Toaster;
@@ -274,7 +278,9 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 		const reasons: string[] = [];
 		if (this.windowInactive) reasons.push(WINDOW_INACTIVE_REASON);
 		if (this.hovering === position) reasons.push(HOVER_REASON);
-		if (this.focusedToast?.opts.position === position) reasons.push(FOCUS_REASON);
+		if (this.regionFocused || this.focusedToast?.opts.position === position) {
+			reasons.push(FOCUS_REASON);
+		}
 		if (this.isPressed(position)) reasons.push(SWIPE_REASON);
 		return reasons;
 	};
@@ -483,15 +489,38 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 	// is left to hold it.
 	private focusOrigin: HTMLElement | null = null;
 
-	/** F6: moves focus into the notification region, remembering where it came from. */
+	/**
+	 * F6: moves focus into the notification region, remembering where it came from. With no toast
+	 * on screen there is nothing to reach, and focus stays where it is.
+	 */
 	focusRegion = () => {
 		const region = this.element;
-		if (!region) return;
+		if (!region || untrack(() => this.toasts.length) === 0) return;
 		const active = region.ownerDocument.activeElement;
 		if (active instanceof HTMLElement && active !== region.ownerDocument.body) {
 			if (!region.contains(active)) this.focusOrigin = active;
 		}
 		region.focus({ preventScroll: true });
+	};
+
+	/** Focus entered the region element itself: the toasts it holds wait for the user to reach them. */
+	onRegionFocusIn = (event: FocusEvent) => {
+		if (event.target !== this.element || this.regionFocused) return;
+		this.regionFocused = true;
+		this.syncHolds();
+	};
+
+	/**
+	 * Focus left the region element, or left the region and everything in it. The element F6 came
+	 * from is forgotten once focus is somewhere else on its own, so it cannot pull focus back later.
+	 */
+	onRegionFocusOut = (event: FocusEvent) => {
+		if (event.target === this.element && this.regionFocused) {
+			this.regionFocused = false;
+			this.syncHolds();
+		}
+		const next = event.relatedTarget;
+		if (!(next instanceof Node) || !this.element?.contains(next)) this.focusOrigin = null;
 	};
 
 	/**
@@ -531,9 +560,29 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 		});
 	};
 
+	// Toasts created in the same tick are spoken together: the live regions hold one message at a
+	// time, and each announcement replaces the one before it within the same frame.
+	private pendingAnnouncements: Record<'polite' | 'assertive', string[]> = {
+		polite: [],
+		assertive: []
+	};
+	private announceTimer: ReturnType<typeof setTimeout> | undefined;
+
 	/** Announces a toast's text in the persistent live regions; `important` ones are assertive. */
 	announce = (message: string, important = false) => {
-		if (message) this.liveRegions.announce(message, important ? 'assertive' : 'polite');
+		if (!message) return;
+		this.pendingAnnouncements[important ? 'assertive' : 'polite'].push(message);
+		if (this.announceTimer !== undefined) return;
+		// A macrotask, so every toast of the burst has reached its announce call by then.
+		this.announceTimer = setTimeout(() => {
+			this.announceTimer = undefined;
+			for (const politeness of ['polite', 'assertive'] as const) {
+				const messages = this.pendingAnnouncements[politeness];
+				if (!messages.length) continue;
+				this.pendingAnnouncements[politeness] = [];
+				this.liveRegions.announce(messages.join('. '), politeness);
+			}
+		}, 0);
 	};
 }
 

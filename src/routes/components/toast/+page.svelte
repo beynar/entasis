@@ -161,7 +161,10 @@
 		'Swipe, drag or flick toward the edge to dismiss',
 		'Stacked layout, hover and background tabs pause timers',
 		'Update, dismiss and promise helpers',
-		'Timers pause for hover, focus and swipes',
+		{
+			label: 'Timers pause for hover, focus and swipes',
+			test: 'a11y:toast.timers-pause-on-focus'
+		},
 		'Loading spinner, progress bar & actions'
 	]}
 >
@@ -491,7 +494,7 @@ toast.success({
 	id: 'upload',
 	loading: { title: 'Uploading…', description: 'Sending your files' },
 	success: (count) => ({ title: \`\${count} files uploaded\` }),
-	error: (error) => ({ title: 'Upload failed', description: error.message })
+	error: (error) => ({ title: 'Upload failed', description: (error as Error).message })
 });`}
 		>
 			<div class="flex flex-wrap justify-center gap-2">
