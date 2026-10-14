@@ -85,17 +85,14 @@ describe('law 1 · open-change details (F1 · CX-1)', () => {
 });
 
 describe('law 2 · lifecycle (F1 · CX-2)', () => {
-	test(
-		'a Dialog open at creation fires onAfterOpen once and dismisses on outside press',
-		async () => {
-			const onAfterOpen = vi.fn();
-			mount('dialog-default-open', { onAfterOpen });
-			await screen.findByRole('dialog');
-			await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
-			await pressOutside();
-			await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-		}
-	);
+	test('a Dialog open at creation fires onAfterOpen once and dismisses on outside press', async () => {
+		const onAfterOpen = vi.fn();
+		mount('dialog-default-open', { onAfterOpen });
+		await screen.findByRole('dialog');
+		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
+		await pressOutside();
+		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+	});
 
 	test('an inline Popover open at creation fires onAfterOpen once', async () => {
 		const onAfterOpen = vi.fn();
@@ -153,21 +150,18 @@ describe('law 4 · trigger contract (F1 · CX-4)', () => {
 });
 
 describe('law 5 · focus (F3 · CX-3)', () => {
-	test(
-		'when the opener is gone, closing restores focus to the last element still in the page',
-		async () => {
-			mount('removed-opener');
-			const notes = screen.getByLabelText('Notes');
-			notes.focus();
-			const opener = button('Open and remove');
-			opener.focus();
-			await fireEvent.click(opener);
-			await screen.findByRole('dialog');
-			await escape();
-			await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-			await waitFor(() => expect(document.activeElement).toBe(notes));
-		}
-	);
+	test('when the opener is gone, closing restores focus to the last element still in the page', async () => {
+		mount('removed-opener');
+		const notes = screen.getByLabelText('Notes');
+		notes.focus();
+		const opener = button('Open and remove');
+		opener.focus();
+		await fireEvent.click(opener);
+		await screen.findByRole('dialog');
+		await escape();
+		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+		await waitFor(() => expect(document.activeElement).toBe(notes));
+	});
 });
 
 describe('law 6 · hover (F5 · MN-7, C14 · DF-6, F1 · MN-4)', () => {
