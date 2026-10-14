@@ -101,7 +101,7 @@
 	let value5 = $state<string | null>(null);
 	let value6 = $state<string | null>(null);
 	let value7 = $state<string | null>(null);
-	let value8 = $state<string | null>(null);
+	let value8 = $state<string | null>('Kiwi');
 	let open9 = $state(false);
 	let submitted = $state('Nothing submitted yet');
 	let chosen = $state('Nothing chosen yet');
@@ -347,17 +347,10 @@
 		<ComponentCard
 			title="Read-only"
 			description="The list opens and can be browsed, but the text stays; it still submits with a form."
-			code={`<Autocomplete readOnly openOnFocus defaultValue="Kiwi" items={fruits} />`}
+			code={`<Autocomplete readOnly openOnFocus items={fruits} bind:value />`}
 		>
 			<div class="w-full max-w-md">
-				<Autocomplete
-					readOnly
-					openOnFocus
-					label="Fruit"
-					items={fruits}
-					defaultValue="Kiwi"
-					bind:value={value8}
-				/>
+				<Autocomplete readOnly openOnFocus label="Fruit" items={fruits} bind:value={value8} />
 			</div>
 		</ComponentCard>
 
