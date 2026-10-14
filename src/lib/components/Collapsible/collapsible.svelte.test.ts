@@ -200,6 +200,15 @@ describe('Collapsible onAfterOpen and onAfterClose', () => {
 });
 
 describe('Collapsible peek variant', () => {
+	test('the clipped text stays readable: the clip is visual only', () => {
+		render(CollapsibleHarness, { variant: 'peek', transition: noMotion });
+		const clip = document.querySelector<HTMLElement>('[id$="-content"]')!;
+		expect(clip.closest('[aria-hidden="true"]')).toBeNull();
+		expect(clip.hasAttribute('hidden')).toBe(false);
+		expect(clip.hasAttribute('inert')).toBe(false);
+		expect(trigger()).toHaveAttribute('aria-expanded', 'false');
+	});
+
 	test('closed, controls below the visible preview are inert and reachable again once open', async () => {
 		render(CollapsibleHarness, { variant: 'peek', transition: noMotion });
 		const clip = document.querySelector<HTMLElement>('[id$="-content"]')!;

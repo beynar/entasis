@@ -80,7 +80,9 @@ type CollapsibleBaseProps = {
 	 * Visual variant. `default` toggles the content in and out with a slide.
 	 * `peek` keeps the content mounted, clips it to `peekHeight` and fades the
 	 * edge while closed, with the trigger floating as a pill over the fade; links and controls
-	 * below the visible preview are inert until it opens.
+	 * below the visible preview are inert until it opens. The clipped text stays in the
+	 * accessibility tree on purpose: the clip is a visual preview, so screen reader users read the
+	 * whole content (a "read more" pattern) and the trigger's `aria-expanded` reports the state.
 	 */
 	variant?: 'default' | 'peek';
 	/**

@@ -80,6 +80,11 @@
 		}
 	];
 
+	const findableItems = [
+		{ title: 'Shipping', content: 'Orders ship within two days from our warehouse.' },
+		{ title: 'Returns', content: 'Returns are free for thirty days after delivery.' }
+	];
+
 	const shippingItems = [
 		{ title: 'Shipping', content: 'Orders ship within two days from our warehouse.' },
 		{ title: 'Returns', content: 'Returns are free for thirty days after delivery.' },
@@ -234,7 +239,7 @@
 			code={`<Accordion items={items} hiddenUntilFound />`}
 		>
 			<div class="w-full max-w-md">
-				<Accordion items={shippingItems} hiddenUntilFound />
+				<Accordion items={findableItems} hiddenUntilFound />
 			</div>
 		</ComponentCard>
 

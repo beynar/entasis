@@ -96,7 +96,7 @@
 	{#snippet examples()}
 		<ComponentCard
 			title="Peek"
-			description="The content stays mounted, clipped to peekHeight with a faded edge, and a pill trigger floats over the fade to expand it. Great for long text."
+			description="The content stays mounted, clipped to peekHeight with a faded edge, and a pill trigger floats over the fade to expand it. Great for long text. The clip is visual only: screen readers still read the whole content, while links and controls hidden below the preview are inert."
 			code={`<Collapsible variant="peek" peekHeight={96}>
 	{#snippet trigger()}
 		<span>{open ? 'Show less' : 'Read more'}</span>

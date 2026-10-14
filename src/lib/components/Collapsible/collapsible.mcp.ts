@@ -71,7 +71,7 @@ The Collapsible component provides a way to show and hide content with a toggle 
   - Allows customizing styles for container, trigger, and content parts
 
 - **variant**: 'default' | 'peek' (default: 'default')
-  - \`peek\` keeps the content mounted, clips it to \`peekHeight\` and fades the edge while closed. While closed, links and controls below the visible preview are inert so Tab never lands on clipped content. \`hiddenUntilFound\` and \`keepMounted\` apply to \`default\` only.
+  - \`peek\` keeps the content mounted, clips it to \`peekHeight\` and fades the edge while closed. While closed, links and controls below the visible preview are inert so Tab never lands on clipped content. The clipped text itself stays in the accessibility tree (the clip is visual only, like a read-more preview), so screen readers read all of it. \`hiddenUntilFound\` and \`keepMounted\` apply to \`default\` only.
 
 ## Examples
 
