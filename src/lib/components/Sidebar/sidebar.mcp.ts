@@ -74,7 +74,7 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 - **iconColor**: Colors - Role tint for the leading icon, applied through \`data-color\`.
 - **iconVariant**: 'bare' | 'tile' - Leading icon treatment. \`tile\` paints a rounded square (\`bg-color-muted text-color-muted-readable\`) around the glyph, so per-project colour chips come from the role scale instead of hand-built markup.
 - **href**: string - Render as an anchor. Mutually exclusive with menu.
-- **onclick**: (event: MouseEvent) => void - Native click handler for button or anchor rows. Mutually exclusive with menu.
+- **onclick**: (event: MouseEvent) => void - Native click handler for button or anchor rows. Mutually exclusive with menu. On a row with \`items\` and no \`href\`, it runs before the submenu toggles, inline or in the collapsed flyout; \`event.preventDefault()\` skips the toggle.
 - **isActive**: boolean - Adds active styling and \`aria-current="page"\`.
 - **disabled**: boolean - Disables button rows and marks anchor rows disabled.
 - **badge**: string | number - Trailing count/status, hidden in icon mode.
@@ -99,7 +99,7 @@ of them renders exactly as a plain one.
 - **iconColor**: Colors - Role tint for the leading icon, applied through \`data-color\`.
 - **iconVariant**: 'bare' | 'tile' - \`tile\` paints the same tinted rounded square as a top-level row.
 - **badge**: string | number - Trailing count or status; the label truncates before it.
-- **tooltip**: string - Tooltip text. The label is always visible on a sub row (inline, or in the collapsed row's flyout), so the tooltip is extra information: shown whenever one is set, never on mobile.
+- **tooltip**: string - Tooltip text. The label is always visible on an inline sub row, so the tooltip is extra information: shown whenever one is set, never on mobile. The collapsed row's flyout lists only each entry's label, icon, \`href\` or \`onclick\`, and \`isActive\`/\`disabled\` state: it shows no tooltip, \`badge\` or \`action\`.
 - **class**: string - Classes applied to the row button.
 - **action**: SidebarMenuActionDescriptor | Snippet<[SidebarApi]> - Trailing action pinned to the row's end (\`data-sidebar="menu-sub-action"\`), drawn by the \`subAction\` theme part: hidden until the row is hovered or focused from \`md\` up, kept visible while its menu is open, always visible below \`md\`. The label truncates before it.
 

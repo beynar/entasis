@@ -195,8 +195,9 @@ export type SidebarMenuSubEntry = {
 	/** Trailing badge. */
 	badge?: string | number;
 	/**
-	 * Tooltip text. Submenus never show in icon-collapsed mode, where the label is hidden, so a
-	 * submenu row shows its tooltip whenever one is set (never on mobile).
+	 * Tooltip text. An inline submenu row always shows its label, so it shows its tooltip whenever
+	 * one is set (never on mobile). The collapsed row's flyout lists only each entry's label, icon,
+	 * destination or handler, and active and disabled state: no tooltip, badge or action.
 	 */
 	tooltip?: string;
 	/** Classes applied to the row button. */
@@ -255,7 +256,11 @@ type SidebarMenuEntryBase = {
 type SidebarMenuEntryNavigation = SidebarMenuEntryBase & {
 	/** Link href. Mutually exclusive with menu and view. */
 	href?: string;
-	/** Native click handler. Mutually exclusive with menu. */
+	/**
+	 * Native click handler. Mutually exclusive with menu. On a row with `items` and no `href`, it
+	 * runs before the submenu toggles, inline or in the collapsed flyout; `event.preventDefault()`
+	 * skips the toggle.
+	 */
 	onclick?: (event: MouseEvent) => void;
 	/**
 	 * Key of the `views` entry this row opens, sliding it in. Mutually exclusive with href, menu,

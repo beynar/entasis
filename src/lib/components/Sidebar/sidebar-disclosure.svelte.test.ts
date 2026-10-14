@@ -158,3 +158,45 @@ describe('collapsed submenu flyout', () => {
 		expect(screen.getByRole('link', { name: /Docs/ })).toHaveAttribute('href', '#docs');
 	});
 });
+
+describe('a submenu row with its own handler', () => {
+	// The same entry runs its handler before the submenu toggles whether the sidebar is expanded
+	// (inline submenu) or collapsed to icons (flyout), and `preventDefault()` skips the toggle in
+	// both.
+	const withHandler = (onclick: (event: MouseEvent) => void): SidebarGroup[] => [
+		{
+			label: 'Pages',
+			items: [
+				{
+					label: 'Planning',
+					icon: 'P',
+					onclick,
+					items: [{ label: 'Roadmap', href: '#roadmap' }]
+				}
+			]
+		}
+	];
+
+	for (const displayState of ['expanded', 'collapsed'] as const) {
+		test(`${displayState}: the handler runs, then the submenu opens`, async () => {
+			const onclick = vi.fn();
+			render(SidebarRowsHarness, { props: { items: withHandler(onclick), displayState } });
+			await tick();
+			const row = button(/Planning/);
+			await fireEvent.click(row);
+			expect(onclick).toHaveBeenCalledTimes(1);
+			await waitFor(() => expect(row).toHaveAttribute('aria-expanded', 'true'));
+		});
+
+		test(`${displayState}: preventDefault() keeps the submenu closed`, async () => {
+			const onclick = vi.fn((event: MouseEvent) => event.preventDefault());
+			render(SidebarRowsHarness, { props: { items: withHandler(onclick), displayState } });
+			await tick();
+			const row = button(/Planning/);
+			await fireEvent.click(row);
+			expect(onclick).toHaveBeenCalledTimes(1);
+			await tick();
+			expect(row).toHaveAttribute('aria-expanded', 'false');
+		});
+	}
+});

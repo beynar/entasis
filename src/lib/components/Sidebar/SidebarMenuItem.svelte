@@ -119,6 +119,14 @@
 		open = !isOpen;
 	}
 
+	// A row whose press reveals its submenu runs its own handler first in either mode, inline or
+	// collapsed to its flyout; `event.preventDefault()` keeps the submenu as it was.
+	function handleSubmenuRowClick(event: MouseEvent) {
+		if (item.disabled) return;
+		item.onclick?.(event);
+		if (!event.defaultPrevented) toggleSubmenu();
+	}
+
 	function handleClick(event: MouseEvent) {
 		if (item.disabled) {
 			event.preventDefault();
@@ -386,7 +394,7 @@
 					{@attach tooltipContent
 						? tooltip({ content: tooltipContent, position: tooltipPosition })
 						: undefined}
-					onclick={toggleSubmenu}
+					onclick={handleSubmenuRowClick}
 				>
 					{@render entryContent()}
 					{@render indicator()}
