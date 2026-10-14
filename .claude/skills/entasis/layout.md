@@ -6,6 +6,7 @@
 - [Tabbar](#tabbar)
 - [Stepper](#stepper)
 - [Breadcrumbs](#breadcrumbs)
+- [NavigationMenu](#navigationmenu)
 - [Accordion](#accordion)
 - [Collapsible](#collapsible)
 - [Separator](#separator)
@@ -177,6 +178,55 @@ Items with `menu` render as PopupMenu. Items can be strings or config objects.
 Breadcrumbs is inline-sized: it is a flex item next to the back button in `PageShellHeader`, so it
 is NOT a query container — adding `@container` would collapse it to zero width. Its item gap is a
 single unconditional `gap-sm` at every width; there is no responsive gap to override per breakpoint.
+
+---
+
+## NavigationMenu
+
+`import { NavigationMenu } from 'entasis/navigation-menu'`
+
+Site navigation with mega-menu panels: a `<nav>` landmark with a row of links and disclosure buttons, and one panel area rendered inline inside the nav (never portaled) that shows the open button's panel. Use it for a site header. MenuBar is the application-menu pattern and the wrong choice for site navigation.
+
+**Props:**
+
+- `items`: `NavigationMenuItem[]` (required) -- `{ type: 'link', label, href, description?, prefix?, ariaLabel?, active?, disabled?, target?, rel?, onclick? }` or `{ type: 'panel', value, label, prefix?, ariaLabel?, disabled?, content?, items? }`; `content` is a list of links or a snippet receiving `{ close }`; `items` adds a nested inline level (links and panels that expand in place)
+- `label`: string -- accessible name of the nav
+- `value` (bindable) / `defaultValue`: `Value | null` -- the open panel's `value`; `onValueChange: (value, details) => void` runs before the change, `details.reason` is `trigger-press`, `trigger-hover`, `list-navigation`, `escape-key`, `outside-press`, `focus-out`, `item-press`, `close-press` or `trigger-unmount`, and `details.cancel()` keeps the current panel. `Value` is generic.
+- `openOnHover`: boolean (default: true), `delay`: number (default: 50), `closeDelay`: number (default: 100)
+- `keepMounted`: boolean -- every panel stays in the DOM under `hidden` (crawlers and server-rendered HTML see the links)
+- `onAfterOpen` / `onAfterClose`: () => void
+- `size`: `'small' | 'normal' | 'large'`, `density`: `'compact' | 'normal' | 'comfortable'`, `color`: `Colors`, `dir`: `'ltr' | 'rtl'`, `transition`, `class`, `theme`
+
+Triggers are `<button aria-expanded aria-controls>` (no `aria-haspopup`). Opening by keyboard keeps focus on the trigger; Tab enters the panel and continues after the trigger. Left/Right (mirrored in RTL), Home and End move along the bar. Hovering switches panels at once and the panel animates its size. Escape closes and returns focus to the trigger. A link press closes every level and reports one `onValueChange(null)`; a consumer `onclick` runs first and `preventDefault()` keeps the menu open.
+
+```svelte
+<script lang="ts">
+	import { NavigationMenu, type NavigationMenuItem } from 'entasis/navigation-menu';
+
+	const items: NavigationMenuItem[] = [
+		{
+			type: 'panel',
+			value: 'product',
+			label: 'Product',
+			content: [
+				{
+					label: 'Components',
+					href: '/components',
+					description: 'The essential interface pieces.'
+				},
+				{ label: 'Blocks', href: '/blocks' }
+			]
+		},
+		{ type: 'link', label: 'Pricing', href: '/pricing', active: true }
+	];
+</script>
+
+<NavigationMenu {items} label="Main" />
+```
+
+**Theme parts:** `root`, `list`, `item`, `trigger` (variant: open), `link` (variant: active), `caret`, `viewport`, `popup`, `panel`, `contentList`, `contentLink`, `contentPrefix`, `contentText`, `contentTitle`, `contentDescription`, `nestedTrigger`, `motion`
+
+**Styling hooks:** `data-open`/`data-closed`, `data-entering`/`data-exiting` (popup), `data-popup-open` (trigger), `data-disabled`, `data-selected` (current-page link), `data-side`, `data-align`, `data-activation-direction` (panel that replaced another); CSS variables `--anchor-width` and `--anchor-height` on the viewport.
 
 ---
 
