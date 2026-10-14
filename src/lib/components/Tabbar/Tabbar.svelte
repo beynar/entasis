@@ -165,10 +165,19 @@
 			event.stopPropagation();
 			return;
 		}
-		if (!tab.href) {
-			select(index);
-			navigation.focusItem(index);
-		}
+		// Link tabs select on click too, without preventing navigation: with focus-driven
+		// activation the focus already selected them (select is idempotent), and with
+		// `activateOnFocus={false}` this is their only path to a selection.
+		select(index);
+		if (!tab.href) navigation.focusItem(index);
+	}
+
+	// Enter on an anchor already dispatches a click; Space does not, so a link tab selects on it
+	// here (and keeps the page from scrolling), matching button tabs.
+	function handleTabKeydown(event: KeyboardEvent, index: number, tab: NormalizedTab) {
+		if (event.key !== ' ' || !tab.href || tab.disabled) return;
+		event.preventDefault();
+		select(index);
 	}
 
 	const indicator = useSlidingIndicator({
@@ -342,6 +351,7 @@
 					fullWidth
 				})}
 				onclick={(event: MouseEvent) => handleTabClick(event, index, tab)}
+				onkeydown={(event: KeyboardEvent) => handleTabKeydown(event, index, tab)}
 				{@attach navigation.itemReference}
 				{@attach indicator.itemReference(index)}
 			>
