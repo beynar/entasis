@@ -28,7 +28,7 @@ describe('how the popover was opened (MN-4)', () => {
 				event: expect.any(MouseEvent)
 			})
 		);
-		expect(document.body.style.overflow).not.toBe('hidden');
+		expect(document.documentElement).not.toHaveAttribute('data-entasis-scroll-lock');
 
 		await pointerClick(button('Hover trigger'));
 		await settle();
@@ -36,7 +36,9 @@ describe('how the popover was opened (MN-4)', () => {
 		expect(button('Hover trigger')).toHaveAttribute('aria-expanded', 'true');
 		expect(onOpenChange).toHaveBeenCalledOnce();
 		// Pinned by the press, it now locks scroll like any pressed-open popover.
-		await waitFor(() => expect(document.body.style.overflow).toBe('hidden'));
+		await waitFor(() =>
+			expect(document.documentElement).toHaveAttribute('data-entasis-scroll-lock')
+		);
 	});
 
 	test('open() from the click handler of a hover-opened popup pins it too (a submenu trigger)', async () => {

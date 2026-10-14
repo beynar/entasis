@@ -1,5 +1,6 @@
 import { untrack } from 'svelte';
 import { createTypeahead } from './typeahead.js';
+import { elementById } from './id.js';
 
 /** What moved the highlight: keys (and typeahead), the pointer, or the list changing underneath it. */
 export type HighlightReason = 'keyboard' | 'pointer' | 'list';
@@ -185,7 +186,7 @@ export const useListNavigation = <Value extends string = string>(
 	const scrollToHighlighted = () => {
 		if (highlighted === undefined || typeof document === 'undefined') return;
 		const id = optionId(highlighted);
-		const element = id ? document.getElementById(id) : null;
+		const element = id ? elementById(opts.scrollContainer?.(), id) : null;
 		if (!element) return;
 		const container = opts.scrollContainer?.() ?? nearestScroller(element);
 		if (container) scrollWithin(container, element);
@@ -241,7 +242,7 @@ export const useListNavigation = <Value extends string = string>(
 				);
 				const element =
 					probe !== undefined && typeof document !== 'undefined'
-						? document.getElementById(optionId(probe)!)
+						? elementById(opts.scrollContainer?.(), optionId(probe)!)
 						: null;
 				const container = opts.scrollContainer?.() ?? (element ? nearestScroller(element) : null);
 				if (container) container.scrollTop = 0;

@@ -1,3 +1,4 @@
+import { applyCspNonce } from '$lib/utils/cspNonce.js';
 import { toArrayBuffer } from './documentViewer.source.js';
 import { getOoxmlUnitCount, renderOoxmlUnit, type OoxmlModel } from './ooxmlAdapter.js';
 import type { LegacyOfficeModel } from './legacyOfficeAdapter.js';
@@ -82,7 +83,7 @@ export class DocumentOutput {
 			frame.remove();
 			throw new Error('The browser could not create a print document.');
 		}
-		const style = printDocument.createElement('style');
+		const style = applyCspNonce(printDocument.createElement('style'));
 		style.textContent =
 			'@page{margin:12mm}body{margin:0;background:white}.unit{break-after:page;display:flex;justify-content:center}.unit:last-child{break-after:auto}canvas{max-width:100%;height:auto}.legacy{white-space:pre-wrap;font:12pt/1.5 system-ui;padding:8mm;box-sizing:border-box;width:100%}h1{font:600 22pt/1.2 system-ui}';
 		printDocument.head.appendChild(style);

@@ -117,6 +117,9 @@ const openReasonOf = (details: OpenChangeDetails): PopoverOpenReason => {
 	return 'programmatic';
 };
 
+/** How close to the viewport's width a touch-opened panel must be to lock page scroll, in px. */
+const TOUCH_LOCK_MARGIN = 20;
+
 /** A press on a trigger, remembered while its event dispatches. */
 type TriggerPress = { node: HTMLElement; event: Event; reason: OpenChangeReason };
 
@@ -148,6 +151,10 @@ export class PopoverState extends PopoverOptionsBase {
 	openReason = $state<PopoverOpenReason | null>(null);
 	/** The details of the last change that was applied, kept until the next one. */
 	lastOpenChange = $state.raw<OpenChangeDetails | null>(null);
+	/** Whether a finger opened the popover (a programmatic open leaves the last change stale). */
+	get #openedByTouch() {
+		return this.openReason === 'press' && this.lastOpenChange?.interaction === 'touch';
+	}
 	/**
 	 * Where the floating panel was last placed: the side it sits on (logical when a logical side
 	 * was requested, `none` when `positionPanel` placed it), its alignment, and whether its anchor
@@ -305,6 +312,26 @@ export class PopoverState extends PopoverOptionsBase {
 			this.#destroyed = true;
 		});
 
+		// A touch-opened popover is non-modal and a finger scrolls the page under it, so it locks
+		// scroll only when its panel spans the viewport, where there is nothing left to scroll to.
+		let panelSpansViewport = $state(false);
+		$effect(() => {
+			const panel = this.dialogElement;
+			if (!panel || !this.#openedByTouch) {
+				panelSpansViewport = false;
+				return;
+			}
+			const measure = () => {
+				const view = panel.ownerDocument.defaultView;
+				panelSpansViewport =
+					!!view && panel.getBoundingClientRect().width >= view.innerWidth - TOUCH_LOCK_MARGIN;
+			};
+			measure();
+			const observer = new ResizeObserver(measure);
+			observer.observe(panel);
+			return () => observer.disconnect();
+		});
+
 		// A hover-opened popover is a preview the pointer can leave: the page keeps scrolling.
 		useScrollLock({
 			isActive: () =>
@@ -313,7 +340,8 @@ export class PopoverState extends PopoverOptionsBase {
 				!this.isMobileSheet &&
 				!this.parent &&
 				this.isOpen &&
-				this.openReason !== 'hover'
+				this.openReason !== 'hover' &&
+				(!this.#openedByTouch || panelSpansViewport)
 		});
 
 		// An open state that did not come through `setOpen` (the `open` prop, `defaultOpen`) is a

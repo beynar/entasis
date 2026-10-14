@@ -1,3 +1,4 @@
+import { applyCspNonce, getCspNonce, nonceAttribute } from '$lib/utils/cspNonce.js';
 import { observeThemeTokens } from '$lib/utils/observeThemeTokens.js';
 import { createId } from '$lib/utils/id.js';
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
@@ -55,7 +56,7 @@ const loadMermaid = (): Promise<MermaidModule> => {
 		const existing = document.querySelector<HTMLScriptElement>(
 			`script[data-mermaid-cdn="${MERMAID_CDN_VERSION}"]`
 		);
-		const scriptEl = existing ?? document.createElement('script');
+		const scriptEl = existing ?? applyCspNonce(document.createElement('script'));
 		const settle = () => {
 			clearTimeout(timeout);
 			if (w.mermaid) resolve(w.mermaid);
@@ -486,10 +487,15 @@ export class MermaidState extends createBindableStateClass<MermaidOptions>() {
 			// A newer render superseded this one.
 			if (token !== this.renderToken || !this.svgHost) return;
 
-			this.svgHost.innerHTML = svg;
+			// mermaid's own `<style>` element rides in the svg markup: with a CSP nonce it is
+			// stamped before parsing, since a style cannot be allowed after it is inserted.
+			const nonce = getCspNonce();
+			this.svgHost.innerHTML = nonce
+				? svg.replace(/<style\b/gi, (tag) => tag + nonceAttribute(nonce))
+				: svg;
 			// Scoped polish (rounded corners / hairline strokes) keyed to the produced
 			// svg's own id so it can't affect any other diagram or the page.
-			const style = document.createElement('style');
+			const style = applyCspNonce(document.createElement('style'), nonce);
 			style.textContent = buildScopedStyle(id);
 			this.svgHost.prepend(style);
 			// Copy sizing attributes from the produced <svg> onto our host.

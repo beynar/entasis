@@ -51,4 +51,17 @@ export type ThemeProps<T extends readonly string[] = readonly string[]> = Omit<
 	 * A `set<Component>Theme` call or an instance `theme` prop still wins.
 	 */
 	components?: ComponentThemeRegistry;
+	/**
+	 * Content-Security-Policy nonce. Applied to every `<script>` and `<style>` the Theme and the
+	 * components below it inject (the theme and viewport boot scripts, design-token CSS, and the
+	 * CDN loaders of PhoneInput, Map and Mermaid). Generate one per request in `hooks.server`,
+	 * pass it through `locals` and layout data, and give the same value to `kit.csp`.
+	 */
+	nonce?: string;
+	/**
+	 * Where portaled panels (dialogs, popovers, menus, tooltips, the floating-window layer) are
+	 * mounted. Defaults to `document.body`, or to the shadow root when the Theme renders inside
+	 * one. Pass an element, or a function for a container that does not exist yet at render time.
+	 */
+	portalContainer?: HTMLElement | ShadowRoot | (() => HTMLElement | ShadowRoot | null | undefined);
 };

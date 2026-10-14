@@ -5,7 +5,7 @@
 	import BeforeHydratation from '../Utils/BeforeHydratation.svelte';
 	import { Theme as SvelteTheme } from 'svelte-themes';
 	import { ThemeState } from './theme.state.svelte.js';
-	import { compileThemeBlockingScript } from './helper.js';
+	import { compileThemeBlockingScript, compileViewportScript, disableAnimation } from './helper.js';
 	import TooltipHost from '../Tooltip/TooltipHost.svelte';
 	import DialogBackdrop from '../Dialog/DialogBackdrop.svelte';
 	import type { ThemeProps } from './theme.props.js';
@@ -14,6 +14,7 @@
 	import { compileThemeDesignTokens, type ThemeDesignTokens } from './theme.designTokens.js';
 	import { mergeMotionTokens } from '$lib/tailwind/scales.js';
 	import { REDUCED_MOTION_ATTRIBUTE, REDUCED_MOTION_QUERY } from '$lib/utils/motion.svelte.js';
+	import { untrack } from 'svelte';
 
 	let {
 		children,
@@ -32,7 +33,9 @@
 		colorScheme,
 		reduceMotion,
 		motion,
-		components
+		components,
+		nonce,
+		portalContainer
 	}: ThemeProps<T> = $props();
 
 	const validatedDefaultTheme = (() => {
@@ -83,10 +86,27 @@
 		get storageKey() {
 			return storageKey;
 		},
-		// `transitionOnChange` is the positive form of svelte-themes' `disableTransitionOnChange`.
-		get disableTransitionOnChange() {
-			return !transitionOnChange;
-		}
+		// svelte-themes would inject its transition-suppressing style element without a nonce; the
+		// effects below do that part with the Theme `nonce`, around the same DOM update.
+		disableTransitionOnChange: false
+	});
+
+	// `transitionOnChange={false}` suppresses CSS transitions for the swap. The pre effect runs
+	// before svelte-themes applies the resolved theme (its effect was created first, in the
+	// constructor above) and the effect after it, so the style brackets the DOM update.
+	let restoreTransitions: (() => void) | null = null;
+	$effect.pre(() => {
+		void theme.resolvedTheme;
+		if (transitionOnChange) return;
+		untrack(() => {
+			restoreTransitions?.();
+			restoreTransitions = disableAnimation(nonce);
+		});
+	});
+	$effect(() => {
+		void theme.resolvedTheme;
+		restoreTransitions?.();
+		restoreTransitions = null;
 	});
 
 	const entasisTheme = new ThemeState(
@@ -113,6 +133,12 @@
 			},
 			get componentThemes() {
 				return components;
+			},
+			get nonce() {
+				return nonce;
+			},
+			get portalContainer() {
+				return portalContainer;
 			},
 			get defaultColor() {
 				const resolved = theme.resolvedTheme;
@@ -162,7 +188,8 @@
 			syncColorScheme,
 			forcedTheme,
 			defaultTheme: validatedDefaultTheme,
-			attribute
+			attribute,
+			nonce
 		})
 	);
 </script>
@@ -170,27 +197,9 @@
 <BeforeHydratation
 	immediate
 	once
-	scripts={[
-		/* js */ `
-	(() => {
-			const visualViewport = window.visualViewport;
-			const setWindowHeight = () => {
-				const height = visualViewport?.height ?? window.innerHeight;
-				document.documentElement.style.setProperty('--window-height', height + 'px');
-			};
-			const setWindowWidth = () => {
-				document.documentElement.style.setProperty('--window-width', window.innerWidth + 'px');
-			};
-			window.addEventListener('resize', setWindowHeight);
-			window.addEventListener('resize', setWindowWidth);
-			visualViewport?.addEventListener('resize', setWindowHeight);
-			setWindowHeight();
-			setWindowWidth();
-	})();
-`,
-		reduceMotionScript
-	]}
+	scripts={[compileViewportScript(), reduceMotionScript]}
 	css={[designTokenCss]}
+	{nonce}
 />
 
 <svelte:head>

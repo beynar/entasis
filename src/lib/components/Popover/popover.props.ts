@@ -173,7 +173,10 @@ export type PopoverProps = WithAttachments<{
 	closeOnMouseLeave?: boolean;
 	/** When true, renders debug overlays for the hover safe-area rectangles (blue) and the prediction cone toward the panel (orange). */
 	debugSafeArea?: boolean;
-	/** When true, locks page scroll while a root-level popover is open, unless hovering opened it. */
+	/**
+	 * When true, locks page scroll while a root-level popover is open, unless hovering opened it or
+	 * a finger did and the panel is narrower than the viewport (the page still scrolls under it).
+	 */
 	lockScroll?: boolean;
 	/** Additional CSS classes merged onto the popover dialog element. */
 	class?: string;

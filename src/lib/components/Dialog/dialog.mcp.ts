@@ -308,7 +308,7 @@ The Dialog component uses a \`DialogState\` instance that is passed to all slot 
 - The root is \`role="dialog"\`, or \`role="alertdialog"\` for \`type="alert"\`, always with \`aria-modal="true"\`
 - The root and the panel carry \`data-type\` with the resolved type (a responsive record or a modal collapsed into a mobile sheet reports the type actually shown), which drawer edge rounding keys on
 - Escape closes only the topmost open layer and an outside press dismisses the layers above the one pressed; both honour \`closeOnEscape\` / \`closable\` / \`closeOnClickOutside\` through the shared layer stack
-- Body scroll is locked when dialog is open
+- Page scroll is locked while a dialog is open: \`data-entasis-scroll-lock\` on \`<html>\` (the Tailwind plugin turns it into \`overflow: hidden\`, so a lock another library holds is never overwritten) and \`--entasis-scrollbar-width\` with the hidden scrollbar's width, for \`position: fixed\` headers that must not jump. A page with \`scrollbar-gutter: stable\` gets no second gutter
 
 ## Notes
 

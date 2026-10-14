@@ -13,7 +13,7 @@ Svelte 5 component library for SvelteKit, styled through a Tailwind CSS v4 plugi
 pnpm add entasis
 ```
 
-Peer dependencies: `svelte ^5`, `@sveltejs/kit ^2` and `tailwindcss ^4` (via `@tailwindcss/vite`). There is no `tailwind.config.js`; all configuration lives in your CSS. The library reads SvelteKit's `$app/environment` and, in `NetworkIndicator`, the `navigating` store, so it runs inside a SvelteKit app.
+Peer dependencies: `svelte ^5.32` (attachments and `fromAction`), `@sveltejs/kit ^2` and `tailwindcss ^4` (via `@tailwindcss/vite`). There is no `tailwind.config.js`; all configuration lives in your CSS. The library reads SvelteKit's `$app/environment` and, in `NetworkIndicator`, the `navigating` store, so it runs inside a SvelteKit app.
 
 ### Optional peers
 

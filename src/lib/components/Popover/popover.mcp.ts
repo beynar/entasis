@@ -87,7 +87,7 @@ The Popover component displays floating content positioned relative to a trigger
 - **directedTransition**: boolean (default: true) - Transition direction follows position
 
 ### Behavior Props
-- **lockScroll**: boolean (default: true) - Lock body scroll while a root-level popover is open, unless hovering opened it
+- **lockScroll**: boolean (default: true) - Lock page scroll while a root-level popover is open, unless hovering opened it, or a finger did and the panel is more than 20px narrower than the viewport (a touch popover the page can still scroll under stays unlocked). The lock is the \`data-entasis-scroll-lock\` attribute on \`<html>\`; \`--entasis-scrollbar-width\` holds the hidden scrollbar's width for fixed bars
 
 ### Styling Props
 - **class**: string - Additional CSS classes
@@ -464,7 +464,7 @@ The Popover component uses a \`PopoverState\` instance that is passed to all slo
 - Automatically adjusts position to stay in viewport: flips, then shifts 20px inside the visual viewport, and places again once the visual viewport settles after an on-screen keyboard opens
 - Coordinates are rounded to the device pixel grid, and in right-to-left documents the panel stays beside its trigger with \`start\` alignment on the right
 - Multiple popovers can be stacked
-- Scroll locking prevents background scroll (when enabled), except for a popover hovering opened
+- Scroll locking prevents background scroll (when enabled), except for a popover hovering opened and a touch-opened popover narrower than the viewport
 - Transitions animate based on position direction
 
 ## Theme Customization

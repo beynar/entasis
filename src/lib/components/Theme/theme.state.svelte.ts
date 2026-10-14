@@ -19,6 +19,8 @@ import { updateThemeWithTransition, type ThemeTransition } from './themeTransiti
 import { ThemeFloatingWindows } from './theme.floatingWindows.js';
 import type { Colors } from '$lib/types/theme.js';
 import { REDUCED_MOTION_QUERY, registerActiveTheme } from '$lib/utils/motion.svelte.js';
+import { registerCspNonce } from '$lib/utils/cspNonce.js';
+import { registerPortalContainer, type PortalContainerSource } from '$lib/attachments/portal.js';
 
 type Events = 'scroll' | 'pointerdown' | 'keydown' | 'keyup';
 type EventPayload = {
@@ -48,6 +50,10 @@ interface ThemeOptions {
 	readonly motionTokens?: DeepPartial<MotionTokens>;
 	/** The `<Theme components>` registry; read by `useComponentTheme`/`useComponentMotion`. */
 	readonly componentThemes?: ComponentThemeRegistry;
+	/** The `<Theme nonce>` value: the CSP nonce of every injected `<script>` and `<style>`. */
+	readonly nonce?: string;
+	/** The `<Theme portalContainer>` value: where portaled panels mount. */
+	readonly portalContainer?: PortalContainerSource;
 }
 
 export class ThemeState extends createBindableStateClass<ThemeOptions>() {
@@ -148,6 +154,8 @@ export class ThemeState extends createBindableStateClass<ThemeOptions>() {
 		this.svelteTheme = svelteTheme;
 		setContext('entasisTheme', this);
 		onDestroy(registerActiveTheme(this));
+		onDestroy(registerCspNonce(() => this.nonce));
+		onDestroy(registerPortalContainer(() => this.portalContainer));
 	}
 
 	resolveTransitionProps = (props?: ResponsiveProps<FSOProps>, defaultTransition?: FSOProps) => {

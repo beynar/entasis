@@ -1,29 +1,65 @@
-// Refcounted scroll lock: the first lock on a scroller stores its original inline
-// overflow/padding and the last release restores them, so stacked overlays can each
-// hold a lock without clobbering one another.
+// Refcounted scroll lock. A lock is an attribute on the scroller (`<html>` by default) and one
+// rule in the Tailwind plugin CSS (`[data-entasis-scroll-lock]`, see `tailwind/global.ts`) that
+// sets `overflow: hidden`. Nothing is read back from or written to the element's inline styles,
+// so a lock another library holds on the same element (a third-party modal that sets inline
+// `overflow: hidden`) is neither restored over nor released early: releasing ours removes only our
+// attribute, and the page stays locked for as long as anyone else's lock holds.
 type ScrollLockOptions = {
 	isActive: () => boolean;
 	scroller?: HTMLElement;
 };
 
+/** The attribute a locked scroller carries. */
+export const SCROLL_LOCK_ATTRIBUTE = 'data-entasis-scroll-lock';
+/**
+ * Value of `data-entasis-scroll-lock` when there is nothing to compensate: the page already
+ * reserves its scrollbar gutter (`scrollbar-gutter: stable`) or shows no classic scrollbar.
+ * Otherwise the value is empty and the plugin rule keeps the scrollbar's room.
+ */
+export const SCROLL_LOCK_UNCOMPENSATED = 'uncompensated';
+/**
+ * Custom property set on a locked scroller: the width in px of the scrollbar the lock hides,
+ * `0px` with overlay scrollbars. Use it to keep `position: fixed` bars from jumping sideways.
+ */
+export const SCROLLBAR_WIDTH_VARIABLE = '--entasis-scrollbar-width';
+
 // WeakMap (not Map): purely imperative refcount bookkeeping keyed by element, read and
 // written from inside effects — a reactive Map here would re-trigger its own effect.
-const locks = new WeakMap<HTMLElement, { count: number; overflow: string; paddingRight: string }>();
+const locks = new WeakMap<HTMLElement, { count: number }>();
 
-/** Locks `scroller` (default `document.body`) and returns a release function. */
-export const lockScroll = (scroller: HTMLElement = document.body) => {
+/** Whether `scrollbar-gutter: stable` already keeps room for the scrollbar on `scroller`. */
+const reservesGutter = (scroller: HTMLElement) => {
+	const document = scroller.ownerDocument;
+	// The root element's value (or the body's, when its overflow propagates) styles the viewport.
+	const targets = scroller === document.documentElement ? [scroller, document.body] : [scroller];
+	return targets.some((target) =>
+		document.defaultView?.getComputedStyle(target).scrollbarGutter?.startsWith('stable')
+	);
+};
+
+/** The width of the scrollbar `scroller` shows now, `0` when it has none or an overlay one. */
+const measureScrollbarWidth = (scroller: HTMLElement) => {
+	const document = scroller.ownerDocument;
+	if (scroller === document.documentElement) {
+		return Math.max(0, (document.defaultView?.innerWidth ?? 0) - scroller.clientWidth);
+	}
+	return Math.max(0, scroller.offsetWidth - scroller.clientWidth);
+};
+
+/** Locks `scroller` (default the page, `<html>`) and returns a release function. */
+export const lockScroll = (scroller: HTMLElement = document.documentElement) => {
 	const entry = locks.get(scroller);
 	if (entry) {
 		entry.count += 1;
 	} else {
-		const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
-		locks.set(scroller, {
-			count: 1,
-			overflow: scroller.style.overflow,
-			paddingRight: scroller.style.paddingRight
-		});
-		if (scrollBarWidth > 0) scroller.style.paddingRight = `${scrollBarWidth}px`;
-		scroller.style.overflow = 'hidden';
+		locks.set(scroller, { count: 1 });
+		// Measured before the attribute hides the scrollbar.
+		const width = measureScrollbarWidth(scroller);
+		scroller.style.setProperty(SCROLLBAR_WIDTH_VARIABLE, `${width}px`);
+		scroller.setAttribute(
+			SCROLL_LOCK_ATTRIBUTE,
+			width === 0 || reservesGutter(scroller) ? SCROLL_LOCK_UNCOMPENSATED : ''
+		);
 	}
 	let released = false;
 	return () => {
@@ -33,8 +69,8 @@ export const lockScroll = (scroller: HTMLElement = document.body) => {
 		if (!current) return;
 		current.count -= 1;
 		if (current.count > 0) return;
-		scroller.style.overflow = current.overflow;
-		scroller.style.paddingRight = current.paddingRight;
+		scroller.removeAttribute(SCROLL_LOCK_ATTRIBUTE);
+		scroller.style.removeProperty(SCROLLBAR_WIDTH_VARIABLE);
 		locks.delete(scroller);
 	};
 };

@@ -163,19 +163,51 @@ export class LayerStack {
 		return this.open.filter((layer) => layer.kind === kind);
 	}
 
+	/** The documents whose listeners are attached now, each with the function that removes them. */
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- imperative listener bookkeeping, written from the effect that syncs it
+	readonly #listening = new Map<Document, () => void>();
+
 	constructor() {
 		// Listeners exist only while something is open. Escape goes to the top layer alone;
-		// a pointer press dismisses every non-hit layer above the first layer it lands in.
+		// a pointer press dismisses every non-hit layer above the first layer it lands in. They
+		// sit on the page's document and on the owner document of every open layer's nodes, so a
+		// popup rendered into an iframe (or a portal container in another document) hears its
+		// own Escape and outside presses. Documents are added and dropped as layers come and go;
+		// a pending touch tap survives that, and only ends when nothing is open.
 		$effect(() => {
-			if (this.open.length === 0) return;
-			const offKey = on(window, 'keydown', this.#onKeyDown);
-			const offPointer = on(document, 'pointerdown', this.#onPointerDown, { capture: true });
-			return () => {
+			const documents: Document[] = [];
+			if (this.open.length > 0) {
+				documents.push(document);
+				for (const layer of this.open) {
+					for (const node of layer.nodes) {
+						const owner = node.ownerDocument;
+						if (owner && !documents.includes(owner)) documents.push(owner);
+					}
+				}
+			}
+			untrack(() => this.#syncDocuments(documents));
+		});
+		$effect(() => () => untrack(() => this.#syncDocuments([])));
+	}
+
+	#syncDocuments(documents: readonly Document[]) {
+		for (const [owner, off] of this.#listening) {
+			if (documents.includes(owner)) continue;
+			off();
+			this.#listening.delete(owner);
+		}
+		for (const owner of documents) {
+			if (this.#listening.has(owner)) continue;
+			const view = owner.defaultView;
+			if (!view) continue;
+			const offKey = on(view, 'keydown', this.#onKeyDown);
+			const offPointer = on(owner, 'pointerdown', this.#onPointerDown, { capture: true });
+			this.#listening.set(owner, () => {
 				offKey();
 				offPointer();
-				this.#pendingTap?.();
-			};
-		});
+			});
+		}
+		if (this.#listening.size === 0) this.#pendingTap?.();
 	}
 
 	/**
@@ -301,10 +333,12 @@ export class LayerStack {
 	#awaitTap(down: PointerEvent, layers: LayerHandle[]) {
 		this.#pendingTap?.();
 		// Capture phase, like the press itself: a control that stops propagation cannot hide it.
+		// On the document the press landed in, which is not the page's inside an iframe.
 		const capture = { capture: true };
+		const owner = (down.currentTarget as Document | null) ?? document;
 		const offs = [
 			on(
-				document,
+				owner,
 				'pointermove',
 				(event) => {
 					if (event.pointerId !== down.pointerId) return;
@@ -314,7 +348,7 @@ export class LayerStack {
 				capture
 			),
 			on(
-				document,
+				owner,
 				'pointercancel',
 				(event) => {
 					if (event.pointerId === down.pointerId) stop();
@@ -322,7 +356,7 @@ export class LayerStack {
 				capture
 			),
 			on(
-				document,
+				owner,
 				'pointerup',
 				(event) => {
 					if (event.pointerId !== down.pointerId) return;

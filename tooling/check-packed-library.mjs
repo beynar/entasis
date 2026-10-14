@@ -39,6 +39,12 @@ try {
 		);
 		dependencies[dependency] = installed.version;
 	}
+	// `ENTASIS_CHECK_SVELTE_VERSION=5.32.0` installs that Svelte in the consumer instead of the
+	// repository's, so CI can run this check against the oldest version the peer range admits.
+	if (process.env.ENTASIS_CHECK_SVELTE_VERSION) {
+		dependencies.svelte = process.env.ENTASIS_CHECK_SVELTE_VERSION;
+		console.log(`Consumer Svelte pinned to ${dependencies.svelte}.`);
+	}
 	await writeFile(
 		path.join(fixtureRoot, 'package.json'),
 		JSON.stringify({ name: 'entasis-consumer-check', private: true, type: 'module', dependencies })

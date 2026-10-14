@@ -253,27 +253,12 @@ const toLogicalEdge = (physical: DndEdge, element: Element, axis: DndAxis): DndE
 };
 
 // ---------------------------------------------------------------------------
-// Drop indicator + default dragging style: one fixed-position line and one
-// tiny stylesheet for the whole app, managed imperatively. Override via the
-// [data-dnd-indicator] / [data-dnd-dragging] selectors.
+// Drop indicator: one fixed-position line for the whole app, managed imperatively. The default
+// dragging style and the empty-list tint are plain rules in the Tailwind plugin CSS
+// (`tailwind/global.ts`), so nothing is injected into the document head and a strict CSP needs
+// no nonce for them. Override via the [data-dnd-indicator] / [data-dnd-dragging] selectors.
 // ---------------------------------------------------------------------------
 let indicatorEl: HTMLElement | null = null;
-
-// Injected once per document, from the list attachment — indicator-less
-// (preview) lists need the data-dnd-dragging default and the empty-list tint
-// too, not just lists that ever draw the line.
-const ensureBaseStyles = () => {
-	if (document.querySelector('style[data-dnd-styles]')) return;
-	const style = document.createElement('style');
-	style.setAttribute('data-dnd-styles', '');
-	// The empty-list rule is wrapped in :where() (zero specificity) so any
-	// consumer class on the container wins over the default tint.
-	style.textContent =
-		'[data-dnd-dragging]{opacity:.4;}' +
-		':where([data-dnd-over="true"]:not(:has([data-dnd-item]))){' +
-		'background-color:color-mix(in oklab, var(--color-primary, currentColor) 6%, transparent);}';
-	document.head.appendChild(style);
-};
 
 const ensureIndicator = (): HTMLElement => {
 	// Query the DOM (not just the module variable) so HMR re-evaluations reuse
@@ -291,7 +276,6 @@ const ensureIndicator = (): HTMLElement => {
 		display: 'none'
 	});
 	document.body.appendChild(indicatorEl);
-	ensureBaseStyles();
 	return indicatorEl;
 };
 
@@ -476,7 +460,7 @@ const registerAutoScroll = (listEl: Element): (() => void) => {
  * containers on its own.
  *
  * Styling hooks: `data-dnd-dragging` on the dragged item (default 0.4 opacity
- * via an injected rule), `data-dnd-over` on a hovered container (an EMPTY
+ * via the Tailwind plugin base styles), `data-dnd-over` on a hovered container (an EMPTY
  * hovered list gets a default primary tint instead of an indicator line —
  * there is no index to point at; override via your own `data-dnd-over`
  * styles), `data-dnd-indicator` on the shared indicator line,
@@ -715,7 +699,6 @@ export const useDndList = <T>(options: UseDndListOptions<T>) => {
 	const list: Attachment = (element) => {
 		element.setAttribute('data-dnd-list', listId);
 		listElements.add(element);
-		ensureBaseStyles();
 
 		/** Rows belonging to THIS list only — nested lists' rows don't count. */
 		const ownRows = () =>
@@ -740,7 +723,7 @@ export const useDndList = <T>(options: UseDndListOptions<T>) => {
 			} else {
 				// Empty list: there is no index to point at, so no line — the
 				// container itself signals via [data-dnd-over] (default tint from
-				// the injected stylesheet, override with your own styles).
+				// the plugin base styles, override with your own styles).
 				hideIndicator();
 			}
 		};

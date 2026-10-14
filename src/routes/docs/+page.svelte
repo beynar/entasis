@@ -211,6 +211,64 @@ pnpm add tailwindcss @tailwindcss/vite`;
 		<!-- app -->
 	{/snippet}
 </Theme>`;
+
+	const cspHooksCode = `// src/hooks.server.ts
+import type { Handle } from '@sveltejs/kit';
+
+export const handle: Handle = async ({ event, resolve }) => {
+	event.locals.nonce = crypto.randomUUID();
+	return resolve(event);
+};
+
+// src/routes/+layout.server.ts
+export const load = ({ locals }) => ({ nonce: locals.nonce });`;
+
+	const cspLayoutCode = `<!-- src/routes/+layout.svelte -->
+<script lang="ts">
+	import { Theme } from 'entasis/theme';
+
+	let { data, children } = $props();
+</${'script'}>
+
+<Theme nonce={data.nonce}>
+	{@render children()}
+</Theme>`;
+
+	const cspConfigCode = `// svelte.config.js — SvelteKit adds the nonce to its own scripts and styles
+const config = {
+	kit: {
+		csp: {
+			mode: 'nonce',
+			directives: { 'script-src': ['self'], 'style-src': ['self'] }
+		}
+	}
+};`;
+
+	const portalCode = `<script lang="ts">
+	import { Theme } from 'entasis/theme';
+
+	let { children } = $props();
+	let host = $state<HTMLElement>();
+</${'script'}>
+
+<div bind:this={host}></div>
+<Theme portalContainer={() => host}>
+	{@render children()}
+</Theme>`;
+
+	const scrollLockCode = `/* A fixed header that must not jump when a dialog hides the scrollbar */
+.app-header {
+	position: fixed;
+	inset-inline: 0;
+	padding-inline-end: var(--entasis-scrollbar-width, 0px);
+}
+
+/* A bottom bar that rides above the on-screen keyboard */
+.composer {
+	position: fixed;
+	inset-inline: 0;
+	bottom: var(--keyboard-inset, 0px);
+}`;
 </script>
 
 {#snippet ic(text: string)}<code class="bg-neutral-muted px-xs py-micro rounded-sm text-sm"
@@ -343,6 +401,52 @@ pnpm add tailwindcss @tailwindcss/vite`;
 		every key. Component density variants remain local choices; their spacing utilities inherit the active
 		runtime spacing scale.
 	</p>
+
+	<Separator class="my-2" children="Content security policy" />
+
+	<p class="text-neutral/70">
+		Pass a per-request nonce to {@render ic('<Theme nonce>')} and every {@render ic('<script>')} and
+		{@render ic('<style>')} entasis injects carries it: the theme and viewport boot scripts, the design-token
+		stylesheet, the {@render ic('transitionOnChange={false}')} style, and the CDN loaders of {@render ic(
+			'PhoneInput'
+		)}, {@render ic('Map')} and {@render ic('Mermaid')}. Drag-and-drop base styles are plain rules
+		in the Tailwind plugin CSS, so nothing is injected for them. Generate the nonce in {@render ic(
+			'hooks.server.ts'
+		)}, send it through {@render ic('locals')} and layout data, and give the same value to SvelteKit's
+		{@render ic('kit.csp')} for its own tags.
+	</p>
+	<Code language="ts" code={cspHooksCode} />
+	<Code language="svelte" code={cspLayoutCode} />
+	<Code language="js" code={cspConfigCode} />
+	<p class="text-neutral/70">
+		Server-rendered {@render ic('style:')} directives compile to {@render ic('style')} attributes, which
+		a nonce cannot cover: allow them with {@render ic("style-src-attr 'unsafe-inline'")}.
+		{@render ic('ThemeState.nonce')} exposes the value to your own injected code.
+	</p>
+
+	<Separator class="my-2" children="Shadow DOM and portals" />
+
+	<p class="text-neutral/70">
+		Dialogs, popovers, menus and tooltips mount in {@render ic('document.body')}. Rendered inside a
+		shadow root they mount in that root, so adopted styles keep applying. {@render ic(
+			'portalContainer'
+		)} overrides both with an element or a function that finds one later. Escape and outside presses are
+		heard on the document a panel lives in, so a panel rendered into an iframe dismisses correctly.
+	</p>
+	<Code language="svelte" code={portalCode} />
+
+	<Separator class="my-2" children="Scroll lock and viewport variables" />
+
+	<p class="text-neutral/70">
+		A dialog or popover locks page scroll with a {@render ic('data-entasis-scroll-lock')} attribute on
+		{@render ic('<html>')} and one rule in the Tailwind plugin CSS. No inline style is written, so a lock
+		another library holds on the same element is neither overwritten nor released early. The hidden scrollbar's
+		room is kept with {@render ic('scrollbar-gutter: stable')} unless your page already reserves a gutter.
+		Two variables help your own layout:
+		{@render ic('--entasis-scrollbar-width')} (set on {@render ic('<html>')} while locked) and
+		{@render ic('--keyboard-inset')} (the height the on-screen keyboard covers, from the visual viewport).
+	</p>
+	<Code language="css" code={scrollLockCode} />
 
 	<Separator class="my-2" children="Color tokens" />
 

@@ -197,6 +197,39 @@ export const applyGlobalEngine = (api: PluginAPI, options?: GlobalEngineOptions)
 		stateOptions
 	);
 
+	// SCROLL LOCK — dialogs and popovers lock the page by putting `data-entasis-scroll-lock` on
+	// `<html>`, never by writing inline styles, so a lock held by another library on the same
+	// element is neither restored over nor released early. The value is empty while the lock
+	// hides a classic scrollbar: `scrollbar-gutter: stable` then keeps its room (padding does the
+	// same where the property is unsupported) and `--entasis-scrollbar-width` carries its width
+	// for `position: fixed` bars. `uncompensated` marks a page that reserves the gutter itself or
+	// has no classic scrollbar, which would otherwise gain a gutter it never had.
+	const scrollLock = '[data-entasis-scroll-lock]';
+	const scrollLockCompensated = `${scrollLock}:not([data-entasis-scroll-lock='uncompensated'])`;
+	addBase({
+		// `!important`: base-layer rules lose to a page's unlayered `html { overflow-y: scroll }`
+		// and to an outside library's inline `overflow`, and the lock has to hold against both.
+		[scrollLock]: { overflow: 'hidden !important' },
+		[scrollLockCompensated]: { 'scrollbar-gutter': 'stable !important' },
+		'@supports not (scrollbar-gutter: stable)': {
+			[scrollLockCompensated]: {
+				'padding-inline-end': 'var(--entasis-scrollbar-width, 0px)'
+			}
+		},
+		// The keyboard overlap from the visual viewport (see Theme); `0px` until a Theme measures it.
+		html: { '--keyboard-inset': '0px' }
+	});
+
+	// DRAG AND DROP — the dragged item's dim and the empty-list drop tint, as plain rules rather
+	// than a `<style>` the list attachment would inject (a strict CSP would block it without a
+	// nonce). The tint sits in `:where()` (zero specificity) so any class on the container wins.
+	addBase({
+		'[data-dnd-dragging]': { opacity: '0.4' },
+		':where([data-dnd-over="true"]:not(:has([data-dnd-item])))': {
+			'background-color': 'color-mix(in oklab, var(--color-primary, currentColor) 6%, transparent)'
+		}
+	});
+
 	// DYNAMIC WINDOW UTILITIES
 	addUtilities({
 		'.h-window': {
