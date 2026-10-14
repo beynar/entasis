@@ -26,10 +26,11 @@ A searchable dropdown component that supports both static arrays and async optio
 
 ### Core Props
 
-- **items**: \`ComboboxOption[] | ((searchValue?: string) => MaybePromise<ComboboxOption[]>)\` (required)
-  - Array of options or async function that returns options based on search value
-  - For arrays: filtered client-side
-  - For functions: called with search value, returns Promise or array
+- **items**: \`ComboboxItems | ((searchValue: string | undefined, request: { signal: AbortSignal }) => MaybePromise<ComboboxItems>)\` (required)
+  - Array of options (and groups) or a function that returns them for the search text
+  - \`ComboboxItems\` is \`(ComboboxOption | { label?: string; items: ComboboxOption[] })[]\`; flat options and groups can be mixed. \`ComboboxOption\` is \`{ value; label; description?; disabled?; data? }\`
+  - For arrays: filtered client-side with a case- and accent-insensitive match on the label, in the active I18n locale ("eclair" finds "Éclair")
+  - For functions: called (after a 100ms pause in typing) with the search text and \`{ signal }\`. The signal is aborted when a newer search replaces the request, and a response that is not the latest is ignored, so a slow answer never overwrites a newer list. The last results stay visible, marked busy, while the next request loads
 
 - **value**: \`string | null\` (bindable)
   - Selected option value
@@ -37,15 +38,31 @@ A searchable dropdown component that supports both static arrays and async optio
   - Initial selected value when \`value\` is omitted
 
 - **searchValue**: \`string\` (default: \`''\`, bindable)
-  - Current search input value
+  - Current search input value (a draft: it is never submitted by a native form)
+
+- **open**: \`boolean\` (bindable) / **defaultOpen**: \`boolean\` (default: \`false\`)
+  - Whether the options list is open. The list only renders while there is something to show (options, a loading or error message, or the "no options" message for the typed text)
+  - **onOpenChange**: \`(open, details) => void\` runs before the list opens or closes. \`details\` carries \`reason\` (\`'input-change'\`, \`'escape-key'\`, \`'item-press'\`, \`'list-navigation'\`, \`'trigger-press'\`, \`'trigger-focus'\`, \`'focus-out'\`), \`event\`, \`interaction\` and \`cancel()\`; a cancelled change leaves the list as it was
+  - **onAfterOpen** / **onAfterClose**: \`() => void\` fire once after the open or close transition
 
 - **loading**: \`boolean\` (default: \`false\`, bindable)
   - Loading state (managed automatically for async options)
 
 ### Behavior Props
 
-- **showAllOnFocus**: \`boolean\` (default: \`false\`)
-  - Show all options when input is focused, even without typing
+- **openOnFocus**: \`boolean\` (default: \`false\`)
+  - Open the list when the input receives focus, even before typing: static arrays list every option, \`items\` functions are called with an empty search
+- **showAllOnFocus**: \`boolean\` (deprecated alias of \`openOnFocus\`, kept for one minor)
+
+- **filter**: \`(option, searchValue) => boolean\` - Custom match for static arrays (functions filter themselves)
+- **limit**: \`number\` - Show at most this many matches; matching stops once the limit is reached, across groups
+
+- **autoHighlight**: \`boolean | 'always'\` (default: \`'always'\`)
+  - \`'always'\` keeps the first match (or the selected option while the text is empty) highlighted; \`true\` only while text is typed; \`false\` highlights nothing until an arrow key or the pointer moves it
+- **loop**: \`'wrap' | 'input' | false\` (default: \`'wrap'\`) - Past either end of the list: continue at the other end, land on no highlight first (focus stays in the input), or stop
+- **separators**: \`boolean\` (default: \`true\`) - Separators between consecutive groups
+- **item**: \`Snippet<[ComboboxOption]>\` - Custom row renderer, replaces the title and description layout
+- **readOnly**: \`boolean\` - The list opens and can be browsed, but the value cannot change: choosing does nothing, the clear button is hidden, the input is natively \`readonly\`. The value still submits
 
 - **getValueOption**: \`(value: string) => MaybePromise<ComboboxOption | null | undefined>\`
   - Function to get option data for a value when not in loaded options
@@ -76,6 +93,9 @@ A searchable dropdown component that supports both static arrays and async optio
 - **onValueChange**: \`({ value, option }: { value: string | null; option: ComboboxOption | null }) => void\`
   - Called when selection changes
   - Receives a named payload with both the value and full option object
+
+- **onHighlightChange**: \`({ value, reason, event }) => void\`
+  - Called when the highlighted option changes. \`value\` is the option's value or \`undefined\`; \`reason\` is \`'keyboard'\`, \`'pointer'\` or \`'list'\` (results changed, or the list opened); \`event\` is the KeyboardEvent or pointer event, absent for \`'list'\`
 
 - **onValidate**: \`(value: string) => string[] | boolean\`
   - Custom validation function
@@ -132,12 +152,12 @@ A searchable dropdown component that supports both static arrays and async optio
 />
 \`\`\`
 
-### Show All Options on Focus
+### Open on Focus
 
 \`\`\`svelte
 <Combobox
 	items={countries}
-	showAllOnFocus={true}
+	openOnFocus
 	bind:value={value}
 />
 \`\`\`
@@ -164,11 +184,42 @@ A searchable dropdown component that supports both static arrays and async optio
 />
 \`\`\`
 
+### Groups, Disabled Options and Custom Rows
+
+\`\`\`svelte
+<Combobox
+	openOnFocus
+	items={[
+		{ label: 'Europe', items: [{ value: 'fr', label: 'France' }, { value: 'de', label: 'Germany' }] },
+		{ label: 'Asia', items: [{ value: 'cn', label: 'China', disabled: true }] }
+	]}
+	bind:value={value}
+>
+	{#snippet item(option)}
+		<span>{option.label}</span>
+	{/snippet}
+</Combobox>
+\`\`\`
+
+### Abortable Async Options
+
+\`\`\`svelte
+<script lang="ts">
+	const getOptions = async (searchValue: string | undefined, { signal }: { signal: AbortSignal }) => {
+		const response = await fetch(\`/api/countries?q=\${searchValue ?? ''}\`, { signal });
+		return response.json();
+	};
+</script>
+
+<Combobox items={getOptions} bind:value={value} />
+\`\`\`
+
 ## State Management
 
 - **value**: Bindable string (option value) or null
 - **searchValue**: Bindable string for search input
 - **loading**: Bindable boolean, automatically managed for async options
+- **open**: Bindable boolean for the list
 - **errors**: Bindable array or boolean for validation errors
 - **focused**: Bindable boolean for focus state
 
@@ -180,15 +231,21 @@ A searchable dropdown component that supports both static arrays and async optio
 - **role="option"** on each option
 - **aria-expanded**, **aria-controls**, **aria-activedescendant** for state
 - **aria-autocomplete="list"** for search behavior
-- Keyboard navigation: ArrowDown/Up (wraps around), Enter (select), Escape (close), Home/End (first/last)
-- Screen reader announcements for loading and error states
+- Keyboard navigation: ArrowDown/ArrowUp open a closed list (with every option) and then move the highlight, Enter selects, Escape closes the list and keeps focus in the input (a second Escape clears the typed text), Home/End jump to the first/last option
+- Clicking the already-focused input toggles the list; choosing an option, Clear and Escape all keep focus in the input
+- The listbox owns only options and groups; the loading, error and "no options" messages sit beside it, and \`aria-expanded\` is true while options are listed
+- One persistent visually hidden live region (\`role="status"\`) next to the input announces result counts ("3 results available"), the empty state, loading and errors after typing settles
+- The highlight follows the selected option when the list opens and when the text is cleared
 
 ## Notes
 
 - **Debouncing**: Search is debounced by 100ms to reduce API calls
-- **Race Conditions**: Handled automatically - only latest async request updates state
+- **Race Conditions**: Handled automatically - older requests are aborted and only the latest response updates state
+- **Native forms**: The search box carries no \`name\`. A hidden input beside it submits the selected value under \`name\` (nothing when there is no name or the field is disabled); \`required\` blocks a native submit while nothing is selected
+- **Closing**: Escape, choosing an option, or focus leaving the field closes the list; the rows stay on screen through the exit transition
 - **Option Format**: Options must have \`value\` (string) and \`label\` (string). Optional \`description\` displays below label
-- **Keyboard Navigation**: Wraps around - ArrowDown at bottom goes to top, ArrowUp at top goes to bottom
+- **Keyboard Navigation**: Wraps around by default - ArrowDown at bottom goes to top, ArrowUp at top goes to bottom (see \`loop\`)
+- **Groups and disabled options**: Disabled options are dimmed and skipped by the keyboard; groups render like Select's (\`role="group"\` with a hidden label, presentational separators)
 - **Empty States**: Shows loading text, error message, or no options text appropriately
 - **Clear Button**: Automatically shown when value exists, uses the shared field action button hitbox
 - **Default Prefix**: Magnifying glass icon shown by default unless \`prefix={false}\` or custom snippet provided
@@ -207,6 +264,7 @@ The theme object contains the following parts:
 - **loading**: Loading state indicator styles
 - **error**: Error message styles
 - **noOptions**: No options found message styles
+- **group**, **groupLabel**, **separator**: Group container, group label and the divider between groups
 
 Option rows are rendered with the shared \`MenuOption\` component (parts: root, title, description, prefix, suffix, content) and are themed through \`setMenuOptionTheme\` from \`entasis/menu-option\`, not through the Combobox theme.
 
@@ -232,6 +290,9 @@ Option rows are rendered with the shared \`MenuOption\` component (parts: root, 
 
 **noOptions**:
 - base: Base classes for no options message
+
+**group**, **groupLabel**, **separator**:
+- base: Base classes for a labelled group, its label and the divider between groups
 
 ### Usage Examples
 

@@ -31,9 +31,12 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 - **loading**: \`boolean\` (default: \`false\`, bindable)
   - Loading state (managed automatically for async options).
 
-- **items**: \`ComboboxOption[] | ((searchValue?: string) => MaybePromise<ComboboxOption[]>)\` (optional)
+- **items**: \`ComboboxItems | ((searchValue: string | undefined, request: { signal: AbortSignal }) => MaybePromise<ComboboxItems>)\` (optional)
   - When omitted, the input accepts free text (any typed value becomes a tag).
-  - When provided, behaves like a Combobox dropdown: static arrays are filtered client-side, functions are called with the search value and may return a Promise.
+  - When provided, behaves like a Combobox dropdown: static arrays are filtered client-side (case- and accent-insensitive, in the active I18n locale), functions are called after a 100ms pause with the search text and \`{ signal }\` and may return a Promise. An older request is aborted and its response ignored when a newer search replaces it; the last results stay visible while the next load.
+  - Flat options and \`{ label?, items }\` groups can be mixed; an option can be \`disabled\`.
+
+- **open** / **defaultOpen** / **onOpenChange**: The dropdown's open state, as in Combobox. \`onOpenChange(open, details)\` runs before the change; \`details.cancel()\` keeps the list as it was.
 
 ### Behavior Props
 
@@ -43,8 +46,17 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 - **maxTags**: \`number\` (optional)
   - Maximum number of tags. Once reached, further adds (free entry and dropdown selection) are ignored.
 
-- **showAllOnFocus**: \`boolean\` (default: \`false\`)
-  - Show all options when the input is focused, even without typing (static arrays only).
+- **openOnFocus**: \`boolean\` (default: \`false\`)
+  - Open the dropdown when the input is focused, even without typing (static arrays list every option, \`items\` functions are called with an empty search).
+- **showAllOnFocus**: \`boolean\` (deprecated alias of \`openOnFocus\`, kept for one minor)
+
+- **keepSearchOnSelect**: \`boolean\` (default: \`false\`)
+  - Keep the typed text after an option is chosen, so several matches of one search can be added in a row. Free text added with Enter always clears it.
+
+- **filter**: \`(option, searchValue) => boolean\` and **limit**: \`number\` - Custom match and a cap on the matches shown (static arrays).
+- **autoHighlight**: \`boolean | 'always'\` (default: \`false\` with \`customTags\`, else \`'always'\`) - With \`customTags\`, nothing is highlighted on its own, so Enter adds what was typed ("Java") instead of the first match ("JavaScript").
+- **loop**, **separators**, **item**, **onHighlightChange**: As in Combobox. \`onHighlightChange({ value, reason, event })\` reports why the highlight moved.
+- **readOnly**: \`boolean\` - The dropdown opens and can be browsed, but tags cannot be added or removed. The tags render as a plain list with no remove buttons. They still submit.
 
 - **getValueOption**: \`(value: string) => MaybePromise<ComboboxOption | null | undefined>\`
   - Resolves the option (and its label) for a value not yet loaded. Useful for pre-filled values with async options.
@@ -73,6 +85,7 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 
 - **onValueChange**: \`(value: string[]) => void\`
   - Called when the list of tags changes.
+- **onAfterOpen** / **onAfterClose**: \`() => void\` - After the dropdown's open or close transition.
 
 - **onValidate**: \`(value: string[]) => string[] | boolean\`
   - Custom validation function.
@@ -80,7 +93,7 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 ### Theme Props
 
 - **theme**: \`TagsInputThemeProps\`
-  - Customize styling for: input, inputContainer, tag, loading, error, noOptions.
+  - Customize styling for: input, inputContainer, tag, loading, error, noOptions, group, groupLabel, separator.
 
 ## Examples
 
@@ -106,7 +119,7 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 	];
 </script>
 
-<TagsInput items={items} showAllOnFocus bind:value={value} />
+<TagsInput items={items} openOnFocus bind:value={value} />
 \`\`\`
 
 ### Async Options
@@ -152,14 +165,18 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 
 - **Enter**: In free mode (or with \`customTags\`), adds the current trimmed text as a tag and clears the input. When the dropdown is open and an option is highlighted, adds that option instead.
 - **Backspace** (input empty): Removes the last tag.
-- **ArrowDown / ArrowUp**: Move the dropdown highlight (wraps around). Restricted mode only.
-- **Home / End**: Highlight the first / last option. Restricted mode only.
-- **Escape**: Blurs the input and closes the dropdown.
+- **ArrowLeft** (**ArrowRight** in right-to-left text) at the start of the text: Moves focus to the last tag.
+- **ArrowLeft / ArrowRight** on a tag: Move between tags (mirrored in right-to-left text); the arrow past the last tag returns to the input. **Home / End** jump to the first / last tag.
+- **Backspace / Delete** on a focused tag: Removes it and moves focus to its neighbour, or to the input after the last one. **Enter / Space** on its remove button removes it too.
+- **ArrowDown / ArrowUp**: Open a closed dropdown (restricted mode), then move the highlight (wraps around; see \`loop\`).
+- **Home / End** (dropdown open): Highlight the first / last option. Restricted mode only.
+- **Escape**: Closes the dropdown and keeps focus in the input; a second Escape clears the typed text (also in free mode).
 
 ## Accessibility
 
-- The tag collection is a real list (\`role="list"\` / \`role="listitem"\`), not a listbox.
-- Each tag chip is non-interactive; removal is a dedicated \`<button type="button">\` with an \`aria-label\` of "Remove <label>".
+- Removable tags form a \`role="toolbar"\` labelled "Tags" with a single tab stop (a roving tabindex over the remove buttons); the arrow keys move between them. Each tag chip is non-interactive; removal is a dedicated \`<button type="button">\` with an \`aria-label\` of "Remove <label>".
+- When the field is disabled or read-only there are no remove buttons (no dead tab stops): the tags are a plain \`role="list"\` of \`role="listitem"\`.
+- The listbox owns only options and groups; the loading, error and "no options" messages sit beside it. A persistent visually hidden live region announces result counts, the empty state, loading and errors.
 - **With items** the input follows the ARIA combobox pattern: \`role="combobox"\`, \`aria-expanded\`, \`aria-controls\`, \`aria-autocomplete="list"\`, \`aria-activedescendant\`, \`aria-haspopup="listbox"\`, and the dropdown is a \`role="listbox"\` with \`role="option"\` items.
 - **Without items** the input is a plain text input.
 - \`autocomplete="off"\` and \`data-1p-ignore\` on the input.
@@ -173,6 +190,7 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 - **Free vs restricted mode**: Omitting \`items\` gives free-text entry. Providing \`items\` restricts entry to the option list; add \`customTags\` to permit free text alongside options.
 - **Label resolution**: A tag's chip label comes from static \`items\`, then a session cache of options picked from the dropdown, then \`getValueOption\` (resolved on mount for initial values), falling back to the raw value string.
 - **Dropdown filtering**: Options whose value is already selected are hidden from the dropdown.
+- **Native forms**: The search box carries no \`name\`. One hidden input per tag (all under \`name\`) submits the tags: read them with \`FormData.getAll(name)\`. Nothing is submitted without a name or when the field is disabled.
 
 ## Theme Customization
 
@@ -186,6 +204,7 @@ The TagsInput uses a theme object customizable via the \`theme\` prop or a globa
 - **loading**: Loading indicator styles.
 - **error**: Error message styles.
 - **noOptions**: No-options message styles.
+- **group**, **groupLabel**, **separator**: Group container, group label and the divider between groups.
 
 ### Global Theme Setting
 

@@ -5,6 +5,12 @@ import { untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 import type { CommandGroup, CommandItem, CommandProps } from './command.props.js';
 import { elementById } from '$lib/utils/id.js';
+import {
+	requestOpenChange,
+	resolveOpenChangeDetails,
+	type OpenChangeDetails,
+	type OpenChangeInit
+} from '$lib/utils/openChange.js';
 
 type CommandOptions<Value extends string = string> = Pick<
 	CommandProps<Value>,
@@ -14,6 +20,9 @@ type CommandOptions<Value extends string = string> = Pick<
 	| 'closeOnSelect'
 	| 'shouldFilter'
 	| 'filter'
+	| 'limit'
+	| 'autoHighlight'
+	| 'loop'
 	| 'onSelect'
 	| 'onHighlightChange'
 	| 'onOpenChange'
@@ -46,14 +55,30 @@ export class CommandState<Value extends string = string> extends BoundCommandOpt
 
 	listId = $derived(`${this.id}-list`);
 
-	/** Groups whose items match the current search query (or all groups when filtering is off). */
+	/**
+	 * Groups whose items match the current search query (or all groups when filtering is off),
+	 * cut off after `limit` items.
+	 */
 	filteredGroups: CommandGroup<Value>[] = $derived.by(() => {
 		const query = this.search.trim();
-		if (!this.shouldFilter || query === '') return this.items;
+		const limit = this.shouldFilter ? this.limit : undefined;
+		if (!this.shouldFilter || (query === '' && limit === undefined)) return this.items;
 		const match = this.filter ?? this.defaultMatch;
-		return this.items
-			.map((group) => ({ ...group, items: group.items.filter((item) => match(item, query)) }))
-			.filter((group) => group.items.length > 0);
+		// Matching stops once the limit is reached: the rest of a long list is never compared.
+		let remaining = limit !== undefined && limit >= 0 ? limit : Infinity;
+		const groups: CommandGroup<Value>[] = [];
+		for (const group of this.items) {
+			if (remaining <= 0) break;
+			const kept: CommandItem<Value>[] = [];
+			for (const item of group.items) {
+				if (remaining <= 0) break;
+				if (query !== '' && !match(item, query)) continue;
+				kept.push(item);
+				remaining -= 1;
+			}
+			if (kept.length > 0) groups.push({ ...group, items: kept });
+		}
+		return groups;
 	});
 
 	/** Groups that actually render — those with at least one (possibly disabled) item. Filtering
@@ -69,12 +94,21 @@ export class CommandState<Value extends string = string> extends BoundCommandOpt
 	isEmpty = $derived(this.visibleGroups.length === 0);
 
 	/** Keyboard navigation: value-driven virtual focus (see useListNavigation). */
-	nav = useListNavigation<Value>({
-		values: () => this.navItems.map((item) => item.value),
-		optionId: (value) => this.optionId(value),
-		onHighlightChange: (value) => this.onHighlightChange?.(value),
-		onSelect: (value) => this.selectValue(value)
-	});
+	nav = ((state: CommandState<Value>) =>
+		useListNavigation<Value>({
+			values: () => state.navItems.map((item) => item.value),
+			get autoHighlight() {
+				return state.autoHighlight ?? 'always';
+			},
+			get loop() {
+				return state.loop ?? 'wrap';
+			},
+			query: () => state.search,
+			// Each value gets its own numbered id, so values such as a.b and a_b never collide.
+			idPrefix: `${state.id}-opt`,
+			onHighlightChange: (value) => state.onHighlightChange?.(value),
+			onSelect: (value) => state.selectValue(value)
+		}))(this);
 
 	/** Value of the currently highlighted (keyboard-active) option. */
 	get highlighted() {
@@ -91,7 +125,7 @@ export class CommandState<Value extends string = string> extends BoundCommandOpt
 			const onKeydown = (event: KeyboardEvent) => {
 				if (event.key.toLowerCase() === key && (event.metaKey || event.ctrlKey)) {
 					event.preventDefault();
-					untrack(() => this.toggle());
+					untrack(() => this.toggle({ reason: 'trigger-press', event }));
 				}
 			};
 			window.addEventListener('keydown', onKeydown);
@@ -118,7 +152,8 @@ export class CommandState<Value extends string = string> extends BoundCommandOpt
 		});
 	};
 
-	optionId = (value: string) => `${this.id}-opt-${value.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+	/** DOM id of a command's option row, unique per value. */
+	optionId = (value: string): string => this.nav.optionId(value as Value) as string;
 
 	/**
 	 * Case- and accent-insensitive substring match on `label`, `keywords` and `value`, compared in
@@ -133,6 +168,14 @@ export class CommandState<Value extends string = string> extends BoundCommandOpt
 		this.nav.setHighlighted(value);
 	};
 
+	/**
+	 * Pointer hover highlight: ignores moves that did not change the pointer position (Safari
+	 * fires one when keyboard scrolling slides a row under a resting pointer).
+	 */
+	pointerHighlight = (value: Value | undefined, event?: MouseEvent | PointerEvent) => {
+		this.nav.pointerHighlight(value, event);
+	};
+
 	/** Move the highlight by `delta` selectable items, wrapping around both ends. */
 	move = (delta: number) => {
 		this.nav.move(delta);
@@ -145,7 +188,7 @@ export class CommandState<Value extends string = string> extends BoundCommandOpt
 		this.setValue(item.value);
 		item.onSelect?.(item.value);
 		this.onSelect?.(item.value);
-		if (this.dialog && this.closeOnSelect) this.close();
+		if (this.dialog && this.closeOnSelect) this.close({ reason: 'item-press' });
 	};
 
 	/** Select an item by value. Link items are clicked so navigation happens natively
@@ -176,22 +219,28 @@ export class CommandState<Value extends string = string> extends BoundCommandOpt
 		this.onSearchChange?.(search);
 	};
 
-	open = () => {
-		this.setOpen(true);
+	open = (input?: OpenChangeDetails | OpenChangeInit | Event) => {
+		this.setOpen(true, input);
 	};
 
-	close = () => {
-		this.setOpen(false);
+	close = (input?: OpenChangeDetails | OpenChangeInit | Event) => {
+		this.setOpen(false, input);
 	};
 
-	toggle = () => {
-		this.setOpen(!this.isOpen);
+	toggle = (input?: OpenChangeDetails | OpenChangeInit | Event) => {
+		this.setOpen(!this.isOpen, input);
 	};
 
-	setOpen = (open: boolean) => {
-		if (open === this.isOpen) return;
+	/**
+	 * Asks to open or close the palette. `onOpenChange(open, details)` runs first and may cancel;
+	 * returns `false` when it did.
+	 */
+	setOpen = (open: boolean, input?: OpenChangeDetails | OpenChangeInit | Event): boolean => {
+		if (open === this.isOpen) return true;
+		const details = resolveOpenChangeDetails(input, { reason: 'imperative-action' });
+		if (!requestOpenChange(this.onOpenChange, open, details)) return false;
 		this.isOpen = open;
-		this.onOpenChange?.(open);
+		return true;
 	};
 
 	onKeydown = (event: KeyboardEvent) => {

@@ -1,7 +1,14 @@
 export { default as Combobox } from './Combobox.svelte';
 export type {
+	ComboboxFilter,
+	ComboboxHighlightChangePayload,
+	ComboboxHighlightReason,
+	ComboboxItems,
+	ComboboxItemsRequest,
+	ComboboxItemsSource,
 	ComboboxProps,
 	ComboboxOption,
+	ComboboxOptionGroup,
 	ComboboxValueChangePayload
 } from './combobox.props.js';
 export {

@@ -10,12 +10,6 @@
 		"reason": "@pierre/diffs paints its own line-number and count colours inside the diffs-container shadow tree"
 	},
 	{
-		"route": "^/components/(combobox|tags-input) \\(no options found\\)$",
-		"ruleId": "aria-required-children",
-		"match": "[role=status]",
-		"reason": "The no-options role=status message renders inside the listbox. Owned by lane C6 (SC-16 / SC-INFRA-3: a persistent live region beside the input replaces it). Remove this entry with that change."
-	},
-	{
 		"route": "^/components/dialog \\(dialog open\\)$",
 		"ruleId": "button-name",
 		"reason": "Dialog's default close button is an icon-only Button without an accessible name. Found by the open-popup sweep (E2E-1); the fix belongs to the Dialog lane (C1). Remove this entry with that change."

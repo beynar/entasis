@@ -1,8 +1,13 @@
 <script lang="ts">
 	import ComponentCard from '../../ComponentCard.svelte';
 	import DocPage from '../../DocPage.svelte';
+	import Button from '$lib/components/Button/Button.svelte';
 	import Combobox from '$lib/components/Form/Combobox/Combobox.svelte';
-	import type { ComboboxOption } from '$lib/components/Form/Combobox/combobox.props.js';
+	import type {
+		ComboboxItems,
+		ComboboxItemsRequest,
+		ComboboxOption
+	} from '$lib/components/Form/Combobox/combobox.props.js';
 	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
@@ -36,17 +41,25 @@
 	// Example 1: Array options (non-async, filtered client-side)
 	const arrayOptions = countries;
 
-	// Example 2: Async function with simulated delay
-	const getAsyncOptions = async (searchValue?: string): Promise<ComboboxOption[]> => {
-		// Simulate API delay
-		await new Promise((resolve) => setTimeout(resolve, 300));
+	// Waits `ms`, rejecting as soon as the request is aborted by a newer search.
+	const delay = (ms: number, signal?: AbortSignal) =>
+		new Promise<void>((resolve, reject) => {
+			const timer = setTimeout(resolve, ms);
+			signal?.addEventListener('abort', () => {
+				clearTimeout(timer);
+				reject(new DOMException('Aborted', 'AbortError'));
+			});
+		});
 
-		console.log('searchValue', searchValue);
+	// Example 2: Async function with simulated delay. `signal` is aborted when a newer search
+	// replaces this request, so a slow answer never overwrites a newer list.
+	const getAsyncOptions = async (
+		searchValue: string | undefined,
+		{ signal }: ComboboxItemsRequest
+	): Promise<ComboboxOption[]> => {
+		await delay(300, signal);
 		// If no search value, return all options
 		if (!searchValue) return countries;
-		console.log(
-			countries.filter((option) => option.label.toLowerCase().includes(searchValue.toLowerCase()))
-		);
 		return countries.filter((option) =>
 			option.label.toLowerCase().includes(searchValue.toLowerCase())
 		);
@@ -61,9 +74,12 @@
 	};
 
 	// Example 4: Async function with error simulation
-	const getAsyncOptionsWithError = async (searchValue?: string): Promise<ComboboxOption[]> => {
+	const getAsyncOptionsWithError = async (
+		searchValue: string | undefined,
+		{ signal }: ComboboxItemsRequest
+	): Promise<ComboboxOption[]> => {
 		// Simulate API delay
-		await new Promise((resolve) => setTimeout(resolve, 200));
+		await delay(200, signal);
 
 		// Simulate error for demonstration (uncomment to test)
 		if (searchValue === 'error') {
@@ -86,6 +102,27 @@
 	let value5 = $state<string | null>(null);
 	let value6 = $state<string | null>(null);
 	let value7 = $state<string | null>('fr'); // Pre-selected value for demo
+	let value8 = $state<string | null>(null);
+	let value9 = $state<string | null>(null);
+	let value10 = $state<string | null>('de');
+	let value11 = $state<string | null>(null);
+	let open12 = $state(false);
+	let submitted = $state('Nothing submitted yet');
+
+	// Grouped example data: flat options and `{ label, items }` groups can be mixed.
+	const groupedOptions: ComboboxItems = [
+		{
+			label: 'Europe',
+			items: countries.filter((country) => country.description === 'Europe')
+		},
+		{
+			label: 'Asia',
+			items: countries
+				.filter((country) => country.description === 'Asia')
+				.map((country) => ({ ...country, disabled: country.value === 'cn' }))
+		},
+		{ value: 'au', label: 'Australia' }
+	];
 	const controls = createComponentControls([
 		{
 			name: 'size',
@@ -118,10 +155,22 @@
 	component="Combobox"
 	features={[
 		{ label: 'role=combobox with aria-autocomplete=list', test: 'a11y:combobox.aria' },
-		'Debounced search, async or static',
-		{ label: 'Arrow keys, Enter, Escape navigation', test: 'a11y:combobox.keyboard' },
-		'Bindable value & searchValue',
-		'Loading, error & empty states'
+		'Debounced search, async or static; stale responses are ignored',
+		{
+			label: 'Arrow keys open and browse, Escape closes and keeps focus',
+			test: 'a11y:combobox.keyboard'
+		},
+		{ label: 'The listbox owns only options and groups', test: 'a11y:combobox.listbox-children' },
+		{
+			label: 'Status messages sit beside the listbox',
+			test: 'a11y:combobox.status-outside-listbox'
+		},
+		{ label: 'Result counts announced politely', test: 'a11y:combobox.live-region' },
+		{ label: 'Read-only: browse the list, keep the value', test: 'a11y:combobox.readonly' },
+		'Bindable value, searchValue and open, with onOpenChange(open, details)',
+		'Groups, disabled options and custom rows',
+		'Loading, error & empty states',
+		'Submits its value (not the search text) in native forms'
 	]}
 >
 	<ComponentCard
@@ -134,7 +183,7 @@
 	disabled={${controls.value.disabled}}
 	label="Country"
 	description="Used to localize dates and currency"
-	showAllOnFocus
+	openOnFocus
 	placeholder="Search countries..."
 	items={[
 		{ value: 'us', label: 'United States', description: 'North America' },
@@ -152,7 +201,7 @@
 				disabled={controls.value.disabled}
 				label="Country"
 				description="Used to localize dates and currency"
-				showAllOnFocus
+				openOnFocus
 				placeholder="Search countries..."
 				items={arrayOptions}
 				bind:value={value1}
@@ -165,7 +214,7 @@
 		<ComponentCard description="Static array, filtered client-side">
 			<div class="w-full max-w-md">
 				<Combobox
-					showAllOnFocus
+					openOnFocus
 					placeholder="Search countries..."
 					items={arrayOptions}
 					bind:value={value1}
@@ -182,21 +231,21 @@
 		label="Small"
 		placeholder="Search countries..."
 		items={arrayOptions}
-		showAllOnFocus
+		openOnFocus
 	/>
 	<Combobox
 		size="normal"
 		label="Normal"
 		placeholder="Search countries..."
 		items={arrayOptions}
-		showAllOnFocus
+		openOnFocus
 	/>
 	<Combobox
 		size="large"
 		label="Large"
 		placeholder="Search countries..."
 		items={arrayOptions}
-		showAllOnFocus
+		openOnFocus
 	/>
 </div>`}
 		>
@@ -206,21 +255,21 @@
 					label="Small"
 					placeholder="Search countries..."
 					items={arrayOptions}
-					showAllOnFocus
+					openOnFocus
 				/>
 				<Combobox
 					size="normal"
 					label="Normal"
 					placeholder="Search countries..."
 					items={arrayOptions}
-					showAllOnFocus
+					openOnFocus
 				/>
 				<Combobox
 					size="large"
 					label="Large"
 					placeholder="Search countries..."
 					items={arrayOptions}
-					showAllOnFocus
+					openOnFocus
 				/>
 			</div>
 		</ComponentCard>
@@ -275,12 +324,12 @@
 		</ComponentCard>
 
 		<!-- Example 6: Show All Options on Focus -->
-		<ComponentCard description="Displays all options when focused, even without typing">
+		<ComponentCard description="Opens with every option when focused, even before typing">
 			<div class="w-full max-w-md">
 				<Combobox
 					placeholder="Search countries..."
 					items={arrayOptions}
-					showAllOnFocus={true}
+					openOnFocus
 					bind:value={value6}
 				/>
 				{#if value6}
@@ -301,6 +350,147 @@
 					}}
 				/>
 			</div>
+		</ComponentCard>
+
+		<!-- Groups, separators and disabled options -->
+		<ComponentCard
+			title="Groups and disabled options"
+			description="Groups follow Select: a labelled group, separators between groups, and disabled options that the keyboard skips."
+			code={`<Combobox
+	openOnFocus
+	placeholder="Search by region..."
+	items={[
+		{ label: 'Europe', items: [{ value: 'fr', label: 'France' }, { value: 'de', label: 'Germany' }] },
+		{
+			label: 'Asia',
+			items: [{ value: 'jp', label: 'Japan' }, { value: 'cn', label: 'China', disabled: true }]
+		},
+		{ value: 'au', label: 'Australia' }
+	]}
+	bind:value
+/>`}
+		>
+			<div class="w-full max-w-md">
+				<Combobox
+					openOnFocus
+					placeholder="Search by region..."
+					items={groupedOptions}
+					bind:value={value8}
+				/>
+			</div>
+		</ComponentCard>
+
+		<!-- item snippet -->
+		<ComponentCard
+			title="Custom rows"
+			description="The item snippet replaces the title and description layout of every row."
+			code={`<Combobox items={countries} openOnFocus bind:value>
+	{#snippet item(option)}
+		<span class="flex w-full items-center justify-between gap-md">
+			<span>{option.label}</span>
+			<span class="text-neutral/70 text-xs">{option.value.toUpperCase()}</span>
+		</span>
+	{/snippet}
+</Combobox>`}
+		>
+			<div class="w-full max-w-md">
+				<Combobox
+					placeholder="Search countries..."
+					items={countries}
+					openOnFocus
+					bind:value={value9}
+				>
+					{#snippet item(option)}
+						<span class="gap-md flex w-full items-center justify-between">
+							<span>{option.label}</span>
+							<span class="text-neutral/70 text-xs">{option.value.toUpperCase()}</span>
+						</span>
+					{/snippet}
+				</Combobox>
+			</div>
+		</ComponentCard>
+
+		<!-- filter + limit -->
+		<ComponentCard
+			title="Filter and limit"
+			description="A custom filter matches names that start with the text, and the list stops at five matches."
+			code={`<Combobox
+	items={countries}
+	limit={5}
+	filter={(option, search) => option.label.toLowerCase().startsWith(search.toLowerCase())}
+	placeholder="Names starting with..."
+	bind:value
+/>`}
+		>
+			<div class="w-full max-w-md">
+				<Combobox
+					items={countries}
+					limit={5}
+					filter={(option, search) => option.label.toLowerCase().startsWith(search.toLowerCase())}
+					placeholder="Names starting with..."
+					bind:value={value11}
+				/>
+			</div>
+		</ComponentCard>
+
+		<!-- readOnly -->
+		<ComponentCard
+			title="Read-only"
+			description="The list opens and can be browsed, but the value stays; the clear button is hidden."
+			code={`<Combobox readOnly openOnFocus label="Country" items={countries} bind:value />`}
+		>
+			<div class="w-full max-w-md">
+				<Combobox readOnly openOnFocus label="Country" items={countries} bind:value={value10} />
+			</div>
+		</ComponentCard>
+
+		<!-- Controlled open state -->
+		<ComponentCard
+			title="Open state"
+			description="open is bindable; onOpenChange runs before the change and can cancel it. This one cannot be dismissed with Escape."
+			code={`<Combobox
+	items={countries}
+	openOnFocus
+	bind:open
+	onOpenChange={(next, details) => {
+		if (!next && details.reason === 'escape-key') details.cancel();
+	}}
+/>`}
+		>
+			<div class="w-full max-w-md">
+				<Combobox
+					items={countries}
+					openOnFocus
+					placeholder="Escape does not close this list"
+					bind:open={open12}
+					onOpenChange={(next, details) => {
+						if (!next && details.reason === 'escape-key') details.cancel();
+					}}
+				/>
+				<p class="text-neutral/70 mt-2 text-xs">open: {open12}</p>
+			</div>
+		</ComponentCard>
+
+		<!-- Native form -->
+		<ComponentCard
+			title="Native form"
+			description="The search box holds a draft. A native form submits the selected value under the field's name."
+			code={`<form onsubmit={(event) => { event.preventDefault(); console.log(new FormData(event.currentTarget).get('country')); }}>
+	<Combobox name="country" items={countries} openOnFocus />
+	<Button type="submit">Submit</Button>
+</form>`}
+		>
+			<form
+				class="grid w-full max-w-md gap-3"
+				onsubmit={(event) => {
+					event.preventDefault();
+					submitted = `country = ${String(new FormData(event.currentTarget).get('country') ?? '(empty)')}`;
+				}}
+			>
+				<Combobox name="country" label="Country" items={countries} openOnFocus />
+				<Button type="submit" class="w-fit">Submit</Button>
+				<p class="text-neutral/70 text-xs">{submitted}</p>
+			</form>
 		</ComponentCard>
 	{/snippet}
 </DocPage>

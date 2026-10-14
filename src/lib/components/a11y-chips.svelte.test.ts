@@ -150,7 +150,7 @@ describe('combobox', () => {
 	test(
 		law(
 			'a11y:combobox.keyboard',
-			'closes with Escape, highlights with ArrowDown, selects with Enter'
+			'closes with Escape and keeps focus, opens with ArrowDown, highlights, selects with Enter'
 		),
 		async () => {
 			mount('combobox');
@@ -162,7 +162,16 @@ describe('combobox', () => {
 			await fireEvent.keyDown(input, { key: 'Escape' });
 			await waitFor(() => expect(input).toHaveAttribute('aria-expanded', 'false'));
 			await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull());
-			input.focus();
+			// Escape closes the list but focus stays on the input; ArrowDown opens it again.
+			expect(document.activeElement).toBe(input);
+			await fireEvent.keyDown(input, { key: 'ArrowDown' });
+			await screen.findByRole('listbox');
+			await fireEvent.keyDown(input, { key: 'Escape' });
+			await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull());
+			// A second Escape clears the typed text, still in place.
+			await fireEvent.keyDown(input, { key: 'Escape' });
+			expect(input).toHaveValue('');
+			expect(document.activeElement).toBe(input);
 			await fireEvent.input(input, { target: { value: 'an' } });
 			await screen.findByRole('listbox');
 			await fireEvent.keyDown(input, { key: 'ArrowDown' });

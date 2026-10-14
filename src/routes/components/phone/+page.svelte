@@ -3,6 +3,7 @@
 	import DocPage from '../../DocPage.svelte';
 	import { PhoneInput } from '$lib/components/Form/PhoneInput/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
+	import I18n from '$lib/i18n/I18n.svelte';
 	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
@@ -42,7 +43,8 @@
 		'Bindable value, errors & country',
 		'Formats number as you type',
 		'Validates with isValidNumber()',
-		'Searchable country dropdown'
+		'Searchable country dropdown, accent-insensitive, with names in the active locale',
+		{ label: 'Result counts announced politely', test: 'a11y:phone.picker-live-region' }
 	]}
 >
 	<ComponentCard
@@ -115,6 +117,20 @@
 						console.log('Form submitted:', data);
 					}}
 				/>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Country names follow the locale"
+			description="Open the picker: names are written, sorted and searched in the active locale (here French, so searching allemagne finds Germany)."
+			code={`<I18n locale="fr">
+	<PhoneInput label="Téléphone" placeholder="Numéro de téléphone" />
+</I18n>`}
+		>
+			<div class="w-full max-w-md">
+				<I18n locale="fr" manageDocument={false}>
+					<PhoneInput label="Téléphone" placeholder="Numéro de téléphone" />
+				</I18n>
 			</div>
 		</ComponentCard>
 	{/snippet}

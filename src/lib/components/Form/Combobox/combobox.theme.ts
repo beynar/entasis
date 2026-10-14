@@ -76,12 +76,51 @@ const defaultNoOptions = cva({
 	}
 });
 
+const defaultGroup = cva({
+	base: 'flex scroll-my-1 flex-col',
+	variants: {
+		size: {
+			small: '',
+			normal: '',
+			large: ''
+		}
+	}
+});
+
+const defaultGroupLabel = cva({
+	base: 'text-neutral/70',
+	variants: {
+		size: {
+			small: 'px-sm py-xs text-xs',
+			normal: 'px-sm py-xs text-xs',
+			large: 'px-sm py-xs text-xs'
+		}
+	},
+	defaultVariants: {
+		size: 'normal'
+	}
+});
+
+const defaultSeparator = cva({
+	base: 'bg-neutral-muted my-xs h-px',
+	variants: {
+		size: {
+			small: '',
+			normal: '',
+			large: ''
+		}
+	}
+});
+
 export const comboboxTheme = {
 	input: defaultInput,
 	inputContainer: defaultInputContainer,
 	loading: defaultLoading,
 	error: defaultError,
-	noOptions: defaultNoOptions
+	noOptions: defaultNoOptions,
+	group: defaultGroup,
+	groupLabel: defaultGroupLabel,
+	separator: defaultSeparator
 };
 
 export type ComboboxTheme = typeof comboboxTheme;

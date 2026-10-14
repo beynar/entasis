@@ -25,6 +25,8 @@ export type OpenChangeReason =
 	| 'item-press'
 	/** Arrow-key navigation opened or closed it (a submenu, a listbox). */
 	| 'list-navigation'
+	/** Typing in the input of a combobox opened or closed its list. */
+	| 'input-change'
 	/** Focus left the overlay. */
 	| 'focus-out'
 	/** A swipe gesture dismissed it. */

@@ -256,7 +256,8 @@ PhoneInput automatically formats numbers based on the selected country:
 
 ## Country Selection
 
-- Searchable dropdown of countries
+- Searchable dropdown of countries: names are written, sorted and searched in the active I18n locale (\`Intl.DisplayNames\`), ignoring case and accents ("cote" finds "Côte d’Ivoire"); the dial code (\`+33\`) and ISO code match too
+- The selected country is highlighted when the picker opens and again when the search is cleared
 - Country flags displayed
 - International dialing codes shown
 - Detects country from phone number
@@ -272,7 +273,7 @@ PhoneInput validates:
 
 - Proper label association
 - Country selector is keyboard accessible: the search input is a \`role="combobox"\` that drives the country \`role="listbox"\` through \`aria-activedescendant\`
-- When the search matches no country, "No countries found" fills a polite \`role="status"\` region that stays mounted outside the listbox (so it is announced), the empty listbox is hidden and the search combobox reports \`aria-expanded="false"\`
+- A persistent visually hidden \`role="status"\` region inside the picker announces result counts ("3 results available") and "No countries found" after typing settles; the visible empty message is plain text outside the listbox, the empty listbox is hidden and the search combobox reports \`aria-expanded="false"\`
 - ARIA attributes for required state
 - Error messages announced
 - Focus management between country and number

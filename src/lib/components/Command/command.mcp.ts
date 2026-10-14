@@ -62,7 +62,7 @@ default, or inside a modal Dialog (⌘K style) with \`dialog\`.
 - **dialog**: boolean (default: false) - Render inside a modal Dialog instead of inline.
 - **open**: boolean (bindable, default: false) - Dialog open state.
 - **defaultOpen**: boolean (default: false) - Initial dialog state when open is omitted.
-- **onOpenChange**: (open: boolean) => void - Fires once after a component-owned open state change.
+- **onOpenChange**: (open: boolean, details) => void - Runs before a library action opens or closes the dialog. \`details\` has \`reason\` ('trigger-press' for the shortcut and the trigger, 'item-press' after a selection, 'escape-key', 'outside-press', 'imperative-action'), \`event\`, \`interaction\` and \`cancel()\`; a cancelled change leaves the dialog as it was. External \`open\` updates are silent.
 - **shortcut**: string | false (default: false) - ⌘/Ctrl + key toggles the dialog (e.g. 'k').
 - **closeOnSelect**: boolean (default: true) - Close the dialog when an item is selected.
 
@@ -79,6 +79,9 @@ default, or inside a modal Dialog (⌘K style) with \`dialog\`.
 - **placeholder**: string (default: 'Type a command or search...')
 - **showInput**: boolean (default: true) - Render the search input row.
 - **shouldFilter**: boolean (default: true) - Filter internally; set false to filter externally.
+- **limit**: number - Show at most this many items across groups; matching stops once the limit is reached (while \`shouldFilter\` is on).
+- **autoHighlight**: boolean | 'always' (default: 'always') - \`'always'\` keeps the first match highlighted, \`true\` only while a search is typed, \`false\` highlights nothing until an arrow key or the pointer moves it.
+- **loop**: 'wrap' | 'input' | false (default: 'wrap') - Past either end of the list: continue at the other end, land on no highlight first, or stop.
 - **filter**: (item, search) => boolean - Custom match predicate (defaults to a case- and
   accent-insensitive substring match on label + keywords + value, compared with
   \`Intl.Collator\` in the active I18n locale, so "eclair" finds "Éclair"; in Spanish "n" does
@@ -107,12 +110,13 @@ default, or inside a modal Dialog (⌘K style) with \`dialog\`.
 - **ArrowDown / ArrowUp**: move the highlight, wrapping around both ends.
 - **Home / End**: jump to first / last selectable item.
 - **Enter**: select the highlighted item (navigates for href items).
-- **Escape**: closes the dialog (dialog mode).
+- **Escape**: closes the dialog (dialog mode); \`onOpenChange\` can cancel it.
 - **⌘/Ctrl + shortcut**: toggles the dialog (dialog mode with \`shortcut\` set).
 
 ## Accessibility
 
-- The input is a \`role="combobox"\` with \`aria-activedescendant\` pointing at the highlighted option.
+- The input is a \`role="combobox"\` with \`aria-activedescendant\` pointing at the highlighted option; \`aria-expanded\` follows the results (false while the search matches nothing and the list is hidden).
+- A persistent visually hidden live region (\`role="status"\`) announces result counts and the empty state after typing settles; the visible empty message is plain text.
 - The list is a \`role="listbox"\`; rows are \`role="option"\` with \`aria-selected\`/\`aria-disabled\`.
 - Pointer movement highlights rows; the highlight re-anchors to the first result while typing.
 

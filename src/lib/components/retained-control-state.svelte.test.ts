@@ -26,7 +26,10 @@ describe('retained control state', () => {
 		expect(screen.getByRole('dialog')).toBeInTheDocument();
 		expect(onOpenChange).not.toHaveBeenCalled();
 		await fireEvent.keyDown(window, { key: 'Escape' });
-		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(false);
+		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(
+			false,
+			expect.objectContaining({ reason: 'escape-key' })
+		);
 		await rerender({ defaultOpen: true, class: 'updated-again' });
 		expect(screen.getByRole('button', { name: 'Open command' })).toHaveAttribute(
 			'aria-expanded',

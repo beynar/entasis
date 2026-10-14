@@ -1,20 +1,24 @@
 <script lang="ts">
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import Field from '../Field/Field.svelte';
+	import FieldHiddenInputs from '../Field/FieldHiddenInputs.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { TagsInputProps } from './tagsInput.props.js';
 	import type { ComboboxOption } from '../Combobox/combobox.props.js';
 	import Chip from '../../Chip/Chip.svelte';
 	import Popover from '../../Popover/Popover.svelte';
-	import ScrollArea from '../../ScrollArea/ScrollArea.svelte';
-	import MenuOption from '../../MenuOption/MenuOption.svelte';
 	import { xIcon } from '../../Icons/x.js';
-	import { useDebounce } from '$lib/utils/useDebounce.svelte.js';
 	import type { PopoverState } from '../../Popover/popover.state.svelte.js';
 	import { useTagsInputTheme } from './tagsInput.theme.js';
-	import { useKeyDown } from '$lib/utils/useKeyDown.svelte.js';
-	import { useListNavigation } from '$lib/utils/useListNavigation.svelte.js';
-	import { onMount, untrack } from 'svelte';
+	import { createBindableValue } from '$lib/utils/state.svelte.js';
+	import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
+	import { useDirection } from '$lib/utils/useDirection.svelte.js';
+	import { flattenItems } from '../Combobox/combobox.items.js';
+	import { ComboboxController } from '../Combobox/combobox.state.svelte.js';
+	import ComboboxPopup from '../Combobox/ComboboxPopup.svelte';
+	import { tick, untrack } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
+	import { on } from 'svelte/events';
 	import { flip } from 'svelte/animate';
 	import { scale } from 'svelte/transition';
 	import { SvelteMap } from 'svelte/reactivity';
@@ -26,6 +30,11 @@
 		errors = $bindable([]),
 		loading = $bindable(false),
 		focused = $bindable(false),
+		open = $bindable(),
+		defaultOpen = false,
+		onOpenChange,
+		onAfterOpen,
+		onAfterClose,
 		required = false,
 		size = 'normal',
 		density = 'normal',
@@ -33,7 +42,16 @@
 		items,
 		customTags = false,
 		maxTags,
+		keepSearchOnSelect = false,
+		openOnFocus,
 		showAllOnFocus = false,
+		filter,
+		limit,
+		autoHighlight,
+		loop,
+		onHighlightChange,
+		separators = true,
+		item,
 		getValueOption,
 		loadingText,
 		noOptionsText,
@@ -55,8 +73,13 @@
 
 	const id = $props.id();
 	const t = $derived(useI18n(i18n));
-	const listboxId = `${id}-listbox`;
-	const optionId = (value: string) => `${id}-option-${value.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+	const openState = createBindableValue(
+		() => open,
+		(next) => {
+			open = next;
+		},
+		() => defaultOpen
+	);
 
 	// Session cache of options resolved from the dropdown or getValueOption, used for label lookup.
 	const optionCache = new SvelteMap<string, ComboboxOption>();
@@ -118,326 +141,235 @@
 	const tags = $derived(field.value ?? []);
 	const hasItems = $derived(items !== undefined);
 	const atMaxTags = $derived(maxTags !== undefined && tags.length >= maxTags);
+	// Tags can be removed while the field is editable; a disabled or read-only field keeps them
+	// as plain text, with no remove buttons to tab to.
+	const removable = $derived(!field.disabled && !field.readOnly);
+
+	const controller = new ComboboxController({
+		id,
+		field,
+		items: () => items,
+		filter: () => filter,
+		limit: () => limit,
+		// Options already selected are left out of the dropdown.
+		exclude: (option) => tags.includes(option.value),
+		messages: () => t,
+		loadingText: () => loadingText,
+		noOptionsText: () => noOptionsText,
+		query: {
+			get: () => searchValue,
+			set: (next) => {
+				searchValue = next;
+			}
+		},
+		loading: {
+			get: () => loading,
+			set: (next) => {
+				loading = next;
+			}
+		},
+		open: {
+			get: () => openState.value,
+			set: (next) => {
+				openState.value = next;
+			}
+		},
+		onOpenChange: () => onOpenChange,
+		openOnFocus: () => openOnFocus ?? showAllOnFocus,
+		// With free text allowed, Enter adds what was typed unless an option was highlighted by hand.
+		autoHighlight: () => autoHighlight ?? (customTags ? false : 'always'),
+		loop: () => loop,
+		onHighlightChange: () => onHighlightChange,
+		onSelect: (option) => {
+			optionCache.set(option.value, option);
+			addTag(option.value, { keepQuery: keepSearchOnSelect });
+			// Focus stays in the input so multi-select can continue (differs from Combobox).
+		}
+	});
 
 	// Resolve a tag's display label: static items, then session cache, else the raw value.
 	const labelFor = (tagValue: string) => {
 		if (Array.isArray(items)) {
-			const staticOption = items.find((option) => option.value === tagValue);
+			const staticOption = flattenItems(items).find((option) => option.value === tagValue);
 			if (staticOption) return staticOption.label;
 		}
 		return optionCache.get(tagValue)?.label ?? tagValue;
 	};
 
-	// Load options state
-	const getOptions = async (searchValue?: string | null, showAllOnFocus?: boolean) => {
-		if (!hasItems) {
-			return { options: [] as ComboboxOption[], error: null };
-		}
-		const isOptionsAsync = typeof items === 'function';
-		if (!searchValue) {
-			if (!showAllOnFocus || isOptionsAsync) {
-				return { options: [] as ComboboxOption[], error: null };
-			} else {
-				return { options: items as ComboboxOption[], error: null };
-			}
-		} else {
-			if (isOptionsAsync) {
-				loading = true;
-				try {
-					const results = await items(searchValue);
-					return { options: results as ComboboxOption[], error: null };
-				} catch (error) {
-					return {
-						options: [] as ComboboxOption[],
-						error: error instanceof Error ? error.message : t.failedToLoadOptions
-					};
-				} finally {
-					loading = false;
-				}
-			} else {
-				const result = (items as ComboboxOption[]).filter((option) =>
-					option.label.toLowerCase().includes(searchValue.toLowerCase())
-				);
-
-				return { options: result, error: null };
-			}
-		}
-	};
-	let optionsAsync = $state<{ options: ComboboxOption[]; error: string | null }>({
-		options: [],
-		error: null
-	});
-
-	// Options already selected are filtered out of the dropdown.
-	const availableOptions = $derived(
-		optionsAsync.options.filter((option) => !tags.includes(option.value))
-	);
-
-	const debouncedSearch = useDebounce((searchValue?: string | null, showAllOnFocus?: boolean) => {
-		getOptions(searchValue, showAllOnFocus).then((result) => {
-			optionsAsync = result;
-		});
-	}, 100);
-
-	$effect(() => {
-		void searchValue;
-		void showAllOnFocus;
-		untrack(() => {
-			debouncedSearch(searchValue, showAllOnFocus);
-		});
-	});
-
-	const isOpen = $derived.by(() => {
-		if (!hasItems) return false;
-		// Should show if
-		// has error or has options or has no options and a search value
-		// is focused
-		return !!(
-			field.focused &&
-			(optionsAsync.error ||
-				availableOptions.length > 0 ||
-				(availableOptions.length === 0 && searchValue))
-		);
-	});
-
 	// Add a tag value. Duplicates are never added (a duplicate add just clears the search),
 	// and adds are ignored once maxTags is reached. Always assigns a fresh array.
-	const addTag = (tagValue: string) => {
+	const addTag = (tagValue: string, { keepQuery = false }: { keepQuery?: boolean } = {}) => {
 		const trimmed = tagValue.trim();
-		if (!trimmed) return;
-		searchValue = '';
+		if (!trimmed || field.disabled || field.readOnly) return;
+		if (!keepQuery) searchValue = '';
 		if (atMaxTags) return;
 		if (tags.includes(trimmed)) return;
-		field.value = [...tags, trimmed];
+		field.setValue([...tags, trimmed]);
 	};
 
 	// Remove a tag value. Always assigns a fresh array.
 	const removeTag = (tagValue: string) => {
-		field.value = tags.filter((tag) => tag !== tagValue);
+		if (field.disabled || field.readOnly) return;
+		field.setValue(tags.filter((tag) => tag !== tagValue));
 	};
 
-	// Handle option selection: add the value, cache its label, clear search but keep focus.
-	const handleSelectOption = (option: ComboboxOption) => {
-		optionCache.set(option.value, option);
-		addTag(option.value);
-		// Keep focus in the input so multi-select can continue (differs from Combobox).
+	let toolbar = $state<HTMLElement | null>(null);
+	const direction = useDirection(() => field.node);
+	// A removed tag stays in the DOM until its exit transition ends: only live tags count.
+	const chipButtons = () =>
+		Array.from(toolbar?.querySelectorAll<HTMLButtonElement>('button[data-tag]') ?? []).filter(
+			(button) => tags.includes(button.dataset.tag ?? '')
+		);
+
+	// The remove buttons are one roving tab stop: arrows move between them, the others are out of
+	// the tab order.
+	const navigation = useNavigation({
+		enabled: () => removable,
+		orientation: 'horizontal',
+		loop: false,
+		focusableContainer: false
+	});
+
+	// Backspace and Delete remove the focused tag and hand focus to its neighbour (the input
+	// after the last one); the arrow past the last tag returns to the input.
+	const toolbarKeys: Attachment<HTMLElement> = (node) =>
+		on(
+			node,
+			'keydown',
+			(event) => {
+				const button = (event.target as Element | null)?.closest<HTMLButtonElement>(
+					'button[data-tag]'
+				);
+				if (!button || event.defaultPrevented || !removable) return;
+				const buttons = chipButtons();
+				const index = buttons.indexOf(button);
+				const towardInput = direction() === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
+				if (event.key === 'Backspace' || event.key === 'Delete') {
+					event.preventDefault();
+					event.stopPropagation();
+					const tag = button.dataset.tag;
+					if (tag === undefined) return;
+					removeTag(tag);
+					void tick().then(() => {
+						const remaining = chipButtons();
+						(remaining[index] ?? remaining[index - 1] ?? field.node)?.focus();
+					});
+				} else if (event.key === towardInput && index === buttons.length - 1) {
+					event.preventDefault();
+					event.stopPropagation();
+					field.node?.focus();
+				}
+			},
+			{ capture: true }
+		);
+
+	const onKeydown = (event: KeyboardEvent) => {
+		if (event.defaultPrevented || event.isComposing) return;
+		const input = event.currentTarget as HTMLInputElement;
+		// Backspace on an empty input removes the last tag.
+		if (event.key === 'Backspace') {
+			if (!searchValue && tags.length > 0) removeTag(tags[tags.length - 1]);
+			return;
+		}
+
+		// The arrow toward the tags, at the start of the text, steps into them.
+		const towardTags = direction() === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
+		if (
+			event.key === towardTags &&
+			removable &&
+			tags.length > 0 &&
+			!event.shiftKey &&
+			input.selectionStart === 0 &&
+			input.selectionEnd === 0
+		) {
+			event.preventDefault();
+			chipButtons().at(-1)?.focus();
+			return;
+		}
+
+		// Enter adds free text in free mode (no items) or when customTags is enabled, unless an
+		// option is highlighted.
+		const canAddCustom = !hasItems || customTags;
+		if (event.key === 'Enter') {
+			const optionHighlighted = controller.expanded && controller.nav.highlighted !== undefined;
+			if (!optionHighlighted && canAddCustom && searchValue.trim() && removable) {
+				event.preventDefault();
+				addTag(searchValue);
+				return;
+			}
+		}
+		controller.onKeydown(event);
 	};
 
-	// Keyboard navigation: value-driven virtual focus over the available (non-selected) options.
-	const nav = useListNavigation({
-		values: () => availableOptions.map((option) => option.value),
-		optionId,
-		onSelect: (value) => {
-			const option = availableOptions.find((opt) => opt.value === value);
-			if (option) handleSelectOption(option);
-		}
-	});
-
-	useKeyDown({
-		isActive: () => field.focused,
-		keys: ['Escape'],
-		callback: () => {
-			field.node?.blur();
-		},
-		onWindow: () => true
-	});
-
-	const keyDownHook = useKeyDown({
-		isActive: () => field.focused,
-		keys: ['ArrowDown', 'ArrowUp', 'Enter', 'Escape', 'Home', 'End', 'Backspace'],
-		preventDefault: false,
-		callback: (event: KeyboardEvent) => {
-			// Backspace on an empty input removes the last tag.
-			if (event.key === 'Backspace') {
-				if (!searchValue && tags.length > 0) {
-					removeTag(tags[tags.length - 1]);
-				}
-				return;
+	// Resolve labels for values the options don't name (pre-filled tags, tags set from outside).
+	// Plain set on purpose: bookkeeping for the effect below, not state anything renders.
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
+	const requested = new Set<string>();
+	$effect(() => {
+		if (!getValueOption) return;
+		const unnamed = tags.filter((tag) => !optionCache.has(tag));
+		untrack(() => {
+			for (const tagValue of unnamed) {
+				if (requested.has(tagValue)) continue;
+				requested.add(tagValue);
+				void Promise.resolve(getValueOption(tagValue)).then((option) => {
+					if (option) optionCache.set(option.value, option);
+				});
 			}
-
-			if (event.key === 'Escape') {
-				field.node?.blur();
-				return;
-			}
-
-			// Enter adds free text in free mode (no items) or when customTags is enabled,
-			// unless it maps to a highlighted dropdown option (handled by nav below).
-			const canAddCustom = !hasItems || customTags;
-			const hasDropdown = isOpen && availableOptions.length > 0;
-
-			if (event.key === 'Enter') {
-				if (hasDropdown && nav.highlighted !== undefined) {
-					event.preventDefault();
-					nav.onKeydown(event);
-					return;
-				}
-				if (canAddCustom && searchValue.trim()) {
-					event.preventDefault();
-					addTag(searchValue);
-				}
-				return;
-			}
-
-			// Remaining navigation keys only matter when the dropdown is open.
-			if (hasDropdown) {
-				nav.onKeydown(event);
-			}
-		},
-		onWindow: () => false // Only attach to input element, not window
-	});
-
-	onMount(async () => {
-		// Resolve labels for pre-filled values via getValueOption.
-		if (getValueOption && tags.length > 0) {
-			for (const tagValue of tags) {
-				if (!optionCache.has(tagValue)) {
-					const option = await getValueOption(tagValue);
-					if (option) {
-						optionCache.set(option.value, option);
-					}
-				}
-			}
-		}
+		});
 	});
 
 	const classes = $derived(useTagsInputTheme(theme));
 </script>
 
 {#snippet tagsList()}
-	<ul role="list" class="contents">
+	<!-- Removable tags form a toolbar (one tab stop, arrows between the remove buttons); tags that
+	     cannot be removed are a plain list. -->
+	<div
+		bind:this={toolbar}
+		role={tags.length === 0 ? undefined : removable ? 'toolbar' : 'list'}
+		aria-label={tags.length === 0 ? undefined : t.tags}
+		aria-orientation={tags.length > 0 && removable ? 'horizontal' : undefined}
+		class="contents"
+		{@attach navigation.containerReference}
+		{@attach toolbarKeys}
+	>
 		{#each tags as tag (tag)}
-			<li
-				role="listitem"
+			<span
+				role={removable ? undefined : 'listitem'}
 				class={classes.tag({ size })}
 				animate:flip={{ duration: 200 }}
 				transition:scale={{ duration: 150, start: 0.8 }}
 			>
-				<Chip {size}>
-					{labelFor(tag)}
-					{#snippet suffix()}
-						<button
-							type="button"
-							aria-label={t.remove(labelFor(tag))}
-							onclick={() => removeTag(tag)}
-							onmousedown={(e) => {
-								e.stopPropagation();
-								e.preventDefault();
-							}}
-							class="flex items-center justify-center opacity-70 transition-opacity hover:opacity-100"
-						>
-							{@render xIcon({ size: 14 })}
-						</button>
-					{/snippet}
-				</Chip>
-			</li>
-		{/each}
-	</ul>
-{/snippet}
-
-{#if hasItems}
-	<Popover
-		haspopup="listbox"
-		closeOnClickOutside={false}
-		fitTrigger
-		position="bottom"
-		size="small"
-		open={isOpen}
-	>
-		<div
-			id={listboxId}
-			role="listbox"
-			aria-label={t.options}
-			class="flex max-h-[min(200px,calc(var(--available-height,100dvh)_-_2*var(--space-xs)))] flex-col gap-1"
-		>
-			{#if loading}
-				<div class={classes.loading({ size })} role="status" aria-live="polite">
-					{loadingText ?? t.loadingEllipsis}
-				</div>
-			{:else if optionsAsync.error}
-				<div class={classes.error({ size })} role="alert" aria-live="assertive">
-					{optionsAsync.error}
-				</div>
-			{:else if availableOptions.length === 0 && searchValue}
-				<div class={classes.noOptions({ size })} role="status">{noOptionsText ?? t.noOptions}</div>
-			{:else if availableOptions.length === 0 && !searchValue && showAllOnFocus}
-				<div class={classes.noOptions({ size })} role="status">{noOptionsText ?? t.noOptions}</div>
-			{:else if availableOptions.length > 0}
-				<ScrollArea
-					scrollOnEdges
-					type="auto"
-					class="flex max-h-[min(200px,calc(var(--available-height,100dvh)_-_2*var(--space-xs)))] flex-col gap-1"
-				>
-					{#each availableOptions as option (option.value)}
-						<MenuOption
-							as="button"
-							role="option"
-							{size}
-							{density}
-							title={option.label}
-							description={option.description}
-							highlighted={nav.highlighted === option.value}
-							onclick={() => handleSelectOption(option)}
-							attrs={{
-								id: optionId(option.value),
-								onpointermove: () => nav.setHighlighted(option.value),
-								onmousedown: (e: MouseEvent) => {
+				{#if removable}
+					<Chip {size}>
+						{labelFor(tag)}
+						{#snippet suffix()}
+							<button
+								type="button"
+								data-tag={tag}
+								aria-label={t.remove(labelFor(tag))}
+								onclick={() => removeTag(tag)}
+								onmousedown={(e) => {
 									e.stopPropagation();
 									e.preventDefault();
-								}
-							}}
-						/>
-					{/each}
-				</ScrollArea>
-			{/if}
-		</div>
-		{#snippet trigger(popover: PopoverState)}
-			<Field
-				{density}
-				{field}
-				{size}
-				{description}
-				{prefix}
-				{suffix}
-				theme={{
-					...(theme || {}),
-					inputContainer: {
-						...(theme?.inputContainer || {}),
-						base: classes.inputContainer({
-							class: theme?.inputContainer?.base,
-							size,
-							disabled: field.disabled
-						})
-					}
-				}}
-				{...rest}
-				{@attach popover.reference}
-			>
-				{@render tagsList()}
-				<input
-					data-1p-ignore
-					type="text"
-					{id}
-					name={field.name}
-					bind:value={searchValue}
-					{placeholder}
-					bind:this={field.node}
-					bind:focused={field.focused}
-					disabled={field.disabled}
-					role="combobox"
-					aria-expanded={isOpen}
-					aria-controls={isOpen ? listboxId : undefined}
-					aria-autocomplete="list"
-					aria-activedescendant={isOpen ? nav.activeDescendant : undefined}
-					aria-haspopup="listbox"
-					aria-invalid={!!optionsAsync.error}
-					autocomplete="off"
-					class={classes.input({ size, disabled: field.disabled })}
-					{@attach keyDownHook.reference}
-				/>
-			</Field>
-		{/snippet}
-	</Popover>
-{:else}
+								}}
+								class="focus-visible:ring-focus/50 flex items-center justify-center rounded-full opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2"
+								{@attach navigation.itemReference}
+							>
+								{@render xIcon({ size: 14 })}
+							</button>
+						{/snippet}
+					</Chip>
+				{:else}
+					<Chip {size}>{labelFor(tag)}</Chip>
+				{/if}
+			</span>
+		{/each}
+	</div>
+{/snippet}
+
+{#snippet fieldView(popover: PopoverState | null)}
 	<Field
 		{density}
 		{field}
@@ -457,21 +389,62 @@
 			}
 		}}
 		{...rest}
+		{@attach popover?.reference}
 	>
 		{@render tagsList()}
 		<input
 			data-1p-ignore
 			type="text"
 			{id}
-			name={field.name}
 			bind:value={searchValue}
 			{placeholder}
 			bind:this={field.node}
 			bind:focused={field.focused}
 			disabled={field.disabled}
+			role={hasItems ? 'combobox' : undefined}
+			aria-expanded={hasItems ? controller.expanded : undefined}
+			aria-controls={hasItems && controller.expanded ? controller.listboxId : undefined}
+			aria-autocomplete={hasItems ? 'list' : undefined}
+			aria-activedescendant={hasItems ? controller.activeDescendant : undefined}
+			aria-haspopup={hasItems ? 'listbox' : undefined}
+			aria-invalid={hasItems ? controller.view.error !== null : undefined}
 			autocomplete="off"
 			class={classes.input({ size, disabled: field.disabled })}
-			{@attach keyDownHook.reference}
+			oninput={(event) => controller.onInput(event)}
+			onkeydown={onKeydown}
+			onfocus={(event) => controller.onFocus(event)}
+			onpointerdown={() => controller.onPointerDown()}
+			onclick={(event) => controller.onClick(event)}
 		/>
+		<!-- The search box holds a draft: the tags are what a native form submits, one per tag. -->
+		<FieldHiddenInputs {field} value={tags} />
+		{#if hasItems}
+			<!-- Persistent, so it exists before the first announcement: result counts and status. -->
+			<span class="sr-only" {...controller.announcer.regionAttrs}>
+				{controller.announcer.message}
+			</span>
+		{/if}
 	</Field>
+{/snippet}
+
+{#if hasItems}
+	<Popover
+		haspopup="listbox"
+		closeOnClickOutside={false}
+		closeOnEscape={false}
+		focusOnClose={false}
+		fitTrigger
+		position="bottom"
+		size="small"
+		open={controller.visible}
+		onAfterOpen={() => onAfterOpen?.()}
+		onAfterClose={() => onAfterClose?.()}
+	>
+		<ComboboxPopup {controller} {classes} {size} {density} {separators} {item} {i18n} />
+		{#snippet trigger(popover: PopoverState)}
+			{@render fieldView(popover)}
+		{/snippet}
+	</Popover>
+{:else}
+	{@render fieldView(null)}
 {/if}

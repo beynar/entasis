@@ -1,3 +1,4 @@
+import { createListFilter } from '$lib/utils/listFilter.js';
 import type { PhoneCountry } from './phoneInput-cdn.js';
 
 export type PhoneCountryOption = {
@@ -5,24 +6,25 @@ export type PhoneCountryOption = {
 	name: string;
 	dialCode: string;
 	flag: string;
-	searchText: string;
 };
 
-const normalizeSearchText = (value: string) =>
-	value
-		.normalize('NFD')
-		.replace(/[\u0300-\u036f]/g, '')
-		.toLowerCase();
-
-const getDisplayNames = () => {
+const getDisplayNames = (locale: string) => {
 	if (typeof Intl === 'undefined' || typeof Intl.DisplayNames !== 'function') {
 		return null;
 	}
 
 	try {
-		return new Intl.DisplayNames('en', { type: 'region' });
+		return new Intl.DisplayNames(locale, { type: 'region' });
 	} catch {
 		return null;
+	}
+};
+
+const getCollator = (locale: string) => {
+	try {
+		return new Intl.Collator(locale);
+	} catch {
+		return new Intl.Collator();
 	}
 };
 
@@ -32,33 +34,44 @@ const getCountryName = (iso2: string, displayNames: Intl.DisplayNames | null) =>
 const getCountryFlag = (iso2: string) =>
 	iso2.toUpperCase().replace(/./g, (letter) => String.fromCodePoint(127397 + letter.charCodeAt(0)));
 
-export const createPhoneCountryOptions = (countries: PhoneCountry[]): PhoneCountryOption[] => {
-	const displayNames = getDisplayNames();
+/**
+ * The country list with names written in `locale` and sorted by that locale's alphabet.
+ */
+export const createPhoneCountryOptions = (
+	countries: PhoneCountry[],
+	locale = 'en'
+): PhoneCountryOption[] => {
+	const displayNames = getDisplayNames(locale);
+	const collator = getCollator(locale);
 
 	return countries
-		.map((country) => {
-			const name = getCountryName(country.iso2, displayNames);
-			const dialCode = `+${country.dialCode}`;
-
-			return {
-				iso2: country.iso2,
-				name,
-				dialCode: country.dialCode,
-				flag: getCountryFlag(country.iso2),
-				searchText: normalizeSearchText(`${name} ${country.iso2} ${dialCode}`)
-			};
-		})
-		.sort((firstCountry, secondCountry) => firstCountry.name.localeCompare(secondCountry.name));
+		.map((country) => ({
+			iso2: country.iso2,
+			name: getCountryName(country.iso2, displayNames),
+			dialCode: country.dialCode,
+			flag: getCountryFlag(country.iso2)
+		}))
+		.sort((firstCountry, secondCountry) => collator.compare(firstCountry.name, secondCountry.name));
 };
 
-export const filterPhoneCountryOptions = (countries: PhoneCountryOption[], searchQuery: string) => {
-	const normalizedQuery = normalizeSearchText(searchQuery.trim());
+/**
+ * The countries whose name, ISO code or dial code (`+33`) contains the search text, ignoring case
+ * and accents in `locale`.
+ */
+export const filterPhoneCountryOptions = (
+	countries: PhoneCountryOption[],
+	searchQuery: string,
+	locale = 'en'
+) => {
+	const query = searchQuery.trim();
 
-	if (!normalizedQuery) {
+	if (!query) {
 		return countries;
 	}
 
-	return countries.filter((country) => country.searchText.includes(normalizedQuery));
+	return createListFilter({ locale }).filter(countries, query, {
+		text: (country) => [country.name, country.iso2, `+${country.dialCode}`]
+	});
 };
 
 export const getPhoneCountryOption = (countries: PhoneCountryOption[], iso2?: string | null) => {
