@@ -70,6 +70,9 @@
 			};
 
 			const handleLoad = () => {
+				// A received image ends the fallback wait: the initials must not appear while the
+				// reveal delay is still running for an image that already arrived.
+				clearFallbackTimer();
 				clearRevealTimer();
 				revealTimer = setTimeout(() => {
 					settle(false);

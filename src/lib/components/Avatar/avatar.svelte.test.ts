@@ -161,6 +161,23 @@ describe('Avatar fallbackDelay and revealDelay (DF-24)', () => {
 		expect(initials(container)).toBeNull();
 	});
 
+	test('an image that loads inside the delay never shows the initials during revealDelay', async () => {
+		vi.useFakeTimers();
+		const { container } = renderInTheme(Avatar, {
+			...person,
+			fallbackDelay: 300,
+			revealDelay: 1000
+		});
+		await vi.advanceTimersByTimeAsync(100);
+		await emit(image(container), 'load');
+		await vi.advanceTimersByTimeAsync(400);
+		expect(root(container)).toHaveAttribute('data-status', 'loading');
+		expect(initials(container)).toBeNull();
+		await vi.advanceTimersByTimeAsync(600);
+		expect(root(container)).toHaveAttribute('data-status', 'loaded');
+		expect(initials(container)).toBeNull();
+	});
+
 	test('an error shows the initials immediately', async () => {
 		vi.useFakeTimers();
 		const { container } = renderInTheme(Avatar, { ...person, fallbackDelay: 300 });

@@ -115,13 +115,18 @@ Shared props (size, color, variant, disabled) apply to all buttons. Individual b
 
 ### Avatar Props
 
-| Prop    | Type    | Default      | Notes                                                      |
-| ------- | ------- | ------------ | ---------------------------------------------------------- |
-| name    | string  | **Required** | Display name; its initials render when no image shows      |
-| src     | string  | -            | Image URL; initials render when omitted or when it fails   |
-| alt     | string  | `name`       | Alternative text for the image                             |
-| delay   | number  | 0            | Delay before revealing a loaded image (ms)                 |
-| loading | boolean | false        | Bindable; `false` with no `src`, and once loaded or failed |
+| Prop          | Type                  | Default      | Notes                                                                                                                 |
+| ------------- | --------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------- |
+| name          | string                | **Required** | Display name; its initials render when no image shows                                                                 |
+| src           | string                | -            | Image URL; initials render when omitted or when it fails                                                              |
+| alt           | string                | `name`       | Accessible name of the whole avatar (`role="img"`, announced once); `""` marks it decorative (aria-hidden)            |
+| image         | AvatarImageAttributes | -            | Native `<img>` attributes: `srcset`, `sizes`, `crossorigin`, `referrerpolicy`, `loading`, `decoding`, `fetchpriority` |
+| fallbackDelay | number                | 0            | Delay (ms) before the initials render while the image is loading; errors and no `src` show them at once               |
+| revealDelay   | number                | 0            | Delay (ms) before a loaded image is revealed                                                                          |
+| delay         | number                | 0            | Deprecated alias of `revealDelay`; it never delays the initials                                                       |
+| loading       | boolean               | false        | Bindable; `false` with no `src`, and once loaded or failed                                                            |
+
+The root carries `data-status` = `idle` (no `src`) / `loading` / `loaded` / `error`, for crossfades and styling.
 
 `name` / `src` / `alt` are the fields of the exported `AvatarItem` type.
 
