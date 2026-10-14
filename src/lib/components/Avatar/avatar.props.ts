@@ -52,8 +52,9 @@ export type AvatarProps = WithAttachments<
 		 */
 		revealDelay?: number;
 		/**
-		 * @deprecated Use `revealDelay`. It still delays revealing a loaded image; it never
-		 * delays the initials (that is `fallbackDelay`).
+		 * Deprecated alias of `revealDelay`: the delay in milliseconds before a loaded image is
+		 * revealed. It never delays the initials (that is `fallbackDelay`).
+		 * @deprecated Use `revealDelay`.
 		 */
 		delay?: number;
 		/**
