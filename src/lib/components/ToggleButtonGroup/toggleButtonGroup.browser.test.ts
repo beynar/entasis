@@ -149,6 +149,62 @@ describe('orientation and loopFocus', () => {
 	});
 });
 
+describe('runtime and layout', () => {
+	test('loopFocus is read on every arrow press, not captured at mount', async () => {
+		await render(Harness, { value: ['underline'] });
+		await settle();
+		button('Underline').focus();
+		await userEvent.keyboard('{ArrowRight}');
+		expect(document.activeElement).toBe(button('Bold'));
+		await userEvent.click(button('Stop looping'));
+		button('Underline').focus();
+		await userEvent.keyboard('{ArrowRight}');
+		expect(document.activeElement).toBe(button('Underline'));
+	});
+
+	test('in RTL the arrows mirror: ArrowLeft moves to the next button', async () => {
+		document.documentElement.dir = 'rtl';
+		try {
+			await render(Harness, { value: ['bold'] });
+			await settle();
+			button('Bold').focus();
+			await userEvent.keyboard('{ArrowLeft}');
+			expect(document.activeElement).toBe(button('Italic'));
+			await userEvent.keyboard('{ArrowRight}');
+			expect(document.activeElement).toBe(button('Bold'));
+		} finally {
+			document.documentElement.removeAttribute('dir');
+		}
+	});
+
+	test('a single group is a radiogroup that reports its orientation', async () => {
+		await render(Harness, { type: 'single', value: 'bold', orientation: 'vertical' });
+		await settle();
+		expect(group().getAttribute('role')).toBe('radiogroup');
+		expect(group().getAttribute('aria-orientation')).toBe('vertical');
+	});
+
+	test('a multiple group never carries aria-orientation', async () => {
+		await render(Harness, { orientation: 'vertical' });
+		await settle();
+		expect(group().getAttribute('role')).toBe('group');
+		expect(group().hasAttribute('aria-orientation')).toBe(false);
+	});
+
+	test('a joined vertical group rounds only the outer corners of the first and last button', async () => {
+		await render(Harness, { joined: true, orientation: 'vertical' });
+		await settle();
+		const radius = (name: string, corner: 'borderTopLeftRadius' | 'borderBottomLeftRadius') =>
+			parseFloat(getComputedStyle(button(name))[corner]);
+		expect(radius('Bold', 'borderTopLeftRadius')).toBeGreaterThan(0);
+		expect(radius('Bold', 'borderBottomLeftRadius')).toBe(0);
+		expect(radius('Italic', 'borderTopLeftRadius')).toBe(0);
+		expect(radius('Italic', 'borderBottomLeftRadius')).toBe(0);
+		expect(radius('Underline', 'borderTopLeftRadius')).toBe(0);
+		expect(radius('Underline', 'borderBottomLeftRadius')).toBeGreaterThan(0);
+	});
+});
+
 describe('focusableWhenDisabled', () => {
 	const items = [
 		{ value: 'bold', children: 'Bold' },

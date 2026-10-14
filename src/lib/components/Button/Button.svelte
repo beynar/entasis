@@ -88,12 +88,13 @@
 		return () => node.removeEventListener('click', refuse, { capture: true });
 	};
 
+	// A focusable disabled button keeps its pointer events, so hover callbacks (a tooltip) still fire.
 	const handlePointerEnter: NonNullable<ButtonInternalProps['onpointerenter']> = (event) => {
-		if (!disabled) onpointerenter?.(event);
+		if (!disabled || focusableWhenDisabled) onpointerenter?.(event);
 	};
 
 	const handlePointerLeave: NonNullable<ButtonInternalProps['onpointerleave']> = (event) => {
-		if (!disabled) onpointerleave?.(event);
+		if (!disabled || focusableWhenDisabled) onpointerleave?.(event);
 	};
 </script>
 

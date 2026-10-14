@@ -49,8 +49,8 @@ export type ToggleButtonGroupProps<
 	/**
 	 * Axis of the group: `'horizontal'` lays the buttons out in a row and moves between them with
 	 * ArrowLeft and ArrowRight; `'vertical'` stacks them and uses ArrowUp and ArrowDown. Keys of
-	 * the other axis are ignored. Exposed as `data-orientation`; the group role never carries
-	 * `aria-orientation`.
+	 * the other axis are ignored. Exposed as `data-orientation`; a `type="single"` group (`radiogroup`)
+	 * also sets `aria-orientation`, the `group` role of a multiple group never does.
 	 * @default 'horizontal'
 	 */
 	orientation?: ToggleButtonGroupOrientation;

@@ -23,7 +23,7 @@ const defaultButton = cva({
 			outline: 'state-layer bg-color/0 border border-color text-color-readable',
 			soft: 'state-layer text-color-muted-readable bg-color-muted',
 			ghost: 'state-layer text-color-readable bg-color/0',
-			link: 'bg-transparent text-color-readable hover:underline'
+			link: 'bg-transparent text-color-readable hover:not-aria-disabled:underline'
 		},
 		// A loading button keeps receiving pointer events: pointer-events-none would let a second click
 		// fall through to the page beneath and drop keyboard focus to <body>. The click guard in

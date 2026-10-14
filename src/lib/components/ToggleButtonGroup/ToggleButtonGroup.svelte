@@ -95,6 +95,7 @@
 <div
 	role={type === 'single' ? 'radiogroup' : 'group'}
 	aria-label={label}
+	aria-orientation={type === 'single' ? orientation : undefined}
 	data-color={color}
 	data-type={type}
 	data-orientation={orientation}

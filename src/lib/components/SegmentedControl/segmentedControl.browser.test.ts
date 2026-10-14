@@ -120,6 +120,16 @@ describe('keyboard moves', () => {
 		expect(changes()).toBe('');
 	});
 
+	test('Shift+Arrow is an ordinary move: it moves focus and selects once', async () => {
+		await render(Harness, { value: 'list' });
+		await settle();
+		radio('List').focus();
+		await userEvent.keyboard('{Shift>}{ArrowRight}{/Shift}');
+		expect(document.activeElement).toBe(radio('Table'));
+		expect(value()).toBe('table');
+		expect(changes()).toBe('table');
+	});
+
 	test('a click selects the item', async () => {
 		await render(Harness, { value: 'list' });
 		await settle();

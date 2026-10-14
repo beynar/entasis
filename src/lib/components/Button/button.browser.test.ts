@@ -72,3 +72,44 @@ test('Tab skips a natively disabled button', async () => {
 	await tab();
 	expect(document.activeElement).not.toBe(save());
 });
+
+test('a focusable disabled button still reports pointer enter and leave', async () => {
+	const onpointerenter = vi.fn();
+	const onpointerleave = vi.fn();
+	await mount({
+		children: 'Save',
+		disabled: true,
+		focusableWhenDisabled: true,
+		onpointerenter,
+		onpointerleave
+	});
+	await userEvent.hover(save());
+	expect(onpointerenter).toHaveBeenCalledOnce();
+	await userEvent.unhover(save());
+	expect(onpointerleave).toHaveBeenCalledOnce();
+});
+
+test('a natively disabled button reports no pointer enter', async () => {
+	const onpointerenter = vi.fn();
+	await mount({ children: 'Save', disabled: true, onpointerenter });
+	save().dispatchEvent(new PointerEvent('pointerenter'));
+	expect(onpointerenter).not.toHaveBeenCalled();
+});
+
+test('the link variant underlines on hover only while the button can be activated', async () => {
+	const underline = () => getComputedStyle(save()).textDecorationLine;
+	await mount({ children: 'Save', variant: 'link' });
+	await userEvent.hover(save());
+	expect(underline()).toBe('underline');
+	await userEvent.unhover(save());
+	expect(underline()).toBe('none');
+});
+
+test.each([{ loading: true }, { disabled: true, focusableWhenDisabled: true }])(
+	'the link variant does not underline on hover when %o',
+	async (state) => {
+		await mount({ children: 'Save', variant: 'link', ...state });
+		await userEvent.hover(save());
+		expect(getComputedStyle(save()).textDecorationLine).toBe('none');
+	}
+);
