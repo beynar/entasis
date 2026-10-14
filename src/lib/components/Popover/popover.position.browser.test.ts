@@ -6,7 +6,11 @@ import { afterEach, expect, test, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
 import { animationsSettled, nextFrame } from '$lib/testing/browser.test-helper.js';
-import { createPanelPositioner, type PanelPositionerOptions } from './popover.position.js';
+import {
+	computePanelPosition,
+	createPanelPositioner,
+	type PanelPositionerOptions
+} from './popover.position.js';
 import type { PopoverPlacement } from './popover.props.js';
 import PopoverCapHarness from './PopoverCapHarness.test.svelte';
 import PopoverPositionHarness from './PopoverPositionHarness.test.svelte';
@@ -299,4 +303,20 @@ test('a list with no room for its full height shrinks to the room below its inpu
 	// The last options are scrolled out of the shrunk list.
 	const last = page.getByRole('option', { name: 'Option 30' }).element();
 	expect(last.getBoundingClientRect().top).toBeGreaterThan(wrapper.getBoundingClientRect().bottom);
+});
+
+test('a submenu with no room beside it and 9px too little below falls to the cross axis below, never over its menu', async () => {
+	await page.viewport(800, 800);
+	// A wide menu near the left edge leaves no room beside its submenu row, which sits low:
+	// the panel overflows the space below by 9px, yet plenty of room is left above the row.
+	const row = fixedBox({ top: 586, left: 42, width: 700, height: 28 });
+	const panel = fixedBox({ top: 0, left: 0, width: 240, height: 171 });
+	const { placement, y } = await computePanelPosition(row, panel, {
+		placement: 'right-start',
+		fallbackAxisSide: 'end'
+	});
+	expect(placement).toBe('bottom-start');
+	// Slid up by shift to stay in the viewport, but it still starts inside the row, not above it.
+	expect(y).toBeGreaterThanOrEqual(row.getBoundingClientRect().top);
+	expect(y + 171).toBeLessThanOrEqual(800 - 20 + 1);
 });

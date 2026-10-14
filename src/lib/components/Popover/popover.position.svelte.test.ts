@@ -16,6 +16,7 @@ import {
 	claimPopupSide,
 	createPanelPositioner,
 	directedMotion,
+	fallbackPlacementsFor,
 	nearestLine,
 	panelMiddleware,
 	releasePanelPosition,
@@ -175,6 +176,36 @@ describe('panel middleware', () => {
 	test('fallbackAxisSide lets flip try the perpendicular axis', () => {
 		const middleware = panelMiddleware({ fallbackAxisSide: 'end' }) as unknown as MiddlewareLike[];
 		expect(middleware[1].options.fallbackAxisSideDirection).toBe('end');
+	});
+
+	test('a submenu falls back to the requested perpendicular side only, never above its row', () => {
+		// floating-ui's defaults for a start-aligned right placement, then only the bottom side.
+		expect(fallbackPlacementsFor('right-start', 'end')).toEqual([
+			'right-end',
+			'left-start',
+			'left-end',
+			'bottom-start',
+			'bottom-end'
+		]);
+		expect(fallbackPlacementsFor('left-end', 'start')).toEqual([
+			'left-start',
+			'right-end',
+			'right-start',
+			'top-end',
+			'top-start'
+		]);
+		expect(fallbackPlacementsFor('right', 'end')).toEqual(['left', 'bottom']);
+		// Nothing to narrow without a fallback, a placement, or a left/right side.
+		expect(fallbackPlacementsFor('right-start', 'none')).toBeUndefined();
+		expect(fallbackPlacementsFor(undefined, 'end')).toBeUndefined();
+		expect(fallbackPlacementsFor('bottom-start', 'end')).toBeUndefined();
+		const middleware = panelMiddleware({
+			placement: 'right-start',
+			fallbackAxisSide: 'end'
+		}) as unknown as MiddlewareLike[];
+		expect(middleware[1].options.fallbackPlacements).toEqual(
+			fallbackPlacementsFor('right-start', 'end')
+		);
 	});
 
 	test('anchoring to a line without a point puts inline() first; with a point the line is chosen outside it', () => {

@@ -170,6 +170,11 @@ export interface PanelMiddlewareOptions {
 	/** The perpendicular sides `flip` falls back to when neither side of the axis fits. */
 	fallbackAxisSide?: PopoverFallbackAxisSide;
 	/**
+	 * The requested placement. With `fallbackAxisSide` and a left or right side it narrows the
+	 * fallback to the one perpendicular side asked for; see `fallbackPlacementsFor`.
+	 */
+	placement?: Placement;
+	/**
 	 * Anchor to the line of a wrapped reference nearest this point (viewport coordinates);
 	 * `null` lets floating-ui's `inline()` pick the first or last line from the side. Omitted
 	 * anchors to the whole box.
@@ -212,6 +217,41 @@ const lineReference = (
 		nearestLine(reference.getClientRects?.() ?? [], point) ?? reference.getBoundingClientRect()
 });
 
+const OPPOSITE_SIDE: Record<Side, Side> = {
+	top: 'bottom',
+	bottom: 'top',
+	left: 'right',
+	right: 'left'
+};
+const OPPOSITE_ALIGNMENT = { start: 'end', end: 'start' } as const;
+
+/**
+ * The placements `flip` tries after the requested one when it asks for a perpendicular fallback
+ * beside a left or right placement (a submenu). floating-ui's own `fallbackAxisSideDirection`
+ * lists both perpendicular sides, and `flip` takes the first that fits: a submenu with no room
+ * below its row would jump above it and cover its menu. Only the requested side is kept, so with
+ * no room anywhere the least-overflowing candidate wins and `shift` slides it back. `undefined`
+ * leaves floating-ui's defaults.
+ */
+export const fallbackPlacementsFor = (
+	placement: Placement | undefined,
+	fallbackAxisSide: PopoverFallbackAxisSide
+): Placement[] | undefined => {
+	if (!placement || fallbackAxisSide === 'none') return undefined;
+	const [side, align] = placement.split('-') as [Side, Alignment | undefined];
+	if (side !== 'left' && side !== 'right') return undefined;
+	const alignments = align ? [align, OPPOSITE_ALIGNMENT[align]] : [undefined];
+	const withAlign = (target: Side, alignment: Alignment | undefined) =>
+		(alignment ? `${target}-${alignment}` : target) as Placement;
+	const cross: Side = fallbackAxisSide === 'end' ? 'bottom' : 'top';
+	return [
+		// What flip tries without the option: the opposite side, then the alignment mirrors.
+		...(align ? [withAlign(side, OPPOSITE_ALIGNMENT[align])] : []),
+		...alignments.map((alignment) => withAlign(OPPOSITE_SIDE[side], alignment)),
+		...alignments.map((alignment) => withAlign(cross, alignment))
+	];
+};
+
 /**
  * The floating-ui middleware every floating panel is placed with, in order: `inline` (only when
  * anchoring to a line without a pointer point), `offset`, `flip`, `size`, `shift` and `hide`. `size` writes the available
@@ -223,6 +263,7 @@ export const panelMiddleware = ({
 	offset: gap,
 	collisionBoundary = 'visualViewport',
 	fallbackAxisSide = 'none',
+	placement,
 	line
 }: PanelMiddlewareOptions = {}) => [
 	...(line === null ? [inline({})] : []),
@@ -231,7 +272,8 @@ export const panelMiddleware = ({
 		mainAxis: true,
 		crossAxis: true,
 		padding: VIEWPORT_PADDING,
-		fallbackAxisSideDirection: fallbackAxisSide
+		fallbackAxisSideDirection: fallbackAxisSide,
+		fallbackPlacements: fallbackPlacementsFor(placement, fallbackAxisSide)
 	}),
 	size({
 		padding: VIEWPORT_PADDING,
@@ -272,7 +314,7 @@ export const computePanelPosition = (
 	computePosition(middleware.line ? lineReference(reference, middleware.line) : reference, panel, {
 		strategy: 'fixed',
 		placement,
-		middleware: panelMiddleware(middleware),
+		middleware: panelMiddleware({ ...middleware, placement }),
 		// The direction resolved for the reference, not the portaled wrapper's own: a trigger in
 		// a `dir="rtl"` subtree aligns like the subtree even though its panel sits under <body>.
 		...(direction ? { platform: { ...platform, isRTL: () => direction === 'rtl' } } : {})

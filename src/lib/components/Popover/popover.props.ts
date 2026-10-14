@@ -95,10 +95,12 @@ export type PopoverProps = WithAttachments<{
 	 */
 	collisionBoundary?: PopoverCollisionBoundary;
 	/**
-	 * When the panel fits neither on its side nor on the opposite one, also try the two sides of
-	 * the perpendicular axis: `'end'` tries bottom (or the inline end) first, `'start'` top (or
-	 * the inline start), `'none'` stays on the axis. Submenus use `'end'`, so a submenu with no
-	 * room beside its menu opens below it.
+	 * When the panel fits neither on its side nor on the opposite one, also try the perpendicular
+	 * axis: `'end'` tries bottom (or the inline end) first, `'start'` top (or the inline start),
+	 * `'none'` stays on the axis. A panel placed beside its reference (left or right) tries only
+	 * the side asked for, so it never jumps over the reference's own row and menu. Submenus use
+	 * `'end'`: a submenu with no room beside its menu opens below its row, sliding back into the
+	 * viewport if that is still too tight.
 	 * @default 'none'
 	 */
 	fallbackAxisSide?: PopoverFallbackAxisSide;
