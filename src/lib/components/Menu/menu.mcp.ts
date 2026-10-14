@@ -512,7 +512,8 @@ This allows for consistent styling across all menu items while maintaining flexi
 
 Submenu items automatically:
 - Add a caret-right icon as suffix (unless custom suffix provided)
-- Open submenus positioned to the right (right-start)
+- Open submenus beside their row on the reading direction's end side (\`inline-end-start\`: right in a left-to-right document, left in a right-to-left one); below \`md\` they drop below the row (\`bottom-start\`)
+- Fall back below their row when neither side of the menu has room (\`fallbackAxisSide: 'end'\`), instead of covering the menu
 - Support hover and click triggers (configurable)
 - Manage submenu state internally using PopupMenu
 - Support nested submenus (submenus within submenus)

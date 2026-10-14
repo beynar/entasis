@@ -4,8 +4,9 @@ import type { ResponsiveProps } from '../Theme/theme.js';
 import type { Sizes } from '$lib/types/theme.js';
 import type { ButtonProps } from '../Button/index.js';
 import type { FSOProps } from '$lib/transitions/transition.js';
-import { type Placement, type VirtualElement } from '@floating-ui/dom';
+import { type Alignment, type Placement, type VirtualElement } from '@floating-ui/dom';
 import type { WithAttachments } from '$lib/types/props.js';
+import type { PopupPlacementSide } from '$lib/utils/stateAttributes.js';
 import type { PopoverThemeProps } from './popover.theme.js';
 import type { OpenChangeHandler } from '$lib/utils/openChange.js';
 
@@ -15,6 +16,36 @@ import type { OpenChangeHandler } from '$lib/utils/openChange.js';
  * `programmatic` (`open()` from code, the `open` prop, `defaultOpen`).
  */
 export type PopoverOpenReason = 'hover' | 'press' | 'keyboard' | 'programmatic';
+
+/**
+ * A side named by reading direction: `inline-start` is the left side in a left-to-right document
+ * and the right side in a right-to-left one; `inline-end` is the other.
+ */
+export type PopoverLogicalSide = 'inline-start' | 'inline-end';
+
+/**
+ * Where the panel goes relative to its reference: a floating-ui placement (`bottom-start`), or a
+ * logical side with an optional alignment (`inline-end`, `inline-end-start`). The `start` / `end`
+ * alignment of `top` and `bottom` already follows the reading direction.
+ */
+export type PopoverPlacement =
+	Placement | PopoverLogicalSide | `${PopoverLogicalSide}-${Alignment}`;
+
+/**
+ * The side a placed panel sits on, written as `data-side` on the panel and `data-popup-side` on
+ * its trigger: the physical side, the logical one when a logical side was requested, or `none`
+ * when `positionPanel` placed the panel.
+ */
+export type PopoverSide = PopupPlacementSide;
+
+/** The viewport `shift` keeps a floating panel inside; see `collisionBoundary`. */
+export type PopoverCollisionBoundary = 'visualViewport' | 'layoutViewport';
+
+/** Perpendicular sides a panel falls back to; see `fallbackAxisSide`. */
+export type PopoverFallbackAxisSide = 'start' | 'end' | 'none';
+
+/** What a panel anchors to on a reference that wraps across lines; see `anchorTo`. */
+export type PopoverAnchorTo = 'box' | 'line';
 
 export type PopoverProps = WithAttachments<{
 	/** Stable DOM id for the popover dialog; falls back to a generated id when omitted. */
@@ -47,8 +78,38 @@ export type PopoverProps = WithAttachments<{
 	 * menu at the cursor. An open popover closes when this element leaves the document.
 	 */
 	ref?: HTMLElement | VirtualElement | null;
-	/** Preferred placement relative to the reference element; supports responsive values. */
-	position?: ResponsiveProps<Placement>;
+	/**
+	 * Preferred placement relative to the reference element; supports responsive values. Takes a
+	 * floating-ui placement (`bottom-start`) or a logical side (`inline-end`, `inline-end-start`)
+	 * that resolves with the reading direction. The panel flips to the opposite side when the
+	 * preferred one has no room; the side it lands on is written as `data-side`.
+	 */
+	position?: ResponsiveProps<PopoverPlacement>;
+	/**
+	 * The viewport the panel is shifted back into when it would cross an edge. `'visualViewport'`
+	 * is the visible area, which shrinks under an on-screen keyboard and follows pinch-zoom;
+	 * `'layoutViewport'` ignores pinch-zoom, so panning a zoomed page doesn't drag the panel
+	 * along. Flipping and the `--available-*` sizes always use the visual viewport. ContextMenu
+	 * uses `'layoutViewport'`.
+	 * @default 'visualViewport'
+	 */
+	collisionBoundary?: PopoverCollisionBoundary;
+	/**
+	 * When the panel fits neither on its side nor on the opposite one, also try the two sides of
+	 * the perpendicular axis: `'end'` tries bottom (or the inline end) first, `'start'` top (or
+	 * the inline start), `'none'` stays on the axis. Submenus use `'end'`, so a submenu with no
+	 * room beside its menu opens below it.
+	 * @default 'none'
+	 */
+	fallbackAxisSide?: PopoverFallbackAxisSide;
+	/**
+	 * What the panel anchors to when its reference wraps across lines (a link in prose): `'box'`
+	 * is the whole bounding box; `'line'` is the line the pointer was on when the panel opened,
+	 * kept while it stays open. Without a pointer (a keyboard open) the panel takes the first
+	 * line above the reference and the last line below it.
+	 * @default 'box'
+	 */
+	anchorTo?: PopoverAnchorTo;
 	/**
 	 * Places the panel yourself instead of floating-ui: return its viewport coordinates (the
 	 * panel is `position: fixed`) and optionally a `minWidth` in px that replaces `fitTrigger`'s,

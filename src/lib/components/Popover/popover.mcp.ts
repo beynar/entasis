@@ -25,10 +25,14 @@ The Popover component displays floating content positioned relative to a trigger
 - **id**: string - Unique identifier
 
 ### Layout Props
-- **position**: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end' | 'left-start' | 'left-end' | 'right-start' | 'right-end' (default: 'bottom')
-  - Determines where popover appears relative to trigger
+- **position**: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end' | 'left-start' | 'left-end' | 'right-start' | 'right-end' | 'inline-start' | 'inline-end' | 'inline-start-start' | 'inline-start-end' | 'inline-end-start' | 'inline-end-end' (default: 'top'; responsive values allowed)
+  - Determines where popover appears relative to trigger. The panel flips to the opposite side when the preferred one has no room, and shifts back inside the viewport (20px from its edges)
+  - \`inline-start\` / \`inline-end\` are logical sides: left / right in a left-to-right document, right / left in a right-to-left one (the i18n direction context, else the trigger's computed \`direction\`). The \`start\` / \`end\` alignment of \`top\` and \`bottom\` already follows the reading direction
+- **collisionBoundary**: 'visualViewport' | 'layoutViewport' (default: 'visualViewport') - The viewport the panel is shifted back into. The visual viewport is the visible area: it shrinks under an on-screen keyboard and follows pinch-zoom. \`'layoutViewport'\` ignores pinch-zoom so panning a zoomed page doesn't drag the panel along; flipping and \`--available-*\` still use the visual viewport. ContextMenu uses \`'layoutViewport'\`
+- **fallbackAxisSide**: 'start' | 'end' | 'none' (default: 'none') - When the panel fits neither on its side nor the opposite one, also try the perpendicular sides: \`'end'\` tries bottom (or the inline end) first, \`'start'\` top (or the inline start). Submenus use \`'end'\`, so a submenu with no room beside its menu opens below its row
+- **anchorTo**: 'box' | 'line' (default: 'box') - What the panel anchors to when its trigger wraps across lines (a link in prose): the whole bounding box, or the line the pointer was on when the panel opened, kept while it stays open. A keyboard open takes the first line above the trigger and the last one below it
 - **offset**: number - Distance in pixels from the reference element
-- **fitTrigger**: boolean (default: false) - Whether popover should match the width of the trigger element
+- **fitTrigger**: boolean (default: false) - Whether popover should match the width of the trigger element (the trigger width snapped to the device pixel grid, also published as \`--anchor-width\`)
 - **positionPanel**: ({ panel, reference }) => { x: number; y: number; minWidth?: number } | null - Place the panel yourself instead of floating-ui: return its viewport coordinates (the panel is \`position: fixed\`) and optionally a \`minWidth\` in px that replaces \`fitTrigger\`'s, or \`null\` to fall back to \`position\`. Called when the panel mounts and whenever floating-ui would reposition it. Select uses it to open over its trigger
 - **mobileSheet**: boolean (default: false) - On mobile viewports (<768px), render as a bottom sheet instead of an anchored floating panel
 - **inline**: boolean (default: false) - Render the panel in normal document flow where the component sits instead of portaling to the viewport-fixed layer: no floating-ui positioning, no scroll lock, no outside-press dismissal (Escape still closes it). Same panel classes and motion, and the trigger still toggles it. Wins over \`mobileSheet\`
@@ -88,6 +92,39 @@ The Popover component displays floating content positioned relative to a trigger
 ### Styling Props
 - **class**: string - Additional CSS classes
 - **theme**: ComponentTheme - Custom theme overrides
+
+## Styling hooks
+
+A floating panel is placed before it shows: it stays hidden until its first placement lands, and \`focusOnOpen\` waits for that placement too. Every placement (scroll, resize, a flip, the end of the opening transition, and the visual viewport settling after an on-screen keyboard) updates these hooks.
+
+**Data attributes**
+- \`data-side\` on the panel: the side of the trigger it sits on after flipping: \`top\`, \`right\`, \`bottom\`, \`left\`; \`inline-start\` / \`inline-end\` when a logical side was requested; \`none\` when \`positionPanel\` placed it
+- \`data-align\` on the panel: \`start\`, \`center\` or \`end\` (absent with \`data-side="none"\`)
+- \`data-anchor-hidden\` on the panel: present while the trigger is scrolled out of view; the panel is hidden meanwhile
+- \`data-popup-side\` on the trigger (or the \`ref\` element): the panel's \`data-side\` while it is placed, so a theme can flatten the corner the panel attaches to
+
+**CSS variables** (set on the positioned wrapper, inherited by the panel and its content)
+- \`--available-height\` / \`--available-width\`: the room between the trigger and the viewport edge on the panel's side, minus 20px. Cap a scrolling list with \`max-height: min(240px, var(--available-height))\` so it shrinks instead of covering its trigger
+- \`--anchor-width\` / \`--anchor-height\`: the trigger's size, snapped to the device pixel grid
+- \`--transform-origin\`: the panel corner facing the trigger, mirrored in right-to-left documents
+
+\`\`\`svelte
+<script>
+	import { Popover } from 'entasis/popover';
+</script>
+
+<!-- Square the corner that touches the trigger, whichever side the panel lands on -->
+<Popover
+	position="bottom-start"
+	class="data-[side=bottom]:rounded-t-none data-[side=top]:rounded-b-none"
+	trigger={{ content: 'Open' }}
+>
+	Attached panel
+</Popover>
+
+<!-- Opens on the reading direction's end side: right in English, left in Arabic -->
+<Popover position="inline-end" trigger={{ content: 'Details' }}>Details</Popover>
+\`\`\`
 
 ## Structure
 
@@ -401,6 +438,7 @@ The Popover component uses a \`PopoverState\` instance that is passed to all slo
 - **size**: Size - Current popover size
 - **position**: Placement - Current popover position
 - **offset**: number - Current offset value
+- **placement**: { side, align, anchorHidden } | null - Where the floating panel was last placed (the values of \`data-side\`, \`data-align\` and \`data-anchor-hidden\`); \`null\` until it is placed and once it unmounts
 - **open(details?)**, **close(details?)**, **toggle(details?)** - Request a change through \`onOpenChange\`. Each accepts the DOM event (\`onclick={popover.toggle}\`) or partial details (\`{ reason, event, trigger }\`); called while a trigger press dispatches, the change reports \`reason: 'trigger-press'\` and that trigger, otherwise \`'imperative-action'\`. \`toggle\` on the trigger of a hover-opened popover pins it open; on another trigger of an open popover it moves the panel there
 - **setOpen(open, details?)**: boolean - The same request with an explicit state; returns \`false\` when \`onOpenChange\` cancelled it
 - **openReason**: 'hover' | 'press' | 'keyboard' | 'programmatic' | null - How the open popover was opened (\`programmatic\` covers \`open()\` from code, the \`open\` prop and \`defaultOpen\`)
@@ -423,7 +461,8 @@ The Popover component uses a \`PopoverState\` instance that is passed to all slo
 - Popover is positioned using floating-ui, except with \`inline\`, where the document lays the panel out
 - Removing the trigger that opened it closes an open popover (reported through \`onOpenChange(false, details)\` with \`reason: 'trigger-unmount'\`), even when another trigger remains, and so does a \`ref\` element leaving the document; a trigger re-rendered as a new element keeps it open and re-anchors it. Unmounting the whole Popover reports nothing
 - \`onAfterOpen\` and \`onAfterClose\` fire exactly once per open and close, also when no transition plays (an \`inline\` or \`defaultOpen\` popover reports its open once mounted)
-- Automatically adjusts position to stay in viewport
+- Automatically adjusts position to stay in viewport: flips, then shifts 20px inside the visual viewport, and places again once the visual viewport settles after an on-screen keyboard opens
+- Coordinates are rounded to the device pixel grid, and in right-to-left documents the panel stays beside its trigger with \`start\` alignment on the right
 - Multiple popovers can be stacked
 - Scroll locking prevents background scroll (when enabled), except for a popover hovering opened
 - Transitions animate based on position direction

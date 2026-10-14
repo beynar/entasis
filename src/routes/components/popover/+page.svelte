@@ -12,7 +12,7 @@
 	import { sizes } from '$lib/utils/tokens.js';
 	import type { OpenChangeDetails } from '$lib/types/index.js';
 
-	const placements = ['top', 'bottom', 'left', 'right'] as const;
+	const placements = ['top', 'bottom', 'left', 'right', 'inline-start', 'inline-end'] as const;
 	const controls = createComponentControls([
 		{
 			name: 'size',

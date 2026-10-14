@@ -26,8 +26,20 @@ import {
 	writePopupAria,
 	type PopupTriggerProps
 } from '$lib/utils/trigger.js';
+import { useDirection } from '$lib/utils/useDirection.svelte.js';
+import { placementAttributes, popupSideAttributes } from '$lib/utils/stateAttributes.js';
 import { usePopoverMotion, type PopoverThemeProps } from './popover.theme.js';
-import { createPanelPositioner, directedMotion, releasePanelPosition } from './popover.position.js';
+import {
+	applyDirectedOffset,
+	createPanelPositioner,
+	directedMotion,
+	releasePanelPosition,
+	type PanelDirection,
+	type PanelPlacement
+} from './popover.position.js';
+
+/** Where a floating panel was last placed; see `PopoverState.placement`. */
+export type PopoverPlacementState = Pick<PanelPlacement, 'side' | 'align' | 'anchorHidden'>;
 
 type MakeRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 interface PopoverOptions extends MakeRequired<
@@ -55,6 +67,9 @@ interface PopoverOptions extends MakeRequired<
 		| 'focusOnOpen'
 		| 'haspopup'
 		| 'positionPanel'
+		| 'collisionBoundary'
+		| 'fallbackAxisSide'
+		| 'anchorTo'
 	>,
 	| 'directedTransition'
 	| 'closeOnEscape'
@@ -132,6 +147,21 @@ export class PopoverState extends PopoverOptionsBase {
 	openReason = $state<PopoverOpenReason | null>(null);
 	/** The details of the last change that was applied, kept until the next one. */
 	lastOpenChange = $state.raw<OpenChangeDetails | null>(null);
+	/**
+	 * Where the floating panel was last placed: the side it sits on (logical when a logical side
+	 * was requested, `none` when `positionPanel` placed it), its alignment, and whether its anchor
+	 * is scrolled out of view. `null` until the first placement lands and once the panel unmounts.
+	 */
+	placement = $state<PopoverPlacementState | null>(null);
+	/** `data-side`, `data-align` and `data-anchor-hidden` for the panel. */
+	panelAttributes = $derived(
+		placementAttributes(
+			this.placement
+				? { side: this.placement.side, align: this.placement.align ?? undefined }
+				: undefined,
+			{ anchorHidden: this.placement?.anchorHidden }
+		)
+	);
 	parent = getContext<PopoverState | null>('popover');
 	// Nested popovers join while they mount and leave when torn down; see `Registry`.
 	readonly #children = new Registry<PopoverState>();
@@ -187,8 +217,14 @@ export class PopoverState extends PopoverOptionsBase {
 	// inside the panel, or when a trigger opened the popover (Safari does not focus a button on
 	// click, so a press and Escape leave focus on <body>). A popover with neither, such as a
 	// combobox list, leaves focus alone, even when the control that kept it blurred on purpose.
+	// A floating panel is hidden until its first placement lands, and nothing in it can take focus
+	// before then, so initial focus waits for that placement.
 	focusScope = useFocusScope({
-		isActive: () => this.isOpen && !this.isMobileSheet && this.layer.isTop,
+		isActive: () =>
+			this.isOpen &&
+			!this.isMobileSheet &&
+			this.layer.isTop &&
+			(this.computedMode !== 'floating' || this.placement !== null),
 		trap: () => false,
 		initialFocus: () => this.focusOnOpen ?? false,
 		restoreFocus: () => this.#focusEntered || this.activeTrigger !== null,
@@ -237,6 +273,16 @@ export class PopoverState extends PopoverOptionsBase {
 
 	addChild = (child: PopoverState) => () => this.#children.add(child);
 
+	/** The element the panel is anchored to, for its writing direction. */
+	#anchorElement = (): HTMLElement | null => {
+		const reference = this.referenceElement;
+		if (reference instanceof HTMLElement) return reference;
+		const context = reference?.contextElement;
+		return context instanceof HTMLElement ? context : null;
+	};
+	/** The reading direction logical sides and start/end alignment resolve with. */
+	#direction = useDirection(this.#anchorElement);
+
 	constructor(options: PopoverOptions) {
 		super();
 		bind(this, options);
@@ -280,6 +326,17 @@ export class PopoverState extends PopoverOptionsBase {
 				this.openReason = 'programmatic';
 				this.#opener = focusedElement();
 			});
+		});
+
+		// The trigger (or `ref` element) reports the side its placed panel sits on, so a theme can
+		// flatten the corner the panel attaches to.
+		$effect(() => {
+			const anchor = this.referenceElement;
+			if (!(anchor instanceof HTMLElement)) return;
+			const { 'data-popup-side': side } = popupSideAttributes(this.placement?.side);
+			if (side) anchor.setAttribute('data-popup-side', side);
+			else anchor.removeAttribute('data-popup-side');
+			return () => anchor.removeAttribute('data-popup-side');
 		});
 	}
 
@@ -436,17 +493,34 @@ export class PopoverState extends PopoverOptionsBase {
 		return true;
 	};
 
-	/** Starts the panel's motion from the side facing the reference, for the resolved placement. */
-	applyDirectedTransition = (node: HTMLElement, placement: Placement) => {
-		const { transformOrigin, axis, distance } = directedMotion(placement);
-		this.transformOrigin = transformOrigin;
-		Object.assign(this.computedTransition.in, {
-			[axis]: distance
-		});
-		Object.assign(this.computedTransition.out, {
-			[axis]: distance
-		});
+	/**
+	 * Points the panel's motion at the side facing the reference, for the resolved placement: the
+	 * scale origin and the exit follow every placement (a flip included), the entrance only the
+	 * placement made before it plays.
+	 */
+	applyDirectedTransition = (
+		placement: Placement,
+		{ direction = 'ltr', intro = true }: { direction?: PanelDirection; intro?: boolean } = {}
+	) => {
+		const motion = directedMotion(placement, direction);
+		this.transformOrigin = motion.transformOrigin;
+		if (intro) applyDirectedOffset(this.computedTransition.in, motion);
+		applyDirectedOffset(this.computedTransition.out, motion);
 	};
+
+	/** Records a placement, reassigning only what changed so styling hooks don't churn on scroll. */
+	#setPlacement = ({ side, align, anchorHidden }: PopoverPlacementState) => {
+		const current = this.placement;
+		if (current?.side === side && current.align === align && current.anchorHidden === anchorHidden)
+			return;
+		this.placement = { side, align, anchorHidden };
+	};
+
+	/**
+	 * Where the pointer last was over the trigger while the popover was closed, in viewport
+	 * coordinates. Frozen while open: `anchorTo: 'line'` anchors to the line under it.
+	 */
+	#anchorPoint: { x: number; y: number } | null = null;
 
 	// floating-ui placement lives in `popover.position.ts`. Its inputs are read when a placement
 	// runs: the mount placement runs inside the `dialog` attachment, so a change to any of them
@@ -455,20 +529,35 @@ export class PopoverState extends PopoverOptionsBase {
 		reference: () => this.referenceElement,
 		// Inline panels and mobile sheets are laid out by the document, never by floating-ui.
 		floating: () => !this.inline && !this.isMobileSheet,
-		settled: () => this.lifecycle.status === 'open',
+		// Untracked: floating-ui runs its first observed update synchronously inside the panel
+		// attachment, which would otherwise re-run (and re-mount the placement) when the opening
+		// transition ends. The catch-up placement in `dialog` covers that moment instead.
+		settled: () => untrack(() => this.lifecycle.status === 'open'),
 		placement: () => this.computedPosition,
 		offset: () => this.offset,
 		fitTrigger: () => this.fitTrigger,
 		positionPanel: () => this.positionPanel,
+		direction: this.#direction,
+		collisionBoundary: () => this.collisionBoundary,
+		fallbackAxisSide: () => this.fallbackAxisSide,
+		anchorTo: () => this.anchorTo,
+		anchorPoint: () => this.#anchorPoint,
 		setMinWidth: (width) => {
 			this.triggerWidth = width;
 		},
-		onPlace: ({ panel, placement, mount }) => {
-			this.safeArea.updateAreas();
-			if (placement && mount && this.lifecycle.status !== 'open' && this.directedTransition) {
-				this.applyDirectedTransition(panel, placement);
-			}
-		}
+		// `positionPanel` places synchronously, inside the panel attachment: nothing read here may
+		// become one of its dependencies.
+		onPlace: ({ placement, side, align, anchorHidden, direction, mount }) =>
+			untrack(() => {
+				this.#setPlacement({ side, align, anchorHidden });
+				this.safeArea.updateAreas();
+				if (placement && this.directedTransition) {
+					this.applyDirectedTransition(placement, {
+						direction,
+						intro: mount && this.lifecycle.status !== 'open'
+					});
+				}
+			})
 	});
 
 	/** Places the floating panel against its reference once; see `PanelPositioner.place`. */
@@ -504,9 +593,19 @@ export class PopoverState extends PopoverOptionsBase {
 		}
 		// A reference that leaves the document closes the popover instead of being placed.
 		const cleanup = this.#positioner.track(node, reference, this.#closeIfAnchorLost);
+		// Changes observed during the opening transition are not placed; catch up once it ends,
+		// so content that resized while opening doesn't leave the panel misplaced.
+		$effect(() => {
+			if (this.lifecycle.status === 'open') untrack(() => void this.place(node));
+		});
 		return () => {
 			cleanup();
 			this.dialogElement = null;
+			// Forget the placement once the panel is gone, not when it is only placed again (a new
+			// `position`), so the styling hooks and the focus gate don't flicker in between.
+			queueMicrotask(() => {
+				if (!this.dialogElement) this.placement = null;
+			});
 			// The panel also leaves when its `ref` anchor does (`bind:this` resets it to null),
 			// and without an outro that happens before the positioner's observers can report the
 			// detached node: judge the anchor once the flush settles, so the popover closes
@@ -637,6 +736,7 @@ export class PopoverState extends PopoverOptionsBase {
 				node.removeEventListener('click', notePress, true);
 				node.removeEventListener('keydown', noteKey, true);
 			});
+			cleanups.push(this.#trackAnchorPoint(node));
 
 			// Return combined cleanup function
 			return () => {
@@ -688,6 +788,28 @@ export class PopoverState extends PopoverOptionsBase {
 		return [...this.#triggers].filter(([, at]) => at > sequence).map(([node]) => node);
 	}
 
+	/**
+	 * Follows the pointer over the trigger while the popover is closed, so an open anchored to a
+	 * line (`anchorTo: 'line'`) uses the line the pointer was on; the point stays put while open.
+	 */
+	#trackAnchorPoint = (node: HTMLElement) => {
+		const follow = (event: PointerEvent) => {
+			if (!this.isOpen) this.#anchorPoint = { x: event.clientX, y: event.clientY };
+		};
+		const forget = () => {
+			if (!this.isOpen) this.#anchorPoint = null;
+		};
+		node.addEventListener('pointerenter', follow);
+		node.addEventListener('pointermove', follow);
+		node.addEventListener('pointerdown', follow);
+		node.addEventListener('pointerleave', forget);
+		return () => {
+			node.removeEventListener('pointerenter', follow);
+			node.removeEventListener('pointermove', follow);
+			node.removeEventListener('pointerdown', follow);
+			node.removeEventListener('pointerleave', forget);
+		};
+	};
 	/**
 	 * Makes any element a complete trigger: it anchors the panel (as \`reference\` does), toggles
 	 * it on click when \`openOnClick\` allows, and keeps \`aria-expanded\` and friends in sync.

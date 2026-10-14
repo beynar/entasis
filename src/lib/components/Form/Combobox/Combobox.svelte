@@ -267,7 +267,7 @@
 		id={listboxId}
 		role="listbox"
 		aria-label={t.options}
-		class="flex max-h-[200px] flex-col gap-1"
+		class="flex max-h-[min(200px,calc(var(--available-height,100dvh)_-_2*var(--space-xs)))] flex-col gap-1"
 	>
 		{#if loading}
 			<div class={classes.loading({ size })} role="status" aria-live="polite">
@@ -282,7 +282,11 @@
 		{:else if optionsAsync.options.length === 0 && !searchValue && showAllOnFocus}
 			<div class={classes.noOptions({ size })} role="status">{noOptionsText ?? t.noOptions}</div>
 		{:else if optionsAsync.options.length > 0}
-			<ScrollArea scrollOnEdges type="auto" class="flex max-h-[200px] flex-col gap-1">
+			<ScrollArea
+				scrollOnEdges
+				type="auto"
+				class="flex max-h-[min(200px,calc(var(--available-height,100dvh)_-_2*var(--space-xs)))] flex-col gap-1"
+			>
 				{#each optionsAsync.options as option (option.value)}
 					<MenuOption
 						as="button"

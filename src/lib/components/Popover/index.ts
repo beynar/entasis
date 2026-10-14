@@ -1,5 +1,5 @@
 export { default as Popover } from './Popover.svelte';
-export type { PopoverProps } from './popover.props.js';
+export type { PopoverPlacement, PopoverProps, PopoverSide } from './popover.props.js';
 export {
 	popoverTheme,
 	setPopoverTheme,
@@ -7,4 +7,8 @@ export {
 	type PopoverTheme,
 	type PopoverThemeProps
 } from './popover.theme.js';
-export { usePopoverContext, type PopoverState } from './popover.state.svelte.js';
+export {
+	usePopoverContext,
+	type PopoverPlacementState,
+	type PopoverState
+} from './popover.state.svelte.js';

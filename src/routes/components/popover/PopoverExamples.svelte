@@ -1,10 +1,9 @@
 <script lang="ts">
-	import type { Placement } from '@floating-ui/dom';
-
 	import Button from '$lib/components/Button/Button.svelte';
 	import Popover from '$lib/components/Popover/Popover.svelte';
 	import PopupMenu from '$lib/components/PopupMenu/PopupMenu.svelte';
 	import type { MenuItem } from '$lib/components/Menu/menu.props.js';
+	import type { PopoverPlacement } from '$lib/components/Popover/popover.props.js';
 	import { copyIcon } from '$lib/components/Icons/copy.js';
 	import { downloadIcon } from '$lib/components/Icons/download.js';
 	import { envelopeIcon } from '$lib/components/Icons/envelope.js';
@@ -22,8 +21,10 @@
 		{ position: 'bottom', label: 'Bottom' },
 		{ position: 'left', label: 'Left' },
 		{ position: 'bottom-start', label: 'Bottom start' },
-		{ position: 'bottom-end', label: 'Bottom end' }
-	] satisfies Array<{ position: Placement; label: string }>;
+		{ position: 'bottom-end', label: 'Bottom end' },
+		{ position: 'inline-start', label: 'Inline start' },
+		{ position: 'inline-end', label: 'Inline end' }
+	] satisfies Array<{ position: PopoverPlacement; label: string }>;
 
 	let externalAnchor = $state<HTMLButtonElement | null>(null);
 	let externalOpen = $state(false);
@@ -89,7 +90,7 @@
 
 <ComponentCard
 	title="Placement"
-	description="Choose the preferred side or aligned edge. Floating UI flips the panel when there is not enough room."
+	description="Choose the preferred side or aligned edge. Floating UI flips the panel when there is not enough room. inline-start and inline-end follow the reading direction: inline-end opens on the right in English and on the left in Arabic."
 	class="!min-h-fit"
 	code={`<Popover position="top" trigger={{ content: 'Top', variant: 'soft' }}>
 	<div>Top placement</div>
@@ -97,6 +98,10 @@
 
 <Popover position="bottom-end" trigger={{ content: 'Bottom end', variant: 'soft' }}>
 	<div>Bottom-end placement</div>
+</Popover>
+
+<Popover position="inline-end" trigger={{ content: 'Inline end', variant: 'soft' }}>
+	<div>Opens on the reading direction's end side</div>
 </Popover>`}
 >
 	<div class="flex w-full max-w-3xl flex-wrap items-center justify-center gap-3">
@@ -112,6 +117,66 @@
 			</Popover>
 		{/each}
 	</div>
+</ComponentCard>
+
+<ComponentCard
+	title="Styling by side"
+	description="The panel reports the side it landed on, after any flip, as data-side, and its trigger reports it as data-popup-side. Square the corners where they meet, whichever way the panel opens."
+	class="!min-h-fit"
+	code={`<Popover
+	position="bottom-start"
+	offset={0}
+	class="data-[side=bottom]:rounded-t-none data-[side=top]:rounded-b-none"
+	trigger={{
+		content: 'Attached panel',
+		variant: 'soft',
+		class: 'data-[popup-side=bottom]:rounded-b-none data-[popup-side=top]:rounded-t-none'
+	}}
+>
+	<div>Attached to its trigger</div>
+</Popover>`}
+>
+	<Popover
+		position="bottom-start"
+		offset={0}
+		class="data-[side=bottom]:rounded-t-none data-[side=top]:rounded-b-none"
+		trigger={{
+			content: 'Attached panel',
+			variant: 'soft',
+			class: 'data-[popup-side=bottom]:rounded-b-none data-[popup-side=top]:rounded-t-none'
+		}}
+	>
+		{@render content('Attached to its trigger')}
+	</Popover>
+</ComponentCard>
+
+<ComponentCard
+	title="Wrapped link"
+	description="A trigger that wraps across lines has a bounding box wider than either line. With anchorTo set to line, the panel anchors to the line the pointer was on when it opened and stays there while it is open."
+	class="!min-h-fit"
+	code={`<p class="w-56">
+	Read the
+	<Popover anchorTo="line" position="bottom-start">
+		{#snippet trigger(popover)}
+			<span class="underline" {@attach popover.trigger}>full release notes for this version</span>
+		{/snippet}
+		<div>Anchored to the line you pointed at</div>
+	</Popover>
+	before upgrading.
+</p>`}
+>
+	<p class="w-56 text-sm leading-6" data-testid="wrapped-link-example">
+		Read the
+		<Popover anchorTo="line" position="bottom-start">
+			{#snippet trigger(popover)}
+				<span class="text-primary cursor-pointer underline" {@attach popover.trigger}
+					>full release notes for this version</span
+				>
+			{/snippet}
+			{@render content('Anchored to the line you pointed at')}
+		</Popover>
+		before upgrading.
+	</p>
 </ComponentCard>
 
 <ComponentCard

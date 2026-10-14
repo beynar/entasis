@@ -168,6 +168,7 @@ A multi-value tag input. Use it for entering a list of free-text tags, or restri
 
 - **Deduplication invariant**: A tag can never appear twice. Duplicate adds (exact string match) simply clear the search. This is a hard requirement — duplicate keys in the keyed list crash the renderer.
 - **Fresh arrays**: The value array is never mutated in place. Every add/remove assigns a new array so binding, reactivity, and form updates fire correctly.
+- **Dropdown height**: The option list scrolls beyond 200px, or beyond the room left between the field and the viewport edge (the Popover's \`--available-height\`), so it shrinks above an on-screen keyboard instead of running under it
 - **Animations**: Tags animate on reorder (\`animate:flip\`) and on enter/leave (\`transition:scale\`).
 - **Free vs restricted mode**: Omitting \`items\` gives free-text entry. Providing \`items\` restricts entry to the option list; add \`customTags\` to permit free text alongside options.
 - **Label resolution**: A tag's chip label comes from static \`items\`, then a session cache of options picked from the dropdown, then \`getValueOption\` (resolved on mount for initial values), falling back to the raw value string.

@@ -192,6 +192,8 @@ A searchable dropdown component that supports both static arrays and async optio
 - **Empty States**: Shows loading text, error message, or no options text appropriately
 - **Clear Button**: Automatically shown when value exists, uses the shared field action button hitbox
 - **Default Prefix**: Magnifying glass icon shown by default unless \`prefix={false}\` or custom snippet provided
+- **List height**: The option list scrolls beyond 200px, or beyond the room left between the field and the viewport edge (the Popover's \`--available-height\`), so it shrinks above an on-screen keyboard instead of running under it
+- **Styling hooks**: While the list is open, the field it is anchored to carries \`data-popup-side\` (\`bottom\` or \`top\`) and the panel \`data-side\`
 
 ## Theme Customization
 

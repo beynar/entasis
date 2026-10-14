@@ -42,8 +42,13 @@ export const transitionStatusAttributes = (
 	'data-exiting': presence(status === 'exiting')
 });
 
-/** The side of the anchor a popup sits on. */
-export type PopupSide = 'top' | 'right' | 'bottom' | 'left';
+/**
+ * The side of the anchor a popup sits on. A popup that asked for a logical side reports
+ * `inline-start` or `inline-end` while it stays on the inline axis.
+ */
+export type PopupSide = 'top' | 'right' | 'bottom' | 'left' | 'inline-start' | 'inline-end';
+/** A popup's side, or `none` when it is not placed beside its anchor (Select over its trigger). */
+export type PopupPlacementSide = PopupSide | 'none';
 /** How a popup lines up with its anchor along that side. */
 export type PopupAlign = 'start' | 'center' | 'end';
 
@@ -54,17 +59,18 @@ export const parsePlacement = (placement: Placement): { side: PopupSide; align: 
 };
 
 export type PlacementAttributes = {
-	'data-side': PopupSide | undefined;
+	'data-side': PopupPlacementSide | undefined;
 	'data-align': PopupAlign | undefined;
 	'data-anchor-hidden': Presence;
 };
 
 /**
  * `data-side` and `data-align` from the resolved placement (not the requested one, which a flip
- * may have changed), and `data-anchor-hidden` while the anchor is scrolled out of view.
+ * may have changed), and `data-anchor-hidden` while the anchor is scrolled out of view. A popup
+ * on side `none` has no alignment.
  */
 export const placementAttributes = (
-	placement: Placement | { side: PopupSide; align?: PopupAlign } | undefined,
+	placement: Placement | { side: PopupPlacementSide; align?: PopupAlign } | undefined,
 	{ anchorHidden = false }: { anchorHidden?: boolean } = {}
 ): PlacementAttributes => {
 	const resolved =
@@ -75,7 +81,7 @@ export const placementAttributes = (
 				: { side: placement.side, align: placement.align ?? 'center' };
 	return {
 		'data-side': resolved?.side,
-		'data-align': resolved?.align,
+		'data-align': resolved?.side === 'none' ? undefined : resolved?.align,
 		'data-anchor-hidden': presence(anchorHidden)
 	};
 };
@@ -87,6 +93,17 @@ export type PopupTriggerAttributes = {
 /** `data-popup-open` on a trigger while the popup it controls is open. */
 export const popupTriggerAttributes = (open: boolean): PopupTriggerAttributes => ({
 	'data-popup-open': presence(open)
+});
+
+export type PopupSideAttributes = {
+	'data-popup-side': PopupPlacementSide | undefined;
+};
+
+/** `data-popup-side` on a trigger: the side its placed popup sits on, omitted while unplaced. */
+export const popupSideAttributes = (
+	side: PopupPlacementSide | null | undefined
+): PopupSideAttributes => ({
+	'data-popup-side': side ?? undefined
 });
 
 export type ItemState = {
@@ -138,10 +155,12 @@ export const stateDataAttributes = {
 	'data-closed': 'Present while closed, including during the exit transition.',
 	'data-entering': 'Present while the enter transition plays.',
 	'data-exiting': 'Present while the exit transition plays.',
-	'data-side': 'The side of the anchor the popup sits on: top, right, bottom or left.',
+	'data-side':
+		'The side of the anchor the popup sits on: top, right, bottom or left; inline-start or inline-end when a logical side was requested; none when the popup is not placed beside its anchor.',
 	'data-align': 'The alignment with the anchor: start, center or end.',
 	'data-anchor-hidden': 'Present while the anchor is scrolled out of view.',
 	'data-popup-open': 'Present on a trigger while its popup is open.',
+	'data-popup-side': 'On a trigger, the side its placed popup sits on (the values of data-side).',
 	'data-highlighted': 'Present on the item the keyboard or pointer highlights.',
 	'data-disabled': 'Present while disabled.',
 	'data-selected': 'Present while selected or checked.'

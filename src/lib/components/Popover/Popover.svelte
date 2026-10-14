@@ -36,6 +36,9 @@
 		lockScroll = true,
 		fitTrigger = false,
 		positionPanel,
+		collisionBoundary = 'visualViewport',
+		fallbackAxisSide = 'none',
+		anchorTo = 'box',
 		inline = false,
 		mobileSheet = false,
 		mobileSheetSizeTransition = true,
@@ -97,6 +100,15 @@
 		},
 		get positionPanel() {
 			return positionPanel;
+		},
+		get collisionBoundary() {
+			return collisionBoundary;
+		},
+		get fallbackAxisSide() {
+			return fallbackAxisSide;
+		},
+		get anchorTo() {
+			return anchorTo;
 		},
 		get mobileSheet() {
 			return mobileSheet;
@@ -175,6 +187,7 @@
 {#snippet floatingPanel()}
 	<div
 		{@attach popover.panel}
+		{...popover.panelAttributes}
 		class={classes.popover({
 			size: popover.computedSize,
 			mode: popover.computedMode,

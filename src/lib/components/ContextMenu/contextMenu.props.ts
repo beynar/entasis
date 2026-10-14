@@ -56,7 +56,8 @@ export type ContextMenuProps = WithAttachments<{
 	/**
 	 * Additional PopupMenu/Popover overrides (position, offset, closeOnEscape, closeOnItemClick,
 	 * ...). `position` places the menu relative to the pointer and defaults to `'bottom-start'`;
-	 * a responsive record keeps that default below its first breakpoint.
+	 * a responsive record keeps that default below its first breakpoint. `collisionBoundary`
+	 * defaults to `'layoutViewport'`, so panning a pinch-zoomed page doesn't drag the menu along.
 	 */
 	popup?: Omit<
 		PopupMenuProps,

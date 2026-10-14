@@ -43,6 +43,10 @@
 		return { ...requested, xs: requested.xs ?? 'bottom-start' };
 	});
 
+	// Shifted back into the layout viewport, not the visual one, so the menu stays where it
+	// opened while a pinch-zoomed page pans. Submenus keep the default.
+	const collisionBoundary = $derived(popup?.collisionBoundary ?? 'layoutViewport');
+
 	// Also the PopupMenu's `onOpenChange`: its details (reason, event, `cancel()`) pass through.
 	function setOpen(nextOpen: boolean, details: OpenChangeDetails) {
 		if (openState.value === nextOpen) return;
@@ -114,5 +118,6 @@
 	{onAfterClose}
 	ref={reference}
 	{position}
+	{collisionBoundary}
 	menu={{ items, ...menu }}
 />

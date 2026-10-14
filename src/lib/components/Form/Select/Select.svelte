@@ -178,7 +178,7 @@
 			viewportRole="presentation"
 			scrollOnEdges
 			type="auto"
-			class="flex max-h-[240px] flex-col"
+			class="flex max-h-[min(240px,calc(var(--available-height,100dvh)_-_2*var(--space-xs)))] flex-col"
 		>
 			{#each select.renderGroups as group, groupIndex (groupIndex)}
 				{#if separators && groupIndex > 0}

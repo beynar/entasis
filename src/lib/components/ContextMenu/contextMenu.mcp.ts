@@ -41,7 +41,7 @@ floating-ui virtual element, so the menu appears exactly at the pointer (and fli
 
 ### Advanced Props
 - **menu**: Omit<MenuProps, 'items'> - Overrides forwarded to the underlying Menu (header, footer, theme).
-- **popup**: PopupMenu/Popover overrides (position, offset, closeOnEscape, closeOnItemClick, ...). position places the menu relative to the pointer and defaults to 'bottom-start' (a responsive record keeps that default below its first breakpoint); ref is managed internally.
+- **popup**: PopupMenu/Popover overrides (position, offset, closeOnEscape, closeOnItemClick, ...). position places the menu relative to the pointer and defaults to 'bottom-start' (a responsive record keeps that default below its first breakpoint); collisionBoundary defaults to 'layoutViewport', so panning a pinch-zoomed page doesn't drag the menu along (submenus keep the visual viewport); ref is managed internally.
 - **class**: string - Class on the wrapper around the target content.
 
 ## Behavior

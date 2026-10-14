@@ -44,7 +44,7 @@ Extends all Field component props plus:
 - **items**: (SelectOption | SelectOptionGroup)[] - Flat \`{ value, label, disabled? }\` options and/or \`{ label, items }\` groups
 - **placeholder**: string (default: 'Select an option') - Trigger text when no selection
 - **separators**: boolean (default: true) - Render separators between consecutive groups
-- **alignItemWithTrigger**: boolean (default: true) - Open over the trigger with the selected option (the first enabled one when nothing is selected) on the trigger's middle and its text on the value text. A list taller than the viewport is capped 8px from the edges and pre-scrolled so the option stays on the trigger; a trigger too close to the bottom for four rows gives up the alignment and the panel rises into view. Wheel and touch scrolling outside the panel are blocked while it is open, so the trigger cannot move away from it. \`false\` opens a dropdown below the trigger instead, capped at ~240px
+- **alignItemWithTrigger**: boolean (default: true) - Open over the trigger with the selected option (the first enabled one when nothing is selected) on the trigger's middle and its text on the value text. A list taller than the viewport is capped 8px from the edges and pre-scrolled so the option stays on the trigger; a trigger too close to the bottom for four rows gives up the alignment and the panel rises into view. Wheel and touch scrolling outside the panel are blocked while it is open, so the trigger cannot move away from it. \`false\` opens a dropdown below the trigger instead, capped at 240px or the room left beside the trigger
 
 ### Field Props (inherited)
 - **label**: string | Snippet - Field label, and the trigger's accessible name; without it the trigger falls back to the placeholder
@@ -96,7 +96,8 @@ rather than repeating the placeholder.
 
 - Selection re-focuses the trigger (matches native select behavior)
 - Clicking outside closes via trigger blur; option rows prevent mousedown so the click can land
-- The list scrolls (ScrollArea) beyond the viewport when item-aligned, beyond ~240px as a dropdown; the highlight scrolls into view on keyboard nav
+- The list scrolls (ScrollArea) beyond the viewport when item-aligned, beyond 240px as a dropdown (less when there is less room beside the trigger: the dropdown list is capped by the Popover's \`--available-height\`, so it never runs under an on-screen keyboard or over its trigger); the highlight scrolls into view on keyboard nav
+- While the dropdown is open, the input container carries \`data-popup-side\` (\`bottom\`, \`top\`, or \`none\` when item-aligned) and the panel \`data-side\`, so a theme can flatten the corner where they meet
 - The panel covers the trigger while open, so clicking outside (not the trigger) closes it, as with a native select
 
 ## State contract
