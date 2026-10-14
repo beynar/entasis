@@ -402,7 +402,11 @@ describe('Popover placement through the positioner', () => {
 			expect(onOpenChange).toHaveBeenCalledTimes(2);
 			expect(onOpenChange).toHaveBeenLastCalledWith(
 				false,
-				expect.objectContaining({ reason: 'trigger-hover', interaction: 'mouse' })
+				expect.objectContaining({
+					reason: 'trigger-hover',
+					interaction: 'mouse',
+					event: expect.any(PointerEvent)
+				})
 			);
 		}
 	);

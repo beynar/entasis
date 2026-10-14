@@ -8,8 +8,9 @@ type HoverActionHandlerOptions = {
 	 * elapses, and when it leaves; never when attaching.
 	 */
 	isActive: () => boolean;
-	onMouseEnter?: () => void;
-	onMouseLeave?: () => void;
+	/** Receives the `mouseenter` event that began the hover, also once a delay has elapsed. */
+	onMouseEnter?: (event: MouseEvent) => void;
+	onMouseLeave?: (event: MouseEvent) => void;
 	/**
 	 * Milliseconds between the pointer entering and `onMouseEnter`. Read on every enter, so a
 	 * getter or a function follows a changing value; a function also lets a class field read
@@ -39,7 +40,7 @@ export const useHoverAction = (props: HoverActionHandlerOptions) => {
 		timeouts.clear();
 	};
 
-	function onMouseEnter(this: HTMLElement) {
+	function onMouseEnter(this: HTMLElement, event: MouseEvent) {
 		if (timeouts.get(this)) {
 			clearTimeout(timeouts.get(this));
 			timeouts.delete(this);
@@ -50,20 +51,20 @@ export const useHoverAction = (props: HoverActionHandlerOptions) => {
 		const delay = readDelay();
 		if (delay) {
 			wait(this, delay).then(() => {
-				if (props.isActive()) props.onMouseEnter?.();
+				if (props.isActive()) props.onMouseEnter?.(event);
 				isHovered = true;
 			});
 		} else {
-			if (props.isActive()) props.onMouseEnter?.();
+			if (props.isActive()) props.onMouseEnter?.(event);
 			isHovered = true;
 		}
 	}
-	function onMouseLeave(this: HTMLElement) {
+	function onMouseLeave(this: HTMLElement, event: MouseEvent) {
 		if (timeouts.get(this)) {
 			clearTimeout(timeouts.get(this));
 			timeouts.delete(this);
 		}
-		if (props.isActive()) props.onMouseLeave?.();
+		if (props.isActive()) props.onMouseLeave?.(event);
 		isHovered = false;
 	}
 

@@ -139,7 +139,8 @@ function drawAreaInDOM(points: Point[], style: DebugAreaStyle): SVGSVGElement {
 
 export const useSafeArea = (opts: {
 	isActive: () => boolean;
-	callback?: () => void;
+	/** Runs when the pointer has left the safe area, with the pointer event that left it. */
+	callback?: (event?: PointerEvent) => void;
 	offset?: number;
 	debug?: SafeAreaDebugOption;
 	trackPosition?: boolean;
@@ -250,11 +251,11 @@ export const useSafeArea = (opts: {
 		closeTimer = null;
 	};
 
-	const scheduleClose = () => {
+	const scheduleClose = (event?: PointerEvent) => {
 		if (closeTimer !== null) return;
 		closeTimer = setTimeout(() => {
 			closeTimer = null;
-			opts.callback?.();
+			opts.callback?.(event);
 			destroy();
 		}, CLOSE_DELAY);
 	};
@@ -283,7 +284,7 @@ export const useSafeArea = (opts: {
 			return;
 		}
 
-		scheduleClose();
+		scheduleClose(e);
 	};
 
 	const removeDebug = () => {

@@ -9,7 +9,7 @@
 		onOpenChange,
 		onAfterOpen
 	}: {
-		scenario: 'snippet-trigger' | 'prevented-trigger' | 'default-open';
+		scenario: 'snippet-trigger' | 'animated-trigger' | 'prevented-trigger' | 'default-open';
 		onOpenChange?: DialogProps['onOpenChange'];
 		onAfterOpen?: DialogProps['onAfterOpen'];
 	} = $props();
@@ -22,6 +22,19 @@
 		<Dialog responsive={false} transition={zero} title="Card details" {onOpenChange}>
 			{#snippet trigger(dialog)}
 				<div data-testid="card" {@attach dialog.trigger}>Ada Lovelace</div>
+			{/snippet}
+			<p>Details</p>
+		</Dialog>
+	{:else if scenario === 'animated-trigger'}
+		<!-- A real closing transition: the close completes while the page behind is still inert. -->
+		<Dialog
+			responsive={false}
+			transition={{ in: { duration: 20 }, out: { duration: 40 } }}
+			title="Animated card"
+			{onOpenChange}
+		>
+			{#snippet trigger(dialog)}
+				<button type="button" data-testid="opener" {@attach dialog.trigger}>Open animated</button>
 			{/snippet}
 			<p>Details</p>
 		</Dialog>

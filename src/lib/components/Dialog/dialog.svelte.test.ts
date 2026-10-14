@@ -166,6 +166,37 @@ describe('Dialog trigger contract (CX-4)', () => {
 		expect(card).toHaveAttribute('aria-expanded', 'false');
 	});
 
+	test.each(['escape', 'close-button'] as const)(
+		'focus returns to the trigger after an animated %s close, although the page behind was inert',
+		async (how) => {
+			// jsdom focuses inert elements; a browser refuses, which is what the restore must survive.
+			const focus = HTMLElement.prototype.focus;
+			const spy = vi.spyOn(HTMLElement.prototype, 'focus').mockImplementation(function (
+				this: HTMLElement,
+				...args
+			) {
+				if (this.closest('[inert]')) return;
+				return focus.apply(this, args);
+			});
+			try {
+				render(DialogTriggerHarness, { props: { scenario: 'animated-trigger' } });
+				const opener = screen.getByTestId('opener');
+				opener.focus();
+				await fireEvent.click(opener);
+				const dialog = await screen.findByRole('dialog', { name: 'Animated card' });
+				await waitFor(() => expect(opener.closest('[inert]')).not.toBeNull());
+
+				if (how === 'escape') await fireEvent.keyDown(window, { key: 'Escape' });
+				else await fireEvent.click(dialog.querySelector('button')!);
+				await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+				await waitFor(() => expect(document.activeElement).toBe(opener));
+				expect(opener.closest('[inert]')).toBeNull();
+			} finally {
+				spy.mockRestore();
+			}
+		}
+	);
+
 	test('cancelling the trigger press keeps the dialog closed and the trigger collapsed', async () => {
 		const onOpenChange = vi.fn((_open: boolean, details: { cancel(): void }) => details.cancel());
 		render(DialogTriggerHarness, { props: { scenario: 'snippet-trigger', onOpenChange } });

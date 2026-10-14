@@ -212,9 +212,9 @@ export class PopoverState extends PopoverOptionsBase {
 	safeArea = useSafeArea({
 		isActive: () =>
 			this.isOpen && this.closeOnMouseLeave && this.children.filter((d) => d.isOpen).length === 0,
-		callback: () => {
+		callback: (event) => {
 			if (this.openReason !== 'hover') return;
-			this.setOpen(false, { reason: 'trigger-hover', interaction: 'mouse' });
+			this.setOpen(false, { reason: 'trigger-hover', event, interaction: 'mouse' });
 		},
 		offset: 15,
 		debug: () => this.debugSafeArea
@@ -222,9 +222,10 @@ export class PopoverState extends PopoverOptionsBase {
 
 	hoverAction = useHoverAction({
 		isActive: () => this.openOnHover && !this.isOpen,
-		onMouseEnter: () => {
+		onMouseEnter: (event) => {
 			this.setOpen(true, {
 				reason: 'trigger-hover',
+				event,
 				trigger: this.#hoveredTrigger ?? undefined,
 				interaction: 'mouse'
 			});

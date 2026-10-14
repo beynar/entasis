@@ -22,7 +22,11 @@ describe('how the popover was opened (MN-4)', () => {
 		await waitFor(() => expect(screen.getByTestId('reason')).toHaveTextContent('hover'));
 		expect(onOpenChange).toHaveBeenLastCalledWith(
 			true,
-			expect.objectContaining({ reason: 'trigger-hover', interaction: 'mouse' })
+			expect.objectContaining({
+				reason: 'trigger-hover',
+				interaction: 'mouse',
+				event: expect.any(MouseEvent)
+			})
 		);
 		expect(document.body.style.overflow).not.toBe('hidden');
 

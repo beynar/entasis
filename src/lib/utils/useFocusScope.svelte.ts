@@ -49,11 +49,18 @@ export function useFocusScope(options: FocusScopeOptions) {
 	let node: HTMLElement | null = null;
 	let returnTarget: HTMLElement | null = null;
 	let restored = false;
+	/** Releases the `inert` this scope set on the page behind it; idempotent. */
+	let releaseSiblings: () => void = () => {};
 
-	/** Idempotent; only moves focus when it is still on `<body>` or inside the scope. */
+	/**
+	 * Idempotent; only moves focus when it is still on `<body>` or inside the scope. The page
+	 * behind is released first: an `inert` opener cannot take focus, and a close that is
+	 * reported once its transition ends runs this before the node is torn down.
+	 */
 	const restore = () => {
 		if (restored) return;
 		restored = true;
+		releaseSiblings();
 		if (!(options.restoreFocus?.() ?? true)) return;
 		const target = options.returnTo?.() ?? returnTarget;
 		returnTarget = null;
@@ -101,6 +108,7 @@ export function useFocusScope(options: FocusScopeOptions) {
 			if (target.tabIndex < 0) target.tabIndex = -1;
 
 			const inerted: Element[] = [];
+			releaseSiblings = () => inerted.splice(0).forEach(releaseInert);
 			const cleanups: Array<() => void> = [on(target.ownerDocument, 'keydown', handleKeyDown)];
 
 			$effect(() => {
@@ -129,13 +137,13 @@ export function useFocusScope(options: FocusScopeOptions) {
 				}
 				return () => {
 					cancelled = true;
-					inerted.splice(0).forEach(releaseInert);
+					releaseSiblings();
 				};
 			});
 
 			return () => {
 				cleanups.forEach((cleanup) => cleanup());
-				inerted.splice(0).forEach(releaseInert);
+				releaseSiblings();
 				restore();
 				node = null;
 			};
