@@ -4,8 +4,7 @@
 	import { Card } from 'entasis/card';
 	import { Chip } from 'entasis/chip';
 	import { Heading } from 'entasis/heading';
-	import { Popover } from 'entasis/popover';
-	import { caretDownIcon } from 'entasis/icons/caretDown';
+	import { NavigationMenu, type NavigationMenuItem } from 'entasis/navigation-menu';
 	import { listChecksIcon } from 'entasis/icons/listChecks';
 	import { paletteIcon } from 'entasis/icons/palette';
 	import { puzzlePieceIcon } from 'entasis/icons/puzzlePiece';
@@ -36,7 +35,35 @@
 			icon: paletteIcon
 		}
 	];
+	const items: NavigationMenuItem[] = [
+		{ type: 'panel', value: 'explore', label: 'Explore', content: explore },
+		{ type: 'link', label: 'Guides', href: '/docs' }
+	];
 </script>
+
+{#snippet explore({ close }: { close: () => void })}
+	<div class="gap-lg grid sm:w-2xl sm:grid-cols-3">
+		<Card color="primary" variant="soft" class="sm:col-span-1" title="A thoughtful foundation"
+			><Stack gap="lg"
+				><p class="text-sm">Start with the patterns that make the whole product feel coherent.</p>
+				<Button href="/docs" variant="outline" size="small" onclick={close}>Get started</Button
+				></Stack
+			></Card
+		>
+		<ul class="gap-sm m-0 grid list-none p-0 sm:col-span-2 sm:grid-cols-2">
+			{#each links as link (link.href)}<li>
+					<Card href={link.href} variant="ghost" density="compact" onclick={close}
+						><Stack gap="lg"
+							><span class="text-primary-readable">{@render link.icon({ size: 24 })}</span><strong
+								>{link.title}</strong
+							>
+							<p class="text-neutral/70 text-xs">{link.description}</p></Stack
+						></Card
+					>
+				</li>{/each}
+		</ul>
+	</div>
+{/snippet}
 
 <section class="bg-surface-recessed min-h-96">
 	<header
@@ -44,34 +71,7 @@
 	>
 		<a href="/" class="text-xl font-semibold">Northstar®</a>
 		<div class="gap-sm flex items-center">
-			<Popover
-				trigger={{ content: 'Explore', variant: 'ghost', suffix: caretDownIcon }}
-				position="bottom"
-				lockScroll={false}
-				class="max-w-3xl"
-				><div class="gap-lg grid sm:grid-cols-3">
-					<Card color="primary" variant="soft" class="sm:col-span-1" title="A thoughtful foundation"
-						><Stack gap="lg"
-							><p class="text-sm">
-								Start with the patterns that make the whole product feel coherent.
-							</p>
-							<Button href="/docs" variant="outline" size="small">Get started</Button></Stack
-						></Card
-					>
-					<nav aria-label="Product menu" class="gap-sm grid sm:col-span-2 sm:grid-cols-2">
-						{#each links as link (link.href)}<Card
-								href={link.href}
-								variant="ghost"
-								density="compact"
-								><Stack gap="lg"
-									><span class="text-primary-readable">{@render link.icon({ size: 24 })}</span
-									><strong>{link.title}</strong>
-									<p class="text-neutral/70 text-xs">{link.description}</p></Stack
-								></Card
-							>{/each}
-					</nav>
-				</div></Popover
-			><Button href="/docs" variant="ghost">Guides</Button><Button href="/components" size="small"
+			<NavigationMenu {items} label="Primary" /><Button href="/components" size="small"
 				>Build</Button
 			>
 		</div>

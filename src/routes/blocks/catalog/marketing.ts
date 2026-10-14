@@ -732,7 +732,7 @@ export const marketingCategories: BlockCategory[] = [
 				description: 'An inset rounded navbar with a resource dropdown and a compact mobile menu.',
 				file: 'navbar/FloatingNavbar.svelte',
 				reference: 'https://www.shadcnblocks.com/block/navbar6',
-				components: ['Button', 'Heading', 'Popover']
+				components: ['Button', 'Heading', 'NavigationMenu']
 			},
 			{
 				id: 'navbar-mega-menu-navbar',
@@ -741,7 +741,7 @@ export const marketingCategories: BlockCategory[] = [
 					'A product dropdown opens a two-column menu with a featured getting-started card.',
 				file: 'navbar/MegaMenuNavbar.svelte',
 				reference: 'https://www.shadcnblocks.com/block/navbar5',
-				components: ['Button', 'Card', 'Chip', 'Heading', 'Popover', 'Stack']
+				components: ['Button', 'Card', 'Chip', 'Heading', 'NavigationMenu', 'Stack']
 			}
 		]
 	},
