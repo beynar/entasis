@@ -28,6 +28,22 @@ describe('scrolling', () => {
 		expect(box.top).toBeGreaterThanOrEqual(view.top - 1);
 	});
 
+	test('scrolling inside a scaled list (popover mid-animation) lands on layout geometry', async () => {
+		await render(ListNavigationHarness);
+		const list = el('list');
+		list.style.transform = 'scale(0.9)';
+		list.style.transformOrigin = 'top center';
+		el('search').focus();
+		await userEvent.keyboard('{End}');
+		await settle();
+		list.style.transform = '';
+		const active = document.getElementById(el('search').getAttribute('aria-activedescendant')!)!;
+		const box = active.getBoundingClientRect();
+		const view = list.getBoundingClientRect();
+		expect(box.bottom).toBeLessThanOrEqual(view.bottom + 0.5);
+		expect(box.top).toBeGreaterThanOrEqual(view.top - 0.5);
+	});
+
 	test('typing after scrolling returns the list to the first match', async () => {
 		await render(ListNavigationHarness);
 		el('search').focus();

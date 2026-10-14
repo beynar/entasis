@@ -120,6 +120,9 @@ const nearestScroller = (element: HTMLElement) => {
 /**
  * Brings `element` into view by moving the container's own `scrollTop`. Unlike `scrollIntoView`
  * it never scrolls the page or an ancestor, so an inline list inside a page stays put.
+ *
+ * Rects include ancestor transforms (a popover mid-open animation is scaled), while `scrollTop`
+ * is in layout pixels, so the offsets are divided by the container's rendered scale first.
  */
 const scrollWithin = (container: HTMLElement, element: HTMLElement) => {
 	const style = getComputedStyle(container);
@@ -127,10 +130,15 @@ const scrollWithin = (container: HTMLElement, element: HTMLElement) => {
 	const paddingBottom = parseFloat(style.scrollPaddingBottom) || 0;
 	const bounds = container.getBoundingClientRect();
 	const target = element.getBoundingClientRect();
-	const top = bounds.top + container.clientTop + paddingTop;
-	const bottom = bounds.top + container.clientTop + container.clientHeight - paddingBottom;
-	if (target.top < top) container.scrollTop -= top - target.top;
-	else if (target.bottom > bottom) container.scrollTop += target.bottom - bottom;
+	const scale =
+		container.offsetHeight > 0 && bounds.height > 0 ? bounds.height / container.offsetHeight : 1;
+	// The element's edges in the container's layout space, from the top of its padding box.
+	const targetTop = (target.top - bounds.top) / scale - container.clientTop;
+	const targetBottom = (target.bottom - bounds.top) / scale - container.clientTop;
+	const top = paddingTop;
+	const bottom = container.clientHeight - paddingBottom;
+	if (targetTop < top) container.scrollTop -= top - targetTop;
+	else if (targetBottom > bottom) container.scrollTop += targetBottom - bottom;
 };
 
 /**
