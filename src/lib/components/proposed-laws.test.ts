@@ -5,12 +5,10 @@ import { render } from 'svelte/server';
 import { describe, expect, test } from 'vitest';
 import Theme from './Theme/Theme.svelte';
 
-const pending = test.fails;
-
 describe('law 14 · CSP (F9 · CX-8)', () => {
-	pending('every script and style Theme puts in the head carries its nonce', () => {
+	test('every script and style Theme puts in the head carries its nonce', () => {
 		const nonce = 'law-14-nonce';
-		// `nonce` is the prop CX-8 adds; the cast lets this entry compile before it exists.
+		// Theme is generic over its theme names; the cast keeps the props record untyped.
 		const { head } = render(Theme as unknown as Component<Record<string, unknown>>, {
 			props: {
 				nonce,

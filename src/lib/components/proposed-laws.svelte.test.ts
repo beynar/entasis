@@ -153,7 +153,7 @@ describe('law 4 · trigger contract (F1 · CX-4)', () => {
 });
 
 describe('law 5 · focus (F3 · CX-3)', () => {
-	pending(
+	test(
 		'when the opener is gone, closing restores focus to the last element still in the page',
 		async () => {
 			mount('removed-opener');
@@ -180,14 +180,14 @@ describe('law 6 · hover (F5 · MN-7, C14 · DF-6, F1 · MN-4)', () => {
 		await fireEvent.mouseEnter(element);
 	};
 
-	pending('a touch tap does not open a tooltip', async () => {
+	test('a touch tap does not open a tooltip', async () => {
 		mount('tooltip');
 		await tap(button('Tooltip trigger'));
 		await settle();
 		expect(screen.queryByRole('tooltip')).toBeNull();
 	});
 
-	pending('hovering a disabled trigger does not open its popover', async () => {
+	test('hovering a disabled trigger does not open its popover', async () => {
 		mount('popover-hover', { triggerDisabled: true });
 		await fireEvent.mouseEnter(button('Hover trigger'));
 		await settle();
@@ -199,7 +199,7 @@ describe('law 6 · hover (F5 · MN-7, C14 · DF-6, F1 · MN-4)', () => {
 		await fireEvent.mouseEnter(button('Hover trigger'));
 		await screen.findByRole('button', { name: 'Inside hover popover' });
 		await settle();
-		expect(document.body.style.overflow).not.toBe('hidden');
+		expect(document.documentElement).not.toHaveAttribute('data-entasis-scroll-lock');
 	});
 });
 

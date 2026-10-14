@@ -1232,6 +1232,10 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'FieldAttributes',
 		'FieldButtonAttributes',
 		'FieldControlAttributes',
+		'FieldHiddenInputOption',
+		'FieldHiddenInputValue',
+		'FieldHiddenInputs',
+		'FieldHiddenInputsProps',
 		'FieldLabelPosition',
 		'FieldMessageOverrides',
 		'FieldMessages',
@@ -2406,6 +2410,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'DialogTheme',
 		'DialogThemeProps',
 		'DialogType',
+		'FocusOnClose',
 		'dialogTheme',
 		'setDialogTheme',
 		'useDialogTheme'
@@ -2470,8 +2475,12 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'useOverlayTheme'
 	],
 	popover: [
+		'FocusOnClose',
 		'Popover',
+		'PopoverPlacement',
+		'PopoverPlacementState',
 		'PopoverProps',
+		'PopoverSide',
 		'PopoverState',
 		'PopoverTheme',
 		'PopoverThemeProps',

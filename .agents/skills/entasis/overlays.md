@@ -18,9 +18,26 @@
 Every overlay shares one layer stack and the same focus laws. On open, focus goes to an
 `[autofocus]` / `[data-autofocus]` target, else the first tabbable control (a close button is
 skipped), else the panel; Dialog always does this, Popover only with `focusOnOpen`. On close, focus
-is restored to the opener. Escape closes only the topmost open layer; an outside press dismisses
-every layer stacked above the one pressed. Modal layers (Dialog) contain Tab and make the rest of
-the page `inert`; Popover is non-modal. See [Dialog](#dialog) and [Popover](#popover).
+is restored to the trigger that opened it (after a programmatic open, to the element focused then);
+when that element is gone or disabled it goes to the last element that had focus in the dialog
+beneath, else to the most recent element still on the page, and a close by Escape or from the
+keyboard shows the focus ring. `focusOnClose` on Dialog and Popover overrides it: `false` leaves
+focus alone, an element receives it, a function gets the change details and returns either. A
+Popover's panel is portaled to the end of the page, so Tab on its open trigger enters the panel,
+Tab past the last control continues after the trigger and closes it, and Shift+Tab returns.
+Escape closes only the topmost open layer; an outside press dismisses every layer stacked above the
+one pressed (a press that began before the layer opened never does, and on touch only a tap does);
+on Android the Back gesture closes the topmost modal layer like Escape. Modal layers (Dialog)
+contain Tab and make the rest of the page `inert`; Popover is non-modal. See [Dialog](#dialog) and
+[Popover](#popover).
+
+`onOpenChange(open, details)` runs before the state changes. `details` carries `reason`
+(`'trigger-press'`, `'trigger-hover'`, `'outside-press'`, `'escape-key'`, `'close-watcher'`,
+`'close-press'`, `'item-press'`, `'swipe'`, `'trigger-unmount'`, `'imperative-action'`…), `event`,
+`trigger`, `interaction` and `cancel()`; cancelling keeps the overlay as it was and leaves the event
+untouched. Import `OpenChangeDetails` from `entasis/types`. `onAfterOpen` and `onAfterClose` fire
+exactly once per open and close, also when no transition plays. A consumer `onclick` on a built-in
+trigger runs first, and `event.preventDefault()` there cancels the built-in toggle.
 
 ---
 
@@ -37,6 +54,7 @@ Modal/drawer overlay that blocks page interaction.
 | `type`                | `'modal' \| 'alert' \| 'fullScreen' \| 'drawerRight' \| 'drawerLeft' \| 'drawerBottom' \| 'drawerTop'` | `'modal'`                            |
 | `open`                | `boolean` (bindable)                                                                                   | `false`                              |
 | `closable`            | `boolean`                                                                                              | `true`                               |
+| `focusOnClose`        | `boolean \| HTMLElement \| ((details) => HTMLElement \| boolean \| void)`                              | `true`                               |
 | `closeOnEscape`       | `boolean`                                                                                              | `true`                               |
 | `closeOnClickOutside` | `boolean`                                                                                              | `true` (`false` for `type: 'alert'`) |
 | `transition`          | `TransitionConfig`                                                                                     | -                                    |
@@ -53,15 +71,18 @@ ignores outside presses unless `closeOnClickOutside` is set explicitly; Escape s
 - `description`: string or `Snippet<[DialogState]>`
 - `children`: `Snippet<[DialogState]>`
 - `header`, `footer`, `closeButton`: `Snippet`
-- `trigger`: `Snippet<[DialogState]>` or `ButtonProps & { content?: string }`
+- `trigger`: `Snippet<[DialogState]>` or `ButtonProps & { content?: string }`; in a snippet,
+  `{@attach dialog.trigger}` gives any element `aria-haspopup`, `aria-expanded`, `aria-controls`
+  and click / Enter / Space opening
 
 ### Events
 
-- `onAfterOpen(payload: DialogState)`, `onAfterClose(payload: DialogState)`
+- `onOpenChange(open, details)`, `onAfterOpen(payload: DialogState)`, `onAfterClose(payload: DialogState)`
 
 ### DialogState (passed to snippets)
 
-- `isOpen`, `id`, `type`, `size`, `open()`, `close()`
+- `isOpen`, `id`, `type`, `size`, `open(details?)`, `close(details?)`, `setOpen(open, details?)`,
+  `trigger` and `reference` (attachments), `lifecycle.status`
 
 ### Theme Parts
 
@@ -100,32 +121,39 @@ Floating content positioned relative to a trigger element.
 
 ### Unique Props
 
-| Prop                  | Type                                                          | Default    |
-| --------------------- | ------------------------------------------------------------- | ---------- |
-| `open`                | `boolean` (bindable)                                          | `false`    |
-| `ref`                 | `HTMLElement \| VirtualElement \| null`                       | -          |
-| `position`            | `Placement` (12 options)                                      | `'bottom'` |
-| `offset`              | `number`                                                      | -          |
-| `fitTrigger`          | `boolean`                                                     | `false`    |
-| `positionPanel`       | `({ panel, reference }) => { x, y, minWidth? } \| null`       | -          |
-| `inline`              | `boolean`                                                     | `false`    |
-| `openOnHover`         | `boolean`                                                     | `false`    |
-| `openOnClick`         | `boolean`                                                     | `true`     |
-| `delay`               | `number`                                                      | `100`      |
-| `closeOnEscape`       | `boolean`                                                     | `true`     |
-| `closeOnClickOutside` | `boolean`                                                     | `true`     |
-| `closeOnMouseLeave`   | `boolean`                                                     | `false`    |
-| `focusOnOpen`         | `'first' \| 'container' \| false`                             | `false`    |
-| `haspopup`            | `'dialog' \| 'menu' \| 'listbox' \| 'tree' \| 'grid' \| true` | `'dialog'` |
-| `lockScroll`          | `boolean`                                                     | `true`     |
-| `directedTransition`  | `boolean`                                                     | `true`     |
+| Prop                  | Type                                                                      | Default    |
+| --------------------- | ------------------------------------------------------------------------- | ---------- |
+| `open`                | `boolean` (bindable)                                                      | `false`    |
+| `ref`                 | `HTMLElement \| VirtualElement \| null`                                   | -          |
+| `position`            | `Placement` (12 options)                                                  | `'bottom'` |
+| `offset`              | `number`                                                                  | -          |
+| `fitTrigger`          | `boolean`                                                                 | `false`    |
+| `positionPanel`       | `({ panel, reference }) => { x, y, minWidth? } \| null`                   | -          |
+| `inline`              | `boolean`                                                                 | `false`    |
+| `openOnHover`         | `boolean`                                                                 | `false`    |
+| `openOnClick`         | `boolean`                                                                 | `true`     |
+| `delay`               | `number`                                                                  | `100`      |
+| `closeOnEscape`       | `boolean`                                                                 | `true`     |
+| `closeOnClickOutside` | `boolean`                                                                 | `true`     |
+| `closeOnMouseLeave`   | `boolean`                                                                 | `false`    |
+| `focusOnOpen`         | `'first' \| 'container' \| false`                                         | `false`    |
+| `focusOnClose`        | `boolean \| HTMLElement \| ((details) => HTMLElement \| boolean \| void)` | `true`     |
+| `haspopup`            | `'dialog' \| 'menu' \| 'listbox' \| 'tree' \| 'grid' \| true`             | `'dialog'` |
+| `lockScroll`          | `boolean`                                                                 | `true`     |
+| `directedTransition`  | `boolean`                                                                 | `true`     |
 
 The trigger automatically gets `aria-haspopup` (from `haspopup`), `aria-expanded`, and `aria-controls`; a snippet trigger opts in with `{@attach popover.reference}`.
 
 `openOnHover` opens after `delay`; leaving the trigger first cancels it, and so does closing the
-popover another way (a click, Escape) while the delay runs. Removing the trigger, or the `ref`
-element, closes an open popover and reports `onOpenChange(false)`; a trigger re-rendered as a new
-element keeps it open.
+popover another way (a click, Escape) while the delay runs. A hover-opened popover does not lock
+page scroll, `closeOnMouseLeave` closes only a hover-opened popover, and pressing its trigger pins it
+open. Removing the trigger that opened it, or the `ref` element, closes an open popover and reports
+`onOpenChange(false, { reason: 'trigger-unmount' })`; a trigger re-rendered as a new element keeps it
+open. With several `{@attach popover.trigger}` elements, the one pressed anchors the panel.
+
+A `haspopup` other than `'dialog'` renders a plain wrapper instead of a `<dialog>`, points the
+trigger's `aria-controls` at the element with that role (`role="menu"` for `menu`) and labels it by
+the trigger.
 
 `inline` renders the panel in normal document flow where the component sits instead of portaling to
 the viewport-fixed layer: no floating-ui positioning, no scroll lock, no outside-press dismissal
@@ -140,11 +168,14 @@ wins over `mobileSheet`.
 
 ### Events
 
-- `onAfterOpen(payload: PopoverState)`, `onAfterClose(payload: PopoverState)`
+- `onOpenChange(open, details)`, `onAfterOpen(payload: PopoverState)`, `onAfterClose(payload: PopoverState)`
 
 ### PopoverState (passed to snippets)
 
-- `isOpen`, `id`, `size`, `position`, `offset`, `open()`, `close()`, `toggle()`, `reference` (attachment for a custom trigger)
+- `isOpen`, `id`, `size`, `position`, `offset`, `open(details?)`, `close(details?)`,
+  `toggle(details?)`, `setOpen(open, details?)`, `openReason` (`'hover' | 'press' | 'keyboard' |
+'programmatic'`), `activeTrigger`, `lifecycle.status`, `trigger` and `reference` (attachments for
+  a custom trigger)
 
 ### Theme Parts
 
