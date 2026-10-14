@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { Tabs } from '$lib/components/Tabs/index.js';
 	import { Button } from '$lib/components/Button/index.js';
 	import { TextInput } from '$lib/components/Form/TextInput/index.js';
@@ -70,8 +71,10 @@
 	const manualTabs = ['Inbox', 'Drafts', 'Sent', 'Spam'];
 	let manualBuilt = $state(0);
 	let manualActivateOnFocus = $state(false);
+	// `+=` reads the counter, so an attachment that only increments would subscribe to what it
+	// writes and rerun forever; untrack keeps the attachment from tracking the counter.
 	const countBuild = () => {
-		manualBuilt += 1;
+		untrack(() => (manualBuilt += 1));
 	};
 
 	// The first tab is disabled, so the default selection is the second one. Removing or
