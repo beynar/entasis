@@ -110,11 +110,16 @@ toast.success({ id: 'save', title: 'Saved', loading: false, duration: 3000 });
 - \`toast.promise(promise, { loading, success, error, id? })\` shows a loading toast (a spinner, no timeout, color \`primary\`), then turns it into the success toast (color \`success\`) or error toast (color \`danger\`) when the promise settles. Each stage is a title string, an options object, or, for \`success\` and \`error\`, a function of the result or the rejection that returns either. The text and actions of the loading stage never carry over to the result. It returns the original promise, so it can be awaited, and a rejection still rejects for the caller.
 
 \`\`\`ts
-const rows = await toast.promise(saveRows(), {
-  loading: { title: 'Saving…', description: 'Hold on' },
-  success: (count) => ({ title: \`Saved \${count} rows\` }),
-  error: (error) => ({ title: 'Save failed', description: (error as Error).message })
-});
+import { toast } from 'entasis/toast';
+
+async function save(saveRows: () => Promise<number>) {
+  const rows = await toast.promise(saveRows(), {
+    loading: { title: 'Saving…', description: 'Hold on' },
+    success: (count) => ({ title: \`Saved \${count} rows\` }),
+    error: (error) => ({ title: 'Save failed', description: (error as Error).message })
+  });
+  return rows;
+}
 
 toast.update('batch', (current) => ({ title: current.title + '!' }));
 toast.dismiss(); // closes every toast

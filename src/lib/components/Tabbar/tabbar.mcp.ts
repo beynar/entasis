@@ -246,7 +246,7 @@ The tabbar follows this DOM structure:
 <script lang="ts">
 	let activeTab = $state('Tab 1');
 	
-	function handleTabChange(value: string) {
+	function handleTabChange({ value }: { value: string }) {
 		console.log('Active tab changed to:', value); // e.g. 'Tab 2'
 	}
 </script>

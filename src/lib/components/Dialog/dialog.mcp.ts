@@ -176,6 +176,7 @@ The Dialog component (also known as Modal) displays content in a layer above the
 		details.cancel();
 		confirmation({
 			title: 'Discard this draft?',
+			description: 'Your changes will be lost.',
 			confirm: { text: 'Discard', color: 'danger' },
 			cancel: 'Keep editing'
 		}).then(({ confirmed }) => {
