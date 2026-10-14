@@ -31,6 +31,7 @@ import { placementAttributes, popupSideAttributes } from '$lib/utils/stateAttrib
 import { usePopoverMotion, type PopoverThemeProps } from './popover.theme.js';
 import {
 	applyDirectedOffset,
+	claimPopupSide,
 	createPanelPositioner,
 	directedMotion,
 	releasePanelPosition,
@@ -328,15 +329,22 @@ export class PopoverState extends PopoverOptionsBase {
 			});
 		});
 
+		// The point the pointer was at belongs to one opening: a later keyboard open must not reuse it.
+		$effect(() => {
+			if (!this.isOpen) return;
+			return () => {
+				this.#anchorOffset = null;
+			};
+		});
+
 		// The trigger (or `ref` element) reports the side its placed panel sits on, so a theme can
 		// flatten the corner the panel attaches to.
 		$effect(() => {
 			const anchor = this.referenceElement;
 			if (!(anchor instanceof HTMLElement)) return;
 			const { 'data-popup-side': side } = popupSideAttributes(this.placement?.side);
-			if (side) anchor.setAttribute('data-popup-side', side);
-			else anchor.removeAttribute('data-popup-side');
-			return () => anchor.removeAttribute('data-popup-side');
+			claimPopupSide(anchor, this, side ?? null);
+			return () => claimPopupSide(anchor, this, null);
 		});
 	}
 
@@ -520,7 +528,18 @@ export class PopoverState extends PopoverOptionsBase {
 	 * Where the pointer last was over the trigger while the popover was closed, in viewport
 	 * coordinates. Frozen while open: `anchorTo: 'line'` anchors to the line under it.
 	 */
-	#anchorPoint: { x: number; y: number } | null = null;
+	#anchorOffset: { reference: HTMLElement | VirtualElement; dx: number; dy: number } | null = null;
+
+	/**
+	 * The captured point resolved against where its reference is now: held as an offset from the
+	 * reference's box, it stays on the same line when the page or a scroll ancestor scrolls.
+	 */
+	#anchorPoint = () => {
+		const offset = this.#anchorOffset;
+		if (!offset) return null;
+		const rect = offset.reference.getBoundingClientRect();
+		return { x: rect.left + offset.dx, y: rect.top + offset.dy };
+	};
 
 	// floating-ui placement lives in `popover.position.ts`. Its inputs are read when a placement
 	// runs: the mount placement runs inside the `dialog` attachment, so a change to any of them
@@ -541,7 +560,7 @@ export class PopoverState extends PopoverOptionsBase {
 		collisionBoundary: () => this.collisionBoundary,
 		fallbackAxisSide: () => this.fallbackAxisSide,
 		anchorTo: () => this.anchorTo,
-		anchorPoint: () => this.#anchorPoint,
+		anchorPoint: this.#anchorPoint,
 		setMinWidth: (width) => {
 			this.triggerWidth = width;
 		},
@@ -794,20 +813,34 @@ export class PopoverState extends PopoverOptionsBase {
 	 */
 	#trackAnchorPoint = (node: HTMLElement) => {
 		const follow = (event: PointerEvent) => {
-			if (!this.isOpen) this.#anchorPoint = { x: event.clientX, y: event.clientY };
+			const reference = this.referenceElement;
+			if (this.isOpen || !reference) return;
+			const rect = reference.getBoundingClientRect();
+			this.#anchorOffset = {
+				reference,
+				dx: event.clientX - rect.left,
+				dy: event.clientY - rect.top
+			};
 		};
-		const forget = () => {
-			if (!this.isOpen) this.#anchorPoint = null;
+		// A finger lifts (pointerleave) before the click that opens the popover: keep its point.
+		const forget = (event: PointerEvent) => {
+			if (!this.isOpen && event.pointerType !== 'touch') this.#anchorOffset = null;
+		};
+		// A keyboard open has no pointer: it takes the first or last line, not a stale hover point.
+		const forgetOnKey = () => {
+			if (!this.isOpen) this.#anchorOffset = null;
 		};
 		node.addEventListener('pointerenter', follow);
 		node.addEventListener('pointermove', follow);
 		node.addEventListener('pointerdown', follow);
 		node.addEventListener('pointerleave', forget);
+		node.addEventListener('keydown', forgetOnKey);
 		return () => {
 			node.removeEventListener('pointerenter', follow);
 			node.removeEventListener('pointermove', follow);
 			node.removeEventListener('pointerdown', follow);
 			node.removeEventListener('pointerleave', forget);
+			node.removeEventListener('keydown', forgetOnKey);
 		};
 	};
 	/**

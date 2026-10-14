@@ -88,6 +88,29 @@ export const resolvePlacement = (placement: PopoverPlacement, direction: PanelDi
 	return (align ? `${side}-${align}` : side) as Placement;
 };
 
+/** The popovers reporting a side on each anchor element, in the order they last reported. */
+const popupSideClaims = new WeakMap<HTMLElement, Map<object, string>>();
+
+/**
+ * Sets `data-popup-side` on an anchor for one owner: the anchor shows the side of the owner that
+ * reported last, and loses the attribute only when no owner reports one. Several popovers (a menu
+ * and its tooltip) can share one trigger; one closing must not strip the others' hook.
+ * Pass `null` to withdraw the owner's claim.
+ */
+export const claimPopupSide = (anchor: HTMLElement, owner: object, side: string | null) => {
+	let claims = popupSideClaims.get(anchor);
+	if (side === null) {
+		claims?.delete(owner);
+	} else {
+		if (!claims) popupSideClaims.set(anchor, (claims = new Map()));
+		claims.delete(owner);
+		claims.set(owner, side);
+	}
+	const current = claims && [...claims.values()].at(-1);
+	if (current) anchor.setAttribute('data-popup-side', current);
+	else anchor.removeAttribute('data-popup-side');
+};
+
 /**
  * The side a placed panel reports: the physical side floating-ui resolved, or, when a logical
  * side was requested and the panel stayed on the inline axis, the logical side it landed on (a

@@ -13,6 +13,7 @@ import { mockRect, viewport } from '$lib/testing/jsdom.test-helper.js';
 import {
 	VIEWPORT_SETTLE_MS,
 	applyDirectedOffset,
+	claimPopupSide,
 	createPanelPositioner,
 	directedMotion,
 	panelMiddleware,
@@ -774,6 +775,86 @@ describe('Popover placement through the positioner', () => {
 		component.update({ open: true });
 		await wrapper();
 		expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({ x: 200, y: 64 });
+	});
+
+	test('anchorTo line keeps its line when the reference scrolls while the popover is open', async () => {
+		const { component } = render(PopoverPositionHarness, {
+			props: { open: false, anchorTo: 'line' }
+		});
+		mockRect(trigger(), { x: 100, y: 200, width: 120, height: 40 });
+		await fireEvent.pointerMove(trigger(), { clientX: 130, clientY: 210 });
+		component.update({ open: true });
+		await wrapper();
+		expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({ x: 130, y: 210 });
+
+		// The page scrolls by 30px: the point scrolls with the reference.
+		await settle();
+		mockRect(trigger(), { x: 100, y: 170, width: 120, height: 40 });
+		observedUpdate()();
+		await waitFor(() =>
+			expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({ x: 130, y: 180 })
+		);
+	});
+
+	test('anchorTo line keeps the point of a tap, whose pointer leaves before the click opens', async () => {
+		const { component } = render(PopoverPositionHarness, {
+			props: { open: false, anchorTo: 'line' }
+		});
+		await fireEvent.pointerDown(trigger(), { pointerType: 'touch', clientX: 30, clientY: 44 });
+		await fireEvent.pointerUp(trigger(), { pointerType: 'touch', clientX: 30, clientY: 44 });
+		await fireEvent.pointerLeave(trigger(), { pointerType: 'touch', clientX: 30, clientY: 44 });
+		component.update({ open: true });
+		await wrapper();
+		expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({ x: 30, y: 44 });
+	});
+
+	test('anchorTo line forgets the point after the popover closes and on a keyboard open', async () => {
+		const { component } = render(PopoverPositionHarness, {
+			props: { open: false, anchorTo: 'line' }
+		});
+		await fireEvent.pointerMove(trigger(), { clientX: 30, clientY: 44 });
+		component.update({ open: true });
+		await wrapper();
+		expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({ x: 30, y: 44 });
+
+		// The pointer never left (a hover open); the popover closes and opens again from the keyboard.
+		await settle();
+		component.update({ open: false });
+		await waitFor(() => expect(screen.queryByText('Inside popover')).toBeNull());
+		component.update({ open: true });
+		await wrapper();
+		expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({});
+
+		// A point captured while closed is dropped by a key press on the trigger.
+		await settle();
+		component.update({ open: false });
+		await waitFor(() => expect(screen.queryByText('Inside popover')).toBeNull());
+		await fireEvent.pointerMove(trigger(), { clientX: 90, clientY: 91 });
+		await fireEvent.keyDown(trigger(), { key: 'Enter' });
+		component.update({ open: true });
+		await wrapper();
+		expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({});
+	});
+
+	test('popups sharing a trigger keep its data-popup-side until the last one lets go', () => {
+		const anchor = document.createElement('button');
+		const first = {};
+		const second = {};
+		claimPopupSide(anchor, first, 'top');
+		claimPopupSide(anchor, second, 'bottom');
+		expect(anchor).toHaveAttribute('data-popup-side', 'bottom');
+
+		// The first closes while the second stays open.
+		claimPopupSide(anchor, first, null);
+		expect(anchor).toHaveAttribute('data-popup-side', 'bottom');
+
+		// Same side from both: one closing doesn't strip the other's hook.
+		claimPopupSide(anchor, first, 'bottom');
+		claimPopupSide(anchor, first, null);
+		expect(anchor).toHaveAttribute('data-popup-side', 'bottom');
+
+		claimPopupSide(anchor, second, null);
+		expect(anchor).not.toHaveAttribute('data-popup-side');
 	});
 
 	// The safe area measures the trigger and the panel; a panel moved by its wrapper's
