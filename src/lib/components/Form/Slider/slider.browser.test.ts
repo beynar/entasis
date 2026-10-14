@@ -82,3 +82,32 @@ test('a read-only track ignores a click', async () => {
 	expect(onValueCommit).not.toHaveBeenCalled();
 	expect(thumbs()[0].value).toBe('0');
 });
+
+chromiumOnly(
+	'clicking the label focuses the first enabled thumb when the first is disabled',
+	async () => {
+		render(SliderHarness, {
+			props: {
+				label: 'Budget',
+				mode: 'range',
+				defaultValue: [20, 60],
+				thumbDisabled: [true, false]
+			}
+		});
+
+		await userEvent.click(page.getByText('Budget'));
+		await expect.poll(() => document.activeElement).toBe(thumbs()[1]);
+	}
+);
+
+chromiumOnly('an app ancestor with the group class does not light every thumb ring', async () => {
+	render(SliderHarness, { props: { label: 'Budget', mode: 'range', defaultValue: [20, 60] } });
+	const wrapper = thumbs()[0].closest('[role="group"]')!.parentElement!;
+	wrapper.classList.add('group');
+
+	await userEvent.tab();
+	expect(document.activeElement).toBe(thumbs()[0]);
+	await expect
+		.poll(() => getComputedStyle(visualOf(thumbs()[0])).boxShadow)
+		.not.toBe(getComputedStyle(visualOf(thumbs()[1])).boxShadow);
+});

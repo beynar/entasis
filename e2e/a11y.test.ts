@@ -267,3 +267,19 @@ test.describe('block previews', () => {
 		});
 	}
 });
+
+test.describe('slider keyboard', () => {
+	test('each thumb is one Tab stop and arrow keys adjust its native range input', async ({
+		page
+	}) => {
+		await page.goto('/components/slider', { waitUntil: 'networkidle' });
+		const min = page.getByRole('slider', { name: 'Minimum budget' });
+		const max = page.getByRole('slider', { name: 'Maximum budget' });
+		await min.focus();
+		const before = Number(await min.inputValue());
+		await page.keyboard.press('ArrowRight');
+		expect(Number(await min.inputValue())).toBeGreaterThan(before);
+		await page.keyboard.press('Tab');
+		await expect(max).toBeFocused();
+	});
+});

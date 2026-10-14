@@ -518,9 +518,28 @@ describe('Slider native range input', () => {
 		const thumb = screen.getByRole('slider');
 		thumb.focus();
 		expect(thumb).toHaveFocus();
-		expect(thumbRoot(thumb).querySelector('[data-slider-thumb-visual]')?.className).toContain(
-			'group-has-[:focus-visible]:ring-2'
-		);
+		// A named group: an unnamed `group` ancestor in the app must not light every thumb.
+		const visual = thumbRoot(thumb).querySelector('[data-slider-thumb-visual]')!;
+		expect(visual.className).toContain('group-has-[:focus-visible]/slider-thumb:ring-2');
+		expect(visual.className).not.toMatch(/(^|\s)group-has-\[:focus-visible\]:/);
+		expect(thumbRoot(thumb).className).toContain('group/slider-thumb');
+	});
+
+	test('the label targets the first enabled thumb when the first one is disabled', () => {
+		render(SliderHarness, {
+			props: {
+				mode: 'range',
+				defaultValue: [20, 60],
+				label: 'Budget',
+				thumbDisabled: [true, false]
+			}
+		});
+
+		const label = screen.getByText('Budget') as HTMLLabelElement;
+		const [first, second] = screen.getAllByRole('slider');
+		expect(first).toBeDisabled();
+		expect(label.control).toBe(second);
+		expect(first.id).not.toBe(second.id);
 	});
 });
 
@@ -888,6 +907,15 @@ describe('Slider per-thumb disabled', () => {
 		expect(values()).toEqual([50, 60]);
 	});
 
+	test('the field control id moves to the first enabled thumb', () => {
+		render(SliderHarness, {
+			props: { mode: 'range', defaultValue: [20, 60], thumbDisabled: [true, false] }
+		});
+		const [, second] = screen.getAllByRole('slider');
+		expect(second.id).not.toContain('-thumb-');
+		expect(screen.getAllByRole('slider')[0].id).toMatch(/-thumb-0$/);
+	});
+
 	test('a disabled thumb keeps its place in the submitted value', () => {
 		const form = document.body.appendChild(document.createElement('form'));
 		render(SliderHarness, {
@@ -982,6 +1010,25 @@ describe('Slider read-only edits', () => {
 		expect(screen.getByRole('group')).toHaveAttribute('data-readonly');
 		expect(thumbRoot(screen.getByRole('slider'))).toHaveAttribute('data-readonly');
 		expect(screen.getByRole('group').className).toContain('cursor-default');
+	});
+
+	test('a read-only range is not draggable and shows no grab cursor', async () => {
+		const onValueChange = vi.fn();
+		render(SliderHarness, {
+			props: {
+				mode: 'range',
+				dragRange: true,
+				readOnly: true,
+				defaultValue: [20, 60],
+				onValueChange
+			}
+		});
+
+		expect(selectedRange().className).not.toContain('cursor-grab');
+		layOutTrack();
+		await drag(selectedRange(), TRACK_LEFT + 40, TRACK_LEFT + 80);
+		expect(onValueChange).not.toHaveBeenCalled();
+		expect(values()).toEqual([20, 60]);
 	});
 
 	test('a read-only swap slider does not move focus', async () => {

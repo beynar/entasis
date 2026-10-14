@@ -145,8 +145,8 @@
 
 		{#each slider.valuePayloads as payload (payload.index)}
 			<SliderThumb
-				onRef={payload.index === 0 ? setFirstThumb : undefined}
-				id={payload.index === 0 ? id : `${id}-thumb-${payload.index}`}
+				onRef={payload.index === slider.controlIndex ? setFirstThumb : undefined}
+				id={payload.index === slider.controlIndex ? id : `${id}-thumb-${payload.index}`}
 				{payload}
 				label={getThumbLabel(payload.index)}
 				describedBy={instructionsId}

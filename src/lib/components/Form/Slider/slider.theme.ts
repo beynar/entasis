@@ -255,7 +255,7 @@ const defaultRange = cva({
 // centring translate flips. It flips on `:dir(rtl)`, the nearest `dir`, rather than on the `rtl:`
 // variant, which also matches inside an ltr slider placed in an rtl page.
 const defaultThumb = cva({
-	base: 'group absolute z-20 flex size-11 touch-none appearance-none items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none',
+	base: 'group/slider-thumb absolute z-20 flex size-11 touch-none appearance-none items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none',
 	variants: {
 		orientation: {
 			horizontal: 'top-1/2 -translate-x-1/2 -translate-y-1/2 [&:dir(rtl)]:translate-x-1/2',
@@ -336,7 +336,7 @@ const defaultThumbHitbox = cva({
 });
 
 const defaultThumbVisual = cva({
-	base: 'pointer-events-none rounded-full border-2 border-surface bg-current lift-1 ring-offset-surface transition-[box-shadow,transform] group-has-[:focus-visible]:ring-2 group-has-[:focus-visible]:ring-focus/50 group-has-[:focus-visible]:ring-offset-2',
+	base: 'pointer-events-none rounded-full border-2 border-surface bg-current lift-1 ring-offset-surface transition-[box-shadow,transform] group-has-[:focus-visible]/slider-thumb:ring-2 group-has-[:focus-visible]/slider-thumb:ring-focus/50 group-has-[:focus-visible]/slider-thumb:ring-offset-2',
 	variants: {
 		orientation: {
 			horizontal: '',
@@ -386,7 +386,7 @@ const defaultThumbVisual = cva({
 		{
 			variant: 'contained',
 			class:
-				'bg-neutral/45 scale-75 border-0 shadow-none transition-[background-color,transform] duration-normal ease-standard group-has-[:focus-visible]:scale-100 group-has-[:focus-visible]:bg-neutral/80'
+				'bg-neutral/45 scale-75 border-0 shadow-none transition-[background-color,transform] duration-normal ease-standard group-has-[:focus-visible]/slider-thumb:scale-100 group-has-[:focus-visible]/slider-thumb:bg-neutral/80'
 		},
 		{ orientation: 'horizontal', variant: 'contained', size: 'small', class: 'h-5 w-1' },
 		{ orientation: 'horizontal', variant: 'contained', size: 'normal', class: 'h-7 w-1.5' },

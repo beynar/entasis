@@ -155,8 +155,18 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 	isRange = $derived(this.values.length > 1);
 	/** Whether any single thumb is disabled on its own. */
 	hasLockedThumb = $derived(this.values.some((_, index) => this.isThumbLocked(index)));
-	/** The selected range moves as a unit only when every thumb is free to move. */
-	canDragRange = $derived(!!this.dragRange && this.isRange && !this.hasLockedThumb);
+	/** The selected range moves as a unit only when every thumb is free to move and edits are allowed. */
+	canDragRange = $derived(
+		!!this.dragRange && this.isRange && !this.hasLockedThumb && !this.readOnly
+	);
+	/**
+	 * The thumb that stands for the field: the label's target and the focus target for errors. It is
+	 * the first thumb that can take focus, because a disabled input ignores label clicks and focus().
+	 */
+	controlIndex = $derived.by(() => {
+		const free = this.values.findIndex((_, index) => !this.isThumbDisabled(index));
+		return free === -1 ? 0 : free;
+	});
 	/** The value keeps an array shape (even with one thumb) when it arrived as one or is a range. */
 	isArrayValue = $derived(
 		Array.isArray(this.value) || this.mode === 'range' || this.thumbCount > 1
