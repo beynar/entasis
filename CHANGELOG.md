@@ -146,6 +146,257 @@ Unreleased section under the new version.
   gets a second gutter.
 - `Theme`: `--keyboard-inset` on `html` is the height the on-screen keyboard covers, measured from
   the visual viewport (`0px` by default).
+- `NavigationMenu`: site navigation with mega-menu panels (import from `entasis/navigation-menu`). A
+  `<nav>` landmark holds a row of links and disclosure buttons (`aria-expanded`, `aria-controls`)
+  and one panel area rendered inline after the row, so Tab order stays natural. Resting the pointer
+  on a trigger opens its panel and moving to another switches at once; the panel area animates its
+  width and height between panels and stays inside the viewport, right to left included. Opening by
+  keyboard keeps focus on the trigger, Tab enters the panel and carries on after the trigger, arrow
+  keys, Home and End move along the bar, and Escape returns focus to the trigger. A link press
+  closes every level and reports one `onValueChange({ value: null, details })`; a consumer `onclick`
+  runs first and `preventDefault()` keeps it open. Supports `value`, `defaultValue`, a generic
+  `Value`, `onValueChange({ value, details })` with reasons and `cancel()`, `openOnHover`, `delay`,
+  `closeDelay`, `keepMounted` (panels stay in the server-rendered HTML for crawlers), `size`,
+  `density`, `color`, `dir`, `transition`, nested inline levels, `iconOnly` links and panels (only
+  `prefix` is painted and the string `label` becomes the accessible name) and the typed
+  `navigationMenuDataAttributes` and `navigationMenuCssVariables` maps.
+- `Autocomplete`: free text with suggestions (import from `entasis/autocomplete`). The value is the
+  text in the input and the input submits it in native forms, so a suggestion is a shortcut for
+  typing and never required. Suggestions can be strings, options, groups, or an async function that
+  receives the text and an abort signal; the function is only asked while the list is open, and a
+  value listed twice appears once (first entry wins). `mode` is `'list'` (filtered), `'both'`
+  (filtered with inline completion), `'inline'` (not filtered, inline completion) or `'none'`;
+  inline completion previews the highlighted suggestion in the input, Escape or blur restore the
+  typed text, and Tab or the arrow keys accept it. Also `autoHighlight`, `openOnFocus`,
+  `shouldFilter`, `filter`, `limit`, `loop`, `onSelect`, `open`/`onOpenChange(open, details)`,
+  `readOnly`, and `inputAttrs` whose event handlers run before the built-in behaviour
+  (`preventDefault()` on `onkeydown`, `onclick` or `onpointerdown` cancels it).
+- `Progress`: a linear progress bar with a determinate fill, an indeterminate state (`value={null}`)
+  and `min`/`max`, `format`, `getAriaValueText` and `locale`. It has a `label` and optional visible
+  value text (`showValue`, `valueLabel`), plus `size`, `density` and semantic `color`, and exposes
+  `data-indeterminate`, `data-progressing` and `data-complete`.
+- `ProgressCircle`: `value={null}` is an indeterminate state that spins the arc and drops
+  `aria-valuenow`. New `min`/`max`, `format`, `getAriaValueText` and `locale` props, and
+  `data-indeterminate`, `data-progressing` and `data-complete`.
+- `Meter`: `format`, `getAriaValueText` and `locale` props. Value text is formatted with Intl in the
+  active I18n locale (French reads `50 %`).
+- `Button` / `ToggleButton`: `focusableWhenDisabled` keeps a disabled button in the tab order. It
+  renders `aria-disabled="true"` instead of the native `disabled` attribute and cancels clicks,
+  Enter, Space and form submission, while pointer events (`onpointerenter`, `onpointerleave`) still
+  reach it so a tooltip can explain why it is unavailable. A disabled anchor drops its `href` and
+  takes `tabindex="0"`.
+- `ToggleButtonGroup`: `orientation` (`'horizontal'` | `'vertical'`) stacks the buttons, moves with
+  ArrowUp and ArrowDown, joins segments top to bottom and sets `data-orientation`. `loopFocus`
+  (default true) lets the arrow keys stop at the ends. Exports the `ToggleButtonGroupOrientation`
+  type.
+- `ScrollArea`: `data-scrolling` on the root, viewport, scrollbars and thumbs, plus
+  `data-has-overflow-x`/`-y`, `data-overflow-{x,y}-{start,end}` and
+  `--scroll-area-overflow-{x,y}-{start,end}` (px hidden past each edge) on the root. The new
+  `overflowEdgeThreshold` prop (default 1) sets how much hidden content counts. The names are
+  exported as `scrollAreaDataAttributes` and `scrollAreaCssVariables`.
+- `ScrollArea`: `viewportAttrs` spreads attributes, a class and handlers onto the scrolling viewport
+  so a widget such as a listbox can own it. A `role` passed there drops the automatic 'Scrollable
+  content' name and tab stop.
+- `Dialog`: `modal={false}` renders a non-modal dialog or drawer that leaves the page interactive:
+  no inert page, scroll lock, backdrop or Tab trap, and outside presses do not dismiss it unless
+  `closeOnClickOutside` is set.
+- `Dialog`: drawer snap points. `snapPoints` (fractions of the available height or CSS lengths),
+  bindable `snapPoint`, `defaultSnapPoint` and `onSnapPointChange({ snapPoint, details })` let
+  bottom and top drawers, and modals collapsed into mobile sheets, rest at several heights. Drags
+  move between points, a flick goes to the next one, dragging below the lowest dismisses, and the
+  body scrolls only at the largest point. `dialog.setSnapPoint()` and `dialog.currentSnapPoint`
+  control it from code; new `DialogSnapPoint` type.
+- `Dialog`: `<html>` carries `data-dialog-open` and `--dialog-depth` while a modal dialog is open,
+  so a page can scale back behind a sheet with plain CSS.
+- `Dialog`: a bottom sheet makes room for the on-screen keyboard while a text field inside has focus
+  (bottom padding follows `--keyboard-inset`), and brings the field into view once the keyboard has
+  stopped moving.
+- `Dialog`: `closeButton={false}` suppresses the visible close button. A closable dialog whose
+  visible close button is suppressed (or a custom one that renders nothing, as in the `Popover`
+  mobile sheet) gets a visually hidden Close button for screen readers.
+- `Popover`: `modal` makes a floating popover modal. Tab stays inside the panel, the page behind
+  becomes inert, focus opens inside the panel, and a visually hidden Close button at the end of the
+  panel lets screen reader users close it.
+- `Popover`: `label` and `labelledBy` give the popup an accessible name (`aria-label` /
+  `aria-labelledby` on the dialog, on the menu, listbox, tree or grid element inside a non-dialog
+  popup, and on the mobile sheet's dialog), also while it is open. `DateSelector`, `ColorInput` and
+  `MediaVolume` now name their popovers.
+- `Popover`: `arrow` draws a pointer from the panel toward its trigger. It follows the trigger when
+  the panel shifts to fit the viewport, reports `data-side` and `data-uncentered`, and is styled
+  with the new `theme.arrow` part. `HoverCard` and `LinkPreview` forward it.
+- `Popover`: one popup can serve many triggers. `{@attach popover.triggerFor(() => row)}` anchors
+  the popup to the pressed trigger and `popover.payload` reads that trigger's data live. `Popover`
+  and `PopoverState` are generic on the payload type (default `unknown`).
+- `Popover`: `tabBridge` (default on) turns the Tab bridge between a trigger and its portaled panel
+  off for panels that are not meant to be tabbed into. `closeOnFocusOut` closes the popover (reason
+  `'focus-out'`) when focus that was in it or on its trigger moves to a control outside both.
+- `HoverCard` / `LinkPreview`: `wrap`, `anchorTo` and `arrow`. `wrap` (default true on
+  `LinkPreview`) lets the link flow with the surrounding text, and the card anchors to the line the
+  pointer entered.
+- `Menu`: checkbox, radio-group and group items. A checkbox is a `menuitemcheckbox` with `value`,
+  `defaultValue` and `onValueChange`; a radio-group is a labelled group of `menuitemradio` rows
+  sharing one value; a group is a labelled `role="group"`. Checkable rows keep the menu open unless
+  `closeOnClick` is true, the check animates out when unchecked, and the labels are hidden from the
+  accessibility tree. The new item types are exported from `entasis/menu`.
+- `Menu`: `filter` adds a search field above the rows (`search`, `defaultSearch`, `onSearchChange`,
+  an `empty` snippet and a custom `match`). Focus stays in the field while ArrowUp and ArrowDown
+  highlight rows, the first match is highlighted as you type and Enter presses the highlighted row.
+  Submenus take a filter of their own, in popups and in stacked mobile-sheet menus.
+- `Menu`: `onHighlightChange` reports the value of the highlighted row (keyboard, pointer or
+  filter), and every item takes a `key` and a `value`.
+- `MenuOption`: `closeOnClick`, where false keeps the `PopupMenu`, `ContextMenu` or `MenuBar` menu
+  open when the row is pressed. Menu buttons and options take it too.
+- `Select`: `multiple` holds a list of values (field type `select-multiple`, and
+  `type: 'select-multiple'` in `Form`). The list stays open while options are toggled with a click,
+  Enter or Space, the listbox is `aria-multiselectable`, the trigger shows two labels and `+N` (or
+  your `formatValue`), the value is an array in item order, and a native form submits one hidden
+  input per value under the same `name`.
+- `Select`: `readOnly` opens the list and lets it be browsed with the arrows, Home, End, typing and
+  hover, while no option can be chosen and the value is still submitted. The trigger carries
+  `aria-readonly` and `data-readonly`.
+- `Select`: `autocomplete` renders a visually hidden input the browser can autofill. The filled text
+  selects the option whose value matches, else whose label matches (ignoring case and accents),
+  without opening the list. A `required` Select blocks a native form submit until it has a value.
+- `Select`: `open`, `defaultOpen`, `onOpenChange(open, details)` (with `reason`, `event`,
+  `interaction` and `cancel()`), `onAfterOpen` and `onAfterClose`.
+- `Select`: `clearable` adds a button that empties the selection and returns focus to the trigger,
+  `id` sets the trigger's id so an external `<label for>` names it, and `items` accept readonly
+  arrays (`as const` data). New `SelectValue` type.
+- `Select`: theme slots `list` (the scrolling list, with a `dropdown` variant that carries the 240px
+  cap) and `listbox`. A `max-height` set on `list` also caps an item-aligned list.
+- `Combobox` / `TagsInput`: `open`, `defaultOpen`, `onOpenChange(open, details)` (reasons
+  `input-change`, `escape-key`, `item-press`, `list-navigation`, `trigger-press`, `trigger-focus`,
+  `focus-out`; `details.cancel()` keeps the list as it was), `onAfterOpen` and `onAfterClose`.
+  `OpenChangeReason` gains `input-change`.
+- `Combobox` / `TagsInput`: `openOnFocus` opens the list when the input gets focus (static arrays
+  list every option, an `items` function is called with an empty search when the field is focused,
+  not on mount). ArrowDown or ArrowUp opens a closed list, and a press on the already focused input
+  toggles it.
+- `Combobox` / `TagsInput`: `items` accept `{ label?, items }` groups mixed with flat options,
+  `disabled` options (dimmed and skipped by the keyboard), a `separators` prop and an `item` snippet
+  for custom rows. New types `ComboboxOptionGroup`, `ComboboxItems`, `ComboboxItemsSource`,
+  `ComboboxItemsRequest`, `ComboboxFilter`, `ComboboxHighlightChangePayload` and
+  `ComboboxHighlightReason`, and the `group`, `groupLabel` and `separator` theme parts.
+- `Combobox` / `TagsInput`: `filter` replaces the match for static arrays and `limit` caps the
+  matches (matching stops once reached). `autoHighlight` (`true`, `false` or `'always'`) and `loop`
+  (`'wrap'`, `'input'` or `false`) control the highlight model, and
+  `onHighlightChange({ value, reason, event })` reports why it moved.
+- `Combobox` / `TagsInput`: `readOnly` lets the list open and be browsed while the value stays put:
+  choosing, Enter, the clear button and tag removal do nothing, the tags render without remove
+  buttons, and the values still submit.
+- `Combobox` / `TagsInput`: an `items` function receives `{ signal }` as its second argument. A
+  newer search aborts the older request and a response that is not the latest is ignored. The last
+  results stay visible, with `aria-busy` and a loading row, while the next search loads, and an
+  external `value` change re-resolves the label.
+- `TagsInput`: `keepSearchOnSelect` keeps the typed text after an option is chosen, so several
+  matches of one search can be added in a row.
+- `Command`: `limit` shows at most that many items across groups, `autoHighlight` and `loop` control
+  the highlight model, and the `open` and `close` slot functions accept the click event, which is
+  reported as a `trigger-press` change.
+- `Form`: `validationMode` (`'submit'`, `'blur'` or `'change'`, also per entry) and
+  `validationDebounce` choose when fields validate by themselves. After a first submit attempt,
+  edited fields re-validate, and a field showing an error re-validates as it is edited.
+  `RichTextInput` honours both, inside a `Field` and standalone.
+- `Form`: `onValidate` may return a promise. The field stays neutral while it runs (no
+  `aria-invalid` or `data-invalid`, `data-validating` on the root), stale results are dropped, a
+  pending result is dropped when the value changes, and submit waits for pending validators.
+  `validateAsync()` is the awaiting counterpart of `validate()`.
+- `Form`: an `errors` prop and `form.setErrors()` show server errors under their fields. They
+  survive validation, do not block a re-submit, and clear when the field's value next changes. The
+  first errored field in render order is revealed.
+- `Form`: `form.reset(value?)` restores initial values (or the given ones) as the new baseline and
+  clears errors, touched, dirty and the submit count without echoing value callbacks. Also
+  `form.dirty`, `form.touched`, `form.validating`, `form.submitCount`, `form.validateField(name)`
+  and `form.validate({ reveal: false })` for quiet validation.
+- `Field`: validation errors fade and grow in under the Theme motion tokens (a `motion` slot in the
+  field theme); reduced motion plays nothing. The root also exposes `data-validating`.
+- `ask()` / `MultiStepForm`: accept `validationMode` and `validationDebounce`, and wait for async
+  validators before submitting or advancing.
+- `NumberInput`: `format` (`Intl.NumberFormatOptions` for currency, percent, unit, fraction digits)
+  and `locale` props; Intl rounding applies to the committed value, and the value keeps full
+  precision when no rounding option is set. Out-of-range messages are localized and show the bound
+  formatted in the input's locale and format.
+- `NumberInput`: `inputAttrs` for native input attributes (`autocomplete`, `aria-label`,
+  `aria-roledescription`, handlers that run before the built-in ones).
+- `NumberInput`: `largeStep` (Shift+Arrow, PageUp, PageDown; default ten times the step),
+  `smallStep` (Alt+Arrow; default a tenth), Home and End jump to `min` and `max`, and `snapOnStep`
+  snaps to the step grid before clamping.
+- `NumberInput`: `wheelStep` steps a focused, hovered input on vertical wheel scrolls (or horizontal
+  with Shift), and `onValueCommit({ value, reason })` reports `blur`, `keyboard`, `step` or `wheel`;
+  a press-and-hold commits once, on release.
+- `PinInput`: `normalizeValue` and `onRejectInput` for the shared normalization of typed, pasted,
+  autofilled, composed and controlled codes, `submitOnComplete` submits the surrounding `Form` (or
+  native form) when the user completes the code, `readOnly` support (typing, paste and autofill are
+  ignored), `groups` for separators between cell groups (for example `[3, 3]`), and shadow DOM
+  support.
+- `CheckboxesInput`: `selectAll` and `selectAllLabel` add a select-all checkbox. It is mixed while
+  some enabled options are selected; clicking selects all, then none, then restores the partial
+  selection you started from. Disabled options keep their state.
+- `Checkbox`: `inputValue` sets the value a native form submits while checked (default `'true'`).
+- `Checkbox` / `CheckboxesInput` / `RadioInput` / `Switch`: `readOnly` keeps the control focusable
+  and announced (`aria-readonly`, `data-readonly`) while the value cannot change; it still validates
+  and submits. Radio groups expose `aria-required` and `aria-readonly`.
+- `RadioInput` / `CheckboxesInput`: `value`, `defaultValue` and `onValueChange` are typed from the
+  options' literal values.
+- `useNavigation`: `enterActivates: false` leaves Enter to the focused item instead of clicking it.
+- `Slider`: `onValueCommit` fires once when an interaction ends with a changed value (pointer
+  release or cancel, each key press, finished screen-reader adjustment) and never for a no-op, so
+  "save on release" no longer needs debouncing `onValueChange`.
+- `Slider`: `largeStep` sets how far PageUp, PageDown and Shift+Arrow move a thumb (ten times `step`
+  by default).
+- `Slider`: `thumbCollisionBehavior` (`none`, `push`, `swap`) decides what a thumb does when it
+  meets a neighbour; `thumbDisabled` disables individual thumbs, which keep their value in the
+  submitted value and block their neighbours. New type `SliderThumbCollisionBehavior`.
+- `Slider`: `readOnly` thumbs stay focusable and announced, refuse every edit and still submit; the
+  track and thumbs carry `data-readonly` and a default cursor.
+- `Toast`: `toast.update(id, patch or function)` changes a toast that is on screen and restarts its
+  countdown, `toast.dismiss(id?)` closes one toast or all of them, and
+  `toast.promise(promise, { loading, success, error })` turns a loading toast into its success or
+  error toast and returns the promise. A toast the user dismissed is never brought back by a late
+  update. The `Toast` handle gains `update()`, `updateKey` and `dismissed`, and each toast renders
+  `data-update-key`. New types `ToastUpdate`, `ToastUpdater` and `ToastPromiseOptions`.
+- `Tooltip`: `hoverable` (default true) keeps the tooltip open while the pointer is over its
+  content, so text can be read and links used (WCAG 1.4.13); `hoverable={false}` lets the pointer
+  through and closes the tooltip as soon as it leaves the trigger.
+- `Tooltip`: `closeOnClick` (default true) closes the tooltip when its trigger is pressed and keeps
+  it closed until the pointer leaves or focus moves away. `disabled` turns a tooltip off: hover and
+  focus no longer open it, an open one closes, and the trigger loses `aria-describedby`.
+  `closeDelay` holds the tooltip for a moment after the pointer leaves.
+- `Tooltip`: moving between triggers keeps one surface. It stays in place, resizes to the new
+  content and carries `data-instant`; the tooltip it leaves gets `onAfterClose` and the new one
+  `onAfterOpen`.
+- `Tabbar` / `Tabs`: `activateOnFocus` (default `true`). Set it to `false` for manual activation:
+  the arrow keys, Home and End only move focus, and Enter, Space or a click selects the focused tab,
+  so arrowing across the list no longer mounts every lazy panel. `Tabs` forwards it as
+  `tabbar={{ activateOnFocus: false }}`.
+- `Tabs`: `data-activation-direction` on the root and on the active panel (`left`, `right`, `up`,
+  `down` or `none`) for direction-aware panel animations. It is mirrored in right-to-left documents,
+  follows the tab list's axis, and is set by clicks, keys, `api` navigation and changes to a bound
+  `value`. The `TabsActivationDirection` type is exported; `Stepper` gains the matching
+  `panelActivationDirection` prop.
+- `Accordion` / `Collapsible`: `hiddenUntilFound` keeps closed content in the DOM under
+  `hidden=until-found`, so the browser's find-in-page, text fragments and `#id` links can find it
+  and open the item, with no animation. Closed content stays out of the reading and tab order, and
+  cancelling the open-change leaves it closed and findable. `keepMounted` keeps closed content
+  mounted under `hidden`, preserving its state.
+- `Accordion`: `disabled` prop and `disabledKey` (default `'disabled'`) disable items with the
+  native `disabled` attribute on the trigger, and items gain `data-open`, `data-closed`,
+  `data-disabled` and `data-index` styling hooks.
+- `Collapsible`: `onAfterOpen` and `onAfterClose`. `Accordion`: `onItemAfterOpen` and
+  `onItemAfterClose` with `{ item, index }`. Each fires exactly once per open or close, also when no
+  animation runs (reduced motion, zero duration, find-in-page); none fires for the initial state.
+  The `OpenChangeReason` list gains `'find-in-page'`.
+- `Avatar`: the `image` prop forwards `srcset`, `sizes`, `crossorigin`, `referrerpolicy`, `loading`,
+  `decoding` and `fetchpriority` to the `<img>`; `AvatarGroup` passes it to every avatar. With
+  `loading: 'lazy'` the initials stay on screen until the browser has fetched the picture.
+- `Avatar`: the root exposes `data-status` (`idle`, `loading`, `loaded` or `error`) and the default
+  theme crossfades the image over the initials from it. `fallbackDelay` holds the initials back
+  while the image loads, so a fast image never flashes the fallback; a failed image or a missing
+  `src` still shows the initials at once.
+- i18n: `resultsCount(count)` and `tags` (the result count announced by `Combobox`, `TagsInput`,
+  `Command` and the `PhoneInput` country picker, and the `TagsInput` tag toolbar),
+  `progressIndeterminate`, `selectAll`, `oneTimeCode` and the `Dialog` Close label, in all 8
+  locales.
 
 ### Changed
 
@@ -284,6 +535,228 @@ Unreleased section under the new version.
   `TableOfContents`) resolve through `getRootNode`, so they work inside shadow roots. Prehydration
   inline scripts and the document-level CDN loaders (Map, PhoneInput, Mermaid) keep
   `document.getElementById` on purpose.
+- `Button` / `ToggleButton`: a disabled button that is `focusableWhenDisabled` keeps its pointer
+  events, so a tooltip can explain why it is unavailable; a natively disabled button still ignores
+  them.
+- `ToggleButtonGroup`: with `type="single"` (radiogroup) `aria-orientation` follows `orientation`; a
+  `type="multiple"` group does not emit it.
+- `ScrollArea`: in `hover` mode the scrollbars also show while the area is scrolling, so touch
+  scrolling reveals them. In `scroll` mode a bar no longer renders when the content does not
+  overflow.
+- `ScrollArea`: wheeling over a scrollbar no longer blocks the page at the edge; the wheel is only
+  consumed while the viewport can still move that way. Pressing a scrollbar or thumb with the
+  primary button no longer moves focus away from the focused control, and scroll snapping on the
+  viewport is paused while a thumb is dragged.
+- `Confirmation`: Escape and the Android Back gesture cancel the question (`{ confirmed: false }`)
+  unless the confirmed action is running. Outside presses still leave it open.
+- `Dialog`: with a mouse or pen, a drawer is dragged only from its thumb and header, so dragging
+  over the body selects text instead of dismissing the drawer. A finger still drags from anywhere,
+  except when text is selected in the panel.
+- `Dialog`: a dialog above another one keeps the one beneath moving with its swipe: the parent's
+  scale and fade follow the child's drag progress. Non-modal dialogs do not push dialogs beneath
+  them back.
+- `Popover`: a popover that closes on outside presses now also closes when focus that was inside it
+  or on its trigger moves to a control outside it, including when Tab leaves a trigger that the Tab
+  bridge does not cover. Set `closeOnFocusOut={false}` to keep the old behaviour. Menus, listboxes,
+  modal popovers and hover-opened popovers are unaffected.
+- `Popover`: an open tooltip no longer counts as a layer above the popover, so the Tab bridge and
+  the modal inert page keep working while a tooltip shows over a control in the panel.
+- `HoverCard`: pointing at the trigger again while the card is closing reopens it at once instead of
+  waiting out `delay`. A card opened from inside another card keeps the outer card open while the
+  pointer is on either, and the outer card closes after the last inner one when the pointer is
+  outside every card.
+- `LinkPreview`: the trigger link is now `display: inline` with `box-decoration-clone` (it was
+  `inline-flex`), so it wraps across lines like text. Pass `wrap={false}` to keep the previous
+  single-box layout.
+- `Menu`: header, footer and the search field sit outside the `role="menu"` element, so links in
+  them are not menu items. The outermost element is a wrapper that holds the class and data
+  attributes.
+- `Menu`: rows are keyed by identity (an explicit `key`, else their plain text, `href` or
+  `textValue`) instead of by position, so focus and the tab stop stay on the same row while items
+  before it are inserted or removed.
+- `PopupMenu`: initial focus follows how the menu opened. Enter, Space and ArrowDown highlight the
+  first row, ArrowUp the last, a pointer press focuses the menu itself, and hovering it open leaves
+  focus where it was. ArrowDown and ArrowUp on the button open the menu, including for snippet
+  triggers and `ToggleMenu` buttons. `MenuBar` opens a menu on its last row with ArrowUp.
+- `PopupMenu` / `ContextMenu` / `MenuBar`: Tab closes the whole menu tree and moves on to the
+  control after the trigger, and Shift+Tab closes it and stays on the trigger (`onOpenChange` reason
+  `'focus-out'`). Focus returning to a row of a parent menu closes the submenus beside it, and a
+  menu that closes no longer takes focus back from a control Tab reached.
+- `Menu`: a submenu the pointer opens no longer takes focus from an outside text field. Pressing an
+  open submenu row again with the keyboard, or with a second click after a click open, closes it; a
+  mouse click after a hover open keeps it open. Filterable menus and submenus do not take focus on a
+  hover open, and ArrowLeft out of a submenu returns focus to the parent's search field.
+- `Menu` / `PopupMenu` / `MenuBar`: right-to-left menus open submenus on the left, mirror the
+  submenu caret and the stacked back arrow, and swap ArrowLeft and ArrowRight, including when the
+  direction comes from a `dir` prop on the bar or a subtree, because the portaled panel carries its
+  trigger's direction. On Apple platforms an open submenu row omits `aria-expanded` so VoiceOver
+  does not announce it twice.
+- `ContextMenu`: a long press tolerates 8 px of finger drift, the native `contextmenu` Android sends
+  after a long press opens the menu once, a second right-click within 8 px of the anchor closes it,
+  the browser's own menu no longer opens over the open panel, and the wrapper disables the iOS touch
+  callout.
+- `ToggleMenu`: disabled items stay in the arrow-key order and keep the roving tab stop, announcing
+  `aria-disabled` instead of leaving the tab order, so a fully disabled toolbar keeps one tab stop.
+  The More menu is built from the new checkbox and radio-group items, with labelled groups.
+- `Select`: the scrolling viewport is now the listbox itself, and flat options are no longer wrapped
+  in an unlabelled `role="group"` (only labelled sets are groups). An open long list no longer needs
+  an accessibility allowlist entry.
+- `Select`: a list opened by touch is a dropdown below the trigger and leaves page scrolling alone;
+  the item-aligned layout is for mouse and keyboard opens. Aligned measurements are rounded to whole
+  pixels so browser zoom no longer leaves sub-pixel gaps.
+- `Select`: focus moving into the open panel (a touch screen reader's cursor) keeps the list open,
+  it closes when focus leaves both the trigger and the panel, Escape on a focused option closes it
+  and returns focus to the trigger, and a visually hidden Close button ends the panel.
+- `Select`: clicking its label focuses the trigger without opening the list, also for an external
+  `<label for>` pointing at the trigger's `id`.
+- `Select`: opening a list of a thousand options is about twice as fast: option ids come from a map
+  instead of a search per row, rows are a lean markup that reuses `MenuOption`'s theme, and ids no
+  longer collide for values such as `a.b` and `a_b`.
+- `Combobox` / `TagsInput`: Escape closes the list and keeps focus in the input, and a second Escape
+  clears the typed text (it used to blur the input). Choosing an option, Clear and Escape no longer
+  drop focus to the page.
+- `Combobox` / `TagsInput`: the search box no longer carries the field `name`. A hidden input beside
+  it submits the selected value (one per tag for `TagsInput`), so a native `<form>` posts the value
+  instead of the typed search text. A field without a `name`, or a disabled one, submits nothing.
+- `Combobox` / `TagsInput`: the options list scrolls in a viewport that is itself the listbox, so it
+  owns only options and groups with no extra 'Scrollable content' tab stop. The loading, error and
+  no-options messages sit beside the listbox, and one persistent live region next to the input
+  announces result counts and status after typing settles.
+- `Combobox` / `TagsInput`: the default match is case- and accent-insensitive in the active I18n
+  locale ("eclair" finds "Éclair"), static lists filter synchronously instead of after a 100 ms
+  pause, and options whose values differ only by punctuation keep distinct ids.
+- `TagsInput`: removable tags form a toolbar labelled 'Tags' with one tab stop. ArrowLeft at the
+  start of the text steps into the tags, the arrows move between them (mirrored in right-to-left
+  text), and Backspace or Delete removes the focused tag. With `customTags`, Enter adds the typed
+  text instead of the first matching option, and a disabled or read-only field has no remove
+  buttons.
+- `Command`: `aria-expanded` on the search input follows the results, the empty message is plain
+  text announced through a persistent live region that also announces result counts, and
+  `onOpenChange` is called as `onOpenChange(open, details)` before the change and can cancel it
+  (dialog mode).
+- `PhoneInput`: country names, their sort order and the search follow the active I18n locale, and
+  match by name, ISO code or dial code ignoring case and accents. The selected country is
+  highlighted when the picker opens and again when the search clears, and the empty state is
+  announced with result counts through a persistent live region.
+- `Form`: disabled fields (directly, or through a disabled `FormGroup` or `Form`) are left out of
+  the submitted value, `onSubmit`, `ask()` results and `MultiStepForm` payloads, as in a native
+  form. In `InferFormValue`, entries and groups that declare `disabled` become optional keys.
+  `validateField(name)` returns false while the field's async validator is pending; use
+  `validateAsync` to wait for the result.
+- `NumberInput`: now a text input with role `spinbutton` instead of a native number input, so
+  separators follow the `locale` prop (default: the i18n locale) rather than the browser. Typed text
+  is parsed by locale (`1 234,5` in French, Arabic-Indic, Persian and full-width digits in any
+  locale), refused when it cannot be part of a number, and formatted and rounded to `format` on blur
+  and Enter. Only complete numbers are published, so intermediate text such as `-` no longer
+  publishes null.
+- `NumberInput`: `name` moved from the visible input to a hidden input that posts the plain number
+  (`1234.5`) to native forms, with `required`, `disabled` and `form` carried over; an empty or
+  disabled input posts nothing.
+- `NumberInput`: the +/- buttons are out of the tab order (`tabindex="-1"`), point at the input with
+  `aria-controls`, repeat while held, keep focus in the input and step by the same amount as the
+  arrow keys. The mouse wheel never changes the value unless `wheelStep` is set.
+- `PinInput`: spaces, dashes and other separators in typed, pasted and autofilled codes are removed,
+  and digits of other numeral systems become ASCII, without a `pasteTransformer`. Controlled values
+  go through the same cleanup once.
+- `PinInput`: the cells and the input are always left to right, so a code no longer reads reversed
+  in right-to-left documents, and the unlabeled input is named by the localized `oneTimeCode`
+  message.
+- `RadioInput`: the group is one Tab stop (the checked option, else the first enabled one). Arrow
+  keys move to the next enabled option and select it, wrapping, with Left and Right swapped in
+  right-to-left layouts; Home and End jump to the ends. Tabbing in or focusing never changes the
+  selection, arrows with Alt, Ctrl or Meta are left to the browser, and Escape still reaches an
+  enclosing `Dialog`, `Popover` or `ask()`. `onValueChange` is typed `(value: Value | null) => void`
+  and is called with null when the group is cleared; a `bind:` to a variable typed with values no
+  option offers is a type error.
+- `Checkbox` / `CheckboxesInput` / `RadioInput`: Enter no longer toggles or selects, including Enter
+  with a modifier key and a held Enter. Like a native checkbox it continues the form: inside an
+  entasis `Form` it moves to the next field (the last field submits), and inside a plain `<form>` it
+  requests the native submission.
+- `Checkbox` / `CheckboxesInput` / `RadioInput`: the hidden native inputs sit beside the controls
+  instead of inside their buttons, and a required group blocks a native submit while empty. A
+  `Checkbox` or `RadioInput` without a `name` no longer submits a generated name.
+- `RadioInput` / `CheckboxesInput` / `Checkbox`: options are named by their label text and described
+  by their description (`aria-labelledby` and `aria-describedby`) instead of an `aria-label` that
+  repeated the text. A description no longer becomes part of the accessible name; it is exposed
+  through `aria-describedby`, alongside any `aria-describedby` from `inputAttrs` and the `Field`
+  helper and error ids. `aria-required` and `aria-readonly` sit on the radiogroup, and the group
+  only references its label when one is rendered.
+- `Switch`: now a native button, so Space acts once on release without repeating, a disabled switch
+  takes no focus, clicking its label toggles it, and `inputAttrs` is supported. It no longer carries
+  `aria-labelledby`.
+- `RadioInput` / `CheckboxesInput` / `Checkbox` / `Switch`: option rows use logical start/end
+  spacing, so marks sit at the inline start in right-to-left layouts; the `Switch` thumb slides
+  toward the inline end.
+- `Slider`: each thumb is now a visually hidden native `<input type="range">` inside a styled thumb
+  instead of a `button role="slider"`, so VoiceOver and TalkBack adjust gestures work. It also
+  replaces the separate hidden inputs: a named slider submits one value per thumb, an unnamed one
+  submits nothing. The thumb wrapper is a `span` (theme part `thumb`) and the focus ring follows
+  `group-has-[:focus-visible]`.
+- `Toast`: timers pause for several independent reasons at once: the pointer over a stack, keyboard
+  focus (`:focus-visible`) in it, a press or swipe on a toast, and an inactive window. They resume
+  only when none applies. A touch tap is no longer treated as a hover, so it can't leave the stack
+  expanded and paused.
+- `Toast`: the notification region is always rendered and hosts persistent polite and assertive live
+  regions, so announcements work from the first toast. Toasts are announced with their rendered
+  title and description, again when updated, and important toasts are assertive. Toasts created in
+  the same tick are announced together. Each toast is a labelled `role="group"` (named by its title,
+  described by its description) instead of its own `role="status"` or `role="alert"` live region.
+- `Toast`: swiping no longer starts from action buttons, the close button, links or
+  `data-swipe-ignore` elements. Swipeable toasts use `touch-action: pan-y` (sideways swipes) or
+  `pan-x` (vertical swipes) instead of `none`, so the page keeps scrolling across them, and the
+  stack stays expanded and paused while a toast is dragged.
+- `Tooltip`: opens on focus only when the focus ring shows. Focus from a mouse press or a tap, focus
+  returned by a closing dialog or popover, and focus coming back with the window no longer open it.
+- `Tooltip`: `onOpenChange` receives `(open, details)` and runs before the tooltip shows or hides,
+  with a reason (`trigger-hover`, `trigger-focus`, `trigger-press`, `outside-press`, `escape-key`)
+  and `details.cancel()`. It is also an option of the `tooltip()` attachment. A tooltip pushed off
+  the surface by another one is told with a close that cannot be cancelled.
+- `Accordion`: each trigger button sits inside a real heading element (h2 to h6, from
+  `headingLevel`) instead of containing a `role="heading"` div. Panels are `role="region"` labelled
+  by their trigger, and triggers carry `id`, `aria-expanded`, `aria-controls` (while the panel
+  exists) and `data-index`. A new `heading` theme slot styles the wrapper.
+- `Accordion`: arrow-key, Home and End roving between triggers is removed, following the current
+  WAI-ARIA guidance. Tab moves between triggers, and arrow keys no longer block page scrolling or
+  jump into nested accordions.
+- `Accordion`: `onItemOpenChange` runs before the change and receives open-change details in its
+  payload (`{ item, index, open, details }`). `details.reason` is `'trigger-press'` or
+  `'find-in-page'`, and `details.cancel()` keeps the item as it was, in which case `onValueChange`
+  is not called.
+- `Collapsible`: `onOpenChange` receives `(open, details)` and runs before the state changes.
+  Calling `details.cancel()` keeps it as it was. The reason is `'trigger-press'` or
+  `'find-in-page'`. Panel content is wrapped in a bare panel element, and the content slot classes
+  and `data-state` sit on the element inside it.
+- `Collapsible` / `Accordion`: panels animate their height through the shared disclosure panel,
+  which exposes `--disclosure-panel-height`. Duration, delay and easing from the motion slot still
+  apply; the preset's slide offsets and opacity no longer do. The closed panel's `aria-controls`
+  only points at the panel while it exists in the DOM.
+- `Collapsible` / `Accordion`: a disabled item or collapsible is not findable with
+  `hiddenUntilFound`. Its closed content stays under plain `hidden`, so the browser's find-in-page
+  never opens a panel the user cannot close. The closed `peek` variant keeps its clipped text in the
+  accessibility tree (the clip is visual only), while controls below the preview stay inert.
+- `Avatar`: the avatar is one image with one name. The root is `role="img"` named by `alt` (default
+  `name`), the inner `<img>` has an empty `alt` and the initials are `aria-hidden`, so a loading,
+  loaded or failed image reads once. `alt=""` makes the avatar decorative. Prefix and suffix content
+  is presentational to assistive technology, so keep interactive controls outside the avatar. The
+  delay before a loaded image is revealed is now `revealDelay` (the old behaviour).
+- `Meter`: `min` and `max` now set the scale. A segment fills `(value - min) / (max - min)` of the
+  track and values are clamped into the scale, so a bar never passes 100% and the indicator text,
+  legend percentage, `aria-valuenow` and `aria-valuetext` always agree. Before, the bar filled from
+  0 and `aria-valuetext` could contradict `aria-valuenow`.
+- `ProgressCircle`: accepts `min` and `max` instead of a fixed 0-100 range. A progressbar has
+  `aria-valuetext` and a visually hidden text node with the value text, so NVDA reads its name.
+- `Sidebar`: with the sidebar collapsed to icons, a folder's flyout is a disclosure of links rather
+  than a menu. The trigger reports `aria-expanded` and `aria-controls` instead of
+  `aria-haspopup="menu"`, the panel is a named `<nav>` list of links, nested folders become named
+  sub-lists instead of submenu popovers, and no `role="menu"` or `role="menuitem"` is rendered. A
+  row's own `onclick` still runs first and `preventDefault()` keeps the flyout open. Action
+  dropdowns keep real menu semantics.
+- Blocks: the Mega menu and Floating navbar blocks use `NavigationMenu` instead of hand-built
+  popovers, gaining hover switching, an animated shared panel and link presses that close the panel.
+- `Tabbar`: `onValueChange` now receives one payload, `{ value, reason }`, instead of the tab value.
+  `reason` is `user`, or `initial`, `disabled` or `missing` when the tab list selected an enabled
+  tab by itself, matching `Tabs`. Read `value` from the payload. The `TabbarValueChangeReason` and
+  `TabbarValueChangePayload` types are exported.
 
 ### Deprecated
 
@@ -293,12 +766,23 @@ Unreleased section under the new version.
   minor.
 - `Theme`: `lastTooltipClosed` on the theme state is deprecated in favour of `hoverIntent` (the
   shared hover warm-up). It still reads and writes the same close time for one minor.
+- `SelectState`: `selectValue(value)` is replaced by `activate(value, event?)`, which also toggles
+  in a multiple `Select`; `selectValue` stays one minor.
+- `Combobox` / `TagsInput`: `showAllOnFocus` is replaced by `openOnFocus` and kept as an alias for
+  one minor.
+- `Avatar` / `AvatarGroup`: `delay` is a deprecated alias of `revealDelay`.
 
 ### Removed
 
 - `Button`: the undocumented `as` prop on `ButtonPrimitiveProps`, which could render an anchor
   without `href`. Pass `href` to render a link.
 - Internal `useDrag` utility. `Toast` and `ScrollArea` use `createPointerDrag`.
+- `Accordion`: the `accessible` prop. Use `hiddenUntilFound` for find-in-page or `keepMounted` to
+  keep state.
+- `Collapsible`: the `accessible` and `srOnlyContent` props. Use `hiddenUntilFound` or `keepMounted`
+  instead.
+- `Meter`: the `steps` prop, which was accepted but never rendered, along with the `Step` type and
+  the second `S` generic of `MeterProps`. `MultiStepForm` no longer passes it.
 
 ### Fixed
 
@@ -578,6 +1062,130 @@ Unreleased section under the new version.
   collide.
 - `Theme`: turning `transitionOnChange` off after mount no longer leaves a
   `* { transition: none !important }` style in the document head.
+- `Button`: a second click on a loading button no longer falls through to the page beneath. The
+  loading variant no longer sets `pointer-events: none`, so the click lands on the button, is
+  cancelled, and keyboard focus stays on it. The `link` variant no longer underlines on hover while
+  the button is loading or disabled with `focusableWhenDisabled`.
+- `ToggleButtonGroup`: the group element is no longer a Tab stop. Tab lands on the first pressed
+  button (the first enabled one when nothing is pressed), Shift+Tab leaves the group in one step,
+  and a disabled group has no tabbable element. Buttons that are `focusableWhenDisabled` stay in the
+  arrow-key order.
+- `SegmentedControl`: only an arrow, Home or End key press selects. Tabbing in no longer changes the
+  value when the selected item is disabled or no item matches. Alt, Ctrl or Meta with an arrow is
+  left to the browser.
+- `SegmentedControl`: a control with one disabled item no longer hangs the page. `useNavigation`'s
+  mutation observer ignores writes that leave an attribute unchanged, which also protects other
+  navigation lists.
+- `ScrollArea`: horizontal scrolling works in right-to-left layouts, including after a runtime
+  writing-direction change (a `dir` flip on the page or a wrapper, or a locale switch). The thumb
+  starts at the inline start, dragging and track clicks write a negative `scrollLeft`, the
+  scrollbars use logical placement (`end-0`/`start-0`), and each bar is inset by the other's
+  thickness at the corner.
+- `ScrollArea`: the thumb size updates when content grows or shrinks while the area already
+  overflows, and one scroll session causes two state writes instead of one per event. While WebKit
+  rubber-bands past either end, the thumb shrinks (minimum 18px) and stays pinned to that edge
+  instead of leaving its track.
+- `Dialog`: the default close button has an accessible name (Close, translated), and a dialog with
+  no title or description no longer shows a close button when `closable` is false.
+- `Dialog`: horizontal scrollers inside left and right drawers claim the swipe correctly in
+  right-to-left layouts. The drag thumb's touch target no longer overflows the panel edge, which
+  gave side drawers phantom horizontal scroll in right-to-left layouts (and top drawers vertical
+  scroll) and made inner-scroll detection claim body swipes.
+- `Dialog`: a drag no longer dismisses a drawer with `swipeToDismiss={false}` (or
+  `closable={false}`) when its `snapPoints` resolve to no usable point. A snap-point sheet keeps its
+  body scroll lock below the largest point after the opening transition.
+- `Popover`: a modal `Dialog` or confirmation opened from the panel (rendered outside it) no longer
+  closes the popover, which stays open underneath and gets focus back when the dialog closes. A
+  tooltip shown over a control inside a modal popover is no longer made inert, so it can be hovered
+  and read by assistive technology.
+- `Popover`: `closeOnFocusOut={false}` also keeps the popover open when Tab leaves its last control,
+  which previously closed it through the Tab bridge.
+- `Menu`: ArrowLeft (ArrowRight in right-to-left text) closes a first-level submenu of an inline
+  `Menu` and returns focus to its row. A row whose text changes when pressed (Mute becoming Unmute)
+  keeps its element and focus. A stacked (mobile sheet) menu opened from a right-to-left subtree
+  carries that direction, so carets, the back arrow and the arrow keys mirror.
+- `MenuBar`: closing a menu after Tab or a click in another field no longer pulls focus back to the
+  menu's trigger, and arrow-key direction follows a page direction changed at runtime instead of
+  staying cached from first use.
+- `ContextMenu`: a second right-click on the spot a menu is anchored to closes it in real browsers,
+  where the press used to dismiss the menu and the same click reopened it. Opening with Shift+F10 or
+  the ContextMenu key highlights the first row instead of focusing the menu container.
+- `PopupMenu`: an earlier keyboard open that was closed from code or cancelled no longer changes
+  where the next pointer open puts focus.
+- `Tree`: the context menu stays open when a checkbox, radio or `closeOnClick: false` row is
+  pressed.
+- `Select`: Space continues a type-ahead search instead of selecting the highlighted option (typing
+  `united s` reaches United States and the list stays open); typing on a closed trigger picks the
+  matching option like a native select, without opening; the typed text is forgotten when the list
+  closes.
+- `Select`: a list opened from outside (`open` or `defaultOpen`) measures its own item-aligned
+  position each time instead of reusing the previous open's size and scroll, moves focus to the
+  trigger so Escape, arrow keys and clicking away dismiss and drive it, and a touch open no longer
+  leaves the next external open as a dropdown.
+- `TagsInput`: removing a tag with Enter or Space on its remove button keeps keyboard focus in the
+  field instead of dropping it to the page.
+- `Combobox` / `TagsInput`: `aria-invalid` clears when an async error disappears and the list
+  closes.
+- `Form`: `FormFieldRenderer` entries follow later changes of their `errors` property instead of
+  reading it once.
+- `Form`: with an async validator, a form that disables itself while submitting (`disabled` bound to
+  `form.loading`) stops the submit when the validator fails, instead of submitting the rejected
+  value. The first invalid field is focused once loading ends. When a radio group is invalid after a
+  submit, focus goes to its checked option instead of the first one.
+- `MultiStepForm` / `ask()`: the pressed Next, Submit or Confirm button no longer becomes natively
+  disabled while the form submits, so keyboard focus stays on it instead of dropping to the page
+  body.
+- `NumberInput`: the increase and decrease buttons no longer submit a surrounding native form, so
+  pressing Enter in the input submits without changing the value. `inputAttrs.inputmode` overrides
+  the derived keyboard hint.
+- `PinInput`: the cells follow the caret when the input lives inside a shadow root. `onRejectInput`
+  fires when a typed key is refused by the pattern, and formatted autofill such as 123-456 is no
+  longer truncated by the browser before separators are stripped.
+- `Checkbox`: a mixed (indeterminate) checkbox that already holds true turns off when clicked
+  instead of doing nothing.
+- `Slider`: the track group is named by the rendered label whenever there is one, including snippet
+  labels and the contained layout, instead of only for plain-text labels.
+- `Slider`: the thumb focus ring no longer lights every thumb when the slider sits inside an element
+  with the Tailwind class `group`; the thumb is a named group (`group/slider-thumb`). With the first
+  thumb disabled through `thumbDisabled`, the label, the field's focus target and error focus use
+  the first enabled thumb. A read-only range slider with `dragRange` no longer shows the grab cursor
+  or captures presses on the selected range.
+- `Toast`: dismissing the focused toast, or having it pushed past `visibleToasts`, no longer drops
+  focus to the page. Focus moves to the nearest visible toast, else back to the element focused
+  before F6, else to the notification region. Pressing F6 with no toast on screen no longer moves
+  focus into the empty region, and the element F6 left is forgotten once focus moves elsewhere on
+  its own.
+- `Toast`: the `Toaster` `direction` prop was declared but did nothing. It sets `dir` on the
+  notification region.
+- `Toast`: focus on the notification region (where F6 lands) holds every stack's timers until focus
+  moves on. Dismissing a toast with the mouse or touch no longer leaves keyboard-style focus on the
+  region, which kept every later toast from timing out; only keyboard focus holds the region's
+  timers.
+- `Tooltip`: after a real mouse click or tap on a trigger, the shared tooltip surface stopped
+  showing any tooltip until reload. Tapping a trigger on a touch device showed the tooltip through
+  focus and left it open.
+- `Tooltip`: the shared surface reopens for later hovers after it was dismissed with Escape or an
+  outside press, where it used to stay blank for the rest of the page. A pointer left resting on
+  tooltip content no longer keeps the next tooltip open after the first one closed another way, and
+  a click from code on an unfocused trigger no longer blocks the tooltip on later keyboard focus.
+- `Tooltip`: moving between triggers while the previous tooltip is still opening calls `onAfterOpen`
+  once for the new tooltip.
+- `Tabbar` / `Tabs`: with `activateOnFocus={false}`, tabs that have an `href` select on click and on
+  Space (Enter already worked through the anchor click), reporting `onValueChange` with reason
+  `'user'`. Navigation is not prevented.
+- `Collapsible`: the `accessible` and `srOnlyContent` props no longer render closed content visibly.
+  The `peek` variant makes links and controls below its visible preview inert while closed, so Tab
+  never lands on clipped content.
+- `Accordion`: collapsed panels are no longer copied into screen-reader-only text that was read
+  aloud and tabbable. `disabledKey` accepts optional boolean properties and any key of loosely typed
+  items.
+- `Avatar`: a failed image no longer announces both the broken image's alt text and the initials,
+  and an avatar without `src` is announced by its name rather than as its initials. The bindable
+  `loading` flag is no longer read inside the image attachment effect, which could re-run the effect
+  in a loop.
+- `NavigationMenu`: Escape returns focus to the trigger after a pointer-opened panel in browsers
+  that do not focus buttons on click (Safari), and the item list wraps instead of clipping its last
+  items in a narrow container.
 
 ## 0.11.0 — 2026-10-10
 
