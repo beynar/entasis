@@ -289,7 +289,7 @@ The Breadcrumbs component supports full keyboard navigation via the \`useNavigat
 - **Enter/Space**: Activate the focused breadcrumb item
 - **Escape**: Clear focus
 
-Disabled items and items hidden with CSS (for example \`hidden md:flex\`) are automatically skipped during keyboard navigation. The \`<nav>\` element is not a Tab stop of its own: Tab reaches the breadcrumbs through their single roving tab stop. Keys pressed on content you render inside Breadcrumbs that is not an item (a custom \`ellipsis\` button) stay with that content, apart from the arrows and Home/End, which move into the trail.
+Disabled items and items hidden with CSS (a \`display: none\` class, the \`hidden\` attribute or a media query) are automatically skipped during keyboard navigation. The \`<nav>\` element is not a Tab stop of its own: Tab reaches the breadcrumbs through their single roving tab stop. Keys pressed on content you render inside Breadcrumbs that is not an item (a custom \`ellipsis\` button) stay with that content, apart from the arrows and Home/End, which move into the trail.
 
 ## Accessibility
 
