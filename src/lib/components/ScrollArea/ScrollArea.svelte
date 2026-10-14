@@ -5,7 +5,7 @@
 	import { useScrollAreaTheme } from './scrollArea.theme.js';
 	import { caretUpIcon } from '../Icons/caretUp.js';
 	import { caretDownIcon } from '../Icons/caretDown.js';
-	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { getI18nDirection, useI18n } from '$lib/i18n/context.svelte.js';
 	import { presence } from '$lib/utils/stateAttributes.js';
 	import { useDirection } from '$lib/utils/useDirection.svelte.js';
 	import { untrack } from 'svelte';
@@ -45,6 +45,7 @@
 	// The horizontal offset of an RTL viewport is negative. The element's own computed direction
 	// wins (a `dir="ltr"` code block inside an RTL page), the i18n direction covers what a
 	// computed style cannot say.
+	const i18nDirection = getI18nDirection();
 	const resolveDirection = useDirection(
 		() => viewportRef,
 		() => {
@@ -72,6 +73,8 @@
 
 	// A direction change (a locale switch, a `dir` flip) moves no box the observers watch.
 	$effect(() => {
+		// The computed direction answers first, so the i18n context is read here to subscribe.
+		void i18nDirection?.();
 		void resolveDirection();
 		untrack(() => scrollArea.measure());
 	});

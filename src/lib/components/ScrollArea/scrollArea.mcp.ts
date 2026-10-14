@@ -96,67 +96,6 @@ The typed maps \`scrollAreaDataAttributes\` and \`scrollAreaCssVariables\` (from
 </ScrollArea>
 \`\`\`
 
-## Behavior Props
-- **scrollOnEdges**: boolean (default: false) - Enables auto-scroll and up/down indicators when the pointer rests near the viewport edges
-- **scrollFade**: boolean (default: false) - Applies the shared \`scroll-fade\` utility to the scrollable viewport
-
-### Styling Props
-- **class**: string - Additional CSS classes for the root scroll area
-- **theme**: ScrollAreaThemeProps - Custom theme overrides
-
-## Examples
-
-### With Scroll Fade
-\`\`\`svelte
-<ScrollArea class="h-64" scrollFade>
-	{#each items as item}
-		<div>{item}</div>
-	{/each}
-</ScrollArea>
-\`\`\`
-
-### Always Visible Scrollbar
-\`\`\`svelte
-<ScrollArea class="h-64" type="always">
-	Content
-</ScrollArea>
-\`\`\`
-
-### Edge Auto Scroll
-\`\`\`svelte
-<ScrollArea class="h-64" scrollOnEdges>
-	Content
-</ScrollArea>
-\`\`\`
-
-## Notes
-
-- The viewport is the native scroll container.
-- The \`scrollFade\` prop applies the utility to the viewport, not the outer wrapper.
-- Native browser scrollbars are hidden while custom scrollbar thumbs are rendered over the viewport.
-- Keyboard focus is applied only when the viewport overflows.
-
-## Accessibility
-
-- A viewport whose content fits is a plain element: no role, no name, no tab stop.
-- While it overflows, the viewport is a \`group\` named by \`label\` (default 'Scrollable content') with \`tabindex="0"\`, so keyboard users can scroll it (WCAG SCR34).
-- A focused viewport whose content stops overflowing keeps its role, name and \`tabindex="-1"\` until it blurs, so focus never drops to the page.
-- \`viewportRole="presentation"\` (or \`none\`) keeps the viewport transparent even while it overflows; use it when a surrounding listbox or grid owns keyboard scrolling.
-- The custom scrollbars and the edge-scroll arrows are pointer-only and carry \`aria-hidden="true"\`.
-
-## Styling hooks
-
-Data attributes (presence attributes, set to \`""\` while the state holds):
-
-- \`data-scrolling\` on the root, viewport, scrollbars and thumbs: from the first scroll event until the viewport has been idle for 400 ms
-- \`data-has-overflow-x\` / \`data-has-overflow-y\` on the root: the content overflows on that axis
-- \`data-overflow-x-start\`, \`data-overflow-x-end\`, \`data-overflow-y-start\`, \`data-overflow-y-end\` on the root: content is hidden past that edge by more than \`overflowEdgeThreshold\`. The x edges are logical (inline start / end), so in RTL \`start\` is the right edge
-- \`data-orientation\` (\`vertical\` | \`horizontal\`) on the scrollbars and thumbs
-
-CSS variables on the root, in px (0 while the axis does not overflow): \`--scroll-area-overflow-x-start\`, \`--scroll-area-overflow-x-end\`, \`--scroll-area-overflow-y-start\`, \`--scroll-area-overflow-y-end\`. Overscroll (WebKit rubber banding) is not counted as hidden content.
-
-The typed maps \`scrollAreaDataAttributes\` and \`scrollAreaCssVariables\` (from \`entasis/scroll-area\`) list each name with its meaning.
-
 \`\`\`css
 /* Fade the top edge only while content is hidden above. */
 [data-scroll-area]::before {

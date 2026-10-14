@@ -245,6 +245,7 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 	dragX = createPointerDrag({
 		onStart: ({ event, node }) => {
 			// Offset from the pointer to the thumb's inline start edge.
+			this.syncDirection();
 			const rect = node.getBoundingClientRect();
 			this.dragOffset = this.rtl ? rect.right - event.clientX : event.clientX - rect.left;
 			this.isDraggingX = true;
@@ -331,6 +332,14 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 		this.viewportElement.scrollLeft = this.rtl ? -value : value;
 	}
 
+	/** Re-resolves the writing direction; true when it flipped. */
+	private syncDirection() {
+		const rtl = this.direction?.() === 'rtl';
+		if (rtl === this.rtl) return false;
+		this.rtl = rtl;
+		return true;
+	}
+
 	private readScrollOffsets() {
 		const viewport = this.viewportElement;
 		if (!viewport) return;
@@ -345,6 +354,8 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 			this.scrollingTimer = null;
 			this.isScrolling = false;
 		}, SCROLLING_IDLE_MS);
+		// A `dir` flip moves no observed box; the next scroll is the cheapest place to notice it.
+		this.syncDirection();
 		this.readScrollOffsets();
 	};
 
@@ -376,6 +387,7 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 		if (!this.viewportElement || !this.scrollbarXElement) return;
 		if (event.composedPath().some((el) => el instanceof HTMLElement && el.dataset.thumb === ''))
 			return;
+		this.syncDirection();
 		const trackRect = this.scrollbarXElement.getBoundingClientRect();
 		const clickX = this.rtl ? trackRect.right - event.clientX : event.clientX - trackRect.left;
 		const maxThumbPos = Math.max(0, trackRect.width - this.thumbXBaseSize);
@@ -410,8 +422,7 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 		if (!viewport) return;
 		// The direction decides how the horizontal offset reads (negative in RTL), so it is
 		// re-read with every measurement, and the offsets are published again when it flips.
-		const rtl = this.direction?.() === 'rtl';
-		if (rtl !== this.rtl) this.rtl = rtl;
+		this.syncDirection();
 		this.readScrollOffsets();
 		const viewportWidth = viewport.clientWidth;
 		const viewportHeight = viewport.clientHeight;
@@ -483,12 +494,23 @@ export class ScrollArea extends createBindableStateClass<ScrollAreaOptions>() {
 		});
 		const offResize = resizeObserver.reference?.(element);
 
+		// A `dir` flip on the page or any wrapper (a language switcher) resizes nothing and need not
+		// scroll anything; watch the attribute on the way up so the direction is re-read.
+		let dirObserver: MutationObserver | null = null;
+		if (typeof MutationObserver === 'function') {
+			dirObserver = new MutationObserver(this.scheduleMeasure);
+			for (let node: Element | null = element; node; node = node.parentElement) {
+				dirObserver.observe(node, { attributes: true, attributeFilter: ['dir'] });
+			}
+		}
+
 		// The observer's first callback can land before layout has settled; re-read next frame.
 		this.scheduleMeasure();
 
 		return () => {
 			offScroll();
 			offResize?.();
+			dirObserver?.disconnect();
 			this.cancelScheduledMeasure();
 			this.clearScrollingTimer();
 			this.restoreScrollSnap();

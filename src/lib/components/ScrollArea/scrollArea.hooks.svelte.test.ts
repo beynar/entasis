@@ -230,6 +230,37 @@ describe('wheel over a scrollbar', () => {
 	});
 });
 
+describe('wheel over the horizontal scrollbar in RTL', () => {
+	const wheel = (init: WheelEventInit) =>
+		new WheelEvent('wheel', { bubbles: true, cancelable: true, ...init });
+
+	test('mirrors the delta: a negative delta heads for the inline end', async () => {
+		layout.scrollWidth = 800;
+		const { position, scrollTo } = await setup({ dir: 'rtl' });
+		await waitFor(() => expect(track('horizontal')).not.toBeNull());
+
+		// At the inline start only the end-ward wheel can move the viewport.
+		const towardsStart = wheel({ deltaX: 40 });
+		track('horizontal')!.dispatchEvent(towardsStart);
+		expect(towardsStart.defaultPrevented).toBe(false);
+		expect(position.left).toBe(0);
+
+		const towardsEnd = wheel({ deltaX: -40 });
+		track('horizontal')!.dispatchEvent(towardsEnd);
+		expect(towardsEnd.defaultPrevented).toBe(true);
+		expect(position.left).toBe(-40);
+
+		// At the inline end the page gets the end-ward wheel, the start-ward one is still ours.
+		await scrollTo({ left: -600 });
+		const pastEnd = wheel({ deltaX: -40 });
+		track('horizontal')!.dispatchEvent(pastEnd);
+		expect(pastEnd.defaultPrevented).toBe(false);
+		const back = wheel({ deltaX: 40 });
+		track('horizontal')!.dispatchEvent(back);
+		expect(back.defaultPrevented).toBe(true);
+	});
+});
+
 describe('thumb size', () => {
 	test('shrinks when content is appended while the area already overflows', async () => {
 		await setup();
@@ -363,6 +394,27 @@ describe('RTL', () => {
 		expect(position.left).toBeCloseTo(-300, 5);
 	});
 
+	test('picks up a dir flip on a wrapper without a remount', async () => {
+		const { scrollTo } = await horizontal({});
+		const wrapper = root().parentElement!;
+		wrapper.setAttribute('dir', 'rtl');
+		// The attribute observer re-reads the direction on the next frame.
+		await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+		await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+		await scrollTo({ left: -600 });
+		expect(thumb('horizontal')!.style.width).toBe('50px');
+		expect(thumb('horizontal')!.style.transform).toBe('translateX(-150px)');
+	});
+
+	test('a flip is also noticed by the next scroll', async () => {
+		const { scrollTo } = await horizontal({});
+		const wrapper = root().parentElement!;
+		// Hide the flip from the attribute observer by flipping and scrolling in the same task.
+		wrapper.setAttribute('dir', 'rtl');
+		await scrollTo({ left: -600 });
+		expect(thumb('horizontal')!.style.transform).toBe('translateX(-150px)');
+	});
+
 	test('anchors the scrollbars to logical sides', async () => {
 		await horizontal({});
 		expect(track('vertical')!.className).toContain('end-0');
@@ -476,6 +528,56 @@ describe('scroll snapping while dragging', () => {
 		expect(viewport().style.scrollSnapType).toBe('none');
 		await firePointer(handle, 'pointercancel', { clientY: 5 });
 		expect(viewport().style.scrollSnapType).toBe('y mandatory');
+	});
+});
+
+describe('scrollOnEdges arrows', () => {
+	const arrows = () => ({
+		up: document.querySelector(
+			'[data-scroll-area] > div[aria-hidden="true"]:not([data-slot]).top-0'
+		),
+		down: document.querySelector(
+			'[data-scroll-area] > div[aria-hidden="true"]:not([data-slot]).bottom-0'
+		)
+	});
+
+	test('show for the edges that hide content', async () => {
+		const { scrollTo } = await setup({ scrollOnEdges: true });
+		expect(arrows().up).toBeNull();
+		expect(arrows().down).not.toBeNull();
+		await scrollTo({ top: 150 });
+		expect(arrows().up).not.toBeNull();
+		expect(arrows().down).not.toBeNull();
+		await scrollTo({ top: 300 });
+		expect(arrows().down).toBeNull();
+	});
+
+	test('use overflowEdgeThreshold to ignore a small remainder', async () => {
+		const { scrollTo } = await setup({ scrollOnEdges: true, overflowEdgeThreshold: 20 });
+		await scrollTo({ top: 285 });
+		expect(arrows().up).not.toBeNull();
+		expect(arrows().down).toBeNull();
+		await scrollTo({ top: 10 });
+		expect(arrows().up).toBeNull();
+		await scrollTo({ top: 270 });
+		expect(arrows().down).not.toBeNull();
+	});
+});
+
+describe('unmounting during a drag', () => {
+	test('puts the scroll snapping back', async () => {
+		const { unmount } = render(ScrollAreaHooksHarness, { props: { type: 'always' } });
+		await waitFor(() => expect(track('vertical')).not.toBeNull());
+		const scrolled = viewport();
+		scrolled.style.scrollSnapType = 'y mandatory';
+		const handle = thumb('vertical')!;
+		mockRect(track('vertical')!, { x: 0, y: 0, width: 6, height: 200 });
+		mockRect(handle, { x: 0, y: 0, width: 6, height: 50 });
+		await tick();
+		await firePointer(handle, 'pointerdown', { clientY: 5 });
+		expect(scrolled.style.scrollSnapType).toBe('none');
+		unmount();
+		expect(scrolled.style.scrollSnapType).toBe('y mandatory');
 	});
 });
 
