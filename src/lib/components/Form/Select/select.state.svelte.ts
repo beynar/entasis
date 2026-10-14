@@ -100,6 +100,10 @@ export class SelectState {
 		position: { x: number; y: number; minWidth: number };
 		viewport: { width: number; height: number };
 	} | null = null;
+	/** The open session in progress has been set up (opened through `setOpen`, or noticed by the effect). */
+	#sessionStarted = false;
+	/** Focus has been given to the trigger for the open session in progress. */
+	#focusedSession = false;
 	#ids!: ReturnType<typeof createOptionIds<string>>;
 
 	listboxId = $derived.by(() => `${this.id}-listbox`);
@@ -235,6 +239,33 @@ export class SelectState {
 				window.removeEventListener('touchmove', block, listen);
 			};
 		});
+		// A list opened from outside (`open`, `defaultOpen`) never went through `setOpen`: it starts
+		// a fresh session all the same, with no measurement or touch flag left from the last one.
+		// Before the DOM updates, so the panel positions against the clean state.
+		$effect.pre(() => {
+			if (!this.isOpen) {
+				this.#sessionStarted = false;
+				return;
+			}
+			if (this.#sessionStarted) return;
+			this.#sessionStarted = true;
+			this.#alignment = null;
+			this.#touch = false;
+		});
+		// Keys and blur drive the list through the trigger, so an externally opened list takes focus
+		// there, as an open through the trigger does.
+		$effect(() => {
+			if (!this.isOpen || this.#focusedSession) {
+				if (!this.isOpen) this.#focusedSession = false;
+				return;
+			}
+			const trigger = this.triggerEl;
+			if (!trigger) return;
+			this.#focusedSession = true;
+			untrack(() => {
+				if (document.activeElement !== trigger) trigger.focus();
+			});
+		});
 		// A disabled Select has no list.
 		$effect(() => {
 			if (!this.disabled || !this.isOpen) return;
@@ -363,6 +394,7 @@ export class SelectState {
 		if (!requestOpenChange(this.onOpenChange, next, details)) return false;
 		this.#pointerType = null;
 		if (next) {
+			this.#sessionStarted = true;
 			this.#alignment = null;
 			this.#touch = interaction === 'touch';
 			this.isOpen = true;
@@ -373,6 +405,7 @@ export class SelectState {
 			// navigation's open/anchor rule, which also scrolls it into view inside the list.
 		} else {
 			this.isOpen = false;
+			this.#sessionStarted = false;
 			this.#typeahead.reset();
 		}
 		return true;

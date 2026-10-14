@@ -141,7 +141,7 @@ rather than repeating the placeholder.
 ## Notes
 
 - Selection re-focuses the trigger (matches native select behavior); with \`multiple\` the list stays open and focus stays on the trigger
-- Clicking outside closes via trigger blur; option rows prevent mousedown so the click can land
+- Clicking outside closes via trigger blur; option rows prevent mousedown so the click can land. A list opened from outside (\`open\`, \`defaultOpen\`) moves focus to the trigger, so Escape, the arrow keys and clicking away work the same, and it is measured afresh each time it opens
 - A \`<label for>\` pointing at \`id\` names the trigger and focuses it on click
 - The list scrolls (ScrollArea) beyond the viewport when item-aligned, beyond 240px as a dropdown (less when there is less room beside the trigger: the dropdown list is capped by the Popover's \`--available-height\`, so it never runs under an on-screen keyboard or over its trigger); the highlight scrolls into view on keyboard nav
 - While the dropdown is open, the input container carries \`data-popup-side\` (\`bottom\`, \`top\`, or \`none\` when item-aligned) and the panel \`data-side\`, so a theme can flatten the corner where they meet

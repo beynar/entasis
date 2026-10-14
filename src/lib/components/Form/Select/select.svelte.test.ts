@@ -442,6 +442,52 @@ describe('Select open state (SC-8)', () => {
 		expect(onOpenChange).toHaveBeenCalledTimes(1);
 	});
 
+	test('an externally opened list takes focus, so Escape and an outside press close it', async () => {
+		mount();
+		const external = screen.getByRole('button', { name: 'External open' });
+		await fireEvent.click(external);
+		await screen.findByRole('listbox');
+		await waitFor(() => expect(document.activeElement).toBe(trigger()));
+
+		await key('Escape');
+		await waitFor(() => expect(expanded()).toBe('false'));
+		await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull());
+
+		// A second external open starts a new session with focus again; focus leaving closes it.
+		await fireEvent.click(external);
+		await screen.findByRole('listbox');
+		await waitFor(() => expect(document.activeElement).toBe(trigger()));
+		external.focus();
+		await waitFor(() => expect(expanded()).toBe('false'));
+	});
+
+	test('a list open at mount takes focus on the trigger', async () => {
+		mount({ defaultOpen: true });
+		await screen.findByRole('listbox');
+		await waitFor(() => expect(document.activeElement).toBe(trigger()));
+		await key('Escape');
+		await waitFor(() => expect(expanded()).toBe('false'));
+	});
+
+	test('a touch open followed by an external open is item-aligned again', async () => {
+		mount({ defaultValue: 'banana' });
+		const popupSide = () =>
+			document.querySelector('[data-popup-side]')?.getAttribute('data-popup-side');
+
+		trigger().dispatchEvent(
+			new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true })
+		);
+		await fireEvent.click(trigger());
+		await screen.findByRole('listbox');
+		expect(popupSide()).toBe('bottom');
+		await key('Escape');
+		await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull());
+
+		await fireEvent.click(screen.getByRole('button', { name: 'External open' }));
+		await screen.findByRole('listbox');
+		expect(popupSide()).toBe('none');
+	});
+
 	test('the bindable open state follows the list', async () => {
 		mount();
 		expect(screen.getByTestId('open')).toHaveTextContent('false');

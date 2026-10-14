@@ -5,6 +5,7 @@ import Collapsible from './Collapsible/Collapsible.svelte';
 import Command from './Command/Command.svelte';
 import PopoverControls from './Form/PopoverControls.test.svelte';
 import TextInput from './Form/TextInput/TextInput.svelte';
+import Select from './Form/Select/Select.svelte';
 import SegmentedControl from './SegmentedControl/SegmentedControl.svelte';
 import Tabbar from './Tabbar/Tabbar.svelte';
 import ToggleButton from './ToggleButton/ToggleButton.svelte';
@@ -127,5 +128,29 @@ describe('state and event law', () => {
 
 		expect(onValueChange).toHaveBeenCalledOnce();
 		expect(onValueChange).toHaveBeenCalledWith({ value: null, option: null });
+	});
+
+	test('Select applies defaultValue and emits one value change', async () => {
+		const onValueChange = vi.fn();
+		renderInTheme(Select, {
+			label: 'Fruit',
+			items: [
+				{ value: 'apple', label: 'Apple' },
+				{ value: 'banana', label: 'Banana' }
+			],
+			defaultValue: 'apple',
+			onValueChange
+		});
+
+		const trigger = screen.getByRole('combobox', { name: 'Fruit' });
+		expect(trigger).toHaveTextContent('Apple');
+		await fireEvent.click(trigger);
+		await fireEvent.click(await screen.findByRole('option', { name: 'Apple' }));
+		expect(onValueChange).not.toHaveBeenCalled();
+
+		await fireEvent.click(trigger);
+		await fireEvent.click(await screen.findByRole('option', { name: 'Banana' }));
+		expect(onValueChange).toHaveBeenCalledOnce();
+		expect(onValueChange).toHaveBeenCalledWith('banana');
 	});
 });

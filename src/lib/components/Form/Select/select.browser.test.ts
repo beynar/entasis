@@ -98,3 +98,27 @@ test('the listbox is the scroll viewport and holds no tab stop of its own (SC-1c
 	expect(element.getAttribute('tabindex')).toBe('-1');
 	expect(element.querySelector('[role="group"]')).toBeNull();
 });
+
+test('a list opened from outside measures its own session (SC-8)', async () => {
+	await render(SelectHarness, { props: { label: 'Fruit', items, defaultValue: 'item-12' } });
+	const button = trigger().element() as HTMLElement;
+	const external = page.getByRole('button', { name: 'External open' });
+	const selected = () => page.getByRole('option', { name: 'Item 12' }).element();
+
+	await userEvent.click(trigger());
+	await expect.element(page.getByRole('listbox')).toBeVisible();
+	const first = rect(page.getByRole('listbox').element()).height;
+	expect(Math.abs(middle(selected()) - middle(button))).toBeLessThanOrEqual(1);
+	await userEvent.keyboard('{Escape}');
+	await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
+
+	await userEvent.click(external);
+	await expect.element(page.getByRole('listbox')).toBeVisible();
+	await expect.element(trigger()).toHaveFocus();
+	// The new list is sized and scrolled like the first, not left at its natural height.
+	expect(rect(page.getByRole('listbox').element()).height).toBeLessThanOrEqual(first + 1);
+	expect(Math.abs(middle(selected()) - middle(button))).toBeLessThanOrEqual(1);
+
+	await userEvent.keyboard('{Escape}');
+	await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
+});
