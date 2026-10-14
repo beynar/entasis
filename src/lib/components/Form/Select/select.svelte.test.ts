@@ -607,6 +607,57 @@ describe('Select focus and touch screen readers (SC-21)', () => {
 		await waitFor(() => expect(expanded()).toBe('false'));
 	});
 
+	test('a mouse press outside is reported as an outside-press with a mouse interaction', async () => {
+		const onOpenChange = vi.fn();
+		mount({ onOpenChange });
+		await open();
+		onOpenChange.mockClear();
+		await fireEvent.pointerDown(document.body, { pointerType: 'mouse' });
+		await fireEvent.blur(trigger(), { relatedTarget: null });
+		await waitFor(() => expect(expanded()).toBe('false'));
+		expect(onOpenChange).toHaveBeenCalledTimes(1);
+		expect(onOpenChange.mock.calls[0][0]).toBe(false);
+		expect(onOpenChange.mock.calls[0][1]).toMatchObject({
+			reason: 'outside-press',
+			interaction: 'mouse'
+		});
+		expect(onOpenChange.mock.calls[0][1].event.type).toBe('pointerdown');
+	});
+
+	test('a touch press outside reports the touch interaction, and cancel() keeps the list open', async () => {
+		const onOpenChange = vi.fn((open: boolean, details: { cancel(): void }) => {
+			if (!open) details.cancel();
+		});
+		mount({ onOpenChange });
+		await open();
+		await fireEvent.pointerDown(document.body, { pointerType: 'touch' });
+		await fireEvent.blur(trigger(), { relatedTarget: null });
+		expect(onOpenChange.mock.calls.at(-1)![1]).toMatchObject({
+			reason: 'outside-press',
+			interaction: 'touch'
+		});
+		expect(expanded()).toBe('true');
+	});
+
+	test('a press inside the panel, or a Tab after one, stays a focus-out', async () => {
+		const onOpenChange = vi.fn((open: boolean, details: { cancel(): void }) => {
+			if (!open) details.cancel();
+		});
+		mount({ onOpenChange });
+		await open();
+		await fireEvent.pointerDown(option('Banana'), { pointerType: 'mouse' });
+		await fireEvent.blur(trigger(), { relatedTarget: null });
+		expect(onOpenChange.mock.calls.at(-1)![1]).toMatchObject({ reason: 'focus-out' });
+
+		await fireEvent.pointerDown(document.body, { pointerType: 'mouse' });
+		await fireEvent.keyDown(trigger(), { key: 'Tab' });
+		await fireEvent.blur(trigger(), { relatedTarget: null });
+		expect(onOpenChange.mock.calls.at(-1)![1]).toMatchObject({
+			reason: 'focus-out',
+			interaction: 'keyboard'
+		});
+	});
+
 	test('focus leaving the panel for the page closes it, back to the trigger does not', async () => {
 		mount();
 		await open();
