@@ -173,6 +173,37 @@ describe('Tooltip focus (DF-6)', () => {
 	});
 });
 
+describe('Tooltip state that outlives the surface', () => {
+	test('the pointer left on content that went away does not hold the next tooltip open', async () => {
+		showFocusRing();
+		render(TooltipOptionsHarness);
+		const trigger = button('First');
+		await fireEvent.mouseEnter(trigger);
+		await fireEvent.mouseLeave(trigger);
+		await fireEvent.mouseEnter(await screen.findByRole('tooltip'));
+		// Focus leaves the trigger while the pointer is on the content: it goes without a mouseleave.
+		await fireEvent.focusIn(trigger);
+		await fireEvent.focusOut(trigger);
+		await waitFor(() => expect(screen.queryByRole('tooltip')).not.toBeInTheDocument());
+
+		await fireEvent.mouseEnter(trigger);
+		await screen.findByRole('tooltip');
+		await fireEvent.mouseLeave(trigger);
+		await waitFor(() => expect(screen.queryByRole('tooltip')).not.toBeInTheDocument(), {
+			timeout: 1000
+		});
+	});
+
+	test('a click from code on a trigger nobody focused does not keep keyboard focus from the tooltip', async () => {
+		showFocusRing();
+		render(TooltipOptionsHarness);
+		const trigger = button('First');
+		trigger.click();
+		await fireEvent.focusIn(trigger);
+		await screen.findByRole('tooltip');
+	});
+});
+
 describe('Tooltip closeOnClick and disabled (DF-7)', () => {
 	test('a press closes it and hovering in place does not reopen it', async () => {
 		const onOpenChange = vi.fn();
@@ -215,7 +246,7 @@ describe('Tooltip closeOnClick and disabled (DF-7)', () => {
 		showFocusRing();
 		render(TooltipOptionsHarness);
 		const trigger = button('First');
-		await fireEvent.focusIn(trigger);
+		trigger.focus();
 		await screen.findByRole('tooltip');
 		await fireEvent.click(trigger, { detail: 0 });
 		await waitFor(() => expect(screen.queryByRole('tooltip')).not.toBeInTheDocument());

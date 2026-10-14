@@ -248,7 +248,7 @@ interchangeable.
 - Dismissed on mouse leave or blur
 - Brief, read-only content; use \`hoverable={false}\` for content that should never take the pointer
 - Renders with \`role="tooltip"\` and sets \`aria-describedby\` on the trigger while visible (any previous value is restored on hide)
-- Does not block content behind it
+- Does not block content behind it when \`hoverable={false}\`; the default hoverable content captures the pointer so it can be read
 
 ## Notes
 

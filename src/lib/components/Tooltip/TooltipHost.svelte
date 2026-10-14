@@ -17,6 +17,9 @@
 	// its place, resizes to the new content and tells neither tooltip to animate in or out.
 	let handoff = $state(false);
 	let shownFor: HTMLElement | null = null;
+	// Whether the open transition of the tooltip now shown has ended. A handoff in the middle of it
+	// leaves the new tooltip's `onAfterOpen` to that transition's end, so it fires once.
+	let opened = false;
 
 	$effect.pre(() => {
 		const next = theme.tooltip;
@@ -26,15 +29,25 @@
 			// The same trigger refreshing its entry (the `open` state seeding it again) changes nothing.
 			if (moved) handoff = true;
 			else if (!next || !shownFor) handoff = false;
+			if (next && !shownFor) opened = false;
 			shownFor = next?.ref ?? null;
-			// A handed-over tooltip plays no transition of its own, so its lifecycle ends and begins now.
-			if (moved && previous) {
+			// The pointer on the content of a tooltip that is gone is no longer on it.
+			if (previous && previous.ref !== next?.ref) reportTooltipContentHover(previous.ref, false);
+			// A handed-over tooltip plays no transition of its own, so its lifecycle ends and begins now,
+			// unless the one it replaces had not finished opening: then neither of them ever completed,
+			// and the open transition still running delivers the new tooltip's `onAfterOpen`.
+			if (moved && previous && opened) {
 				previous.onAfterClose?.();
 				next.onAfterOpen?.();
 			}
 		});
 		if (next) currentTooltip = next;
 	});
+
+	function handleAfterOpen() {
+		opened = true;
+		currentTooltip?.onAfterOpen?.();
+	}
 
 	function handleAfterClose() {
 		currentTooltip?.onAfterClose?.();
@@ -90,7 +103,7 @@
      the surface both need to, since the wrapper is the box that hugs the surface. -->
 <Popover
 	{id}
-	open={!!theme.tooltip}
+	bind:open={() => !!theme.tooltip, () => {}}
 	ref={currentTooltip?.ref}
 	lockScroll={false}
 	tabBridge={false}
@@ -99,7 +112,7 @@
 	transition={tooltipTransition}
 	closeOnMouseLeave={false}
 	offset={currentTooltip?.offset}
-	onAfterOpen={currentTooltip?.onAfterOpen}
+	onAfterOpen={handleAfterOpen}
 	onAfterClose={handleAfterClose}
 	onOpenChange={handleOpenChange}
 	class="!w-fit !max-w-fit !bg-transparent !p-0 !shadow-none !ring-0"

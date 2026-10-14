@@ -95,6 +95,36 @@ describe('press and shared surface (DF-7)', () => {
 	});
 });
 
+describe('dismissal and the shared surface', () => {
+	test('Escape closes it, and hovering a trigger afterwards shows its tooltip again', async () => {
+		await mount();
+		await userEvent.hover(trigger('First'));
+		await expect.poll(() => surface()?.textContent).toBe('First content');
+		await userEvent.keyboard('{Escape}');
+		await expect.poll(surface).toBeNull();
+
+		await userEvent.hover(trigger('After'));
+		await userEvent.hover(trigger('Second'));
+		await expect.poll(() => surface()?.textContent).toBe('Second content');
+		await userEvent.unhover(trigger('Second'));
+		await expect.poll(surface).toBeNull();
+		await userEvent.hover(trigger('First'));
+		await expect.poll(() => surface()?.textContent).toBe('First content');
+	});
+
+	test('an outside press closes a focus tooltip, and the next hover still shows one', async () => {
+		await mount();
+		element('Before').focus();
+		await tab();
+		await expect.poll(() => surface()?.textContent).toBe('First content');
+		await userEvent.click(trigger('Before'));
+		await expect.poll(surface).toBeNull();
+
+		await userEvent.hover(trigger('Second'));
+		await expect.poll(() => surface()?.textContent).toBe('Second content');
+	});
+});
+
 describe('hoverable content and handoff (TT-1, DF-8)', () => {
 	test('the pointer can travel from the trigger onto the content and read it', async () => {
 		await mount();
@@ -106,6 +136,29 @@ describe('hoverable content and handoff (TT-1, DF-8)', () => {
 		expect(surface()).toBe(content);
 		await userEvent.unhover(content);
 		await expect.poll(surface).toBeNull();
+	});
+
+	test('a handoff during the open transition reports the lifecycle of the new tooltip once', async () => {
+		const slow = { in: { duration: 400 }, out: { duration: 0 } };
+		const events: string[] = [];
+		const record = (name: string) => () => events.push(name);
+		await mount({
+			first: {
+				transition: slow,
+				onAfterOpen: record('first open'),
+				onAfterClose: record('first close')
+			},
+			second: {
+				transition: slow,
+				onAfterOpen: record('second open'),
+				onAfterClose: record('second close')
+			}
+		});
+		await userEvent.hover(trigger('First'));
+		await expect.poll(surface).not.toBeNull();
+		await userEvent.hover(trigger('Second'));
+		await wait(700);
+		expect(events).toEqual(['second open']);
 	});
 
 	test('moving to the next trigger keeps the same surface', async () => {

@@ -51,6 +51,8 @@ export const tooltip = (props: TooltipOptions) => {
 	};
 	const hide = (init: OpenChangeInit) => {
 		clearHideTimer();
+		// The content goes away with the tooltip, without telling the trigger the pointer left it.
+		overContent = false;
 		const ref = refElement;
 		if (!ref || theme.tooltip?.ref !== ref) return;
 		requestTooltipChange(theme, null, init);
@@ -126,8 +128,9 @@ export const tooltip = (props: TooltipOptions) => {
 				press(event);
 			}),
 			// Enter or Space on a focused trigger: a click with no pointer behind it.
+			// A click from code, or from Enter in a form field, reaches a trigger nobody focused.
 			on(ref, 'click', (event) => {
-				if (event.detail === 0) press(event);
+				if (event.detail === 0 && getDeepActiveElement(ref.ownerDocument) === ref) press(event);
 			}),
 			// Keyboard users get the tooltip on focus when the focus ring shows; a click, a tap, focus
 			// the page gave back (a closing dialog) or the window returning do not open it. Screen
