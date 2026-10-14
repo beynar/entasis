@@ -5,6 +5,7 @@ export type {
 	SliderMode,
 	SliderProps,
 	SliderRangeLabelPayload,
+	SliderThumbCollisionBehavior,
 	SliderVariant
 } from './slider.props.js';
 export { SliderState } from './slider.state.svelte.js';

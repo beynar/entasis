@@ -28,6 +28,7 @@
 		onValidate,
 		visible,
 		onValueChange,
+		onValueCommit,
 		color,
 		marks = [],
 		showValue = false,
@@ -39,6 +40,9 @@
 		thumbs,
 		orientation = 'horizontal',
 		minStepsBetweenThumbs = 0,
+		thumbCollisionBehavior = 'none',
+		thumbDisabled,
+		largeStep,
 		dragRange = false,
 		thumbLabels = [],
 		size = 'normal',
@@ -78,11 +82,20 @@
 		get step() {
 			return step;
 		},
+		get largeStep() {
+			return largeStep;
+		},
 		get thumbs() {
 			return thumbs ?? (mode === 'range' ? 2 : undefined);
 		},
 		get minStepsBetweenThumbs() {
 			return minStepsBetweenThumbs;
+		},
+		get thumbCollisionBehavior() {
+			return thumbCollisionBehavior;
+		},
+		get thumbDisabled() {
+			return thumbDisabled;
 		},
 		get orientation() {
 			return orientation;
@@ -91,8 +104,15 @@
 		get disabled(): boolean {
 			return field.disabled;
 		},
+		// Refused edits: the field's effective read-only state, or that of a Form around it.
+		get readOnly(): boolean {
+			return field.readOnly;
+		},
 		get dragRange() {
 			return dragRange;
+		},
+		get onValueCommit() {
+			return onValueCommit;
 		},
 		get focused() {
 			return focused;
@@ -185,7 +205,7 @@
 				? t.maximumValue
 				: t.sliderThumbValue(index + 1);
 	};
-	const setFirstThumb = (node: HTMLButtonElement | null) => {
+	const setFirstThumb = (node: HTMLInputElement | null) => {
 		field.node = node;
 	};
 </script>
@@ -209,10 +229,6 @@
 	{...rest}
 >
 	<div class={classes.root({ orientation: slider.orientationValue, size })}>
-		{#each slider.values as hiddenValue, index (index)}
-			<input type="hidden" name={field.name} value={hiddenValue} disabled={slider.disabled} />
-		{/each}
-
 		<div
 			class={classes.control({
 				orientation: slider.orientationValue,
@@ -224,7 +240,7 @@
 			{#if hasContainedLayout && label}
 				<Slot
 					as="label"
-					attrs={{ for: id }}
+					attrs={{ for: id, id: field.labelId }}
 					render={label}
 					class={classes.containedLabel({
 						size,
@@ -243,9 +259,9 @@
 				{variant}
 				{size}
 				{marks}
-				{groupLabel}
+				{field}
+				groupLabelId={label ? field.labelId : undefined}
 				{getThumbLabel}
-				readOnly={field.readOnly}
 				{t}
 			/>
 

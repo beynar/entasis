@@ -122,6 +122,10 @@ const defaultTrack = cva({
 			true: 'cursor-not-allowed opacity-50',
 			false: 'cursor-pointer'
 		},
+		readOnly: {
+			true: 'cursor-default',
+			false: ''
+		},
 		variant: {
 			default: '',
 			thick: '',
@@ -133,6 +137,7 @@ const defaultTrack = cva({
 		size: 'normal',
 		color: 'neutral',
 		disabled: false,
+		readOnly: false,
 		variant: 'default'
 	},
 	compoundVariants: [
@@ -265,6 +270,10 @@ const defaultThumb = cva({
 			true: 'cursor-not-allowed',
 			false: 'cursor-grab active:cursor-grabbing'
 		},
+		readOnly: {
+			true: 'cursor-default active:cursor-default',
+			false: ''
+		},
 		color: {
 			primary: '',
 			secondary: '',
@@ -285,6 +294,7 @@ const defaultThumb = cva({
 		orientation: 'horizontal',
 		size: 'normal',
 		disabled: false,
+		readOnly: false,
 		color: 'neutral',
 		variant: 'default'
 	}
@@ -306,6 +316,10 @@ const defaultThumbHitbox = cva({
 			true: 'pointer-events-none cursor-not-allowed',
 			false: 'cursor-grab active:cursor-grabbing'
 		},
+		readOnly: {
+			true: 'cursor-default active:cursor-default',
+			false: ''
+		},
 		variant: {
 			default: 'hidden',
 			thick: '',
@@ -316,12 +330,13 @@ const defaultThumbHitbox = cva({
 		orientation: 'horizontal',
 		size: 'normal',
 		disabled: false,
+		readOnly: false,
 		variant: 'default'
 	}
 });
 
 const defaultThumbVisual = cva({
-	base: 'pointer-events-none rounded-full border-2 border-surface bg-current lift-1 ring-offset-surface transition-[box-shadow,transform] group-focus-visible:ring-2 group-focus-visible:ring-focus/50 group-focus-visible:ring-offset-2',
+	base: 'pointer-events-none rounded-full border-2 border-surface bg-current lift-1 ring-offset-surface transition-[box-shadow,transform] group-has-[:focus-visible]:ring-2 group-has-[:focus-visible]:ring-focus/50 group-has-[:focus-visible]:ring-offset-2',
 	variants: {
 		orientation: {
 			horizontal: '',
@@ -371,7 +386,7 @@ const defaultThumbVisual = cva({
 		{
 			variant: 'contained',
 			class:
-				'bg-neutral/45 scale-75 border-0 shadow-none transition-[background-color,transform] duration-normal ease-standard group-focus-visible:scale-100 group-focus-visible:bg-neutral/80'
+				'bg-neutral/45 scale-75 border-0 shadow-none transition-[background-color,transform] duration-normal ease-standard group-has-[:focus-visible]:scale-100 group-has-[:focus-visible]:bg-neutral/80'
 		},
 		{ orientation: 'horizontal', variant: 'contained', size: 'small', class: 'h-5 w-1' },
 		{ orientation: 'horizontal', variant: 'contained', size: 'normal', class: 'h-7 w-1.5' },

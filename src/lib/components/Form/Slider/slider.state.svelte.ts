@@ -5,6 +5,7 @@ import { useDirection } from '$lib/utils/useDirection.svelte.js';
 import { createPointerDrag, type PointerDragPayload } from '$lib/utils/pointerDrag.js';
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
 import type { FieldValue } from '../Field/field.js';
+import type { SliderThumbCollisionBehavior } from './slider.props.js';
 
 export type SliderValue = number | number[];
 export type SliderOrientation = 'horizontal' | 'vertical';
@@ -50,13 +51,19 @@ type SliderStateOptions = {
 	min?: number;
 	max?: number;
 	step?: number;
+	largeStep?: number;
 	thumbs?: number;
 	minStepsBetweenThumbs?: number;
+	thumbCollisionBehavior?: SliderThumbCollisionBehavior;
+	thumbDisabled?: boolean[];
 	orientation?: SliderOrientation;
 	formatValue?: SliderFormatValue;
 	disabled?: boolean;
+	readOnly?: boolean;
 	dragRange?: boolean;
 	focused?: boolean;
+	/** Receives the settled value (scalar or array, like the field value) when an interaction ends. */
+	onValueCommit?: (value: SliderValue) => void;
 };
 
 const DEFAULT_MIN = 0;
@@ -81,12 +88,18 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 	activeThumb = $state<number | null>(null);
 	dragState = $state<SliderDragState | null>(null);
 	private trackNode: HTMLElement | null = null;
-	private thumbNodes = new SvelteMap<number, HTMLButtonElement>();
+	private thumbNodes = new SvelteMap<number, HTMLInputElement>();
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Render-time attachment caches must not update reactive state.
-	private thumbAttachments = new Map<number, Attachment<HTMLButtonElement>>();
+	private thumbAttachments = new Map<number, Attachment<HTMLElement>>();
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Render-time attachment caches must not update reactive state.
+	private thumbInputAttachments = new Map<number, Attachment<HTMLInputElement>>();
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Render-time attachment caches must not update reactive state.
 	private thumbHitboxAttachments = new Map<number, Attachment<HTMLElement>>();
 	private documentHitboxDragCleanup: (() => void) | null = null;
+	// What the value was when the interaction in progress began. The commit compares against it,
+	// so an interaction that ends where it started commits nothing.
+	private dragFrom: number[] | null = null;
+	private inputFrom: number[] | null = null;
 	// Not reactive: `fieldValue` memoizes its array output here (see fieldValue).
 	private arrayFieldValue: number[] | null = null;
 	private trackDrag = createPointerDrag({
@@ -125,11 +138,25 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 			this.thumbCount <= 1 ? requestedDistance : availableDistance / (this.thumbCount - 1);
 		return Math.min(requestedDistance, maxDistance);
 	});
+	/** Amount PageUp, PageDown and Shift+Arrow move a thumb by. */
+	largeStepSize = $derived.by(() => {
+		const largeStep = getFiniteNumber(this.largeStep, 0);
+		return largeStep > 0 ? largeStep : this.stepValue * 10;
+	});
+	collisionBehavior = $derived<SliderThumbCollisionBehavior>(
+		this.thumbCollisionBehavior === 'push' || this.thumbCollisionBehavior === 'swap'
+			? this.thumbCollisionBehavior
+			: 'none'
+	);
 	orientationValue = $derived<SliderOrientation>(
 		this.orientation === 'vertical' ? 'vertical' : 'horizontal'
 	);
 	values = $derived.by(() => this.getNormalizedValues());
 	isRange = $derived(this.values.length > 1);
+	/** Whether any single thumb is disabled on its own. */
+	hasLockedThumb = $derived(this.values.some((_, index) => this.isThumbLocked(index)));
+	/** The selected range moves as a unit only when every thumb is free to move. */
+	canDragRange = $derived(!!this.dragRange && this.isRange && !this.hasLockedThumb);
 	/** The value keeps an array shape (even with one thumb) when it arrived as one or is a range. */
 	isArrayValue = $derived(
 		Array.isArray(this.value) || this.mode === 'range' || this.thumbCount > 1
@@ -188,7 +215,7 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 			offPointerDown();
 			this.cleanupDocumentHitboxDrag();
 			this.trackNode = null;
-			this.endDrag();
+			this.cancelDrag();
 		};
 	};
 
@@ -196,34 +223,58 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 		return this.rangeDrag(node);
 	};
 
+	/** The pointer surface of a thumb: its visual wrapper, which holds the focusable range input. */
 	thumb(index: number) {
 		const cachedAttachment = this.thumbAttachments.get(index);
 		if (cachedAttachment) return cachedAttachment;
 
-		const attachment: Attachment<HTMLButtonElement> = (node) => {
-			const drag = createPointerDrag<HTMLButtonElement>({
-				disabled: () => this.isDisabled(),
+		const attachment: Attachment<HTMLElement> = (node) => {
+			const drag = createPointerDrag<HTMLElement>({
+				disabled: () => this.isThumbDisabled(index),
 				stopPropagation: true,
-				onStart: () => this.startThumbPointerDrag(index, node),
+				onStart: () => this.startThumbHitboxPointerDrag(index),
 				onMove: (payload) => this.updatePointerDrag(payload),
 				onEnd: () => this.endDrag()
 			});
+			const offLocked = this.swallowLockedPress(node, index);
+			const offDrag = drag(node);
+
+			return () => {
+				offLocked();
+				offDrag?.();
+			};
+		};
+
+		this.thumbAttachments.set(index, attachment);
+		return attachment;
+	}
+
+	/** The focus target of a thumb: its visually hidden `<input type="range">`. */
+	thumbInput(index: number) {
+		const cachedAttachment = this.thumbInputAttachments.get(index);
+		if (cachedAttachment) return cachedAttachment;
+
+		const attachment: Attachment<HTMLInputElement> = (node) => {
 			const offFocus = on(node, 'focus', () => this.focusThumb(index));
 			const offBlur = on(node, 'blur', this.onThumbBlur);
-			const offDrag = drag(node);
 			const offKeyDown = on(node, 'keydown', (event) => this.onThumbKeyDown(event, index));
+			// Assistive technology adjusts a range input without key events, through `input`
+			// while it moves and `change` once the adjustment is done.
+			const offInput = on(node, 'input', () => this.onThumbInput(index));
+			const offChange = on(node, 'change', () => this.flushInputCommit());
 			this.thumbNodes.set(index, node);
 
 			return () => {
 				offFocus();
 				offBlur();
-				offDrag?.();
 				offKeyDown();
-				this.thumbNodes.delete(index);
+				offInput();
+				offChange();
+				if (this.thumbNodes.get(index) === node) this.thumbNodes.delete(index);
 			};
 		};
 
-		this.thumbAttachments.set(index, attachment);
+		this.thumbInputAttachments.set(index, attachment);
 		return attachment;
 	}
 
@@ -233,14 +284,19 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 
 		const attachment: Attachment<HTMLElement> = (node) => {
 			const drag = createPointerDrag<HTMLElement>({
-				disabled: () => this.isDisabled(),
+				disabled: () => this.isThumbDisabled(index),
 				stopPropagation: true,
 				onStart: () => this.startThumbHitboxPointerDrag(index),
 				onMove: (payload) => this.updatePointerDrag(payload),
 				onEnd: () => this.endDrag()
 			});
+			const offLocked = this.swallowLockedPress(node, index);
+			const offDrag = drag(node);
 
-			return drag(node);
+			return () => {
+				offLocked();
+				offDrag?.();
+			};
 		};
 
 		this.thumbHitboxAttachments.set(index, attachment);
@@ -341,18 +397,37 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 		};
 	}
 
+	/**
+	 * The range a thumb can move within. A thumb is stopped by the thumbs that block it: its
+	 * neighbours when thumbs stop at each other, and a disabled thumb in every mode. Pushing needs
+	 * room for each thumb it moves along, so its bounds leave that room.
+	 */
 	getThumbBounds(index: number) {
-		const previousValue = this.values[index - 1];
-		const nextValue = this.values[index + 1];
+		const values = this.values;
+		const gap = this.minDistance;
+		const behavior = this.collisionBehavior;
+		const pushes = behavior === 'push';
+		const blocks = (other: number) => behavior === 'none' || this.isThumbLocked(other);
 
-		return {
-			min:
-				typeof previousValue === 'number'
-					? this.normalize(previousValue + this.minDistance)
-					: this.minValue,
-			max:
-				typeof nextValue === 'number' ? this.normalize(nextValue - this.minDistance) : this.maxValue
-		};
+		let below = index - 1;
+		while (below >= 0 && !blocks(below)) below -= 1;
+		let above = index + 1;
+		while (above < values.length && !blocks(above)) above += 1;
+
+		const lower =
+			below < 0
+				? pushes
+					? this.minValue + index * gap
+					: this.minValue
+				: values[below] + (pushes ? index - below : 1) * gap;
+		const upper =
+			above >= values.length
+				? pushes
+					? this.maxValue - (values.length - 1 - index) * gap
+					: this.maxValue
+				: values[above] - (pushes ? above - index : 1) * gap;
+
+		return { min: this.normalize(lower), max: this.normalize(upper) };
 	}
 
 	markPayload(mark: { value: number }) {
@@ -365,10 +440,12 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 		};
 	}
 
+	/** The enabled thumb nearest to `value`, or null when none can move. */
 	getClosestThumbIndex(value: number) {
-		let closestIndex = 0;
+		let closestIndex: number | null = null;
 		let closestDistance = Number.POSITIVE_INFINITY;
 		this.values.forEach((thumbValue, index) => {
+			if (this.isThumbLocked(index)) return;
 			const distance = Math.abs(thumbValue - value);
 			if (distance < closestDistance) {
 				closestIndex = index;
@@ -378,17 +455,45 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 		return closestIndex;
 	}
 
-	setThumbValue(index: number, nextValue: number) {
+	/**
+	 * Moves a thumb toward `nextValue`, the way the collision behavior allows, and returns the
+	 * index the thumb ends at. The index changes only when thumbs swap places.
+	 */
+	setThumbValue(index: number, nextValue: number): number {
+		if (this.readOnly || this.isThumbDisabled(index)) return index;
+		const bounds = this.getThumbBounds(index);
+		if (bounds.min > bounds.max) return index;
+		const gap = this.minDistance;
+		const target = Math.min(bounds.max, Math.max(bounds.min, nextValue));
 		const nextValues = [...this.values];
-		const previousValue = nextValues[index - 1] ?? this.minValue - this.minDistance;
-		const nextThumbValue = nextValues[index + 1] ?? this.maxValue + this.minDistance;
-		const constrainedValue = Math.min(
-			nextThumbValue - this.minDistance,
-			Math.max(previousValue + this.minDistance, nextValue)
-		);
 
-		nextValues[index] = this.normalize(constrainedValue);
-		this.setValues(nextValues);
+		if (this.collisionBehavior === 'swap') {
+			// The thumb is re-inserted among the others where its new value falls, keeping the
+			// minimum distance on both sides. A tie stays where the thumb is.
+			const others = nextValues.filter((_, other) => other !== index);
+			const before = others.filter((other) => other < target).length;
+			const upTo = others.filter((other) => other <= target).length;
+			const position = Math.min(upTo, Math.max(before, index));
+			const lower = position > 0 ? others[position - 1] + gap : this.minValue;
+			const upper = position < others.length ? others[position] - gap : this.maxValue;
+			if (lower > upper) return index;
+			others.splice(position, 0, this.normalize(Math.min(upper, Math.max(lower, target))));
+			if (others.every((value, other) => value === this.values[other])) return index;
+			this.setValues(others);
+			return position;
+		}
+
+		nextValues[index] = this.normalize(target);
+		if (this.collisionBehavior === 'push') {
+			for (let other = index + 1; other < nextValues.length; other += 1) {
+				nextValues[other] = Math.max(nextValues[other], nextValues[other - 1] + gap);
+			}
+			for (let other = index - 1; other >= 0; other -= 1) {
+				nextValues[other] = Math.min(nextValues[other], nextValues[other + 1] - gap);
+			}
+		}
+		this.setValues(nextValues.map((value) => this.normalize(value)));
+		return index;
 	}
 
 	setValues(nextValues: number[]) {
@@ -407,24 +512,36 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 
 	startTrackDrag(pointerValue: number) {
 		const index = this.getClosestThumbIndex(pointerValue);
-		this.setThumbValue(index, pointerValue);
-		this.startThumbDrag(index);
-		return index;
+		if (index === null) return null;
+		this.beginDrag();
+		const thumb = this.setThumbValue(index, pointerValue);
+		this.enterThumbDrag(thumb);
+		return thumb;
 	}
 
 	startThumbDrag(index: number) {
-		this.activeThumb = index;
-		this.dragState = { type: 'thumb', index };
+		this.beginDrag();
+		this.enterThumbDrag(index);
 	}
 
 	startRangeDrag(pointerValue: number) {
 		if (this.values.length <= 1) return false;
+		this.beginDrag();
 		this.dragState = {
 			type: 'range',
 			pointerValue,
 			values: [...this.values]
 		};
 		return true;
+	}
+
+	private beginDrag() {
+		this.dragFrom = [...this.values];
+	}
+
+	private enterThumbDrag(index: number) {
+		this.activeThumb = index;
+		this.dragState = { type: 'thumb', index };
 	}
 
 	moveRange(delta: number) {
@@ -448,19 +565,50 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 			this.moveRange(pointerValue - this.dragState.pointerValue);
 			return true;
 		}
-		this.setThumbValue(this.dragState.index, pointerValue);
+		const index = this.dragState.index;
+		const thumb = this.setThumbValue(index, pointerValue);
+		if (thumb !== index) {
+			// The thumbs swapped places: the drag, the focus and the highlight follow the one moving.
+			this.enterThumbDrag(thumb);
+			this.focusThumbNode(thumb);
+		}
 		return true;
 	}
 
+	/** Ends the drag, release or cancel alike, and commits the value if the drag changed it. */
 	endDrag() {
 		this.dragState = null;
+		const from = this.dragFrom;
+		this.dragFrom = null;
+		if (from) this.commit(from);
+	}
+
+	/** Drops the drag without a commit: the slider went away mid-drag. */
+	private cancelDrag() {
+		this.dragState = null;
+		this.dragFrom = null;
+	}
+
+	/** Reports the settled value, unless the interaction ended where it began. */
+	private commit(from: number[]) {
+		const values = this.values;
+		if (from.length === values.length && from.every((value, index) => value === values[index])) {
+			return;
+		}
+		this.onValueCommit?.(this.isArrayValue ? [...values] : (values[0] ?? this.minValue));
+	}
+
+	private flushInputCommit() {
+		const from = this.inputFrom;
+		this.inputFrom = null;
+		if (from) this.commit(from);
 	}
 
 	private getDirection = useDirection(() => this.trackNode);
 
 	applyThumbKey(index: number, key: string, shiftKey: boolean) {
 		const currentValue = this.values[index] ?? this.minValue;
-		const stepSize = shiftKey ? this.stepValue * 10 : this.stepValue;
+		const stepSize = shiftKey ? this.largeStepSize : this.stepValue;
 		let nextValue: number;
 		// Horizontal arrows follow the writing direction: in RTL, ArrowRight decreases.
 		const rtl = this.orientationValue !== 'vertical' && this.getDirection() === 'rtl';
@@ -472,9 +620,9 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 		} else if (key === decrease || key === 'ArrowDown') {
 			nextValue = currentValue - stepSize;
 		} else if (key === 'PageUp') {
-			nextValue = currentValue + this.stepValue * 10;
+			nextValue = currentValue + this.largeStepSize;
 		} else if (key === 'PageDown') {
-			nextValue = currentValue - this.stepValue * 10;
+			nextValue = currentValue - this.largeStepSize;
 		} else if (key === 'Home') {
 			nextValue = this.minValue;
 		} else if (key === 'End') {
@@ -483,8 +631,9 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 			return false;
 		}
 
-		this.activeThumb = index;
-		this.setThumbValue(index, nextValue);
+		const thumb = this.setThumbValue(index, nextValue);
+		this.activeThumb = thumb;
+		if (thumb !== index) this.focusThumbNode(thumb);
 		return true;
 	}
 
@@ -505,6 +654,23 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 
 	private isDisabled() {
 		return !!this.disabled;
+	}
+
+	/** Whether this thumb alone is disabled (not the whole slider). */
+	isThumbLocked(index: number) {
+		return !!this.thumbDisabled?.[index];
+	}
+
+	/** Whether this thumb cannot be moved: the slider or the thumb itself is disabled. */
+	isThumbDisabled(index: number) {
+		return this.isDisabled() || this.isThumbLocked(index);
+	}
+
+	/** A press on a disabled thumb does nothing, instead of falling through to the track. */
+	private swallowLockedPress(node: HTMLElement, index: number) {
+		return on(node, 'pointerdown', (event) => {
+			if (this.isThumbLocked(index)) event.stopPropagation();
+		});
 	}
 
 	private getPointerValue(event: PointerEvent) {
@@ -541,12 +707,9 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 		const pointerValue = this.getPointerValue(payload.event);
 		if (pointerValue === null) return false;
 
-		this.focusThumbNode(this.startTrackDrag(pointerValue));
-	}
-
-	private startThumbPointerDrag(index: number, node: HTMLButtonElement) {
-		node.focus();
-		this.startThumbDrag(index);
+		const index = this.startTrackDrag(pointerValue);
+		if (index === null) return false;
+		this.focusThumbNode(index);
 	}
 
 	private startThumbHitboxPointerDrag(index: number) {
@@ -555,7 +718,7 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 	}
 
 	private startRangePointerDrag(payload: PointerDragPayload) {
-		if (!this.dragRange || !this.isRange) return false;
+		if (!this.canDragRange) return false;
 
 		const pointerValue = this.getPointerValue(payload.event);
 		if (pointerValue === null) return false;
@@ -582,19 +745,54 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 	}
 
 	private onThumbKeyDown(event: KeyboardEvent, index: number) {
-		if (this.isDisabled()) return;
+		if (this.isThumbDisabled(index)) return;
 
-		if (this.applyThumbKey(index, event.key, event.shiftKey)) {
-			event.preventDefault();
+		const from = [...this.values];
+		if (!this.applyThumbKey(index, event.key, event.shiftKey)) return;
+		event.preventDefault();
+		// Each accepted key is its own interaction; a key during a drag belongs to the drag.
+		if (!this.dragState) this.commit(from);
+	}
+
+	/**
+	 * Assistive technology adjusts the range input directly (a VoiceOver swipe, a TalkBack
+	 * gesture) and sends no key events. The input's value is read as a request: the accepted
+	 * value is written back, so a refused one (read-only, a blocked thumb) leaves the input
+	 * showing what the slider holds.
+	 */
+	private onThumbInput(index: number) {
+		const input = this.thumbNodes.get(index);
+		if (!input) return;
+		const requested = Number(input.value);
+		let thumb = index;
+		if (Number.isFinite(requested) && !this.isThumbDisabled(index)) {
+			this.inputFrom ??= [...this.values];
+			thumb = this.setThumbValue(index, requested);
 		}
+		for (const [other, node] of this.thumbNodes) {
+			const accepted = `${this.values[other] ?? this.minValue}`;
+			if (node.value !== accepted) node.value = accepted;
+		}
+		if (thumb !== index) this.focusThumbNode(thumb);
 	}
 
 	private onThumbBlur = (event: FocusEvent) => {
+		// An adjustment whose `change` never came ends with the focus leaving.
+		this.flushInputCommit();
 		const relatedTarget = event.relatedTarget;
-		if (relatedTarget instanceof Node && this.trackNode?.contains(relatedTarget)) return;
+		if (relatedTarget instanceof Node && this.isInsideTrack(relatedTarget)) return;
 		this.focused = false;
 		this.activeThumb = null;
 	};
+
+	/** Containment that also holds when the slider sits in a shadow root. */
+	private isInsideTrack(node: Node) {
+		for (let current: Node | null = node; current;) {
+			if (current === this.trackNode) return true;
+			current = current.parentNode ?? (current instanceof ShadowRoot ? current.host : null);
+		}
+		return false;
+	}
 
 	private onDocumentPointerDown(event: PointerEvent) {
 		if (event.button !== 0 || this.dragState || this.isDisabled() || !this.trackNode) return;
@@ -616,7 +814,7 @@ export class SliderState extends createBindableStateClass<SliderStateOptions>() 
 		const hitboxes = this.trackNode.querySelectorAll<HTMLElement>('[data-slider-thumb-hitbox]');
 		for (const [index, hitbox] of hitboxes.entries()) {
 			const rect = hitbox.getBoundingClientRect();
-			if (rect.width <= 0 || rect.height <= 0) continue;
+			if (rect.width <= 0 || rect.height <= 0 || this.isThumbLocked(index)) continue;
 			const isInside =
 				event.clientX >= rect.left &&
 				event.clientX <= rect.right &&

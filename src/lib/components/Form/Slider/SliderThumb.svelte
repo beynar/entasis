@@ -15,12 +15,15 @@
 		orientation,
 		disabled,
 		readOnly,
+		required,
+		name,
 		variant,
 		color,
 		size,
 		classes,
 		onRef,
 		attachment,
+		inputAttachment,
 		hitboxAttachment
 	}: {
 		id: string;
@@ -30,12 +33,17 @@
 		orientation: SliderOrientation;
 		disabled?: boolean;
 		readOnly?: boolean;
+		/** A value is required; a range input has no native `required`, so the thumb announces it. */
+		required?: boolean;
+		/** Submitted name of this thumb's range input. */
+		name?: string;
 		variant: SliderVariant;
 		color: Colors;
 		size?: Sizes;
 		classes: SliderClasses;
-		onRef?: (node: HTMLButtonElement | null) => void;
-		attachment: Attachment<HTMLButtonElement>;
+		onRef?: (node: HTMLInputElement | null) => void;
+		attachment: Attachment<HTMLElement>;
+		inputAttachment: Attachment<HTMLInputElement>;
 		hitboxAttachment: Attachment<HTMLElement>;
 	} = $props();
 
@@ -77,7 +85,7 @@
 			: `inset-inline-start: ${containedPosition};`;
 	});
 
-	const registerRef = (node: HTMLButtonElement) => {
+	const registerRef = (node: HTMLInputElement) => {
 		onRef?.(node);
 		return () => onRef?.(null);
 	};
@@ -90,37 +98,55 @@
 	class={classes.thumbHitbox({
 		orientation,
 		disabled,
+		readOnly,
 		variant,
 		size
 	})}
 	style={thumbPositionStyle}
 ></span>
 
-<button
-	{@attach registerRef}
+<span
 	{@attach attachment}
-	{id}
-	type="button"
-	role="slider"
-	data-slider-thumb
-	aria-label={label}
-	aria-describedby={describedBy}
-	aria-orientation={orientation}
-	aria-valuemin={payload.thumbMin}
-	aria-valuemax={payload.thumbMax}
-	aria-valuenow={payload.value}
-	aria-valuetext={payload.formatted}
-	aria-readonly={readOnly || undefined}
-	{disabled}
+	data-slider-thumb-root
+	data-disabled={disabled ? '' : undefined}
+	data-readonly={readOnly ? '' : undefined}
 	class={classes.thumb({
 		orientation,
 		disabled,
+		readOnly,
 		variant,
 		color,
 		size
 	})}
 	style={thumbPositionStyle}
 >
+	<!-- The one focus target. Pointer input goes through the thumb around it; assistive technology
+	     adjusts the range input itself, which is what mobile screen-reader gestures need. -->
+	<!-- aria-required on a slider is ARIA 1.3 (axe accepts it); a range input has no native `required`. -->
+	<!-- svelte-ignore a11y_role_supports_aria_props_implicit -->
+	<input
+		{@attach registerRef}
+		{@attach inputAttachment}
+		{id}
+		{name}
+		type="range"
+		data-slider-thumb
+		class="pointer-events-none absolute inset-0 m-0 size-full opacity-0"
+		aria-label={label}
+		aria-describedby={describedBy}
+		aria-orientation={orientation}
+		aria-valuemin={payload.thumbMin}
+		aria-valuemax={payload.thumbMax}
+		aria-valuenow={payload.value}
+		aria-valuetext={payload.formatted}
+		aria-readonly={readOnly || undefined}
+		aria-required={required || undefined}
+		min={payload.thumbMin}
+		max={payload.thumbMax}
+		step={payload.step}
+		value={payload.value}
+		{disabled}
+	/>
 	<span
 		aria-hidden="true"
 		data-slider-thumb-visual
@@ -131,4 +157,4 @@
 			size
 		})}
 	></span>
-</button>
+</span>

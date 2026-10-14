@@ -23,6 +23,12 @@
 	let brightness = $state<number | null>(30);
 	let rtlRange = $state<number[] | null>([20, 60]);
 	let rtlGlow = $state<number | null>(1.2);
+	let savedVolume = $state<number | null>(30);
+	let commits = $state<string[]>([]);
+	let pushSplit = $state<number[] | null>([20, 45, 70]);
+	let swapWindow = $state<number[] | null>([30, 60]);
+	let lockedBudget = $state<number[] | null>([20, 60]);
+	let steppedLevel = $state<number | null>(20);
 
 	const semanticColors = ['primary', 'secondary', 'success', 'warning', 'danger', 'info'] as const;
 	const sizeLabels = {
@@ -69,6 +75,11 @@
 		'Default, thick, and contained variants',
 		'Vertical orientation',
 		'Draggable selected range',
+		'Commit on release with onValueCommit',
+		'Push or swap thumb collisions',
+		'Per-thumb disabled',
+		'Custom largeStep',
+		'Read-only',
 		'One-element arrays stay arrays',
 		'Right-to-left track mirroring'
 	]}
@@ -173,6 +184,109 @@
 					formatValue={(value) => `$${value}k`}
 					thumbLabels={['Minimum budget', 'Maximum budget']}
 				/>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Commit on release"
+			description="onValueChange fires on every move; onValueCommit fires once when the interaction ends with a different value: on pointer release or cancel, after each key press, and after a screen-reader adjustment."
+			code={`<Slider
+	label="Volume"
+	bind:value={volume}
+	onValueChange={(value) => (changes += 1)}
+	onValueCommit={(value) => save(value)}
+/>`}
+		>
+			<div class="grid w-full max-w-md gap-2">
+				<Slider
+					label="Volume"
+					bind:value={savedVolume}
+					showValue
+					onValueCommit={(value) => (commits = [...commits.slice(-4), `${value}`])}
+				/>
+				<p class="text-neutral/70 text-xs" data-testid="slider-commit-log">
+					Commits: {commits.length ? commits.join(', ') : 'none yet'}
+				</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Large step"
+			description="PageUp, PageDown and Shift+Arrow move by largeStep (ten steps by default), snapped to the step."
+			code={`<Slider label="Level" bind:value={level} min={0} max={100} step={1} largeStep={25} showValue />`}
+		>
+			<div class="w-full max-w-md">
+				<Slider
+					label="Level"
+					bind:value={steppedLevel}
+					min={0}
+					max={100}
+					step={1}
+					largeStep={25}
+					showValue
+				/>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Thumb collisions"
+			description="By default a thumb stops at its neighbour. push moves the neighbours along while there is room; swap lets the thumb pass, and the drag and focus follow it."
+			code={`<Slider label="Split" bind:value={split} thumbs={3} thumbCollisionBehavior="push" showValue />
+<Slider
+	mode="range"
+	label="Window"
+	bind:value={window}
+	thumbCollisionBehavior="swap"
+	showValue
+/>`}
+		>
+			<div class="grid w-full max-w-md gap-6">
+				<Slider
+					label="Split (push)"
+					bind:value={pushSplit}
+					thumbs={3}
+					thumbCollisionBehavior="push"
+					showValue
+				/>
+				<Slider
+					mode="range"
+					label="Window (swap)"
+					bind:value={swapWindow}
+					thumbCollisionBehavior="swap"
+					showValue
+				/>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Disabled thumb"
+			description="A disabled thumb keeps its value but cannot be focused or moved, and it blocks the thumb next to it."
+			code={`<Slider
+	mode="range"
+	label="Budget"
+	bind:value={budget}
+	thumbDisabled={[true, false]}
+	showValue
+/>`}
+		>
+			<div class="w-full max-w-md">
+				<Slider
+					mode="range"
+					label="Budget"
+					bind:value={lockedBudget}
+					thumbDisabled={[true, false]}
+					showValue
+				/>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Read only"
+			description="Read-only thumbs stay focusable and announced, refuse every edit, and the value is still submitted."
+			code={`<Slider label="Level" value={72} readOnly showValue />`}
+		>
+			<div class="w-full max-w-md">
+				<Slider label="Level" value={72} readOnly showValue />
 			</div>
 		</ComponentCard>
 
