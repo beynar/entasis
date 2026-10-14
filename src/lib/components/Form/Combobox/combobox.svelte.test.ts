@@ -403,6 +403,27 @@ describe('Combobox async items', () => {
 		expect(input()).toHaveAttribute('aria-invalid', 'true');
 	});
 
+	test('aria-invalid follows the live error: it clears once the text is emptied and the list closes', async () => {
+		mount({ items: () => Promise.reject(new Error('Boom')) });
+		await type('a');
+		await screen.findByText('Boom');
+		expect(input()).toHaveAttribute('aria-invalid', 'true');
+		await fireEvent.input(input(), { target: { value: '' } });
+		await waitFor(() => expect(screen.queryByText('Boom')).toBeNull());
+		await waitFor(() => expect(input()).toHaveAttribute('aria-invalid', 'false'));
+	});
+
+	test('openOnFocus does not run the items function before the field is focused', async () => {
+		const items = vi.fn(async () => fruits);
+		mount({ items, openOnFocus: true });
+		await new Promise((resolve) => setTimeout(resolve, 300));
+		expect(items).not.toHaveBeenCalled();
+		expect(screen.getByTestId('loading')).toHaveTextContent('false');
+		input().focus();
+		await waitFor(() => expect(items).toHaveBeenCalledTimes(1));
+		expect(items).toHaveBeenCalledWith('', expect.objectContaining({ signal: expect.anything() }));
+	});
+
 	test('an external value change updates the label', async () => {
 		const getValueOption = vi.fn((optionValue: string) => ({
 			value: optionValue,

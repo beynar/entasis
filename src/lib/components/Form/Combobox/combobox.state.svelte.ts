@@ -191,7 +191,8 @@ export class ComboboxController {
 	/** Text shown in a query-less list: every option while the list is open for browsing. */
 	get #showAll() {
 		const open = this.#options.open.get();
-		return this.#options.openOnFocus() || (open && this.#mode === 'browse');
+		// Only an open list shows every option: a closed one must not fetch before any interaction.
+		return open && (this.#mode === 'browse' || this.#options.openOnFocus());
 	}
 
 	get #wantsResults() {
@@ -225,6 +226,11 @@ export class ComboboxController {
 			query
 		};
 	});
+
+	/** The live async error: the input's validity follows it, not the frozen exit snapshot. */
+	get error(): string | null {
+		return this.#error;
+	}
 
 	/** What the list renders: the live results, or the last ones shown while it closes. */
 	get view(): ComboboxView {

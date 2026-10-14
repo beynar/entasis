@@ -221,6 +221,21 @@
 			(button) => tags.includes(button.dataset.tag ?? '')
 		);
 
+	// Remove the tag of a focused remove button and hand focus to its neighbour (the input after
+	// the last one), so the focused button leaving the DOM never drops focus to the body.
+	const removeFocusedTag = (button: HTMLButtonElement) => {
+		const tag = button.dataset.tag;
+		if (tag === undefined) return;
+		const index = chipButtons().indexOf(button);
+		const hadFocus = button.ownerDocument.activeElement === button;
+		removeTag(tag);
+		if (!hadFocus) return;
+		void tick().then(() => {
+			const remaining = chipButtons();
+			(remaining[index] ?? remaining[index - 1] ?? field.node)?.focus();
+		});
+	};
+
 	// The remove buttons are one roving tab stop: arrows move between them, the others are out of
 	// the tab order.
 	const navigation = useNavigation({
@@ -247,13 +262,7 @@
 				if (event.key === 'Backspace' || event.key === 'Delete') {
 					event.preventDefault();
 					event.stopPropagation();
-					const tag = button.dataset.tag;
-					if (tag === undefined) return;
-					removeTag(tag);
-					void tick().then(() => {
-						const remaining = chipButtons();
-						(remaining[index] ?? remaining[index - 1] ?? field.node)?.focus();
-					});
+					removeFocusedTag(button);
 				} else if (event.key === towardInput && index === buttons.length - 1) {
 					event.preventDefault();
 					event.stopPropagation();
@@ -349,7 +358,7 @@
 								type="button"
 								data-tag={tag}
 								aria-label={t.remove(labelFor(tag))}
-								onclick={() => removeTag(tag)}
+								onclick={(event) => removeFocusedTag(event.currentTarget)}
 								onmousedown={(e) => {
 									e.stopPropagation();
 									e.preventDefault();
@@ -407,7 +416,7 @@
 			aria-autocomplete={hasItems ? 'list' : undefined}
 			aria-activedescendant={hasItems ? controller.activeDescendant : undefined}
 			aria-haspopup={hasItems ? 'listbox' : undefined}
-			aria-invalid={hasItems ? controller.view.error !== null : undefined}
+			aria-invalid={hasItems ? controller.error !== null : undefined}
 			autocomplete="off"
 			class={classes.input({ size, disabled: field.disabled })}
 			oninput={(event) => controller.onInput(event)}

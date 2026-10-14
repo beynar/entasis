@@ -276,7 +276,7 @@
 				aria-autocomplete="list"
 				aria-activedescendant={controller.activeDescendant}
 				aria-haspopup="listbox"
-				aria-invalid={controller.view.error !== null}
+				aria-invalid={controller.error !== null}
 				autocomplete="off"
 				class={classes.input({ size, hasValue: field.value !== null, disabled: field.disabled })}
 				class:placeholder:text-neutral={selectedOption && !searchValue}

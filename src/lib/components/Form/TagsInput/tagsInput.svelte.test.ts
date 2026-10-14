@@ -230,6 +230,30 @@ describe('TagsInput tags toolbar', () => {
 		await waitFor(() => expect(document.activeElement).toBe(input()));
 	});
 
+	test('a11y:tags-input.remove-click activating a focused remove button (Enter, Space) keeps focus in the field', async () => {
+		mount({ defaultValue: ['js', 'ts', 'svelte'] });
+		const [, ts] = removeButtons();
+		ts.focus();
+		// Enter and Space on a button arrive as a click on the focused button.
+		await fireEvent.click(ts);
+		expect(value()).toEqual(['js', 'svelte']);
+		await waitFor(() =>
+			expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Remove Svelte' }))
+		);
+		await fireEvent.click(document.activeElement!);
+		await fireEvent.click(screen.getByRole('button', { name: 'Remove JavaScript' }));
+		expect(value()).toEqual([]);
+		await waitFor(() => expect(document.activeElement).toBe(input()));
+	});
+
+	test('a mouse click on a remove button does not take focus', async () => {
+		mount({ defaultValue: ['js', 'ts'] });
+		input().focus();
+		await fireEvent.click(removeButtons()[0]);
+		expect(value()).toEqual(['ts']);
+		expect(document.activeElement).toBe(input());
+	});
+
 	test('Backspace in an empty input removes the last tag', async () => {
 		mount({ defaultValue: ['js', 'ts'] });
 		input().focus();
@@ -297,5 +321,68 @@ describe('TagsInput grouped options', () => {
 			'aria-disabled',
 			'true'
 		);
+	});
+});
+
+describe('TagsInput items wiring', () => {
+	test('an async items function is aborted when stale, and chosen tags are excluded', async () => {
+		const requests: { query?: string; signal: AbortSignal; resolve: () => void }[] = [];
+		const items = (query: string | undefined, { signal }: { signal: AbortSignal }) =>
+			new Promise<typeof techs>((resolve) => {
+				requests.push({
+					query,
+					signal,
+					resolve: () => resolve(techs.filter((tech) => tech.label.includes(query ?? '')))
+				});
+			});
+		mount({ items, defaultValue: ['js'] });
+		await type(input(), 'S');
+		await waitFor(() => expect(requests).toHaveLength(1));
+		await fireEvent.input(input(), { target: { value: 'Sv' } });
+		await waitFor(() => expect(requests).toHaveLength(2));
+		expect(requests[0].signal.aborted).toBe(true);
+		requests[1].resolve();
+		await waitFor(() => expect(optionLabels()).toEqual(['Svelte']));
+		// The chosen tag never comes back as an option.
+		await fireEvent.input(input(), { target: { value: 'J' } });
+		await waitFor(() => expect(requests).toHaveLength(3));
+		requests[2].resolve();
+		await waitFor(() => expect(screen.queryAllByRole('option')).toHaveLength(0));
+	});
+
+	test('async tags keep their label after the options leave the list', async () => {
+		mount({
+			items: async () => techs,
+			getValueOption: (tagValue: string) => techs.find((tech) => tech.value === tagValue)
+		});
+		await type(input(), 'type');
+		await waitFor(() => expect(optionLabels()).toContain('TypeScript'));
+		await fireEvent.click(screen.getByRole('option', { name: 'TypeScript' }));
+		await waitFor(() => expect(value()).toEqual(['ts']));
+		expect(screen.getByRole('button', { name: 'Remove TypeScript' })).toBeInTheDocument();
+	});
+
+	test('onHighlightChange reports the value, the reason and the event', async () => {
+		const onHighlightChange = vi.fn();
+		mount({ onHighlightChange });
+		input().focus();
+		await fireEvent.keyDown(input(), { key: 'ArrowDown' });
+		await waitFor(() =>
+			expect(onHighlightChange).toHaveBeenCalledWith(
+				expect.objectContaining({ value: 'js', reason: 'list' })
+			)
+		);
+		await fireEvent.keyDown(input(), { key: 'ArrowDown' });
+		const payload = onHighlightChange.mock.calls.at(-1)![0];
+		expect(payload).toMatchObject({ value: 'ts', reason: 'keyboard' });
+		expect(payload.event).toBeInstanceOf(KeyboardEvent);
+	});
+
+	test('a controlled open prop opens the list and reports requested changes', async () => {
+		const onOpenChange = vi.fn();
+		mount({ open: true, onOpenChange });
+		await waitFor(() => expect(screen.getByRole('listbox')).toBeInTheDocument());
+		expect(screen.getByTestId('open')).toHaveTextContent('true');
+		expect(input()).toHaveAttribute('aria-expanded', 'true');
 	});
 });

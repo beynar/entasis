@@ -110,10 +110,15 @@ test.describe('component pages', () => {
 // short and overflowing lists, grouped lists with separators, and the empty state of a search.
 /** Wait until the open popup's list overflows and its ScrollArea has laid out the scrollbar. */
 const scrollbarShown = (page: Page) =>
-	// The listbox is inside the scroll area (Select) or is its viewport (Combobox, TagsInput), so
-	// the scrollbar is found from the scroll area that holds the listbox.
+	// The scroll area is inside the listbox (Select) or holds it as its viewport (Combobox,
+	// TagsInput), so the scrollbar is found either way.
 	page
-		.locator('[data-slot="scroll-area"]:has([role="listbox"]) [data-slot="scroll-area-scrollbar"]')
+		.locator(
+			[
+				'[role="listbox"] [data-slot="scroll-area-scrollbar"]',
+				'[data-slot="scroll-area"]:has([role="listbox"]) [data-slot="scroll-area-scrollbar"]'
+			].join(', ')
+		)
 		.first()
 		.waitFor();
 
