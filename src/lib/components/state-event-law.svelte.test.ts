@@ -67,7 +67,7 @@ describe('state and event law', () => {
 
 		await fireEvent.click(screen.getByRole('tab', { name: 'Overview' }));
 		expect(onValueChange).toHaveBeenCalledOnce();
-		expect(onValueChange).toHaveBeenCalledWith('Overview', { reason: 'user' });
+		expect(onValueChange).toHaveBeenCalledWith({ value: 'Overview', reason: 'user' });
 	});
 
 	test('Collapsible applies defaultOpen and emits one disclosure change', async () => {

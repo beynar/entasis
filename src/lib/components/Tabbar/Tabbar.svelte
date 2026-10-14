@@ -63,7 +63,7 @@
 		origin,
 		onFallback: (next, { reason }) => {
 			valueState.value = next;
-			if (reason) onValueChange?.(next, { reason });
+			if (reason) onValueChange?.({ value: next, reason });
 		}
 	});
 	/** Index of the active tab; -1 when no tab is selected. */
@@ -76,7 +76,7 @@
 		if (selectedIndex === index || isTabDisabled(items[index])) return;
 		const next = tabValues[index];
 		valueState.value = next;
-		onValueChange?.(next, { reason: 'user' });
+		onValueChange?.({ value: next, reason: 'user' });
 	};
 
 	type NormalizedTab = {

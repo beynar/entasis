@@ -93,7 +93,7 @@
 							label="Features"
 							items={items.map((feature) => feature.title)}
 							value={active.title}
-							onValueChange={(value) => (chosen = value)}
+							onValueChange={({ value }) => (chosen = value)}
 							orientation="vertical"
 							variant="pill"
 							size={kit.step(1)}

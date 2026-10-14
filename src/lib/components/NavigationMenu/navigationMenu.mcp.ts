@@ -42,7 +42,7 @@ NavigationMenu is site navigation: a \`<nav>\` landmark with a row of links and 
 	];
 </script>
 
-<NavigationMenu {items} bind:value={open} onValueChange={(next, details) => console.log(next, details.reason)} />
+<NavigationMenu {items} bind:value={open} onValueChange={({ value, details }) => console.log(value, details.reason)} />
 \`\`\`
 
 ## Items
@@ -56,7 +56,7 @@ NavigationMenu is site navigation: a \`<nav>\` landmark with a row of links and 
 - **items**: NavigationMenuItem[] (required) - Entries of the bar.
 - **label**: string - Accessible name of the nav landmark. Give it when the page has more than one nav.
 - **value** / **defaultValue**: Value | null - The open panel's \`value\`; \`null\` while all are closed. \`value\` is bindable.
-- **onValueChange**: (value: Value | null, details: OpenChangeDetails) => void - Called before the open panel changes. \`details.reason\` is \`trigger-press\`, \`trigger-hover\`, \`list-navigation\`, \`escape-key\`, \`outside-press\`, \`focus-out\`, \`item-press\`, \`close-press\` or \`trigger-unmount\`; \`details.event\` carries the DOM event; \`details.cancel()\` keeps the current panel. A link press closes every level and calls it once with \`null\`. Not called for the initial state or for changes the parent assigns to \`value\`.
+- **onValueChange**: (payload: { value: Value | null; details: OpenChangeDetails }) => void - Called before the open panel changes with the panel that will be open. \`details.reason\` is \`trigger-press\`, \`trigger-hover\`, \`list-navigation\`, \`escape-key\`, \`outside-press\`, \`focus-out\`, \`item-press\`, \`close-press\` or \`trigger-unmount\`; \`details.event\` carries the DOM event; \`details.cancel()\` keeps the current panel. A link press closes every level and calls it once with \`null\`. Not called for the initial state or for changes the parent assigns to \`value\`.
 - **openOnHover**: boolean (default: true) - Resting the pointer on a trigger opens its panel. Touch never hovers.
 - **delay**: number (default: 50) - Milliseconds before a hovered trigger opens. Switching between triggers while a panel is open is immediate.
 - **closeDelay**: number (default: 100) - Milliseconds the pointer may stay outside the triggers and the panel before a hover-opened panel closes.

@@ -48,7 +48,8 @@ export type NavigationMenuStateOptions<Value extends string> = {
 	/** The raw value: controlled, or the retained uncontrolled one. */
 	value: () => Value | null;
 	setValue: (value: Value | null) => void;
-	onValueChange: () => ((value: Value | null, details: OpenChangeDetails) => void) | undefined;
+	onValueChange: () =>
+		((payload: { value: Value | null; details: OpenChangeDetails }) => void) | undefined;
 	openOnHover: () => boolean;
 	delay: () => number;
 	closeDelay: () => number;
@@ -172,7 +173,7 @@ export function useNavigationMenuState<Value extends string>(
 			return false;
 		}
 		const details = createOpenChangeDetails(init);
-		options.onValueChange()?.(next, details);
+		options.onValueChange()?.({ value: next, details });
 		if (details.isCanceled) return false;
 		const previous = displayValue;
 		const doc = navElement?.ownerDocument ?? document;

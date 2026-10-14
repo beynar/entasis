@@ -16,7 +16,7 @@ describe('Tabbar link tabs with manual activation', () => {
 		await fireEvent.click(screen.getByRole('tab', { name: 'B' }));
 
 		expect(screen.getByRole('tab', { name: 'B' })).toHaveAttribute('aria-selected', 'true');
-		expect(onValueChange).toHaveBeenCalledExactlyOnceWith('B', { reason: 'user' });
+		expect(onValueChange).toHaveBeenCalledExactlyOnceWith({ value: 'B', reason: 'user' });
 	});
 
 	test('Space selects a focused link tab when activateOnFocus is false', async () => {
@@ -28,7 +28,7 @@ describe('Tabbar link tabs with manual activation', () => {
 		await fireEvent.keyDown(tab, { key: ' ' });
 
 		expect(tab).toHaveAttribute('aria-selected', 'true');
-		expect(onValueChange).toHaveBeenCalledExactlyOnceWith('B', { reason: 'user' });
+		expect(onValueChange).toHaveBeenCalledExactlyOnceWith({ value: 'B', reason: 'user' });
 	});
 
 	test('a click reports one change for a link tab when focus already selected it', async () => {
@@ -39,6 +39,6 @@ describe('Tabbar link tabs with manual activation', () => {
 		tab.focus();
 		await fireEvent.click(tab);
 
-		expect(onValueChange).toHaveBeenCalledExactlyOnceWith('B', { reason: 'user' });
+		expect(onValueChange).toHaveBeenCalledExactlyOnceWith({ value: 'B', reason: 'user' });
 	});
 });

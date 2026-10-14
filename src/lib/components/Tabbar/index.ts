@@ -5,7 +5,7 @@ export type {
 	TabAlignment,
 	TabOrientation,
 	TabbarPosition,
-	TabbarValueChangeDetails,
+	TabbarValueChangePayload,
 	TabbarValueChangeReason
 } from './tabbar.props.js';
 export {

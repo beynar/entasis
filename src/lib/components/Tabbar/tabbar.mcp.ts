@@ -28,9 +28,9 @@ The Tabbar component is a flexible navigation component that displays a list of 
   - A value you set is never rewritten; see Selection fallback for what the Tabbar changes by itself
 - **defaultValue**: string - Initial active tab value when value is omitted
 
-- **onValueChange**: (value: string, details: { reason }) => void
-  - Called once per change of the active tab with the new tab's value: a click, an arrow key, Enter or Space, a menu entry, or an automatic fallback (see Selection fallback)
-  - \`details.reason\` (\`TabbarValueChangeReason\`) is \`user\` for a click, key or menu entry, and \`initial\`, \`disabled\` or \`missing\` when the Tabbar selected an enabled tab by itself
+- **onValueChange**: (payload: { value: string; reason }) => void
+  - Called once per change of the active tab with \`{ value, reason }\`, the new tab's value and why it changed: a click, an arrow key, Enter or Space, a menu entry, or an automatic fallback (see Selection fallback)
+  - \`reason\` (\`TabbarValueChangeReason\`) is \`user\` for a click, key or menu entry, and \`initial\`, \`disabled\` or \`missing\` when the Tabbar selected an enabled tab by itself
   - Not called when the current tab is re-selected or when value is changed externally
 - **activateOnFocus**: boolean (default: true)
   - \`true\`: the arrow keys, Home and End select the tab they move to (selection follows focus)

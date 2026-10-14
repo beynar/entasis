@@ -71,7 +71,7 @@
 			items={all}
 			transition={zero}
 			bind:value
-			onValueChange={(next, details) => changes.push({ value: next, reason: details.reason })}
+			onValueChange={({ value, details }) => changes.push({ value, reason: details.reason })}
 			{...menu}
 		/>
 	</div>

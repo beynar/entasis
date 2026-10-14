@@ -262,7 +262,7 @@
 <NavigationMenu
 	{items}
 	bind:value={section}
-	onValueChange={(next, details) => console.log(next, details.reason)}
+	onValueChange={({ value, details }) => console.log(value, details.reason)}
 />`}
 		>
 			<div class="grid min-h-72 w-full content-start gap-4">
@@ -279,7 +279,7 @@
 					items={controlledItems}
 					label="Controlled"
 					bind:value={section}
-					onValueChange={(_next, details) => (lastReason = details.reason)}
+					onValueChange={({ details }) => (lastReason = details.reason)}
 				/>
 			</div>
 		</ComponentCard>

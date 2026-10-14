@@ -4,7 +4,8 @@ export type {
 	NavigationMenuLink,
 	NavigationMenuPanel,
 	NavigationMenuPanelApi,
-	NavigationMenuProps
+	NavigationMenuProps,
+	NavigationMenuValueChangePayload
 } from './navigationMenu.props.js';
 export {
 	navigationMenuCssVariables,

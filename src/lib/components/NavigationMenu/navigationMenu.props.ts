@@ -73,6 +73,14 @@ export type NavigationMenuPanel<Value extends string = string> = {
 export type NavigationMenuItem<Value extends string = string> =
 	({ type: 'link' } & NavigationMenuLink) | NavigationMenuPanel<Value>;
 
+/** Payload of `onValueChange`: the panel the menu is about to show and why. */
+export type NavigationMenuValueChangePayload<Value extends string = string> = {
+	/** The panel that will be open, `null` when every panel closes. */
+	value: Value | null;
+	/** Reason, originating event and `cancel()`. */
+	details: OpenChangeDetails;
+};
+
 export type NavigationMenuProps<Value extends string = string> = WithAttachments<{
 	/** The entries of the bar, in order. */
 	items: NavigationMenuItem<Value>[];
@@ -87,12 +95,12 @@ export type NavigationMenuProps<Value extends string = string> = WithAttachments
 	/**
 	 * Called before the open panel changes: a trigger press, hovering or arrow-keying to another
 	 * trigger, Escape, an outside press, focus leaving, a link press, or the open panel being
-	 * removed. `details.reason` says why, `details.event` carries the DOM event, and
+	 * removed. `details.reason` (in the `{ value, details }` payload) says why, `details.event` carries the DOM event, and
 	 * `details.cancel()` keeps the current panel. Inside the callback `value` still holds the
 	 * previous panel. A link press closes every level and calls this once with `null`. Not called
 	 * for the initial state or for changes the parent assigns to `value`.
 	 */
-	onValueChange?: (value: Value | null, details: OpenChangeDetails) => void;
+	onValueChange?: (payload: NavigationMenuValueChangePayload<Value>) => void;
 	/** Opens a panel when the pointer rests on its trigger. Touch never hovers. @default true */
 	openOnHover?: boolean;
 	/** Milliseconds the pointer rests on a trigger before its panel opens; switching between triggers is immediate. @default 50 */

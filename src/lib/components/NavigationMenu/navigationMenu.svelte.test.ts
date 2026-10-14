@@ -385,7 +385,7 @@ describe('value', () => {
 			props: {
 				items,
 				menu: {
-					onValueChange: (_next: string | null, details: { cancel: () => void }) => details.cancel()
+					onValueChange: ({ details }: { details: { cancel: () => void } }) => details.cancel()
 				}
 			}
 		});

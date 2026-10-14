@@ -88,7 +88,7 @@
 		{ label: 'Reports', href: '#reports' }
 	];
 
-	function handleTabChange(value: string) {
+	function handleTabChange({ value }: { value: string }) {
 		console.log('Tab changed to:', value);
 	}
 
@@ -120,7 +120,7 @@
 	size="${controls.value.size}"
 	variant="${controls.value.variant}"
 	color="${controls.value.color}"
-	onValueChange={(value) => console.log('Tab changed to:', value)}
+	onValueChange={({ value }) => console.log('Tab changed to:', value)}
 />`}
 	>
 		<div class="flex flex-col items-center">
@@ -187,14 +187,14 @@
 		<ComponentCard
 			title="Selection fallback"
 			description="The disabled first tab is skipped by the default selection, and removing the active tab selects its nearest enabled neighbour; the new value is written back to the binding and reported through onValueChange. A value the parent or another control sets is never rewritten: one that names no tab selects no tab and hides the indicator."
-			code={`<Tabbar {items} bind:value onValueChange={(value) => console.log(value)} />`}
+			code={`<Tabbar {items} bind:value onValueChange={({ value }) => console.log(value)} />`}
 		>
 			<div class="flex flex-col items-center gap-3">
 				<Tabbar
 					class="w-fit"
 					items={fallbackTabs}
 					bind:value={fallbackActiveTab}
-					onValueChange={(value) => (fallbackReports = [...fallbackReports, value])}
+					onValueChange={({ value }) => (fallbackReports = [...fallbackReports, value])}
 				/>
 				<div class="flex flex-wrap justify-center gap-2">
 					<Button

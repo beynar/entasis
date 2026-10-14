@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Tabbar from './Tabbar.svelte';
-	import type { TabItem, TabbarValueChangeDetails } from './tabbar.props.js';
+	import type { TabItem, TabbarValueChangePayload } from './tabbar.props.js';
 
 	let {
 		items,
@@ -17,7 +17,7 @@
 		externalValue?: string;
 		/** Renders a second tab list bound to the same value, as a responsive layout would. */
 		mirrorItems?: TabItem[];
-		onValueChange?: (value: string, details: TabbarValueChangeDetails) => void;
+		onValueChange?: (payload: TabbarValueChangePayload) => void;
 		activateOnFocus?: boolean;
 	} = $props();
 

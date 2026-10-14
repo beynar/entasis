@@ -120,7 +120,7 @@
 		controlsPanels
 		fullWidth={tabbar?.fullWidth}
 		label={tabbar?.label}
-		onValueChange={(next, { reason }) => emitChange(tabValues.indexOf(next), reason)}
+		onValueChange={({ value: next, reason }) => emitChange(tabValues.indexOf(next), reason)}
 		activateOnFocus={tabbar?.activateOnFocus}
 		{items}
 		bind:value={() => activeValue, (next) => (valueState.value = next)}

@@ -10,8 +10,12 @@ import type { HTMLAttributes } from 'svelte/elements';
  */
 export type TabbarValueChangeReason = 'user' | 'initial' | 'disabled' | 'missing';
 
-/** Second argument of Tabbar's `onValueChange`. */
-export type TabbarValueChangeDetails = { reason: TabbarValueChangeReason };
+/** Payload of Tabbar's `onValueChange`. */
+export type TabbarValueChangePayload = {
+	/** The new active tab's value. */
+	value: string;
+	reason: TabbarValueChangeReason;
+};
 
 export type TabAlignment = 'start' | 'center' | 'end';
 export type TabOrientation = 'horizontal' | 'vertical';
@@ -112,10 +116,10 @@ export type TabbarProps = WithAttachments<
 		 * entry, or the Tabbar moving the selection to an enabled tab by itself because
 		 * `defaultValue` named no enabled tab or the selected tab was removed or disabled. Not
 		 * called when the current tab is re-selected or when `value` is changed externally. The
-		 * second argument carries the `reason`: `user`, or `initial`, `disabled` or `missing` for a
-		 * selection the Tabbar made by itself.
+		 * payload is `{ value, reason }`: `reason` is `user`, or `initial`, `disabled` or `missing`
+		 * for a selection the Tabbar made by itself.
 		 */
-		onValueChange?: (value: string, details: TabbarValueChangeDetails) => void;
+		onValueChange?: (payload: TabbarValueChangePayload) => void;
 		/**
 		 * Whether moving focus with the arrow keys, Home or End also selects the tab. Set `false`
 		 * for manual activation: the keys only move focus, and Enter or Space (or a click) selects

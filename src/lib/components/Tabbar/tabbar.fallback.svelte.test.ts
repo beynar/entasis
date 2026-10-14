@@ -41,7 +41,7 @@ describe('Tabbar selects an enabled tab', () => {
 
 		expect(selectedTabs()).toEqual([screen.getByRole('tab', { name: 'Overview' })]);
 		expect(bound()).toBe('Overview');
-		expect(onValueChange).toHaveBeenCalledExactlyOnceWith('Overview', { reason: 'initial' });
+		expect(onValueChange).toHaveBeenCalledExactlyOnceWith({ value: 'Overview', reason: 'initial' });
 	});
 
 	test('a value another control sets to no tab is kept: nothing is selected or reported', async () => {
@@ -119,7 +119,7 @@ describe('Tabbar selects an enabled tab', () => {
 
 		expect(selectedTabs()).toEqual([screen.getByRole('tab', { name: 'Settings' })]);
 		expect(bound()).toBe('Settings');
-		expect(onValueChange).toHaveBeenCalledExactlyOnceWith('Settings', { reason: 'missing' });
+		expect(onValueChange).toHaveBeenCalledExactlyOnceWith({ value: 'Settings', reason: 'missing' });
 	});
 
 	test('a click on an object item reports its value', async () => {
@@ -132,7 +132,7 @@ describe('Tabbar selects an enabled tab', () => {
 
 		await fireEvent.click(screen.getByRole('tab', { name: 'Activity' }));
 
-		expect(onValueChange).toHaveBeenCalledExactlyOnceWith('activity', { reason: 'user' });
+		expect(onValueChange).toHaveBeenCalledExactlyOnceWith({ value: 'activity', reason: 'user' });
 	});
 
 	test('hides the indicator when no tab can be selected and shows it again on a selection', async () => {
