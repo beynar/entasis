@@ -18,7 +18,7 @@ const settle = async () => {
 };
 
 describe('single tab stop', () => {
-	test('the group element is not focusable and only the pressed button is a tab stop', async () => {
+	test('a11y:toggle-button-group.single-tab-stop the group element is not focusable and only the pressed button is a tab stop', async () => {
 		await render(Harness, { value: ['italic'] });
 		await settle();
 		expect(group().hasAttribute('tabindex')).toBe(false);

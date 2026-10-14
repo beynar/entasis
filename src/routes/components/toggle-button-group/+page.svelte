@@ -60,7 +60,10 @@
 		'Value is the single pressed-state source',
 		'Optional joined button layout',
 		'Horizontal or vertical orientation with matching arrow keys',
-		'Single tab stop on the pressed button, optional focus looping',
+		{
+			label: 'Single tab stop on the pressed button, optional focus looping',
+			test: 'a11y:toggle-button-group.single-tab-stop'
+		},
 		'onValueChange emits the pressed values',
 		'Composes ToggleButton primitives'
 	]}

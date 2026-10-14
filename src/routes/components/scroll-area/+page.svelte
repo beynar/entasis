@@ -30,7 +30,10 @@
 		'Optional scroll fade via the shared utility',
 		'data-scrolling and overflow-edge attributes and CSS variables for styling',
 		'Right-to-left horizontal scrolling with logical scrollbar placement',
-		'Thumb drags keep focus where it is and pause scroll snapping',
+		{
+			label: 'Thumb drags keep focus where it is and pause scroll snapping',
+			test: 'a11y:scroll-area.thumb-keeps-focus'
+		},
 		{
 			label: 'Keyboard-focusable region only when it overflows (WCAG SCR34)',
 			test: 'a11y:scroll-area.tabbable-on-overflow'

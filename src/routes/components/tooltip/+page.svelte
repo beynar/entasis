@@ -57,7 +57,10 @@
 		'Warm-up shared with hover cards and hover popovers: the next opens at once',
 		'Moving between triggers keeps the surface and animates its size; closeDelay',
 		'Hoverable content (WCAG 1.4.13): the pointer can move onto the tooltip to read it',
-		'Opens on keyboard focus only when the focus ring shows; never from a tap or a click',
+		{
+			label: 'Opens on keyboard focus only when the focus ring shows; never from a tap or a click',
+			test: 'a11y:tooltip.focus-ring-only'
+		},
 		'closeOnClick closes it on press; disabled turns it off',
 		'onOpenChange(open, details) runs before the change and can cancel it'
 	]}

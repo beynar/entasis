@@ -41,7 +41,7 @@ const thumbOf = (orientation: 'vertical' | 'horizontal') =>
 		`[data-slot="scroll-area-thumb"][data-orientation="${orientation}"]`
 	)!;
 
-test('pressing the scrollbar keeps focus in the control that has it', async () => {
+test('a11y:scroll-area.thumb-keeps-focus pressing the scrollbar keeps focus in the control that has it', async () => {
 	await render(ScrollAreaHooksHarness, {
 		props: { type: 'always', items: 30, style: 'width: 200px; height: 100px' }
 	});

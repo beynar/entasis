@@ -37,7 +37,7 @@ describe('focus (DF-6)', () => {
 		await expect.poll(surface).toBeNull();
 	});
 
-	test('focus from a mouse press does not open it', async () => {
+	test('a11y:tooltip.focus-ring-only focus from a mouse press does not open it', async () => {
 		await mount({ first: { hoverable: false } });
 		await userEvent.click(trigger('First'));
 		// The press closed whatever the hover had opened; focus from the press shows no ring.
