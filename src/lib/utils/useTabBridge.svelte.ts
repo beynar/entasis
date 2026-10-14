@@ -5,7 +5,8 @@
 // - Tab past the panel's last control continues after the trigger and closes the panel.
 // - Shift+Tab on the panel's first control returns to the trigger.
 // - When nothing follows the trigger, the engine's Tab is left alone: sending focus back to the
-//   start of the panel would loop for ever.
+//   start of the panel would loop for ever. Inside a modal scope (the trigger is the last control
+//   of a dialog) it wraps to the scope's first control instead, as the scope's own Tab would.
 //
 // The listeners sit on the trigger and on the panel, not on the document, so they run before a
 // surrounding modal scope's document-level Tab handling and after a control's own key handling.
@@ -16,6 +17,7 @@ import {
 	getTabbableAfter,
 	getTabbableElements
 } from './focus.js';
+import { findTrappingScope } from './useFocusScope.svelte.js';
 
 export interface TabBridgeOptions {
 	/** The bridge is live: the panel is open, placed and nothing above it owns Tab. */
@@ -50,10 +52,19 @@ export function useTabBridge(options: TabBridgeOptions) {
 			exclude: panel,
 			boundary: options.boundary ? options.boundary() : undefined
 		});
-		// Nothing follows: let the engine move on, so Tab cannot cycle between the two.
-		if (!next) return;
+		let target = next;
+		if (!target) {
+			// Nothing follows. In a modal scope the page behind is inert, so the engine would leave
+			// the scope: wrap to its first control. Anywhere else the engine moves on, so Tab cannot
+			// cycle between the trigger and the panel.
+			const scope = findTrappingScope(anchor);
+			if (!scope) return;
+			target =
+				getTabbableElements(scope).find((element) => !composedContains(panel, element)) ?? null;
+			if (!target) return;
+		}
 		event.preventDefault();
-		next.focus(FOCUS_VISIBLE);
+		target.focus(FOCUS_VISIBLE);
 		options.onLeave(event);
 	};
 
@@ -74,7 +85,7 @@ export function useTabBridge(options: TabBridgeOptions) {
 		if (!composedContains(panel, active)) return;
 
 		const tabbable = getTabbableElements(panel);
-		const index = tabbable.indexOf(active);
+		const index = active instanceof HTMLElement ? tabbable.indexOf(active) : -1;
 		if (event.shiftKey) {
 			// Back from the first control, or from the panel itself when it holds focus. Anything
 			// else is the engine's to move: an item the list does not know has a control before it.

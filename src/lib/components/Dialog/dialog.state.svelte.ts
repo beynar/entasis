@@ -90,6 +90,8 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 	}
 	/** The details of the last change that was applied, kept until the next one. */
 	lastOpenChange = $state.raw<OpenChangeDetails | null>(null);
+	/** The open state `setOpen` last applied, to tell a change made from outside. */
+	#appliedOpen: boolean | undefined;
 	// Registered in the shared layer stack, which owns Escape / outside-press / close-request
 	// dismissal, open ordering and z-index for every overlay kind.
 	layer = this.theme.layers.register({
@@ -189,6 +191,15 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 	constructor(options: DialogOptions) {
 		super(options);
 		setContext('dialog', this);
+		// Details describe the change `setOpen` made: an open state moved from outside (the bound
+		// `open` prop) leaves none, so a later close does not read the one that opened it.
+		$effect.pre(() => {
+			const open = this.isOpen;
+			untrack(() => {
+				if (this.#appliedOpen !== open) this.lastOpenChange = null;
+				this.#appliedOpen = open;
+			});
+		});
 		if (this.parent) onMount(this.parent.addChild(this));
 		onMount(() => {
 			this.#mounted = true;
@@ -239,6 +250,7 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 			this.#opener = details.trigger ? triggerFocusTarget(details.trigger, details.event) : null;
 		}
 		this.lastOpenChange = details;
+		this.#appliedOpen = nextOpen;
 		this.isOpen = nextOpen;
 		return true;
 	}

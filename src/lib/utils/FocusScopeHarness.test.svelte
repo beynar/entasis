@@ -10,7 +10,12 @@
 	import type { PopoverProps } from '../components/Popover/popover.props.js';
 
 	type Scenario =
-		'stacked' | 'focus-on-close' | 'disabled-opener' | 'popover-focus-on-close' | 'trap';
+		| 'stacked'
+		| 'focus-on-close'
+		| 'disabled-opener'
+		| 'popover-focus-on-close'
+		| 'bound-close'
+		| 'trap';
 
 	let {
 		scenario,
@@ -70,6 +75,17 @@
 			<button type="button">One</button>
 			<button type="button">Two</button>
 			<button type="button">Three</button>
+		</Dialog>
+	{:else if scenario === 'bound-close'}
+		<Dialog
+			bind:open
+			responsive={false}
+			transition={motion}
+			title="Bound"
+			{focusOnClose}
+			trigger={{ content: 'Open bound' }}
+		>
+			<button type="button" onclick={() => (open = false)}>Cancel</button>
 		</Dialog>
 	{:else if scenario === 'focus-on-close'}
 		<button bind:this={target} type="button">Elsewhere</button>

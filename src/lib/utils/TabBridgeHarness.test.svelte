@@ -4,9 +4,21 @@
 	import Theme from '../components/Theme/Theme.svelte';
 	import Dialog from '../components/Dialog/Dialog.svelte';
 	import Popover from '../components/Popover/Popover.svelte';
+	import DateInput from '../components/Form/DateInput/DateInput.svelte';
 
-	let { scenario }: { scenario: 'basic' | 'last' | 'listbox' | 'in-dialog' | 'nested' | 'empty' } =
-		$props();
+	let {
+		scenario
+	}: {
+		scenario:
+			| 'basic'
+			| 'last'
+			| 'listbox'
+			| 'in-dialog'
+			| 'dialog-last'
+			| 'nested'
+			| 'empty'
+			| 'date-input';
+	} = $props();
 	const zero = { in: { duration: 0 }, out: { duration: 0 } };
 </script>
 
@@ -44,6 +56,17 @@
 			<button type="button">Outer last</button>
 		</Popover>
 		<button type="button">After</button>
+	{:else if scenario === 'date-input'}
+		<DateInput />
+		<button type="button">After</button>
+	{:else if scenario === 'dialog-last'}
+		<Dialog defaultOpen responsive={false} transition={zero} title="Settings">
+			<button type="button">Dialog first</button>
+			<Popover transition={zero} trigger={{ content: 'Open popover' }}>
+				<button type="button">First</button>
+				<button type="button">Second</button>
+			</Popover>
+		</Dialog>
 	{:else}
 		<Dialog defaultOpen responsive={false} transition={zero} title="Settings">
 			<button type="button">Dialog first</button>

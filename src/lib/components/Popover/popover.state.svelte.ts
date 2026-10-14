@@ -8,6 +8,7 @@ import type { Placement, VirtualElement } from '@floating-ui/dom';
 import { useScrollLock } from '$lib/utils/useScrollLock.svelte.js';
 import { useFocusScope } from '$lib/utils/useFocusScope.svelte.js';
 import { useTabBridge } from '$lib/utils/useTabBridge.svelte.js';
+import { isTextField } from '$lib/utils/focus.js';
 import { useSafeArea } from '$lib/utils/safeArea.svelte.js';
 import { useHoverAction } from '$lib/utils/useHoverAction.svelte.js';
 import { useOpenLifecycle, type OpenLifecycle } from '$lib/utils/openLifecycle.svelte.js';
@@ -156,6 +157,8 @@ export class PopoverState extends PopoverOptionsBase {
 	openReason = $state<PopoverOpenReason | null>(null);
 	/** The details of the last change that was applied, kept until the next one. */
 	lastOpenChange = $state.raw<OpenChangeDetails | null>(null);
+	/** The open state `setOpen` last applied, to tell a change made from outside. */
+	#appliedOpen: boolean | undefined;
 	/** Whether a finger opened the popover (a programmatic open leaves the last change stale). */
 	get #openedByTouch() {
 		return this.openReason === 'press' && this.lastOpenChange?.interaction === 'touch';
@@ -339,6 +342,15 @@ export class PopoverState extends PopoverOptionsBase {
 		});
 		setContext('popover', this);
 		if (this.parent) onMount(this.parent.addChild(this));
+		// Details describe the change `setOpen` made: an open state moved from outside (the bound
+		// `open` prop) leaves none, so a later close does not read the one that opened it.
+		$effect.pre(() => {
+			const open = this.isOpen;
+			untrack(() => {
+				if (this.#appliedOpen !== open) this.lastOpenChange = null;
+				this.#appliedOpen = open;
+			});
+		});
 		useTabBridge({
 			isActive: () => this.tabBridgeActive,
 			anchor: this.#bridgeAnchor,
@@ -521,13 +533,17 @@ export class PopoverState extends PopoverOptionsBase {
 
 	/**
 	 * The control Tab starts from and returns to: the one that opened the popover, else the focusable
-	 * part of the trigger. `null` without a registered trigger (a popover anchored to a `ref`).
+	 * part of the trigger. `null` without a registered trigger (a popover anchored to a `ref`), and
+	 * for a text field (a date or color input): Tab there moves on to the next field of a form.
 	 */
 	#bridgeAnchor = (): HTMLElement | null => {
 		const trigger = this.triggerReference;
 		if (!trigger || !this.#triggers.has(trigger)) return null;
-		if (this.openReason !== 'programmatic' && this.#opener?.isConnected) return this.#opener;
-		return triggerFocusTarget(trigger);
+		const anchor =
+			this.openReason !== 'programmatic' && this.#opener?.isConnected
+				? this.#opener
+				: triggerFocusTarget(trigger);
+		return anchor && !isTextField(anchor) ? anchor : null;
 	};
 
 	/** The details for a request, filled in from the trigger press it happens during. */
@@ -579,6 +595,7 @@ export class PopoverState extends PopoverOptionsBase {
 						: null;
 		}
 		this.lastOpenChange = details;
+		this.#appliedOpen = nextOpen;
 		this.#committed = nextOpen;
 		this.isOpen = nextOpen;
 		return true;

@@ -90,12 +90,33 @@ const isFocusInside = (node: HTMLElement) => {
 interface ScopeRecord {
 	node: HTMLElement;
 	isActive: () => boolean;
+	/** Whether the scope contains Tab right now. */
+	traps: () => boolean;
 	/** The last element that had focus inside the scope, while it is still usable. */
 	lastFocused: () => HTMLElement | null;
 }
 
 /** Mounted scopes, in the order they last became active (the newest is last). */
 const scopes: ScopeRecord[] = [];
+
+/**
+ * The node of the newest live scope that contains Tab and holds `element` (a modal dialog around a
+ * popover's trigger), or `null`. Lets Tab that has nowhere to go inside a portaled panel wrap
+ * within the modal instead of leaving it.
+ */
+export function findTrappingScope(element: Node): HTMLElement | null {
+	for (let index = scopes.length - 1; index >= 0; index -= 1) {
+		const scope = scopes[index];
+		if (
+			scope.node.isConnected &&
+			scope.isActive() &&
+			scope.traps() &&
+			composedContains(scope.node, element)
+		)
+			return scope.node;
+	}
+	return null;
+}
 
 const usable = (element: HTMLElement | null): element is HTMLElement =>
 	!!element && element.isConnected && !element.closest('[inert]') && isFocusable(element);
@@ -179,7 +200,7 @@ export function useFocusScope(options: FocusScopeOptions) {
 		element.focus({ preventScroll: true });
 	};
 
-	const insideOtherScope = (element: HTMLElement) =>
+	const insideOtherScope = (element: Element) =>
 		scopes.some(
 			(other) => other.node !== node && other.isActive() && composedContains(other.node, element)
 		);
@@ -199,7 +220,7 @@ export function useFocusScope(options: FocusScopeOptions) {
 			node.focus();
 			return;
 		}
-		const index = active ? tabbable.indexOf(active) : -1;
+		const index = active instanceof HTMLElement ? tabbable.indexOf(active) : -1;
 		const edge = event.shiftKey ? tabbable[tabbable.length - 1] : tabbable[0];
 		let next: HTMLElement;
 		if (index >= 0) {
@@ -232,13 +253,15 @@ export function useFocusScope(options: FocusScopeOptions) {
 			initialFocusDone = false;
 			const doc = target.ownerDocument;
 			const active = getDeepActiveElement(doc);
-			returnTarget = active && active !== doc.body ? active : null;
-			lastFocusedInside = active && composedContains(target, active) ? active : null;
+			returnTarget = active instanceof HTMLElement && active !== doc.body ? active : null;
+			lastFocusedInside =
+				active instanceof HTMLElement && composedContains(target, active) ? active : null;
 			if (target.tabIndex < 0) target.tabIndex = -1;
 
 			const record: ScopeRecord = {
 				node: target,
 				isActive: () => options.isActive(),
+				traps: () => options.trap?.() ?? options.isActive(),
 				lastFocused: () => lastFocusedInside
 			};
 			scopes.push(record);

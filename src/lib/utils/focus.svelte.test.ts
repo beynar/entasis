@@ -30,6 +30,18 @@ describe('getDeepActiveElement', () => {
 		expect(getDeepActiveElement(document)).toBe(button);
 	});
 
+	test('is the focused SVG element, not null', () => {
+		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+		const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+		circle.setAttribute('tabindex', '0');
+		svg.append(circle);
+		document.body.append(svg);
+		circle.focus();
+		expect(document.activeElement).toBe(circle);
+		expect(getDeepActiveElement(document)).toBe(circle);
+		svg.remove();
+	});
+
 	test('is the body when nothing is focused', () => {
 		expect(getDeepActiveElement(document)).toBe(document.body);
 	});

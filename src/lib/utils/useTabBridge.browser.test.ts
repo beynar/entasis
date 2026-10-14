@@ -126,4 +126,40 @@ describe('portaled popover tab order (OV-14)', () => {
 		await tab();
 		expect(document.activeElement).toBe(element('After'));
 	});
+
+	test('with the trigger last in a modal dialog, Tab past the panel wraps inside the dialog', async () => {
+		mount('dialog-last');
+		await expect.element(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
+		element('Dialog first').focus();
+		await tab();
+		expect(document.activeElement).toBe(element('Open popover'));
+		await userEvent.keyboard('{Enter}');
+		await expect.element(page.getByRole('button', { name: 'First' })).toBeInTheDocument();
+		await tab();
+		expect(document.activeElement).toBe(element('First'));
+		await tab();
+		expect(document.activeElement).toBe(element('Second'));
+		await tab();
+		// Not <body>, not outside the modal: the dialog's first control (its close button).
+		const dialog = page.getByRole('dialog', { name: 'Settings' }).element();
+		expect(document.activeElement).not.toBe(document.body);
+		expect(dialog.contains(document.activeElement)).toBe(true);
+		expect(document.activeElement).toBe(dialog.querySelector('button'));
+		await expect.element(page.getByRole('button', { name: 'First' })).not.toBeInTheDocument();
+	});
+
+	test('Tab from a date input text field moves on instead of entering the calendar', async () => {
+		mount('date-input');
+		const input = page.getByRole('textbox').first().element() as HTMLElement;
+		input.focus();
+		await userEvent.click(input);
+		await expect.element(page.getByRole('button', { name: /previous month/i })).toBeInTheDocument();
+		expect(document.activeElement).toBe(input);
+		await tab();
+		const panel = page
+			.getByRole('button', { name: /previous month/i })
+			.element()
+			.closest('dialog');
+		expect(panel?.contains(document.activeElement) ?? false).toBe(false);
+	});
 });

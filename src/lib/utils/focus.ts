@@ -42,12 +42,13 @@ export function isTabbable(element: HTMLElement): boolean {
 /**
  * The element that really has focus: `root.activeElement` stops at a shadow host, so this looks
  * inside open shadow roots until it reaches the focused element. Like `activeElement`, it is
- * `<body>` when nothing is focused.
+ * `<body>` when nothing is focused. It is an `Element`, not only an `HTMLElement`: an SVG element
+ * with a `tabindex` takes focus too, and must not read as "nothing is focused".
  */
-export function getDeepActiveElement(root: Document | ShadowRoot = document): HTMLElement | null {
+export function getDeepActiveElement(root: Document | ShadowRoot = document): Element | null {
 	let active: Element | null = root.activeElement;
 	while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
-	return active instanceof HTMLElement ? active : null;
+	return active;
 }
 
 /**

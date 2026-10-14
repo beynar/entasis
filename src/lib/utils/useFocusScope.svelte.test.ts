@@ -93,6 +93,20 @@ describe('useFocusScope · focusOnClose (CX-3b)', () => {
 		expect(document.activeElement).toBe(opener);
 	});
 
+	test('a close through the bound open flag reports no details, not the ones that opened it', async () => {
+		const choose = vi.fn(() => undefined);
+		render(FocusScopeHarness, { props: { scenario: 'bound-close', focusOnClose: choose } });
+		const opener = button('Open bound');
+		opener.focus();
+		await fireEvent.click(opener);
+		await screen.findByRole('dialog', { name: 'Bound' });
+		await fireEvent.click(button('Cancel'));
+		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+		await settled();
+		expect(choose).toHaveBeenCalledWith(null);
+		expect(document.activeElement).toBe(opener);
+	});
+
 	test('Popover takes the same option', async () => {
 		render(FocusScopeHarness, {
 			props: { scenario: 'popover-focus-on-close', popoverFocusOnClose: false }
