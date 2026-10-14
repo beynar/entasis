@@ -92,6 +92,16 @@ describe('Progress text', () => {
 		).toBe('');
 	});
 
+	test('a11y:progress.nvda keeps text inside an indeterminate bar even with showValue and no label', () => {
+		const { getByRole } = render(Progress, { props: { value: null, showValue: true } });
+
+		const bar = getByRole('progressbar');
+		expect(bar.querySelector('[data-slot="progress-value"]')!.textContent).toBe('');
+		expect(bar.querySelector('[role="presentation"].sr-only')).toHaveTextContent(
+			'Indeterminate progress'
+		);
+	});
+
 	test('formats the value with format options and a custom aria text', () => {
 		const { getByRole } = render(Progress, {
 			props: {

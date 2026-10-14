@@ -62,8 +62,8 @@
 		percent: range.percent,
 		status: range.status
 	});
-	// Always present as text, so NVDA reads the bar's name (nvaccess/nvda#13904); hidden unless
-	// `showValue` draws it.
+	// Always present as text, so NVDA reads the bar's name (nvaccess/nvda#13904). The visible
+	// value text covers it, except while indeterminate when that text is empty.
 	const valueText = $derived(aria['aria-valuetext'] ?? range.formatted);
 	const hasLabel = $derived(!!label);
 	const hasHeader = $derived(hasLabel || showValue);
@@ -121,7 +121,7 @@
 			style:width={range.percent === null ? undefined : `${range.percent}%`}
 		></div>
 	</div>
-	{#if !showValue}
+	{#if !showValue || !range.formatted}
 		<span role="presentation" class="sr-only">{valueText}</span>
 	{/if}
 </div>

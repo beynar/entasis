@@ -81,7 +81,7 @@ Use Progress for work that is moving toward completion (uploads, imports, steps)
 
 - The root is \`role="progressbar"\` with \`aria-valuemin\`, \`aria-valuemax\`, \`aria-valuenow\` (the clamped value, omitted while indeterminate) and \`aria-valuetext\` (the formatted value; "Indeterminate progress" from the i18n catalog while indeterminate).
 - A visible \`label\` names the bar through \`aria-labelledby\` and is presentational, so NVDA reads the name; without a label the bar is named from the catalog.
-- The value text is always present as text inside the bar (visually hidden unless \`showValue\`), because NVDA ignores the name of a progressbar with no text content.
+- The value text is always present as text inside the bar (visually hidden unless \`showValue\` draws it; an indeterminate bar has no visible value, so the hidden text stays), because NVDA ignores the name of a progressbar with no text content.
 - The fill's slide animation stops under reduced motion (OS setting or the Theme reduceMotion override).
 
 ## Styling Hooks
