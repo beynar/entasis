@@ -117,6 +117,7 @@
 <!-- A landmark region (not a dialog), always rendered: it hosts the persistent live regions that
      announce toasts, which must exist before the first one. It is empty and click-through while no
      toast shows. `data-live-region` keeps it outside any modal's `inert` sweep. F6 jumps to it. -->
+<!-- svelte-ignore a11y_no_redundant_roles -->
 <section
 	bind:this={toaster.element}
 	tabIndex={-1}

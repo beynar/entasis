@@ -134,14 +134,16 @@
 	// `toast.update` changes a toast that is on screen, from a patch or from a function of its
 	// current options. A toast the user already closed is left alone.
 	let batch = 0;
+	let batchTimer: ReturnType<typeof setInterval> | undefined;
 	const showBatch = () => {
+		clearInterval(batchTimer);
 		batch = 0;
 		toast.info({ id: 'batch', title: 'Processed 0 of 5', duration: 8000, progress: true });
-		const tick = setInterval(() => {
+		batchTimer = setInterval(() => {
 			batch += 1;
 			toast.update('batch', { title: `Processed ${batch} of 5` });
 			if (batch === 5) {
-				clearInterval(tick);
+				clearInterval(batchTimer);
 				toast.update('batch', { color: 'success', title: 'All 5 processed' });
 			}
 		}, 700);

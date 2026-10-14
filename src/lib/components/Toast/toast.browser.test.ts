@@ -54,6 +54,22 @@ test('a mouse click that focuses a toast does not hold its timer', async () => {
 	expect(document.activeElement).toBe(items()[0]);
 });
 
+test('closing the last toast with the mouse leaves no focus hold on the next toast', async () => {
+	await render(Harness, { props: { position: 'bottom-right' } });
+	toast.info({ title: 'One', duration: 60_000 });
+	await expect.poll(() => items().length).toBe(1);
+	await userEvent.click(items()[0].querySelector('button')!);
+	await expect.poll(() => items().length).toBe(0);
+	await userEvent.hover(document.documentElement, { position: { x: 5, y: 5 } });
+	await sleep(100);
+	expect(toaster().regionFocused).toBe(false);
+
+	const next = toast.info({ title: 'Two', duration: 60_000 });
+	await expect.poll(() => items().length).toBe(1);
+	await expect.poll(() => next.timer?.paused).toBe(false);
+	expect(next.timer?.heldBy).toEqual([]);
+});
+
 test('dismissing the focused toast with the keyboard moves focus to the next toast', async () => {
 	await render(Harness, { props: { position: 'bottom-right' } });
 	toast.info({ title: 'Older', duration: false });

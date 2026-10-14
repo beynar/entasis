@@ -178,6 +178,16 @@ type ToasterOptions = Omit<
 const HOVER_REASON = 'hover';
 const FOCUS_REASON = 'focus';
 const SWIPE_REASON = 'swipe';
+
+/** Whether `element` shows keyboard focus; engines without `:focus-visible` count every focus. */
+const isFocusVisible = (element: Element | null) => {
+	if (!element) return false;
+	try {
+		return element.matches(':focus-visible');
+	} catch {
+		return true;
+	}
+};
 const HOLD_REASONS = [WINDOW_INACTIVE_REASON, HOVER_REASON, FOCUS_REASON, SWIPE_REASON];
 
 export class Toaster extends createBindableStateClass<ToasterOptions>() {
@@ -506,14 +516,41 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 		if (active instanceof HTMLElement && active !== region.ownerDocument.body) {
 			if (!region.contains(active)) this.focusOrigin = active;
 		}
-		region.focus({ preventScroll: true });
+		this.focusRegionElement(true);
+	};
+
+	// Set while focus is being sent to the region on behalf of a keyboard user (F6, or the toast
+	// they had focused leaving): that focus holds every stack even where `:focus-visible` is unsure.
+	private keyboardRegionFocus = false;
+
+	/**
+	 * Focuses the region. Only keyboard focus holds the timers: a pointer or touch user whose toast
+	 * left lands on the region too, and must not leave every later toast waiting on it.
+	 */
+	private focusRegionElement = (keyboard: boolean) => {
+		const region = this.element;
+		if (!region) return;
+		this.keyboardRegionFocus = keyboard;
+		try {
+			region.focus({ preventScroll: true });
+			// Already focused: no focus event announces the keyboard user's intent.
+			if (keyboard && region.ownerDocument.activeElement === region) this.holdRegion();
+		} finally {
+			this.keyboardRegionFocus = false;
+		}
+	};
+
+	private holdRegion = () => {
+		if (this.regionFocused) return;
+		this.regionFocused = true;
+		this.syncHolds();
 	};
 
 	/** Focus entered the region element itself: the toasts it holds wait for the user to reach them. */
 	onRegionFocusIn = (event: FocusEvent) => {
-		if (event.target !== this.element || this.regionFocused) return;
-		this.regionFocused = true;
-		this.syncHolds();
+		const region = this.element;
+		if (event.target !== region) return;
+		if (this.keyboardRegionFocus || isFocusVisible(region)) this.holdRegion();
 	};
 
 	/**
@@ -547,6 +584,8 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 		}
 		const stack = this.toastsPerPositions[toast.opts.position] ?? [];
 		const former = stack.indexOf(toast);
+		// Read before the toast leaves: a pointer user's focus is not keyboard focus.
+		const keyboard = isFocusVisible(ownerDocument.activeElement);
 		tick().then(() => {
 			const active = ownerDocument.activeElement;
 			// Focus went somewhere else on its own in the meantime.
@@ -561,8 +600,9 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 				.filter((candidate) => candidate.element?.isConnected)
 				.sort((a, b) => order(a) - order(b) || stack.indexOf(b) - stack.indexOf(a))[0];
 			const origin = this.focusOrigin?.isConnected ? this.focusOrigin : null;
-			const target = next?.element ?? origin ?? this.element;
-			target?.focus({ preventScroll: true });
+			const target = next?.element ?? origin;
+			if (target) target.focus({ preventScroll: true });
+			else this.focusRegionElement(keyboard);
 		});
 	};
 

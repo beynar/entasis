@@ -138,6 +138,19 @@ describe('F6 and the region', () => {
 		outside.remove();
 	});
 
+	test('focus that reaches the region without the keyboard holds nothing', async () => {
+		render(Harness);
+		const shown = toast.info({ title: 'Timed', duration: 5000 });
+		await tick();
+		// jsdom never reports a programmatic focus as `:focus-visible`, as for a pointer user.
+		region().focus();
+		expect(document.activeElement).toBe(region());
+		expect(shown.timer?.heldBy).toEqual([]);
+		// F6 is keyboard intent even while the region already has focus.
+		toaster().focusRegion();
+		expect(shown.timer?.heldBy).toEqual(['focus']);
+	});
+
 	test('moving from the region to a toast keeps the hold', async () => {
 		render(Harness);
 		const shown = toast.info({ title: 'Timed', duration: 5000 });
