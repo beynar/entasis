@@ -117,9 +117,9 @@
 						{size}
 						color={resolvedColor}
 						disabled={link.disabled}
-						label={link.ariaLabel}
+						label={link.iconOnly && typeof link.label === 'string' ? link.label : undefined}
 						prefix={link.prefix}
-						children={link.label}
+						children={link.iconOnly ? undefined : link.label}
 						data-slot="navigation-menu-link"
 						data-selected={presence(link.active)}
 						data-disabled={presence(link.disabled)}

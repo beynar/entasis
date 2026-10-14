@@ -24,8 +24,9 @@
 		{
 			type: 'panel',
 			value: 'menu',
-			label: listIcon,
-			ariaLabel: 'Open navigation',
+			label: 'Open navigation',
+			prefix: listIcon,
+			iconOnly: true,
 			content: [
 				{ label: 'Components', href: '/components' },
 				{ label: 'Blocks', href: '/blocks' },

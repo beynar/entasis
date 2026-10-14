@@ -135,7 +135,7 @@ const defaultNavigationMenuContentList = cva({
 			comfortable: 'gap-xs'
 		},
 		nested: {
-			true: 'pl-md',
+			true: 'ps-md',
 			false: 'min-w-64'
 		}
 	},

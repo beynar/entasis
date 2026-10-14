@@ -46,9 +46,9 @@
 	{size}
 	{color}
 	disabled={item.disabled}
-	label={item.ariaLabel}
+	label={item.iconOnly && typeof item.label === 'string' ? item.label : undefined}
 	prefix={item.prefix}
-	children={item.label}
+	children={item.iconOnly ? undefined : item.label}
 	suffix={caret}
 	expanded={open}
 	controls={menu.hasPanel(item.value) ? menu.panelId(item.value) : undefined}

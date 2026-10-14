@@ -17,8 +17,11 @@ export type NavigationMenuLink = {
 	description?: Slot;
 	/** Content before the label, usually an icon. */
 	prefix?: Slot;
-	/** Accessible name of a top-level link whose label is an icon. Applied as `aria-label`. */
-	ariaLabel?: string;
+	/**
+	 * Paints only `prefix`. The string `label` is then spoken instead of painted, as the accessible
+	 * name of an icon-only top-level link.
+	 */
+	iconOnly?: boolean;
 	/** Marks the link of the current page: renders `aria-current="page"` and the selected look. */
 	active?: boolean;
 	/** The link cannot be followed: it drops its `href`, leaves the tab order and renders `aria-disabled`. */
@@ -49,8 +52,11 @@ export type NavigationMenuPanel<Value extends string = string> = {
 	label: Slot;
 	/** Content before the label, usually an icon. */
 	prefix?: Slot;
-	/** Accessible name of a trigger whose label is an icon. Applied as `aria-label`. */
-	ariaLabel?: string;
+	/**
+	 * Paints only `prefix` (and the caret). The string `label` is then spoken instead of painted, as
+	 * the accessible name of an icon-only trigger.
+	 */
+	iconOnly?: boolean;
 	/** A disabled trigger never opens: it renders `disabled` and `data-disabled`. */
 	disabled?: boolean;
 	/** The panel's body: a list of links, or a snippet that renders anything. */

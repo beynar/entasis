@@ -47,8 +47,8 @@ NavigationMenu is site navigation: a \`<nav>\` landmark with a row of links and 
 
 ## Items
 
-- A **link** (\`type: 'link'\`) is a plain entry of the bar: \`label\`, \`href\`, optional \`prefix\`, \`ariaLabel\` (accessible name for an icon-only label), \`active\` (renders \`aria-current="page"\`), \`disabled\`, \`target\`, \`rel\` and \`onclick\`.
-- A **panel** (\`type: 'panel'\`) is a disclosure button: \`value\` (unique), \`label\`, optional \`prefix\`, \`ariaLabel\` (accessible name for an icon-only label), \`disabled\`, and the body in \`content\`: a list of links (\`label\`, \`href\`, \`description\`, \`prefix\`, \`active\`, \`disabled\`, \`target\`, \`rel\`, \`onclick\`), or a snippet \`{#snippet content({ close })}\` that renders anything. \`items\` adds a nested level under \`content\`: links, and more panels that expand in place.
+- A **link** (\`type: 'link'\`) is a plain entry of the bar: \`label\`, \`href\`, optional \`prefix\`, \`iconOnly\` (paint only the prefix; the string label becomes the accessible name), \`active\` (renders \`aria-current="page"\`), \`disabled\`, \`target\`, \`rel\` and \`onclick\`.
+- A **panel** (\`type: 'panel'\`) is a disclosure button: \`value\` (unique), \`label\`, optional \`prefix\`, \`iconOnly\` (paint only the prefix; the string label becomes the accessible name), \`disabled\`, and the body in \`content\`: a list of links (\`label\`, \`href\`, \`description\`, \`prefix\`, \`active\`, \`disabled\`, \`target\`, \`rel\`, \`onclick\`), or a snippet \`{#snippet content({ close })}\` that renders anything. \`items\` adds a nested level under \`content\`: links, and more panels that expand in place.
 - \`Value\` is generic: \`NavigationMenuItem<'product' | 'company'>\` types \`value\`, \`defaultValue\` and \`onValueChange\`.
 
 ## Props

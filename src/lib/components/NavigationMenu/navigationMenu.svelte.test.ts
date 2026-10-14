@@ -328,6 +328,31 @@ describe('closing', () => {
 		expect(trigger('Inner')).toHaveAttribute('aria-expanded', 'false');
 	});
 
+	test('a nested level is indented with a logical inline-start padding', async () => {
+		const items: NavigationMenuItem<string>[] = [
+			{
+				type: 'panel',
+				value: 'outer',
+				label: 'Outer',
+				content: [{ label: 'Top link', href: '#top' }],
+				items: [
+					{
+						type: 'panel',
+						value: 'inner',
+						label: 'Inner',
+						content: [{ label: 'Deep link', href: '#deep' }]
+					}
+				]
+			}
+		];
+		await mount({ items });
+		await open('Outer');
+		await fireEvent.click(trigger('Inner'));
+		const nested = link('Deep link').closest('ul');
+		expect(nested).toHaveClass('ps-md');
+		expect(nested).not.toHaveClass('pl-md');
+	});
+
 	test('a snippet panel receives close()', async () => {
 		const { changes } = await mount({ withSnippet: true });
 		await open('Rich');
@@ -401,6 +426,36 @@ describe('value', () => {
 		await tick();
 		await waitFor(() => expect(changes.at(-1)).toEqual({ value: null, reason: 'trigger-unmount' }));
 		expect(screen.getByRole('button', { name: 'B' })).toHaveAttribute('aria-expanded', 'false');
+	});
+});
+
+describe('iconOnly', () => {
+	test('the string label names an icon-only link and trigger without painting', async () => {
+		const items: NavigationMenuItem<string>[] = [
+			{ type: 'link', label: 'Home', href: '#home', iconOnly: true, prefix: 'H' },
+			{
+				type: 'panel',
+				value: 'menu',
+				label: 'Open navigation',
+				prefix: 'M',
+				iconOnly: true,
+				content: [{ label: 'One', href: '#1' }]
+			}
+		];
+		await mount({ items });
+		const home = screen.getByRole('link', { name: 'Home' });
+		expect(home).toHaveAttribute('aria-label', 'Home');
+		expect(home).not.toHaveTextContent('Home');
+		const menuTrigger = trigger('Open navigation');
+		expect(menuTrigger).toHaveAttribute('aria-label', 'Open navigation');
+		expect(menuTrigger).not.toHaveTextContent('Open navigation');
+		await open('Open navigation');
+		expect(link('One')).toBeInTheDocument();
+	});
+
+	test('a painted label adds no aria-label', async () => {
+		await mount();
+		expect(trigger('Company')).not.toHaveAttribute('aria-label');
 	});
 });
 

@@ -189,7 +189,7 @@ Site navigation with mega-menu panels: a `<nav>` landmark with a row of links an
 
 **Props:**
 
-- `items`: `NavigationMenuItem[]` (required) -- `{ type: 'link', label, href, description?, prefix?, ariaLabel?, active?, disabled?, target?, rel?, onclick? }` or `{ type: 'panel', value, label, prefix?, ariaLabel?, disabled?, content?, items? }`; `content` is a list of links or a snippet receiving `{ close }`; `items` adds a nested inline level (links and panels that expand in place)
+- `items`: `NavigationMenuItem[]` (required) -- `{ type: 'link', label, href, description?, prefix?, iconOnly?, active?, disabled?, target?, rel?, onclick? }` or `{ type: 'panel', value, label, prefix?, iconOnly?, disabled?, content?, items? }`; `content` is a list of links or a snippet receiving `{ close }`; `items` adds a nested inline level (links and panels that expand in place)
 - `label`: string -- accessible name of the nav
 - `value` (bindable) / `defaultValue`: `Value | null` -- the open panel's `value`; `onValueChange: (value, details) => void` runs before the change, `details.reason` is `trigger-press`, `trigger-hover`, `list-navigation`, `escape-key`, `outside-press`, `focus-out`, `item-press`, `close-press` or `trigger-unmount`, and `details.cancel()` keeps the current panel. `Value` is generic.
 - `openOnHover`: boolean (default: true), `delay`: number (default: 50), `closeDelay`: number (default: 100)
