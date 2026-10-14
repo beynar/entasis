@@ -644,11 +644,13 @@ describe('Dialog snap points (DLG-5)', () => {
 
 	test('the body scrolls only at the largest point', async () => {
 		const node = snapSetup({ defaultSnapPoint: 0.5 });
-		expect(node.style.overflowY).toBe('hidden');
+		// A class: an inline overflow-y would be lost when the intro transition rewrites `overflow`.
+		expect(node.classList.contains('overflow-y-hidden!')).toBe(true);
+		expect(node.style.overflowY).toBe('');
 		expect(node.style.touchAction).toBe('none');
 		await dragBy(node, -AVAILABLE * 0.5);
 		expect(readout('snap')).toBe('1');
-		expect(node.style.overflowY).toBe('');
+		expect(node.classList.contains('overflow-y-hidden!')).toBe(false);
 		expect(node.style.touchAction).toBe('');
 	});
 

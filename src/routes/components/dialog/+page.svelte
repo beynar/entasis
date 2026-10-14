@@ -403,23 +403,26 @@ ${'</' + 'script>'}
 			code={`<Dialog
 	modal={false}
 	type="drawerRight"
+	size="small"
 	title="Inspector"
 	trigger={{ content: 'Open inspector' }}
 >
 	<p>The page behind stays interactive.</p>
 </Dialog>`}
 		>
-			<div class="flex w-full max-w-xl flex-wrap items-center justify-center gap-3">
+			<!-- The page button sits at the start edge, where the right-hand drawer cannot cover it. -->
+			<div class="flex w-full flex-wrap items-center justify-start gap-3">
+				<Button variant="soft" onclick={() => (pageClicks += 1)}>Page button · {pageClicks}</Button>
 				<Dialog
 					modal={false}
 					type="drawerRight"
+					size="small"
 					title="Inspector"
 					description="The page behind stays interactive."
 					trigger={{ content: 'Open inspector', color: 'primary' }}
 				>
 					<p>{shortText}</p>
 				</Dialog>
-				<Button variant="soft" onclick={() => (pageClicks += 1)}>Page button · {pageClicks}</Button>
 			</div>
 		</ComponentCard>
 

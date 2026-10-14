@@ -221,7 +221,6 @@
 				style:height={dialog.snapPanelHeight === undefined
 					? undefined
 					: `${dialog.snapPanelHeight}px`}
-				style:overflow-y={dialog.bodyScrollLocked ? 'hidden' : undefined}
 				style:touch-action={dialog.bodyScrollLocked ? 'none' : undefined}
 				in:panelTransition={dialog.computedTransition.in}
 				out:panelTransition={dialog.computedTransition.out}
@@ -231,7 +230,10 @@
 					size: dialog.computedSize,
 					type: dialog.computedType,
 					scroll: dialog.computedScroll,
-					modal: dialog.modal
+					modal: dialog.modal,
+					// A class, not an inline style: Svelte's transitions stash and rewrite the inline
+					// `overflow` shorthand, which drops an `overflow-y` longhand when the intro ends.
+					className: dialog.bodyScrollLocked ? 'overflow-y-hidden!' : undefined
 				})}
 			>
 				<div

@@ -81,7 +81,19 @@ describe('drawer snap points (DLG-5)', () => {
 				return height === Math.round(available) && Math.abs(visible - expected) <= 1;
 			});
 		// Only the largest point scrolls its body.
-		expect(layout().panel.style.overflowY).toBe('hidden');
+		expect(getComputedStyle(layout().panel).overflowY).toBe('hidden');
+	});
+
+	test('the body stays locked once the intro transition has ended', async () => {
+		render(DialogBrowserHarness, { props: { scenario: 'snap-animated' } });
+		await userEvent.click(page.getByRole('button', { name: 'Open sheet' }));
+		await expect.element(page.getByRole('dialog', { name: 'Sheet' })).toBeVisible();
+		await sleep(400);
+		const { panel } = layout();
+		// Svelte's transition rewrote the inline `overflow` shorthand when the intro ended, which
+		// dropped an inline `overflow-y` and left the body scrollable at the lowest point.
+		expect(getComputedStyle(panel).overflowY).toBe('hidden');
+		expect(panel.style.touchAction).toBe('none');
 	});
 
 	test('dragging the sheet up rests it at the largest point and reports it through snapPoint', async () => {
@@ -105,9 +117,27 @@ describe('drawer snap points (DLG-5)', () => {
 
 		await expect.element(page.getByTestId('snap')).toHaveTextContent('1');
 		await expect.poll(() => layout().panel.style.transform).toBe('');
-		await expect.poll(() => layout().panel.style.overflowY).toBe('');
+		await expect.poll(() => getComputedStyle(layout().panel).overflowY).toBe('auto');
 		await expect
 			.poll(() => Math.round(layout().panel.getBoundingClientRect().height))
 			.toBe(Math.round(available));
+	});
+});
+
+describe('drawer thumb geometry (CX-14)', () => {
+	test('a side drawer panel has no phantom horizontal scroll in right-to-left layouts', async () => {
+		document.documentElement.dir = 'rtl';
+		try {
+			render(DialogBrowserHarness, { props: { scenario: 'drawer' } });
+			await userEvent.click(page.getByRole('button', { name: 'Open drawer' }));
+			await expect.element(page.getByRole('dialog', { name: 'Drawer' })).toBeVisible();
+			const root = document.querySelector('[role="dialog"]') as HTMLElement;
+			const panel = root.firstElementChild!.firstElementChild as HTMLElement;
+			await expect.poll(() => panel.querySelector('[data-drag-handle]')).not.toBeNull();
+			expect(panel.scrollWidth).toBe(panel.clientWidth);
+			expect(panel.scrollHeight).toBe(panel.clientHeight);
+		} finally {
+			document.documentElement.removeAttribute('dir');
+		}
 	});
 });
