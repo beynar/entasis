@@ -585,8 +585,7 @@ export const ja: Messages = {
 	fieldRangeOverflow: (max: string | number) => `${max}以下の値を入力してください`,
 	fieldIncomplete: (length: string | number) => `${length}文字すべてを入力してください`,
 	// Combobox
-	resultsCount: (count: string | number) =>
-		`${count} 件の結果があります`,
+	resultsCount: (count: string | number) => `${count} 件の結果があります`,
 	tags: 'タグ',
 	// CheckboxesInput
 	selectAll: 'すべて選択',

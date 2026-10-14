@@ -587,7 +587,13 @@ export const ar: Messages = {
 	fieldIncomplete: (length: string | number) => `أدخل جميع الأحرف البالغ عددها ${length}`,
 	// Combobox
 	resultsCount: (count: string | number) =>
-		Number(count) === 1 ? 'نتيجة واحدة متاحة' : Number(count) === 2 ? 'نتيجتان متاحتان' : Number(count) >= 3 && Number(count) <= 10 ? `${count} نتائج متاحة` : `${count} نتيجة متاحة`,
+		Number(count) === 1
+			? 'نتيجة واحدة متاحة'
+			: Number(count) === 2
+				? 'نتيجتان متاحتان'
+				: Number(count) >= 3 && Number(count) <= 10
+					? `${count} نتائج متاحة`
+					: `${count} نتيجة متاحة`,
 	tags: 'الوسوم',
 	// CheckboxesInput
 	selectAll: 'تحديد الكل',

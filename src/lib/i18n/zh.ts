@@ -579,8 +579,7 @@ export const zh: Messages = {
 	fieldRangeOverflow: (max: string | number) => `请输入小于或等于 ${max} 的值`,
 	fieldIncomplete: (length: string | number) => `请输入全部 ${length} 个字符`,
 	// Combobox
-	resultsCount: (count: string | number) =>
-		`有 ${count} 个结果可用`,
+	resultsCount: (count: string | number) => `有 ${count} 个结果可用`,
 	tags: '标签',
 	// CheckboxesInput
 	selectAll: '全选',
