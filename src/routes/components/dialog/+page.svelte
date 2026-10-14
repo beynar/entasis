@@ -404,19 +404,22 @@ ${'</' + 'script>'}
 	modal={false}
 	type="drawerRight"
 	size="small"
+	theme={{ content: { base: 'max-w-72' } }}
 	title="Inspector"
 	trigger={{ content: 'Open inspector' }}
 >
 	<p>The page behind stays interactive.</p>
 </Dialog>`}
 		>
-			<!-- The page button sits at the start edge, where the right-hand drawer cannot cover it. -->
+			<!-- The page button sits at the start edge and the drawer is narrowed, so even the tablet-width
+				content column (about 460px beside the sidebar) leaves the button uncovered. -->
 			<div class="flex w-full flex-wrap items-center justify-start gap-3">
 				<Button variant="soft" onclick={() => (pageClicks += 1)}>Page button · {pageClicks}</Button>
 				<Dialog
 					modal={false}
 					type="drawerRight"
 					size="small"
+					theme={{ content: { base: 'max-w-72' } }}
 					title="Inspector"
 					description="The page behind stays interactive."
 					trigger={{ content: 'Open inspector', color: 'primary' }}
