@@ -208,3 +208,34 @@ describe('form attribute', () => {
 		);
 	});
 });
+
+describe('form attribute on buttons', () => {
+	test('buttons without a type do not become submit buttons of the named form', async () => {
+		const onSubmit = vi.fn();
+		render(NativeFormHarness, { props: { scenario: 'buttons', onSubmit } });
+		const buttons = [...otherForm().querySelectorAll('button')];
+		expect(buttons.length).toBeGreaterThan(0);
+		for (const button of buttons) expect(button).not.toHaveAttribute('form');
+
+		for (const button of buttons) await fireEvent.click(button);
+		await nextTask();
+		expect(onSubmit).not.toHaveBeenCalled();
+	});
+});
+
+describe('native reset of search drafts', () => {
+	test('uncommitted text in a combobox or tags input is cleared with the form', async () => {
+		render(NativeFormHarness, { props: { scenario: 'drafts' } });
+		const combobox = screen.getAllByRole('combobox')[0] as HTMLInputElement;
+		const tags = form().querySelector<HTMLInputElement>('input[name="topics"]')!;
+		await fireEvent.input(combobox, { target: { value: 'zzz' } });
+		await fireEvent.input(tags, { target: { value: 'qqq' } });
+		expect(combobox).toHaveValue('zzz');
+
+		form().reset();
+		await nextTask();
+		await nextTask();
+		expect(combobox).toHaveValue('');
+		expect(tags).toHaveValue('');
+	});
+});

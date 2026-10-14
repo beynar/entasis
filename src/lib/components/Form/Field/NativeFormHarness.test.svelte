@@ -3,6 +3,9 @@
 	// join it from outside through the `form` attribute.
 	import Theme from '../../Theme/Theme.svelte';
 	import Checkbox from '../Checkbox/Checkbox.svelte';
+	import Combobox from '../Combobox/Combobox.svelte';
+	import FileInput from '../File/FileInput.svelte';
+	import TagsInput from '../TagsInput/TagsInput.svelte';
 	import CheckboxesInput from '../CheckboxesInput/CheckboxesInput.svelte';
 	import Form from '../Form/Form.svelte';
 	import type { LiveFormValue } from '../Form/form.js';
@@ -27,7 +30,7 @@
 		onSwitchChange,
 		onFormValueChange
 	}: {
-		scenario?: 'controls' | 'outside' | 'entasis-form';
+		scenario?: 'controls' | 'outside' | 'entasis-form' | 'drafts' | 'buttons';
 		switchDefault?: boolean | null;
 		switchRequired?: boolean;
 		formValue?: LiveFormValue<typeof formInputs>;
@@ -98,6 +101,39 @@
 			<Switch form="profile" name="alerts" label="Alerts" />
 			<HiddenInputsControl form="profile" name="tags" label="Tags" mode="values" value={['red']} />
 			<button type="reset">Reset other</button>
+		</form>
+	{:else if scenario === 'drafts'}
+		<form data-testid="form" onsubmit={submit}>
+			<Combobox
+				name="city"
+				label="City"
+				defaultValue="paris"
+				items={[
+					{ value: 'paris', label: 'Paris' },
+					{ value: 'rome', label: 'Rome' }
+				]}
+			/>
+			<TagsInput
+				name="topics"
+				label="Topics"
+				defaultValue={['svelte']}
+				items={[
+					{ value: 'svelte', label: 'Svelte' },
+					{ value: 'css', label: 'CSS' }
+				]}
+			/>
+			<button type="reset">Reset</button>
+		</form>
+	{:else if scenario === 'buttons'}
+		<form id="ext" data-testid="form" onsubmit={submit}></form>
+		<form data-testid="other-form">
+			<FileInput
+				form="ext"
+				name="files"
+				label="Files"
+				mode="multiple"
+				defaultValue={[new File(['a'], 'a.txt', { type: 'text/plain' })]}
+			/>
 		</form>
 	{:else}
 		<form data-testid="form" onsubmit={submit}>

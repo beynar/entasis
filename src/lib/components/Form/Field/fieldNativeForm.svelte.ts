@@ -19,11 +19,15 @@ export const setFieldFormAttribute = (field: object, read: () => string | undefi
 export const getFieldFormAttribute = (field: object): string | undefined =>
 	formAttributes.get(field)?.();
 
-const formControls = 'button, input, select, textarea';
+// Inputs, selects and textareas, plus the buttons that submit or reset on their own say-so. A
+// button without a `type` is left alone: with a `form` attribute it would turn into a submit
+// button of that form, and a button needs none to work as `type="button"`.
+const formControls =
+	'input, select, textarea, button[type="submit" i], button[type="reset" i], button[type="image" i]';
 
-// Gives every form control inside the field root the `form` attribute, now and as the control
-// renders more of them (a hidden input per value, a clear button). Controls that set their own
-// `form` attribute keep it.
+// Gives the form controls inside the field root the `form` attribute, now and as the control
+// renders more of them (a hidden input per value). Controls that set their own `form` attribute
+// keep it.
 const mirrorFormAttribute = (root: HTMLElement, form: string) => {
 	const marked: Element[] = [];
 	const mark = () => {
@@ -55,7 +59,12 @@ const belongsTo = (field: object, root: HTMLElement, form: HTMLFormElement) => {
 // value it renders changes. Pinning every default to the live state first turns the native reset
 // into a no-op for the field's controls, so they always show what the field holds; the field then
 // returns to its initial value and renders it.
-const holdNativeState = (root: HTMLElement, form: HTMLFormElement) => {
+// The text box of a combobox or a tags input holds a search draft, not the field's value: it is
+// left to the native reset, which clears it like any text input, and the control's own binding
+// follows.
+const draftTypes: ReadonlySet<string> = new Set(['combobox', 'tag']);
+
+const holdNativeState = (root: HTMLElement, form: HTMLFormElement, type: string) => {
 	for (const element of root.querySelectorAll<FormControl>('input, select, textarea')) {
 		if (element.form !== form) continue;
 		if (element.localName === 'select') {
@@ -64,7 +73,7 @@ const holdNativeState = (root: HTMLElement, form: HTMLFormElement) => {
 			}
 		} else if (element.type === 'checkbox' || element.type === 'radio') {
 			(element as HTMLInputElement).defaultChecked = (element as HTMLInputElement).checked;
-		} else if (element.type !== 'file') {
+		} else if (element.type !== 'file' && !draftTypes.has(type)) {
 			(element as HTMLInputElement | HTMLTextAreaElement).defaultValue = element.value;
 		}
 	}
@@ -95,7 +104,7 @@ export const fieldNativeForm =
 		const onreset = (event: Event) => {
 			const form = event.target as HTMLFormElement | null;
 			if (form?.localName !== 'form' || !belongsTo(field, root, form)) return;
-			holdNativeState(root, form);
+			holdNativeState(root, form, field.type);
 			clearTimeout(timer);
 			timer = setTimeout(() => {
 				if (event.defaultPrevented) return;
