@@ -233,6 +233,20 @@ describe('closing', () => {
 		expect(changes.at(-1)).toEqual({ value: null, reason: 'escape-key' });
 	});
 
+	test('Escape returns focus to the trigger when a pointer-opened panel left focus on the body', async () => {
+		// Safari does not focus a button on click: the panel opens, focus stays on the body.
+		const { changes } = await mount();
+		const button = trigger('Product');
+		await open('Product');
+		button.blur();
+		expect(document.body).toHaveFocus();
+		await keydown(document.body, 'Escape');
+		await tick();
+		expect(button).toHaveAttribute('aria-expanded', 'false');
+		expect(button).toHaveFocus();
+		expect(changes.at(-1)).toEqual({ value: null, reason: 'escape-key' });
+	});
+
 	test('a press outside closes it', async () => {
 		const { changes } = await mount();
 		await open('Product');

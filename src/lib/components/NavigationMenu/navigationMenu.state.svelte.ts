@@ -175,13 +175,19 @@ export function useNavigationMenuState<Value extends string>(
 		options.onValueChange()?.(next, details);
 		if (details.isCanceled) return false;
 		const previous = displayValue;
-		const active = getDeepActiveElement(navElement?.ownerDocument ?? document);
+		const doc = navElement?.ownerDocument ?? document;
+		const active = getDeepActiveElement(doc);
 		// Safari does not focus a link or button on click, so the press target counts as well.
 		const target = init.event?.target;
 		const focusInside =
 			!!popupElement &&
 			((!!active && composedContains(popupElement, active)) ||
 				(target instanceof Node && composedContains(popupElement, target)));
+		// Safari does not focus a button on click either, so a panel opened by the pointer has
+		// focus on the page body: Escape still hands it back to the trigger, since nothing else holds it.
+		const focusAdrift =
+			init.reason === 'escape-key' &&
+			(!active || active === doc.body || active === doc.documentElement);
 		if (next !== null && init.reason === 'trigger-hover') {
 			pendingHover = next;
 			// A parent that refuses the value leaves the flag unconsumed; it must not outlive this task.
@@ -190,7 +196,7 @@ export function useNavigationMenuState<Value extends string>(
 		options.setValue(next);
 		if (next === null) {
 			nestedOpen.clear();
-			if (focusInside && RESTORING_REASONS.has(init.reason) && previous !== null) {
+			if ((focusInside || focusAdrift) && RESTORING_REASONS.has(init.reason) && previous !== null) {
 				const trigger = triggers.get(previous);
 				trigger?.focus(
 					details.interaction === 'keyboard' ? FOCUS_VISIBLE : { preventScroll: true }

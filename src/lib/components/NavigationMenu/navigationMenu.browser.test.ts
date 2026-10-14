@@ -144,12 +144,34 @@ describe('keyboard in a real browser', () => {
 		expect(trigger('Product').matches(':focus-visible')).toBe(true);
 	});
 
+	test('Escape after a pointer-opened panel left focus on the body returns focus to the trigger', async () => {
+		render(NavigationMenuHarness);
+		await userEvent.click(trigger('Product'));
+		// Safari does not focus a button on click.
+		trigger('Product').blur();
+		expect(document.activeElement).toBe(document.body);
+		await userEvent.keyboard('{Escape}');
+		expect(expanded('Product')).toBe('false');
+		expect(document.activeElement).toBe(trigger('Product'));
+	});
+
 	test('a link press closes the panel and returns focus to the trigger', async () => {
 		render(NavigationMenuHarness);
 		await userEvent.click(trigger('Product'));
 		await userEvent.click(page.getByRole('link', { name: 'Blocks' }));
 		expect(expanded('Product')).toBe('false');
 		expect(document.activeElement).toBe(trigger('Product'));
+	});
+});
+
+describe('wrapping', () => {
+	test('a bar wider than its container wraps instead of clipping its last item', async () => {
+		render(NavigationMenuHarness, { props: { menu: { class: 'max-w-40' } } });
+		const nav = document.querySelector('nav')!;
+		const list = nav.querySelector('ul')!;
+		expect(list.scrollWidth).toBeLessThanOrEqual(nav.clientWidth + 1);
+		const last = page.getByRole('link', { name: 'Pricing' }).element().getBoundingClientRect();
+		expect(last.right).toBeLessThanOrEqual(nav.getBoundingClientRect().right + 1);
 	});
 });
 

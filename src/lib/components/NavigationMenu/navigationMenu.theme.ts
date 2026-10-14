@@ -20,7 +20,7 @@ const defaultNavigationMenu = cva({
 });
 
 const defaultNavigationMenuList = cva({
-	base: 'm-0 flex list-none items-center p-0',
+	base: 'm-0 flex list-none flex-wrap items-center p-0',
 	variants: {
 		size: {
 			small: 'gap-micro',

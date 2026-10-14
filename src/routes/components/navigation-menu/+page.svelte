@@ -101,7 +101,7 @@
 
 	// Controlled value, reported with a reason.
 	type Section = 'product' | 'company';
-	let section = $state<Section | null>('product');
+	let section = $state<Section | null>(null);
 	let lastReason = $state('none yet');
 	const controlledItems: NavigationMenuItem<Section>[] = [
 		{
@@ -256,7 +256,7 @@
 			class="min-h-[320px] items-start"
 			code={`<script lang="ts">
 	type Section = 'product' | 'company';
-	let section = $state<Section | null>('product');
+	let section = $state<Section | null>(null);
 </scr${'ipt'}>
 
 <NavigationMenu
@@ -266,21 +266,21 @@
 />`}
 		>
 			<div class="grid min-h-72 w-full content-start gap-4">
+				<div class="flex flex-wrap items-center gap-2">
+					<Button size="small" variant="outline" onclick={() => (section = 'company')}>
+						Open Company
+					</Button>
+					<Button size="small" variant="outline" onclick={() => (section = null)}>Close</Button>
+				</div>
+				<p class="text-neutral/70 text-sm">
+					value: <code>{JSON.stringify(section)}</code> · last reason: <code>{lastReason}</code>
+				</p>
 				<NavigationMenu
 					items={controlledItems}
 					label="Controlled"
 					bind:value={section}
 					onValueChange={(_next, details) => (lastReason = details.reason)}
 				/>
-				<p class="text-neutral/70 text-sm">
-					value: <code>{JSON.stringify(section)}</code> · last reason: <code>{lastReason}</code>
-				</p>
-				<div class="flex gap-2">
-					<Button size="small" variant="outline" onclick={() => (section = 'company')}>
-						Open Company
-					</Button>
-					<Button size="small" variant="outline" onclick={() => (section = null)}>Close</Button>
-				</div>
 			</div>
 		</ComponentCard>
 
