@@ -8,6 +8,8 @@
 	import { sizes } from '$lib/utils/tokens.js';
 	import type { OpenChangeDetails } from '$lib/types/index.js';
 
+	let searchField = $state<HTMLInputElement | null>(null);
+
 	const dialogTypes = [
 		'modal',
 		'alert',
@@ -296,6 +298,60 @@ ${'</' + 'script>'}
 				<p class="text-neutral/70 text-center text-sm" data-testid="dialog-open-change-log">
 					{dialogLog}
 				</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Where focus goes on close"
+			description="Focus returns to the button that opened the dialog, with a focus ring after Escape. Closing the confirmation inside it returns focus to Delete, not to the first field. With focusOnClose, the Save button sends focus to the search field instead; Escape still restores the trigger."
+			code={`<script lang="ts">
+	let search = $state<HTMLInputElement | null>(null);
+${'</' + 'script>'}
+
+<input bind:this={search} aria-label="Search" />
+<Dialog
+	title="Rename project"
+	trigger={{ content: 'Rename' }}
+	focusOnClose={(details) => (details?.reason === 'close-press' ? search : undefined)}
+>
+	<input aria-label="Name" />
+	<Button onclick={() => confirmation({ title: 'Delete project?', confirm: 'Delete', cancel: 'Keep' })}>
+		Delete
+	</Button>
+</Dialog>`}
+		>
+			<div class="flex w-full max-w-xl flex-wrap items-center justify-center gap-3">
+				<input
+					bind:this={searchField}
+					aria-label="Search"
+					placeholder="Search"
+					class="border-neutral/20 rounded-md border px-2 py-1 text-sm"
+				/>
+				<Dialog
+					title="Rename project"
+					trigger={{ content: 'Rename', color: 'primary' }}
+					size="small"
+					focusOnClose={(details) => (details?.reason === 'close-press' ? searchField : undefined)}
+				>
+					<div class="flex flex-col gap-3">
+						<input
+							aria-label="Name"
+							placeholder="Name"
+							class="border-neutral/20 rounded-md border px-2 py-1 text-sm"
+						/>
+						<Button
+							variant="soft"
+							color="danger"
+							onclick={() =>
+								confirmation({
+									title: 'Delete project?',
+									description: 'This cannot be undone.',
+									confirm: 'Delete',
+									cancel: 'Keep'
+								})}>Delete</Button
+						>
+					</div>
+				</Dialog>
 			</div>
 		</ComponentCard>
 

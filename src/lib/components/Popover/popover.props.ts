@@ -9,6 +9,7 @@ import type { WithAttachments } from '$lib/types/props.js';
 import type { PopupPlacementSide } from '$lib/utils/stateAttributes.js';
 import type { PopoverThemeProps } from './popover.theme.js';
 import type { OpenChangeHandler } from '$lib/utils/openChange.js';
+import type { FocusOnClose } from '$lib/utils/useFocusScope.svelte.js';
 
 /**
  * How an open popover was opened: `hover` (the pointer rested on the trigger), `press` (a click
@@ -167,6 +168,16 @@ export type PopoverProps = WithAttachments<{
 	 * @default false
 	 */
 	focusOnOpen?: 'first' | 'container' | false;
+	/**
+	 * Where focus goes when the popover closes with focus inside it or after a trigger opened it.
+	 * By default it returns to the trigger (with a visible focus ring after Escape or another
+	 * keyboard close); when that control is gone or disabled, to the most recent element that is
+	 * still on the page. `false` leaves focus where it is, an element receives it, and a function
+	 * is called with the change details (`reason`, `interaction`…) and returns one of these, or
+	 * nothing to restore as usual. A close because focus moved on (`'focus-out'`) never moves it.
+	 * @default true
+	 */
+	focusOnClose?: FocusOnClose;
 	/**
 	 * Value of `aria-haspopup` applied to the trigger, describing what the panel contains.
 	 * `aria-expanded` and `aria-controls` are managed automatically alongside it. A `'dialog'`

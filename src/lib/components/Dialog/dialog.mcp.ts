@@ -58,6 +58,7 @@ The Dialog component (also known as Modal) displays content in a layer above the
 - **closeOnEscape**: boolean (default: true) - Close when Escape key is pressed (and, on Android, on the Back gesture)
 - **closeOnClickOutside**: boolean (default: true, false for \`type="alert"\`) - Close when pressing outside dialog. A press that began before the dialog opened does not count
 - **closable**: boolean (default: true) - Whether dialog can be closed
+- **focusOnClose**: boolean | HTMLElement | ((details) => HTMLElement | boolean | void) (default: true) - Where focus goes when the dialog closes. \`true\` returns it to the control that opened the dialog, else to the most recent element still on the page; \`false\` leaves focus alone; an element receives it; a function gets the change details (\`reason\`, \`interaction\`…) and returns one of these, or nothing to restore as usual
 - **swipeToDismiss**: boolean (default: true for drawer types) - Drag the drawer toward its edge to dismiss. Direction-aware (drawerRight drags right, drawerBottom drags down, etc.) and never hijacks inner scrolling or a mostly sideways drag (a press that travels more across the dismiss axis than along it is spent); a quick flick dismisses even when the last move before release is nearly stationary; opt elements out with \`data-no-swipe\`
 - **thumb**: boolean (default: true) - Drag thumb bar shown on swipe-dismissable drawers (inner edge, orientation follows the drawer side, oversized hitbox); set false to hide. Themeable via the \`thumb\` theme part
 - **inset**: a spacing step or \`'none'\` — how far a drawer stands off the screen edge for this dialog. Defaults to the theme's \`designTokens.drawerInset\` (\`'layout-md'\`). At \`'none'\` the drawer is edge to edge, its edge corners square off and only the corners facing the page stay rounded
@@ -111,6 +112,26 @@ The Dialog component (also known as Modal) displays content in a layer above the
 	{#snippet trigger(dialog)}
 		<Button {@attach dialog.trigger}>Open</Button>
 	{/snippet}
+</Dialog>
+\`\`\`
+
+### Choose where focus goes on close
+
+\`\`\`svelte
+<script lang="ts">
+	import { Dialog } from 'entasis/dialog';
+
+	let search = $state<HTMLInputElement | null>(null);
+</script>
+
+<input bind:this={search} aria-label="Search" />
+<!-- After a save, focus the search field instead of the button that opened the dialog. -->
+<Dialog
+	title="Rename"
+	trigger={{ content: 'Rename' }}
+	focusOnClose={(details) => (details?.reason === 'close-press' ? search : undefined)}
+>
+	<p>New name</p>
 </Dialog>
 \`\`\`
 
@@ -301,7 +322,9 @@ The Dialog component uses a \`DialogState\` instance that is passed to all slot 
 
 - Initial focus goes to an \`[autofocus]\` / \`[data-autofocus]\` element inside the dialog, else the first tabbable control (the close button is skipped), else the panel itself
 - Tab and Shift+Tab are contained inside the dialog, and the rest of the page is \`inert\` while a modal is open
-- Focus is restored to the opener after the close transition finishes, just before \`onAfterClose\`: the trigger that opened it, else the element focused when it opened
+- Focus is restored to the opener after the close transition finishes, just before \`onAfterClose\`: the trigger that opened it, else the element focused when it opened. When that element is gone or disabled (a menu item that opened the dialog), focus goes to the last element that had it inside the dialog beneath this one, else to the most recent element still on the page. A close by Escape or from the keyboard returns focus with a visible focus ring, and in Safari a focused text field is blurred before it unmounts so the page does not jump. \`focusOnClose\` overrides all of this
+- When a dialog (a Confirmation, say) closes over another dialog, the one beneath keeps focus where it was and receives it back from the closing one; it does not move focus to its first field again
+- Tab moves focus inside the dialog itself instead of leaving it to the browser, so it wraps in Safari too, where Tab skips buttons by default
 - The trigger (built-in, or a snippet element with \`{@attach dialog.trigger}\`) carries \`aria-haspopup="dialog"\`, \`aria-expanded\` and \`aria-controls\` pointing at the open dialog
 - On Android, the Back gesture closes the topmost dialog through a \`CloseWatcher\` (\`reason: 'close-watcher'\`), under the same rules as Escape
 - \`aria-labelledby\` links the \`title\` and \`aria-describedby\` links the \`description\`

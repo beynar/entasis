@@ -7,6 +7,7 @@ import type { PopoverOpenReason, PopoverProps } from './popover.props.js';
 import type { Placement, VirtualElement } from '@floating-ui/dom';
 import { useScrollLock } from '$lib/utils/useScrollLock.svelte.js';
 import { useFocusScope } from '$lib/utils/useFocusScope.svelte.js';
+import { useTabBridge } from '$lib/utils/useTabBridge.svelte.js';
 import { useSafeArea } from '$lib/utils/safeArea.svelte.js';
 import { useHoverAction } from '$lib/utils/useHoverAction.svelte.js';
 import { useOpenLifecycle, type OpenLifecycle } from '$lib/utils/openLifecycle.svelte.js';
@@ -67,6 +68,7 @@ interface PopoverOptions extends MakeRequired<
 		| 'mobileSheet'
 		| 'inline'
 		| 'focusOnOpen'
+		| 'focusOnClose'
 		| 'haspopup'
 		| 'positionPanel'
 		| 'collisionBoundary'
@@ -140,6 +142,8 @@ export class PopoverState extends PopoverOptionsBase {
 		this.triggerReference || this.externalRef || null
 	);
 	dialogElement: HTMLElement | null = $state(null);
+	/** The panel element focus moves into (inside `dialogElement`); `null` while it is not mounted. */
+	panelElement: HTMLElement | null = $state(null);
 	// Applied to the animated panel (not the portaled positioning wrapper) so the scale/fly
 	// transition originates from the edge nearest the trigger.
 	transformOrigin = $state('center center');
@@ -237,8 +241,28 @@ export class PopoverState extends PopoverOptionsBase {
 		trap: () => false,
 		initialFocus: () => this.focusOnOpen ?? false,
 		restoreFocus: () => this.#focusEntered || this.activeTrigger !== null,
-		returnTo: () => this.#returnTarget()
+		returnTo: () => this.#returnTarget(),
+		// Focus that moved on by itself (Tab past the end of the panel) is not taken back.
+		focusOnClose: () => (this.lastOpenChange?.reason === 'focus-out' ? false : this.focusOnClose),
+		closeDetails: () => this.lastOpenChange
 	});
+	/**
+	 * Whether Tab is bridged between the trigger and the portaled panel: a floating dialog popup
+	 * opened from a trigger. Menus, listboxes and the like manage focus themselves, and a panel the
+	 * pointer merely hovered open is not a Tab destination.
+	 */
+	get tabBridgeActive(): boolean {
+		return (
+			this.isOpen &&
+			this.computedMode === 'floating' &&
+			this.isDialogPopup &&
+			this.openReason !== 'hover' &&
+			this.layer.isTop &&
+			this.placement !== null &&
+			this.panelElement !== null &&
+			this.#bridgeAnchor() !== null
+		);
+	}
 	// Mode preset from `popoverTheme.motion`, through the override ladder
 	// (registry → `setPopoverTheme` → instance `theme.motion` → `transition` prop).
 	private resolveMotion = usePopoverMotion();
@@ -315,6 +339,19 @@ export class PopoverState extends PopoverOptionsBase {
 		});
 		setContext('popover', this);
 		if (this.parent) onMount(this.parent.addChild(this));
+		useTabBridge({
+			isActive: () => this.tabBridgeActive,
+			anchor: this.#bridgeAnchor,
+			panel: () => this.panelElement,
+			// A trigger inside another popover's panel tabs on within that panel.
+			boundary: () => {
+				const anchor = this.#bridgeAnchor();
+				const parentPanel = this.parent?.panelElement;
+				return anchor && parentPanel && parentPanel.contains(anchor) ? parentPanel : undefined;
+			},
+			onLeave: (event) =>
+				void this.setOpen(false, { reason: 'focus-out', event, interaction: 'keyboard' })
+		});
 		onDestroy(() => {
 			this.#destroyed = true;
 		});
@@ -480,6 +517,17 @@ export class PopoverState extends PopoverOptionsBase {
 		if (this.openReason === 'programmatic' || this.openReason === null) return null;
 		const trigger = this.activeTrigger ?? this.triggerReference;
 		return trigger ? triggerFocusTarget(trigger) : null;
+	};
+
+	/**
+	 * The control Tab starts from and returns to: the one that opened the popover, else the focusable
+	 * part of the trigger. `null` without a registered trigger (a popover anchored to a `ref`).
+	 */
+	#bridgeAnchor = (): HTMLElement | null => {
+		const trigger = this.triggerReference;
+		if (!trigger || !this.#triggers.has(trigger)) return null;
+		if (this.openReason !== 'programmatic' && this.#opener?.isConnected) return this.#opener;
+		return triggerFocusTarget(trigger);
 	};
 
 	/** The details for a request, filled in from the trigger press it happens during. */
@@ -671,6 +719,10 @@ export class PopoverState extends PopoverOptionsBase {
 	panel = (node: HTMLElement) => {
 		return untrack(() => {
 			const cleanups: Array<(() => void) | null | void> = [];
+			this.panelElement = node;
+			cleanups.push(() => {
+				if (this.panelElement === node) this.panelElement = null;
+			});
 			this.#focusEntered = node.contains(node.ownerDocument.activeElement);
 			cleanups.push(
 				on(node, 'focusin', () => {

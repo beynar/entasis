@@ -17,12 +17,80 @@ export const focusableSelector = [
 	'[tabindex]'
 ].join(',');
 
+/**
+ * Whether the element can take focus right now: a focusable kind of element that is enabled,
+ * rendered and not inside an `inert`, `hidden` or `aria-hidden` subtree. Unlike `isTabbable` it
+ * accepts `tabindex="-1"`, the kind of target focus restoration may land on.
+ */
+export function isFocusable(element: HTMLElement): boolean {
+	if (!element.isConnected || !element.matches(focusableSelector)) return false;
+	if (element.matches(':disabled')) return false;
+	if (element.closest('[inert], [hidden], [aria-hidden="true"]')) return false;
+	if (element.getClientRects().length === 0) return false;
+	const style = getComputedStyle(element);
+	return style.visibility !== 'hidden' && style.visibility !== 'collapse';
+}
+
 export function isTabbable(element: HTMLElement): boolean {
 	if (element.tabIndex < 0 || element.matches(':disabled')) return false;
 	if (element.closest('[inert], [hidden], [aria-hidden="true"]')) return false;
 	if (element.getClientRects().length === 0) return false;
 	const style = getComputedStyle(element);
 	return style.visibility !== 'hidden' && style.visibility !== 'collapse';
+}
+
+/**
+ * The element that really has focus: `root.activeElement` stops at a shadow host, so this looks
+ * inside open shadow roots until it reaches the focused element. Like `activeElement`, it is
+ * `<body>` when nothing is focused.
+ */
+export function getDeepActiveElement(root: Document | ShadowRoot = document): HTMLElement | null {
+	let active: Element | null = root.activeElement;
+	while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+	return active instanceof HTMLElement ? active : null;
+}
+
+/**
+ * `container.contains(node)` across shadow boundaries: an element inside a shadow root belongs to
+ * the container when its host does.
+ */
+export function composedContains(container: Node, node: Node | null): boolean {
+	let current: Node | null = node;
+	while (current) {
+		if (current === container) return true;
+		current = current.parentNode ?? (current as ShadowRoot).host ?? null;
+	}
+	return false;
+}
+
+/**
+ * Whether the page runs in WebKit (Safari, and every browser on iOS) rather than Chromium or
+ * Gecko. Safari is the only engine whose `navigator.vendor` is Apple's.
+ */
+export function isWebKit(): boolean {
+	return typeof navigator !== 'undefined' && /Apple/i.test(navigator.vendor ?? '');
+}
+
+const TEXT_INPUT_TYPES = new Set([
+	'text',
+	'search',
+	'email',
+	'url',
+	'tel',
+	'password',
+	'number',
+	''
+]);
+
+/** Whether typing goes into the element: a text input, a textarea or an editable region. */
+export function isTextField(element: Element | null): element is HTMLElement {
+	if (!(element instanceof HTMLElement)) return false;
+	if (element instanceof HTMLTextAreaElement) return true;
+	if (element instanceof HTMLInputElement) return TEXT_INPUT_TYPES.has(element.type);
+	return (
+		element.isContentEditable === true ||
+		element.matches('[contenteditable]:not([contenteditable="false"])')
+	);
 }
 
 /** Tabbable descendants in tab order (positive tabindex first, one radio per group). */
@@ -64,4 +132,30 @@ export function resolveInitialFocus(node: HTMLElement): HTMLElement {
 	return (
 		tabbable.find((element) => !element.closest('[data-autofocus-skip]')) ?? tabbable[0] ?? node
 	);
+}
+
+/**
+ * The first tabbable element that follows `reference` in document order, skipping its own
+ * descendants and everything inside `exclude`. `boundary` limits the search to one subtree (a
+ * parent popover's panel). `null` when nothing follows.
+ */
+export function getTabbableAfter(
+	reference: HTMLElement,
+	{
+		exclude,
+		boundary = reference.ownerDocument.body
+	}: { exclude?: HTMLElement | null; boundary?: HTMLElement | null } = {}
+): HTMLElement | null {
+	if (!boundary) return null;
+	let next: HTMLElement | null = null;
+	for (const element of getTabbableElements(boundary)) {
+		if (exclude && composedContains(exclude, element)) continue;
+		const position = reference.compareDocumentPosition(element);
+		if (position & Node.DOCUMENT_POSITION_CONTAINED_BY) continue;
+		if (!(position & Node.DOCUMENT_POSITION_FOLLOWING)) continue;
+		// The tabbable list puts positive tabindex first; the nearest one in the page wins here.
+		if (!next || next.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_PRECEDING)
+			next = element;
+	}
+	return next;
 }

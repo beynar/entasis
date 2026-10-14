@@ -27,6 +27,7 @@
 		closeOnEscape = true,
 		closeOnClickOutside,
 		closable = true,
+		focusOnClose,
 		swipeToDismiss,
 		swipeFrom,
 		thumb = true,
@@ -91,6 +92,9 @@
 		},
 		get closable() {
 			return closable;
+		},
+		get focusOnClose() {
+			return focusOnClose;
 		},
 		get swipeToDismiss() {
 			return swipeToDismiss;

@@ -18,7 +18,13 @@
 Every overlay shares one layer stack and the same focus laws. On open, focus goes to an
 `[autofocus]` / `[data-autofocus]` target, else the first tabbable control (a close button is
 skipped), else the panel; Dialog always does this, Popover only with `focusOnOpen`. On close, focus
-is restored to the trigger that opened it (after a programmatic open, to the element focused then).
+is restored to the trigger that opened it (after a programmatic open, to the element focused then);
+when that element is gone or disabled it goes to the last element that had focus in the dialog
+beneath, else to the most recent element still on the page, and a close by Escape or from the
+keyboard shows the focus ring. `focusOnClose` on Dialog and Popover overrides it: `false` leaves
+focus alone, an element receives it, a function gets the change details and returns either. A
+Popover's panel is portaled to the end of the page, so Tab on its open trigger enters the panel,
+Tab past the last control continues after the trigger and closes it, and Shift+Tab returns.
 Escape closes only the topmost open layer; an outside press dismisses every layer stacked above the
 one pressed (a press that began before the layer opened never does, and on touch only a tap does);
 on Android the Back gesture closes the topmost modal layer like Escape. Modal layers (Dialog)
@@ -48,6 +54,7 @@ Modal/drawer overlay that blocks page interaction.
 | `type`                | `'modal' \| 'alert' \| 'fullScreen' \| 'drawerRight' \| 'drawerLeft' \| 'drawerBottom' \| 'drawerTop'` | `'modal'`                            |
 | `open`                | `boolean` (bindable)                                                                                   | `false`                              |
 | `closable`            | `boolean`                                                                                              | `true`                               |
+| `focusOnClose`        | `boolean \| HTMLElement \| ((details) => HTMLElement \| boolean \| void)`                              | `true`                               |
 | `closeOnEscape`       | `boolean`                                                                                              | `true`                               |
 | `closeOnClickOutside` | `boolean`                                                                                              | `true` (`false` for `type: 'alert'`) |
 | `transition`          | `TransitionConfig`                                                                                     | -                                    |
@@ -114,25 +121,26 @@ Floating content positioned relative to a trigger element.
 
 ### Unique Props
 
-| Prop                  | Type                                                          | Default    |
-| --------------------- | ------------------------------------------------------------- | ---------- |
-| `open`                | `boolean` (bindable)                                          | `false`    |
-| `ref`                 | `HTMLElement \| VirtualElement \| null`                       | -          |
-| `position`            | `Placement` (12 options)                                      | `'bottom'` |
-| `offset`              | `number`                                                      | -          |
-| `fitTrigger`          | `boolean`                                                     | `false`    |
-| `positionPanel`       | `({ panel, reference }) => { x, y, minWidth? } \| null`       | -          |
-| `inline`              | `boolean`                                                     | `false`    |
-| `openOnHover`         | `boolean`                                                     | `false`    |
-| `openOnClick`         | `boolean`                                                     | `true`     |
-| `delay`               | `number`                                                      | `100`      |
-| `closeOnEscape`       | `boolean`                                                     | `true`     |
-| `closeOnClickOutside` | `boolean`                                                     | `true`     |
-| `closeOnMouseLeave`   | `boolean`                                                     | `false`    |
-| `focusOnOpen`         | `'first' \| 'container' \| false`                             | `false`    |
-| `haspopup`            | `'dialog' \| 'menu' \| 'listbox' \| 'tree' \| 'grid' \| true` | `'dialog'` |
-| `lockScroll`          | `boolean`                                                     | `true`     |
-| `directedTransition`  | `boolean`                                                     | `true`     |
+| Prop                  | Type                                                                      | Default    |
+| --------------------- | ------------------------------------------------------------------------- | ---------- |
+| `open`                | `boolean` (bindable)                                                      | `false`    |
+| `ref`                 | `HTMLElement \| VirtualElement \| null`                                   | -          |
+| `position`            | `Placement` (12 options)                                                  | `'bottom'` |
+| `offset`              | `number`                                                                  | -          |
+| `fitTrigger`          | `boolean`                                                                 | `false`    |
+| `positionPanel`       | `({ panel, reference }) => { x, y, minWidth? } \| null`                   | -          |
+| `inline`              | `boolean`                                                                 | `false`    |
+| `openOnHover`         | `boolean`                                                                 | `false`    |
+| `openOnClick`         | `boolean`                                                                 | `true`     |
+| `delay`               | `number`                                                                  | `100`      |
+| `closeOnEscape`       | `boolean`                                                                 | `true`     |
+| `closeOnClickOutside` | `boolean`                                                                 | `true`     |
+| `closeOnMouseLeave`   | `boolean`                                                                 | `false`    |
+| `focusOnOpen`         | `'first' \| 'container' \| false`                                         | `false`    |
+| `focusOnClose`        | `boolean \| HTMLElement \| ((details) => HTMLElement \| boolean \| void)` | `true`     |
+| `haspopup`            | `'dialog' \| 'menu' \| 'listbox' \| 'tree' \| 'grid' \| true`             | `'dialog'` |
+| `lockScroll`          | `boolean`                                                                 | `true`     |
+| `directedTransition`  | `boolean`                                                                 | `true`     |
 
 The trigger automatically gets `aria-haspopup` (from `haspopup`), `aria-expanded`, and `aria-controls`; a snippet trigger opts in with `{@attach popover.reference}`.
 
@@ -166,7 +174,7 @@ wins over `mobileSheet`.
 
 - `isOpen`, `id`, `size`, `position`, `offset`, `open(details?)`, `close(details?)`,
   `toggle(details?)`, `setOpen(open, details?)`, `openReason` (`'hover' | 'press' | 'keyboard' |
-  'programmatic'`), `activeTrigger`, `lifecycle.status`, `trigger` and `reference` (attachments for
+'programmatic'`), `activeTrigger`, `lifecycle.status`, `trigger` and `reference` (attachments for
   a custom trigger)
 
 ### Theme Parts

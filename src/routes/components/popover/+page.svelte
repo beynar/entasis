@@ -610,5 +610,27 @@ ${'</' + 'script>'}
 				</Popover>
 			</div>
 		</ComponentCard>
+
+		<ComponentCard
+			title="Tab order"
+			description="The panel is rendered at the end of the page, but Tab treats it as part of the trigger: Tab on the open trigger enters the panel, Tab past its last control continues with the next control and closes it, and Shift+Tab on its first control returns to the trigger. focusOnClose chooses where focus goes when it closes."
+			code={`<Button>Previous control</Button>
+<Popover trigger={{ content: 'Open filters' }}>
+	<label><input type="checkbox" /> In stock</label>
+	<label><input type="checkbox" /> On sale</label>
+</Popover>
+<Button>Next control</Button>`}
+		>
+			<div class="flex flex-wrap items-center justify-center gap-3">
+				<Button variant="outline" color="neutral">Previous control</Button>
+				<Popover trigger={{ content: 'Open filters', variant: 'soft' }} position="bottom">
+					<div class="flex flex-col gap-2 text-sm">
+						<label class="flex items-center gap-2"><input type="checkbox" /> In stock</label>
+						<label class="flex items-center gap-2"><input type="checkbox" /> On sale</label>
+					</div>
+				</Popover>
+				<Button variant="outline" color="neutral">Next control</Button>
+			</div>
+		</ComponentCard>
 	{/snippet}
 </DocPage>

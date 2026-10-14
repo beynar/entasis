@@ -15,6 +15,7 @@
 	import { mergeMotionTokens } from '$lib/tailwind/scales.js';
 	import { REDUCED_MOTION_ATTRIBUTE, REDUCED_MOTION_QUERY } from '$lib/utils/motion.svelte.js';
 	import { untrack } from 'svelte';
+	import { installFocusHistory } from '$lib/utils/focusHistory.js';
 
 	let {
 		children,
@@ -154,6 +155,10 @@
 		},
 		theme
 	);
+
+	// Remember where focus has been, so a dialog whose opener left the page (a menu item) can hand
+	// focus to the last element that is still there.
+	$effect(() => installFocusHistory(document));
 
 	// Mirror the resolved preference onto <html> so CSS-only animations (Marquee, Code)
 	// can honour it. The blocking script below sets it before hydration so a

@@ -45,6 +45,7 @@
 		mobileSheet = false,
 		mobileSheetSizeTransition = true,
 		focusOnOpen = false,
+		focusOnClose,
 		haspopup = 'dialog',
 		class: className,
 		trigger,
@@ -148,6 +149,9 @@
 		get focusOnOpen() {
 			return focusOnOpen;
 		},
+		get focusOnClose() {
+			return focusOnClose;
+		},
 		get haspopup() {
 			return haspopup;
 		},
@@ -232,6 +236,12 @@
 	{/if}
 {/if}
 
+<!-- A screen reader reads a portaled panel straight after its trigger when the trigger's
+     container owns it; the span is out of the layout and names no content of its own. -->
+{#if trigger && typeof trigger !== 'boolean' && popover.tabBridgeActive}
+	<span class="sr-only" aria-owns={popover.id}></span>
+{/if}
+
 {#if popover.isMobileSheet}
 	<Dialog
 		id={popover.id}
@@ -242,6 +252,7 @@
 		{transition}
 		{closeOnEscape}
 		{closeOnClickOutside}
+		{focusOnClose}
 		closable={closeOnEscape || closeOnClickOutside}
 		swipeToDismiss={closeOnClickOutside}
 		thumb={false}

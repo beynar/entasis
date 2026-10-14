@@ -45,6 +45,7 @@ interface DialogOptions extends MakeRequired<
 		| 'swipeToDismiss'
 		| 'swipeFrom'
 		| 'responsive'
+		| 'focusOnClose'
 	>,
 	'closeOnEscape' | 'closable'
 > {
@@ -178,7 +179,9 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 	focusScope = useFocusScope({
 		isActive: () => this.isTop,
 		inertSiblings: () => true,
-		returnTo: () => (this.#opener?.isConnected ? this.#opener : null)
+		returnTo: () => (this.#opener?.isConnected ? this.#opener : null),
+		focusOnClose: () => this.focusOnClose,
+		closeDetails: () => this.lastOpenChange
 	});
 
 	addChild = (child: DialogState) => () => this.#children.add(child);

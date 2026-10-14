@@ -1,5 +1,6 @@
 export { default as Popover } from './Popover.svelte';
 export type { PopoverPlacement, PopoverProps, PopoverSide } from './popover.props.js';
+export type { FocusOnClose } from '$lib/utils/useFocusScope.svelte.js';
 export {
 	popoverTheme,
 	setPopoverTheme,

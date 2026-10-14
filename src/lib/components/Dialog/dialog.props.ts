@@ -8,6 +8,7 @@ import type { ButtonProps } from '../Button/index.js';
 import type { FSOProps } from '$lib/transitions/transition.js';
 import type { DialogThemeProps } from './dialog.theme.js';
 import type { OpenChangeHandler } from '$lib/utils/openChange.js';
+import type { FocusOnClose } from '$lib/utils/useFocusScope.svelte.js';
 
 export type DialogType =
 	'fullScreen' | 'drawerRight' | 'drawerLeft' | 'drawerBottom' | 'drawerTop' | 'alert' | 'modal';
@@ -47,6 +48,16 @@ export type DialogProps = WithSlot<
 		scroll?: ResponsiveProps<'inner' | 'outer'>;
 		/** Fly/scale opacity transition overrides for open and close; supports responsive values. */
 		transition?: ResponsiveProps<FSOProps>;
+		/**
+		 * Where focus goes when the dialog closes. By default it returns to the control that
+		 * opened the dialog (with a visible focus ring after Escape or another keyboard close);
+		 * when that control is gone or disabled, to the most recent element that is still on the
+		 * page. `false` leaves focus where it is, an element receives it, and a function is called
+		 * with the change details (`reason`, `interaction`…) and returns one of these, or nothing
+		 * to restore as usual.
+		 * @default true
+		 */
+		focusOnClose?: FocusOnClose;
 		/** Snippet for main dialog body content; receives the dialog state instance. */
 		children?: Snippet<[DialogState]>;
 		/**
