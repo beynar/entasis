@@ -101,6 +101,12 @@
 		'Panel mode and contained frames for embedded previews',
 		'Header, footer, search, menu, and action rows',
 		'Recursive tree groups with inline and icon-popover navigation',
+		{
+			label: 'Collapsed rows open a flyout of links that Tab walks in and out of',
+			test: 'a11y:sidebar.flyout-tab'
+		},
+		'Row menus, flyouts and tooltips open toward the page from either edge and reading direction',
+		'Collapsible groups, inline submenus and tree branches share the disclosure panel animation',
 		'Independent item size and spacing density',
 		'Soft, outline, or solid active rows through one activeVariant axis',
 		'Tinted icon tiles and multiple pinned group actions from typed props'
@@ -173,7 +179,7 @@
 		</ComponentCard>
 
 		<ComponentCard
-			description="Icon collapse keeps labels mounted and fades them while the panel width animates. If any data-driven row lacks an icon, Sidebar falls back to hidden offcanvas collapse."
+			description="Icon collapse keeps labels mounted and fades them while the panel width animates. A row with a submenu opens its entries in a flyout of links, and menus, flyouts and tooltips open toward the page from whichever edge the sidebar is docked to. If any data-driven row lacks an icon, Sidebar falls back to hidden offcanvas collapse."
 			class="!min-h-fit !items-start !p-4"
 			code={iconCode}
 		>

@@ -30,7 +30,10 @@
 {:else if action.menu}
 	<PopupMenu
 		menu={{ items: action.menu }}
-		position={getSidebarMenuPosition(action.menuSide, action.menuAlign, api.isMobile)}
+		position={getSidebarMenuPosition(action.menuSide, action.menuAlign, {
+			isMobile: api.isMobile,
+			side: api.side
+		})}
 		class={action.menuClass}
 		fitTrigger={false}
 	>

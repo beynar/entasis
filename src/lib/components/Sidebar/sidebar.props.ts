@@ -24,7 +24,14 @@ export type SidebarMenuButtonVariant = 'default' | 'outline';
 export type SidebarMenuButtonSize = Sizes;
 export type SidebarTooltipMode = 'auto' | 'always';
 export type SidebarRail = boolean | 'line' | 'thumb';
-export type SidebarMenuSide = 'top' | 'right' | 'bottom' | 'left';
+/**
+ * The side of its row a menu opens on: physical (`top`, `right`, `bottom`, `left`) or logical
+ * (`inline-start` / `inline-end`, the start and end of the reading direction: `left` / `right` in
+ * a left-to-right document, mirrored in a right-to-left one). Left out, a desktop menu opens
+ * toward the page, at the `inline-end` of a `left` sidebar and the `inline-start` of a `right`
+ * one, and a mobile one below its row.
+ */
+export type SidebarMenuSide = 'top' | 'right' | 'bottom' | 'left' | 'inline-start' | 'inline-end';
 export type SidebarMenuAlign = 'start' | 'center' | 'end';
 export type SidebarIcon = Slot | string;
 /** How an active row is painted. Soft is the shared selected recipe, solid its loud counterpart. */
@@ -157,7 +164,10 @@ export type SidebarMenuActionDescriptor = {
 	onclick?: (event: MouseEvent, api: SidebarApi) => void;
 	/** Classes applied to the popup menu surface. */
 	menuClass?: string;
-	/** Preferred popup side. */
+	/**
+	 * Preferred popup side, physical or logical (`inline-end`). Defaults to the side facing the
+	 * page on desktop (logical, so it follows the reading direction) and `bottom` on mobile.
+	 */
 	menuSide?: SidebarMenuSide;
 	/** Preferred popup alignment. */
 	menuAlign?: SidebarMenuAlign;
@@ -225,7 +235,10 @@ type SidebarMenuEntryBase = {
 	items?: SidebarMenuSubEntry[];
 	/** Classes applied to the popup menu surface. */
 	menuClass?: string;
-	/** Preferred popup side. */
+	/**
+	 * Preferred popup side, physical or logical (`inline-end`). Defaults to the side facing the
+	 * page on desktop (logical, so it follows the reading direction) and `bottom` on mobile.
+	 */
 	menuSide?: SidebarMenuSide;
 	/** Preferred popup alignment. */
 	menuAlign?: SidebarMenuAlign;
@@ -362,7 +375,10 @@ type SidebarMenuButtonItemBase = {
 	 * Defaults to a chevron when a menu is set.
 	 */
 	trailing?: SidebarIcon | false | SidebarMenuActionDescriptor;
-	/** Preferred popup side. */
+	/**
+	 * Preferred popup side, physical or logical (`inline-end`). Defaults to the side facing the
+	 * page on desktop (logical, so it follows the reading direction) and `bottom` on mobile.
+	 */
 	menuSide?: SidebarMenuSide;
 	/** Preferred popup alignment. */
 	menuAlign?: SidebarMenuAlign;

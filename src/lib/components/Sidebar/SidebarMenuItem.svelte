@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { disclosurePanel } from '$lib/attachments/disclosurePanel.svelte.js';
 	import PopupMenu from '$lib/components/PopupMenu/PopupMenu.svelte';
 	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
 	import { caretRightIcon } from '$lib/components/Icons/caretRight.js';
@@ -6,6 +7,7 @@
 	import { minusIcon } from '$lib/components/Icons/minus.js';
 	import { plusIcon } from '$lib/components/Icons/plus.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { composeHandlers } from '$lib/utils/handlers.js';
 	import type { DisclosureIndicator } from '$lib/types/theme.js';
 	import type {
 		SidebarActiveVariant,
@@ -15,11 +17,12 @@
 		SidebarSize,
 		SidebarTooltipMode
 	} from './sidebar.props.js';
-	import { getSidebarMenuPosition } from './sidebar-position.js';
+	import { useDirection } from '$lib/utils/useDirection.svelte.js';
+	import { getSidebarMenuPosition, sidebarInwardPhysicalSide } from './sidebar-position.js';
 	import SidebarAction from './SidebarAction.svelte';
+	import SidebarFlyout from './SidebarFlyout.svelte';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import SidebarMenuSubItem from './SidebarMenuSubItem.svelte';
-	import { slide } from '$lib/transitions/transition.js';
 	import { useSidebarMotion, useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 
 	let {
@@ -55,10 +58,8 @@
 	let actionRef = $state<HTMLElement | null>(null);
 	const classes = $derived(useSidebarTheme(theme));
 	// Motion preset from `sidebarTheme.motion`, through the override ladder
-	// (registry → `setSidebarTheme` → the instance `theme.motion` slot). `slide` is a
-	// factory: it must be created during init, because it reads the theme context.
+	// (registry → `setSidebarTheme` → the instance `theme.motion` slot).
 	const resolveMotion = useSidebarMotion();
-	const slideTransition = slide();
 	const collapseMotion = $derived(resolveMotion(undefined, { motion: theme?.motion }));
 	const t = $derived(useI18n());
 	const isOpen = $derived(open ?? item.defaultOpen ?? false);
@@ -78,6 +79,26 @@
 	const showSubmenu = $derived(
 		hasSubmenu && !isIconCollapsed && (item.collapsible === false || isOpen)
 	);
+	// Collapsed to its icon, a row whose own press only reveals its submenu would do nothing: it
+	// opens its entries in a flyout instead. A row that navigates, opens a view or owns a menu
+	// keeps that press.
+	const hasFlyout = $derived(
+		isIconCollapsed &&
+			hasSubmenu &&
+			!item.menu &&
+			!item.href &&
+			item.view === undefined &&
+			!item.disabled
+	);
+	let itemRef = $state<HTMLLIElement | null>(null);
+	const direction = useDirection(() => itemRef);
+	// Toward the page, whichever edge the sidebar sits on and whichever way the text reads.
+	const tooltipPosition = $derived(sidebarInwardPhysicalSide(api.side, direction()));
+	const uid = $props.id();
+	const submenuId = `${uid}-submenu`;
+	// The submenu's `hidden` state and its height animation, reversible mid-way, come from the
+	// shared disclosure panel, as Collapsible's and Accordion's do.
+	const submenuPanel = disclosurePanel({ open: () => showSubmenu, motion: () => collapseMotion });
 
 	$effect(() => {
 		const activeElement = document.activeElement;
@@ -134,7 +155,7 @@
 			icon={caretRightIcon}
 			class={classes.menuTrailing({
 				size,
-				className: ['transition-transform', isOpen && 'rotate-90']
+				className: ['transition-transform', isOpen ? 'rotate-90' : 'rtl:-scale-x-100']
 			})}
 		/>
 	{/if}
@@ -163,7 +184,9 @@
 				itemSize: item.size,
 				className: item.class
 			})}
-			{@attach tooltipContent ? tooltip({ content: tooltipContent, position: 'right' }) : undefined}
+			{@attach tooltipContent
+				? tooltip({ content: tooltipContent, position: tooltipPosition })
+				: undefined}
 			onclick={handleClick}
 		>
 			{@render entryContent()}
@@ -190,7 +213,9 @@
 				itemSize: item.size,
 				className: item.class
 			})}
-			{@attach tooltipContent ? tooltip({ content: tooltipContent, position: 'right' }) : undefined}
+			{@attach tooltipContent
+				? tooltip({ content: tooltipContent, position: tooltipPosition })
+				: undefined}
 			onclick={handleClick}
 		>
 			{@render entryContent()}
@@ -207,7 +232,10 @@
 {#snippet dropdownButton()}
 	<PopupMenu
 		menu={{ items: item.menu ?? [] }}
-		position={getSidebarMenuPosition(item.menuSide, item.menuAlign, api.isMobile)}
+		position={getSidebarMenuPosition(item.menuSide, item.menuAlign, {
+			isMobile: api.isMobile,
+			side: api.side
+		})}
 		class={item.menuClass}
 		fitTrigger
 	>
@@ -231,7 +259,7 @@
 				aria-haspopup="menu"
 				aria-controls={popover.isOpen ? popover.id : undefined}
 				{@attach tooltipContent
-					? tooltip({ content: tooltipContent, position: 'right' })
+					? tooltip({ content: tooltipContent, position: tooltipPosition })
 					: undefined}
 				{@attach popover.reference}
 				onclick={() => popover.toggle()}
@@ -243,16 +271,50 @@
 	</PopupMenu>
 {/snippet}
 
+{#snippet flyoutButton()}
+	<SidebarFlyout label={item.label} links={item.items ?? []} side={api.side} {size} {density}>
+		{#snippet trigger(popover)}
+			<button
+				bind:this={submenuTriggerRef}
+				type="button"
+				data-slot="sidebar-menu-button"
+				data-sidebar="menu-button"
+				data-size={item.size ?? 'normal'}
+				data-active={item.isActive ? 'true' : undefined}
+				data-active-variant={activeVariant}
+				class={classes.menuButton({
+					variant: item.variant,
+					activeVariant,
+					size,
+					density,
+					itemSize: item.size,
+					className: item.class
+				})}
+				aria-expanded={popover.isOpen}
+				aria-controls={popover.isOpen ? popover.id : undefined}
+				{@attach tooltipContent
+					? tooltip({ content: tooltipContent, position: tooltipPosition })
+					: undefined}
+				{@attach popover.reference}
+				onclick={composeHandlers(item.onclick, () => popover.toggle())}
+			>
+				{@render entryContent()}
+			</button>
+		{/snippet}
+	</SidebarFlyout>
+{/snippet}
+
 {#snippet submenu()}
 	<ul
 		bind:this={submenuRef}
+		id={submenuId}
 		data-slot="sidebar-menu-sub"
 		data-sidebar="menu-sub"
-		inert={showSubmenu ? undefined : true}
-		aria-hidden={showSubmenu ? undefined : 'true'}
+		{...submenuPanel.attributes}
+		inert={submenuPanel.open ? undefined : true}
+		aria-hidden={submenuPanel.open ? undefined : 'true'}
 		class={classes.subMenu({ density, className: item.subClass })}
-		in:slideTransition={collapseMotion.in}
-		out:slideTransition={collapseMotion.out}
+		{@attach submenuPanel.attach}
 	>
 		{#each item.items ?? [] as sub, index (sub.label + index)}
 			<SidebarMenuSubItem
@@ -268,10 +330,17 @@
 	</ul>
 {/snippet}
 
-<li data-slot="sidebar-menu-item" data-sidebar="menu-item" class={classes.menuItem()}>
+<li
+	bind:this={itemRef}
+	data-slot="sidebar-menu-item"
+	data-sidebar="menu-item"
+	class={classes.menuItem()}
+>
 	<div class="group/menu-row relative">
 		{#if item.menu}
 			{@render dropdownButton()}
+		{:else if hasFlyout}
+			{@render flyoutButton()}
 		{:else if hasSubmenu && item.collapsible === false}
 			{@render leafButton()}
 		{:else if hasSubmenu}
@@ -288,6 +357,7 @@
 					data-open={isOpen ? 'true' : undefined}
 					aria-label={`${t.toggle} ${t.submenu}`}
 					aria-expanded={showSubmenu}
+					aria-controls={submenuPanel.rendered ? submenuId : undefined}
 					disabled={item.disabled || undefined}
 					onclick={toggleSubmenu}
 				>
@@ -312,8 +382,9 @@
 						className: item.class
 					})}
 					aria-expanded={showSubmenu}
+					aria-controls={submenuPanel.rendered ? submenuId : undefined}
 					{@attach tooltipContent
-						? tooltip({ content: tooltipContent, position: 'right' })
+						? tooltip({ content: tooltipContent, position: tooltipPosition })
 						: undefined}
 					onclick={toggleSubmenu}
 				>
@@ -348,7 +419,7 @@
 		{/if}
 	</div>
 
-	{#if showSubmenu}
+	{#if submenuPanel.rendered}
 		{@render submenu()}
 	{/if}
 </li>

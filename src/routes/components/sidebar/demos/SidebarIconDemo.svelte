@@ -2,7 +2,8 @@
 	import {
 		Sidebar,
 		type SidebarDisplayState,
-		type SidebarGroup
+		type SidebarGroup,
+		type SidebarSide
 	} from '$lib/components/Sidebar/index.js';
 	import { Skeleton } from '$lib/components/Skeleton/index.js';
 	import { bookOpenIcon } from '$lib/components/Icons/bookOpen.js';
@@ -15,6 +16,7 @@
 	import { robotIcon } from '$lib/components/Icons/robot.js';
 
 	let displayState = $state<SidebarDisplayState>('collapsed');
+	let side = $state<SidebarSide>('left');
 	let width = $state('16rem');
 	const open = $derived(displayState === 'expanded');
 
@@ -23,7 +25,15 @@
 			items: [
 				{ label: 'Automations', href: '#automations', icon: robotIcon, isActive: true },
 				{ label: 'Insights', href: '#insights', icon: chartPieIcon, badge: 4 },
-				{ label: 'Data', href: '#data', icon: databaseIcon },
+				{
+					label: 'Data',
+					icon: databaseIcon,
+					items: [
+						{ label: 'Tables', href: '#tables' },
+						{ label: 'Backups', href: '#backups' },
+						{ label: 'Archive', href: '#archive', disabled: true }
+					]
+				},
 				{ label: 'Security', href: '#security', icon: lockIcon },
 				{ label: 'Settings', href: '#settings', icon: gearIcon }
 			]
@@ -32,7 +42,14 @@
 </script>
 
 <div class="flex h-[460px] w-full flex-col gap-3">
-	<div class="flex w-full justify-end">
+	<div class="flex w-full justify-end gap-2">
+		<button
+			type="button"
+			class="state-layer border-neutral-muted bg-surface text-neutral inline-flex h-8 items-center rounded-md border px-3 text-sm font-medium transition"
+			onclick={() => (side = side === 'left' ? 'right' : 'left')}
+		>
+			{side === 'left' ? 'Dock right' : 'Dock left'}
+		</button>
 		<button
 			type="button"
 			class="state-layer border-neutral-muted bg-surface text-neutral inline-flex h-8 items-center rounded-md border px-3 text-sm font-medium transition"
@@ -50,6 +67,7 @@
 			bind:displayState
 			bind:width
 			{items}
+			{side}
 			collapsible="icon"
 			tooltips="always"
 			variant="floating"

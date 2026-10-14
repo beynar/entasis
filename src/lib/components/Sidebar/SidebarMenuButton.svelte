@@ -106,7 +106,7 @@
 		getSidebarMenuPosition(
 			menuSide ?? (compact || brand ? 'bottom' : undefined),
 			menuAlign ?? defaultAlign,
-			mobile
+			{ isMobile: mobile, side: api?.side }
 		)
 	);
 

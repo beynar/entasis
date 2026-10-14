@@ -2,6 +2,7 @@
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import { cx } from '$lib/utils/cva/index.js';
 	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
+	import { useDirection } from '$lib/utils/useDirection.svelte.js';
 	import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
 	import type {
 		SidebarActivityBar,
@@ -11,6 +12,7 @@
 		SidebarSize,
 		SidebarVariant
 	} from './sidebar.props.js';
+	import { sidebarInwardPhysicalSide } from './sidebar-position.js';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import { useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
@@ -45,10 +47,12 @@
 
 	const classes = $derived(useSidebarTheme(theme));
 	const resolvedColor = $derived(useDefaultColor());
-	// The rail is pinned to the outer screen edge, so the only on-screen direction is inward:
-	// tooltips point at the page (and overlap the panel), never off screen.
+	let navRef = $state<HTMLElement | null>(null);
+	const direction = useDirection(() => navRef);
+	// The rail is pinned to the outer edge, so the only on-screen direction is inward: tooltips
+	// point at the page (and overlap the panel), never off screen, in either reading direction.
 	const tooltipPosition = $derived(
-		orientation === 'horizontal' ? 'bottom' : side === 'right' ? 'left' : 'right'
+		orientation === 'horizontal' ? 'bottom' : sidebarInwardPhysicalSide(side, direction())
 	);
 
 	type Entry = { item: SidebarActivityBarItem; index: number; pinned: boolean };
@@ -182,6 +186,7 @@
 {/snippet}
 
 <nav
+	bind:this={navRef}
 	data-slot="sidebar-activity-bar"
 	data-sidebar="activity-bar"
 	data-color={resolvedColor}
