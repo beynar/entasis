@@ -23,7 +23,8 @@
 			label: 'Density',
 			value: 'normal',
 			options: densities
-		}
+		},
+		{ name: 'arrow', type: 'switch', label: 'Arrow', value: false }
 	]);
 	const stats = [
 		{ label: 'Components', value: '70+' },
@@ -52,6 +53,10 @@
 		{ label: 'Opens on hover and keyboard focus', test: 'a11y:hover-card.focus-opens' },
 		'Configurable open and close delays',
 		'Neighbouring cards, tooltips and hover popovers open without waiting',
+		'Pointing at the trigger again while the card is closing reopens it at once',
+		'A card opened from inside a card keeps its parent open while the pointer is on either',
+		'Wrapping trigger for a link inside a paragraph, anchored to the line the pointer entered',
+		'Optional arrow toward the trigger',
 		'Opens from a mouse or pen hover, never from a touch tap’s pointer events',
 		'Positioned by Popover with flip-aware transitions',
 		'Card-powered title, description, content and footer',
@@ -64,7 +69,7 @@
 		code={`<HoverCard
 	trigger={{ content: '@entasis', variant: 'link' }}
 	size="${controls.value.size}"
-	density="${controls.value.density}"
+	density="${controls.value.density}"${controls.value.arrow ? '\n\tarrow' : ''}
 	title="@entasis"
 	description="Configuration-first Svelte components."
 >
@@ -75,6 +80,7 @@
 			trigger={{ content: '@entasis', variant: 'link' }}
 			size={controls.value.size}
 			density={controls.value.density}
+			arrow={controls.value.arrow as boolean}
 			title="@entasis"
 			description="Configuration-first Svelte components."
 		>
@@ -204,6 +210,63 @@
 					<span class="text-neutral/70 text-xs">Updated just now</span>
 				{/snippet}
 			</HoverCard>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Cards inside cards"
+			description="A card opened from inside another card (a link in its text) keeps the outer card open while the pointer is on either of them. When the last inner card closes with the pointer outside every card, the outer one closes too."
+			class="!min-h-fit"
+			code={`<HoverCard trigger={{ content: 'Entasis', variant: 'link' }} title="Entasis">
+	<p>
+		Built on
+		<HoverCard trigger={{ content: 'Svelte', variant: 'link' }} title="Svelte">
+			<p>Cybernetically enhanced web apps.</p>
+		</HoverCard>
+	</p>
+</HoverCard>`}
+		>
+			<HoverCard trigger={{ content: 'Entasis', variant: 'link' }} title="Entasis">
+				<p class="text-neutral/70 text-sm">
+					Built on
+					<HoverCard
+						trigger={{ content: 'Svelte', variant: 'link' }}
+						title="Svelte"
+						position="right"
+					>
+						<p class="text-neutral/70 text-sm">Cybernetically enhanced web apps.</p>
+					</HoverCard>
+					and Tailwind.
+				</p>
+			</HoverCard>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Wrapping trigger and arrow"
+			description="wrap lets the trigger flow like text, so a link in a paragraph breaks across lines; the card anchors to the line the pointer entered. arrow points the card at its trigger."
+			class="!min-h-fit"
+			code={`<p class="w-56">
+	Read the
+	<HoverCard wrap arrow>
+		{#snippet trigger()}
+			<span class="underline">full release notes for this version</span>
+		{/snippet}
+		<p>Anchored to the line you pointed at.</p>
+	</HoverCard>
+	before upgrading.
+</p>`}
+		>
+			<p class="w-56 text-sm leading-6">
+				Read the
+				<HoverCard wrap arrow offset={10}>
+					{#snippet trigger()}
+						<span class="text-primary cursor-pointer underline"
+							>full release notes for this version</span
+						>
+					{/snippet}
+					<p class="text-neutral/70 text-sm">Anchored to the line you pointed at.</p>
+				</HoverCard>
+				before upgrading.
+			</p>
 		</ComponentCard>
 
 		<ComponentCard

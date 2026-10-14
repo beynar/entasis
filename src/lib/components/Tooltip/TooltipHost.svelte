@@ -52,6 +52,8 @@
 	open={!!theme.tooltip}
 	ref={currentTooltip?.ref}
 	lockScroll={false}
+	tabBridge={false}
+	closeOnFocusOut={false}
 	position={currentTooltip?.position}
 	transition={tooltipTransition}
 	closeOnMouseLeave={false}

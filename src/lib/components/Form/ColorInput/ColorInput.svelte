@@ -183,6 +183,7 @@
 <Popover
 	id={`${id}-color-popover`}
 	bind:open={isPickerOpen}
+	label={`${t.choose} ${t.color}`}
 	position="bottom-start"
 	size="normal"
 	class={classes.popover({ class: theme?.popover?.base })}

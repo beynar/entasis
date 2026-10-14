@@ -189,6 +189,7 @@
 	{id}
 	open={openState.value}
 	onOpenChange={setOpen}
+	label={calendarLabel ?? t.chooseDates}
 	{position}
 	{offset}
 	{mobileSheet}

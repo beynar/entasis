@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" generics="Payload = unknown">
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { getPopoverDialogTheme } from './popover.dialog.theme.js';
 	import type { PopoverProps } from './popover.props.js';
@@ -12,6 +12,7 @@
 	import { composeHandlers } from '$lib/utils/handlers.js';
 	import type { Attachment } from 'svelte/attachments';
 	import { SAFE_AREA_CLOSE_DELAY } from '$lib/utils/safeArea.svelte.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
 		id: customId,
@@ -44,14 +45,20 @@
 		inline = false,
 		mobileSheet = false,
 		mobileSheetSizeTransition = true,
-		focusOnOpen = false,
+		focusOnOpen,
 		focusOnClose,
 		haspopup = 'dialog',
+		label,
+		labelledBy,
+		modal = false,
+		tabBridge = true,
+		closeOnFocusOut,
+		arrow = false,
 		class: className,
 		trigger,
 		theme,
 		...attachments
-	}: PopoverProps = $props();
+	}: PopoverProps<Payload> = $props();
 	const openState = createBindableValue(
 		() => open,
 		(next) => {
@@ -61,7 +68,8 @@
 	);
 
 	const id = $props.id();
-	const popover = new PopoverState({
+	const t = $derived(useI18n());
+	const popover = new PopoverState<Payload>({
 		get id() {
 			return customId || id;
 		},
@@ -155,6 +163,24 @@
 		get haspopup() {
 			return haspopup;
 		},
+		get label() {
+			return label;
+		},
+		get labelledBy() {
+			return labelledBy;
+		},
+		get modal() {
+			return modal;
+		},
+		get tabBridge() {
+			return tabBridge;
+		},
+		get closeOnFocusOut() {
+			return closeOnFocusOut;
+		},
+		get arrow() {
+			return arrow;
+		},
 		get motion() {
 			return theme?.motion;
 		}
@@ -178,6 +204,18 @@
 	// Floating panels portal to the body layer; inline ones stay in normal document flow.
 	const maybePortal: Attachment<HTMLElement> = $derived(inline ? () => {} : portal());
 
+	// The sheet's Dialog has no title to name it by: the sheet's content names the dialog around it.
+	const nameSheet: Attachment<HTMLElement> = (node) => {
+		const dialog = node.closest('[role="dialog"]');
+		if (!dialog || (!label && !labelledBy)) return;
+		if (label) dialog.setAttribute('aria-label', label);
+		if (labelledBy) dialog.setAttribute('aria-labelledby', labelledBy);
+		return () => {
+			dialog.removeAttribute('aria-label');
+			dialog.removeAttribute('aria-labelledby');
+		};
+	};
+
 	const mobileSheetDialogTheme = $derived(
 		getPopoverDialogTheme(
 			classes.popover({
@@ -200,6 +238,7 @@
 		class={classes.popover({
 			size: popover.computedSize,
 			mode: popover.computedMode,
+			arrow: arrow && popover.computedMode === 'floating',
 			className
 		})}
 		style:transform-origin={popover.transformOrigin}
@@ -213,7 +252,24 @@
 		onintroend={popover.lifecycle.introEnd}
 		onoutroend={popover.lifecycle.outroEnd}
 	>
+		{#if arrow && popover.computedMode === 'floating'}
+			<div {@attach popover.arrowRef} aria-hidden="true" class={classes.arrow()}></div>
+		{/if}
 		{@render children?.(popover)}
+		{#if popover.isModal && (closeOnEscape || closeOnClickOutside)}
+			<!-- The page behind a modal panel is inert and its Escape and outside press are no use to
+			     a screen reader's virtual cursor: a Close button at the end of the panel is. Out of
+			     the Tab order, which the panel's own controls own. -->
+			<button
+				type="button"
+				class="sr-only"
+				tabindex="-1"
+				data-autofocus-skip
+				onclick={(event) => popover.close({ reason: 'close-press', event })}
+			>
+				{t.close}
+			</button>
+		{/if}
 	</div>
 {/snippet}
 
@@ -262,7 +318,11 @@
 		onAfterOpen={popover.lifecycle.introEnd}
 		onAfterClose={popover.lifecycle.outroEnd}
 	>
-		<div {@attach transitionSize({ isActive: () => mobileSheetSizeTransition })} {...attachments}>
+		<div
+			{@attach transitionSize({ isActive: () => mobileSheetSizeTransition })}
+			{@attach nameSheet}
+			{...attachments}
+		>
 			{@render children?.(popover)}
 		</div>
 	</Dialog>
@@ -277,6 +337,9 @@
 		open={true}
 		id={popover.id}
 		class={classes.root({ mode: popover.computedMode })}
+		aria-label={label}
+		aria-labelledby={labelledBy}
+		aria-modal={popover.isModal ? 'true' : undefined}
 		style:visibility={inline ? undefined : 'hidden'}
 		style:z-index={inline ? undefined : popover.layer.zIndex}
 		{...attachments}

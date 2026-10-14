@@ -8,7 +8,9 @@ import type { Placement, VirtualElement } from '@floating-ui/dom';
 import { useScrollLock } from '$lib/utils/useScrollLock.svelte.js';
 import { useFocusScope } from '$lib/utils/useFocusScope.svelte.js';
 import { useTabBridge } from '$lib/utils/useTabBridge.svelte.js';
-import { isTextField } from '$lib/utils/focus.js';
+import { composedContains, getDeepActiveElement, isTextField } from '$lib/utils/focus.js';
+import type { LayerHandle } from '$lib/utils/layers.svelte.js';
+import type { Attachment } from 'svelte/attachments';
 import { useSafeArea } from '$lib/utils/safeArea.svelte.js';
 import { useHoverAction } from '$lib/utils/useHoverAction.svelte.js';
 import { useOpenLifecycle, type OpenLifecycle } from '$lib/utils/openLifecycle.svelte.js';
@@ -45,9 +47,9 @@ import {
 export type PopoverPlacementState = Pick<PanelPlacement, 'side' | 'align' | 'anchorHidden'>;
 
 type MakeRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
-interface PopoverOptions extends MakeRequired<
+interface PopoverOptions<Payload = unknown> extends MakeRequired<
 	Pick<
-		PopoverProps,
+		PopoverProps<Payload>,
 		| 'id'
 		| 'size'
 		| 'position'
@@ -75,6 +77,12 @@ interface PopoverOptions extends MakeRequired<
 		| 'collisionBoundary'
 		| 'fallbackAxisSide'
 		| 'anchorTo'
+		| 'modal'
+		| 'label'
+		| 'labelledBy'
+		| 'tabBridge'
+		| 'closeOnFocusOut'
+		| 'arrow'
 	>,
 	| 'directedTransition'
 	| 'closeOnEscape'
@@ -86,6 +94,9 @@ interface PopoverOptions extends MakeRequired<
 	| 'delay'
 	| 'openOnClick'
 	| 'inline'
+	| 'modal'
+	| 'tabBridge'
+	| 'arrow'
 > {
 	isOpen: boolean;
 	// An HTMLElement, or a floating-ui virtual element (e.g. a point at the cursor for context menus).
@@ -101,7 +112,7 @@ export type PopoverOpenChangeInput = OpenChangeDetails | OpenChangeInit | Event;
 // `bind(this, options)` installs the option properties on the instance; this type-only base
 // class is what declares them to TypeScript. (Merging an empty `interface` into the class
 // would be unsafe declaration merging: the interface promises members the class never defines.)
-const PopoverOptionsBase = class {} as unknown as new () => PopoverOptions;
+const PopoverOptionsBase = class {} as unknown as new <Payload>() => PopoverOptions<Payload>;
 
 /** The role a non-dialog popup's content element carries, by `haspopup`. */
 const POPUP_ROLE = {
@@ -127,7 +138,7 @@ const TOUCH_LOCK_MARGIN = 20;
 /** A press on a trigger, remembered while its event dispatches. */
 type TriggerPress = { node: HTMLElement; event: Event; reason: OpenChangeReason };
 
-export class PopoverState extends PopoverOptionsBase {
+export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload> {
 	/** The trigger that opened the popover, while it is open; `null` for a programmatic open. */
 	activeTrigger = $state<HTMLElement | null>(null);
 	/** The most recently attached `reference` / `trigger` element. */
@@ -143,6 +154,8 @@ export class PopoverState extends PopoverOptionsBase {
 		this.triggerReference || this.externalRef || null
 	);
 	dialogElement: HTMLElement | null = $state(null);
+	/** The arrow inside the panel (`arrow`); `null` while there is none. */
+	arrowElement: HTMLElement | null = $state(null);
 	/** The panel element focus moves into (inside `dialogElement`); `null` while it is not mounted. */
 	panelElement: HTMLElement | null = $state(null);
 	// Applied to the animated panel (not the portaled positioning wrapper) so the scale/fly
@@ -201,11 +214,27 @@ export class PopoverState extends PopoverOptionsBase {
 	layer = this.theme.layers.register({
 		kind: 'popover',
 		isOpen: () => this.isOpen && !this.isMobileSheet,
-		isModal: () => false,
+		isModal: () => this.isModal,
 		dismissOnEscape: () => this.closeOnEscape,
 		dismissOnOutside: () => !this.inline && this.closeOnClickOutside,
 		onDismiss: (request) => this.setOpen(false, request),
 		state: this
+	});
+	/**
+	 * Whether no open layer sits above this popover, except a tooltip: a tooltip never takes focus
+	 * or holds a control, so one showing over a button in the panel (or over the trigger) must not
+	 * count as something that took over from it.
+	 */
+	isTopLayer = $derived.by(() => {
+		const open = this.theme.layers.open;
+		const index = open.indexOf(this.layer);
+		if (index < 0) return false;
+		return open.slice(index + 1).every((layer) => {
+			const state = layer.state;
+			return (
+				state instanceof PopoverState && !!state.panelElement?.querySelector('[role="tooltip"]')
+			);
+		});
 	});
 	computedSize = $derived(this.theme.resolveResponsiveProps(this.size, 'normal'));
 	// `inline` wins over `mobileSheet`: an in-flow panel never becomes a sheet.
@@ -213,6 +242,12 @@ export class PopoverState extends PopoverOptionsBase {
 	computedMode: 'floating' | 'inline' | 'mobileSheet' = $derived(
 		this.inline ? 'inline' : this.isMobileSheet ? 'mobileSheet' : 'floating'
 	);
+	/**
+	 * Whether the panel is modal right now: a floating panel with `modal` contains Tab and makes the
+	 * page behind it `inert`. An inline panel sits in the page and never is; the mobile sheet is a
+	 * modal Dialog of its own.
+	 */
+	isModal = $derived(!!this.modal && this.computedMode === 'floating');
 	/**
 	 * Whether the panel holds dialog content. Menus, listboxes, trees and grids render a plain
 	 * wrapper instead of an unnamed `<dialog>`, and their trigger controls the role owner inside.
@@ -239,10 +274,11 @@ export class PopoverState extends PopoverOptionsBase {
 		isActive: () =>
 			this.isOpen &&
 			!this.isMobileSheet &&
-			this.layer.isTop &&
+			this.isTopLayer &&
 			(this.computedMode !== 'floating' || this.placement !== null),
-		trap: () => false,
-		initialFocus: () => this.focusOnOpen ?? false,
+		trap: () => this.isModal,
+		inertSiblings: () => this.isModal,
+		initialFocus: () => this.focusOnOpen ?? (this.isModal ? 'first' : false),
 		restoreFocus: () => this.#focusEntered || this.activeTrigger !== null,
 		returnTo: () => this.#returnTarget(),
 		// Focus that moved on by itself (Tab past the end of the panel) is not taken back.
@@ -251,19 +287,36 @@ export class PopoverState extends PopoverOptionsBase {
 	});
 	/**
 	 * Whether Tab is bridged between the trigger and the portaled panel: a floating dialog popup
-	 * opened from a trigger. Menus, listboxes and the like manage focus themselves, and a panel the
-	 * pointer merely hovered open is not a Tab destination.
+	 * opened from a trigger, unless `tabBridge` is off. Menus, listboxes and the like manage focus
+	 * themselves, a modal panel contains Tab on its own, and a panel the pointer merely hovered
+	 * open is not a Tab destination.
 	 */
 	get tabBridgeActive(): boolean {
 		return (
 			this.isOpen &&
+			this.tabBridge &&
+			!this.isModal &&
 			this.computedMode === 'floating' &&
 			this.isDialogPopup &&
 			this.openReason !== 'hover' &&
-			this.layer.isTop &&
+			this.isTopLayer &&
 			this.placement !== null &&
 			this.panelElement !== null &&
 			this.#bridgeAnchor() !== null
+		);
+	}
+	/**
+	 * Whether focus moving away closes the popover: a floating dialog popup that is not modal (a
+	 * modal one keeps focus), not opened by the pointer hovering, and `closeOnFocusOut` (by
+	 * default, `closeOnClickOutside`). Menus and lists steer focus themselves.
+	 */
+	get closesOnFocusOut(): boolean {
+		return (
+			(this.closeOnFocusOut ?? this.closeOnClickOutside) &&
+			!this.isModal &&
+			this.computedMode === 'floating' &&
+			this.isDialogPopup &&
+			this.openReason !== 'hover'
 		);
 	}
 	// Mode preset from `popoverTheme.motion`, through the override ladder
@@ -294,7 +347,7 @@ export class PopoverState extends PopoverOptionsBase {
 	});
 
 	hoverAction = useHoverAction({
-		isActive: () => this.openOnHover && !this.isOpen,
+		isActive: () => this.openOnHover && !this.modal && !this.isOpen,
 		onMouseEnter: (event) => {
 			this.setOpen(true, {
 				reason: 'trigger-hover',
@@ -325,7 +378,7 @@ export class PopoverState extends PopoverOptionsBase {
 	/** The reading direction logical sides and start/end alignment resolve with. */
 	#direction = useDirection(this.#anchorElement);
 
-	constructor(options: PopoverOptions) {
+	constructor(options: PopoverOptions<Payload>) {
 		super();
 		bind(this, options);
 		this.lifecycle = useOpenLifecycle({
@@ -341,7 +394,8 @@ export class PopoverState extends PopoverOptionsBase {
 			}
 		});
 		setContext('popover', this);
-		if (this.parent) onMount(this.parent.addChild(this));
+		// The parent registers its children whatever their payload type.
+		if (this.parent) onMount(this.parent.addChild(this as unknown as PopoverState));
 		// Details describe the change `setOpen` made: an open state moved from outside (the bound
 		// `open` prop) leaves none, so a later close does not read the one that opened it.
 		$effect.pre(() => {
@@ -363,6 +417,35 @@ export class PopoverState extends PopoverOptionsBase {
 			},
 			onLeave: (event) =>
 				void this.setOpen(false, { reason: 'focus-out', event, interaction: 'keyboard' })
+		});
+		// Focus that was inside the popover (or on its trigger) moving on closes it. A popover whose
+		// panel focus never entered is left to outside presses: Tab, a click or a screen reader's
+		// virtual cursor elsewhere on the page only counts once focus has been in the tree. Judged
+		// in a microtask, where focus has settled and reactive state is safe to read: `focus()`
+		// calls made by a closing popup's teardown dispatch this event in the middle of a flush.
+		$effect(() => {
+			if (!this.isOpen || !this.closesOnFocusOut) return;
+			const doc = this.dialogElement?.ownerDocument;
+			if (!doc) return;
+			let within = untrack(() => this.#focusInTree(getDeepActiveElement(doc)));
+			let scheduled = false;
+			return on(doc, 'focusin', (event) => {
+				if (scheduled) return;
+				scheduled = true;
+				queueMicrotask(() => {
+					scheduled = false;
+					if (!this.isOpen || this.#appliedOpen === false || !this.closesOnFocusOut) return;
+					const active = getDeepActiveElement(doc);
+					if (!active || active === doc.body) return;
+					if (this.#focusInTree(active)) {
+						within = true;
+						return;
+					}
+					if (!within) return;
+					within = false;
+					this.setOpen(false, { reason: 'focus-out', event, interaction: 'keyboard' });
+				});
+			});
 		});
 		onDestroy(() => {
 			this.#destroyed = true;
@@ -546,6 +629,23 @@ export class PopoverState extends PopoverOptionsBase {
 		return anchor && !isTextField(anchor) ? anchor : null;
 	};
 
+	/**
+	 * Whether `target` belongs to this popover: its panel, a trigger, the `ref` element, or a popup
+	 * opened from any of them (a nested popover, a dialog the panel opened).
+	 */
+	#focusInTree = (target: Node | null): boolean => {
+		if (!target) return false;
+		const external = this.externalRef;
+		if (external instanceof Node && composedContains(external, target)) return true;
+		return this.theme.layers.open.some((layer) => {
+			for (let current: LayerHandle | null = layer; current; current = current.parent) {
+				if (current !== this.layer) continue;
+				return [...layer.nodes].some((node) => composedContains(node, target));
+			}
+			return false;
+		});
+	};
+
 	/** The details for a request, filled in from the trigger press it happens during. */
 	#details = (input?: PopoverOpenChangeInput): OpenChangeDetails => {
 		if (isOpenChangeDetails(input)) return input;
@@ -661,6 +761,7 @@ export class PopoverState extends PopoverOptionsBase {
 		fallbackAxisSide: () => this.fallbackAxisSide,
 		anchorTo: () => this.anchorTo,
 		anchorPoint: this.#anchorPoint,
+		arrow: () => (this.arrow && this.computedMode === 'floating' ? this.arrowElement : null),
 		setMinWidth: (width) => {
 			this.triggerWidth = width;
 		},
@@ -781,8 +882,11 @@ export class PopoverState extends PopoverOptionsBase {
 			}
 			set(owner, 'id', `${this.id}-${role}`);
 			this.#popupOwnerId = owner.id;
+			// Named by the consumer: `label` / `labelledBy` win over the trigger.
+			if (this.labelledBy) set(owner, 'aria-labelledby', this.labelledBy);
+			if (this.label) set(owner, 'aria-label', this.label);
 			const trigger = this.triggerReference;
-			if (trigger && !owner.hasAttribute('aria-label')) {
+			if (trigger && !owner.hasAttribute('aria-label') && !owner.hasAttribute('aria-labelledby')) {
 				set(trigger, 'id', `${this.id}-trigger`);
 				set(owner, 'aria-labelledby', trigger.id);
 			}
@@ -947,12 +1051,59 @@ export class PopoverState extends PopoverOptionsBase {
 			node.removeEventListener('keydown', forgetOnKey);
 		};
 	};
+	/** Attachment for the arrow element inside the panel; see the `arrow` prop. */
+	arrowRef = (node: HTMLElement) => {
+		this.arrowElement = node;
+		return () => {
+			if (this.arrowElement === node) this.arrowElement = null;
+		};
+	};
+
+	/** Payload getters of the triggers made with `triggerFor`. */
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- teardown bookkeeping; `#payloadVersion` carries the reactivity
+	readonly #payloads = new Map<HTMLElement, () => Payload>();
+	#payloadVersion = $state(0);
 	/**
-	 * Makes any element a complete trigger: it anchors the panel (as \`reference\` does), toggles
-	 * it on click when \`openOnClick\` allows, and keeps \`aria-expanded\` and friends in sync.
-	 * An element that is not already a control also gets \`role="button"\`, \`tabindex="0"\` and
+	 * The payload of the trigger the panel is anchored to: the one that opened it, else the most
+	 * recently attached. `undefined` for a trigger made without one. Several triggers share this one
+	 * popup, so a list of rows needs a single popover, not one per row.
+	 */
+	payload: Payload | undefined = $derived.by(() => {
+		void this.#payloadVersion;
+		const trigger = this.triggerReference;
+		return trigger ? this.#payloads.get(trigger)?.() : undefined;
+	});
+
+	/**
+	 * A complete trigger (see `trigger`) that carries data for the panel: read it back as
+	 * `popover.payload` while this trigger is the one the panel is anchored to. Pass a getter, so
+	 * the payload follows its source without re-attaching the trigger:
+	 * `{@attach popover.triggerFor(() => row)}`.
+	 */
+	triggerFor(payload: () => Payload): Attachment<HTMLElement> {
+		return (node) => {
+			const attached = this.trigger(node);
+			untrack(() => {
+				this.#payloads.set(node, payload);
+				this.#payloadVersion += 1;
+			});
+			return () => {
+				attached?.();
+				untrack(() => {
+					if (this.#payloads.get(node) !== payload) return;
+					this.#payloads.delete(node);
+					this.#payloadVersion += 1;
+				});
+			};
+		};
+	}
+
+	/**
+	 * Makes any element a complete trigger: it anchors the panel (as `reference` does), toggles
+	 * it on click when `openOnClick` allows, and keeps `aria-expanded` and friends in sync.
+	 * An element that is not already a control also gets `role="button"`, `tabindex="0"` and
 	 * Enter/Space activation, so a card or an avatar opens the panel from the keyboard too.
-	 * The element's own handler runs first: calling \`event.preventDefault()\` there, or opening,
+	 * The element's own handler runs first: calling `event.preventDefault()` there, or opening,
 	 * closing or toggling the popover itself, stops the default toggle.
 	 */
 	trigger = (node: HTMLElement) => {

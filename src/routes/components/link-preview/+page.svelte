@@ -12,7 +12,8 @@
 			label: 'Size',
 			value: 'normal',
 			options: sizes
-		}
+		},
+		{ name: 'arrow', type: 'switch', label: 'Arrow', value: false }
 	]);
 
 	const entasisMetadata = {
@@ -33,15 +34,20 @@
 		'Loads metadata when opened or prefetched',
 		'Skeleton loading and explicit error states',
 		'Supports Open Graph images and favicons',
+		'Wraps across lines inside a paragraph; the card anchors to the line the pointer entered',
 		'Custom fetcher or endpoint contract'
 	]}
 >
 	<ComponentCard
 		{controls}
 		description="Hover or focus the link to load metadata through the default endpoint."
-		code={`<LinkPreview href="https://svelte.dev" size="${controls.value.size}">Svelte</LinkPreview>`}
+		code={`<LinkPreview href="https://svelte.dev" size="${controls.value.size}"${controls.value.arrow ? ' arrow' : ''}>Svelte</LinkPreview>`}
 	>
-		<LinkPreview href="https://svelte.dev" size={controls.value.size}>Svelte</LinkPreview>
+		<LinkPreview
+			href="https://svelte.dev"
+			size={controls.value.size}
+			arrow={controls.value.arrow as boolean}>Svelte</LinkPreview
+		>
 	</ComponentCard>
 
 	{#snippet examples()}
@@ -62,6 +68,27 @@
 </LinkPreview>`}
 		>
 			<LinkPreview href="https://entasis.dev" metadata={entasisMetadata}>Entasis</LinkPreview>
+		</ComponentCard>
+
+		<ComponentCard
+			title="In a paragraph"
+			description="The link flows with the text around it. When it breaks across lines the card sits under the line the pointer entered and stays there while it is open; wrap={false} keeps the link one box."
+			class="!min-h-fit"
+			code={`<p class="w-56">
+	Read the
+	<LinkPreview href="https://entasis.dev" metadata={metadata}>
+		documentation about wrapping links in paragraphs
+	</LinkPreview>
+	and keep reading.
+</p>`}
+		>
+			<p class="w-56 text-sm leading-6">
+				Read the
+				<LinkPreview href="https://entasis.dev" metadata={entasisMetadata}>
+					documentation about wrapping links in paragraphs
+				</LinkPreview>
+				and keep reading.
+			</p>
 		</ComponentCard>
 
 		<ComponentCard

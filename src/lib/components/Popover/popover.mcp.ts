@@ -40,11 +40,11 @@ The Popover component displays floating content positioned relative to a trigger
 
 ### Event Props
 - **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void - Called before each library-requested state change, with \`details.reason\` (\`'trigger-press'\`, \`'trigger-hover'\`, \`'outside-press'\`, \`'escape-key'\`, \`'item-press'\`, \`'trigger-unmount'\`, \`'imperative-action'\`…), \`details.event\`, \`details.trigger\`, \`details.interaction\` and \`details.cancel()\`. Cancelling keeps the popover as it is and leaves the event untouched (a cancelled Escape is not \`defaultPrevented\`). Inside the callback \`open\` still holds the previous state. Types from \`entasis/types\`
-- **onAfterOpen**: (payload: PopoverState) => void - Called once per open after the open transition finishes, right away when none plays (\`defaultOpen\`, \`inline\`)
-- **onAfterClose**: (payload: PopoverState) => void - Called once per close after the close transition finishes
+- **onAfterOpen**: (payload: PopoverState<Payload>) => void - Called once per open after the open transition finishes, right away when none plays (\`defaultOpen\`, \`inline\`)
+- **onAfterClose**: (payload: PopoverState<Payload>) => void - Called once per close after the close transition finishes
 
 ### Slot Props
-- **children**: Snippet<[PopoverState]> - Popover content
+- **children**: Snippet<[PopoverState<Payload>]> - Popover content. \`Payload\` is inferred from the type you give the snippet parameter (\`PopoverState<Person>\`) and defaults to \`unknown\`
 - **trigger**: Snippet<[PopoverState]> | (ButtonProps & { content?: string }) | false - Trigger element
   - Pass a snippet function for custom trigger: \`{#snippet trigger(popover)}...</snippet>\`. Put
     \`{@attach popover.trigger}\` on any element (a card, an avatar, a Button) and it opens the
@@ -68,6 +68,11 @@ The Popover component displays floating content positioned relative to a trigger
 ### Focus & ARIA Props
 - **focusOnOpen**: 'first' | 'container' | false (default: false) - Where focus goes when the panel opens: \`'first'\` moves it to an \`[autofocus]\` / \`[data-autofocus]\` target or the first tabbable control, \`'container'\` focuses the panel itself, \`false\` keeps it on the trigger. When the popover closes with focus inside it, focus returns to the trigger that opened it (or the control pressed inside a wrapper trigger), and after a programmatic open to the element that had focus when it opened
 - **focusOnClose**: boolean | HTMLElement | ((details) => HTMLElement | boolean | void) (default: true) - Where focus goes when the popover closes with focus inside it or after a trigger opened it. \`true\` returns it to the trigger (a visible focus ring after Escape or another keyboard close), else to the most recent element still on the page; \`false\` leaves focus alone; an element receives it; a function gets the change details and returns one of these, or nothing to restore as usual. A close because focus moved on (\`'focus-out'\`) never moves it
+- **label**: string - The popup's accessible name, written as \`aria-label\` on the \`<dialog>\` (on the element with the menu, listbox, tree or grid role inside a non-dialog popup unless it has a name of its own, and on the mobile sheet's dialog). A popover that holds a form or a picker is announced as a dialog: name it
+- **labelledBy**: string - The id of an element that names the popup, written as \`aria-labelledby\` where \`label\` goes
+- **modal**: boolean (default: false) - Makes a floating popover modal: Tab stays inside the panel (wrapping from the last control to the first), the rest of the page becomes \`inert\`, the panel opens with focus inside it (\`focusOnOpen\` defaults to \`'first'\`), the layer counts as modal for Android Back and touch dismissal, and a visually hidden Close button at the end of the panel (out of the Tab order, \`reason: 'close-press'\`) gives screen reader users a control that closes it. A modal popover does not open on hover, and an \`inline\` panel ignores it. The mobile sheet is always modal
+- **tabBridge**: boolean (default: true) - Tab on the open trigger enters the portaled panel, Tab past its last control continues after the trigger and closes the panel (\`reason: 'focus-out'\`), and Shift+Tab on its first control returns to the trigger; a screen reader finds the panel straight after the trigger through \`aria-owns\`. Applies to dialog popups opened from a trigger. Menus, listboxes and the like (\`haspopup\`), modal popovers, \`ref\`-anchored panels and panels a hover opened manage Tab themselves; set \`false\` for a panel that is not meant to be tabbed into (the tooltip surface does). A trigger that is a text field (a date, color or phone input) is never bridged: Tab there moves on to the next field
+- **closeOnFocusOut**: boolean (default: the value of \`closeOnClickOutside\`) - Close (\`reason: 'focus-out'\`) when focus that was inside the popover or on its trigger moves to a control outside both and outside any popup opened from them. Focus that never entered is left to outside presses, and focus that moved on is not taken back. Does not apply to menus, lists, modal popovers or a popover the pointer opened by hovering
 - **haspopup**: 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid' | true (default: 'dialog') - Value of \`aria-haspopup\` on the trigger, describing what the panel contains. \`aria-expanded\` and \`aria-controls\` are managed automatically alongside it, for the built-in Button trigger and for a snippet trigger using \`{@attach popover.reference}\`. A \`'dialog'\` popup renders in a \`<dialog>\`; any other value renders a plain \`<div>\` wrapper, points \`aria-controls\` at the element inside with the matching role (\`role="menu"\` for \`menu\` and \`true\`) and labels that element by the trigger (\`aria-labelledby\`) unless it has an \`aria-label\`
 
 \`\`\`svelte
@@ -85,6 +90,7 @@ The Popover component displays floating content positioned relative to a trigger
   - small: Compact popover size
   - normal: Standard popover size
   - large: Larger popover size
+- **arrow**: boolean (default: false) - Draws an arrow from a floating panel toward its trigger, inside the panel behind its content. It is placed by floating-ui's \`arrow\` middleware after \`shift\`, so it keeps pointing at the trigger when the panel slides to fit the viewport, stays 10px from the panel's corners, and writes \`data-side\` (the physical side it sits on) and \`data-uncentered\` (the trigger is not under the middle of the panel). Style it with \`theme.arrow\`; it takes the panel colour (\`bg-surface-floating\`)
 - **transition**: TransitionConfig - Custom transition animation
 - **directedTransition**: boolean (default: true) - Transition direction follows position
 
@@ -103,6 +109,7 @@ A floating panel is placed before it shows: it stays hidden until its first plac
 - \`data-side\` on the panel: the side of the trigger it sits on after flipping: \`top\`, \`right\`, \`bottom\`, \`left\`; \`inline-start\` / \`inline-end\` when a logical side was requested; \`none\` when \`positionPanel\` placed it
 - \`data-align\` on the panel: \`start\`, \`center\` or \`end\` (absent with \`data-side="none"\`)
 - \`data-anchor-hidden\` on the panel: present while the trigger is scrolled out of view; the panel is hidden meanwhile
+- \`data-side\` / \`data-uncentered\` on the arrow (\`arrow\`): the physical side of the panel it sits on, and present while the trigger is not under the middle of the panel
 - \`data-popup-side\` on the trigger (or the \`ref\` element): the panel's \`data-side\` while it is placed, so a theme can flatten the corner the panel attaches to
 
 **CSS variables** (set on the positioned wrapper, inherited by the panel and its content)
@@ -180,6 +187,41 @@ activation:
 	{/snippet}
 
 	<p>Profile details</p>
+</Popover>
+\`\`\`
+
+### One popup for many triggers
+
+A list of rows needs one Popover, not one per row. \`popover.triggerFor(() => row)\` is \`popover.trigger\` plus a payload getter: the popup moves to the trigger that was pressed (pressing another trigger while it is open moves it there and keeps it open), and \`popover.payload\` is that trigger's data, read live. Pass a getter, not the value, so the payload follows its source without the trigger being removed and re-attached (which would close the popover).
+
+\`\`\`svelte
+<script lang="ts">
+	import { Popover, type PopoverState } from 'entasis/popover';
+	import { Button } from 'entasis/button';
+
+	type Person = { id: number; name: string; role: string };
+	let { people }: { people: Person[] } = $props();
+</script>
+
+<Popover position="bottom" arrow>
+	{#snippet trigger(popover: PopoverState<Person>)}
+		{#each people as person (person.id)}
+			<Button {@attach popover.triggerFor(() => person)}>{person.name}</Button>
+		{/each}
+	{/snippet}
+	{#snippet children(popover: PopoverState<Person>)}
+		<strong>{popover.payload?.name}</strong>
+		<p>{popover.payload?.role}</p>
+	{/snippet}
+</Popover>
+\`\`\`
+
+### Modal and named
+
+\`\`\`svelte
+<Popover modal label="Delivery options" trigger={{ content: 'Delivery options' }}>
+	<fieldset>...</fieldset>
+	<Button>Save</Button>
 </Popover>
 \`\`\`
 
@@ -481,6 +523,7 @@ The theme object contains the following parts:
   sheet slides up). Takes \`in\` / \`out\` FSO params plus a \`duration\` / \`easing\` motion token;
   the \`transition\` prop wins over it
 - **popover**: Main popover container styles
+- **arrow**: The arrow (\`arrow\` prop): a rotated square in the panel colour, absolutely positioned inside the panel behind its content (\`-z-10\`); its position is written inline by the placement
 
 ### Theme Type Definition
 

@@ -48,7 +48,7 @@ export type PopoverFallbackAxisSide = 'start' | 'end' | 'none';
 /** What a panel anchors to on a reference that wraps across lines; see `anchorTo`. */
 export type PopoverAnchorTo = 'box' | 'line';
 
-export type PopoverProps = WithAttachments<{
+export type PopoverProps<Payload = unknown> = WithAttachments<{
 	/** Stable DOM id for the popover dialog; falls back to a generated id when omitted. */
 	id?: string;
 	/** Controls whether the popover is open; bindable for two-way control. */
@@ -65,9 +65,9 @@ export type PopoverProps = WithAttachments<{
 	 */
 	onOpenChange?: OpenChangeHandler;
 	/** Called once per open, after the open transition finishes (right away when none plays, e.g. `defaultOpen`). */
-	onAfterOpen?: (payload: PopoverState) => void;
+	onAfterOpen?: (payload: PopoverState<Payload>) => void;
 	/** Called once per close, after the close transition finishes. */
-	onAfterClose?: (payload: PopoverState) => void;
+	onAfterClose?: (payload: PopoverState<Payload>) => void;
 	/** Popover panel size variant; supports responsive values. */
 	size?: ResponsiveProps<Sizes>;
 	/** Gap in pixels between the reference element and the popover panel. */
@@ -151,7 +151,7 @@ export type PopoverProps = WithAttachments<{
 	/** Fly/scale opacity transition overrides for open and close; supports responsive values. */
 	transition?: ResponsiveProps<FSOProps>;
 	/** Snippet for popover panel content; receives the popover state instance. */
-	children?: Snippet<[PopoverState]>;
+	children?: Snippet<[PopoverState<Payload>]>;
 	/**
 	 * Snippet, button props, or `false` to render, customize, or hide the trigger control. The
 	 * trigger that opened the popover anchors it and gets focus back; an open popover closes when
@@ -159,12 +159,12 @@ export type PopoverProps = WithAttachments<{
 	 * element keeps it open. The built-in button's `onclick` runs first: calling
 	 * `event.preventDefault()` there stops the toggle.
 	 */
-	trigger?: Snippet<[PopoverState]> | (ButtonProps & { content?: string }) | false;
+	trigger?: Snippet<[PopoverState<Payload>]> | (ButtonProps & { content?: string }) | false;
 	/**
 	 * Where focus goes when the panel opens: `'first'` (autofocus target or first tabbable),
 	 * `'container'` (the panel itself), or `false` (stay on the trigger). When the popover
 	 * closes, focus returns to the trigger that opened it, or after a programmatic open to the
-	 * element that had focus when it opened.
+	 * element that had focus when it opened. A `modal` popover defaults to `'first'`.
 	 * @default false
 	 */
 	focusOnOpen?: 'first' | 'container' | false;
@@ -187,6 +187,52 @@ export type PopoverProps = WithAttachments<{
 	 * @default 'dialog'
 	 */
 	haspopup?: 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid' | true;
+	/**
+	 * The popup's accessible name, written as `aria-label` on the `<dialog>` (on the menu, listbox,
+	 * tree or grid element inside a non-dialog popup, unless it has a name of its own, and on the
+	 * mobile sheet's dialog). A popover that holds a form or a picker is announced as a dialog:
+	 * name it, or point `labelledBy` at its visible heading.
+	 */
+	label?: string;
+	/**
+	 * The id of an element that names the popup, written as `aria-labelledby` where `label` goes.
+	 * Wins over `label` for assistive technology when both are set.
+	 */
+	labelledBy?: string;
+	/**
+	 * Makes the popover modal while it floats: Tab stays inside the panel, the rest of the page
+	 * becomes `inert`, the panel opens with focus inside it (`focusOnOpen` defaults to
+	 * `'first'`), and a visually hidden Close button at the end of the panel gives screen reader
+	 * users a control that closes it. A modal popover does not open on hover. The mobile sheet is
+	 * always modal; an `inline` panel ignores this.
+	 * @default false
+	 */
+	modal?: boolean;
+	/**
+	 * Bridges Tab between the trigger and the panel, which is portaled to the end of the page:
+	 * Tab on the open trigger enters the panel, Tab past its last control continues after the
+	 * trigger and closes it, and Shift+Tab on its first control returns to the trigger. Applies to
+	 * dialog popups opened from a trigger; menus, listboxes and the like (`haspopup`) and modal
+	 * popovers manage Tab themselves. Turn it off for a panel that is not meant to be tabbed into.
+	 * @default true
+	 */
+	tabBridge?: boolean;
+	/**
+	 * Closes the popover (`reason: 'focus-out'`) when focus that was inside it or on its trigger
+	 * moves to a control outside both and outside any popup opened from it. Defaults to the value
+	 * of `closeOnClickOutside`, so a popover that outlives outside presses outlives focus moving
+	 * on too. Does not apply to menus, listboxes and the like, or to a popover the pointer opened
+	 * by hovering.
+	 */
+	closeOnFocusOut?: boolean;
+	/**
+	 * Draws an arrow from the panel toward its trigger. It is placed with floating-ui's `arrow`
+	 * middleware, so it stays on the trigger when the panel shifts to fit the viewport, and
+	 * reports the side it sits on as `data-side` (`data-uncentered` when the trigger is not
+	 * under its middle). Style it with `theme.arrow`. Only a floating panel has one.
+	 * @default false
+	 */
+	arrow?: boolean;
 	/** When true, pressing outside the popover closes it. A press that began before it opened does not count, and on touch screens only a tap does (a finger that starts scrolling the page does not). */
 	closeOnClickOutside?: boolean;
 	/** When true, pressing Escape closes the topmost open popover. */

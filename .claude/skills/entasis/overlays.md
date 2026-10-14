@@ -24,11 +24,14 @@ beneath, else to the most recent element still on the page, and a close by Escap
 keyboard shows the focus ring. `focusOnClose` on Dialog and Popover overrides it: `false` leaves
 focus alone, an element receives it, a function gets the change details and returns either. A
 Popover's panel is portaled to the end of the page, so Tab on its open trigger enters the panel,
-Tab past the last control continues after the trigger and closes it, and Shift+Tab returns.
+Tab past the last control continues after the trigger and closes it (`tabBridge`, default on for
+dialog popups; menus, lists and the tooltip surface opt out), and Shift+Tab returns. Focus that was in
+the popover or on its trigger moving to a control outside it closes it too (`closeOnFocusOut`,
+following `closeOnClickOutside`).
 Escape closes only the topmost open layer; an outside press dismisses every layer stacked above the
 one pressed (a press that began before the layer opened never does, and on touch only a tap does);
 on Android the Back gesture closes the topmost modal layer like Escape. Modal layers (Dialog)
-contain Tab and make the rest of the page `inert`; Popover is non-modal. See [Dialog](#dialog) and
+contain Tab and make the rest of the page `inert`; a Popover is non-modal unless it sets `modal`. See [Dialog](#dialog) and
 [Popover](#popover).
 
 `onOpenChange(open, details)` runs before the state changes. `details` carries `reason`
@@ -145,26 +148,31 @@ Floating content positioned relative to a trigger element.
 
 ### Unique Props
 
-| Prop                  | Type                                                                      | Default    |
-| --------------------- | ------------------------------------------------------------------------- | ---------- |
-| `open`                | `boolean` (bindable)                                                      | `false`    |
-| `ref`                 | `HTMLElement \| VirtualElement \| null`                                   | -          |
-| `position`            | `Placement` (12 options)                                                  | `'bottom'` |
-| `offset`              | `number`                                                                  | -          |
-| `fitTrigger`          | `boolean`                                                                 | `false`    |
-| `positionPanel`       | `({ panel, reference }) => { x, y, minWidth? } \| null`                   | -          |
-| `inline`              | `boolean`                                                                 | `false`    |
-| `openOnHover`         | `boolean`                                                                 | `false`    |
-| `openOnClick`         | `boolean`                                                                 | `true`     |
-| `delay`               | `number`                                                                  | `100`      |
-| `closeOnEscape`       | `boolean`                                                                 | `true`     |
-| `closeOnClickOutside` | `boolean`                                                                 | `true`     |
-| `closeOnMouseLeave`   | `boolean`                                                                 | `false`    |
-| `focusOnOpen`         | `'first' \| 'container' \| false`                                         | `false`    |
-| `focusOnClose`        | `boolean \| HTMLElement \| ((details) => HTMLElement \| boolean \| void)` | `true`     |
-| `haspopup`            | `'dialog' \| 'menu' \| 'listbox' \| 'tree' \| 'grid' \| true`             | `'dialog'` |
-| `lockScroll`          | `boolean`                                                                 | `true`     |
-| `directedTransition`  | `boolean`                                                                 | `true`     |
+| Prop                  | Type                                                                      | Default               |
+| --------------------- | ------------------------------------------------------------------------- | --------------------- |
+| `open`                | `boolean` (bindable)                                                      | `false`               |
+| `ref`                 | `HTMLElement \| VirtualElement \| null`                                   | -                     |
+| `position`            | `Placement` (12 options)                                                  | `'bottom'`            |
+| `offset`              | `number`                                                                  | -                     |
+| `fitTrigger`          | `boolean`                                                                 | `false`               |
+| `positionPanel`       | `({ panel, reference }) => { x, y, minWidth? } \| null`                   | -                     |
+| `inline`              | `boolean`                                                                 | `false`               |
+| `openOnHover`         | `boolean`                                                                 | `false`               |
+| `openOnClick`         | `boolean`                                                                 | `true`                |
+| `delay`               | `number`                                                                  | `100`                 |
+| `closeOnEscape`       | `boolean`                                                                 | `true`                |
+| `closeOnClickOutside` | `boolean`                                                                 | `true`                |
+| `closeOnMouseLeave`   | `boolean`                                                                 | `false`               |
+| `focusOnOpen`         | `'first' \| 'container' \| false`                                         | `false`               |
+| `focusOnClose`        | `boolean \| HTMLElement \| ((details) => HTMLElement \| boolean \| void)` | `true`                |
+| `haspopup`            | `'dialog' \| 'menu' \| 'listbox' \| 'tree' \| 'grid' \| true`             | `'dialog'`            |
+| `label`, `labelledBy` | `string` (aria-label text / id of the naming element)                     | -                     |
+| `modal`               | `boolean`                                                                 | `false`               |
+| `tabBridge`           | `boolean`                                                                 | `true`                |
+| `closeOnFocusOut`     | `boolean`                                                                 | `closeOnClickOutside` |
+| `arrow`               | `boolean`                                                                 | `false`               |
+| `lockScroll`          | `boolean`                                                                 | `true`                |
+| `directedTransition`  | `boolean`                                                                 | `true`                |
 
 The trigger automatically gets `aria-haspopup` (from `haspopup`), `aria-expanded`, and `aria-controls`; a snippet trigger opts in with `{@attach popover.reference}`.
 
@@ -178,6 +186,13 @@ open. With several `{@attach popover.trigger}` elements, the one pressed anchors
 A `haspopup` other than `'dialog'` renders a plain wrapper instead of a `<dialog>`, points the
 trigger's `aria-controls` at the element with that role (`role="menu"` for `menu`) and labels it by
 the trigger.
+
+`label` (or `labelledBy`, an element id) names the dialog; a popover that holds a form or a picker is
+announced as a dialog, so name it. `modal` keeps Tab inside the panel, makes the page `inert`, opens
+with focus inside and adds a visually hidden Close button at the end of the panel for screen readers.
+`arrow` draws a pointer toward the trigger that stays on it when the panel shifts to fit. One Popover
+can serve many triggers: `{@attach popover.triggerFor(() => row)}` anchors it to the one pressed and
+`popover.payload` holds that trigger's data (type the snippet parameter `PopoverState<Row>`).
 
 `inline` renders the panel in normal document flow where the component sits instead of portaling to
 the viewport-fixed layer: no floating-ui positioning, no scroll lock, no outside-press dismissal
@@ -197,13 +212,13 @@ wins over `mobileSheet`.
 ### PopoverState (passed to snippets)
 
 - `isOpen`, `id`, `size`, `position`, `offset`, `open(details?)`, `close(details?)`,
-  `toggle(details?)`, `setOpen(open, details?)`, `openReason` (`'hover' | 'press' | 'keyboard' |
-'programmatic'`), `activeTrigger`, `lifecycle.status`, `trigger` and `reference` (attachments for
-  a custom trigger)
+  `toggle(details?)`, `setOpen(open, details?)`, `payload`, `openReason` (`'hover' | 'press' | 'keyboard' |
+'programmatic'`), `activeTrigger`, `lifecycle.status`, `trigger`, `triggerFor(() => payload)` and
+  `reference` (attachments for a custom trigger)
 
 ### Theme Parts
 
-`root` (mode: floating | inline | mobileSheet) | `popover` (base, size, mode)
+`root` (mode: floating | inline | mobileSheet) | `popover` (base, size, mode) | `arrow`
 
 ### Example
 
