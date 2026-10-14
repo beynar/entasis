@@ -14,14 +14,19 @@ The Avatar component displays a user's profile picture with fallback initials. I
 ### Core Props
 - **name**: string (required) - Display name; its initials are the fallback when no image renders
 - **src**: string - Image URL; omit it, or let it fail, to render the initials instead
-- **alt**: string - Alternative text for the image (defaults to \`name\`)
+- **alt**: string - Accessible name of the whole avatar (defaults to \`name\`). An empty string makes the avatar decorative: it is hidden from assistive technology
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
   - small: 24px (1.5rem)
   - normal: 32px (2rem)
   - large: 40px (2.5rem)
 
+### Image Props
+- **image**: { srcset, sizes, crossorigin, referrerpolicy, loading, decoding, fetchpriority } - Native attributes forwarded to the \`<img>\`. Use \`image={{ loading: 'lazy' }}\` to defer offscreen images: the initials stay on screen until the browser has fetched the picture. (The avatar's own \`loading\` prop is the bindable in-flight flag, not the \`<img>\` attribute.)
+
 ### Loading Props
-- **delay**: number (default: 0) - Delay in milliseconds before showing avatar
+- **fallbackDelay**: number (default: 0) - Delay in milliseconds before the initials render while the image is still loading. Until then the surface stays empty, so a fast image never flashes the fallback. A failed image or a missing \`src\` shows the initials immediately
+- **revealDelay**: number (default: 0) - Delay in milliseconds before a loaded image is revealed
+- **delay**: number - Deprecated alias of \`revealDelay\`; it never delays the initials
 - **loading**: boolean (default: false, bindable) - True while the image request is in flight; false with no \`src\`, and false once the image has loaded or failed. A failed image is reported by rendering the initials.
 
 ### Content Slots
@@ -49,6 +54,7 @@ The Avatar component displays a user's profile picture with fallback initials. I
 - **items**: Array<{ src?: string; alt?: string; name: string } & T> (required) - Avatar items
 - **max**: number - Maximum number of avatars to show before "+N" indicator
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
+- **image**, **fallbackDelay**, **revealDelay**, **loading**: forwarded to every avatar
 
 ### Content Slots
 - **avatar**: Snippet<{ item: T; index: number; avatarProps }> - Custom avatar rendering
@@ -203,9 +209,11 @@ The Avatar component displays a user's profile picture with fallback initials. I
 
 ## Accessibility
 
-- \`alt\` defaults to \`name\`, so the image always carries alt text
-- Fallback to initials when image fails to load
-- Proper foreground for initials display
+- The root is \`role="img"\` named by \`alt ?? name\`, so a loading, loaded or failed image and an avatar without \`src\` are all announced as one image with one name
+- The inner \`<img>\` has an empty \`alt\` and the initials are \`aria-hidden\`, so nothing is read twice
+- \`alt=""\` marks the avatar decorative (\`aria-hidden\` on the root), for an avatar next to its visible name
+- Because the root is an image, prefix and suffix content is presentational to assistive technology; keep interactive controls outside the avatar
+- The root carries \`data-status="idle | loading | loaded | error"\` (\`idle\` means no \`src\`). The default theme crossfades the image over the initials on it; style it with \`group-data-[status=loaded]/avatar:\` or \`[data-status=error]\`
 - The image loading flag is bindable
 
 ## Notes

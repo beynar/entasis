@@ -584,6 +584,7 @@ export const es: Messages = {
 	// Medidor
 	meter: 'Medidor',
 	meterSegment: (index: string | number, count: string | number) => `Segmento ${index} de ${count}`,
+	progressIndeterminate: 'Progreso indeterminado',
 	// Validación de campos
 	fieldRequired: 'Este campo es obligatorio',
 	fieldMustBeChecked: 'Marca esta casilla para continuar',
@@ -598,5 +599,13 @@ export const es: Messages = {
 	fieldRangeUnderflow: (min: string | number) => `Introduce un valor mayor o igual que ${min}`,
 	fieldRangeOverflow: (max: string | number) => `Introduce un valor menor o igual que ${max}`,
 	fieldIncomplete: (length: string | number) =>
-		`Introduce ${Number(length) === 1 ? 'el carácter' : `los ${length} caracteres`}`
+		`Introduce ${Number(length) === 1 ? 'el carácter' : `los ${length} caracteres`}`,
+	// Combobox
+	resultsCount: (count: string | number) =>
+		Number(count) === 1 ? '1 resultado disponible' : `${count} resultados disponibles`,
+	tags: 'Etiquetas',
+	// CheckboxesInput
+	selectAll: 'Seleccionar todo',
+	// PinInput
+	oneTimeCode: 'Código de un solo uso'
 };

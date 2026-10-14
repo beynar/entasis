@@ -1,10 +1,10 @@
 <script lang="ts">
-	import PopupMenu from '$lib/components/PopupMenu/PopupMenu.svelte';
+	import MenuOption from '$lib/components/MenuOption/MenuOption.svelte';
+	import Popover from '$lib/components/Popover/Popover.svelte';
 	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
 	import { caretRightIcon } from '$lib/components/Icons/caretRight.js';
 	import { fileIcon } from '$lib/components/Icons/file.js';
 	import { folderIcon } from '$lib/components/Icons/folder.js';
-	import type { MenuItem } from '$lib/components/Menu/menu.props.js';
 	import type {
 		SidebarActiveVariant,
 		SidebarApi,
@@ -69,39 +69,6 @@
 	const rowSlot = $derived(isSubNode ? 'sidebar-menu-sub-button' : 'sidebar-menu-button');
 	const rowData = $derived(isSubNode ? 'menu-sub-button' : 'menu-button');
 	const popupPosition = $derived(api.side === 'right' ? 'left-start' : 'right-start');
-	const popupItems = $derived(isSubNode ? [] : toMenuItems(node.children ?? []));
-
-	function toMenuItems(nodes: SidebarTreeNode[]): MenuItem[] {
-		return nodes.map((treeNode): MenuItem => {
-			const children = treeNode.children ?? [];
-			const option = {
-				title: treeNode.label,
-				prefix: treeNode.icon ?? (children.length ? folderIcon : fileIcon),
-				size,
-				active: treeNode.isActive,
-				attrs: treeNode.isActive ? { 'aria-current': 'page' } : undefined
-			};
-
-			if (children.length) {
-				return {
-					...option,
-					type: 'submenu',
-					menu: toMenuItems(children)
-				};
-			}
-
-			return {
-				...option,
-				type: 'option',
-				href: treeNode.href,
-				// The node's own handler runs first; `event.preventDefault()` skips this explicit close. The
-				// flyout is a PopupMenu, which closes on any item press, so it closes either way.
-				onclick: composeHandlers(treeNode.onclick, () => {
-					popupOpen = false;
-				})
-			};
-		});
-	}
 
 	$effect(() => {
 		if (!isIconCollapsed) popupOpen = false;
@@ -113,6 +80,39 @@
 	});
 </script>
 
+{#snippet flyoutLevel(nodes: SidebarTreeNode[], group?: string)}
+	<ul
+		aria-label={group}
+		class="gap-micro m-0 flex list-none flex-col p-0 {group !== undefined ? 'ps-md' : ''}"
+	>
+		{#each nodes as child, index (child.label + index)}
+			<li>
+				{#if child.children?.length}
+					<span aria-hidden="true" class="px-md py-xs text-neutral/70 block text-xs font-medium">
+						{child.label}
+					</span>
+					{@render flyoutLevel(child.children, child.label)}
+				{:else}
+					<!-- The node's own handler runs first; `event.preventDefault()` skips the explicit
+					     close of the flyout. -->
+					<MenuOption
+						href={child.href}
+						title={child.label}
+						prefix={child.icon ?? fileIcon}
+						{size}
+						{density}
+						active={child.isActive}
+						attrs={child.isActive ? { 'aria-current': 'page' } : undefined}
+						onclick={composeHandlers(child.onclick, () => {
+							popupOpen = false;
+						})}
+					/>
+				{/if}
+			</li>
+		{/each}
+	</ul>
+{/snippet}
+
 <li
 	data-slot={isSubNode ? 'sidebar-menu-sub-item' : 'sidebar-menu-item'}
 	data-sidebar={isSubNode ? 'menu-sub-item' : 'menu-item'}
@@ -120,11 +120,15 @@
 >
 	{#if hasChildren}
 		{#if isIconCollapsed && !isSubNode}
-			<PopupMenu
+			<!-- A flyout of links is a disclosure, not a menu: the trigger reports aria-expanded and
+			     aria-controls, and the panel is a named nav of links (nested folders become named
+			     sub-lists), so Tab walks it and every row is announced as the link it is. -->
+			<Popover
 				bind:open={popupOpen}
-				menu={{ items: popupItems, submenuMode: 'popover', density }}
 				position={popupPosition}
 				fitTrigger={false}
+				size="small"
+				label={node.label}
 			>
 				{#snippet trigger(popover)}
 					<button
@@ -134,7 +138,6 @@
 						data-sidebar={rowData}
 						class={rowClass}
 						aria-expanded={popover.isOpen}
-						aria-haspopup="menu"
 						aria-controls={popover.isOpen ? popover.id : undefined}
 						{@attach tooltipContent
 							? tooltip({ content: tooltipContent, position: 'right' })
@@ -146,7 +149,10 @@
 						<span class={classes.menuLabel()}>{node.label}</span>
 					</button>
 				{/snippet}
-			</PopupMenu>
+				<nav aria-label={node.label} data-slot="sidebar-flyout" class="min-w-48">
+					{@render flyoutLevel(node.children ?? [])}
+				</nav>
+			</Popover>
 		{:else}
 			<button
 				bind:this={triggerRef}

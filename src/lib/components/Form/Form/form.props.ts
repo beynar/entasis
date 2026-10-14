@@ -1,8 +1,10 @@
 import type { Snippet } from 'svelte';
 import type { WithSlot } from '$lib/components/Slot/slot.js';
 import type { Density, Sizes } from '$lib/types/theme.js';
+import type { ValidationMode } from '../Field/field.state.svelte.js';
 import type {
 	FormAction,
+	FormErrors,
 	FormInputs,
 	FormInputsWithState,
 	FormSubmitHandler,
@@ -70,8 +72,28 @@ export type FormProps<I extends FormInputs> = WithSlot<
 		 */
 		actions?: FormAction<I>[];
 		/**
+		 * When fields validate by themselves, besides a submit. `'submit'` (the default) waits for
+		 * the first submit attempt and then re-validates each edited field; `'blur'` validates a
+		 * field when focus leaves it; `'change'` validates on every change. A field that shows an
+		 * error always re-validates as it is edited. A field's own `validationMode` wins.
+		 */
+		validationMode?: ValidationMode;
+		/**
+		 * Milliseconds an edit waits before the validation it triggers, so an async `onValidate`
+		 * is not called on every keystroke. Submit and blur validate at once.
+		 */
+		validationDebounce?: number;
+		/**
+		 * Errors from outside the form, a server response such as a SvelteKit `ActionData`, keyed
+		 * by field name. Each shows under its field, survives validation, does not block a
+		 * submit, and clears when that field's value next changes. Changing the prop replaces
+		 * the errors, and `form.setErrors()` does the same imperatively.
+		 */
+		errors?: FormErrors<I>;
+		/**
 		 * Disables every field, for example `disabled={form.loading}` while a submission runs.
-		 * Disabled fields skip validation.
+		 * Disabled fields skip validation and, as in a native form, are left out of the submitted
+		 * value.
 		 */
 		disabled?: boolean;
 		/**

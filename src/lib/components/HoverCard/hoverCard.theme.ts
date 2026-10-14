@@ -3,15 +3,22 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 import { motion, useComponentMotion } from '$lib/utils/motion/index.js';
 
 const defaultHoverCardTrigger = cva({
-	base: 'inline-flex w-fit max-w-full outline-none',
+	base: 'max-w-full outline-none',
 	variants: {
 		disabled: {
 			true: 'pointer-events-none opacity-55',
 			false: null
+		},
+		// A wrapping trigger flows like text, so a link in a paragraph breaks across lines and each
+		// line keeps its own box; its box-decoration (rings, rounding) repeats on every line.
+		wrap: {
+			true: 'box-decoration-clone inline',
+			false: 'inline-flex w-fit'
 		}
 	},
 	defaultVariants: {
-		disabled: false
+		disabled: false,
+		wrap: false
 	}
 });
 

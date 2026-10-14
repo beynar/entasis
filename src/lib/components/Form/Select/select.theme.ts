@@ -83,6 +83,28 @@ const defaultContent = cva({
 	}
 });
 
+// The scrolling list inside the panel. A dropdown (`alignItemWithTrigger={false}`, or a list
+// opened by touch) is capped at 240px or the room left beside the trigger; an item-aligned list
+// is sized by the viewport instead, and honours any `max-height` a theme puts here.
+const defaultList = cva({
+	base: 'flex flex-col',
+	variants: {
+		dropdown: {
+			true: 'max-h-[min(240px,calc(var(--available-height,100dvh)_-_2*var(--space-xs)))]',
+			false: ''
+		}
+	},
+	defaultVariants: {
+		dropdown: false
+	}
+});
+
+// The scrolling viewport is the listbox itself: it takes the keyboard-driven focus ring away and
+// keeps the highlighted option clear of the padded edges when it scrolls into view.
+const defaultListbox = cva({
+	base: 'scroll-py-xs outline-none'
+});
+
 const defaultGroup = cva({
 	base: 'flex scroll-my-1 flex-col p-xs',
 	variants: {
@@ -127,6 +149,8 @@ export const selectTheme = {
 	value: defaultValue,
 	triggerIcon: defaultTriggerIcon,
 	content: defaultContent,
+	list: defaultList,
+	listbox: defaultListbox,
 	group: defaultGroup,
 	groupLabel: defaultGroupLabel,
 	separator: defaultSeparator

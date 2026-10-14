@@ -4,6 +4,14 @@ import {
 	type InferComponentTheme,
 	useComponentTheme
 } from '$lib/utils/cva/index.js';
+import { getContext } from 'svelte';
+import {
+	motion,
+	type DeepPartial,
+	type MotionSpec,
+	type MotionTheme,
+	type ResolvedMotion
+} from '$lib/utils/motion/index.js';
 
 // A Field lays itself out against its OWN width, not the viewport: the `left` (horizontal)
 // label layout turns the root into an inline-size container and every breakpoint below is a
@@ -230,7 +238,17 @@ const defaultFieldHelper = cva({
 	}
 });
 
+// Errors fade and grow in on the y axis; the Theme's motion tokens decide the duration and easing.
+export const defaultFieldMotion = motion({
+	base: {
+		in: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0 },
+		out: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0 },
+		easing: 'enter'
+	}
+});
+
 export const fieldTheme = {
+	motion: defaultFieldMotion,
 	root: defaultField,
 	header: defaultFieldHeader,
 	label: defaultFieldLabel,
@@ -251,3 +269,21 @@ export type FieldThemeProps = InferComponentTheme<FieldTheme>;
 
 export const setFieldTheme = setComponentTheme<FieldTheme>('field');
 export const useFieldTheme = useComponentTheme<FieldTheme>('field', fieldTheme);
+
+/**
+ * The Field motion resolver. Unlike other components a Field also renders without a `<Theme>`
+ * (a standalone control), so it falls back to the library motion scale instead of throwing.
+ */
+export const useFieldMotion = (): ((override?: DeepPartial<MotionSpec>) => ResolvedMotion) => {
+	const theme = getContext('entasisTheme') as
+		| (MotionTheme & {
+				componentThemes?: Record<string, { motion?: DeepPartial<MotionSpec> } | undefined>;
+		  })
+		| undefined;
+	const scoped = getContext<{ motion?: DeepPartial<MotionSpec> } | undefined>('fieldTheme');
+	return (override) =>
+		defaultFieldMotion(
+			{},
+			{ theme, overrides: [theme?.componentThemes?.field?.motion, scoped?.motion, override] }
+		);
+};

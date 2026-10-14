@@ -41,11 +41,34 @@ const defaultPopover = cva({
 			inline: '',
 			mobileSheet:
 				'max-h-[85dvh] w-full max-w-none overflow-auto rounded-b-none rounded-t-xl pb-[calc(env(safe-area-inset-bottom)+1rem)]'
+		},
+		// The arrow is placed against the panel's box.
+		arrow: {
+			true: 'relative',
+			false: ''
 		}
 	},
 	defaultVariants: {
-		mode: 'floating'
+		mode: 'floating',
+		arrow: false
 	}
+});
+
+// The arrow is a rotated square the panel's colour, half of it poking out of the edge that faces
+// the trigger. It sits behind the panel's content (`-z-10` inside the panel's own stacking
+// context) but above the panel's own border, so the half inside the panel hides the border
+// beneath it and the half outside carries the edge on its two outer sides: the corner that
+// points at the trigger is the top-left one before the 45° turn when the panel is below it, the
+// bottom-right one when above, and so on. Its position along the edge and its edge offset are
+// written by the placement, with the side as `data-side`.
+const defaultPopoverArrow = cva({
+	base: [
+		'bg-surface-floating pointer-events-none absolute -z-10 size-2.5 rotate-45 rounded-xs border border-transparent',
+		'data-[side=bottom]:border-t-neutral-muted data-[side=bottom]:border-l-neutral-muted',
+		'data-[side=top]:border-r-neutral-muted data-[side=top]:border-b-neutral-muted',
+		'data-[side=right]:border-b-neutral-muted data-[side=right]:border-l-neutral-muted',
+		'data-[side=left]:border-t-neutral-muted data-[side=left]:border-r-neutral-muted'
+	].join(' ')
 });
 
 // A floating panel scales in place; the mobile sheet slides up from the bottom edge.
@@ -74,7 +97,8 @@ export const defaultPopoverMotion = motion({
 export const popoverTheme = {
 	motion: defaultPopoverMotion,
 	root: defaultPopoverContainer,
-	popover: defaultPopover
+	popover: defaultPopover,
+	arrow: defaultPopoverArrow
 };
 
 export type PopoverTheme = typeof popoverTheme;

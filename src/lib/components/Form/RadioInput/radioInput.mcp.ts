@@ -26,8 +26,8 @@ The RadioInput component provides a group of radio buttons for single-selection 
 Extends all Field component props plus:
 
 ### Core Props
-- **value**: string (bindable) - Selected value
-- **items**: Array<{ value: string, label: string, description?: string, disabled?: boolean }> (required)
+- **value**: string | null (bindable) - Selected value. Typed from the options: with literal option values (for example \`value: 'free'\` and \`value: 'pro'\`) it is \`'free' | 'pro' | null\`, and \`onValueChange\` receives that union, or \`null\` when the group is cleared. A variable typed as plain \`string\` still binds
+- **items**: Array<{ value: string, label: string, description?: string, disabled?: boolean }> (required). A disabled option cannot be selected; when it is the selected one, a native \`<form>\` leaves it out of its submission (like a disabled native radio) while the field value, and so an entasis Form value, keeps it
 
 ### Layout Props
 - **mode**: 'normal' | 'card' (default: 'normal') - Visual layout style of the options
@@ -37,7 +37,8 @@ Extends all Field component props plus:
 - **description**: string | Snippet - Helper text for the entire group
 - **error**: string - Error message
 - **required**: boolean - Mark as required
-- **disabled**: boolean - Disable all options
+- **disabled**: boolean - Disable all options. A disabled group is left out of the submitted Form value and skips validation
+- **readOnly**: boolean - Keeps the group focusable and announced (\`aria-readonly\` on the radiogroup) while selecting does nothing: arrow keys move focus without checking, clicks are ignored. The value still validates and submits
 - **size**: 'small' | 'normal' | 'large'
 
 ### Styling Props
@@ -305,13 +306,14 @@ RadioInput automatically validates:
 
 ## Accessibility
 
-- Proper radio group semantics
-- ARIA attributes for required state
-- Keyboard navigation support
-- Focus management
-- Screen reader announcements
-- Disabled options communicated properly
-- Each option button gets an id unique to the instance (\`<field id>-option-<index>\`) and its hidden input \`<option id>-input\`, so two fields with the same \`name\` or values containing spaces never produce duplicate or invalid ids
+- The fieldset is the \`radiogroup\`: \`aria-required\` and \`aria-readonly\` sit on it (never on a radio), and \`aria-labelledby\` points at the label only when one is rendered
+- Each option is named by its label text (\`aria-labelledby\`, with the value as a fallback \`aria-label\` for an option without a label) and described by its description (\`aria-describedby\`)
+- Keyboard: the group is one Tab stop, on the checked option, or the first enabled one when nothing is checked. ArrowDown and ArrowRight move to the next enabled option and check it, ArrowUp and ArrowLeft go back, and Home and End jump to the ends; the keys wrap, and Left and Right swap in right-to-left layouts. Tabbing in, focusing or clicking never changes the selection beyond what was clicked, arrows held with Alt, Ctrl or Meta are left to the browser, and with \`readOnly\` focus moves without checking. Space checks the focused option
+- Enter does not select. Like a native radio it continues the form: inside an entasis Form it validates the field and moves focus to the next one (the last field submits), and inside a plain \`<form>\` it clicks the form's default submit button
+- Disabled options are skipped by the arrows and communicated as disabled
+- The submitted value is one hidden input beside the options (never inside a button); a required group blocks a native submit while nothing is selected and hands the browser's report to the Tab stop
+- Each option button gets an id unique to the instance (\`<field id>-option-<index>\`), so two fields with the same \`name\` or values containing spaces never produce duplicate or invalid ids
+- When an entasis Form finds the group invalid, it focuses the checked option
 
 ## Notes
 

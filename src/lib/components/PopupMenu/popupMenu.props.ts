@@ -5,7 +5,9 @@ import type { PopupMenuThemeProps } from './popupMenu.theme.js';
 
 export type PopupMenuProps = Omit<PopoverProps, 'children' | 'theme'> & {
 	/**
-	 * Menu props including items array and theme.
+	 * Menu props including the items array, theme and the search field (`filter`). Left out,
+	 * `focusOnMount` follows how the menu opened: the first row (the last for ArrowUp) after a
+	 * keyboard open, the menu itself after a pointer open, nothing after a hover open.
 	 */
 	menu: MenuProps;
 	/**
@@ -31,4 +33,15 @@ export type PopupMenuProps = Omit<PopoverProps, 'children' | 'theme'> & {
 export type PopupMenuInternalProps = PopupMenuProps & {
 	/** The menu tree this PopupMenu opens from as a submenu; its root then decides for this level. */
 	submenuOf?: PopupMenuRoot;
+	/**
+	 * This PopupMenu is a submenu level of the Menu that renders it, even when no tree hosts that
+	 * Menu (an inline Menu): ArrowLeft leaves the level and a mobile sheet shows a back control.
+	 */
+	isSubmenu?: boolean;
+	/**
+	 * Whether the browser's own context menu may open over this menu's panels (and its submenus').
+	 * A ContextMenu turns it off, so a right-click on the open menu does not show a second menu.
+	 * @default true
+	 */
+	nativeMenu?: boolean;
 };

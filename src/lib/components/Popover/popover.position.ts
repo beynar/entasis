@@ -6,6 +6,7 @@
 // placement runs; the synchronous part of the mount placement runs inside the panel attachment,
 // so the inputs it reads re-place a mounted panel when they change.
 import {
+	arrow as arrowMiddleware,
 	autoUpdate,
 	computePosition,
 	flip,
@@ -180,7 +181,12 @@ export interface PanelMiddlewareOptions {
 	 * anchors to the whole box.
 	 */
 	line?: { x: number; y: number } | null;
+	/** The arrow element the panel draws toward its reference; omitted for a panel without one. */
+	arrow?: HTMLElement | null;
 }
+
+/** Room in px the arrow keeps from the panel's corners, so it never sits on a rounded corner. */
+const ARROW_PADDING = 10;
 
 /** The line box of a wrapped reference nearest a point: the one holding it, else the closest. */
 export const nearestLine = <Rect extends ClientRectObject>(
@@ -254,7 +260,8 @@ export const fallbackPlacementsFor = (
 
 /**
  * The floating-ui middleware every floating panel is placed with, in order: `inline` (only when
- * anchoring to a line without a pointer point), `offset`, `flip`, `size`, `shift` and `hide`. `size` writes the available
+ * anchoring to a line without a pointer point), `offset`, `flip`, `size`, `shift`, `arrow` (only
+ * with an arrow element) and `hide`. `size` writes the available
  * space and the snapped reference size as CSS variables on the wrapper. It runs before `shift`,
  * so `--available-height` is the room on the panel's own side of the reference: a list capped by
  * it never has to slide over its trigger to fit.
@@ -264,7 +271,8 @@ export const panelMiddleware = ({
 	collisionBoundary = 'visualViewport',
 	fallbackAxisSide = 'none',
 	placement,
-	line
+	line,
+	arrow
 }: PanelMiddlewareOptions = {}) => [
 	...(line === null ? [inline({})] : []),
 	offset(gap ?? DEFAULT_OFFSET),
@@ -295,6 +303,8 @@ export const panelMiddleware = ({
 		// pinch-zoom, so panning a zoomed page doesn't drag the panel along.
 		rootBoundary: collisionBoundary === 'layoutViewport' ? 'layoutViewport' : 'viewport'
 	}),
+	// After `shift`, so the arrow follows the panel to where it finally sits.
+	...(arrow ? [arrowMiddleware({ element: arrow, padding: ARROW_PADDING })] : []),
 	hide()
 ];
 
@@ -343,6 +353,42 @@ export const writePanelPosition = (
 		bottom: 'auto',
 		visibility: anchorHidden ? 'hidden' : ''
 	});
+};
+
+const ARROW_STATIC_SIDE: Record<Side, Side> = {
+	top: 'bottom',
+	right: 'left',
+	bottom: 'top',
+	left: 'right'
+};
+
+/** What floating-ui's `arrow` middleware reports. */
+export type ArrowData = { x?: number; y?: number; centerOffset: number };
+
+/**
+ * Places the arrow on the edge of the panel that faces the reference, along the cross axis where
+ * `arrow` put it, and records the physical side as `data-side`. `data-uncentered` marks an arrow
+ * pushed off the middle of the panel by a shift. The edge offset is half the arrow's own size:
+ * a rotated square then pokes out by half its diagonal's overhang.
+ */
+export const writeArrowPosition = (
+	arrow: HTMLElement,
+	placement: Placement,
+	data: ArrowData | undefined
+) => {
+	const side = placement.split('-')[0] as Side;
+	const edge = ARROW_STATIC_SIDE[side];
+	const half = (arrow.offsetWidth || 0) / 2;
+	Object.assign(arrow.style, {
+		left: data?.x != null ? `${data.x}px` : '',
+		top: data?.y != null ? `${data.y}px` : '',
+		right: '',
+		bottom: '',
+		[edge]: `${-half}px`
+	});
+	arrow.setAttribute('data-side', side);
+	if (data && data.centerOffset !== 0) arrow.setAttribute('data-uncentered', '');
+	else arrow.removeAttribute('data-uncentered');
 };
 
 /**
@@ -449,6 +495,8 @@ export interface PanelPositionerOptions {
 	anchorTo?: () => PopoverAnchorTo | undefined;
 	/** The point (viewport coordinates) that picks the line when anchoring to a line. */
 	anchorPoint?: () => { x: number; y: number } | null;
+	/** The arrow element inside the panel, or `null` for a panel without one. */
+	arrow?: () => HTMLElement | null;
 	/**
 	 * Receives the panel's minimum width in px: the reference width snapped to the device pixel
 	 * grid (`fitTrigger`), the `minWidth` returned by `positionPanel`, or `null` when the panel is
@@ -527,6 +575,7 @@ export const createPanelPositioner = (options: PanelPositionerOptions): PanelPos
 		const requested = options.placement();
 		const lineAnchor =
 			options.anchorTo?.() === 'line' && typeof reference.getClientRects === 'function';
+		const arrow = options.arrow?.() ?? null;
 		const { x, y, strategy, placement, middlewareData } = await computePanelPosition(
 			reference,
 			panel,
@@ -536,7 +585,8 @@ export const createPanelPositioner = (options: PanelPositionerOptions): PanelPos
 				offset: options.offset(),
 				collisionBoundary: options.collisionBoundary?.(),
 				fallbackAxisSide: options.fallbackAxisSide?.(),
-				...(lineAnchor ? { line: options.anchorPoint?.() ?? null } : {})
+				...(lineAnchor ? { line: options.anchorPoint?.() ?? null } : {}),
+				arrow
 			}
 		);
 		// The panel unmounted while floating-ui measured it: nothing left to place or report.
@@ -544,6 +594,7 @@ export const createPanelPositioner = (options: PanelPositionerOptions): PanelPos
 		const anchorHidden =
 			!!middlewareData?.hide?.referenceHidden && canReportHidden(reference, anchor.rect);
 		writePanelPosition(panel, x, y, strategy, { anchorHidden });
+		if (arrow?.isConnected) writeArrowPosition(arrow, placement, middlewareData?.arrow);
 		panel.style.setProperty('--transform-origin', transformOriginFor(placement, direction));
 		options.onPlace({
 			panel,

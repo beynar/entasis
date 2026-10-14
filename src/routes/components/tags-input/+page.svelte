@@ -2,7 +2,12 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import DocPage from '../../DocPage.svelte';
 	import TagsInput from '$lib/components/Form/TagsInput/TagsInput.svelte';
-	import type { ComboboxOption } from '$lib/components/Form/Combobox/combobox.props.js';
+	import Button from '$lib/components/Button/Button.svelte';
+	import type {
+		ComboboxItems,
+		ComboboxItemsRequest,
+		ComboboxOption
+	} from '$lib/components/Form/Combobox/combobox.props.js';
 	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
@@ -28,9 +33,18 @@
 	const arrayOptions = technologies;
 
 	// Async function with simulated delay
-	const getAsyncOptions = async (searchValue?: string): Promise<ComboboxOption[]> => {
-		// Simulate API delay
-		await new Promise((resolve) => setTimeout(resolve, 300));
+	const getAsyncOptions = async (
+		searchValue: string | undefined,
+		{ signal }: ComboboxItemsRequest
+	): Promise<ComboboxOption[]> => {
+		// Simulate API delay; a newer search aborts this request.
+		await new Promise<void>((resolve, reject) => {
+			const timer = setTimeout(resolve, 300);
+			signal.addEventListener('abort', () => {
+				clearTimeout(timer);
+				reject(new DOMException('Aborted', 'AbortError'));
+			});
+		});
 
 		// If no search value, return all options
 		if (!searchValue) return technologies;
@@ -48,6 +62,24 @@
 	let value4 = $state<string[] | null>(null);
 	let value5 = $state<string[] | null>(null);
 	let value6 = $state<string[] | null>(['svelte', 'ts']); // Pre-filled values for demo
+	let value8 = $state<string[] | null>(null);
+	let value9 = $state<string[] | null>(null);
+	let value10 = $state<string[] | null>(['svelte', 'ts', 'rust']);
+	let submitted = $state('Nothing submitted yet');
+
+	const groupedOptions: ComboboxItems = [
+		{
+			label: 'Languages',
+			items: technologies.filter((option) => option.description === 'Language')
+		},
+		{
+			label: 'Frameworks',
+			items: technologies
+				.filter((option) => option.description === 'Framework')
+				.map((option) => ({ ...option, disabled: option.value === 'qwik' }))
+		},
+		{ value: 'bun', label: 'Bun' }
+	];
 	const controls = createComponentControls([
 		{
 			name: 'size',
@@ -80,10 +112,20 @@
 	component="TagsInput"
 	features={[
 		'Free-text or restricted to an option list',
-		'Debounced search, async or static items',
+		'Debounced search, async or static items; stale responses are ignored',
 		'Animated tag add/remove with Chip',
-		'Bindable value (string[]) & searchValue',
-		'Backspace removes the last tag'
+		'Bindable value (string[]), searchValue and open, with onOpenChange(open, details)',
+		{ label: 'Tags are a toolbar with one tab stop', test: 'a11y:tags-input.toolbar' },
+		{ label: 'Arrow keys move between tags', test: 'a11y:tags-input.chip-keys' },
+		{ label: 'Backspace and Delete remove a tag', test: 'a11y:tags-input.remove-keys' },
+		{
+			label: 'No remove buttons when disabled or read-only',
+			test: 'a11y:tags-input.no-dead-buttons'
+		},
+		{ label: 'Read-only: browse the list, keep the tags', test: 'a11y:tags-input.readonly' },
+		'Enter adds the typed text when custom tags are allowed',
+		'Groups, disabled options and custom rows',
+		'Submits one value per tag in native forms'
 	]}
 >
 	<ComponentCard
@@ -125,11 +167,11 @@
 			</div>
 		</ComponentCard>
 
-		<!-- Example 2: Static items with showAllOnFocus -->
-		<ComponentCard description="Restricted to a static list, shows all options on focus">
+		<!-- Example 2: Static items with openOnFocus -->
+		<ComponentCard description="Restricted to a static list, opens with every option on focus">
 			<div class="w-full max-w-md">
 				<TagsInput
-					showAllOnFocus
+					openOnFocus
 					placeholder="Search technologies..."
 					items={arrayOptions}
 					bind:value={value2}
@@ -155,7 +197,7 @@
 			<div class="w-full max-w-md">
 				<TagsInput
 					customTags
-					showAllOnFocus
+					openOnFocus
 					placeholder="Pick or type your own..."
 					items={arrayOptions}
 					bind:value={value4}
@@ -205,6 +247,79 @@
 				<TagsInput size="normal" label="Normal" placeholder="Add tags..." />
 				<TagsInput size="large" label="Large" placeholder="Add tags..." />
 			</div>
+		</ComponentCard>
+
+		<!-- keepSearchOnSelect -->
+		<ComponentCard
+			title="Keep the search"
+			description="keepSearchOnSelect keeps the typed text after a choice, so several matches of one search can be added in a row."
+			code={`<TagsInput keepSearchOnSelect items={technologies} placeholder="Type 'js' and pick several..." bind:value />`}
+		>
+			<div class="w-full max-w-md">
+				<TagsInput
+					keepSearchOnSelect
+					items={arrayOptions}
+					placeholder="Type 'a' and pick several..."
+					bind:value={value8}
+				/>
+			</div>
+		</ComponentCard>
+
+		<!-- Groups, disabled -->
+		<ComponentCard
+			title="Groups and disabled options"
+			description="Groups follow Select. Tags that are already chosen leave the list; disabled options are skipped by the keyboard."
+			code={`<TagsInput
+	openOnFocus
+	items={[
+		{ label: 'Languages', items: [{ value: 'js', label: 'JavaScript' }] },
+		{ label: 'Frameworks', items: [{ value: 'svelte', label: 'Svelte' }, { value: 'qwik', label: 'Qwik', disabled: true }] },
+		{ value: 'bun', label: 'Bun' }
+	]}
+	bind:value
+/>`}
+		>
+			<div class="w-full max-w-md">
+				<TagsInput
+					openOnFocus
+					items={groupedOptions}
+					placeholder="Search by group..."
+					bind:value={value9}
+				/>
+			</div>
+		</ComponentCard>
+
+		<!-- Read-only -->
+		<ComponentCard
+			title="Read-only"
+			description="Tags stay as plain text with no remove buttons; the list can still be browsed."
+			code={`<TagsInput readOnly openOnFocus label="Stack" items={technologies} bind:value />`}
+		>
+			<div class="w-full max-w-md">
+				<TagsInput readOnly openOnFocus label="Stack" items={arrayOptions} bind:value={value10} />
+			</div>
+		</ComponentCard>
+
+		<!-- Native form -->
+		<ComponentCard
+			title="Native form"
+			description="A native form submits one value per tag under the field's name; the search box holds a draft."
+			code={`<form onsubmit={(event) => { event.preventDefault(); console.log(new FormData(event.currentTarget).getAll('stack')); }}>
+	<TagsInput name="stack" items={technologies} openOnFocus />
+	<Button type="submit">Submit</Button>
+</form>`}
+		>
+			<form
+				class="grid w-full max-w-md gap-3"
+				onsubmit={(event) => {
+					event.preventDefault();
+					submitted = `stack = ${JSON.stringify(new FormData(event.currentTarget).getAll('stack'))}`;
+				}}
+			>
+				<TagsInput name="stack" label="Stack" items={arrayOptions} openOnFocus />
+				<Button type="submit" class="w-fit">Submit</Button>
+				<p class="text-neutral/70 text-xs">{submitted}</p>
+			</form>
 		</ComponentCard>
 	{/snippet}
 </DocPage>

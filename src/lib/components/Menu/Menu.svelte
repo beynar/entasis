@@ -4,7 +4,7 @@
 	import MenuStacked from './MenuStacked.svelte';
 	import type { MenuProps } from './menu.props.js';
 
-	let { submenuMode = 'auto', ...menuProps }: MenuProps = $props();
+	let { submenuMode = 'auto', search = $bindable(), ...menuProps }: MenuProps = $props();
 
 	const parentPopover = usePopoverContext();
 	const resolvedSubmenuMode = $derived(
@@ -13,7 +13,7 @@
 </script>
 
 {#if resolvedSubmenuMode === 'stack'}
-	<MenuStacked {...menuProps} />
+	<MenuStacked {...menuProps} bind:search />
 {:else}
-	<MenuFloating {...menuProps} />
+	<MenuFloating {...menuProps} bind:search />
 {/if}

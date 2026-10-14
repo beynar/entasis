@@ -9,6 +9,7 @@
 	import DocPage from '../../DocPage.svelte';
 
 	const variants = ['ghost', 'outline'] as const;
+	const orientations = ['horizontal', 'vertical'] as const;
 	const formattingItems = [
 		{ value: 'bold', prefix: textBIcon, label: 'Bold' },
 		{ value: 'italic', prefix: textItalicIcon, label: 'Italic' },
@@ -36,6 +37,15 @@
 			value: 'neutral',
 			options: colors
 		},
+		{
+			name: 'orientation',
+			type: 'segmented',
+			label: 'Orientation',
+			value: 'horizontal',
+			options: orientations
+		},
+		{ name: 'joined', type: 'switch', label: 'Joined', value: false },
+		{ name: 'loopFocus', type: 'switch', label: 'Loop focus', value: true },
 		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
 	]);
 
@@ -49,6 +59,11 @@
 	features={[
 		'Value is the single pressed-state source',
 		'Optional joined button layout',
+		'Horizontal or vertical orientation with matching arrow keys',
+		{
+			label: 'Single tab stop on the pressed button, optional focus looping',
+			test: 'a11y:toggle-button-group.single-tab-stop'
+		},
 		'onValueChange emits the pressed values',
 		'Composes ToggleButton primitives'
 	]}
@@ -63,6 +78,9 @@
 \tsize="${controls.value.size}"
 \tvariant="${controls.value.variant}"
 \tcolor="${controls.value.color}"
+\torientation="${controls.value.orientation}"
+\tjoined={${controls.value.joined}}
+\tloopFocus={${controls.value.loopFocus}}
 \tdisabled={${controls.value.disabled}}
 \titems={[
 \t\t{ value: 'bold', prefix: textBIcon, label: 'Bold' },
@@ -78,6 +96,9 @@
 				size={controls.value.size}
 				variant={controls.value.variant}
 				color={controls.value.color}
+				orientation={controls.value.orientation}
+				joined={controls.value.joined}
+				loopFocus={controls.value.loopFocus}
 				disabled={controls.value.disabled}
 				items={formattingItems}
 			/>
@@ -107,6 +128,37 @@
 						value={['bold']}
 					/>
 				{/each}
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Vertical"
+			description="Vertical stacks the buttons and moves with ArrowUp and ArrowDown. ArrowLeft and ArrowRight are ignored, and joined segments join top to bottom. The group role carries data-orientation, never aria-orientation."
+			class="!min-h-fit"
+			code={`<ToggleButtonGroup
+\torientation="vertical"
+\tjoined
+\tloopFocus={false}
+\tlabel="Text formatting"
+\titems={formattingItems}
+/>`}
+		>
+			<div class="flex flex-wrap items-start justify-center gap-6">
+				<ToggleButtonGroup
+					orientation="vertical"
+					label="Vertical text formatting"
+					items={formattingItems}
+					value={['bold']}
+				/>
+				<ToggleButtonGroup
+					orientation="vertical"
+					joined
+					variant="outline"
+					loopFocus={false}
+					label="Vertical joined text formatting"
+					items={formattingItems}
+					value={['italic']}
+				/>
 			</div>
 		</ComponentCard>
 
@@ -147,6 +199,30 @@
 					/>
 				{/each}
 			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Keyboard"
+			description="One tab stop for the whole group, on the first pressed button. Tab and Shift+Tab pass through in one step. Disabled buttons that set focusableWhenDisabled stay in the arrow-key order, announced as disabled."
+			class="!min-h-fit"
+			code={`<ToggleButtonGroup
+\tlabel="Text formatting"
+\titems={[
+\t\t{ value: 'bold', children: 'Bold' },
+\t\t{ value: 'italic', children: 'Italic', disabled: true, focusableWhenDisabled: true },
+\t\t{ value: 'underline', children: 'Underline' }
+\t]}
+/>`}
+		>
+			<ToggleButtonGroup
+				label="Keyboard text formatting"
+				items={[
+					{ value: 'bold', children: 'Bold' },
+					{ value: 'italic', children: 'Italic', disabled: true, focusableWhenDisabled: true },
+					{ value: 'underline', children: 'Underline' }
+				]}
+				value={['underline']}
+			/>
 		</ComponentCard>
 
 		<ComponentCard

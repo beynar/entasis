@@ -82,14 +82,14 @@ A \`menu\` item renders a normal button with menu-button ARIA state and inherite
 
 ## Overflow
 
-ToggleMenu stays on one row. When complete logical units no longer fit, it moves them into a More popup rather than wrapping or splitting a group. Toggle overflow rows use \`menuitemcheckbox\`; radio rows use \`menuitemradio\`. Both expose \`aria-checked\` and remain open while changing state. Menu buttons become submenus from the same menu data. Custom controls contribute their declared \`overflowItems\` as one logical unit.
+ToggleMenu stays on one row. When complete logical units no longer fit, it moves them into a More popup rather than wrapping or splitting a group. The rows are the Menu's own checkbox items and radio groups: a toggle becomes a \`menuitemcheckbox\`, the buttons of a group become checkbox rows inside a labelled \`role="group"\` (the group \`label\`), and a radio group becomes a labelled radio group of \`menuitemradio\` rows. All expose \`aria-checked\`, show an animated check, report once per change through the item's \`onValueChange\` and remain open while changing state. Menu buttons become submenus from the same menu data. Custom controls contribute their declared \`overflowItems\` as one logical unit.
 
 ## Keyboard And Tooltips
 
 - The toolbar uses one roving tab stop.
 - ArrowLeft and ArrowRight move between visible controls; Home and End move to the edges.
 - Arrow navigation through a radio group does not change its value. Space, Enter, or click selects the focused radio.
-- Disabled and overflowed controls are excluded from navigation.
+- Disabled controls stay in the arrow-key order and take the tab stop like any other item (the APG toolbar pattern): they announce \`aria-disabled\` and \`data-disabled\`, refuse activation, and still receive pointer events, so a tooltip can say why they are unavailable. A fully disabled toolbar therefore keeps exactly one tab stop. Overflowed controls are excluded from navigation; the More button is in it only while something overflows.
 - A text field passed as a custom control keeps its editing keys: Home, End, Space and Enter stay in the field, and ArrowLeft / ArrowRight leave it only when the caret is already at the start or end of its text (mirrored in RTL).
 - Icon-only toggle and menu controls automatically use their \`label\` as tooltip content. Custom snippets own their tooltip and accessible label.
 - Use \`radio-group\` for exclusive choices inside ToggleMenu and SegmentedControl for standalone exclusive controls.

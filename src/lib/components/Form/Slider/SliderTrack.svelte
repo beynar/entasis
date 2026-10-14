@@ -3,6 +3,8 @@
 	import type { Messages } from '$lib/i18n/en.js';
 	import type { SliderMark, SliderVariant } from './slider.props.js';
 	import type { SliderState } from './slider.state.svelte.js';
+	import FieldHiddenInputs from '../Field/FieldHiddenInputs.svelte';
+	import type { FieldState } from '../Field/field.state.svelte.js';
 	import SliderMarks from './SliderMarks.svelte';
 	import SliderThumb from './SliderThumb.svelte';
 	import type { useSliderTheme } from './slider.theme.js';
@@ -17,10 +19,10 @@
 		variant,
 		size,
 		marks,
-		groupLabel,
+		field,
+		groupLabelId,
 		getThumbLabel,
 		onFirstThumbRef,
-		readOnly,
 		t
 	}: {
 		id: string;
@@ -30,11 +32,12 @@
 		variant: SliderVariant;
 		size?: Sizes;
 		marks: SliderMark[];
-		groupLabel?: string;
+		/** The field: it names the submitted inputs and says whether edits are refused. */
+		field: FieldState<'slider' | 'slider-range'>;
+		/** Id of the rendered label, which names the track group whatever the label is made of. */
+		groupLabelId?: string;
 		getThumbLabel: (index: number) => string | undefined;
-		onFirstThumbRef?: (node: HTMLButtonElement | null) => void;
-		/** Edits are refused: every thumb exposes aria-readonly, not only the first one. */
-		readOnly?: boolean;
+		onFirstThumbRef?: (node: HTMLInputElement | null) => void;
 		t: Messages;
 	} = $props();
 
@@ -43,7 +46,7 @@
 		if (size === 'large') return '18px';
 		return '14px';
 	};
-	const setFirstThumb = (node: HTMLButtonElement | null) => {
+	const setFirstThumb = (node: HTMLInputElement | null) => {
 		onFirstThumbRef?.(node);
 	};
 	const getThickThumbSize = () => {
@@ -61,6 +64,11 @@
 		return '6px';
 	};
 	const getContainedRangeEndOffset = () => getContainedRangeMinimum();
+	// FieldState names an unnamed field `${type}-input-${id}` so Form wiring stays unique. Only a
+	// name the app gave, directly or through Form, is submitted, as for a native control.
+	const submittedName = $derived(
+		field.name === `${field.type}-input-${field.id}` ? undefined : field.name
+	);
 	const instructionsId = $derived(`${id}-instructions`);
 	const instructions = $derived(
 		slider.isRange ? t.sliderInstructionsRange : t.sliderInstructionsSingle
@@ -99,10 +107,12 @@
 			size,
 			color,
 			variant,
-			disabled: slider.disabled
+			disabled: slider.disabled,
+			readOnly: field.readOnly
 		})}
-		aria-label={groupLabel}
+		aria-labelledby={groupLabelId}
 		aria-disabled={slider.disabled}
+		data-readonly={field.readOnly ? '' : undefined}
 		aria-describedby={instructionsId}
 	>
 		<div class={classes.trackBackground({ orientation: slider.orientationValue, variant })}></div>
@@ -128,28 +138,35 @@
 				orientation: slider.orientationValue,
 				variant,
 				size,
-				dragRange: !!slider.dragRange && slider.isRange
+				dragRange: slider.canDragRange
 			})}
 			style={rangeStyle}
 		></div>
 
 		{#each slider.valuePayloads as payload (payload.index)}
 			<SliderThumb
-				onRef={payload.index === 0 ? setFirstThumb : undefined}
-				id={payload.index === 0 ? id : `${id}-thumb-${payload.index}`}
+				onRef={payload.index === slider.controlIndex ? setFirstThumb : undefined}
+				id={payload.index === slider.controlIndex ? id : `${id}-thumb-${payload.index}`}
 				{payload}
 				label={getThumbLabel(payload.index)}
 				describedBy={instructionsId}
 				orientation={slider.orientationValue}
-				disabled={slider.disabled}
-				{readOnly}
+				disabled={slider.isThumbDisabled(payload.index)}
+				readOnly={field.readOnly}
+				required={field.required}
+				name={submittedName}
 				{variant}
 				{color}
 				{size}
 				{classes}
 				attachment={slider.thumb(payload.index)}
+				inputAttachment={slider.thumbInput(payload.index)}
 				hitboxAttachment={slider.thumbHitbox(payload.index)}
 			/>
+			{#if slider.isThumbLocked(payload.index)}
+				<!-- A disabled range input submits nothing; the thumb keeps its place in the value. -->
+				<FieldHiddenInputs {field} value={payload.value} name={submittedName} />
+			{/if}
 		{/each}
 	</div>
 

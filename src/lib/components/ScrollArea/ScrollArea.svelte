@@ -5,27 +5,55 @@
 	import { useScrollAreaTheme } from './scrollArea.theme.js';
 	import { caretUpIcon } from '../Icons/caretUp.js';
 	import { caretDownIcon } from '../Icons/caretDown.js';
-	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { getI18nDirection, useI18n } from '$lib/i18n/context.svelte.js';
+	import { presence } from '$lib/utils/stateAttributes.js';
+	import { useDirection } from '$lib/utils/useDirection.svelte.js';
+	import { untrack } from 'svelte';
 
 	let {
 		ref = $bindable(null),
 		viewportRef = $bindable(null),
 		label,
 		viewportRole,
+		viewportAttrs,
 		class: className = '',
 		children,
 		delay = 0,
 		type = 'hover',
 		scrollOnEdges = false,
 		scrollFade = false,
+		overflowEdgeThreshold = 1,
 		onscroll,
 		theme,
 		...attachments
 	}: ScrollAreaProps = $props();
 	const t = $derived(useI18n());
 
+	const MERGED_VIEWPORT_ATTRS = [
+		'role',
+		'aria-label',
+		'tabindex',
+		'class',
+		'onscroll',
+		'onfocus',
+		'onblur'
+	];
+
 	const componentId = $props.id();
 	const viewportId = `${componentId}-viewport`;
+
+	// The horizontal offset of an RTL viewport is negative. The element's own computed direction
+	// wins (a `dir="ltr"` code block inside an RTL page), the i18n direction covers what a
+	// computed style cannot say.
+	const i18nDirection = getI18nDirection();
+	const resolveDirection = useDirection(
+		() => viewportRef,
+		() => {
+			if (!viewportRef || typeof getComputedStyle !== 'function') return undefined;
+			const computed = getComputedStyle(viewportRef).direction;
+			return computed === 'rtl' || computed === 'ltr' ? computed : undefined;
+		}
+	);
 
 	const scrollArea = new ScrollArea({
 		get type() {
@@ -36,7 +64,19 @@
 		},
 		get scrollOnEdges() {
 			return scrollOnEdges;
-		}
+		},
+		get overflowEdgeThreshold() {
+			return overflowEdgeThreshold;
+		},
+		direction: () => resolveDirection()
+	});
+
+	// A direction change (a locale switch, a `dir` flip) moves no box the observers watch.
+	$effect(() => {
+		// The computed direction answers first, so the i18n context is read here to subscribe.
+		void i18nDirection?.();
+		void resolveDirection();
+		untrack(() => scrollArea.measure());
 	});
 
 	const scrollFadeAxis = $derived.by(() => {
@@ -56,29 +96,85 @@
 	// active-descendant navigation, say) owns keyboard scrolling, and a focusable or named node
 	// would cancel the presentational role.
 	//
+	// A caller that makes the viewport its own widget passes `viewportAttrs` with a `role`: the
+	// caller then owns the name and the tab stop as well, and the viewport adds neither.
+	//
 	// A viewport that holds focus keeps its role, name and a programmatic tab stop (-1) after its
 	// content stops overflowing (a resize, a zoom-out, filtered content): removing the tabindex of
 	// the focused element would make the browser drop focus to <body>. They go once it blurs.
 	let viewportFocused = $state(false);
 	const exposed = $derived(scrollArea.overflowing || viewportFocused);
-	const presentational = $derived(viewportRole === 'presentation' || viewportRole === 'none');
+	const ownedRole = $derived(viewportAttrs?.role);
+	const effectiveRole = $derived(ownedRole ?? viewportRole);
+	const presentational = $derived(effectiveRole === 'presentation' || effectiveRole === 'none');
 	const resolvedViewportRole = $derived(
-		viewportRole ?? (label !== undefined || exposed ? 'group' : undefined)
+		ownedRole ?? viewportRole ?? (label !== undefined || exposed ? 'group' : undefined)
 	);
 	const resolvedViewportLabel = $derived(
-		presentational ? undefined : (label ?? (exposed ? t.scrollableContent : undefined))
+		viewportAttrs?.['aria-label'] ??
+			(presentational
+				? undefined
+				: (label ??
+					(exposed && ownedRole === undefined && !viewportAttrs?.['aria-labelledby']
+						? t.scrollableContent
+						: undefined)))
 	);
 	const resolvedViewportTabindex = $derived(
-		presentational ? undefined : scrollArea.overflowing ? 0 : viewportFocused ? -1 : undefined
+		viewportAttrs?.tabindex ??
+			(presentational || ownedRole !== undefined
+				? undefined
+				: scrollArea.overflowing
+					? 0
+					: viewportFocused
+						? -1
+						: undefined)
 	);
+	// Everything else the caller passes goes straight onto the viewport. The properties above, the
+	// class and the handlers are merged instead, so they are left out here.
+	const viewportExtra = $derived.by(() => {
+		const extra: Record<PropertyKey, unknown> = { ...viewportAttrs };
+		for (const key of MERGED_VIEWPORT_ATTRS) delete extra[key];
+		return extra;
+	});
+
+	// Bars show while the area is hovered or scrolling in `hover` mode: touch scrolling, which
+	// never hovers, still reveals them.
+	const showScrollbarY = $derived(
+		scrollArea.isDraggingY ||
+			(scrollArea.visible &&
+				(type === 'always' ||
+					type === 'auto' ||
+					(type === 'hover' && (scrollArea.hoover.isHovered || scrollArea.isScrolling)) ||
+					(type === 'scroll' && scrollArea.isScrolling)))
+	);
+	const showScrollbarX = $derived(
+		scrollArea.isDraggingX ||
+			(scrollArea.visibleX &&
+				(type === 'always' ||
+					type === 'auto' ||
+					(type === 'hover' && (scrollArea.hoover.isHovered || scrollArea.isScrolling)) ||
+					(type === 'scroll' && scrollArea.isScrolling)))
+	);
+	const scrolling = $derived(presence(scrollArea.isScrolling));
 </script>
 
 <div
 	data-scroll-area
 	data-slot="scroll-area"
+	data-scrolling={scrolling}
+	data-has-overflow-x={presence(scrollArea.visibleX)}
+	data-has-overflow-y={presence(scrollArea.visible)}
+	data-overflow-x-start={presence(scrollArea.hasOverflowXStart)}
+	data-overflow-x-end={presence(scrollArea.hasOverflowXEnd)}
+	data-overflow-y-start={presence(scrollArea.hasOverflowYStart)}
+	data-overflow-y-end={presence(scrollArea.hasOverflowYEnd)}
 	bind:this={ref}
 	class={classes.root({ className })}
 	style:position="relative"
+	style:--scroll-area-overflow-x-start="{scrollArea.overflowXStart}px"
+	style:--scroll-area-overflow-x-end="{scrollArea.overflowXEnd}px"
+	style:--scroll-area-overflow-y-start="{scrollArea.overflowYStart}px"
+	style:--scroll-area-overflow-y-end="{scrollArea.overflowYEnd}px"
 	{@attach scrollArea.hoover.reference}
 	{@attach scrollArea.scrollOnEdgesAttachment}
 	{...attachments}
@@ -89,17 +185,28 @@
 	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 	<div
 		id={viewportId}
+		{...viewportExtra}
 		data-scroll-area-viewport
 		data-slot="scroll-area-viewport"
+		data-scrolling={scrolling}
 		data-scroll-fade-axis={scrollFadeAxis === 'none' ? undefined : scrollFadeAxis}
 		bind:this={viewportRef}
-		class={classes.viewport({ scrollFade: scrollFadeAxis })}
+		class={classes.viewport({ scrollFade: scrollFadeAxis, className: viewportAttrs?.class })}
 		tabindex={resolvedViewportTabindex}
 		role={resolvedViewportRole}
 		aria-label={resolvedViewportLabel}
-		{onscroll}
-		onfocus={() => (viewportFocused = true)}
-		onblur={() => (viewportFocused = false)}
+		onscroll={(event) => {
+			viewportAttrs?.onscroll?.(event);
+			onscroll?.(event);
+		}}
+		onfocus={(event) => {
+			viewportAttrs?.onfocus?.(event);
+			viewportFocused = true;
+		}}
+		onblur={(event) => {
+			viewportAttrs?.onblur?.(event);
+			viewportFocused = false;
+		}}
 		{@attach scrollArea.viewportAttachment}
 		style:position="relative"
 		style:overflow="scroll"
@@ -125,14 +232,17 @@
 
 	<!-- The scrollbars are pointer-only affordances: the viewport is the keyboard scroll region, so
 	     the tracks stay out of the accessibility tree instead of exposing an unreachable
-	     role="scrollbar" (inside a listbox they would also be invalid children). -->
-	{#if (type === 'hover' && scrollArea.visible && scrollArea.hoover.isHovered) || scrollArea.isDraggingY || (type === 'always' && scrollArea.visible) || (type === 'auto' && scrollArea.visible) || (type === 'scroll' && scrollArea.isScrolling)}
+	     role="scrollbar" (inside a listbox they would also be invalid children). Where both bars
+	     show, each stops short of the other at the corner. -->
+	{#if showScrollbarY}
 		<div
 			data-slot="scroll-area-scrollbar"
+			data-orientation="vertical"
+			data-scrolling={scrolling}
 			transition:fade={{ duration: 200 }}
 			bind:this={scrollArea.scrollbarYElement}
 			class={classes.scrollbar()}
-			style="bottom: 0px"
+			style:bottom="{scrollArea.trackXThickness}px"
 			style:display="flex"
 			style:user-select="none"
 			style:opacity={scrollArea.visible ? 1 : 0}
@@ -144,6 +254,8 @@
 			<div
 				data-thumb
 				data-slot="scroll-area-thumb"
+				data-orientation="vertical"
+				data-scrolling={scrolling}
 				class={classes.scrollbarThumb()}
 				style:height={scrollArea.thumbYSize + 'px'}
 				style:width="100%"
@@ -154,27 +266,32 @@
 		</div>
 	{/if}
 
-	{#if (type === 'hover' && scrollArea.visibleX && scrollArea.hoover.isHovered) || scrollArea.isDraggingX || (type === 'always' && scrollArea.visibleX) || (type === 'auto' && scrollArea.visibleX) || (type === 'scroll' && scrollArea.isScrolling)}
+	{#if showScrollbarX}
 		<div
 			data-slot="scroll-area-scrollbar"
+			data-orientation="horizontal"
+			data-scrolling={scrolling}
 			transition:fade={{ duration: 200 }}
 			bind:this={scrollArea.scrollbarXElement}
 			class={classes.scrollbarX()}
-			style="right: 0px"
+			style:inset-inline-end="{scrollArea.trackYThickness}px"
 			style:display="flex"
 			style:user-select="none"
 			style:opacity={scrollArea.visibleX ? 1 : 0}
 			style:transition="opacity 0.2s ease"
 			aria-hidden="true"
 			{@attach scrollArea.trackAttachmentX}
+			{@attach scrollArea.trackRectX.reference}
 		>
 			<div
 				data-thumb
 				data-slot="scroll-area-thumb"
+				data-orientation="horizontal"
+				data-scrolling={scrolling}
 				class={classes.scrollbarThumb()}
 				style:width={scrollArea.thumbXSize + 'px'}
 				style:height="100%"
-				style:transform={`translateX(${scrollArea.thumbXPosition}px)`}
+				style:transform={`translateX(${scrollArea.thumbXTranslate}px)`}
 				{@attach scrollArea.dragX}
 			></div>
 		</div>

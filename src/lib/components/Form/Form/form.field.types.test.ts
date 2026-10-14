@@ -27,6 +27,32 @@ describe('Form field entry types', () => {
 		expect(flattenFormInputs(inputs).map(({ name }) => name)).toEqual(['displayName']);
 	});
 
+	test('entries and groups that declare disabled are optional in the submitted value', () => {
+		const disabledInputs = {
+			name: { type: 'text', required: true },
+			code: { type: 'text', required: true, disabled: true },
+			active: { type: 'text', disabled: false, required: true },
+			locked: {
+				type: 'group',
+				label: 'Locked',
+				disabled: true,
+				inputs: { note: { type: 'text', required: true } }
+			}
+		} as const satisfies FormInputs;
+		type Expected = { name: string; active: string; code?: string; note?: string };
+		type Actual = InferFormValue<typeof disabledInputs>;
+		expectTypeOf<Actual>().toExtend<Expected>();
+		expectTypeOf<Expected>().toExtend<Actual>();
+		expect(flattenFormInputs(disabledInputs).map(({ name }) => name)).toEqual([
+			'name',
+			'code',
+			'active',
+			'note'
+		]);
+		// Only the declared entries may be missing: `name` and `active` stay required.
+		expectTypeOf<{ code: string; note: string }>().not.toExtend<Actual>();
+	});
+
 	test('exposes Combobox value and option context as one payload', () => {
 		expectTypeOf<NonNullable<ComboboxProps['onValueChange']>>().toEqualTypeOf<
 			(payload: ComboboxValueChangePayload) => void

@@ -25,6 +25,7 @@
 		panelAriaLabelledby,
 		panelAriaLabel,
 		panelId,
+		panelActivationDirection,
 		mount = 'eager'
 	}: StepperProps<Item> = $props();
 	const valueState = createBindableValue(
@@ -167,6 +168,7 @@ container.style.height = firstSlide.clientHeight + 'px';
 				id={panelId?.(index)}
 				data-step-active={isActiveStep ? 'true' : undefined}
 				data-step={index}
+				data-activation-direction={panelActivationDirection?.(index)}
 				tabindex={panelTabindex}
 				hidden={!isActiveStep && !isLeaving(index)}
 				inert={!isActiveStep}

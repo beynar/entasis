@@ -119,6 +119,21 @@ export type LinkPreviewProps = WithAttachments<{
 	size?: Sizes;
 	/** When true, prevents opening and marks the trigger as disabled. */
 	disabled?: boolean;
+	/**
+	 * Lets the link wrap across lines like the text around it. The card anchors to the line the
+	 * pointer entered on and stays there while it is open; a keyboard open takes the first line
+	 * above the link and the last one below it. Set it to `false` for a link that must stay one
+	 * box, such as a button-like link with a fixed layout.
+	 * @default true
+	 */
+	wrap?: boolean;
+	/**
+	 * What the card anchors to when the link wraps: the whole box, or the line the pointer entered
+	 * on. Defaults to `'line'` with `wrap`.
+	 */
+	anchorTo?: PopoverProps['anchorTo'];
+	/** Draws an arrow from the card toward the link. */
+	arrow?: PopoverProps['arrow'];
 	/** Additional CSS classes merged onto the trigger anchor. */
 	class?: string;
 	/** Props forwarded to the inner Card surface. */

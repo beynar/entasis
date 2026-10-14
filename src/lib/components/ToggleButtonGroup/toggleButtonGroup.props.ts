@@ -3,6 +3,8 @@ import type { WithAttachments, WithoutAttachments } from '$lib/types/props.js';
 import type { ToggleButtonProps, ToggleButtonVariant } from '../ToggleButton/index.js';
 import type { ToggleButtonGroupThemeProps } from './toggleButtonGroup.theme.js';
 
+export type ToggleButtonGroupOrientation = 'horizontal' | 'vertical';
+
 export type ToggleButtonGroupType = 'single' | 'multiple';
 
 export type ToggleButtonGroupItem = Omit<
@@ -37,10 +39,27 @@ export type ToggleButtonGroupProps<
 	color?: Colors;
 	/** Visual variant applied to every button in the group. */
 	variant?: ToggleButtonVariant;
-	/** When true, disables all buttons in the group. */
+	/**
+	 * When true, disables all buttons in the group. A disabled group has no tab stop, unless an
+	 * item sets `focusableWhenDisabled`.
+	 */
 	disabled?: boolean;
 	/** When true, renders the buttons as contiguous segments. */
 	joined?: boolean;
+	/**
+	 * Axis of the group: `'horizontal'` lays the buttons out in a row and moves between them with
+	 * ArrowLeft and ArrowRight; `'vertical'` stacks them and uses ArrowUp and ArrowDown. Keys of
+	 * the other axis are ignored. Exposed as `data-orientation`; a `type="single"` group (`radiogroup`)
+	 * also sets `aria-orientation`, the `group` role of a multiple group never does.
+	 * @default 'horizontal'
+	 */
+	orientation?: ToggleButtonGroupOrientation;
+	/**
+	 * Whether the arrow keys wrap from the last button to the first and back. When false, focus
+	 * stops at the ends.
+	 * @default true
+	 */
+	loopFocus?: boolean;
 	/**
 	 * `'multiple'` (default): any number of buttons can be pressed (`aria-pressed`).
 	 * `'single'`: at most one is checked at a time, exposed as a radio group.

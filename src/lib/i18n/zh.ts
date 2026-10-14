@@ -565,6 +565,7 @@ export const zh: Messages = {
 	meter: '计量器',
 	meterSegment: (index: string | number, count: string | number) =>
 		`第 ${index} 段，共 ${count} 段`,
+	progressIndeterminate: '进度不确定',
 	// 字段验证
 	fieldRequired: '此字段为必填项',
 	fieldMustBeChecked: '请勾选此框以继续',
@@ -576,5 +577,12 @@ export const zh: Messages = {
 	fieldTooLong: (max: string | number) => `最多只能输入 ${max} 个字符`,
 	fieldRangeUnderflow: (min: string | number) => `请输入大于或等于 ${min} 的值`,
 	fieldRangeOverflow: (max: string | number) => `请输入小于或等于 ${max} 的值`,
-	fieldIncomplete: (length: string | number) => `请输入全部 ${length} 个字符`
+	fieldIncomplete: (length: string | number) => `请输入全部 ${length} 个字符`,
+	// Combobox
+	resultsCount: (count: string | number) => `有 ${count} 个结果可用`,
+	tags: '标签',
+	// CheckboxesInput
+	selectAll: '全选',
+	// PinInput
+	oneTimeCode: '一次性验证码'
 };

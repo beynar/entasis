@@ -20,6 +20,107 @@ const defaultMenu = cva({
 	}
 });
 
+// The `role="menu"` element itself: only rows, so a header or footer never sits inside it.
+const defaultMenuList = cva({
+	base: 'flex flex-col w-full outline-none',
+	variants: {
+		density: {
+			compact: 'gap-0',
+			normal: 'gap-micro',
+			comfortable: 'gap-xs'
+		}
+	},
+	defaultVariants: {
+		density: 'normal'
+	}
+});
+
+// A `role="group"`: its rows follow the menu's own rhythm.
+const defaultMenuGroup = cva({
+	base: 'flex flex-col w-full',
+	variants: {
+		density: {
+			compact: 'gap-0',
+			normal: 'gap-micro',
+			comfortable: 'gap-xs'
+		}
+	},
+	defaultVariants: {
+		density: 'normal'
+	}
+});
+
+const defaultMenuGroupLabel = cva({
+	base: 'text-xs font-medium text-neutral/70 select-none',
+	variants: {
+		density: {
+			compact: 'px-sm pt-xs',
+			normal: 'px-md pt-sm pb-micro',
+			comfortable: 'px-lg pt-md pb-xs'
+		}
+	},
+	defaultVariants: {
+		density: 'normal'
+	}
+});
+
+// The search field of a filterable menu: a row-height strip with a leading icon, a divider below.
+const defaultMenuSearch = cva({
+	base: 'flex w-full items-center border-b border-neutral-muted',
+	variants: {
+		size: {
+			small: 'h-control-sm gap-sm px-sm',
+			normal: 'h-control-md gap-md px-md',
+			large: 'h-control-lg gap-md px-lg'
+		}
+	},
+	defaultVariants: {
+		size: 'normal'
+	}
+});
+
+const defaultMenuSearchIcon = cva({
+	base: 'shrink-0 opacity-50',
+	variants: {
+		size: {
+			small: 'size-3.5',
+			normal: 'size-4',
+			large: 'size-4.5'
+		}
+	},
+	defaultVariants: {
+		size: 'normal'
+	}
+});
+
+const defaultMenuSearchInput = cva({
+	base: 'placeholder:text-neutral/70 w-full min-w-0 flex-1 bg-transparent outline-none',
+	variants: {
+		size: {
+			small: 'text-xs',
+			normal: 'text-sm',
+			large: 'text-base'
+		}
+	},
+	defaultVariants: {
+		size: 'normal'
+	}
+});
+
+const defaultMenuEmpty = cva({
+	base: 'text-sm text-neutral/70 text-center select-none',
+	variants: {
+		density: {
+			compact: 'px-sm py-xs',
+			normal: 'px-md py-md',
+			comfortable: 'px-lg py-lg'
+		}
+	},
+	defaultVariants: {
+		density: 'normal'
+	}
+});
+
 const defaultMenuHeader = cva({
 	base: ''
 });
@@ -30,6 +131,13 @@ const defaultMenuFooter = cva({
 
 export const menuTheme = {
 	root: defaultMenu,
+	list: defaultMenuList,
+	group: defaultMenuGroup,
+	groupLabel: defaultMenuGroupLabel,
+	search: defaultMenuSearch,
+	searchIcon: defaultMenuSearchIcon,
+	searchInput: defaultMenuSearchInput,
+	empty: defaultMenuEmpty,
 	header: defaultMenuHeader,
 	footer: defaultMenuFooter
 };

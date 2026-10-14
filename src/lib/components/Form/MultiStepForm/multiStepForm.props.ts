@@ -10,6 +10,7 @@ import type {
 } from '../Form/form.js';
 import type { FormState } from '../Form/form.state.svelte.js';
 import type { FormProps } from '../Form/form.props.js';
+import type { ValidationMode } from '../Field/field.state.svelte.js';
 import type { MultiStepFormState } from './multiStepForm.state.svelte.js';
 import type { MultiStepFormThemeProps } from './multiStepForm.theme.js';
 import type { ButtonProps } from '$lib/components/Button/index.js';
@@ -101,6 +102,10 @@ export type MultiStepFormProps<I extends MultiStepFormItems = FormStep[]> = With
 			/** Theme overrides passed to each step Form component. */
 			form?: FormProps<FormInputs>['theme'];
 		};
+		/** When fields validate by themselves; see `Form`. Applies to every step. */
+		validationMode?: ValidationMode;
+		/** Milliseconds an edit waits before the validation it triggers; see `Form`. */
+		validationDebounce?: number;
 		/** Props spread onto the previous-step button. */
 		previousButtonProps?: ButtonProps;
 		/** Props spread onto the next-step button. */

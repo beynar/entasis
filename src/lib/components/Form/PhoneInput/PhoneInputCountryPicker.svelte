@@ -9,6 +9,8 @@
 	import TextInput from '../TextInput/TextInput.svelte';
 	import type { Sizes } from '$lib/types/theme.js';
 	import { useListNavigation } from '$lib/utils/useListNavigation.svelte.js';
+	import { useLiveAnnouncer } from '$lib/utils/useLiveAnnouncer.svelte.js';
+	import { untrack } from 'svelte';
 	import type { PhoneInputThemeProps } from './phoneInput.theme.js';
 	import { usePhoneInputTheme } from './phoneInput.theme.js';
 	import { filterPhoneCountryOptions, type PhoneCountryOption } from './phoneInputCountry.js';
@@ -44,7 +46,7 @@
 	const listboxId = $derived(`${id}-listbox`);
 	const classes = $derived(usePhoneInputTheme(theme));
 	const t = $derived(useI18n());
-	const filteredCountries = $derived(filterPhoneCountryOptions(countries, searchQuery));
+	const filteredCountries = $derived(filterPhoneCountryOptions(countries, searchQuery, t.locale));
 	const optionId = (iso2: string) => `${id}-option-${iso2}`;
 
 	const selectCountry = (iso2: string) => {
@@ -52,21 +54,34 @@
 		if (country) onSelectCountry(country);
 	};
 
+	// The selected country is highlighted when the picker opens and again when the search clears.
 	const nav = useListNavigation({
 		values: () => filteredCountries.map((country) => country.iso2),
 		optionId,
+		query: () => searchQuery,
+		anchor: () => selectedCountry?.iso2,
 		onSelect: selectCountry
 	});
 
-	const highlightSelectedCountry = () => {
-		const selectedIso2 = selectedCountry?.iso2;
-		if (selectedIso2 && filteredCountries.some((country) => country.iso2 === selectedIso2)) {
-			nav.highlight(selectedIso2);
-			return;
-		}
-
-		nav.first();
-	};
+	// Result counts and the empty state reach screen readers through one persistent region,
+	// announced after typing settles (a region that mounts already filled is skipped).
+	const announcer = useLiveAnnouncer(generatedId, 'live');
+	$effect(() => {
+		const message =
+			filteredCountries.length === 0
+				? t.noCountries
+				: searchQuery.trim()
+					? t.resultsCount(filteredCountries.length)
+					: '';
+		return untrack(() => {
+			if (!message) {
+				announcer.reset();
+				return;
+			}
+			const timer = setTimeout(() => announcer.announce(message), 250);
+			return () => clearTimeout(timer);
+		});
+	});
 
 	const attachSearchInput: Attachment<HTMLElement> = (node) => {
 		const input = node.querySelector<HTMLInputElement>('input');
@@ -81,10 +96,7 @@
 		input.setAttribute('autocapitalize', 'off');
 		input.setAttribute('spellcheck', 'false');
 
-		const focusTimeout = setTimeout(() => {
-			input.focus();
-			highlightSelectedCountry();
-		}, 0);
+		const focusTimeout = setTimeout(() => input.focus(), 0);
 		const removeKeydown = on(input, 'keydown', nav.onKeydown);
 
 		return () => {
@@ -148,17 +160,14 @@
 		class={classes.countryList({ class: theme?.countryList?.base })}
 	>
 		<!-- The empty message lives OUTSIDE the listbox: a listbox may only own options and groups
-		     (aria-required-children). The role="status" region stays mounted (empty and unstyled
-		     while countries match) because screen readers skip a live region that mounts already
-		     filled; filling it when the search empties the list announces it politely. -->
-		<div
-			role="status"
-			class={filteredCountries.length === 0
-				? classes.countryEmpty({ size, class: theme?.countryEmpty?.base })
-				: undefined}
-		>
-			{#if filteredCountries.length === 0}{t.noCountries}{/if}
-		</div>
+		     (aria-required-children). The persistent live region announces it and the result counts:
+		     screen readers skip a live region that mounts already filled. -->
+		{#if filteredCountries.length === 0}
+			<div class={classes.countryEmpty({ size, class: theme?.countryEmpty?.base })}>
+				{t.noCountries}
+			</div>
+		{/if}
+		<span class="sr-only" {...announcer.regionAttrs}>{announcer.message}</span>
 		<!-- Kept mounted while empty (hidden) so the search input's aria-controls always resolves. -->
 		<div
 			id={listboxId}
@@ -187,7 +196,7 @@
 						highlighted,
 						class: theme?.countryOption?.base
 					})}
-					onpointermove={() => nav.setHighlighted(country.iso2)}
+					onpointermove={(event) => nav.pointerHighlight(country.iso2, event)}
 					onclick={() => onSelectCountry(country)}
 				>
 					<span class={classes.countryFlag({ size, class: theme?.countryFlag?.base })}>

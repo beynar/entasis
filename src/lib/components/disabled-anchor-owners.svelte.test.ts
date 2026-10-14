@@ -124,7 +124,7 @@ describe('shared disabled anchor owners', () => {
 		expectDisabledAnchor(anchor);
 		// A disabled default is never shown as selected: the enabled tab takes over on mount.
 		expect(anchor).toHaveAttribute('aria-selected', 'false');
-		expect(onValueChange).toHaveBeenCalledExactlyOnceWith('Enabled');
+		expect(onValueChange).toHaveBeenCalledExactlyOnceWith({ value: 'Enabled', reason: 'initial' });
 		await fireEvent.keyDown(anchor, { key: 'Enter' });
 		expect(onValueChange).toHaveBeenCalledOnce();
 		expect(screen.getByRole('tab', { name: 'Enabled' })).toHaveAttribute('tabindex', '0');

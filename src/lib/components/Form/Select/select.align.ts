@@ -17,6 +17,11 @@ export type SelectAlignMetrics = {
 	/** The option to put on the trigger: the selected one, else the first. */
 	item: { top: number; height: number; textStart: number };
 	rtl: boolean;
+	/**
+	 * The tallest the option list may be, in px: a `max-height` the theme or consumer put on it.
+	 * Absent (or `Infinity`) when it is only limited by the viewport.
+	 */
+	maxListHeight?: number;
 };
 
 export type SelectAlignment = {
@@ -66,17 +71,34 @@ export function alignItemWithTrigger(m: SelectAlignMetrics): SelectAlignment {
 		height = minHeight;
 		y = Math.max(top, Math.min(y, bottom - height));
 	}
-	const listHeight = Math.max(0, height - chromeAbove - chromeBelow);
+	let listHeight = Math.max(0, height - chromeAbove - chromeBelow);
 	scrollTop = clamp(scrollTop, 0, m.list.height - listHeight);
+
+	// A cap on the list shortens the window. The option keeps its place on the trigger: when the
+	// shorter window would end above it, the list scrolls by the shortfall and the panel moves down
+	// by the same amount, so the row does not move on screen.
+	const cap = m.maxListHeight ?? Infinity;
+	if (listHeight > cap) {
+		const itemMiddleInWindow = m.item.top + m.item.height / 2 - m.list.top - scrollTop;
+		const shortfall = Math.max(0, itemMiddleInWindow - (cap - m.item.height / 2));
+		const shift = Math.min(shortfall, Math.max(0, m.list.height - cap - scrollTop));
+		listHeight = cap;
+		scrollTop += shift;
+		y = Math.min(y + shift, Math.max(top, bottom - chromeAbove - chromeBelow - cap));
+	}
 
 	// Line the option's text up with the value's: the panel moves by the gap between them.
 	const textOffset = m.rtl ? m.panel.right - m.item.textStart : m.item.textStart - m.panel.left;
 	const x = m.rtl ? m.valueTextStart + textOffset - m.panel.width : m.valueTextStart - textOffset;
 
+	// Fractional measurements come from browser zoom and fractional layout: positions snap to whole
+	// pixels, and the list rounds up so a list that fits is never cut by a fraction of a pixel.
 	return {
-		x: clamp(x, SELECT_ALIGN_MARGIN, m.viewport.width - SELECT_ALIGN_MARGIN - m.panel.width),
-		y,
-		listHeight,
-		scrollTop
+		x: Math.round(
+			clamp(x, SELECT_ALIGN_MARGIN, m.viewport.width - SELECT_ALIGN_MARGIN - m.panel.width)
+		),
+		y: Math.round(y),
+		listHeight: Math.ceil(listHeight),
+		scrollTop: Math.round(scrollTop)
 	};
 }

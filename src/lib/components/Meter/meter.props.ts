@@ -1,6 +1,6 @@
 import type { Snippet } from 'svelte';
 import type { Colors, Sizes } from '../../types/theme.js';
-import type { Slot, WithSlot } from '../Slot/slot.js';
+import type { WithSlot } from '../Slot/slot.js';
 import type { MeterThemeProps } from './meter.theme.js';
 
 export type MeterStep<T = unknown> = {
@@ -32,42 +32,7 @@ export type MeterStep<T = unknown> = {
 	data?: T;
 };
 
-type Step<T = unknown> = {
-	/**
-	 * Scale value where this background step segment begins.
-	 */
-	start: number;
-	/**
-	 * Scale value where this background step segment ends.
-	 */
-	end?: number;
-	/**
-	 * Vertical placement of the step label relative to the track.
-	 */
-	position?: 'top' | 'bottom';
-	/**
-	 * Additional CSS classes for the step segment element.
-	 */
-	class?: string;
-	/**
-	 * Additional CSS classes for the step label element.
-	 */
-	labelClass?: string;
-	/**
-	 * Theme color of the step segment.
-	 */
-	color: Colors;
-	/**
-	 * Slot content rendered as the step label.
-	 */
-	label: Slot;
-	/**
-	 * Arbitrary metadata attached to this step definition.
-	 */
-	data?: T;
-};
-
-export type MeterProps<T = unknown, S = unknown> = WithSlot<
+export type MeterProps<T = unknown> = WithSlot<
 	WithSlot<
 		{
 			/**
@@ -97,10 +62,6 @@ export type MeterProps<T = unknown, S = unknown> = WithSlot<
 			 */
 			color?: Colors;
 			/**
-			 * Colored range segments overlaid along the meter scale.
-			 */
-			steps?: Step<S>[];
-			/**
 			 * When true, renders a legend listing each segment's label and percentage.
 			 */
 			showLegend?: boolean;
@@ -121,16 +82,37 @@ export type MeterProps<T = unknown, S = unknown> = WithSlot<
 			 */
 			precision?: number;
 			/**
-			 * Minimum value of the meter scale, reported as `aria-valuemin`.
+			 * Minimum value of the meter scale, reported as `aria-valuemin`. A segment fills
+			 * `(value - min) / (max - min)` of the track.
 			 * @default 0
 			 */
 			min?: number;
 			/**
-			 * Maximum value of the meter scale used for percentage calculations, reported as
-			 * `aria-valuemax`.
+			 * Maximum value of the meter scale, reported as `aria-valuemax`. Values are clamped into
+			 * `[min, max]`, so a segment never draws past the track and `aria-valuenow` stays in range.
 			 * @default 100
 			 */
 			max?: number;
+			/**
+			 * `Intl.NumberFormat` options for the value text when `showIndicatorAs` is `'value'`
+			 * (`{ style: 'unit', unit: 'megabyte' }`). The clamped value is formatted in the active
+			 * I18n locale. The percentage text is always the share of the scale.
+			 */
+			format?: Intl.NumberFormatOptions;
+			/**
+			 * Overrides the `aria-valuetext` of a meter, which otherwise mirrors the indicator text.
+			 * Receives the clamped value, its formatted text and the scale bounds.
+			 */
+			getAriaValueText?: (payload: {
+				value: number;
+				formattedValue: string;
+				min: number;
+				max: number;
+			}) => string;
+			/**
+			 * Locale used to format the value and percentage text. Defaults to the I18n locale.
+			 */
+			locale?: Intl.LocalesArgument;
 			/**
 			 * Visual size variant of the meter track, labels, and legend.
 			 */

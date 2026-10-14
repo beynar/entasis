@@ -64,6 +64,25 @@ export type HoverCardProps = WithAttachments<{
 	density?: Density;
 	/** When true, prevents hover, focus, and click opening. */
 	disabled?: boolean;
+	/**
+	 * Lets the trigger wrap across lines like text, for a link inside a paragraph: it renders
+	 * inline instead of inline-flex, and the card anchors to the line the pointer entered on
+	 * (`anchorTo: 'line'`) instead of the box that spans both lines. Applies to a snippet or button
+	 * trigger; a string trigger is a button, which is one box.
+	 * @default false
+	 */
+	wrap?: boolean;
+	/**
+	 * What the card anchors to when its trigger wraps across lines: the whole box, or the line the
+	 * pointer entered on, kept while the card is open. Defaults to `'line'` with `wrap`.
+	 * @default 'box'
+	 */
+	anchorTo?: PopoverProps['anchorTo'];
+	/**
+	 * Draws an arrow from the card toward its trigger. Style it with `popover.theme.arrow`.
+	 * @default false
+	 */
+	arrow?: PopoverProps['arrow'];
 	/** Additional CSS classes merged onto the Card surface. */
 	class?: string;
 	/** Additional CSS classes merged onto the trigger wrapper. */

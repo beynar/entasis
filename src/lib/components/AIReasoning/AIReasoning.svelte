@@ -149,7 +149,7 @@
 <Collapsible
 	bind:ref
 	bind:open={openState.value}
-	{onOpenChange}
+	onOpenChange={(nextOpen) => onOpenChange?.(nextOpen)}
 	icon={triggerSlot === undefined ? undefined : 'none'}
 	class={classes.root({ className })}
 	theme={collapsibleTheme}

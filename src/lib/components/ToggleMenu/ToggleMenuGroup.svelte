@@ -61,6 +61,7 @@
 			color={item.color ?? color}
 			variant={item.variant ?? variant}
 			disabled={disabled || !!item.disabled || !!button.disabled}
+			focusableWhenDisabled
 			value={pressed.includes(button.value)}
 			onValueChange={(checked) => onToggle({ value: button.value, checked })}
 			{@attach overflowed ? undefined : buttonReference}

@@ -29,8 +29,11 @@ The CheckboxesInput component is a multi-selection input that allows users to se
     - value: string (required) - Unique identifier for the option
     - label?: Slot - Display label (can be text or Svelte snippet)
     - description?: Slot - Optional description text
+    - disabled?: boolean - The option cannot be toggled. When it is selected, a native \`<form>\` leaves it out of its submission (like a disabled native checkbox) while the field value, and so an entasis Form value, keeps it
 
-- **value**: string[] (bindable) - Array of selected option values
+- **value**: string[] (bindable) - Array of selected option values. Typed from the options: with literal option values it is an array of that union, and \`onValueChange\` receives it
+- **selectAll**: boolean (default: false) - Adds a select-all checkbox above the options, labelled with the localized "Select all" (override with **selectAllLabel**). It is mixed (\`aria-checked="mixed"\`) while some, but not all, enabled options are selected and lists the options in \`aria-controls\`. A click selects every enabled option, the next clears them, and the next gives back the partial selection the row started from; with no partial selection it toggles between all and none. Disabled options always keep their state. The field value stays the list of option values, so \`required\` and \`onValidate\` never see the row, and \`onValueChange\` fires once per click
+- **selectAllLabel**: Slot - Label of the select-all row
 - **mode**: 'normal' | 'card' (default: 'normal')
   - normal: Simple checkbox list
   - card: Each option displayed as a raised card with selection ring
@@ -39,7 +42,8 @@ The CheckboxesInput component is a multi-selection input that allows users to se
 - **label**: Slot - Field label
 - **description**: Slot - Helper text below label
 - **required**: boolean (default: false) - Makes field required
-- **disabled**: boolean - Disables all checkboxes
+- **disabled**: boolean - Disables all checkboxes. A disabled group is left out of the submitted Form value and skips validation
+- **readOnly**: boolean - Keeps every option focusable and announced (\`aria-readonly\`) while clicks and keys change nothing; the selection still validates and submits
 - **visible**: boolean - Controls field visibility
 - **name**: string - Form field name
 
@@ -312,13 +316,12 @@ The component renders as a fieldset with the following DOM structure:
 ## Accessibility
 
 - Uses semantic \`<fieldset>\` and \`<legend>\` elements
-- Each checkbox properly associated with its label
-- Hidden native checkbox inputs for keyboard navigation
-- Supports keyboard interaction (Space/Enter to toggle)
+- Each option is named by its label (\`aria-labelledby\`) and described by its description (\`aria-describedby\`), so the description is not part of the accessible name
+- Every option is a Tab stop; Space toggles it. Enter does not toggle: like a native checkbox it continues the form. Inside an entasis Form it validates the field and moves focus to the next one (the last field submits), and inside a plain \`<form>\` it clicks the form's default submit button
+- The submitted values are hidden inputs beside the options (never inside a button), one per selected enabled option; a required group blocks a native submit while nothing is selected
 - ARIA attributes for validation states
 - Error announcements for screen readers
-- Focus management within the group
-- Each option button gets an id unique to the instance (\`<field id>-option-<index>\`) and its hidden input \`<option id>-input\`, so two fields with the same \`name\` or values containing spaces never produce duplicate or invalid ids
+- Each option button gets an id unique to the instance (\`<field id>-option-<index>\`), so two fields with the same \`name\` or values containing spaces never produce duplicate or invalid ids
 
 ## Theme Customization
 
@@ -457,7 +460,7 @@ The theme object contains the following parts:
 - Empty array means no selections
 - Options are rendered in a responsive grid (1 column mobile, 2 columns desktop)
 - Check icon automatically appears when option is selected
-- Native checkbox is hidden but maintained for accessibility
+- Hidden native inputs sit beside the options so plain \`<form>\` submissions work
 - Works seamlessly with Form component
 - Supports Svelte 5 snippets for labels and descriptions
 - Each option requires a unique \`value\` property

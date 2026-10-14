@@ -20,6 +20,7 @@
 		selected,
 		active = false,
 		disabled = false,
+		closeOnClick = true,
 		textValue,
 		title,
 		description,
@@ -46,6 +47,7 @@
 	// key is simply absent unless a `highlighted` prop is passed (listbox/combobox family).
 	const dynamicAttrs = $derived({
 		...attrs,
+		...(closeOnClick === false ? { 'data-menu-keep-open': 'true' } : {}),
 		...(highlighted !== undefined ? { 'data-highlighted': highlighted ? 'true' : undefined } : {}),
 		...(selected !== undefined
 			? {

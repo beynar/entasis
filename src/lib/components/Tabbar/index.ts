@@ -4,7 +4,9 @@ export type {
 	TabItem,
 	TabAlignment,
 	TabOrientation,
-	TabbarPosition
+	TabbarPosition,
+	TabbarValueChangePayload,
+	TabbarValueChangeReason
 } from './tabbar.props.js';
 export {
 	tabbarTheme,

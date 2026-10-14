@@ -28,6 +28,7 @@
 		label,
 		controlsPanels = false,
 		onValueChange,
+		activateOnFocus = true,
 		size = 'normal',
 		orientation = 'horizontal',
 		color,
@@ -62,7 +63,7 @@
 		origin,
 		onFallback: (next, { reason }) => {
 			valueState.value = next;
-			if (reason) onValueChange?.(next);
+			if (reason) onValueChange?.({ value: next, reason });
 		}
 	});
 	/** Index of the active tab; -1 when no tab is selected. */
@@ -75,7 +76,7 @@
 		if (selectedIndex === index || isTabDisabled(items[index])) return;
 		const next = tabValues[index];
 		valueState.value = next;
-		onValueChange?.(next);
+		onValueChange?.({ value: next, reason: 'user' });
 	};
 
 	type NormalizedTab = {
@@ -144,8 +145,14 @@
 		enableHoverFocus: false,
 		onChange: (index) => {
 			// Menu tabs activate manually (via entry selection), never by focus alone —
-			// arrowing onto the trigger must not slide the indicator to it.
-			if (index !== null && index !== selectedIndex && !normalizedTabs[index]?.menu) {
+			// arrowing onto the trigger must not slide the indicator to it. With
+			// `activateOnFocus={false}` no tab activates by focus: Enter, Space or a click does.
+			if (
+				activateOnFocus &&
+				index !== null &&
+				index !== selectedIndex &&
+				!normalizedTabs[index]?.menu
+			) {
 				select(index);
 			}
 		},
@@ -158,10 +165,19 @@
 			event.stopPropagation();
 			return;
 		}
-		if (!tab.href) {
-			select(index);
-			navigation.focusItem(index);
-		}
+		// Link tabs select on click too, without preventing navigation: with focus-driven
+		// activation the focus already selected them (select is idempotent), and with
+		// `activateOnFocus={false}` this is their only path to a selection.
+		select(index);
+		if (!tab.href) navigation.focusItem(index);
+	}
+
+	// Enter on an anchor already dispatches a click; Space does not, so a link tab selects on it
+	// here (and keeps the page from scrolling), matching button tabs.
+	function handleTabKeydown(event: KeyboardEvent, index: number, tab: NormalizedTab) {
+		if (event.key !== ' ' || !tab.href || tab.disabled) return;
+		event.preventDefault();
+		select(index);
 	}
 
 	const indicator = useSlidingIndicator({
@@ -335,6 +351,7 @@
 					fullWidth
 				})}
 				onclick={(event: MouseEvent) => handleTabClick(event, index, tab)}
+				onkeydown={(event: KeyboardEvent) => handleTabKeydown(event, index, tab)}
 				{@attach navigation.itemReference}
 				{@attach indicator.itemReference(index)}
 			>

@@ -9,7 +9,12 @@
 		onOpenChange,
 		onAfterOpen
 	}: {
-		scenario: 'snippet-trigger' | 'animated-trigger' | 'prevented-trigger' | 'default-open';
+		scenario:
+			| 'snippet-trigger'
+			| 'animated-trigger'
+			| 'prevented-trigger'
+			| 'built-in-trigger'
+			| 'default-open';
 		onOpenChange?: DialogProps['onOpenChange'];
 		onAfterOpen?: DialogProps['onAfterOpen'];
 	} = $props();
@@ -37,6 +42,16 @@
 				<button type="button" data-testid="opener" {@attach dialog.trigger}>Open animated</button>
 			{/snippet}
 			<p>Details</p>
+		</Dialog>
+	{:else if scenario === 'built-in-trigger'}
+		<Dialog
+			responsive={false}
+			transition={zero}
+			title="Built-in"
+			trigger={{ content: 'Open built-in' }}
+			{onOpenChange}
+		>
+			<p>Built-in body</p>
 		</Dialog>
 	{:else if scenario === 'prevented-trigger'}
 		<Dialog

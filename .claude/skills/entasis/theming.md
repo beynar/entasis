@@ -1071,7 +1071,7 @@ resolved as data attributes on their root, so a Tailwind attribute variant does 
 ```
 
 `data-color` is on the root of Alert, AudioPlayer, Button, Card, Carousel, Chip, EventCalendar, Form,
-GanttChart, Kanban, Kbd, Menu, MenuOption, Meter, NetworkIndicator, Pagination, ProgressCircle,
+GanttChart, Kanban, Kbd, Menu, MenuOption, Meter, NetworkIndicator, Pagination, Progress, ProgressCircle,
 SegmentedControl, Separator, Sidebar, Skeleton, Spinner, SpinnerText, Stat, Tabbar,
 TableOfContents, Timeline, Toast, ToggleButton, ToggleButtonGroup, ToggleMenu and Tooltip.
 `data-variant` is on the root of Accordion, AIMarker, AIMessage, AITool, Alert, Card, Chip, Form,

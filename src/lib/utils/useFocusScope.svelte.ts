@@ -118,6 +118,17 @@ export function findTrappingScope(element: Node): HTMLElement | null {
 	return null;
 }
 
+// Counts the `focus()` calls a closing overlay makes to give focus back. Their `focusin` events
+// are dispatched inside the call, so a listener can tell restored focus from focus the user moved.
+let restoringFocus = 0;
+
+/**
+ * Whether the focus event being dispatched right now comes from an overlay handing focus back to
+ * its opener. Read it synchronously inside a `focus` or `focusin` listener: a tooltip does not
+ * open for focus the page returned, only for focus the user moved.
+ */
+export const isRestoringFocus = () => restoringFocus > 0;
+
 const usable = (element: HTMLElement | null): element is HTMLElement =>
 	!!element && element.isConnected && !element.closest('[inert]') && isFocusable(element);
 
@@ -141,10 +152,15 @@ export function useFocusScope(options: FocusScopeOptions) {
 		// `focusVisible` makes engines that do not infer a focus ring from the last input (Firefox,
 		// Safari after a pointer open) show it; engines that do not know the option ignore it. It is
 		// left out otherwise: `false` would suppress the ring a keyboard user is owed.
-		element.focus({
-			preventScroll: true,
-			...(focusVisible ? { focusVisible } : {})
-		} as FocusOptions);
+		restoringFocus += 1;
+		try {
+			element.focus({
+				preventScroll: true,
+				...(focusVisible ? { focusVisible } : {})
+			} as FocusOptions);
+		} finally {
+			restoringFocus -= 1;
+		}
 	};
 
 	/**

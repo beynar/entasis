@@ -23,14 +23,23 @@ const defaultButton = cva({
 			outline: 'state-layer bg-color/0 border border-color text-color-readable',
 			soft: 'state-layer text-color-muted-readable bg-color-muted',
 			ghost: 'state-layer text-color-readable bg-color/0',
-			link: 'bg-transparent text-color-readable hover:underline'
+			link: 'bg-transparent text-color-readable hover:not-aria-disabled:underline'
 		},
+		// A loading button keeps receiving pointer events: pointer-events-none would let a second click
+		// fall through to the page beneath and drop keyboard focus to <body>. The click guard in
+		// Button.svelte refuses the activation instead.
 		loading: {
-			true: 'cursor-default pointer-events-none',
+			true: 'cursor-default active:translate-y-0',
 			false: null
 		},
 		disabled: {
-			true: 'opacity-50 cursor-not-allowed pointer-events-none',
+			true: 'opacity-50 cursor-not-allowed',
+			false: null
+		},
+		// Disabled but still focusable (`focusableWhenDisabled`): it renders `aria-disabled`, so it
+		// must keep its pointer events for the click guard and for hover tooltips.
+		focusable: {
+			true: null,
 			false: null
 		},
 		squared: {
@@ -44,9 +53,13 @@ const defaultButton = cva({
 	defaultVariants: {
 		color: 'neutral',
 		variant: 'solid',
-		size: 'normal'
+		size: 'normal',
+		focusable: false
 	},
 	compoundVariants: [
+		// A natively disabled button takes no pointer events; a focusable one keeps them.
+		{ disabled: true, focusable: false, class: 'pointer-events-none' },
+		{ disabled: true, focusable: true, class: 'active:translate-y-0' },
 		// The neutral outline is toolbar chrome next to inputs and selects, which all draw a
 		// `neutral-muted` hairline; a full-strength neutral border made it the odd one out.
 		{ color: 'neutral', variant: 'outline', class: 'border-neutral-muted' }

@@ -10,7 +10,13 @@ const defaultButton = cva({
 			false: null
 		},
 		disabled: {
-			true: 'opacity-50 cursor-not-allowed pointer-events-none',
+			true: 'opacity-50 cursor-not-allowed',
+			false: null
+		},
+		// Disabled but still focusable (`focusableWhenDisabled`): it renders `aria-disabled`, so it
+		// keeps its pointer events for the click guard and for hover tooltips.
+		focusable: {
+			true: null,
 			false: null
 		},
 		color: {
@@ -40,9 +46,12 @@ const defaultButton = cva({
 		checked: false,
 		size: 'normal',
 		variant: 'ghost',
-		color: 'neutral'
+		color: 'neutral',
+		focusable: false
 	},
 	compoundVariants: [
+		// A natively disabled button takes no pointer events; a focusable one keeps them.
+		{ disabled: true, focusable: false, class: 'pointer-events-none' },
 		// Mirrors button.theme.ts: the neutral outline is toolbar chrome next to inputs and selects,
 		// which all draw a `neutral-muted` hairline; a full-strength neutral border made it the odd
 		// one out.

@@ -231,6 +231,126 @@ describe('Button loading', () => {
 	});
 });
 
+describe('Button focusableWhenDisabled', () => {
+	test('a disabled button stays focusable and announces aria-disabled instead of the native attribute', () => {
+		renderInTheme(Button, { children: 'Publish', disabled: true, focusableWhenDisabled: true });
+
+		const button = screen.getByRole('button', { name: 'Publish' });
+		expect(button).not.toBeDisabled();
+		expect(button).toHaveAttribute('aria-disabled', 'true');
+		expect(button).not.toHaveAttribute('aria-busy');
+
+		button.focus();
+		expect(document.activeElement).toBe(button);
+	});
+
+	test('does nothing without disabled', () => {
+		renderInTheme(Button, { children: 'Publish', focusableWhenDisabled: true });
+
+		const button = screen.getByRole('button', { name: 'Publish' });
+		expect(button).not.toHaveAttribute('aria-disabled');
+		expect(button).not.toBeDisabled();
+	});
+
+	test('disabled alone still removes the button from the tab order with the native attribute', () => {
+		renderInTheme(Button, { children: 'Publish', disabled: true });
+
+		const button = screen.getByRole('button', { name: 'Publish' });
+		expect(button).toBeDisabled();
+		expect(button).not.toHaveAttribute('aria-disabled');
+	});
+
+	test('cancels pointer, Enter and Space activation before the click handler runs', async () => {
+		const onclick = vi.fn();
+		renderInTheme(Button, {
+			children: 'Publish',
+			disabled: true,
+			focusableWhenDisabled: true,
+			onclick
+		});
+
+		const button = screen.getByRole('button', { name: 'Publish' });
+		const activation = new MouseEvent('click', { bubbles: true, cancelable: true });
+		expect(button.dispatchEvent(activation)).toBe(false);
+		button.click();
+		await fireEvent.click(button);
+
+		expect(onclick).not.toHaveBeenCalled();
+	});
+
+	test('a disabled focusable submit button does not submit its form, and submits once enabled', async () => {
+		const onSubmit = vi.fn();
+		const { rerender } = render(ButtonInForm, {
+			props: { disabled: true, focusableWhenDisabled: true, onSubmit }
+		});
+
+		const button = screen.getByRole('button', { name: 'Send' });
+		button.click();
+		expect(onSubmit).not.toHaveBeenCalled();
+
+		await rerender({ disabled: false, focusableWhenDisabled: true, onSubmit });
+		expect(button).not.toHaveAttribute('aria-disabled');
+		button.click();
+		expect(onSubmit).toHaveBeenCalledOnce();
+	});
+
+	test('focus stays on the button when it becomes disabled', async () => {
+		const { rerender } = renderInTheme(Button, {
+			children: 'Publish',
+			focusableWhenDisabled: true
+		});
+
+		const button = screen.getByRole('button', { name: 'Publish' });
+		button.focus();
+		await rerender({ children: 'Publish', focusableWhenDisabled: true, disabled: true });
+
+		expect(button).toHaveAttribute('aria-disabled', 'true');
+		expect(document.activeElement).toBe(button);
+	});
+
+	test('a disabled focusable anchor drops its href, takes the tab order and refuses navigation', () => {
+		const onclick = vi.fn();
+		renderInTheme(Button, {
+			children: 'Docs',
+			href: '#docs',
+			disabled: true,
+			focusableWhenDisabled: true,
+			onclick
+		});
+
+		const anchor = screen.getByRole('link', { name: 'Docs' });
+		expect(anchor).not.toHaveAttribute('href');
+		expect(anchor).toHaveAttribute('tabindex', '0');
+		expect(anchor).toHaveAttribute('aria-disabled', 'true');
+
+		anchor.focus();
+		expect(document.activeElement).toBe(anchor);
+		const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+		expect(anchor.dispatchEvent(click)).toBe(false);
+		expect(onclick).not.toHaveBeenCalled();
+	});
+});
+
+describe('Button pointer events', () => {
+	test('a loading button keeps receiving pointer events so a second click cannot fall through', () => {
+		renderInTheme(Button, { children: 'Save', loading: true });
+
+		const button = screen.getByRole('button', { name: 'Save' });
+		expect(button.className).not.toContain('pointer-events-none');
+	});
+
+	test('a natively disabled button ignores pointer events; a focusable disabled one keeps them', () => {
+		const { unmount } = renderInTheme(Button, { children: 'Save', disabled: true });
+		expect(screen.getByRole('button', { name: 'Save' }).className).toContain('pointer-events-none');
+		unmount();
+
+		renderInTheme(Button, { children: 'Save', disabled: true, focusableWhenDisabled: true });
+		expect(screen.getByRole('button', { name: 'Save' }).className).not.toContain(
+			'pointer-events-none'
+		);
+	});
+});
+
 describe('Button props', () => {
 	test('has no `as` prop: href alone makes the root an anchor', () => {
 		const props: ButtonPrimitiveProps = {

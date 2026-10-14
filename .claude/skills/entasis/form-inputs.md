@@ -21,6 +21,7 @@ Global theme setter: `import { setComponentNameTheme } from 'entasis/kebab-case-
 - [ColorPicker](#colorpicker)
 - [Select](#select)
 - [Combobox](#combobox)
+- [Autocomplete](#autocomplete)
 - [TagsInput](#tagsinput)
 - [KeyValueInput](#keyvalueinput)
 - [Switch](#switch)
@@ -82,9 +83,9 @@ When `maxLength` is set, a character counter is auto-displayed.
 
 `import { NumberInput } from 'entasis/number-input'`
 
-**Unique props:** `value: number` (bindable), `min`, `max`, `step` (default 1), `showControls: boolean` (default true), `placeholder`
+**Unique props:** `value: number | null` (bindable), `min`, `max`, `step` (default 1), `largeStep` (default 10 x step), `smallStep` (default step / 10), `snapOnStep`, `wheelStep` (opt in; the wheel never steps otherwise), `showControls: boolean` (default true), `format` (`Intl.NumberFormatOptions`: currency, percent, unit, fraction digits), `locale` (default: the i18n locale), `onValueCommit({ value, reason })`, `inputAttrs`, `placeholder`, `readOnly`
 
-Keyboard: ArrowUp/Down (step), PageUp/Down (step\*10). Supports `prefix`/`suffix` for units.
+A text input with `role="spinbutton"` that parses and formats by locale (`1 234,5` in `fr`, Arabic-Indic digits in any locale); `name` is posted by a hidden input as the plain number. Keyboard: ArrowUp/Down (step), Shift+Arrow and PageUp/Down (largeStep), Alt+Arrow (smallStep), Home/End (min/max). The +/- buttons repeat while held, keep focus in the input and are out of the tab order. Supports `prefix`/`suffix` for units.
 
 **Theme parts:** `input`, `inputContainer` (variants: `size`, `disabled`)
 
@@ -331,6 +332,39 @@ Option format: `{ value: string, label: string, description?: string }`. Debounc
 </script>
 
 <Combobox label="City" items={search} bind:value={val} />
+```
+
+---
+
+## Autocomplete
+
+`import { Autocomplete } from 'entasis/autocomplete'`
+
+Free text with suggestions. The value is the text in the input (submitted natively under `name`); a suggestion is a shortcut for typing. Use Combobox when people must pick from the list.
+
+**Unique props:**
+
+- `items`: strings, `ComboboxOption`s, `{ label?, items }` groups, or `(query, { signal }) => MaybePromise<items>` (required; async calls are debounced 100ms and aborted by newer text)
+- `value: string | null` (bindable), `defaultValue`, `onValueChange(value)`, `onSelect({ item, value, event })`
+- `mode`: `'list'` (filter, default) | `'both'` (filter + inline completion) | `'inline'` (no filter + inline completion) | `'none'` (no filter, text never previewed)
+- `autoHighlight`: `boolean | 'always'` (default `false`, so Enter keeps the typed text); use `true` with `mode="both"` to complete as you type
+- `openOnFocus`, `open` (bindable) / `defaultOpen` / `onOpenChange(open, details)`, `shouldFilter`, `filter`, `limit`, `loop`
+- `placeholder`, `emptyText`, `loadingText`, `autocomplete` (browser autofill hint, default `'off'`), `item` snippet, `inputAttrs`, `readOnly`
+
+Inline completion previews the highlighted suggestion in the input while `value` stays the typed text: Escape restores it, blur restores it, Enter chooses the suggestion, Tab or ArrowLeft/Right/Home/End accept it as typed text.
+
+**Theme parts:** `input`, `inputContainer`, `loading`, `error`, `noOptions`, `group`, `groupLabel`, `separator`
+
+```svelte
+<script lang="ts">
+	import { Autocomplete } from 'entasis/autocomplete';
+
+	let city = $state('');
+	const search = async (query: string, { signal }: { signal: AbortSignal }) =>
+		fetch(`/api/cities?q=${encodeURIComponent(query)}`, { signal }).then((r) => r.json());
+</script>
+
+<Autocomplete name="city" label="City" items={search} bind:value={city} />
 ```
 
 ---

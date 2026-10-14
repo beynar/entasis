@@ -32,6 +32,12 @@
 			options: colors
 		},
 		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{
+			name: 'focusableWhenDisabled',
+			type: 'switch',
+			label: 'Focusable when disabled',
+			value: false
+		},
 		{ name: 'loading', type: 'switch', label: 'Loading', value: false }
 	]);
 
@@ -51,6 +57,7 @@
 			label: 'Loading keeps focus, aria-busy, blocks activation',
 			test: 'a11y:button.loading-stays-focusable'
 		},
+		'Disabled buttons can stay focusable (focusableWhenDisabled)',
 		'Loading spinner overlay attachment',
 		'Bindable ref to root element',
 		'Renders as anchor when href set',
@@ -59,13 +66,14 @@
 >
 	<ComponentCard
 		{controls}
-		code={`<Button size="${controls.value.size}" variant="${controls.value.variant}" color="${controls.value.color}" disabled={${controls.value.disabled}} loading={${controls.value.loading}}>Click me</Button>`}
+		code={`<Button size="${controls.value.size}" variant="${controls.value.variant}" color="${controls.value.color}" disabled={${controls.value.disabled}} focusableWhenDisabled={${controls.value.focusableWhenDisabled}} loading={${controls.value.loading}}>Click me</Button>`}
 	>
 		<Button
 			size={controls.value.size}
 			variant={controls.value.variant}
 			color={controls.value.color}
 			disabled={controls.value.disabled}
+			focusableWhenDisabled={controls.value.focusableWhenDisabled}
 			loading={controls.value.loading}
 		>
 			Click me
@@ -119,6 +127,19 @@
 				<Button disabled>Solid</Button>
 				<Button variant="outline" disabled>Outline</Button>
 				<Button variant="soft" disabled>Soft</Button>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="focusableWhenDisabled keeps a disabled button in the tab order. It renders aria-disabled instead of the native attribute and refuses clicks, Enter, Space and form submission, so keyboard users can still reach it and read why it is unavailable."
+			code="<Button disabled focusableWhenDisabled>Publish</Button>"
+		>
+			<div class="flex flex-wrap items-center justify-center gap-3">
+				<Button disabled focusableWhenDisabled>Publish</Button>
+				<Button variant="outline" disabled focusableWhenDisabled>Export</Button>
+				<Button href="https://svelte.dev" variant="link" disabled focusableWhenDisabled>
+					Docs
+				</Button>
 			</div>
 		</ComponentCard>
 

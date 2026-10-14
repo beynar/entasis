@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { describe, expect, test, vi } from 'vitest';
 import FocusScopeHarness from './FocusScopeHarness.test.svelte';
 import { clearFocusHistory } from './focusHistory.js';
+import { isRestoringFocus } from './useFocusScope.svelte.js';
 
 const button = (name: string) => screen.getByRole('button', { name }) as HTMLButtonElement;
 const settled = () => new Promise((resolve) => setTimeout(resolve, 120));
@@ -183,5 +184,28 @@ describe('useFocusScope · text fields on close', () => {
 		expect(blur).not.toHaveBeenCalled();
 		agent.mockRestore();
 		blur.mockRestore();
+	});
+});
+
+describe('useFocusScope · isRestoringFocus (DF-6)', () => {
+	test('is true inside the focusin of the focus a closing dialog hands back, and only there', async () => {
+		render(FocusScopeHarness, { props: { scenario: 'focus-on-close' } });
+		const seen: Array<{ target: EventTarget | null; restoring: boolean }> = [];
+		const record = (event: Event) =>
+			seen.push({ target: event.target, restoring: isRestoringFocus() });
+		document.addEventListener('focusin', record);
+		const opener = button('Open dialog');
+		opener.focus();
+		await fireEvent.click(opener);
+		await screen.findByRole('dialog');
+		await fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+		await settled();
+		document.removeEventListener('focusin', record);
+
+		const onOpener = seen.filter((entry) => entry.target === opener);
+		// The user's own focus first, then the restore.
+		expect(onOpener.map((entry) => entry.restoring)).toEqual([false, true]);
+		expect(isRestoringFocus()).toBe(false);
 	});
 });

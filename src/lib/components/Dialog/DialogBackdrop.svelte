@@ -7,6 +7,7 @@
 	import type { ResolvedMotion } from '$lib/utils/motion/index.js';
 	import { portal } from '$lib/attachments/portal.js';
 	import { useScrollLock } from '$lib/utils/useScrollLock.svelte.js';
+	import { applyDialogIndent } from './dialog.indent.js';
 
 	const theme = useTheme();
 	const classes = $derived(useDialogTheme());
@@ -18,7 +19,9 @@
 	const resolveMotion = useDialogMotion();
 	const fallbackMotion = $derived(resolveMotion({ type: 'modal' }));
 
-	const openDialogs = $derived(theme.layers.ofKind('dialog'));
+	// Only modal dialogs dim the page, lock its scroll and move it back; a non-modal one leaves
+	// the page as it is.
+	const openDialogs = $derived(theme.layers.ofKind('dialog').filter((layer) => layer.isModal));
 	const isVisible = $derived(openDialogs.length > 0);
 
 	// Swipe-to-dismiss on the top drawer fades the backdrop with the drag; a snap-back
@@ -38,6 +41,13 @@
 	);
 
 	useScrollLock({ isActive: () => openDialogs.length > 0 });
+
+	// `data-dialog-open` and `--dialog-depth` on <html>, for pages that scale back behind a sheet.
+	$effect(() => {
+		const depth = openDialogs.length;
+		if (depth === 0) return;
+		return applyDialogIndent(document.documentElement, depth);
+	});
 </script>
 
 {#if isVisible}

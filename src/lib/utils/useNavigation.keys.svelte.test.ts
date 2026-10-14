@@ -38,10 +38,12 @@ const settle = async () => {
 	await tick();
 };
 
-/** Open the harness PopupMenu with a click; its panel then has focus (`focusOnMount: 'container'`). */
+/** Open the harness PopupMenu with a mouse click; a pointer open leaves focus on the panel itself. */
 const openPopup = async (items = menuItems()) => {
 	render(NavigationKeysHarness, { props: { scenario: 'popup', items } });
-	await fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+	const opener = screen.getByRole('button', { name: 'Open' });
+	await fireEvent.pointerDown(opener, { pointerType: 'mouse' });
+	await fireEvent.click(opener, { detail: 1 });
 	const menu = await waitFor(() => screen.getByRole('menu'));
 	await settle();
 	return { menu, rows: within(menu).getAllByRole('menuitem') };

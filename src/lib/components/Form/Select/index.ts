@@ -4,6 +4,7 @@ export type {
 	SelectOption,
 	SelectOptionGroup,
 	SelectItems,
+	SelectValue,
 	SelectTriggerAttributes
 } from './select.props.js';
 export { SelectState } from './select.state.svelte.js';

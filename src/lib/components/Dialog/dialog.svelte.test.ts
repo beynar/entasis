@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { describe, expect, test, vi } from 'vitest';
 import DialogLawHarness from './dialogLawHarness.test.svelte';
 import DialogSwapHarness from './DialogSwapHarness.test.svelte';
@@ -213,6 +214,25 @@ describe('Dialog trigger contract (CX-4)', () => {
 		expect(card).toHaveAttribute('aria-expanded', 'false');
 	});
 
+	test('DLG-2 the built-in trigger carries aria-haspopup, aria-expanded and aria-controls', async () => {
+		render(DialogTriggerHarness, { props: { scenario: 'built-in-trigger' } });
+		const trigger = screen.getByRole('button', { name: 'Open built-in' });
+		expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
+		expect(trigger).toHaveAttribute('aria-expanded', 'false');
+		expect(trigger).not.toHaveAttribute('aria-controls');
+
+		await fireEvent.click(trigger);
+		const dialog = await screen.findByRole('dialog', { name: 'Built-in' });
+		await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'));
+		expect(trigger).toHaveAttribute('aria-controls', dialog.id);
+
+		await fireEvent.click(within(dialog).getByRole('button', { name: 'Close' }));
+		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+		expect(trigger).toHaveAttribute('aria-expanded', 'false');
+		expect(trigger).not.toHaveAttribute('aria-controls');
+		expect(document.activeElement).toBe(trigger);
+	});
+
 	test("the built-in trigger's onclick runs first, and preventDefault keeps the dialog closed", async () => {
 		const onOpenChange = vi.fn();
 		render(DialogTriggerHarness, { props: { scenario: 'prevented-trigger', onOpenChange } });
@@ -233,5 +253,312 @@ describe('Dialog lifecycle (CX-2)', () => {
 		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
 		await new Promise((resolve) => setTimeout(resolve, 80));
 		expect(onAfterOpen).toHaveBeenCalledOnce();
+	});
+});
+
+const escapeKey = () => fireEvent.keyDown(window, { key: 'Escape' });
+const openLaw = async () => {
+	await fireEvent.click(screen.getByRole('button', { name: 'Open law dialog' }));
+	return screen.findByRole('dialog');
+};
+const stillOpen = async () => {
+	await sleep(30);
+	return screen.queryByRole('dialog') !== null;
+};
+
+describe('Dialog close requests (OV-1)', () => {
+	const veto = () =>
+		vi.fn((open: boolean, details: { cancel(): void }) => {
+			if (!open) details.cancel();
+		});
+
+	test('a cancelled Escape keeps the dialog open and leaves the key untouched', async () => {
+		const onOpenChange = veto();
+		render(DialogLawHarness, { props: { onOpenChange } });
+		await openLaw();
+		onOpenChange.mockClear();
+
+		const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+		window.dispatchEvent(event);
+		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(
+			false,
+			expect.objectContaining({ reason: 'escape-key', interaction: 'keyboard' })
+		);
+		expect(event.defaultPrevented).toBe(false);
+		expect(await stillOpen()).toBe(true);
+	});
+
+	test('a cancelled outside press keeps the dialog open', async () => {
+		const onOpenChange = veto();
+		const onAfterOpen = vi.fn();
+		render(DialogLawHarness, { props: { onOpenChange, onAfterOpen } });
+		await openLaw();
+		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
+		onOpenChange.mockClear();
+
+		await pressOutside();
+		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(
+			false,
+			expect.objectContaining({ reason: 'outside-press' })
+		);
+		expect(await stillOpen()).toBe(true);
+	});
+
+	test('a cancelled close button keeps the dialog open', async () => {
+		const onOpenChange = veto();
+		render(DialogLawHarness, { props: { onOpenChange } });
+		await openLaw();
+		onOpenChange.mockClear();
+
+		await fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+		expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(
+			false,
+			expect.objectContaining({ reason: 'close-press', event: expect.any(MouseEvent) })
+		);
+		expect(await stillOpen()).toBe(true);
+	});
+
+	test('once the veto is lifted every path closes it', async () => {
+		let blocked = true;
+		const onOpenChange = vi.fn((open: boolean, details: { cancel(): void }) => {
+			if (!open && blocked) details.cancel();
+		});
+		render(DialogLawHarness, { props: { onOpenChange } });
+		await openLaw();
+		await escapeKey();
+		expect(await stillOpen()).toBe(true);
+		blocked = false;
+		await escapeKey();
+		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+	});
+});
+
+describe('Dialog close button for screen readers (OV-18)', () => {
+	test('a11y:dialog.close-button-named the default close button is named Close', async () => {
+		render(DialogLawHarness);
+		const dialog = await openLaw();
+		const button = within(dialog).getByRole('button', { name: 'Close' });
+		expect(button).not.toHaveClass('sr-only');
+	});
+
+	test('a11y:dialog.hidden-close a suppressed close button leaves a hidden one that closes the dialog', async () => {
+		const onOpenChange = vi.fn();
+		render(DialogLawHarness, { props: { closeButton: false, onOpenChange } });
+		const dialog = await openLaw();
+
+		const hidden = within(dialog).getByRole('button', { name: 'Close' });
+		expect(hidden).toHaveClass('sr-only');
+		// Reachable by a screen reader's virtual cursor, but not a stop in the Tab order.
+		expect(hidden).toHaveAttribute('tabindex', '-1');
+		// At the end of the panel, after the content.
+		const buttons = within(dialog).getAllByRole('button');
+		expect(buttons.at(-1)).toBe(hidden);
+
+		await fireEvent.click(hidden);
+		expect(onOpenChange).toHaveBeenLastCalledWith(
+			false,
+			expect.objectContaining({ reason: 'close-press' })
+		);
+		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+	});
+
+	test('a close button snippet that renders nothing is treated as suppressed', async () => {
+		render(DialogLawHarness, { props: { emptyClose: true } });
+		const dialog = await openLaw();
+		expect(within(dialog).getAllByRole('button', { name: 'Close' })).toHaveLength(1);
+		expect(within(dialog).getByRole('button', { name: 'Close' })).toHaveClass('sr-only');
+	});
+
+	test('no hidden button for a dialog that is not closable or an alert', async () => {
+		const { unmount } = render(DialogLawHarness, {
+			props: { closeButton: false, closable: false }
+		});
+		let dialog = await openLaw();
+		expect(within(dialog).queryByRole('button', { name: 'Close' })).toBeNull();
+		unmount();
+
+		render(DialogLawHarness, { props: { closeButton: false, type: 'alert' } });
+		await fireEvent.click(screen.getByRole('button', { name: 'Open law dialog' }));
+		dialog = await screen.findByRole('alertdialog');
+		expect(within(dialog).queryByRole('button', { name: 'Close' })).toBeNull();
+	});
+});
+
+describe('Dialog non-modal (DLG-3)', () => {
+	const backdrop = () => document.querySelector('[aria-hidden="true"] > .backdrop-blur-xs');
+	const lockAttribute = () => document.documentElement.hasAttribute('data-entasis-scroll-lock');
+
+	test('a modal makes the page inert, dims it and locks scroll', async () => {
+		render(DialogLawHarness);
+		const dialog = await openLaw();
+		expect(dialog).toHaveAttribute('aria-modal', 'true');
+		await waitFor(() =>
+			expect(screen.getByTestId('page-button').closest('[inert]')).not.toBeNull()
+		);
+		expect(backdrop()).not.toBeNull();
+		expect(lockAttribute()).toBe(true);
+	});
+
+	test('a non-modal dialog leaves the page interactive: no inert, no backdrop, no scroll lock', async () => {
+		render(DialogLawHarness, { props: { modal: false } });
+		const dialog = await openLaw();
+		expect(dialog).not.toHaveAttribute('aria-modal');
+		expect(dialog).toHaveAttribute('data-modal', 'false');
+		await sleep(30);
+		expect(screen.getByTestId('page-button').closest('[inert]')).toBeNull();
+		expect(backdrop()).toBeNull();
+		expect(lockAttribute()).toBe(false);
+		// The viewport-sized root lets presses through to the page; the panel takes them.
+		expect(dialog).toHaveClass('pointer-events-none');
+		expect(dialog.querySelector('[data-type]')).toHaveClass('pointer-events-auto');
+	});
+
+	test('a non-modal dialog ignores outside presses by default and still answers Escape and its button', async () => {
+		const onAfterOpen = vi.fn();
+		const { unmount } = render(DialogLawHarness, { props: { modal: false, onAfterOpen } });
+		await openLaw();
+		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
+		await pressOutside();
+		expect(await stillOpen()).toBe(true);
+		await escapeKey();
+		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+		unmount();
+
+		render(DialogLawHarness, { props: { modal: false } });
+		await openLaw();
+		await fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+	});
+
+	test('closeOnClickOutside opts a non-modal dialog into outside dismissal', async () => {
+		const onAfterOpen = vi.fn();
+		render(DialogLawHarness, { props: { modal: false, closeOnClickOutside: true, onAfterOpen } });
+		await openLaw();
+		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
+		await pressOutside();
+		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+	});
+});
+
+describe('Dialog indent hooks (DLG-4)', () => {
+	const root = document.documentElement;
+
+	test('a modal dialog sets data-dialog-open and --dialog-depth on <html> while it is open', async () => {
+		render(DialogLawHarness);
+		expect(root).not.toHaveAttribute('data-dialog-open');
+		await openLaw();
+		await waitFor(() => expect(root).toHaveAttribute('data-dialog-open'));
+		expect(root.style.getPropertyValue('--dialog-depth')).toBe('1');
+
+		await escapeKey();
+		await waitFor(() => expect(root).not.toHaveAttribute('data-dialog-open'));
+		expect(root.style.getPropertyValue('--dialog-depth')).toBe('');
+	});
+
+	test('the depth counts stacked modal dialogs', async () => {
+		render(DialogSwapHarness);
+		await fireEvent.click(screen.getByRole('button', { name: 'Open first' }));
+		await screen.findByRole('dialog', { name: 'First' });
+		await waitFor(() => expect(root.style.getPropertyValue('--dialog-depth')).toBe('1'));
+		await escapeKey();
+		await waitFor(() => expect(root).not.toHaveAttribute('data-dialog-open'));
+	});
+
+	test('a non-modal dialog does not move the page back', async () => {
+		render(DialogLawHarness, { props: { modal: false } });
+		await openLaw();
+		await sleep(30);
+		expect(root).not.toHaveAttribute('data-dialog-open');
+	});
+});
+
+describe('Dialog bottom sheet and the on-screen keyboard (OV-13)', () => {
+	const align = () => screen.getByRole('dialog').firstElementChild as HTMLElement;
+	const scrollIntoView = vi.fn();
+	const root = document.documentElement;
+
+	test('a focused field makes room for the keyboard, released a frame after focus leaves', async () => {
+		render(DialogLawHarness, { props: { type: 'drawerBottom' } });
+		await openLaw();
+		expect(align().className).not.toContain('--keyboard-inset');
+
+		const field = screen.getByLabelText('Draft');
+		field.focus();
+		await waitFor(() => expect(align().className).toContain('--keyboard-inset'));
+
+		// Moving focus to another field never lets the sheet drop in between.
+		screen.getByRole('button', { name: 'Close law dialog' }).focus();
+		await waitFor(() => expect(align().className).not.toContain('--keyboard-inset'));
+	});
+
+	test('moving focus from one field to the next never lets the sheet drop its keyboard room', async () => {
+		render(DialogLawHarness, { props: { type: 'drawerBottom' } });
+		await openLaw();
+		screen.getByLabelText('Draft').focus();
+		await waitFor(() => expect(align().className).toContain('--keyboard-inset'));
+
+		const dropped: boolean[] = [];
+		const watch = new MutationObserver(() =>
+			dropped.push(!align().className.includes('--keyboard-inset'))
+		);
+		watch.observe(align(), { attributes: true, attributeFilter: ['class'] });
+		try {
+			// Focus leaves the first field and lands on the next one a moment later, after the DOM has
+			// been flushed in between (the release waits a frame for exactly this).
+			screen.getByLabelText('Draft').blur();
+			await tick();
+			await tick();
+			screen.getByLabelText('Second draft').focus();
+			await sleep(80);
+			expect(align().className).toContain('--keyboard-inset');
+			expect(dropped).not.toContain(true);
+		} finally {
+			watch.disconnect();
+		}
+	});
+
+	test('it is a bottom sheet behaviour: other types keep their padding', async () => {
+		render(DialogLawHarness, { props: { type: 'drawerRight' } });
+		await openLaw();
+		screen.getByLabelText('Draft').focus();
+		await sleep(50);
+		expect(align().className).not.toContain('--keyboard-inset');
+	});
+
+	test('the field is brought into view once the keyboard has covered the viewport', async () => {
+		const original = Element.prototype.scrollIntoView;
+		Element.prototype.scrollIntoView = scrollIntoView;
+		root.style.setProperty('--keyboard-inset', '300px');
+		try {
+			render(DialogLawHarness, { props: { type: 'drawerBottom' } });
+			await openLaw();
+			const field = screen.getByLabelText('Draft');
+			field.focus();
+			expect(scrollIntoView).not.toHaveBeenCalled();
+			await waitFor(
+				() => expect(scrollIntoView).toHaveBeenCalledWith({ block: 'center', inline: 'nearest' }),
+				{
+					timeout: 1500
+				}
+			);
+		} finally {
+			Element.prototype.scrollIntoView = original;
+			root.style.removeProperty('--keyboard-inset');
+		}
+	});
+
+	test('with no keyboard (inset 0) the field is left where it is', async () => {
+		const original = Element.prototype.scrollIntoView;
+		scrollIntoView.mockClear();
+		Element.prototype.scrollIntoView = scrollIntoView;
+		try {
+			render(DialogLawHarness, { props: { type: 'drawerBottom' } });
+			await openLaw();
+			screen.getByLabelText('Draft').focus();
+			await sleep(600);
+			expect(scrollIntoView).not.toHaveBeenCalled();
+		} finally {
+			Element.prototype.scrollIntoView = original;
+		}
 	});
 });

@@ -287,9 +287,9 @@ Pattern: `import { set{Component}Theme } from 'entasis/{kebab-name}'`. Overrides
 
 **Display**: See [display.md](display.md) for Button, ButtonGroup, Avatar, Chip, Heading, Code, Meter, MetadataList, Rating, ToggleButton, ToggleButtonGroup, QRCode, DocumentViewer, Icons.
 
-**Form Inputs**: See [form-inputs.md](form-inputs.md) for TextInput, TextArea, NumberInput, RatingInput, PasswordInput, PhoneInput, DateInput, TimeInput, ColorInput, ColorPicker, Select, Combobox, TagsInput, KeyValueInput, Switch, RadioInput, CheckboxesInput, FileInput, Calendar, MiniCalendar, Form, MultiStepForm.
+**Form Inputs**: See [form-inputs.md](form-inputs.md) for TextInput, TextArea, NumberInput, RatingInput, PasswordInput, PhoneInput, DateInput, TimeInput, ColorInput, ColorPicker, Select, Combobox, Autocomplete, TagsInput, KeyValueInput, Switch, RadioInput, CheckboxesInput, FileInput, Calendar, MiniCalendar, Form, MultiStepForm.
 
-**Layout & Navigation**: See [layout.md](layout.md) for Tabs, Tabbar, Stepper, Breadcrumbs, Accordion, Collapsible, Separator, Menu, PopupMenu, MenuOption, Carousel, ScrollArea, AspectRatio, Marquee, Sidebar, AppShell, Grid/GridSpan — including `AppShell variant="framed"`, `Sidebar activeVariant`, and the `mount` axis on Tabs and Stepper.
+**Layout & Navigation**: See [layout.md](layout.md) for Tabs, Tabbar, Stepper, Breadcrumbs, NavigationMenu, Accordion, Collapsible, Separator, Menu, PopupMenu, MenuOption, Carousel, ScrollArea, AspectRatio, Marquee, Sidebar, AppShell, Grid/GridSpan — including `AppShell variant="framed"`, `Sidebar activeVariant`, and the `mount` axis on Tabs and Stepper.
 
 **Overlays & Feedback**: See [overlays.md](overlays.md) for Dialog, Popover, Tooltip, Toast, Confirmation, Alert, NetworkIndicator.
 
@@ -410,6 +410,7 @@ This section is generated from `tooling/component-contract/manifest.ts`.
 
 ### Forms
 
+- `entasis/autocomplete` — Autocomplete (/components/autocomplete)
 - `entasis/calendar` — Calendar (/components/calendar)
 - `entasis/checkbox` — Checkbox (/components/checkbox)
 - `entasis/checkboxes-input` — Checkboxes (/components/checkboxes)
@@ -466,6 +467,7 @@ This section is generated from `tooling/component-contract/manifest.ts`.
 - `entasis/empty` — Empty (/components/empty)
 - `entasis/meter` — Meter (/components/meter)
 - `entasis/network-indicator` — Network indicator (/components/network-indicator)
+- `entasis/progress` — Progress (/components/progress)
 - `entasis/progress-circle` — Progress circle (/components/progress-circle)
 - `entasis/skeleton` — Skeleton (/components/skeleton)
 - `entasis/spinner` — Spinner (/components/spinner)
@@ -481,6 +483,7 @@ This section is generated from `tooling/component-contract/manifest.ts`.
 
 - `entasis/breadcrumbs` — Breadcrumbs (/components/breadcrumbs)
 - `entasis/command` — Command (/components/command)
+- `entasis/navigation-menu` — Navigation menu (/components/navigation-menu)
 - `entasis/pagination` — Pagination (/components/pagination)
 - `entasis/stepper` — Stepper (/components/stepper)
 - `entasis/tabbar` — Tabbar (/components/tabbar)

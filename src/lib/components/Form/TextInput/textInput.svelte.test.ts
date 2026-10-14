@@ -57,7 +57,7 @@ const renderPeopleTable = (props: Omit<DataTableProps<Person>, 'items' | 'getRow
 describe('library search fields built on TextInput', () => {
 	test('the PhoneInput country search keeps the 1Password opt-out', () => {
 		renderInTheme(PhoneInputCountryPicker, {
-			countries: [{ iso2: 'fr', name: 'France', dialCode: '33', flag: '', searchText: 'france' }],
+			countries: [{ iso2: 'fr', name: 'France', dialCode: '33', flag: '' }],
 			selectedCountry: null,
 			searchPlaceholder: 'Search countries',
 			onSelectCountry: vi.fn()

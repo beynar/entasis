@@ -3,6 +3,7 @@ import { render, within } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import Meter from './Meter.svelte';
+import RangeLocaleHarness from '../Progress/RangeLocaleHarness.test.svelte';
 
 const segments = (container: HTMLElement) =>
 	Array.from(container.querySelectorAll<HTMLElement>('[data-first]'));
@@ -203,5 +204,115 @@ describe('Meter accessibility', () => {
 		for (const segment of segments) {
 			expect(segment.querySelector('[role="presentation"].sr-only')).not.toBeNull();
 		}
+	});
+});
+
+describe('Meter range, clamping and formatting', () => {
+	const fill = (container: HTMLElement) => segments(container)[0].style.width;
+	const indicator = (container: HTMLElement) =>
+		container.querySelector<HTMLElement>('[data-position]')?.textContent?.trim();
+
+	test('measures a segment from min to max', () => {
+		const { container, getByRole } = render(Meter, {
+			props: { value: 30, min: 20, max: 40, label: 'Load' }
+		});
+
+		expect(fill(container)).toBe('50%');
+		expect(indicator(container)).toBe('50%');
+		const meter = getByRole('meter');
+		expect(meter).toHaveAttribute('aria-valuemin', '20');
+		expect(meter).toHaveAttribute('aria-valuemax', '40');
+		expect(meter).toHaveAttribute('aria-valuenow', '30');
+		expect(meter).toHaveAttribute('aria-valuetext', '50%');
+	});
+
+	test('clamps a value past max so the fill, text and ARIA agree', () => {
+		const { container, getByRole } = render(Meter, {
+			props: { value: 120, max: 100, label: 'Load' }
+		});
+
+		expect(fill(container)).toBe('100%');
+		expect(indicator(container)).toBe('100%');
+		expect(getByRole('meter')).toHaveAttribute('aria-valuenow', '100');
+		expect(getByRole('meter')).toHaveAttribute('aria-valuetext', '100%');
+	});
+
+	test('clamps a value below min to an empty fill', () => {
+		const { container, getByRole } = render(Meter, {
+			props: { value: 10, min: 20, max: 40, label: 'Load' }
+		});
+
+		expect(fill(container)).toBe('0%');
+		expect(getByRole('meter')).toHaveAttribute('aria-valuenow', '20');
+		expect(getByRole('meter')).toHaveAttribute('aria-valuetext', '0%');
+	});
+
+	test('clamps each stacked segment and reports its own value text', () => {
+		const { container, getAllByRole } = render(Meter, {
+			props: { min: 0, max: 50, label: 'Mix', value: [{ value: 25 }, { value: 80 }] }
+		});
+
+		expect(segments(container).map((bar) => bar.style.width)).toEqual(['50%', '100%']);
+		const meters = getAllByRole('meter');
+		expect(meters.map((meter) => meter.getAttribute('aria-valuenow'))).toEqual(['25', '50']);
+		expect(meters.map((meter) => meter.getAttribute('aria-valuetext'))).toEqual(['50%', '100%']);
+	});
+
+	test('formats the value text with the format options in value mode', () => {
+		const { getByRole, container } = render(Meter, {
+			props: {
+				value: 1234.5,
+				max: 5000,
+				showIndicatorAs: 'value',
+				format: { style: 'unit', unit: 'megabyte' },
+				label: 'Disk'
+			}
+		});
+
+		expect(indicator(container)).toMatch(/1,234\.5\s?MB/);
+		expect(getByRole('meter').getAttribute('aria-valuetext')).toMatch(/1,234\.5\s?MB/);
+	});
+
+	test('getAriaValueText overrides the announced text with a payload', () => {
+		const calls: unknown[] = [];
+		const { getByRole } = render(Meter, {
+			props: {
+				value: 30,
+				min: 20,
+				max: 40,
+				label: 'Load',
+				getAriaValueText: (payload) => {
+					calls.push(payload);
+					return `${payload.formattedValue} of capacity`;
+				}
+			}
+		});
+
+		expect(getByRole('meter')).toHaveAttribute('aria-valuetext', '50% of capacity');
+		expect(calls[0]).toEqual({ value: 30, formattedValue: '50%', min: 20, max: 40 });
+	});
+
+	test('formats the percentage with the locale of the surrounding I18n', () => {
+		const { container } = render(RangeLocaleHarness, { props: { locale: 'fr', value: 50 } });
+
+		const meter = container.querySelector('[role="meter"]')!;
+		expect(meter.getAttribute('aria-valuetext')).toMatch(/^50\s%$/);
+		expect(meter.getAttribute('aria-valuetext')).not.toBe('50%');
+	});
+
+	test('the locale prop wins over the I18n locale', () => {
+		const { container } = render(Meter, { props: { value: 50, label: 'Load', locale: 'fr' } });
+
+		expect(container.querySelector('[role="meter"]')!.getAttribute('aria-valuetext')).toMatch(
+			/^50\s%$/
+		);
+	});
+
+	test('formats legend percentages in the locale', () => {
+		const { container } = render(Meter, {
+			props: { value: 50, showLegend: true, label: 'Load', locale: 'fr' }
+		});
+
+		expect(container.textContent).toMatch(/50\s%/);
 	});
 });

@@ -197,7 +197,7 @@
 		</ComponentCard>
 
 		<ComponentCard
-			description="Tree groups render recursive folder structures inline when expanded and as Menu submenu popovers in desktop icon mode."
+			description="Tree groups render recursive folder structures inline when expanded and as a popover list of links in desktop icon mode."
 			class="!min-h-fit !items-start !p-4"
 			code={treeCode}
 		>

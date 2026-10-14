@@ -218,24 +218,76 @@ describe('Switch required validation', () => {
 	});
 });
 
-describe('Switch inline label', () => {
-	test('clicking the label text focuses the switch without toggling it', async () => {
-		render(SwitchForms);
+describe('Switch labels', () => {
+	test('clicking the inline label toggles the switch exactly once', async () => {
+		const onValueChange = vi.fn();
+		render(SwitchForms, { props: { onSwitchChange: onValueChange } });
 		const control = nativeSwitch();
-		expect(control).not.toHaveFocus();
 
 		await fireEvent.click(within(nativeForm()).getByText('Alerts'));
 
-		expect(control).toHaveFocus();
+		expect(control).toHaveAttribute('aria-checked', 'true');
+		expect(onValueChange).toHaveBeenCalledExactlyOnceWith(true);
+		await fireEvent.click(within(nativeForm()).getByText('Alerts'));
 		expect(control).toHaveAttribute('aria-checked', 'false');
+		expect(onValueChange).toHaveBeenCalledTimes(2);
 	});
 
-	test('a disabled switch ignores a label click', async () => {
+	test('the label is a <label for> the switch, so it names it without aria-labelledby', () => {
+		render(SwitchForms);
+		const control = nativeSwitch();
+		const label = within(nativeForm()).getByText('Alerts');
+
+		expect(label.tagName).toBe('LABEL');
+		expect(label).toHaveAttribute('for', control.id);
+		expect(control.tagName).toBe('BUTTON');
+		expect(control).not.toHaveAttribute('aria-labelledby');
+		expect(control).toHaveAccessibleName('Alerts');
+	});
+
+	test('a disabled switch ignores a label click and takes no focus', async () => {
 		render(SwitchForms, { props: { nativeDisabled: true } });
 
 		await fireEvent.click(within(nativeForm()).getByText('Alerts'));
 
-		expect(nativeSwitch()).not.toHaveFocus();
+		expect(nativeSwitch()).toBeDisabled();
 		expect(nativeSwitch()).toHaveAttribute('aria-checked', 'false');
+		nativeSwitch().focus();
+		expect(nativeSwitch()).not.toHaveFocus();
+	});
+
+	test('an aria-label in inputAttrs names the switch instead of its label', () => {
+		render(SwitchForms, { props: { inputAttrs: { 'aria-label': 'Email alerts' } } });
+
+		expect(within(nativeForm()).getByRole('switch', { name: 'Email alerts' })).toBeInTheDocument();
+		expect(within(nativeForm()).queryByRole('switch', { name: 'Alerts' })).toBeNull();
+	});
+});
+
+describe('Switch read-only', () => {
+	test('stays focusable and announced, and ignores clicks and the label', async () => {
+		const onSwitchChange = vi.fn();
+		render(SwitchForms, { props: { nativeReadOnly: true, onSwitchChange } });
+		const control = nativeSwitch();
+
+		expect(control).toHaveAttribute('aria-readonly', 'true');
+		expect(control).toHaveAttribute('data-readonly');
+		expect(control).not.toBeDisabled();
+		control.focus();
+		expect(control).toHaveFocus();
+		await fireEvent.click(control);
+		await fireEvent.click(within(nativeForm()).getByText('Alerts'));
+		expect(control).toHaveAttribute('aria-checked', 'false');
+		expect(onSwitchChange).not.toHaveBeenCalled();
+	});
+
+	test('a read-only switch that is on still submits its value', async () => {
+		const onNativeSubmit = vi.fn();
+		render(SwitchForms, {
+			props: { nativeReadOnly: true, nativeDefaultValue: true, onNativeSubmit }
+		});
+
+		await submitNative();
+		expect(onNativeSubmit.mock.calls[0][0].get('alerts')).toBe('true');
 	});
 });

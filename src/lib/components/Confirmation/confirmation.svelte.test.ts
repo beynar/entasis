@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import { describe, expect, test, vi } from 'vitest';
 import ConfirmationHarness from './ConfirmationHarness.test.svelte';
 import { confirmation } from './confirmation.state.svelte.js';
@@ -197,5 +197,68 @@ describe('Confirmation', () => {
 		await screen.findByRole('alertdialog');
 		unmount();
 		await expect(pending).resolves.toEqual({ confirmed: false, result: undefined });
+	});
+
+	test('a11y:confirmation.escape-cancels Escape answers the question as declined and closes it', async () => {
+		render(ConfirmationHarness);
+		const onConfirm = vi.fn();
+		const pending = ask(onConfirm);
+		await screen.findByRole('alertdialog');
+
+		await fireEvent.keyDown(window, { key: 'Escape' });
+		await expect(pending).resolves.toEqual({ confirmed: false, result: undefined });
+		expect(onConfirm).not.toHaveBeenCalled();
+		await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
+	});
+
+	test('Escape does nothing while the confirmed action is running', async () => {
+		render(ConfirmationHarness);
+		let finishAction: (value: string) => void = () => {};
+		const pending = ask(
+			() =>
+				new Promise<string>((resolve) => {
+					finishAction = resolve;
+				})
+		);
+		const settled = vi.fn();
+		void pending.then(settled);
+		await screen.findByRole('alertdialog');
+		await fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+		await waitFor(() => expect(screen.getByRole('button', { name: 'Keep' })).toBeDisabled());
+
+		const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+		window.dispatchEvent(event);
+		await new Promise((resolve) => setTimeout(resolve, 30));
+		expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+		expect(settled).not.toHaveBeenCalled();
+		// A refused Escape stays available to whatever else handles it.
+		expect(event.defaultPrevented).toBe(false);
+
+		finishAction('deleted');
+		await expect(pending).resolves.toEqual({ confirmed: true, result: 'deleted' });
+	});
+
+	test('an outside press leaves the question open', async () => {
+		render(ConfirmationHarness);
+		const pending = ask();
+		const dialog = await screen.findByRole('alertdialog');
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		await fireEvent.pointerDown(document.body);
+		await new Promise((resolve) => setTimeout(resolve, 30));
+		expect(dialog).toBeInTheDocument();
+		await fireEvent.click(screen.getByRole('button', { name: 'Keep' }));
+		await expect(pending).resolves.toEqual({ confirmed: false, result: undefined });
+	});
+
+	test('the only controls are the two answers: no close button, visible or hidden', async () => {
+		render(ConfirmationHarness);
+		void ask();
+		const dialog = await screen.findByRole('alertdialog');
+		expect(
+			within(dialog)
+				.getAllByRole('button')
+				.map((button) => button.textContent?.trim())
+		).toEqual(['Keep', 'Delete']);
+		await fireEvent.click(screen.getByRole('button', { name: 'Keep' }));
 	});
 });

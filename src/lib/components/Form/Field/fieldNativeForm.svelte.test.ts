@@ -227,7 +227,8 @@ describe('native reset of search drafts', () => {
 	test('uncommitted text in a combobox or tags input is cleared with the form', async () => {
 		render(NativeFormHarness, { props: { scenario: 'drafts' } });
 		const combobox = screen.getAllByRole('combobox')[0] as HTMLInputElement;
-		const tags = form().querySelector<HTMLInputElement>('input[name="topics"]')!;
+		// The search boxes carry no name: the hidden inputs beside them submit the values.
+		const tags = screen.getAllByRole('combobox')[1] as HTMLInputElement;
 		await fireEvent.input(combobox, { target: { value: 'zzz' } });
 		await fireEvent.input(tags, { target: { value: 'qqq' } });
 		expect(combobox).toHaveValue('zzz');

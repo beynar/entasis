@@ -9,6 +9,8 @@
 - [Heading](#heading)
 - [Code](#code)
 - [Meter](#meter)
+- [Progress](#progress)
+- [ProgressCircle](#progresscircle)
 - [Stat](#stat)
 - [MetadataList](#metadatalist)
 - [Rating](#rating)
@@ -115,13 +117,18 @@ Shared props (size, color, variant, disabled) apply to all buttons. Individual b
 
 ### Avatar Props
 
-| Prop    | Type    | Default      | Notes                                                      |
-| ------- | ------- | ------------ | ---------------------------------------------------------- |
-| name    | string  | **Required** | Display name; its initials render when no image shows      |
-| src     | string  | -            | Image URL; initials render when omitted or when it fails   |
-| alt     | string  | `name`       | Alternative text for the image                             |
-| delay   | number  | 0            | Delay before revealing a loaded image (ms)                 |
-| loading | boolean | false        | Bindable; `false` with no `src`, and once loaded or failed |
+| Prop          | Type                  | Default      | Notes                                                                                                                 |
+| ------------- | --------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------- |
+| name          | string                | **Required** | Display name; its initials render when no image shows                                                                 |
+| src           | string                | -            | Image URL; initials render when omitted or when it fails                                                              |
+| alt           | string                | `name`       | Accessible name of the whole avatar (`role="img"`, announced once); `""` marks it decorative (aria-hidden)            |
+| image         | AvatarImageAttributes | -            | Native `<img>` attributes: `srcset`, `sizes`, `crossorigin`, `referrerpolicy`, `loading`, `decoding`, `fetchpriority` |
+| fallbackDelay | number                | 0            | Delay (ms) before the initials render while the image is loading; errors and no `src` show them at once               |
+| revealDelay   | number                | 0            | Delay (ms) before a loaded image is revealed                                                                          |
+| delay         | number                | 0            | Deprecated alias of `revealDelay`; it never delays the initials                                                       |
+| loading       | boolean               | false        | Bindable; `false` with no `src`, and once loaded or failed                                                            |
+
+The root carries `data-status` = `idle` (no `src`) / `loading` / `loaded` / `error`, for crossfades and styling.
 
 `name` / `src` / `alt` are the fields of the exported `AvatarItem` type.
 
@@ -298,20 +305,22 @@ Progress/measurement visualization with spring animations.
 
 ### Unique Props
 
-| Prop                                   | Type                                         | Default      | Notes                                                                                                             |
-| -------------------------------------- | -------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------- |
-| value                                  | number \| MeterStep\<T\> \| MeterStep\<T\>[] | **Required** | Plain number, one segment, or stacked segments; a segment is `{ value, label?, color?, icon?, position?, data? }` |
-| color                                  | Colors                                       | 'primary'    | Color for a numeric value, and the fallback for segments with no color                                            |
-| min                                    | number                                       | 0            | Minimum value                                                                                                     |
-| max                                    | number                                       | 100          | Maximum value                                                                                                     |
-| showIndicatorAs                        | 'value' \| 'percentage'                      | -            | Indicator display format                                                                                          |
-| showLegend                             | boolean                                      | false        | Lists each segment's label and percentage under the track                                                         |
-| steps                                  | Array\<Step\>                                | -            | `{ start, end?, label: Slot, color, position?, class?, labelClass?, data? }`                                      |
-| stiffness / damping / soft / precision | number                                       | -            | Spring animation params                                                                                           |
+| Prop                                   | Type                                                     | Default      | Notes                                                                                                             |
+| -------------------------------------- | -------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------- |
+| value                                  | number \| MeterStep\<T\> \| MeterStep\<T\>[]             | **Required** | Plain number, one segment, or stacked segments; a segment is `{ value, label?, color?, icon?, position?, data? }` |
+| color                                  | Colors                                                   | 'primary'    | Color for a numeric value, and the fallback for segments with no color                                            |
+| min                                    | number                                                   | 0            | Minimum value; a segment fills `(value - min) / (max - min)` of the track                                         |
+| max                                    | number                                                   | 100          | Maximum value; values are clamped into `[min, max]`                                                               |
+| format                                 | Intl.NumberFormatOptions                                 | -            | Formats the clamped value in `showIndicatorAs="value"` mode (`{ style: 'unit', unit: 'megabyte' }`)               |
+| getAriaValueText                       | (payload: { value, formattedValue, min, max }) => string | -            | Overrides `aria-valuetext`, which mirrors the indicator text                                                      |
+| locale                                 | Intl.LocalesArgument                                     | I18n locale  | Locale of the value and percentage text (French reads `50 %`)                                                     |
+| showIndicatorAs                        | 'value' \| 'percentage'                                  | -            | Indicator display format                                                                                          |
+| showLegend                             | boolean                                                  | false        | Lists each segment's label and percentage under the track                                                         |
+| stiffness / damping / soft / precision | number                                                   | -            | Spring animation params                                                                                           |
 
 A numeric `value` renders one segment whose legend label defaults to the number itself.
 
-The metadata generics are unconstrained and default to `unknown` (`MeterProps<T = unknown, S = unknown>`, `MeterStep<T = unknown>`), so `data` takes any shape. `steps` is currently accepted but never rendered, and `min` only sets `aria-valuemin` and the clamp (the bar still fills from 0).
+The metadata generics are unconstrained and default to `unknown` (`MeterProps<T = unknown>`, `MeterStep<T = unknown>`), so `data` takes any shape. Each segment value is clamped into `[min, max]` and fills `(clamped - min) / (max - min)` of the track; the indicator text, the legend percentage and `aria-valuetext` all come from that same number, formatted in the I18n locale.
 
 Accessibility: one segment makes the root `role="meter"` with `aria-valuemin`/`aria-valuemax`, the clamped `aria-valuenow`, and the indicator text as `aria-valuetext`; it is named by `label` and described by `helper`/`description`. Several segments make the root a `role="group"` named by `label` and described by `helper`/`description`, with one `meter` per segment named by the segment's `label` (or "Segment 2 of 3"). Always pass `label`: an unlabelled meter falls back to the generic catalog name "Meter".
 
@@ -336,11 +345,85 @@ Slots: `label`, `description`, `helper`, `header`, `indicator` (payload-less; us
 		{ value: 20, color: 'info', label: 'Cached' }
 	]}
 	max={100}
-	steps={[
-		{ start: 0, end: 50, label: 'Low', color: 'success' },
-		{ start: 50, end: 100, label: 'High', color: 'danger' }
-	]}
 />
+```
+
+---
+
+## Progress
+
+`import { Progress } from 'entasis/progress'`
+
+Linear progress bar: determinate or indeterminate (`value={null}`), with a label and value text in a header.
+
+### Unique Props
+
+| Prop             | Type                                                     | Default       | Notes                                                                                         |
+| ---------------- | -------------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------- |
+| value            | number \| null                                           | 0             | Clamped into `[min, max]`; `null` is indeterminate (no `aria-valuenow`, `data-indeterminate`) |
+| min / max        | number                                                   | 0 / 100       | Range bounds, reported as `aria-valuemin` / `aria-valuemax`; `data-complete` at `max`         |
+| format           | Intl.NumberFormatOptions                                 | -             | Formats the clamped value; without it the text is the percentage of the range                 |
+| getAriaValueText | (payload: { value, formattedValue, min, max }) => string | -             | Overrides `aria-valuetext` (`value` is `null` while indeterminate)                            |
+| locale           | Intl.LocalesArgument                                     | I18n locale   | Locale of the value text                                                                      |
+| label            | string \| Snippet                                        | -             | Visible label; names the bar (without one it is named "Progress" from the catalog)            |
+| showValue        | boolean                                                  | false         | Shows the value text in the header; it is always announced                                    |
+| valueLabel       | Snippet\<[{ value, formattedValue, percent, status }]\>  | -             | Replaces the visible value text                                                               |
+| size             | 'small' \| 'normal' \| 'large'                           | 'normal'      | Track thickness and text size                                                                 |
+| density          | 'compact' \| 'normal' \| 'comfortable'                   | 'normal'      | Gap between the header and the track                                                          |
+| color            | Colors                                                   | Theme default | Fill color                                                                                    |
+
+The value text is always inside the bar as presentational text (hidden unless `showValue`) so NVDA reads the bar's name.
+
+### Theme Parts
+
+`root` (base, density), `header` (base), `label` (base, size), `value` (base, size), `track` (base, size), `indicator` (base, color)
+
+### Key Example
+
+```svelte
+<script>
+	import { Progress } from 'entasis/progress';
+</script>
+
+<Progress value={45} label="Uploading" showValue />
+<Progress value={null} label="Preparing" />
+```
+
+---
+
+## ProgressCircle
+
+`import { ProgressCircle } from 'entasis/progress-circle'`
+
+Compact circular progress indicator.
+
+### Unique Props
+
+| Prop               | Type                                                     | Default            | Notes                                                                   |
+| ------------------ | -------------------------------------------------------- | ------------------ | ----------------------------------------------------------------------- |
+| value              | number \| null                                           | 0                  | Clamped into `[min, max]`; `null` is indeterminate and the arc spins    |
+| min / max          | number                                                   | 0 / 100            | Range bounds; `data-complete` at `max`                                  |
+| format             | Intl.NumberFormatOptions                                 | -                  | Formats the clamped value for the value text                            |
+| getAriaValueText   | (payload: { value, formattedValue, min, max }) => string | -                  | Overrides `aria-valuetext`                                              |
+| locale             | Intl.LocalesArgument                                     | I18n locale        | Locale of the value text                                                |
+| size / diameter    | 'small' \| 'normal' \| 'large' / number                  | 'normal'           | Semantic size, or an explicit pixel diameter                            |
+| label / decorative | string / boolean                                         | 'Progress' / false | Accessible name; `decorative` removes the semantics and the hidden text |
+
+Not decorative, it holds a visually hidden presentational value text so NVDA reads the name.
+
+### Theme Parts
+
+`root` (base, size, color), `svg` (base, indeterminate), `track` (base), `indicator` (base)
+
+### Key Example
+
+```svelte
+<script>
+	import { ProgressCircle } from 'entasis/progress-circle';
+</script>
+
+<ProgressCircle value={45} label="Upload" />
+<ProgressCircle value={null} label="Loading" />
 ```
 
 ---

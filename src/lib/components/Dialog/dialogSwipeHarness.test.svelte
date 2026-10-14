@@ -8,9 +8,26 @@
 		swipeFrom,
 		swipeToDismiss,
 		closable = true,
+		title,
+		snapPoints,
+		defaultSnapPoint,
+		snapPoint = $bindable(),
+		onSnapPointChange,
 		onOpenChange,
 		onAction
-	}: Pick<DialogProps, 'type' | 'swipeFrom' | 'swipeToDismiss' | 'closable' | 'onOpenChange'> & {
+	}: Pick<
+		DialogProps,
+		| 'type'
+		| 'swipeFrom'
+		| 'swipeToDismiss'
+		| 'closable'
+		| 'title'
+		| 'snapPoints'
+		| 'defaultSnapPoint'
+		| 'snapPoint'
+		| 'onSnapPointChange'
+		| 'onOpenChange'
+	> & {
 		onAction?: () => void;
 	} = $props();
 </script>
@@ -22,6 +39,11 @@
 		{swipeFrom}
 		{swipeToDismiss}
 		{closable}
+		{title}
+		{snapPoints}
+		{defaultSnapPoint}
+		bind:snapPoint
+		{onSnapPointChange}
 		{onOpenChange}
 		responsive={false}
 		transition={{ in: { duration: 0 }, out: { duration: 0 } }}
@@ -31,10 +53,19 @@
 			<span data-testid="dragging">{dialog.dragging}</span>
 			<span data-testid="progress">{dialog.dragProgress}</span>
 			<span data-testid="offset">{dialog.dragOffset}</span>
+			<span data-testid="snap">{dialog.currentSnapPoint}</span>
+			<button
+				type="button"
+				data-testid="snap-first"
+				onclick={() => dialog.setSnapPoint(snapPoints![0])}
+			>
+				First point
+			</button>
 			<button type="button" data-testid="action" onclick={onAction}>Action</button>
 			<div data-testid="body">Body copy</div>
 			<div data-testid="opted-out" data-no-swipe>Opted out</div>
 			<div data-testid="scroller" style="overflow-y: auto;">Scrollable</div>
+			<div data-testid="x-scroller" dir="rtl" style="overflow-x: auto; direction: rtl;">Wide</div>
 		{/snippet}
 	</Dialog>
 </Theme>

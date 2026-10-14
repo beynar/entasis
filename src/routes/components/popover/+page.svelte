@@ -12,6 +12,14 @@
 	import { sizes } from '$lib/utils/tokens.js';
 	import type { OpenChangeDetails } from '$lib/types/index.js';
 	import type { PopoverPlacement } from '$lib/components/Popover/popover.props.js';
+	import type { PopoverState } from '$lib/components/Popover/popover.state.svelte.js';
+
+	type Person = { id: number; name: string; role: string };
+	const people: Person[] = [
+		{ id: 1, name: 'Ada', role: 'Mathematician' },
+		{ id: 2, name: 'Grace', role: 'Rear admiral' },
+		{ id: 3, name: 'Edsger', role: 'Computer scientist' }
+	];
 
 	const placements = ['top', 'bottom', 'left', 'right', 'inline-start', 'inline-end'] as const;
 	const controls = createComponentControls([
@@ -28,7 +36,8 @@
 			label: 'Position',
 			value: 'bottom',
 			options: placements
-		}
+		},
+		{ name: 'arrow', type: 'switch', label: 'Arrow', value: false }
 	]);
 
 	const panelText =
@@ -108,7 +117,26 @@
 			label: 'Hover never opens from a touch tap or a disabled trigger',
 			test: 'a11y:popover.hover-ignores-touch-and-disabled'
 		},
-		'Neighbouring hover popovers, hover cards and tooltips open without waiting'
+		'Neighbouring hover popovers, hover cards and tooltips open without waiting',
+		{
+			label: 'Tab reaches the panel from its trigger and continues after it',
+			test: 'a11y:popover.tab-into-panel'
+		},
+		{
+			label:
+				'Modal popovers contain Tab, make the page inert and give screen readers a Close button',
+			test: 'a11y:popover.modal-inert'
+		},
+		{
+			label: 'Named with label or labelledBy',
+			test: 'a11y:popover.label'
+		},
+		{
+			label: 'Closes when focus moves on to something else',
+			test: 'a11y:popover.focus-out'
+		},
+		'Optional arrow that follows the trigger',
+		'One popup shared by many triggers, each with its own payload'
 	]}
 >
 	<ComponentCard
@@ -120,7 +148,7 @@
 		color: 'primary'
 	}}
 	size="${controls.value.size}"
-	position="${controls.value.position}"
+	position="${controls.value.position}"${controls.value.arrow ? '\n\tarrow' : ''}
 >
 	<div>
 		<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor</p>
@@ -134,6 +162,7 @@
 			}}
 			size={controls.value.size}
 			position={controls.value.position}
+			arrow={controls.value.arrow as boolean}
 		>
 			<div>
 				<p>{text}</p>
@@ -631,6 +660,140 @@ ${'</' + 'script>'}
 				</Popover>
 				<Button variant="outline" color="neutral">Next control</Button>
 			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Closing when focus moves on"
+			description="Focus that was on the trigger or inside the panel moving to a control outside both closes the popover (reason 'focus-out') and is not taken back. It follows closeOnClickOutside unless closeOnFocusOut says otherwise. Menus and lists steer focus themselves, so they are left alone. tabBridge={false} takes the panel out of the trigger's Tab order for a panel that is not meant to be tabbed into."
+			code={`<Popover focusOnOpen="first" trigger={{ content: 'Closes when focus leaves' }}>
+	<input aria-label="Name" />
+</Popover>
+
+<Popover closeOnFocusOut={false} trigger={{ content: 'Stays open' }}>
+	<input aria-label="Name" />
+</Popover>
+
+<Popover tabBridge={false} trigger={{ content: 'Not in the Tab order' }}>
+	Hover-style hint, not for tabbing into
+</Popover>`}
+		>
+			<div class="flex flex-wrap items-center justify-center gap-3">
+				<Popover
+					focusOnOpen="first"
+					position="bottom"
+					trigger={{ content: 'Closes when focus leaves', variant: 'soft' }}
+				>
+					<input
+						aria-label="Name"
+						placeholder="Name"
+						class="border-neutral/30 w-full rounded-md border px-2 py-1 text-sm"
+					/>
+				</Popover>
+				<Popover
+					closeOnFocusOut={false}
+					focusOnOpen="first"
+					position="bottom"
+					trigger={{ content: 'Stays open', variant: 'soft' }}
+				>
+					<input
+						aria-label="Name"
+						placeholder="Name"
+						class="border-neutral/30 w-full rounded-md border px-2 py-1 text-sm"
+					/>
+				</Popover>
+				<Popover
+					tabBridge={false}
+					position="bottom"
+					trigger={{ content: 'Not in the Tab order', variant: 'soft' }}
+				>
+					{@render panelContent('A hint', 'Tab on the trigger moves on to the next control.')}
+				</Popover>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Modal and named"
+			description="A modal popover keeps Tab inside the panel, makes the rest of the page inert and opens with focus inside it. A visually hidden Close button at the end of the panel gives screen reader users a control that closes it. label names the dialog for assistive technology (labelledBy points at a visible heading instead)."
+			code={`<Popover modal label="Delivery options" trigger={{ content: 'Delivery options' }}>
+	<fieldset>
+		<label><input type="radio" name="speed" /> Standard</label>
+		<label><input type="radio" name="speed" /> Express</label>
+	</fieldset>
+	<Button>Save</Button>
+</Popover>`}
+		>
+			<Popover
+				modal
+				label="Delivery options"
+				position="bottom"
+				trigger={{ content: 'Delivery options', color: 'primary' }}
+			>
+				{#snippet children(popover)}
+					<div class="grid gap-3 text-sm">
+						<label class="flex items-center gap-2"
+							><input type="radio" name="speed" checked /> Standard</label
+						>
+						<label class="flex items-center gap-2"
+							><input type="radio" name="speed" /> Express</label
+						>
+						<Button size="small" onclick={() => popover.close()}>Save</Button>
+					</div>
+				{/snippet}
+			</Popover>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Arrow"
+			description="arrow draws a small pointer from the panel toward the trigger. It is placed after the panel has shifted to fit the viewport, so it keeps pointing at the trigger, and it reports the side it sits on as data-side (data-uncentered when the trigger is not under the middle of the panel). Style it with theme.arrow."
+			code={`<Popover arrow position="bottom" offset={10} trigger={{ content: 'Bottom' }}>
+	<div>Arrow points up at the trigger</div>
+</Popover>
+
+<Popover arrow position="right" offset={10} trigger={{ content: 'Right' }}>
+	<div>Arrow points left</div>
+</Popover>`}
+		>
+			<div class="flex flex-wrap items-center justify-center gap-4">
+				{#each ['top', 'right', 'bottom', 'left'] as const as side (side)}
+					<Popover arrow offset={10} position={side} trigger={{ content: side, variant: 'soft' }}>
+						{@render panelContent(`Arrow on the ${side} side`, 'It follows the trigger.')}
+					</Popover>
+				{/each}
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="One popup for many triggers"
+			description="A list of rows does not need a popover per row. Put {'{@attach popover.triggerFor(() => row)}'} on every row's trigger: one Popover moves to the one that was pressed, and popover.payload is that trigger's data, read live. Pressing another trigger while it is open moves the panel to it."
+			code={`<Popover>
+	{#snippet trigger(popover)}
+		{#each people as person (person.id)}
+			<Button {@attach popover.triggerFor(() => person)}>{person.name}</Button>
+		{/each}
+	{/snippet}
+	{#snippet children(popover)}
+		<strong>{popover.payload?.name}</strong>
+		<p>{popover.payload?.role}</p>
+	{/snippet}
+</Popover>`}
+		>
+			<Popover position="bottom" arrow offset={10}>
+				{#snippet trigger(popover: PopoverState<Person>)}
+					<div class="flex flex-wrap items-center justify-center gap-3">
+						{#each people as person (person.id)}
+							<Button variant="soft" {@attach popover.triggerFor(() => person)}>
+								{person.name}
+							</Button>
+						{/each}
+					</div>
+				{/snippet}
+				{#snippet children(popover: PopoverState<Person>)}
+					<div class="grid gap-1" data-testid="shared-popup">
+						<strong class="text-sm">{popover.payload?.name}</strong>
+						<span class="text-neutral/70 text-sm">{popover.payload?.role}</span>
+					</div>
+				{/snippet}
+			</Popover>
 		</ComponentCard>
 	{/snippet}
 </DocPage>

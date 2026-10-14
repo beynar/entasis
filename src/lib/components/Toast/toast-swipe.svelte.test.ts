@@ -2,7 +2,7 @@
 // primary button only, cancel snaps back, a sideways press is spent, a flick dismisses, and the
 // click that ends a drag is not a press on the toast.
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import Harness from './ToasterHarness.test.svelte';
@@ -122,5 +122,92 @@ describe('Toast swipe', () => {
 		await firePointer(li, 'pointerup', { x: 120, t: 520 });
 		await fireEvent.click(li);
 		expect(toaster().toasts).toEqual([]);
+	});
+});
+
+describe('Toast swipe robustness (DF-5)', () => {
+	test('a press on an action button never starts a drag', async () => {
+		const li = await showToast({ actions: [{ content: 'Undo', dismiss: false }] });
+		const button = screen.getByRole('button', { name: 'Undo' });
+		await firePointer(button, 'pointerdown', { x: 100, t: 0 });
+		await firePointer(button, 'pointermove', { x: 160, t: 100 });
+		await firePointer(button, 'pointermove', { x: 220, t: 200 });
+		expect(offset(li)).toBe('0px');
+		expect(li.style.cursor).not.toBe('grabbing');
+		await firePointer(button, 'pointerup', { x: 220, t: 210 });
+		expect(toaster().toasts).toHaveLength(1);
+	});
+
+	test('a press on the close button never starts a drag, and a press on the surface still does', async () => {
+		const li = await showToast();
+		const close = screen.getByRole('button', { name: 'Dismiss notification' });
+		await firePointer(close, 'pointerdown', { x: 100, t: 0 });
+		await firePointer(close, 'pointermove', { x: 200, t: 100 });
+		expect(offset(li)).toBe('0px');
+		await firePointer(close, 'pointerup', { x: 200, t: 110 });
+
+		await firePointer(li, 'pointerdown', { x: 100, t: 200 });
+		await firePointer(li, 'pointermove', { x: 130, t: 300 });
+		expect(offset(li)).toBe('30px');
+		await firePointer(li, 'pointercancel', { x: 130, t: 310 });
+	});
+
+	test('an element marked data-swipe-ignore does not start a drag', async () => {
+		const li = await showToast();
+		const marked = document.createElement('span');
+		marked.setAttribute('data-swipe-ignore', '');
+		li.append(marked);
+		await firePointer(marked, 'pointerdown', { x: 100, t: 0 });
+		await firePointer(marked, 'pointermove', { x: 180, t: 100 });
+		expect(offset(li)).toBe('0px');
+		await firePointer(marked, 'pointerup', { x: 180, t: 110 });
+		marked.remove();
+	});
+
+	test('the swipe leaves page scrolling along the other axis to the browser', async () => {
+		// Bottom-right swipes sideways: the page may still pan vertically across the toast.
+		const li = await showToast();
+		expect(li.style.touchAction).toBe('pan-y');
+	});
+
+	test('a toast that swipes vertically leaves horizontal panning to the browser', async () => {
+		render(Harness, { position: 'top-center' });
+		toast.info({ id: 'vertical', title: 'Swipe up', duration: false });
+		await waitFor(() => expect(items()).toHaveLength(1));
+		expect(items()[0].style.touchAction).toBe('pan-x');
+	});
+
+	test('a toast that cannot be swiped does not touch the browser panning', async () => {
+		const li = await showToast({ swipeToDismiss: false });
+		expect(li.style.touchAction).toBe('');
+	});
+
+	test('the stack stays expanded while one of its toasts is dragged', async () => {
+		render(Harness, { position: 'bottom-right' });
+		toast.info({ id: 'back', title: 'Back', duration: false });
+		toast.info({ id: 'front', title: 'Front', duration: false });
+		await waitFor(() => expect(items()).toHaveLength(2));
+		await tick();
+		const front = toaster().toasts[1];
+		expect(front.stacked).toBe(true);
+
+		const li = items()[1];
+		await firePointer(li, 'pointerdown', { x: 100, t: 0 });
+		await firePointer(li, 'pointermove', { x: 130, t: 100 });
+		expect(front.dragging).toBe(true);
+		expect(toaster().toasts[0].stacked).toBe(false);
+		await firePointer(li, 'pointerup', { x: 130, t: 400 });
+		expect(toaster().toasts[0].stacked).toBe(true);
+	});
+
+	test('a drag holds the timers and a cancelled one releases them', async () => {
+		const li = await showToast({ duration: 5000 });
+		const shown = toaster().toasts[0];
+		await firePointer(li, 'pointerdown', { x: 100, t: 0 });
+		await firePointer(li, 'pointermove', { x: 130, t: 100 });
+		expect(shown.timer?.heldBy).toEqual(['swipe']);
+		await firePointer(li, 'pointercancel', { x: 130, t: 200 });
+		expect(shown.pressed).toBe(false);
+		expect(shown.timer?.paused).toBe(false);
 	});
 });

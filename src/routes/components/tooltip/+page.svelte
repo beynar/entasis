@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { Attachment } from 'svelte/attachments';
 	import Button from '$lib/components/Button/Button.svelte';
 	import Tooltip from '$lib/components/Tooltip/Tooltip.svelte';
@@ -9,6 +10,7 @@
 	import DocPage from '../../DocPage.svelte';
 
 	const placements = ['top', 'bottom', 'left', 'right'] as const;
+	let tooltipsOff = $state(true);
 	const controls = createComponentControls([
 		{
 			name: 'size',
@@ -53,7 +55,14 @@
 		'Any-side placement via Floating UI',
 		'Single shared surface through theme state',
 		'Warm-up shared with hover cards and hover popovers: the next opens at once',
-		'Never shown by a touch tap’s compatibility mouse events'
+		'Moving between triggers keeps the surface and animates its size; closeDelay',
+		'Hoverable content (WCAG 1.4.13): the pointer can move onto the tooltip to read it',
+		{
+			label: 'Opens on keyboard focus only when the focus ring shows; never from a tap or a click',
+			test: 'a11y:tooltip.focus-ring-only'
+		},
+		'closeOnClick closes it on press; disabled turns it off',
+		'onOpenChange(open, details) runs before the change and can cancel it'
 	]}
 >
 	<ComponentCard
@@ -111,6 +120,88 @@
 					color="info"
 					trigger={{ content: 'Forced open', variant: 'outline', color: 'neutral' }}
 				/>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="Move the pointer onto the tooltip: it stays open so its content can be read and used. hoverable={false} lets the pointer through instead."
+			code={`{#snippet shortcuts()}
+	<span>Press <kbd>⌘</kbd> <kbd>K</kbd> or <a href="/components/command">open the palette docs</a>.</span>
+{/snippet}
+
+<Tooltip content={shortcuts} trigger={{ content: 'Hoverable content' }} />
+<Tooltip hoverable={false} content="Click-through" trigger={{ content: 'Not hoverable' }} />`}
+		>
+			{#snippet shortcuts()}
+				<span>
+					Press <kbd>⌘</kbd> <kbd>K</kbd> or
+					<a class="underline" href={resolve('/components/command')}>open the palette docs</a>.
+				</span>
+			{/snippet}
+			<div class="flex flex-wrap items-center justify-center gap-4">
+				<Tooltip
+					content={shortcuts}
+					position="bottom"
+					trigger={{ content: 'Hoverable content', variant: 'outline', color: 'neutral' }}
+				/>
+				<Tooltip
+					hoverable={false}
+					content="The pointer passes through me"
+					position="bottom"
+					trigger={{ content: 'Not hoverable', variant: 'outline', color: 'neutral' }}
+				/>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="Moving along a row keeps one surface: it slides to the next trigger and resizes to its content. closeDelay holds the tooltip a moment after the pointer leaves."
+			code={`<Tooltip content="Bold" closeDelay={150} trigger={{ content: 'B', variant: 'outline' }} />
+<Tooltip content="Italic text" closeDelay={150} trigger={{ content: 'I', variant: 'outline' }} />
+<Tooltip content="Underline with a longer label" closeDelay={150} trigger={{ content: 'U', variant: 'outline' }} />`}
+		>
+			<div class="flex items-center justify-center gap-1">
+				<Tooltip
+					content="Bold"
+					closeDelay={150}
+					trigger={{ content: 'B', variant: 'outline', color: 'neutral' }}
+				/>
+				<Tooltip
+					content="Italic text"
+					closeDelay={150}
+					trigger={{ content: 'I', variant: 'outline', color: 'neutral' }}
+				/>
+				<Tooltip
+					content="Underline with a longer label"
+					closeDelay={150}
+					trigger={{ content: 'U', variant: 'outline', color: 'neutral' }}
+				/>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="A press closes the tooltip until the pointer leaves (closeOnClick, on by default). closeOnClick={false} keeps it open; disabled turns the tooltip off."
+			code={`<Tooltip content="Closes when pressed" trigger={{ content: 'closeOnClick' }} />
+<Tooltip closeOnClick={false} content="Stays after a press" trigger={{ content: 'closeOnClick off' }} />
+<Tooltip disabled={off} content="Hidden while disabled" trigger={{ content: 'disabled' }} />`}
+		>
+			<div class="flex flex-wrap items-center justify-center gap-4">
+				<Tooltip
+					content="Closes when pressed"
+					trigger={{ content: 'closeOnClick', variant: 'outline', color: 'neutral' }}
+				/>
+				<Tooltip
+					closeOnClick={false}
+					content="Stays after a press"
+					trigger={{ content: 'closeOnClick off', variant: 'outline', color: 'neutral' }}
+				/>
+				<Tooltip
+					disabled={tooltipsOff}
+					content="Hidden while disabled"
+					trigger={{ content: 'disabled', variant: 'outline', color: 'neutral' }}
+				/>
+				<Button variant="soft" color="neutral" onclick={() => (tooltipsOff = !tooltipsOff)}>
+					{tooltipsOff ? 'Enable' : 'Disable'} the third
+				</Button>
 			</div>
 		</ComponentCard>
 

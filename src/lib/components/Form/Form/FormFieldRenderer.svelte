@@ -6,7 +6,7 @@
 	import {
 		createFieldState,
 		type FieldState,
-		type FieldValidationResult
+		type FieldValidatorResult
 	} from '../Field/field.state.svelte.js';
 	import type { FormFieldEntry, FormRegisteredInput } from './form.js';
 	import { getFormInputDefinition } from './form.registry.js';
@@ -27,6 +27,8 @@
 		'density',
 		'labelPosition',
 		'onValidate',
+		'validationMode',
+		'validationDebounce',
 		'onValueChange',
 		'fieldAttrs',
 		'theme',
@@ -72,6 +74,26 @@
 	);
 	let errors = $state<string[] | boolean>(initialInput.errors ?? []);
 	let focused = $state(initialInput.focused ?? false);
+
+	// An entry's `errors` follows later changes, not just its first value.
+	let lastErrors = initialInput.errors;
+	const sameErrors = (
+		left: string[] | boolean | undefined,
+		right: string[] | boolean | undefined
+	) =>
+		left === right ||
+		(Array.isArray(left) &&
+			Array.isArray(right) &&
+			left.length === right.length &&
+			left.every((message, index) => message === right[index]));
+	$effect(() => {
+		const nextErrors = input.errors;
+		untrack(() => {
+			if (sameErrors(nextErrors, lastErrors)) return;
+			lastErrors = nextErrors;
+			errors = nextErrors ?? [];
+		});
+	});
 
 	const field = createFieldState<FieldType>({
 		id,
@@ -119,7 +141,13 @@
 		},
 		get onValidate() {
 			return input.onValidate as
-				((value: FieldValue<FieldType>) => FieldValidationResult) | undefined;
+				((value: FieldValue<FieldType>) => FieldValidatorResult) | undefined;
+		},
+		get validationMode() {
+			return input.validationMode;
+		},
+		get validationDebounce() {
+			return input.validationDebounce;
 		},
 		get onValueChange() {
 			return input.onValueChange as ((value: FieldValue<FieldType> | null) => void) | undefined;

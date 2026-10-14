@@ -284,10 +284,12 @@ Switch validates:
 
 ## Accessibility
 
-- Proper ARIA roles and attributes; a required switch carries \`aria-required\` and a required marker on its label
-- Keyboard accessible (Space/Enter to toggle)
+- The control is a native \`<button role="switch">\` with \`aria-checked\`; a required switch carries \`aria-required\` and a required marker on its label
+- Keyboard accessible: Enter toggles once on press and Space once on release (holding Space does not repeat), because the browser's own button handling does it
 - Focus states clearly visible
-- Label clickable to toggle
+- The label is a \`<label for>\` the switch, so it names the switch and clicking it toggles it exactly once; an \`aria-label\` in \`inputAttrs\` names the switch instead
+- A disabled switch is a disabled button and takes no focus; a read-only one stays focusable with \`aria-readonly\` and does not toggle
+- The native submission is a hidden checkbox beside the button, never inside it
 - State changes announced to screen readers
 - Disabled state communicated properly
 

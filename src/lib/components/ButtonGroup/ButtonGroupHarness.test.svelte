@@ -3,7 +3,7 @@
 	import Button from '../Button/Button.svelte';
 	import ButtonGroup from './ButtonGroup.svelte';
 
-	let { mode }: { mode: 'items' | 'children' } = $props();
+	let { mode }: { mode: 'items' | 'children' | 'focusable' } = $props();
 </script>
 
 <Theme>
@@ -12,6 +12,12 @@
 			label="Alignment"
 			disabled
 			items={[{ children: 'Left' }, { children: 'Right', disabled: false }]}
+		/>
+	{:else if mode === 'focusable'}
+		<ButtonGroup
+			label="Publishing"
+			disabled
+			items={[{ children: 'Draft' }, { children: 'Publish', focusableWhenDisabled: true }]}
 		/>
 	{:else}
 		<ButtonGroup label="History">

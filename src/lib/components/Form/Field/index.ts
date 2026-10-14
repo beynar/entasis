@@ -11,7 +11,9 @@ export { schemas as fieldSchemas } from './schemas.js';
 export type {
 	FieldControlAttributes,
 	FieldState,
-	FieldValidationResult
+	FieldValidationResult,
+	FieldValidatorResult,
+	ValidationMode
 } from './field.state.svelte.js';
 export type { FieldMessageOverrides, FieldMessages } from './field.messages.js';
 export {

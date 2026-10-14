@@ -14,6 +14,7 @@
 
 	let selected = $state<string[]>(['email']);
 	let cardSelected = $state<string[]>([]);
+	let allSelected = $state<string[]>(['sms']);
 	const controls = createComponentControls([
 		{
 			name: 'size',
@@ -96,6 +97,47 @@
 				<CheckboxesInput label="Small" mode="normal" size="small" {items} />
 				<CheckboxesInput label="Normal" mode="normal" size="normal" {items} />
 				<CheckboxesInput label="Large" mode="normal" size="large" {items} />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Select all"
+			description="selectAll adds a parent checkbox. It is mixed while some enabled options are selected; clicking it selects all, then none, then gives back the selection you started from. Disabled options are never changed."
+			code={`<CheckboxesInput
+	label="Notifications"
+	selectAll
+	items={[
+		{ value: 'email', label: 'Email' },
+		{ value: 'sms', label: 'SMS' },
+		{ value: 'push', label: 'Push', disabled: true }
+	]}
+	bind:value={selected}
+/>`}
+		>
+			<div class="w-full max-w-md">
+				<CheckboxesInput
+					label="Notifications"
+					selectAll
+					items={[
+						{ value: 'email', label: 'Email' },
+						{ value: 'sms', label: 'SMS' },
+						{ value: 'push', label: 'Push', disabled: true }
+					]}
+					bind:value={allSelected}
+				/>
+				<p class="text-neutral/70 mt-4 text-sm">
+					Selected: {allSelected.join(', ') || 'none'}
+				</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Read-only"
+			description="Focusable and announced as read-only, but unchangeable. The selection still submits."
+			code={`<CheckboxesInput label="Notifications" readOnly value={['email']} items={items} />`}
+		>
+			<div class="w-full max-w-md">
+				<CheckboxesInput label="Notifications" readOnly value={['email']} {items} />
 			</div>
 		</ComponentCard>
 

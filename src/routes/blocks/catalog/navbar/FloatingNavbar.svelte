@@ -1,12 +1,39 @@
 <script lang="ts">
 	import { Button } from 'entasis/button';
 	import { Heading } from 'entasis/heading';
-	import { Popover } from 'entasis/popover';
+	import { NavigationMenu, type NavigationMenuItem } from 'entasis/navigation-menu';
 	import { bookOpenIcon } from 'entasis/icons/bookOpen';
-	import { caretDownIcon } from 'entasis/icons/caretDown';
 	import { listIcon } from 'entasis/icons/list';
 	import { paletteIcon } from 'entasis/icons/palette';
 	import { squaresFourIcon } from 'entasis/icons/squaresFour';
+
+	const primaryItems: NavigationMenuItem[] = [
+		{ type: 'link', label: 'Product', href: '/components' },
+		{
+			type: 'panel',
+			value: 'resources',
+			label: 'Resources',
+			content: [
+				{ label: 'Documentation', href: '/docs', prefix: bookOpenIcon },
+				{ label: 'Block library', href: '/blocks', prefix: squaresFourIcon },
+				{ label: 'Color system', href: '/colors', prefix: paletteIcon }
+			]
+		}
+	];
+	const mobileItems: NavigationMenuItem[] = [
+		{
+			type: 'panel',
+			value: 'menu',
+			label: 'Open navigation',
+			prefix: listIcon,
+			iconOnly: true,
+			content: [
+				{ label: 'Components', href: '/components' },
+				{ label: 'Blocks', href: '/blocks' },
+				{ label: 'Guides', href: '/docs' }
+			]
+		}
+	];
 </script>
 
 <section class="bg-primary-muted p-lg md:p-xl min-h-80">
@@ -14,38 +41,19 @@
 		class="gap-md border-neutral-muted bg-surface p-md mx-auto flex max-w-5xl flex-wrap items-center justify-between rounded-full border"
 	>
 		<a href="/" class="px-md font-semibold">✳ Northstar</a>
-		<nav aria-label="Primary navigation" class="gap-sm hidden items-center sm:flex">
-			<Button href="/components" variant="ghost" size="small">Product</Button><Popover
-				trigger={{ content: 'Resources', variant: 'ghost', size: 'small', suffix: caretDownIcon }}
-				position="bottom-start"
-				lockScroll={false}
-				><nav aria-label="Resources" class="gap-sm flex min-w-56 flex-col">
-					<Button href="/docs" variant="ghost" prefix={bookOpenIcon}>Documentation</Button><Button
-						href="/blocks"
-						variant="ghost"
-						prefix={squaresFourIcon}>Block library</Button
-					><Button href="/colors" variant="ghost" prefix={paletteIcon}>Color system</Button>
-				</nav></Popover
-			>
-		</nav>
+		<NavigationMenu
+			items={primaryItems}
+			label="Primary navigation"
+			size="small"
+			class="hidden sm:block"
+		/>
 		<div class="gap-sm flex items-center">
-			<Button href="/docs" size="small">Start building</Button><Popover
-				trigger={{
-					prefix: listIcon,
-					variant: 'ghost',
-					size: 'small',
-					label: 'Open navigation',
-					class: 'sm:hidden'
-				}}
-				position="bottom-end"
-				lockScroll={false}
-				><nav aria-label="Mobile navigation" class="gap-sm flex min-w-48 flex-col">
-					<Button href="/components" variant="ghost">Components</Button><Button
-						href="/blocks"
-						variant="ghost">Blocks</Button
-					><Button href="/docs" variant="ghost">Guides</Button>
-				</nav></Popover
-			>
+			<Button href="/docs" size="small">Start building</Button><NavigationMenu
+				items={mobileItems}
+				label="Mobile navigation"
+				size="small"
+				class="sm:hidden"
+			/>
 		</div>
 	</header>
 	<div class="gap-lg p-xl mx-auto flex max-w-xl flex-col items-center text-center">

@@ -6,11 +6,13 @@
 	let {
 		loading = false,
 		disabled = false,
+		focusableWhenDisabled = false,
 		onclick,
 		onSubmit
 	}: {
 		loading?: boolean;
 		disabled?: boolean;
+		focusableWhenDisabled?: boolean;
 		onclick?: (event: MouseEvent) => void;
 		onSubmit: (event: SubmitEvent) => void;
 	} = $props();
@@ -24,6 +26,6 @@
 		}}
 	>
 		<input name="note" aria-label="Note" />
-		<Button type="submit" {loading} {disabled} {onclick}>Send</Button>
+		<Button type="submit" {loading} {disabled} {focusableWhenDisabled} {onclick}>Send</Button>
 	</form>
 </Theme>

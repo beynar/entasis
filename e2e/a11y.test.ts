@@ -110,7 +110,17 @@ test.describe('component pages', () => {
 // short and overflowing lists, grouped lists with separators, and the empty state of a search.
 /** Wait until the open popup's list overflows and its ScrollArea has laid out the scrollbar. */
 const scrollbarShown = (page: Page) =>
-	page.getByRole('listbox').locator('[data-slot="scroll-area-scrollbar"]').first().waitFor();
+	// The scroll area is inside the listbox (Select) or holds it as its viewport (Combobox,
+	// TagsInput), so the scrollbar is found either way.
+	page
+		.locator(
+			[
+				'[role="listbox"] [data-slot="scroll-area-scrollbar"]',
+				'[data-slot="scroll-area"]:has([role="listbox"]) [data-slot="scroll-area-scrollbar"]'
+			].join(', ')
+		)
+		.first()
+		.waitFor();
 
 const openPopups: { route: string; open: string; show: (page: Page) => Promise<unknown> }[] = [
 	{
@@ -256,4 +266,21 @@ test.describe('block previews', () => {
 			}
 		});
 	}
+});
+
+test.describe('slider keyboard', () => {
+	test('each thumb is one Tab stop and arrow keys adjust its native range input', async ({
+		page
+	}) => {
+		await page.goto('/components/slider', { waitUntil: 'networkidle' });
+		await page.getByRole('tab', { name: 'Examples' }).click();
+		const min = page.getByRole('slider', { name: 'Minimum budget' });
+		const max = page.getByRole('slider', { name: 'Maximum budget' });
+		await min.focus();
+		const before = Number(await min.inputValue());
+		await page.keyboard.press('ArrowRight');
+		expect(Number(await min.inputValue())).toBeGreaterThan(before);
+		await page.keyboard.press('Tab');
+		await expect(max).toBeFocused();
+	});
 });

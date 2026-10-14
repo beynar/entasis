@@ -1,9 +1,15 @@
-<script lang="ts" generics="T = unknown, S = unknown">
+<script lang="ts" generics="T = unknown">
 	import type { MeterProps, MeterStep } from './meter.props.js';
 	import { useMeterTheme } from './meter.theme.js';
 	import Slot from '../Slot/Slot.svelte';
 	import { useSpringState } from '$lib/utils/spring.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import {
+		clampRange,
+		formatRangeValue,
+		rangeAriaAttributes,
+		toPercent
+	} from '$lib/utils/range.js';
 	import { untrack } from 'svelte';
 
 	let {
@@ -20,13 +26,17 @@
 		soft = 0.1,
 		min = 0,
 		max = 100,
+		format,
+		getAriaValueText,
+		locale: localeProp,
 		header,
 		label,
 		helper,
 		description,
 		theme
-	}: MeterProps<T, S> = $props();
+	}: MeterProps<T> = $props();
 	const t = $derived(useI18n());
+	const locale = $derived(localeProp ?? t.locale);
 
 	const id = $props.id();
 	const labelId = `${id}-label`;
@@ -53,13 +63,14 @@
 				: [value]
 	);
 
-	const percentOf = (stepValue: number) => (stepValue / max) * 100;
+	// One source of truth for the fill, the visible text and the ARIA values: the segment value is
+	// clamped into [min, max] and measured as (clamped - min) / (max - min). A non-finite value
+	// reads as `min`.
+	const finiteValue = (stepValue: number) => (Number.isFinite(stepValue) ? stepValue : min);
+	const percentOf = (stepValue: number) => toPercent(finiteValue(stepValue), min, max);
 
 	const createMeterSprings = (steps: MeterStep<T>[]) =>
-		steps.map((step) => ({
-			value: spring(step.value),
-			width: spring(percentOf(step.value))
-		}));
+		steps.map((step) => ({ width: spring(percentOf(step.value)) }));
 
 	let springs = $state(untrack(() => createMeterSprings(meterSteps)));
 
@@ -70,8 +81,7 @@
 			return;
 		}
 		for (const [index, step] of currentSteps.entries()) {
-			springs[index].value.set(step.value || 0, { soft });
-			springs[index].width!.set(percentOf(step.value), { soft });
+			springs[index].width.set(percentOf(step.value), { soft });
 		}
 	});
 
@@ -82,10 +92,29 @@
 	// drawn, and aria-valuenow is clamped to the scale.
 	const stacked = $derived(meterSteps.length !== 1);
 	const labelRendered = $derived(!header && !!label);
-	const clampToScale = (stepValue: number) =>
-		Number.isFinite(stepValue) ? Math.min(max, Math.max(min, stepValue)) : min;
-	const valueText = (step: MeterStep<T>) =>
-		showIndicatorAs === 'value' ? step.value.toFixed(0) : `${percentOf(step.value).toFixed(0)}%`;
+	// `format` shapes the value text in value mode; the percentage text is the share of the scale.
+	const rangeOptions = (stepValue: number) => ({
+		value: finiteValue(stepValue),
+		min,
+		max,
+		locale,
+		format: showIndicatorAs === 'value' ? (format ?? {}) : undefined
+	});
+	const valueText = (step: MeterStep<T>) => formatRangeValue(rangeOptions(step.value));
+	const ariaValues = (step: MeterStep<T>) =>
+		rangeAriaAttributes({
+			...rangeOptions(step.value),
+			getAriaValueText:
+				getAriaValueText &&
+				((formattedValue, rawValue) =>
+					getAriaValueText({
+						value: clampRange(rawValue ?? min, min, max),
+						formattedValue,
+						min,
+						max
+					}))
+		});
+	const rootAria = $derived(stacked ? undefined : ariaValues(meterSteps[0]));
 	// A custom `header` replaces the rendered label, so a string label still names the meter
 	// directly. A single segment object can name it with its own label; the catalog name is the
 	// last resort so every meter is announced with a name.
@@ -114,16 +143,17 @@
 
 {#snippet meter(index: number, meter: MeterStep<T>)}
 	{@const spring = springs[index]}
+	{@const aria = stacked ? ariaValues(meter) : undefined}
 	<div
 		data-first={index === 0}
 		data-last={index === springs.length - 1}
 		data-color={meter.color ?? color}
 		role={stacked ? 'meter' : undefined}
 		aria-label={stacked ? meter.label || t.meterSegment(index + 1, meterSteps.length) : undefined}
-		aria-valuemin={stacked ? min : undefined}
-		aria-valuemax={stacked ? max : undefined}
-		aria-valuenow={stacked ? clampToScale(meter.value) : undefined}
-		aria-valuetext={stacked ? valueText(meter) : undefined}
+		aria-valuemin={aria?.['aria-valuemin']}
+		aria-valuemax={aria?.['aria-valuemax']}
+		aria-valuenow={aria?.['aria-valuenow']}
+		aria-valuetext={aria?.['aria-valuetext']}
 		style:width="{spring.width.current}%"
 		class={classes.container({ first: index === 0, last: index === springs.length - 1 })}
 	>
@@ -165,10 +195,10 @@
 	aria-labelledby={labelRendered ? labelId : undefined}
 	aria-label={rootName}
 	aria-describedby={describedBy}
-	aria-valuemin={stacked ? undefined : min}
-	aria-valuemax={stacked ? undefined : max}
-	aria-valuenow={stacked ? undefined : clampToScale(meterSteps[0].value)}
-	aria-valuetext={stacked ? undefined : valueText(meterSteps[0])}
+	aria-valuemin={rootAria?.['aria-valuemin']}
+	aria-valuemax={rootAria?.['aria-valuemax']}
+	aria-valuenow={rootAria?.['aria-valuenow']}
+	aria-valuetext={rootAria?.['aria-valuetext']}
 >
 	<Slot
 		class={classes.header({ size })}
@@ -183,7 +213,6 @@
 	{#if showLegend}
 		<div class={classes.legend({ size })}>
 			{#each meterSteps as meterItem, i (i)}
-				{@const percentage = percentOf(meterItem.value)}
 				<div data-color={meterItem.color ?? color} class={classes.legendItem({ size })}>
 					{#if meterItem.icon}
 						<div class={classes.legendIcon({ size })}>
@@ -194,7 +223,7 @@
 						<span class={classes.legendLabel({ size })}>{meterItem.label}</span>
 					{/if}
 					<span class={classes.legendPercentage({ size })}>
-						{percentage.toFixed(0)}%
+						{formatRangeValue({ value: finiteValue(meterItem.value), min, max, locale })}
 					</span>
 				</div>
 			{/each}

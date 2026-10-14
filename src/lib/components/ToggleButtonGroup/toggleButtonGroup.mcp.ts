@@ -32,8 +32,10 @@ ToggleButtonGroup renders an ordered list of ToggleButton items and exposes the 
 - **size**: 'small' | 'normal' | 'large' - Applied to every item.
 - **color**: Colors - Applied to every item.
 - **variant**: 'outline' | 'ghost' - Applied to every item. Defaults to 'ghost'.
-- **disabled**: boolean - Disables every item.
+- **disabled**: boolean - Disables every item. A disabled group has no tab stop, unless an item sets \`focusableWhenDisabled\`.
 - **joined**: boolean (default: false) - Renders the buttons as contiguous segments.
+- **orientation**: 'horizontal' | 'vertical' (default: 'horizontal') - Axis of the group. Horizontal lays the buttons out in a row and moves with ArrowLeft / ArrowRight; vertical stacks them (joined segments join top to bottom) and moves with ArrowUp / ArrowDown. Keys of the other axis are ignored. Reflected as \`data-orientation\`; a \`type="single"\` group (radiogroup) also sets \`aria-orientation\`, the \`group\` role of a multiple group never does.
+- **loopFocus**: boolean (default: true) - Whether the arrow keys wrap from the last button to the first and back. False stops focus at the ends (Home / End still jump).
 - **type**: 'single' | 'multiple' (default: 'multiple') - \`'multiple'\` lets any number of buttons be pressed (\`role="group"\`, \`aria-pressed\`) and its value is a \`string[]\`. \`'single'\` makes the selection exclusive: the value is a single string, the root becomes \`role="radiogroup"\`, each button \`role="radio"\` with \`aria-checked\`, pressing one clears the others, and the checked radio cannot be unpressed.
 - **class**: string - Additional CSS classes for the root.
 - **theme**: ToggleButtonGroupThemeProps - Theme overrides.
@@ -113,7 +115,8 @@ ToggleButtonGroup renders an ordered list of ToggleButton items and exposes the 
 
 - \`type="multiple"\`: the root is \`role="group"\` named by \`label\`; each ToggleButton exposes its independent state through \`aria-pressed\`.
 - \`type="single"\`: the root is \`role="radiogroup"\`; buttons are \`role="radio"\` with \`aria-checked\`.
-- The group is a single tab stop (roving tabindex; the group element itself has \`tabindex="-1"\` and is never a Tab stop): Tab enters it, ArrowLeft / ArrowRight move between buttons (looping, mirrored in RTL), Home / End jump to the first / last, Space or Enter toggles the focused button.
+- The group is a single tab stop (roving tabindex), and the group element itself is not focusable, so Shift+Tab leaves the group in one step. Tab lands on the first pressed enabled button, or the first enabled button when nothing is pressed. ArrowLeft / ArrowRight (ArrowUp / ArrowDown when \`orientation="vertical"\`) move between buttons (looping unless \`loopFocus={false}\`, mirrored in RTL), Home / End jump to the first / last, Space or Enter toggles the focused button. Alt, Ctrl or Meta with an arrow is left to the browser.
+- An item with \`focusableWhenDisabled\` that is disabled stays in the arrow-key order and keeps the tab stop reachable, announced with \`aria-disabled\`; it cannot be toggled.
 - Prefer SegmentedControl for a visually segmented exclusive choice; use \`type="single"\` when you want toggle-button styling with exclusive semantics.
 
 ## Theme example

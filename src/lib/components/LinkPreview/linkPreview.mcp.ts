@@ -79,6 +79,9 @@ By default, LinkPreview requests \`/api/link-metadata?url=<href>\` when the card
 - **transition**: object - Popover transition overrides.
 - **size**: 'small' | 'normal' | 'large' - Preview card size.
 - **disabled**: boolean - Disable opening and link navigation.
+- **wrap**: boolean (default: true) - The link flows with the text around it (\`display: inline\`, \`box-decoration-break: clone\`) and breaks across lines; the card anchors to the line the pointer entered and stays there while it is open, and a keyboard open takes the first line above the link and the last one below it. \`false\` keeps the link one \`inline-flex\` box
+- **anchorTo**: 'box' | 'line' (default: 'line' with \`wrap\`) - What the card anchors to when the link wraps
+- **arrow**: boolean (default: false) - Draws an arrow from the card toward the link
 - **class**: string - Trigger anchor classes.
 - **card**: Props forwarded to the inner Card as one object - \`{ class, color, variant, theme }\` (defaults: color 'neutral', variant 'solid').
 - **popover**: Props forwarded to the Popover panel as one object - \`{ class, theme }\`.

@@ -69,6 +69,20 @@ const defaultCell = cva({
 	}
 });
 
+const defaultSeparator = cva({
+	base: 'h-0.5 shrink-0 rounded-full bg-neutral-muted',
+	variants: {
+		size: {
+			small: 'w-1.5',
+			normal: 'w-2',
+			large: 'w-3'
+		}
+	},
+	defaultVariants: {
+		size: 'normal'
+	}
+});
+
 const defaultCharacter = cva({
 	base: 'select-none leading-none'
 });
@@ -82,6 +96,7 @@ export const pinInputTheme = {
 	root: defaultRoot,
 	input: defaultInput,
 	cell: defaultCell,
+	separator: defaultSeparator,
 	character: defaultCharacter,
 	caret: defaultCaret
 };

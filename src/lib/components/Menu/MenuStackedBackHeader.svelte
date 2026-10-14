@@ -2,6 +2,7 @@
 	import type { Attachment } from 'svelte/attachments';
 	import type { Colors, Density, Sizes } from '$lib/types/theme.js';
 	import MenuOption from '../MenuOption/MenuOption.svelte';
+	import MenuMirroredIcon from './MenuMirroredIcon.svelte';
 	import { arrowLeftIcon } from '../Icons/arrowLeft.js';
 	import type { MenuItem } from './menu.props.js';
 	import type { MenuThemeProps } from './menu.theme.js';
@@ -37,9 +38,13 @@
 	const openerTheme = $derived(theme?.submenu ?? theme?.option);
 </script>
 
+{#snippet backIcon()}
+	<MenuMirroredIcon icon={arrowLeftIcon} />
+{/snippet}
+
 <MenuOption
 	role="menuitem"
-	prefix={arrowLeftIcon}
+	prefix={backIcon}
 	color={resolvedColor}
 	size={resolvedSize}
 	density={resolvedDensity}

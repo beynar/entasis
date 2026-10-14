@@ -31,7 +31,7 @@ Pass either \`items\` or \`children\`.
 - **size**: 'small' | 'normal' | 'large' - Applied to all buttons in the group
 - **color**: 'primary' | 'secondary' | 'neutral' | 'danger' | 'success' | 'warning' | 'info' - Shared color for all buttons
 - **variant**: 'solid' | 'outline' | 'soft' | 'ghost' | 'link' - Shared variant for all buttons
-- **disabled**: boolean - Disables all buttons in the group, even one whose item sets \`disabled: false\`
+- **disabled**: boolean - Disables all buttons in the group, even one whose item sets \`disabled: false\`. An item that sets \`focusableWhenDisabled\` stays focusable and announces \`aria-disabled\` instead of leaving the tab order
 
 ### Styling Props
 - **class**: string - Additional CSS classes for the group container

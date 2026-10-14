@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
 	import Button from '../Button/Button.svelte';
-	import { checkIcon } from '../Icons/check.js';
 	import { dotsThreeIcon } from '../Icons/dotsThree.js';
 	import type { MenuItem } from '../Menu/index.js';
 	import PopupMenu from '../PopupMenu/PopupMenu.svelte';
@@ -17,7 +16,6 @@
 		ToggleMenuItem,
 		ToggleMenuMenuItem,
 		ToggleMenuProps,
-		ToggleMenuRadioGroupButton,
 		ToggleMenuRadioGroupItem,
 		ToggleMenuToggleItem
 	} from './toggleMenu.props.js';
@@ -40,10 +38,14 @@
 	const t = $derived(useI18n());
 
 	const classes = $derived(useToggleMenuTheme(theme));
+	// A disabled item stays in the arrow-key order and can hold the tab stop (the APG toolbar
+	// pattern), so a fully disabled toolbar keeps one tab stop and a screen reader can reach what
+	// is unavailable. Items refuse activation themselves.
 	const navigation = useNavigation({
 		orientation: 'horizontal',
 		loop: true,
-		enableHoverFocus: false
+		enableHoverFocus: false,
+		skipDisabled: false
 	});
 	const overflow = useToggleMenuOverflow();
 
@@ -119,7 +121,11 @@
 		};
 	}
 
-	function createOverflowOption(
+	function overflowLabel(button: ToggleMenuGroupButton | ToggleMenuToggleItem) {
+		return typeof button.children === 'string' ? button.children : button.label;
+	}
+
+	function createOverflowCheckbox(
 		itemIndex: number,
 		button: ToggleMenuGroupButton | ToggleMenuToggleItem,
 		checked: boolean,
@@ -127,49 +133,46 @@
 		groupButtonValue?: string
 	): MenuItem {
 		return {
-			type: 'option',
-			role: 'menuitemcheckbox',
-			attrs: {
-				'aria-checked': checked,
-				'aria-label': typeof button.children === 'string' ? button.children : button.label
-			},
+			type: 'checkbox',
+			key:
+				groupButtonValue === undefined
+					? `toggle-${itemIndex}`
+					: `group-${itemIndex}-${groupButtonValue}`,
+			attrs: { 'aria-label': overflowLabel(button) },
 			children: button.children ?? button.label,
 			prefix: button.prefix,
-			suffix: checked ? checkIcon : undefined,
 			size: group?.size ?? size,
 			color: group?.color ?? color,
 			disabled: disabled || !!group?.disabled || !!button.disabled,
-			onclick: () => {
+			value: checked,
+			onValueChange: (next) => {
 				if (group && groupButtonValue !== undefined) {
-					updateGroup(itemIndex, group, groupButtonValue, !checked);
+					updateGroup(itemIndex, group, groupButtonValue, next);
 					return;
 				}
 				const item = items[itemIndex];
-				if (item?.type === 'toggle') updateToggle(itemIndex, item, !checked);
+				if (item?.type === 'toggle') updateToggle(itemIndex, item, next);
 			}
 		};
 	}
 
-	function createOverflowRadioOption(
-		itemIndex: number,
-		group: ToggleMenuRadioGroupItem,
-		button: ToggleMenuRadioGroupButton
-	): MenuItem {
-		const checked = (group.value ?? group.defaultValue) === button.value;
+	function createOverflowRadioGroup(itemIndex: number, group: ToggleMenuRadioGroupItem): MenuItem {
 		return {
-			type: 'option',
-			role: 'menuitemradio',
-			attrs: {
-				'aria-checked': checked,
-				'aria-label': typeof button.children === 'string' ? button.children : button.label
-			},
-			children: button.children ?? button.label,
-			prefix: button.prefix,
-			suffix: checked ? checkIcon : undefined,
-			size: group.size ?? size,
-			color: group.color ?? color,
-			disabled: disabled || !!group.disabled || !!button.disabled,
-			onclick: () => updateRadioGroup(itemIndex, button.value)
+			type: 'radio-group',
+			key: `radio-${itemIndex}`,
+			label: group.label,
+			value: group.value ?? group.defaultValue ?? '',
+			onValueChange: (next) => updateRadioGroup(itemIndex, next),
+			disabled: disabled || !!group.disabled,
+			items: group.items.map((button) => ({
+				value: button.value,
+				attrs: { 'aria-label': overflowLabel(button) },
+				children: button.children ?? button.label,
+				prefix: button.prefix,
+				size: group.size ?? size,
+				color: group.color ?? color,
+				disabled: disabled || !!group.disabled || !!button.disabled
+			}))
 		};
 	}
 
@@ -182,25 +185,26 @@
 
 			if (item.type === 'toggle') {
 				unitItems.push(
-					createOverflowOption(itemIndex, item, item.value ?? item.defaultValue ?? false)
+					createOverflowCheckbox(itemIndex, item, item.value ?? item.defaultValue ?? false)
 				);
 			} else if (item.type === 'group') {
 				const pressed = getGroupValue(item);
-				item.items.forEach((button) => {
-					unitItems.push(
-						createOverflowOption(
+				unitItems.push({
+					type: 'group',
+					key: `group-${itemIndex}`,
+					label: item.label,
+					items: item.items.map((button) =>
+						createOverflowCheckbox(
 							itemIndex,
 							button,
 							pressed.includes(button.value),
 							item,
 							button.value
 						)
-					);
+					)
 				});
 			} else if (item.type === 'radio-group') {
-				item.items.forEach((button) => {
-					unitItems.push(createOverflowRadioOption(itemIndex, item, button));
-				});
+				unitItems.push(createOverflowRadioGroup(itemIndex, item));
 			} else if (item.type === 'menu') {
 				unitItems.push(createOverflowMenu(item));
 			} else {
@@ -307,6 +311,7 @@
 						color={item.color ?? color}
 						variant={item.variant ?? variant}
 						disabled={disabled || !!item.disabled}
+						focusableWhenDisabled
 						value={item.value ?? item.defaultValue ?? false}
 						onValueChange={(checked) => updateToggle(index, item, checked)}
 						{@attach overflowed ? undefined : navigation.itemReference}
@@ -338,6 +343,7 @@
 					color="neutral"
 					{size}
 					{disabled}
+					focusableWhenDisabled
 					squared
 					label={t.moreTools}
 					prefix={dotsThreeIcon}

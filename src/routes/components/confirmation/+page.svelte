@@ -60,8 +60,12 @@
 		'Promise-based imperative API — no local state',
 		'Async onConfirm with an automatic loading state',
 		{
-			label: 'Modal: cannot be dismissed by escape or click-outside',
+			label: 'Modal: a press outside leaves the question open',
 			test: 'a11y:confirmation.modal'
+		},
+		{
+			label: 'Escape answers it as Cancel, unless the confirmed action is running',
+			test: 'a11y:confirmation.escape-cancels'
 		},
 		{
 			label: 'role=alertdialog named by its title',

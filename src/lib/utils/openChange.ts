@@ -25,12 +25,16 @@ export type OpenChangeReason =
 	| 'item-press'
 	/** Arrow-key navigation opened or closed it (a submenu, a listbox). */
 	| 'list-navigation'
+	/** Typing in the input of a combobox opened or closed its list. */
+	| 'input-change'
 	/** Focus left the overlay. */
 	| 'focus-out'
 	/** A swipe gesture dismissed it. */
 	| 'swipe'
 	/** The trigger it was anchored to left the document. */
 	| 'trigger-unmount'
+	/** The browser's find-in-page, a text fragment or a `#id` link reached content a disclosure hides. */
+	| 'find-in-page'
 	/** Code called `open()`, `close()`, `toggle()` or `setOpen()` with no user event behind it. */
 	| 'imperative-action';
 

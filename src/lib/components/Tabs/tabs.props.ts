@@ -93,7 +93,9 @@ export type TabsProps<Item extends TabItem = TabItem> = WithAttachments<{
 	transition?: ResponsiveProps<FSOProps>;
 	/**
 	 * Props forwarded to the inner Tabbar. `orientation` falls back to the value implied by
-	 * `placement` (vertical for `left`/`right`).
+	 * `placement` (vertical for `left`/`right`). `activateOnFocus: false` switches to manual
+	 * activation: the arrow keys only move focus, and Enter, Space or a click opens the tab, so
+	 * arrowing across the list does not mount every lazy panel on the way.
 	 */
 	tabbar?: Pick<
 		TabbarProps,
@@ -107,6 +109,7 @@ export type TabsProps<Item extends TabItem = TabItem> = WithAttachments<{
 		| 'label'
 		| 'variant'
 		| 'scrollFade'
+		| 'activateOnFocus'
 	>;
 	/**
 	 * When each panel's content is created.

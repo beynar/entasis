@@ -1,7 +1,7 @@
 export const tooltipDescription = `
 # Tooltip
 
-Contextual information shown on hover or keyboard focus. Two forms share one surface:
+Contextual information shown on hover or on keyboard focus (when the focus ring shows). Two forms share one surface:
 
 - \`<Tooltip>\` — a component with a \`trigger\` prop, like every other overlay.
 - \`tooltip()\` — the underlying attachment, for elements you already render yourself.
@@ -28,14 +28,29 @@ Both are rendered by the single tooltip surface that \`<Theme>\` mounts (\`Toolt
   \`content\` for a richer body
 - **open**: boolean (default: false) - Shows the tooltip without hover or focus; bindable
 - **defaultOpen**: boolean (default: false) - Initial open state when \`open\` is not provided
-- **onOpenChange**: (open: boolean) => void - Called whenever the tooltip becomes visible or hidden,
-  hover and focus included
+- **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void - Called before the tooltip
+  shows or hides, whatever causes it (hover, focus, a press on the trigger, Escape, an outside press).
+  \`details.reason\` is \`'trigger-hover'\`, \`'trigger-focus'\`, \`'trigger-press'\`, \`'outside-press'\`,
+  \`'escape-key'\` or \`'imperative-action'\`; \`details.event\` and \`details.trigger\` say what caused it, and
+  \`details.cancel()\` keeps the tooltip as it was. When another tooltip takes the shared surface, the
+  one it leaves is told with a close that cannot be cancelled. A change to the \`open\` prop is silent
 - **position**: Placement (default: 'top') - Tooltip position relative to the trigger
   - Options: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end' | 'left-start' | 'left-end' | 'right-start' | 'right-end'
 - **size**: 'small' | 'normal' | 'large' (default: 'normal') - Visual size
 - **color**: Colors (default: 'neutral') - Color theme
 - **variant**: 'solid' | 'outline' | 'soft' (default: 'solid') - Visual style matching Chip
 - **delay**: number (default: 400) - Delay in ms before showing tooltip; zero shows immediately
+- **closeDelay**: number (default: 0) - Delay in ms between the pointer leaving the trigger (or the
+  content) and the tooltip closing; moving to another tooltip's trigger within it hands the surface
+  over without closing it. With \`hoverable\` content the pointer always gets at least 100 ms to reach it
+- **hoverable**: boolean (default: true) - The tooltip stays open while the pointer is over its content
+  (WCAG 1.4.13), so its text can be read or selected and its links used. \`false\` makes the content
+  ignore the pointer and closes the tooltip as soon as the pointer leaves the trigger
+- **closeOnClick**: boolean (default: true) - A press on the trigger (pointer, or Enter / Space) closes
+  the tooltip, and it stays closed until the pointer leaves the trigger or focus moves away. \`false\`
+  leaves it open
+- **disabled**: boolean (default: false) - Turns the tooltip off: hover and focus do not open it, an
+  open one closes, and the trigger loses \`aria-describedby\`. Read live
 - **offset**: number - Distance from the trigger in pixels
 - **class**: string - Additional CSS classes
 - **transition**: FSOProps - Custom transition configuration
@@ -43,8 +58,8 @@ Both are rendered by the single tooltip surface that \`<Theme>\` mounts (\`Toolt
 - **onAfterOpen**: () => void - Callback after the opening transition completes
 - **onAfterClose**: () => void - Callback after the closing transition completes
 
-Every prop except \`trigger\`, \`open\`, \`defaultOpen\` and \`onOpenChange\` is also an option of the
-\`tooltip()\` attachment.
+Every prop except \`trigger\`, \`open\` and \`defaultOpen\` is also an option of the \`tooltip()\`
+attachment, \`onOpenChange\` included.
 
 ## Examples
 
@@ -145,6 +160,41 @@ Every prop except \`trigger\`, \`open\`, \`defaultOpen\` and \`onOpenChange\` is
 <Tooltip content={richContent} trigger={{ content: 'Keyboard Shortcuts' }} />
 \`\`\`
 
+### Hoverable Content
+\`\`\`svelte
+<script lang="ts">
+	import { Tooltip } from 'entasis/tooltip';
+</script>
+
+{#snippet help()}
+	Read the <a href="/docs/shortcuts">shortcut list</a>.
+{/snippet}
+
+<!-- The pointer can move onto the tooltip and use the link -->
+<Tooltip content={help} trigger={{ content: 'Shortcuts' }} />
+
+<!-- The pointer passes through, and the tooltip closes on leaving the trigger -->
+<Tooltip hoverable={false} content="Not interactive" trigger={{ content: 'Hint' }} />
+\`\`\`
+
+### Press and Disabled
+\`\`\`svelte
+<script lang="ts">
+	import { Tooltip } from 'entasis/tooltip';
+
+	let busy = $state(false);
+</script>
+
+<!-- Closes when the trigger is pressed, and stays closed until the pointer leaves -->
+<Tooltip content="Save changes" trigger={{ content: 'Save' }} />
+
+<!-- Stays open after a press -->
+<Tooltip closeOnClick={false} content="Save changes" trigger={{ content: 'Save' }} />
+
+<!-- No tooltip while busy -->
+<Tooltip disabled={busy} content="Save changes" trigger={{ content: 'Save' }} />
+\`\`\`
+
 ### With Callbacks
 \`\`\`svelte
 <script lang="ts">
@@ -153,6 +203,7 @@ Every prop except \`trigger\`, \`open\`, \`defaultOpen\` and \`onOpenChange\` is
 
 <Tooltip
 	content="Tracked tooltip"
+	onOpenChange={(open, details) => console.log(open, details.reason)}
 	onAfterOpen={() => console.log('Tooltip opened')}
 	onAfterClose={() => console.log('Tooltip closed')}
 	trigger={{ content: 'Track me' }}
@@ -187,23 +238,29 @@ interchangeable.
 
 - Shows on pointer hover and on keyboard focus (\`focusin\` / \`focusout\` on the trigger element), so
   attach it to focusable elements for keyboard users
+- Focus opens it only when the browser shows a focus ring: focus from a mouse press or a tap, focus a
+  closing dialog or popover hands back, and focus that returns with the window do not
 - A touch tap is not a hover: the compatibility mouse events a tap fires never show the tooltip
+- The content can be hovered (WCAG 1.4.13: hoverable, dismissible, persistent): the pointer may move
+  onto the tooltip, and Escape dismisses it
 - A trigger that appears under a resting pointer (a dialog closing over it, a list scrolled by the
   wheel) shows its tooltip once the pointer moves, not on arrival
 - Dismissed on mouse leave or blur
-- Non-interactive (cannot be clicked)
+- Brief, read-only content; use \`hoverable={false}\` for content that should never take the pointer
 - Renders with \`role="tooltip"\` and sets \`aria-describedby\` on the trigger while visible (any previous value is restored on hide)
-- Does not block content behind it
+- Does not block content behind it when \`hoverable={false}\`; the default hoverable content captures the pointer so it can be read
 
 ## Notes
 
 - Only one tooltip shows at a time; an \`open\` tooltip hands the surface over when another tooltip is
-  hovered and reports that through \`onOpenChange\`
+  hovered and reports that through \`onOpenChange\`. Moving between triggers keeps the surface: it
+  stays in place, resizes to the new content and carries \`data-instant\`; the tooltip it leaves gets
+  \`onAfterClose\` and the new one \`onAfterOpen\`
 - Automatically positions to stay in viewport using Floating UI
 - Uses smart delay: right after a tooltip, a hover card or a hover-opened popover was open
   (within 400ms of it closing, or while a hover card or popover is still open), the next tooltip
   shows instantly. A tooltip inside an open hover card keeps its delay.
-- Brief content only (use Popover for interactive content)
+- Brief content only: text and a link are fine, but use Popover for controls and forms
 - The surface is a singleton (\`TooltipHost\`) rendered by \`<Theme>\`
 - Does not lock scroll or trap focus
 

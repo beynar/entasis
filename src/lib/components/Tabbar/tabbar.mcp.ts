@@ -28,10 +28,14 @@ The Tabbar component is a flexible navigation component that displays a list of 
   - A value you set is never rewritten; see Selection fallback for what the Tabbar changes by itself
 - **defaultValue**: string - Initial active tab value when value is omitted
 
-- **onValueChange**: (value: string) => void
-  - Called once per change of the active tab with the new tab's value: a click, an arrow key, a menu entry, or an automatic fallback (see Selection fallback)
+- **onValueChange**: (payload: { value: string; reason }) => void
+  - Called once per change of the active tab with \`{ value, reason }\`, the new tab's value and why it changed: a click, an arrow key, Enter or Space, a menu entry, or an automatic fallback (see Selection fallback)
+  - \`reason\` (\`TabbarValueChangeReason\`) is \`user\` for a click, key or menu entry, and \`initial\`, \`disabled\` or \`missing\` when the Tabbar selected an enabled tab by itself
   - Not called when the current tab is re-selected or when value is changed externally
-  - \`Tabs\` reports the reason of each change (\`user\`, \`initial\`, \`disabled\`, \`missing\`) in its own payload
+- **activateOnFocus**: boolean (default: true)
+  - \`true\`: the arrow keys, Home and End select the tab they move to (selection follows focus)
+  - \`false\`: manual activation. The keys only move focus; Enter, Space or a click selects the focused tab. Use it when selecting is costly, for example when lazy panels mount on selection, so arrowing across the list does not build every panel it passes
+  - Menu tabs always open manually, whatever this is set to
 
 ### Styling Props
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
@@ -242,7 +246,7 @@ The tabbar follows this DOM structure:
 <script lang="ts">
 	let activeTab = $state('Tab 1');
 	
-	function handleTabChange(value: string) {
+	function handleTabChange({ value }: { value: string }) {
 		console.log('Active tab changed to:', value); // e.g. 'Tab 2'
 	}
 </script>
@@ -339,8 +343,8 @@ Full keyboard support following WAI-ARIA best practices:
 - **Enter/Space**: Activate the focused tab
 
 **Behavior:**
-- Arrow keys move keyboard **focus** (visual indicator with ring)
-- Enter/Space keys **activate** the focused tab (changes selection)
+- Arrow keys move keyboard **focus** (visual indicator with ring) and, by default, select the tab they reach (\`activateOnFocus\`)
+- With \`activateOnFocus={false}\` the arrow keys only move focus, and Enter/Space **activate** the focused tab (changes selection)
 - Focus automatically wraps around (loops from last to first and vice versa)
 - Disabled tabs are automatically skipped during navigation
 - Focused tab automatically scrolls into view (smooth scroll)

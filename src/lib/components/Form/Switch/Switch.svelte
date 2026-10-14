@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import type { Attachment } from 'svelte/attachments';
-	import type { HTMLAttributes } from 'svelte/elements';
-	import Field, { focusFromLabel } from '../Field/Field.svelte';
+	import Field from '../Field/Field.svelte';
+	import FieldHiddenInputs from '../Field/FieldHiddenInputs.svelte';
 	import { useFieldTheme } from '../Field/field.theme.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { SwitchProps } from './switch.props.js';
@@ -94,54 +93,15 @@
 
 	const classes = $derived(useSwitchTheme(theme));
 	const fieldClasses = $derived(useFieldTheme(theme));
-	const onclick = () => {
-		if (field.disabled) return;
+	// A read-only or disabled switch refuses the edit inside setValue.
+	const toggle = () => {
 		field.value = !field.value;
-	};
-
-	// A blocked native submit (or reportValidity) focuses the first invalid control. When that is
-	// this switch's hidden input, the report belongs to the visible switch: it shows its own error
-	// and takes focus. Firefox hides its bubble when the reported input loses focus, which only
-	// works once its focus has settled, so the hand-off waits a task. A silent checkValidity()
-	// focuses nothing, so it changes nothing here.
-	const onHiddenInputFocus = (event: FocusEvent & { currentTarget: HTMLInputElement }) => {
-		const input = event.currentTarget;
-		field.validate();
-		setTimeout(() => {
-			if (input.ownerDocument.activeElement === input) field.node?.focus();
-		});
-	};
-
-	// While a required switch is off, its hidden input also carries a blank custom error. Chromium
-	// and WebKit trim the message before showing their bubble, so a blank one shows nothing over
-	// the switch's own error, and the constraint never lapses: every submit stays blocked, even
-	// ones sent back to back.
-	const blankNativeReport: Attachment<HTMLInputElement> = (input) => {
-		input.setCustomValidity(field.required && !field.value ? ' ' : '');
-	};
-
-	// The switch is still a div (a native button is C10's CC-13), so the button attributes are
-	// spread as plain element attributes.
-	const controlAttrs = $derived(inputAttrs as HTMLAttributes<HTMLElement> | undefined);
-	// An aria-label from inputAttrs names the switch instead of its painted label.
-	const labelledBy = $derived(
-		inputAttrs?.['aria-labelledby'] ??
-			(label && !inputAttrs?.['aria-label'] ? field.labelId : undefined)
-	);
-
-	const onKeydown = (e: KeyboardEvent) => {
-		if (field.disabled) return;
-		if (e.key === 'Enter' || e.key === ' ') {
-			e.preventDefault();
-			field.value = !field.value;
-		}
 	};
 </script>
 
 <Field
 	{field}
 	{labelPosition}
-	labelFor={false}
 	label={labelPosition ? label : undefined}
 	theme={{
 		...(theme || {}),
@@ -156,61 +116,50 @@
 	}}
 	{...rest}
 >
-	<!-- Visually hidden rather than `hidden`, so the browser can still report it invalid. -->
-	<input
-		onchange={onclick}
-		onfocus={onHiddenInputFocus}
-		name={name || undefined}
-		id={'input-' + field.id}
-		value={inputValue}
-		checked={!!field.value}
-		required={field.required}
-		disabled={field.disabled}
-		type="checkbox"
-		tabindex={-1}
-		aria-hidden="true"
-		class="sr-only"
-		{@attach blankNativeReport}
-	/>
-	<div
-		{...controlAttrs}
+	<!-- A native button: Enter and Space toggle once (Space on release), a disabled switch takes no
+	     focus, and the labels below are <label for>, so a click on one toggles it. The name comes
+	     from the label, or from an `aria-label` in inputAttrs. -->
+	<button
+		{...inputAttrs}
 		bind:this={field.node}
 		id={field.id}
-		data-checked={!!value}
-		aria-checked={!!value}
-		aria-labelledby={labelledBy}
-		aria-required={field.required || undefined}
-		aria-disabled={field.disabled || undefined}
+		type="button"
 		role="switch"
-		tabindex={field.disabled ? -1 : 0}
-		class={classes.toggle({ checked: !!value, size, disabled: field.disabled })}
+		aria-checked={!!field.value}
+		disabled={field.disabled}
+		data-checked={!!field.value}
+		data-readonly={field.readOnly ? '' : undefined}
+		class={classes.toggle({
+			checked: !!field.value,
+			size,
+			disabled: field.disabled,
+			readOnly: field.readOnly
+		})}
 		onclick={(event) => {
-			controlAttrs?.onclick?.(event);
-			if (!event.defaultPrevented) onclick();
-		}}
-		onkeydown={(event) => {
-			controlAttrs?.onkeydown?.(event);
-			if (!event.defaultPrevented) onKeydown(event);
+			inputAttrs?.onclick?.(event);
+			if (!event.defaultPrevented) toggle();
 		}}
 		onfocus={(event) => {
-			controlAttrs?.onfocus?.(event);
+			inputAttrs?.onfocus?.(event);
 			field.focused = true;
 		}}
 		onblur={(event) => {
-			controlAttrs?.onblur?.(event);
+			inputAttrs?.onblur?.(event);
 			field.focused = false;
 		}}
 	>
-		<span class={classes.thumb({ checked: !!value, size })} data-checked={!!value}></span>
-	</div>
+		<span class={classes.thumb({ checked: !!field.value, size })} data-checked={!!field.value}
+		></span>
+	</button>
+	<!-- Beside the button, not inside it: a button may not contain interactive content. -->
+	<FieldHiddenInputs {field} checked={!!field.value} value={inputValue} />
 	{#snippet suffix()}
 		{#if !labelPosition}
 			<Slot
-				as="span"
-				attrs={{ id: field.labelId }}
+				as="label"
+				attrs={{ id: field.labelId, for: field.id }}
 				render={label}
-				class={fieldClasses.label({ required: field.required })}
-				{@attach focusFromLabel(field)}
+				class={fieldClasses.label({ required: field.required, disabled: field.disabled })}
 			/>
 		{/if}
 	{/snippet}

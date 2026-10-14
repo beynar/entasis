@@ -62,7 +62,8 @@ MultiStepForm owns one Form per step, displays them through Stepper, validates v
 - **meterColor**: meter color token. Defaults to neutral.
 - **previousText**, **nextText**, **submitText**: navigation labels.
 - **variant**: visual presentation of the multi-step shell. Card renders one shared Card surface around the fixed meter, transitioning step content, and navigation footer. Header, meter, step fields, and footer share one horizontal inset in every variant. Each step reuses Form's card spacing and edge-to-edge separator rules without creating another Card surface. Supports plain, sectioned, and card; defaults to plain.
-- **previousButtonProps**, **nextButtonProps**, **submitButtonProps**: Button props. Custom click handlers are composed with internal behavior; disabled and loading protection cannot be overridden.
+- **validationMode**, **validationDebounce**: when fields validate by themselves, for every step; see Form.
+- **previousButtonProps**, **nextButtonProps**, **submitButtonProps**: Button props. Custom click handlers are composed with internal behavior; disabled and loading protection cannot be overridden. While a step submits the buttons are marked loading, never natively disabled, so the pressed button keeps keyboard focus.
 - **class**: additional classes on the root.
 - **theme**: MultiStepForm theme overrides plus optional nested form theme overrides.
 
@@ -87,7 +88,8 @@ When onBeforeChange is present, navigation remains blocked unless the hook calls
 
 ## Submission behavior
 
-- Next validates every visited step. Hooks do not run and the active step does not change when validation fails.
+- Next validates every visited step, and waits for async validators (the buttons show a spinner meanwhile). Hooks do not run and the active step does not change when validation fails.
+- Disabled fields skip validation and are left out of the merged payload.
 - Final submission validates every step before calling onSubmitForm; partial invalid data is never submitted.
 - Enter follows Form's field-navigation behavior. A terminal Enter validates the current and visited steps, advances when permitted, and submits from the final step.
 - Rejected hooks and submit handlers propagate their errors, while loading always resets.
@@ -98,7 +100,7 @@ When onBeforeChange is present, navigation remains blocked unless the hook calls
 - **steps**: current step definitions.
 - **stepper**: bound Stepper state, including value, next(), and previous().
 - **value**: merged live partial value.
-- **loading**: true while a navigation or final-submit hook is pending.
+- **loading**: true while async validators or a navigation or final-submit hook is pending.
 - **isLastStep**: whether the current step is final.
 - **progress** and **meterSteps**: values used by the default meter.
 - **submit()**: validates and advances or submits, returning the validated visited-step payload or false. The final-step result is the complete validated payload.

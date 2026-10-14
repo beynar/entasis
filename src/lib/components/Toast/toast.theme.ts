@@ -228,7 +228,7 @@ const defaultToastDescription = cva({
 // (margins, border, padding, sizing) and lets pointer events fall through — the
 // toasts themselves re-enable pointer-events.
 const defaultToaster = cva({
-	base: 'pointer-events-none fixed inset-0 z-[9999] m-0 h-full w-full max-h-none max-w-none overflow-hidden border-0 bg-transparent p-0'
+	base: 'pointer-events-none fixed inset-0 z-[9999] m-0 h-full w-full max-h-none max-w-none overflow-hidden border-0 bg-transparent p-0 outline-none'
 });
 
 // Motion preset, keyed by the toast's resolved `position`: every toast flies in from

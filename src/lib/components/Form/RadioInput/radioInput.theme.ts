@@ -12,11 +12,11 @@ const defaultRadioInput = cva({
 });
 
 const defaultRadioInputItem = cva({
-	base: 'relative grid w-full cursor-pointer items-start gap-xs rounded-md text-left transition-[color,background-color,box-shadow,opacity] outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
+	base: 'relative grid w-full cursor-pointer items-start gap-xs rounded-md text-start transition-[color,background-color,box-shadow,opacity] outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
 	variants: {
 		mode: {
-			card: 'raised bg-surface-raised py-md pl-layout-lg',
-			normal: 'py-xs pl-layout-xl'
+			card: 'raised bg-surface-raised py-md ps-layout-lg',
+			normal: 'py-xs ps-layout-xl'
 		},
 		size: {
 			small: 'min-h-row-sm',
@@ -29,6 +29,11 @@ const defaultRadioInputItem = cva({
 		},
 		disabled: {
 			true: 'cursor-not-allowed opacity-50',
+			false: ''
+		},
+		// Focusable and announced, but not changeable: no pointer cursor promising a selection.
+		readOnly: {
+			true: 'cursor-default',
 			false: ''
 		}
 	},
@@ -59,7 +64,7 @@ const defaultRadioInputItemLabel = cva({
 });
 
 const defaultRadioInputItemTrack = cva({
-	base: 'origin-center content-[""] bg-surface-raised border border-neutral-muted rounded-full absolute left-2',
+	base: 'origin-center content-[""] bg-surface-raised border border-neutral-muted rounded-full absolute start-2',
 	variants: {
 		checked: {
 			true: '',
@@ -99,7 +104,7 @@ const defaultRadioInputItemTrack = cva({
 });
 
 const defaultRadioInputItemThumb = cva({
-	base: 'origin-center radio rounded-full transition-[background-color,opacity,scale] content-[""] absolute left-2 scale-[40%] opacity-0',
+	base: 'origin-center radio rounded-full transition-[background-color,opacity,scale] content-[""] absolute start-2 scale-[40%] opacity-0',
 	variants: {
 		checked: {
 			true: 'bg-selected scale-[60%] opacity-100',

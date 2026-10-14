@@ -18,13 +18,15 @@ describe.each([
 		for (const id of ids) expect(id).toMatch(/^\S+$/);
 	});
 
-	test('sit on the visible option, with a derived id on its hidden input', () => {
+	test('sit on the visible option, with no input inside an option', () => {
 		render(OptionIdsHarness);
-		const [first, second] = within(screen.getByTestId(testId)).getAllByRole(role);
+		const group = screen.getByTestId(testId);
+		const [first, second] = within(group).getAllByRole(role);
 
 		expect(first.id).toMatch(/-option-0$/);
 		expect(second.id).toMatch(/-option-1$/);
-		expect(first.querySelector('input')).toHaveAttribute('id', `${first.id}-input`);
+		// A button may not contain interactive content.
+		expect(group.querySelectorAll('button input')).toHaveLength(0);
 	});
 
 	test('keep selection independent per instance', async () => {

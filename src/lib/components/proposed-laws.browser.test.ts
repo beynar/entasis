@@ -1,14 +1,12 @@
 // Entries for the proposed laws (decisions.md) that need a real engine: focus rings
 // (`:focus-visible`) and input modality do not exist in jsdom. Same convention as
-// `proposed-laws.svelte.test.ts`: `pending` entries repro today's behaviour and are expected to
-// fail until the owning lane lands; plain `test` entries hold today and guard the clause.
+// `proposed-laws.svelte.test.ts`: a `pending` entry (`test.fails`) repros today's behaviour and
+// is expected to fail until the owning lane lands; plain `test` entries guard the clause.
 import { describe, expect, test } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
 import { nextFrame, tab } from '$lib/testing/browser.test-helper.js';
 import ProposedLawsHarness from './ProposedLawsHarness.test.svelte';
-
-const pending = test.fails;
 
 type Props = Parameters<typeof ProposedLawsHarness>[1];
 const mount = (scenario: Props['scenario']) => render(ProposedLawsHarness, { props: { scenario } });
@@ -54,7 +52,7 @@ describe('law 5 · focus (F3 · CX-3, C14 · DF-6)', () => {
 		await expect.element(page.getByRole('tooltip')).toBeInTheDocument();
 	});
 
-	pending('a tooltip does not open when its trigger gets focus without a focus ring', async () => {
+	test('a tooltip does not open when its trigger gets focus without a focus ring', async () => {
 		mount('tooltip');
 		// A pointer interaction, then focus from script: the browser shows no focus ring.
 		await userEvent.click(page.getByRole('button', { name: 'Before' }));
@@ -69,7 +67,7 @@ describe('law 5 · focus (F3 · CX-3, C14 · DF-6)', () => {
 
 describe('menu initial focus (C3 · MN-4b)', () => {
 	// The APG menu button pattern: a keyboard open puts focus on the first item, not on the menu.
-	pending('Enter on a menu button focuses the first item', async () => {
+	test('Enter on a menu button focuses the first item', async () => {
 		mount('popup-menu');
 		element('Actions').focus();
 		await userEvent.keyboard('{Enter}');

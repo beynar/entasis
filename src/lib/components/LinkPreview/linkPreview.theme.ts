@@ -2,15 +2,22 @@ import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 
 const defaultLinkPreviewTrigger = cva({
-	base: 'text-primary-readable inline-flex max-w-full items-center rounded-sm underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
+	base: 'text-primary-readable max-w-full rounded-sm underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
 	variants: {
 		disabled: {
 			true: 'pointer-events-none opacity-55',
 			false: null
+		},
+		// The link flows with the text around it and breaks across lines; its ring and rounding
+		// repeat on every line.
+		wrap: {
+			true: 'box-decoration-clone inline',
+			false: 'inline-flex items-center'
 		}
 	},
 	defaultVariants: {
-		disabled: false
+		disabled: false,
+		wrap: true
 	}
 });
 

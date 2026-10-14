@@ -88,7 +88,7 @@
 		{ label: 'Reports', href: '#reports' }
 	];
 
-	function handleTabChange(value: string) {
+	function handleTabChange({ value }: { value: string }) {
 		console.log('Tab changed to:', value);
 	}
 
@@ -98,6 +98,7 @@
 	let fallbackTabs = $state(fallbackSeed);
 	let fallbackActiveTab = $state<string>();
 	let fallbackReports = $state<string[]>([]);
+	let manualActiveTab = $state('Inbox');
 </script>
 
 <DocPage
@@ -119,7 +120,7 @@
 	size="${controls.value.size}"
 	variant="${controls.value.variant}"
 	color="${controls.value.color}"
-	onValueChange={(value) => console.log('Tab changed to:', value)}
+	onValueChange={({ value }) => console.log('Tab changed to:', value)}
 />`}
 	>
 		<div class="flex flex-col items-center">
@@ -137,7 +138,7 @@
 
 	{#snippet examples()}
 		<ComponentCard
-			description="Use Arrow keys (Left/Right for horizontal, Up/Down for vertical) to move focus; Home/End jump to first/last tab; Enter or Space activates the focused tab."
+			description="Use Arrow keys (Left/Right for horizontal, Up/Down for vertical) to move to a tab and select it; Home/End jump to the first/last tab."
 		>
 			<div class="flex flex-col items-center gap-3">
 				<Tabbar
@@ -147,6 +148,24 @@
 					onValueChange={handleTabChange}
 				/>
 				<p class="text-neutral/70 text-sm">Active tab: {simpleActiveTab}</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Manual activation"
+			description="With activateOnFocus set to false the arrow keys, Home and End only move focus; Enter, Space or a click selects the focused tab. Focus the first tab, press the arrow keys, and watch the selection stay put until you press Enter."
+			code={`<Tabbar items={['Inbox', 'Drafts', 'Sent']} activateOnFocus={false} bind:value />`}
+		>
+			<div class="flex flex-col items-center gap-3">
+				<Tabbar
+					class="w-fit"
+					items={['Inbox', 'Drafts', 'Sent']}
+					activateOnFocus={false}
+					bind:value={manualActiveTab}
+				/>
+				<p class="text-neutral/70 text-sm" data-testid="tabbar-manual-status">
+					Active tab: {manualActiveTab}
+				</p>
 			</div>
 		</ComponentCard>
 
@@ -168,14 +187,14 @@
 		<ComponentCard
 			title="Selection fallback"
 			description="The disabled first tab is skipped by the default selection, and removing the active tab selects its nearest enabled neighbour; the new value is written back to the binding and reported through onValueChange. A value the parent or another control sets is never rewritten: one that names no tab selects no tab and hides the indicator."
-			code={`<Tabbar {items} bind:value onValueChange={(value) => console.log(value)} />`}
+			code={`<Tabbar {items} bind:value onValueChange={({ value }) => console.log(value)} />`}
 		>
 			<div class="flex flex-col items-center gap-3">
 				<Tabbar
 					class="w-fit"
 					items={fallbackTabs}
 					bind:value={fallbackActiveTab}
-					onValueChange={(value) => (fallbackReports = [...fallbackReports, value])}
+					onValueChange={({ value }) => (fallbackReports = [...fallbackReports, value])}
 				/>
 				<div class="flex flex-wrap justify-center gap-2">
 					<Button

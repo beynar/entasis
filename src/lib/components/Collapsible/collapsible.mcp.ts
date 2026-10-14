@@ -28,9 +28,22 @@ The Collapsible component provides a way to show and hide content with a toggle 
   - Disables the collapsible trigger and prevents toggling.
   - Applies opacity styling and removes pointer events.
 
-- **onOpenChange**: (open: boolean) => void (optional)
-  - Callback fired once after a component-owned open state change.
-  - Receives the new open state as parameter.
+- **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void (optional)
+  - Called before a component-owned open state change: a trigger press or the browser's find-in-page.
+  - \`open\` is the requested state. \`details.reason\` is \`'trigger-press'\` or \`'find-in-page'\`, \`details.event\` carries the DOM event, and \`details.cancel()\` keeps the collapsible as it was. See \`entasis/types\` for \`OpenChangeDetails\`.
+  - Not called for initialization or for changes the parent assigns to \`open\`.
+
+- **onAfterOpen** / **onAfterClose**: () => void (optional)
+  - Called once each time an open or close finishes: after the slide, or at once when no animation plays (reduced motion, zero duration, find-in-page), also when the panel is removed mid-close. Not called for the initial state.
+
+- **hiddenUntilFound**: boolean (default: false)
+  - Keeps the closed content in the DOM under \`hidden="until-found"\`, so the browser's find-in-page, text fragments and \`#id\` links reach it and open the collapsible (reason \`find-in-page\`, no animation).
+  - Closed content stays out of the accessibility tree and the tab order until then. Cancelling the open-change leaves it closed and findable.
+  - A disabled collapsible is not findable: its closed content stays under plain \`hidden\`.
+  - Only the content is skipped while closed, so keep padding, gaps and margins on an element inside the panel (the \`content\` theme slot already is).
+
+- **keepMounted**: boolean (default: false)
+  - Keeps the closed content mounted under \`hidden\`, preserving its state (form values, scroll, media). Not findable by the browser.
 
 ### Layout Props
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
@@ -50,12 +63,15 @@ The Collapsible component provides a way to show and hide content with a toggle 
   - Typically contains text, icons, or both
 
 - **children**: Snippet<{ open: boolean }> - Content shown when expanded
-  - Rendered inside the content container with a slide transition
+  - Rendered inside the content container, animated by height
   - Receives the current \`open\` state as a payload
 
 ### Advanced Props
 - **theme**: CollapsibleThemeProps - Theme configuration overrides
   - Allows customizing styles for container, trigger, and content parts
+
+- **variant**: 'default' | 'peek' (default: 'default')
+  - \`peek\` keeps the content mounted, clips it to \`peekHeight\` and fades the edge while closed. While closed, links and controls below the visible preview are inert so Tab never lands on clipped content. The clipped text itself stays in the accessibility tree (the clip is visual only, like a read-more preview), so screen readers read all of it. \`hiddenUntilFound\` and \`keepMounted\` apply to \`default\` only.
 
 ## Examples
 
@@ -132,18 +148,30 @@ The Collapsible component provides a way to show and hide content with a toggle 
 </Collapsible>
 \`\`\`
 
+### Example 6 - Find in page
+\`\`\`svelte
+<!-- Ctrl+F for "refund window" opens the collapsible; onOpenChange reports reason 'find-in-page'. -->
+<Collapsible hiddenUntilFound onOpenChange={(open, details) => console.log(open, details.reason)}>
+	{#snippet trigger()}
+		Refund policy
+	{/snippet}
+	<p>The refund window is 30 days.</p>
+</Collapsible>
+\`\`\`
+
 ## Structure
 
 The component renders:
 - A container \`<div>\` with data attributes for state
 - A trigger \`<button>\` with ARIA attributes
-- A content \`<div>\` with slide transition (only when open)
+- A content panel \`<div>\` (only when open, or while closed with \`keepMounted\` / \`hiddenUntilFound\`) holding the themed content \`<div>\`; it carries \`hidden\` or \`hidden="until-found"\` while closed
+- Styling hooks: \`data-open\` / \`data-closed\` on the root, trigger and content, \`data-disabled\`, and \`data-entering\` / \`data-exiting\` on the root and panel; the panel exposes \`--disclosure-panel-height\` while it animates
 
 ## Accessibility
 
 - **ARIA Attributes**:
   - \`aria-expanded\` on trigger indicates open/closed state
-  - \`aria-controls\` links trigger to content element
+  - \`aria-controls\` links trigger to the content element while it exists in the DOM
   - \`data-state\` attribute provides state information for styling
 
 - **Keyboard Support**:
@@ -152,13 +180,14 @@ The component renders:
 
 - **Semantic HTML**:
   - Uses \`<button>\` element for trigger (proper focus and keyboard handling)
-  - Content is hidden from accessibility tree when closed
+  - Closed content is not in the DOM (or is \`hidden\` / \`hidden="until-found"\`), so it is neither read nor tabbable
 
 ## Notes
 
-- The component uses Svelte's built-in \`slide\` transition with a 200ms duration.
+- The panel animates its height with the theme's \`motion\` slot (\`duration\`, \`delay\`, \`easing\`); reduced motion disables it.
+- Migration: the \`accessible\` and \`srOnlyContent\` props are removed. They rendered the closed content visibly; use \`hiddenUntilFound\` or \`keepMounted\` instead.
 - When \`open\` prop is provided, the component is controlled. Otherwise, it manages its own state.
-- Content is completely removed from DOM when closed (not just hidden) for better performance.
+- Content is removed from the DOM when closed unless \`keepMounted\` or \`hiddenUntilFound\` is set.
 
 ## Theme Customization
 
@@ -169,7 +198,7 @@ The Collapsible component uses a theme object that can be customized using the \
 The theme object contains the following parts:
 - **root**: Main collapsible container styles
 - **trigger**: Toggle trigger button styles
-- **content**: Collapsible content panel styles
+- **content**: Collapsible content styles, on the element inside the panel
 - **icon**: Expand/collapse icon styles
 
 ### Available Variants
@@ -272,8 +301,8 @@ The theme object contains the following parts:
 
 ## Motion
 
-- **motion** theme slot, keyed by \`variant\`: \`default\` slides the content open on the y axis,
-  \`peek\` animates its clip height on \`slow\` / \`enter\`.
+- **motion** theme slot, keyed by \`variant\`: \`default\` animates the panel's height with the
+  preset's \`duration\` / \`delay\` / \`easing\`, \`peek\` animates its clip height on \`slow\` / \`enter\`.
 - Ladder: \`<Theme components={{ collapsible: { motion } }}>\` → \`setCollapsibleTheme({ motion })\`
   → \`theme.motion\` → the \`transition\` prop. Reduced motion collapses it to 0.
 `;

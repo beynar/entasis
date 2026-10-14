@@ -26,6 +26,8 @@ export function useMenuBarState(
 
 	const openStates = $state(untrack(() => getMenus().map(() => false)));
 	let keyboardOpen = $state(false);
+	// ArrowUp on a trigger opens its menu on the last row, ArrowDown on the first.
+	let openOnLast = $state(false);
 	let openedByTrigger = $state(false);
 	let lastActiveIndex = $state<number | null>(null);
 	const triggerElements = $state<Array<HTMLElement | undefined>>([]);
@@ -33,8 +35,10 @@ export function useMenuBarState(
 		const index = openStates.findIndex(Boolean);
 		return index === -1 ? null : index;
 	});
-	const nextKey = $derived(getDirection() === 'rtl' ? 'ArrowLeft' : 'ArrowRight');
-	const previousKey = $derived(getDirection() === 'rtl' ? 'ArrowRight' : 'ArrowLeft');
+	// Read when a key arrives, not derived: the direction comes from computed style, which has no
+	// reactive dependency, so a `dir` changed on the page after the bar was used would stay cached.
+	const nextKey = () => (getDirection() === 'rtl' ? 'ArrowLeft' : 'ArrowRight');
+	const previousKey = () => (getDirection() === 'rtl' ? 'ArrowRight' : 'ArrowLeft');
 
 	$effect(() => {
 		const menuCount = getMenus().length;
@@ -58,13 +62,19 @@ export function useMenuBarState(
 		return -1;
 	}
 
-	function openMenu(index: number, source: 'keyboard' | 'pointer', isTriggerActivation = false) {
+	function openMenu(
+		index: number,
+		source: 'keyboard' | 'pointer',
+		isTriggerActivation = false,
+		onLast = false
+	) {
 		const menus = getMenus();
 		if (menus[index]?.disabled) return;
 		for (let menuIndex = 0; menuIndex < menus.length; menuIndex++) {
 			openStates[menuIndex] = menuIndex === index;
 		}
 		keyboardOpen = source === 'keyboard';
+		openOnLast = onLast;
 		openedByTrigger = isTriggerActivation;
 		lastActiveIndex = index;
 	}
@@ -105,6 +115,10 @@ export function useMenuBarState(
 
 	function handleMenuClose(index: number) {
 		if (openStates.some(Boolean) || lastActiveIndex !== index) return;
+		// Focus that went somewhere on purpose (Tab to the next control, a click in a field) stays
+		// there; only focus the closed menu dropped on the page is given back to its trigger.
+		const active = document.activeElement;
+		if (active && active !== document.body && active !== triggerElements[index]) return;
 		triggerElements[index]?.focus();
 	}
 
@@ -136,7 +150,7 @@ export function useMenuBarState(
 						return;
 					}
 
-					openMenu(index, 'keyboard', true);
+					openMenu(index, 'keyboard', true, event.key === 'ArrowUp');
 				});
 
 				return () => {
@@ -154,16 +168,17 @@ export function useMenuBarState(
 				node,
 				'keydown',
 				(event) => {
-					if (event.key !== nextKey && event.key !== previousKey) return;
+					const next = nextKey();
+					if (event.key !== next && event.key !== previousKey()) return;
 					// Alt/Ctrl/Meta + an arrow is a browser shortcut (Alt+ArrowLeft is Back).
 					if (hasShortcutModifier(event)) return;
 
 					const target = event.target as HTMLElement & { onNext?: () => void };
-					if (event.key === nextKey && typeof target.onNext === 'function') return;
+					if (event.key === next && typeof target.onNext === 'function') return;
 
 					event.preventDefault();
 					event.stopPropagation();
-					moveOpenMenu(index, event.key === nextKey ? 1 : -1);
+					moveOpenMenu(index, event.key === next ? 1 : -1);
 				},
 				{ capture: true }
 			);
@@ -178,7 +193,8 @@ export function useMenuBarState(
 		delete props.disabled;
 		return {
 			...props,
-			focusOnMount: keyboardOpen && activeIndex === index ? true : 'container',
+			focusOnMount:
+				keyboardOpen && activeIndex === index ? (openOnLast ? 'last' : true) : 'container',
 			[menuAttachmentKey]: attachMenuNavigation(index)
 		};
 	}

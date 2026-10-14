@@ -200,6 +200,7 @@
 		<Popover
 			open={openState.value}
 			onOpenChange={setOpen}
+			label={resolvedLabel}
 			{onAfterOpen}
 			{onAfterClose}
 			{position}

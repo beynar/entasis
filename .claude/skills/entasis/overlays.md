@@ -24,11 +24,14 @@ beneath, else to the most recent element still on the page, and a close by Escap
 keyboard shows the focus ring. `focusOnClose` on Dialog and Popover overrides it: `false` leaves
 focus alone, an element receives it, a function gets the change details and returns either. A
 Popover's panel is portaled to the end of the page, so Tab on its open trigger enters the panel,
-Tab past the last control continues after the trigger and closes it, and Shift+Tab returns.
+Tab past the last control continues after the trigger and closes it (`tabBridge`, default on for
+dialog popups; menus, lists and the tooltip surface opt out), and Shift+Tab returns. Focus that was in
+the popover or on its trigger moving to a control outside it closes it too (`closeOnFocusOut`,
+following `closeOnClickOutside`).
 Escape closes only the topmost open layer; an outside press dismisses every layer stacked above the
 one pressed (a press that began before the layer opened never does, and on touch only a tap does);
 on Android the Back gesture closes the topmost modal layer like Escape. Modal layers (Dialog)
-contain Tab and make the rest of the page `inert`; Popover is non-modal. See [Dialog](#dialog) and
+contain Tab and make the rest of the page `inert`; a Popover is non-modal unless it sets `modal`. See [Dialog](#dialog) and
 [Popover](#popover).
 
 `onOpenChange(open, details)` runs before the state changes. `details` carries `reason`
@@ -49,21 +52,44 @@ Modal/drawer overlay that blocks page interaction.
 
 ### Unique Props
 
-| Prop                  | Type                                                                                                   | Default                              |
-| --------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------ |
-| `type`                | `'modal' \| 'alert' \| 'fullScreen' \| 'drawerRight' \| 'drawerLeft' \| 'drawerBottom' \| 'drawerTop'` | `'modal'`                            |
-| `open`                | `boolean` (bindable)                                                                                   | `false`                              |
-| `closable`            | `boolean`                                                                                              | `true`                               |
-| `focusOnClose`        | `boolean \| HTMLElement \| ((details) => HTMLElement \| boolean \| void)`                              | `true`                               |
-| `closeOnEscape`       | `boolean`                                                                                              | `true`                               |
-| `closeOnClickOutside` | `boolean`                                                                                              | `true` (`false` for `type: 'alert'`) |
-| `transition`          | `TransitionConfig`                                                                                     | -                                    |
+| Prop                  | Type                                                                                                   | Default                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| `type`                | `'modal' \| 'alert' \| 'fullScreen' \| 'drawerRight' \| 'drawerLeft' \| 'drawerBottom' \| 'drawerTop'` | `'modal'`                                                |
+| `open`                | `boolean` (bindable)                                                                                   | `false`                                                  |
+| `closable`            | `boolean`                                                                                              | `true`                                                   |
+| `focusOnClose`        | `boolean \| HTMLElement \| ((details) => HTMLElement \| boolean \| void)`                              | `true`                                                   |
+| `closeOnEscape`       | `boolean`                                                                                              | `true`                                                   |
+| `closeOnClickOutside` | `boolean`                                                                                              | `true` (`false` for `type: 'alert'` and `modal={false}`) |
+| `modal`               | `boolean`                                                                                              | `true`                                                   |
+| `closeButton`         | `Snippet \| false`                                                                                     | the default button                                       |
+| `snapPoints`          | `(number \| string)[]` (bottom and top drawers)                                                        | -                                                        |
+| `snapPoint`           | `number \| string` (bindable), `defaultSnapPoint` sets where it opens                                  | the largest point                                        |
+| `onSnapPointChange`   | `({ snapPoint, details }) => void`; `details.cancel()` keeps the current point                         | -                                                        |
+| `transition`          | `TransitionConfig`                                                                                     | -                                                        |
 
 `type` accepts a responsive record such as `{ xs: 'drawerBottom', md: 'modal' }` (nearest defined key at or below the active breakpoint wins); a `modal` collapses into a bottom sheet on mobile by default, and drawers can be dragged toward their edge to dismiss. `aria-labelledby` / `aria-describedby` link `title` and `description`; focus is restored to the opener before `onAfterClose`.
 
 `type="alert"` is for an interruption that needs an answer: it renders `role="alertdialog"` and
 ignores outside presses unless `closeOnClickOutside` is set explicitly; Escape still closes it
 (turn that off with `closeOnEscape={false}`).
+
+`modal={false}` leaves the page usable: no `inert` page, scroll lock, backdrop or Tab containment,
+and outside presses do not dismiss it; Escape and the close button still do. Every way out (Escape,
+an outside press, the close button, a swipe, Android Back for modal dialogs) goes through `onOpenChange` first, so
+`details.cancel()` can hold any of them back (ask before discarding a draft); a cancelled swipe
+snaps back. The close button is named `Close`; with `closeButton={false}` (or a snippet that renders
+nothing, as the Popover mobile sheet passes) a closable dialog keeps a visually hidden `Close`
+button for screen readers (never for an `alert`). A mouse or pen drags a drawer only from its
+thumb and header, a finger from anywhere unless text is selected, and a dialog above another keeps
+the one beneath moving with its swipe.
+
+`snapPoints` (fractions of the available height such as `[0.3, 0.6, 1]`, or CSS lengths like
+`'148px'`, `'20rem'`, `'40%'`, `'50vh'`) let a bottom or top drawer, or a modal collapsed into a
+mobile sheet, rest at several heights: drag it between them, a flick moves it to the next, dragging
+below the lowest dismisses it, and its body scrolls only at the largest. While a modal dialog is
+open `<html>` carries `data-dialog-open` and `--dialog-depth` so a page can scale back behind a
+sheet; in a bottom sheet a focused text field makes room for the on-screen keyboard
+(`--keyboard-inset`).
 
 ### Slots
 
@@ -81,7 +107,8 @@ ignores outside presses unless `closeOnClickOutside` is set explicitly; Escape s
 
 ### DialogState (passed to snippets)
 
-- `isOpen`, `id`, `type`, `size`, `open(details?)`, `close(details?)`, `setOpen(open, details?)`,
+- `isOpen`, `id`, `type`, `size`, `modal`, `open(details?)`, `close(details?)`,
+  `setOpen(open, details?)`, `setSnapPoint(point, details?)`, `currentSnapPoint`,
   `trigger` and `reference` (attachments), `lifecycle.status`
 
 ### Theme Parts
@@ -121,26 +148,31 @@ Floating content positioned relative to a trigger element.
 
 ### Unique Props
 
-| Prop                  | Type                                                                      | Default    |
-| --------------------- | ------------------------------------------------------------------------- | ---------- |
-| `open`                | `boolean` (bindable)                                                      | `false`    |
-| `ref`                 | `HTMLElement \| VirtualElement \| null`                                   | -          |
-| `position`            | `Placement` (12 options)                                                  | `'bottom'` |
-| `offset`              | `number`                                                                  | -          |
-| `fitTrigger`          | `boolean`                                                                 | `false`    |
-| `positionPanel`       | `({ panel, reference }) => { x, y, minWidth? } \| null`                   | -          |
-| `inline`              | `boolean`                                                                 | `false`    |
-| `openOnHover`         | `boolean`                                                                 | `false`    |
-| `openOnClick`         | `boolean`                                                                 | `true`     |
-| `delay`               | `number`                                                                  | `100`      |
-| `closeOnEscape`       | `boolean`                                                                 | `true`     |
-| `closeOnClickOutside` | `boolean`                                                                 | `true`     |
-| `closeOnMouseLeave`   | `boolean`                                                                 | `false`    |
-| `focusOnOpen`         | `'first' \| 'container' \| false`                                         | `false`    |
-| `focusOnClose`        | `boolean \| HTMLElement \| ((details) => HTMLElement \| boolean \| void)` | `true`     |
-| `haspopup`            | `'dialog' \| 'menu' \| 'listbox' \| 'tree' \| 'grid' \| true`             | `'dialog'` |
-| `lockScroll`          | `boolean`                                                                 | `true`     |
-| `directedTransition`  | `boolean`                                                                 | `true`     |
+| Prop                  | Type                                                                      | Default               |
+| --------------------- | ------------------------------------------------------------------------- | --------------------- |
+| `open`                | `boolean` (bindable)                                                      | `false`               |
+| `ref`                 | `HTMLElement \| VirtualElement \| null`                                   | -                     |
+| `position`            | `Placement` (12 options)                                                  | `'bottom'`            |
+| `offset`              | `number`                                                                  | -                     |
+| `fitTrigger`          | `boolean`                                                                 | `false`               |
+| `positionPanel`       | `({ panel, reference }) => { x, y, minWidth? } \| null`                   | -                     |
+| `inline`              | `boolean`                                                                 | `false`               |
+| `openOnHover`         | `boolean`                                                                 | `false`               |
+| `openOnClick`         | `boolean`                                                                 | `true`                |
+| `delay`               | `number`                                                                  | `100`                 |
+| `closeOnEscape`       | `boolean`                                                                 | `true`                |
+| `closeOnClickOutside` | `boolean`                                                                 | `true`                |
+| `closeOnMouseLeave`   | `boolean`                                                                 | `false`               |
+| `focusOnOpen`         | `'first' \| 'container' \| false`                                         | `false`               |
+| `focusOnClose`        | `boolean \| HTMLElement \| ((details) => HTMLElement \| boolean \| void)` | `true`                |
+| `haspopup`            | `'dialog' \| 'menu' \| 'listbox' \| 'tree' \| 'grid' \| true`             | `'dialog'`            |
+| `label`, `labelledBy` | `string` (aria-label text / id of the naming element)                     | -                     |
+| `modal`               | `boolean`                                                                 | `false`               |
+| `tabBridge`           | `boolean`                                                                 | `true`                |
+| `closeOnFocusOut`     | `boolean`                                                                 | `closeOnClickOutside` |
+| `arrow`               | `boolean`                                                                 | `false`               |
+| `lockScroll`          | `boolean`                                                                 | `true`                |
+| `directedTransition`  | `boolean`                                                                 | `true`                |
 
 The trigger automatically gets `aria-haspopup` (from `haspopup`), `aria-expanded`, and `aria-controls`; a snippet trigger opts in with `{@attach popover.reference}`.
 
@@ -154,6 +186,13 @@ open. With several `{@attach popover.trigger}` elements, the one pressed anchors
 A `haspopup` other than `'dialog'` renders a plain wrapper instead of a `<dialog>`, points the
 trigger's `aria-controls` at the element with that role (`role="menu"` for `menu`) and labels it by
 the trigger.
+
+`label` (or `labelledBy`, an element id) names the dialog; a popover that holds a form or a picker is
+announced as a dialog, so name it. `modal` keeps Tab inside the panel, makes the page `inert`, opens
+with focus inside and adds a visually hidden Close button at the end of the panel for screen readers.
+`arrow` draws a pointer toward the trigger that stays on it when the panel shifts to fit. One Popover
+can serve many triggers: `{@attach popover.triggerFor(() => row)}` anchors it to the one pressed and
+`popover.payload` holds that trigger's data (type the snippet parameter `PopoverState<Row>`).
 
 `inline` renders the panel in normal document flow where the component sits instead of portaling to
 the viewport-fixed layer: no floating-ui positioning, no scroll lock, no outside-press dismissal
@@ -173,13 +212,13 @@ wins over `mobileSheet`.
 ### PopoverState (passed to snippets)
 
 - `isOpen`, `id`, `size`, `position`, `offset`, `open(details?)`, `close(details?)`,
-  `toggle(details?)`, `setOpen(open, details?)`, `openReason` (`'hover' | 'press' | 'keyboard' |
-'programmatic'`), `activeTrigger`, `lifecycle.status`, `trigger` and `reference` (attachments for
-  a custom trigger)
+  `toggle(details?)`, `setOpen(open, details?)`, `payload`, `openReason` (`'hover' | 'press' | 'keyboard' |
+'programmatic'`), `activeTrigger`, `lifecycle.status`, `trigger`, `triggerFor(() => payload)` and
+  `reference` (attachments for a custom trigger)
 
 ### Theme Parts
 
-`root` (mode: floating | inline | mobileSheet) | `popover` (base, size, mode)
+`root` (mode: floating | inline | mobileSheet) | `popover` (base, size, mode) | `arrow`
 
 ### Example
 
@@ -388,7 +427,7 @@ const { confirmed, result } = await confirmation({
 | `cancel`      | `string \| { text, ...ButtonProps }` | yes      |
 | `onConfirm`   | `() => Promise<R>`                   | no       |
 
-**Note:** Cannot be dismissed via Escape or click-outside. Confirm button shows loading during `onConfirm` execution. If `onConfirm` throws or rejects, loading ends and the dialog stays open so the user can retry or cancel.
+**Note:** A press outside does nothing; Escape answers it as Cancel (`{ confirmed: false }`) unless `onConfirm` is running. Confirm button shows loading during `onConfirm` execution. If `onConfirm` throws or rejects, loading ends and the dialog stays open so the user can retry or cancel.
 
 `<Confirmation />` registers itself as the host on the surrounding `<Theme>`. A `confirmation()`
 call made before that host mounts is queued rather than thrown away, and resolves as soon as the

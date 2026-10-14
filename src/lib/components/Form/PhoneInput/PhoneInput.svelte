@@ -53,7 +53,7 @@
 	let library = $state<IntlTelInputLibrary | null>(null);
 	let attachmentId = 0;
 	const countryOptions = $derived(
-		library ? createPhoneCountryOptions(library.getAllCountries()) : []
+		library ? createPhoneCountryOptions(library.getAllCountries(), t.locale) : []
 	);
 
 	const getValue = () => {
@@ -171,7 +171,7 @@
 					}
 
 					library = intlTelInput;
-					const countries = createPhoneCountryOptions(intlTelInput.getAllCountries());
+					const countries = createPhoneCountryOptions(intlTelInput.getAllCountries(), t.locale);
 					const initialCountry =
 						getPhoneCountryOption(countries, country) ?? getPhoneCountryOption(countries, 'fr');
 					instance = intlTelInput(node, {

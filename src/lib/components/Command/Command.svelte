@@ -10,6 +10,8 @@
 	import { magnifyingGlassIcon } from '../Icons/magnifyingGlass.js';
 	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { useLiveAnnouncer } from '$lib/utils/useLiveAnnouncer.svelte.js';
+	import { untrack } from 'svelte';
 
 	let {
 		items,
@@ -30,6 +32,9 @@
 		showInput = true,
 		shouldFilter = true,
 		filter,
+		limit,
+		autoHighlight,
+		loop,
 		onSelect,
 		onHighlightChange,
 		empty,
@@ -108,6 +113,15 @@
 		get filter() {
 			return filter;
 		},
+		get limit() {
+			return limit;
+		},
+		get autoHighlight() {
+			return autoHighlight;
+		},
+		get loop() {
+			return loop;
+		},
 		get onOpenChange() {
 			return onOpenChange;
 		},
@@ -130,8 +144,36 @@
 	const resolvedTitle = $derived(title ?? t.commandPalette);
 	const resolvedPlaceholder = $derived(placeholder ?? t.commandPlaceholder);
 	const resolvedEmpty = $derived(empty ?? t.noResults);
+	const resolvedEmptyText = $derived(typeof empty === 'string' ? empty : t.noResults);
 
-	const slotPayload = { open: () => command.open(), close: () => command.close() };
+	// A Button's `onclick={open}` hands its click event over: the change is then a trigger press.
+	const slotPayload = {
+		open: (event?: Event) => command.open(event ? { reason: 'trigger-press', event } : undefined),
+		close: (event?: Event) => command.close(event ? { reason: 'close-press', event } : undefined)
+	};
+
+	// Result counts and the empty state reach screen readers through one persistent region,
+	// announced after typing settles (a region that mounts already filled is skipped).
+	const announcer = useLiveAnnouncer(id, 'live');
+	const resultCount = $derived(
+		command.visibleGroups.reduce((count, group) => count + group.items.length, 0)
+	);
+	$effect(() => {
+		const searching = searchState.value.trim() !== '';
+		const message = command.isEmpty
+			? resolvedEmptyText
+			: searching
+				? t.resultsCount(resultCount)
+				: '';
+		return untrack(() => {
+			if (!message) {
+				announcer.reset();
+				return;
+			}
+			const timer = setTimeout(() => announcer.announce(message), 250);
+			return () => clearTimeout(timer);
+		});
+	});
 
 	// Dialog mode: the content mounts on each open and the Dialog does no focus management of
 	// its own, so grab focus for the search input once the mount settles ({@attach} on the input).
@@ -172,8 +214,8 @@
 			id: command.optionId(it.value),
 			'data-value': it.value,
 			tabindex: -1,
-			onpointermove: () => {
-				if (!it.disabled) command.setHighlighted(it.value);
+			onpointermove: (event: PointerEvent) => {
+				if (!it.disabled) command.pointerHighlight(it.value, event);
 			}
 		}}
 	/>
@@ -191,7 +233,7 @@
 						type="text"
 						role="combobox"
 						aria-autocomplete="list"
-						aria-expanded="true"
+						aria-expanded={!command.isEmpty}
 						aria-controls={command.listId}
 						aria-activedescendant={command.highlighted !== undefined
 							? command.optionId(command.highlighted)
@@ -210,17 +252,12 @@
 		{/if}
 
 		<!-- The empty/no-results message lives OUTSIDE the listbox: a listbox may only own
-		     `option`/`group` nodes (aria-required-children), and a status message is not either of
-		     those. `role="status"` also announces it politely when filtering empties the list.
+		     `option`/`group` nodes (aria-required-children). The live region below announces it.
 		     It takes the list's `flex-1` so the box keeps the exact same layout as a filled list. -->
 		{#if command.isEmpty}
-			<Slot
-				render={resolvedEmpty}
-				class="flex-1 {classes.empty({ size })}"
-				attrs={{ role: 'status' }}
-				payload={slotPayload}
-			/>
+			<Slot render={resolvedEmpty} class="flex-1 {classes.empty({ size })}" payload={slotPayload} />
 		{/if}
+		<span class="sr-only" {...announcer.regionAttrs}>{announcer.message}</span>
 
 		<!-- Kept mounted while empty (hidden) so `aria-controls`/`aria-activedescendant` ids on the
 		     combobox input always resolve; `hidden` keeps it out of the flex layout. -->
@@ -272,7 +309,8 @@
 
 {#if dialog}
 	<Dialog
-		bind:open={() => openState.value, command.setOpen}
+		open={openState.value}
+		onOpenChange={(next, details) => command.setOpen(next, details)}
 		type="modal"
 		title={resolvedTitle}
 		theme={commandDialogTheme}

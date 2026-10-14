@@ -156,6 +156,10 @@ export const componentNavigationSections = [
 		label: 'Forms',
 		links: [
 			{
+				href: '/components/autocomplete',
+				text: 'Autocomplete'
+			},
+			{
 				href: '/components/calendar',
 				text: 'Calendar'
 			},
@@ -366,6 +370,10 @@ export const componentNavigationSections = [
 				text: 'Network indicator'
 			},
 			{
+				href: '/components/progress',
+				text: 'Progress'
+			},
+			{
 				href: '/components/progress-circle',
 				text: 'Progress circle'
 			},
@@ -410,6 +418,10 @@ export const componentNavigationSections = [
 			{
 				href: '/components/command',
 				text: 'Command'
+			},
+			{
+				href: '/components/navigation-menu',
+				text: 'Navigation menu'
 			},
 			{
 				href: '/components/pagination',

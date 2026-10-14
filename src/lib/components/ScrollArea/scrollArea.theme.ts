@@ -28,12 +28,15 @@ const defaultScrollAreaContent = cva({
 	base: 'relative'
 });
 
+// Logical placement: the vertical bar sits at the inline end (the right in LTR, the left in RTL),
+// the horizontal bar fills from the inline start. Where both show, the component insets each by
+// the other's thickness so they do not overlap at the corner.
 const defaultScrollAreaScrollbar = cva({
-	base: 'absolute top-0 right-0 z-30 w-1.5 cursor-pointer'
+	base: 'absolute top-0 end-0 z-30 w-1.5 cursor-pointer'
 });
 
 const defaultScrollAreaScrollbarX = cva({
-	base: 'absolute bottom-0 left-0 z-30 h-1.5 cursor-pointer'
+	base: 'absolute bottom-0 start-0 z-30 h-1.5 cursor-pointer'
 });
 
 const defaultScrollAreaScrollbarThumb = cva({
@@ -52,4 +55,7 @@ export const scrollAreaTheme = {
 export type ScrollAreaTheme = typeof scrollAreaTheme;
 export type ScrollAreaThemeProps = InferComponentTheme<ScrollAreaTheme>;
 export const setScrollAreaTheme = setComponentTheme<ScrollAreaTheme>('scroll-area');
-export const useScrollAreaTheme = useComponentTheme<ScrollAreaTheme>('scroll-area', scrollAreaTheme);
+export const useScrollAreaTheme = useComponentTheme<ScrollAreaTheme>(
+	'scroll-area',
+	scrollAreaTheme
+);

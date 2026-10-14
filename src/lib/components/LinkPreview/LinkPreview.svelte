@@ -40,6 +40,9 @@
 		transition,
 		size = 'normal',
 		disabled = false,
+		wrap = true,
+		anchorTo,
+		arrow = false,
 		class: className,
 		card,
 		popover,
@@ -173,6 +176,9 @@
 	{transition}
 	{size}
 	{disabled}
+	{wrap}
+	{anchorTo}
+	{arrow}
 	{popover}
 	card={{ color: card?.color ?? 'neutral', variant: card?.variant ?? 'solid', theme: card?.theme }}
 	{showBorders}
@@ -188,7 +194,7 @@
 			href={disabled ? undefined : href}
 			{target}
 			rel={resolvedRel}
-			class={classes.trigger({ disabled, className })}
+			class={classes.trigger({ disabled, wrap, className })}
 			data-status={previewState.status}
 			aria-describedby={id}
 			aria-disabled={disabled || undefined}

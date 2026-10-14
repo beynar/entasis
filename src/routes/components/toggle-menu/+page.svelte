@@ -170,6 +170,10 @@
 		{ label: 'One roving keyboard tab stop', test: 'a11y:toggle-menu.roving-tabindex' },
 		'Toolbar-specific radio group semantics',
 		'Logical groups stay intact during overflow',
+		{
+			label: 'Disabled items stay reachable by the arrow keys',
+			test: 'a11y:toggle-menu.disabled-reachable'
+		},
 		'Persistent checkbox and radio More menu',
 		'First-class menu buttons with automatic overflow submenus',
 		'Automatic tooltips for icon-only toggles and menus',
@@ -248,9 +252,31 @@
 
 		<ComponentCard
 			title="Disabled"
-			description="Disabling the toolbar preserves every pressed state."
+			description="Disabling the toolbar preserves every pressed state. Disabled items stay in the arrow-key order and announce aria-disabled, so a fully disabled toolbar keeps one tab stop."
 		>
 			<ToggleMenu items={createEditorItems()} label="Unavailable editor tools" disabled />
+		</ComponentCard>
+
+		<ComponentCard
+			title="A disabled item among enabled ones"
+			description="Italic is disabled but reachable: ArrowRight from Bold lands on it, and Space does nothing."
+			code={`<ToggleMenu
+	label="Formatting"
+	items={[
+		{ type: 'toggle', children: 'Bold', value: true },
+		{ type: 'toggle', children: 'Italic', disabled: true },
+		{ type: 'toggle', children: 'Underline' }
+	]}
+/>`}
+		>
+			<ToggleMenu
+				label="Formatting"
+				items={[
+					{ type: 'toggle', children: 'Bold', value: true },
+					{ type: 'toggle', children: 'Italic', disabled: true },
+					{ type: 'toggle', children: 'Underline' }
+				]}
+			/>
 		</ComponentCard>
 	{/snippet}
 </DocPage>

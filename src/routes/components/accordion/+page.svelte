@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Accordion from '$lib/components/Accordion/Accordion.svelte';
 	import SegmentedControl from '$lib/components/SegmentedControl/SegmentedControl.svelte';
+	import Switch from '$lib/components/Form/Switch/Switch.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
@@ -45,7 +46,7 @@
 		{
 			title: 'Is it accessible?',
 			content:
-				'Yes. It adheres to the WAI-ARIA design pattern, and collapsed content stays available to screen readers.'
+				'Yes. Each trigger is a button inside a heading, each panel is a labelled region, and collapsed content stays out of the reading order and the tab order.'
 		},
 		{
 			title: 'Is it styled?',
@@ -79,6 +80,25 @@
 		}
 	];
 
+	const findableItems = [
+		{ title: 'Shipping', content: 'Orders ship within two days from our warehouse.' },
+		{ title: 'Returns', content: 'Returns are free for thirty days after delivery.' }
+	];
+
+	const shippingItems = [
+		{ title: 'Shipping', content: 'Orders ship within two days from our warehouse.' },
+		{ title: 'Returns', content: 'Returns are free for thirty days after delivery.' },
+		{
+			title: 'Warranty',
+			content: 'Every product carries a two year warranty.',
+			disabled: true
+		}
+	];
+
+	let lastChange = $state('Nothing changed yet.');
+	let lastFinished = $state('Nothing finished yet.');
+	let blockClosing = $state(false);
+
 	const faqByKey = [
 		{
 			question: 'How do I install it?',
@@ -96,10 +116,11 @@
 	subtitle="Vertically stacked sections that expand and collapse to reveal their content."
 	component="Accordion"
 	features={[
-		'Built on Melt Accordion builder',
-		'Slide transition on expand/collapse',
+		'Heading around each trigger, labelled region per panel',
+		'Height animation on expand/collapse',
 		'oneAtATime or multi-panel open',
-		'Collapsed content kept in sr-only span'
+		'hiddenUntilFound: find-in-page opens a collapsed item',
+		'Per-item disabled, cancellable open-change details'
 	]}
 >
 	<ComponentCard
@@ -209,6 +230,60 @@
 			<div class="grid w-full gap-8 lg:grid-cols-2">
 				<Accordion variant="card" splitted items={faqItems.slice(0, 2)} />
 				<Accordion variant="outline" splitted items={faqItems.slice(0, 2)} />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Find in page"
+			description="hiddenUntilFound keeps collapsed panels findable: search for 'warehouse' with Ctrl+F (Cmd+F) and the Shipping item opens. Collapsed content stays out of the reading and tab order until then."
+			code={`<Accordion items={items} hiddenUntilFound />`}
+		>
+			<div class="w-full max-w-md">
+				<Accordion items={findableItems} hiddenUntilFound />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Disabled items"
+			description="An item with disabled: true (or the key named by disabledKey) gets a natively disabled trigger, skipped by Tab. The root disabled prop disables every item."
+			code={`<Accordion
+	items={[
+		{ title: 'Shipping', content: '…' },
+		{ title: 'Warranty', content: '…', disabled: true }
+	]}
+/>`}
+		>
+			<div class="w-full max-w-md">
+				<Accordion items={shippingItems} />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Open-change details and lifecycle"
+			description="onItemOpenChange runs before an item opens or closes with a reason, and details.cancel() keeps it as it was. onItemAfterOpen and onItemAfterClose fire once when the change finishes, also without animation."
+			code={`<Accordion
+	{items}
+	onItemOpenChange={({ item, open, details }) => {
+		if (!open && blockClosing) details.cancel();
+	}}
+	onItemAfterOpen={({ item }) => (finished = item.title + ' finished opening')}
+	onItemAfterClose={({ item }) => (finished = item.title + ' finished closing')}
+/>`}
+		>
+			<div class="flex w-full max-w-md flex-col gap-4">
+				<Switch bind:value={blockClosing} label="Refuse closing (details.cancel())" />
+				<Accordion
+					items={faqItems}
+					oneAtATime={false}
+					onItemOpenChange={({ item, open, details }) => {
+						lastChange = `${item.title}: ${open ? 'open' : 'close'} requested (${details.reason})`;
+						if (!open && blockClosing) details.cancel();
+					}}
+					onItemAfterOpen={({ item }) => (lastFinished = `${item.title} finished opening`)}
+					onItemAfterClose={({ item }) => (lastFinished = `${item.title} finished closing`)}
+				/>
+				<p class="text-neutral/70 text-sm" data-testid="accordion-last-change">{lastChange}</p>
+				<p class="text-neutral/70 text-sm" data-testid="accordion-last-finished">{lastFinished}</p>
 			</div>
 		</ComponentCard>
 

@@ -87,6 +87,11 @@ export type StepperProps<Item> = {
 	/** DOM id for each panel, so a tab can reference it with `aria-controls`. */
 	panelId?: (index: number) => string;
 	/**
+	 * Value of `data-activation-direction` for one panel, or undefined for none; a styling hook
+	 * for direction-aware panel animations. Tabs sets it on the active panel.
+	 */
+	panelActivationDirection?: (index: number) => string | undefined;
+	/**
 	 * When each panel's content is created.
 	 * `eager` creates every panel up front, `lazy` creates a panel the first time it is
 	 * activated and destroys it once the slide away from it has finished, `once` keeps it after

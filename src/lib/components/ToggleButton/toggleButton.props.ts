@@ -25,8 +25,20 @@ export type ToggleButtonProps = WithAttachments<
 			variant?: ToggleButtonVariant;
 			/** Size token controlling padding, height, and typography. */
 			size?: Sizes;
-			/** When true, prevents toggling and applies disabled styles. */
+			/**
+			 * When true, prevents toggling and applies disabled styles. The button gets the native
+			 * `disabled` attribute and leaves the tab order, unless `focusableWhenDisabled` is set.
+			 */
 			disabled?: boolean;
+			/**
+			 * When true, a `disabled` button stays focusable: it renders `aria-disabled="true"`
+			 * instead of the native `disabled` attribute, keeps its place in the tab order and still
+			 * receives pointer events, and refuses to toggle: clicks from the pointer, Enter and
+			 * Space are cancelled before any other listener sees them. Inside a ToggleButtonGroup the
+			 * arrow keys stop on it. Has no effect without `disabled`.
+			 * @default false
+			 */
+			focusableWhenDisabled?: boolean;
 			/**
 			 * The class name of the button. First element that the component outputs in the DOM.
 			 */

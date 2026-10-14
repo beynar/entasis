@@ -175,6 +175,11 @@
 			label: 'Choosing a submenu item closes the menu and refocuses its trigger',
 			test: 'a11y:menu-bar.item-closes-tree'
 		},
+		{
+			label: 'ArrowDown opens a menu on its first row, ArrowUp on its last',
+			test: 'a11y:menu-bar.arrow-opens'
+		},
+		{ label: 'Tab leaves an open menu and moves past the bar', test: 'a11y:menu-bar.tab-leaves' },
 		'RTL and disabled-menu support'
 	]}
 >

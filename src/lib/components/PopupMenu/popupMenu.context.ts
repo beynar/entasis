@@ -33,7 +33,26 @@ export interface PopupMenuRoot {
 	 * `event` is the item press, reported to each level's `onOpenChange` as `reason: 'item-press'`.
 	 */
 	close: (event?: Event) => void;
+	/**
+	 * Tab or Shift+Tab pressed in a panel of the tree: closes every level and hands focus to the
+	 * root trigger (Shift+Tab stays there; Tab lets the browser carry on from it, so focus lands on
+	 * the control after the trigger). Optional: a host that does not provide it leaves Tab alone.
+	 */
+	leave?: (event: KeyboardEvent) => void;
+	/** Whether the browser's own context menu may open over a panel of the tree. Default `true`. */
+	nativeMenu?: () => boolean;
 }
+
+// Whether the Menu rendering below is a submenu level (a PopupMenu that joined its parent's tree)
+// rather than a root menu. Set by every PopupMenu for the Menu it renders, read by MenuFloating
+// to decide whether ArrowLeft leaves a level and whether the row set has a back control.
+const POPUP_MENU_LEVEL = Symbol('entasis:popup-menu-level');
+
+export const providePopupMenuLevel = (submenu: boolean) => setContext(POPUP_MENU_LEVEL, submenu);
+
+/** Whether the Menu being rendered is a submenu level; `false` for a root or a standalone Menu. */
+export const usePopupMenuSubmenu = (): boolean =>
+	getContext<boolean | undefined>(POPUP_MENU_LEVEL) ?? false;
 
 /** Makes `root` the tree that the submenus of every Menu rendered below it join. */
 export const providePopupMenuRoot = (root: PopupMenuRoot) => setContext(POPUP_MENU_ROOT, root);
@@ -58,17 +77,18 @@ const containsInTree = (popover: PopoverState, node: Node): boolean =>
  * Focus left inside the tree goes straight to `returnTo`, the element the root hands focus back
  * to. No row of a closing panel keeps focus through the close transition, and every panel's focus
  * scope then finds focus already outside and leaves it alone. `rootMenu`, the root's Menu element,
- * covers a root panel the popover does not own, such as a mobile sheet.
+ * covers a root panel the popover does not own, such as a mobile sheet. Returns `false` when the
+ * consumer's `onOpenChange` cancelled the close and the tree stayed as it was.
  */
 export const closeMenuTree = (
 	root: PopoverState,
 	returnTo: HTMLElement | null,
 	rootMenu?: HTMLElement | null,
 	details?: OpenChangeInit
-) => {
+): boolean => {
 	const active = document.activeElement;
 	const focusInTree = !!active && (!!rootMenu?.contains(active) || containsInTree(root, active));
-	if (root.isOpen && root.close(details) === false) return;
+	if (root.isOpen && root.close(details) === false) return false;
 	const closeBelow = (popover: PopoverState) => {
 		for (const child of popover.children) {
 			closeBelow(child);
@@ -77,4 +97,5 @@ export const closeMenuTree = (
 	};
 	closeBelow(root);
 	if (focusInTree && returnTo?.isConnected) returnTo.focus({ preventScroll: true });
+	return true;
 };

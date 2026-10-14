@@ -69,7 +69,8 @@
 				aria-expanded={popover.isOpen}
 				data-color={resolvedColor}
 				data-checked="false"
-				disabled={isDisabled}
+				aria-disabled={isDisabled || undefined}
+				data-disabled={isDisabled || undefined}
 				class={classes.root({
 					color: resolvedColor,
 					checked: false,
@@ -77,6 +78,7 @@
 					variant: resolvedVariant,
 					size: resolvedSize,
 					disabled: isDisabled,
+					focusable: true,
 					className: item.class
 				})}
 				{@attach overflowed ? undefined : buttonReference}
@@ -84,7 +86,10 @@
 				{@attach !item.children && item.label && !popover.isOpen && !overflowed
 					? tooltip({ content: item.label, delay: 350 })
 					: undefined}
-				onclick={() => popover.toggle()}
+				onclick={() => {
+					// Disabled but focusable: it stays in the toolbar's arrow-key order and refuses to open.
+					if (!isDisabled) popover.toggle();
+				}}
 			>
 				<Slot render={item.prefix} class={classes.prefix({ size: resolvedSize, checked: false })} />
 				<Slot render={item.children} />

@@ -34,6 +34,7 @@ import { toggleMenuDescription } from '$lib/components/ToggleMenu/toggleMenu.mcp
 import { selectionMenuDescription } from '$lib/components/SelectionMenu/selectionMenu.mcp.js';
 import { askDescription } from '$lib/components/Form/Ask/ask.mcp.js';
 import { fieldDescription } from '$lib/components/Form/Field/field.mcp.js';
+import { autocompleteDescription } from '$lib/components/Form/Autocomplete/autocomplete.mcp.js';
 import { calendarDescription } from '$lib/components/Form/Calendar/calendar.mcp.js';
 import { checkboxDescription } from '$lib/components/Form/Checkbox/checkbox.mcp.js';
 import { checkboxesInputDescription } from '$lib/components/Form/CheckboxesInput/checkboxesInput.mcp.js';
@@ -83,6 +84,7 @@ import { confirmationDescription } from '$lib/components/Confirmation/confirmati
 import { emptyDescription } from '$lib/components/Empty/empty.mcp.js';
 import { meterDescription } from '$lib/components/Meter/meter.mcp.js';
 import { networkIndicatorDescription } from '$lib/components/NetworkIndicator/networkIndicator.mcp.js';
+import { progressDescription } from '$lib/components/Progress/progress.mcp.js';
 import { progressCircleDescription } from '$lib/components/ProgressCircle/progressCircle.mcp.js';
 import { skeletonDescription } from '$lib/components/Skeleton/skeleton.mcp.js';
 import { spinnerDescription } from '$lib/components/Spinner/spinner.mcp.js';
@@ -92,6 +94,7 @@ import { accordionDescription } from '$lib/components/Accordion/accordion.mcp.js
 import { collapsibleDescription } from '$lib/components/Collapsible/collapsible.mcp.js';
 import { breadcrumbsDescription } from '$lib/components/Breadcrumbs/breadcrumbs.mcp.js';
 import { commandDescription } from '$lib/components/Command/command.mcp.js';
+import { navigationMenuDescription } from '$lib/components/NavigationMenu/navigationMenu.mcp.js';
 import { paginationDescription } from '$lib/components/Pagination/pagination.mcp.js';
 import { stepperDescription } from '$lib/components/Stepper/stepper.mcp.js';
 import { tabbarDescription } from '$lib/components/Tabbar/tabbar.mcp.js';
@@ -174,6 +177,7 @@ export const componentMcpRegistry = {
 	'selection-menu': selectionMenuDescription,
 	ask: askDescription,
 	field: fieldDescription,
+	autocomplete: autocompleteDescription,
 	calendar: calendarDescription,
 	checkbox: checkboxDescription,
 	'checkboxes-input': checkboxesInputDescription,
@@ -224,6 +228,7 @@ export const componentMcpRegistry = {
 	empty: emptyDescription,
 	meter: meterDescription,
 	'network-indicator': networkIndicatorDescription,
+	progress: progressDescription,
 	'progress-circle': progressCircleDescription,
 	skeleton: skeletonDescription,
 	spinner: spinnerDescription,
@@ -233,6 +238,7 @@ export const componentMcpRegistry = {
 	collapsible: collapsibleDescription,
 	breadcrumbs: breadcrumbsDescription,
 	command: commandDescription,
+	'navigation-menu': navigationMenuDescription,
 	pagination: paginationDescription,
 	stepper: stepperDescription,
 	tabbar: tabbarDescription,

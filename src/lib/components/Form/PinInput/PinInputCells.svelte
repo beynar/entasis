@@ -10,14 +10,28 @@
 		classes,
 		size,
 		disabled,
-		mask = false
+		mask = false,
+		groups
 	}: {
 		state: PinInputState;
 		classes: PinInputClasses;
 		size?: Sizes;
 		disabled?: boolean;
 		mask?: boolean;
+		groups?: number[];
 	} = $props();
+
+	// Indexes of the cells a separator follows: the end of every group but the last cell's.
+	const separatorAfter = $derived.by(() => {
+		const after: number[] = [];
+		let end = 0;
+		for (const group of groups ?? []) {
+			if (!Number.isFinite(group) || group < 1) continue;
+			end += Math.floor(group);
+			if (end < state.length) after.push(end - 1);
+		}
+		return after;
+	});
 
 	const displayValue = (char: string | null) => (mask && char ? '•' : char);
 </script>
@@ -42,4 +56,11 @@
 			</span>
 		{/if}
 	</div>
+	{#if separatorAfter.includes(cell.index)}
+		<div
+			data-slot="pin-input-separator"
+			aria-hidden="true"
+			class={classes.separator({ size })}
+		></div>
+	{/if}
 {/each}

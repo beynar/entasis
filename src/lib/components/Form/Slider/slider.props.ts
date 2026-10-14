@@ -21,6 +21,16 @@ export type SliderMark = {
 export type SliderRangeLabelPayload = SliderRangePayload;
 export type SliderMode = 'single' | 'range';
 export type SliderVariant = 'default' | 'thick' | 'contained';
+/**
+ * What a thumb does when it meets a neighbour.
+ *
+ * - `none`: stops against the neighbour (and `minStepsBetweenThumbs`).
+ * - `push`: moves the neighbour along, as long as there is room.
+ * - `swap`: passes through; the thumbs trade places and focus follows the moving one.
+ *
+ * A disabled thumb never moves, and no other thumb passes or pushes it.
+ */
+export type SliderThumbCollisionBehavior = 'none' | 'push' | 'swap';
 
 export type SliderProps = Omit<
 	InputProps<'slider'>,
@@ -39,6 +49,11 @@ export type SliderProps = Omit<
 	max?: number;
 	/** Value increment used by pointer and keyboard changes. */
 	step?: number;
+	/**
+	 * Amount PageUp, PageDown and Shift+Arrow change the value by; the result still snaps to
+	 * `step`. Defaults to ten times `step`.
+	 */
+	largeStep?: number;
 	/** Rendering mode; range defaults to two thumbs and range Form semantics. */
 	mode?: SliderMode;
 	/** Visual track style; contained places the label and optional value inside an input-like rail. */
@@ -49,6 +64,14 @@ export type SliderProps = Omit<
 	orientation?: 'horizontal' | 'vertical';
 	/** Minimum distance between neighboring thumbs, expressed in step units. */
 	minStepsBetweenThumbs?: number;
+	/** What a thumb does when it meets a neighbour. @default 'none' */
+	thumbCollisionBehavior?: SliderThumbCollisionBehavior;
+	/**
+	 * Disables individual thumbs by index. A disabled thumb keeps its value (and its place in the
+	 * submitted value) but cannot be focused or moved, and it blocks the thumbs next to it. Range
+	 * dragging is off while any thumb is disabled.
+	 */
+	thumbDisabled?: boolean[];
 	/** Allows dragging the filled range segment when multiple thumbs are rendered. */
 	dragRange?: boolean;
 	/** Semantic color used for the filled track and thumb. */
@@ -69,6 +92,13 @@ export type SliderProps = Omit<
 	i18n?: Partial<Messages>;
 	/** Called whenever the field value changes, with the same scalar or array shape as `value`. */
 	onValueChange?: (value: number | number[] | null) => void;
+	/**
+	 * Called when an interaction ends with a value that differs from the one it started with: on
+	 * pointer release, on pointer cancel, after each accepted key press, and when assistive
+	 * technology finishes an adjustment. It never fires for a no-op. The value has the same scalar
+	 * or array shape as `value`. Use it to save on release instead of on every move.
+	 */
+	onValueCommit?: (value: number | number[]) => void;
 	/** Validates the current value, returning error messages (or false) when invalid. */
 	onValidate?: (value: number | number[]) => string[] | boolean;
 	/** Theme overrides for slider parts and inherited Field parts. */

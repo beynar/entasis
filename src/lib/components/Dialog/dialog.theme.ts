@@ -8,10 +8,17 @@ export const defaultDialog = cva({
 		scroll: {
 			inner: 'overflow-hidden',
 			outer: 'overflow-y-auto'
+		},
+		// A non-modal dialog leaves the page behind usable: the full-viewport root lets pointer
+		// events through, and only the panel takes them (see `content`).
+		modal: {
+			true: '',
+			false: 'pointer-events-none'
 		}
 	},
 	defaultVariants: {
-		scroll: 'inner'
+		scroll: 'inner',
+		modal: true
 	}
 });
 
@@ -34,10 +41,18 @@ export const defaultDialogAlign = cva({
 		scroll: {
 			inner: 'h-full',
 			outer: 'min-h-full'
+		},
+		// A bottom sheet with a focused text field makes room for the on-screen keyboard: the
+		// bottom padding grows by `--keyboard-inset` (published on `<html>` by the Theme), which
+		// is 0 where there is no overlapping keyboard.
+		keyboard: {
+			true: 'pb-[calc(var(--drawer-inset)+var(--keyboard-inset,0px))]',
+			false: ''
 		}
 	},
 	defaultVariants: {
-		scroll: 'inner'
+		scroll: 'inner',
+		keyboard: false
 	}
 });
 
@@ -70,10 +85,16 @@ export const defaultDialogContent = cva({
 		scroll: {
 			inner: 'max-h-full overflow-auto overscroll-none',
 			outer: ''
+		},
+		// The panel takes pointer events again inside a non-modal root that lets them through.
+		modal: {
+			true: '',
+			false: 'pointer-events-auto'
 		}
 	},
 	defaultVariants: {
-		scroll: 'inner'
+		scroll: 'inner',
+		modal: true
 	}
 });
 
@@ -82,15 +103,21 @@ export const defaultDialogContent = cva({
 export const defaultDialogThumb = cva({
 	// Absolute so the bar overlays the panel edge instead of taking flow space (the header
 	// sits flush at the top). The ::before oversizes the hitbox around the 6px bar (~38px
-	// touch target); pointer events on it target the thumb, so drags there count as handle drags.
-	base: "absolute z-10 touch-none rounded-full bg-neutral-muted before:absolute before:-inset-4 before:content-['']",
+	// touch target) except past the panel edge, where it would overflow the panel and add a
+	// scrollable sliver (in RTL, 10px of horizontal scroll); pointer events on it target the thumb,
+	// so drags there count as handle drags.
+	base: "absolute z-10 touch-none rounded-full bg-neutral-muted before:absolute before:content-['']",
 	variants: {
 		type: {
 			fullScreen: 'hidden',
-			drawerRight: 'left-1.5 top-1/2 -translate-y-1/2 h-12 w-1.5',
-			drawerLeft: 'right-1.5 top-1/2 -translate-y-1/2 h-12 w-1.5',
-			drawerBottom: 'left-1/2 -translate-x-1/2 top-1.5 h-1.5 w-12',
-			drawerTop: 'left-1/2 -translate-x-1/2 bottom-1.5 h-1.5 w-12',
+			drawerRight:
+				'left-1.5 top-1/2 -translate-y-1/2 h-12 w-1.5 before:-inset-y-4 before:-left-1.5 before:-right-4',
+			drawerLeft:
+				'right-1.5 top-1/2 -translate-y-1/2 h-12 w-1.5 before:-inset-y-4 before:-right-1.5 before:-left-4',
+			drawerBottom:
+				'left-1/2 -translate-x-1/2 top-1.5 h-1.5 w-12 before:-inset-x-4 before:-top-1.5 before:-bottom-4',
+			drawerTop:
+				'left-1/2 -translate-x-1/2 bottom-1.5 h-1.5 w-12 before:-inset-x-4 before:-bottom-1.5 before:-top-4',
 			modal: 'hidden',
 			alert: 'hidden'
 		}

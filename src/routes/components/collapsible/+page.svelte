@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Collapsible from '$lib/components/Collapsible/Collapsible.svelte';
 	import Button from '$lib/components/Button/Button.svelte';
+	import Switch from '$lib/components/Form/Switch/Switch.svelte';
 	import { sizes } from '$lib/utils/tokens.js';
 	import { caretUpDownIcon } from '$lib/components/Icons/caretUpDown.js';
 	import ComponentCard from '../../ComponentCard.svelte';
@@ -28,6 +29,9 @@
 
 	let controlledOpen = $state(false);
 	let peekOpen = $state(false);
+	let findReason = $state('Not opened yet.');
+	let finishedLog = $state('Nothing finished yet.');
+	let refuseChanges = $state(false);
 </script>
 
 {#snippet repo(name: string)}
@@ -46,7 +50,10 @@
 		'default & peek variants',
 		'bind:open — controlled or uncontrolled',
 		'chevron / plus-minus / none or a custom icon',
-		'Slide transition, three sizes',
+		'Height animation, three sizes',
+		'hiddenUntilFound: find-in-page opens it; keepMounted keeps state',
+		'onOpenChange details with a reason and cancel()',
+		'onAfterOpen / onAfterClose that always fire once',
 		{ label: 'aria-expanded / aria-controls, onOpenChange', test: 'a11y:collapsible.aria-expanded' }
 	]}
 >
@@ -89,7 +96,7 @@
 	{#snippet examples()}
 		<ComponentCard
 			title="Peek"
-			description="The content stays mounted, clipped to peekHeight with a faded edge, and a pill trigger floats over the fade to expand it. Great for long text."
+			description="The content stays mounted, clipped to peekHeight with a faded edge, and a pill trigger floats over the fade to expand it. Great for long text. The clip is visual only: screen readers still read the whole content, while links and controls hidden below the preview are inert."
 			code={`<Collapsible variant="peek" peekHeight={96}>
 	{#snippet trigger()}
 		<span>{open ? 'Show less' : 'Read more'}</span>
@@ -120,6 +127,67 @@
 						</p>
 					</div>
 				</Collapsible>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Find in page"
+			description="hiddenUntilFound keeps the closed content in the page under hidden=until-found: search for 'thirty days' with Ctrl+F (Cmd+F) and the collapsible opens. Until then the content is out of the reading and tab order. keepMounted keeps the content mounted (and its state) without making it findable."
+			class="!min-h-fit !justify-center"
+			code={`<Collapsible hiddenUntilFound onOpenChange={(open, details) => (reason = details.reason)}>
+	{#snippet trigger()}
+		<span>Refund policy</span>
+	{/snippet}
+	<p>Refunds are accepted for thirty days after delivery.</p>
+</Collapsible>`}
+		>
+			<div class="flex w-[360px] flex-col gap-3">
+				<div class="border-neutral-muted bg-surface rounded-xl border px-2 shadow-sm">
+					<Collapsible
+						hiddenUntilFound
+						onOpenChange={(_open, details) => (findReason = `reason: ${details.reason}`)}
+					>
+						{#snippet trigger()}
+							<span class="text-neutral">Refund policy</span>
+						{/snippet}
+						<p class="text-neutral/70 text-sm">
+							Refunds are accepted for thirty days after delivery.
+						</p>
+					</Collapsible>
+				</div>
+				<p class="text-neutral/70 text-sm" data-testid="collapsible-find-reason">{findReason}</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Cancel and lifecycle"
+			description="onOpenChange runs before the change and details.cancel() keeps the collapsible as it was. onAfterOpen and onAfterClose fire once when the change finishes, also without animation."
+			class="!min-h-fit !justify-center"
+			code={`<Collapsible
+	onOpenChange={(open, details) => {
+		if (refuse) details.cancel();
+	}}
+	onAfterOpen={() => (log = 'finished opening')}
+	onAfterClose={() => (log = 'finished closing')}
+>…</Collapsible>`}
+		>
+			<div class="flex w-[360px] flex-col gap-3">
+				<Switch bind:value={refuseChanges} label="Refuse every change (details.cancel())" />
+				<div class="border-neutral-muted bg-surface rounded-xl border px-2 shadow-sm">
+					<Collapsible
+						onOpenChange={(_open, details) => {
+							if (refuseChanges) details.cancel();
+						}}
+						onAfterOpen={() => (finishedLog = 'finished opening')}
+						onAfterClose={() => (finishedLog = 'finished closing')}
+					>
+						{#snippet trigger()}
+							<span class="text-neutral">Release notes</span>
+						{/snippet}
+						<p class="text-neutral/70 text-sm">Version 0.12 adds find-in-page to disclosures.</p>
+					</Collapsible>
+				</div>
+				<p class="text-neutral/70 text-sm" data-testid="collapsible-finished">{finishedLog}</p>
 			</div>
 		</ComponentCard>
 

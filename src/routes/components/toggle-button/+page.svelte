@@ -30,7 +30,13 @@
 			value: 'neutral',
 			options: colors
 		},
-		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{
+			name: 'focusableWhenDisabled',
+			type: 'switch',
+			label: 'Focusable when disabled',
+			value: false
+		}
 	]);
 </script>
 
@@ -40,6 +46,7 @@
 	component="ToggleButton"
 	features={[
 		'Bindable value state',
+		'Disabled toggles can stay focusable (focusableWhenDisabled)',
 		'Ghost and outline variants (Button subset)',
 		'Resting outline matches Button',
 		'Auto square layout for icon-only',
@@ -49,7 +56,7 @@
 >
 	<ComponentCard
 		{controls}
-		code={`<ToggleButton type="button" size="${controls.value.size}" variant="${controls.value.variant}" color="${controls.value.color}" disabled={${controls.value.disabled}}>Toggle me</ToggleButton>`}
+		code={`<ToggleButton type="button" size="${controls.value.size}" variant="${controls.value.variant}" color="${controls.value.color}" disabled={${controls.value.disabled}} focusableWhenDisabled={${controls.value.focusableWhenDisabled}}>Toggle me</ToggleButton>`}
 	>
 		<ToggleButton
 			type="button"
@@ -57,6 +64,7 @@
 			variant={controls.value.variant}
 			color={controls.value.color}
 			disabled={controls.value.disabled}
+			focusableWhenDisabled={controls.value.focusableWhenDisabled}
 		>
 			Toggle me
 		</ToggleButton>
@@ -129,6 +137,16 @@
 			<div class="flex flex-wrap items-center justify-center gap-3">
 				<ToggleButton disabled>Off</ToggleButton>
 				<ToggleButton disabled value>On</ToggleButton>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			description="focusableWhenDisabled keeps a disabled toggle in the tab order. It renders aria-disabled instead of the native attribute and refuses clicks, Enter and Space."
+			code="<ToggleButton disabled focusableWhenDisabled>Bold</ToggleButton>"
+		>
+			<div class="flex flex-wrap items-center justify-center gap-3">
+				<ToggleButton disabled focusableWhenDisabled>Off</ToggleButton>
+				<ToggleButton disabled focusableWhenDisabled value>On</ToggleButton>
 			</div>
 		</ComponentCard>
 	{/snippet}

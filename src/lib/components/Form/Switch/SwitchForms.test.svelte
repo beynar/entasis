@@ -2,11 +2,16 @@
 	import Theme from '../../Theme/Theme.svelte';
 	import Form from '../Form/Form.svelte';
 	import Switch from './Switch.svelte';
+	import type { SwitchProps } from './switch.props.js';
 
 	let {
 		inputValue,
 		nativeRequired = false,
 		nativeDisabled = false,
+		nativeReadOnly = false,
+		nativeDefaultValue = null,
+		inputAttrs,
+		onSwitchChange,
 		secondRequired = false,
 		withUnnamed = false,
 		formDefaultValue = false,
@@ -16,6 +21,10 @@
 		inputValue?: string;
 		nativeRequired?: boolean;
 		nativeDisabled?: boolean;
+		nativeReadOnly?: boolean;
+		nativeDefaultValue?: boolean | null;
+		inputAttrs?: SwitchProps['inputAttrs'];
+		onSwitchChange?: (value: boolean | null) => void;
 		secondRequired?: boolean;
 		/** Adds a switch without a name to the native form. */
 		withUnnamed?: boolean;
@@ -39,6 +48,10 @@
 			{inputValue}
 			required={nativeRequired}
 			disabled={nativeDisabled}
+			readOnly={nativeReadOnly}
+			defaultValue={nativeDefaultValue}
+			{inputAttrs}
+			onValueChange={onSwitchChange}
 		/>
 		{#if secondRequired}
 			<Switch name="updates" label="Updates" required />

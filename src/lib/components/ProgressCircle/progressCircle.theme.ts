@@ -8,7 +8,7 @@ import {
 // `--progress-circle-size` is INTERNAL: the root publishes the resolved diameter for the svg
 // and label parts. It follows the `size` prop, which is the public way to change it.
 const defaultProgressCircleRoot = cva({
-	base: 'inline-flex shrink-0 items-center justify-center align-middle [--progress-circle-size:1.75rem]',
+	base: 'relative inline-flex shrink-0 items-center justify-center align-middle [--progress-circle-size:1.75rem]',
 	variants: {
 		size: {
 			small: '[--progress-circle-size:1.25rem]',
@@ -32,7 +32,12 @@ const defaultProgressCircleRoot = cva({
 });
 
 const defaultProgressCircleSvg = cva({
-	base: 'size-[var(--progress-circle-size)] shrink-0 overflow-visible'
+	base: 'size-[var(--progress-circle-size)] shrink-0 overflow-visible',
+	variants: {
+		indeterminate: {
+			true: 'animate-spin motion-reduce:animate-none [html[data-entasis-reduce-motion]_&]:animate-none'
+		}
+	}
 });
 
 const defaultProgressCircleTrack = cva({

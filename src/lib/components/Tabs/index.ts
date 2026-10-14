@@ -7,6 +7,7 @@ export type {
 	TabsValueChangePayload,
 	TabsValueChangeReason
 } from './tabs.props.js';
+export type { TabsActivationDirection } from './tabs.direction.svelte.js';
 export {
 	tabsTheme,
 	setTabsTheme,

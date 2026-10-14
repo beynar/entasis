@@ -4,6 +4,19 @@ import type { WithAttachments } from '$lib/types/props.js';
 import type { TabbarThemeProps } from './tabbar.theme.js';
 import type { HTMLAttributes } from 'svelte/elements';
 
+/**
+ * Why a Tabbar reported a change: `user` for a click, arrow key, Enter, Space or menu entry,
+ * `initial`, `disabled` or `missing` when the Tabbar selected an enabled tab by itself.
+ */
+export type TabbarValueChangeReason = 'user' | 'initial' | 'disabled' | 'missing';
+
+/** Payload of Tabbar's `onValueChange`. */
+export type TabbarValueChangePayload = {
+	/** The new active tab's value. */
+	value: string;
+	reason: TabbarValueChangeReason;
+};
+
 export type TabAlignment = 'start' | 'center' | 'end';
 export type TabOrientation = 'horizontal' | 'vertical';
 export type TabbarPosition = 'top' | 'bottom' | 'left' | 'right';
@@ -102,9 +115,19 @@ export type TabbarProps = WithAttachments<
 		 * Called once per change of the active tab with its value: a click, an arrow key, a menu
 		 * entry, or the Tabbar moving the selection to an enabled tab by itself because
 		 * `defaultValue` named no enabled tab or the selected tab was removed or disabled. Not
-		 * called when the current tab is re-selected or when `value` is changed externally.
+		 * called when the current tab is re-selected or when `value` is changed externally. The
+		 * payload is `{ value, reason }`: `reason` is `user`, or `initial`, `disabled` or `missing`
+		 * for a selection the Tabbar made by itself.
 		 */
-		onValueChange?: (value: string) => void;
+		onValueChange?: (payload: TabbarValueChangePayload) => void;
+		/**
+		 * Whether moving focus with the arrow keys, Home or End also selects the tab. Set `false`
+		 * for manual activation: the keys only move focus, and Enter or Space (or a click) selects
+		 * the focused tab. Use it when selecting a tab is costly, for example when each panel
+		 * mounts lazily, so arrowing across the list does not build every panel on the way.
+		 * @default true
+		 */
+		activateOnFocus?: boolean;
 		/** DOM id prefix for tab elements (`{id}-tab-{index}`); `aria-controls` targets `{id}-panel-{index}`. */
 		id?: string;
 		/**

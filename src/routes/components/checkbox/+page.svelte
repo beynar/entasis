@@ -33,10 +33,15 @@
 	component="Checkbox"
 	features={[
 		'Single boolean field',
-		'Hidden native checkbox for forms',
+		'Hidden native checkbox beside the button, with inputValue and required',
 		'Bindable boolean value',
 		'Normal and card display modes',
-		'Required and custom validation'
+		'Required and custom validation',
+		{
+			label: 'Enter continues the form instead of toggling',
+			test: 'a11y:checkbox.enter-continues-form'
+		},
+		{ label: 'Read-only stays focusable and announced', test: 'a11y:checkbox.read-only' }
 	]}
 >
 	<ComponentCard
@@ -98,6 +103,27 @@
 				/>
 				<p class="text-neutral/70 mt-4 text-sm">Value: {terms}</p>
 			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Read-only"
+			description="Focusable and announced as read-only, but unchangeable. The value still submits."
+			code={`<Checkbox label="Email" readOnly value={true} />`}
+		>
+			<div class="w-full max-w-md">
+				<Checkbox label="Email" description="Set by your administrator" readOnly value={true} />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Accessible name"
+			description="inputAttrs reaches the checkbox button: an aria-label names the checkbox instead of its label. The description is exposed as a description, not as part of the name."
+			code={`<Checkbox
+	mode="control"
+	inputAttrs={{ 'aria-label': 'Select row 3' }}
+/>`}
+		>
+			<Checkbox mode="control" inputAttrs={{ 'aria-label': 'Select row 3' }} />
 		</ComponentCard>
 
 		<ComponentCard description="Using type: 'checkbox' inside a Form.">

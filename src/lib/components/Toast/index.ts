@@ -8,3 +8,4 @@ export {
 	type ToastThemeProps
 } from './toast.theme.js';
 export type { ToastProps, ToasterProps } from './toast.props.js';
+export type { ToastPromiseOptions, ToastUpdate, ToastUpdater } from './toast.state.svelte.js';

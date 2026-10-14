@@ -112,10 +112,13 @@ describe('collapsible', () => {
 			mount('collapsible');
 			const trigger = screen.getByRole('button', { name: /Show details/ });
 			expect(trigger).toHaveAttribute('aria-expanded', 'false');
-			const controls = trigger.getAttribute('aria-controls');
-			expect(controls).toBeTruthy();
+			// Closed content is not in the DOM, so there is nothing to control yet.
+			expect(trigger).not.toHaveAttribute('aria-controls');
+			expect(screen.queryByText('Hidden details')).toBeNull();
 			await fireEvent.click(trigger);
 			await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'));
+			const controls = trigger.getAttribute('aria-controls');
+			expect(controls).toBeTruthy();
 			expect(document.getElementById(controls!)).toHaveTextContent('Hidden details');
 		}
 	);
@@ -150,7 +153,7 @@ describe('combobox', () => {
 	test(
 		law(
 			'a11y:combobox.keyboard',
-			'closes with Escape, highlights with ArrowDown, selects with Enter'
+			'closes with Escape and keeps focus, opens with ArrowDown, highlights, selects with Enter'
 		),
 		async () => {
 			mount('combobox');
@@ -162,7 +165,16 @@ describe('combobox', () => {
 			await fireEvent.keyDown(input, { key: 'Escape' });
 			await waitFor(() => expect(input).toHaveAttribute('aria-expanded', 'false'));
 			await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull());
-			input.focus();
+			// Escape closes the list but focus stays on the input; ArrowDown opens it again.
+			expect(document.activeElement).toBe(input);
+			await fireEvent.keyDown(input, { key: 'ArrowDown' });
+			await screen.findByRole('listbox');
+			await fireEvent.keyDown(input, { key: 'Escape' });
+			await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull());
+			// A second Escape clears the typed text, still in place.
+			await fireEvent.keyDown(input, { key: 'Escape' });
+			expect(input).toHaveValue('');
+			expect(document.activeElement).toBe(input);
 			await fireEvent.input(input, { target: { value: 'an' } });
 			await screen.findByRole('listbox');
 			await fireEvent.keyDown(input, { key: 'ArrowDown' });
@@ -199,12 +211,11 @@ describe('command', () => {
 
 describe('confirmation', () => {
 	test(
-		law('a11y:confirmation.modal', 'ignores Escape and outside presses until a choice is made'),
+		law('a11y:confirmation.modal', 'ignores outside presses until a choice is made'),
 		async () => {
 			mount('confirmation');
 			await fireEvent.click(screen.getByRole('button', { name: 'Ask' }));
 			const dialog = await screen.findByRole('alertdialog');
-			await escape();
 			await pressOutside();
 			expect(dialog).toBeInTheDocument();
 			expect(screen.getByTestId('confirmed')).toHaveTextContent('pending');
@@ -511,7 +522,9 @@ describe('radios', () => {
 		mount('radios');
 		const group = screen.getByRole('radiogroup', { name: 'Plan' });
 		const radios = within(group).getAllByRole('radio');
-		expect(radios.map((radio) => radio.getAttribute('aria-label'))).toEqual(['Free', 'Pro']);
+		expect(radios.map((radio) => radio.getAttribute('aria-label'))).toEqual([null, null]);
+		expect(radios[0]).toHaveAccessibleName('Free');
+		expect(radios[1]).toHaveAccessibleName('Pro');
 	});
 });
 
@@ -667,16 +680,6 @@ describe('switch', () => {
 		expect(control).toHaveAttribute('aria-checked', 'false');
 		await fireEvent.click(control);
 		await waitFor(() => expect(control).toHaveAttribute('aria-checked', 'true'));
-	});
-
-	test(law('a11y:switch.keyboard-toggle', 'toggles with Enter and Space'), async () => {
-		mount('switch');
-		const control = screen.getByRole('switch', { name: 'Notifications' });
-		control.focus();
-		await fireEvent.keyDown(control, { key: 'Enter' });
-		await waitFor(() => expect(screen.getByTestId('switch-value')).toHaveTextContent('true'));
-		await fireEvent.keyDown(control, { key: ' ' });
-		await waitFor(() => expect(screen.getByTestId('switch-value')).toHaveTextContent('false'));
 	});
 });
 

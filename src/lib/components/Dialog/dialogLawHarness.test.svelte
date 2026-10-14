@@ -7,15 +7,25 @@
 		defaultOpen = false,
 		type,
 		responsive = false,
+		modal,
+		closable,
+		closeButton,
+		emptyClose = false,
 		closeOnClickOutside,
 		onOpenChange,
 		onAfterOpen,
 		onAfterClose
-	}: Pick<
+	}: {
+		/** Passes a close button snippet that renders nothing, as the Popover mobile sheet does. */
+		emptyClose?: boolean;
+	} & Pick<
 		DialogProps,
 		| 'defaultOpen'
 		| 'type'
 		| 'responsive'
+		| 'modal'
+		| 'closable'
+		| 'closeButton'
 		| 'closeOnClickOutside'
 		| 'onOpenChange'
 		| 'onAfterOpen'
@@ -23,11 +33,17 @@
 	> = $props();
 </script>
 
+{#snippet emptyCloseButton()}{/snippet}
+
 <Theme>
+	<button type="button" data-testid="page-button">Page control</button>
 	<Dialog
 		{defaultOpen}
 		{type}
 		{responsive}
+		{modal}
+		{closable}
+		closeButton={emptyClose ? emptyCloseButton : closeButton}
 		{closeOnClickOutside}
 		{onOpenChange}
 		{onAfterOpen}
@@ -41,6 +57,8 @@
 
 		{#snippet children(dialog)}
 			<button type="button" onclick={dialog.close}>Close law dialog</button>
+			<input aria-label="Draft" />
+			<input aria-label="Second draft" />
 		{/snippet}
 	</Dialog>
 </Theme>

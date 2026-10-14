@@ -66,10 +66,12 @@
 	component="Command"
 	features={[
 		{ label: 'Listbox + combobox ARIA wiring', test: 'a11y:command.aria' },
+		{ label: 'aria-expanded follows the results', test: 'a11y:command.expanded' },
+		{ label: 'Result counts announced politely', test: 'a11y:command.live-region' },
 		'Arrow, Home, End, Enter navigation',
-		'Optional dialog mode with ⌘K shortcut',
+		'Optional dialog mode with ⌘K shortcut and onOpenChange(open, details)',
 		'bind:open, bind:value, and bind:search',
-		'Keyword-aware, case- and accent-insensitive filtering'
+		'Keyword-aware, case- and accent-insensitive filtering, with an optional limit'
 	]}
 >
 	<ComponentCard
@@ -153,6 +155,17 @@
 			<p class="text-neutral text-center text-sm">
 				Last selected: <span class="font-medium">{lastSelected}</span>
 			</p>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Limit and highlight"
+			description="limit shows at most four items; autoHighlight={false} leaves nothing highlighted until an arrow key moves it, and loop='input' returns to the input past the last item."
+			class="max-w-md"
+			code={`<Command items={groups} limit={4} autoHighlight={false} loop="input" />`}
+		>
+			<div class="border-neutral-muted w-full rounded-xl border">
+				<Command items={groups} limit={4} autoHighlight={false} loop="input" />
+			</div>
 		</ComponentCard>
 	{/snippet}
 </DocPage>

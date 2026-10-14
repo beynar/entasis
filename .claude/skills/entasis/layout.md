@@ -6,6 +6,7 @@
 - [Tabbar](#tabbar)
 - [Stepper](#stepper)
 - [Breadcrumbs](#breadcrumbs)
+- [NavigationMenu](#navigationmenu)
 - [Accordion](#accordion)
 - [Collapsible](#collapsible)
 - [Separator](#separator)
@@ -180,6 +181,55 @@ single unconditional `gap-sm` at every width; there is no responsive gap to over
 
 ---
 
+## NavigationMenu
+
+`import { NavigationMenu } from 'entasis/navigation-menu'`
+
+Site navigation with mega-menu panels: a `<nav>` landmark with a row of links and disclosure buttons, and one panel area rendered inline inside the nav (never portaled) that shows the open button's panel. Use it for a site header. MenuBar is the application-menu pattern and the wrong choice for site navigation.
+
+**Props:**
+
+- `items`: `NavigationMenuItem[]` (required) -- `{ type: 'link', label, href, description?, prefix?, iconOnly?, active?, disabled?, target?, rel?, onclick? }` or `{ type: 'panel', value, label, prefix?, iconOnly?, disabled?, content?, items? }`; `content` is a list of links or a snippet receiving `{ close }`; `items` adds a nested inline level (links and panels that expand in place)
+- `label`: string -- accessible name of the nav
+- `value` (bindable) / `defaultValue`: `Value | null` -- the open panel's `value`; `onValueChange: (value, details) => void` runs before the change, `details.reason` is `trigger-press`, `trigger-hover`, `list-navigation`, `escape-key`, `outside-press`, `focus-out`, `item-press`, `close-press` or `trigger-unmount`, and `details.cancel()` keeps the current panel. `Value` is generic.
+- `openOnHover`: boolean (default: true), `delay`: number (default: 50), `closeDelay`: number (default: 100)
+- `keepMounted`: boolean -- every panel stays in the DOM under `hidden` (crawlers and server-rendered HTML see the links)
+- `onAfterOpen` / `onAfterClose`: () => void
+- `size`: `'small' | 'normal' | 'large'`, `density`: `'compact' | 'normal' | 'comfortable'`, `color`: `Colors`, `dir`: `'ltr' | 'rtl'`, `transition`, `class`, `theme`
+
+Triggers are `<button aria-expanded aria-controls>` (no `aria-haspopup`). Opening by keyboard keeps focus on the trigger; Tab enters the panel and continues after the trigger. Left/Right (mirrored in RTL), Home and End move along the bar. Hovering switches panels at once and the panel animates its size. Escape closes and returns focus to the trigger. A link press closes every level and reports one `onValueChange(null)`; a consumer `onclick` runs first and `preventDefault()` keeps the menu open.
+
+```svelte
+<script lang="ts">
+	import { NavigationMenu, type NavigationMenuItem } from 'entasis/navigation-menu';
+
+	const items: NavigationMenuItem[] = [
+		{
+			type: 'panel',
+			value: 'product',
+			label: 'Product',
+			content: [
+				{
+					label: 'Components',
+					href: '/components',
+					description: 'The essential interface pieces.'
+				},
+				{ label: 'Blocks', href: '/blocks' }
+			]
+		},
+		{ type: 'link', label: 'Pricing', href: '/pricing', active: true }
+	];
+</script>
+
+<NavigationMenu {items} label="Main" />
+```
+
+**Theme parts:** `root`, `list`, `item`, `trigger` (variant: open), `link` (variant: active), `caret`, `viewport`, `popup`, `panel`, `contentList`, `contentLink`, `contentPrefix`, `contentText`, `contentTitle`, `contentDescription`, `nestedTrigger`, `motion`
+
+**Styling hooks:** `data-open`/`data-closed`, `data-entering`/`data-exiting` (popup), `data-popup-open` (trigger), `data-disabled`, `data-selected` (current-page link), `data-side`, `data-align`, `data-activation-direction` (panel that replaced another); CSS variables `--anchor-width` and `--anchor-height` on the viewport.
+
+---
+
 ## Accordion
 
 `import { Accordion } from 'entasis/accordion'`
@@ -196,8 +246,15 @@ Collapsible content sections with single/multiple expand modes.
 - `oneAtATime`: boolean (default: true)
 - `value`: `string[]` (bindable) -- expanded item ids, `defaultValue`, `onValueChange: (value: string[]) => void`
 - `icon`: `DisclosureIndicator | Slot` -- `'chevron' | 'plus-minus' | 'none'` (default: `'chevron'`)
-- `onItemOpenChange`: `({ item, index, open }) => void` -- one item's open state; `onValueChange` reports the whole set
-- `transitions`: SlideTransitionProps
+- `disabled`: boolean -- disables every item; `disabledKey`: key whose boolean disables one item (default `'disabled'`). A disabled trigger is natively disabled (skipped by Tab)
+- `headingLevel`: `1 | 2 | 3 | 4 | 5 | 6` (default: 3) -- each trigger button sits inside a heading of this level; each panel is a `region` labelled by its trigger
+- `hiddenUntilFound`: boolean -- collapsed panels stay in the DOM under `hidden="until-found"`, so find-in-page and `#id` links open the item (reason `find-in-page`, no animation). Disabled items are not findable
+- `keepMounted`: boolean -- collapsed panels stay mounted under `hidden`, keeping their state; not findable
+- `onItemOpenChange`: `({ item, index, open, details }) => void` -- runs before one item changes; `details.reason` (`'trigger-press'`, `'find-in-page'`), `details.event`, `details.cancel()` keeps the item as it was. `onValueChange` reports the whole set after the change
+- `onItemAfterOpen` / `onItemAfterClose`: `({ item, index }) => void` -- once per finished open or close, also when no animation runs
+- `transition`: motion override for the panel slide
+
+Keyboard: Tab moves between triggers; Enter and Space toggle. There is no arrow-key navigation, and collapsed content is never copied into screen-reader-only text.
 
 **Snippets:** `title`, `description`, `content`, `icon` (receives `{ isOpen }`)
 
@@ -231,13 +288,16 @@ Single toggle show/hide with slide transition.
 - `defaultOpen`: boolean (default: false, uncontrolled)
 - `size`: `'small' | 'normal' | 'large'` (default: `'normal'`)
 - `disabled`: boolean
-- `onOpenChange`: `(open: boolean) => void`
+- `onOpenChange`: `(open: boolean, details) => void` -- runs before the state changes; `details.reason` (`'trigger-press'`, `'find-in-page'`), `details.event`, `details.cancel()` keeps it as it was
+- `onAfterOpen` / `onAfterClose`: `() => void` -- once per finished open or close, also when no animation runs
+- `hiddenUntilFound`: boolean -- closed content stays in the DOM under `hidden="until-found"`, so find-in-page and `#id` links open it (reason `find-in-page`). A disabled collapsible is not findable
+- `keepMounted`: boolean -- closed content stays mounted under `hidden`, keeping its state; not findable
 - `icon`: `DisclosureIndicator | Slot` -- `'chevron' | 'plus-minus' | 'none'` (default: `'chevron'`)
-- `variant`: `'default' | 'peek'`, `peekHeight`: number | string -- peek keeps a preview of the content visible when closed
+- `variant`: `'default' | 'peek'`, `peekHeight`: number | string -- peek keeps a preview of the content visible when closed; controls below the preview are inert while closed
 
-**Snippets:** `trigger` (receives `{ open }`), `children` (the content, receives `{ open }`), `srOnlyContent`
+**Snippets:** `trigger` (receives `{ open }`), `children` (the content, receives `{ open }`)
 
-Uses Svelte slide transition (200ms). Content removed from DOM when closed.
+Slides open and closed (height animation, none under reduced motion). Closed content is removed from the DOM unless `hiddenUntilFound` or `keepMounted` is set; it is never copied into screen-reader-only text.
 
 ```svelte
 <script>
@@ -289,19 +349,26 @@ Visual divider with optional label.
 
 `import { Menu } from 'entasis/menu'`
 
-Renders an array of items: buttons, options, separators, and submenus.
+Renders an array of items: buttons, options, separators, submenus, checkbox items, radio groups and labelled groups.
 
 **Props:**
 
 - `items`: `MenuItem[]` (required) -- discriminated union by `type`
-- `header` / `footer`: Snippet
+- `header` / `footer`: Snippet, rendered outside the `role="menu"` element (a link or field in them is not a menu item)
+- `filter`: `boolean | { placeholder?, label?, match? }` adds a search field above the rows; `search` (bindable) / `defaultSearch` / `onSearchChange(search)`, `onHighlightChange(value)`, `empty`: Snippet
+- `focusOnMount`: `boolean | 'container' | 'last'`; a PopupMenu decides from how it opened when this is left out
 
 **Item types:**
 
-- `{ type: 'option', title, description?, prefix?, suffix?, onclick?, href?, color?, size? }`
-- `{ type: 'button', children, variant?, color?, onclick? }`
+- `{ type: 'option', title, description?, prefix?, suffix?, onclick?, href?, color?, size?, closeOnClick? }`
+- `{ type: 'button', children, variant?, color?, onclick?, closeOnClick? }`
 - `{ type: 'separator', color?, thickness?, children? }`
-- `{ type: 'submenu', title, menu: MenuItem[], openOnHover?, openOnClick?, delay?, closeOnMouseLeave? }`
+- `{ type: 'submenu', title, menu: MenuItem[], openOnHover?, openOnClick?, delay?, closeOnMouseLeave?, filter?, onHighlightChange? }`
+- `{ type: 'checkbox', title, value?, defaultValue?, onValueChange?(value), closeOnClick? }` -- a `menuitemcheckbox` that keeps the menu open unless `closeOnClick: true`
+- `{ type: 'radio-group', label?, items: [{ value, title, ... }], value?, defaultValue?, onValueChange?(value), closeOnClick?, disabled? }` -- a labelled `role="group"` of `menuitemradio` rows
+- `{ type: 'group', label?, items: MenuItem[] }` -- a labelled `role="group"`
+
+Every item takes a `key`: rows keep their DOM node (focus, tab stop) through insertions and removals; without one it comes from the row's plain text, `href` or `textValue`.
 
 ```svelte
 <script>
@@ -326,7 +393,7 @@ Renders an array of items: buttons, options, separators, and submenus.
 />
 ```
 
-**Theme parts:** `root` (variants: gap), `header`, `footer`. Item styling is forwarded to the child components (`MenuOption`, `Button`, `Separator`) via each item's own `theme`.
+**Theme parts:** `root` (variants: density), `list`, `group`, `groupLabel`, `search`, `searchIcon`, `searchInput`, `empty`, `header`, `footer`. Item styling is forwarded to the child components (`MenuOption`, `Button`, `Separator`) via each item's own `theme`.
 
 ---
 
@@ -345,6 +412,8 @@ Popover + Menu combo. Inherits all Popover props.
   this setting; an item with `data-menu-keep-open="true"` never closes the menu. A PopupMenu in
   another menu's header, footer or trigger keeps its own setting.
 - `position`, `offset`, `open` (bindable), `openOnClick`, `openOnHover`, `delay`, `closeOnClickOutside`, `closeOnEscape`, `closeOnMouseLeave`
+
+Focus follows how the menu opened: Enter, Space, a screen reader press or ArrowDown highlights the first row, ArrowUp the last, a mouse or touch press focuses the menu itself, and a hover open leaves focus where it was. ArrowDown and ArrowUp on the button open the menu. Tab closes the whole tree and continues after the trigger; Shift+Tab stays on the trigger (`onOpenChange` reason `'focus-out'`). In right-to-left text the panel carries the trigger's direction: submenus open to the left and ArrowLeft opens them.
 
 ```svelte
 <script lang="ts">
@@ -380,6 +449,7 @@ Individual menu item with title/description layout.
 - `color`: Colors (default: `'neutral'`)
 - `onclick`, `onpointerenter`, `onpointerleave`
 - `href`, `target`, `rel`
+- `closeOnClick`: boolean (default `true`) -- `false` keeps the menu open when the row is pressed
 - `as`: string -- override element type
 
 **Auto element detection:** href renders a, onclick renders button, else div.
@@ -397,7 +467,7 @@ Individual menu item with title/description layout.
 </MenuOption>
 ```
 
-**Theme parts:** `root` (variants: size, color), `title`, `description`, `prefix` (variants: size, align), `suffix`, `content`
+**Theme parts:** `root` (variants: size, color), `title`, `description`, `prefix` (variants: size, align), `suffix`, `content`, `indicator` (variants: checked)
 
 ---
 

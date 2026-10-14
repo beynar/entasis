@@ -737,9 +737,14 @@ export const componentInventory = [
 		sourceIndex: 'src/lib/components/ScrollArea/index.ts',
 		exportedSymbols: [
 			'ScrollArea',
+			'ScrollAreaCssVariable',
+			'ScrollAreaDataAttribute',
 			'ScrollAreaProps',
 			'ScrollAreaTheme',
 			'ScrollAreaThemeProps',
+			'ScrollAreaViewportAttributes',
+			'scrollAreaCssVariables',
+			'scrollAreaDataAttributes',
 			'scrollAreaTheme',
 			'setScrollAreaTheme',
 			'useScrollAreaTheme'
@@ -1064,6 +1069,7 @@ export const componentInventory = [
 			'ToggleButtonGroup',
 			'ToggleButtonGroupItem',
 			'ToggleButtonGroupItems',
+			'ToggleButtonGroupOrientation',
 			'ToggleButtonGroupProps',
 			'ToggleButtonGroupTheme',
 			'ToggleButtonGroupThemeProps',
@@ -1193,6 +1199,7 @@ export const componentInventory = [
 			'FieldTheme',
 			'FieldThemeProps',
 			'FieldValidationResult',
+			'FieldValidatorResult',
 			'FieldValue',
 			'FileInputType',
 			'InputProps',
@@ -1210,6 +1217,7 @@ export const componentInventory = [
 			'TagInputType',
 			'TextInputType',
 			'TimeInputType',
+			'ValidationMode',
 			'VoiceInputType',
 			'createFieldState',
 			'fieldSchemas',
@@ -1222,6 +1230,41 @@ export const componentInventory = [
 		docs: [],
 		capabilities: ['svelte', 'component', 'forms'],
 		relatedComponents: ['form'],
+		visibility: 'public'
+	},
+	{
+		id: 'autocomplete',
+		subpath: 'entasis/autocomplete',
+		sourceIndex: 'src/lib/components/Form/Autocomplete/index.ts',
+		exportedSymbols: [
+			'Autocomplete',
+			'AutocompleteFilter',
+			'AutocompleteHighlightChangePayload',
+			'AutocompleteInputAttributes',
+			'AutocompleteItem',
+			'AutocompleteItemGroup',
+			'AutocompleteItems',
+			'AutocompleteItemsRequest',
+			'AutocompleteItemsSource',
+			'AutocompleteMode',
+			'AutocompleteProps',
+			'AutocompleteSelectPayload',
+			'AutocompleteTheme',
+			'AutocompleteThemeProps',
+			'autocompleteTheme',
+			'setAutocompleteTheme',
+			'useAutocompleteTheme'
+		],
+		docs: [
+			{
+				id: 'autocomplete',
+				route: '/components/autocomplete',
+				category: 'Forms',
+				label: 'Autocomplete'
+			}
+		],
+		capabilities: ['svelte', 'component', 'forms'],
+		relatedComponents: ['combobox', 'text-input', 'tags-input'],
 		visibility: 'public'
 	},
 	{
@@ -1367,7 +1410,14 @@ export const componentInventory = [
 		sourceIndex: 'src/lib/components/Form/Combobox/index.ts',
 		exportedSymbols: [
 			'Combobox',
+			'ComboboxFilter',
+			'ComboboxHighlightChangePayload',
+			'ComboboxHighlightReason',
+			'ComboboxItems',
+			'ComboboxItemsRequest',
+			'ComboboxItemsSource',
 			'ComboboxOption',
+			'ComboboxOptionGroup',
 			'ComboboxProps',
 			'ComboboxTheme',
 			'ComboboxThemeProps',
@@ -1385,7 +1435,7 @@ export const componentInventory = [
 			}
 		],
 		capabilities: ['svelte', 'component', 'forms'],
-		relatedComponents: ['select', 'tags-input'],
+		relatedComponents: ['select', 'tags-input', 'autocomplete'],
 		visibility: 'public'
 	},
 	{
@@ -1490,6 +1540,7 @@ export const componentInventory = [
 			'FormAction',
 			'FormActionInput',
 			'FormCustomInput',
+			'FormErrors',
 			'FormFieldController',
 			'FormFieldEntry',
 			'FormFieldInput',
@@ -1513,11 +1564,13 @@ export const componentInventory = [
 			'FormSubmitHandler',
 			'FormTheme',
 			'FormThemeProps',
+			'FormValidateOptions',
 			'FormValueInput',
 			'FormVariant',
 			'InferFormValue',
 			'LiveFormValue',
 			'MaybePromise',
+			'ValidationMode',
 			'ask',
 			'formTheme',
 			'registerFormInputs',
@@ -1595,6 +1648,9 @@ export const componentInventory = [
 		sourceIndex: 'src/lib/components/Form/NumberInput/index.ts',
 		exportedSymbols: [
 			'NumberInput',
+			'NumberInputCommitDetail',
+			'NumberInputCommitReason',
+			'NumberInputInputAttributes',
 			'NumberInputProps',
 			'NumberInputTheme',
 			'NumberInputThemeProps',
@@ -1678,6 +1734,7 @@ export const componentInventory = [
 			'PinInputCell',
 			'PinInputPattern',
 			'PinInputProps',
+			'PinInputRejectDetail',
 			'PinInputTheme',
 			'PinInputThemeProps',
 			'pinInputTheme',
@@ -1803,6 +1860,7 @@ export const componentInventory = [
 			'SelectTheme',
 			'SelectThemeProps',
 			'SelectTriggerAttributes',
+			'SelectValue',
 			'selectTheme',
 			'setSelectTheme',
 			'useSelectTheme'
@@ -1836,6 +1894,7 @@ export const componentInventory = [
 			'SliderState',
 			'SliderTheme',
 			'SliderThemeProps',
+			'SliderThumbCollisionBehavior',
 			'SliderValue',
 			'SliderValuePayload',
 			'SliderVariant',
@@ -2047,8 +2106,10 @@ export const componentInventory = [
 			'AvatarGroupProps',
 			'AvatarGroupTheme',
 			'AvatarGroupThemeProps',
+			'AvatarImageAttributes',
 			'AvatarItem',
 			'AvatarProps',
+			'AvatarStatus',
 			'AvatarTheme',
 			'AvatarThemeProps',
 			'avatarGroupTheme',
@@ -2905,7 +2966,7 @@ export const componentInventory = [
 			}
 		],
 		capabilities: ['svelte', 'component', 'feedback'],
-		relatedComponents: ['progress-circle'],
+		relatedComponents: ['progress', 'progress-circle'],
 		visibility: 'public'
 	},
 	{
@@ -2938,6 +2999,33 @@ export const componentInventory = [
 		visibility: 'public'
 	},
 	{
+		id: 'progress',
+		subpath: 'entasis/progress',
+		sourceIndex: 'src/lib/components/Progress/index.ts',
+		exportedSymbols: [
+			'Progress',
+			'ProgressProps',
+			'ProgressSize',
+			'ProgressTheme',
+			'ProgressThemeProps',
+			'ProgressValueState',
+			'progressTheme',
+			'setProgressTheme',
+			'useProgressTheme'
+		],
+		docs: [
+			{
+				id: 'progress',
+				route: '/components/progress',
+				category: 'Feedback',
+				label: 'Progress'
+			}
+		],
+		capabilities: ['svelte', 'component', 'feedback'],
+		relatedComponents: ['progress-circle', 'meter', 'spinner'],
+		visibility: 'public'
+	},
+	{
 		id: 'progress-circle',
 		subpath: 'entasis/progress-circle',
 		sourceIndex: 'src/lib/components/ProgressCircle/index.ts',
@@ -2960,7 +3048,7 @@ export const componentInventory = [
 			}
 		],
 		capabilities: ['svelte', 'component', 'feedback'],
-		relatedComponents: ['meter', 'spinner'],
+		relatedComponents: ['progress', 'meter', 'spinner'],
 		visibility: 'public'
 	},
 	{
@@ -3048,8 +3136,11 @@ export const componentInventory = [
 		exportedSymbols: [
 			'Toast',
 			'ToastProps',
+			'ToastPromiseOptions',
 			'ToastTheme',
 			'ToastThemeProps',
+			'ToastUpdate',
+			'ToastUpdater',
 			'Toaster',
 			'ToasterProps',
 			'setToastTheme',
@@ -3176,6 +3267,40 @@ export const componentInventory = [
 		visibility: 'public'
 	},
 	{
+		id: 'navigation-menu',
+		subpath: 'entasis/navigation-menu',
+		sourceIndex: 'src/lib/components/NavigationMenu/index.ts',
+		exportedSymbols: [
+			'NavigationMenu',
+			'NavigationMenuCssVariable',
+			'NavigationMenuDataAttribute',
+			'NavigationMenuItem',
+			'NavigationMenuLink',
+			'NavigationMenuPanel',
+			'NavigationMenuPanelApi',
+			'NavigationMenuProps',
+			'NavigationMenuTheme',
+			'NavigationMenuThemeProps',
+			'NavigationMenuValueChangePayload',
+			'navigationMenuCssVariables',
+			'navigationMenuDataAttributes',
+			'navigationMenuTheme',
+			'setNavigationMenuTheme',
+			'useNavigationMenuTheme'
+		],
+		docs: [
+			{
+				id: 'navigation-menu',
+				route: '/components/navigation-menu',
+				category: 'Navigation',
+				label: 'Navigation menu'
+			}
+		],
+		capabilities: ['svelte', 'component', 'navigation'],
+		relatedComponents: ['menu-bar', 'tabbar', 'popover'],
+		visibility: 'public'
+	},
+	{
 		id: 'pagination',
 		subpath: 'entasis/pagination',
 		sourceIndex: 'src/lib/components/Pagination/index.ts',
@@ -3254,6 +3379,8 @@ export const componentInventory = [
 			'TabbarProps',
 			'TabbarTheme',
 			'TabbarThemeProps',
+			'TabbarValueChangePayload',
+			'TabbarValueChangeReason',
 			'setTabbarTheme',
 			'tabbarTheme',
 			'useTabbarTheme'
@@ -3307,6 +3434,7 @@ export const componentInventory = [
 		sourceIndex: 'src/lib/components/Tabs/index.ts',
 		exportedSymbols: [
 			'Tabs',
+			'TabsActivationDirection',
 			'TabsApi',
 			'TabsPlacement',
 			'TabsProps',
@@ -3362,8 +3490,20 @@ export const componentInventory = [
 		sourceIndex: 'src/lib/components/Menu/index.ts',
 		exportedSymbols: [
 			'Menu',
+			'MenuButtonItem',
+			'MenuCheckboxItem',
+			'MenuFilter',
+			'MenuFilterMatchItem',
+			'MenuFilterOptions',
+			'MenuGroupItem',
 			'MenuItem',
+			'MenuItemBase',
+			'MenuOptionItem',
 			'MenuProps',
+			'MenuRadioGroupItem',
+			'MenuRadioItem',
+			'MenuSeparatorItem',
+			'MenuSubmenuItem',
 			'MenuSubmenuMode',
 			'MenuTheme',
 			'MenuThemeProps',
@@ -3467,6 +3607,7 @@ export const componentInventory = [
 		exportedSymbols: [
 			'Dialog',
 			'DialogProps',
+			'DialogSnapPoint',
 			'DialogTheme',
 			'DialogThemeProps',
 			'DialogType',
@@ -4490,12 +4631,13 @@ export const relatedComponents = {
 	'selection-menu': ['toggle-menu', 'select'],
 	ask: [],
 	field: ['form'],
+	autocomplete: ['combobox', 'text-input', 'tags-input'],
 	calendar: ['date-input', 'date-selector', 'mini-calendar'],
 	checkbox: [],
 	'checkboxes-input': ['checkbox', 'radio-input'],
 	'color-input': ['color-picker'],
 	'color-picker': ['color-input'],
-	combobox: ['select', 'tags-input'],
+	combobox: ['select', 'tags-input', 'autocomplete'],
 	'date-input': ['date-selector', 'calendar'],
 	'date-selector': ['date-input', 'calendar'],
 	'file-input': [],
@@ -4538,9 +4680,10 @@ export const relatedComponents = {
 	alert: ['toast', 'confirmation'],
 	confirmation: ['dialog', 'alert'],
 	empty: [],
-	meter: ['progress-circle'],
+	meter: ['progress', 'progress-circle'],
 	'network-indicator': ['alert', 'toast'],
-	'progress-circle': ['meter', 'spinner'],
+	progress: ['progress-circle', 'meter', 'spinner'],
+	'progress-circle': ['progress', 'meter', 'spinner'],
 	skeleton: ['spinner'],
 	spinner: ['spinner-text', 'skeleton'],
 	'spinner-text': ['spinner'],
@@ -4549,6 +4692,7 @@ export const relatedComponents = {
 	collapsible: ['accordion'],
 	breadcrumbs: [],
 	command: ['menu', 'dialog'],
+	'navigation-menu': ['menu-bar', 'tabbar', 'popover'],
 	pagination: [],
 	stepper: ['multi-step-form'],
 	tabbar: ['tabs'],

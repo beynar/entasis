@@ -571,6 +571,7 @@ export const ja: Messages = {
 	// メーター
 	meter: 'メーター',
 	meterSegment: (index: string | number, count: string | number) => `セグメント ${index}/${count}`,
+	progressIndeterminate: '進行状況は不定です',
 	// フィールドの検証
 	fieldRequired: 'この項目は必須です',
 	fieldMustBeChecked: '続行するにはこのチェックボックスをオンにしてください',
@@ -582,5 +583,12 @@ export const ja: Messages = {
 	fieldTooLong: (max: string | number) => `${max}文字以内で入力してください`,
 	fieldRangeUnderflow: (min: string | number) => `${min}以上の値を入力してください`,
 	fieldRangeOverflow: (max: string | number) => `${max}以下の値を入力してください`,
-	fieldIncomplete: (length: string | number) => `${length}文字すべてを入力してください`
+	fieldIncomplete: (length: string | number) => `${length}文字すべてを入力してください`,
+	// Combobox
+	resultsCount: (count: string | number) => `${count} 件の結果があります`,
+	tags: 'タグ',
+	// CheckboxesInput
+	selectAll: 'すべて選択',
+	// PinInput
+	oneTimeCode: 'ワンタイムコード'
 };

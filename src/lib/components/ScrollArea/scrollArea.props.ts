@@ -3,6 +3,11 @@ import type { WithAttachments } from '$lib/types/props.js';
 import type { ScrollAreaThemeProps } from './scrollArea.theme.js';
 import type { HTMLAttributes } from 'svelte/elements';
 
+/** Attributes, handlers and attachments for the scrolling viewport element. */
+export type ScrollAreaViewportAttributes = WithAttachments<
+	Omit<HTMLAttributes<HTMLDivElement>, 'children'>
+>;
+
 type ScrollAreaRootAttributes = Omit<
 	HTMLAttributes<HTMLDivElement>,
 	'children' | 'class' | 'onscroll'
@@ -30,7 +35,19 @@ export type ScrollAreaProps = WithAttachments<
 		 */
 		viewportRole?: string;
 		/**
-		 * Controls when the vertical scrollbar is shown (`hover`, `always`, `scroll`, or `auto`).
+		 * Attributes spread onto the scrolling viewport, for a widget that makes the viewport itself
+		 * its semantic element: a listbox with `role`, `aria-activedescendant` and its own `id`,
+		 * say. They are merged with the viewport's own, and win over them: `class` is added to the
+		 * viewport's classes, and `onscroll`, `onfocus` and `onblur` run before the built-in
+		 * handling. A `role` here hands the viewport's semantics to the caller: the viewport then
+		 * takes neither the automatic "Scrollable content" name nor the automatic tab stop, so pass
+		 * `tabindex` (and a name) when the role needs them.
+		 */
+		viewportAttrs?: ScrollAreaViewportAttributes;
+		/**
+		 * Controls when the scrollbars are shown. `hover` shows them while the pointer is over the
+		 * area or the area is scrolling (so touch scrolling, which never hovers, still reveals them),
+		 * `always` and `auto` whenever the content overflows, `scroll` only while scrolling.
 		 * @default 'hover'
 		 */
 		type?: 'auto' | 'always' | 'scroll' | 'hover';
@@ -44,6 +61,13 @@ export type ScrollAreaProps = WithAttachments<
 		 * @default false
 		 */
 		scrollFade?: boolean;
+		/**
+		 * Px of content that may stay hidden past an edge before `data-overflow-*-start` and
+		 * `data-overflow-*-end` (and the `scrollOnEdges` arrows) count it. A fractional zoom level
+		 * leaves a remainder below one px at the scroll end, which must not read as more content.
+		 * @default 1
+		 */
+		overflowEdgeThreshold?: number;
 		/**
 		 * Milliseconds to wait before hover mode treats the scroll area as hovered.
 		 * @default 0

@@ -58,6 +58,7 @@ Use items for the collection and a single children snippet for the repeated pane
 - panelAriaLabelledby: aria-labelledby value, callback, or false. Defaults to stepper-{index} when panelRole is "tabpanel".
 - panelAriaLabel: aria-label value or callback for each panel.
 - panelId: (index) => string giving each panel a DOM id so a tab can reference it with aria-controls. Tabs uses it to link Tabbar tabs to their panels.
+- panelActivationDirection: (index) => string | undefined giving the value of \`data-activation-direction\` for each panel. Tabs sets it on the active panel with the direction the selection moved.
 - mount: when a step's content is created — \`eager\` (default) for every step up front, \`lazy\` on first activation and destroyed once the slide away from it finishes, \`once\` on first activation and kept. Inactive panels are \`inert\` and \`aria-hidden\` at once and \`hidden\` as soon as the slide settles, so at rest exactly one panel is not \`hidden\`. Tabs forwards its own \`mount\`, which defaults to \`lazy\`.
 - class: extra classes applied to the root container.
 

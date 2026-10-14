@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { onDestroy, untrack } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
 
 	import Button from '../Button/Button.svelte';
 	import Card from '../Card/Card.svelte';
@@ -10,6 +11,7 @@
 	import type { HoverCardProps, HoverCardTrigger } from './hoverCard.props.js';
 	import { useHoverCardMotion, useHoverCardTheme } from './hoverCard.theme.js';
 	import { useTheme } from '../Theme/theme.state.svelte.js';
+	import type { PopoverState } from '../Popover/popover.state.svelte.js';
 
 	let {
 		id: customId,
@@ -33,6 +35,9 @@
 		size = 'normal',
 		density = 'normal',
 		disabled = false,
+		wrap = false,
+		anchorTo,
+		arrow = false,
 		class: className,
 		triggerClass,
 		popover,
@@ -68,6 +73,21 @@
 	const themeState = useTheme();
 	let triggerElement = $state<HTMLElement | null>(null);
 	let cardElement = $state<HTMLElement | null>(null);
+	// The popover behind this card, for the cards opened from inside it (see `hasChildOpen`).
+	let cardPopover = $state.raw<PopoverState | null>(null);
+	const trackPopover =
+		(popover: PopoverState): Attachment =>
+		() => {
+			cardPopover = popover;
+			return () => {
+				if (cardPopover === popover) cardPopover = null;
+			};
+		};
+	// Whether the pointer is over the trigger or the card. Plain fields: read when a timer fires.
+	let pointerInside = false;
+	// From the close request until the close transition has ended: a pointer that comes back in
+	// that time reopens the card at once instead of waiting out `delay` again.
+	let closing = false;
 
 	// An open card keeps the hover warm-up going: moving on to a neighbouring card, tooltip or
 	// hover popover opens it at once. Triggers inside this card do not count as moving on.
@@ -106,6 +126,7 @@
 
 	const setOpen = (nextOpen: boolean) => {
 		if (isOpen === nextOpen) return;
+		closing = !nextOpen;
 		openState.value = nextOpen;
 		onOpenChange?.(nextOpen);
 	};
@@ -121,7 +142,7 @@
 	const scheduleOpen = () => {
 		clearCloseTimer();
 		if (disabled || isOpen || openTimer) return;
-		if (themeState.hoverIntent.isWarm(triggerElement)) {
+		if (closing || themeState.hoverIntent.isWarm(triggerElement)) {
 			openImmediately();
 			return;
 		}
@@ -130,17 +151,42 @@
 
 	// Hover is a mouse or pen affair: a touch tap reaches the card through focus instead.
 	const handlePointerEnter = (event: PointerEvent) => {
-		if (event.pointerType !== 'touch') scheduleOpen();
+		if (event.pointerType === 'touch') return;
+		pointerInside = true;
+		scheduleOpen();
 	};
 	const handlePointerLeave = (event: PointerEvent) => {
-		if (event.pointerType !== 'touch') scheduleClose();
+		if (event.pointerType === 'touch') return;
+		pointerInside = false;
+		scheduleClose();
 	};
+
+	// A card opened from inside this one (a link in its text) keeps this one open while the pointer
+	// is on it: the pointer left this card, but not the cards it leads to.
+	const hasOpenChild = () => !!cardPopover?.hasChildOpen;
 
 	const scheduleClose = () => {
 		clearOpenTimer();
 		if (!isOpen || closeTimer) return;
-		closeTimer = setTimeout(closeImmediately, closeDelay);
+		closeTimer = setTimeout(() => {
+			closeTimer = null;
+			if (!hasOpenChild()) closeImmediately();
+		}, closeDelay);
 	};
+
+	// When the last child card closes with the pointer outside every card, this one closes too.
+	let hadOpenChild = false;
+	$effect(() => {
+		const open = !!cardPopover?.hasChildOpen;
+		untrack(() => {
+			const closedLast = hadOpenChild && !open;
+			hadOpenChild = open;
+			if (!closedLast || !isOpen || pointerInside) return;
+			const focused = cardElement?.ownerDocument.activeElement;
+			if (focused && (cardElement?.contains(focused) || triggerElement?.contains(focused))) return;
+			scheduleClose();
+		});
+	});
 
 	const handleFocusIn = () => {
 		if (openOnFocus) scheduleOpen();
@@ -175,7 +221,10 @@
 	transition={hoverCardTransition}
 	{closeOnEscape}
 	{closeOnClickOutside}
+	closeOnFocusOut={false}
 	{directedTransition}
+	{arrow}
+	anchorTo={anchorTo ?? (wrap ? 'line' : 'box')}
 	openOnClick={false}
 	openOnHover={false}
 	closeOnMouseLeave={false}
@@ -185,12 +234,16 @@
 	theme={popover?.theme}
 	onOpenChange={setOpen}
 	onAfterOpen={() => onAfterOpen?.(payload)}
-	onAfterClose={() => onAfterClose?.(payload)}
+	onAfterClose={() => {
+		closing = false;
+		onAfterClose?.(payload);
+	}}
 >
 	{#snippet trigger(anchor)}
 		{#if typeof triggerContent === 'string'}
 			<button
 				{@attach anchor.reference}
+				{@attach trackPopover(anchor)}
 				type="button"
 				class={classes.trigger({ disabled, className: triggerClass })}
 				data-state={isOpen ? 'open' : 'closed'}
@@ -211,7 +264,8 @@
 		{:else}
 			<span
 				{@attach anchor.reference}
-				class={classes.trigger({ disabled, className: triggerClass })}
+				{@attach trackPopover(anchor)}
+				class={classes.trigger({ disabled, wrap, className: triggerClass })}
 				data-state={isOpen ? 'open' : 'closed'}
 				role="presentation"
 				bind:this={triggerElement}
@@ -252,7 +306,10 @@
 	<div
 		role="presentation"
 		bind:this={cardElement}
-		onpointerenter={openImmediately}
+		onpointerenter={(event) => {
+			if (event.pointerType !== 'touch') pointerInside = true;
+			openImmediately();
+		}}
 		onpointerleave={handlePointerLeave}
 		onfocusin={handleFocusIn}
 		onfocusout={scheduleClose}

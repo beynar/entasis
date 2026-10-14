@@ -29,7 +29,10 @@ export type ButtonGroupProps = WithAttachments<
 		color?: Colors;
 		/** Visual variant applied to every item in the group. */
 		variant?: ButtonVariant;
-		/** When true, disables every item in the group, whatever the item says. */
+		/**
+		 * When true, disables every item in the group, whatever the item says. An item with
+		 * `focusableWhenDisabled` stays focusable and announces `aria-disabled` instead.
+		 */
 		disabled?: boolean;
 		/** Class name on the root group container element. */
 		class?: string;

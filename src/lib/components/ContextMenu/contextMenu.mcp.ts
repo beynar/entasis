@@ -28,7 +28,7 @@ floating-ui virtual element, so the menu appears exactly at the pointer (and fli
 ## Props
 
 ### Core Props
-- **items**: MenuItem[] (required) - Menu entries shown on right-click. Same item shapes as Menu: type 'button', 'option', 'separator', or 'submenu'.
+- **items**: MenuItem[] (required) - Menu entries shown on right-click. Same item shapes as Menu: type 'button', 'option', 'separator', 'submenu', 'checkbox', 'radio-group' or 'group'.
 - **children**: Snippet (required) - The right-click target content.
 - **disabled**: boolean (default: false) - When true, right-click is ignored and the native context menu shows.
 
@@ -48,15 +48,18 @@ floating-ui virtual element, so the menu appears exactly at the pointer (and fli
 
 - Right-click on the target opens the menu at the cursor via a virtual reference element.
 - Keyboard: Shift+F10 or the ContextMenu key, while focus is inside the target, opens the menu anchored to the focused element.
-- Touch: a 500 ms long-press opens the menu at the finger; moving or lifting the finger earlier cancels it.
-- A second right-click elsewhere re-mounts the menu at the new point.
+- Touch: a 500 ms long-press opens the menu at the finger. A finger may drift up to 8 px while it presses; moving further, or lifting earlier, cancels the press. The native \`contextmenu\` event Android Chrome sends with a long-press (before or just after the finger lifts) is part of the same gesture: the menu opens once, with one \`onOpenChange(true)\`.
+- A second right-click within 8 px of the point the open menu is anchored to closes it; a right-click elsewhere re-mounts the menu at the new point.
+- The browser's own context menu never opens over the open panel, its padding or its submenus. While the menu is enabled the wrapper sets \`-webkit-touch-callout: none\`, so iOS Safari's long-press callout does not compete with the long-press that opens the menu.
+- A pointer open (right-click, long-press) focuses the menu itself; Shift+F10 and the ContextMenu key highlight the first row.
 - Left-click outside, Escape, or selecting an item closes it. Selecting an item inside a submenu closes the submenu and the menu together, and focus returns to the element that had it before the menu opened.
 - Submenus, keyboard navigation, and highlighting are inherited from Menu.
 
 ## Accessibility
 
 The menu is a role="menu" with role="menuitem" children and full keyboard navigation (arrows, Home/End,
-Enter, Escape, and ArrowRight/Left for submenus), plus type-ahead. Keyboard users open it with
+Enter, Escape, and ArrowRight/Left for submenus, mirrored in right-to-left text), plus type-ahead. Tab closes the
+menu and returns focus to the element that had it before the menu opened. Keyboard users open it with
 Shift+F10 or the ContextMenu key; touch users with a long-press. The target wrapper is a plain
 element with contextmenu, keydown, and pointer handlers.
 

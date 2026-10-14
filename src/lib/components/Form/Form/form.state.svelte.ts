@@ -1,11 +1,12 @@
-import { setContext, untrack } from 'svelte';
+import { setContext, tick, untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-import type { FieldState } from '../Field/field.state.svelte.js';
+import type { FieldState, ValidationMode } from '../Field/field.state.svelte.js';
 import type { FieldType, FieldValue, InputType } from '../Field/field.js';
 import type {
 	FlatFormField,
+	FormErrors,
 	FormGroup,
 	FormInputs,
 	FormRenderableInput,
@@ -23,7 +24,34 @@ type FormStateOptions<I extends FormInputs> = {
 	onSubmit?: FormSubmitHandler<I>;
 	value?: LiveFormValue<I>;
 	onValueChange?: (value: LiveFormValue<I>) => void;
+	validationMode?: ValidationMode;
+	validationDebounce?: number;
+	errors?: FormErrors<I>;
 };
+
+/** Options for `FormState.validate` and `validateAsync`. */
+export type FormValidateOptions = {
+	/**
+	 * Whether a failed validation scrolls to and focuses the first invalid field, and whether the
+	 * call counts as a submit attempt. Pass `false` to check quietly. Defaults to `true`.
+	 */
+	reveal?: boolean;
+};
+
+/** What one validation pass over the visible, enabled fields found. */
+type ValidationPass = {
+	value: FormValueRecord;
+	firstErrored: RegisteredField | null;
+	/** Fields whose async validators have not settled. */
+	validating: RegisteredField[];
+	/** The raw value each field held when it was validated. */
+	snapshot: [RegisteredField, unknown][];
+};
+
+const toMessages = (messages: string | string[] | null | undefined): string[] =>
+	(Array.isArray(messages) ? messages : messages ? [messages] : []).filter(
+		(message) => typeof message === 'string' && message !== ''
+	);
 
 type RegisteredField = FieldState<FieldType>;
 
@@ -77,6 +105,7 @@ const supportedInputTypes = new Set<InputType>([
 	'keyvalue',
 	'pin',
 	'select',
+	'select-multiple',
 	'radio',
 	'combobox',
 	'calendar',
@@ -102,12 +131,58 @@ export class FormState<I extends FormInputs = FormInputs> {
 	private valueCache = $state<FormValueRecord>({});
 	private configuredValues = new SvelteMap<string, FieldValue<FieldType> | null | undefined>();
 	private defaultValues = new SvelteMap<string, FieldValue<FieldType> | null | undefined>();
+	private initialValues = new SvelteMap<string, FieldValue<FieldType> | null | undefined>();
 	private publishedValue: LiveFormValue<I> | undefined;
 	private submitPromise: Promise<InferFormValue<I> | false> | null = null;
+	// Server errors by field name, kept for fields that register after they were set.
+	private externalErrors = new SvelteMap<string, string[]>();
+	private revealAfterSubmit = false;
+	private revealFieldAfterSubmit: RegisteredField | null = null;
+	/** How many times the form was validated to submit; fields re-validate on edit after the first. */
+	submitCount = $state(0);
 
 	value = $derived.by(() => this.getVisibleValue());
 
+	/** When fields validate by themselves; a field's own `validationMode` takes precedence. */
+	get validationMode(): ValidationMode {
+		return this.options.validationMode ?? 'submit';
+	}
+
+	/** Milliseconds an edit waits before the validation it triggers; a field's own value wins. */
+	get validationDebounce(): number {
+		return this.options.validationDebounce ?? 0;
+	}
+
+	/** True when any field differs from its initial value. */
+	get dirty(): boolean {
+		for (const field of this.fields.values()) if (field.dirty) return true;
+		return false;
+	}
+
+	/** True when focus has entered and left any field. */
+	get touched(): boolean {
+		for (const field of this.fields.values()) if (field.touched) return true;
+		return false;
+	}
+
+	/** True while an async validator of any field is pending. */
+	get validating(): boolean {
+		for (const field of this.fields.values()) if (field.validating) return true;
+		return false;
+	}
+
 	constructor(private readonly options: FormStateOptions<I>) {
+		let appliedErrors = false;
+		$effect(() => {
+			const errors = this.options.errors;
+			untrack(() => {
+				// Mounting with errors shows them without taking focus; later ones reveal the first.
+				if (errors === undefined && !appliedErrors) return;
+				this.applyExternalErrors(errors, appliedErrors);
+				appliedErrors = true;
+			});
+		});
+
 		$effect(() => {
 			const inputs = this.options.inputs;
 			const externalValue = this.options.value;
@@ -150,9 +225,12 @@ export class FormState<I extends FormInputs = FormInputs> {
 
 		const registeredField = field as RegisteredField;
 		this.fields.set(field.name, registeredField);
+		const serverErrors = this.externalErrors.get(field.name);
+		if (serverErrors) field.setExternalErrors(serverErrors);
 
 		return () => {
 			if (this.fields.get(field.name) !== registeredField) return;
+			if (field.initialValue !== undefined) this.initialValues.set(field.name, field.initialValue);
 			if (this.getFieldDefinition(field.name)) this.setCachedValue(field.name, field.value);
 			else this.removeCachedValue(field.name);
 			this.fields.delete(field.name);
@@ -214,7 +292,13 @@ export class FormState<I extends FormInputs = FormInputs> {
 			return;
 		}
 
-		navigableFields[currentIndex + 1]?.focusTarget.focus();
+		const moveOn = () => {
+			if (currentField.field.hasValidationError) currentField.focusTarget.focus();
+			else navigableFields[currentIndex + 1]?.focusTarget.focus();
+		};
+		// An async validator decides before focus moves on.
+		if (currentField.field.validating) void currentField.field.settle().then(moveOn);
+		else moveOn();
 	}
 
 	isInputVisible(name: string): boolean {
@@ -231,42 +315,241 @@ export class FormState<I extends FormInputs = FormInputs> {
 		return isFieldVisible(group, this.valueCache);
 	}
 
-	validate = (): InferFormValue<I> | false => {
-		let firstErroredField: RegisteredField | null = null;
-		const validatedValue: FormValueRecord = {};
+	/**
+	 * Validates every visible, enabled field synchronously and returns the validated value, or
+	 * false after revealing the first invalid field. Disabled fields are skipped and left out of
+	 * the value. It does not wait for async validators: use `validateAsync` or `submit` for those.
+	 */
+	validate = (options: FormValidateOptions = {}): InferFormValue<I> | false => {
+		const reveal = options.reveal !== false;
+		if (reveal) this.submitCount += 1;
+		const pass = this.collect();
+		if (pass.firstErrored) return this.fail(pass.firstErrored, reveal);
+		this.hasError = false;
+		return pass.value as InferFormValue<I>;
+	};
+
+	/** Like `validate`, and waits for the async validators of every field to settle. */
+	validateAsync = async (options: FormValidateOptions = {}): Promise<InferFormValue<I> | false> =>
+		this.validateStaged(options);
+
+	/**
+	 * @internal `validate` that returns a promise only when an async validator is pending, for
+	 * callers that must keep their synchronous timing otherwise.
+	 */
+	validateStaged = (
+		options: FormValidateOptions = {}
+	): InferFormValue<I> | false | Promise<InferFormValue<I> | false> => {
+		const reveal = options.reveal !== false;
+		if (reveal) this.submitCount += 1;
+		return this.stage(reveal);
+	};
+
+	/**
+	 * Validates one field now and returns whether it is valid. A field that is not a visible
+	 * field of this form reads as invalid; a disabled one skips validation and reads as valid.
+	 * A field whose async validator is still running reads as invalid: use `validateAsync` to wait.
+	 * It neither scrolls nor focuses, and does not count as a submit attempt.
+	 */
+	validateField = (name: string): boolean => {
+		const field = this.fields.get(name);
+		if (!field || !this.isInputVisible(name)) return false;
+		const [hasError] = field.validate();
+		// A pending async validator has not accepted the value yet.
+		return !hasError && !field.validating;
+	};
+
+	submit = (): Promise<InferFormValue<I> | false> => {
+		if (this.submitPromise) return this.submitPromise;
+
+		this.submitCount += 1;
+		const staged = this.stage(true);
+		if (!(staged instanceof Promise)) {
+			if (staged === false) return Promise.resolve(false);
+			this.submitPromise = this.submitValidatedValue(staged);
+			return this.submitPromise;
+		}
+
+		// Async validators are pending: the form is busy until they settle and the handler ran.
+		this.submitPromise = (async () => {
+			this.loading = true;
+			try {
+				const value = await staged;
+				if (value === false) return false as const;
+				return await this.submitValidatedValue(value);
+			} finally {
+				this.loading = false;
+				this.submitPromise = null;
+				const invalid = this.revealFieldAfterSubmit;
+				this.revealFieldAfterSubmit = null;
+				if (invalid) void tick().then(() => this.revealField(invalid));
+			}
+		})();
+		return this.submitPromise;
+	};
+
+	/**
+	 * Shows errors from outside the form, a server response say, under their fields. They replace
+	 * the errors set before, survive validation and clear when the field's value next changes.
+	 * Keys are field names; a value is a message or a list of them. Reveals the first field in
+	 * render order that has one.
+	 */
+	setErrors(errors: FormErrors<I> | null | undefined): void {
+		this.applyExternalErrors(errors, true);
+	}
+
+	/**
+	 * Restores every field to its initial value, or to `value` where it gives one, and makes that
+	 * the new baseline: errors, touched, dirty and the submit count clear, and fields do not
+	 * report the change as an edit. The form's `onValueChange` runs once if the visible value
+	 * changed.
+	 */
+	reset(value?: LiveFormValue<I>): void {
+		const previousValue = this.value;
+		const given = value as FormValueRecord | undefined;
+		const nextCache = { ...this.valueCache };
+		const restored: [RegisteredField, FieldValue<FieldType> | null | undefined][] = [];
+
+		for (const { name } of flattenFormInputs(this.options.inputs)) {
+			const field = this.fields.get(name);
+			let next: FieldValue<FieldType> | null | undefined;
+			if (given && hasOwn(given, name)) {
+				next = given[name];
+				this.initialValues.set(name, next);
+				this.defaultValues.set(name, next);
+			} else if (field && field.initialValue !== undefined) {
+				next = field.initialValue;
+			} else if (this.initialValues.has(name)) {
+				next = this.initialValues.get(name);
+			} else if (this.defaultValues.has(name)) {
+				next = this.defaultValues.get(name);
+			} else {
+				continue;
+			}
+			nextCache[name] = next;
+			if (field) restored.push([field, next]);
+		}
+
+		this.externalErrors.clear();
+		this.revealAfterSubmit = false;
+		this.valueCache = nextCache;
+		for (const [field, next] of restored) field.reset(next);
+		this.submitCount = 0;
+		this.hasError = false;
+
+		const nextValue = this.value;
+		if (areValuesEqual(previousValue, nextValue)) return;
+		this.publishedValue = nextValue;
+		this.options.value = nextValue;
+		this.options.onValueChange?.(nextValue);
+	}
+
+	/** @internal A field whose value changed drops its server errors from the form's record. */
+	forgetExternalErrors(name: string): void {
+		this.externalErrors.delete(name);
+	}
+
+	private applyExternalErrors(errors: FormErrors<I> | null | undefined, reveal: boolean): void {
+		const next = new SvelteMap<string, string[]>();
+		for (const [name, messages] of Object.entries(errors ?? {})) {
+			const list = toMessages(messages as string | string[] | null | undefined);
+			if (list.length > 0) next.set(name, list);
+		}
+		this.externalErrors = next;
+		for (const field of this.fields.values()) field.setExternalErrors(next.get(field.name));
+		if (next.size === 0) return;
+		this.hasError = true;
+		if (!reveal) return;
+		// A form that disables itself while submitting cannot focus yet: reveal once it is done.
+		if (this.loading) this.revealAfterSubmit = true;
+		else this.revealExternalErrors();
+	}
+
+	private revealExternalErrors(): void {
+		for (const definition of this.getActiveFieldDefinitions()) {
+			const field = this.fields.get(definition.name);
+			if (field && field.externalErrors.length > 0 && !field.disabled) {
+				this.revealField(field);
+				return;
+			}
+		}
+	}
+
+	// One validation pass, in render order: disabled fields are skipped, as in a native form.
+	private collect(): ValidationPass {
+		const pass: ValidationPass = { value: {}, firstErrored: null, validating: [], snapshot: [] };
 
 		for (const definition of this.getActiveFieldDefinitions()) {
 			const field = this.fields.get(definition.name);
 			if (!field) {
 				throw new Error(`Form field "${definition.name}" is visible but not registered.`);
 			}
+			if (field.disabled) continue;
 
+			pass.snapshot.push([field, field.value]);
 			const [hasFieldError, parsedValue] = field.validate();
 			if (hasFieldError) {
-				firstErroredField ??= field;
+				pass.firstErrored ??= field;
 				continue;
 			}
-			validatedValue[definition.name] = parsedValue as FieldValue<FieldType> | null;
+			if (field.validating) pass.validating.push(field);
+			pass.value[definition.name] = parsedValue as FieldValue<FieldType> | null;
 		}
 
-		this.hasError = firstErroredField !== null;
-		if (firstErroredField) {
-			this.revealField(firstErroredField);
-			return false;
+		return pass;
+	}
+
+	private fail(field: RegisteredField, reveal: boolean): false {
+		this.hasError = true;
+		// A form that disables itself while submitting cannot focus yet: reveal once it is done.
+		if (reveal && this.loading && field.disabled) this.revealFieldAfterSubmit = field;
+		else if (reveal) this.revealField(field);
+		return false;
+	}
+
+	// The fields the pass validated, in render order: a form that disables itself while it
+	// submits must still honour what their validators decided.
+	private firstInvalidField(pass: ValidationPass): RegisteredField | null {
+		for (const [field] of pass.snapshot) {
+			if (field.hasValidationError) return field;
+		}
+		return null;
+	}
+
+	// A validation pass that returns at once when no async validator is pending, so a plain form
+	// keeps validating and submitting synchronously.
+	private stage(
+		reveal: boolean,
+		attempt = 0
+	): InferFormValue<I> | false | Promise<InferFormValue<I> | false> {
+		const pass = this.collect();
+		if (pass.firstErrored) {
+			// An async field that renders before the sync error may still turn out invalid: it
+			// leads, so focus waits for its result.
+			const order = pass.snapshot.map(([field]) => field);
+			const errorIndex = order.indexOf(pass.firstErrored);
+			const earlier = pass.validating.filter((field) => order.indexOf(field) < errorIndex);
+			if (earlier.length === 0) return this.fail(pass.firstErrored, reveal);
+			const firstErrored = pass.firstErrored;
+			return Promise.all(earlier.map((field) => field.settle())).then(() =>
+				this.fail(this.firstInvalidField(pass) ?? firstErrored, reveal)
+			);
+		}
+		if (pass.validating.length === 0) {
+			this.hasError = false;
+			return pass.value as InferFormValue<I>;
 		}
 
-		return validatedValue as InferFormValue<I>;
-	};
-
-	submit = (): Promise<InferFormValue<I> | false> => {
-		if (this.submitPromise) return this.submitPromise;
-
-		const validatedValue = this.validate();
-		if (validatedValue === false) return Promise.resolve(false);
-
-		this.submitPromise = this.submitValidatedValue(validatedValue);
-		return this.submitPromise;
-	};
+		return Promise.all(pass.validating.map((field) => field.settle())).then(() => {
+			const invalid = this.firstInvalidField(pass);
+			if (invalid) return this.fail(invalid, reveal);
+			// A field edited while the validators ran is validated again before the value is used.
+			const edited = pass.snapshot.some(([field, value]) => !Object.is(field.value, value));
+			if (edited && attempt < 2) return this.stage(reveal, attempt + 1);
+			this.hasError = false;
+			return pass.value as InferFormValue<I>;
+		});
+	}
 
 	private async submitValidatedValue(
 		validatedValue: InferFormValue<I>
@@ -278,6 +561,10 @@ export class FormState<I extends FormInputs = FormInputs> {
 		} finally {
 			this.loading = false;
 			this.submitPromise = null;
+			if (this.revealAfterSubmit) {
+				this.revealAfterSubmit = false;
+				void tick().then(() => this.revealExternalErrors());
+			}
 		}
 	}
 
@@ -480,7 +767,13 @@ export class FormState<I extends FormInputs = FormInputs> {
 	}
 
 	private getFieldFocusTarget(field: RegisteredField): HTMLElement | null {
-		return field.node ?? field.rootNode?.querySelector<HTMLElement>(focusableControl) ?? null;
+		// A roving group (radios) has one Tab stop, the checked option, which is where focus belongs.
+		return (
+			field.node ??
+			field.rootNode?.querySelector<HTMLElement>('[role="radio"][tabindex="0"]:not([disabled])') ??
+			field.rootNode?.querySelector<HTMLElement>(focusableControl) ??
+			null
+		);
 	}
 
 	private isEnterNavigationEvent(event: KeyboardEvent): boolean {
