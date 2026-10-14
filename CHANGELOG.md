@@ -40,6 +40,108 @@ Unreleased section under the new version.
 - `Tabs`: the `onValueChange` payload gains `reason`: `user` for a click, key, menu entry or `api`
   navigation, and `initial`, `disabled` or `missing` for an automatic fallback. The new
   `TabsValueChangePayload` and `TabsValueChangeReason` types are exported from `entasis/tabs`.
+- `Popover` / `Dialog` / `Overlay` / `FloatingWindow` / `ImageZoom`: `onOpenChange(open, details)`
+  receives a second argument with `reason`, `event`, `trigger`, `interaction` and `cancel()`. It
+  runs before the state changes. Calling `details.cancel()` keeps the overlay as it was: a cancelled
+  Escape is not `defaultPrevented` and a cancelled drawer swipe snaps back. A hover open or close
+  passes the originating mouse or pointer event as `details.event`, and the Android Back gesture
+  reports `reason: 'close-watcher'` with `interaction: 'touch'`. The new `OpenChangeDetails`,
+  `OpenChangeHandler`, `OpenChangeReason` and `OpenChangeInteraction` types are exported from
+  `entasis/types`, and `PopoverState.close()` returns `false` when `onOpenChange` cancelled the
+  change.
+- `Dialog`: `{@attach dialog.trigger}` and `{@attach dialog.reference}` make any element a trigger,
+  with `aria-haspopup`, `aria-expanded` and `aria-controls` kept in sync. The built-in trigger
+  carries the same attributes.
+- `Dialog`: on Android the Back gesture closes the topmost modal dialog (a `CloseWatcher` per open
+  modal layer), under the same rules as Escape, including `cancel()`.
+- `Popover`: `openReason` is `hover`, `press`, `keyboard` or `programmatic`.
+- `Dialog` / `Popover`: `focusOnClose` chooses where focus goes when the overlay closes: `false`
+  leaves it alone, an element receives it, and a function gets the change details (`reason`,
+  `interaction`) and returns one of these, or nothing to restore as usual. The `FocusOnClose` type
+  is exported from `entasis/dialog` and `entasis/popover`.
+- `Popover`: `position` accepts the logical sides `inline-start` and `inline-end` (and
+  `inline-end-start`, `inline-start-end`, and so on). They resolve with the reading direction, so
+  `inline-end` opens on the right in English and on the left in Arabic.
+- `Popover`: `collisionBoundary` (`'visualViewport'` or `'layoutViewport'`) chooses the viewport a
+  panel is shifted back into. `ContextMenu` uses `'layoutViewport'`, so panning a pinch-zoomed page
+  no longer drags an open context menu along.
+- `Popover`: `fallbackAxisSide` (`'start'`, `'end'` or `'none'`) lets a panel with no room on either
+  side of its axis open on the perpendicular axis. Submenus use it, so a submenu with no room beside
+  its menu opens below its row instead of covering the menu.
+- `Popover`: `anchorTo` (`'box'` or `'line'`). With `'line'`, a trigger that wraps across lines
+  anchors the panel to the line the pointer was on when it opened, and the panel stays there while
+  it is open.
+- `Popover`: the panel carries `data-side`, `data-align` and `data-anchor-hidden`, and the trigger
+  carries `data-popup-side` (a `ref` anchor element gets it too). They report the side the panel
+  landed on after flipping, `inline-start` or `inline-end` when a logical side was requested, or
+  `none` when `positionPanel` placed it. Themes can use them to flatten the corner where trigger and
+  panel meet. `PopoverState.placement` exposes the same values, and `PopoverPlacement`,
+  `PopoverSide` and `PopoverPlacementState` are exported from `entasis/popover`.
+- `Popover`: the panel's wrapper exposes `--available-width` and `--available-height` (the room
+  between the trigger and the viewport edge on the panel's side) and pixel-snapped `--anchor-width`
+  and `--anchor-height`, so a scrolling list can cap itself with
+  `max-height: min(240px, var(--available-height))`.
+- `Popover`: `closeDelay` (default 120 ms) is how long the pointer may stay outside the hover safe
+  area before `closeOnMouseLeave` closes the popover. `PopupMenu` submenus honour it too.
+- `useNavigation`: `disabledItemsFocusable` and `skipDisabled: false` keep `aria-disabled` and
+  `data-disabled` items in the arrow-key order and as the tab stop (toolbars), without ever
+  activating them. Natively disabled items are always skipped. `orientation: 'both'` serves radio
+  groups, `focusableContainer: false` containers that must stay unfocusable, and
+  `onKeyboardMove(index)` fires only when an arrow, Home, End or type-ahead moves focus.
+- `MenuOption` / `Menu`: `textValue` sets the text type-ahead matches instead of the visible title
+  (reflected to `data-typeahead`). Submenu rows take it too.
+- `useListNavigation`: `autoHighlight` (`true`, `false` or `'always'`), `anchor`, `query`, `open`,
+  `loop: 'wrap' | 'input' | false`, `scrollContainer` and `idPrefix` options. The utility also
+  returns `optionId`, `pointerHighlight`, `typeahead.isTyping`, `typeahead.reset`, `reanchor` and
+  `scrollToHighlighted`, and exports `createOptionIds`. `onHighlightChange` receives a second
+  argument with the `reason` (`'keyboard'`, `'pointer'` or `'list'`) and the originating event.
+- `Field`: every input accepts `readOnly`, so the control stays focusable and announced as read-only
+  (`readonly` on text inputs, `aria-readonly` on role-based controls), refuses edits, and still
+  validates and submits. A read-only `Form`, `FormGroup` or `Field as="fieldset"` makes the fields
+  inside it read-only too. A disabled `Form`, `FormGroup` or fieldset `Field` disables the fields
+  inside it, and a field's effective state combines its own, its group's and the form's.
+- `Field`: validation messages come from the i18n catalog in all 8 locales, never from the
+  validation library. An empty required field shows one message, and a required `Checkbox` or
+  `Switch` says it must be on. The new `messages` prop overrides `required`, `invalid`, `email`,
+  `url`, `tooShort`, `tooLong`, `rangeUnderflow`, `rangeOverflow` and `incomplete` per field or
+  `Form` entry. Text controls also accept `minLength` and `maxLength`.
+- `Field`: `FieldState` gains `touched`, `dirty`, `filled`, `initialValue`, `reset(value?)` and
+  `focusControl()`, and the Field root carries `data-invalid`, `data-disabled`, `data-readonly`,
+  `data-focused`, `data-filled`, `data-dirty` and `data-touched`. `null`, an empty string and an
+  empty array count as equal.
+- `Checkbox` / `Switch`: `inputAttrs` (typed `FieldButtonAttributes`) forwards native attributes
+  such as `aria-label`, `title` and event handlers to the button. An `aria-label` there replaces the
+  automatic `aria-labelledby`, and a handler that calls `preventDefault()` cancels the toggle.
+- `Calendar` / `DateSelector` / `ColorPicker`: `readOnly` keeps them focusable and browsable,
+  refuses selection and edits, and reports `aria-readonly` on their grid or sliders. A read-only
+  `CheckboxesInput` marks each option with `aria-readonly`.
+- Docs: a Read only control on the Usage cards of the `Slider`, `NumberInput` and `KeyValueInput`
+  pages.
+- `FieldHiddenInputs` (from `entasis/field`) renders the inputs a custom control submits in a plain
+  `<form>`. It takes one value, several values under the same name, or a checkbox that submits only
+  while checked, and uses the field's `name`, `required`, `disabled` and `form`. While a required
+  value is missing it blocks the native submit, and the browser's report moves to the visible
+  control, which shows the field's own error. With `autocomplete`, the browser can autofill the
+  field, matching options by value or label.
+- Inputs: every input accepts a `form` prop with the id of a native `<form>` placed elsewhere on the
+  page. The control's native elements and hidden inputs submit with that form and follow its reset.
+- `Form`: `FormState.advanceFrom(field)` moves on from a field the way Enter does in a text field:
+  it validates the field and focuses the next one, or submits from the last field. It returns
+  `false` for a hidden, disabled or unregistered field, so controls such as checkboxes and radios
+  can fall back to the native form. The new `requestNativeSubmit(element)` utility submits the
+  element's form through its default submit button.
+- `Theme`: `nonce` is applied to every script and style entasis injects (theme and viewport boot
+  scripts, design-token CSS, the `transitionOnChange` suppression style, Mermaid styles, the
+  document print frame, and the PhoneInput, Map and Mermaid CDN loaders), and is readable as
+  `ThemeState.nonce`. Setup for SvelteKit is documented on the Getting started page.
+- `Theme`: `portalContainer` (element, shadow root or function) sets where dialogs, popovers, menus,
+  tooltips and the floating-window layer mount. Inside a shadow root they now mount in that root by
+  default.
+- `Dialog` / `Popover`: while page scroll is locked, `--entasis-scrollbar-width` is set on `html` so
+  fixed headers can compensate, and a page that already uses `scrollbar-gutter: stable` no longer
+  gets a second gutter.
+- `Theme`: `--keyboard-inset` on `html` is the height the on-screen keyboard covers, measured from
+  the visual viewport (`0px` by default).
 
 ### Changed
 
@@ -92,11 +194,107 @@ Unreleased section under the new version.
   finds the `deploy` keyword) and compares text with `Intl.Collator` in the active I18n locale, so
   each language keeps its own letters (in Spanish, "n" does not find "ñ"). A custom `filter` still
   replaces it.
+- `Popover` / `Dialog` / `Overlay` / `FloatingWindow` / `ImageZoom`: because `onOpenChange` runs
+  before the state changes, reading the open state inside the callback returns the previous value.
+  Use the first argument.
+- `Select` / `Combobox` / `TagsInput`: the dropdown list scrolls beyond 240px (`Select`) or 200px
+  (`Combobox`, `TagsInput`), or beyond the room left beside the field, whichever is smaller. On a
+  short viewport or above an on-screen keyboard the list shrinks instead of running under the
+  keyboard or covering its input.
+- `Popover`: panel coordinates are rounded to the device pixel grid. Placement uses the visual
+  viewport as its boundary and places the panel again once the viewport settles after an on-screen
+  keyboard opens, so dropdowns no longer stay under the iOS keyboard. Initial focus (`focusOnOpen`)
+  waits until the panel has been placed, so `focusOnOpen="first"` can no longer miss its target
+  while the panel is still hidden.
+- `Popover`: the Placement (including `inline-start` and `inline-end`), Styling by side and Wrapped
+  link examples now appear on the Examples tab of the docs page. The unused `PopoverExamples.svelte`
+  was removed.
+- `Tooltip` / `HoverCard` / `LinkPreview` / `Popover` (`openOnHover`): hovering is read from a mouse
+  or pen only. A touch tap's compatibility mouse events no longer open a tooltip, hover card or
+  hover popover, and a disabled trigger (`disabled`, `aria-disabled="true"` or `data-disabled`) no
+  longer hover-opens a popover or hover card. A pending hover open checks the pointer is still on
+  the trigger when its delay ends, so a dropped `mouseleave` cannot leave a stale open.
+- `Tooltip` / `HoverCard` / `LinkPreview` / `Popover` (`openOnHover`): they share one hover warm-up.
+  While one is open and for 400 ms after the last one closed, the next opens without its delay (root
+  popovers only; submenus keep their delay, and a tooltip inside an open hover card keeps its own).
+- `Dialog` drawers: release speed is measured over an 80 ms window and ignores a trailing stationary
+  move, so flicks on Android Chrome and 120 Hz screens dismiss again. Sidebar view swipes and
+  `Toast` use the same measure. A drag that travels more across the dismiss axis than along it is
+  spent before the drawer takes it, so a sideways swipe on a carousel inside a bottom drawer no
+  longer starts dismissing it.
+- `Toast`: dragging uses the shared pointer drag. Only the primary button drags, a cancelled touch
+  or a mouse released outside the window snaps the toast back instead of leaving it stuck, a flick
+  toward the edge dismisses it, mostly sideways presses never move it, and the click that ends a
+  drag no longer counts as a `closeOnClick` press.
+- `useNavigation` (`Tabbar`, `SegmentedControl`, `ToggleButtonGroup`, `ToggleMenu`, `Menu`,
+  `MenuBar`, `Breadcrumbs`, the `Calendar` month and year picker, `Sidebar` activity bar): the
+  roving tab stop follows the focused element, so inserting, removing or reordering items no longer
+  moves it to a different item. Removing the focused item moves focus to the item that took its
+  place, including in Safari.
+- `useNavigation`: items hidden with CSS (`display: none`, `hidden`, `inert`, such as
+  `hidden md:flex` breadcrumbs) are skipped by arrow keys, Home, End and type-ahead, and
+  `aria-disabled` items are skipped by default. The container is no longer a Tab stop
+  (`tabindex="-1"`), so Tab and Shift+Tab pass through a tab list in one step.
+- `useNavigation`: Home, End, Space and Enter stay inside text fields placed in a navigation list
+  (such as a `ToggleMenu` toolbar). Left and Right leave the field only when the caret is at that
+  edge of the text. Type-ahead continues past disabled matches, the typed text starts over when
+  focus leaves the list, and its timer is cleared on destroy. Scrolling to the focused item respects
+  reduced motion.
+- `useNavigation`: a highlight move among hundreds of items makes at most four attribute writes, and
+  mounting checks document order with one linear pass instead of sorting.
+- `useListNavigation`: highlighting a row scrolls only the list's own scroll container instead of
+  calling `scrollIntoView`, so an inline `Command` or list no longer scrolls the page or a parent
+  around it. ArrowUp with nothing highlighted moves to the last option.
+- `Field`: `focused` reports focus anywhere inside the field, for every control, including popups
+  the field opened, and clears when the focused control is disabled or removed. Leaving the field
+  sets `touched`.
+- `Field`: description and helper text are linked to the control through `aria-describedby`, ahead
+  of the errors. Errors render in one `role="alert"` container. Role-based controls (checkbox,
+  switch, radiogroup, slider, combobox) get `aria-required` from Field.
+- `Field` / `Select` / `Switch` / `RatingInput`: clicking a non-native label (`labelFor={false}`)
+  focuses its control without toggling or opening it. `Select` uses this, so clicking its label no
+  longer opens the list. A press on the padding, icon or chips around a text control focuses the
+  control, while buttons inside the container keep their own behaviour.
+- `Form`: disabled fields, directly or through a disabled group or `Form`, are barred from
+  validation.
+- `NumberInput` / `PinInput` / `PasswordInput`: range, incomplete-code and minimum-length errors use
+  the localized catalog messages. `PasswordInput` applies its `minLength` through the field.
+- Inputs: a native form reset (a `type="reset"` button or `form.reset()`) returns every control to
+  the value it mounted with, clears its errors and touched state, and calls `onValueChange` once.
+  Controls show the restored value one task after the reset, and a reset cancelled by another
+  listener leaves them unchanged.
+- `Dialog` / `Popover` / `FloatingWindow`: page scroll is locked with a `data-entasis-scroll-lock`
+  attribute on `html` and one rule in the Tailwind plugin CSS instead of inline body styles, so a
+  lock held by another library is no longer overwritten or released early. The default scroller is
+  `html` instead of `body`. A popover opened by touch no longer locks page scroll unless its panel
+  is within 20px of the viewport width.
+- Tailwind plugin: drag-and-drop base styles (dragging dim, empty-list tint) are rules in the plugin
+  CSS rather than a style element injected into the document head, so they sit in the base layer and
+  any utility class overrides them.
+- Package: the `svelte` peer dependency is now `^5.32.0` (was `^5.0.0`), because attachments and
+  `fromAction` need it. CI also runs the packed-library check against Svelte 5.32.0.
+- Docs: the Content Security Policy setup for SvelteKit no longer asks you to share a nonce with
+  `kit.csp`, which cannot accept one. Create the nonce in `hooks.server`, add it to SvelteKit's
+  inline tags in `transformPageChunk`, and send the `Content-Security-Policy` header yourself.
+- Id lookups for rendered elements (`Select`, `Command`, `MenuBar`, list navigation,
+  `TableOfContents`) resolve through `getRootNode`, so they work inside shadow roots. Prehydration
+  inline scripts and the document-level CDN loaders (Map, PhoneInput, Mermaid) keep
+  `document.getElementById` on purpose.
+
+### Deprecated
+
+- `Popover` / `Dialog`: the `hasTransitioned` state field is deprecated; read
+  `lifecycle.status === 'open'`. It is kept for one minor.
+- `RatingInput`: `readonly` is deprecated in favour of `readOnly` and stays as an alias for one
+  minor.
+- `Theme`: `lastTooltipClosed` on the theme state is deprecated in favour of `hoverIntent` (the
+  shared hover warm-up). It still reads and writes the same close time for one minor.
 
 ### Removed
 
 - `Button`: the undocumented `as` prop on `ButtonPrimitiveProps`, which could render an anchor
   without `href`. Pass `href` to render a link.
+- Internal `useDrag` utility. `Toast` and `ScrollArea` use `createPointerDrag`.
 
 ### Fixed
 
@@ -241,6 +439,138 @@ Unreleased section under the new version.
   height is dropped. The next step then appears in place instead of sliding in.
 - `Command`: the default search now finds Arabic and Hebrew labels written with vowel marks
   (tashkeel, shadda, niqqud) when the query is typed without them, and the other way round.
+- `Dialog` / `Popover` / `FloatingWindow` / `Overlay`: `onAfterOpen` and `onAfterClose` fire exactly
+  once per open and close even when no transition plays (`defaultOpen`, open on mount, hydration,
+  reduced motion), and outside presses dismiss such overlays. `Confirmation` no longer needs its
+  mount-then-open delay.
+- `Popover`: a click on a popover opened by hover keeps it open instead of closing it. The
+  leave-to-close safe area applies only to hover-opened popovers, and a hover-opened popover no
+  longer locks page scroll. Pressing the trigger of a hover-opened popover through `popover.open()`
+  (such as a menu submenu trigger) pins it open, as `toggle()` already did.
+- `Popover`: with several triggers, the panel anchors to the one that was pressed and returns focus
+  to it. Removing the trigger that opened a popover closes it, reported as `trigger-unmount`. A
+  programmatic open returns focus to the element that had it, which also fixes focus dropping to the
+  body when the `PhoneInput` country picker closes with Escape.
+- `Popover` / `Dialog` / `Toast` / `Confirmation` / `Sidebar` activity bar / tree nodes: a consumer
+  `onclick` that calls `event.preventDefault()` skips the built-in behaviour, so a loading `Button`
+  used as a snippet trigger no longer opens its popover.
+- `Popover`: a finger that starts scrolling the page outside a non-modal popover no longer dismisses
+  it (a tap does), and a deliberate outside click during the opening animation counts.
+- `Popover` / `Select` / `Combobox` / `TagsInput`: menus, listboxes, trees and grids render a plain
+  wrapper instead of an unnamed dialog element. The trigger's `aria-controls` points at the
+  `role="menu"` (or listbox) element, which is labelled by its trigger, and the `Select`, `Combobox`
+  and `TagsInput` triggers use `aria-haspopup="listbox"`.
+- `Popover`: Escape after a click on the trigger returns focus to the trigger in Safari, where
+  clicking a button does not focus it.
+- `PopupMenu`: cancelling the item-press close from `onOpenChange` keeps the whole menu tree as it
+  was. Open submenus stay open and focus stays inside the menu. The root is asked first, then
+  submenus close deepest first.
+- `Dialog`: focus goes back to the element that opened it after Escape, backdrop or close-button
+  closes. The page behind the dialog is released from `inert` before focus returns, so this also
+  holds for dialogs with a closing animation.
+- `Dialog` / `Confirmation`: closing a `Confirmation` that was opened from inside a `Dialog` returns
+  focus to the button that asked for it. The `Dialog` beneath no longer moves focus to its first
+  field when it becomes the top layer again, so focus no longer ends up on the page body.
+- `Dialog` / `Popover`: when the control that opened an overlay is gone or disabled (a menu item
+  that opened a dialog), focus returns to the last element that had it inside the dialog beneath,
+  else to the most recent element still on the page, instead of falling to the page body. A focused
+  SVG element outside a closing overlay keeps its focus.
+- `Dialog` / `Popover`: closing with Escape or from the keyboard returns focus to the trigger with a
+  visible focus ring, in Safari and Firefox as well. In Safari a focused text field is blurred
+  before the overlay unmounts so the page no longer jumps.
+- `Dialog` / `Confirmation`: Tab and Shift+Tab inside a modal move focus through every tabbable
+  control and wrap at both ends in every browser. In Safari without Full Keyboard Access, Tab used
+  to skip buttons and leave an open alert dialog for the page body. A popover panel opened from
+  inside a dialog keeps its own Tab order, and when the popover trigger is the last control of the
+  dialog, Tab past the end of the open panel wraps to the dialog's first control.
+- `Popover`: a popover opened from a trigger is reachable from the keyboard. Tab on the open trigger
+  enters the panel, Tab past its last control continues with the next control after the trigger and
+  closes the popover (reported as reason `focus-out`), and Shift+Tab on its first control returns to
+  the trigger. When nothing follows the trigger, Tab is left to the browser so it cannot loop.
+  Menus, listboxes, trees, grids, hover-opened popovers and popovers anchored to a `ref` keep their
+  own focus handling. Tab from the text field of a date, time, color or phone input moves on to the
+  next field instead of entering the open picker.
+- `Dialog` / `Popover`: closing through the bound or controlled `open` prop no longer reuses the
+  details of the change that opened them (a spurious keyboard focus ring on the trigger, a stale
+  `focusOnClose` argument, or a skipped focus restore).
+- `Popover`: in right-to-left documents, floating panels (`Select`, `PopupMenu`, `Popover`) no
+  longer render at the viewport's right edge instead of beside their trigger. Their `start`
+  alignment sits on the right and the scale animation grows from the corner nearest the trigger.
+- `Popover`: content that resizes while the opening animation plays no longer leaves the panel
+  misplaced; the panel is placed again once the animation ends. A panel whose trigger has scrolled
+  out of its container is hidden and marked `data-anchor-hidden` instead of floating over unrelated
+  content.
+- `Popover`: the entrance animation no longer slides in diagonally after the panel previously opened
+  on the other axis, and the exit and scale origin follow a flip that happens while the panel is
+  open. A trigger shared by several popovers (a menu and its tooltip) keeps `data-popup-side` while
+  any of them is placed.
+- `Popover` with `anchorTo="line"`: the panel anchors to the wrapped line nearest the pointer even
+  when the link's lines overlap horizontally (it always used the last line unless the lines were
+  disjoint). The anchored line follows the reference when the page or a scroll ancestor scrolls
+  while the popover is open, a tap anchors to the tapped line, and a keyboard open after a hover or
+  tap takes the first or last line instead of a stale pointer point.
+- `PopupMenu`: submenus (`fallbackAxisSide`) with no room beside their menu fall back to the cross
+  axis below their row and slide into the viewport. They no longer flip above the row and cover the
+  parent menu. Reopening a menu from the keyboard while the pointer rests where a submenu row
+  appears no longer opens that submenu and moves focus into it.
+- `ScrollArea`: dragging a scrollbar thumb ends when the pointer is cancelled or lost, and a mouse
+  released outside the window no longer leaves the drag stuck.
+- Press-and-hold stepper buttons: keyboard and screen-reader activations always step, including
+  after a touch hold on the same button. A mouse or pen press whose release was lost outside the
+  window stops when the pointer re-enters the button instead of repeating until the next
+  `pointerup`.
+- `Breadcrumbs` / `Tabbar` / `Sidebar` / `Menu` / `MenuBar` and similar roving-tab-stop lists: the
+  single Tab stop moves to the next visible item when the item holding it is hidden with a class, an
+  inline style or a media query after mount, so Tab no longer skips the whole list.
+- `useListNavigation`: options with values such as `a.b` and `a_b` get distinct ids through
+  `nav.optionId`, so `aria-activedescendant` no longer points at the wrong option. `Select`'s id
+  lookup is constant-time instead of scanning the list.
+- `useListNavigation`: `pointerHighlight` ignores `pointermove` events whose coordinates have not
+  changed, so Safari no longer snaps the keyboard highlight to the option that scrolls under a
+  resting cursor.
+- `useListNavigation`: when the query changes, the list scrolls back to the top and the first match
+  is highlighted and in view, even after the user had scrolled, with nothing highlighted, or when
+  the previously highlighted option was filtered out. The selected value (`anchor`) is highlighted
+  even when the options load after the list has opened. Scrolling works in layout space, so the
+  highlighted option is fully visible while a popover is still animating open (`PhoneInput` country
+  picker, `Select`, `Combobox`).
+- `Field`: a required `Switch` or `Checkbox` that is off, a required email left empty, and other
+  empty required fields show a localized message instead of 'Invalid value' or raw validation text
+  such as 'Invalid type: Expected string but received null'. A validation error shown in a field is
+  written again in the new language when the locale changes; errors set by the app are left
+  untouched.
+- `Field`: `bind:focused` no longer stays true when a focused control becomes disabled or is removed
+  (Chromium sends no blur in those cases). Pressing text inside a field, such as its description,
+  clears `focused` and `data-focused` and sets `touched`, while buttons and controls inside the
+  field keep the focus. Moving focus between parts of a field, for example from the input to a
+  suffix button, no longer clears them.
+- `RichTextInput`: a read-only editor is no longer editable: it is not content-editable, stays
+  focusable and hides its fixed toolbar. A read-only `CalendarInput`, `DateSelectorInput`,
+  `ColorPickerInput` and `FileInput` no longer change what they display or open the file chooser
+  while the field value stays unchanged.
+- `Rating` / `Switch` / `Select`: turning `readOnly` or `required` off no longer leaves
+  `aria-readonly` or `aria-required` stuck.
+- `Switch`: clicking the inline label text focuses the switch without toggling it, like the other
+  non-native labels. `Slider`: every thumb of a range exposes `aria-readonly` while the field is
+  read-only, not only the first.
+- `Switch` / `Checkbox` and the other choice controls no longer go out of sync with their hidden
+  inputs after a native form reset. A switch used to stay on while its form value had been cleared.
+  A native form reset also clears uncommitted search text in `Combobox` and `TagsInput`.
+- Inputs: controls that take a `form` prop no longer turn buttons without a type into submit buttons
+  of the named form. Only inputs, selects, textareas and buttons that explicitly submit or reset get
+  the attribute.
+- `Dialog` / `Popover`: Escape and outside presses are heard on the document the panel lives in, so
+  panels rendered into an iframe dismiss correctly. A third-party scroll lock on `html` or `body` no
+  longer leaves the page locked after close, and clearing it while a dialog is open no longer
+  unlocks the page. The lock keeps the page width when `scrollbar-gutter` does not reserve the
+  hidden scrollbar's room: it measures after applying and pads the scrollbar's width instead.
+- `ListNavigation`: scrolling the highlighted option into view finds options inside a shadow root.
+  In a shadow root, `Select` scroll-wheel and touch scrolling inside an open list now work, and
+  `Select`, `MenuBar` and `Command` look up their portaled options and menus there.
+  `TableOfContents` resolves heading ids in the tree it renders in, so generated ids no longer
+  collide.
+- `Theme`: turning `transitionOnChange` off after mount no longer leaves a
+  `* { transition: none !important }` style in the document head.
 
 ## 0.11.0 — 2026-10-10
 
