@@ -100,33 +100,34 @@
 	const setPolygon = useSafeArea({
 		isActive: () => !!toaster.hovering,
 		offset: 30,
-		callback: () => {
-			if (toaster.hovering) toaster.toggleTimers(toaster.hovering, 'resume');
-			toaster.hovering = null;
-		}
+		callback: () => toaster.setHovering(null)
 	});
 
 	const classes = $derived(useToastTheme(theme));
 	// F6 focuses the notification region from anywhere (Sonner's convention).
-	const hotkey = useHotKey({
-		hotKeys: { f6: () => toaster.element?.focus({ preventScroll: true }) },
+	// The window listener alone: attaching the hotkey's `reference` would make the always-present
+	// region a tab stop.
+	useHotKey({
+		hotKeys: { f6: () => toaster.focusRegion() },
 		isActive: true,
 		onWindow: true
 	});
 </script>
 
-<!-- A landmark region (not a dialog) so live announcements are not wrapped in a dialog role;
-     `data-live-region` keeps it outside any modal's `inert` sweep. F6 jumps to it. -->
+<!-- A landmark region (not a dialog), always rendered: it hosts the persistent live regions that
+     announce toasts, which must exist before the first one. It is empty and click-through while no
+     toast shows. `data-live-region` keeps it outside any modal's `inert` sweep. F6 jumps to it. -->
 <section
 	bind:this={toaster.element}
 	tabIndex={-1}
 	role="region"
-	hidden={!toaster.isOpen}
+	{...direction ? { dir: direction } : {}}
 	aria-label={t.notifications}
 	data-live-region
+	data-open={toaster.isOpen ? '' : undefined}
 	class={classes.toaster()}
 	data-hovering={toaster.hovering}
-	{@attach hotkey.reference}
+	{@attach toaster.liveRegions.host}
 >
 	{#each toaster.toasts as toast (toast.id)}
 		<Toast

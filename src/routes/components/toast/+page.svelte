@@ -112,6 +112,40 @@
 			});
 		}, 1600);
 	};
+
+	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+	// `toast.promise` shows the loading toast, then the success or error one when the promise
+	// settles. It returns the promise, so the caller can still await it.
+	const upload = (fail: boolean) =>
+		toast.promise(
+			sleep(1800).then(() => {
+				if (fail) throw new Error('The connection dropped');
+				return 3;
+			}),
+			{
+				id: 'upload',
+				loading: { title: 'Uploading…', description: 'Sending your files' },
+				success: (count) => ({ title: `${count} files uploaded` }),
+				error: (error) => ({ title: 'Upload failed', description: (error as Error).message })
+			}
+		);
+
+	// `toast.update` changes a toast that is on screen, from a patch or from a function of its
+	// current options. A toast the user already closed is left alone.
+	let batch = 0;
+	const showBatch = () => {
+		batch = 0;
+		toast.info({ id: 'batch', title: 'Processed 0 of 5', duration: 8000, progress: true });
+		const tick = setInterval(() => {
+			batch += 1;
+			toast.update('batch', { title: `Processed ${batch} of 5` });
+			if (batch === 5) {
+				clearInterval(tick);
+				toast.update('batch', { color: 'success', title: 'All 5 processed' });
+			}
+		}, 700);
+	};
 </script>
 
 <Toaster />
@@ -126,6 +160,8 @@
 		'Six corner and center positions',
 		'Swipe, drag or flick toward the edge to dismiss',
 		'Stacked layout, hover and background tabs pause timers',
+		'Update, dismiss and promise helpers',
+		'Timers pause for hover, focus and swipes',
 		'Loading spinner, progress bar & actions'
 	]}
 >
@@ -445,6 +481,79 @@ toast.success({
 });`}
 		>
 			<Button color="primary" onclick={showLoadingToast}>Save changes</Button>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Promise"
+			description="toast.promise(promise, stages) shows a loading toast and turns it into the success or error toast when the promise settles. success and error take options or a function of the result. It returns the promise, and a toast the user dismissed while waiting is not shown again."
+			class="!min-h-fit"
+			code={`await toast.promise(uploadFiles(), {
+	id: 'upload',
+	loading: { title: 'Uploading…', description: 'Sending your files' },
+	success: (count) => ({ title: \`\${count} files uploaded\` }),
+	error: (error) => ({ title: 'Upload failed', description: error.message })
+});`}
+		>
+			<div class="flex flex-wrap justify-center gap-2">
+				<Button color="primary" onclick={() => upload(false).catch(() => {})}>Upload</Button>
+				<Button color="danger" variant="soft" onclick={() => upload(true).catch(() => {})}>
+					Upload and fail
+				</Button>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Update and dismiss"
+			description="toast.update(id, patch) changes a toast that is on screen: a patch, or a function of its current options. The countdown restarts and the toast's data-update-key attribute changes. toast.dismiss(id) closes one toast, toast.dismiss() all of them."
+			class="!min-h-fit"
+			code={`toast.info({ id: 'batch', title: 'Processed 0 of 5', duration: 8000, progress: true });
+
+toast.update('batch', { title: 'Processed 3 of 5' });
+toast.update('batch', (current) => ({ title: current.title + '!' }));
+toast.update('batch', { color: 'success', title: 'All 5 processed' });
+
+toast.dismiss('batch'); // one toast
+toast.dismiss(); // every toast`}
+		>
+			<div class="flex flex-wrap justify-center gap-2">
+				<Button color="info" variant="soft" onclick={showBatch}>Start batch</Button>
+				<Button color="neutral" variant="outline" onclick={() => toast.dismiss()}>
+					Dismiss all
+				</Button>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Keyboard, focus and screen readers"
+			description="Press F6 from anywhere to move focus into the notification region, then Tab through the toasts. Timers pause while the pointer or keyboard focus is on a stack, while a touch or swipe is on a toast, and while the window is in the background. Dismissing the focused toast moves focus to the next one. Toasts are announced through a live region that is always present."
+			class="!min-h-fit"
+			code={`<Toaster /> // a landmark named "Notifications", always rendered
+
+toast.success({ title: 'Saved' }); // announced politely
+toast.danger({ title: 'Payment failed', important: true }); // announced assertively`}
+		>
+			<div class="flex flex-wrap justify-center gap-2">
+				<Button
+					color="success"
+					variant="soft"
+					onclick={() =>
+						toast.success({
+							title: 'Saved',
+							description: 'Press F6, then Tab, to reach this toast.',
+							duration: 15000
+						})}
+				>
+					Polite toast
+				</Button>
+				<Button
+					color="danger"
+					variant="soft"
+					onclick={() =>
+						toast.danger({ title: 'Payment failed', important: true, duration: 15000 })}
+				>
+					Important toast
+				</Button>
+			</div>
 		</ComponentCard>
 	{/snippet}
 </DocPage>

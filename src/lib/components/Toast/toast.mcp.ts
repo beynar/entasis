@@ -60,7 +60,7 @@ toast.warning({
 - \`richColors\` (boolean, optional): If true, uses richer color variants. Default: inherited from Toaster
 - \`loading\` (boolean, optional): If true, shows a loading spinner using Theme's global \`spinnerVariant\`
 - \`progress\` (boolean, optional): If true, shows a bar counting down the remaining duration (pauses on hover and while the window is inactive). Only appears when the toast has a finite \`duration\`. Can also be set on \`<Toaster progress />\` as a default.
-- \`swipeToDismiss\` (boolean, optional, default true): Drag the toast toward its anchored screen edge (down for bottom-*, up for top-*) past a threshold, or flick it that way, to dismiss it; dragging the other way rubber-bands. Only the primary button drags; a press that travels mostly across the swipe axis never moves the toast; a cancelled touch snaps it back, and a mouse released outside the window ends the drag where the button was last held (it dismisses or snaps back by the same rule as a normal release); and the click that ends a drag is not a \`closeOnClick\` press. A manual dismiss fires \`onDismiss\`, not \`onAutoDismiss\`.
+- \`swipeToDismiss\` (boolean, optional, default true): Drag the toast toward its anchored screen edge (down for bottom-*, up for top-*) past a threshold, or flick it that way, to dismiss it; dragging the other way rubber-bands. Only the primary button drags, and only from the toast's surface: a press on an action button, the close button, a link or any \`[data-swipe-ignore]\` element never starts a drag. A press that travels mostly across the swipe axis never moves the toast, so the page keeps scrolling (a swipeable toast sets \`touch-action\` to \`pan-y\` when it swipes sideways and \`pan-x\` when it swipes vertically); the stack stays expanded and its timers paused while a toast is dragged; a cancelled touch snaps it back, and a mouse released outside the window ends the drag where the button was last held (it dismisses or snaps back by the same rule as a normal release); and the click that ends a drag is not a \`closeOnClick\` press. A manual dismiss fires \`onDismiss\`, not \`onAutoDismiss\`.
 - \`closeOnClick\` (boolean, optional, default false): Dismiss when the toast body is clicked. Off by default now that swipe-to-dismiss exists; the close icon and swipe are the primary dismiss affordances.
 - \`size\` (Sizes, optional): Size of the toast — scales padding, corner radius, type and icon. Options: \`'small'\`, \`'normal'\`, \`'large'\` (default \`'normal'\`). Can be defaulted for all toasts with \`<Toaster size="..." />\`.
 - \`prefix\` (Slot | false, optional): Content before the text. \`false\` hides the default icon
@@ -100,21 +100,48 @@ toast.primary({ id: 'save', title: 'Saving…', loading: true, duration: false }
 toast.success({ id: 'save', title: 'Saved', loading: false, duration: 3000 });
 \`\`\`
 
+**Changing a toast: \`toast.update\`, \`toast.dismiss\`, \`toast.promise\`**
+
+\`update\`, \`dismiss\` and \`promise\` are reserved names, not colors.
+
+- \`toast.update(id, patch)\` changes the toast with that id that is on screen and returns its \`Toast\` handle (\`undefined\` when there is none). \`patch\` is an options object, or a function that receives the toast's current options (Toaster defaults included) and returns one. Keys left out keep their value, the timer restarts from the full \`duration\`, and the toast's \`data-update-key\` attribute changes. The handle has the same method: \`handle.update(patch)\`. A toast that was dismissed stays dismissed: updating it does nothing, so a result that arrives after the user closed the toast never brings it back.
+- \`toast.dismiss(id?)\` dismisses one toast, or every toast on screen (and any still waiting for a Toaster) when called without an id. Each fires \`onDismiss\` once.
+- \`toast.promise(promise, { loading, success, error, id? })\` shows a loading toast (a spinner, no timeout, color \`primary\`), then turns it into the success toast (color \`success\`) or error toast (color \`danger\`) when the promise settles. Each stage is a title string, an options object, or, for \`success\` and \`error\`, a function of the result or the rejection that returns either. The text and actions of the loading stage never carry over to the result. It returns the original promise, so it can be awaited, and a rejection still rejects for the caller.
+
+\`\`\`ts
+const rows = await toast.promise(saveRows(), {
+  loading: { title: 'Saving…', description: 'Hold on' },
+  success: (count) => ({ title: \`Saved \${count} rows\` }),
+  error: (error) => ({ title: 'Save failed', description: error.message })
+});
+
+toast.update('batch', (current) => ({ title: current.title + '!' }));
+toast.dismiss(); // closes every toast
+\`\`\`
+
 **Mounting order:** \`toast()\` never throws when no \`<Toaster />\` is mounted yet — the toast is queued and shown by the first Toaster that mounts. In development, a single \`console.warn\` reports a queue that is still waiting a tick later. Dismissing a queued toast drops it from the queue, and a \`toast()\` call made during SSR is discarded instead of queued.
 
 **Returns:**
 A \`Toast\` instance that you can use to programmatically control the root:
 - \`toast.remove()\` - Remove the toast manually
+- \`toast.update(patch)\` - Update the toast in place (see Changing a toast); ignored once the toast was dismissed
+- \`toast.updateKey\` - Number of updates received, rendered as \`data-update-key\`
+- \`toast.dismissed\` - Whether the toast was dismissed
 - \`toast.id\` - Unique identifier
 - \`toast.opts\` - Toast options
 
 **Notes:**
 - Toasts are non-blocking and don't prevent user interaction
-- The toaster is a \`role="region"\` landmark named "Notifications" (not a \`<dialog>\`); pressing F6 anywhere moves focus into it. Each toast is \`role="status"\`, or \`role="alert"\` when \`important\`
+- The toaster is a \`role="region"\` landmark named "Notifications" (not a \`<dialog>\`), always rendered and empty while no toast shows; pressing F6 anywhere moves focus into it, and Tab then reaches the toasts. Toasts are announced through two live regions inside it that exist before the first toast: a polite one, and an assertive one for \`important\` toasts. The text announced is the toast's rendered title and description, again whenever the toast is updated. Each toast is a labelled \`role="group"\` (named by its title, described by its description), not a live region of its own
+- When the focused toast is dismissed, or is pushed past \`visibleToasts\` and turns inert, focus moves to the nearest toast that stays visible, else back to the element that was focused before F6, else to the region, instead of dropping to the page
 - Toasts stacked away behind the front one are \`inert\` (rather than \`aria-hidden\`), so they take no clicks or tab stops until they surface
 - Multiple toasts can be displayed simultaneously and will stack based on position
-- Toasts pause their auto-close timer when hovered, and while the browser window is blurred or its tab is hidden; they resume with the time they had left. A toast shown while the window is inactive starts paused
+- Toasts pause their auto-close timer while the pointer is over their stack (a touch tap is not a hover), while keyboard focus (\`:focus-visible\`) is on the stack (a mouse click or tap that focuses a toast does not pause anything), while a press or swipe is on one of its toasts, and while the browser window is blurred or its tab is hidden. The timers resume only when none of these holds them, with the time they had left. A toast shown while any of them applies starts paused
 - Toasts can be dismissed by clicking the close icon, clicking the toast (if \`closeOnClick\` is true), or automatically after the duration expires
+
+## Toaster props
+
+- \`direction\` (\`'ltr' | 'rtl'\`, optional): sets \`dir\` on the notification region, so the toasts' text and layout follow it. Inherited from the page when omitted. Positions stay physical: \`left\` and \`right\` are screen sides.
 
 ## Theme Customization
 

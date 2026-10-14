@@ -12,6 +12,7 @@
 	import { mergeToastTheme, useToastTheme, type ToastThemeProps } from './toast.theme.js';
 	import type { WithAttachments } from '$lib/types/props.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { tick, untrack } from 'svelte';
 	import { createPointerDrag } from '$lib/utils/pointerDrag.js';
 	import { createVelocityTracker } from '$lib/utils/swipeVelocity.js';
 	import { composeHandlers } from '$lib/utils/handlers.js';
@@ -67,14 +68,40 @@
 	);
 
 	const in_out = fso();
+	const uid = $props.id();
+	const titleId = `${uid}-title`;
+	const descriptionId = `${uid}-description`;
 
-	const onPointerEnter = () => {
+	// A tap fires compatibility mouse events and a `pointerenter`, but is not a hover: no
+	// `pointermove` follows it that would ever release the stack again.
+	const onPointerEnter = (event: PointerEvent) => {
 		const toaster = toast.toaster;
 		const position = toast.opts.position;
-		if (!toaster || toaster.hovering === position) return;
-		toaster.hovering = position;
+		if (!toaster || event.pointerType === 'touch' || toaster.hovering === position) return;
+		toaster.setHovering(position);
 		updateArea();
-		toaster.toggleTimers(position, 'pause');
+	};
+
+	// Keyboard focus holds the stack's timers, as hover does; a click or tap that focuses the toast
+	// does not (`:focus-visible` is what tells them apart).
+	const isFocusVisible = (target: EventTarget | null) => {
+		if (!(target instanceof Element)) return false;
+		try {
+			return target.matches(':focus-visible');
+		} catch {
+			// No `:focus-visible`: every focus counts, so a keyboard user is never left behind.
+			return true;
+		}
+	};
+	const onFocusIn = (event: FocusEvent) => {
+		const toaster = toast.toaster;
+		if (!toaster) return;
+		toaster.setFocused(isFocusVisible(event.target) ? toast : null);
+	};
+	const onFocusOut = (event: FocusEvent) => {
+		// Moving between the toast's own controls keeps the hold.
+		if (event.relatedTarget instanceof Node && toast.element?.contains(event.relatedTarget)) return;
+		toast.toaster?.setFocused(null, toast);
 	};
 
 	// --- Swipe / drag to dismiss ------------------------------------------------
@@ -101,19 +128,32 @@
 	const swipeEnabled = $derived(!!toast.opts.dismissible && toast.opts.swipeToDismiss !== false);
 
 	let dragOffset = $state(0);
-	let dragging = $state(false);
 	// The click that ends a drag is not a press on the toast (`closeOnClick`). Set when a drag
 	// ends; the click consumes it, and the next press clears one that no click followed.
 	let suppressClick = false;
 	const tracker = createVelocityTracker();
 	const axisPos = (event: PointerEvent) => (swipe.axis === 'x' ? event.clientX : event.clientY);
 
+	// The press, or the swipe it became, ends: the stack's timers resume unless something else
+	// holds them.
+	const release = () => {
+		toast.dragging = false;
+		if (toast.pressed) {
+			toast.pressed = false;
+			toast.toaster?.syncHolds();
+		}
+	};
+	// Pressing a toast's own controls (action buttons, the close button, a link in its text) acts
+	// on them; only the surface of the toast starts a swipe.
+	const SWIPE_IGNORED =
+		'button, a[href], input, select, textarea, label, [role="button"], [data-swipe-ignore]';
+
 	// A toast re-added with the id of one still animating out takes this item over. It must
 	// not inherit the swipe that dismissed its predecessor, or it rests off its slot.
 	$effect.pre(() => {
 		if (!toast) return;
 		dragOffset = 0;
-		dragging = false;
+		untrack(release);
 	});
 
 	// Primary button only; a cancelled touch or a lost capture snaps the toast back. A mouse
@@ -121,12 +161,22 @@
 	// or snaps back by the same rule as a normal release.
 	const dragAttachment = createPointerDrag({
 		disabled: () => !swipeEnabled,
+		canStart: (event) => {
+			const control = event.target instanceof Element ? event.target.closest(SWIPE_IGNORED) : null;
+			return !control || !toast.element?.contains(control);
+		},
+		// `touch-action` keeps the page scrolling along the axis the swipe does not use, so the
+		// browser has to be left to govern touch panning around the gesture.
+		preventTouchMove: false,
 		// The toast holds buttons, not just a handle: the pointer is captured only once the press
 		// becomes a drag, so a press that never travels keeps its click.
 		capture: 'on-activate',
 		// A press that travels mostly across the swipe axis is spent: it never drags the toast.
 		axis: () => swipe.axis,
 		onDown: ({ event }) => {
+			// A press holds the stack's timers, so a toast does not vanish under a finger.
+			toast.pressed = true;
+			toast.toaster?.syncHolds();
 			suppressClick = false;
 			tracker.reset();
 			tracker.add(axisPos(event), event.timeStamp);
@@ -134,7 +184,7 @@
 		// Attributed to the swipe axis (either way along it): the drag starts.
 		shouldActivate: () => true,
 		onStart: ({ node }) => {
-			dragging = true;
+			toast.dragging = true;
 			// A mouse press that travelled before it became a drag may have begun selecting text.
 			const selection = window.getSelection();
 			if (selection && !selection.isCollapsed && node.contains(selection.anchorNode)) {
@@ -149,7 +199,7 @@
 			tracker.add(axisPos(event), event.timeStamp);
 		},
 		onEnd: ({ event }) => {
-			dragging = false;
+			release();
 			suppressClick = true;
 			tracker.add(axisPos(event), event.timeStamp);
 			const towardEdge = dragOffset * swipe.dir;
@@ -161,14 +211,44 @@
 			}
 		},
 		onCancel: () => {
-			dragging = false;
+			release();
 			dragOffset = 0;
 		}
 	});
 
+	// The toast is announced through the Toaster's persistent live regions rather than as a live
+	// region of its own, which screen readers often miss when it is inserted already filled in.
+	// Announces on arrival and again whenever the toast is updated, with the text as rendered.
+	let contentElement = $state<HTMLElement>();
+	$effect(() => {
+		void toast.opts.title;
+		void toast.opts.description;
+		void toast.opts.important;
+		void toast.updateKey;
+		const toaster = toast.toaster;
+		const important = !!toast.opts.important;
+		let cancelled = false;
+		tick().then(() => {
+			if (cancelled || !contentElement) return;
+			const text = [...contentElement.children]
+				.map((part) => part.textContent?.trim())
+				.filter(Boolean)
+				.join('. ');
+			toaster?.announce(text, important);
+		});
+		return () => (cancelled = true);
+	});
+
+	// A toast pushed past `visibleToasts` turns inert, and focus on it would drop to the page.
+	$effect.pre(() => {
+		if (hidden) untrack(() => toast.toaster?.moveFocusFrom(toast));
+	});
+
 	// Fade the toast as it's dragged toward dismissal.
 	const dragOpacity = $derived(
-		dragging && dragOffset * swipe.dir > 0 ? Math.max(0.2, 1 - (dragOffset * swipe.dir) / 140) : 1
+		toast.dragging && dragOffset * swipe.dir > 0
+			? Math.max(0.2, 1 - (dragOffset * swipe.dir) / 140)
+			: 1
 	);
 </script>
 
@@ -179,6 +259,8 @@
 	{...attachments}
 	{@attach dragAttachment}
 	onpointerenter={onPointerEnter}
+	onfocusin={onFocusIn}
+	onfocusout={onFocusOut}
 	ontransitionend={(e) => {
 		if (e.propertyName === 'translate' && toast.hovered && index === 0) {
 			updateArea();
@@ -196,16 +278,17 @@
 	}}
 	out:in_out={toast.animations.out}
 	in:in_out={toast.animations.in}
-	aria-live={toast.opts.important ? 'assertive' : 'polite'}
-	aria-atomic="true"
-	role={toast.opts.important ? 'alert' : 'status'}
+	data-update-key={toast.updateKey}
+	role="group"
+	aria-labelledby={toast.opts.title ? titleId : toast.opts.description ? descriptionId : undefined}
+	aria-describedby={toast.opts.title && toast.opts.description ? descriptionId : undefined}
 	tabIndex={hidden ? -1 : 0}
 	inert={hidden}
 	style:opacity={hidden ? 0 : dragOpacity}
 	style:pointer-events={hidden ? 'none' : undefined}
-	style:touch-action={swipeEnabled ? 'none' : undefined}
-	style:cursor={dragging ? 'grabbing' : swipeEnabled ? 'grab' : undefined}
-	style:user-select={dragging ? 'none' : undefined}
+	style:touch-action={swipeEnabled ? (swipe.axis === 'x' ? 'pan-y' : 'pan-x') : undefined}
+	style:cursor={toast.dragging ? 'grabbing' : swipeEnabled ? 'grab' : undefined}
+	style:user-select={toast.dragging ? 'none' : undefined}
 	class={classes.root({
 		richColors: toast.opts.richColors,
 		color: toast.opts.color,
@@ -215,7 +298,7 @@
 	style:scale={toast.stacked ? Math.pow(0.97, reversedIndex).toFixed(4) : '1'}
 	style:translate="{swipe.axis === 'x' ? dragOffset : 0}px {toast.translateY +
 		(swipe.axis === 'y' ? dragOffset : 0)}px"
-	style:transition={dragging ? 'none' : undefined}
+	style:transition={toast.dragging ? 'none' : undefined}
 	style={toast.actualizedPosition[2]}
 	onclick={toast.opts.dismissible && toast.opts.closeOnClick
 		? () => {
@@ -240,6 +323,7 @@
 		</div>
 	{/if}
 	<div
+		bind:this={contentElement}
 		class={classes.content({
 			size: toast.opts.size,
 			color: toast.opts.color,
@@ -253,6 +337,7 @@
 				richColors: toast.opts.richColors
 			})}
 			render={toast.opts.title}
+			attrs={{ id: titleId }}
 		/>
 		<Slot
 			class={classes.description({
@@ -261,6 +346,7 @@
 				richColors: toast.opts.richColors
 			})}
 			render={toast.opts.description}
+			attrs={{ id: descriptionId }}
 		/>
 	</div>
 	{#if toast.opts.actions?.length}

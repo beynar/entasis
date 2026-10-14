@@ -32,7 +32,7 @@ const setVisibility = (state: DocumentVisibilityState) => {
 };
 
 const toaster = () => window.toaster as Toaster;
-const items = () => document.querySelectorAll('section[data-live-region] > li');
+const items = () => document.querySelectorAll<HTMLElement>('section[data-live-region] > li');
 
 // From the call on, transitions never finish, so a removed toast stays mid-exit.
 const holdAnimations = () =>
@@ -351,8 +351,7 @@ describe('toast timers and window activity', () => {
 
 		// Leaving the stack while the window is inactive keeps it paused too.
 		window.dispatchEvent(new FocusEvent('blur'));
-		toaster().toggleTimers(shown.opts.position, 'resume');
-		toaster().hovering = null;
+		toaster().setHovering(null);
 		expect(shown.timer?.paused).toBe(true);
 
 		window.dispatchEvent(new FocusEvent('focus'));
@@ -447,5 +446,286 @@ describe('toast action handlers (CX-4)', () => {
 		await tick();
 		expect(leave).toHaveBeenCalledOnce();
 		await waitFor(() => expect(items()).toHaveLength(0));
+	});
+});
+
+// jsdom never matches `:focus-visible`; this stands in for a keyboard user's focus ring.
+const focusVisible = (visible: boolean) =>
+	vi.spyOn(Element.prototype, 'matches').mockImplementation(function (
+		this: Element,
+		selector: string
+	) {
+		if (selector === ':focus-visible') return visible;
+		return Element.prototype.matches.call(this, selector);
+	});
+
+describe('toast pause reasons (DF-2)', () => {
+	test('keyboard focus holds the stack and releases with the time that was left', async () => {
+		render(Harness);
+		const onAutoDismiss = vi.fn();
+		const shown = toast.success({ title: 'Saved', duration: 1000, onAutoDismiss });
+		await tick();
+		run(400);
+
+		const spy = focusVisible(true);
+		items()[0].focus();
+		expect(shown.timer?.heldBy).toEqual(['focus']);
+		run(5000);
+		expect(onAutoDismiss).not.toHaveBeenCalled();
+
+		items()[0].blur();
+		expect(shown.timer?.paused).toBe(false);
+		run(560);
+		expect(onAutoDismiss).not.toHaveBeenCalled();
+		run(64);
+		expect(onAutoDismiss).toHaveBeenCalledTimes(1);
+		spy.mockRestore();
+	});
+
+	test('a focus that is not a keyboard focus (a click, a tap) holds nothing', async () => {
+		render(Harness);
+		const shown = toast.success({ title: 'Saved', duration: 1000 });
+		await tick();
+		const spy = focusVisible(false);
+		items()[0].focus();
+		expect(shown.timer?.paused).toBe(false);
+		spy.mockRestore();
+	});
+
+	test('hover and focus hold together: the stack resumes only when both are gone', async () => {
+		render(Harness);
+		const shown = toast.success({ title: 'Saved', duration: 1000 });
+		await tick();
+		const spy = focusVisible(true);
+		await fireEvent.pointerEnter(items()[0], { pointerType: 'mouse' });
+		items()[0].focus();
+		expect(shown.timer?.heldBy).toEqual(['hover', 'focus']);
+
+		// Pointer first, focus second.
+		toaster().setHovering(null);
+		expect(shown.timer?.heldBy).toEqual(['focus']);
+		await fireEvent.pointerEnter(items()[0], { pointerType: 'mouse' });
+		items()[0].blur();
+		expect(shown.timer?.heldBy).toEqual(['hover']);
+		toaster().setHovering(null);
+		expect(shown.timer?.paused).toBe(false);
+		spy.mockRestore();
+	});
+
+	test('focus moving between two toasts of a stack keeps the hold', async () => {
+		render(Harness);
+		const first = toast.success({ title: 'First', duration: 1000 });
+		const second = toast.success({ title: 'Second', duration: 1000 });
+		await tick();
+		const spy = focusVisible(true);
+		items()[0].focus();
+		items()[1].focus();
+		expect(first.timer?.heldBy).toEqual(['focus']);
+		expect(second.timer?.heldBy).toEqual(['focus']);
+		items()[1].blur();
+		expect(first.timer?.paused).toBe(false);
+		spy.mockRestore();
+	});
+
+	test('a touch pointer entering a toast is not a hover', async () => {
+		render(Harness);
+		const shown = toast.success({ title: 'Saved', duration: 1000 });
+		await tick();
+		await fireEvent.pointerEnter(items()[0], { pointerType: 'touch' });
+		expect(toaster().hovering).toBeNull();
+		expect(shown.timer?.paused).toBe(false);
+		await fireEvent.pointerEnter(items()[0], { pointerType: 'mouse' });
+		expect(toaster().hovering).toBe(shown.opts.position);
+	});
+
+	test('a press holds the stack until the pointer is released or cancelled', async () => {
+		render(Harness, { position: 'bottom-right' });
+		const shown = toast.success({ title: 'Saved', duration: 1000 });
+		await tick();
+		const li = items()[0] as HTMLElement;
+		const touch = { pointerId: 9, pointerType: 'touch', clientX: 100, clientY: 100 };
+		await fireEvent.pointerDown(li, touch);
+		expect(shown.timer?.heldBy).toEqual(['swipe']);
+		run(3000);
+		expect(shown.timer?.remaining).toBe(1000);
+		await fireEvent.pointerUp(li, touch);
+		expect(shown.timer?.paused).toBe(false);
+
+		await fireEvent.pointerDown(li, touch);
+		expect(shown.timer?.heldBy).toEqual(['swipe']);
+		await fireEvent.pointerCancel(li, touch);
+		expect(shown.timer?.paused).toBe(false);
+	});
+
+	test('a dismissed toast takes its focus and hover holds with it', async () => {
+		render(Harness);
+		const keep = toast.info({ title: 'Other', duration: 1000, position: 'top-left' });
+		const gone = toast.success({ title: 'Gone', duration: false, position: 'bottom-right' });
+		await tick();
+		const spy = focusVisible(true);
+		(items()[1] as HTMLElement).focus();
+		await fireEvent.pointerEnter(items()[1], { pointerType: 'mouse' });
+		expect(toaster().focusedToast).toBe(gone);
+		gone.remove();
+		expect(toaster().focusedToast).toBeNull();
+		expect(toaster().hovering).toBeNull();
+		expect(keep.timer?.paused).toBe(false);
+		spy.mockRestore();
+	});
+});
+
+describe('toast.update, toast.dismiss and toast.promise (DF-3)', () => {
+	test('update() takes a patch, keeps the other options, restarts the timer and bumps data-update-key', async () => {
+		render(Harness);
+		const shown = toast.info({
+			id: 'job',
+			title: 'Working',
+			description: 'Step 1',
+			duration: 1000
+		});
+		await tick();
+		expect(items()[0]).toHaveAttribute('data-update-key', '0');
+		run(600);
+
+		expect(toast.update('job', { title: 'Still working' })).toBe(shown);
+		await tick();
+		expect(screen.getByText('Still working')).toBeInTheDocument();
+		expect(screen.getByText('Step 1')).toBeInTheDocument();
+		expect(items()[0]).toHaveAttribute('data-update-key', '1');
+		expect(shown.timer?.remaining).toBe(1000);
+
+		shown.update({ color: 'success' });
+		await tick();
+		expect(items()[0]).toHaveAttribute('data-color', 'success');
+		expect(items()[0]).toHaveAttribute('data-update-key', '2');
+	});
+
+	test('a function update sees the current options, Toaster defaults included', async () => {
+		render(Harness, { duration: 7000 });
+		const shown = toast.info({ id: 'count', title: 'Items: 1', description: 'one' });
+		await tick();
+		let seen: { title?: unknown; duration?: unknown } = {};
+		toast.update('count', (current) => {
+			seen = { title: current.title, duration: current.duration };
+			return { title: `${current.title}!` };
+		});
+		await tick();
+		expect(seen).toEqual({ title: 'Items: 1', duration: 7000 });
+		expect(shown.opts.title).toBe('Items: 1!');
+		shown.update((current) => ({ title: `${current.title}?` }));
+		expect(shown.opts.title).toBe('Items: 1!?');
+	});
+
+	test('update() with an id that is not on screen does nothing', async () => {
+		render(Harness);
+		expect(toast.update('nobody', { title: 'x' })).toBeUndefined();
+		const shown = toast.info({ id: 'closed', title: 'Closed', duration: false });
+		await tick();
+		shown.remove();
+		await tick();
+		expect(toast.update('closed', { title: 'Back' })).toBeUndefined();
+		// The handle of a dismissed toast stays dismissed too.
+		shown.update({ title: 'Back' });
+		await tick();
+		expect(toaster().toasts).toEqual([]);
+	});
+
+	test('dismiss(id) closes one toast and dismiss() all of them, each onDismiss once', async () => {
+		render(Harness);
+		const onDismiss = vi.fn();
+		toast.info({ id: 'a', title: 'A', duration: false, onDismiss });
+		toast.info({ id: 'b', title: 'B', duration: false, onDismiss });
+		toast.info({ id: 'c', title: 'C', duration: false, position: 'top-left', onDismiss });
+		await tick();
+
+		toast.dismiss('a');
+		toast.dismiss('a');
+		expect(toaster().toasts.map((t) => t.id)).toEqual(['b', 'c']);
+		expect(onDismiss).toHaveBeenCalledTimes(1);
+
+		toast.dismiss();
+		expect(toaster().toasts).toEqual([]);
+		expect(onDismiss).toHaveBeenCalledTimes(3);
+		toast.dismiss();
+		expect(onDismiss).toHaveBeenCalledTimes(3);
+	});
+
+	test('dismiss() also drops toasts still waiting for a Toaster', async () => {
+		const onDismiss = vi.fn();
+		const queued = toast.info({ title: 'Early', duration: false, onDismiss });
+		toast.dismiss();
+		expect(onDismiss).toHaveBeenCalledTimes(1);
+		render(Harness);
+		await tick();
+		expect(queued.toaster).toBeNull();
+		expect(items()).toHaveLength(0);
+	});
+
+	test('promise() shows a loading toast, then the success options computed from the result', async () => {
+		render(Harness);
+		let resolve!: (value: number) => void;
+		const pending = new Promise<number>((done) => (resolve = done));
+		const returned = toast.promise(pending, {
+			id: 'save',
+			loading: { title: 'Saving', description: 'Hold on' },
+			success: (rows) => ({ title: `Saved ${rows} rows` }),
+			error: 'Failed'
+		});
+		expect(returned).toBe(pending);
+		await tick();
+		const shown = toaster().find('save')!;
+		expect(shown.loading).toBe(true);
+		expect(shown.timer).toBeUndefined();
+		expect(shown.opts.color).toBe('primary');
+		expect(screen.getByText('Hold on')).toBeInTheDocument();
+
+		resolve(3);
+		await returned;
+		await tick();
+		expect(shown.loading).toBe(false);
+		expect(shown.opts.color).toBe('success');
+		expect(screen.getByText('Saved 3 rows')).toBeInTheDocument();
+		// The pending toast's description does not leak into the result.
+		expect(screen.queryByText('Hold on')).not.toBeInTheDocument();
+		expect(shown.timer?.delay).toBe(4000);
+		expect(items()).toHaveLength(1);
+	});
+
+	test('promise() turns a rejection into the error toast and still rejects for the caller', async () => {
+		render(Harness);
+		const failure = new Error('disk full');
+		const returned = toast.promise(Promise.reject(failure), {
+			id: 'upload',
+			loading: 'Uploading',
+			success: 'Uploaded',
+			error: (reason) => `Failed: ${(reason as Error).message}`
+		});
+		await expect(returned).rejects.toBe(failure);
+		await tick();
+		expect(screen.getByText('Failed: disk full')).toBeInTheDocument();
+		expect(toaster().find('upload')?.opts.color).toBe('danger');
+	});
+
+	test('a promise that settles after the user dismissed its toast does not bring it back', async () => {
+		render(Harness);
+		let resolve!: () => void;
+		const pending = new Promise<void>((done) => (resolve = done));
+		toast.promise(pending, { id: 'late', loading: 'Working', success: 'Done', error: 'Failed' });
+		await tick();
+		toast.dismiss('late');
+		await tick();
+		resolve();
+		await pending;
+		await tick();
+		expect(toaster().toasts).toEqual([]);
+		expect(screen.queryByText('Done')).not.toBeInTheDocument();
+	});
+
+	test('the reserved names are not colors: no toast is created by accident', async () => {
+		render(Harness);
+		toast.update('missing', {});
+		toast.dismiss();
+		await tick();
+		expect(toaster().toasts).toEqual([]);
 	});
 });
