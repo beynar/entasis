@@ -25,6 +25,7 @@
 		ref = $bindable(),
 		fullWidth = false,
 		disabled = false,
+		focusableWhenDisabled = false,
 		theme,
 		rel,
 		target,
@@ -46,10 +47,15 @@
 		squared ?? !!((!children && prefix && !suffix) || (!children && !prefix && suffix))
 	);
 	const isAnchor = $derived(!!href);
-	// Only a disabled <button> uses the native attribute. A loading button stays focusable, so a
-	// keyboard user keeps their place, and refuses activation through `aria-disabled` instead.
-	const nativeDisabled = $derived(!isAnchor && disabled);
+	// Only a disabled <button> uses the native attribute, and only when it may leave the tab order.
+	// A loading button, or one that is `focusableWhenDisabled`, stays focusable, so a keyboard user
+	// keeps their place, and refuses activation through `aria-disabled` instead.
+	const nativeDisabled = $derived(!isAnchor && disabled && !focusableWhenDisabled);
 	const inactive = $derived(disabled || loading);
+	// A disabled anchor has no `href`, so only an explicit tabindex keeps it focusable.
+	const anchorTabindex = $derived(
+		isAnchor && disabled ? (focusableWhenDisabled ? (tabindex ?? 0) : -1) : tabindex
+	);
 
 	const resolvedColor = $derived(useDefaultColor(color));
 	// One set of variant values for every slot; the template reads `slots.x()`.
@@ -61,6 +67,7 @@
 			size,
 			loading,
 			disabled,
+			focusable: focusableWhenDisabled,
 			fullWidth
 		})
 	);
@@ -106,7 +113,7 @@
 	{target}
 	{download}
 	{type}
-	tabindex={isAnchor && disabled ? -1 : tabindex}
+	tabindex={anchorTabindex}
 	bind:this={ref}
 	data-active={dataActive}
 	data-highlighted={dataHighlighted}

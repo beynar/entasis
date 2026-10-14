@@ -72,9 +72,10 @@
 		enabled: () => !disabled,
 		enableHoverFocus: false,
 		defaultFocusedIndex: () => (tabStopIndex >= 0 ? tabStopIndex : null),
-		onChange: (index) => {
-			if (index !== null) selectItem(index);
-		}
+		// Selection follows the keyboard, but only a deliberate key move (an arrow, Home or End)
+		// selects. Tabbing in, a programmatic focus or the restore after a removal never changes
+		// the value, and Alt, Ctrl or Meta with an arrow is left to the browser.
+		onKeyboardMove: (index) => selectItem(index)
 	});
 
 	const indicator = useSlidingIndicator({

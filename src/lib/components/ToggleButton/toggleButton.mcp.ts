@@ -30,7 +30,8 @@ The ToggleButton component is a two-state button that can be toggled on and off,
 - **size**: 'small' | 'normal' | 'large' (default: 'normal')
 
 ### State Props
-- **disabled**: boolean (default: false) - Disables interaction
+- **disabled**: boolean (default: false) - Disables interaction. The button gets the native \`disabled\` attribute and leaves the tab order, unless \`focusableWhenDisabled\` is set
+- **focusableWhenDisabled**: boolean (default: false) - Keeps a \`disabled\` button focusable: it renders \`aria-disabled="true"\` instead of the native attribute, stays in the tab order, still receives pointer events (for a tooltip that explains why), and refuses to toggle: clicks from the pointer, Enter and Space are cancelled before any other listener sees them. Has no effect without \`disabled\`
 
 ### Event Props
 - **onValueChange**: (value: boolean) => void - Called once when toggle state changes
@@ -167,6 +168,7 @@ The theme object contains the following parts:
 - Variants:
   - checked: boolean - Checked/toggled state styling
   - disabled: boolean - Disabled state styling
+  - focusable: boolean - Set with \`focusableWhenDisabled\`: a disabled button keeps its pointer events
   - color: Color variants
   - variant: 'outline' | 'ghost' - Button variant
   - squared: boolean - Square button styling

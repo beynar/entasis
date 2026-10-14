@@ -33,7 +33,8 @@ The Button component is a flexible and customizable button element that supports
 - **fullWidth**: boolean (default: false) - Makes button take full width of container
 - **squared**: boolean - Makes button square (aspect-ratio 1:1), auto-determined if only prefix/suffix is provided
 - **disabled**: boolean (default: false) - Disables button interaction. A \`<button>\` gets the native \`disabled\` attribute and leaves the tab order; an anchor drops its href, leaves the tab order and renders \`aria-disabled="true"\`
-- **loading**: boolean (default: false) - Shows the Theme-configured loading spinner and refuses activation while staying focusable: renders \`aria-busy="true"\` and \`aria-disabled="true"\`, ignores pointer events, and cancels clicks from Enter or Space before any other listener sees them, including attachments such as \`popover.trigger\`, as well as the form submission of a \`type="submit"\` button and the navigation of an anchor. It never sets the native \`disabled\` attribute, so keyboard focus stays on the button while the work runs
+- **focusableWhenDisabled**: boolean (default: false) - Keeps a \`disabled\` button focusable: it renders \`aria-disabled="true"\` instead of the native \`disabled\` attribute, stays in the tab order and still receives pointer events (so a tooltip can explain why it is unavailable), and refuses activation: clicks from the pointer, Enter and Space are cancelled before any other listener sees them, and a \`type="submit"\` button does not submit. A disabled anchor drops its href and takes \`tabindex="0"\`. Has no effect without \`disabled\`
+- **loading**: boolean (default: false) - Shows the Theme-configured loading spinner and refuses activation while staying focusable: renders \`aria-busy="true"\` and \`aria-disabled="true"\`, and cancels clicks (pointer, Enter and Space) before any other listener sees them, including attachments such as \`popover.trigger\`, as well as the form submission of a \`type="submit"\` button and the navigation of an anchor. It never sets the native \`disabled\` attribute, so keyboard focus stays on the button while the work runs
 
 ### State Props
 Describe the meaning; the Button writes the ARIA. Never pass an aria-* attribute to a Button.
@@ -140,6 +141,7 @@ The button follows this DOM structure:
 - Disabled state prevents interaction
 - Loading state keeps focus on the button and announces it busy (\`aria-busy\`) and unavailable (\`aria-disabled\`); clicks, Enter, Space and form submission are cancelled until it ends
 - Prefer \`loading\` over \`disabled\` for a button whose own action is running: \`disabled\` removes the button from the tab order and drops focus to the page body
+- Use \`focusableWhenDisabled\` for a button that stays in the tab order while unavailable (for example with a tooltip explaining why); it is announced with \`aria-disabled\` and refuses activation
 
 ## Notes
 
@@ -202,6 +204,7 @@ const customTheme: ButtonThemeProps = {
   - variant: 'solid' | 'outline' | 'soft' | 'ghost' | 'link' - Visual style variant
   - loading: boolean - Loading state styling
   - disabled: boolean - Disabled state styling
+  - focusable: boolean - Set with \`focusableWhenDisabled\`: a disabled button keeps its pointer events
   - squared: boolean - Square button styling
   - fullWidth: boolean - Full width styling
 

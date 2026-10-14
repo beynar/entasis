@@ -68,10 +68,10 @@ export type ButtonPrimitiveProps = WithAttachments<
 			href?: string;
 			/**
 			 * When true, shows a spinner overlay and refuses activation while keeping the button
-			 * focusable: it renders `aria-busy="true"` and `aria-disabled="true"`, ignores pointer
-			 * events, and cancels clicks from the keyboard (Enter, Space) before any other listener
-			 * sees them, including attachments such as `popover.trigger`, as well as the form
-			 * submission of a `type="submit"` button and the navigation of an anchor. Unlike
+			 * focusable: it renders `aria-busy="true"` and `aria-disabled="true"`, and cancels clicks
+			 * (pointer, Enter and Space) before any other listener sees them, including attachments
+			 * such as `popover.trigger`, as well as the form submission of a `type="submit"` button
+			 * and the navigation of an anchor. Unlike
 			 * `disabled`, it never sets the native `disabled` attribute, so focus stays on the
 			 * button while the work runs.
 			 */
@@ -99,9 +99,20 @@ export type ButtonPrimitiveProps = WithAttachments<
 			/**
 			 * When true, prevents interaction and applies disabled styles. A `<button>` gets the
 			 * native `disabled` attribute and leaves the tab order; an anchor drops its `href`,
-			 * leaves the tab order and renders `aria-disabled="true"`.
+			 * leaves the tab order and renders `aria-disabled="true"`. With `focusableWhenDisabled`
+			 * the button stays in the tab order instead.
 			 */
 			disabled?: boolean;
+			/**
+			 * When true, a `disabled` button stays focusable: it renders `aria-disabled="true"`
+			 * instead of the native `disabled` attribute, keeps its place in the tab order and still
+			 * receives pointer events (so a tooltip can explain why it is unavailable), and refuses
+			 * activation: clicks from the pointer, Enter and Space are cancelled before any other
+			 * listener sees them, and a `type="submit"` button does not submit. An anchor drops its
+			 * `href` and takes `tabindex="0"`. Has no effect without `disabled`.
+			 * @default false
+			 */
+			focusableWhenDisabled?: boolean;
 			/**
 			 * The class name of the button. First element that the component outputs in the DOM.
 			 */

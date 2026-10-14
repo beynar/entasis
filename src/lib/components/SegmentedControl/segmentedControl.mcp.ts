@@ -74,8 +74,8 @@ Extra fields on item objects remain available to the snippet through generic inf
 
 ## Keyboard behavior
 
-- Tab enters on the selected item, or the first enabled item when no value matches.
-- Arrow Left/Right moves and selects, wrapping at the ends.
+- Tab enters on the selected item, or the first enabled item when no value matches. Tabbing in never changes the value, even when the selected item is disabled or no value matches.
+- Arrow Left/Right moves and selects, wrapping at the ends. Only a deliberate key move selects: arrows, Home and End.
 - Home/End selects the first/last enabled item.
 - Disabled items are skipped.
 - Arrow, Home and End keys pressed with Alt, Ctrl or Meta are left to the browser and never change the selection (Alt+ArrowLeft stays Back); Shift+Arrow still moves.

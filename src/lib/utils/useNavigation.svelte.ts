@@ -89,6 +89,13 @@ const hasMovedNode = (records: MutationRecord[]) => {
 	return records.some((record) => Array.from(record.addedNodes).some((node) => removed.has(node)));
 };
 
+/** An attribute record whose attribute holds the value it had before the write. */
+const isUnchangedAttribute = (record: MutationRecord) =>
+	record.type === 'attributes' &&
+	record.attributeName !== null &&
+	record.target instanceof Element &&
+	record.oldValue === record.target.getAttribute(record.attributeName);
+
 /** Writes an attribute only when its value differs, so unchanged items cost a read, not a write. */
 const setAttribute = (node: Element, name: string, value: string) => {
 	if (node.getAttribute(name) !== value) node.setAttribute(name, value);
@@ -765,6 +772,10 @@ export const useNavigation = (opts: NavigationOptions) => {
 				// placed as they register and removals keep it.
 				if (typeof MutationObserver !== 'undefined') {
 					observer = new MutationObserver((records) => {
+						// Writing an attribute with the value it already has still queues a record (a
+						// template re-assigning `button.disabled = true`). Counting it would re-run the
+						// attribute sync, which re-runs that template: an endless loop.
+						if (records.every(isUnchangedAttribute)) return;
 						if (hasMovedNode(records)) orderStale = true;
 						revision += 1;
 					});
@@ -772,6 +783,7 @@ export const useNavigation = (opts: NavigationOptions) => {
 						childList: true,
 						subtree: true,
 						attributes: true,
+						attributeOldValue: true,
 						attributeFilter: ['disabled', 'aria-disabled', 'data-disabled', 'hidden', 'inert']
 					});
 				}

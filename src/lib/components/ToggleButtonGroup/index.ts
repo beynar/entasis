@@ -2,6 +2,7 @@ export { default as ToggleButtonGroup } from './ToggleButtonGroup.svelte';
 export type {
 	ToggleButtonGroupItem,
 	ToggleButtonGroupItems,
+	ToggleButtonGroupOrientation,
 	ToggleButtonGroupProps,
 	ToggleButtonGroupType,
 	ToggleButtonGroupValue

@@ -84,6 +84,7 @@
 		'Bindable value with inferred item unions',
 		'Normal and pill shape variants',
 		'Radiogroup semantics and arrow keys',
+		'Only arrow, Home and End key moves select; tabbing in never changes the value',
 		'Size-aware item hit targets without visual growth',
 		'Default icon/label or custom item snippet'
 	]}

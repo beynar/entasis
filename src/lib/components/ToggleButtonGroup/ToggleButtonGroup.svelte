@@ -26,6 +26,8 @@
 		variant,
 		disabled,
 		joined = false,
+		orientation = 'horizontal',
+		loopFocus = true,
 		type = 'multiple' as Type,
 		theme,
 		class: className,
@@ -42,18 +44,33 @@
 
 	const classes = $derived(useToggleButtonGroupTheme(theme));
 	const id = $props.id();
-	// One tab stop for the whole group; arrows move between buttons (Radix ToggleGroup / Toolbar).
-	const navigation = useNavigation({
-		orientation: 'horizontal',
-		loop: true,
-		id,
-		enableHoverFocus: false
-	});
-
 	const pressed = $derived.by(() => {
 		const current = valueState.value as string[] | string | undefined;
 		if (Array.isArray(current)) return current;
 		return current === undefined ? [] : [current];
+	});
+
+	// One tab stop for the whole group, on the first pressed enabled button (the first enabled one
+	// when nothing is pressed); arrows move between buttons (Radix ToggleGroup / Toolbar). The group
+	// element is never a tab stop, so Shift+Tab leaves it in one step and a disabled group has no
+	// tabbable element. Buttons that are `focusableWhenDisabled` stay in the arrow-key order.
+	const navigation = useNavigation({
+		orientation: () => orientation,
+		get loop() {
+			return loopFocus;
+		},
+		id,
+		enableHoverFocus: false,
+		focusableContainer: false,
+		disabledItemsFocusable: true,
+		defaultFocusedIndex: () => {
+			const index = items.findIndex(
+				(item) =>
+					pressed.includes(item.value) &&
+					(!(disabled || item.disabled) || item.focusableWhenDisabled)
+			);
+			return index === -1 ? null : index;
+		}
 	});
 
 	function getButtonProps(item: ToggleButtonGroupItem) {
@@ -80,7 +97,9 @@
 	aria-label={label}
 	data-color={color}
 	data-type={type}
-	class={classes.root({ className, joined })}
+	data-orientation={orientation}
+	data-disabled={disabled ? '' : undefined}
+	class={classes.root({ className, joined, orientation })}
 	{@attach navigation.containerReference}
 	{...attachments}
 >

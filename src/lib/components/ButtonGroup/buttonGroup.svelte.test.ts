@@ -16,4 +16,12 @@ describe('ButtonGroup', () => {
 		expect(getByRole('button', { name: 'Left' })).toBeDisabled();
 		expect(getByRole('button', { name: 'Right' })).toBeDisabled();
 	});
+
+	test('an item that is focusableWhenDisabled stays focusable inside a disabled group', () => {
+		const { getByRole } = render(Harness, { props: { mode: 'focusable' } });
+		expect(getByRole('button', { name: 'Draft' })).toBeDisabled();
+		const publish = getByRole('button', { name: 'Publish' });
+		expect(publish).not.toBeDisabled();
+		expect(publish).toHaveAttribute('aria-disabled', 'true');
+	});
 });
