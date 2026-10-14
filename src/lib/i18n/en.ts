@@ -588,6 +588,7 @@ export const en = {
 	// Meter
 	meter: 'Meter',
 	meterSegment: (index: string | number, count: string | number) => `Segment ${index} of ${count}`,
+	progressIndeterminate: 'Indeterminate progress',
 	// Field validation
 	fieldRequired: 'This field is required',
 	fieldMustBeChecked: 'Check this box to continue',
@@ -602,7 +603,15 @@ export const en = {
 	fieldRangeUnderflow: (min: string | number) => `Enter a value of ${min} or more`,
 	fieldRangeOverflow: (max: string | number) => `Enter a value of ${max} or less`,
 	fieldIncomplete: (length: string | number) =>
-		`Enter all ${length} character${Number(length) === 1 ? '' : 's'}`
+		`Enter all ${length} character${Number(length) === 1 ? '' : 's'}`,
+	// Combobox
+	resultsCount: (count: string | number) =>
+		`${count} ${Number(count) === 1 ? 'result' : 'results'} available`,
+	tags: 'Tags',
+	// CheckboxesInput
+	selectAll: 'Select all',
+	// PinInput
+	oneTimeCode: 'One-time code'
 };
 
 export type Messages = typeof en;

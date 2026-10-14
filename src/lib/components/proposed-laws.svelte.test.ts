@@ -242,12 +242,11 @@ describe('law 7 · keyboard lists (F4a · CX-7)', () => {
 	});
 });
 
-// Menu renders its rows keyed by position (`{#each items as item, index (index)}` in
-// MenuFloating), so after "Copy" is removed the focused row node shows "Delete": the focus jumps
-// to another item before any key is pressed. The tab stop itself follows the element (above); the
-// rows need keys that follow their item, which is Menu's change to make (C3).
+// Menu keys its rows by identity (`menuItemKeys`: an explicit `key`, else the row's text), so
+// after "Copy" is removed the focused row node is still "Cut" and the next ArrowDown reaches
+// "Delete". The tab stop itself follows the element (above).
 describe('law 7 · Menu rows keep their node through removals (C3 · CX-7)', () => {
-	pending('removing an item before the focused one keeps arrow keys on track', async () => {
+	test('removing an item before the focused one keeps arrow keys on track', async () => {
 		const items = ['Archive', 'Copy', 'Cut', 'Delete'].map((title): MenuItem => ({
 			type: 'option',
 			title

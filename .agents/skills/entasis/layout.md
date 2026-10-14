@@ -349,19 +349,26 @@ Visual divider with optional label.
 
 `import { Menu } from 'entasis/menu'`
 
-Renders an array of items: buttons, options, separators, and submenus.
+Renders an array of items: buttons, options, separators, submenus, checkbox items, radio groups and labelled groups.
 
 **Props:**
 
 - `items`: `MenuItem[]` (required) -- discriminated union by `type`
-- `header` / `footer`: Snippet
+- `header` / `footer`: Snippet, rendered outside the `role="menu"` element (a link or field in them is not a menu item)
+- `filter`: `boolean | { placeholder?, label?, match? }` adds a search field above the rows; `search` (bindable) / `defaultSearch` / `onSearchChange(search)`, `onHighlightChange(value)`, `empty`: Snippet
+- `focusOnMount`: `boolean | 'container' | 'last'`; a PopupMenu decides from how it opened when this is left out
 
 **Item types:**
 
-- `{ type: 'option', title, description?, prefix?, suffix?, onclick?, href?, color?, size? }`
-- `{ type: 'button', children, variant?, color?, onclick? }`
+- `{ type: 'option', title, description?, prefix?, suffix?, onclick?, href?, color?, size?, closeOnClick? }`
+- `{ type: 'button', children, variant?, color?, onclick?, closeOnClick? }`
 - `{ type: 'separator', color?, thickness?, children? }`
-- `{ type: 'submenu', title, menu: MenuItem[], openOnHover?, openOnClick?, delay?, closeOnMouseLeave? }`
+- `{ type: 'submenu', title, menu: MenuItem[], openOnHover?, openOnClick?, delay?, closeOnMouseLeave?, filter?, onHighlightChange? }`
+- `{ type: 'checkbox', title, value?, defaultValue?, onValueChange?(value), closeOnClick? }` -- a `menuitemcheckbox` that keeps the menu open unless `closeOnClick: true`
+- `{ type: 'radio-group', label?, items: [{ value, title, ... }], value?, defaultValue?, onValueChange?(value), closeOnClick?, disabled? }` -- a labelled `role="group"` of `menuitemradio` rows
+- `{ type: 'group', label?, items: MenuItem[] }` -- a labelled `role="group"`
+
+Every item takes a `key`: rows keep their DOM node (focus, tab stop) through insertions and removals; without one it comes from the row's plain text, `href` or `textValue`.
 
 ```svelte
 <script>
@@ -386,7 +393,7 @@ Renders an array of items: buttons, options, separators, and submenus.
 />
 ```
 
-**Theme parts:** `root` (variants: gap), `header`, `footer`. Item styling is forwarded to the child components (`MenuOption`, `Button`, `Separator`) via each item's own `theme`.
+**Theme parts:** `root` (variants: density), `list`, `group`, `groupLabel`, `search`, `searchIcon`, `searchInput`, `empty`, `header`, `footer`. Item styling is forwarded to the child components (`MenuOption`, `Button`, `Separator`) via each item's own `theme`.
 
 ---
 
@@ -405,6 +412,8 @@ Popover + Menu combo. Inherits all Popover props.
   this setting; an item with `data-menu-keep-open="true"` never closes the menu. A PopupMenu in
   another menu's header, footer or trigger keeps its own setting.
 - `position`, `offset`, `open` (bindable), `openOnClick`, `openOnHover`, `delay`, `closeOnClickOutside`, `closeOnEscape`, `closeOnMouseLeave`
+
+Focus follows how the menu opened: Enter, Space, a screen reader press or ArrowDown highlights the first row, ArrowUp the last, a mouse or touch press focuses the menu itself, and a hover open leaves focus where it was. ArrowDown and ArrowUp on the button open the menu. Tab closes the whole tree and continues after the trigger; Shift+Tab stays on the trigger (`onOpenChange` reason `'focus-out'`). In right-to-left text the panel carries the trigger's direction: submenus open to the left and ArrowLeft opens them.
 
 ```svelte
 <script lang="ts">
@@ -440,6 +449,7 @@ Individual menu item with title/description layout.
 - `color`: Colors (default: `'neutral'`)
 - `onclick`, `onpointerenter`, `onpointerleave`
 - `href`, `target`, `rel`
+- `closeOnClick`: boolean (default `true`) -- `false` keeps the menu open when the row is pressed
 - `as`: string -- override element type
 
 **Auto element detection:** href renders a, onclick renders button, else div.
@@ -457,7 +467,7 @@ Individual menu item with title/description layout.
 </MenuOption>
 ```
 
-**Theme parts:** `root` (variants: size, color), `title`, `description`, `prefix` (variants: size, align), `suffix`, `content`
+**Theme parts:** `root` (variants: size, color), `title`, `description`, `prefix` (variants: size, align), `suffix`, `content`, `indicator` (variants: checked)
 
 ---
 

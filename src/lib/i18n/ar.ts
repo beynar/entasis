@@ -572,6 +572,7 @@ export const ar: Messages = {
 	// مقياس
 	meter: 'مقياس',
 	meterSegment: (index: string | number, count: string | number) => `الجزء ${index} من ${count}`,
+	progressIndeterminate: 'تقدم غير محدد',
 	// التحقق من الحقول
 	fieldRequired: 'هذا الحقل مطلوب',
 	fieldMustBeChecked: 'حدد هذا المربع للمتابعة',
@@ -583,5 +584,13 @@ export const ar: Messages = {
 	fieldTooLong: (max: string | number) => `أدخل ${max} أحرف كحد أقصى`,
 	fieldRangeUnderflow: (min: string | number) => `أدخل قيمة أكبر من ${min} أو تساويها`,
 	fieldRangeOverflow: (max: string | number) => `أدخل قيمة أصغر من ${max} أو تساويها`,
-	fieldIncomplete: (length: string | number) => `أدخل جميع الأحرف البالغ عددها ${length}`
+	fieldIncomplete: (length: string | number) => `أدخل جميع الأحرف البالغ عددها ${length}`,
+	// Combobox
+	resultsCount: (count: string | number) =>
+		Number(count) === 1 ? 'نتيجة واحدة متاحة' : Number(count) === 2 ? 'نتيجتان متاحتان' : Number(count) >= 3 && Number(count) <= 10 ? `${count} نتائج متاحة` : `${count} نتيجة متاحة`,
+	tags: 'الوسوم',
+	// CheckboxesInput
+	selectAll: 'تحديد الكل',
+	// PinInput
+	oneTimeCode: 'رمز لمرة واحدة'
 };

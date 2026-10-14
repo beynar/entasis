@@ -212,6 +212,9 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 		docs: false,
 		related: ['form']
 	}),
+	component('autocomplete', 'components/Form/Autocomplete', 'Forms', 'Autocomplete', {
+		related: ['combobox', 'text-input', 'tags-input']
+	}),
 	component('calendar', 'components/Form/Calendar', 'Forms', 'Calendar', {
 		related: ['date-input', 'date-selector', 'mini-calendar']
 	}),
@@ -227,7 +230,7 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 		related: ['color-input']
 	}),
 	component('combobox', 'components/Form/Combobox', 'Forms', 'Combobox', {
-		related: ['select', 'tags-input']
+		related: ['select', 'tags-input', 'autocomplete']
 	}),
 	component('date-input', 'components/Form/DateInput', 'Forms', 'Date input', {
 		related: ['date-selector', 'calendar']
@@ -349,13 +352,16 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 	}),
 	component('empty', 'components/Empty', 'Feedback', 'Empty'),
 	component('meter', 'components/Meter', 'Feedback', 'Meter', {
-		related: ['progress-circle']
+		related: ['progress', 'progress-circle']
 	}),
 	component('network-indicator', 'components/NetworkIndicator', 'Feedback', 'Network indicator', {
 		related: ['alert', 'toast']
 	}),
+	component('progress', 'components/Progress', 'Feedback', 'Progress', {
+		related: ['progress-circle', 'meter', 'spinner']
+	}),
 	component('progress-circle', 'components/ProgressCircle', 'Feedback', 'Progress circle', {
-		related: ['meter', 'spinner']
+		related: ['progress', 'meter', 'spinner']
 	}),
 	component('skeleton', 'components/Skeleton', 'Feedback', 'Skeleton', {
 		related: ['spinner']
@@ -380,6 +386,9 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 	component('breadcrumbs', 'components/Breadcrumbs', 'Navigation', 'Breadcrumbs'),
 	component('command', 'components/Command', 'Navigation', 'Command', {
 		related: ['menu', 'dialog']
+	}),
+	component('navigation-menu', 'components/NavigationMenu', 'Navigation', 'Navigation menu', {
+		related: ['menu-bar', 'tabbar', 'popover']
 	}),
 	component('pagination', 'components/Pagination', 'Navigation', 'Pagination'),
 	component('stepper', 'components/Stepper', 'Navigation', 'Stepper', {
@@ -1013,9 +1022,14 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	'scroll-area': [
 		'ScrollArea',
+		'ScrollAreaCssVariable',
+		'ScrollAreaDataAttribute',
 		'ScrollAreaProps',
 		'ScrollAreaTheme',
 		'ScrollAreaThemeProps',
+		'ScrollAreaViewportAttributes',
+		'scrollAreaCssVariables',
+		'scrollAreaDataAttributes',
 		'scrollAreaTheme',
 		'setScrollAreaTheme',
 		'useScrollAreaTheme'
@@ -1180,6 +1194,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'ToggleButtonGroup',
 		'ToggleButtonGroupItem',
 		'ToggleButtonGroupItems',
+		'ToggleButtonGroupOrientation',
 		'ToggleButtonGroupProps',
 		'ToggleButtonGroupTheme',
 		'ToggleButtonGroupThemeProps',
@@ -1244,6 +1259,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'FieldTheme',
 		'FieldThemeProps',
 		'FieldValidationResult',
+		'FieldValidatorResult',
 		'FieldValue',
 		'FileInputType',
 		'InputProps',
@@ -1261,6 +1277,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'TagInputType',
 		'TextInputType',
 		'TimeInputType',
+		'ValidationMode',
 		'VoiceInputType',
 		'createFieldState',
 		'fieldSchemas',
@@ -1269,6 +1286,25 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'llmDescription',
 		'setFieldTheme',
 		'useFieldTheme'
+	],
+	autocomplete: [
+		'Autocomplete',
+		'AutocompleteFilter',
+		'AutocompleteHighlightChangePayload',
+		'AutocompleteInputAttributes',
+		'AutocompleteItem',
+		'AutocompleteItemGroup',
+		'AutocompleteItems',
+		'AutocompleteItemsRequest',
+		'AutocompleteItemsSource',
+		'AutocompleteMode',
+		'AutocompleteProps',
+		'AutocompleteSelectPayload',
+		'AutocompleteTheme',
+		'AutocompleteThemeProps',
+		'autocompleteTheme',
+		'setAutocompleteTheme',
+		'useAutocompleteTheme'
 	],
 	calendar: [
 		'BaseCalendarProps',
@@ -1329,7 +1365,14 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	combobox: [
 		'Combobox',
+		'ComboboxFilter',
+		'ComboboxHighlightChangePayload',
+		'ComboboxHighlightReason',
+		'ComboboxItems',
+		'ComboboxItemsRequest',
+		'ComboboxItemsSource',
 		'ComboboxOption',
+		'ComboboxOptionGroup',
 		'ComboboxProps',
 		'ComboboxTheme',
 		'ComboboxThemeProps',
@@ -1388,6 +1431,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'FormAction',
 		'FormActionInput',
 		'FormCustomInput',
+		'FormErrors',
 		'FormFieldController',
 		'FormFieldEntry',
 		'FormFieldInput',
@@ -1411,11 +1455,13 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'FormSubmitHandler',
 		'FormTheme',
 		'FormThemeProps',
+		'FormValidateOptions',
 		'FormValueInput',
 		'FormVariant',
 		'InferFormValue',
 		'LiveFormValue',
 		'MaybePromise',
+		'ValidationMode',
 		'ask',
 		'formTheme',
 		'registerFormInputs',
@@ -1445,6 +1491,9 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	'number-input': [
 		'NumberInput',
+		'NumberInputCommitDetail',
+		'NumberInputCommitReason',
+		'NumberInputInputAttributes',
 		'NumberInputProps',
 		'NumberInputTheme',
 		'NumberInputThemeProps',
@@ -1480,6 +1529,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'PinInputCell',
 		'PinInputPattern',
 		'PinInputProps',
+		'PinInputRejectDetail',
 		'PinInputTheme',
 		'PinInputThemeProps',
 		'pinInputTheme',
@@ -1541,6 +1591,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'SelectTheme',
 		'SelectThemeProps',
 		'SelectTriggerAttributes',
+		'SelectValue',
 		'selectTheme',
 		'setSelectTheme',
 		'useSelectTheme'
@@ -1558,6 +1609,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'SliderState',
 		'SliderTheme',
 		'SliderThemeProps',
+		'SliderThumbCollisionBehavior',
 		'SliderValue',
 		'SliderValuePayload',
 		'SliderVariant',
@@ -1641,8 +1693,10 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'AvatarGroupProps',
 		'AvatarGroupTheme',
 		'AvatarGroupThemeProps',
+		'AvatarImageAttributes',
 		'AvatarItem',
 		'AvatarProps',
+		'AvatarStatus',
 		'AvatarTheme',
 		'AvatarThemeProps',
 		'avatarGroupTheme',
@@ -2185,6 +2239,17 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'toggleNetworkIndicator',
 		'useNetworkIndicatorTheme'
 	],
+	progress: [
+		'Progress',
+		'ProgressProps',
+		'ProgressSize',
+		'ProgressTheme',
+		'ProgressThemeProps',
+		'ProgressValueState',
+		'progressTheme',
+		'setProgressTheme',
+		'useProgressTheme'
+	],
 	'progress-circle': [
 		'ProgressCircle',
 		'ProgressCircleProps',
@@ -2228,8 +2293,11 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	toast: [
 		'Toast',
 		'ToastProps',
+		'ToastPromiseOptions',
 		'ToastTheme',
 		'ToastThemeProps',
+		'ToastUpdate',
+		'ToastUpdater',
 		'Toaster',
 		'ToasterProps',
 		'setToastTheme',
@@ -2279,6 +2347,23 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'setCommandTheme',
 		'useCommandTheme'
 	],
+	'navigation-menu': [
+		'NavigationMenu',
+		'NavigationMenuCssVariable',
+		'NavigationMenuDataAttribute',
+		'NavigationMenuItem',
+		'NavigationMenuLink',
+		'NavigationMenuPanel',
+		'NavigationMenuPanelApi',
+		'NavigationMenuProps',
+		'NavigationMenuTheme',
+		'NavigationMenuThemeProps',
+		'navigationMenuCssVariables',
+		'navigationMenuDataAttributes',
+		'navigationMenuTheme',
+		'setNavigationMenuTheme',
+		'useNavigationMenuTheme'
+	],
 	pagination: [
 		'Pagination',
 		'PaginationControlType',
@@ -2322,6 +2407,8 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'TabbarProps',
 		'TabbarTheme',
 		'TabbarThemeProps',
+		'TabbarValueChangeDetails',
+		'TabbarValueChangeReason',
 		'setTabbarTheme',
 		'tabbarTheme',
 		'useTabbarTheme'
@@ -2343,6 +2430,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	tabs: [
 		'Tabs',
+		'TabsActivationDirection',
 		'TabsApi',
 		'TabsPlacement',
 		'TabsProps',
@@ -2366,8 +2454,20 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	menu: [
 		'Menu',
+		'MenuButtonItem',
+		'MenuCheckboxItem',
+		'MenuFilter',
+		'MenuFilterMatchItem',
+		'MenuFilterOptions',
+		'MenuGroupItem',
 		'MenuItem',
+		'MenuItemBase',
+		'MenuOptionItem',
 		'MenuProps',
+		'MenuRadioGroupItem',
+		'MenuRadioItem',
+		'MenuSeparatorItem',
+		'MenuSubmenuItem',
 		'MenuSubmenuMode',
 		'MenuTheme',
 		'MenuThemeProps',
@@ -2407,6 +2507,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	dialog: [
 		'Dialog',
 		'DialogProps',
+		'DialogSnapPoint',
 		'DialogTheme',
 		'DialogThemeProps',
 		'DialogType',

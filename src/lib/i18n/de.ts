@@ -585,6 +585,7 @@ export const de: Messages = {
 	// Messanzeige
 	meter: 'Messanzeige',
 	meterSegment: (index: string | number, count: string | number) => `Segment ${index} von ${count}`,
+	progressIndeterminate: 'Fortschritt unbestimmt',
 	// Feldvalidierung
 	fieldRequired: 'Dieses Feld ist erforderlich',
 	fieldMustBeChecked: 'Aktivieren Sie dieses Kästchen, um fortzufahren',
@@ -598,5 +599,13 @@ export const de: Messages = {
 		`Geben Sie einen Wert größer oder gleich ${min} ein`,
 	fieldRangeOverflow: (max: string | number) =>
 		`Geben Sie einen Wert kleiner oder gleich ${max} ein`,
-	fieldIncomplete: (length: string | number) => `Geben Sie alle ${length} Zeichen ein`
+	fieldIncomplete: (length: string | number) => `Geben Sie alle ${length} Zeichen ein`,
+	// Combobox
+	resultsCount: (count: string | number) =>
+		Number(count) === 1 ? '1 Ergebnis verfügbar' : `${count} Ergebnisse verfügbar`,
+	tags: 'Tags',
+	// CheckboxesInput
+	selectAll: 'Alle auswählen',
+	// PinInput
+	oneTimeCode: 'Einmalcode'
 };

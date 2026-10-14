@@ -591,6 +591,7 @@ export const fr: Messages = {
 	// Jauge
 	meter: 'Jauge',
 	meterSegment: (index: string | number, count: string | number) => `Segment ${index} sur ${count}`,
+	progressIndeterminate: 'Progression indéterminée',
 	// Validation des champs
 	fieldRequired: 'Ce champ est obligatoire',
 	fieldMustBeChecked: 'Cochez cette case pour continuer',
@@ -606,5 +607,13 @@ export const fr: Messages = {
 		`Saisissez une valeur supérieure ou égale à ${min}`,
 	fieldRangeOverflow: (max: string | number) => `Saisissez une valeur inférieure ou égale à ${max}`,
 	fieldIncomplete: (length: string | number) =>
-		`Saisissez ${Number(length) > 1 ? `les ${length} caractères` : 'le caractère'}`
+		`Saisissez ${Number(length) > 1 ? `les ${length} caractères` : 'le caractère'}`,
+	// Combobox
+	resultsCount: (count: string | number) =>
+		Number(count) === 1 ? '1 résultat disponible' : `${count} résultats disponibles`,
+	tags: 'Étiquettes',
+	// CheckboxesInput
+	selectAll: 'Tout sélectionner',
+	// PinInput
+	oneTimeCode: 'Code à usage unique'
 };

@@ -331,6 +331,11 @@
 			"svelte": "./dist/components/Form/Field/index.js",
 			"default": "./dist/components/Form/Field/index.js"
 		},
+		"./autocomplete": {
+			"types": "./dist/components/Form/Autocomplete/index.d.ts",
+			"svelte": "./dist/components/Form/Autocomplete/index.js",
+			"default": "./dist/components/Form/Autocomplete/index.js"
+		},
 		"./calendar": {
 			"types": "./dist/components/Form/Calendar/index.d.ts",
 			"svelte": "./dist/components/Form/Calendar/index.js",
@@ -576,6 +581,11 @@
 			"svelte": "./dist/components/NetworkIndicator/index.js",
 			"default": "./dist/components/NetworkIndicator/index.js"
 		},
+		"./progress": {
+			"types": "./dist/components/Progress/index.d.ts",
+			"svelte": "./dist/components/Progress/index.js",
+			"default": "./dist/components/Progress/index.js"
+		},
 		"./progress-circle": {
 			"types": "./dist/components/ProgressCircle/index.d.ts",
 			"svelte": "./dist/components/ProgressCircle/index.js",
@@ -620,6 +630,11 @@
 			"types": "./dist/components/Command/index.d.ts",
 			"svelte": "./dist/components/Command/index.js",
 			"default": "./dist/components/Command/index.js"
+		},
+		"./navigation-menu": {
+			"types": "./dist/components/NavigationMenu/index.d.ts",
+			"svelte": "./dist/components/NavigationMenu/index.js",
+			"default": "./dist/components/NavigationMenu/index.js"
 		},
 		"./pagination": {
 			"types": "./dist/components/Pagination/index.d.ts",
@@ -946,6 +961,9 @@
 			"field": [
 				"dist/components/Form/Field/index.d.ts"
 			],
+			"autocomplete": [
+				"dist/components/Form/Autocomplete/index.d.ts"
+			],
 			"calendar": [
 				"dist/components/Form/Calendar/index.d.ts"
 			],
@@ -1093,6 +1111,9 @@
 			"network-indicator": [
 				"dist/components/NetworkIndicator/index.d.ts"
 			],
+			"progress": [
+				"dist/components/Progress/index.d.ts"
+			],
 			"progress-circle": [
 				"dist/components/ProgressCircle/index.d.ts"
 			],
@@ -1119,6 +1140,9 @@
 			],
 			"command": [
 				"dist/components/Command/index.d.ts"
+			],
+			"navigation-menu": [
+				"dist/components/NavigationMenu/index.d.ts"
 			],
 			"pagination": [
 				"dist/components/Pagination/index.d.ts"
