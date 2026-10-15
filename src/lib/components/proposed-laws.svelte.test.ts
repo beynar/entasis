@@ -19,7 +19,7 @@ import { mockNotRendered } from '$lib/testing/jsdom.test-helper.js';
 import type { MenuItem } from './Menu/menu.props.js';
 import ProposedLawsHarness from './ProposedLawsHarness.test.svelte';
 
-const pending = test.fails;
+// Every law in this file is delivered; a new pending law declares `const pending = test.fails;`.
 
 type Props = Parameters<typeof ProposedLawsHarness>[1];
 const mount = (scenario: Props['scenario'], props: Omit<Props, 'scenario'> = {}) =>
@@ -295,7 +295,7 @@ describe('law 10 · native forms (B7 · CX-13b)', () => {
 });
 
 describe('law 12 · styling hooks (R1 · CX-6)', () => {
-	pending('an open Popover marks its panel data-open and its trigger data-popup-open', async () => {
+	test('an open Popover marks its panel data-open and its trigger data-popup-open', async () => {
 		mount('popover');
 		const trigger = button('Open popover');
 		await fireEvent.click(trigger);
