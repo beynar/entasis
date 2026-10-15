@@ -272,19 +272,23 @@ single `TooltipHost` instance that `<Theme>` mounts.
 | `trigger`      | `Snippet<[Attachment<HTMLElement>]> \| ButtonProps` (required) | -           |
 | `open`         | `boolean` (bindable)                                           | `false`     |
 | `defaultOpen`  | `boolean`                                                      | `false`     |
-| `onOpenChange` | `(open: boolean) => void`                                      | -           |
+| `onOpenChange` | `(open: boolean, details: OpenChangeDetails) => void`          | -           |
 | `position`     | `Placement` (12 options)                                       | `'top'`     |
 | `size`         | `Sizes`                                                        | `'normal'`  |
 | `color`        | `Colors`                                                       | `'neutral'` |
 | `variant`      | `'solid' \| 'outline' \| 'soft'`                               | `'solid'`   |
 | `delay`        | `number`                                                       | `400`       |
+| `closeDelay`   | `number` (ms before closing once the pointer leaves)           | `0`         |
+| `hoverable`    | `boolean` (stays open while the pointer is over the content)   | `true`      |
+| `closeOnClick` | `boolean` (a press on the trigger closes it)                   | `true`      |
+| `disabled`     | `boolean` (hover and focus never open it)                      | `false`     |
 | `offset`       | `number`                                                       | -           |
 | `transition`   | `FSOProps`                                                     | -           |
 | `class`        | `string`                                                       | -           |
 
 `trigger` takes Button props (rendered as a `Button`, `content` is its label) or a snippet handed
-the tooltip attachment to spread on its own element. Every prop except `trigger`, `open`,
-`defaultOpen` and `onOpenChange` is also an option of `tooltip()`.
+the tooltip attachment to spread on its own element. Every prop except `trigger`, `open` and
+`defaultOpen` is also an option of `tooltip()`, `onOpenChange` included.
 
 ### Theme Parts
 
@@ -321,8 +325,9 @@ the tooltip attachment to spread on its own element. Every prop except `trigger`
 
 **Note:** Only one tooltip shows at a time; an `open` one hands the surface over when another tooltip
 is hovered and reports that through `onOpenChange`. Subsequent tooltips show instantly within 400ms of
-previous. Opens on hover and on keyboard focus, and sets `aria-describedby` on the trigger while
-visible.
+previous. Opens on mouse or pen hover (never from a touch tap) and on focus only when the focus ring
+shows, so a mouse press, a tap or focus returned by a closing dialog does not open it. Sets
+`aria-describedby` on the trigger while visible.
 
 ---
 
