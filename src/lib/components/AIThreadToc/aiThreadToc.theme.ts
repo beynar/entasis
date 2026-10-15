@@ -13,7 +13,7 @@ const defaultRoot = cva({
 const defaultScrollArea = cva({ base: 'h-full w-full overflow-visible' });
 const defaultScrollContent = cva({ base: 'flex min-h-full w-full items-center' });
 const defaultTrack = cva({
-	base: 'relative w-full shrink-0 cursor-default overflow-visible'
+	base: 'group/toc-stack relative w-full shrink-0 cursor-default overflow-visible'
 });
 const defaultPinArea = cva({ base: 'absolute inset-x-0 top-3 bottom-3' });
 const defaultRail = cva({
@@ -36,8 +36,11 @@ const defaultPin = cva({
 	},
 	defaultVariants: { side: 'left', active: false }
 });
+// The pins animate only while the stack is pointed at or focused (the magnification). Scrolling
+// the thread changes which pins are visible on every frame, and transitions restarted on each
+// scroll kept the browser restyling and repainting the TOC, which made the thread scroll stutter.
 const defaultPinIndicator = cva({
-	base: 'h-0.5 w-3 rounded-full bg-neutral [opacity:var(--ai-thread-toc-opacity)] [transform:scaleX(var(--ai-thread-toc-scale))] motion-safe:transition-[opacity,transform] motion-safe:duration-fast motion-safe:ease-standard',
+	base: 'h-0.5 w-3 rounded-full bg-neutral [opacity:var(--ai-thread-toc-opacity)] [transform:scaleX(var(--ai-thread-toc-scale))] motion-safe:group-data-[interacting=true]/toc-stack:transition-[opacity,transform] motion-safe:group-data-[interacting=true]/toc-stack:duration-fast motion-safe:group-data-[interacting=true]/toc-stack:ease-standard',
 	variants: {
 		side: {
 			left: 'origin-left',

@@ -11,6 +11,7 @@
 	import ScrollArea from '../ScrollArea/ScrollArea.svelte';
 	import Slot from '../Slot/Slot.svelte';
 	import type { AIThreadItem, AIThreadTocEntry, AIThreadTocProps } from './aiThreadToc.props.js';
+	import type { AIThreadTocPin } from '../AIThread/aiThread.props.js';
 	import { useAIThreadTocTheme } from './aiThreadToc.theme.js';
 	import AIThreadTocPreview from './AIThreadTocPreview.svelte';
 	import {
@@ -60,12 +61,34 @@
 	let pointerFrame: number | undefined;
 	let previewOpenTimer: ReturnType<typeof setTimeout> | undefined;
 	let previewCloseTimer: ReturnType<typeof setTimeout> | undefined;
-	const pins = $derived(
-		compactAIThreadTocEntries<TMessage>(tocState.entries, {
+	// The TOC state is rebuilt on every scroll. Keep the previous pins while they still show the same
+	// entries: new pin objects make the keyed list run its flip animation, which measures every pin
+	// with getBoundingClientRect on each scroll event and made scrolling stutter.
+	let previousPins: AIThreadTocPin<TMessage>[] = [];
+	const pins = $derived.by(() => {
+		const next = compactAIThreadTocEntries<TMessage>(tocState.entries, {
 			maxPins,
 			activeEntryIndex: tocState.activeIndex
-		})
-	);
+		});
+		const same =
+			next.length === previousPins.length &&
+			next.every((pin, index) => {
+				const previous = previousPins[index];
+				return (
+					pin.key === previous.key &&
+					pin.isBucket === previous.isBucket &&
+					pin.entry.index === previous.entry.index &&
+					pin.entry.title === previous.entry.title &&
+					pin.entry.excerpt === previous.entry.excerpt &&
+					pin.entry.fileCount === previous.entry.fileCount
+				);
+			});
+		if (!same) previousPins = next;
+		return previousPins;
+	});
+	// Built once per pin list: in the template the label would be re-truncated on every scroll,
+	// because it updates with the pin's active and visible state.
+	const pinLabels = $derived(pins.map((tocPin) => getAIThreadTocLabel(tocPin.entry)));
 	const visibleStartPercent = $derived(offsetPercent(tocState.visibleStartOffset));
 	const visibleEndPercent = $derived(offsetPercent(tocState.visibleEndOffset));
 	const visibleRangePercent = $derived(Math.max(0, visibleEndPercent - visibleStartPercent));
@@ -360,7 +383,7 @@
 								class={classes.pin({ side, active })}
 								style:top={`${pinStackTopPercent(pinIndex, pins.length)}%`}
 								style:transform-origin={side === 'left' ? 'left center' : 'right center'}
-								aria-label={getAIThreadTocLabel(tocPin.entry)}
+								aria-label={pinLabels[pinIndex]}
 								aria-current={active ? 'location' : undefined}
 								animate:flip={{ duration: pinFlipDuration, easing: quintOut }}
 								transition:scale={{

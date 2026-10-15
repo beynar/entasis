@@ -193,7 +193,20 @@ function buildEntries<TMessage extends AIThreadItem>(
 	return entries;
 }
 
+// The TOC is rebuilt on every scroll (its active entry follows the viewport), and normalizing every
+// message's text each time made scrolling a long thread drop frames. Messages are replaced, never
+// mutated, so their text is computed once per message object.
+const messageTextCache = new WeakMap<AIThreadItem, { renderedContent?: string; text: string }>();
+
 function messageText(message: AIThreadItem, renderedContent?: string): string {
+	const cached = messageTextCache.get(message);
+	if (cached && cached.renderedContent === renderedContent) return cached.text;
+	const text = computeMessageText(message, renderedContent);
+	messageTextCache.set(message, { renderedContent, text });
+	return text;
+}
+
+function computeMessageText(message: AIThreadItem, renderedContent?: string): string {
 	const content = normalize(message.content ?? '');
 	if (content) return content;
 	const partContent = normalize(
