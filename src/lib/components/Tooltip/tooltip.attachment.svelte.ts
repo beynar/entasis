@@ -43,14 +43,69 @@ export const tooltip = (props: TooltipOptions) => {
 		hideTimer = null;
 	};
 
+	// A tooltip opened by hover closes when the pointer leaves, but `mouseleave` is not guaranteed:
+	// a trigger re-rendered, moved or removed under the pointer (a navigation that updates the
+	// active item of a rail, say) may never send one. While such a tooltip shows, every pointer move
+	// that lands on neither the trigger nor the tooltip's content closes it after the usual grace.
+	let offStrayPointer: (() => void) | null = null;
+	let strayTimer: ReturnType<typeof setTimeout> | null = null;
+	const clearStrayTimer = () => {
+		if (strayTimer !== null) clearTimeout(strayTimer);
+		strayTimer = null;
+	};
+	const stopWatchingPointer = () => {
+		offStrayPointer?.();
+		offStrayPointer = null;
+		clearStrayTimer();
+	};
+	const isOnTooltip = (ref: HTMLElement, target: EventTarget | null) => {
+		if (!(target instanceof Node)) return false;
+		if (ref.isConnected && ref.contains(target)) return true;
+		const surface = theme.tooltipId ? ref.ownerDocument.getElementById(theme.tooltipId) : null;
+		return props.hoverable !== false && !!surface?.contains(target);
+	};
+	const watchPointer = (ref: HTMLElement) => {
+		if (offStrayPointer) return;
+		offStrayPointer = on(
+			ref.ownerDocument,
+			'pointermove',
+			(event) => {
+				if (event.pointerType === 'touch') return;
+				if (theme.tooltip?.ref !== ref) {
+					stopWatchingPointer();
+					return;
+				}
+				const target = event.composedPath?.()[0] ?? event.target;
+				if (isOnTooltip(ref, target)) {
+					clearStrayTimer();
+					return;
+				}
+				if (strayTimer !== null) return;
+				const closeDelay = Math.max(0, props.closeDelay ?? 0);
+				const delay =
+					props.hoverable === false ? closeDelay : Math.max(closeDelay, TOOLTIP_CONTENT_GRACE);
+				strayTimer = setTimeout(() => {
+					strayTimer = null;
+					// The hover the trigger still believes in is stale; drop it so a later enter starts fresh.
+					hoverAction.cancel();
+					hide({ reason: 'trigger-hover', event, interaction: 'mouse' });
+				}, delay);
+			},
+			{ capture: true, passive: true }
+		);
+	};
+
 	const show = (init: OpenChangeInit) => {
 		const ref = refElement;
 		clearHideTimer();
 		if (!ref || props.disabled || pressed) return;
-		requestTooltipChange(theme, { ...props, ref }, init);
+		if (requestTooltipChange(theme, { ...props, ref }, init) && init.interaction === 'mouse') {
+			watchPointer(ref);
+		}
 	};
 	const hide = (init: OpenChangeInit) => {
 		clearHideTimer();
+		stopWatchingPointer();
 		// The content goes away with the tooltip, without telling the trigger the pointer left it.
 		overContent = false;
 		const ref = refElement;
@@ -186,6 +241,7 @@ export const tooltip = (props: TooltipOptions) => {
 			off?.();
 			offs.forEach((stop) => stop());
 			clearHideTimer();
+			stopWatchingPointer();
 			if (windowFocusTimer !== null) clearTimeout(windowFocusTimer);
 			hoverAction.destroy();
 			if (theme.tooltip?.ref === ref) theme.tooltip = null;

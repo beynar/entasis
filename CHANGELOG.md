@@ -930,6 +930,10 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Fixed
 
+- `Tooltip`: a tooltip opened by hover also closes when the pointer moves away from its trigger and
+  content without a `mouseleave` reaching the trigger (a trigger re-rendered, moved or removed under
+  the pointer, as when a navigation updates the active item of a Sidebar activity bar), so it can no
+  longer stay on screen after the pointer has left.
 - `Popover`, `Dialog`, `FloatingWindow`: closing again after a reopen that interrupted the closing
   transition now waits for that transition. Before, `status` turned `closed` and `onAfterClose`
   fired while the panel was still fading out, and a `Popover` reopened in that window kept a panel

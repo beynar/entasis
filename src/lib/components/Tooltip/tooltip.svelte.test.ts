@@ -298,6 +298,57 @@ describe('Tooltip closeOnClick and disabled (DF-7)', () => {
 	});
 });
 
+describe('Tooltip without a mouseleave', () => {
+	// A trigger re-rendered or removed under the pointer may never send `mouseleave`.
+	test('a pointer move away from the trigger and content closes a hover tooltip', async () => {
+		render(TooltipOptionsHarness);
+		const trigger = button('First');
+		await fireEvent.mouseEnter(trigger);
+		await screen.findByRole('tooltip');
+
+		await fireEvent.pointerMove(button('After'));
+		await waitFor(() => expect(screen.queryByRole('tooltip')).not.toBeInTheDocument());
+
+		// The stale hover is dropped: hovering again opens it again. (jsdom puts every event at 0,0,
+		// so the enter reads as a resting pointer and waits for a move on the trigger.)
+		await fireEvent.mouseEnter(trigger);
+		await fireEvent.mouseMove(trigger);
+		expect(await screen.findByRole('tooltip')).toHaveTextContent('First content');
+	});
+
+	test('moves on the trigger or onto the content keep it open', async () => {
+		render(TooltipOptionsHarness);
+		const trigger = button('First');
+		await fireEvent.mouseEnter(trigger);
+		const tooltip = await screen.findByRole('tooltip');
+		await fireEvent.pointerMove(trigger);
+		await fireEvent.pointerMove(tooltip);
+		await wait(250);
+		expect(screen.getByRole('tooltip')).toBe(tooltip);
+	});
+
+	test('a trigger removed while its tooltip shows closes it on the next move', async () => {
+		render(TooltipOptionsHarness);
+		const trigger = button('First');
+		await fireEvent.mouseEnter(trigger);
+		await screen.findByRole('tooltip');
+		trigger.remove();
+
+		await fireEvent.pointerMove(document.body);
+		await waitFor(() => expect(screen.queryByRole('tooltip')).not.toBeInTheDocument());
+	});
+
+	test('a tooltip opened by keyboard focus ignores pointer moves elsewhere', async () => {
+		showFocusRing();
+		render(TooltipOptionsHarness);
+		await fireEvent.focusIn(button('First'));
+		await screen.findByRole('tooltip');
+		await fireEvent.pointerMove(button('After'));
+		await wait(250);
+		expect(screen.getByRole('tooltip')).toBeInTheDocument();
+	});
+});
+
 describe('Tooltip hoverable content (TT-1)', () => {
 	test('stays open while the pointer is over the content, closes when it leaves', async () => {
 		render(TooltipOptionsHarness);
