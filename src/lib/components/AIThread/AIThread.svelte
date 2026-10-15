@@ -139,13 +139,8 @@
 	let hasInitializedEnd = $state(false);
 	let isInitializingEnd = $state(false);
 	let isFollowingAppendedItem = $state(false);
-	// `isPinned` is the user's intent to follow the end, not a geometry reading: content that grows
-	// under the viewport (a tool block rendering, streaming text) must not unpin it. Only the user
-	// scrolling away does, and scrolling back to the end re-pins.
-	let isUserTouching = false;
-	let isDraggingScrollbar = false;
-	// Until when a scroll counts as the user's own: a wheel or a navigation key just happened.
-	let userScrollUntil = 0;
+	// The thread follows new output only while the user is at the very end. Scrolling up stops it;
+	// scrolling back to the end resumes it. Nothing else moves the user's scroll position.
 	let lastScrollTop = 0;
 	let stickFrame: number | undefined;
 	let errorMessage = $state<string>();
@@ -438,11 +433,7 @@
 			isPinned = true;
 			return;
 		}
-		// Reaching the very end pins; leaving it does not unpin (see `handleScroll` and `handleWheel`).
-		// `bottomThreshold` is not used here: a wheel scroll moves less than it, so pinning within it
-		// would pull every scroll up back down. Only the DOM position counts: the virtualizer's own
-		// offset lags a scroll the user just made.
-		if (distanceFromEnd() <= 1) isPinned = true;
+		if (distanceFromEnd() < 1) isPinned = true;
 		stickToEnd();
 	}
 
@@ -452,7 +443,7 @@
 		if (stickFrame !== undefined || !followOutput) return;
 		stickFrame = requestAnimationFrame(() => {
 			stickFrame = undefined;
-			if (!viewport || !isPinned || isUserTouching || isInitializingEnd) return;
+			if (!viewport || !isPinned || isInitializingEnd) return;
 			// A smooth follow or a smooth scroll-to-latest owns the viewport until it lands.
 			if (isFollowingAppendedItem || renderItems.length === 0) return;
 			if (distanceFromEnd() <= 1) return;
@@ -475,10 +466,6 @@
 		return distanceFromEnd() <= Math.max(0, bottomThreshold);
 	}
 
-	function isUserScrolling(): boolean {
-		return isUserTouching || isDraggingScrollbar || performance.now() < userScrollUntil;
-	}
-
 	function unpin(): void {
 		cancelInitialEndSettlement();
 		isInitializingEnd = false;
@@ -488,54 +475,16 @@
 
 	function handleScroll(event: UIEvent & { currentTarget: EventTarget & HTMLDivElement }): void {
 		const scrollTop = event.currentTarget.scrollTop;
-		const delta = scrollTop - lastScrollTop;
+		if (scrollTop < lastScrollTop - 0.5 && !isInitializingEnd) unpin();
 		lastScrollTop = scrollTop;
-		// Only the user's own scrolls change the intent. Content that shrinks or grows also moves
-		// `scrollTop`, and must neither unpin nor re-pin the thread.
-		if (isUserScrolling()) {
-			if (delta < -1) unpin();
-			// Scrolling back down near the end resumes following.
-			else if (delta > 1 && isViewportAtEnd()) isPinned = true;
-		}
 		syncThreadPosition();
 		onscroll?.(event);
 	}
 
+	// A wheel up stops following before its scroll lands, so no output appended in between pulls the
+	// view back down.
 	function handleWheel(event: WheelEvent): void {
-		if (event.deltaY === 0) return;
-		userScrollUntil = performance.now() + 250;
 		if (event.deltaY < 0) unpin();
-	}
-
-	function handleKeyDown(event: KeyboardEvent): void {
-		const keys = ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '];
-		if (!keys.includes(event.key)) return;
-		userScrollUntil = performance.now() + 600;
-		if (event.key === 'ArrowUp' || event.key === 'PageUp' || event.key === 'Home') unpin();
-	}
-
-	// A press on the viewport itself (not its content) is a press on its scrollbar.
-	function handlePointerDown(event: PointerEvent): void {
-		if (event.target !== viewport || event.pointerType === 'touch') return;
-		isDraggingScrollbar = true;
-		const release = () => {
-			isDraggingScrollbar = false;
-			window.removeEventListener('pointerup', release, true);
-			window.removeEventListener('pointercancel', release, true);
-			if (distanceFromEnd() <= 1) isPinned = true;
-		};
-		window.addEventListener('pointerup', release, true);
-		window.addEventListener('pointercancel', release, true);
-	}
-
-	function handleTouchStart(): void {
-		isUserTouching = true;
-	}
-
-	function handleTouchEnd(): void {
-		isUserTouching = false;
-		if (distanceFromEnd() <= 1) isPinned = true;
-		else stickToEnd();
 	}
 
 	function handleRootWheel(
@@ -671,11 +620,6 @@
 			tabindex="0"
 			aria-label={viewportLabel ?? t.aiThreadTranscript}
 			onscroll={handleScroll}
-			onkeydown={handleKeyDown}
-			onpointerdown={handlePointerDown}
-			ontouchstart={handleTouchStart}
-			ontouchend={handleTouchEnd}
-			ontouchcancel={handleTouchEnd}
 		>
 			<AIThreadItems
 				{renderItems}
