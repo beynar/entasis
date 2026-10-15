@@ -13,9 +13,9 @@ import { useOpenLifecycle } from '$lib/utils/openLifecycle.svelte.js';
 import {
 	applyStateAttributes,
 	openStateAttributes,
-	popupTriggerAttributes,
 	transitionStatusAttributes
 } from '$lib/utils/stateAttributes.js';
+import { claimPopupOpen } from '../Popover/popover.claims.js';
 import {
 	getInteractionType,
 	isOpenChangeDetails,
@@ -448,7 +448,12 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 	reference = (node: HTMLElement) => {
 		$effect(() => {
 			writePopupAria(node, this.triggerProps);
-			applyStateAttributes(node, popupTriggerAttributes(this.isOpen));
+		});
+		// Claimed, not written: a tooltip on the same trigger closing while the dialog is open
+		// must leave `data-popup-open` in place.
+		$effect(() => {
+			claimPopupOpen(node, this, this.isOpen);
+			return () => claimPopupOpen(node, this, false);
 		});
 		return untrack(() => {
 			// Capture phase: runs before the element's own (delegated) handlers, so a

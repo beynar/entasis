@@ -12,11 +12,15 @@
 	import PopupMenu from './PopupMenu/PopupMenu.svelte';
 	import Select from './Form/Select/Select.svelte';
 	import Tooltip from './Tooltip/Tooltip.svelte';
+	import { tooltip } from './Tooltip/tooltip.attachment.svelte.js';
 	import type { MenuItem } from './Menu/menu.props.js';
+	import { createAttachmentKey } from 'svelte/attachments';
 
 	type Scenario =
 		| 'popover'
 		| 'dialog'
+		| 'dialog-tooltip'
+		| 'select-tooltip'
 		| 'tooltip'
 		| 'hover-card'
 		| 'popup-menu'
@@ -66,6 +70,26 @@
 		>
 			<button type="button">Inside dialog</button>
 		</Dialog>
+	{:else if scenario === 'dialog-tooltip'}
+		<!-- A trigger shared by a dialog and a tooltip: the tooltip closing keeps the dialog's hook. -->
+		<Dialog responsive={false} transition={zero} title="Hooked dialog">
+			{#snippet trigger(dialog)}
+				<button
+					type="button"
+					{@attach dialog.trigger}
+					{@attach tooltip({ content: 'Dialog hint', delay: 0 })}>Open hinted dialog</button
+				>
+			{/snippet}
+			<button type="button">Inside dialog</button>
+		</Dialog>
+	{:else if scenario === 'select-tooltip'}
+		<Select
+			label="Plan"
+			items={options}
+			defaultValue="pro"
+			{open}
+			triggerAttrs={{ [createAttachmentKey()]: tooltip({ content: 'Plan hint', delay: 0 }) }}
+		/>
 	{:else if scenario === 'tooltip'}
 		<Tooltip {open} content="Tooltip content" transition={zero} trigger={{ content: 'Hint' }} />
 	{:else if scenario === 'hover-card'}

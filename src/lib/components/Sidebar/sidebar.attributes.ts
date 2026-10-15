@@ -26,7 +26,7 @@ export const sidebarDataAttributes = {
 	'data-exiting':
 		'On a group, submenu or tree branch panel: present while its closing animation plays.',
 	'data-popup-open':
-		'On a row with a `menu` and on a collapsed row with a flyout: present while that popup is open.',
+		'On a row: present while one of its popups is open, its `menu`, its flyout on the collapsed rail, or its tooltip (every row on the collapsed rail, and every row with `tooltips="always"`). Match `[aria-expanded="true"]` to style an open menu or flyout only.',
 	'data-sidebar': 'The part (`sidebar`, `menu-button`, `menu-sub`, `group-content`, `rail`, ...).'
 } as const;
 

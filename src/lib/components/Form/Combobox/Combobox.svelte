@@ -5,6 +5,7 @@
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { ComboboxProps, ComboboxOption } from './combobox.props.js';
 	import Popover from '../../Popover/Popover.svelte';
+	import { popupOpenClaim } from '../../Popover/popover.claims.js';
 	import { xIcon } from '../../Icons/x.js';
 	import { magnifyingGlassIcon } from '../../Icons/magnifyingGlass.js';
 	import type { PopoverApi } from '../../Popover/popover.api.js';
@@ -279,7 +280,7 @@
 				aria-haspopup="listbox"
 				aria-invalid={controller.error !== null}
 				data-disabled={presence(field.disabled)}
-				data-popup-open={presence(controller.visible)}
+				{@attach popupOpenClaim(controller.visible)}
 				autocomplete="off"
 				class={classes.input({ size, hasValue: field.value !== null, disabled: field.disabled })}
 				class:placeholder:text-neutral={selectedOption && !searchValue}

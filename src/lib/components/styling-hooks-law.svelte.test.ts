@@ -21,20 +21,26 @@ import {
 	collapsibleDataAttributes
 } from './Collapsible/collapsible.attributes.js';
 import { collapsibleDescription } from './Collapsible/collapsible.mcp.js';
-import { comboboxDataAttributes } from './Form/Combobox/combobox.attributes.js';
+import {
+	comboboxCssVariables,
+	comboboxDataAttributes
+} from './Form/Combobox/combobox.attributes.js';
 import { comboboxDescription } from './Form/Combobox/combobox.mcp.js';
 import { dialogCssVariables, dialogDataAttributes } from './Dialog/dialog.attributes.js';
 import { dialogDescription } from './Dialog/dialog.mcp.js';
-import { hoverCardDataAttributes } from './HoverCard/hoverCard.attributes.js';
+import {
+	hoverCardCssVariables,
+	hoverCardDataAttributes
+} from './HoverCard/hoverCard.attributes.js';
 import { hoverCardDescription } from './HoverCard/hoverCard.mcp.js';
-import { menuDataAttributes } from './Menu/menu.attributes.js';
+import { menuCssVariables, menuDataAttributes } from './Menu/menu.attributes.js';
 import { menuDescription } from './Menu/menu.mcp.js';
 import { overlayDataAttributes } from './Overlay/overlay.attributes.js';
 import { overlayDescription } from './Overlay/overlay.mcp.js';
 import { popoverCssVariables, popoverDataAttributes } from './Popover/popover.attributes.js';
 import { popoverDescription } from './Popover/popover.mcp.js';
 import { PANEL_CSS_VARIABLES } from './Popover/popover.position.js';
-import { selectDataAttributes } from './Form/Select/select.attributes.js';
+import { selectCssVariables, selectDataAttributes } from './Form/Select/select.attributes.js';
 import { selectDescription } from './Form/Select/select.mcp.js';
 import { sidebarCssVariables, sidebarDataAttributes } from './Sidebar/sidebar.attributes.js';
 import { sidebarDescription } from './Sidebar/sidebar.mcp.js';
@@ -45,10 +51,18 @@ const owners = {
 	popover: { data: popoverDataAttributes, css: popoverCssVariables, doc: popoverDescription },
 	dialog: { data: dialogDataAttributes, css: dialogCssVariables, doc: dialogDescription },
 	tooltip: { data: tooltipDataAttributes, css: tooltipCssVariables, doc: tooltipDescription },
-	hoverCard: { data: hoverCardDataAttributes, css: {}, doc: hoverCardDescription },
-	menu: { data: menuDataAttributes, css: {}, doc: menuDescription },
-	select: { data: selectDataAttributes, css: {}, doc: selectDescription },
-	combobox: { data: comboboxDataAttributes, css: {}, doc: comboboxDescription },
+	hoverCard: {
+		data: hoverCardDataAttributes,
+		css: hoverCardCssVariables,
+		doc: hoverCardDescription
+	},
+	menu: { data: menuDataAttributes, css: menuCssVariables, doc: menuDescription },
+	select: { data: selectDataAttributes, css: selectCssVariables, doc: selectDescription },
+	combobox: {
+		data: comboboxDataAttributes,
+		css: comboboxCssVariables,
+		doc: comboboxDescription
+	},
 	collapsible: {
 		data: collapsibleDataAttributes,
 		css: collapsibleCssVariables,
@@ -90,7 +104,6 @@ const unobserved: Record<Owner, readonly string[]> = {
 		'data-peek',
 		'data-active',
 		'data-active-variant',
-		'data-popup-open',
 		'data-sidebar'
 	]
 };
@@ -232,6 +245,40 @@ describe('law 12 · styling hooks (R1 · CX-6)', () => {
 		expectHook('dialog', trigger, 'data-popup-open', false);
 		expectHook('dialog', document.documentElement, 'data-dialog-open', false);
 		observed.dialog.add('data-closed');
+	});
+
+	const tooltipSurface = () => document.querySelector('[role="tooltip"]');
+
+	test("a tooltip closing on the trigger leaves the open dialog's data-popup-open", async () => {
+		mount('dialog-tooltip');
+		const trigger = button('Open hinted dialog');
+		await fireEvent.mouseEnter(trigger);
+		await waitFor(() => expect(tooltipSurface()).not.toBeNull());
+		await fireEvent.click(trigger);
+		await screen.findByRole('dialog', { name: 'Hooked dialog' });
+		await fireEvent.mouseLeave(trigger);
+		await waitFor(() => expect(tooltipSurface()).toBeNull());
+		expectHook('dialog', trigger, 'data-popup-open', '');
+
+		await fireEvent.keyDown(window, { key: 'Escape' });
+		await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Hooked dialog' })).toBeNull());
+		expectHook('dialog', trigger, 'data-popup-open', false);
+	});
+
+	test("a tooltip closing on the Select trigger leaves the open list's data-popup-open", async () => {
+		const { rerender } = mount('select-tooltip', false);
+		const trigger = screen.getByRole('combobox', { name: 'Plan' });
+		await fireEvent.mouseEnter(trigger);
+		await waitFor(() => expect(tooltipSurface()).not.toBeNull());
+		await rerender({ scenario: 'select-tooltip', open: true });
+		await screen.findByRole('listbox');
+		await fireEvent.mouseLeave(trigger);
+		await waitFor(() => expect(tooltipSurface()).toBeNull());
+		expectHook('select', trigger, 'data-popup-open', '');
+
+		await rerender({ scenario: 'select-tooltip', open: false });
+		await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull());
+		expectHook('select', trigger, 'data-popup-open', false);
 	});
 
 	test('the surface carries the panel state and the trigger data-popup-open', async () => {
@@ -453,6 +500,42 @@ describe('law 12 · styling hooks (R1 · CX-6)', () => {
 		expectHook('sidebar', planning, 'data-open', '');
 		const submenu = document.getElementById(planning.getAttribute('aria-controls')!);
 		expect(submenu?.style.getPropertyValue('--disclosure-panel-height')).not.toBe('');
+	});
+
+	test('collapsed rows carry data-popup-open while their tooltip or flyout shows', async () => {
+		render(SidebarRowsHarness, {
+			props: {
+				displayState: 'collapsed',
+				items: [
+					{
+						label: 'Pages',
+						items: [
+							{ label: 'Inbox', href: '#inbox', icon: 'I' },
+							{ label: 'Planning', icon: 'P', items: [{ label: 'Roadmap', href: '#roadmap' }] }
+						]
+					}
+				]
+			}
+		});
+		// A row's tooltip is a popup of the row too: a leaf link carries the hook while it shows.
+		const inbox = await screen.findByRole('link', { name: /Inbox/ });
+		expectHook('sidebar', inbox, 'data-popup-open', false);
+		await fireEvent.mouseEnter(inbox);
+		await waitFor(() => expect(document.querySelector('[role="tooltip"]')).not.toBeNull());
+		expectHook('sidebar', inbox, 'data-popup-open', '');
+		await fireEvent.mouseLeave(inbox);
+		await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toBeNull());
+		expectHook('sidebar', inbox, 'data-popup-open', false);
+
+		const planning = button(/Planning/);
+		await fireEvent.click(planning);
+		await waitFor(() => expect(planning).toHaveAttribute('aria-expanded', 'true'));
+		expectHook('sidebar', planning, 'data-popup-open', '');
+		await fireEvent.keyDown(await screen.findByRole('link', { name: 'Roadmap' }), {
+			key: 'Escape'
+		});
+		await waitFor(() => expect(planning).toHaveAttribute('aria-expanded', 'false'));
+		await waitFor(() => expectHook('sidebar', planning, 'data-popup-open', false));
 	});
 
 	test('every name in every map is observed above or listed as unobserved', () => {
