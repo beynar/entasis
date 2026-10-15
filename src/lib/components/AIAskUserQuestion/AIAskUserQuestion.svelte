@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
+	import { onDestroy, tick } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
+	import { composedContains, getDeepActiveElement, resolveInitialFocus } from '$lib/utils/focus.js';
 	import Alert from '../Alert/Alert.svelte';
 	import Empty from '../Empty/Empty.svelte';
 	import Slot from '../Slot/Slot.svelte';
@@ -82,6 +83,7 @@
 	let isSubmitting = $state(false);
 	let isDiscarding = $state(false);
 	let advanceTimer: ReturnType<typeof setTimeout> | undefined;
+	let bodyElement = $state<HTMLDivElement>();
 	// Number-key pickers of the default question steps, keyed by question id (read from the key
 	// handler only).
 	const pickers = new SvelteMap<string, (position: number) => boolean>();
@@ -175,7 +177,26 @@
 			activeIndex = 0;
 			return;
 		}
-		activeIndex = Math.max(0, Math.min(index, questionItems.length - 1));
+		const nextIndex = Math.max(0, Math.min(index, questionItems.length - 1));
+		// The step that held focus turns inert, which drops focus to <body> and out of the number
+		// keys and Enter. Focus that was inside the steps follows to the new one; a header pager or
+		// footer button keeps its own focus.
+		const followFocus =
+			nextIndex !== activeIndex &&
+			bodyElement !== undefined &&
+			composedContains(bodyElement, getDeepActiveElement(bodyElement.ownerDocument));
+		activeIndex = nextIndex;
+		if (followFocus) void focusActiveStep();
+	}
+
+	async function focusActiveStep(): Promise<void> {
+		await tick();
+		const step = bodyElement?.querySelector<HTMLElement>(
+			'[data-step-active="true"] [data-slot="ai-ask-user-question-step"]'
+		);
+		// A custom `children` body has no step element: its first control takes focus.
+		const scope = step ?? bodyElement;
+		if (scope) resolveInitialFocus(scope).focus({ preventScroll: true });
 	}
 
 	function scheduleAdvance(question: AIAskQuestion, answer: AIAskAnswer): void {
@@ -346,7 +367,7 @@
 			/>
 		{/if}
 
-		<div data-slot="ai-ask-user-question-body" class={classes.body()}>
+		<div bind:this={bodyElement} data-slot="ai-ask-user-question-body" class={classes.body()}>
 			{#if children}
 				<Slot render={children} payload={componentState} />
 			{:else}

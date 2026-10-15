@@ -41,19 +41,17 @@ const defaultPin = cva({
 // the thread changes which pins are visible on every frame, and transitions restarted on each
 // scroll kept the browser restyling and repainting the TOC, which made the thread scroll stutter.
 const defaultPinIndicator = cva({
-	base: 'h-0.5 rounded-full bg-neutral [opacity:var(--ai-thread-toc-opacity)] [transform:scaleX(var(--ai-thread-toc-scale))] motion-safe:group-data-[interacting=true]/toc-stack:transition-[opacity,transform] motion-safe:group-data-[interacting=true]/toc-stack:duration-fast motion-safe:group-data-[interacting=true]/toc-stack:ease-standard',
+	// The active turn's pin is longer and fully opaque; pins in view are lighter, the rest faint.
+	// The length follows the pin's own `data-active`, so a scroll that moves the active turn never
+	// rewrites a class.
+	base: 'h-0.5 w-3 rounded-full bg-neutral [opacity:var(--ai-thread-toc-opacity)] [transform:scaleX(var(--ai-thread-toc-scale))] group-data-[active=true]:w-4 motion-safe:group-data-[interacting=true]/toc-stack:transition-[opacity,transform] motion-safe:group-data-[interacting=true]/toc-stack:duration-fast motion-safe:group-data-[interacting=true]/toc-stack:ease-standard',
 	variants: {
 		side: {
 			left: 'origin-left',
 			right: 'origin-right'
-		},
-		// The active turn's pin is longer and fully opaque; pins in view are lighter, the rest faint.
-		active: {
-			true: 'w-4',
-			false: 'w-3'
 		}
 	},
-	defaultVariants: { side: 'left', active: false }
+	defaultVariants: { side: 'left' }
 });
 const defaultPreviewAnchor = cva({
 	base: 'pointer-events-none absolute top-[var(--ai-thread-toc-preview-top)] z-10 flex h-[5px] w-7 -translate-y-1/2 opacity-0',

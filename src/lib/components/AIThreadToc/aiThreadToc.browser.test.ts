@@ -1,5 +1,6 @@
 // The rail removes itself in a narrow container: that needs real layout widths.
 import { expect, test } from 'vitest';
+import { userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
 import Harness from './AIThreadTocHarness.test.svelte';
 
@@ -44,4 +45,22 @@ test('an overflowing pin stack is still one tab stop', async () => {
 	);
 	expect(tabStops).toHaveLength(1);
 	expect(tabStops[0]).toHaveAttribute('data-slot', 'ai-thread-toc-pin');
+});
+
+test('Tab into the rail lands on the active turn while the resting tab stop stays put', async () => {
+	const screen = await render(Harness, { props: { activeIndex: 2 } });
+	const pins = () =>
+		Array.from(document.querySelectorAll<HTMLElement>('[data-slot="ai-thread-toc-pin"]'));
+	await expect.poll(() => pins().length).toBe(4);
+	expect(pins().map((pin) => pin.tabIndex)).toEqual([0, -1, -1, -1]);
+	const before = document.querySelector<HTMLButtonElement>('button')!;
+	before.focus();
+	await userEvent.tab();
+	await expect.poll(() => document.activeElement).toBe(pins()[2]);
+	expect(pins().map((pin) => pin.tabIndex)).toEqual([-1, -1, 0, -1]);
+	before.focus();
+	await screen.rerender({ activeIndex: 3 });
+	expect(pins().map((pin) => pin.tabIndex)).toEqual([-1, -1, 0, -1]);
+	await userEvent.tab();
+	await expect.poll(() => document.activeElement).toBe(pins()[3]);
 });

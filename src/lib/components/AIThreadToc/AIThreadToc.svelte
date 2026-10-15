@@ -63,7 +63,9 @@
 	let pointerPinPosition = $state<number>();
 	let focusedPinIndex = $state<number>();
 	let pinAreaElement = $state<HTMLDivElement>();
-	// Roving tab stop: the last focused pin while focus is inside, otherwise the active pin.
+	// Roving tab stop: the last pin focused from the keyboard (the first pin until then). It never
+	// follows the active turn, so scrolling the thread writes no `tabindex`; a keyboard entry into
+	// the rail moves on to the active pin instead (see `handlePinFocus`).
 	let rovingKey = $state<string>();
 	// Width of the surrounding container, measured while the rail is mounted.
 	let containerWidth = $state<number>();
@@ -123,12 +125,9 @@
 	const activePinIndex = $derived(
 		pins.findIndex((tocPin) => tocPin.entryIndex === tocState.activeIndex)
 	);
-	const tabStopIndex = $derived.by(() => {
-		const roving =
-			rovingKey === undefined ? -1 : pins.findIndex((tocPin) => tocPin.key === rovingKey);
-		if (roving >= 0) return roving;
-		return activePinIndex >= 0 ? activePinIndex : 0;
-	});
+	const tabStopIndex = $derived(
+		Math.max(0, rovingKey === undefined ? 0 : pins.findIndex((tocPin) => tocPin.key === rovingKey))
+	);
 	const previewTurn = $derived(
 		previewEntry ? tocState.entries.findIndex((entry) => entry.key === previewEntry?.key) + 1 : 0
 	);
@@ -355,6 +354,14 @@
 			focusedPinIndex = undefined;
 			return;
 		}
+		// Tab (or Shift+Tab) into the rail lands on the resting tab stop; the active turn's pin is
+		// where a keyboard user expects to start.
+		const from = event.relatedTarget;
+		const entering = !(from instanceof Node && pinAreaElement?.contains(from));
+		if (entering && activePinIndex >= 0 && activePinIndex !== pinIndex) {
+			focusPin(activePinIndex);
+			return;
+		}
 		focusedPinIndex = pinIndex;
 		rovingKey = pins[pinIndex]?.key;
 		openPreview(entry, true);
@@ -365,7 +372,6 @@
 		if (next && event.currentTarget instanceof HTMLElement && event.currentTarget.contains(next))
 			return;
 		focusedPinIndex = undefined;
-		rovingKey = undefined;
 		const pointerPin = pointerPinIndex === undefined ? undefined : pins[pointerPinIndex];
 		if (pointerPin) {
 			openPreview(pointerPin.entry);
@@ -537,7 +543,7 @@
 								{:else}
 									<span
 										data-slot="ai-thread-toc-pin-indicator"
-										class={classes.pinIndicator({ side, active })}
+										class={classes.pinIndicator({ side })}
 										style:--ai-thread-toc-scale={pinScale(influence, targeted)}
 										style:--ai-thread-toc-opacity={pinOpacity(influence, active, visible, targeted)}
 									></span>

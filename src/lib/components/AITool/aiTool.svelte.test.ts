@@ -267,15 +267,21 @@ describe('AITool values', () => {
 			const content = container.querySelector('[data-slot="ai-tool-value-content"]');
 			const result = {
 				view: content?.getAttribute('data-view'),
+				dir: content?.getAttribute('dir'),
 				text: content?.querySelector('pre')?.textContent?.trim()
 			};
 			unmount();
 			return result;
 		};
-		expect(view('3')).toEqual({ view: 'json', text: '"3"' });
-		expect(view(3)).toEqual({ view: 'json', text: '3' });
-		expect(view('true')).toEqual({ view: 'json', text: '"true"' });
-		expect(view('line one\nline two')).toEqual({ view: 'text', text: 'line one\nline two' });
+		// JSON is code: left to right even in an RTL page. Prose follows its own text.
+		expect(view('3')).toEqual({ view: 'json', dir: 'ltr', text: '"3"' });
+		expect(view(3)).toEqual({ view: 'json', dir: 'ltr', text: '3' });
+		expect(view('true')).toEqual({ view: 'json', dir: 'ltr', text: '"true"' });
+		expect(view('line one\nline two')).toEqual({
+			view: 'text',
+			dir: 'auto',
+			text: 'line one\nline two'
+		});
 	});
 
 	test('keeps circular values bounded in the JSON view', () => {

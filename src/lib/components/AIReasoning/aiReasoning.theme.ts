@@ -22,7 +22,11 @@ const defaultMessage = cva({
 	},
 	defaultVariants: { current: true }
 });
-const defaultElapsed = cva({ base: 'shrink-0 tabular-nums text-neutral/60' });
+// The live count and its widest same-unit reading share one grid cell (see `elapsedReserve`).
+const defaultElapsed = cva({
+	base: 'grid shrink-0 whitespace-nowrap tabular-nums text-neutral/60 [&>*]:[grid-area:1/1]'
+});
+const defaultElapsedReserve = cva({ base: 'invisible' });
 const defaultDuration = cva({ base: 'min-w-0' });
 // Reasoning reads quieter than the answer: muted, text-sm, and Markdown's own body colour yields.
 const defaultContent = cva({
@@ -47,6 +51,7 @@ export const aiReasoningTheme = {
 	status: defaultStatus,
 	message: defaultMessage,
 	elapsed: defaultElapsed,
+	elapsedReserve: defaultElapsedReserve,
 	duration: defaultDuration,
 	content: defaultContent,
 	stream: defaultStream,

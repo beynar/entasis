@@ -26,7 +26,7 @@ const defaultStep = cva({
 const defaultBody = cva({
 	base: 'grid min-w-0 gap-lg'
 });
-const defaultStepContent = cva({ base: 'grid w-full min-w-0 gap-lg px-lg pb-xs' });
+const defaultStepContent = cva({ base: 'grid w-full min-w-0 gap-lg px-lg pb-xs outline-none' });
 const defaultQuestion = cva({ base: 'grid min-w-0 gap-xs' });
 const defaultQuestionTitle = cva({
 	base: 'break-words text-sm font-medium leading-snug text-neutral [overflow-wrap:anywhere]'

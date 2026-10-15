@@ -30,8 +30,10 @@ describe('AIThreadToc', () => {
 		const active = indicators[1] as HTMLElement;
 		const inView = indicators[2] as HTMLElement;
 		expect(pins()[2]).toHaveAttribute('data-visible', 'true');
-		expect(active.className).toContain('w-4');
-		expect(inView.className).toContain('w-3');
+		expect(pins()[1]).toHaveAttribute('data-active', 'true');
+		// The length follows the pin's `data-active`, not a class of its own.
+		expect(active.className).toContain('group-data-[active=true]:w-4');
+		expect(active.className).toBe(inView.className);
 		const opacity = (node: HTMLElement) =>
 			Number(node.style.getPropertyValue('--ai-thread-toc-opacity'));
 		expect(opacity(active)).toBeGreaterThan(opacity(inView));
@@ -41,7 +43,7 @@ describe('AIThreadToc', () => {
 	test('a11y:ai-thread-toc.roving-tab-stop is one tab stop with arrow keys between pins', async () => {
 		const onScrollToIndex = vi.fn();
 		render(Harness, { activeIndex: 1, onScrollToIndex });
-		expect(pins().map((pin) => pin.tabIndex)).toEqual([-1, 0, -1, -1]);
+		expect(pins().map((pin) => pin.tabIndex)).toEqual([0, -1, -1, -1]);
 		pins()[1]?.focus();
 		await fireEvent.keyDown(pins()[1] as HTMLElement, { key: 'ArrowDown' });
 		expect(document.activeElement).toBe(pins()[2]);
@@ -52,6 +54,21 @@ describe('AIThreadToc', () => {
 		expect(document.activeElement).toBe(pins()[3]);
 		await fireEvent.click(pins()[3] as HTMLElement);
 		expect(onScrollToIndex).toHaveBeenCalledWith(6);
+	});
+
+	test('a scroll that moves the active turn writes no class or tabindex on the pins', async () => {
+		const { rerender } = render(Harness, { count: 8, activeIndex: 1 });
+		const changed = new Set<string>();
+		const observer = new MutationObserver((records) => {
+			for (const record of records) if (record.attributeName) changed.add(record.attributeName);
+		});
+		const area = document.querySelector('[data-slot="ai-thread-toc-pin-area"]') as HTMLElement;
+		observer.observe(area, { attributes: true, subtree: true });
+		for (const activeIndex of [2, 3, 4, 5, 4, 3]) await rerender({ activeIndex });
+		observer.disconnect();
+		expect(changed.has('data-active')).toBe(true);
+		expect(changed.has('class')).toBe(false);
+		expect(changed.has('tabindex')).toBe(false);
 	});
 
 	test('a touch tap previews a pin and a second tap navigates', async () => {

@@ -63,6 +63,11 @@
 	const presentation = $derived<'text' | 'tree' | 'json'>(
 		plainText !== undefined ? 'text' : valueView === 'tree' ? 'tree' : 'json'
 	);
+	// JSON is code and reads left to right in an RTL page (else braces mirror and lines align to the
+	// right); multi-line prose takes the direction of its own text.
+	const valueDir = $derived(
+		presentation === 'json' ? 'ltr' : presentation === 'text' ? 'auto' : undefined
+	);
 	const treeNodes = $derived(
 		presentation === 'tree' ? buildToolValueTree(structured, maxDepth, maxEntries, t) : []
 	);
@@ -132,6 +137,7 @@
 			data-slot="ai-tool-value-content"
 			data-view={presentation}
 			data-collapsed={collapsed || undefined}
+			dir={valueDir}
 			class={classes.clamp({ collapsed })}
 			style:max-height={collapsed ? `calc(${lineLimit} * 1lh + 1.5rem)` : undefined}
 		>

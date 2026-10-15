@@ -47,7 +47,7 @@ The default preview clamps the prompt to one line, shows "Turn N of M", clamps t
 ## Interaction
 
 - The rail and the visible-range bar are painted; the active turn's pin is longer and fully opaque, pins in view are lighter, the rest faint.
-- Keyboard: the rail is one tab stop (the active pin, or the last focused one). ArrowUp/ArrowDown (and Left/Right), Home and End move between pins; Enter or Space navigates.
+- Keyboard: the rail is one tab stop, and Tab into it lands on the active turn's pin. ArrowUp/ArrowDown (and Left/Right), Home and End move between pins; Enter or Space navigates.
 - Pointer: hovering magnifies nearby pins and previews the one under the pointer; clicking navigates.
 - Touch: the first tap on a pin previews it, a second tap on the same pin navigates, and a tap outside closes the preview.
 - Pin transitions run only while the stack is pointed at or focused; scrolling the thread does not restyle the pins.

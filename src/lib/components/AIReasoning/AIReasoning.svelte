@@ -138,6 +138,15 @@
 		}
 	});
 
+	/** The widest elapsed reading in the same unit as `milliseconds` (59s, 59m 59s, 99h 59m). */
+	function widestElapsed(milliseconds: number): number {
+		const seconds = Math.floor(milliseconds / MS_IN_S);
+		if (seconds < 60) return 59 * MS_IN_S;
+		if (seconds < 3600) return 3599 * MS_IN_S;
+		const hourDigits = String(Math.floor(seconds / 3600)).length;
+		return (Number('9'.repeat(hourDigits)) * 3600 + 59 * 60) * MS_IN_S;
+	}
+
 	// Live elapsed time: one tick per second, only while streaming.
 	$effect(() => {
 		if (!streaming) return;
@@ -194,8 +203,11 @@
 			{/each}
 		</span>
 		{#if elapsed !== undefined && elapsed >= MS_IN_S}
+			<!-- The widest reading of the current unit shares the cell, so the chevron holds still as
+			     the count gains a digit (9s → 10s) and only steps once per unit change. -->
 			<span data-slot="ai-reasoning-elapsed" aria-hidden="true" class={classes.elapsed()}>
-				· {formatAIElapsed(elapsed, t)}
+				<span class={classes.elapsedReserve()}>· {formatAIElapsed(widestElapsed(elapsed), t)}</span>
+				<span>· {formatAIElapsed(elapsed, t)}</span>
 			</span>
 		{/if}
 	{:else if duration === undefined}

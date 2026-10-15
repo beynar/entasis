@@ -27,12 +27,12 @@
 			type: 'segmented',
 			label: 'Status',
 			value: 'running',
+			// Three options fit the controls panel at phone width; the approval states have their own
+			// example below.
 			options: [
 				{ value: 'running', label: 'Running' },
 				{ value: 'success', label: 'Success' },
-				{ value: 'error', label: 'Error' },
-				{ value: 'approval-requested', label: 'Approval' },
-				{ value: 'output-denied', label: 'Denied' }
+				{ value: 'error', label: 'Error' }
 			]
 		},
 		{

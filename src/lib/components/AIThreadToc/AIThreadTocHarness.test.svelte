@@ -46,6 +46,8 @@
 </script>
 
 <Theme>
+	<!-- A focus target before the rail, for Tab-entry tests. -->
+	<button type="button">Before</button>
 	<div data-testid="container" style:width={`${width}px`} style:height="400px" style:display="flex">
 		<AIThreadToc state={tocState} {minContainerWidth} />
 	</div>

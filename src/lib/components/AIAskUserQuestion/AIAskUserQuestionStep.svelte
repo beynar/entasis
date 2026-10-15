@@ -155,7 +155,13 @@
 	}
 </script>
 
-<div bind:this={stepElement} data-slot="ai-ask-user-question-step" class={classes.stepContent()}>
+<!-- tabindex -1: the step itself takes focus when a step change finds no control inside it. -->
+<div
+	bind:this={stepElement}
+	data-slot="ai-ask-user-question-step"
+	tabindex="-1"
+	class={classes.stepContent()}
+>
 	{#if renderer}
 		<Slot
 			render={renderer}
