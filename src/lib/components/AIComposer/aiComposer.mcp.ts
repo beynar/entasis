@@ -53,7 +53,7 @@ AIComposer embeds RichTextInput, which is built on Lexical. Those packages are o
 
 Enter sends and Shift+Enter inserts a newline (\`submitShortcut\` defaults to \`'enter'\`; pass \`'none'\` to make Enter a newline). When no direct submit callback is supplied, the nearest conversation receives a user message. Either way the draft clears once the send succeeds: a direct \`onSubmit\` clears it when it returns or its promise resolves, and keeps it when it throws or rejects, showing the error as a danger alert. Focus returns to the editor after every send that started in the composer (Enter, the send button even in Safari, the Queue button, or committing a queued edit), so the next message can be typed straight away. \`onStop\` overrides \`conversation.requestStop()\`; stop failures are also visible.
 
-The handle's \`submit(text?)\` sends the current draft, or \`text\` in its place, through the same path (queueing while busy) and focuses the editor; use it for submit-on-select prompt suggestions.
+The handle's \`submit(text?)\` sends the current draft, or \`text\` in its place, through the same path (queueing while busy) and focuses the editor; use it for submit-on-select prompt suggestions. For fill-on-select, set the input and call \`focus()\`: it lands in the editor with the caret after the new text, even when the value changed in the same tick.
 
 ## Trigger sources
 
@@ -108,7 +108,7 @@ AIComposer does not automatically drain the queue when \`busy\` becomes false. M
 
 \`submitShortcut\` is \`none | enter | shift-enter | command-enter\` and defaults to \`enter\`. \`toolbar\` is \`hover | fixed | both | none\` and defaults to \`none\` (no formatting chrome in a chat composer; Markdown shortcuts still work); \`formats\` and \`autoresize\` are forwarded to RichTextInput.
 
-The / @ $ menus show an item's \`description\` (or a reference's \`path\`) as a second line and a leading icon per kind when the item has none. Inline tokens are tinted by kind: commands primary, mentions info, skills success, files and references neutral.
+The / @ $ menus show an item's \`path\` (files and references) or else its \`description\` as a second line and a leading icon per kind when the item has none. Inline tokens are tinted by kind: commands primary, mentions info, skills success, files and references neutral.
 
 \`header\`, \`prefix\`, \`suffix\`, and \`modelSelector\` are content slots. \`dropzone\` customizes the active file-drop overlay. \`footerStart\`, \`actions\`, and replacement \`footer\` receive \`{ value, files, attachments, isEmpty, isBusy }\`. The default footer puts the attach button at the far start, then \`footerStart\`; the end holds custom \`actions\`, the \`modelSelector\` slot, voice input and the send/stop control, which is always last and keeps priority when the footer is tight. The voice button carries an accessible name only (\`voiceInputAriaLabel\`), no visible label.
 

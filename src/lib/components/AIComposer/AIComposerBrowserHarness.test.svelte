@@ -1,8 +1,10 @@
 <script lang="ts">
 	// Harness for `aiComposer.browser.test.ts`: the composer at a desktop or a phone width, with a
-	// direct `onSubmit`, a busy queue, a long model name in the footer, and inside AIChat.
+	// direct `onSubmit`, a busy queue, a long model name in the footer, inside AIConversation (a
+	// suggestion fills the shared input and focuses the editor), and inside AIChat.
 	import Theme from '../Theme/Theme.svelte';
 	import AIChat from '../AIChat/AIChat.svelte';
+	import AIConversation from '../AIConversation/AIConversation.svelte';
 	import AIModelSelector from '../AIModelSelector/AIModelSelector.svelte';
 	import AIComposer from './AIComposer.svelte';
 	import type {
@@ -21,7 +23,7 @@
 		queue = $bindable<AIComposerQueuedMessage[]>([]),
 		onSubmit
 	}: {
-		scenario?: 'submit' | 'footer' | 'chat';
+		scenario?: 'submit' | 'footer' | 'chat' | 'conversation';
 		width?: number;
 		fail?: boolean;
 		busy?: boolean;
@@ -32,6 +34,7 @@
 	} = $props();
 
 	let composer: AIComposerHandle | undefined = $state();
+	let conversationInput = $state('');
 	const models = [
 		{
 			id: 'long',
@@ -52,7 +55,20 @@
 <Theme>
 	<div data-testid="host" style:width={`${width}px`} style:height="560px">
 		{#if scenario === 'chat'}
-			<AIChat {models} {maxTokens} />
+			<AIChat {models} {maxTokens} suggestions={['Add owners']} />
+		{:else if scenario === 'conversation'}
+			<AIConversation bind:currentInput={conversationInput}>
+				<AIComposer bind:this={composer} />
+			</AIConversation>
+			<button
+				type="button"
+				onclick={() => {
+					conversationInput = 'Identify failure states';
+					composer?.focus();
+				}}
+			>
+				Fill suggestion
+			</button>
 		{:else}
 			<AIComposer
 				bind:this={composer}
@@ -64,7 +80,11 @@
 				commands={[
 					{ id: 'summarize', label: 'Summarize', description: 'Summarize selected context.' }
 				]}
-				references={{ items: [{ id: 'brief', label: 'brief.md', path: 'docs/brief.md' }] }}
+				references={{
+					items: [
+						{ id: 'brief', label: 'brief.md', description: 'Launch brief', path: 'docs/brief.md' }
+					]
+				}}
 				onSubmit={submit}
 				onStop={() => {}}
 			>

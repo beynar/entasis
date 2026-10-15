@@ -1,6 +1,7 @@
 // AIComposer in real browsers (Chromium and WebKit): Enter or Send keeps the editor focused, the
 // draft clears after a direct onSubmit, the footer fits a phone, the focus ring follows the
-// editor only, Escape leaves a queued-message edit, and AIChat's composer sends on Enter.
+// editor only, Escape leaves a queued-message edit, a suggestion fill focuses the editor, and
+// AIChat's composer sends on Enter.
 import { describe, expect, test, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
@@ -105,12 +106,41 @@ describe('suggestions and tokens', () => {
 		await expect.poll(() => firstOption()?.textContent).toContain('Summarize selected context.');
 		await userEvent.keyboard('{Enter}');
 		await userEvent.keyboard(' @');
+		// A reference's file path wins over its description on the second line.
 		await expect.poll(() => firstOption()?.textContent).toContain('docs/brief.md');
+		expect(firstOption()?.textContent).not.toContain('Launch brief');
 		await userEvent.keyboard('{Enter}');
 		await expect.poll(() => token('reference')).not.toBeNull();
 		expect(getComputedStyle(token('command')!).backgroundColor).not.toBe(
 			getComputedStyle(token('reference')!).backgroundColor
 		);
+	});
+});
+
+describe('filling from a suggestion', () => {
+	const caretAtEnd = () => {
+		const selection = window.getSelection();
+		if (!selection?.rangeCount || !selection.isCollapsed) return false;
+		const range = document.createRange();
+		range.selectNodeContents(editor());
+		range.setStart(selection.anchorNode!, selection.anchorOffset);
+		return range.toString() === '';
+	};
+
+	test('a parent that fills the conversation input and calls focus() lands in the editor', async () => {
+		mount({ scenario: 'conversation' });
+		await userEvent.click(button('Fill suggestion'));
+		await expect.poll(() => editor().textContent).toBe('Identify failure states');
+		await expect.poll(editorFocused).toBe(true);
+		expect(caretAtEnd()).toBe(true);
+	});
+
+	test('an AIChat suggestion fills and focuses the chat editor', async () => {
+		mount({ scenario: 'chat' });
+		await userEvent.click(button('Add owners'));
+		await expect.poll(() => editor().textContent).toBe('Add owners');
+		await expect.poll(editorFocused).toBe(true);
+		expect(caretAtEnd()).toBe(true);
 	});
 });
 
