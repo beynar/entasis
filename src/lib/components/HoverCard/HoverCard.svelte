@@ -13,6 +13,7 @@
 	import { useTheme } from '../Theme/theme.state.svelte.js';
 	import { popoverInternals, type PopoverState } from '../Popover/popover.state.svelte.js';
 	import type { PopoverApi } from '../Popover/popover.api.js';
+	import { presence } from '$lib/utils/stateAttributes.js';
 
 	let {
 		id: customId,
@@ -249,6 +250,7 @@
 				type="button"
 				class={classes.trigger({ disabled, className: triggerClass })}
 				data-state={isOpen ? 'open' : 'closed'}
+				data-disabled={presence(disabled)}
 				aria-haspopup="dialog"
 				aria-expanded={isOpen}
 				aria-controls={id}
@@ -269,6 +271,7 @@
 				{@attach trackPopover(anchor)}
 				class={classes.trigger({ disabled, wrap, className: triggerClass })}
 				data-state={isOpen ? 'open' : 'closed'}
+				data-disabled={presence(disabled)}
 				role="presentation"
 				bind:this={triggerElement}
 				onpointerenter={handlePointerEnter}

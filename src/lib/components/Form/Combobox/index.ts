@@ -18,3 +18,4 @@ export {
 	type ComboboxTheme,
 	type ComboboxThemeProps
 } from './combobox.theme.js';
+export { comboboxDataAttributes, type ComboboxDataAttribute } from './combobox.attributes.js';

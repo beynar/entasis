@@ -14,6 +14,7 @@
 	import { ComboboxController } from './combobox.state.svelte.js';
 	import ComboboxPopup from './ComboboxPopup.svelte';
 	import { untrack } from 'svelte';
+	import { presence } from '$lib/utils/stateAttributes.js';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
 
 	let {
@@ -277,6 +278,8 @@
 				aria-activedescendant={controller.activeDescendant}
 				aria-haspopup="listbox"
 				aria-invalid={controller.error !== null}
+				data-disabled={presence(field.disabled)}
+				data-popup-open={presence(controller.visible)}
 				autocomplete="off"
 				class={classes.input({ size, hasValue: field.value !== null, disabled: field.disabled })}
 				class:placeholder:text-neutral={selectedOption && !searchValue}

@@ -5,6 +5,13 @@
 	import Popover from '../Popover/Popover.svelte';
 	import Slot from '../Slot/Slot.svelte';
 	import { useTheme } from '../Theme/theme.state.svelte.js';
+	import {
+		applyStateAttributes,
+		openStateAttributes,
+		placementAttributes,
+		transitionStatusAttributes
+	} from '$lib/utils/stateAttributes.js';
+	import type { PopoverApi } from '../Popover/popover.api.js';
 	import { reportTooltipContentHover } from './tooltip.surface.js';
 	import { useTooltipTheme, useTooltipMotion } from './tooltip.theme.js';
 
@@ -88,6 +95,31 @@
 	const resizeWithContent = transitionSize({ axis: 'both', isActive: () => handoff });
 
 	const classes = $derived(useTooltipTheme(currentTooltip?.theme));
+	// The surface is what a tooltip's `class` and theme style, so it carries the panel's hooks:
+	// open state, transition phase and the side it landed on (see `tooltipDataAttributes`).
+	const surfaceAttributes = (popover: PopoverApi) => ({
+		...openStateAttributes(popover.isOpen),
+		...transitionStatusAttributes(popover.status),
+		...placementAttributes(
+			popover.placement
+				? { side: popover.placement.side, align: popover.placement.align ?? undefined }
+				: undefined,
+			{ anchorHidden: popover.placement?.anchorHidden }
+		)
+	});
+	// Written from here as well as by the template: Svelte pauses the effects of a block while its
+	// out-transition plays, so only an effect outside the surface reaches it while it fades out.
+	let surface = $state<{ node: HTMLElement; popover: PopoverApi } | null>(null);
+	const trackSurface = (popover: PopoverApi) => (node: HTMLElement) => {
+		const entry = { node, popover };
+		surface = entry;
+		return () => {
+			if (surface === entry) surface = null;
+		};
+	};
+	$effect(() => {
+		if (surface) applyStateAttributes(surface.node, surfaceAttributes(surface.popover));
+	});
 	// Own motion preset (ladder: registry → setTooltipTheme → theme.motion → transition
 	// prop), handed to the Popover as an already-resolved `{ in, out }`.
 	const resolveMotion = useTooltipMotion();
@@ -124,25 +156,32 @@
 		};
 	}}
 >
-	<div
-		id={surfaceId}
-		role="tooltip"
-		data-color={color}
-		data-size={size}
-		data-variant={variant}
-		data-instant={handoff ? '' : undefined}
-		class={classes.root({ color, size, variant, className: currentTooltip?.class })}
-		style:pointer-events={hoverable ? undefined : 'none'}
-		onmouseenter={(event) => {
-			if (currentTooltip) reportTooltipContentHover(currentTooltip.ref, true, event);
-		}}
-		onmouseleave={(event) => {
-			if (currentTooltip) reportTooltipContentHover(currentTooltip.ref, false, event);
-		}}
-	>
-		<!-- The surface keeps its minimum width, so its content is what grows and shrinks. -->
-		<span class="inline-flex items-center justify-center gap-[inherit]" {@attach resizeWithContent}>
-			<Slot render={currentTooltip?.content} />
-		</span>
-	</div>
+	{#snippet children(popover: PopoverApi)}
+		<div
+			id={surfaceId}
+			role="tooltip"
+			data-color={color}
+			data-size={size}
+			data-variant={variant}
+			data-instant={handoff ? '' : undefined}
+			{...surfaceAttributes(popover)}
+			{@attach trackSurface(popover)}
+			class={classes.root({ color, size, variant, className: currentTooltip?.class })}
+			style:pointer-events={hoverable ? undefined : 'none'}
+			onmouseenter={(event) => {
+				if (currentTooltip) reportTooltipContentHover(currentTooltip.ref, true, event);
+			}}
+			onmouseleave={(event) => {
+				if (currentTooltip) reportTooltipContentHover(currentTooltip.ref, false, event);
+			}}
+		>
+			<!-- The surface keeps its minimum width, so its content is what grows and shrinks. -->
+			<span
+				class="inline-flex items-center justify-center gap-[inherit]"
+				{@attach resizeWithContent}
+			>
+				<Slot render={currentTooltip?.content} />
+			</span>
+		</div>
+	{/snippet}
 </Popover>

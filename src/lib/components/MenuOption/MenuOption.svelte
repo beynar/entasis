@@ -60,7 +60,7 @@
 					'data-selected': selected || undefined
 				}
 			: {}),
-		...(disabled ? { 'aria-disabled': true, onclick: handleClick } : {}),
+		...(disabled ? { 'aria-disabled': true, 'data-disabled': '', onclick: handleClick } : {}),
 		...(disabled && elementType === 'button' ? { disabled: true } : {}),
 		...(disabled && elementType === 'a' ? { tabindex: -1, href: undefined } : {})
 	});

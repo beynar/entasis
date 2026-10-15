@@ -91,27 +91,42 @@ export const resolvePlacement = (placement: PopoverPlacement, direction: PanelDi
 };
 
 /** The popovers reporting a side on each anchor element, in the order they last reported. */
-const popupSideClaims = new WeakMap<HTMLElement, Map<object, string>>();
+const anchorAttributeClaims = new WeakMap<HTMLElement, Map<string, Map<object, string>>>();
 
 /**
- * Sets `data-popup-side` on an anchor for one owner: the anchor shows the side of the owner that
- * reported last, and loses the attribute only when no owner reports one. Several popovers (a menu
+ * Sets an attribute on an anchor for one owner: the anchor shows the value of the owner that
+ * claimed it last, and loses the attribute only when no owner claims it. Several popovers (a menu
  * and its tooltip) can share one trigger; one closing must not strip the others' hook.
  * Pass `null` to withdraw the owner's claim.
  */
-export const claimPopupSide = (anchor: HTMLElement, owner: object, side: string | null) => {
-	let claims = popupSideClaims.get(anchor);
-	if (side === null) {
+export const claimAnchorAttribute = (
+	anchor: HTMLElement,
+	owner: object,
+	name: string,
+	value: string | null
+) => {
+	let byName = anchorAttributeClaims.get(anchor);
+	let claims = byName?.get(name);
+	if (value === null) {
 		claims?.delete(owner);
 	} else {
-		if (!claims) popupSideClaims.set(anchor, (claims = new Map()));
+		if (!byName) anchorAttributeClaims.set(anchor, (byName = new Map()));
+		if (!claims) byName.set(name, (claims = new Map()));
 		claims.delete(owner);
-		claims.set(owner, side);
+		claims.set(owner, value);
 	}
 	const current = claims && [...claims.values()].at(-1);
-	if (current) anchor.setAttribute('data-popup-side', current);
-	else anchor.removeAttribute('data-popup-side');
+	if (current !== undefined) anchor.setAttribute(name, current);
+	else anchor.removeAttribute(name);
 };
+
+/** `data-popup-side` on an anchor for one owner; see `claimAnchorAttribute`. */
+export const claimPopupSide = (anchor: HTMLElement, owner: object, side: string | null) =>
+	claimAnchorAttribute(anchor, owner, 'data-popup-side', side);
+
+/** `data-popup-open` on an anchor for one owner while its popup is open; see `claimAnchorAttribute`. */
+export const claimPopupOpen = (anchor: HTMLElement, owner: object, open: boolean) =>
+	claimAnchorAttribute(anchor, owner, 'data-popup-open', open ? '' : null);
 
 /**
  * The side a placed panel reports: the physical side floating-ui resolved, or, when a logical

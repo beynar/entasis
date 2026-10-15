@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { disclosurePanel } from '$lib/attachments/disclosurePanel.svelte.js';
+	import { openStateAttributes } from '$lib/utils/stateAttributes.js';
 	import PopupMenu from '$lib/components/PopupMenu/PopupMenu.svelte';
 	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
 	import { caretRightIcon } from '$lib/components/Icons/caretRight.js';
@@ -365,9 +366,9 @@
 					class={classes.menuAction({
 						size,
 						density,
-						className: 'bg-neutral-muted right-auto left-1 data-[open=true]:rotate-90'
+						className: 'bg-neutral-muted right-auto left-1 data-open:rotate-90'
 					})}
-					data-open={isOpen ? 'true' : undefined}
+					{...openStateAttributes(showSubmenu)}
 					aria-label={`${t.toggle} ${t.submenu}`}
 					aria-expanded={showSubmenu}
 					aria-controls={submenuPanel.rendered ? submenuId : undefined}
@@ -396,6 +397,7 @@
 					})}
 					aria-expanded={showSubmenu}
 					aria-controls={submenuPanel.rendered ? submenuId : undefined}
+					{...openStateAttributes(showSubmenu)}
 					{@attach tooltipContent
 						? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
 						: undefined}

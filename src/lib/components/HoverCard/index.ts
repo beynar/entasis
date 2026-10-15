@@ -7,3 +7,4 @@ export {
 	type HoverCardTheme,
 	type HoverCardThemeProps
 } from './hoverCard.theme.js';
+export { hoverCardDataAttributes, type HoverCardDataAttribute } from './hoverCard.attributes.js';

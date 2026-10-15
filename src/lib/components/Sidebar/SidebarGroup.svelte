@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { disclosurePanel } from '$lib/attachments/disclosurePanel.svelte.js';
+	import { openStateAttributes } from '$lib/utils/stateAttributes.js';
 	import type { DisclosureIndicator } from '$lib/types/theme.js';
 	import type {
 		SidebarActiveVariant,
@@ -145,6 +146,7 @@
 			aria-hidden={isIconCollapsed ? 'true' : undefined}
 			aria-expanded={isOpen}
 			aria-controls={content.rendered ? contentId : undefined}
+			{...openStateAttributes(isOpen)}
 			onclick={() => (open = !isOpen)}
 		>
 			<span>{group.label}</span>

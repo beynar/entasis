@@ -45,6 +45,7 @@
 	data-density={density}
 	data-highlighted={highlighted ? 'true' : undefined}
 	data-selected={selected ? 'true' : undefined}
+	data-disabled={disabled ? '' : undefined}
 	aria-selected={selected}
 	aria-disabled={disabled ? true : undefined}
 	{disabled}

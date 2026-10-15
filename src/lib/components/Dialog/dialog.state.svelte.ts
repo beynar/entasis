@@ -11,6 +11,12 @@ import { resolveSnapPoints, settleSnapIndex, snapPointHeight } from './dialog.sn
 import { useFocusScope } from '$lib/utils/useFocusScope.svelte.js';
 import { useOpenLifecycle } from '$lib/utils/openLifecycle.svelte.js';
 import {
+	applyStateAttributes,
+	openStateAttributes,
+	popupTriggerAttributes,
+	transitionStatusAttributes
+} from '$lib/utils/stateAttributes.js';
+import {
 	getInteractionType,
 	isOpenChangeDetails,
 	requestOpenChange,
@@ -101,6 +107,14 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 	get hasTransitioned() {
 		return this.lifecycle.status === 'open';
 	}
+	/**
+	 * `data-open` / `data-closed` and `data-entering` / `data-exiting` for the root and the panel
+	 * (see `dialogDataAttributes`). Closed, they render only while the exit transition plays.
+	 */
+	stateAttributes = $derived({
+		...openStateAttributes(this.isOpen),
+		...transitionStatusAttributes(this.lifecycle.status)
+	});
 	/** The details of the last change that was applied, kept until the next one. */
 	lastOpenChange = $state.raw<OpenChangeDetails | null>(null);
 	/** The open state `setOpen` last applied, to tell a change made from outside. */
@@ -361,7 +375,21 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 		onMount(() => {
 			this.#mounted = true;
 		});
+		// The root's and the panel's open state and transition phase, written from here rather than
+		// only by the template: Svelte pauses the effects of a block while its out-transition plays,
+		// so the template would leave a closing dialog marked `data-open` until it is gone.
+		$effect(() => {
+			const content = this.#contentElement;
+			if (!content) return;
+			const attributes = this.stateAttributes;
+			applyStateAttributes(content, attributes);
+			const root = content.closest('[data-layer-root]');
+			if (root) applyStateAttributes(root, attributes);
+		});
 	}
+
+	/** The panel element while it is rendered, closing transition included. */
+	#contentElement = $state<HTMLElement | null>(null);
 
 	/** Calls to `setOpen`, direct or through `open`, `close` and `toggle`, unchanged state included. */
 	#openRequests = 0;
@@ -420,6 +448,7 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 	reference = (node: HTMLElement) => {
 		$effect(() => {
 			writePopupAria(node, this.triggerProps);
+			applyStateAttributes(node, popupTriggerAttributes(this.isOpen));
 		});
 		return untrack(() => {
 			// Capture phase: runs before the element's own (delegated) handlers, so a
@@ -460,6 +489,10 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 	contentAttachment = (node: HTMLElement) => {
 		return untrack(() => {
 			const cleanups: Array<(() => void) | void> = [];
+			this.#contentElement = node;
+			cleanups.push(() => {
+				if (this.#contentElement === node) this.#contentElement = null;
+			});
 			cleanups.push(this.focusScope.attachment(node));
 			cleanups.push(this.layer.node(node));
 			cleanups.push(this.swipeAttachment(node));

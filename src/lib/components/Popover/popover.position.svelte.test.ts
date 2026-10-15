@@ -13,6 +13,7 @@ import { mockRect, viewport } from '$lib/testing/jsdom.test-helper.js';
 import {
 	VIEWPORT_SETTLE_MS,
 	applyDirectedOffset,
+	claimPopupOpen,
 	claimPopupSide,
 	createPanelPositioner,
 	directedMotion,
@@ -924,6 +925,25 @@ describe('Popover placement through the positioner', () => {
 
 		claimPopupSide(anchor, second, null);
 		expect(anchor).not.toHaveAttribute('data-popup-side');
+	});
+
+	test('popups sharing a trigger keep its data-popup-open until the last one closes', () => {
+		const anchor = document.createElement('button');
+		const menu = {};
+		const tooltip = {};
+		claimPopupOpen(anchor, menu, true);
+		claimPopupOpen(anchor, tooltip, true);
+		expect(anchor).toHaveAttribute('data-popup-open', '');
+
+		// The tooltip closes while the menu stays open: the menu's hook stays.
+		claimPopupOpen(anchor, tooltip, false);
+		expect(anchor).toHaveAttribute('data-popup-open', '');
+		// Each attribute is claimed on its own: the side claims leave it alone.
+		claimPopupSide(anchor, tooltip, null);
+		expect(anchor).toHaveAttribute('data-popup-open', '');
+
+		claimPopupOpen(anchor, menu, false);
+		expect(anchor).not.toHaveAttribute('data-popup-open');
 	});
 
 	// The safe area measures the trigger and the panel; a panel moved by its wrapper's

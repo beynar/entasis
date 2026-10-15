@@ -7,3 +7,9 @@ export {
 	type AccordionTheme,
 	type AccordionThemeProps
 } from './accordion.theme.js';
+export {
+	accordionDataAttributes,
+	accordionCssVariables,
+	type AccordionDataAttribute,
+	type AccordionCssVariable
+} from './accordion.attributes.js';

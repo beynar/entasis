@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { disclosurePanel } from '$lib/attachments/disclosurePanel.svelte.js';
+	import { openStateAttributes } from '$lib/utils/stateAttributes.js';
 	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
 	import { caretRightIcon } from '$lib/components/Icons/caretRight.js';
 	import { fileIcon } from '$lib/components/Icons/file.js';
@@ -126,6 +127,7 @@
 				class={rowClass}
 				aria-expanded={showChildren}
 				aria-controls={branch.rendered ? childrenId : undefined}
+				{...openStateAttributes(showChildren)}
 				{@attach tooltipContent
 					? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
 					: undefined}

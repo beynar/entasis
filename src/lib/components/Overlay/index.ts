@@ -13,3 +13,4 @@ export {
 	type OverlayTheme,
 	type OverlayThemeProps
 } from './overlay.theme.js';
+export { overlayDataAttributes, type OverlayDataAttribute } from './overlay.attributes.js';

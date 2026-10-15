@@ -307,6 +307,7 @@
 				{...buttonProps}
 				{...keepOpen(item.closeOnClick)}
 				{...valueAttrs(item)}
+				data-disabled={item.disabled ? '' : undefined}
 				theme={theme?.button}
 				{@attach attachItemReference(isActivePanel)}
 				{@attach attachPrevious}

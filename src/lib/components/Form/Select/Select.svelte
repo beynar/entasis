@@ -347,6 +347,8 @@
 						: (placeholder ?? t.selectOption))}
 				data-placeholder={hasValue ? undefined : ''}
 				data-readonly={presence(field.readOnly)}
+				data-disabled={presence(field.disabled)}
+				data-popup-open={presence(select.isOpen)}
 				disabled={field.disabled}
 				class={classes.input({ size, disabled: field.disabled })}
 				onpointerdown={(event) => {

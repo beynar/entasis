@@ -24,3 +24,9 @@ export type PopoverState<Payload = unknown> = PopoverApi<Payload>;
 
 /** The nearest enclosing popover, or `null` outside one. */
 export const usePopoverContext: () => PopoverApi | null = usePopoverStateContext;
+export {
+	popoverDataAttributes,
+	popoverCssVariables,
+	type PopoverDataAttribute,
+	type PopoverCssVariable
+} from './popover.attributes.js';

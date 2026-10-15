@@ -31,11 +31,18 @@ import {
 	type PopupTriggerProps
 } from '$lib/utils/trigger.js';
 import { useDirection } from '$lib/utils/useDirection.svelte.js';
-import { placementAttributes, popupSideAttributes } from '$lib/utils/stateAttributes.js';
+import {
+	applyStateAttributes,
+	openStateAttributes,
+	placementAttributes,
+	popupSideAttributes,
+	transitionStatusAttributes
+} from '$lib/utils/stateAttributes.js';
 import { usePopoverMotion, type PopoverThemeProps } from './popover.theme.js';
 import type { PopoverApi } from './popover.api.js';
 import {
 	applyDirectedOffset,
+	claimPopupOpen,
 	claimPopupSide,
 	createPanelPositioner,
 	directedMotion,
@@ -207,15 +214,20 @@ export class PopoverState<Payload = unknown>
 	 * is scrolled out of view. `null` until the first placement lands and once the panel unmounts.
 	 */
 	placement = $state<PopoverPlacementState | null>(null);
-	/** `data-side`, `data-align` and `data-anchor-hidden` for the panel. */
-	panelAttributes = $derived(
-		placementAttributes(
+	/**
+	 * The panel's styling hooks: `data-open` / `data-closed`, `data-entering` / `data-exiting`,
+	 * `data-side`, `data-align` and `data-anchor-hidden` (see `popoverDataAttributes`).
+	 */
+	panelAttributes = $derived({
+		...openStateAttributes(this.isOpen),
+		...transitionStatusAttributes(this.status),
+		...placementAttributes(
 			this.placement
 				? { side: this.placement.side, align: this.placement.align ?? undefined }
 				: undefined,
 			{ anchorHidden: this.placement?.anchorHidden }
 		)
-	);
+	});
 	parent = getContext<PopoverState | null>('popover');
 	// Nested popovers join while they mount and leave when torn down; see `Registry`.
 	readonly #children = new Registry<PopoverState>();
@@ -622,6 +634,29 @@ export class PopoverState<Payload = unknown>
 			const { 'data-popup-side': side } = popupSideAttributes(this.placement?.side);
 			claimPopupSide(anchor, this, side ?? null);
 			return () => claimPopupSide(anchor, this, null);
+		});
+
+		// The element the panel is anchored to (the trigger that opened it, or the `ref` element)
+		// carries `data-popup-open` while it is open. Claimed like the side: a menu and its tooltip
+		// share a trigger, and the tooltip closing leaves the menu's hook in place.
+		$effect(() => {
+			const anchor = this.referenceElement;
+			if (!(anchor instanceof HTMLElement)) return;
+			claimPopupOpen(anchor, this, this.isOpen);
+			return () => claimPopupOpen(anchor, this, false);
+		});
+
+		// The panel's open state and transition phase, written from here rather than only by the
+		// template: Svelte pauses the effects of a block while its out-transition plays, so the
+		// panel's own attributes would stay `data-open` until it is gone. The session lives until
+		// the exit ends, so `data-closed` and `data-exiting` reach the closing panel.
+		$effect(() => {
+			const panel = this.panelElement;
+			if (!panel) return;
+			applyStateAttributes(panel, {
+				...openStateAttributes(this.isOpen),
+				...transitionStatusAttributes(this.lifecycle.status)
+			});
 		});
 	};
 

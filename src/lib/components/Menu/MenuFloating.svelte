@@ -382,6 +382,7 @@
 				{...buttonProps}
 				{...keepOpen(item.closeOnClick)}
 				{...valueAttrs(item)}
+				data-disabled={item.disabled ? '' : undefined}
 				theme={theme?.button}
 				{@attach navigation.itemReference}
 				{@attach attachPrevious}
