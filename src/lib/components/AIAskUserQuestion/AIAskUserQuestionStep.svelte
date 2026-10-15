@@ -14,6 +14,7 @@
 		getAIAskFileAnswer,
 		getAIAskOptionAnswers,
 		getAIAskStringAnswer,
+		getAIAskStringArrayAnswer,
 		isAIAskQuestionRequired
 	} from './aiAskUserQuestionAnswers.js';
 	import type {
@@ -34,8 +35,11 @@
 		errorMessage,
 		disabled = false,
 		renderer,
+		other,
 		onValueChange,
+		onOtherChange,
 		onError,
+		onRegister,
 		theme
 	}: {
 		question: AIAskQuestion;
@@ -43,8 +47,14 @@
 		errorMessage?: string;
 		disabled?: boolean;
 		renderer?: SlotType<AIAskUserQuestionQuestionState>;
-		onValueChange: (value: AIAskAnswer) => void;
+		/** The "Other…" text while Other is chosen, kept by the parent so it survives a remount. */
+		other?: string;
+		/** `advance: false` marks an edit that must never auto-advance (the "Other…" field). */
+		onValueChange: (value: AIAskAnswer, options?: { advance?: boolean }) => void;
+		onOtherChange: (text: string | undefined) => void;
 		onError: (message: string) => void;
+		/** Registers the number-key picker; returns its cleanup. */
+		onRegister?: (pick: (position: number) => boolean) => () => void;
 		theme?: AIAskUserQuestionThemeProps;
 	} = $props();
 
@@ -54,13 +64,12 @@
 	const required = $derived(isAIAskQuestionRequired(question));
 	const errorId = $derived(`${id}-error`);
 	let stepElement = $state<HTMLElement>();
-	// "Other…" stays chosen while its text is still empty, so it needs local state; once text is
-	// typed the answer itself (a string that is no option id) says Other is chosen.
-	let otherChosen = $state(false);
-	let otherDraft = $state<string>();
+	// The parent remembers whether "Other…" is chosen and its text, so typed text that equals an
+	// option id still reads as Other. An answer that arrives with free text (a string that is no
+	// option id, from `defaultValue` say) also chooses Other.
 	const customAnswer = $derived(getAIAskCustomAnswer(question, value));
-	const otherText = $derived(otherDraft ?? customAnswer ?? '');
-	const otherActive = $derived(otherChosen || customAnswer !== undefined);
+	const otherText = $derived(other ?? customAnswer ?? '');
+	const otherActive = $derived(other !== undefined || customAnswer !== undefined);
 	const choiceAttrs = $derived({
 		'aria-invalid': errorMessage ? ('true' as const) : undefined,
 		'aria-describedby': errorMessage ? errorId : undefined
@@ -79,39 +88,54 @@
 			?.focus();
 	}
 
+	// The option ids of a multiple answer. Its "Other…" text is the last entry, and is left out
+	// even when it equals an option id.
+	function optionAnswers(): string[] {
+		if (question.type !== 'multiple') return [];
+		const entries = getAIAskStringArrayAnswer(value);
+		const withoutOther =
+			otherActive && otherText.trim() && entries.at(-1) === otherText
+				? entries.slice(0, -1)
+				: entries;
+		return getAIAskOptionAnswers(question, withoutOther);
+	}
+
 	function selectSingle(answer: string | null): void {
 		if (answer === null) return;
 		if (answer !== AI_ASK_OTHER_VALUE) {
-			otherChosen = false;
+			onOtherChange(undefined);
 			onValueChange(answer);
 			return;
 		}
-		otherChosen = true;
-		onValueChange(otherText.trim() ? otherText : '');
+		const text = otherText;
+		onOtherChange(text);
+		onValueChange(text.trim() ? text : '', { advance: false });
 		void focusOther();
 	}
 
 	function selectMultiple(next: string[]): void {
 		const withOther = next.includes(AI_ASK_OTHER_VALUE);
 		const options = next.filter((entry) => entry !== AI_ASK_OTHER_VALUE);
+		const text = otherText;
 		if (withOther && !otherActive) void focusOther();
-		otherChosen = withOther;
-		onValueChange(withOther && otherText.trim() ? [...options, otherText] : options);
+		onOtherChange(withOther ? text : undefined);
+		onValueChange(withOther && text.trim() ? [...options, text] : options, { advance: false });
 	}
 
 	function typeOther(text: string): void {
-		otherDraft = text;
-		otherChosen = true;
+		const options = optionAnswers();
+		onOtherChange(text);
 		if (question.type === 'multiple') {
-			const options = getAIAskOptionAnswers(question, value);
-			onValueChange(text.trim() ? [...options, text] : options);
+			onValueChange(text.trim() ? [...options, text] : options, { advance: false });
 			return;
 		}
-		onValueChange(text);
+		onValueChange(text, { advance: false });
 	}
 
+	$effect(() => onRegister?.(pickOption));
+
 	/** Picks or toggles the option behind a number key: 1 is the first option, Other comes last. */
-	export function pickOption(position: number): boolean {
+	function pickOption(position: number): boolean {
 		if (renderer || disabled) return false;
 		if (question.type !== 'single' && question.type !== 'multiple') return false;
 		const items = choiceItems(question);
@@ -121,10 +145,7 @@
 			selectSingle(item.value);
 			return true;
 		}
-		const current = [
-			...getAIAskOptionAnswers(question, value),
-			...(otherActive ? [AI_ASK_OTHER_VALUE] : [])
-		];
+		const current = [...optionAnswers(), ...(otherActive ? [AI_ASK_OTHER_VALUE] : [])];
 		selectMultiple(
 			current.includes(item.value)
 				? current.filter((entry) => entry !== item.value)
@@ -136,7 +157,10 @@
 
 <div bind:this={stepElement} data-slot="ai-ask-user-question-step" class={classes.stepContent()}>
 	{#if renderer}
-		<Slot render={renderer} payload={{ question, value, setValue: onValueChange }} />
+		<Slot
+			render={renderer}
+			payload={{ question, value, setValue: (answer: AIAskAnswer) => onValueChange(answer) }}
+		/>
 	{:else}
 		<div class={classes.question()}>
 			<div id={`${id}-title`} class={classes.questionTitle()}>
@@ -183,10 +207,7 @@
 		{:else if question.type === 'multiple'}
 			<CheckboxesInput
 				mode="card"
-				value={[
-					...getAIAskOptionAnswers(question, value),
-					...(otherActive ? [AI_ASK_OTHER_VALUE] : [])
-				]}
+				value={[...optionAnswers(), ...(otherActive ? [AI_ASK_OTHER_VALUE] : [])]}
 				name={question.id}
 				items={choiceItems(question)}
 				class={classes.options()}
@@ -198,6 +219,9 @@
 		{:else if question.type === 'file'}
 			<AIAskUserQuestionFileStep
 				{question}
+				labelledby={`${id}-title`}
+				invalid={Boolean(errorMessage)}
+				describedby={errorMessage ? errorId : undefined}
 				files={getAIAskFileAnswer(value)}
 				{required}
 				{disabled}

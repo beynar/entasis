@@ -131,6 +131,74 @@ describe('AIAskUserQuestion flow', () => {
 		);
 		expect(screen.getByRole('radio', { name: 'Other…' })).toHaveAttribute('aria-checked', 'true');
 	});
+
+	test('Other… text equal to an option id stays Other and never advances', async () => {
+		const onValueChange = vi.fn();
+		renderInTheme(AIAskUserQuestion, {
+			questions: [{ ...tone, allowOther: true }, notes],
+			autoAdvanceDelay: 0,
+			onValueChange
+		});
+		await fireEvent.click(screen.getByRole('radio', { name: 'Other…' }));
+		await fireEvent.input(screen.getByRole('textbox', { name: 'Other…' }), {
+			target: { value: 'brief' }
+		});
+		expect(onValueChange).toHaveBeenLastCalledWith({ tone: 'brief' });
+		await new Promise((resolve) => setTimeout(resolve, 30));
+		const firstDot = screen.getByRole('button', { name: 'Go to question 1' });
+		expect(firstDot).toHaveAttribute('aria-current', 'step');
+		expect(screen.getByRole('radio', { name: 'Other…' })).toHaveAttribute('aria-checked', 'true');
+		expect(screen.getByRole('radio', { name: 'Brief' })).toHaveAttribute('aria-checked', 'false');
+
+		// Leaving the step and coming back keeps Other and its text.
+		await fireEvent.click(screen.getByRole('button', { name: 'Go to question 2' }));
+		await fireEvent.click(screen.getByRole('button', { name: 'Go to question 1' }));
+		expect(screen.getByRole('radio', { name: 'Other…' })).toHaveAttribute('aria-checked', 'true');
+		expect(screen.getByRole('textbox', { name: 'Other…' })).toHaveValue('brief');
+	});
+
+	test('a multiple Other… text equal to an option id does not check that option', async () => {
+		const onValueChange = vi.fn();
+		renderInTheme(AIAskUserQuestion, {
+			questions: [{ ...tone, type: 'multiple', allowOther: true }],
+			onValueChange
+		});
+		await fireEvent.click(screen.getByRole('checkbox', { name: 'Other…' }));
+		const other = screen.getByRole('textbox', { name: 'Other…' });
+		await fireEvent.input(other, { target: { value: 'b' } });
+		await fireEvent.input(other, { target: { value: 'brief' } });
+		expect(onValueChange).toHaveBeenLastCalledWith({ tone: ['brief'] });
+		expect(screen.getByRole('checkbox', { name: 'Brief' })).toHaveAttribute(
+			'aria-checked',
+			'false'
+		);
+		await fireEvent.input(other, { target: { value: 'brief notes' } });
+		expect(onValueChange).toHaveBeenLastCalledWith({ tone: ['brief notes'] });
+		await fireEvent.click(screen.getByRole('checkbox', { name: 'Detailed' }));
+		expect(onValueChange).toHaveBeenLastCalledWith({ tone: ['detailed', 'brief notes'] });
+	});
+
+	test('mounting the steps logs no dev warning', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		try {
+			renderInTheme(AIAskUserQuestion, { questions: [tone, notes] });
+			expect(warn).not.toHaveBeenCalled();
+		} finally {
+			warn.mockRestore();
+		}
+	});
+
+	test('a file question error is described on its named group', async () => {
+		renderInTheme(AIAskUserQuestion, {
+			questions: [{ id: 'logs', title: 'Attach the logs', type: 'file', required: true }]
+		});
+		await fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+		const alert = await screen.findByRole('alert');
+		const group = screen.getByRole('group', { name: /Attach the logs/ });
+		expect(group).toHaveAttribute('data-slot', 'ai-ask-user-question-file');
+		expect(group).toHaveAttribute('data-invalid');
+		expect(group).toHaveAttribute('aria-describedby', alert.id);
+	});
 });
 
 describe('AIAskUserQuestion answered summary', () => {

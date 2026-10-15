@@ -26,7 +26,7 @@ The package exports Valibot schemas for tool state, options, every question kind
 - Multiple choice: \`{ id, title, type: 'multiple', options, allowOther?, otherLabel?, otherPlaceholder?, ... }\`
 - File: \`{ id, title, type: 'file', accept?, multiple?, maxFiles?, maxSize?, ... }\`
 
-Questions are optional by default; \`required: true\` blocks continuing until answered and shows a required marker after the title. On an optional, unanswered step before the last one the primary action reads "Skip" (\`skipLabel\`). \`allowOther\` adds a free-text "Other…" choice after the options: its typed text is the answer (the single answer string, or one extra entry of the multiple answer array) and it never auto-advances. Disabled choice options remain visible but cannot be selected. File questions use the shared chooser/drop acceptance behavior and show type, size, count, and duplicate failures.
+Questions are optional by default; \`required: true\` blocks continuing until answered and shows a required marker after the title. On an optional, unanswered step before the last one the primary action reads "Skip" (\`skipLabel\`). \`allowOther\` adds a free-text "Other…" choice after the options: its typed text is the answer (the single answer string, or the last entry of the multiple answer array) and it never auto-advances, even when the text equals an option id. The answer stays a plain string, so in \`summarizeAIAskAnswers\` and in a value restored later, text equal to an option id reads as that option. Disabled choice options remain visible but cannot be selected. File questions use the shared chooser/drop acceptance behavior and show type, size, count, and duplicate failures.
 
 ## State and behavior
 
@@ -34,7 +34,7 @@ Questions are optional by default; \`required: true\` blocks continuing until an
 - \`onValueChange(value)\` runs once after a user changes an answer. Parent value changes and selecting the current answer do not emit it.
 - \`activeIndex\` is bindable and is clamped whenever the question list changes.
 - \`autoAdvance\` wins over \`autoAdvanceSingle\`; \`autoAdvanceDelay\` wins over \`autoAdvanceSingleDelay\`.
-- Single-choice answers auto-advance by default after 280 ms, including values set through a custom question slot. Empty values, "Other…" text, the last step, disabled state, and active async work never auto-advance.
+- Single-choice answers auto-advance by default after 280 ms, including values set through a custom question slot. Empty values, anything typed or chosen through "Other…", the last step, disabled state, and active async work never auto-advance.
 - Keyboard: number keys 1–9 pick (single) or toggle (multiple) the active question's options, with "Other…" last; digits typed into a text field stay text. Enter on a choice or a one-line field continues or submits; in a textarea, Ctrl/Cmd+Enter does. A consumer \`onkeydown\` runs first and \`preventDefault()\` cancels these keys.
 - \`disabled\` blocks all controls. \`submitting\` combines with internal async submit/discard state.
 

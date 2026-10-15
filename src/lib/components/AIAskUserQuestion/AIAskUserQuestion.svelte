@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
+	import { SvelteMap } from 'svelte/reactivity';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Alert from '../Alert/Alert.svelte';
 	import Empty from '../Empty/Empty.svelte';
@@ -81,8 +82,13 @@
 	let isSubmitting = $state(false);
 	let isDiscarding = $state(false);
 	let advanceTimer: ReturnType<typeof setTimeout> | undefined;
-	// Default question steps, keyed by question id, so number keys can pick their options.
-	const steps: Record<string, { pickOption: (position: number) => boolean } | undefined> = {};
+	// Number-key pickers of the default question steps, keyed by question id (read from the key
+	// handler only).
+	const pickers = new SvelteMap<string, (position: number) => boolean>();
+	// The "Other…" text of each choice question while Other is chosen. Kept here rather than in the
+	// step so it survives the step remounting, and so typed text that equals an option id still
+	// reads as Other.
+	const otherAnswers = new SvelteMap<string, string>();
 
 	const questionItems = $derived<AIAskQuestion[]>(Array.from(questions));
 	const resolvedValues = $derived(valueState.value);
@@ -133,7 +139,21 @@
 		activeIndex = Math.max(0, Math.min(activeIndex, questionItems.length - 1));
 	});
 
-	function setAnswer(questionId: string, answer: AIAskAnswer): void {
+	function registerPicker(questionId: string, pick: (position: number) => boolean): () => void {
+		pickers.set(questionId, pick);
+		return () => {
+			if (pickers.get(questionId) === pick) pickers.delete(questionId);
+		};
+	}
+
+	function setOther(questionId: string, text: string | undefined): void {
+		if (controlsDisabled) return;
+		if (text === undefined) otherAnswers.delete(questionId);
+		else otherAnswers.set(questionId, text);
+	}
+
+	/** `advance: false` (an "Other…" edit) never schedules the auto-advance. */
+	function setAnswer(questionId: string, answer: AIAskAnswer, advance = true): void {
 		const question = questionItems.find((candidate) => candidate.id === questionId);
 		if (!question) throw new Error(`Cannot answer missing AI question "${questionId}".`);
 		if (controlsDisabled) return;
@@ -145,7 +165,8 @@
 			errorMessage = undefined;
 		}
 		onValueChange?.(nextValues);
-		scheduleAdvance(question, answer);
+		if (advance) scheduleAdvance(question, answer);
+		else clearAdvance();
 	}
 
 	function goTo(index: number): void {
@@ -163,7 +184,7 @@
 			!shouldAutoAdvance ||
 			question.type !== 'single' ||
 			typeof answer !== 'string' ||
-			// Only a picked option advances; typing an "Other…" answer must not.
+			// Only a picked option advances (an app's own question renderer may set free text).
 			!question.options.some((option) => option.id === answer) ||
 			isLast ||
 			controlsDisabled ||
@@ -285,7 +306,7 @@
 		}
 		if (preventedBefore || event.ctrlKey || event.metaKey || event.altKey) return;
 		if (!/^[1-9]$/.test(event.key) || isTextEntry(target) || !activeQuestion) return;
-		if (steps[activeQuestion.id]?.pickOption(Number(event.key) - 1)) event.preventDefault();
+		if (pickers.get(activeQuestion.id)?.(Number(event.key) - 1)) event.preventDefault();
 	}
 </script>
 
@@ -338,14 +359,17 @@
 				>
 					{#snippet children({ item })}
 						<AIAskUserQuestionStep
-							bind:this={steps[item.id]}
 							question={item}
 							value={resolvedValues[item.id]}
 							errorMessage={errorQuestionId === item.id ? errorMessage : undefined}
 							disabled={controlsDisabled}
 							renderer={questionSlot}
-							onValueChange={(answer) => setAnswer(item.id, answer)}
+							other={otherAnswers.get(item.id)}
+							onValueChange={(answer, options) =>
+								setAnswer(item.id, answer, options?.advance ?? true)}
+							onOtherChange={(text) => setOther(item.id, text)}
 							onError={(message) => setQuestionError(item.id, message)}
+							onRegister={(pick) => registerPicker(item.id, pick)}
 							{theme}
 						/>
 					{/snippet}

@@ -54,9 +54,12 @@
 
 	// A primitive error is one sentence, not a key/value inspector.
 	const errorSentence = $derived(kind === 'error' ? getToolErrorSentence(value) : undefined);
-	// Tools often return JSON as text; show it structured. Other strings stay prose.
+	// Tools often return JSON as text; show it structured. Multi-line strings stay prose; a one-line
+	// string is shown quoted like any JSON value, so the output "3" never reads as the number 3.
 	const structured = $derived(parseJsonText(value));
-	const plainText = $derived(typeof structured === 'string' ? structured : undefined);
+	const plainText = $derived(
+		typeof structured === 'string' && /[\r\n]/.test(structured) ? structured : undefined
+	);
 	const presentation = $derived<'text' | 'tree' | 'json'>(
 		plainText !== undefined ? 'text' : valueView === 'tree' ? 'tree' : 'json'
 	);

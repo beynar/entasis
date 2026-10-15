@@ -18,7 +18,7 @@
 		createAIToolAccordionTheme,
 		type AIToolAccordionScope
 	} from './aiToolPrimitiveThemes.js';
-	import { createAIToolClock } from './aiToolClock.svelte.js';
+	import type { AIToolClock } from './aiToolClock.svelte.js';
 	import {
 		formatAIElapsed,
 		getAIToolCallValue,
@@ -45,6 +45,7 @@
 		variant = 'ghost',
 		toggleIcon = 'none',
 		labels,
+		clock,
 		formatStatus,
 		icon,
 		title,
@@ -67,6 +68,7 @@
 		variant?: AIToolVariant;
 		toggleIcon?: AIToolToggleIcon;
 		labels: AIToolLabels;
+		clock: AIToolClock;
 		formatStatus: (status: AIToolStatus) => string;
 		icon?: AIToolSnippet;
 		title?: AIToolSnippet;
@@ -94,9 +96,6 @@
 	const accordionTheme = $derived(
 		createAIToolAccordionTheme(classes, { scope, variant, toggleIcon })
 	);
-	const clock = createAIToolClock(() =>
-		items.map((item) => ({ key: item.id, tool: item.tool, status: resolveAIToolStatus(item.tool) }))
-	);
 </script>
 
 {#snippet toolTitle(payload: { item: ToolAccordionItem })}
@@ -106,7 +105,11 @@
 	{@const tone = getAIToolStatusTone(currentStatus)}
 	{@const statusLabel = formatStatus(currentStatus)}
 	{@const summary = getAIToolSummary(tool)}
-	{@const elapsed = clock.elapsed(payload.item.id, tool, currentStatus)}
+	{@const elapsed = clock.elapsed(
+		getAIToolCallValue(tool, payload.item.index),
+		tool,
+		currentStatus
+	)}
 	{@const showWord = tone !== 'success'}
 	<div data-slot="ai-tool-call-trigger-content" data-tone={tone} class={classes.title()}>
 		{#if icon}

@@ -11,6 +11,9 @@
 	let {
 		question,
 		files,
+		labelledby,
+		invalid = false,
+		describedby,
 		disabled = false,
 		required = false,
 		onValueChange,
@@ -19,6 +22,12 @@
 	}: {
 		question: AIFileQuestion;
 		files: File[];
+		/** Id of the question title that names the file group. */
+		labelledby?: string;
+		/** Marks the group `data-invalid` while the question shows an error. */
+		invalid?: boolean;
+		/** Id of the question's error message. */
+		describedby?: string;
 		disabled?: boolean;
 		required?: boolean;
 		onValueChange: (files: File[]) => void;
@@ -49,7 +58,16 @@
 	}
 </script>
 
-<div data-slot="ai-ask-user-question-file" class={classes.file()}>
+<!-- The group carries the question's name and error message, as the choice and text controls do
+     (a group has no aria-invalid, so the invalid state is a data attribute). -->
+<div
+	data-slot="ai-ask-user-question-file"
+	data-invalid={invalid || undefined}
+	role="group"
+	aria-labelledby={labelledby}
+	aria-describedby={describedby}
+	class={classes.file()}
+>
 	{#if question.multiple ?? true}
 		<FileInput
 			mode="multiple"

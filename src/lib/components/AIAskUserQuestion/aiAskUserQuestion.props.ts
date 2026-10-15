@@ -21,7 +21,9 @@ type AIQuestionBase = {
 type AIChoiceQuestionOther = {
 	/**
 	 * Adds a free-text "Other…" choice after the options. Its text is stored in the answer as
-	 * typed: the single answer string, or one extra entry of the multiple answer array.
+	 * typed: the single answer string, or the last entry of the multiple answer array. Editing it
+	 * never auto-advances. The answer stays a plain string, so text equal to an option id reads
+	 * as that option once the flow is gone (in `summarizeAIAskAnswers` or a restored `value`).
 	 */
 	allowOther?: boolean;
 	/** Label of the "Other…" choice. */

@@ -159,6 +159,34 @@ describe('AITool header anatomy', () => {
 		expect(duration()).toBe('1m 12s');
 		expect(rowFor('Build')).not.toHaveTextContent('Running');
 	});
+
+	test('an observed final duration survives a lone call growing into a group', async () => {
+		vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'Date'] });
+		vi.setSystemTime(new Date('2026-10-15T10:00:00Z'));
+		const search = { id: 'search', name: 'searchDocs', input: { query: 'svelte' } };
+		const { container, rerender } = renderInTheme(AITool, {
+			tool: { ...search, status: 'running' },
+			defaultValue: ['search']
+		});
+		vi.advanceTimersByTime(2_000);
+		flushSync();
+		await rerender({ tool: { ...search, output: { hits: 3 } } });
+		const durations = () =>
+			[...container.querySelectorAll('[data-slot="ai-tool-call-duration"]')].map(
+				(node) => node.textContent
+			);
+		expect(durations()).toEqual(['2s']);
+		vi.advanceTimersByTime(5_000);
+		await rerender({
+			tool: undefined,
+			tools: [
+				{ ...search, output: { hits: 3 } },
+				{ id: 'read', name: 'readPage', status: 'running' }
+			]
+		});
+		expect(container.querySelector('[data-slot="ai-tool-group-title"]')).not.toBeNull();
+		expect(durations()[0]).toBe('2s');
+	});
 });
 
 describe('AITool values', () => {
@@ -228,6 +256,26 @@ describe('AITool values', () => {
 			'aria-expanded',
 			'true'
 		);
+	});
+
+	test('quotes a one-line string value and keeps multi-line text as prose', () => {
+		const view = (output: unknown) => {
+			const { container, unmount } = renderInTheme(AITool, {
+				tool: { id: 'x', name: 'count', output },
+				defaultValue: ['x']
+			});
+			const content = container.querySelector('[data-slot="ai-tool-value-content"]');
+			const result = {
+				view: content?.getAttribute('data-view'),
+				text: content?.querySelector('pre')?.textContent?.trim()
+			};
+			unmount();
+			return result;
+		};
+		expect(view('3')).toEqual({ view: 'json', text: '"3"' });
+		expect(view(3)).toEqual({ view: 'json', text: '3' });
+		expect(view('true')).toEqual({ view: 'json', text: '"true"' });
+		expect(view('line one\nline two')).toEqual({ view: 'text', text: 'line one\nline two' });
 	});
 
 	test('keeps circular values bounded in the JSON view', () => {

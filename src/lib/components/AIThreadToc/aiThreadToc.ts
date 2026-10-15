@@ -6,6 +6,9 @@ import type {
 	AIThreadTocState
 } from '../AIThread/aiThread.props.js';
 import type { AIThreadRenderItem } from '../AIThread/threadRenderItems.js';
+import type { Messages } from '$lib/i18n/en.js';
+
+type AIThreadTocMessages = Pick<Messages, 'aiThreadTocFiles' | 'aiThreadTocScrollTo'>;
 
 type BuildAIThreadTocStateOptions = {
 	totalSize: number;
@@ -107,7 +110,7 @@ export function compactAIThreadTocEntries<TMessage extends AIThreadItem>(
 		});
 }
 
-export function getAIThreadTocMetadata(entry: AIThreadTocEntry): string {
+export function getAIThreadTocMetadata(entry: AIThreadTocEntry, t: AIThreadTocMessages): string {
 	if (entry.fileCount === 0) return '';
 	const names = [...entry.attachments, ...entry.files]
 		.map((file) => file.name.trim())
@@ -117,16 +120,16 @@ export function getAIThreadTocMetadata(entry: AIThreadTocEntry): string {
 	const namesLabel = shownNames.length > 0 ? ` - ${shownNames.join(', ')}` : '';
 	const hiddenLabel = hiddenCount > 0 ? ` +${hiddenCount}` : '';
 	return truncate(
-		`${entry.fileCount} ${entry.fileCount === 1 ? 'file' : 'files'}${namesLabel}${hiddenLabel}`,
+		`${t.aiThreadTocFiles(entry.fileCount)}${namesLabel}${hiddenLabel}`,
 		TOC_METADATA_LABEL_MAX_LENGTH
 	);
 }
 
-export function getAIThreadTocLabel(entry: AIThreadTocEntry): string {
-	const metadata = getAIThreadTocMetadata(entry);
+export function getAIThreadTocLabel(entry: AIThreadTocEntry, t: AIThreadTocMessages): string {
+	const metadata = getAIThreadTocMetadata(entry, t);
 	return truncate(
 		[
-			`Scroll to ${truncate(entry.title, TOC_TITLE_MAX_LENGTH)}`,
+			t.aiThreadTocScrollTo(truncate(entry.title, TOC_TITLE_MAX_LENGTH)),
 			truncate(entry.excerpt, TOC_ARIA_EXCERPT_MAX_LENGTH),
 			metadata
 		]

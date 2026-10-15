@@ -9,8 +9,10 @@ export type AIToolClockEntry = { key: string; tool: AIToolCall; status: AIToolSt
 
 /**
  * Elapsed time per call: the call's own `duration` or `startedAt`/`completedAt` when given,
- * otherwise measured from when this list first saw the call running until it settled. While any
- * call runs, a one-second tick keeps the live durations current; no timer runs otherwise.
+ * otherwise measured from when this AITool first saw the call running until it settled. While any
+ * call runs, a one-second tick keeps the live durations current; no timer runs otherwise. Observed
+ * bounds live as long as the AITool: a call that must keep its duration across remounts (a
+ * virtualized transcript) carries `duration` or `startedAt`/`completedAt` itself.
  */
 export function createAIToolClock(entries: () => readonly AIToolClockEntry[]) {
 	let now = $state(Date.now());
@@ -61,3 +63,5 @@ export function createAIToolClock(entries: () => readonly AIToolClockEntry[]) {
 		}
 	};
 }
+
+export type AIToolClock = ReturnType<typeof createAIToolClock>;

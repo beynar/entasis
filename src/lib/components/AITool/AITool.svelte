@@ -5,6 +5,7 @@
 	import { useAIToolTheme } from './aiTool.theme.js';
 	import { createAIToolAccordionTheme } from './aiToolPrimitiveThemes.js';
 	import {
+		getAIToolCallValue,
 		getAIToolGroupSummary,
 		getAIToolGroupValue,
 		getAIToolStatusLabel,
@@ -14,6 +15,7 @@
 	} from './toolRendering.js';
 	import AIToolCallList from './AIToolCallList.svelte';
 	import AIToolStatusMark from './AIToolStatusMark.svelte';
+	import { createAIToolClock } from './aiToolClock.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type ToolGroupAccordionItem = { id: string; tools: readonly AIToolCall[] };
@@ -83,6 +85,15 @@
 	);
 	const resolvedTone = $derived(getAIToolStatusTone(resolvedStatus));
 	const classes = $derived(useAIToolTheme(theme));
+	// One clock for every call, above the single/group switch: a lone call that becomes a group
+	// (or a collapsed group whose rows are not mounted) keeps its observed run bounds.
+	const clock = createAIToolClock(() =>
+		resolvedTools.map((call, index) => ({
+			key: getAIToolCallValue(call, index),
+			tool: call,
+			status: resolveAIToolStatus(call)
+		}))
+	);
 	const groupAccordionTheme = $derived(
 		createAIToolAccordionTheme(classes, {
 			scope: 'group',
@@ -126,6 +137,7 @@
 			{variant}
 			{toggleIcon}
 			labels={resolvedLabels}
+			{clock}
 			{formatStatus}
 			{icon}
 			{title}
@@ -161,6 +173,7 @@
 			{variant}
 			{toggleIcon}
 			labels={resolvedLabels}
+			{clock}
 			{formatStatus}
 			{icon}
 			{title}

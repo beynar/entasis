@@ -65,7 +65,11 @@
 	let pinAreaElement = $state<HTMLDivElement>();
 	// Roving tab stop: the last focused pin while focus is inside, otherwise the active pin.
 	let rovingKey = $state<string>();
-	let narrow = $state(false);
+	// Width of the surrounding container, measured while the rail is mounted.
+	let containerWidth = $state<number>();
+	const narrow = $derived(
+		minContainerWidth > 0 && containerWidth !== undefined && containerWidth < minContainerWidth
+	);
 	// A touch tap previews a pin first; a second tap on the same pin navigates.
 	let lastPointerType: string | undefined;
 	let touchPreviewKey = $state<string>();
@@ -77,6 +81,7 @@
 	// entries: new pin objects make the keyed list run its flip animation, which measures every pin
 	// with getBoundingClientRect on each scroll event and made scrolling stutter.
 	let previousPins: AIThreadTocPin<TMessage>[] = [];
+	const t = $derived(useI18n());
 	const pins = $derived.by(() => {
 		const next = compactAIThreadTocEntries<TMessage>(tocState.entries, {
 			maxPins,
@@ -100,7 +105,7 @@
 	});
 	// Built once per pin list: in the template the label would be re-truncated on every scroll,
 	// because it updates with the pin's active and visible state.
-	const pinLabels = $derived(pins.map((tocPin) => getAIThreadTocLabel(tocPin.entry)));
+	const pinLabels = $derived(pins.map((tocPin) => getAIThreadTocLabel(tocPin.entry, t)));
 	const visibleStartPercent = $derived(offsetPercent(tocState.visibleStartOffset));
 	const visibleEndPercent = $derived(offsetPercent(tocState.visibleEndOffset));
 	const visibleRangePercent = $derived(Math.max(0, visibleEndPercent - visibleStartPercent));
@@ -130,7 +135,6 @@
 	const pinTransitionDuration = $derived(prefersReducedMotion() ? 0 : 240);
 	const pinFlipDuration = $derived(prefersReducedMotion() ? 0 : 170);
 	const classes = $derived(useAIThreadTocTheme(theme));
-	const t = $derived(useI18n());
 
 	function offsetPercent(offset: number): number {
 		const rangeSize =
@@ -260,15 +264,17 @@
 		}
 		if (!container) return;
 		const measured = container;
+		// Only the width is stored; `narrow` derives from it, so a new `minContainerWidth` applies
+		// at once instead of waiting for the next resize.
 		const measure = () => {
-			narrow = minContainerWidth > 0 && measured.clientWidth < minContainerWidth;
+			containerWidth = measured.clientWidth;
 		};
 		const observer = new ResizeObserver(measure);
 		observer.observe(measured);
 		measure();
 		return () => {
 			observer.disconnect();
-			narrow = false;
+			containerWidth = undefined;
 		};
 	};
 
@@ -464,6 +470,7 @@
 	{#if pins.length > 0 && !narrow}
 		<ScrollArea
 			label={scrollAreaLabel ?? t.threadMinimapEntries}
+			viewportAttrs={{ tabindex: -1 }}
 			class={classes.scrollArea()}
 			theme={aiThreadTocScrollAreaTheme}
 		>

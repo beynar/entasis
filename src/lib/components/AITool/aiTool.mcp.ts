@@ -42,14 +42,14 @@ Each row reads: status mark (spinner, then a check, x, hand or slashed-circle gl
 - Title: \`title\` wins unless it only repeats \`name\`; raw names are humanized (\`searchDocs\` → "Search docs", \`analyze_release\` → "Analyze release", \`mcp__github__list_issues\` → "List issues").
 - \`icon\`: an entasis icon snippet per call; it takes the leading place and the status glyph moves next to the status word.
 - \`summary\`: overrides the input summary (first primitive input value, strings quoted); \`''\` hides it.
-- Duration: \`duration\` (ms), or \`startedAt\` + \`completedAt\`. A running call counts its elapsed time live (from \`startedAt\`, or from when the list first saw it running) and keeps its final duration after it settles: "<1s", "6s", "1m 12s".
+- Duration: \`duration\` (ms), or \`startedAt\` + \`completedAt\`. A running call counts its elapsed time live (from \`startedAt\`, or from when the AITool first saw it running) and keeps its final duration after it settles, also when a lone call grows into a group: "<1s", "6s", "1m 12s". A duration the AITool only observed lives as long as that AITool; a row that remounts (a virtualized transcript) keeps it only when the call carries \`duration\` or \`startedAt\` + \`completedAt\`.
 - Group header: "Search docs · 2 calls" from the distinct tool titles and the call count; override with \`labels.group(count, tools)\`.
 
 Use \`icon\`, \`title\`, \`status\`, \`input\`, \`output\`, \`error\`, or \`content\` snippets with a \`{ tool, index }\` payload. The \`icon\` snippet replaces the leading mark and \`status\` replaces the trailing word and duration. \`formatStatus\` changes the status word and the mark's accessible name (defaults are localized).
 
 ## Values
 
-Input, output and error sections share one text label style ("Input", "Output", "Error"). \`valueView="json"\` (default) shows highlighted, wrapped JSON through the Code component with a copy button; \`valueView="tree"\` shows a key/value tree with quoted strings and no array index keys. String values that hold JSON are shown structured; other strings stay plain wrapped text. A primitive error (a string, an Error, an MCP \`isError\` result with text content) renders as one plain sentence. Values longer than \`maxLines\` (12) lines or rows collapse behind "Show all".
+Input, output and error sections share one text label style ("Input", "Output", "Error"). \`valueView="json"\` (default) shows highlighted, wrapped JSON through the Code component with a copy button; \`valueView="tree"\` shows a key/value tree with quoted strings and no array index keys. String values that hold JSON are shown structured; other one-line strings are quoted like JSON (so the output \`"3"\` never reads as the number \`3\`), and multi-line strings stay plain wrapped text. A primitive error (a string, an Error, an MCP \`isError\` result with text content) renders as one plain sentence. Values longer than \`maxLines\` (12) lines or rows collapse behind "Show all".
 
 ## Variants
 
