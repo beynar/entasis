@@ -6,6 +6,48 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+This minor (0.12.0) batches the behaviour changes of the Base UI adoption. Every renamed API keeps
+a deprecated alias for one minor, so an app built on 0.11 keeps compiling; the notes below say what
+to change before the aliases go.
+
+### Upgrading from 0.11
+
+- `readonly` becomes `readOnly`. Every value control now takes `readOnly`: it stays focusable and
+  announced, refuses edits, and still validates and submits. Rename `RatingInput`'s `readonly` to
+  `readOnly`; the old name works for one minor. Inputs still render the native `readonly`
+  attribute, so `[readonly]` selectors keep matching.
+- Disabled fields are left out of the Form value. A field that is disabled, directly or through a
+  disabled `FormGroup` or `Form`, skips validation and is missing from `onSubmit`, `ask()` results
+  and `MultiStepForm` payloads, as in a native form. In `InferFormValue`, entries and groups that
+  declare `disabled` are optional keys, so code that reads them needs a fallback. Use `readOnly`
+  for a value that must still be submitted while it cannot be edited.
+- `PopoverState` becomes `PopoverApi`. Popover's `trigger` and `children` snippets, `onAfterOpen`,
+  `onAfterClose` and `usePopoverContext()` receive a `PopoverApi`, and Dialog's receive a
+  `DialogApi`. Change `import type { PopoverState } from 'entasis/popover'` to `PopoverApi`; the old
+  name is a deprecated alias for one minor. The narrow type keeps the open state, `open()`,
+  `close()`, `toggle()`, `setOpen()`, `placement`, `payload` and the `trigger`, `reference` and
+  `triggerFor` attachments. Read `status === 'open'` instead of `hasTransitioned`, and read the
+  `size`, `position` and `offset` (Popover) or `type` and `size` (Dialog) props you passed instead
+  of the deprecated snippet members. Internal members such as `place()`, `layer`, `focusScope` or
+  `computedPosition` are no longer typed.
+- `Accordion`'s `accessible` prop is removed, as are `Collapsible`'s `accessible` and
+  `srOnlyContent`. Use `hiddenUntilFound` so find-in-page can open a panel, or `keepMounted` to keep
+  closed content in the DOM.
+- `Tabbar` `onValueChange` takes one payload object: change `onValueChange={(value) => …}` to
+  `onValueChange={({ value }) => …}`. The payload also carries `reason`. `NavigationMenu`, new in
+  this release, uses the same shape: `{ value, details }`.
+- `onOpenChange(open, details)` now runs before the state changes on every overlay and disclosure,
+  so reading the component's open state inside the callback returns the previous value. Use the
+  first argument, and `details.cancel()` to refuse a change.
+- Other aliases kept for one minor: `Combobox` / `TagsInput` `showAllOnFocus` (now `openOnFocus`),
+  `SelectState.selectValue` (now `activate`), `Avatar` / `AvatarGroup` `delay` (now
+  `revealDelay`) and `Theme` `lastTooltipClosed` (now `hoverIntent`).
+- Behaviour to check in your app (details under Changed): a `required` `Switch` must be on,
+  `type="alert"` dialogs ignore outside presses, Escape in `Combobox` and `TagsInput` keeps focus in
+  the input, Enter on a `Checkbox` or `RadioInput` continues the form instead of toggling, a
+  `loading` `Button` stays focusable, `Tabs` and `Tabbar` fall back to the first enabled tab, and
+  `Accordion` arrow keys no longer move between triggers.
+
 ### Added
 
 - `Toast`: a toast with no `id` whose color, title and description match one still on screen updates
