@@ -1,27 +1,23 @@
 <script lang="ts" module>
+	// Assistant replies are flat prose of varying length; user turns are short bubbles.
 	const assistantRows = [
-		{ primary: 'w-4/5 max-w-lg', secondary: 'w-2/3 max-w-md', tertiary: 'w-1/2 max-w-sm' },
-		{ primary: 'w-3/4 max-w-xl', secondary: 'w-4/5 max-w-lg', tertiary: 'w-2/5 max-w-xs' },
-		{ primary: 'w-2/3 max-w-md', secondary: 'w-1/2 max-w-sm', tertiary: 'w-3/5 max-w-md' }
-	] as const;
-	const userRows = [
-		{ primary: 'w-2/5 max-w-sm', secondary: 'w-1/3 max-w-xs' },
-		{ primary: 'w-1/2 max-w-md', secondary: 'w-1/4 max-w-40' }
+		['w-full', 'w-11/12', 'w-3/5'],
+		['w-full', 'w-4/5'],
+		['w-full', 'w-full', 'w-10/12', 'w-2/5']
 	] as const;
 
 	function createSkeletonRows(messageCount: number) {
 		const finiteCount = Number.isFinite(messageCount) ? messageCount : 4;
 		const count = Math.min(8, Math.max(1, Math.trunc(finiteCount)));
-		return Array.from({ length: count }, (_, index) => {
-			if (index % 3 === 1) {
-				return { id: index, side: 'user' as const, layout: userRows[index % userRows.length]! };
-			}
-			return {
-				id: index,
-				side: 'assistant' as const,
-				layout: assistantRows[index % assistantRows.length]!
-			};
-		});
+		return Array.from({ length: count }, (_, index) =>
+			index % 2 === 0
+				? { id: index, side: 'user' as const, lines: [] as readonly string[] }
+				: {
+						id: index,
+						side: 'assistant' as const,
+						lines: assistantRows[Math.floor(index / 2) % assistantRows.length]!
+					}
+		);
 	}
 </script>
 
@@ -37,6 +33,7 @@
 		showHeader = false,
 		showComposer = true,
 		showFooter = false,
+		contentWidth = '48rem',
 		role = 'status',
 		'aria-label': label,
 		'aria-busy': ariaBusy = 'true',
@@ -47,6 +44,9 @@
 	const t = $derived(useI18n());
 	const rows = $derived(createSkeletonRows(messageCount));
 	const classes = $derived(useAIChatTheme(theme));
+	const resolvedContentWidth = $derived(
+		typeof contentWidth === 'number' ? `${contentWidth}px` : contentWidth
+	);
 </script>
 
 <div
@@ -57,6 +57,7 @@
 	aria-label={label ?? t.aiChatConnecting}
 	aria-busy={ariaBusy}
 	class={classes.root({ className })}
+	style:--ai-chat-content-width={resolvedContentWidth}
 >
 	{#if showHeader}
 		<div data-slot="ai-chat-skeleton-header" aria-hidden="true" class={classes.header()}>
@@ -74,20 +75,12 @@
 		<div class={classes.skeletonMessages()}>
 			{#each rows as row (row.id)}
 				{#if row.side === 'user'}
-					<div class="flex justify-end">
-						<div class="flex w-full max-w-[82%] flex-col items-end gap-2">
-							<Skeleton class={`h-4 ${row.layout.primary}`} />
-							<Skeleton class={`h-4 ${row.layout.secondary}`} />
-						</div>
-					</div>
+					<Skeleton data-slot="ai-chat-skeleton-user" class={classes.skeletonUser()} />
 				{:else}
-					<div class="flex gap-3">
-						<Skeleton class="size-8 shrink-0 rounded-full" />
-						<div class="flex min-w-0 flex-1 flex-col gap-2 pt-1">
-							<Skeleton class={`h-4 ${row.layout.primary}`} />
-							<Skeleton class={`h-4 ${row.layout.secondary}`} />
-							<Skeleton class={`h-4 ${row.layout.tertiary}`} />
-						</div>
+					<div data-slot="ai-chat-skeleton-assistant" class={classes.skeletonAssistant()}>
+						{#each row.lines as width, line (line)}
+							<Skeleton class={`h-4 ${width}`} />
+						{/each}
 					</div>
 				{/if}
 			{/each}
@@ -96,15 +89,14 @@
 
 	{#if showComposer}
 		<div data-slot="ai-chat-skeleton-composer" aria-hidden="true" class={classes.composer()}>
-			<div class="grid min-h-24 gap-3">
-				<Skeleton class="h-4 w-3/4" />
+			<div class={classes.skeletonComposer()}>
 				<Skeleton class="h-4 w-1/2" />
-				<div class="mt-2 flex items-center justify-between gap-3">
-					<div class="flex min-w-0 items-center gap-2">
-						<Skeleton class="size-8" />
-						<Skeleton class="h-8 w-24" />
+				<div class="flex items-center justify-between gap-3">
+					<Skeleton class="size-7 rounded-md" />
+					<div class="flex items-center gap-2">
+						<Skeleton class="h-7 w-20 rounded-md" />
+						<Skeleton class="size-7 rounded-md" />
 					</div>
-					<Skeleton class="size-8 shrink-0" />
 				</div>
 			</div>
 		</div>

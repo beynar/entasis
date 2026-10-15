@@ -13,11 +13,8 @@ const modules = import.meta.glob<ThemeModule>('./AI*/ai*.theme.ts', { eager: tru
 
 // Theme keys owned by other lanes of the AI chat wave. Remove an entry once its lane lands the
 // one-key fix; `test.fails` then turns red and points at the entry to delete.
-const pendingOtherLanes: Record<string, string> = {
-	// Lane AI1 fixes AIMessageActions. (Lane AI2 already fixed AIFilePreview, AIModelSelector and
-	// AISuggestion, so those run as plain tests.)
-	AIMessageActions: 'AI1'
-};
+// (Lane AI1 fixed AIMessageActions; lane AI2 fixed AIFilePreview, AIModelSelector and AISuggestion.)
+const pendingOtherLanes: Record<string, string> = {};
 
 const cases = Object.entries(modules).flatMap(([path, module]) =>
 	Object.keys(module)

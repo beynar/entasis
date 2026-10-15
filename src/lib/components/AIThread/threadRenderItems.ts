@@ -1,13 +1,48 @@
-import type { AIToolCall, AIToolStatus } from '../AITool/aiTool.props.js';
+import type { AIAskAnswers, AIAskQuestion } from '../AIAskUserQuestion/aiAskUserQuestion.props.js';
+import type { AIToolCall } from '../AITool/aiTool.props.js';
 import type {
+	AIFileSource,
 	AIThreadAskUserQuestion,
+	AIThreadAskUserQuestionState,
 	AIThreadItem,
 	AIThreadPart,
-	AIThreadToolPart
+	AIThreadRole,
+	AIThreadSource
 } from './aiThread.props.js';
+import { isAskUserQuestionTool, toAskUserQuestionRequest } from './threadAskUserQuestion.js';
+import { collectAIThreadMessageTools, normalizeToolCall, toolFromPart } from './threadTools.js';
+
+export { collectAIThreadMessageTools } from './threadTools.js';
+
+/**
+ * The action bar of one transcript unit. A user message is its own unit; an assistant turn —
+ * reasoning, tools, and text up to the next user message or marker — is one unit with one bar at
+ * its end. `content` joins every text segment of the unit, so copy takes the whole answer, and
+ * `message`/`messageIndex` point at the turn's last assistant message, the retry target.
+ */
+export type AIThreadUnitActions<TMessage extends AIThreadItem = AIThreadItem> = {
+	message: TMessage;
+	messageIndex: number;
+	role: AIThreadRole;
+	content: string;
+	/** The unit is the final assistant turn: nothing but markers follows it. */
+	latest: boolean;
+};
 
 export type AIThreadRenderItem<TMessage extends AIThreadItem = AIThreadItem> =
-	| { kind: 'message'; key: string; message: TMessage; messageIndex: number; content?: string }
+	| {
+			kind: 'message';
+			key: string;
+			message: TMessage;
+			messageIndex: number;
+			content?: string;
+			/** Files from AI SDK `file` parts, shown with this segment. */
+			files?: readonly AIFileSource[];
+			/** The unit's action bar when this segment ends its unit; `false` when another one does. */
+			actions?: AIThreadUnitActions<TMessage> | false;
+			/** The segment is the end of a reply that is still streaming. */
+			streaming?: boolean;
+	  }
 	| {
 			kind: 'marker';
 			key: string;
@@ -22,12 +57,62 @@ export type AIThreadRenderItem<TMessage extends AIThreadItem = AIThreadItem> =
 			message: TMessage;
 			messageIndex: number;
 			tools: AIToolCall[];
+	  }
+	| {
+			kind: 'reasoning';
+			key: string;
+			message: TMessage;
+			messageIndex: number;
+			content: string;
+			streaming: boolean;
+	  }
+	| {
+			kind: 'question-summary';
+			key: string;
+			message: TMessage;
+			messageIndex: number;
+			questions: readonly AIAskQuestion[];
+			value: AIAskAnswers;
+			title?: string;
+	  }
+	| {
+			kind: 'sources';
+			key: string;
+			message: TMessage;
+			messageIndex: number;
+			sources: AIThreadSource[];
+	  }
+	| {
+			/** A unit's action bar on its own row, when the unit ends with tools or reasoning. */
+			kind: 'actions';
+			key: string;
+			message: TMessage;
+			messageIndex: number;
+			actions: AIThreadUnitActions<TMessage>;
+	  }
+	| {
+			/** Placeholder assistant row while a reply to the last user turn has not started. */
+			kind: 'pending';
+			key: string;
+	  }
+	| {
+			/** The conversation error, shown where the reply failed. */
+			kind: 'error';
+			key: string;
 	  };
 
 export type DeriveAIThreadRenderItemsOptions<TMessage extends AIThreadItem> = {
 	getMessageKey: (message: TMessage, index: number) => string;
 	activeQuestion?: AIThreadAskUserQuestion<TMessage> | null;
 	splitMessageParts?: boolean;
+	/** Local ask-user-question resolutions, by request key, that the messages may not show yet. */
+	questionStates?: Record<string, AIThreadAskUserQuestionState | undefined>;
+	/** Submitted ask-user-question values by request key. */
+	questionValues?: Record<string, AIAskAnswers | undefined>;
+	/** An assistant reply is streaming: adds the pending row or marks the streaming segment. */
+	streaming?: boolean;
+	/** Appends the error row at the end of the transcript. */
+	error?: boolean;
 };
 
 type PendingToolGroup<TMessage extends AIThreadItem> = {
@@ -38,11 +123,20 @@ type PendingToolGroup<TMessage extends AIThreadItem> = {
 	tools: AIToolCall[];
 };
 
+type ContentItem<TMessage extends AIThreadItem> = Exclude<
+	AIThreadRenderItem<TMessage>,
+	{ kind: 'pending' } | { kind: 'error' }
+>;
+type MessageItem<TMessage extends AIThreadItem> = Extract<
+	AIThreadRenderItem<TMessage>,
+	{ kind: 'message' }
+>;
+
 export function deriveAIThreadRenderItems<TMessage extends AIThreadItem>(
 	messages: readonly TMessage[],
 	options: DeriveAIThreadRenderItemsOptions<TMessage>
 ): AIThreadRenderItem<TMessage>[] {
-	const items: AIThreadRenderItem<TMessage>[] = [];
+	const items: ContentItem<TMessage>[] = [];
 	let pendingTools: PendingToolGroup<TMessage> | undefined;
 
 	function flushTools(): void {
@@ -61,9 +155,17 @@ export function deriveAIThreadRenderItems<TMessage extends AIThreadItem>(
 		message: TMessage,
 		messageIndex: number,
 		key: string,
-		content?: string
+		content?: string,
+		files?: readonly AIFileSource[]
 	): void {
-		items.push({ kind: 'message', key, message, messageIndex, content });
+		items.push({
+			kind: 'message',
+			key,
+			message,
+			messageIndex,
+			content,
+			...(files?.length ? { files } : {})
+		});
 	}
 
 	function pushMarker(
@@ -88,6 +190,33 @@ export function deriveAIThreadRenderItems<TMessage extends AIThreadItem>(
 			flushTools();
 			return;
 		}
+		const question = isAskUserQuestionTool(normalizedTool)
+			? toAskUserQuestionRequest(
+					message,
+					messageIndex,
+					messageKey,
+					normalizedTool,
+					toolIndex,
+					options.questionStates ?? {}
+				)
+			: undefined;
+		// An answered question keeps a compact question → answer record in the transcript instead of
+		// a raw tool row; a dismissed one settles as a cancelled call rather than spinning.
+		if (question?.state === 'completed') {
+			flushTools();
+			items.push({
+				kind: 'question-summary',
+				key: `${messageKey}:question-${toolIndex}`,
+				message,
+				messageIndex,
+				questions: question.questions,
+				value: options.questionValues?.[question.key] ?? question.value ?? {},
+				title: question.title
+			});
+			return;
+		}
+		const groupedTool =
+			question?.state === 'discarded' ? { ...normalizedTool, status: 'cancelled' } : normalizedTool;
 		pendingTools ??= {
 			firstKey: `${messageKey}:${toolIndex}`,
 			lastKey: `${messageKey}:${toolIndex}`,
@@ -96,7 +225,7 @@ export function deriveAIThreadRenderItems<TMessage extends AIThreadItem>(
 			tools: []
 		};
 		pendingTools.lastKey = `${messageKey}:${toolIndex}`;
-		pendingTools.tools.push(normalizedTool);
+		pendingTools.tools.push(groupedTool);
 	}
 
 	for (const [messageIndex, message] of messages.entries()) {
@@ -114,14 +243,24 @@ export function deriveAIThreadRenderItems<TMessage extends AIThreadItem>(
 		}
 
 		if (options.splitMessageParts !== false && message.parts?.length) {
+			const firstItemIndex = items.length;
+			let files: readonly AIFileSource[] | undefined = messageFileParts(message.parts, messageKey);
+			let sources: AIThreadSource[] | undefined;
 			let renderedPart = false;
+			const takeFiles = () => {
+				const taken = files;
+				files = undefined;
+				return taken;
+			};
 			const hasTextPart = message.parts.some((part) => part.type === 'text' && Boolean(part.text));
 			if (!hasTextPart && hasMessageContent(message)) {
 				flushTools();
-				pushMessage(message, messageIndex, `${messageKey}:content`);
+				pushMessage(message, messageIndex, `${messageKey}:content`, undefined, takeFiles());
 				renderedPart = true;
 			}
 			let toolIndex = 0;
+			const lastPartIndex = message.parts.length - 1;
+			const isLastMessage = messageIndex === messages.length - 1;
 			for (const [partIndex, part] of message.parts.entries()) {
 				const partKey = `${messageKey}:part-${partIndex}`;
 				const tool = toolFromPart(part, partKey);
@@ -139,9 +278,61 @@ export function deriveAIThreadRenderItems<TMessage extends AIThreadItem>(
 				}
 				if (part.type === 'text' && part.text) {
 					flushTools();
-					pushMessage(message, messageIndex, partKey, part.text);
+					pushMessage(message, messageIndex, partKey, part.text, takeFiles());
+					renderedPart = true;
+					continue;
+				}
+				if (part.type === 'reasoning' && typeof part.text === 'string' && part.text) {
+					flushTools();
+					items.push({
+						kind: 'reasoning',
+						key: partKey,
+						message,
+						messageIndex,
+						content: part.text,
+						// AI SDK marks a reasoning part `streaming` until it is done; without a state, the
+						// last part of a streaming reply is the one still being written.
+						streaming:
+							part.state === 'streaming' ||
+							(part.state === undefined &&
+								Boolean(options.streaming) &&
+								isLastMessage &&
+								partIndex === lastPartIndex)
+					});
+					renderedPart = true;
+					continue;
+				}
+				const source = sourceFromPart(part, partKey);
+				if (source) {
+					if (sources) {
+						sources.push(source);
+					} else {
+						flushTools();
+						sources = [source];
+						items.push({
+							kind: 'sources',
+							key: `${partKey}:sources`,
+							message,
+							messageIndex,
+							sources
+						});
+					}
 					renderedPart = true;
 				}
+			}
+			// Files with no text segment to sit on get a segment of their own, first in the message,
+			// where an uploaded file sits above its prompt.
+			const leftoverFiles = takeFiles();
+			if (leftoverFiles?.length) {
+				items.splice(firstItemIndex, 0, {
+					kind: 'message',
+					key: `${messageKey}:files`,
+					message,
+					messageIndex,
+					content: '',
+					files: leftoverFiles
+				});
+				renderedPart = true;
 			}
 			if (renderedPart) continue;
 		}
@@ -168,95 +359,178 @@ export function deriveAIThreadRenderItems<TMessage extends AIThreadItem>(
 	}
 
 	flushTools();
-	return items;
+	const withActions = assignUnitActions(items, options.streaming === true);
+	return appendStatusItems(withActions, options);
 }
 
-export function collectAIThreadMessageTools(
-	message: AIThreadItem,
-	_messageIndex: number,
-	messageKey: string,
-	includePartTools = true
-): AIToolCall[] {
-	const partTools = (includePartTools ? (message.parts ?? []) : []).flatMap((part, index) => {
-		const tool = toolFromPart(part, `${messageKey}:part-${index}`);
-		return tool ? [tool] : [];
-	});
-	if (partTools.length > 0) return partTools;
-	if (message.tools?.length) {
-		return message.tools.map((tool, index) =>
-			normalizeToolCall(tool, `${messageKey}:tool-${index}`)
-		);
-	}
-	if (message.tool) return [normalizeToolCall(message.tool, messageKey)];
-	if (message.role === 'tool' || message.type === 'tool') {
-		return [
-			{
-				id: message.id ?? messageKey,
-				name: message.toolName ?? message.name,
-				title: message.name,
-				status: messageToolStatus(message),
-				input: message.input,
-				output: message.output !== undefined ? message.output : message.content,
-				error: message.error
+type Unit = { kind: 'user' | 'assistant' | 'none'; start: number; end: number };
+
+function itemRole<TMessage extends AIThreadItem>(item: ContentItem<TMessage>): AIThreadRole {
+	return item.message.role ?? 'assistant';
+}
+
+/**
+ * Splits the transcript into units and gives each one action bar. A user (or system) message is
+ * one unit; an assistant turn runs from the first non-user item to the next user message or
+ * marker. The bar sits on the unit's last text segment when the unit ends with text, otherwise
+ * on an `actions` row after the unit. The final assistant turn of a streaming reply has no bar.
+ */
+function assignUnitActions<TMessage extends AIThreadItem>(
+	items: ContentItem<TMessage>[],
+	streaming: boolean
+): ContentItem<TMessage>[] {
+	const units: Unit[] = [];
+	for (const [index, item] of items.entries()) {
+		const previous = units.at(-1);
+		if (item.kind === 'marker') {
+			units.push({ kind: 'none', start: index, end: index });
+			continue;
+		}
+		const role = itemRole(item);
+		if (item.kind === 'message' && (role === 'user' || role === 'system')) {
+			// Several text parts of one user message stay one unit.
+			const previousItem = previous ? items[previous.end] : undefined;
+			if (
+				previous?.kind === 'user' &&
+				previousItem?.kind === 'message' &&
+				previousItem.messageIndex === item.messageIndex
+			) {
+				previous.end = index;
+			} else {
+				units.push({ kind: 'user', start: index, end: index });
 			}
-		];
+			continue;
+		}
+		if (previous?.kind === 'assistant') previous.end = index;
+		else units.push({ kind: 'assistant', start: index, end: index });
 	}
-	return [];
+
+	const lastUserUnit = units.findLastIndex((unit) => unit.kind === 'user');
+	const lastAssistantUnit = units.findLastIndex((unit) => unit.kind === 'assistant');
+	const result: ContentItem<TMessage>[] = [];
+	for (const [unitIndex, unit] of units.entries()) {
+		const unitItems = items.slice(unit.start, unit.end + 1);
+		if (unit.kind === 'none') {
+			result.push(...unitItems);
+			continue;
+		}
+		const latest =
+			unit.kind === 'assistant' && unitIndex === lastAssistantUnit && unitIndex > lastUserUnit;
+		const messageItems = unitItems.filter(
+			(item): item is MessageItem<TMessage> => item.kind === 'message'
+		);
+		const content = messageItems
+			.map((item) => item.content ?? item.message.content ?? '')
+			.filter(Boolean)
+			.join('\n\n');
+		const last = unitItems.at(-1)!;
+		const target =
+			messageItems.findLast((item) => itemRole(item) === 'assistant') ??
+			messageItems.at(-1) ??
+			last;
+		const actions: AIThreadUnitActions<TMessage> = {
+			message: target.message,
+			messageIndex: target.messageIndex,
+			role: unit.kind === 'assistant' ? 'assistant' : itemRole(target),
+			content,
+			latest
+		};
+		const replying = streaming && latest;
+		// The bar rides on the last segment only when that segment holds the whole unit's text (and
+		// is the retry target), so its copy and retry act on the unit; otherwise it gets a row.
+		const barOnLast =
+			last.kind === 'message' &&
+			last === target &&
+			(last.content ?? last.message.content ?? '') === content;
+		for (const item of unitItems) {
+			if (item.kind !== 'message') {
+				result.push(item);
+				continue;
+			}
+			const isLast = item === last;
+			result.push({
+				...item,
+				actions: isLast && barOnLast && !replying ? actions : false,
+				...(replying && isLast ? { streaming: true } : {})
+			});
+		}
+		if (!replying && !barOnLast) {
+			result.push({
+				kind: 'actions',
+				key: `${last.key}:actions`,
+				message: actions.message,
+				messageIndex: actions.messageIndex,
+				actions
+			});
+		}
+	}
+	return result;
+}
+
+function appendStatusItems<TMessage extends AIThreadItem>(
+	items: ContentItem<TMessage>[],
+	options: DeriveAIThreadRenderItemsOptions<TMessage>
+): AIThreadRenderItem<TMessage>[] {
+	const result: AIThreadRenderItem<TMessage>[] = items;
+	if (options.error) {
+		result.push({ kind: 'error', key: `error:${items.at(-1)?.key ?? 'empty'}` });
+		return result;
+	}
+	if (!options.streaming) return result;
+	const lastContent = items.findLast((item) => item.kind !== 'marker');
+	if (lastContent?.kind === 'message' && itemRole(lastContent) === 'user') {
+		result.push({ kind: 'pending', key: `pending:${lastContent.key}` });
+	}
+	return result;
 }
 
 function hasMessageContent(message: AIThreadItem): boolean {
 	return message.content !== undefined && message.content !== '';
 }
 
-function normalizeToolCall(tool: AIToolCall, fallbackId: string): AIToolCall {
-	return { ...tool, id: tool.id ?? fallbackId, status: toolStatus(tool) };
+const SAFE_URL = /^(?:https?:|blob:|data:image\/)/i;
+
+function messageFileParts(parts: readonly AIThreadPart[], messageKey: string): AIFileSource[] {
+	return parts.flatMap((part, index) => {
+		if (part.type !== 'file') return [];
+		const url = typeof part.url === 'string' && SAFE_URL.test(part.url) ? part.url : undefined;
+		const type = typeof part.mediaType === 'string' ? part.mediaType : undefined;
+		const name =
+			(typeof part.filename === 'string' && part.filename) ||
+			(url && !url.startsWith('data:') ? (url.split(/[?#]/)[0]?.split('/').at(-1) ?? '') : '') ||
+			type ||
+			'file';
+		return [{ id: `${messageKey}:part-${index}`, name, type, previewUrl: url }];
+	});
 }
 
-function toolStatus(tool: AIToolCall): AIToolStatus | undefined {
-	if (tool.status) return tool.status;
-	if (tool.error !== undefined) return 'error';
-	if (tool.output !== undefined || tool.result !== undefined) return 'success';
+function sourceFromPart(part: AIThreadPart, key: string): AIThreadSource | undefined {
+	if (part.type === 'source-url' && typeof part.url === 'string') {
+		const url = /^https?:/i.test(part.url) ? part.url : undefined;
+		return {
+			id: typeof part.sourceId === 'string' ? part.sourceId : key,
+			url,
+			title: (typeof part.title === 'string' && part.title) || hostname(part.url) || part.url
+		};
+	}
+	if (part.type === 'source-document') {
+		return {
+			id: typeof part.sourceId === 'string' ? part.sourceId : key,
+			title:
+				(typeof part.title === 'string' && part.title) ||
+				(typeof part.filename === 'string' && part.filename) ||
+				(typeof part.mediaType === 'string' ? part.mediaType : key)
+		};
+	}
 	return undefined;
 }
 
-function messageToolStatus(message: AIThreadItem): AIToolStatus | undefined {
-	if (message.status) return message.status;
-	if (message.error !== undefined) return 'error';
-	if (message.output !== undefined || message.content !== undefined) return 'success';
-	return undefined;
-}
-
-function toolFromPart(part: AIThreadPart, fallbackId: string): AIToolCall | undefined {
-	if (part.type === 'tool' && part.tool) return normalizeToolCall(part.tool, fallbackId);
-	if (!isToolPart(part)) return undefined;
-	const name = part.toolName ?? (part.type.startsWith('tool-') ? part.type.slice(5) : undefined);
-	return normalizeToolCall(
-		{
-			id: part.toolCallId ?? fallbackId,
-			name,
-			title: name,
-			status: toolPartStatus(part.state),
-			input: part.input,
-			output: part.output,
-			structuredContent: part.structuredContent,
-			result: part.result,
-			error: part.errorText ?? part.error,
-			_meta: part._meta
-		},
-		fallbackId
-	);
-}
-
-function isToolPart(part: AIThreadPart): part is AIThreadToolPart {
-	return part.type === 'dynamic-tool' || part.type?.startsWith('tool-') === true;
-}
-
-function toolPartStatus(state: string | undefined): AIToolStatus | undefined {
-	if (state === 'output-error') return 'error';
-	if (state === 'output-available') return 'success';
-	if (state === 'input-streaming') return 'streaming';
-	if (state === 'input-available') return 'running';
-	return undefined;
+function hostname(url: string): string | undefined {
+	try {
+		return new URL(url).hostname.replace(/^www\./, '');
+	} catch {
+		return undefined;
+	}
 }
 
 function isQuestionTool<TMessage extends AIThreadItem>(

@@ -1,4 +1,6 @@
 <script lang="ts" generics="TMessage extends AIThreadItem = AIThreadItem">
+	import { getContext } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
 	import { useClipboard } from '../../utils/useClipboard.svelte.js';
 	import Alert from '../Alert/Alert.svelte';
 	import Button from '../Button/Button.svelte';
@@ -7,6 +9,7 @@
 	import { copyIcon } from '../Icons/copy.js';
 	import { pencilSimpleIcon } from '../Icons/pencilSimple.js';
 	import Slot from '../Slot/Slot.svelte';
+	import { tooltip } from '../Tooltip/tooltip.attachment.svelte.js';
 	import type { AIThreadItem } from '../AIThread/aiThread.props.js';
 	import { getAIConversation } from '../AIConversation/aiConversation.state.svelte.js';
 	import type { AIMessageActionState, AIMessageActionsProps } from './aiMessageActions.props.js';
@@ -84,6 +87,12 @@
 			Boolean(customActions || actionState.canCopy || actionState.canEdit || actionState.canRetry)
 	);
 	const buttonSize = $derived(size === 'large' ? 'normal' : 'small');
+	// Icon-only buttons name themselves for assistive technology through `label`; the tooltip shows
+	// the same name to sighted pointer and keyboard users. Tooltips need a Theme (it hosts the
+	// shared surface), so outside one the buttons keep their accessible name only.
+	const hasTooltipHost = Boolean(getContext('entasisTheme'));
+	const withTooltip = (content: string): Attachment<HTMLElement> | undefined =>
+		hasTooltipHost ? tooltip({ content, position: 'bottom' }) : undefined;
 
 	function resolveRoleLayout(
 		value: AIThreadItem['role']
@@ -120,13 +129,11 @@
 		errorMessage = undefined;
 		try {
 			const didCopy = await copyMessage();
-			if (!didCopy) errorMessage = 'Unable to copy this message.';
+			if (!didCopy) errorMessage = t.aiMessageCopyFailed;
 		} catch (error) {
 			setActionError(
 				error,
-				clipboard.copied
-					? 'The message was copied, but the copy action failed.'
-					: 'Unable to copy this message.'
+				clipboard.copied ? t.aiMessageCopyCallbackFailed : t.aiMessageCopyFailed
 			);
 		}
 	}
@@ -136,7 +143,7 @@
 		try {
 			await editMessage();
 		} catch (error) {
-			setActionError(error, 'Unable to edit this message.');
+			setActionError(error, t.aiMessageEditFailed);
 		}
 	}
 
@@ -145,7 +152,7 @@
 		try {
 			await retryMessage();
 		} catch (error) {
-			setActionError(error, 'Unable to retry this message.');
+			setActionError(error, t.aiMessageRetryFailed);
 		}
 	}
 
@@ -170,6 +177,7 @@
 					variant="ghost"
 					label={actionState.copied ? t.copied : t.copy}
 					onclick={() => void handleCopy()}
+					{@attach withTooltip(actionState.copied ? t.copied : t.copy)}
 					class={classes.button({ size })}
 					>{@render (actionState.copied ? checkIcon : copyIcon)({ size: 14 })}</Button
 				>{/if}
@@ -180,6 +188,7 @@
 					variant="ghost"
 					label={t.aiMessageEdit}
 					onclick={() => void handleEdit()}
+					{@attach withTooltip(t.aiMessageEdit)}
 					class={classes.button({ size })}>{@render pencilSimpleIcon({ size: 14 })}</Button
 				>{/if}
 			{#if actionState.canRetry}<Button
@@ -189,6 +198,7 @@
 					variant="ghost"
 					label={t.aiMessageRetry}
 					onclick={() => void handleRetry()}
+					{@attach withTooltip(t.aiMessageRetry)}
 					class={classes.button({ size })}>{@render arrowsClockwiseIcon({ size: 14 })}</Button
 				>{/if}
 		{/if}

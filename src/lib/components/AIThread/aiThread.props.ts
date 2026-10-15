@@ -1,6 +1,6 @@
 import type { Slot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
-import type { Density } from '$lib/types/theme.js';
+import type { Colors, Density } from '$lib/types/theme.js';
 import type { HTMLAttributes } from 'svelte/elements';
 import type { AIMarkerVariant } from '$lib/components/AIMarker/aiMarker.props.js';
 import type {
@@ -43,8 +43,18 @@ export type AIThreadToolPart = {
 	result?: unknown;
 	error?: unknown;
 	errorText?: string;
+	/** AI SDK approval record; `approved: false` renders the call as denied. */
+	approval?: AIThreadToolApproval;
 	_meta?: Record<string, unknown>;
 };
+
+export type AIThreadToolApproval = { id?: string; approved?: boolean; reason?: string };
+
+/**
+ * A cited source from an AI SDK `source-url` or `source-document` part. `url` is set only for
+ * http(s) links.
+ */
+export type AIThreadSource = { id: string; title: string; url?: string };
 
 export type AIThreadPart = {
 	type?: string;
@@ -61,6 +71,15 @@ export type AIThreadPart = {
 	result?: unknown;
 	error?: unknown;
 	errorText?: string;
+	approval?: AIThreadToolApproval;
+	/** `source-url` and `file` parts. */
+	url?: string;
+	/** `source-url` and `source-document` parts. */
+	title?: string;
+	sourceId?: string;
+	/** `file` and `source-document` parts. */
+	mediaType?: string;
+	filename?: string;
 	_meta?: Record<string, unknown>;
 	[key: string]: unknown;
 };
@@ -119,6 +138,12 @@ export type AIThreadMessageRenderPayload<TMessage extends AIThreadItem = AIThrea
 		/** Visibility resolved by the thread for this message's action region. */
 		actionsVisibility: AIMessageActionVisibility;
 	};
+
+/**
+ * When default message actions show. `latest` keeps the final assistant turn's bar visible and
+ * reveals the others on hover or focus; touch screens, which cannot hover, always show them.
+ */
+export type AIThreadMessageActionsVisibility = AIMessageActionVisibility | 'latest';
 
 export type AIThreadScrollBehavior = 'auto' | 'smooth' | 'instant';
 export type AIThreadScrollButtonPosition = 'left' | 'center' | 'right';
@@ -191,8 +216,19 @@ export type AIThreadProps<TMessage extends AIThreadItem = AIThreadItem> = WithAt
 		density?: AIThreadDensity;
 		/** Size forwarded to default AIMessage rows. @default 'normal' */
 		messageSize?: AIMessageSize;
-		/** Presentation forwarded to default AIMessage rows. @default 'bubble' */
+		/** Presentation forwarded to default AIMessage rows. @default 'minimal' */
 		messageVariant?: AIMessageVariant;
+		/**
+		 * User-bubble colour forwarded to default AIMessage rows. Neutral is a quiet grey bubble;
+		 * any other role paints a solid bubble. Defaults to the theme's default colour.
+		 */
+		messageColor?: Colors;
+		/**
+		 * Maximum width of the centred reading column, as a CSS length (`48rem`) or pixels. Sets
+		 * `--ai-thread-content-width`; when omitted, rows follow `--ai-chat-content-width` from an
+		 * ancestor (AIChat sets it) and otherwise span the thread.
+		 */
+		contentWidth?: string | number;
 		/** Follows appended output while the viewport remains pinned to the bottom. */
 		followOutput?: boolean;
 		/** Distance from the bottom, in pixels, considered pinned. */
@@ -211,7 +247,7 @@ export type AIThreadProps<TMessage extends AIThreadItem = AIThreadItem> = WithAt
 		scrollBehavior?: AIThreadScrollBehavior;
 		/** Displays the floating scroll-to-latest action. */
 		showScrollButton?: boolean;
-		/** Horizontal alignment of the scroll-to-latest action. */
+		/** Horizontal alignment of the scroll-to-latest action. @default 'center' */
 		scrollButtonPosition?: AIThreadScrollButtonPosition;
 		/** Displays the user-turn minimap when multiple turns overflow the viewport. */
 		showToc?: boolean;
@@ -227,10 +263,24 @@ export type AIThreadProps<TMessage extends AIThreadItem = AIThreadItem> = WithAt
 		renderAskUserQuestion?: boolean;
 		/** Disables the active ask-user-question flow. */
 		askUserQuestionDisabled?: boolean;
-		/** Suggestions used as the default empty state. */
+		/**
+		 * Prompt suggestions: chips under the empty-state greeting, then follow-ups below the
+		 * transcript after a finished assistant turn. Falls back to the nearest conversation.
+		 */
 		suggestions?: readonly string[];
-		/** Handles selection from the default empty-state suggestions. */
+		/** Shows `suggestions` as follow-ups after the last assistant turn. @default true */
+		showFollowUps?: boolean;
+		/** Handles selection from the empty-state suggestions and the follow-ups. */
 		onSelect?: (suggestion: string) => void;
+		/** Error shown as a row at the end of the transcript. Falls back to the nearest conversation. */
+		error?: unknown;
+		/** Shows `error` in the transcript. @default true */
+		showError?: boolean;
+		/**
+		 * Retries after an error. Defaults to the conversation's `retry`, targeting the last
+		 * message; without either, the error row has no Retry button.
+		 */
+		onErrorRetry?: () => void | Promise<void>;
 		/** Content rendered above the virtual transcript. */
 		header?: Slot;
 		/** Content rendered below the virtual transcript. */
@@ -243,8 +293,11 @@ export type AIThreadProps<TMessage extends AIThreadItem = AIThreadItem> = WithAt
 		message?: Slot<AIThreadMessageRenderPayload<TMessage>>;
 		/** Custom action renderer shared by default message rows. */
 		messageActions?: AIMessageActionSnippet<TMessage> | false;
-		/** Controls default message action visibility. @default 'always' */
-		messageActionsVisibility?: AIMessageActionVisibility;
+		/**
+		 * When default message actions show. `latest` keeps the final assistant turn's bar visible
+		 * and reveals the rest on hover or focus (always on touch screens). @default 'latest'
+		 */
+		messageActionsVisibility?: AIThreadMessageActionsVisibility;
 		/** Enables or disables copy actions. */
 		messageCopyable?: boolean;
 		/** Enables or disables edit actions. */

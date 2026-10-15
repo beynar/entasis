@@ -18,7 +18,7 @@ const defaultViewport = cva({
 });
 const defaultList = cva({ base: 'relative w-full' });
 const defaultItem = cva({
-	base: 'absolute top-0 left-0 z-0 w-full has-[[data-actions-visibility=always]]:z-10 hover:!z-20 focus-within:!z-20',
+	base: 'absolute top-0 left-0 z-0 w-full hover:!z-20 focus-within:!z-20',
 	variants: {
 		density: {
 			compact: 'px-lg py-micro',
@@ -28,16 +28,43 @@ const defaultItem = cva({
 	},
 	defaultVariants: { density: 'normal' }
 });
+// The centred reading column. `--ai-thread-content-width` (the `contentWidth` prop) wins over an
+// ancestor's `--ai-chat-content-width`; with neither, rows span the thread.
+const defaultContent = cva({
+	base: 'mx-auto w-full min-w-0 max-w-[var(--ai-thread-content-width,var(--ai-chat-content-width,none))]'
+});
+const defaultEmpty = cva({
+	base: 'mx-auto flex min-h-full w-full max-w-[var(--ai-thread-content-width,var(--ai-chat-content-width,none))] flex-col items-center justify-center gap-xl px-xl py-layout-sm text-center'
+});
+const defaultGreeting = cva({ base: 'text-xl font-semibold text-balance text-neutral' });
+const defaultEmptySuggestions = cva({
+	base: 'flex max-w-full min-w-0 flex-wrap justify-center gap-sm'
+});
+const defaultFollowUps = cva({ base: 'shrink-0 px-xl pb-sm' });
+const defaultFollowUpList = cva({
+	base: 'mx-auto flex w-full min-w-0 max-w-[var(--ai-thread-content-width,var(--ai-chat-content-width,none))] flex-wrap gap-sm'
+});
+// The pending assistant row's label: rendered inside an assistant AIMessage, so it takes the
+// message's type size and column, with the shared `shimmer` utility on top.
+const defaultPending = cva({ base: 'shimmer text-neutral/70' });
+const defaultError = cva({ base: 'w-full min-w-0' });
+const defaultErrorBody = cva({ base: 'flex flex-col items-start gap-sm' });
+const defaultSources = cva({ base: 'flex min-w-0 flex-wrap items-center gap-xs text-sm' });
+const defaultSourcesLabel = cva({ base: 'text-xs font-medium text-neutral/70' });
+const defaultSource = cva({
+	base: 'inline-flex h-6 max-w-60 min-w-0 items-center truncate rounded-full border border-neutral-muted px-md text-xs text-neutral/70 [&[href]]:state-layer [&[href]]:hover:text-neutral'
+});
+const defaultActions = cva({ base: 'w-full min-w-0' });
 const defaultScrollButton = cva({
-	base: 'absolute bottom-4 z-10',
+	base: 'absolute bottom-md z-10 rounded-full bg-surface-raised lift-2',
 	variants: {
 		position: {
-			left: 'left-4',
+			left: 'left-md',
 			center: 'left-1/2 -translate-x-1/2',
-			right: 'right-4'
+			right: 'right-md'
 		}
 	},
-	defaultVariants: { position: 'right' }
+	defaultVariants: { position: 'center' }
 });
 const defaultAskQuestion = cva({
 	base: 'shrink-0 border-t border-neutral-muted p-lg'
@@ -60,6 +87,19 @@ export const aiThreadTheme = {
 	viewport: defaultViewport,
 	list: defaultList,
 	item: defaultItem,
+	content: defaultContent,
+	empty: defaultEmpty,
+	greeting: defaultGreeting,
+	emptySuggestions: defaultEmptySuggestions,
+	followUps: defaultFollowUps,
+	followUpList: defaultFollowUpList,
+	pending: defaultPending,
+	error: defaultError,
+	errorBody: defaultErrorBody,
+	sources: defaultSources,
+	sourcesLabel: defaultSourcesLabel,
+	source: defaultSource,
+	actions: defaultActions,
 	scrollButton: defaultScrollButton,
 	askQuestion: defaultAskQuestion,
 	tocOverlay: defaultTocOverlay,

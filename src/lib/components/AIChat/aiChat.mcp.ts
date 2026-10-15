@@ -40,9 +40,9 @@ Product-level snippets receive the central \`AIConversationState\` instance dire
 
 - \`children\` replaces the complete default surface while retaining the provider.
 - \`header\`, \`beforeThread\`, \`thread\`, \`afterThread\`, \`composer\`, and \`footer\` replace or insert complete surface regions.
-- \`errorRegion\` replaces the default error alert.
+- \`errorRegion\` replaces the default error. Without it, a conversation \`error\` shows as a row at the end of the transcript, where the reply failed, with a Retry button that calls the conversation's \`retry\` on the last message (so \`onRetry\` receives \`{ target: { index } }\`) and clears the error. An empty transcript shows the error instead of the greeting. A replacement \`errorRegion\`, or a replaced \`thread\`, renders above the transcript.
 - \`context\` and \`modelSelector\` replace their individual composer controls; \`controls\` replaces both together.
-- \`empty\` replaces the transcript empty state; \`suggestionsRegion\` replaces suggestions inside that empty state.
+- \`empty\` replaces the transcript empty state (a vertically centred greeting with wrapping suggestion chips); \`suggestionsRegion\` replaces suggestions inside that empty state and turns off the follow-ups.
 - \`message\`, \`tool\`, and \`marker\` customize transcript renderers with their row payloads.
   Message payloads include the thread-resolved \`actionsVisibility\` value so custom AIMessage
   composition does not make intermediate actions permanently visible.
@@ -64,16 +64,31 @@ Product-level snippets receive the central \`AIConversationState\` instance dire
 </AIChat>
 \`\`\`
 
-## Thread controls
+## Layout and thread controls
 
-Use \`density\` for transcript spacing, \`messageSize\` for the default message scale, and
-\`messageVariant\` (\`bubble\` or \`minimal\`) for default message presentation. Use \`showToc\`,
-\`tocSide\`, and \`toc\` for user-turn navigation. Custom message snippets own their message
-presentation. Configure advanced virtualizer tuning on \`AIThread\` through direct composition.
+The transcript rows and the composer share one centred reading column. \`contentWidth\` (default
+\`'48rem'\`; a number is pixels, \`'none'\` spans the chat) sets the CSS variable
+\`--ai-chat-content-width\` on the root, which AIThread rows and AIComposer both read.
 
-Use \`messageActions\`, \`messageActionsVisibility\` (\`hover\`, \`always\`, or \`none\`), \`messageCopyable\`, \`messageEditable\`, \`messageRetryable\`, \`onMessageCopy\`, \`onMessageEdit\`, and \`onMessageRetry\` for default message actions. Explicit message-action callbacks take precedence over conversation fallbacks.
-Intermediate assistant segments that continue through tools into another assistant segment omit the
-action region; actions attach to the terminal assistant response for the turn.
+Use \`density\` for transcript spacing, \`messageSize\` for the default message scale (normal reads
+at 16px), \`messageVariant\` (\`minimal\`, the default: flat full-width assistant prose; or
+\`bubble\`: framed assistant replies) and \`messageColor\` (the user bubble: \`neutral\` grey by
+default, any other role paints a solid bubble — \`primary\` gives the previous saturated look). Use
+\`showToc\`, \`tocSide\`, and \`toc\` for user-turn navigation; the table of contents steps aside
+in a thread narrower than 480px. Custom message snippets own their message presentation. Configure
+advanced virtualizer tuning on \`AIThread\` through direct composition.
+
+While a reply streams and the last item is a user turn, the transcript shows a pending assistant
+row ("Thinking…" or \`liveText\`, with the \`shimmer\` utility); the streaming reply shows a caret.
+AI SDK \`reasoning\`, tool (including approval states), \`source-url\`/\`source-document\` and
+\`file\` parts render in the transcript, and an answered ask-user-question leaves a compact
+question → answer summary.
+
+Use \`messageActions\`, \`messageActionsVisibility\` (\`latest\`, the default, \`hover\`, \`always\`, or \`none\`), \`messageCopyable\`, \`messageEditable\`, \`messageRetryable\`, \`onMessageCopy\`, \`onMessageEdit\`, and \`onMessageRetry\` for default message actions. Explicit message-action callbacks take precedence over conversation fallbacks.
+A turn is one unit: reasoning, tools and text up to the next user message share a single action bar
+at the end of the turn, whose copy takes the whole turn's text. \`latest\` keeps the final assistant
+turn's bar visible and reveals the others on hover or focus; touch screens always show them. The
+bar of a reply that is still streaming appears when it ends.
 
 ## Context and model controls
 
@@ -86,7 +101,8 @@ The default AIComposer remains connected to the central conversation state. AICh
 - Queueing: \`disabled\`, \`queueWhileBusy\`, \`queue\`, \`onQueueChange\`, \`onQueuedMessageAdd\`, \`onQueuedMessageCancel\`, \`onQueuedMessageEditStart\`, \`onQueuedMessageEditCommit\`, \`onQueuedMessageEditCancel\`, \`onQueuedMessageReorder\`, and \`onSteer\`.
 - Files: \`fileDropzone\`, \`fileMultiple\`, \`accept\`, \`maxFiles\`, \`maxFileSize\`, \`onFilesRejected\`, \`onFileReject\`, \`onAttachmentAdd\`, \`onAttachmentRetry\`, and \`onAttachmentRemove\`. AIChat defaults \`fileDropzone\` to true.
 - Suggestions in the editor: \`commands\`, \`mentions\`, \`references\`, and \`skills\`.
-Use \`AIConversation\` with \`AIThread\` and \`AIComposer\` directly for editor formatting, toolbar, shortcut, and other primitive-level tuning.
+- Editor: \`submitShortcut\` (AIComposer's default \`'enter'\`: Enter sends, Shift+Enter adds a line) and \`toolbar\` (AIComposer's default \`'none'\`).
+Use \`AIConversation\` with \`AIThread\` and \`AIComposer\` directly for other primitive-level tuning.
 
 Conversation \`onSubmit\`, \`onStop\`, and \`onFilesChange\` remain central state events rather than bypassing or duplicating the Composer path.
 
@@ -94,11 +110,11 @@ Conversation \`onSubmit\`, \`onStop\`, and \`onFilesChange\` remain central stat
 
 An active \`activeAskUserQuestion\` replaces both a custom or default composer. The complete request is rendered with every question, initial values, title, requester, context, navigation labels, submit label, and discard label. Answers are retained by request key, and completion or dismissal resolves the captured request through \`AIConversationState.resolveAskUserQuestion\`.
 
-Prompt \`suggestions\` render only inside an empty transcript. An explicit \`empty\` region has precedence. An explicit \`onSelect\` callback -- the pick event for a suggestion -- has precedence over the default behavior; without it, picking a suggestion updates \`currentInput\` and focuses the default composer.
+Prompt \`suggestions\` render as chips under the empty-state greeting, then as follow-ups above the composer once an assistant turn has finished (not while streaming, during a question, or under an error); \`showFollowUps={false}\` keeps them to the empty state. An explicit \`empty\` region has precedence. An explicit \`onSelect\` callback -- the pick event for a suggestion -- has precedence over the default behavior; without it, picking a suggestion updates \`currentInput\` and focuses the default composer.
 
 ## Skeleton
 
-AIChatSkeleton accepts native div attributes plus \`messageCount\`, \`showHeader\`, \`showComposer\`, \`showFooter\`, \`class\`, and \`theme\`. \`messageCount\` defaults to 4 and is clamped from 1 to 8. Header and footer default off; composer defaults on. The root defaults to \`role="status"\`, \`aria-label="Connecting chat"\`, and \`aria-busy="true"\`, all overridable with native attributes.
+AIChatSkeleton mirrors the default chat — user turns as end-aligned bubbles, assistant turns as flat lines, the composer as a bordered card, all in the centred column — so nothing jumps when the chat replaces it. It accepts native div attributes plus \`messageCount\`, \`showHeader\`, \`showComposer\`, \`showFooter\`, \`contentWidth\` (default \`'48rem'\`, match the chat's), \`class\`, and \`theme\`. \`messageCount\` defaults to 4 and is clamped from 1 to 8. Header and footer default off; composer defaults on. The root defaults to \`role="status"\`, \`aria-label="Connecting chat"\`, and \`aria-busy="true"\`, all overridable with native attributes.
 
 \`\`\`svelte
 <AIChatSkeleton
@@ -111,5 +127,5 @@ AIChatSkeleton accepts native div attributes plus \`messageCount\`, \`showHeader
 
 ## Theme
 
-Use \`theme\` or \`setAIChatTheme\` to override \`root\`, \`header\`, \`error\`, \`beforeThread\`, \`thread\`, \`afterThread\`, \`suggestions\`, \`composer\`, \`controls\`, \`footer\`, and \`skeletonMessages\` parts.
+Use \`theme\` or \`setAIChatTheme\` to override \`root\`, \`header\`, \`error\`, \`beforeThread\`, \`thread\`, \`afterThread\`, \`suggestions\`, \`composer\`, \`controls\`, \`footer\`, \`skeletonMessages\`, \`skeletonUser\`, \`skeletonAssistant\`, and \`skeletonComposer\` parts.
 `;

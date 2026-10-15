@@ -8,6 +8,7 @@ export type {
 	AIThreadAskUserQuestionStateChange,
 	AIThreadDensity,
 	AIThreadItem,
+	AIThreadMessageActionsVisibility,
 	AIThreadMessageRenderPayload,
 	AIThreadMessageKey,
 	AIThreadPart,
@@ -16,6 +17,7 @@ export type {
 	AIThreadRole,
 	AIThreadScrollBehavior,
 	AIThreadScrollButtonPosition,
+	AIThreadSource,
 	AIThreadTocEntry,
 	AIThreadTocPin,
 	AIThreadTocPinPayload,
@@ -24,6 +26,7 @@ export type {
 	AIThreadTocRange,
 	AIThreadTocSide,
 	AIThreadTocState,
+	AIThreadToolApproval,
 	AIThreadToolPart
 } from './aiThread.props.js';
 export type { AIMessageSize, AIMessageVariant } from '../AIMessage/aiMessage.props.js';

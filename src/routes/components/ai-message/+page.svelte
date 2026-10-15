@@ -24,8 +24,15 @@
 			name: 'variant',
 			type: 'segmented',
 			label: 'Variant',
-			value: 'bubble',
-			options: ['bubble', 'minimal']
+			value: 'minimal',
+			options: ['minimal', 'bubble']
+		},
+		{
+			name: 'color',
+			type: 'segmented',
+			label: 'User bubble',
+			value: 'neutral',
+			options: ['neutral', 'primary', 'secondary', 'success', 'info']
 		},
 		{
 			name: 'size',
@@ -40,6 +47,12 @@
 			label: 'Actions',
 			value: 'always',
 			options: ['hover', 'always', 'none']
+		},
+		{
+			name: 'streaming',
+			type: 'switch',
+			label: 'Streaming',
+			value: false
 		}
 	]);
 </script>
@@ -50,12 +63,15 @@
 	component="AIMessage"
 	features={[
 		'Assistant, user, system, and tool layouts',
-		'Bubble and minimal presentation variants',
+		'Minimal (default) and bubble presentation variants',
+		'Neutral or coloured user bubbles with direction-aware tails',
+		'16px chat prose with compact headings, hanging lists, and body-size tables',
+		'Streaming caret',
 		'Small, normal, and large content scales',
 		'Markdown or plain text content',
 		'File attachment rows with scroll fade',
 		'File, reference, skill, command, and mention tokens',
-		'Hover, always, or hidden actions',
+		'Hover, always, or hidden actions with tooltips, in the layout flow',
 		'Conversation-aware retry behavior'
 	]}
 >
@@ -68,11 +84,12 @@
 ${'</' + 'script>'}
 
 <AIMessage
-  from="assistant"
+  from="${controls.value.role}"
   content={content}
-  variant="minimal"
-  size="normal"
-  actionsVisibility="always"
+  variant="${controls.value.variant}"
+  color="${controls.value.color}"
+  size="${controls.value.size}"
+  actionsVisibility="${controls.value.actions}"${controls.value.streaming ? '\n  streaming' : ''}
 />`}
 	>
 		<AIMessage
@@ -80,8 +97,10 @@ ${'</' + 'script>'}
 			content={controls.value.role === 'user' ? 'Use the attached launch brief.' : tokenContent}
 			files={[{ name: 'launch-brief.md', size: 18_420, type: 'text/markdown' }]}
 			variant={controls.value.variant}
+			color={controls.value.color}
 			size={controls.value.size}
 			actionsVisibility={controls.value.actions}
+			streaming={controls.value.streaming}
 			class="w-full max-w-3xl"
 		/>
 	</ComponentCard>

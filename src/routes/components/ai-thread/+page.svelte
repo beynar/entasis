@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import AIConversation from '$lib/components/AIConversation/AIConversation.svelte';
 	import AIThread from '$lib/components/AIThread/AIThread.svelte';
 	import AIThreadToc from '$lib/components/AIThreadToc/AIThreadToc.svelte';
@@ -80,6 +81,11 @@
 			content: 'I found the policy and checked the rollout requirements.',
 			parts: [
 				{
+					type: 'reasoning',
+					text: 'The policy lives in the docs repository; the runbook lists the gates.',
+					state: 'done'
+				},
+				{
 					type: 'text',
 					text: 'I found the policy and checked the rollout requirements.'
 				},
@@ -97,10 +103,39 @@
 					state: 'output-available',
 					input: { documents: 2 },
 					output: { gates: ['compatibility', 'telemetry', 'approval'] }
+				},
+				{
+					type: 'tool-deployCanary',
+					toolCallId: 'deploy-canary',
+					state: 'approval-requested',
+					input: { service: 'checkout', percent: 5 },
+					approval: { id: 'approve-canary' }
+				},
+				{
+					type: 'text',
+					text: 'The rollout needs **compatibility**, **telemetry**, and **approval** gates. The canary deploy waits for your approval.'
+				},
+				{
+					type: 'source-url',
+					sourceId: 'policy',
+					url: 'https://example.com/docs/release-policy',
+					title: 'Release policy'
+				},
+				{
+					type: 'source-url',
+					sourceId: 'runbook',
+					url: 'https://example.com/runbooks/rollout'
 				}
 			]
 		}
 	];
+	const liveMessages: AIThreadItem[] = [
+		{ id: 'live-user', role: 'user', content: 'Draft the rollout announcement.' }
+	];
+	const liveReply =
+		'Here is a short announcement: the checkout service moves to the new rollout gates on Monday, starting with a 5% canary.'.split(
+			' '
+		);
 	const questionMessages: AIThreadItem[] = [
 		{
 			id: 'question-user',
@@ -194,8 +229,22 @@
 			name: 'messageVariant',
 			type: 'segmented',
 			label: 'Messages',
-			value: 'bubble',
-			options: ['bubble', 'minimal']
+			value: 'minimal',
+			options: ['minimal', 'bubble']
+		},
+		{
+			name: 'messageColor',
+			type: 'segmented',
+			label: 'User bubble',
+			value: 'neutral',
+			options: ['neutral', 'primary']
+		},
+		{
+			name: 'messageActionsVisibility',
+			type: 'segmented',
+			label: 'Actions',
+			value: 'latest',
+			options: ['latest', 'hover', 'always', 'none']
 		}
 	]);
 	const tocControls = createComponentControls([
@@ -234,6 +283,8 @@
 	const density = $derived(controls.value.density);
 	const messageSize = $derived(controls.value.messageSize);
 	const messageVariant = $derived(controls.value.messageVariant);
+	const messageColor = $derived(controls.value.messageColor);
+	const messageActionsVisibility = $derived(controls.value.messageActionsVisibility);
 	const tocMode = $derived(tocControls.value.tocMode);
 	const tocSide = $derived(tocControls.value.tocSide);
 	const suggestionSource = $derived(suggestionControls.value.suggestionSource);
@@ -243,6 +294,43 @@
 	let questionReset = $state(0);
 	let questionResolution = $state('');
 	let selectedSuggestion = $state('');
+	let liveThread = $state<AIThreadItem[]>(liveMessages);
+	let liveStreaming = $state(false);
+	let liveTimers: ReturnType<typeof setTimeout>[] = [];
+
+	// Simulated stream: the pending row shows until the reply's first word arrives, then the text
+	// grows behind the caret and the action bar appears when the reply ends.
+	function startLiveReply(): void {
+		for (const timer of liveTimers) clearTimeout(timer);
+		liveTimers = [];
+		liveThread = liveMessages;
+		liveStreaming = true;
+		liveReply.forEach((_, index) => {
+			liveTimers.push(
+				setTimeout(
+					() => {
+						liveThread = [
+							...liveMessages,
+							{
+								id: 'live-assistant',
+								role: 'assistant',
+								content: liveReply.slice(0, index + 1).join(' ')
+							}
+						];
+					},
+					1_200 + index * 120
+				)
+			);
+		});
+		liveTimers.push(setTimeout(() => (liveStreaming = false), 1_300 + liveReply.length * 120));
+	}
+
+	$effect(() => {
+		if (mode === 'live') untrack(startLiveReply);
+		return () => {
+			for (const timer of liveTimers) clearTimeout(timer);
+		};
+	});
 
 	const historyMessages = $derived(completeHistory.slice(historyStart, historyEnd));
 	const displayedMessages = $derived(
@@ -252,7 +340,9 @@
 				? partMessages
 				: mode === 'question'
 					? questionMessages
-					: historyMessages
+					: mode === 'live'
+						? liveThread
+						: historyMessages
 	);
 	const tocMessages = completeHistory.slice(0, 26);
 
@@ -331,7 +421,12 @@
 	features={[
 		'TanStack virtualization with initial end anchoring',
 		'Independent transcript density and message scale',
-		'Bubble or minimal default message presentation',
+		'Minimal (default) or bubble message presentation, neutral or coloured user bubbles',
+		'Centred reading column through contentWidth',
+		'Pending row, streaming caret, and inline error row with retry',
+		'AI SDK reasoning, approval, source, and file parts',
+		'One action bar per turn, visible on the latest turn',
+		'Follow-up suggestions after the last assistant turn',
 		'Pinned append and same-row growth following',
 		'Absolute-start and middle-position prepend preservation',
 		'Context markers, AI SDK tool parts, and grouped tools',
@@ -341,7 +436,7 @@
 >
 	<ComponentCard
 		{controls}
-		description="History exposes prepend, append, and stable message-key behavior. Live text is announced without becoming a transcript row; pending ask-user-question tool parts move into the standalone flow below the viewport."
+		description="History exposes prepend, append, and stable message-key behavior; scroll up and the round button brings you back. AI SDK parts render reasoning, tools (including an approval request), sources, and one action bar per turn. Live streams a reply behind a pending row and a caret. Answering the question leaves a compact summary in the transcript."
 		class="!min-h-0 p-4"
 		code={`<script lang="ts">
   import { AIThread } from 'entasis/ai-thread';
@@ -352,13 +447,14 @@ ${'</' + 'script>'}
 <AIThread
   bind:ref={threadRoot}
   class="h-[32rem] rounded-lg border"
-  {messages}
+  {messages}${mode === 'live' ? '\n  streaming={isStreaming}' : ''}${mode === 'empty' ? '\n  suggestions={suggestions}\n  onSelect={handleSuggestion}' : ''}
   getMessageKey={(message) => message.id}
-  density="normal"
-  messageSize="normal"
-  messageVariant="minimal"
-  scrollBehavior="smooth"
-  showToc
+  density="${density}"
+  messageSize="${messageSize}"
+  messageVariant="${messageVariant}"
+  messageColor="${messageColor}"
+  messageActionsVisibility="${messageActionsVisibility}"
+  scrollBehavior="${scrollBehavior}"${mode === 'history' || mode === 'parts' ? '\n  showToc' : ''}
 />`}
 	>
 		<div class="grid h-[560px] w-full grid-rows-[2rem_minmax(0,1fr)] gap-3">
@@ -384,6 +480,13 @@ ${'</' + 'script>'}
 						disabled={historyEnd === completeHistory.length}
 						onclick={appendHistory}>Append</Button
 					>
+				{:else if mode === 'live'}
+					<Button
+						size="small"
+						variant="outline"
+						prefix={arrowCounterClockwiseIcon}
+						onclick={startLiveReply}>Replay stream</Button
+					>
 				{:else if mode === 'question'}
 					<Button
 						size="small"
@@ -404,9 +507,10 @@ ${'</' + 'script>'}
 					{density}
 					{messageSize}
 					{messageVariant}
+					{messageColor}
+					{messageActionsVisibility}
 					showToc={mode === 'history' || mode === 'parts'}
-					liveText={mode === 'live' ? 'Assistant is drafting the next section.' : undefined}
-					streaming={mode === 'live'}
+					streaming={mode === 'live' && liveStreaming}
 					suggestions={mode === 'empty' ? directSuggestions : undefined}
 					onSelect={handleSuggestionSelect}
 					onAskUserQuestionStateChange={handleQuestionStateChange}

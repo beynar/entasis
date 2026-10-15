@@ -15,16 +15,17 @@ import type {
 } from '../AIConversation/aiConversation.state.svelte.js';
 import type {
 	AIMessageActionHandler,
-	AIMessageActionState,
-	AIMessageActionVisibility
+	AIMessageActionState
 } from '../AIMessageActions/aiMessageActions.props.js';
 import type {
 	AIModelSelectorGroup,
 	AIModelSelectorModel
 } from '../AIModelSelector/aiModelSelector.props.js';
+import type { Colors } from '$lib/types/theme.js';
 import type {
 	AIThreadDensity,
 	AIThreadAskUserQuestion,
+	AIThreadMessageActionsVisibility,
 	AIThreadItem,
 	AIThreadMessageRenderPayload,
 	AIThreadRenderPayload,
@@ -72,6 +73,8 @@ type AIChatComposerBehaviorProps = Pick<
 	| 'onQueuedMessageEditCancel'
 	| 'onQueuedMessageReorder'
 	| 'onSteer'
+	| 'submitShortcut'
+	| 'toolbar'
 >;
 
 type AIChatRootAttributes = Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'class'>;
@@ -99,7 +102,10 @@ type AIChatBaseProps<TMessage extends AIThreadItem> = AIChatComposerBehaviorProp
 	queue?: AIComposerQueuedMessage[];
 	/** Assistant text that is still streaming. */
 	liveText?: string;
-	/** Prompt suggestions displayed only by the empty transcript state. */
+	/**
+	 * Prompt suggestions: chips under the empty-state greeting, then follow-ups above the composer
+	 * after a finished assistant turn.
+	 */
 	suggestions?: string[];
 	/** Context-window usage displayed by `AIContext`. */
 	contextUsage?: AIContextUsage;
@@ -129,12 +135,28 @@ type AIChatBaseProps<TMessage extends AIThreadItem> = AIChatComposerBehaviorProp
 	density?: AIThreadDensity;
 	/** Size forwarded to default message rows. @default 'normal' */
 	messageSize?: AIMessageSize;
-	/** Presentation forwarded to default message rows. @default 'bubble' */
+	/** Presentation forwarded to default message rows. @default 'minimal' */
 	messageVariant?: AIMessageVariant;
+	/**
+	 * User-bubble colour forwarded to default message rows. Neutral is a quiet grey bubble; any
+	 * other role paints a solid bubble. Defaults to the theme's default colour.
+	 */
+	messageColor?: Colors;
+	/**
+	 * Maximum width of the centred column shared by the transcript and the composer, as a CSS
+	 * length or pixels. Exposed as `--ai-chat-content-width`; `'none'` spans the chat.
+	 * @default '48rem'
+	 */
+	contentWidth?: string | number;
+	/** Shows `suggestions` as follow-ups above the composer after an assistant turn. @default true */
+	showFollowUps?: boolean;
 	/** Custom action renderer shared by default message rows. */
 	messageActions?: Slot<AIMessageActionState<TMessage>> | false;
-	/** Controls whether default message actions are always shown, hover-revealed, or omitted. */
-	messageActionsVisibility?: AIMessageActionVisibility;
+	/**
+	 * When default message actions show. `latest` keeps the final assistant turn's bar visible and
+	 * reveals the rest on hover or focus (always on touch screens). @default 'latest'
+	 */
+	messageActionsVisibility?: AIThreadMessageActionsVisibility;
 	/** Enables or disables default copy actions. */
 	messageCopyable?: boolean;
 	/** Enables or disables default edit actions. */
@@ -147,7 +169,7 @@ type AIChatBaseProps<TMessage extends AIThreadItem> = AIChatComposerBehaviorProp
 	onMessageEdit?: AIMessageActionHandler<TMessage>;
 	/** Handles message retry actions. */
 	onMessageRetry?: AIMessageActionHandler<TMessage>;
-	/** Called instead of the default input update when an empty-state suggestion is selected. */
+	/** Called instead of the default input update when a suggestion or follow-up is selected. */
 	onSelect?: (suggestion: string) => void;
 	/** Replaces the complete default surface while retaining the conversation provider. */
 	children?: Slot<AIChatState<TMessage>>;
@@ -161,7 +183,10 @@ type AIChatBaseProps<TMessage extends AIThreadItem> = AIChatComposerBehaviorProp
 	context?: Slot<AIChatState<TMessage>>;
 	/** Replaces the default model selector. */
 	modelSelector?: Slot<AIChatState<TMessage>>;
-	/** Replaces the default error alert. */
+	/**
+	 * Replaces the default error, which otherwise shows as a row at the end of the transcript with
+	 * a Retry button wired to the conversation's `retry`. A replacement renders above the transcript.
+	 */
 	errorRegion?: Slot<AIChatState<TMessage>>;
 	/** Replaces the complete transcript region. */
 	thread?: Slot<AIChatState<TMessage>>;

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AIChat from '$lib/components/AIChat/AIChat.svelte';
 	import AIChatSkeleton from '$lib/components/AIChat/AIChatSkeleton.svelte';
+	import Button from '$lib/components/Button/Button.svelte';
 	import AIComposer from '$lib/components/AIComposer/AIComposer.svelte';
 	import AIConversation from '$lib/components/AIConversation/AIConversation.svelte';
 	import AIThread from '$lib/components/AIThread/AIThread.svelte';
@@ -35,10 +36,29 @@
 			name: 'messageVariant',
 			type: 'segmented',
 			label: 'Messages',
-			value: 'bubble',
-			options: ['bubble', 'minimal']
+			value: 'minimal',
+			options: ['minimal', 'bubble']
+		},
+		{
+			name: 'messageColor',
+			type: 'segmented',
+			label: 'User bubble',
+			value: 'neutral',
+			options: ['neutral', 'primary']
+		},
+		{
+			name: 'messageActionsVisibility',
+			type: 'segmented',
+			label: 'Actions',
+			value: 'latest',
+			options: ['latest', 'hover', 'always', 'none']
 		}
 	]);
+	const errorMessages = [
+		{ id: 'error-user', role: 'user', content: 'Draft the release notes for the beta.' }
+	];
+	let retries = $state(0);
+	let errorPreview = $state(new Error('The model provider is unavailable.'));
 	const skeletonControls = createComponentControls([
 		{
 			name: 'layout',
@@ -67,6 +87,9 @@
 	features={[
 		'Central conversation-state payloads',
 		'Transcript density, message size, and presentation controls',
+		'Centred reading column shared by transcript and composer',
+		'Pending, streaming, and inline error states with retry',
+		'Follow-up suggestions above the composer',
 		'Before, after, context, and model regions',
 		'Message actions and transcript navigation',
 		'Product-level composer sources, files, and queueing',
@@ -76,24 +99,30 @@
 >
 	<ComponentCard
 		{controls}
-		description="AIChat connects product-level controls to one conversation state while retaining regional replacement snippets."
+		description="AIChat connects product-level controls to one conversation state while retaining regional replacement snippets. Send a message to see the pending row, streamed reasoning and the caret; a failed reply shows inline with a Retry button."
 		class="!min-h-0 p-3 sm:p-6"
-		code={`<script lang="ts">
+		code={controls.value.previewState === 'loading'
+			? `<script lang="ts">
+  import { AIChatSkeleton } from 'entasis/ai-chat';
+${'</' + 'script>'}
+
+<AIChatSkeleton class="h-[520px]" />`
+			: `<script lang="ts">
   import { AIChat } from 'entasis/ai-chat';
 ${'</' + 'script>'}
 
 <AIChat
   bind:messages
   bind:selectedModel
+  bind:contextUsage
+  bind:suggestions${controls.value.previewState === 'error' ? "\n  error={new Error('The model provider is unavailable.')}\n  onRetry={retryLastTurn}" : ''}
   {models}
-  {contextUsage}
-  {suggestions}
-  density="normal"
-  messageSize="normal"
-  messageVariant="minimal"
-  showToc
-  messageActionsVisibility="hover"
-  fileDropzone
+  maxTokens={128_000}
+  density="${controls.value.density}"
+  messageSize="${controls.value.messageSize}"
+  messageVariant="${controls.value.messageVariant}"
+  messageColor="${controls.value.messageColor}"
+  messageActionsVisibility="${controls.value.messageActionsVisibility}"
   onSubmit={sendMessage}
   onStop={stopGeneration}
 />`}
@@ -103,17 +132,39 @@ ${'</' + 'script>'}
 				density={controls.value.density}
 				messageSize={controls.value.messageSize}
 				messageVariant={controls.value.messageVariant}
+				messageColor={controls.value.messageColor}
+				messageActionsVisibility={controls.value.messageActionsVisibility}
 			/>
 		{:else if controls.value.previewState === 'loading'}
 			<AIChatSkeleton class="h-[520px] w-full" />
 		{:else}
-			<AIChat
-				error={new Error('The model provider is unavailable.')}
-				density={controls.value.density}
-				messageSize={controls.value.messageSize}
-				messageVariant={controls.value.messageVariant}
-				class="h-[520px] w-full"
-			/>
+			{#key errorPreview}
+				<AIChat
+					messages={errorMessages}
+					error={errorPreview}
+					density={controls.value.density}
+					messageSize={controls.value.messageSize}
+					messageVariant={controls.value.messageVariant}
+					messageColor={controls.value.messageColor}
+					messageActionsVisibility={controls.value.messageActionsVisibility}
+					onRetry={() => (retries += 1)}
+					class="h-[520px] w-full"
+				>
+					{#snippet afterThread()}
+						{#if retries > 0}
+							<div class="text-neutral/70 flex items-center justify-center gap-2 px-4 py-2 text-xs">
+								<span aria-live="polite">Retried {retries} {retries === 1 ? 'time' : 'times'}</span>
+								<Button
+									size="small"
+									variant="ghost"
+									onclick={() => (errorPreview = new Error('The model provider is unavailable.'))}
+									>Fail again</Button
+								>
+							</div>
+						{/if}
+					{/snippet}
+				</AIChat>
+			{/key}
 		{/if}
 	</ComponentCard>
 

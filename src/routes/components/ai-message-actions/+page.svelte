@@ -54,7 +54,9 @@
 		'Role-aware edit and retry defaults',
 		'Small, normal, and large action scales',
 		'Custom action snippet',
-		'Accessible icon buttons',
+		'Icon buttons with accessible names and tooltips',
+		'Icons aligned with the message text edge',
+		'Hover rows always visible on touch screens',
 		'Direct callbacks or conversation retry',
 		'Bindable rendering through action state'
 	]}
@@ -68,10 +70,10 @@
 ${'</' + 'script>'}
 
 <AIMessageActions
-  role="assistant"
+  role="${controls.value.role}"
   content="A generated answer"
-  size="normal"
-  visibility="always"
+  size="${controls.value.size}"
+  visibility="${controls.value.visibility}"
   onRetry={({ content }) => regenerate(content)}
 />`}
 	>

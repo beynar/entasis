@@ -22,7 +22,7 @@ Virtualized AI transcript with stable message keys, initial end anchoring, pinne
 />
 \`\`\`
 
-\`liveText\` is announced through a polite, atomic, screen-reader-only region. It is not appended to the visual transcript and does not suppress the empty state.
+\`liveText\` is announced through a polite, atomic, screen-reader-only region and does not suppress the empty state. While \`streaming\` is true and the last item is a user turn, a pending assistant row shows \`liveText\` (or "Thinking…") with the \`shimmer\` utility; the live region announces the same text. The segment that ends a streaming reply shows a pulsing caret.
 
 ## Message input
 
@@ -31,9 +31,13 @@ Virtualized AI transcript with stable message keys, initial end anchoring, pinne
 - \`{ type: 'text', text }\`
 - \`{ type: 'marker', content, variant? }\`
 - \`{ type: 'tool', tool: AIToolCall }\`
-- AI SDK \`dynamic-tool\` and \`tool-*\` parts with \`toolCallId\`, \`state\`, \`input\`, \`output\`, \`structuredContent\`, \`result\`, \`error\`, and \`_meta\`
+- AI SDK \`dynamic-tool\` and \`tool-*\` parts with \`toolCallId\`, \`state\`, \`input\`, \`output\`, \`structuredContent\`, \`result\`, \`error\`, \`approval\`, and \`_meta\`. States map through \`getAIToolStatusFromState\`: \`approval-requested\`, \`approval-responded\` and \`output-denied\` become AITool's awaiting, approved and denied statuses, so a call waiting on the user never spins.
+- AI SDK \`{ type: 'reasoning', text, state? }\` - rendered with AIReasoning, streaming while \`state\` is \`'streaming'\` (or, without a state, while it is the last part of a streaming reply).
+- AI SDK \`source-url\` / \`source-document\` parts - one "Sources" row of chips per message; only http(s) URLs become links.
+- AI SDK \`file\` parts - shown as file previews with the message's text segment (or a segment of their own). Only https, blob and image data URLs are used as previews.
+- \`step-start\` and \`data-*\` parts carry no visible content and are skipped.
 
-When text parts are present, top-level message content is not rendered again. Consecutive ordinary tools are grouped through \`AITool\`.
+When text parts are present, top-level message content is not rendered again. Consecutive ordinary tools are grouped through \`AITool\`. An ask-user-question tool that is answered (by the conversation, by the AI SDK output state, or locally through this thread) renders as a compact question → answer summary (\`AIAskUserQuestionSummary\`); a dismissed one settles as a cancelled call.
 
 ## Core props
 
@@ -43,16 +47,18 @@ When text parts are present, top-level message content is not rendered again. Co
 - **streaming**: boolean - Sets the busy state. Falls back to AIConversation.
 - **density**: 'compact' | 'normal' | 'comfortable' - Transcript row and edge spacing. Default 'normal'.
 - **messageSize**: 'small' | 'normal' | 'large' - Size forwarded to default AIMessage rows. Default 'normal'.
-- **messageVariant**: 'bubble' | 'minimal' - Presentation forwarded to default AIMessage rows. Default 'bubble'.
+- **messageVariant**: 'minimal' | 'bubble' - Presentation forwarded to default AIMessage rows. Default 'minimal' (flat full-width assistant prose).
+- **messageColor**: Colors - User-bubble colour forwarded to default AIMessage rows. Neutral (the theme default) is a quiet grey bubble; any other role paints a solid bubble.
+- **contentWidth**: string | number - Maximum width of the centred reading column (a CSS length, or pixels). Sets \`--ai-thread-content-width\`; without it rows follow an ancestor's \`--ai-chat-content-width\` (AIChat sets 48rem) and otherwise span the thread.
 - **followOutput**: boolean - Follow appended rows only while pinned. Default true.
 - **bottomThreshold**: number - End-pinned tolerance in pixels. Default 80.
 - **estimateSize**: number - Estimated row height. Defaults to 80, 96, or 120 from density.
 - **overscan**: number - Extra virtual rows. Default 4.
 - **padding**: number - Shared start/end virtual padding. Defaults to 8, 16, or 24 from density.
-- **paddingStart**, **paddingEnd**: number - Per-edge virtual padding overrides.
+- **paddingStart**, **paddingEnd**: number - Per-edge virtual padding overrides. Message actions sit inside their row, so the end padding reserves no extra room for them.
 - **scrollBehavior**: 'auto' | 'smooth' | 'instant' - Append, TOC, and scroll-button behavior. Default 'smooth'.
-- **showScrollButton**: boolean - Show the latest-message action away from the end. Default true.
-- **scrollButtonPosition**: 'left' | 'center' | 'right' - Default 'right'.
+- **showScrollButton**: boolean - Show the round scroll-to-latest button as soon as the view leaves the end (by wheel, trackpad, keys or scrollbar). Default true.
+- **scrollButtonPosition**: 'left' | 'center' | 'right' - Default 'center', just above whatever sits below the thread.
 - **ref**: HTMLDivElement - Bindable thread root, not the internal scroll viewport.
 - **class**: string - Thread-root classes.
 - **role**: HTML role - Thread-root role. Default 'log'.
@@ -60,11 +66,15 @@ When text parts are present, top-level message content is not rendered again. Co
 - **onscroll**: (event) => void - Raw native viewport-scroll callback.
 - Native div attributes and Svelte attachments are forwarded to the thread root.
 
-## Empty state and suggestions
+## Empty state, suggestions and errors
 
-- **empty**: Slot - Replaces the empty state.
-- **suggestions**: readonly string[] - Default empty-state suggestions. Falls back to AIConversation.
-- **onSelect**: (suggestion) => void - Pick event for an empty-state suggestion; takes precedence over the provider's default \`setInput\` behavior.
+- **empty**: Slot - Replaces the empty state, a vertically centred greeting ("How can I help you today?") with wrapping suggestion chips.
+- **suggestions**: readonly string[] - Empty-state chips, then follow-ups below the transcript after a finished assistant turn (not while streaming, during a question or under an error). Falls back to AIConversation.
+- **showFollowUps**: boolean - Show the follow-ups. Default true.
+- **onSelect**: (suggestion) => void - Pick event for a suggestion or follow-up; takes precedence over the provider's default \`setInput\` behavior.
+- **error**: unknown - Shown as a danger row at the end of the transcript, where the reply failed. Falls back to AIConversation. An empty transcript shows the error instead of the greeting.
+- **showError**: boolean - Show that row. Default true.
+- **onErrorRetry**: () => void - The row's Retry button. Defaults to the conversation's \`retry\` targeting the last message; without either, there is no Retry button.
 
 ## Message composition
 
@@ -72,13 +82,16 @@ When text parts are present, top-level message content is not rendered again. Co
   resolved action visibility keeps custom renderers aligned with the thread's latest-message rule.
 - **messageSize**, **messageVariant** - Configure only the default AIMessage renderer; a custom message slot owns its presentation.
 - **messageActions**: AIMessageActionSnippet | false - Replaces or disables default actions.
-- **messageActionsVisibility**: 'hover' | 'always' | 'none' (default: 'always')
+- **messageActionsVisibility**: 'latest' | 'hover' | 'always' | 'none' (default: 'latest'). \`latest\` keeps the final assistant turn's bar visible and reveals the rest on hover or focus; hover-revealed bars always show on touch screens. Hidden bars keep their height, so no row draws under them.
 - **messageCopyable**, **messageEditable**, **messageRetryable**: boolean
 - **onMessageCopy**, **onMessageEdit**, **onMessageRetry**: AIMessage action handlers.
 
-Assistant text that continues through tool rows into another assistant segment does not render
-an action region. Actions belong to the terminal assistant segment for that user turn; completed
-historical turns retain hover actions.
+A turn is one unit. A user message has its own bar; an assistant turn — reasoning, tools, and text
+up to the next user message or marker — has a single bar at its end. When the turn ends with its
+only text segment the bar sits under that text; otherwise it gets a row of its own whose copy takes
+the whole turn's text and whose retry targets the turn's last assistant message. The bar of a
+reply that is still streaming appears when it ends. The message slot's \`actionsVisibility\` is
+\`none\` for segments that do not end their unit.
 
 ## Tool and marker composition
 
@@ -98,7 +111,7 @@ Pending ask-user-question tools are auto-detected. Inside AIConversation, AIThre
 
 ## Minimap
 
-- **showToc**: boolean - Show the user-turn minimap when at least two user turns overflow the viewport.
+- **showToc**: boolean - Show the user-turn minimap when at least two user turns overflow the viewport. Below a 480px-wide viewport the minimap and its gutter step aside.
 - **tocSide**: 'left' | 'right' - Default 'left'.
 - **tocMaxPins**: number - Maximum compacted pins.
 - **tocTheme**: AIThreadTocThemeProps - Theme overrides forwarded to the default standalone primitive.
