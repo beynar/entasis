@@ -109,7 +109,8 @@
 	});
 	// Written from here as well as by the template: Svelte pauses the effects of a block while its
 	// out-transition plays, so only an effect outside the surface reaches it while it fades out.
-	let surface = $state<{ node: HTMLElement; popover: PopoverApi } | null>(null);
+	// Raw state: the entry holds a DOM node and is compared by identity when the surface unmounts.
+	let surface = $state.raw<{ node: HTMLElement; popover: PopoverApi } | null>(null);
 	const trackSurface = (popover: PopoverApi) => (node: HTMLElement) => {
 		const entry = { node, popover };
 		surface = entry;

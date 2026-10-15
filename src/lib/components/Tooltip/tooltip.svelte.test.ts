@@ -194,6 +194,25 @@ describe('Tooltip state that outlives the surface', () => {
 		});
 	});
 
+	test('closing the surface lets go of it without a proxy identity warning', async () => {
+		const warn = vi.spyOn(console, 'warn');
+		render(TooltipOptionsHarness);
+		const trigger = button('First');
+		await fireEvent.mouseEnter(trigger);
+		const closed = await screen.findByRole('tooltip');
+		await fireEvent.mouseLeave(trigger);
+		await waitFor(() => expect(screen.queryByRole('tooltip')).not.toBeInTheDocument(), {
+			timeout: 1000
+		});
+
+		await fireEvent.mouseEnter(trigger);
+		await waitFor(() => expect(screen.getByRole('tooltip')).toHaveAttribute('data-open'));
+		expect(screen.getByRole('tooltip')).not.toBe(closed);
+		expect(
+			warn.mock.calls.some((call) => String(call[0]).includes('state_proxy_equality_mismatch'))
+		).toBe(false);
+	});
+
 	test('a click from code on a trigger nobody focused does not keep keyboard focus from the tooltip', async () => {
 		showFocusRing();
 		render(TooltipOptionsHarness);
