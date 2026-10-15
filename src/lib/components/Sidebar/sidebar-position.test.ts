@@ -4,7 +4,8 @@ import { describe, expect, test } from 'vitest';
 import {
 	getSidebarMenuPosition,
 	sidebarInwardPhysicalSide,
-	sidebarInwardSide
+	sidebarInwardSide,
+	sidebarTooltip
 } from './sidebar-position.js';
 
 describe('getSidebarMenuPosition', () => {
@@ -50,4 +51,12 @@ test('the inward side faces away from the sidebar edge in either reading directi
 	expect(sidebarInwardPhysicalSide('right', 'ltr')).toBe('left');
 	expect(sidebarInwardPhysicalSide('left', 'rtl')).toBe('left');
 	expect(sidebarInwardPhysicalSide('right', 'rtl')).toBe('right');
+});
+
+test('a row tooltip resolves its side when it opens, not when it is built', () => {
+	let direction: 'ltr' | 'rtl' = 'ltr';
+	const options = sidebarTooltip('Planning', () => sidebarInwardPhysicalSide('left', direction));
+	expect(options.position).toBe('right');
+	direction = 'rtl';
+	expect({ ...options }.position).toBe('left');
 });

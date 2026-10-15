@@ -18,7 +18,11 @@
 		SidebarTooltipMode
 	} from './sidebar.props.js';
 	import { useDirection } from '$lib/utils/useDirection.svelte.js';
-	import { getSidebarMenuPosition, sidebarInwardPhysicalSide } from './sidebar-position.js';
+	import {
+		getSidebarMenuPosition,
+		sidebarInwardPhysicalSide,
+		sidebarTooltip
+	} from './sidebar-position.js';
 	import SidebarAction from './SidebarAction.svelte';
 	import SidebarFlyout from './SidebarFlyout.svelte';
 	import SidebarIcon from './SidebarIcon.svelte';
@@ -92,8 +96,9 @@
 	);
 	let itemRef = $state<HTMLLIElement | null>(null);
 	const direction = useDirection(() => itemRef);
-	// Toward the page, whichever edge the sidebar sits on and whichever way the text reads.
-	const tooltipPosition = $derived(sidebarInwardPhysicalSide(api.side, direction()));
+	// Toward the page, whichever edge the sidebar sits on and whichever way the text reads, read
+	// when the tooltip opens so a runtime `dir` change is followed.
+	const tooltipPosition = () => sidebarInwardPhysicalSide(api.side, direction());
 	const uid = $props.id();
 	const submenuId = `${uid}-submenu`;
 	// The submenu's `hidden` state and its height animation, reversible mid-way, come from the
@@ -193,7 +198,7 @@
 				className: item.class
 			})}
 			{@attach tooltipContent
-				? tooltip({ content: tooltipContent, position: tooltipPosition })
+				? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
 				: undefined}
 			onclick={handleClick}
 		>
@@ -222,7 +227,7 @@
 				className: item.class
 			})}
 			{@attach tooltipContent
-				? tooltip({ content: tooltipContent, position: tooltipPosition })
+				? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
 				: undefined}
 			onclick={handleClick}
 		>
@@ -267,7 +272,7 @@
 				aria-haspopup="menu"
 				aria-controls={popover.isOpen ? popover.id : undefined}
 				{@attach tooltipContent
-					? tooltip({ content: tooltipContent, position: tooltipPosition })
+					? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
 					: undefined}
 				{@attach popover.reference}
 				onclick={() => popover.toggle()}
@@ -301,7 +306,7 @@
 				aria-expanded={popover.isOpen}
 				aria-controls={popover.isOpen ? popover.id : undefined}
 				{@attach tooltipContent
-					? tooltip({ content: tooltipContent, position: tooltipPosition })
+					? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
 					: undefined}
 				{@attach popover.reference}
 				onclick={composeHandlers(item.onclick, () => popover.toggle())}
@@ -392,7 +397,7 @@
 					aria-expanded={showSubmenu}
 					aria-controls={submenuPanel.rendered ? submenuId : undefined}
 					{@attach tooltipContent
-						? tooltip({ content: tooltipContent, position: tooltipPosition })
+						? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
 						: undefined}
 					onclick={handleSubmenuRowClick}
 				>

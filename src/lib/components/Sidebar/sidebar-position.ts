@@ -2,6 +2,9 @@ import type {
 	PopoverLogicalSide,
 	PopoverPlacement
 } from '$lib/components/Popover/popover.props.js';
+import type { Placement } from '@floating-ui/dom';
+import type { Slot } from '$lib/components/Slot/slot.js';
+import type { TooltipOptions } from '$lib/components/Tooltip/tooltip.props.js';
 import type { Direction } from '$lib/utils/useDirection.svelte.js';
 import type { SidebarMenuAlign, SidebarMenuSide, SidebarSide } from './sidebar.props.js';
 
@@ -23,6 +26,18 @@ export const sidebarInwardPhysicalSide = (
 	direction: Direction
 ): 'left' | 'right' =>
 	(sidebarInwardSide(side) === 'inline-end') === (direction === 'ltr') ? 'right' : 'left';
+
+/**
+ * Tooltip options whose `position` is resolved each time the tooltip opens rather than when the
+ * row renders: the reading direction comes from computed style, which a runtime `dir` change
+ * on the document alters without any reactive signal.
+ */
+export const sidebarTooltip = (content: Slot, position: () => Placement): TooltipOptions => ({
+	content,
+	get position() {
+		return position();
+	}
+});
 
 type SidebarMenuPositionContext = {
 	/** The mobile drawer: menus open below their row. */

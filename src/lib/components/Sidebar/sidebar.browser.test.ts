@@ -111,6 +111,19 @@ describe('positions toward the page', () => {
 			expect(rect(panel).right).toBeLessThanOrEqual(rect(row).left + 1);
 		});
 	}
+
+	test('a tooltip follows a reading direction changed after the rows rendered', async () => {
+		render(SidebarRowsHarness, { props: { items: items(), displayState: 'collapsed' } });
+		const row = button(/Planning/);
+		// Nothing reactive changes: only the computed direction does, as with `document.dir`.
+		row.closest('[dir]')!.setAttribute('dir', 'rtl');
+		await expect.poll(() => rect(row).left).toBeGreaterThan(500);
+		await userEvent.hover(row);
+		const tooltip = () => document.querySelector<HTMLElement>('[role="tooltip"]');
+		await expect.poll(() => tooltip()?.textContent).toBe('Planning');
+		await animationsSettled();
+		expect(rect(tooltip()!).right).toBeLessThanOrEqual(rect(row).left + 1);
+	});
 });
 
 describe('collapsed flyout keyboard', () => {

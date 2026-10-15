@@ -12,7 +12,7 @@
 		SidebarSize,
 		SidebarVariant
 	} from './sidebar.props.js';
-	import { sidebarInwardPhysicalSide } from './sidebar-position.js';
+	import { sidebarInwardPhysicalSide, sidebarTooltip } from './sidebar-position.js';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import { useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
@@ -51,9 +51,9 @@
 	const direction = useDirection(() => navRef);
 	// The rail is pinned to the outer edge, so the only on-screen direction is inward: tooltips
 	// point at the page (and overlap the panel), never off screen, in either reading direction.
-	const tooltipPosition = $derived(
-		orientation === 'horizontal' ? 'bottom' : sidebarInwardPhysicalSide(side, direction())
-	);
+	// Read when a tooltip opens, so a runtime `dir` change is followed.
+	const tooltipPosition = () =>
+		orientation === 'horizontal' ? 'bottom' : sidebarInwardPhysicalSide(side, direction());
 
 	type Entry = { item: SidebarActivityBarItem; index: number; pinned: boolean };
 	// One flat list keeps a single roving tab stop, so ArrowDown walks from the primary
@@ -153,7 +153,7 @@
 				disabled: !!item.disabled
 			})}
 			{@attach navigation.itemReference}
-			{@attach content ? tooltip({ content, position: tooltipPosition }) : undefined}
+			{@attach content ? tooltip(sidebarTooltip(content, tooltipPosition)) : undefined}
 			onclick={(event) => handleClick(event, entry)}
 		>
 			{@render inner()}
@@ -177,7 +177,7 @@
 				disabled: !!item.disabled
 			})}
 			{@attach navigation.itemReference}
-			{@attach content ? tooltip({ content, position: tooltipPosition }) : undefined}
+			{@attach content ? tooltip(sidebarTooltip(content, tooltipPosition)) : undefined}
 			onclick={(event) => handleClick(event, entry)}
 		>
 			{@render inner()}

@@ -13,7 +13,7 @@
 		SidebarTreeNode
 	} from './sidebar.props.js';
 	import { useDirection } from '$lib/utils/useDirection.svelte.js';
-	import { sidebarInwardPhysicalSide } from './sidebar-position.js';
+	import { sidebarInwardPhysicalSide, sidebarTooltip } from './sidebar-position.js';
 	import SidebarFlyout from './SidebarFlyout.svelte';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import SidebarTreeNodeComponent from './SidebarTreeNode.svelte';
@@ -67,8 +67,9 @@
 	const rowData = $derived(isSubNode ? 'menu-sub-button' : 'menu-button');
 	let itemRef = $state<HTMLLIElement | null>(null);
 	const direction = useDirection(() => itemRef);
-	// Toward the page, whichever edge the sidebar sits on and whichever way the text reads.
-	const tooltipPosition = $derived(sidebarInwardPhysicalSide(api.side, direction()));
+	// Toward the page, whichever edge the sidebar sits on and whichever way the text reads, read
+	// when the tooltip opens so a runtime `dir` change is followed.
+	const tooltipPosition = () => sidebarInwardPhysicalSide(api.side, direction());
 	const uid = $props.id();
 	const childrenId = `${uid}-children`;
 	// The branch's `hidden` state and its height animation, reversible mid-way, come from the
@@ -106,7 +107,7 @@
 						aria-expanded={popover.isOpen}
 						aria-controls={popover.isOpen ? popover.id : undefined}
 						{@attach tooltipContent
-							? tooltip({ content: tooltipContent, position: tooltipPosition })
+							? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
 							: undefined}
 						{@attach popover.reference}
 						onclick={() => popover.toggle()}
@@ -126,7 +127,7 @@
 				aria-expanded={showChildren}
 				aria-controls={branch.rendered ? childrenId : undefined}
 				{@attach tooltipContent
-					? tooltip({ content: tooltipContent, position: tooltipPosition })
+					? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
 					: undefined}
 				onclick={() => (open = !isOpen)}
 			>
@@ -175,7 +176,7 @@
 			aria-current={node.isActive ? 'page' : undefined}
 			class={rowClass}
 			{@attach tooltipContent
-				? tooltip({ content: tooltipContent, position: tooltipPosition })
+				? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
 				: undefined}
 			onclick={node.onclick}
 		>
@@ -192,7 +193,7 @@
 			data-active-variant={activeVariant}
 			class={rowClass}
 			{@attach tooltipContent
-				? tooltip({ content: tooltipContent, position: tooltipPosition })
+				? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
 				: undefined}
 			onclick={node.onclick}
 		>
