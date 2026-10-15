@@ -97,7 +97,11 @@ const closeWatcherConstructor = (): CloseWatcherConstructor | null => {
 export class LayerHandle {
 	readonly kind: LayerKind;
 	readonly options: LayerOptions;
-	readonly parent: LayerHandle | null;
+	/**
+	 * The parent from context, read on each access: a layer built while its owner was closed (a
+	 * mobile-sheet Dialog inside a closed Popover) reaches the owner's layer once it opens.
+	 */
+	readonly #resolveParent: () => LayerHandle | null;
 	/** Global sequence assigned on every open; later opens sit above earlier ones. */
 	openOrder = $state(0);
 	/**
@@ -123,7 +127,8 @@ export class LayerHandle {
 		this.#stack = stack;
 		this.kind = options.kind;
 		this.options = options;
-		this.parent = options.parent !== undefined ? options.parent : useParentLayer()();
+		const explicit = options.parent;
+		this.#resolveParent = explicit !== undefined ? () => explicit : useParentLayer();
 		this.stackIndex = $derived(stack.open.indexOf(this));
 		this.isTop = $derived(this.stackIndex >= 0 && this.stackIndex === stack.open.length - 1);
 		this.isTopOfKind = $derived(this.isOpen && stack.ofKind(this.kind).at(-1) === this);
@@ -135,6 +140,11 @@ export class LayerHandle {
 		this.zIndex = $derived(LAYER_Z_BASE[this.kind] + this.openOrder * LAYER_Z_STEP);
 	}
 
+	/** The layer this one renders inside, or `null`. */
+	get parent(): LayerHandle | null {
+		const parent = this.#resolveParent();
+		return parent === this ? null : parent;
+	}
 	get isOpen() {
 		return this.options.isOpen();
 	}
