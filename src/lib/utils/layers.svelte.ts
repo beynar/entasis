@@ -46,6 +46,27 @@ export interface LayerOptions {
 
 const LAYER_CONTEXT = Symbol('entasis:layer');
 
+/** A registered layer, or a resolver for one that only exists while its owner is open. */
+type LayerContext = LayerHandle | (() => LayerHandle | null);
+
+/**
+ * The layer the calling component renders inside, as a getter read when a layer registers.
+ * Call during component initialisation.
+ */
+export function useParentLayer(): () => LayerHandle | null {
+	const context = hasContext(LAYER_CONTEXT) ? getContext<LayerContext>(LAYER_CONTEXT) : null;
+	return typeof context === 'function' ? context : () => context;
+}
+
+/**
+ * Makes `resolve()` the parent layer of every layer registered below the calling component, for
+ * an owner that registers its own layer later, in a child created on open (a closed Popover
+ * registers none). Call during component initialisation.
+ */
+export function provideLayer(resolve: () => LayerHandle | null) {
+	setContext(LAYER_CONTEXT, resolve);
+}
+
 /** Movement in px after which a touch on the page is a scroll, not a tap. */
 const TAP_SLOP = 10;
 
@@ -102,12 +123,7 @@ export class LayerHandle {
 		this.#stack = stack;
 		this.kind = options.kind;
 		this.options = options;
-		this.parent =
-			options.parent !== undefined
-				? options.parent
-				: hasContext(LAYER_CONTEXT)
-					? getContext<LayerHandle>(LAYER_CONTEXT)
-					: null;
+		this.parent = options.parent !== undefined ? options.parent : useParentLayer()();
 		this.stackIndex = $derived(stack.open.indexOf(this));
 		this.isTop = $derived(this.stackIndex >= 0 && this.stackIndex === stack.open.length - 1);
 		this.isTopOfKind = $derived(this.isOpen && stack.ofKind(this.kind).at(-1) === this);

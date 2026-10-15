@@ -512,6 +512,7 @@ Every slot snippet (\`trigger\`, \`children\`), \`onAfterOpen\` and \`onAfterClo
 - Automatically adjusts position to stay in viewport: flips, then shifts 20px inside the visual viewport, and places again once the visual viewport settles after an on-screen keyboard opens
 - Coordinates are rounded to the device pixel grid, and in right-to-left documents the panel stays beside its trigger with \`start\` alignment on the right
 - Multiple popovers can be stacked
+- A closed popover is cheap: its layer, focus scope, hover safe area, Tab bridge and scroll lock are built when it opens and released once its closing transition ends, so a page with many closed Selects, date inputs or row menus mounts without them. Only the trigger's listeners and ARIA attributes exist while it is closed
 - Scroll locking prevents background scroll (when enabled), except for a popover hovering opened and a touch-opened popover narrower than the viewport
 - Transitions animate based on position direction
 
