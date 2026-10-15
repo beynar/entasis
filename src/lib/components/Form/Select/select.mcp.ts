@@ -132,7 +132,14 @@ Attributes are presence attributes (set while the state holds, omitted otherwise
 - \`data-exiting\`: On the list panel: present while the exit transition plays.
 - \`data-side\`: On the list panel: \`none\` while it is placed over the trigger (aligned on the selected option), otherwise the side of the trigger it sits on.
 
-The typed map \`selectDataAttributes\` (from \`entasis/select\`) lists each name with its meaning.
+**CSS variables** (set on the list panel's positioned wrapper and inherited by the list; the mobile sheet has none)
+- \`--available-width\`: The width in px the panel can take before it reaches the viewport edges, minus 20px.
+- \`--available-height\`: The room in px between the trigger and the viewport edge on the panel's side, minus 20px. Cap a scrolling list with \`max-height: min(240px, var(--available-height))\`.
+- \`--anchor-width\`: The trigger's width in px, snapped to the device pixel grid.
+- \`--anchor-height\`: The trigger's height in px, snapped to the device pixel grid.
+- \`--transform-origin\`: The panel corner facing the trigger, mirrored in right-to-left documents; the point the panel scales from.
+
+The typed maps \`selectDataAttributes\` and \`selectCssVariables\` (from \`entasis/select\`) list each name with its meaning.
 
 ## Accessibility
 

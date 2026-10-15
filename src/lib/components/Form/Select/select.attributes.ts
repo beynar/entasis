@@ -1,8 +1,10 @@
+import { popoverCssVariables } from '../../Popover/popover.attributes.js';
+
 /**
  * The styling hooks a Select exposes. Attributes are presence attributes (set while the state
  * holds, omitted otherwise) unless the description says they carry a value. The list sits in a
- * Popover panel, whose `data-open`, `data-closed`, `data-entering` and `data-exiting` and CSS
- * variables (`popoverCssVariables`, from `entasis/popover`) it also carries.
+ * Popover panel, whose `data-open`, `data-closed`, `data-entering` and `data-exiting` it also
+ * carries, and whose CSS variables are `selectCssVariables`.
  */
 export const selectDataAttributes = {
 	'data-popup-open':
@@ -25,3 +27,13 @@ export const selectDataAttributes = {
 
 /** The name of a Select data attribute. */
 export type SelectDataAttribute = keyof typeof selectDataAttributes;
+
+/**
+ * The CSS variables a placement writes on the list panel's positioned wrapper, inherited by the
+ * list: the Popover set (`popoverCssVariables`). The dropdown list caps its height with
+ * `--available-height`; the mobile sheet has none.
+ */
+export const selectCssVariables = popoverCssVariables;
+
+/** The name of a Select CSS variable. */
+export type SelectCssVariable = keyof typeof selectCssVariables;

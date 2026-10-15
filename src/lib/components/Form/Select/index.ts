@@ -15,4 +15,9 @@ export {
 	type SelectTheme,
 	type SelectThemeProps
 } from './select.theme.js';
-export { selectDataAttributes, type SelectDataAttribute } from './select.attributes.js';
+export {
+	selectDataAttributes,
+	selectCssVariables,
+	type SelectDataAttribute,
+	type SelectCssVariable
+} from './select.attributes.js';

@@ -1,7 +1,9 @@
+import { popoverCssVariables } from '../Popover/popover.attributes.js';
+
 /**
  * The styling hooks a HoverCard exposes. Attributes are presence attributes (`''` while the state
  * holds, omitted otherwise) unless the description says they carry a value. The card is a
- * Popover panel, so its CSS variables are `popoverCssVariables` (from `entasis/popover`).
+ * Popover panel.
  */
 export const hoverCardDataAttributes = {
 	'data-open': 'On the card: present while open.',
@@ -9,7 +11,7 @@ export const hoverCardDataAttributes = {
 	'data-entering': 'On the card: present while the enter transition plays.',
 	'data-exiting': 'On the card: present while the exit transition plays.',
 	'data-side':
-		'On the card: the side of the trigger it sits on after flipping, `top`, `right`, `bottom` or `left`.',
+		'On the card: the side of the trigger it sits on after flipping, `top`, `right`, `bottom` or `left`; `inline-start` / `inline-end` when a logical `position` was requested.',
 	'data-align': 'On the card: `start`, `center` or `end`, how it lines up with the trigger.',
 	'data-anchor-hidden': 'On the card: present while the trigger is scrolled out of view.',
 	'data-state':
@@ -21,3 +23,12 @@ export const hoverCardDataAttributes = {
 
 /** The name of a HoverCard data attribute. */
 export type HoverCardDataAttribute = keyof typeof hoverCardDataAttributes;
+
+/**
+ * The CSS variables a placement writes on the card's positioned wrapper, inherited by the card and
+ * its content: the Popover set (`popoverCssVariables`), where the panel is the card.
+ */
+export const hoverCardCssVariables = popoverCssVariables;
+
+/** The name of a HoverCard CSS variable. */
+export type HoverCardCssVariable = keyof typeof hoverCardCssVariables;

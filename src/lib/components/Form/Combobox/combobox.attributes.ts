@@ -1,7 +1,9 @@
+import { popoverCssVariables } from '../../Popover/popover.attributes.js';
+
 /**
  * The styling hooks a Combobox exposes. Attributes are presence attributes (set while the state
  * holds, omitted otherwise) unless the description says they carry a value. The list sits in a
- * Popover panel, whose CSS variables (`popoverCssVariables`, from `entasis/popover`) it inherits.
+ * Popover panel, whose CSS variables (`comboboxCssVariables`) it inherits.
  */
 export const comboboxDataAttributes = {
 	'data-popup-open':
@@ -21,3 +23,13 @@ export const comboboxDataAttributes = {
 
 /** The name of a Combobox data attribute. */
 export type ComboboxDataAttribute = keyof typeof comboboxDataAttributes;
+
+/**
+ * The CSS variables a placement writes on the list panel's positioned wrapper, inherited by the
+ * list: the Popover set (`popoverCssVariables`). The option list caps its height with
+ * `--available-height`.
+ */
+export const comboboxCssVariables = popoverCssVariables;
+
+/** The name of a Combobox CSS variable. */
+export type ComboboxCssVariable = keyof typeof comboboxCssVariables;

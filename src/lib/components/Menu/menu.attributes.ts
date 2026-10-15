@@ -1,9 +1,11 @@
+import { popoverCssVariables } from '../Popover/popover.attributes.js';
+
 /**
  * The styling hooks a Menu exposes. Attributes are presence attributes (set while the state
  * holds, omitted otherwise) unless the description says they carry a value. A popup menu
  * (PopupMenu, ContextMenu, a submenu) is a Popover panel: it also carries `data-open`,
  * `data-closed`, `data-entering`, `data-exiting`, `data-side` and `data-align`, and the CSS
- * variables of `popoverCssVariables` (from `entasis/popover`).
+ * variables of `menuCssVariables`.
  */
 export const menuDataAttributes = {
 	'data-highlighted':
@@ -25,3 +27,12 @@ export const menuDataAttributes = {
 
 /** The name of a Menu data attribute. */
 export type MenuDataAttribute = keyof typeof menuDataAttributes;
+
+/**
+ * The CSS variables a placement writes on a popup menu's or submenu's positioned wrapper, inherited
+ * by the panel and its rows: the Popover set (`popoverCssVariables`). An inline Menu has none.
+ */
+export const menuCssVariables = popoverCssVariables;
+
+/** The name of a Menu CSS variable. */
+export type MenuCssVariable = keyof typeof menuCssVariables;

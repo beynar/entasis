@@ -658,7 +658,14 @@ Attributes are presence attributes (set while the state holds, omitted otherwise
 - \`data-size\`: On the root and the list: the resolved \`size\`.
 - \`data-density\`: On the root and the list: the resolved \`density\`.
 
-The typed map \`menuDataAttributes\` (from \`entasis/menu\`) lists each name with its meaning.
+**CSS variables** (set on a popup menu's or submenu's positioned wrapper and inherited by the panel and its rows; an inline Menu has none)
+- \`--available-width\`: The width in px the panel can take before it reaches the viewport edges, minus 20px.
+- \`--available-height\`: The room in px between the trigger and the viewport edge on the panel's side, minus 20px. Cap a scrolling list with \`max-height: min(240px, var(--available-height))\`.
+- \`--anchor-width\`: The trigger's width in px, snapped to the device pixel grid.
+- \`--anchor-height\`: The trigger's height in px, snapped to the device pixel grid.
+- \`--transform-origin\`: The panel corner facing the trigger, mirrored in right-to-left documents; the point the panel scales from.
+
+The typed maps \`menuDataAttributes\` and \`menuCssVariables\` (from \`entasis/menu\`) list each name with its meaning.
 
 ## Accessibility
 

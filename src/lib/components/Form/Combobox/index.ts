@@ -18,4 +18,9 @@ export {
 	type ComboboxTheme,
 	type ComboboxThemeProps
 } from './combobox.theme.js';
-export { comboboxDataAttributes, type ComboboxDataAttribute } from './combobox.attributes.js';
+export {
+	comboboxDataAttributes,
+	comboboxCssVariables,
+	type ComboboxDataAttribute,
+	type ComboboxCssVariable
+} from './combobox.attributes.js';

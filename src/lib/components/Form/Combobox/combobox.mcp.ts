@@ -242,7 +242,14 @@ Attributes are presence attributes (set while the state holds, omitted otherwise
 - \`data-side\`: On the list panel: the side of the field it sits on after flipping.
 - \`data-align\`: On the list panel: \`start\`, \`center\` or \`end\`.
 
-The typed map \`comboboxDataAttributes\` (from \`entasis/combobox\`) lists each name with its meaning.
+**CSS variables** (set on the list panel's positioned wrapper and inherited by the list)
+- \`--available-width\`: The width in px the panel can take before it reaches the viewport edges, minus 20px.
+- \`--available-height\`: The room in px between the trigger and the viewport edge on the panel's side, minus 20px. Cap a scrolling list with \`max-height: min(240px, var(--available-height))\`.
+- \`--anchor-width\`: The trigger's width in px, snapped to the device pixel grid.
+- \`--anchor-height\`: The trigger's height in px, snapped to the device pixel grid.
+- \`--transform-origin\`: The panel corner facing the trigger, mirrored in right-to-left documents; the point the panel scales from.
+
+The typed maps \`comboboxDataAttributes\` and \`comboboxCssVariables\` (from \`entasis/combobox\`) list each name with its meaning.
 
 ## Accessibility
 
