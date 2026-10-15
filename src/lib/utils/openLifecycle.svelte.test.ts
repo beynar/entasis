@@ -102,4 +102,29 @@ describe('useOpenLifecycle', () => {
 		expect(onAfterOpen).toHaveBeenCalledTimes(2);
 		expect(status()).toBe('open');
 	});
+
+	// Once an element's exit has started, Svelte keeps its options and does not call the transition
+	// function again: the next exit of an element whose first one was reversed still plays.
+	test('the next exit of a surface whose exit was reversed waits for its transition', async () => {
+		const onAfterOpen = vi.fn();
+		const onAfterClose = vi.fn();
+		const { rerender } = render(OpenLifecycleHarness, {
+			props: { duration: 80, onAfterOpen, onAfterClose }
+		});
+		await rerender({ open: true });
+		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledOnce());
+		void rerender({ open: false });
+		void rerender({ open: true });
+		await waitFor(() => expect(onAfterOpen).toHaveBeenCalledTimes(2));
+		const surface = screen.getByTestId('surface');
+
+		void rerender({ open: false });
+		await settleFlush();
+		expect(status()).toBe('exiting');
+		expect(onAfterClose).not.toHaveBeenCalled();
+		expect(surface).toBeInTheDocument();
+		await waitFor(() => expect(onAfterClose).toHaveBeenCalledOnce());
+		expect(status()).toBe('closed');
+		expect(screen.queryByTestId('surface')).toBeNull();
+	});
 });

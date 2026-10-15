@@ -161,6 +161,23 @@ describe('hoverable content and handoff (TT-1, DF-8)', () => {
 		expect(events).toEqual(['second open']);
 	});
 
+	test('the surface carries its exit hooks while it fades out, and only the new one opens', async () => {
+		await mount({ first: { transition: { in: { duration: 0 }, out: { duration: 400 } } } });
+		await userEvent.hover(trigger('First'));
+		await expect.poll(() => surface()?.hasAttribute('data-open')).toBe(true);
+		const fading = surface()!;
+		await userEvent.unhover(trigger('First'));
+		await expect.poll(() => fading.hasAttribute('data-closed')).toBe(true);
+		expect(fading.isConnected).toBe(true);
+		expect(fading.hasAttribute('data-exiting')).toBe(true);
+		await expect.poll(() => fading.isConnected, { timeout: 2000 }).toBe(false);
+
+		await userEvent.hover(trigger('First'));
+		await expect.poll(() => surface()?.hasAttribute('data-open')).toBe(true);
+		expect(surface()).not.toBe(fading);
+		expect(fading.hasAttribute('data-open')).toBe(false);
+	});
+
 	test('moving to the next trigger keeps the same surface', async () => {
 		await mount();
 		await userEvent.hover(trigger('First'));
