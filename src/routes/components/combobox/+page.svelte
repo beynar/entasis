@@ -145,7 +145,8 @@
 			value: 'top',
 			options: ['top', 'left']
 		},
-		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false }
 	]);
 </script>
 
@@ -182,6 +183,7 @@
 	density="${controls.value.density}"
 	labelPosition="${controls.value.labelPosition}"
 	disabled={${controls.value.disabled}}
+	readOnly={${controls.value.readOnly}}
 	label="Country"
 	description="Used to localize dates and currency"
 	openOnFocus
@@ -200,6 +202,7 @@
 				density={controls.value.density}
 				labelPosition={controls.value.labelPosition}
 				disabled={controls.value.disabled}
+				readOnly={controls.value.readOnly}
 				label="Country"
 				description="Used to localize dates and currency"
 				openOnFocus

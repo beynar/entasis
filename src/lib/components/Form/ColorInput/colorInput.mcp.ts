@@ -38,6 +38,7 @@ Extends all Field component props plus:
 - **description**: string | Snippet - Helper text
 - **required**: boolean - Mark as required (a required color must be a non-empty string)
 - **disabled**: boolean - Disable input, swatch and picker
+- **readOnly**: boolean - The input stays focusable and announced as read-only and the color cannot be changed (typing or picking); the value still validates and submits
 - **size**: 'small' | 'normal' | 'large' - Field size, forwarded to the embedded ColorPicker
 
 ### Event Props

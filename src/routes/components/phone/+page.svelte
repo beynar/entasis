@@ -30,7 +30,8 @@
 			value: 'top',
 			options: ['top', 'left']
 		},
-		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false }
 	]);
 </script>
 
@@ -55,6 +56,7 @@
 	density="${controls.value.density}"
 	labelPosition="${controls.value.labelPosition}"
 	disabled={${controls.value.disabled}}
+	readOnly={${controls.value.readOnly}}
 	label="Phone"
 	description="We'll send delivery updates to this number"
 	placeholder="Phone number"
@@ -67,6 +69,7 @@
 				density={controls.value.density}
 				labelPosition={controls.value.labelPosition}
 				disabled={controls.value.disabled}
+				readOnly={controls.value.readOnly}
 				label="Phone"
 				description="We'll send delivery updates to this number"
 				placeholder="Phone number"

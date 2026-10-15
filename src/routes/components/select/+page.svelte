@@ -130,6 +130,7 @@
 			options: ['top', 'left']
 		},
 		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false },
 		{ name: 'alignItemWithTrigger', type: 'switch', label: 'Align item', value: true }
 	]);
 </script>
@@ -174,7 +175,8 @@
 	size="${controls.value.size}"
 	density="${controls.value.density}"
 	labelPosition="${controls.value.labelPosition}"
-	disabled={${controls.value.disabled}}${controls.value.alignItemWithTrigger ? '' : '\n\talignItemWithTrigger={false}'}
+	disabled={${controls.value.disabled}}
+	readOnly={${controls.value.readOnly}}${controls.value.alignItemWithTrigger ? '' : '\n\talignItemWithTrigger={false}'}
 	label="Role"
 	description="Controls what this member can see and do"
 	placeholder="Select a role"
@@ -193,6 +195,7 @@
 				density={controls.value.density}
 				labelPosition={controls.value.labelPosition}
 				disabled={controls.value.disabled}
+				readOnly={controls.value.readOnly}
 				alignItemWithTrigger={controls.value.alignItemWithTrigger}
 				label="Role"
 				description="Controls what this member can see and do"

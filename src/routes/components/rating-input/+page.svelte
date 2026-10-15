@@ -29,7 +29,8 @@
 			value: 'top',
 			options: ['top', 'left']
 		},
-		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false }
 	]);
 </script>
 
@@ -52,6 +53,7 @@
 	density="${controls.value.density}"
 	labelPosition="${controls.value.labelPosition}"
 	disabled={${controls.value.disabled}}
+	readOnly={${controls.value.readOnly}}
 	label="Overall rating"
 	description="How would you rate your experience?"
 	bind:value={rating}
@@ -63,6 +65,7 @@
 				density={controls.value.density}
 				labelPosition={controls.value.labelPosition}
 				disabled={controls.value.disabled}
+				readOnly={controls.value.readOnly}
 				label="Overall rating"
 				description="How would you rate your experience?"
 				bind:value={rating}

@@ -25,7 +25,8 @@
 			value: 'top',
 			options: ['top', 'left']
 		},
-		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false }
 	]);
 </script>
 
@@ -49,6 +50,7 @@
 	size="${controls.value.size}"
 	labelPosition="${controls.value.labelPosition}"
 	disabled={${controls.value.disabled}}
+	readOnly={${controls.value.readOnly}}
 	label="Notifications"
 	description="Receive updates by email"
 	bind:value={enabled}
@@ -59,6 +61,7 @@
 				size={controls.value.size}
 				labelPosition={controls.value.labelPosition}
 				disabled={controls.value.disabled}
+				readOnly={controls.value.readOnly}
 				label="Notifications"
 				description="Receive updates by email"
 				bind:value={enabled}

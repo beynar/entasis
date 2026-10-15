@@ -30,7 +30,8 @@
 			value: 'normal',
 			options: ['normal', 'card']
 		},
-		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false }
 	]);
 </script>
 
@@ -53,6 +54,7 @@
 	size="${controls.value.size}"
 	mode="${controls.value.mode}"
 	disabled={${controls.value.disabled}}
+	readOnly={${controls.value.readOnly}}
 	label="Notifications"
 	description="Pick the channels you want to hear from"
 	items={[
@@ -68,6 +70,7 @@
 				size={controls.value.size}
 				mode={controls.value.mode}
 				disabled={controls.value.disabled}
+				readOnly={controls.value.readOnly}
 				label="Notifications"
 				description="Pick the channels you want to hear from"
 				{items}

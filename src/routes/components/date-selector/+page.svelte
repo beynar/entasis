@@ -64,7 +64,8 @@
 			value: 'single',
 			options: ['single', 'double']
 		},
-		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false }
 	]);
 </script>
 
@@ -91,6 +92,7 @@
 	labelPosition="${controls.value.labelPosition}"
 	view="${controls.value.view}"
 	disabled={${controls.value.disabled}}
+	readOnly={${controls.value.readOnly}}
 	label="Due date"
 	description="We'll remind you the day before"
 	bind:value={date}
@@ -103,6 +105,7 @@
 				labelPosition={controls.value.labelPosition}
 				view={controls.value.view}
 				disabled={controls.value.disabled}
+				readOnly={controls.value.readOnly}
 				label="Due date"
 				description="We'll remind you the day before"
 				bind:value={selectedDate}
