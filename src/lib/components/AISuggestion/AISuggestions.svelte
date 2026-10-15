@@ -77,7 +77,7 @@
 			{:else}
 				<AISuggestion
 					suggestion={item}
-					selected={persistSelection && valueState.value === item}
+					selected={persistSelection ? valueState.value === item : undefined}
 					{disabled}
 					{variant}
 					onSelect={select}

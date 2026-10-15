@@ -1,4 +1,4 @@
-// AIComposer in real browsers (Chromium and WebKit): Enter sends and the editor keeps focus, the
+// AIComposer in real browsers (Chromium and WebKit): Enter or Send keeps the editor focused, the
 // draft clears after a direct onSubmit, the footer fits a phone, the focus ring follows the
 // editor only, Escape leaves a queued-message edit, and AIChat's composer sends on Enter.
 import { describe, expect, test, vi } from 'vitest';
@@ -74,6 +74,16 @@ describe('sending', () => {
 		await expect.poll(editorFocused).toBe(true);
 	});
 
+	test('clicking Send keeps focus in the editor (WebKit does not focus a clicked button)', async () => {
+		const onSubmit = vi.fn();
+		mount({ onSubmit });
+		await typeInEditor('Hello');
+		await userEvent.click(button('Send message'));
+		await expect.poll(() => onSubmit.mock.calls.length).toBe(1);
+		await expect.poll(() => editor().textContent).toBe('');
+		await expect.poll(editorFocused).toBe(true);
+	});
+
 	test('the submit handle sends the given text and focuses the editor', async () => {
 		const onSubmit = vi.fn();
 		mount({ onSubmit });
@@ -136,6 +146,17 @@ describe('busy footer', () => {
 		);
 	});
 
+	test('the Queue button unmounts once it queues the draft, and focus returns to the editor', async () => {
+		mount({ busy: true });
+		await typeInEditor('Next question');
+		await userEvent.click(button('Queue message'));
+		await expect
+			.poll(() => document.querySelector('[data-slot="ai-composer-queue-item"]')?.textContent)
+			.toContain('Next question');
+		expect(document.querySelector('[data-slot="ai-composer-queue-action"]')).toBeNull();
+		await expect.poll(editorFocused).toBe(true);
+	});
+
 	test('Escape leaves a queued-message edit and puts the message back', async () => {
 		mount({ busy: true, queue: [queued('Queued follow-up')] });
 		await userEvent.click(button(/^Edit queued message/));
@@ -173,6 +194,12 @@ describe('phone width', () => {
 		// Touch-sized controls and at least 16px editor text (no iOS focus zoom) on a narrow composer.
 		expect(rect(send).height).toBe(36);
 		expect(parseFloat(getComputedStyle(editor()).fontSize)).toBeGreaterThanOrEqual(16);
+	});
+
+	test('the mic grows to 36px with the other footer controls on a narrow composer', async () => {
+		mount({ scenario: 'footer', width: 358, voiceInput: true });
+		await expect.poll(() => rect(button('Start voice recording')).height).toBe(36);
+		expect(rect(button('Send message')).height).toBe(36);
 	});
 
 	test('a wide composer keeps 28px controls and the smaller text step', async () => {

@@ -20,8 +20,11 @@ type AIComposerSubmitControllerOptions = {
 	conversation: AIConversationState<AIThreadItem> | null;
 	buildMeta: () => AIComposerSubmitMeta;
 	clearDraft: () => void;
-	/** Whether keyboard focus is inside the composer right now. */
-	hasFocus: () => boolean;
+	/**
+	 * Whether the send started inside the composer: focus is there, or the submit came from one of
+	 * its buttons (Safari does not focus a clicked button, so focus sits on `<body>` then).
+	 */
+	hasFocus: (event?: AIComposerSubmitEvent) => boolean;
 	/** Returns focus to the editor once a send settles. */
 	restoreFocus: () => void;
 	messages: { submitFailed: string; stopFailed: string };
@@ -45,17 +48,20 @@ export class AIComposerSubmitController {
 		const options = this.options;
 		if (options.disabled || this.isWorking || !options.canSubmit) return;
 		const meta = options.buildMeta();
+		// A send that started inside the composer hands focus back to the editor once it settles:
+		// the editor is read-only while a send is in flight (which blurs it), and queueing or
+		// committing an edit clears the draft, which unmounts or disables the button that sent it.
+		const hadFocus = options.hasFocus(event);
 		if (options.queue.isEditing) {
 			options.queue.commitEdit(meta);
+			if (hadFocus) options.restoreFocus();
 			return;
 		}
 		if (options.busy) {
 			if (options.queueWhileBusy) options.queue.enqueue(meta);
+			if (hadFocus) options.restoreFocus();
 			return;
 		}
-		// The editor is read-only while a send is in flight, which blurs it; a send that started
-		// from inside the composer hands focus back to the editor when it settles, success or not.
-		const hadFocus = options.hasFocus();
 		this.isSubmitting = true;
 		this.error = undefined;
 		try {

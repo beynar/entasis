@@ -7,7 +7,7 @@
 	let {
 		ref = $bindable(),
 		suggestion,
-		selected = false,
+		selected,
 		disabled = false,
 		variant = 'soft',
 		size = 'small',
@@ -19,6 +19,7 @@
 		...buttonProps
 	}: AISuggestionProps = $props();
 	const classes = $derived(useAISuggestionTheme(theme));
+	// Without `selected` the chip is a one-shot action, a plain button; with it, a toggle button.
 	const forwardedButtonProps = $derived({ ...buttonProps, 'data-slot': 'ai-suggestion' });
 
 	function select() {

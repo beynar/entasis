@@ -65,21 +65,63 @@ describe('file rejection notes', () => {
 		});
 		vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 		try {
-			const note = () => container.querySelector('[data-slot="ai-composer-notice"]');
-			const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
-			Object.defineProperty(input, 'files', { value: [file('notes.txt')], configurable: true });
-			await fireEvent.change(input);
-			await tick();
+			// The live region is mounted, empty, before anything is rejected, so screen readers
+			// announce the text inserted into it.
+			const status = container.querySelector('[data-slot="ai-composer-notice"] [role="status"]');
+			expect(status).not.toBeNull();
+			expect(status).toHaveTextContent('');
+			await choose(container, [file('notes.txt')]);
 			expect(onFileReject).toHaveBeenCalledOnce();
-			expect(note()).toHaveAttribute('role', 'status');
-			expect(note()).toHaveTextContent("notes.txt isn't supported — use images or PDF");
+			expect(liveStatus(container)).toBe(status);
+			expect(status).toHaveTextContent("notes.txt isn't supported — use images or PDF");
 			expect(container.querySelector('[role="alert"]')).toBeNull();
 
 			await vi.advanceTimersByTimeAsync(6000);
 			await tick();
-			expect(note()).toBeNull();
+			expect(liveStatus(container)).toBe(status);
+			expect(status).toHaveTextContent('');
 		} finally {
 			vi.useRealTimers();
 		}
 	});
+
+	test('a repeated identical rejection restarts the timer', async () => {
+		const { container } = render(Harness, { fileDropzone: true, accept: ['image/*', '.pdf'] });
+		vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+		try {
+			await choose(container, [file('notes.txt')]);
+			await vi.advanceTimersByTimeAsync(5000);
+			await choose(container, [file('notes.txt')]);
+			await vi.advanceTimersByTimeAsync(5000);
+			await tick();
+			// Ten seconds after the first note, but only five after the repeat: still visible.
+			expect(liveStatus(container)).toHaveTextContent("notes.txt isn't supported");
+			await vi.advanceTimersByTimeAsync(1000);
+			await tick();
+			expect(liveStatus(container)).toHaveTextContent('');
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	test('a single-file composer states its real one-file limit', async () => {
+		const { container } = render(Harness, {
+			fileDropzone: true,
+			fileMultiple: false,
+			accept: ['image/*']
+		});
+		await choose(container, [file('a.png', 'image/png'), file('b.png', 'image/png')]);
+		expect(liveStatus(container)).toHaveTextContent('You can attach up to 1 file');
+	});
 });
+
+function liveStatus(container: HTMLElement) {
+	return container.querySelector('[data-slot="ai-composer-notice"] [role="status"]');
+}
+
+async function choose(container: HTMLElement, files: File[]) {
+	const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
+	Object.defineProperty(input, 'files', { value: files, configurable: true });
+	await fireEvent.change(input);
+	await tick();
+}

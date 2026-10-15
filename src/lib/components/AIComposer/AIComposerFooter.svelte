@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { MediaQuery } from 'svelte/reactivity';
 	import Button from '../Button/Button.svelte';
 	import VoiceInput from '../Form/VoiceInput/VoiceInput.svelte';
 	import type { VoiceInputResult } from '../Form/VoiceInput/voiceInput.props.js';
@@ -85,6 +86,22 @@
 	let voiceInputErrors = $state<string[]>([]);
 	let isVoiceInputProcessing = $state(false);
 
+	// The footer's other controls grow to 36px through the theme's `@max-md` container query and
+	// `pointer-coarse`; VoiceInput sizes its mic, playback and clear buttons from its `size` prop, so
+	// the same two conditions pick its 36px `normal` size here. 28rem is Tailwind's `@md` container.
+	const coarsePointer = new MediaQuery('(pointer: coarse)', false);
+	let narrowFooter = $state(false);
+	const touchControls = $derived(narrowFooter || coarsePointer.current);
+
+	function observeFooterWidth(node: HTMLElement) {
+		const observer = new ResizeObserver(([entry]) => {
+			const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+			narrowFooter = entry.contentRect.width < 28 * rem;
+		});
+		observer.observe(node);
+		return () => observer.disconnect();
+	}
+
 	async function processVoiceInput(result: VoiceInputResult): Promise<void> {
 		voiceInputValue = null;
 		voiceInputDuration = 0;
@@ -107,7 +124,11 @@
 {:else}
 	<!-- Attach sits at the far start; the model picker, voice and the send position share the end,
 	     so the send/stop control is always last and never pushed out of the composer. -->
-	<div data-slot="ai-composer-footer" class={classes.footer()}>
+	<div
+		data-slot="ai-composer-footer"
+		class={classes.footer()}
+		{@attach voiceInput ? observeFooterWidth : undefined}
+	>
 		<div class={classes.actions({ side: 'start' })}>
 			{#if fileDropzone}
 				<Button
@@ -137,7 +158,7 @@
 						<Button
 							type="button"
 							squared
-							size="small"
+							size={touchControls ? 'large' : 'small'}
 							variant="ghost"
 							color="neutral"
 							label={voiceInputProcessingLabel}
@@ -150,7 +171,7 @@
 							bind:value={voiceInputValue}
 							bind:duration={voiceInputDuration}
 							bind:errors={voiceInputErrors}
-							size="small"
+							size={touchControls ? 'normal' : 'small'}
 							variant={voiceInputVariant}
 							minDuration={voiceInputMinDuration}
 							maxDuration={voiceInputMaxDuration}

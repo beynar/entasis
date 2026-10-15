@@ -17,12 +17,15 @@ describe('AISuggestions selection', () => {
 		await fireEvent.click(chip);
 		expect(onSelect).toHaveBeenCalledExactlyOnceWith('Summarize');
 		expect(onValueChange).toHaveBeenCalledExactlyOnceWith('Summarize');
-		expect(chip).not.toHaveAttribute('aria-pressed', 'true');
+		// A one-shot action is a plain button, not a toggle announced as "not pressed".
+		expect(chip).not.toHaveAttribute('aria-pressed');
+		expect(screen.getByRole('button', { name: 'Explain' })).not.toHaveAttribute('aria-pressed');
 	});
 
 	test('persistSelection keeps the picked suggestion pressed', async () => {
 		renderInTheme(AISuggestions, { suggestions: ['Summarize', 'Explain'], persistSelection: true });
 		const chip = screen.getByRole('button', { name: 'Explain' });
+		expect(chip).toHaveAttribute('aria-pressed', 'false');
 		await fireEvent.click(chip);
 		expect(chip).toHaveAttribute('aria-pressed', 'true');
 	});

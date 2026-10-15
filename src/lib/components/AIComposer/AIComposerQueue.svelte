@@ -76,13 +76,18 @@
 				{#snippet item({ item }: SortableListItemPayload<AIComposerQueuedMessage>)}
 					<div
 						data-slot="ai-composer-queue-item"
-						class={classes.queueItem()}
+						class={classes.queueItem({ steered: Boolean(item.steered) })}
 						data-steered={item.steered || undefined}
 					>
+						{#if item.steered}
+							<span data-slot="ai-composer-queue-badge" class={classes.queueBadge()}>
+								{t.aiComposerSteering}
+							</span>
+						{/if}
 						<div class={classes.queueText()}>{getMessagePreview(item)}</div>
 						{#if item.attachments.length > 0}
-							<span class="text-neutral/50 text-xs">
-								{item.attachments.length} file{item.attachments.length === 1 ? '' : 's'}
+							<span data-slot="ai-composer-queue-files" class={classes.queueFiles()}>
+								{t.aiComposerQueuedFiles(item.attachments.length)}
 							</span>
 						{/if}
 						<Button

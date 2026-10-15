@@ -47,12 +47,16 @@ const defaultEditor = cva({
 const defaultToolbar = cva({ base: 'min-w-0' });
 const defaultFile = cva({ base: 'shrink-0' });
 const defaultError = cva({ base: 'min-w-0' });
-// Rejected files are reported as a quiet inline note that dismisses itself, not as an alert.
+// Rejected files are reported as a quiet inline note that dismisses itself, not as an alert. The
+// note's live region stays mounted; while empty it is visually hidden and takes no grid row.
 const defaultNotice = cva({
-	base: 'flex min-w-0 items-center justify-between gap-md px-sm text-xs text-danger-readable'
+	base: 'flex min-w-0 items-center justify-between gap-md px-sm text-xs text-danger-readable',
+	variants: { empty: { true: 'sr-only', false: '' } },
+	defaultVariants: { empty: false }
 });
-// On a narrow composer or a touch screen the footer controls grow to the 36px control height
-// (the mic keeps its field height), so the targets are reachable with a thumb.
+// On a narrow composer or a touch screen the footer controls grow to the 36px control height, so
+// the targets are reachable with a thumb. VoiceInput's buttons are excluded here: the footer gives
+// the VoiceInput its 36px `normal` size under the same conditions instead.
 const defaultFooter = cva({
 	base: 'flex min-w-0 items-center gap-md @max-md:[&_button:not([data-slot=ai-composer-voice-input]_button)]:h-control-lg pointer-coarse:[&_button:not([data-slot=ai-composer-voice-input]_button)]:h-control-lg'
 });

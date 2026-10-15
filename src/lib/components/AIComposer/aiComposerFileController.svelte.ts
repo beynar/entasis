@@ -33,6 +33,8 @@ export class AIComposerFileController {
 	error = $state<string>();
 	/** Plain-language note about files that were just rejected; the composer dismisses it. */
 	notice = $state<string>();
+	/** Counts rejection notes, so a repeated identical note still re-announces and restarts its timer. */
+	noticeId = $state(0);
 
 	constructor(private optionsSource: () => AIComposerFileControllerOptions) {
 		this.dropzone = new FileDropzone(() => ({
@@ -63,8 +65,9 @@ export class AIComposerFileController {
 		return this.options.accept;
 	}
 
+	/** The effective file limit: a single-file composer holds one file whatever `maxFiles` says. */
 	get maxFiles(): number {
-		return this.options.maxFiles;
+		return this.options.fileMultiple ? this.options.maxFiles : 1;
 	}
 
 	get isDisabled(): boolean {
@@ -223,9 +226,10 @@ export class AIComposerFileController {
 		const options = this.options;
 		options.onFileReject?.(rejections);
 		options.onFilesRejected?.(rejections.map((rejection) => rejection.file));
+		this.noticeId += 1;
 		this.notice = describeRejections(rejections, {
 			accept: options.accept,
-			maxFiles: options.maxFiles,
+			maxFiles: this.maxFiles,
 			maxFileSize: this.dropzone.formatSize(options.maxFileSize),
 			messages: options.messages
 		});

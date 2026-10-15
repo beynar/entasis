@@ -245,7 +245,11 @@
 		conversation,
 		buildMeta: buildSubmitMeta,
 		clearDraft,
-		hasFocus: () => Boolean(ref?.contains(document.activeElement)),
+		hasFocus: (event) =>
+			Boolean(
+				ref?.contains(document.activeElement) ||
+				(event && 'submitter' in event && ref?.contains(event.submitter))
+			),
 		restoreFocus: focusEditorAfterSend,
 		messages: { submitFailed: t.aiComposerSubmitFailed, stopFailed: t.aiComposerStopFailed },
 		onSubmit,
@@ -271,8 +275,10 @@
 		queueController.syncConversation(resolvedQueue);
 	});
 
-	// A rejected-file note is information, not a blocking error: it dismisses itself.
+	// A rejected-file note is information, not a blocking error: it dismisses itself. Each new
+	// rejection (even one with the same text) bumps `noticeId` and restarts the timer.
 	$effect(() => {
+		void fileController.noticeId;
 		if (!fileController.notice) return;
 		const timeout = setTimeout(() => fileController.dismissNotice(), NOTICE_DURATION);
 		return () => clearTimeout(timeout);
@@ -529,9 +535,17 @@
 		<Alert color="danger" variant="soft" description={visibleError} class={classes.error()} />
 	{/if}
 
-	{#if fileController.notice}
-		<div data-slot="ai-composer-notice" role="status" class={classes.notice()}>
-			<span class="min-w-0">{fileController.notice}</span>
+	<!-- The status region stays mounted (visually hidden while empty) and only its text changes, so
+	     screen readers announce each note; re-keying the text re-announces a repeated rejection. -->
+	<div
+		data-slot="ai-composer-notice"
+		data-empty={fileController.notice ? undefined : 'true'}
+		class={classes.notice({ empty: !fileController.notice })}
+	>
+		<span role="status" class="min-w-0">
+			{#key fileController.noticeId}{fileController.notice ?? ''}{/key}
+		</span>
+		{#if fileController.notice}
 			<Button
 				type="button"
 				squared
@@ -543,8 +557,8 @@
 			>
 				{@render xIcon({ size: 14 })}
 			</Button>
-		</div>
-	{/if}
+		{/if}
+	</div>
 
 	<AIComposerFooter
 		state={submitState}

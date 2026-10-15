@@ -28,7 +28,10 @@ export type AISuggestionProps = Omit<
 		ref?: HTMLButtonElement | null;
 		/** Suggestion value passed to `onSelect`. */
 		suggestion: string;
-		/** Marks the suggestion as selected. */
+		/**
+		 * Marks the suggestion as selected and makes it a toggle button (`aria-pressed`). Leave it
+		 * unset for a one-shot suggestion, which renders a plain button.
+		 */
 		selected?: boolean;
 		/** Replaces the default suggestion label. */
 		children?: Slot;
