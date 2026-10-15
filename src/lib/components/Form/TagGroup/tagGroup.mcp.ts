@@ -53,6 +53,7 @@ TagGroup renders a finite set of selectable tags as chips. It is a form input fo
 - **name**: string - Form field name.
 - **required**: boolean (default: false) - Marks selection as required.
 - **disabled**: boolean (default: false) - Disables all tag buttons.
+- **readOnly**: boolean (default: false) - Tags stay focusable but pressing them changes nothing; the selection still validates and submits.
 
 ### Option Props
 - **value**: string - Unique selection value.

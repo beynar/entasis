@@ -293,6 +293,7 @@
 	subtitle="A list of actions or options triggered from a control."
 	component="Menu"
 	features={[
+		'Styling hooks: data-highlighted, data-disabled and data-selected on rows, data-popup-open on submenu rows (menuDataAttributes)',
 		'role=menu with menuitem children',
 		{ label: 'Arrow key navigation with loop', test: 'a11y:menu.arrow-keys' },
 		'Submenus as popovers or stacked views',

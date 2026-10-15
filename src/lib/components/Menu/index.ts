@@ -23,3 +23,9 @@ export {
 	type MenuTheme,
 	type MenuThemeProps
 } from './menu.theme.js';
+export {
+	menuDataAttributes,
+	menuCssVariables,
+	type MenuDataAttribute,
+	type MenuCssVariable
+} from './menu.attributes.js';

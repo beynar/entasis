@@ -82,7 +82,8 @@ Standalone tab navigation bar with active indicator.
 - `orientation`: `'horizontal' | 'vertical'`
 - `alignment`: `'start' | 'center' | 'end'`
 - `fullWidth`: boolean
-- `onValueChange`: `(value: string) => void`
+- `onValueChange`: `({ value, reason }) => void` -- one payload object; `reason` is `user`, or `initial`, `disabled` or `missing` when the Tabbar moved the selection to an enabled tab by itself
+- `activateOnFocus`: boolean (default: `true`) -- `false` makes arrow keys only move focus; Enter, Space or a click selects
 
 When `href` is provided, tab renders as `<a>`. Roving tabindex + full keyboard nav (Arrow keys, Home, End); each tab carries `id`, `aria-selected`, and (with `controlsPanels`) `aria-controls`.
 
@@ -191,13 +192,13 @@ Site navigation with mega-menu panels: a `<nav>` landmark with a row of links an
 
 - `items`: `NavigationMenuItem[]` (required) -- `{ type: 'link', label, href, description?, prefix?, iconOnly?, active?, disabled?, target?, rel?, onclick? }` or `{ type: 'panel', value, label, prefix?, iconOnly?, disabled?, content?, items? }`; `content` is a list of links or a snippet receiving `{ close }`; `items` adds a nested inline level (links and panels that expand in place)
 - `label`: string -- accessible name of the nav
-- `value` (bindable) / `defaultValue`: `Value | null` -- the open panel's `value`; `onValueChange: (value, details) => void` runs before the change, `details.reason` is `trigger-press`, `trigger-hover`, `list-navigation`, `escape-key`, `outside-press`, `focus-out`, `item-press`, `close-press` or `trigger-unmount`, and `details.cancel()` keeps the current panel. `Value` is generic.
+- `value` (bindable) / `defaultValue`: `Value | null` -- the open panel's `value`; `onValueChange: ({ value, details }) => void` (one payload object) runs before the change, `details.reason` is `trigger-press`, `trigger-hover`, `list-navigation`, `escape-key`, `outside-press`, `focus-out`, `item-press`, `close-press` or `trigger-unmount`, and `details.cancel()` keeps the current panel. `Value` is generic.
 - `openOnHover`: boolean (default: true), `delay`: number (default: 50), `closeDelay`: number (default: 100)
 - `keepMounted`: boolean -- every panel stays in the DOM under `hidden` (crawlers and server-rendered HTML see the links)
 - `onAfterOpen` / `onAfterClose`: () => void
 - `size`: `'small' | 'normal' | 'large'`, `density`: `'compact' | 'normal' | 'comfortable'`, `color`: `Colors`, `dir`: `'ltr' | 'rtl'`, `transition`, `class`, `theme`
 
-Triggers are `<button aria-expanded aria-controls>` (no `aria-haspopup`). Opening by keyboard keeps focus on the trigger; Tab enters the panel and continues after the trigger. Left/Right (mirrored in RTL), Home and End move along the bar. Hovering switches panels at once and the panel animates its size. Escape closes and returns focus to the trigger. A link press closes every level and reports one `onValueChange(null)`; a consumer `onclick` runs first and `preventDefault()` keeps the menu open.
+Triggers are `<button aria-expanded aria-controls>` (no `aria-haspopup`). Opening by keyboard keeps focus on the trigger; Tab enters the panel and continues after the trigger. Left/Right (mirrored in RTL), Home and End move along the bar. Hovering switches panels at once and the panel animates its size. Escape closes and returns focus to the trigger. A link press closes every level and reports one `onValueChange({ value: null, details })`; a consumer `onclick` runs first and `preventDefault()` keeps the menu open.
 
 ```svelte
 <script lang="ts">

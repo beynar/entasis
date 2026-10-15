@@ -7,7 +7,7 @@
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import Popover from '../../Popover/Popover.svelte';
-	import type { PopoverState } from '../../Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '../../Popover/popover.api.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import type { ColorInputProps } from './colorInput.props.js';
 	import { useColorInputTheme } from './colorInput.theme.js';
@@ -201,7 +201,7 @@
 		/>
 	</div>
 
-	{#snippet trigger(popover: PopoverState)}
+	{#snippet trigger(popover: PopoverApi)}
 		{#snippet swatch()}
 			<span class={classes.swatch({ empty: isEmpty, class: theme?.swatch?.base })}>
 				{#if !isEmpty}

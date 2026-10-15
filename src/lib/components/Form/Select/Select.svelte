@@ -12,6 +12,7 @@
 	import { SelectState } from './select.state.svelte.js';
 	import SelectOptionRow from './SelectOptionRow.svelte';
 	import Popover from '../../Popover/Popover.svelte';
+	import { popupOpenClaim } from '../../Popover/popover.claims.js';
 	import ScrollArea from '../../ScrollArea/ScrollArea.svelte';
 	import { caretDownIcon } from '../../Icons/caretDown.js';
 	import { checkIcon } from '../../Icons/check.js';
@@ -347,6 +348,8 @@
 						: (placeholder ?? t.selectOption))}
 				data-placeholder={hasValue ? undefined : ''}
 				data-readonly={presence(field.readOnly)}
+				data-disabled={presence(field.disabled)}
+				{@attach popupOpenClaim(select.isOpen)}
 				disabled={field.disabled}
 				class={classes.input({ size, disabled: field.disabled })}
 				onpointerdown={(event) => {

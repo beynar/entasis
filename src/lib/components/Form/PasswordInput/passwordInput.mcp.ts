@@ -30,6 +30,7 @@ Extends all TextInput component props:
 - **error**: string - Error message
 - **required**: boolean - Mark as required
 - **disabled**: boolean - Disable input
+- **readOnly**: boolean - Make the input read-only: stays focusable and announced as read-only, refuses edits, and still validates and submits. A read-only Form, FormGroup or fieldset Field makes it read-only too
 - **size**: 'small' | 'normal' | 'large'
 
 ### Content Slots

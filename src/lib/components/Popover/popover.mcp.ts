@@ -40,16 +40,16 @@ The Popover component displays floating content positioned relative to a trigger
 
 ### Event Props
 - **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void - Called before each library-requested state change, with \`details.reason\` (\`'trigger-press'\`, \`'trigger-hover'\`, \`'outside-press'\`, \`'escape-key'\`, \`'item-press'\`, \`'trigger-unmount'\`, \`'imperative-action'\`…), \`details.event\`, \`details.trigger\`, \`details.interaction\` and \`details.cancel()\`. Cancelling keeps the popover as it is and leaves the event untouched (a cancelled Escape is not \`defaultPrevented\`). Inside the callback \`open\` still holds the previous state. Types from \`entasis/types\`
-- **onAfterOpen**: (payload: PopoverState<Payload>) => void - Called once per open after the open transition finishes, right away when none plays (\`defaultOpen\`, \`inline\`)
-- **onAfterClose**: (payload: PopoverState<Payload>) => void - Called once per close after the close transition finishes
+- **onAfterOpen**: (payload: PopoverApi<Payload>) => void - Called once per open after the open transition finishes, right away when none plays (\`defaultOpen\`, \`inline\`)
+- **onAfterClose**: (payload: PopoverApi<Payload>) => void - Called once per close after the close transition finishes
 
 ### Slot Props
-- **children**: Snippet<[PopoverState<Payload>]> - Popover content. \`Payload\` is inferred from the type you give the snippet parameter (\`PopoverState<Person>\`) and defaults to \`unknown\`
-- **trigger**: Snippet<[PopoverState]> | (ButtonProps & { content?: string }) | false - Trigger element
+- **children**: Snippet<[PopoverApi<Payload>]> - Popover content. \`Payload\` is inferred from the type you give the snippet parameter (\`PopoverApi<Person>\`) and defaults to \`unknown\`
+- **trigger**: Snippet<[PopoverApi<Payload>]> | (ButtonProps & { content?: string }) | false - Trigger element
   - Pass a snippet function for custom trigger: \`{#snippet trigger(popover)}...</snippet>\`. Put
     \`{@attach popover.trigger}\` on any element (a card, an avatar, a Button) and it opens the
     panel on click and from the keyboard, with the ARIA state kept in sync. Type the parameter
-    with \`PopoverState\` from \`entasis/popover\`.
+    with \`PopoverApi\` from \`entasis/popover\`.
   - Pass button props object for default button: \`trigger={{ content: "Click Me", color: "primary" }}\`.
     \`children\` (a string or a snippet) replaces \`content\` for a richer body; \`prefix\` and
     \`suffix\` work as on Button.
@@ -105,17 +105,26 @@ The Popover component displays floating content positioned relative to a trigger
 
 A floating panel is placed before it shows: it stays hidden until its first placement lands, and \`focusOnOpen\` waits for that placement too. Every placement (scroll, resize, a flip, the end of the opening transition, and the visual viewport settling after an on-screen keyboard) updates these hooks.
 
-**Data attributes**
-- \`data-side\` on the panel: the side of the trigger it sits on after flipping: \`top\`, \`right\`, \`bottom\`, \`left\`; \`inline-start\` / \`inline-end\` when a logical side was requested; \`none\` when \`positionPanel\` placed it
-- \`data-align\` on the panel: \`start\`, \`center\` or \`end\` (absent with \`data-side="none"\`)
-- \`data-anchor-hidden\` on the panel: present while the trigger is scrolled out of view; the panel is hidden meanwhile
-- \`data-side\` / \`data-uncentered\` on the arrow (\`arrow\`): the physical side of the panel it sits on, and present while the trigger is not under the middle of the panel
-- \`data-popup-side\` on the trigger (or the \`ref\` element): the panel's \`data-side\` while it is placed, so a theme can flatten the corner the panel attaches to
+**Data attributes** (presence attributes unless they carry a value)
+- \`data-open\`: On the panel: present while open.
+- \`data-closed\`: On the panel: present while its exit transition plays (a closed panel is not rendered).
+- \`data-entering\`: On the panel: present while the enter transition plays.
+- \`data-exiting\`: On the panel: present while the exit transition plays.
+- \`data-side\`: On the panel: the side of the trigger it sits on after flipping, \`top\`, \`right\`, \`bottom\` or \`left\`; \`inline-start\` / \`inline-end\` when a logical side was requested; \`none\` when \`positionPanel\` placed it. On the arrow: the physical side of the panel it sits on.
+- \`data-align\`: On the panel: \`start\`, \`center\` or \`end\`, how it lines up with the trigger (absent with \`data-side="none"\`).
+- \`data-anchor-hidden\`: On the panel: present while the trigger is scrolled out of view; the panel is hidden meanwhile.
+- \`data-uncentered\`: On the arrow: present while the trigger is not under the middle of the panel (a shift moved the panel).
+- \`data-popup-open\`: On the element the panel is anchored to (the trigger that opened it, or the \`ref\` element): present while the popover is open.
+- \`data-popup-side\`: On the element the panel is anchored to: the panel's \`data-side\` while it is placed, so a theme can flatten the corner the panel attaches to.
 
 **CSS variables** (set on the positioned wrapper, inherited by the panel and its content)
-- \`--available-height\` / \`--available-width\`: the room between the trigger and the viewport edge on the panel's side, minus 20px. Cap a scrolling list with \`max-height: min(240px, var(--available-height))\` so it shrinks instead of covering its trigger
-- \`--anchor-width\` / \`--anchor-height\`: the trigger's size, snapped to the device pixel grid
-- \`--transform-origin\`: the panel corner facing the trigger, mirrored in right-to-left documents
+- \`--available-width\`: The width in px the panel can take before it reaches the viewport edges, minus 20px.
+- \`--available-height\`: The room in px between the trigger and the viewport edge on the panel's side, minus 20px. Cap a scrolling list with \`max-height: min(240px, var(--available-height))\`.
+- \`--anchor-width\`: The trigger's width in px, snapped to the device pixel grid.
+- \`--anchor-height\`: The trigger's height in px, snapped to the device pixel grid.
+- \`--transform-origin\`: The panel corner facing the trigger, mirrored in right-to-left documents; the point the panel scales from.
+
+The typed maps \`popoverDataAttributes\` and \`popoverCssVariables\` (from \`entasis/popover\`) list each name with its meaning. Select, Combobox, Menu, PopupMenu, HoverCard and Tooltip are built on Popover and carry the same panel hooks.
 
 \`\`\`svelte
 <script>
@@ -174,12 +183,12 @@ activation:
 
 \`\`\`svelte
 <script lang="ts">
-	import { Popover, type PopoverState } from 'entasis/popover';
+	import { Popover, type PopoverApi } from 'entasis/popover';
 	import { Avatar } from 'entasis/avatar';
 </script>
 
 <Popover>
-	{#snippet trigger(popover: PopoverState)}
+	{#snippet trigger(popover: PopoverApi)}
 		<div class="flex items-center gap-sm" {@attach popover.trigger}>
 			<Avatar name="Ada Lovelace" />
 			<span>Ada Lovelace</span>
@@ -196,7 +205,7 @@ A list of rows needs one Popover, not one per row. \`popover.triggerFor(() => ro
 
 \`\`\`svelte
 <script lang="ts">
-	import { Popover, type PopoverState } from 'entasis/popover';
+	import { Popover, type PopoverApi } from 'entasis/popover';
 	import { Button } from 'entasis/button';
 
 	type Person = { id: number; name: string; role: string };
@@ -204,12 +213,12 @@ A list of rows needs one Popover, not one per row. \`popover.triggerFor(() => ro
 </script>
 
 <Popover position="bottom" arrow>
-	{#snippet trigger(popover: PopoverState<Person>)}
+	{#snippet trigger(popover: PopoverApi<Person>)}
 		{#each people as person (person.id)}
 			<Button {@attach popover.triggerFor(() => person)}>{person.name}</Button>
 		{/each}
 	{/snippet}
-	{#snippet children(popover: PopoverState<Person>)}
+	{#snippet children(popover: PopoverApi<Person>)}
 		<strong>{popover.payload?.name}</strong>
 		<p>{popover.payload?.role}</p>
 	{/snippet}
@@ -476,20 +485,23 @@ A list of rows needs one Popover, not one per row. \`popover.triggerFor(() => ro
 
 ## State Management
 
-The Popover component uses a \`PopoverState\` instance that is passed to all slot snippets. This state object provides:
+Every slot snippet (\`trigger\`, \`children\`), \`onAfterOpen\` and \`onAfterClose\` receive a \`PopoverApi\` (\`import type { PopoverApi } from 'entasis/popover'\`). It is a narrow handle: the class behind it stays internal, so its layers, focus scope and hover tracking can change without breaking you. \`PopoverState\` is a deprecated alias of \`PopoverApi\`, kept for one minor. It provides:
 
-- **id**: string - Popover identifier
-- **size**: Size - Current popover size
-- **position**: Placement - Current popover position
-- **offset**: number - Current offset value
+- **id**: string - Popover identifier, which the open trigger's \`aria-controls\` points at
+- **isOpen**: boolean - Whether the popover is open
+- **status**: 'closed' | 'entering' | 'open' | 'exiting' - Where the panel is in its open/close lifecycle
 - **placement**: { side, align, anchorHidden } | null - Where the floating panel was last placed (the values of \`data-side\`, \`data-align\` and \`data-anchor-hidden\`); \`null\` until it is placed and once it unmounts
-- **open(details?)**, **close(details?)**, **toggle(details?)** - Request a change through \`onOpenChange\`. Each accepts the DOM event (\`onclick={popover.toggle}\`) or partial details (\`{ reason, event, trigger }\`); called while a trigger press dispatches, the change reports \`reason: 'trigger-press'\` and that trigger, otherwise \`'imperative-action'\`. \`toggle\` on the trigger of a hover-opened popover pins it open; on another trigger of an open popover it moves the panel there
+- **open(details?)**, **close(details?)**, **toggle(details?)** - Request a change through \`onOpenChange\`. Each accepts the DOM event (\`onclick={popover.toggle}\`) or partial details (\`{ reason, event, trigger }\`); called while a trigger press dispatches, the change reports \`reason: 'trigger-press'\` and that trigger, otherwise \`'imperative-action'\`. \`close\` returns \`false\` when the change was cancelled. \`toggle\` on the trigger of a hover-opened popover pins it open; on another trigger of an open popover it moves the panel there
 - **setOpen(open, details?)**: boolean - The same request with an explicit state; returns \`false\` when \`onOpenChange\` cancelled it
 - **openReason**: 'hover' | 'press' | 'keyboard' | 'programmatic' | null - How the open popover was opened (\`programmatic\` covers \`open()\` from code, the \`open\` prop and \`defaultOpen\`)
 - **activeTrigger**: HTMLElement | null - The trigger that opened it: the panel anchors to it and focus returns to it
-- **lifecycle.status**: 'closed' | 'entering' | 'open' | 'exiting' - Where the panel is in its open/close lifecycle
+- **triggerProps**: { haspopup, expanded, controls } - The trigger state in the library's semantic vocabulary, to spread on a Button; \`trigger\` and \`reference\` already write it as ARIA attributes
+- **payload**: Payload | undefined - The data of the trigger the panel is anchored to (see \`triggerFor\`)
 - **trigger**: attachment that makes any element the trigger (\`{@attach popover.trigger}\`): \`reference\` plus a click toggle (when \`openOnClick\`), and on a non-control \`role="button"\`, \`tabindex="0"\` and Enter/Space activation. The element's own handler runs first: when it calls \`event.preventDefault()\`, or \`open\`, \`close\`, \`toggle\` or \`setOpen\` during the click, the default toggle stands down, so a kept \`onclick={popover.toggle}\` does not toggle twice. Several elements may carry it: the one pressed opens the popover and anchors it
+- **triggerFor(() => payload)**: \`trigger\` plus a payload getter, read back as \`payload\` while that trigger anchors the panel
 - **reference**: attachment for a custom trigger element (\`{@attach popover.reference}\`); anchors the panel to it and keeps its \`aria-haspopup\`, \`aria-expanded\`, and \`aria-controls\` in sync, leaving clicks and keyboard to the element
+
+\`usePopoverContext()\` returns the enclosing popover's \`PopoverApi\`, or \`null\` outside one.
 
 ## Accessibility
 
@@ -509,6 +521,7 @@ The Popover component uses a \`PopoverState\` instance that is passed to all slo
 - Automatically adjusts position to stay in viewport: flips, then shifts 20px inside the visual viewport, and places again once the visual viewport settles after an on-screen keyboard opens
 - Coordinates are rounded to the device pixel grid, and in right-to-left documents the panel stays beside its trigger with \`start\` alignment on the right
 - Multiple popovers can be stacked
+- A closed popover is cheap: its layer, focus scope, hover safe area, Tab bridge and scroll lock are built when it opens and released once its closing transition ends, so a page with many closed Selects, date inputs or row menus mounts without them. Only the trigger's listeners and ARIA attributes exist while it is closed
 - Scroll locking prevents background scroll (when enabled), except for a popover hovering opened and a touch-opened popover narrower than the viewport
 - Transitions animate based on position direction
 

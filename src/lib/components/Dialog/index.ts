@@ -1,5 +1,6 @@
 export { default as Dialog } from './Dialog.svelte';
 export type { DialogProps, DialogSnapPoint, DialogType } from './dialog.props.js';
+export type { DialogApi } from './dialog.api.js';
 export type { FocusOnClose } from '$lib/utils/useFocusScope.svelte.js';
 export {
 	dialogTheme,
@@ -8,3 +9,9 @@ export {
 	type DialogTheme,
 	type DialogThemeProps
 } from './dialog.theme.js';
+export {
+	dialogDataAttributes,
+	dialogCssVariables,
+	type DialogDataAttribute,
+	type DialogCssVariable
+} from './dialog.attributes.js';

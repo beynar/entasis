@@ -167,6 +167,27 @@ The component renders:
 - A content panel \`<div>\` (only when open, or while closed with \`keepMounted\` / \`hiddenUntilFound\`) holding the themed content \`<div>\`; it carries \`hidden\` or \`hidden="until-found"\` while closed
 - Styling hooks: \`data-open\` / \`data-closed\` on the root, trigger and content, \`data-disabled\`, and \`data-entering\` / \`data-exiting\` on the root and panel; the panel exposes \`--disclosure-panel-height\` while it animates
 
+## Styling hooks
+
+Every part carries the open state, so a \`data-open:\` variant styles it without reading component state.
+
+Attributes are presence attributes (set while the state holds, omitted otherwise) unless they carry a value.
+
+**Data attributes**
+- \`data-open\`: On the root, the trigger, the panel and the content: present while open.
+- \`data-closed\`: On the root, the trigger, the panel and the content: present while closed, including during the exit transition.
+- \`data-entering\`: On the root and the panel (\`variant="peek"\` has no separate panel): present while the opening animation plays.
+- \`data-exiting\`: On the root and the panel (\`variant="peek"\` has no separate panel): present while the closing animation plays.
+- \`data-disabled\`: On the root, the trigger, the panel and the content: present while \`disabled\`.
+- \`data-state\`: On the root, the trigger, the panel and the content: \`open\` or \`closed\` (kept for compatibility; prefer \`data-open\` / \`data-closed\`).
+- \`data-size\`: On the root: the resolved \`size\`.
+- \`data-variant\`: On the root: \`peek\` with \`variant="peek"\`.
+
+**CSS variables**
+- \`--disclosure-panel-height\`: On the panel: its measured height in px while it animates, \`auto\` once open and \`0px\` once closed.
+
+The typed maps \`collapsibleDataAttributes\` and \`collapsibleCssVariables\` (from \`entasis/collapsible\`) list each name with its meaning.
+
 ## Accessibility
 
 - **ARIA Attributes**:

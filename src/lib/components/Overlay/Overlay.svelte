@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { useOpenLifecycle } from '$lib/utils/openLifecycle.svelte.js';
+	import { openStateAttributes, transitionStatusAttributes } from '$lib/utils/stateAttributes.js';
 	import Button from '../Button/Button.svelte';
 	import Slot from '../Slot/Slot.svelte';
 	import type { OverlayProps } from './overlay.props.js';
@@ -40,7 +41,7 @@
 	const classes = $derived(useOverlayTheme(theme));
 	// CSS transitions animate the overlay: each open and close reports once its animations
 	// settle, an overlay open at creation included.
-	useOpenLifecycle({
+	const lifecycle = useOpenLifecycle({
 		isOpen: () => isOpen,
 		animated: () => ref,
 		onAfterOpen: () => onAfterOpen?.(),
@@ -51,7 +52,8 @@
 <div
 	bind:this={ref}
 	data-entasis-overlay
-	data-open={isOpen}
+	{...openStateAttributes(isOpen)}
+	{...transitionStatusAttributes(lifecycle.status)}
 	data-show-on={showOn}
 	data-position={position}
 	aria-hidden={!isOpen}
@@ -102,35 +104,33 @@
 	}
 
 	:global(:where(*:has(> [data-entasis-overlay]:first-child)):hover)
-		> [data-entasis-overlay][data-open='true'][data-show-on='hover'],
+		> [data-entasis-overlay][data-open][data-show-on='hover'],
 	:global(:where(*:has(> [data-entasis-overlay]:first-child)):focus-within)
-		> [data-entasis-overlay][data-open='true'][data-show-on='hover'],
+		> [data-entasis-overlay][data-open][data-show-on='hover'],
 	:global(:where(*:has(> [data-entasis-overlay]:first-child)):focus-within)
-		> [data-entasis-overlay][data-open='true'][data-show-on='focus'] {
+		> [data-entasis-overlay][data-open][data-show-on='focus'] {
 		opacity: 1;
 	}
 
 	:global(:where(*:has(> [data-entasis-overlay]:first-child)):hover)
-		> [data-entasis-overlay][data-open='true'][data-show-on='hover']
+		> [data-entasis-overlay][data-open][data-show-on='hover']
 		> [data-overlay-content],
 	:global(:where(*:has(> [data-entasis-overlay]:first-child)):focus-within)
-		> [data-entasis-overlay][data-open='true'][data-show-on='hover']
+		> [data-entasis-overlay][data-open][data-show-on='hover']
 		> [data-overlay-content],
 	:global(:where(*:has(> [data-entasis-overlay]:first-child)):focus-within)
-		> [data-entasis-overlay][data-open='true'][data-show-on='focus']
+		> [data-entasis-overlay][data-open][data-show-on='focus']
 		> [data-overlay-content] {
 		pointer-events: auto;
 		translate: 0;
 	}
 
 	@media (hover: none) {
-		:global([data-entasis-overlay][data-open='true'][data-show-on='hover']) {
+		:global([data-entasis-overlay][data-open][data-show-on='hover']) {
 			opacity: 1;
 		}
 
-		:global(
-			[data-entasis-overlay][data-open='true'][data-show-on='hover'] > [data-overlay-content]
-		) {
+		:global([data-entasis-overlay][data-open][data-show-on='hover'] > [data-overlay-content]) {
 			pointer-events: auto;
 			translate: 0;
 		}

@@ -23,7 +23,8 @@
 			value: 'normal',
 			options: ['normal', 'card']
 		},
-		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false }
 	]);
 </script>
 
@@ -51,6 +52,7 @@
 	size="${controls.value.size}"
 	mode="${controls.value.mode}"
 	disabled={${controls.value.disabled}}
+	readOnly={${controls.value.readOnly}}
 	label="Email"
 	description="Receive updates by email"
 	bind:value={email}
@@ -61,6 +63,7 @@
 				size={controls.value.size}
 				mode={controls.value.mode}
 				disabled={controls.value.disabled}
+				readOnly={controls.value.readOnly}
 				label="Email"
 				description="Receive updates by email"
 				bind:value={email}

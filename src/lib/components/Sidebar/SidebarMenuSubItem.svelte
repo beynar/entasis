@@ -7,6 +7,8 @@
 		SidebarMenuSubEntry,
 		SidebarSize
 	} from './sidebar.props.js';
+	import { useDirection } from '$lib/utils/useDirection.svelte.js';
+	import { sidebarInwardPhysicalSide, sidebarTooltip } from './sidebar-position.js';
 	import SidebarAction from './SidebarAction.svelte';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import { useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
@@ -39,6 +41,11 @@
 	// The label is always visible on a submenu row, so the tooltip is extra information: shown
 	// whenever one is set, never on mobile, where hover does not exist.
 	const tooltipContent = $derived(sub.tooltip && !api.isMobile ? sub.tooltip : undefined);
+	let itemRef = $state<HTMLLIElement | null>(null);
+	const direction = useDirection(() => itemRef);
+	// Toward the page, whichever edge the sidebar sits on and whichever way the text reads, read
+	// when the tooltip opens so a runtime `dir` change is followed.
+	const tooltipPosition = () => sidebarInwardPhysicalSide(api.side, direction());
 	const buttonClass = $derived(
 		classes.subButton({
 			size: subSize,
@@ -80,6 +87,7 @@
 {/snippet}
 
 <li
+	bind:this={itemRef}
 	data-slot="sidebar-menu-sub-item"
 	data-sidebar="menu-sub-item"
 	class="group/menu-sub-item relative"
@@ -98,7 +106,9 @@
 			aria-disabled={sub.disabled || undefined}
 			tabindex={sub.disabled ? -1 : undefined}
 			class={buttonClass}
-			{@attach tooltipContent ? tooltip({ content: tooltipContent, position: 'right' }) : undefined}
+			{@attach tooltipContent
+				? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
+				: undefined}
 			onclick={handleClick}
 		>
 			{@render entryContent()}
@@ -114,7 +124,9 @@
 			data-active-variant={activeVariant}
 			disabled={sub.disabled || undefined}
 			class={buttonClass}
-			{@attach tooltipContent ? tooltip({ content: tooltipContent, position: 'right' }) : undefined}
+			{@attach tooltipContent
+				? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
+				: undefined}
 			onclick={handleClick}
 		>
 			{@render entryContent()}

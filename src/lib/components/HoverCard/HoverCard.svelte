@@ -11,7 +11,9 @@
 	import type { HoverCardProps, HoverCardTrigger } from './hoverCard.props.js';
 	import { useHoverCardMotion, useHoverCardTheme } from './hoverCard.theme.js';
 	import { useTheme } from '../Theme/theme.state.svelte.js';
-	import type { PopoverState } from '../Popover/popover.state.svelte.js';
+	import { popoverInternals, type PopoverState } from '../Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '../Popover/popover.api.js';
+	import { presence } from '$lib/utils/stateAttributes.js';
 
 	let {
 		id: customId,
@@ -76,8 +78,9 @@
 	// The popover behind this card, for the cards opened from inside it (see `hasChildOpen`).
 	let cardPopover = $state.raw<PopoverState | null>(null);
 	const trackPopover =
-		(popover: PopoverState): Attachment =>
+		(api: PopoverApi): Attachment =>
 		() => {
+			const popover = popoverInternals(api);
 			cardPopover = popover;
 			return () => {
 				if (cardPopover === popover) cardPopover = null;
@@ -247,6 +250,7 @@
 				type="button"
 				class={classes.trigger({ disabled, className: triggerClass })}
 				data-state={isOpen ? 'open' : 'closed'}
+				data-disabled={presence(disabled)}
 				aria-haspopup="dialog"
 				aria-expanded={isOpen}
 				aria-controls={id}
@@ -267,6 +271,7 @@
 				{@attach trackPopover(anchor)}
 				class={classes.trigger({ disabled, wrap, className: triggerClass })}
 				data-state={isOpen ? 'open' : 'closed'}
+				data-disabled={presence(disabled)}
 				role="presentation"
 				bind:this={triggerElement}
 				onpointerenter={handlePointerEnter}

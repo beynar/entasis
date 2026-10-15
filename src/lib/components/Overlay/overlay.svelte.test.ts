@@ -42,7 +42,9 @@ describe('Overlay disclosure state', () => {
 			}
 		});
 
-		expect(container.querySelector('[data-entasis-overlay]')).toHaveAttribute('data-open', 'false');
+		const overlay = container.querySelector('[data-entasis-overlay]');
+		expect(overlay).not.toHaveAttribute('data-open');
+		expect(overlay).toHaveAttribute('data-closed', '');
 	});
 
 	test('keeps external state changes silent and reports settled lifecycle', async () => {

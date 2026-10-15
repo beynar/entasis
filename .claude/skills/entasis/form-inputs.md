@@ -1,6 +1,14 @@
 # Entasis Form Inputs Reference
 
-All form inputs extend the **Field** component, inheriting: `label`, `description`, `error`, `required`, `disabled`, `size` (`'small' | 'normal' | 'large'`), `density`, `prefix`, `suffix`, `class`, `theme`. Do not repeat these in each component usage.
+All form inputs extend the **Field** component, inheriting: `label`, `description`, `error`, `required`, `disabled`, `readOnly`, `messages`, `size` (`'small' | 'normal' | 'large'`), `density`, `prefix`, `suffix`, `class`, `theme`. Do not repeat these in each component usage.
+
+**Field validation (every input):**
+
+- `onValidate: (value) => FieldValidatorResult` -- return a message, a list of messages or `true` to mark the value invalid, and `false`/`null`/`undefined` to accept it. It may return a **promise**: while it is pending the field is neither valid nor invalid (`field.validating` is `true`), submit waits for it, a result for an older value is dropped, and a rejected promise marks the field invalid with the generic message.
+- `validationMode: 'submit' | 'blur' | 'change'` -- when the field validates by itself. `'submit'` (default) waits for the first submit attempt, then re-validates each edit; a field that shows an error always re-validates as it is edited. Overrides the Form's `validationMode`.
+- `validationDebounce: number` -- milliseconds an edit waits before the validation it triggers, so an async `onValidate` is not called on every keystroke. Submit and blur validate at once.
+- `disabled` fields skip validation and are left out of Form values (as in a native form); `readOnly` fields stay focusable, validate and submit, but refuse edits.
+- **FieldState** (the `snippet` argument of a Form `type: 'field'` entry, and what custom controls compose): `value`, `setValue(value)` for accepted edits (refused while disabled or read-only), `validate()` (synchronous), `validateAsync()` (waits for a pending async validator), `settle()` (resolves once no async validation is pending), `validating`, `isValid`, `dirty`, `touched`, `reset(value?)`, `focusControl()`.
 
 Import pattern: `import { ComponentName } from 'entasis/kebab-case-name'`
 Global theme setter: `import { setComponentNameTheme } from 'entasis/kebab-case-name'` (shape: `{ slot: { base, variantName: { value: classes } } }`, see theming.md)
@@ -107,7 +115,7 @@ A text input with `role="spinbutton"` that parses and formats by locale (`1 234,
 
 `import { RatingInput } from 'entasis/rating-input'`
 
-**Unique props:** `value: number | null` (bindable, default `null`), `max: number` (default 5, the star count and maximum value), `halfSteps: boolean` (default false, snaps to 0.5 increments), `readonly: boolean` (default false), `clearable: boolean` (default true, click the current value to clear), `dir` (`'ltr' | 'rtl'`, inherits ambient direction when omitted), `color` (default `'warning'`, the gold star fill), `star` (snippet, custom icon -- see Rating in display.md)
+**Unique props:** `value: number | null` (bindable, default `null`), `max: number` (default 5, the star count and maximum value), `halfSteps: boolean` (default false, snaps to 0.5 increments), `readOnly: boolean` (default false; `readonly` is a deprecated alias kept for one minor), `clearable: boolean` (default true, click the current value to clear), `dir` (`'ltr' | 'rtl'`, inherits ambient direction when omitted), `color` (default `'warning'`, the gold star fill), `star` (snippet, custom icon -- see Rating in display.md)
 
 Builds on the `Rating` display component (display.md) -- same star rendering and theme. `role="slider"`: ArrowRight/Up increase, ArrowLeft/Down decrease by the step (0.5 if `halfSteps`, else 1), Home clears, End sets `max`. In RTL the stars render and fill right-to-left, but the numeric value never flips (Right always increases).
 
@@ -272,13 +280,22 @@ The square and both sliders support click-to-jump and pointer drag; the area thu
 
 `import { Select } from 'entasis/select'`
 
-**Unique props:** `value: string` (bindable), `items: Array<{ value: string, label: string, disabled? } | { label?, items: SelectOption[] }>` (flat options or labelled groups), `placeholder`, `separators: boolean`, `alignItemWithTrigger: boolean` (default `true`)
+**Unique props:** `value: string | null` (bindable), `defaultValue`, `onValueChange`, `items: Array<{ value: string, label: string, disabled? } | { label?, items: SelectOption[] }>` (flat options or labelled groups), `placeholder`, `separators: boolean`, `alignItemWithTrigger: boolean` (default `true`)
+
+- `multiple: boolean` -- `value` is a `string[]` in item order, the list stays open while options toggle, and `formatValue: (options) => string` sets the trigger text (default `Apple, Banana +2`)
+- `clearable: boolean` -- a clear button sets `null` (or `[]`) and returns focus to the trigger
+- `open` (bindable) / `defaultOpen` / `onOpenChange(open, details)`, `onAfterOpen`, `onAfterClose`
+- `autocomplete` (an autofill token such as `country`; a hidden input the browser fills selects the matching option), `id` (for an external `<label for>`), `triggerAttrs`, `readOnly`
 
 A custom select-only combobox (not a native `<select>`) with keyboard navigation and type-ahead.
+A named Select submits through hidden inputs beside its Field (one per value when `multiple`);
+a disabled one submits nothing, a read-only one still submits.
 Like a native select, it opens over the trigger with the selected option (or the first, when
 nothing is selected) on the value and its text lined up with the value's; a list taller than the
 viewport is capped and pre-scrolled to keep the option there, and page scrolling is blocked while
-it is open. `alignItemWithTrigger={false}` opens a dropdown below the trigger instead.
+it is open. `alignItemWithTrigger={false}` opens a dropdown below the trigger instead, and a
+touch open always does, leaving page scroll alone. Clicking the label focuses the trigger without
+opening the list.
 
 **Theme parts:** `input`, `inputContainer` (variants: `size`, `disabled`)
 
@@ -310,15 +327,20 @@ Searchable dropdown with async support.
 
 **Unique props:**
 
-- `items`: `ComboboxOption[]` or `(searchValue?) => MaybePromise<ComboboxOption[]>` (required)
+- `items`: `ComboboxOption[]`, `{ label?, items }` groups, or `(searchValue, { signal }) => MaybePromise<items>` (required; the signal aborts when newer text replaces the request)
 - `value: string | null` (bindable), `searchValue: string` (bindable), `loading: boolean` (bindable)
-- `showAllOnFocus`, `getValueOption: (value) => MaybePromise<ComboboxOption>` (async pre-selected)
+- `openOnFocus` (`showAllOnFocus` is its deprecated alias), `getValueOption: (value) => MaybePromise<ComboboxOption>` (async pre-selected)
+- `open` (bindable) / `defaultOpen` / `onOpenChange(open, details)`, `onAfterOpen`, `onAfterClose`
+- `filter`, `limit`, `autoHighlight`, `loop`, `onHighlightChange`, `separators`, `item` snippet, `density`, `readOnly`
 - `placeholder`, `loadingText`, `noOptionsText`
 - `onValueChange: ({ value, option }) => void`, `onValidate`
 - `prefix`: default magnifying glass, set `false` to hide
 - `errors: string[] | boolean` (bindable), `focused: boolean` (bindable)
 
-Option format: `{ value: string, label: string, description?: string }`. Debounced 100ms.
+Option format: `{ value: string, label: string, description?: string }`. Static lists filter at
+once, case- and accent-insensitively in the I18n locale; async sources are debounced 100ms.
+Escape closes the list and keeps focus in the input, and a second Escape clears the text. A
+hidden input beside the search box submits the selected value under `name`.
 
 **Theme parts:** `input`, `inputContainer`, `loading`, `error`, `noOptions`
 
@@ -378,15 +400,15 @@ Multi-tag input: free text, or restricted to a searchable option list (like Comb
 **Unique props:**
 
 - `value: string[] | null` (bindable, default `null`), `searchValue: string` (bindable), `loading: boolean` (bindable)
-- `items`: `ComboboxOption[]` or `(searchValue?) => MaybePromise<ComboboxOption[]>` (optional) -- when provided, behaves like Combobox (debounced 100ms, dropdown, async/static, loading/error/empty states)
+- `items`: `ComboboxOption[]` or `(searchValue?) => MaybePromise<ComboboxOption[]>` (optional) -- when provided, behaves like Combobox (static lists filter at once, async sources are debounced 100ms; dropdown, loading/error/empty states)
 - `customTags: boolean` (default `false`) -- with `items`, also allow Enter to add free text not in the list
 - `maxTags: number` -- once reached, further adds are ignored
-- `showAllOnFocus`, `getValueOption: (value) => MaybePromise<ComboboxOption>` (resolve labels for initial values)
+- `openOnFocus` (`showAllOnFocus` is its deprecated alias), `getValueOption: (value) => MaybePromise<ComboboxOption>` (resolve labels for initial values)
 - `placeholder`, `loadingText`, `noOptionsText`
 - `onValueChange: (value: string[]) => void`, `onValidate`
 - `errors: string[] | boolean` (bindable), `focused: boolean` (bindable)
 
-Option format: `{ value: string, label: string, description?: string }` (reused from Combobox). Without `items` it is a plain free-text tag input; with `items` it is restricted to the list (unless `customTags`). Duplicate tags are never added. Keyboard: Enter (add current search), Backspace on empty input (remove last tag), Arrow keys / Home / End / Enter to navigate the dropdown, Escape blurs.
+Option format: `{ value: string, label: string, description?: string }` (reused from Combobox). Without `items` it is a plain free-text tag input; with `items` it is restricted to the list (unless `customTags`). Duplicate tags are never added. Keyboard: Enter (add current search), Backspace on empty input (remove last tag), Arrow keys / Home / End / Enter to navigate the dropdown. Escape closes the list and keeps focus in the input; a second Escape clears the typed text. Removable tags form a toolbar with one tab stop: ArrowLeft at the start of the text steps into them, the arrows move between them, and Backspace or Delete removes the focused tag. With `customTags`, Enter adds the typed text rather than the first match.
 
 **Theme parts:** `input`, `inputContainer` (flex-wrap layout), `tag` (animated wrapper), `loading`, `error`, `noOptions`
 
@@ -402,7 +424,7 @@ Option format: `{ value: string, label: string, description?: string }` (reused 
 </script>
 
 <TagsInput placeholder="Add tags..." bind:value={tags} />
-<TagsInput items={technologies} showAllOnFocus customTags bind:value={tags} />
+<TagsInput items={technologies} openOnFocus customTags bind:value={tags} />
 ```
 
 ---
@@ -632,6 +654,10 @@ Declarative form from config. Manages state, validation, layout.
 - `inputs: FormInputs` (required) -- `{ fieldName: { type, ...fieldProps } }`
 - `value` (bindable), `defaultValue`, `onValueChange`, `form: FormState` (bindable), `onSubmit: (value) => void | Promise`
 - `actions: FormAction[]` (buttons rendered after the fields), `variant: 'plain' | 'sectioned' | 'card'`, `layout: 'vertical' | 'horizontal'`, `size`, `density`
+- `disabled` -- disables every field (for example `disabled={form.loading}`); disabled fields skip validation and are left out of the submitted value
+- `readOnly` -- makes every field read-only: focusable, validated and submitted, but not editable
+- `validationMode: 'submit' | 'blur' | 'change'` (default `'submit'`) and `validationDebounce: number` -- defaults for every field; a field's own values win
+- `errors: FormErrors` -- errors from outside the form (a server response such as a SvelteKit `ActionData`), keyed by field name; they show under their fields, survive validation, do not block a submit and clear when that field's value next changes
 
 **Slots:** `children`, `header`, `title`, `description`, `footer` -- all receive the `FormState` instance.
 
@@ -667,7 +693,13 @@ is doing. Size the form's host, not the browser window, to get a particular colu
 `@`-prefixed container variants (never `sm:` / `md:` / `lg:`) in Form, Field or Ask theme
 overrides.
 
-**FormState:** `value`, `loading`, `hasError`, `fields`, `validate()`, `submit()`
+**FormState:** `value`, `loading`, `hasError`, `fields`, `dirty`, `touched`, `validating`, `submitCount`, and:
+
+- `validate({ reveal? })` -- synchronous; returns the value or `false` after revealing the first invalid field. It does **not** wait for async validators.
+- `validateAsync({ reveal? })` -- like `validate`, and waits for every async validator to settle. Pass `reveal: false` to check quietly (no scroll, no focus, no submit attempt).
+- `validateField(name)` -- validates one field now; a field whose async validator is still pending reads as invalid.
+- `submit()` -- waits for pending async validators (the form is `loading` meanwhile), then calls `onSubmit` with the validated value.
+- `setErrors(errors)` -- the imperative form of the `errors` prop; `reset(value?)` -- restores initial values as the new baseline.
 
 **Theme parts:** `root`, `formHeader`, `formTitle`, `formDescription`, `formGroup`, `formGroupLabel`, `formGroupDescription`, `formGroupFields`, `formItem`, `formActions`, `formAction`, `formCustom`, `formFooter`
 

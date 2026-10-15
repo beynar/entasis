@@ -74,15 +74,16 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 - **iconColor**: Colors - Role tint for the leading icon, applied through \`data-color\`.
 - **iconVariant**: 'bare' | 'tile' - Leading icon treatment. \`tile\` paints a rounded square (\`bg-color-muted text-color-muted-readable\`) around the glyph, so per-project colour chips come from the role scale instead of hand-built markup.
 - **href**: string - Render as an anchor. Mutually exclusive with menu.
-- **onclick**: (event: MouseEvent) => void - Native click handler for button or anchor rows. Mutually exclusive with menu.
+- **onclick**: (event: MouseEvent) => void - Native click handler for button or anchor rows. Mutually exclusive with menu. On a row with \`items\` and no \`href\`, it runs before the submenu toggles, inline or in the collapsed flyout; \`event.preventDefault()\` skips the toggle.
 - **isActive**: boolean - Adds active styling and \`aria-current="page"\`.
 - **disabled**: boolean - Disables button rows and marks anchor rows disabled.
 - **badge**: string | number - Trailing count/status, hidden in icon mode.
 - **tooltip**: string - Entasis Tooltip content in icon mode. Defaults to label.
-- **items**: SidebarMenuSubEntry[] - Inline nested menu.
+- **items**: SidebarMenuSubEntry[] - Inline nested menu. Collapsed to icons on desktop, a row with \`items\` and no \`href\`, \`view\` or \`menu\` opens them in a flyout of links instead.
 - **collapsible**: boolean - Set false for an always-open submenu.
 - **defaultOpen**: boolean - Initial nested menu state.
 - **menu**: MenuItem[] - Popup menu opened from the full row. Mutually exclusive with href/onclick.
+- **menuSide** / **menuAlign**: SidebarMenuSide / 'start' | 'center' | 'end' - Where that menu opens. \`menuSide\` takes a physical side (\`top\`, \`right\`, \`bottom\`, \`left\`) or a logical one (\`inline-start\`, \`inline-end\`, mirrored in right-to-left). Left out, a desktop menu opens toward the page (\`inline-end\` of a left sidebar, \`inline-start\` of a right one, so it follows the reading direction) aligned to the row's start, and a mobile one below the row aligned to its end. The same pair sits on action descriptors and on \`headerButton\` / \`footerButton\`.
 - **view**: string - Key of the \`views\` entry the row opens, sliding it in; the row shows a trailing chevron. Mutually exclusive with href, menu and items.
 - **action**: SidebarMenuActionDescriptor | Snippet<[SidebarApi]> - Hover/focus trailing action.
 
@@ -98,7 +99,7 @@ of them renders exactly as a plain one.
 - **iconColor**: Colors - Role tint for the leading icon, applied through \`data-color\`.
 - **iconVariant**: 'bare' | 'tile' - \`tile\` paints the same tinted rounded square as a top-level row.
 - **badge**: string | number - Trailing count or status; the label truncates before it.
-- **tooltip**: string - Tooltip text. Submenus never show in icon-collapsed mode, so a sub row shows its tooltip whenever one is set (never on mobile).
+- **tooltip**: string - Tooltip text. The label is always visible on an inline sub row, so the tooltip is extra information: shown whenever one is set, never on mobile. The collapsed row's flyout lists only each entry's label, icon, \`href\` or \`onclick\`, and \`isActive\`/\`disabled\` state: it shows no tooltip, \`badge\` or \`action\`.
 - **class**: string - Classes applied to the row button.
 - **action**: SidebarMenuActionDescriptor | Snippet<[SidebarApi]> - Trailing action pinned to the row's end (\`data-sidebar="menu-sub-action"\`), drawn by the \`subAction\` theme part: hidden until the row is hovered or focused from \`md\` up, kept visible while its menu is open, always visible below \`md\`. The label truncates before it.
 
@@ -237,8 +238,9 @@ Use for \`headerButton\`, \`footerButton\`, or direct \`<SidebarMenuButton />\` 
 
 ## Motion
 
-- **motion** theme slot: the y-axis slide shared by collapsible groups, inline submenus, and
-  tree branches. Takes \`in\` / \`out\` slide params plus a \`duration\` / \`easing\` motion token.
+- **motion** theme slot: the height animation shared by collapsible groups, inline submenus, and
+  tree branches. Its \`in\` / \`out\` \`duration\`, \`delay\` and \`easing\` (motion tokens) time the
+  open and the close; the panel animates its height, block padding, borders and margins.
 - Ladder: \`<Theme components={{ sidebar: { motion } }}>\` → \`setSidebarTheme({ motion })\` →
   \`theme.motion\`. Reduced motion collapses it to 0.
 - The \`view\` variant (\`part: 'view'\`) is the pager between views: \`in.x\` / \`out.x\` is how far a view travels (default \`'100%'\`: the two views slide side by side like pages) while it fades between \`opacity\` (default 0) and 1, at the \`slow\` duration on the \`enter\` easing. The back swipe moves the same layers the view change would, with the same travel and opacity. Reduced motion makes the switch instant while a swipe still follows the finger.
@@ -265,6 +267,38 @@ default verbatim, prefixes included.
 - **Row height.** A plain height beats the compound \`h-control-*\`: \`theme={{ menuButton: { base: 'h-11' } }}\`
 - **Bigger icons.** A prop, not a theme: \`iconSize="large"\`.
 
+## Styling hooks
+
+\`data-open\` on a disclosure toggle is a presence attribute (before 0.12.0 a submenu toggle carried \`data-open="true"\`); match it with \`[data-open]\` or \`data-open:\`.
+
+Attributes are presence attributes (set while the state holds, omitted otherwise) unless they carry a value.
+
+**Data attributes**
+- \`data-state\`: On the root: \`expanded\` or \`collapsed\`.
+- \`data-display-state\`: On the root: what is on screen, \`expanded\`, \`collapsed\` (the icon rail) or \`hidden\`.
+- \`data-collapsible\`: On the root: \`icon\` while collapsed to the icon rail, \`offcanvas\` while hidden, empty while expanded.
+- \`data-side\`: On the root, the panel and its rail and handles: \`left\` or \`right\`.
+- \`data-variant\`: On the root: the resolved \`variant\`.
+- \`data-size\`: On the root: the resolved \`size\`.
+- \`data-density\`: On the root: the resolved \`density\`.
+- \`data-peek\`: On the layout wrapper: \`true\` while a hover peek shows the collapsed panel at full width.
+- \`data-active\`: On a row: \`true\` while it is the current page (\`isActive\`).
+- \`data-active-variant\`: On a row: the resolved \`activeVariant\`.
+- \`data-open\`: On the toggle of a collapsible group, a submenu or a tree branch, and on its panel: present while it is open.
+- \`data-closed\`: On the toggle of a collapsible group, a submenu or a tree branch, and on its panel: present while it is closed, including during the exit transition.
+- \`data-entering\`: On a group, submenu or tree branch panel: present while its opening animation plays.
+- \`data-exiting\`: On a group, submenu or tree branch panel: present while its closing animation plays.
+- \`data-popup-open\`: On a row: present while one of its popups is open, its \`menu\`, its flyout on the collapsed rail, or its tooltip (every row on the collapsed rail, and every row with \`tooltips="always"\`). Match \`[aria-expanded="true"]\` to style an open menu or flyout only.
+- \`data-sidebar\`: The part (\`sidebar\`, \`menu-button\`, \`menu-sub\`, \`group-content\`, \`rail\`, ...).
+
+**CSS variables**
+- \`--sidebar-width\`: On the root: the expanded panel width.
+- \`--sidebar-width-icon\`: On the root: the width of the collapsed icon rail.
+- \`--sidebar-width-mobile\`: On the root: the width of the mobile drawer.
+- \`--disclosure-panel-height\`: On a group, submenu or tree branch panel: its measured height in px while it animates, \`auto\` once open and \`0px\` once closed.
+
+The typed maps \`sidebarDataAttributes\` and \`sidebarCssVariables\` (from \`entasis/sidebar\`) list each name with its meaning.
+
 ## Accessibility
 
 - The body navigation renders inside a named \`<nav>\` landmark (\`data-sidebar="nav"\`), so assistive tech can jump straight to it and tell it apart from the activity bar's own landmark.
@@ -275,8 +309,9 @@ default verbatim, prefixes included.
 - Icon-collapsed rows keep their labels mounted and visually fade them, preserving accessible names and stable icon geometry.
 - Search, group controls, actions, and nested rows become inert before collapse can remove or hide them; focus returns to the owning visible row.
 - A submenu row's \`action\` is a sibling of its link, so Tab reaches the action button right after the row; its trigger takes \`label\` as its accessible name, and Escape closes its menu and returns focus to the trigger. It is \`inert\` and \`aria-hidden\` whenever the Sidebar is collapsed to icons.
-- Nested groups, tree branches, and inline submenus use reversible height transitions for open, close, and sidebar-collapse changes.
-- Tree roots use menu-row styling and nested tree nodes use submenu-row styling. In desktop icon mode, a root folder is a disclosure button (\`aria-expanded\`, \`aria-controls\`) that opens a popover holding a named \`<nav>\` of links: nested folders are named sub-lists, a row with an \`onclick\` and no \`href\` is a button, and a press on any row closes the flyout (the row's own handler runs first, and \`preventDefault()\` keeps it open). There is no \`role="menu"\`; root leaves retain direct navigation and tooltips.
+- Collapsible groups, tree branches, and inline submenus are disclosure panels (the shared \`disclosurePanel\` Collapsible and Accordion use): the toggle sets \`aria-expanded\` and, while the panel is rendered, \`aria-controls\` to its id; the panel carries \`data-open\` / \`data-closed\` and \`data-entering\` / \`data-exiting\`, exposes \`--disclosure-panel-height\` while it animates, and stays \`inert\` while it closes. Open, close and sidebar-collapse changes animate the panel's height and reverse from where they are when interrupted; the \`motion\` slot's duration, delay and easing time them.
+- Tree roots use menu-row styling and nested tree nodes use submenu-row styling. In desktop icon mode, a root folder, and a menu row with \`items\` and no \`href\`, \`view\` or \`menu\`, is a disclosure button (\`aria-expanded\`, \`aria-controls\`) that opens a flyout holding a named \`<nav>\` of links, with NavigationMenu's semantics: nested folders are named sub-lists, a row with an \`onclick\` and no \`href\` is a button, a disabled sub entry stays listed without a destination, and a press on any row closes the flyout (the row's own handler runs first, and \`preventDefault()\` keeps it open). Opening from the keyboard keeps focus on the row; Tab enters the flyout's links, Tab past the last one continues after the row and closes it, Shift+Tab from the first returns to the row, and Escape closes it and refocuses the row. There is no \`role="menu"\`; root leaves retain direct navigation and tooltips.
+- Row menus, flyouts and tooltips open toward the page: at the inline end of a \`left\` sidebar and the inline start of a \`right\` one, the side the layout row puts the page on in either reading direction (a \`left\` sidebar is the row's start, on the right in right-to-left). An explicit \`menuSide\` wins.
 - When \`rail\` and \`resizable\` are both enabled, one edge control owns click-to-toggle, drag resize, and keyboard resize without overlapping hitboxes.
 - Hidden offcanvas sidebars keep that combined edge control while temporarily revealed. Resizing does not pin the sidebar open; leaving the panel, trigger, and handle tolerance re-hides it without discarding the configured width.
 - Both peeks (edge reveal and \`expandOnHover\`) stay open while focus is inside the panel or while an overlay opened from inside it is open, including nested submenus. They release about 120ms after the pointer, focus, and every such overlay are gone.

@@ -10,7 +10,7 @@
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import Popover from '../../Popover/Popover.svelte';
-	import type { PopoverState } from '../../Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '../../Popover/popover.api.js';
 	import ComboboxPopup from '../Combobox/ComboboxPopup.svelte';
 	import { ComboboxController } from '../Combobox/combobox.state.svelte.js';
 	import { flattenItems } from '../Combobox/combobox.items.js';
@@ -342,7 +342,7 @@
 		{i18n}
 		isSelected={() => false}
 	/>
-	{#snippet trigger(popover: PopoverState)}
+	{#snippet trigger(popover: PopoverApi)}
 		<Field
 			{density}
 			{field}

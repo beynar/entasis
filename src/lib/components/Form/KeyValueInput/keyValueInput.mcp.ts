@@ -43,6 +43,7 @@ An editable list of key/value string pairs. Each row renders a key text input, a
 
 - **required**: \`boolean\` (default: \`false\`)
 - **disabled**: \`boolean\`
+- **readOnly**: \`boolean\` - Rows stay focusable and readable but cannot be edited, added or removed; the value still validates and submits
 - **size**: \`'small' | 'normal' | 'large'\` (default: \`'normal'\`)
 - **name**: \`string\`
 - **errors**: \`string[] | boolean\` (bindable)

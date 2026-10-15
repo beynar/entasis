@@ -1,7 +1,7 @@
 import type { SpacingStep } from '$lib/tailwind/spacing.js';
 import type { Snippet } from 'svelte';
 import type { Slot, WithSlot } from '../Slot/slot.js';
-import type { DialogState } from './dialog.state.svelte.js';
+import type { DialogApi } from './dialog.api.js';
 import type { ResponsiveProps } from '../Theme/theme.js';
 import type { Sizes } from '$lib/types/theme.js';
 import type { ButtonProps } from '../Button/index.js';
@@ -55,9 +55,9 @@ export type DialogProps = WithSlot<
 		 */
 		onOpenChange?: OpenChangeHandler;
 		/** Called once per open, after the open transition finishes (right away when none plays). */
-		onAfterOpen?: (payload: DialogState) => void;
+		onAfterOpen?: (payload: DialogApi) => void;
 		/** Called once per close, after the close transition finishes. */
-		onAfterClose?: (payload: DialogState) => void;
+		onAfterClose?: (payload: DialogApi) => void;
 		/** Content max-width for modal and alert types; supports responsive values. */
 		size?: ResponsiveProps<Sizes>;
 		/** Where a dialog taller than the viewport scrolls: inside the card (`inner`, default) or the viewport (`outer`). */
@@ -99,8 +99,8 @@ export type DialogProps = WithSlot<
 			snapPoint: DialogSnapPoint;
 			details: OpenChangeDetails;
 		}) => void;
-		/** Snippet for main dialog body content; receives the dialog state instance. */
-		children?: Snippet<[DialogState]>;
+		/** Snippet for main dialog body content; receives the dialog (`DialogApi`). */
+		children?: Snippet<[DialogApi]>;
 		/**
 		 * Snippet or button props that render the control used to open the dialog. The built-in
 		 * button carries `aria-haspopup="dialog"`, `aria-expanded` and `aria-controls`, and its
@@ -108,7 +108,7 @@ export type DialogProps = WithSlot<
 		 * snippet trigger gets the same contract with `{@attach dialog.trigger}`; focus returns to
 		 * the trigger when the dialog closes.
 		 */
-		trigger?: Snippet<[DialogState]> | (ButtonProps & { content?: string });
+		trigger?: Snippet<[DialogApi]> | (ButtonProps & { content?: string });
 		/** When true, shows a close button and allows Escape to close the dialog. */
 		closable?: boolean;
 		/** When true, pressing outside the dialog panel closes the topmost open dialog. Defaults to

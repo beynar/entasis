@@ -8,6 +8,7 @@
 	import { portal } from '$lib/attachments/portal.js';
 	import { useScrollLock } from '$lib/utils/useScrollLock.svelte.js';
 	import { applyDialogIndent } from './dialog.indent.js';
+	import { applyStateAttributes, openStateAttributes } from '$lib/utils/stateAttributes.js';
 
 	const theme = useTheme();
 	const classes = $derived(useDialogTheme());
@@ -42,6 +43,13 @@
 
 	useScrollLock({ isActive: () => openDialogs.length > 0 });
 
+	// `data-open` / `data-closed` follow the stack from here: the template's own attributes freeze
+	// while the backdrop's fade-out plays (Svelte pauses an outroing block's effects).
+	let backdrop = $state<HTMLElement | null>(null);
+	$effect(() => {
+		if (backdrop) applyStateAttributes(backdrop, openStateAttributes(isVisible));
+	});
+
 	// `data-dialog-open` and `--dialog-depth` on <html>, for pages that scale back behind a sheet.
 	$effect(() => {
 		const depth = openDialogs.length;
@@ -58,7 +66,9 @@
 		aria-hidden="true"
 	>
 		<div
+			bind:this={backdrop}
 			class={classes.backdrop()}
+			{...openStateAttributes(isVisible)}
 			style:opacity={dragOpacity}
 			style:transition={top?.dragging
 				? 'none'

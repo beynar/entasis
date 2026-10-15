@@ -6,7 +6,7 @@
 	import { speakerLowIcon } from '../Icons/speakerLow.js';
 	import { speakerSlashIcon } from '../Icons/speakerSlash.js';
 	import Popover from '../Popover/Popover.svelte';
-	import type { PopoverState } from '../Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '../Popover/popover.api.js';
 	import { isMediaEffectivelyMuted } from './mediaVolume.js';
 	import type {
 		MediaVolumeControlButtonPayload,
@@ -94,7 +94,7 @@
 		onVolumeChange(nextVolume / 100);
 	}
 
-	function handleTriggerClick(popover: PopoverState) {
+	function handleTriggerClick(popover: PopoverApi) {
 		if (unmuteOnTrigger && isEffectivelyMuted) {
 			onToggleMuted();
 			popover.open();
@@ -115,7 +115,7 @@
 		};
 	}
 
-	function getTriggerPayload(popover: PopoverState): MediaVolumeControlTriggerPayload {
+	function getTriggerPayload(popover: PopoverApi): MediaVolumeControlTriggerPayload {
 		return {
 			...getTogglePayload(),
 			label: triggerLabel,

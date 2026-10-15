@@ -9,7 +9,7 @@ import { useScrollLock } from '$lib/utils/useScrollLock.svelte.js';
 import { useFocusScope } from '$lib/utils/useFocusScope.svelte.js';
 import { useTabBridge } from '$lib/utils/useTabBridge.svelte.js';
 import { composedContains, getDeepActiveElement, isTextField } from '$lib/utils/focus.js';
-import type { LayerHandle } from '$lib/utils/layers.svelte.js';
+import { provideLayer, useParentLayer, type LayerHandle } from '$lib/utils/layers.svelte.js';
 import type { Attachment } from 'svelte/attachments';
 import { useSafeArea } from '$lib/utils/safeArea.svelte.js';
 import { useHoverAction } from '$lib/utils/useHoverAction.svelte.js';
@@ -31,10 +31,18 @@ import {
 	type PopupTriggerProps
 } from '$lib/utils/trigger.js';
 import { useDirection } from '$lib/utils/useDirection.svelte.js';
-import { placementAttributes, popupSideAttributes } from '$lib/utils/stateAttributes.js';
+import {
+	applyStateAttributes,
+	openStateAttributes,
+	placementAttributes,
+	popupSideAttributes,
+	transitionStatusAttributes
+} from '$lib/utils/stateAttributes.js';
 import { usePopoverMotion, type PopoverThemeProps } from './popover.theme.js';
+import type { PopoverApi } from './popover.api.js';
 import {
 	applyDirectedOffset,
+	claimPopupOpen,
 	claimPopupSide,
 	createPanelPositioner,
 	directedMotion,
@@ -84,6 +92,7 @@ interface PopoverOptions<Payload = unknown> extends MakeRequired<
 		| 'closeOnFocusOut'
 		| 'arrow'
 	>,
+	| 'id'
 	| 'directedTransition'
 	| 'closeOnEscape'
 	| 'lockScroll'
@@ -135,10 +144,33 @@ const openReasonOf = (details: OpenChangeDetails): PopoverOpenReason => {
 /** How close to the viewport's width a touch-opened panel must be to lock page scroll, in px. */
 const TOUCH_LOCK_MARGIN = 20;
 
+/** The part of the safe area a popover's owners read: whether a point is in it, and a refresh. */
+export type PopoverSafeArea = Pick<ReturnType<typeof useSafeArea>, 'containsPoint' | 'updateAreas'>;
+
+/** A closed popover's safe area: it has none, so no point is inside it. */
+const CLOSED_SAFE_AREA: PopoverSafeArea = {
+	containsPoint: () => false,
+	updateAreas: () => {}
+};
+
+/** What an open popover builds and a closed one does not; see `PopoverState.openSession`. */
+interface PopoverSession {
+	readonly layer: LayerHandle;
+	readonly focusScope: ReturnType<typeof useFocusScope>;
+	readonly safeArea: ReturnType<typeof useSafeArea>;
+	readonly isTopLayer: boolean;
+	/** Makes a trigger part of the layer and an anchor of the safe area. */
+	addTrigger(node: HTMLElement): void;
+	removeTrigger(node: HTMLElement): void;
+}
+
 /** A press on a trigger, remembered while its event dispatches. */
 type TriggerPress = { node: HTMLElement; event: Event; reason: OpenChangeReason };
 
-export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload> {
+export class PopoverState<Payload = unknown>
+	extends PopoverOptionsBase<Payload>
+	implements PopoverApi<Payload>
+{
 	/** The trigger that opened the popover, while it is open; `null` for a programmatic open. */
 	activeTrigger = $state<HTMLElement | null>(null);
 	/** The most recently attached `reference` / `trigger` element. */
@@ -182,15 +214,20 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 	 * is scrolled out of view. `null` until the first placement lands and once the panel unmounts.
 	 */
 	placement = $state<PopoverPlacementState | null>(null);
-	/** `data-side`, `data-align` and `data-anchor-hidden` for the panel. */
-	panelAttributes = $derived(
-		placementAttributes(
+	/**
+	 * The panel's styling hooks: `data-open` / `data-closed`, `data-entering` / `data-exiting`,
+	 * `data-side`, `data-align` and `data-anchor-hidden` (see `popoverDataAttributes`).
+	 */
+	panelAttributes = $derived({
+		...openStateAttributes(this.isOpen),
+		...transitionStatusAttributes(this.status),
+		...placementAttributes(
 			this.placement
 				? { side: this.placement.side, align: this.placement.align ?? undefined }
 				: undefined,
 			{ anchorHidden: this.placement?.anchorHidden }
 		)
-	);
+	});
 	parent = getContext<PopoverState | null>('popover');
 	// Nested popovers join while they mount and leave when torn down; see `Registry`.
 	readonly #children = new Registry<PopoverState>();
@@ -204,42 +241,42 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 	 * Created in the constructor: it reads the options as it starts, after `bind` installs them.
 	 */
 	lifecycle: OpenLifecycle;
-	/** @deprecated Read `lifecycle.status === 'open'`; kept for one minor. */
+	/** Where the panel is in its open/close lifecycle; see `PopoverApi.status`. */
+	get status() {
+		return this.lifecycle.status;
+	}
+	/** @deprecated Read `status === 'open'`; kept for one minor. */
 	get hasTransitioned() {
 		return this.lifecycle.status === 'open';
 	}
-	// The mobile sheet delegates to a Dialog, which registers its own layer.
-	// An inline panel sits in the flow and is not dismissed by an outside press; Escape still
-	// reaches it while it is the top layer.
-	layer = this.theme.layers.register({
-		kind: 'popover',
-		isOpen: () => this.isOpen && !this.isMobileSheet,
-		isModal: () => this.isModal,
-		dismissOnEscape: () => this.closeOnEscape,
-		dismissOnOutside: () => !this.inline && this.closeOnClickOutside,
-		onDismiss: (request) => this.setOpen(false, request),
-		state: this
-	});
+	/**
+	 * What only an open popover needs, while it is open or closing; see `openSession`. A closed
+	 * popover (every Select, date input and row menu on a page) builds none of it.
+	 */
+	#session = $state.raw<PopoverSession | null>(null);
+	/** `#session` as last written, for teardowns, which must not read `$state`. */
+	#currentSession: PopoverSession | null = null;
+	/** The layer this popover renders inside (a Dialog, a parent menu), read when it opens. */
+	#parentLayer = useParentLayer();
+	/** The popover's layer while it is open or closing, else `null`. */
+	get layer(): LayerHandle | null {
+		return this.#session?.layer ?? null;
+	}
 	/**
 	 * Whether no open layer sits above this popover, except a tooltip: a tooltip never takes focus
 	 * or holds a control, so one showing over a button in the panel (or over the trigger) must not
-	 * count as something that took over from it.
+	 * count as something that took over from it. `false` while closed.
 	 */
-	isTopLayer = $derived.by(() => {
-		const open = this.theme.layers.open;
-		const index = open.indexOf(this.layer);
-		if (index < 0) return false;
-		return open.slice(index + 1).every((layer) => {
-			const state = layer.state;
-			// The shared tooltip surface is known by id, so it counts before its panel has mounted:
-			// the scope would otherwise release and re-apply `inert` around the tooltip itself.
-			return (
-				state instanceof PopoverState &&
-				(`${state.id}-tooltip` === this.theme.tooltipId ||
-					!!state.panelElement?.querySelector('[role="tooltip"]'))
-			);
-		});
-	});
+	get isTopLayer(): boolean {
+		return this.#session?.isTopLayer ?? false;
+	}
+	/**
+	 * The safe area around the trigger and the panel (menus ask it whether the pointer is on its way
+	 * to an open submenu). A closed popover has none: no point is inside it.
+	 */
+	get safeArea(): PopoverSafeArea {
+		return this.#session?.safeArea ?? CLOSED_SAFE_AREA;
+	}
 	computedSize = $derived(this.theme.resolveResponsiveProps(this.size, 'normal'));
 	// `inline` wins over `mobileSheet`: an in-flow panel never becomes a sheet.
 	isMobileSheet = $derived(!this.inline && !!this.mobileSheet && this.theme.isMobile);
@@ -267,27 +304,6 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 		haspopup: this.haspopup ?? 'dialog',
 		expanded: this.isOpen,
 		controls: this.isOpen && !this.isMobileSheet ? this.controlsId : undefined
-	});
-	// Non-modal: no Tab containment or `inert`; optional initial focus. Focus goes back when it was
-	// inside the panel, or when a trigger opened the popover (Safari does not focus a button on
-	// click, so a press and Escape leave focus on <body>). A popover with neither, such as a
-	// combobox list, leaves focus alone, even when the control that kept it blurred on purpose.
-	// A floating panel is hidden until its first placement lands, and nothing in it can take focus
-	// before then, so initial focus waits for that placement.
-	focusScope = useFocusScope({
-		isActive: () =>
-			this.isOpen &&
-			!this.isMobileSheet &&
-			this.isTopLayer &&
-			(this.computedMode !== 'floating' || this.placement !== null),
-		trap: () => this.isModal,
-		inertSiblings: () => this.isModal,
-		initialFocus: () => this.focusOnOpen ?? (this.isModal ? 'first' : false),
-		restoreFocus: () => this.#focusEntered || this.activeTrigger !== null,
-		returnTo: () => this.#returnTarget(),
-		// Focus that moved on by itself (Tab past the end of the panel) is not taken back.
-		focusOnClose: () => (this.lastOpenChange?.reason === 'focus-out' ? false : this.focusOnClose),
-		closeDetails: () => this.lastOpenChange
 	});
 	/**
 	 * Whether Tab is bridged between the trigger and the portaled panel: a floating dialog popup
@@ -334,22 +350,6 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 	);
 	computedPosition = $derived(this.theme.resolveResponsiveProps(this.position, 'top'));
 
-	// Hook instances
-	// The safe area tracks every open popover (menus ask it whether the pointer is on its way to
-	// an open submenu), but leaving it closes only a popover the pointer opened by hovering: one
-	// opened by a press, the keyboard or code stays until it is dismissed.
-	safeArea = useSafeArea({
-		isActive: () =>
-			this.isOpen && this.closeOnMouseLeave && this.children.filter((d) => d.isOpen).length === 0,
-		callback: (event) => {
-			if (this.openReason !== 'hover') return;
-			this.setOpen(false, { reason: 'trigger-hover', event, interaction: 'mouse' });
-		},
-		offset: 15,
-		debug: () => this.debugSafeArea,
-		closeDelay: () => this.closeDelay
-	});
-
 	hoverAction = useHoverAction({
 		isActive: () => this.openOnHover && !this.modal && !this.isOpen,
 		onMouseEnter: (event) => {
@@ -390,7 +390,7 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 			external: () => this.isMobileSheet,
 			onAfterOpen: () => this.onAfterOpen?.(this),
 			onAfterClose: () => {
-				this.focusScope.restore();
+				this.#currentSession?.focusScope.restore();
 				this.onAfterClose?.(this);
 				this.openReason = null;
 				this.#setActiveTrigger(null);
@@ -398,6 +398,9 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 			}
 		});
 		setContext('popover', this);
+		// Layers registered inside the panel (a nested popover, a dialog it opens) sit above this
+		// popover's layer, which exists only while it is open.
+		provideLayer(() => this.#currentSession?.layer ?? null);
 		// The parent registers its children whatever their payload type.
 		if (this.parent) onMount(this.parent.addChild(this as unknown as PopoverState));
 		// Details describe the change `setOpen` made: an open state moved from outside (the bound
@@ -409,6 +412,133 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 				this.#appliedOpen = open;
 			});
 		});
+		onDestroy(() => {
+			this.#destroyed = true;
+		});
+
+		// An open state that did not come through `setOpen` (the `open` prop, `defaultOpen`) is a
+		// programmatic open: focus returns to whatever had it when it opened.
+		$effect.pre(() => {
+			const open = this.isOpen;
+			untrack(() => {
+				const committed = this.#committed;
+				this.#committed = null;
+				if (committed === open || !open) return;
+				this.openReason = 'programmatic';
+				this.#opener = focusedElement();
+			});
+		});
+	}
+
+	/**
+	 * Whether the open-only machinery is needed: while the popover is open, and until its closing
+	 * transition has finished. `PopoverSession` is rendered while this holds.
+	 */
+	get sessionActive(): boolean {
+		return this.isOpen || this.lifecycle.status !== 'closed';
+	}
+
+	/**
+	 * Builds what only an open popover needs: its layer, focus scope, safe area, Tab bridge, scroll
+	 * lock and focus-out watch, and registers the attached triggers with them. `PopoverSession`
+	 * calls it during its initialisation while `sessionActive` holds; everything it creates goes
+	 * with that component.
+	 */
+	openSession = () => {
+		// The mobile sheet delegates to a Dialog, which registers its own layer.
+		// An inline panel sits in the flow and is not dismissed by an outside press; Escape still
+		// reaches it while it is the top layer.
+		const layer = this.theme.layers.register({
+			kind: 'popover',
+			isOpen: () => this.isOpen && !this.isMobileSheet,
+			isModal: () => this.isModal,
+			dismissOnEscape: () => this.closeOnEscape,
+			dismissOnOutside: () => !this.inline && this.closeOnClickOutside,
+			onDismiss: (request) => this.setOpen(false, request),
+			state: this,
+			// Read here, not from the session component's context, which is this popover's own.
+			parent: untrack(this.#parentLayer)
+		});
+		const isTopLayer = $derived.by(() => {
+			const open = this.theme.layers.open;
+			const index = open.indexOf(layer);
+			if (index < 0) return false;
+			return open.slice(index + 1).every(({ state }) => {
+				// The shared tooltip surface is known by id, so it counts before its panel has
+				// mounted: the scope would otherwise release and re-apply `inert` around the tooltip.
+				return (
+					state instanceof PopoverState &&
+					(`${state.id}-tooltip` === this.theme.tooltipId ||
+						!!state.panelElement?.querySelector('[role="tooltip"]'))
+				);
+			});
+		});
+		// Non-modal: no Tab containment or `inert`; optional initial focus. Focus goes back when it
+		// was inside the panel, or when a trigger opened the popover (Safari does not focus a button
+		// on click, so a press and Escape leave focus on <body>). A popover with neither, such as a
+		// combobox list, leaves focus alone, even when the control that kept it blurred on purpose.
+		// A floating panel is hidden until its first placement lands, and nothing in it can take
+		// focus before then, so initial focus waits for that placement.
+		const focusScope = useFocusScope({
+			isActive: () =>
+				this.isOpen &&
+				!this.isMobileSheet &&
+				isTopLayer &&
+				(this.computedMode !== 'floating' || this.placement !== null),
+			trap: () => this.isModal,
+			inertSiblings: () => this.isModal,
+			initialFocus: () => this.focusOnOpen ?? (this.isModal ? 'first' : false),
+			restoreFocus: () => this.#focusEntered || this.activeTrigger !== null,
+			returnTo: () => this.#returnTarget(),
+			// Focus that moved on by itself (Tab past the end of the panel) is not taken back.
+			focusOnClose: () => (this.lastOpenChange?.reason === 'focus-out' ? false : this.focusOnClose),
+			closeDetails: () => this.lastOpenChange
+		});
+		// The safe area tracks every open popover (menus ask it whether the pointer is on its way to
+		// an open submenu), but leaving it closes only a popover the pointer opened by hovering: one
+		// opened by a press, the keyboard or code stays until it is dismissed.
+		const safeArea = useSafeArea({
+			isActive: () =>
+				this.isOpen && this.closeOnMouseLeave && this.children.every((child) => !child.isOpen),
+			callback: (event) => {
+				if (this.openReason !== 'hover') return;
+				this.setOpen(false, { reason: 'trigger-hover', event, interaction: 'mouse' });
+			},
+			offset: 15,
+			debug: () => this.debugSafeArea,
+			closeDelay: () => this.closeDelay
+		});
+		// Every attached trigger counts as inside the layer and anchors the safe area.
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- teardown bookkeeping, never rendered
+		const triggers = new Map<HTMLElement, Array<(() => void) | void>>();
+		const session: PopoverSession = {
+			layer,
+			focusScope,
+			safeArea,
+			get isTopLayer() {
+				return isTopLayer;
+			},
+			addTrigger: (node) => {
+				if (triggers.has(node)) return;
+				triggers.set(node, [layer.node(node), safeArea.anchorReference(node)]);
+			},
+			removeTrigger: (node) => {
+				triggers.get(node)?.forEach((off) => off?.());
+				triggers.delete(node);
+			}
+		};
+		untrack(() => {
+			for (const node of this.#triggers.keys()) session.addTrigger(node);
+			this.#currentSession = session;
+			this.#session = session;
+		});
+		onDestroy(() => {
+			for (const node of [...triggers.keys()]) session.removeTrigger(node);
+			if (this.#currentSession !== session) return;
+			this.#currentSession = null;
+			this.#session = null;
+		});
+
 		useTabBridge({
 			isActive: () => this.tabBridgeActive,
 			anchor: this.#bridgeAnchor,
@@ -455,9 +585,6 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 				});
 			});
 		});
-		onDestroy(() => {
-			this.#destroyed = true;
-		});
 
 		// A touch-opened popover is non-modal and a finger scrolls the page under it, so it locks
 		// scroll only when its panel spans the viewport, where there is nothing left to scroll to.
@@ -491,19 +618,6 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 				(!this.#openedByTouch || panelSpansViewport)
 		});
 
-		// An open state that did not come through `setOpen` (the `open` prop, `defaultOpen`) is a
-		// programmatic open: focus returns to whatever had it when it opened.
-		$effect.pre(() => {
-			const open = this.isOpen;
-			untrack(() => {
-				const committed = this.#committed;
-				this.#committed = null;
-				if (committed === open || !open) return;
-				this.openReason = 'programmatic';
-				this.#opener = focusedElement();
-			});
-		});
-
 		// The point the pointer was at belongs to one opening: a later keyboard open must not reuse it.
 		$effect(() => {
 			if (!this.isOpen) return;
@@ -521,7 +635,30 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 			claimPopupSide(anchor, this, side ?? null);
 			return () => claimPopupSide(anchor, this, null);
 		});
-	}
+
+		// The element the panel is anchored to (the trigger that opened it, or the `ref` element)
+		// carries `data-popup-open` while it is open. Claimed like the side: a menu and its tooltip
+		// share a trigger, and the tooltip closing leaves the menu's hook in place.
+		$effect(() => {
+			const anchor = this.referenceElement;
+			if (!(anchor instanceof HTMLElement)) return;
+			claimPopupOpen(anchor, this, this.isOpen);
+			return () => claimPopupOpen(anchor, this, false);
+		});
+
+		// The panel's open state and transition phase, written from here rather than only by the
+		// template: Svelte pauses the effects of a block while its out-transition plays, so the
+		// panel's own attributes would stay `data-open` until it is gone. The session lives until
+		// the exit ends, so `data-closed` and `data-exiting` reach the closing panel.
+		$effect(() => {
+			const panel = this.panelElement;
+			if (!panel) return;
+			applyStateAttributes(panel, {
+				...openStateAttributes(this.isOpen),
+				...transitionStatusAttributes(this.lifecycle.status)
+			});
+		});
+	};
 
 	/** Toggles the popover. A press on the trigger of a popover the pointer opened by hovering pins it open instead. */
 	toggle = (input?: PopoverOpenChangeInput) => {
@@ -645,10 +782,13 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 		if (!target) return false;
 		const external = this.externalRef;
 		if (external instanceof Node && composedContains(external, target)) return true;
+		// Without a layer (closed) nothing opened from the popover is showing.
+		const own = this.layer;
+		if (!own) return false;
 		const open = this.theme.layers.open;
 		// A modal layer opened above this popover (a Dialog or confirmation the panel's content
 		// opened, rendered elsewhere) holds focus while the popover waits underneath it.
-		const above = open.indexOf(this.layer);
+		const above = open.indexOf(own);
 		if (
 			above >= 0 &&
 			open
@@ -661,7 +801,7 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 			return true;
 		return open.some((layer) => {
 			for (let current: LayerHandle | null = layer; current; current = current.parent) {
-				if (current !== this.layer) continue;
+				if (current !== own) continue;
 				return [...layer.nodes].some((node) => composedContains(node, target));
 			}
 			return false;
@@ -869,9 +1009,13 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 					this.#focusEntered = true;
 				})
 			);
-			cleanups.push(this.layer.node(node));
-			cleanups.push(this.focusScope.attachment(node));
-			cleanups.push(this.safeArea.floatingReference?.(node));
+			// The session exists whenever the panel does: it is rendered first, while open or closing.
+			const session = this.#currentSession;
+			if (session) {
+				cleanups.push(session.layer.node(node));
+				cleanups.push(session.focusScope.attachment(node));
+				cleanups.push(session.safeArea.floatingReference(node));
+			}
 			if (!this.isDialogPopup) cleanups.push(this.#labelPopupOwner(node));
 			return () => {
 				cleanups.forEach((cleanup) => cleanup?.());
@@ -956,13 +1100,17 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 
 	reference = (node: HTMLElement) => {
 		// Keep the trigger's ARIA in sync whichever way it was rendered (snippet or Button). With
-		// several triggers, only the one the panel is anchored to reads as expanded.
+		// several triggers, only the one the panel is anchored to reads as expanded. Closed, they all
+		// read the same: the anchor is not read then, so attaching a trigger (a row of a long list
+		// sharing one popover) does not rewrite every other trigger's attributes.
 		$effect(() => {
-			const anchored = this.triggerReference === node || this.triggerReference === null;
+			const props = this.triggerProps;
+			const anchored =
+				!props.expanded || this.triggerReference === node || this.triggerReference === null;
 			writePopupAria(node, {
-				...this.triggerProps,
-				expanded: this.triggerProps.expanded && anchored,
-				controls: anchored ? this.triggerProps.controls : undefined
+				...props,
+				expanded: props.expanded && anchored,
+				controls: anchored ? props.controls : undefined
 			});
 		});
 		return untrack(() => {
@@ -973,8 +1121,9 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 
 			// Gather all cleanup callbacks
 			const cleanups: Array<(() => void) | null | void> = [];
-			cleanups.push(this.layer.node(node));
-			cleanups.push(this.safeArea.anchorReference?.(node));
+			// Inside the layer and anchoring the safe area while open; see `openSession`.
+			this.#currentSession?.addTrigger(node);
+			cleanups.push(() => this.#currentSession?.removeTrigger(node));
 			// Before the hover action's own listener, which may open at once (no delay).
 			cleanups.push(
 				on(node, 'mouseenter', () => {
@@ -1164,7 +1313,13 @@ export class PopoverState<Payload = unknown> extends PopoverOptionsBase<Payload>
 	};
 }
 
-// Use interface merging to add the properties
+/**
+ * The state behind the `PopoverApi` a Popover hands its snippets and callbacks. For library
+ * components that drive a popover's internals (menus, hover cards); consumers get the narrow API.
+ */
+export const popoverInternals = <Payload = unknown>(
+	popover: PopoverApi<Payload>
+): PopoverState<Payload> => popover as PopoverState<Payload>;
 
 export const usePopoverContext = () => {
 	const hasPopover = hasContext('popover');

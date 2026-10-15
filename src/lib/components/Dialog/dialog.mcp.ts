@@ -43,16 +43,16 @@ The Dialog component (also known as Modal) displays content in a layer above the
 
 ### Event Props
 - **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void - Called before each library-requested state change, with \`details.reason\` (\`'trigger-press'\`, \`'escape-key'\`, \`'outside-press'\`, \`'close-press'\`, \`'swipe'\`, \`'close-watcher'\` for the Android Back gesture, \`'imperative-action'\`…), \`details.event\`, \`details.trigger\`, \`details.interaction\` and \`details.cancel()\`. Cancelling keeps the dialog as it is (a cancelled swipe snaps back) and leaves the event untouched. Inside the callback \`open\` still holds the previous state. Types from \`entasis/types\`
-- **onAfterOpen**: (payload: DialogState) => void - Called once per open after the open transition finishes; a dialog created open (\`defaultOpen\`) renders once mounted, animates in and reports it too
-- **onAfterClose**: (payload: DialogState) => void - Called once per close after the close transition finishes
+- **onAfterOpen**: (payload: DialogApi) => void - Called once per open after the open transition finishes; a dialog created open (\`defaultOpen\`) renders once mounted, animates in and reports it too
+- **onAfterClose**: (payload: DialogApi) => void - Called once per close after the close transition finishes
 
 ### Slot Props
-- **title**: string | Snippet<[DialogState]> - Dialog title
-- **description**: string | Snippet<[DialogState]> - Dialog description
-- **children**: Snippet<[DialogState]> - Main dialog content
+- **title**: string | Snippet - Dialog title
+- **description**: string | Snippet - Dialog description
+- **children**: Snippet<[DialogApi]> - Main dialog content
 - **header**: Snippet - Custom header content
 - **footer**: Snippet - Custom footer content
-- **trigger**: Snippet | (ButtonProps & { content?: string }) - Custom trigger button. The built-in button carries \`aria-haspopup="dialog"\`, \`aria-expanded\` and \`aria-controls\`; its \`onclick\` runs first, and \`event.preventDefault()\` there keeps the dialog closed. In a snippet, \`{@attach dialog.trigger}\` gives any element the same contract
+- **trigger**: Snippet<[DialogApi]> | (ButtonProps & { content?: string }) - Custom trigger button. The built-in button carries \`aria-haspopup="dialog"\`, \`aria-expanded\` and \`aria-controls\`; its \`onclick\` runs first, and \`event.preventDefault()\` there keeps the dialog closed. In a snippet, \`{@attach dialog.trigger}\` gives any element the same contract
 - **closeButton**: Snippet | false - Custom close button, or \`false\` to suppress the visible one. A closable dialog whose visible button is suppressed (\`false\`, or a snippet that renders nothing, as the Popover mobile sheet passes) still renders a visually hidden \`Close\` button at the end of the panel, out of the Tab order but in the accessibility tree, so screen reader users have a control that closes it. An \`alert\` never gets one: its own buttons answer it. The default close button is named \`Close\` (translated by the i18n catalog)
 
 ### Behavior Props
@@ -375,20 +375,52 @@ size:"small"
 
 ## State Management
 
-The Dialog component uses a \`DialogState\` instance that is passed to all slot snippets. This state object provides:
+The \`trigger\` and \`children\` snippets, \`onAfterOpen\` and \`onAfterClose\` receive a \`DialogApi\` (\`import type { DialogApi } from 'entasis/dialog'\`). It is a narrow handle: the class behind it stays internal, so its layer, focus scope and swipe machinery can change without breaking you. It provides:
 
-- **id**: string - Dialog identifier
-- **type**: DialogType - The \`type\` prop as passed (possibly a responsive record)
+- **id**: string - Dialog identifier, which the open trigger's \`aria-controls\` points at
+- **isOpen**: boolean - Whether the dialog is open
+- **status**: 'closed' | 'entering' | 'open' | 'exiting' - Where the dialog is in its open/close lifecycle
+- **modal**: boolean - Whether the dialog is modal
 - **computedType**: DialogType - The type resolved for the current viewport, after the mobile sheet collapse
-- **size**: Size - Current dialog size
 - **open(details?)**, **close(details?)**, **toggle(details?)** - Request a change through \`onOpenChange\`; each accepts the DOM event or partial details (\`{ reason, event }\`), and reports \`'imperative-action'\` unless a trigger press is dispatching
 - **setOpen(open, details?)**: boolean - The same request with an explicit state; returns \`false\` when \`onOpenChange\` cancelled it
 - **setSnapPoint(point, details?)**: boolean - Moves a snap-point drawer to one of its \`snapPoints\` (or the nearest to \`point\`) through \`onSnapPointChange\`; returns \`false\` when it did not move
 - **currentSnapPoint**: number | string | undefined - The point the drawer rests at, as written in \`snapPoints\`
-- **modal**: boolean - Whether the dialog is modal
-- **lifecycle.status**: 'closed' | 'entering' | 'open' | 'exiting' - Where the dialog is in its open/close lifecycle
+- **triggerProps**: { haspopup, expanded, controls } - The trigger state in the library's semantic vocabulary, to spread on a Button; \`trigger\` and \`reference\` already write it as ARIA attributes
 - **trigger**: attachment that makes any element the dialog's trigger (\`{@attach dialog.trigger}\`): \`reference\`, plus a click that opens the dialog and, on a non-control, \`role="button"\`, \`tabindex="0"\` and Enter/Space activation. The element's own handler runs first; \`event.preventDefault()\` there stops it
 - **reference**: attachment that keeps a custom trigger's \`aria-haspopup\`, \`aria-expanded\` and \`aria-controls\` in sync and makes it the element focus returns to, leaving clicks to the element
+
+## Styling hooks
+
+The root, the panel, the trigger and the shared backdrop carry state attributes, so a theme or a \`class\` can style each phase without reading component state.
+
+Attributes are presence attributes (set while the state holds, omitted otherwise) unless they carry a value.
+
+**Data attributes**
+- \`data-open\`: On the root (\`role="dialog"\`), the panel and the shared backdrop: present while open.
+- \`data-closed\`: On the root, the panel and the backdrop: present while their exit transition plays (a closed dialog is not rendered).
+- \`data-entering\`: On the root and the panel: present while the enter transition plays.
+- \`data-exiting\`: On the root and the panel: present while the exit transition plays.
+- \`data-type\`: On the root and the panel: the type actually shown (\`modal\`, \`drawerBottom\`, ...), after responsive records and the mobile-sheet fallback resolve.
+- \`data-modal\`: On the root: \`true\` or \`false\`, whether the dialog is modal.
+- \`data-popup-open\`: On the trigger (the built-in button, or an element with \`dialog.trigger\` / \`dialog.reference\`): present while the dialog is open.
+- \`data-dialog-open\`: On \`<html>\`: present while at least one modal dialog is open.
+
+**CSS variables**
+- \`--dialog-depth\`: On \`<html>\`: how many modal dialogs are open (\`1\` for a single sheet), for pages that scale back behind a sheet.
+- \`--drawer-inset\`: On the root: the gap between a drawer and the screen edge, from the \`inset\` prop or the theme.
+- \`--drawer-edge-radius\`: On a drawer's panel: the radius of its screen-edge corners, \`0\` while it touches the edge.
+
+The typed maps \`dialogDataAttributes\` and \`dialogCssVariables\` (from \`entasis/dialog\`) list each name with its meaning.
+
+\`\`\`svelte
+<script>
+	import { Dialog } from 'entasis/dialog';
+</script>
+
+<!-- Fade the trigger while its dialog is open -->
+<Dialog trigger={{ content: 'Open', class: 'data-popup-open:opacity-60' }} title="Settings">…</Dialog>
+\`\`\`
 
 ## Accessibility
 

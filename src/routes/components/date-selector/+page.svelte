@@ -4,7 +4,7 @@
 	import DateSelectorInput from '$lib/components/Form/DateSelector/DateSelectorInput.svelte';
 	import type { DateSelectorPreset } from '$lib/components/Form/DateSelector/dateSelector.props.js';
 	import { calendarBlankIcon } from '$lib/components/Icons/calendarBlank.js';
-	import type { PopoverState } from '$lib/components/Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '$lib/components/Popover/popover.api.js';
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
@@ -64,7 +64,8 @@
 			value: 'single',
 			options: ['single', 'double']
 		},
-		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false }
 	]);
 </script>
 
@@ -91,6 +92,7 @@
 	labelPosition="${controls.value.labelPosition}"
 	view="${controls.value.view}"
 	disabled={${controls.value.disabled}}
+	readOnly={${controls.value.readOnly}}
 	label="Due date"
 	description="We'll remind you the day before"
 	bind:value={date}
@@ -103,6 +105,7 @@
 				labelPosition={controls.value.labelPosition}
 				view={controls.value.view}
 				disabled={controls.value.disabled}
+				readOnly={controls.value.readOnly}
 				label="Due date"
 				description="We'll remind you the day before"
 				bind:value={selectedDate}
@@ -128,7 +131,7 @@
 		>
 			<div class="flex flex-col items-center gap-3">
 				<DateSelector bind:value={selectedDate} presets={datePresets}>
-					{#snippet trigger(popover: PopoverState)}
+					{#snippet trigger(popover: PopoverApi)}
 						<Button suffix={calendarBlankIcon} onclick={popover.toggle} {@attach popover.reference}>
 							{formatDate(selectedDate)}
 						</Button>

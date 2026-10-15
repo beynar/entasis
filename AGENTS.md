@@ -45,6 +45,51 @@ App-defined input types are named, serializable entries: apps type them by augme
 `FormInputRegistry` in `entasis/form` and supply the component with `registerFormInputs`. They
 render through the same FieldState path as `type: 'field'`, in Form and in `ask()`.
 
+## Interaction laws
+
+Laws 1–8, 10, 12 and 14 have executable entries in `src/lib/components/proposed-laws*.test.ts`.
+Laws 9, 11 and 13 are guarded only by their owners' suites (`form.validation.svelte.test.ts`,
+`field.messages.test.ts`, and the Popover and Dialog `*.api.svelte.test.ts`). A new law starts in
+the proposed-laws tests as `pending` (`test.fails`) and flips to `test` in the change that
+delivers it.
+
+1. **Open-change details.** Every owner of open state calls `onOpenChange(open, details)` before
+   it changes that state. `details.reason` comes from the one `OpenChangeReason` list in
+   `src/lib/utils/openChange.ts` (exported with `OpenChangeDetails` from `entasis/types`); add a
+   reason there rather than inventing a local one. `details.cancel()` leaves the state and the
+   originating event untouched: a cancelled Escape is not `defaultPrevented`.
+2. **Lifecycle.** `onAfterOpen` and `onAfterClose` fire exactly once per open and close, also when
+   no animation runs. Overlays use `useOpenLifecycle` instead of local flags.
+3. **Handler composition.** A consumer handler runs before the built-in behaviour on the same
+   event, and `preventDefault()` cancels the built-in behaviour.
+4. **Trigger contract.** Disclosure owners expose a trigger attachment that sets `aria-haspopup`,
+   `aria-expanded` and `aria-controls`. The trigger that opened a popup anchors it and receives
+   focus back, and removing it closes the popup (`reason: 'trigger-unmount'`).
+5. **Focus.** Restore falls back to focus history when the original target is gone. Keyboard closes
+   restore a visible focus ring. Tooltips open on focus only when the focus ring shows.
+6. **Hover.** Hover-driven opening ignores touch and disabled triggers. Hover-opened popups do not
+   lock page scroll.
+7. **Keyboard lists.** Natively disabled and hidden items are never targets. `aria-disabled` items
+   are focusable only when opted in. The single tab stop survives insertions, removals and
+   reorders, so rows are keyed by identity, never by index.
+8. **Read-only.** Every value control accepts `readOnly` (never `readonly`): focusable, announced,
+   unchangeable, still validated and submitted. Controls forward the native `readonly` attribute
+   to their inputs; role-based controls announce `aria-readonly`.
+9. **Disabled.** Disabled fields, directly or through a disabled `FormGroup`, `Form` or fieldset
+   `Field`, skip validation and are left out of the submitted value.
+10. **Native forms.** Hidden inputs come from `FieldHiddenInputs`, sit beside the control (never
+    inside a `<button>`), and carry `disabled`, `required` and `form`.
+11. **Messages.** Every validation message a user sees comes from the i18n catalog in all 8 locales,
+    with per-field `messages` overrides. Validation library text never reaches users.
+12. **Styling hooks.** Overlays and lists write `data-open`, `data-closed`, `data-entering`,
+    `data-exiting`, `data-side`, `data-align`, `data-popup-open`, `data-highlighted`,
+    `data-disabled` and `data-selected`, plus documented CSS variables. Each owner exports them as
+    typed `<owner>DataAttributes` and `<owner>CssVariables` maps from `<owner>.attributes.ts` and
+    lists them in its MCP docs.
+13. **Public types.** Snippet and callback payloads use a narrow `Api` interface (`PopoverApi`,
+    `DialogApi`), never an internal state class.
+14. **CSP.** Every injected `<script>` and `<style>` carries the Theme `nonce`.
+
 ## Theme ownership
 
 Component CVA definitions live in `<owner>.theme.ts`. Consumer-specific theme presets use

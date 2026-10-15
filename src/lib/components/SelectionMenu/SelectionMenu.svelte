@@ -2,7 +2,8 @@
 	import { tick } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import Popover from '../Popover/Popover.svelte';
-	import type { PopoverState } from '../Popover/popover.state.svelte.js';
+	import { popoverInternals, type PopoverState } from '../Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '../Popover/popover.api.js';
 	import Slot from '../Slot/Slot.svelte';
 	import ToggleMenu from '../ToggleMenu/ToggleMenu.svelte';
 	import type { SelectionMenuProps, SelectionMenuPayload } from './selectionMenu.props.js';
@@ -84,7 +85,8 @@
 		open = nextOpen;
 	}
 
-	function contentReference(popover: PopoverState): Attachment<HTMLElement> {
+	function contentReference(api: PopoverApi): Attachment<HTMLElement> {
+		const popover = popoverInternals(api);
 		return (node) => {
 			popoverState = popover;
 			contentElement = node;

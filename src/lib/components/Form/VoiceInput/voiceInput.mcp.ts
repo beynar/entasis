@@ -41,6 +41,7 @@ VoiceInput records microphone audio into a bindable Blob, renders live microphon
 - **variant**: \`'default' | 'expandable' | 'compact'\` (default: \`'default'\`) - Keeps the waveform full width, expands it only while recording or previewing, or renders a mic-only level indicator.
 - **size**: \`'small' | 'normal' | 'large'\` (default: \`'normal'\`) - Control height, waveform height, timer size, and action size.
 - **disabled**: \`boolean\` (default: \`false\`) - Prevents microphone, playback, seeking, and clear interactions.
+- **readOnly**: \`boolean\` (default: \`false\`) - Disables recording and clearing while the recorded value still validates and submits.
 - **required**: \`boolean\` (default: \`false\`) - Requires a recorded Blob during Field/Form validation.
 - **startLabel**: \`string\` (default: \`'Start voice recording'\`) - Start-button accessible label and tooltip.
 - **stopLabel**: \`string\` (default: \`'Stop recording'\`) - Stop-button accessible label and tooltip.

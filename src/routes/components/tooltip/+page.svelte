@@ -48,6 +48,7 @@
 	subtitle="Contextual information on hover, as a component or an attachment."
 	component="Tooltip"
 	features={[
+		'Styling hooks: data-open, data-closed, data-entering, data-exiting, data-side on the surface, data-popup-open on the trigger (tooltipDataAttributes)',
 		'trigger prop: Button props or a snippet handed the attachment',
 		'open forces the tooltip visible',
 		'{@attach tooltip()} primitive for any element',

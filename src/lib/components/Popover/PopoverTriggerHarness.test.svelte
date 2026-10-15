@@ -1,18 +1,18 @@
 <script lang="ts">
 	import Theme from '../Theme/Theme.svelte';
 	import Popover from './Popover.svelte';
-	import type { PopoverState } from './popover.state.svelte.js';
+	import type { PopoverApi } from './popover.api.js';
 </script>
 
-{#snippet profileTrigger(popover: PopoverState)}
+{#snippet profileTrigger(popover: PopoverApi)}
 	<div data-testid="profile" {@attach popover.trigger}>Ada Lovelace</div>
 {/snippet}
 
-{#snippet legacyTrigger(popover: PopoverState)}
+{#snippet legacyTrigger(popover: PopoverApi)}
 	<button type="button" onclick={popover.toggle} {@attach popover.trigger}>Legacy</button>
 {/snippet}
 
-{#snippet openerTrigger(popover: PopoverState)}
+{#snippet openerTrigger(popover: PopoverApi)}
 	<button type="button" onclick={() => popover.open()} {@attach popover.trigger}>Opener</button>
 {/snippet}
 

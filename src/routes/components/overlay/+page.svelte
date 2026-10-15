@@ -56,6 +56,7 @@
 	subtitle="Concise content and actions layered over bounded media surfaces."
 	component="Overlay"
 	features={[
+		'Styling hooks: presence data-open and data-closed, data-entering and data-exiting (overlayDataAttributes)',
 		'Automatic first-child parent positioning',
 		'Fill, top, and bottom treatments',
 		'Direction-aware edge reveal motion',

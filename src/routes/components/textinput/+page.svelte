@@ -29,7 +29,8 @@
 			value: 'top',
 			options: ['top', 'left']
 		},
-		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false }
 	]);
 </script>
 
@@ -52,6 +53,7 @@
 	density="${controls.value.density}"
 	labelPosition="${controls.value.labelPosition}"
 	disabled={${controls.value.disabled}}
+	readOnly={${controls.value.readOnly}}
 	label="Email"
 	description="We'll only use this for receipts"
 	placeholder="you@example.com"
@@ -64,6 +66,7 @@
 				density={controls.value.density}
 				labelPosition={controls.value.labelPosition}
 				disabled={controls.value.disabled}
+				readOnly={controls.value.readOnly}
 				label="Email"
 				description="We'll only use this for receipts"
 				placeholder="you@example.com"

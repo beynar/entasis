@@ -44,3 +44,9 @@ export {
 	type SidebarThemeProps
 } from './sidebar.theme.js';
 export { sidebarDescription } from './sidebar.mcp.js';
+export {
+	sidebarDataAttributes,
+	sidebarCssVariables,
+	type SidebarDataAttribute,
+	type SidebarCssVariable
+} from './sidebar.attributes.js';

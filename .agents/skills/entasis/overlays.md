@@ -93,23 +93,27 @@ sheet; in a bottom sheet a focused text field makes room for the on-screen keybo
 
 ### Slots
 
-- `title`: string or `Snippet<[DialogState]>`
-- `description`: string or `Snippet<[DialogState]>`
-- `children`: `Snippet<[DialogState]>`
+- `title`: string or `Snippet`
+- `description`: string or `Snippet`
+- `children`: `Snippet<[DialogApi]>`
 - `header`, `footer`, `closeButton`: `Snippet`
-- `trigger`: `Snippet<[DialogState]>` or `ButtonProps & { content?: string }`; in a snippet,
+- `trigger`: `Snippet<[DialogApi]>` or `ButtonProps & { content?: string }`; in a snippet,
   `{@attach dialog.trigger}` gives any element `aria-haspopup`, `aria-expanded`, `aria-controls`
   and click / Enter / Space opening
 
 ### Events
 
-- `onOpenChange(open, details)`, `onAfterOpen(payload: DialogState)`, `onAfterClose(payload: DialogState)`
+- `onOpenChange(open, details)`, `onAfterOpen(payload: DialogApi)`, `onAfterClose(payload: DialogApi)`
 
-### DialogState (passed to snippets)
+### DialogApi (passed to snippets)
 
-- `isOpen`, `id`, `type`, `size`, `modal`, `open(details?)`, `close(details?)`,
-  `setOpen(open, details?)`, `setSnapPoint(point, details?)`, `currentSnapPoint`,
-  `trigger` and `reference` (attachments), `lifecycle.status`
+`import type { DialogApi } from 'entasis/dialog'`. A narrow handle; the state class behind it is
+internal.
+
+- `isOpen`, `id`, `status` (`'closed' | 'entering' | 'open' | 'exiting'`), `modal`, `computedType`,
+  `open(details?)`, `close(details?)`, `toggle(details?)`, `setOpen(open, details?)`,
+  `setSnapPoint(point, details?)`, `currentSnapPoint`, `triggerProps`, and `trigger` and
+  `reference` (attachments)
 
 ### Theme Parts
 
@@ -192,7 +196,7 @@ announced as a dialog, so name it. `modal` keeps Tab inside the panel, makes the
 with focus inside and adds a visually hidden Close button at the end of the panel for screen readers.
 `arrow` draws a pointer toward the trigger that stays on it when the panel shifts to fit. One Popover
 can serve many triggers: `{@attach popover.triggerFor(() => row)}` anchors it to the one pressed and
-`popover.payload` holds that trigger's data (type the snippet parameter `PopoverState<Row>`).
+`popover.payload` holds that trigger's data (type the snippet parameter `PopoverApi<Row>`).
 
 `inline` renders the panel in normal document flow where the component sits instead of portaling to
 the viewport-fixed layer: no floating-ui positioning, no scroll lock, no outside-press dismissal
@@ -202,19 +206,22 @@ wins over `mobileSheet`.
 
 ### Slots
 
-- `children`: `Snippet<[PopoverState]>`
-- `trigger`: `Snippet<[PopoverState]>` | `ButtonProps & { content?: string }` | `false`
+- `children`: `Snippet<[PopoverApi]>`
+- `trigger`: `Snippet<[PopoverApi]>` | `ButtonProps & { content?: string }` | `false`
 
 ### Events
 
-- `onOpenChange(open, details)`, `onAfterOpen(payload: PopoverState)`, `onAfterClose(payload: PopoverState)`
+- `onOpenChange(open, details)`, `onAfterOpen(payload: PopoverApi)`, `onAfterClose(payload: PopoverApi)`
 
-### PopoverState (passed to snippets)
+### PopoverApi (passed to snippets)
 
-- `isOpen`, `id`, `size`, `position`, `offset`, `open(details?)`, `close(details?)`,
-  `toggle(details?)`, `setOpen(open, details?)`, `payload`, `openReason` (`'hover' | 'press' | 'keyboard' |
-'programmatic'`), `activeTrigger`, `lifecycle.status`, `trigger`, `triggerFor(() => payload)` and
-  `reference` (attachments for a custom trigger)
+`import type { PopoverApi } from 'entasis/popover'`. A narrow handle; the state class behind it is
+internal. `PopoverState` is its deprecated alias (one minor). `usePopoverContext()` returns it too.
+
+- `isOpen`, `id`, `status` (`'closed' | 'entering' | 'open' | 'exiting'`), `open(details?)`,
+  `close(details?)`, `toggle(details?)`, `setOpen(open, details?)`, `payload`, `openReason`
+  (`'hover' | 'press' | 'keyboard' | 'programmatic'`), `activeTrigger`, `placement`, `triggerProps`,
+  `trigger`, `triggerFor(() => payload)` and `reference` (attachments for a custom trigger)
 
 ### Theme Parts
 
@@ -265,19 +272,23 @@ single `TooltipHost` instance that `<Theme>` mounts.
 | `trigger`      | `Snippet<[Attachment<HTMLElement>]> \| ButtonProps` (required) | -           |
 | `open`         | `boolean` (bindable)                                           | `false`     |
 | `defaultOpen`  | `boolean`                                                      | `false`     |
-| `onOpenChange` | `(open: boolean) => void`                                      | -           |
+| `onOpenChange` | `(open: boolean, details: OpenChangeDetails) => void`          | -           |
 | `position`     | `Placement` (12 options)                                       | `'top'`     |
 | `size`         | `Sizes`                                                        | `'normal'`  |
 | `color`        | `Colors`                                                       | `'neutral'` |
 | `variant`      | `'solid' \| 'outline' \| 'soft'`                               | `'solid'`   |
 | `delay`        | `number`                                                       | `400`       |
+| `closeDelay`   | `number` (ms before closing once the pointer leaves)           | `0`         |
+| `hoverable`    | `boolean` (stays open while the pointer is over the content)   | `true`      |
+| `closeOnClick` | `boolean` (a press on the trigger closes it)                   | `true`      |
+| `disabled`     | `boolean` (hover and focus never open it)                      | `false`     |
 | `offset`       | `number`                                                       | -           |
 | `transition`   | `FSOProps`                                                     | -           |
 | `class`        | `string`                                                       | -           |
 
 `trigger` takes Button props (rendered as a `Button`, `content` is its label) or a snippet handed
-the tooltip attachment to spread on its own element. Every prop except `trigger`, `open`,
-`defaultOpen` and `onOpenChange` is also an option of `tooltip()`.
+the tooltip attachment to spread on its own element. Every prop except `trigger`, `open` and
+`defaultOpen` is also an option of `tooltip()`, `onOpenChange` included.
 
 ### Theme Parts
 
@@ -314,8 +325,9 @@ the tooltip attachment to spread on its own element. Every prop except `trigger`
 
 **Note:** Only one tooltip shows at a time; an `open` one hands the surface over when another tooltip
 is hovered and reports that through `onOpenChange`. Subsequent tooltips show instantly within 400ms of
-previous. Opens on hover and on keyboard focus, and sets `aria-describedby` on the trigger while
-visible.
+previous. Opens on mouse or pen hover (never from a touch tap) and on focus only when the focus ring
+shows, so a mouse press, a tap or focus returned by a closing dialog does not open it. Sets
+`aria-describedby` on the trigger while visible.
 
 ---
 

@@ -71,9 +71,31 @@ fails the build when it does not.
 - **Callbacks name the change, not the gesture**, take one payload object, and are present tense:
   `onValueChange`, `onOpenChange`, `onWidthChange`, `onSearchChange`. Never `onChange`, `onClick`,
   `onToggle`, `onPageChange`, or `onWidthChanged`.
+- **Open changes carry details.** `onOpenChange(open, details)` is the only callback with two
+  arguments. It runs before the state changes, so inside it the component still reports the old
+  state: read the first argument. `details` (`OpenChangeDetails` from `entasis/types`) has
+  `reason` (`'trigger-press'`, `'outside-press'`, `'escape-key'`, `'item-press'`,
+  `'trigger-unmount'`…), `event`, `trigger`, `interaction` and `cancel()`, which keeps the
+  component as it was. Every other change callback takes one payload object, including Tabbar's
+  `{ value, reason }` and NavigationMenu's `{ value, details }`.
+- **`onAfterOpen` / `onAfterClose` fire once per open and close**, also when no animation plays.
+- **`readOnly`, never `readonly`.** Every value control takes `readOnly`: it stays focusable and
+  announced, refuses edits, and still validates and submits. A read-only `Form`, `FormGroup` or
+  `Field as="fieldset"` makes the fields inside it read-only.
+- **Disabled fields are not submitted.** A disabled field, directly or through a disabled
+  `FormGroup` or `Form`, skips validation and is left out of `onSubmit`, `ask()` and
+  `MultiStepForm` values, like a native form. Use `readOnly` for a value that must still submit.
 - **`api` is the instance handle.** `bind:api` on Tabs, Stepper, DataTable, Tree, AIChat, and
   AIConversation gives the state object; the exported types are `TabsApi`, `StepperApi`,
-  `DataTableApi`, `AIConversationApi`.
+  `DataTableApi`, `AIConversationApi`. Popover and Dialog snippets and lifecycle callbacks receive
+  the narrow `PopoverApi` (`entasis/popover`) and `DialogApi` (`entasis/dialog`): open state,
+  `open()`, `close()`, `toggle()` and the `trigger` / `reference` attachments. `PopoverState` is a
+  deprecated alias of `PopoverApi`.
+- **Styling hooks are data attributes.** Overlays and lists write `data-open`, `data-closed`,
+  `data-entering`, `data-exiting`, `data-side`, `data-align`, `data-popup-open`,
+  `data-highlighted`, `data-disabled` and `data-selected`; style them with Tailwind's `data-*`
+  variants instead of reading component state. Each owner exports the typed list
+  (`popoverDataAttributes`, `popoverCssVariables`, …).
 - **`label` is the one prop that names a component.** It is painted where the component has a
   visible label (every Field input, Select, Checkbox, Switch, Slider, Rating, Meter, Stat) and
   spoken where it has none (Button, ToggleButton, SegmentedControl, Pagination, Chart, ScrollArea,

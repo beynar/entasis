@@ -4,6 +4,7 @@
 	import type { PopoverProps } from './popover.props.js';
 	import { usePopoverTheme } from './popover.theme.js';
 	import { PopoverState } from './popover.state.svelte.js';
+	import PopoverSession from './PopoverSession.svelte';
 	import Button from '../Button/Button.svelte';
 	import Dialog from '../Dialog/Dialog.svelte';
 	import { fso } from '$lib/transitions/transition.js';
@@ -229,6 +230,12 @@
 
 {#snippet emptyCloseButton()}{/snippet}
 
+<!-- First in the template: what only an open popover needs (its layer, focus scope, safe area)
+     exists before the panel below reads it, and stays until the closing transition ends. -->
+{#if popover.sessionActive}
+	<PopoverSession {popover} />
+{/if}
+
 <!-- The panel is a child of the wrapper, so it is never re-parented mid-transition (which would
      break the intro). It carries the visuals, transform-origin, and animation. -->
 {#snippet floatingPanel()}
@@ -341,7 +348,7 @@
 		aria-labelledby={labelledBy}
 		aria-modal={popover.isModal ? 'true' : undefined}
 		style:visibility={inline ? undefined : 'hidden'}
-		style:z-index={inline ? undefined : popover.layer.zIndex}
+		style:z-index={inline ? undefined : popover.layer?.zIndex}
 		{...attachments}
 	>
 		{@render floatingPanel()}
@@ -353,7 +360,7 @@
 		id={popover.id}
 		class={classes.root({ mode: popover.computedMode })}
 		style:visibility={inline ? undefined : 'hidden'}
-		style:z-index={inline ? undefined : popover.layer.zIndex}
+		style:z-index={inline ? undefined : popover.layer?.zIndex}
 		{...attachments}
 	>
 		{@render floatingPanel()}

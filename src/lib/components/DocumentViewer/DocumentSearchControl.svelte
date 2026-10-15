@@ -6,7 +6,8 @@
 	import { caretUpIcon } from '../Icons/caretUp.js';
 	import { magnifyingGlassIcon } from '../Icons/magnifyingGlass.js';
 	import Popover from '../Popover/Popover.svelte';
-	import type { PopoverState } from '../Popover/popover.state.svelte.js';
+	import { popoverInternals } from '../Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '../Popover/popover.api.js';
 	import type { Colors, Sizes } from '../../types/index.js';
 	import type { DocumentToolbarPosition } from './documentViewer.props.js';
 	import type { DocumentViewerState } from './documentViewer.state.svelte.js';
@@ -67,12 +68,13 @@
 		clearTimeout(searchTimer);
 		searchTimer = setTimeout(runSearch, 250);
 	};
-	const onAfterClose = (popover: PopoverState) => {
+	const onAfterClose = (api: PopoverApi) => {
 		clearTimeout(searchTimer);
 		searchTimer = undefined;
 		query = '';
 		viewer.clearSearch();
-		if (popover.referenceElement instanceof HTMLElement) popover.referenceElement.focus();
+		const { referenceElement } = popoverInternals(api);
+		if (referenceElement instanceof HTMLElement) referenceElement.focus();
 	};
 	const onKeydown = (event: KeyboardEvent) => {
 		if (event.key !== 'Enter') return;

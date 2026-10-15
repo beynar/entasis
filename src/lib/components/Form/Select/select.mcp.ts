@@ -112,6 +112,35 @@ Extends all Field component props plus:
 - Typing on a closed trigger picks the matching option without opening the list, as a native select does, with one \`onValueChange\` (not with \`multiple\` or \`readOnly\`)
 - Disabled options are skipped by the highlight and the type-ahead
 
+## Styling hooks
+
+The trigger, the field container, the list panel and every option carry state attributes. \`data-highlighted\` and \`data-selected\` are written as \`"true"\`; match them by presence (\`[data-highlighted]\`).
+
+Attributes are presence attributes (set while the state holds, omitted otherwise) unless they carry a value.
+
+**Data attributes**
+- \`data-popup-open\`: On the trigger button and the field container around it: present while the list is open.
+- \`data-placeholder\`: On the trigger: present while no value is chosen and the placeholder shows.
+- \`data-disabled\`: On the trigger: present while disabled. On an option: present while it is disabled.
+- \`data-readonly\`: On the trigger: present while \`readOnly\`.
+- \`data-popup-side\`: On the field container: \`none\` while the list is placed over the trigger, otherwise the side it sits on.
+- \`data-highlighted\`: On an option: present while the keyboard or the pointer highlights it.
+- \`data-selected\`: On an option: present while it is selected.
+- \`data-open\`: On the list panel: present while open.
+- \`data-closed\`: On the list panel: present while its exit transition plays.
+- \`data-entering\`: On the list panel: present while the enter transition plays.
+- \`data-exiting\`: On the list panel: present while the exit transition plays.
+- \`data-side\`: On the list panel: \`none\` while it is placed over the trigger (aligned on the selected option), otherwise the side of the trigger it sits on.
+
+**CSS variables** (set on the list panel's positioned wrapper and inherited by the list; the mobile sheet has none)
+- \`--available-width\`: The width in px the panel can take before it reaches the viewport edges, minus 20px.
+- \`--available-height\`: The room in px between the trigger and the viewport edge on the panel's side, minus 20px. Cap a scrolling list with \`max-height: min(240px, var(--available-height))\`.
+- \`--anchor-width\`: The trigger's width in px, snapped to the device pixel grid.
+- \`--anchor-height\`: The trigger's height in px, snapped to the device pixel grid.
+- \`--transform-origin\`: The panel corner facing the trigger, mirrored in right-to-left documents; the point the panel scales from.
+
+The typed maps \`selectDataAttributes\` and \`selectCssVariables\` (from \`entasis/select\`) list each name with its meaning.
+
 ## Accessibility
 
 ARIA 1.2 select-only combobox pattern: the trigger is a \`role="combobox"\` button with

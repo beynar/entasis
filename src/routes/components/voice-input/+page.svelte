@@ -37,7 +37,8 @@
 			value: 'default',
 			options: ['default', 'expandable', 'compact']
 		},
-		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false }
 	]);
 
 	const usageCode = $derived(`<script lang="ts">
@@ -53,6 +54,7 @@ ${'</' + 'script>'}
 	labelPosition="${controls.value.labelPosition}"
 	variant="${controls.value.variant}"
 	disabled={${controls.value.disabled}}
+	readOnly={${controls.value.readOnly}}
 	label="Voice note"
 	description="Record a short message."
 	bind:value={recording}
@@ -131,6 +133,7 @@ ${'</' + 'script>'}
 				labelPosition={controls.value.labelPosition}
 				variant={controls.value.variant}
 				disabled={controls.value.disabled}
+				readOnly={controls.value.readOnly}
 				label="Voice note"
 				description="Record a message between 1 and 60 seconds."
 				bind:value={recording}

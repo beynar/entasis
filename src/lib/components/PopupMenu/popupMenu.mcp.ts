@@ -100,9 +100,9 @@ The PopupMenu component is a wrapper around Popover that renders a Menu inside. 
 
 - **onOpenChange**: (open: boolean, details: OpenChangeDetails) => void - Called before component-owned state changes, with \`details.reason\` (\`'trigger-press'\`, \`'trigger-hover'\`, \`'item-press'\` when a chosen item closes the menu, \`'escape-key'\`, \`'outside-press'\`…), \`details.event\` and \`details.cancel()\`, which keeps the menu as it is (cancelling an \`'item-press'\` close also keeps its open submenus and focus where they were)
 
-- **onAfterOpen**: (popover: PopoverState) => void - Called after the popover opens
+- **onAfterOpen**: (popover: PopoverApi) => void - Called after the popover opens
 
-- **onAfterClose**: (popover: PopoverState) => void - Called after the popover closes
+- **onAfterClose**: (popover: PopoverApi) => void - Called after the popover closes
 
 - **theme**: PopoverThemeProps - Theme overrides for popover
 
@@ -407,6 +407,10 @@ Checkbox and radio rows keep the menu open on their own, so a menu of settings n
 
 <PopupMenu trigger={{ content: 'Main Menu' }} position="bottom-start" menu={{ items }} />
 \`\`\`
+
+## Styling hooks
+
+The popup is a Popover panel: it carries \`data-open\`, \`data-closed\`, \`data-entering\`, \`data-exiting\`, \`data-side\` and \`data-align\`, and the \`--available-height\`, \`--anchor-width\` and \`--transform-origin\` variables (\`popoverDataAttributes\` and \`popoverCssVariables\` from \`entasis/popover\`). The trigger carries \`data-popup-open\` while the menu is open. Rows and submenu rows carry \`data-highlighted\`, \`data-disabled\`, \`data-selected\` and \`data-popup-open\` (\`menuDataAttributes\` from \`entasis/menu\`).
 
 ## Accessibility
 

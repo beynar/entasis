@@ -8,7 +8,7 @@
 	import Select from '$lib/components/Form/Select/Select.svelte';
 	import HoverCard from '$lib/components/HoverCard/HoverCard.svelte';
 	import Popover from '$lib/components/Popover/Popover.svelte';
-	import type { PopoverState } from '$lib/components/Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '$lib/components/Popover/popover.api.js';
 	import type { GanttDependencyTooltipPayload } from './ganttChart.props.js';
 	import type { GanttChartState } from './ganttChart.state.svelte.js';
 	import type {
@@ -79,7 +79,7 @@
 		{ value: 'week', label: 'Weeks' }
 	];
 
-	function handleKeydown(event: KeyboardEvent, popover: PopoverState): void {
+	function handleKeydown(event: KeyboardEvent, popover: PopoverApi): void {
 		if (event.key === 'Delete' || event.key === 'Backspace') {
 			event.preventDefault();
 			event.stopPropagation();
@@ -94,7 +94,7 @@
 		openEditor(popover);
 	}
 
-	function openEditor(popover: PopoverState): void {
+	function openEditor(popover: PopoverApi): void {
 		draftType = dependency.dependency.type;
 		draftLagValue = dependency.dependency.lag?.value ?? null;
 		draftLagUnit = dependency.dependency.lag?.unit ?? 'day';
@@ -118,7 +118,7 @@
 		}
 	}
 
-	function commitEditor(popover: PopoverState): void {
+	function commitEditor(popover: PopoverApi): void {
 		const currentLag = dependency.dependency.lag;
 		const isUnchanged =
 			dependency.dependency.type === draftType &&

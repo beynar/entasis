@@ -17,8 +17,12 @@
 		usePopupMenuRoot,
 		usePopupMenuSubmenu
 	} from '../PopupMenu/popupMenu.context.js';
-	import { usePopoverContext } from '../Popover/popover.state.svelte.js';
-	import type { PopoverState } from '../Popover/popover.state.svelte.js';
+	import {
+		popoverInternals,
+		usePopoverContext,
+		type PopoverState
+	} from '../Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '../Popover/popover.api.js';
 	import type { PopoverPlacement } from '../Popover/popover.props.js';
 	import Separator from '../Separator/Separator.svelte';
 	import Slot from '../Slot/Slot.svelte';
@@ -328,7 +332,8 @@
 	const rowKeys = $derived(keysFor('', visibleItems));
 
 	/** Wires a submenu trigger row: its popover registration, ArrowRight and ArrowLeft. */
-	const registerSubmenu = (node: HTMLElement, key: string, popover: PopoverState) => {
+	const registerSubmenu = (node: HTMLElement, key: string, api: PopoverApi) => {
+		const popover = popoverInternals(api);
 		// VoiceOver announces the trigger's state again when focus lands in the submenu it opened;
 		// leaving `aria-expanded` off while the submenu is open avoids that.
 		// The popover writes the attribute from its own effect, so this watches the attribute and
@@ -377,6 +382,7 @@
 				{...buttonProps}
 				{...keepOpen(item.closeOnClick)}
 				{...valueAttrs(item)}
+				data-disabled={item.disabled ? '' : undefined}
 				theme={theme?.button}
 				{@attach navigation.itemReference}
 				{@attach attachPrevious}

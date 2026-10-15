@@ -11,6 +11,12 @@ import { resolveSnapPoints, settleSnapIndex, snapPointHeight } from './dialog.sn
 import { useFocusScope } from '$lib/utils/useFocusScope.svelte.js';
 import { useOpenLifecycle } from '$lib/utils/openLifecycle.svelte.js';
 import {
+	applyStateAttributes,
+	openStateAttributes,
+	transitionStatusAttributes
+} from '$lib/utils/stateAttributes.js';
+import { claimPopupOpen } from '../Popover/popover.claims.js';
+import {
 	getInteractionType,
 	isOpenChangeDetails,
 	requestOpenChange,
@@ -26,6 +32,7 @@ import {
 	type PopupTriggerProps
 } from '$lib/utils/trigger.js';
 import { useDialogMotion, type DialogThemeProps } from './dialog.theme.js';
+import type { DialogApi } from './dialog.api.js';
 
 export { DIALOG_Z_BASE, DIALOG_Z_STEP } from '../Theme/theme.layers.js';
 
@@ -53,14 +60,14 @@ interface DialogOptions extends MakeRequired<
 		| 'defaultSnapPoint'
 		| 'onSnapPointChange'
 	>,
-	'closeOnEscape' | 'closable' | 'modal'
+	'id' | 'closeOnEscape' | 'closable' | 'modal'
 > {
 	isOpen: boolean;
 	/** The resting snap point; `undefined` until one is chosen (the default point applies). */
 	snapPoint?: DialogSnapPoint;
 	onOpenChange?: OpenChangeHandler;
-	onAfterOpen?: (payload: DialogState) => void;
-	onAfterClose?: (payload: DialogState) => void;
+	onAfterOpen?: (payload: DialogApi) => void;
+	onAfterClose?: (payload: DialogApi) => void;
 	/** The instance `theme.motion` slot; the `transition` prop still wins over it. */
 	motion?: DialogThemeProps['motion'];
 }
@@ -68,7 +75,7 @@ interface DialogOptions extends MakeRequired<
 /** What `open`, `close`, `toggle` and `setOpen` accept: details, a partial, or the DOM event. */
 export type DialogOpenChangeInput = OpenChangeDetails | OpenChangeInit | Event;
 
-export class DialogState extends createBindableStateClass<DialogOptions>() {
+export class DialogState extends createBindableStateClass<DialogOptions>() implements DialogApi {
 	parent = getContext<DialogState | null>('dialog');
 	// Nested dialogs join while they mount and leave when torn down; see `Registry`.
 	readonly #children = new Registry<DialogState>();
@@ -92,10 +99,22 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 			this.#opener = null;
 		}
 	});
-	/** @deprecated Read `lifecycle.status === 'open'`; kept for one minor. */
+	/** Where the dialog is in its open/close lifecycle; see `DialogApi.status`. */
+	get status() {
+		return this.lifecycle.status;
+	}
+	/** @deprecated Read `status === 'open'`; kept for one minor. */
 	get hasTransitioned() {
 		return this.lifecycle.status === 'open';
 	}
+	/**
+	 * `data-open` / `data-closed` and `data-entering` / `data-exiting` for the root and the panel
+	 * (see `dialogDataAttributes`). Closed, they render only while the exit transition plays.
+	 */
+	stateAttributes = $derived({
+		...openStateAttributes(this.isOpen),
+		...transitionStatusAttributes(this.lifecycle.status)
+	});
 	/** The details of the last change that was applied, kept until the next one. */
 	lastOpenChange = $state.raw<OpenChangeDetails | null>(null);
 	/** The open state `setOpen` last applied, to tell a change made from outside. */
@@ -356,7 +375,21 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 		onMount(() => {
 			this.#mounted = true;
 		});
+		// The root's and the panel's open state and transition phase, written from here rather than
+		// only by the template: Svelte pauses the effects of a block while its out-transition plays,
+		// so the template would leave a closing dialog marked `data-open` until it is gone.
+		$effect(() => {
+			const content = this.#contentElement;
+			if (!content) return;
+			const attributes = this.stateAttributes;
+			applyStateAttributes(content, attributes);
+			const root = content.closest('[data-layer-root]');
+			if (root) applyStateAttributes(root, attributes);
+		});
 	}
+
+	/** The panel element while it is rendered, closing transition included. */
+	#contentElement = $state<HTMLElement | null>(null);
 
 	/** Calls to `setOpen`, direct or through `open`, `close` and `toggle`, unchanged state included. */
 	#openRequests = 0;
@@ -416,6 +449,12 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 		$effect(() => {
 			writePopupAria(node, this.triggerProps);
 		});
+		// Claimed, not written: a tooltip on the same trigger closing while the dialog is open
+		// must leave `data-popup-open` in place.
+		$effect(() => {
+			claimPopupOpen(node, this, this.isOpen);
+			return () => claimPopupOpen(node, this, false);
+		});
 		return untrack(() => {
 			// Capture phase: runs before the element's own (delegated) handlers, so a
 			// `dialog.open()` called from `onclick` knows the press it belongs to.
@@ -455,6 +494,10 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 	contentAttachment = (node: HTMLElement) => {
 		return untrack(() => {
 			const cleanups: Array<(() => void) | void> = [];
+			this.#contentElement = node;
+			cleanups.push(() => {
+				if (this.#contentElement === node) this.#contentElement = null;
+			});
 			cleanups.push(this.focusScope.attachment(node));
 			cleanups.push(this.layer.node(node));
 			cleanups.push(this.swipeAttachment(node));
@@ -744,3 +787,9 @@ export class DialogState extends createBindableStateClass<DialogOptions>() {
 		};
 	};
 }
+
+/**
+ * The state behind the `DialogApi` a Dialog hands its snippets and callbacks. For library code
+ * and tests that read a dialog's internals; consumers get the narrow API.
+ */
+export const dialogInternals = (dialog: DialogApi): DialogState => dialog as DialogState;

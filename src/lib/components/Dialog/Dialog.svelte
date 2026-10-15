@@ -203,6 +203,7 @@
 		data-type={dialog.computedType}
 		data-size={size}
 		data-modal={dialog.modal}
+		{...dialog.stateAttributes}
 		style:z-index={dialog.zIndex}
 		style:--drawer-inset={inset === undefined ? undefined : drawerInsetValue(inset)}
 	>
@@ -216,6 +217,7 @@
 			<div
 				{@attach dialog.contentAttachment}
 				data-type={dialog.computedType}
+				{...dialog.stateAttributes}
 				style:transform={dialog.contentTransform}
 				style:transition={dialog.dragging || dialog.followsChild ? 'none' : undefined}
 				style:height={dialog.snapPanelHeight === undefined

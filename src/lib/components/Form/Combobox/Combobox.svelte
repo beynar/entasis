@@ -5,15 +5,17 @@
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { ComboboxProps, ComboboxOption } from './combobox.props.js';
 	import Popover from '../../Popover/Popover.svelte';
+	import { popupOpenClaim } from '../../Popover/popover.claims.js';
 	import { xIcon } from '../../Icons/x.js';
 	import { magnifyingGlassIcon } from '../../Icons/magnifyingGlass.js';
-	import type { PopoverState } from '../../Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '../../Popover/popover.api.js';
 	import { useComboboxTheme } from './combobox.theme.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { flattenItems } from './combobox.items.js';
 	import { ComboboxController } from './combobox.state.svelte.js';
 	import ComboboxPopup from './ComboboxPopup.svelte';
 	import { untrack } from 'svelte';
+	import { presence } from '$lib/utils/stateAttributes.js';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
 
 	let {
@@ -239,7 +241,7 @@
 		{i18n}
 		isSelected={(option) => field.value === option.value}
 	/>
-	{#snippet trigger(popover: PopoverState)}
+	{#snippet trigger(popover: PopoverApi)}
 		<Field
 			{density}
 			{field}
@@ -277,6 +279,8 @@
 				aria-activedescendant={controller.activeDescendant}
 				aria-haspopup="listbox"
 				aria-invalid={controller.error !== null}
+				data-disabled={presence(field.disabled)}
+				{@attach popupOpenClaim(controller.visible)}
 				autocomplete="off"
 				class={classes.input({ size, hasValue: field.value !== null, disabled: field.disabled })}
 				class:placeholder:text-neutral={selectedOption && !searchValue}

@@ -1,5 +1,5 @@
 import type { Snippet } from 'svelte';
-import type { PopoverState } from './popover.state.svelte.js';
+import type { PopoverApi } from './popover.api.js';
 import type { ResponsiveProps } from '../Theme/theme.js';
 import type { Sizes } from '$lib/types/theme.js';
 import type { ButtonProps } from '../Button/index.js';
@@ -65,9 +65,9 @@ export type PopoverProps<Payload = unknown> = WithAttachments<{
 	 */
 	onOpenChange?: OpenChangeHandler;
 	/** Called once per open, after the open transition finishes (right away when none plays, e.g. `defaultOpen`). */
-	onAfterOpen?: (payload: PopoverState<Payload>) => void;
+	onAfterOpen?: (payload: PopoverApi<Payload>) => void;
 	/** Called once per close, after the close transition finishes. */
-	onAfterClose?: (payload: PopoverState<Payload>) => void;
+	onAfterClose?: (payload: PopoverApi<Payload>) => void;
 	/** Popover panel size variant; supports responsive values. */
 	size?: ResponsiveProps<Sizes>;
 	/** Gap in pixels between the reference element and the popover panel. */
@@ -150,8 +150,8 @@ export type PopoverProps<Payload = unknown> = WithAttachments<{
 	directedTransition?: boolean;
 	/** Fly/scale opacity transition overrides for open and close; supports responsive values. */
 	transition?: ResponsiveProps<FSOProps>;
-	/** Snippet for popover panel content; receives the popover state instance. */
-	children?: Snippet<[PopoverState<Payload>]>;
+	/** Snippet for popover panel content; receives the popover (`PopoverApi`). */
+	children?: Snippet<[PopoverApi<Payload>]>;
 	/**
 	 * Snippet, button props, or `false` to render, customize, or hide the trigger control. The
 	 * trigger that opened the popover anchors it and gets focus back; an open popover closes when
@@ -159,7 +159,7 @@ export type PopoverProps<Payload = unknown> = WithAttachments<{
 	 * element keeps it open. The built-in button's `onclick` runs first: calling
 	 * `event.preventDefault()` there stops the toggle.
 	 */
-	trigger?: Snippet<[PopoverState<Payload>]> | (ButtonProps & { content?: string }) | false;
+	trigger?: Snippet<[PopoverApi<Payload>]> | (ButtonProps & { content?: string }) | false;
 	/**
 	 * Where focus goes when the panel opens: `'first'` (autofocus target or first tabbable),
 	 * `'container'` (the panel itself), or `false` (stay on the trigger). When the popover

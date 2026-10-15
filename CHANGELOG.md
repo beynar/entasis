@@ -6,6 +6,52 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+This minor (0.12.0) batches the behaviour changes of the Base UI adoption. Every renamed API keeps
+a deprecated alias for one minor, so code that only uses renamed names keeps compiling until the
+aliases go. Some changes have no alias and need code changes before an app built on 0.11 compiles:
+the removed props (Accordion and Collapsible `accessible`, Collapsible `srOnlyContent`, Meter
+`steps`, Button `as`), the one-payload Tabbar `onValueChange`, and the Popover and Dialog snippet
+members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `focusScope`,
+`computedPosition`). The notes below cover both.
+
+### Upgrading from 0.11
+
+- `readonly` becomes `readOnly`. Every value control now takes `readOnly`: it stays focusable and
+  announced, refuses edits, and still validates and submits. Rename `RatingInput`'s `readonly` to
+  `readOnly`; the old name works for one minor. Inputs still render the native `readonly`
+  attribute, so `[readonly]` selectors keep matching.
+- Disabled fields are left out of the Form value. A field that is disabled, directly or through a
+  disabled `FormGroup` or `Form`, skips validation and is missing from `onSubmit`, `ask()` results
+  and `MultiStepForm` payloads, as in a native form. In `InferFormValue`, entries and groups that
+  declare `disabled` are optional keys, so code that reads them needs a fallback. Use `readOnly`
+  for a value that must still be submitted while it cannot be edited.
+- `PopoverState` becomes `PopoverApi`. Popover's `trigger` and `children` snippets, `onAfterOpen`,
+  `onAfterClose` and `usePopoverContext()` receive a `PopoverApi`, and Dialog's receive a
+  `DialogApi`. Change `import type { PopoverState } from 'entasis/popover'` to `PopoverApi`; the old
+  name is a deprecated alias for one minor. The narrow type keeps the open state, `open()`,
+  `close()`, `toggle()`, `setOpen()`, `placement`, `payload` and the `trigger`, `reference` and
+  `triggerFor` attachments. Read `status === 'open'` instead of `hasTransitioned`, and read the
+  `size`, `position` and `offset` (Popover) or `type` and `size` (Dialog) props you passed instead
+  of the deprecated snippet members. Internal members such as `place()`, `layer`, `focusScope` or
+  `computedPosition` are no longer typed.
+- `Accordion`'s `accessible` prop is removed, as are `Collapsible`'s `accessible` and
+  `srOnlyContent`. Use `hiddenUntilFound` so find-in-page can open a panel, or `keepMounted` to keep
+  closed content in the DOM.
+- `Tabbar` `onValueChange` takes one payload object: change `onValueChange={(value) => …}` to
+  `onValueChange={({ value }) => …}`. The payload also carries `reason`. `NavigationMenu`, new in
+  this release, uses the same shape: `{ value, details }`.
+- `onOpenChange(open, details)` now runs before the state changes on every overlay and disclosure,
+  so reading the component's open state inside the callback returns the previous value. Use the
+  first argument, and `details.cancel()` to refuse a change.
+- Other aliases kept for one minor: `Combobox` / `TagsInput` `showAllOnFocus` (now `openOnFocus`),
+  `SelectState.selectValue` (now `activate`), `Avatar` / `AvatarGroup` `delay` (now
+  `revealDelay`) and `Theme` `lastTooltipClosed` (now `hoverIntent`).
+- Behaviour to check in your app (details under Changed): a `required` `Switch` must be on,
+  `type="alert"` dialogs ignore outside presses, Escape in `Combobox` and `TagsInput` keeps focus in
+  the input, Enter on a `Checkbox` or `RadioInput` continues the form instead of toggling, a
+  `loading` `Button` stays focusable, `Tabs` and `Tabbar` fall back to the first enabled tab, and
+  `Accordion` arrow keys no longer move between triggers.
+
 ### Added
 
 - `Toast`: a toast with no `id` whose color, title and description match one still on screen updates
@@ -119,8 +165,14 @@ Unreleased section under the new version.
 - `Calendar` / `DateSelector` / `ColorPicker`: `readOnly` keeps them focusable and browsable,
   refuses selection and edits, and reports `aria-readonly` on their grid or sliders. A read-only
   `CheckboxesInput` marks each option with `aria-readonly`.
-- Docs: a Read only control on the Usage cards of the `Slider`, `NumberInput` and `KeyValueInput`
-  pages.
+- Docs: a Read only control on the Usage card of every value control (`Slider`, `NumberInput`,
+  `KeyValueInput`, `TextInput`, `TextArea`, `PasswordInput`, `PhoneInput`, `DateInput`,
+  `TimeInput`, `ColorInput`, `ColorPicker`, `Calendar`, `DateSelector`, `Select`, `Combobox`,
+  `Autocomplete`, `TagsInput`, `Checkbox`, `CheckboxesInput`, `RadioInput`, `Switch`,
+  `RatingInput`, `FileInput`, `TagGroup`, `VoiceInput` and `RichTextInput`), with the `readOnly`
+  value in the Usage code. The MCP docs of `TextInput`, `TextArea`, `PasswordInput`, `PhoneInput`,
+  `ColorInput`, `KeyValueInput`, `TagGroup`, `VoiceInput`, `DateInput` and `TimeInput` document
+  `readOnly`.
 - `FieldHiddenInputs` (from `entasis/field`) renders the inputs a custom control submits in a plain
   `<form>`. It takes one value, several values under the same name, or a checkbox that submits only
   while checked, and uses the field's `name`, `required`, `disabled` and `form`. While a required
@@ -399,6 +451,52 @@ Unreleased section under the new version.
   `Command` and the `PhoneInput` country picker, and the `TagsInput` tag toolbar),
   `progressIndeterminate`, `selectAll`, `oneTimeCode` and the `Dialog` Close label, in all 8
   locales.
+- `Popover`: `PopoverApi` (from `entasis/popover`) is the type the `trigger` and `children`
+  snippets, `onAfterOpen` and `onAfterClose` receive: `id`, `isOpen`, `status`, `openReason`,
+  `activeTrigger`, `placement`, `triggerProps`, `payload`, `open`, `close`, `toggle`, `setOpen`,
+  `trigger`, `reference` and `triggerFor`. Type a snippet parameter `PopoverApi<Row>` to read
+  `payload` as a `Row`. `PopoverOpenReason` is exported too.
+- `Dialog`: `DialogApi` (from `entasis/dialog`) is the type the `trigger` and `children` snippets,
+  `onAfterOpen` and `onAfterClose` receive: `id`, `isOpen`, `status`, `modal`, `computedType`,
+  `currentSnapPoint`, `triggerProps`, `open`, `close`, `toggle`, `setOpen`, `setSnapPoint`,
+  `trigger` and `reference`.
+- `Popover` / `Dialog`: the snippet payload has `status` (`'closed'`, `'entering'`, `'open'` or
+  `'exiting'`), which tells where the panel is in its open and close lifecycle.
+- `Popover`, `Dialog`, `Tooltip`, `HoverCard`, `Menu`, `Select`, `Combobox`, `Collapsible`,
+  `Accordion`, `Overlay` and `Sidebar` export typed styling-hook maps, each with its name type:
+  `popoverDataAttributes`, `popoverCssVariables`, `dialogDataAttributes`, `dialogCssVariables`,
+  `tooltipDataAttributes`, `tooltipCssVariables`, `hoverCardDataAttributes`,
+  `menuDataAttributes`, `selectDataAttributes`, `comboboxDataAttributes`,
+  `collapsibleDataAttributes`, `collapsibleCssVariables`, `accordionDataAttributes`,
+  `accordionCssVariables`, `overlayDataAttributes`, `sidebarDataAttributes` and
+  `sidebarCssVariables`. `hoverCardCssVariables`, `menuCssVariables`, `selectCssVariables` and
+  `comboboxCssVariables` list the Popover placement variables those panels inherit
+  (`--available-width`, `--available-height`, `--anchor-width`, `--anchor-height`,
+  `--transform-origin`). Each component's documentation has a Styling hooks section listing every
+  attribute and variable.
+- `Popover`: the panel carries `data-open`, `data-closed`, `data-entering` and `data-exiting`. The
+  element the panel is anchored to (the trigger that opened it, or the ref element) carries
+  `data-popup-open` while the popover is open. `Select`, `Combobox`, `Menu`, `PopupMenu`,
+  `ContextMenu` and `HoverCard` panels inherit these hooks, and so do their triggers and submenu
+  rows.
+- `Dialog`: the root, the panel and the shared backdrop carry `data-open` and `data-closed`; the
+  root and panel also carry `data-entering` and `data-exiting`. The trigger (the built-in button,
+  or an element with `dialog.trigger` or `dialog.reference`) carries `data-popup-open` while the
+  dialog is open.
+- `Tooltip`: the surface (`role="tooltip"`) carries `data-open`, `data-closed`, `data-entering`,
+  `data-exiting`, `data-side` and `data-align`. The trigger carries `data-popup-open` while its
+  tooltip shows.
+- `Select` / `Combobox`: the trigger or input carries `data-popup-open` and `data-disabled`, and
+  disabled options carry `data-disabled`. `HoverCard` triggers and disabled `Menu` and `MenuOption`
+  rows carry `data-disabled`.
+- `Sidebar`: collapsed to icons on desktop, a menu row that only expands a submenu (it has `items`
+  and no `href`, `view` or `menu`) now opens its sub entries in a flyout of links, like tree
+  folders. Before, the row did nothing. The flyout is a disclosure button with `aria-expanded` and
+  `aria-controls` holding a named `<nav>`. Tab enters it from the open row, Tab past the last link
+  moves on after the row and closes it, Shift+Tab returns to the row, and Escape or a press on any
+  entry closes it.
+- `Sidebar`: `menuSide` on rows, action descriptors and `headerButton` / `footerButton` accepts the
+  logical sides `inline-start` and `inline-end`, which mirror in right-to-left documents.
 
 ### Changed
 
@@ -759,11 +857,55 @@ Unreleased section under the new version.
   `reason` is `user`, or `initial`, `disabled` or `missing` when the tab list selected an enabled
   tab by itself, matching `Tabs`. Read `value` from the payload. The `TabbarValueChangeReason` and
   `TabbarValueChangePayload` types are exported.
+- `Popover` / `Dialog`: the `trigger` and `children` snippets, `onAfterOpen` and `onAfterClose`
+  receive the narrow `PopoverApi<Payload>` / `DialogApi` instead of the internal state classes, and
+  `usePopoverContext()` returns `PopoverApi | null`. Layers, focus scope, safe area, hover tracking
+  and swipe machinery are no longer in the public types, so they can change without breaking
+  consumers. Code that read those internals no longer type-checks.
+- `Popover`: a closed popover no longer builds its layer, focus scope, hover safe area, Tab bridge
+  or scroll lock. They are created when it opens and released once its closing transition ends.
+  Pages with many closed Selects, date inputs, comboboxes or row menus mount faster: in the
+  Chromium benchmark, 300 closed popovers went from about 70 ms to 31 ms, and 200 `DataTable` rows
+  with a row menu each from about 180 ms to 90 ms. Opening, closing, nesting and dismissal behave
+  as before.
+- `Overlay`: `data-open` is now a presence attribute. A closed overlay carries `data-closed` and no
+  `data-open`, where it used to carry `data-open="false"`. Selectors like `[data-open='true']`
+  become `[data-open]` (or Tailwind's `data-open:` variant). The overlay also carries
+  `data-entering` and `data-exiting` while it animates.
+- `Sidebar`: collapsible groups, inline submenus and tree branches use the shared disclosure panel
+  of `Collapsible` and `Accordion`. Their toggles set `aria-controls` while the panel is rendered
+  and carry presence `data-open` and `data-closed`; a submenu toggle used to carry
+  `data-open="true"`, so `data-[open=true]:` overrides become `data-open:`. Panels carry
+  `data-open` / `data-closed` and `data-entering` / `data-exiting`, expose
+  `--disclosure-panel-height` while they animate, and reverse an interrupted open or close from
+  where they are. The `motion` slot's duration, delay and easing time the height animation; the old
+  slide's opacity fade is gone.
+- `Sidebar`: row menus, collapsed flyouts and tooltips open toward the page from either edge. A
+  desktop menu with no `menuSide` opens at the `inline-end` of a left sidebar and the
+  `inline-start` of a right one; before, it always asked for `right` and only flipped when it ran
+  out of room. Its panel and trigger report `data-side` / `data-popup-side` as `inline-end` or
+  `inline-start`, not `right`. Tooltips of a right sidebar, or of any sidebar in right-to-left, no
+  longer point at the screen edge.
+- `Sidebar`: a menu row with `items` and no `href` runs its `onclick` before its submenu toggles,
+  both inline and in the icon-collapsed flyout; `event.preventDefault()` in that handler keeps the
+  submenu as it was. Before, expanded rows ignored `onclick`.
+- `Sidebar`: the docs say that a row has `data-popup-open` while any of its popups is open,
+  including its tooltip (every row on the collapsed rail, and every row with `tooltips="always"`).
+  Match `[aria-expanded="true"]` to style an open menu or flyout only.
+- Skill: the entasis skill documents `onOpenChange(open, details)`, `readOnly`, disabled fields
+  being left out of submitted values, `PopoverApi` / `DialogApi` and the styling-hook data
+  attributes. Its `Tabbar`, `NavigationMenu`, `Tooltip`, `Select`, `Combobox` and `TagsInput`
+  sections match the 0.12 API (one-payload `onValueChange`, `openOnFocus`, Escape keeping focus,
+  the new `Tooltip` props).
 
 ### Deprecated
 
-- `Popover` / `Dialog`: the `hasTransitioned` state field is deprecated; read
-  `lifecycle.status === 'open'`. It is kept for one minor.
+- `Popover` / `Dialog`: `hasTransitioned` on `PopoverApi` and `DialogApi` is deprecated; read
+  `status === 'open'`. The snippet members that echo props are deprecated too: `size`, `position`
+  and `offset` on `PopoverApi` (read the props you passed, or `placement` for where the panel
+  landed), and `type` and `size` on `DialogApi` (read `computedType` or the props you passed). All
+  are kept for one minor.
+- `Popover`: the `PopoverState` type is a deprecated alias of `PopoverApi`, kept for one minor.
 - `RatingInput`: `readonly` is deprecated in favour of `readOnly` and stays as an alias for one
   minor.
 - `Theme`: `lastTooltipClosed` on the theme state is deprecated in favour of `hoverIntent` (the
@@ -1188,6 +1330,18 @@ Unreleased section under the new version.
 - `NavigationMenu`: Escape returns focus to the trigger after a pointer-opened panel in browsers
   that do not focus buttons on click (Safari), and the item list wraps instead of clipping its last
   items in a narrow container.
+- `Popover`: attaching another trigger to a closed popover shared by many triggers (`triggerFor`
+  rows) no longer rewrites the ARIA attributes of every other trigger.
+- `Popover` / `Dialog` / `Tooltip`: a closing panel reports `data-closed` and `data-exiting` while
+  its exit transition plays. Before, the attributes stayed as they were when the panel was open,
+  because Svelte pauses an outroing block's template effects.
+- `Tooltip`: when a tooltip shares a trigger with a `Dialog`, `Select` or `Combobox`, the tooltip
+  closing no longer removes `data-popup-open` from that trigger while the dialog or list is still
+  open.
+- `Sidebar`: tooltips on collapsed rows, sub-rows, tree nodes and the activity bar pick their side
+  when they open, so they still face the page after a runtime `dir` change.
+- `TimeInput` / `DateInput`: the MCP documentation covers `readOnly` and `disabled`, and
+  `TimeInput`'s page has an import, a usage example and a props list.
 
 ## 0.11.0 — 2026-10-10
 

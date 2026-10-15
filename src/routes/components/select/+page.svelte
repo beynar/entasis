@@ -130,6 +130,7 @@
 			options: ['top', 'left']
 		},
 		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false },
 		{ name: 'alignItemWithTrigger', type: 'switch', label: 'Align item', value: true }
 	]);
 </script>
@@ -139,6 +140,7 @@
 	subtitle="A dropdown for choosing one option from a list."
 	component="Select"
 	features={[
+		'Styling hooks: data-popup-open and data-disabled on the trigger, data-highlighted, data-selected and data-disabled on options (selectDataAttributes)',
 		{ label: 'role=combobox + listbox ARIA pattern', test: 'a11y:select.aria' },
 		{ label: 'Arrow keys, Enter, Escape navigation', test: 'a11y:select.keyboard' },
 		'Opens over the trigger on the selected option',
@@ -173,7 +175,8 @@
 	size="${controls.value.size}"
 	density="${controls.value.density}"
 	labelPosition="${controls.value.labelPosition}"
-	disabled={${controls.value.disabled}}${controls.value.alignItemWithTrigger ? '' : '\n\talignItemWithTrigger={false}'}
+	disabled={${controls.value.disabled}}
+	readOnly={${controls.value.readOnly}}${controls.value.alignItemWithTrigger ? '' : '\n\talignItemWithTrigger={false}'}
 	label="Role"
 	description="Controls what this member can see and do"
 	placeholder="Select a role"
@@ -192,6 +195,7 @@
 				density={controls.value.density}
 				labelPosition={controls.value.labelPosition}
 				disabled={controls.value.disabled}
+				readOnly={controls.value.readOnly}
 				alignItemWithTrigger={controls.value.alignItemWithTrigger}
 				label="Role"
 				description="Controls what this member can see and do"

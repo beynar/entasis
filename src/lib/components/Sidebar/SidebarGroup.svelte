@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { disclosurePanel } from '$lib/attachments/disclosurePanel.svelte.js';
+	import { openStateAttributes } from '$lib/utils/stateAttributes.js';
 	import type { DisclosureIndicator } from '$lib/types/theme.js';
 	import type {
 		SidebarActiveVariant,
@@ -14,7 +16,6 @@
 	import SidebarIcon from './SidebarIcon.svelte';
 	import SidebarMenuList from './SidebarMenuList.svelte';
 	import SidebarTreeNode from './SidebarTreeNode.svelte';
-	import { slide } from '$lib/transitions/transition.js';
 	import { useSidebarMotion, useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 
 	let {
@@ -50,10 +51,8 @@
 	let contentRef = $state<HTMLElement | null>(null);
 	const classes = $derived(useSidebarTheme(theme));
 	// Motion preset from `sidebarTheme.motion`, through the override ladder
-	// (registry → `setSidebarTheme` → the instance `theme.motion` slot). `slide` is a
-	// factory: it must be created during init, because it reads the theme context.
+	// (registry → `setSidebarTheme` → the instance `theme.motion` slot).
 	const resolveMotion = useSidebarMotion();
-	const slideTransition = slide();
 	const collapseMotion = $derived(resolveMotion(undefined, { motion: theme?.motion }));
 	const isOpen = $derived(open ?? group.defaultOpen ?? true);
 	// A hover peek renders the collapsed panel at full width, so icon-mode behaviour has to
@@ -62,6 +61,11 @@
 		api.displayState === 'collapsed' && !api.isMobile && !api.isPeeking
 	);
 	const showGroupContent = $derived(!group.collapsible || isIconCollapsed || isOpen);
+	const uid = $props.id();
+	const contentId = `${uid}-content`;
+	// The group's `hidden` state and its height animation, reversible mid-way, come from the
+	// shared disclosure panel, as Collapsible's and Accordion's do.
+	const content = disclosurePanel({ open: () => showGroupContent, motion: () => collapseMotion });
 
 	function focusFirstMenuRow() {
 		const fallback = Array.from(
@@ -97,13 +101,14 @@
 {#snippet groupMenu()}
 	<div
 		bind:this={contentRef}
+		id={contentId}
 		data-slot="sidebar-group-content"
 		data-sidebar="group-content"
-		inert={showGroupContent ? undefined : true}
-		aria-hidden={showGroupContent ? undefined : 'true'}
+		{...content.attributes}
+		inert={content.open ? undefined : true}
+		aria-hidden={content.open ? undefined : 'true'}
 		class={classes.groupContent({ size })}
-		in:slideTransition={collapseMotion.in}
-		out:slideTransition={collapseMotion.out}
+		{@attach content.attach}
 	>
 		{#if group.tree}
 			<ul data-slot="sidebar-menu" data-sidebar="menu" class={classes.menu({ density })}>
@@ -140,12 +145,14 @@
 			inert={isIconCollapsed ? true : undefined}
 			aria-hidden={isIconCollapsed ? 'true' : undefined}
 			aria-expanded={isOpen}
+			aria-controls={content.rendered ? contentId : undefined}
+			{...openStateAttributes(isOpen)}
 			onclick={() => (open = !isOpen)}
 		>
 			<span>{group.label}</span>
 			<SidebarIcon
 				icon={caretRightIcon}
-				class="ml-auto transition-transform {isOpen ? 'rotate-90' : ''}"
+				class="ms-auto transition-transform {isOpen ? 'rotate-90' : 'rtl:-scale-x-100'}"
 			/>
 		</button>
 		{#if actions.length}
@@ -168,7 +175,7 @@
 				{/each}
 			</div>
 		{/if}
-		{#if showGroupContent}
+		{#if content.rendered}
 			{@render groupMenu()}
 		{/if}
 	</div>

@@ -7,7 +7,7 @@
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import { calendarBlankIcon } from '../../Icons/calendarBlank.js';
-	import type { PopoverState } from '../../Popover/popover.state.svelte.js';
+	import type { PopoverApi } from '../../Popover/popover.api.js';
 	import type { DateInputProps } from './dateInput.props.js';
 	import { useDateInputTheme } from './dateInput.theme.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
@@ -250,7 +250,7 @@
 	onValueChange={handleCalendarChange}
 	class={classes.popover({ class: theme?.popover?.base })}
 >
-	{#snippet trigger(popover: PopoverState)}
+	{#snippet trigger(popover: PopoverApi)}
 		<Field
 			{field}
 			size={rest.size}

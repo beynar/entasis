@@ -1,6 +1,6 @@
 <script lang="ts">
-	import MenuOption from '$lib/components/MenuOption/MenuOption.svelte';
-	import Popover from '$lib/components/Popover/Popover.svelte';
+	import { disclosurePanel } from '$lib/attachments/disclosurePanel.svelte.js';
+	import { openStateAttributes } from '$lib/utils/stateAttributes.js';
 	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
 	import { caretRightIcon } from '$lib/components/Icons/caretRight.js';
 	import { fileIcon } from '$lib/components/Icons/file.js';
@@ -13,10 +13,11 @@
 		SidebarTooltipMode,
 		SidebarTreeNode
 	} from './sidebar.props.js';
+	import { useDirection } from '$lib/utils/useDirection.svelte.js';
+	import { sidebarInwardPhysicalSide, sidebarTooltip } from './sidebar-position.js';
+	import SidebarFlyout from './SidebarFlyout.svelte';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import SidebarTreeNodeComponent from './SidebarTreeNode.svelte';
-	import { slide } from '$lib/transitions/transition.js';
-	import { composeHandlers } from '$lib/utils/handlers.js';
 	import { useSidebarMotion, useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 
 	let {
@@ -40,15 +41,12 @@
 	} = $props();
 
 	let open = $state<boolean | undefined>();
-	let popupOpen = $state(false);
 	let triggerRef = $state<HTMLButtonElement | null>(null);
 	let childrenRef = $state<HTMLUListElement | null>(null);
 	const classes = $derived(useSidebarTheme(theme));
 	// Motion preset from `sidebarTheme.motion`, through the override ladder
-	// (registry → `setSidebarTheme` → the instance `theme.motion` slot). `slide` is a
-	// factory: it must be created during init, because it reads the theme context.
+	// (registry → `setSidebarTheme` → the instance `theme.motion` slot).
 	const resolveMotion = useSidebarMotion();
-	const slideTransition = slide();
 	const collapseMotion = $derived(resolveMotion(undefined, { motion: theme?.motion }));
 	const isOpen = $derived(open ?? node.defaultOpen ?? false);
 	const hasChildren = $derived(!!node.children?.length);
@@ -68,11 +66,16 @@
 	);
 	const rowSlot = $derived(isSubNode ? 'sidebar-menu-sub-button' : 'sidebar-menu-button');
 	const rowData = $derived(isSubNode ? 'menu-sub-button' : 'menu-button');
-	const popupPosition = $derived(api.side === 'right' ? 'left-start' : 'right-start');
-
-	$effect(() => {
-		if (!isIconCollapsed) popupOpen = false;
-	});
+	let itemRef = $state<HTMLLIElement | null>(null);
+	const direction = useDirection(() => itemRef);
+	// Toward the page, whichever edge the sidebar sits on and whichever way the text reads, read
+	// when the tooltip opens so a runtime `dir` change is followed.
+	const tooltipPosition = () => sidebarInwardPhysicalSide(api.side, direction());
+	const uid = $props.id();
+	const childrenId = `${uid}-children`;
+	// The branch's `hidden` state and its height animation, reversible mid-way, come from the
+	// shared disclosure panel, as Collapsible's and Accordion's do.
+	const branch = disclosurePanel({ open: () => showChildren, motion: () => collapseMotion });
 
 	$effect(() => {
 		if (showChildren || !childrenRef?.contains(document.activeElement)) return;
@@ -80,55 +83,20 @@
 	});
 </script>
 
-{#snippet flyoutLevel(nodes: SidebarTreeNode[], group?: string)}
-	<ul
-		aria-label={group}
-		class="gap-micro m-0 flex list-none flex-col p-0 {group !== undefined ? 'ps-md' : ''}"
-	>
-		{#each nodes as child, index (child.label + index)}
-			<li>
-				{#if child.children?.length}
-					<span aria-hidden="true" class="px-md py-xs text-neutral/70 block text-xs font-medium">
-						{child.label}
-					</span>
-					{@render flyoutLevel(child.children, child.label)}
-				{:else}
-					<!-- The node's own handler runs first; `event.preventDefault()` skips the explicit
-					     close of the flyout. -->
-					<MenuOption
-						href={child.href}
-						title={child.label}
-						prefix={child.icon ?? fileIcon}
-						{size}
-						{density}
-						active={child.isActive}
-						attrs={child.isActive ? { 'aria-current': 'page' } : undefined}
-						onclick={composeHandlers(child.onclick, () => {
-							popupOpen = false;
-						})}
-					/>
-				{/if}
-			</li>
-		{/each}
-	</ul>
-{/snippet}
-
 <li
+	bind:this={itemRef}
 	data-slot={isSubNode ? 'sidebar-menu-sub-item' : 'sidebar-menu-item'}
 	data-sidebar={isSubNode ? 'menu-sub-item' : 'menu-item'}
 	class={isSubNode ? 'group/menu-sub-item relative' : classes.menuItem()}
 >
 	{#if hasChildren}
 		{#if isIconCollapsed && !isSubNode}
-			<!-- A flyout of links is a disclosure, not a menu: the trigger reports aria-expanded and
-			     aria-controls, and the panel is a named nav of links (nested folders become named
-			     sub-lists), so Tab walks it and every row is announced as the link it is. -->
-			<Popover
-				bind:open={popupOpen}
-				position={popupPosition}
-				fitTrigger={false}
-				size="small"
+			<SidebarFlyout
 				label={node.label}
+				links={node.children ?? []}
+				side={api.side}
+				{size}
+				{density}
 			>
 				{#snippet trigger(popover)}
 					<button
@@ -140,7 +108,7 @@
 						aria-expanded={popover.isOpen}
 						aria-controls={popover.isOpen ? popover.id : undefined}
 						{@attach tooltipContent
-							? tooltip({ content: tooltipContent, position: 'right' })
+							? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
 							: undefined}
 						{@attach popover.reference}
 						onclick={() => popover.toggle()}
@@ -149,10 +117,7 @@
 						<span class={classes.menuLabel()}>{node.label}</span>
 					</button>
 				{/snippet}
-				<nav aria-label={node.label} data-slot="sidebar-flyout" class="min-w-48">
-					{@render flyoutLevel(node.children ?? [])}
-				</nav>
-			</Popover>
+			</SidebarFlyout>
 		{:else}
 			<button
 				bind:this={triggerRef}
@@ -161,29 +126,32 @@
 				data-sidebar={rowData}
 				class={rowClass}
 				aria-expanded={showChildren}
+				aria-controls={branch.rendered ? childrenId : undefined}
+				{...openStateAttributes(showChildren)}
 				{@attach tooltipContent
-					? tooltip({ content: tooltipContent, position: 'right' })
+					? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
 					: undefined}
 				onclick={() => (open = !isOpen)}
 			>
 				<SidebarIcon
 					icon={caretRightIcon}
-					class="transition-transform {isOpen ? 'rotate-90' : ''}"
+					class="transition-transform {isOpen ? 'rotate-90' : 'rtl:-scale-x-100'}"
 				/>
 				<SidebarIcon icon={node.icon ?? folderIcon} />
 				<span class={isSubNode ? undefined : classes.menuLabel()}>{node.label}</span>
 			</button>
 		{/if}
-		{#if showChildren}
+		{#if branch.rendered}
 			<ul
 				bind:this={childrenRef}
+				id={childrenId}
 				data-slot="sidebar-menu-sub"
 				data-sidebar="menu-sub"
-				inert={showChildren ? undefined : true}
-				aria-hidden={showChildren ? undefined : 'true'}
+				{...branch.attributes}
+				inert={branch.open ? undefined : true}
+				aria-hidden={branch.open ? undefined : 'true'}
 				class={classes.treeSubMenu({ density })}
-				in:slideTransition={collapseMotion.in}
-				out:slideTransition={collapseMotion.out}
+				{@attach branch.attach}
 			>
 				{#each node.children ?? [] as child, index (child.label + index)}
 					<SidebarTreeNodeComponent
@@ -209,7 +177,9 @@
 			data-active-variant={activeVariant}
 			aria-current={node.isActive ? 'page' : undefined}
 			class={rowClass}
-			{@attach tooltipContent ? tooltip({ content: tooltipContent, position: 'right' }) : undefined}
+			{@attach tooltipContent
+				? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
+				: undefined}
 			onclick={node.onclick}
 		>
 			<SidebarIcon icon={node.icon ?? fileIcon} />
@@ -224,7 +194,9 @@
 			data-active={node.isActive ? 'true' : undefined}
 			data-active-variant={activeVariant}
 			class={rowClass}
-			{@attach tooltipContent ? tooltip({ content: tooltipContent, position: 'right' }) : undefined}
+			{@attach tooltipContent
+				? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
+				: undefined}
 			onclick={node.onclick}
 		>
 			<SidebarIcon icon={node.icon ?? fileIcon} />

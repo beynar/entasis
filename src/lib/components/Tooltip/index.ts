@@ -10,3 +10,9 @@ export {
 } from './tooltip.theme.js';
 
 export { tooltip } from './tooltip.attachment.svelte.js';
+export {
+	tooltipDataAttributes,
+	tooltipCssVariables,
+	type TooltipDataAttribute,
+	type TooltipCssVariable
+} from './tooltip.attributes.js';
