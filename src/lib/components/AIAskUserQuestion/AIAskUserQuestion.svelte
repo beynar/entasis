@@ -305,8 +305,14 @@
 		return target instanceof Element && target.closest('[role="radio"],[role="checkbox"]') !== null;
 	}
 
+	// The step itself holds focus when a step change finds no control inside it (a file step).
+	function isStep(target: EventTarget | null): boolean {
+		return target instanceof Element && target.matches('[data-slot="ai-ask-user-question-step"]');
+	}
+
 	// Number keys 1–9 pick the active question's options (Other… comes last); Enter continues or
-	// submits from a choice or a one-line field, and Ctrl/Cmd+Enter does so from a textarea.
+	// submits from a choice, a one-line field or a focused step, and Ctrl/Cmd+Enter does so from a
+	// textarea.
 	function handleKeydown(event: KeyboardEvent & { currentTarget: EventTarget & HTMLDivElement }) {
 		const preventedBefore = event.defaultPrevented;
 		onKeydownProp?.(event);
@@ -319,7 +325,7 @@
 			const modified = event.ctrlKey || event.metaKey;
 			const textArea = target instanceof HTMLTextAreaElement;
 			if (textArea ? !modified : modified && !isTextEntry(target)) return;
-			if (!isChoice(target) && !isTextEntry(target)) return;
+			if (!isChoice(target) && !isTextEntry(target) && !isStep(target)) return;
 			if (preventedBefore && !isChoice(target)) return;
 			event.preventDefault();
 			nextOrSubmit();

@@ -69,6 +69,36 @@ test('a11y:ai-ask-user-question.step-focus Enter moves focus into the next step 
 	await expect.poll(focusInActiveStep).toBe(true);
 });
 
+test('Enter on a focused step without controls continues and submits', async () => {
+	const submissions: unknown[] = [];
+	render(ThemeProviderHarness, {
+		props: {
+			component: AIAskUserQuestion as unknown as Component<Record<string, unknown>>,
+			questions: [
+				{ id: 'notes', title: 'Notes' },
+				{ id: 'files', title: 'Files', type: 'file' },
+				{ id: 'more', title: 'More files', type: 'file' }
+			],
+			onSubmit: (payload: { values: unknown }) => {
+				submissions.push(payload.values);
+			}
+		}
+	});
+	(page.getByRole('textbox').element() as HTMLElement).focus();
+	await userEvent.keyboard('Ship it');
+	await userEvent.keyboard('{Control>}{Enter}{/Control}');
+	await expect.poll(() => activeStep()?.textContent).toContain('Files');
+	await expect.poll(() => document.activeElement === activeStep()).toBe(true);
+
+	await userEvent.keyboard('{Enter}');
+	await expect.poll(() => activeStep()?.textContent).toContain('More files');
+	await expect.poll(() => document.activeElement === activeStep()).toBe(true);
+
+	await userEvent.keyboard('{Enter}');
+	await expect.poll(() => submissions).toHaveLength(1);
+	expect(submissions[0]).toMatchObject({ notes: 'Ship it' });
+});
+
 test('a picked option that auto-advances keeps focus inside the question', async () => {
 	render(ThemeProviderHarness, {
 		props: {

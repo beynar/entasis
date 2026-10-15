@@ -35,7 +35,7 @@ Questions are optional by default; \`required: true\` blocks continuing until an
 - \`activeIndex\` is bindable and is clamped whenever the question list changes.
 - \`autoAdvance\` wins over \`autoAdvanceSingle\`; \`autoAdvanceDelay\` wins over \`autoAdvanceSingleDelay\`.
 - Single-choice answers auto-advance by default after 280 ms, including values set through a custom question slot. Empty values, anything typed or chosen through "Other…", the last step, disabled state, and active async work never auto-advance.
-- Keyboard: number keys 1–9 pick (single) or toggle (multiple) the active question's options, with "Other…" last; digits typed into a text field stay text. Enter on a choice or a one-line field continues or submits; in a textarea, Ctrl/Cmd+Enter does. When the step changes with focus inside it, focus moves to the new step's first control, so the keys keep working step after step. A consumer \`onkeydown\` runs first and \`preventDefault()\` cancels these keys.
+- Keyboard: number keys 1–9 pick (single) or toggle (multiple) the active question's options, with "Other…" last; digits typed into a text field stay text. Enter on a choice or a one-line field continues or submits; in a textarea, Ctrl/Cmd+Enter does. When the step changes with focus inside it, focus moves to the new step's first control (or to the step itself when it has none, such as a file step, where Enter also continues or submits), so the keys keep working step after step. A consumer \`onkeydown\` runs first and \`preventDefault()\` cancels these keys.
 - \`disabled\` blocks all controls. \`submitting\` combines with internal async submit/discard state.
 
 ## Validation and actions
