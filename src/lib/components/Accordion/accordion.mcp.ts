@@ -279,6 +279,30 @@ The heading wraps the button, as the WAI-ARIA accordion pattern asks, so assisti
 </Accordion>
 \`\`\`
 
+## Styling hooks
+
+Every item, trigger and panel carries its own open state.
+
+Attributes are presence attributes (set while the state holds, omitted otherwise) unless they carry a value.
+
+**Data attributes**
+- \`data-open\`: On an item, its trigger, its panel and the panel's content: present while the item is expanded.
+- \`data-closed\`: On an item, its trigger, its panel and the panel's content: present while the item is collapsed, including during the exit transition.
+- \`data-entering\`: On a panel: present while its opening animation plays.
+- \`data-exiting\`: On a panel: present while its closing animation plays.
+- \`data-disabled\`: On an item and its trigger: present while the item is disabled.
+- \`data-state\`: On a trigger: \`open\` or \`closed\` (kept for compatibility; prefer \`data-open\` / \`data-closed\`).
+- \`data-index\`: On an item and its trigger: the item index.
+- \`data-slot\`: The part: \`accordion\`, \`accordion-item\`, \`accordion-trigger\`, \`accordion-icon-wrapper\` or \`accordion-panel\`.
+- \`data-size\`: On the root: the resolved \`size\`.
+- \`data-density\`: On the root: the resolved \`density\`.
+- \`data-variant\`: On the root: the resolved \`variant\`.
+
+**CSS variables**
+- \`--disclosure-panel-height\`: On a panel: its measured height in px while it animates, \`auto\` once open and \`0px\` once closed.
+
+The typed maps \`accordionDataAttributes\` and \`accordionCssVariables\` (from \`entasis/accordion\`) list each name with its meaning.
+
 ## Accessibility
 
 - Each trigger is a native \`<button>\` inside a heading element (\`headingLevel\`), with \`aria-expanded\` and, while its panel exists, \`aria-controls\`.

@@ -84,6 +84,7 @@
 	subtitle="Navigation panels with responsive collapse, data-driven navigation, menus, search, and recursive tree groups."
 	component="Sidebar"
 	features={[
+		'Styling hooks: presence data-open and data-closed on disclosure toggles and panels (sidebarDataAttributes)',
 		'Desktop icon and offcanvas collapse modes',
 		'Resizable desktop panels with drag handles',
 		'Hidden offcanvas sidebars reveal, resize, and dismiss through a safe hover area',

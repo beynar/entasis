@@ -139,6 +139,7 @@
 	subtitle="A dropdown for choosing one option from a list."
 	component="Select"
 	features={[
+		'Styling hooks: data-popup-open and data-disabled on the trigger, data-highlighted, data-selected and data-disabled on options (selectDataAttributes)',
 		{ label: 'role=combobox + listbox ARIA pattern', test: 'a11y:select.aria' },
 		{ label: 'Arrow keys, Enter, Escape navigation', test: 'a11y:select.keyboard' },
 		'Opens over the trigger on the selected option',

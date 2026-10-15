@@ -233,6 +233,7 @@
 	subtitle="A contextual menu that floats near its trigger."
 	component="PopupMenu"
 	features={[
+		'Styling hooks: Popover panel attributes on the popup, data-popup-open on the trigger, row state attributes (menuDataAttributes)',
 		'Popover + Menu composition',
 		'Bindable open for external control',
 		{ label: 'Hover or click open, escape dismiss', test: 'a11y:popup-menu.escape' },

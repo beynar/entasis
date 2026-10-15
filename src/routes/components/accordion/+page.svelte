@@ -116,6 +116,7 @@
 	subtitle="Vertically stacked sections that expand and collapse to reveal their content."
 	component="Accordion"
 	features={[
+		'Styling hooks: per-item data-open, data-closed and data-disabled, panel data-entering and data-exiting (accordionDataAttributes)',
 		'Heading around each trigger, labelled region per panel',
 		'Height animation on expand/collapse',
 		'oneAtATime or multi-panel open',

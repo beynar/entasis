@@ -105,17 +105,26 @@ The Popover component displays floating content positioned relative to a trigger
 
 A floating panel is placed before it shows: it stays hidden until its first placement lands, and \`focusOnOpen\` waits for that placement too. Every placement (scroll, resize, a flip, the end of the opening transition, and the visual viewport settling after an on-screen keyboard) updates these hooks.
 
-**Data attributes**
-- \`data-side\` on the panel: the side of the trigger it sits on after flipping: \`top\`, \`right\`, \`bottom\`, \`left\`; \`inline-start\` / \`inline-end\` when a logical side was requested; \`none\` when \`positionPanel\` placed it
-- \`data-align\` on the panel: \`start\`, \`center\` or \`end\` (absent with \`data-side="none"\`)
-- \`data-anchor-hidden\` on the panel: present while the trigger is scrolled out of view; the panel is hidden meanwhile
-- \`data-side\` / \`data-uncentered\` on the arrow (\`arrow\`): the physical side of the panel it sits on, and present while the trigger is not under the middle of the panel
-- \`data-popup-side\` on the trigger (or the \`ref\` element): the panel's \`data-side\` while it is placed, so a theme can flatten the corner the panel attaches to
+**Data attributes** (presence attributes unless they carry a value)
+- \`data-open\`: On the panel: present while open.
+- \`data-closed\`: On the panel: present while its exit transition plays (a closed panel is not rendered).
+- \`data-entering\`: On the panel: present while the enter transition plays.
+- \`data-exiting\`: On the panel: present while the exit transition plays.
+- \`data-side\`: On the panel: the side of the trigger it sits on after flipping, \`top\`, \`right\`, \`bottom\` or \`left\`; \`inline-start\` / \`inline-end\` when a logical side was requested; \`none\` when \`positionPanel\` placed it. On the arrow: the physical side of the panel it sits on.
+- \`data-align\`: On the panel: \`start\`, \`center\` or \`end\`, how it lines up with the trigger (absent with \`data-side="none"\`).
+- \`data-anchor-hidden\`: On the panel: present while the trigger is scrolled out of view; the panel is hidden meanwhile.
+- \`data-uncentered\`: On the arrow: present while the trigger is not under the middle of the panel (a shift moved the panel).
+- \`data-popup-open\`: On the element the panel is anchored to (the trigger that opened it, or the \`ref\` element): present while the popover is open.
+- \`data-popup-side\`: On the element the panel is anchored to: the panel's \`data-side\` while it is placed, so a theme can flatten the corner the panel attaches to.
 
 **CSS variables** (set on the positioned wrapper, inherited by the panel and its content)
-- \`--available-height\` / \`--available-width\`: the room between the trigger and the viewport edge on the panel's side, minus 20px. Cap a scrolling list with \`max-height: min(240px, var(--available-height))\` so it shrinks instead of covering its trigger
-- \`--anchor-width\` / \`--anchor-height\`: the trigger's size, snapped to the device pixel grid
-- \`--transform-origin\`: the panel corner facing the trigger, mirrored in right-to-left documents
+- \`--available-width\`: The width in px the panel can take before it reaches the viewport edges, minus 20px.
+- \`--available-height\`: The room in px between the trigger and the viewport edge on the panel's side, minus 20px. Cap a scrolling list with \`max-height: min(240px, var(--available-height))\`.
+- \`--anchor-width\`: The trigger's width in px, snapped to the device pixel grid.
+- \`--anchor-height\`: The trigger's height in px, snapped to the device pixel grid.
+- \`--transform-origin\`: The panel corner facing the trigger, mirrored in right-to-left documents; the point the panel scales from.
+
+The typed maps \`popoverDataAttributes\` and \`popoverCssVariables\` (from \`entasis/popover\`) list each name with its meaning. Select, Combobox, Menu, PopupMenu, HoverCard and Tooltip are built on Popover and carry the same panel hooks.
 
 \`\`\`svelte
 <script>

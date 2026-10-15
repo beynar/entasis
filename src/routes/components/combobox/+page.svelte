@@ -154,6 +154,7 @@
 	subtitle="A text input with a filterable dropdown of options."
 	component="Combobox"
 	features={[
+		'Styling hooks: data-popup-open on the input, data-highlighted, data-selected and data-disabled on options (comboboxDataAttributes)',
 		{ label: 'role=combobox with aria-autocomplete=list', test: 'a11y:combobox.aria' },
 		'Debounced search, async or static; stale responses are ignored',
 		{

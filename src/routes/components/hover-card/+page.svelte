@@ -50,6 +50,7 @@
 	subtitle="A hover and focus preview composed from Popover positioning and Card content."
 	component="HoverCard"
 	features={[
+		'Styling hooks: the card carries data-open, data-closed and data-side; the trigger data-popup-open (hoverCardDataAttributes)',
 		{ label: 'Opens on hover and keyboard focus', test: 'a11y:hover-card.focus-opens' },
 		'Configurable open and close delays',
 		'Neighbouring cards, tooltips and hover popovers open without waiting',

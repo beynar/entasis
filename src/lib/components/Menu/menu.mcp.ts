@@ -637,6 +637,29 @@ const moveTo = {
 <Menu {items} density="comfortable" />
 \`\`\`
 
+## Styling hooks
+
+Rows carry their state as attributes, so \`data-highlighted:\`, \`data-disabled:\` and \`data-selected:\` variants style them without a theme override. \`data-highlighted\` and \`data-selected\` are written as \`"true"\`; match them by presence (\`[data-highlighted]\`).
+
+Attributes are presence attributes (set while the state holds, omitted otherwise) unless they carry a value.
+
+**Data attributes**
+- \`data-highlighted\`: On a row: present while the keyboard or the pointer highlights it (the roving tab stop).
+- \`data-disabled\`: On a row: present while it is disabled.
+- \`data-selected\`: On a checkbox, radio or option row: present while it is checked or selected.
+- \`data-popup-open\`: On a submenu row: present while its submenu is open.
+- \`data-popup-side\`: On a submenu row: the submenu's \`data-side\` while it is placed.
+- \`data-open\`: On a popup menu or submenu panel: present while open.
+- \`data-closed\`: On a popup menu or submenu panel: present while its exit transition plays.
+- \`data-entering\`: On a popup menu or submenu panel: present while the enter transition plays.
+- \`data-exiting\`: On a popup menu or submenu panel: present while the exit transition plays.
+- \`data-side\`: On a popup menu or submenu panel: the side of its trigger it sits on after flipping.
+- \`data-align\`: On a popup menu or submenu panel: \`start\`, \`center\` or \`end\`.
+- \`data-size\`: On the root and the list: the resolved \`size\`.
+- \`data-density\`: On the root and the list: the resolved \`density\`.
+
+The typed map \`menuDataAttributes\` (from \`entasis/menu\`) lists each name with its meaning.
+
 ## Accessibility
 
 - Automatically sets \`role="menu"\` on the container

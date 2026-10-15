@@ -112,6 +112,27 @@ A card opened from inside another card (a link in its text) keeps the outer card
 </HoverCard>
 \`\`\`
 
+## Styling hooks
+
+The card is a Popover panel and carries its state attributes; the trigger carries the popup state.
+
+Attributes are presence attributes (set while the state holds, omitted otherwise) unless they carry a value.
+
+**Data attributes**
+- \`data-open\`: On the card: present while open.
+- \`data-closed\`: On the card: present while its exit transition plays.
+- \`data-entering\`: On the card: present while the enter transition plays.
+- \`data-exiting\`: On the card: present while the exit transition plays.
+- \`data-side\`: On the card: the side of the trigger it sits on after flipping, \`top\`, \`right\`, \`bottom\` or \`left\`.
+- \`data-align\`: On the card: \`start\`, \`center\` or \`end\`, how it lines up with the trigger.
+- \`data-anchor-hidden\`: On the card: present while the trigger is scrolled out of view.
+- \`data-state\`: On the trigger: \`open\` or \`closed\` (kept for compatibility; prefer \`data-popup-open\`).
+- \`data-popup-open\`: On the trigger: present while the card is open.
+- \`data-popup-side\`: On the trigger: the card's \`data-side\` while it is placed.
+- \`data-disabled\`: On the trigger: present while \`disabled\`.
+
+The typed map \`hoverCardDataAttributes\` (from \`entasis/hover-card\`) lists each name with its meaning.
+
 ## Accessibility
 
 - Opens on pointer hover and keyboard focus by default. Hover means a mouse or a pen: a touch tap's pointer events never open or close the card, focus does.

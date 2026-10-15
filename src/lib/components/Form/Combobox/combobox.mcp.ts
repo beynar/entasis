@@ -223,6 +223,27 @@ A searchable dropdown component that supports both static arrays and async optio
 - **errors**: Bindable array or boolean for validation errors
 - **focused**: Bindable boolean for focus state
 
+## Styling hooks
+
+The input, the field container, the list panel and every option carry state attributes. \`data-highlighted\` and \`data-selected\` are written as \`"true"\`; match them by presence.
+
+Attributes are presence attributes (set while the state holds, omitted otherwise) unless they carry a value.
+
+**Data attributes**
+- \`data-popup-open\`: On the input and the field container around it: present while the list (or its empty, loading or error status) shows.
+- \`data-popup-side\`: On the field container: the side of the field the list sits on.
+- \`data-disabled\`: On the input: present while disabled. On an option: present while it is disabled.
+- \`data-highlighted\`: On an option: present while the keyboard or the pointer highlights it.
+- \`data-selected\`: On an option: present while it is the value.
+- \`data-open\`: On the list panel: present while open.
+- \`data-closed\`: On the list panel: present while its exit transition plays.
+- \`data-entering\`: On the list panel: present while the enter transition plays.
+- \`data-exiting\`: On the list panel: present while the exit transition plays.
+- \`data-side\`: On the list panel: the side of the field it sits on after flipping.
+- \`data-align\`: On the list panel: \`start\`, \`center\` or \`end\`.
+
+The typed map \`comboboxDataAttributes\` (from \`entasis/combobox\`) lists each name with its meaning.
+
 ## Accessibility
 
 - Full ARIA combobox pattern implementation

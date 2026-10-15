@@ -101,6 +101,7 @@
 	subtitle="Floating content anchored to a trigger element."
 	component="Popover"
 	features={[
+		'Styling hooks: data-open, data-closed, data-entering, data-exiting, data-side, data-align on the panel, data-popup-open on the trigger (popoverDataAttributes)',
 		'Positioned with Floating UI flip & offset',
 		'Bindable open, external ref support',
 		'Click, hover, or custom trigger snippet',
@@ -171,6 +172,30 @@
 	</ComponentCard>
 
 	{#snippet examples()}
+		<ComponentCard
+			title="Styling hooks"
+			description="State attributes style each part without reading component state: the trigger carries data-popup-open while the panel is open, the panel data-open, data-side and data-align, and data-entering / data-exiting while its transition plays. popoverDataAttributes and popoverCssVariables list them all."
+			code={`<Popover
+	position="bottom-start"
+	class="data-[side=bottom]:rounded-t-none data-[side=top]:rounded-b-none"
+	trigger={{ content: 'Open', variant: 'outline', class: 'data-popup-open:bg-primary-muted' }}
+>
+	<p>The trigger stays tinted while this panel is open.</p>
+</Popover>`}
+		>
+			<Popover
+				position="bottom-start"
+				class="data-[side=bottom]:rounded-t-none data-[side=top]:rounded-b-none"
+				trigger={{
+					content: 'Open',
+					variant: 'outline',
+					class: 'data-popup-open:bg-primary-muted'
+				}}
+			>
+				<p class="text-sm">The trigger stays tinted while this panel is open.</p>
+			</Popover>
+		</ComponentCard>
+
 		<ComponentCard
 			description="Inline (static): the panel renders in normal flow where the component sits — no portal, no floating placement — so an open panel can be shown in place."
 			code={`<Popover inline open trigger={false} size="normal">

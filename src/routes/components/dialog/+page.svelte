@@ -100,6 +100,7 @@
 	subtitle="Modal, alert, and full-screen overlays layered above the page."
 	component="Dialog"
 	features={[
+		'Styling hooks: data-open, data-closed, data-entering, data-exiting on the root and panel, data-popup-open on the trigger (dialogDataAttributes)',
 		'Portals over a single shared backdrop',
 		{
 			label: 'Escape & click-outside dismissal, both toggleable',

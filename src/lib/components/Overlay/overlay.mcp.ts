@@ -75,6 +75,24 @@ Top and bottom content enters from its corresponding edge while the scrim fades 
 </div>
 \`\`\`
 
+## Styling hooks
+
+\`data-open\` is a presence attribute: a closed overlay carries \`data-closed\` and no \`data-open\` (before 0.12.0 it carried \`data-open="false"\`). Select an open overlay with \`[data-open]\` or Tailwind's \`data-open:\` variant.
+
+Attributes are presence attributes (set while the state holds, omitted otherwise) unless they carry a value.
+
+**Data attributes**
+- \`data-open\`: On the root: present while open (shown, or ready to show on hover or focus).
+- \`data-closed\`: On the root: present while closed, including during the exit transition.
+- \`data-entering\`: On the root: present while the opening transition plays.
+- \`data-exiting\`: On the root: present while the closing transition plays.
+- \`data-show-on\`: On the root: \`always\`, \`hover\` or \`focus\`, the resolved \`showOn\`.
+- \`data-position\`: On the root: the resolved \`position\`.
+- \`data-entasis-overlay\`: On the root: always present; marks the overlay inside its container.
+- \`data-overlay-content\`: On the content panel: always present.
+
+The typed map \`overlayDataAttributes\` (from \`entasis/overlay\`) lists each name with its meaning.
+
 ## Accessibility
 
 - The overlay is semantically neutral; supplied buttons and links keep their native semantics.

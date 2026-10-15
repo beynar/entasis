@@ -47,6 +47,7 @@
 	subtitle="Toggles the visibility of a single content region. Use the `peek` variant to tease long content behind a fading edge with a floating trigger."
 	component="Collapsible"
 	features={[
+		'Styling hooks: data-open, data-closed, data-entering, data-exiting and --disclosure-panel-height (collapsibleDataAttributes)',
 		'default & peek variants',
 		'bind:open — controlled or uncontrolled',
 		'chevron / plus-minus / none or a custom icon',

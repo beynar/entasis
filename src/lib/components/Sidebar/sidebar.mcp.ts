@@ -267,6 +267,38 @@ default verbatim, prefixes included.
 - **Row height.** A plain height beats the compound \`h-control-*\`: \`theme={{ menuButton: { base: 'h-11' } }}\`
 - **Bigger icons.** A prop, not a theme: \`iconSize="large"\`.
 
+## Styling hooks
+
+\`data-open\` on a disclosure toggle is a presence attribute (before 0.12.0 a submenu toggle carried \`data-open="true"\`); match it with \`[data-open]\` or \`data-open:\`.
+
+Attributes are presence attributes (set while the state holds, omitted otherwise) unless they carry a value.
+
+**Data attributes**
+- \`data-state\`: On the root: \`expanded\` or \`collapsed\`.
+- \`data-display-state\`: On the root: what is on screen, \`expanded\`, \`collapsed\` (the icon rail) or \`hidden\`.
+- \`data-collapsible\`: On the root: \`icon\` while collapsed to the icon rail, \`offcanvas\` while hidden, empty while expanded.
+- \`data-side\`: On the root, the panel and its rail and handles: \`left\` or \`right\`.
+- \`data-variant\`: On the root: the resolved \`variant\`.
+- \`data-size\`: On the root: the resolved \`size\`.
+- \`data-density\`: On the root: the resolved \`density\`.
+- \`data-peek\`: On the layout wrapper: \`true\` while a hover peek shows the collapsed panel at full width.
+- \`data-active\`: On a row: \`true\` while it is the current page (\`isActive\`).
+- \`data-active-variant\`: On a row: the resolved \`activeVariant\`.
+- \`data-open\`: On the toggle of a collapsible group, a submenu or a tree branch, and on its panel: present while it is open.
+- \`data-closed\`: On the toggle of a collapsible group, a submenu or a tree branch, and on its panel: present while it is closed, including during the exit transition.
+- \`data-entering\`: On a group, submenu or tree branch panel: present while its opening animation plays.
+- \`data-exiting\`: On a group, submenu or tree branch panel: present while its closing animation plays.
+- \`data-popup-open\`: On a row with a \`menu\` and on a collapsed row with a flyout: present while that popup is open.
+- \`data-sidebar\`: The part (\`sidebar\`, \`menu-button\`, \`menu-sub\`, \`group-content\`, \`rail\`, ...).
+
+**CSS variables**
+- \`--sidebar-width\`: On the root: the expanded panel width.
+- \`--sidebar-width-icon\`: On the root: the width of the collapsed icon rail.
+- \`--sidebar-width-mobile\`: On the root: the width of the mobile drawer.
+- \`--disclosure-panel-height\`: On a group, submenu or tree branch panel: its measured height in px while it animates, \`auto\` once open and \`0px\` once closed.
+
+The typed maps \`sidebarDataAttributes\` and \`sidebarCssVariables\` (from \`entasis/sidebar\`) list each name with its meaning.
+
 ## Accessibility
 
 - The body navigation renders inside a named \`<nav>\` landmark (\`data-sidebar="nav"\`), so assistive tech can jump straight to it and tell it apart from the activity bar's own landmark.

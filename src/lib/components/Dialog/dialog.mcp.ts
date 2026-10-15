@@ -390,6 +390,38 @@ The \`trigger\` and \`children\` snippets, \`onAfterOpen\` and \`onAfterClose\` 
 - **trigger**: attachment that makes any element the dialog's trigger (\`{@attach dialog.trigger}\`): \`reference\`, plus a click that opens the dialog and, on a non-control, \`role="button"\`, \`tabindex="0"\` and Enter/Space activation. The element's own handler runs first; \`event.preventDefault()\` there stops it
 - **reference**: attachment that keeps a custom trigger's \`aria-haspopup\`, \`aria-expanded\` and \`aria-controls\` in sync and makes it the element focus returns to, leaving clicks to the element
 
+## Styling hooks
+
+The root, the panel, the trigger and the shared backdrop carry state attributes, so a theme or a \`class\` can style each phase without reading component state.
+
+Attributes are presence attributes (set while the state holds, omitted otherwise) unless they carry a value.
+
+**Data attributes**
+- \`data-open\`: On the root (\`role="dialog"\`), the panel and the shared backdrop: present while open.
+- \`data-closed\`: On the root, the panel and the backdrop: present while their exit transition plays (a closed dialog is not rendered).
+- \`data-entering\`: On the root and the panel: present while the enter transition plays.
+- \`data-exiting\`: On the root and the panel: present while the exit transition plays.
+- \`data-type\`: On the root and the panel: the type actually shown (\`modal\`, \`drawerBottom\`, ...), after responsive records and the mobile-sheet fallback resolve.
+- \`data-modal\`: On the root: \`true\` or \`false\`, whether the dialog is modal.
+- \`data-popup-open\`: On the trigger (the built-in button, or an element with \`dialog.trigger\` / \`dialog.reference\`): present while the dialog is open.
+- \`data-dialog-open\`: On \`<html>\`: present while at least one modal dialog is open.
+
+**CSS variables**
+- \`--dialog-depth\`: On \`<html>\`: how many modal dialogs are open (\`1\` for a single sheet), for pages that scale back behind a sheet.
+- \`--drawer-inset\`: On the root: the gap between a drawer and the screen edge, from the \`inset\` prop or the theme.
+- \`--drawer-edge-radius\`: On a drawer's panel: the radius of its screen-edge corners, \`0\` while it touches the edge.
+
+The typed maps \`dialogDataAttributes\` and \`dialogCssVariables\` (from \`entasis/dialog\`) list each name with its meaning.
+
+\`\`\`svelte
+<script>
+	import { Dialog } from 'entasis/dialog';
+</script>
+
+<!-- Fade the trigger while its dialog is open -->
+<Dialog trigger={{ content: 'Open', class: 'data-popup-open:opacity-60' }} title="Settings">…</Dialog>
+\`\`\`
+
 ## Accessibility
 
 - Initial focus goes to an \`[autofocus]\` / \`[data-autofocus]\` element inside the dialog, else the first tabbable control (the close button is skipped), else the panel itself

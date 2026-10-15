@@ -408,6 +408,10 @@ Checkbox and radio rows keep the menu open on their own, so a menu of settings n
 <PopupMenu trigger={{ content: 'Main Menu' }} position="bottom-start" menu={{ items }} />
 \`\`\`
 
+## Styling hooks
+
+The popup is a Popover panel: it carries \`data-open\`, \`data-closed\`, \`data-entering\`, \`data-exiting\`, \`data-side\` and \`data-align\`, and the \`--available-height\`, \`--anchor-width\` and \`--transform-origin\` variables (\`popoverDataAttributes\` and \`popoverCssVariables\` from \`entasis/popover\`). The trigger carries \`data-popup-open\` while the menu is open. Rows and submenu rows carry \`data-highlighted\`, \`data-disabled\`, \`data-selected\` and \`data-popup-open\` (\`menuDataAttributes\` from \`entasis/menu\`).
+
 ## Accessibility
 
 - Inherits all Popover accessibility features: the trigger carries \`aria-haspopup="menu"\`, \`aria-expanded\`, and \`aria-controls\`, and focus returns to it on close
