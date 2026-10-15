@@ -10,9 +10,10 @@
 	import AIAskUserQuestionStep from './AIAskUserQuestionStep.svelte';
 	import {
 		getFirstMissingAIAskQuestionIndex,
-		getAIAskQuestionType,
+		hasAIAskAnswer,
 		hasSameAIAskAnswer,
 		isAIAskQuestionAnswered,
+		isAIAskQuestionRequired,
 		toAIAskAnswerList
 	} from './aiAskUserQuestionAnswers.js';
 	import type {
@@ -43,8 +44,11 @@
 		submitLabel,
 		submittingLabel,
 		discardLabel,
+		// Deprecated and no longer rendered; destructured so it never lands on the root element.
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		previousLabel,
 		nextLabel,
+		skipLabel,
 		emptyLabel,
 		emptyTitle,
 		emptyDescription,
@@ -60,6 +64,7 @@
 		children,
 		class: className,
 		theme,
+		onkeydown: onKeydownProp,
 		...attachments
 	}: AIAskUserQuestionProps = $props();
 	const t = $derived(useI18n());
@@ -76,6 +81,8 @@
 	let isSubmitting = $state(false);
 	let isDiscarding = $state(false);
 	let advanceTimer: ReturnType<typeof setTimeout> | undefined;
+	// Default question steps, keyed by question id, so number keys can pick their options.
+	const steps: Record<string, { pickOption: (position: number) => boolean } | undefined> = {};
 
 	const questionItems = $derived<AIAskQuestion[]>(Array.from(questions));
 	const resolvedValues = $derived(valueState.value);
@@ -90,6 +97,13 @@
 	const controlsDisabled = $derived(disabled || isWorking);
 	const isFirst = $derived(activeIndex <= 0);
 	const isLast = $derived(activeIndex >= questionItems.length - 1);
+	const canSkip = $derived(
+		Boolean(
+			activeQuestion &&
+			!isAIAskQuestionRequired(activeQuestion) &&
+			!hasAIAskAnswer(activeQuestion, resolvedValues)
+		)
+	);
 	const classes = $derived(useAIAskUserQuestionTheme(theme));
 	const componentState = $derived<AIAskUserQuestionState>({
 		questions: questionItems,
@@ -147,9 +161,10 @@
 		clearAdvance();
 		if (
 			!shouldAutoAdvance ||
-			getAIAskQuestionType(question) !== 'single' ||
+			question.type !== 'single' ||
 			typeof answer !== 'string' ||
-			answer.length === 0 ||
+			// Only a picked option advances; typing an "Other…" answer must not.
+			!question.options.some((option) => option.id === answer) ||
 			isLast ||
 			controlsDisabled ||
 			activeQuestion?.id !== question.id
@@ -211,7 +226,7 @@
 				questions: questionItems
 			});
 		} catch (error) {
-			errorMessage = getErrorMessage(error, 'Unable to submit the answers.');
+			errorMessage = getErrorMessage(error, t.aiAskSubmitFailed);
 		} finally {
 			isSubmitting = false;
 		}
@@ -225,7 +240,7 @@
 		try {
 			await onDiscard();
 		} catch (error) {
-			errorMessage = getErrorMessage(error, 'Unable to discard the questions.');
+			errorMessage = getErrorMessage(error, t.aiAskDiscardFailed);
 		} finally {
 			isDiscarding = false;
 		}
@@ -234,6 +249,44 @@
 	function getErrorMessage(error: unknown, fallback: string): string {
 		return error instanceof Error && error.message ? error.message : fallback;
 	}
+
+	function isTextEntry(target: EventTarget | null): boolean {
+		if (!(target instanceof HTMLElement)) return false;
+		if (target.isContentEditable || target instanceof HTMLTextAreaElement) return true;
+		return (
+			target instanceof HTMLInputElement &&
+			!['radio', 'checkbox', 'button', 'submit', 'reset', 'file'].includes(target.type)
+		);
+	}
+
+	function isChoice(target: EventTarget | null): boolean {
+		return target instanceof Element && target.closest('[role="radio"],[role="checkbox"]') !== null;
+	}
+
+	// Number keys 1–9 pick the active question's options (Other… comes last); Enter continues or
+	// submits from a choice or a one-line field, and Ctrl/Cmd+Enter does so from a textarea.
+	function handleKeydown(event: KeyboardEvent & { currentTarget: EventTarget & HTMLDivElement }) {
+		const preventedBefore = event.defaultPrevented;
+		onKeydownProp?.(event);
+		if ((!preventedBefore && event.defaultPrevented) || controlsDisabled || event.isComposing) {
+			return;
+		}
+		const target = event.target;
+		if (event.key === 'Enter') {
+			if (event.repeat || event.shiftKey || event.altKey) return;
+			const modified = event.ctrlKey || event.metaKey;
+			const textArea = target instanceof HTMLTextAreaElement;
+			if (textArea ? !modified : modified && !isTextEntry(target)) return;
+			if (!isChoice(target) && !isTextEntry(target)) return;
+			if (preventedBefore && !isChoice(target)) return;
+			event.preventDefault();
+			nextOrSubmit();
+			return;
+		}
+		if (preventedBefore || event.ctrlKey || event.metaKey || event.altKey) return;
+		if (!/^[1-9]$/.test(event.key) || isTextEntry(target) || !activeQuestion) return;
+		if (steps[activeQuestion.id]?.pickOption(Number(event.key) - 1)) event.preventDefault();
+	}
 </script>
 
 <div
@@ -241,6 +294,7 @@
 	data-slot="ai-ask-user-question"
 	class={classes.root({ className })}
 	{...attachments}
+	onkeydown={handleKeydown}
 >
 	{#if questionItems.length === 0}
 		{#if empty}
@@ -284,6 +338,7 @@
 				>
 					{#snippet children({ item })}
 						<AIAskUserQuestionStep
+							bind:this={steps[item.id]}
 							question={item}
 							value={resolvedValues[item.id]}
 							errorMessage={errorQuestionId === item.id ? errorMessage : undefined}
@@ -298,7 +353,7 @@
 			{/if}
 
 			{#if errorMessage && !errorQuestionId}
-				<Alert color="danger" variant="soft" description={errorMessage} class={classes.error()} />
+				<Alert color="danger" variant="soft" description={errorMessage} class={classes.alert()} />
 			{/if}
 		</div>
 
@@ -306,19 +361,17 @@
 			<Slot render={footer} payload={componentState} class={classes.footer()} />
 		{:else}
 			<AIAskUserQuestionFooter
-				{isFirst}
 				{isLast}
+				{canSkip}
 				disabled={controlsDisabled}
 				isSubmitting={resolvedIsSubmitting}
 				{isDiscarding}
 				canDiscard={Boolean(onDiscard)}
-				previousLabel={previousLabel ?? t.aiAskPrevious}
 				nextLabel={nextLabel ?? t.aiAskNext}
+				skipLabel={skipLabel ?? t.aiAskSkip}
 				submitLabel={submitLabel ?? t.submit}
 				submittingLabel={submittingLabel ?? t.aiAskSubmitting}
 				discardLabel={discardLabel ?? t.dismiss}
-				onPrevious={() => goTo(activeIndex - 1)}
-				onNext={() => goTo(activeIndex + 1)}
 				onPrimary={nextOrSubmit}
 				onDiscard={() => void discardAnswers()}
 				{theme}

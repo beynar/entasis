@@ -16,14 +16,15 @@ const defaultTrack = cva({
 	base: 'group/toc-stack relative w-full shrink-0 cursor-default overflow-visible'
 });
 const defaultPinArea = cva({ base: 'absolute inset-x-0 top-3 bottom-3' });
+// The rail and the visible-range bar are painted: the bar is the "you are here" of the thread.
 const defaultRail = cva({
-	base: 'pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 rounded-full'
+	base: 'pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 rounded-full bg-neutral/10'
 });
 const defaultViewport = cva({
-	base: 'absolute left-1/2 min-h-2 w-1 -translate-x-1/2 rounded-full'
+	base: 'absolute left-1/2 min-h-2 w-1 -translate-x-1/2 rounded-full bg-neutral/25'
 });
 const defaultPin = cva({
-	base: 'group absolute left-0 flex h-[5px] w-full -translate-y-1/2 cursor-default items-center rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-focus/50 focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+	base: 'group absolute left-0 flex h-2.5 w-full -translate-y-1/2 cursor-default items-center rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-focus/50 focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
 	variants: {
 		side: {
 			left: 'justify-start',
@@ -40,14 +41,19 @@ const defaultPin = cva({
 // the thread changes which pins are visible on every frame, and transitions restarted on each
 // scroll kept the browser restyling and repainting the TOC, which made the thread scroll stutter.
 const defaultPinIndicator = cva({
-	base: 'h-0.5 w-3 rounded-full bg-neutral [opacity:var(--ai-thread-toc-opacity)] [transform:scaleX(var(--ai-thread-toc-scale))] motion-safe:group-data-[interacting=true]/toc-stack:transition-[opacity,transform] motion-safe:group-data-[interacting=true]/toc-stack:duration-fast motion-safe:group-data-[interacting=true]/toc-stack:ease-standard',
+	base: 'h-0.5 rounded-full bg-neutral [opacity:var(--ai-thread-toc-opacity)] [transform:scaleX(var(--ai-thread-toc-scale))] motion-safe:group-data-[interacting=true]/toc-stack:transition-[opacity,transform] motion-safe:group-data-[interacting=true]/toc-stack:duration-fast motion-safe:group-data-[interacting=true]/toc-stack:ease-standard',
 	variants: {
 		side: {
 			left: 'origin-left',
 			right: 'origin-right'
+		},
+		// The active turn's pin is longer and fully opaque; pins in view are lighter, the rest faint.
+		active: {
+			true: 'w-4',
+			false: 'w-3'
 		}
 	},
-	defaultVariants: { side: 'left' }
+	defaultVariants: { side: 'left', active: false }
 });
 const defaultPreviewAnchor = cva({
 	base: 'pointer-events-none absolute top-[var(--ai-thread-toc-preview-top)] z-10 flex h-[5px] w-7 -translate-y-1/2 opacity-0',
@@ -71,6 +77,7 @@ const defaultPreviewExcerpt = cva({
 	base: 'line-clamp-4 text-xs leading-relaxed text-neutral/70'
 });
 const defaultPreviewMetadata = cva({ base: 'truncate text-xs text-neutral/70' });
+const defaultPreviewTurn = cva({ base: 'truncate text-xs text-neutral/60 tabular-nums' });
 const defaultPreviewFiles = cva({
 	base: 'flex min-w-0 flex-wrap items-center gap-x-lg gap-y-xs pt-micro'
 });
@@ -92,6 +99,7 @@ export const aiThreadTocTheme = {
 	previewTitle: defaultPreviewTitle,
 	previewExcerpt: defaultPreviewExcerpt,
 	previewMetadata: defaultPreviewMetadata,
+	previewTurn: defaultPreviewTurn,
 	previewFiles: defaultPreviewFiles
 };
 
@@ -99,6 +107,6 @@ export type AIThreadTocTheme = typeof aiThreadTocTheme;
 export type AIThreadTocThemeProps = InferComponentTheme<AIThreadTocTheme>;
 export const setAIThreadTocTheme = setComponentTheme<AIThreadTocTheme>('ai-thread-toc');
 export const useAIThreadTocTheme = useComponentTheme<AIThreadTocTheme>(
-	'aiThreadToc',
+	'ai-thread-toc',
 	aiThreadTocTheme
 );

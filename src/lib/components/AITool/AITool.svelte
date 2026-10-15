@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Accordion from '../Accordion/Accordion.svelte';
-	import Spinner from '../Spinner/Spinner.svelte';
-	import type { AIToolCall, AIToolLabels, AIToolProps } from './aiTool.props.js';
+	import type { AIToolCall, AIToolLabels, AIToolProps, AIToolStatus } from './aiTool.props.js';
 	import { useAIToolTheme } from './aiTool.theme.js';
 	import { createAIToolAccordionTheme } from './aiToolPrimitiveThemes.js';
 	import {
-		formatAIToolStatus,
+		getAIToolGroupSummary,
 		getAIToolGroupValue,
+		getAIToolStatusLabel,
 		getAIToolStatusTone,
-		isActiveAIToolStatus,
 		resolveAIToolGroupStatus,
 		resolveAIToolStatus
 	} from './toolRendering.js';
 	import AIToolCallList from './AIToolCallList.svelte';
+	import AIToolStatusMark from './AIToolStatusMark.svelte';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type ToolGroupAccordionItem = { id: string; tools: readonly AIToolCall[] };
@@ -30,8 +30,10 @@
 		toggleIcon = 'none',
 		maxDepth = 8,
 		maxEntries = 80,
+		valueView = 'json',
+		maxLines = 12,
 		labels,
-		formatStatus = formatAIToolStatus,
+		formatStatus: formatStatusProp,
 		icon,
 		title,
 		status,
@@ -62,12 +64,20 @@
 	);
 	const resolvedLabels = $derived<AIToolLabels>({
 		fallbackTitle: labels?.fallbackTitle ?? t.aiToolCall,
-		group: labels?.group ?? t.aiToolCalls,
+		group:
+			labels?.group ??
+			((_count, groupTools) =>
+				getAIToolGroupSummary(groupTools, labels?.fallbackTitle ?? t.aiToolCall, t)),
 		input: labels?.input ?? t.aiToolInput,
 		output: labels?.output ?? t.aiToolOutput,
 		error: labels?.error ?? t.aiToolError,
-		empty: labels?.empty ?? t.aiToolEmpty
+		empty: labels?.empty ?? t.aiToolEmpty,
+		showAll: labels?.showAll ?? t.aiToolShowAll,
+		showLess: labels?.showLess ?? t.aiToolShowLess
 	});
+	const formatStatus = $derived(
+		formatStatusProp ?? ((value: AIToolStatus) => getAIToolStatusLabel(value, t))
+	);
 	const resolvedStatus = $derived(
 		singleTool ? resolveAIToolStatus(singleTool) : resolveAIToolGroupStatus(resolvedTools)
 	);
@@ -85,22 +95,25 @@
 
 {#snippet groupTitle(payload: { item: ToolGroupAccordionItem })}
 	{@const currentStatus = resolveAIToolGroupStatus(payload.item.tools)}
-	<div data-slot="ai-tool-group-trigger-content" class={classes.title()}>
-		<span
-			data-slot="ai-tool-group-icon"
-			role="img"
-			aria-label={formatStatus(currentStatus)}
-			class={classes.groupIcon({ tone: getAIToolStatusTone(currentStatus) })}
-		>
-			{#if isActiveAIToolStatus(currentStatus)}
-				<Spinner size="small" decorative class="motion-reduce:[&_*]:animate-none" />
-			{:else}
-				<span class={classes.indicatorDot()}></span>
-			{/if}
-		</span>
+	{@const tone = getAIToolStatusTone(currentStatus)}
+	{@const statusLabel = formatStatus(currentStatus)}
+	<div data-slot="ai-tool-group-trigger-content" data-tone={tone} class={classes.title()}>
+		<AIToolStatusMark
+			status={currentStatus}
+			label={statusLabel}
+			slot="ai-tool-group-icon"
+			{theme}
+		/>
 		<span data-slot="ai-tool-group-title" class={classes.name()}>
-			{resolvedLabels.group(payload.item.tools.length)}
+			{resolvedLabels.group(payload.item.tools.length, payload.item.tools)}
 		</span>
+		{#if tone !== 'success'}
+			<span data-slot="ai-tool-group-meta" class={classes.meta()}>
+				<span data-slot="ai-tool-group-status" class={classes.statusWord({ tone })}>
+					{statusLabel}
+				</span>
+			</span>
+		{/if}
 	</div>
 {/snippet}
 
@@ -123,6 +136,8 @@
 			{error}
 			{maxDepth}
 			{maxEntries}
+			{valueView}
+			{maxLines}
 			{theme}
 		/>
 	</div>
@@ -143,6 +158,7 @@
 			{onValueChange}
 			{multiple}
 			scope="single"
+			{variant}
 			{toggleIcon}
 			labels={resolvedLabels}
 			{formatStatus}
@@ -155,6 +171,8 @@
 			{error}
 			{maxDepth}
 			{maxEntries}
+			{valueView}
+			{maxLines}
 			{theme}
 		/>
 	</div>

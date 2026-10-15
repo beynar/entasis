@@ -7,6 +7,7 @@
 	import { quintOut } from 'svelte/easing';
 	import { prefersReducedMotion } from '$lib/utils/motion.svelte.js';
 	import { scale } from 'svelte/transition';
+	import type { Attachment } from 'svelte/attachments';
 	import HoverCard from '../HoverCard/HoverCard.svelte';
 	import ScrollArea from '../ScrollArea/ScrollArea.svelte';
 	import Slot from '../Slot/Slot.svelte';
@@ -31,6 +32,10 @@
 	const PREVIEW_DELAY = 80;
 	const PREVIEW_CLOSE_DELAY = 120;
 	const PREVIEW_GAP = 10;
+	const PIN_ACTIVE_OPACITY = 1;
+	const PIN_VISIBLE_OPACITY = 0.55;
+	const PIN_IDLE_OPACITY = 0.28;
+	const DEFAULT_MIN_CONTAINER_WIDTH = 480;
 
 	let {
 		ref = $bindable(),
@@ -40,6 +45,7 @@
 		side = 'left',
 		previewSide,
 		previewAlign = 'center',
+		minContainerWidth = DEFAULT_MIN_CONTAINER_WIDTH,
 		pin,
 		preview,
 		title,
@@ -57,6 +63,12 @@
 	let pointerPinPosition = $state<number>();
 	let focusedPinIndex = $state<number>();
 	let pinAreaElement = $state<HTMLDivElement>();
+	// Roving tab stop: the last focused pin while focus is inside, otherwise the active pin.
+	let rovingKey = $state<string>();
+	let narrow = $state(false);
+	// A touch tap previews a pin first; a second tap on the same pin navigates.
+	let lastPointerType: string | undefined;
+	let touchPreviewKey = $state<string>();
 	let pendingPointerY: number | undefined;
 	let pointerFrame: number | undefined;
 	let previewOpenTimer: ReturnType<typeof setTimeout> | undefined;
@@ -103,6 +115,18 @@
 		previewPinIndex >= 0 ? pinStackTopPercent(previewPinIndex, pins.length) : 50
 	);
 	const resolvedPreviewPosition = $derived(previewPosition());
+	const activePinIndex = $derived(
+		pins.findIndex((tocPin) => tocPin.entryIndex === tocState.activeIndex)
+	);
+	const tabStopIndex = $derived.by(() => {
+		const roving =
+			rovingKey === undefined ? -1 : pins.findIndex((tocPin) => tocPin.key === rovingKey);
+		if (roving >= 0) return roving;
+		return activePinIndex >= 0 ? activePinIndex : 0;
+	});
+	const previewTurn = $derived(
+		previewEntry ? tocState.entries.findIndex((entry) => entry.key === previewEntry?.key) + 1 : 0
+	);
 	const pinTransitionDuration = $derived(prefersReducedMotion() ? 0 : 240);
 	const pinFlipDuration = $derived(prefersReducedMotion() ? 0 : 170);
 	const classes = $derived(useAIThreadTocTheme(theme));
@@ -145,7 +169,11 @@
 		targeted: boolean
 	): string {
 		if (targeted) return '1';
-		const baseOpacity = active || visible ? 0.8 : 0.32;
+		const baseOpacity = active
+			? PIN_ACTIVE_OPACITY
+			: visible
+				? PIN_VISIBLE_OPACITY
+				: PIN_IDLE_OPACITY;
 		const peakOpacity = Math.max(baseOpacity, PIN_NEIGHBOR_MAX_OPACITY);
 		return (baseOpacity + influence * (peakOpacity - baseOpacity)).toFixed(3);
 	}
@@ -153,6 +181,96 @@
 	function activate(entry: AIThreadTocEntry<TMessage>): void {
 		tocState.scrollToIndex(entry.index);
 	}
+
+	function handlePinPointerDown(event: PointerEvent): void {
+		lastPointerType = event.pointerType;
+	}
+
+	function handlePinClick(entry: AIThreadTocEntry<TMessage>, pinIndex: number, key: string): void {
+		const touch = lastPointerType === 'touch';
+		lastPointerType = undefined;
+		if (touch && touchPreviewKey !== key) {
+			touchPreviewKey = key;
+			pointerPinPosition = pinIndex;
+			pointerPinIndex = pinIndex;
+			openPreview(entry, true);
+			return;
+		}
+		if (touch) closeTouchPreview();
+		activate(entry);
+	}
+
+	function closeTouchPreview(): void {
+		if (touchPreviewKey === undefined) return;
+		touchPreviewKey = undefined;
+		pointerPinIndex = undefined;
+		pointerPinPosition = undefined;
+		schedulePreviewClose();
+	}
+
+	// A touch preview closes on the next tap outside the rail.
+	$effect(() => {
+		if (touchPreviewKey === undefined || !ref) return;
+		const root = ref;
+		const ownerDocument = root.ownerDocument;
+		const handlePointerDown = (event: PointerEvent) => {
+			if (event.target instanceof Node && root.contains(event.target)) return;
+			closeTouchPreview();
+		};
+		ownerDocument.addEventListener('pointerdown', handlePointerDown, true);
+		return () => ownerDocument.removeEventListener('pointerdown', handlePointerDown, true);
+	});
+
+	function handleStackKeydown(event: KeyboardEvent): void {
+		if (event.altKey || event.ctrlKey || event.metaKey || pins.length === 0) return;
+		const current =
+			event.target instanceof Element ? event.target.closest('[data-toc-pin-key]') : null;
+		if (!current) return;
+		const index = pins.findIndex(
+			(tocPin) => tocPin.key === current.getAttribute('data-toc-pin-key')
+		);
+		let next: number;
+		if (event.key === 'ArrowDown' || event.key === 'ArrowRight') next = index + 1;
+		else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') next = index - 1;
+		else if (event.key === 'Home') next = 0;
+		else if (event.key === 'End') next = pins.length - 1;
+		else return;
+		event.preventDefault();
+		focusPin(Math.max(0, Math.min(pins.length - 1, next)));
+	}
+
+	function focusPin(pinIndex: number): void {
+		const tocPin = pins[pinIndex];
+		if (!tocPin || !pinAreaElement) return;
+		rovingKey = tocPin.key;
+		const element = Array.from(
+			pinAreaElement.querySelectorAll<HTMLElement>('[data-slot="ai-thread-toc-pin"]')
+		).find((candidate) => candidate.dataset.tocPinKey === tocPin.key);
+		element?.focus();
+	}
+
+	// The rail is a wide-layout affordance: it removes itself when the surrounding container (the
+	// nearest ancestor wider than the rail, typically the thread) is narrower than
+	// `minContainerWidth`.
+	const watchContainer: Attachment<HTMLElement> = (node) => {
+		if (typeof ResizeObserver === 'undefined') return;
+		let container = node.parentElement;
+		while (container && container.clientWidth <= node.offsetWidth + 1) {
+			container = container.parentElement;
+		}
+		if (!container) return;
+		const measured = container;
+		const measure = () => {
+			narrow = minContainerWidth > 0 && measured.clientWidth < minContainerWidth;
+		};
+		const observer = new ResizeObserver(measure);
+		observer.observe(measured);
+		measure();
+		return () => {
+			observer.disconnect();
+			narrow = false;
+		};
+	};
 
 	function handleStackPointerMove(event: PointerEvent): void {
 		if (event.pointerType !== 'mouse' && event.pointerType !== 'pen') return;
@@ -213,6 +331,10 @@
 		const pinIndex = Math.round(pinPosition);
 		const tocPin = pins[pinIndex];
 		if (!tocPin) return;
+		if (lastPointerType === 'touch') {
+			handlePinClick(tocPin.entry, pinIndex, tocPin.key);
+			return;
+		}
 		activatePointerPin(pinIndex);
 		activate(tocPin.entry);
 	}
@@ -228,6 +350,7 @@
 			return;
 		}
 		focusedPinIndex = pinIndex;
+		rovingKey = pins[pinIndex]?.key;
 		openPreview(entry, true);
 	}
 
@@ -236,6 +359,7 @@
 		if (next && event.currentTarget instanceof HTMLElement && event.currentTarget.contains(next))
 			return;
 		focusedPinIndex = undefined;
+		rovingKey = undefined;
 		const pointerPin = pointerPinIndex === undefined ? undefined : pins[pointerPinIndex];
 		if (pointerPin) {
 			openPreview(pointerPin.entry);
@@ -315,6 +439,8 @@
 	{#if previewEntry}
 		<AIThreadTocPreview
 			entry={previewEntry}
+			turn={previewTurn}
+			total={tocState.entries.length}
 			{preview}
 			{title}
 			{excerpt}
@@ -329,17 +455,19 @@
 	bind:this={ref}
 	data-slot="ai-thread-toc"
 	aria-label={t.threadMinimap}
+	data-narrow={narrow || undefined}
+	hidden={narrow || undefined}
 	class={classes.root({ side, className })}
 	{...rootAttributes}
+	{@attach watchContainer}
 >
-	{#if pins.length > 0}
+	{#if pins.length > 0 && !narrow}
 		<ScrollArea
 			label={scrollAreaLabel ?? t.threadMinimapEntries}
 			class={classes.scrollArea()}
 			theme={aiThreadTocScrollAreaTheme}
 		>
 			<div class={classes.scrollContent()}>
-				<!-- svelte-ignore a11y_click_events_have_key_events -->
 				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<div
 					data-slot="ai-thread-toc-stack"
@@ -348,7 +476,9 @@
 					style:height={`${trackHeight}px`}
 					onpointermove={handleStackPointerMove}
 					onpointerleave={handleStackPointerLeave}
+					onpointerdown={handlePinPointerDown}
 					onfocusout={handleStackFocusOut}
+					onkeydown={handleStackKeydown}
 					onclick={handleStackClick}
 				>
 					<div
@@ -380,6 +510,7 @@
 								data-bucket={tocPin.isBucket}
 								data-magnified={influence > 0 ? 'true' : undefined}
 								data-targeted={targeted ? 'true' : undefined}
+								tabindex={pinIndex === tabStopIndex ? 0 : -1}
 								class={classes.pin({ side, active })}
 								style:top={`${pinStackTopPercent(pinIndex, pins.length)}%`}
 								style:transform-origin={side === 'left' ? 'left center' : 'right center'}
@@ -392,14 +523,14 @@
 									easing: quintOut
 								}}
 								onfocus={(event) => handlePinFocus(event, tocPin.entry, pinIndex)}
-								onclick={() => activate(tocPin.entry)}
+								onclick={() => handlePinClick(tocPin.entry, pinIndex, tocPin.key)}
 							>
 								{#if pin}
 									<Slot render={pin} payload={{ entry: tocPin.entry, active }} />
 								{:else}
 									<span
 										data-slot="ai-thread-toc-pin-indicator"
-										class={classes.pinIndicator({ side })}
+										class={classes.pinIndicator({ side, active })}
 										style:--ai-thread-toc-scale={pinScale(influence, targeted)}
 										style:--ai-thread-toc-opacity={pinOpacity(influence, active, visible, targeted)}
 									></span>

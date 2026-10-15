@@ -39,22 +39,25 @@
 			<div class={classes.title()}>{title}</div>
 			{#if context}<div class={classes.description()}>{context}</div>{/if}
 		</div>
-		<div class={classes.progressGroup()}>
-			<span class={classes.progress()}>
-				{progressLabel(activeIndex + 1, questions.length)}
-			</span>
-			<div class={classes.steps()} aria-label={t.questions}>
-				{#each questions as question, index (question.id)}
-					<button
-						type="button"
-						aria-label={t.goToQuestion(index + 1)}
-						aria-current={index === activeIndex ? 'step' : undefined}
-						{disabled}
-						class={classes.step({ active: index === activeIndex })}
-						onclick={() => onSelect(index)}
-					></button>
-				{/each}
+		<!-- A lone question has nowhere to go: no pager. -->
+		{#if questions.length > 1}
+			<div class={classes.progressGroup()}>
+				<span class={classes.progress()}>
+					{progressLabel(activeIndex + 1, questions.length)}
+				</span>
+				<div class={classes.steps()} role="group" aria-label={t.questions}>
+					{#each questions as question, index (question.id)}
+						<button
+							type="button"
+							aria-label={t.goToQuestion(index + 1)}
+							aria-current={index === activeIndex ? 'step' : undefined}
+							{disabled}
+							class={classes.step({ active: index === activeIndex })}
+							onclick={() => onSelect(index)}
+						></button>
+					{/each}
+				</div>
 			</div>
-		</div>
+		{/if}
 	</div>
 </div>

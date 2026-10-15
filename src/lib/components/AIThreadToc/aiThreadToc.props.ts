@@ -43,6 +43,12 @@ export type AIThreadTocProps<TMessage extends AIThreadItem = AIThreadItem> = Wit
 		previewSide?: AIThreadTocPreviewSide;
 		/** Alignment of previews relative to their navigation pins. */
 		previewAlign?: AIThreadTocPreviewAlign;
+		/**
+		 * Container width in pixels below which the rail removes itself. The container is the
+		 * nearest ancestor wider than the rail, usually the thread. `0` keeps it at every width.
+		 * @default 480
+		 */
+		minContainerWidth?: number;
 		/** Replaces the visual indicator for each navigation pin. */
 		pin?: Slot<AIThreadTocPinPayload<TMessage>>;
 		/** Replaces the complete preview for a user turn. */

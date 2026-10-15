@@ -14,7 +14,20 @@ type AIQuestionBase = {
 	id: string;
 	title: string;
 	description?: string;
+	/** Blocks continuing until answered and shows a required marker. Questions are optional by default. */
 	required?: boolean;
+};
+
+type AIChoiceQuestionOther = {
+	/**
+	 * Adds a free-text "Other…" choice after the options. Its text is stored in the answer as
+	 * typed: the single answer string, or one extra entry of the multiple answer array.
+	 */
+	allowOther?: boolean;
+	/** Label of the "Other…" choice. */
+	otherLabel?: string;
+	/** Placeholder of the "Other…" text field. */
+	otherPlaceholder?: string;
 };
 
 export type AITextQuestion = AIQuestionBase & {
@@ -22,14 +35,16 @@ export type AITextQuestion = AIQuestionBase & {
 	placeholder?: string;
 	rows?: number;
 };
-export type AISingleQuestion = AIQuestionBase & {
-	type: 'single';
-	options: readonly AIQuestionOption[];
-};
-export type AIMultipleQuestion = AIQuestionBase & {
-	type: 'multiple';
-	options: readonly AIQuestionOption[];
-};
+export type AISingleQuestion = AIQuestionBase &
+	AIChoiceQuestionOther & {
+		type: 'single';
+		options: readonly AIQuestionOption[];
+	};
+export type AIMultipleQuestion = AIQuestionBase &
+	AIChoiceQuestionOther & {
+		type: 'multiple';
+		options: readonly AIQuestionOption[];
+	};
 export type AIFileQuestion = AIQuestionBase & {
 	type: 'file';
 	accept?: string | readonly string[];
@@ -72,6 +87,34 @@ export type AIAskUserQuestionSubmitPayload = {
 	values: AIAskAnswers;
 	questions: readonly AIAskQuestion[];
 };
+
+/** One answered (or skipped) question of a completed request, ready to display. */
+export type AIAskUserQuestionSummaryItem = {
+	question: AIAskQuestion;
+	questionId: string;
+	/** Chosen option labels, typed text, or file names; empty when the question was skipped. */
+	labels: string[];
+	answered: boolean;
+};
+
+export type AIAskUserQuestionSummaryProps = WithAttachments<
+	Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'class' | 'title'> & {
+		/** Bindable reference to the summary root. */
+		ref?: HTMLDivElement | null;
+		/** The questions of the completed request. */
+		questions: readonly AIAskQuestion[];
+		/** The submitted answers keyed by question id. */
+		value: AIAskAnswers;
+		/** Heading above the answers; `false` hides it. Defaults to the localized "Your answers". */
+		title?: string | false;
+		/** Shows skipped questions with a "Skipped" note. @default true */
+		showSkipped?: boolean;
+		/** Class applied to the summary root. */
+		class?: string;
+		/** Theme overrides for the shared question theme, including the summary parts. */
+		theme?: AIAskUserQuestionThemeProps;
+	}
+>;
 
 export type AIAskUserQuestionQuestionState = {
 	question: AIAskQuestion;
@@ -123,7 +166,7 @@ export type AIAskUserQuestionProps = WithAttachments<
 		submitting?: boolean;
 		/** Heading for the complete answer request. */
 		title?: string;
-		/** Optional name of the model, tool, or agent requesting the answers. */
+		/** Optional name of the model, tool, or agent requesting the answers, shown above the title. */
 		requester?: string;
 		/** Optional context displayed above the active question. */
 		context?: string;
@@ -133,10 +176,16 @@ export type AIAskUserQuestionProps = WithAttachments<
 		submittingLabel?: string;
 		/** Optional discard action label. */
 		discardLabel?: string;
-		/** Previous-step action label. */
+		/**
+		 * Previous-step action label.
+		 * @deprecated The default footer no longer renders previous/next arrow buttons: the step dots
+		 * and the primary action navigate. Custom footers can still call `previous()`.
+		 */
 		previousLabel?: string;
-		/** Next-step action label. */
+		/** Primary action label before the last question. */
 		nextLabel?: string;
+		/** Primary action label on an optional, unanswered question before the last one. */
+		skipLabel?: string;
 		/** Title used by the default empty state. Takes precedence over `emptyTitle`. */
 		emptyLabel?: string;
 		/** Svelte Pro-compatible alias for `emptyLabel`. */

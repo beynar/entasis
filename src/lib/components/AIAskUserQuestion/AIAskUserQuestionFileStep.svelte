@@ -1,5 +1,6 @@
 <script lang="ts">
 	import FileInput from '../Form/File/FileInput.svelte';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import type { FileRejection } from '../Form/File/fileAcceptance.js';
 	import type { AIFileQuestion } from './aiAskUserQuestion.props.js';
 	import {
@@ -27,6 +28,7 @@
 
 	const types = $derived(normalizeAccept(question.accept));
 	const classes = $derived(useAIAskUserQuestionTheme(theme));
+	const t = $derived(useI18n());
 
 	function normalizeAccept(accept: string | readonly string[] | undefined): string[] {
 		if (!accept) return [];
@@ -39,11 +41,11 @@
 
 	function formatRejections(rejections: FileRejection[]): string {
 		const reasons = new Set(rejections.map((rejection) => rejection.reason));
-		if (reasons.has('type')) return 'Some files do not match the accepted type.';
-		if (reasons.has('size')) return 'Some files are larger than the allowed size.';
-		if (reasons.has('limit')) return 'Too many files selected for this question.';
-		if (reasons.has('duplicate')) return 'Some files were already selected.';
-		return 'Some files could not be added.';
+		if (reasons.has('type')) return t.aiAskFileType;
+		if (reasons.has('size')) return t.aiAskFileSize;
+		if (reasons.has('limit')) return t.aiAskFileLimit;
+		if (reasons.has('duplicate')) return t.aiAskFileDuplicate;
+		return t.aiAskFileRejected;
 	}
 </script>
 

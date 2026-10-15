@@ -4,8 +4,12 @@
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
 
-	const content =
-		'I should compare the requested behavior with the existing state contract, then preserve the smallest compatible public surface.';
+	const content = [
+		'I should compare the requested behavior with the existing state contract, then preserve the smallest compatible public surface.',
+		'The open state already has a bindable value and a default, so the stream lifecycle only needs to request changes through the same setter.',
+		'Measured durations round to whole seconds; anything under half a second reads as less than a second rather than an endless shimmer.',
+		'Finally, the trigger keeps one width while labels cycle, so the chevron never moves under the pointer.'
+	].join('\n\n');
 	const thinkingMessages = ['Planning', 'Checking constraints', 'Preparing response'];
 	const reasoningLabels = {
 		thinking: 'Working',
@@ -30,8 +34,9 @@ ${'</' + 'script>'}
 	const examples = {
 		duration: {
 			title: 'Known duration',
-			description: 'Completed traces accept an explicit duration in seconds.',
-			code: `<AIReasoning {content} duration={8} defaultOpen />`
+			description:
+				'Completed traces accept an explicit duration in seconds: 0 reads "less than a second", a minute or more reads "1m 12s".',
+			code: `<AIReasoning {content} duration={72} defaultOpen />`
 		},
 		'opt-out': {
 			title: 'Auto-open opt-out',
@@ -90,6 +95,14 @@ ${'</' + 'script>'}
 			options: exampleOptions
 		},
 		{
+			name: 'seconds',
+			type: 'segmented',
+			label: 'Seconds',
+			value: '8',
+			options: ['0', '8', '72'],
+			visible: (value) => value.example === 'duration'
+		},
+		{
 			name: 'controlledMode',
 			type: 'segmented',
 			label: 'Open',
@@ -117,14 +130,19 @@ ${'</' + 'script>'}
 		'Seconds-based controlled or measured duration',
 		'Per-stream auto-open and one-time completion close',
 		'Controlled and bindable open state',
-		'Cycling supplied SpinnerText labels',
+		'Live elapsed time while streaming ("Thinking… · 6s")',
+		'Bounded streaming window that follows the latest lines',
+		{
+			label: 'Steady-width cycling labels with a clean accessible name',
+			test: 'a11y:ai-reasoning.accessible-name'
+		},
 		'Overridable status and duration labels',
 		'Custom trigger with live state payload'
 	]}
 >
 	<ComponentCard
 		{controls}
-		description="Switch to completed to measure the stream and exercise the 1000ms delayed close."
+		description="While streaming, the trigger counts the elapsed seconds and the body follows the newest lines in a bounded window. Switch to completed to measure the stream and exercise the 1000ms delayed close."
 		class="!min-h-[280px]"
 		code={mainCode}
 	>
@@ -140,7 +158,12 @@ ${'</' + 'script>'}
 			code={selectedExample.code}
 		>
 			{#if exampleControls.value.example === 'duration'}
-				<AIReasoning {content} duration={8} defaultOpen class="w-full max-w-2xl" />
+				<AIReasoning
+					{content}
+					duration={Number(exampleControls.value.seconds)}
+					defaultOpen
+					class="w-full max-w-2xl"
+				/>
 			{:else if exampleControls.value.example === 'opt-out'}
 				<AIReasoning {content} streaming defaultOpen={false} class="w-full max-w-2xl" />
 			{:else if exampleControls.value.example === 'controlled'}

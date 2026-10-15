@@ -7,8 +7,10 @@ export type {
 	AIToolSnippet,
 	AIToolStatus,
 	AIToolToggleIcon,
+	AIToolValueView,
 	AIToolVariant
 } from './aiTool.props.js';
+export { getAIToolStatusFromState } from './toolRendering.js';
 export {
 	aiToolTheme,
 	setAIToolTheme,

@@ -79,7 +79,7 @@ describe('AIAskUserQuestion state contract', () => {
 	});
 
 	test('validates required answers and preserves the typed submit payload', async () => {
-		const question: AIAskQuestion = { id: 'notes', title: 'Notes' };
+		const question: AIAskQuestion = { id: 'notes', title: 'Notes', required: true };
 		const onSubmit = vi.fn();
 		renderInTheme(AIAskUserQuestion, { questions: [question], onSubmit });
 		await fireEvent.click(screen.getByRole('button', { name: 'Submit' }));

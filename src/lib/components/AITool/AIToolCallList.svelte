@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Accordion from '../Accordion/Accordion.svelte';
 	import Slot from '../Slot/Slot.svelte';
-	import Spinner from '../Spinner/Spinner.svelte';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import type {
 		AIToolCall,
 		AIToolLabels,
@@ -9,6 +9,7 @@
 		AIToolSnippet,
 		AIToolStatus,
 		AIToolToggleIcon,
+		AIToolValueView,
 		AIToolVariant
 	} from './aiTool.props.js';
 	import type { AIToolThemeProps } from './aiTool.theme.js';
@@ -17,17 +18,20 @@
 		createAIToolAccordionTheme,
 		type AIToolAccordionScope
 	} from './aiToolPrimitiveThemes.js';
+	import { createAIToolClock } from './aiToolClock.svelte.js';
 	import {
-		formatAIToolStatus,
+		formatAIElapsed,
 		getAIToolCallValue,
 		getAIToolErrorValue,
 		getAIToolGroupValue,
 		getAIToolOutputValue,
 		getAIToolStatusTone,
+		getAIToolSummary,
+		getAIToolTitle,
 		hasRenderableAIToolValue,
-		isActiveAIToolStatus,
 		resolveAIToolStatus
 	} from './toolRendering.js';
+	import AIToolStatusMark from './AIToolStatusMark.svelte';
 	import AIToolValueSection from './AIToolValueSection.svelte';
 
 	type ToolAccordionItem = { id: string; tool: AIToolCall; index: number };
@@ -41,7 +45,7 @@
 		variant = 'ghost',
 		toggleIcon = 'none',
 		labels,
-		formatStatus = formatAIToolStatus,
+		formatStatus,
 		icon,
 		title,
 		status,
@@ -51,6 +55,8 @@
 		error,
 		maxDepth,
 		maxEntries,
+		valueView,
+		maxLines,
 		theme
 	}: {
 		tools: readonly AIToolCall[];
@@ -61,7 +67,7 @@
 		variant?: AIToolVariant;
 		toggleIcon?: AIToolToggleIcon;
 		labels: AIToolLabels;
-		formatStatus?: (status: AIToolStatus) => string;
+		formatStatus: (status: AIToolStatus) => string;
 		icon?: AIToolSnippet;
 		title?: AIToolSnippet;
 		status?: AIToolSnippet;
@@ -71,9 +77,12 @@
 		error?: AIToolSnippet;
 		maxDepth: number;
 		maxEntries: number;
+		valueView?: AIToolValueView;
+		maxLines?: number;
 		theme?: AIToolThemeProps;
 	} = $props();
 
+	const t = $derived(useI18n());
 	const items = $derived<ToolAccordionItem[]>(
 		tools.map((tool, index) => ({
 			id: scope === 'single' ? getAIToolGroupValue([tool]) : getAIToolCallValue(tool, index),
@@ -85,43 +94,69 @@
 	const accordionTheme = $derived(
 		createAIToolAccordionTheme(classes, { scope, variant, toggleIcon })
 	);
-
-	function displayName(tool: AIToolCall): string {
-		return tool.title ?? tool.name ?? labels.fallbackTitle;
-	}
+	const clock = createAIToolClock(() =>
+		items.map((item) => ({ key: item.id, tool: item.tool, status: resolveAIToolStatus(item.tool) }))
+	);
 </script>
 
 {#snippet toolTitle(payload: { item: ToolAccordionItem })}
 	{@const tool = payload.item.tool}
 	{@const renderPayload: AIToolRenderPayload = { tool, index: payload.item.index }}
 	{@const currentStatus = resolveAIToolStatus(tool)}
-	<div
-		data-slot="ai-tool-call-trigger-content"
-		data-tone={getAIToolStatusTone(currentStatus)}
-		class={classes.title()}
-	>
-		<span
-			data-slot="ai-tool-call-status-indicator"
-			role="img"
-			aria-label={formatStatus(currentStatus)}
-			class={classes.indicator({ tone: getAIToolStatusTone(currentStatus) })}
-		>
-			{#if icon}
+	{@const tone = getAIToolStatusTone(currentStatus)}
+	{@const statusLabel = formatStatus(currentStatus)}
+	{@const summary = getAIToolSummary(tool)}
+	{@const elapsed = clock.elapsed(payload.item.id, tool, currentStatus)}
+	{@const showWord = tone !== 'success'}
+	<div data-slot="ai-tool-call-trigger-content" data-tone={tone} class={classes.title()}>
+		{#if icon}
+			<span
+				data-slot="ai-tool-call-status-indicator"
+				role="img"
+				aria-label={statusLabel}
+				class={classes.indicator({ tone })}
+			>
 				<Slot render={icon} payload={renderPayload} />
-			{:else if isActiveAIToolStatus(currentStatus)}
-				<Spinner size="small" decorative class="motion-reduce:[&_*]:animate-none" />
-			{:else}
-				<span class={classes.indicatorDot()}></span>
-			{/if}
-		</span>
+			</span>
+		{:else if tool.icon}
+			<span data-slot="ai-tool-call-icon" aria-hidden="true" class={classes.indicator()}>
+				{@render tool.icon({ size: 16 })}
+			</span>
+		{:else}
+			<AIToolStatusMark status={currentStatus} label={statusLabel} {theme} />
+		{/if}
 		{#if title}
 			<Slot render={title} payload={renderPayload} />
 		{:else}
-			<span data-slot="ai-tool-call-title" class={classes.name()}>{displayName(tool)}</span>
+			<span data-slot="ai-tool-call-title" class={classes.name()}>
+				{getAIToolTitle(tool, labels.fallbackTitle)}
+			</span>
+		{/if}
+		{#if summary}
+			<span data-slot="ai-tool-call-summary" class={classes.summary()}>{summary}</span>
 		{/if}
 		{#if status}
 			<span data-slot="ai-tool-status" class={classes.status()}>
 				<Slot render={status} payload={renderPayload} />
+			</span>
+		{:else if showWord || elapsed !== undefined || (tool.icon && !icon)}
+			<span data-slot="ai-tool-call-meta" class={classes.meta()}>
+				{#if showWord || (tool.icon && !icon)}
+					<span data-slot="ai-tool-call-status" class={classes.statusWord({ tone })}>
+						{#if tool.icon && !icon}
+							<AIToolStatusMark
+								status={currentStatus}
+								label={statusLabel}
+								decorative={showWord}
+								{theme}
+							/>
+						{/if}
+						{#if showWord}{statusLabel}{/if}
+					</span>
+				{/if}
+				{#if elapsed !== undefined}
+					<span data-slot="ai-tool-call-duration">{formatAIElapsed(elapsed, t)}</span>
+				{/if}
 			</span>
 		{/if}
 	</div>
@@ -147,6 +182,10 @@
 					snippet={input}
 					{maxDepth}
 					{maxEntries}
+					{valueView}
+					{maxLines}
+					showAllLabel={labels.showAll}
+					showLessLabel={labels.showLess}
 					{theme}
 				/>
 			{/if}
@@ -162,6 +201,10 @@
 					tone="error"
 					{maxDepth}
 					{maxEntries}
+					{valueView}
+					{maxLines}
+					showAllLabel={labels.showAll}
+					showLessLabel={labels.showLess}
 					{theme}
 				/>
 			{:else if hasRenderableAIToolValue(outputValue)}
@@ -174,6 +217,10 @@
 					snippet={output}
 					{maxDepth}
 					{maxEntries}
+					{valueView}
+					{maxLines}
+					showAllLabel={labels.showAll}
+					showLessLabel={labels.showLess}
 					{theme}
 				/>
 			{/if}
@@ -193,7 +240,7 @@
 	title={toolTitle}
 	content={toolContent}
 	icon={toggleIcon}
-	variant={scope === 'single' ? 'outline' : 'classic'}
+	variant="classic"
 	density="compact"
 	theme={accordionTheme}
 />

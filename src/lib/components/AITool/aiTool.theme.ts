@@ -5,59 +5,62 @@ import {
 	type InferComponentTheme
 } from '$lib/utils/cva/index.js';
 
+const tones = {
+	active: '',
+	awaiting: '',
+	success: '',
+	error: '',
+	denied: '',
+	cancelled: '',
+	default: ''
+};
+
+// One call and a group share one surface per variant, so a lone call and a group of calls read
+// as the same block. The block follows its container, never the viewport, and caps at 32rem.
 const defaultRoot = cva({
-	base: 'inline-grid max-w-full min-w-0 align-top text-neutral transition-[color,background-color,box-shadow]',
+	base: 'grid w-full max-w-[32rem] min-w-0 text-sm text-neutral transition-[color,background-color,box-shadow]',
 	variants: {
 		scope: {
 			single: '',
 			group: ''
 		},
 		variant: {
-			card: '',
+			card: 'rounded-lg bg-surface-raised ring-1 ring-neutral-muted lift-1',
 			ghost: '',
-			outline: '',
-			soft: ''
+			outline: 'rounded-lg ring-1 ring-neutral-muted',
+			soft: 'rounded-lg'
 		},
-		tone: {
-			active: '',
-			success: '',
-			error: '',
-			cancelled: '',
-			default: ''
-		}
+		tone: tones
 	},
+	// The soft tint doubles on the dark surface, where `/5` disappears.
 	compoundVariants: [
-		{
-			scope: 'single',
-			variant: 'card',
-			class: 'rounded-lg bg-surface-raised ring-1 ring-neutral-muted lift-1'
-		},
-		{ scope: 'single', variant: 'outline', class: 'rounded-lg ring-1 ring-neutral-muted' },
-		{ scope: 'single', variant: 'soft', tone: 'active', class: 'rounded-lg bg-info/5' },
-		{ scope: 'single', variant: 'soft', tone: 'success', class: 'rounded-lg bg-success/5' },
-		{ scope: 'single', variant: 'soft', tone: 'error', class: 'rounded-lg bg-danger/5' },
-		{ scope: 'single', variant: 'soft', tone: 'cancelled', class: 'rounded-lg bg-neutral/5' },
-		{ scope: 'single', variant: 'soft', tone: 'default', class: 'rounded-lg bg-neutral/5' }
+		{ variant: 'soft', tone: 'active', class: 'bg-info/5 dark:bg-info/10' },
+		{ variant: 'soft', tone: 'awaiting', class: 'bg-warning/5 dark:bg-warning/10' },
+		{ variant: 'soft', tone: 'success', class: 'bg-success/5 dark:bg-success/10' },
+		{ variant: 'soft', tone: 'error', class: 'bg-danger/5 dark:bg-danger/10' },
+		{ variant: 'soft', tone: 'denied', class: 'bg-neutral/5 dark:bg-neutral/10' },
+		{ variant: 'soft', tone: 'cancelled', class: 'bg-neutral/5 dark:bg-neutral/10' },
+		{ variant: 'soft', tone: 'default', class: 'bg-neutral/5 dark:bg-neutral/10' }
 	],
 	defaultVariants: { scope: 'single', variant: 'ghost', tone: 'default' }
 });
 const defaultAccordionRoot = cva({
-	base: 'max-w-full gap-xs',
+	base: 'w-full min-w-0 gap-0',
 	variants: {
 		scope: {
-			single: 'w-[min(32rem,100%)]',
-			group: 'w-fit',
-			calls: 'w-[min(32rem,calc(100vw-2rem))]'
+			single: '',
+			group: '',
+			calls: ''
 		}
 	}
 });
 const defaultAccordionItem = cva({
-	base: 'max-w-full',
+	base: 'w-full min-w-0 border-b-0',
 	variants: {
 		scope: {
-			single: 'w-full',
-			group: 'w-fit',
-			calls: 'w-full'
+			single: '',
+			group: '',
+			calls: ''
 		},
 		variant: {
 			card: '',
@@ -67,72 +70,40 @@ const defaultAccordionItem = cva({
 		}
 	},
 	compoundVariants: [
-		{
-			scope: 'calls',
-			variant: 'card',
-			class:
-				'mb-md rounded-sm border-b-0 bg-surface-raised ring-1 ring-neutral-muted lift-1 last:mb-0'
-		},
-		{
-			scope: 'calls',
-			variant: 'outline',
-			class: 'mb-md rounded-sm border-b-0 ring-1 ring-neutral-muted last:mb-0'
-		},
-		{
-			scope: 'calls',
-			variant: 'soft',
-			class:
-				'mb-md rounded-sm border-b-0 bg-neutral/5 last:mb-0 has-[[data-tone=active]]:bg-info/5 has-[[data-tone=success]]:bg-success/5 has-[[data-tone=error]]:bg-danger/5'
-		}
+		// Calls inside a framed group are divided rows of the one surface.
+		{ scope: 'calls', variant: 'card', class: 'border-t border-neutral-muted first:border-t-0' },
+		{ scope: 'calls', variant: 'outline', class: 'border-t border-neutral-muted first:border-t-0' },
+		{ scope: 'calls', variant: 'soft', class: 'border-t border-neutral/10 first:border-t-0' }
 	],
 	defaultVariants: { variant: 'ghost' }
 });
 const defaultAccordionHeader = cva({ base: 'min-w-0 flex-1' });
+// Group and call rows share padding, so the group header lines up with the calls below it.
 const defaultAccordionTrigger = cva({
-	base: 'state-layer relative min-h-row-sm max-w-full items-center gap-md rounded-sm text-left text-xs text-neutral/70 hover:text-neutral',
+	base: 'state-layer relative min-h-row-sm w-full min-w-0 items-center gap-md rounded-sm text-left text-sm text-neutral/70 hover:text-neutral',
 	variants: {
 		scope: {
-			single: 'px-md py-sm',
-			group: 'w-fit',
+			single: '',
+			group: '',
 			calls: ''
 		},
 		variant: {
-			card: 'px-lg py-md',
-			ghost: 'px-md py-sm',
-			outline: 'px-lg py-md',
-			soft: 'px-lg py-md'
+			card: 'px-md py-sm',
+			ghost: 'px-sm py-xs',
+			outline: 'px-md py-sm',
+			soft: 'px-md py-sm'
 		},
-		tone: {
-			active: '',
-			success: '',
-			error: '',
-			cancelled: '',
-			default: ''
-		},
+		tone: tones,
 		toggleIcon: {
 			none: '',
 			chevron: 'pr-layout-md',
 			'plus-minus': 'pr-layout-md'
 		}
 	},
-	compoundVariants: [
-		{ scope: 'group', variant: 'ghost', class: 'pl-md' },
-		{
-			scope: 'group',
-			variant: 'card',
-			class: 'bg-surface-raised ring-1 ring-neutral-muted lift-1'
-		},
-		{ scope: 'group', variant: 'outline', class: 'ring-1 ring-neutral-muted' },
-		{ scope: 'group', variant: 'soft', tone: 'active', class: 'bg-info/5' },
-		{ scope: 'group', variant: 'soft', tone: 'success', class: 'bg-success/5' },
-		{ scope: 'group', variant: 'soft', tone: 'error', class: 'bg-danger/5' },
-		{ scope: 'group', variant: 'soft', tone: 'cancelled', class: 'bg-neutral/5' },
-		{ scope: 'group', variant: 'soft', tone: 'default', class: 'bg-neutral/5' }
-	],
 	defaultVariants: { variant: 'ghost', tone: 'default', toggleIcon: 'none' }
 });
 const defaultAccordionTitle = cva({
-	base: 'min-w-0 w-full no-underline group-hover/accordion-trigger:no-underline'
+	base: 'w-full min-w-0 no-underline group-hover/accordion-trigger:no-underline'
 });
 const defaultAccordionIcon = cva({ base: 'size-2.5 text-neutral/45' });
 const defaultAccordionIconWrapper = cva({
@@ -142,9 +113,9 @@ const defaultAccordionContent = cva({
 	base: 'min-w-0 pt-0',
 	variants: {
 		scope: {
-			single: 'px-md pb-md',
-			group: 'px-0 pb-xs',
-			calls: 'px-0 pb-md'
+			single: '',
+			group: 'px-0 pb-0',
+			calls: ''
 		},
 		variant: {
 			card: '',
@@ -154,126 +125,152 @@ const defaultAccordionContent = cva({
 		}
 	},
 	compoundVariants: [
-		{ scope: 'calls', variant: 'card', class: 'px-lg pt-md pb-lg' },
-		{ scope: 'calls', variant: 'outline', class: 'px-lg pt-md pb-lg' },
-		{ scope: 'calls', variant: 'soft', class: 'px-lg pt-md pb-lg' }
+		{ scope: 'single', variant: 'ghost', class: 'px-sm pb-sm' },
+		{ scope: 'calls', variant: 'ghost', class: 'px-sm pb-sm' },
+		{ scope: 'single', variant: ['card', 'outline', 'soft'], class: 'px-md pb-md' },
+		{ scope: 'calls', variant: ['card', 'outline', 'soft'], class: 'px-md pb-md' }
 	],
 	defaultVariants: { variant: 'ghost' }
 });
-const defaultTitle = cva({ base: 'flex min-w-0 flex-1 items-center gap-md text-xs' });
-// Status is a bare mark, no badge: a spinner while the call runs, a dot once it has settled,
-// coloured by outcome. The box is the icon size so rows and the group title line up.
+const defaultTitle = cva({ base: 'flex min-w-0 flex-1 items-center gap-md text-sm' });
+// The leading mark: a spinner while the call runs, then a glyph for the outcome, so status reads
+// by shape as well as colour. The box is the icon size so rows and the group title line up.
 const defaultIndicator = cva({
 	base: 'flex size-icon-md shrink-0 items-center justify-center',
 	variants: {
 		tone: {
 			active: 'text-info',
-			success: 'text-success',
-			error: 'text-danger',
-			cancelled: 'text-neutral/45',
-			default: 'text-neutral/45'
-		}
-	}
-});
-const defaultIndicatorDot = cva({ base: 'size-1.5 rounded-full bg-current' });
-const defaultGroupIcon = cva({
-	base: 'flex size-icon-md shrink-0 items-center justify-center',
-	variants: {
-		tone: {
-			active: 'text-info',
-			success: 'text-success',
-			error: 'text-danger',
-			cancelled: 'text-neutral/45',
+			awaiting: 'text-warning-readable',
+			success: 'text-success-readable',
+			error: 'text-danger-readable',
+			denied: 'text-neutral/60',
+			cancelled: 'text-neutral/60',
 			default: 'text-neutral/45'
 		}
 	},
 	defaultVariants: { tone: 'default' }
 });
-const defaultName = cva({ base: 'min-w-0 flex-1 truncate font-medium text-neutral' });
-const defaultStatus = cva({ base: 'shrink-0' });
-const defaultContent = cva({ base: 'grid min-w-0 gap-md pb-xs' });
+const defaultIndicatorDot = cva({ base: 'size-1.5 rounded-full bg-current' });
+const defaultGroupIcon = defaultIndicator;
+const defaultName = cva({ base: 'min-w-0 truncate font-medium text-neutral' });
+const defaultSummary = cva({ base: 'min-w-0 flex-1 truncate text-neutral/60' });
+// Trailing status word and duration. `ms-auto` keeps them at the row end when there is no summary.
+const defaultMeta = cva({
+	base: 'ms-auto flex shrink-0 items-center gap-sm text-xs text-neutral/60 tabular-nums'
+});
+const defaultStatusWord = cva({
+	base: 'flex items-center gap-xs',
+	variants: {
+		tone: {
+			active: '',
+			awaiting: 'text-warning-readable',
+			success: '',
+			error: 'text-danger-readable',
+			denied: '',
+			cancelled: '',
+			default: ''
+		}
+	},
+	defaultVariants: { tone: 'default' }
+});
+const defaultStatus = cva({ base: 'ms-auto shrink-0' });
+const defaultContent = cva({ base: 'grid min-w-0 gap-md' });
 const defaultGroupContent = cva({
-	base: 'min-w-0 pl-xs',
+	base: 'min-w-0',
 	variants: {
 		variant: {
-			card: 'pt-md',
+			card: 'border-t border-neutral-muted',
 			ghost: '',
-			outline: 'pt-md',
-			soft: 'pt-md'
+			outline: 'border-t border-neutral-muted',
+			soft: 'border-t border-neutral/10'
 		}
 	},
 	defaultVariants: { variant: 'ghost' }
 });
+// Input, output and error sections share one label style and no nested frames.
 const defaultSection = cva({
-	base: 'relative grid min-w-0 gap-sm rounded-sm border bg-surface p-md',
+	base: 'grid min-w-0 gap-xs',
 	variants: {
 		tone: {
-			default: 'border-neutral-muted',
-			error: 'border-danger/20 bg-danger/5'
+			default: '',
+			error: ''
 		}
 	}
 });
 const defaultLabel = cva({
-	base: 'flex h-3.5 w-fit items-center',
+	base: 'text-xs font-medium text-neutral/60',
 	variants: {
-		kind: {
-			icon: 'absolute top-2 right-2 z-10',
-			text: 'text-xs font-medium tracking-wide uppercase'
-		},
 		tone: {
-			default: 'text-neutral/70',
-			error: 'text-danger-readable'
+			default: '',
+			error: ''
 		}
 	},
-	defaultVariants: { kind: 'text' }
+	defaultVariants: { tone: 'default' }
 });
-// A full-width block flush inside `section`'s padding box, so its own `sm` step is capped by what
-// that padding leaves: `rounded-sm p-md` → `min(4px, 4 - 8)` → 0, a square corner, rather than a
-// repeat of the section's own radius.
-const defaultScrollArea = cva({
-	base: 'flex max-h-48 min-w-0 flex-col rounded-sm-concentric',
+const defaultErrorMessage = cva({
+	base: 'min-w-0 rounded-sm bg-danger/5 px-md py-sm text-sm leading-relaxed break-words whitespace-pre-wrap text-danger-readable [overflow-wrap:anywhere] dark:bg-danger/10'
+});
+const defaultCode = cva({
+	base: 'my-0 rounded-sm text-xs',
 	variants: {
 		tone: {
-			default: 'bg-surface-raised/60',
-			error: 'bg-danger/5'
+			default: '',
+			error: 'border-danger/30'
 		}
 	}
 });
-const defaultScrollViewport = cva({ base: 'max-h-48 w-full' });
-const defaultScrollContent = cva({ base: 'min-w-full' });
-const defaultScrollScrollbar = cva({ base: '' });
-const defaultScrollScrollbarX = cva({ base: '' });
-const defaultScrollThumb = cva({
-	base: '',
+const defaultCodeContainer = cva({
+	base: 'text-xs leading-relaxed [&_pre]:!px-md [&_pre]:!py-sm'
+});
+// A long value collapses to `maxLines` with a bottom fade; "Show all" lifts the cap.
+const defaultClamp = cva({
+	base: 'relative min-w-0 text-xs leading-relaxed',
+	variants: {
+		collapsed: {
+			true: 'overflow-hidden [mask-image:linear-gradient(to_bottom,black_70%,transparent)]',
+			false: ''
+		}
+	},
+	defaultVariants: { collapsed: false }
+});
+const defaultShowAll = cva({ base: 'justify-self-start' });
+const defaultEmpty = cva({ base: 'py-xs text-sm text-neutral/60' });
+const defaultTree = cva({
+	base: 'grid min-w-0 gap-xs rounded-sm border border-neutral-muted bg-surface p-md font-mono text-xs leading-relaxed',
 	variants: {
 		tone: {
-			default: 'bg-neutral-muted',
-			error: 'bg-danger/45'
+			default: '',
+			error: 'border-danger/30'
 		}
 	}
 });
-const defaultEmpty = cva({ base: 'py-xs text-xs text-neutral/70' });
-const defaultTree = cva({ base: 'grid min-w-full gap-xs p-md text-xs' });
 const defaultTreeNode = cva({ base: 'min-w-0' });
 const defaultTreeBranch = cva({ base: 'flex min-w-0 items-baseline gap-md' });
-const defaultTreeKey = cva({ base: 'min-w-0 truncate text-neutral/70' });
-const defaultTreeSummary = cva({ base: 'shrink-0 text-xs text-neutral/70' });
+const defaultTreeKey = cva({ base: 'max-w-[12rem] min-w-0 truncate text-neutral/60' });
+const defaultTreeSummary = cva({ base: 'shrink-0 text-neutral/60' });
 const defaultTreeChildren = cva({
-	base: 'mt-xs ml-xs grid gap-xs border-l border-neutral-muted pl-lg'
+	base: 'mt-xs ms-xs grid min-w-0 gap-xs border-s border-neutral-muted ps-lg'
 });
 const defaultTreeLeaf = cva({
-	base: 'grid w-max min-w-full grid-cols-[minmax(4rem,8rem)_max-content] items-baseline gap-lg'
+	base: 'grid min-w-0 items-baseline gap-md',
+	variants: {
+		keyed: {
+			true: 'grid-cols-[minmax(3rem,max-content)_minmax(0,1fr)]',
+			false: 'grid-cols-1'
+		}
+	},
+	defaultVariants: { keyed: true }
 });
 const defaultTreeValue = cva({
-	base: 'whitespace-pre font-mono text-xs leading-relaxed',
+	base: 'min-w-0 break-words whitespace-pre-wrap [overflow-wrap:anywhere]',
 	variants: {
 		kind: {
 			string: 'text-neutral',
 			number: 'text-neutral tabular-nums',
 			boolean: 'text-primary-readable',
-			null: 'text-neutral/70 italic',
-			undefined: 'text-neutral/70 italic',
-			empty: 'text-neutral/70 italic',
+			null: 'text-neutral/60 italic',
+			undefined: 'text-neutral/60 italic',
+			empty: 'text-neutral/60 italic',
 			unknown: 'text-neutral'
 		},
 		tone: {
@@ -298,17 +295,19 @@ export const aiToolTheme = {
 	indicatorDot: defaultIndicatorDot,
 	groupIcon: defaultGroupIcon,
 	name: defaultName,
+	summary: defaultSummary,
+	meta: defaultMeta,
+	statusWord: defaultStatusWord,
 	status: defaultStatus,
 	content: defaultContent,
 	groupContent: defaultGroupContent,
 	section: defaultSection,
 	label: defaultLabel,
-	scrollArea: defaultScrollArea,
-	scrollViewport: defaultScrollViewport,
-	scrollContent: defaultScrollContent,
-	scrollScrollbar: defaultScrollScrollbar,
-	scrollScrollbarX: defaultScrollScrollbarX,
-	scrollThumb: defaultScrollThumb,
+	errorMessage: defaultErrorMessage,
+	code: defaultCode,
+	codeContainer: defaultCodeContainer,
+	clamp: defaultClamp,
+	showAll: defaultShowAll,
 	empty: defaultEmpty,
 	tree: defaultTree,
 	treeNode: defaultTreeNode,
