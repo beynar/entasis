@@ -44,6 +44,21 @@ describe('collapsed tree flyout', () => {
 		expect(trigger()).not.toHaveAttribute('aria-haspopup', 'menu');
 	});
 
+	// Pending: NavigationMenu disclosure semantics mean no `aria-haspopup` at all and no `<dialog>`
+	// around the nav, which needs a Popover option for a popup that is not a dialog (deferred from
+	// lane R4 to the Popover owner). Switch to `test` when that option lands and the flyout uses it.
+	test.fails(
+		'the trigger has no aria-haspopup and the nav is not wrapped in a dialog',
+		async () => {
+			await mount();
+			await fireEvent.click(trigger());
+			await waitFor(() => expect(trigger()).toHaveAttribute('aria-expanded', 'true'));
+			expect(trigger()).not.toHaveAttribute('aria-haspopup');
+			const nav = await screen.findByRole('navigation', { name: 'Workspace' });
+			expect(nav.closest('dialog')).toBeNull();
+		}
+	);
+
 	test('the links are a named nav, nested folders named sub-lists', async () => {
 		await mount();
 		await fireEvent.click(trigger());
