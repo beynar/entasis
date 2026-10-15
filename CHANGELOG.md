@@ -930,6 +930,12 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Fixed
 
+- `Popover`, `Dialog`, `FloatingWindow`: closing again after a reopen that interrupted the closing
+  transition now waits for that transition. Before, `status` turned `closed` and `onAfterClose`
+  fired while the panel was still fading out, and a `Popover` reopened in that window kept a panel
+  without its layer, focus scope and safe area (Svelte logged `derived_inert` in development).
+- `Tooltip`: a closing tooltip no longer logs a Svelte `state_proxy_equality_mismatch` warning in
+  development, and the removed surface stops receiving state attributes.
 - `MenuBar`, `Menu`: switching menus with ArrowRight/ArrowLeft no longer logs a Svelte `derived_inert`
   warning in development. Navigation reads its focused indexes without a derived that outlives the
   menu being closed.
