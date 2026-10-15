@@ -143,7 +143,16 @@ export function useOpenLifecycle(options: OpenLifecycleOptions): OpenLifecycle {
 					// within the same flush, before any microtask.
 					early('transition', playing);
 				}
-				return (fn as unknown as (...args: unknown[]) => unknown)(...args);
+				const config = (fn as unknown as (...args: unknown[]) => unknown)(...args);
+				// Svelte keeps these options for as long as the element lives once an exit has started
+				// (a reopen reverses it) and does not call this function for the next exit. Handed back
+				// as a deferred config, they are asked for on every run instead, in a microtask the
+				// flush that starts it queues: before `completeWithoutTransition` reads
+				// `transitionStarted` after its tick.
+				return (options: { direction: 'in' | 'out' }) => {
+					if (!completed && (options.direction === 'in') === direction) transitionStarted = true;
+					return typeof config === 'function' ? config(options) : config;
+				};
 			}) as unknown as Fn,
 		introEnd: () => {
 			if (direction) complete(phase);

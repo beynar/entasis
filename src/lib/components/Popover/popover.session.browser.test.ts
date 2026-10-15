@@ -69,6 +69,36 @@ describe('popover session (CX-10)', () => {
 		expect(state().layer?.isOpen).toBe(true);
 	});
 
+	// Svelte reuses the options of a reversed transition without calling its function again: the
+	// session must still wait for the exit that follows, or the panel outlives its session.
+	test('the close after a reopen during the exit still waits for the exit and keeps the session', async () => {
+		let api: PopoverApi | undefined;
+		render(PopoverSessionHarness, {
+			props: { scenario: 'slow', onApi: (_name, popover) => (api = popover) }
+		});
+		const state = () => popoverInternals(api!);
+		await userEvent.click(page.getByRole('button', { name: 'Slow' }));
+		await expect.poll(() => state().status).toBe('open');
+		const layer = state().layer;
+		await userEvent.keyboard('{Escape}');
+		await nextFrame();
+		state().open();
+		await expect.poll(() => state().status).toBe('open');
+
+		await userEvent.keyboard('{Escape}');
+		await nextFrame();
+		await nextFrame();
+		expect(state().status).toBe('exiting');
+		expect(document.body.textContent).toContain('Inside slow');
+		expect(state().layer).toBe(layer);
+		// Reopened again while that exit plays: the panel and its session are still one.
+		state().open();
+		await expect.poll(() => state().isOpen).toBe(true);
+		await nextFrame();
+		expect(state().layer).toBe(layer);
+		expect(state().layer?.isOpen).toBe(true);
+	});
+
 	test('a mobile sheet built while closed still counts as inside the field that owns it', async () => {
 		await page.viewport(400, 800);
 		let field!: FieldState<FieldType>;
