@@ -1,4 +1,9 @@
 import { en, type Messages } from '$lib/i18n/en.js';
+import { atIcon } from '../Icons/at.js';
+import { fileTextIcon } from '../Icons/fileText.js';
+import { lightningIcon } from '../Icons/lightning.js';
+import { linkIcon } from '../Icons/link.js';
+import { sparkleIcon } from '../Icons/sparkle.js';
 import type {
 	RichTextInputItem,
 	RichTextInputSuggestionLifecycleState,
@@ -272,9 +277,10 @@ function createAtSearch(
 			mapSearchResult(
 				compatibilitySearch ? searchMentions(compatibilitySearch, context.query, 'all') : [],
 				(items) =>
-					items
-						.filter(isAtMention)
-						.map((item) => ({ ...item, kind: getAIComposerMentionKind(item, 'mention') }))
+					items.filter(isAtMention).map((item) => {
+						const kind = getAIComposerMentionKind(item, 'mention');
+						return { ...item, kind, icon: item.icon ?? KIND_ICONS[kind] };
+					})
 			)
 		]);
 }
@@ -358,11 +364,24 @@ function requireMention(item: RichTextInputItem): AIComposerMentionItem {
 	return { ...item, kind };
 }
 
+// A leading icon per token kind in the / @ $ menus when the item brings none, so people, files
+// and references are told apart at a glance in a mixed @ list.
+const KIND_ICONS = {
+	command: lightningIcon,
+	mention: atIcon,
+	file: fileTextIcon,
+	reference: linkIcon,
+	skill: sparkleIcon
+} satisfies Record<RichTextInputTokenKind, RichTextInputItem['icon']>;
+
 function withKind(
 	items: readonly RichTextInputItem[] | undefined,
 	fallback: RichTextInputTokenKind
 ): RichTextInputItem[] {
-	return (items ?? []).map((item) => ({ ...item, kind: itemKind(item, fallback) }));
+	return (items ?? []).map((item) => {
+		const kind = itemKind(item, fallback);
+		return { ...item, kind, icon: item.icon ?? KIND_ICONS[kind] };
+	});
 }
 
 function itemKind(

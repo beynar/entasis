@@ -114,7 +114,7 @@
 	features={[
 		'Usage totals and category breakdown',
 		'70% warning and 90% danger defaults',
-		'Compact trigger mode',
+		'Compact ring-and-percentage trigger',
 		'Custom token formatter',
 		'Overridable visible and accessible labels',
 		'Conversation-scoped usage fallback',
@@ -123,14 +123,13 @@
 >
 	<ComponentCard
 		{controls}
-		description="Change the token count to exercise default, warning, and danger states, then hover the trigger for the breakdown."
+		description="Change the token count to exercise default, warning, and danger states, then hover the trigger for the breakdown. Compact shows the ring with the percentage, sized like a composer footer button."
 		class="!min-h-[260px]"
 		code={`<script lang="ts">
   import { AIContext } from 'entasis/ai-context';
 ${'</' + 'script>'}
 
-
-<AIContext maxTokens={128000} {usedTokens} {compact} />`}
+<AIContext maxTokens={128000} usedTokens={${usedTokens}}${compact ? ' compact' : ''} />`}
 	>
 		<AIContext maxTokens={128_000} {usedTokens} {compact} />
 	</ComponentCard>

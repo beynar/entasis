@@ -54,6 +54,7 @@ export function buildRichTextInputGroups(
 		groupItems.push({
 			value: getSuggestionValue(trigger, item),
 			label: item.label,
+			description: item.description ?? item.path,
 			icon: item.icon,
 			keywords: item.keywords
 		});

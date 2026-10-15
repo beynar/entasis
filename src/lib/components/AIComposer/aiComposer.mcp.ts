@@ -51,7 +51,9 @@ AIComposer embeds RichTextInput, which is built on Lexical. Those packages are o
 />
 \`\`\`
 
-When no direct submit callback is supplied, the nearest conversation receives a user message and the draft clears after successful submission. Direct callbacks retain the draft so application code controls when it clears. Callback failures render a danger alert. \`onStop\` overrides \`conversation.requestStop()\`; stop failures are also visible.
+Enter sends and Shift+Enter inserts a newline (\`submitShortcut\` defaults to \`'enter'\`; pass \`'none'\` to make Enter a newline). When no direct submit callback is supplied, the nearest conversation receives a user message. Either way the draft clears once the send succeeds: a direct \`onSubmit\` clears it when it returns or its promise resolves, and keeps it when it throws or rejects, showing the error as a danger alert. Focus returns to the editor after every send, so the next message can be typed straight away. \`onStop\` overrides \`conversation.requestStop()\`; stop failures are also visible.
+
+The handle's \`submit(text?)\` sends the current draft, or \`text\` in its place, through the same path (queueing while busy) and focuses the editor; use it for submit-on-select prompt suggestions.
 
 ## Trigger sources
 
@@ -71,7 +73,7 @@ When no direct submit callback is supplied, the nearest conversation receives a 
 
 Set \`fileDropzone\` to enable the chooser, paste, and drag-and-drop intake. The composer delegates to the shared \`FileDropzone\`, exposes \`data-file-drag-state="potential | valid | invalid"\`, and renders a default overlay while a file drag is active. Override its copy with \`dropLabel\` and \`dropInvalidLabel\`, or replace the overlay content through the \`dropzone\` slot, which receives \`{ state, files, accept, multiple, maxFiles, maxFileSize }\`. \`fileMultiple\`, accepted types, maximum count, and maximum bytes use the shared file acceptance rules and report detailed rejections through \`onFileReject\`.
 
-With only \`files\`, the composer uses raw \`File[]\`. Supplying \`attachments\`, an attachment callback, or conversation attachment state activates managed attachments. Managed records use \`pending | uploading | uploaded | failed\`, keep stable ids across queue edits, show \`previewUrl\` or \`remoteUrl\`, and expose add/retry/remove callbacks. Rejected files and retry failures remain visible.
+With only \`files\`, the composer uses raw \`File[]\`. Supplying \`attachments\`, an attachment callback, or conversation attachment state activates managed attachments. Managed records use \`pending | uploading | uploaded | failed\`, keep stable ids across queue edits, show \`previewUrl\` or \`remoteUrl\`, and expose add/retry/remove callbacks. Retry failures render as an alert. Rejected files show a short, localized note that names the file and what to attach instead ("notes.txt isn't supported — use images or PDF", built from \`accept\`), with a dismiss button; it clears itself after a few seconds or on the next accepted file.
 
 ## Voice input
 
@@ -91,7 +93,7 @@ Configure capture with \`voiceInputMinDuration\`, \`voiceInputMaxDuration\`, \`v
 
 ## Queue
 
-When \`busy\` and \`queueWhileBusy\` are true, submission creates a flat \`AIComposerQueuedMessage\` and clears the draft. Queue rows can be reordered, steered, edited, restored, cancelled, or have editing cancelled. The lifecycle callbacks are:
+When \`busy\` and \`queueWhileBusy\` are true, submission creates a flat \`AIComposerQueuedMessage\` and clears the draft. While busy the footer shows a solid stop button in the send position and, once the draft is not empty, a "Queue message" button next to it. Queue rows can be reordered, steered (a steered row carries a "Steering" badge), edited, restored, cancelled, or have editing cancelled; Escape in the composer cancels an edit unless the suggestion popup handled it. Long queued messages truncate inside the composer. The lifecycle callbacks are:
 
 - \`onQueueChange\`
 - \`onQueuedMessageAdd\`, \`onQueuedMessageCancel\`
@@ -104,11 +106,17 @@ AIComposer does not automatically drain the queue when \`busy\` becomes false. M
 
 ## Editor and composition
 
-\`submitShortcut\` is \`none | enter | shift-enter | command-enter\`. \`toolbar\` is \`hover | fixed | both | none\`; \`formats\` and \`autoresize\` are forwarded to RichTextInput.
+\`submitShortcut\` is \`none | enter | shift-enter | command-enter\` and defaults to \`enter\`. \`toolbar\` is \`hover | fixed | both | none\` and defaults to \`none\` (no formatting chrome in a chat composer; Markdown shortcuts still work); \`formats\` and \`autoresize\` are forwarded to RichTextInput.
 
-\`header\`, \`prefix\`, \`suffix\`, and \`modelSelector\` are content slots. \`dropzone\` customizes the active file-drop overlay. \`footerStart\`, \`actions\`, and replacement \`footer\` receive \`{ value, files, attachments, isEmpty, isBusy }\`. The default footer orders file/model controls at the start and custom actions, voice input, and submit/stop at the end.
+The / @ $ menus show an item's \`description\` (or a reference's \`path\`) as a second line and a leading icon per kind when the item has none. Inline tokens are tinted by kind: commands primary, mentions info, skills success, files and references neutral.
 
-The component handle exposes \`focus\`, \`clear\`, \`insertText\`, \`insertItem\`, \`insertToken\`, \`insertCommand\`, \`insertMention\`, \`insertReference\`, and \`insertSkill\`. \`clear()\` clears editor Markdown and token metadata, not attached files.
+\`header\`, \`prefix\`, \`suffix\`, and \`modelSelector\` are content slots. \`dropzone\` customizes the active file-drop overlay. \`footerStart\`, \`actions\`, and replacement \`footer\` receive \`{ value, files, attachments, isEmpty, isBusy }\`. The default footer puts the attach button at the far start, then \`footerStart\`; the end holds custom \`actions\`, the \`modelSelector\` slot, voice input and the send/stop control, which is always last and keeps priority when the footer is tight. The voice button carries an accessible name only (\`voiceInputAriaLabel\`), no visible label.
 
-The root accepts native form attributes plus bindable \`ref\`, \`class\`, and \`theme\`. Theme parts cover root, dropzone/dropzone icon, header, files, file rows, body, editor, toolbar, errors, footer/actions, the voice-input region, and every queue region. \`voiceInputTheme\` is forwarded to the reused VoiceInput primitive.
+The component handle exposes \`submit\`, \`focus\`, \`clear\`, \`insertText\`, \`insertItem\`, \`insertToken\`, \`insertCommand\`, \`insertMention\`, \`insertReference\`, and \`insertSkill\`. \`clear()\` clears editor Markdown and token metadata, not attached files.
+
+## Look and layout
+
+The composer is a raised card (raised surface, hairline border, soft lift) that reads on any chat surface. It caps its width at the CSS variable \`--ai-chat-content-width\` when an ancestor sets it (AIChat does) and centres itself; without the variable it spans its container. The focus ring shows only while the editor has focus, not when a footer button does. On a narrow composer (below 28rem) or a touch screen, editor text steps up to 16px (no iOS focus zoom) and footer buttons grow to the 36px control height.
+
+The root accepts native form attributes plus bindable \`ref\`, \`class\`, and \`theme\`; a native \`onkeydown\` runs before the built-in Escape handling and \`preventDefault()\` cancels it. Theme parts cover root, dropzone/dropzone icon, header, files, file rows, body, editor, toolbar, errors, the rejected-file \`notice\`, footer/actions, the voice-input region, and every queue region including \`queueBadge\` and \`queueFiles\`. \`voiceInputTheme\` is forwarded to the reused VoiceInput primitive.
 `;

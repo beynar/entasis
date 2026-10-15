@@ -238,7 +238,8 @@ ${'</' + 'script>'}
 		'Additional recursive MenuItem settings',
 		'Disabled model states',
 		'Provider and keyword search metadata',
-		'Context-window labels',
+		'Ghost text trigger sized to its label',
+		'Context-window labels, kept on the selected row',
 		'Provider-aware overridable labels',
 		'Conversation-scoped selected model',
 		'Custom trigger, search, and empty slots'
@@ -246,7 +247,7 @@ ${'</' + 'script>'}
 >
 	<ComponentCard
 		{controls}
-		description="Select a model from flat or nested sources. Direct value props override the nearest conversation default."
+		description="Select a model from flat or nested sources. Direct value props override the nearest conversation default. With one provider the menu shows no provider heading, and the selected row keeps its context-window badge beside the check."
 		class="!min-h-[240px]"
 		code={`<script lang="ts">
   import { AIModelSelector } from 'entasis/ai-model-selector';

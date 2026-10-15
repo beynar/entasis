@@ -122,6 +122,11 @@ export type AIComposerQueuedMessageEditPayload = AIComposerQueuedMessagePayload 
 };
 
 export type AIComposerHandle = RichTextInputHandle & {
+	/**
+	 * Sends the current draft, or `text` in its place, exactly like Enter or the send button
+	 * (queued while busy when `queueWhileBusy` is on), then focuses the editor.
+	 */
+	submit: (text?: string) => Promise<void>;
 	insertCommand: (item: AIComposerCommand) => void;
 	insertMention: (item: AIComposerMentionItem) => void;
 	insertReference: (item: AIComposerMentionItem) => void;
@@ -204,9 +209,17 @@ export type AIComposerProps = WithAttachments<
 		references?: AIComposerTriggerSource<AIComposerMentionItem>;
 		/** Skill trigger source. */
 		skills?: AIComposerTriggerSource<AIComposerSkillItem> | readonly AIComposerSkillItem[];
-		/** Keyboard shortcut that submits when the suggestion popup has not handled the key. */
+		/**
+		 * Keyboard shortcut that submits when the suggestion popup has not handled the key. With the
+		 * default `'enter'`, Shift+Enter inserts a newline; `'none'` makes Enter a newline again.
+		 * @default 'enter'
+		 */
 		submitShortcut?: RichTextInputSubmitShortcut;
-		/** Formatting toolbar mode forwarded to RichTextInput. */
+		/**
+		 * Formatting toolbar mode forwarded to RichTextInput. Chat composers show no formatting chrome
+		 * by default; Markdown shortcuts still work.
+		 * @default 'none'
+		 */
 		toolbar?: RichTextInputToolbar;
 		/** Formatting controls and Markdown shortcuts enabled in RichTextInput. */
 		formats?: RichTextInputFormat[];
@@ -222,7 +235,7 @@ export type AIComposerProps = WithAttachments<
 		voiceInputMaxDuration?: number;
 		/** Semantic color used while recording. */
 		voiceInputColor?: Colors;
-		/** Accessible label and tooltip for starting voice capture. */
+		/** Accessible name and tooltip of the mic button that starts voice capture (no visible label). */
 		voiceInputAriaLabel?: string;
 		/** Accessible label and tooltip for stopping voice capture. */
 		voiceInputStopLabel?: string;
@@ -246,7 +259,7 @@ export type AIComposerProps = WithAttachments<
 		dropzone?: Slot<AIComposerDropzoneState>;
 		/** Content rendered below the composer controls. */
 		footer?: Slot<AIComposerSubmitState>;
-		/** Content rendered at the start of the default footer. */
+		/** Content rendered at the start of the default footer, after the attach button. */
 		footerStart?: Slot<AIComposerSubmitState>;
 		/** Additional actions rendered before the default submit or stop control. */
 		actions?: Slot<AIComposerSubmitState>;
@@ -254,13 +267,20 @@ export type AIComposerProps = WithAttachments<
 		prefix?: Slot;
 		/** Content rendered after the default composer actions. */
 		suffix?: Slot;
-		/** Model selector rendered in the default action row. */
+		/** Model selector rendered at the end of the default footer, next to the send control. */
 		modelSelector?: Slot;
-		/** Handles a submission, queued submission, or steering message. */
+		/**
+		 * Handles a submission, queued submission, or steering message. The draft clears once it
+		 * returns or its promise resolves; a throw or rejection keeps the draft and shows the error.
+		 * Focus returns to the editor either way.
+		 */
 		onSubmit?: (payload: AIComposerSubmitPayload) => void | Promise<void>;
 		/** Requests that the active response stop. */
 		onStop?: () => void | Promise<void>;
-		/** Called with files rejected by count, type, or size constraints. */
+		/**
+		 * Called with files rejected by count, type, or size constraints. The composer also shows a
+		 * short, localized note naming the file and what to attach instead, which dismisses itself.
+		 */
 		onFilesRejected?: (files: File[]) => void;
 		/** Called whenever the accepted file list changes. */
 		onFilesChange?: (files: File[]) => void;

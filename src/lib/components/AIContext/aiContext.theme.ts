@@ -9,10 +9,13 @@ const defaultRoot = cva({ base: 'inline-flex' });
 const defaultPopover = cva({ base: 'w-auto p-0' });
 const defaultCard = cva({ base: 'w-auto gap-0 py-0' });
 const defaultCardContent = cva({ base: 'p-0' });
+// A transparent control on the small control height, so it sits on any composer surface beside
+// the footer buttons. Compact keeps the ring and adds the percentage: a ring alone reads as a
+// loading spinner.
 const defaultTrigger = cva({
-	base: 'state-layer inline-flex items-center rounded-sm bg-surface text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-focus/50',
+	base: 'state-layer inline-flex h-control-sm shrink-0 items-center rounded-md bg-transparent text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-focus/50',
 	variants: {
-		compact: { true: 'size-8 justify-center p-0', false: 'gap-sm px-md py-xs' },
+		compact: { true: 'justify-center gap-xs px-sm', false: 'gap-sm px-md' },
 		tone: {
 			default: 'text-neutral',
 			warning: 'text-warning-readable',
@@ -23,6 +26,7 @@ const defaultTrigger = cva({
 });
 const defaultProgress = cva({ base: 'shrink-0' });
 const defaultTriggerValue = cva({ base: 'text-center font-normal tabular-nums' });
+const defaultTriggerPercent = cva({ base: 'tabular-nums' });
 const defaultContent = cva({ base: 'flex min-w-56 flex-col gap-lg p-lg' });
 const defaultSummary = cva({ base: 'flex items-start justify-between gap-lg' });
 const defaultTitle = cva({ base: 'text-xs leading-4 font-medium' });
@@ -49,6 +53,7 @@ export const aiContextTheme = {
 	trigger: defaultTrigger,
 	progress: defaultProgress,
 	triggerValue: defaultTriggerValue,
+	triggerPercent: defaultTriggerPercent,
 	content: defaultContent,
 	summary: defaultSummary,
 	title: defaultTitle,

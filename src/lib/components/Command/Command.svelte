@@ -202,6 +202,7 @@
 		{size}
 		{density}
 		title={item ? undefined : it.label}
+		description={item || !it.description ? undefined : it.description}
 		prefix={item ? undefined : it.icon}
 		suffix={item || !it.shortcut ? undefined : shortcut}
 		children={item ? customRow : undefined}

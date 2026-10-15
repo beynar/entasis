@@ -20,6 +20,11 @@ type AIComposerSubmitControllerOptions = {
 	conversation: AIConversationState<AIThreadItem> | null;
 	buildMeta: () => AIComposerSubmitMeta;
 	clearDraft: () => void;
+	/** Whether keyboard focus is inside the composer right now. */
+	hasFocus: () => boolean;
+	/** Returns focus to the editor once a send settles. */
+	restoreFocus: () => void;
+	messages: { submitFailed: string; stopFailed: string };
 	onSubmit: AIComposerProps['onSubmit'];
 	onStop: AIComposerProps['onStop'];
 };
@@ -48,14 +53,19 @@ export class AIComposerSubmitController {
 			if (options.queueWhileBusy) options.queue.enqueue(meta);
 			return;
 		}
+		// The editor is read-only while a send is in flight, which blurs it; a send that started
+		// from inside the composer hands focus back to the editor when it settles, success or not.
+		const hadFocus = options.hasFocus();
 		this.isSubmitting = true;
 		this.error = undefined;
 		try {
-			if (await this.dispatch(meta, event)) options.clearDraft();
+			await this.dispatch(meta, event);
+			options.clearDraft();
 		} catch (error) {
-			this.error = getErrorMessage(error, 'Unable to submit the message.');
+			this.error = getErrorMessage(error, options.messages.submitFailed);
 		} finally {
 			this.isSubmitting = false;
+			if (hadFocus) options.restoreFocus();
 		}
 	};
 
@@ -69,7 +79,7 @@ export class AIComposerSubmitController {
 			else if (options.conversation) await options.conversation.requestStop();
 			else throw new Error('AIComposer requires onStop or a parent AIConversation to stop.');
 		} catch (error) {
-			this.error = getErrorMessage(error, 'Unable to stop the response.');
+			this.error = getErrorMessage(error, options.messages.stopFailed);
 		} finally {
 			this.isStopping = false;
 		}
@@ -79,15 +89,16 @@ export class AIComposerSubmitController {
 		return this.optionsSource();
 	}
 
+	/** Hands the draft to `onSubmit` or the conversation; a rejection keeps the draft. */
 	private async dispatch(
 		meta: AIComposerSubmitMeta,
 		event: AIComposerSubmitEvent | undefined
-	): Promise<boolean> {
+	): Promise<void> {
 		const options = this.options;
 		const detail: AIComposerSubmitPayload = { ...meta, event, steered: false };
 		if (options.onSubmit) {
 			await options.onSubmit(detail);
-			return false;
+			return;
 		}
 		if (!options.conversation) {
 			throw new Error('AIComposer requires onSubmit or a parent AIConversation.');
@@ -97,7 +108,6 @@ export class AIComposerSubmitController {
 			event,
 			meta
 		});
-		return true;
 	}
 }
 

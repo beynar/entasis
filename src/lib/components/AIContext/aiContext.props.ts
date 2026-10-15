@@ -54,7 +54,10 @@ export type AIContextProps = WithAttachments<
 		usedTokens?: number;
 		/** Structured token breakdown; falls back to conversation state when omitted or undefined. Pass `null` to suppress that fallback. */
 		usage?: AIContextUsage | null;
-		/** Renders only the circular meter in the trigger. */
+		/**
+		 * Renders the circular meter with the rounded percentage (`17%`) instead of the token totals,
+		 * on the small control height used by composer footers.
+		 */
 		compact?: boolean;
 		/** Percentage at which warning styling begins. */
 		warningAt?: number;

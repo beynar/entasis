@@ -1,3 +1,4 @@
+import type { Messages } from '$lib/i18n/en.js';
 import type { FileRejection } from '../Form/File/fileAcceptance.js';
 import { FileDropzone } from '../Form/File/fileDropzone.svelte.js';
 import { getFilesFromClipboard } from '../Form/File/fileSelection.js';
@@ -24,11 +25,14 @@ type AIComposerFileControllerOptions = {
 	onAttachmentAdd?: (payload: AIComposerAttachment) => void;
 	onAttachmentRetry?: (payload: AIComposerAttachment) => void | Promise<void>;
 	onAttachmentRemove?: (payload: AIComposerAttachment) => void;
+	messages: Messages;
 };
 
 export class AIComposerFileController {
 	readonly dropzone: FileDropzone;
 	error = $state<string>();
+	/** Plain-language note about files that were just rejected; the composer dismisses it. */
+	notice = $state<string>();
 
 	constructor(private optionsSource: () => AIComposerFileControllerOptions) {
 		this.dropzone = new FileDropzone(() => ({
@@ -105,7 +109,10 @@ export class AIComposerFileController {
 				error: undefined
 			}));
 		} catch (error) {
-			const message = getErrorMessage(error, `Unable to upload ${attachment.file.name}.`);
+			const message = getErrorMessage(
+				error,
+				this.options.messages.aiComposerUploadFailed(attachment.file.name)
+			);
 			this.updateAttachment(attachmentId, (current) => ({
 				...current,
 				status: 'failed',
@@ -119,7 +126,12 @@ export class AIComposerFileController {
 		if (this.options.managedAttachments) this.commitManagedAttachments([]);
 		else this.commitFiles([]);
 		this.error = undefined;
+		this.notice = undefined;
 		this.dropzone.reset();
+	}
+
+	dismissNotice(): void {
+		this.notice = undefined;
 	}
 
 	restore(message: AIComposerQueuedMessage): void {
@@ -149,6 +161,7 @@ export class AIComposerFileController {
 
 	private replaceFiles(files: File[]): void {
 		this.error = undefined;
+		this.notice = undefined;
 		const options = this.options;
 		if (!options.managedAttachments) {
 			this.commitFiles(files);
@@ -204,18 +217,71 @@ export class AIComposerFileController {
 
 	private reportRejections(rejections: FileRejection[]): void {
 		if (rejections.length === 0) {
-			this.error = undefined;
+			this.notice = undefined;
 			return;
 		}
 		const options = this.options;
 		options.onFileReject?.(rejections);
-		const files = rejections.map((rejection) => rejection.file);
-		options.onFilesRejected?.(files);
-		const reasons = rejections
-			.map((rejection) => rejection.reason)
-			.filter((reason, index, allReasons) => allReasons.indexOf(reason) === index);
-		this.error = `${files.length} file${files.length === 1 ? '' : 's'} rejected (${reasons.join(', ')}).`;
+		options.onFilesRejected?.(rejections.map((rejection) => rejection.file));
+		this.notice = describeRejections(rejections, {
+			accept: options.accept,
+			maxFiles: options.maxFiles,
+			maxFileSize: this.dropzone.formatSize(options.maxFileSize),
+			messages: options.messages
+		});
 	}
+}
+
+/**
+ * One sentence a person can act on: the file's name and what to do instead ("notes.txt isn't
+ * supported — use images or PDF"), never the rejection code.
+ */
+export function describeRejections(
+	rejections: readonly FileRejection[],
+	context: { accept: readonly string[]; maxFiles: number; maxFileSize: string; messages: Messages }
+): string {
+	const { messages } = context;
+	const first = rejections[0].reason;
+	const reason = rejections.every((rejection) => rejection.reason === first) ? first : undefined;
+	const name = rejections[0].file.name;
+	const single = rejections.length === 1;
+	if (reason === 'limit') return messages.aiComposerFileLimit(context.maxFiles);
+	if (reason === 'type') {
+		const types = describeAcceptedTypes(context.accept, messages);
+		return single
+			? messages.aiComposerFileUnsupported(name, types)
+			: messages.aiComposerFilesUnsupported(rejections.length, types);
+	}
+	if (single && reason === 'size')
+		return messages.aiComposerFileTooLarge(name, context.maxFileSize);
+	if (single && reason === 'duplicate') return messages.aiComposerFileDuplicate(name);
+	return messages.aiComposerFilesRejected(rejections.length);
+}
+
+/** "images or PDF" from `['image/*', '.pdf']`, joined the locale's way. */
+export function describeAcceptedTypes(accept: readonly string[], messages: Messages): string {
+	const names = accept.map((pattern) => describeAcceptPattern(pattern.trim(), messages));
+	const unique = names.filter((name, index) => name && names.indexOf(name) === index);
+	try {
+		return new Intl.ListFormat(messages.locale, { type: 'disjunction' }).format(unique);
+	} catch {
+		return unique.join(', ');
+	}
+}
+
+function describeAcceptPattern(pattern: string, messages: Messages): string {
+	const normalized = pattern.toLowerCase();
+	if (normalized.startsWith('.')) return normalized.slice(1).toUpperCase();
+	const [family, subtype] = normalized.split('/');
+	if (subtype === '*') {
+		if (family === 'image') return messages.aiComposerFileTypeImages;
+		if (family === 'video') return messages.aiComposerFileTypeVideos;
+		if (family === 'audio') return messages.aiComposerFileTypeAudio;
+		if (family === 'text') return messages.aiComposerFileTypeText;
+		return family;
+	}
+	// `application/pdf` → PDF; `application/vnd.ms-excel` → MS-EXCEL.
+	return (subtype ?? family).replace(/^(?:vnd\.|x-)/, '').toUpperCase();
 }
 
 function createAttachment(file: File): AIComposerAttachment {
