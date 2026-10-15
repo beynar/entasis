@@ -233,7 +233,7 @@
 			scrollToFn: scrollController.scrollToFn,
 			anchorTo: 'end',
 			followOnAppend: followOnAppendBehavior(),
-			scrollEndThreshold: Math.max(0, bottomThreshold),
+			scrollEndThreshold: endThreshold(),
 			initialOffset: initialThreadOffset,
 			onChange: handleVirtualizerChange
 		}))
@@ -314,7 +314,7 @@
 			scrollToFn: scrollController.scrollToFn,
 			anchorTo: 'end',
 			followOnAppend: followOnAppendBehavior(),
-			scrollEndThreshold: Math.max(0, bottomThreshold),
+			scrollEndThreshold: endThreshold(),
 			onChange: handleVirtualizerChange
 		});
 		if (prependScrollTarget) {
@@ -350,6 +350,18 @@
 		}
 		syncThreadPosition();
 		if (!shouldSmoothAppendedItem) stickToEnd();
+	});
+
+	$effect(() => {
+		void isPinned;
+		untrack(() => {
+			const virtualizer = get(virtualizerStore);
+			virtualizer.setOptions({
+				...virtualizer.options,
+				followOnAppend: followOnAppendBehavior(),
+				scrollEndThreshold: endThreshold()
+			});
+		});
 	});
 
 	onDestroy(() => {
@@ -402,8 +414,16 @@
 		return renderItems.length;
 	}
 
+	// The virtualizer keeps the end in view by itself when an item is appended or re-measured
+	// (streaming text, rows mounting as they scroll in) within `scrollEndThreshold` of the end. That
+	// is only wanted while the thread follows: once the user scrolls up, it would pull every small
+	// scroll back down. Read untracked: the effect below applies a change of `isPinned`.
 	function followOnAppendBehavior(): AIThreadScrollBehavior | false {
-		return followOutput ? scrollBehavior : false;
+		return followOutput && untrack(() => isPinned) ? scrollBehavior : false;
+	}
+
+	function endThreshold(): number {
+		return untrack(() => isPinned) ? Math.max(0, bottomThreshold) : 0;
 	}
 
 	function handleVirtualizerChange(): void {
