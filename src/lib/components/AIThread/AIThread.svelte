@@ -143,6 +143,9 @@
 	// under the viewport (a tool block rendering, streaming text) must not unpin it. Only the user
 	// scrolling away does, and scrolling back to the end re-pins.
 	let isUserTouching = false;
+	let isDraggingScrollbar = false;
+	// Until when a scroll counts as the user's own: a wheel or a navigation key just happened.
+	let userScrollUntil = 0;
 	let lastScrollTop = 0;
 	let stickFrame: number | undefined;
 	let errorMessage = $state<string>();
@@ -415,9 +418,11 @@
 			isPinned = true;
 			return;
 		}
-		// Reaching the end pins; leaving it does not unpin (see `handleScroll` and `handleWheel`). Only
-		// the DOM position counts: the virtualizer's own offset lags a scroll the user just made.
-		if (isViewportAtEnd()) isPinned = true;
+		// Reaching the very end pins; leaving it does not unpin (see `handleScroll` and `handleWheel`).
+		// `bottomThreshold` is not used here: a wheel scroll moves less than it, so pinning within it
+		// would pull every scroll up back down. Only the DOM position counts: the virtualizer's own
+		// offset lags a scroll the user just made.
+		if (distanceFromEnd() <= 1) isPinned = true;
 		stickToEnd();
 	}
 
@@ -430,8 +435,7 @@
 			if (!viewport || !isPinned || isUserTouching || isInitializingEnd) return;
 			// A smooth follow or a smooth scroll-to-latest owns the viewport until it lands.
 			if (isFollowingAppendedItem || renderItems.length === 0) return;
-			const distanceFromEnd = viewport.scrollHeight - viewport.clientHeight - viewport.scrollTop;
-			if (distanceFromEnd <= 1) return;
+			if (distanceFromEnd() <= 1) return;
 			get(virtualizerStore).scrollToEnd({ behavior: 'instant' });
 			syncThreadPosition();
 		});
@@ -441,39 +445,67 @@
 		return !viewport || viewport.scrollTop <= 1;
 	}
 
+	function distanceFromEnd(): number {
+		if (!viewport) return 0;
+		return Math.max(0, viewport.scrollHeight - viewport.clientHeight - viewport.scrollTop);
+	}
+
 	function isViewportAtEnd(): boolean {
 		if (!viewport) return isPinned;
-		const distanceFromEnd = viewport.scrollHeight - viewport.clientHeight - viewport.scrollTop;
-		return Math.max(distanceFromEnd, 0) <= Math.max(0, bottomThreshold);
+		return distanceFromEnd() <= Math.max(0, bottomThreshold);
+	}
+
+	function isUserScrolling(): boolean {
+		return isUserTouching || isDraggingScrollbar || performance.now() < userScrollUntil;
+	}
+
+	function unpin(): void {
+		cancelInitialEndSettlement();
+		isInitializingEnd = false;
+		isFollowingAppendedItem = false;
+		isPinned = false;
 	}
 
 	function handleScroll(event: UIEvent & { currentTarget: EventTarget & HTMLDivElement }): void {
 		const scrollTop = event.currentTarget.scrollTop;
-		const movedUp = scrollTop < lastScrollTop - 1;
+		const delta = scrollTop - lastScrollTop;
 		lastScrollTop = scrollTop;
-		// Growth moves the end away without moving the viewport, so only an upward move that lands
-		// away from the end counts as the user leaving it.
-		if (movedUp && !isInitializingEnd && (isUserTouching || !isViewportAtEnd())) {
-			isPinned = false;
-			isFollowingAppendedItem = false;
+		// Only the user's own scrolls change the intent. Content that shrinks or grows also moves
+		// `scrollTop`, and must neither unpin nor re-pin the thread.
+		if (isUserScrolling()) {
+			if (delta < -1) unpin();
+			// Scrolling back down near the end resumes following.
+			else if (delta > 1 && isViewportAtEnd()) isPinned = true;
 		}
 		syncThreadPosition();
 		onscroll?.(event);
 	}
 
 	function handleWheel(event: WheelEvent): void {
-		cancelInitialEndSettlement();
-		isInitializingEnd = false;
-		if (event.deltaY >= 0) return;
-		isFollowingAppendedItem = false;
-		isPinned = false;
+		if (event.deltaY === 0) return;
+		userScrollUntil = performance.now() + 250;
+		if (event.deltaY < 0) unpin();
 	}
 
 	function handleKeyDown(event: KeyboardEvent): void {
-		if (event.key === 'ArrowUp' || event.key === 'PageUp' || event.key === 'Home') {
-			isFollowingAppendedItem = false;
-			isPinned = false;
-		}
+		const keys = ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '];
+		if (!keys.includes(event.key)) return;
+		userScrollUntil = performance.now() + 600;
+		if (event.key === 'ArrowUp' || event.key === 'PageUp' || event.key === 'Home') unpin();
+	}
+
+	// A press on the viewport itself (not its content) is a press on its scrollbar.
+	function handlePointerDown(event: PointerEvent): void {
+		if (event.target !== viewport || event.pointerType === 'touch') return;
+		isDraggingScrollbar = true;
+		const release = () => {
+			isDraggingScrollbar = false;
+			window.removeEventListener('pointerup', release, true);
+			window.removeEventListener('pointercancel', release, true);
+			if (distanceFromEnd() <= 1) isPinned = true;
+		};
+		window.addEventListener('pointerup', release, true);
+		window.addEventListener('pointercancel', release, true);
 	}
 
 	function handleTouchStart(): void {
@@ -482,7 +514,7 @@
 
 	function handleTouchEnd(): void {
 		isUserTouching = false;
-		if (isViewportAtEnd()) isPinned = true;
+		if (distanceFromEnd() <= 1) isPinned = true;
 		else stickToEnd();
 	}
 
@@ -620,6 +652,7 @@
 			aria-label={viewportLabel ?? t.aiThreadTranscript}
 			onscroll={handleScroll}
 			onkeydown={handleKeyDown}
+			onpointerdown={handlePointerDown}
 			ontouchstart={handleTouchStart}
 			ontouchend={handleTouchEnd}
 			ontouchcancel={handleTouchEnd}
