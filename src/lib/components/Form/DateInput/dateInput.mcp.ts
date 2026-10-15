@@ -50,6 +50,11 @@ Use \`format\` with \`dd\`, \`mm\`, \`yy\`, and \`yyyy\` segments. Supported val
 
 The selector never opens on focus, so tabbing through the field does not pop it. Open it with ArrowDown while the input has focus, or from the full-height calendar button (which carries \`aria-haspopup="dialog"\`, \`aria-expanded\`, and \`aria-controls\`). It stays open after selection unless \`closeOnSelect\` is enabled. Calendar days support arrow, Home/End, and PageUp/PageDown navigation.
 
+## Disabled and read-only
+
+- **disabled**: boolean - Disable the input and the calendar button; a disabled field leaves Form values and posts nothing.
+- **readOnly**: boolean - The input stays focusable and is announced as read-only; typing and selector picks are refused, and the value still validates and submits. A read-only Form, FormGroup or fieldset Field makes it read-only too.
+
 ## State contract
 
 - **value**: current bindable editable value.

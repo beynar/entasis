@@ -47,8 +47,11 @@ render through the same FieldState path as `type: 'field'`, in Form and in `ask(
 
 ## Interaction laws
 
-Each law has an executable entry in `src/lib/components/proposed-laws*.test.ts`. A new law starts
-there as `pending` (`test.fails`) and flips to `test` in the change that delivers it.
+Laws 1–8, 10, 12 and 14 have executable entries in `src/lib/components/proposed-laws*.test.ts`.
+Laws 9, 11 and 13 are guarded only by their owners' suites (`form.validation.svelte.test.ts`,
+`field.messages.test.ts`, and the Popover and Dialog `*.api.svelte.test.ts`). A new law starts in
+the proposed-laws tests as `pending` (`test.fails`) and flips to `test` in the change that
+delivers it.
 
 1. **Open-change details.** Every owner of open state calls `onOpenChange(open, details)` before
    it changes that state. `details.reason` comes from the one `OpenChangeReason` list in

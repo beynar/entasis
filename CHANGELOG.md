@@ -7,8 +7,12 @@ Unreleased section under the new version.
 ## Unreleased
 
 This minor (0.12.0) batches the behaviour changes of the Base UI adoption. Every renamed API keeps
-a deprecated alias for one minor, so an app built on 0.11 keeps compiling; the notes below say what
-to change before the aliases go.
+a deprecated alias for one minor, so code that only uses renamed names keeps compiling until the
+aliases go. Some changes have no alias and need code changes before an app built on 0.11 compiles:
+the removed props (Accordion and Collapsible `accessible`, Collapsible `srOnlyContent`, Meter
+`steps`, Button `as`), the one-payload Tabbar `onValueChange`, and the Popover and Dialog snippet
+members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `focusScope`,
+`computedPosition`). The notes below cover both.
 
 ### Upgrading from 0.11
 
@@ -804,8 +808,12 @@ to change before the aliases go.
 
 ### Deprecated
 
-- `Popover` / `Dialog`: the `hasTransitioned` state field is deprecated; read
-  `lifecycle.status === 'open'`. It is kept for one minor.
+- `Popover` / `Dialog`: `hasTransitioned` on `PopoverApi` and `DialogApi` is deprecated; read
+  `status === 'open'`. The snippet members that echo props are deprecated too: `size`, `position`
+  and `offset` on `PopoverApi` (read the props you passed, or `placement` for where the panel
+  landed), and `type` and `size` on `DialogApi` (read `computedType` or the props you passed). All
+  are kept for one minor.
+- `Popover`: the `PopoverState` type is a deprecated alias of `PopoverApi`, kept for one minor.
 - `RatingInput`: `readonly` is deprecated in favour of `readOnly` and stays as an alias for one
   minor.
 - `Theme`: `lastTooltipClosed` on the theme state is deprecated in favour of `hoverIntent` (the

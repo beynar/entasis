@@ -1,11 +1,36 @@
 // Law 8 (read-only) in the documentation: every value control takes `readOnly`, so its MCP docs
 // name the prop next to `disabled`, and its Usage card can switch it on.
-import { readdirSync, readFileSync } from 'node:fs';
-import path from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-const root = path.resolve(import.meta.dirname, '../../..');
-const formDir = path.join(root, 'src/lib/components/Form');
+// Component sources (tests excluded) and MCP docs: every Form input, plus RichTextInput.
+const sources = import.meta.glob<string>(
+	[
+		'../../lib/components/Form/*/*.{svelte,ts}',
+		'../../lib/components/RichTextInput/*.{svelte,ts}',
+		'!**/*.test.*',
+		'!**/*.mcp.ts'
+	],
+	{ query: '?raw', import: 'default', eager: true }
+);
+const mcpDocs = import.meta.glob<string>(
+	['../../lib/components/Form/*/*.mcp.ts', '../../lib/components/RichTextInput/*.mcp.ts'],
+	{ query: '?raw', import: 'default', eager: true }
+);
+const pages = import.meta.glob<string>('./*/+page.svelte', {
+	query: '?raw',
+	import: 'default',
+	eager: true
+});
+
+const directoryOf = (file: string) => file.slice(0, file.lastIndexOf('/'));
+const componentName = (dir: string) => dir.slice(dir.lastIndexOf('/') + 1);
+
+/** Component directories whose own source declares or destructures `readOnly`. */
+const readOnlyDirs = new Set(
+	Object.entries(sources)
+		.filter(([, source]) => /^\s*readOnly(\??:|,|\s*=)/m.test(source))
+		.map(([file]) => directoryOf(file))
+);
 
 // Docs pages whose Usage card renders a value control that accepts `readOnly`.
 const valueControlPages = [
@@ -26,6 +51,7 @@ const valueControlPages = [
 	'pin-input',
 	'radios',
 	'rating-input',
+	'rich-text-input',
 	'select',
 	'slider',
 	'switch',
@@ -38,26 +64,21 @@ const valueControlPages = [
 ];
 
 describe('readOnly documentation', () => {
-	test('every Form input MCP doc that lists disabled also documents readOnly', () => {
-		const missing = readdirSync(formDir, { withFileTypes: true })
-			.filter((entry) => entry.isDirectory())
-			.flatMap((entry) =>
-				readdirSync(path.join(formDir, entry.name))
-					.filter((file) => file.endsWith('.mcp.ts'))
-					.map((file) => path.join(entry.name, file))
-			)
-			.filter((file) => {
-				const source = readFileSync(path.join(formDir, file), 'utf8');
-				return /^- \*\*disabled\*\*/m.test(source) && !/\breadOnly\b/.test(source);
-			});
+	test('every component that accepts readOnly documents it in its MCP doc', () => {
+		const checked = Object.entries(mcpDocs).filter(([file]) => readOnlyDirs.has(directoryOf(file)));
+		// Guard the filter itself: the value controls are found, not silently skipped.
+		expect(checked.map(([file]) => componentName(directoryOf(file)))).toEqual(
+			expect.arrayContaining(['DateInput', 'TimeInput', 'TextInput', 'Select', 'RichTextInput'])
+		);
+		const missing = checked
+			.filter(([, source]) => !/\breadOnly\b/.test(source))
+			.map(([file]) => file);
 		expect(missing).toEqual([]);
 	});
 
 	test.each(valueControlPages)('the %s Usage card has a Read only control', (page) => {
-		const source = readFileSync(
-			path.join(root, 'src/routes/components', page, '+page.svelte'),
-			'utf8'
-		);
+		const source = pages[`./${page}/+page.svelte`];
+		expect(source).toBeDefined();
 		expect(source).toMatch(/name: 'readOnly', type: 'switch'/);
 		expect(source).toContain('readOnly={controls.value.readOnly}');
 		expect(source).toContain('readOnly={${controls.value.readOnly}}');

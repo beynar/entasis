@@ -165,7 +165,8 @@
 			value: 'both',
 			options: ['hover', 'fixed', 'both', 'none']
 		},
-		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
+		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false }
 	]);
 </script>
 
@@ -191,6 +192,7 @@
 	labelPosition="${controls.value.labelPosition}"
 	toolbar="${controls.value.toolbar}"
 	disabled={${controls.value.disabled}}
+	readOnly={${controls.value.readOnly}}
 	bind:value
 	{triggers}
 	formats={formats}
@@ -204,6 +206,7 @@
 				labelPosition={controls.value.labelPosition}
 				toolbar={controls.value.toolbar}
 				disabled={controls.value.disabled}
+				readOnly={controls.value.readOnly}
 				bind:value
 				{triggers}
 				{formats}

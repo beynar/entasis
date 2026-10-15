@@ -2,6 +2,14 @@
 
 All form inputs extend the **Field** component, inheriting: `label`, `description`, `error`, `required`, `disabled`, `readOnly`, `messages`, `size` (`'small' | 'normal' | 'large'`), `density`, `prefix`, `suffix`, `class`, `theme`. Do not repeat these in each component usage.
 
+**Field validation (every input):**
+
+- `onValidate: (value) => FieldValidatorResult` -- return a message, a list of messages or `true` to mark the value invalid, and `false`/`null`/`undefined` to accept it. It may return a **promise**: while it is pending the field is neither valid nor invalid (`field.validating` is `true`), submit waits for it, a result for an older value is dropped, and a rejected promise marks the field invalid with the generic message.
+- `validationMode: 'submit' | 'blur' | 'change'` -- when the field validates by itself. `'submit'` (default) waits for the first submit attempt, then re-validates each edit; a field that shows an error always re-validates as it is edited. Overrides the Form's `validationMode`.
+- `validationDebounce: number` -- milliseconds an edit waits before the validation it triggers, so an async `onValidate` is not called on every keystroke. Submit and blur validate at once.
+- `disabled` fields skip validation and are left out of Form values (as in a native form); `readOnly` fields stay focusable, validate and submit, but refuse edits.
+- **FieldState** (the `snippet` argument of a Form `type: 'field'` entry, and what custom controls compose): `value`, `setValue(value)` for accepted edits (refused while disabled or read-only), `validate()` (synchronous), `validateAsync()` (waits for a pending async validator), `settle()` (resolves once no async validation is pending), `validating`, `isValid`, `dirty`, `touched`, `reset(value?)`, `focusControl()`.
+
 Import pattern: `import { ComponentName } from 'entasis/kebab-case-name'`
 Global theme setter: `import { setComponentNameTheme } from 'entasis/kebab-case-name'` (shape: `{ slot: { base, variantName: { value: classes } } }`, see theming.md)
 
@@ -646,6 +654,10 @@ Declarative form from config. Manages state, validation, layout.
 - `inputs: FormInputs` (required) -- `{ fieldName: { type, ...fieldProps } }`
 - `value` (bindable), `defaultValue`, `onValueChange`, `form: FormState` (bindable), `onSubmit: (value) => void | Promise`
 - `actions: FormAction[]` (buttons rendered after the fields), `variant: 'plain' | 'sectioned' | 'card'`, `layout: 'vertical' | 'horizontal'`, `size`, `density`
+- `disabled` -- disables every field (for example `disabled={form.loading}`); disabled fields skip validation and are left out of the submitted value
+- `readOnly` -- makes every field read-only: focusable, validated and submitted, but not editable
+- `validationMode: 'submit' | 'blur' | 'change'` (default `'submit'`) and `validationDebounce: number` -- defaults for every field; a field's own values win
+- `errors: FormErrors` -- errors from outside the form (a server response such as a SvelteKit `ActionData`), keyed by field name; they show under their fields, survive validation, do not block a submit and clear when that field's value next changes
 
 **Slots:** `children`, `header`, `title`, `description`, `footer` -- all receive the `FormState` instance.
 
@@ -681,7 +693,13 @@ is doing. Size the form's host, not the browser window, to get a particular colu
 `@`-prefixed container variants (never `sm:` / `md:` / `lg:`) in Form, Field or Ask theme
 overrides.
 
-**FormState:** `value`, `loading`, `hasError`, `fields`, `validate()`, `submit()`
+**FormState:** `value`, `loading`, `hasError`, `fields`, `dirty`, `touched`, `validating`, `submitCount`, and:
+
+- `validate({ reveal? })` -- synchronous; returns the value or `false` after revealing the first invalid field. It does **not** wait for async validators.
+- `validateAsync({ reveal? })` -- like `validate`, and waits for every async validator to settle. Pass `reveal: false` to check quietly (no scroll, no focus, no submit attempt).
+- `validateField(name)` -- validates one field now; a field whose async validator is still pending reads as invalid.
+- `submit()` -- waits for pending async validators (the form is `loading` meanwhile), then calls `onSubmit` with the validated value.
+- `setErrors(errors)` -- the imperative form of the `errors` prop; `reset(value?)` -- restores initial values as the new baseline.
 
 **Theme parts:** `root`, `formHeader`, `formTitle`, `formDescription`, `formGroup`, `formGroupLabel`, `formGroupDescription`, `formGroupFields`, `formItem`, `formActions`, `formAction`, `formCustom`, `formFooter`
 
