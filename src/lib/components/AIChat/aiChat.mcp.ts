@@ -92,7 +92,7 @@ bar of a reply that is still streaming appears when it ends.
 
 ## Context and model controls
 
-\`models\` and \`modelGroups\` populate the default selector. \`maxTokens\` defaults to 128000. \`showContext\` and \`showModelSelector\` default to true; the model selector renders only when at least one model exists. Custom \`context\` and \`modelSelector\` snippets render regardless of those visibility flags. \`controls\` has precedence over both individual regions.
+\`models\` and \`modelGroups\` populate the default selector. The default context indicator renders only when there is something to measure: \`maxTokens\` is set or the conversation reports \`contextUsage\`. With usage but no \`maxTokens\`, the percentage is computed against 128000. \`showContext\` and \`showModelSelector\` default to true; the model selector renders only when at least one model exists. Custom \`context\` and \`modelSelector\` snippets render regardless of those visibility flags. \`controls\` has precedence over both individual regions. These controls render at the end of the composer footer, next to the send button.
 
 ## Composer behavior
 

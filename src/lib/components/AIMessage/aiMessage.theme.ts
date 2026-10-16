@@ -167,9 +167,10 @@ const defaultCaret = cva({
 	base: 'mt-xs inline-block size-2.5 shrink-0 rounded-full bg-current opacity-70 motion-safe:animate-pulse'
 });
 // Actions sit in the flow under the content and keep their row's height when hover-hidden, so
-// the next row never draws under them.
+// the next row never draws under them. The row sizes to its buttons (AIMessageActions), never to
+// the bubble, so it does not wrap under a one-word message.
 const defaultActions = cva({
-	base: 'w-full min-w-0',
+	base: '',
 	variants: {
 		visibility: {
 			hover: null,

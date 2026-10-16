@@ -17,17 +17,35 @@ const defaultViewport = cva({
 	}
 });
 const defaultList = cva({ base: 'relative w-full' });
+// One vertical rhythm: rows of a turn (reasoning, tools, text, sources) are one fixed gap apart, the
+// first row of the next turn (or marker) adds a larger fixed gap, and a turn's own action-bar row
+// sits right under the row it closes. Rows carry no outer margins of their own.
 const defaultItem = cva({
 	base: 'absolute top-0 left-0 z-0 w-full hover:!z-20 focus-within:!z-20',
 	variants: {
 		density: {
-			compact: 'px-lg py-micro',
-			normal: 'px-xl py-md',
-			comfortable: 'px-layout-sm py-lg'
+			compact: 'px-lg pb-micro',
+			normal: 'px-xl pb-md',
+			comfortable: 'px-layout-sm pb-lg'
+		},
+		boundary: {
+			part: null,
+			unit: null,
+			bar: 'pt-0'
 		}
 	},
-	defaultVariants: { density: 'normal' }
+	compoundVariants: [
+		{ boundary: 'part', density: 'compact', class: 'pt-micro' },
+		{ boundary: 'part', density: 'normal', class: 'pt-md' },
+		{ boundary: 'part', density: 'comfortable', class: 'pt-lg' },
+		{ boundary: 'unit', density: 'compact', class: 'pt-md' },
+		{ boundary: 'unit', density: 'normal', class: 'pt-layout-md' },
+		{ boundary: 'unit', density: 'comfortable', class: 'pt-layout-lg' }
+	],
+	defaultVariants: { density: 'normal', boundary: 'part' }
 });
+// AIMessage rendered by the thread: the row supplies the vertical rhythm, so the message adds none.
+const defaultMessage = cva({ base: 'py-0' });
 // The centred reading column. `--ai-thread-content-width` (the `contentWidth` prop) wins over an
 // ancestor's `--ai-chat-content-width`; with neither, rows span the thread.
 const defaultContent = cva({
@@ -40,7 +58,18 @@ const defaultGreeting = cva({ base: 'text-xl font-semibold text-balance text-neu
 const defaultEmptySuggestions = cva({
 	base: 'flex max-w-full min-w-0 flex-wrap justify-center gap-sm'
 });
-const defaultFollowUps = cva({ base: 'shrink-0 px-xl pb-sm' });
+// Follow-ups share the rows' inline inset at the thread's density.
+const defaultFollowUps = cva({
+	base: 'shrink-0 pb-sm',
+	variants: {
+		density: {
+			compact: 'px-lg',
+			normal: 'px-xl',
+			comfortable: 'px-layout-sm'
+		}
+	},
+	defaultVariants: { density: 'normal' }
+});
 const defaultFollowUpList = cva({
 	base: 'mx-auto flex w-full min-w-0 max-w-[var(--ai-thread-content-width,var(--ai-chat-content-width,none))] flex-wrap gap-sm'
 });
@@ -54,7 +83,8 @@ const defaultSourcesLabel = cva({ base: 'text-xs font-medium text-neutral/70' })
 const defaultSource = cva({
 	base: 'inline-flex h-6 max-w-60 min-w-0 items-center truncate rounded-full border border-neutral-muted px-md text-xs text-neutral/70 [&[href]]:state-layer [&[href]]:hover:text-neutral'
 });
-const defaultActions = cva({ base: 'w-full min-w-0' });
+// A turn's action-bar row. AIMessageActions sizes the row to its buttons.
+const defaultActions = cva({ base: '' });
 const defaultScrollButton = cva({
 	base: 'absolute bottom-md z-10 rounded-full bg-surface-raised lift-2',
 	variants: {
@@ -87,6 +117,7 @@ export const aiThreadTheme = {
 	viewport: defaultViewport,
 	list: defaultList,
 	item: defaultItem,
+	message: defaultMessage,
 	content: defaultContent,
 	empty: defaultEmpty,
 	greeting: defaultGreeting,

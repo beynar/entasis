@@ -6,7 +6,7 @@ import {
 } from '$lib/utils/cva/index.js';
 
 const defaultRoot = cva({
-	base: 'flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-lg border border-neutral-muted bg-surface'
+	base: 'group/ai-chat flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-lg border border-neutral-muted bg-surface'
 });
 const defaultHeader = cva({ base: 'shrink-0 border-b border-neutral-muted px-xl py-lg' });
 const defaultError = cva({ base: 'shrink-0 px-xl pt-lg' });
@@ -15,8 +15,11 @@ const defaultThread = cva({ base: 'min-h-0 flex-1' });
 const defaultAfterThread = cva({ base: 'shrink-0' });
 const defaultSuggestions = cva({ base: 'border-t border-neutral-muted px-lg py-md' });
 // The composer is its own raised card, so its band has no rule above it: the card separates
-// itself from the transcript.
-const defaultComposer = cva({ base: 'shrink-0 px-lg pt-xs pb-lg' });
+// itself from the transcript. Its inline inset matches the thread rows at the chat's density, so
+// the card and the transcript share their edges at every width.
+const defaultComposer = cva({
+	base: 'shrink-0 px-xl pt-xs pb-lg group-data-[density=compact]/ai-chat:px-lg group-data-[density=comfortable]/ai-chat:px-layout-sm'
+});
 const defaultControls = cva({ base: 'flex min-w-0 items-center gap-md' });
 const defaultFooter = cva({ base: 'shrink-0 border-t border-neutral-muted px-xl py-md' });
 // The skeleton mirrors the default chat: rows in the centred column, user turns as end-aligned

@@ -133,4 +133,35 @@ describe('AIMessage', () => {
 			.poll(() => document.querySelector('[role="tooltip"]')?.textContent?.trim())
 			.toBe('Copy');
 	});
+
+	test.each([
+		['user', undefined],
+		['assistant', undefined],
+		['assistant', 'bubble']
+	] as const)(
+		'the action row never wraps under a one-word %s message (%s)',
+		async (from, variant) => {
+			await render(Harness, {
+				props: { from, variant, content: 'yo', onEdit: () => {}, onRetry: () => {} }
+			});
+			await expect
+				.poll(() => document.querySelectorAll('[data-slot="ai-message-actions"] button').length)
+				.toBe(2);
+			const buttons = [
+				...document.querySelectorAll<HTMLElement>('[data-slot="ai-message-actions"] button')
+			].map((button) => button.getBoundingClientRect());
+			expect(buttons.every((rect) => Math.abs(rect.top - buttons[0]!.top) < 0.5)).toBe(true);
+			expect(buttons[1]!.left).toBeGreaterThan(buttons[0]!.left);
+			// User rows stay at the bubble's end edge, assistant rows at the start edge.
+			const bubble = q('[data-slot="ai-message-content"]').getBoundingClientRect();
+			const icons = [
+				...document.querySelectorAll<SVGElement>('[data-slot="ai-message-actions"] svg')
+			].map((icon) => icon.getBoundingClientRect());
+			if (from === 'user') {
+				expect(Math.abs(icons.at(-1)!.right - bubble.right)).toBeLessThanOrEqual(1.5);
+			} else {
+				expect(icons[0]!.left).toBeLessThanOrEqual(bubble.left + 1.5);
+			}
+		}
+	);
 });

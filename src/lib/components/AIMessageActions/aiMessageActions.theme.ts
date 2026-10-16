@@ -6,14 +6,15 @@ import {
 } from '$lib/utils/cva/index.js';
 // The action row takes layout space (it is never positioned over the next row) and its ghost
 // buttons are pulled out by their own inset, so the first icon lines up with the edge of the text
-// or bubble above: the start edge for assistant rows, the end edge for user rows.
+// or bubble above: the start edge for assistant rows, the end edge for user rows. The row is as wide
+// as its buttons and never wraps, whatever the width of a short bubble above it.
 const defaultRoot = cva({
-	base: 'flex min-h-[var(--control-height-sm)] w-full flex-wrap items-center gap-xs transition-opacity motion-reduce:transition-none',
+	base: 'flex min-h-[var(--control-height-sm)] w-max max-w-none shrink-0 flex-nowrap items-center gap-xs transition-opacity motion-reduce:transition-none',
 	variants: {
 		role: {
-			user: 'justify-end',
+			user: 'ms-auto justify-end',
 			assistant: 'justify-start',
-			system: 'justify-center',
+			system: 'mx-auto justify-center',
 			tool: 'justify-start'
 		},
 		visibility: {
@@ -63,7 +64,8 @@ const defaultButton = cva({
 	},
 	defaultVariants: { size: 'normal' }
 });
-const defaultError = cva({ base: 'w-full basis-full pt-xs' });
+// Rendered after the row, not inside it, so a message never widens or wraps the button row.
+const defaultError = cva({ base: 'w-full min-w-0 pt-xs' });
 export const aiMessageActionsTheme = {
 	root: defaultRoot,
 	button: defaultButton,

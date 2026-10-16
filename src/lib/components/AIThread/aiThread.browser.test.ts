@@ -187,3 +187,91 @@ describe('turn units and status rows', () => {
 		expect(getComputedStyle(viewport()).paddingLeft).toBe('0px');
 	});
 });
+
+describe('turn layout', () => {
+	const turns: AIThreadItem[] = [
+		{ id: 'u1', role: 'user', content: 'Plan the launch' },
+		{
+			id: 'a1',
+			role: 'assistant',
+			parts: [
+				{ type: 'reasoning', text: 'Weighing the gates.', state: 'done' },
+				{ type: 'text', text: 'First part of the answer.' },
+				{
+					type: 'tool-search',
+					toolCallId: 's1',
+					state: 'output-available',
+					input: { query: 'gates' },
+					output: { hits: 2 }
+				},
+				{ type: 'text', text: 'Second part of the answer.' }
+			]
+		},
+		{ id: 'u2', role: 'user', content: 'Thanks' },
+		{ id: 'a2', role: 'assistant', content: 'Any time.' }
+	];
+	const rows = () =>
+		[...document.querySelectorAll<HTMLElement>('[data-slot="ai-thread-item"]')].sort(
+			(a, b) => Number(a.dataset.index) - Number(b.dataset.index)
+		);
+	const contentRect = (row: HTMLElement) =>
+		row.querySelector('[data-slot="ai-thread-item-content"]')!.getBoundingClientRect();
+
+	test('rows of a turn share one gap and turns are a larger fixed gap apart', async () => {
+		await render(Harness, { props: { messages: turns, height: 560 } });
+		await expect.poll(() => rows().length).toBe(8);
+		expect(rows().map((row) => row.dataset.kind)).toEqual([
+			'message',
+			'reasoning',
+			'message',
+			'tool-group',
+			'message',
+			'actions',
+			'message',
+			'message'
+		]);
+		const [user, reasoning, first, tools, second, , nextUser] = rows();
+		const gap = (a: HTMLElement, b: HTMLElement) => contentRect(b).top - contentRect(a).bottom;
+		const inTurn = [gap(reasoning!, first!), gap(first!, tools!), gap(tools!, second!)];
+		// Rows sit on whole-pixel offsets, so allow a subpixel of rounding.
+		expect(Math.max(...inTurn) - Math.min(...inTurn)).toBeLessThan(1.5);
+		const betweenTurns = [gap(user!, reasoning!), gap(rows()[5]!, nextUser!)];
+		expect(Math.abs(betweenTurns[0]! - betweenTurns[1]!)).toBeLessThan(1.5);
+		expect(betweenTurns[0]!).toBeGreaterThan(inTurn[0]! + 4);
+	});
+
+	test('hovering any row of an earlier turn reveals that turn’s action bar', async () => {
+		await render(Harness, { props: { messages: turns, height: 560 } });
+		await expect.poll(() => rows().length).toBe(8);
+		const bar = () =>
+			rows()
+				.find((row) => row.dataset.kind === 'actions')!
+				.querySelector<HTMLElement>('[data-slot="ai-message-actions"]')!;
+		await userEvent.unhover(rows()[0]!);
+		await expect.poll(() => getComputedStyle(bar()).opacity).toBe('0');
+
+		await userEvent.hover(rows()[2]!.querySelector('p')!);
+		await expect.poll(() => getComputedStyle(bar()).opacity).toBe('1');
+
+		await userEvent.hover(rows()[6]!.querySelector('p')!);
+		await expect.poll(() => getComputedStyle(bar()).opacity).toBe('0');
+	});
+
+	test('a trailing system notice keeps the follow-ups and the latest bar', async () => {
+		await render(Harness, {
+			props: {
+				messages: [
+					{ id: 'u', role: 'user', content: 'hi' },
+					{ id: 'a', role: 'assistant', content: 'Hello there.' },
+					{ id: 's', role: 'system', content: 'Model switched' }
+				],
+				suggestions: ['Tell me more']
+			}
+		});
+		await expect
+			.poll(() => document.querySelector('[data-slot="ai-thread-follow-ups"]')?.textContent)
+			.toContain('Tell me more');
+		const assistant = document.querySelector<HTMLElement>('[data-from="assistant"]')!;
+		expect(assistant.dataset.actionsVisibility).toBe('always');
+	});
+});

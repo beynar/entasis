@@ -47,6 +47,20 @@ describe('AIChat', () => {
 			.toBeGreaterThan(800);
 	});
 
+	test.each(['compact', 'normal', 'comfortable'] as const)(
+		'below the column width, rows and the composer card share their edges (%s)',
+		async (density) => {
+			await render(Harness, { props: { messages: turn, contentWidth: 'none', density } });
+			await expect
+				.poll(() => document.querySelector('[data-slot="ai-chat-composer"] > *'))
+				.not.toBeNull();
+			const row = rect('[data-slot="ai-thread-item-content"]');
+			const card = rect('[data-slot="ai-chat-composer"] > *');
+			expect(Math.abs(row.left - card.left)).toBeLessThan(0.5);
+			expect(Math.abs(row.right - card.right)).toBeLessThan(0.5);
+		}
+	);
+
 	test('an error shows at the failed turn with a Retry wired to the conversation', async () => {
 		const onRetry = vi.fn();
 		await render(Harness, {

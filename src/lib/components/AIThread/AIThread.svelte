@@ -240,7 +240,14 @@
 	const liveRegionText = $derived(
 		resolvedLiveText || (isPending ? t.aiReasoningThinking : undefined)
 	);
-	const lastMessage = $derived(resolvedMessages.at(-1));
+	// The last turn, ignoring markers and system notices that may follow it (a context marker, a
+	// "model switched" notice): they do not end the turn.
+	const lastTurnMessage = $derived(
+		resolvedMessages.findLast(
+			(message) =>
+				message.type !== 'marker' && message.type !== 'context' && message.role !== 'system'
+		)
+	);
 	const shouldShowFollowUps = $derived(
 		showFollowUps &&
 			resolvedSuggestions.length > 0 &&
@@ -248,12 +255,9 @@
 			!resolvedStreaming &&
 			!hasErrorRow &&
 			!resolvedQuestion &&
-			lastMessage !== undefined &&
-			lastMessage.type !== 'marker' &&
-			lastMessage.type !== 'context' &&
+			lastTurnMessage !== undefined &&
 			// After an assistant turn: its reply, or the tool calls that ended it.
-			lastMessage.role !== 'user' &&
-			lastMessage.role !== 'system'
+			lastTurnMessage.role !== 'user'
 	);
 
 	const tocState = $derived.by(() => {
@@ -726,7 +730,7 @@
 			data-slot="ai-thread-follow-ups"
 			role="group"
 			aria-label={t.aiThreadFollowUps}
-			class={classes.followUps()}
+			class={classes.followUps({ density: resolvedDensity })}
 		>
 			<div class={classes.followUpList()}>
 				{#each resolvedSuggestions as suggestion, index (`${suggestion}:${index}`)}

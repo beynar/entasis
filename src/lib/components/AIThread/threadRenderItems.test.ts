@@ -248,3 +248,107 @@ describe('streaming and errors', () => {
 		expect(kinds(derive([], { error: true }))).toEqual(['error']);
 	});
 });
+
+describe('review fixes', () => {
+	test('a files-only user message after a tool-ending reply keeps the tool group before it', () => {
+		const items = derive([
+			{ id: 'u1', role: 'user', content: 'hi' },
+			{
+				id: 'a1',
+				role: 'assistant',
+				parts: [
+					{ type: 'text', text: 'Looking' },
+					{
+						type: 'tool-search',
+						toolCallId: 's1',
+						state: 'output-available',
+						input: {},
+						output: {}
+					}
+				]
+			},
+			{
+				id: 'u2',
+				role: 'user',
+				parts: [{ type: 'file', mediaType: 'image/png', url: 'https://example.com/a.png' }]
+			}
+		]);
+		expect(
+			items.map((item) => `${item.kind}:${'messageIndex' in item ? item.messageIndex : ''}`)
+		).toEqual(['message:0', 'message:1', 'tool-group:1', 'actions:1', 'message:2']);
+		const [bar] = ofKind(items, 'actions');
+		expect(bar?.actions).toMatchObject({ messageIndex: 1, latest: false });
+		const assistantUnits = new Set(
+			items
+				.filter((item) => 'messageIndex' in item && item.messageIndex === 1)
+				.map((item) => item.unit)
+		);
+		expect(assistantUnits.size).toBe(1);
+	});
+
+	test.each([
+		['no parts', []],
+		['only step-start', [{ type: 'step-start' }]],
+		['an empty text part', [{ type: 'text', text: '' }]],
+		['an empty reasoning part', [{ type: 'reasoning', text: '' }]]
+	])('an assistant message with %s keeps the pending row while streaming', (_, parts) => {
+		const messages: AIThreadItem[] = [
+			{ id: 'u', role: 'user', content: 'hi' },
+			{ id: 'a', role: 'assistant', parts }
+		];
+		expect(kinds(derive(messages, { streaming: true }))).toEqual(['message', 'pending']);
+		expect(kinds(derive(messages))).toEqual(['message']);
+	});
+
+	test('an empty assistant placeholder without parts keeps the pending row while streaming', () => {
+		const messages: AIThreadItem[] = [
+			{ id: 'u', role: 'user', content: 'hi' },
+			{ id: 'a', role: 'assistant', content: '' }
+		];
+		expect(kinds(derive(messages, { streaming: true }))).toEqual(['message', 'pending']);
+	});
+
+	test('a trailing system notice does not end the latest assistant turn', () => {
+		const items = derive([
+			{ id: 'u', role: 'user', content: 'hi' },
+			{ id: 'a', role: 'assistant', content: 'yo' },
+			{ id: 's', role: 'system', content: 'Model switched' }
+		]);
+		const messages = ofKind(items, 'message');
+		expect(messages[1]?.actions).toMatchObject({ role: 'assistant', latest: true });
+		expect(messages[2]?.unit).not.toBe(messages[1]?.unit);
+	});
+
+	test('every row of a turn shares one unit key, distinct from the next turn', () => {
+		const items = derive([
+			{ id: 'u', role: 'user', content: 'Search' },
+			{
+				id: 'a',
+				role: 'assistant',
+				parts: [
+					{ type: 'reasoning', text: 'Planning.', state: 'done' },
+					{ type: 'text', text: 'One' },
+					{
+						type: 'tool-search',
+						toolCallId: 's1',
+						state: 'output-available',
+						input: {},
+						output: {}
+					},
+					{ type: 'text', text: 'Two' }
+				]
+			}
+		]);
+		expect(kinds(items)).toEqual([
+			'message',
+			'reasoning',
+			'message',
+			'tool-group',
+			'message',
+			'actions'
+		]);
+		const [user, ...turn] = items;
+		expect(new Set(turn.map((item) => item.unit)).size).toBe(1);
+		expect(turn[0]?.unit).not.toBe(user?.unit);
+	});
+});

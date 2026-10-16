@@ -121,7 +121,10 @@ type AIChatBaseProps<TMessage extends AIThreadItem> = AIChatComposerBehaviorProp
 	models?: readonly AIModelSelectorModel[];
 	/** Nested model groups shown by the default model selector. */
 	modelGroups?: readonly AIModelSelectorGroup[];
-	/** Context-window limit used by the default context indicator. */
+	/**
+	 * Context-window limit used by the default context indicator. The indicator renders only when
+	 * this is set or the conversation reports `contextUsage` (then measured against 128000).
+	 */
 	maxTokens?: number;
 	/** Displays the default context indicator when no `context` snippet is provided. */
 	showContext?: boolean;

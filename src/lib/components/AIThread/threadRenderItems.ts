@@ -29,7 +29,7 @@ export type AIThreadUnitActions<TMessage extends AIThreadItem = AIThreadItem> = 
 	latest: boolean;
 };
 
-export type AIThreadRenderItem<TMessage extends AIThreadItem = AIThreadItem> =
+export type AIThreadRenderItem<TMessage extends AIThreadItem = AIThreadItem> = (
 	| {
 			kind: 'message';
 			key: string;
@@ -99,7 +99,14 @@ export type AIThreadRenderItem<TMessage extends AIThreadItem = AIThreadItem> =
 			/** The conversation error, shown where the reply failed. */
 			kind: 'error';
 			key: string;
-	  };
+	  }
+) & {
+	/**
+	 * The key of the transcript unit the row belongs to (a user message, an assistant turn or a
+	 * marker). Rows of one unit share it; status rows (pending, error) have none.
+	 */
+	unit?: string;
+};
 
 export type DeriveAIThreadRenderItemsOptions<TMessage extends AIThreadItem> = {
 	getMessageKey: (message: TMessage, index: number) => string;
@@ -243,8 +250,11 @@ export function deriveAIThreadRenderItems<TMessage extends AIThreadItem>(
 		}
 
 		if (options.splitMessageParts !== false && message.parts?.length) {
-			const firstItemIndex = items.length;
 			let files: readonly AIFileSource[] | undefined = messageFileParts(message.parts, messageKey);
+			// Files may be spliced in at the start of this message below, so a tool group still open
+			// from the previous message closes first and keeps its place before them.
+			if (files.length > 0) flushTools();
+			const firstItemIndex = items.length;
 			let sources: AIThreadSource[] | undefined;
 			let renderedPart = false;
 			const takeFiles = () => {
@@ -354,6 +364,15 @@ export function deriveAIThreadRenderItems<TMessage extends AIThreadItem>(
 			continue;
 		}
 
+		// An assistant message with nothing visible is not a row: an AI SDK message whose parts are
+		// only `step-start`, `data-*` or empty text, or the empty placeholder a client adds before the
+		// first token. While the reply streams, the pending row stays in its place.
+		if (
+			isEmptyAssistantMessage(message) &&
+			(message.parts !== undefined || (options.streaming && messageIndex === messages.length - 1))
+		) {
+			continue;
+		}
 		flushTools();
 		pushMessage(message, messageIndex, `${messageKey}:message`);
 	}
@@ -363,7 +382,7 @@ export function deriveAIThreadRenderItems<TMessage extends AIThreadItem>(
 	return appendStatusItems(withActions, options);
 }
 
-type Unit = { kind: 'user' | 'assistant' | 'none'; start: number; end: number };
+type Unit = { kind: 'user' | 'system' | 'assistant' | 'none'; start: number; end: number };
 
 function itemRole<TMessage extends AIThreadItem>(item: ContentItem<TMessage>): AIThreadRole {
 	return item.message.role ?? 'assistant';
@@ -374,6 +393,7 @@ function itemRole<TMessage extends AIThreadItem>(item: ContentItem<TMessage>): A
  * one unit; an assistant turn runs from the first non-user item to the next user message or
  * marker. The bar sits on the unit's last text segment when the unit ends with text, otherwise
  * on an `actions` row after the unit. The final assistant turn of a streaming reply has no bar.
+ * Like markers, system notices do not end the latest turn: only a user message does.
  */
 function assignUnitActions<TMessage extends AIThreadItem>(
 	items: ContentItem<TMessage>[],
@@ -388,16 +408,17 @@ function assignUnitActions<TMessage extends AIThreadItem>(
 		}
 		const role = itemRole(item);
 		if (item.kind === 'message' && (role === 'user' || role === 'system')) {
+			const kind = role === 'user' ? 'user' : 'system';
 			// Several text parts of one user message stay one unit.
 			const previousItem = previous ? items[previous.end] : undefined;
 			if (
-				previous?.kind === 'user' &&
+				previous?.kind === kind &&
 				previousItem?.kind === 'message' &&
 				previousItem.messageIndex === item.messageIndex
 			) {
 				previous.end = index;
 			} else {
-				units.push({ kind: 'user', start: index, end: index });
+				units.push({ kind, start: index, end: index });
 			}
 			continue;
 		}
@@ -410,8 +431,9 @@ function assignUnitActions<TMessage extends AIThreadItem>(
 	const result: ContentItem<TMessage>[] = [];
 	for (const [unitIndex, unit] of units.entries()) {
 		const unitItems = items.slice(unit.start, unit.end + 1);
+		const unitKey = unitItems[0]!.key;
 		if (unit.kind === 'none') {
-			result.push(...unitItems);
+			result.push(...unitItems.map((item) => ({ ...item, unit: unitKey })));
 			continue;
 		}
 		const latest =
@@ -444,12 +466,13 @@ function assignUnitActions<TMessage extends AIThreadItem>(
 			(last.content ?? last.message.content ?? '') === content;
 		for (const item of unitItems) {
 			if (item.kind !== 'message') {
-				result.push(item);
+				result.push({ ...item, unit: unitKey });
 				continue;
 			}
 			const isLast = item === last;
 			result.push({
 				...item,
+				unit: unitKey,
 				actions: isLast && barOnLast && !replying ? actions : false,
 				...(replying && isLast ? { streaming: true } : {})
 			});
@@ -460,7 +483,8 @@ function assignUnitActions<TMessage extends AIThreadItem>(
 				key: `${last.key}:actions`,
 				message: actions.message,
 				messageIndex: actions.messageIndex,
-				actions
+				actions,
+				unit: unitKey
 			});
 		}
 	}
@@ -486,6 +510,15 @@ function appendStatusItems<TMessage extends AIThreadItem>(
 
 function hasMessageContent(message: AIThreadItem): boolean {
 	return message.content !== undefined && message.content !== '';
+}
+
+function isEmptyAssistantMessage(message: AIThreadItem): boolean {
+	return (
+		(message.role ?? 'assistant') === 'assistant' &&
+		!hasMessageContent(message) &&
+		!message.files?.length &&
+		!message.attachments?.length
+	);
 }
 
 const SAFE_URL = /^(?:https?:|blob:|data:image\/)/i;

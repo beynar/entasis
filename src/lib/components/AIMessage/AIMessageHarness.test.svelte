@@ -13,7 +13,9 @@
 		streaming = false,
 		dir = 'ltr',
 		width = 640,
-		files
+		files,
+		onEdit,
+		onRetry
 	}: {
 		from?: 'user' | 'assistant';
 		content?: string;
@@ -23,6 +25,8 @@
 		dir?: 'ltr' | 'rtl';
 		width?: number;
 		files?: { name: string; size?: number; type?: string }[];
+		onEdit?: () => void;
+		onRetry?: () => void;
 	} = $props();
 </script>
 
@@ -37,6 +41,8 @@
 			{files}
 			actionsVisibility="always"
 			copyable
+			{onEdit}
+			{onRetry}
 		/>
 	</div>
 </Theme>

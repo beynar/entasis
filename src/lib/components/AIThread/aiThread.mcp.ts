@@ -35,7 +35,7 @@ Virtualized AI transcript with stable message keys, initial end anchoring, pinne
 - AI SDK \`{ type: 'reasoning', text, state? }\` - rendered with AIReasoning, streaming while \`state\` is \`'streaming'\` (or, without a state, while it is the last part of a streaming reply).
 - AI SDK \`source-url\` / \`source-document\` parts - one "Sources" row of chips per message; only http(s) URLs become links.
 - AI SDK \`file\` parts - shown as file previews with the message's text segment (or a segment of their own). Only https, blob and image data URLs are used as previews.
-- \`step-start\` and \`data-*\` parts carry no visible content and are skipped.
+- \`step-start\` and \`data-*\` parts carry no visible content and are skipped. An assistant message with nothing visible yet (only such parts, empty text, or the empty placeholder a client adds before the first token) is not rendered, so the pending row stays until real content arrives.
 
 When text parts are present, top-level message content is not rendered again. Consecutive ordinary tools are grouped through \`AITool\`. An ask-user-question tool that is answered (by the conversation, by the AI SDK output state, or locally through this thread) renders as a compact question → answer summary (\`AIAskUserQuestionSummary\`); a dismissed one settles as a cancelled call.
 
@@ -82,7 +82,7 @@ When text parts are present, top-level message content is not rendered again. Co
   resolved action visibility keeps custom renderers aligned with the thread's latest-message rule.
 - **messageSize**, **messageVariant** - Configure only the default AIMessage renderer; a custom message slot owns its presentation.
 - **messageActions**: AIMessageActionSnippet | false - Replaces or disables default actions.
-- **messageActionsVisibility**: 'latest' | 'hover' | 'always' | 'none' (default: 'latest'). \`latest\` keeps the final assistant turn's bar visible and reveals the rest on hover or focus; hover-revealed bars always show on touch screens. Hidden bars keep their height, so no row draws under them.
+- **messageActionsVisibility**: 'latest' | 'hover' | 'always' | 'none' (default: 'latest'). \`latest\` keeps the final assistant turn's bar visible and reveals the rest on hover or focus; hovering any row of a turn (its reasoning, tools or text) reveals that turn's bar, and hover-revealed bars always show on touch screens. Hidden bars keep their height, so no row draws under them. A system notice or marker after the last reply does not make it lose its \`latest\` bar or hide the follow-ups.
 - **messageCopyable**, **messageEditable**, **messageRetryable**: boolean
 - **onMessageCopy**, **onMessageEdit**, **onMessageRetry**: AIMessage action handlers.
 
@@ -91,7 +91,8 @@ up to the next user message or marker — has a single bar at its end. When the 
 only text segment the bar sits under that text; otherwise it gets a row of its own whose copy takes
 the whole turn's text and whose retry targets the turn's last assistant message. The bar of a
 reply that is still streaming appears when it ends. The message slot's \`actionsVisibility\` is
-\`none\` for segments that do not end their unit.
+\`none\` for segments that do not end their unit. Rows of one turn are spaced by one gap; a larger
+fixed gap separates turns, and the action bar sits right under the row it closes.
 
 ## Tool and marker composition
 

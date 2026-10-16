@@ -183,6 +183,7 @@
 	<div
 		bind:this={ref}
 		data-slot="ai-chat"
+		data-density={density === 'compact' || density === 'comfortable' ? density : 'normal'}
 		class={classes.root({ className })}
 		{...attachments}
 		style:--ai-chat-content-width={resolvedContentWidth}

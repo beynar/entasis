@@ -110,15 +110,46 @@
 		return message.role ?? 'assistant';
 	}
 
+	// The turn under the pointer. Its bar may sit on a row of its own, outside the hovered row, so
+	// hovering any row of the turn (reasoning, tools, text) reveals the turn's bar.
+	let hoveredUnit = $state<string>();
+
+	function enterUnit(event: PointerEvent, unit: string | undefined): void {
+		if (event.pointerType === 'touch') return;
+		hoveredUnit = unit;
+	}
+
+	function leaveUnit(unit: string | undefined): void {
+		if (hoveredUnit === unit) hoveredUnit = undefined;
+	}
+
 	// `latest` keeps the final assistant turn's bar visible and the rest on hover (always shown on
 	// touch screens by AIMessageActions' hover recipe). Segments that do not end their unit have no
 	// bar at all.
 	function unitVisibility(
-		actions: AIThreadUnitActions<TMessage> | false | undefined
+		actions: AIThreadUnitActions<TMessage> | false | undefined,
+		unit: string | undefined
 	): AIMessageActionVisibility {
 		if (actions === false) return 'none';
-		if (messageActionsVisibility !== 'latest') return messageActionsVisibility;
-		return actions?.latest ? 'always' : 'hover';
+		const visibility =
+			messageActionsVisibility !== 'latest'
+				? messageActionsVisibility
+				: actions?.latest
+					? 'always'
+					: 'hover';
+		return visibility === 'hover' && unit !== undefined && hoveredUnit === unit
+			? 'always'
+			: visibility;
+	}
+
+	// The spacing rhythm: the first row of a turn adds the larger gap between turns, a turn's own
+	// action-bar row sits right under the row it closes, other rows keep the in-turn gap.
+	function rowBoundary(index: number): 'part' | 'unit' | 'bar' {
+		const item = renderItems[index];
+		if (!item || index === 0) return 'part';
+		if (item.kind === 'actions') return 'bar';
+		const previous = renderItems[index - 1];
+		return item.unit === undefined || item.unit !== previous?.unit ? 'unit' : 'part';
 	}
 
 	function previousMessage(index: number): MessageRenderItem<TMessage> | undefined {
@@ -192,7 +223,11 @@
 		</div>
 	{/if}
 {:else}
-	<div class={classes.list()} style:height={`${totalSize}px`}>
+	<div
+		class={classes.list()}
+		style:height={`${totalSize}px`}
+		onpointerleave={() => (hoveredUnit = undefined)}
+	>
 		{#each virtualItems as virtualItem (virtualItem.key)}
 			{@const item = renderItems[virtualItem.index]}
 			{#if item}
@@ -200,13 +235,15 @@
 					data-slot="ai-thread-item"
 					data-index={virtualItem.index}
 					data-kind={item.kind}
-					class={classes.item({ density })}
+					class={classes.item({ density, boundary: rowBoundary(virtualItem.index) })}
 					style:transform={`translateY(${virtualItem.start}px)`}
+					onpointerenter={(event) => enterUnit(event, item.unit)}
+					onpointerleave={() => leaveUnit(item.unit)}
 					{@attach measureItem}
 				>
 					<div data-slot="ai-thread-item-content" class={classes.content()}>
 						{#if item.kind === 'message'}
-							{@const visibility = unitVisibility(item.actions)}
+							{@const visibility = unitVisibility(item.actions, item.unit)}
 							{#if messageSlot}
 								<Slot
 									render={messageSlot}
@@ -220,6 +257,7 @@
 								<AIMessage
 									message={item.message}
 									index={item.messageIndex}
+									class={classes.message()}
 									size={messageSize}
 									variant={messageVariant}
 									color={messageColor}
@@ -292,7 +330,7 @@
 								{/each}
 							</div>
 						{:else if item.kind === 'actions'}
-							{@const visibility = unitVisibility(item.actions)}
+							{@const visibility = unitVisibility(item.actions, item.unit)}
 							{#if messageActions !== false && visibility !== 'none'}
 								<AIMessageActions
 									message={item.actions.message}
@@ -318,6 +356,7 @@
 								size={messageSize}
 								variant={messageVariant}
 								actions={false}
+								class={classes.message()}
 								aria-hidden="true"
 								data-slot="ai-thread-pending"
 								children={pendingLabel}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	// Test-only harness: AIChat or AIChatSkeleton in a fixed-size box inside a Theme.
 	import Theme from '../Theme/Theme.svelte';
-	import type { AIThreadItem } from '../AIThread/aiThread.props.js';
+	import type { AIThreadDensity, AIThreadItem } from '../AIThread/aiThread.props.js';
 	import AIChat from './AIChat.svelte';
 	import AIChatSkeleton from './AIChatSkeleton.svelte';
 
@@ -11,6 +11,7 @@
 		error,
 		suggestions = [],
 		contentWidth,
+		density,
 		customErrorRegion = false,
 		onRetry
 	}: {
@@ -19,6 +20,7 @@
 		error?: unknown;
 		suggestions?: string[];
 		contentWidth?: string | number;
+		density?: AIThreadDensity;
 		customErrorRegion?: boolean;
 		onRetry?: (payload: { target?: unknown }) => void;
 	} = $props();
@@ -38,6 +40,7 @@
 				{error}
 				{suggestions}
 				{contentWidth}
+				{density}
 				{onRetry}
 				errorRegion={customErrorRegion ? errorRegion : undefined}
 				class="h-full w-full"

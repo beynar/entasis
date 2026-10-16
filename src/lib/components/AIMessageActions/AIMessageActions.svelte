@@ -202,8 +202,8 @@
 					class={classes.button({ size })}>{@render arrowsClockwiseIcon({ size: 14 })}</Button
 				>{/if}
 		{/if}
-		{#if errorMessage}<div data-slot="ai-message-actions-error" class={classes.error()}>
-				<Alert color="danger" variant="soft" description={errorMessage} />
-			</div>{/if}
 	</div>
+	{#if errorMessage}<div data-slot="ai-message-actions-error" class={classes.error()}>
+			<Alert color="danger" variant="soft" description={errorMessage} />
+		</div>{/if}
 {/if}
