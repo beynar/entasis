@@ -234,6 +234,8 @@
 		</div>
 	{/if}
 {:else}
+	<!-- Pointer tracking only reveals a turn's hover actions; the actions stay keyboard-reachable. -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class={classes.list()}
 		style:height={`${totalSize}px`}
@@ -242,6 +244,7 @@
 		{#each virtualItems as virtualItem (virtualItem.key)}
 			{@const item = renderItems[virtualItem.index]}
 			{#if item}
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<div
 					data-slot="ai-thread-item"
 					data-index={virtualItem.index}
