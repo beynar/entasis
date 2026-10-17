@@ -197,6 +197,8 @@
 		<PopupMenu
 			menu={{
 				items: menu,
+				size,
+				density,
 				header: menuShowLabel ? identityRow : undefined,
 				theme: menuIconClass ? { option: { prefix: { base: menuIconClass } } } : undefined
 			}}
@@ -252,6 +254,7 @@
 				action={trailingAction}
 				api={api as SidebarApi}
 				size={trailingActionSize}
+				{density}
 				{theme}
 			/>
 		</div>

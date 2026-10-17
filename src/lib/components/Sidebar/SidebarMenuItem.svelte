@@ -245,7 +245,7 @@
 
 {#snippet dropdownButton()}
 	<PopupMenu
-		menu={{ items: item.menu ?? [] }}
+		menu={{ items: item.menu ?? [], size, density }}
 		position={getSidebarMenuPosition(item.menuSide, item.menuAlign, {
 			isMobile: api.isMobile,
 			side: api.side
@@ -429,7 +429,7 @@
 				aria-hidden={isIconCollapsed ? 'true' : undefined}
 				class={classes.menuAction({ size, density })}
 			>
-				<SidebarAction action={item.action} {api} {size} {theme} />
+				<SidebarAction action={item.action} {api} {size} {density} {theme} />
 			</div>
 		{/if}
 	</div>

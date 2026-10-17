@@ -150,7 +150,7 @@
 			aria-hidden={iconCollapsed ? 'true' : undefined}
 			class={classes.subAction({ size: subSize, density })}
 		>
-			<SidebarAction action={sub.action} {api} size={subSize} {theme} />
+			<SidebarAction action={sub.action} {api} size={subSize} {density} {theme} />
 		</div>
 	{/if}
 </li>

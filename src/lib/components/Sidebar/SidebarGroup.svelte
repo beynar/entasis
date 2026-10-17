@@ -170,7 +170,7 @@
 			>
 				{#each actions as action, index (index)}
 					<div class={classes.actionSlot({ size: actionSize(action) })}>
-						<SidebarAction {action} {api} size={actionSize(action)} {theme} />
+						<SidebarAction {action} {api} size={actionSize(action)} {density} {theme} />
 					</div>
 				{/each}
 			</div>
@@ -206,7 +206,7 @@
 			>
 				{#each actions as action, index (index)}
 					<div class={classes.actionSlot({ size: actionSize(action) })}>
-						<SidebarAction {action} {api} size={actionSize(action)} {theme} />
+						<SidebarAction {action} {api} size={actionSize(action)} {density} {theme} />
 					</div>
 				{/each}
 			</div>

@@ -584,6 +584,9 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Changed
 
+- `Sidebar`: the menus it opens (row "…" actions, item menus and the header and footer account
+  menus) follow the Sidebar's `size` and `density`, so a small Sidebar opens small menu rows. A
+  `size` or `density` set on a menu item still wins.
 - `DataTable`: a date cell editor opens its calendar as soon as editing starts, as a select editor
   opens its list; focus stays in the date field, so the date can still be typed.
 - `NavigationMenu`: switching panels animates in both directions. The old panel fades and slides

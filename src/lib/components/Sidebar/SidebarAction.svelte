@@ -1,7 +1,12 @@
 <script lang="ts">
 	import PopupMenu from '$lib/components/PopupMenu/PopupMenu.svelte';
 	import { dotsThreeIcon } from '$lib/components/Icons/dotsThree.js';
-	import type { SidebarApi, SidebarMenuActionDescriptor, SidebarSize } from './sidebar.props.js';
+	import type {
+		SidebarApi,
+		SidebarMenuActionDescriptor,
+		SidebarDensity,
+		SidebarSize
+	} from './sidebar.props.js';
 	import { getSidebarMenuPosition } from './sidebar-position.js';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import { useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
@@ -10,11 +15,13 @@
 		action,
 		api,
 		size,
+		density = 'normal',
 		theme
 	}: {
 		action: SidebarMenuActionDescriptor | import('svelte').Snippet<[SidebarApi]>;
 		api: SidebarApi;
 		size: SidebarSize;
+		density?: SidebarDensity;
 		theme?: SidebarThemeProps;
 	} = $props();
 
@@ -29,7 +36,7 @@
 	{@render action(api)}
 {:else if action.menu}
 	<PopupMenu
-		menu={{ items: action.menu }}
+		menu={{ items: action.menu, size, density }}
 		position={getSidebarMenuPosition(action.menuSide, action.menuAlign, {
 			isMobile: api.isMobile,
 			side: api.side
