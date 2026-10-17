@@ -60,7 +60,7 @@ const defaultContent = cva({
 const defaultEmpty = cva({
 	base: 'mx-auto flex min-h-full w-full max-w-[var(--ai-thread-content-width,var(--ai-chat-content-width,none))] flex-col items-center justify-center gap-xl px-xl py-layout-sm text-center'
 });
-const defaultGreeting = cva({ base: 'text-xl font-semibold text-balance text-neutral' });
+const defaultGreeting = cva({ base: 'text-lg font-semibold text-balance text-neutral' });
 const defaultEmptySuggestions = cva({
 	base: 'flex max-w-full min-w-0 flex-wrap justify-center gap-sm'
 });

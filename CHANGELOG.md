@@ -54,8 +54,9 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 - AI chat defaults follow the Claude.ai and ChatGPT conventions; each old look stays one prop away.
   `AIThread`, `AIChat` and `AIMessage` default to the `minimal` message variant (flat assistant
   prose; pass `messageVariant="bubble"` or `variant="bubble"` for the framed look). User bubbles are
-  neutral grey (`messageColor="primary"` restores the saturated bubble). Prose reads at 16px at
-  `normal` size (it was 14px; `messageSize="small"` keeps the denser scale).
+  neutral grey (`messageColor="primary"` restores the saturated bubble). The message size scale
+  steps down one notch: `normal` reads at 14px (the previous `small`), `large` at 16px (the
+  previous `normal`) and `small` at 12px; pass `messageSize="large"` for the previous default.
   `messageActionsVisibility` defaults to `latest` (`always` for the previous behaviour). `AIChat`
   centres the transcript and composer in a 48rem column (`contentWidth="none"` spans the full
   width). The scroll-to-latest button is centred (`scrollButtonPosition="right"` keeps the corner).
@@ -981,8 +982,8 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
   space stands in for the gap before the next turn. Action rows take layout space instead of
   floating over the next row, and their icons line up with the text edge.
 - `AIMessage` user bubbles are neutral grey; the new `color` prop (`messageColor` on `AIThread` and
-  `AIChat`) paints a solid bubble in any other role. Prose reads at 16px with a 1.625 line height at
-  `normal` size, with headings close to the body; `small` and `large` step one size either side.
+  `AIChat`) paints a solid bubble in any other role. Prose reads at 14px with a 1.625 line height at
+  `normal` size (16px at `large`, 12px at `small`), with headings close to the body.
 - `AIThread` and `AIChat`: the new `latest` actions visibility mode keeps the final assistant turn's
   actions visible, also when a system notice follows it, and shows the others on hover or focus;
   touch screens always show them.

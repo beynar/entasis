@@ -71,7 +71,7 @@ The transcript rows and the composer share one centred reading column. \`content
 \`--ai-chat-content-width\` on the root, which AIThread rows and AIComposer both read.
 
 Use \`density\` for transcript spacing, \`messageSize\` for the default message scale (normal reads
-at 16px), \`messageVariant\` (\`minimal\`, the default: flat full-width assistant prose; or
+at 14px, large at 16px), \`messageVariant\` (\`minimal\`, the default: flat full-width assistant prose; or
 \`bubble\`: framed assistant replies) and \`messageColor\` (the user bubble: \`neutral\` grey by
 default, any other role paints a solid bubble — \`primary\` gives the previous saturated look). Use
 \`showToc\`, \`tocSide\`, and \`toc\` for user-turn navigation; the table of contents steps aside

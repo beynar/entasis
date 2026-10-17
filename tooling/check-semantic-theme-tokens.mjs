@@ -385,15 +385,6 @@ const ARBITRARY_TEXT_SIZE = /^!?text-\[(?:length:)?-?\d*\.?\d+[a-z%]*\]$/;
 // `<part>:<ramp>` for a ramp or by the utility itself for a length.
 const typeRampExceptions = new Map([
 	[
-		'AIMessage/aiMessage.theme.ts',
-		new Map([
-			[
-				'defaultBubble:sm/base/lg',
-				'Chat prose is a reading surface: the normal message reads at body size (16px, as Claude.ai and ChatGPT do), one step either side for small and large'
-			]
-		])
-	],
-	[
 		'DocumentViewer/documentViewer.theme.ts',
 		new Map([
 			[

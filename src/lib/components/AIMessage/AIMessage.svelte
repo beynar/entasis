@@ -114,8 +114,10 @@
 
 	// The Markdown scale supplies block spacing and code size; AIMessage's own `markdown` theme part
 	// sets the prose type size and the heading steps on top of it.
+	// Messages sit one step below the Markdown scale: a `normal` message reads at 14px, so it takes
+	// Markdown's `small` block spacing and code size, and `large` takes Markdown's `normal`.
 	function resolveMarkdownSize(value: AIMessageSize): MarkdownSize {
-		return value;
+		return value === 'large' ? 'normal' : 'small';
 	}
 </script>
 

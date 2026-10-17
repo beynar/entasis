@@ -22,8 +22,8 @@ tails sit on logical corners, so they follow the writing direction. Bubbles keep
 only once the message is at least 24rem wide; a narrower message gives them its full width.
 
 \`size\` accepts \`small\`, \`normal\`, or \`large\` and scales typography, content padding, file
-previews, and the default action controls together. Normal prose reads at 16px with a 1.625 line
-height; headings stay close to the body (h2 about 1.25x), lists hang-indent, inline code is a muted
+previews, and the default action controls together. Normal prose reads at 14px (large 16px, small
+12px) with a 1.625 line height; headings stay close to the body (h2 about 1.25x), lists hang-indent, inline code is a muted
 chip at 0.9em, and tables read at body size and scroll with an edge fade when they overflow.
 \`streaming\` shows a pulsing caret after the content while a reply is still being written. A
 message that carries only files shows no empty bubble.

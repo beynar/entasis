@@ -16,8 +16,8 @@ const defaultRoot = cva({
 			tool: 'justify-start'
 		},
 		size: {
-			small: 'py-sm',
-			normal: 'py-md',
+			small: 'py-xs',
+			normal: 'py-sm',
 			large: 'py-md'
 		}
 	},
@@ -36,8 +36,8 @@ const defaultBody = cva({
 		},
 		size: {
 			small: 'gap-micro',
-			normal: 'gap-xs',
-			large: 'gap-sm'
+			normal: 'gap-micro',
+			large: 'gap-xs'
 		},
 		variant: {
 			bubble: null,
@@ -59,13 +59,13 @@ const defaultHeader = cva({
 		size: {
 			small: 'text-xs',
 			normal: 'text-xs',
-			large: 'text-sm'
+			large: 'text-xs'
 		}
 	},
 	defaultVariants: { size: 'normal' }
 });
-// Chat prose is a reading surface: `normal` sets 16px with a 1.625 line height, as Claude.ai and
-// ChatGPT do. Bubble tails sit on logical corners so they follow the writing direction.
+// Chat prose is a reading surface: `normal` sets 14px with a 1.625 line height (`large` 16px,
+// `small` 12px). Bubble tails sit on logical corners so they follow the writing direction.
 const defaultBubble = cva({
 	base: 'min-w-0 max-w-full break-words [&_*:first-child]:mt-0 [&_*:last-child]:mb-0',
 	variants: {
@@ -77,9 +77,9 @@ const defaultBubble = cva({
 			tool: 'w-full max-w-none rounded-lg rounded-es-sm bg-neutral-muted text-neutral'
 		},
 		size: {
-			small: 'px-lg py-sm text-sm leading-relaxed',
-			normal: 'px-xl py-md text-base leading-relaxed',
-			large: 'px-layout-sm py-lg text-lg leading-relaxed'
+			small: 'px-md py-xs text-xs leading-relaxed',
+			normal: 'px-lg py-sm text-sm leading-relaxed',
+			large: 'px-xl py-md text-base leading-relaxed'
 		},
 		variant: {
 			bubble: null,
@@ -137,9 +137,9 @@ const defaultBubble = cva({
 			color: 'info',
 			class: 'bg-info text-info-contrast [&_*]:!text-info-contrast [&_code]:!bg-info-contrast/15'
 		},
-		{ role: 'system', size: 'small', class: 'px-md py-xs !text-xs' },
-		{ role: 'system', size: 'normal', class: 'px-lg py-sm !text-xs' },
-		{ role: 'system', size: 'large', class: 'px-xl py-md !text-sm' },
+		{ role: 'system', size: 'small', class: 'px-sm py-micro !text-xs' },
+		{ role: 'system', size: 'normal', class: 'px-md py-xs !text-xs' },
+		{ role: 'system', size: 'large', class: 'px-lg py-sm !text-xs' },
 		{
 			role: ['assistant', 'tool'],
 			variant: 'minimal',
@@ -154,9 +154,9 @@ const defaultMarkdown = cva({
 	base: 'min-w-0 !text-[length:inherit] !leading-[inherit]',
 	variants: {
 		size: {
-			small: '[&_h1]:!text-lg [&_h2]:!text-base [&_:is(h3,h4,h5,h6)]:!text-sm',
-			normal: '[&_h1]:!text-xl [&_h2]:!text-lg [&_:is(h3,h4,h5,h6)]:!text-base',
-			large: '[&_h1]:!text-2xl [&_h2]:!text-xl [&_:is(h3,h4,h5,h6)]:!text-lg'
+			small: '[&_h1]:!text-base [&_h2]:!text-sm [&_:is(h3,h4,h5,h6)]:!text-xs',
+			normal: '[&_h1]:!text-lg [&_h2]:!text-base [&_:is(h3,h4,h5,h6)]:!text-sm',
+			large: '[&_h1]:!text-xl [&_h2]:!text-lg [&_:is(h3,h4,h5,h6)]:!text-base'
 		}
 	},
 	defaultVariants: { size: 'normal' }
