@@ -198,7 +198,7 @@ describe('moving along the bar', () => {
 		expect(product).toHaveFocus();
 	});
 
-	test('with a panel open, the arrow keys only move focus; ArrowDown or Enter there switches', async () => {
+	test('with a panel open, the open panel follows the arrow keys along the bar; a link closes it', async () => {
 		const { changes } = await mount();
 		const product = trigger('Product');
 		product.focus();
@@ -206,20 +206,21 @@ describe('moving along the bar', () => {
 		await keydown(product, 'ArrowRight');
 		await tick();
 		expect(trigger('Company')).toHaveFocus();
-		expect(product).toHaveAttribute('aria-expanded', 'true');
-		expect(trigger('Company')).toHaveAttribute('aria-expanded', 'false');
+		expect(product).toHaveAttribute('aria-expanded', 'false');
+		expect(trigger('Company')).toHaveAttribute('aria-expanded', 'true');
 		await keydown(trigger('Company'), 'ArrowRight');
 		await tick();
 		expect(link('Pricing')).toHaveFocus();
-		expect(product).toHaveAttribute('aria-expanded', 'true');
+		expect(trigger('Company')).toHaveAttribute('aria-expanded', 'false');
+		// No panel open any more: the arrows only move focus again.
 		await keydown(link('Pricing'), 'ArrowLeft');
-		await keydown(trigger('Company'), 'ArrowDown');
 		await tick();
-		expect(trigger('Company')).toHaveAttribute('aria-expanded', 'true');
 		expect(trigger('Company')).toHaveFocus();
+		expect(trigger('Company')).toHaveAttribute('aria-expanded', 'false');
 		expect(changes).toEqual([
 			{ value: 'product', reason: 'trigger-press' },
-			{ value: 'company', reason: 'list-navigation' }
+			{ value: 'company', reason: 'list-navigation' },
+			{ value: null, reason: 'list-navigation' }
 		]);
 	});
 
@@ -231,6 +232,7 @@ describe('moving along the bar', () => {
 		await keydown(trigger('Company'), 'Escape');
 		await tick();
 		expect(trigger('Product')).toHaveAttribute('aria-expanded', 'false');
+		expect(trigger('Company')).toHaveAttribute('aria-expanded', 'false');
 		expect(trigger('Company')).toHaveFocus();
 	});
 

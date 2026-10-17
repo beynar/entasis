@@ -4,8 +4,9 @@
 // enter, exit and switch animations.
 //
 // Keyboard follows the WAI-ARIA APG disclosure navigation pattern, with Base UI's choices where
-// the pattern leaves room: ArrowDown opens a trigger without moving focus, arrows along the bar
-// only move focus (no wrap), and arrows inside a panel wrap.
+// the pattern leaves room (ArrowDown opens a trigger without moving focus, arrows inside a panel
+// wrap) and menubar-style inline arrows: with a panel open, moving along the bar, from the bar or
+// from inside the panel, switches the open panel to the focused trigger (no wrap).
 //
 // The panel area is one viewport rendered inline inside the `<nav>`, after the trigger list. It
 // is never portaled, so the document order stays the reading order; `useTabBridge` carries Tab
@@ -467,8 +468,8 @@ export function useNavigationMenuState<Value extends string>(
 
 	/**
 	 * Arrow keys, Home and End move between the bar's triggers and links; Tab still visits each.
-	 * They only move focus: the open panel, if any, stays as it is (Enter, Space or ArrowDown on
-	 * another trigger switches to its panel).
+	 * While a panel is open the open panel follows focus: a trigger switches to its panel (focus
+	 * stays on the trigger) and a link closes it. With no panel open they only move focus.
 	 */
 	let listElement: HTMLElement | null = null;
 	const list: Attachment<HTMLElement> = (node) => {
@@ -492,6 +493,7 @@ export function useNavigationMenuState<Value extends string>(
 				edge === 'first' ? items[0] : edge === 'last' ? items.at(-1) : items[index + step];
 			event.preventDefault();
 			if (!target || target === current) return;
+			if (isOpen) followFocusWithPanel(event, target);
 			target.focus(FOCUS_VISIBLE);
 		});
 		return () => {
@@ -499,6 +501,20 @@ export function useNavigationMenuState<Value extends string>(
 			if (listElement === node) listElement = null;
 		};
 	};
+
+	function followFocusWithPanel(event: KeyboardEvent, target: HTMLElement) {
+		const value = [...triggers].find(([, element]) => element === target)?.[0];
+		if (value === undefined) {
+			requestChange(null, { reason: 'list-navigation', event, interaction: 'keyboard' });
+			return;
+		}
+		requestChange(value, {
+			reason: 'list-navigation',
+			event,
+			trigger: target,
+			interaction: 'keyboard'
+		});
+	}
 
 	/** Whether the arrow keys belong to the control itself: it edits text or picks an option. */
 	const ownsArrowKeys = (element: Element): boolean =>

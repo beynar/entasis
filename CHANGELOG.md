@@ -584,11 +584,12 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Changed
 
-- `NavigationMenu`: keyboard follows the WAI-ARIA disclosure navigation pattern. ArrowLeft and
-  ArrowRight along the bar only move focus: an open panel stays open until Enter, Space or
-  ArrowDown on another trigger switches to it, Escape closes it or focus leaves the menu. Before,
-  arrowing onto another trigger switched panels and arrowing onto a link closed the panel. Inside an open panel, ArrowDown and ArrowUp now move between its links and buttons, wrapping, the inline arrows (mirrored in right-to-left) go to the neighbouring menu of the bar like a menubar (its panel opens with focus on its first control; a plain link closes the panel and takes focus), and Home and End jump to the first and last; disabled
-  links, collapsed nested levels and text fields are skipped.
+- `NavigationMenu`: keyboard follows the WAI-ARIA disclosure navigation pattern, with menubar-style
+  arrows. Inside an open panel, ArrowDown and ArrowUp move between its links and buttons, wrapping,
+  and Home and End jump to the first and last; disabled links, collapsed nested levels and text
+  fields are skipped. The inline arrows (mirrored in right-to-left) go to the neighbouring entry of
+  the bar, inside a panel or on the bar: with a panel open, a trigger switches to its panel (from
+  inside a panel, focus lands on its first control) and a plain link closes it.
 
 - `AIMessage` and `AIThread`: rich content reads on one scale. Tables, lists, quotes and alerts
   read at the message size and fenced code at 0.9× of it, like inline code (it was fixed at text-sm), and tool

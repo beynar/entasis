@@ -206,17 +206,16 @@ describe('keyboard inside a panel and along the bar', () => {
 		await expect.poll(() => document.activeElement).toBe(linkNamed('Components'));
 	});
 
-	test('arrowing along the bar keeps the open panel; ArrowDown on another trigger switches', async () => {
+	test('arrowing along the bar with a panel open switches to the panel of the focused trigger', async () => {
 		render(NavigationMenuHarness);
 		trigger('Product').focus();
 		await userEvent.keyboard('{Enter}');
 		await userEvent.keyboard('{ArrowRight}');
 		expect(document.activeElement).toBe(trigger('Company'));
-		expect(expanded('Product')).toBe('true');
-		await userEvent.keyboard('{ArrowDown}');
-		expect(expanded('Company')).toBe('true');
+		await expect.poll(() => expanded('Company')).toBe('true');
 		expect(expanded('Product')).toBe('false');
-		expect(document.activeElement).toBe(trigger('Company'));
+		await userEvent.keyboard('{ArrowDown}');
+		await expect.poll(() => document.activeElement).toBe(linkNamed('About'));
 	});
 
 	test('Tab from a later entry of the bar skips the open panel and leaves the menu', async () => {
