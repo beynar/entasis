@@ -112,3 +112,54 @@ test('a picked option that auto-advances keeps focus inside the question', async
 	await expect.poll(() => activeStep()?.textContent).toContain('Scope');
 	await expect.poll(focusInActiveStep).toBe(true);
 });
+
+test('a number key moves focus and the tab stop to the option it picks', async () => {
+	const values: unknown[] = [];
+	render(ThemeProviderHarness, {
+		props: {
+			component: AIAskUserQuestion as unknown as Component<Record<string, unknown>>,
+			questions,
+			autoAdvance: false,
+			onValueChange: (value: unknown) => values.push(value)
+		}
+	});
+	const brief = page.getByRole('radio', { name: 'Brief' }).element() as HTMLElement;
+	const detailed = page.getByRole('radio', { name: 'Detailed' }).element() as HTMLElement;
+	brief.focus();
+	await userEvent.keyboard('2');
+	await expect.poll(() => detailed.getAttribute('aria-checked')).toBe('true');
+	await expect.poll(() => document.activeElement).toBe(detailed);
+	expect(detailed.tabIndex).toBe(0);
+	expect(brief.tabIndex).toBe(-1);
+	// Space checks the focused option, which is now the picked one.
+	await userEvent.keyboard(' ');
+	await expect.poll(() => values.at(-1)).toEqual({ tone: 'detailed' });
+	expect(brief.getAttribute('aria-checked')).toBe('false');
+
+	await userEvent.keyboard('{Enter}');
+	await expect.poll(() => activeStep()?.textContent).toContain('Scope');
+	await expect.poll(focusInActiveStep).toBe(true);
+	await userEvent.keyboard('3');
+	await expect.poll(() => document.activeElement?.textContent?.trim()).toBe('Docs');
+});
+
+test('the step dots are 24px pointer targets around an 8px dot', async () => {
+	render(ThemeProviderHarness, {
+		props: {
+			component: AIAskUserQuestion as unknown as Component<Record<string, unknown>>,
+			questions
+		}
+	});
+	const dots = [...document.querySelectorAll<HTMLElement>('button[aria-label^="Go to question"]')];
+	expect(dots).toHaveLength(3);
+	for (const dot of dots) {
+		const { width, height } = dot.getBoundingClientRect();
+		expect(width).toBeGreaterThanOrEqual(24);
+		expect(height).toBeGreaterThanOrEqual(24);
+		expect(getComputedStyle(dot, '::after').width).toBe('8px');
+	}
+	// The active dot fills, the others stay muted.
+	const active = getComputedStyle(dots[0], '::after').backgroundColor;
+	expect(active).not.toBe(getComputedStyle(dots[1], '::after').backgroundColor);
+	expect(getComputedStyle(dots[1]).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+});
