@@ -35,3 +35,17 @@ test('the trigger keeps its width when the elapsed count gains a digit', async (
 	flushSync();
 	expect(trigger().getBoundingClientRect().width).toBe(atNine);
 });
+
+test('the default trigger is compact: about 28px tall, never below a 24px pointer target', async () => {
+	render(ThemeProviderHarness, {
+		props: {
+			component: AIReasoning as unknown as Component<Record<string, unknown>>,
+			content: 'Plan',
+			duration: 4
+		}
+	});
+	const trigger = document.querySelector<HTMLElement>('[data-slot="ai-reasoning"] button')!;
+	const { height } = trigger.getBoundingClientRect();
+	expect(height).toBeGreaterThanOrEqual(24);
+	expect(height).toBeLessThanOrEqual(30);
+});
