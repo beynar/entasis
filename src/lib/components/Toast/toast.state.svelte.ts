@@ -983,6 +983,9 @@ const promiseToast = <Result>(promise: Promise<Result>, options: ToastPromiseOpt
 		const resolved = typeof stage === 'function' ? stage(value) : stage;
 		// `update` leaves a toast the user dismissed in the meantime alone.
 		handle.update({ color, loading: false, duration: undefined, ...stageUpdate(resolved) });
+		// The result arrives in a toast the user may have stopped watching: bounce it once, as a
+		// toast shown again does. A dismissed toast stays gone.
+		if (!handle.dismissed) handle.attentionKey += 1;
 	};
 	promise.then(
 		(result) => settle('success', options.success, result),

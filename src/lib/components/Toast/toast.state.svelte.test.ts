@@ -365,6 +365,29 @@ describe('toast attention bounce', () => {
 		await tick();
 		expect(first.attentionKey).toBe(1);
 	});
+
+	test('a settled toast.promise bounces once, on success and on failure', async () => {
+		render(Harness);
+		await toast.promise(Promise.resolve('ok'), {
+			id: 'p1',
+			loading: 'Saving',
+			success: 'Saved',
+			error: 'Failed'
+		});
+		await tick();
+		expect(toaster().toasts.find((candidate) => candidate.id === 'p1')?.attentionKey).toBe(1);
+
+		await toast
+			.promise(Promise.reject(new Error('no')), {
+				id: 'p2',
+				loading: 'Saving',
+				success: 'Saved',
+				error: 'Failed'
+			})
+			.catch(() => {});
+		await tick();
+		expect(toaster().toasts.find((candidate) => candidate.id === 'p2')?.attentionKey).toBe(1);
+	});
 });
 
 describe('toast timers and window activity', () => {

@@ -83,7 +83,7 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 ### Added
 
 - `Toast`: a toast shown again while it is on screen (the same `id`, or the same message
-  deduplicated) bounces once to draw the eye back to it. `toast.update()` does not, and reduced
+  deduplicated) bounces once to draw the eye back to it. So does a `toast.promise()` toast when it settles, on success or failure. `toast.update()` does not, and reduced
   motion keeps it still. The handle exposes the count as `attentionKey`.
 - `AIThreadToc`: `showRange` (`tocShowRange` on `AIThread`) draws the rail and the bar marking the
   part of the thread on screen. It is off by default: the minimap shows its pins only.
