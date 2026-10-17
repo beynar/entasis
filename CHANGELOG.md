@@ -1106,6 +1106,10 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Fixed
 
+- `Autocomplete`, `Combobox`, `DateInput`, `TimeInput`, `PhoneInput`, `ColorInput` and
+  `TagsInput`: the popup opens against the input box, not below the field's description. Their
+  popovers anchored to the whole field. `Field` takes a new `anchor` attachment that it applies to
+  the input box, for custom controls that open a popup.
 - `Sidebar`: a row's "…" action is a real small icon button sized to the row (20, 24 or 28px at
   `small`, `normal` and `large`, on menu and submenu rows alike) instead of an 18px target. A row
   with both a badge and an action no longer draws the dots over the count: from `md` up the badge

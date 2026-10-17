@@ -146,6 +146,7 @@
 		theme,
 		field,
 		as = 'div',
+		anchor,
 		labelFor = field.id,
 		fieldAttrs,
 		form,
@@ -348,6 +349,7 @@
 			labelPosition: resolvedLabelPosition
 		})}
 		{@attach focusFromContainer}
+		{@attach anchor}
 	>
 		<Slot render={prefix} class={classes.prefix({ density })} />
 		{@render children()}

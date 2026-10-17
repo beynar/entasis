@@ -399,7 +399,7 @@
 			}
 		}}
 		{...rest}
-		{@attach popover?.reference}
+		anchor={popover?.reference}
 	>
 		{@render tagsList()}
 		<input

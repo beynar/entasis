@@ -362,7 +362,7 @@
 				}
 			}}
 			{...rest}
-			{@attach popover.reference}
+			anchor={popover.reference}
 		>
 			<input
 				data-1p-ignore={autocomplete === 'off' ? '' : undefined}

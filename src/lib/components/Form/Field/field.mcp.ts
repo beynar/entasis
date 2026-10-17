@@ -124,6 +124,8 @@ motion plays nothing.
 - density: compact, normal, or comfortable internal spacing, independent of size.
 - labelPosition: top or left; left switches to side labels once the field itself is at least 32rem wide (a container query on the field, not the viewport).
 - fieldAttrs: native attributes for the wrapper. Put native control attributes on the control.
+- anchor: an attachment applied to the input box rather than the wrapper. Pass a popover's
+  \`reference\` here so its panel opens against the box, not below the description.
 - class and theme: wrapper classes and Field part overrides.
 
 Slots include header, label, actions, prefix, suffix, footer, description, helper,

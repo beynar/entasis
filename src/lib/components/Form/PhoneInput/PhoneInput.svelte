@@ -262,7 +262,7 @@
 				}
 			}}
 			{...rest}
-			{@attach popover.reference}
+			anchor={popover.reference}
 			{@attach focusInputOnFieldClick}
 		>
 			<PhoneInputCountryTrigger

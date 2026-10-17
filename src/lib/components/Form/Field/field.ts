@@ -1,5 +1,6 @@
 import type { WithSlot } from '$lib/components/Slot/slot.js';
 import type { Snippet } from 'svelte';
+import type { Attachment } from 'svelte/attachments';
 import type { HTMLAttributes, HTMLButtonAttributes } from 'svelte/elements';
 import type { FieldState, FieldValidatorResult, ValidationMode } from './field.state.svelte.js';
 import type { FieldMessageOverrides } from './field.messages.js';
@@ -233,6 +234,12 @@ export type FieldProps<T extends FieldType> = Omit<
 > & {
 	/** Native wrapper element; use fieldset for a group of controls. */
 	as?: string;
+	/**
+	 * Attachment applied to the input container, the visible box, rather than the field root
+	 * (which also holds the label and description). Pass a popover's `reference` here so its panel
+	 * opens against the box, not below the description.
+	 */
+	anchor?: Attachment<HTMLElement>;
 	/** Control ID associated with the label, or false for an aria-labelledby label. */
 	labelFor?: string | false;
 	/** Custom control content composed with the shared field controller. */

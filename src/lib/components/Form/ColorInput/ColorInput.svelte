@@ -224,7 +224,7 @@
 				}
 			}}
 			{...rest}
-			{@attach popover.reference}
+			anchor={popover.reference}
 		>
 			<!-- Same primitive as the password visibility toggle: the action button stretches to the
 			     field's full height/padding, so the click target is much larger than the swatch itself. -->
