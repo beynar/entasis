@@ -1,9 +1,9 @@
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
-// `size` scales typography/icons only; `density` owns paddings, gaps and
-// min-heights ('small' matches the old small spacing, 'large' the old
-// large spacing — defaults render exactly as before the split).
+// `size` scales typography/icons; `density` owns paddings, gaps and min-heights. A `small` row
+// also steps its geometry down one notch at every density (the compound variants below), so a
+// small menu is shorter as well as smaller-type; `normal` and `large` keep the density geometry.
 // A row is always flush against the padding box of whatever hosts it — a popover panel, a Command
 // palette, a Select listbox — so it keeps the `md` control step but never more than the host's
 // corner allows: `rounded-md-concentric` = `min(md, radius-parent - padding)`, computed from what
@@ -50,6 +50,11 @@ const defaultMenuOption = cva({
 			false: ''
 		}
 	},
+	compoundVariants: [
+		{ size: 'small', density: 'compact', class: 'px-xs py-micro gap-xs min-h-5' },
+		{ size: 'small', density: 'normal', class: 'px-sm py-xs gap-sm min-h-6' },
+		{ size: 'small', density: 'comfortable', class: 'px-md py-sm gap-md min-h-row-sm' }
+	],
 	defaultVariants: {
 		size: 'normal',
 		density: 'normal',

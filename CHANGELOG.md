@@ -584,6 +584,10 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Changed
 
+- Menu rows (`MenuOption`, so every menu, `Select`, `Command` and `Combobox` list): `size="small"`
+  makes a row shorter as well as smaller-type. It steps the row one notch down at every density
+  (20, 24 and 32px tall for compact, normal and comfortable, against 24, 32 and 40px at `normal`).
+  Before, `size` changed only the text, so a small menu was as tall as a normal one.
 - `Sidebar`: the menus it opens (row "…" actions, item menus and the header and footer account
   menus) follow the Sidebar's `size` and `density`, so a small Sidebar opens small menu rows. A
   `size` or `density` set on a menu item still wins.
@@ -1102,6 +1106,9 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Fixed
 
+- `Collapsible` (and the `AIReasoning` "Thought for…" line built on it): the chevron sits on the
+  text's centre at every size. It was always drawn at 16px, so it overflowed the 12px small box
+  (2px low) and sat at the top of the 20px large one.
 - `DataTable`: a `select` cell editor no longer makes its row 8px taller while it is open. The
   editor's visually hidden label still took a grid gap above the control.
 - `DataTable`: the date cell editor's calendar button no longer overflows the cell and gets

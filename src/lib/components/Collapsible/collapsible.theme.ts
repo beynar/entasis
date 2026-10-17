@@ -49,8 +49,10 @@ const defaultCollapsibleContent = cva({
 	}
 });
 
+// The glyph fills the box: drawn at its own 16px it overflowed a small (12px) box downward and
+// sat in the top of a large (20px) one, so the chevron was off the text's centre.
 const defaultCollapsibleIcon = cva({
-	base: 'size-4 transition-transform flex-shrink-0',
+	base: 'size-4 transition-transform flex-shrink-0 [&>svg]:size-full',
 	variants: {
 		size: {
 			small: 'size-3',
