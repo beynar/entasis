@@ -1081,6 +1081,10 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Fixed
 
+- `ToggleButtonGroup` / `ToggleButton`: a pressed neutral `outline` toggle keeps the group's
+  hairline border and shows its selection with the soft fill, instead of boxing itself off with a
+  dark border in a joined group; pressed segments sit above their neighbours so a coloured pressed
+  border is never cut.
 - `spinnerOverlay` (and so a `loading` `Button`): the overlay takes the host's inner corner radius
   (outer radius minus border width), so the host's background no longer shows at its corners.
 - `NavigationMenu`, `Pagination` and the `Tooltip` handoff: while their size animates, content keeps
