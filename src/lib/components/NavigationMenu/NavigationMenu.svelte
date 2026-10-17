@@ -73,6 +73,8 @@
 		onAfterOpen: () => onAfterOpen,
 		onAfterClose: () => onAfterClose
 	});
+	// Svelte's `out:` directive takes an identifier.
+	const panelOut = menu.panelOut;
 	setNavigationMenuState(menu as unknown as NavigationMenuState<string>);
 
 	// The current page: `aria-current` is not a Button prop, so it is written on the element.
@@ -167,6 +169,7 @@
 							{...openStateAttributes(active)}
 							class={classes.panel({ density })}
 							{@attach menu.panel(panel.value)}
+							out:panelOut
 						>
 							<NavigationMenuContent item={panel} {size} {density} {classes} />
 						</div>

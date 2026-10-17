@@ -206,6 +206,25 @@ describe('keyboard inside a panel and along the bar', () => {
 		await expect.poll(() => document.activeElement).toBe(linkNamed('Components'));
 	});
 
+	test('a switch slides the old panel out toward the side away from the new trigger', async () => {
+		// The default motion: the harness otherwise turns every transition off.
+		render(NavigationMenuHarness, { props: { menu: { transition: undefined } } });
+		trigger('Product').focus();
+		await userEvent.keyboard('{Enter}');
+		await expect.poll(() => expanded('Product')).toBe('true');
+		const popup = linkNamed('Components')
+			.closest('[data-slot="navigation-menu-content-link"]')!
+			.parentElement!.closest('[id]')!.parentElement!;
+		await userEvent.keyboard('{ArrowRight}');
+		// Both panels are in the popup while the old one leaves, out of the layout.
+		const panels = () => Array.from(popup.children).filter((child) => child.id);
+		await expect.poll(() => panels().length).toBe(2);
+		const leaving = panels().find((panel) => getComputedStyle(panel).position === 'absolute');
+		expect(leaving).toBeDefined();
+		await expect.poll(() => panels().length, { timeout: 2000 }).toBe(1);
+		expect(expanded('Company')).toBe('true');
+	});
+
 	test('arrowing along the bar with a panel open switches to the panel of the focused trigger', async () => {
 		render(NavigationMenuHarness);
 		trigger('Product').focus();

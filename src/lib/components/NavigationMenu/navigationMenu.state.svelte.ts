@@ -16,7 +16,8 @@ import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import { useTheme } from '$lib/components/Theme/theme.state.svelte.js';
-import { easingBezierStrings } from '$lib/transitions/easingFunctions.js';
+import { easingBezierStrings, easingFunctions } from '$lib/transitions/easingFunctions.js';
+import type { TransitionConfig } from 'svelte/transition';
 import type { FSOProps } from '$lib/transitions/transition.js';
 import type { ResponsiveProps } from '$lib/components/Theme/theme.js';
 import {
@@ -382,6 +383,42 @@ export function useNavigationMenuState<Value extends string>(
 		);
 	};
 
+	/**
+	 * The outgoing panel of a switch: it leaves toward the side away from the new trigger while the
+	 * new one slides in from the other side. It is taken out of the layout first, at the place and
+	 * width it occupied, so only the incoming panel sizes the popup. Closing the menu does not run
+	 * it (the panel stays until the popup is gone), and neither does a panel kept mounted.
+	 */
+	const panelOut = (element: HTMLElement): TransitionConfig => {
+		// Runs as the old panel leaves the DOM, before the effect that records the switch, so the
+		// direction comes from the panels themselves: where the leaving one sits relative to the new.
+		const next = activeValue;
+		const leaving = [...panelElements].find(([, panel]) => panel === element)?.[0];
+		if (next === null || leaving === undefined || leaving === next) return { duration: 0 };
+		const later = panelIndex(next) > panelIndex(leaving);
+		const physical = later ? 'right' : 'left';
+		const toward = getDirection() === 'rtl' ? (physical === 'right' ? 'left' : 'right') : physical;
+		const spec = resolveMotion(undefined, {
+			motion: options.motion(),
+			transition: options.transition()
+		}).out;
+		const duration = spec.duration ?? 0;
+		if (!duration) return { duration: 0 };
+		const to = toward === 'right' ? -SWITCH_DISTANCE : SWITCH_DISTANCE;
+		const { offsetTop, offsetLeft, offsetWidth } = element;
+		element.style.position = 'absolute';
+		element.style.top = `${offsetTop}px`;
+		element.style.left = `${offsetLeft}px`;
+		element.style.width = `${offsetWidth}px`;
+		element.style.pointerEvents = 'none';
+		const easing = easingFunctions[spec.easing ?? 'cubicOut'] ?? easingFunctions.cubicOut;
+		return {
+			duration,
+			easing,
+			css: (t) => `opacity: ${t}; transform: translateX(${(1 - t) * to}px);`
+		};
+	};
+
 	// ---- placement -------------------------------------------------------------------------
 
 	// The popup lines up with the active trigger's inline edge and is clamped to the layout
@@ -721,6 +758,7 @@ export function useNavigationMenuState<Value extends string>(
 			return options.delay();
 		},
 		isSwitching,
+		panelOut,
 		panelIndex,
 		triggerId: (value: Value) => `${options.id}-trigger-${panelIndex(value)}`,
 		panelId: (value: Value) => `${options.id}-panel-${panelIndex(value)}`,

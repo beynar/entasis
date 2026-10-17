@@ -97,9 +97,10 @@ const defaultNavigationMenuViewport = cva({
 });
 
 // The visible, animated surface. It animates its own width and height as the active panel
-// changes, so it hugs whichever panel it shows.
+// changes, so it hugs whichever panel it shows. It is the positioning context of an outgoing panel,
+// which leaves absolutely positioned inside it and is clipped with it.
 const defaultNavigationMenuPopup = cva({
-	base: 'raised-3 bg-surface-floating text-neutral isolate max-w-full origin-top rounded-lg text-sm',
+	base: 'raised-3 bg-surface-floating text-neutral relative isolate max-w-full origin-top rounded-lg text-sm',
 	variants: {
 		density: {
 			compact: 'p-sm',
