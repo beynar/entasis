@@ -37,7 +37,8 @@
 			options: ['none', 'single', 'multiple']
 		},
 		{ name: 'search', type: 'switch', label: 'Search', value: true },
-		{ name: 'stickyHeader', type: 'switch', label: 'Sticky header', value: true }
+		{ name: 'stickyHeader', type: 'switch', label: 'Sticky header', value: true },
+		{ name: 'editable', type: 'switch', label: 'Editable', value: false }
 	]);
 </script>
 
@@ -69,7 +70,7 @@
 		{controls}
 		title="Semantic client table"
 		description="Native table semantics with global search, typed column filters, multi-sort, pagination, resizing, visibility, ordering, and pinning."
-		code={basicDataTableCode}
+		code={basicDataTableCode(controls.value)}
 		class="min-h-0 items-stretch p-3 md:p-5"
 	>
 		<div class="w-full">
@@ -78,6 +79,7 @@
 				selectionMode={controls.value.selectionMode}
 				search={controls.value.search}
 				stickyHeader={controls.value.stickyHeader}
+				editable={controls.value.editable}
 			/>
 		</div>
 	</ComponentCard>

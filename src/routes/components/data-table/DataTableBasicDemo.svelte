@@ -2,6 +2,7 @@
 	import { Chip } from '$lib/components/Chip/index.js';
 	import {
 		DataTable,
+		type DataTableCellCommit,
 		type DataTableCellPayload,
 		type DataTableColumn
 	} from '$lib/components/DataTable/index.js';
@@ -22,16 +23,18 @@
 		density = 'normal',
 		selectionMode = 'none',
 		search = true,
-		stickyHeader = true
+		stickyHeader = true,
+		editable = false
 	}: {
 		density?: Density;
 		selectionMode?: DataTableSelectionMode;
 		search?: boolean;
 		stickyHeader?: boolean;
+		editable?: boolean;
 	} = $props();
 
-	const people = createPeople(137);
-	const columns: DataTableColumn<Person>[] = [
+	let people = $state(createPeople(137));
+	const baseColumns: DataTableColumn<Person>[] = [
 		{
 			id: 'name',
 			accessor: 'name',
@@ -90,6 +93,45 @@
 			width: 120
 		}
 	];
+
+	const editors: Record<string, DataTableColumn<Person>['editor']> = {
+		name: { type: 'text', placeholder: 'Full name' },
+		department: {
+			type: 'select',
+			options: departments.map((department) => ({ value: department, label: department }))
+		},
+		status: {
+			type: 'select',
+			options: statuses.map((status) => ({ value: status, label: status }))
+		},
+		salary: { type: 'number', min: 0, step: 1000 },
+		joinedAt: { type: 'date' },
+		verified: { type: 'switch' }
+	};
+
+	// The Editable switch adds an editor to every column; double-click a cell, or focus it and press
+	// Enter or F2 (grid mode), to edit it.
+	const columns = $derived(
+		editable
+			? baseColumns.map((column) => ({ ...column, editor: editors[column.id] }))
+			: baseColumns
+	);
+
+	const commitCell = ({ rowId, columnId, value }: DataTableCellCommit<Person>) => {
+		people = people.map((person) => {
+			if (person.id !== rowId) return person;
+			switch (columnId) {
+				case 'salary':
+					return { ...person, salary: Number(value) };
+				case 'joinedAt':
+					return { ...person, joinedAt: value instanceof Date ? value : person.joinedAt };
+				case 'verified':
+					return { ...person, verified: Boolean(value) };
+				default:
+					return { ...person, [columnId]: String(value ?? '') };
+			}
+		});
+	};
 </script>
 
 {#snippet statusCell(payload: DataTableCellPayload<Person>)}
@@ -125,6 +167,8 @@
 		{density}
 		{selectionMode}
 		{stickyHeader}
+		interactionMode={editable ? 'grid' : 'table'}
+		onCellCommit={editable ? commitCell : undefined}
 		pagination={{ pageSize: 25, pageSizes: [25, 50, 100] }}
 	/>
 </div>

@@ -1,5 +1,31 @@
-export const basicDataTableCode = `<script lang="ts">
-  import { DataTable, type DataTableCellPayload, type DataTableColumn } from 'entasis/data-table';
+export const basicDataTableCode = ({
+	density,
+	selectionMode,
+	search,
+	stickyHeader,
+	editable
+}: {
+	density: string;
+	selectionMode: string;
+	search: boolean;
+	stickyHeader: boolean;
+	editable: boolean;
+}) => {
+	const props = [
+		density !== 'normal' && `density="${density}"`,
+		selectionMode !== 'none' && `selectionMode="${selectionMode}"`,
+		search && `search={{ placeholder: 'Search the directory', debounce: 120 }}`,
+		!stickyHeader && 'stickyHeader={false}',
+		editable && `interactionMode="grid"`,
+		editable && 'onCellCommit={commitCell}'
+	].filter(Boolean);
+
+	return `<script lang="ts">
+  import {
+    DataTable,${editable ? '\n    type DataTableCellCommit,' : ''}
+    type DataTableCellPayload,
+    type DataTableColumn
+  } from 'entasis/data-table';
 
   type Person = {
     id: string;
@@ -7,6 +33,9 @@ export const basicDataTableCode = `<script lang="ts">
     department: string;
     salary: number;
   };
+
+  let { initialPeople, departments }: { initialPeople: Person[]; departments: string[] } = $props();
+  let items = $state(initialPeople);
 
   const currency = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -20,7 +49,7 @@ export const basicDataTableCode = `<script lang="ts">
       accessor: 'name',
       header: 'Name',
       sortable: true,
-      filter: { type: 'text' }
+      filter: { type: 'text' }${editable ? ",\n      editor: { type: 'text' }" : ''}
     },
     {
       id: 'department',
@@ -29,18 +58,31 @@ export const basicDataTableCode = `<script lang="ts">
       filter: {
         type: 'select',
         options: departments.map((value) => ({ value, label: value }))
-      }
+      }${editable ? ",\n      editor: {\n        type: 'select',\n        options: departments.map((value) => ({ value, label: value }))\n      }" : ''}
     },
     {
       id: 'salary',
       accessor: 'salary',
       header: 'Salary',
       sortable: true,
-      filter: { type: 'number', min: 0 },
+      filter: { type: 'number', min: 0 },${editable ? "\n      editor: { type: 'number', min: 0, step: 1000 }," : ''}
       cell: salaryCell,
       align: 'end'
     }
-  ];
+  ];${
+		editable
+			? `
+
+  // Double-click a cell, or focus it and press Enter or F2, to edit it.
+  const commitCell = ({ rowId, columnId, value }: DataTableCellCommit<Person>) => {
+    items = items.map((person) =>
+      person.id !== rowId
+        ? person
+        : { ...person, [columnId]: columnId === 'salary' ? Number(value) : String(value) }
+    );
+  };`
+			: ''
+	}
 </script>
 
 {#snippet salaryCell(payload: DataTableCellPayload<Person>)}
@@ -52,10 +94,10 @@ export const basicDataTableCode = `<script lang="ts">
     {items}
     {columns}
     getRowId={(person) => person.id}
-    search={{ placeholder: 'Search the directory', debounce: 120 }}
-    pagination={{ pageSize: 25, pageSizes: [25, 50, 100] }}
+${props.map((prop) => `    ${prop}\n`).join('')}    pagination={{ pageSize: 25, pageSizes: [25, 50, 100] }}
   />
 </div>`;
+};
 
 export const editingDataTableCode = `<script lang="ts">
   import {
