@@ -82,6 +82,8 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Added
 
+- `AIThreadToc`: `showRange` (`tocShowRange` on `AIThread`) draws the rail and the bar marking the
+  part of the thread on screen. It is off by default: the minimap shows its pins only.
 - `AIReasoning`, `AITool`, `AIMarker` and `AIAskUserQuestionSummary`: a `size` prop (`small`,
   `normal`, `large`) that scales their text and icons with the `AIMessage` scale. `AIThread` and
   `AIChat` pass `messageSize` to every row, so reasoning, tool calls, sources, markers and answered

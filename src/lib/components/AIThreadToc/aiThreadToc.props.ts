@@ -35,6 +35,11 @@ export type AIThreadTocProps<TMessage extends AIThreadItem = AIThreadItem> = Wit
 		state: AIThreadTocState<TMessage>;
 		/** Maximum visible navigation pins before entries are compacted. */
 		maxPins?: number;
+		/**
+		 * Draws a rail beside the pins with a bar marking the part of the thread on screen.
+		 * @default false
+		 */
+		showRange?: boolean;
 		/** Accessible label for the nested scrollable pin region. */
 		scrollAreaLabel?: string;
 		/** Side occupied by the navigation rail. @default 'left' */

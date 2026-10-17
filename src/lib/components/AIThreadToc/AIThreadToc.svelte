@@ -41,6 +41,7 @@
 		ref = $bindable(),
 		state: tocState,
 		maxPins = 96,
+		showRange = false,
 		scrollAreaLabel,
 		side = 'left',
 		previewSide,
@@ -500,14 +501,16 @@
 						class={classes.pinArea()}
 						style={`--ai-thread-toc-preview-top: ${previewPinTop}%`}
 					>
-						<div data-slot="ai-thread-toc-rail" class={classes.rail()}>
-							<div
-								data-slot="ai-thread-toc-viewport"
-								class={classes.viewport()}
-								style:top={`${visibleStartPercent}%`}
-								style:height={`${visibleRangePercent}%`}
-							></div>
-						</div>
+						{#if showRange}
+							<div data-slot="ai-thread-toc-rail" class={classes.rail()}>
+								<div
+									data-slot="ai-thread-toc-viewport"
+									class={classes.viewport()}
+									style:top={`${visibleStartPercent}%`}
+									style:height={`${visibleRangePercent}%`}
+								></div>
+							</div>
+						{/if}
 
 						{#each pins as tocPin, pinIndex (tocPin.key)}
 							{@const active = tocPin.entryIndex === tocState.activeIndex}

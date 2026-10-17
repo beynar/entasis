@@ -82,6 +82,7 @@
 		showToc = false,
 		tocSide = 'left',
 		tocMaxPins,
+		tocShowRange = false,
 		tocTheme,
 		activeAskUserQuestion,
 		renderAskUserQuestion = true,
@@ -755,7 +756,13 @@
 				<Slot render={toc} payload={tocState} />
 			{:else}
 				<div class={classes.tocOverlay({ side: tocSide })}>
-					<AIThreadToc state={tocState} maxPins={tocMaxPins} side={tocSide} theme={tocTheme} />
+					<AIThreadToc
+						state={tocState}
+						maxPins={tocMaxPins}
+						showRange={tocShowRange}
+						side={tocSide}
+						theme={tocTheme}
+					/>
 				</div>
 			{/if}
 		{/if}

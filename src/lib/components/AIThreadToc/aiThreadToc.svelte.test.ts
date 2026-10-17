@@ -12,8 +12,14 @@ const pins = () =>
 	Array.from(document.querySelectorAll<HTMLElement>('[data-slot="ai-thread-toc-pin"]'));
 
 describe('AIThreadToc', () => {
-	test('paints the rail and the visible-range bar', () => {
+	test('draws no rail or visible-range bar by default', () => {
 		render(Harness);
+		expect(document.querySelector('[data-slot="ai-thread-toc-rail"]')).toBeNull();
+		expect(document.querySelector('[data-slot="ai-thread-toc-viewport"]')).toBeNull();
+	});
+
+	test('showRange paints the rail and the visible-range bar', () => {
+		render(Harness, { props: { showRange: true } });
 		expect(document.querySelector('[data-slot="ai-thread-toc-rail"]')?.className).toContain(
 			'bg-neutral/10'
 		);

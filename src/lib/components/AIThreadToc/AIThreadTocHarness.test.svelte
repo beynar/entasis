@@ -9,12 +9,14 @@
 		activeIndex = 1,
 		width = 720,
 		minContainerWidth,
+		showRange,
 		onScrollToIndex
 	}: {
 		count?: number;
 		activeIndex?: number;
 		width?: number;
 		minContainerWidth?: number;
+		showRange?: boolean;
 		onScrollToIndex?: (index: number) => void;
 	} = $props();
 
@@ -49,6 +51,6 @@
 	<!-- A focus target before the rail, for Tab-entry tests. -->
 	<button type="button">Before</button>
 	<div data-testid="container" style:width={`${width}px`} style:height="400px" style:display="flex">
-		<AIThreadToc state={tocState} {minContainerWidth} />
+		<AIThreadToc state={tocState} {minContainerWidth} {showRange} />
 	</div>
 </Theme>

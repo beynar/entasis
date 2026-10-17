@@ -1,7 +1,7 @@
 export const aiThreadTocDescription = `
 # AIThreadToc
 
-Standalone, controlled user-turn navigation for AI transcripts. It renders a compact rail, visible-range marker, magnifying pins, and one shared HoverCard preview from an AIThreadTocState.
+Standalone, controlled user-turn navigation for AI transcripts. It renders magnifying pins (with an optional rail and visible-range marker, \`showRange\`), and one shared HoverCard preview from an AIThreadTocState.
 
 Import it directly from **entasis/ai-thread-toc**. AIThread composes the same primitive for its default minimap and exposes measured state through its **toc** slot.
 
@@ -26,6 +26,7 @@ The component is controlled: **state.entries** supplies measured user turns, **a
 
 - **state**: AIThreadTocState - Required controlled navigation state.
 - **maxPins**: number - Maximum pins before spatial compaction. Default 96.
+- **showRange**: boolean - Draws a rail beside the pins with a bar marking the part of the thread on screen. Default false (AIThread: \`tocShowRange\`).
 - **scrollAreaLabel**: string - Accessible label for the nested scrollable pin region.
 - **side**: 'left' | 'right' - Rail alignment and pin transform origin. Default 'left'.
 - **previewSide**: 'left' | 'right' - Preview side; defaults away from the rail.
@@ -46,7 +47,7 @@ The default preview clamps the prompt to one line, shows "Turn N of M", clamps t
 
 ## Interaction
 
-- The rail and the visible-range bar are painted; the active turn's pin is longer and fully opaque, pins in view are lighter, the rest faint.
+- With \`showRange\`, the rail and the visible-range bar are painted; the active turn's pin is longer and fully opaque, pins in view are lighter, the rest faint.
 - Keyboard: the rail is one tab stop, and Tab into it lands on the active turn's pin. ArrowUp/ArrowDown (and Left/Right), Home and End move between pins; Enter or Space navigates.
 - Pointer: hovering magnifies nearby pins and previews the one under the pointer; clicking navigates.
 - Touch: the first tap on a pin previews it, a second tap on the same pin navigates, and a tap outside closes the preview.

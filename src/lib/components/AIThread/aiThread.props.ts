@@ -255,6 +255,8 @@ export type AIThreadProps<TMessage extends AIThreadItem = AIThreadItem> = WithAt
 		tocSide?: AIThreadTocSide;
 		/** Maximum visible minimap pins before compaction. */
 		tocMaxPins?: number;
+		/** Shows the minimap's rail and on-screen range bar beside its pins. @default false */
+		tocShowRange?: boolean;
 		/** Theme overrides forwarded to the default AIThreadToc. */
 		tocTheme?: AIThreadTocThemeProps;
 		/** Direct ask-user-question request. `null` explicitly suppresses auto-detection. */
