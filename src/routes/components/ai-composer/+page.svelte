@@ -58,8 +58,8 @@
 			name: 'toolbar',
 			type: 'segmented',
 			label: 'Toolbar',
-			value: 'hover',
-			options: ['hover', 'fixed', 'both', 'none']
+			value: 'none',
+			options: ['none', 'hover', 'fixed', 'both']
 		},
 		{
 			name: 'voiceInput',
@@ -80,6 +80,7 @@
 	component="AIComposer"
 	requires="pnpm add lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils"
 	features={[
+		'Enter sends, Shift+Enter adds a line',
 		'Existing RichTextInput editor',
 		'Commands, mentions, references, and skills',
 		'Paste, drop, and file chooser acceptance',
@@ -91,7 +92,7 @@
 >
 	<ComponentCard
 		{controls}
-		description="Type /, @, or $ to insert tokens. The submit detail includes Markdown, model input, token ids, files, and attachment states."
+		description="Type /, @, or $ to insert tokens. Enter sends, Shift+Enter adds a line, and the editor keeps focus for the next message. The submit detail includes Markdown, model input, token ids, files, and attachment states."
 		class="!min-h-[360px] p-4"
 		code={`<script lang="ts">
   import { AIComposer } from 'entasis/ai-composer';
@@ -101,15 +102,11 @@ ${'</' + 'script>'}
   {commands}
   {mentions}
   {references}
-	  {skills}
-	  fileDropzone
-	  voiceInput
-	  voiceInputVariant="compact"
-	  accept={['image/*', '.pdf']}
-	  toolbar="hover"
-	  submitShortcut="enter"
-	  onVoiceInput={(audioBuffer) => transcribe(audioBuffer)}
-	  onSubmit={sendMessage}
+  {skills}
+  fileDropzone${controls.value.voiceInput === 'off' ? '' : `\n  voiceInput\n  voiceInputVariant="${selectedVoiceInputVariant}"`}
+  accept={['image/*', '.pdf']}${controls.value.toolbar === 'none' ? '' : `\n  toolbar="${controls.value.toolbar}"`}${controls.value.mode === 'streaming' ? '\n  busy' : ''}${controls.value.mode === 'disabled' ? '\n  disabled' : ''}
+  onVoiceInput={(audioBuffer) => transcribe(audioBuffer)}
+  onSubmit={sendMessage}
 />`}
 	>
 		<div class="grid w-full max-w-3xl gap-4">
@@ -123,7 +120,6 @@ ${'</' + 'script>'}
 				voiceInputVariant={selectedVoiceInputVariant}
 				accept={['image/*', '.pdf']}
 				toolbar={controls.value.toolbar}
-				submitShortcut="enter"
 				busy={controls.value.mode === 'streaming'}
 				disabled={controls.value.mode === 'disabled'}
 				onStop={() => {
@@ -172,14 +168,10 @@ ${'</' + 'script>'}
 
 		<ComponentCard
 			title="Conversation queue"
-			description="When the provider is busy, queueWhileBusy stores sortable messages instead of dispatching them immediately."
+			description="When the provider is busy, queueWhileBusy stores sortable messages instead of dispatching them immediately. Type while streaming to see the Queue button beside Stop; steered rows carry a Steering badge and Escape cancels an edit."
 			class="!min-h-[300px] p-4"
 			code={`<AIConversation bind:streaming>
-	  <AIComposer
-	    bind:queue={queuedMessages}
-	    queueWhileBusy
-	    submitShortcut="enter"
-	  />
+  <AIComposer bind:queue={queuedMessages} queueWhileBusy />
 </AIConversation>`}
 		>
 			<div class="grid w-full max-w-3xl gap-3">
@@ -190,14 +182,27 @@ ${'</' + 'script>'}
 					</span>
 				</div>
 				<AIConversation bind:streaming>
-					<AIComposer bind:queue={queuedMessages} queueWhileBusy submitShortcut="enter" />
+					<AIComposer bind:queue={queuedMessages} queueWhileBusy />
 				</AIConversation>
 			</div>
 		</ComponentCard>
 
 		<ComponentCard
+			title="Centred content width"
+			description="Inside a host that sets --ai-chat-content-width (AIChat does), the composer caps itself at that width and centres. Without the variable it spans its container."
+			class="!min-h-[220px] p-4"
+			code={`<div style="--ai-chat-content-width: 32rem">
+  <AIComposer />
+</div>`}
+		>
+			<div class="w-full" style="--ai-chat-content-width: 32rem">
+				<AIComposer onSubmit={() => {}} />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
 			title="Visible submission failures"
-			description="Rejected submit callbacks stay in the composer as an actionable error without clearing the draft."
+			description="Rejected submit callbacks stay in the composer as an actionable error without clearing the draft. A callback that resolves clears it."
 			class="!min-h-[260px] p-4"
 			code={`<AIComposer
   value="Keep this draft"

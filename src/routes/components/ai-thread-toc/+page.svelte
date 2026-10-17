@@ -89,13 +89,19 @@
 		'Standalone entasis/ai-thread-toc package export',
 		'Controlled state from AIThread or another transcript owner',
 		'80% container-height bound with scrollbar-free ScrollArea',
-		'Side-aware pin magnification and shared HoverCard preview',
-		'Wheel, touch, and programmatic navigation'
+		'Painted rail with a visible-range bar and a distinct active pin',
+		'Side-aware pin magnification and a shared preview with “Turn N of M”',
+		{
+			label: 'One tab stop with arrow-key, Home, and End navigation between pins',
+			test: 'a11y:ai-thread-toc.roving-tab-stop'
+		},
+		'Touch: the first tap previews a pin, the second navigates',
+		'Removes itself in containers narrower than minContainerWidth (480px)'
 	]}
 >
 	<ComponentCard
 		{controls}
-		description="The short container forces the standalone rail to scroll while its root remains capped at 80% of the available height. Scrollbars stay hidden; wheel, touch, focus, and pin activation remain functional."
+		description="The short container forces the standalone rail to scroll while its root remains capped at 80% of the available height. Tab into the rail once, then use the arrow keys; on touch, tap a pin to preview it and tap again to go there. Below 480px of container width the rail removes itself."
 		class="!min-h-0 p-4"
 		code={`<script lang="ts">
   import {

@@ -51,6 +51,33 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
   the input, Enter on a `Checkbox` or `RadioInput` continues the form instead of toggling, a
   `loading` `Button` stays focusable, `Tabs` and `Tabbar` fall back to the first enabled tab, and
   `Accordion` arrow keys no longer move between triggers.
+- AI chat defaults follow the Claude.ai and ChatGPT conventions; each old look stays one prop away.
+  `AIThread`, `AIChat` and `AIMessage` default to the `minimal` message variant (flat assistant
+  prose; pass `messageVariant="bubble"` or `variant="bubble"` for the framed look). User bubbles are
+  neutral grey (`messageColor="primary"` restores the saturated bubble). Prose reads at 16px at
+  `normal` size (it was 14px; `messageSize="small"` keeps the denser scale).
+  `messageActionsVisibility` defaults to `latest` (`always` for the previous behaviour). `AIChat`
+  centres the transcript and composer in a 48rem column (`contentWidth="none"` spans the full
+  width). The scroll-to-latest button is centred (`scrollButtonPosition="right"` keeps the corner).
+- `AIComposer`: Enter sends and Shift+Enter inserts a newline (`submitShortcut` defaults to
+  `'enter'`; it was `'none'`), in `AIChat` too. The selection formatting toolbar is off (`toolbar`
+  defaults to `'none'`; pass `toolbar="hover"` for the bubble). A direct `onSubmit` clears the draft
+  when it returns or its promise resolves and keeps it when it throws or rejects. The footer puts
+  attach first and moves the `modelSelector` slot to the end, next to voice and send; `AIChat`'s
+  model picker and context controls move there too.
+- `AISuggestions` are one-shot by default: a pick reports `onSelect` and updates `value`, but no
+  chip stays pressed and the chips are plain buttons without `aria-pressed`. Set `persistSelection`
+  for toggle chips. A standalone `AISuggestion` is a toggle button only when `selected` is set.
+- `AIChat` shows its default context indicator only when `maxTokens` is set or the conversation
+  reports `contextUsage`; an empty 128k ring no longer shows. The compact `AIContext` shows its
+  percentage.
+- The theme registry keys of `AISuggestion`, `AIModelSelector` and `AIFilePreview` are kebab-case,
+  matching their set functions: rename `aiSuggestion`, `aiModelSelector` and `aiFilePreview` to
+  `'ai-suggestion'`, `'ai-model-selector'` and `'ai-file-preview'` in `<Theme components>`.
+- `AIAskUserQuestion` questions are optional by default; set `required: true` to keep one blocking.
+  `AITool` blocks are `w-full max-w-[32rem]` of their container instead of sized from the viewport,
+  and its `scroll*` theme slots are removed (see Removed). `AIReasoning` has no built-in bottom
+  margin; the surrounding layout owns the spacing.
 
 ### Added
 
@@ -497,6 +524,53 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
   entry closes it.
 - `Sidebar`: `menuSide` on rows, action descriptors and `headerButton` / `footerButton` accepts the
   logical sides `inline-start` and `inline-end`, which mirror in right-to-left documents.
+- `AIThread` shows a pending assistant row ("Thinking…" or `liveText`, with the shimmer utility)
+  while the reply to the last user turn has not started, also while a streamed message has nothing
+  visible yet (AI SDK `step-start` or `data-*` parts only, or empty text). `AIMessage`'s new
+  `streaming` prop shows a caret on the reply still being written.
+- `AIThread` renders AI SDK `reasoning` parts with `AIReasoning`, maps tool approval states
+  (`approval-requested`, `approval-responded`, `output-denied`) onto `AITool` statuses, shows
+  `source-url` and `source-document` parts as a Sources row and `file` parts as previews, and
+  replaces an answered ask-user-question with a compact answer summary.
+- `AIThread` and `AIChat` show `suggestions` as follow-ups above the composer after a finished
+  assistant turn, also when a system notice follows it (`showFollowUps` turns them off). The empty
+  state is a vertically centred greeting with wrapping suggestion chips.
+- `AIThread` accepts `error`, `showError` and `onErrorRetry`, and `contentWidth`. `AIChat` forwards
+  `AIComposer`'s `submitShortcut` and `toolbar`. New exported types:
+  `AIThreadMessageActionsVisibility`, `AIThreadSource` and `AIThreadToolApproval`.
+- `AIComposer`: a solid stop button in the send position, and a Queue message action beside it while
+  a response runs with a non-empty draft. Steered queue rows carry a localized Steering badge. New
+  theme slots: `notice`, `queueBadge` and `queueFiles`. The handle's new `submit(text?)` sends the
+  draft, or `text` in its place, the way Enter does (queued while busy), then focuses the editor.
+- `Command`: items accept a `description`, rendered as a second line under the label and not
+  searched.
+- `AITool` supports AI SDK approval flows with the `approval-requested`, `approval-responded` and
+  `output-denied` statuses. Calls awaiting approval and denied calls never spin, and
+  `approval: { approved: false }` renders as denied. The new
+  `getAIToolStatusFromState(part.state)` maps every AI SDK tool part state onto a status.
+- `AITool` rows show a readable title (`searchDocs` becomes "Search docs" unless a distinct `title`
+  is given), an optional per-call `icon`, a muted one-line input `summary`, a status word and a
+  duration. The duration counts live while the call runs and stays after it settles (`duration`, or
+  `startedAt` and `completedAt`), also when a lone call grows into a group. Groups read "Search docs
+  · 2 calls", overridable with `labels.group(count, tools)`.
+- `AITool` values render as highlighted left-to-right JSON with a copy button through Code, or as a
+  key/value tree with `valueView="tree"`. One-line strings show quoted, so the output "3" no longer
+  reads like the number 3. Long values collapse behind "Show all" past `maxLines` (12) instead of a
+  hidden scroll cap. New `labels.showAll` and `labels.showLess`.
+- `AIAskUserQuestion`: number keys 1–9 pick options, and Enter continues or submits (Ctrl/Cmd+Enter
+  in a textarea), also on a step with no focusable control. Choice questions accept `allowOther`
+  (with `otherLabel` and `otherPlaceholder`) for a free-text "Other…" answer, which never
+  auto-advances and is kept when you leave the step. Optional unanswered steps show Skip
+  (`skipLabel`), and the requester shows above a stronger title.
+- `AIAskUserQuestionSummary` and `summarizeAIAskAnswers` render or return a compact question →
+  chosen-labels record of a completed request, for the transcript.
+- `AIReasoning` shows a live elapsed time while streaming ("Thinking… · 6s") that keeps a steady
+  width, and the streaming body is a bounded window that follows the latest lines under a top fade.
+  Completed durations read "less than a second" for 0 and "1m 12s" from a minute on.
+- `AIThreadToc` has one tab stop, also when its pin stack overflows, with arrow, Home and End keys
+  between pins; Tab into the rail lands on the active turn. On touch, the first tap on a pin opens
+  its preview and a second tap navigates. The preview shows "Turn N of M", and the new
+  `minContainerWidth` prop (default 480) hides the rail in narrow containers.
 
 ### Changed
 
@@ -897,6 +971,60 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
   attributes. Its `Tabbar`, `NavigationMenu`, `Tooltip`, `Select`, `Combobox` and `TagsInput`
   sections match the 0.12 API (one-payload `onValueChange`, `openOnFocus`, Escape keeping focus,
   the new `Tooltip` props).
+- `AIThread` spaces a transcript in one rhythm: the rows of a turn (reasoning, tools, text, sources)
+  are one fixed gap apart and turns a larger gap apart. Messages rendered by the thread add no
+  vertical padding of their own (new `message` theme part; the `item` part gains a `boundary`
+  variant).
+- `AIThread` gives each turn one action bar, right under the row it closes: reasoning, tools and
+  text up to the next user message share it. Its copy takes the whole turn and its retry targets the
+  turn's last assistant message. Hovering any row of the turn reveals it, and the bar's reserved
+  space stands in for the gap before the next turn. Action rows take layout space instead of
+  floating over the next row, and their icons line up with the text edge.
+- `AIMessage` user bubbles are neutral grey; the new `color` prop (`messageColor` on `AIThread` and
+  `AIChat`) paints a solid bubble in any other role. Prose reads at 16px with a 1.625 line height at
+  `normal` size, with headings close to the body; `small` and `large` step one size either side.
+- `AIThread` and `AIChat`: the new `latest` actions visibility mode keeps the final assistant turn's
+  actions visible, also when a system notice follows it, and shows the others on hover or focus;
+  touch screens always show them.
+- `AIChat` centres the transcript and composer in a reading column set with the new `contentWidth`
+  prop and exposed as `--ai-chat-content-width`. `AIThread`'s scroll-to-latest button is a centred
+  round button just above whatever sits below the thread.
+- `AIChat` shows a conversation error as a row at the failed turn with a Retry button wired to the
+  conversation's `retry`, instead of a banner above an empty state. A custom `errorRegion` keeps the
+  old placement.
+- `AIChatSkeleton` mirrors the real chat (user bubbles, flat assistant lines, a bordered composer
+  card, the centred column) and accepts `contentWidth`. The `AIChat` composer band no longer draws a
+  rule above the composer card.
+- `Markdown`: lists hang-indent, inline code is a readable muted chip at 0.9em with no doubled
+  padding, and table cells read at the surrounding text size without forced 200px columns, with an
+  edge fade when the table scrolls.
+- `AIComposer` is a raised card (raised surface, hairline border, soft lift) that caps its width at
+  `--ai-chat-content-width` when an ancestor sets it, and rings only while the editor has focus. On
+  a narrow (under 28rem) or touch composer, editor text is 16px, so iOS Safari no longer zooms on
+  focus, and footer controls, including the voice mic, grow to 36px.
+- `AIComposer`: rejected files show a short localized note that names the file and what to attach
+  instead ("notes.txt isn't supported — use images or PDF") and dismisses itself, instead of a
+  danger Alert. It sits in an always-mounted `role="status"` region, so each rejection is announced,
+  and a repeated rejection restarts its timer. With `fileMultiple={false}`, the limit note reads one
+  file.
+- `AIComposer` / `RichTextInput`: the / @ $ menus show each item's description as a second line, and
+  a file or reference its path, with a leading icon per kind. Inline tokens are tinted by kind:
+  commands, mentions and skills each get their own colour.
+- `AIModelSelector`: the default trigger is a ghost text button sized to its label that shrinks and
+  truncates in a crowded footer, instead of a 176px soft box. A menu whose models share one provider
+  shows no provider heading, rows no longer repeat a provider their heading names, and the selected
+  row keeps its context-window badge next to the check.
+- `AIAskUserQuestion`: required questions show a marker, and a validation error is one
+  danger-coloured message under the question instead of red-tinted options. A single question shows
+  no step pager, and the default footer has no previous/next arrow buttons.
+- `AITool`: rows use `text-sm`, and a single call and a group share the same variant surface. Status
+  reads by glyph and word as well as colour, and the spinner takes the info colour. Errors that are
+  a string, an Error or MCP text render as one plain sentence, sections are labelled Input, Output
+  and Error in words, and the soft variant's tint doubles in dark mode.
+- `AIReasoning`: the body is muted `text-sm` Markdown that reads quieter than the answer. Cycled
+  thinking labels keep a steady width and only the current one is named.
+- `AIThreadToc` paints its rail and visible-range bar, and the active pin is longer and more opaque
+  than pins merely in view.
 
 ### Deprecated
 
@@ -915,6 +1043,9 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 - `Combobox` / `TagsInput`: `showAllOnFocus` is replaced by `openOnFocus` and kept as an alias for
   one minor.
 - `Avatar` / `AvatarGroup`: `delay` is a deprecated alias of `revealDelay`.
+- `AIAskUserQuestion`: `previousLabel` is deprecated, because the default footer no longer renders
+  previous/next arrow buttons. The step dots and the primary action navigate, and custom footers can
+  still call `previous()`.
 
 ### Removed
 
@@ -927,6 +1058,10 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
   instead.
 - `Meter`: the `steps` prop, which was accepted but never rendered, along with the `Step` type and
   the second `S` generic of `MeterProps`. `MultiStepForm` no longer passes it.
+- `AITool`: the `scrollArea`, `scrollViewport`, `scrollContent`, `scrollScrollbar`,
+  `scrollScrollbarX` and `scrollThumb` theme slots, because values no longer render in a ScrollArea.
+  New slots: `summary`, `meta`, `statusWord`, `errorMessage`, `code`, `codeContainer`, `clamp` and
+  `showAll`.
 
 ### Fixed
 
@@ -1352,6 +1487,45 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
   when they open, so they still face the page after a runtime `dir` change.
 - `TimeInput` / `DateInput`: the MCP documentation covers `readOnly` and `disabled`, and
   `TimeInput`'s page has an import, a usage example and a props list.
+- `AIThread`: the scroll-to-latest button appears as soon as you scroll away from the end by wheel,
+  trackpad, keyboard or scrollbar. Before, only a programmatic scroll showed it.
+- `AIThread` no longer triggers "ResizeObserver loop completed with undelivered notifications" when
+  rows mount or unmount while the virtualizer re-measures a pinned, streaming transcript.
+- `AIThread`: a files-only user message no longer moves the previous assistant turn's tool calls
+  below the upload.
+- `AIMessage`: bubble tails point the right way in right-to-left layouts, and on narrow threads
+  bubbles and the table of contents gutter no longer squeeze messages to half the width.
+- `AIMessageActions` never wraps: the row is as wide as its buttons, so Copy and Edit stay on one
+  line under a one-word message. A failed action's error shows after the button row and stays
+  visible while the row is hover-hidden. Icon buttons show their name as a tooltip, error messages
+  are localized, and `setAIMessageActionsTheme` / `<Theme components>` overrides apply.
+- `Markdown`: table cells with no explicit column alignment follow the logical start in
+  right-to-left layouts; centre and right columns keep their alignment.
+- Docs: the /components/ai-shimmer URL redirects to /utilities/shimmer instead of returning a 404.
+- `AIComposer`: the editor keeps focus after a send that started in the composer (Enter, the send
+  button including in Safari, the Queue button, or committing a queued edit), so the next message no
+  longer lands on `<body>` or appends to the previous draft. `focus()` called right after a parent
+  fills the input (an `AISuggestion` pick in fill mode, or an `AIChat` suggestion) places the caret
+  after the new text.
+- `AIComposer`: at phone width the footer no longer overlaps; the attach button, a truncated model
+  name and the send or stop button fit inside the composer, and the voice button no longer renders a
+  visible label above the mic. Long queued messages truncate instead of pushing their actions past
+  the edge, Escape cancels editing a queued message, and the queued-file count and failure fallbacks
+  are translated.
+- `AIFilePreview`, `AIModelSelector`, `AISuggestion`: `set*Theme` and `<Theme components>` overrides
+  apply again; each component reads the same kebab-case key it registers.
+- `Command`: a highlighted row keeps its own text colour on a `bg-selected-muted` fill, instead of a
+  dimmer ink that looked disabled in dark mode. This covers the `AIComposer` / @ $ menus.
+- `setAIReasoningTheme`, `setAIThreadTocTheme` and `setAIAskUserQuestionTheme` overrides apply; the
+  set and use calls registered under different context keys.
+- `AITool`, `AIReasoning`, `AIAskUserQuestion` and `AIThreadToc` no longer show hard-coded English.
+  Placeholders, file rejection and submit errors, value-tree words, "+N more" and the TOC pin names
+  ("Scroll to …" and the file count) come from the i18n catalog in all 8 locales.
+- `AIAskUserQuestion`: when Enter or auto-advance moves to the next step, focus moves to that step's
+  first control, so number keys and Enter keep working through the flow. A file question's error is
+  linked to a group named by the question (`aria-describedby`), which gets `data-invalid` while the
+  error shows, and the dev-mode `binding_property_non_reactive` warning no longer appears for each
+  step.
 
 ## 0.11.0 — 2026-10-10
 

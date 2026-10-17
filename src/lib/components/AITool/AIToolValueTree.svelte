@@ -1,23 +1,17 @@
 <script lang="ts">
 	import type { AIToolValueTreeNode } from './toolValueTree.js';
-	import { buildToolValueTree } from './toolValueTree.js';
 	import { useAIToolTheme } from './aiTool.theme.js';
 	import type { AIToolThemeProps } from './aiTool.theme.js';
 
 	let {
-		value,
+		nodes,
 		tone = 'default',
-		maxDepth = 8,
-		maxEntries = 80,
 		theme
 	}: {
-		value: unknown;
+		nodes: readonly AIToolValueTreeNode[];
 		tone?: 'default' | 'error';
-		maxDepth?: number;
-		maxEntries?: number;
 		theme?: AIToolThemeProps;
 	} = $props();
-	const nodes = $derived(buildToolValueTree(value, maxDepth, maxEntries));
 	const classes = $derived(useAIToolTheme(theme));
 </script>
 
@@ -25,9 +19,10 @@
 	<li data-slot="ai-tool-value-tree-node" class={classes.treeNode()}>
 		{#if node.kind === 'branch'}
 			<div data-slot="ai-tool-value-tree-branch" class={classes.treeBranch()}>
-				<span data-slot="ai-tool-value-tree-key" class={classes.treeKey()}>{node.key}</span><span
-					data-slot="ai-tool-value-tree-summary"
-					class={classes.treeSummary()}>{node.summary}</span
+				{#if node.key}<span data-slot="ai-tool-value-tree-key" class={classes.treeKey()}
+						>{node.key}</span
+					>{/if}<span data-slot="ai-tool-value-tree-summary" class={classes.treeSummary()}
+					>{node.summary}</span
 				>
 			</div>
 			<ul data-slot="ai-tool-value-tree-children" class={classes.treeChildren()}>
@@ -36,10 +31,10 @@
 					)}{/each}
 			</ul>
 		{:else}
-			<div data-slot="ai-tool-value-tree-leaf" class={classes.treeLeaf()}>
-				<span data-slot="ai-tool-value-tree-key" class={classes.treeKey()}
-					>{node.key || 'value'}</span
-				><span
+			<div data-slot="ai-tool-value-tree-leaf" class={classes.treeLeaf({ keyed: node.key !== '' })}>
+				{#if node.key}<span data-slot="ai-tool-value-tree-key" class={classes.treeKey()}
+						>{node.key}</span
+					>{/if}<span
 					data-slot="ai-tool-value-tree-value"
 					class={classes.treeValue({ kind: node.valueKind, tone })}>{node.value}</span
 				>
@@ -48,6 +43,6 @@
 	</li>
 {/snippet}
 
-<ul data-slot="ai-tool-value-tree" class={classes.tree()}>
+<ul data-slot="ai-tool-value-tree" class={classes.tree({ tone })}>
 	{#each nodes as node, index (`${node.key}-${index}`)}{@render treeNode(node)}{/each}
 </ul>

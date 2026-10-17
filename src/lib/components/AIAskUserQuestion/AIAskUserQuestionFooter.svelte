@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Button from '../Button/Button.svelte';
-	import { arrowLeftIcon } from '../Icons/arrowLeft.js';
 	import { arrowRightIcon } from '../Icons/arrowRight.js';
 	import { checkIcon } from '../Icons/check.js';
 	import {
@@ -9,93 +8,68 @@
 	} from './aiAskUserQuestion.theme.js';
 
 	let {
-		isFirst,
 		isLast,
+		canSkip,
 		disabled,
 		isSubmitting,
 		isDiscarding,
 		canDiscard,
-		previousLabel,
 		nextLabel,
+		skipLabel,
 		submitLabel,
 		submittingLabel,
 		discardLabel,
-		onPrevious,
-		onNext,
 		onPrimary,
 		onDiscard,
 		theme
 	}: {
-		isFirst: boolean;
 		isLast: boolean;
+		/** The active question is optional and unanswered, so the primary action skips it. */
+		canSkip: boolean;
 		disabled: boolean;
 		isSubmitting: boolean;
 		isDiscarding: boolean;
 		canDiscard: boolean;
-		previousLabel: string;
 		nextLabel: string;
+		skipLabel: string;
 		submitLabel: string;
 		submittingLabel: string;
 		discardLabel: string;
-		onPrevious: () => void;
-		onNext: () => void;
 		onPrimary: () => void;
 		onDiscard: () => void;
 		theme?: AIAskUserQuestionThemeProps;
 	} = $props();
 
 	const classes = $derived(useAIAskUserQuestionTheme(theme));
+	const skipping = $derived(!isLast && canSkip);
 </script>
 
+<!-- The step dots and the primary action navigate; there is no second pair of arrow buttons. -->
 <div data-slot="ai-ask-user-question-footer" class={classes.footer()}>
-	<div class="flex items-center gap-1">
+	{#if canDiscard}
 		<Button
 			type="button"
-			squared
-			variant="outline"
+			variant="ghost"
+			color="neutral"
 			size="small"
-			label={previousLabel}
-			disabled={disabled || isFirst}
-			onclick={onPrevious}
-		>
-			{@render arrowLeftIcon({ size: 16 })}
-		</Button>
-		<Button
-			type="button"
-			squared
-			variant="outline"
-			size="small"
-			label={nextLabel}
-			disabled={disabled || isLast}
-			onclick={onNext}
-		>
-			{@render arrowRightIcon({ size: 16 })}
-		</Button>
-	</div>
-	<div class="flex min-w-0 items-center gap-2">
-		{#if canDiscard}
-			<Button
-				type="button"
-				variant="ghost"
-				color="neutral"
-				size="small"
-				loading={isDiscarding}
-				{disabled}
-				onclick={onDiscard}
-			>
-				{discardLabel}
-			</Button>
-		{/if}
-		<Button
-			type="button"
-			size="small"
-			prefix={isLast ? checkIcon : undefined}
-			suffix={isLast ? undefined : arrowRightIcon}
-			loading={isLast && isSubmitting}
+			loading={isDiscarding}
 			{disabled}
-			onclick={onPrimary}
+			onclick={onDiscard}
 		>
-			{isLast ? (isSubmitting ? submittingLabel : submitLabel) : nextLabel}
+			{discardLabel}
 		</Button>
-	</div>
+	{/if}
+	<Button
+		type="button"
+		size="small"
+		variant={skipping ? 'outline' : undefined}
+		color={skipping ? 'neutral' : undefined}
+		prefix={isLast ? checkIcon : undefined}
+		suffix={isLast ? undefined : arrowRightIcon}
+		loading={isLast && isSubmitting}
+		{disabled}
+		onclick={onPrimary}
+	>
+		{isLast ? (isSubmitting ? submittingLabel : submitLabel) : skipping ? skipLabel : nextLabel}
+	</Button>
 </div>

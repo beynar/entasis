@@ -13,7 +13,7 @@ const defaultHeader = cva({ base: 'grid min-w-0 px-lg pt-lg' });
 const defaultHeaderTop = cva({ base: 'flex min-w-0 items-start justify-between gap-lg' });
 const defaultHeaderText = cva({ base: 'grid min-w-0 gap-xs' });
 const defaultRequester = cva({
-	base: 'sr-only'
+	base: 'truncate text-xs text-neutral/70'
 });
 const defaultProgressGroup = cva({
 	base: 'flex shrink-0 items-center'
@@ -26,11 +26,13 @@ const defaultStep = cva({
 const defaultBody = cva({
 	base: 'grid min-w-0 gap-lg'
 });
-const defaultStepContent = cva({ base: 'grid w-full min-w-0 gap-lg px-lg pb-xs' });
+const defaultStepContent = cva({ base: 'grid w-full min-w-0 gap-lg px-lg pb-xs outline-none' });
 const defaultQuestion = cva({ base: 'grid min-w-0 gap-xs' });
 const defaultQuestionTitle = cva({
 	base: 'break-words text-sm font-medium leading-snug text-neutral [overflow-wrap:anywhere]'
 });
+const defaultRequiredMarker = cva({ base: 'ms-xs text-danger-readable' });
+const defaultOther = cva({ base: 'min-w-0' });
 const defaultQuestionDescription = cva({
 	base: 'break-words text-xs leading-relaxed text-neutral/70 [overflow-wrap:anywhere]'
 });
@@ -38,14 +40,34 @@ const defaultTextArea = cva({ base: 'min-h-24 resize-none text-sm' });
 const defaultOptions = cva({ base: 'grid w-full min-w-0 gap-md' });
 const defaultFile = cva({ base: 'min-w-0' });
 const defaultEmpty = cva({ base: 'm-lg min-w-0' });
-const defaultError = cva({ base: 'mx-lg min-w-0 text-sm' });
-const defaultFooter = cva({ base: 'flex min-w-0 items-center justify-between gap-md px-lg pb-lg' });
+// One danger message under the question; the step already carries the horizontal padding.
+const defaultError = cva({ base: 'min-w-0 text-sm text-danger-readable' });
+const defaultAlert = cva({ base: 'mx-lg min-w-0' });
+const defaultFooter = cva({ base: 'flex min-w-0 items-center justify-end gap-md px-lg pb-lg' });
 const defaultProgress = cva({ base: 'sr-only' });
 const defaultTitle = cva({
-	base: 'break-words text-xs font-medium leading-snug text-neutral/70 [overflow-wrap:anywhere]'
+	base: 'break-words text-sm font-semibold leading-snug text-neutral [overflow-wrap:anywhere]'
 });
 const defaultDescription = cva({
 	base: 'break-words text-xs leading-relaxed text-neutral/70 [overflow-wrap:anywhere]'
+});
+// The answered record a transcript keeps once the request is complete: question → chosen labels.
+const defaultSummary = cva({ base: 'grid min-w-0 gap-sm text-sm text-neutral' });
+const defaultSummaryTitle = cva({ base: 'text-xs font-medium text-neutral/70' });
+const defaultSummaryList = cva({ base: 'grid min-w-0 gap-sm' });
+const defaultSummaryItem = cva({ base: 'grid min-w-0 gap-micro' });
+const defaultSummaryQuestion = cva({
+	base: 'break-words text-neutral/70 [overflow-wrap:anywhere]'
+});
+const defaultSummaryAnswer = cva({
+	base: 'break-words font-medium text-neutral [overflow-wrap:anywhere]',
+	variants: {
+		answered: {
+			true: '',
+			false: 'font-normal text-neutral/70 italic'
+		}
+	},
+	defaultVariants: { answered: true }
 });
 export const aiAskUserQuestionTheme = {
 	root: defaultRoot,
@@ -69,13 +91,22 @@ export const aiAskUserQuestionTheme = {
 	footer: defaultFooter,
 	progress: defaultProgress,
 	title: defaultTitle,
-	description: defaultDescription
+	description: defaultDescription,
+	requiredMarker: defaultRequiredMarker,
+	other: defaultOther,
+	alert: defaultAlert,
+	summary: defaultSummary,
+	summaryTitle: defaultSummaryTitle,
+	summaryList: defaultSummaryList,
+	summaryItem: defaultSummaryItem,
+	summaryQuestion: defaultSummaryQuestion,
+	summaryAnswer: defaultSummaryAnswer
 };
 export type AIAskUserQuestionTheme = typeof aiAskUserQuestionTheme;
 export type AIAskUserQuestionThemeProps = InferComponentTheme<AIAskUserQuestionTheme>;
 export const setAIAskUserQuestionTheme =
 	setComponentTheme<AIAskUserQuestionTheme>('ai-ask-user-question');
 export const useAIAskUserQuestionTheme = useComponentTheme<AIAskUserQuestionTheme>(
-	'aiAskUserQuestion',
+	'ai-ask-user-question',
 	aiAskUserQuestionTheme
 );

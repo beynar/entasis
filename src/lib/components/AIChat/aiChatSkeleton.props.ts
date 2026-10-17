@@ -16,6 +16,11 @@ export type AIChatSkeletonProps = WithAttachments<
 		showComposer?: boolean;
 		/** Displays a chat-footer placeholder. */
 		showFooter?: boolean;
+		/**
+		 * Width of the centred column, matching AIChat's `contentWidth` so the skeleton lines up with
+		 * the chat that replaces it. @default '48rem'
+		 */
+		contentWidth?: string | number;
 		/** Class applied to the skeleton root. */
 		class?: string;
 		/** AI chat theme overrides reused by the skeleton layout. */

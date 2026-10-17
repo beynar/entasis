@@ -138,13 +138,18 @@
 		if (tokens >= 1_000) return `${Math.round(tokens / 1_000)}K`;
 		return `${tokens}`;
 	}
-	function modelItem(model: AIModelSelectorModel): MenuItem {
+	/**
+	 * `showProvider` is off where a provider heading already names the provider (or every model
+	 * shares one), so a row never repeats it as its description. The selected row keeps its
+	 * context-window badge next to the check.
+	 */
+	function modelItem(model: AIModelSelectorModel, showProvider = true): MenuItem {
 		return {
 			type: 'option',
 			title: model.label,
-			description: model.description ?? model.provider,
+			description: model.description ?? (showProvider ? model.provider : undefined),
 			prefix: model.icon,
-			suffix: selectedValue === model.id ? checkIcon : contextLabel(model.contextWindow),
+			suffix: selectedValue === model.id ? selectedSuffix : contextLabel(model.contextWindow),
 			disabled: disabled || model.disabled,
 			active: selectedValue === model.id,
 			class: classes.option({ selected: selectedValue === model.id }),
@@ -157,7 +162,7 @@
 		};
 	}
 	function groupItem(group: AIModelSelectorGroup): MenuItem {
-		const modelItems = (group.models ?? []).map(modelItem);
+		const modelItems = (group.models ?? []).map((model) => modelItem(model));
 		const groupItems = (group.groups ?? []).map(groupItem);
 		const menu = [
 			...modelItems,
@@ -210,8 +215,8 @@
 			const provider = model.provider ?? resolvedLabels.providerFallback;
 			providers.set(provider, [...(providers.get(provider) ?? []), model]);
 		}
-		if (providers.size === 1 && providers.has(resolvedLabels.providerFallback))
-			return source.map(modelItem);
+		// One provider needs no heading: it would only repeat what every row shares.
+		if (providers.size <= 1) return source.map((model) => modelItem(model, false));
 		return [...providers.entries()].flatMap(([provider, providerModels], index) => [
 			...(index > 0 ? [{ type: 'separator' } satisfies MenuItem] : []),
 			{
@@ -222,7 +227,7 @@
 				fullWidth: true,
 				class: classes.provider()
 			} satisfies MenuItem,
-			...providerModels.map(modelItem)
+			...providerModels.map((model) => modelItem(model, false))
 		]);
 	}
 	function resolveSupplementalItems(source: readonly AIModelSelectorMenuItem[]): MenuItem[] {
@@ -280,6 +285,14 @@
 	]);
 </script>
 
+{#snippet selectedSuffix()}
+	{@const context = contextLabel(selectedModel?.contextWindow)}
+	<span data-slot="ai-model-selector-selected" class={classes.optionMeta()}>
+		{#if context}<span>{context}</span>{/if}
+		{@render checkIcon({ size: 14 })}
+	</span>
+{/snippet}
+
 {#snippet emptyContent()}
 	<span data-slot="ai-model-selector-empty">
 		<Slot render={empty ?? resolvedLabels.empty} payload={selectorState} />
@@ -319,7 +332,8 @@
 		<Button
 			type="button"
 			data-slot="ai-model-selector-trigger"
-			variant="soft"
+			variant="ghost"
+			color="neutral"
 			size="small"
 			{disabled}
 			haspopup="menu"

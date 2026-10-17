@@ -9,19 +9,35 @@
 		AIThreadTocProps
 	} from './aiThreadToc.props.js';
 	import { useAIThreadTocTheme } from './aiThreadToc.theme.js';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	type Props = Pick<
 		AIThreadTocProps<TMessage>,
 		'preview' | 'title' | 'excerpt' | 'metadata' | 'icon' | 'theme'
 	> & {
 		entry: AIThreadTocEntry<TMessage>;
+		/** 1-based position of the entry among the thread's user turns; 0 hides it. */
+		turn?: number;
+		total?: number;
 	};
 
 	type PreviewFile = {
 		file: AIFileSource;
 	};
 
-	let { entry, preview, title, excerpt, metadata, icon, theme }: Props = $props();
+	let {
+		entry,
+		turn = 0,
+		total = 0,
+		preview,
+		title,
+		excerpt,
+		metadata,
+		icon,
+		theme
+	}: Props = $props();
+
+	const t = $derived(useI18n());
 
 	const classes = $derived(useAIThreadTocTheme(theme));
 	const files = $derived(previewFiles(entry));
@@ -55,6 +71,11 @@
 				<div data-slot="ai-thread-toc-preview-title" class={classes.previewTitle()}>
 					<Slot render={title ?? entry.title} payload={entry} />
 				</div>
+				{#if turn > 0 && total > 0}
+					<div data-slot="ai-thread-toc-preview-turn" class={classes.previewTurn()}>
+						{t.aiThreadTocTurn(turn, total)}
+					</div>
+				{/if}
 				{#if metadata}
 					<div data-slot="ai-thread-toc-preview-metadata" class={classes.previewMetadata()}>
 						<Slot render={metadata} payload={entry} />
@@ -79,7 +100,9 @@
 					</div>
 				{/each}
 				{#if entry.fileCount > files.length}
-					<div class={classes.previewMetadata()}>+{entry.fileCount - files.length} more</div>
+					<div class={classes.previewMetadata()}>
+						{t.aiThreadTocMoreFiles(entry.fileCount - files.length)}
+					</div>
 				{/if}
 			</div>
 		{/if}

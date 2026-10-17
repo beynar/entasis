@@ -26,6 +26,9 @@
 			| 'density'
 			| 'messageSize'
 			| 'messageVariant'
+			| 'messageColor'
+			| 'contentWidth'
+			| 'showFollowUps'
 			| 'messageActions'
 			| 'messageActionsVisibility'
 			| 'messageCopyable'
@@ -59,6 +62,8 @@
 			| 'onQueuedMessageEditCancel'
 			| 'onQueuedMessageReorder'
 			| 'onSteer'
+			| 'submitShortcut'
+			| 'toolbar'
 			| 'header'
 			| 'beforeThread'
 			| 'controls'
@@ -95,6 +100,9 @@
 		density,
 		messageSize,
 		messageVariant,
+		messageColor,
+		contentWidth = '48rem',
+		showFollowUps,
 		messageActions,
 		messageActionsVisibility,
 		messageCopyable,
@@ -128,6 +136,8 @@
 		onQueuedMessageEditCancel,
 		onQueuedMessageReorder,
 		onSteer,
+		submitShortcut,
+		toolbar,
 		header,
 		beforeThread,
 		controls,
@@ -153,6 +163,12 @@
 	let composerSurface = $state<{ focus: () => void }>();
 	const classes = $derived(useAIChatTheme(theme));
 	const t = $derived(useI18n());
+	const resolvedContentWidth = $derived(
+		typeof contentWidth === 'number' ? `${contentWidth}px` : contentWidth
+	);
+	// The default thread shows the error as a row where the reply failed, with a Retry button. An
+	// `errorRegion` replacement, or a replaced thread, keeps the error above the transcript.
+	const errorInThread = $derived(!errorRegion && !thread);
 
 	function displayError(value: unknown): string {
 		if (value instanceof Error && value.message) return value.message;
@@ -164,13 +180,20 @@
 {#if children}
 	<Slot render={children} payload={conversation} />
 {:else}
-	<div bind:this={ref} data-slot="ai-chat" class={classes.root({ className })} {...attachments}>
+	<div
+		bind:this={ref}
+		data-slot="ai-chat"
+		data-density={density === 'compact' || density === 'comfortable' ? density : 'normal'}
+		class={classes.root({ className })}
+		{...attachments}
+		style:--ai-chat-content-width={resolvedContentWidth}
+	>
 		{#if header}
 			<div data-slot="ai-chat-header" class={classes.header()}>
 				<Slot render={header} payload={conversation} />
 			</div>
 		{/if}
-		{#if conversation.error !== undefined}
+		{#if conversation.error !== undefined && !errorInThread}
 			<div data-slot="ai-chat-error" class={classes.error()}>
 				{#if errorRegion}
 					<Slot render={errorRegion} payload={conversation} />
@@ -203,6 +226,9 @@
 			{density}
 			{messageSize}
 			{messageVariant}
+			{messageColor}
+			{showFollowUps}
+			showError={errorInThread}
 			{messageActions}
 			{messageActionsVisibility}
 			{messageCopyable}
@@ -257,6 +283,8 @@
 			{onQueuedMessageEditCancel}
 			{onQueuedMessageReorder}
 			{onSteer}
+			{submitShortcut}
+			{toolbar}
 			{theme}
 		/>
 		{#if footer}

@@ -1,4 +1,3 @@
-import { selectedSoft } from '$lib/components/Theme/theme.recipes.js';
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
@@ -128,8 +127,10 @@ const defaultCommandItem = cva({
 		},
 		highlighted: {
 			// The keyboard cursor is a persistent selection, not a hover: it paints the shared soft
-			// selected recipe in the current role, like a sidebar row or a toggle button.
-			true: selectedSoft,
+			// selected fill in the current role, like a sidebar row or a toggle button. The row keeps
+			// its own ink: the neutral muted-readable ink is dimmer than an unhighlighted row in dark
+			// mode, which made the active row look disabled.
+			true: 'bg-selected-muted',
 			false: ''
 		}
 	},

@@ -6,7 +6,7 @@ import type {
 	AIThreadItem,
 	AIThreadMessageKey
 } from './aiThread.props.js';
-import { collectAIThreadMessageTools } from './threadRenderItems.js';
+import { collectAIThreadMessageTools } from './threadTools.js';
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -40,7 +40,7 @@ export function findActiveAskUserQuestion<TMessage extends AIThreadItem>(
 	return null;
 }
 
-function toAskUserQuestionRequest<TMessage extends AIThreadItem>(
+export function toAskUserQuestionRequest<TMessage extends AIThreadItem>(
 	message: TMessage,
 	messageIndex: number,
 	messageKey: AIThreadMessageKey,
@@ -75,7 +75,7 @@ function toAskUserQuestionRequest<TMessage extends AIThreadItem>(
 	};
 }
 
-function isAskUserQuestionTool(tool: AIToolCall): boolean {
+export function isAskUserQuestionTool(tool: AIToolCall): boolean {
 	const name = normalizedName(tool.name ?? tool.title);
 	return ['askuserquestion', 'askquestion', 'requestuserquestion', 'requestuserinput'].includes(
 		name

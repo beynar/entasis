@@ -7,6 +7,7 @@
 	import AIComposer from '../AIComposer/AIComposer.svelte';
 	import type {
 		AIComposerHandle,
+		AIComposerProps,
 		AIComposerQueuedMessage
 	} from '../AIComposer/aiComposer.props.js';
 	import AIContext from '../AIContext/AIContext.svelte';
@@ -55,7 +56,13 @@
 		| 'onQueuedMessageReorder'
 		| 'onSteer'
 		| 'theme'
-	> & { conversation: AIConversationState<TMessage> };
+	> & {
+		conversation: AIConversationState<TMessage>;
+		/** Composer submit shortcut; AIComposer's default (`'enter'`) when omitted. */
+		submitShortcut?: AIComposerProps['submitShortcut'];
+		/** Composer formatting toolbar; AIComposer's default (`'none'`) when omitted. */
+		toolbar?: AIComposerProps['toolbar'];
+	};
 
 	let {
 		conversation,
@@ -66,7 +73,7 @@
 		composer,
 		models = [],
 		modelGroups = [],
-		maxTokens = 128_000,
+		maxTokens,
 		showContext = true,
 		showModelSelector = true,
 		disabled = false,
@@ -93,13 +100,21 @@
 		onQueuedMessageEditCancel,
 		onQueuedMessageReorder,
 		onSteer,
+		submitShortcut,
+		toolbar,
 		theme
 	}: Props<TMessage> = $props();
 	const t = $derived(useI18n());
+	const DEFAULT_MAX_TOKENS = 128_000;
 
 	let composerHandle = $state<AIComposerHandle>();
 	let askUserQuestionValues = $state<Record<string, AIAskAnswers | undefined>>({});
 	const hasModels = $derived(models.length > 0 || modelGroups.length > 0);
+	// The default indicator only appears once there is something to measure: a context-window
+	// limit from the app or usage reported by the conversation. An empty ring reads as a spinner.
+	const hasContextData = $derived(
+		maxTokens !== undefined || conversation.contextUsage !== undefined
+	);
 	const classes = $derived(useAIChatTheme(theme));
 
 	export function focus(): void {
@@ -137,8 +152,8 @@
 		<div class={classes.controls()}>
 			{#if context}
 				<Slot render={context} payload={conversation} />
-			{:else if showContext}
-				<AIContext {maxTokens} compact />
+			{:else if showContext && hasContextData}
+				<AIContext maxTokens={maxTokens ?? DEFAULT_MAX_TOKENS} compact />
 			{/if}
 			{#if modelSelector}
 				<Slot render={modelSelector} payload={conversation} />
@@ -201,7 +216,9 @@
 			{onQueuedMessageEditCancel}
 			{onQueuedMessageReorder}
 			{onSteer}
-			footerStart={defaultControls}
+			{submitShortcut}
+			{toolbar}
+			modelSelector={defaultControls}
 		/>
 	{/if}
 </div>

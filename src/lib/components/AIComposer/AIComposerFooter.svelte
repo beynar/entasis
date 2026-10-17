@@ -1,11 +1,13 @@
 <script lang="ts">
+	import { MediaQuery } from 'svelte/reactivity';
 	import Button from '../Button/Button.svelte';
 	import VoiceInput from '../Form/VoiceInput/VoiceInput.svelte';
 	import type { VoiceInputResult } from '../Form/VoiceInput/voiceInput.props.js';
 	import type { VoiceInputThemeProps } from '../Form/VoiceInput/voiceInput.theme.js';
+	import { listPlusIcon } from '../Icons/listPlus.js';
 	import { paperPlaneRightIcon } from '../Icons/paperPlaneRight.js';
 	import { paperclipIcon } from '../Icons/paperclip.js';
-	import { stopIcon } from '../Icons/stop.js';
+	import { stopIconFill } from '../Icons/stop.js';
 	import Slot from '../Slot/Slot.svelte';
 	import type { Slot as SlotType } from '../Slot/slot.js';
 	import type { Colors } from '../../types/theme.js';
@@ -26,6 +28,7 @@
 		voiceInputAriaLabel,
 		voiceInputStopLabel,
 		voiceInputProcessingLabel,
+		voiceInputFailedLabel,
 		onVoiceInput,
 		fileDropzone,
 		attachDisabled,
@@ -37,6 +40,7 @@
 		queueWhileBusy,
 		submitLabel,
 		stopLabel,
+		queueLabel,
 		attachLabel,
 		onAttach,
 		onStop,
@@ -56,6 +60,7 @@
 		voiceInputAriaLabel: string;
 		voiceInputStopLabel: string;
 		voiceInputProcessingLabel: string;
+		voiceInputFailedLabel: string;
 		onVoiceInput?: (audioBuffer: ArrayBuffer) => Promise<void>;
 		fileDropzone: boolean;
 		attachDisabled: boolean;
@@ -67,6 +72,7 @@
 		queueWhileBusy: boolean;
 		submitLabel: string;
 		stopLabel: string;
+		queueLabel: string;
 		attachLabel: string;
 		onAttach: () => void;
 		onStop: () => void;
@@ -80,6 +86,22 @@
 	let voiceInputErrors = $state<string[]>([]);
 	let isVoiceInputProcessing = $state(false);
 
+	// The footer's other controls grow to 36px through the theme's `@max-md` container query and
+	// `pointer-coarse`; VoiceInput sizes its mic, playback and clear buttons from its `size` prop, so
+	// the same two conditions pick its 36px `normal` size here. 28rem is Tailwind's `@md` container.
+	const coarsePointer = new MediaQuery('(pointer: coarse)', false);
+	let narrowFooter = $state(false);
+	const touchControls = $derived(narrowFooter || coarsePointer.current);
+
+	function observeFooterWidth(node: HTMLElement) {
+		const observer = new ResizeObserver(([entry]) => {
+			const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+			narrowFooter = entry.contentRect.width < 28 * rem;
+		});
+		observer.observe(node);
+		return () => observer.disconnect();
+	}
+
 	async function processVoiceInput(result: VoiceInputResult): Promise<void> {
 		voiceInputValue = null;
 		voiceInputDuration = 0;
@@ -90,9 +112,7 @@
 		try {
 			await onVoiceInput(await result.blob.arrayBuffer());
 		} catch (cause) {
-			voiceInputErrors = [
-				cause instanceof Error ? cause.message : 'Voice input processing failed.'
-			];
+			voiceInputErrors = [cause instanceof Error ? cause.message : voiceInputFailedLabel];
 		} finally {
 			isVoiceInputProcessing = false;
 		}
@@ -102,9 +122,14 @@
 {#if footer}
 	<Slot render={footer} payload={submitState} class={classes.footer()} />
 {:else}
-	<div data-slot="ai-composer-footer" class={classes.footer()}>
+	<!-- Attach sits at the far start; the model picker, voice and the send position share the end,
+	     so the send/stop control is always last and never pushed out of the composer. -->
+	<div
+		data-slot="ai-composer-footer"
+		class={classes.footer()}
+		{@attach voiceInput ? observeFooterWidth : undefined}
+	>
 		<div class={classes.actions({ side: 'start' })}>
-			<Slot render={footerStart} payload={submitState} />
 			{#if fileDropzone}
 				<Button
 					type="button"
@@ -119,10 +144,11 @@
 					{@render paperclipIcon({ size: 16 })}
 				</Button>
 			{/if}
-			<Slot render={modelSelector} />
+			<Slot render={footerStart} payload={submitState} />
 		</div>
 		<div class={classes.actions({ side: 'end' })}>
 			<Slot render={actions} payload={submitState} />
+			<Slot render={modelSelector} />
 			{#if voiceInput}
 				<div
 					data-slot="ai-composer-voice-input"
@@ -132,7 +158,7 @@
 						<Button
 							type="button"
 							squared
-							size="small"
+							size={touchControls ? 'large' : 'small'}
 							variant="ghost"
 							color="neutral"
 							label={voiceInputProcessingLabel}
@@ -140,16 +166,17 @@
 							disabled
 						/>
 					{:else}
+						<!-- startLabel names the mic button; no Field label, so nothing renders above it. -->
 						<VoiceInput
 							bind:value={voiceInputValue}
 							bind:duration={voiceInputDuration}
 							bind:errors={voiceInputErrors}
-							size="small"
+							size={touchControls ? 'normal' : 'small'}
 							variant={voiceInputVariant}
 							minDuration={voiceInputMinDuration}
 							maxDuration={voiceInputMaxDuration}
 							color={voiceInputColor}
-							label={voiceInputAriaLabel}
+							startLabel={voiceInputAriaLabel}
 							stopLabel={voiceInputStopLabel}
 							disabled={disabled || isWorking}
 							onStop={processVoiceInput}
@@ -159,23 +186,38 @@
 				</div>
 			{/if}
 			{#if submitState.isBusy && !isEditing}
+				{#if queueWhileBusy && !submitState.isEmpty}
+					<Button
+						type="submit"
+						squared
+						size="small"
+						variant="ghost"
+						color="neutral"
+						data-slot="ai-composer-queue-action"
+						label={queueLabel}
+						disabled={disabled || isWorking}
+					>
+						{@render listPlusIcon({ size: 16 })}
+					</Button>
+				{/if}
 				<Button
 					type="button"
 					squared
 					size="small"
-					variant="soft"
+					data-slot="ai-composer-stop"
 					label={stopLabel}
 					loading={isStopping}
 					disabled={disabled || isWorking}
 					onclick={onStop}
 				>
-					{@render stopIcon({ size: 16 })}
+					{@render stopIconFill({ size: 14 })}
 				</Button>
 			{:else}
 				<Button
 					type="submit"
 					squared
 					size="small"
+					data-slot="ai-composer-submit"
 					label={submitLabel}
 					loading={isSubmitting}
 					disabled={disabled ||

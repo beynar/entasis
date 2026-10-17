@@ -21,14 +21,18 @@ AIReasoning renders an AI reasoning trace in the Entasis Collapsible primitive. 
 />
 \`\`\`
 
-The default trigger displays a brain icon and a shimmer-only \`SpinnerText\` label while streaming. A supplied \`thinkingMessages\` list replaces the resolved \`labels.thinking\` value and advances every two seconds when it contains more than one message. The compact \`labels\` object also overrides the unknown-duration sentence and completed-duration formatter.
+The default trigger displays a brain icon and a shimmering label while streaming, followed by a live elapsed time once a second has passed ("Thinking… · 6s"). A supplied \`thinkingMessages\` list replaces the resolved \`labels.thinking\` value and advances every two seconds when it contains more than one message. Every message sits in the same grid cell, so the trigger keeps the widest message's width (the caret never shifts) and only the current message is visible and part of the button's accessible name; the elapsed time is hidden from assistive technology and reserves the width of its unit's widest reading (59s, then 59m 59s), so the caret holds still as the count gains a digit and steps only when the unit changes. The compact \`labels\` object also overrides the unknown-duration sentence and completed-duration formatter.
+
+Completed durations read "Thought for less than a second" for \`0\`, "Thought for 6 seconds" under a minute, and "Thought for 1m 12s" from a minute on.
+
+While streaming, the body is a bounded window (\`max-h-40\`) that follows the newest lines; once earlier lines leave the window its top edge fades. The full body returns when streaming ends. The body renders Markdown at \`size="normal"\` (text-sm) in a muted colour that Markdown paragraphs and lists inherit, so reasoning reads quieter than the answer. The root has no outer margin: the surrounding thread or message owns the spacing.
 
 ## Streaming lifecycle
 
 - \`open\` starts from \`defaultOpen ?? streaming\`.
 - At the start of a streaming session, the component auto-opens once unless \`defaultOpen={false}\`.
 - Closing the panel manually during that stream keeps it closed; streaming does not force it open again.
-- When streaming ends, the measured duration is rounded up to whole seconds.
+- When streaming ends, the measured duration is rounded to whole seconds (under half a second becomes \`0\`).
 - After the first observed stream completes, an open panel closes after \`1000\` ms by default. A trace that never streamed is not auto-closed.
 - An explicit \`duration\` is expressed in seconds and takes precedence over the measured duration.
 
@@ -63,7 +67,7 @@ Use \`defaultOpen={false}\` to opt out of streaming auto-open without disabling 
 
 ## Custom trigger and body
 
-A custom \`trigger\` replaces the complete default row, including its default label and caret. The Collapsible button remains the interactive and accessible owner. The trigger payload is \`{ open, streaming, duration, message }\`, where \`message\` is the currently displayed thinking label.
+A custom \`trigger\` replaces the complete default row, including its default label and caret. The Collapsible button remains the interactive and accessible owner. The trigger payload is \`{ open, streaming, duration, elapsed, message, labels }\`, where \`message\` is the currently displayed thinking label and \`elapsed\` the whole seconds of the current stream.
 
 \`\`\`svelte
 <AIReasoning streaming thinkingMessages={['Planning', 'Checking']}>
@@ -102,7 +106,7 @@ Pass Markdown options through \`markdown\`. AIReasoning owns \`content\` and alw
 
 ## Theme slots
 
-The AIReasoning \`trigger\` and \`content\` theme slots are composed into the actual Collapsible trigger button and content panel. \`root\` styles the Collapsible root; \`icon\`, \`status\`, and \`duration\` style the default trigger regions.
+The AIReasoning \`trigger\` and \`content\` theme slots are composed into the actual Collapsible trigger button and content panel. \`root\` styles the Collapsible root; \`icon\`, \`status\` (the stacked label cell), \`message\` (each cycled label, \`current\` variant), \`elapsed\` (with \`elapsedReserve\`, its invisible widest reading), and \`duration\` style the default trigger regions; \`stream\` and \`streamBody\` style the streaming window.
 
 \`\`\`svelte
 <AIReasoning
@@ -121,7 +125,7 @@ Global overrides use \`setAIReasoningTheme\` from the same package entry.
 ## Props
 
 - \`content?: string\`: Markdown trace. Takes precedence over custom children.
-- \`streaming?: boolean\`: Drives status labels, auto-open, duration measurement, and completion close.
+- \`streaming?: boolean\`: Drives status labels, the live elapsed time, the following window, auto-open, duration measurement, and completion close.
 - \`thinkingMessages?: readonly string[]\`: Optional labels cycled every two seconds while streaming; takes precedence over \`labels.thinking\`.
 - \`labels?: Partial<AIReasoningLabels>\`: Default thinking text, unknown-duration text, and duration formatter.
 - \`open?: boolean\`: Bindable open state.

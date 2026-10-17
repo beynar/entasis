@@ -3,6 +3,7 @@
 	import Markdown from '../Markdown/Markdown.svelte';
 	import type { MarkdownSize } from '../Markdown/markdown.props.js';
 	import Slot from '../Slot/Slot.svelte';
+	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
 	import AIMessageActions from '../AIMessageActions/AIMessageActions.svelte';
 	import type { AIThreadItem, AIThreadRole } from '../AIThread/aiThread.props.js';
 	import type { AIMessageProps, AIMessageRenderPayload, AIMessageSize } from './aiMessage.props.js';
@@ -24,7 +25,9 @@
 		content,
 		files,
 		size = 'normal',
-		variant = 'bubble',
+		variant = 'minimal',
+		color,
+		streaming = false,
 		markdown = true,
 		streamdown,
 		markdownProps,
@@ -59,6 +62,7 @@
 		resolvedMarkdownProps?.allowedImagePrefixes ?? ['https://']
 	);
 	const resolvedActionVisibility = $derived(actionsVisibility ?? actionVisibility ?? 'always');
+	const resolvedColor = $derived(useDefaultColor(color));
 	const resolvedCopyable = $derived(copyable ?? copyAction);
 	const resolvedEditable = $derived(editable ?? editAction ?? resolvedRole === 'user');
 	const resolvedRetryable = $derived(retryable ?? retryAction ?? resolvedRole === 'assistant');
@@ -88,6 +92,10 @@
 	const markdownSize = $derived(resolveMarkdownSize(size));
 	const roleLayout = $derived(resolveRoleLayout(resolvedRole));
 	const fileAlignment = $derived(resolveFileAlignment(roleLayout));
+	// A message that only carries files (an upload with no prompt) shows no empty bubble.
+	const showBubble = $derived(
+		children !== undefined || streaming || resolvedContent !== '' || resolvedFiles.length === 0
+	);
 
 	function resolveRoleLayout(value: AIThreadRole): 'user' | 'assistant' | 'system' | 'tool' {
 		if (value === 'user') return 'user';
@@ -104,9 +112,10 @@
 		return 'start';
 	}
 
+	// The Markdown scale supplies block spacing and code size; AIMessage's own `markdown` theme part
+	// sets the prose type size and the heading steps on top of it.
 	function resolveMarkdownSize(value: AIMessageSize): MarkdownSize {
-		if (value === 'large') return 'large';
-		return 'small';
+		return value;
 	}
 </script>
 
@@ -117,6 +126,8 @@
 	data-role={resolvedRole}
 	data-size={size}
 	data-variant={variant}
+	data-color={resolvedColor}
+	data-streaming={streaming ? 'true' : undefined}
 	data-actions-visibility={resolvedActionVisibility}
 	class={classes.root({
 		role: roleLayout,
@@ -130,19 +141,26 @@
 				{resolvedName}
 			</div>{/if}
 		<AIMessageFiles files={resolvedFiles} align={fileAlignment} {size} class={classes.files()} />
-		<div data-slot="ai-message-content" class={classes.bubble({ role: roleLayout, size, variant })}>
-			{#if children !== undefined}<Slot render={children} {payload} />{:else if markdown}<Markdown
-					content={markdownContent}
-					{...resolvedMarkdownProps}
-					size={markdownSize}
-					class={classes.markdown({ size, className: resolvedMarkdownProps?.class })}
-					{allowedLinkPrefixes}
-					{allowedImagePrefixes}
-					renderHtml={false}
-					{extensions}
-					{mdxComponents}
-				/>{:else}<span class="whitespace-pre-wrap">{resolvedContent}</span>{/if}
-		</div>
+		{#if showBubble}
+			<div
+				data-slot="ai-message-content"
+				class={classes.bubble({ role: roleLayout, size, variant, color: resolvedColor })}
+			>
+				{#if children !== undefined}<Slot render={children} {payload} />{:else if markdown}<Markdown
+						content={markdownContent}
+						{...resolvedMarkdownProps}
+						size={markdownSize}
+						class={classes.markdown({ size, className: resolvedMarkdownProps?.class })}
+						{allowedLinkPrefixes}
+						{allowedImagePrefixes}
+						renderHtml={false}
+						{extensions}
+						{mdxComponents}
+					/>{:else}<span class="whitespace-pre-wrap">{resolvedContent}</span>{/if}
+				{#if streaming}<span data-slot="ai-message-caret" aria-hidden="true" class={classes.caret()}
+					></span>{/if}
+			</div>
+		{/if}
 		<AIMessageActions
 			{message}
 			messageIndex={resolvedIndex}

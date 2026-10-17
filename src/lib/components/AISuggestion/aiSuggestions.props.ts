@@ -28,6 +28,13 @@ export type AISuggestionsProps = Omit<
 		disabled?: boolean;
 		/** Button treatment applied to the built-in suggestion items. */
 		variant?: AISuggestionProps['variant'];
+		/**
+		 * Keeps the last picked suggestion pressed. Off by default: suggestions are one-shot prompts,
+		 * so a pick reports `onSelect` (and updates `value`) without leaving a sticky pressed chip.
+		 * Custom `suggestion` snippets still receive the real `selected` state.
+		 * @default false
+		 */
+		persistSelection?: boolean;
 		/** Enables the shared scroll-fade utility on horizontal overflow. */
 		scrollFade?: boolean;
 		/** Custom suggestion renderer with selection state and action. */

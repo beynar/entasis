@@ -144,9 +144,13 @@
 				decorative
 				class={classes.progress()}
 			/>
-			{#if !compact}<span class={classes.triggerValue()}
-					>{state.formattedUsed} / {state.formattedMax}</span
-				>{/if}
+			{#if compact}
+				<span data-slot="ai-context-trigger-percent" class={classes.triggerPercent()}
+					>{Math.round(clampedPercent)}%</span
+				>
+			{:else}
+				<span class={classes.triggerValue()}>{state.formattedUsed} / {state.formattedMax}</span>
+			{/if}
 		</button>
 	{/if}
 {/snippet}

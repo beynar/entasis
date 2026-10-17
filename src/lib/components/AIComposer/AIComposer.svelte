@@ -10,6 +10,8 @@
 	} from '../RichTextInput/richTextInput.props.js';
 	import { toRichTextInputToken } from '../RichTextInput/suggestions.js';
 	import Alert from '../Alert/Alert.svelte';
+	import Button from '../Button/Button.svelte';
+	import { xIcon } from '../Icons/x.js';
 	import { getAIConversation } from '../AIConversation/aiConversation.state.svelte.js';
 	import { uploadSimpleIcon } from '../Icons/uploadSimple.js';
 	import Slot from '../Slot/Slot.svelte';
@@ -59,8 +61,8 @@
 		mentions,
 		references,
 		skills,
-		submitShortcut = 'none',
-		toolbar = 'hover',
+		submitShortcut = 'enter',
+		toolbar = 'none',
 		formats,
 		autoresize = true,
 		voiceInput = false,
@@ -115,6 +117,7 @@
 		class: className,
 		theme,
 		voiceInputTheme,
+		onkeydown,
 		...formAttachments
 	}: AIComposerProps = $props();
 	const valueState = createBindableValue<string | undefined>(
@@ -123,6 +126,7 @@
 		() => defaultValue
 	);
 
+	const NOTICE_DURATION = 6000;
 	const conversation = getAIConversation<AIThreadItem>();
 	const t = $derived(useI18n());
 	let editorHandle = $state<RichTextInputHandle>();
@@ -196,7 +200,10 @@
 		onFileReject,
 		onAttachmentAdd,
 		onAttachmentRetry,
-		onAttachmentRemove
+		onAttachmentRemove,
+		get messages() {
+			return t;
+		}
 	}));
 	const fileDropzoneController = fileController.dropzone;
 	const displayFiles: File[] = $derived(fileController.files);
@@ -238,6 +245,13 @@
 		conversation,
 		buildMeta: buildSubmitMeta,
 		clearDraft,
+		hasFocus: (event) =>
+			Boolean(
+				ref?.contains(document.activeElement) ||
+				(event && 'submitter' in event && ref?.contains(event.submitter))
+			),
+		restoreFocus: focusEditorAfterSend,
+		messages: { submitFailed: t.aiComposerSubmitFailed, stopFailed: t.aiComposerStopFailed },
 		onSubmit,
 		onStop
 	}));
@@ -261,12 +275,44 @@
 		queueController.syncConversation(resolvedQueue);
 	});
 
+	// A rejected-file note is information, not a blocking error: it dismisses itself. Each new
+	// rejection (even one with the same text) bumps `noticeId` and restarts the timer.
+	$effect(() => {
+		void fileController.noticeId;
+		if (!fileController.notice) return;
+		const timeout = setTimeout(() => fileController.dismissNotice(), NOTICE_DURATION);
+		return () => clearTimeout(timeout);
+	});
+
+	/**
+	 * Focuses the editor with the caret at the end. A parent that has just changed the value (a
+	 * suggestion filling the shared input) has not reached the editor yet: Lexical would load that
+	 * text after this call and skip writing the selection, so focus again once it has loaded.
+	 */
 	export function focus(): void {
 		editorHandle?.focus();
+		void tick().then(() => editorHandle?.focus());
 	}
 
 	export function clear(): void {
 		clearEditor();
+	}
+
+	/**
+	 * Sends the current draft, or `text` in place of it, through the same path as Enter or the send
+	 * button (queueing while busy), then returns focus to the editor.
+	 */
+	export async function submit(text?: string): Promise<void> {
+		if (text !== undefined) {
+			tokens = [];
+			submitMetadata.clear();
+			editorValue = text;
+			setValue(text);
+			await tick();
+		}
+		await submitController.submit();
+		await tick();
+		editorHandle?.focus();
 	}
 
 	export function insertText(text: string): void {
@@ -368,6 +414,22 @@
 		void tick().then(() => editorHandle?.focus());
 	}
 
+	function focusEditorAfterSend(): void {
+		void tick().then(() => {
+			const active = document.activeElement;
+			if (active && active !== document.body && !ref?.contains(active)) return;
+			editorHandle?.focus();
+		});
+	}
+
+	function handleKeydown(event: KeyboardEvent & { currentTarget: HTMLFormElement }): void {
+		onkeydown?.(event);
+		// The editor and its suggestion popup handle Escape first and mark it handled.
+		if (event.defaultPrevented || event.key !== 'Escape' || !queueController.isEditing) return;
+		event.preventDefault();
+		queueController.cancelEdit();
+	}
+
 	function clearDraft(): void {
 		clearEditor();
 		fileController.clear();
@@ -389,6 +451,7 @@
 	data-file-drag-state={fileDropzoneController.isActive ? fileDropzoneController.state : undefined}
 	class={classes.root({ className, dragState: fileDropzoneController.state })}
 	onsubmit={submitController.submit}
+	onkeydown={handleKeydown}
 	onpaste={(event) => fileController.handlePaste(event)}
 	{@attach fileDropzoneController.zone}
 	{...formAttachments}
@@ -461,7 +524,7 @@
 		{autoresize}
 		triggers={resolvedSources.triggers}
 		placeholder={resolvedPlaceholder}
-		disabled={disabled || isWorking}
+		disabled={disabled || submitController.isSubmitting}
 		{submitShortcut}
 		{prefix}
 		{suffix}
@@ -478,6 +541,31 @@
 		<Alert color="danger" variant="soft" description={visibleError} class={classes.error()} />
 	{/if}
 
+	<!-- The status region stays mounted (visually hidden while empty) and only its text changes, so
+	     screen readers announce each note; re-keying the text re-announces a repeated rejection. -->
+	<div
+		data-slot="ai-composer-notice"
+		data-empty={fileController.notice ? undefined : 'true'}
+		class={classes.notice({ empty: !fileController.notice })}
+	>
+		<span role="status" class="min-w-0">
+			{#key fileController.noticeId}{fileController.notice ?? ''}{/key}
+		</span>
+		{#if fileController.notice}
+			<Button
+				type="button"
+				squared
+				size="small"
+				variant="ghost"
+				color="neutral"
+				label={t.close}
+				onclick={() => fileController.dismissNotice()}
+			>
+				{@render xIcon({ size: 14 })}
+			</Button>
+		{/if}
+	</div>
+
 	<AIComposerFooter
 		state={submitState}
 		{footer}
@@ -492,6 +580,7 @@
 		voiceInputAriaLabel={voiceInputAriaLabel ?? t.voiceInputStart}
 		voiceInputStopLabel={voiceInputStopLabel ?? t.voiceInputStop}
 		voiceInputProcessingLabel={voiceInputProcessingLabel ?? t.voiceInputProcessing}
+		voiceInputFailedLabel={t.aiComposerVoiceFailed}
 		{onVoiceInput}
 		{fileDropzone}
 		attachDisabled={disabled || isWorking || displayFiles.length >= resolvedMaxFiles}
@@ -503,6 +592,7 @@
 		{queueWhileBusy}
 		submitLabel={resolvedSubmitLabel}
 		stopLabel={resolvedStopLabel}
+		queueLabel={t.aiComposerQueue}
 		attachLabel={resolvedAttachLabel}
 		onAttach={() => fileDropzoneController.open()}
 		onStop={submitController.stop}

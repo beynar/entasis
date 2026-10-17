@@ -65,7 +65,7 @@ type SizeScale = {
 	headingMargin: string;
 	// Vertical margin applied to block-level elements (blockquote, table, code…).
 	blockMargin: string;
-	// List left padding / indentation.
+	// List start padding (the hanging indent the outside markers sit in).
 	listIndent: string;
 	// Vertical padding on each list item.
 	listItemPad: string;
@@ -85,7 +85,7 @@ const SIZES: Record<MarkdownSize, SizeScale> = {
 		h6: 'text-sm',
 		headingMargin: 'mt-xl mb-sm',
 		blockMargin: 'my-md',
-		listIndent: 'ml-lg',
+		listIndent: 'ps-lg',
 		listItemPad: 'py-0',
 		smallText: 'text-xs',
 		ruleMargin: 'my-xl'
@@ -99,7 +99,7 @@ const SIZES: Record<MarkdownSize, SizeScale> = {
 		h6: 'text-sm',
 		headingMargin: 'mt-layout-sm mb-md',
 		blockMargin: 'my-lg',
-		listIndent: 'ml-xl',
+		listIndent: 'ps-xl',
 		listItemPad: 'py-micro',
 		smallText: 'text-sm',
 		ruleMargin: 'my-layout-sm'
@@ -113,7 +113,7 @@ const SIZES: Record<MarkdownSize, SizeScale> = {
 		h6: 'text-base',
 		headingMargin: 'mt-layout-md mb-md',
 		blockMargin: 'my-xl',
-		listIndent: 'ml-layout-sm',
+		listIndent: 'ps-layout-sm',
 		listItemPad: 'py-micro',
 		smallText: 'text-sm',
 		ruleMargin: 'my-layout-md'
@@ -155,11 +155,13 @@ export const buildMarkdownStreamdownTheme = (size: MarkdownSize): StreamdownProp
 		paragraph: {
 			base: `${s.blockMargin} text-neutral`
 		},
+		// Markers sit outside the text box, so a wrapped line hangs under the first word instead of
+		// under the bullet. `ml-0` replaces the base theme's margin; the indent is the padding.
 		ul: {
-			base: `${s.listIndent} list-inside list-disc whitespace-normal text-neutral`
+			base: `ml-0 ${s.listIndent} list-outside list-disc whitespace-normal text-neutral`
 		},
 		ol: {
-			base: `${s.listIndent} list-inside whitespace-normal text-neutral`
+			base: `ml-0 ${s.listIndent} list-outside list-decimal whitespace-normal text-neutral`
 		},
 		li: {
 			base: s.listItemPad,
@@ -174,8 +176,10 @@ export const buildMarkdownStreamdownTheme = (size: MarkdownSize): StreamdownProp
 			pre: 'overflow-x-auto font-mono p-0 bg-surface',
 			line: 'block '
 		},
+		// A readable chip on any surface: the muted neutral fill, at the base theme's 0.9em with its
+		// own padding (no second padding is layered on top).
 		codespan: {
-			base: `bg-surface-raised rounded-sm px-sm py-micro font-mono text-neutral ${s.smallText}`
+			base: 'bg-neutral-muted rounded-sm font-mono text-neutral'
 		},
 		image: {
 			base: `group relative ${s.blockMargin} mx-auto w-fit block`,
@@ -197,8 +201,9 @@ export const buildMarkdownStreamdownTheme = (size: MarkdownSize): StreamdownProp
 			important:
 				'[&>[data-alert-title]]:text-primary-muted-readable border-primary/40 stroke-primary bg-primary-muted'
 		},
+		// A table wider than its column scrolls, and an edge fade shows that it does.
 		table: {
-			base: `overflow-x-auto max-w-full ${s.blockMargin} rounded-lg border border-neutral-muted`,
+			base: `scroll-fade-x overflow-x-auto max-w-full ${s.blockMargin} rounded-lg border border-neutral-muted`,
 			table: 'w-full border-collapse min-w-full'
 		},
 		thead: {
@@ -213,11 +218,15 @@ export const buildMarkdownStreamdownTheme = (size: MarkdownSize): StreamdownProp
 		tr: {
 			base: 'state-layer border-neutral-muted not-last:border-b transition-colors'
 		},
+		// Cells read at body size and size to their content (no forced 200px columns); the base
+		// theme supplies the cell padding. Streamdown writes `align="left"` on every cell without an
+		// explicit column alignment; those cells follow the logical start so RTL tables read from the
+		// right, while centre and right columns keep their `align`.
 		td: {
-			base: `px-xl py-lg ${s.smallText} text-neutral min-w-[200px] max-w-[400px] break-words`
+			base: 'text-[length:inherit] text-neutral min-w-0 max-w-[400px] break-words [&[align=left]]:text-start'
 		},
 		th: {
-			base: `px-xl py-lg ${s.smallText} text-neutral min-w-[200px] max-w-[400px] break-words`
+			base: 'text-[length:inherit] text-neutral font-semibold min-w-0 max-w-[400px] break-words [&[align=left]]:text-start'
 		},
 		sup: {
 			base: s.smallText

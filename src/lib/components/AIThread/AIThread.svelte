@@ -1,11 +1,15 @@
 <script lang="ts" generics="TMessage extends AIThreadItem = AIThreadItem">
-	import { createVirtualizer } from '@tanstack/svelte-virtual';
+	import {
+		createVirtualizer,
+		measureElement as measureVirtualElement
+	} from '@tanstack/svelte-virtual';
 	import { onDestroy, tick, untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import { get } from 'svelte/store';
 	import Alert from '../Alert/Alert.svelte';
 	import Button from '../Button/Button.svelte';
 	import type { AIMessageSize } from '../AIMessage/aiMessage.props.js';
+	import AISuggestion from '../AISuggestion/AISuggestion.svelte';
 	import { arrowDownIcon } from '../Icons/arrowDown.js';
 	import type {
 		AIAskAnswers,
@@ -42,21 +46,11 @@
 		normal: 96,
 		comfortable: 120
 	};
-	const MESSAGE_ACTION_HEIGHT: Record<AIMessageSize, number> = {
-		small: 24,
-		normal: 28,
-		large: 32
-	};
-	const MESSAGE_BOTTOM_PADDING: Record<AIMessageSize, number> = {
-		small: 6,
-		normal: 8,
-		large: 10
-	};
-	const ITEM_BOTTOM_PADDING: Record<AIThreadDensity, number> = {
-		compact: 2,
-		normal: 8,
-		comfortable: 14
-	};
+	// The scroll-to-latest button shows as soon as the view is this far from the end.
+	const SCROLL_BUTTON_THRESHOLD = 8;
+	// Below this viewport width the table of contents and its gutter step aside (AIThreadToc's own
+	// narrow-container width), so a phone-width thread keeps its full width for messages.
+	const TOC_MIN_VIEWPORT_WIDTH = 480;
 	function normalizeThreadScale(value: unknown): 'small' | 'normal' | 'large' {
 		return value === 'small' || value === 'large' ? value : 'normal';
 	}
@@ -72,7 +66,9 @@
 		streaming,
 		density = 'normal',
 		messageSize = 'normal',
-		messageVariant = 'bubble',
+		messageVariant = 'minimal',
+		messageColor,
+		contentWidth,
 		followOutput = true,
 		bottomThreshold = 80,
 		estimateSize,
@@ -82,7 +78,7 @@
 		paddingEnd,
 		scrollBehavior = 'smooth',
 		showScrollButton = true,
-		scrollButtonPosition = 'right',
+		scrollButtonPosition = 'center',
 		showToc = false,
 		tocSide = 'left',
 		tocMaxPins,
@@ -91,11 +87,15 @@
 		renderAskUserQuestion = true,
 		askUserQuestionDisabled = false,
 		suggestions,
+		showFollowUps = true,
 		onSelect,
+		error: errorProp,
+		showError = true,
+		onErrorRetry,
 		empty,
 		message: messageSlot,
 		messageActions,
-		messageActionsVisibility,
+		messageActionsVisibility = 'latest',
 		messageCopyable,
 		messageEditable,
 		messageRetryable,
@@ -134,6 +134,7 @@
 	let generatedKeyId = 0;
 	let viewport = $state<HTMLDivElement>();
 	let viewportHeight = $state(0);
+	let viewportWidth = $state(0);
 	let viewportScrollTop = $state(0);
 	let isPinned = $state(true);
 	let hasInitializedEnd = $state(false);
@@ -143,6 +144,8 @@
 	// scrolling back to the end resumes it. Nothing else moves the user's scroll position.
 	let lastScrollTop = 0;
 	let stickFrame: number | undefined;
+	// Set while the virtualizer handles its ResizeObserver delivery (see `measureItem`).
+	let isInResizeDelivery = false;
 	let errorMessage = $state<string>();
 	let questionStates = $state<Record<string, AIThreadAskUserQuestionState | undefined>>({});
 	let questionValuesByKey = $state<Record<string, AIAskAnswers | undefined>>({});
@@ -159,24 +162,20 @@
 	);
 	const resolvedPadding = $derived(Math.max(0, padding ?? DENSITY_PADDING[resolvedDensity]));
 	const resolvedPaddingStart = $derived(Math.max(0, paddingStart ?? resolvedPadding));
-	const messageActionOverflow = $derived(
-		messageActions === false || messageActionsVisibility === 'none'
-			? 0
-			: Math.max(
-					0,
-					MESSAGE_ACTION_HEIGHT[resolvedMessageSize] -
-						MESSAGE_BOTTOM_PADDING[resolvedMessageSize] -
-						ITEM_BOTTOM_PADDING[resolvedDensity]
-				)
-	);
-	const resolvedPaddingEnd = $derived(
-		Math.max(0, paddingEnd ?? Math.max(resolvedPadding, messageActionOverflow))
-	);
+	// Message actions take layout space inside their row, so the end padding no longer reserves
+	// room for an action bar hanging below the last message.
+	const resolvedPaddingEnd = $derived(Math.max(0, paddingEnd ?? resolvedPadding));
 
 	const resolvedMessages = $derived<readonly TMessage[]>(messages ?? conversation?.messages ?? []);
 	const resolvedLiveText = $derived(liveText ?? conversation?.liveText);
 	const resolvedStreaming = $derived(streaming ?? conversation?.streaming ?? false);
 	const resolvedSuggestions = $derived(suggestions ?? conversation?.suggestions ?? []);
+	const resolvedError = $derived(errorProp !== undefined ? errorProp : conversation?.error);
+	const hasErrorRow = $derived(showError && resolvedError !== undefined);
+	const errorRetry = $derived(resolveErrorRetry());
+	const resolvedContentWidth = $derived(
+		typeof contentWidth === 'number' ? `${contentWidth}px` : contentWidth
+	);
 	const messageKeys = $derived.by(() => createMessageKeys(resolvedMessages));
 	const detectedQuestion = $derived<AIThreadAskUserQuestion<TMessage> | null>(
 		findActiveAskUserQuestion(
@@ -199,22 +198,17 @@
 		return deriveAIThreadRenderItems(resolvedMessages, {
 			getMessageKey: (_message, index) => messageKeys[index] ?? `missing:${index}`,
 			activeQuestion: resolvedQuestion,
-			splitMessageParts: !messageSlot
+			splitMessageParts: !messageSlot,
+			questionStates,
+			questionValues: questionValuesByKey,
+			streaming: resolvedStreaming,
+			error: hasErrorRow
 		});
 	});
 	const classes = $derived(useAIThreadTheme(theme));
 	const isSettlingInitialEnd = $derived(
 		renderItems.length > 0 && (!hasInitializedEnd || isInitializingEnd)
 	);
-	const shouldShowScrollButton = $derived(
-		showScrollButton &&
-			!isPinned &&
-			!isFollowingAppendedItem &&
-			!isSettlingInitialEnd &&
-			!isViewportAtEnd() &&
-			renderItems.length > 0
-	);
-
 	const virtualizerStore = createVirtualizer<HTMLDivElement, HTMLElement>(
 		untrack(() => ({
 			count: initialThreadCount(),
@@ -230,12 +224,48 @@
 			followOnAppend: followOnAppendBehavior(),
 			scrollEndThreshold: endThreshold(),
 			initialOffset: initialThreadOffset,
+			measureElement: measureThreadItem,
 			onChange: handleVirtualizerChange
 		}))
 	);
 
 	const virtualItems = $derived($virtualizerStore.getVirtualItems());
 	const totalSize = $derived($virtualizerStore.getTotalSize());
+	// Read from reactive scroll state, not the DOM: a wheel, trackpad, key or scrollbar scroll
+	// updates `viewportScrollTop`, so the button appears as soon as the view leaves the end.
+	const distanceToEnd = $derived(Math.max(0, totalSize - viewportHeight - viewportScrollTop));
+	const shouldShowScrollButton = $derived(
+		showScrollButton &&
+			renderItems.length > 0 &&
+			!isFollowingAppendedItem &&
+			!isSettlingInitialEnd &&
+			distanceToEnd > SCROLL_BUTTON_THRESHOLD &&
+			(!isPinned || !followOutput)
+	);
+	const isPending = $derived(renderItems.at(-1)?.kind === 'pending');
+	const liveRegionText = $derived(
+		resolvedLiveText || (isPending ? t.aiReasoningThinking : undefined)
+	);
+	// The last turn, ignoring markers and system notices that may follow it (a context marker, a
+	// "model switched" notice): they do not end the turn.
+	const lastTurnMessage = $derived(
+		resolvedMessages.findLast(
+			(message) =>
+				message.type !== 'marker' && message.type !== 'context' && message.role !== 'system'
+		)
+	);
+	const shouldShowFollowUps = $derived(
+		showFollowUps &&
+			resolvedSuggestions.length > 0 &&
+			renderItems.length > 0 &&
+			!resolvedStreaming &&
+			!hasErrorRow &&
+			!resolvedQuestion &&
+			lastTurnMessage !== undefined &&
+			// After an assistant turn: its reply, or the tool calls that ended it.
+			lastTurnMessage.role !== 'user'
+	);
+
 	const tocState = $derived.by(() => {
 		const virtualizer = $virtualizerStore;
 		const effectiveScrollOffset = isPinned
@@ -258,7 +288,11 @@
 		});
 	});
 	const shouldRenderToc = $derived(
-		showToc && tocState.entries.length > 1 && viewportHeight > 0 && totalSize > viewportHeight + 1
+		showToc &&
+			tocState.entries.length > 1 &&
+			viewportHeight > 0 &&
+			viewportWidth >= TOC_MIN_VIEWPORT_WIDTH &&
+			totalSize > viewportHeight + 1
 	);
 
 	$effect(() => {
@@ -366,8 +400,51 @@
 		scrollController.destroy();
 	});
 
+	// The virtualizer re-measures rows from its ResizeObserver and re-renders the range in the same
+	// pass (a streamed row grows, the pinned view moves to the new end, rows enter and leave the
+	// overscan). A row that starts or stops being laid out while the browser is still delivering
+	// resize notifications cannot be delivered in that pass, and the browser reports a
+	// "ResizeObserver loop" error. Rows that mount during a delivery are measured and observed on the
+	// next frame, before the next delivery (their cached or estimated size holds until then), and a
+	// removed row stops being observed before the browser looks for further changes.
+	function measureThreadItem(
+		element: HTMLElement,
+		entry: ResizeObserverEntry | undefined,
+		instance: Parameters<typeof measureVirtualElement<HTMLElement>>[2]
+	): number {
+		if (entry && !isInResizeDelivery) {
+			isInResizeDelivery = true;
+			setTimeout(() => (isInResizeDelivery = false));
+		}
+		return measureVirtualElement(element, entry, instance);
+	}
+
+	let isReleasingItems = false;
+
+	function releaseRemovedItems(): void {
+		if (isReleasingItems) return;
+		isReleasingItems = true;
+		queueMicrotask(() => {
+			isReleasingItems = false;
+			// With no node, the virtualizer unobserves and forgets every disconnected row.
+			get(virtualizerStore).measureElement(null);
+		});
+	}
+
 	const measureItem: Attachment<HTMLElement> = (element) => {
-		get(virtualizerStore).measureElement(element);
+		let frame: number | undefined;
+		if (isInResizeDelivery) {
+			frame = requestAnimationFrame(() => {
+				frame = undefined;
+				if (element.isConnected) get(virtualizerStore).measureElement(element);
+			});
+		} else {
+			get(virtualizerStore).measureElement(element);
+		}
+		return () => {
+			if (frame !== undefined) cancelAnimationFrame(frame);
+			releaseRemovedItems();
+		};
 	};
 
 	function createMessageKeys(currentMessages: readonly TMessage[]): string[] {
@@ -428,6 +505,7 @@
 	function syncThreadPosition(): void {
 		if (!viewport) return;
 		viewportHeight = viewport.clientHeight;
+		viewportWidth = viewport.clientWidth;
 		viewportScrollTop = viewport.scrollTop;
 		if (isInitializingEnd) {
 			isPinned = true;
@@ -536,6 +614,16 @@
 		initialEndFrame = undefined;
 	}
 
+	function resolveErrorRetry(): (() => void | Promise<void>) | undefined {
+		if (onErrorRetry) return onErrorRetry;
+		const current = conversation;
+		if (!current) return undefined;
+		return () => {
+			const index = current.messages.length - 1;
+			current.retry(index >= 0 ? { index } : undefined);
+		};
+	}
+
 	function handleSuggestionSelect(suggestion: string): void {
 		if (onSelect) {
 			onSelect(suggestion);
@@ -565,6 +653,7 @@
 	}): Promise<void> {
 		errorMessage = undefined;
 		questionStates = { ...questionStates, [request.key]: state };
+		if (detail) questionValuesByKey = { ...questionValuesByKey, [request.key]: detail.values };
 		const change = {
 			request,
 			state,
@@ -583,7 +672,7 @@
 			await conversation.resolveAskUserQuestion(state, change.detail, request);
 		} catch (error) {
 			questionStates = { ...questionStates, [request.key]: 'pending' };
-			errorMessage = getErrorMessage(error, 'Unable to resolve the question request.');
+			errorMessage = getErrorMessage(error, t.aiThreadQuestionFailed);
 		}
 	}
 
@@ -600,11 +689,12 @@
 	aria-busy={resolvedStreaming}
 	class={classes.root({ className })}
 	{...rootAttributes}
+	style:--ai-thread-content-width={resolvedContentWidth}
 	onwheel={handleRootWheel}
 >
-	{#if resolvedLiveText}
+	{#if liveRegionText}
 		<div data-slot="ai-thread-live-region" class="sr-only" aria-live="polite" aria-atomic="true">
-			{resolvedLiveText}
+			{liveRegionText}
 		</div>
 	{/if}
 	{#if header}<Slot render={header} class={classes.header()} />{/if}
@@ -629,8 +719,12 @@
 				density={resolvedDensity}
 				messageSize={resolvedMessageSize}
 				{messageVariant}
+				{messageColor}
 				suggestions={resolvedSuggestions}
 				onSelect={handleSuggestionSelect}
+				error={resolvedError}
+				{errorRetry}
+				liveText={resolvedLiveText}
 				{empty}
 				message={messageSlot}
 				{messageActions}
@@ -669,9 +763,10 @@
 		{#if shouldShowScrollButton}
 			<Button
 				squared
-				size="small"
-				variant="soft"
+				size="normal"
+				variant="outline"
 				label={t.aiThreadScrollToLatest}
+				data-slot="ai-thread-scroll-button"
 				class={classes.scrollButton({ position: scrollButtonPosition })}
 				onclick={() => scrollToBottom()}
 			>
@@ -679,6 +774,20 @@
 			</Button>
 		{/if}
 	</div>
+	{#if shouldShowFollowUps}
+		<div
+			data-slot="ai-thread-follow-ups"
+			role="group"
+			aria-label={t.aiThreadFollowUps}
+			class={classes.followUps({ density: resolvedDensity })}
+		>
+			<div class={classes.followUpList()}>
+				{#each resolvedSuggestions as suggestion, index (`${suggestion}:${index}`)}
+					<AISuggestion {suggestion} size="small" onSelect={handleSuggestionSelect} />
+				{/each}
+			</div>
+		</div>
+	{/if}
 	{#if renderAskUserQuestion && resolvedQuestion}
 		{@const question = resolvedQuestion}
 		{#key question.key}

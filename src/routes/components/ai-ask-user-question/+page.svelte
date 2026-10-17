@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AIAskUserQuestion from '$lib/components/AIAskUserQuestion/AIAskUserQuestion.svelte';
+	import AIAskUserQuestionSummary from '$lib/components/AIAskUserQuestion/AIAskUserQuestionSummary.svelte';
 	import type {
 		AIAskAnswers,
 		AIAskQuestion,
@@ -25,6 +26,7 @@
 			id: 'checks',
 			type: 'multiple',
 			title: 'Which checks are required?',
+			allowOther: true,
 			options: [
 				{ id: 'a11y', label: 'Accessibility' },
 				{ id: 'security', label: 'Security' },
@@ -47,6 +49,20 @@
 		}
 	];
 	let answers = $state<AIAskAnswers>({});
+	const summaryQuestions: AIAskQuestion[] = [questions[0], questions[1], questions[2]].filter(
+		(question): question is AIAskQuestion => question !== undefined
+	);
+	const summaryValue: AIAskAnswers = { release: 'ga', checks: ['a11y', 'Load test on staging'] };
+	const otherQuestion: AIAskQuestion = {
+		id: 'format',
+		type: 'single',
+		title: 'How should the summary be formatted?',
+		allowOther: true,
+		options: [
+			{ id: 'bullets', label: 'Bullet points' },
+			{ id: 'prose', label: 'Short paragraph' }
+		]
+	};
 	let submitted = $state<AIAskUserQuestionSubmitPayload>();
 	const controls = createComponentControls([
 		{
@@ -75,16 +91,21 @@
 	component="AIAskUserQuestion"
 	features={[
 		'Text, single, multiple, and file questions',
+		'Optional by default, with a marker on required questions and Skip on optional steps',
+		{
+			label: 'Keyboard: number keys pick options; Enter continues or submits',
+			test: 'a11y:ai-ask-user-question.number-keys'
+		},
+		'Free-text “Other…” choice',
+		'Compact answered summary for the transcript',
 		'Valibot schemas and exported value types',
-		'Required-answer validation',
-		'Optional automatic advance',
 		'Bindable answers and active step',
 		'Explicit async submission errors'
 	]}
 >
 	<ComponentCard
 		{controls}
-		description="The flow composes existing form primitives and returns answers keyed by question id."
+		description="The flow composes existing form primitives and returns answers keyed by question id. Only the release question is required; the others can be skipped. Press 1–9 to pick an option and Enter to continue."
 		class="!min-h-0 p-4"
 		code={`<script lang="ts">
   import { AIAskUserQuestion } from 'entasis/ai-ask-user-question';
@@ -100,6 +121,7 @@ ${'</' + 'script>'}
 			<AIAskUserQuestion
 				{questions}
 				{activeIndex}
+				requester="Release assistant"
 				autoAdvance={false}
 				submitting={controls.value.flowState === 'submitting'}
 				disabled={controls.value.flowState === 'disabled'}
@@ -120,6 +142,46 @@ ${'</' + 'script>'}
 	</ComponentCard>
 
 	{#snippet examples()}
+		<ComponentCard
+			title="Other… answer"
+			description="allowOther adds a free-text choice after the options. The typed text is the answer; it never auto-advances."
+			class="!min-h-[280px] p-4"
+			code={`<AIAskUserQuestion
+  questions={[{
+    id: 'format',
+    type: 'single',
+    title: 'How should the summary be formatted?',
+    allowOther: true,
+    options: [
+      { id: 'bullets', label: 'Bullet points' },
+      { id: 'prose', label: 'Short paragraph' }
+    ]
+  }]}
+/>`}
+		>
+			<AIAskUserQuestion questions={[otherQuestion]} class="w-full max-w-2xl" />
+		</ComponentCard>
+
+		<ComponentCard
+			title="Answered summary"
+			description="Once a request is complete, AIAskUserQuestionSummary keeps a compact question → answer record in the transcript. summarizeAIAskAnswers returns the same pairs as data."
+			class="!min-h-[200px] p-4"
+			code={`<script lang="ts">
+  import { AIAskUserQuestionSummary } from 'entasis/ai-ask-user-question';
+${'</' + 'script>'}
+
+<AIAskUserQuestionSummary
+  {questions}
+  value={{ release: 'ga', checks: ['a11y', 'Load test on staging'] }}
+/>`}
+		>
+			<AIAskUserQuestionSummary
+				questions={summaryQuestions}
+				value={summaryValue}
+				class="w-full max-w-2xl"
+			/>
+		</ComponentCard>
+
 		<ComponentCard
 			title="Empty"
 			description="An empty question set renders the existing Empty primitive with an overridable label."

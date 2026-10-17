@@ -53,7 +53,7 @@ default, or inside a modal Dialog (⌘K style) with \`dialog\`.
 ### Core Props
 - **items**: CommandGroup[] (required)
   - \`CommandGroup\`: \`{ heading?: string; items: CommandItem[]; class?: string }\`
-  - \`CommandItem\`: \`{ value: string; label: string; icon?: Slot; shortcut?: string; keywords?: string[]; disabled?: boolean; href?: string; onSelect?: (value) => void; class?: string }\`
+  - \`CommandItem\`: \`{ value: string; label: string; description?: string; icon?: Slot; shortcut?: string; keywords?: string[]; disabled?: boolean; href?: string; onSelect?: (value) => void; class?: string }\`. \`description\` renders as a second line under the label and is not searched.
   - Items with \`href\` render as \`<a>\` and navigate on click/Enter.
 - **size**: 'small' | 'normal' | 'large' (default: 'normal') - Typography and spacing scale.
 - **density**: 'compact' | 'normal' | 'comfortable' (default: 'normal') - Spacing density forwarded to the option rows (paddings, gaps, min-height).

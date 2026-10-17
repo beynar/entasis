@@ -24,6 +24,8 @@
 		| 'density'
 		| 'messageSize'
 		| 'messageVariant'
+		| 'messageColor'
+		| 'showFollowUps'
 		| 'messageActions'
 		| 'messageActionsVisibility'
 		| 'messageCopyable'
@@ -37,6 +39,8 @@
 	> & {
 		conversation: AIConversationState<TMessage>;
 		onComposerFocus?: () => void;
+		/** Shows the conversation error as a transcript row. */
+		showError?: boolean;
 	};
 
 	let {
@@ -52,7 +56,10 @@
 		tocSide = 'right',
 		density = 'normal',
 		messageSize = 'normal',
-		messageVariant = 'bubble',
+		messageVariant = 'minimal',
+		messageColor,
+		showFollowUps = true,
+		showError = true,
 		messageActions,
 		messageActionsVisibility,
 		messageCopyable = true,
@@ -114,6 +121,9 @@
 		{density}
 		{messageSize}
 		{messageVariant}
+		{messageColor}
+		{showFollowUps}
+		{showError}
 		{messageActions}
 		{messageActionsVisibility}
 		{messageCopyable}

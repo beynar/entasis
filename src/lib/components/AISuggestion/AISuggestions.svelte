@@ -19,6 +19,7 @@
 		onValueChange,
 		disabled = false,
 		variant = 'soft',
+		persistSelection = false,
 		scrollFade = true,
 		suggestion,
 		onSelect,
@@ -76,7 +77,7 @@
 			{:else}
 				<AISuggestion
 					suggestion={item}
-					selected={valueState.value === item}
+					selected={persistSelection ? valueState.value === item : undefined}
 					{disabled}
 					{variant}
 					onSelect={select}

@@ -39,13 +39,19 @@ export const aiTextQuestionSchema = v.looseObject({
 export const aiSingleQuestionSchema = v.looseObject({
 	...aiQuestionBaseEntries,
 	type: v.literal('single'),
-	options: v.array(aiQuestionOptionSchema)
+	options: v.array(aiQuestionOptionSchema),
+	allowOther: v.optional(v.boolean()),
+	otherLabel: v.optional(v.string()),
+	otherPlaceholder: v.optional(v.string())
 });
 
 export const aiMultipleQuestionSchema = v.looseObject({
 	...aiQuestionBaseEntries,
 	type: v.literal('multiple'),
-	options: v.array(aiQuestionOptionSchema)
+	options: v.array(aiQuestionOptionSchema),
+	allowOther: v.optional(v.boolean()),
+	otherLabel: v.optional(v.string()),
+	otherPlaceholder: v.optional(v.string())
 });
 
 export const aiFileQuestionSchema = v.looseObject({

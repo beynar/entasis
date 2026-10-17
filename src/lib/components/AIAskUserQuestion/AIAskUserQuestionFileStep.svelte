@@ -1,5 +1,6 @@
 <script lang="ts">
 	import FileInput from '../Form/File/FileInput.svelte';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import type { FileRejection } from '../Form/File/fileAcceptance.js';
 	import type { AIFileQuestion } from './aiAskUserQuestion.props.js';
 	import {
@@ -10,6 +11,9 @@
 	let {
 		question,
 		files,
+		labelledby,
+		invalid = false,
+		describedby,
 		disabled = false,
 		required = false,
 		onValueChange,
@@ -18,6 +22,12 @@
 	}: {
 		question: AIFileQuestion;
 		files: File[];
+		/** Id of the question title that names the file group. */
+		labelledby?: string;
+		/** Marks the group `data-invalid` while the question shows an error. */
+		invalid?: boolean;
+		/** Id of the question's error message. */
+		describedby?: string;
 		disabled?: boolean;
 		required?: boolean;
 		onValueChange: (files: File[]) => void;
@@ -27,6 +37,7 @@
 
 	const types = $derived(normalizeAccept(question.accept));
 	const classes = $derived(useAIAskUserQuestionTheme(theme));
+	const t = $derived(useI18n());
 
 	function normalizeAccept(accept: string | readonly string[] | undefined): string[] {
 		if (!accept) return [];
@@ -39,15 +50,24 @@
 
 	function formatRejections(rejections: FileRejection[]): string {
 		const reasons = new Set(rejections.map((rejection) => rejection.reason));
-		if (reasons.has('type')) return 'Some files do not match the accepted type.';
-		if (reasons.has('size')) return 'Some files are larger than the allowed size.';
-		if (reasons.has('limit')) return 'Too many files selected for this question.';
-		if (reasons.has('duplicate')) return 'Some files were already selected.';
-		return 'Some files could not be added.';
+		if (reasons.has('type')) return t.aiAskFileType;
+		if (reasons.has('size')) return t.aiAskFileSize;
+		if (reasons.has('limit')) return t.aiAskFileLimit;
+		if (reasons.has('duplicate')) return t.aiAskFileDuplicate;
+		return t.aiAskFileRejected;
 	}
 </script>
 
-<div data-slot="ai-ask-user-question-file" class={classes.file()}>
+<!-- The group carries the question's name and error message, as the choice and text controls do
+     (a group has no aria-invalid, so the invalid state is a data attribute). -->
+<div
+	data-slot="ai-ask-user-question-file"
+	data-invalid={invalid || undefined}
+	role="group"
+	aria-labelledby={labelledby}
+	aria-describedby={describedby}
+	class={classes.file()}
+>
 	{#if question.multiple ?? true}
 		<FileInput
 			mode="multiple"

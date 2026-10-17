@@ -34,7 +34,8 @@ Card, Stat, Stack, Grid, and GridSpan are also available as built-in MDX compone
 
 - **Block elements**: headings (h1–h6), paragraphs, lists (ordered, unordered, task lists), blockquotes, horizontal rules, tables, images and links are all styled from entasis tokens.
 - **GitHub alerts**: \\\`> [!NOTE]\\\`, \\\`> [!TIP]\\\`, \\\`> [!IMPORTANT]\\\`, \\\`> [!WARNING]\\\` and \\\`> [!CAUTION]\\\` render as colored callouts mapped to entasis info/success/primary/warning/danger muted pairings.
-- **Inline code** (\\\`codespan\\\`): styled as a subtle chip; its text size scales with \\\`size\\\`.
+- **Inline code** (\\\`codespan\\\`): a muted neutral chip at 0.9em of the surrounding text, readable on any surface.
+- **Lists** hang-indent: markers sit outside the text, so a wrapped line starts under the first word. **Tables** read at the surrounding text size, size their columns to content, and scroll with an edge fade when wider than their container.
 - **Code fences**: rendered by entasis's Code component — syntax highlighting and a copy button. The code block sizing follows \\\`size\\\`.
 - **Mermaid fences**: a fence tagged \\\`mermaid\\\` renders through entasis's Mermaid component with \\\`errorForgiving\\\` enabled, so a diagram that is still streaming in holds its last valid frame instead of flashing parse errors. Diagram size maps from the Markdown \\\`size\\\`.
 

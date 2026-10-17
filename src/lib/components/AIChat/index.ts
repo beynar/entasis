@@ -2,7 +2,10 @@ export { default as AIChat } from './AIChat.svelte';
 export { default as AIChatSkeleton } from './AIChatSkeleton.svelte';
 export type { AIChatProps, AIChatState, AIChatToolPayload } from './aiChat.props.js';
 export type { AIMessageSize, AIMessageVariant } from '../AIMessage/aiMessage.props.js';
-export type { AIThreadDensity } from '../AIThread/aiThread.props.js';
+export type {
+	AIThreadDensity,
+	AIThreadMessageActionsVisibility
+} from '../AIThread/aiThread.props.js';
 export type { AIChatSkeletonProps } from './aiChatSkeleton.props.js';
 export {
 	aiChatTheme,

@@ -18,6 +18,6 @@ export type AISuggestionTheme = typeof aiSuggestionTheme;
 export type AISuggestionThemeProps = InferComponentTheme<AISuggestionTheme>;
 export const setAISuggestionTheme = setComponentTheme<AISuggestionTheme>('ai-suggestion');
 export const useAISuggestionTheme = useComponentTheme<AISuggestionTheme>(
-	'aiSuggestion',
+	'ai-suggestion',
 	aiSuggestionTheme
 );

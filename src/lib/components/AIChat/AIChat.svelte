@@ -40,6 +40,9 @@
 		density,
 		messageSize,
 		messageVariant,
+		messageColor,
+		contentWidth,
+		showFollowUps,
 		messageActions,
 		messageActionsVisibility,
 		messageCopyable,
@@ -73,6 +76,8 @@
 		onQueuedMessageEditCancel,
 		onQueuedMessageReorder,
 		onSteer,
+		submitShortcut,
+		toolbar,
 		onStatusChange,
 		onSubmit,
 		onStop,
@@ -174,6 +179,9 @@
 			{density}
 			{messageSize}
 			{messageVariant}
+			{messageColor}
+			{contentWidth}
+			{showFollowUps}
 			{messageActions}
 			{messageActionsVisibility}
 			{messageCopyable}
@@ -207,6 +215,8 @@
 			{onQueuedMessageEditCancel}
 			{onQueuedMessageReorder}
 			{onSteer}
+			{submitShortcut}
+			{toolbar}
 			{header}
 			{beforeThread}
 			{controls}

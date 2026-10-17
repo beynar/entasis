@@ -13,6 +13,8 @@ export type CommandItem<Value extends string = string> = {
 	value: Value;
 	/** Visible label. Also matched against the search query (alongside `value`/`keywords`). */
 	label: string;
+	/** Secondary line under the label (a command's summary, a file's path). Not searched. */
+	description?: string;
 	/** Leading icon — a string or a snippet (typically an icon snippet from `$lib/components/Icons`). */
 	icon?: Slot;
 	/** Trailing keybind hint, e.g. `⌘K`. */

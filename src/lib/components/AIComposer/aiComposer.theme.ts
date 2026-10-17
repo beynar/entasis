@@ -4,8 +4,13 @@ import {
 	useComponentTheme,
 	type InferComponentTheme
 } from '$lib/utils/cva/index.js';
+// The composer is a raised card so it separates from whatever chat surface hosts it: its own
+// raised fill, a hairline and a soft lift. It caps itself at `--ai-chat-content-width` when a host
+// (AIChat) publishes one and centres in the remaining room; without the variable it spans its
+// host. `@container` lets the editor and footer switch to touch ergonomics on a narrow composer.
+// The focus ring follows the editor only, so focusing a footer control does not ring the card.
 const defaultRoot = cva({
-	base: 'relative grid min-w-0 grid-cols-[minmax(0,1fr)] gap-xs rounded-md border border-neutral-muted bg-surface p-sm transition-colors focus-within:ring-2 focus-within:ring-focus/50',
+	base: '@container relative mx-auto grid w-full max-w-[var(--ai-chat-content-width,none)] min-w-0 grid-cols-[minmax(0,1fr)] gap-xs rounded-lg border border-neutral-muted bg-surface-raised p-sm lift-2 transition-colors has-[[data-slot=ai-composer-editor]:focus-within]:ring-2 has-[[data-slot=ai-composer-editor]:focus-within]:ring-focus/50',
 	variants: {
 		dragState: {
 			idle: '',
@@ -42,12 +47,26 @@ const defaultEditor = cva({
 const defaultToolbar = cva({ base: 'min-w-0' });
 const defaultFile = cva({ base: 'shrink-0' });
 const defaultError = cva({ base: 'min-w-0' });
-const defaultFooter = cva({ base: 'flex min-w-0 items-center gap-md' });
+// Rejected files are reported as a quiet inline note that dismisses itself, not as an alert. The
+// note's live region stays mounted; while empty it is visually hidden and takes no grid row.
+const defaultNotice = cva({
+	base: 'flex min-w-0 items-center justify-between gap-md px-sm text-xs text-danger-readable',
+	variants: { empty: { true: 'sr-only', false: '' } },
+	defaultVariants: { empty: false }
+});
+// On a narrow composer or a touch screen the footer controls grow to the 36px control height, so
+// the targets are reachable with a thumb. VoiceInput's buttons are excluded here: the footer gives
+// the VoiceInput its 36px `normal` size under the same conditions instead.
+const defaultFooter = cva({
+	base: 'flex min-w-0 items-center gap-md @max-md:[&_button:not([data-slot=ai-composer-voice-input]_button)]:h-control-lg pointer-coarse:[&_button:not([data-slot=ai-composer-voice-input]_button)]:h-control-lg'
+});
+// The start group (attach, footerStart) may shrink; the end group (model, voice, queue,
+// stop/send) keeps priority so the send position never leaves the composer.
 const defaultActions = cva({
 	base: 'flex items-center gap-xs',
 	variants: {
 		side: {
-			start: 'shrink-0',
+			start: 'min-w-0 shrink',
 			end: 'ml-auto min-w-0 flex-1 justify-end'
 		}
 	},
@@ -67,8 +86,18 @@ const defaultQueue = cva({ base: 'grid gap-xs border-b border-neutral-muted pb-m
 const defaultQueueEditing = cva({
 	base: 'flex min-w-0 items-center justify-between gap-md rounded-sm bg-neutral-muted/50 px-md py-xs text-sm text-neutral/70'
 });
-const defaultQueueList = cva({ base: 'grid gap-xs' });
-const defaultQueueItem = cva({ base: 'flex min-w-0 flex-1 items-center gap-md' });
+// One `minmax(0, 1fr)` track: an `auto` track grows to a long message's width and pushes the row
+// actions past the composer edge instead of truncating the preview.
+const defaultQueueList = cva({ base: 'grid grid-cols-[minmax(0,1fr)] gap-xs [&>*]:min-w-0' });
+const defaultQueueItem = cva({
+	base: 'flex min-w-0 flex-1 items-center gap-md',
+	variants: { steered: { true: '', false: '' } },
+	defaultVariants: { steered: false }
+});
+const defaultQueueBadge = cva({
+	base: 'shrink-0 rounded-sm bg-primary-muted px-sm text-xs font-medium text-primary-muted-readable'
+});
+const defaultQueueFiles = cva({ base: 'shrink-0 text-xs text-neutral/70' });
 const defaultQueueText = cva({ base: 'min-w-0 flex-1 truncate text-sm text-neutral/70' });
 export const aiComposerTheme = {
 	root: defaultRoot,
@@ -81,6 +110,7 @@ export const aiComposerTheme = {
 	toolbar: defaultToolbar,
 	file: defaultFile,
 	error: defaultError,
+	notice: defaultNotice,
 	footer: defaultFooter,
 	actions: defaultActions,
 	voiceInput: defaultVoiceInput,
@@ -88,9 +118,14 @@ export const aiComposerTheme = {
 	queueEditing: defaultQueueEditing,
 	queueList: defaultQueueList,
 	queueItem: defaultQueueItem,
+	queueBadge: defaultQueueBadge,
+	queueFiles: defaultQueueFiles,
 	queueText: defaultQueueText
 };
 export type AIComposerTheme = typeof aiComposerTheme;
 export type AIComposerThemeProps = InferComponentTheme<AIComposerTheme>;
 export const setAIComposerTheme = setComponentTheme<AIComposerTheme>('ai-composer');
-export const useAIComposerTheme = useComponentTheme<AIComposerTheme>('ai-composer', aiComposerTheme);
+export const useAIComposerTheme = useComponentTheme<AIComposerTheme>(
+	'ai-composer',
+	aiComposerTheme
+);

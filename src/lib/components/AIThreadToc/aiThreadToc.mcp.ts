@@ -30,6 +30,7 @@ The component is controlled: **state.entries** supplies measured user turns, **a
 - **side**: 'left' | 'right' - Rail alignment and pin transform origin. Default 'left'.
 - **previewSide**: 'left' | 'right' - Preview side; defaults away from the rail.
 - **previewAlign**: 'start' | 'center' | 'end' - Preview alignment. Default 'center'.
+- **minContainerWidth**: number - Container width in pixels below which the rail removes itself (hidden, no pins). The container is the nearest ancestor wider than the rail, usually the thread. Default 480; 0 keeps it at every width.
 - **pin**: Slot<{ entry, active }> - Replaces each pin indicator.
 - **preview**: Slot<AIThreadTocEntry> - Replaces the complete shared HoverCard preview.
 - **title**, **excerpt**, **metadata**, **icon**: Slot<AIThreadTocEntry> - Compose the default preview.
@@ -41,9 +42,17 @@ The root is bounded to 80% of its containing height. Pins live in the shared Scr
 
 AIThreadTocEntry includes the source user message, prompt title, latest assistant excerpt, measured offset and size, files, attachments, and file count. AIThreadTocState includes entries, total range, active entry, visible offsets, **scrollToIndex**, and **scrollToOffset**.
 
-The default preview clamps the prompt to one line, clamps the assistant response to four lines, and renders attachments as quiet inline labels. Pin focus and activation are keyboard accessible.
+The default preview clamps the prompt to one line, shows "Turn N of M", clamps the assistant response to four lines, and renders attachments as quiet inline labels.
+
+## Interaction
+
+- The rail and the visible-range bar are painted; the active turn's pin is longer and fully opaque, pins in view are lighter, the rest faint.
+- Keyboard: the rail is one tab stop, and Tab into it lands on the active turn's pin. ArrowUp/ArrowDown (and Left/Right), Home and End move between pins; Enter or Space navigates.
+- Pointer: hovering magnifies nearby pins and previews the one under the pointer; clicking navigates.
+- Touch: the first tap on a pin previews it, a second tap on the same pin navigates, and a tap outside closes the preview.
+- Pin transitions run only while the stack is pointed at or focused; scrolling the thread does not restyle the pins.
 
 ## Theme
 
-Theme parts are **root**, **scrollArea**, **scrollContent**, **track**, **pinArea**, **rail**, **viewport**, **pin**, **pinIndicator**, **previewAnchor**, **preview**, **previewHeader**, **previewIcon**, **previewTitle**, **previewExcerpt**, **previewMetadata**, and **previewFiles**.
+Theme parts are **root**, **scrollArea**, **scrollContent**, **track**, **pinArea**, **rail**, **viewport**, **pin**, **pinIndicator** (\`active\` variant), **previewAnchor**, **preview**, **previewHeader**, **previewIcon**, **previewTitle**, **previewTurn**, **previewExcerpt**, **previewMetadata**, and **previewFiles**.
 `;

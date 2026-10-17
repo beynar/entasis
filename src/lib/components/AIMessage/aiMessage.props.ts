@@ -1,6 +1,6 @@
 import type { Slot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
-import type { Sizes } from '$lib/types/theme.js';
+import type { Colors, Sizes } from '$lib/types/theme.js';
 import type { HTMLAttributes } from 'svelte/elements';
 import type { MarkdownProps } from '../Markdown/markdown.props.js';
 import type {
@@ -50,8 +50,18 @@ export type AIMessageProps<TMessage extends AIThreadItem = AIThreadItem> = WithA
 		files?: readonly AIFileSource[];
 		/** Type and control scale. @default 'normal' */
 		size?: AIMessageSize;
-		/** Message presentation. Minimal keeps user bubbles but unframes assistant and tool content. @default 'bubble' */
+		/**
+		 * Message presentation. Minimal keeps the user bubble and renders assistant and tool content
+		 * as flat, full-width prose; bubble frames assistant replies too. @default 'minimal'
+		 */
 		variant?: AIMessageVariant;
+		/**
+		 * User-bubble colour. `neutral` is a quiet grey bubble; any other role paints a solid bubble
+		 * in that role (`primary` gives the saturated look). Defaults to the theme's default colour.
+		 */
+		color?: Colors;
+		/** The reply is still streaming: shows a pulsing caret after the content. */
+		streaming?: boolean;
 		/** Renders content with the shared Markdown component. */
 		markdown?: boolean;
 		/** Props forwarded to Markdown except for its owned safety boundary. */

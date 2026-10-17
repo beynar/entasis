@@ -54,6 +54,8 @@ export function buildRichTextInputGroups(
 		groupItems.push({
 			value: getSuggestionValue(trigger, item),
 			label: item.label,
+			// A file or reference shows its path, the clearest way to tell two same-named files apart.
+			description: item.path ?? item.description,
 			icon: item.icon,
 			keywords: item.keywords
 		});

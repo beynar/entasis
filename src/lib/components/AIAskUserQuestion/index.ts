@@ -1,4 +1,6 @@
 export { default as AIAskUserQuestion } from './AIAskUserQuestion.svelte';
+export { default as AIAskUserQuestionSummary } from './AIAskUserQuestionSummary.svelte';
+export { summarizeAIAskAnswers } from './aiAskUserQuestionAnswers.js';
 export type {
 	AIAskAnswer,
 	AIAskAnswers,
@@ -12,6 +14,8 @@ export type {
 	AIAskUserQuestionQuestionState,
 	AIAskUserQuestionState,
 	AIAskUserQuestionSubmitPayload,
+	AIAskUserQuestionSummaryItem,
+	AIAskUserQuestionSummaryProps,
 	AIAskUserQuestionTextQuestion,
 	AIAskUserQuestionType,
 	AIAskUserQuestionValue,
