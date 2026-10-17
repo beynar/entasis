@@ -77,7 +77,7 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 - **onclick**: (event: MouseEvent) => void - Native click handler for button or anchor rows. Mutually exclusive with menu. On a row with \`items\` and no \`href\`, it runs before the submenu toggles, inline or in the collapsed flyout; \`event.preventDefault()\` skips the toggle.
 - **isActive**: boolean - Adds active styling and \`aria-current="page"\`.
 - **disabled**: boolean - Disables button rows and marks anchor rows disabled.
-- **badge**: string | number - Trailing count/status, hidden in icon mode.
+- **badge**: string | number - Trailing count/status, hidden in icon mode. On a row with an \`action\`, the badge steps aside while the action shows (hover, focus, open menu) from \`md\` up, and sits just before the always-visible action below \`md\`: the two never overlap.
 - **tooltip**: string - Entasis Tooltip content in icon mode. Defaults to label.
 - **items**: SidebarMenuSubEntry[] - Inline nested menu. Collapsed to icons on desktop, a row with \`items\` and no \`href\`, \`view\` or \`menu\` opens them in a flyout of links instead.
 - **collapsible**: boolean - Set false for an always-open submenu.
@@ -98,7 +98,7 @@ of them renders exactly as a plain one.
 - **isActive** / **disabled** / **size** - As on a top-level entry; \`size\` defaults to the Sidebar size.
 - **iconColor**: Colors - Role tint for the leading icon, applied through \`data-color\`.
 - **iconVariant**: 'bare' | 'tile' - \`tile\` paints the same tinted rounded square as a top-level row.
-- **badge**: string | number - Trailing count or status; the label truncates before it.
+- **badge**: string | number - Trailing count or status; the label truncates before it. It shares the row's end column with the parent rows' badges and makes way for the row's \`action\` as a top-level badge does.
 - **tooltip**: string - Tooltip text. The label is always visible on an inline sub row, so the tooltip is extra information: shown whenever one is set, never on mobile. The collapsed row's flyout lists only each entry's label, icon, \`href\` or \`onclick\`, and \`isActive\`/\`disabled\` state: it shows no tooltip, \`badge\` or \`action\`.
 - **class**: string - Classes applied to the row button.
 - **action**: SidebarMenuActionDescriptor | Snippet<[SidebarApi]> - Trailing action pinned to the row's end (\`data-sidebar="menu-sub-action"\`), drawn by the \`subAction\` theme part: hidden until the row is hovered or focused from \`md\` up, kept visible while its menu is open, always visible below \`md\`. The label truncates before it.

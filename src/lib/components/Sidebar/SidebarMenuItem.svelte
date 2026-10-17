@@ -366,7 +366,8 @@
 					class={classes.menuAction({
 						size,
 						density,
-						className: 'bg-neutral-muted right-auto left-1 data-open:rotate-90'
+						className:
+							'bg-neutral-muted start-1 end-auto data-open:rotate-90 rtl:not-data-open:-scale-x-100'
 					})}
 					{...openStateAttributes(showSubmenu)}
 					aria-label={`${t.toggle} ${t.submenu}`}
@@ -415,7 +416,7 @@
 			<div
 				data-slot="sidebar-menu-badge"
 				data-sidebar="menu-badge"
-				class={classes.badge({ size, density })}
+				class={classes.badge({ size, density, action: item.action ? 'row' : 'none' })}
 			>
 				{item.badge}
 			</div>

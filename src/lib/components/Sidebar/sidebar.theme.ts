@@ -244,17 +244,20 @@ const defaultMenu = cva({
 });
 
 const defaultMenuButton = cva({
-	base: 'state-layer peer/menu-button group/menu-button flex w-full items-center overflow-hidden rounded-sm text-left outline-none transition-[background,color,width,height,padding,margin,border-radius] duration-normal ease-linear hover:text-neutral focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:font-medium group-has-data-[sidebar=menu-action]/menu-item:pr-layout-lg group-data-[collapsible=icon]:mx-[calc((var(--sidebar-width-icon)-var(--sidebar-icon-button-width))/2-var(--sidebar-group-padding))] group-data-[collapsible=icon]:w-[var(--sidebar-icon-button-width)] group-data-[collapsible=icon]:rounded-none group-data-[variant=admin]:group-data-[collapsible=icon]:rounded-sm group-data-[variant=framed]:group-data-[collapsible=icon]:rounded-sm group-data-[variant=inset]:group-data-[collapsible=icon]:rounded-sm group-data-[collapsible=icon]:![padding-inline:calc((var(--sidebar-icon-button-width)-var(--sidebar-icon-size))/2)] group-data-[collapsible=icon]:ring-inset [&_svg]:shrink-0 [&_svg]:size-[var(--sidebar-icon-size)]',
+	base: 'state-layer peer/menu-button group/menu-button flex w-full items-center overflow-hidden rounded-sm text-left outline-none transition-[background,color,width,height,padding,margin,border-radius] duration-normal ease-linear hover:text-neutral focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:font-medium group-data-[collapsible=icon]:mx-[calc((var(--sidebar-width-icon)-var(--sidebar-icon-button-width))/2-var(--sidebar-group-padding))] group-data-[collapsible=icon]:w-[var(--sidebar-icon-button-width)] group-data-[collapsible=icon]:rounded-none group-data-[variant=admin]:group-data-[collapsible=icon]:rounded-sm group-data-[variant=framed]:group-data-[collapsible=icon]:rounded-sm group-data-[variant=inset]:group-data-[collapsible=icon]:rounded-sm group-data-[collapsible=icon]:![padding-inline:calc((var(--sidebar-icon-button-width)-var(--sidebar-icon-size))/2)] group-data-[collapsible=icon]:ring-inset [&_svg]:shrink-0 [&_svg]:size-[var(--sidebar-icon-size)]',
 	variants: {
 		activeVariant: activeVariants,
 		variant: {
 			default: '',
 			outline: 'border border-neutral-muted bg-surface'
 		},
+		// A row that pins an action keeps its end clear of the action's box (`menuAction`), so the
+		// label truncates before it.
 		size: {
-			small: 'text-xs leading-4',
-			normal: 'text-sm leading-5',
-			large: 'text-base leading-6'
+			small: 'text-xs leading-4 group-has-data-[sidebar=menu-action]/menu-item:pe-layout-lg',
+			normal: 'text-sm leading-5 group-has-data-[sidebar=menu-action]/menu-item:pe-layout-lg',
+			large:
+				'text-base leading-6 group-has-data-[sidebar=menu-action]/menu-item:pe-[calc(var(--spacing)*10)]'
 		},
 		density: {
 			compact: 'gap-sm px-sm',
@@ -320,13 +323,15 @@ const defaultMenuTrailing = cva({
 	}
 });
 
+// Only the start side is indented: a submenu row runs to its parent row's end edge, so badges
+// and actions of every level share one end column. The guide line sits on the start edge.
 const defaultSubMenu = cva({
-	base: 'border-neutral-muted flex min-w-0 translate-x-px flex-col border-l',
+	base: 'border-neutral-muted flex min-w-0 flex-col border-s',
 	variants: {
 		density: {
-			compact: 'mx-md gap-micro px-md py-micro',
-			normal: 'mx-lg gap-xs px-md py-micro',
-			comfortable: 'mx-xl gap-sm px-lg py-xs'
+			compact: 'ms-md gap-micro py-micro ps-md',
+			normal: 'ms-lg gap-xs py-micro ps-md',
+			comfortable: 'ms-xl gap-sm py-xs ps-lg'
 		}
 	},
 	defaultVariants: {
@@ -335,12 +340,12 @@ const defaultSubMenu = cva({
 });
 
 const defaultTreeSubMenu = cva({
-	base: 'border-neutral-muted ml-0 flex min-w-0 translate-x-px flex-col border-l',
+	base: 'border-neutral-muted flex min-w-0 flex-col border-s',
 	variants: {
 		density: {
-			compact: 'ml-sm gap-micro py-micro pl-sm',
-			normal: 'ml-md gap-xs py-micro pl-md',
-			comfortable: 'ml-md gap-sm py-xs pl-md'
+			compact: 'ms-sm gap-micro py-micro ps-sm',
+			normal: 'ms-md gap-xs py-micro ps-md',
+			comfortable: 'ms-md gap-sm py-xs ps-md'
 		}
 	},
 	defaultVariants: {
@@ -349,7 +354,7 @@ const defaultTreeSubMenu = cva({
 });
 
 const defaultSubButton = cva({
-	base: 'state-layer text-neutral/70 hover:text-neutral flex min-w-0 -translate-x-px items-center overflow-hidden rounded-sm outline-none transition-[background,color,height,padding] duration-normal ease-linear focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:shrink-0 [&>svg]:size-[var(--sidebar-icon-size)]',
+	base: 'state-layer text-neutral/70 hover:text-neutral flex w-full min-w-0 items-center overflow-hidden rounded-sm outline-none transition-[background,color,height,padding] duration-normal ease-linear focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:shrink-0 [&>svg]:size-[var(--sidebar-icon-size)]',
 	variants: {
 		activeVariant: activeVariants,
 		size: {
@@ -370,10 +375,15 @@ const defaultSubButton = cva({
 		// Room at the row's end for a pinned action or badge, so the label truncates before it
 		// instead of running under it. Off adds nothing: a plain row keeps its exact classes.
 		reserveEnd: {
-			true: 'pr-layout-lg',
+			true: '',
 			false: ''
 		}
 	},
+	// The reserve clears the pinned action's box at each size.
+	compoundVariants: [
+		{ reserveEnd: true, size: ['small', 'normal'], class: 'pe-layout-lg' },
+		{ reserveEnd: true, size: 'large', class: 'pe-[calc(var(--spacing)*10)]' }
+	],
 	defaultVariants: {
 		activeVariant: 'soft',
 		size: 'normal',
@@ -383,19 +393,27 @@ const defaultSubButton = cva({
 	}
 });
 
+// A row's pinned action is a real small icon button: one box per Sidebar `size`, shared by menu
+// and submenu rows so every level's action sits in the same end column. The box leaves the
+// row's own height around it (32/36/40 rows, 24/28/32 submenu rows) and holds the dots at the
+// sidebar icon size. `end-*` keeps it on the row's end edge in either direction.
+const rowActionSize = {
+	small: 'size-5',
+	normal: 'size-6',
+	large: 'size-7'
+};
+
+const rowTrailingEnd = {
+	compact: 'end-0.5',
+	normal: 'end-1',
+	comfortable: 'end-1.5'
+};
+
 const defaultMenuAction = cva({
 	base: 'state-layer text-neutral hover:text-neutral peer-hover/menu-button:text-neutral absolute top-1/2 flex aspect-square -translate-y-1/2 items-center justify-center rounded-sm p-0 opacity-100 outline-none transition group-data-[collapsible=icon]:hidden focus-visible:ring-2 focus-visible:ring-focus/50 md:opacity-0 group-focus-within/menu-row:opacity-100 group-hover/menu-row:opacity-100 has-[[aria-expanded=true]]:opacity-100 [&>svg]:shrink-0 [&>svg]:size-[var(--sidebar-icon-size)]',
 	variants: {
-		size: {
-			small: 'size-4.5',
-			normal: 'size-5',
-			large: 'size-6'
-		},
-		density: {
-			compact: 'right-0.5',
-			normal: 'right-1',
-			comfortable: 'right-1.5'
-		}
+		size: rowActionSize,
+		density: rowTrailingEnd
 	},
 	defaultVariants: {
 		size: 'normal',
@@ -404,21 +422,13 @@ const defaultMenuAction = cva({
 });
 
 // A submenu row's pinned action: the `menuAction` recipe keyed to the sub row's own
-// `group/menu-sub-item`, one step smaller to sit in the shorter row. Hidden until the row is
-// hovered or focused from `md` up, kept while its menu is open, always shown below `md`.
+// `group/menu-sub-item`, at the same box so it lines up with its parent's action. Hidden until the
+// row is hovered or focused from `md` up, kept while its menu is open, always shown below `md`.
 const defaultSubAction = cva({
 	base: 'state-layer text-neutral hover:text-neutral absolute top-1/2 flex aspect-square -translate-y-1/2 items-center justify-center rounded-sm p-0 opacity-100 outline-none transition group-data-[collapsible=icon]:hidden focus-visible:ring-2 focus-visible:ring-focus/50 md:opacity-0 group-focus-within/menu-sub-item:opacity-100 group-hover/menu-sub-item:opacity-100 has-[[aria-expanded=true]]:opacity-100 [&>svg]:shrink-0 [&>svg]:size-[var(--sidebar-icon-size)]',
 	variants: {
-		size: {
-			small: 'size-4',
-			normal: 'size-4.5',
-			large: 'size-5'
-		},
-		density: {
-			compact: 'right-0.5',
-			normal: 'right-1',
-			comfortable: 'right-1.5'
-		}
+		size: rowActionSize,
+		density: rowTrailingEnd
 	},
 	defaultVariants: {
 		size: 'normal',
@@ -496,23 +506,42 @@ const defaultActionTrigger = cva({
 	}
 });
 
+// A badge shares its row's end column with the row's pinned action, and the two never overlap.
+// From `md` up the action only shows while the row is hovered, focused or has its menu open, and
+// the badge steps aside for exactly that time. Below `md` the action is always shown, so the badge
+// sits just before it instead.
 const defaultBadge = cva({
-	base: 'text-neutral/70 peer-hover/menu-button:text-neutral peer-data-active/menu-button:text-neutral pointer-events-none absolute top-1/2 flex -translate-y-1/2 items-center justify-center rounded-sm px-xs font-medium tabular-nums select-none group-data-[collapsible=icon]:hidden',
+	base: 'text-neutral/70 peer-hover/menu-button:text-neutral peer-data-active/menu-button:text-neutral pointer-events-none absolute top-1/2 flex -translate-y-1/2 items-center justify-center rounded-sm px-xs font-medium tabular-nums transition-opacity select-none group-data-[collapsible=icon]:hidden',
 	variants: {
 		size: {
 			small: 'h-4 min-w-4 text-xs',
 			normal: 'h-5 min-w-5 text-sm',
 			large: 'h-6 min-w-6 text-sm'
 		},
-		density: {
-			compact: 'right-0.5',
-			normal: 'right-1',
-			comfortable: 'right-1.5'
+		density: rowTrailingEnd,
+		// Which row's action the badge makes way for; `none` when the row pins no action.
+		action: {
+			none: '',
+			row: 'md:group-focus-within/menu-row:opacity-0 md:group-hover/menu-row:opacity-0 md:group-has-[[data-sidebar=menu-action]_[aria-expanded=true]]/menu-row:opacity-0',
+			sub: 'md:group-focus-within/menu-sub-item:opacity-0 md:group-hover/menu-sub-item:opacity-0 md:group-has-[[data-sidebar=menu-sub-action]_[aria-expanded=true]]/menu-sub-item:opacity-0'
 		}
 	},
+	// Below `md`: the action's end offset, plus its box, plus a hairline gap.
+	compoundVariants: [
+		{ action: ['row', 'sub'], density: 'compact', size: 'small', class: 'max-md:end-6' },
+		{ action: ['row', 'sub'], density: 'compact', size: 'normal', class: 'max-md:end-7' },
+		{ action: ['row', 'sub'], density: 'compact', size: 'large', class: 'max-md:end-8' },
+		{ action: ['row', 'sub'], density: 'normal', size: 'small', class: 'max-md:end-6.5' },
+		{ action: ['row', 'sub'], density: 'normal', size: 'normal', class: 'max-md:end-7.5' },
+		{ action: ['row', 'sub'], density: 'normal', size: 'large', class: 'max-md:end-8.5' },
+		{ action: ['row', 'sub'], density: 'comfortable', size: 'small', class: 'max-md:end-7' },
+		{ action: ['row', 'sub'], density: 'comfortable', size: 'normal', class: 'max-md:end-8' },
+		{ action: ['row', 'sub'], density: 'comfortable', size: 'large', class: 'max-md:end-9' }
+	],
 	defaultVariants: {
 		size: 'normal',
-		density: 'normal'
+		density: 'normal',
+		action: 'none'
 	}
 });
 

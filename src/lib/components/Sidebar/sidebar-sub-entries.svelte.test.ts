@@ -106,7 +106,7 @@ describe('submenu entry action', () => {
 			expect(wrapper.className.split(' ')).toContain(visibility);
 		}
 		const button = row.querySelector('[data-sidebar="menu-sub-button"]') as HTMLElement;
-		expect(button.className).toContain('pr-layout-lg');
+		expect(button.className).toContain('pe-layout-lg');
 	});
 
 	test('is inert and hidden from assistive technology while the Sidebar is collapsed to icons', () => {
@@ -137,7 +137,7 @@ describe('submenu entry without the new fields', () => {
 		expect(link.className).toBe(
 			sidebarTheme.subButton({ size: 'normal', activeVariant: 'soft', density: 'normal' })
 		);
-		expect(link.className).not.toContain('pr-layout-lg');
+		expect(link.className).not.toContain('pe-layout-lg');
 		expect(link.querySelector('[data-slot="sidebar-menu-icon"]')).toBeNull();
 		expect(Array.from(link.children).map((child) => child.tagName)).toEqual(['SPAN', 'SPAN']);
 		expect(link).not.toHaveAttribute('aria-describedby');
@@ -187,7 +187,7 @@ describe('submenu entry parity fields', () => {
 		expect(badge).toHaveTextContent('3');
 		const link = row.querySelector('[data-sidebar="menu-sub-button"]') as HTMLElement;
 		expect(link.className).toContain('italic');
-		expect(link.className).toContain('pr-layout-lg');
+		expect(link.className).toContain('pe-layout-lg');
 
 		await fireEvent.mouseEnter(link);
 		await vi.waitFor(() =>

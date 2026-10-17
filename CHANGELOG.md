@@ -1106,6 +1106,13 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Fixed
 
+- `Sidebar`: a row's "…" action is a real small icon button sized to the row (20, 24 or 28px at
+  `small`, `normal` and `large`, on menu and submenu rows alike) instead of an 18px target. A row
+  with both a badge and an action no longer draws the dots over the count: from `md` up the badge
+  steps aside while the action shows, and below `md` it sits just before the action. Submenu rows
+  now run to their parent row's end edge, indented on the start side only, so the badges and actions
+  of every level share one column; this also holds in right-to-left layouts, where the badge, action
+  and guide line now sit on the correct side.
 - `Collapsible` (and the `AIReasoning` "Thought for…" line built on it): the chevron sits on the
   text's centre at every size. It was always drawn at 16px, so it overflowed the 12px small box
   (2px low) and sat at the top of the 20px large one.

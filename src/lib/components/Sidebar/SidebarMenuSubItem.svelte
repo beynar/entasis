@@ -137,7 +137,7 @@
 		<div
 			data-slot="sidebar-menu-sub-badge"
 			data-sidebar="menu-sub-badge"
-			class={classes.badge({ size: subSize, density })}
+			class={classes.badge({ size: subSize, density, action: sub.action ? 'sub' : 'none' })}
 		>
 			{sub.badge}
 		</div>
