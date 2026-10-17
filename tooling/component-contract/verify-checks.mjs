@@ -174,7 +174,11 @@ test('API inventory resolves inherited callbacks, nested any, method payloads, s
 			'ChartAxisTicks',
 			'ChartScatterSize'
 		];
-		const domainTypes = owners.map((name) => `export type ${name} = { size: number };`).join('\n');
+		const domainTypes = [
+			...owners.map((name) => `export type ${name} = { size: number };`),
+			// A nested owner: AITool's icon snippet receives an icon size.
+			'export type AIToolCall = { icon: { size: number } };'
+		].join('\n');
 		await write(
 			'src/lib/components/Widget/index.ts',
 			`${domainTypes}\nexport type { WidgetProps } from './widget.props.js'; export { default as Widget } from './Widget.svelte';`
