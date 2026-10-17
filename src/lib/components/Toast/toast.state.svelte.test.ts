@@ -343,6 +343,30 @@ describe('toast dedupe by content', () => {
 	});
 });
 
+describe('toast attention bounce', () => {
+	test('showing a toast again while it is on screen asks for attention; an update does not', async () => {
+		render(Harness);
+		const first = toast.info({ id: 'sync', title: 'Syncing', duration: false });
+		await tick();
+		expect(first.attentionKey).toBe(0);
+
+		toast.info({ id: 'sync', title: 'Syncing again' });
+		await tick();
+		expect(first.attentionKey).toBe(1);
+
+		toast.info({ title: 'Saved', duration: false });
+		await tick();
+		const saved = toaster().toasts.find((candidate) => candidate.opts.title === 'Saved');
+		toast.info({ title: 'Saved', duration: false });
+		await tick();
+		expect(saved?.attentionKey).toBe(1);
+
+		toast.update('sync', { title: 'Still syncing' });
+		await tick();
+		expect(first.attentionKey).toBe(1);
+	});
+});
+
 describe('toast timers and window activity', () => {
 	test('window blur pauses timers and focus resumes them with the remaining time', async () => {
 		render(Harness);

@@ -16,6 +16,7 @@
 	import { createPointerDrag } from '$lib/utils/pointerDrag.js';
 	import { createVelocityTracker } from '$lib/utils/swipeVelocity.js';
 	import { composeHandlers } from '$lib/utils/handlers.js';
+	import { useTheme } from '../Theme/theme.state.svelte.js';
 
 	let {
 		toast,
@@ -220,6 +221,23 @@
 	// region of its own, which screen readers often miss when it is inserted already filled in.
 	// Announces on arrival and again whenever the toast is updated, with the text as rendered.
 	let contentElement = $state<HTMLElement>();
+
+	// A toast shown again while it is on screen bounces once. It animates the `scale` property, which
+	// composes with the `transform` the stack and swipe write, and stays still under reduced motion.
+	const motionTheme = useTheme();
+	let seenAttention = untrack(() => toast.attentionKey);
+	$effect(() => {
+		const key = toast.attentionKey;
+		if (key === seenAttention) return;
+		seenAttention = key;
+		const element = untrack(() => toast.element);
+		if (!element || typeof element.animate !== 'function') return;
+		if (motionTheme?.preferReducesMotion) return;
+		element.animate([{ scale: '1' }, { scale: '1.04' }, { scale: '0.98' }, { scale: '1' }], {
+			duration: 360,
+			easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+		});
+	});
 	$effect(() => {
 		void toast.opts.title;
 		void toast.opts.description;

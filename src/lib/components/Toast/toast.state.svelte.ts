@@ -417,7 +417,11 @@ export class Toaster extends createBindableStateClass<ToasterOptions>() {
 			const live =
 				this.toasts.find((candidate) => candidate.id === toast.id) ?? this.arriving.get(toast.id);
 			if (live) {
-				if (live !== toast) live.merge(toast.requested);
+				if (live !== toast) {
+					live.merge(toast.requested);
+					// Shown again while already on screen: the update alone would go unnoticed.
+					if (this.toasts.includes(live)) live.attentionKey += 1;
+				}
 				this.refreshToast(live);
 				return live;
 			}
@@ -653,6 +657,11 @@ export class Toast {
 	 * `toast.update()` or `update()`. Rendered as `data-update-key`.
 	 */
 	updateKey = $state(0);
+	/**
+	 * Counts the times this toast was shown again while on screen (a `toast()` call with its id, or
+	 * the same message deduplicated). Each one plays a short bounce to draw the eye back to it.
+	 */
+	attentionKey = $state(0);
 	/** A pointer is down on the toast, or it is being swiped; its stack's timers are held. */
 	pressed = $state(false);
 	/** The toast is being dragged; its stack stays expanded meanwhile. */
