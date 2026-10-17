@@ -1022,8 +1022,9 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
   reads by glyph and word as well as colour, and the spinner takes the info colour. Errors that are
   a string, an Error or MCP text render as one plain sentence, sections are labelled Input, Output
   and Error in words, and the soft variant's tint doubles in dark mode.
-- `AIReasoning`: the body is muted `text-sm` Markdown that reads quieter than the answer. Cycled
-  thinking labels keep a steady width and only the current one is named.
+- `AIReasoning`: the body is compact, muted small Markdown (12px, tight paragraph spacing, a small
+  gap under the trigger) that reads quieter than the answer. Cycled thinking labels keep a steady
+  width and only the current one is named.
 - `AIThreadToc` paints its rail and visible-range bar, and the active pin is longer and more opaque
   than pins merely in view.
 

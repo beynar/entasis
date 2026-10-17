@@ -30,8 +30,10 @@ const defaultElapsed = cva({
 const defaultElapsedReserve = cva({ base: 'invisible' });
 const defaultDuration = cva({ base: 'min-w-0' });
 // Reasoning reads quieter than the answer: muted, text-sm, and Markdown's own body colour yields.
+// Compact: a small gap under the trigger, tight paragraph spacing, and the small Markdown scale
+// (12px, normal leading), so reasoning reads one step quieter than the answer it precedes.
 const defaultContent = cva({
-	base: 'mt-md min-w-0 border-s border-neutral-muted ps-xl text-sm text-neutral/70 [&_:is(p,li,ul,ol,blockquote,strong,em,h1,h2,h3,h4,h5,h6)]:text-inherit'
+	base: 'mt-xs min-w-0 border-s border-neutral-muted ps-xl text-neutral/70 [&_:is(p,li,ul,ol,blockquote,strong,em,h1,h2,h3,h4,h5,h6)]:text-inherit [&_:is(p,ul,ol,blockquote,pre)]:!my-sm'
 });
 // While streaming: a bounded window that follows the newest lines, fading out at the top.
 const defaultStream = cva({

@@ -223,7 +223,7 @@
 
 {#snippet body()}
 	{#if content != null}
-		<Markdown {content} size="normal" {...markdown} renderHtml={false} />
+		<Markdown {content} size="small" {...markdown} renderHtml={false} />
 	{:else if childrenSlot}
 		<Slot render={childrenSlot} payload={reasoningState} />
 	{/if}
