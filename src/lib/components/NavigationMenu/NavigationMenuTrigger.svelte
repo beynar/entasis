@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import Button from '../Button/Button.svelte';
 	import { caretDownIcon } from '../Icons/caretDown.js';
 	import type { Colors, Sizes } from '$lib/types/theme.js';
@@ -32,6 +33,17 @@
 		onMouseEnter: (event) => menu.hoverTrigger(item.value, event),
 		delay: () => (menu.isOpen ? 0 : menu.delay)
 	});
+	// A hover that began before the open panel changed another way (a press, Escape, a key) must
+	// not undo that change when its delay runs out, such as reopening a panel a press just closed.
+	$effect(() => {
+		void menu.value;
+		untrack(() => hover.cancel());
+	});
+
+	function press(event: MouseEvent) {
+		hover.cancel();
+		menu.pressTrigger(item.value, event);
+	}
 </script>
 
 {#snippet caret()}
@@ -56,7 +68,7 @@
 	{...popupTriggerAttributes(open)}
 	data-disabled={presence(item.disabled)}
 	class={classes.trigger({ open })}
-	onclick={(event) => menu.pressTrigger(item.value, event)}
+	onclick={press}
 	{@attach menu.trigger(item.value)}
 	{@attach hover.reference}
 	{@attach open ? menu.safeArea.anchorReference : undefined}

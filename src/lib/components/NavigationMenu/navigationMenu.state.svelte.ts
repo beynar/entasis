@@ -1,6 +1,11 @@
 // Behaviour of a NavigationMenu: which panel is open and why, hover switching, the layer that
-// dismisses it, Tab order between the triggers and the inline panel area, placement of that area
-// under the active trigger, and the enter, exit and switch animations.
+// dismisses it, Tab order between the triggers and the inline panel area, the arrow keys along
+// the bar and inside the open panel, placement of that area under the active trigger, and the
+// enter, exit and switch animations.
+//
+// Keyboard follows the WAI-ARIA APG disclosure navigation pattern, with Base UI's choices where
+// the pattern leaves room: ArrowDown opens a trigger without moving focus, arrows along the bar
+// only move focus (no wrap), and arrows inside a panel wrap.
 //
 // The panel area is one viewport rendered inline inside the `<nav>`, after the trigger list. It
 // is never portaled, so the document order stays the reading order; `useTabBridge` carries Tab
@@ -24,7 +29,13 @@ import { useSafeArea } from '$lib/utils/safeArea.svelte.js';
 import { useTabBridge } from '$lib/utils/useTabBridge.svelte.js';
 import { useDirection, type Direction } from '$lib/utils/useDirection.svelte.js';
 import { hasShortcutModifier } from '$lib/utils/useKeyDown.svelte.js';
-import { composedContains, getDeepActiveElement, getTabbableElements } from '$lib/utils/focus.js';
+import {
+	composedContains,
+	getDeepActiveElement,
+	getTabbableAfter,
+	getTabbableElements,
+	isTextField
+} from '$lib/utils/focus.js';
 import type { NavigationMenuItem, NavigationMenuPanel } from './navigationMenu.props.js';
 import { useNavigationMenuMotion } from './navigationMenu.theme.js';
 
@@ -219,10 +230,19 @@ export function useNavigationMenuState<Value extends string>(
 
 	function pressTrigger(value: Value, event: MouseEvent) {
 		const trigger = triggers.get(value);
+		// Safari does not focus a button on click. Focus it, so Tab, ArrowDown and Escape carry on
+		// from the trigger as they do after a click in every other engine.
+		if (trigger && event.detail > 0) {
+			const active = getDeepActiveElement(trigger.ownerDocument);
+			if (active !== trigger) {
+				trigger.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
+			}
+		}
 		const current = options.value();
 		if (current === value) {
-			// A panel that hovering opened turns into a pressed one; the next press closes it.
-			if (hoverValue === value) {
+			// A pointer press on a panel that hovering opened turns it into a pressed one; the next
+			// press closes it. Enter and Space (a click with no pointer, `detail` 0) toggle as usual.
+			if (hoverValue === value && event.detail > 0) {
 				hoverValue = null;
 				return;
 			}
@@ -418,20 +438,51 @@ export function useNavigationMenuState<Value extends string>(
 		);
 	}
 
-	/** Arrow keys, Home and End move between the bar's triggers and links; Tab still visits each. */
+	/** The step an arrow key takes along a line of items, mirrored in right-to-left. */
+	function arrowStep(key: string, vertical: boolean) {
+		const rtl = getDirection() === 'rtl';
+		if (key === 'ArrowRight') return rtl ? -1 : 1;
+		if (key === 'ArrowLeft') return rtl ? 1 : -1;
+		if (vertical && key === 'ArrowDown') return 1;
+		if (vertical && key === 'ArrowUp') return -1;
+		return 0;
+	}
+
+	/**
+	 * Tab from an entry of the bar that is not the open trigger, where the next stop in the page is
+	 * the panel area (it follows the list in the document): the panel belongs to its trigger, so
+	 * focus skips it and goes on after the menu. Without this, focus would wander through a panel
+	 * that is not this entry's and then jump back to the entry after the open trigger.
+	 */
+	function skipForeignPanel(event: KeyboardEvent, current: HTMLElement) {
+		const viewport = viewportElement;
+		if (!isOpen || event.shiftKey || !viewport || current === activeTrigger) return;
+		const next = getTabbableAfter(current);
+		if (!next || !composedContains(viewport, next)) return;
+		const after = getTabbableAfter(current, { exclude: viewport });
+		if (!after) return;
+		event.preventDefault();
+		after.focus(FOCUS_VISIBLE);
+	}
+
+	/**
+	 * Arrow keys, Home and End move between the bar's triggers and links; Tab still visits each.
+	 * They only move focus: the open panel, if any, stays as it is (Enter, Space or ArrowDown on
+	 * another trigger switches to its panel).
+	 */
 	const list: Attachment<HTMLElement> = (node) =>
 		on(node, 'keydown', (event) => {
-			if (event.defaultPrevented || hasShortcutModifier(event)) return;
-			const rtl = getDirection() === 'rtl';
-			let step = 0;
-			let edge: 'first' | 'last' | null = null;
-			if (event.key === 'ArrowRight') step = rtl ? -1 : 1;
-			else if (event.key === 'ArrowLeft') step = rtl ? 1 : -1;
-			else if (event.key === 'Home') edge = 'first';
-			else if (event.key === 'End') edge = 'last';
-			else return;
+			if (event.defaultPrevented) return;
 			const current = (event.target as Element).closest<HTMLElement>(ITEM_SELECTOR);
 			if (!current || !node.contains(current)) return;
+			if (event.key === 'Tab') {
+				if (!event.ctrlKey && !event.metaKey) skipForeignPanel(event, current);
+				return;
+			}
+			if (hasShortcutModifier(event)) return;
+			const step = arrowStep(event.key, false);
+			const edge = event.key === 'Home' ? 'first' : event.key === 'End' ? 'last' : null;
+			if (!step && !edge) return;
 			const items = enabledItems(node);
 			const index = items.indexOf(current);
 			if (index === -1) return;
@@ -440,16 +491,58 @@ export function useNavigationMenuState<Value extends string>(
 			event.preventDefault();
 			if (!target || target === current) return;
 			target.focus(FOCUS_VISIBLE);
-			if (!isOpen) return;
-			// With a panel open, moving along the bar moves the panel with focus; landing on a link closes it.
-			const value = [...triggers].find(([, element]) => element === target)?.[0];
-			requestChange(value ?? null, {
-				reason: 'list-navigation',
-				event,
-				trigger: target,
-				interaction: 'keyboard'
-			});
 		});
+
+	/** Whether the arrow keys belong to the control itself: it edits text or picks an option. */
+	const ownsArrowKeys = (element: Element): boolean =>
+		isTextField(element) || element.matches('select');
+
+	/**
+	 * Inside the open panel, the arrow keys move between its links and buttons (ArrowDown and
+	 * the inline-end arrow forward, ArrowUp and the inline-start arrow back, wrapping at either
+	 * end), and Home and End jump to the first and last. Disabled links and collapsed nested
+	 * levels are not tab stops, so they are skipped. A text field keeps its arrow keys, and a
+	 * control that handles them itself (it calls `preventDefault()`) wins.
+	 */
+	function panelKeydown(event: KeyboardEvent) {
+		if (event.defaultPrevented) return;
+		const panel = activePanel;
+		const target = event.target;
+		if (!isOpen || !panel || !(target instanceof HTMLElement)) return;
+		if (!composedContains(panel, target)) return;
+		if (event.key === 'Tab') {
+			leaveAtPageEnd(event, panel, target);
+			return;
+		}
+		if (hasShortcutModifier(event) || ownsArrowKeys(target)) return;
+		const step = arrowStep(event.key, true);
+		const edge = event.key === 'Home' ? 'first' : event.key === 'End' ? 'last' : null;
+		if (!step && !edge) return;
+		const items = getTabbableElements(panel).filter((element) => !ownsArrowKeys(element));
+		const index = items.indexOf(target);
+		if (index === -1 || items.length === 0) return;
+		const next =
+			edge === 'first'
+				? items[0]
+				: edge === 'last'
+					? items[items.length - 1]
+					: items[(index + step + items.length) % items.length];
+		event.preventDefault();
+		if (next !== target) next.focus(FOCUS_VISIBLE);
+	}
+
+	/**
+	 * Tab past the panel's last control when nothing in the page follows the trigger: the Tab
+	 * bridge leaves the key to the engine, which moves focus out of the page, and the panel closes
+	 * as it does when Tab moves on to anything else.
+	 */
+	function leaveAtPageEnd(event: KeyboardEvent, panel: HTMLElement, target: HTMLElement) {
+		const anchor = activeTrigger;
+		if (event.shiftKey || event.ctrlKey || event.metaKey || !anchor) return;
+		if (getTabbableElements(panel).at(-1) !== target) return;
+		if (getTabbableAfter(anchor, { exclude: viewportElement })) return;
+		requestChange(null, { reason: 'focus-out', event, interaction: 'keyboard' });
+	}
 
 	function triggerKeydown(value: Value, event: KeyboardEvent) {
 		if (event.defaultPrevented || event.key !== 'ArrowDown' || hasShortcutModifier(event)) return;
@@ -505,7 +598,9 @@ export function useNavigationMenuState<Value extends string>(
 	const popup: Attachment<HTMLElement> = (node) =>
 		untrack(() => {
 			popupElement = node;
+			const offKeydown = on(node, 'keydown', panelKeydown);
 			return () => {
+				offKeydown();
 				if (popupElement === node) popupElement = null;
 			};
 		});

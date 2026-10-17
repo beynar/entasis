@@ -75,13 +75,14 @@ NavigationMenu is site navigation: a \`<nav>\` landmark with a row of links and 
 
 - The markup is \`<nav aria-label><ul>\`: each panel trigger is a \`<button>\` with \`aria-expanded\` and \`aria-controls\` (no \`aria-haspopup\`: it is a disclosure, not a menu), each link an \`<a>\`. There is no \`aria-orientation\`.
 - **One inline panel area.** The panel area is rendered inside the nav, after the trigger list, never portaled. It animates its width and height as the open panel changes, and aligns to the open trigger's inline edge inside the layout viewport.
-- **Opening.** Click, Enter or Space toggle a trigger; ArrowDown opens it. Opening by keyboard keeps focus on the trigger. Tab from an open trigger enters the panel's links; Tab past the last link continues after the trigger and closes the panel; Shift+Tab from the first link returns to the trigger. ArrowDown on an open trigger moves into the panel.
-- **Moving along the bar.** ArrowLeft and ArrowRight (mirrored in RTL), Home and End move between the bar's enabled triggers and links; Tab still visits each. With a panel open, landing on another trigger switches to its panel and landing on a link closes it.
-- **Hover.** Resting on a trigger opens its panel after \`delay\`; moving to another trigger switches at once. A panel opened by hover closes when the pointer leaves the trigger and the panel (with a diagonal-safe area) after \`closeDelay\`, unless focus is inside it. Pressing the trigger of a hover-opened panel keeps it open; pressing again closes it.
-- **Closing.** Escape closes and returns focus to the trigger. A press outside, focus moving out, and a press on any link close it. A link press closes every level, once. A consumer \`onclick\` runs first and \`event.preventDefault()\` there skips the built-in close.
+- **Opening.** Click, Enter or Space toggle a trigger; ArrowDown opens it. Opening by keyboard keeps focus on the trigger. Tab from an open trigger enters the panel's links; Tab past the last link continues after the trigger and closes the panel (also when nothing follows the menu and focus leaves the page); Shift+Tab from the first link returns to the trigger. ArrowDown on an open trigger moves into the panel. A panel is entered by Tab only from its own trigger: Tab from a later entry of the bar skips it and leaves the menu. A pointer press focuses the trigger (Safari does not focus buttons on click), so Tab, ArrowDown and Escape carry on from it.
+- **Moving along the bar.** ArrowLeft and ArrowRight (mirrored in RTL), Home and End move focus between the bar's enabled triggers and links, without wrapping; Tab still visits each. They only move focus: an open panel stays open until Enter, Space or ArrowDown on another trigger switches to that panel, Escape closes it, or focus leaves the menu.
+- **Inside a panel.** ArrowDown and ArrowUp move to the next and previous link or button of the open panel, wrapping at either end; ArrowRight and ArrowLeft do the same (mirrored in RTL); Home and End jump to the first and last. Disabled links and links of a collapsed nested level are skipped. A text field or select keeps its own arrow keys, and a control that handles an arrow key itself (calls \`preventDefault()\`) keeps it. Snippet panels get the same keys over their tabbable controls.
+- **Hover.** Resting on a trigger opens its panel after \`delay\`; moving to another trigger switches at once. A panel opened by hover closes when the pointer leaves the trigger and the panel (with a diagonal-safe area) after \`closeDelay\`, unless focus is inside it. A pointer press on the trigger of a hover-opened panel keeps it open; pressing again closes it. Enter or Space on that trigger closes it. A hover that began before a press or Escape never reopens the panel afterwards.
+- **Closing.** Escape closes the open panel; from inside the panel it returns focus to the trigger with a visible ring, and from the bar focus stays where it is. A press outside, focus moving out, and a press on any link close it. A link press closes every level, once. A consumer \`onclick\` runs first and \`event.preventDefault()\` there skips the built-in close.
 - **Disabled.** A disabled panel trigger never opens and is skipped by the arrow keys; it renders \`disabled\` and \`data-disabled\`. A disabled link drops its \`href\` and leaves the tab order.
 - **Removed panels.** If the open panel is removed or disabled, the value resets to \`null\` (\`onValueChange\` with reason \`trigger-unmount\`).
-- **Nested levels.** \`items\` under a panel render inline; a nested panel is a disclosure button that expands in place (click only).
+- **Nested levels.** \`items\` under a panel render inline; a nested panel is a disclosure button that expands in place with a click, Enter or Space. The panel's arrow keys reach nested triggers and the links of expanded levels.
 
 ## Styling hooks
 
@@ -117,5 +118,20 @@ CSS variables on the viewport: \`--anchor-width\` and \`--anchor-height\`, the o
 
 ## Accessibility
 
-Disclosure navigation: every trigger and link keeps its place in the natural Tab order, panels follow in the document, and arrow keys are a shortcut between triggers. Escape returns focus to the trigger and keyboard closes show the focus ring. A current-page link renders \`aria-current="page"\`.
+Disclosure navigation (the WAI-ARIA APG disclosure navigation pattern): every trigger and link keeps its place in the natural Tab order, panels follow in the document, and arrow keys are a shortcut that supplements Tab, along the bar and inside the open panel. Escape returns focus to the trigger and keyboard closes show the focus ring.
+
+| Focus | Key | Result |
+| --- | --- | --- |
+| Trigger | Enter, Space | Toggles its panel; focus stays |
+| Closed trigger | ArrowDown | Opens its panel; focus stays |
+| Open trigger | ArrowDown, Tab | First control of the panel |
+| Bar entry | ArrowRight / ArrowLeft (mirrored in RTL) | Next / previous enabled entry, no wrap; the open panel is unchanged |
+| Bar entry | Home / End | First / last enabled entry |
+| Bar entry | Escape | Closes the open panel; focus stays |
+| Panel | ArrowDown, ArrowRight / ArrowUp, ArrowLeft | Next / previous control, wrapping |
+| Panel | Home / End | First / last control |
+| Panel | Tab past the last control | Next entry after the trigger; the panel closes |
+| Panel | Shift+Tab on the first control | The trigger; the panel stays open |
+| Panel | Escape | Closes; focus returns to the trigger with a ring |
+| Anywhere | Focus leaves the menu | Closes | A current-page link renders \`aria-current="page"\`.
 `;

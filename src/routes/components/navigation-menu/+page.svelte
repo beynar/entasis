@@ -225,6 +225,10 @@
 			label: 'Escape closes and returns focus to the trigger',
 			test: 'a11y:navigation-menu.escape-restores-focus'
 		},
+		{
+			label: 'Arrow keys, Home and End move inside the open panel',
+			test: 'a11y:navigation-menu.panel-arrows'
+		},
 		'Hover switching with an animated panel size',
 		'A link press closes every level',
 		'Panels can stay in the HTML for crawlers',

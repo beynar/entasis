@@ -198,7 +198,7 @@ describe('moving along the bar', () => {
 		expect(product).toHaveFocus();
 	});
 
-	test('with a panel open, arrowing to another trigger switches panels and onto a link closes', async () => {
+	test('with a panel open, the arrow keys only move focus; ArrowDown or Enter there switches', async () => {
 		const { changes } = await mount();
 		const product = trigger('Product');
 		product.focus();
@@ -206,15 +206,241 @@ describe('moving along the bar', () => {
 		await keydown(product, 'ArrowRight');
 		await tick();
 		expect(trigger('Company')).toHaveFocus();
-		expect(trigger('Company')).toHaveAttribute('aria-expanded', 'true');
+		expect(product).toHaveAttribute('aria-expanded', 'true');
+		expect(trigger('Company')).toHaveAttribute('aria-expanded', 'false');
 		await keydown(trigger('Company'), 'ArrowRight');
 		await tick();
-		expect(trigger('Company')).toHaveAttribute('aria-expanded', 'false');
-		expect(changes.map((change) => change.reason)).toEqual([
-			'trigger-press',
-			'list-navigation',
-			'list-navigation'
+		expect(link('Pricing')).toHaveFocus();
+		expect(product).toHaveAttribute('aria-expanded', 'true');
+		await keydown(link('Pricing'), 'ArrowLeft');
+		await keydown(trigger('Company'), 'ArrowDown');
+		await tick();
+		expect(trigger('Company')).toHaveAttribute('aria-expanded', 'true');
+		expect(trigger('Company')).toHaveFocus();
+		expect(changes).toEqual([
+			{ value: 'product', reason: 'trigger-press' },
+			{ value: 'company', reason: 'list-navigation' }
 		]);
+	});
+
+	test('Escape on another entry of the bar closes the open panel and leaves focus there', async () => {
+		await mount();
+		trigger('Product').focus();
+		await open('Product');
+		await keydown(trigger('Product'), 'ArrowRight');
+		await keydown(trigger('Company'), 'Escape');
+		await tick();
+		expect(trigger('Product')).toHaveAttribute('aria-expanded', 'false');
+		expect(trigger('Company')).toHaveFocus();
+	});
+
+	test('Tab from the last entry of the bar skips a panel that belongs to another trigger', async () => {
+		const { changes } = await mount();
+		trigger('Product').focus();
+		await open('Product');
+		link('Pricing').focus();
+		await keydown(link('Pricing'), 'Tab');
+		expect(screen.getByRole('button', { name: 'After the menu' })).toHaveFocus();
+		await tick();
+		expect(changes.at(-1)).toEqual({ value: null, reason: 'focus-out' });
+	});
+});
+
+describe('moving inside a panel', () => {
+	const panelLinks: NavigationMenuItem<string>[] = [
+		{
+			type: 'panel',
+			value: 'docs',
+			label: 'Docs',
+			content: [
+				{ label: 'One', href: '#one' },
+				{ label: 'Two', href: '#two' },
+				{ label: 'Gone', href: '#gone', disabled: true },
+				{ label: 'Three', href: '#three' }
+			]
+		},
+		{ type: 'link', label: 'Blog', href: '#blog' }
+	];
+
+	test('a11y:navigation-menu.panel-arrows ArrowDown and ArrowUp move between the links, wrapping, and skip a disabled one', async () => {
+		await mount({ items: panelLinks });
+		trigger('Docs').focus();
+		await open('Docs');
+		await keydown(trigger('Docs'), 'ArrowDown');
+		expect(link('One')).toHaveFocus();
+		await keydown(link('One'), 'ArrowDown');
+		expect(link('Two')).toHaveFocus();
+		await keydown(link('Two'), 'ArrowDown');
+		expect(link('Three')).toHaveFocus();
+		await keydown(link('Three'), 'ArrowDown');
+		expect(link('One')).toHaveFocus();
+		await keydown(link('One'), 'ArrowUp');
+		expect(link('Three')).toHaveFocus();
+		expect(trigger('Docs')).toHaveAttribute('aria-expanded', 'true');
+	});
+
+	test('Home and End jump to the first and last link and leave the bar alone', async () => {
+		await mount({ items: panelLinks });
+		trigger('Docs').focus();
+		await open('Docs');
+		link('Two').focus();
+		await keydown(link('Two'), 'End');
+		expect(link('Three')).toHaveFocus();
+		await keydown(link('Three'), 'Home');
+		expect(link('One')).toHaveFocus();
+	});
+
+	test('ArrowRight and ArrowLeft step through the links too, mirrored in right-to-left', async () => {
+		await mount({ items: panelLinks });
+		trigger('Docs').focus();
+		await open('Docs');
+		link('One').focus();
+		await keydown(link('One'), 'ArrowRight');
+		expect(link('Two')).toHaveFocus();
+		await keydown(link('Two'), 'ArrowLeft');
+		expect(link('One')).toHaveFocus();
+	});
+
+	test('in right-to-left ArrowLeft moves forward inside the panel', async () => {
+		await mount({ items: panelLinks, dir: 'rtl', menu: { dir: 'rtl' } });
+		trigger('Docs').focus();
+		await open('Docs');
+		link('One').focus();
+		await keydown(link('One'), 'ArrowLeft');
+		expect(link('Two')).toHaveFocus();
+		await keydown(link('Two'), 'ArrowRight');
+		expect(link('One')).toHaveFocus();
+	});
+
+	test('a modified arrow key is left to the browser', async () => {
+		await mount({ items: panelLinks });
+		trigger('Docs').focus();
+		await open('Docs');
+		link('One').focus();
+		await keydown(link('One'), 'ArrowDown', { altKey: true });
+		expect(link('One')).toHaveFocus();
+	});
+
+	test('nested triggers are stops, links of a collapsed level are not', async () => {
+		const items: NavigationMenuItem<string>[] = [
+			{
+				type: 'panel',
+				value: 'outer',
+				label: 'Outer',
+				content: [{ label: 'Top link', href: '#top' }],
+				items: [
+					{
+						type: 'panel',
+						value: 'inner',
+						label: 'Inner',
+						content: [{ label: 'Deep link', href: '#deep' }]
+					},
+					{ type: 'link', label: 'Last link', href: '#last' }
+				]
+			}
+		];
+		await mount({ items, menu: { keepMounted: true } });
+		trigger('Outer').focus();
+		await open('Outer');
+		link('Top link').focus();
+		await keydown(link('Top link'), 'ArrowDown');
+		expect(trigger('Inner')).toHaveFocus();
+		await keydown(trigger('Inner'), 'ArrowDown');
+		expect(link('Last link')).toHaveFocus();
+		await fireEvent.click(trigger('Inner'));
+		await tick();
+		await keydown(link('Last link'), 'ArrowUp');
+		expect(link('Deep link')).toHaveFocus();
+	});
+
+	test('a snippet panel moves between its controls, and a text field keeps its arrow keys', async () => {
+		await mount({ withSnippet: true });
+		trigger('Rich').focus();
+		await open('Rich');
+		const guide = screen.getByRole('link', { name: 'Guide' });
+		const search = screen.getByRole('textbox', { name: 'Search the docs' });
+		const close = screen.getByRole('button', { name: 'Close panel' });
+		guide.focus();
+		// The text field is not an arrow stop: ArrowDown goes from the link to the button.
+		await keydown(guide, 'ArrowDown');
+		expect(close).toHaveFocus();
+		search.focus();
+		await keydown(search, 'ArrowDown');
+		await keydown(search, 'Home');
+		expect(search).toHaveFocus();
+	});
+
+	test('a control that handles an arrow key itself keeps it', async () => {
+		await mount({ items: panelLinks });
+		trigger('Docs').focus();
+		await open('Docs');
+		link('One').focus();
+		link('One').addEventListener('keydown', (event) => event.preventDefault(), { once: true });
+		await keydown(link('One'), 'ArrowDown');
+		expect(link('One')).toHaveFocus();
+	});
+});
+
+describe('pointer and keyboard together', () => {
+	test('a pointer press focuses the trigger, as Safari does not', async () => {
+		await mount();
+		screen.getByRole('button', { name: 'After the menu' }).focus();
+		await fireEvent.click(trigger('Product'), { detail: 1 });
+		await tick();
+		expect(trigger('Product')).toHaveFocus();
+		expect(trigger('Product')).toHaveAttribute('aria-expanded', 'true');
+	});
+
+	test('Enter on the trigger of a hover-opened panel closes it; a pointer press pins it', async () => {
+		const { changes } = await mount({ menu: { delay: 0 } });
+		await fireEvent.mouseEnter(trigger('Product'));
+		await tick();
+		expect(trigger('Product')).toHaveAttribute('aria-expanded', 'true');
+		await fireEvent.click(trigger('Product'), { detail: 1 });
+		await tick();
+		expect(trigger('Product')).toHaveAttribute('aria-expanded', 'true');
+		await fireEvent.mouseLeave(trigger('Product'));
+		await fireEvent.mouseEnter(trigger('Company'));
+		await tick();
+		expect(trigger('Company')).toHaveAttribute('aria-expanded', 'true');
+		trigger('Company').focus();
+		// Enter and Space click with no pointer: detail 0.
+		await fireEvent.click(trigger('Company'), { detail: 0 });
+		await tick();
+		expect(trigger('Company')).toHaveAttribute('aria-expanded', 'false');
+		expect(changes.at(-1)).toEqual({ value: null, reason: 'trigger-press' });
+	});
+
+	test('a hover that began before a press cannot reopen the panel the press closed', async () => {
+		await mount({ menu: { delay: 40 } });
+		await fireEvent.mouseEnter(trigger('Product'));
+		await fireEvent.click(trigger('Product'), { detail: 1 });
+		await tick();
+		await fireEvent.click(trigger('Product'), { detail: 1 });
+		await tick();
+		expect(trigger('Product')).toHaveAttribute('aria-expanded', 'false');
+		await new Promise((resolve) => setTimeout(resolve, 80));
+		await tick();
+		expect(trigger('Product')).toHaveAttribute('aria-expanded', 'false');
+	});
+
+	test('Tab past the last link of the last panel, with nothing after the menu, closes it', async () => {
+		const items: NavigationMenuItem<string>[] = [
+			{ type: 'link', label: 'Home', href: '#home' },
+			{ type: 'panel', value: 'more', label: 'More', content: [{ label: 'Last', href: '#last' }] }
+		];
+		const { changes } = await mount({ items });
+		screen.getByRole('button', { name: 'After the menu' }).remove();
+		trigger('More').focus();
+		await open('More');
+		link('Last').focus();
+		const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+		link('Last').dispatchEvent(tab);
+		await tick();
+		// The browser moves focus out of the page, so the key is not taken.
+		expect(tab.defaultPrevented).toBe(false);
+		expect(changes.at(-1)).toEqual({ value: null, reason: 'focus-out' });
+		await waitFor(() => expect(trigger('More')).toHaveAttribute('aria-expanded', 'false'));
 	});
 });
 

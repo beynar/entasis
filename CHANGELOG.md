@@ -584,6 +584,14 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Changed
 
+- `NavigationMenu`: keyboard follows the WAI-ARIA disclosure navigation pattern. ArrowLeft and
+  ArrowRight along the bar only move focus: an open panel stays open until Enter, Space or
+  ArrowDown on another trigger switches to it, Escape closes it or focus leaves the menu. Before,
+  arrowing onto another trigger switched panels and arrowing onto a link closed the panel. Inside
+  an open panel, ArrowDown and ArrowUp (and the inline arrows, mirrored in right-to-left) now move
+  between its links and buttons, wrapping, and Home and End jump to the first and last; disabled
+  links, collapsed nested levels and text fields are skipped.
+
 - `AIMessage` and `AIThread`: rich content reads on one scale. Tables, lists, quotes and alerts
   read at the message size and fenced code at 0.9× of it, like inline code (it was fixed at text-sm), and tool
   calls and reasoning in a thread read one step below the message text. `AIMessage` takes a
@@ -1080,6 +1088,13 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
   `showAll`.
 
 ### Fixed
+
+- `NavigationMenu`: a pointer press focuses the trigger, so in Safari Tab after a click enters the
+  panel and ArrowDown moves into it instead of skipping it. Enter or Space on the trigger of a
+  hover-opened panel closes it instead of doing nothing. A hover that began just before a press
+  no longer reopens the panel a quick second press (or Escape) closed. Tab from a bar entry after
+  the open trigger skips that trigger's panel instead of wandering through it and back to the bar,
+  and Tab past the last link with nothing after the menu closes the panel.
 
 - `ToggleButtonGroup` / `ToggleButton`: a pressed neutral `outline` toggle keeps the group's
   hairline border and shows its selection with the soft fill, instead of boxing itself off with a

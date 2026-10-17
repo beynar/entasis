@@ -164,6 +164,106 @@ describe('keyboard in a real browser', () => {
 	});
 });
 
+describe('keyboard inside a panel and along the bar', () => {
+	const linkNamed = (name: string) =>
+		page.getByRole('link', { name: new RegExp(`^${name}`) }).element() as HTMLElement;
+
+	test("the arrow keys, Home and End move between the open panel's links, wrapping", async () => {
+		render(NavigationMenuHarness);
+		trigger('Product').focus();
+		await userEvent.keyboard('{Enter}');
+		await userEvent.keyboard('{ArrowDown}');
+		expect(document.activeElement).toBe(linkNamed('Components'));
+		await userEvent.keyboard('{ArrowDown}');
+		expect(document.activeElement).toBe(linkNamed('Blocks'));
+		await userEvent.keyboard('{ArrowDown}');
+		expect(document.activeElement).toBe(linkNamed('Components'));
+		await userEvent.keyboard('{ArrowUp}');
+		expect(document.activeElement).toBe(linkNamed('Blocks'));
+		await userEvent.keyboard('{Home}');
+		expect(document.activeElement).toBe(linkNamed('Components'));
+		await userEvent.keyboard('{End}');
+		expect(document.activeElement).toBe(linkNamed('Blocks'));
+		expect(linkNamed('Blocks').matches(':focus-visible')).toBe(true);
+		expect(expanded('Product')).toBe('true');
+		// The page did not scroll with the keys.
+		expect(window.scrollY).toBe(0);
+	});
+
+	test('in right-to-left the inline arrows mirror inside the panel', async () => {
+		render(NavigationMenuHarness, { props: { dir: 'rtl', menu: { dir: 'rtl' } } });
+		trigger('Product').focus();
+		await userEvent.keyboard('{Enter}');
+		await tab();
+		await userEvent.keyboard('{ArrowLeft}');
+		expect(document.activeElement).toBe(linkNamed('Blocks'));
+		await userEvent.keyboard('{ArrowRight}');
+		expect(document.activeElement).toBe(linkNamed('Components'));
+	});
+
+	test('arrowing along the bar keeps the open panel; ArrowDown on another trigger switches', async () => {
+		render(NavigationMenuHarness);
+		trigger('Product').focus();
+		await userEvent.keyboard('{Enter}');
+		await userEvent.keyboard('{ArrowRight}');
+		expect(document.activeElement).toBe(trigger('Company'));
+		expect(expanded('Product')).toBe('true');
+		await userEvent.keyboard('{ArrowDown}');
+		expect(expanded('Company')).toBe('true');
+		expect(expanded('Product')).toBe('false');
+		expect(document.activeElement).toBe(trigger('Company'));
+	});
+
+	test('Tab from a later entry of the bar skips the open panel and leaves the menu', async () => {
+		render(NavigationMenuHarness);
+		trigger('Product').focus();
+		await userEvent.keyboard('{Enter}');
+		await userEvent.keyboard('{End}');
+		expect(document.activeElement).toBe(page.getByRole('link', { name: 'Pricing' }).element());
+		await tab();
+		expect(document.activeElement).toBe(
+			page.getByRole('button', { name: 'After the menu' }).element()
+		);
+		await expect.poll(() => expanded('Product')).toBe('false');
+	});
+});
+
+describe('pointer, then keyboard', () => {
+	test('a pressed trigger takes focus in every engine, without a ring: Tab enters its panel', async () => {
+		render(NavigationMenuHarness, { props: { menu: { openOnHover: false } } });
+		await userEvent.click(trigger('Product'));
+		expect(document.activeElement).toBe(trigger('Product'));
+		expect(trigger('Product').matches(':focus-visible')).toBe(false);
+		await tab();
+		expect(document.activeElement).toBe(page.getByRole('link', { name: /^Components/ }).element());
+	});
+
+	test('ArrowDown after a press moves into the panel', async () => {
+		render(NavigationMenuHarness, { props: { menu: { openOnHover: false } } });
+		await userEvent.click(trigger('Product'));
+		await userEvent.keyboard('{ArrowDown}');
+		expect(document.activeElement).toBe(page.getByRole('link', { name: /^Components/ }).element());
+	});
+
+	test('Enter on the focused trigger of a hover-opened panel closes it', async () => {
+		render(NavigationMenuHarness, { props: { menu: { delay: 0, closeDelay: 60 } } });
+		trigger('Product').focus();
+		await userEvent.hover(trigger('Product'));
+		await expect.poll(() => expanded('Product')).toBe('true');
+		await userEvent.keyboard('{Enter}');
+		expect(expanded('Product')).toBe('false');
+	});
+
+	test('a quick second press closes the panel for good, before the hover delay runs out', async () => {
+		render(NavigationMenuHarness, { props: { menu: { delay: 150 } } });
+		await userEvent.click(trigger('Product'));
+		await userEvent.click(trigger('Product'));
+		expect(expanded('Product')).toBe('false');
+		await sleep(300);
+		expect(expanded('Product')).toBe('false');
+	});
+});
+
 describe('wrapping', () => {
 	test('a bar wider than its container wraps instead of clipping its last item', async () => {
 		render(NavigationMenuHarness, { props: { menu: { class: 'max-w-40' } } });

@@ -93,8 +93,8 @@ export type NavigationMenuProps<Value extends string = string> = WithAttachments
 	/** The open panel when `value` is omitted. */
 	defaultValue?: Value | null;
 	/**
-	 * Called before the open panel changes: a trigger press, hovering or arrow-keying to another
-	 * trigger, Escape, an outside press, focus leaving, a link press, or the open panel being
+	 * Called before the open panel changes: a trigger press, hovering, ArrowDown on a trigger,
+	 * Escape, an outside press, focus leaving, a link press, or the open panel being
 	 * removed. `details.reason` (in the `{ value, details }` payload) says why, `details.event` carries the DOM event, and
 	 * `details.cancel()` keeps the current panel. Inside the callback `value` still holds the
 	 * previous panel. A link press closes every level and calls this once with `null`. Not called

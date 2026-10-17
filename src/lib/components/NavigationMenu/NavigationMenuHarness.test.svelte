@@ -57,6 +57,8 @@
 
 {#snippet richContent({ close }: { close: () => void })}
 	<p>Custom content</p>
+	<a href="#guide">Guide</a>
+	<input aria-label="Search the docs" />
 	<button type="button" onclick={close}>Close panel</button>
 {/snippet}
 
