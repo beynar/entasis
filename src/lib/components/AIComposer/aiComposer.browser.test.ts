@@ -187,13 +187,14 @@ describe('busy footer', () => {
 		await expect.poll(editorFocused).toBe(true);
 	});
 
-	test('Escape leaves a queued-message edit and puts the message back', async () => {
+	test('Escape leaves a queued-message edit, puts the message back and keeps the editor focused', async () => {
 		mount({ busy: true, queue: [queued('Queued follow-up')] });
 		await userEvent.click(button(/^Edit queued message/));
 		await expect
 			.poll(() => document.querySelector('[data-slot="ai-composer-queue-editing"]'))
 			.not.toBeNull();
 		await expect.poll(editorFocused).toBe(true);
+		await userEvent.keyboard(' changed');
 		await userEvent.keyboard('{Escape}');
 		await expect
 			.poll(() => document.querySelector('[data-slot="ai-composer-queue-editing"]'))
@@ -201,6 +202,21 @@ describe('busy footer', () => {
 		expect(document.querySelector('[data-slot="ai-composer-queue-item"]')?.textContent).toContain(
 			'Queued follow-up'
 		);
+		await expect.poll(editorFocused).toBe(true);
+		expect(document.activeElement).not.toBe(document.body);
+	});
+
+	test('the cancel-edit button unmounts and focus returns to the editor', async () => {
+		mount({ busy: true, queue: [queued('Queued follow-up')] });
+		await userEvent.click(button(/^Edit queued message/));
+		await expect
+			.poll(() => document.querySelector('[data-slot="ai-composer-queue-editing"]'))
+			.not.toBeNull();
+		await userEvent.click(button('Cancel queued message edit'));
+		await expect
+			.poll(() => document.querySelector('[data-slot="ai-composer-queue-editing"]'))
+			.toBeNull();
+		await expect.poll(editorFocused).toBe(true);
 	});
 
 	test('a long queued message truncates inside the composer', async () => {

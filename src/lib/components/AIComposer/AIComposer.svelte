@@ -250,7 +250,7 @@
 				ref?.contains(document.activeElement) ||
 				(event && 'submitter' in event && ref?.contains(event.submitter))
 			),
-		restoreFocus: focusEditorAfterSend,
+		restoreFocus: restoreEditorFocus,
 		messages: { submitFailed: t.aiComposerSubmitFailed, stopFailed: t.aiComposerStopFailed },
 		onSubmit,
 		onStop
@@ -414,7 +414,9 @@
 		void tick().then(() => editorHandle?.focus());
 	}
 
-	function focusEditorAfterSend(): void {
+	// Sending, queueing and leaving a queued edit clear the editor or unmount the control that was
+	// used; keep focus in the composer unless it already moved somewhere else on the page.
+	function restoreEditorFocus(): void {
 		void tick().then(() => {
 			const active = document.activeElement;
 			if (active && active !== document.body && !ref?.contains(active)) return;
@@ -427,7 +429,12 @@
 		// The editor and its suggestion popup handle Escape first and mark it handled.
 		if (event.defaultPrevented || event.key !== 'Escape' || !queueController.isEditing) return;
 		event.preventDefault();
+		cancelQueuedEdit();
+	}
+
+	function cancelQueuedEdit(): void {
 		queueController.cancelEdit();
+		restoreEditorFocus();
 	}
 
 	function clearDraft(): void {
@@ -500,7 +507,7 @@
 		onSteer={(messageId) => queueController.steer(messageId)}
 		onEdit={(messageId) => queueController.startEdit(messageId)}
 		onCancel={(messageId) => queueController.cancel(messageId)}
-		onCancelEdit={() => queueController.cancelEdit()}
+		onCancelEdit={cancelQueuedEdit}
 		{theme}
 	/>
 
