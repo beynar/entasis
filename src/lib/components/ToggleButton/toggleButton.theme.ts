@@ -65,7 +65,10 @@ const defaultButton = cva({
 			variant: 'outline',
 			checked: true,
 			class: `${selectedSoft} border-color`
-		}
+		},
+		// A pressed neutral outline keeps its hairline: the soft fill shows the selection, and a
+		// full-strength neutral border boxed the pressed segment off from the rest of a joined group.
+		{ color: 'neutral', variant: 'outline', checked: true, class: 'border-neutral-muted' }
 	]
 });
 
