@@ -19,6 +19,12 @@ export type TransitionSizeOptions = {
 	easing?: MotionEasingToken | Easing;
 	/** Optional custom event names that should trigger a re-measure. */
 	events?: string | string[];
+	/**
+	 * While a width animation runs, keep each direct child at the width it settles at, so its
+	 * content does not re-wrap at every intermediate width; the clipped element reveals it as it
+	 * grows. Default `true` for the `width` and `both` axes.
+	 */
+	fixContentWidth?: boolean;
 };
 
 const defaultAxis = 'height' satisfies TransitionSizeOptions['axis'];
@@ -82,6 +88,7 @@ export const transitionSize = (options: TransitionSizeOptions = {}): Attachment<
 	};
 	const isActive = () => options.isActive?.() ?? true;
 	const eventNames = getEventNames(options.events);
+	const fixContentWidth = options.fixContentWidth ?? axis !== 'height';
 
 	return (node) => {
 		if (typeof ResizeObserver === 'undefined') return;
@@ -92,9 +99,32 @@ export const transitionSize = (options: TransitionSizeOptions = {}): Attachment<
 		let animationId = 0;
 		let shouldRetarget = false;
 		const initialOverflow = node.style.overflow;
+		// Children pinned to their settled width for the current animation, with their own styles.
+		let pinned: { child: HTMLElement; width: string; flexShrink: string }[] = [];
+
+		const unpinChildren = () => {
+			for (const { child, width, flexShrink } of pinned) {
+				child.style.width = width;
+				child.style.flexShrink = flexShrink;
+			}
+			pinned = [];
+		};
+
+		const pinChildren = () => {
+			if (!fixContentWidth) return;
+			for (const child of Array.from(node.children)) {
+				if (!(child instanceof HTMLElement) || child.hidden) continue;
+				const width = child.getBoundingClientRect().width;
+				if (!width) continue;
+				pinned.push({ child, width: child.style.width, flexShrink: child.style.flexShrink });
+				child.style.width = `${width}px`;
+				child.style.flexShrink = '0';
+			}
+		};
 
 		const restoreOverflow = (id: number) => {
 			if (id !== animationId) return;
+			unpinChildren();
 			node.style.overflow = initialOverflow;
 			animation = null;
 			previousSize = readSize(node);
@@ -106,6 +136,8 @@ export const transitionSize = (options: TransitionSizeOptions = {}): Attachment<
 			const currentAnimation = animation;
 			animation = null;
 			currentAnimation.cancel();
+			// The next measurement must see the children's natural layout, not the pinned one.
+			unpinChildren();
 		};
 
 		const animateToCurrentSize = () => {
@@ -143,6 +175,8 @@ export const transitionSize = (options: TransitionSizeOptions = {}): Attachment<
 				? currentDuration
 				: remainingDuration;
 			node.style.overflow = 'hidden';
+			// Measured before the keyframes apply, while the children sit at their settled widths.
+			pinChildren();
 			animation = node.animate(getKeyframes(previousVisualSize, nextSize, axis), {
 				duration: animationDuration,
 				easing: easing()
@@ -172,6 +206,7 @@ export const transitionSize = (options: TransitionSizeOptions = {}): Attachment<
 		return () => {
 			if (frame !== null) cancelAnimationFrame(frame);
 			cancelAnimation();
+			unpinChildren();
 			observer.disconnect();
 			mutationObserver.disconnect();
 			eventNames.forEach((eventName) => node.removeEventListener(eventName, handleEvent));

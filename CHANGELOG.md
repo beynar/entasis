@@ -1078,6 +1078,10 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Fixed
 
+- `NavigationMenu`, `Pagination` and the `Tooltip` handoff: while their size animates, content keeps
+  the width it settles at instead of re-wrapping at every intermediate width; the animating frame
+  clips it. `transitionSize` does this for the `width` and `both` axes (`fixContentWidth: false`
+  opts out).
 - Child menus and controls follow their owner's `size` and `density`: `ToggleMenu`'s overflow and
   item menus, `Tabbar`'s tab menus and `VideoPlayer`'s settings menu take its `size`; `DataTable`'s
   rows-per-page and cell-editor `Select` take its `density`; `AITool`'s grouped calls and the
