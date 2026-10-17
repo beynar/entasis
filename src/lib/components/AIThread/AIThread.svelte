@@ -1,5 +1,8 @@
 <script lang="ts" generics="TMessage extends AIThreadItem = AIThreadItem">
-	import { createVirtualizer } from '@tanstack/svelte-virtual';
+	import {
+		createVirtualizer,
+		measureElement as measureVirtualElement
+	} from '@tanstack/svelte-virtual';
 	import { onDestroy, tick, untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import { get } from 'svelte/store';
@@ -141,6 +144,8 @@
 	// scrolling back to the end resumes it. Nothing else moves the user's scroll position.
 	let lastScrollTop = 0;
 	let stickFrame: number | undefined;
+	// Set while the virtualizer handles its ResizeObserver delivery (see `measureItem`).
+	let isInResizeDelivery = false;
 	let errorMessage = $state<string>();
 	let questionStates = $state<Record<string, AIThreadAskUserQuestionState | undefined>>({});
 	let questionValuesByKey = $state<Record<string, AIAskAnswers | undefined>>({});
@@ -219,6 +224,7 @@
 			followOnAppend: followOnAppendBehavior(),
 			scrollEndThreshold: endThreshold(),
 			initialOffset: initialThreadOffset,
+			measureElement: measureThreadItem,
 			onChange: handleVirtualizerChange
 		}))
 	);
@@ -394,8 +400,51 @@
 		scrollController.destroy();
 	});
 
+	// The virtualizer re-measures rows from its ResizeObserver and re-renders the range in the same
+	// pass (a streamed row grows, the pinned view moves to the new end, rows enter and leave the
+	// overscan). A row that starts or stops being laid out while the browser is still delivering
+	// resize notifications cannot be delivered in that pass, and the browser reports a
+	// "ResizeObserver loop" error. Rows that mount during a delivery are measured and observed on the
+	// next frame, before the next delivery (their cached or estimated size holds until then), and a
+	// removed row stops being observed before the browser looks for further changes.
+	function measureThreadItem(
+		element: HTMLElement,
+		entry: ResizeObserverEntry | undefined,
+		instance: Parameters<typeof measureVirtualElement<HTMLElement>>[2]
+	): number {
+		if (entry && !isInResizeDelivery) {
+			isInResizeDelivery = true;
+			setTimeout(() => (isInResizeDelivery = false));
+		}
+		return measureVirtualElement(element, entry, instance);
+	}
+
+	let isReleasingItems = false;
+
+	function releaseRemovedItems(): void {
+		if (isReleasingItems) return;
+		isReleasingItems = true;
+		queueMicrotask(() => {
+			isReleasingItems = false;
+			// With no node, the virtualizer unobserves and forgets every disconnected row.
+			get(virtualizerStore).measureElement(null);
+		});
+	}
+
 	const measureItem: Attachment<HTMLElement> = (element) => {
-		get(virtualizerStore).measureElement(element);
+		let frame: number | undefined;
+		if (isInResizeDelivery) {
+			frame = requestAnimationFrame(() => {
+				frame = undefined;
+				if (element.isConnected) get(virtualizerStore).measureElement(element);
+			});
+		} else {
+			get(virtualizerStore).measureElement(element);
+		}
+		return () => {
+			if (frame !== undefined) cancelAnimationFrame(frame);
+			releaseRemovedItems();
+		};
 	};
 
 	function createMessageKeys(currentMessages: readonly TMessage[]): string[] {

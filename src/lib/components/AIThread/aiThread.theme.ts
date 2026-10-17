@@ -19,7 +19,9 @@ const defaultViewport = cva({
 const defaultList = cva({ base: 'relative w-full' });
 // One vertical rhythm: rows of a turn (reasoning, tools, text, sources) are one fixed gap apart, the
 // first row of the next turn (or marker) adds a larger fixed gap, and a turn's own action-bar row
-// sits right under the row it closes. Rows carry no outer margins of their own.
+// sits right under the row it closes. A turn that ends with an action bar is already set apart by
+// the bar's reserved height, so the next turn adds only the in-turn gap after it (`afterBar`).
+// Rows carry no outer margins of their own.
 const defaultItem = cva({
 	base: 'absolute top-0 left-0 z-0 w-full hover:!z-20 focus-within:!z-20',
 	variants: {
@@ -31,6 +33,7 @@ const defaultItem = cva({
 		boundary: {
 			part: null,
 			unit: null,
+			afterBar: null,
 			bar: 'pt-0'
 		}
 	},
@@ -38,6 +41,9 @@ const defaultItem = cva({
 		{ boundary: 'part', density: 'compact', class: 'pt-micro' },
 		{ boundary: 'part', density: 'normal', class: 'pt-md' },
 		{ boundary: 'part', density: 'comfortable', class: 'pt-lg' },
+		{ boundary: 'afterBar', density: 'compact', class: 'pt-micro' },
+		{ boundary: 'afterBar', density: 'normal', class: 'pt-md' },
+		{ boundary: 'afterBar', density: 'comfortable', class: 'pt-lg' },
 		{ boundary: 'unit', density: 'compact', class: 'pt-md' },
 		{ boundary: 'unit', density: 'normal', class: 'pt-layout-md' },
 		{ boundary: 'unit', density: 'comfortable', class: 'pt-layout-lg' }

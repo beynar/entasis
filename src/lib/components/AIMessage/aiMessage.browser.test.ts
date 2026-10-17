@@ -91,6 +91,35 @@ describe('AIMessage', () => {
 		expect(heading / bodySize).toBeLessThan(1.4);
 	});
 
+	test('table cells align to the logical start in RTL; an explicit column alignment still wins', async () => {
+		// A short body cell under a long header, so start versus left alignment is visible.
+		const table = ['| Release gate name | Owner |', '| --- | :---: |', '| Go | Marketing |'].join(
+			'\n'
+		);
+		await render(Harness, { props: { content: table, dir: 'rtl', width: 360 } });
+		await expect
+			.poll(() => document.querySelector('[data-slot="ai-message-content"] td'))
+			.not.toBeNull();
+		const [th, centredTh] = Array.from(
+			document.querySelectorAll<HTMLElement>('[data-slot="ai-message-content"] th')
+		);
+		const [td, centredTd] = Array.from(
+			document.querySelectorAll<HTMLElement>('[data-slot="ai-message-content"] td')
+		);
+		// A cell's text hugs the inline start edge, which is the right edge in RTL.
+		const startGap = (cell: HTMLElement) => {
+			const range = document.createRange();
+			range.selectNodeContents(cell);
+			const text = range.getBoundingClientRect();
+			const box = cell.getBoundingClientRect();
+			return box.right - parseFloat(getComputedStyle(cell).paddingRight) - text.right;
+		};
+		expect(Math.abs(startGap(th))).toBeLessThan(1);
+		expect(Math.abs(startGap(td))).toBeLessThan(1);
+		expect(getComputedStyle(centredTh).textAlign).toMatch(/center$/);
+		expect(getComputedStyle(centredTd).textAlign).toMatch(/center$/);
+	});
+
 	test('a narrow message gives the user bubble its full width', async () => {
 		const long = 'A user message long enough to wrap across the full width of the column.';
 		const screen = await render(Harness, { props: { from: 'user', content: long, width: 300 } });

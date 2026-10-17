@@ -142,14 +142,25 @@
 			: visibility;
 	}
 
+	// Whether a row ends with a built-in action bar. The bar keeps its layout space while it is
+	// hover-hidden, so that space already separates the turn from the next one.
+	function endsWithBar(item: AIThreadRenderItem<TMessage> | undefined): boolean {
+		if (!item || messageActions === false || messageActionsVisibility === 'none') return false;
+		if (item.kind === 'actions') return true;
+		return item.kind === 'message' && !messageSlot && Boolean(item.actions);
+	}
+
 	// The spacing rhythm: the first row of a turn adds the larger gap between turns, a turn's own
-	// action-bar row sits right under the row it closes, other rows keep the in-turn gap.
-	function rowBoundary(index: number): 'part' | 'unit' | 'bar' {
+	// action-bar row sits right under the row it closes, other rows keep the in-turn gap. After a
+	// turn that ends with a bar, the bar stands in for the larger gap (`afterBar`), so a hidden bar
+	// does not add its height on top of the turn gap.
+	function rowBoundary(index: number): 'part' | 'unit' | 'afterBar' | 'bar' {
 		const item = renderItems[index];
 		if (!item || index === 0) return 'part';
 		if (item.kind === 'actions') return 'bar';
 		const previous = renderItems[index - 1];
-		return item.unit === undefined || item.unit !== previous?.unit ? 'unit' : 'part';
+		if (item.unit !== undefined && item.unit === previous?.unit) return 'part';
+		return endsWithBar(previous) ? 'afterBar' : 'unit';
 	}
 
 	function previousMessage(index: number): MessageRenderItem<TMessage> | undefined {

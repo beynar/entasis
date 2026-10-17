@@ -219,12 +219,14 @@ export const buildMarkdownStreamdownTheme = (size: MarkdownSize): StreamdownProp
 			base: 'state-layer border-neutral-muted not-last:border-b transition-colors'
 		},
 		// Cells read at body size and size to their content (no forced 200px columns); the base
-		// theme supplies the cell padding.
+		// theme supplies the cell padding. Streamdown writes `align="left"` on every cell without an
+		// explicit column alignment; those cells follow the logical start so RTL tables read from the
+		// right, while centre and right columns keep their `align`.
 		td: {
-			base: 'text-[length:inherit] text-neutral min-w-0 max-w-[400px] break-words'
+			base: 'text-[length:inherit] text-neutral min-w-0 max-w-[400px] break-words [&[align=left]]:text-start'
 		},
 		th: {
-			base: 'text-[length:inherit] text-neutral font-semibold min-w-0 max-w-[400px] break-words text-start'
+			base: 'text-[length:inherit] text-neutral font-semibold min-w-0 max-w-[400px] break-words [&[align=left]]:text-start'
 		},
 		sup: {
 			base: s.smallText

@@ -102,6 +102,31 @@ describe('following a streaming reply', () => {
 		expect(scrollButton()).toBeNull();
 	});
 
+	test('rows mounted by a pinned re-measure raise no ResizeObserver loop error', async () => {
+		const errors: string[] = [];
+		const record = (event: ErrorEvent) => {
+			if (/ResizeObserver/.test(event.message)) {
+				errors.push(event.message);
+				event.preventDefault();
+			}
+		};
+		window.addEventListener('error', record);
+		try {
+			const long = 'A long streamed paragraph that fills the viewport. '.repeat(60);
+			const screen = await renderAtEnd({ messages: streamingThread(long), streaming: true });
+			// The last row shrinks while pinned: the virtualizer re-measures it from its resize
+			// observer, the view moves up to the new end, and earlier rows mount in that same pass.
+			for (const text of ['Short now.', long, 'Short again.']) {
+				await screen.rerender({ messages: streamingThread(text), streaming: true });
+				await settle();
+			}
+			await expect.poll(() => distanceToEnd()).toBeLessThan(2);
+			expect(errors).toEqual([]);
+		} finally {
+			window.removeEventListener('error', record);
+		}
+	});
+
 	test('a reply that has not started shows the pending row', async () => {
 		await render(Harness, {
 			props: { messages: [{ id: 'u', role: 'user', content: 'Hello' }], streaming: true }
@@ -235,9 +260,31 @@ describe('turn layout', () => {
 		const inTurn = [gap(reasoning!, first!), gap(first!, tools!), gap(tools!, second!)];
 		// Rows sit on whole-pixel offsets, so allow a subpixel of rounding.
 		expect(Math.max(...inTurn) - Math.min(...inTurn)).toBeLessThan(1.5);
+		// Every turn here ends with an action bar (hover-hidden, still taking its space). The bar
+		// stands in for the turn gap: from a bar to the next turn is the in-turn gap.
 		const betweenTurns = [gap(user!, reasoning!), gap(rows()[5]!, nextUser!)];
 		expect(Math.abs(betweenTurns[0]! - betweenTurns[1]!)).toBeLessThan(1.5);
-		expect(betweenTurns[0]!).toBeGreaterThan(inTurn[0]! + 4);
+		expect(Math.abs(betweenTurns[0]! - inTurn[0]!)).toBeLessThan(1.5);
+		// What the eye sees after a user bubble whose bar is hidden: larger than the in-turn gap, but
+		// the hidden bar is not added on top of a full turn gap.
+		const bubble = user!.querySelector('[data-slot="ai-message-content"]')!.getBoundingClientRect();
+		const bar = user!.querySelector('[data-slot="ai-message-actions"]')!.getBoundingClientRect();
+		expect(getComputedStyle(user!.querySelector('[data-slot="ai-message-actions"]')!).opacity).toBe(
+			'0'
+		);
+		const visible = contentRect(reasoning!).top - bubble.bottom;
+		expect(visible).toBeGreaterThan(inTurn[0]! + 4);
+		expect(visible - bar.height - inTurn[0]!).toBeLessThan(8);
+	});
+
+	test('a turn without an action bar is a full turn gap from the next one', async () => {
+		await render(Harness, {
+			props: { messages: turns, height: 560, messageActionsVisibility: 'none' }
+		});
+		await expect.poll(() => rows().length).toBe(8);
+		const [user, reasoning, first] = rows();
+		const gap = (a: HTMLElement, b: HTMLElement) => contentRect(b).top - contentRect(a).bottom;
+		expect(gap(user!, reasoning!)).toBeGreaterThan(gap(reasoning!, first!) + 4);
 	});
 
 	test('hovering any row of an earlier turn reveals that turn’s action bar', async () => {
