@@ -105,7 +105,10 @@ export type AIAskUserQuestionSummaryProps = WithAttachments<
 		ref?: HTMLDivElement | null;
 		/** The questions of the completed request. */
 		questions: readonly AIAskQuestion[];
-		/** The submitted answers keyed by question id. */
+		/**
+		 * The submitted answers keyed by question id.
+		 * @readonly-value The summary displays a completed request's answers and never edits them.
+		 */
 		value: AIAskAnswers;
 		/** Heading above the answers; `false` hides it. Defaults to the localized "Your answers". */
 		title?: string | false;
