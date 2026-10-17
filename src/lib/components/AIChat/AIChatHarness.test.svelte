@@ -13,6 +13,7 @@
 		contentWidth,
 		density,
 		customErrorRegion = false,
+		width = 960,
 		onRetry
 	}: {
 		scenario?: 'chat' | 'skeleton';
@@ -22,6 +23,7 @@
 		contentWidth?: string | number;
 		density?: AIThreadDensity;
 		customErrorRegion?: boolean;
+		width?: number;
 		onRetry?: (payload: { target?: unknown }) => void;
 	} = $props();
 </script>
@@ -31,7 +33,7 @@
 {/snippet}
 
 <Theme>
-	<div data-testid="container" style:width="960px" style:height="560px" style:display="flex">
+	<div data-testid="container" style:width="{width}px" style:height="560px" style:display="flex">
 		{#if scenario === 'skeleton'}
 			<AIChatSkeleton class="h-full w-full" />
 		{:else}

@@ -76,8 +76,10 @@ const defaultFollowUps = cva({
 	},
 	defaultVariants: { density: 'normal' }
 });
+// The content column holding the follow-up row. The row pads itself vertically for focus rings,
+// so the negative block margin keeps the band as tall as before.
 const defaultFollowUpList = cva({
-	base: 'mx-auto flex w-full min-w-0 max-w-[var(--ai-thread-content-width,var(--ai-chat-content-width,none))] flex-wrap gap-sm'
+	base: 'mx-auto -my-xs w-full min-w-0 max-w-[var(--ai-thread-content-width,var(--ai-chat-content-width,none))]'
 });
 // The pending assistant row's label: rendered inside an assistant AIMessage, so it takes the
 // message's type size and column, with the shared `shimmer` utility on top.

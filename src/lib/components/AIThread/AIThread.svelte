@@ -9,7 +9,7 @@
 	import Alert from '../Alert/Alert.svelte';
 	import Button from '../Button/Button.svelte';
 	import type { AIMessageSize } from '../AIMessage/aiMessage.props.js';
-	import AISuggestion from '../AISuggestion/AISuggestion.svelte';
+	import AISuggestions from '../AISuggestion/AISuggestions.svelte';
 	import { arrowDownIcon } from '../Icons/arrowDown.js';
 	import type {
 		AIAskAnswers,
@@ -775,16 +775,15 @@
 		{/if}
 	</div>
 	{#if shouldShowFollowUps}
-		<div
-			data-slot="ai-thread-follow-ups"
-			role="group"
-			aria-label={t.aiThreadFollowUps}
-			class={classes.followUps({ density: resolvedDensity })}
-		>
+		<!-- The scroll row's viewport is the labelled group. -->
+		<div data-slot="ai-thread-follow-ups" class={classes.followUps({ density: resolvedDensity })}>
+			<!-- One row that scrolls sideways (with a fade) rather than wrapping on a phone. -->
 			<div class={classes.followUpList()}>
-				{#each resolvedSuggestions as suggestion, index (`${suggestion}:${index}`)}
-					<AISuggestion {suggestion} size="small" onSelect={handleSuggestionSelect} />
-				{/each}
+				<AISuggestions
+					suggestions={resolvedSuggestions}
+					label={t.aiThreadFollowUps}
+					onSelect={handleSuggestionSelect}
+				/>
 			</div>
 		</div>
 	{/if}

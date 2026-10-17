@@ -117,6 +117,30 @@ describe('AIChat', () => {
 		);
 	});
 
+	test('on a phone the follow-ups stay one scrollable row instead of wrapping', async () => {
+		await render(Harness, {
+			props: {
+				messages: turn,
+				width: 390,
+				suggestions: ['Add owners', 'Identify launch risks', 'Draft release notes']
+			}
+		});
+		await expect
+			.poll(() => document.querySelectorAll('[data-slot="ai-thread-follow-ups"] button').length)
+			.toBe(3);
+		const chips = [
+			...document.querySelectorAll<HTMLElement>('[data-slot="ai-thread-follow-ups"] button')
+		].map((chip) => chip.getBoundingClientRect());
+		expect(new Set(chips.map((chip) => Math.round(chip.top))).size).toBe(1);
+		const row = rect('[data-slot="ai-thread-follow-ups"]');
+		expect(row.height).toBeLessThan(chips[0]!.height * 2);
+		expect(row.right).toBeLessThanOrEqual(rect('[data-testid="container"]').right);
+		// The first chip keeps the transcript rows' inline edge.
+		expect(
+			Math.abs(chips[0]!.left - rect('[data-slot="ai-thread-item-content"]').left)
+		).toBeLessThan(0.5);
+	});
+
 	test('the composer band has no rule above it', async () => {
 		await render(Harness, { props: { messages: turn } });
 		await expect
