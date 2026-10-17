@@ -150,16 +150,30 @@ const defaultBubble = cva({
 });
 // Markdown inherits the bubble's type size and leading, and headings stay close to the body
 // (h2 about 1.25x) instead of the Markdown component's document scale.
+// Rich content reads on one scale: tables, lists, quotes and alerts at the message size; code
+// blocks one step below it (as tool and reasoning rows are), never under text-xs. Density owns
+// table-cell and code padding and the space between blocks.
 const defaultMarkdown = cva({
-	base: 'min-w-0 !text-[length:inherit] !leading-[inherit]',
+	base: 'min-w-0 !text-[length:inherit] !leading-[inherit] [&_:is(td,th,blockquote,li)]:!text-[length:inherit]',
 	variants: {
 		size: {
-			small: '[&_h1]:!text-base [&_h2]:!text-sm [&_:is(h3,h4,h5,h6)]:!text-xs',
-			normal: '[&_h1]:!text-lg [&_h2]:!text-base [&_:is(h3,h4,h5,h6)]:!text-sm',
-			large: '[&_h1]:!text-xl [&_h2]:!text-lg [&_:is(h3,h4,h5,h6)]:!text-base'
+			small:
+				'[&_h1]:!text-base [&_h2]:!text-sm [&_:is(h3,h4,h5,h6)]:!text-xs [&_[data-slot=code]_pre]:!text-xs',
+			normal:
+				'[&_h1]:!text-lg [&_h2]:!text-base [&_:is(h3,h4,h5,h6)]:!text-sm [&_[data-slot=code]_pre]:!text-xs',
+			large:
+				'[&_h1]:!text-xl [&_h2]:!text-lg [&_:is(h3,h4,h5,h6)]:!text-base [&_[data-slot=code]_pre]:!text-sm'
+		},
+		density: {
+			compact:
+				'[&_:is(td,th)]:!px-md [&_:is(td,th)]:!py-xs [&_[data-slot=code]_pre]:!px-md [&_[data-slot=code]_pre]:!py-sm [&_:is(p,ul,ol,blockquote)]:!my-sm',
+			normal:
+				'[&_:is(td,th)]:!px-lg [&_:is(td,th)]:!py-md [&_[data-slot=code]_pre]:!px-lg [&_[data-slot=code]_pre]:!py-md',
+			comfortable:
+				'[&_:is(td,th)]:!px-xl [&_:is(td,th)]:!py-lg [&_[data-slot=code]_pre]:!px-xl [&_[data-slot=code]_pre]:!py-lg [&_:is(p,ul,ol,blockquote)]:!my-lg'
 		}
 	},
-	defaultVariants: { size: 'normal' }
+	defaultVariants: { size: 'normal', density: 'normal' }
 });
 const defaultFiles = cva({ base: 'max-w-full min-w-0' });
 // The streaming caret: a small pulsing dot after the content, like Claude.ai and ChatGPT.

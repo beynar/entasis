@@ -45,8 +45,8 @@ When text parts are present, top-level message content is not rendered again. Co
 - **getMessageKey**: (message, index) => string | number | bigint | undefined - Stable virtualization key. Prefer persistent identifiers.
 - **liveText**: string - Screen-reader announcement. Falls back to AIConversation.
 - **streaming**: boolean - Sets the busy state. Falls back to AIConversation.
-- **density**: 'compact' | 'normal' | 'comfortable' - Transcript row and edge spacing. Default 'normal'.
-- **messageSize**: 'small' | 'normal' | 'large' - Type scale of the whole transcript: default AIMessage rows, reasoning, tool calls, sources, markers and answered-question summaries all follow it. Default 'normal'.
+- **density**: 'compact' | 'normal' | 'comfortable' - Transcript row and edge spacing, and the spacing inside messages (table cells, code blocks, space between paragraphs and lists). Default 'normal'.
+- **messageSize**: 'small' | 'normal' | 'large' - Type scale of the whole transcript. Message text, tables, lists and quotes read at it; code blocks, tool calls and reasoning one step below it (never under text-xs); sources, markers and answered-question summaries follow it too. Default 'normal'.
 - **messageVariant**: 'minimal' | 'bubble' - Presentation forwarded to default AIMessage rows. Default 'minimal' (flat full-width assistant prose).
 - **messageColor**: Colors - User-bubble colour forwarded to default AIMessage rows. Neutral (the theme default) is a quiet grey bubble; any other role paints a solid bubble.
 - **contentWidth**: string | number - Maximum width of the centred reading column (a CSS length, or pixels). Sets \`--ai-thread-content-width\`; without it rows follow an ancestor's \`--ai-chat-content-width\` (AIChat sets 48rem) and otherwise span the thread.

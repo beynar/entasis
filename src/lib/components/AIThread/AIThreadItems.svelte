@@ -101,6 +101,9 @@
 		errorRetry,
 		theme
 	}: Props<TMessage> = $props();
+	// Tool calls and reasoning read one step below the message text (code blocks do the same), so
+	// they sit with the answer without competing with it; `small` messages are already at the floor.
+	const blockSize = $derived(messageSize === 'large' ? 'normal' : 'small');
 
 	const conversation = getAIConversation<TMessage>();
 	const classes = $derived(useAIThreadTheme(theme));
@@ -273,6 +276,7 @@
 									index={item.messageIndex}
 									class={classes.message()}
 									size={messageSize}
+									{density}
 									variant={messageVariant}
 									color={messageColor}
 									name={messageName(item, virtualItem.index)}
@@ -311,7 +315,7 @@
 							{:else}
 								<AITool
 									tools={item.tools}
-									size={messageSize}
+									size={blockSize}
 									icon={toolIcon}
 									title={toolTitle}
 									content={toolContent}
@@ -322,7 +326,7 @@
 								/>
 							{/if}
 						{:else if item.kind === 'reasoning'}
-							<AIReasoning content={item.content} streaming={item.streaming} size={messageSize} />
+							<AIReasoning content={item.content} streaming={item.streaming} size={blockSize} />
 						{:else if item.kind === 'question-summary'}
 							<AIAskUserQuestionSummary
 								size={messageSize}
@@ -376,6 +380,7 @@
 							<AIMessage
 								from="assistant"
 								size={messageSize}
+								{density}
 								variant={messageVariant}
 								actions={false}
 								class={classes.message()}

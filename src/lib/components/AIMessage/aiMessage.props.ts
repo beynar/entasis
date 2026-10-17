@@ -1,6 +1,6 @@
 import type { Slot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
-import type { Colors, Sizes } from '$lib/types/theme.js';
+import type { Colors, Density, Sizes } from '$lib/types/theme.js';
 import type { HTMLAttributes } from 'svelte/elements';
 import type { MarkdownProps } from '../Markdown/markdown.props.js';
 import type {
@@ -50,6 +50,12 @@ export type AIMessageProps<TMessage extends AIThreadItem = AIThreadItem> = WithA
 		files?: readonly AIFileSource[];
 		/** Type and control scale. @default 'normal' */
 		size?: AIMessageSize;
+		/**
+		 * Spacing inside rich content: table cell and code block padding and the space between
+		 * paragraphs, lists, quotes, tables and code. AIThread and AIChat pass their `density`.
+		 * @default 'normal'
+		 */
+		density?: Density;
 		/**
 		 * Message presentation. Minimal keeps the user bubble and renders assistant and tool content
 		 * as flat, full-width prose; bubble frames assistant replies too. @default 'minimal'

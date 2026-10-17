@@ -25,6 +25,7 @@
 		content,
 		files,
 		size = 'normal',
+		density = 'normal',
 		variant = 'minimal',
 		color,
 		streaming = false,
@@ -127,6 +128,7 @@
 	data-from={resolvedRole}
 	data-role={resolvedRole}
 	data-size={size}
+	data-density={density}
 	data-variant={variant}
 	data-color={resolvedColor}
 	data-streaming={streaming ? 'true' : undefined}
@@ -152,7 +154,7 @@
 						content={markdownContent}
 						{...resolvedMarkdownProps}
 						size={markdownSize}
-						class={classes.markdown({ size, className: resolvedMarkdownProps?.class })}
+						class={classes.markdown({ size, density, className: resolvedMarkdownProps?.class })}
 						{allowedLinkPrefixes}
 						{allowedImagePrefixes}
 						renderHtml={false}

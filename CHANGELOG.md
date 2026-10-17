@@ -579,6 +579,11 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Changed
 
+- `AIMessage` and `AIThread`: rich content reads on one scale. Tables, lists, quotes and alerts
+  read at the message size and fenced code one step below it (it was fixed at text-sm), and tool
+  calls and reasoning in a thread read one step below the message text. `AIMessage` takes a
+  `density` (passed by `AIThread` and `AIChat`) that sets table-cell and code-block padding and the
+  space between paragraphs, lists and quotes.
 - `PopupMenu` / `ContextMenu` / `MenuBar`: radio and selected options inside floating submenus now
   close the whole menu tree when chosen, like every other item. Before, they left every menu open.
   To keep the menu open for multi-select, give the option `attrs: { 'data-menu-keep-open': 'true' }`
