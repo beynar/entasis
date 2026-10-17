@@ -1,3 +1,4 @@
+import type { Sizes } from '$lib/types/theme.js';
 import type { Slot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { MarkdownProps } from '$lib/components/Markdown/markdown.props.js';
@@ -29,6 +30,8 @@ export type AIReasoningProps = WithAttachments<
 	Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'class' | 'content'> & {
 		/** Bindable reference to the collapsible root. */
 		ref?: HTMLElement | null;
+		/** Type and icon scale: `small`, `normal` (default) or `large`, matching AIMessage sizes. AIThread passes its `messageSize`. */
+		size?: Sizes;
 		/** Markdown reasoning content. Takes precedence over custom children when provided. */
 		content?: string;
 		/** Bindable controlled open state. */

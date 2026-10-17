@@ -5,12 +5,14 @@ import {
 	type InferComponentTheme
 } from '$lib/utils/cva/index.js';
 // No outer margin: the thread or message owns the spacing between reasoning and the answer.
-const defaultRoot = cva({ base: 'not-prose min-w-0' });
+const defaultRoot = cva({ base: 'group/ai-reasoning-size not-prose min-w-0' });
 // Compact like a chat app's "Thought for…" line: py-xs keeps it about 28px tall.
 const defaultTrigger = cva({
-	base: 'flex w-fit max-w-full min-w-0 items-center justify-start gap-md py-xs text-sm text-neutral/70 transition-colors hover:text-neutral'
+	base: 'flex w-fit max-w-full min-w-0 items-center justify-start gap-md py-xs text-sm group-data-[size=small]/ai-reasoning-size:text-xs group-data-[size=large]/ai-reasoning-size:text-base text-neutral/70 transition-colors hover:text-neutral'
 });
-const defaultIcon = cva({ base: 'size-4 shrink-0' });
+const defaultIcon = cva({
+	base: 'size-4 group-data-[size=small]/ai-reasoning-size:size-3.5 group-data-[size=large]/ai-reasoning-size:size-4.5 shrink-0'
+});
 // One grid cell for every cycled label, so the trigger width follows the widest one.
 const defaultStatus = cva({ base: 'grid min-w-0 [&>*]:[grid-area:1/1]' });
 const defaultMessage = cva({

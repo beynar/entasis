@@ -86,10 +86,14 @@ const defaultFollowUpList = cva({
 const defaultPending = cva({ base: 'shimmer text-neutral/70' });
 const defaultError = cva({ base: 'w-full min-w-0' });
 const defaultErrorBody = cva({ base: 'flex flex-col items-start gap-sm' });
-const defaultSources = cva({ base: 'flex min-w-0 flex-wrap items-center gap-xs text-sm' });
-const defaultSourcesLabel = cva({ base: 'text-xs font-medium text-neutral/70' });
+const defaultSources = cva({
+	base: 'group/ai-thread-sources-size flex min-w-0 flex-wrap items-center gap-xs text-sm data-[size=small]:text-xs data-[size=large]:text-base'
+});
+const defaultSourcesLabel = cva({
+	base: 'text-xs group-data-[size=large]/ai-thread-sources-size:text-sm font-medium text-neutral/70'
+});
 const defaultSource = cva({
-	base: 'inline-flex h-6 max-w-60 min-w-0 items-center truncate rounded-full border border-neutral-muted px-md text-xs text-neutral/70 [&[href]]:state-layer [&[href]]:hover:text-neutral'
+	base: 'inline-flex h-6 max-w-60 min-w-0 items-center truncate rounded-full border border-neutral-muted px-md text-xs group-data-[size=large]/ai-thread-sources-size:text-sm text-neutral/70 [&[href]]:state-layer [&[href]]:hover:text-neutral'
 });
 // A turn's action-bar row. AIMessageActions sizes the row to its buttons.
 const defaultActions = cva({ base: '' });

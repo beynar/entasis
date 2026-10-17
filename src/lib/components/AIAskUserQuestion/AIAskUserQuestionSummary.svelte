@@ -6,6 +6,7 @@
 
 	let {
 		ref = $bindable(null),
+		size = 'normal',
 		questions,
 		value,
 		title,
@@ -28,6 +29,7 @@
 	bind:this={ref}
 	data-slot="ai-ask-user-question-summary"
 	role="group"
+	data-size={size}
 	aria-labelledby={heading ? `${id}-title` : undefined}
 	class={classes.summary({ className })}
 	{...attachments}

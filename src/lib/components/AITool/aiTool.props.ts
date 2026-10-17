@@ -1,5 +1,5 @@
 import type { Slot } from '$lib/components/Slot/slot.js';
-import type { DisclosureIndicator } from '$lib/types/theme.js';
+import type { DisclosureIndicator, Sizes } from '$lib/types/theme.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { Snippet } from 'svelte';
 import type { HTMLAttributes } from 'svelte/elements';
@@ -91,6 +91,8 @@ export type AIToolProps = WithAttachments<
 	AIToolRootAttributes & {
 		/** Bindable reference to the root tool-call group. */
 		ref?: HTMLDivElement | null;
+		/** Type and icon scale: `small`, `normal` (default) or `large`, matching AIMessage sizes. AIThread passes its `messageSize`. */
+		size?: Sizes;
 		/** Single call fallback used when `tools` is empty. */
 		tool?: AIToolCall;
 		/** Consecutive calls rendered as one aggregate accordion group. Takes precedence over `tool`. */

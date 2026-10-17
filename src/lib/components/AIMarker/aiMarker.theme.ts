@@ -6,7 +6,7 @@ import {
 } from '$lib/utils/cva/index.js';
 
 const defaultRoot = cva({
-	base: 'group/ai-marker relative flex min-h-4 w-full items-center gap-md text-left text-sm text-neutral/70 [&_svg:not([class*=size-])]:size-4',
+	base: 'group/ai-marker-size group/ai-marker relative flex min-h-4 w-full items-center gap-md text-left text-sm data-[size=small]:text-xs data-[size=large]:text-base text-neutral/70 [&_svg:not([class*=size-])]:size-4',
 	variants: {
 		variant: {
 			default: null,
@@ -18,7 +18,7 @@ const defaultRoot = cva({
 });
 const defaultRule = cva({ base: 'h-px min-w-0 flex-1 bg-neutral-muted' });
 const defaultIcon = cva({
-	base: 'flex size-4 shrink-0 items-center justify-center [&_svg:not([class*=size-])]:size-4'
+	base: 'flex size-4 group-data-[size=small]/ai-marker-size:size-3.5 group-data-[size=large]/ai-marker-size:size-4.5 shrink-0 items-center justify-center [&_svg:not([class*=size-])]:size-4'
 });
 const defaultContent = cva({
 	base: 'min-w-0 break-words [&_a]:underline [&_a]:underline-offset-3 [&_a:hover]:text-neutral',

@@ -14,4 +14,6 @@ Transcript marker with default, separator, and bottom-border variants.
 
 <AIMarker variant="separator" {icon} {content} aria-label="Imported files" />
 \`\`\`
+
+\`size\` (\`small\`, \`normal\` or \`large\`, default \`normal\`) scales the marker text and icon with the AIMessage size scale; AIThread passes its \`messageSize\`.
 `;

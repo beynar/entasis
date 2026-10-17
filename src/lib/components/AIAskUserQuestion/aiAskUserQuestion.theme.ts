@@ -55,8 +55,12 @@ const defaultDescription = cva({
 	base: 'break-words text-xs leading-relaxed text-neutral/70 [overflow-wrap:anywhere]'
 });
 // The answered record a transcript keeps once the request is complete: question → chosen labels.
-const defaultSummary = cva({ base: 'grid min-w-0 gap-sm text-sm text-neutral' });
-const defaultSummaryTitle = cva({ base: 'text-xs font-medium text-neutral/70' });
+const defaultSummary = cva({
+	base: 'group/ai-ask-summary-size grid min-w-0 gap-sm text-sm data-[size=small]:text-xs data-[size=large]:text-base text-neutral'
+});
+const defaultSummaryTitle = cva({
+	base: 'text-xs group-data-[size=large]/ai-ask-summary-size:text-sm font-medium text-neutral/70'
+});
 const defaultSummaryList = cva({ base: 'grid min-w-0 gap-sm' });
 const defaultSummaryItem = cva({ base: 'grid min-w-0 gap-micro' });
 const defaultSummaryQuestion = cva({

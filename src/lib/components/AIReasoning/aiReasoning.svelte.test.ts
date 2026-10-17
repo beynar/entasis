@@ -71,7 +71,8 @@ describe('AIReasoning', () => {
 		const root = document.querySelector('[data-slot="ai-reasoning"]');
 		expect(root?.className).not.toContain('mb-xl');
 		const paragraph = screen.getByText('Plan');
-		const markdown = paragraph.closest('.text-sm');
+		// The body uses the small Markdown scale (text-xs), one step quieter than a normal message.
+		const markdown = paragraph.closest('.text-xs');
 		expect(markdown).not.toBeNull();
 		// Markdown paints its paragraphs `text-neutral`; reasoning makes them inherit its muted colour.
 		const content = document.querySelector(

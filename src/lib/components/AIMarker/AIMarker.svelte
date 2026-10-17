@@ -6,6 +6,7 @@
 
 	let {
 		ref = $bindable(),
+		size = 'normal',
 		variant = 'default',
 		icon,
 		content,
@@ -22,6 +23,7 @@
 	bind:this={ref}
 	data-slot="ai-marker"
 	data-variant={variant}
+	data-size={size}
 	class={classes.root({ variant, className })}
 	{...attachments}
 >

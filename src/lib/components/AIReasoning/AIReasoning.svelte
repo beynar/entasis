@@ -23,6 +23,7 @@
 
 	let {
 		ref = $bindable(),
+		size = 'normal',
 		content,
 		streaming = false,
 		defaultOpen,
@@ -223,7 +224,12 @@
 
 {#snippet body()}
 	{#if content != null}
-		<Markdown {content} size="small" {...markdown} renderHtml={false} />
+		<Markdown
+			{content}
+			size={size === 'large' ? 'normal' : 'small'}
+			{...markdown}
+			renderHtml={false}
+		/>
 	{:else if childrenSlot}
 		<Slot render={childrenSlot} payload={reasoningState} />
 	{/if}
@@ -234,6 +240,7 @@
 	bind:open={openState.value}
 	onOpenChange={(nextOpen) => onOpenChange?.(nextOpen)}
 	icon={triggerSlot === undefined ? undefined : 'none'}
+	{size}
 	class={classes.root({ className })}
 	theme={collapsibleTheme}
 	{...rootAttributes}

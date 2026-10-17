@@ -28,14 +28,15 @@ async function renderProse(props: Record<string, unknown> = {}) {
 }
 
 describe('AIMessage', () => {
-	test('defaults to flat assistant prose at body size and a neutral user bubble', async () => {
+	test('defaults to flat assistant prose at the compact text-sm size and a neutral user bubble', async () => {
 		const screen = await render(Harness, { props: { content: 'Hello there' } });
 		await expect.poll(() => document.querySelector('[data-slot="ai-message"]')).not.toBeNull();
 		expect(q('[data-slot="ai-message"]').dataset.variant).toBe('minimal');
 		expect(style('[data-slot="ai-message-content"]').backgroundColor).toBe('rgba(0, 0, 0, 0)');
-		expect(parseFloat(style('[data-slot="ai-message-content"] p').fontSize)).toBeGreaterThanOrEqual(
-			16
-		);
+		// `normal` reads at text-sm (14px in the default type scale): one step below body text.
+		const fontSize = parseFloat(style('[data-slot="ai-message-content"] p').fontSize);
+		expect(fontSize).toBeGreaterThanOrEqual(13);
+		expect(fontSize).toBeLessThan(16);
 		expect(
 			parseFloat(style('[data-slot="ai-message-content"] p').lineHeight) /
 				parseFloat(style('[data-slot="ai-message-content"] p').fontSize)

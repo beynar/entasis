@@ -18,7 +18,7 @@ const tones = {
 // One call and a group share one surface per variant, so a lone call and a group of calls read
 // as the same block. The block follows its container, never the viewport, and caps at 32rem.
 const defaultRoot = cva({
-	base: 'grid w-full max-w-[32rem] min-w-0 text-sm text-neutral transition-[color,background-color,box-shadow]',
+	base: 'group/ai-tool-size grid w-full max-w-[32rem] min-w-0 text-sm data-[size=small]:text-xs data-[size=large]:text-base text-neutral transition-[color,background-color,box-shadow]',
 	variants: {
 		scope: {
 			single: '',
@@ -80,7 +80,7 @@ const defaultAccordionItem = cva({
 const defaultAccordionHeader = cva({ base: 'min-w-0 flex-1' });
 // Group and call rows share padding, so the group header lines up with the calls below it.
 const defaultAccordionTrigger = cva({
-	base: 'state-layer relative min-h-row-sm w-full min-w-0 items-center gap-md rounded-sm text-left text-sm text-neutral/70 hover:text-neutral',
+	base: 'state-layer relative min-h-row-sm w-full min-w-0 items-center gap-md rounded-sm text-left text-sm group-data-[size=small]/ai-tool-size:text-xs group-data-[size=large]/ai-tool-size:text-base text-neutral/70 hover:text-neutral',
 	variants: {
 		scope: {
 			single: '',
@@ -132,7 +132,9 @@ const defaultAccordionContent = cva({
 	],
 	defaultVariants: { variant: 'ghost' }
 });
-const defaultTitle = cva({ base: 'flex min-w-0 flex-1 items-center gap-md text-sm' });
+const defaultTitle = cva({
+	base: 'flex min-w-0 flex-1 items-center gap-md text-sm group-data-[size=small]/ai-tool-size:text-xs group-data-[size=large]/ai-tool-size:text-base'
+});
 // The leading mark: a spinner while the call runs, then a glyph for the outcome, so status reads
 // by shape as well as colour. The box is the icon size so rows and the group title line up.
 const defaultIndicator = cva({
@@ -156,7 +158,7 @@ const defaultName = cva({ base: 'min-w-0 truncate font-medium text-neutral' });
 const defaultSummary = cva({ base: 'min-w-0 flex-1 truncate text-neutral/70' });
 // Trailing status word and duration. `ms-auto` keeps them at the row end when there is no summary.
 const defaultMeta = cva({
-	base: 'ms-auto flex shrink-0 items-center gap-sm text-xs text-neutral/70 tabular-nums'
+	base: 'ms-auto flex shrink-0 items-center gap-sm text-xs group-data-[size=large]/ai-tool-size:text-sm text-neutral/70 tabular-nums'
 });
 const defaultStatusWord = cva({
 	base: 'flex items-center gap-xs',
@@ -198,7 +200,7 @@ const defaultSection = cva({
 	}
 });
 const defaultLabel = cva({
-	base: 'text-xs font-medium text-neutral/70',
+	base: 'text-xs group-data-[size=large]/ai-tool-size:text-sm font-medium text-neutral/70',
 	variants: {
 		tone: {
 			default: '',
@@ -208,10 +210,10 @@ const defaultLabel = cva({
 	defaultVariants: { tone: 'default' }
 });
 const defaultErrorMessage = cva({
-	base: 'min-w-0 rounded-sm bg-danger/5 px-md py-sm text-sm leading-relaxed break-words whitespace-pre-wrap text-danger-readable [overflow-wrap:anywhere] dark:bg-danger/10'
+	base: 'min-w-0 rounded-sm bg-danger/5 px-md py-sm text-sm group-data-[size=small]/ai-tool-size:text-xs group-data-[size=large]/ai-tool-size:text-base leading-relaxed break-words whitespace-pre-wrap text-danger-readable [overflow-wrap:anywhere] dark:bg-danger/10'
 });
 const defaultCode = cva({
-	base: 'my-0 rounded-sm text-xs',
+	base: 'my-0 rounded-sm text-xs group-data-[size=large]/ai-tool-size:text-sm',
 	variants: {
 		tone: {
 			default: '',
@@ -220,11 +222,11 @@ const defaultCode = cva({
 	}
 });
 const defaultCodeContainer = cva({
-	base: 'text-xs leading-relaxed [&_pre]:!px-md [&_pre]:!py-sm'
+	base: 'text-xs group-data-[size=large]/ai-tool-size:text-sm leading-relaxed [&_pre]:!px-md [&_pre]:!py-sm'
 });
 // A long value collapses to `maxLines` with a bottom fade; "Show all" lifts the cap.
 const defaultClamp = cva({
-	base: 'relative min-w-0 text-xs leading-relaxed',
+	base: 'relative min-w-0 text-xs group-data-[size=large]/ai-tool-size:text-sm leading-relaxed',
 	variants: {
 		collapsed: {
 			true: 'overflow-hidden [mask-image:linear-gradient(to_bottom,black_70%,transparent)]',
@@ -234,9 +236,11 @@ const defaultClamp = cva({
 	defaultVariants: { collapsed: false }
 });
 const defaultShowAll = cva({ base: 'justify-self-start' });
-const defaultEmpty = cva({ base: 'py-xs text-sm text-neutral/70' });
+const defaultEmpty = cva({
+	base: 'py-xs text-sm group-data-[size=small]/ai-tool-size:text-xs group-data-[size=large]/ai-tool-size:text-base text-neutral/70'
+});
 const defaultTree = cva({
-	base: 'grid min-w-0 gap-xs rounded-sm border border-neutral-muted bg-surface p-md font-mono text-xs leading-relaxed',
+	base: 'grid min-w-0 gap-xs rounded-sm border border-neutral-muted bg-surface p-md font-mono text-xs group-data-[size=large]/ai-tool-size:text-sm leading-relaxed',
 	variants: {
 		tone: {
 			default: '',

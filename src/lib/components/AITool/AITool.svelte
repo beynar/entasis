@@ -22,6 +22,7 @@
 
 	let {
 		ref = $bindable(null),
+		size = 'normal',
 		tool,
 		tools = [],
 		defaultValue = [],
@@ -161,6 +162,7 @@
 		bind:this={ref}
 		data-slot="ai-tool"
 		data-variant={variant}
+		data-size={size}
 		data-status={resolvedStatus}
 		class={classes.root({ scope: 'single', variant, tone: resolvedTone, className })}
 	>
@@ -195,6 +197,7 @@
 		bind:this={ref}
 		data-slot="ai-tool"
 		data-variant={variant}
+		data-size={size}
 		data-status={resolvedStatus}
 		class={classes.root({ scope: 'group', variant, tone: resolvedTone, className })}
 	>

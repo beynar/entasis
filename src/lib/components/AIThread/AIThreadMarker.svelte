@@ -6,11 +6,13 @@
 
 	let {
 		item,
+		size = 'normal',
 		marker,
 		markerIcon,
 		markerContent
 	}: {
 		item: Extract<AIThreadRenderItem<TMessage>, { kind: 'marker' }>;
+		size?: import('$lib/types/theme.js').Sizes;
 		marker?: import('../Slot/slot.js').Slot<AIThreadRenderPayload<TMessage>>;
 		markerIcon?: import('../Slot/slot.js').Slot<AIThreadRenderPayload<TMessage>>;
 		markerContent?: import('../Slot/slot.js').Slot<AIThreadRenderPayload<TMessage>>;
@@ -30,5 +32,10 @@
 {#if marker}
 	<Slot render={marker} {payload} />
 {:else}
-	<AIMarker variant={item.variant ?? 'separator'} icon={markerIcon ? icon : undefined} {content} />
+	<AIMarker
+		{size}
+		variant={item.variant ?? 'separator'}
+		icon={markerIcon ? icon : undefined}
+		{content}
+	/>
 {/if}

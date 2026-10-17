@@ -82,6 +82,10 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Added
 
+- `AIReasoning`, `AITool`, `AIMarker` and `AIAskUserQuestionSummary`: a `size` prop (`small`,
+  `normal`, `large`) that scales their text and icons with the `AIMessage` scale. `AIThread` and
+  `AIChat` pass `messageSize` to every row, so reasoning, tool calls, sources, markers and answered
+  questions follow the message size instead of a fixed one.
 - `Toast`: a toast with no `id` whose color, title and description match one still on screen updates
   that toast and restarts its timer instead of stacking a duplicate, so a repeated submission shows
   once. It compares plain-text titles and descriptions only. Pass `dedupe: false` to always add a

@@ -291,7 +291,13 @@
 								/>
 							{/if}
 						{:else if item.kind === 'marker'}
-							<AIThreadMarker {item} marker={markerSlot} {markerIcon} {markerContent} />
+							<AIThreadMarker
+								{item}
+								size={messageSize}
+								marker={markerSlot}
+								{markerIcon}
+								{markerContent}
+							/>
 						{:else if item.kind === 'tool-group'}
 							{#if toolSlot}
 								<Slot
@@ -305,6 +311,7 @@
 							{:else}
 								<AITool
 									tools={item.tools}
+									size={messageSize}
 									icon={toolIcon}
 									title={toolTitle}
 									content={toolContent}
@@ -315,15 +322,16 @@
 								/>
 							{/if}
 						{:else if item.kind === 'reasoning'}
-							<AIReasoning content={item.content} streaming={item.streaming} />
+							<AIReasoning content={item.content} streaming={item.streaming} size={messageSize} />
 						{:else if item.kind === 'question-summary'}
 							<AIAskUserQuestionSummary
+								size={messageSize}
 								questions={item.questions}
 								value={item.value}
 								title={item.title}
 							/>
 						{:else if item.kind === 'sources'}
-							<div data-slot="ai-thread-sources" class={classes.sources()}>
+							<div data-slot="ai-thread-sources" data-size={messageSize} class={classes.sources()}>
 								<span class={classes.sourcesLabel()}>{t.aiThreadSources}</span>
 								{#each item.sources as source (source.id)}
 									{#if source.url}

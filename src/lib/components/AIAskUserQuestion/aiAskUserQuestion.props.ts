@@ -1,3 +1,4 @@
+import type { Sizes } from '$lib/types/theme.js';
 import type { Slot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { AIAskUserQuestionThemeProps } from './aiAskUserQuestion.theme.js';
@@ -103,6 +104,8 @@ export type AIAskUserQuestionSummaryProps = WithAttachments<
 	Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'class' | 'title'> & {
 		/** Bindable reference to the summary root. */
 		ref?: HTMLDivElement | null;
+		/** Type and icon scale: `small`, `normal` (default) or `large`, matching AIMessage sizes. AIThread passes its `messageSize`. */
+		size?: Sizes;
 		/** The questions of the completed request. */
 		questions: readonly AIAskQuestion[];
 		/**

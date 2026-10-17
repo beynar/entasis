@@ -53,7 +53,7 @@ Input, output and error sections share one text label style ("Input", "Output", 
 
 ## Variants
 
-The default \`ghost\` variant renders unframed rows. \`card\` is an elevated surface, \`outline\` a transparent bounded surface, and \`soft\` a status-aware tint that doubles in dark mode. A lone call and a group share the same surface; group rows are divided inside it and align with the group header. The block is \`w-full max-w-[32rem]\` of its container, never sized from the viewport.
+The default \`ghost\` variant renders unframed rows. \`card\` is an elevated surface, \`outline\` a transparent bounded surface, and \`soft\` a status-aware tint that doubles in dark mode. \`size\` (\`small\`, \`normal\` or \`large\`, default \`normal\`) scales row text, values and icons with the AIMessage size scale; AIThread and AIChat pass their \`messageSize\`. A lone call and a group share the same surface; group rows are divided inside it and align with the group header. The block is \`w-full max-w-[32rem]\` of its container, never sized from the viewport.
 
 Use \`toggleIcon="none"\` for the default minimal trigger, \`chevron\` for a rotating disclosure icon, or \`plus-minus\` for plus/minus expansion controls. The choice applies to both group and child triggers.
 `;

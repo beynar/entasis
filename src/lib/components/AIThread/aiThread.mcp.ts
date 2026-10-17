@@ -46,7 +46,7 @@ When text parts are present, top-level message content is not rendered again. Co
 - **liveText**: string - Screen-reader announcement. Falls back to AIConversation.
 - **streaming**: boolean - Sets the busy state. Falls back to AIConversation.
 - **density**: 'compact' | 'normal' | 'comfortable' - Transcript row and edge spacing. Default 'normal'.
-- **messageSize**: 'small' | 'normal' | 'large' - Size forwarded to default AIMessage rows. Default 'normal'.
+- **messageSize**: 'small' | 'normal' | 'large' - Type scale of the whole transcript: default AIMessage rows, reasoning, tool calls, sources, markers and answered-question summaries all follow it. Default 'normal'.
 - **messageVariant**: 'minimal' | 'bubble' - Presentation forwarded to default AIMessage rows. Default 'minimal' (flat full-width assistant prose).
 - **messageColor**: Colors - User-bubble colour forwarded to default AIMessage rows. Neutral (the theme default) is a quiet grey bubble; any other role paints a solid bubble.
 - **contentWidth**: string | number - Maximum width of the centred reading column (a CSS length, or pixels). Sets \`--ai-thread-content-width\`; without it rows follow an ancestor's \`--ai-chat-content-width\` (AIChat sets 48rem) and otherwise span the thread.
@@ -80,7 +80,7 @@ When text parts are present, top-level message content is not rendered again. Co
 
 - **message**: Slot<{ message, index, actionsVisibility }> - Replaces a complete message row. The
   resolved action visibility keeps custom renderers aligned with the thread's latest-message rule.
-- **messageSize**, **messageVariant** - Configure only the default AIMessage renderer; a custom message slot owns its presentation.
+- **messageVariant** configures only the default AIMessage renderer, and a custom message slot owns its presentation. **messageSize** also sizes the built-in reasoning, tool, source, marker and summary rows.
 - **messageActions**: AIMessageActionSnippet | false - Replaces or disables default actions.
 - **messageActionsVisibility**: 'latest' | 'hover' | 'always' | 'none' (default: 'latest'). \`latest\` keeps the final assistant turn's bar visible and reveals the rest on hover or focus; hovering any row of a turn (its reasoning, tools or text) reveals that turn's bar, and hover-revealed bars always show on touch screens. Hidden bars keep their height, so no row draws under them. A system notice or marker after the last reply does not make it lose its \`latest\` bar or hide the follow-ups.
 - **messageCopyable**, **messageEditable**, **messageRetryable**: boolean
