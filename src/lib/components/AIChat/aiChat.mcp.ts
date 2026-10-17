@@ -110,7 +110,7 @@ Conversation \`onSubmit\`, \`onStop\`, and \`onFilesChange\` remain central stat
 
 An active \`activeAskUserQuestion\` replaces both a custom or default composer. The complete request is rendered with every question, initial values, title, requester, context, navigation labels, submit label, and discard label. Answers are retained by request key, and completion or dismissal resolves the captured request through \`AIConversationState.resolveAskUserQuestion\`.
 
-Prompt \`suggestions\` render as chips under the empty-state greeting, then as follow-ups above the composer once an assistant turn has finished (not while streaming, during a question, or under an error); \`showFollowUps={false}\` keeps them to the empty state. An explicit \`empty\` region has precedence. An explicit \`onSelect\` callback -- the pick event for a suggestion -- has precedence over the default behavior; without it, picking a suggestion updates \`currentInput\` and focuses the default composer.
+Prompt \`suggestions\` render as chips under the empty-state greeting, then as follow-ups above the composer (one row that scrolls sideways on narrow screens) once an assistant turn has finished (not while streaming, during a question, or under an error); \`showFollowUps={false}\` keeps them to the empty state. An explicit \`empty\` region has precedence. An explicit \`onSelect\` callback -- the pick event for a suggestion -- has precedence over the default behavior; without it, picking a suggestion updates \`currentInput\` and focuses the default composer.
 
 ## Skeleton
 

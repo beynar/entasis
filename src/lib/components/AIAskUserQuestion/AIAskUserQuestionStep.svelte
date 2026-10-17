@@ -6,6 +6,7 @@
 	import TextInput from '../Form/TextInput/TextInput.svelte';
 	import Slot from '../Slot/Slot.svelte';
 	import type { Slot as SlotType } from '../Slot/slot.js';
+	import { composedContains, getDeepActiveElement } from '$lib/utils/focus.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import AIAskUserQuestionFileStep from './AIAskUserQuestionFileStep.svelte';
 	import {
@@ -141,17 +142,31 @@
 		const items = choiceItems(question);
 		const item = items[position];
 		if (!item || ('disabled' in item && item.disabled)) return false;
+		const followFocus =
+			item.value !== AI_ASK_OTHER_VALUE &&
+			stepElement !== undefined &&
+			composedContains(stepElement, getDeepActiveElement(stepElement.ownerDocument));
 		if (question.type === 'single') {
 			selectSingle(item.value);
-			return true;
+		} else {
+			const current = [...optionAnswers(), ...(otherActive ? [AI_ASK_OTHER_VALUE] : [])];
+			selectMultiple(
+				current.includes(item.value)
+					? current.filter((entry) => entry !== item.value)
+					: [...current, item.value]
+			);
 		}
-		const current = [...optionAnswers(), ...(otherActive ? [AI_ASK_OTHER_VALUE] : [])];
-		selectMultiple(
-			current.includes(item.value)
-				? current.filter((entry) => entry !== item.value)
-				: [...current, item.value]
-		);
+		// Like an arrow key in a radio group, the picked option takes focus and the Tab stop, so
+		// Space and Tab act on it next. Other… focuses its own text field instead.
+		if (followFocus) void focusChoice(position);
 		return true;
+	}
+
+	async function focusChoice(position: number): Promise<void> {
+		await tick();
+		stepElement
+			?.querySelectorAll<HTMLElement>('[role="radio"],[role="checkbox"]')
+			[position]?.focus();
 	}
 </script>
 

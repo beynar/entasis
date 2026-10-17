@@ -69,7 +69,7 @@ When text parts are present, top-level message content is not rendered again. Co
 ## Empty state, suggestions and errors
 
 - **empty**: Slot - Replaces the empty state, a vertically centred greeting ("How can I help you today?") with wrapping suggestion chips.
-- **suggestions**: readonly string[] - Empty-state chips, then follow-ups below the transcript after a finished assistant turn (not while streaming, during a question or under an error). Falls back to AIConversation.
+- **suggestions**: readonly string[] - Empty-state chips, then follow-ups below the transcript after a finished assistant turn (not while streaming, during a question or under an error). Follow-ups are one row that scrolls sideways with an edge fade instead of wrapping. Falls back to AIConversation.
 - **showFollowUps**: boolean - Show the follow-ups. Default true.
 - **onSelect**: (suggestion) => void - Pick event for a suggestion or follow-up; takes precedence over the provider's default \`setInput\` behavior.
 - **error**: unknown - Shown as a danger row at the end of the transcript, where the reply failed. Falls back to AIConversation. An empty transcript shows the error instead of the greeting.

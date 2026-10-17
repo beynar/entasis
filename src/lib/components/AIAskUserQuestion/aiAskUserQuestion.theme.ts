@@ -4,7 +4,6 @@ import {
 	useComponentTheme,
 	type InferComponentTheme
 } from '$lib/utils/cva/index.js';
-import { selectedSolid } from '$lib/components/Theme/theme.recipes.js';
 
 const defaultRoot = cva({
 	base: 'raised grid min-w-0 gap-lg rounded-lg bg-surface-raised text-sm text-neutral'
@@ -18,10 +17,14 @@ const defaultRequester = cva({
 const defaultProgressGroup = cva({
 	base: 'flex shrink-0 items-center'
 });
-const defaultSteps = cva({ base: 'flex shrink-0 items-center gap-sm' });
+// The negative margins let the 24px hit areas overhang, so the dots line up with the header edge
+// and the row stays as tall as the progress text.
+const defaultSteps = cva({ base: '-my-xs -me-md flex shrink-0 items-center' });
+// A 24px pointer target (WCAG 2.5.8) drawing an 8px dot: the step dots are the way back to an
+// earlier question.
 const defaultStep = cva({
-	base: 'state-layer size-2 rounded-full bg-neutral/20 text-neutral transition-colors disabled:pointer-events-none disabled:opacity-50',
-	variants: { active: { true: selectedSolid, false: '' } }
+	base: "state-layer grid size-6 place-items-center rounded-full text-neutral transition-colors after:size-2 after:rounded-full after:bg-neutral/20 after:transition-colors after:content-[''] disabled:pointer-events-none disabled:opacity-50",
+	variants: { active: { true: 'after:bg-selected', false: '' } }
 });
 const defaultBody = cva({
 	base: 'grid min-w-0 gap-lg'

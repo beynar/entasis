@@ -1526,6 +1526,14 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
   linked to a group named by the question (`aria-describedby`), which gets `data-invalid` while the
   error shows, and the dev-mode `binding_property_non_reactive` warning no longer appears for each
   step.
+- `AIComposer`: cancelling a queued-message edit, with Escape or its cancel button, keeps focus in the
+  editor instead of dropping it to `<body>`.
+- `AIAskUserQuestion`: a number key that picks an option while focus is on the options moves focus
+  and the Tab stop to the picked option, so Space and Tab act on it next. The step dots, the way
+  back to an earlier question, are 24px pointer targets around the same 8px dot.
+- `AIReasoning`: the default trigger is about 28px tall instead of 36px.
+- `AIThread` / `AIChat`: follow-up suggestions are one row that scrolls sideways with an edge fade
+  instead of wrapping onto several rows on a phone.
 
 ## 0.11.0 — 2026-10-10
 

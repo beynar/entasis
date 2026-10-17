@@ -93,7 +93,7 @@ Configure capture with \`voiceInputMinDuration\`, \`voiceInputMaxDuration\`, \`v
 
 ## Queue
 
-When \`busy\` and \`queueWhileBusy\` are true, submission creates a flat \`AIComposerQueuedMessage\` and clears the draft. While busy the footer shows a solid stop button in the send position and, once the draft is not empty, a "Queue message" button next to it. Queue rows can be reordered, steered (a steered row carries a "Steering" badge), edited, restored, cancelled, or have editing cancelled; Escape in the composer cancels an edit unless the suggestion popup handled it. Long queued messages truncate inside the composer. The lifecycle callbacks are:
+When \`busy\` and \`queueWhileBusy\` are true, submission creates a flat \`AIComposerQueuedMessage\` and clears the draft. While busy the footer shows a solid stop button in the send position and, once the draft is not empty, a "Queue message" button next to it. Queue rows can be reordered, steered (a steered row carries a "Steering" badge), edited, restored, cancelled, or have editing cancelled; Escape in the composer cancels an edit unless the suggestion popup handled it; cancelling an edit, by Escape or its button, keeps focus in the editor. Long queued messages truncate inside the composer. The lifecycle callbacks are:
 
 - \`onQueueChange\`
 - \`onQueuedMessageAdd\`, \`onQueuedMessageCancel\`
