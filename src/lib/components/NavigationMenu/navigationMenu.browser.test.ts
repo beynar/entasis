@@ -190,15 +190,20 @@ describe('keyboard inside a panel and along the bar', () => {
 		expect(window.scrollY).toBe(0);
 	});
 
-	test('in right-to-left the inline arrows mirror inside the panel', async () => {
+	test('inline arrows inside a panel walk across the menus of the bar, mirrored in right-to-left', async () => {
 		render(NavigationMenuHarness, { props: { dir: 'rtl', menu: { dir: 'rtl' } } });
 		trigger('Product').focus();
 		await userEvent.keyboard('{Enter}');
 		await tab();
-		await userEvent.keyboard('{ArrowLeft}');
-		expect(document.activeElement).toBe(linkNamed('Blocks'));
-		await userEvent.keyboard('{ArrowRight}');
 		expect(document.activeElement).toBe(linkNamed('Components'));
+		// Right-to-left: ArrowLeft is the inline end, the next menu.
+		await userEvent.keyboard('{ArrowLeft}');
+		await expect.poll(() => expanded('Company')).toBe('true');
+		expect(expanded('Product')).toBe('false');
+		await expect.poll(() => document.activeElement).toBe(linkNamed('About'));
+		await userEvent.keyboard('{ArrowRight}');
+		await expect.poll(() => expanded('Product')).toBe('true');
+		await expect.poll(() => document.activeElement).toBe(linkNamed('Components'));
 	});
 
 	test('arrowing along the bar keeps the open panel; ArrowDown on another trigger switches', async () => {

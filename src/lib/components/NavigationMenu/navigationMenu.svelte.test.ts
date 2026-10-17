@@ -290,26 +290,33 @@ describe('moving inside a panel', () => {
 		expect(link('One')).toHaveFocus();
 	});
 
-	test('ArrowRight and ArrowLeft step through the links too, mirrored in right-to-left', async () => {
+	test('ArrowRight inside a panel goes to the next entry of the bar: a link closes the panel and takes focus', async () => {
 		await mount({ items: panelLinks });
 		trigger('Docs').focus();
 		await open('Docs');
 		link('One').focus();
 		await keydown(link('One'), 'ArrowRight');
-		expect(link('Two')).toHaveFocus();
-		await keydown(link('Two'), 'ArrowLeft');
-		expect(link('One')).toHaveFocus();
+		expect(link('Blog')).toHaveFocus();
+		expect(trigger('Docs')).toHaveAttribute('aria-expanded', 'false');
 	});
 
-	test('in right-to-left ArrowLeft moves forward inside the panel', async () => {
+	test('ArrowLeft at the first entry of the bar stays put, and the arrows mirror in right-to-left', async () => {
+		await mount({ items: panelLinks });
+		trigger('Docs').focus();
+		await open('Docs');
+		link('One').focus();
+		await keydown(link('One'), 'ArrowLeft');
+		expect(link('One')).toHaveFocus();
+		expect(trigger('Docs')).toHaveAttribute('aria-expanded', 'true');
+	});
+
+	test('in right-to-left ArrowLeft goes to the next entry of the bar', async () => {
 		await mount({ items: panelLinks, dir: 'rtl', menu: { dir: 'rtl' } });
 		trigger('Docs').focus();
 		await open('Docs');
 		link('One').focus();
 		await keydown(link('One'), 'ArrowLeft');
-		expect(link('Two')).toHaveFocus();
-		await keydown(link('Two'), 'ArrowRight');
-		expect(link('One')).toHaveFocus();
+		expect(link('Blog')).toHaveFocus();
 	});
 
 	test('a modified arrow key is left to the browser', async () => {

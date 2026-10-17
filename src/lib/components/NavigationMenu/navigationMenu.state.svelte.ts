@@ -10,7 +10,7 @@
 // The panel area is one viewport rendered inline inside the `<nav>`, after the trigger list. It
 // is never portaled, so the document order stays the reading order; `useTabBridge` carries Tab
 // from the open trigger into the panel and on to whatever follows the trigger.
-import { getContext, setContext, untrack } from 'svelte';
+import { getContext, setContext, tick, untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
@@ -470,8 +470,10 @@ export function useNavigationMenuState<Value extends string>(
 	 * They only move focus: the open panel, if any, stays as it is (Enter, Space or ArrowDown on
 	 * another trigger switches to its panel).
 	 */
-	const list: Attachment<HTMLElement> = (node) =>
-		on(node, 'keydown', (event) => {
+	let listElement: HTMLElement | null = null;
+	const list: Attachment<HTMLElement> = (node) => {
+		listElement = node;
+		const off = on(node, 'keydown', (event) => {
 			if (event.defaultPrevented) return;
 			const current = (event.target as Element).closest<HTMLElement>(ITEM_SELECTOR);
 			if (!current || !node.contains(current)) return;
@@ -492,15 +494,53 @@ export function useNavigationMenuState<Value extends string>(
 			if (!target || target === current) return;
 			target.focus(FOCUS_VISIBLE);
 		});
+		return () => {
+			off();
+			if (listElement === node) listElement = null;
+		};
+	};
 
 	/** Whether the arrow keys belong to the control itself: it edits text or picks an option. */
 	const ownsArrowKeys = (element: Element): boolean =>
 		isTextField(element) || element.matches('select');
 
 	/**
-	 * Inside the open panel, the arrow keys move between its links and buttons (ArrowDown and
-	 * the inline-end arrow forward, ArrowUp and the inline-start arrow back, wrapping at either
-	 * end), and Home and End jump to the first and last. Disabled links and collapsed nested
+	 * From inside the open panel, the inline arrows go to the neighbouring entry of the bar, as in
+	 * a menubar: a trigger opens its panel and focus lands on that panel's first control (so the
+	 * arrows keep walking across menus); a link closes the panel and takes focus. The bar's ends do
+	 * not wrap.
+	 */
+	function moveToAdjacentEntry(event: KeyboardEvent, step: number) {
+		const bar = listElement;
+		const current = activeTrigger;
+		if (!bar || !current) return;
+		event.preventDefault();
+		const items = enabledItems(bar);
+		const target = items[items.indexOf(current) + step];
+		if (!target) return;
+		const value = [...triggers].find(([, element]) => element === target)?.[0];
+		if (value === undefined) {
+			if (requestChange(null, { reason: 'list-navigation', event, interaction: 'keyboard' }))
+				target.focus(FOCUS_VISIBLE);
+			return;
+		}
+		const opened = requestChange(value, {
+			reason: 'list-navigation',
+			event,
+			trigger: target,
+			interaction: 'keyboard'
+		});
+		if (!opened) return;
+		void tick().then(() => {
+			const first = activePanel ? getTabbableElements(activePanel)[0] : undefined;
+			(first ?? target).focus(FOCUS_VISIBLE);
+		});
+	}
+
+	/**
+	 * Inside the open panel, ArrowDown and ArrowUp move between its links and buttons (wrapping at
+	 * either end), the inline arrows move to the neighbouring menu of the bar (see
+	 * `moveToAdjacentEntry`), and Home and End jump to the first and last. Disabled links and collapsed nested
 	 * levels are not tab stops, so they are skipped. A text field keeps its arrow keys, and a
 	 * control that handles them itself (it calls `preventDefault()`) wins.
 	 */
@@ -515,6 +555,10 @@ export function useNavigationMenuState<Value extends string>(
 			return;
 		}
 		if (hasShortcutModifier(event) || ownsArrowKeys(target)) return;
+		if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+			moveToAdjacentEntry(event, arrowStep(event.key, false));
+			return;
+		}
 		const step = arrowStep(event.key, true);
 		const edge = event.key === 'Home' ? 'first' : event.key === 'End' ? 'last' : null;
 		if (!step && !edge) return;

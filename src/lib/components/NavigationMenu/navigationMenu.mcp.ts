@@ -128,7 +128,8 @@ Disclosure navigation (the WAI-ARIA APG disclosure navigation pattern): every tr
 | Bar entry | ArrowRight / ArrowLeft (mirrored in RTL) | Next / previous enabled entry, no wrap; the open panel is unchanged |
 | Bar entry | Home / End | First / last enabled entry |
 | Bar entry | Escape | Closes the open panel; focus stays |
-| Panel | ArrowDown, ArrowRight / ArrowUp, ArrowLeft | Next / previous control, wrapping |
+| Panel | ArrowDown / ArrowUp | Next / previous control, wrapping |
+| Panel | ArrowRight / ArrowLeft (mirrored in RTL) | The neighbouring entry of the bar: a trigger opens its panel and focus goes to its first control; a link closes the panel and takes focus; no wrap at the ends |
 | Panel | Home / End | First / last control |
 | Panel | Tab past the last control | Next entry after the trigger; the panel closes |
 | Panel | Shift+Tab on the first control | The trigger; the panel stays open |
