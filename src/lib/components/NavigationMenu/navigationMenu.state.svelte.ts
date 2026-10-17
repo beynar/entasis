@@ -43,8 +43,8 @@ import { useNavigationMenuMotion } from './navigationMenu.theme.js';
 
 /** Space in px kept between the panel area and the edges of the layout viewport. */
 const COLLISION_PADDING = 8;
-/** Distance in px the incoming panel travels when it replaces another. */
-const SWITCH_DISTANCE = 16;
+/** Distance in px a panel travels when it replaces another (in) or is replaced (out). */
+const SWITCH_DISTANCE = 24;
 /** How long a panel switch counts as under way: the window in which size and slide animations run. */
 const SWITCH_WINDOW = 300;
 
@@ -365,13 +365,16 @@ export function useNavigationMenuState<Value extends string>(
 	});
 
 	/** Slides a panel in from the side of the trigger that was open before it. */
+	// A switch is staged like a cross-slide: the old panel leaves first (`panelOut`, the motion's
+	// out duration), then the new one slides in over twice the in duration while the popup is still
+	// resizing, so each step can be seen. It waits invisible (`fill: backwards`) until its turn.
 	const animatePanel = (element: HTMLElement) => {
 		if (!isSwitching() || activationDirection === null) return;
-		const spec = resolveMotion(undefined, {
+		const resolved = resolveMotion(undefined, {
 			motion: options.motion(),
 			transition: options.transition()
-		}).in;
-		const duration = spec.duration ?? 0;
+		});
+		const duration = (resolved.in.duration ?? 0) * 2;
 		if (!duration || typeof element.animate !== 'function') return;
 		const from = activationDirection === 'right' ? SWITCH_DISTANCE : -SWITCH_DISTANCE;
 		return element.animate(
@@ -379,7 +382,12 @@ export function useNavigationMenuState<Value extends string>(
 				{ opacity: 0, transform: `translateX(${from}px)` },
 				{ opacity: 1, transform: 'translateX(0px)' }
 			],
-			{ duration, easing: easingBezierStrings[spec.easing ?? 'cubicOut'] }
+			{
+				duration,
+				delay: resolved.out.duration ?? 0,
+				fill: 'backwards',
+				easing: easingBezierStrings[resolved.in.easing ?? 'cubicOut']
+			}
 		);
 	};
 

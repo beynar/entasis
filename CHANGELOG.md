@@ -585,8 +585,9 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 ### Changed
 
 - `NavigationMenu`: switching panels animates in both directions. The old panel fades and slides
-  out away from the new trigger while the new one slides in from its side; before, the old panel
-  vanished at once.
+  out away from the new trigger first, then the new one slides in from its side while the popup
+  resizes, so each step reads; before, the old panel vanished at once and the new one slid in
+  together with the resize.
 - `NavigationMenu`: keyboard follows the WAI-ARIA disclosure navigation pattern, with menubar-style
   arrows. Inside an open panel, ArrowDown and ArrowUp move between its links and buttons, wrapping,
   and Home and End jump to the first and last; disabled links, collapsed nested levels and text
