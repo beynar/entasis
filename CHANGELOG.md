@@ -16,6 +16,10 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Upgrading from 0.11
 
+- `Sidebar` theme: the sub-row variant `reserveEnd` is replaced by `endReserve`
+  (`none | action | actionBelowMd`), which menu rows now use too. Overrides keyed on
+  `reserveEnd` stop matching; key them on `endReserve`. A row badge now sits inside the row's link
+  or button, so it is part of the row's accessible name ("Inbox 12").
 - `readonly` becomes `readOnly`. Every value control now takes `readOnly`: it stays focusable and
   announced, refuses edits, and still validates and submits. Rename `RatingInput`'s `readonly` to
   `readOnly`; the old name works for one minor. Inputs still render the native `readonly`
