@@ -79,6 +79,35 @@ export const spinnerOverlay = (opts: SpinnerOverlayOptions) => {
 		mountedSpinnerIndicators.set(overlay, { component, className, variant });
 	};
 
+	// The overlay sits inside the host's border, where the host clips its content with its inner
+	// radius (outer radius minus border width). Inheriting the outer radius made the overlay's corners
+	// rounder than that clip and let the host's background show at each corner.
+	const matchInnerRadius = (node: HTMLElement, overlay: HTMLElement) => {
+		const style = getComputedStyle(node);
+		const corner = (radius: string, a: string, b: string) =>
+			`max(0px, calc(${radius} - ${Math.max(parseFloat(a) || 0, parseFloat(b) || 0)}px))`;
+		overlay.style.borderTopLeftRadius = corner(
+			style.borderTopLeftRadius,
+			style.borderTopWidth,
+			style.borderLeftWidth
+		);
+		overlay.style.borderTopRightRadius = corner(
+			style.borderTopRightRadius,
+			style.borderTopWidth,
+			style.borderRightWidth
+		);
+		overlay.style.borderBottomRightRadius = corner(
+			style.borderBottomRightRadius,
+			style.borderBottomWidth,
+			style.borderRightWidth
+		);
+		overlay.style.borderBottomLeftRadius = corner(
+			style.borderBottomLeftRadius,
+			style.borderBottomWidth,
+			style.borderLeftWidth
+		);
+	};
+
 	const setOverlay = (node: HTMLElement) => {
 		let mounted = false;
 		let overlay = getSpinnerOverlay(node);
@@ -91,6 +120,7 @@ export const spinnerOverlay = (opts: SpinnerOverlayOptions) => {
 		}
 		overlay.dataset.color = opts.color ?? 'neutral';
 		overlay.className = classes.overlay({ class: opts.class });
+		matchInnerRadius(node, overlay);
 
 		return [overlay, mounted] as const;
 	};

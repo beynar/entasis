@@ -1078,6 +1078,8 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Fixed
 
+- `spinnerOverlay` (and so a `loading` `Button`): the overlay takes the host's inner corner radius
+  (outer radius minus border width), so the host's background no longer shows at its corners.
 - `NavigationMenu`, `Pagination` and the `Tooltip` handoff: while their size animates, content keeps
   the width it settles at instead of re-wrapping at every intermediate width; the animating frame
   clips it. `transitionSize` does this for the `width` and `both` axes (`fixContentWidth: false`
