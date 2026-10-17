@@ -169,8 +169,11 @@ const defaultGroup = cva({
 	}
 });
 
+// The label text is its own span and truncates on one line; with pinned actions
+// (`--sidebar-group-actions-width`, published by the group) it stops before them. A static label
+// pads its end; a collapsible one keeps its chevron at the end and spaces the text off the actions.
 const defaultGroupLabel = cva({
-	base: 'text-neutral/70 flex shrink-0 items-center rounded-sm font-medium outline-none transition-[height,margin,padding,opacity] duration-normal ease-linear group-data-[collapsible=icon]:opacity-0 disabled:pointer-events-none [&>svg]:shrink-0 [&>svg]:size-[var(--sidebar-icon-size)]',
+	base: 'text-neutral/70 flex shrink-0 items-center rounded-sm text-start font-medium outline-none [&>span]:min-w-0 [&>span]:flex-1 [&>span]:truncate transition-[height,margin,padding,opacity] duration-normal ease-linear group-data-[collapsible=icon]:opacity-0 disabled:pointer-events-none [&_svg]:shrink-0 [&_svg]:size-[var(--sidebar-icon-size)]',
 	variants: {
 		interactive: {
 			true: 'state-layer hover:text-neutral focus-visible:ring-2 focus-visible:ring-focus/50',
@@ -185,12 +188,29 @@ const defaultGroupLabel = cva({
 			compact: 'px-md',
 			normal: 'px-lg',
 			comfortable: 'px-lg'
+		},
+		hasActions: {
+			true: '',
+			false: ''
 		}
 	},
+	compoundVariants: [
+		{
+			interactive: false,
+			hasActions: true,
+			class: 'pe-[calc(var(--sidebar-group-actions-width)+var(--space-md))]'
+		},
+		{
+			interactive: true,
+			hasActions: true,
+			class: '[&>span]:me-[calc(var(--sidebar-group-actions-width)+var(--space-md))]'
+		}
+	],
 	defaultVariants: {
 		interactive: false,
 		size: 'normal',
-		density: 'normal'
+		density: 'normal',
+		hasActions: false
 	}
 });
 
@@ -207,10 +227,12 @@ const defaultGroupAction = cva({
 				'top-[calc(var(--sidebar-group-padding)+var(--control-height-md)/2)] -translate-y-1/2',
 			large: 'top-[calc(var(--sidebar-group-padding)+var(--control-height-lg)/2)] -translate-y-1/2'
 		},
+		// Just inside the label's end. Beside a collapsible label's chevron: the group padding,
+		// the label padding, the chevron and a gap, so the two never touch at any icon size.
 		density: {
-			compact: 'right-2.5',
-			normal: 'right-3',
-			comfortable: 'right-4'
+			compact: 'end-2.5',
+			normal: 'end-3',
+			comfortable: 'end-4'
 		},
 		hasToggle: {
 			true: '',
@@ -218,9 +240,18 @@ const defaultGroupAction = cva({
 		}
 	},
 	compoundVariants: [
-		{ density: 'compact', hasToggle: true, class: 'right-8' },
-		{ density: 'normal', hasToggle: true, class: 'right-10' },
-		{ density: 'comfortable', hasToggle: true, class: 'right-12' }
+		{
+			density: 'compact',
+			hasToggle: true,
+			class:
+				'end-[calc(var(--sidebar-group-padding)+var(--space-md)+var(--sidebar-icon-size)+var(--space-xs))]'
+		},
+		{
+			density: ['normal', 'comfortable'],
+			hasToggle: true,
+			class:
+				'end-[calc(var(--sidebar-group-padding)+var(--space-lg)+var(--sidebar-icon-size)+var(--space-xs))]'
+		}
 	],
 	defaultVariants: {
 		size: 'normal',
@@ -243,21 +274,35 @@ const defaultMenu = cva({
 	}
 });
 
+// Room at a row's end for its pinned action (`menuAction` / `subAction`), so the label and any
+// in-flow trailing part (badge, chevron) stop before the action's box. `action` reserves it
+// always. `actionBelowMd` is for a row whose last trailing part is its badge: from `md` up the
+// badge holds the end column and the action takes its place while it shows, so the room is only
+// needed below `md`, where the action is always visible and the badge sits before it.
+const rowEndReserveKeys = { none: '', action: '', actionBelowMd: '' };
+const rowEndReserve: {
+	endReserve: 'action' | 'actionBelowMd';
+	size: 'large' | ('small' | 'normal')[];
+	class: string;
+}[] = [
+	{ endReserve: 'action', size: ['small', 'normal'], class: 'pe-layout-lg' },
+	{ endReserve: 'action', size: 'large', class: 'pe-[calc(var(--spacing)*10)]' },
+	{ endReserve: 'actionBelowMd', size: ['small', 'normal'], class: 'max-md:pe-layout-lg' },
+	{ endReserve: 'actionBelowMd', size: 'large', class: 'max-md:pe-[calc(var(--spacing)*10)]' }
+];
+
 const defaultMenuButton = cva({
-	base: 'state-layer peer/menu-button group/menu-button flex w-full items-center overflow-hidden rounded-sm text-left outline-none transition-[background,color,width,height,padding,margin,border-radius] duration-normal ease-linear hover:text-neutral focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:font-medium group-data-[collapsible=icon]:mx-[calc((var(--sidebar-width-icon)-var(--sidebar-icon-button-width))/2-var(--sidebar-group-padding))] group-data-[collapsible=icon]:w-[var(--sidebar-icon-button-width)] group-data-[collapsible=icon]:rounded-none group-data-[variant=admin]:group-data-[collapsible=icon]:rounded-sm group-data-[variant=framed]:group-data-[collapsible=icon]:rounded-sm group-data-[variant=inset]:group-data-[collapsible=icon]:rounded-sm group-data-[collapsible=icon]:![padding-inline:calc((var(--sidebar-icon-button-width)-var(--sidebar-icon-size))/2)] group-data-[collapsible=icon]:ring-inset [&_svg]:shrink-0 [&_svg]:size-[var(--sidebar-icon-size)]',
+	base: 'state-layer peer/menu-button group/menu-button flex w-full items-center overflow-hidden rounded-sm text-start outline-none transition-[background,color,width,height,padding,margin,border-radius] duration-normal ease-linear hover:text-neutral focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:font-medium group-data-[collapsible=icon]:mx-[calc((var(--sidebar-width-icon)-var(--sidebar-icon-button-width))/2-var(--sidebar-group-padding))] group-data-[collapsible=icon]:w-[var(--sidebar-icon-button-width)] group-data-[collapsible=icon]:rounded-none group-data-[variant=admin]:group-data-[collapsible=icon]:rounded-sm group-data-[variant=framed]:group-data-[collapsible=icon]:rounded-sm group-data-[variant=inset]:group-data-[collapsible=icon]:rounded-sm group-data-[collapsible=icon]:![padding-inline:calc((var(--sidebar-icon-button-width)-var(--sidebar-icon-size))/2)] group-data-[collapsible=icon]:ring-inset [&_svg]:shrink-0 [&_svg]:size-[var(--sidebar-icon-size)]',
 	variants: {
 		activeVariant: activeVariants,
 		variant: {
 			default: '',
 			outline: 'border border-neutral-muted bg-surface'
 		},
-		// A row that pins an action keeps its end clear of the action's box (`menuAction`), so the
-		// label truncates before it.
 		size: {
-			small: 'text-xs leading-4 group-has-data-[sidebar=menu-action]/menu-item:pe-layout-lg',
-			normal: 'text-sm leading-5 group-has-data-[sidebar=menu-action]/menu-item:pe-layout-lg',
-			large:
-				'text-base leading-6 group-has-data-[sidebar=menu-action]/menu-item:pe-[calc(var(--spacing)*10)]'
+			small: 'text-xs leading-4',
+			normal: 'text-sm leading-5',
+			large: 'text-base leading-6'
 		},
 		density: {
 			compact: 'gap-sm px-sm',
@@ -269,9 +314,11 @@ const defaultMenuButton = cva({
 			small: 'text-xs',
 			normal: '',
 			large: ''
-		}
+		},
+		endReserve: rowEndReserveKeys
 	},
 	compoundVariants: [
+		...rowEndReserve,
 		{ size: 'small', itemSize: 'small', class: 'h-control-sm' },
 		{ size: 'small', itemSize: 'normal', class: 'h-control-md' },
 		{ size: 'small', itemSize: 'large', class: 'h-row-lg' },
@@ -287,7 +334,8 @@ const defaultMenuButton = cva({
 		variant: 'default',
 		size: 'normal',
 		density: 'normal',
-		itemSize: 'normal'
+		itemSize: 'normal',
+		endReserve: 'none'
 	}
 });
 
@@ -310,7 +358,7 @@ const defaultMenuSecondary = cva({
 });
 
 const defaultMenuTrailing = cva({
-	base: 'ml-auto shrink-0 opacity-100 transition-[opacity,transform] duration-normal ease-standard group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:translate-x-1 group-data-[collapsible=icon]:opacity-0 [&>svg]:size-[var(--sidebar-icon-size)]',
+	base: 'ms-auto shrink-0 opacity-100 transition-[opacity,transform] duration-normal ease-standard group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:translate-x-1 group-data-[collapsible=icon]:opacity-0 [&>svg]:size-[var(--sidebar-icon-size)]',
 	variants: {
 		size: {
 			small: '',
@@ -354,7 +402,7 @@ const defaultTreeSubMenu = cva({
 });
 
 const defaultSubButton = cva({
-	base: 'state-layer text-neutral/70 hover:text-neutral flex w-full min-w-0 items-center overflow-hidden rounded-sm outline-none transition-[background,color,height,padding] duration-normal ease-linear focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:shrink-0 [&>svg]:size-[var(--sidebar-icon-size)]',
+	base: 'state-layer text-neutral/70 hover:text-neutral flex w-full min-w-0 items-center overflow-hidden rounded-sm outline-none transition-[background,color,height,padding] duration-normal ease-linear focus-visible:ring-2 focus-visible:ring-focus/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>[data-slot=sidebar-menu-sub-label]]:min-w-0 [&>[data-slot=sidebar-menu-sub-label]]:truncate [&>svg]:shrink-0 [&>svg]:size-[var(--sidebar-icon-size)]',
 	variants: {
 		activeVariant: activeVariants,
 		size: {
@@ -362,34 +410,29 @@ const defaultSubButton = cva({
 			normal: 'h-control-sm text-sm leading-5',
 			large: 'h-control-md text-base leading-6'
 		},
+		// The start padding indents the sub row's content; the end padding matches a top-level
+		// row's (`menuButton`), so badges and chevrons of every level end on one column.
 		density: {
-			compact: 'gap-sm px-md',
-			normal: 'gap-md px-lg',
-			comfortable: 'gap-md px-lg'
+			compact: 'gap-sm ps-md pe-sm',
+			normal: 'gap-md ps-lg pe-md',
+			comfortable: 'gap-md ps-lg pe-md'
 		},
 		itemSize: {
 			small: 'text-xs',
 			normal: '',
 			large: ''
 		},
-		// Room at the row's end for a pinned action or badge, so the label truncates before it
-		// instead of running under it. Off adds nothing: a plain row keeps its exact classes.
-		reserveEnd: {
-			true: '',
-			false: ''
-		}
+		// Room at the row's end for a pinned action, as on a top-level row. `none` adds nothing: a
+		// plain row keeps its exact classes.
+		endReserve: rowEndReserveKeys
 	},
-	// The reserve clears the pinned action's box at each size.
-	compoundVariants: [
-		{ reserveEnd: true, size: ['small', 'normal'], class: 'pe-layout-lg' },
-		{ reserveEnd: true, size: 'large', class: 'pe-[calc(var(--spacing)*10)]' }
-	],
+	compoundVariants: [...rowEndReserve],
 	defaultVariants: {
 		activeVariant: 'soft',
 		size: 'normal',
 		density: 'normal',
 		itemSize: 'normal',
-		reserveEnd: false
+		endReserve: 'none'
 	}
 });
 
@@ -506,19 +549,20 @@ const defaultActionTrigger = cva({
 	}
 });
 
-// A badge shares its row's end column with the row's pinned action, and the two never overlap.
-// From `md` up the action only shows while the row is hovered, focused or has its menu open, and
-// the badge steps aside for exactly that time. Below `md` the action is always shown, so the badge
-// sits just before it instead.
+// A badge is the row's last in-flow trailing part before any chevron, so the label truncates
+// before it whatever its width. It shares the row's end column with the row's pinned action and
+// the two never overlap: from `md` up the action only shows while the row is hovered, focused or
+// has its menu open, and the badge steps aside for exactly that time (its box is at least the
+// action's, so the action covers only its place). Below `md` the action is always shown and the
+// row reserves its box (`endReserve`), so the badge sits just before it.
 const defaultBadge = cva({
-	base: 'text-neutral/70 peer-hover/menu-button:text-neutral peer-data-active/menu-button:text-neutral pointer-events-none absolute top-1/2 flex -translate-y-1/2 items-center justify-center rounded-sm px-xs font-medium tabular-nums transition-opacity select-none group-data-[collapsible=icon]:hidden',
+	base: 'text-neutral/70 [:hover>&]:text-current [[data-active]>&]:text-current pointer-events-none ms-auto flex shrink-0 items-center justify-center rounded-sm px-xs font-medium tabular-nums transition-opacity select-none group-data-[collapsible=icon]:hidden',
 	variants: {
 		size: {
-			small: 'h-4 min-w-4 text-xs',
-			normal: 'h-5 min-w-5 text-sm',
-			large: 'h-6 min-w-6 text-sm'
+			small: 'h-4 min-w-5 text-xs',
+			normal: 'h-5 min-w-6 text-sm',
+			large: 'h-6 min-w-7 text-sm'
 		},
-		density: rowTrailingEnd,
 		// Which row's action the badge makes way for; `none` when the row pins no action.
 		action: {
 			none: '',
@@ -526,21 +570,8 @@ const defaultBadge = cva({
 			sub: 'md:group-focus-within/menu-sub-item:opacity-0 md:group-hover/menu-sub-item:opacity-0 md:group-has-[[data-sidebar=menu-sub-action]_[aria-expanded=true]]/menu-sub-item:opacity-0'
 		}
 	},
-	// Below `md`: the action's end offset, plus its box, plus a hairline gap.
-	compoundVariants: [
-		{ action: ['row', 'sub'], density: 'compact', size: 'small', class: 'max-md:end-6' },
-		{ action: ['row', 'sub'], density: 'compact', size: 'normal', class: 'max-md:end-7' },
-		{ action: ['row', 'sub'], density: 'compact', size: 'large', class: 'max-md:end-8' },
-		{ action: ['row', 'sub'], density: 'normal', size: 'small', class: 'max-md:end-6.5' },
-		{ action: ['row', 'sub'], density: 'normal', size: 'normal', class: 'max-md:end-7.5' },
-		{ action: ['row', 'sub'], density: 'normal', size: 'large', class: 'max-md:end-8.5' },
-		{ action: ['row', 'sub'], density: 'comfortable', size: 'small', class: 'max-md:end-7' },
-		{ action: ['row', 'sub'], density: 'comfortable', size: 'normal', class: 'max-md:end-8' },
-		{ action: ['row', 'sub'], density: 'comfortable', size: 'large', class: 'max-md:end-9' }
-	],
 	defaultVariants: {
 		size: 'normal',
-		density: 'normal',
 		action: 'none'
 	}
 });

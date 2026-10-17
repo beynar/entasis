@@ -1117,6 +1117,13 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
   now run to their parent row's end edge, indented on the start side only, so the badges and actions
   of every level share one column; this also holds in right-to-left layouts, where the badge, action
   and guide line now sit on the correct side.
+- `Sidebar`: trailing parts of a row no longer overlap or get cut off. A row badge now follows
+  the label inside the row, so a long label truncates before it instead of running underneath
+  (it did on every badge row), and a badge before a chevron or dots stays clear of both. Group
+  labels truncate on one line and stop before their pinned actions instead of wrapping out of
+  the header and under the `+`; a collapsible group's actions no longer touch its chevron. Nested
+  tree branches stay inside the panel instead of growing to their label's width. In right-to-left
+  layouts, menu rows, header rows and group labels align their text to the start.
 - `Collapsible` (and the `AIReasoning` "Thought for…" line built on it): the chevron sits on the
   text's centre at every size. It was always drawn at 16px, so it overflowed the 12px small box
   (2px low) and sat at the top of the 20px large one.

@@ -187,7 +187,13 @@ describe('submenu entry parity fields', () => {
 		expect(badge).toHaveTextContent('3');
 		const link = row.querySelector('[data-sidebar="menu-sub-button"]') as HTMLElement;
 		expect(link.className).toContain('italic');
-		expect(link.className).toContain('pe-layout-lg');
+		// The badge follows the label inside the row, so the label truncates before it whatever its
+		// width; with no action there is nothing else to make room for.
+		expect(link).toContainElement(badge as HTMLElement);
+		expect(link.querySelector('[data-slot="sidebar-menu-sub-label"]')).toHaveTextContent(
+			'Inbox zero'
+		);
+		expect(link.className).not.toContain('pe-layout-lg');
 
 		await fireEvent.mouseEnter(link);
 		await vi.waitFor(() =>

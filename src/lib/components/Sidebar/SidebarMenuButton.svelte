@@ -157,7 +157,7 @@
 			{/if}
 		</div>
 	{:else}
-		<div class={classes.menuLabel({ className: 'grid text-left leading-tight' })}>
+		<div class={classes.menuLabel({ className: 'grid text-start leading-tight' })}>
 			<span class="truncate font-medium">{title}</span>
 			{#if subtitle}
 				<span class={classes.menuSecondary({ size })}>{subtitle}</span>
@@ -181,7 +181,7 @@
 {/snippet}
 
 {#snippet identityRow()}
-	<div class="flex items-center gap-2 px-2 py-1 text-left">
+	<div class="flex items-center gap-2 px-2 py-1 text-start">
 		{@render media()}
 		<div class="grid min-w-0 flex-1 leading-tight">
 			<span class="text-neutral truncate font-medium">{title}</span>

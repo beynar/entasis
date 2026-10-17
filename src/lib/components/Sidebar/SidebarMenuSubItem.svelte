@@ -52,7 +52,9 @@
 			itemSize: sub.size,
 			activeVariant,
 			density,
-			reserveEnd: !!sub.action || hasBadge,
+			// With a badge last in the row, the badge holds the end column from `md` up and the
+			// action takes its place while it shows; below `md` the two sit side by side.
+			endReserve: !sub.action ? 'none' : hasBadge ? 'actionBelowMd' : 'action',
 			className: sub.class
 		})
 	);
@@ -83,7 +85,18 @@
 	{:else}
 		<SidebarIcon icon={sub.icon} />
 	{/if}
-	<span>{sub.label}</span>
+	{#if hasBadge}
+		<span data-slot="sidebar-menu-sub-label">{sub.label}</span>
+		<span
+			data-slot="sidebar-menu-sub-badge"
+			data-sidebar="menu-sub-badge"
+			class={classes.badge({ size: subSize, action: sub.action ? 'sub' : 'none' })}
+		>
+			{sub.badge}
+		</span>
+	{:else}
+		<span>{sub.label}</span>
+	{/if}
 {/snippet}
 
 <li
@@ -133,15 +146,6 @@
 		</button>
 	{/if}
 
-	{#if hasBadge}
-		<div
-			data-slot="sidebar-menu-sub-badge"
-			data-sidebar="menu-sub-badge"
-			class={classes.badge({ size: subSize, density, action: sub.action ? 'sub' : 'none' })}
-		>
-			{sub.badge}
-		</div>
-	{/if}
 	{#if sub.action}
 		<div
 			data-slot="sidebar-menu-sub-action"

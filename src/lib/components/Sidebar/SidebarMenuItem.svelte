@@ -78,6 +78,17 @@
 		showTooltip ? (item.tooltip ?? ariaLabel ?? item.label) : undefined
 	);
 	const hasSubmenu = $derived(!!item.items?.length);
+	const showBadge = $derived(item.badge != null && !isIconCollapsed);
+	// An in-flow chevron or dots after the badge: the row then keeps its action's room at every
+	// width, since the action would otherwise cover that glyph when it shows.
+	const hasTrailingGlyph = $derived(
+		!!item.menu ||
+			(item.view !== undefined && !back) ||
+			(hasSubmenu && !item.href && item.collapsible !== false && collapseIcon !== 'none')
+	);
+	const endReserve = $derived(
+		!item.action ? 'none' : showBadge && !hasTrailingGlyph ? 'actionBelowMd' : 'action'
+	);
 	// A bare glyph stays bare: the wrapper only appears when the entry asks for a role tint or a
 	// tile, so an untinted row never inherits the ambient `data-color`.
 	const hasIconSurface = $derived(!!item.icon && (item.iconVariant === 'tile' || !!item.iconColor));
@@ -157,6 +168,15 @@
 		<SidebarIcon icon={item.icon} class={back ? 'rtl:-scale-x-100' : undefined} />
 	{/if}
 	<span class={classes.menuLabel()}>{item.label}</span>
+	{#if showBadge}
+		<span
+			data-slot="sidebar-menu-badge"
+			data-sidebar="menu-badge"
+			class={classes.badge({ size, action: item.action ? 'row' : 'none' })}
+		>
+			{item.badge}
+		</span>
+	{/if}
 {/snippet}
 
 {#snippet indicator()}
@@ -196,6 +216,7 @@
 				size,
 				density,
 				itemSize: item.size,
+				endReserve,
 				className: item.class
 			})}
 			{@attach tooltipContent
@@ -225,6 +246,7 @@
 				size,
 				density,
 				itemSize: item.size,
+				endReserve,
 				className: item.class
 			})}
 			{@attach tooltipContent
@@ -267,6 +289,7 @@
 					size,
 					density,
 					itemSize: item.size,
+					endReserve,
 					className: ['aria-expanded:bg-neutral-muted', item.class]
 				})}
 				aria-expanded={popover.isOpen}
@@ -302,6 +325,7 @@
 					size,
 					density,
 					itemSize: item.size,
+					endReserve,
 					className: item.class
 				})}
 				aria-expanded={popover.isOpen}
@@ -394,6 +418,7 @@
 						size,
 						density,
 						itemSize: item.size,
+						endReserve,
 						className: item.class
 					})}
 					aria-expanded={showSubmenu}
@@ -412,15 +437,6 @@
 			{@render leafButton()}
 		{/if}
 
-		{#if item.badge != null && !isIconCollapsed}
-			<div
-				data-slot="sidebar-menu-badge"
-				data-sidebar="menu-badge"
-				class={classes.badge({ size, density, action: item.action ? 'row' : 'none' })}
-			>
-				{item.badge}
-			</div>
-		{/if}
 		{#if item.action}
 			<div
 				bind:this={actionRef}

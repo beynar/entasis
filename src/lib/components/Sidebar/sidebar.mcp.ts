@@ -63,7 +63,7 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 - **label**: string - Group label, hidden in icon-collapsed mode.
 - **items**: SidebarMenuEntry[] - Menu rows.
 - **tree**: SidebarTreeNode[] - Recursive tree rows instead of menu items.
-- **action**: SidebarMenuActionDescriptor | SidebarMenuActionDescriptor[] | Snippet<[SidebarApi]> - Top-right group actions. Pass an array to pin several affordances (a \`+\` and a drag handle) to one group header; each renders as its own icon-only ghost button.
+- **action**: SidebarMenuActionDescriptor | SidebarMenuActionDescriptor[] | Snippet<[SidebarApi]> - Group actions pinned to the label's end. The label truncates on one line before them. Pass an array to pin several affordances (a \`+\` and a drag handle) to one group header; each renders as its own icon-only ghost button.
 - **collapsible**: boolean - Makes the group label a toggle.
 - **defaultOpen**: boolean - Initial collapsible group state.
 - **separator**: boolean - Divider before the group.
@@ -77,7 +77,7 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 - **onclick**: (event: MouseEvent) => void - Native click handler for button or anchor rows. Mutually exclusive with menu. On a row with \`items\` and no \`href\`, it runs before the submenu toggles, inline or in the collapsed flyout; \`event.preventDefault()\` skips the toggle.
 - **isActive**: boolean - Adds active styling and \`aria-current="page"\`.
 - **disabled**: boolean - Disables button rows and marks anchor rows disabled.
-- **badge**: string | number - Trailing count/status, hidden in icon mode. On a row with an \`action\`, the badge steps aside while the action shows (hover, focus, open menu) from \`md\` up, and sits just before the always-visible action below \`md\`: the two never overlap.
+- **badge**: string | number - Trailing count/status, hidden in icon mode. It follows the label inside the row (before any chevron), so the label truncates before it whatever its width. On a row with an \`action\`, the badge steps aside while the action shows (hover, focus, open menu) from \`md\` up, and sits just before the always-visible action below \`md\`: the two never overlap.
 - **tooltip**: string - Entasis Tooltip content in icon mode. Defaults to label.
 - **items**: SidebarMenuSubEntry[] - Inline nested menu. Collapsed to icons on desktop, a row with \`items\` and no \`href\`, \`view\` or \`menu\` opens them in a flyout of links instead.
 - **collapsible**: boolean - Set false for an always-open submenu.

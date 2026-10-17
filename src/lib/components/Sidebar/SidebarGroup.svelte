@@ -44,6 +44,16 @@
 	>(group.action == null ? [] : Array.isArray(group.action) ? group.action : [group.action]);
 	const actionSize = (action: (typeof actions)[number]) =>
 		typeof action === 'function' ? size : (action.size ?? size);
+	const controlHeight = { small: 'sm', normal: 'md', large: 'lg' } as const;
+	// The pinned actions' total width (each `actionSlot` box plus the gaps between them), so the
+	// label truncates before them instead of running underneath.
+	const actionsWidth = $derived(
+		actions.length
+			? `calc(${actions
+					.map((action) => `var(--control-height-${controlHeight[actionSize(action)]})`)
+					.join(' + ')} + ${actions.length - 1} * var(--space-micro))`
+			: undefined
+	);
 
 	let open = $state<boolean | undefined>();
 	let labelRef = $state<HTMLButtonElement | null>(null);
@@ -136,11 +146,17 @@
 		data-slot="sidebar-group"
 		data-sidebar="group"
 		class={classes.group({ density, className: group.class })}
+		style:--sidebar-group-actions-width={actionsWidth}
 	>
 		<button
 			bind:this={labelRef}
 			type="button"
-			class={classes.groupLabel({ interactive: true, size, density })}
+			class={classes.groupLabel({
+				interactive: true,
+				size,
+				density,
+				hasActions: actions.length > 0
+			})}
 			disabled={isIconCollapsed || undefined}
 			inert={isIconCollapsed ? true : undefined}
 			aria-hidden={isIconCollapsed ? 'true' : undefined}
@@ -184,15 +200,16 @@
 		data-slot="sidebar-group"
 		data-sidebar="group"
 		class={classes.group({ density, className: group.class })}
+		style:--sidebar-group-actions-width={actionsWidth}
 	>
 		{#if group.label}
 			<div
 				data-slot="sidebar-group-label"
 				data-sidebar="group-label"
 				aria-hidden={isIconCollapsed ? 'true' : undefined}
-				class={classes.groupLabel({ size, density })}
+				class={classes.groupLabel({ size, density, hasActions: actions.length > 0 })}
 			>
-				{group.label}
+				<span>{group.label}</span>
 			</div>
 		{/if}
 		{#if actions.length}
