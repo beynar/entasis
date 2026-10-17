@@ -1094,6 +1094,8 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 - `DataTable`: a `select` cell editor no longer makes its row 8px taller while it is open. The
   editor's visually hidden label still took a grid gap above the control.
+- `DataTable`: the date cell editor's calendar button no longer overflows the cell and gets
+  clipped. It pulled itself into the field's usual padding, which is wider than the cell's.
 - Drag auto-scroll works again: `Kanban` boards and card lists, `SortableList` and `GanttChart`
   dependency drags scroll their container near its edges in every browser, inside `Tabs` too. The
   auto-scroll listened to a second copy of the drag engine, so only Chromium's narrow native edge

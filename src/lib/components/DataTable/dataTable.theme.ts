@@ -196,13 +196,17 @@ const editor = cva({ base: 'relative grid h-full w-full min-w-0 items-center' })
 // beside it would make the cell taller than the row while it edits.
 const editorField = cva({ base: 'w-full min-w-0 gap-0' });
 const editorInput = cva({ base: 'h-auto min-w-0 rounded-none text-sm' });
+// The padding matches the cell's, so the value does not move when editing starts. A field action
+// (the date picker's calendar button) pulls itself into the field's own `px-lg` padding with a
+// negative margin; here it pulls back by the cell padding instead, or it would overflow the cell.
 const editorInputContainer = cva({
 	base: 'w-full rounded-none border-0 bg-transparent shadow-none transition-none focus-within:ring-0',
 	variants: {
 		density: {
-			compact: 'min-h-row-sm px-sm py-xs',
-			normal: 'min-h-row-md p-md',
-			comfortable: 'min-h-row-lg p-lg'
+			compact:
+				'min-h-row-sm px-sm py-xs [&>button:first-child]:-ml-sm [&>button:last-child]:-mr-sm',
+			normal: 'min-h-row-md p-md [&>button:first-child]:-ml-md [&>button:last-child]:-mr-md',
+			comfortable: 'min-h-row-lg p-lg [&>button:first-child]:-ml-lg [&>button:last-child]:-mr-lg'
 		}
 	},
 	defaultVariants: { density: 'normal' }
