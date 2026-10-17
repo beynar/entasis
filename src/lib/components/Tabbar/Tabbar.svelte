@@ -263,6 +263,7 @@
 				{/if}
 			{/snippet}
 			<PopupMenu
+				{size}
 				position="bottom-start"
 				menu={{ items: menuItemsFor(index, tab), header: menuHeader }}
 			>

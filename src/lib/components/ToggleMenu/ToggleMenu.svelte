@@ -176,8 +176,13 @@
 		};
 	}
 
+	// Overflowed toolbar items become one menu. Single entries (a toggle, a menu, one custom item)
+	// sit together like any menu rows; a separator only sets apart a multi-option unit (a button
+	// group, a radio group, several custom entries), as a toolbar's grouping does.
+	// A small toolbar opens compact menus: menu rows take their height from density, not size.
 	const overflowMenuItems = $derived.by(() => {
 		const menuItems: MenuItem[] = [];
+		let previousIsSet = false;
 
 		items.slice(overflow.visibleCount).forEach((item, overflowIndex) => {
 			const itemIndex = overflow.visibleCount + overflowIndex;
@@ -212,8 +217,10 @@
 			}
 
 			if (unitItems.length === 0) return;
-			if (menuItems.length > 0) menuItems.push({ type: 'separator' });
+			const isSet = item.type === 'group' || item.type === 'radio-group' || unitItems.length > 1;
+			if (menuItems.length > 0 && (isSet || previousIsSet)) menuItems.push({ type: 'separator' });
 			menuItems.push(...unitItems);
+			previousIsSet = isSet;
 		});
 
 		return menuItems;
@@ -332,7 +339,8 @@
 		{@attach overflow.moreReference}
 	>
 		<PopupMenu
-			menu={{ items: overflowMenuItems }}
+			{size}
+			menu={{ items: overflowMenuItems, density: size === 'small' ? 'compact' : 'normal' }}
 			closeOnItemClick={false}
 			position="bottom-end"
 			fitTrigger={false}

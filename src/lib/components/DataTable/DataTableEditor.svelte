@@ -164,6 +164,7 @@
 		{:else if editor.type === 'select'}
 			<Select
 				size="normal"
+				{density}
 				class={classes.editorField()}
 				theme={fieldTheme}
 				label={t.dataTableEditColumn(typeof config?.header === 'string' ? config.header : columnId)}

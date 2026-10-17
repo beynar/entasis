@@ -657,6 +657,7 @@
 				<span id={rowsPerPageId} class={classes.summary()}>{t.dataTableRowsPerPage}</span>
 				<Select
 					size="small"
+					{density}
 					triggerAttrs={{ 'aria-labelledby': rowsPerPageId }}
 					items={pageSizeItems}
 					value={String(tableState!.pagination.pageSize)}

@@ -204,6 +204,6 @@
 		{/if}
 	</div>
 	{#if errorMessage}<div data-slot="ai-message-actions-error" class={classes.error()}>
-			<Alert color="danger" variant="soft" description={errorMessage} />
+			<Alert {size} color="danger" variant="soft" description={errorMessage} />
 		</div>{/if}
 {/if}

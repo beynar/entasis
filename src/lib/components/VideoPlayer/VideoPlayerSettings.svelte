@@ -107,6 +107,7 @@
 {#if hasMenuItems}
 	<PopupMenu
 		bind:open
+		{size}
 		position="top-end"
 		offset={8}
 		lockScroll={false}

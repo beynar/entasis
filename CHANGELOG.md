@@ -1071,6 +1071,12 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Fixed
 
+- Child menus and controls follow their owner's `size` and `density`: `ToggleMenu`'s overflow and
+  item menus, `Tabbar`'s tab menus and `VideoPlayer`'s settings menu take its `size`; `DataTable`'s
+  rows-per-page and cell-editor `Select` take its `density`; `AITool`'s grouped calls and the
+  `AIMessageActions` copy-failure alert take their `size`. A `small` `ToggleMenu` opens compact
+  menus, and its overflow menu only separates multi-option units (button and radio groups) instead
+  of putting a separator between every overflowed item.
 - `Tooltip`: a tooltip opened by hover also closes when the pointer moves away from its trigger and
   content without a `mouseleave` reaching the trigger (a trigger re-rendered, moved or removed under
   the pointer, as when a navigation updates the active item of a Sidebar activity bar), so it can no

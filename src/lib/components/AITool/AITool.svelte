@@ -202,6 +202,7 @@
 		class={classes.root({ scope: 'group', variant, tone: resolvedTone, className })}
 	>
 		<Accordion
+			{size}
 			items={groupItems}
 			bind:value={valueState.value}
 			{onValueChange}
