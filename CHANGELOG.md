@@ -1089,6 +1089,10 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Fixed
 
+- Drag auto-scroll works again: `Kanban` boards and card lists, `SortableList` and `GanttChart`
+  dependency drags scroll their container near its edges in every browser, inside `Tabs` too. The
+  auto-scroll listened to a second copy of the drag engine, so only Chromium's narrow native edge
+  scrolling ran, and WebKit did not scroll at all.
 - `NavigationMenu`: a pointer press focuses the trigger, so in Safari Tab after a click enters the
   panel and ArrowDown moves into it instead of skipping it. Enter or Space on the trigger of a
   hover-opened panel closes it instead of doing nothing. A hover that began just before a press
