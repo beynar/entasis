@@ -151,18 +151,15 @@ const defaultBubble = cva({
 // Markdown inherits the bubble's type size and leading, and headings stay close to the body
 // (h2 about 1.25x) instead of the Markdown component's document scale.
 // Rich content reads on one scale: tables, lists, quotes and alerts at the message size; code
-// blocks one step below it (as tool and reasoning rows are), never under text-xs. Density owns
+// blocks at 0.9em of it, like inline code, so code grows with every size step. Density owns
 // table-cell and code padding and the space between blocks.
 const defaultMarkdown = cva({
-	base: 'min-w-0 !text-[length:inherit] !leading-[inherit] [&_:is(td,th,blockquote,li)]:!text-[length:inherit]',
+	base: 'min-w-0 !text-[length:inherit] !leading-[inherit] [&_:is(td,th,blockquote,li)]:!text-[length:inherit] [&_[data-slot=code]]:!text-[0.9em] [&_[data-slot=code]_*]:!text-[length:inherit]',
 	variants: {
 		size: {
-			small:
-				'[&_h1]:!text-base [&_h2]:!text-sm [&_:is(h3,h4,h5,h6)]:!text-xs [&_[data-slot=code]_pre]:!text-xs',
-			normal:
-				'[&_h1]:!text-lg [&_h2]:!text-base [&_:is(h3,h4,h5,h6)]:!text-sm [&_[data-slot=code]_pre]:!text-xs',
-			large:
-				'[&_h1]:!text-xl [&_h2]:!text-lg [&_:is(h3,h4,h5,h6)]:!text-base [&_[data-slot=code]_pre]:!text-sm'
+			small: '[&_h1]:!text-base [&_h2]:!text-sm [&_:is(h3,h4,h5,h6)]:!text-xs',
+			normal: '[&_h1]:!text-lg [&_h2]:!text-base [&_:is(h3,h4,h5,h6)]:!text-sm',
+			large: '[&_h1]:!text-xl [&_h2]:!text-lg [&_:is(h3,h4,h5,h6)]:!text-base'
 		},
 		density: {
 			compact:

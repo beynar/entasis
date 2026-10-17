@@ -26,7 +26,7 @@ previews, and the default action controls together. Normal prose reads at 14px (
 12px) with a 1.625 line height; headings stay close to the body (h2 about 1.25x), lists hang-indent, inline code is a muted
 chip at 0.9em, and tables read at body size and scroll with an edge fade when they overflow.
 \`streaming\` shows a pulsing caret after the content while a reply is still being written. A
-message that carries only files shows no empty bubble. Tables, lists, quotes and alerts read at the message size; fenced code one step below it. \`density\` (\`compact\`, \`normal\`, \`comfortable\`) sets table-cell and code-block padding and the space between paragraphs, lists and quotes; AIThread and AIChat pass theirs.
+message that carries only files shows no empty bubble. Tables, lists, quotes and alerts read at the message size; fenced code at 0.9× of it, like inline code, so it grows with every size. \`density\` (\`compact\`, \`normal\`, \`comfortable\`) sets table-cell and code-block padding and the space between paragraphs, lists and quotes; AIThread and AIChat pass theirs.
 
 \`\`\`svelte
 <script>

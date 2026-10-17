@@ -385,6 +385,15 @@ const ARBITRARY_TEXT_SIZE = /^!?text-\[(?:length:)?-?\d*\.?\d+[a-z%]*\]$/;
 // `<part>:<ramp>` for a ramp or by the utility itself for a length.
 const typeRampExceptions = new Map([
 	[
+		'AIMessage/aiMessage.theme.ts',
+		new Map([
+			[
+				'[&_[data-slot=code]]:!text-[0.9em]',
+				'Fenced code in a chat message reads at a fixed ratio of the message text (like inline code), so it grows with every message size instead of sitting on a ramp step'
+			]
+		])
+	],
+	[
 		'DocumentViewer/documentViewer.theme.ts',
 		new Map([
 			[

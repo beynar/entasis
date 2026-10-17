@@ -580,7 +580,7 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 ### Changed
 
 - `AIMessage` and `AIThread`: rich content reads on one scale. Tables, lists, quotes and alerts
-  read at the message size and fenced code one step below it (it was fixed at text-sm), and tool
+  read at the message size and fenced code at 0.9× of it, like inline code (it was fixed at text-sm), and tool
   calls and reasoning in a thread read one step below the message text. `AIMessage` takes a
   `density` (passed by `AIThread` and `AIChat`) that sets table-cell and code-block padding and the
   space between paragraphs, lists and quotes.
