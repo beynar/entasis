@@ -584,6 +584,8 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Changed
 
+- `DataTable`: a date cell editor opens its calendar as soon as editing starts, as a select editor
+  opens its list; focus stays in the date field, so the date can still be typed.
 - `NavigationMenu`: switching panels animates in both directions. The old panel fades and slides
   out away from the new trigger first, then the new one slides in from its side while the popup
   resizes, so each step reads; before, the old panel vanished at once and the new one slid in
@@ -1089,6 +1091,11 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
   `scrollScrollbarX` and `scrollThumb` theme slots, because values no longer render in a ScrollArea.
   New slots: `summary`, `meta`, `statusWord`, `errorMessage`, `code`, `codeContainer`, `clamp` and
   `showAll`.
+- `DataTable`: the request indicator bar along the top of the table, its `savingIndicator` theme
+  slot, and the `dataTableLoading` and `dataTableSaving` i18n messages. The table no longer decides
+  how a request looks. Show your own indicator (a `NetworkIndicator`, a toast…) from `loading` and
+  `api.isSaving`, which tracks pending `onCellCommit` calls. The loading skeleton, the error state
+  and `aria-busy` are unchanged.
 
 ### Fixed
 
