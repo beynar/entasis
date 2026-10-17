@@ -148,7 +148,7 @@ const defaultNavigationMenuContentList = cva({
 // A link row inside a panel: flush against the popup's padding box, so it takes the concentric
 // radius like a menu option.
 const defaultNavigationMenuContentLink = cva({
-	base: 'state-layer rounded-md-concentric relative flex w-full cursor-pointer items-start text-start no-underline outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus/50',
+	base: 'state-layer rounded-md-concentric relative flex w-full cursor-pointer items-start text-start no-underline outline-none',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -196,7 +196,7 @@ const defaultNavigationMenuContentDescription = cva({
 // The inline disclosure of a nested level: a row that looks like a link and expands its own
 // list underneath.
 const defaultNavigationMenuNestedTrigger = cva({
-	base: 'state-layer rounded-md-concentric relative flex w-full cursor-pointer items-center justify-between text-start outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus/50',
+	base: 'state-layer rounded-md-concentric relative flex w-full cursor-pointer items-center justify-between text-start outline-none',
 	variants: {
 		size: {
 			small: 'text-xs',

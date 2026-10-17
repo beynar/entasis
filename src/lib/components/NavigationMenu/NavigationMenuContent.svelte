@@ -4,6 +4,8 @@
 	import type { Density, Sizes } from '$lib/types/theme.js';
 	import { composeHandlers } from '$lib/utils/handlers.js';
 	import { itemStateAttributes } from '$lib/utils/stateAttributes.js';
+	import { on } from 'svelte/events';
+	import type { Attachment } from 'svelte/attachments';
 	import { getNavigationMenuState } from './navigationMenu.state.svelte.js';
 	import type {
 		NavigationMenuItem,
@@ -13,6 +15,23 @@
 	import type { useNavigationMenuTheme } from './navigationMenu.theme.js';
 
 	type Classes = ReturnType<typeof useNavigationMenuTheme>;
+
+	// Keyboard focus reads like a highlighted menu row: the shared state layer fills the row through
+	// `data-highlighted`, with no ring, as in Menu and PopupMenu. Pointer focus adds nothing (hover
+	// already fills the row).
+	const highlightOnKeyboardFocus: Attachment<HTMLElement> = (node) => {
+		const offFocus = on(node, 'focus', () => {
+			if (node.matches(':focus-visible')) node.dataset.highlighted = 'true';
+		});
+		const offBlur = on(node, 'blur', () => {
+			delete node.dataset.highlighted;
+		});
+		return () => {
+			offFocus();
+			offBlur();
+			delete node.dataset.highlighted;
+		};
+	};
 
 	let {
 		item,
@@ -47,6 +66,7 @@
 		data-slot="navigation-menu-content-link"
 		{...itemStateAttributes({ selected: link.active, disabled: link.disabled })}
 		class={classes.contentLink({ size, density, active: !!link.active, disabled: !!link.disabled })}
+		{@attach highlightOnKeyboardFocus}
 		onclick={link.disabled ? pressDisabled : composeHandlers(link.onclick, menu.pressLink)}
 	>
 		{#if link.prefix}
@@ -96,6 +116,7 @@
 						data-slot="navigation-menu-nested-trigger"
 						{...itemStateAttributes({ disabled: entry.disabled })}
 						class={classes.nestedTrigger({ size, density, disabled: !!entry.disabled })}
+						{@attach highlightOnKeyboardFocus}
 						onclick={() => {
 							if (expanded) menu.nestedOpen.delete(entry.value);
 							else menu.nestedOpen.add(entry.value);
