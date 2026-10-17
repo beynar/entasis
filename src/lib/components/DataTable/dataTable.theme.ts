@@ -192,7 +192,9 @@ const pinnedBoundary = cva({
 	defaultVariants: { side: 'none' }
 });
 const editor = cva({ base: 'relative grid h-full w-full min-w-0 items-center' });
-const editorField = cva({ base: 'w-full min-w-0' });
+// No gap: a field with a label keeps its (visually hidden) label row, and the field's gap
+// beside it would make the cell taller than the row while it edits.
+const editorField = cva({ base: 'w-full min-w-0 gap-0' });
 const editorInput = cva({ base: 'h-auto min-w-0 rounded-none text-sm' });
 const editorInputContainer = cva({
 	base: 'w-full rounded-none border-0 bg-transparent shadow-none transition-none focus-within:ring-0',
