@@ -24,7 +24,7 @@ const defaultMessage = cva({
 });
 // The live count and its widest same-unit reading share one grid cell (see `elapsedReserve`).
 const defaultElapsed = cva({
-	base: 'grid shrink-0 whitespace-nowrap tabular-nums text-neutral/60 [&>*]:[grid-area:1/1]'
+	base: 'grid shrink-0 whitespace-nowrap tabular-nums text-neutral/70 [&>*]:[grid-area:1/1]'
 });
 const defaultElapsedReserve = cva({ base: 'invisible' });
 const defaultDuration = cva({ base: 'min-w-0' });

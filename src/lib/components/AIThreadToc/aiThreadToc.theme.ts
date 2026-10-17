@@ -75,7 +75,7 @@ const defaultPreviewExcerpt = cva({
 	base: 'line-clamp-4 text-xs leading-relaxed text-neutral/70'
 });
 const defaultPreviewMetadata = cva({ base: 'truncate text-xs text-neutral/70' });
-const defaultPreviewTurn = cva({ base: 'truncate text-xs text-neutral/60 tabular-nums' });
+const defaultPreviewTurn = cva({ base: 'truncate text-xs text-neutral/70 tabular-nums' });
 const defaultPreviewFiles = cva({
 	base: 'flex min-w-0 flex-wrap items-center gap-x-lg gap-y-xs pt-micro'
 });

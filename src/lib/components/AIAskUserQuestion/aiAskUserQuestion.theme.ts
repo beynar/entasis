@@ -13,7 +13,7 @@ const defaultHeader = cva({ base: 'grid min-w-0 px-lg pt-lg' });
 const defaultHeaderTop = cva({ base: 'flex min-w-0 items-start justify-between gap-lg' });
 const defaultHeaderText = cva({ base: 'grid min-w-0 gap-xs' });
 const defaultRequester = cva({
-	base: 'truncate text-xs text-neutral/60'
+	base: 'truncate text-xs text-neutral/70'
 });
 const defaultProgressGroup = cva({
 	base: 'flex shrink-0 items-center'
@@ -53,7 +53,7 @@ const defaultDescription = cva({
 });
 // The answered record a transcript keeps once the request is complete: question → chosen labels.
 const defaultSummary = cva({ base: 'grid min-w-0 gap-sm text-sm text-neutral' });
-const defaultSummaryTitle = cva({ base: 'text-xs font-medium text-neutral/60' });
+const defaultSummaryTitle = cva({ base: 'text-xs font-medium text-neutral/70' });
 const defaultSummaryList = cva({ base: 'grid min-w-0 gap-sm' });
 const defaultSummaryItem = cva({ base: 'grid min-w-0 gap-micro' });
 const defaultSummaryQuestion = cva({
@@ -64,7 +64,7 @@ const defaultSummaryAnswer = cva({
 	variants: {
 		answered: {
 			true: '',
-			false: 'font-normal text-neutral/60 italic'
+			false: 'font-normal text-neutral/70 italic'
 		}
 	},
 	defaultVariants: { answered: true }

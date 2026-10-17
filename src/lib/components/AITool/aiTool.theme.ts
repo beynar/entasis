@@ -143,8 +143,8 @@ const defaultIndicator = cva({
 			awaiting: 'text-warning-readable',
 			success: 'text-success-readable',
 			error: 'text-danger-readable',
-			denied: 'text-neutral/60',
-			cancelled: 'text-neutral/60',
+			denied: 'text-neutral/70',
+			cancelled: 'text-neutral/70',
 			default: 'text-neutral/45'
 		}
 	},
@@ -153,10 +153,10 @@ const defaultIndicator = cva({
 const defaultIndicatorDot = cva({ base: 'size-1.5 rounded-full bg-current' });
 const defaultGroupIcon = defaultIndicator;
 const defaultName = cva({ base: 'min-w-0 truncate font-medium text-neutral' });
-const defaultSummary = cva({ base: 'min-w-0 flex-1 truncate text-neutral/60' });
+const defaultSummary = cva({ base: 'min-w-0 flex-1 truncate text-neutral/70' });
 // Trailing status word and duration. `ms-auto` keeps them at the row end when there is no summary.
 const defaultMeta = cva({
-	base: 'ms-auto flex shrink-0 items-center gap-sm text-xs text-neutral/60 tabular-nums'
+	base: 'ms-auto flex shrink-0 items-center gap-sm text-xs text-neutral/70 tabular-nums'
 });
 const defaultStatusWord = cva({
 	base: 'flex items-center gap-xs',
@@ -198,7 +198,7 @@ const defaultSection = cva({
 	}
 });
 const defaultLabel = cva({
-	base: 'text-xs font-medium text-neutral/60',
+	base: 'text-xs font-medium text-neutral/70',
 	variants: {
 		tone: {
 			default: '',
@@ -234,7 +234,7 @@ const defaultClamp = cva({
 	defaultVariants: { collapsed: false }
 });
 const defaultShowAll = cva({ base: 'justify-self-start' });
-const defaultEmpty = cva({ base: 'py-xs text-sm text-neutral/60' });
+const defaultEmpty = cva({ base: 'py-xs text-sm text-neutral/70' });
 const defaultTree = cva({
 	base: 'grid min-w-0 gap-xs rounded-sm border border-neutral-muted bg-surface p-md font-mono text-xs leading-relaxed',
 	variants: {
@@ -246,8 +246,8 @@ const defaultTree = cva({
 });
 const defaultTreeNode = cva({ base: 'min-w-0' });
 const defaultTreeBranch = cva({ base: 'flex min-w-0 items-baseline gap-md' });
-const defaultTreeKey = cva({ base: 'max-w-[12rem] min-w-0 truncate text-neutral/60' });
-const defaultTreeSummary = cva({ base: 'shrink-0 text-neutral/60' });
+const defaultTreeKey = cva({ base: 'max-w-[12rem] min-w-0 truncate text-neutral/70' });
+const defaultTreeSummary = cva({ base: 'shrink-0 text-neutral/70' });
 const defaultTreeChildren = cva({
 	base: 'mt-xs ms-xs grid min-w-0 gap-xs border-s border-neutral-muted ps-lg'
 });
@@ -268,9 +268,9 @@ const defaultTreeValue = cva({
 			string: 'text-neutral',
 			number: 'text-neutral tabular-nums',
 			boolean: 'text-primary-readable',
-			null: 'text-neutral/60 italic',
-			undefined: 'text-neutral/60 italic',
-			empty: 'text-neutral/60 italic',
+			null: 'text-neutral/70 italic',
+			undefined: 'text-neutral/70 italic',
+			empty: 'text-neutral/70 italic',
 			unknown: 'text-neutral'
 		},
 		tone: {
