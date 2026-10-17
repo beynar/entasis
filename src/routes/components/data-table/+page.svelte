@@ -109,7 +109,7 @@
 
 		<ComponentCard
 			title="Selection and async editing"
-			description="Click a cell, navigate with arrow keys, then press Enter or F2 to edit; double-click still edits directly. Commits update optimistically while the table indicator tracks the request; clearing a name demonstrates rollback and the rejected state."
+			description="Click a cell, navigate with arrow keys, then press Enter or F2 to edit; double-click still edits directly. Commits update optimistically; DataTable draws no request indicator, so this example shows its own NetworkIndicator while a commit is in flight; clearing a name demonstrates rollback and the rejected state."
 			code={editingDataTableCode}
 			class="min-h-0 items-stretch p-3 md:p-5"
 		>

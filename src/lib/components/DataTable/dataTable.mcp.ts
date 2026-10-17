@@ -74,7 +74,9 @@ instead to drop the table into normal document flow at its natural height:
 - **showColumnVisibilityControl**: default false.
 - **stickyHeader**, **overscan**, **estimatedRowHeight**, and **animateRows** control rendering.
 - **disabled** blocks sorting controls, selection paths, editing, and column manipulation.
-- **loading** and **error** drive table states and the NetworkIndicator.
+- **loading** and **error** drive the table's loading skeleton and error state. DataTable draws no
+  request indicator: show your own (a \`NetworkIndicator\`, a toast…) from \`loading\` and the
+  \`onCellCommit\` promise.
 - **api**: bindable narrow external-control instance handle (\`DataTableApi<TData>\`).
 - **cell** and **header**: table-level renderer snippets with \`renderDefault\` delegates.
 - **class**, **theme**, **ref**, and Svelte attachments follow Entasis conventions.
@@ -158,7 +160,7 @@ only loaded row objects; all selected IDs remain in \`state.rowSelection\`.
 Built-in editors are text, number, select, date, and switch. A custom editor snippet receives row
 metadata, draft, pending/error state, \`setDraft\`, \`commit\`, and \`cancel\`. DataTable never
 mutates rows; changed values call \`onCellCommit\` and render optimistically while the
-NetworkIndicator tracks the request. Unchanged drafts close without a commit. Rejection rolls back,
+request runs; the edited cell's editor is \`pending\` and the table is \`aria-busy\` until it settles. Unchanged drafts close without a commit. Rejection rolls back,
 restores the editor and draft, and exposes the error. Only one asynchronous transaction can be
 active or recoverable. Columns with editors do not enter edit mode without \`onCellCommit\` and
 issue a development warning.

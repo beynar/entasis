@@ -6,7 +6,6 @@
 	import type { Attachment } from 'svelte/attachments';
 	import Empty from '../Empty/Empty.svelte';
 	import Select from '../Form/Select/Select.svelte';
-	import NetworkIndicator from '../NetworkIndicator/NetworkIndicator.svelte';
 	import Pagination from '../Pagination/Pagination.svelte';
 	import ScrollArea from '../ScrollArea/ScrollArea.svelte';
 	import Skeleton from '../Skeleton/Skeleton.svelte';
@@ -155,6 +154,9 @@
 		return 40;
 	});
 	const viewportHeight = $derived(typeof height === 'number' ? `${height}px` : height);
+	// No request indicator is drawn: the app owns `loading` and the `onCellCommit` promise, so it
+	// shows progress however it likes
+	// (`api.isSaving` tracks pending commits). Assistive technology still hears that the table is busy.
 	const isSaving = $derived(model.pendingCommitCount > 0);
 	const isBusy = $derived(loading || isSaving);
 	const rowFlip = dataTableRowFlip(() => animateRows);
@@ -500,14 +502,6 @@
 	<DataTableToolbar {model} {classes} revision={modelRevision} {tableApi} />
 
 	<div class={classes.viewport({ fill: fillsParent })} style:height={viewportHeight}>
-		<NetworkIndicator
-			loading={isBusy}
-			color="primary"
-			height={2}
-			theme={{ motion: { duration: 120 } }}
-			label={isSaving ? t.dataTableSaving : t.dataTableLoading}
-			class={classes.savingIndicator()}
-		/>
 		<ScrollArea bind:viewportRef class={classes.scrollArea()} type="auto" label={t.dataTableLabel}>
 			<table
 				{@attach dataTableGridNavigation({

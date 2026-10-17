@@ -195,8 +195,6 @@ export const zh: Messages = {
 	playVideo: '播放视频',
 	imageLoadError: '图片无法加载',
 	dataTableLabel: '数据表',
-	dataTableLoading: '正在加载表格数据',
-	dataTableSaving: '正在保存表格更改',
 	dataTableLoadingRows: '正在加载行',
 	dataTableErrorTitle: '无法加载数据',
 	dataTableErrorDescription: '数据无法加载。',

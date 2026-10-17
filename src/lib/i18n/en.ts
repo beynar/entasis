@@ -205,8 +205,6 @@ export const en = {
 	playVideo: 'Play video',
 	imageLoadError: 'The image could not be loaded',
 	dataTableLabel: 'Data table',
-	dataTableLoading: 'Loading table data',
-	dataTableSaving: 'Saving table changes',
 	dataTableLoadingRows: 'Loading rows',
 	dataTableErrorTitle: 'Could not load data',
 	dataTableErrorDescription: 'The data could not be loaded.',

@@ -198,8 +198,6 @@ export const fr: Messages = {
 	playVideo: 'Lire la vidéo',
 	imageLoadError: 'L’image n’a pas pu être chargée',
 	dataTableLabel: 'Tableau de données',
-	dataTableLoading: 'Chargement des données du tableau',
-	dataTableSaving: 'Enregistrement des modifications du tableau',
 	dataTableLoadingRows: 'Chargement des lignes',
 	dataTableErrorTitle: 'Impossible de charger les données',
 	dataTableErrorDescription: 'Les données n’ont pas pu être chargées.',

@@ -199,8 +199,6 @@ export const es: Messages = {
 	playVideo: 'Reproducir vídeo',
 	imageLoadError: 'No se pudo cargar la imagen',
 	dataTableLabel: 'Tabla de datos',
-	dataTableLoading: 'Cargando datos de la tabla',
-	dataTableSaving: 'Guardando cambios de la tabla',
 	dataTableLoadingRows: 'Cargando filas',
 	dataTableErrorTitle: 'No se pudieron cargar los datos',
 	dataTableErrorDescription: 'Los datos no se pudieron cargar.',

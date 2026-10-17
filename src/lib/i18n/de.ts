@@ -199,8 +199,6 @@ export const de: Messages = {
 	playVideo: 'Video abspielen',
 	imageLoadError: 'Das Bild konnte nicht geladen werden',
 	dataTableLabel: 'Datentabelle',
-	dataTableLoading: 'Tabellendaten werden geladen',
-	dataTableSaving: 'Tabellenänderungen werden gespeichert',
 	dataTableLoadingRows: 'Zeilen werden geladen',
 	dataTableErrorTitle: 'Daten konnten nicht geladen werden',
 	dataTableErrorDescription: 'Die Daten konnten nicht geladen werden.',

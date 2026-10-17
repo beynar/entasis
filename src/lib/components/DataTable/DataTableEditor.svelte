@@ -40,7 +40,10 @@
 			if (target) {
 				target.tabIndex = 0;
 				target.focus();
+				// Pickers open with the editor: the select's list, and the date field's calendar (a click
+				// on its input opens it, while focus stays in the input for typing).
 				if (editor?.type === 'select' && target.matches('[role="combobox"]')) target.click();
+				if (editor?.type === 'date' && target instanceof HTMLInputElement) target.click();
 			}
 			if (target instanceof HTMLInputElement && target.type !== 'checkbox') target.select();
 		});

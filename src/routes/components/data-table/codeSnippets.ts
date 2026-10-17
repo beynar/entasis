@@ -102,13 +102,17 @@ ${props.map((prop) => `    ${prop}\n`).join('')}    pagination={{ pageSize: 25, 
 export const editingDataTableCode = `<script lang="ts">
   import {
     DataTable,
+    type DataTableApi,
     type DataTableCellCommit,
     type DataTableColumn,
     type DataTableEditorPayload
   } from 'entasis/data-table';
+  import { NetworkIndicator } from 'entasis/network-indicator';
   import { Select } from 'entasis/select';
 
   let items = $state<Person[]>(initialPeople);
+  // DataTable draws no request indicator: show your own from api.isSaving.
+  let api = $state<DataTableApi<Person>>();
 
   const columns: DataTableColumn<Person>[] = [
     { id: 'name', accessor: 'name', header: 'Name', editor: { type: 'text' } },
@@ -127,7 +131,7 @@ export const editingDataTableCode = `<script lang="ts">
   ];
 
   async function commitCell(commit: DataTableCellCommit<Person>) {
-    await api.people.update(commit.rowId, commit.columnId, commit.value);
+    await server.people.update(commit.rowId, commit.columnId, commit.value);
     items = items.map((person) =>
       person.id === commit.rowId
         ? { ...person, [commit.columnId]: commit.value }
@@ -145,6 +149,7 @@ export const editingDataTableCode = `<script lang="ts">
   />
 {/snippet}
 
+<NetworkIndicator loading={api?.isSaving ?? false} label="Saving changes" />
 <DataTable
   {items}
   columns={columns.map((column) =>
@@ -159,6 +164,7 @@ export const editingDataTableCode = `<script lang="ts">
   selectionMode="multiple"
   pagination={{ pageSize: 10, pageSizes: [10, 18] }}
   onCellCommit={commitCell}
+  bind:api
 />`;
 
 export const groupingDataTableCode = `<script lang="ts">

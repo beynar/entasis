@@ -197,8 +197,6 @@ export const ar: Messages = {
 	playVideo: 'تشغيل الفيديو',
 	imageLoadError: 'تعذر تحميل الصورة',
 	dataTableLabel: 'جدول البيانات',
-	dataTableLoading: 'جارٍ تحميل بيانات الجدول',
-	dataTableSaving: 'جارٍ حفظ تغييرات الجدول',
 	dataTableLoadingRows: 'جارٍ تحميل الصفوف',
 	dataTableErrorTitle: 'تعذر تحميل البيانات',
 	dataTableErrorDescription: 'تعذر تحميل البيانات.',

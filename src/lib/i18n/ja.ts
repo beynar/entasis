@@ -197,8 +197,6 @@ export const ja: Messages = {
 	playVideo: '動画を再生',
 	imageLoadError: '画像を読み込めませんでした',
 	dataTableLabel: 'データテーブル',
-	dataTableLoading: 'テーブルデータを読み込み中',
-	dataTableSaving: 'テーブルの変更を保存中',
 	dataTableLoadingRows: '行を読み込み中',
 	dataTableErrorTitle: 'データを読み込めませんでした',
 	dataTableErrorDescription: 'データを読み込めませんでした。',

@@ -36,7 +36,6 @@ const viewport = cva({
 	},
 	defaultVariants: { fill: false }
 });
-const savingIndicator = cva({ base: '!absolute !z-30 !rounded-none' });
 const scrollArea = cva({ base: 'h-full' });
 const virtualTable = cva({ base: 'grid min-w-full table-fixed text-sm' });
 const caption = cva({
@@ -251,7 +250,6 @@ export const dataTableTheme = {
 	toolbarGroup,
 	search,
 	viewport,
-	savingIndicator,
 	scrollArea,
 	virtualTable,
 	caption,

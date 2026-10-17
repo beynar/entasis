@@ -2,6 +2,7 @@
 	import { Button } from '$lib/components/Button/index.js';
 	import {
 		DataTable,
+		type DataTableApi,
 		type DataTableCellCommit,
 		type DataTableCellPayload,
 		type DataTableColumn,
@@ -12,9 +13,12 @@
 	import { Select } from '$lib/components/Form/Select/index.js';
 	import { checkIcon } from '$lib/components/Icons/check.js';
 	import { trashIcon } from '$lib/components/Icons/trash.js';
+	import { NetworkIndicator } from '$lib/components/NetworkIndicator/index.js';
 	import { createPeople, formatJoinedAt, formatSalary, type Person } from './exampleData.js';
 
 	let people = $state(createPeople(18));
+	// DataTable draws no request indicator; the app shows its own from `api.isSaving`.
+	let api = $state<DataTableApi<Person>>();
 	const roleOptions = ['Analyst', 'Designer', 'Director', 'Engineer', 'Manager'].map((role) => ({
 		value: role,
 		label: role
@@ -144,21 +148,30 @@
 	</div>
 {/snippet}
 
-<DataTable
-	items={people}
-	columns={columns.map((column) =>
-		column.id === 'role'
-			? { ...column, editor: { type: 'custom', render: roleEditor } as const }
-			: column
-	)}
-	getRowId={(person) => person.id}
-	height={420}
-	density="comfortable"
-	interactionMode="grid"
-	selectionMode="multiple"
-	pagination={{ pageSize: 10, pageSizes: [10, 18] }}
-	{bulkActions}
-	{rowActions}
-	{expandedContent}
-	onCellCommit={commitCell}
-/>
+<div class="relative">
+	<NetworkIndicator
+		loading={api?.isSaving ?? false}
+		label="Saving changes"
+		height={2}
+		class="absolute z-30 rounded-none"
+	/>
+	<DataTable
+		items={people}
+		columns={columns.map((column) =>
+			column.id === 'role'
+				? { ...column, editor: { type: 'custom', render: roleEditor } as const }
+				: column
+		)}
+		getRowId={(person) => person.id}
+		height={420}
+		density="comfortable"
+		interactionMode="grid"
+		selectionMode="multiple"
+		pagination={{ pageSize: 10, pageSizes: [10, 18] }}
+		{bulkActions}
+		{rowActions}
+		{expandedContent}
+		onCellCommit={commitCell}
+		bind:api
+	/>
+</div>
