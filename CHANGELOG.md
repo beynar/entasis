@@ -6,7 +6,7 @@ Unreleased section under the new version.
 
 ## Unreleased
 
-## 0.12.0 — 2026-10-18
+## 0.12.0 — 2026-10-19
 
 This minor (0.12.0) batches the behaviour changes of the Base UI adoption. Every renamed API keeps
 a deprecated alias for one minor, so code that only uses renamed names keeps compiling until the

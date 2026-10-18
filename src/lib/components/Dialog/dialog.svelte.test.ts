@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
-import { tick } from 'svelte';
+import { flushSync } from 'svelte';
 import { describe, expect, test, vi } from 'vitest';
 import DialogLawHarness from './dialogLawHarness.test.svelte';
 import DialogSwapHarness from './DialogSwapHarness.test.svelte';
@@ -504,10 +504,11 @@ describe('Dialog bottom sheet and the on-screen keyboard (OV-13)', () => {
 		watch.observe(align(), { attributes: true, attributeFilter: ['class'] });
 		try {
 			// Focus leaves the first field and lands on the next one a moment later, after the DOM has
-			// been flushed in between (the release waits a frame for exactly this).
+			// been flushed in between (the release waits a frame for exactly this). `flushSync`, not
+			// `tick()`: with Svelte's async mode `tick()` can wait for the next animation frame, and
+			// under load that frame is the release's, so the test raced its own premise.
 			screen.getByLabelText('Draft').blur();
-			await tick();
-			await tick();
+			flushSync();
 			screen.getByLabelText('Second draft').focus();
 			await sleep(80);
 			expect(align().className).toContain('--keyboard-inset');
