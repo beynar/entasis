@@ -265,7 +265,7 @@
 			<PopupMenu
 				{size}
 				position="bottom-start"
-				menu={{ items: menuItemsFor(index, tab), header: menuHeader }}
+				menu={{ items: menuItemsFor(index, tab), header: menuHeader, size }}
 			>
 				{#snippet trigger(popover)}
 					<button

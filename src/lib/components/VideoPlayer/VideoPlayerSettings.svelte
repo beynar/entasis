@@ -117,6 +117,7 @@
 		class={classes.popoverPanel({ className: 'min-w-52 p-1' })}
 		menu={{
 			items: menuItems,
+			size,
 			class: classes.menu(),
 			footer: includeVolume ? volumeFooter : undefined,
 			theme: {

@@ -1149,6 +1149,9 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Fixed
 
+- `ToggleMenu`, `Tabbar` and `VideoPlayer` menus: submenus (a toggle menu's "Text color", say)
+  opened at the normal size under a small menu. These menus now give their size to the menu
+  itself, not only to its panel or to each row, so the rows and every submenu inherit it.
 - `Dialog` sheets with snap points: the first opening slid the sheet fully open and only dropped
   it to its snap point when the intro ended. The resting offset is now written before the intro
   reads the panel's transform, so the sheet slides up to its snap point (and closes from it).

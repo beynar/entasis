@@ -57,7 +57,7 @@
 	<PopupMenu
 		bind:open
 		size={resolvedSize}
-		menu={{ items: menuItems }}
+		menu={{ items: menuItems, size: resolvedSize }}
 		closeOnItemClick={item.closeOnItemClick ?? true}
 		position="bottom"
 		fitTrigger={false}

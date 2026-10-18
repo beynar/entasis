@@ -179,7 +179,7 @@
 	// Overflowed toolbar items become one menu. Single entries (a toggle, a menu, one custom item)
 	// sit together like any menu rows; a separator only sets apart a multi-option unit (a button
 	// group, a radio group, several custom entries), as a toolbar's grouping does.
-	// A small toolbar opens compact menus: menu rows take their height from density, not size.
+	// The menu takes the toolbar's size, which also sets its rows' height (and its submenus').
 	const overflowMenuItems = $derived.by(() => {
 		const menuItems: MenuItem[] = [];
 		let previousIsSet = false;
@@ -340,7 +340,7 @@
 	>
 		<PopupMenu
 			{size}
-			menu={{ items: overflowMenuItems }}
+			menu={{ items: overflowMenuItems, size }}
 			closeOnItemClick={false}
 			position="bottom-end"
 			fitTrigger={false}
