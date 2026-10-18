@@ -43,6 +43,9 @@ try {
 	// repository's, so CI can run this check against the oldest version the peer range admits.
 	if (process.env.ENTASIS_CHECK_SVELTE_VERSION) {
 		dependencies.svelte = process.env.ENTASIS_CHECK_SVELTE_VERSION;
+		// The repository's vite-plugin-svelte (7.x) requires Svelte 5.46.4 or later, so npm cannot
+		// resolve it next to an older Svelte. 6.x is the newest line that accepts every Svelte 5.
+		dependencies['@sveltejs/vite-plugin-svelte'] = '^6.2.4';
 		console.log(`Consumer Svelte pinned to ${dependencies.svelte}.`);
 	}
 	await writeFile(
