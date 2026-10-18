@@ -26,7 +26,8 @@ export const headerLinks: AppNavigationLink[] = [
 	{ href: '/blocks', text: 'Blocks' },
 	{ href: '/templates', text: 'Templates' },
 	{ href: '/playground', text: 'Playground' },
-	{ href: '/colors', text: 'Colors' }
+	{ href: '/colors', text: 'Colors' },
+	{ href: '/changelog', text: 'Changelog' }
 ];
 
 const gettingStartedLinks: AppNavigationLink[] = [
@@ -38,6 +39,7 @@ const gettingStartedLinks: AppNavigationLink[] = [
 	{ href: '/docs/consistency', text: 'Consistency rules' },
 	{ href: '/docs/theme-transitions', text: 'Theme transitions' },
 	{ href: '/docs/i18n', text: 'Internationalization' },
+	{ href: '/changelog', text: 'Changelog' },
 	{ href: '/stress', text: 'Stress test' }
 ];
 
@@ -133,8 +135,8 @@ function blockSidebarGroups(routeId: string): SidebarGroup[] {
 export type DocsSidebarView = 'docs' | 'components' | 'blocks' | 'templates';
 
 /**
- * The sidebar view a route shows: one per header section. Playground and Colors are single pages
- * with no list of their own, so they sit in the Docs view beside the theme topics they belong to.
+ * The sidebar view a route shows: one per header section. Playground, Colors and Changelog are
+ * single pages with no list of their own, so they sit in the Docs view beside the theme topics.
  */
 export function getSidebarView(routeId: string | null | undefined): DocsSidebarView {
 	if (routeId?.startsWith('/blocks')) return 'blocks';
@@ -143,6 +145,7 @@ export function getSidebarView(routeId: string | null | undefined): DocsSidebarV
 		routeId?.startsWith('/docs') ||
 		routeId === '/playground' ||
 		routeId === '/colors' ||
+		routeId === '/changelog' ||
 		routeId === '/stress'
 	)
 		return 'docs';

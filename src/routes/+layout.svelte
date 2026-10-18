@@ -12,6 +12,7 @@
 	import Confirmation from '$lib/components/Confirmation/Confirmation.svelte';
 	import Ask from '$lib/components/Form/Ask/Ask.svelte';
 	import { bookOpenIcon } from '$lib/components/Icons/bookOpen.js';
+	import { clockCounterClockwiseIcon } from '$lib/components/Icons/clockCounterClockwise.js';
 	import { commandIcon } from '$lib/components/Icons/command.js';
 	import { cubeIcon } from '$lib/components/Icons/cube.js';
 	import { layoutIcon } from '$lib/components/Icons/layout.js';
@@ -261,7 +262,8 @@
 		'/blocks': squaresFourIcon,
 		'/templates': layoutIcon,
 		'/playground': slidersHorizontalIcon,
-		'/colors': paletteIcon
+		'/colors': paletteIcon,
+		'/changelog': clockCounterClockwiseIcon
 	} as Record<string, typeof bookOpenIcon>;
 	const activityBar = $derived<SidebarActivityBar>({
 		label: 'Sections',
