@@ -8,7 +8,9 @@ const defaultRoot = cva({ base: 'relative flex min-h-0 min-w-0 flex-1 flex-col' 
 const defaultHeader = cva({ base: 'shrink-0' });
 const defaultBody = cva({ base: 'relative flex min-h-0 min-w-0 flex-1' });
 const defaultViewport = cva({
-	base: 'min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
+	// `isolate`: rows raise themselves on hover (to keep their action bar on top), and that must not
+	// lift them above what floats over the transcript (the follow-up suggestions, the scroll button).
+	base: 'isolate min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
 	variants: {
 		tocSide: {
 			left: 'pl-layout-lg',
@@ -65,8 +67,11 @@ const defaultEmptySuggestions = cva({
 	base: 'flex max-w-full min-w-0 flex-wrap justify-center gap-sm'
 });
 // Follow-ups share the rows' inline inset at the thread's density.
+// Floats over the bottom of the transcript, with no band of its own: the text scrolls behind the
+// chips, and the list's end padding (the row's height) keeps the last row clear of them at the end.
+// Only the chips' column takes the pointer; the transcript beside it stays selectable.
 const defaultFollowUps = cva({
-	base: 'shrink-0 pb-sm',
+	base: 'pointer-events-none absolute inset-x-0 bottom-0 z-10 pb-sm',
 	variants: {
 		density: {
 			compact: 'px-lg',
@@ -79,7 +84,7 @@ const defaultFollowUps = cva({
 // The content column holding the follow-up row. The row pads itself vertically for focus rings,
 // so the negative block margin keeps the band as tall as before.
 const defaultFollowUpList = cva({
-	base: 'mx-auto -my-xs w-full min-w-0 max-w-[var(--ai-thread-content-width,var(--ai-chat-content-width,none))]'
+	base: 'pointer-events-auto mx-auto -my-xs w-full min-w-0 max-w-[var(--ai-thread-content-width,var(--ai-chat-content-width,none))]'
 });
 // The pending assistant row's label: rendered inside an assistant AIMessage, so it takes the
 // message's type size and column, with the shared `shimmer` utility on top.
@@ -98,7 +103,8 @@ const defaultSource = cva({
 // A turn's action-bar row. AIMessageActions sizes the row to its buttons.
 const defaultActions = cva({ base: '' });
 const defaultScrollButton = cva({
-	base: 'absolute bottom-md z-10 rounded-full bg-surface-raised lift-2',
+	// Above the follow-up suggestions when they show (`--ai-thread-follow-ups-height`).
+	base: 'absolute bottom-[calc(var(--space-md)+var(--ai-thread-follow-ups-height,0px))] z-10 rounded-full bg-surface-raised lift-2',
 	variants: {
 		position: {
 			left: 'left-md',

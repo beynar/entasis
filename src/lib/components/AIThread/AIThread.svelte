@@ -169,6 +169,9 @@
 	// Message actions take layout space inside their row, so the end padding no longer reserves
 	// room for an action bar hanging below the last message.
 	const resolvedPaddingEnd = $derived(Math.max(0, paddingEnd ?? resolvedPadding));
+	// The follow-up suggestions float over the bottom of the transcript (no band of their own), so
+	// the list ends that much lower: at the end, the last row still sits above the chips.
+	let followUpsHeight = $state(0);
 
 	const resolvedMessages = $derived<readonly TMessage[]>(messages ?? conversation?.messages ?? []);
 	const resolvedLiveText = $derived(liveText ?? conversation?.liveText);
@@ -269,6 +272,8 @@
 			// After an assistant turn: its reply, or the tool calls that ended it.
 			lastTurnMessage.role !== 'user'
 	);
+	const followUpsInset = $derived(shouldShowFollowUps ? followUpsHeight : 0);
+	const listPaddingEnd = $derived(resolvedPaddingEnd + followUpsInset);
 
 	const tocState = $derived.by(() => {
 		const virtualizer = $virtualizerStore;
@@ -334,7 +339,7 @@
 			estimateSize: () => resolvedEstimateSize,
 			overscan: Math.max(0, overscan),
 			paddingStart: resolvedPaddingStart,
-			paddingEnd: resolvedPaddingEnd,
+			paddingEnd: listPaddingEnd,
 			getItemKey: renderItemKey,
 			scrollToFn: scrollController.scrollToFn,
 			anchorTo: 'end',
@@ -459,7 +464,7 @@
 	function initialThreadOffset(): number {
 		return Math.max(
 			0,
-			resolvedPaddingStart + resolvedPaddingEnd + renderItems.length * resolvedEstimateSize
+			resolvedPaddingStart + listPaddingEnd + renderItems.length * resolvedEstimateSize
 		);
 	}
 
@@ -792,7 +797,7 @@
 	{/if}
 	{#if header}<Slot render={header} class={classes.header()} />{/if}
 	{#if errorMessage}<Alert color="danger" variant="soft" description={errorMessage} />{/if}
-	<div class={classes.body()}>
+	<div class={classes.body()} style:--ai-thread-follow-ups-height={`${followUpsInset}px`}>
 		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 		<div
 			bind:this={viewport}
@@ -876,20 +881,24 @@
 				{@render arrowDownIcon({ size: 16 })}
 			</Button>
 		{/if}
-	</div>
-	{#if shouldShowFollowUps}
-		<!-- The scroll row's viewport is the labelled group. -->
-		<div data-slot="ai-thread-follow-ups" class={classes.followUps({ density: resolvedDensity })}>
-			<!-- One row that scrolls sideways (with a fade) rather than wrapping on a phone. -->
-			<div class={classes.followUpList()}>
-				<AISuggestions
-					suggestions={resolvedSuggestions}
-					label={t.aiThreadFollowUps}
-					onSelect={handleSuggestionSelect}
-				/>
+		{#if shouldShowFollowUps}
+			<!-- The scroll row's viewport is the labelled group. -->
+			<div
+				data-slot="ai-thread-follow-ups"
+				class={classes.followUps({ density: resolvedDensity })}
+				bind:clientHeight={followUpsHeight}
+			>
+				<!-- One row that scrolls sideways (with a fade) rather than wrapping on a phone. -->
+				<div class={classes.followUpList()}>
+					<AISuggestions
+						suggestions={resolvedSuggestions}
+						label={t.aiThreadFollowUps}
+						onSelect={handleSuggestionSelect}
+					/>
+				</div>
 			</div>
-		</div>
-	{/if}
+		{/if}
+	</div>
 	{#if renderAskUserQuestion && resolvedQuestion}
 		{@const question = resolvedQuestion}
 		{#key question.key}

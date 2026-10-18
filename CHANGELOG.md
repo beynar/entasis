@@ -602,6 +602,10 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Changed
 
+- `AIThread`: the follow-up suggestions float over the bottom of the transcript instead of taking
+  a band of their own, so the text scrolls behind the transparent row; the list's end padding (the
+  row's height) keeps the last message clear of the chips at the end, and the scroll-to-latest
+  button sits above them. Showing suggestions no longer resizes the transcript.
 - `AIThread`: following output is instant. An appended row (a sent message, a new answer, a
   thinking or tool row) is in place at the end on its first painted frame instead of being painted
   below the fold and slid up, which on a short message read as a stutter; growing text, the action
