@@ -95,7 +95,8 @@ describe('removing the focused item', () => {
 		await settle();
 
 		expect(document.activeElement).toBe(button('Cut'));
-		expect(tabStops(list)).toEqual([button('Cut')]);
+		// The roving stop follows focus a beat later; on a busy machine that outlasts `settle`.
+		await expect.poll(() => tabStops(list)).toEqual([button('Cut')]);
 		// Tab leaves the list in one step, and Shift+Tab comes back to its single stop (with no
 		// default item, the first one once focus has left).
 		await tab();
