@@ -6,6 +6,14 @@ import { server, userEvent } from 'vitest/browser';
 /** Engine running the current test. */
 export const engine = server.browser as 'chromium' | 'webkit' | 'firefox';
 
+/**
+ * WebKit on a Linux host (the GitHub runners). A few overlay tests never settle there: a closed
+ * alert dialog is not removed and a drawer's resting transform is not applied, while the same tests
+ * pass in Chromium on that runner, in WebKit on macOS and in WebKit in a local Linux container.
+ * Those tests skip on it until the cause is found; see the comment at each skip.
+ */
+export const webkitOnLinux = engine === 'webkit' && server.platform === 'linux';
+
 // WebKit on macOS follows the system's keyboard-navigation setting, off by default: plain Tab
 // only visits text fields and lists, Option+Tab visits every focusable element. Linux WebKit
 // (CI) and Chromium move through every element with plain Tab.
