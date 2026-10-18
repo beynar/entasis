@@ -1147,7 +1147,11 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
   the end that is still settling (on load, or after "scroll to latest") yields to the reader
   instead of steering them back. When the thread's viewport grows (the composer coming back after a
   docked question is dismissed), the browser's clamp onto the end no longer reads as a scroll up,
-  so a following thread keeps following the output that arrives next.
+  so a following thread keeps following the output that arrives next. More generally, only the reader stops the
+  following: a wheel or key up, or a drag of the scrollbar or a touch pan. An upward move caused by
+  layout (the virtualizer keeping the end anchored when the suggestions bar under the thread goes
+  away as a message is sent) no longer stops it, so that message is followed instead of being left
+  below the fold.
 - `Autocomplete`, `Combobox`, `DateInput`, `TimeInput`, `PhoneInput`, `ColorInput` and
   `TagsInput`: the popup opens against the input box, not below the field's description. Their
   popovers anchored to the whole field. `Field` takes a new `anchor` attachment that it applies to

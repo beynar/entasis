@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
+	import { dev } from '$app/environment';
 	import Alert from '$lib/components/Alert/Alert.svelte';
 	import Button from '$lib/components/Button/Button.svelte';
 	import AIChat from '$lib/components/AIChat/AIChat.svelte';
@@ -184,6 +185,92 @@
 		timers = [];
 	}
 
+	// Dev only: append one of each kind of transcript row, to check layout, spacing and scrolling.
+	const longAnswer = [
+		'## Release readiness',
+		'',
+		'The launch is **on track**, with two open items. Here is where each workstream stands and what still needs a decision before the beta opens to invited customers.',
+		'',
+		'### Open items',
+		'',
+		'1. Finalize the onboarding copy with the design team.',
+		'2. Run the accessibility review on the new settings pages.',
+		'3. Confirm the rollback drill owner for the platform team.',
+		'',
+		'| Workstream | Owner | Status |',
+		'| --- | --- | --- |',
+		'| Copy | Design | In review |',
+		'| Accessibility | Platform | Scheduled |',
+		'| Rollback drill | Platform | Done |',
+		'',
+		'```bash',
+		'pnpm release --dry-run --channel beta',
+		'```',
+		'',
+		'> Ship the beta once both reviews sign off; the general release follows a week later.',
+		'',
+		'Let me know if you want owners added to each step or a short summary for the announcement.'
+	].join('\n');
+	const longUserMessage =
+		'Before we ship, can you double-check the whole plan? I want the rollback drill to happen before the accessibility review, the copy to be final by Thursday, and a short summary I can paste into the launch channel. Also flag anything that still has no owner, and tell me which of these items could slip without blocking the beta, because the design team is short-handed this week and I would rather move something than rush it.';
+
+	function appendDemo(
+		kind: 'user-short' | 'user-long' | 'answer-short' | 'answer-long' | 'thinking' | 'tool'
+	): void {
+		if (!conversation) return;
+		const state = conversation;
+		const id = crypto.randomUUID();
+		if (kind === 'user-short' || kind === 'user-long') {
+			state.appendMessage({
+				id,
+				role: 'user',
+				content: kind === 'user-short' ? 'Looks good, ship it.' : longUserMessage
+			});
+			return;
+		}
+		if (kind === 'answer-short' || kind === 'answer-long') {
+			state.appendMessage({
+				id,
+				role: 'assistant',
+				parts: [
+					{
+						type: 'text',
+						text: kind === 'answer-short' ? 'Done: the checklist is updated.' : longAnswer
+					}
+				]
+			});
+			return;
+		}
+		if (kind === 'thinking') {
+			const text =
+				'The user wants the rollback drill first. That moves the platform sign-off earlier, so the accessibility review shifts to Thursday. Copy can still land the same day.';
+			state.appendMessage({
+				id,
+				role: 'assistant',
+				parts: [{ type: 'reasoning', text: text.slice(0, 40), state: 'streaming' }]
+			});
+			schedule(700, () =>
+				state.updateMessage({ id }, (message) => ({
+					...message,
+					parts: [{ type: 'reasoning', text, state: 'done' }]
+				}))
+			);
+			return;
+		}
+		const toolCallId = crypto.randomUUID();
+		const tool = (done: boolean): AIThreadPart => ({
+			type: 'tool-list_tasks',
+			toolCallId,
+			state: done ? 'output-available' : 'input-available',
+			input: { status: 'open', team: 'platform' },
+			...(done ? { output: ['Rollback drill', 'Accessibility review'] } : {})
+		});
+		state.appendMessage({ id, role: 'assistant', parts: [tool(false)] });
+		schedule(1_200, () =>
+			state.updateMessage({ id }, (message) => ({ ...message, parts: [tool(true)] }))
+		);
+	}
+
 	function askForInput(): void {
 		if (!conversation) return;
 		const toolId = crypto.randomUUID();
@@ -250,6 +337,26 @@
 			</div>
 			<Button size="small" variant="outline" onclick={askForInput}>Ask for input</Button>
 		</div>
+		{#if dev}
+			<!-- Dev only (not on the published site): append each kind of row. -->
+			<div class="mt-3 flex flex-wrap items-center gap-1.5">
+				<span class="text-neutral/70 me-1 text-xs">Append</span>
+				<Button size="small" variant="soft" onclick={() => appendDemo('user-short')}
+					>User short</Button
+				>
+				<Button size="small" variant="soft" onclick={() => appendDemo('user-long')}
+					>User long</Button
+				>
+				<Button size="small" variant="soft" onclick={() => appendDemo('answer-short')}
+					>Answer short</Button
+				>
+				<Button size="small" variant="soft" onclick={() => appendDemo('answer-long')}
+					>Answer long</Button
+				>
+				<Button size="small" variant="soft" onclick={() => appendDemo('thinking')}>Thinking</Button>
+				<Button size="small" variant="soft" onclick={() => appendDemo('tool')}>Tool call</Button>
+			</div>
+		{/if}
 	{/snippet}
 	{#snippet footer(state)}
 		{#if state.status === 'asking-user'}

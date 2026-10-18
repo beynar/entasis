@@ -24,6 +24,16 @@ const distanceToEnd = () => {
 	return node.scrollHeight - node.clientHeight - node.scrollTop;
 };
 const settle = () => new Promise((resolve) => setTimeout(resolve, 120));
+/** The reader dragging the transcript up by `distance` px (its scrollbar, a touch pan): a press on it,
+ *  the scroll, the release. A scroll with no input is layout, which never stops following. */
+const dragUp = async (distance: number) => {
+	viewport().dispatchEvent(
+		new PointerEvent('pointerdown', { bubbles: true, pointerType: 'mouse' })
+	);
+	viewport().scrollTop = viewport().scrollTop - distance;
+	await new Promise((resolve) => requestAnimationFrame(resolve));
+	window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'mouse' }));
+};
 
 async function renderAtEnd(props: Record<string, unknown> = {}) {
 	const screen = await render(Harness, { props: { messages: history(12), ...props } });
@@ -72,8 +82,8 @@ describe('scroll-to-latest button', () => {
 		await expect.poll(() => distanceToEnd()).toBeLessThan(2);
 		await expect.poll(() => scrollButton()).toBeNull();
 		await settle();
-		// A scrollbar drag lands as plain scroll events, like setting scrollTop.
-		viewport().scrollTop = viewport().scrollTop - 60;
+		// A scrollbar drag: a press on the transcript, then plain scroll events.
+		await dragUp(60);
 		await expect.poll(() => scrollButton()).not.toBeNull();
 	});
 });
@@ -111,6 +121,21 @@ describe('following a streaming reply', () => {
 		expect(scrollButton()).toBeNull();
 	});
 
+	test('a message appended as the viewport grows is followed', async () => {
+		// Sending a message hides the follow-up suggestions under the thread, so its viewport grows
+		// in the same update that appends the row. The virtualizer moves the offset up to keep the end
+		// anchored; that move is not the reader scrolling up, so the new row must still be followed.
+		const screen = await renderAtEnd({ messages: history(12), height: 400 });
+		await screen.rerender({
+			messages: [...history(12), { id: 'u-new', role: 'user', content: 'Ship it.' }],
+			height: 434
+		});
+		await expect.poll(() => distanceToEnd()).toBeLessThan(2);
+		await settle();
+		expect(distanceToEnd()).toBeLessThan(2);
+		expect(scrollButton()).toBeNull();
+	});
+
 	test('a following thread keeps following when its viewport shrinks and grows back', async () => {
 		// A question docked in place of the composer shrinks the thread; dismissing it grows the
 		// thread back, which clamps the offset upward onto the end. That clamp is not the reader
@@ -129,7 +154,7 @@ describe('following a streaming reply', () => {
 	test('a layout change that leaves a reader at the end does not make the thread follow again', async () => {
 		const long = 'A long streamed paragraph that fills the viewport. '.repeat(30);
 		const screen = await renderAtEnd({ messages: streamingThread(long), streaming: true });
-		viewport().scrollTop = viewport().scrollTop - 150;
+		await dragUp(150);
 		await expect.poll(() => scrollButton()).not.toBeNull();
 		await settle();
 

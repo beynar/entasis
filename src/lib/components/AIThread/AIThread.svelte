@@ -145,6 +145,9 @@
 	// The thread follows new output only while the user is at the very end. Scrolling up stops it;
 	// scrolling back to the end resumes it. Nothing else moves the user's scroll position.
 	let lastScrollTop = 0;
+	// A pointer or a finger is down on the transcript: a scroll now is the reader dragging it (the
+	// scrollbar, a touch pan), not layout or the virtualizer moving the offset.
+	let isDragging = false;
 	let stickFrame: number | undefined;
 	// Set while the virtualizer handles its ResizeObserver delivery (see `measureItem`).
 	let isInResizeDelivery = false;
@@ -573,11 +576,13 @@
 	function handleScroll(event: UIEvent & { currentTarget: EventTarget & HTMLDivElement }): void {
 		const scrollTop = event.currentTarget.scrollTop;
 		if (scrollTop < lastScrollTop - 0.5) {
-			// Moving up away from the end stops following. Moving up *onto* the end is the browser
-			// clamping the offset because the viewport grew or the content shrank (the composer coming
-			// back after a docked question): it changes nothing, so a following thread keeps following
-			// and a reader who scrolled up is not re-pinned.
-			if (!isInitializingEnd && distanceFromEnd() >= 1) unpin();
+			// Only the reader moving up away from the end stops following. A wheel or a key already
+			// unpinned on its own event; here that leaves a drag (the scrollbar, a touch pan). Every other
+			// upward move is layout: the virtualizer keeping the end anchored as the viewport grows (the
+			// suggestions bar going away), or the browser clamping the offset onto the end (the composer
+			// coming back after a docked question). Those change nothing, so a following thread keeps
+			// following and a reader who scrolled up is not re-pinned.
+			if (isDragging && !isInitializingEnd && distanceFromEnd() >= 1) unpin();
 		}
 		// Only a scroll that reaches the very end follows output again. A layout change that happens
 		// to leave the view at the end (rows above it measured smaller) must not re-pin it, or the next
@@ -602,6 +607,29 @@
 			return;
 		if (scrollUpKeys.has(event.key) || (event.key === ' ' && event.shiftKey)) unpin();
 	}
+
+	// Tracks a drag on the transcript. Touch uses touch events: a touch pan cancels its pointer as
+	// soon as the browser takes it over, before the scroll events arrive.
+	const trackDrag: Attachment<HTMLDivElement> = (node) => {
+		const start = () => (isDragging = true);
+		const end = () => (isDragging = false);
+		const offs = [
+			on(node, 'pointerdown', (event) => {
+				if (event.pointerType !== 'touch') start();
+			}),
+			on(node, 'touchstart', start, { passive: true }),
+			on(window, 'pointerup', end),
+			on(window, 'pointercancel', (event) => {
+				if (event.pointerType !== 'touch') end();
+			}),
+			on(window, 'touchend', end),
+			on(window, 'touchcancel', end)
+		];
+		return () => {
+			for (const off of offs) off();
+			isDragging = false;
+		};
+	};
 
 	function handleRootWheel(
 		event: WheelEvent & { currentTarget: EventTarget & HTMLDivElement }
@@ -749,6 +777,7 @@
 			aria-label={viewportLabel ?? t.aiThreadTranscript}
 			onscroll={handleScroll}
 			{@attach (node) => on(node, 'keydown', handleViewportKeydown)}
+			{@attach trackDrag}
 		>
 			<AIThreadItems
 				{renderItems}
