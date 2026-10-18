@@ -495,8 +495,10 @@
 		return followOutput && untrack(() => isPinned) ? scrollBehavior : false;
 	}
 
+	// Unpinned, no distance counts as the end (-1): a reader left exactly at the end by a layout
+	// change (a row shrinking under them) would otherwise be pulled down when that row grows again.
 	function endThreshold(): number {
-		return untrack(() => isPinned) ? Math.max(0, bottomThreshold) : 0;
+		return untrack(() => isPinned) ? Math.max(0, bottomThreshold) : -1;
 	}
 
 	function handleVirtualizerChange(): void {
@@ -512,7 +514,6 @@
 			isPinned = true;
 			return;
 		}
-		if (distanceFromEnd() < 1) isPinned = true;
 		stickToEnd();
 	}
 
@@ -555,6 +556,10 @@
 	function handleScroll(event: UIEvent & { currentTarget: EventTarget & HTMLDivElement }): void {
 		const scrollTop = event.currentTarget.scrollTop;
 		if (scrollTop < lastScrollTop - 0.5 && !isInitializingEnd) unpin();
+		// Only a scroll that reaches the very end follows output again. A layout change that happens
+		// to leave the view at the end (rows above it measured smaller) must not re-pin it, or the next
+		// growth pulls a reader who scrolled up back to the bottom.
+		else if (distanceFromEnd() < 1) isPinned = true;
 		lastScrollTop = scrollTop;
 		syncThreadPosition();
 		onscroll?.(event);

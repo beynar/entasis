@@ -50,6 +50,10 @@ const positioner = (
 };
 
 const panelBox = () => fixedBox({ top: 0, left: 0, width: 200, height: 100 });
+// Text line boxes can end on a half pixel (WebKit on Linux), while panels are placed on whole
+// pixels: allow one pixel either way where a panel is measured against a line of text.
+const expectWithinPixel = (actual: number, expected: number) =>
+	expect(Math.abs(actual - expected)).toBeLessThanOrEqual(1);
 
 const initialViewport = { width: window.innerWidth, height: window.innerHeight };
 
@@ -238,13 +242,13 @@ test('anchorTo line places the panel against the wrapped line that holds the poi
 		anchorPoint: () => point
 	});
 	await place(panel);
-	expect(panel.getBoundingClientRect().top).toBeCloseTo(last.bottom + 4, 0);
-	expect(panel.getBoundingClientRect().left).toBeCloseTo(last.left, 0);
+	expectWithinPixel(panel.getBoundingClientRect().top, last.bottom + 4);
+	expectWithinPixel(panel.getBoundingClientRect().left, last.left);
 
 	point = { x: first.left + 2, y: first.top + first.height / 2 };
 	await place(panel);
-	expect(panel.getBoundingClientRect().top).toBeCloseTo(first.bottom + 4, 0);
-	expect(panel.getBoundingClientRect().left).toBeCloseTo(first.left, 0);
+	expectWithinPixel(panel.getBoundingClientRect().top, first.bottom + 4);
+	expectWithinPixel(panel.getBoundingClientRect().left, first.left);
 });
 
 test('anchorTo line follows the pointer even when the wrapped lines overlap horizontally', async () => {
@@ -274,13 +278,13 @@ test('anchorTo line follows the pointer even when the wrapped lines overlap hori
 		anchorPoint: () => point
 	});
 	await place(panel);
-	expect(panel.getBoundingClientRect().top).toBeCloseTo(first.bottom + 4, 0);
-	expect(panel.getBoundingClientRect().left).toBeCloseTo(first.left, 0);
+	expectWithinPixel(panel.getBoundingClientRect().top, first.bottom + 4);
+	expectWithinPixel(panel.getBoundingClientRect().left, first.left);
 
 	point = { x: last.left + 4, y: last.top + last.height / 2 };
 	await place(panel);
-	expect(panel.getBoundingClientRect().top).toBeCloseTo(last.bottom + 4, 0);
-	expect(panel.getBoundingClientRect().left).toBeCloseTo(last.left, 0);
+	expectWithinPixel(panel.getBoundingClientRect().top, last.bottom + 4);
+	expectWithinPixel(panel.getBoundingClientRect().left, last.left);
 });
 
 test('a list with no room for its full height shrinks to the room below its input instead of covering it', async () => {

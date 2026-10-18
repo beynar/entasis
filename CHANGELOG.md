@@ -1112,6 +1112,10 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Fixed
 
+- `AIThread`: a reader who scrolled up is never pulled back to the end by a layout change. When rows
+  measured after load (or a reply that shrank) left the view at the end without the reader
+  scrolling there, the thread followed again and the next growth jumped them to the bottom. Only a
+  scroll that reaches the very end follows output again.
 - `Autocomplete`, `Combobox`, `DateInput`, `TimeInput`, `PhoneInput`, `ColorInput` and
   `TagsInput`: the popup opens against the input box, not below the field's description. Their
   popovers anchored to the whole field. `Field` takes a new `anchor` attachment that it applies to

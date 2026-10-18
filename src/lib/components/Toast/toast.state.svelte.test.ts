@@ -149,8 +149,10 @@ describe('toast upsert by id', () => {
 
 		expect(second).not.toBe(first);
 		expect(items()).toHaveLength(1);
-		expect(screen.getByText('Synced')).toBeInTheDocument();
-		expect(screen.queryByText('Syncing')).not.toBeInTheDocument();
+		// Scoped to the toast: the Toaster's live region may still be announcing the first title
+		// (it holds messages for its first 100ms, so on a slow machine "Syncing" is spoken there).
+		expect(within(items()[0]).getByText('Synced')).toBeInTheDocument();
+		expect(within(items()[0]).queryByText('Syncing')).not.toBeInTheDocument();
 		await waitFor(() => expect(reopened).toHaveBeenCalledWith(second));
 		expect(onDismiss).toHaveBeenCalledTimes(1);
 		// The replacement inherits the live element and its size, so stacking reads its real height.

@@ -40,7 +40,8 @@ describe('scroll-to-latest button', () => {
 
 		await page.elementLocator(viewport()).wheel({ delta: { y: -300 } });
 		await expect.poll(() => scrollButton()).not.toBeNull();
-		expect(distanceToEnd()).toBeGreaterThan(100);
+		// WebKit on Linux scrolls a wheel smoothly: the button shows before the scroll has landed.
+		await expect.poll(() => distanceToEnd()).toBeGreaterThan(100);
 
 		const container = document.querySelector('[data-testid="container"]')!.getBoundingClientRect();
 		const button = scrollButton()!.getBoundingClientRect();
@@ -100,6 +101,32 @@ describe('following a streaming reply', () => {
 		await screen.rerender({ messages: streamingThread(text), streaming: true });
 		await expect.poll(() => distanceToEnd()).toBeLessThan(2);
 		expect(scrollButton()).toBeNull();
+	});
+
+	test('a layout change that leaves a reader at the end does not make the thread follow again', async () => {
+		const long = 'A long streamed paragraph that fills the viewport. '.repeat(30);
+		const screen = await renderAtEnd({ messages: streamingThread(long), streaming: true });
+		viewport().scrollTop = viewport().scrollTop - 150;
+		await expect.poll(() => scrollButton()).not.toBeNull();
+		await settle();
+
+		// The last row shrinks under the reader: the view is clamped to the new end without them
+		// scrolling there, so it must not follow when the row grows again.
+		await screen.rerender({ messages: streamingThread('Short now.'), streaming: true });
+		await settle();
+		// What the reader sees: the row at the top of the view, and where it sits on screen.
+		const top = viewport().getBoundingClientRect().top;
+		const anchor = [...viewport().querySelectorAll<HTMLElement>('[data-index]')].find(
+			(row) => row.getBoundingClientRect().bottom > top
+		)!;
+		const anchorTop = anchor.getBoundingClientRect().top;
+		await screen.rerender({ messages: streamingThread(long), streaming: true });
+		await settle();
+		await settle();
+		// Following would move it by the row's whole growth (over 300px here); the virtualizer may
+		// still settle a few pixels of a correction it could not apply while the view was clamped.
+		expect(Math.abs(anchor.getBoundingClientRect().top - anchorTop)).toBeLessThan(10);
+		expect(distanceToEnd()).toBeGreaterThan(100);
 	});
 
 	test('rows mounted by a pinned re-measure raise no ResizeObserver loop error', async () => {
