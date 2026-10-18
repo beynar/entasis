@@ -391,8 +391,10 @@ function itemRole<TMessage extends AIThreadItem>(item: ContentItem<TMessage>): A
 /**
  * Splits the transcript into units and gives each one action bar. A user (or system) message is
  * one unit; an assistant turn runs from the first non-user item to the next user message or
- * marker. The bar sits on the unit's last text segment when the unit ends with text, otherwise
- * on an `actions` row after the unit. The final assistant turn of a streaming reply has no bar.
+ * marker. The bar belongs to text answers: it sits on the turn's last text segment when that
+ * segment holds the whole text, otherwise on an `actions` row right after it, never under the
+ * thinking or tool rows that follow. An assistant turn without text (only thinking or tool calls)
+ * has no bar, and neither does the final assistant turn of a streaming reply.
  * Like markers, system notices do not end the latest turn: only a user message does.
  */
 function assignUnitActions<TMessage extends AIThreadItem>(
@@ -446,6 +448,11 @@ function assignUnitActions<TMessage extends AIThreadItem>(
 			.filter(Boolean)
 			.join('\n\n');
 		const last = unitItems.at(-1)!;
+		// The row the bar follows: an assistant turn's last text segment, a user message's last item.
+		const anchor =
+			unit.kind === 'assistant'
+				? messageItems.findLast((item) => (item.content ?? item.message.content ?? '').trim())
+				: last;
 		const target =
 			messageItems.findLast((item) => itemRole(item) === 'assistant') ??
 			messageItems.at(-1) ??
@@ -458,34 +465,35 @@ function assignUnitActions<TMessage extends AIThreadItem>(
 			latest
 		};
 		const replying = streaming && latest;
-		// The bar rides on the last segment only when that segment holds the whole unit's text (and
-		// is the retry target), so its copy and retry act on the unit; otherwise it gets a row.
-		const barOnLast =
-			last.kind === 'message' &&
-			last === target &&
-			(last.content ?? last.message.content ?? '') === content;
+		const showBar = !replying && anchor !== undefined;
+		// The bar rides on the anchor only when it holds the whole unit's text (and is the retry
+		// target), so its copy and retry act on the unit; otherwise it gets a row right after it.
+		const barOnAnchor =
+			anchor?.kind === 'message' &&
+			anchor === target &&
+			(anchor.content ?? anchor.message.content ?? '') === content;
 		for (const item of unitItems) {
+			const isLast = item === last;
 			if (item.kind !== 'message') {
 				result.push({ ...item, unit: unitKey });
-				continue;
+			} else {
+				result.push({
+					...item,
+					unit: unitKey,
+					actions: showBar && barOnAnchor && item === anchor ? actions : false,
+					...(replying && isLast ? { streaming: true } : {})
+				});
 			}
-			const isLast = item === last;
-			result.push({
-				...item,
-				unit: unitKey,
-				actions: isLast && barOnLast && !replying ? actions : false,
-				...(replying && isLast ? { streaming: true } : {})
-			});
-		}
-		if (!replying && !barOnLast) {
-			result.push({
-				kind: 'actions',
-				key: `${last.key}:actions`,
-				message: actions.message,
-				messageIndex: actions.messageIndex,
-				actions,
-				unit: unitKey
-			});
+			if (showBar && !barOnAnchor && item === anchor) {
+				result.push({
+					kind: 'actions',
+					key: `${item.key}:actions`,
+					message: actions.message,
+					messageIndex: actions.messageIndex,
+					actions,
+					unit: unitKey
+				});
+			}
 		}
 	}
 	return result;

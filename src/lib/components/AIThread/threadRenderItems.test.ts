@@ -37,7 +37,9 @@ describe('AI SDK parts', () => {
 			]
 		};
 		const settled = derive([message]);
-		expect(kinds(settled)).toEqual(['reasoning', 'message', 'reasoning', 'actions']);
+		// The bar rides on the text answer, not on the thinking that follows it.
+		expect(kinds(settled)).toEqual(['reasoning', 'message', 'reasoning']);
+		expect(ofKind(settled, 'message')[0]?.actions).toMatchObject({ content: 'Here is the plan.' });
 		expect(ofKind(settled, 'reasoning').map((item) => item.streaming)).toEqual([false, false]);
 
 		const streaming = derive([message], { streaming: true });
@@ -144,7 +146,8 @@ describe('answered questions', () => {
 				parts: [askPart('output-available', { state: 'completed', values: { scope: 'ga' } })]
 			}
 		]);
-		expect(kinds(items)).toEqual(['question-summary', 'actions']);
+		// No text answer, so no copy/retry bar.
+		expect(kinds(items)).toEqual(['question-summary']);
 		expect(ofKind(items, 'question-summary')[0]).toMatchObject({
 			title: 'Release scope',
 			value: { scope: 'ga' }
@@ -212,13 +215,27 @@ describe('one action bar per unit', () => {
 		expect(messages[2]?.actions).toMatchObject({ role: 'user', content: 'Second question' });
 	});
 
-	test('a turn that ends with tools gets an actions row', () => {
+	test('an assistant turn without text (only tools or thinking) has no bar', () => {
 		const items = derive([
 			{ id: 'u', role: 'user', content: 'Search' },
+			{ id: 't', role: 'tool', tools: [{ id: 'search', name: 'search', status: 'success' }] },
+			{ id: 'r', role: 'assistant', parts: [{ type: 'reasoning', text: 'Hmm.', state: 'done' }] }
+		]);
+		expect(kinds(items)).toEqual(['message', 'tool-group', 'reasoning']);
+		expect(ofKind(items, 'message')[0]?.actions).toMatchObject({ role: 'user' });
+	});
+
+	test('a turn whose text is followed by tools keeps its bar on the text', () => {
+		const items = derive([
+			{ id: 'u', role: 'user', content: 'Search' },
+			{ id: 'a', role: 'assistant', content: 'Searching now.' },
 			{ id: 't', role: 'tool', tools: [{ id: 'search', name: 'search', status: 'success' }] }
 		]);
-		expect(kinds(items)).toEqual(['message', 'tool-group', 'actions']);
-		expect(ofKind(items, 'actions')[0]?.actions).toMatchObject({ content: '', latest: true });
+		expect(kinds(items)).toEqual(['message', 'message', 'tool-group']);
+		expect(ofKind(items, 'message')[1]?.actions).toMatchObject({
+			content: 'Searching now.',
+			latest: true
+		});
 	});
 });
 
@@ -275,8 +292,9 @@ describe('review fixes', () => {
 		]);
 		expect(
 			items.map((item) => `${item.kind}:${'messageIndex' in item ? item.messageIndex : ''}`)
-		).toEqual(['message:0', 'message:1', 'tool-group:1', 'actions:1', 'message:2']);
-		const [bar] = ofKind(items, 'actions');
+		).toEqual(['message:0', 'message:1', 'tool-group:1', 'message:2']);
+		// The reply's bar sits on its text, before the tool group.
+		const bar = ofKind(items, 'message').find((item) => item.messageIndex === 1);
 		expect(bar?.actions).toMatchObject({ messageIndex: 1, latest: false });
 		const assistantUnits = new Set(
 			items

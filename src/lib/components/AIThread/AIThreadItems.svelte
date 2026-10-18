@@ -59,6 +59,8 @@
 		renderItems: readonly AIThreadRenderItem<TMessage>[];
 		virtualItems: readonly VirtualItem[];
 		totalSize: number;
+		/** The element sized to `totalSize`, so the thread can resize it in step with the virtualizer. */
+		listRef?: HTMLDivElement | null;
 		measureItem: Attachment<HTMLElement>;
 		error?: unknown;
 		errorRetry?: () => void | Promise<void>;
@@ -68,6 +70,7 @@
 		renderItems,
 		virtualItems,
 		totalSize,
+		listRef = $bindable(null),
 		measureItem,
 		suggestions = [],
 		onSelect,
@@ -240,6 +243,7 @@
 	<!-- Pointer tracking only reveals a turn's hover actions; the actions stay keyboard-reachable. -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
+		bind:this={listRef}
 		class={classes.list()}
 		style:height={`${totalSize}px`}
 		onpointerleave={() => (hoveredUnit = undefined)}

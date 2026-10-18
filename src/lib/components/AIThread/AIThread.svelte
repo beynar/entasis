@@ -132,7 +132,7 @@
 	const conversation = getAIConversation<TMessage>();
 	const generatedKeys = new WeakMap<object, string>();
 	const questionPublisher = new AIThreadAskUserQuestionPublisher<TMessage>();
-	const scrollController = new AIThreadScrollController(() => scrollBehavior);
+	const scrollController = new AIThreadScrollController();
 	let generatedKeyId = 0;
 	let viewport = $state<HTMLDivElement>();
 	let viewportHeight = $state(0);
@@ -156,7 +156,6 @@
 	let questionValuesByKey = $state<Record<string, AIAskAnswers | undefined>>({});
 	let previousRenderItemCount = 0;
 	let previousFirstRenderItemKey: string | undefined;
-	let shouldSmoothAppendedItem = false;
 	let prependScrollTarget: 'start' | 'end' | undefined;
 	let initialEndFrame: number | undefined;
 	let initialEndSchedule = 0;
@@ -324,19 +323,11 @@
 					? 'end'
 					: undefined
 			: undefined;
-		shouldSmoothAppendedItem =
-			hasAddedItems &&
-			!hasPrependedItems &&
-			followOutput &&
-			scrollBehavior === 'smooth' &&
-			isViewportAtEnd();
-		if (shouldSmoothAppendedItem) isFollowingAppendedItem = true;
 	});
 
 	$effect(() => {
 		const count = renderItems.length;
 		const currentViewport = viewport;
-		scrollController.prepareSmoothAppendAdjustment(shouldSmoothAppendedItem);
 		get(virtualizerStore).setOptions({
 			count,
 			getScrollElement: () => currentViewport ?? null,
@@ -361,14 +352,6 @@
 		}
 		previousRenderItemCount = count;
 		previousFirstRenderItemKey = renderItems[0]?.key;
-		if (shouldSmoothAppendedItem) {
-			scrollController.scheduleSmoothAppendAdjustmentReset();
-			scrollController.watchAppendFollowEnd(isViewportAtEnd, () => {
-				isFollowingAppendedItem = false;
-				syncThreadPosition();
-				stickToEnd();
-			});
-		}
 		if (count === 0) {
 			isPinned = true;
 			hasInitializedEnd = false;
@@ -383,7 +366,7 @@
 			scheduleInitialEndSettlement();
 		}
 		syncThreadPosition();
-		if (!shouldSmoothAppendedItem) stickToEnd();
+		stickToEnd();
 	});
 
 	$effect(() => {
@@ -488,8 +471,11 @@
 	// (streaming text, rows mounting as they scroll in) within `scrollEndThreshold` of the end. That
 	// is only wanted while the thread follows: once the user scrolls up, it would pull every small
 	// scroll back down. Read untracked: the effect below applies a change of `isPinned`.
+	// Always instant: a new row is in place on its first painted frame, like streamed text. A smooth
+	// follow painted it below the fold first, which on a short row reads as a one-frame stutter;
+	// `scrollBehavior` stays for the navigation the reader asks for (TOC, scroll to latest).
 	function followOnAppendBehavior(): AIThreadScrollBehavior | false {
-		return followOutput && untrack(() => isPinned) ? scrollBehavior : false;
+		return followOutput && untrack(() => isPinned) ? 'instant' : false;
 	}
 
 	// Unpinned, no distance counts as the end (-1): a reader left exactly at the end by a layout
@@ -498,7 +484,24 @@
 		return untrack(() => isPinned) ? Math.max(0, bottomThreshold) : -1;
 	}
 
-	function handleVirtualizerChange(): void {
+	let listElement = $state<HTMLDivElement | null>(null);
+
+	// Called from inside the virtualizer's measurement (a row's resize observer). When a row grows
+	// at the end it moves the offset to keep the end in view, but the list's height only follows a
+	// moment later through the template, so the browser clamps that move and the virtualizer retries
+	// it right after this callback. Sizing the list here, before the retry, lets it land before the
+	// frame is painted, instead of showing the new line below the fold for a frame.
+	function handleVirtualizerChange(instance: { getTotalSize: () => number }): void {
+		// Only while following: a reader who scrolled up keeps the template's pace, or the
+		// virtualizer's correction for a row growing across the fold would land in full and move them.
+		const following = isPinned && followOutput && !isInitializingEnd && !isFollowingAppendedItem;
+		if (following && viewport && listElement) {
+			listElement.style.height = `${instance.getTotalSize()}px`;
+			// With the list already at its new height, land on the end now rather than in
+			// `stickToEnd`'s next frame (a row growing at the end, the action bar mounting as a reply
+			// ends).
+			if (distanceFromEnd() > 1) viewport.scrollTop = viewport.scrollHeight;
+		}
 		syncThreadPosition();
 	}
 
@@ -555,13 +558,18 @@
 	}
 
 	// The virtualizer keeps steering a scrollToEnd/scrollToIndex toward its target for up to 5s,
-	// until the offset holds for a frame, and re-scrolls whenever measurements move that target. On a
-	// busy page it is still steering when the reader scrolls away, and pulls them back. The reader
-	// wins: drop the pending reconcile. It has no public cancel (and scrolling to the current offset
-	// would cut a smooth wheel or keyboard scroll short), so clear the field it checks.
+	// until the offset holds for a frame, and re-scrolls whenever measurements move that target. It
+	// also remembers an end adjustment the browser clamped, and re-applies it once the list grows.
+	// On a busy page either can still be pending when the reader scrolls away, and would pull them
+	// back. The reader wins: drop both. Neither has a public cancel (and scrolling to the current
+	// offset would cut a smooth wheel or keyboard scroll short), so clear the fields they check.
 	function cancelProgrammaticScroll(): void {
-		const virtualizer = get(virtualizerStore) as unknown as { scrollState?: unknown };
+		const virtualizer = get(virtualizerStore) as unknown as {
+			scrollState?: unknown;
+			_clampedAdjustment?: unknown;
+		};
 		if (virtualizer.scrollState) virtualizer.scrollState = null;
+		if (virtualizer._clampedAdjustment) virtualizer._clampedAdjustment = null;
 	}
 
 	function applyFollowOptions(): void {
@@ -607,6 +615,25 @@
 			return;
 		if (scrollUpKeys.has(event.key) || (event.key === ' ' && event.shiftKey)) unpin();
 	}
+
+	// When the viewport itself changes height while the thread follows the end (the suggestions bar
+	// appearing as a reply ends, a question docked in place of the composer), land on the end before
+	// the frame is painted. A resize observer runs after layout and before paint; the virtualizer's
+	// change callback would only stick a frame later, showing the end below the fold for a frame.
+	const keepEndOnResize: Attachment<HTMLDivElement> = (node) => {
+		if (typeof ResizeObserver === 'undefined') return;
+		let lastHeight = node.clientHeight;
+		const observer = new ResizeObserver(() => {
+			const height = node.clientHeight;
+			if (height === lastHeight) return;
+			lastHeight = height;
+			if (!isPinned || !followOutput || isInitializingEnd || isFollowingAppendedItem) return;
+			node.scrollTop = node.scrollHeight;
+			syncThreadPosition();
+		});
+		observer.observe(node);
+		return () => observer.disconnect();
+	};
 
 	// Tracks a drag on the transcript. Touch uses touch events: a touch pan cancels its pointer as
 	// soon as the browser takes it over, before the scroll events arrive.
@@ -778,11 +805,13 @@
 			onscroll={handleScroll}
 			{@attach (node) => on(node, 'keydown', handleViewportKeydown)}
 			{@attach trackDrag}
+			{@attach keepEndOnResize}
 		>
 			<AIThreadItems
 				{renderItems}
 				{virtualItems}
 				{totalSize}
+				bind:listRef={listElement}
 				{measureItem}
 				density={resolvedDensity}
 				messageSize={resolvedMessageSize}

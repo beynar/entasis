@@ -121,6 +121,16 @@ describe('following a streaming reply', () => {
 		expect(scrollButton()).toBeNull();
 	});
 
+	test('an appended row is in place on the first painted frame, without a smooth slide', async () => {
+		const screen = await renderAtEnd({ messages: history(12) });
+		await screen.rerender({
+			messages: [...history(12), { id: 'u-new', role: 'user', content: 'Ship it.' }]
+		});
+		// One frame, then the task after its paint: the row must already be at the end.
+		await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+		expect(distanceToEnd()).toBeLessThan(2);
+	});
+
 	test('a message appended as the viewport grows is followed', async () => {
 		// Sending a message hides the follow-up suggestions under the thread, so its viewport grows
 		// in the same update that appends the row. The virtualizer moves the offset up to keep the end

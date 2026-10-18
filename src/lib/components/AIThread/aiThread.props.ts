@@ -245,7 +245,10 @@ export type AIThreadProps<TMessage extends AIThreadItem = AIThreadItem> = WithAt
 		paddingStart?: number;
 		/** Virtualizer padding after the final item. Overrides `padding`. */
 		paddingEnd?: number;
-		/** Scroll behavior used by transcript navigation. */
+		/**
+		 * Scroll behavior of navigation the reader asks for: the TOC and the scroll-to-latest button.
+		 * Following output is always instant, so new rows are in place on their first frame.
+		 */
 		scrollBehavior?: AIThreadScrollBehavior;
 		/** Displays the floating scroll-to-latest action. */
 		showScrollButton?: boolean;

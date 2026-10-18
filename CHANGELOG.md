@@ -602,6 +602,14 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Changed
 
+- `AIThread`: following output is instant. An appended row (a sent message, a new answer, a
+  thinking or tool row) is in place at the end on its first painted frame instead of being painted
+  below the fold and slid up, which on a short message read as a stutter; growing text, the action
+  bar mounting as a reply ends, and the suggestions bar resizing the thread land in the same frame
+  too. `scrollBehavior` now applies to the TOC and the scroll-to-latest button only.
+- `AIThread`: the copy/regenerate bar belongs to text answers. It sits right after a turn's last
+  text, never under thinking or tool rows that follow it, and an assistant turn with no text (only
+  thinking or tool calls) has no bar.
 - `AIAskUserQuestion`: a new `showOther` prop (default `true`) adds a free-text "Other…" choice to
   every single- and multiple-choice question, so the user can always answer in their own words. A
   question's own `showOther` wins either way; file questions are left alone, since their answer is

@@ -2,12 +2,8 @@ import type { Virtualizer } from '@tanstack/svelte-virtual';
 import type { AIThreadScrollBehavior } from './aiThread.props.js';
 
 export class AIThreadScrollController {
-	private shouldSmoothAppendAdjustment = false;
-	private smoothAppendResetFrame: number | undefined;
 	private appendFollowFrame: number | undefined;
 	private prependSettleFrame: number | undefined;
-
-	constructor(private readonly getScrollBehavior: () => AIThreadScrollBehavior) {}
 
 	scrollToFn = (
 		offset: number,
@@ -17,29 +13,12 @@ export class AIThreadScrollController {
 		const scrollElement = instance.scrollElement;
 		if (!scrollElement) return;
 		const targetOffset = offset + adjustments;
-		const resolvedBehavior = this.resolveScrollBehavior(behavior);
-		if (!resolvedBehavior || resolvedBehavior === 'auto' || resolvedBehavior === 'instant') {
+		if (!behavior || behavior === 'auto' || behavior === 'instant') {
 			scrollElement.scrollTop = targetOffset;
 			return;
 		}
-		scrollElement.scrollTo({ top: targetOffset, behavior: resolvedBehavior });
+		scrollElement.scrollTo({ top: targetOffset, behavior });
 	};
-
-	prepareSmoothAppendAdjustment(enabled: boolean): void {
-		this.shouldSmoothAppendAdjustment = enabled;
-	}
-
-	scheduleSmoothAppendAdjustmentReset(): void {
-		if (this.smoothAppendResetFrame !== undefined) {
-			cancelAnimationFrame(this.smoothAppendResetFrame);
-		}
-		this.smoothAppendResetFrame = requestAnimationFrame(() => {
-			this.smoothAppendResetFrame = requestAnimationFrame(() => {
-				this.shouldSmoothAppendAdjustment = false;
-				this.smoothAppendResetFrame = undefined;
-			});
-		});
-	}
 
 	settlePrependedItems(scrollToTarget: () => void, sync: () => void): void {
 		this.cancelPrependSettle();
@@ -70,29 +49,8 @@ export class AIThreadScrollController {
 	}
 
 	destroy(): void {
-		this.cancelSmoothAppendReset();
 		this.cancelAppendFollow();
 		this.cancelPrependSettle();
-	}
-
-	private resolveScrollBehavior(
-		behavior: AIThreadScrollBehavior | undefined
-	): AIThreadScrollBehavior | undefined {
-		if (
-			this.shouldSmoothAppendAdjustment &&
-			behavior === 'auto' &&
-			this.getScrollBehavior() === 'smooth'
-		) {
-			this.shouldSmoothAppendAdjustment = false;
-			return 'smooth';
-		}
-		return behavior;
-	}
-
-	private cancelSmoothAppendReset(): void {
-		if (this.smoothAppendResetFrame === undefined) return;
-		cancelAnimationFrame(this.smoothAppendResetFrame);
-		this.smoothAppendResetFrame = undefined;
 	}
 
 	private cancelAppendFollow(): void {

@@ -56,7 +56,7 @@ When text parts are present, top-level message content is not rendered again. Co
 - **overscan**: number - Extra virtual rows. Default 4.
 - **padding**: number - Shared start/end virtual padding. Defaults to 8, 16, or 24 from density.
 - **paddingStart**, **paddingEnd**: number - Per-edge virtual padding overrides. Message actions sit inside their row, so the end padding reserves no extra room for them.
-- **scrollBehavior**: 'auto' | 'smooth' | 'instant' - Append, TOC, and scroll-button behavior. Default 'smooth'.
+- **scrollBehavior**: 'auto' | 'smooth' | 'instant' - TOC and scroll-to-latest behavior. Default 'smooth'. Following output (an appended row, streamed text, a docked question resizing the thread) is always instant, so new content is in place on its first painted frame.
 - **showScrollButton**: boolean - Show the round scroll-to-latest button as soon as the view leaves the end (by wheel, trackpad, keys or scrollbar). Default true.
 - **scrollButtonPosition**: 'left' | 'center' | 'right' - Default 'center', just above whatever sits below the thread.
 - **ref**: HTMLDivElement - Bindable thread root, not the internal scroll viewport.
