@@ -11,11 +11,18 @@
 	import { Button } from '$lib/components/Button/index.js';
 	import Confirmation from '$lib/components/Confirmation/Confirmation.svelte';
 	import Ask from '$lib/components/Form/Ask/Ask.svelte';
+	import { bookOpenIcon } from '$lib/components/Icons/bookOpen.js';
 	import { commandIcon } from '$lib/components/Icons/command.js';
+	import { cubeIcon } from '$lib/components/Icons/cube.js';
+	import { layoutIcon } from '$lib/components/Icons/layout.js';
+	import { paletteIcon } from '$lib/components/Icons/palette.js';
+	import { slidersHorizontalIcon } from '$lib/components/Icons/slidersHorizontal.js';
+	import { squaresFourIcon } from '$lib/components/Icons/squaresFour.js';
 	import { sidebarSimpleIcon } from '$lib/components/Icons/sidebarSimple.js';
 	import { NetworkIndicator } from '$lib/components/NetworkIndicator/index.js';
 	import type { PageShellThemeProps } from '$lib/components/PageShell/index.js';
 	import type {
+		SidebarActivityBar,
 		SidebarApi,
 		SidebarCollapsible,
 		SidebarDisplayState,
@@ -246,7 +253,32 @@
 		scroller.scrollTop = 0;
 	});
 
+	// ponytail: a test rail for checking the activity bar against the docs shell; one square per
+	// header section, active from the URL. Remove it once that is settled.
+	const activityBarIcons = {
+		'/docs': bookOpenIcon,
+		'/components': cubeIcon,
+		'/blocks': squaresFourIcon,
+		'/templates': layoutIcon,
+		'/playground': slidersHorizontalIcon,
+		'/colors': paletteIcon
+	} as Record<string, typeof bookOpenIcon>;
+	const activityBar = $derived<SidebarActivityBar>({
+		label: 'Sections',
+		items: headerLinks.map(({ href, text }) => {
+			const path = resolveLink(href);
+			return {
+				id: href,
+				label: text,
+				icon: activityBarIcons[href],
+				href: path,
+				isActive: sidebarPath === path || sidebarPath.startsWith(`${path}/`)
+			};
+		})
+	});
+
 	const sidebar = $derived<AppShellSidebarProps>({
+		activityBar,
 		displayState: sidebarDisplayState,
 		onDisplayStateChange: handleSidebarDisplayStateChange,
 		collapsible: sidebarCollapsible,
