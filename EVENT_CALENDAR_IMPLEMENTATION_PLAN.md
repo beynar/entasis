@@ -454,15 +454,15 @@ The concrete `EventCalendarProps<TItemFields, TResourceFields>` is one `WithAtta
 
 ### Date, locale, and visible range
 
-| Prop            | Type                                           | Default                      | Contract                                                                                      |
-| --------------- | ---------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------- |
-| `timeZone`      | `string`                                       | required                     | Explicit display-zone IANA name or `'UTC'`; prevents server/browser inference from diverging. |
+| Prop            | Type                                           | Default                       | Contract                                                                                      |
+| --------------- | ---------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------- |
+| `timeZone`      | `string`                                       | required                      | Explicit display-zone IANA name or `'UTC'`; prevents server/browser inference from diverging. |
 | `locale`        | `string`                                       | active Entasis catalog locale | BCP-47 locale for date/time formatting.                                                       |
-| `i18n`          | `Partial<Messages>`                            | none                         | Per-instance Entasis message overrides.                                                        |
-| `dir`           | `'ltr' \| 'rtl'`                               | ambient direction            | Mirrors navigation and horizontal interaction semantics.                                      |
-| `weekStartsOn`  | `EventCalendarWeekday`                         | locale-derived               | Explicit value wins over locale week information.                                             |
-| `validRange`    | `EventCalendarRange`                           | unbounded                    | Half-open navigation, selection, and mutation boundary.                                       |
-| `onRangeChange` | `(info: EventCalendarRangeChangeInfo) => void` | none                         | Fires after mount for the initial client range and every later derived `fetchRange`.          |
+| `i18n`          | `Partial<Messages>`                            | none                          | Per-instance Entasis message overrides.                                                       |
+| `dir`           | `'ltr' \| 'rtl'`                               | ambient direction             | Mirrors navigation and horizontal interaction semantics.                                      |
+| `weekStartsOn`  | `EventCalendarWeekday`                         | locale-derived                | Explicit value wins over locale week information.                                             |
+| `validRange`    | `EventCalendarRange`                           | unbounded                     | Half-open navigation, selection, and mutation boundary.                                       |
+| `onRangeChange` | `(info: EventCalendarRangeChangeInfo) => void` | none                          | Fires after mount for the initial client range and every later derived `fetchRange`.          |
 
 ### View configuration
 

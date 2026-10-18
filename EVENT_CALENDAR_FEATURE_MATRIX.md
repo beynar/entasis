@@ -39,7 +39,7 @@ Vendor columns link to official documentation. Specialist claims use additional 
 
 ## 1. Views and rendering
 
-| Capability                                | Entasis                    | [FullCalendar][fc-docs]                        | [React Big Calendar][rbc-core] | [Mobiscroll][mb-overview]             | [Syncfusion][sf-views]                                     | [Bryntum][br-features]                          |
+| Capability                                | Entasis                   | [FullCalendar][fc-docs]                        | [React Big Calendar][rbc-core] | [Mobiscroll][mb-overview]             | [Syncfusion][sf-views]                                     | [Bryntum][br-features]                          |
 | ----------------------------------------- | ------------------------- | ---------------------------------------------- | ------------------------------ | ------------------------------------- | ---------------------------------------------------------- | ----------------------------------------------- |
 | Month grid                                | ✅                        | ✅                                             | ✅                             | ✅                                    | ✅                                                         | ✅                                              |
 | Week and day time grids                   | ✅                        | ✅                                             | ✅                             | ✅                                    | ✅                                                         | ✅                                              |
@@ -58,7 +58,7 @@ Entasis's ordinary calendar and resource-scheduling view surface is mature. The 
 
 ## 2. Interaction and mutation
 
-| Capability                                      | Entasis                                     | [FullCalendar][fc-dnd]                   | [React Big Calendar][rbc-dnd]                   | [Mobiscroll][mb-dnd]                                            | [Syncfusion][sf-events]        | [Bryntum][br-features]       |
+| Capability                                      | Entasis                                    | [FullCalendar][fc-dnd]                   | [React Big Calendar][rbc-dnd]                   | [Mobiscroll][mb-dnd]                                            | [Syncfusion][sf-events]        | [Bryntum][br-features]       |
 | ----------------------------------------------- | ------------------------------------------ | ---------------------------------------- | ----------------------------------------------- | --------------------------------------------------------------- | ------------------------------ | ---------------------------- |
 | Event drag-to-move                              | ✅                                         | ✅                                       | ⊕ drag-and-drop add-on                          | ✅                                                              | ✅                             | ✅                           |
 | Resize from start and end edges                 | ✅                                         | ✅                                       | ✅ add-on                                       | ✅                                                              | ✅                             | ✅                           |
@@ -80,7 +80,7 @@ Entasis is unusually strong here. Its main interaction deficit is **ecosystem dr
 
 ## 3. Recurrence, dates, and time zones
 
-| Capability                                              | Entasis                                        | [FullCalendar][fc-rrule]                                | [React Big Calendar][rbc-core] | [Mobiscroll][mb-timezones]            | [Syncfusion][sf-recurrence]     | [Bryntum][br-core]              |
+| Capability                                              | Entasis                                       | [FullCalendar][fc-rrule]                                | [React Big Calendar][rbc-core] | [Mobiscroll][mb-timezones]            | [Syncfusion][sf-recurrence]     | [Bryntum][br-core]              |
 | ------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------- | ------------------------------ | ------------------------------------- | ------------------------------- | ------------------------------- |
 | Daily/weekly/monthly/yearly recurrence                  | ✅                                            | ⊕ built-in simple recurrence plus RRule plugin          | —                              | ✅                                    | ✅                              | ✅                              |
 | RRULE-style advanced rules                              | ✅ structured rules plus restricted raw RRULE | ⊕ RRule plugin                                          | —                              | ✅ rule strings/objects               | ✅ iCalendar recurrence rules   | ◐ product recurrence model      |
@@ -100,7 +100,7 @@ Recurrence and time-zone correctness are Entasis strengths. The missing feature 
 
 ## 4. Resources, data, and scale
 
-| Capability                              | Entasis                                         | [FullCalendar][fc-plugins]                                           | [React Big Calendar][rbc-core] | [Mobiscroll][mb-resources]               | [Syncfusion][sf-resources]                                                        | [Bryntum][br-product]                                             |
+| Capability                              | Entasis                                        | [FullCalendar][fc-plugins]                                           | [React Big Calendar][rbc-core] | [Mobiscroll][mb-resources]               | [Syncfusion][sf-resources]                                                        | [Bryntum][br-product]                                             |
 | --------------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------- | ------------------------------ | ---------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | Resource hierarchy/grouping             | ✅ parent/leaf tree                            | ⊕ Premium hierarchy/grouping                                         | — flat columns                 | ✅ grouping/resource controls            | ✅ multi-level hierarchy                                                          | ◐ resource view/grouping                                          |
 | Multiple resources on one event         | ✅ `resourceIds` with legacy single assignment | ⊕ Premium resource arrays                                            | —                              | ✅ resource arrays                       | ✅ multiple selection                                                             | ◐ documented resource assignment, exact multiplicity not verified |
@@ -117,7 +117,7 @@ Entasis owns coherent calendar resource scheduling through resource-day columns,
 
 ## 5. Accessibility, composition, and product features
 
-| Capability                                    | Entasis                                               | [FullCalendar][fc-a11y]                                      | [React Big Calendar][rbc-core]                    | [Mobiscroll][mb-templates]                                  | [Syncfusion][sf-overview]                                       | [Bryntum][br-core]                       |
+| Capability                                    | Entasis                                              | [FullCalendar][fc-a11y]                                      | [React Big Calendar][rbc-core]                    | [Mobiscroll][mb-templates]                                  | [Syncfusion][sf-overview]                                       | [Bryntum][br-core]                       |
 | --------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------- |
 | Event/cell/header/resource render composition | ✅ Svelte snippets inside owned semantics            | ✅ content/class/mount hooks                                 | ✅ component/getter overrides                     | ✅ templates                                                | ✅ templates                                                    | ✅ renderers/class overrides             |
 | Per-instance and global theme contract        | ✅ CVA theme parts/tokens                            | ✅ theme and render hooks                                    | ◐ CSS/SASS customization                          | ✅ themes/templates                                         | ✅ theme packages/templates                                     | ✅ SASS/CSS themes                       |
@@ -140,7 +140,7 @@ Entasis's accessibility and composition architecture is competitive. The absent 
 
 ## Completeness by market
 
-| Target market                                            | Entasis readiness              | Reason                                                                                                      |
+| Target market                                            | Entasis readiness             | Reason                                                                                                      |
 | -------------------------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | Product calendar, meeting planner, booking UI            | **High**                      | Core views, recurrence, time zones, resource day, interactions, accessibility, and composition are present. |
 | Team calendar similar to Google Calendar basics          | **High with companion forms** | Needs an application-owned event/recurrence editor and persistence, which are deliberate boundaries.        |

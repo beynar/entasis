@@ -10,6 +10,5 @@
 	{...field.controlAttrs}
 	{@attach field.control}
 	value={field.value?.amount ?? ''}
-	oninput={(event) =>
-		field.setValue({ amount: Number(event.currentTarget.value), currency })}
+	oninput={(event) => field.setValue({ amount: Number(event.currentTarget.value), currency })}
 />

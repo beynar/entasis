@@ -27,4 +27,7 @@ export const toggleMenuTheme = {
 export type ToggleMenuTheme = typeof toggleMenuTheme;
 export type ToggleMenuThemeProps = InferComponentTheme<ToggleMenuTheme>;
 export const setToggleMenuTheme = setComponentTheme<ToggleMenuTheme>('toggle-menu');
-export const useToggleMenuTheme = useComponentTheme<ToggleMenuTheme>('toggle-menu', toggleMenuTheme);
+export const useToggleMenuTheme = useComponentTheme<ToggleMenuTheme>(
+	'toggle-menu',
+	toggleMenuTheme
+);

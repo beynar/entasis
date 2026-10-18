@@ -254,7 +254,8 @@ export const applicationCategories: BlockCategory[] = [
 		slug: 'feedback',
 		title: 'Feedback',
 		group: 'Application',
-		description: 'Feedback patterns composed from Entasis controls, display, and layout primitives.',
+		description:
+			'Feedback patterns composed from Entasis controls, display, and layout primitives.',
 		blocks: [
 			{
 				id: 'feedback-rating-feedback',

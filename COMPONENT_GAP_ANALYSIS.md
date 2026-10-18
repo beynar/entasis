@@ -42,7 +42,7 @@ AI elements (`svelte-pro/src/lib/ai-elements`) deliberately excluded.
 
 ## Near-equivalents (present under a different name — not gaps)
 
-| svelte-pro                                                                                                    | entasis                           |
+| svelte-pro                                                                                                    | entasis                          |
 | ------------------------------------------------------------------------------------------------------------- | -------------------------------- |
 | Progress                                                                                                      | Meter                            |
 | AlertDialog                                                                                                   | Confirmation                     |
