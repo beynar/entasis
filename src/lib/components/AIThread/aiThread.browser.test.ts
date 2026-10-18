@@ -111,6 +111,21 @@ describe('following a streaming reply', () => {
 		expect(scrollButton()).toBeNull();
 	});
 
+	test('a following thread keeps following when its viewport shrinks and grows back', async () => {
+		// A question docked in place of the composer shrinks the thread; dismissing it grows the
+		// thread back, which clamps the offset upward onto the end. That clamp is not the reader
+		// scrolling up: output that arrives next must still be followed.
+		const screen = await renderAtEnd({ messages: streamingThread('Starting'), streaming: true });
+		await screen.rerender({ messages: streamingThread('Starting'), streaming: true, height: 220 });
+		await expect.poll(() => distanceToEnd()).toBeLessThan(2);
+		await screen.rerender({ messages: streamingThread('Starting'), streaming: true, height: 400 });
+		await settle();
+		const longer = 'Starting, then a reply that grows past the fold. '.repeat(12);
+		await screen.rerender({ messages: streamingThread(longer), streaming: true, height: 400 });
+		await expect.poll(() => distanceToEnd()).toBeLessThan(2);
+		expect(scrollButton()).toBeNull();
+	});
+
 	test('a layout change that leaves a reader at the end does not make the thread follow again', async () => {
 		const long = 'A long streamed paragraph that fills the viewport. '.repeat(30);
 		const screen = await renderAtEnd({ messages: streamingThread(long), streaming: true });

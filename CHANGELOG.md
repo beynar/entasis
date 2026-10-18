@@ -1145,7 +1145,9 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
   Home, Shift+Space on the transcript) stops following on the key press, as a wheel already did,
   so rows measured while a smooth scroll is still landing cannot pull it back down. A scroll to
   the end that is still settling (on load, or after "scroll to latest") yields to the reader
-  instead of steering them back.
+  instead of steering them back. When the thread's viewport grows (the composer coming back after a
+  docked question is dismissed), the browser's clamp onto the end no longer reads as a scroll up,
+  so a following thread keeps following the output that arrives next.
 - `Autocomplete`, `Combobox`, `DateInput`, `TimeInput`, `PhoneInput`, `ColorInput` and
   `TagsInput`: the popup opens against the input box, not below the field's description. Their
   popovers anchored to the whole field. `Field` takes a new `anchor` attachment that it applies to

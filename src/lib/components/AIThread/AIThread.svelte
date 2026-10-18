@@ -572,7 +572,13 @@
 
 	function handleScroll(event: UIEvent & { currentTarget: EventTarget & HTMLDivElement }): void {
 		const scrollTop = event.currentTarget.scrollTop;
-		if (scrollTop < lastScrollTop - 0.5 && !isInitializingEnd) unpin();
+		if (scrollTop < lastScrollTop - 0.5) {
+			// Moving up away from the end stops following. Moving up *onto* the end is the browser
+			// clamping the offset because the viewport grew or the content shrank (the composer coming
+			// back after a docked question): it changes nothing, so a following thread keeps following
+			// and a reader who scrolled up is not re-pinned.
+			if (!isInitializingEnd && distanceFromEnd() >= 1) unpin();
+		}
 		// Only a scroll that reaches the very end follows output again. A layout change that happens
 		// to leave the view at the end (rows above it measured smaller) must not re-pin it, or the next
 		// growth pulls a reader who scrolled up back to the bottom.
