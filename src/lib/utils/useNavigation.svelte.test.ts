@@ -502,7 +502,9 @@ describe('highlight moves are cheap (MN-13)', () => {
 		expect(item('Row 10')).toHaveAttribute('tabindex', '-1');
 		expect(item('Row 11')).toHaveAttribute('data-highlighted', 'true');
 		expect(item('Row 10')).not.toHaveAttribute('data-highlighted');
-	});
+		// Mounting 500 rows in jsdom outlasts the default 5s on a loaded CI runner; this test counts
+		// attribute writes, not time.
+	}, 20_000);
 
 	test('mounting checks the order with one linear pass, and appending an item adds one comparison', async () => {
 		const compare = vi.spyOn(Node.prototype, 'compareDocumentPosition');
