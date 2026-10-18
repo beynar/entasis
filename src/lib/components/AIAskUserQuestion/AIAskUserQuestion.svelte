@@ -38,6 +38,7 @@
 		autoAdvanceSingle,
 		autoAdvanceDelay,
 		autoAdvanceSingleDelay,
+		showOther = true,
 		disabled = false,
 		submitting = false,
 		title,
@@ -92,7 +93,16 @@
 	// reads as Other.
 	const otherAnswers = new SvelteMap<string, string>();
 
-	const questionItems = $derived<AIAskQuestion[]>(Array.from(questions));
+	// A choice question without its own `showOther` takes the component's, so free text is on by
+	// default; the resolved question is what the steps, the state and the submit payload see.
+	const questionItems = $derived<AIAskQuestion[]>(
+		Array.from(questions, (question) =>
+			(question.type === 'single' || question.type === 'multiple') &&
+			question.showOther === undefined
+				? { ...question, showOther }
+				: question
+		)
+	);
 	const resolvedValues = $derived(valueState.value);
 	const shouldAutoAdvance = $derived(autoAdvance ?? autoAdvanceSingle ?? true);
 	const resolvedAutoAdvanceDelay = $derived(autoAdvanceDelay ?? autoAdvanceSingleDelay ?? 280);

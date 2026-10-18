@@ -121,6 +121,8 @@ export type AIThreadAskUserQuestion<TMessage extends AIThreadItem = AIThreadItem
 	nextLabel?: string;
 	previousLabel?: string;
 	discardLabel?: string;
+	/** Free-text "Other…" on choice questions; unset keeps AIAskUserQuestion's default (on). */
+	showOther?: boolean;
 };
 export type AIThreadAskUserQuestionStateChange<TMessage extends AIThreadItem = AIThreadItem> = {
 	request: AIThreadAskUserQuestion<TMessage>;

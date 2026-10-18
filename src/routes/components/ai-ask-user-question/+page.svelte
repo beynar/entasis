@@ -26,7 +26,6 @@
 			id: 'checks',
 			type: 'multiple',
 			title: 'Which checks are required?',
-			allowOther: true,
 			options: [
 				{ id: 'a11y', label: 'Accessibility' },
 				{ id: 'security', label: 'Security' },
@@ -57,7 +56,7 @@
 		id: 'format',
 		type: 'single',
 		title: 'How should the summary be formatted?',
-		allowOther: true,
+		showOther: true,
 		options: [
 			{ id: 'bullets', label: 'Bullet points' },
 			{ id: 'prose', label: 'Short paragraph' }
@@ -78,7 +77,8 @@
 			label: 'State',
 			value: 'ready',
 			options: ['ready', 'submitting', 'disabled']
-		}
+		},
+		{ name: 'showOther', type: 'switch', label: 'Other…', value: true }
 	]);
 	const activeIndex = $derived(
 		['single', 'multiple', 'text', 'file'].indexOf(controls.value.question)
@@ -96,7 +96,7 @@
 			label: 'Keyboard: number keys pick options; Enter continues or submits',
 			test: 'a11y:ai-ask-user-question.number-keys'
 		},
-		'Free-text “Other…” choice',
+		'Free-text “Other…” on every choice question, on by default',
 		'Compact answered summary for the transcript',
 		'Valibot schemas and exported value types',
 		'Bindable answers and active step',
@@ -112,7 +112,7 @@
 ${'</' + 'script>'}
 
 <AIAskUserQuestion
-  {questions}
+  {questions}${controls.value.showOther ? '' : '\n  showOther={false}'}
   bind:value={answers}
   onSubmit={({ answers }) => resolveTool(answers)}
 />`}
@@ -123,6 +123,7 @@ ${'</' + 'script>'}
 				{activeIndex}
 				requester="Release assistant"
 				autoAdvance={false}
+				showOther={controls.value.showOther}
 				submitting={controls.value.flowState === 'submitting'}
 				disabled={controls.value.flowState === 'disabled'}
 				bind:value={answers}
@@ -144,14 +145,14 @@ ${'</' + 'script>'}
 	{#snippet examples()}
 		<ComponentCard
 			title="Other… answer"
-			description="allowOther adds a free-text choice after the options. The typed text is the answer; it never auto-advances."
+			description="showOther adds a free-text choice after the options. The typed text is the answer; it never auto-advances."
 			class="!min-h-[280px] p-4"
 			code={`<AIAskUserQuestion
   questions={[{
     id: 'format',
     type: 'single',
     title: 'How should the summary be formatted?',
-    allowOther: true,
+    showOther: true,
     options: [
       { id: 'bullets', label: 'Bullet points' },
       { id: 'prose', label: 'Short paragraph' }

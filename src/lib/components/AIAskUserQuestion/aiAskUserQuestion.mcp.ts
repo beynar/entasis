@@ -22,11 +22,11 @@ The package exports Valibot schemas for tool state, options, every question kind
 ## Question kinds
 
 - Text: \`{ id, title, type?: 'text', description?, required?, placeholder?, rows? }\`
-- Single choice: \`{ id, title, type: 'single', options, allowOther?, otherLabel?, otherPlaceholder?, ... }\`
-- Multiple choice: \`{ id, title, type: 'multiple', options, allowOther?, otherLabel?, otherPlaceholder?, ... }\`
+- Single choice: \`{ id, title, type: 'single', options, showOther?, otherLabel?, otherPlaceholder?, ... }\`
+- Multiple choice: \`{ id, title, type: 'multiple', options, showOther?, otherLabel?, otherPlaceholder?, ... }\`
 - File: \`{ id, title, type: 'file', accept?, multiple?, maxFiles?, maxSize?, ... }\`
 
-Questions are optional by default; \`required: true\` blocks continuing until answered and shows a required marker after the title. On an optional, unanswered step before the last one the primary action reads "Skip" (\`skipLabel\`). \`allowOther\` adds a free-text "Other…" choice after the options: its typed text is the answer (the single answer string, or the last entry of the multiple answer array) and it never auto-advances, even when the text equals an option id. The answer stays a plain string, so in \`summarizeAIAskAnswers\` and in a value restored later, text equal to an option id reads as that option. Disabled choice options remain visible but cannot be selected. File questions use the shared chooser/drop acceptance behavior and show type, size, count, and duplicate failures.
+Questions are optional by default; \`required: true\` blocks continuing until answered and shows a required marker after the title. On an optional, unanswered step before the last one the primary action reads "Skip" (\`skipLabel\`). Every single- and multiple-choice question offers a free-text "Other…" choice after its options, so the user can always answer in their own words. The component's \`showOther\` prop (default \`true\`) sets this for every choice question and a question's own \`showOther\` wins over it, either way; file questions never get one (their answer is files). In AIThread and AIChat, an \`showOther\` key on the ask_user_question tool input (or the docked request) passes through. The Other… choice: its typed text is the answer (the single answer string, or the last entry of the multiple answer array) and it never auto-advances, even when the text equals an option id. The answer stays a plain string, so in \`summarizeAIAskAnswers\` and in a value restored later, text equal to an option id reads as that option. Disabled choice options remain visible but cannot be selected. File questions use the shared chooser/drop acceptance behavior and show type, size, count, and duplicate failures.
 
 ## State and behavior
 

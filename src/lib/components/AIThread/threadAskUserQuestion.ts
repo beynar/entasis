@@ -71,7 +71,8 @@ export function toAskUserQuestionRequest<TMessage extends AIThreadItem>(
 		submittingLabel: stringValue(output?.submittingLabel ?? input?.submittingLabel),
 		nextLabel: stringValue(output?.nextLabel ?? input?.nextLabel),
 		previousLabel: stringValue(output?.previousLabel ?? input?.previousLabel),
-		discardLabel: stringValue(output?.discardLabel ?? input?.discardLabel)
+		discardLabel: stringValue(output?.discardLabel ?? input?.discardLabel),
+		showOther: booleanValue(output?.showOther ?? input?.showOther)
 	};
 }
 
@@ -127,6 +128,10 @@ function isQuestion(value: unknown): value is AIAskQuestion {
 		return Array.isArray(question.options);
 	}
 	return question.type === undefined || question.type === 'text' || question.type === 'file';
+}
+
+function booleanValue(value: unknown): boolean | undefined {
+	return typeof value === 'boolean' ? value : undefined;
 }
 
 function stringValue(value: unknown): string | undefined {

@@ -55,6 +55,7 @@
 		nextLabel={request.nextLabel}
 		previousLabel={request.previousLabel}
 		discardLabel={request.discardLabel}
+		showOther={request.showOther}
 		onValueChange={(values) => onValuesChange({ request, values })}
 		onSubmit={(detail: AIAskUserQuestionSubmitPayload) =>
 			onResolve({ request, state: 'completed', detail })}

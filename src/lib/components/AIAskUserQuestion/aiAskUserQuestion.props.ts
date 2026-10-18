@@ -26,7 +26,7 @@ type AIChoiceQuestionOther = {
 	 * never auto-advances. The answer stays a plain string, so text equal to an option id reads
 	 * as that option once the flow is gone (in `summarizeAIAskAnswers` or a restored `value`).
 	 */
-	allowOther?: boolean;
+	showOther?: boolean;
 	/** Label of the "Other…" choice. */
 	otherLabel?: string;
 	/** Placeholder of the "Other…" text field. */
@@ -168,6 +168,13 @@ export type AIAskUserQuestionProps = WithAttachments<
 		autoAdvanceDelay?: number;
 		/** Svelte Pro-compatible alias for `autoAdvanceDelay`. */
 		autoAdvanceSingleDelay?: number;
+		/**
+		 * Adds a free-text "Other…" choice to every single- and multiple-choice question, so the
+		 * user can always answer in their own words. A question's own `showOther` wins. File
+		 * questions are left as they are: their answer is files, not text.
+		 * @default true
+		 */
+		showOther?: boolean;
 		/** Disables answer controls and actions. */
 		disabled?: boolean;
 		/** Marks submission as externally in progress and disables the complete flow. */

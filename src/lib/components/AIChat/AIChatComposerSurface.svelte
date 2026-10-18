@@ -182,6 +182,7 @@
 			nextLabel={request.nextLabel}
 			previousLabel={request.previousLabel}
 			discardLabel={request.discardLabel}
+			showOther={request.showOther}
 			onValueChange={(value) => updateAskUserQuestionValue(request, value)}
 			onSubmit={(detail) => resolveAskUserQuestion(request, 'completed', detail)}
 			onDiscard={() => resolveAskUserQuestion(request, 'discarded')}

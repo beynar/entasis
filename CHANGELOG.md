@@ -18,6 +18,10 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Upgrading from 0.11
 
+- `AIAskUserQuestion` single- and multiple-choice questions now offer a free-text "Other…" choice
+  by default. Pass `showOther={false}` to the component (or `showOther: false` on the
+  ask_user_question tool input or the docked request) to keep a fixed list; a question's own
+  `showOther` still wins.
 - `Mermaid` renders with [Pele](https://pele.run) instead of mermaid.js. The `chart` source, the
   props, the controls and Markdown ` ```mermaid ` fences are unchanged, but colours now come
   from `--pele-*` CSS variables that the theme maps onto design tokens: `config.themeVariables`
@@ -582,7 +586,7 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
   reads like the number 3. Long values collapse behind "Show all" past `maxLines` (12) instead of a
   hidden scroll cap. New `labels.showAll` and `labels.showLess`.
 - `AIAskUserQuestion`: number keys 1–9 pick options, and Enter continues or submits (Ctrl/Cmd+Enter
-  in a textarea), also on a step with no focusable control. Choice questions accept `allowOther`
+  in a textarea), also on a step with no focusable control. Choice questions accept `showOther`
   (with `otherLabel` and `otherPlaceholder`) for a free-text "Other…" answer, which never
   auto-advances and is kept when you leave the step. Optional unanswered steps show Skip
   (`skipLabel`), and the requester shows above a stronger title.
@@ -598,6 +602,10 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Changed
 
+- `AIAskUserQuestion`: a new `showOther` prop (default `true`) adds a free-text "Other…" choice to
+  every single- and multiple-choice question, so the user can always answer in their own words. A
+  question's own `showOther` wins either way; file questions are left alone, since their answer is
+  files. AIThread and AIChat pass it through from the tool input or the docked request.
 - `Mermaid`: diagrams render with [Pele](https://pele.run), a lightweight Mermaid renderer (MIT,
   by Obsidian), loaded from jsDelivr at runtime: about 250 KB gzipped instead of mermaid.js's
   ~1 MB, and synchronous, with no measuring container left in the page. The SVG draws with CSS
@@ -1127,6 +1135,9 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Fixed
 
+- `AIChat`: a question docked in place of the composer is as wide as the composer and the message
+  column (`--ai-chat-content-width`, 48rem by default) instead of spanning the whole chat.
+  `AIAskUserQuestion` caps itself at that variable when a host sets it, as `AIComposer` does.
 - `AIThread`: a reader who scrolled up is never pulled back to the end by a layout change. When rows
   measured after load (or a reply that shrank) left the view at the end without the reader
   scrolling there, the thread followed again and the next growth jumped them to the bottom. Only a

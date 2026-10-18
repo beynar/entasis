@@ -78,7 +78,7 @@
 
 	function choiceItems(choice: AISingleQuestion | AIMultipleQuestion) {
 		const items = choice.options.map((option) => ({ ...option, value: option.id }));
-		if (!choice.allowOther) return items;
+		if (!choice.showOther) return items;
 		return [...items, { value: AI_ASK_OTHER_VALUE, label: choice.otherLabel ?? t.aiAskOther }];
 	}
 
@@ -252,7 +252,7 @@
 			/>
 		{/if}
 
-		{#if (question.type === 'single' || question.type === 'multiple') && question.allowOther && otherActive}
+		{#if (question.type === 'single' || question.type === 'multiple') && question.showOther && otherActive}
 			<div data-slot="ai-ask-user-question-other" class={classes.other()}>
 				<TextInput
 					value={otherText}

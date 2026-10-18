@@ -5,8 +5,11 @@ import {
 	type InferComponentTheme
 } from '$lib/utils/cva/index.js';
 
+// Like the composer it can stand in for, the card caps itself at `--ai-chat-content-width` when a
+// host sets it (AIChat docks it in place of the composer) and centres; elsewhere it spans its
+// container.
 const defaultRoot = cva({
-	base: 'raised grid min-w-0 gap-lg rounded-lg bg-surface-raised text-sm text-neutral'
+	base: 'raised mx-auto grid w-full min-w-0 max-w-[var(--ai-chat-content-width,none)] gap-lg rounded-lg bg-surface-raised text-sm text-neutral'
 });
 const defaultHeader = cva({ base: 'grid min-w-0 px-lg pt-lg' });
 const defaultHeaderTop = cva({ base: 'flex min-w-0 items-start justify-between gap-lg' });

@@ -113,10 +113,42 @@ describe('AIAskUserQuestion flow', () => {
 		expect(onValueChange).not.toHaveBeenCalled();
 	});
 
+	test('choice questions offer Other… by default, and showOther opts out', () => {
+		const multi: AIAskQuestion = { ...tone, id: 'pick', type: 'multiple' };
+		const view = renderInTheme(AIAskUserQuestion, { questions: [tone] });
+		expect(screen.getByRole('radio', { name: 'Other…' })).toBeInTheDocument();
+		view.unmount();
+
+		// The component-level switch, then a question's own setting, which wins either way.
+		const off = renderInTheme(AIAskUserQuestion, { questions: [tone], showOther: false });
+		expect(screen.queryByRole('radio', { name: 'Other…' })).toBeNull();
+		off.unmount();
+		const own = renderInTheme(AIAskUserQuestion, {
+			questions: [{ ...tone, showOther: false }],
+			showOther: true
+		});
+		expect(screen.queryByRole('radio', { name: 'Other…' })).toBeNull();
+		own.unmount();
+		renderInTheme(AIAskUserQuestion, { questions: [multi], showOther: false });
+		expect(screen.queryByRole('checkbox', { name: 'Other…' })).toBeNull();
+	});
+
+	test('the default Other… reaches the submit payload as free text', async () => {
+		const onSubmit = vi.fn();
+		renderInTheme(AIAskUserQuestion, { questions: [tone], onSubmit });
+		await fireEvent.click(screen.getByRole('radio', { name: 'Other…' }));
+		await fireEvent.input(screen.getByRole('textbox', { name: 'Other…' }), {
+			target: { value: 'Playful' }
+		});
+		await fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+		await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+		expect(onSubmit.mock.calls[0][0].values).toEqual({ tone: 'Playful' });
+	});
+
 	test('an Other… choice takes free text and never auto-advances', async () => {
 		const onValueChange = vi.fn();
 		renderInTheme(AIAskUserQuestion, {
-			questions: [{ ...tone, allowOther: true }, notes],
+			questions: [{ ...tone, showOther: true }, notes],
 			autoAdvanceDelay: 0,
 			onValueChange
 		});
@@ -135,7 +167,7 @@ describe('AIAskUserQuestion flow', () => {
 	test('Other… text equal to an option id stays Other and never advances', async () => {
 		const onValueChange = vi.fn();
 		renderInTheme(AIAskUserQuestion, {
-			questions: [{ ...tone, allowOther: true }, notes],
+			questions: [{ ...tone, showOther: true }, notes],
 			autoAdvanceDelay: 0,
 			onValueChange
 		});
@@ -160,7 +192,7 @@ describe('AIAskUserQuestion flow', () => {
 	test('a multiple Other… text equal to an option id does not check that option', async () => {
 		const onValueChange = vi.fn();
 		renderInTheme(AIAskUserQuestion, {
-			questions: [{ ...tone, type: 'multiple', allowOther: true }],
+			questions: [{ ...tone, type: 'multiple', showOther: true }],
 			onValueChange
 		});
 		await fireEvent.click(screen.getByRole('checkbox', { name: 'Other…' }));
@@ -204,7 +236,7 @@ describe('AIAskUserQuestion flow', () => {
 describe('AIAskUserQuestion answered summary', () => {
 	const questions: AIAskQuestion[] = [
 		tone,
-		{ ...tone, id: 'many', type: 'multiple', title: 'Formats', allowOther: true },
+		{ ...tone, id: 'many', type: 'multiple', title: 'Formats', showOther: true },
 		notes
 	];
 

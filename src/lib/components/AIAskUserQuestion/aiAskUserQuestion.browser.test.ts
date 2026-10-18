@@ -21,7 +21,7 @@ const questions: AIAskQuestion[] = [
 		id: 'scope',
 		title: 'Scope',
 		type: 'multiple',
-		allowOther: true,
+		showOther: true,
 		options: [
 			{ id: 'api', label: 'API' },
 			{ id: 'ui', label: 'UI' },
