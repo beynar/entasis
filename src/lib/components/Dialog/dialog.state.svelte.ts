@@ -768,6 +768,10 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 		this.#measureLayout(node);
 		this.dragging = false;
 		this.dragOffset = this.restOffset;
+		// Written now, not on the next render: the intro transition reads the panel's computed
+		// transform when it starts and slides relative to it. Left to the template, it read none and
+		// slid the sheet fully open, then the snap point's offset landed as the intro ended.
+		node.style.transform = this.contentTransform ?? '';
 		const positioner = node.parentElement;
 		const observer =
 			positioner && typeof ResizeObserver !== 'undefined'

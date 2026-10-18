@@ -1149,6 +1149,9 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Fixed
 
+- `Dialog` sheets with snap points: the first opening slid the sheet fully open and only dropped
+  it to its snap point when the intro ended. The resting offset is now written before the intro
+  reads the panel's transform, so the sheet slides up to its snap point (and closes from it).
 - `Popover` (and Tooltip/HoverCard arrows that share it): in dark mode the arrow was darker than
   the panel, with a dark ring. The panel's elevation lightens its surface with an inset tint; the
   arrow now paints the same tint, clipped to its padding box.

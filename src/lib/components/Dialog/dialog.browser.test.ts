@@ -93,6 +93,25 @@ describe('drawer snap points (DLG-5)', () => {
 		}
 	);
 
+	test('the intro slides the sheet up to its snap point, never past it', async () => {
+		render(DialogBrowserHarness, { props: { scenario: 'snap-animated' } });
+		const tops: number[] = [];
+		let recording = true;
+		const record = () => {
+			const panel = document.querySelector('[role="dialog"]')?.firstElementChild?.firstElementChild;
+			if (panel) tops.push(panel.getBoundingClientRect().top);
+			if (recording) requestAnimationFrame(record);
+		};
+		requestAnimationFrame(record);
+		await userEvent.click(page.getByRole('button', { name: 'Open sheet' }));
+		await sleep(400);
+		recording = false;
+		const rest = layout().panel.getBoundingClientRect().top;
+		// The intro used to animate from the panel's untransformed position: the sheet slid fully
+		// open, then dropped to its snap point when the intro ended.
+		expect(Math.min(...tops)).toBeGreaterThanOrEqual(rest - 1);
+	});
+
 	test('the body stays locked once the intro transition has ended', async () => {
 		render(DialogBrowserHarness, { props: { scenario: 'snap-animated' } });
 		await userEvent.click(page.getByRole('button', { name: 'Open sheet' }));
