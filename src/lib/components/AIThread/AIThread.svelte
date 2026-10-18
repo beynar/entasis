@@ -1,4 +1,5 @@
 <script lang="ts" generics="TMessage extends AIThreadItem = AIThreadItem">
+	import { on } from 'svelte/events';
 	import {
 		createVirtualizer,
 		measureElement as measureVirtualElement
@@ -384,14 +385,7 @@
 
 	$effect(() => {
 		void isPinned;
-		untrack(() => {
-			const virtualizer = get(virtualizerStore);
-			virtualizer.setOptions({
-				...virtualizer.options,
-				followOnAppend: followOnAppendBehavior(),
-				scrollEndThreshold: endThreshold()
-			});
-		});
+		untrack(applyFollowOptions);
 	});
 
 	onDestroy(() => {
@@ -551,6 +545,18 @@
 		isInitializingEnd = false;
 		isFollowingAppendedItem = false;
 		isPinned = false;
+		// Now, not in the effect below: a row measured before that effect runs would otherwise still
+		// see the pinned end threshold and scroll a scroll that has only just started back down.
+		applyFollowOptions();
+	}
+
+	function applyFollowOptions(): void {
+		const virtualizer = get(virtualizerStore);
+		virtualizer.setOptions({
+			...virtualizer.options,
+			followOnAppend: followOnAppendBehavior(),
+			scrollEndThreshold: endThreshold()
+		});
 	}
 
 	function handleScroll(event: UIEvent & { currentTarget: EventTarget & HTMLDivElement }): void {
@@ -569,6 +575,15 @@
 	// view back down.
 	function handleWheel(event: WheelEvent): void {
 		if (event.deltaY < 0) unpin();
+	}
+
+	// The keys that scroll the transcript up stop following on keydown, like a wheel: a smooth
+	// keyboard scroll lands over several frames, and output appended meanwhile must not undo it.
+	const scrollUpKeys = new Set(['PageUp', 'ArrowUp', 'Home']);
+	function handleViewportKeydown(event: KeyboardEvent): void {
+		if (event.target !== event.currentTarget || event.altKey || event.ctrlKey || event.metaKey)
+			return;
+		if (scrollUpKeys.has(event.key) || (event.key === ' ' && event.shiftKey)) unpin();
 	}
 
 	function handleRootWheel(
@@ -716,6 +731,7 @@
 			tabindex="0"
 			aria-label={viewportLabel ?? t.aiThreadTranscript}
 			onscroll={handleScroll}
+			{@attach (node) => on(node, 'keydown', handleViewportKeydown)}
 		>
 			<AIThreadItems
 				{renderItems}
