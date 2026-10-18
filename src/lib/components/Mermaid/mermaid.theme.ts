@@ -1,10 +1,36 @@
 import { setComponentTheme, useComponentTheme } from '$lib/utils/cva/index.js';
 import { cva, type InferComponentTheme } from '$lib/utils/cva/index.js';
 
+// Pele draws every diagram with `--pele-*` CSS variables, so the palette is plain CSS on the
+// root: design tokens, with node surfaces, borders and lines a soft mix of the accent over the
+// surface. Light/dark and palette changes restyle the diagram in place, without a re-render.
+const peleColors = [
+	'[--pele-bg:var(--color-surface-raised)]',
+	'[--pele-fg:var(--color-neutral)]',
+	'[--pele-muted:color-mix(in_oklab,var(--color-neutral)_60%,var(--color-surface-raised))]',
+	'[--pele-line:color-mix(in_oklab,var(--color-primary)_65%,var(--color-surface-raised))]',
+	'[--pele-surface:color-mix(in_oklab,var(--color-primary)_7%,var(--color-surface-raised))]',
+	'[--pele-surface-alt:color-mix(in_oklab,var(--color-primary)_13%,var(--color-surface-raised))]',
+	'[--pele-border:color-mix(in_oklab,var(--color-primary)_55%,var(--color-surface-raised))]',
+	'[--pele-accent:var(--color-primary)]',
+	'[--pele-critical:var(--color-danger)]',
+	'[--pele-error:var(--color-danger)]',
+	'[--pele-radius:var(--radius-sm)]',
+	// Charts and colour-coded categories: the semantic hues, softened over the surface.
+	'[--pele-series-1:color-mix(in_oklab,var(--color-primary)_70%,var(--color-surface-raised))]',
+	'[--pele-series-2:color-mix(in_oklab,var(--color-info)_70%,var(--color-surface-raised))]',
+	'[--pele-series-3:color-mix(in_oklab,var(--color-success)_70%,var(--color-surface-raised))]',
+	'[--pele-series-4:color-mix(in_oklab,var(--color-warning)_70%,var(--color-surface-raised))]',
+	'[--pele-series-5:color-mix(in_oklab,var(--color-secondary)_70%,var(--color-surface-raised))]',
+	'[--pele-series-6:color-mix(in_oklab,var(--color-danger)_70%,var(--color-surface-raised))]',
+	'[--pele-series-7:color-mix(in_oklab,var(--color-primary)_40%,var(--color-surface-raised))]',
+	'[--pele-series-8:color-mix(in_oklab,var(--color-info)_40%,var(--color-surface-raised))]'
+].join(' ');
+
 // The outer element: the panzoom "owner" viewport. The expand control opens the same
 // diagram in a fullScreen Dialog rather than promoting this element to an overlay.
 const defaultMermaidRoot = cva({
-	base: 'group/mermaid relative w-full overflow-hidden rounded-sm border border-neutral-muted bg-surface-raised',
+	base: `group/mermaid relative w-full overflow-hidden rounded-sm border border-neutral-muted bg-surface-raised text-neutral ${peleColors}`,
 	variants: {
 		size: {
 			small: 'h-64 min-h-48',

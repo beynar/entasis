@@ -1,5 +1,5 @@
 // The CSP nonce reaches code outside components: the registry, the helpers, and the PhoneInput,
-// Map and Mermaid CDN loaders that append a `<script>` (CX-8).
+// Map and Mermaid (Pele) CDN loaders that append a `<script>` (CX-8).
 import '@testing-library/jest-dom/vitest';
 import { render } from '@testing-library/svelte';
 import { afterEach, describe, expect, test } from 'vitest';
@@ -63,10 +63,10 @@ describe('CDN loaders carry the Theme nonce', () => {
 			props: {
 				nonce: 'mermaid-nonce',
 				child: Mermaid as never,
-				childProps: { code: 'graph TD; A-->B' }
+				childProps: { chart: 'graph TD; A-->B' }
 			}
 		});
-		expect(document.head.querySelector('script[data-mermaid-cdn]')).toHaveAttribute(
+		expect(document.head.querySelector('script[data-pele-cdn]')).toHaveAttribute(
 			'nonce',
 			'mermaid-nonce'
 		);

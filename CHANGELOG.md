@@ -18,6 +18,14 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Upgrading from 0.11
 
+- `Mermaid` renders with [Pele](https://pele.run) instead of mermaid.js. The `chart` source, the
+  props, the controls and Markdown ` ```mermaid ` fences are unchanged, but colours now come
+  from `--pele-*` CSS variables that the theme maps onto design tokens: `config.themeVariables`
+  and `config.securityLevel` no longer apply (override a variable through the `root` theme part or
+  a class, e.g. `[--pele-accent:var(--color-success)]`). `config` still carries Mermaid settings
+  and `fontFamily`. The `MermaidModule` type now describes Pele's `render(source, options)`. The
+  renderer loads from jsDelivr instead of cdnjs, so a strict CSP must allow `cdn.jsdelivr.net` in
+  `script-src`.
 - `Sidebar` theme: the sub-row variant `reserveEnd` is replaced by `endReserve`
   (`none | action | actionBelowMd`), which menu rows now use too. Overrides keyed on
   `reserveEnd` stop matching; key them on `endReserve`. A row badge now sits inside the row's link
@@ -590,6 +598,13 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Changed
 
+- `Mermaid`: diagrams render with [Pele](https://pele.run), a lightweight Mermaid renderer (MIT,
+  by Obsidian), loaded from jsDelivr at runtime: about 250 KB gzipped instead of mermaid.js's
+  ~1 MB, and synchronous, with no measuring container left in the page. The SVG draws with CSS
+  variables mapped onto the design tokens, so light/dark and palette changes restyle a diagram in
+  place instead of re-rendering it, and it has no `<style>` element to stamp with a CSP nonce. More
+  diagram types (mindmap, timeline, kanban, git graph, sankey and others), parse errors with their
+  line, and a downloaded SVG that keeps the on-screen colours.
 - Menu rows (`MenuOption`, so every menu, `Select`, `Command` and `Combobox` list): `size="small"`
   makes a row shorter as well as smaller-type. It steps the row one notch down at every density
   (20, 24 and 32px tall for compact, normal and comfortable, against 24, 32 and 40px at `normal`).

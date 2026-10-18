@@ -93,10 +93,10 @@
 
 <DocPage
 	title="Mermaid"
-	subtitle="Render Mermaid diagrams (flowcharts, sequence, gantt, pie, and more) with pan, zoom, fullscreen and download. Mermaid is loaded from cdnjs at runtime and never bundled. The diagram is themed with our design tokens, so it adapts to light and dark automatically."
+	subtitle="Render Mermaid diagrams (flowcharts, sequence, gantt, pie, mindmaps, timelines and more) with pan, zoom, fullscreen and download. The renderer, Pele, is loaded from jsDelivr at runtime and never bundled. The diagram draws with CSS variables mapped onto our design tokens, so it follows light and dark without re-rendering."
 	component="Mermaid"
 	features={[
-		'Mermaid loaded from cdnjs at runtime',
+		'Rendered by Pele, loaded from jsDelivr at runtime',
 		'Pan, zoom, fit and fullscreen controls',
 		'Design-token theming for light and dark',
 		'errorForgiving holds last valid frame'

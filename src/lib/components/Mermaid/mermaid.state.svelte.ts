@@ -1,103 +1,122 @@
-import { applyCspNonce, getCspNonce, nonceAttribute } from '$lib/utils/cspNonce.js';
-import { observeThemeTokens } from '$lib/utils/observeThemeTokens.js';
+import { applyCspNonce } from '$lib/utils/cspNonce.js';
 import { createId } from '$lib/utils/id.js';
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
 import { usePanzoom } from '$lib/utils/usePanzoom.svelte.js';
 import { onDestroy, untrack } from 'svelte';
 import { on } from 'svelte/events';
-import { useTheme } from '../Theme/theme.state.svelte.js';
 import type { MermaidProps } from './mermaid.props.js';
 
-// mermaid is loaded from cdnjs at runtime and never bundled with the component,
-// so we declare the minimal structural types we use rather than depending on the
-// `mermaid` npm type package. Bump this single const to any version cdnjs hosts
-// to upgrade mermaid (mirrors the pinned PDF.js runtime in DocumentViewer).
-const MERMAID_CDN_VERSION = '11.12.0';
-// The self-contained UMD build. NOT the ESM `.mjs` — mermaid's ESM is split into
-// sibling chunks that fail to resolve cross-origin from cdnjs.
-const MERMAID_CDN = `https://cdnjs.cloudflare.com/ajax/libs/mermaid/${MERMAID_CDN_VERSION}/mermaid.min.js`;
+// Mermaid source is rendered by Pele (https://pele.run, MIT, by Obsidian): a lightweight Mermaid
+// renderer that returns themeable SVG synchronously. It is loaded from jsDelivr at runtime and never
+// bundled, so we declare the minimal structural types we use rather than depending on its package.
+// Bump this single const to upgrade (mirrors the pinned PDF.js runtime in DocumentViewer).
+const PELE_CDN_VERSION = '1.6.0';
+// The self-contained global build: one script that defines `window.pele` with every diagram type.
+const PELE_CDN = `https://cdn.jsdelivr.net/npm/pele@${PELE_CDN_VERSION}/dist/pele.global.js`;
 
-/** The subset of mermaid's config we set. Extra keys are allowed and forwarded. */
+/**
+ * Mermaid settings forwarded to Pele as its `config` (frontmatter and directives in the source
+ * still override them), plus `fontFamily` for the diagram font. Pele draws with CSS variables, so
+ * colours come from the theme rather than from a `themeVariables` key.
+ */
 export interface MermaidConfig {
-	theme?: 'base' | 'default' | 'dark' | 'forest' | 'neutral' | 'null';
-	startOnLoad?: boolean;
-	securityLevel?: 'strict' | 'loose' | 'antiscript' | 'sandbox';
-	suppressErrorRendering?: boolean;
 	fontFamily?: string;
-	themeVariables?: Record<string, string>;
-	flowchart?: { useMaxWidth?: boolean; htmlLabels?: boolean; curve?: string };
+	flowchart?: { curve?: string; [key: string]: unknown };
 	[key: string]: unknown;
 }
 
-/** The minimal mermaid API surface this component calls. */
+/** The minimal Pele API surface this component calls (`window.pele` once loaded). */
 export interface MermaidModule {
-	initialize(config: MermaidConfig): void;
-	render(id: string, code: string): Promise<{ svg: string; bindFunctions?: (el: Element) => void }>;
+	render(
+		source: string,
+		options?: {
+			fontFamily?: string;
+			fontSize?: number;
+			idPrefix?: string;
+			responsive?: boolean;
+			config?: Record<string, unknown>;
+			[key: string]: unknown;
+		}
+	): { svg: string; width: number; height: number; type: string };
 }
 
 // Module-level singleton: dedupes concurrent loads and repeat mounts. Reset to
 // null on failure so a later mount can retry. Only ever touched client-side.
-let mermaidPromise: Promise<MermaidModule> | null = null;
+let pelePromise: Promise<MermaidModule> | null = null;
 
-const loadMermaid = (): Promise<MermaidModule> => {
+const loadPele = (): Promise<MermaidModule> => {
 	if (typeof window === 'undefined') {
-		return Promise.reject(new Error('mermaid can only be loaded in the browser'));
+		return Promise.reject(new Error('Pele can only be loaded in the browser'));
 	}
-	const w = window as unknown as { mermaid?: MermaidModule };
-	if (w.mermaid) return Promise.resolve(w.mermaid);
-	if (mermaidPromise) return mermaidPromise;
+	const w = window as unknown as { pele?: MermaidModule };
+	if (w.pele) return Promise.resolve(w.pele);
+	if (pelePromise) return pelePromise;
 
-	mermaidPromise = new Promise<MermaidModule>((resolve, reject) => {
+	pelePromise = new Promise<MermaidModule>((resolve, reject) => {
 		// Reuse a matching script tag if one already exists (added by another instance),
 		// otherwise inject a fresh one. `scriptEl` is the element we are waiting on so
 		// fail() can always remove it — a script that loaded but never defined
-		// window.mermaid (corrupt/partial asset) must not be left behind, or a later
+		// window.pele (corrupt/partial asset) must not be left behind, or a later
 		// retry would attach listeners to an already-fired, dead <script> and hang.
 		const existing = document.querySelector<HTMLScriptElement>(
-			`script[data-mermaid-cdn="${MERMAID_CDN_VERSION}"]`
+			`script[data-pele-cdn="${PELE_CDN_VERSION}"]`
 		);
 		const scriptEl = existing ?? applyCspNonce(document.createElement('script'));
 		const settle = () => {
 			clearTimeout(timeout);
-			if (w.mermaid) resolve(w.mermaid);
-			else fail(new Error('mermaid loaded but window.mermaid is undefined'));
+			if (w.pele) resolve(w.pele);
+			else fail(new Error('Pele loaded but window.pele is undefined'));
 		};
 		const fail = (err: Error) => {
 			clearTimeout(timeout);
 			scriptEl.remove();
-			mermaidPromise = null; // allow a retry on the next mount
+			pelePromise = null; // allow a retry on the next mount
 			reject(err);
 		};
-		// Wall-clock guard: a stalled cdnjs request may never fire load/error.
-		const timeout = setTimeout(() => fail(new Error('mermaid load timed out')), 30000);
+		// Wall-clock guard: a stalled CDN request may never fire load/error.
+		const timeout = setTimeout(() => fail(new Error('Pele load timed out')), 30000);
 
 		if (existing) {
-			if (w.mermaid) {
+			if (w.pele) {
 				clearTimeout(timeout);
-				return resolve(w.mermaid);
+				return resolve(w.pele);
 			}
 			existing.addEventListener('load', settle, { once: true });
 			existing.addEventListener(
 				'error',
-				() => fail(new Error('Failed to load mermaid from cdnjs')),
+				() => fail(new Error('Failed to load Pele from jsDelivr')),
 				{
 					once: true
 				}
 			);
 			return;
 		}
-		scriptEl.src = MERMAID_CDN;
+		scriptEl.src = PELE_CDN;
 		scriptEl.async = true;
 		scriptEl.crossOrigin = 'anonymous';
-		scriptEl.dataset.mermaidCdn = MERMAID_CDN_VERSION;
+		scriptEl.dataset.peleCdn = PELE_CDN_VERSION;
 		scriptEl.addEventListener('load', settle, { once: true });
-		scriptEl.addEventListener('error', () => fail(new Error('Failed to load mermaid from cdnjs')), {
+		scriptEl.addEventListener('error', () => fail(new Error('Failed to load Pele from jsDelivr')), {
 			once: true
 		});
 		document.head.appendChild(scriptEl);
 	});
-	return mermaidPromise;
+	return pelePromise;
 };
+
+// The colour variables the theme maps onto design tokens, resolved into a downloaded file.
+const PELE_COLOR_VARIABLES = [
+	'--pele-bg',
+	'--pele-fg',
+	'--pele-muted',
+	'--pele-line',
+	'--pele-surface',
+	'--pele-surface-alt',
+	'--pele-border',
+	'--pele-accent',
+	'--pele-critical',
+	...Array.from({ length: 8 }, (_, index) => `--pele-series-${index + 1}`)
+];
 
 /**
  * Sanitize raw mermaid source. Defensive against copy/paste artefacts: BOM,
@@ -182,155 +201,6 @@ export const sanitizeMermaidCode = (code: string): string => {
 	}
 };
 
-// Map our --color-* design tokens onto mermaid themeVariables. mermaid reads
-// these at initialize() time as concrete colors (not live CSS vars), so we
-// resolve them from the DOM at render time and re-initialize on theme change.
-//
-// Our tokens resolve to `oklab()`/`color-mix()`, which mermaid's color parser
-// rejects ("Unsupported color format"). So we resolve each token to a concrete
-// computed color via a probe element, then normalize it to `#rrggbb`/`rgba()`
-// through a canvas (which serializes any CSS color space to hex/rgb).
-let colorProbe: HTMLElement | null = null;
-let colorCtx: CanvasRenderingContext2D | null = null;
-
-// Rasterize the color to a 1×1 canvas and read the pixel back: this forces any
-// CSS color space (oklab, color-mix, etc.) down to concrete sRGB bytes we can hex.
-// (A plain fillStyle round-trip keeps oklab as-is in Chrome, which mermaid rejects.)
-const normalizeColor = (color: string): string | null => {
-	if (!colorCtx) {
-		const canvas = document.createElement('canvas');
-		canvas.width = 1;
-		canvas.height = 1;
-		colorCtx = canvas.getContext('2d', { willReadFrequently: true });
-	}
-	if (!colorCtx || !color) return null;
-	try {
-		colorCtx.clearRect(0, 0, 1, 1);
-		colorCtx.fillStyle = '#000000';
-		colorCtx.fillStyle = color;
-		colorCtx.fillRect(0, 0, 1, 1);
-		const [r, g, b] = colorCtx.getImageData(0, 0, 1, 1).data;
-		return `#${[r, g, b].map((n) => n.toString(16).padStart(2, '0')).join('')}`;
-	} catch {
-		return null;
-	}
-};
-
-// Resolve any CSS color expression (var(), color-mix(), oklab()) to a concrete
-// hex under the active theme, via the probe + canvas readback.
-const readColor = (value: string, fallback: string): string => {
-	if (typeof window === 'undefined') return fallback;
-	if (!colorProbe) {
-		colorProbe = document.createElement('div');
-		colorProbe.style.cssText = 'position:absolute;width:0;height:0;pointer-events:none;opacity:0;';
-		document.body.appendChild(colorProbe);
-	}
-	colorProbe.style.color = '';
-	colorProbe.style.color = value;
-	const resolved = getComputedStyle(colorProbe).color;
-	return normalizeColor(resolved) || fallback;
-};
-
-const readToken = (name: string, fallback: string): string => readColor(`var(${name})`, fallback);
-
-// A token mixed `pct`% over the background — the derivation ladder. Low percentages
-// give faint surface tints, higher ones give soft strokes/lines. Everything is
-// derived from a token + the background so it adapts to light/dark automatically.
-const mixOver = (token: string, pct: number, fallback: string): string =>
-	readColor(`color-mix(in oklab, var(${token}) ${pct}%, var(--color-surface))`, fallback);
-const mixFg = (pct: number, fallback: string) => mixOver('--color-neutral', pct, fallback);
-const mixAccent = (pct: number, fallback: string) => mixOver('--color-primary', pct, fallback);
-
-const buildThemeVariables = (fontFamily: string): Record<string, string> => {
-	const foreground = readToken('--color-neutral', '#1f2328');
-	const background = readToken('--color-surface', '#ffffff');
-
-	// GitHub-flavoured, but not black-and-white: surfaces carry a faint accent tint
-	// and borders/links a soft (not saturated) accent, so the diagram has colour
-	// without the old "primary everywhere". Text stays at full contrast.
-	const nodeFill = mixAccent(7, '#eef1fb'); // faintly accent-tinted node surface
-	const nodeStroke = mixAccent(45, '#a6b1f0'); // soft accent border
-	const secondaryFill = mixAccent(13, '#e3e8fa'); // secondary nodes / activations
-	const surface = mixAccent(6, '#eef1fb'); // clusters / notes / title bands
-	const surfaceStroke = mixAccent(28, '#c3ccf3');
-	const line = mixAccent(52, '#8f9cec'); // edges / connectors / arrows
-	const textMuted = mixFg(50, '#6b7280'); // edge labels, muted text (kept neutral)
-
-	return {
-		background,
-		// Primary node family — neutral surface + grey border, NOT brand colour.
-		primaryColor: nodeFill,
-		primaryBorderColor: nodeStroke,
-		primaryTextColor: foreground,
-		mainBkg: nodeFill,
-		nodeBorder: nodeStroke,
-		// Secondary / tertiary surfaces (still greyscale).
-		secondaryColor: secondaryFill,
-		secondaryBorderColor: surfaceStroke,
-		secondaryTextColor: foreground,
-		tertiaryColor: surface,
-		tertiaryBorderColor: surfaceStroke,
-		tertiaryTextColor: foreground,
-		// Text + lines.
-		textColor: foreground,
-		lineColor: line,
-		titleColor: foreground,
-		edgeLabelBackground: background,
-		labelColor: foreground,
-		// Clusters / subgraphs.
-		clusterBkg: surface,
-		clusterBorder: surfaceStroke,
-		// Notes.
-		noteBkgColor: surface,
-		noteTextColor: foreground,
-		noteBorderColor: surfaceStroke,
-		// Sequence diagrams.
-		actorBkg: nodeFill,
-		actorBorder: nodeStroke,
-		actorTextColor: foreground,
-		actorLineColor: line,
-		signalColor: foreground,
-		signalTextColor: foreground,
-		labelBoxBkgColor: nodeFill,
-		labelBoxBorderColor: nodeStroke,
-		labelTextColor: foreground,
-		loopTextColor: foreground,
-		activationBkgColor: secondaryFill,
-		activationBorderColor: nodeStroke,
-		// Pie / bar: soft multi-hue from our semantic tokens (mixed over the
-		// background so they're muted pastels, not neon) — distinct and colourful,
-		// but calm. Full-contrast label text stays readable over these mid tones.
-		pie1: mixOver('--color-primary', 60, '#a6b1f0'),
-		pie2: mixOver('--color-info', 58, '#8fd0e6'),
-		pie3: mixOver('--color-success', 58, '#9bd8b0'),
-		pie4: mixOver('--color-warning', 62, '#eacf8f'),
-		pie5: mixOver('--color-secondary', 55, '#b7bcc6'),
-		pie6: mixOver('--color-danger', 58, '#eaa3a3'),
-		pie7: mixOver('--color-primary', 38, '#c8cff5'),
-		pie8: mixOver('--color-info', 38, '#bce3ef'),
-		pieStrokeColor: background,
-		pieOuterStrokeColor: nodeStroke,
-		pieTitleTextColor: foreground,
-		pieSectionTextColor: foreground,
-		pieLegendTextColor: foreground,
-		pieStrokeWidth: '1.5px',
-		pieOuterStrokeWidth: '1px',
-		// Muted edge-label text.
-		edgeLabelColor: textMuted,
-		fontFamily
-	};
-};
-
-// Scoped SVG polish mermaid's themeVariables can't express: soft-rounded node
-// corners + edge-label pills, and hairline strokes. Scoped by the diagram's own id
-// so it never leaks to other diagrams or the page (an unscoped <style> would).
-const buildScopedStyle = (id: string): string =>
-	`#${id} .node rect,#${id} .node polygon,#${id} .node circle,#${id} .cluster rect,` +
-	`#${id} rect.actor,#${id} .labelBox{rx:6px;ry:6px}` +
-	`#${id} .edgeLabel rect,#${id} .edgeLabel .label-container{rx:4px;ry:4px}` +
-	`#${id} .node rect,#${id} .cluster rect,#${id} rect.actor{stroke-width:1px}` +
-	`#${id} .edgePath path,#${id} .flowchart-link{stroke-width:1.5px}`;
-
 type MermaidOptions = Pick<
 	MermaidProps,
 	'chart' | 'config' | 'mouseWheelZoom' | 'touchPan' | 'errorForgiving' | 'onRender' | 'onError'
@@ -339,21 +209,16 @@ type MermaidOptions = Pick<
 /** The bound option props are declared by the base class, so `this.chart` & co. are typed
  *  without merging an interface into the class declaration. */
 export class MermaidState extends createBindableStateClass<MermaidOptions>() {
-	// The library instance once loaded from cdnjs.
+	// The renderer (Pele) once loaded from the CDN.
 	mermaid: MermaidModule | null = $state.raw(null);
 	loading = $state(true);
 	error: Error | null = $state(null);
 
-	private theme = useTheme();
 	// The <svg> host we render into, and the wrapper the panzoom transforms.
 	private svgHost: SVGSVGElement | null = null;
 	private renderToken = 0;
-	/** The derived themeVariables last handed to mermaid, to skip no-op re-renders. */
-	private themeSignature = '';
-
-	private get fontFamily() {
-		return this.config?.fontFamily || 'ui-sans-serif, system-ui, -apple-system, sans-serif';
-	}
+	// Unique per instance: Pele prefixes the ids its markers and gradients reference with it.
+	private idPrefix = createId('mermaid');
 	private mounted = false;
 	// Hover gating: only enable wheel-zoom after the pointer has dwelled a moment,
 	// so scrolling the page past the diagram doesn't hijack the wheel.
@@ -380,12 +245,14 @@ export class MermaidState extends createBindableStateClass<MermaidOptions>() {
 			}
 		});
 
-		// Load mermaid once (client only), then render.
+		// Load the renderer once (client only), then render.
 		$effect(() => {
 			untrack(() => void this.ensureLoaded());
 		});
 
-		// Re-render when the chart or config changes.
+		// Re-render when the chart or config changes. Colours need no re-render: the SVG draws with
+		// `--pele-*` variables that the theme maps onto design tokens, so a light/dark flip or a
+		// palette change restyles it in place.
 		$effect(() => {
 			void this.chart;
 			void this.config;
@@ -394,23 +261,9 @@ export class MermaidState extends createBindableStateClass<MermaidOptions>() {
 			});
 		});
 
-		// Re-render when the resolved --color-* tokens change: a light/dark flip, a palette
-		// swap or runtime design-token edits. Tokens are read from the DOM rather than from
-		// the reactive `resolvedTheme`, which flips before the attribute (and the colours) do.
-		// `<head>` also mutates on plain navigation, so only re-render when the derived
-		// variables actually differ from the ones last handed to mermaid.
-		$effect(() =>
-			observeThemeTokens(() => {
-				if (!this.mounted) return;
-				if (JSON.stringify(buildThemeVariables(this.fontFamily)) === this.themeSignature) return;
-				void this.render();
-			})
-		);
-
 		onDestroy(() => {
 			this.renderToken++;
 			clearTimeout(this.hoverTimer);
-			this.removeTempContainer();
 		});
 	}
 
@@ -419,7 +272,7 @@ export class MermaidState extends createBindableStateClass<MermaidOptions>() {
 		this.loading = true;
 		this.error = null;
 		try {
-			this.mermaid = await loadMermaid();
+			this.mermaid = await loadPele();
 			this.mounted = true;
 			await this.render();
 		} catch (e) {
@@ -427,17 +280,6 @@ export class MermaidState extends createBindableStateClass<MermaidOptions>() {
 			this.error = e instanceof Error ? e : new Error(String(e));
 			this.onError?.(this.error);
 		}
-	};
-
-	// The id of the temporary measuring container mermaid.render() leaves in <body>
-	// (it's `d` + our render id). Tracked so we can remove exactly OUR own leftover —
-	// never a concurrent instance's still-in-flight node (removing that throws inside
-	// mermaid's layout: `x.firstChild` on a null container).
-	private lastTempId: string | null = null;
-
-	private removeTempContainer = (tempId = this.lastTempId) => {
-		if (typeof document === 'undefined' || !tempId) return;
-		document.getElementById(tempId)?.remove();
 	};
 
 	render = async () => {
@@ -448,7 +290,6 @@ export class MermaidState extends createBindableStateClass<MermaidOptions>() {
 		const hasContent = !!this.svgHost.querySelector('svg');
 		if (!hasContent) this.loading = true;
 		this.error = null;
-		let tempId: string | undefined;
 		try {
 			const sanitized = sanitizeMermaidCode(this.chart ?? '');
 			if (!sanitized.trim()) {
@@ -457,53 +298,31 @@ export class MermaidState extends createBindableStateClass<MermaidOptions>() {
 				return;
 			}
 
-			const fontFamily = this.fontFamily;
-			// Pull the caller's themeVariables out so they merge per-key over the brand
-			// mapping instead of the trailing spread clobbering the whole object.
-			const { themeVariables: userThemeVars, ...restConfig } = this.config ?? {};
-			const themeVariables = buildThemeVariables(fontFamily);
-			this.themeSignature = JSON.stringify(themeVariables);
-			const config: MermaidConfig = {
-				theme: 'base',
-				startOnLoad: false,
-				fontFamily,
-				flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
-				...restConfig,
-				themeVariables: {
-					...themeVariables,
-					...(userThemeVars || {})
-				},
-				// Hard-pinned last so caller config can't downgrade the sandbox: the rendered
-				// SVG is inserted via innerHTML, so strict sanitization is not optional.
-				securityLevel: 'strict',
-				suppressErrorRendering: true
-			};
-			this.mermaid.initialize(config);
-
-			const id = createId(`dmm-${token}`);
-			tempId = `d${id}`;
-			this.lastTempId = tempId;
-			const { svg } = await this.mermaid.render(id, sanitized);
+			// Labels are measured in the font they are drawn with: the page's, unless the caller
+			// names one. Pele writes it as the fallback of `--pele-font`, so the two always agree.
+			const { fontFamily: configFont, ...config } = this.config ?? {};
+			const computed = getComputedStyle(this.svgHost);
+			const { svg } = this.mermaid.render(sanitized, {
+				fontFamily: configFont || computed.fontFamily || 'sans-serif',
+				fontSize: parseFloat(computed.fontSize) || 16,
+				idPrefix: this.idPrefix,
+				// Natural size: the panzoom fits it to the viewport.
+				responsive: false,
+				config
+			});
 			// A newer render superseded this one.
 			if (token !== this.renderToken || !this.svgHost) return;
 
-			// mermaid's own `<style>` element rides in the svg markup: with a CSP nonce it is
-			// stamped before parsing, since a style cannot be allowed after it is inserted.
-			const nonce = getCspNonce();
-			this.svgHost.innerHTML = nonce
-				? svg.replace(/<style\b/gi, (tag) => tag + nonceAttribute(nonce))
-				: svg;
-			// Scoped polish (rounded corners / hairline strokes) keyed to the produced
-			// svg's own id so it can't affect any other diagram or the page.
-			const style = applyCspNonce(document.createElement('style'), nonce);
-			style.textContent = buildScopedStyle(id);
-			this.svgHost.prepend(style);
+			// Pele's markup carries no `<style>` element or script, only presentation attributes and
+			// inline CSS variables, so it needs no CSP nonce.
+			this.svgHost.innerHTML = svg;
 			// Copy sizing attributes from the produced <svg> onto our host.
 			const parsed = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement;
 			for (const attr of Array.from(parsed.attributes)) {
-				if (attr.name !== 'id') this.svgHost.setAttribute(attr.name, attr.value);
+				if (attr.name !== 'id' && attr.name !== 'class' && attr.name !== 'style') {
+					this.svgHost.setAttribute(attr.name, attr.value);
+				}
 			}
-			this.removeTempContainer(tempId);
 			this.loading = false;
 			// Fit twice: the first pass measures, the second centres at final scale.
 			this.panzoom.zoomToFit();
@@ -511,7 +330,6 @@ export class MermaidState extends createBindableStateClass<MermaidOptions>() {
 			this.onRender?.(this);
 		} catch (e) {
 			if (token !== this.renderToken) return;
-			this.removeTempContainer(tempId);
 			this.loading = false;
 			const err = e instanceof Error ? e : new Error(String(e));
 			// Streaming/forgiving mode: the source is transiently invalid between tokens,
@@ -571,6 +389,16 @@ export class MermaidState extends createBindableStateClass<MermaidOptions>() {
 		const styles = getComputedStyle(svg);
 		if (!clone.getAttribute('width')) clone.setAttribute('width', styles.width);
 		if (!clone.getAttribute('height')) clone.setAttribute('height', styles.height);
+		// The file leaves the page, and with it the theme that defines `--pele-*`: write the
+		// resolved colours onto its root so it keeps the palette it has on screen.
+		const probe = svg.ownerDocument.createElement('span');
+		svg.parentNode?.appendChild(probe);
+		for (const name of PELE_COLOR_VARIABLES) {
+			probe.style.color = `var(${name})`;
+			const color = getComputedStyle(probe).color;
+			if (color) clone.style.setProperty(name, color);
+		}
+		probe.remove();
 		return new XMLSerializer().serializeToString(clone);
 	};
 

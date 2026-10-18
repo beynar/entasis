@@ -31,10 +31,9 @@ export type MermaidProps = WithAttachments<{
 	 */
 	chart: string;
 	/**
-	 * Extra mermaid configuration merged over the defaults (`theme: 'base'`,
-	 * strict security, brand `themeVariables`, flowchart curve `basis`). Provide
-	 * `themeVariables` here to override individual mapped colors, or `fontFamily`
-	 * to change the diagram font.
+	 * Mermaid settings passed to the renderer (frontmatter and directives in the
+	 * source override them), plus `fontFamily` to change the diagram font. Colours
+	 * come from the theme's `--pele-*` variables, not from this object.
 	 */
 	config?: MermaidConfig;
 	/**

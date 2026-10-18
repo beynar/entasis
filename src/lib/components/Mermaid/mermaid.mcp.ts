@@ -1,7 +1,7 @@
 export const mermaidDescription = `
 # Mermaid Component
 
-Renders a [Mermaid](https://mermaid.js.org/) diagram (flowchart, sequence, gantt, pie, class, state, ER, etc.) from a code string, with pan, zoom, fullscreen and download controls. The diagram is themed with our design tokens so it adapts to light and dark automatically. Ported from svelte-streamdown's Mermaid element, rebuilt on the entasis state/theme system.
+Renders a [Mermaid](https://mermaid.js.org/) diagram (flowchart, sequence, gantt, pie, class, state, ER, mindmap, timeline, kanban, git graph and more) from a code string, with pan, zoom, fullscreen and download controls. The source is Mermaid syntax; the renderer is [Pele](https://pele.run), a lightweight Mermaid renderer that outputs themeable SVG. The diagram is coloured with our design tokens through CSS variables, so it adapts to light and dark without re-rendering.
 
 ## Basic Usage
 
@@ -14,7 +14,7 @@ Renders a [Mermaid](https://mermaid.js.org/) diagram (flowchart, sequence, gantt
 
 ### Core Props
 - **chart**: string (required) - The mermaid diagram source. Sanitized before rendering (BOM, zero-width/control chars, smart quotes, CRLF, HTML entities, flowchart arrow spacing, trailing semicolons). Re-renders reactively when it changes.
-- **config**: MermaidConfig - Extra mermaid config merged over the defaults (\`theme: 'base'\`, \`securityLevel: 'strict'\`, brand \`themeVariables\`, flowchart \`curve: 'basis'\`). Pass \`themeVariables\` to override individual mapped colors, or \`fontFamily\` to change the diagram font.
+- **config**: MermaidConfig - Mermaid settings passed to the renderer (frontmatter and \`%%{init}%%\` directives in the source override them; support varies by diagram type), plus \`fontFamily\` to change the diagram font (default: the page font). Colours do not come from here: see Theming.
 - **size**: 'small' | 'normal' | 'large' (default: 'normal') - The height of the diagram viewport.
 
 ### Interaction Props
@@ -25,7 +25,7 @@ Renders a [Mermaid](https://mermaid.js.org/) diagram (flowchart, sequence, gantt
 
 ### Event Props
 - **onRender**: (state: MermaidState) => void - Called after each successful render.
-- **onError**: (error: Error) => void - Called when loading mermaid, parsing, or rendering fails.
+- **onError**: (error: Error) => void - Called when loading the renderer, parsing, or rendering fails. Parse errors carry the line in their message.
 
 ### Advanced Props
 - **class**: string - Additional CSS classes on the root element (the panzoom viewport).
@@ -39,9 +39,9 @@ Renders a [Mermaid](https://mermaid.js.org/) diagram (flowchart, sequence, gantt
 - **Fullscreen**: the expand button opens the same diagram in a \`fullScreen\` Dialog (focus trap, Escape and the close button exit, single-finger touch pans inside it).
 - **Download**: serializes the rendered diagram to a standalone .svg file.
 
-## Brand theming
+## Theming
 
-Mermaid is initialized with \`theme: 'base'\` and a \`themeVariables\` object whose values are read from our \`--color-*\` design tokens at render time (mermaid reads them as concrete colors, not live CSS vars). The diagram re-renders when the active theme changes, so it stays in sync with light/dark. Mapping: \`primaryColor -> --color-primary-muted\`, \`primaryTextColor/textColor -> --color-neutral\`, \`primaryBorderColor/nodeBorder -> --color-primary\`, \`lineColor -> --color-neutral-muted\`, \`background -> --color-surface\`, \`mainBkg -> --color-surface-raised\`, \`secondaryColor -> --color-secondary\`, \`tertiaryColor -> --color-neutral-muted\`, plus note/cluster/title colors and \`fontFamily\`.
+The renderer draws with \`--pele-*\` CSS variables, and the component's root maps them onto our design tokens: \`--pele-bg\` (surface-raised), \`--pele-fg\` (neutral), \`--pele-muted\`, \`--pele-line\`, \`--pele-surface\`, \`--pele-surface-alt\` and \`--pele-border\` (soft mixes of primary over the surface), \`--pele-accent\` (primary), \`--pele-critical\` and \`--pele-error\` (danger), \`--pele-radius\`, and \`--pele-series-1\`…\`-8\` for charts. Because they are live CSS variables, light/dark and palette changes restyle the diagram in place. Override any of them through the \`root\` theme part or a class, e.g. \`class="[--pele-accent:var(--color-success)]"\`. Inline \`style\`, \`classDef\` and \`linkStyle\` in the source still win, with fixed colours.
 
 ## Examples
 
@@ -66,7 +66,7 @@ Mermaid is initialized with \`theme: 'base'\` and a \`themeVariables\` object wh
 
 ## Notes
 
-- **mermaid is not bundled**: it is loaded from cdnjs at runtime, on the client only (mermaid **${'11.12.0'}**, the self-contained UMD build). The component is SSR-safe and shows a skeleton while loading. A strict Content-Security-Policy must allow \`cdnjs.cloudflare.com\` in \`script-src\`.
-- On a load failure or a mermaid parse/render error, an error surface is shown (danger tokens) with the message — \`securityLevel: 'strict'\` + \`suppressErrorRendering\` keep mermaid from injecting its own error DOM.
-- mermaid leaves temporary measuring containers in the body; they are removed after each render and on destroy.
+- **The renderer is not bundled**: Pele **1.6.0** is loaded from jsDelivr at runtime, on the client only (its self-contained global build, about 250 KB gzipped, every diagram type). The script carries the Theme's CSP nonce; a strict Content-Security-Policy must also allow \`cdn.jsdelivr.net\` in \`script-src\`. The component is SSR-safe and shows a skeleton while loading.
+- The rendered SVG has no \`<style>\` element or script, only presentation attributes and CSS variables, so it needs no style nonce.
+- On a load failure or a parse/render error, an error surface is shown (danger tokens) with the message.
 `;
