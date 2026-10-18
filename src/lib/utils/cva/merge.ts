@@ -7,7 +7,7 @@
  * "last class wins" rule holds for them too:
  *   - `raised-*`      elevation (bordered) and `lift-*` (shadow only)
  *   - `h-control-*`   control heights
- *   - `h-row-*` / `min-h-row-*` row densities
+ *   - `h-row-*` / `min-h-row-*` row densities, `min-h-control-*` control-height floors
  *   - `size-icon-*`   icon sizes
  *   - `min-size-hit-*` minimum hit areas
  *   - `ps-indent-*`  nesting indents
@@ -70,6 +70,7 @@ export const mergeConfig = {
 			'h-control': [{ 'h-control': ['sm', 'md', 'lg'] }],
 			'h-row': [{ 'h-row': ['sm', 'md', 'lg'] }],
 			'min-h-row': [{ 'min-h-row': ['sm', 'md', 'lg'] }],
+			'min-h-control': [{ 'min-h-control': ['sm', 'md', 'lg'] }],
 			'size-icon': [{ 'size-icon': ['xs', 'sm', 'md', 'lg', 'xl'] }],
 			'min-size-hit': [{ 'min-size-hit': ['sm', 'md', 'lg'] }],
 			'ps-indent': [{ 'ps-indent': ['sm', 'md', 'lg', 'xl'] }],
@@ -111,10 +112,11 @@ export const mergeConfig = {
 			w: ['size-icon'],
 			size: ['h-control', 'h-row', 'size-icon'],
 			// `min-size-hit-*` sets `min-width` + `min-height`, `min-h-row-*` only the height.
-			'min-size-hit': ['min-w', 'min-h', 'min-h-row'],
-			'min-h-row': ['min-h', 'min-size-hit'],
+			'min-size-hit': ['min-w', 'min-h', 'min-h-row', 'min-h-control'],
+			'min-h-row': ['min-h', 'min-size-hit', 'min-h-control'],
+			'min-h-control': ['min-h', 'min-size-hit', 'min-h-row'],
 			'min-w': ['min-size-hit'],
-			'min-h': ['min-size-hit', 'min-h-row'],
+			'min-h': ['min-size-hit', 'min-h-row', 'min-h-control'],
 			// `ps-indent-*` sets `padding-inline-start`.
 			'ps-indent': ['ps', 'px', 'p'],
 			ps: ['ps-indent'],

@@ -100,6 +100,8 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Added
 
+- Tailwind plugin: `min-h-control-sm|md|lg`, a control height as a floor for rows that can wrap
+  (small menu rows use it).
 - `Toast`: a toast shown again while it is on screen (the same `id`, or the same message
   deduplicated) bounces once to draw the eye back to it. So does a `toast.promise()` toast when it settles, on success or failure. `toast.update()` does not, and reduced
   motion keeps it still. The handle exposes the count as `attentionKey`.
@@ -626,8 +628,8 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
   diagram types (mindmap, timeline, kanban, git graph, sankey and others), parse errors with their
   line, and a downloaded SVG that keeps the on-screen colours.
 - Menu rows (`MenuOption`, so every menu, `Select`, `Command` and `Combobox` list): `size="small"`
-  makes a row shorter as well as smaller-type. It steps the row one notch down at every density
-  (20, 24 and 32px tall for compact, normal and comfortable, against 24, 32 and 40px at `normal`).
+  makes a row shorter as well as smaller-type. It steps the row half a notch down at every density
+  (24, 28 and 36px tall for compact, normal and comfortable, against 24, 32 and 40px at `normal`).
   Before, `size` changed only the text, so a small menu was as tall as a normal one.
 - `Sidebar`: the menus it opens (row "…" actions, item menus and the header and footer account
   menus) follow the Sidebar's `size` and `density`, so a small Sidebar opens small menu rows. A
@@ -1147,6 +1149,9 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Fixed
 
+- `Popover` (and Tooltip/HoverCard arrows that share it): in dark mode the arrow was darker than
+  the panel, with a dark ring. The panel's elevation lightens its surface with an inset tint; the
+  arrow now paints the same tint, clipped to its padding box.
 - `AIChat`: a question docked in place of the composer is as wide as the composer and the message
   column (`--ai-chat-content-width`, 48rem by default) instead of spanning the whole chat.
   `AIAskUserQuestion` caps itself at that variable when a host sets it, as `AIComposer` does.

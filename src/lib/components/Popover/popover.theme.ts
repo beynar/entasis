@@ -63,7 +63,9 @@ const defaultPopover = cva({
 // written by the placement, with the side as `data-side`.
 const defaultPopoverArrow = cva({
 	base: [
-		'bg-surface-floating pointer-events-none absolute -z-10 size-2.5 rotate-45 rounded-xs border border-transparent',
+		// The panel's elevation lightens its surface in dark mode with an inset tint (`raised-3`); the
+		// arrow paints the same tint, without the drop shadow, or it reads darker than the panel.
+		'bg-surface-floating pointer-events-none absolute -z-10 size-2.5 rotate-45 rounded-xs border border-transparent bg-clip-padding shadow-[inset_0_0_0_9999px_var(--elevation-tint-3)]',
 		'data-[side=bottom]:border-t-neutral-muted data-[side=bottom]:border-l-neutral-muted',
 		'data-[side=top]:border-r-neutral-muted data-[side=top]:border-b-neutral-muted',
 		'data-[side=right]:border-b-neutral-muted data-[side=right]:border-l-neutral-muted',

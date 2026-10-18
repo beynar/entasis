@@ -46,6 +46,13 @@ export const applyGeometryEngine = ({ addBase, addUtilities }: PluginAPI) => {
 			md: 'var(--row-height-md)',
 			lg: 'var(--row-height-lg)'
 		}),
+		// A control height as a floor, for rows that may wrap (a small menu row: a control tall,
+		// growing with a description).
+		...sizedUtilities('min-h-control', 'min-height', {
+			sm: 'var(--control-height-sm)',
+			md: 'var(--control-height-md)',
+			lg: 'var(--control-height-lg)'
+		}),
 		...sizedUtilities('min-h-row', 'min-height', {
 			sm: 'var(--row-height-sm)',
 			md: 'var(--row-height-md)',

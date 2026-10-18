@@ -340,7 +340,7 @@
 	>
 		<PopupMenu
 			{size}
-			menu={{ items: overflowMenuItems, density: size === 'small' ? 'compact' : 'normal' }}
+			menu={{ items: overflowMenuItems }}
 			closeOnItemClick={false}
 			position="bottom-end"
 			fitTrigger={false}

@@ -678,7 +678,7 @@ function checkSurfaceClasses(source, filename) {
 				usedGeometryExceptions.add(`${relative}::${token}`);
 			else
 				errors.add(
-					`${relative}: numeric height ${token} — controls use h-control-*, rows use h-row-* / min-h-row-*`
+					`${relative}: numeric height ${token} — controls use h-control-* / min-h-control-*, rows use h-row-* / min-h-row-*`
 				);
 		}
 		const muted = utility.match(MUTED_TEXT);
