@@ -604,6 +604,10 @@ members that `PopoverApi` and `DialogApi` no longer type (`place()`, `layer`, `f
 
 ### Changed
 
+- `AIThread`: the transcript's scrollbar looks like ScrollArea's: a thin rounded `neutral-muted`
+  thumb with no track, shown while the pointer is over the transcript, instead of the platform's
+  classic bar. The transcript keeps its native scroller (the virtualized list's row measurement
+  and a ScrollArea's content observer would trip ResizeObserver loop notices).
 - `AIThread`: the follow-up suggestions float over the bottom of the transcript instead of taking
   a band of their own, so the text scrolls behind the transparent row; the list's end padding (the
   row's height) keeps the last message clear of the chips at the end, and the scroll-to-latest

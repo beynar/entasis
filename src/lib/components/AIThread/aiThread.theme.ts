@@ -10,7 +10,17 @@ const defaultBody = cva({ base: 'relative flex min-h-0 min-w-0 flex-1' });
 const defaultViewport = cva({
 	// `isolate`: rows raise themselves on hover (to keep their action bar on top), and that must not
 	// lift them above what floats over the transcript (the follow-up suggestions, the scroll button).
-	base: 'isolate min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
+	base: [
+		'isolate min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-focus/50',
+		// The native scrollbar, drawn like ScrollArea's: a thin rounded `neutral-muted` thumb with no
+		// track, shown while the pointer is over the transcript. The virtualized list stays on the
+		// native scroller (a ScrollArea's content observer fights its row measurement). WebKit/Blink
+		// read the `::-webkit-scrollbar` parts; Firefox, which has none, gets the standard properties
+		// (set only there: in Chromium they would switch the parts off).
+		'[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:bg-transparent [&::-webkit-scrollbar-track]:bg-transparent',
+		'[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-neutral-muted',
+		'supports-[not_selector(::-webkit-scrollbar)]:[scrollbar-width:thin] supports-[not_selector(::-webkit-scrollbar)]:[scrollbar-color:transparent_transparent] supports-[not_selector(::-webkit-scrollbar)]:hover:[scrollbar-color:var(--color-neutral-muted)_transparent]'
+	].join(' '),
 	variants: {
 		tocSide: {
 			left: 'pl-layout-lg',
