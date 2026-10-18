@@ -40,8 +40,13 @@ describe('scroll-to-latest button', () => {
 
 		await page.elementLocator(viewport()).wheel({ delta: { y: -300 } });
 		await expect.poll(() => scrollButton()).not.toBeNull();
-		// WebKit on Linux scrolls a wheel smoothly: the button shows before the scroll has landed.
-		await expect.poll(() => distanceToEnd()).toBeGreaterThan(100);
+		// The view stays where the wheel left it. How far that is varies: WebKit scrolls a wheel
+		// smoothly, and the virtualizer's correction for rows measured as they scroll in can cut it
+		// short. What must not happen is a pull back to the end.
+		await settle();
+		await settle();
+		expect(distanceToEnd()).toBeGreaterThan(8);
+		expect(scrollButton()).not.toBeNull();
 
 		const container = document.querySelector('[data-testid="container"]')!.getBoundingClientRect();
 		const button = scrollButton()!.getBoundingClientRect();
@@ -62,6 +67,9 @@ describe('scroll-to-latest button', () => {
 		await expect.poll(() => scrollButton()).not.toBeNull();
 
 		scrollButton()!.click();
+		// The button hides at once, but the smooth scroll to the end is still landing; a scripted
+		// scrollTop does not cancel it in WebKit the way a real drag does, so wait for it to land.
+		await expect.poll(() => distanceToEnd()).toBeLessThan(2);
 		await expect.poll(() => scrollButton()).toBeNull();
 		await settle();
 		// A scrollbar drag lands as plain scroll events, like setting scrollTop.

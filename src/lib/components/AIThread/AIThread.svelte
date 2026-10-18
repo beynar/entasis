@@ -548,6 +548,17 @@
 		// Now, not in the effect below: a row measured before that effect runs would otherwise still
 		// see the pinned end threshold and scroll a scroll that has only just started back down.
 		applyFollowOptions();
+		cancelProgrammaticScroll();
+	}
+
+	// The virtualizer keeps steering a scrollToEnd/scrollToIndex toward its target for up to 5s,
+	// until the offset holds for a frame, and re-scrolls whenever measurements move that target. On a
+	// busy page it is still steering when the reader scrolls away, and pulls them back. The reader
+	// wins: drop the pending reconcile. It has no public cancel (and scrolling to the current offset
+	// would cut a smooth wheel or keyboard scroll short), so clear the field it checks.
+	function cancelProgrammaticScroll(): void {
+		const virtualizer = get(virtualizerStore) as unknown as { scrollState?: unknown };
+		if (virtualizer.scrollState) virtualizer.scrollState = null;
 	}
 
 	function applyFollowOptions(): void {
