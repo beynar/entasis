@@ -17,6 +17,9 @@ Unreleased section under the new version.
 - `Code` adapts to a narrow block (under 28rem, as on a phone): 12px text and tighter padding, and
   the line-number gutter is sized in `ch` of the code font (about 46px at 14px, 29px at 12px)
   instead of a fixed 64px.
+- A double-month `Calendar` (also in `DateSelector` and `DateInput` popups) opens with both months
+  instead of showing one and redrawing as two once the popup's intro ended: it measures its layout
+  width on mount, and ignores the popup's scale-in transform.
 - The last chrome that stayed `primary` whatever the theme's default color now follows it: a
   `Calendar` day no longer draws a primary ring on hover (the shared hover tint remains) and its
   range-edge markers use the `selected` role; the `DocumentViewer` search field focuses with the

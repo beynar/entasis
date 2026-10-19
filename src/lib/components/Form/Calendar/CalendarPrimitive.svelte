@@ -80,7 +80,9 @@
 	const containerResizeObserver = useResizeObserver({
 		isActive: () => true,
 		callback: (entry) => {
-			const nextWidth = entry.target.getBoundingClientRect().width;
+			// The layout width, not the rendered one: a popover scaling in reports a narrower
+			// `getBoundingClientRect()`, which kept a double view single until its intro ended.
+			const nextWidth = (entry.target as HTMLElement).offsetWidth;
 			const wasDoubleView = containerWidth >= doubleViewMinWidth;
 			const isDoubleView = nextWidth >= doubleViewMinWidth;
 			const crossesViewBoundary = view === 'double' && wasDoubleView !== isDoubleView;
@@ -101,6 +103,12 @@
 			});
 		}
 	});
+
+	// Measured as soon as the calendar mounts, before the first paint, so a double view opens with
+	// both months instead of starting single and redrawing when the observer first reports.
+	const measureOnMount = (node: HTMLElement) => {
+		containerWidth = node.offsetWidth;
+	};
 
 	const calendar = new CalendarState<CalendarEvent, T>({
 		get events() {
@@ -248,6 +256,7 @@
 	aria-label={resolvedLabel}
 	aria-disabled={disabled}
 	{@attach containerResizeObserver.reference}
+	{@attach measureOnMount}
 	{@attach calendar.calendar}
 >
 	<Slot render={header} class={classes.header({ picker: activeView === 'picker' })}>
