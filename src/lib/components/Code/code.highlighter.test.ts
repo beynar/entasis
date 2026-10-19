@@ -20,9 +20,11 @@ describe('code highlighter (TanStack Highlight)', () => {
 		expect(resolveLanguage('c')).toBe('cpp');
 		expect(resolveLanguage('text')).toBe('plaintext');
 		expect(resolveLanguage(undefined)).toBe('plaintext');
-		expect(resolveLanguage('rust')).toBe('plaintext');
+		expect(resolveLanguage('rust')).toBe('rust');
+		expect(resolveLanguage('cobol')).toBe('plaintext');
 		expect(getLanguageLabel('ts')).toBe('TypeScript');
-		expect(getLanguageLabel('rust')).toBe('rust');
+		expect(getLanguageLabel('rust')).toBe('Rust');
+		expect(getLanguageLabel('cobol')).toBe('cobol');
 		expect(getLanguageLabel(undefined)).toBe('Text');
 	});
 
@@ -45,7 +47,7 @@ describe('code highlighter (TanStack Highlight)', () => {
 	});
 
 	it('renders unknown languages as plain text without throwing', () => {
-		const html = codeToHtml('fn main() {}', { language: 'rust' });
+		const html = codeToHtml('fn main() {}', { language: 'cobol' });
 		expect(html).toContain('th-code--plaintext');
 		expect(html).toContain('fn main() {}');
 	});

@@ -16,7 +16,9 @@ const languageLabels: Record<string, string> = {
 	apache: 'Apache',
 	cmake: 'CMake',
 	cpp: 'C++',
+	csharp: 'C#',
 	css: 'CSS',
+	dart: 'Dart',
 	diff: 'Diff',
 	dockerfile: 'Dockerfile',
 	ejs: 'EJS',
@@ -24,19 +26,26 @@ const languageLabels: Record<string, string> = {
 	go: 'Go',
 	html: 'HTML',
 	http: 'HTTP',
+	java: 'Java',
 	js: 'JavaScript',
 	json: 'JSON',
 	jsx: 'JSX',
+	kotlin: 'Kotlin',
+	lua: 'Lua',
 	markdown: 'Markdown',
 	mermaid: 'Mermaid',
 	nginx: 'Nginx',
+	perl: 'Perl',
 	php: 'PHP',
 	plaintext: 'Text',
 	python: 'Python',
+	ruby: 'Ruby',
+	rust: 'Rust',
 	scheme: 'Scheme',
 	shell: 'Shell',
 	sql: 'SQL',
 	svelte: 'Svelte',
+	swift: 'Swift',
 	toml: 'TOML',
 	ts: 'TypeScript',
 	tsrx: 'Octane',
@@ -65,7 +74,7 @@ export const PLAIN_TEXT_LANGUAGE = 'plaintext';
 /**
  * Every language TanStack Highlight ships, bundled by default so any snippet
  * highlights without per-language registration. Ids the tokenizers do not
- * cover (`rust`, `java`, ...) render as plain text.
+ * cover (`cobol`, `haskell`, ...) render as plain text.
  */
 export const bundledCodeLanguagesInfo: readonly CodeLanguageInfo[] = allLanguages.map(
 	(definition) => ({
@@ -101,7 +110,7 @@ export function resolveLanguage(language: string | undefined): string {
 
 /**
  * Human-friendly label for a language id (for the header). Unknown ids keep
- * the raw input so a `language="rust"` block is still titled "rust".
+ * the raw input so a `language="cobol"` block is still titled "cobol".
  */
 export function getLanguageLabel(language: string | undefined): string {
 	const normalized = language?.trim().toLowerCase();

@@ -4,7 +4,7 @@
 import '@testing-library/jest-dom/vitest';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import Harness from './ToasterHarness.test.svelte';
 import { toast, type Toaster } from './toast.state.svelte.js';
 
@@ -142,8 +142,17 @@ describe('F6 and the region', () => {
 		render(Harness);
 		const shown = toast.info({ title: 'Timed', duration: 5000 });
 		await tick();
-		// jsdom never reports a programmatic focus as `:focus-visible`, as for a pointer user.
+		// A pointer user's focus: no focus ring. jsdom 30.1 matches `:focus-visible` on a programmatic
+		// focus, so the premise is stated rather than left to the engine.
+		const matches = Element.prototype.matches;
+		const noRing = vi.spyOn(Element.prototype, 'matches').mockImplementation(function (
+			this: Element,
+			selector: string
+		) {
+			return selector === ':focus-visible' ? false : matches.call(this, selector);
+		});
 		region().focus();
+		noRing.mockRestore();
 		expect(document.activeElement).toBe(region());
 		expect(shown.timer?.heldBy).toEqual([]);
 		// F6 is keyboard intent even while the region already has focus.
