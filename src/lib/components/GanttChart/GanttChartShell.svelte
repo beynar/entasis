@@ -50,6 +50,7 @@
 	import type { Density } from '$lib/types/theme.js';
 	import { createVirtualizer } from '@tanstack/svelte-virtual';
 	import { get } from 'svelte/store';
+	import { untrack } from 'svelte';
 	import GanttTimeline from './GanttTimeline.svelte';
 	import GanttTreeGrid from './GanttTreeGrid.svelte';
 	import { resolveGanttColumns } from './ganttChart.columns.js';
@@ -242,6 +243,24 @@
 		visibleRange: chart.visibleRange,
 		zoom: chart.zoom,
 		defaultContent: defaultLoading
+	});
+
+	// A narrow chart (a phone, a side panel) would otherwise give the grid its whole default width
+	// and leave the timeline a sliver: the first layout there starts the grid at 45% at most. Once,
+	// so the splitter stays the user's to drag wider.
+	const NARROW_CHART_REM = 40;
+	const NARROW_GRID_SHARE = 0.45;
+	let narrowFitted = false;
+	$effect.pre(() => {
+		if (narrowFitted || containerWidth <= 0) return;
+		narrowFitted = true;
+		const rootFontSize =
+			typeof document === 'undefined'
+				? 16
+				: parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+		if (containerWidth >= NARROW_CHART_REM * rootFontSize) return;
+		const fitted = Math.max(chart.minGridWidth, Math.round(containerWidth * NARROW_GRID_SHARE));
+		if (untrack(() => chart.gridWidth) > fitted) chart.gridWidth = fitted;
 	});
 
 	$effect.pre(() => {

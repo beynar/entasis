@@ -17,6 +17,16 @@ Unreleased section under the new version.
 - `Code` adapts to a narrow block (under 28rem, as on a phone): 12px text and tighter padding, and
   the line-number gutter is sized in `ch` of the code font (about 46px at 14px, 29px at 12px)
   instead of a fixed 64px.
+- Phone-width fixes found by checking every component page at 375px:
+  - `Diff` gains `responsive` (default `true`): a split diff narrower than 36rem shows unified.
+  - `DocumentViewer` opens without its thumbnail overlay in a narrow viewer (under 42rem), and
+    picking a thumbnail there closes it.
+  - `Pagination` drops the pages beside the current one (1 … 6 … 20) when its row would wrap, and
+    brings them back once there is room.
+  - `GanttChart` starts its grid at 45% of a narrow chart (under 40rem) so the timeline stays
+    usable; the splitter still drags wider.
+  - `AudioPlayer`'s waveform fits a phone-width player: gaps shrink with the width and bars may
+    thin to 1px.
 - `AIModelSelector` searches with the Menu's own filter field: borderless with an icon, focus
   stays in it while the arrow keys walk the models and Enter picks one. Matching (label,
   provider, description) and the `query` binding are unchanged; a custom `search` snippet still

@@ -41,7 +41,7 @@
 	);
 	const disabledInput = $derived(disabled || maxValue <= 0);
 	const formattedValue = $derived(formatAudioPlayerTime(currentValue, maxValue));
-	const gridStyle = $derived(`grid-template-columns: repeat(${samples.length}, minmax(2px, 1fr));`);
+	const gridStyle = $derived(`grid-template-columns: repeat(${samples.length}, minmax(1px, 1fr));`);
 
 	function handleInput(event: Event) {
 		const input = event.currentTarget;

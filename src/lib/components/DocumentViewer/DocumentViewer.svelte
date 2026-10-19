@@ -160,6 +160,31 @@
 	const classes = $derived(useDocumentViewerTheme(theme));
 	const t = $derived(useI18n());
 	let isSidebarOpen = $derived(sidebar);
+	// Below 42rem the thumbnails overlay the page (see the theme's `sidebar` part), so a narrow
+	// viewer (a phone, a side panel) opens without them, and picking a page closes them again.
+	const OVERLAY_SIDEBAR_REM = 42;
+	let narrow = $state(false);
+	const trackWidth = (node: HTMLElement) => {
+		const view = node.ownerDocument.defaultView;
+		const isNarrow = () => {
+			const rootFontSize =
+				parseFloat(view?.getComputedStyle(node.ownerDocument.documentElement).fontSize ?? '') || 16;
+			return node.clientWidth > 0 && node.clientWidth < OVERLAY_SIDEBAR_REM * rootFontSize;
+		};
+		untrack(() => {
+			narrow = isNarrow();
+			if (narrow) isSidebarOpen = false;
+		});
+		if (typeof ResizeObserver === 'undefined') return;
+		const observer = new ResizeObserver(() => (narrow = isNarrow()));
+		observer.observe(node);
+		return () => observer.disconnect();
+	};
+	const closeOverlayOnPick = (event: MouseEvent) => {
+		if (narrow && event.target instanceof Element && event.target.closest('button')) {
+			isSidebarOpen = false;
+		}
+	};
 
 	const zoomGestures = (node: HTMLElement) =>
 		untrack(() => {
@@ -226,6 +251,7 @@
 <div
 	bind:this={ref}
 	class={classes.root({ size, position: toolbarPosition, className })}
+	{@attach trackWidth}
 	{...attachments}
 >
 	<div class={classes.viewer({ position: toolbarPosition })} aria-busy={viewer.loading}>
@@ -250,7 +276,11 @@
 			{/if}
 			<div class={classes.workspace()}>
 				{#if sidebar && isSidebarOpen && viewer.capabilities.sidebar && viewer.totalPages}
-					<aside class={classes.sidebar()} aria-label={t.documentThumbnails}>
+					<aside
+						class={classes.sidebar()}
+						aria-label={t.documentThumbnails}
+						onclick={closeOverlayOnPick}
+					>
 						<ScrollArea
 							class="min-h-0 flex-1"
 							type="hover"

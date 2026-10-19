@@ -27,6 +27,12 @@ export type DiffProps = WithAttachments<
 
 			/** `'split'` (side-by-side) or `'unified'` (inline). Defaults to `'split'`. */
 			diffStyle?: DiffOptionProps['diffStyle'];
+			/**
+			 * A split diff narrower than 36rem (a phone, a side panel) shows unified instead, since two
+			 * columns of code no longer fit side by side. Set `false` to keep it split at any width.
+			 * @default true
+			 */
+			responsive?: boolean;
 			/** Show the line-number gutter. Defaults to on. */
 			lineNumbers?: DiffOptionProps['lineNumbers'];
 			/** Wrap long lines instead of horizontal scrolling. Defaults to off (scroll). */

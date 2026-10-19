@@ -40,6 +40,7 @@ Or render a unified patch string (can contain multiple files):
 
 ### Layout Props
 - **diffStyle**: 'split' | 'unified' (default: 'split') - Side-by-side vs inline.
+- **responsive**: boolean (default: true) - A split diff narrower than 36rem (a phone, a side panel) shows unified, since two columns of code no longer fit; the root then carries \`data-narrow\`. \`false\` keeps it split at any width.
 - **lineNumbers**: boolean (default: true) - Show the line-number gutter.
 - **wrapping**: boolean (default: false) - Wrap long lines instead of horizontal scrolling.
 - **backgrounds**: boolean (default: true) - Show the tinted added/removed line backgrounds.

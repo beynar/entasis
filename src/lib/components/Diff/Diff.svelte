@@ -19,6 +19,7 @@
 		patch,
 		files,
 		diffStyle,
+		responsive = true,
 		lineNumbers,
 		wrapping,
 		backgrounds,
@@ -129,9 +130,28 @@
 			.replaceAll('>', '&gt;');
 	}
 
+	// Two columns of code no longer fit side by side below this width: a responsive split diff
+	// shows unified there. Measured on the root, so a narrow side panel counts as much as a phone.
+	const SPLIT_MIN_WIDTH_REM = 36;
+	let narrow = $state(false);
+	const measureWidth: Attachment<HTMLDivElement> = (node) => {
+		const view = node.ownerDocument.defaultView;
+		const measure = () => {
+			const rootFontSize =
+				parseFloat(view?.getComputedStyle(node.ownerDocument.documentElement).fontSize ?? '') || 16;
+			narrow = node.clientWidth > 0 && node.clientWidth < SPLIT_MIN_WIDTH_REM * rootFontSize;
+		};
+		measure();
+		if (typeof ResizeObserver === 'undefined') return;
+		const observer = new ResizeObserver(measure);
+		observer.observe(node);
+		return () => observer.disconnect();
+	};
+
 	function createOptionProps(): DiffOptionProps {
+		const split = (diffStyle ?? 'split') === 'split';
 		return {
-			diffStyle,
+			diffStyle: responsive && narrow && split ? 'unified' : diffStyle,
 			diffIndicators,
 			hunkSeparators,
 			lineDiffType,
@@ -233,7 +253,13 @@
 
 <CodeTheme />
 
-<div data-slot="diff" class={classes.root({ className })} {...attachments}>
+<div
+	data-slot="diff"
+	data-narrow={narrow || undefined}
+	class={classes.root({ className })}
+	{@attach measureWidth}
+	{...attachments}
+>
 	{#if errorMessage}
 		<div class={classes.error()} role="alert">{errorMessage}</div>
 	{/if}

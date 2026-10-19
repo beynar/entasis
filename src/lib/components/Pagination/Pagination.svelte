@@ -84,6 +84,33 @@
 	);
 
 	const classes = $derived(usePaginationTheme(theme));
+	// When the page row would wrap (a phone, a narrow column), the pages beside the current one
+	// drop out (1 … 6 … 20) so it stays on one line; they come back once the space that was too
+	// narrow has grown.
+	let tight = $state(false);
+	let tightenedAt = 0;
+	const fitPages = (list: HTMLElement) => {
+		const host = list.closest('nav')?.parentElement ?? list.parentElement;
+		const fit = () => {
+			const available = host?.clientWidth ?? 0;
+			if (tight) {
+				if (available > tightenedAt) tight = false;
+				return;
+			}
+			const rows = [...list.children] as HTMLElement[];
+			const wraps = rows.length > 1 && rows.at(-1)!.offsetTop > rows[0].offsetTop;
+			if (wraps && siblingCount > 0) {
+				tightenedAt = available;
+				tight = true;
+			}
+		};
+		fit();
+		if (typeof ResizeObserver === 'undefined') return;
+		const observer = new ResizeObserver(fit);
+		observer.observe(list);
+		if (host) observer.observe(host);
+		return () => observer.disconnect();
+	};
 	const resolvedColor = $derived(useDefaultColor(color));
 	const t = $derived(useI18n(i18n));
 	const pagination = new PaginationState({
@@ -103,7 +130,7 @@
 			return pageSize;
 		},
 		get siblingCount() {
-			return siblingCount;
+			return tight ? 0 : siblingCount;
 		},
 		get boundaryCount() {
 			return boundaryCount;
@@ -239,7 +266,7 @@
 				/>
 			{/if}
 
-			<ul class={classes.list({ size, variant })}>
+			<ul class={classes.list({ size, variant })} {@attach fitPages}>
 				{#each renderItems as item (item.key)}
 					<li
 						class={classes.item({

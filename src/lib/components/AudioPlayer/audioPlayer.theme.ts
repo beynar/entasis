@@ -174,8 +174,10 @@ const defaultAudioPlayerWaveform = cva({
 	}
 });
 
+// The gap shrinks with the waveform (3px from 500px wide) and bars may thin to 1px, so every
+// sample fits a phone-width player instead of running past its box.
 const defaultAudioPlayerWaveformBars = cva({
-	base: 'grid h-full min-w-0 gap-[3px]',
+	base: 'grid h-full min-w-0 gap-[min(3px,0.6%)]',
 	variants: {
 		variant: {
 			centered: 'items-center',
