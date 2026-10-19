@@ -30,7 +30,7 @@ The ScrollArea component provides a native scroll viewport with custom overlay s
 
 ### Behavior Props
 - **scrollOnEdges**: boolean (default: false) - Enables auto-scroll and up/down indicators when the pointer rests near the viewport edges
-- **scrollFade**: boolean (default: false) - Applies the shared \`scroll-fade\` utility to the scrollable viewport
+- **scrollFade**: boolean (default: on inside a popup, off elsewhere) - Applies the shared \`scroll-fade\` utility to the scrollable viewport. Left out, it is on inside any overlay layer (a popover, a menu, a dialog), where the fade marks the clipped edge of a short panel; pass \`false\` to turn it off there
 
 ### Styling Props
 - **class**: string - Additional CSS classes for the root scroll area

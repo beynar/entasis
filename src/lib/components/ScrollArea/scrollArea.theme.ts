@@ -39,8 +39,10 @@ const defaultScrollAreaScrollbarX = cva({
 	base: 'absolute bottom-0 start-0 z-30 h-1.5 cursor-pointer'
 });
 
+// Translucent, so the thumb shows on any surface: `bg-neutral-muted` is the very tone of a dark
+// floating surface (a popover, a menu), where it disappeared.
 const defaultScrollAreaScrollbarThumb = cva({
-	base: "relative bg-neutral-muted after:absolute after:-inset-1 after:content-['']"
+	base: "relative bg-neutral/25 after:absolute after:-inset-1 after:content-['']"
 });
 
 export const scrollAreaTheme = {

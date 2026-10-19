@@ -57,8 +57,9 @@ export type ScrollAreaProps = WithAttachments<
 		 */
 		scrollOnEdges?: boolean;
 		/**
-		 * Applies the shared scroll-fade utility to the scrollable viewport.
-		 * @default false
+		 * Applies the shared scroll-fade utility to the scrollable viewport. Left out, it is on inside
+		 * a popup (a popover, a menu, a dialog: any layer), where the fade marks the clipped edge
+		 * of a short panel, and off elsewhere.
 		 */
 		scrollFade?: boolean;
 		/**

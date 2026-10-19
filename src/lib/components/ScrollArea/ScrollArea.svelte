@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
+	import { useParentLayer } from '$lib/utils/layers.svelte.js';
 	import { ScrollArea } from './scrollArea.svelte.js';
 	import type { ScrollAreaProps } from './scrollArea.props.js';
 	import { useScrollAreaTheme } from './scrollArea.theme.js';
@@ -21,7 +22,7 @@
 		delay = 0,
 		type = 'hover',
 		scrollOnEdges = false,
-		scrollFade = false,
+		scrollFade,
 		overflowEdgeThreshold = 1,
 		onscroll,
 		theme,
@@ -79,8 +80,11 @@
 		untrack(() => scrollArea.measure());
 	});
 
+	// Inside an overlay (any registered layer) the fade is on unless the caller turned it off.
+	const parentLayer = useParentLayer();
+	const resolvedScrollFade = $derived(scrollFade ?? !!parentLayer());
 	const scrollFadeAxis = $derived.by(() => {
-		if (!scrollFade) return 'none';
+		if (!resolvedScrollFade) return 'none';
 		if (scrollArea.visibleX) return 'x';
 		if (scrollArea.visible) return 'y';
 		return 'none';
