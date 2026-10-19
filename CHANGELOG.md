@@ -85,6 +85,9 @@ Unreleased section under the new version.
 
 ### Fixed
 
+- `MiniCalendar` day buttons and the `AIContext` trigger are named starting with the text they
+  show ("Oct 19, Monday, 2026"; "56K / 128K, …"), so speech-input users can say what they see
+  (WCAG 2.5.3, flagged by axe 4.14's label-content-name-mismatch).
 - A tooltip no longer opens on focus a script moves after a tap (Safari shows such focus a ring
   because it never focused the tapped button), so opening the mobile Sidebar no longer pops the
   active activity-bar item's tooltip.

@@ -65,6 +65,11 @@
 		formattedRemaining: formatTokens(remainingTokens),
 		labels: resolvedLabels
 	});
+	// What the trigger shows; its accessible name starts with it so a speech user can say it
+	// (WCAG 2.5.3, axe label-content-name-mismatch).
+	const triggerText = $derived(
+		compact ? `${Math.round(clampedPercent)}%` : `${state.formattedUsed} / ${state.formattedMax}`
+	);
 	const rows = $derived(
 		[
 			{
@@ -130,11 +135,11 @@
 			data-slot="ai-context-trigger"
 			data-compact={compact || undefined}
 			data-tone={tone}
-			aria-label={resolvedLabels.label(
+			aria-label={`${triggerText}, ${resolvedLabels.label(
 				state.formattedUsed,
 				state.formattedMax,
 				state.formattedRemaining
-			)}
+			)}`}
 			class={classes.trigger({ compact, tone })}
 		>
 			<ProgressCircle
@@ -146,10 +151,10 @@
 			/>
 			{#if compact}
 				<span data-slot="ai-context-trigger-percent" class={classes.triggerPercent()}
-					>{Math.round(clampedPercent)}%</span
+					>{triggerText}</span
 				>
 			{:else}
-				<span class={classes.triggerValue()}>{state.formattedUsed} / {state.formattedMax}</span>
+				<span class={classes.triggerValue()}>{triggerText}</span>
 			{/if}
 		</button>
 	{/if}

@@ -97,13 +97,12 @@
 	const prevIcon = $derived(isRtl ? caretRightIcon : caretLeftIcon);
 	const nextIcon = $derived(isRtl ? caretLeftIcon : caretRightIcon);
 
-	const dayLabel = (date: Date) =>
-		date.toLocaleDateString(resolvedLocale, {
-			weekday: 'long',
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric'
-		});
+	// The name starts with what the cell shows ("Oct 19"), so a speech user can say it (WCAG 2.5.3,
+	// axe label-content-name-mismatch), then adds the weekday and year.
+	const dayLabel = (cell: { date: Date; monthLabel: string; dayNumber: number | string }) =>
+		`${cell.monthLabel} ${cell.dayNumber}, ${cell.date.toLocaleDateString(resolvedLocale, {
+			weekday: 'long'
+		})}, ${cell.date.getFullYear()}`;
 
 	// Direction of the last chevron navigation; drives the slide. Stays 0 until the first
 	// shift so the initial mount does not animate.
@@ -160,7 +159,7 @@
 						type="button"
 						{disabled}
 						aria-pressed={cell.selected}
-						aria-label={dayLabel(cell.date)}
+						aria-label={dayLabel(cell)}
 						data-today={cell.today ? '' : undefined}
 						data-selected={cell.selected ? '' : undefined}
 						class={classes.day({
