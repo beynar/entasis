@@ -147,6 +147,14 @@
 		{placeholder}
 		class={classes.input({ disabled: field.disabled, size: rest.size })}
 		disabled={field.disabled}
+		onkeydown={(event) => {
+			inputAttrs?.onkeydown?.(event);
+			// The reveal button is out of the Tab order (Tab goes to the next field); Alt+F8, the
+			// shortcut Windows and Edge use for their own reveal button, toggles it from the input.
+			if (event.defaultPrevented || !event.altKey || event.key !== 'F8') return;
+			event.preventDefault();
+			togglePasswordVisibility();
+		}}
 	/>
 	<FieldActionButton
 		active={showPassword}

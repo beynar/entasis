@@ -36,6 +36,7 @@
 <div class={classes.search({ size })}>
 	{@render magnifyingGlassIcon({ class: classes.searchIcon({ size }) })}
 	<input
+		data-1p-ignore
 		bind:this={input}
 		class={classes.searchInput({ size })}
 		type="text"

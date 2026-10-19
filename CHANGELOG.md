@@ -17,6 +17,18 @@ Unreleased section under the new version.
 - `Code` adapts to a narrow block (under 28rem, as on a phone): 12px text and tighter padding, and
   the line-number gutter is sized in `ch` of the code font (about 46px at 14px, 29px at 12px)
   instead of a fixed 64px.
+- Tab moves from one field to the next. The buttons inside a field (`PasswordInput` reveal,
+  `Combobox` and `Select` clear, `DateInput`, `TimeInput` and `ColorInput` picker buttons) leave
+  the Tab order; the input offers the same action: ArrowDown opens the `TimeInput` and
+  `ColorInput` pickers (as it already did for `DateInput`), and Alt+F8 toggles the password
+  reveal. `FieldActionButton` gains `tabbable` for a button that is the field's only control
+  (`VoiceInput` uses it).
+- A field's edge action button (clear, reveal, picker, stepper) takes the field's corner radius,
+  so its hover or danger fill no longer pokes past the rounded corner. Its open/pressed state uses
+  the `selected` role instead of primary.
+- `VoiceInput` keeps one height in every state (idle, recording, playback, error), its mic and
+  stop buttons fill the box top to bottom, and a collapsed `expandable` mic is a regular rounded
+  button; a `compact` one turns flush when it expands to show an error.
 - A double-month `Calendar` (also in `DateSelector` and `DateInput` popups) opens with both months
   instead of showing one and redrawing as two once the popup's intro ended: it measures its layout
   width on mount, and ignores the popup's scale-in transform.

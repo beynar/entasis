@@ -32,6 +32,8 @@ counted from midnight, in the unit chosen by \`as\`.
 - **readOnly**: boolean - The input stays focusable and is announced as read-only; typing and picker choices are refused, and the value still validates and submits. A read-only Form, FormGroup or fieldset Field makes it read-only too
 - **size**: 'small' | 'normal' | 'large' - Input size
 
+The clock button stays out of the Tab order, so Tab moves to the next field; ArrowDown in the input opens the picker.
+
 ## State contract
 
 - **value**: current bindable editable value.

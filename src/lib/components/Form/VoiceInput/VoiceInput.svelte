@@ -229,6 +229,7 @@
 >
 	{#if hasPlayback}
 		<FieldActionButton
+			tabbable
 			id={`${id}-playback`}
 			{size}
 			color={recorder.isPlaying ? resolvedColor : 'neutral'}
@@ -262,6 +263,7 @@
 	/>
 	{#if hasPlayback}
 		<FieldActionButton
+			tabbable
 			id={`${id}-clear`}
 			{size}
 			color="danger"
@@ -279,6 +281,7 @@
 		/>
 	{/if}
 	<FieldActionButton
+		tabbable
 		{id}
 		{size}
 		color={recorder.isRecording ? resolvedColor : 'neutral'}
@@ -288,6 +291,7 @@
 		class={classes.action({
 			size,
 			variant,
+			expanded: isExpanded,
 			recording: recorder.isRecording,
 			class: theme?.action?.base
 		})}

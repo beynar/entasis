@@ -292,6 +292,7 @@ The visibility toggle button:
 - Shows an eye-off icon when password is visible
 - Toggles between \`type="password"\` and \`type="text"\`
 - Is always rendered; there is no prop to hide it
+- Stays out of the Tab order, so Tab moves from the password to the next field; Alt+F8 in the input (the shortcut Windows and Edge use for their own reveal button) toggles it, and screen readers still reach the button
 
 ## Validation
 

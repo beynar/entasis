@@ -27,6 +27,14 @@
 			active?: boolean;
 			/** Field edge whose padding the action occupies. */
 			edge?: FieldActionButtonEdge;
+			/**
+			 * Keeps the button in the Tab order. An action inside a field (reveal, clear, open the
+			 * picker) is skipped by default, so Tab goes from one field to the next; the field
+			 * offers the same action from its input (ArrowDown opens a picker). Set it when the
+			 * button is the field's only control.
+			 * @default false
+			 */
+			tabbable?: boolean;
 		}
 	>;
 
@@ -46,6 +54,7 @@
 		expanded,
 		haspopup,
 		pressed,
+		tabbable = false,
 		...attachments
 	}: FieldActionButtonProps = $props();
 
@@ -66,6 +75,7 @@
 	{controls}
 	{pressed}
 	{disabled}
+	tabindex={tabbable ? undefined : -1}
 	class={classes.actionButton({ size, edge, active, class: className })}
 	{prefix}
 	{onclick}

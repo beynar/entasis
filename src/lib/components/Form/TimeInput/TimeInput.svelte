@@ -229,6 +229,14 @@
 				{placeholder}
 				class={classes.input({ disabled: field.disabled, size: rest.size })}
 				disabled={field.disabled}
+				onkeydown={(event) => {
+					// The clock button is out of the Tab order (Tab goes to the next field), so the
+					// input opens the picker itself, as DateInput does.
+					if (event.key !== 'ArrowDown' || event.defaultPrevented) return;
+					if (field.disabled || pickerOpen) return;
+					event.preventDefault();
+					popover.open();
+				}}
 				{@attach maskAction}
 			/>
 			<TimeInputTrigger

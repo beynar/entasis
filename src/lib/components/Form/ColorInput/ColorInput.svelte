@@ -258,6 +258,13 @@
 				aria-label={`${t.color} ${t.value}`}
 				class={classes.input({ disabled: field.disabled, size: rest.size })}
 				{@attach colorMask({ format: () => format })}
+				onkeydown={(event) => {
+					// The swatch button is out of the Tab order, so the input opens the picker itself.
+					if (event.key !== 'ArrowDown' || event.defaultPrevented) return;
+					if (field.disabled || isPickerOpen) return;
+					event.preventDefault();
+					popover.open();
+				}}
 				oninput={handleInput}
 				onfocus={() => {
 					field.focused = true;
