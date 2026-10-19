@@ -18,6 +18,27 @@ export const themeTransitions = [
 
 export type ThemeTransition = (typeof themeTransitions)[number];
 
+/** A theme transition with its timing tuned. Left out, each keeps the variation's own value. */
+export type ThemeTransitionOptions = {
+	/** The variation. */
+	type: ThemeTransition;
+	/** Length of the whole reveal in ms; grid and shutter steps scale with it. */
+	duration?: number;
+	/** CSS easing of the reveal. Grid variations step from cell to cell whatever the easing. */
+	easing?: string;
+};
+
+/** A variation name, or the variation with its duration and easing. */
+export type ThemeTransitionInput = ThemeTransition | ThemeTransitionOptions;
+
+/** The options form of a transition input. */
+export function resolveThemeTransition(
+	transition: ThemeTransitionInput | undefined
+): ThemeTransitionOptions | undefined {
+	if (!transition) return undefined;
+	return typeof transition === 'string' ? { type: transition } : transition;
+}
+
 type RadialThemeTransition = Extract<ThemeTransition, `radial-${string}`>;
 type LineThemeTransition = Extract<ThemeTransition, `line-${string}`>;
 type ShutterThemeTransition = Extract<ThemeTransition, `shutter-${string}`>;
@@ -78,9 +99,11 @@ const SHUTTER_PHASE_DURATION = 50;
 let activeTransitionId = 0;
 
 export function updateThemeWithTransition(
-	transition: ThemeTransition | undefined,
+	input: ThemeTransitionInput | undefined,
 	update: () => void | Promise<void>
 ) {
+	const options = resolveThemeTransition(input);
+	const transition = options?.type;
 	if (!canAnimateThemeChange(transition)) {
 		void update();
 		return;
@@ -88,7 +111,15 @@ export function updateThemeWithTransition(
 
 	const root = document.documentElement;
 	const transitionId = ++activeTransitionId;
-	const animation = createThemeTransitionAnimation(transition);
+	const variation = createThemeTransitionAnimation(transition);
+	const animation: ThemeTransitionAnimation = {
+		...variation,
+		duration:
+			options?.duration !== undefined && Number.isFinite(options.duration) && options.duration >= 0
+				? options.duration
+				: variation.duration,
+		easing: options?.easing ?? variation.easing
+	};
 	root.dataset.entasisThemeTransition = transition;
 
 	let viewTransition: ViewTransition;

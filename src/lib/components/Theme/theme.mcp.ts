@@ -98,7 +98,10 @@ enabled. \`systemTheme\`, \`syncColorScheme\`, and \`transitionOnChange\` all de
 
 \`ThemeState\` exposes \`theme\`, \`resolvedTheme\`, \`themes\`, and \`systemTheme\`. Assign
 \`theme.theme\` to switch themes. The optional \`transition\` prop applies a named view transition;
-unsupported browsers and reduced-motion users switch instantly.
+unsupported browsers and reduced-motion users switch instantly. Pass
+\`{ type, duration, easing }\` instead of a name to tune its timing, e.g.
+\`transition={{ type: 'radial-top-right', duration: 600 }}\` (duration in ms; grid and shutter steps
+scale with it).
 
 \`spinnerVariant\` sets the global default spinner animation. The children snippet is required.
 

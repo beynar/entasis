@@ -14,7 +14,13 @@ export {
 	type TypeScalePreset,
 	type TypeScaleRatio
 } from './theme.designTokens.js';
-export { themeTransitions, type ThemeTransition } from './themeTransition.js';
+export {
+	resolveThemeTransition,
+	themeTransitions,
+	type ThemeTransition,
+	type ThemeTransitionInput,
+	type ThemeTransitionOptions
+} from './themeTransition.js';
 export { focusRing, selectedSoft, selectedSolid } from './theme.recipes.js';
 export {
 	themePresetNames,

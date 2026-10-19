@@ -2,7 +2,7 @@ import type { Snippet } from 'svelte';
 import type { SvelteThemeProps } from 'svelte-themes';
 import type { SpinnerVariant } from '../Spinner/spinner.props.js';
 import type { ThemeState } from './theme.state.svelte.js';
-import type { ThemeTransition } from './themeTransition.js';
+import type { ThemeTransitionInput } from './themeTransition.js';
 import type { ThemeDesignTokenMap } from './theme.designTokens.js';
 import type { DeepPartial, MotionTokens } from '$lib/tailwind/scales.js';
 import type { ComponentThemeRegistry } from '$lib/utils/cva/theme.js';
@@ -32,8 +32,11 @@ export type ThemeProps<T extends readonly string[] = readonly string[]> = Omit<
 	spinnerVariant?: SpinnerVariant;
 	/** Runtime design tokens keyed by logical theme name. */
 	designTokens?: ThemeDesignTokenMap<T>;
-	/** View transition used when ThemeState.theme changes. Omit for an instant change. */
-	transition?: ThemeTransition;
+	/**
+	 * View transition used when ThemeState.theme changes: a variation name, or
+	 * `{ type, duration, easing }` to tune its timing (duration in ms). Omit for an instant change.
+	 */
+	transition?: ThemeTransitionInput;
 	/**
 	 * Forces reduced motion on (`true`) or off (`false`) for every entasis animation.
 	 * Omit to follow the user's OS reduced-motion setting.

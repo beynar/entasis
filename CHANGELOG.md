@@ -6,6 +6,12 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `Theme`'s `transition` also accepts `{ type, duration, easing }` to tune a theme transition's
+  timing, e.g. `transition={{ type: 'radial-top-right', duration: 600 }}` (ms); grid and shutter
+  steps scale with the duration. A variation name keeps its own timing.
+
 ## 0.13.0 — 2026-10-19
 
 ### Dependencies

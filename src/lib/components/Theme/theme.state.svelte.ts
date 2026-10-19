@@ -16,7 +16,7 @@ import { LayerStack } from '$lib/utils/layers.svelte.js';
 import { HoverIntentGroup } from '$lib/utils/hoverIntent.js';
 import type { TooltipOptions } from '../Tooltip/tooltip.props.js';
 import type { ConfirmationHost } from '../Confirmation/confirmation.state.svelte.js';
-import { updateThemeWithTransition, type ThemeTransition } from './themeTransition.js';
+import { updateThemeWithTransition, type ThemeTransitionInput } from './themeTransition.js';
 import { ThemeFloatingWindows } from './theme.floatingWindows.js';
 import type { Colors } from '$lib/types/theme.js';
 import { REDUCED_MOTION_QUERY, registerActiveTheme } from '$lib/utils/motion.svelte.js';
@@ -44,7 +44,7 @@ type ThemeEventListener = (event: never) => void;
 
 interface ThemeOptions {
 	readonly spinnerVariant: SpinnerVariant;
-	readonly themeTransition?: ThemeTransition;
+	readonly themeTransition?: ThemeTransitionInput;
 	readonly defaultColor?: Colors;
 	readonly reduceMotion?: boolean;
 	/** The partial scale passed as `<Theme motion>`; `motion` below is the resolved one. */
