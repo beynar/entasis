@@ -174,7 +174,11 @@ describe('portal container (CX-12)', () => {
 describe('keyboard inset (OV-INFRA-7)', () => {
 	type Listener = () => void;
 	type Viewport = { height: number; offsetTop: number; scale: number };
-	const runViewportScript = (visualViewport: Viewport | undefined, innerHeight: number) => {
+	const runViewportScript = (
+		visualViewport: Viewport | undefined,
+		innerHeight: number,
+		clientHeight = 0
+	) => {
 		const listeners = new Map<string, Listener[]>();
 		const track = (type: string, listener: Listener) =>
 			listeners.set(type, [...(listeners.get(type) ?? []), listener]);
@@ -191,6 +195,7 @@ describe('keyboard inset (OV-INFRA-7)', () => {
 		};
 		const fakeDocument = {
 			documentElement: {
+				clientHeight,
 				style: { setProperty: (name: string, value: string) => properties.set(name, value) }
 			}
 		};
@@ -221,6 +226,24 @@ describe('keyboard inset (OV-INFRA-7)', () => {
 		expect(properties.get('--keyboard-inset')).toBe('0px');
 	});
 
+	test('publishes how far the visual viewport is scrolled into the layout viewport', () => {
+		const { properties, fire, visualViewport } = runViewportScript(
+			{ height: 500, offsetTop: 0, scale: 1 },
+			800
+		);
+		expect(properties.get('--visual-viewport-top')).toBe('0px');
+		visualViewport.offsetTop = 240;
+		fire('vv:scroll');
+		expect(properties.get('--visual-viewport-top')).toBe('240px');
+		expect(properties.get('--keyboard-inset')).toBe('60px');
+	});
+
+	test('measures the layout viewport from the root when innerHeight shrinks with the keyboard', () => {
+		// iOS 26: innerHeight follows the visual viewport, the root keeps the fixed layout height.
+		const { properties } = runViewportScript({ height: 377, offsetTop: 0, scale: 1 }, 377, 714);
+		expect(properties.get('--keyboard-inset')).toBe('337px');
+	});
+
 	test('stays 0px while pinch-zoomed and without a visual viewport', () => {
 		expect(
 			runViewportScript({ height: 400, offsetTop: 0, scale: 2 }, 800).properties.get(
@@ -228,6 +251,11 @@ describe('keyboard inset (OV-INFRA-7)', () => {
 			)
 		).toBe('0px');
 		expect(runViewportScript(undefined, 800).properties.get('--keyboard-inset')).toBe('0px');
+		expect(
+			runViewportScript({ height: 400, offsetTop: 200, scale: 2 }, 800).properties.get(
+				'--visual-viewport-top'
+			)
+		).toBe('0px');
 	});
 
 	test('keeps the existing window size variables', () => {

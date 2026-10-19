@@ -216,8 +216,25 @@ export const applyGlobalEngine = (api: PluginAPI, options?: GlobalEngineOptions)
 		[`${scrollLock}[data-entasis-scroll-lock='padding']`]: {
 			'padding-inline-end': 'var(--entasis-scrollbar-width, 0px)'
 		},
-		// The keyboard overlap from the visual viewport (see Theme); `0px` until a Theme measures it.
-		html: { '--keyboard-inset': '0px' }
+		// The keyboard overlap and visual viewport scroll (see Theme); `0px` until a Theme measures them.
+		html: { '--keyboard-inset': '0px', '--visual-viewport-top': '0px' }
+	});
+
+	// TOUCH TEXT ENTRY — iOS Safari zooms the page into any text field whose text is below 16px
+	// when it takes focus, and leaves it zoomed. On a touch screen, text-entry controls therefore
+	// read the two steps below `base` (`text-xs`, `text-sm`) as at least 16px, and a control
+	// without a size utility takes at least 16px over the size it inherits. Larger steps and
+	// arbitrary sizes are untouched; the rule sits in the base layer, so a utility still wins.
+	const touchTextSize = 'max(16px, var(--text-base, 1rem))';
+	addBase({
+		'@media (pointer: coarse)': {
+			'input:not([type="checkbox"],[type="radio"],[type="range"],[type="color"],[type="file"],[type="button"],[type="submit"],[type="reset"],[type="image"],[type="hidden"]), textarea, select, [contenteditable]:not([contenteditable="false"])':
+				{
+					'font-size': 'max(16px, 1em)',
+					'--text-xs': touchTextSize,
+					'--text-sm': touchTextSize
+				}
+		}
 	});
 
 	// DRAG AND DROP — the dragged item's dim and the empty-list drop tint, as plain rules rather

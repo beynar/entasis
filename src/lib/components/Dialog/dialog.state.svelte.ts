@@ -528,9 +528,11 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 	}
 
 	// While a text field inside the panel has focus the on-screen keyboard may be up. A bottom sheet
-	// then makes room for it (`keyboardAvoiding`, see `--keyboard-inset`), and the field is brought
-	// into view once the visual viewport has stopped moving. The flag is released a frame late, so
-	// a tap that moves focus from one field to the next never lets the sheet drop in between.
+	// then fits itself above it (`keyboardAvoiding`, see `--keyboard-inset`), and once the visual
+	// viewport has stopped moving the field is scrolled into view inside the dialog. Only the
+	// dialog's own scroll containers move: scrolling the page would move the visual viewport the
+	// sheet follows. The flag is released a frame late, so a tap that moves focus from one field
+	// to the next never lets the sheet drop in between.
 	private keyboardAttachment = (node: HTMLElement) => {
 		const view = node.ownerDocument.defaultView;
 		if (!view) return;
@@ -538,12 +540,30 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 		let reveal: ReturnType<typeof setTimeout> | undefined;
 		let revealing: (() => void) | undefined;
 
-		const insetNow = () =>
-			parseFloat(
-				view
-					.getComputedStyle(node.ownerDocument.documentElement)
-					.getPropertyValue('--keyboard-inset')
-			) || 0;
+		const keyboardUp = () => {
+			const root = view.getComputedStyle(node.ownerDocument.documentElement);
+			return (
+				(parseFloat(root.getPropertyValue('--keyboard-inset')) || 0) +
+					(parseFloat(root.getPropertyValue('--visual-viewport-top')) || 0) >
+				0
+			);
+		};
+
+		// Centres the field in each scroll container between it and the dialog root that clips it.
+		const revealField = (field: HTMLElement) => {
+			const stop = node.closest('[data-layer-root]');
+			for (let scroller = field.parentElement; scroller; scroller = scroller.parentElement) {
+				const { overflowY } = view.getComputedStyle(scroller);
+				if (/auto|scroll/.test(overflowY) && scroller.scrollHeight > scroller.clientHeight) {
+					const box = scroller.getBoundingClientRect();
+					const target = field.getBoundingClientRect();
+					if (target.top < box.top || target.bottom > box.bottom) {
+						scroller.scrollTop += target.top + target.height / 2 - (box.top + box.height / 2);
+					}
+				}
+				if (scroller === stop) break;
+			}
+		};
 
 		const stopRevealing = () => {
 			clearTimeout(reveal);
@@ -557,8 +577,8 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 			const viewport = view.visualViewport;
 			const show = () => {
 				stopRevealing();
-				if (field.isConnected && field.ownerDocument.activeElement === field && insetNow() > 0) {
-					field.scrollIntoView({ block: 'center', inline: 'nearest' });
+				if (field.isConnected && field.ownerDocument.activeElement === field && keyboardUp()) {
+					revealField(field);
 				}
 			};
 			// The keyboard animates for a few hundred ms: wait for the viewport to stop resizing, and

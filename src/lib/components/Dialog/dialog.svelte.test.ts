@@ -526,40 +526,55 @@ describe('Dialog bottom sheet and the on-screen keyboard (OV-13)', () => {
 		expect(align().className).not.toContain('--keyboard-inset');
 	});
 
-	test('the field is brought into view once the keyboard has covered the viewport', async () => {
+	// jsdom has no layout: the panel is made a scroll container holding the field below its fold.
+	const clipField = (field: HTMLElement) => {
+		const panel = field.closest('[data-type]') as HTMLElement;
+		panel.style.overflowY = 'auto';
+		Object.defineProperty(panel, 'scrollHeight', { configurable: true, value: 600 });
+		Object.defineProperty(panel, 'clientHeight', { configurable: true, value: 200 });
+		panel.getBoundingClientRect = () => ({ top: 0, bottom: 200, height: 200 }) as DOMRect;
+		field.getBoundingClientRect = () =>
+			({ top: 400 - panel.scrollTop, bottom: 432 - panel.scrollTop, height: 32 }) as DOMRect;
+		return panel;
+	};
+
+	test('the sheet follows the visible area: padded by the keyboard and by the scrolled viewport', async () => {
+		render(DialogLawHarness, { props: { type: 'drawerBottom' } });
+		await openLaw();
+		screen.getByLabelText('Draft').focus();
+		await waitFor(() => expect(align().className).toContain('--keyboard-inset'));
+		expect(align().className).toContain('--visual-viewport-top');
+	});
+
+	test('once the keyboard is up the field is centred inside the sheet, never by scrolling the page', async () => {
 		const original = Element.prototype.scrollIntoView;
+		scrollIntoView.mockClear();
 		Element.prototype.scrollIntoView = scrollIntoView;
-		root.style.setProperty('--keyboard-inset', '300px');
+		// iOS scrolled the visual viewport down to show the field: the keyboard is up.
+		root.style.setProperty('--visual-viewport-top', '300px');
 		try {
 			render(DialogLawHarness, { props: { type: 'drawerBottom' } });
 			await openLaw();
 			const field = screen.getByLabelText('Draft');
+			const panel = clipField(field);
 			field.focus();
+			expect(panel.scrollTop).toBe(0);
+			// The field's centre (416) lands on the panel's centre (100).
+			await waitFor(() => expect(panel.scrollTop).toBe(316), { timeout: 1500 });
 			expect(scrollIntoView).not.toHaveBeenCalled();
-			await waitFor(
-				() => expect(scrollIntoView).toHaveBeenCalledWith({ block: 'center', inline: 'nearest' }),
-				{
-					timeout: 1500
-				}
-			);
 		} finally {
 			Element.prototype.scrollIntoView = original;
-			root.style.removeProperty('--keyboard-inset');
+			root.style.removeProperty('--visual-viewport-top');
 		}
 	});
 
 	test('with no keyboard (inset 0) the field is left where it is', async () => {
-		const original = Element.prototype.scrollIntoView;
-		scrollIntoView.mockClear();
-		Element.prototype.scrollIntoView = scrollIntoView;
-		try {
-			render(DialogLawHarness, { props: { type: 'drawerBottom' } });
-			await openLaw();
-			screen.getByLabelText('Draft').focus();
-			await sleep(600);
-			expect(scrollIntoView).not.toHaveBeenCalled();
-		} finally {
-			Element.prototype.scrollIntoView = original;
-		}
+		render(DialogLawHarness, { props: { type: 'drawerBottom' } });
+		await openLaw();
+		const field = screen.getByLabelText('Draft');
+		const panel = clipField(field);
+		field.focus();
+		await sleep(600);
+		expect(panel.scrollTop).toBe(0);
 	});
 });

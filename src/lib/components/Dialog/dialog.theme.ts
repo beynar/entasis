@@ -42,11 +42,13 @@ export const defaultDialogAlign = cva({
 			inner: 'h-full',
 			outer: 'min-h-full'
 		},
-		// A bottom sheet with a focused text field makes room for the on-screen keyboard: the
-		// bottom padding grows by `--keyboard-inset` (published on `<html>` by the Theme), which
-		// is 0 where there is no overlapping keyboard.
+		// A bottom sheet with a focused text field stays inside the part of the screen the
+		// on-screen keyboard leaves visible: the bottom padding grows by `--keyboard-inset` and
+		// the top padding by `--visual-viewport-top` (both published on `<html>` by the Theme, 0
+		// without a keyboard), so the sheet sits on the keyboard and shrinks to fit above it,
+		// wherever iOS scrolled the page to show the field.
 		keyboard: {
-			true: 'pb-[calc(var(--drawer-inset)+var(--keyboard-inset,0px))]',
+			true: 'pt-[calc(var(--drawer-inset)+var(--visual-viewport-top,0px))] pb-[calc(var(--drawer-inset)+var(--keyboard-inset,0px))]',
 			false: ''
 		}
 	},

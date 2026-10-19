@@ -291,6 +291,11 @@ describe the viewport for your own layout:
   viewport, measured from the visual viewport (\`0px\` without a keyboard, while pinch-zoomed, and in
   browsers that resize the layout viewport for the keyboard). Pin a bottom bar above the keyboard with
   \`bottom: var(--keyboard-inset)\`.
+- \`--visual-viewport-top\`: how far in px the visible area starts below the top of the layout
+  viewport. iOS scrolls it down to bring a focused field above the keyboard, and fixed content then
+  starts above the screen; pad it by this to keep it visible (\`0px\` without a keyboard and while
+  pinch-zoomed). The layout viewport is the larger of \`innerHeight\` and the root's
+  \`clientHeight\`, because iOS 26 shrinks \`innerHeight\` along with the keyboard.
 
 ## Build-time boundary
 

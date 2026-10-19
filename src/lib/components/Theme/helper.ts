@@ -117,13 +117,21 @@ export const compileThemeBlockingScript = ({
 
 /** The custom property carrying how far the on-screen keyboard overlaps the layout viewport. */
 export const KEYBOARD_INSET_VARIABLE = '--keyboard-inset';
+/** The custom property carrying how far the visual viewport is scrolled into the layout viewport. */
+export const VISUAL_VIEWPORT_TOP_VARIABLE = '--visual-viewport-top';
 
 /**
- * Boot script that mirrors the viewport onto `<html>`: `--window-height` and `--window-width`,
- * and `--keyboard-inset`, the px height the on-screen keyboard (or any other browser UI that
+ * Boot script that mirrors the viewport onto `<html>`: `--window-height` and `--window-width`;
+ * `--keyboard-inset`, the px height the on-screen keyboard (or any other browser UI that
  * shrinks only the visual viewport) covers at the bottom of the layout viewport, `0px` without
- * one. A pinch zoom also shrinks the visual viewport, so the inset stays `0px` while it is
- * zoomed. Browsers that resize the layout viewport for the keyboard report no overlap either.
+ * one; and `--visual-viewport-top`, how far the visible area starts below the top of the layout
+ * viewport (iOS scrolls it down to bring a focused field above the keyboard). Fixed content
+ * padded by both stays inside what the user can see. A pinch zoom also shrinks and moves the
+ * visual viewport, so both stay `0px` while it is zoomed. Browsers that resize the layout
+ * viewport for the keyboard report no overlap either.
+ *
+ * The layout viewport is the larger of `innerHeight` and the root's `clientHeight`: iOS 26
+ * shrinks `innerHeight` with the keyboard, while the root keeps the height fixed content uses.
  * Written as a self-contained string because it runs before hydration.
  */
 export const compileViewportScript = () => /* js */ `
@@ -139,11 +147,14 @@ export const compileViewportScript = () => /* js */ `
 	};
 	const setKeyboardInset = () => {
 		const zoomed = !!visualViewport && Math.abs(visualViewport.scale - 1) > 0.01;
+		const layoutHeight = Math.max(window.innerHeight, root.clientHeight || 0);
+		const top = visualViewport && !zoomed ? Math.max(0, Math.round(visualViewport.offsetTop)) : 0;
 		const inset =
 			visualViewport && !zoomed
-				? Math.max(0, Math.round(window.innerHeight - visualViewport.height - visualViewport.offsetTop))
+				? Math.max(0, Math.round(layoutHeight - visualViewport.height - visualViewport.offsetTop))
 				: 0;
 		root.style.setProperty('${KEYBOARD_INSET_VARIABLE}', inset + 'px');
+		root.style.setProperty('${VISUAL_VIEWPORT_TOP_VARIABLE}', top + 'px');
 	};
 	window.addEventListener('resize', setWindowHeight);
 	window.addEventListener('resize', setWindowWidth);

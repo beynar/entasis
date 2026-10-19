@@ -6,6 +6,18 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Fixed
+
+- Bottom sheets with text fields work on iPhone. On a touch screen, text-entry controls now read
+  `text-xs` and `text-sm` as at least 16px (a base style in the Tailwind plugin), so iOS Safari no
+  longer zooms the page in when a field takes focus and leaves it zoomed. A focused field in a
+  `drawerBottom` keeps the whole sheet above the keyboard: the Theme publishes a new
+  `--visual-viewport-top` (how far iOS scrolled the page to show the field) next to
+  `--keyboard-inset`, the sheet pads itself by both, and the field is centered by scrolling the
+  sheet, never the page. `--keyboard-inset` now measures the layout viewport from the root's
+  `clientHeight` as well, because iOS 26 shrinks `innerHeight` along with the keyboard and the
+  inset read 0.
+
 ## 0.12.0 — 2026-10-19
 
 This minor (0.12.0) batches the behaviour changes of the Base UI adoption. Every renamed API keeps
