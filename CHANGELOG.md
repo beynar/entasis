@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.13.0 — 2026-10-19
+
 ### Dependencies
 
 - SvelteKit 3 is supported: the `@sveltejs/kit` peer range is now `^2.43.5 || ^3.0.0`. The library
