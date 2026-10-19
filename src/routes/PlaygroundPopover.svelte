@@ -13,7 +13,9 @@
 	);
 </script>
 
-<!-- The playground levers live in the shell footer so every docs page can be retuned live. -->
+<!-- The playground levers live in the shell footer so every docs page can be retuned live. The
+     visible "Theme: …" text is the button's name (axe label-content-name-mismatch); aria-haspopup
+     says it opens the playground. -->
 <Popover
 	position="top-end"
 	size="large"
@@ -24,8 +26,7 @@
 		content: `Theme: ${label}`,
 		prefix: slidersHorizontalIcon,
 		variant: 'outline',
-		size: 'small',
-		label: 'Open the theme playground'
+		size: 'small'
 	}}
 >
 	<div class="pr-xs max-h-[70vh] overflow-y-auto">

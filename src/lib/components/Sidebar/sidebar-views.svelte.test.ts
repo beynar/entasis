@@ -3,7 +3,7 @@
 // chain. Views that share their header and footer keep one panel and only the menu slides; a view
 // that changes them slides the whole panel as one page.
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { describe, expect, test, vi } from 'vitest';
 import SidebarViewsHarness from './SidebarViewsHarness.test.svelte';
 import type { SidebarView } from './sidebar.props.js';
@@ -94,8 +94,9 @@ describe('sidebar views', () => {
 		// Billing clears the search and swaps the footer button: the whole panel slides as one.
 		await fireEvent.click(screen.getByRole('button', { name: /Billing$/ }));
 		expect(layers('panel')).toHaveLength(2);
-		await settle();
-		expect(layers('panel')).toHaveLength(1);
+		// The outgoing panel leaves once its slide ends: waited for, as a busy run can take more
+		// than a fixed delay.
+		await waitFor(() => expect(layers('panel')).toHaveLength(1));
 		expect(screen.queryByPlaceholderText('Search settings')).not.toBeInTheDocument();
 		expect(document.querySelector('[data-slot="sidebar-footer"]')).toHaveTextContent('Upgrade');
 	});

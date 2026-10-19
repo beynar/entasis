@@ -23,7 +23,9 @@ const appliesTo = (entry: Allow, route: string) => new RegExp(entry.route).test(
  * removal. Open-popup states use it; their popups are opened and settled deterministically.
  */
 async function audit(page: Page, route: string, { strict = false }: { strict?: boolean } = {}) {
-	// Let enter transitions (accordion slides, fades) finish so axe measures resting colours.
+	// Let enter transitions (accordion slides, fades) finish so axe measures resting colours. The cap
+	// only bounds a stuck animation: under a full parallel run a dialog's fade-in outlasted 1.5s and
+	// axe measured its text mid-fade.
 	await page.evaluate(() =>
 		Promise.race([
 			Promise.all(
@@ -32,7 +34,7 @@ async function audit(page: Page, route: string, { strict = false }: { strict?: b
 					.filter((animation) => animation.effect?.getComputedTiming().iterations !== Infinity)
 					.map((animation) => animation.finished.catch(() => undefined))
 			),
-			new Promise((resolve) => setTimeout(resolve, 1500))
+			new Promise((resolve) => setTimeout(resolve, 4000))
 		])
 	);
 	const results = await new AxeBuilder({ page })

@@ -32,7 +32,8 @@ try {
 		'svelte',
 		'typescript',
 		'@sveltejs/vite-plugin-svelte',
-		'tailwindcss'
+		'tailwindcss',
+		'svelte-check'
 	]) {
 		const installed = JSON.parse(
 			await readFile(path.join(repositoryRoot, 'node_modules', dependency, 'package.json'), 'utf8')
@@ -46,6 +47,9 @@ try {
 		// The repository's vite-plugin-svelte (7.x) requires Svelte 5.46.4 or later, so npm cannot
 		// resolve it next to an older Svelte. 6.x is the newest line that accepts every Svelte 5.
 		dependencies['@sveltejs/vite-plugin-svelte'] = '^6.2.4';
+		// npm installs the SvelteKit peer itself, and the newest match (3.x) needs Svelte 5.56.4 and
+		// vite-plugin-svelte 7: an app on the oldest Svelte is on SvelteKit 2.
+		dependencies['@sveltejs/kit'] = '^2.43.5';
 		console.log(`Consumer Svelte pinned to ${dependencies.svelte}.`);
 	}
 	await writeFile(
@@ -153,7 +157,9 @@ try {
 		path.join(fixtureRoot, 'svelte.config.js'),
 		"import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';\nexport default { preprocess: vitePreprocess() };\n"
 	);
-	await run(path.join(repositoryRoot, 'node_modules/.bin/svelte-check'), [
+	// The consumer's own svelte-check: the repository's resolves its own Svelte for the component
+	// shims, so a consumer on another Svelte would see two unrelated `Snippet` types.
+	await run(path.join(fixtureRoot, 'node_modules/.bin/svelte-check'), [
 		'--workspace',
 		fixtureRoot,
 		'--tsconfig',
