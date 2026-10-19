@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import { dev } from '$app/environment';
+	import { DEV as dev } from 'esm-env';
 	import Alert from '$lib/components/Alert/Alert.svelte';
 	import Button from '$lib/components/Button/Button.svelte';
 	import AIChat from '$lib/components/AIChat/AIChat.svelte';

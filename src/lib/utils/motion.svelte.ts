@@ -1,4 +1,4 @@
-import { browser } from '$app/environment';
+import { BROWSER as browser } from 'esm-env';
 import { MediaQuery } from 'svelte/reactivity';
 import type { ThemeState } from '$lib/components/Theme/theme.state.svelte.js';
 

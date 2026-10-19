@@ -1,10 +1,13 @@
 import font from '@svelte-plugin/font';
 import tailwindcss from '@tailwindcss/vite';
 import { svelteTesting } from '@testing-library/svelte/vite';
+import adapter from '@sveltejs/adapter-cloudflare';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
 import { entasisPropsDocs } from './tooling/props-docs/plugin.js';
 import { entasisStructureDocs } from './tooling/structure-docs/plugin.js';
+import { componentAliases } from './src/lib/generated/componentAliases.js';
+import { svelteOptions } from './svelte.options.js';
 
 // Test file kinds. jsdom has no layout, so focus order, tabbability, positioning and real pointer
 // or keyboard input are tested in `*.browser.test.ts` files, which run in Chromium and WebKit.
@@ -54,7 +57,17 @@ export default defineConfig(async ({ mode }) => ({
 			]
 		}),
 		tailwindcss(),
-		sveltekit(),
+		sveltekit({
+			...svelteOptions,
+			adapter: adapter(),
+			// SvelteKit 3 dropped the built-in `$lib`; the library keeps it as an alias, which
+			// `svelte-package` rewrites to relative paths in `dist`. The public subpaths resolve to
+			// source in the docs app.
+			alias: { $lib: 'src/lib', ...componentAliases },
+			experimental: {
+				remoteFunctions: true
+			}
+		}),
 		entasisPropsDocs(),
 		entasisStructureDocs()
 	],

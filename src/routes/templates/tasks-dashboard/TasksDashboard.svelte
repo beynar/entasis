@@ -133,7 +133,7 @@
 		// `resolve()` only accepts a route id, so the query is appended to what it returns.
 		const base = resolve('/templates/tasks-dashboard');
 		const target = (value === 'overview' ? base : `${base}?tab=${value}`) as ResolvedPathname;
-		void goto(target, { keepFocus: true, noScroll: true, replaceState: true });
+		void goto(target, { replace: true, reset: false });
 	}
 
 	const sidebarGroups = $derived.by((): SidebarGroup[] => {

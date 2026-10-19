@@ -1,6 +1,6 @@
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
 import { getContext, onDestroy, onMount, setContext, tick } from 'svelte';
-import { browser } from '$app/environment';
+import { BROWSER as browser } from 'esm-env';
 import { MediaQuery } from 'svelte/reactivity';
 import type { SpinnerVariant } from '../Spinner/spinner.props.js';
 import type { ResponsiveProps, Breakpoint } from './theme.js';

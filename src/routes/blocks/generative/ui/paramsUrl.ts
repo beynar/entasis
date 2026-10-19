@@ -5,7 +5,10 @@ import type { DimValue, Params, SectionType } from '../engine/types.js';
  * variant is a readable, editable link. Values are matched against the type's own levers; anything
  * else is kept as text and left for validation to reject with a precise reason.
  */
-export function paramsFromUrl(type: SectionType, url: URL, prefix = ''): Params | null {
+/** Read-only views of a URL: SvelteKit's `page.url` is immutable, and these only read it. */
+type UrlQuery = { readonly searchParams: { get(name: string): string | null } };
+
+export function paramsFromUrl(type: SectionType, url: UrlQuery, prefix = ''): Params | null {
 	const params: Params = {};
 	let found = false;
 	for (const [lever, values] of Object.entries(type.dims)) {
@@ -17,8 +20,13 @@ export function paramsFromUrl(type: SectionType, url: URL, prefix = ''): Params 
 	return found ? params : null;
 }
 
-export function writeParams(type: SectionType, url: URL, params: Params, prefix = '') {
-	const next = new URL(url);
+export function writeParams(
+	type: SectionType,
+	url: { readonly href: string },
+	params: Params,
+	prefix = ''
+) {
+	const next = new URL(url.href);
 	for (const lever of Object.keys(type.dims)) next.searchParams.delete(prefix + lever);
 	for (const [lever, value] of Object.entries(params))
 		next.searchParams.set(prefix + lever, String(value));

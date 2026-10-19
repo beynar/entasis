@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
+	import { BROWSER as browser } from 'esm-env';
 	import {
 		AUDIO_PLAYER_DEFAULT_CONTROLS as DEFAULT_CONTROLS,
 		type AudioPlayerError,

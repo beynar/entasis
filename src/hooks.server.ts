@@ -1,4 +1,4 @@
-import type { HandleServerError } from '@sveltejs/kit';
+import type { HandleServerError } from '@sveltejs/kit/hooks';
 import { mcpHandler, tool } from 'svelte-mcp/mcp';
 
 import * as z from 'zod/v4';
@@ -46,7 +46,10 @@ export const handle = sequence(async ({ event, resolve }) => {
 	return resolve(event);
 }, handler.handle);
 
-export const handleError: HandleServerError = async ({ error, status }) => {
+export const handleError: HandleServerError = async ({ kind, error }) => {
+	// SvelteKit's own errors (a 404) and validation errors carry a status; app and unknown errors
+	// are logged in full.
+	const status = kind === 'framework' || kind === 'validation' ? error.status : 500;
 	if (status !== 404) {
 		console.log(error);
 	} else {

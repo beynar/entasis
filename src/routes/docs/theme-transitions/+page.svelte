@@ -54,15 +54,11 @@
 	);
 
 	async function previewTransition(transition: ThemeTransition) {
-		const searchParams = new SvelteURLSearchParams(page.url.searchParams);
+		const searchParams = new SvelteURLSearchParams(page.url.searchParams.toString());
 		searchParams.set('transition', transition);
 		// `resolve()` only accepts a route id, so the query is appended to what it returns.
 		const target = `${resolve('/docs/theme-transitions')}?${searchParams}` as ResolvedPathname;
-		await goto(target, {
-			keepFocus: true,
-			noScroll: true,
-			replaceState: true
-		});
+		await goto(target, { replace: true, reset: false });
 		await tick();
 		theme.theme = theme.resolvedTheme === 'dark' ? 'light' : 'dark';
 	}

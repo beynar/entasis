@@ -32,7 +32,7 @@
 		// `resolve()` only accepts a route id, so the query is appended to what it returns.
 		const base = resolve('/blocks/generative');
 		const target = (id === 'neutral' ? base : `${base}?direction=${id}`) as ResolvedPathname;
-		void goto(target, { replaceState: true, noScroll: true, keepFocus: true });
+		void goto(target, { replace: true, reset: false });
 	}
 
 	const steps = [

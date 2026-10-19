@@ -14,7 +14,7 @@
 	);
 
 	function selectPreset(preset: TypeScalePreset) {
-		void goto(resolve(`/fluid-scale?preset=${preset}`), { keepFocus: true, noScroll: true });
+		void goto(resolve(`/fluid-scale?preset=${preset}`), { reset: false });
 	}
 </script>
 
