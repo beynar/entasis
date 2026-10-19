@@ -85,8 +85,8 @@ describe('retained control state', () => {
 			defaultValue: startDate,
 			onValueChange
 		});
-		const first = screen.getByRole('button', { name: 'Monday, September 7, 2026' });
-		const second = screen.getByRole('button', { name: 'Tuesday, September 8, 2026' });
+		const first = screen.getByRole('button', { name: 'Sep 7, Monday, 2026' });
+		const second = screen.getByRole('button', { name: 'Sep 8, Tuesday, 2026' });
 		await fireEvent.click(first);
 		expect(onValueChange).not.toHaveBeenCalled();
 		await fireEvent.click(second);
