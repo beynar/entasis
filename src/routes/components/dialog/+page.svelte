@@ -519,7 +519,7 @@ html[data-dialog-open] .app-shell {
 
 		<ComponentCard
 			title="Fields above the keyboard"
-			description="In a bottom sheet (or a modal collapsed into one on mobile), the sheet stays above the on-screen keyboard while a field inside has focus: its padding follows --keyboard-inset and --visual-viewport-top, so it fits the visible area wherever iOS scrolled the page, and the field is centered inside the sheet once the keyboard has stopped moving. Fields read at 16px on touch screens, so iOS does not zoom in. Browsers that resize the layout for the keyboard (Chrome on Android only with interactive-widget=resizes-content in the viewport meta tag) report no inset and need no help; by default Chrome on Android reports it like iOS."
+			description="In a bottom sheet (or a modal collapsed into one on mobile), the sheet stays above the on-screen keyboard while a field inside has focus: its padding follows --keyboard-inset and --visual-viewport-top, so it fits the visible area wherever iOS scrolled the page, and the field is centered inside the sheet once the keyboard has stopped moving. On iOS the Theme keeps Safari from zooming into the focused field. Browsers that resize the layout for the keyboard (Chrome on Android only with interactive-widget=resizes-content in the viewport meta tag) report no inset and need no help; by default Chrome on Android reports it like iOS."
 			code={`<Dialog type="drawerBottom" title="Reply" trigger={{ content: 'Reply' }}>
 	<TextInput label="Subject" />
 	<TextArea label="Message" />

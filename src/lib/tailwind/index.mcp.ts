@@ -15,11 +15,6 @@ Use it when colors are defined separately instead of through the theme plugin.
 
 ## Base styles
 
-- On a touch screen (\`pointer: coarse\`), text-entry controls (\`input\` text types, \`textarea\`,
-  \`select\`, \`contenteditable\`) read \`text-xs\` and \`text-sm\` as at least 16px, and a control
-  without a size utility takes at least 16px over the size it inherits. iOS Safari zooms the page
-  into any field below 16px when it takes focus; at 16px it does not. Larger steps and arbitrary
-  sizes are untouched.
 - \`--keyboard-inset\` and \`--visual-viewport-top\` default to \`0px\` on \`<html>\` (the Theme
   measures them).
 

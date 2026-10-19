@@ -220,23 +220,6 @@ export const applyGlobalEngine = (api: PluginAPI, options?: GlobalEngineOptions)
 		html: { '--keyboard-inset': '0px', '--visual-viewport-top': '0px' }
 	});
 
-	// TOUCH TEXT ENTRY — iOS Safari zooms the page into any text field whose text is below 16px
-	// when it takes focus, and leaves it zoomed. On a touch screen, text-entry controls therefore
-	// read the two steps below `base` (`text-xs`, `text-sm`) as at least 16px, and a control
-	// without a size utility takes at least 16px over the size it inherits. Larger steps and
-	// arbitrary sizes are untouched; the rule sits in the base layer, so a utility still wins.
-	const touchTextSize = 'max(16px, var(--text-base, 1rem))';
-	addBase({
-		'@media (pointer: coarse)': {
-			'input:not([type="checkbox"],[type="radio"],[type="range"],[type="color"],[type="file"],[type="button"],[type="submit"],[type="reset"],[type="image"],[type="hidden"]), textarea, select, [contenteditable]:not([contenteditable="false"])':
-				{
-					'font-size': 'max(16px, 1em)',
-					'--text-xs': touchTextSize,
-					'--text-sm': touchTextSize
-				}
-		}
-	});
-
 	// DRAG AND DROP — the dragged item's dim and the empty-list drop tint, as plain rules rather
 	// than a `<style>` the list attachment would inject (a strict CSP would block it without a
 	// nonce). The tint sits in `:where()` (zero specificity) so any class on the container wins.

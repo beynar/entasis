@@ -56,12 +56,6 @@ describe('scroll lock rules', () => {
 		expect(source).toMatch(/--visual-viewport-top:\s*0px/);
 	});
 
-	it('lifts text-entry controls to 16px on touch screens (no iOS focus zoom)', async () => {
-		const source = await css();
-		expect(source).toMatch(/@media \(pointer: coarse\)/);
-		expect(source).toMatch(/--text-sm:\s*max\(16px, var\(--text-base, 1rem\)\)/);
-		expect(source).toMatch(/font-size:\s*max\(16px, 1em\)/);
-	});
 });
 
 describe('drag-and-drop base styles', () => {

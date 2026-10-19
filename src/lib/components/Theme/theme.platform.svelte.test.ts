@@ -258,6 +258,41 @@ describe('keyboard inset (OV-INFRA-7)', () => {
 		).toBe('0px');
 	});
 
+	describe('iOS focus zoom', () => {
+		const runWithViewportMeta = (userAgent: string, content: string, maxTouchPoints = 5) => {
+			const meta = { content };
+			new Function('window', 'document', compileViewportScript())(
+				{
+					innerHeight: 800,
+					innerWidth: 400,
+					navigator: { userAgent, platform: 'iPhone', maxTouchPoints },
+					addEventListener: () => {}
+				},
+				{
+					documentElement: { clientHeight: 800, style: { setProperty: () => {} } },
+					querySelector: (selector: string) => (selector === 'meta[name="viewport"]' ? meta : null)
+				}
+			);
+			return meta.content;
+		};
+		const iPhone = 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) AppleWebKit/605.1.15';
+
+		test('caps the scale on iOS, so Safari does not zoom into a focused field', () => {
+			expect(runWithViewportMeta(iPhone, 'width=device-width, initial-scale=1')).toBe(
+				'width=device-width, initial-scale=1, maximum-scale=1'
+			);
+		});
+
+		test("keeps the page's own maximum-scale and leaves other platforms alone", () => {
+			expect(runWithViewportMeta(iPhone, 'width=device-width, maximum-scale=5')).toBe(
+				'width=device-width, maximum-scale=5'
+			);
+			expect(
+				runWithViewportMeta('Mozilla/5.0 (Linux; Android 15) Chrome/140', 'width=device-width', 5)
+			).toBe('width=device-width');
+		});
+	});
+
 	test('keeps the existing window size variables', () => {
 		const { properties } = runViewportScript({ height: 500, offsetTop: 0, scale: 1 }, 800);
 		expect(properties.get('--window-height')).toBe('500px');

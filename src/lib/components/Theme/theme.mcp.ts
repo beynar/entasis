@@ -297,6 +297,11 @@ describe the viewport for your own layout:
   pinch-zoomed). The layout viewport is the larger of \`innerHeight\` and the root's
   \`clientHeight\`, because iOS 26 shrinks \`innerHeight\` along with the keyboard.
 
+On iOS, the same script adds \`maximum-scale=1\` to the page's \`<meta name="viewport">\` (when it
+sets no \`maximum-scale\` of its own). Safari otherwise zooms the page into any text field below
+16px when it takes focus and leaves it zoomed. iOS ignores the limit for the user's own pinch zoom,
+so the page stays zoomable; other platforms would honour it, so they are left alone.
+
 ## Build-time boundary
 
 The Tailwind plugin still generates color palettes and registers utility names, variants,

@@ -132,12 +132,26 @@ export const VISUAL_VIEWPORT_TOP_VARIABLE = '--visual-viewport-top';
  *
  * The layout viewport is the larger of `innerHeight` and the root's `clientHeight`: iOS 26
  * shrinks `innerHeight` with the keyboard, while the root keeps the height fixed content uses.
+ *
+ * On iOS it also adds `maximum-scale=1` to the viewport meta tag (unless it sets its own): Safari
+ * zooms the page into any text field below 16px when it takes focus and leaves it zoomed. iOS
+ * ignores the limit for the user's pinch zoom, so the page stays zoomable; other platforms would
+ * honour it, so they are left alone.
  * Written as a self-contained string because it runs before hydration.
  */
 export const compileViewportScript = () => /* js */ `
 (() => {
 	const visualViewport = window.visualViewport;
 	const root = document.documentElement;
+	const navigator = window.navigator;
+	const ios =
+		!!navigator &&
+		(/iP(hone|od|ad)/.test(navigator.userAgent) ||
+			(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+	const viewportMeta = ios ? document.querySelector?.('meta[name="viewport"]') : null;
+	if (viewportMeta && !/maximum-scale/.test(viewportMeta.content)) {
+		viewportMeta.content = viewportMeta.content + ', maximum-scale=1';
+	}
 	const setWindowHeight = () => {
 		const height = visualViewport?.height ?? window.innerHeight;
 		root.style.setProperty('--window-height', height + 'px');
