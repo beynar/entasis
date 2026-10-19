@@ -135,23 +135,26 @@
 	/* Reserve the gutter on every visual row when a numbered line wraps. The
 	   negative margin pulls the number into that reserved space on row one. */
 	:global([data-slot='code'] .th-code--line-numbers[data-wrap] .th-line) {
-		padding-left: 4rem;
+		padding-left: 5.5ch;
 	}
 
 	:global([data-slot='code'] .th-code--line-numbers[data-wrap] .th-line)::before {
-		margin-left: -4rem;
+		margin-left: -5.5ch;
 	}
 
 	/* `sticky; left: 0` pins the gutter to the left edge so it stays visible while a long
-	   line scrolls horizontally under it; the background strip masks the code sliding behind. */
+	   line scrolls horizontally under it; the background strip masks the code sliding behind.
+	   Sized in `ch` of the code font (three digits, a 1ch pad and a 1.5ch gap), so the gutter
+	   scales with the text instead of taking a fixed 4rem from a narrow block. */
 	:global([data-slot='code'] .th-code--line-numbers .th-line)::before {
 		content: attr(data-line);
 		position: sticky;
 		left: 0;
 		display: inline-block;
-		width: 3rem;
-		padding-right: 1rem;
-		margin-right: 1rem;
+		box-sizing: border-box;
+		width: 4ch;
+		padding-right: 1ch;
+		margin-right: 1.5ch;
 		text-align: right;
 		color: var(--code-token-comment);
 		background-color: var(--code-token-surface);

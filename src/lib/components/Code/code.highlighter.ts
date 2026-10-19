@@ -35,10 +35,11 @@ export type HighlightOptions = {
 // Applied to the highlighter's `<pre>`. Scrolling is owned by the wrapping ScrollArea (see
 // Code.svelte), so the pre itself does not scroll: when not wrapping it takes its natural
 // (max-content) width so the ScrollArea sees the horizontal overflow; when wrapping it fills
-// and soft-wraps. `has-[.th-line]:px-0` lets the gutter sit flush against the edge.
+// and soft-wraps. `has-[.th-line]:px-0` lets the gutter sit flush against the edge. A narrow
+// block (under 28rem) tightens its padding, as its text steps down (see `code.theme.ts`).
 const preClass = (wrap: boolean) =>
 	[
-		'px-4 py-3.5 outline-none has-[.th-line]:px-0',
+		'px-4 py-3.5 @max-md:px-3 @max-md:py-2.5 outline-none has-[.th-line]:px-0',
 		wrap ? 'w-full whitespace-pre-wrap break-words' : 'w-max'
 	].join(' ');
 
