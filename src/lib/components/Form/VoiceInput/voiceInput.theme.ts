@@ -246,17 +246,9 @@ const defaultPlaybackAction = cva({
 		}
 	},
 	compoundVariants: [
-		// Compact is a round mic with level rings while collapsed; it only expands to show an
-		// error, and then takes the flush edge like every other field action.
-		{
-			variant: 'compact',
-			expanded: false,
-			class:
-				'relative isolate !m-0 !self-auto !rounded-full !overflow-visible before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-full before:border before:border-color/55 before:[opacity:calc(var(--voice-input-level)*0.7)] before:[transform:scale(calc(1+var(--voice-input-level)*0.55))] before:transition-[transform,opacity] before:duration-fast before:ease-standard before:content-[""] after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-full after:border after:border-color/30 after:[opacity:calc(var(--voice-input-level)*0.45)] after:[transform:scale(calc(1+var(--voice-input-level)*1.05))] after:transition-[transform,opacity] after:duration-normal after:ease-standard after:content-[""] motion-reduce:before:transition-none motion-reduce:after:transition-none'
-		},
-		{ variant: 'compact', expanded: false, size: 'small', class: '!size-8' },
-		{ variant: 'compact', expanded: false, size: 'normal', class: '!size-9' },
-		{ variant: 'compact', expanded: false, size: 'large', class: '!size-10' }
+		{ variant: 'compact', size: 'small', class: '!size-8' },
+		{ variant: 'compact', size: 'normal', class: '!size-9' },
+		{ variant: 'compact', size: 'large', class: '!size-10' }
 	],
 	defaultVariants: {
 		size: 'normal',
@@ -279,17 +271,9 @@ const defaultClearAction = cva({
 		}
 	},
 	compoundVariants: [
-		// Compact is a round mic with level rings while collapsed; it only expands to show an
-		// error, and then takes the flush edge like every other field action.
-		{
-			variant: 'compact',
-			expanded: false,
-			class:
-				'relative isolate !m-0 !self-auto !rounded-full !overflow-visible before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-full before:border before:border-color/55 before:[opacity:calc(var(--voice-input-level)*0.7)] before:[transform:scale(calc(1+var(--voice-input-level)*0.55))] before:transition-[transform,opacity] before:duration-fast before:ease-standard before:content-[""] after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-full after:border after:border-color/30 after:[opacity:calc(var(--voice-input-level)*0.45)] after:[transform:scale(calc(1+var(--voice-input-level)*1.05))] after:transition-[transform,opacity] after:duration-normal after:ease-standard after:content-[""] motion-reduce:before:transition-none motion-reduce:after:transition-none'
-		},
-		{ variant: 'compact', expanded: false, size: 'small', class: '!size-8' },
-		{ variant: 'compact', expanded: false, size: 'normal', class: '!size-9' },
-		{ variant: 'compact', expanded: false, size: 'large', class: '!size-10' }
+		{ variant: 'compact', size: 'small', class: '!size-8' },
+		{ variant: 'compact', size: 'normal', class: '!size-9' },
+		{ variant: 'compact', size: 'large', class: '!size-10' }
 	],
 	defaultVariants: {
 		size: 'normal',
