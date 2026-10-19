@@ -19,7 +19,7 @@
 		{#if control.type === 'segmented'}
 			<!-- A settings row on phones (label left, control right), centred groups from sm up. -->
 			<div
-				class="flex max-w-full min-w-0 flex-wrap items-center justify-between gap-x-2 gap-y-1 ps-1.5 sm:justify-center sm:gap-2 sm:ps-0"
+				class="flex max-w-full min-w-0 flex-wrap items-center justify-between gap-x-2 gap-y-0.5 ps-1 sm:justify-center sm:gap-2 sm:ps-0"
 			>
 				<span class="text-neutral/70 text-xs font-medium">{control.label}</span>
 				<SegmentedControl

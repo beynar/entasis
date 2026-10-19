@@ -100,7 +100,7 @@
 	<ComponentCard
 		{controls}
 		description="AIChat connects product-level controls to one conversation state while retaining regional replacement snippets. Send a message to see the pending row, streamed reasoning and the caret; a failed reply shows inline with a Retry button."
-		class="!min-h-0 p-3 sm:p-6"
+		class="!min-h-0 p-2 sm:p-6"
 		code={controls.value.previewState === 'loading'
 			? `<script lang="ts">
   import { AIChatSkeleton } from 'entasis/ai-chat';
