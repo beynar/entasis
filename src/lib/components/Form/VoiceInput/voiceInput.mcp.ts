@@ -53,6 +53,7 @@ VoiceInput records microphone audio into a bindable Blob, renders live microphon
 - **onStart**: \`() => void\` - Runs after microphone capture starts.
 - **onStop**: \`({ blob, duration }: VoiceInputResult) => void\` - Runs after MediaRecorder finalizes the recording.
 - **onError**: \`(error: Error) => void\` - Runs when permission, recording, or playback fails.
+- **inlineError**: \`boolean\` (default \`true\`) - Shows a failure inside the control (a \`compact\` or \`expandable\` voice input expands to hold the message). \`false\` keeps the control its size with only the danger border, for UI that reports \`onError\` itself (AIComposer shows it in its error banner).
 - **theme**: \`VoiceInputThemeProps & FieldThemeProps\` - Overrides voice-input and inherited Field theme parts.
 
 VoiceInput also accepts the standard Field props and slots, including \`label\`, \`description\`, \`helper\`, errors, and attachments.

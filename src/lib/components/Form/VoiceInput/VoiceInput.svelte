@@ -35,6 +35,7 @@
 		onStart,
 		onStop,
 		onError,
+		inlineError = true,
 		visible,
 		color,
 		size = 'normal',
@@ -153,10 +154,12 @@
 
 	const classes = $derived(useVoiceInputTheme(theme));
 	const hasPlayback = $derived(!!field.value && !recorder.isRecording && !recorder.isStopping);
+	// An error the control shows itself; with `inlineError={false}` the surrounding UI reports it.
+	const shownError = $derived(inlineError ? recorder.errorMessage : null);
 	const isExpanded = $derived.by(() => {
 		if (variant === 'default') return true;
-		if (variant === 'compact') return !!recorder.errorMessage;
-		return hasPlayback || recorder.isRecording || recorder.isStopping || !!recorder.errorMessage;
+		if (variant === 'compact') return !!shownError;
+		return hasPlayback || recorder.isRecording || recorder.isStopping || !!shownError;
 	});
 	const fieldTheme = $derived({
 		...(theme || {}),
@@ -189,7 +192,7 @@
 		recorder.isPlaying ? (pauseLabel ?? t.voiceInputPause) : (playLabel ?? t.voiceInputPlay)
 	);
 	const statusMessage = $derived.by(() => {
-		if (recorder.errorMessage) return recorder.errorMessage;
+		if (shownError) return shownError;
 		if (recorder.status === 'requesting') return t.voiceInputStatusRequesting;
 		if (recorder.isRecording) return t.voiceInputStatusRecording;
 		if (recorder.isStopping) return t.voiceInputStatusFinishing;

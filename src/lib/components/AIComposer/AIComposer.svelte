@@ -256,7 +256,10 @@
 		onStop
 	}));
 	const isWorking: boolean = $derived(submitController.isWorking);
-	const visibleError = $derived(submitController.error ?? fileController.error);
+	// A voice failure (microphone denied, recording or transcription failed) shows in the same
+	// banner instead of inside the footer, where the voice control has no room to hold it.
+	let voiceError = $state<string | null>(null);
+	const visibleError = $derived(submitController.error ?? fileController.error ?? voiceError);
 	const classes = $derived(useAIComposerTheme(theme));
 	const dropzoneState = $derived<AIComposerDropzoneState>({
 		state: fileDropzoneController.state,
@@ -575,6 +578,7 @@
 
 	<AIComposerFooter
 		state={submitState}
+		onVoiceError={(message) => (voiceError = message)}
 		{footer}
 		{footerStart}
 		{actions}

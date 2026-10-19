@@ -81,7 +81,7 @@ Set \`voiceInput\` to render the existing VoiceInput primitive before the submit
 
 Configure capture with \`voiceInputMinDuration\`, \`voiceInputMaxDuration\`, \`voiceInputColor\`, the accessible labels, and \`voiceInputTheme\`.
 
-\`onVoiceInput\` is the only voice lifecycle callback. It receives the finalized recording as an \`ArrayBuffer\` and must return a promise. AIComposer clears the internal recording before playback can render and replaces the voice control with a spinner until the promise settles. Callback failures render on the voice field. AIComposer remains transport-free: the callback owns transcription, upload, or any other application workflow. Replacing the complete \`footer\` also replaces the integrated voice control.
+\`onVoiceInput\` is the only voice lifecycle callback. It receives the finalized recording as an \`ArrayBuffer\` and must return a promise. AIComposer clears the internal recording before playback can render and replaces the voice control with a spinner until the promise settles. Callback failures, a denied microphone and recording failures render in the composer's error banner (the same one file and submit errors use); the voice control stays mic-sized, and the next recording clears the message. AIComposer remains transport-free: the callback owns transcription, upload, or any other application workflow. Replacing the complete \`footer\` also replaces the integrated voice control.
 
 \`\`\`svelte
 <AIComposer

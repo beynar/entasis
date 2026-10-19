@@ -17,6 +17,10 @@ Unreleased section under the new version.
 - `Code` adapts to a narrow block (under 28rem, as on a phone): 12px text and tighter padding, and
   the line-number gutter is sized in `ch` of the code font (about 46px at 14px, 29px at 12px)
   instead of a fixed 64px.
+- A denied microphone (or a failed recording or transcription) in `AIComposer` shows in the
+  composer's error banner instead of expanding the voice control across the footer and past the
+  composer's edge. `VoiceInput` gains `inlineError` (default `true`) for UI that reports `onError`
+  itself.
 - Phone-width fixes found by checking every component page at 375px:
   - `Diff` gains `responsive` (default `true`): a split diff narrower than 36rem shows unified.
   - `DocumentViewer` opens without its thumbnail overlay in a narrow viewer (under 42rem), and

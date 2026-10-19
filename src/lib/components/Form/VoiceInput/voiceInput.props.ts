@@ -46,6 +46,14 @@ export type VoiceInputProps = WithAttachments<
 		onStop?: (payload: VoiceInputResult) => void;
 		/** Called when microphone access or recording fails. */
 		onError?: (error: Error) => void;
+		/**
+		 * Shows a microphone or recording failure inside the control: a `compact` or `expandable`
+		 * voice input expands to hold the message. Set `false` where the surrounding UI reports
+		 * `onError` itself (AIComposer does, in its error banner): the control then stays its size
+		 * and only takes the danger border.
+		 * @default true
+		 */
+		inlineError?: boolean;
 		/** Theme overrides for the voice input and inherited Field parts. */
 		theme?: VoiceInputThemeProps & InputProps<'voice'>['theme'];
 	}

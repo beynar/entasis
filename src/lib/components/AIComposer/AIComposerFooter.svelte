@@ -30,6 +30,7 @@
 		voiceInputProcessingLabel,
 		voiceInputFailedLabel,
 		onVoiceInput,
+		onVoiceError,
 		fileDropzone,
 		attachDisabled,
 		disabled,
@@ -61,6 +62,8 @@
 		voiceInputStopLabel: string;
 		voiceInputProcessingLabel: string;
 		voiceInputFailedLabel: string;
+		/** A microphone, recording or transcription failure for the composer's error banner. */
+		onVoiceError: (message: string | null) => void;
 		onVoiceInput?: (audioBuffer: ArrayBuffer) => Promise<void>;
 		fileDropzone: boolean;
 		attachDisabled: boolean;
@@ -83,7 +86,6 @@
 	const classes = $derived(useAIComposerTheme(theme));
 	let voiceInputValue = $state<Blob | null>(null);
 	let voiceInputDuration = $state(0);
-	let voiceInputErrors = $state<string[]>([]);
 	let isVoiceInputProcessing = $state(false);
 
 	// The footer's other controls grow to 36px through the theme's `@max-md` container query and
@@ -105,14 +107,14 @@
 	async function processVoiceInput(result: VoiceInputResult): Promise<void> {
 		voiceInputValue = null;
 		voiceInputDuration = 0;
-		voiceInputErrors = [];
+		onVoiceError(null);
 		if (!onVoiceInput) return;
 
 		isVoiceInputProcessing = true;
 		try {
 			await onVoiceInput(await result.blob.arrayBuffer());
 		} catch (cause) {
-			voiceInputErrors = [cause instanceof Error ? cause.message : voiceInputFailedLabel];
+			onVoiceError(cause instanceof Error ? cause.message : voiceInputFailedLabel);
 		} finally {
 			isVoiceInputProcessing = false;
 		}
@@ -170,7 +172,6 @@
 						<VoiceInput
 							bind:value={voiceInputValue}
 							bind:duration={voiceInputDuration}
-							bind:errors={voiceInputErrors}
 							size={touchControls ? 'normal' : 'small'}
 							variant={voiceInputVariant}
 							minDuration={voiceInputMinDuration}
@@ -180,6 +181,9 @@
 							stopLabel={voiceInputStopLabel}
 							disabled={disabled || isWorking}
 							onStop={processVoiceInput}
+							inlineError={false}
+							onStart={() => onVoiceError(null)}
+							onError={(error) => onVoiceError(error.message)}
 							theme={voiceInputTheme}
 						/>
 					{/if}
