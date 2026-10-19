@@ -31,6 +31,7 @@
 		position = 'bottom-start',
 		offset,
 		mobileSheet = false,
+		focusOnClose,
 		view = 'single',
 		weekStartsOnMonday = true,
 		weekdayLength = 'narrow',
@@ -193,6 +194,7 @@
 	{position}
 	{offset}
 	{mobileSheet}
+	{focusOnClose}
 	mobileSheetSizeTransition={false}
 	trigger={resolvedTrigger}
 	class={classes.popover({ class: className })}

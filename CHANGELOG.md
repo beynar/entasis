@@ -25,9 +25,10 @@ Unreleased section under the new version.
   shows on a dark floating surface too.
 - Tab moves from one field to the next. The buttons inside a field (`PasswordInput` reveal,
   `Combobox` and `Select` clear, `DateInput`, `TimeInput` and `ColorInput` picker buttons) leave
-  the Tab order; the input offers the same action: ArrowDown opens the `TimeInput` and
-  `ColorInput` pickers (as it already did for `DateInput`), and Alt+F8 toggles the password
-  reveal. `FieldActionButton` gains `tabbable` for a button that is the field's only control
+  the Tab order; the input offers the same action: ArrowDown opens the `DateInput`, `TimeInput` and
+  `ColorInput` pickers and moves focus into them (onto the selected day or hour), Escape returns
+  to the input, and Alt+F8 toggles the password reveal. `DateSelector` passes `focusOnClose`
+  through. `FieldActionButton` gains `tabbable` for a button that is the field's only control
   (`VoiceInput` uses it).
 - A field's edge action button (clear, reveal, picker, stepper) takes the field's corner radius,
   so its hover or danger fill no longer pokes past the rounded corner. Its open/pressed state uses

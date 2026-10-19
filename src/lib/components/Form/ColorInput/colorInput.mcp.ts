@@ -105,7 +105,7 @@ Extends all Field component props plus:
 
 ## Accessibility
 
-- The swatch button stays out of the Tab order, so Tab moves from field to field; ArrowDown in the input opens the picker.
+- The swatch button stays out of the Tab order, so Tab moves from field to field; ArrowDown in the input opens the picker and moves focus onto its first control, and Escape returns to the input.
 
 - The swatch sits inside a field action button (the same primitive as the password visibility
   toggle), which stretches to the field's full height for a generous hit target and carries

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { focusIntoPopup } from '../Field/focusIntoPopup.js';
 	import { addAlphaToHex, isValidColor, parseCSS, rgb2hex, rgb2hsl } from 'colorizr';
 	import ColorPicker from '../ColorPicker/ColorPicker.svelte';
 	import { closeFunctional, colorMask } from '../ColorPicker/colorMask.js';
@@ -183,6 +184,7 @@
 <Popover
 	id={`${id}-color-popover`}
 	bind:open={isPickerOpen}
+	focusOnClose={() => field.node ?? true}
 	label={`${t.choose} ${t.color}`}
 	position="bottom-start"
 	size="normal"
@@ -259,11 +261,12 @@
 				class={classes.input({ disabled: field.disabled, size: rest.size })}
 				{@attach colorMask({ format: () => format })}
 				onkeydown={(event) => {
-					// The swatch button is out of the Tab order, so the input opens the picker itself.
-					if (event.key !== 'ArrowDown' || event.defaultPrevented) return;
-					if (field.disabled || isPickerOpen) return;
+					// The swatch button is out of the Tab order: ArrowDown opens the picker (focus
+					// already does) and moves focus onto its first control.
+					if (event.key !== 'ArrowDown' || event.defaultPrevented || field.disabled) return;
 					event.preventDefault();
-					popover.open();
+					if (!isPickerOpen) popover.open();
+					focusIntoPopup(() => document.getElementById(`${id}-color-picker`));
 				}}
 				oninput={handleInput}
 				onfocus={() => {

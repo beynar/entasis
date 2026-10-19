@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { focusIntoPopup } from '../Field/focusIntoPopup.js';
 	import { Maskito } from '@maskito/core';
 	import { maskitoDateOptionsGenerator } from '@maskito/kit';
 	import DateSelector from '../DateSelector/DateSelector.svelte';
@@ -234,6 +235,7 @@
 <DateSelector
 	id={`${id}-calendar-popover`}
 	bind:open={isCalendarOpen}
+	focusOnClose={() => field.node ?? true}
 	position="bottom-start"
 	mode="date"
 	value={field.value}
@@ -288,12 +290,15 @@
 				}}
 				onkeydown={(event) => {
 					// Keyboard users open the calendar deliberately; tabbing through never pops it.
-					if ((event.key === 'ArrowDown' || event.altKey) && !field.disabled && !isCalendarOpen) {
-						if (event.key === 'ArrowDown') {
-							event.preventDefault();
-							isCalendarOpen = true;
-						}
-					}
+					// ArrowDown opens it and moves focus onto the selected day (the calendar button
+					// is out of the Tab order, so this is the keyboard's way in).
+					if (event.key !== 'ArrowDown' || event.defaultPrevented || field.disabled) return;
+					event.preventDefault();
+					isCalendarOpen = true;
+					focusIntoPopup(
+						() => document.getElementById(`${id}-calendar-popover`),
+						'[data-date][tabindex="0"]'
+					);
 				}}
 				onblur={() => {
 					field.focused = false;

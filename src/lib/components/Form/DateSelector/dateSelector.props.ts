@@ -1,3 +1,4 @@
+import type { FocusOnClose } from '$lib/utils/useFocusScope.svelte.js';
 import type { Placement } from '@floating-ui/dom';
 import type { Messages } from '$lib/i18n/en.js';
 import type { PopoverProps } from '$lib/components/Popover/popover.props.js';
@@ -47,6 +48,8 @@ export type DateSelectorProps<Mode extends DateSelectorMode = 'date'> = {
 	offset?: number;
 	/** Renders the popover as a bottom sheet below 768px. */
 	mobileSheet?: boolean;
+	/** Where focus goes when the selector closes; see `PopoverProps.focusOnClose`. */
+	focusOnClose?: FocusOnClose;
 	/** Shows one month or two months side by side. */
 	view?: 'single' | 'double';
 	/** When true, weeks begin on Monday. */
