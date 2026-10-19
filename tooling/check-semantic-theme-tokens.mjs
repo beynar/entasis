@@ -36,7 +36,7 @@ const geometryExceptions = new Map([
 	[
 		'AudioPlayer/audioPlayer.theme.ts',
 		new Map([
-			['gap-[3px]', 'Fixed waveform bar separation'],
+			['gap-[min(3px,0.6%)]', 'Waveform bar separation: 3px, shrinking with a narrow player'],
 			['h-8', 'Small seek track hit area sized around the bar it draws (before:h-1.5)'],
 			['h-10', 'Normal seek track hit area sized around the bar it draws (before:h-2)'],
 			['h-12', 'Large seek track hit area sized around the bar it draws (before:h-2.5)']
