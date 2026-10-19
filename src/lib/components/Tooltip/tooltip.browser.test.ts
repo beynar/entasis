@@ -139,7 +139,9 @@ describe('hoverable content and handoff (TT-1, DF-8)', () => {
 	});
 
 	test('a handoff during the open transition reports the lifecycle of the new tooltip once', async () => {
-		const slow = { in: { duration: 400 }, out: { duration: 0 } };
+		// Long enough that the second hover lands inside the first intro on a slow runner too
+		// (WebKit on Linux CI took over 400ms to move the pointer and finished the first intro).
+		const slow = { in: { duration: 1500 }, out: { duration: 0 } };
 		const events: string[] = [];
 		const record = (name: string) => () => events.push(name);
 		await mount({
@@ -157,7 +159,8 @@ describe('hoverable content and handoff (TT-1, DF-8)', () => {
 		await userEvent.hover(trigger('First'));
 		await expect.poll(surface).not.toBeNull();
 		await userEvent.hover(trigger('Second'));
-		await wait(700);
+		await expect.poll(() => events, { timeout: 4000 }).toEqual(['second open']);
+		await wait(200);
 		expect(events).toEqual(['second open']);
 	});
 
