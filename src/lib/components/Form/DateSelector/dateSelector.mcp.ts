@@ -68,7 +68,7 @@ The \`trigger\` prop follows Popover's trigger contract. A trigger snippet recei
 
 ## Calendar configuration
 
-Use \`view\`, \`weekStartsOnMonday\`, \`weekdayLength\`, \`locale\`, \`minDate\`, \`maxDate\`, and \`disabledDates\` to configure the embedded calendar. Set \`readOnly\` to let the popup open while refusing date and preset choices. Set \`mobileSheet\` to render the selector as a bottom sheet below 768px.
+Use \`view\`, \`weekStartsOnMonday\`, \`weekdayLength\`, \`locale\`, \`minDate\`, \`maxDate\`, and \`disabledDates\` to configure the embedded calendar. Set \`readOnly\` to let the popup open while refusing date and preset choices. Set \`mobileSheet\` to render the selector as a bottom sheet below 768px. \`focusOnClose\` sets where focus goes when it closes (DateInput returns it to its text field), as on Popover.
 
 The content container animates intrinsic height changes. Month navigation uses a direction-aware slide and respects reduced-motion preferences.
 

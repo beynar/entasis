@@ -44,27 +44,25 @@ describe('pickers that hold dialog content (OV-14b audit)', () => {
 		await expect.poll(panelOpen).toBe(false);
 	});
 
-	test('ColorInput: the swatch button bridges Tab into the picker, the text field moves on to the next control', async () => {
+	test('ColorInput: Tab goes field to field; ArrowDown enters the picker and Escape comes back', async () => {
 		mount('color-input');
-		const swatch = element(/choose color/i);
+		const input = page.getByRole('textbox').element() as HTMLElement;
+		// The swatch button stays out of the Tab order: Tab lands on the text field, which opens
+		// the picker on focus.
 		element('Before').focus();
 		await tab();
-		expect(document.activeElement).toBe(swatch);
-		await userEvent.keyboard('{Enter}');
+		expect(document.activeElement).toBe(input);
 		await expect.poll(panelOpen).toBe(true);
 		expect(panel()?.getAttribute('aria-label')).toMatch(/color/i);
-		await tab();
-		expect(insidePanel()).toBe(true);
-		await tab({ shift: true });
-		expect(document.activeElement).toBe(swatch);
-		await userEvent.keyboard('{Escape}');
-		await expect.poll(panelOpen).toBe(false);
 
-		// The text field opens the picker on focus; Tab leaves it for the next control and the
-		// picker closes behind it instead of staying open over the page.
-		const input = page.getByRole('textbox').element() as HTMLElement;
-		input.focus();
-		await expect.poll(panelOpen).toBe(true);
+		// ArrowDown moves focus onto the picker's first control; Escape closes it and returns to
+		// the text field.
+		await userEvent.keyboard('{ArrowDown}');
+		await expect.poll(insidePanel).toBe(true);
+		await userEvent.keyboard('{Escape}');
+		await expect.poll(() => document.activeElement).toBe(input);
+
+		// Tab leaves the field for the next control and the picker closes behind it.
 		await tab();
 		expect(insidePanel()).toBe(false);
 		expect(document.activeElement).toBe(element('After'));

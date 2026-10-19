@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Field from '../Field/Field.svelte';
+	import { focusIntoPopup } from '../Field/focusIntoPopup.js';
 	import Popover from '../../Popover/Popover.svelte';
 	import TimeInputPicker from './TimeInputPicker.svelte';
 	import TimeInputTrigger from './TimeInputTrigger.svelte';
@@ -186,6 +187,7 @@
 <Popover
 	id={`${id}-time-popover`}
 	bind:open={pickerOpen}
+	focusOnClose={() => field.node ?? true}
 	position="bottom-start"
 	size="small"
 	class={classes.popover({ class: theme?.popover?.base })}
@@ -232,10 +234,13 @@
 				onkeydown={(event) => {
 					// The clock button is out of the Tab order (Tab goes to the next field), so the
 					// input opens the picker itself, as DateInput does.
-					if (event.key !== 'ArrowDown' || event.defaultPrevented) return;
-					if (field.disabled || pickerOpen) return;
+					if (event.key !== 'ArrowDown' || event.defaultPrevented || field.disabled) return;
 					event.preventDefault();
-					popover.open();
+					if (!pickerOpen) popover.open();
+					focusIntoPopup(
+						() => document.getElementById(`${id}-time-picker`),
+						'[aria-pressed="true"]'
+					);
 				}}
 				{@attach maskAction}
 			/>

@@ -48,7 +48,7 @@ Use \`format\` with \`dd\`, \`mm\`, \`yy\`, and \`yyyy\` segments. Supported val
 />
 \`\`\`
 
-The selector never opens on focus, so tabbing through the field does not pop it. Open it with ArrowDown while the input has focus, or from the full-height calendar button (which carries \`aria-haspopup="dialog"\`, \`aria-expanded\`, and \`aria-controls\`). It stays open after selection unless \`closeOnSelect\` is enabled. Calendar days support arrow, Home/End, and PageUp/PageDown navigation.
+The selector never opens on focus, so tabbing through the field does not pop it. Open it with ArrowDown while the input has focus (focus moves onto the selected day, and Escape returns to the input), or from the full-height calendar button (which carries \`aria-haspopup="dialog"\`, \`aria-expanded\`, and \`aria-controls\`). It stays open after selection unless \`closeOnSelect\` is enabled. Calendar days support arrow, Home/End, and PageUp/PageDown navigation.
 
 ## Disabled and read-only
 
