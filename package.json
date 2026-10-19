@@ -147,7 +147,7 @@
 		"colorizr": "^5.1.1",
 		"esm-env": "^1.2.2",
 		"file-selector": "^5.0.1",
-		"lightgallery": "^2.9.0",
+		"lightgallery": "^3.0.0",
 		"melt": "^0.44.0",
 		"runed": "^0.37.1",
 		"svelte-streamdown": "^4.2.1",

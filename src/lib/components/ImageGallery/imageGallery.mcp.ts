@@ -47,7 +47,7 @@ Images are discovered from the DOM with \`imageSelector\`, defaulting to \`img\`
 - **closeLabel**: string (default: "Close image gallery") - Accessible close button label.
 - **previousLabel**: string (default: "Previous image") - Previous control label.
 - **nextLabel**: string (default: "Next image") - Next control label.
-- **licenseKey**: string (default: LightGallery evaluation key) - LightGallery license key. A production key is required unless the consuming project is GPLv3-compatible.
+- **licenseKey**: string (default: LightGallery evaluation key) - LightGallery license key. A production key is required unless the consuming project is GPLv3-compatible. lightGallery 3 keys start with \`LIG\` (a v2 key is not valid); with the evaluation key the gallery works and logs a one-time console warning.
 - **class**: string - Additional root classes.
 - **theme**: ImageGalleryThemeProps - Per-instance theme overrides.
 - **onOpenChange**: (open: boolean) => void - Fired once when the library requests a new open state.
