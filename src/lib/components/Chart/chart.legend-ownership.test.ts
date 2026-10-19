@@ -75,8 +75,10 @@ describe('Chart legend ownership', () => {
 					(node) => node.kind === 'rule' && node.key.startsWith('reference:')
 				);
 				expect(rules).toHaveLength(visible.length);
+				// Non-interactive: no tooltip points. Since TanStack Charts 1.0 a decorative mark keeps
+				// its series ownership (for inline legend states) without becoming a target.
 				expect(scene.points).toEqual([]);
-				expect(rules.every((node) => node.pointOwner === undefined)).toBe(true);
+				expect(rules.map((node) => node.pointOwner?.group).sort()).toEqual([...visible].sort());
 			}
 		}
 	);
@@ -123,7 +125,7 @@ describe('Chart legend ownership', () => {
 		const all = createScene(marks, ['A', 'B']);
 		const arrow = flattenNodes(all.nodes).filter((node) => node.key.startsWith('selected:'));
 		expect(arrow).toHaveLength(3);
-		expect(arrow.every((node) => node.pointOwner === undefined)).toBe(true);
+		// The arrow adds no interaction targets: the only points are the source line's.
 		expect(all.points).toHaveLength(observations.length);
 		const hidden = createScene(marks, ['A']);
 		expect(flattenNodes(hidden.nodes).some((node) => node.key.startsWith('selected:'))).toBe(false);
