@@ -33,7 +33,12 @@
 					variant={control.variant ?? 'pill'}
 					disabled={control.disabled}
 					label={control.label}
-					class={control.class}
+					class={[
+						'scrollbar max-w-full scrollbar-none overflow-x-auto overscroll-x-contain',
+						control.class
+					]
+						.filter(Boolean)
+						.join(' ')}
 				/>
 			</div>
 		{:else if control.type === 'switch'}

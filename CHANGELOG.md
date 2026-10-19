@@ -17,6 +17,8 @@ Unreleased section under the new version.
 - `Code` adapts to a narrow block (under 28rem, as on a phone): 12px text and tighter padding, and
   the line-number gutter is sized in `ch` of the code font (about 46px at 14px, 29px at 12px)
   instead of a fixed 64px.
+- `AISuggestions` trims its chips' side padding and gaps in a narrow row (under 28rem), so more
+  suggestions fit on a phone.
 - Following a link in the mobile Sidebar drawer's panel closes the drawer. The activity bar's links,
   buttons, and clicks that open elsewhere (a modifier key, `target="_blank"`, `download`) keep it
   open.

@@ -5,9 +5,13 @@ import {
 	type InferComponentTheme
 } from '$lib/utils/cva/index.js';
 
-const defaultRoot = cva({ base: 'min-w-0 w-full' });
-const defaultList = cva({ base: 'flex w-max min-w-full flex-nowrap items-center gap-md py-xs' });
-const defaultSuggestion = cva({ base: 'shrink-0 rounded-full px-xl' });
+// The row is a container: in a narrow one (under 28rem, a phone or a side panel) the chips keep
+// their height but trim their side padding and gaps, so more of them fit before the scroll fade.
+const defaultRoot = cva({ base: '@container min-w-0 w-full' });
+const defaultList = cva({
+	base: 'flex w-max min-w-full flex-nowrap items-center gap-md @max-md:gap-sm py-xs'
+});
+const defaultSuggestion = cva({ base: 'shrink-0 rounded-full px-xl @max-md:px-md' });
 
 export const aiSuggestionTheme = {
 	root: defaultRoot,

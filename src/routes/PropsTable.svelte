@@ -47,9 +47,15 @@
 </script>
 
 {#if docs}
-	<div class="border-neutral-muted bg-surface mt-12 w-full overflow-hidden rounded-xl border">
+	<!-- Below sm the table stacks: each prop is a row with its name and type on one line and the
+	     description under them, so nothing is cut off or squeezed into a tall narrow column. -->
+	<div
+		class="border-neutral-muted bg-surface mt-8 w-full overflow-hidden rounded-xl border sm:mt-12"
+	>
 		{#if docs.htmlAttributes.length > 0}
-			<div class="border-neutral-muted/40 flex items-center gap-2 border-b px-6 py-3">
+			<div
+				class="border-neutral-muted/40 flex flex-wrap items-center gap-2 border-b px-4 py-3 sm:px-6"
+			>
 				<span class="text-neutral/65 text-[10.5px] font-semibold tracking-[0.12em] uppercase">
 					Extends
 				</span>
@@ -61,13 +67,13 @@
 			</div>
 		{/if}
 		<div class="overflow-x-auto" role="region" aria-label="Props table" tabindex="0">
-			<table class="w-full border-collapse text-left">
+			<table class="w-full border-collapse text-left max-sm:block">
 				{#each sections as section (section.label)}
-					<tbody>
-						<tr>
+					<tbody class="max-sm:block">
+						<tr class="max-sm:block">
 							<th
 								colspan="3"
-								class="text-neutral/65 px-6 pt-5 pb-1.5 text-left text-[10.5px] font-semibold tracking-[0.12em] uppercase"
+								class="text-neutral/65 px-4 pt-4 pb-1.5 text-left text-[10.5px] font-semibold tracking-[0.12em] uppercase max-sm:block sm:px-6 sm:pt-5"
 							>
 								<span class="flex items-center gap-1.5">
 									{@render section.icon({ size: 13, color: section.color })}
@@ -76,8 +82,10 @@
 							</th>
 						</tr>
 						{#each section.props as prop (prop.name)}
-							<tr class="state-layer border-neutral-muted/40 border-t align-top transition-colors">
-								<td class="px-6 py-3.5 whitespace-nowrap">
+							<tr
+								class="state-layer border-neutral-muted/40 border-t align-top transition-colors max-sm:grid max-sm:grid-cols-[auto_minmax(0,1fr)] max-sm:items-start max-sm:gap-x-3 max-sm:gap-y-1 max-sm:px-4 max-sm:py-3"
+							>
+								<td class="px-6 py-3.5 whitespace-nowrap max-sm:p-0">
 									<span class="inline-flex items-center gap-2">
 										<span class="text-neutral font-mono text-[13px] font-medium">{prop.name}</span>
 										{#if !prop.optional}
@@ -89,7 +97,9 @@
 										{/if}
 									</span>
 								</td>
-								<td class="px-6 py-3.5">
+								<td
+									class="px-6 py-3.5 [overflow-wrap:anywhere] max-sm:min-w-0 max-sm:p-0 max-sm:text-end"
+								>
 									{#if prop.type}
 										<Popover
 											openOnHover
@@ -103,7 +113,7 @@
 													type="button"
 													{@attach popover.reference}
 													onclick={() => popover.toggle()}
-													class="text-primary/90 hover:text-primary-readable decoration-primary/30 hover:decoration-primary/60 cursor-help bg-transparent p-0 text-left font-mono text-[13px] underline decoration-dotted underline-offset-[3px] transition-colors"
+													class="text-primary/90 hover:text-primary-readable decoration-primary/30 hover:decoration-primary/60 max-w-full cursor-help bg-transparent p-0 text-left font-mono text-[13px] underline decoration-dotted underline-offset-[3px] transition-colors sm:max-w-80"
 												>
 													{prop.value}
 												</button>
@@ -121,7 +131,9 @@
 										<code class="text-primary/90 font-mono text-[13px]">{prop.value}</code>
 									{/if}
 								</td>
-								<td class="text-neutral/70 px-6 py-3.5 text-[13px] leading-relaxed">
+								<td
+									class="text-neutral/70 px-6 py-3.5 text-[13px] leading-relaxed max-sm:col-span-2 max-sm:p-0"
+								>
 									{#each describe(prop.description) as part, i (i)}
 										{#if part.code}
 											<code class="text-neutral font-mono text-[12.5px]">{part.value}</code>
