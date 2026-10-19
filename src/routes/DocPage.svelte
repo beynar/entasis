@@ -58,16 +58,16 @@
 </svelte:head>
 
 <article class="mx-auto w-full max-w-6xl">
-	<header class="mb-6">
-		<h1 class="text-neutral text-3xl font-bold tracking-tight">{title}</h1>
+	<header class="mb-4 sm:mb-6">
+		<h1 class="text-neutral text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
 		{#if subtitle}
-			<p class="text-neutral/70 mt-2 text-base">{subtitle}</p>
+			<p class="text-neutral/70 mt-1 text-sm sm:mt-2 sm:text-base">{subtitle}</p>
 		{/if}
 	</header>
 
 	{#if requires}
 		<section
-			class="border-neutral-muted bg-surface mb-8 rounded-md border p-4"
+			class="border-neutral-muted bg-surface mb-6 rounded-md border p-3 sm:mb-8 sm:p-4"
 			aria-label="Requires"
 		>
 			<h2 class="text-neutral text-sm font-semibold">Requires</h2>
@@ -80,11 +80,14 @@
 	{/if}
 
 	{#if features && features.length}
-		<ul class="mb-8 flex flex-wrap gap-2">
+		<!-- One row that scrolls sideways on phones, wrapping from sm up. -->
+		<ul
+			class="scrollbar -mx-4 mb-6 flex scrollbar-none gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:mb-8 sm:flex-wrap sm:gap-2 sm:overflow-visible sm:px-0"
+		>
 			{#each features as feature (typeof feature === 'string' ? feature : feature.test)}
 				{@const verified = typeof feature !== 'string'}
 				<li
-					class="border-neutral-muted bg-surface text-neutral/80 inline-flex items-center gap-1.5 rounded-full border py-1 pr-3 pl-2 text-xs"
+					class="border-neutral-muted bg-surface text-neutral/80 inline-flex shrink-0 items-center gap-1.5 rounded-full border py-1 pr-3 pl-2 text-xs whitespace-nowrap sm:shrink sm:whitespace-normal"
 					title={verified ? `Verified by test ${feature.test}` : undefined}
 				>
 					{#if verified}
@@ -111,9 +114,9 @@
 
 	<Tabbar items={tabs} bind:value={tabValue} />
 
-	<div class="mt-8">
+	<div class="mt-4 sm:mt-8">
 		{#if tabValue === 'Usage'}
-			<div class="grid gap-10">
+			<div class="grid gap-6 sm:gap-10">
 				{@render children()}
 			</div>
 			{#if component}
@@ -127,7 +130,7 @@
 			{/each}
 		{:else if tabValue === 'Examples'}
 			{#if examples}
-				<div class="grid gap-10">
+				<div class="grid gap-6 sm:gap-10">
 					{@render examples()}
 				</div>
 			{:else}

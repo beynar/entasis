@@ -92,7 +92,7 @@
 	} satisfies Record<TypeScalePreset, ThemeDesignTokens>;
 	const docsPageShellTheme = {
 		contentInner: {
-			padding: { large: 'p-5 md:p-5' }
+			padding: { large: 'p-4 md:p-5' }
 		}
 	} satisfies PageShellThemeProps;
 	// Previews and full-page templates render bare: they own their own chrome and token scope.
@@ -325,8 +325,9 @@
 {/snippet}
 
 {#snippet shellFooter()}
+	<!-- The sidebar levers shape the desktop sidebar only (phones get a drawer): hidden below md. -->
 	<div class="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
-		<div class="flex min-w-0 flex-wrap items-center gap-1.5">
+		<div class="hidden min-w-0 flex-wrap items-center gap-1.5 md:flex">
 			<span class="text-neutral/70 mr-1 text-xs font-medium">Variant</span>
 			<div class="flex flex-wrap items-center gap-1" role="group" aria-label="Sidebar variant">
 				{#each sidebarVariants as variant, index (index)}
@@ -341,7 +342,7 @@
 			</div>
 		</div>
 
-		<div class="flex min-w-0 flex-wrap items-center gap-1.5">
+		<div class="hidden min-w-0 flex-wrap items-center gap-1.5 md:flex">
 			<span class="text-neutral/70 mr-1 text-xs font-medium">State</span>
 			<div class="flex flex-wrap items-center gap-1" role="group" aria-label="Sidebar state">
 				{#each sidebarStates as state, index (index)}
@@ -393,7 +394,8 @@
 							class="md:hidden"
 							onclick={() => sidebar.toggle()}
 						/>
-						<nav aria-label="Primary" class="flex min-w-0 flex-wrap items-center gap-1">
+						<!-- On phones the drawer's activity bar carries these sections. -->
+						<nav aria-label="Primary" class="hidden min-w-0 flex-wrap items-center gap-1 md:flex">
 							{#each headerLinks as link, index (index)}
 								{@render headerLink(link)}
 							{/each}

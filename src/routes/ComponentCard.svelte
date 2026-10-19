@@ -36,7 +36,8 @@
 	let showCode = $state(false);
 </script>
 
-<div {...attachments} class="my-10 grid gap-4">
+<!-- Phones get tighter spacing everywhere, so the preview keeps the width it needs. -->
+<div {...attachments} class="my-6 grid gap-3 first:mt-0 sm:my-10 sm:gap-4 sm:first:mt-10">
 	{#if title || description}
 		<div>
 			{#if title}
@@ -49,7 +50,7 @@
 	{/if}
 	<div class="border-neutral-muted bg-surface raised overflow-hidden rounded-xl border">
 		<div
-			class="dotted-grid relative flex min-h-[400px] w-full items-center justify-center gap-4 p-8 {controls
+			class="dotted-grid relative flex min-h-[240px] w-full items-center justify-center gap-3 p-3 sm:min-h-[400px] sm:gap-4 sm:p-8 {controls
 				? 'flex-col items-stretch justify-start'
 				: ''} {className}"
 		>
@@ -57,7 +58,7 @@
 				<div
 					role="group"
 					aria-label="Preview controls"
-					class="border-neutral-muted bg-surface/95 raised z-20 mx-auto flex max-w-full flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-lg border p-2 backdrop-blur-sm"
+					class="border-neutral-muted bg-surface/95 raised z-20 mx-auto flex w-full max-w-full flex-col items-stretch gap-1 rounded-lg border p-1.5 backdrop-blur-sm sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-4 sm:gap-y-2 sm:p-2"
 				>
 					<ComponentControls {controls} />
 				</div>
