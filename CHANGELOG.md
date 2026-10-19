@@ -14,6 +14,9 @@ Unreleased section under the new version.
 - A drawer swipes closed from anywhere under a finger, buttons and links included, so a mobile
   Sidebar made of rows can be swiped away; a tap stays a tap. Fields, selects and media keep their
   own gesture, and `data-no-swipe` still opts an element out.
+- Following a link in the mobile Sidebar drawer's panel closes the drawer. The activity bar's links,
+  buttons, and clicks that open elsewhere (a modifier key, `target="_blank"`, `download`) keep it
+  open.
 
 ### Fixed
 

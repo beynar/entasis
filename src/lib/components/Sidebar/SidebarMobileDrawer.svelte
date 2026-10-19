@@ -41,6 +41,20 @@
 	const classes = $derived(useSidebarTheme(theme));
 	const resolvedColor = $derived(useDefaultColor());
 	const dialogType = $derived(side === 'right' ? 'drawerRight' : 'drawerLeft');
+
+	// Following a link in the panel takes the user to the page, so the drawer gets out of the way.
+	// The activity bar sits outside the panel: its links switch sections and keep the drawer open.
+	// A click that opens elsewhere (a modifier key, a new tab, a download) leaves it open. A
+	// prevented click still closes it: a client-side router (SvelteKit's) prevents every link
+	// click it navigates itself.
+	function closeOnLink(event: MouseEvent) {
+		if (event.button !== 0) return;
+		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+		const link = event.target instanceof Element ? event.target.closest('a[href]') : null;
+		if (!(link instanceof HTMLAnchorElement)) return;
+		if (link.target === '_blank' || link.hasAttribute('download')) return;
+		close();
+	}
 </script>
 
 <Dialog
@@ -70,6 +84,7 @@
 			style:--sidebar-width-mobile={widthMobile}
 			{dir}
 			class={classes.mobilePanel({ side, size, iconSize, density })}
+			onclick={closeOnLink}
 		>
 			{@render children()}
 		</div>
