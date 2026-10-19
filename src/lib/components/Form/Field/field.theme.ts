@@ -176,11 +176,11 @@ const defaultFieldActionButton = cva({
 			normal: '[&_svg:not([class*=size-])]:size-icon-md',
 			large: '[&_svg:not([class*=size-])]:size-icon-lg'
 		},
-		// Flush with the field's border, so the outer corners take the field's radius less that
-		// border: a hover or danger fill no longer pokes past the rounded corner.
+		// Flush with the field's border, so the outer corners take the field's radius: a hover or
+		// danger fill stays inside the rounded corner instead of poking past it.
 		edge: {
-			start: '-ml-lg mr-xs rounded-s-[calc(var(--radius-md)-1px)]',
-			end: 'ml-xs -mr-lg rounded-e-[calc(var(--radius-md)-1px)]',
+			start: '-ml-lg mr-xs rounded-s-md',
+			end: 'ml-xs -mr-lg rounded-e-md',
 			none: 'mx-0'
 		},
 		// The open/pressed state (a revealed password, an open picker) in the `selected` role, so
