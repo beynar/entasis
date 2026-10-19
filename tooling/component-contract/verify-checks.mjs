@@ -571,7 +571,10 @@ test('theme inventory sweeps a theme factory, not just a theme object', async ()
 
 		// Every rule reaches in here, not a chosen one: the factory body is ordinary theme source.
 		for (const [classes, diagnostic] of [
-			['h-9', /numeric height h-9 — controls use h-control-\* \/ min-h-control-\*, rows use h-row-\* \/ min-h-row-\*/],
+			[
+				'h-9',
+				/numeric height h-9 — controls use h-control-\* \/ min-h-control-\*, rows use h-row-\* \/ min-h-row-\*/
+			],
 			['text-neutral/80', /muted text text-neutral\/80 — secondary text is text-<role>\/70/],
 			['space-y-2', /numeric spacing utility space-y-2/],
 			['rounded-lg shadow-lg', /raw shadow shadow-lg — elevation comes from raised-N/]

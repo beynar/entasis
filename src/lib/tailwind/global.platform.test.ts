@@ -55,7 +55,6 @@ describe('scroll lock rules', () => {
 		expect(source).toMatch(/--keyboard-inset:\s*0px/);
 		expect(source).toMatch(/--visual-viewport-top:\s*0px/);
 	});
-
 });
 
 describe('drag-and-drop base styles', () => {
