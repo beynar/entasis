@@ -110,13 +110,15 @@ const defaultCountrySearch = cva({
 	base: 'w-full'
 });
 
+// The search row reads like a filterable Menu's (see the Menu theme's `search` parts); this part
+// stays as the override hook on that row.
 const defaultCountrySearchInputContainer = cva({
-	base: 'bg-surface-canvas',
+	base: '',
 	variants: {
 		size: {
-			small: 'py-xs',
-			normal: 'py-xs',
-			large: 'py-sm'
+			small: null,
+			normal: null,
+			large: null
 		}
 	},
 	defaultVariants: {
@@ -125,12 +127,12 @@ const defaultCountrySearchInputContainer = cva({
 });
 
 const defaultCountrySearchInput = cva({
-	base: 'placeholder:text-neutral/70',
+	base: '',
 	variants: {
 		size: {
-			small: 'text-xs',
-			normal: 'text-sm',
-			large: 'text-sm'
+			small: null,
+			normal: null,
+			large: null
 		}
 	},
 	defaultVariants: {

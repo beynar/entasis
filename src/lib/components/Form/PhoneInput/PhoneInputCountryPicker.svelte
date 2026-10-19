@@ -6,7 +6,8 @@
 	import Button from '../../Button/Button.svelte';
 	import { checkIcon } from '../../Icons/check.js';
 	import ScrollArea from '../../ScrollArea/ScrollArea.svelte';
-	import TextInput from '../TextInput/TextInput.svelte';
+	import { magnifyingGlassIcon } from '../../Icons/magnifyingGlass.js';
+	import { useMenuTheme } from '../../Menu/menu.theme.js';
 	import type { Sizes } from '$lib/types/theme.js';
 	import { useListNavigation } from '$lib/utils/useListNavigation.svelte.js';
 	import { useLiveAnnouncer } from '$lib/utils/useLiveAnnouncer.svelte.js';
@@ -45,6 +46,7 @@
 	const id = $derived(customId ?? generatedId);
 	const listboxId = $derived(`${id}-listbox`);
 	const classes = $derived(usePhoneInputTheme(theme));
+	const menuClasses = $derived(useMenuTheme());
 	const t = $derived(useI18n());
 	const filteredCountries = $derived(filterPhoneCountryOptions(countries, searchQuery, t.locale));
 	const optionId = (iso2: string) => `${id}-option-${iso2}`;
@@ -131,28 +133,37 @@
 </script>
 
 <div {id} class={classes.countryPicker({ class: theme?.countryPicker?.base })}>
-	<TextInput
+	<!-- The same search row as a filterable Menu: an icon, a borderless input, a divider. -->
+	<div
 		{@attach attachSearchInput}
-		bind:value={searchQuery}
-		inputAttrs={{ 'data-1p-ignore': true }}
-		placeholder={searchPlaceholder}
-		{size}
-		class={classes.countrySearch({ class: theme?.countrySearch?.base })}
-		theme={{
-			inputContainer: {
-				base: classes.countrySearchInputContainer({
+		class={classes.countrySearch({
+			class: [
+				menuClasses.search({ size }),
+				classes.countrySearchInputContainer({
 					class: theme?.countrySearchInputContainer?.base,
 					size
-				})
-			},
-			input: {
-				base: classes.countrySearchInput({
-					class: theme?.countrySearchInput?.base,
-					size
-				})
-			}
-		}}
-	/>
+				}),
+				theme?.countrySearch?.base
+			]
+				.filter(Boolean)
+				.join(' ')
+		})}
+	>
+		{@render magnifyingGlassIcon({ class: menuClasses.searchIcon({ size }) })}
+		<input
+			data-1p-ignore
+			type="text"
+			bind:value={searchQuery}
+			placeholder={searchPlaceholder}
+			aria-label={searchPlaceholder}
+			class={classes.countrySearchInput({
+				class: [menuClasses.searchInput({ size }), theme?.countrySearchInput?.base]
+					.filter(Boolean)
+					.join(' '),
+				size
+			})}
+		/>
+	</div>
 
 	<ScrollArea
 		scrollOnEdges

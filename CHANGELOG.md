@@ -17,6 +17,9 @@ Unreleased section under the new version.
 - `Code` adapts to a narrow block (under 28rem, as on a phone): 12px text and tighter padding, and
   the line-number gutter is sized in `ch` of the code font (about 46px at 14px, 29px at 12px)
   instead of a fixed 64px.
+- The `PhoneInput` country search reads like a filterable Menu (an icon, a borderless input and
+  a divider) instead of a bordered text field; the Menu's search divider is translucent, so it
+  shows on a dark floating surface too.
 - Tab moves from one field to the next. The buttons inside a field (`PasswordInput` reveal,
   `Combobox` and `Select` clear, `DateInput`, `TimeInput` and `ColorInput` picker buttons) leave
   the Tab order; the input offers the same action: ArrowDown opens the `TimeInput` and

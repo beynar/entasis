@@ -65,8 +65,10 @@ const defaultMenuGroupLabel = cva({
 });
 
 // The search field of a filterable menu: a row-height strip with a leading icon, a divider below.
+// A translucent divider: `border-neutral-muted` is the very tone of a dark floating surface (a
+// menu in a popover, the PhoneInput country picker), where it disappeared.
 const defaultMenuSearch = cva({
-	base: 'flex w-full items-center border-b border-neutral-muted',
+	base: 'flex w-full items-center border-b border-neutral/15',
 	variants: {
 		size: {
 			small: 'h-control-sm gap-sm px-sm',
