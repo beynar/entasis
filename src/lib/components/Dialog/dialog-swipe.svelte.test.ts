@@ -378,8 +378,8 @@ describe('Dialog drawer swipe-to-dismiss', () => {
 		setup();
 		const node = panel();
 
-		// NO_SWIPE_TAGS: the button owns its own pointer gesture.
-		await firePointer(screen.getByTestId('action'), 'pointerdown', { pos: 0, t: 0 });
+		// NO_SWIPE_TAGS: the field owns its own pointer gesture (the caret, the selection).
+		await firePointer(screen.getByTestId('field'), 'pointerdown', { pos: 0, t: 0 });
 		await firePointer(node, 'pointermove', { pos: 80, t: 100 });
 		expect(readout('dragging')).toBe('false');
 		await firePointer(node, 'pointerup', { pos: 80, t: 200 });
@@ -395,6 +395,15 @@ describe('Dialog drawer swipe-to-dismiss', () => {
 		if (!(thumb instanceof HTMLElement)) throw new Error('drag thumb not rendered');
 		await firePointer(thumb, 'pointerdown', { pos: 0, t: 600 });
 		await firePointer(node, 'pointermove', { pos: 80, t: 700 });
+		expect(readout('dragging')).toBe('true');
+		expect(readout('offset')).toBe('80');
+	});
+
+	test('a drag that starts on a button or a link swipes: they have no gesture of their own', async () => {
+		setup();
+		const node = panel();
+		await firePointer(screen.getByTestId('action'), 'pointerdown', { pos: 0, t: 0 });
+		await firePointer(node, 'pointermove', { pos: 80, t: 100 });
 		expect(readout('dragging')).toBe('true');
 		expect(readout('offset')).toBe('80');
 	});

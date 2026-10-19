@@ -37,7 +37,7 @@
 		variant?: SidebarVariant;
 		/** `static` when there is no desktop container to hold its gutters (`collapsible="none"`). */
 		placement?: 'positioned' | 'static';
-		/** Vertical along the sidebar edge on desktop; horizontal at the top of the mobile drawer. */
+		/** Vertical along the sidebar edge (also in the mobile drawer); horizontal across the top. */
 		orientation?: 'vertical' | 'horizontal';
 		/** Fallback accessible name when the activity bar sets no label. */
 		label: string;

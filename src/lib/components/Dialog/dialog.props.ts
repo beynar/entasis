@@ -124,7 +124,8 @@ export type DialogProps = WithSlot<
 		 *  does a drag that travels more across the axis than along it. A flick dismisses on release
 		 *  speed alone. A mouse or pen drags only from the handles (the thumb and the header), so
 		 *  dragging over the body selects text; a finger drags from anywhere unless text is selected
-		 *  in the panel. Opt elements out with `data-no-swipe`. A dialog above another keeps the one
+		 *  in the panel, buttons and links included (a field, a select or a media element keeps its
+		 *  own gesture). Opt elements out with `data-no-swipe`. A dialog above another keeps the one
 		 *  beneath moving with its swipe. */
 		swipeToDismiss?: boolean;
 		/** Show the drag thumb bar on swipe-dismissable drawers; set false to hide. Default true. */

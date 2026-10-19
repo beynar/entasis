@@ -5,6 +5,7 @@ import { getDeepActiveElement } from '$lib/utils/focus.js';
 import type { OpenChangeInit } from '$lib/utils/openChange.js';
 import { useHoverAction } from '$lib/utils/useHoverAction.svelte.js';
 import { isRestoringFocus } from '$lib/utils/useFocusScope.svelte.js';
+import { inputModality } from '$lib/utils/inputModality.js';
 import type { TooltipOptions } from './tooltip.props.js';
 import { requestTooltipChange, watchTooltipContentHover } from './tooltip.surface.js';
 
@@ -17,9 +18,16 @@ const FOCUSABLE =
  */
 export const TOOLTIP_CONTENT_GRACE = 100;
 
+// Follow the input kind from load on: a tooltip mounted by a tap (a drawer's items) must already
+// know that a tap came before the focus it receives.
+if (typeof document !== 'undefined') inputModality(document);
+
 /** Whether the focus that just arrived shows a focus ring (keyboard focus, not a click or a tap). */
 const showsFocusRing = (target: EventTarget | null) => {
 	if (!(target instanceof Element)) return true;
+	// After a tap, focus a script moves (a drawer opening on its first item) is no keyboard focus,
+	// though Safari, which never focused the tapped button, shows it a ring.
+	if (inputModality(target.ownerDocument) === 'touch') return false;
 	try {
 		return target.matches(':focus-visible');
 	} catch {
@@ -167,6 +175,8 @@ export const tooltip = (props: TooltipOptions) => {
 			hide({ reason: 'trigger-press', event });
 		};
 		const win = ref.ownerDocument.defaultView;
+		// Follow the input kind of the trigger's document too (an iframe, a popup window).
+		inputModality(ref.ownerDocument);
 		let windowFocusTimer: ReturnType<typeof setTimeout> | null = null;
 		const offs = [
 			// A new hover on the trigger ends the wait to close and the press that closed it.

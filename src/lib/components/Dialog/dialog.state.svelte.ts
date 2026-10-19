@@ -508,14 +508,14 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 		});
 	};
 
-	// Native controls that own their own pointer gesture — a drag starting on one of
-	// these must never become a drawer dismiss.
+	// Native controls that own their own pointer gesture (a caret, a selection, a slider, a
+	// scrubber): a drag starting on one of these must never become a drawer dismiss. Buttons and
+	// links have none, so a drawer made of rows (a mobile sidebar) still swipes; a tap stays a
+	// tap, since the drag only takes the pointer once it has travelled toward the edge.
 	static readonly NO_SWIPE_TAGS: readonly string[] = [
 		'INPUT',
 		'TEXTAREA',
 		'SELECT',
-		'BUTTON',
-		'A',
 		'VIDEO',
 		'AUDIO'
 	];

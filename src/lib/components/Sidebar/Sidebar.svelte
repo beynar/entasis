@@ -300,6 +300,19 @@
 		{theme}
 	/>
 {/snippet}
+{#snippet mobileActivityBar()}
+	{#if activityBar}
+		<SidebarActivityBar
+			{activityBar}
+			{side}
+			{size}
+			{density}
+			placement="static"
+			label={activityBarLabel}
+			{theme}
+		/>
+	{/if}
+{/snippet}
 {#snippet staticActivityBar()}
 	{#if activityBar}
 		<SidebarActivityBar
@@ -378,19 +391,10 @@
 					{iconSize}
 					{density}
 					label={navLabel}
+					rail={activityBar ? mobileActivityBar : undefined}
+					activityWidth={activityBarWidth}
 					{theme}
 				>
-					{#if activityBar}
-						<SidebarActivityBar
-							{activityBar}
-							{side}
-							{size}
-							{density}
-							orientation="horizontal"
-							label={activityBarLabel}
-							{theme}
-						/>
-					{/if}
 					{@render panel()}
 				</SidebarMobileDrawer>
 			{:else if resolvedCollapsible === 'none'}

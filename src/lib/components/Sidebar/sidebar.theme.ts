@@ -939,8 +939,8 @@ const defaultActivityBar = cva({
 			vertical: 'h-full w-[var(--sidebar-width-activity)] flex-col',
 			horizontal: 'w-full flex-row items-center border-b border-neutral-muted bg-surface-canvas'
 		},
-		// Beside the panel the rail wears that variant's panel surface (see the compounds); the
-		// mobile drawer's horizontal bar keeps one look whatever the variant.
+		// Beside the panel the rail wears that variant's panel surface (see the compounds); in the
+		// mobile drawer it is the admin column whatever the variant.
 		variant: {
 			admin: '',
 			floating: '',

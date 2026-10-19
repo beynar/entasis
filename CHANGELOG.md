@@ -6,7 +6,20 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Changed
+
+- The mobile Sidebar drawer runs the full screen height, flush with its edge (no inset), and keeps
+  its activity bar as a column at the drawer's outer edge beside the panel instead of a row across
+  the top.
+- A drawer swipes closed from anywhere under a finger, buttons and links included, so a mobile
+  Sidebar made of rows can be swiped away; a tap stays a tap. Fields, selects and media keep their
+  own gesture, and `data-no-swipe` still opts an element out.
+
 ### Fixed
+
+- A tooltip no longer opens on focus a script moves after a tap (Safari shows such focus a ring
+  because it never focused the tapped button), so opening the mobile Sidebar no longer pops the
+  active activity-bar item's tooltip.
 
 - Bottom sheets with text fields work on iPhone. On iOS the Theme adds `maximum-scale=1` to the
   viewport meta tag, so Safari no longer zooms the page into a focused field below 16px and leaves

@@ -152,6 +152,23 @@ describe('Tooltip focus (DF-6)', () => {
 		await waitFor(() => expect(screen.queryByRole('tooltip')).not.toBeInTheDocument());
 	});
 
+	test('focus a script moves after a tap does not open it, even with a ring (Safari)', async () => {
+		showFocusRing();
+		render(TooltipOptionsHarness);
+		// A finger opened a drawer that focused its first item: Safari shows that focus a ring.
+		document.body.dispatchEvent(
+			new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch' })
+		);
+		await fireEvent.focusIn(button('First'));
+		await wait(30);
+		expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+		// The keyboard takes over: focus is keyboard focus again.
+		await fireEvent.focusOut(button('First'));
+		await fireEvent.keyDown(document.body, { key: 'Tab' });
+		await fireEvent.focusIn(button('First'));
+		await screen.findByRole('tooltip');
+	});
+
 	test('focus that returns with the window does not open it', async () => {
 		showFocusRing();
 		render(TooltipOptionsHarness);

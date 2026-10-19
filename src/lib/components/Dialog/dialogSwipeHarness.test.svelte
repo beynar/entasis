@@ -64,6 +64,7 @@
 				First point
 			</button>
 			<button type="button" data-testid="action" onclick={onAction}>Action</button>
+			<input data-testid="field" aria-label="Field" />
 			<div data-testid="body">Body copy</div>
 			<div data-testid="opted-out" data-no-swipe>Opted out</div>
 			<div data-testid="scroller" style="overflow-y: auto;">Scrollable</div>
