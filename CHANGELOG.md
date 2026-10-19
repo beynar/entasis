@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.13.1 — 2026-10-19
+
 ### Added
 
 - `Theme`'s `transition` also accepts `{ type, duration, easing }` to tune a theme transition's
