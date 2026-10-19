@@ -17,6 +17,10 @@ Unreleased section under the new version.
 - `Code` adapts to a narrow block (under 28rem, as on a phone): 12px text and tighter padding, and
   the line-number gutter is sized in `ch` of the code font (about 46px at 14px, 29px at 12px)
   instead of a fixed 64px.
+- `AIModelSelector` searches with the Menu's own filter field: borderless with an icon, focus
+  stays in it while the arrow keys walk the models and Enter picks one. Matching (label,
+  provider, description) and the `query` binding are unchanged; a custom `search` snippet still
+  renders in the header.
 - `AISuggestions` trims its chips' side padding and gaps in a narrow row (under 28rem), so more
   suggestions fit on a phone.
 - Following a link in the mobile Sidebar drawer's panel closes the drawer. The activity bar's links,

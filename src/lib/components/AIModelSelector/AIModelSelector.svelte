@@ -6,7 +6,6 @@
 	import type { PopoverApi } from '../Popover/popover.api.js';
 	import PopupMenu from '../PopupMenu/PopupMenu.svelte';
 	import Slot from '../Slot/Slot.svelte';
-	import TextInput from '../Form/TextInput/TextInput.svelte';
 	import { getAIConversation } from '../AIConversation/aiConversation.state.svelte.js';
 	import { SvelteMap } from 'svelte/reactivity';
 	import type {
@@ -301,15 +300,7 @@
 
 {#snippet searchHeader()}
 	<div data-slot="ai-model-selector-search" class={classes.search()}>
-		{#if search}<Slot render={search} payload={selectorState} />{:else}<TextInput
-				value={query}
-				size="small"
-				placeholder={resolvedLabels.searchPlaceholder}
-				label={resolvedLabels.searchPlaceholder}
-				theme={{ label: { base: 'sr-only' } }}
-				inputAttrs={{ 'data-1p-ignore': true }}
-				onValueChange={(nextValue: string | null) => setQuery(nextValue ?? '')}
-			/>{/if}
+		{#if search}<Slot render={search} payload={selectorState} />{/if}
 	</div>
 {/snippet}
 
@@ -378,7 +369,21 @@
 		menu={{
 			items: menuItems,
 			class: classes.menu(),
-			header: searchable && hasModelSources ? searchHeader : undefined
+			// The menu's own search field (focus stays in it while the arrow keys walk the rows and
+			// Enter picks one). The selector keeps matching models itself (label, provider,
+			// description…), so every row the menu receives already matches. A custom `search`
+			// snippet keeps its place in the header instead.
+			header: searchable && hasModelSources && search ? searchHeader : undefined,
+			filter:
+				searchable && hasModelSources && !search
+					? {
+							placeholder: resolvedLabels.searchPlaceholder,
+							label: resolvedLabels.searchPlaceholder,
+							match: () => true
+						}
+					: undefined,
+			search: query,
+			onSearchChange: setQuery
 		}}
 	/>
 </div>
