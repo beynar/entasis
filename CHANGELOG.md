@@ -6,6 +6,22 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Dependencies
+
+- SvelteKit 3 is supported: the `@sveltejs/kit` peer range is now `^2.43.5 || ^3.0.0`. The library
+  reads `browser` from `esm-env` instead of `$app/environment` (deprecated in SvelteKit 3), so only
+  NetworkIndicator still needs SvelteKit (`$app/state`).
+- `@tanstack/charts` 1.x is supported: the optional peer range is now `^0.18.0 || ^1.0.0`; Chart
+  works with both.
+- `lightgallery` 3 (ImageGallery, ImageZoom): same API, SVG icons instead of the icon font.
+  lightGallery 3 license keys start with `LIG` and a v2 key is no longer valid: pass a v3 key
+  through `licenseKey`; with the evaluation key the gallery works and logs a one-time warning.
+- `@atlaskit/pragmatic-drag-and-drop` 4, `@tanstack/table-core` 9.3, `@tanstack/highlight` 1.1
+  (Code now highlights Rust, Java, C#, Dart, Kotlin, Lua, Perl, Ruby and Swift), `@pierre/diffs`
+  1.5, `@maskito` 5.6 and `cn` 0.5.
+- TypeScript stays on 6: TypeScript 7 (the native compiler) has no compiler API yet, which
+  svelte-check, svelte2tsx, SvelteKit 3 and typescript-eslint all require.
+
 ### Changed
 
 - The mobile Sidebar drawer runs the full screen height, flush with its edge (no inset), and keeps
