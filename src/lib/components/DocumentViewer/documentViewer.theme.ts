@@ -99,7 +99,7 @@ const error = cva({
 const skeleton = cva({ base: 'absolute inset-0 z-30 h-full w-full rounded-none' });
 const search = cva({ base: 'flex items-center gap-xs' });
 const searchInput = cva({
-	base: 'min-w-0 flex-1 rounded-sm border border-neutral-muted bg-surface px-md py-xs text-sm outline-none focus:border-primary',
+	base: 'min-w-0 flex-1 rounded-sm border border-neutral-muted bg-surface px-md py-xs text-sm outline-none focus:border-focus',
 	variants: { size: { small: 'py-micro text-xs', normal: 'text-sm', large: 'text-base' } },
 	defaultVariants: { size: 'normal' }
 });

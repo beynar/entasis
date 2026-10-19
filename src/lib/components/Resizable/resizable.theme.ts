@@ -56,7 +56,7 @@ const defaultHandle = cva({
 		},
 		variant: {
 			default:
-				'bg-neutral-muted opacity-70 hover:opacity-100 data-[dragging=true]:bg-primary/45 data-[dragging=true]:opacity-100',
+				'bg-neutral-muted opacity-70 hover:opacity-100 data-[dragging=true]:bg-color/45 data-[dragging=true]:opacity-100',
 			splitted: 'bg-transparent data-[dragging=true]:bg-transparent'
 		},
 		lines: {

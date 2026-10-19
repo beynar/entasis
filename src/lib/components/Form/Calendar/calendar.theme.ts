@@ -86,8 +86,10 @@ const defaultWeekday = cva({
 	base: 'text-center text-xs font-medium text-neutral/70 uppercase py-md'
 });
 
+// Hover is the shared state-layer tint, as on every other control; selection, the range and its
+// edge markers follow the `selected` role, so the day grid takes the theme's default color.
 const defaultDay = cva({
-	base: 'state-layer relative flex aspect-square max-h-10 w-full cursor-pointer items-center justify-center rounded-sm text-sm ring-inset outline-none transition-colors hover:z-[1] hover:ring-2 hover:ring-primary focus-visible:z-[2] focus-visible:ring-2 focus-visible:ring-focus/50 disabled:cursor-not-allowed disabled:opacity-50',
+	base: 'state-layer relative flex aspect-square max-h-10 w-full cursor-pointer items-center justify-center rounded-sm text-sm ring-inset outline-none transition-colors focus-visible:z-[2] focus-visible:ring-2 focus-visible:ring-focus/50 disabled:cursor-not-allowed disabled:opacity-50',
 	variants: {
 		selected: {
 			true: `${selectedSoft} font-semibold`
@@ -106,10 +108,10 @@ const defaultDay = cva({
 			true: 'opacity-50 cursor-not-allowed'
 		},
 		startOfRange: {
-			true: `relative rounded-r-none after:content-["|"] after:text-primary-muted-readable after:text-sm after:font-semibold after:absolute after:left-0 after:top-1/2 after:-translate-y-1/2`
+			true: `relative rounded-r-none after:content-["|"] after:text-selected-muted-readable after:text-sm after:font-semibold after:absolute after:left-0 after:top-1/2 after:-translate-y-1/2`
 		},
 		endOfRange: {
-			true: `relative rounded-l-none after:content-["|"] after:text-primary-muted-readable after:text-sm after:font-semibold after:absolute after:right-0 after:top-1/2 after:-translate-y-1/2`
+			true: `relative rounded-l-none after:content-["|"] after:text-selected-muted-readable after:text-sm after:font-semibold after:absolute after:right-0 after:top-1/2 after:-translate-y-1/2`
 		},
 		isPast: {
 			true: ''
