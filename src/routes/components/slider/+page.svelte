@@ -4,6 +4,7 @@
 	import Form from '$lib/components/Form/Form/Form.svelte';
 	import { Slider } from '$lib/components/Form/Slider/index.js';
 	import I18n from '$lib/i18n/I18n.svelte';
+	import { ar } from '$lib/i18n/ar.js';
 	import { sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
@@ -306,7 +307,7 @@
 		<ComponentCard
 			title="Right-to-left"
 			description="In an RTL locale the horizontal track mirrors: the minimum sits at the right edge, ArrowLeft increases, and a press reads its value from the right."
-			code={`<I18n locale="ar">
+			code={`<I18n locale="ar" catalogs={{ ar }}>
 	<Slider label="السطوع" bind:value={brightness} showValue />
 	<Slider
 		mode="range"
@@ -321,7 +322,7 @@
 	<Slider variant="contained" label="التوهج" bind:value={glow} min={0} max={3} step={0.1} showValue />
 </I18n>`}
 		>
-			<I18n locale="ar" manageDocument={false}>
+			<I18n locale="ar" catalogs={{ ar }} manageDocument={false}>
 				<div class="grid w-full max-w-md gap-6" data-testid="slider-rtl-demo">
 					<Slider label="السطوع" bind:value={brightness} showValue />
 					<Slider

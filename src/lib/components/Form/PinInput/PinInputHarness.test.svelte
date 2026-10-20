@@ -2,7 +2,7 @@
 	// PinInput inside the contexts the pin tests need: a locale, a native <form>, and an entasis
 	// Form that has an earlier field.
 	import { I18n } from '$lib/i18n/index.js';
-	import type { LocaleCode } from '$lib/i18n/locales.js';
+	import { locales, type LocaleCode } from '$lib/i18n/locales.js';
 	import Theme from '../../Theme/Theme.svelte';
 	import Form from '../Form/Form.svelte';
 	import PinInput from './PinInput.svelte';
@@ -23,7 +23,7 @@
 </script>
 
 <Theme>
-	<I18n {locale} manageDocument={false}>
+	<I18n {locale} catalogs={{ [locale]: locales[locale].messages }} manageDocument={false}>
 		{#if scenario === 'native-form'}
 			<form
 				data-testid="native-form"

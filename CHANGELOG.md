@@ -6,6 +6,21 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Fixed
+
+- An app no longer bundles all eight translation catalogs. `I18n` used to import every catalog to
+  look up its `locale`; it now reads `catalogs`, which takes the catalogs to render immediately and
+  on the server: `<I18n locale="fr" catalogs={{ fr }}>`, with `fr` imported from `entasis/i18n`
+  (`es`, `fr`, `de`, `ja`, `zh`, `pt` and `ar` are now exported by name). A locale missing from
+  `catalogs` loads its own chunk when selected and shows English until it arrives, so an existing
+  `<I18n locale="fr">` keeps working in the browser but renders English on the server. The
+  `locales` registry still imports every catalog; keep it for language pickers.
+
+### Dependencies
+
+- `svelte-streamdown` 5 (Markdown, AIMessage): it renders Mermaid with pele, so `mermaid` and its
+  dependency tree are no longer installed with entasis.
+
 ## 0.13.1 — 2026-10-19
 
 ### Added

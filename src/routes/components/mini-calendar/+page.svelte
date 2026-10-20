@@ -4,6 +4,7 @@
 	import DocPage from '../../DocPage.svelte';
 	import MiniCalendar from '$lib/components/MiniCalendar/MiniCalendar.svelte';
 	import I18n from '$lib/i18n/I18n.svelte';
+	import { ar } from '$lib/i18n/ar.js';
 
 	let selected = $state<Date | null>(new Date());
 	const today = new Date();
@@ -161,11 +162,11 @@
 		<!-- Example 7: Locale + RTL — month labels and aria-labels follow the I18n catalog locale -->
 		<ComponentCard
 			description="Arabic catalog: month labels, aria-labels and layout follow the I18n locale"
-			code={`<I18n locale="ar">
+			code={`<I18n locale="ar" catalogs={{ ar }}>
 	<MiniCalendar dir="rtl" value={new Date()} />
 </I18n>`}
 		>
-			<I18n locale="ar" manageDocument={false}>
+			<I18n locale="ar" catalogs={{ ar }} manageDocument={false}>
 				<MiniCalendar dir="rtl" value={new Date()} />
 			</I18n>
 		</ComponentCard>

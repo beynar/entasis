@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/Button/index.js';
 	import { GanttChart, type GanttTask } from '$lib/components/GanttChart/index.js';
-	import { I18n } from '$lib/i18n/index.js';
+	import { I18n, ar } from '$lib/i18n/index.js';
 	import { newYorkProjectCalendar } from './ganttChartDemoData.js';
 
 	let loading = $state(false);
@@ -42,7 +42,7 @@
 			</Button>
 		</div>
 	</div>
-	<I18n locale={direction === 'rtl' ? 'ar' : 'en'} manageDocument={false}>
+	<I18n locale={direction === 'rtl' ? 'ar' : 'en'} catalogs={{ ar }} manageDocument={false}>
 		<div dir={direction}>
 			<GanttChart
 				bind:tasks

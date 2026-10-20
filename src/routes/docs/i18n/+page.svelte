@@ -9,6 +9,8 @@
 
 	// Direct catalog read for the live readouts / code generation below.
 	const t = $derived(locales[locale].messages);
+	// This page shows every locale, so it preloads them all; an app passes only the ones it renders.
+	const catalogs = Object.fromEntries(localeList.map(({ code, messages }) => [code, messages]));
 
 	const options = [
 		{ value: 'a', label: 'Alpha' },
@@ -18,14 +20,14 @@
 
 	const scriptCode = `
 <s${'cript'}>
-	import { I18n } from '$lib/i18n/index.js';
-	let locale = $state<'en' | 'fr' | 'ar'>('en');
+	import { I18n, fr } from 'entasis/i18n';
+	let locale = $state<'en' | 'fr' | 'ar'>('fr');
 </s${'cript'}>
 		`;
 	const setupCode = `<!-- +layout.svelte — wrap the app once -->
 ${scriptCode}
 
-<I18n bind:locale>
+<I18n bind:locale catalogs={{ fr }}>
 	{@render children()}
 </I18n>
 
@@ -34,10 +36,15 @@ ${scriptCode}
   keeps <html dir> / <html lang> in sync (rtl for Arabic).
   Bind \`locale\` to a picker to switch languages live.
 
+  Only the catalogs you import are bundled. \`catalogs\` holds the ones
+  rendered immediately (and on the server); any other locale loads its
+  own chunk the first time it is selected, English showing meanwhile.
+
   Override individual keys on top of the locale:
     <I18n bind:locale messages={{ search: 'Rechercher' }}>...</I18n>
 
-  Headless alternative (no wrapper): setI18n(locales.fr.messages)
+  Headless alternative (no wrapper): setI18n(fr)
+  The \`locales\` registry imports all eight catalogs: use it only for a picker.
 -->`;
 
 	const instanceCode = `<!-- Override for a single component instance -->
@@ -57,7 +64,7 @@ ${scriptCode}
 	let codeTab = $state('Setup');
 </script>
 
-<I18n bind:locale>
+<I18n bind:locale {catalogs}>
 	<div class="mx-auto flex max-w-3xl flex-col gap-6 p-6">
 		<div>
 			<h1 class="text-neutral-light text-2xl font-semibold">Internationalization</h1>

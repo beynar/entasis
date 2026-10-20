@@ -1,6 +1,6 @@
 <script lang="ts">
 	import I18n from '$lib/i18n/I18n.svelte';
-	import type { LocaleCode } from '$lib/i18n/locales.js';
+	import { locales, type LocaleCode } from '$lib/i18n/locales.js';
 	import Theme from '../Theme/Theme.svelte';
 	import AIComposer from './AIComposer.svelte';
 	import type { AIComposerHandle, AIComposerProps } from './aiComposer.props.js';
@@ -16,7 +16,7 @@
 </script>
 
 <Theme>
-	<I18n {locale} manageDocument={false}>
+	<I18n {locale} catalogs={{ [locale]: locales[locale].messages }} manageDocument={false}>
 		<AIComposer
 			bind:this={composer}
 			{value}

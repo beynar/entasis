@@ -131,7 +131,7 @@ export const customizationCode = [
 ].join('\n');
 
 export const loadingRtlCode = [
-	'<I18n locale="ar" manageDocument={false}>',
+	'<I18n locale="ar" catalogs={{ ar }} manageDocument={false}>',
 	'  <div dir="rtl">',
 	'    <GanttChart',
 	'      bind:tasks {loading}',

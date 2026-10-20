@@ -19,7 +19,11 @@ export type LocaleMeta = {
 	messages: Messages;
 };
 
-/** All shipped locales. Pass `locales[code].messages` to `setI18n` and set `document.dir` from `locales[code].dir`. */
+/**
+ * Every shipped locale with its catalog, for a language picker. Importing it bundles all eight
+ * catalogs: an app with a fixed locale imports that catalog by name instead (`import { fr } from
+ * 'entasis/i18n'`) and passes it to `<I18n catalogs={{ fr }}>` or `setI18n`.
+ */
 export const locales: Record<LocaleCode, LocaleMeta> = {
 	en: { name: 'English', dir: 'ltr', messages: en },
 	es: { name: 'Español', dir: 'ltr', messages: es },
@@ -31,7 +35,7 @@ export const locales: Record<LocaleCode, LocaleMeta> = {
 	ar: { name: 'العربية', dir: 'rtl', messages: ar }
 };
 
-export const localeList = Object.entries(locales).map(([code, meta]) => ({
+export const localeList = /* @__PURE__ */ Object.entries(locales).map(([code, meta]) => ({
 	code: code as LocaleCode,
 	...meta
 }));

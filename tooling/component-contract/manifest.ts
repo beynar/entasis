@@ -2982,11 +2982,18 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'LocaleCode',
 		'LocaleMeta',
 		'Messages',
+		'ar',
+		'de',
 		'en',
+		'es',
+		'fr',
+		'ja',
 		'localeList',
 		'locales',
+		'pt',
 		'setI18n',
-		'useI18n'
+		'useI18n',
+		'zh'
 	],
 	'tailwind-plugin': ['default'],
 	types: [

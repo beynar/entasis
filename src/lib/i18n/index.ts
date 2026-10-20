@@ -1,4 +1,11 @@
 export { default as I18n } from './I18n.svelte';
 export { en, type Messages } from './en.js';
+export { es } from './es.js';
+export { fr } from './fr.js';
+export { de } from './de.js';
+export { ja } from './ja.js';
+export { zh } from './zh.js';
+export { pt } from './pt.js';
+export { ar } from './ar.js';
 export { setI18n, useI18n, type I18nInput } from './context.svelte.js';
 export { locales, localeList, type LocaleCode, type LocaleMeta } from './locales.js';

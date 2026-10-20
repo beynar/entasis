@@ -4,6 +4,7 @@
 	import { PhoneInput } from '$lib/components/Form/PhoneInput/index.js';
 	import Form from '$lib/components/Form/Form/Form.svelte';
 	import I18n from '$lib/i18n/I18n.svelte';
+	import { fr } from '$lib/i18n/fr.js';
 	import { densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
@@ -126,12 +127,12 @@
 		<ComponentCard
 			title="Country names follow the locale"
 			description="Open the picker: names are written, sorted and searched in the active locale (here French, so searching allemagne finds Germany)."
-			code={`<I18n locale="fr">
+			code={`<I18n locale="fr" catalogs={{ fr }}>
 	<PhoneInput label="Téléphone" placeholder="Numéro de téléphone" />
 </I18n>`}
 		>
 			<div class="w-full max-w-md">
-				<I18n locale="fr" manageDocument={false}>
+				<I18n locale="fr" catalogs={{ fr }} manageDocument={false}>
 					<PhoneInput label="Téléphone" placeholder="Numéro de téléphone" />
 				</I18n>
 			</div>
