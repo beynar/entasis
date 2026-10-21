@@ -195,9 +195,11 @@ test('a close during the open reverses from the current height and reports only 
 	const after = height();
 	await nextFrame();
 	const later = height();
-	// No jump to full height or to zero: the collapse continues from where the open was (the open
-	// grows about 3px a frame), then shrinks.
-	expect(Math.abs(after - before)).toBeLessThan(8);
+	// No jump to full height (118px) or to zero (the panel is past 30px, so either jump moves it
+	// 30px or more): the collapse continues from where the open was, then shrinks. A slow runner
+	// can drop frames between the two reads (the close moves about 6px a frame), so the bound
+	// only rules out a jump.
+	expect(Math.abs(after - before)).toBeLessThan(30);
 	expect(later).toBeLessThan(after);
 	expect(later).toBeGreaterThan(0);
 	expect(panel().hasAttribute('data-exiting')).toBe(true);
