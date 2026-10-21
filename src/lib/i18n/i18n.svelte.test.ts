@@ -23,9 +23,16 @@ describe('I18n catalogs', () => {
 			props: { locale: 'fr', catalogs: { fr } }
 		});
 
+		// The chunk can arrive before any assertion runs, so record every text the probe shows.
+		const probe = getByTestId('probe');
+		const shown: string[] = [];
+		const observer = new MutationObserver(() => shown.push(probe.textContent ?? ''));
+		observer.observe(probe, { characterData: true, childList: true, subtree: true });
+
 		await rerender({ locale: 'es', catalogs: { fr } });
-		expect(getByTestId('probe')).toHaveTextContent('Précédent');
-		expect(await findByText('Anterior')).toBe(getByTestId('probe'));
+		expect(await findByText('Anterior')).toBe(probe);
+		observer.disconnect();
+		expect(shown).not.toContain('Previous');
 	});
 
 	test('applies per-key overrides on top of the catalog', () => {
