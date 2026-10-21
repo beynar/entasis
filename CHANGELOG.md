@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.13.2 — 2026-10-21
+
 ### Fixed
 
 - An app no longer bundles all eight translation catalogs. `I18n` used to import every catalog to
