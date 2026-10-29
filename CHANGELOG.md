@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.13.3 — 2026-10-29
+
 ### Added
 
 - Sidebar rows take a `suffix` snippet, on `SidebarMenuEntry` and `SidebarMenuSubEntry`:
