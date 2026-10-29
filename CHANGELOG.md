@@ -6,6 +6,19 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- Sidebar rows take a `suffix` snippet, on `SidebarMenuEntry` and `SidebarMenuSubEntry`:
+  `suffix?: Snippet<[SidebarApi, SidebarMenuEntry]>` (`SidebarMenuSubEntry` on a sub entry),
+  rendered at the row's end beside the label (a count, a `Chip`, an icon, a status dot, its own
+  `PopupMenu` trigger). It receives the row's own entry, so rows built as data share one snippet
+  declared in markup, `{#snippet suffix(api, entry)}`, and tell themselves apart by `entry.href`. It sits beside the row's link or button,
+  never inside it, so its controls never follow the row's `href` nor toggle it, and Tab reaches
+  them right after the row. The label truncates before it, the new `suffix` theme part bounds its
+  width, and with an `action` it stays visible just before the action at every width. The row's
+  link is `aria-describedby` the suffix. Hidden and `inert` in icon-collapsed mode, shown in the
+  mobile drawer.
+
 ## 0.13.2 — 2026-10-21
 
 ### Fixed

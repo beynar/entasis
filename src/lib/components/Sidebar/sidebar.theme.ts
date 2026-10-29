@@ -279,16 +279,40 @@ const defaultMenu = cva({
 // always. `actionBelowMd` is for a row whose last trailing part is its badge: from `md` up the
 // badge holds the end column and the action takes its place while it shows, so the room is only
 // needed below `md`, where the action is always visible and the badge sits before it.
-const rowEndReserveKeys = { none: '', action: '', actionBelowMd: '' };
+// `suffix` and `suffixAction` hold a row's `suffix` (see `suffix`), which sits beside the row
+// rather than inside it: the row reserves the suffix's measured width (`--sidebar-suffix-width`,
+// its maximum width until measured), plus the row's own end padding or the action's box.
+const rowEndReserveKeys = { none: '', action: '', actionBelowMd: '', suffix: '', suffixAction: '' };
 const rowEndReserve: {
-	endReserve: 'action' | 'actionBelowMd';
-	size: 'large' | ('small' | 'normal')[];
+	endReserve: 'action' | 'actionBelowMd' | 'suffix' | 'suffixAction';
+	size?: 'large' | ('small' | 'normal')[];
+	density?: 'compact' | ('normal' | 'comfortable')[];
 	class: string;
 }[] = [
 	{ endReserve: 'action', size: ['small', 'normal'], class: 'pe-layout-lg' },
 	{ endReserve: 'action', size: 'large', class: 'pe-[calc(var(--spacing)*10)]' },
 	{ endReserve: 'actionBelowMd', size: ['small', 'normal'], class: 'max-md:pe-layout-lg' },
-	{ endReserve: 'actionBelowMd', size: 'large', class: 'max-md:pe-[calc(var(--spacing)*10)]' }
+	{ endReserve: 'actionBelowMd', size: 'large', class: 'max-md:pe-[calc(var(--spacing)*10)]' },
+	{
+		endReserve: 'suffix',
+		density: 'compact',
+		class: 'pe-[calc(var(--sidebar-suffix-width,40%)+var(--space-sm)*2)]'
+	},
+	{
+		endReserve: 'suffix',
+		density: ['normal', 'comfortable'],
+		class: 'pe-[calc(var(--sidebar-suffix-width,40%)+var(--space-md)+var(--space-sm))]'
+	},
+	{
+		endReserve: 'suffixAction',
+		size: ['small', 'normal'],
+		class: 'pe-[calc(var(--sidebar-suffix-width,40%)+var(--layout-space-lg)+var(--space-sm))]'
+	},
+	{
+		endReserve: 'suffixAction',
+		size: 'large',
+		class: 'pe-[calc(var(--sidebar-suffix-width,40%)+var(--spacing)*10+var(--space-sm))]'
+	}
 ];
 
 const defaultMenuButton = cva({
@@ -319,6 +343,12 @@ const defaultMenuButton = cva({
 	},
 	compoundVariants: [
 		...rowEndReserve,
+		// The suffix covers the row's end, so hovering it keeps the row's hover tint.
+		{
+			endReserve: ['suffix', 'suffixAction'],
+			class:
+				'group-has-[[data-sidebar=menu-suffix]:hover]/menu-row:before:opacity-[var(--state-hover-opacity)]'
+		},
 		{ size: 'small', itemSize: 'small', class: 'h-control-sm' },
 		{ size: 'small', itemSize: 'normal', class: 'h-control-md' },
 		{ size: 'small', itemSize: 'large', class: 'h-row-lg' },
@@ -426,7 +456,14 @@ const defaultSubButton = cva({
 		// plain row keeps its exact classes.
 		endReserve: rowEndReserveKeys
 	},
-	compoundVariants: [...rowEndReserve],
+	compoundVariants: [
+		...rowEndReserve,
+		{
+			endReserve: ['suffix', 'suffixAction'],
+			class:
+				'group-has-[[data-sidebar=menu-sub-suffix]:hover]/menu-sub-item:before:opacity-[var(--state-hover-opacity)]'
+		}
+	],
 	defaultVariants: {
 		activeVariant: 'soft',
 		size: 'normal',
@@ -476,6 +513,44 @@ const defaultSubAction = cva({
 	defaultVariants: {
 		size: 'normal',
 		density: 'normal'
+	}
+});
+
+// A row's `suffix`: consumer content (a count, a Chip, a status dot, its own menu trigger) beside
+// the row's link or button rather than inside it, so it may hold controls. It sits at the row's
+// end, before the pinned action's box when the row has one, and stays visible while the action
+// shows. Its width is bounded, so a wide suffix clips instead of pushing the label out; the row
+// reserves its measured width (`endReserve`), so the label truncates before it. Hidden with the
+// labels in icon-collapsed mode.
+const defaultSuffix = cva({
+	base: 'text-neutral/70 absolute top-1/2 flex max-w-[40%] min-w-0 -translate-y-1/2 items-center justify-end gap-xs overflow-x-clip [overflow-clip-margin:var(--space-xs)] [&>*]:min-w-0 group-data-[collapsible=icon]:hidden',
+	variants: {
+		size: {
+			small: 'text-xs',
+			normal: 'text-sm',
+			large: 'text-sm'
+		},
+		density: {
+			compact: '',
+			normal: '',
+			comfortable: ''
+		},
+		// Whether the row also pins an `action`: the suffix then ends before the action's box.
+		action: {
+			none: '',
+			action: ''
+		}
+	},
+	compoundVariants: [
+		{ action: 'none', density: 'compact', class: 'end-[var(--space-sm)]' },
+		{ action: 'none', density: ['normal', 'comfortable'], class: 'end-[var(--space-md)]' },
+		{ action: 'action', size: ['small', 'normal'], class: 'end-[var(--layout-space-lg)]' },
+		{ action: 'action', size: 'large', class: 'end-[calc(var(--spacing)*10)]' }
+	],
+	defaultVariants: {
+		size: 'normal',
+		density: 'normal',
+		action: 'none'
 	}
 });
 
@@ -1176,6 +1251,7 @@ export const sidebarTheme = {
 	subButton: defaultSubButton,
 	menuAction: defaultMenuAction,
 	subAction: defaultSubAction,
+	suffix: defaultSuffix,
 	actionSlot: defaultActionSlot,
 	actionTrigger: defaultActionTrigger,
 	menuIcon: defaultMenuIcon,

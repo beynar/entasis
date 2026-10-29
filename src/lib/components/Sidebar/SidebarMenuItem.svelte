@@ -28,6 +28,7 @@
 	import SidebarFlyout from './SidebarFlyout.svelte';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import SidebarMenuSubItem from './SidebarMenuSubItem.svelte';
+	import { useSidebarSuffixWidth } from './sidebar.suffix.svelte.js';
 	import { useSidebarMotion, useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 
 	let {
@@ -61,6 +62,8 @@
 	let submenuTriggerRef = $state<HTMLButtonElement | null>(null);
 	let submenuRef = $state<HTMLUListElement | null>(null);
 	let actionRef = $state<HTMLElement | null>(null);
+	let suffixRef = $state<HTMLElement | null>(null);
+	const suffixWidth = useSidebarSuffixWidth();
 	const classes = $derived(useSidebarTheme(theme));
 	// Motion preset from `sidebarTheme.motion`, through the override ladder
 	// (registry → `setSidebarTheme` → the instance `theme.motion` slot).
@@ -86,9 +89,20 @@
 			(item.view !== undefined && !back) ||
 			(hasSubmenu && !item.href && item.collapsible !== false && collapseIcon !== 'none')
 	);
+	// A suffix sits beside the row and stays visible before the action, so a row with one reserves
+	// the suffix's width and the action's box at every width, and its badge never steps aside.
 	const endReserve = $derived(
-		!item.action ? 'none' : showBadge && !hasTrailingGlyph ? 'actionBelowMd' : 'action'
+		item.suffix
+			? item.action
+				? 'suffixAction'
+				: 'suffix'
+			: !item.action
+				? 'none'
+				: showBadge && !hasTrailingGlyph
+					? 'actionBelowMd'
+					: 'action'
 	);
+	const badgeAction = $derived(item.action && !item.suffix ? 'row' : 'none');
 	// A bare glyph stays bare: the wrapper only appears when the entry asks for a role tint or a
 	// tile, so an untinted row never inherits the ambient `data-color`.
 	const hasIconSurface = $derived(!!item.icon && (item.iconVariant === 'tile' || !!item.iconColor));
@@ -113,6 +127,9 @@
 	const tooltipPosition = () => sidebarInwardPhysicalSide(api.side, direction());
 	const uid = $props.id();
 	const submenuId = `${uid}-submenu`;
+	const suffixId = `${uid}-suffix`;
+	// The row reads with its suffix (« Dossiers, 20 ») while the suffix is on screen.
+	const describedBy = $derived(item.suffix && !isIconCollapsed ? suffixId : undefined);
 	// The submenu's `hidden` state and its height animation, reversible mid-way, come from the
 	// shared disclosure panel, as Collapsible's and Accordion's do.
 	const submenuPanel = disclosurePanel({ open: () => showSubmenu, motion: () => collapseMotion });
@@ -126,7 +143,10 @@
 			return;
 		}
 
-		if (isIconCollapsed && actionRef?.contains(activeElement)) {
+		if (
+			isIconCollapsed &&
+			(actionRef?.contains(activeElement) || suffixRef?.contains(activeElement))
+		) {
 			(submenuTriggerRef ?? rowRef)?.focus();
 		}
 	});
@@ -172,7 +192,7 @@
 		<span
 			data-slot="sidebar-menu-badge"
 			data-sidebar="menu-badge"
-			class={classes.badge({ size, action: item.action ? 'row' : 'none' })}
+			class={classes.badge({ size, action: badgeAction })}
 		>
 			{item.badge}
 		</span>
@@ -209,6 +229,7 @@
 			data-active-variant={activeVariant}
 			aria-current={item.isActive ? 'page' : undefined}
 			aria-disabled={item.disabled || undefined}
+			aria-describedby={describedBy}
 			tabindex={item.disabled ? -1 : undefined}
 			class={classes.menuButton({
 				variant: item.variant,
@@ -238,6 +259,7 @@
 			data-active-variant={activeVariant}
 			aria-current={item.isActive ? 'page' : undefined}
 			aria-label={ariaLabel}
+			aria-describedby={describedBy}
 			data-sidebar-view-target={item.view}
 			disabled={item.disabled || undefined}
 			class={classes.menuButton({
@@ -295,6 +317,7 @@
 				aria-expanded={popover.isOpen}
 				aria-haspopup="menu"
 				aria-controls={popover.isOpen ? popover.id : undefined}
+				aria-describedby={describedBy}
 				{@attach tooltipContent
 					? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
 					: undefined}
@@ -374,7 +397,10 @@
 	data-sidebar="menu-item"
 	class={classes.menuItem()}
 >
-	<div class="group/menu-row relative">
+	<div
+		class="group/menu-row relative"
+		style:--sidebar-suffix-width={item.suffix ? suffixWidth.value : undefined}
+	>
 		{#if item.menu}
 			{@render dropdownButton()}
 		{:else if hasFlyout}
@@ -423,6 +449,7 @@
 					})}
 					aria-expanded={showSubmenu}
 					aria-controls={submenuPanel.rendered ? submenuId : undefined}
+					aria-describedby={describedBy}
 					{...openStateAttributes(showSubmenu)}
 					{@attach tooltipContent
 						? tooltip(sidebarTooltip(tooltipContent, tooltipPosition))
@@ -435,6 +462,22 @@
 			{/if}
 		{:else}
 			{@render leafButton()}
+		{/if}
+
+		{#if item.suffix}
+			<!-- Beside the row, never inside it: the suffix may hold its own controls. -->
+			<div
+				bind:this={suffixRef}
+				id={suffixId}
+				data-slot="sidebar-menu-suffix"
+				data-sidebar="menu-suffix"
+				inert={isIconCollapsed ? true : undefined}
+				aria-hidden={isIconCollapsed ? 'true' : undefined}
+				class={classes.suffix({ size, density, action: item.action ? 'action' : 'none' })}
+				{@attach suffixWidth.measure}
+			>
+				{@render item.suffix(api, item)}
+			</div>
 		{/if}
 
 		{#if item.action}

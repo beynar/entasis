@@ -207,6 +207,14 @@ export type SidebarMenuSubEntry = {
 	 * from `md` up and while its menu is open, always on touch-sized screens.
 	 */
 	action?: Snippet<[SidebarApi]> | SidebarMenuActionDescriptor;
+	/**
+	 * Content rendered at the row's end, beside the label: a count, a Chip, an icon, a status dot,
+	 * its own menu trigger. It sits beside the row's link or button, never inside it, so it may hold
+	 * controls; the row's link is described by it. It stays visible before the `action`, and is
+	 * hidden in icon-collapsed mode. It receives the row's entry, so one snippet can serve every
+	 * row (`{#snippet suffix(api, entry)}`) and tell them apart by `entry.href`.
+	 */
+	suffix?: Snippet<[SidebarApi, SidebarMenuSubEntry]>;
 };
 
 type SidebarMenuEntryBase = {
@@ -251,6 +259,14 @@ type SidebarMenuEntryBase = {
 	defaultOpen?: boolean;
 	/** Secondary action pinned to the row edge. */
 	action?: Snippet<[SidebarApi]> | SidebarMenuActionDescriptor;
+	/**
+	 * Content rendered at the row's end, beside the label: a count, a Chip, an icon, a status dot,
+	 * its own menu trigger. It sits beside the row's link or button, never inside it, so it may hold
+	 * controls; the row's link is described by it. It stays visible before the `action`, and is
+	 * hidden in icon-collapsed mode. It receives the row's entry, so one snippet can serve every
+	 * row (`{#snippet suffix(api, entry)}`) and tell them apart by `entry.href`.
+	 */
+	suffix?: Snippet<[SidebarApi, SidebarMenuEntry]>;
 };
 
 type SidebarMenuEntryNavigation = SidebarMenuEntryBase & {

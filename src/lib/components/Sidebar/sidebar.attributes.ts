@@ -37,6 +37,8 @@ export const sidebarCssVariables = {
 	'--sidebar-width': 'On the root: the expanded panel width.',
 	'--sidebar-width-icon': 'On the root: the width of the collapsed icon rail.',
 	'--sidebar-width-mobile': 'On the root: the width of the mobile drawer.',
+	'--sidebar-suffix-width':
+		"On a row with a `suffix` (its `menu-item` row wrapper or `menu-sub-item`): the suffix's measured width in px, reserved at the row's end so the label truncates before it.",
 	'--disclosure-panel-height':
 		'On a group, submenu or tree branch panel: its measured height in px while it animates, `auto` once open and `0px` once closed.'
 } as const;
