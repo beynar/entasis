@@ -1,7 +1,7 @@
 // Toast with real input in Chromium and WebKit (DF-2, DF-4): keyboard focus pauses timers, a
 // click does not, focus follows a dismissed toast, and the hover safe area does not outlive the
 // toasts that made it.
-import { afterEach, expect, test } from 'vitest';
+import { afterEach, beforeEach, expect, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
 import Harness from './ToasterHarness.test.svelte';
@@ -10,6 +10,12 @@ import { toast, type Toaster } from './toast.state.svelte.js';
 const toaster = () => window.toaster as Toaster;
 const items = () => [...document.querySelectorAll<HTMLElement>('section[data-live-region] > li')];
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// The pointer stays where the previous test file left it, possibly over a bottom-right toast,
+// where its hover would hold the timers too; park it away before each test as well.
+beforeEach(async () => {
+	await userEvent.hover(document.documentElement, { position: { x: 600, y: 400 } });
+});
 
 afterEach(async () => {
 	toast.dismiss();

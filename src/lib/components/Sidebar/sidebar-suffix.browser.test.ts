@@ -55,6 +55,8 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
+	// Leave the pointer off the screen corners, where the next file's popups and toasts open.
+	await userEvent.hover(document.documentElement, { position: { x: 300, y: 300 } });
 	if (window.innerWidth !== initialViewport.width || window.innerHeight !== initialViewport.height)
 		await page.viewport(initialViewport.width, initialViewport.height);
 });
