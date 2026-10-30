@@ -144,25 +144,35 @@
 		closeOnClickOutside={false}
 		swipeToDismiss={false}
 		theme={{
-			header: { base: '-mx-4 px-4' },
-			footer: { base: 'border-neutral-muted -mx-4 mt-2 border-t px-4 pt-3' }
+			header: { base: '-mx-4 shrink-0 px-4' },
+			footer: { base: 'border-neutral-muted -mx-4 mt-2 shrink-0 border-t px-4 pt-3' }
 		}}
 		onAfterClose={() => finishClose(askState)}
 	>
-		<Form
-			inputs={askState.options.inputs}
-			onSubmit={(value) => completeAskSubmission(askState, value)}
-			bind:value={askState.value}
-			bind:form={askState.form}
-			class={askState.options.class}
-			size={askState.options.size}
-			density={askState.options.density}
-			variant={askState.options.variant}
-			layout={askState.options.layout}
-			validationMode={askState.options.validationMode}
-			validationDebounce={askState.options.validationDebounce}
-			theme={askState.options.theme}
-		/>
+		<!-- The form is the body, and the only part that scrolls: with `scroll: 'inner'` the card is
+		     capped to the viewport, so a tall form shrinks here and the title, description and
+		     buttons stay on screen. It runs to the card's edges (`-mx-4 px-4`, like the header and
+		     footer) with a little room above and below, so a full-width field's focus ring is never
+		     clipped. With `scroll: 'outer'` nothing caps it and it never scrolls. -->
+		<div
+			data-slot="ask-body"
+			class="-mx-4 -my-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-1"
+		>
+			<Form
+				inputs={askState.options.inputs}
+				onSubmit={(value) => completeAskSubmission(askState, value)}
+				bind:value={askState.value}
+				bind:form={askState.form}
+				class={askState.options.class}
+				size={askState.options.size}
+				density={askState.options.density}
+				variant={askState.options.variant}
+				layout={askState.options.layout}
+				validationMode={askState.options.validationMode}
+				validationDebounce={askState.options.validationDebounce}
+				theme={askState.options.theme}
+			/>
+		</div>
 
 		{#snippet footer()}
 			<!-- The button row lays itself out against the dialog footer's own width, not the

@@ -6,6 +6,14 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Fixed
+
+- An `ask()` dialog taller than the viewport no longer scrolls as a whole card. With
+  `dialog.scroll: 'inner'` (the default) the form is the only part that scrolls, so the title,
+  description and Confirm/Cancel row stay on screen, and the scrolling body keeps room around its
+  fields so a full-width field's focus ring is not clipped. `dialog.scroll: 'outer'` still scrolls
+  the whole card.
+
 ## 0.13.3 — 2026-10-29
 
 ### Added

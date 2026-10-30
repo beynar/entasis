@@ -37,7 +37,10 @@ export type AskOptions<I extends FormInputs> = Pick<
 	confirm: AskButton;
 	/** Cancel action label or protected Button presentation props. */
 	cancel: AskButton;
-	/** Dialog presentation options. Dismissal behavior remains owned by Ask. */
+	/**
+	 * Dialog presentation options. Dismissal behavior remains owned by Ask. With `scroll: 'inner'`
+	 * (the default) only the form scrolls, so the header and the buttons stay on screen.
+	 */
 	dialog?: AskDialogOptions;
 };
 
