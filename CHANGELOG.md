@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.13.4 — 2026-10-30
+
 ### Fixed
 
 - An `ask()` dialog taller than the viewport no longer scrolls as a whole card. With
