@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.13.6 — 2026-10-31
+
 ### Added
 
 - \`AddressInput\` (\`entasis/address-input\`, and \`type: 'address'\` in Form and \`ask()\`): a postal
