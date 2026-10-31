@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.13.5 — 2026-10-31
+
 ### Added
 
 - Timeline items take a \`progress: 'done' | 'current' | 'upcoming'\` (\`TimelineProgress\`) to draw a
