@@ -12,8 +12,9 @@ const defaultCodeFloatingCopy = cva({
 	base: 'absolute top-2 right-2 z-10 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100'
 });
 
+// Header and footer never shrink: in a height-bound column the code scrolls between them.
 const defaultCodeHeader = cva({
-	base: 'flex items-center justify-between gap-md border-b border-neutral-muted bg-surface-raised px-lg py-sm text-xs text-neutral/70'
+	base: 'flex shrink-0 items-center justify-between gap-md border-b border-neutral-muted bg-surface-raised px-lg py-sm text-xs text-neutral/70'
 });
 
 const defaultCodeTitle = cva({
@@ -22,13 +23,13 @@ const defaultCodeTitle = cva({
 
 const defaultCodeContainer = cva({
 	// The scroll + padding live on the inner highlighter <pre> (classes added by codeToHtml)
-	// so the focusable node is the scroller; the container is just the surface. `tab-size` is
-	// driven by a CSS var set on the root (defaults to 2).
-	base: 'min-w-0 bg-surface text-sm @max-md:text-xs [&_pre]:!bg-transparent [&_pre]:[tab-size:var(--code-tab-size,2)] [&_code]:font-mono'
+	// so the focusable node is the scroller; the container is just the surface. The pre's
+	// white-space and `tab-size` (from `--code-tab-size` on the root) live in CodeTheme.svelte.
+	base: 'min-w-0 bg-surface text-sm @max-md:text-xs [&_pre]:!bg-transparent [&_code]:font-mono'
 });
 
 const defaultCodeFooter = cva({
-	base: 'flex items-center justify-between gap-md border-t border-neutral-muted bg-surface-raised px-lg py-sm text-xs text-neutral/70'
+	base: 'flex shrink-0 items-center justify-between gap-md border-t border-neutral-muted bg-surface-raised px-lg py-sm text-xs text-neutral/70'
 });
 
 export const codeTheme = {

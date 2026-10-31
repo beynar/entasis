@@ -6,6 +6,28 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- Timeline items take a \`progress: 'done' | 'current' | 'upcoming'\` (\`TimelineProgress\`) to draw a
+  process's progress band. A done step's marker is filled with a check, the current one is a ring
+  around a point with \`aria-current="step"\`, and an upcoming one is a quiet ring with its step
+  number, all at the size's marker scale. The connector is solid up to the current step and faint
+  after it, 2px thick, in the step's color unless \`connectorColor\` is set. \`icon\`, \`loading\`,
+  the \`marker\` snippet and theme overrides (\`marker\` and \`connector\` gain a \`progress\`
+  variant) still apply. Items without \`progress\` render exactly as before.
+
+### Fixed
+
+- A \`Code\` in a height-bound flex column (a Dialog or Drawer body) no longer clips its last lines:
+  it shrinks to the room left and scrolls inside, under its header and above its footer.
+  \`class="shrink-0"\` keeps its full height for the column to scroll instead.
+- \`Code\`'s \`wrap\` and \`tabSize\` hold against an app stylesheet that styles every \`pre.th-code\`
+  (edytor's \`code.css\` sets \`white-space: pre\` and \`tab-size\` unlayered, which beat Code's
+  utilities): Code now sets them itself, scoped under its root.
+- A hidden offcanvas Sidebar revealed from the edge beside an `activityBar` no longer slides
+  across the activity bar: the panel comes out from under it, for every variant. The activity bar
+  now sits above the panel in every state, a hover peek included.
+
 ## 0.13.4 — 2026-10-30
 
 ### Fixed

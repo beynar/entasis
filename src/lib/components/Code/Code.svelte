@@ -108,8 +108,13 @@
 	{/if}
 
 	<!-- ScrollArea owns both axes: horizontal (long lines) natively, vertical when maxHeight caps
-	     the height. Its viewport is the focusable native scroll region (keyboard + focus ring). -->
-	<ScrollArea type="hover" class="flex max-h-[var(--code-max-height)] flex-col rounded-b-lg">
+	     the height or a height-bound flex column (a Dialog body) shrinks the block: `min-h-0` lets
+	     it shrink below its content, so it scrolls under the kept header instead of the root
+	     clipping its last lines. Its viewport is the focusable native scroll region. -->
+	<ScrollArea
+		type="hover"
+		class="flex max-h-[var(--code-max-height)] min-h-0 flex-col rounded-b-lg"
+	>
 		{@render codeBody()}
 	</ScrollArea>
 

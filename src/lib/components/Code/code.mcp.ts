@@ -23,9 +23,11 @@ adapt to light and dark automatically from the design tokens.
 - **showLineNumbers**: boolean (default: false) - Renders a line-number gutter.
 - **showHeader**: boolean (default: true) - Renders the default header row (title + copy button). Set to false to show only the code block. Ignored when a custom \`header\` snippet is provided.
 - **copyable**: boolean (default: true) - Shows the copy-to-clipboard button. In the header when one is shown, otherwise a floating button in the top-right corner that appears on hover.
-- **wrap**: boolean (default: false) - Soft-wraps long lines instead of scrolling horizontally.
+- **wrap**: boolean (default: false) - Soft-wraps long lines instead of scrolling horizontally. Code sets its \`<pre>\`'s \`white-space\` and \`tab-size\` itself, scoped under its root, so an app stylesheet that styles every \`pre.th-code\` (edytor's \`code.css\` does) changes neither.
 - **maxHeight**: number | string (default: none) - Caps the block height and makes it vertically scrollable (via ScrollArea). A number is pixels; a string is used as-is (e.g. \`'20rem'\`).
 - **tabSize**: number (default: 2) - Tab width in spaces.
+
+In a height-bound flex column (a Dialog or Drawer body, \`flex min-h-0 flex-1 flex-col\`), a Code taller than the room left shrinks to it and scrolls inside: the header and footer stay put and every line stays reachable. To keep its full height and let the column scroll instead, pass \`class="shrink-0"\`.
 
 ### Styling Props
 - **class**: string - Additional CSS classes on the root element.

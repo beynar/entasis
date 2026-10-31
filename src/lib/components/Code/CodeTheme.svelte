@@ -52,11 +52,22 @@
 		--code-token-property: color-mix(in oklab, var(--color-info) 70%, var(--color-neutral));
 	}
 
-	/* The pre stays transparent so the container background shows through. */
+	/* The pre stays transparent so the container background shows through. Code owns its layout
+	   too: an app stylesheet may style every `pre.th-code` (edytor's `code.css` sets `white-space:
+	   pre`, `tab-size` and `overflow-x`, unlayered, so it beats utilities), and these selectors
+	   are scoped under the Code root so they win. The ScrollArea scrolls, never the pre. */
 	:global([data-slot='code'] pre.th-code) {
 		margin: 0;
+		overflow: visible;
 		background-color: transparent;
 		color: var(--code-token-plain);
+		white-space: pre;
+		word-break: normal;
+		tab-size: var(--code-tab-size, 2);
+	}
+
+	:global([data-slot='code'] pre.th-code[data-wrap]) {
+		white-space: pre-wrap;
 	}
 
 	/* Token classes emitted by TanStack Highlight (`th-token th-<role>`), mapped to our roles. */
