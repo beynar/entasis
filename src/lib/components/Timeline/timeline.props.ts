@@ -10,6 +10,12 @@ export type TimelineOrientation = 'vertical' | 'horizontal';
 export type TimelinePlacement = 'start' | 'end' | 'alternate';
 export type TimelineSide = 'start' | 'end';
 export type TimelineVariant = 'ghost' | 'card' | 'outline' | 'soft';
+/**
+ * Where a step stands in a process: finished, under way, or still to come. Drives the default
+ * marker (a filled check, a ring with a point, a quiet numbered ring) and the outgoing connector
+ * (solid after a finished step, faint after the others).
+ */
+export type TimelineProgress = 'done' | 'current' | 'upcoming';
 
 export type TimelineItem = {
 	/** Stable identity. Use an explicit ID when the array can reorder. */
@@ -30,6 +36,13 @@ export type TimelineItem = {
 	color?: Colors;
 	/** Outgoing connector color. Ignored on the final item. */
 	connectorColor?: Colors;
+	/**
+	 * Step progress. A `done` step draws a filled check and a solid outgoing connector, the
+	 * `current` step a ring with a point and `aria-current="step"`, an `upcoming` step a quiet ring
+	 * with its step number; the connectors after `current` and `upcoming` steps stay faint. An
+	 * `icon` replaces the check, the point or the number; `loading` replaces the whole marker.
+	 */
+	progress?: TimelineProgress;
 	/** Logical side override. Valid only when placement is alternate. */
 	side?: TimelineSide;
 };
@@ -82,7 +95,10 @@ export type TimelineProps<Item extends TimelineItem = TimelineItem> = WithAttach
 			density?: Density;
 			/** Default semantic item accent. */
 			color?: Colors;
-			/** Default outgoing connector accent. */
+			/**
+			 * Default outgoing connector accent. When omitted, an item with `progress` takes its own
+			 * color for its connector, and every other item takes `neutral`.
+			 */
 			connectorColor?: Colors;
 			/** Shows connector segments between markers. */
 			showConnectors?: boolean;

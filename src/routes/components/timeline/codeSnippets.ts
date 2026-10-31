@@ -158,6 +158,20 @@ export const milestonesCode = [
 	'</Timeline>'
 ].join('\n');
 
+export const progressCode = [
+	'const claim: TimelineItem[] = [',
+	"  { id: 'opened', title: 'Opened', description: 'Mar 3', progress: 'done' },",
+	"  { id: 'documents', title: 'Documents', description: 'Mar 9', progress: 'done' },",
+	"  { id: 'appraisal', title: 'Appraisal', description: 'Under way', progress: 'current' },",
+	"  { id: 'report', title: 'Report', progress: 'upcoming' },",
+	"  { id: 'offer', title: 'Offer', progress: 'upcoming' },",
+	"  { id: 'closed', title: 'Closed', progress: 'upcoming' }",
+	'];',
+	'',
+	'<Timeline items={claim} orientation="horizontal" color="primary" density="compact" />',
+	'<Timeline items={onboarding} size="small" color="success" />'
+].join('\n');
+
 export const minimalCode = [
 	'<Timeline items={releases} density="comfortable">',
 	'  {#snippet marker({ index, defaultMarker })}',

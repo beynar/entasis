@@ -7,6 +7,7 @@
 	import TimelineMilestonesDemo from './TimelineMilestonesDemo.svelte';
 	import TimelineMinimalDemo from './TimelineMinimalDemo.svelte';
 	import TimelineOrderTrackingDemo from './TimelineOrderTrackingDemo.svelte';
+	import TimelineProgressDemo from './TimelineProgressDemo.svelte';
 	import TimelineVariantsDemo from './TimelineVariantsDemo.svelte';
 	import {
 		activityCode,
@@ -14,6 +15,7 @@
 		layoutCode,
 		milestonesCode,
 		minimalCode,
+		progressCode,
 		variantsCode
 	} from './codeSnippets.js';
 
@@ -82,7 +84,8 @@
 		'Start, end, and responsive alternate placement',
 		'Ghost, card, outline, and soft variants',
 		'Independent size, density, item color, and connector color',
-		'Default date, title, description, icon, and loading rendering'
+		'Default date, title, description, icon, and loading rendering',
+		'Done, current, and upcoming step progress with solid and faint connectors'
 	]}
 >
 	<ComponentCard
@@ -105,6 +108,15 @@
 	</ComponentCard>
 
 	{#snippet examples()}
+		<ComponentCard
+			title="Step progress"
+			description="Give each item a progress: done steps draw a filled check, the current step a ringed point marked aria-current=step, upcoming steps a quiet numbered ring. The connector stays solid up to the current step and faint after it, in the step's color."
+			code={progressCode}
+			class="!min-h-0 !items-stretch !justify-start p-3 sm:p-6"
+		>
+			<TimelineProgressDemo />
+		</ComponentCard>
+
 		<ComponentCard
 			title="Alternating milestone cards"
 			description="Rich cards can add media or project fields to the item type. The opposite snippet renders selected dates as chips and delegates every other date to defaultOpposite."

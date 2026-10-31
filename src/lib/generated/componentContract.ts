@@ -2811,6 +2811,7 @@ export const componentInventory = [
 			'TimelineItemPayload',
 			'TimelineOrientation',
 			'TimelinePlacement',
+			'TimelineProgress',
 			'TimelineProps',
 			'TimelineSide',
 			'TimelineTheme',

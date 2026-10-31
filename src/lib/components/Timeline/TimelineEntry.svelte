@@ -1,4 +1,5 @@
 <script lang="ts" generics="Item extends TimelineItem = TimelineItem">
+	import { checkIcon } from '../Icons/check.js';
 	import Slot from '../Slot/Slot.svelte';
 	import Spinner from '../Spinner/Spinner.svelte';
 	import type { Density, Sizes } from '$lib/types/theme.js';
@@ -64,6 +65,8 @@
 	data-density={density}
 	data-first={entry.isFirst ? 'true' : undefined}
 	data-last={entry.isLast ? 'true' : undefined}
+	data-progress={entry.item.progress}
+	aria-current={entry.item.progress === 'current' ? 'step' : undefined}
 	class={classes.item({
 		orientation: entry.orientation,
 		placement,
@@ -107,9 +110,11 @@
 			<span
 				data-slot="timeline-connector"
 				data-color={entry.connectorColor}
+				data-progress={entry.item.progress}
 				class={classes.connector({
 					orientation: entry.orientation,
-					color: entry.connectorColor
+					color: entry.connectorColor,
+					progress: entry.item.progress ?? 'none'
 				})}
 			></span>
 		{/if}
@@ -182,7 +187,12 @@
 	<span
 		data-slot="timeline-marker"
 		data-color={entry.color}
-		class={classes.marker({ size, color: entry.color })}
+		data-progress={entry.item.loading ? undefined : entry.item.progress}
+		class={classes.marker({
+			size,
+			color: entry.color,
+			progress: entry.item.loading ? 'none' : (entry.item.progress ?? 'none')
+		})}
 	>
 		{#if entry.item.loading}
 			<span data-slot="timeline-loading" class={classes.loading({ size })}>
@@ -190,6 +200,10 @@
 			</span>
 		{:else if entry.item.icon}
 			<Slot render={entry.item.icon} />
+		{:else if entry.item.progress === 'done'}
+			{@render checkIcon()}
+		{:else if entry.item.progress === 'upcoming'}
+			<span data-slot="timeline-step-number">{entry.index + 1}</span>
 		{:else}
 			<span data-slot="timeline-dot"></span>
 		{/if}

@@ -43,7 +43,7 @@ The default configuration is a vertical timeline with all content on the logical
 - **size**: \`'small' | 'normal' | 'large'\` (default: \`'normal'\`) — title and description typography, marker and icon scale, and loading Spinner scale.
 - **density**: \`'compact' | 'normal' | 'comfortable'\` (default: \`'normal'\`) — item gaps, surface padding, connector spacing, and horizontal item minimum width.
 - **color**: Entasis semantic color (default: \`'neutral'\`) — default marker and outline or soft surface accent.
-- **connectorColor**: Entasis semantic color (default: \`'neutral'\`) — default outgoing connector color.
+- **connectorColor**: Entasis semantic color — default outgoing connector color. When omitted, an item with \`progress\` uses its own resolved color for its connector, and every other item uses \`'neutral'\`.
 - **showConnectors**: \`boolean\` (default: \`true\`) — shows connector segments between markers.
 - **scrollFade**: \`boolean\` (default: \`true\`) — applies the shared logical horizontal scroll fade only while a horizontal timeline actually overflows.
 - **i18n**: \`Partial<Messages>\` — per-instance translations merged over the global i18n catalog.
@@ -74,6 +74,7 @@ type TimelineItem = {
   loading?: boolean;
   color?: Colors;
   connectorColor?: Colors;
+  progress?: 'done' | 'current' | 'upcoming';
   side?: 'start' | 'end';
 };
 \`\`\`
@@ -86,6 +87,7 @@ type TimelineItem = {
 - \`color\` overrides the root color for this marker and its outline or soft surface.
 - \`connectorColor\` overrides the root color for this item's outgoing connector. It has no effect on the final item.
 - \`side\` overrides alternate parity for one item. It is not valid with fixed placement.
+- \`progress\` marks a step of a process (\`TimelineProgress\`). See Step progress below.
 
 ## Placement and dates
 
@@ -97,7 +99,36 @@ Fixed \`start\` and \`end\` placement keeps every surface on one logical side. T
 <Timeline items={milestones} placement="alternate" variant="card" />
 \`\`\`
 
-Timeline treats dates as display content. It does not parse, format, compare, or sort them. It also has no completed, current, or pending status model. Put status meaning in the title or description and use semantic color or a custom marker only as supporting presentation.
+Timeline treats dates as display content. It does not parse, format, compare, or sort them.
+
+## Step progress
+
+Give each item a \`progress\` to draw a process's progress band, such as a file's six stages, so a reader sees at a glance what is done, what is under way, and what is to come:
+
+\`\`\`svelte
+<script lang="ts">
+  import { Timeline, type TimelineItem } from 'entasis/timeline';
+
+  const steps: TimelineItem[] = [
+    { id: 'opened', title: 'Opened', progress: 'done' },
+    { id: 'documents', title: 'Documents', progress: 'done' },
+    { id: 'appraisal', title: 'Appraisal', progress: 'current' },
+    { id: 'report', title: 'Report', progress: 'upcoming' }
+  ];
+</script>
+
+<Timeline items={steps} orientation="horizontal" color="primary" />
+\`\`\`
+
+- \`done\`: the marker is filled with the item color and carries a check. Its outgoing connector is solid.
+- \`current\`: the marker is a ring in the item color around a point. The \`<li>\` gets \`aria-current="step"\`. Its outgoing connector is faint.
+- \`upcoming\`: the marker is a quiet neutral ring carrying the step number (the item's position, from 1). Its outgoing connector is faint.
+- Markers keep the size's marker scale. Progress connectors are 2px thick instead of the hairline, so the done part of the band stands out.
+- An item \`icon\` replaces the check, the point, or the number, and keeps the progress ring and fill. \`loading\` replaces the whole marker with the Spinner.
+- \`progress\` is per item: Timeline does not derive it from an index, so a host may mark any combination.
+- The step's state is not announced by the markers, which stay decorative. Put it in the item's own text (for example "Step 3 of 6, done") or an \`item\` snippet. \`aria-current="step"\` on the current item is the only state Timeline adds.
+- The \`marker\` snippet still replaces every marker: read \`payload.item.progress\` and call \`defaultMarker()\` for the steps it leaves alone. Theme overrides reach the \`progress\` variant of the \`marker\` and \`connector\` parts, for example \`theme={{ connector: { progress: { done: 'bg-success' } } }}\`.
+- Styling hooks: \`data-progress\` on the item, its marker and its outgoing connector.
 
 ## Generic snippets and defaults
 
@@ -177,6 +208,7 @@ The ID check preserves number and string identity, so \`1\` and \`'1'\` are diff
 
 - The root is an ordered list and every event is a list item.
 - Axis anchors, markers, and connectors are decorative and hidden from assistive technology. Do not use marker color or shape as the only status signal.
+- An item with \`progress: 'current'\` carries \`aria-current="step"\`.
 - A default loading marker has a localized polite status announcement outside the decorative axis.
 - A default date with \`datetime\` renders as a semantic \`<time>\` element.
 - An overflowing horizontal timeline becomes a native keyboard scroll region; a non-overflowing timeline adds no tab stop.
@@ -185,5 +217,5 @@ The ID check preserves number and string identity, so \`1\` and \`'1'\` are diff
 
 \`root\`, \`item\`, \`opposite\`, \`axis\`, \`connector\`, \`marker\`, \`content\`, \`date\`, \`titleRow\`, \`title\`, \`description\`, and \`loading\`.
 
-Timeline is display-only. It has no selection, navigation, event callbacks, animation state, bindable controller, date processing, or built-in progress status.
+Timeline is display-only. It has no selection, navigation, event callbacks, animation state, bindable controller, or date processing. Step \`progress\` is presentation the host sets per item, not a state Timeline advances.
 `;

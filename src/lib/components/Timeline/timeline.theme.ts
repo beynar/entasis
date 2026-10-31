@@ -267,6 +267,8 @@ const defaultAxis = cva({
 	}
 });
 
+// `progress` is the step the connector leaves: solid after a done step, faint after the
+// current and upcoming ones, so the band reads as finished up to the current step.
 const defaultConnector = cva({
 	base: 'pointer-events-none absolute z-0 bg-color/35',
 	variants: {
@@ -274,11 +276,22 @@ const defaultConnector = cva({
 			vertical: 'left-1/2 top-[calc(var(--timeline-marker-size)/2)] h-full w-px -translate-x-1/2',
 			horizontal: 'start-[calc(var(--timeline-marker-size)/2)] top-1/2 h-px w-full -translate-y-1/2'
 		},
-		color: colorVariants
+		color: colorVariants,
+		progress: {
+			none: '',
+			done: 'bg-color',
+			current: 'bg-color/20',
+			upcoming: 'bg-color/20'
+		}
 	},
+	compoundVariants: [
+		{ orientation: 'vertical', progress: ['done', 'current', 'upcoming'], class: 'w-0.5' },
+		{ orientation: 'horizontal', progress: ['done', 'current', 'upcoming'], class: 'h-0.5' }
+	],
 	defaultVariants: {
 		orientation: 'vertical',
-		color: 'neutral'
+		color: 'neutral',
+		progress: 'none'
 	}
 });
 
@@ -290,11 +303,22 @@ const defaultMarker = cva({
 			normal: 'size-[1.125rem]',
 			large: 'size-[1.375rem]'
 		},
-		color: colorVariants
+		color: colorVariants,
+		// A done step is filled with its check, the current one ringed around its point, an
+		// upcoming one a quiet ring around its step number. The number is a glyph drawn to the
+		// marker, like the check, so it scales with the marker size rather than the type ramp.
+		progress: {
+			none: '',
+			done: 'bg-color text-color-contrast ring-color',
+			current: 'ring-2 ring-color',
+			upcoming:
+				'text-neutral/70 ring-neutral-muted font-medium leading-none tabular-nums text-[length:calc(var(--timeline-marker-size)*0.55)]'
+		}
 	},
 	defaultVariants: {
 		size: 'normal',
-		color: 'neutral'
+		color: 'neutral',
+		progress: 'none'
 	}
 });
 

@@ -2160,6 +2160,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'TimelineItemPayload',
 		'TimelineOrientation',
 		'TimelinePlacement',
+		'TimelineProgress',
 		'TimelineProps',
 		'TimelineSide',
 		'TimelineTheme',

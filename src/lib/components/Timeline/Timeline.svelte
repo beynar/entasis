@@ -15,7 +15,7 @@
 		size = 'normal',
 		density = 'normal',
 		color = 'neutral',
-		connectorColor = 'neutral',
+		connectorColor,
 		showConnectors = true,
 		scrollFade = true,
 		i18n,

@@ -4,6 +4,7 @@ export type {
 	TimelineItemPayload,
 	TimelineOrientation,
 	TimelinePlacement,
+	TimelineProgress,
 	TimelineProps,
 	TimelineSide,
 	TimelineVariant

@@ -27,7 +27,7 @@ export function resolveTimelineItems<Item extends TimelineItem>(
 	orientation: TimelineOrientation,
 	placement: TimelinePlacement,
 	color: Colors,
-	connectorColor: Colors
+	connectorColor: Colors | undefined
 ): readonly ResolvedTimelineItem<Item>[] {
 	const explicitIds = new Set<string | number>();
 
@@ -53,6 +53,8 @@ export function resolveTimelineItems<Item extends TimelineItem>(
 				? (timelineItem.side ?? (index % 2 === 0 ? 'end' : 'start'))
 				: placement;
 
+		const itemColor = timelineItem.color ?? color;
+
 		let key = `index:${index}`;
 		if (explicitId !== undefined) {
 			key = `id:${typeof explicitId}:${explicitId}`;
@@ -64,8 +66,13 @@ export function resolveTimelineItems<Item extends TimelineItem>(
 			index,
 			side,
 			orientation,
-			color: timelineItem.color ?? color,
-			connectorColor: timelineItem.connectorColor ?? connectorColor,
+			color: itemColor,
+			// A progress band reads as one stroke: its connectors follow the step's own color
+			// unless a connector color is set on the item or the root.
+			connectorColor:
+				timelineItem.connectorColor ??
+				connectorColor ??
+				(timelineItem.progress ? itemColor : 'neutral'),
 			isFirst: index === 0,
 			isLast: index === items.length - 1
 		};
