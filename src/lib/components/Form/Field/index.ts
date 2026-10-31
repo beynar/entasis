@@ -45,6 +45,8 @@ export {
 	type PinInputType,
 	type RatingInputType,
 	type RichTextInputType,
+	type AddressInputType,
+	type SignatureInputType,
 	type SingleOptionInputType,
 	type SliderRangeInputType,
 	type TagGroupInputType,

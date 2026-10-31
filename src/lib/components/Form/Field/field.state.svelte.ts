@@ -10,6 +10,7 @@ import type { Density, Sizes } from '$lib/types/theme.js';
 import type { LayerHandle, LayerStack } from '$lib/utils/layers.svelte.js';
 import { getFirstTabbable } from '$lib/utils/focus.js';
 import { isEmptyValue, valuesEqual } from '$lib/utils/values.js';
+import { isAddressEmpty, type Address } from '../../Address/address.js';
 import { useI18nResolver } from '$lib/i18n/context.svelte.js';
 import {
 	describeFieldIssue,
@@ -651,6 +652,8 @@ export const createFieldState = <T extends FieldType>(
 		if (BOOLEAN_TYPES.has(field.type)) return value !== true;
 		// A rating of zero stars is no rating.
 		if (field.type === 'rating') return !value;
+		// An address with none of its parts filled is no address.
+		if (field.type === 'address') return isAddressEmpty(value as Address | null);
 		return isEmptyValue(value);
 	}
 

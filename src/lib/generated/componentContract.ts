@@ -1192,6 +1192,7 @@ export const componentInventory = [
 		subpath: 'entasis/field',
 		sourceIndex: 'src/lib/components/Form/Field/index.ts',
 		exportedSymbols: [
+			'AddressInputType',
 			'BooleanInputType',
 			'CalendarInputType',
 			'ColorInputType',
@@ -1225,6 +1226,7 @@ export const componentInventory = [
 			'PinInputType',
 			'RatingInputType',
 			'RichTextInputType',
+			'SignatureInputType',
 			'SingleOptionInputType',
 			'SliderRangeInputType',
 			'TagGroupInputType',
@@ -1244,6 +1246,35 @@ export const componentInventory = [
 		docs: [],
 		capabilities: ['svelte', 'component', 'forms'],
 		relatedComponents: ['form'],
+		visibility: 'public'
+	},
+	{
+		id: 'address-input',
+		subpath: 'entasis/address-input',
+		sourceIndex: 'src/lib/components/Form/AddressInput/index.ts',
+		exportedSymbols: [
+			'AddressFieldConfig',
+			'AddressFieldItem',
+			'AddressFieldRow',
+			'AddressInput',
+			'AddressInputLayout',
+			'AddressInputProps',
+			'AddressInputTheme',
+			'AddressInputThemeProps',
+			'addressInputTheme',
+			'setAddressInputTheme',
+			'useAddressInputTheme'
+		],
+		docs: [
+			{
+				id: 'address-input',
+				route: '/components/address-input',
+				category: 'Forms',
+				label: 'Address input'
+			}
+		],
+		capabilities: ['svelte', 'component', 'forms'],
+		relatedComponents: ['address', 'autocomplete'],
 		visibility: 'public'
 	},
 	{
@@ -1900,6 +1931,34 @@ export const componentInventory = [
 		visibility: 'public'
 	},
 	{
+		id: 'signature-input',
+		subpath: 'entasis/signature-input',
+		sourceIndex: 'src/lib/components/Form/SignatureInput/index.ts',
+		exportedSymbols: [
+			'SignatureFormat',
+			'SignatureInput',
+			'SignatureInputProps',
+			'SignatureInputTheme',
+			'SignatureInputThemeProps',
+			'SignaturePoint',
+			'SignatureStroke',
+			'setSignatureInputTheme',
+			'signatureInputTheme',
+			'useSignatureInputTheme'
+		],
+		docs: [
+			{
+				id: 'signature-input',
+				route: '/components/signature-input',
+				category: 'Forms',
+				label: 'Signature input'
+			}
+		],
+		capabilities: ['svelte', 'component', 'forms'],
+		relatedComponents: ['voice-input', 'file-input'],
+		visibility: 'public'
+	},
+	{
 		id: 'slider',
 		subpath: 'entasis/slider',
 		sourceIndex: 'src/lib/components/Form/Slider/index.ts',
@@ -2116,6 +2175,57 @@ export const componentInventory = [
 		],
 		capabilities: ['svelte', 'component', 'forms'],
 		relatedComponents: ['text-input', 'ai-composer'],
+		visibility: 'public'
+	},
+	{
+		id: 'address',
+		subpath: 'entasis/address',
+		sourceIndex: 'src/lib/components/Address/index.ts',
+		exportedSymbols: [
+			'ADDRESS_FIELDS',
+			'Address',
+			'AddressField',
+			'AddressLayout',
+			'AddressLocation',
+			'AddressProps',
+			'AddressProvider',
+			'AddressProviderRequest',
+			'AddressSuggestion',
+			'AddressTheme',
+			'AddressThemeProps',
+			'AddressValue',
+			'COUNTRY_CODES',
+			'DEFAULT_ADDRESS_ENDPOINT',
+			'FormatAddressOptions',
+			'GooglePlace',
+			'GooglePlaceAddressComponent',
+			'GooglePlacesError',
+			'GooglePlacesProviderOptions',
+			'GooglePlacesProxyOptions',
+			'addressCountryName',
+			'addressTheme',
+			'composeStreetLine',
+			'countryName',
+			'createGooglePlacesProvider',
+			'createGooglePlacesProxy',
+			'formatAddress',
+			'formatAddressLine',
+			'isAddressEmpty',
+			'parseGooglePlace',
+			'setAddressProvider',
+			'setAddressTheme',
+			'useAddressTheme'
+		],
+		docs: [
+			{
+				id: 'address',
+				route: '/components/address',
+				category: 'Data display',
+				label: 'Address'
+			}
+		],
+		capabilities: ['svelte', 'component', 'dataDisplay'],
+		relatedComponents: ['address-input'],
 		visibility: 'public'
 	},
 	{
@@ -4697,6 +4807,7 @@ export const relatedComponents = {
 	'selection-menu': ['toggle-menu', 'select'],
 	ask: [],
 	field: ['form'],
+	'address-input': ['address', 'autocomplete'],
 	autocomplete: ['combobox', 'text-input', 'tags-input'],
 	calendar: ['date-input', 'date-selector', 'mini-calendar'],
 	checkbox: [],
@@ -4718,6 +4829,7 @@ export const relatedComponents = {
 	'rating-input': ['rating'],
 	'rich-text-input': ['text-area', 'markdown'],
 	select: ['combobox', 'selection-menu'],
+	'signature-input': ['voice-input', 'file-input'],
 	slider: ['number-input'],
 	switch: ['checkbox', 'toggle-button'],
 	'tag-group': ['tags-input', 'chip'],
@@ -4726,6 +4838,7 @@ export const relatedComponents = {
 	'text-area': ['text-input', 'rich-text-input'],
 	'time-input': ['date-input'],
 	'voice-input': ['text-input', 'ai-composer'],
+	address: ['address-input'],
 	avatar: [],
 	'avatar-group': [],
 	chart: [],

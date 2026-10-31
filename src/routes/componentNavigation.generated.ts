@@ -156,6 +156,10 @@ export const componentNavigationSections = [
 		label: 'Forms',
 		links: [
 			{
+				href: '/components/address-input',
+				text: 'Address input'
+			},
+			{
 				href: '/components/autocomplete',
 				text: 'Autocomplete'
 			},
@@ -240,6 +244,10 @@ export const componentNavigationSections = [
 				text: 'Select'
 			},
 			{
+				href: '/components/signature-input',
+				text: 'Signature input'
+			},
+			{
 				href: '/components/slider',
 				text: 'Slider'
 			},
@@ -276,6 +284,10 @@ export const componentNavigationSections = [
 	{
 		label: 'Data display',
 		links: [
+			{
+				href: '/components/address',
+				text: 'Address'
+			},
 			{
 				href: '/components/avatar',
 				text: 'Avatar'

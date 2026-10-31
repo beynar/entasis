@@ -2,6 +2,7 @@
 	import type { Density, Sizes } from '$lib/types/theme.js';
 	import type { FieldLabelPosition } from '../Field/field.js';
 	import RichTextInput from '../../RichTextInput/RichTextInput.svelte';
+	import AddressInput from '../AddressInput/AddressInput.svelte';
 	import CalendarInput from '../Calendar/CalendarInput.svelte';
 	import Checkbox from '../Checkbox/Checkbox.svelte';
 	import CheckboxesInput from '../CheckboxesInput/CheckboxesInput.svelte';
@@ -19,6 +20,7 @@
 	import RadioInput from '../RadioInput/RadioInput.svelte';
 	import RatingInput from '../RatingInput/RatingInput.svelte';
 	import Select from '../Select/Select.svelte';
+	import SignatureInput from '../SignatureInput/SignatureInput.svelte';
 	import Slider from '../Slider/Slider.svelte';
 	import Switch from '../Switch/Switch.svelte';
 	import TagGroup from '../TagGroup/TagGroup.svelte';
@@ -67,6 +69,10 @@
 	<RatingInput {...inputProps as FormInputProps<'rating'>} {name} />
 {:else if input.type === 'voice'}
 	<VoiceInput {...inputProps as FormInputProps<'voice'>} {name} />
+{:else if input.type === 'signature'}
+	<SignatureInput {...inputProps as FormInputProps<'signature'>} {name} />
+{:else if input.type === 'address'}
+	<AddressInput {...inputProps as FormInputProps<'address'>} {name} />
 {:else if input.type === 'slider'}
 	<Slider {...inputProps as FormInputProps<'slider'>} {name} />
 {:else if input.type === 'slider-range'}

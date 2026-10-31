@@ -62,6 +62,12 @@ export const schemas: {
 		// Voice input type
 		voice: v.instance(Blob),
 
+		// Signature input type: the exported image as a data URL
+		signature: v.pipe(v.string(), v.minLength(1)),
+
+		// Address input type: an object of parts (emptiness is checked by the field)
+		address: v.looseObject({}),
+
 		// Tag input type
 		tag: nonEmptyArray(v.string()),
 		'tag-group': tagGroupValue,
@@ -121,6 +127,12 @@ export const schemas: {
 
 		// Voice input type
 		voice: optional(v.instance(Blob)),
+
+		// Signature input type
+		signature: optional(emptyStringNull(v.string())),
+
+		// Address input type
+		address: optional(v.looseObject({})),
 
 		// Tag input type
 		tag: optional(emptyArrayNull(v.array(v.string()))),

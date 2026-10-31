@@ -88,6 +88,8 @@ const supportedInputTypes = new Set<InputType>([
 	'number',
 	'rating',
 	'voice',
+	'signature',
+	'address',
 	'slider',
 	'time',
 	'text',

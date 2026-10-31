@@ -424,7 +424,7 @@ Errors fade and grow in; reduced motion and the Theme motion tokens apply (the f
 
 ## Supported input types
 
-text, email, url, password, number, rating, voice, slider, slider-range, textarea, rich-text, select, select-multiple, combobox, radio, checkboxes, checkbox, switch, phone, calendar, calendar-range, date, datetime, color, file, files, tag-group, tag, keyvalue, pin, and time.
+text, email, url, password, number, rating, voice, signature, address, slider, slider-range, textarea, rich-text, select, select-multiple, combobox, radio, checkboxes, checkbox, switch, phone, calendar, calendar-range, date, datetime, color, file, files, tag-group, tag, keyvalue, pin, and time.
 
 Alternative displays are display: 'selector' for date and calendar-range, and display: 'picker' for color.
 

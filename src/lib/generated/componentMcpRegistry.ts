@@ -34,6 +34,7 @@ import { toggleMenuDescription } from '$lib/components/ToggleMenu/toggleMenu.mcp
 import { selectionMenuDescription } from '$lib/components/SelectionMenu/selectionMenu.mcp.js';
 import { askDescription } from '$lib/components/Form/Ask/ask.mcp.js';
 import { fieldDescription } from '$lib/components/Form/Field/field.mcp.js';
+import { addressInputDescription } from '$lib/components/Form/AddressInput/addressInput.mcp.js';
 import { autocompleteDescription } from '$lib/components/Form/Autocomplete/autocomplete.mcp.js';
 import { calendarDescription } from '$lib/components/Form/Calendar/calendar.mcp.js';
 import { checkboxDescription } from '$lib/components/Form/Checkbox/checkbox.mcp.js';
@@ -55,6 +56,7 @@ import { radioInputDescription } from '$lib/components/Form/RadioInput/radioInpu
 import { ratingInputDescription } from '$lib/components/Form/RatingInput/ratingInput.mcp.js';
 import { richTextInputDescription } from '$lib/components/RichTextInput/richTextInput.mcp.js';
 import { selectDescription } from '$lib/components/Form/Select/select.mcp.js';
+import { signatureInputDescription } from '$lib/components/Form/SignatureInput/signatureInput.mcp.js';
 import { sliderDescription } from '$lib/components/Form/Slider/slider.mcp.js';
 import { switchDescription } from '$lib/components/Form/Switch/switch.mcp.js';
 import { tagGroupDescription } from '$lib/components/Form/TagGroup/tagGroup.mcp.js';
@@ -63,6 +65,7 @@ import { textInputDescription } from '$lib/components/Form/TextInput/textInput.m
 import { textAreaDescription } from '$lib/components/Form/TextArea/textArea.mcp.js';
 import { timeInputDescription } from '$lib/components/Form/TimeInput/timeInput.mcp.js';
 import { voiceInputDescription } from '$lib/components/Form/VoiceInput/voiceInput.mcp.js';
+import { addressDescription } from '$lib/components/Address/address.mcp.js';
 import { avatarDescription } from '$lib/components/Avatar/avatar.mcp.js';
 import { chartDescription } from '$lib/components/Chart/chart.mcp.js';
 import { chipDescription } from '$lib/components/Chip/chip.mcp.js';
@@ -177,6 +180,7 @@ export const componentMcpRegistry = {
 	'selection-menu': selectionMenuDescription,
 	ask: askDescription,
 	field: fieldDescription,
+	'address-input': addressInputDescription,
 	autocomplete: autocompleteDescription,
 	calendar: calendarDescription,
 	checkbox: checkboxDescription,
@@ -198,6 +202,7 @@ export const componentMcpRegistry = {
 	'rating-input': ratingInputDescription,
 	'rich-text-input': richTextInputDescription,
 	select: selectDescription,
+	'signature-input': signatureInputDescription,
 	slider: sliderDescription,
 	switch: switchDescription,
 	'tag-group': tagGroupDescription,
@@ -206,6 +211,7 @@ export const componentMcpRegistry = {
 	'text-area': textAreaDescription,
 	'time-input': timeInputDescription,
 	'voice-input': voiceInputDescription,
+	address: addressDescription,
 	avatar: avatarDescription,
 	'avatar-group': avatarDescription,
 	chart: chartDescription,

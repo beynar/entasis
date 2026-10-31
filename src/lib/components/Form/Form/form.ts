@@ -11,6 +11,8 @@ import type { TextInputProps } from '../TextInput/textInput.props.js';
 import type { NumberInputProps } from '../NumberInput/numberInput.props.js';
 import type { RatingInputProps } from '../RatingInput/ratingInput.props.js';
 import type { VoiceInputProps } from '../VoiceInput/voiceInput.props.js';
+import type { SignatureInputProps } from '../SignatureInput/signatureInput.props.js';
+import type { AddressInputProps } from '../AddressInput/addressInput.props.js';
 import type { SliderProps } from '../Slider/slider.props.js';
 import type { TextAreaProps } from '../TextArea/textArea.props.js';
 import type { SelectProps } from '../Select/select.props.js';
@@ -118,6 +120,12 @@ type BaseFormFieldInput =
 	| ({
 			type: 'voice';
 	  } & VoiceInputProps)
+	| ({
+			type: 'signature';
+	  } & SignatureInputProps)
+	| ({
+			type: 'address';
+	  } & AddressInputProps)
 	| ({
 			type: 'slider';
 	  } & SliderProps)

@@ -1,0 +1,808 @@
+{
+	"paris": {
+		"autocomplete": {
+			"suggestions": [
+				{
+					"placePrediction": {
+						"place": "places/ChIJB7KW9P1x5kcRDLV9p40tSvE",
+						"placeId": "ChIJB7KW9P1x5kcRDLV9p40tSvE",
+						"text": {
+							"text": "12 Rue de Rivoli, Paris, France",
+							"matches": [
+								{
+									"endOffset": 2
+								},
+								{
+									"startOffset": 3,
+									"endOffset": 16
+								},
+								{
+									"startOffset": 18,
+									"endOffset": 23
+								}
+							]
+						},
+						"structuredFormat": {
+							"mainText": {
+								"text": "12 Rue de Rivoli",
+								"matches": [
+									{
+										"endOffset": 2
+									},
+									{
+										"startOffset": 3,
+										"endOffset": 16
+									}
+								]
+							},
+							"secondaryText": {
+								"text": "Paris, France",
+								"matches": [
+									{
+										"endOffset": 5
+									}
+								]
+							}
+						},
+						"types": ["subpremise", "geocode"]
+					}
+				},
+				{
+					"placePrediction": {
+						"place": "places/EicxMiBSaXZvbGkgQXZlbnVlLCBTcGFuaXNoIFRvd24sIEphbWFpY2EiLiosChQKEgkJlYsxOxPbjhHDypXLzCJh-BIUChIJ3QY9zeES244R3fC8Jl81uX4",
+						"placeId": "EicxMiBSaXZvbGkgQXZlbnVlLCBTcGFuaXNoIFRvd24sIEphbWFpY2EiLiosChQKEgkJlYsxOxPbjhHDypXLzCJh-BIUChIJ3QY9zeES244R3fC8Jl81uX4",
+						"text": {
+							"text": "12 Rivoli Avenue, Spanish Town, Jamaica",
+							"matches": [
+								{
+									"startOffset": 6,
+									"endOffset": 9
+								}
+							]
+						},
+						"structuredFormat": {
+							"mainText": {
+								"text": "12 Rivoli Avenue",
+								"matches": [
+									{
+										"startOffset": 6,
+										"endOffset": 9
+									}
+								]
+							},
+							"secondaryText": {
+								"text": "Spanish Town, Jamaica"
+							}
+						},
+						"types": ["route", "geocode"]
+					}
+				}
+			]
+		},
+		"place": {
+			"id": "ChIJB7KW9P1x5kcRDLV9p40tSvE",
+			"formattedAddress": "12 Rue de Rivoli, 75004 Paris, France",
+			"addressComponents": [
+				{
+					"longText": "12",
+					"shortText": "12",
+					"types": ["street_number"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "Rue de Rivoli",
+					"shortText": "Rue de Rivoli",
+					"types": ["route"],
+					"languageCode": "fr"
+				},
+				{
+					"longText": "Paris",
+					"shortText": "Paris",
+					"types": ["locality", "political"],
+					"languageCode": "fr"
+				},
+				{
+					"longText": "Paris",
+					"shortText": "Paris",
+					"types": ["administrative_area_level_2", "political"],
+					"languageCode": "fr"
+				},
+				{
+					"longText": "Île-de-France",
+					"shortText": "IDF",
+					"types": ["administrative_area_level_1", "political"],
+					"languageCode": "fr"
+				},
+				{
+					"longText": "France",
+					"shortText": "FR",
+					"types": ["country", "political"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "75004",
+					"shortText": "75004",
+					"types": ["postal_code"],
+					"languageCode": "en"
+				}
+			],
+			"location": {
+				"latitude": 48.8556278,
+				"longitude": 2.3599615
+			}
+		}
+	},
+	"mountainView": {
+		"autocomplete": {
+			"suggestions": [
+				{
+					"placePrediction": {
+						"place": "places/ChIJgz9fdgK6j4AR3EL1yn1L-Mo",
+						"placeId": "ChIJgz9fdgK6j4AR3EL1yn1L-Mo",
+						"text": {
+							"text": "1600 Amphitheatre Parkway, Mountain View, CA, USA",
+							"matches": [
+								{
+									"endOffset": 4
+								},
+								{
+									"startOffset": 5,
+									"endOffset": 25
+								},
+								{
+									"startOffset": 27,
+									"endOffset": 40
+								}
+							]
+						},
+						"structuredFormat": {
+							"mainText": {
+								"text": "1600 Amphitheatre Parkway",
+								"matches": [
+									{
+										"endOffset": 4
+									},
+									{
+										"startOffset": 5,
+										"endOffset": 25
+									}
+								]
+							},
+							"secondaryText": {
+								"text": "Mountain View, CA, USA",
+								"matches": [
+									{
+										"endOffset": 13
+									}
+								]
+							}
+						},
+						"types": ["premise", "geocode"]
+					}
+				},
+				{
+					"placePrediction": {
+						"place": "places/ChIJEWc5kFHj3T8RC_kqBh2iR-s",
+						"placeId": "ChIJEWc5kFHj3T8RC_kqBh2iR-s",
+						"text": {
+							"text": "Mountain View، 1600 Amphitheatre Parkway، Nasiriyah, Iraq",
+							"matches": [
+								{
+									"startOffset": 15,
+									"endOffset": 19
+								}
+							]
+						},
+						"structuredFormat": {
+							"mainText": {
+								"text": "1600 Amphitheatre Parkway",
+								"matches": [
+									{
+										"endOffset": 4
+									}
+								]
+							},
+							"secondaryText": {
+								"text": "Mountain View، Nasiriyah, Iraq"
+							}
+						},
+						"types": ["premise", "geocode"]
+					}
+				},
+				{
+					"placePrediction": {
+						"place": "places/ChIJHZ3ngSlPVjcRXUuXUiR6frk",
+						"placeId": "ChIJHZ3ngSlPVjcRXUuXUiR6frk",
+						"text": {
+							"text": "1600 Amphitheatre Parkway, Mymensingh, Bangladesh",
+							"matches": [
+								{
+									"endOffset": 4
+								}
+							]
+						},
+						"structuredFormat": {
+							"mainText": {
+								"text": "1600 Amphitheatre Parkway",
+								"matches": [
+									{
+										"endOffset": 4
+									}
+								]
+							},
+							"secondaryText": {
+								"text": "Mymensingh, Bangladesh"
+							}
+						},
+						"types": ["geocode", "premise"]
+					}
+				}
+			]
+		},
+		"place": {
+			"id": "ChIJgz9fdgK6j4AR3EL1yn1L-Mo",
+			"formattedAddress": "1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA",
+			"addressComponents": [
+				{
+					"longText": "1600",
+					"shortText": "1600",
+					"types": ["street_number"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "Amphitheatre Parkway",
+					"shortText": "Amphitheatre Pkwy",
+					"types": ["route"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "Mountain View",
+					"shortText": "Mountain View",
+					"types": ["locality", "political"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "Santa Clara County",
+					"shortText": "Santa Clara County",
+					"types": ["administrative_area_level_2", "political"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "California",
+					"shortText": "CA",
+					"types": ["administrative_area_level_1", "political"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "United States",
+					"shortText": "US",
+					"types": ["country", "political"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "94043",
+					"shortText": "94043",
+					"types": ["postal_code"],
+					"languageCode": "en"
+				}
+			],
+			"location": {
+				"latitude": 37.4215571,
+				"longitude": -122.08398629999999
+			}
+		}
+	},
+	"berlin": {
+		"autocomplete": {
+			"suggestions": [
+				{
+					"placePrediction": {
+						"place": "places/ChIJp3ULWdFRqEcRerYcEbJRe3M",
+						"placeId": "ChIJp3ULWdFRqEcRerYcEbJRe3M",
+						"text": {
+							"text": "Friedrichstraße 43, Berlin-Friedrichshain-Kreuzberg, Germany",
+							"matches": [
+								{
+									"endOffset": 15
+								},
+								{
+									"startOffset": 16,
+									"endOffset": 18
+								},
+								{
+									"startOffset": 20,
+									"endOffset": 26
+								}
+							]
+						},
+						"structuredFormat": {
+							"mainText": {
+								"text": "Friedrichstraße 43",
+								"matches": [
+									{
+										"endOffset": 15
+									},
+									{
+										"startOffset": 16,
+										"endOffset": 18
+									}
+								]
+							},
+							"secondaryText": {
+								"text": "Berlin-Friedrichshain-Kreuzberg, Germany",
+								"matches": [
+									{
+										"endOffset": 6
+									}
+								]
+							}
+						},
+						"types": ["subpremise", "geocode"]
+					}
+				},
+				{
+					"placePrediction": {
+						"place": "places/EjhGcmllZHJpY2hzdHJhw59lIDQzLCBCZXJsaW4tU3RlZ2xpdHotWmVobGVuZG9yZiwgR2VybWFueSIwEi4KFAoSCaXjr0haWqhHEfySCpFxGzVWECsqFAoSCfMQBVdaWqhHEfmnuVyJHeyp",
+						"placeId": "EjhGcmllZHJpY2hzdHJhw59lIDQzLCBCZXJsaW4tU3RlZ2xpdHotWmVobGVuZG9yZiwgR2VybWFueSIwEi4KFAoSCaXjr0haWqhHEfySCpFxGzVWECsqFAoSCfMQBVdaWqhHEfmnuVyJHeyp",
+						"text": {
+							"text": "Friedrichstraße 43, Berlin-Steglitz-Zehlendorf, Germany",
+							"matches": [
+								{
+									"endOffset": 18
+								},
+								{
+									"startOffset": 20,
+									"endOffset": 26
+								}
+							]
+						},
+						"structuredFormat": {
+							"mainText": {
+								"text": "Friedrichstraße 43",
+								"matches": [
+									{
+										"endOffset": 18
+									}
+								]
+							},
+							"secondaryText": {
+								"text": "Berlin-Steglitz-Zehlendorf, Germany",
+								"matches": [
+									{
+										"endOffset": 6
+									}
+								]
+							}
+						},
+						"types": ["geocode", "street_address"]
+					}
+				},
+				{
+					"placePrediction": {
+						"place": "places/Ei1GcmllZHJpY2hzdHJhw59lIDQzLCBCZXJsaW4sIFNwYW5kYXUsIEdlcm1hbnkiMBIuChQKEgntaav-QFaoRxFAtX7j265sSRArKhQKEgntaav-QFaoRxF7gbePTcREpw",
+						"placeId": "Ei1GcmllZHJpY2hzdHJhw59lIDQzLCBCZXJsaW4sIFNwYW5kYXUsIEdlcm1hbnkiMBIuChQKEgntaav-QFaoRxFAtX7j265sSRArKhQKEgntaav-QFaoRxF7gbePTcREpw",
+						"text": {
+							"text": "Friedrichstraße 43, Berlin, Spandau, Germany",
+							"matches": [
+								{
+									"endOffset": 18
+								},
+								{
+									"startOffset": 20,
+									"endOffset": 26
+								}
+							]
+						},
+						"structuredFormat": {
+							"mainText": {
+								"text": "Friedrichstraße 43",
+								"matches": [
+									{
+										"endOffset": 18
+									}
+								]
+							},
+							"secondaryText": {
+								"text": "Berlin, Spandau, Germany",
+								"matches": [
+									{
+										"endOffset": 6
+									}
+								]
+							}
+						},
+						"types": ["geocode", "street_address"]
+					}
+				},
+				{
+					"placePrediction": {
+						"place": "places/ChIJ73CYyzYyqEcRAUgFqEvClO0",
+						"placeId": "ChIJ73CYyzYyqEcRAUgFqEvClO0",
+						"text": {
+							"text": "Friedrichstraße 43, Rüdersdorf-Hennickendorf, Germany",
+							"matches": [
+								{
+									"endOffset": 15
+								},
+								{
+									"startOffset": 16,
+									"endOffset": 18
+								},
+								{
+									"startOffset": 20,
+									"endOffset": 30
+								}
+							]
+						},
+						"structuredFormat": {
+							"mainText": {
+								"text": "Friedrichstraße 43",
+								"matches": [
+									{
+										"endOffset": 15
+									},
+									{
+										"startOffset": 16,
+										"endOffset": 18
+									}
+								]
+							},
+							"secondaryText": {
+								"text": "Rüdersdorf-Hennickendorf, Germany",
+								"matches": [
+									{
+										"endOffset": 10
+									}
+								]
+							}
+						},
+						"types": ["subpremise", "geocode"]
+					}
+				},
+				{
+					"placePrediction": {
+						"place": "places/EihGcmllZHJpY2hzdHJhw59lIDQzLCBCaXJsZW5iYWNoLCBHZXJtYW55IjASLgoUChIJWeCNqoHNvUcR3cAD452y3g0QKyoUChIJ3wEo4YDNvUcRxYUFzcBl7is",
+						"placeId": "EihGcmllZHJpY2hzdHJhw59lIDQzLCBCaXJsZW5iYWNoLCBHZXJtYW55IjASLgoUChIJWeCNqoHNvUcR3cAD452y3g0QKyoUChIJ3wEo4YDNvUcRxYUFzcBl7is",
+						"text": {
+							"text": "Friedrichstraße 43, Birlenbach, Germany",
+							"matches": [
+								{
+									"endOffset": 18
+								},
+								{
+									"startOffset": 20,
+									"endOffset": 30
+								}
+							]
+						},
+						"structuredFormat": {
+							"mainText": {
+								"text": "Friedrichstraße 43",
+								"matches": [
+									{
+										"endOffset": 18
+									}
+								]
+							},
+							"secondaryText": {
+								"text": "Birlenbach, Germany",
+								"matches": [
+									{
+										"endOffset": 10
+									}
+								]
+							}
+						},
+						"types": ["geocode", "street_address"]
+					}
+				}
+			]
+		},
+		"place": {
+			"id": "ChIJp3ULWdFRqEcRerYcEbJRe3M",
+			"formattedAddress": "Friedrichstraße 43, 10969 Berlin-Bezirk Friedrichshain-Kreuzberg, Germany",
+			"addressComponents": [
+				{
+					"longText": "43",
+					"shortText": "43",
+					"types": ["street_number"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "Friedrichstraße",
+					"shortText": "Friedrichstraße",
+					"types": ["route"],
+					"languageCode": "de"
+				},
+				{
+					"longText": "Bezirk Friedrichshain-Kreuzberg",
+					"shortText": "Bezirk Friedrichshain-Kreuzberg",
+					"types": ["sublocality_level_1", "sublocality", "political"],
+					"languageCode": "de"
+				},
+				{
+					"longText": "Berlin",
+					"shortText": "Berlin",
+					"types": ["locality", "political"],
+					"languageCode": "de"
+				},
+				{
+					"longText": "Kreisfreie Stadt Berlin",
+					"shortText": "Kreisfreie Stadt Berlin",
+					"types": ["administrative_area_level_3", "political"],
+					"languageCode": "de"
+				},
+				{
+					"longText": "Berlin",
+					"shortText": "BE",
+					"types": ["administrative_area_level_1", "political"],
+					"languageCode": "de"
+				},
+				{
+					"longText": "Germany",
+					"shortText": "DE",
+					"types": ["country", "political"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "10969",
+					"shortText": "10969",
+					"types": ["postal_code"],
+					"languageCode": "en"
+				}
+			],
+			"location": {
+				"latitude": 52.506866099999996,
+				"longitude": 13.390727499999999
+			}
+		}
+	},
+	"london": {
+		"autocomplete": {
+			"suggestions": [
+				{
+					"placePrediction": {
+						"place": "places/ChIJx2E7b8UEdkgRtw6rLyLUl5w",
+						"placeId": "ChIJx2E7b8UEdkgRtw6rLyLUl5w",
+						"text": {
+							"text": "10 Downing Street, London, UK",
+							"matches": [
+								{
+									"endOffset": 2
+								},
+								{
+									"startOffset": 3,
+									"endOffset": 17
+								},
+								{
+									"startOffset": 19,
+									"endOffset": 25
+								}
+							]
+						},
+						"structuredFormat": {
+							"mainText": {
+								"text": "10 Downing Street",
+								"matches": [
+									{
+										"endOffset": 2
+									},
+									{
+										"startOffset": 3,
+										"endOffset": 17
+									}
+								]
+							},
+							"secondaryText": {
+								"text": "London, UK",
+								"matches": [
+									{
+										"endOffset": 6
+									}
+								]
+							}
+						},
+						"types": ["subpremise", "geocode"]
+					}
+				},
+				{
+					"placePrediction": {
+						"place": "places/EicxMCBEb3duaW5nIENyZXNjZW50LCBMb25kb24sIE9OLCBDYW5hZGEiMBIuChQKEgljKPG5qfMuiBHKnoBKEbBL4BAKKhQKEgkxvq6vqfMuiBHJ0I6T5RTVIA",
+						"placeId": "EicxMCBEb3duaW5nIENyZXNjZW50LCBMb25kb24sIE9OLCBDYW5hZGEiMBIuChQKEgljKPG5qfMuiBHKnoBKEbBL4BAKKhQKEgkxvq6vqfMuiBHJ0I6T5RTVIA",
+						"text": {
+							"text": "10 Downing Crescent, London, ON, Canada",
+							"matches": [
+								{
+									"endOffset": 19
+								},
+								{
+									"startOffset": 21,
+									"endOffset": 27
+								}
+							]
+						},
+						"structuredFormat": {
+							"mainText": {
+								"text": "10 Downing Crescent",
+								"matches": [
+									{
+										"endOffset": 19
+									}
+								]
+							},
+							"secondaryText": {
+								"text": "London, ON, Canada",
+								"matches": [
+									{
+										"endOffset": 6
+									}
+								]
+							}
+						},
+						"types": ["street_address", "geocode"]
+					}
+				},
+				{
+					"placePrediction": {
+						"place": "places/ChIJiVuXmu0SdkgRoiYLgB6kxQI",
+						"placeId": "ChIJiVuXmu0SdkgRoiYLgB6kxQI",
+						"text": {
+							"text": "10 Downing Drive, Greenford, UK",
+							"matches": [
+								{
+									"endOffset": 2
+								},
+								{
+									"startOffset": 3,
+									"endOffset": 16
+								}
+							]
+						},
+						"structuredFormat": {
+							"mainText": {
+								"text": "10 Downing Drive",
+								"matches": [
+									{
+										"endOffset": 2
+									},
+									{
+										"startOffset": 3,
+										"endOffset": 16
+									}
+								]
+							},
+							"secondaryText": {
+								"text": "Greenford, UK"
+							}
+						},
+						"types": ["geocode", "premise"]
+					}
+				},
+				{
+					"placePrediction": {
+						"place": "places/ChIJISUQe3Ol2EcRGHcbawMbixg",
+						"placeId": "ChIJISUQe3Ol2EcRGHcbawMbixg",
+						"text": {
+							"text": "10 Downing Road, Dagenham, UK",
+							"matches": [
+								{
+									"endOffset": 2
+								},
+								{
+									"startOffset": 3,
+									"endOffset": 15
+								}
+							]
+						},
+						"structuredFormat": {
+							"mainText": {
+								"text": "10 Downing Road",
+								"matches": [
+									{
+										"endOffset": 2
+									},
+									{
+										"startOffset": 3,
+										"endOffset": 15
+									}
+								]
+							},
+							"secondaryText": {
+								"text": "Dagenham, UK"
+							}
+						},
+						"types": ["premise", "geocode"]
+					}
+				},
+				{
+					"placePrediction": {
+						"place": "places/ChIJvUSM32MTdkgRW1rOad9yr7c",
+						"placeId": "ChIJvUSM32MTdkgRW1rOad9yr7c",
+						"text": {
+							"text": "10 Downing Close, Harrow, UK",
+							"matches": [
+								{
+									"endOffset": 2
+								},
+								{
+									"startOffset": 3,
+									"endOffset": 16
+								}
+							]
+						},
+						"structuredFormat": {
+							"mainText": {
+								"text": "10 Downing Close",
+								"matches": [
+									{
+										"endOffset": 2
+									},
+									{
+										"startOffset": 3,
+										"endOffset": 16
+									}
+								]
+							},
+							"secondaryText": {
+								"text": "Harrow, UK"
+							}
+						},
+						"types": ["geocode", "subpremise"]
+					}
+				}
+			]
+		},
+		"place": {
+			"id": "ChIJx2E7b8UEdkgRtw6rLyLUl5w",
+			"formattedAddress": "10 Downing St, London SW1A 2AA, UK",
+			"addressComponents": [
+				{
+					"longText": "10",
+					"shortText": "10",
+					"types": ["street_number"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "Downing Street",
+					"shortText": "Downing St",
+					"types": ["route"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "London",
+					"shortText": "London",
+					"types": ["postal_town"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "Greater London",
+					"shortText": "Greater London",
+					"types": ["administrative_area_level_2", "political"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "England",
+					"shortText": "England",
+					"types": ["administrative_area_level_1", "political"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "United Kingdom",
+					"shortText": "GB",
+					"types": ["country", "political"],
+					"languageCode": "en"
+				},
+				{
+					"longText": "SW1A 2AA",
+					"shortText": "SW1A 2AA",
+					"types": ["postal_code"],
+					"languageCode": "en"
+				}
+			],
+			"location": {
+				"latitude": 51.503339499999996,
+				"longitude": -0.1275662
+			}
+		}
+	}
+}

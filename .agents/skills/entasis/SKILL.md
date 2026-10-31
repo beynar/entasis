@@ -432,6 +432,7 @@ This section is generated from `tooling/component-contract/manifest.ts`.
 
 ### Forms
 
+- `entasis/address-input` — Address input (/components/address-input)
 - `entasis/autocomplete` — Autocomplete (/components/autocomplete)
 - `entasis/calendar` — Calendar (/components/calendar)
 - `entasis/checkbox` — Checkbox (/components/checkbox)
@@ -453,6 +454,7 @@ This section is generated from `tooling/component-contract/manifest.ts`.
 - `entasis/rating-input` — Rating input (/components/rating-input)
 - `entasis/rich-text-input` — Rich text input (/components/rich-text-input)
 - `entasis/select` — Select (/components/select)
+- `entasis/signature-input` — Signature input (/components/signature-input)
 - `entasis/slider` — Slider (/components/slider)
 - `entasis/switch` — Switch (/components/switch)
 - `entasis/tag-group` — Tag group (/components/tag-group)
@@ -464,6 +466,7 @@ This section is generated from `tooling/component-contract/manifest.ts`.
 
 ### Data display
 
+- `entasis/address` — Address (/components/address)
 - `entasis/avatar` — Avatar (/components/avatar)
 - `entasis/avatar` — Avatar group (/components/avatar-group)
 - `entasis/chart` — Chart (/components/chart)

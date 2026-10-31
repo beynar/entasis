@@ -331,6 +331,11 @@
 			"svelte": "./dist/components/Form/Field/index.js",
 			"default": "./dist/components/Form/Field/index.js"
 		},
+		"./address-input": {
+			"types": "./dist/components/Form/AddressInput/index.d.ts",
+			"svelte": "./dist/components/Form/AddressInput/index.js",
+			"default": "./dist/components/Form/AddressInput/index.js"
+		},
 		"./autocomplete": {
 			"types": "./dist/components/Form/Autocomplete/index.d.ts",
 			"svelte": "./dist/components/Form/Autocomplete/index.js",
@@ -436,6 +441,11 @@
 			"svelte": "./dist/components/Form/Select/index.js",
 			"default": "./dist/components/Form/Select/index.js"
 		},
+		"./signature-input": {
+			"types": "./dist/components/Form/SignatureInput/index.d.ts",
+			"svelte": "./dist/components/Form/SignatureInput/index.js",
+			"default": "./dist/components/Form/SignatureInput/index.js"
+		},
 		"./slider": {
 			"types": "./dist/components/Form/Slider/index.d.ts",
 			"svelte": "./dist/components/Form/Slider/index.js",
@@ -475,6 +485,11 @@
 			"types": "./dist/components/Form/VoiceInput/index.d.ts",
 			"svelte": "./dist/components/Form/VoiceInput/index.js",
 			"default": "./dist/components/Form/VoiceInput/index.js"
+		},
+		"./address": {
+			"types": "./dist/components/Address/index.d.ts",
+			"svelte": "./dist/components/Address/index.js",
+			"default": "./dist/components/Address/index.js"
 		},
 		"./avatar": {
 			"types": "./dist/components/Avatar/index.d.ts",
@@ -961,6 +976,9 @@
 			"field": [
 				"dist/components/Form/Field/index.d.ts"
 			],
+			"address-input": [
+				"dist/components/Form/AddressInput/index.d.ts"
+			],
 			"autocomplete": [
 				"dist/components/Form/Autocomplete/index.d.ts"
 			],
@@ -1024,6 +1042,9 @@
 			"select": [
 				"dist/components/Form/Select/index.d.ts"
 			],
+			"signature-input": [
+				"dist/components/Form/SignatureInput/index.d.ts"
+			],
 			"slider": [
 				"dist/components/Form/Slider/index.d.ts"
 			],
@@ -1047,6 +1068,9 @@
 			],
 			"voice-input": [
 				"dist/components/Form/VoiceInput/index.d.ts"
+			],
+			"address": [
+				"dist/components/Address/index.d.ts"
 			],
 			"avatar": [
 				"dist/components/Avatar/index.d.ts"

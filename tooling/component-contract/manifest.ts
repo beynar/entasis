@@ -212,6 +212,9 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 		docs: false,
 		related: ['form']
 	}),
+	component('address-input', 'components/Form/AddressInput', 'Forms', 'Address input', {
+		related: ['address', 'autocomplete']
+	}),
 	component('autocomplete', 'components/Form/Autocomplete', 'Forms', 'Autocomplete', {
 		related: ['combobox', 'text-input', 'tags-input']
 	}),
@@ -275,6 +278,9 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 	component('select', 'components/Form/Select', 'Forms', 'Select', {
 		related: ['combobox', 'selection-menu']
 	}),
+	component('signature-input', 'components/Form/SignatureInput', 'Forms', 'Signature input', {
+		related: ['voice-input', 'file-input']
+	}),
 	component('slider', 'components/Form/Slider', 'Forms', 'Slider', {
 		related: ['number-input']
 	}),
@@ -302,6 +308,9 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 		related: ['text-input', 'ai-composer']
 	}),
 
+	component('address', 'components/Address', 'Data display', 'Address', {
+		related: ['address-input']
+	}),
 	component('avatar', 'components/Avatar', 'Data display', 'Avatar', {
 		docs: [
 			docs('avatar', '/components/avatar', 'Data display', 'Avatar'),
@@ -1252,6 +1261,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	ask: ['Ask', 'AskButton', 'AskDialogOptions', 'AskOptions', 'AskProps', 'AskResult', 'ask'],
 	field: [
+		'AddressInputType',
 		'BooleanInputType',
 		'CalendarInputType',
 		'ColorInputType',
@@ -1285,6 +1295,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'PinInputType',
 		'RatingInputType',
 		'RichTextInputType',
+		'SignatureInputType',
 		'SingleOptionInputType',
 		'SliderRangeInputType',
 		'TagGroupInputType',
@@ -1300,6 +1311,19 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'llmDescription',
 		'setFieldTheme',
 		'useFieldTheme'
+	],
+	'address-input': [
+		'AddressFieldConfig',
+		'AddressFieldItem',
+		'AddressFieldRow',
+		'AddressInput',
+		'AddressInputLayout',
+		'AddressInputProps',
+		'AddressInputTheme',
+		'AddressInputThemeProps',
+		'addressInputTheme',
+		'setAddressInputTheme',
+		'useAddressInputTheme'
 	],
 	autocomplete: [
 		'Autocomplete',
@@ -1599,6 +1623,18 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'setRichTextInputTheme',
 		'useRichTextInputTheme'
 	],
+	'signature-input': [
+		'SignatureFormat',
+		'SignatureInput',
+		'SignatureInputProps',
+		'SignatureInputTheme',
+		'SignatureInputThemeProps',
+		'SignaturePoint',
+		'SignatureStroke',
+		'setSignatureInputTheme',
+		'signatureInputTheme',
+		'useSignatureInputTheme'
+	],
 	select: [
 		'Select',
 		'SelectCssVariable',
@@ -1708,6 +1744,41 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'setVoiceInputTheme',
 		'useVoiceInputTheme',
 		'voiceInputTheme'
+	],
+	address: [
+		'ADDRESS_FIELDS',
+		'Address',
+		'AddressField',
+		'AddressLayout',
+		'AddressLocation',
+		'AddressProps',
+		'AddressProvider',
+		'AddressProviderRequest',
+		'AddressSuggestion',
+		'AddressTheme',
+		'AddressThemeProps',
+		'AddressValue',
+		'COUNTRY_CODES',
+		'DEFAULT_ADDRESS_ENDPOINT',
+		'FormatAddressOptions',
+		'GooglePlace',
+		'GooglePlaceAddressComponent',
+		'GooglePlacesError',
+		'GooglePlacesProviderOptions',
+		'GooglePlacesProxyOptions',
+		'addressCountryName',
+		'addressTheme',
+		'composeStreetLine',
+		'countryName',
+		'createGooglePlacesProvider',
+		'createGooglePlacesProxy',
+		'formatAddress',
+		'formatAddressLine',
+		'isAddressEmpty',
+		'parseGooglePlace',
+		'setAddressProvider',
+		'setAddressTheme',
+		'useAddressTheme'
 	],
 	avatar: [
 		'Avatar',

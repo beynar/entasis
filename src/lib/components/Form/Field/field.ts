@@ -7,6 +7,7 @@ import type { FieldMessageOverrides } from './field.messages.js';
 import type { FieldThemeProps } from './field.theme.js';
 import type { Density, Sizes } from '$lib/types/theme.js';
 import type { FormInputRegistry } from '../Form/form.js';
+import type { Address } from '../../Address/address.js';
 
 export type KeyValuePair = { key: string; value: string };
 
@@ -15,6 +16,8 @@ export type RichTextInputType = 'rich-text';
 export type NumberInputType = 'number' | 'slider';
 export type RatingInputType = 'rating';
 export type VoiceInputType = 'voice';
+export type SignatureInputType = 'signature';
+export type AddressInputType = 'address';
 export type SliderRangeInputType = 'slider-range';
 export type TagInputType = 'tag';
 export type TagGroupInputType = 'tag-group';
@@ -60,6 +63,8 @@ export type InputType =
 	| NumberInputType
 	| RatingInputType
 	| VoiceInputType
+	| SignatureInputType
+	| AddressInputType
 	| TimeInputType
 	| TextInputType
 	| RichTextInputType
@@ -100,33 +105,37 @@ export type FieldValue<T extends FieldType> = T extends RegisteredInputType
 							? number
 							: T extends VoiceInputType
 								? Blob
-								: T extends TimeInputType
-									? number
-									: T extends TextInputType
-										? string
-										: T extends RichTextInputType
-											? string
-											: T extends PinInputType
+								: T extends SignatureInputType
+									? string
+									: T extends AddressInputType
+										? Address
+										: T extends TimeInputType
+											? number
+											: T extends TextInputType
 												? string
-												: T extends BooleanInputType
-													? boolean
-													: T extends MultipleChoiceInputType
-														? string[]
-														: T extends TagInputType
-															? string[]
-															: T extends TagGroupInputType
-																? string | string[] | null
-																: T extends KeyValueInputType
-																	? KeyValuePair[]
-																	: T extends SingleOptionInputType
-																		? string
-																		: T extends 'calendar'
-																			? Date
-																			: T extends 'calendar-range'
-																				? [Date | null, Date | null]
-																				: T extends ColorInputType
-																					? string
-																					: never;
+												: T extends RichTextInputType
+													? string
+													: T extends PinInputType
+														? string
+														: T extends BooleanInputType
+															? boolean
+															: T extends MultipleChoiceInputType
+																? string[]
+																: T extends TagInputType
+																	? string[]
+																	: T extends TagGroupInputType
+																		? string | string[] | null
+																		: T extends KeyValueInputType
+																			? KeyValuePair[]
+																			: T extends SingleOptionInputType
+																				? string
+																				: T extends 'calendar'
+																					? Date
+																					: T extends 'calendar-range'
+																						? [Date | null, Date | null]
+																						: T extends ColorInputType
+																							? string
+																							: never;
 
 export type InputProps<T extends FieldType> = WithSlot<
 	{

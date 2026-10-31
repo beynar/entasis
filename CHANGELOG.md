@@ -6,6 +6,32 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- \`AddressInput\` (\`entasis/address-input\`, and \`type: 'address'\` in Form and \`ask()\`): a postal
+  address field whose value is an address object. \`fields\` picks the parts it shows (\`line1\`,
+  \`line2\`, \`postalCode\`, \`city\`, \`region\`, \`country\`) and lays them out in rows, several
+  side by side with their own widths, labels and placeholders; \`editableFields\`
+  the ones a person may type in, \`requiredFields\` the ones a started address must fill ("Required:
+  City"). The street line searches Google Places as it is typed, built in, and a chosen suggestion
+  fills every part, with its coordinates (\`location: { lat, lng }\`) and place id. The search
+  goes through the app's \`/api/places\` route, one file with \`createGooglePlacesProxy({ apiKey })\`,
+  so the key stays on the server; without it the search turns itself off. \`provider\` or
+  \`setAddressProvider\` swaps in another search, \`null\` turns it off. \`layout="search"\` shows one search input
+  instead. The country is a list named in the active locale; a native form receives
+  \`name[line1]\`, \`name[postalCode]\`… The part inputs are not Form entries.
+- \`entasis/address\`: the address model, \`formatAddress\` (each country's line order: "75004 Paris",
+  "Mountain View, CA 94043", the UK's postcode line, the street number before or after the
+  street), an \`<Address>\` display component with the same \`fields\` choice,
+  \`createGooglePlacesProxy\` (the server handlers of the \`/api/places\` route, which forward only
+  the two Places calls) and \`createGooglePlacesProvider\`, which searches Google Places (Places
+  API "New") over REST, with no SDK. It bills one session per chosen address and keeps to
+  addresses by default.
+- \`SignatureInput\` (\`entasis/signature-input\`, and \`type: 'signature'\` in Form and \`ask()\`): a
+  pad to sign with a mouse, a finger or a pen. Its value is the signature as a PNG or SVG data
+  URL cropped to the ink, drawn in black for documents while the pad follows the theme. Strokes
+  are smoothed, follow pen pressure, and undo or clear by button or key.
+
 ## 0.13.5 — 2026-10-31
 
 ### Added
