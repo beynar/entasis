@@ -266,7 +266,7 @@
 	});
 
 	function hasIcon(entry: SidebarMenuEntry) {
-		return entry.icon != null;
+		return entry.icon != null || entry.media != null;
 	}
 
 	function hasCollapsibleMedia(button: SidebarMenuButtonItem | undefined) {

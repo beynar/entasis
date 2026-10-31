@@ -6,6 +6,20 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- Sidebar menu entries and submenu entries take \`media\`, \`description\` and \`meta\`, so a
+  conversation list stays data: \`media\` is a snippet drawn in place of the icon (a face, an
+  avatar) at the media size, which an \`svg\` or \`img\` placed directly inside fills, and which
+  stays visible when the Sidebar collapses to icons; \`description\` is a lighter second line
+  under the label, truncated to one line, which gives the row the large height; \`meta\` is a short
+  text at the end of the label's line (a time, "Hier"), before which the label truncates, left out
+  in icon mode like \`badge\`. On a row with a description, the \`badge\` and the \`suffix\` sit at
+  the end of the description's line, so every row's meta ends on one column. \`suffix\`,
+  \`badge\`, \`action\`, \`isActive\`, \`href\` and the tooltips keep their behaviour. New theme
+  parts: \`menuMedia\`, \`menuText\`, \`menuTitleRow\`, \`menuTitle\`, \`menuDescriptionRow\`,
+  \`menuMeta\`.
+
 ## 0.13.6 — 2026-10-31
 
 ### Added

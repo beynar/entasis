@@ -11,6 +11,7 @@
 	import { sidebarInwardPhysicalSide, sidebarTooltip } from './sidebar-position.js';
 	import SidebarAction from './SidebarAction.svelte';
 	import SidebarIcon from './SidebarIcon.svelte';
+	import SidebarMenuText from './SidebarMenuText.svelte';
 	import { useSidebarSuffixWidth } from './sidebar.suffix.svelte.js';
 	import { useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 
@@ -39,6 +40,9 @@
 	// tile, so an untinted row never inherits the ambient `data-color`.
 	const hasIconSurface = $derived(!!sub.icon && (sub.iconVariant === 'tile' || !!sub.iconColor));
 	const hasBadge = $derived(sub.badge != null);
+	// On a two-line row the suffix and the badge sit on the description's line, so the label's
+	// line, and its meta, run to the same end on every row.
+	const twoLine = $derived(sub.description != null);
 	const suffixWidth = useSidebarSuffixWidth();
 	const uid = $props.id();
 	const suffixId = `${uid}-suffix`;
@@ -63,13 +67,18 @@
 			// stays visible before the action, so a row with one reserves both at every width.
 			endReserve: sub.suffix
 				? sub.action
-					? 'suffixAction'
-					: 'suffix'
+					? twoLine
+						? 'suffixLineAction'
+						: 'suffixAction'
+					: twoLine
+						? 'suffixLine'
+						: 'suffix'
 				: !sub.action
 					? 'none'
 					: hasBadge
 						? 'actionBelowMd'
 						: 'action',
+			tall: sub.description != null || sub.media != null,
 			className: sub.class
 		})
 	);
@@ -85,7 +94,11 @@
 </script>
 
 {#snippet entryContent()}
-	{#if hasIconSurface}
+	{#if sub.media}
+		<span data-slot="sidebar-menu-media" data-sidebar="menu-media" class={classes.menuMedia()}>
+			{@render sub.media(api, sub)}
+		</span>
+	{:else if hasIconSurface}
 		<span
 			data-slot="sidebar-menu-icon"
 			data-color={sub.iconColor}
@@ -100,18 +113,35 @@
 	{:else}
 		<SidebarIcon icon={sub.icon} />
 	{/if}
-	{#if hasBadge}
+	{#if sub.description != null || sub.meta != null}
+		<SidebarMenuText
+			label={sub.label}
+			description={sub.description}
+			meta={sub.meta}
+			suffix={!!sub.suffix}
+			trailing={twoLine && hasBadge ? badge : undefined}
+			size={subSize}
+			{theme}
+		/>
+		{#if !twoLine && hasBadge}
+			{@render badge()}
+		{/if}
+	{:else if hasBadge}
 		<span data-slot="sidebar-menu-sub-label">{sub.label}</span>
-		<span
-			data-slot="sidebar-menu-sub-badge"
-			data-sidebar="menu-sub-badge"
-			class={classes.badge({ size: subSize, action: sub.action && !sub.suffix ? 'sub' : 'none' })}
-		>
-			{sub.badge}
-		</span>
+		{@render badge()}
 	{:else}
 		<span>{sub.label}</span>
 	{/if}
+{/snippet}
+
+{#snippet badge()}
+	<span
+		data-slot="sidebar-menu-sub-badge"
+		data-sidebar="menu-sub-badge"
+		class={classes.badge({ size: subSize, action: sub.action && !sub.suffix ? 'sub' : 'none' })}
+	>
+		{sub.badge}
+	</span>
 {/snippet}
 
 <li
@@ -175,7 +205,8 @@
 			class={classes.suffix({
 				size: subSize,
 				density,
-				action: sub.action ? 'action' : 'none'
+				action: sub.action ? 'action' : 'none',
+				line: twoLine ? 'two' : 'one'
 			})}
 			{@attach suffixWidth.measure}
 		>

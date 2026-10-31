@@ -28,6 +28,7 @@
 	import SidebarFlyout from './SidebarFlyout.svelte';
 	import SidebarIcon from './SidebarIcon.svelte';
 	import SidebarMenuSubItem from './SidebarMenuSubItem.svelte';
+	import SidebarMenuText from './SidebarMenuText.svelte';
 	import { useSidebarSuffixWidth } from './sidebar.suffix.svelte.js';
 	import { useSidebarMotion, useSidebarTheme, type SidebarThemeProps } from './sidebar.theme.js';
 
@@ -82,6 +83,13 @@
 	);
 	const hasSubmenu = $derived(!!item.items?.length);
 	const showBadge = $derived(item.badge != null && !isIconCollapsed);
+	// A description stacks a second line under the label, so the row takes the large height
+	// unless the entry sets its own size.
+	const rowSize = $derived(item.size ?? (item.description != null ? 'large' : undefined));
+	const lead = $derived(item.media ? 'media' : 'icon');
+	// On a two-line row the suffix and the badge sit on the description's line, so the label's
+	// line, and its meta, run to the same end on every row.
+	const twoLine = $derived(item.description != null);
 	// An in-flow chevron or dots after the badge: the row then keeps its action's room at every
 	// width, since the action would otherwise cover that glyph when it shows.
 	const hasTrailingGlyph = $derived(
@@ -94,8 +102,12 @@
 	const endReserve = $derived(
 		item.suffix
 			? item.action
-				? 'suffixAction'
-				: 'suffix'
+				? twoLine
+					? 'suffixLineAction'
+					: 'suffixAction'
+				: twoLine
+					? 'suffixLine'
+					: 'suffix'
 			: !item.action
 				? 'none'
 				: showBadge && !hasTrailingGlyph
@@ -176,7 +188,11 @@
 </script>
 
 {#snippet entryContent()}
-	{#if hasIconSurface}
+	{#if item.media}
+		<span data-slot="sidebar-menu-media" data-sidebar="menu-media" class={classes.menuMedia()}>
+			{@render item.media(api, item)}
+		</span>
+	{:else if hasIconSurface}
 		<span
 			data-slot="sidebar-menu-icon"
 			data-color={item.iconColor}
@@ -187,7 +203,25 @@
 	{:else}
 		<SidebarIcon icon={item.icon} class={back ? 'rtl:-scale-x-100' : undefined} />
 	{/if}
-	<span class={classes.menuLabel()}>{item.label}</span>
+	{#if item.description != null || item.meta != null}
+		<SidebarMenuText
+			label={item.label}
+			description={item.description}
+			meta={isIconCollapsed ? undefined : item.meta}
+			suffix={!!item.suffix}
+			trailing={twoLine ? badge : undefined}
+			{size}
+			{theme}
+		/>
+	{:else}
+		<span class={classes.menuLabel()}>{item.label}</span>
+	{/if}
+	{#if !twoLine}
+		{@render badge()}
+	{/if}
+{/snippet}
+
+{#snippet badge()}
 	{#if showBadge}
 		<span
 			data-slot="sidebar-menu-badge"
@@ -224,7 +258,7 @@
 			role={item.disabled ? 'link' : undefined}
 			data-slot="sidebar-menu-button"
 			data-sidebar="menu-button"
-			data-size={item.size ?? 'normal'}
+			data-size={rowSize ?? 'normal'}
 			data-active={item.isActive ? 'true' : undefined}
 			data-active-variant={activeVariant}
 			aria-current={item.isActive ? 'page' : undefined}
@@ -236,7 +270,8 @@
 				activeVariant,
 				size,
 				density,
-				itemSize: item.size,
+				itemSize: rowSize,
+				lead,
 				endReserve,
 				className: item.class
 			})}
@@ -254,7 +289,7 @@
 			type="button"
 			data-slot="sidebar-menu-button"
 			data-sidebar="menu-button"
-			data-size={item.size ?? 'normal'}
+			data-size={rowSize ?? 'normal'}
 			data-active={item.isActive ? 'true' : undefined}
 			data-active-variant={activeVariant}
 			aria-current={item.isActive ? 'page' : undefined}
@@ -267,7 +302,8 @@
 				activeVariant,
 				size,
 				density,
-				itemSize: item.size,
+				itemSize: rowSize,
+				lead,
 				endReserve,
 				className: item.class
 			})}
@@ -302,7 +338,7 @@
 				type="button"
 				data-slot="sidebar-menu-button"
 				data-sidebar="menu-button"
-				data-size={item.size ?? 'normal'}
+				data-size={rowSize ?? 'normal'}
 				data-active-variant={activeVariant}
 				disabled={item.disabled || undefined}
 				class={classes.menuButton({
@@ -310,7 +346,8 @@
 					activeVariant,
 					size,
 					density,
-					itemSize: item.size,
+					itemSize: rowSize,
+					lead,
 					endReserve,
 					className: ['aria-expanded:bg-neutral-muted', item.class]
 				})}
@@ -339,7 +376,7 @@
 				type="button"
 				data-slot="sidebar-menu-button"
 				data-sidebar="menu-button"
-				data-size={item.size ?? 'normal'}
+				data-size={rowSize ?? 'normal'}
 				data-active={item.isActive ? 'true' : undefined}
 				data-active-variant={activeVariant}
 				class={classes.menuButton({
@@ -347,7 +384,8 @@
 					activeVariant,
 					size,
 					density,
-					itemSize: item.size,
+					itemSize: rowSize,
+					lead,
 					endReserve,
 					className: item.class
 				})}
@@ -434,7 +472,7 @@
 					type="button"
 					data-slot="sidebar-menu-button"
 					data-sidebar="menu-button"
-					data-size={item.size ?? 'normal'}
+					data-size={rowSize ?? 'normal'}
 					data-active={item.isActive ? 'true' : undefined}
 					data-active-variant={activeVariant}
 					disabled={item.disabled || undefined}
@@ -443,7 +481,8 @@
 						activeVariant,
 						size,
 						density,
-						itemSize: item.size,
+						itemSize: rowSize,
+						lead,
 						endReserve,
 						className: item.class
 					})}
@@ -473,7 +512,12 @@
 				data-sidebar="menu-suffix"
 				inert={isIconCollapsed ? true : undefined}
 				aria-hidden={isIconCollapsed ? 'true' : undefined}
-				class={classes.suffix({ size, density, action: item.action ? 'action' : 'none' })}
+				class={classes.suffix({
+					size,
+					density,
+					action: item.action ? 'action' : 'none',
+					line: twoLine ? 'two' : 'one'
+				})}
 				{@attach suffixWidth.measure}
 			>
 				{@render item.suffix(api, item)}

@@ -73,6 +73,9 @@ recursive tree groups, header/footer rows, search, actions, and snippet escape h
 - **icon**: SidebarIcon - Entasis icon snippet or string.
 - **iconColor**: Colors - Role tint for the leading icon, applied through \`data-color\`.
 - **iconVariant**: 'bare' | 'tile' - Leading icon treatment. \`tile\` paints a rounded square (\`bg-color-muted text-color-muted-readable\`) around the glyph, so per-project colour chips come from the role scale instead of hand-built markup.
+- **media**: Snippet<[SidebarApi, SidebarMenuEntry]> - Leading media in place of \`icon\`: a face, an avatar, a logo. It renders inside the row (\`data-sidebar="menu-media"\`, drawn by the \`menuMedia\` theme part) in a box at the Sidebar's media size (32px at \`size="normal"\`; \`iconSize="large"\` gives 36px), which an \`svg\` or \`img\` placed directly inside fills. It receives the row's entry, so one snippet draws every face (\`{#snippet face(api, entry)}\`). Collapsed to icons it stays visible and centred, as an icon does, and it counts as the row's icon for icon-collapse eligibility.
+- **description**: string | Snippet - Second line under the label: the last message, a path, a status. Drawn by the \`menuSecondary\` recipe (lighter, regular weight) and truncated to one line. The row takes the large height (\`h-14\` at \`size="normal"\`) unless the entry sets its own \`size\`. The label, its meta and the description sit in one column (\`menuText\`, \`menuTitleRow\`, \`menuTitle\`, \`menuDescriptionRow\` theme parts) that fades with the labels in icon mode. On such a two-line row the \`badge\` and the \`suffix\` sit at the end of the description's line, which reserves the suffix's width, so the label's line and its \`meta\` end on the same column on every row, with or without a suffix.
+- **meta**: string | Snippet - Short text at the end of the label's line: a time, "Hier" (\`data-sidebar="menu-meta"\`, \`menuMeta\` theme part). The label truncates before it. On a one-line row it ends before any \`suffix\`; on a row with a \`description\` it ends at the row's end, above the suffix. Left out in icon-collapsed mode, like \`badge\`. The row's accessible name reads label, meta, then description.
 - **href**: string - Render as an anchor. Mutually exclusive with menu.
 - **onclick**: (event: MouseEvent) => void - Native click handler for button or anchor rows. Mutually exclusive with menu. On a row with \`items\` and no \`href\`, it runs before the submenu toggles, inline or in the collapsed flyout; \`event.preventDefault()\` skips the toggle.
 - **isActive**: boolean - Adds active styling and \`aria-current="page"\`.
@@ -99,6 +102,7 @@ of them renders exactly as a plain one.
 - **isActive** / **disabled** / **size** - As on a top-level entry; \`size\` defaults to the Sidebar size.
 - **iconColor**: Colors - Role tint for the leading icon, applied through \`data-color\`.
 - **iconVariant**: 'bare' | 'tile' - \`tile\` paints the same tinted rounded square as a top-level row.
+- **media** / **description** / **meta** - As on a top-level entry (\`media\` receives the sub entry). A sub row with a \`description\` or a \`media\` takes the two-line height (40 / 48 / 56px by size).
 - **badge**: string | number - Trailing count or status; the label truncates before it. It shares the row's end column with the parent rows' badges and makes way for the row's \`action\` as a top-level badge does.
 - **tooltip**: string - Tooltip text. The label is always visible on an inline sub row, so the tooltip is extra information: shown whenever one is set, never on mobile. The collapsed row's flyout lists only each entry's label, icon, \`href\` or \`onclick\`, and \`isActive\`/\`disabled\` state: it shows no tooltip, \`badge\`, \`suffix\` or \`action\`.
 - **class**: string - Classes applied to the row button.
@@ -148,6 +152,55 @@ of them renders exactly as a plain one.
 </script>
 
 <Sidebar {items} />
+\`\`\`
+
+A conversation list built as data: each row leads with a face (\`media\`), reads a name and a time
+(\`meta\`) over the last message (\`description\`), and ends with an unread dot (\`suffix\`). The
+rows keep \`isActive\`, \`href\`, tooltips and icon collapse.
+
+\`\`\`svelte
+<script lang="ts">
+	import {
+		Sidebar,
+		type SidebarApi,
+		type SidebarGroup,
+		type SidebarMenuEntry,
+		type SidebarMenuSubEntry
+	} from 'entasis/sidebar';
+
+	const agents = [
+		{ id: 'ada', name: 'Ada', time: '10:42', last: 'The report is ready.', unread: true },
+		{ id: 'brune', name: 'Brune', time: 'Hier', last: 'Venue booked for Thursday.' }
+	];
+
+	const items: SidebarGroup[] = [
+		{
+			label: 'Agents',
+			items: agents.map((agent) => ({
+				label: agent.name,
+				href: \`/agents/\${agent.id}\`,
+				media: face,
+				meta: agent.time,
+				description: agent.last,
+				isActive: agent.id === 'ada',
+				suffix: agent.unread ? unread : undefined
+			}))
+		}
+	];
+</script>
+
+{#snippet face(_api: SidebarApi, entry: SidebarMenuEntry | SidebarMenuSubEntry)}
+	<svg viewBox="0 0 40 40" aria-hidden="true">
+		<circle cx="20" cy="20" r="20" fill="currentColor" opacity="0.2" />
+		<text x="20" y="25" text-anchor="middle" font-size="14">{entry.label[0]}</text>
+	</svg>
+{/snippet}
+
+{#snippet unread()}
+	<span class="bg-primary block size-2.5 rounded-full" aria-label="Unread"></span>
+{/snippet}
+
+<Sidebar {items} iconSize="large" collapsible="icon" />
 \`\`\`
 
 ### SidebarView

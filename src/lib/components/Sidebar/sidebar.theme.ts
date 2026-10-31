@@ -282,15 +282,31 @@ const defaultMenu = cva({
 // `suffix` and `suffixAction` hold a row's `suffix` (see `suffix`), which sits beside the row
 // rather than inside it: the row reserves the suffix's measured width (`--sidebar-suffix-width`,
 // its maximum width until measured), plus the row's own end padding or the action's box.
-const rowEndReserveKeys = { none: '', action: '', actionBelowMd: '', suffix: '', suffixAction: '' };
+// On a two-line row the suffix sits on the description's line, which reserves its width itself
+// (`menuDescriptionRow`), so the label's line runs to the row's end: `suffixLine` reserves
+// nothing and `suffixLineAction` only the action's box.
+const rowEndReserveKeys = {
+	none: '',
+	action: '',
+	actionBelowMd: '',
+	suffix: '',
+	suffixAction: '',
+	suffixLine: '',
+	suffixLineAction: ''
+};
+type RowEndReserve = Exclude<keyof typeof rowEndReserveKeys, 'none'>;
 const rowEndReserve: {
-	endReserve: 'action' | 'actionBelowMd' | 'suffix' | 'suffixAction';
+	endReserve: RowEndReserve | RowEndReserve[];
 	size?: 'large' | ('small' | 'normal')[];
 	density?: 'compact' | ('normal' | 'comfortable')[];
 	class: string;
 }[] = [
-	{ endReserve: 'action', size: ['small', 'normal'], class: 'pe-layout-lg' },
-	{ endReserve: 'action', size: 'large', class: 'pe-[calc(var(--spacing)*10)]' },
+	{ endReserve: ['action', 'suffixLineAction'], size: ['small', 'normal'], class: 'pe-layout-lg' },
+	{
+		endReserve: ['action', 'suffixLineAction'],
+		size: 'large',
+		class: 'pe-[calc(var(--spacing)*10)]'
+	},
 	{ endReserve: 'actionBelowMd', size: ['small', 'normal'], class: 'max-md:pe-layout-lg' },
 	{ endReserve: 'actionBelowMd', size: 'large', class: 'max-md:pe-[calc(var(--spacing)*10)]' },
 	{
@@ -339,13 +355,20 @@ const defaultMenuButton = cva({
 			normal: '',
 			large: ''
 		},
+		// What leads the row. Collapsed to icons, a `media` row centres its media box rather than
+		// the icon glyph in the icon button.
+		lead: {
+			icon: '',
+			media:
+				'group-data-[collapsible=icon]:![padding-inline:calc((var(--sidebar-icon-button-width)-var(--sidebar-media-size))/2)]'
+		},
 		endReserve: rowEndReserveKeys
 	},
 	compoundVariants: [
 		...rowEndReserve,
 		// The suffix covers the row's end, so hovering it keeps the row's hover tint.
 		{
-			endReserve: ['suffix', 'suffixAction'],
+			endReserve: ['suffix', 'suffixAction', 'suffixLine', 'suffixLineAction'],
 			class:
 				'group-has-[[data-sidebar=menu-suffix]:hover]/menu-row:before:opacity-[var(--state-hover-opacity)]'
 		},
@@ -365,6 +388,7 @@ const defaultMenuButton = cva({
 		size: 'normal',
 		density: 'normal',
 		itemSize: 'normal',
+		lead: 'icon',
 		endReserve: 'none'
 	}
 });
@@ -374,7 +398,7 @@ const defaultMenuLabel = cva({
 });
 
 const defaultMenuSecondary = cva({
-	base: 'truncate text-neutral/70',
+	base: 'min-w-0 flex-1 truncate font-normal text-neutral/70',
 	variants: {
 		size: {
 			small: 'text-xs',
@@ -385,6 +409,56 @@ const defaultMenuSecondary = cva({
 	defaultVariants: {
 		size: 'normal'
 	}
+});
+
+// A row with a `description` or a `meta` stacks its text: the label's line (the label, then the
+// meta at its end) over the description. The column fades with the labels in icon mode.
+const defaultMenuText = cva({
+	base: 'grid min-w-0 flex-1 text-start opacity-100 transition-[opacity,transform] duration-normal ease-standard group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:translate-x-1 group-data-[collapsible=icon]:opacity-0'
+});
+
+const defaultMenuTitleRow = cva({
+	base: 'flex min-w-0 items-baseline gap-sm whitespace-nowrap'
+});
+
+const defaultMenuTitle = cva({
+	base: 'min-w-0 flex-1 truncate'
+});
+
+// The description's line: the description, then the row's badge. With a `suffix`, the suffix
+// sits on this line, so the line reserves its measured width and the label's line does not.
+const defaultMenuDescriptionRow = cva({
+	base: 'flex min-w-0 items-center gap-sm',
+	variants: {
+		suffix: {
+			false: '',
+			true: 'pe-[calc(var(--sidebar-suffix-width,40%)+var(--space-sm))]'
+		}
+	},
+	defaultVariants: {
+		suffix: false
+	}
+});
+
+// A row's `meta`: a short text (a time, « Hier ») at the end of the label's line.
+const defaultMenuMeta = cva({
+	base: 'text-neutral/70 shrink-0 font-normal tabular-nums group-data-[collapsible=icon]:hidden',
+	variants: {
+		size: {
+			small: 'text-xs',
+			normal: 'text-xs',
+			large: 'text-sm'
+		}
+	},
+	defaultVariants: {
+		size: 'normal'
+	}
+});
+
+// A row's `media` (a face, an avatar): a box at the media size, which an `svg` or `img` placed
+// directly inside fills, over the row's icon sizing.
+const defaultMenuMedia = cva({
+	base: 'flex size-[var(--sidebar-media-size)] shrink-0 items-center justify-center [&>img]:size-full [&>img]:object-cover [&>svg]:!size-full'
 });
 
 const defaultMenuTrailing = cva({
@@ -454,12 +528,20 @@ const defaultSubButton = cva({
 		},
 		// Room at the row's end for a pinned action, as on a top-level row. `none` adds nothing: a
 		// plain row keeps its exact classes.
-		endReserve: rowEndReserveKeys
+		endReserve: rowEndReserveKeys,
+		// A row with a `description` or a `media` takes the two-line height.
+		tall: {
+			false: '',
+			true: ''
+		}
 	},
 	compoundVariants: [
 		...rowEndReserve,
+		{ tall: true, size: 'small', class: 'h-row-md' },
+		{ tall: true, size: 'normal', class: 'h-row-lg' },
+		{ tall: true, size: 'large', class: 'h-14' },
 		{
-			endReserve: ['suffix', 'suffixAction'],
+			endReserve: ['suffix', 'suffixAction', 'suffixLine', 'suffixLineAction'],
 			class:
 				'group-has-[[data-sidebar=menu-sub-suffix]:hover]/menu-sub-item:before:opacity-[var(--state-hover-opacity)]'
 		}
@@ -469,7 +551,8 @@ const defaultSubButton = cva({
 		size: 'normal',
 		density: 'normal',
 		itemSize: 'normal',
-		endReserve: 'none'
+		endReserve: 'none',
+		tall: false
 	}
 });
 
@@ -539,9 +622,18 @@ const defaultSuffix = cva({
 		action: {
 			none: '',
 			action: ''
+		},
+		// Which line the suffix is centred on. A row with a description centres it on the
+		// description's line, half the label's line height below the row's middle.
+		line: {
+			one: '',
+			two: ''
 		}
 	},
 	compoundVariants: [
+		{ line: 'two', size: 'small', class: 'top-[calc(50%+0.5rem)]' },
+		{ line: 'two', size: 'normal', class: 'top-[calc(50%+0.625rem)]' },
+		{ line: 'two', size: 'large', class: 'top-[calc(50%+0.75rem)]' },
 		{ action: 'none', density: 'compact', class: 'end-[var(--space-sm)]' },
 		{ action: 'none', density: ['normal', 'comfortable'], class: 'end-[var(--space-md)]' },
 		{ action: 'action', size: ['small', 'normal'], class: 'end-[var(--layout-space-lg)]' },
@@ -550,7 +642,8 @@ const defaultSuffix = cva({
 	defaultVariants: {
 		size: 'normal',
 		density: 'normal',
-		action: 'none'
+		action: 'none',
+		line: 'one'
 	}
 });
 
@@ -1245,6 +1338,12 @@ export const sidebarTheme = {
 	menuButton: defaultMenuButton,
 	menuLabel: defaultMenuLabel,
 	menuSecondary: defaultMenuSecondary,
+	menuText: defaultMenuText,
+	menuTitleRow: defaultMenuTitleRow,
+	menuTitle: defaultMenuTitle,
+	menuDescriptionRow: defaultMenuDescriptionRow,
+	menuMeta: defaultMenuMeta,
+	menuMedia: defaultMenuMedia,
 	menuTrailing: defaultMenuTrailing,
 	subMenu: defaultSubMenu,
 	treeSubMenu: defaultTreeSubMenu,

@@ -182,6 +182,21 @@ export type SidebarMenuSubEntry = {
 	onclick?: (event: MouseEvent) => void;
 	/** Leading icon. */
 	icon?: SidebarIcon;
+	/**
+	 * Leading media in place of `icon` (a face, an avatar, a logo), in a box at the Sidebar's
+	 * media size (`iconSize` scales it). An `svg` or `img` placed directly inside fills the box.
+	 * The row takes the two-line height.
+	 */
+	media?: Snippet<[SidebarApi, SidebarMenuSubEntry]>;
+	/**
+	 * Second line under the label: a preview, a path, a status. Lighter, and truncated to one
+	 * line. The row takes the two-line height.
+	 */
+	description?: string | Snippet;
+	/**
+	 * Short text at the end of the label's line: a time, « Hier ». The label truncates before it.
+	 */
+	meta?: string | Snippet;
 	/** Whether this entry represents the current page. */
 	isActive?: boolean;
 	/** Disable interaction. */
@@ -222,6 +237,22 @@ type SidebarMenuEntryBase = {
 	label: string;
 	/** Leading icon. */
 	icon?: SidebarIcon;
+	/**
+	 * Leading media in place of `icon` (a face, an avatar, a logo), in a box at the Sidebar's
+	 * media size (`iconSize` scales it). An `svg` or `img` placed directly inside fills the box.
+	 * It stays visible when the Sidebar collapses to icons, as an icon does.
+	 */
+	media?: Snippet<[SidebarApi, SidebarMenuEntry]>;
+	/**
+	 * Second line under the label: a preview, a path, a status. Lighter, and truncated to one
+	 * line. The row then takes the large height (`size: 'large'` geometry) unless `size` is set.
+	 */
+	description?: string | Snippet;
+	/**
+	 * Short text at the end of the label's line: a time, « Hier ». The label truncates before it.
+	 * Hidden in icon-collapsed mode, like `badge`.
+	 */
+	meta?: string | Snippet;
 	/** Role tint applied to the leading icon, through `data-color`. */
 	iconColor?: Colors;
 	/** Leading icon treatment. 'tile' paints a tinted rounded square around the glyph. */

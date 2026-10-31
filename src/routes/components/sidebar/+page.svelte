@@ -4,6 +4,7 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import SidebarActivityBarDemo from './demos/SidebarActivityBarDemo.svelte';
 	import SidebarBasicDemo from './demos/SidebarBasicDemo.svelte';
+	import SidebarConversationsDemo from './demos/SidebarConversationsDemo.svelte';
 	import SidebarIconDemo from './demos/SidebarIconDemo.svelte';
 	import SidebarPanelModeDemo from './demos/SidebarPanelModeDemo.svelte';
 	import SidebarTreeDemo from './demos/SidebarTreeDemo.svelte';
@@ -11,6 +12,7 @@
 	import SidebarViewsDemo from './demos/SidebarViewsDemo.svelte';
 	import ShellMentalModel from '../ShellMentalModel.svelte';
 	import rawActivityBarCode from './demos/SidebarActivityBarDemo.svelte?raw';
+	import rawConversationsCode from './demos/SidebarConversationsDemo.svelte?raw';
 	import rawIconCode from './demos/SidebarIconDemo.svelte?raw';
 	import rawPanelModeCode from './demos/SidebarPanelModeDemo.svelte?raw';
 	import rawTreeCode from './demos/SidebarTreeDemo.svelte?raw';
@@ -62,6 +64,7 @@
 
 	const activityBarCode = toPublicExampleCode(rawActivityBarCode);
 	const iconCode = toPublicExampleCode(rawIconCode);
+	const conversationsCode = toPublicExampleCode(rawConversationsCode);
 	const panelModeCode = toPublicExampleCode(rawPanelModeCode);
 	const treeCode = toPublicExampleCode(rawTreeCode);
 	const variantCode = toPublicExampleCode(rawVariantCode);
@@ -201,6 +204,14 @@
 			code={viewsCode}
 		>
 			<SidebarViewsDemo />
+		</ComponentCard>
+
+		<ComponentCard
+			description="Rows can lead with media instead of an icon (a face, an avatar), read a meta at the end of the label's line (a time) and a description under it (the last message), and keep their suffix, active state and links: a conversation list built as data. A description gives the row the large height; collapsed to icons, the media stays as the icon does."
+			class="!min-h-fit !items-start !p-4"
+			code={conversationsCode}
+		>
+			<SidebarConversationsDemo />
 		</ComponentCard>
 
 		<ComponentCard
