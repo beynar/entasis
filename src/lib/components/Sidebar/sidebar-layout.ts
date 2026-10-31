@@ -93,8 +93,10 @@ export function getSidebarActivityBarContainerClass(
 	frame: SidebarFrame,
 	variant: SidebarVariant
 ) {
+	// Above the panel in every state, a peek (`z-40`) included: an edge-revealed panel slides in
+	// from past the screen edge and must come out from under the rail, never across it.
 	return cx(
-		'inset-y-0 z-30 hidden w-[var(--sidebar-activity-offset,3rem)] md:flex',
+		'inset-y-0 z-[45] hidden w-[var(--sidebar-activity-offset,3rem)] md:flex',
 		frame === 'viewport' ? 'fixed h-window' : 'absolute h-full',
 		side === 'left' ? 'left-0' : 'right-0',
 		variant === 'inset' && 'py-md',
