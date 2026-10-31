@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.13.7 — 2026-11-01
+
 ### Added
 
 - Sidebar menu entries and submenu entries take \`media\`, \`description\` and \`meta\`, so a
