@@ -25,7 +25,9 @@ const outside = () => page.getByText('Outside').element() as HTMLElement;
 
 describe('hover', () => {
 	test('resting on a trigger opens its panel after the delay, moving to another switches at once', async () => {
-		render(NavigationMenuHarness, { props: { menu: { delay: 120 } } });
+		// The delay is long against a slow runner's hover round trip, so « still closed » and « no
+		// delay while open » stay measurable there.
+		render(NavigationMenuHarness, { props: { menu: { delay: 400 } } });
 		await userEvent.hover(trigger('Product'));
 		await sleep(40);
 		expect(expanded('Product')).toBe('false');
@@ -33,8 +35,8 @@ describe('hover', () => {
 
 		await userEvent.hover(trigger('Company'));
 		// No delay while a panel is open.
-		await expect.poll(() => expanded('Company'), { timeout: 100 }).toBe('true');
-		expect(expanded('Product')).toBe('false');
+		await expect.poll(() => expanded('Company'), { timeout: 250 }).toBe('true');
+		await expect.poll(() => expanded('Product')).toBe('false');
 		expect(page.getByRole('link', { name: 'About' }).element()).toBeTruthy();
 	});
 
@@ -215,13 +217,23 @@ describe('keyboard inside a panel and along the bar', () => {
 		const popup = linkNamed('Components')
 			.closest('[data-slot="navigation-menu-content-link"]')!
 			.parentElement!.closest('[id]')!.parentElement!;
-		await userEvent.keyboard('{ArrowRight}');
-		// Both panels are in the popup while the old one leaves, out of the layout.
+		// Both panels are in the popup while the old one leaves, out of the layout. The exit is
+		// recorded as it happens rather than polled, which a slow runner can step over.
 		const panels = () => Array.from(popup.children).filter((child) => child.id);
-		await expect.poll(() => panels().length).toBe(2);
-		const leaving = panels().find((panel) => getComputedStyle(panel).position === 'absolute');
-		expect(leaving).toBeDefined();
+		let leavingSeen = false;
+		const observer = new MutationObserver(() => {
+			const current = panels();
+			if (
+				current.length === 2 &&
+				current.some((panel) => getComputedStyle(panel).position === 'absolute')
+			)
+				leavingSeen = true;
+		});
+		observer.observe(popup, { childList: true, subtree: true, attributes: true });
+		await userEvent.keyboard('{ArrowRight}');
+		await expect.poll(() => leavingSeen).toBe(true);
 		await expect.poll(() => panels().length, { timeout: 2000 }).toBe(1);
+		observer.disconnect();
 		expect(expanded('Company')).toBe('true');
 	});
 
