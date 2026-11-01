@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.13.8 — 2026-11-01
+
 ### Fixed
 
 - \`SignatureInput\`: a saved signature (a value set from outside) shows in the pad's ink color,
