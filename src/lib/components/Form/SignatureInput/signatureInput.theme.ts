@@ -46,9 +46,21 @@ const defaultInk = cva({
 	base: 'pointer-events-none absolute inset-0 size-full overflow-visible'
 });
 
-// A value set from outside (a saved signature) shows as an image, scaled to fit the pad.
+// A value set from outside (a saved signature) shows scaled to fit the pad. With `imageInk`
+// 'theme' it is a mask over the pad's ink color (`bg-current`), so a black signature saved for
+// paper reads on a dark surface; 'as-is' is the image itself.
 const defaultImage = cva({
-	base: 'pointer-events-none absolute inset-0 size-full object-contain p-md'
+	base: 'pointer-events-none absolute inset-0 size-full p-md',
+	variants: {
+		ink: {
+			theme:
+				'bg-current [mask-clip:content-box] [mask-origin:content-box] [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain]',
+			'as-is': 'object-contain'
+		}
+	},
+	defaultVariants: {
+		ink: 'theme'
+	}
 });
 
 // The line to sign on and its hint: decorative, gone as soon as there is ink.

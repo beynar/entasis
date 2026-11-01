@@ -4,6 +4,8 @@ import type { InputProps } from '../Field/field.js';
 import type { SignatureFormat } from './signatureInput.strokes.js';
 import type { SignatureInputThemeProps } from './signatureInput.theme.js';
 
+export type SignatureImageInk = 'theme' | 'as-is';
+
 export type SignatureInputProps = WithAttachments<
 	Omit<InputProps<'signature'>, 'theme'> & {
 		/**
@@ -16,6 +18,14 @@ export type SignatureInputProps = WithAttachments<
 		 * white document whatever the app's theme; the pad itself draws in the theme's text color.
 		 */
 		inkColor?: string;
+		/**
+		 * How a value set from outside (a saved signature) shows in the pad. `'theme'` (default)
+		 * paints its shape in the pad's ink color, as live strokes are, so a black signature saved
+		 * for paper still reads on a dark theme; only its transparency counts. `'as-is'` shows the
+		 * image unchanged: for a signature with several colors or an opaque background. The value
+		 * itself is never changed.
+		 */
+		imageInk?: SignatureImageInk;
 		/** Line width in CSS pixels at a medium pen pressure. Defaults to 2.5. */
 		strokeWidth?: number;
 		/** Hint on the signing line while the pad is empty. Defaults to the i18n `signatureInputPlaceholder`. */

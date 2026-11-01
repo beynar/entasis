@@ -103,7 +103,7 @@
 	{#snippet examples()}
 		<ComponentCard
 			title="A saved signature"
-			description="A value set from outside shows as an image. Drawing over it starts a new signature."
+			description="A value set from outside shows in the pad's ink color, as the strokes are: a black signature saved for paper still reads on a dark theme. imageInk='as-is' shows the image unchanged. Drawing over it starts a new signature."
 			code={`<SignatureInput label="Signature" defaultValue={savedSignature} />`}
 		>
 			<div class="w-full max-w-md">

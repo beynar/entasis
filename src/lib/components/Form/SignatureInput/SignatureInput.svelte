@@ -33,6 +33,7 @@
 		size = 'normal',
 		format = 'png',
 		inkColor = '#000000',
+		imageInk = 'theme',
 		strokeWidth = 2.5,
 		placeholder,
 		clearLabel,
@@ -125,6 +126,27 @@
 
 	const hasInk = $derived(strokes.length > 0 || current !== null);
 	const image = $derived(hasInk ? null : (field.value ?? null));
+
+	// A mask image is fetched in CORS mode: a URL from another origin that does not allow it would
+	// paint nothing. Such a URL is probed once and, when refused, shown as the image itself.
+	let refusedMask = $state<string | null>(null);
+	const ownsImage = (url: string) =>
+		/^(data|blob):/.test(url) || new URL(url, location.href).origin === location.origin;
+	$effect(() => {
+		if (imageInk !== 'theme' || !image || ownsImage(image)) return;
+		const probe = new Image();
+		probe.crossOrigin = 'anonymous';
+		probe.onerror = () => (refusedMask = image);
+		probe.src = image;
+		return () => {
+			probe.onerror = null;
+		};
+	});
+	const imageMode = $derived(imageInk === 'theme' && refusedMask !== image ? 'theme' : 'as-is');
+	// Quoted for `url()`: a data URL may hold characters CSS would end the string on.
+	const maskImage = $derived(
+		image ? `url("${image.replace(/["\\\n]/g, (char) => encodeURIComponent(char))}")` : undefined
+	);
 	const shapes = $derived(
 		[...strokes, ...(current ? [current] : [])].flatMap((stroke) =>
 			strokeShapes(stroke, strokeWidth)
@@ -277,7 +299,23 @@
 				</div>
 			{/if}
 			{#if image}
-				<img data-slot="signature-image" src={image} alt="" class={classes.image()} />
+				{#if imageMode === 'theme'}
+					<span
+						data-slot="signature-image"
+						data-ink="theme"
+						class={classes.image({ ink: 'theme' })}
+						style:mask-image={maskImage}
+						style:-webkit-mask-image={maskImage}
+					></span>
+				{:else}
+					<img
+						data-slot="signature-image"
+						data-ink="as-is"
+						src={image}
+						alt=""
+						class={classes.image({ ink: 'as-is' })}
+					/>
+				{/if}
 			{/if}
 			<svg data-slot="signature-ink" class={classes.ink()} aria-hidden="true" focusable="false">
 				<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">

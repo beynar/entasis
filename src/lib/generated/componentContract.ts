@@ -1936,6 +1936,7 @@ export const componentInventory = [
 		sourceIndex: 'src/lib/components/Form/SignatureInput/index.ts',
 		exportedSymbols: [
 			'SignatureFormat',
+			'SignatureImageInk',
 			'SignatureInput',
 			'SignatureInputProps',
 			'SignatureInputTheme',

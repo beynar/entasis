@@ -1625,6 +1625,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	'signature-input': [
 		'SignatureFormat',
+		'SignatureImageInk',
 		'SignatureInput',
 		'SignatureInputProps',
 		'SignatureInputTheme',

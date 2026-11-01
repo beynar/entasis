@@ -6,6 +6,15 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Fixed
+
+- \`SignatureInput\`: a saved signature (a value set from outside) shows in the pad's ink color,
+  as the live strokes do, so the black PNG saved for paper reads on a dark theme. The image is
+  painted as a mask over the theme's text color; the value and \`inkColor\` are unchanged. The new
+  \`imageInk\` prop (\`'theme'\` by default, or \`'as-is'\`) keeps an image with several colors or
+  an opaque background as it is. A URL from another origin that refuses CORS falls back to the
+  image itself.
+
 ## 0.13.7 — 2026-11-01
 
 ### Added

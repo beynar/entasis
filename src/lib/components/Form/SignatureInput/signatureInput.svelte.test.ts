@@ -117,15 +117,33 @@ describe('SignatureInput', () => {
 	test('a value from outside shows as an image, and drawing replaces it', async () => {
 		const onValueChange = vi.fn();
 		renderInTheme(SignatureInputHarness, { defaultValue: saved, onValueChange });
-		const image = document.querySelector<HTMLImageElement>('[data-slot="signature-image"]')!;
-		expect(image).toHaveAttribute('src', saved);
-		expect(image).toHaveAttribute('alt', '');
+		const image = document.querySelector<HTMLElement>('[data-slot="signature-image"]')!;
+		// Shown as a mask over the pad's ink color: a black signature reads on a dark theme too.
+		expect(image).toHaveAttribute('data-ink', 'theme');
+		expect(image.style.maskImage).toContain(saved);
+		expect(image).not.toHaveAttribute('src');
 		expect(screen.queryByRole('button', { name: 'Undo last stroke' })).toBeNull();
 		expect(screen.getByRole('button', { name: 'Clear signature' })).toBeInTheDocument();
 
 		await draw([10, 10], [60, 30]);
 		expect(document.querySelector('[data-slot="signature-image"]')).toBeNull();
 		expect(onValueChange.mock.calls[0]![0]).not.toBe(saved);
+	});
+
+	test("imageInk 'as-is' shows the value as the image itself", () => {
+		renderInTheme(SignatureInputHarness, { defaultValue: saved, imageInk: 'as-is' });
+		const image = document.querySelector<HTMLImageElement>('[data-slot="signature-image"]')!;
+		expect(image.tagName).toBe('IMG');
+		expect(image).toHaveAttribute('data-ink', 'as-is');
+		expect(image).toHaveAttribute('src', saved);
+		expect(image).toHaveAttribute('alt', '');
+	});
+
+	test('a value with a quote still makes one CSS url()', () => {
+		const quoted = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"/>';
+		renderInTheme(SignatureInputHarness, { defaultValue: quoted });
+		const image = document.querySelector<HTMLElement>('[data-slot="signature-image"]')!;
+		expect(image.style.maskImage).toContain('%22http://www.w3.org/2000/svg%22');
 	});
 
 	test('read-only shows the value but takes no ink and offers no buttons', async () => {

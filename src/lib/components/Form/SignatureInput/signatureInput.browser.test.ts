@@ -74,6 +74,52 @@ describe('SignatureInput in a browser', () => {
 		expect(decodeURIComponent(value!)).toContain('stroke="#000000"');
 	});
 
+	test('a saved black signature shows in the pad ink color, not in black', async () => {
+		// A black PNG on a transparent background, as the pad exports with the default inkColor.
+		const canvas = document.createElement('canvas');
+		canvas.width = 200;
+		canvas.height = 60;
+		const context = canvas.getContext('2d')!;
+		context.fillStyle = '#000000';
+		context.fillRect(20, 20, 160, 20);
+		const saved = canvas.toDataURL('image/png');
+
+		// A pad ink no theme uses, so the pixels tell the mask from the image.
+		render(SignatureInputHarness, {
+			defaultValue: saved,
+			format: 'png',
+			theme: { pad: { base: 'text-[rgb(255,0,0)] bg-[rgb(0,0,255)]' } }
+		});
+		const image = document.querySelector<HTMLElement>('[data-slot="signature-image"]')!;
+		expect(image.dataset.ink).toBe('theme');
+		expect(getComputedStyle(image).backgroundColor).toBe('rgb(255, 0, 0)');
+
+		const shot = await page.screenshot({ element: pad(), base64: true, save: false });
+		const bitmap = await createImageBitmap(
+			await (await fetch(`data:image/png;base64,${shot}`)).blob()
+		);
+		const surface = new OffscreenCanvas(bitmap.width, bitmap.height).getContext('2d')!;
+		surface.drawImage(bitmap, 0, 0);
+		const pixels = surface.getImageData(0, 0, bitmap.width, bitmap.height).data;
+		let red = 0;
+		let black = 0;
+		for (let index = 0; index < pixels.length; index += 4) {
+			const [r, g, b] = [pixels[index]!, pixels[index + 1]!, pixels[index + 2]!];
+			if (r > 200 && g < 60 && b < 60) red += 1;
+			if (r < 40 && g < 40 && b < 40) black += 1;
+		}
+		expect(red).toBeGreaterThan(500);
+		expect(black).toBe(0);
+	});
+
+	test('a cross-origin value that refuses CORS falls back to the image itself', async () => {
+		render(SignatureInputHarness, { defaultValue: 'http://127.0.0.1:9/signature.png' });
+		await expect
+			.poll(() => document.querySelector<HTMLElement>('[data-slot="signature-image"]')?.dataset.ink)
+			.toBe('as-is');
+		expect(document.querySelector('[data-slot="signature-image"]')!.tagName).toBe('IMG');
+	});
+
 	test('a stroke focuses the pad without a keyboard focus ring', async () => {
 		await page.viewport(700, 400);
 		render(SignatureInputHarness, { label: 'Signature', description: 'Sign with your mouse.' });
