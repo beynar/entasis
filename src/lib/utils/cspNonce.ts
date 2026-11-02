@@ -3,12 +3,19 @@
 // here while it is mounted, the way `registerActiveTheme` exposes the Theme to plain modules;
 // components that render markup (BeforeHydratation) read it from the Theme directly.
 
+import { BROWSER } from 'esm-env';
+
 type NonceSource = () => string | undefined;
 
 const sources: NonceSource[] = [];
 
-/** Registers where the nonce comes from; the returned function removes the registration. */
+/**
+ * Registers where the nonce comes from; the returned function removes the registration. Browser
+ * only: on the server this list would outlive the request (a page Svelte renders twice never
+ * runs its first pass's cleanup), so nothing is kept there.
+ */
 export function registerCspNonce(source: NonceSource) {
+	if (!BROWSER) return () => {};
 	sources.push(source);
 	return () => {
 		const index = sources.lastIndexOf(source);

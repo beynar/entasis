@@ -1,3 +1,4 @@
+import { BROWSER } from 'esm-env';
 import type { Attachment } from 'svelte/attachments';
 
 /** What `<Theme portalContainer>` accepts: a container, or a function that finds it later. */
@@ -14,6 +15,8 @@ const sources: ContainerSource[] = [];
  * way `prefersReducedMotion()` finds it: the most recently mounted one that sets a container.
  */
 export function registerPortalContainer(source: ContainerSource) {
+	// Portals only mount in the browser; on the server the list would outlive the request.
+	if (!BROWSER) return () => {};
 	sources.push(source);
 	return () => {
 		const index = sources.lastIndexOf(source);

@@ -17,8 +17,12 @@ export { REDUCED_MOTION_ATTRIBUTE } from '$lib/tailwind/scales.js';
 // Theme from event handlers and plain modules, where `getContext` is unavailable.
 let activeTheme: ThemeState | null = null;
 
-/** Registers `theme` as the active Theme; the returned function restores the previous one. */
+/**
+ * Registers `theme` as the active Theme; the returned function restores the previous one. Browser
+ * only: on the server a module-level Theme would outlive its request and be read by the next one.
+ */
 export function registerActiveTheme(theme: ThemeState) {
+	if (!browser) return () => {};
 	const previous = activeTheme;
 	activeTheme = theme;
 	return () => {
