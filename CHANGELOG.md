@@ -6,6 +6,60 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.14.0 — 2026-11-02
+
+### Added
+
+- \`RichTextInput\`: \`collaboration\` hands edytor's collaboration settings to the editor (\`room\`,
+  \`server\`, \`params\`, \`actor\`, \`document\`, \`sync\`, \`presence\`…): a room kept in the browser
+  and synced across tabs, a room people edit together through a server, or one document shared
+  between views. The shared document is the source of truth: \`value\` seeds only an empty room,
+  later parent values are not loaded, and \`value\` / \`onValueChange\` follow every edit, remote ones
+  included. Collaborators' carets, names and selections show in their colors.
+- \`DataTable\`: \`sortableRows\` lets the user reorder rows. A row drags by its grip (a line shows
+  where it lands), or moves with ArrowUp / ArrowDown, Home and End once its grip has focus, each
+  keyboard move announced. The table shows the new order, writes it to a bound \`items\` (now
+  bindable), then calls \`onRowMove({ row, from, to, rows, after, before })\` once per move, with the
+  row's new neighbours in the whole order. \`canDragRow\` keeps a row in place. Reordering pauses
+  (grips disabled, the reason in their title) while a sort, a filter, a search or a grouping is
+  active, and for hierarchical rows. Rows slide to their new places unless the reader prefers
+  reduced motion; theme parts \`rowDragCell\` and \`rowDragHandle\`.
+
+### Changed
+
+- **Breaking:** \`RichTextInput\`, and the \`AIComposer\` and \`AIChat\` that embed it, run on
+  [edytor](https://edytor.dev) instead of Lexical. Install \`edytor\` (\`pnpm add edytor\`) in place
+  of the eight Lexical packages. The props, the markdown \`value\`, triggers and tokens, the
+  toolbars, \`formats\`, the submit shortcut and the handle (\`focus\`, \`clear\`, \`insertText\`,
+  \`insertItem\`, \`insertToken\`) are unchanged, and the markdown read and written is the same:
+  one block per line, newlines kept, nothing escaped, tokens as \`<File id label path />\` tags.
+- \`RichTextInput\`: \`ref\` is the editable root as an \`HTMLElement\` (it was typed
+  \`HTMLDivElement\`).
+- \`RichTextInput\`: a press below the last line puts the caret at the end of the text, and blocks
+  pasted into an empty line take its place.
+
+### Removed
+
+- The optional peer dependencies \`lexical\`, \`@lexical/history\`, \`@lexical/link\`,
+  \`@lexical/list\`, \`@lexical/markdown\`, \`@lexical/rich-text\`, \`@lexical/selection\` and
+  \`@lexical/utils\`.
+
+### Fixed
+
+- \`DataTable\`: \`animateRows\` no longer slides rows when the reader prefers reduced motion.
+- The loading overlay (\`spinnerOverlay\`, Button's \`loading\`) no longer moves its host. It made
+  every host \`position: relative\` from its inline style alone, so a button placed by its classes
+  (\`absolute\`, \`fixed\`, \`sticky\`) fell back into the flow while it loaded, and the inline style
+  stayed after. Only a static host is made relative now, and it gets its position back when loading
+  ends.
+- The loading overlay keeps its host's corners when the host's radius changes while it loads (a
+  class or style swap). It copied the radius once, when it appeared, so a button turned into a pill
+  mid-load showed the overlay's old square-ish corners.
+- A loading Button with its own background (\`solid\`, \`soft\`) no longer shows a thin dark line
+  around its rounded corners. Its background ended on the same anti-aliased edge as the overlay and
+  bled through it; the overlay now paints that background itself, opaque and in the same tint, and
+  the host's own is cleared until loading ends.
+
 ## 0.13.8 — 2026-11-01
 
 ### Fixed
