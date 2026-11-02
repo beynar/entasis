@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
+	import { Edytor, type JSONDoc, type Plugin } from 'edytor';
+	import type { RichTextInputCollaboration } from './richTextInput.props.js';
 	import ScrollArea from '../ScrollArea/ScrollArea.svelte';
 	import type { Sizes } from '$lib/types/theme.js';
 	import type { RichTextInputMaxHeight } from './richTextInput.props.js';
@@ -9,8 +11,13 @@
 
 	type Props = {
 		id?: string;
-		rootElement?: HTMLDivElement | null;
-		editorAttachment?: Attachment<HTMLDivElement>;
+		/** The editable root, once edytor attached it. */
+		rootElement?: HTMLElement | null;
+		/** The document edytor mounts with (read once). */
+		value: JSONDoc;
+		plugins: Plugin[];
+		/** edytor's collaboration settings, passed as they are. */
+		collaboration?: RichTextInputCollaboration;
 		size: Sizes;
 		theme?: RichTextInputThemeProps;
 		disabled?: boolean;
@@ -19,15 +26,18 @@
 		standalone?: boolean;
 		maxHeight?: RichTextInputMaxHeight;
 		isEmpty: boolean;
-		onKeydown: (event: KeyboardEvent) => void;
 		onFocus?: (event: FocusEvent) => void;
 		onBlur?: (event: FocusEvent) => void;
+		/** A press below the last line: the caret goes to the end of the text. */
+		onPressBelowContent?: () => void;
 	};
 
 	let {
 		id,
-		rootElement = $bindable<HTMLDivElement | null>(null),
-		editorAttachment,
+		rootElement = null,
+		value,
+		plugins,
+		collaboration,
 		size,
 		theme,
 		disabled = false,
@@ -36,9 +46,9 @@
 		standalone = false,
 		maxHeight = false,
 		isEmpty,
-		onKeydown,
 		onFocus,
-		onBlur
+		onBlur,
+		onPressBelowContent
 	}: Props = $props();
 
 	const classes = $derived(useRichTextInputTheme(theme));
@@ -61,7 +71,7 @@
 		return Number.isFinite(pixels) ? pixels : 0;
 	}
 
-	function getEditorHeight(editorElement: HTMLDivElement, shellElement: HTMLDivElement) {
+	function getEditorHeight(editorElement: HTMLElement, shellElement: HTMLDivElement) {
 		const shellStyles = getComputedStyle(shellElement);
 		return (
 			editorElement.scrollHeight +
@@ -76,7 +86,7 @@
 		return 40;
 	}
 
-	function getCaretRect(editorElement: HTMLDivElement) {
+	function getCaretRect(editorElement: HTMLElement) {
 		const selection = window.getSelection();
 		if (!selection?.anchorNode || selection.rangeCount === 0) return null;
 		if (!editorElement.contains(selection.anchorNode)) return null;
@@ -90,7 +100,7 @@
 	function scrollCaretIntoComfortZone() {
 		const editorElement = rootElement;
 		const viewport = getViewport();
-		if (!editorElement || !viewport || document.activeElement !== editorElement) return;
+		if (!editorElement || !viewport || !editorElement.contains(document.activeElement)) return;
 
 		const caretRect = getCaretRect(editorElement);
 		if (!caretRect) return;
@@ -165,6 +175,45 @@
 		void maxHeightCss;
 		scheduleRefresh?.();
 	});
+
+	// edytor starts a new paragraph for a press under its last block (Notion's page). In an input
+	// that press means "write at the end", as a textarea does.
+	const pressBelowContent: Attachment<HTMLDivElement> = (node) => {
+		const onPointerDown = (event: PointerEvent) => {
+			const root = rootElement;
+			if (event.button !== 0 || !root || event.target !== root || disabled || readOnly) return;
+			const blocks = root.querySelectorAll(':scope > [data-edytor-block]');
+			const last = blocks[blocks.length - 1];
+			if (last && event.clientY <= last.getBoundingClientRect().bottom) return;
+			event.preventDefault();
+			event.stopPropagation();
+			onPressBelowContent?.();
+		};
+		node.addEventListener('pointerdown', onPointerDown, { capture: true });
+		return () => node.removeEventListener('pointerdown', onPointerDown, { capture: true });
+	};
+
+	// edytor renders the editable root; the input names it and states what it may do.
+	$effect(() => {
+		const root = rootElement;
+		if (!root) return;
+		root.setAttribute('data-slot', 'ai-composer-editor');
+		root.setAttribute('data-rich-text-input-editor', 'true');
+		if (disabled) root.setAttribute('aria-disabled', 'true');
+		else root.removeAttribute('aria-disabled');
+		// A read-only input stays focusable (its text can be selected and read); a disabled one does not.
+		if (readOnly && !disabled) root.setAttribute('tabindex', '0');
+		else root.removeAttribute('tabindex');
+		if (!onFocus && !onBlur) return;
+		const focus = (event: FocusEvent) => onFocus?.(event);
+		const blur = (event: FocusEvent) => onBlur?.(event);
+		root.addEventListener('focus', focus);
+		root.addEventListener('blur', blur);
+		return () => {
+			root.removeEventListener('focus', focus);
+			root.removeEventListener('blur', blur);
+		};
+	});
 </script>
 
 <div
@@ -179,26 +228,20 @@
 	>
 		<div
 			{@attach observeViewport}
+			{@attach pressBelowContent}
 			data-slot="rich-text-input-shell"
 			class={classes.editorShell({ size })}
 		>
-			<div
+			<Edytor
+				{...collaboration}
 				{id}
-				{@attach editorAttachment}
-				data-slot="ai-composer-editor"
-				data-rich-text-input-editor="true"
-				contenteditable={disabled || readOnly ? 'false' : 'true'}
-				role="textbox"
+				{value}
+				{plugins}
+				defaultPlugins={false}
+				readonly={disabled || readOnly}
 				aria-label={placeholder}
-				aria-multiline="true"
-				aria-disabled={disabled || undefined}
-				tabindex={disabled ? undefined : 0}
-				spellcheck="true"
 				class={classes.editor({ size, disabled })}
-				onkeydown={onKeydown}
-				onfocus={onFocus}
-				onblur={onBlur}
-			></div>
+			/>
 			{#if isEmpty}
 				<div data-slot="rich-text-input-placeholder" class={classes.placeholder({ size })}>
 					{placeholder}

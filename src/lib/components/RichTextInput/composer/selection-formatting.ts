@@ -1,47 +1,20 @@
-import { $insertList, $isListNode, $removeList, ListNode } from '@lexical/list';
-import { $isLinkNode, $toggleLink } from '@lexical/link';
-import {
-	$createHeadingNode,
-	$createQuoteNode,
-	$isHeadingNode,
-	$isQuoteNode,
-	type HeadingTagType
-} from '@lexical/rich-text';
-import { $setBlocksType } from '@lexical/selection';
-import { $getNearestNodeOfType } from '@lexical/utils';
-import {
-	$createParagraphNode,
-	$getSelection,
-	$isRangeSelection,
-	$setSelection,
-	type LexicalEditor,
-	type LexicalNode,
-	type RangeSelection,
-	type TextFormatType
-} from 'lexical';
+import { richTextOperations, type EdytorInstance as Edytor } from 'edytor';
 import type { AnchoredReference } from '../anchored-reference.js';
 import type { RichTextInputFormat } from '../richTextInput.props.js';
-import { $isAIComposerTokenNode } from './token-node.js';
 
-export type AIComposerSelectionFormat = Extract<
-	TextFormatType,
-	'bold' | 'italic' | 'code' | 'strikethrough' | 'highlight'
->;
+export type AIComposerSelectionFormat = 'bold' | 'italic' | 'code' | 'strikethrough' | 'highlight';
 export type AIComposerSelectionListType = 'bullet' | 'number';
 export type AIComposerSelectionBlockType =
 	'paragraph' | 'heading1' | 'heading2' | 'heading3' | 'quote';
 
-export type AIComposerSelectionFormats = {
-	bold: boolean;
-	italic: boolean;
-	code: boolean;
-	strikethrough: boolean;
-	highlight: boolean;
-};
+export type AIComposerSelectionFormats = Record<AIComposerSelectionFormat, boolean>;
+
+/** The editor's selection, kept so a toolbar can act on it after taking focus (the link field). */
+type SavedSelection = Edytor['selection']['value'];
 
 export type AIComposerSelectionState = {
 	anchor: AnchoredReference | null;
-	selection: RangeSelection;
+	selection: SavedSelection;
 	signature: string;
 	linkUrl: string;
 	formats: AIComposerSelectionFormats;
@@ -78,97 +51,139 @@ export const AI_COMPOSER_ALL_RICH_TEXT_FORMATS: RichTextInputFormat[] = [
 	'quote'
 ];
 
+/** The editor's mark for each toolbar format. */
+const MARKS: Record<AIComposerSelectionFormat, string> = {
+	bold: 'bold',
+	italic: 'italic',
+	code: 'code',
+	strikethrough: 'strike',
+	highlight: 'highlight'
+};
+
+const LIST_TYPES: Record<AIComposerSelectionListType, string> = {
+	bullet: 'bulleted-list-item',
+	number: 'numbered-list-item'
+};
+
+const isSet = (value: unknown) => value !== undefined && value !== null && value !== false;
+
+function blockTypeOf(edytor: Edytor, blockId: string): AIComposerSelectionBlockType {
+	const block = edytor.idToBlock.get(blockId);
+	if (block?.type === 'quote') return 'quote';
+	if (block?.type === 'heading') {
+		const level = String(block.data?.level ?? 'h1');
+		if (level === 'h2') return 'heading2';
+		if (level === 'h3') return 'heading3';
+		return 'heading1';
+	}
+	return 'paragraph';
+}
+
+function listTypeOf(edytor: Edytor, blockId: string): AIComposerSelectionListType | null {
+	const type = edytor.idToBlock.get(blockId)?.type;
+	if (type === LIST_TYPES.bullet) return 'bullet';
+	if (type === LIST_TYPES.number) return 'number';
+	return null;
+}
+
 export function readAIComposerSelectionState(
-	rootElement: HTMLDivElement | null,
+	edytor: Edytor | null,
+	rootElement: HTMLElement | null,
 	options: ReadSelectionOptions = {}
 ): AIComposerSelectionState | null {
-	if (!rootElement || typeof window === 'undefined') return null;
-	const selection = $getSelection();
-	if (!$isRangeSelection(selection)) return null;
-	if (selection.isCollapsed() && options.requireText !== false) return null;
-	if (options.requireText !== false && selection.getTextContent().trim().length === 0) return null;
-	if (selection.getNodes().some($isAIComposerTokenNode)) return null;
+	if (!edytor || !rootElement || typeof window === 'undefined') return null;
+	const projection = edytor.selection.projection;
+	const { start, end, isCollapsed } = projection;
+	if (projection.kind !== 'text' || !start || !end) return null;
+	if (options.requireText !== false) {
+		if (isCollapsed || projection.content.trim().length === 0) return null;
+	}
+	// A range over a token formats nothing the token shows: no toolbar for it.
+	if (!isCollapsed && projection.segments.some((segment) => segment.kind === 'inline')) return null;
 
 	const anchor = createSelectedTextAnchor(rootElement);
 	if (!anchor && options.requireAnchor !== false) return null;
 
+	// At a caret, the marks the next character takes (a toolbar press stages them there).
+	const marks = { ...projection.marks, ...(edytor.selection.pending ?? {}) };
+	const link = marks.link as { href?: string } | null | undefined;
 	return {
 		anchor,
-		selection: selection.clone(),
-		signature: selectionSignature(selection),
-		linkUrl: getSelectedLinkUrl(selection),
+		selection: edytor.selection.value,
+		signature: [start.block, start.offset, end.block, end.offset, projection.content].join(':'),
+		linkUrl: isSet(link) ? (link?.href ?? '') : '',
 		formats: {
-			bold: selection.hasFormat('bold'),
-			italic: selection.hasFormat('italic'),
-			code: selection.hasFormat('code'),
-			strikethrough: selection.hasFormat('strikethrough'),
-			highlight: selection.hasFormat('highlight')
+			bold: isSet(marks.bold),
+			italic: isSet(marks.italic),
+			code: isSet(marks.code),
+			strikethrough: isSet(marks.strike),
+			highlight: isSet(marks.highlight)
 		},
-		blockType: getSelectionBlockType(selection),
-		listType: getSelectionListType(selection)
+		blockType: blockTypeOf(edytor, start.block),
+		listType: listTypeOf(edytor, start.block)
 	};
 }
 
+/** Put the toolbar's selection back when focus left the editor (the link field took it). */
+function restoreSelection(edytor: Edytor, selection: SavedSelection) {
+	if (edytor.selection.value !== selection) edytor.selection.select(selection);
+	return edytor.selection.projection.kind === 'text';
+}
+
 export function applyAIComposerSelectionFormat(
-	editor: LexicalEditor,
-	selection: RangeSelection,
+	edytor: Edytor,
+	selection: SavedSelection,
 	format: AIComposerSelectionFormat
 ) {
-	editor.update(() => {
-		const currentSelection = restoreSelection(selection);
-		if (!currentSelection) return;
-		currentSelection.formatText(format);
-	});
+	if (!restoreSelection(edytor, selection)) return;
+	richTextOperations(edytor).setMarkAtRange(MARKS[format]);
 }
 
 export function applyAIComposerSelectionList(
-	editor: LexicalEditor,
-	selection: RangeSelection,
+	edytor: Edytor,
+	selection: SavedSelection,
 	listType: AIComposerSelectionListType
 ) {
-	editor.update(() => {
-		const currentSelection = restoreSelection(selection);
-		if (!currentSelection) return;
-		if (getSelectionListType(currentSelection) === listType) {
-			$removeList();
-			return;
-		}
-		$insertList(listType);
+	if (!restoreSelection(edytor, selection)) return;
+	const blocks = edytor.selection.projection.blocks;
+	// Every selected block already in this list leaves it; otherwise they all join it.
+	const leave = blocks.every((id) => listTypeOf(edytor, id) === listType);
+	edytor.transact(() => {
+		for (const id of blocks) edytor.setBlockType(id, leave ? 'paragraph' : LIST_TYPES[listType]);
 	});
 }
 
 export function applyAIComposerSelectionBlock(
-	editor: LexicalEditor,
-	selection: RangeSelection,
+	edytor: Edytor,
+	selection: SavedSelection,
 	blockType: AIComposerSelectionBlockType
 ) {
-	editor.update(() => {
-		const currentSelection = restoreSelection(selection);
-		if (!currentSelection) return;
-		$setBlocksType(currentSelection, () => createBlockNode(blockType));
+	if (!restoreSelection(edytor, selection)) return;
+	const blocks = edytor.selection.projection.blocks;
+	edytor.transact(() => {
+		for (const id of blocks) {
+			if (blockType === 'paragraph' || blockType === 'quote') {
+				edytor.setBlock(id, { type: blockType });
+			} else {
+				edytor.setBlock(id, { type: 'heading', data: { level: `h${blockType.slice(-1)}` } });
+			}
+		}
 	});
 }
 
 export function applyAIComposerSelectionLink(
-	editor: LexicalEditor,
-	selection: RangeSelection,
+	edytor: Edytor,
+	selection: SavedSelection,
 	url: string | null
 ) {
-	editor.update(() => {
-		if (!restoreSelection(selection)) return;
-		const nextUrl = url?.trim() || null;
-		$toggleLink(nextUrl);
-	});
+	if (!restoreSelection(edytor, selection)) return;
+	const href = url?.trim();
+	const operations = richTextOperations(edytor);
+	if (href) operations.setLinkAtRange({ href });
+	else operations.removeLinkAtRange();
 }
 
-function restoreSelection(selection: RangeSelection) {
-	$setSelection(selection.clone());
-	const currentSelection = $getSelection();
-	if (!$isRangeSelection(currentSelection)) return null;
-	return currentSelection;
-}
-
-function createSelectedTextAnchor(rootElement: HTMLDivElement): AnchoredReference | null {
+function createSelectedTextAnchor(rootElement: HTMLElement): AnchoredReference | null {
 	const domSelection = window.getSelection();
 	if (!domSelection || domSelection.rangeCount === 0) return null;
 	if (!domSelection.anchorNode || !domSelection.focusNode) return null;
@@ -192,7 +207,7 @@ function createSelectedTextAnchor(rootElement: HTMLDivElement): AnchoredReferenc
 	};
 }
 
-function getRangeRect(range: Range, rootElement: HTMLDivElement) {
+function getRangeRect(range: Range, rootElement: HTMLElement) {
 	const rects = Array.from(range.getClientRects()).filter(hasRectSize);
 	if (rects.length === 0) return rootElement.getBoundingClientRect();
 
@@ -205,82 +220,4 @@ function getRangeRect(range: Range, rootElement: HTMLDivElement) {
 
 function hasRectSize(rect: DOMRect) {
 	return rect.width > 0 || rect.height > 0;
-}
-
-function selectionSignature(selection: RangeSelection) {
-	return [
-		selection.anchor.key,
-		selection.anchor.offset,
-		selection.focus.key,
-		selection.focus.offset,
-		selection.getTextContent()
-	].join(':');
-}
-
-function createBlockNode(blockType: AIComposerSelectionBlockType) {
-	if (blockType === 'heading1') return $createHeadingNode('h1');
-	if (blockType === 'heading2') return $createHeadingNode('h2');
-	if (blockType === 'heading3') return $createHeadingNode('h3');
-	if (blockType === 'quote') return $createQuoteNode();
-	return $createParagraphNode();
-}
-
-function getSelectionBlockType(selection: RangeSelection): AIComposerSelectionBlockType {
-	const anchorNode = selection.anchor.getNode();
-	const heading = getNearestHeadingNode(anchorNode);
-	if (heading) return headingTagToBlockType(heading.getTag());
-	const quote = getNearestQuoteNode(anchorNode);
-	if (quote) return 'quote';
-	return 'paragraph';
-}
-
-function getSelectionListType(selection: RangeSelection): AIComposerSelectionListType | null {
-	const list = $getNearestNodeOfType(selection.anchor.getNode(), ListNode);
-	if (!$isListNode(list)) return null;
-	const listType = list.getListType();
-	if (listType === 'bullet' || listType === 'number') return listType;
-	return null;
-}
-
-function getNearestHeadingNode(node: LexicalNode) {
-	let currentNode: LexicalNode | null = node;
-	while (currentNode) {
-		if ($isHeadingNode(currentNode)) return currentNode;
-		currentNode = currentNode.getParent();
-	}
-	return null;
-}
-
-function getNearestQuoteNode(node: LexicalNode) {
-	let currentNode: LexicalNode | null = node;
-	while (currentNode) {
-		if ($isQuoteNode(currentNode)) return currentNode;
-		currentNode = currentNode.getParent();
-	}
-	return null;
-}
-
-function headingTagToBlockType(tag: HeadingTagType): AIComposerSelectionBlockType {
-	if (tag === 'h1') return 'heading1';
-	if (tag === 'h2') return 'heading2';
-	if (tag === 'h3') return 'heading3';
-	return 'paragraph';
-}
-
-function getSelectedLinkUrl(selection: RangeSelection) {
-	const urls = new Set<string>();
-	for (const node of selection.getNodes()) {
-		const link = getNearestLinkNode(node);
-		if (link) urls.add(link.getURL());
-	}
-	return urls.size === 1 ? [...urls][0] : '';
-}
-
-function getNearestLinkNode(node: LexicalNode) {
-	let currentNode: LexicalNode | null = node;
-	while (currentNode) {
-		if ($isLinkNode(currentNode)) return currentNode;
-		currentNode = currentNode.getParent();
-	}
-	return null;
 }

@@ -289,8 +289,8 @@
 
 	/**
 	 * Focuses the editor with the caret at the end. A parent that has just changed the value (a
-	 * suggestion filling the shared input) has not reached the editor yet: Lexical would load that
-	 * text after this call and skip writing the selection, so focus again once it has loaded.
+	 * suggestion filling the shared input) has not reached the editor yet: the editor loads that
+	 * text after this call, so focus again once it has loaded.
 	 */
 	export function focus(): void {
 		editorHandle?.focus();

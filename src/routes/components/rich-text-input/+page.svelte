@@ -11,6 +11,7 @@
 		type RichTextInputItem,
 		type RichTextInputTriggers
 	} from '$lib/components/RichTextInput/index.js';
+	import RichTextInputCollaborationDemo from './RichTextInputCollaborationDemo.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import DocPage from '../../DocPage.svelte';
@@ -174,7 +175,7 @@
 	title="Rich Text Input"
 	subtitle="Markdown editor with inline formatting, trigger suggestions, and token insertion."
 	component="RichTextInput"
-	requires="pnpm add lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils"
+	requires="pnpm add edytor"
 	features={[
 		'Bindable markdown value',
 		'Slash, mention, and skill trigger suggestions',
@@ -278,6 +279,25 @@
 		>
 			<div class="w-full max-w-3xl">
 				<RichTextInput placeholder="Write without an internal height cap..." />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Collaboration"
+			description="collaboration hands edytor's settings to the editor: a room (local, or shared through a server) or a document shared between views. Here two inputs share one document; each publishes every edit as its markdown value."
+			code={`<RichTextInput
+	label="Meeting notes"
+	bind:value={notes}
+	collaboration={{
+		server: 'wss://rooms.example.com/rooms',
+		room: 'meeting-42',
+		params: { token },
+		actor: { id: user.id, name: user.name, color: user.color }
+	}}
+/>`}
+		>
+			<div class="w-full max-w-3xl">
+				<RichTextInputCollaborationDemo />
 			</div>
 		</ComponentCard>
 

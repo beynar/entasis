@@ -1,4 +1,4 @@
-import type { LexicalEditor } from 'lexical';
+import type { EdytorInstance } from 'edytor';
 import {
 	applyAIComposerSelectionFormat,
 	applyAIComposerSelectionBlock,
@@ -12,8 +12,8 @@ import {
 } from './selection-formatting.js';
 
 type AIComposerSelectionMenuOptions = {
-	editor: LexicalEditor | null;
-	rootElement: HTMLDivElement | null;
+	editor: EdytorInstance | null;
+	rootElement: HTMLElement | null;
 	suggestionMenuOpen: boolean;
 	disabled: boolean;
 };
@@ -67,7 +67,7 @@ export class AIComposerSelectionMenuController {
 			return;
 		}
 
-		const nextSelection = readAIComposerSelectionState(options.rootElement, {
+		const nextSelection = readAIComposerSelectionState(options.editor, options.rootElement, {
 			requireAnchor: false
 		});
 		if (!nextSelection) {

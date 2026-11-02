@@ -4,7 +4,7 @@
 //
 // The fixture lives outside the repository and gets an explicit `node_modules`: only
 // entasis's own `dependencies`, its peers — including the OPTIONAL peers (Chart's TanStack
-// Charts + D3, RichTextInput's Lexical, Globe's cobe) a consumer of those components
+// Charts + D3, RichTextInput's edytor, Globe's cobe) a consumer of those components
 // installs — and the two toolchain packages the fixture's own config imports. Nothing
 // resolves by walking up into the repository's `node_modules`, so a missing peer fails
 // here instead of passing by accident.

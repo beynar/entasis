@@ -5,9 +5,9 @@ RichTextInput is a markdown rich text editor for AI-style composition. It suppor
 
 ## Requires
 
-RichTextInput is built on Lexical. Those packages are optional peer dependencies of entasis, so install them alongside it:
+RichTextInput is built on edytor, an optional peer dependency of entasis, so install it alongside it:
 
-\`pnpm add lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils\`
+\`pnpm add edytor\`
 
 ## Basic Usage
 
@@ -57,18 +57,52 @@ RichTextInput is built on Lexical. Those packages are optional peer dependencies
 />
 \`\`\`
 
+## Collaboration
+
+\`collaboration\` hands edytor's collaboration settings to the editor (read once): \`room\` alone
+keeps a local copy in the browser and syncs its open tabs; with \`server\` people edit the room
+together through edytor's room (a Cloudflare Durable Object, \`edytor/cloudflare\`); \`document\`
+shares one \`createDocument()\` between views. Collaborators' carets, names and selections show in
+their colors (\`actor\`).
+
+\`\`\`svelte
+<script lang="ts">
+  import { RichTextInput } from 'entasis/rich-text-input';
+
+  let { token, user }: { token: string; user: { id: string; name: string; color: string } } =
+    $props();
+  let notes = $state('');
+</script>
+
+<RichTextInput
+  label="Meeting notes"
+  bind:value={notes}
+  collaboration={{
+    server: 'wss://rooms.example.com/rooms',
+    room: 'meeting-42',
+    params: { token },
+    actor: user
+  }}
+/>
+\`\`\`
+
+The shared document is then the source of truth: \`value\` only seeds a room that turns out empty,
+later \`value\` changes from the parent are not loaded, and \`value\` / \`onValueChange\` follow every
+edit, remote ones included. \`clear()\` and the insert methods edit the document for everyone.
+
 ## Props
 
 ### Value
 - **value**: string - Bindable markdown value.
 - **name**: string - Hidden input name for native form submission; Form supplies this from the field key.
 - **id**: string - Applied to the editable root.
-- **ref**: HTMLDivElement | null - Bindable editable root reference.
+- **ref**: HTMLElement | null - Bindable editable root reference.
 - **label**, **description**, **helper**, **errors**, **required**, **onValidate** - Standard Field props.
 - **placeholder**: string (default: "Ask anything...") - Placeholder and textbox aria-label.
 - **disabled**: boolean (default: false) - Disables editing and suggestions.
 - **readOnly**: boolean (default: false) - The editor stays focusable and selectable but is not editable; the fixed toolbar is hidden and the value still submits.
 - **standalone**: boolean (default: false) - Renders only the rich text editor chrome without the Field wrapper or input surface.
+- **collaboration**: RichTextInputCollaboration - edytor's room, server, params, actor, document, sync, presence, requireHydration, onSyncExpired and onSyncRefused (see Collaboration).
 - **maxHeight**: number | string | false (default: false) - False lets the editor grow with content; a number/string caps the editor height.
 
 ### Suggestions

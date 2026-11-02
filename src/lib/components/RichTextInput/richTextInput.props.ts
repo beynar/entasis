@@ -1,3 +1,4 @@
+import type { EdytorProps } from 'edytor';
 import type { Slot } from '$lib/components/Slot/slot.js';
 import type { InputProps } from '$lib/components/Form/Field/field.js';
 import type { WithAttachments } from '$lib/types/props.js';
@@ -96,6 +97,26 @@ export type RichTextInputHandle = {
 	insertToken: (token: RichTextInputToken) => void;
 };
 
+/**
+ * edytor's collaboration settings, passed to the editor as they are (read once, when it mounts):
+ * \`room\` alone keeps a local copy in the browser and syncs its open tabs; with \`server\`, people
+ * edit the room together. \`actor\` names the local author (presence and attribution); \`document\`
+ * shares one \`createDocument()\` between views; \`sync\` is a custom provider.
+ */
+export type RichTextInputCollaboration = Pick<
+	EdytorProps,
+	| 'room'
+	| 'server'
+	| 'params'
+	| 'actor'
+	| 'document'
+	| 'sync'
+	| 'presence'
+	| 'requireHydration'
+	| 'onSyncExpired'
+	| 'onSyncRefused'
+>;
+
 type RichTextInputFieldProps = Omit<InputProps<'rich-text'>, 'theme' | 'onValueChange'>;
 
 export type RichTextInputProps = WithAttachments<
@@ -104,8 +125,8 @@ export type RichTextInputProps = WithAttachments<
 		value?: string | null;
 		/** Initial markdown value when `value` is not bound. */
 		defaultValue?: string | null;
-		/** Bindable reference to the editable Lexical root. */
-		ref?: HTMLDivElement | null;
+		/** Bindable reference to the editable root. */
+		ref?: HTMLElement | null;
 		/** Stable id applied to the editable root. */
 		id?: string;
 		/** Trigger configuration keyed by one-character trigger strings such as `/`, `@`, or `$`. */
@@ -124,6 +145,13 @@ export type RichTextInputProps = WithAttachments<
 		onSubmitShortcut?: (event: KeyboardEvent) => void;
 		/** Keyboard shortcut that calls `onSubmitShortcut`. */
 		submitShortcut?: RichTextInputSubmitShortcut;
+		/**
+		 * Edit a shared document (edytor's CRDT): a local room, a server room, or a document shared
+		 * between views. The document is then the source of truth: \`value\` (or \`defaultValue\`)
+		 * only seeds a room that turns out empty, later \`value\` changes from the parent are not
+		 * loaded, and \`value\` / \`onValueChange\` follow every edit, remote ones included.
+		 */
+		collaboration?: RichTextInputCollaboration;
 		/** Formatting toolbar mode: selected text, fixed top, both, or none. */
 		toolbar?: RichTextInputToolbar;
 		/** Render only the editor chrome, without the Field wrapper or input surface. */

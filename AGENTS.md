@@ -94,7 +94,7 @@ delivers it.
 
 Component CVA definitions live in `<owner>.theme.ts`. Consumer-specific theme presets use
 `<consumer>.<role>.theme.ts`, geometry maps use `<owner>.geometry.ts`, and third-party adapters use
-explicit names such as `<owner>.lexicalTheme.ts`. Generated interfaces use semantic spacing
+explicit names such as `<owner>.edytorTheme.ts`. Generated interfaces use semantic spacing
 tokens; `micro`, `layout-*`, and arbitrary spacing are internal implementation vocabulary.
 Kit chrome inherits `Theme.designTokens.defaultColor` (default `neutral`). Unset `primary`
 stays indigo. Resolve omitted `color` props with `useDefaultColor`. Alert, Toast, Rating,

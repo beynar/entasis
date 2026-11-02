@@ -1,21 +1,18 @@
-import { untrack } from 'svelte';
-import type { Attachment } from 'svelte/attachments';
+import { createRichTextPlugin, type EdytorInstance, type JSONDoc, type Plugin } from 'edytor';
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
-import type { LexicalEditor } from 'lexical';
 import type { AnchoredReference } from './anchored-reference.js';
-import { mountAIComposerLexicalEditor } from './composer/editor-lexical.js';
 import {
-	EXTERNAL_MARKDOWN_UPDATE,
-	loadComposerMarkdown,
-	readComposerChange
-} from './composer/editor-markdown.js';
+	insertDocAtSelection,
+	insertTextAtSelection,
+	insertTokenAtSelection,
+	insertTokenForTrigger,
+	placeCaretAtEnd,
+	replaceDocument
+} from './composer/editing.js';
 import { AIComposerSelectionMenuController } from './composer/editor-selection-menu.svelte.js';
-import {
-	insertAIComposerTextAtSelection,
-	insertAIComposerToken,
-	insertAIComposerTokenAtSelection
-} from './composer/insert-token.js';
-import { handleEditorFormatKeydown, type AIComposerSuggestionHandle } from './composer/keyboard.js';
+import { docToMarkdown, isDocEmpty, markdownToDoc, readDocTokens } from './composer/markdown.js';
+import { createRichTextInputPlugin, type AIComposerSuggestionHandle } from './composer/plugin.js';
+import { applyAIComposerSelectionLink } from './composer/selection-formatting.js';
 import {
 	createCaretAnchor,
 	isSameTriggerState,
@@ -54,18 +51,27 @@ type RichTextInputStateOptions = {
 	toolbar: RichTextInputToolbar;
 	formats: RichTextInputFormat[];
 	disabled: boolean;
+	/** The editor edits a shared document: it, not \`value\`, is the source of truth. */
+	collaborative?: boolean;
 };
 
+const URL_RE = /^https?:\/\/\S+$/;
+
 export class RichTextInputState extends createBindableStateClass<RichTextInputStateOptions>() {
-	rootElement = $state<HTMLDivElement | null>(null);
-	editor = $state<LexicalEditor | null>(null);
+	rootElement = $state<HTMLElement | null>(null);
+	editor = $state<EdytorInstance | null>(null);
 	isEmpty = $state(true);
 	menu = $state<TriggerState | null>(null);
 	caretAnchor = $state<AnchoredReference | null>(null);
 	suggestions = $state<AIComposerSuggestionHandle | undefined>();
 	selectionMenuHandle = $state<{ focusFirst: () => void } | undefined>();
-	lastMarkdown = $state('');
 	highlightedSuggestionValue = $state<string | null>(null);
+	/** The document the editor mounts with; edytor reads its `value` once. */
+	readonly initialDoc: JSONDoc;
+	/** The editor's content as markdown, as last published or loaded. */
+	private lastMarkdown: string;
+	/** The `value` the editor last loaded or published, so a parent echo loads nothing. */
+	private syncedValue: string;
 
 	triggerCharacters = $derived(Object.keys(this.triggers));
 	hasToolbarFormats = $derived(this.formats.length > 0);
@@ -112,42 +118,53 @@ export class RichTextInputState extends createBindableStateClass<RichTextInputSt
 		enabled: this.showFixedToolbar
 	}));
 
+	/** The plugins the editor mounts with: the input's own, then rich text. */
+	readonly plugins: Plugin[];
+
 	constructor(options: RichTextInputStateOptions) {
 		super(options);
-		this.lastMarkdown = this.value;
+		this.initialDoc = markdownToDoc(this.value, this.formats);
+		this.lastMarkdown = docToMarkdown(this.initialDoc);
+		this.syncedValue = this.value;
+		this.isEmpty = isDocEmpty(this.initialDoc);
+
+		let instance: EdytorInstance | null = null;
+		const plugin = createRichTextInputPlugin({
+			getFormats: () => this.formats,
+			getMenuOpen: () => this.menu !== null,
+			getSuggestions: () => this.suggestions,
+			getSubmitShortcut: () => this.submitShortcut,
+			getOnSubmitShortcut: () => this.onSubmitShortcut,
+			closeMenu: this.closeMenu,
+			focusToolbar: this.focusToolbar,
+			paste: this.paste,
+			onChange: this.emitChange,
+			onSelectionChange: this.updateMenuFromSelection,
+			onAttached: (node) => {
+				this.editor = instance;
+				this.rootElement = node;
+				// A shared document may already hold content (another view seeded it, a room loaded it)
+				// that no change will announce: publish what the editor actually shows.
+				if (instance) this.emitChange(instance.value);
+				return () => {
+					this.closeMenu();
+					this.fixedToolbar.reset();
+					this.selectionMenu.reset();
+					if (this.editor === instance) this.editor = null;
+					if (this.rootElement === node) this.rootElement = null;
+				};
+			}
+		});
+		// The plugin factory is where edytor hands over its view; it is published once attached.
+		const capture: Plugin = (edytor) => {
+			if (edytor) instance = edytor;
+			return plugin(edytor);
+		};
+		this.plugins = [capture, createRichTextPlugin()];
 	}
 
-	rootAttachment: Attachment<HTMLDivElement> = (node) =>
-		untrack(() => {
-			this.rootElement = node;
-			const nextEditor = mountAIComposerLexicalEditor({
-				rootElement: node,
-				value: this.value,
-				disabled: this.disabled,
-				getMenu: () => this.menu,
-				getSuggestions: () => this.suggestions,
-				getSubmitShortcut: () => this.submitShortcut,
-				getFormats: () => this.formats,
-				closeMenu: this.closeMenu,
-				onSubmitShortcut: this.onSubmitShortcut,
-				onUpdate: this.emitChange,
-				onSelectionChange: this.updateMenuFromSelection
-			});
-			this.editor = nextEditor.editor;
-			this.lastMarkdown = this.value;
-
-			return () => {
-				nextEditor.cleanup();
-				this.closeMenu();
-				this.fixedToolbar.reset();
-				this.selectionMenu.reset();
-				if (this.editor === nextEditor.editor) this.editor = null;
-				if (this.rootElement === node) this.rootElement = null;
-			};
-		});
-
 	updateMenuFromSelection = () => {
-		const nextMenu = readTriggerState(this.triggerCharacters);
+		const nextMenu = this.disabled ? null : readTriggerState(this.editor, this.triggerCharacters);
 		if (!isSameTriggerState(this.menu, nextMenu)) {
 			this.menu = nextMenu;
 			this.caretAnchor = nextMenu ? createCaretAnchor(this.rootElement) : null;
@@ -156,14 +173,14 @@ export class RichTextInputState extends createBindableStateClass<RichTextInputSt
 		this.selectionMenu.update();
 	};
 
-	emitChange = (isExternal: boolean) => {
-		const change = readComposerChange(this.formats);
-		const hasChanged = change.markdown !== this.lastMarkdown;
-		this.lastMarkdown = isExternal ? this.value : change.markdown;
-		this.isEmpty = change.isEmpty;
-		if (!isExternal && hasChanged) {
-			this.value = change.markdown;
-			this.onValueChange?.(change);
+	emitChange = (doc: JSONDoc) => {
+		const markdown = docToMarkdown(doc);
+		this.isEmpty = isDocEmpty(doc);
+		if (markdown !== this.lastMarkdown) {
+			this.lastMarkdown = markdown;
+			this.syncedValue = markdown;
+			this.value = markdown;
+			this.onValueChange?.({ markdown, tokens: readDocTokens(doc), isEmpty: this.isEmpty });
 		}
 		this.updateMenuFromSelection();
 	};
@@ -181,47 +198,68 @@ export class RichTextInputState extends createBindableStateClass<RichTextInputSt
 	};
 
 	selectSuggestion = (value: string) => {
-		if (!this.editor || !this.menu) return;
+		const { editor, menu } = this;
+		if (!editor || !menu) return;
 		const selection = this.search.resolve(value);
 		if (!selection) return;
-		insertAIComposerToken(this.editor, this.menu, selection.token);
+		insertTokenForTrigger(editor, menu, selection.token);
 		selection.config.onSelect?.({
 			item: selection.item,
-			context: { trigger: selection.trigger, query: this.menu.query }
+			context: { trigger: selection.trigger, query: menu.query }
 		});
 		this.closeMenu();
-		this.editor.focus();
+		editor.focus();
 	};
 
-	handleKeydown = (event: KeyboardEvent) => {
-		handleEditorFormatKeydown(this.editor, event, this.formats);
-		if (event.defaultPrevented) return;
+	focusToolbar = () => {
+		if (!this.selectionMenu.open || !this.selectionMenuHandle) return false;
+		this.selectionMenuHandle.focusFirst();
+		return true;
+	};
+
+	paste = (markdown: string) => {
+		const editor = this.editor;
+		if (!editor) return;
+		this.closeMenu();
+		const url = markdown.trim();
+		const projection = editor.selection.projection;
 		if (
-			event.altKey &&
-			!event.ctrlKey &&
-			!event.metaKey &&
-			event.key === 'F10' &&
-			this.selectionMenu.open
+			this.formats.includes('link') &&
+			URL_RE.test(url) &&
+			!projection.isCollapsed &&
+			projection.content.trim().length > 0
 		) {
-			event.preventDefault();
-			this.selectionMenuHandle?.focusFirst();
+			applyAIComposerSelectionLink(editor, editor.selection.value, url);
+			return;
 		}
+		insertDocAtSelection(editor, markdownToDoc(markdown, this.formats));
 	};
 
 	focus = () => {
-		this.editor?.focus();
+		const editor = this.editor;
+		if (!editor) return;
+		if (!editor.selection.projection.start) placeCaretAtEnd(editor);
+		editor.focus();
+	};
+
+	focusEnd = () => {
+		const editor = this.editor;
+		if (!editor) return;
+		placeCaretAtEnd(editor);
+		editor.focus();
 	};
 
 	clear = () => {
 		if (!this.editor) return;
 		this.closeMenu();
-		loadComposerMarkdown(this.editor, '', this.formats);
+		replaceDocument(this.editor, { children: [] });
+		this.afterReplace();
 	};
 
 	insertText = (text: string) => {
 		if (!this.editor) return;
 		this.closeMenu();
-		insertAIComposerTextAtSelection(this.editor, text);
+		insertTextAtSelection(this.editor, text);
 		this.editor.focus();
 	};
 
@@ -240,21 +278,31 @@ export class RichTextInputState extends createBindableStateClass<RichTextInputSt
 	insertTokenData = (token: RichTextInputToken) => {
 		if (!this.editor) return false;
 		this.closeMenu();
-		insertAIComposerTokenAtSelection(this.editor, token);
+		insertTokenAtSelection(this.editor, token);
 		this.editor.focus();
 		return true;
 	};
 
-	syncEditable = () => {
-		this.editor?.setEditable(!this.disabled);
-	};
+	/** A replaced document keeps no selection of the old one: the caret goes to its end if focused. */
+	private afterReplace() {
+		const editor = this.editor;
+		const root = this.rootElement;
+		if (!editor) return;
+		if (root?.contains(document.activeElement)) placeCaretAtEnd(editor);
+		else editor.selection.select({ kind: 'none' });
+	}
 
 	syncValue = () => {
-		if (!this.editor || this.value === this.lastMarkdown) return;
-		this.lastMarkdown = this.value;
-		loadComposerMarkdown(this.editor, this.value, this.formats, {
-			tag: EXTERNAL_MARKDOWN_UPDATE,
-			discrete: true
-		});
+		const value = this.value;
+		const editor = this.editor;
+		// A shared document is edited by everyone in it: a parent's value never replaces it.
+		if (this.collaborative) return;
+		if (!editor || value === this.syncedValue) return;
+		this.syncedValue = value;
+		const doc = markdownToDoc(value, this.formats);
+		this.lastMarkdown = docToMarkdown(doc);
+		this.closeMenu();
+		replaceDocument(editor, doc);
+		this.afterReplace();
 	};
 }

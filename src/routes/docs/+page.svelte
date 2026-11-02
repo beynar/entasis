@@ -297,10 +297,8 @@ export const load = ({ locals }) => ({ nonce: locals.nonce });`;
 		{@render ic('@tanstack/charts d3-array d3-force d3-hierarchy d3-sankey d3-scale d3-shape')},
 		{@render ic('RichTextInput')} — and the {@render ic('AIComposer')} / {@render ic('AIChat')} that render
 		it — needs
-		{@render ic(
-			'lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils'
-		)}, and {@render ic('Globe')} needs {@render ic('cobe')}. Every other component works with
-		entasis alone.
+		{@render ic('edytor')}, and {@render ic('Globe')} needs {@render ic('cobe')}. Every other
+		component works with entasis alone.
 	</p>
 
 	<p class="text-neutral/70">

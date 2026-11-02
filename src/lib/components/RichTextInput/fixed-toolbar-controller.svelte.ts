@@ -1,4 +1,4 @@
-import type { LexicalEditor } from 'lexical';
+import type { EdytorInstance } from 'edytor';
 import {
 	applyAIComposerSelectionBlock,
 	applyAIComposerSelectionFormat,
@@ -13,8 +13,8 @@ import {
 } from './composer/selection-formatting.js';
 
 type RichTextInputFixedToolbarOptions = {
-	editor: LexicalEditor | null;
-	rootElement: HTMLDivElement | null;
+	editor: EdytorInstance | null;
+	rootElement: HTMLElement | null;
 	enabled: boolean;
 };
 
@@ -56,7 +56,7 @@ export class RichTextInputFixedToolbarController {
 	update() {
 		const options = this.optionsSource();
 		this.selection = options.enabled
-			? readAIComposerSelectionState(options.rootElement, {
+			? readAIComposerSelectionState(options.editor, options.rootElement, {
 					requireText: false,
 					requireAnchor: false
 				})
@@ -92,7 +92,7 @@ export class RichTextInputFixedToolbarController {
 	}
 
 	private withSelection(
-		callback: (editor: LexicalEditor, selection: AIComposerSelectionState) => void
+		callback: (editor: EdytorInstance, selection: AIComposerSelectionState) => void
 	) {
 		const { editor } = this.options;
 		if (!editor || !this.selection) return;

@@ -18,7 +18,7 @@
 		id: idProp,
 		defaultValue = '',
 		value = $bindable<string | null>(),
-		ref = $bindable<HTMLDivElement | null>(null),
+		ref = $bindable<HTMLElement | null>(null),
 		errors = $bindable([]),
 		focused = $bindable(false),
 		required = false,
@@ -36,6 +36,7 @@
 		onSubmitShortcut,
 		submitShortcut = 'none',
 		toolbar = 'hover',
+		collaboration,
 		standalone = false,
 		maxHeight = false,
 		formats = AI_COMPOSER_DEFAULT_RICH_TEXT_FORMATS,
@@ -163,6 +164,8 @@
 		get formats() {
 			return formats;
 		},
+		// Read once, as edytor reads its collaboration settings once.
+		collaborative: untrack(() => !!collaboration),
 		// A read-only editor stops editing and suggestions too; only its chrome stays enabled.
 		get disabled() {
 			return field.disabled || field.readOnly;
@@ -194,17 +197,18 @@
 		if (untrack(() => ref) !== rootElement) ref = rootElement;
 		field.node = rootElement;
 	});
-	$effect(() => state.syncEditable());
 	$effect(() => state.syncValue());
 </script>
 
 {#snippet richTextInputChrome()}
 	<RichTextInputChrome
 		id={field.id}
-		bind:rootElement={state.rootElement}
+		rootElement={state.rootElement}
+		value={state.initialDoc}
+		plugins={state.plugins}
+		{collaboration}
 		bind:suggestions={state.suggestions}
 		bind:selectionMenuHandle={state.selectionMenuHandle}
-		editorAttachment={state.rootAttachment}
 		{size}
 		{theme}
 		showFixedToolbar={state.showFixedToolbar}
@@ -219,9 +223,9 @@
 		{standalone}
 		{maxHeight}
 		isEmpty={state.isEmpty}
-		onKeydown={state.handleKeydown}
 		onFocus={() => (field.focused = true)}
 		onBlur={() => (field.focused = false)}
+		onPressBelowContent={state.focusEnd}
 		menu={state.menu}
 		caretAnchor={state.caretAnchor}
 		suggestionGroups={state.suggestionGroups}

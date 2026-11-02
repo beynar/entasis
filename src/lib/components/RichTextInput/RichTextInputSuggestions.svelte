@@ -6,7 +6,12 @@
 	import type { CommandState } from '../Command/command.state.svelte.js';
 	import type { Sizes } from '$lib/types/theme.js';
 	import type { RichTextInputThemeProps } from './richTextInput.theme.js';
-	import { useRichTextInputTheme } from './richTextInput.theme.js';
+	import {
+		richTextInputSuggestionCommandTheme,
+		richTextInputSuggestionOptionTheme,
+		useRichTextInputTheme
+	} from './richTextInput.theme.js';
+	import { setMenuOptionTheme } from '../MenuOption/menuOption.theme.js';
 
 	type Props = {
 		size: Sizes;
@@ -46,6 +51,8 @@
 	let popoverOpen = $derived(open && anchor !== null);
 
 	const classes = $derived(useRichTextInputTheme(theme));
+
+	setMenuOptionTheme(richTextInputSuggestionOptionTheme);
 
 	export function moveHighlight(delta: number) {
 		command?.commandState.move(delta);
@@ -115,6 +122,7 @@
 >
 	<Command
 		bind:this={command}
+		theme={richTextInputSuggestionCommandTheme}
 		{size}
 		items={visibleItems}
 		search={query}

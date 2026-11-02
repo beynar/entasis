@@ -78,7 +78,7 @@
 	title="AI Composer"
 	subtitle="A Markdown composer with typed tokens, validated files, voice capture, steering, sortable queueing, and submit/stop lifecycle."
 	component="AIComposer"
-	requires="pnpm add lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils"
+	requires="pnpm add edytor"
 	features={[
 		'Enter sends, Shift+Enter adds a line',
 		'Existing RichTextInput editor',

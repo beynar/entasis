@@ -5,9 +5,9 @@ AIComposer is a Markdown prompt composer built on the existing \`RichTextInput\`
 
 ## Requires
 
-AIComposer embeds RichTextInput, which is built on Lexical. Those packages are optional peer dependencies of entasis, so install them alongside it:
+AIComposer embeds RichTextInput, which is built on edytor, an optional peer dependency of entasis, so install it alongside it:
 
-\`pnpm add lexical @lexical/history @lexical/link @lexical/list @lexical/markdown @lexical/rich-text @lexical/selection @lexical/utils\`
+\`pnpm add edytor\`
 
 ## Import
 

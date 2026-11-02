@@ -1600,6 +1600,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	'rich-text-input': [
 		'RichTextInput',
 		'RichTextInputChange',
+		'RichTextInputCollaboration',
 		'RichTextInputFormat',
 		'RichTextInputHandle',
 		'RichTextInputItem',
@@ -2206,6 +2207,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'DataTableProcessingMode',
 		'DataTableProps',
 		'DataTableRowActivation',
+		'DataTableRowMove',
 		'DataTableRowPayload',
 		'DataTableSearchConfig',
 		'DataTableSelectEditor',

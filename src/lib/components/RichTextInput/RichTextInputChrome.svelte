@@ -3,12 +3,13 @@
 	import type { CommandGroup } from '../Command/command.props.js';
 	import type { Sizes } from '$lib/types/theme.js';
 	import type { WithAttachments } from '$lib/types/props.js';
-	import type { Attachment } from 'svelte/attachments';
 	import type { RichTextInputFormat, RichTextInputMaxHeight } from './richTextInput.props.js';
 	import RichTextInputFormattingToolbar from './RichTextInputFormattingToolbar.svelte';
 	import RichTextInputSuggestions from './RichTextInputSuggestions.svelte';
 	import type { AIComposerSelectionMenuController } from './composer/editor-selection-menu.svelte.js';
-	import type { AIComposerSuggestionHandle } from './composer/keyboard.js';
+	import type { AIComposerSuggestionHandle } from './composer/plugin.js';
+	import type { JSONDoc, Plugin } from 'edytor';
+	import type { RichTextInputCollaboration } from './richTextInput.props.js';
 	import type { RichTextInputSearchStatus } from './search.svelte.js';
 	import type { TriggerState } from './composer/trigger.js';
 	import type { RichTextInputFixedToolbarController } from './fixed-toolbar-controller.svelte.js';
@@ -18,8 +19,10 @@
 
 	type Props = WithAttachments<{
 		id?: string;
-		rootElement: HTMLDivElement | null;
-		editorAttachment?: Attachment<HTMLDivElement>;
+		rootElement: HTMLElement | null;
+		value: JSONDoc;
+		plugins: Plugin[];
+		collaboration?: RichTextInputCollaboration;
 		suggestions: AIComposerSuggestionHandle | undefined;
 		selectionMenuHandle: { focusFirst: () => void } | undefined;
 		size: Sizes;
@@ -45,9 +48,9 @@
 		suggestionStatus: RichTextInputSearchStatus;
 		suggestionError: unknown | null;
 		suggestionEmpty: string;
-		onKeydown: (event: KeyboardEvent) => void;
 		onFocus?: (event: FocusEvent) => void;
 		onBlur?: (event: FocusEvent) => void;
+		onPressBelowContent?: () => void;
 		onSuggestionSelect: (value: string) => void;
 		onSuggestionDismiss: () => void;
 		onSuggestionHighlightChange: (value: string | undefined) => void;
@@ -55,8 +58,10 @@
 
 	let {
 		id,
-		rootElement = $bindable<HTMLDivElement | null>(null),
-		editorAttachment,
+		rootElement,
+		value,
+		plugins,
+		collaboration,
 		suggestions = $bindable<AIComposerSuggestionHandle | undefined>(),
 		selectionMenuHandle = $bindable<{ focusFirst: () => void } | undefined>(),
 		size,
@@ -81,9 +86,9 @@
 		suggestionStatus,
 		suggestionError,
 		suggestionEmpty,
-		onKeydown,
 		onFocus,
 		onBlur,
+		onPressBelowContent,
 		onSuggestionSelect,
 		onSuggestionDismiss,
 		onSuggestionHighlightChange,
@@ -122,8 +127,10 @@
 
 	<RichTextInputViewport
 		{id}
-		bind:rootElement
-		{editorAttachment}
+		{rootElement}
+		{value}
+		{plugins}
+		{collaboration}
 		{size}
 		{theme}
 		{disabled}
@@ -132,9 +139,9 @@
 		{standalone}
 		{maxHeight}
 		{isEmpty}
-		{onKeydown}
 		{onFocus}
 		{onBlur}
+		{onPressBelowContent}
 	/>
 </div>
 

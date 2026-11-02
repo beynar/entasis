@@ -1860,6 +1860,7 @@ export const componentInventory = [
 		exportedSymbols: [
 			'RichTextInput',
 			'RichTextInputChange',
+			'RichTextInputCollaboration',
 			'RichTextInputFormat',
 			'RichTextInputHandle',
 			'RichTextInputItem',
@@ -2880,6 +2881,7 @@ export const componentInventory = [
 			'DataTableProcessingMode',
 			'DataTableProps',
 			'DataTableRowActivation',
+			'DataTableRowMove',
 			'DataTableRowPayload',
 			'DataTableSearchConfig',
 			'DataTableSelectEditor',
