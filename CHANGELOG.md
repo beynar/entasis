@@ -6,6 +6,18 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.14.1 — 2026-11-02
+
+### Fixed
+
+- Server rendering no longer leaks a \`ThemeState\` per request. A \`<Theme>\` registered itself in
+  module-level lists (active Theme for reduced motion, CSP nonce, portal container), and when Svelte
+  renders a page twice on the server (a child writing a bound prop, such as \`<Tabs bind:api>\`), it
+  never runs the discarded pass's cleanup: one Theme, with its props and snippets, stayed in memory
+  for good, and its nonce or motion setting could be read by later requests. These registrations
+  now happen in the browser only, still synchronously in the Theme's constructor; the server HTML is
+  unchanged.
+
 ## 0.14.0 — 2026-11-02
 
 ### Added
