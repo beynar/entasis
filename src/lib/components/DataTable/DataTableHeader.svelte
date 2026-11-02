@@ -106,7 +106,26 @@
 		{#each columns as column (column.id)}
 			{@const allIndex = allColumns.findIndex((entry) => entry.id === column.id)}
 			{@const gridColumn = allIndex + 1 + (model.getColumnPinning(column) === 'right' ? 1 : 0)}
-			{#if column.id === '__selection'}
+			{#if column.id === '__drag'}
+				<th
+					role="columnheader"
+					aria-colindex={allIndex + 1}
+					class={classes.headerCell({
+						density,
+						align: 'center',
+						pinned: true,
+						class: [
+							classes.rowDragCell(),
+							classes.pinnedBoundary({ side: pinnedBoundaryFor(column) })
+						].join(' ')
+					})}
+					style:grid-column={gridColumn}
+					style:position="sticky"
+					style:inset-inline-start={`${model.getColumnPinnedOffset(column)}px`}
+				>
+					<span class="sr-only">{t.dataTableReorderRows}</span>
+				</th>
+			{:else if column.id === '__selection'}
 				<th
 					role="columnheader"
 					aria-colindex={allIndex + 1}

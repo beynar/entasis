@@ -10,6 +10,7 @@
 	import DataTableLargeDemo from './DataTableLargeDemo.svelte';
 	import DataTableManualDemo from './DataTableManualDemo.svelte';
 	import DataTableRenderingDemo from './DataTableRenderingDemo.svelte';
+	import DataTableRowReorderDemo from './DataTableRowReorderDemo.svelte';
 	import {
 		basicDataTableCode,
 		editingDataTableCode,
@@ -18,7 +19,8 @@
 		groupingDataTableCode,
 		inFlowDataTableCode,
 		manualDataTableCode,
-		renderingDataTableCode
+		renderingDataTableCode,
+		rowReorderDataTableCode
 	} from './codeSnippets.js';
 
 	const controls = createComponentControls([
@@ -137,6 +139,17 @@
 		>
 			<div class="w-full">
 				<DataTableInFlowDemo />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Reorderable rows"
+			description="sortableRows adds a grip to each row: drag it, or focus it and use the up and down arrow keys (Home and End for the ends). The table shows the new order, writes it to a bound items, and reports it once through onRowMove with the row's new neighbours. Reordering pauses while a sort, filter, search or grouping is active."
+			code={rowReorderDataTableCode}
+			class="min-h-0 items-stretch p-3 md:p-5"
+		>
+			<div class="w-full">
+				<DataTableRowReorderDemo />
 			</div>
 		</ComponentCard>
 

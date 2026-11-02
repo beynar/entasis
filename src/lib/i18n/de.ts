@@ -524,6 +524,13 @@ export const de: Messages = {
 	dataTableCollapseRow: 'Zeile einklappen',
 	dataTableSelectPage: 'Aktuelle Seite auswählen',
 	dataTableSelectRow: (index: string | number) => `Zeile ${index} auswählen`,
+	dataTableMoveRow: (index: string | number) =>
+		`Zeile ${index} mit den Pfeiltasten nach oben und unten verschieben`,
+	dataTableRowMoved: (position: string | number, total: string | number) =>
+		`Zeile an Position ${position} von ${total} verschoben`,
+	dataTableReorderRows: 'Zeilen neu anordnen',
+	dataTableRowReorderPaused:
+		'Sortierung, Filter und Gruppierung entfernen, um Zeilen neu anzuordnen',
 	dataTableEditColumn: (column: string | number) => `${column} bearbeiten`,
 	dataTableRowsPerPage: 'Zeilen pro Seite',
 	// Kanban, Diff und Markdown-Aufgabenlisten

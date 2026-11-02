@@ -512,6 +512,12 @@ export const ja: Messages = {
 	dataTableCollapseRow: '行を折りたたむ',
 	dataTableSelectPage: '現在のページを選択',
 	dataTableSelectRow: (index: string | number) => `行 ${index} を選択`,
+	dataTableMoveRow: (index: string | number) => `上下の矢印キーで行 ${index} を移動`,
+	dataTableRowMoved: (position: string | number, total: string | number) =>
+		`行を ${total} 件中 ${position} 番目に移動しました`,
+	dataTableReorderRows: '行の並べ替え',
+	dataTableRowReorderPaused:
+		'行を並べ替えるには、並べ替え・フィルター・グループ化を解除してください',
 	dataTableEditColumn: (column: string | number) => `${column} を編集`,
 	dataTableRowsPerPage: 'ページあたりの行数',
 	// カンバン・差分・Markdown のタスクリスト

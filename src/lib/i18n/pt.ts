@@ -524,6 +524,13 @@ export const pt: Messages = {
 	dataTableCollapseRow: 'Recolher linha',
 	dataTableSelectPage: 'Selecionar a página atual',
 	dataTableSelectRow: (index: string | number) => `Selecionar a linha ${index}`,
+	dataTableMoveRow: (index: string | number) =>
+		`Mover a linha ${index} com as setas para cima e para baixo`,
+	dataTableRowMoved: (position: string | number, total: string | number) =>
+		`Linha movida para a posição ${position} de ${total}`,
+	dataTableReorderRows: 'Reordenar linhas',
+	dataTableRowReorderPaused:
+		'Remova a ordenação, os filtros e o agrupamento para reordenar as linhas',
 	dataTableEditColumn: (column: string | number) => `Editar ${column}`,
 	dataTableRowsPerPage: 'Linhas por página',
 	// Kanban, diferenças e listas de tarefas em Markdown

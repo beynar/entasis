@@ -524,6 +524,13 @@ export const es: Messages = {
 	dataTableCollapseRow: 'Contraer fila',
 	dataTableSelectPage: 'Seleccionar la página actual',
 	dataTableSelectRow: (index: string | number) => `Seleccionar la fila ${index}`,
+	dataTableMoveRow: (index: string | number) =>
+		`Mover la fila ${index} con las flechas arriba y abajo`,
+	dataTableRowMoved: (position: string | number, total: string | number) =>
+		`Fila movida a la posición ${position} de ${total}`,
+	dataTableReorderRows: 'Reordenar filas',
+	dataTableRowReorderPaused:
+		'Quita la ordenación, los filtros y la agrupación para reordenar las filas',
 	dataTableEditColumn: (column: string | number) => `Editar ${column}`,
 	dataTableRowsPerPage: 'Filas por página',
 	// Kanban, diferencias y listas de tareas de Markdown

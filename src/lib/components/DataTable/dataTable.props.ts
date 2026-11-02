@@ -195,6 +195,22 @@ export type DataTableHeaderPayload<TData> = {
 	toggleSorting: (multi?: boolean) => void;
 };
 
+/** A row moved by a drag or the keyboard, once the table shows it in its new place. */
+export type DataTableRowMove<TData> = {
+	/** The moved row. */
+	row: TData;
+	/** Its index in `items` before the move. */
+	from: number;
+	/** Its index in `rows`, the new order. */
+	to: number;
+	/** Every item in the new order (also assigned to a bound `items`). */
+	rows: TData[];
+	/** The row it now follows, or null at the start. */
+	after: TData | null;
+	/** The row it now precedes, or null at the end. */
+	before: TData | null;
+};
+
 export type DataTableCellRenderPayload<TData> = DataTableCellPayload<TData> & {
 	column: DataTableColumn<TData>;
 	placeholder: boolean;
@@ -264,7 +280,10 @@ export type DataTablePaginationConfig = {
 };
 
 type DataTableBaseProps<TData> = {
-	/** Rows to display; provide only the current server page in manual mode. */
+	/**
+	 * Rows to display; provide only the current server page in manual mode. Bindable: with
+	 * `sortableRows`, a moved row is written back in its new order.
+	 */
 	items: readonly TData[];
 	/** Column accessors, headers, rendering, and interaction policies. */
 	columns: readonly DataTableColumn<TData>[];
@@ -310,6 +329,17 @@ type DataTableBaseProps<TData> = {
 	canExpand?: (row: TData) => boolean;
 	/** Whether a particular row may be selected. */
 	isRowSelectable?: (row: TData) => boolean;
+	/**
+	 * Lets the user reorder rows: each row drags by its grip, or moves with the up and down arrow
+	 * keys (Home and End to the first and last place) once the grip has focus. The order is the
+	 * one of `items`, so reordering pauses while a sort, a filter, a search or a grouping is
+	 * active, and for hierarchical rows (`getSubRows`).
+	 */
+	sortableRows?: boolean;
+	/** Whether a particular row may be moved. Others keep their place but still let rows pass. */
+	canDragRow?: (row: TData) => boolean;
+	/** Called once per completed move, after the table shows the new order. */
+	onRowMove?: (payload: DataTableRowMove<TData>) => void;
 	/** Persists an edited cell; rejection leaves the edit error visible. */
 	onCellCommit?: (payload: DataTableCellCommit<TData>) => void | Promise<void>;
 	/** Additional classes on the table root. */

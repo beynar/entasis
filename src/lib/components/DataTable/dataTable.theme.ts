@@ -159,6 +159,12 @@ const selectionCheckboxControl = cva({
 	base: '!h-full !w-full !min-h-0 !rounded-none focus:ring-inset focus:ring-offset-0'
 });
 const selectionCheckboxIndicator = cva({ base: '!size-4 !rounded-sm' });
+// The row grip fills its cell, so the whole cell drags; a dragged row dims (useDndList's
+// `data-dnd-dragging`) while the drop line shows where it lands.
+const rowDragCell = cva({ base: 'p-0' });
+const rowDragHandle = cva({
+	base: 'grid h-full w-full cursor-grab touch-none place-items-center text-neutral/70 outline-none transition-colors hover:text-neutral focus-visible:text-primary-readable focus-visible:ring-2 focus-visible:ring-focus/50 focus-visible:ring-inset active:cursor-grabbing disabled:cursor-default disabled:text-neutral/45'
+});
 const actionsCell = cva({ base: 'p-0 [&>*]:h-full [&>*]:w-full [&>*]:rounded-none' });
 const detailRow = cva({
 	base: 'grid min-w-full border-b border-neutral-muted bg-surface-raised/50'
@@ -274,6 +280,8 @@ export const dataTableTheme = {
 	selectionCheckboxContainer,
 	selectionCheckboxControl,
 	selectionCheckboxIndicator,
+	rowDragCell,
+	rowDragHandle,
 	actionsCell,
 	detailRow,
 	detailCell,

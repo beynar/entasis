@@ -16,6 +16,9 @@
 	import { dataTableGridNavigation } from './dataTableGridNavigation.js';
 	import { createDataTableState, DataTableModel } from './dataTable.model.svelte.js';
 	import { dataTableRowFlip } from './dataTableRowFlip.js';
+	import type { DataTableRowInstance } from './dataTable.table.js';
+	import { useDndList } from '$lib/utils/useDndList.svelte.js';
+	import { prefersReducedMotion } from '$lib/utils/motion.svelte.js';
 	import type {
 		DataTableApi,
 		DataTablePaginationConfig,
@@ -26,7 +29,7 @@
 	import { useDataTableTheme } from './dataTable.theme.js';
 
 	let {
-		items,
+		items = $bindable(),
 		columns,
 		getRowId,
 		height,
@@ -52,6 +55,9 @@
 		getSubRows,
 		canExpand,
 		isRowSelectable,
+		sortableRows = false,
+		canDragRow,
+		onRowMove,
 		onCellCommit,
 		class: className,
 		ref = $bindable(null),
@@ -110,6 +116,9 @@
 				getSubRows,
 				canExpand,
 				isRowSelectable,
+				sortableRows,
+				canDragRow,
+				onRowMove,
 				onCellCommit,
 				class: className,
 				ref,
@@ -159,7 +168,14 @@
 	// (`api.isSaving` tracks pending commits). Assistive technology still hears that the table is busy.
 	const isSaving = $derived(model.pendingCommitCount > 0);
 	const isBusy = $derived(loading || isSaving);
-	const rowFlip = dataTableRowFlip(() => animateRows);
+	// A row move animates like a sort with `animateRows`, and on its own too: rows slide to their
+	// new places unless the reader asked for reduced motion.
+	let flipNextRowMove = false;
+	const rowFlip = dataTableRowFlip(() => {
+		const enabled = animateRows || flipNextRowMove;
+		flipNextRowMove = false;
+		return enabled && !prefersReducedMotion();
+	});
 
 	$effect.pre(() => {
 		void [
@@ -171,7 +187,8 @@
 			selectionMode,
 			pagination,
 			rowActions,
-			rowActionsWidth
+			rowActionsWidth,
+			sortableRows
 		];
 		model.reconcileProcessingMode();
 		model.reconcileColumns();
@@ -184,6 +201,91 @@
 		void modelRevision;
 		return model.pageRows;
 	});
+	const rowReorderActive = $derived.by(() => {
+		void [
+			modelRevision,
+			tableState!.sorting,
+			tableState!.grouping,
+			tableState!.columnFilters,
+			tableState!.globalFilter
+		];
+		return model.rowReorderActive;
+	});
+	let rowMoveAnnouncement = $state('');
+
+	/**
+	 * Place `moved` beside its new neighbours on the page, in the full `items` order (so a move on
+	 * page two keeps every other page as it was), show it, then report it.
+	 */
+	const commitRowMove = (moved: TData, pageOrder: readonly TData[], pageIndex: number) => {
+		const pageAfter = pageOrder[pageIndex - 1];
+		const pageBefore = pageOrder[pageIndex + 1];
+		const next = [...items];
+		const from = next.indexOf(moved);
+		if (from === -1) return false;
+		next.splice(from, 1);
+		const to = pageAfter ? next.indexOf(pageAfter) + 1 : pageBefore ? next.indexOf(pageBefore) : 0;
+		if (to === from) return false;
+		next.splice(to, 0, moved);
+		flipNextRowMove = true;
+		items = next;
+		// Its neighbours in the whole order: at the top of page two it still follows page one's last.
+		onRowMove?.({
+			row: moved,
+			from,
+			to,
+			rows: next,
+			after: next[to - 1] ?? null,
+			before: next[to + 1] ?? null
+		});
+		return true;
+	};
+
+	const rowsDnd = useDndList<DataTableRowInstance<TData>>({
+		id: 'data-table-rows',
+		items: () => rows,
+		itemId: (row) => row.id,
+		handle: true,
+		disabled: () => !rowReorderActive,
+		canDrag: (row) => canDragRow?.(row.original as TData) ?? true,
+		onReorder: (next, detail) => {
+			if (detail.from === detail.to) return;
+			commitRowMove(
+				detail.item.original as TData,
+				next.map((row) => row.original as TData),
+				detail.to
+			);
+		}
+	});
+
+	const moveRowWithKeyboard = (
+		row: DataTableRowInstance<TData>,
+		target: 'previous' | 'next' | 'first' | 'last'
+	) => {
+		const pageOrder = rows.map((entry) => entry.original as TData);
+		const from = rows.findIndex((entry) => entry.id === row.id);
+		const last = pageOrder.length - 1;
+		const to =
+			target === 'first'
+				? 0
+				: target === 'last'
+					? last
+					: Math.min(last, Math.max(0, from + (target === 'next' ? 1 : -1)));
+		if (from === -1 || to === from) return;
+		const [moved] = pageOrder.splice(from, 1);
+		pageOrder.splice(to, 0, moved);
+		if (!commitRowMove(moved, pageOrder, to)) return;
+		rowMoveAnnouncement = t.dataTableRowMoved(to + 1, pageOrder.length);
+		if (virtualize) get(rowVirtualizerStore).scrollToIndex(to, { align: 'auto' });
+		// The row's element moves in the DOM, which can drop focus: give it back to its grip.
+		requestAnimationFrame(() => {
+			const handle = ref?.querySelector<HTMLElement>(
+				`tr[data-row-id="${CSS.escape(row.id)}"] [data-dnd-handle]`
+			);
+			if (handle && document.activeElement !== handle) handle.focus({ preventScroll: true });
+		});
+	};
+
 	const allColumns = $derived.by(() => {
 		void modelRevision;
 		return [
@@ -529,7 +631,11 @@
 					sticky={stickyHeader}
 				/>
 
-				<tbody class={classes.body()} {@attach rowFlip}>
+				<tbody
+					class={classes.body()}
+					{@attach rowFlip}
+					{@attach sortableRows ? rowsDnd.list : undefined}
+				>
 					{#if error || (!loading && rows.length === 0)}
 						<tr class={classes.stateRow()} style:grid-template-columns={gridTemplate}>
 							<td
@@ -625,6 +731,14 @@
 									revision={modelRevision}
 									measureAttachment={measureRow}
 									detailMeasureAttachment={measureDetailRow(virtualRow.index)}
+									dragAttachment={sortableRows ? rowsDnd.item(row) : undefined}
+									reorder={sortableRows
+										? {
+												active: rowReorderActive,
+												canDrag: canDragRow?.(row.original as TData) ?? true,
+												move: (target) => moveRowWithKeyboard(row, target)
+											}
+										: undefined}
 									onNavigate={navigateGrid}
 								/>
 							{/if}
@@ -640,6 +754,10 @@
 			</table>
 		</ScrollArea>
 	</div>
+
+	{#if sortableRows}
+		<div class="sr-only" aria-live="polite" aria-atomic="true">{rowMoveAnnouncement}</div>
+	{/if}
 
 	{#if paginationConfig && paginationConfig.showControls !== false}
 		<div class={classes.footer()}>

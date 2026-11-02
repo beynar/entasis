@@ -32,6 +32,7 @@ export type {
 	DataTableProcessingMode,
 	DataTableProps,
 	DataTableRowActivation,
+	DataTableRowMove,
 	DataTableRowPayload,
 	DataTableSearchConfig,
 	DataTableSelectionMode,

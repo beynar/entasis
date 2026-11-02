@@ -506,6 +506,11 @@ export const zh: Messages = {
 	dataTableCollapseRow: '折叠行',
 	dataTableSelectPage: '选择当前页',
 	dataTableSelectRow: (index: string | number) => `选择第 ${index} 行`,
+	dataTableMoveRow: (index: string | number) => `使用上下方向键移动第 ${index} 行`,
+	dataTableRowMoved: (position: string | number, total: string | number) =>
+		`已将行移到第 ${position} 位，共 ${total} 行`,
+	dataTableReorderRows: '重新排列行',
+	dataTableRowReorderPaused: '清除排序、筛选和分组后即可重新排列行',
 	dataTableEditColumn: (column: string | number) => `编辑 ${column}`,
 	dataTableRowsPerPage: '每页行数',
 	// 看板、差异与 Markdown 任务列表

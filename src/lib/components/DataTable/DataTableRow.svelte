@@ -4,8 +4,10 @@
 	import DataTableCellContent from './DataTableCellContent.svelte';
 	import DataTableEditor from './DataTableEditor.svelte';
 	import DataTableSelectionCheckbox from './DataTableSelectionCheckbox.svelte';
+	import { dotsSixVerticalIcon } from '../Icons/dotsSixVertical.js';
 	import {
 		DATA_TABLE_ACTIONS_COLUMN,
+		DATA_TABLE_DRAG_COLUMN,
 		DATA_TABLE_SELECTION_COLUMN,
 		type DataTableModel
 	} from './dataTable.model.svelte.js';
@@ -28,6 +30,8 @@
 		revision,
 		measureAttachment,
 		detailMeasureAttachment,
+		dragAttachment,
+		reorder,
 		onNavigate
 	}: {
 		row: DataTableRowInstance<TData>;
@@ -43,6 +47,14 @@
 		revision: number;
 		measureAttachment: Attachment<HTMLElement>;
 		detailMeasureAttachment: Attachment<HTMLElement>;
+		/** The row's drag registration, with `sortableRows`. */
+		dragAttachment?: Attachment<HTMLElement>;
+		/** Whether rows reorder now, whether this one may move, and its keyboard move. */
+		reorder?: {
+			active: boolean;
+			canDrag: boolean;
+			move: (target: 'previous' | 'next' | 'first' | 'last') => void;
+		};
 		onNavigate: (rowIndex: number, columnIndex: number, event: KeyboardEvent) => void;
 	} = $props();
 	const t = $derived(useI18n());
@@ -61,7 +73,9 @@
 	const firstDataColumnId = $derived(
 		allColumns.find(
 			(column) =>
-				column.id !== DATA_TABLE_SELECTION_COLUMN && column.id !== DATA_TABLE_ACTIONS_COLUMN
+				column.id !== DATA_TABLE_DRAG_COLUMN &&
+				column.id !== DATA_TABLE_SELECTION_COLUMN &&
+				column.id !== DATA_TABLE_ACTIONS_COLUMN
 		)?.id
 	);
 	const pinnedCellLayouts = $derived.by(() => {
@@ -184,9 +198,25 @@
 	);
 	const activatesFrom = (columnId: string) =>
 		activatable &&
+		columnId !== DATA_TABLE_DRAG_COLUMN &&
 		columnId !== DATA_TABLE_SELECTION_COLUMN &&
 		columnId !== DATA_TABLE_ACTIONS_COLUMN &&
 		model.editing?.row.id !== row.id;
+
+	const MOVE_KEYS: Record<string, 'previous' | 'next' | 'first' | 'last'> = {
+		ArrowUp: 'previous',
+		ArrowDown: 'next',
+		Home: 'first',
+		End: 'last'
+	};
+	// The grip moves its row with the keyboard; the keys stay with it rather than moving grid focus.
+	const moveWithKeyboard = (event: KeyboardEvent) => {
+		const target = MOVE_KEYS[event.key];
+		if (!target || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+		event.preventDefault();
+		event.stopPropagation();
+		if (reorder?.active && reorder.canDrag) reorder.move(target);
+	};
 	const activate = (event: MouseEvent | KeyboardEvent) =>
 		model.props.onRowActivate?.({ ...rowPayload, event });
 </script>
@@ -203,6 +233,7 @@
 	class={classes.row({ density, grouped: row.getIsGrouped(), activatable })}
 	style:grid-template-columns={gridTemplate}
 	{@attach measureAttachment}
+	{@attach dragAttachment}
 >
 	{#each columns as column (column.id)}
 		{@const allIndex = allColumns.findIndex((entry) => entry.id === column.id)}
@@ -227,13 +258,18 @@
 			data-focused={isFocused || undefined}
 			class={classes.cell({
 				density,
-				align: config?.align ?? (column.id === DATA_TABLE_SELECTION_COLUMN ? 'center' : 'start'),
+				align:
+					config?.align ??
+					(column.id === DATA_TABLE_SELECTION_COLUMN || column.id === DATA_TABLE_DRAG_COLUMN
+						? 'center'
+						: 'start'),
 				pinned: !!pinning,
 				focused: isFocused,
 				editing: isEditing,
 				class: [
 					config?.class,
 					column.id === DATA_TABLE_SELECTION_COLUMN ? classes.selectionCell() : '',
+					column.id === DATA_TABLE_DRAG_COLUMN ? classes.rowDragCell() : '',
 					column.id === DATA_TABLE_ACTIONS_COLUMN ? classes.actionsCell() : '',
 					classes.pinnedBoundary({ side: pinnedCell?.boundary ?? 'none' })
 				]
@@ -244,6 +280,9 @@
 			style:position={pinning ? 'sticky' : undefined}
 			style:inset-inline-start={pinning === 'left' ? `${pinnedCell?.offset ?? 0}px` : undefined}
 			style:inset-inline-end={pinning === 'right' ? `${pinnedCell?.offset ?? 0}px` : undefined}
+			title={column.id === DATA_TABLE_DRAG_COLUMN && reorder && !reorder.active
+				? t.dataTableRowReorderPaused
+				: undefined}
 			onfocusin={() => model.moveFocusedCell(rowIndex, allIndex)}
 			onmousedown={(event) => {
 				if (event.detail > 1 && config?.editor) event.preventDefault();
@@ -256,7 +295,19 @@
 				model.startEditing(row, column.id);
 			}}
 		>
-			{#if column.id === DATA_TABLE_SELECTION_COLUMN}
+			{#if column.id === DATA_TABLE_DRAG_COLUMN}
+				<button
+					type="button"
+					data-dnd-handle
+					disabled={!reorder?.active || !reorder.canDrag}
+					class={classes.rowDragHandle()}
+					aria-label={t.dataTableMoveRow(rowIndex + 1)}
+					aria-keyshortcuts="ArrowUp ArrowDown Home End"
+					onkeydown={moveWithKeyboard}
+				>
+					{@render dotsSixVerticalIcon({ class: 'size-4', 'aria-hidden': 'true' })}
+				</button>
+			{:else if column.id === DATA_TABLE_SELECTION_COLUMN}
 				<DataTableSelectionCheckbox
 					label={t.dataTableSelectRow(rowIndex + 1)}
 					value={rowSelected}

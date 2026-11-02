@@ -511,6 +511,12 @@ export const ar: Messages = {
 	dataTableCollapseRow: 'طي الصف',
 	dataTableSelectPage: 'تحديد الصفحة الحالية',
 	dataTableSelectRow: (index: string | number) => `تحديد الصف ${index}`,
+	dataTableMoveRow: (index: string | number) =>
+		`انقل الصف ${index} باستخدام مفتاحي السهم لأعلى ولأسفل`,
+	dataTableRowMoved: (position: string | number, total: string | number) =>
+		`نُقل الصف إلى الموضع ${position} من ${total}`,
+	dataTableReorderRows: 'إعادة ترتيب الصفوف',
+	dataTableRowReorderPaused: 'أزل الفرز وعوامل التصفية والتجميع لإعادة ترتيب الصفوف',
 	dataTableEditColumn: (column: string | number) => `تعديل ${column}`,
 	dataTableRowsPerPage: 'صفوف لكل صفحة',
 	// كانبان والفروق وقوائم المهام في ماركداون

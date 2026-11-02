@@ -528,6 +528,13 @@ export const fr: Messages = {
 	dataTableCollapseRow: 'Réduire la ligne',
 	dataTableSelectPage: 'Sélectionner la page actuelle',
 	dataTableSelectRow: (index: string | number) => `Sélectionner la ligne ${index}`,
+	dataTableMoveRow: (index: string | number) =>
+		`Déplacer la ligne ${index} avec les flèches haut et bas`,
+	dataTableRowMoved: (position: string | number, total: string | number) =>
+		`Ligne déplacée en position ${position} sur ${total}`,
+	dataTableReorderRows: 'Réordonner les lignes',
+	dataTableRowReorderPaused:
+		'Retirez le tri, les filtres et le regroupement pour réordonner les lignes',
 	dataTableEditColumn: (column: string | number) => `Modifier ${column}`,
 	dataTableRowsPerPage: 'Lignes par page',
 	// Kanban, diff et listes de tâches Markdown

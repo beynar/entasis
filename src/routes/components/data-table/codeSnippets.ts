@@ -368,3 +368,21 @@ export const inFlowDataTableCode = `<DataTable
   pagination={false}
   search={false}
 />`;
+
+export const rowReorderDataTableCode = `<script lang="ts">
+	import { DataTable, type DataTableRowMove } from 'entasis/data-table';
+
+	let tasks = $state<Task[]>(initialTasks);
+
+	// Save the move: \`after\` / \`before\` are the row's new neighbours in the whole order.
+	const save = ({ row, after, before }: DataTableRowMove<Task>) =>
+		db.tasks.move({ where: { id: row.id }, ...(after ? { after: after.id } : { before: before?.id }) });
+</script>
+
+<DataTable
+	bind:items={tasks}
+	{columns}
+	getRowId={(task) => task.id}
+	sortableRows
+	onRowMove={save}
+/>`;

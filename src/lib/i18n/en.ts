@@ -528,6 +528,11 @@ export const en = {
 	dataTableCollapseRow: 'Collapse row',
 	dataTableSelectPage: 'Select current page',
 	dataTableSelectRow: (index: string | number) => `Select row ${index}`,
+	dataTableMoveRow: (index: string | number) => `Move row ${index} with the up and down arrow keys`,
+	dataTableRowMoved: (position: string | number, total: string | number) =>
+		`Row moved to position ${position} of ${total}`,
+	dataTableReorderRows: 'Reorder rows',
+	dataTableRowReorderPaused: 'Clear sorting, filters and grouping to reorder rows',
 	dataTableEditColumn: (column: string | number) => `Edit ${column}`,
 	dataTableRowsPerPage: 'Rows per page',
 	// Kanban, diff, and markdown task lists

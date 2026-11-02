@@ -56,7 +56,7 @@ instead to drop the table into normal document flow at its natural height:
 
 ## Core props
 
-- **items**: \`readonly TData[]\`.
+- **items**: \`readonly TData[]\`, bindable: with \`sortableRows\` a move writes the new order back.
 - **columns**: \`readonly DataTableColumn<TData>[]\`.
 - **getRowId**: stable row identity used by selection, expansion, virtualization, and focus.
 - **height**: optional \`string | number\`; otherwise fills a definite-height parent. Only read
@@ -73,7 +73,9 @@ instead to drop the table into normal document flow at its natural height:
 - **search**: false, true, or placeholder/debounce configuration.
 - **showColumnVisibilityControl**: default false.
 - **stickyHeader**, **overscan**, **estimatedRowHeight**, and **animateRows** control rendering.
-- **disabled** blocks sorting controls, selection paths, editing, and column manipulation.
+- **sortableRows**, **canDragRow** and **onRowMove** reorder rows (see Row reordering).
+- **disabled** blocks sorting controls, selection paths, editing, column manipulation, and row
+  reordering.
 - **loading** and **error** drive the table's loading skeleton and error state. DataTable draws no
   request indicator: show your own (a \`NetworkIndicator\`, a toast…) from \`loading\` and the
   \`onCellCommit\` promise.
@@ -184,6 +186,44 @@ It fires on a click anywhere in the row except on a control (link, button, input
 element), the selection or actions column, a group row, or a click that ends a text selection.
 In grid mode Enter activates a cell that has no editor and no control. Rows show a pointer while it
 is set. Table-mode rows are not focusable, so keep a link or row action for keyboard users.
+
+## Row reordering
+
+\`sortableRows\` adds a grip column: a row drags by its grip (a line shows where it lands), or,
+with the grip focused, moves with ArrowUp / ArrowDown (Home / End to the first and last place on the
+page), each keyboard move announced. The table shows the new order first, writes it to a bound
+\`items\`, then calls \`onRowMove({ row, from, to, rows, after, before })\` once per move: \`from\` /
+\`to\` index \`items\`, \`rows\` is the new order, and \`after\` / \`before\` are the row's new
+neighbours in the whole order (null at an end), ready for a "place after / before" save.
+
+\`\`\`svelte
+<script lang="ts">
+  import { DataTable } from 'entasis/data-table';
+
+  type Task = { id: string; title: string };
+  let tasks = $state<Task[]>([
+    { id: 't1', title: 'Draft the brief' },
+    { id: 't2', title: 'Review pricing' }
+  ]);
+</script>
+
+<DataTable
+  bind:items={tasks}
+  columns={[{ id: 'title', accessor: 'title', header: 'Task' }]}
+  getRowId={(task) => task.id}
+  virtualize={false}
+  sortableRows
+  canDragRow={(task) => task.id !== 't1'}
+  onRowMove={({ row, after }) => console.log(row.id, 'after', after?.id)}
+/>
+\`\`\`
+
+Rows follow the order of \`items\`, so reordering pauses (grips disabled, the reason in their cell's
+title) while a sort, a column filter, a search or a grouping is active, and for hierarchical rows
+(\`getSubRows\`). \`canDragRow\` keeps a row in place; others still move past it. Paged tables move
+within the page and keep every other page as it was. A move slides rows to their places unless the
+reader prefers reduced motion. The dragged row carries \`data-dnd-dragging\`; theme parts
+\`rowDragCell\` and \`rowDragHandle\`.
 
 ## Accessibility and virtualization
 

@@ -29,7 +29,12 @@ import {
 
 export const DATA_TABLE_SELECTION_COLUMN = '__selection';
 export const DATA_TABLE_ACTIONS_COLUMN = '__actions';
-const INTERNAL_COLUMNS = new Set([DATA_TABLE_SELECTION_COLUMN, DATA_TABLE_ACTIONS_COLUMN]);
+export const DATA_TABLE_DRAG_COLUMN = '__drag';
+const INTERNAL_COLUMNS = new Set([
+	DATA_TABLE_DRAG_COLUMN,
+	DATA_TABLE_SELECTION_COLUMN,
+	DATA_TABLE_ACTIONS_COLUMN
+]);
 
 const DEFAULT_PAGE_SIZE = 25;
 
@@ -76,6 +81,7 @@ export class DataTableModel<TData> {
 	private columnsSource: readonly DataTableColumn<TData>[] | null = null;
 	private columnsSelectionMode: DataTableProps<TData>['selectionMode'] = undefined;
 	private columnsHaveActions = false;
+	private columnsHaveDrag = false;
 	private columnsProcessingMode: DataTableProps<TData>['processingMode'] = undefined;
 	private columnDefsCache: DataTableColumnDef<TData>[] = [];
 
@@ -112,6 +118,23 @@ export class DataTableModel<TData> {
 
 	get filteredRows() {
 		return this.table.getFilteredRowModel().flatRows;
+	}
+
+	/**
+	 * Rows reorder in the order of `items`: never while a sort, a filter, a search or a grouping
+	 * shows them in another order, nor for hierarchical rows.
+	 */
+	get rowReorderActive() {
+		const { props, state } = this;
+		return (
+			!!props.sortableRows &&
+			!props.disabled &&
+			!props.getSubRows &&
+			state.sorting.length === 0 &&
+			state.grouping.length === 0 &&
+			state.columnFilters.length === 0 &&
+			!state.globalFilter
+		);
 	}
 
 	get selectedRows() {
@@ -200,15 +223,16 @@ export class DataTableModel<TData> {
 		const props = this.props;
 		const state = this.state;
 		const isManual = props.processingMode === 'manual';
+		const leadingColumns = [
+			...(props.sortableRows ? [DATA_TABLE_DRAG_COLUMN] : []),
+			...(props.selectionMode !== 'none' ? [DATA_TABLE_SELECTION_COLUMN] : [])
+		];
 		const columnOrder = [
-			...(props.selectionMode !== 'none' ? [DATA_TABLE_SELECTION_COLUMN] : []),
+			...leadingColumns,
 			...state.columnOrder,
 			...(props.rowActions ? [DATA_TABLE_ACTIONS_COLUMN] : [])
 		];
-		const startPinning = [
-			...(props.selectionMode !== 'none' ? [DATA_TABLE_SELECTION_COLUMN] : []),
-			...state.columnPinning.left
-		];
+		const startPinning = [...leadingColumns, ...state.columnPinning.left];
 		const endPinning = [
 			...state.columnPinning.right,
 			...(props.rowActions ? [DATA_TABLE_ACTIONS_COLUMN] : [])
@@ -451,8 +475,10 @@ export class DataTableModel<TData> {
 
 	private getColumnDefs() {
 		const hasRowActions = !!this.props.rowActions;
+		const hasDrag = !!this.props.sortableRows;
 		if (
 			this.columnsSource === this.publicColumns &&
+			this.columnsHaveDrag === hasDrag &&
 			this.columnsSelectionMode === this.props.selectionMode &&
 			this.columnsHaveActions === hasRowActions &&
 			this.columnsProcessingMode === this.props.processingMode
@@ -462,6 +488,7 @@ export class DataTableModel<TData> {
 		this.columnsSource = this.publicColumns;
 		this.columnsSelectionMode = this.props.selectionMode;
 		this.columnsHaveActions = hasRowActions;
+		this.columnsHaveDrag = hasDrag;
 		this.columnsProcessingMode = this.props.processingMode;
 		this.columnDefsCache = this.createColumnDefs();
 		return this.columnDefsCache;
@@ -469,6 +496,19 @@ export class DataTableModel<TData> {
 
 	private createColumnDefs(): DataTableColumnDef<TData>[] {
 		const definitions: DataTableColumnDef<TData>[] = [];
+		if (this.props.sortableRows) {
+			definitions.push({
+				id: DATA_TABLE_DRAG_COLUMN,
+				size: 32,
+				minSize: 32,
+				maxSize: 32,
+				enableHiding: false,
+				enablePinning: false,
+				enableResizing: false,
+				enableSorting: false,
+				enableGrouping: false
+			});
+		}
 		if (this.props.selectionMode !== 'none') {
 			definitions.push({
 				id: DATA_TABLE_SELECTION_COLUMN,
