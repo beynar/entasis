@@ -394,6 +394,15 @@ const typeRampExceptions = new Map([
 		])
 	],
 	[
+		'Markdown/markdown.theme.ts',
+		new Map([
+			[
+				'text-[0.9em]',
+				'Inline code reads at a fixed ratio of the surrounding text, so it follows every heading, list and table size; the streamdown base theme spells the same class from node_modules, where Tailwind never generates it'
+			]
+		])
+	],
+	[
 		'DocumentViewer/documentViewer.theme.ts',
 		new Map([
 			[

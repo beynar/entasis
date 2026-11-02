@@ -176,10 +176,11 @@ export const buildMarkdownStreamdownTheme = (size: MarkdownSize): StreamdownProp
 			pre: 'overflow-x-auto font-mono p-0 bg-surface',
 			line: 'block '
 		},
-		// A readable chip on any surface: the muted neutral fill, at the base theme's 0.9em with its
-		// own padding (no second padding is layered on top).
+		// A readable chip on any surface: the muted neutral fill, at 0.9em with its own padding (no
+		// second padding is layered on top). The 0.9em is spelled here: the base theme's own class lives
+		// in node_modules, where Tailwind never looks, so nothing else generates it.
 		codespan: {
-			base: 'bg-neutral-muted rounded-sm font-mono text-neutral'
+			base: 'bg-neutral-muted rounded-sm font-mono text-neutral text-[0.9em]'
 		},
 		image: {
 			base: `group relative ${s.blockMargin} mx-auto w-fit block`,

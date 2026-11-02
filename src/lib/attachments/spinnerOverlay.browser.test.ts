@@ -59,7 +59,10 @@ describe('spinnerOverlay', () => {
 		// around each corner; the overlay now paints it, opaque, and the host's own is cleared.
 		render(SpinnerOverlayHarness, { initial: true });
 		const host = button('flow');
-		await expect.poll(() => getComputedStyle(host).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+		// The handover waits for the overlay's fade-in to finish, which a loaded runner can stretch.
+		await expect
+			.poll(() => getComputedStyle(host).backgroundColor, { timeout: 4000 })
+			.toBe('rgba(0, 0, 0, 0)');
 		const painted = getComputedStyle(overlay(host)!).backgroundColor;
 		expect(painted).not.toMatch(/\/\s*0?\.\d+\)$|,\s*0?\.\d+\)$/);
 		await toggle();
