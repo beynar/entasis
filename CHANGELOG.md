@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.15.1 — 2026-11-03
+
 ### Fixed
 
 - WebKit memory on mount (Safari, WKWebView apps): `ScrollArea` no longer declares its overflow
