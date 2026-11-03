@@ -5,6 +5,7 @@
 	import type { ButtonInternalProps } from './button.props.js';
 	import { useButtonTheme } from './button.theme.js';
 	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
+	import { getModelContext, useWebMCPConfig } from '$lib/utils/webmcp/webmcp.registry.js';
 
 	let {
 		loading = false,
@@ -40,6 +41,7 @@
 		'data-active': dataActive,
 		'data-highlighted': dataHighlighted,
 		'data-slot': dataSlot,
+		tool,
 		...attachments
 	}: ButtonInternalProps = $props();
 
@@ -88,6 +90,26 @@
 		return () => node.removeEventListener('click', refuse, { capture: true });
 	};
 
+	const webmcp = useWebMCPConfig();
+
+	// Offers the button to agents under `<Theme webmcp>`. It reads what decides that, so a button
+	// that gets disabled leaves the list; without the option it stops at the first line.
+	const offerToAgents: Attachment<HTMLElement> = (node) => {
+		const options = webmcp.options;
+		if (!options || tool === false || inactive || !getModelContext()) return;
+		const own = typeof tool === 'object' ? tool : {};
+		const danger = resolvedColor === 'danger';
+		let stop: (() => void) | undefined;
+		let stopped = false;
+		void import('./button.webmcp.js').then(({ trackButton }) => {
+			if (!stopped) stop = trackButton({ node, danger, tool: own, webmcp: options });
+		});
+		return () => {
+			stopped = true;
+			stop?.();
+		};
+	};
+
 	// A focusable disabled button keeps its pointer events, so hover callbacks (a tooltip) still fire.
 	const handlePointerEnter: NonNullable<ButtonInternalProps['onpointerenter']> = (event) => {
 		if (!disabled || focusableWhenDisabled) onpointerenter?.(event);
@@ -124,6 +146,7 @@
 	class={slots.root({ className })}
 	{@attach refuseInactiveActivation}
 	{@attach spinnerOverlay({ loading, size })}
+	{@attach offerToAgents}
 	{onclick}
 	onpointerenter={onpointerenter ? handlePointerEnter : undefined}
 	onpointerleave={onpointerleave ? handlePointerLeave : undefined}

@@ -348,6 +348,7 @@
 			hasError: field.hasError,
 			labelPosition: resolvedLabelPosition
 		})}
+		data-field-control
 		{@attach focusFromContainer}
 		{@attach anchor}
 	>

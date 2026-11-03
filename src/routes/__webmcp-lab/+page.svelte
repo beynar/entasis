@@ -7,6 +7,7 @@
 	let submitted = $state<string>('—');
 	let askResult = $state<string>('—');
 	let failNext = $state(false);
+	let clicks = $state(0);
 	let allTypes = $state<string>('—');
 
 	const plans = [
@@ -104,6 +105,16 @@
 		<Button onclick={openAsk}>Ouvrir ask()</Button>
 		<Button variant="outline" onclick={() => (failNext = !failNext)}>failNext: {failNext}</Button>
 	</div>
+
+	<div class="flex gap-2">
+		<Button onclick={() => (clicks += 1)}>Compter</Button>
+		<Button color="danger" onclick={() => (clicks = 0)}>Tout effacer</Button>
+		<Button disabled>Inactif</Button>
+		<Button tool={false}>Privé</Button>
+		<Button href="https://example.com">Externe</Button>
+		<Button label="Paramètres" tool={{ description: 'Opens the settings.' }}>⚙</Button>
+	</div>
+	<pre data-testid="clicks">{clicks}</pre>
 
 	<pre data-testid="submitted">{submitted}</pre>
 	<pre data-testid="ask-result">{askResult}</pre>

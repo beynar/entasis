@@ -301,7 +301,8 @@ describe('ask() under <Theme webmcp>', () => {
 			cancel: { text: 'Keep', disabled: true }
 		});
 		const save = await screen.findByRole('button', { name: 'Save' });
-		await new Promise((resolve) => setTimeout(resolve, 20));
+		// Past the delay that lets buttons offer themselves: the close button must not.
+		await new Promise((resolve) => setTimeout(resolve, 80));
 		expect(tools.size).toBe(0);
 		expect(save).toBeDisabled();
 		screen.getByRole('button', { name: 'Close' }).click();

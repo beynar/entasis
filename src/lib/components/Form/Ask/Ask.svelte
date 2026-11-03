@@ -211,6 +211,7 @@
 		closeOnEscape={askState.open && !askState.form?.loading}
 		closeOnClickOutside={false}
 		swipeToDismiss={false}
+		tool={false}
 		theme={{
 			header: { base: '-mx-4 shrink-0 px-4' },
 			footer: { base: 'border-neutral-muted -mx-4 mt-2 shrink-0 border-t px-4 pt-3' }
@@ -253,6 +254,7 @@
 				<div class="flex flex-col gap-2 @sm:flex-row @sm:justify-end">
 					<Button
 						color="neutral"
+						tool={false}
 						{...cancelButton.props}
 						type="button"
 						size={cancelButton.size ?? askState.options.size}
@@ -266,6 +268,7 @@
 						{cancelButton.text}
 					</Button>
 					<Button
+						tool={false}
 						{...confirmButton.props}
 						type="button"
 						size={confirmButton.size ?? askState.options.size}

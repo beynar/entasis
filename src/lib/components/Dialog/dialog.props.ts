@@ -111,6 +111,8 @@ export type DialogProps = WithSlot<
 		trigger?: Snippet<[DialogApi]> | (ButtonProps & { content?: string });
 		/** When true, shows a close button and allows Escape to close the dialog. */
 		closable?: boolean;
+		/** `false` keeps the close button from AI agents under `<Theme webmcp>`. */
+		tool?: boolean;
 		/** When true, pressing outside the dialog panel closes the topmost open dialog. Defaults to
 		 *  `true`, except for an `alert`, which ignores outside presses unless this is set. A press
 		 *  that began before the dialog opened does not count. */

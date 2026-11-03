@@ -23,6 +23,17 @@ type ButtonEventAttributes = {
 	onpointerleave?: PointerEventHandler<HTMLElement> | null;
 };
 type ButtonForwardedAnchorAttributes = Pick<HTMLAnchorAttributes, 'download'>;
+/** How a Button appears to AI agents under `<Theme webmcp>`. Everything has a default. */
+export type ButtonToolOptions = {
+	/** Tells the model what the button does, besides its text. */
+	description?: string;
+	/**
+	 * Whether the action is significant or hard to undo, so the browser may ask the user first.
+	 * Defaults to `color="danger"`.
+	 */
+	consequential?: boolean;
+};
+
 export type ButtonPrimitiveProps = WithAttachments<
 	WithSlot<
 		{
@@ -58,6 +69,11 @@ export type ButtonPrimitiveProps = WithAttachments<
 			 * `aria-haspopup`. A entasis surface sets this on its own trigger.
 			 */
 			haspopup?: 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid' | true;
+			/**
+			 * How the button appears to AI agents under `<Theme webmcp>`: its text is enough, options
+			 * refine it, and `false` keeps it from agents.
+			 */
+			tool?: boolean | ButtonToolOptions;
 			/**
 			 * Bindable reference to the root button or anchor element.
 			 */

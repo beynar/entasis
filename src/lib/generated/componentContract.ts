@@ -980,6 +980,7 @@ export const componentInventory = [
 			'ButtonProps',
 			'ButtonTheme',
 			'ButtonThemeProps',
+			'ButtonToolOptions',
 			'ButtonVariant',
 			'buttonTheme',
 			'setButtonTheme',

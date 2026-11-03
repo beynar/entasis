@@ -1192,6 +1192,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'ButtonProps',
 		'ButtonTheme',
 		'ButtonThemeProps',
+		'ButtonToolOptions',
 		'ButtonVariant',
 		'buttonTheme',
 		'setButtonTheme',

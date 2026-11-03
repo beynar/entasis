@@ -28,6 +28,7 @@
 		transition,
 		children,
 		closeOnEscape = true,
+		tool,
 		closeOnClickOutside,
 		closable = true,
 		focusOnClose,
@@ -184,6 +185,7 @@
 			size="small"
 			variant="ghost"
 			label={t.close}
+			tool={tool === false ? false : undefined}
 			{@attach (node) => node.setAttribute('data-autofocus-skip', '')}
 			onclick={(event) => dialog.close({ reason: 'close-press', event })}
 		>
