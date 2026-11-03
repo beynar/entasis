@@ -69,6 +69,7 @@ beforeEach(reset);
 afterEach(() => captured.clear());
 
 const root = () => document.querySelector<HTMLElement>('[data-scroll-area]')!;
+const edges = () => root().querySelector<HTMLElement>(':scope > [data-scroll-area-edges]')!;
 const viewport = () => document.querySelector<HTMLElement>('[data-scroll-area-viewport]')!;
 const track = (orientation: 'vertical' | 'horizontal') =>
 	document.querySelector<HTMLElement>(
@@ -149,19 +150,19 @@ describe('overflow edges', () => {
 		expect(root()).not.toHaveAttribute('data-has-overflow-x');
 		expect(root()).not.toHaveAttribute('data-overflow-y-start');
 		expect(root()).toHaveAttribute('data-overflow-y-end');
-		expect(root().style.getPropertyValue('--scroll-area-overflow-y-start')).toBe('0px');
-		expect(root().style.getPropertyValue('--scroll-area-overflow-y-end')).toBe('300px');
+		expect(edges().style.getPropertyValue('--scroll-area-overflow-y-start')).toBe('0px');
+		expect(edges().style.getPropertyValue('--scroll-area-overflow-y-end')).toBe('300px');
 
 		await scrollTo({ top: 120 });
 		expect(root()).toHaveAttribute('data-overflow-y-start');
 		expect(root()).toHaveAttribute('data-overflow-y-end');
-		expect(root().style.getPropertyValue('--scroll-area-overflow-y-start')).toBe('120px');
-		expect(root().style.getPropertyValue('--scroll-area-overflow-y-end')).toBe('180px');
+		expect(edges().style.getPropertyValue('--scroll-area-overflow-y-start')).toBe('120px');
+		expect(edges().style.getPropertyValue('--scroll-area-overflow-y-end')).toBe('180px');
 
 		await scrollTo({ top: 300 });
 		expect(root()).toHaveAttribute('data-overflow-y-start');
 		expect(root()).not.toHaveAttribute('data-overflow-y-end');
-		expect(root().style.getPropertyValue('--scroll-area-overflow-y-end')).toBe('0px');
+		expect(edges().style.getPropertyValue('--scroll-area-overflow-y-end')).toBe('0px');
 	});
 
 	test('a remainder under the threshold is not hidden content', async () => {
@@ -176,7 +177,7 @@ describe('overflow edges', () => {
 		const { scrollTo } = await setup({ overflowEdgeThreshold: 20 });
 		await scrollTo({ top: 285 });
 		expect(root()).not.toHaveAttribute('data-overflow-y-end');
-		expect(root().style.getPropertyValue('--scroll-area-overflow-y-end')).toBe('15px');
+		expect(edges().style.getPropertyValue('--scroll-area-overflow-y-end')).toBe('15px');
 		await scrollTo({ top: 270 });
 		expect(root()).toHaveAttribute('data-overflow-y-end');
 	});
@@ -191,8 +192,8 @@ describe('overflow edges', () => {
 
 		await scrollTo({ left: -250 });
 		expect(root()).toHaveAttribute('data-overflow-x-start');
-		expect(root().style.getPropertyValue('--scroll-area-overflow-x-start')).toBe('250px');
-		expect(root().style.getPropertyValue('--scroll-area-overflow-x-end')).toBe('350px');
+		expect(edges().style.getPropertyValue('--scroll-area-overflow-x-start')).toBe('250px');
+		expect(edges().style.getPropertyValue('--scroll-area-overflow-x-end')).toBe('350px');
 
 		await scrollTo({ left: -600 });
 		expect(root()).not.toHaveAttribute('data-overflow-x-end');
@@ -309,7 +310,7 @@ describe('overscroll', () => {
 		const { scrollTo } = await setup();
 		await scrollTo({ top: -20 });
 		expect(root()).not.toHaveAttribute('data-overflow-y-start');
-		expect(root().style.getPropertyValue('--scroll-area-overflow-y-start')).toBe('0px');
+		expect(edges().style.getPropertyValue('--scroll-area-overflow-y-start')).toBe('0px');
 	});
 });
 

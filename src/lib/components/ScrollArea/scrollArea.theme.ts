@@ -12,10 +12,12 @@ const defaultScrollAreaViewport = cva({
 	// viewport is the focusable scroll region (keyboard scrolling).
 	base: 'relative outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus/50',
 	variants: {
+		// The fade itself is the component's mask (see ScrollArea.svelte), driven by the measured
+		// overflow; these classes only add to it.
 		scrollFade: {
 			none: '',
-			y: 'scroll-fade',
-			x: 'scroll-fade-x'
+			y: '',
+			x: ''
 		}
 	},
 	defaultVariants: {
@@ -26,6 +28,12 @@ const defaultScrollAreaViewport = cva({
 const defaultScrollAreaContent = cva({
 	// Sizing (min-width/width/position) is set inline in the component; keep this minimal.
 	base: 'relative'
+});
+
+// The empty overlay above the viewport that carries the overflow variables: the place for edge
+// fades (`before:` / `after:`) that follow them.
+const defaultScrollAreaEdges = cva({
+	base: 'z-20'
 });
 
 // Logical placement: the vertical bar sits at the inline end (the right in LTR, the left in RTL),
@@ -49,6 +57,7 @@ export const scrollAreaTheme = {
 	root: defaultScrollArea,
 	viewport: defaultScrollAreaViewport,
 	content: defaultScrollAreaContent,
+	edges: defaultScrollAreaEdges,
 	scrollbar: defaultScrollAreaScrollbar,
 	scrollbarX: defaultScrollAreaScrollbarX,
 	scrollbarThumb: defaultScrollAreaScrollbarThumb

@@ -1,7 +1,7 @@
 /**
  * The styling hooks a ScrollArea exposes. Attributes are presence attributes (`''` while the
  * state holds, omitted otherwise) unless the description says they carry a value; the variables
- * are set on the root element in px.
+ * are set in px on the edges overlay.
  */
 export const scrollAreaDataAttributes = {
 	'data-scrolling':
@@ -21,7 +21,10 @@ export const scrollAreaDataAttributes = {
 /** The name of a ScrollArea data attribute. */
 export type ScrollAreaDataAttribute = keyof typeof scrollAreaDataAttributes;
 
-/** Set on the root and read there, on its ::before / ::after and the scrollbars; the scrolled content does not inherit them. */
+/**
+ * Set only on the edges overlay (`[data-scroll-area-edges]`, an empty layer above the viewport); read
+ * them there or on its `::before` / `::after`. Never on the root, the scrollbars or the content.
+ */
 export const scrollAreaCssVariables = {
 	'--scroll-area-overflow-x-start':
 		'Px of content hidden past the inline start edge (0 while the axis does not overflow).',

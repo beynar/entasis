@@ -6,6 +6,36 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Fixed
+
+- WebKit memory on mount (Safari, WKWebView apps): `ScrollArea` no longer declares its overflow
+  variables on any ancestor of the scrolled content. 0.15.0 reset them on the viewport so that
+  scrolling stopped restyling the content, but WebKit's style cache is keyed on the identity of the
+  inherited variables: the reset (as the root's own variables before it) gave every mounted
+  ScrollArea a new set, so all of its content missed the cache and added entries, and memory grew
+  with each mount (+80 MiB over 300 navigations, reported from svelte-desktop). Measured in a
+  WKWebView over 1,000 mounts of a 422-node ScrollArea: +100 MB → +74 MB (an empty mount costs
+  +37 MB); scrolling stays at 0.02 ms of style work per step.
+- WebKit memory with `ScrollArea`'s `scrollFade` (on by default inside popups: Select, Combobox,
+  menus…): the edge fade is now a mask that follows the measured overflow instead of the
+  scroll-driven `scroll-fade` animation. In WebKit, a scroll-driven animation on the viewport made
+  all of its content miss the style cache on every mount, and that memory was never released. Same look, same size variables (`--scroll-fade-size`, `--scroll-fade-t-size`…,
+  `--scroll-fade-reveal`). 1,000 mounts of a faded 422-node ScrollArea: +238 MB → +80 MB, the same
+  as without the fade. The `scroll-fade` utilities also register their private variables as not
+  inherited; they still animate, so they suit small scrollers (tabs, code blocks).
+
+### Changed
+
+- `ScrollArea`: the `--scroll-area-overflow-*` variables move from the root to a new empty,
+  `aria-hidden` overlay above the viewport, `[data-scroll-area-edges]` (theme part `edges`). Read
+  them there or on its `::before` / `::after`: an edge fade written as
+  `[data-scroll-area]::before { … var(--scroll-area-overflow-y-start) … }` becomes
+  `[data-scroll-area-edges]::before { … }`. The root and the scrollbars no longer carry them; for an
+  on/off edge treatment on the root, the `data-overflow-*` attributes are unchanged.
+- `ScrollArea` theme: the viewport's `scrollFade` variant no longer adds the `scroll-fade` /
+  `scroll-fade-x` classes (the fade is the component's own mask); its `y` / `x` entries are empty,
+  for classes that add to it.
+
 ## 0.15.0 — 2026-11-03
 
 ### Added

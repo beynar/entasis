@@ -30,7 +30,7 @@ The ScrollArea component provides a native scroll viewport with custom overlay s
 
 ### Behavior Props
 - **scrollOnEdges**: boolean (default: false) - Enables auto-scroll and up/down indicators when the pointer rests near the viewport edges
-- **scrollFade**: boolean (default: on inside a popup, off elsewhere) - Applies the shared \`scroll-fade\` utility to the scrollable viewport. Left out, it is on inside any overlay layer (a popover, a menu, a dialog), where the fade marks the clipped edge of a short panel; pass \`false\` to turn it off there
+- **scrollFade**: boolean (default: on inside a popup, off elsewhere) - Fades the viewport's edges where content is hidden, growing over the first \`--scroll-fade-reveal\` of scroll. A mask driven by the measured overflow, not the CSS \`scroll-fade\` utility (a scroll-driven animation, which in WebKit costs memory on each mount of a large scroller); it takes the same size variables (\`--scroll-fade-size\`, \`--scroll-fade-t-size\`, \`-b-size\`, \`-s-size\`, \`-e-size\`). Left out, it is on inside any overlay layer (a popover, a menu, a dialog), where the fade marks the clipped edge of a short panel; pass \`false\` to turn it off there
 
 ### Styling Props
 - **class**: string - Additional CSS classes for the root scroll area
@@ -64,7 +64,7 @@ The ScrollArea component provides a native scroll viewport with custom overlay s
 ## Notes
 
 - The viewport is the native scroll container.
-- The \`scrollFade\` prop applies the utility to the viewport, not the outer wrapper.
+- The \`scrollFade\` prop masks the viewport, not the outer wrapper.
 - Native browser scrollbars are hidden while custom scrollbar thumbs are rendered over the viewport.
 - Keyboard focus is applied only when the viewport overflows.
 
@@ -85,7 +85,7 @@ Data attributes (presence attributes, set to \`""\` while the state holds):
 - \`data-overflow-x-start\`, \`data-overflow-x-end\`, \`data-overflow-y-start\`, \`data-overflow-y-end\` on the root: content is hidden past that edge by more than \`overflowEdgeThreshold\`. The x edges are logical (inline start / end), so in RTL \`start\` is the right edge
 - \`data-orientation\` (\`vertical\` | \`horizontal\`) on the scrollbars and thumbs
 
-CSS variables on the root, in px (0 while the axis does not overflow): \`--scroll-area-overflow-x-start\`, \`--scroll-area-overflow-x-end\`, \`--scroll-area-overflow-y-start\`, \`--scroll-area-overflow-y-end\`. Overscroll (WebKit rubber banding) is not counted as hidden content. Read them on the root, its \`::before\` / \`::after\` or the scrollbars: the scrolled content does not inherit them, since they change on every scroll.
+CSS variables in px (0 while the axis does not overflow): \`--scroll-area-overflow-x-start\`, \`--scroll-area-overflow-x-end\`, \`--scroll-area-overflow-y-start\`, \`--scroll-area-overflow-y-end\`. Overscroll (WebKit rubber banding) is not counted as hidden content. They change on every scroll, so they are set only on \`[data-scroll-area-edges]\` (an empty, \`aria-hidden\` layer covering the viewport, theme part \`edges\`): read them there or on its \`::before\` / \`::after\`. The root, the scrollbars and the scrolled content never carry them (WebKit would restyle the whole content on each value and keep every restyle). For an on/off edge treatment on the root, use the \`data-overflow-*\` attributes.
 
 The typed maps \`scrollAreaDataAttributes\` and \`scrollAreaCssVariables\` (from \`entasis/scroll-area\`) list each name with its meaning.
 
@@ -98,7 +98,7 @@ The typed maps \`scrollAreaDataAttributes\` and \`scrollAreaCssVariables\` (from
 
 \`\`\`css
 /* Fade the top edge only while content is hidden above. */
-[data-scroll-area]::before {
+[data-scroll-area-edges]::before {
 	opacity: min(1, calc(var(--scroll-area-overflow-y-start) / 24));
 }
 \`\`\`
@@ -123,5 +123,5 @@ The theme object contains:
 ## Available Variants
 
 **viewport**:
-- scrollFade: 'none' | 'y' | 'x' - Adds the shared vertical or horizontal scroll-fade utility
+- scrollFade: 'none' | 'y' | 'x' - The fading axis; empty by default (the mask is the component's own), for classes to add to it
 `;

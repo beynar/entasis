@@ -117,14 +117,15 @@ test('an RTL viewport scrolls with a negative offset that the thumb follows from
 	expect(area).toHaveAttribute('data-overflow-x-start');
 });
 
-test('the overflow variables reach the root and its ::before, not the scrolled content', async () => {
-	// They change on every scroll: inherited by the content, WebKit restyled all of it per scroll
-	// and kept each restyle in its style cache. The root's ::before / ::after still read them.
+test('the overflow variables sit on the edges overlay, not on an ancestor of the content', async () => {
+	// They change on every scroll. Declared on an ancestor of the content (even as a reset), WebKit
+	// missed its style cache for every descendant on each scroll and each mount, keeping each entry.
 	const style = document.createElement('style');
-	style.textContent = `[data-scroll-area]::before { content: ''; position: absolute; width: var(--scroll-area-overflow-y-start); }`;
+	style.textContent = `[data-scroll-area-edges]::before { content: ''; position: absolute; width: var(--scroll-area-overflow-y-start); }`;
 	document.head.append(style);
 	await render(ScrollAreaHarness, { props: { style: 'height: 40px' } });
 	const root = document.querySelector<HTMLElement>('[data-scroll-area]')!;
+	const edges = root.querySelector<HTMLElement>(':scope > [data-scroll-area-edges]')!;
 	const viewport = root.querySelector<HTMLElement>('[data-scroll-area-viewport]')!;
 	const content = viewport.querySelector('p')!;
 	content.style.height = '400px';
@@ -132,13 +133,51 @@ test('the overflow variables reach the root and its ::before, not the scrolled c
 
 	viewport.scrollTop = 30;
 	await expect
-		.poll(() => getComputedStyle(root).getPropertyValue('--scroll-area-overflow-y-start'))
+		.poll(() => getComputedStyle(edges).getPropertyValue('--scroll-area-overflow-y-start'))
 		.toBe('30px');
-	expect(getComputedStyle(root, '::before').width).toBe('30px');
-	expect(getComputedStyle(content).getPropertyValue('--scroll-area-overflow-y-start')).toBe('');
+	expect(getComputedStyle(edges, '::before').width).toBe('30px');
+	const scrollbar = root.querySelector<HTMLElement>('[data-slot="scroll-area-scrollbar"]')!;
+	for (const element of [root, viewport, content, scrollbar]) {
+		expect(element.style.cssText).not.toContain('--');
+		expect(getComputedStyle(element).getPropertyValue('--scroll-area-overflow-y-start')).toBe('');
+	}
 
-	// …and follow the next scroll (WebKit kept a stale ::before for variables registered not inherited).
 	viewport.scrollTop = 12;
-	await expect.poll(() => getComputedStyle(root, '::before').width).toBe('12px');
+	await expect.poll(() => getComputedStyle(edges, '::before').width).toBe('12px');
 	style.remove();
+});
+
+test('the scroll fade follows the hidden content without animating the viewport', async () => {
+	// A scroll-driven animation made the same fade in CSS, but in WebKit it made the viewport's
+	// whole content miss the style cache on every mount.
+	await render(ScrollAreaHarness, {
+		props: { style: 'height: 100px; --spacing: 4px; --scroll-fade-size: 20px', scrollFade: true }
+	});
+	const viewport = document.querySelector<HTMLElement>('[data-scroll-area-viewport]')!;
+	const content = viewport.querySelector('p')!;
+	content.style.height = '1000px';
+	const progress = (edge: 'start' | 'end') =>
+		getComputedStyle(viewport).getPropertyValue(`--scroll-area-fade-${edge}`).trim();
+	const mask = () => {
+		const style = getComputedStyle(viewport);
+		return style.maskImage || style.getPropertyValue('-webkit-mask-image');
+	};
+
+	await expect.poll(() => viewport.dataset.scrollFadeAxis).toBe('y');
+	await expect.poll(() => progress('end')).toBe('1');
+	expect(progress('start')).toBe('0');
+	expect(mask()).toMatch(/linear-gradient\(.*0px.*calc\(100% - 20px\)/);
+
+	// Halfway through the reveal distance (24 × 4px), eased; past it, fully faded.
+	viewport.scrollTop = 48;
+	await expect.poll(() => progress('start')).toBe('0.5');
+	viewport.scrollTop = 400;
+	await expect.poll(() => progress('start')).toBe('1');
+	expect(mask()).toMatch(/linear-gradient\(.*20px/);
+	viewport.scrollTop = viewport.scrollHeight;
+	await expect.poll(() => progress('end')).toBe('0');
+
+	expect(viewport.getAnimations()).toEqual([]);
+	expect(getComputedStyle(content).getPropertyValue('--scroll-area-fade-start').trim()).toBe('0');
+	expect(content.style.cssText).not.toContain('--');
 });

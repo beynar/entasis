@@ -90,6 +90,35 @@
 		return 'none';
 	});
 
+	// The fade follows the content hidden past each edge, which ScrollArea already measures: the
+	// viewport's mask reads two progress values written here. A scroll-driven animation did the
+	// same in CSS, but in WebKit that animation made the viewport's whole content miss the
+	// style cache on every mount, and memory grew with each one. The values are registered, not
+	// inherited, so the content never sees them either.
+	let fadeReveal = $state(96);
+	$effect(() => {
+		if (scrollFadeAxis === 'none' || !viewportRef) return;
+		const reveal = parseFloat(
+			getComputedStyle(viewportRef).getPropertyValue('--_scroll-area-fade-reveal')
+		);
+		if (reveal > 0) fadeReveal = reveal;
+	});
+	/** 0 → 1 over the reveal distance, eased in and out like the CSS animation it replaces. */
+	const fadeProgress = (hidden: number) => {
+		const t = Math.min(1, Math.max(0, hidden / fadeReveal));
+		return String(Math.round(t * t * (3 - 2 * t) * 1000) / 1000);
+	};
+	const fadeStart = $derived(
+		scrollFadeAxis === 'none'
+			? undefined
+			: fadeProgress(scrollFadeAxis === 'y' ? scrollArea.overflowYStart : scrollArea.overflowXStart)
+	);
+	const fadeEnd = $derived(
+		scrollFadeAxis === 'none'
+			? undefined
+			: fadeProgress(scrollFadeAxis === 'y' ? scrollArea.overflowYEnd : scrollArea.overflowXEnd)
+	);
+
 	const classes = $derived(useScrollAreaTheme(theme));
 
 	// Accessibility of the viewport. An idle viewport is a plain div: it adds no role, no name and
@@ -175,10 +204,6 @@
 	bind:this={ref}
 	class={classes.root({ className })}
 	style:position="relative"
-	style:--scroll-area-overflow-x-start="{scrollArea.overflowXStart}px"
-	style:--scroll-area-overflow-x-end="{scrollArea.overflowXEnd}px"
-	style:--scroll-area-overflow-y-start="{scrollArea.overflowYStart}px"
-	style:--scroll-area-overflow-y-end="{scrollArea.overflowYEnd}px"
 	{@attach scrollArea.hoover.reference}
 	{@attach scrollArea.scrollOnEdgesAttachment}
 	{...attachments}
@@ -214,6 +239,8 @@
 		{@attach scrollArea.viewportAttachment}
 		style:position="relative"
 		style:overflow="scroll"
+		style:--scroll-area-fade-start={fadeStart}
+		style:--scroll-area-fade-end={fadeEnd}
 		style:width="100%"
 		style:height="100%"
 	>
@@ -233,6 +260,24 @@
 			{@render children?.()}
 		</div>
 	</div>
+
+	<!-- The overflow variables change on every scroll, so they sit on this one empty overlay, never
+	     on an ancestor of the content. WebKit caches styles per inherited
+	     variable set: a variable declared above the content (even one resetting them) made it miss
+	     that cache for every descendant, on each scroll and on each mount, and memory kept growing. -->
+	<div
+		aria-hidden="true"
+		data-scroll-area-edges
+		data-slot="scroll-area-edges"
+		class={classes.edges()}
+		style:position="absolute"
+		style:inset="0"
+		style:pointer-events="none"
+		style:--scroll-area-overflow-x-start="{scrollArea.overflowXStart}px"
+		style:--scroll-area-overflow-x-end="{scrollArea.overflowXEnd}px"
+		style:--scroll-area-overflow-y-start="{scrollArea.overflowYStart}px"
+		style:--scroll-area-overflow-y-end="{scrollArea.overflowYEnd}px"
+	></div>
 
 	<!-- The scrollbars are pointer-only affordances: the viewport is the keyboard scroll region, so
 	     the tracks stay out of the accessibility tree instead of exposing an unreachable
@@ -324,16 +369,174 @@
 </div>
 
 <style>
-	/* The overflow variables change on every scroll. The scrolled content does not inherit them:
-	   WebKit would otherwise restyle all of it on each new value and keep every restyle in its
-	   style cache, growing memory with each scroll. The root, its ::before / ::after and the
-	   scrollbars still read them. (Registering them `inherits: false` would also hide them from
-	   ::before, and WebKit does not update a ::before that inherits them back explicitly.) */
-	[data-scroll-area-viewport] {
-		--scroll-area-overflow-x-start: initial;
-		--scroll-area-overflow-x-end: initial;
-		--scroll-area-overflow-y-start: initial;
-		--scroll-area-overflow-y-end: initial;
+	/* The edge fade (the scrollFade prop): a mask on the viewport whose two edges follow
+	   --scroll-area-fade-start / -end, progress values the component writes as the content scrolls.
+	   Only registered, non-inherited variables are declared on the viewport: an inheritable one
+	   would give its whole content a new variable set on every mount, which WebKit's style cache
+	   misses. The sizes keep the scroll-fade utility's knobs (--scroll-fade-size, -t-size, -b-size,
+	   -s-size, -e-size and --scroll-fade-reveal). */
+	@property --scroll-area-fade-start {
+		syntax: '<number>';
+		inherits: false;
+		initial-value: 0;
+	}
+	@property --scroll-area-fade-end {
+		syntax: '<number>';
+		inherits: false;
+		initial-value: 0;
+	}
+	@property --_scroll-area-fade-reveal {
+		syntax: '<length>';
+		inherits: false;
+		initial-value: 96px;
+	}
+
+	[data-scroll-area-viewport][data-scroll-fade-axis] {
+		--_scroll-area-fade-reveal: var(--scroll-fade-reveal, calc(var(--spacing, 0.25rem) * 24));
+		-webkit-mask-repeat: no-repeat;
+		mask-repeat: no-repeat;
+	}
+
+	[data-scroll-area-viewport][data-scroll-fade-axis='y'] {
+		-webkit-mask-image: linear-gradient(
+			to bottom,
+			transparent 0,
+			#000
+				calc(
+					var(
+							--scroll-fade-t-size,
+							var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+						) *
+						var(--scroll-area-fade-start)
+				),
+			#000
+				calc(
+					100% -
+						var(
+							--scroll-fade-b-size,
+							var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+						) *
+						var(--scroll-area-fade-end)
+				),
+			transparent 100%
+		);
+		mask-image: linear-gradient(
+			to bottom,
+			transparent 0,
+			#000
+				calc(
+					var(
+							--scroll-fade-t-size,
+							var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+						) *
+						var(--scroll-area-fade-start)
+				),
+			#000
+				calc(
+					100% -
+						var(
+							--scroll-fade-b-size,
+							var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+						) *
+						var(--scroll-area-fade-end)
+				),
+			transparent 100%
+		);
+	}
+
+	[data-scroll-area-viewport][data-scroll-fade-axis='x'] {
+		-webkit-mask-image: linear-gradient(
+			to right,
+			transparent 0,
+			#000
+				calc(
+					var(
+							--scroll-fade-s-size,
+							var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+						) *
+						var(--scroll-area-fade-start)
+				),
+			#000
+				calc(
+					100% -
+						var(
+							--scroll-fade-e-size,
+							var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+						) *
+						var(--scroll-area-fade-end)
+				),
+			transparent 100%
+		);
+		mask-image: linear-gradient(
+			to right,
+			transparent 0,
+			#000
+				calc(
+					var(
+							--scroll-fade-s-size,
+							var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+						) *
+						var(--scroll-area-fade-start)
+				),
+			#000
+				calc(
+					100% -
+						var(
+							--scroll-fade-e-size,
+							var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+						) *
+						var(--scroll-area-fade-end)
+				),
+			transparent 100%
+		);
+	}
+
+	/* Start and end are logical: in RTL the start edge is the right one. */
+	[data-scroll-area-viewport][data-scroll-fade-axis='x']:dir(rtl) {
+		-webkit-mask-image: linear-gradient(
+			to left,
+			transparent 0,
+			#000
+				calc(
+					var(
+							--scroll-fade-s-size,
+							var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+						) *
+						var(--scroll-area-fade-start)
+				),
+			#000
+				calc(
+					100% -
+						var(
+							--scroll-fade-e-size,
+							var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+						) *
+						var(--scroll-area-fade-end)
+				),
+			transparent 100%
+		);
+		mask-image: linear-gradient(
+			to left,
+			transparent 0,
+			#000
+				calc(
+					var(
+							--scroll-fade-s-size,
+							var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+						) *
+						var(--scroll-area-fade-start)
+				),
+			#000
+				calc(
+					100% -
+						var(
+							--scroll-fade-e-size,
+							var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+						) *
+						var(--scroll-area-fade-end)
+				),
+			transparent 100%
+		);
 	}
 
 	/* Hide native scrollbars cross-browser; custom thumbs overlay the real scroll container.

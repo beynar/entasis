@@ -79,7 +79,20 @@ const scrollFadeProperties: CssRule = {
 	'@property --scroll-fade-mask': {
 		syntax: '"*"',
 		inherits: 'false'
-	}
+	},
+	// Only the faded element reads these. Left inheritable, they gave its whole subtree a new
+	// inherited variable set on every mount, which WebKit's style cache keys on: each descendant
+	// missed it and added an entry, so memory grew with every mount.
+	...Object.fromEntries(
+		[
+			'--_scroll-fade-size-t',
+			'--_scroll-fade-size-b',
+			'--_scroll-fade-size-s',
+			'--_scroll-fade-size-e',
+			'--scroll-fade-block',
+			'--scroll-fade-inline'
+		].map((name) => [`@property ${name}`, { syntax: '"*"', inherits: 'false' }])
+	)
 };
 
 export const scrollFadeKeyframes = {
